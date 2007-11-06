@@ -248,3 +248,27 @@ QStringList QCMake::availableGenerators() const
   return this->AvailableGenerators;
 }
 
+void QCMake::deleteCache()
+{
+  // delete cache
+  this->CMakeInstance->GetCacheManager()->DeleteCache(this->BinaryDirectory.toAscii().data());
+  // reload to make our cache empty
+  this->CMakeInstance->GetCacheManager()->LoadCache(this->BinaryDirectory.toAscii().data());
+  // emit no generator and no properties
+  this->setGenerator(QString());
+  QCMakeCachePropertyList props = this->properties();
+  emit this->propertiesChanged(props);
+}
+
+void QCMake::reloadCache()
+{
+  // emit that the cache was cleaned out
+  QCMakeCachePropertyList props;
+  emit this->propertiesChanged(props);
+  // reload
+  this->CMakeInstance->GetCacheManager()->LoadCache(this->BinaryDirectory.toAscii().data());
+  // emit new cache properties
+  props = this->properties();
+  emit this->propertiesChanged(props);
+}
+

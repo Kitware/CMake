@@ -26,6 +26,8 @@
 #include <QCloseEvent>
 #include <QCoreApplication>
 #include <QSettings>
+#include <QMenu>
+#include <QMenuBar>
 
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
@@ -61,6 +63,7 @@ void QCMakeThread::run()
 }
 
 CMakeSetupDialog::CMakeSetupDialog()
+  : QuitOnConfigure(true)
 {
   // create the GUI
   QSettings settings;
@@ -83,7 +86,34 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->statusBar()->addPermanentWidget(this->InterruptButton);
   this->statusBar()->addPermanentWidget(this->ProgressBar);
 
+  QMenu* FileMenu = this->menuBar()->addMenu(tr("&File"));
+  QAction* a = FileMenu->addAction(tr("&Reload Cache"));
+  QObject::connect(a, SIGNAL(triggered(bool)), this, SLOT(doReloadCache()));
+  a = FileMenu->addAction(tr("&Delete Cache"));
+  QObject::connect(a, SIGNAL(triggered(bool)), this, SLOT(doDeleteCache()));
+  a = FileMenu->addAction(tr("&Exit"));
+  QObject::connect(a, SIGNAL(triggered(bool)), this, SLOT(close()));
+  a = FileMenu->addAction(tr("Exit after Generation"));
+  a->setCheckable(true);
+  a->setChecked(true);  // TODO read from registry
+  QObject::connect(a, SIGNAL(triggered(bool)),
+                   this, SLOT(setExitAfterGenerate(bool)));
+  a = FileMenu->addSeparator();
+  // TODO: recent list
 
+  QMenu* ToolsMenu = this->menuBar()->addMenu(tr("&Tools"));
+  a = ToolsMenu->addAction(tr("&Configure"));
+  QObject::connect(a, SIGNAL(triggered(bool)), this, SLOT(doConfigure()));
+  a = ToolsMenu->addAction(tr("&Generate"));
+  QObject::connect(a, SIGNAL(triggered(bool)), this, SLOT(doGenerate()));
+
+  QMenu* HelpMenu = this->menuBar()->addMenu(tr("&Help"));
+  a = HelpMenu->addAction(tr("About"));
+  QObject::connect(a, SIGNAL(triggered(bool)),
+                   this, SLOT(doAbout()));
+  a = HelpMenu->addAction(tr("Help"));
+  QObject::connect(a, SIGNAL(triggered(bool)),
+                   this, SLOT(doHelp()));
   
   // start the cmake worker thread
   this->CMakeThread = new QCMakeThread(this);
@@ -110,10 +140,7 @@ void CMakeSetupDialog::initialize()
                    this, SLOT(finishGenerate(int)));
 
   QObject::connect(this->GenerateButton, SIGNAL(clicked(bool)),
-                   this, SLOT(doOk()));
-  
-  QObject::connect(this->CancelButton, SIGNAL(clicked(bool)),
-                   this, SLOT(close()));
+                   this, SLOT(doGenerate()));
   
   QObject::connect(this->BrowseSourceDirectoryButton, SIGNAL(clicked(bool)),
                    this, SLOT(doSourceBrowse()));
@@ -147,9 +174,6 @@ void CMakeSetupDialog::initialize()
   QObject::connect(this->CMakeThread->cmakeInstance(),
                    SIGNAL(outputMessage(QString)),
                    this->Output, SLOT(append(QString)));
-  
-  QObject::connect(this->HelpButton, SIGNAL(clicked(bool)),
-                   this, SLOT(doHelp()));
 
   QObject::connect(this->Advanced, SIGNAL(clicked(bool)), 
                    this->CacheValues, SLOT(setShowAdvanced(bool)));
@@ -251,13 +275,13 @@ void CMakeSetupDialog::finishGenerate(int err)
       tr("Error in generation process, project files may be invalid"),
       QMessageBox::Ok);
     }
-  else
+  else if(this->QuitOnConfigure)
     {
     QApplication::quit();
     }
 }
 
-void CMakeSetupDialog::doOk()
+void CMakeSetupDialog::doGenerate()
 {
   this->InterruptButton->setEnabled(true);
   this->setEnabledState(false);
@@ -394,7 +418,6 @@ void CMakeSetupDialog::setEnabledState(bool enabled)
   this->BrowseBinaryDirectoryButton->setEnabled(enabled);
   this->ConfigureButton->setEnabled(enabled);
   this->GenerateButton->setEnabled(enabled);
-  this->CancelButton->setEnabled(enabled);
 }
 
 void CMakeSetupDialog::promptForGenerator()
@@ -432,6 +455,43 @@ void CMakeSetupDialog::updateGeneratorLabel(const QString& gen)
     str += gen;
     }
   this->Generator->setText(str);
+}
+
+void CMakeSetupDialog::doReloadCache()
+{
+  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
+    "reloadCache", Qt::QueuedConnection);
+}
+
+void CMakeSetupDialog::doDeleteCache()
+{
+  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
+    "deleteCache", Qt::QueuedConnection);
+}
+
+void CMakeSetupDialog::doAbout()
+{
+  QString msg = "CMakeSetup\nwww.cmake.org";
+
+  QDialog dialog;
+  dialog.setWindowTitle(tr("About CMakeSetup"));
+  QVBoxLayout* l = new QVBoxLayout(&dialog);
+  QLabel* lab = new QLabel(&dialog);
+  l->addWidget(lab);
+  lab->setText(msg);
+  lab->setWordWrap(true);
+  QDialogButtonBox* btns = new QDialogButtonBox(QDialogButtonBox::Ok,
+                                                Qt::Horizontal, &dialog);
+  QObject::connect(btns, SIGNAL(accepted()), &dialog, SLOT(accept()));
+  l->addWidget(btns);
+  dialog.exec();
+}
+
+void CMakeSetupDialog::setExitAfterGenerate(bool b)
+{
+  this->QuitOnConfigure = b;
+  // TODO
+  // save to registry
 }
 
 

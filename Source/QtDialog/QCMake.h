@@ -83,6 +83,10 @@ public slots:
   void setProperties(const QCMakeCachePropertyList&);
   /// interrupt the configure or generate process
   void interrupt();
+  /// delete the cache in binary directory
+  void deleteCache();
+  /// reload the cache in binary directory
+  void reloadCache();
 
 public:
   /// get the list of cache properties

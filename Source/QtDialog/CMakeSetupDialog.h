@@ -39,8 +39,9 @@ public:
 protected slots: 
   void initialize();
   void doConfigure();
-  void doOk();
+  void doGenerate();
   void doHelp();
+  void doAbout();
   void doInterrupt();
   void finishConfigure(int error);
   void finishGenerate(int error);
@@ -48,12 +49,15 @@ protected slots:
   
   void doSourceBrowse();
   void doBinaryBrowse();
+  void doReloadCache();
+  void doDeleteCache();
   void updateSourceDirectory(const QString& dir);
   void setBinaryDirectory(const QString& dir);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
   void promptForGenerator();
   void updateGeneratorLabel(const QString& gen);
+  void setExitAfterGenerate(bool);
 
 protected:
   void closeEvent(QCloseEvent*);
@@ -61,6 +65,7 @@ protected:
   QCMakeThread* CMakeThread;
   QProgressBar* ProgressBar;
   QToolButton* InterruptButton;
+  bool QuitOnConfigure;
 };
 
 // QCMake instance on a thread
