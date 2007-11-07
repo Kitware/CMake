@@ -35,7 +35,8 @@ QCMake::QCMake(QObject* p)
 #if defined(Q_OS_WIN)
   this->CMakeExecutable = appDir.filePath("cmake.exe");
 #elif defined(Q_OS_MAC)
-# error "need to implement for Mac OS X"
+  appDir.cd("../../../");  // path to cmake in build directory (need to fix for deployment)
+  this->CMakeExecutable = appDir.filePath("cmake");
 #else
   this->CMakeExecutable = appDir.filePath("cmake");
 #endif
