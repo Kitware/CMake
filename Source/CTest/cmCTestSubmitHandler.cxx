@@ -697,7 +697,8 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
 
     // off_t can be bigger than size_t.  fread takes size_t.
     // make sure the file is not too big.
-    if (st.st_size > (size_t)-1)
+    if(static_cast<off_t>(static_cast<size_t>(st.st_size)) !=
+       static_cast<off_t>(st.st_size))
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "  File too big: "
         << local_file.c_str() << std::endl);
