@@ -78,7 +78,7 @@ SET(libCurl_SRCS
   ldap.c
   llist.c
   md5.c
-  memdebug.c
+#  memdebug.c -not used
   mprintf.c
   multi.c
   netrc.c
