@@ -604,13 +604,19 @@ void CMakeSetupDialog::dropEvent(QDropEvent* e)
   if(file.endsWith("CMakeCache.txt", Qt::CaseInsensitive))
     {
     QFileInfo info(file);
-    this->setBinaryDirectory(info.absolutePath());
+    if(this->CMakeThread->cmakeInstance()->binaryDirectory() != info.absolutePath())
+      {
+      this->setBinaryDirectory(info.absolutePath());
+      }
     }
   else if(file.endsWith("CMakeLists.txt", Qt::CaseInsensitive))
     {
     QFileInfo info(file);
-    this->setSourceDirectory(info.absolutePath());
-    this->setBinaryDirectory(info.absolutePath());
+    if(this->CMakeThread->cmakeInstance()->binaryDirectory() != info.absolutePath())
+      {
+      this->setSourceDirectory(info.absolutePath());
+      this->setBinaryDirectory(info.absolutePath());
+      }
     }
 }
 
