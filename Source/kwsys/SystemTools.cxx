@@ -1597,7 +1597,8 @@ bool SystemTools::FilesDiffer(const char* source,
     finDestination.read(dest_buf, nnext);
 
     // If either failed to read assume they are different.
-    if(finSource.gcount() != nnext || finDestination.gcount() != nnext)
+    if(static_cast<kwsys_ios::streamsize>(finSource.gcount()) != nnext ||
+       static_cast<kwsys_ios::streamsize>(finDestination.gcount()) != nnext)
       {
       return true;
       }
