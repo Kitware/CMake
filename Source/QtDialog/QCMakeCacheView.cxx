@@ -124,7 +124,7 @@ void QCMakeCacheView::setSearchFilter(const QString& s)
 }
 
 QCMakeCacheModel::QCMakeCacheModel(QObject* p)
-  : QAbstractTableModel(p), NewCount(0), IsDirty(false)
+  : QAbstractTableModel(p), NewCount(0), ModifiedValues(false)
 {
 }
 
@@ -132,9 +132,9 @@ QCMakeCacheModel::~QCMakeCacheModel()
 {
 }
 
-bool QCMakeCacheModel::isDirty() const
+bool QCMakeCacheModel::modifiedValues() const
 {
-  return this->IsDirty;
+  return this->ModifiedValues;
 }
 
 static uint qHash(const QCMakeCacheProperty& p)
@@ -164,8 +164,8 @@ void QCMakeCacheModel::setProperties(const QCMakeCachePropertyList& props)
   qSort(tmp);
   this->Properties += tmp;
   
+  this->ModifiedValues = NewCount != 0;
   this->reset();
-  this->IsDirty = false;
 }
   
 QCMakeCachePropertyList QCMakeCacheModel::properties() const
@@ -268,19 +268,19 @@ bool QCMakeCacheModel::setData (const QModelIndex& idx, const QVariant& value, i
   if(idx.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
     this->Properties[idx.row()].Key = value.toString();
-    this->IsDirty = true;
+    this->ModifiedValues = true;
     emit this->dataChanged(idx, idx);
     }
   else if(idx.column() == 1 && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
     this->Properties[idx.row()].Value = value.toString();
-    this->IsDirty = true;
+    this->ModifiedValues = true;
     emit this->dataChanged(idx, idx);
     }
   else if(idx.column() == 1 && (role == Qt::CheckStateRole))
     {
     this->Properties[idx.row()].Value = value.toInt() == Qt::Checked;
-    this->IsDirty = true;
+    this->ModifiedValues = true;
     emit this->dataChanged(idx, idx);
     }
   return false;

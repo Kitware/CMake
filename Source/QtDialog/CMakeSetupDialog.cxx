@@ -28,6 +28,9 @@
 #include <QSettings>
 #include <QMenu>
 #include <QMenuBar>
+#include <QDragEnterEvent>
+#include <QMimeData>
+#include <QUrl>
 
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
@@ -63,7 +66,7 @@ void QCMakeThread::run()
 }
 
 CMakeSetupDialog::CMakeSetupDialog()
-  : QuitOnConfigure(true)
+  : ExitAfterGenerate(true)
 {
   // create the GUI
   QSettings settings;
@@ -87,25 +90,31 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->statusBar()->addPermanentWidget(this->ProgressBar);
 
   QMenu* FileMenu = this->menuBar()->addMenu(tr("&File"));
-  QAction* a = FileMenu->addAction(tr("&Reload Cache"));
-  QObject::connect(a, SIGNAL(triggered(bool)), this, SLOT(doReloadCache()));
-  a = FileMenu->addAction(tr("&Delete Cache"));
-  QObject::connect(a, SIGNAL(triggered(bool)), this, SLOT(doDeleteCache()));
-  a = FileMenu->addAction(tr("&Exit"));
-  QObject::connect(a, SIGNAL(triggered(bool)), this, SLOT(close()));
-  a = FileMenu->addAction(tr("Exit after Generation"));
-  a->setCheckable(true);
-  a->setChecked(true);  // TODO read from registry
-  QObject::connect(a, SIGNAL(triggered(bool)),
-                   this, SLOT(setExitAfterGenerate(bool)));
-  a = FileMenu->addSeparator();
-  // TODO: recent list
+  this->ReloadCacheAction = FileMenu->addAction(tr("&Reload Cache"));
+  QObject::connect(this->ReloadCacheAction, SIGNAL(triggered(bool)), 
+                   this, SLOT(doReloadCache()));
+  this->DeleteCacheAction = FileMenu->addAction(tr("&Delete Cache"));
+  QObject::connect(this->DeleteCacheAction, SIGNAL(triggered(bool)), 
+                   this, SLOT(doDeleteCache()));
+  this->ExitAction = FileMenu->addAction(tr("&Exit"));
+  QObject::connect(this->ExitAction, SIGNAL(triggered(bool)), 
+                   this, SLOT(close()));
 
   QMenu* ToolsMenu = this->menuBar()->addMenu(tr("&Tools"));
-  a = ToolsMenu->addAction(tr("&Configure"));
-  QObject::connect(a, SIGNAL(triggered(bool)), this, SLOT(doConfigure()));
-  a = ToolsMenu->addAction(tr("&Generate"));
-  QObject::connect(a, SIGNAL(triggered(bool)), this, SLOT(doGenerate()));
+  this->ConfigureAction = ToolsMenu->addAction(tr("&Configure"));
+  QObject::connect(this->ConfigureAction, SIGNAL(triggered(bool)), 
+                   this, SLOT(doConfigure()));
+  this->GenerateAction = ToolsMenu->addAction(tr("&Generate"));
+  QObject::connect(this->GenerateAction, SIGNAL(triggered(bool)), 
+                   this, SLOT(doGenerate()));
+  
+  QMenu* OptionsMenu = this->menuBar()->addMenu(tr("&Options"));
+  QAction* a = OptionsMenu->addAction(tr("Exit after Generation"));
+  a->setCheckable(true);
+  this->ExitAfterGenerate = settings.value("ExitAfterGenerate", true).toBool();
+  a->setChecked(this->ExitAfterGenerate);
+  QObject::connect(a, SIGNAL(triggered(bool)),
+                   this, SLOT(setExitAfterGenerate(bool)));
 
   QMenu* HelpMenu = this->menuBar()->addMenu(tr("&Help"));
   a = HelpMenu->addAction(tr("About"));
@@ -115,6 +124,10 @@ CMakeSetupDialog::CMakeSetupDialog()
   QObject::connect(a, SIGNAL(triggered(bool)),
                    this, SLOT(doHelp()));
   
+  this->setGenerateEnabled(false);
+
+  this->setAcceptDrops(true);
+
   // start the cmake worker thread
   this->CMakeThread = new QCMakeThread(this);
   QObject::connect(this->CMakeThread, SIGNAL(cmakeInitialized()),
@@ -184,19 +197,17 @@ void CMakeSetupDialog::initialize()
                    SIGNAL(generatorChanged(QString)),
                    this, SLOT(updateGeneratorLabel(QString)));
   this->updateGeneratorLabel(QString());
+  
+  QObject::connect(this->CacheValues->cacheModel(),
+                   SIGNAL(dataChanged(QModelIndex, QModelIndex)),
+                   this, SLOT(cacheModelDirty()));
+  QObject::connect(this->CacheValues->cacheModel(), SIGNAL(modelReset()),
+                   this, SLOT(cacheModelDirty()));
 
   // get the saved binary directories
   QSettings settings;
   settings.beginGroup("Settings/StartPath");
-  QStringList buildPaths;
-  for(int i=0; i<10; i++)
-    {
-    QString p = settings.value(QString("WhereBuild%1").arg(i)).toString();
-    if(!p.isEmpty())
-      {
-      buildPaths.append(p);
-      }
-    }
+  QStringList buildPaths = settings.value("WhereBuild").toStringList();
   this->BinaryDirectory->addItems(buildPaths);
 }
 
@@ -214,13 +225,14 @@ CMakeSetupDialog::~CMakeSetupDialog()
   
 void CMakeSetupDialog::doConfigure()
 {
-  QDir dir(this->BinaryDirectory->currentText());
+  QString bindir = this->CMakeThread->cmakeInstance()->binaryDirectory();
+  QDir dir(bindir);
   if(!dir.exists())
     {
     QString message = tr("Build directory does not exist, "
                          "should I create it?\n\n"
                          "Directory: ");
-    message += this->BinaryDirectory->currentText();
+    message += bindir;
     QString title = tr("Create Directory");
     QMessageBox::StandardButton btn;
     btn = QMessageBox::information(this, title, message, 
@@ -237,6 +249,9 @@ void CMakeSetupDialog::doConfigure()
     {
     this->promptForGenerator();
     }
+
+  // remember path
+  this->addBinaryPath(dir.absolutePath());
 
   this->InterruptButton->setEnabled(true);
   this->setEnabledState(false);
@@ -261,12 +276,17 @@ void CMakeSetupDialog::finishConfigure(int err)
       tr("Error in configuration process, project files may be invalid"), 
       QMessageBox::Ok);
     }
+  if(!this->CacheValues->cacheModel()->modifiedValues())
+    {
+    this->setGenerateEnabled(true);
+    }
 }
 
 void CMakeSetupDialog::finishGenerate(int err)
 {
   this->InterruptButton->setEnabled(false);
   this->setEnabledState(true);
+  this->setGenerateEnabled(true);
   this->ProgressBar->reset();
   this->statusBar()->showMessage(tr("Generate Done"), 2000);
   if(err != 0)
@@ -275,7 +295,7 @@ void CMakeSetupDialog::finishGenerate(int err)
       tr("Error in generation process, project files may be invalid"),
       QMessageBox::Ok);
     }
-  else if(this->QuitOnConfigure)
+  else if(this->ExitAfterGenerate)
     {
     QApplication::quit();
     }
@@ -285,6 +305,7 @@ void CMakeSetupDialog::doGenerate()
 {
   this->InterruptButton->setEnabled(true);
   this->setEnabledState(false);
+  this->setGenerateEnabled(false);
   this->Output->clear();
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "generate", Qt::QueuedConnection);
@@ -299,7 +320,7 @@ void CMakeSetupDialog::closeEvent(QCloseEvent* e)
     }
   
   // prompt for close if there are unsaved changes
-  if(this->CacheValues->cacheModel()->isDirty())
+  if(this->CacheValues->cacheModel()->modifiedValues())
     {
     QString message = tr("You have changed options but not rebuilt, "
                     "are you sure you want to exit?");
@@ -401,7 +422,9 @@ void CMakeSetupDialog::error(const QString& title, const QString& message,
                              bool* cancel)
 {
   QMessageBox::StandardButton btn;
-  btn = QMessageBox::critical(this, title, message,
+  QString msg = message + "\n\n" + 
+    tr("(Press cancel to suppress any further messages.)");
+  btn = QMessageBox::critical(this, title, msg,
                               QMessageBox::Ok | QMessageBox::Cancel);
   if(btn == QMessageBox::Cancel)
     {
@@ -411,17 +434,26 @@ void CMakeSetupDialog::error(const QString& title, const QString& message,
 
 void CMakeSetupDialog::setEnabledState(bool enabled)
 {
+  // disable parts of the GUI during configure/generate
   this->CacheValues->setEnabled(enabled);
   this->SourceDirectory->setEnabled(enabled);
   this->BrowseSourceDirectoryButton->setEnabled(enabled);
   this->BinaryDirectory->setEnabled(enabled);
   this->BrowseBinaryDirectoryButton->setEnabled(enabled);
   this->ConfigureButton->setEnabled(enabled);
-  this->GenerateButton->setEnabled(enabled);
+  this->ReloadCacheAction->setEnabled(enabled);
+  this->DeleteCacheAction->setEnabled(enabled);
+  this->ExitAction->setEnabled(enabled);
+  this->ConfigureAction->setEnabled(enabled);
+  // generate button/action are handled separately
 }
 
 void CMakeSetupDialog::promptForGenerator()
 {
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+  QString lastGen = settings.value("LastGenerator").toString();
+
   QStringList gens = this->CMakeThread->cmakeInstance()->availableGenerators();
   QDialog dialog;
   dialog.setWindowTitle(tr("CMakeSetup choose generator"));
@@ -431,6 +463,11 @@ void CMakeSetupDialog::promptForGenerator()
                     "Press OK once you have made your selection."));
   QComboBox* combo = new QComboBox(&dialog);
   combo->addItems(gens);
+  int idx = combo->findText(lastGen);
+  if(idx != -1)
+    {
+    combo->setCurrentIndex(idx);
+    }
   QDialogButtonBox* btns = new QDialogButtonBox(QDialogButtonBox::Ok,
                                                 Qt::Horizontal, &dialog);
   QObject::connect(btns, SIGNAL(accepted()), &dialog, SLOT(accept()));
@@ -440,6 +477,9 @@ void CMakeSetupDialog::promptForGenerator()
   l->addWidget(combo);
   l->addWidget(btns);
   dialog.exec();
+  
+  lastGen = combo->currentText();
+  settings.setValue("LastGenerator", lastGen);
   this->CMakeThread->cmakeInstance()->setGenerator(combo->currentText());
 }
 
@@ -489,9 +529,81 @@ void CMakeSetupDialog::doAbout()
 
 void CMakeSetupDialog::setExitAfterGenerate(bool b)
 {
-  this->QuitOnConfigure = b;
-  // TODO
-  // save to registry
+  this->ExitAfterGenerate = b;
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+  settings.setValue("ExitAfterGenerate", b);
 }
 
+void CMakeSetupDialog::cacheModelDirty()
+{
+  if(this->CacheValues->cacheModel()->modifiedValues())
+    {
+    this->setGenerateEnabled(false);
+    }
+}
+
+void CMakeSetupDialog::setGenerateEnabled(bool b)
+{
+  this->GenerateButton->setEnabled(b);
+  this->GenerateAction->setEnabled(b);
+}
+
+void CMakeSetupDialog::addBinaryPath(const QString& path)
+{
+  QString cleanpath = QDir::cleanPath(path);
+  
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+  QStringList buildPaths = settings.value("WhereBuild").toStringList();
+  buildPaths.removeAll(cleanpath);
+  int idx = this->BinaryDirectory->findText(cleanpath);
+  if(idx != -1)
+    {
+    this->BinaryDirectory->removeItem(idx);
+    }
+  this->BinaryDirectory->insertItem(0, cleanpath);
+  this->BinaryDirectory->setCurrentIndex(0);
+  buildPaths.prepend(cleanpath);
+  while(buildPaths.count() > 10)
+    {
+    buildPaths.removeLast();
+    }
+  settings.setValue("WhereBuild", buildPaths);
+}
+
+void CMakeSetupDialog::dragEnterEvent(QDragEnterEvent* e)
+{
+  const QMimeData* data = e->mimeData();
+  QList<QUrl> urls = data->urls();
+  QString file = urls.count() ? urls[0].toLocalFile() : QString();
+  if(!file.isEmpty() && 
+    (file.endsWith("CMakeCache.txt", Qt::CaseInsensitive) ||
+    file.endsWith("CMakeLists.txt", Qt::CaseInsensitive) ) )
+    {
+    e->accept();
+    }
+  else
+    {
+    e->ignore();
+    }
+}
+
+void CMakeSetupDialog::dropEvent(QDropEvent* e)
+{
+  const QMimeData* data = e->mimeData();
+  QList<QUrl> urls = data->urls();
+  QString file = urls.count() ? urls[0].toLocalFile() : QString();
+  if(file.endsWith("CMakeCache.txt", Qt::CaseInsensitive))
+    {
+    QFileInfo info(file);
+    this->setBinaryDirectory(info.absolutePath());
+    }
+  else if(file.endsWith("CMakeLists.txt", Qt::CaseInsensitive))
+    {
+    QFileInfo info(file);
+    this->SourceDirectory->setText(info.absolutePath());
+    this->setBinaryDirectory(info.absolutePath());
+    }
+}
 

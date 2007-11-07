@@ -17,8 +17,6 @@
 #include "QCMake.h"  // include to disable MS warnings
 #include <QApplication>
 
-#include "cmSystemTools.h"
-
 #include "CMakeSetupDialog.h"
 
 int main(int argc, char** argv)

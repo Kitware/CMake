@@ -238,6 +238,16 @@ void QCMake::errorCallback(const char* msg, const char* title,
   emit self->error(title, msg, &stop);
 }
 
+QString QCMake::binaryDirectory() const
+{
+  return this->BinaryDirectory;
+}
+
+QString QCMake::sourceDirectory() const
+{
+  return this->SourceDirectory;
+}
+
 QString QCMake::generator() const
 {
   return this->Generator;

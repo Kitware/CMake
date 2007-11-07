@@ -77,14 +77,14 @@ public:
   bool setData ( const QModelIndex& index, const QVariant& value, int role );
 
   // flag if a cache property has been modified
-  bool isDirty() const;
+  bool modifiedValues() const;
   // get the properties
   QCMakeCachePropertyList properties() const;
 
 protected:
   QCMakeCachePropertyList Properties;
   int NewCount;
-  bool IsDirty;
+  bool ModifiedValues;
 };
 
 /// Qt delegate class for interaction (or other customization) 

@@ -61,6 +61,13 @@
    <item row="1" column="0" >
     <layout class="QHBoxLayout" >
      <item>
+      <widget class="QCheckBox" name="Advanced" >
+       <property name="text" >
+        <string>Show Advanced</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="label_4" >
        <property name="sizePolicy" >
         <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
@@ -76,7 +83,7 @@
      <item>
       <widget class="QLineEdit" name="Search" >
        <property name="sizePolicy" >
-        <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -84,28 +91,27 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="Advanced" >
-       <property name="text" >
-        <string>Show Advanced</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="Generator" >
-      </widget>
-     </item>
-     <item>
       <spacer>
        <property name="orientation" >
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Minimum</enum>
+       </property>
        <property name="sizeHint" >
         <size>
-         <width>141</width>
+         <width>61</width>
          <height>23</height>
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="Generator" >
+       <property name="text" >
+        <string>Current Generator:</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

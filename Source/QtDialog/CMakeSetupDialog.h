@@ -58,14 +58,24 @@ protected slots:
   void promptForGenerator();
   void updateGeneratorLabel(const QString& gen);
   void setExitAfterGenerate(bool);
+  void cacheModelDirty();
+  void setGenerateEnabled(bool);
+  void addBinaryPath(const QString&);
 
 protected:
   void closeEvent(QCloseEvent*);
+  void dragEnterEvent(QDragEnterEvent*);
+  void dropEvent(QDropEvent*);
 
   QCMakeThread* CMakeThread;
   QProgressBar* ProgressBar;
   QToolButton* InterruptButton;
-  bool QuitOnConfigure;
+  bool ExitAfterGenerate;
+  QAction* ReloadCacheAction;
+  QAction* DeleteCacheAction;
+  QAction* ExitAction;
+  QAction* ConfigureAction;
+  QAction* GenerateAction;
 };
 
 // QCMake instance on a thread
