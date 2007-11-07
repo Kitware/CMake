@@ -46,7 +46,15 @@ IF(${CMAKE_MAJOR_VERSION} LESS 3)
   ENDIF(NOT DEFINED CMAKE_PATCH_VERSION)
 ENDIF(${CMAKE_MAJOR_VERSION} LESS 3)
 
+# for MSVC greater than 71 assume mt is around
+# for other versions allow for the cache to be
+# seeded with a value for CMAKE_MT_EXECUTABLE
+# this allows for MSVC71 to build CMakeSetup that
+# will have the manifest stuff for windows vista
 IF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
+  SET(CMAKE_MT_EXECUTABLE mt)
+ENDIF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
+IF(CMAKE_MT_EXECUTABLE)
   SET(exe "${CMAKE_CFG_INTDIR}/CMakeSetup.exe")
   IF(EXECUTABLE_OUTPUT_PATH)
     SET(exe "${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/CMakeSetup.exe")
@@ -79,18 +87,23 @@ IF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
     ENDIF(NOT verbatim_flag)
   ENDIF(NOT CMAKE_CONFIGURATION_TYPES)
 
-
+  SET(_CMAKE_INPUT_RESOURCE "-inputresource:${exe};#1")
+  # if msvc71 then you can not replace the resource
+  # but you can add one, so set the input resource to empty
+  IF(MSVC71)
+    SET(_CMAKE_INPUT_RESOURCE )
+  ENDIF(MSVC71)
   # Solve the "things named like *Setup prompt for admin privileges
   # on Vista" problem by merging a manifest fragment that contains a
   # requestedExecutionLevel element:
   #
   ADD_CUSTOM_COMMAND(TARGET CMakeSetup
     POST_BUILD COMMAND mt
-    "-inputresource:${exe};#1"
+    "${_CMAKE_INPUT_RESOURCE}"
     -manifest "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetupManifest.xml"
     "-outputresource:${exe};#1"
     ${verbatim_flag}
   )
-ENDIF(MSVC AND NOT MSVC60 AND NOT MSVC70 AND NOT MSVC71)
+ENDIF(CMAKE_MT_EXECUTABLE)
 
 INSTALL_TARGETS(/bin CMakeSetup)
