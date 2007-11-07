@@ -183,6 +183,26 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QToolButton" name="InterruptButton" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="text" >
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QProgressBar" name="ProgressBar" >
+       <property name="value" >
+        <number>0</number>
+       </property>
+       <property name="textVisible" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>

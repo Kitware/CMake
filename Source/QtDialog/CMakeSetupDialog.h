@@ -75,8 +75,6 @@ protected:
   void dropEvent(QDropEvent*);
 
   QCMakeThread* CMakeThread;
-  QProgressBar* ProgressBar;
-  QToolButton* InterruptButton;
   bool ExitAfterGenerate;
   QAction* ReloadCacheAction;
   QAction* DeleteCacheAction;

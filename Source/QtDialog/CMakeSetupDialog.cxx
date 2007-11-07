@@ -80,14 +80,9 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->Splitter->setStretchFactor(0, 2);
   this->Splitter->setStretchFactor(1, 1);
   this->setCentralWidget(cont);
-  this->ProgressBar = new QProgressBar();
-  this->ProgressBar->setRange(0,100);
-  this->InterruptButton = new QToolButton();
-  this->InterruptButton->setEnabled(false);
+  this->ProgressBar->reset();
   this->InterruptButton->setIcon(
     this->style()->standardPixmap(QStyle::SP_DialogCancelButton));
-  this->statusBar()->addPermanentWidget(this->InterruptButton);
-  this->statusBar()->addPermanentWidget(this->ProgressBar);
 
   QMenu* FileMenu = this->menuBar()->addMenu(tr("&File"));
   this->ReloadCacheAction = FileMenu->addAction(tr("&Reload Cache"));
@@ -179,8 +174,6 @@ void CMakeSetupDialog::initialize()
                    this, SLOT(error(QString,QString,bool*)),
                    Qt::BlockingQueuedConnection);
 
-  QObject::connect(this->InterruptButton, SIGNAL(clicked(bool)),
-                   this->CMakeThread->cmakeInstance(), SLOT(interrupt()));
   QObject::connect(this->InterruptButton, SIGNAL(clicked(bool)),
                    this, SLOT(doInterrupt()));
   
@@ -282,7 +275,6 @@ void CMakeSetupDialog::finishConfigure(int err)
   this->InterruptButton->setEnabled(false);
   this->setEnabledState(true);
   this->ProgressBar->reset();
-  this->statusBar()->showMessage(tr("Configure Done"), 2000);
   if(err != 0)
     {
     QMessageBox::critical(this, tr("Error"), 
@@ -301,7 +293,6 @@ void CMakeSetupDialog::finishGenerate(int err)
   this->setEnabledState(true);
   this->setGenerateEnabled(true);
   this->ProgressBar->reset();
-  this->statusBar()->showMessage(tr("Generate Done"));
   if(err != 0)
     {
     QMessageBox::critical(this, tr("Error"), 
@@ -387,7 +378,8 @@ void CMakeSetupDialog::doHelp()
 void CMakeSetupDialog::doInterrupt()
 {
   this->InterruptButton->setEnabled(false);
-  this->statusBar()->showMessage(tr("Interrupting..."));
+  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
+    "interrupt", Qt::QueuedConnection);
 }
 
 void CMakeSetupDialog::doSourceBrowse()
@@ -442,9 +434,8 @@ void CMakeSetupDialog::setSourceDirectory(const QString& dir)
   this->SourceDirectory->setText(dir);
 }
 
-void CMakeSetupDialog::showProgress(const QString& msg, float percent)
+void CMakeSetupDialog::showProgress(const QString& /*msg*/, float percent)
 {
-  this->statusBar()->showMessage(msg);
   this->ProgressBar->setValue(qRound(percent * 100));
 }
   
