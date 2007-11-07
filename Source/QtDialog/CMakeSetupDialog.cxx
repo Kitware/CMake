@@ -581,6 +581,12 @@ void CMakeSetupDialog::addBinaryPath(const QString& path)
 
 void CMakeSetupDialog::dragEnterEvent(QDragEnterEvent* e)
 {
+  if(!this->ConfigureButton->isEnabled())
+    {
+    e->ignore();
+    return;
+    }
+
   const QMimeData* dat = e->mimeData();
   QList<QUrl> urls = dat->urls();
   QString file = urls.count() ? urls[0].toLocalFile() : QString();
@@ -598,6 +604,10 @@ void CMakeSetupDialog::dragEnterEvent(QDragEnterEvent* e)
 
 void CMakeSetupDialog::dropEvent(QDropEvent* e)
 {
+  if(!this->ConfigureButton->isEnabled())
+    {
+    return;
+    }
   const QMimeData* dat = e->mimeData();
   QList<QUrl> urls = dat->urls();
   QString file = urls.count() ? urls[0].toLocalFile() : QString();
