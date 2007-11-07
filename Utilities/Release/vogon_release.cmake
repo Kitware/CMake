@@ -9,6 +9,7 @@ set(MAKE_PROGRAM "nmake")
 set(INITIAL_CACHE "CMAKE_BUILD_TYPE:STRING=Release
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
 CMAKE_GENERATOR:INTERNAL=NMake Makefiles
+CMAKE_MT_EXECUTABLE:STRING=mt
 ")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)
