@@ -228,10 +228,34 @@ int cmCPackNSISGenerator::InitializeInternal()
       << nsisVersion << std::endl);
     return 0;
     }
-
   this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", nsisPath.c_str());
   const char* cpackPackageExecutables
     = this->GetOption("CPACK_PACKAGE_EXECUTABLES");
+  const char* cpackPackageDeskTopLinks
+    = this->GetOption("CPACK_CREATE_DESKTOP_LINKS");
+  std::vector<std::string> cpackPackageDesktopLinksVector;
+  if(cpackPackageDeskTopLinks)
+    {
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPACK_CREATE_DESKTOP_LINKS: "
+                << cpackPackageDeskTopLinks << std::endl);
+    
+    cmSystemTools::
+      ExpandListArgument(cpackPackageDeskTopLinks,
+                         cpackPackageDesktopLinksVector);
+    for(std::vector<std::string>::iterator i = 
+          cpackPackageDesktopLinksVector.begin(); i !=
+          cpackPackageDesktopLinksVector.end(); ++i)
+      {
+       cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPACK_CREATE_DESKTOP_LINKS: "
+                << *i << std::endl);
+      }
+    }
+  else
+    {
+        cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPACK_CREATE_DESKTOP_LINKS: "
+                << "not set" << std::endl);
+
+    }
   if ( cpackPackageExecutables )
     {
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "The cpackPackageExecutables: "
@@ -263,9 +287,11 @@ int cmCPackNSISGenerator::InitializeInternal()
         << ".lnk\"" << std::endl;
       // see if CPACK_CREATE_DESKTOP_LINK_ExeName is on
       // if so add a desktop link
-      std::string desktop = "CPACK_CREATE_DESKTOP_LINK_";
-      desktop += execName;
-      if(this->IsSet(desktop.c_str()))
+      if(cpackPackageDesktopLinksVector.size() &&
+         std::find(cpackPackageDesktopLinksVector.begin(),
+                   cpackPackageDesktopLinksVector.end(),
+                   execName) 
+         != cpackPackageDesktopLinksVector.end())
         {
         str << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
         str << "    CreateShortCut \"$DESKTOP\\"

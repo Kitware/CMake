@@ -2,7 +2,10 @@
 IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   IF(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
     SET(CMAKE_INSTALL_MFC_LIBRARIES 1)
-    INCLUDE(InstallRequiredSystemLibraries)
+    OPTION(CMAKE_INSTALL_DEBUG_LIBRARIES 
+      "Install Microsoft runtime debug libraries with CMake." FALSE)
+    MARK_AS_ADVANCED(CMAKE_INSTALL_DEBUG_LIBRARIES)
+    INCLUDE(${CMake_SOURCE_DIR}/Modules/InstallRequiredSystemLibraries.cmake)
   ENDIF(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
   CONFIGURE_FILE("${CMake_SOURCE_DIR}/CMakeCPackOptions.cmake.in"
     "${CMake_BINARY_DIR}/CMakeCPackOptions.cmake" @ONLY)
