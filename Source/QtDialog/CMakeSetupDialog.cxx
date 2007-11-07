@@ -107,7 +107,7 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->GenerateAction = ToolsMenu->addAction(tr("&Generate"));
   QObject::connect(this->GenerateAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doGenerate()));
-  
+  /* 
   QMenu* OptionsMenu = this->menuBar()->addMenu(tr("&Options"));
   QAction* a = OptionsMenu->addAction(tr("Exit after Generation"));
   a->setCheckable(true);
@@ -115,9 +115,10 @@ CMakeSetupDialog::CMakeSetupDialog()
   a->setChecked(this->ExitAfterGenerate);
   QObject::connect(a, SIGNAL(triggered(bool)),
                    this, SLOT(setExitAfterGenerate(bool)));
+                   */
 
   QMenu* HelpMenu = this->menuBar()->addMenu(tr("&Help"));
-  a = HelpMenu->addAction(tr("About"));
+  QAction* a = HelpMenu->addAction(tr("About"));
   QObject::connect(a, SIGNAL(triggered(bool)),
                    this, SLOT(doAbout()));
   a = HelpMenu->addAction(tr("Help"));
@@ -205,9 +206,7 @@ void CMakeSetupDialog::initialize()
                    this, SLOT(cacheModelDirty()));
 
   // get the saved binary directories
-  QSettings settings;
-  settings.beginGroup("Settings/StartPath");
-  QStringList buildPaths = settings.value("WhereBuild").toStringList();
+  QStringList buildPaths = this->loadBuildPaths();
   this->BinaryDirectory->addItems(buildPaths);
 }
 
@@ -288,17 +287,19 @@ void CMakeSetupDialog::finishGenerate(int err)
   this->setEnabledState(true);
   this->setGenerateEnabled(true);
   this->ProgressBar->reset();
-  this->statusBar()->showMessage(tr("Generate Done"), 2000);
+  this->statusBar()->showMessage(tr("Generate Done"));
   if(err != 0)
     {
     QMessageBox::critical(this, tr("Error"), 
       tr("Error in generation process, project files may be invalid"),
       QMessageBox::Ok);
     }
+  /*
   else if(this->ExitAfterGenerate)
     {
     QApplication::quit();
     }
+    */
 }
 
 void CMakeSetupDialog::doGenerate()
@@ -381,7 +382,7 @@ void CMakeSetupDialog::doSourceBrowse()
     tr("Enter Path to Source"), this->SourceDirectory->text());
   if(!dir.isEmpty())
     {
-    this->SourceDirectory->setText(dir);
+    this->setSourceDirectory(dir);
     }
 }
 
@@ -389,7 +390,7 @@ void CMakeSetupDialog::updateSourceDirectory(const QString& dir)
 {
   if(this->SourceDirectory->text() != dir)
     {
-    this->SourceDirectory->setText(dir);
+    this->setSourceDirectory(dir);
     }
 }
 
@@ -410,6 +411,11 @@ void CMakeSetupDialog::setBinaryDirectory(const QString& dir)
   this->BinaryDirectory->setEditText(dir);
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "setBinaryDirectory", Qt::QueuedConnection, Q_ARG(QString, dir));
+}
+
+void CMakeSetupDialog::setSourceDirectory(const QString& dir)
+{
+  this->SourceDirectory->setText(dir);
 }
 
 void CMakeSetupDialog::showProgress(const QString& msg, float percent)
@@ -530,9 +536,11 @@ void CMakeSetupDialog::doAbout()
 void CMakeSetupDialog::setExitAfterGenerate(bool b)
 {
   this->ExitAfterGenerate = b;
+  /*
   QSettings settings;
   settings.beginGroup("Settings/StartPath");
   settings.setValue("ExitAfterGenerate", b);
+  */
 }
 
 void CMakeSetupDialog::cacheModelDirty()
@@ -553,10 +561,8 @@ void CMakeSetupDialog::addBinaryPath(const QString& path)
 {
   QString cleanpath = QDir::cleanPath(path);
   
-  QSettings settings;
-  settings.beginGroup("Settings/StartPath");
-  QStringList buildPaths = settings.value("WhereBuild").toStringList();
-  buildPaths.removeAll(cleanpath);
+  // update UI
+  this->BinaryDirectory->blockSignals(true);
   int idx = this->BinaryDirectory->findText(cleanpath);
   if(idx != -1)
     {
@@ -564,18 +570,19 @@ void CMakeSetupDialog::addBinaryPath(const QString& path)
     }
   this->BinaryDirectory->insertItem(0, cleanpath);
   this->BinaryDirectory->setCurrentIndex(0);
+  this->BinaryDirectory->blockSignals(false);
+  
+  // save to registry
+  QStringList buildPaths = this->loadBuildPaths();
+  buildPaths.removeAll(cleanpath);
   buildPaths.prepend(cleanpath);
-  while(buildPaths.count() > 10)
-    {
-    buildPaths.removeLast();
-    }
-  settings.setValue("WhereBuild", buildPaths);
+  this->saveBuildPaths(buildPaths);
 }
 
 void CMakeSetupDialog::dragEnterEvent(QDragEnterEvent* e)
 {
-  const QMimeData* data = e->mimeData();
-  QList<QUrl> urls = data->urls();
+  const QMimeData* dat = e->mimeData();
+  QList<QUrl> urls = dat->urls();
   QString file = urls.count() ? urls[0].toLocalFile() : QString();
   if(!file.isEmpty() && 
     (file.endsWith("CMakeCache.txt", Qt::CaseInsensitive) ||
@@ -591,8 +598,8 @@ void CMakeSetupDialog::dragEnterEvent(QDragEnterEvent* e)
 
 void CMakeSetupDialog::dropEvent(QDropEvent* e)
 {
-  const QMimeData* data = e->mimeData();
-  QList<QUrl> urls = data->urls();
+  const QMimeData* dat = e->mimeData();
+  QList<QUrl> urls = dat->urls();
   QString file = urls.count() ? urls[0].toLocalFile() : QString();
   if(file.endsWith("CMakeCache.txt", Qt::CaseInsensitive))
     {
@@ -602,8 +609,42 @@ void CMakeSetupDialog::dropEvent(QDropEvent* e)
   else if(file.endsWith("CMakeLists.txt", Qt::CaseInsensitive))
     {
     QFileInfo info(file);
-    this->SourceDirectory->setText(info.absolutePath());
+    this->setSourceDirectory(info.absolutePath());
     this->setBinaryDirectory(info.absolutePath());
+    }
+}
+
+QStringList CMakeSetupDialog::loadBuildPaths()
+{
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+
+  QStringList buildPaths;
+  for(int i=0; i<10; i++)
+    { 
+      QString p = settings.value(QString("WhereBuild%1").arg(i)).toString();
+      if(!p.isEmpty())
+        {
+        buildPaths.append(p);
+        }
+    }
+  return buildPaths;
+}
+
+void CMakeSetupDialog::saveBuildPaths(const QStringList& paths)
+{
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+
+  int num = paths.count();
+  if(num > 10)
+    {
+    num = 10;
+    }
+
+  for(int i=0; i<num; i++)
+    { 
+    settings.setValue(QString("WhereBuild%1").arg(i), paths[i]);
     }
 }
 

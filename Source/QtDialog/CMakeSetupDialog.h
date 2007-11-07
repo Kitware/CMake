@@ -36,6 +36,10 @@ public:
   CMakeSetupDialog();
   ~CMakeSetupDialog();
 
+public slots:
+  void setBinaryDirectory(const QString& dir);
+  void setSourceDirectory(const QString& dir);
+
 protected slots: 
   void initialize();
   void doConfigure();
@@ -52,7 +56,6 @@ protected slots:
   void doReloadCache();
   void doDeleteCache();
   void updateSourceDirectory(const QString& dir);
-  void setBinaryDirectory(const QString& dir);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
   void promptForGenerator();
@@ -61,6 +64,8 @@ protected slots:
   void cacheModelDirty();
   void setGenerateEnabled(bool);
   void addBinaryPath(const QString&);
+  QStringList loadBuildPaths();
+  void saveBuildPaths(const QStringList&);
 
 protected:
   void closeEvent(QCloseEvent*);
