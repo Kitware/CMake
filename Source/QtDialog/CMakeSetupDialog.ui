@@ -68,6 +68,22 @@
       </widget>
      </item>
      <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Minimum</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QLabel" name="label_4" >
        <property name="sizePolicy" >
         <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >

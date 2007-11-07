@@ -162,10 +162,9 @@ void CMakeSetupDialog::initialize()
                    this, SLOT(doBinaryBrowse()));
   
   QObject::connect(this->BinaryDirectory, SIGNAL(editTextChanged(QString)),
-                   this, SLOT(setBinaryDirectory(QString)));
+                   this, SLOT(onBinaryDirectoryChanged(QString)));
   QObject::connect(this->SourceDirectory, SIGNAL(textChanged(QString)),
-                   this->CMakeThread->cmakeInstance(),
-                   SLOT(setSourceDirectory(QString)));
+                   this, SLOT(onSourceDirectoryChanged(QString)));
 
   QObject::connect(this->CMakeThread->cmakeInstance(),
                    SIGNAL(sourceDirChanged(QString)),
@@ -207,7 +206,20 @@ void CMakeSetupDialog::initialize()
 
   // get the saved binary directories
   QStringList buildPaths = this->loadBuildPaths();
+  this->BinaryDirectory->blockSignals(true);
   this->BinaryDirectory->addItems(buildPaths);
+  this->BinaryDirectory->blockSignals(false);
+  
+  if(!this->SourceDirectory->text().isEmpty() ||
+     !this->BinaryDirectory->lineEdit()->text().isEmpty())
+    {
+    this->onSourceDirectoryChanged(this->SourceDirectory->text());
+    this->onBinaryDirectoryChanged(this->BinaryDirectory->lineEdit()->text());
+    }
+  else
+    {
+    this->onBinaryDirectoryChanged(this->BinaryDirectory->lineEdit()->text());
+    }
 }
 
 CMakeSetupDialog::~CMakeSetupDialog()
@@ -251,9 +263,11 @@ void CMakeSetupDialog::doConfigure()
 
   // remember path
   this->addBinaryPath(dir.absolutePath());
-
+    
   this->InterruptButton->setEnabled(true);
   this->setEnabledState(false);
+  this->setGenerateEnabled(false);
+
   this->Output->clear();
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "setProperties", Qt::QueuedConnection, 
@@ -406,9 +420,19 @@ void CMakeSetupDialog::doBinaryBrowse()
 
 void CMakeSetupDialog::setBinaryDirectory(const QString& dir)
 {
+  this->BinaryDirectory->setEditText(dir);
+}
+
+void CMakeSetupDialog::onSourceDirectoryChanged(const QString& dir)
+{
+  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
+    "setSourceDirectory", Qt::QueuedConnection, Q_ARG(QString, dir));
+}
+
+void CMakeSetupDialog::onBinaryDirectoryChanged(const QString& dir)
+{
   this->CacheValues->cacheModel()->clear();
   this->Output->clear();
-  this->BinaryDirectory->setEditText(dir);
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "setBinaryDirectory", Qt::QueuedConnection, Q_ARG(QString, dir));
 }
@@ -441,7 +465,7 @@ void CMakeSetupDialog::error(const QString& title, const QString& message,
 void CMakeSetupDialog::setEnabledState(bool enabled)
 {
   // disable parts of the GUI during configure/generate
-  this->CacheValues->setEnabled(enabled);
+  this->CacheValues->cacheModel()->setEditEnabled(enabled);
   this->SourceDirectory->setEnabled(enabled);
   this->BrowseSourceDirectoryButton->setEnabled(enabled);
   this->BinaryDirectory->setEnabled(enabled);

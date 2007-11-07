@@ -65,6 +65,7 @@ public:
 public slots:
   void setProperties(const QCMakeCachePropertyList& props);
   void clear();
+  void setEditEnabled(bool);
 
 public:
   // satisfy [pure] virtuals
@@ -80,11 +81,15 @@ public:
   bool modifiedValues() const;
   // get the properties
   QCMakeCachePropertyList properties() const;
+  
+  // editing enabled
+  bool editEnabled() const;
 
 protected:
   QCMakeCachePropertyList Properties;
   int NewCount;
   bool ModifiedValues;
+  bool EditEnabled;
 };
 
 /// Qt delegate class for interaction (or other customization) 

@@ -124,7 +124,8 @@ void QCMakeCacheView::setSearchFilter(const QString& s)
 }
 
 QCMakeCacheModel::QCMakeCacheModel(QObject* p)
-  : QAbstractTableModel(p), NewCount(0), ModifiedValues(false)
+  : QAbstractTableModel(p),
+    NewCount(0), ModifiedValues(false), EditEnabled(true)
 {
 }
 
@@ -171,6 +172,16 @@ void QCMakeCacheModel::setProperties(const QCMakeCachePropertyList& props)
 QCMakeCachePropertyList QCMakeCacheModel::properties() const
 {
   return this->Properties;
+}
+
+void QCMakeCacheModel::setEditEnabled(bool e)
+{
+  this->EditEnabled = e;
+}
+
+bool QCMakeCacheModel::editEnabled() const
+{
+  return this->EditEnabled;
 }
 
 int QCMakeCacheModel::columnCount (const QModelIndex& /*p*/ ) const
@@ -250,7 +261,7 @@ Qt::ItemFlags QCMakeCacheModel::flags (const QModelIndex& idx) const
 {
   Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
   // all column 1's are editable
-  if(idx.column() == 1)
+  if(idx.column() == 1 && this->EditEnabled)
     {
     f |= Qt::ItemIsEditable;
     // booleans are editable in place

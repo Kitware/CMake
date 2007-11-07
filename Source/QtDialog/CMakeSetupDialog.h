@@ -66,6 +66,8 @@ protected slots:
   void addBinaryPath(const QString&);
   QStringList loadBuildPaths();
   void saveBuildPaths(const QStringList&);
+  void onBinaryDirectoryChanged(const QString& dir);
+  void onSourceDirectoryChanged(const QString& dir);
 
 protected:
   void closeEvent(QCloseEvent*);
