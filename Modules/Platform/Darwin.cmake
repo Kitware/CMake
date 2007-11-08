@@ -1,13 +1,40 @@
 SET(APPLE 1)
 
+# Darwin versions:
+#   6.x == Mac OSX 10.2
+#   7.x == Mac OSX 10.3
+#   8.x == Mac OSX 10.4
+#   9.x == Mac OSX 10.5
+STRING(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\1" DARWIN_MAJOR_VERSION "${CMAKE_SYSTEM_VERSION}")
+STRING(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\2" DARWIN_MINOR_VERSION "${CMAKE_SYSTEM_VERSION}")
+
+# Do not use the "-Wl,-search_paths_first" flag with the OSX 10.2 compiler.
+# Done this way because it is too early to do a TRY_COMPILE.
+IF(NOT DEFINED HAVE_FLAG_SEARCH_PATHS_FIRST)
+  SET(HAVE_FLAG_SEARCH_PATHS_FIRST 0)
+  IF("${DARWIN_MAJOR_VERSION}" GREATER 6)
+    SET(HAVE_FLAG_SEARCH_PATHS_FIRST 1)
+  ENDIF("${DARWIN_MAJOR_VERSION}" GREATER 6)
+ENDIF(NOT DEFINED HAVE_FLAG_SEARCH_PATHS_FIRST)
+# More desirable, but does not work:
+  #INCLUDE(CheckCXXCompilerFlag)
+  #CHECK_CXX_COMPILER_FLAG("-Wl,-search_paths_first" HAVE_FLAG_SEARCH_PATHS_FIRST)
+
 SET(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 SET(CMAKE_SHARED_LIBRARY_SUFFIX ".dylib")
 SET(CMAKE_SHARED_MODULE_PREFIX "lib")
 SET(CMAKE_SHARED_MODULE_SUFFIX ".so")
 SET(CMAKE_MODULE_EXISTS 1)
 SET(CMAKE_DL_LIBS "")
-SET(CMAKE_C_LINK_FLAGS "-Wl,-search_paths_first -headerpad_max_install_names")
-SET(CMAKE_CXX_LINK_FLAGS "-Wl,-search_paths_first -headerpad_max_install_names")
+
+SET(CMAKE_C_LINK_FLAGS "-headerpad_max_install_names")
+SET(CMAKE_CXX_LINK_FLAGS "-headerpad_max_install_names")
+
+IF(HAVE_FLAG_SEARCH_PATHS_FIRST)
+  SET(CMAKE_C_LINK_FLAGS "-Wl,-search_paths_first ${CMAKE_C_LINK_FLAGS}")
+  SET(CMAKE_CXX_LINK_FLAGS "-Wl,-search_paths_first ${CMAKE_CXX_LINK_FLAGS}")
+ENDIF(HAVE_FLAG_SEARCH_PATHS_FIRST)
+
 SET(CMAKE_PLATFORM_HAS_INSTALLNAME 1)
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-dynamiclib -headerpad_max_install_names")
 SET(CMAKE_SHARED_MODULE_CREATE_C_FLAGS "-bundle -headerpad_max_install_names")
