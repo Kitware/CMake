@@ -677,8 +677,14 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
       if ( !found )
         { 
         reason = "Required regular expression not found.";
-        reason +=  "Regex=[";
-        reason += passIt->second;
+        reason +=  "Regex=["; 
+        for ( passIt = it->RequiredRegularExpressions.begin();
+            passIt != it->RequiredRegularExpressions.end();
+            ++ passIt )
+          {
+          reason += passIt->second;
+          reason += "\n";
+          }
         reason += "]";
         forceFail = true;
         }
