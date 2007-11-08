@@ -375,8 +375,11 @@ IF (QT4_QMAKE_FOUND)
   IF (NOT QT_MKSPECS_DIR)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QMAKE_MKSPECS"
-      OUTPUT_VARIABLE qt_mkspecs_dir )
-    SET(QT_MKSPECS_DIR ${qt_mkspecs_dir} CACHE PATH "The location of the Qt mkspecs")
+      OUTPUT_VARIABLE qt_mkspecs_dirs )
+    STRING(REPLACE ":" ";" qt_mkspecs_dirs "${qt_mkspecs_dirs}")
+    FIND_PATH(QT_MKSPECS_DIR qconfig.pri PATHS ${qt_mkspecs_dirs}
+      DOC "The location of the Qt mkspecs containing qconfig.pri"
+      NO_DEFAULT_PATH )
   ENDIF (NOT QT_MKSPECS_DIR)
 
   # ask qmake for the plugins directory
