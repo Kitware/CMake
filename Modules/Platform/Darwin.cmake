@@ -63,6 +63,9 @@ IF(EXISTS /Developer/SDKs/MacOSX10.4u.sdk)
   IF("${_CMAKE_OSX_MACHINE}" MATCHES "Power")
     SET(_CMAKE_OSX_MACHINE ppc)
   ENDIF("${_CMAKE_OSX_MACHINE}" MATCHES "Power")
+  # set the default based on uname and not the environment variable
+  # as that is what is used to change it!
+  SET(CMAKE_OSX_ARCHITECTURES_DEFAULT ${_CMAKE_OSX_MACHINE})
   # check for environment variable CMAKE_OSX_ARCHITECTURES
   # if it is set.
   IF(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
@@ -71,7 +74,6 @@ IF(EXISTS /Developer/SDKs/MacOSX10.4u.sdk)
   # now put _CMAKE_OSX_MACHINE into the cache
   SET(CMAKE_OSX_ARCHITECTURES ${_CMAKE_OSX_MACHINE}
     CACHE STRING "Build architectures for OSX")
-  SET(CMAKE_OSX_ARCHITECTURES_DEFAULT ${_CMAKE_OSX_MACHINE})
 ENDIF(EXISTS /Developer/SDKs/MacOSX10.4u.sdk)
 
 
