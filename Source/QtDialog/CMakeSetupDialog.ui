@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>693</width>
-    <height>582</height>
+    <width>705</width>
+    <height>495</height>
    </rect>
   </property>
   <layout class="QGridLayout" >
@@ -140,6 +140,9 @@
       <property name="alternatingRowColors" >
        <bool>true</bool>
       </property>
+      <property name="selectionMode" >
+       <enum>QAbstractItemView::ExtendedSelection</enum>
+      </property>
       <property name="selectionBehavior" >
        <enum>QAbstractItemView::SelectRows</enum>
       </property>
@@ -154,7 +157,7 @@
      </widget>
     </widget>
    </item>
-   <item row="3" column="0" >
+   <item row="4" column="0" >
     <layout class="QHBoxLayout" >
      <item>
       <widget class="QPushButton" name="ConfigureButton" >
@@ -167,6 +170,13 @@
       <widget class="QPushButton" name="GenerateButton" >
        <property name="text" >
         <string>Generate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="DeleteCacheButton" >
+       <property name="text" >
+        <string>Delete Cache</string>
        </property>
       </widget>
      </item>
@@ -204,6 +214,19 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="3" column="0" >
+    <widget class="QLabel" name="label_3" >
+     <property name="text" >
+      <string>Right click on a cache value for additional options (delete, ignore, and help).&lt;br>Press Configure to update and display new values in red, then press Generate to generate selected build files.</string>
+     </property>
+     <property name="alignment" >
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap" >
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

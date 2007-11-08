@@ -150,22 +150,45 @@ void QCMake::generate()
   
 void QCMake::setProperties(const QCMakeCachePropertyList& props)
 {
+  QStringList toremove;
   cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
-  cmCacheManager::CacheIterator it = cachem->NewIterator();
-  foreach(QCMakeCacheProperty prop, props)
+  for(cmCacheManager::CacheIterator i = cachem->NewIterator();
+      !i.IsAtEnd(); i.Next())
     {
-    if ( it.Find(prop.Key.toAscii().data()) )
+
+    if(i.GetType() == cmCacheManager::INTERNAL ||
+       i.GetType() == cmCacheManager::STATIC)
       {
+      continue;
+      }
+
+    QCMakeCacheProperty prop;
+    prop.Key = i.GetName();
+    int idx = props.indexOf(prop);
+    if(idx == -1)
+      {
+      toremove.append(i.GetName());
+      }
+    else
+      {
+      prop = props[idx];
       if(prop.Value.type() == QVariant::Bool)
         {
-        it.SetValue(prop.Value.toBool() ? "ON" : "OFF");
+        i.SetValue(prop.Value.toBool() ? "ON" : "OFF");
         }
       else
         {
-        it.SetValue(prop.Value.toString().toAscii().data());
+        i.SetValue(prop.Value.toString().toAscii().data());
         }
       }
+
     }
+
+  foreach(QString s, toremove)
+    {
+    cachem->RemoveCacheEntry(s.toAscii().data());
+    }
+  
   cachem->SaveCache(this->BinaryDirectory.toAscii().data());
 }
 

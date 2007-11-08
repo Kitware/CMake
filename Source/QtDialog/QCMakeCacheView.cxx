@@ -25,6 +25,10 @@
 #include <QFileInfo>
 #include <QStyle>
 #include <QKeyEvent>
+#include <QMenu>
+#include <QDialog>
+#include <QLabel>
+#include <QDialogButtonBox>
 
 static QRegExp AdvancedRegExp[2] = { QRegExp("(false)"), QRegExp("(true|false)") };
 
@@ -40,6 +44,7 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
   this->SearchFilter = new QSortFilterProxyModel(this);
   this->SearchFilter->setSourceModel(this->AdvancedFilter);
   this->SearchFilter->setFilterCaseSensitivity(Qt::CaseInsensitive);
+  this->SearchFilter->setFilterKeyColumn(-1); // all columns
   this->setModel(this->SearchFilter);
 
   // our delegate for creating our editors
@@ -71,6 +76,81 @@ void QCMakeCacheView::showEvent(QShowEvent* e)
 QCMakeCacheModel* QCMakeCacheView::cacheModel() const
 {
   return this->CacheModel;
+}
+  
+void QCMakeCacheView::contextMenuEvent(QContextMenuEvent* /*e*/)
+{
+  QList<QModelIndex> idxs = this->selectionModel()->selectedRows();
+
+  if(idxs.count())
+    {
+    QMenu* menu = new QMenu(this);
+    QAction* d = NULL;
+    QAction* i = NULL;
+    if(this->cacheModel()->editEnabled())
+      {
+      QString t = idxs.count() > 1 ? tr("Delete Cache Entries") : 
+                                     tr("Delete Cache Entry");
+      d = menu->addAction(t);
+      t = idxs.count() > 1 ? tr("Ignore Cache Entries") : 
+                             tr("Ignore Cache Entry");
+      i = menu->addAction(t);
+      }
+    QAction* h = menu->addAction(tr("Help For Cache Entry"));
+    QAction* which = menu->exec(QCursor::pos());
+    if(!which)
+      {
+      return;
+      }
+    
+    if(which == h)
+      {
+      QModelIndex idx = this->selectionModel()->currentIndex();
+      idx = this->SearchFilter->mapToSource(idx);
+      idx = this->AdvancedFilter->mapToSource(idx);
+      idx = this->cacheModel()->index(idx.row(), 0);
+      QString msg = this->cacheModel()->data(idx, Qt::DisplayRole).toString() +
+                    "\n\n" +
+             this->cacheModel()->data(idx, QCMakeCacheModel::HelpRole).toString();
+      QDialog dialog;
+      dialog.setWindowTitle(tr("CMakeSetup Help"));
+      QVBoxLayout* l = new QVBoxLayout(&dialog);
+      QLabel* lab = new QLabel(&dialog);
+      l->addWidget(lab);
+      lab->setText(msg);
+      lab->setWordWrap(true);
+      QDialogButtonBox* btns = new QDialogButtonBox(QDialogButtonBox::Ok,
+                                                    Qt::Horizontal, &dialog);
+      QObject::connect(btns, SIGNAL(accepted()), &dialog, SLOT(accept()));
+      l->addWidget(btns);
+      dialog.exec();
+      }
+    else
+      {
+      QList<QPersistentModelIndex> pidxs;
+      foreach(QModelIndex i, idxs)
+        {
+        i = this->SearchFilter->mapToSource(i);
+        i = this->AdvancedFilter->mapToSource(i);
+        pidxs.append(i);
+        }
+      if(which == d)
+        {
+        foreach(QPersistentModelIndex j, pidxs)
+          {
+          this->cacheModel()->removeRows(j.row(), 1);
+          }
+        }
+      else if(which == i)
+        {
+        foreach(QPersistentModelIndex j, pidxs)
+          {
+          j = this->cacheModel()->index(j.row(), 1);
+          this->cacheModel()->setData(j, "IGNORE", Qt::DisplayRole);
+          }
+        }
+      }
+    }
 }
 
 QModelIndex QCMakeCacheView::moveCursor(CursorAction act, 
@@ -120,7 +200,7 @@ bool QCMakeCacheView::showAdvanced() const
 
 void QCMakeCacheView::setSearchFilter(const QString& s)
 {
-  this->SearchFilter->setFilterRegExp(s);
+  this->SearchFilter->setFilterFixedString(s);
 }
 
 QCMakeCacheModel::QCMakeCacheModel(QObject* p)
@@ -297,7 +377,30 @@ bool QCMakeCacheModel::setData (const QModelIndex& idx, const QVariant& value, i
   return false;
 }
 
-
+QModelIndex QCMakeCacheModel::buddy ( const QModelIndex& idx ) const
+{
+  if(idx.column() == 0)
+    {
+    return this->index(idx.row(), 1);
+    }
+  return idx;
+}
+  
+bool QCMakeCacheModel::removeRows(int row, int, const QModelIndex&)
+{
+  if(row < 0 || row >= this->Properties.count())
+    {
+    return false;
+    }
+  this->beginRemoveRows(QModelIndex(), row, row);
+  this->Properties.removeAt(row);
+  if(this->NewCount >= row+1)
+    {
+    this->NewCount--;
+    }
+  this->endRemoveRows();
+  return true;
+}
 
 QCMakeCacheModelDelegate::QCMakeCacheModelDelegate(QObject* p)
   : QItemDelegate(p)
@@ -314,52 +417,56 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
     }
   else if(type == QCMakeCacheProperty::PATH)
     {
-    return new QCMakeCachePathEditor(idx.data().toString(), false, p);
+    return new QCMakeCachePathEditor(false, p);
     }
   else if(type == QCMakeCacheProperty::FILEPATH)
     {
-    return new QCMakeCachePathEditor(idx.data().toString(), true, p);
+    return new QCMakeCachePathEditor(true, p);
     }
 
   return new QLineEdit(p);
 }
   
-QCMakeCachePathEditor::QCMakeCachePathEditor(const QString& file, bool fp,
-                                             QWidget* p)
-  : QWidget(p), LineEdit(this), IsFilePath(fp)
+QCMakeCachePathEditor::QCMakeCachePathEditor(bool fp, QWidget* p)
+  : QLineEdit(p), IsFilePath(fp)
 {
-  QHBoxLayout* l = new QHBoxLayout(this);
-  l->setMargin(0);
-  l->setSpacing(0);
-  l->addWidget(&this->LineEdit);
-  QToolButton* tb = new QToolButton(this);
-  tb->setText("...");
-  l->addWidget(tb);
-  QObject::connect(tb, SIGNAL(clicked(bool)),
+  // this *is* instead of has a line edit so QAbstractItemView
+  // doesn't get confused with what the editor really is
+  this->setContentsMargins(0, 0, 0, 0);
+  this->ToolButton = new QToolButton(this);
+  this->ToolButton->setText("...");
+  this->ToolButton->setCursor(QCursor(Qt::ArrowCursor));
+  QObject::connect(this->ToolButton, SIGNAL(clicked(bool)),
                    this, SLOT(chooseFile()));
-  this->LineEdit.setText(file);
-  this->LineEdit.selectAll();
-  tb->setFocusProxy(&this->LineEdit);
-  this->setFocusProxy(&this->LineEdit);
+}
+
+void QCMakeCachePathEditor::resizeEvent(QResizeEvent* e)
+{
+  // make the tool button fit on the right side
+  int h = e->size().height();
+  this->ToolButton->resize(h, h);
+  this->ToolButton->move(this->width() - h, 0);
+  this->setContentsMargins(0, 0, h, 0);
 }
 
 void QCMakeCachePathEditor::chooseFile()
 {
+  // choose a file and set it
   QString path;
   if(this->IsFilePath)
     {
-    QFileInfo info(this->value());
+    QFileInfo info(this->text());
     path = QFileDialog::getOpenFileName(this, tr("Select File"), 
         info.absolutePath());
     }
   else
     {
     path = QFileDialog::getExistingDirectory(this, tr("Select Path"), 
-        this->value());
+        this->text());
     }
   if(!path.isEmpty())
     {
-    this->LineEdit.setText(path);
+    this->setText(path);
     }
 }
 

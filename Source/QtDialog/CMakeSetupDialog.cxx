@@ -77,7 +77,7 @@ CMakeSetupDialog::CMakeSetupDialog()
 
   QWidget* cont = new QWidget(this);
   this->setupUi(cont);
-  this->Splitter->setStretchFactor(0, 2);
+  this->Splitter->setStretchFactor(0, 3);
   this->Splitter->setStretchFactor(1, 1);
   this->setCentralWidget(cont);
   this->ProgressBar->reset();
@@ -196,6 +196,9 @@ void CMakeSetupDialog::initialize()
                    this, SLOT(cacheModelDirty()));
   QObject::connect(this->CacheValues->cacheModel(), SIGNAL(modelReset()),
                    this, SLOT(cacheModelDirty()));
+  
+  QObject::connect(this->DeleteCacheButton, SIGNAL(clicked(bool)), 
+                   this, SLOT(doDeleteCache()));
 
   // get the saved binary directories
   QStringList buildPaths = this->loadBuildPaths();
@@ -464,6 +467,7 @@ void CMakeSetupDialog::setEnabledState(bool enabled)
   this->ConfigureButton->setEnabled(enabled);
   this->ReloadCacheAction->setEnabled(enabled);
   this->DeleteCacheAction->setEnabled(enabled);
+  this->DeleteCacheButton->setEnabled(enabled);
   this->ExitAction->setEnabled(enabled);
   this->ConfigureAction->setEnabled(enabled);
   // generate button/action are handled separately

@@ -27,6 +27,7 @@
 #include <QSortFilterProxyModel>
 
 class QCMakeCacheModel;
+class QToolButton;
 
 
 /// Qt view class for cache properties
@@ -44,6 +45,7 @@ public slots:
   void setSearchFilter(const QString&);
 
 protected:
+  void contextMenuEvent(QContextMenuEvent* e);
   QModelIndex moveCursor(CursorAction, Qt::KeyboardModifiers);
   void showEvent(QShowEvent* e);
   bool Init;
@@ -66,16 +68,18 @@ public slots:
   void setProperties(const QCMakeCachePropertyList& props);
   void clear();
   void setEditEnabled(bool);
+  bool removeRows(int row, int count, const QModelIndex& idx = QModelIndex());
 
 public:
   // satisfy [pure] virtuals
   int columnCount ( const QModelIndex & parent ) const;
-  QVariant data ( const QModelIndex & index, int role ) const;
+  QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole) const;
   QModelIndex parent ( const QModelIndex & index ) const;
   int rowCount ( const QModelIndex & parent ) const;
   QVariant headerData ( int section, Qt::Orientation orient, int role ) const;
   Qt::ItemFlags flags ( const QModelIndex& index ) const;
   bool setData ( const QModelIndex& index, const QVariant& value, int role );
+  QModelIndex buddy ( const QModelIndex& index ) const;
 
   // flag if a cache property has been modified
   bool modifiedValues() const;
@@ -105,18 +109,17 @@ public:
 };
 
 /// Editor widget for editing paths or file paths
-class QCMakeCachePathEditor : public QWidget
+class QCMakeCachePathEditor : public QLineEdit
 {
   Q_OBJECT
-  Q_PROPERTY(QString value READ value USER true)
 public:
-  QCMakeCachePathEditor(const QString& file, bool isFilePath, QWidget* p);
-  QString value() const { return this->LineEdit.text(); }
+  QCMakeCachePathEditor(bool isFilePath, QWidget* p);
 protected slots:
   void chooseFile();
 protected:
-  QLineEdit LineEdit;
+  void resizeEvent(QResizeEvent* e);
   bool IsFilePath;
+  QToolButton* ToolButton;
 };
 
 #endif
