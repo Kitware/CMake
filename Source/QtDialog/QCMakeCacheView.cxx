@@ -85,25 +85,25 @@ void QCMakeCacheView::contextMenuEvent(QContextMenuEvent* /*e*/)
   if(idxs.count())
     {
     QMenu* menu = new QMenu(this);
-    QAction* d = NULL;
-    QAction* i = NULL;
+    QAction* deleteAction = NULL;
+    QAction* ignoreAction = NULL;
     if(this->cacheModel()->editEnabled())
       {
       QString t = idxs.count() > 1 ? tr("Delete Cache Entries") : 
                                      tr("Delete Cache Entry");
-      d = menu->addAction(t);
+      deleteAction = menu->addAction(t);
       t = idxs.count() > 1 ? tr("Ignore Cache Entries") : 
                              tr("Ignore Cache Entry");
-      i = menu->addAction(t);
+      ignoreAction = menu->addAction(t);
       }
-    QAction* h = menu->addAction(tr("Help For Cache Entry"));
+    QAction* helpAction = menu->addAction(tr("Help For Cache Entry"));
     QAction* which = menu->exec(QCursor::pos());
     if(!which)
       {
       return;
       }
     
-    if(which == h)
+    if(which == helpAction)
       {
       QModelIndex idx = this->selectionModel()->currentIndex();
       idx = this->SearchFilter->mapToSource(idx);
@@ -134,14 +134,14 @@ void QCMakeCacheView::contextMenuEvent(QContextMenuEvent* /*e*/)
         i = this->AdvancedFilter->mapToSource(i);
         pidxs.append(i);
         }
-      if(which == d)
+      if(which == deleteAction)
         {
         foreach(QPersistentModelIndex j, pidxs)
           {
           this->cacheModel()->removeRows(j.row(), 1);
           }
         }
-      else if(which == i)
+      else if(which == ignoreAction)
         {
         foreach(QPersistentModelIndex j, pidxs)
           {
