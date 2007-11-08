@@ -54,7 +54,7 @@ QCMake::QCMake(QObject* p)
   std::vector<std::string>::iterator iter;
   for(iter = generators.begin(); iter != generators.end(); ++iter)
     {
-    this->AvailableGenerators.append(QString::fromStdString(*iter));
+    this->AvailableGenerators.append(iter->c_str());
     }
 }
 
@@ -107,7 +107,7 @@ void QCMake::setBinaryDirectory(const QString& dir)
       const char* extraGen = cachem->GetCacheValue("CMAKE_EXTRA_GENERATOR");
       std::string curGen = cmExternalMakefileProjectGenerator::
                               CreateFullGeneratorName(itm.GetValue(), extraGen);
-      this->setGenerator(QString::fromStdString(curGen));
+      this->setGenerator(curGen.c_str());
       }
     }
 }

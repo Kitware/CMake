@@ -284,7 +284,7 @@ void CMakeSetupDialog::finishConfigure(int err)
       tr("Error in configuration process, project files may be invalid"), 
       QMessageBox::Ok);
     }
-  if(!this->CacheValues->cacheModel()->modifiedValues())
+  else if(!this->CacheValues->cacheModel()->modifiedValues())
     {
     this->setGenerateEnabled(true);
     }
