@@ -303,8 +303,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --test-command helloDemo
     )
 
-  # do the five tutorial steps
-  FOREACH (STP RANGE 1 5)
+  # do each of the tutorial steps
+  FOREACH(STP RANGE 1 7)
     ADD_TEST(TutorialStep${STP} ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/Tutorial/Step${STP}"

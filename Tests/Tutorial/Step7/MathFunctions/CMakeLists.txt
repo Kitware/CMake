@@ -1,0 +1,26 @@
+# first we add the executable that generates the table
+add_executable(MakeTable MakeTable.cxx)
+
+get_target_property(MakeTableLocation MakeTable LOCATION)
+
+# add the command to generate the source code
+add_custom_command (
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Table.h
+  DEPENDS MakeTable
+  COMMAND ${MakeTableLocation}
+  ARGS ${CMAKE_CURRENT_BINARY_DIR}/Table.h
+  )
+
+set_source_files_properties (
+  mysqrt.cxx PROPERTIES 
+  OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Table.h
+  )
+
+# add the binary tree directory to the search path for include files
+include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
+
+# add the main library
+add_library(MathFunctions mysqrt.cxx)
+
+install_targets (/bin MathFunctions)
+install_files (/include FILES MathFunctions.h)
