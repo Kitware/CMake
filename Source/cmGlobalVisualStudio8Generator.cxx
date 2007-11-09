@@ -146,20 +146,21 @@ void cmGlobalVisualStudio8Generator::Generate()
         // target.
         const char* no_main_dependency = 0;
         const char* no_working_directory = 0;
+        std::string stampName = cmake::GetCMakeFilesDirectoryPostSlash();
+        stampName += CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.stamp";
         mf->AddCustomCommandToOutput(
-          CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.cmake", listFiles,
+          stampName.c_str(), listFiles,
           no_main_dependency, commandLines, "Checking Build System",
           no_working_directory, true);
-        if(cmSourceFile* file = mf->GetSource(CMAKE_CHECK_BUILD_SYSTEM_TARGET 
-                                              ".vcproj.cmake.rule"))
+        std::string ruleName = stampName;
+        ruleName += ".rule";
+        if(cmSourceFile* file = mf->GetSource(ruleName.c_str()))
           {
           tgt->AddSourceFile(file);
           }
         else
           {
-          cmSystemTools::Error("Error adding rule for " 
-                               CMAKE_CHECK_BUILD_SYSTEM_TARGET 
-                               ".vcproj.cmake");
+          cmSystemTools::Error("Error adding rule for ", stampName.c_str());
           }
         }
       }

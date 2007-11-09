@@ -24,6 +24,8 @@
 #include "cmCacheManager.h"
 #include "cmake.h"
 
+#include "cmGeneratedFileStream.h"
+
 #include <cmsys/System.h>
 
 #include <ctype.h> // for isspace
@@ -152,25 +154,35 @@ void cmLocalVisualStudio7Generator
   fname += "/";
   fname += lname;
   fname += ".vcproj";
-  // save the name of the real dsp file
-  std::string realVCProj = fname;
-  fname += ".cmake";
-  std::ofstream fout(fname.c_str());
-  if(!fout)
-    {
-    cmSystemTools::Error("Error Writing ", fname.c_str());
-    }
+
+  // Generate the project file and replace it atomically with
+  // copy-if-different.  We use a separate timestamp so that the IDE
+  // does not reload project files unnecessarily.
+  {
+  cmGeneratedFileStream fout(fname.c_str());
+  fout.SetCopyIfDifferent(true);
   this->WriteVCProjFile(fout,lname,target);
-  fout.close();
-  // if the dsp file has changed, then write it.
-  cmSystemTools::CopyFileIfDifferent(fname.c_str(), realVCProj.c_str());
+  }
+
+  // Touch a timestamp file used to determine when the project file is
+  // out of date.
+  std::string stampName;
+  stampName = this->Makefile->GetStartOutputDirectory();
+  stampName += cmake::GetCMakeFilesDirectory();
+  cmSystemTools::MakeDirectory(stampName.c_str());
+  stampName += "/";
+  stampName += lname;
+  stampName += ".vcproj.stamp";
+  std::ofstream stamp(stampName.c_str());
+  stamp << "# CMake timestamp for " << lname << ".vcproj" << std::endl;
 }
 
 
 void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmTarget& tgt)
 {
-  std::string dspname = tgt.GetName();
-  dspname += ".vcproj.cmake";
+  std::string stampName = cmake::GetCMakeFilesDirectoryPostSlash();
+  stampName += tgt.GetName();
+  stampName += ".vcproj.stamp";
   const char* dsprule = 
     this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
@@ -213,7 +225,7 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmTarget& tgt)
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
   const char* no_working_directory = 0;
-  this->Makefile->AddCustomCommandToOutput(dspname.c_str(), listFiles,
+  this->Makefile->AddCustomCommandToOutput(stampName.c_str(), listFiles,
                                            makefileIn.c_str(), commandLines,
                                            comment.c_str(),
                                            no_working_directory, true);
@@ -958,10 +970,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
-
-  // trace the visual studio dependencies
-  std::string name = libName;
-  name += ".vcproj.cmake";
 
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
