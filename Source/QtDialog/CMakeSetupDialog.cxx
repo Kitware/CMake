@@ -66,7 +66,7 @@ void QCMakeThread::run()
 }
 
 CMakeSetupDialog::CMakeSetupDialog()
-  : ExitAfterGenerate(true)
+  : ExitAfterGenerate(true), CacheModified(false)
 {
   // create the GUI
   QSettings settings;
@@ -170,9 +170,8 @@ void CMakeSetupDialog::initialize()
                    this, SLOT(showProgress(QString,float)));
   
   QObject::connect(this->CMakeThread->cmakeInstance(),
-                   SIGNAL(error(QString, QString, bool*)),
-                   this, SLOT(error(QString,QString,bool*)),
-                   Qt::BlockingQueuedConnection);
+                   SIGNAL(errorMessage(QString)),
+                   this, SLOT(error(QString)));
 
   QObject::connect(this->InterruptButton, SIGNAL(clicked(bool)),
                    this, SLOT(doInterrupt()));
@@ -191,14 +190,13 @@ void CMakeSetupDialog::initialize()
                    this, SLOT(updateGeneratorLabel(QString)));
   this->updateGeneratorLabel(QString());
   
-  QObject::connect(this->CacheValues->cacheModel(),
-                   SIGNAL(dataChanged(QModelIndex, QModelIndex)),
-                   this, SLOT(cacheModelDirty()));
-  QObject::connect(this->CacheValues->cacheModel(), SIGNAL(modelReset()),
-                   this, SLOT(cacheModelDirty()));
-  
   QObject::connect(this->DeleteCacheButton, SIGNAL(clicked(bool)), 
                    this, SLOT(doDeleteCache()));
+
+  QObject::connect(this->CacheValues->cacheModel(),
+                   SIGNAL(dataChanged(QModelIndex,QModelIndex)), 
+                   this, SLOT(setCacheModified()));
+
 
   // get the saved binary directories
   QStringList buildPaths = this->loadBuildPaths();
@@ -284,7 +282,7 @@ void CMakeSetupDialog::finishConfigure(int err)
       tr("Error in configuration process, project files may be invalid"), 
       QMessageBox::Ok);
     }
-  else if(!this->CacheValues->cacheModel()->modifiedValues())
+  else if(0 == this->CacheValues->cacheModel()->newCount())
     {
     this->setGenerateEnabled(true);
     }
@@ -329,7 +327,7 @@ void CMakeSetupDialog::closeEvent(QCloseEvent* e)
     }
   
   // prompt for close if there are unsaved changes
-  if(this->CacheValues->cacheModel()->modifiedValues())
+  if(this->CacheModified)
     {
     QString message = tr("You have changed options but not rebuilt, "
                     "are you sure you want to exit?");
@@ -426,6 +424,7 @@ void CMakeSetupDialog::onSourceDirectoryChanged(const QString& dir)
 
 void CMakeSetupDialog::onBinaryDirectoryChanged(const QString& dir)
 {
+  this->CacheModified = false;
   this->CacheValues->cacheModel()->clear();
   this->Output->clear();
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
@@ -442,18 +441,9 @@ void CMakeSetupDialog::showProgress(const QString& /*msg*/, float percent)
   this->ProgressBar->setValue(qRound(percent * 100));
 }
   
-void CMakeSetupDialog::error(const QString& title, const QString& message, 
-                             bool* cancel)
+void CMakeSetupDialog::error(const QString& message)
 {
-  QMessageBox::StandardButton btn;
-  QString msg = message + "\n\n" + 
-    tr("(Press cancel to suppress any further messages.)");
-  btn = QMessageBox::critical(this, title, msg,
-                              QMessageBox::Ok | QMessageBox::Cancel);
-  if(btn == QMessageBox::Cancel)
-    {
-    *cancel = false;
-    }
+  this->Output->append(QString("<b><font color=red>%1</font></b>").arg(message));
 }
 
 void CMakeSetupDialog::setEnabledState(bool enabled)
@@ -560,14 +550,6 @@ void CMakeSetupDialog::setExitAfterGenerate(bool b)
   settings.beginGroup("Settings/StartPath");
   settings.setValue("ExitAfterGenerate", b);
   */
-}
-
-void CMakeSetupDialog::cacheModelDirty()
-{
-  if(this->CacheValues->cacheModel()->modifiedValues())
-    {
-    this->setGenerateEnabled(false);
-    }
 }
 
 void CMakeSetupDialog::setGenerateEnabled(bool b)
@@ -682,4 +664,11 @@ void CMakeSetupDialog::saveBuildPaths(const QStringList& paths)
     settings.setValue(QString("WhereBuild%1").arg(i), paths[i]);
     }
 }
+  
+void CMakeSetupDialog::setCacheModified()
+{
+  this->CacheModified = true;
+  this->setGenerateEnabled(false);
+}
+
 

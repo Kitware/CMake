@@ -255,11 +255,11 @@ void QCMake::progressCallback(const char* msg, float percent, void* cd)
     }
 }
 
-void QCMake::errorCallback(const char* msg, const char* title,
-                           bool& stop, void* cd)
+void QCMake::errorCallback(const char* msg, const char* /*title*/,
+                           bool& /*stop*/, void* cd)
 {
   QCMake* self = reinterpret_cast<QCMake*>(cd);
-  emit self->error(title, msg, &stop);
+  emit self->errorMessage(msg);
 }
 
 QString QCMake::binaryDirectory() const

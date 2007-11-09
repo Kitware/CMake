@@ -49,7 +49,7 @@ protected slots:
   void doInterrupt();
   void finishConfigure(int error);
   void finishGenerate(int error);
-  void error(const QString& title, const QString& message, bool* cancel);
+  void error(const QString& message);
   
   void doSourceBrowse();
   void doBinaryBrowse();
@@ -61,13 +61,13 @@ protected slots:
   void promptForGenerator();
   void updateGeneratorLabel(const QString& gen);
   void setExitAfterGenerate(bool);
-  void cacheModelDirty();
   void setGenerateEnabled(bool);
   void addBinaryPath(const QString&);
   QStringList loadBuildPaths();
   void saveBuildPaths(const QStringList&);
   void onBinaryDirectoryChanged(const QString& dir);
   void onSourceDirectoryChanged(const QString& dir);
+  void setCacheModified();
 
 protected:
   void closeEvent(QCloseEvent*);
@@ -76,6 +76,7 @@ protected:
 
   QCMakeThread* CMakeThread;
   bool ExitAfterGenerate;
+  bool CacheModified;
   QAction* ReloadCacheAction;
   QAction* DeleteCacheAction;
   QAction* ExitAction;

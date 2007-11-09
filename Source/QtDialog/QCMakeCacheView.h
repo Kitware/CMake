@@ -81,18 +81,17 @@ public:
   bool setData ( const QModelIndex& index, const QVariant& value, int role );
   QModelIndex buddy ( const QModelIndex& index ) const;
 
-  // flag if a cache property has been modified
-  bool modifiedValues() const;
   // get the properties
   QCMakeCachePropertyList properties() const;
   
   // editing enabled
   bool editEnabled() const;
 
+  int newCount() const;
+
 protected:
   QCMakeCachePropertyList Properties;
   int NewCount;
-  bool ModifiedValues;
   bool EditEnabled;
 };
 

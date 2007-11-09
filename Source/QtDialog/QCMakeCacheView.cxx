@@ -207,17 +207,12 @@ void QCMakeCacheView::setSearchFilter(const QString& s)
 
 QCMakeCacheModel::QCMakeCacheModel(QObject* p)
   : QAbstractTableModel(p),
-    NewCount(0), ModifiedValues(false), EditEnabled(true)
+    NewCount(0), EditEnabled(true)
 {
 }
 
 QCMakeCacheModel::~QCMakeCacheModel()
 {
-}
-
-bool QCMakeCacheModel::modifiedValues() const
-{
-  return this->ModifiedValues;
 }
 
 static uint qHash(const QCMakeCacheProperty& p)
@@ -247,7 +242,6 @@ void QCMakeCacheModel::setProperties(const QCMakeCachePropertyList& props)
   qSort(tmp);
   this->Properties += tmp;
   
-  this->ModifiedValues = NewCount != 0;
   this->reset();
 }
   
@@ -264,6 +258,11 @@ void QCMakeCacheModel::setEditEnabled(bool e)
 bool QCMakeCacheModel::editEnabled() const
 {
   return this->EditEnabled;
+}
+
+int QCMakeCacheModel::newCount() const
+{
+  return this->NewCount;
 }
 
 int QCMakeCacheModel::columnCount (const QModelIndex& /*p*/ ) const
@@ -361,19 +360,16 @@ bool QCMakeCacheModel::setData (const QModelIndex& idx, const QVariant& value, i
   if(idx.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
     this->Properties[idx.row()].Key = value.toString();
-    this->ModifiedValues = true;
     emit this->dataChanged(idx, idx);
     }
   else if(idx.column() == 1 && (role == Qt::DisplayRole || role == Qt::EditRole))
     {
     this->Properties[idx.row()].Value = value.toString();
-    this->ModifiedValues = true;
     emit this->dataChanged(idx, idx);
     }
   else if(idx.column() == 1 && (role == Qt::CheckStateRole))
     {
     this->Properties[idx.row()].Value = value.toInt() == Qt::Checked;
-    this->ModifiedValues = true;
     emit this->dataChanged(idx, idx);
     }
   return false;

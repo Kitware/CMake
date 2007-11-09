@@ -105,8 +105,6 @@ signals:
   void propertiesChanged(const QCMakeCachePropertyList& vars);
   /// signal when the generator changes
   void generatorChanged(const QString& gen);
-  /// signal when there is an error message
-  void error(const QString& title, const QString& message, bool*);
   /// signal when the source directory changes (binary directory already
   /// containing a CMakeCache.txt file)
   void sourceDirChanged(const QString& dir);
@@ -118,6 +116,8 @@ signals:
   void generateDone(int error);
   /// signal when there is an output message
   void outputMessage(const QString& msg);
+  /// signal when there is an error message
+  void errorMessage(const QString& msg);
 
 protected:
   cmake* CMakeInstance;
