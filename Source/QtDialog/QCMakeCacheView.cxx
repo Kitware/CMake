@@ -29,6 +29,8 @@
 #include <QDialog>
 #include <QLabel>
 #include <QDialogButtonBox>
+#include <QDirModel>
+#include <QCompleter>
 
 static QRegExp AdvancedRegExp[2] = { QRegExp("(false)"), QRegExp("(true|false)") };
 
@@ -438,6 +440,15 @@ QCMakeCachePathEditor::QCMakeCachePathEditor(bool fp, QWidget* p)
   this->ToolButton->setCursor(QCursor(Qt::ArrowCursor));
   QObject::connect(this->ToolButton, SIGNAL(clicked(bool)),
                    this, SLOT(chooseFile()));
+  QCompleter* comp = new QCompleter(this);
+  QDirModel* model = new QDirModel(comp);
+  if(!fp)
+    {
+    // only dirs
+    model->setFilter(QDir::AllDirs | QDir::Drives);
+    }
+  comp->setModel(model);
+  this->setCompleter(comp);
 }
 
 void QCMakeCachePathEditor::resizeEvent(QResizeEvent* e)
