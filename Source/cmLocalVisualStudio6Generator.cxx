@@ -217,23 +217,7 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
                   START_OUTPUT, UNCHANGED, true);
   commandLine.push_back(args);
 
-  std::string configFile = 
-    this->Makefile->GetRequiredDefinition("CMAKE_ROOT");
-  configFile += "/Templates/CMakeWindowsSystemConfig.cmake";
-  std::vector<std::string> listFiles = this->Makefile->GetListFiles();
-  bool found = false;
-  for(std::vector<std::string>::iterator i = listFiles.begin();
-      i != listFiles.end(); ++i)
-    {
-    if(*i == configFile)
-      {
-      found  = true;
-      }
-    }
-  if(!found)
-    {
-    listFiles.push_back(configFile);
-    }
+  std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
 
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
