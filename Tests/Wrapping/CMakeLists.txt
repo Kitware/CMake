@@ -93,10 +93,6 @@ SET (FLTK_WRAP_UI "On")
 SET (FLTK_FLUID_EXECUTABLE "${FLUID_LOC}")
 FLTK_WRAP_UI (wraplibFLTK ${FLTK_SRCS})
 ADD_LIBRARY(wraplibFLTK ${wraplibFLTK_FLTK_UI_SRCS})
-CONFIGURE_FILE(
-  ${Wrapping_SOURCE_DIR}/fltk1.fl
-  ${Wrapping_BINARY_DIR}/fltk1.cxx
-  COPYONLY)
 ADD_DEPENDENCIES(wraplibFLTK fakefluid)
 ADD_DEPENDENCIES(fakefluid Wrap)
 #

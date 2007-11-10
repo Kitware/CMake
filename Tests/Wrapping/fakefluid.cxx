@@ -11,7 +11,6 @@ int main(int ac, char** av)
       FILE* file = fopen(av[i+1], "w");
       fprintf(file, "// hello\n");
       fclose(file);
-      return 0;
       }
     }
   return 0;
