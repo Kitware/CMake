@@ -68,6 +68,8 @@ protected slots:
   void onBinaryDirectoryChanged(const QString& dir);
   void onSourceDirectoryChanged(const QString& dir);
   void setCacheModified();
+  void removeSelectedCacheEntries();
+  void selectionChanged();
 
 protected:
   void closeEvent(QCloseEvent*);

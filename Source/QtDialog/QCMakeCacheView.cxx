@@ -26,9 +26,6 @@
 #include <QStyle>
 #include <QKeyEvent>
 #include <QMenu>
-#include <QDialog>
-#include <QLabel>
-#include <QDialogButtonBox>
 #include <QDirModel>
 #include <QCompleter>
 
@@ -79,82 +76,7 @@ QCMakeCacheModel* QCMakeCacheView::cacheModel() const
 {
   return this->CacheModel;
 }
-  
-void QCMakeCacheView::contextMenuEvent(QContextMenuEvent* /*e*/)
-{
-  QList<QModelIndex> idxs = this->selectionModel()->selectedRows();
-
-  if(idxs.count())
-    {
-    QMenu* menu = new QMenu(this);
-    QAction* deleteAction = NULL;
-    QAction* ignoreAction = NULL;
-    if(this->cacheModel()->editEnabled())
-      {
-      QString t = idxs.count() > 1 ? tr("Delete Cache Entries") : 
-                                     tr("Delete Cache Entry");
-      deleteAction = menu->addAction(t);
-      t = idxs.count() > 1 ? tr("Ignore Cache Entries") : 
-                             tr("Ignore Cache Entry");
-      ignoreAction = menu->addAction(t);
-      }
-    QAction* helpAction = menu->addAction(tr("Help For Cache Entry"));
-    QAction* which = menu->exec(QCursor::pos());
-    if(!which)
-      {
-      return;
-      }
-    
-    if(which == helpAction)
-      {
-      QModelIndex idx = this->selectionModel()->currentIndex();
-      idx = this->SearchFilter->mapToSource(idx);
-      idx = this->AdvancedFilter->mapToSource(idx);
-      idx = this->cacheModel()->index(idx.row(), 0);
-      QString msg = this->cacheModel()->data(idx, Qt::DisplayRole).toString() +
-                    "\n\n" +
-             this->cacheModel()->data(idx, QCMakeCacheModel::HelpRole).toString();
-      QDialog dialog;
-      dialog.setWindowTitle(tr("CMakeSetup Help"));
-      QVBoxLayout* l = new QVBoxLayout(&dialog);
-      QLabel* lab = new QLabel(&dialog);
-      l->addWidget(lab);
-      lab->setText(msg);
-      lab->setWordWrap(true);
-      QDialogButtonBox* btns = new QDialogButtonBox(QDialogButtonBox::Ok,
-                                                    Qt::Horizontal, &dialog);
-      QObject::connect(btns, SIGNAL(accepted()), &dialog, SLOT(accept()));
-      l->addWidget(btns);
-      dialog.exec();
-      }
-    else
-      {
-      QList<QPersistentModelIndex> pidxs;
-      foreach(QModelIndex i, idxs)
-        {
-        i = this->SearchFilter->mapToSource(i);
-        i = this->AdvancedFilter->mapToSource(i);
-        pidxs.append(i);
-        }
-      if(which == deleteAction)
-        {
-        foreach(QPersistentModelIndex j, pidxs)
-          {
-          this->cacheModel()->removeRows(j.row(), 1);
-          }
-        }
-      else if(which == ignoreAction)
-        {
-        foreach(QPersistentModelIndex j, pidxs)
-          {
-          j = this->cacheModel()->index(j.row(), 1);
-          this->cacheModel()->setData(j, "IGNORE", Qt::DisplayRole);
-          }
-        }
-      }
-    }
-}
-
+ 
 QModelIndex QCMakeCacheView::moveCursor(CursorAction act, 
   Qt::KeyboardModifiers mod)
 {
@@ -228,17 +150,19 @@ void QCMakeCacheModel::clear()
 void QCMakeCacheModel::setProperties(const QCMakeCachePropertyList& props)
 {
   QSet<QCMakeCacheProperty> newProps = props.toSet();
+  QSet<QCMakeCacheProperty> newProps2 = props.toSet();
   QSet<QCMakeCacheProperty> oldProps = this->Properties.toSet();
   
   oldProps.intersect(newProps);
   newProps.subtract(oldProps);
+  newProps2.subtract(newProps);
 
   this->NewCount = newProps.count();
   this->Properties.clear();
 
   this->Properties = newProps.toList();
   qSort(this->Properties);
-  QCMakeCachePropertyList tmp = oldProps.toList();
+  QCMakeCachePropertyList tmp = newProps2.toList();
   qSort(tmp);
   this->Properties += tmp;
   
@@ -384,17 +308,20 @@ QModelIndex QCMakeCacheModel::buddy ( const QModelIndex& idx ) const
   return idx;
 }
   
-bool QCMakeCacheModel::removeRows(int row, int, const QModelIndex&)
+bool QCMakeCacheModel::removeRows(int row, int num, const QModelIndex&)
 {
-  if(row < 0 || row >= this->Properties.count())
+  if(row < 0 || row+num > this->Properties.count())
     {
     return false;
     }
-  this->beginRemoveRows(QModelIndex(), row, row);
-  this->Properties.removeAt(row);
-  if(this->NewCount >= row+1)
+  this->beginRemoveRows(QModelIndex(), row, row+num-1);
+  for(int i=0; i<num; i++)
     {
-    this->NewCount--;
+    this->Properties.removeAt(row);
+    if(this->NewCount >= row+1)
+      {
+      this->NewCount--;
+      }
     }
   this->endRemoveRows();
   return true;

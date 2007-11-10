@@ -83,6 +83,8 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->ProgressBar->reset();
   this->InterruptButton->setIcon(
     this->style()->standardPixmap(QStyle::SP_DialogCancelButton));
+  this->InterruptButton->setEnabled(false);
+  this->RemoveEntry->setEnabled(false);
 
   QMenu* FileMenu = this->menuBar()->addMenu(tr("&File"));
   this->ReloadCacheAction = FileMenu->addAction(tr("&Reload Cache"));
@@ -190,13 +192,15 @@ void CMakeSetupDialog::initialize()
                    this, SLOT(updateGeneratorLabel(QString)));
   this->updateGeneratorLabel(QString());
   
-  QObject::connect(this->DeleteCacheButton, SIGNAL(clicked(bool)), 
-                   this, SLOT(doDeleteCache()));
-
   QObject::connect(this->CacheValues->cacheModel(),
                    SIGNAL(dataChanged(QModelIndex,QModelIndex)), 
                    this, SLOT(setCacheModified()));
-
+  
+  QObject::connect(this->CacheValues->selectionModel(),
+                   SIGNAL(selectionChanged(QItemSelection,QItemSelection)), 
+                   this, SLOT(selectionChanged()));
+  QObject::connect(this->RemoveEntry, SIGNAL(clicked(bool)), 
+                   this, SLOT(removeSelectedCacheEntries()));
 
   // get the saved binary directories
   QStringList buildPaths = this->loadBuildPaths();
@@ -457,9 +461,9 @@ void CMakeSetupDialog::setEnabledState(bool enabled)
   this->ConfigureButton->setEnabled(enabled);
   this->ReloadCacheAction->setEnabled(enabled);
   this->DeleteCacheAction->setEnabled(enabled);
-  this->DeleteCacheButton->setEnabled(enabled);
   this->ExitAction->setEnabled(enabled);
   this->ConfigureAction->setEnabled(enabled);
+  this->RemoveEntry->setEnabled(false);  // let selection re-enable it
   // generate button/action are handled separately
 }
 
@@ -671,4 +675,30 @@ void CMakeSetupDialog::setCacheModified()
   this->setGenerateEnabled(false);
 }
 
+void CMakeSetupDialog::removeSelectedCacheEntries()
+{
+  QModelIndexList idxs = this->CacheValues->selectionModel()->selectedRows();
+  QList<QPersistentModelIndex> pidxs;
+  foreach(QModelIndex i, idxs)
+    {
+    pidxs.append(i);
+    }
+  foreach(QPersistentModelIndex pi, pidxs)
+    {
+    this->CacheValues->model()->removeRow(pi.row());
+    }
+}
+
+void CMakeSetupDialog::selectionChanged()
+{
+  QModelIndexList idxs = this->CacheValues->selectionModel()->selectedRows();
+  if(idxs.count() && !this->InterruptButton->isEnabled())
+    {
+    this->RemoveEntry->setEnabled(true);
+    }
+  else
+    {
+    this->RemoveEntry->setEnabled(false);
+    }
+}
 

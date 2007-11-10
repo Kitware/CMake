@@ -45,7 +45,6 @@ public slots:
   void setSearchFilter(const QString&);
 
 protected:
-  void contextMenuEvent(QContextMenuEvent* e);
   QModelIndex moveCursor(CursorAction, Qt::KeyboardModifiers);
   void showEvent(QShowEvent* e);
   bool Init;
