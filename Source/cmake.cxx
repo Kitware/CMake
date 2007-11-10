@@ -104,6 +104,8 @@
 
 #include <memory> // auto_ptr
 
+static bool cmakeCheckStampFile(const char* stampName);
+
 void cmNeedBackwardsCompatibility(const std::string& variable,
   int access_type, void*, const char*, const cmMakefile*)
 {
@@ -519,6 +521,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       this->CheckBuildSystemArgument = args[++i];
       this->ClearBuildSystem = (atoi(args[++i].c_str()) > 0);
+      }
+    else if((i < args.size()-1) && (arg.find("--check-stamp-file",0) == 0))
+      {
+      this->CheckStampFile = args[++i];
       }
     else if(arg.find("-V",0) == 0)
       {
@@ -1994,6 +2000,13 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     return -1;
     }
 
+  // If we are given a stamp file check if it is really out of date.
+  if(!this->CheckStampFile.empty() &&
+     cmakeCheckStampFile(this->CheckStampFile.c_str()))
+    {
+    return 0;
+    }
+
   // set the cmake command
   this->CMakeCommand = args[0];
   
@@ -3405,4 +3418,69 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   // clean up the directory
   cmSystemTools::RemoveADirectory(destPath.c_str());
   return 0;
+}
+
+//----------------------------------------------------------------------------
+static bool cmakeCheckStampFile(const char* stampName)
+{
+  // If the stamp file still exists then it must really be out of
+  // date.
+  if(cmSystemTools::FileExists(stampName))
+    {
+    return false;
+    }
+
+  // The stamp file does not exist.  Use the stamp dependencies to
+  // determine whether it is really out of date.  This works in
+  // conjunction with cmLocalVisualStudio7Generator to avoid
+  // repeatedly re-running CMake when the user rebuilds the entire
+  // solution.
+  std::string stampDepends = stampName;
+  stampDepends += ".depend";
+#if defined(_WIN32) || defined(__CYGWIN__)
+  std::ifstream fin(stampDepends.c_str(), std::ios::in | std::ios::binary);
+#else
+  std::ifstream fin(stampDepends.c_str(), std::ios::in);
+#endif
+  if(!fin)
+    {
+    // The stamp dependencies file cannot be read.  Just assume the
+    // build system is really out of date.
+    return false;
+    }
+
+  // Compare the stamp dependencies against the dependency file itself.
+  cmFileTimeComparison ftc;
+  std::string dep;
+  while(cmSystemTools::GetLineFromStream(fin, dep))
+    {
+    int result;
+    if(dep.length() >= 1 && dep[0] != '#' &&
+       (!ftc.FileTimeCompare(stampDepends.c_str(), dep.c_str(), &result)
+        || result < 0))
+      {
+      // The stamp depends file is older than this dependency.  The
+      // build system is really out of date.
+      return false;
+      }
+    }
+
+  // The build system is up to date.  The stamp file has been removed
+  // by the VS IDE due to a "rebuild" request.  Just restore it.
+  std::ofstream stamp(stampName);
+  stamp << "# CMake timestamp file for corresponding VS project.\n";
+  if(stamp)
+    {
+    // Notify the user why CMake is not re-running.  It is safe to
+    // just print to stdout here because this code is only reachable
+    // through an undocumented flag used by the VS generator.
+    std::cout << "CMake does not need to re-run because the "
+              << "project timestamp is up-to-date.\n";
+    return true;
+    }
+  else
+    {
+    cmSystemTools::Error("Cannot restore timestamp ", stampName);
+    return false;
+    }
 }

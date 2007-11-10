@@ -164,17 +164,40 @@ void cmLocalVisualStudio7Generator
   this->WriteVCProjFile(fout,lname,target);
   }
 
+  // Create a helper file so CMake can determine when it is run
+  // through the rule created by AddVCProjBuildRule whether it really
+  // needs to regenerate the project.  This file lists its own
+  // dependencies.  If any file listed in it is newer than itself then
+  // CMake must rerun.  Otherwise the project file is up to date and
+  // the stamp file can just be touched.
+  {
+  std::string depName = this->Makefile->GetStartOutputDirectory();
+  depName += cmake::GetCMakeFilesDirectory();
+  depName += "/";
+  depName += lname;
+  depName += ".vcproj.stamp.depend";
+  std::ofstream depFile(depName.c_str());
+  depFile << "# CMake dependency list for corresponding VS project.\n";
+  std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
+  for(std::vector<std::string>::const_iterator lf = listFiles.begin();
+      lf != listFiles.end(); ++lf)
+    {
+    depFile << *lf << std::endl;
+    }
+  }
+
   // Touch a timestamp file used to determine when the project file is
   // out of date.
-  std::string stampName;
-  stampName = this->Makefile->GetStartOutputDirectory();
+  {
+  std::string stampName = this->Makefile->GetStartOutputDirectory();
   stampName += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(stampName.c_str());
   stampName += "/";
   stampName += lname;
   stampName += ".vcproj.stamp";
   std::ofstream stamp(stampName.c_str());
-  stamp << "# CMake timestamp for " << lname << ".vcproj" << std::endl;
+  stamp << "# CMake timestamp file for corresponding VS project.\n";
+  }
 }
 
 
@@ -203,6 +226,8 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmTarget& tgt)
     this->Convert(this->Makefile->GetHomeOutputDirectory(),
                   START_OUTPUT, UNCHANGED, true);
   commandLine.push_back(args);
+  commandLine.push_back("--check-stamp-file");
+  commandLine.push_back(stampName.c_str());
 
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
 

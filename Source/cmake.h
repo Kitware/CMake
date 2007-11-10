@@ -401,6 +401,7 @@ private:
   std::string CXXEnvironment;
   std::string CCEnvironment;
   std::string CheckBuildSystemArgument;
+  std::string CheckStampFile;
   std::string CTestCommand;
   std::string CPackCommand;
   bool ClearBuildSystem;

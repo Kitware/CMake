@@ -124,6 +124,8 @@ void cmGlobalVisualStudio8Generator::Generate()
         listFiles.erase(new_end, listFiles.end());
 
         // Create a rule to re-run CMake.
+        std::string stampName = cmake::GetCMakeFilesDirectoryPostSlash();
+        stampName += CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.stamp";
         const char* dsprule = mf->GetRequiredDefinition("CMAKE_COMMAND");
         cmCustomCommandLine commandLine;
         commandLine.push_back(dsprule);
@@ -137,6 +139,8 @@ void cmGlobalVisualStudio8Generator::Generate()
                             cmLocalGenerator::START_OUTPUT,
                             cmLocalGenerator::UNCHANGED, true);
         commandLine.push_back(argB);
+        commandLine.push_back("--check-stamp-file");
+        commandLine.push_back(stampName.c_str());
         cmCustomCommandLines commandLines;
         commandLines.push_back(commandLine);
 
@@ -146,8 +150,6 @@ void cmGlobalVisualStudio8Generator::Generate()
         // target.
         const char* no_main_dependency = 0;
         const char* no_working_directory = 0;
-        std::string stampName = cmake::GetCMakeFilesDirectoryPostSlash();
-        stampName += CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.stamp";
         mf->AddCustomCommandToOutput(
           stampName.c_str(), listFiles,
           no_main_dependency, commandLines, "Checking Build System",
