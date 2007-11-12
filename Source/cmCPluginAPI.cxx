@@ -529,8 +529,10 @@ void * CCONV cmCreateSourceFile()
 
 void * CCONV cmCreateNewSourceFile(void *arg)
 {
-  (void)arg; // no longer needed
-  return (void*)new cmCPluginAPISourceFile;
+  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  cmCPluginAPISourceFile *sf = new cmCPluginAPISourceFile;
+  sf->Properties.SetCMakeInstance(mf->GetCMakeInstance());
+  return (void*)sf;
 }
 
 void CCONV cmDestroySourceFile(void *arg)
