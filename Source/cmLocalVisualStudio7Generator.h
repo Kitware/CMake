@@ -73,14 +73,15 @@ private:
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const char* configName);
   void FixGlobalTargets();
-  void OutputVCProjFile();
+  void WriteProjectFiles();
+  void WriteStampFiles();
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteVCProjFooter(std::ostream& fout);
   void CreateSingleVCProj(const char *lname, cmTarget &tgt);
   void WriteVCProjFile(std::ostream& fout, const char *libName, 
                        cmTarget &tgt);
-  void AddVCProjBuildRule(cmTarget& tgt);
+  cmSourceFile* CreateVCProjBuildRule();
   void WriteConfigurations(std::ostream& fout,
                            const char *libName, cmTarget &tgt);
   void WriteConfiguration(std::ostream& fout,

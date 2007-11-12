@@ -125,7 +125,7 @@ void cmGlobalVisualStudio8Generator::Generate()
 
         // Create a rule to re-run CMake.
         std::string stampName = cmake::GetCMakeFilesDirectoryPostSlash();
-        stampName += CMAKE_CHECK_BUILD_SYSTEM_TARGET ".vcproj.stamp";
+        stampName += "generate.stamp";
         const char* dsprule = mf->GetRequiredDefinition("CMAKE_COMMAND");
         cmCustomCommandLine commandLine;
         commandLine.push_back(dsprule);
@@ -146,8 +146,8 @@ void cmGlobalVisualStudio8Generator::Generate()
 
         // Add the rule.  Note that we cannot use the CMakeLists.txt
         // file as the main dependency because it would get
-        // overwritten by the AddVCProjBuildRule of the ALL_BUILD
-        // target.
+        // overwritten by the CreateVCProjBuildRule.
+        // (this could be avoided with per-target source files)
         const char* no_main_dependency = 0;
         const char* no_working_directory = 0;
         mf->AddCustomCommandToOutput(

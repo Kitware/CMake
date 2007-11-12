@@ -58,7 +58,8 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
 
 void cmLocalVisualStudio7Generator::Generate()
 {
-  this->OutputVCProjFile();
+  this->WriteProjectFiles();
+  this->WriteStampFiles();
 }
 
 void cmLocalVisualStudio7Generator::FixGlobalTargets()
@@ -99,7 +100,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
 // TODO
 // for CommandLine= need to repleace quotes with &quot
 // write out configurations
-void cmLocalVisualStudio7Generator::OutputVCProjFile()
+void cmLocalVisualStudio7Generator::WriteProjectFiles()
 {
   // If not an in source build, then create the output directory
   if(strcmp(this->Makefile->GetStartOutputDirectory(),
@@ -113,23 +114,28 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
       }
     }
 
-  // Create the VCProj or set of VCProj's for libraries and executables
-
+  // Get the set of targets in this directory.
   cmTargets &tgts = this->Makefile->GetTargets();
-  for(cmTargets::iterator l = tgts.begin();
-      l != tgts.end(); l++)
+
+  // Create the regeneration custom rule.
+  if(!this->Makefile->IsOn("CMAKE_SUPPRESS_REGENERATION"))
     {
-    // Add a rule to regenerate the build system when the target
+    // Create a rule to regenerate the build system when the target
     // specification source changes.
-    const char* suppRegenRule =
-      this->Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
-    if (!cmSystemTools::IsOn(suppRegenRule) &&
-        (strcmp(l->first.c_str(), CMAKE_CHECK_BUILD_SYSTEM_TARGET) != 0))
+    if(cmSourceFile* sf = this->CreateVCProjBuildRule())
       {
-      this->AddVCProjBuildRule(l->second);
+      // Add the rule to targets that need it.
+      for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
+        {
+        if(l->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
+          {
+          l->second.AddSourceFile(sf);
+          }
+        }
       }
     }
 
+  // Create the project file for each target.
   for(cmTargets::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
@@ -142,6 +148,38 @@ void cmLocalVisualStudio7Generator::OutputVCProjFile()
     }
 }
 
+//----------------------------------------------------------------------------
+void cmLocalVisualStudio7Generator::WriteStampFiles()
+{
+  // Touch a timestamp file used to determine when the project file is
+  // out of date.
+  std::string stampName = this->Makefile->GetStartOutputDirectory();
+  stampName += cmake::GetCMakeFilesDirectory();
+  cmSystemTools::MakeDirectory(stampName.c_str());
+  stampName += "/";
+  stampName += "generate.stamp";
+  std::ofstream stamp(stampName.c_str());
+  stamp << "# CMake generation timestamp file this directory.\n";
+
+  // Create a helper file so CMake can determine when it is run
+  // through the rule created by CreateVCProjBuildRule whether it
+  // really needs to regenerate the project.  This file lists its own
+  // dependencies.  If any file listed in it is newer than itself then
+  // CMake must rerun.  Otherwise the project files are up to date and
+  // the stamp file can just be touched.
+  std::string depName = stampName;
+  depName += ".depend";
+  std::ofstream depFile(depName.c_str());
+  depFile << "# CMake generation dependency list for this directory.\n";
+  std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
+  for(std::vector<std::string>::const_iterator lf = listFiles.begin();
+      lf != listFiles.end(); ++lf)
+    {
+    depFile << *lf << std::endl;
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator
 ::CreateSingleVCProj(const char *lname, cmTarget &target)
 {
@@ -158,54 +196,16 @@ void cmLocalVisualStudio7Generator
   // Generate the project file and replace it atomically with
   // copy-if-different.  We use a separate timestamp so that the IDE
   // does not reload project files unnecessarily.
-  {
   cmGeneratedFileStream fout(fname.c_str());
   fout.SetCopyIfDifferent(true);
   this->WriteVCProjFile(fout,lname,target);
-  }
-
-  // Create a helper file so CMake can determine when it is run
-  // through the rule created by AddVCProjBuildRule whether it really
-  // needs to regenerate the project.  This file lists its own
-  // dependencies.  If any file listed in it is newer than itself then
-  // CMake must rerun.  Otherwise the project file is up to date and
-  // the stamp file can just be touched.
-  {
-  std::string depName = this->Makefile->GetStartOutputDirectory();
-  depName += cmake::GetCMakeFilesDirectory();
-  depName += "/";
-  depName += lname;
-  depName += ".vcproj.stamp.depend";
-  std::ofstream depFile(depName.c_str());
-  depFile << "# CMake dependency list for corresponding VS project.\n";
-  std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
-  for(std::vector<std::string>::const_iterator lf = listFiles.begin();
-      lf != listFiles.end(); ++lf)
-    {
-    depFile << *lf << std::endl;
-    }
-  }
-
-  // Touch a timestamp file used to determine when the project file is
-  // out of date.
-  {
-  std::string stampName = this->Makefile->GetStartOutputDirectory();
-  stampName += cmake::GetCMakeFilesDirectory();
-  cmSystemTools::MakeDirectory(stampName.c_str());
-  stampName += "/";
-  stampName += lname;
-  stampName += ".vcproj.stamp";
-  std::ofstream stamp(stampName.c_str());
-  stamp << "# CMake timestamp file for corresponding VS project.\n";
-  }
 }
 
-
-void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmTarget& tgt)
+//----------------------------------------------------------------------------
+cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 {
   std::string stampName = cmake::GetCMakeFilesDirectoryPostSlash();
-  stampName += tgt.GetName();
-  stampName += ".vcproj.stamp";
+  stampName += "generate.stamp";
   const char* dsprule = 
     this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
@@ -240,14 +240,14 @@ void cmLocalVisualStudio7Generator::AddVCProjBuildRule(cmTarget& tgt)
                                            no_working_directory, true);
   if(cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str()))
     {
-    tgt.AddSourceFile(file);
+    return file;
     }
   else
     {
     cmSystemTools::Error("Error adding rule for ", makefileIn.c_str());
+    return 0;
     }
 }
-
 
 void cmLocalVisualStudio7Generator::WriteConfigurations(std::ostream& fout,
                                                         const char *libName,
