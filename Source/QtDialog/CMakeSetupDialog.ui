@@ -10,8 +10,20 @@
    </rect>
   </property>
   <layout class="QGridLayout" >
+   <property name="margin" >
+    <number>9</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
    <item row="0" column="0" >
     <layout class="QGridLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
      <item row="0" column="0" >
       <widget class="QLabel" name="label" >
        <property name="text" >
@@ -39,7 +51,9 @@
      <item row="1" column="1" >
       <widget class="QComboBox" name="BinaryDirectory" >
        <property name="sizePolicy" >
-        <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+        <sizepolicy>
+         <hsizetype>7</hsizetype>
+         <vsizetype>0</vsizetype>
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -74,12 +88,23 @@
        <property name="margin" >
         <number>0</number>
        </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
        <item>
         <layout class="QHBoxLayout" >
+         <property name="margin" >
+          <number>0</number>
+         </property>
+         <property name="spacing" >
+          <number>6</number>
+         </property>
          <item>
           <widget class="QLabel" name="label_4" >
            <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
+            <sizepolicy>
+             <hsizetype>0</hsizetype>
+             <vsizetype>0</vsizetype>
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -92,7 +117,9 @@
          <item>
           <widget class="QLineEdit" name="Search" >
            <property name="sizePolicy" >
-            <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+            <sizepolicy>
+             <hsizetype>7</hsizetype>
+             <vsizetype>0</vsizetype>
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -116,7 +143,7 @@
            </property>
            <property name="sizeHint" >
             <size>
-             <width>61</width>
+             <width>40</width>
              <height>23</height>
             </size>
            </property>
@@ -168,6 +195,12 @@
        </item>
        <item>
         <layout class="QHBoxLayout" >
+         <property name="margin" >
+          <number>0</number>
+         </property>
+         <property name="spacing" >
+          <number>6</number>
+         </property>
          <item>
           <widget class="QPushButton" name="ConfigureButton" >
            <property name="text" >

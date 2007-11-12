@@ -350,8 +350,8 @@ void CMakeSetupDialog::doHelp()
     "sure the values are correct.   For some projects the Configure process can "
     "be iterative, so continue to press the Configure button until there are no "
     "longer red entries.\r\n\r\n4. Once there are no longer red entries, you "
-    "should click the OK button.  This will write the build files to the build "
-    "directory and exit CMake.");
+    "should click the Generate button.  This will write the build files to the build "
+    "directory.");
 
   QDialog dialog;
   dialog.setWindowTitle(tr("CMakeSetup Help"));
