@@ -70,11 +70,11 @@
       <property name="frameShadow" >
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QGridLayout" >
+      <layout class="QVBoxLayout" >
        <property name="margin" >
         <number>0</number>
        </property>
-       <item row="0" column="0" colspan="6" >
+       <item>
         <layout class="QHBoxLayout" >
          <item>
           <widget class="QLabel" name="label_4" >
@@ -128,16 +128,19 @@
             <string>Remove Selected Entries</string>
            </property>
            <property name="text" >
-            <string/>
+            <string>Remove Entry</string>
            </property>
            <property name="icon" >
             <iconset resource="CMakeSetup.qrc" >:/Icons/Delete16.png</iconset>
+           </property>
+           <property name="toolButtonStyle" >
+            <enum>Qt::ToolButtonTextBesideIcon</enum>
            </property>
           </widget>
          </item>
         </layout>
        </item>
-       <item row="1" column="0" colspan="6" >
+       <item>
         <widget class="QCMakeCacheView" name="CacheValues" >
          <property name="alternatingRowColors" >
           <bool>true</bool>
@@ -150,73 +153,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0" >
-        <widget class="QPushButton" name="ConfigureButton" >
-         <property name="text" >
-          <string>Configure</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1" >
-        <widget class="QPushButton" name="GenerateButton" >
-         <property name="text" >
-          <string>Generate</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2" >
-        <widget class="QLabel" name="Generator" >
-         <property name="text" >
-          <string>Current Generator:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType" >
-          <enum>QSizePolicy::Expanding</enum>
-         </property>
-         <property name="sizeHint" >
-          <size>
-           <width>121</width>
-           <height>27</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="3" column="5" >
-        <widget class="QProgressBar" name="ProgressBar" >
-         <property name="minimum" >
-          <number>0</number>
-         </property>
-         <property name="maximum" >
-          <number>100</number>
-         </property>
-         <property name="value" >
-          <number>0</number>
-         </property>
-         <property name="textVisible" >
-          <bool>false</bool>
-         </property>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="textDirection" >
-          <enum>QProgressBar::BottomToTop</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="4" >
-        <widget class="QToolButton" name="InterruptButton" >
-         <property name="text" >
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="6" >
+       <item>
         <widget class="QLabel" name="label_3" >
          <property name="text" >
           <string>Press Configure to update and display new values in red, then press Generate to generate selected build files.</string>
@@ -228,6 +165,69 @@
           <bool>true</bool>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QPushButton" name="ConfigureButton" >
+           <property name="text" >
+            <string>Configure</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="GenerateButton" >
+           <property name="text" >
+            <string>Generate</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="Generator" >
+           <property name="text" >
+            <string>Current Generator:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType" >
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>121</width>
+             <height>27</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QProgressBar" name="ProgressBar" >
+           <property name="minimum" >
+            <number>0</number>
+           </property>
+           <property name="maximum" >
+            <number>100</number>
+           </property>
+           <property name="value" >
+            <number>0</number>
+           </property>
+           <property name="textVisible" >
+            <bool>false</bool>
+           </property>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="textDirection" >
+            <enum>QProgressBar::BottomToTop</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

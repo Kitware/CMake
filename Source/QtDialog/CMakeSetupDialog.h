@@ -61,7 +61,6 @@ protected slots:
   void promptForGenerator();
   void updateGeneratorLabel(const QString& gen);
   void setExitAfterGenerate(bool);
-  void setGenerateEnabled(bool);
   void addBinaryPath(const QString&);
   QStringList loadBuildPaths();
   void saveBuildPaths(const QStringList&);
@@ -72,6 +71,10 @@ protected slots:
   void selectionChanged();
 
 protected:
+
+  enum State { Interrupting, ReadyConfigure, ReadyGenerate, Configuring, Generating };
+  void enterState(State s);
+
   void closeEvent(QCloseEvent*);
   void dragEnterEvent(QDragEnterEvent*);
   void dropEvent(QDropEvent*);
@@ -84,6 +87,8 @@ protected:
   QAction* ExitAction;
   QAction* ConfigureAction;
   QAction* GenerateAction;
+  State CurrentState;
+
 };
 
 // QCMake instance on a thread

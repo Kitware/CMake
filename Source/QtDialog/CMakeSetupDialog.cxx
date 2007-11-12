@@ -66,7 +66,7 @@ void QCMakeThread::run()
 }
 
 CMakeSetupDialog::CMakeSetupDialog()
-  : ExitAfterGenerate(true), CacheModified(false)
+  : ExitAfterGenerate(true), CacheModified(false), CurrentState(Interrupting)
 {
   // create the GUI
   QSettings settings;
@@ -81,9 +81,6 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->Splitter->setStretchFactor(1, 1);
   this->setCentralWidget(cont);
   this->ProgressBar->reset();
-  this->InterruptButton->setIcon(
-    this->style()->standardPixmap(QStyle::SP_DialogCancelButton));
-  this->InterruptButton->setEnabled(false);
   this->RemoveEntry->setEnabled(false);
 
   QMenu* FileMenu = this->menuBar()->addMenu(tr("&File"));
@@ -104,15 +101,6 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->GenerateAction = ToolsMenu->addAction(tr("&Generate"));
   QObject::connect(this->GenerateAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doGenerate()));
-  /* 
-  QMenu* OptionsMenu = this->menuBar()->addMenu(tr("&Options"));
-  QAction* a = OptionsMenu->addAction(tr("Exit after Generation"));
-  a->setCheckable(true);
-  this->ExitAfterGenerate = settings.value("ExitAfterGenerate", true).toBool();
-  a->setChecked(this->ExitAfterGenerate);
-  QObject::connect(a, SIGNAL(triggered(bool)),
-                   this, SLOT(setExitAfterGenerate(bool)));
-                   */
 
   QMenu* HelpMenu = this->menuBar()->addMenu(tr("&Help"));
   QAction* a = HelpMenu->addAction(tr("About"));
@@ -122,8 +110,6 @@ CMakeSetupDialog::CMakeSetupDialog()
   QObject::connect(a, SIGNAL(triggered(bool)),
                    this, SLOT(doHelp()));
   
-  this->setGenerateEnabled(false);
-
   this->setAcceptDrops(true);
 
   // start the cmake worker thread
@@ -131,6 +117,8 @@ CMakeSetupDialog::CMakeSetupDialog()
   QObject::connect(this->CMakeThread, SIGNAL(cmakeInitialized()),
                    this, SLOT(initialize()), Qt::QueuedConnection);  
   this->CMakeThread->start();
+  
+  this->enterState(ReadyConfigure);
 }
 
 void CMakeSetupDialog::initialize()
@@ -175,9 +163,6 @@ void CMakeSetupDialog::initialize()
                    SIGNAL(errorMessage(QString)),
                    this, SLOT(error(QString)));
 
-  QObject::connect(this->InterruptButton, SIGNAL(clicked(bool)),
-                   this, SLOT(doInterrupt()));
-  
   QObject::connect(this->CMakeThread->cmakeInstance(),
                    SIGNAL(outputMessage(QString)),
                    this->Output, SLOT(append(QString)));
@@ -234,6 +219,13 @@ CMakeSetupDialog::~CMakeSetupDialog()
   
 void CMakeSetupDialog::doConfigure()
 {
+  if(this->CurrentState == Configuring)
+    {
+    // stop configure
+    doInterrupt();
+    return;
+    }
+
   QString bindir = this->CMakeThread->cmakeInstance()->binaryDirectory();
   QDir dir(bindir);
   if(!dir.exists())
@@ -262,9 +254,7 @@ void CMakeSetupDialog::doConfigure()
   // remember path
   this->addBinaryPath(dir.absolutePath());
     
-  this->InterruptButton->setEnabled(true);
-  this->setEnabledState(false);
-  this->setGenerateEnabled(false);
+  this->enterState(Configuring);
 
   this->Output->clear();
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
@@ -277,47 +267,44 @@ void CMakeSetupDialog::doConfigure()
 
 void CMakeSetupDialog::finishConfigure(int err)
 {
-  this->InterruptButton->setEnabled(false);
-  this->setEnabledState(true);
-  this->ProgressBar->reset();
+  if(0 == err && 0 == this->CacheValues->cacheModel()->newCount())
+    {
+    this->enterState(ReadyGenerate);
+    }
+  else
+    {
+    this->enterState(ReadyConfigure);
+    this->CacheValues->scrollToTop();
+    }
+  
   if(err != 0)
     {
     QMessageBox::critical(this, tr("Error"), 
       tr("Error in configuration process, project files may be invalid"), 
       QMessageBox::Ok);
     }
-  else if(0 == this->CacheValues->cacheModel()->newCount())
-    {
-    this->setGenerateEnabled(true);
-    }
 }
 
 void CMakeSetupDialog::finishGenerate(int err)
 {
-  this->InterruptButton->setEnabled(false);
-  this->setEnabledState(true);
-  this->setGenerateEnabled(true);
-  this->ProgressBar->reset();
+  this->enterState(ReadyGenerate);
   if(err != 0)
     {
     QMessageBox::critical(this, tr("Error"), 
       tr("Error in generation process, project files may be invalid"),
       QMessageBox::Ok);
     }
-  /*
-  else if(this->ExitAfterGenerate)
-    {
-    QApplication::quit();
-    }
-    */
 }
 
 void CMakeSetupDialog::doGenerate()
 {
-  this->InterruptButton->setEnabled(true);
-  this->setEnabledState(false);
-  this->setGenerateEnabled(false);
-  this->Output->clear();
+  if(this->CurrentState == Generating)
+    {
+    // stop generate
+    doInterrupt();
+    return;
+    }
+  this->enterState(Generating);
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "generate", Qt::QueuedConnection);
 }
@@ -325,7 +312,7 @@ void CMakeSetupDialog::doGenerate()
 void CMakeSetupDialog::closeEvent(QCloseEvent* e)
 {
   // don't close if we're busy
-  if(this->InterruptButton->isEnabled())
+  if(this->CurrentState == Configuring || this->CurrentState == Generating)
     {
     e->ignore();
     }
@@ -382,7 +369,7 @@ void CMakeSetupDialog::doHelp()
 
 void CMakeSetupDialog::doInterrupt()
 {
-  this->InterruptButton->setEnabled(false);
+  this->enterState(Interrupting);
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "interrupt", Qt::QueuedConnection);
 }
@@ -458,7 +445,6 @@ void CMakeSetupDialog::setEnabledState(bool enabled)
   this->BrowseSourceDirectoryButton->setEnabled(enabled);
   this->BinaryDirectory->setEnabled(enabled);
   this->BrowseBinaryDirectoryButton->setEnabled(enabled);
-  this->ConfigureButton->setEnabled(enabled);
   this->ReloadCacheAction->setEnabled(enabled);
   this->DeleteCacheAction->setEnabled(enabled);
   this->ExitAction->setEnabled(enabled);
@@ -549,17 +535,6 @@ void CMakeSetupDialog::doAbout()
 void CMakeSetupDialog::setExitAfterGenerate(bool b)
 {
   this->ExitAfterGenerate = b;
-  /*
-  QSettings settings;
-  settings.beginGroup("Settings/StartPath");
-  settings.setValue("ExitAfterGenerate", b);
-  */
-}
-
-void CMakeSetupDialog::setGenerateEnabled(bool b)
-{
-  this->GenerateButton->setEnabled(b);
-  this->GenerateAction->setEnabled(b);
 }
 
 void CMakeSetupDialog::addBinaryPath(const QString& path)
@@ -586,7 +561,8 @@ void CMakeSetupDialog::addBinaryPath(const QString& path)
 
 void CMakeSetupDialog::dragEnterEvent(QDragEnterEvent* e)
 {
-  if(!this->ConfigureButton->isEnabled())
+  if(this->CurrentState != ReadyConfigure || 
+     this->CurrentState != ReadyGenerate)
     {
     e->ignore();
     return;
@@ -609,10 +585,12 @@ void CMakeSetupDialog::dragEnterEvent(QDragEnterEvent* e)
 
 void CMakeSetupDialog::dropEvent(QDropEvent* e)
 {
-  if(!this->ConfigureButton->isEnabled())
+  if(this->CurrentState != ReadyConfigure || 
+     this->CurrentState != ReadyGenerate)
     {
     return;
     }
+
   const QMimeData* dat = e->mimeData();
   QList<QUrl> urls = dat->urls();
   QString file = urls.count() ? urls[0].toLocalFile() : QString();
@@ -672,7 +650,7 @@ void CMakeSetupDialog::saveBuildPaths(const QStringList& paths)
 void CMakeSetupDialog::setCacheModified()
 {
   this->CacheModified = true;
-  this->setGenerateEnabled(false);
+  this->enterState(ReadyConfigure);
 }
 
 void CMakeSetupDialog::removeSelectedCacheEntries()
@@ -692,7 +670,9 @@ void CMakeSetupDialog::removeSelectedCacheEntries()
 void CMakeSetupDialog::selectionChanged()
 {
   QModelIndexList idxs = this->CacheValues->selectionModel()->selectedRows();
-  if(idxs.count() && !this->InterruptButton->isEnabled())
+  if(idxs.count() && 
+      (this->CurrentState == ReadyConfigure || 
+       this->CurrentState == ReadyGenerate) )
     {
     this->RemoveEntry->setEnabled(true);
     }
@@ -701,4 +681,64 @@ void CMakeSetupDialog::selectionChanged()
     this->RemoveEntry->setEnabled(false);
     }
 }
+  
+void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
+{
+  if(s == this->CurrentState)
+    {
+    return;
+    }
+
+  CMakeSetupDialog::State old = this->CurrentState;
+  this->CurrentState = s;
+
+  if(s == Interrupting)
+    {
+    if(old == Configuring)
+      {
+      this->ConfigureButton->setEnabled(false);
+      }
+    if(old == Generating)
+      {
+      this->GenerateButton->setEnabled(false);
+      }
+    }
+  else if(s == Configuring)
+    {
+    this->Output->clear();
+    this->setEnabledState(false);
+    this->GenerateButton->setEnabled(false);
+    this->GenerateAction->setEnabled(false);
+    this->ConfigureButton->setText(tr("Stop"));
+    }
+  else if(s == Generating)
+    {
+    this->Output->clear();
+    this->setEnabledState(false);
+    this->ConfigureButton->setEnabled(false);
+    this->GenerateAction->setEnabled(false);
+    this->GenerateButton->setText(tr("Stop"));
+    }
+  else if(s == ReadyConfigure)
+    {
+    this->ProgressBar->reset();
+    this->setEnabledState(true);
+    this->GenerateButton->setEnabled(false);
+    this->GenerateAction->setEnabled(false);
+    this->ConfigureButton->setEnabled(true);
+    this->ConfigureButton->setText(tr("Configure"));
+    this->GenerateButton->setText(tr("Generate"));
+    }
+  else if(s == ReadyGenerate)
+    {
+    this->ProgressBar->reset();
+    this->setEnabledState(true);
+    this->GenerateButton->setEnabled(true);
+    this->GenerateAction->setEnabled(true);
+    this->ConfigureButton->setEnabled(true);
+    this->ConfigureButton->setText(tr("Configure"));
+    this->GenerateButton->setText(tr("Generate"));
+    }
+}
+
 
