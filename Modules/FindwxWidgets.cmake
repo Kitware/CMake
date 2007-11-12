@@ -591,6 +591,10 @@ ELSE(WIN32_STYLE_FIND)
         SEPARATE_ARGUMENTS(wxWidgets_LIBRARIES)
         STRING(REPLACE "-framework;" "-framework "
           wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
+        STRING(REPLACE "-arch;" "-arch "
+          wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
+        STRING(REPLACE "-isysroot;" "-isysroot "
+          wxWidgets_LIBRARIES "${wxWidgets_LIBRARIES}")
 
         # extract linkdirs (-L) for rpath (i.e., LINK_DIRECTORIES)
         STRING(REGEX MATCHALL "-L[^;]+"
