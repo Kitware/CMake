@@ -689,19 +689,12 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     return;
     }
 
-  CMakeSetupDialog::State old = this->CurrentState;
   this->CurrentState = s;
 
   if(s == Interrupting)
     {
-    if(old == Configuring)
-      {
-      this->ConfigureButton->setEnabled(false);
-      }
-    if(old == Generating)
-      {
-      this->GenerateButton->setEnabled(false);
-      }
+    this->ConfigureButton->setEnabled(false);
+    this->GenerateButton->setEnabled(false);
     }
   else if(s == Configuring)
     {
@@ -713,6 +706,7 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     }
   else if(s == Generating)
     {
+    this->CacheModified = false;
     this->Output->clear();
     this->setEnabledState(false);
     this->ConfigureButton->setEnabled(false);
