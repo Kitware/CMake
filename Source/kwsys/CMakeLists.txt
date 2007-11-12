@@ -135,6 +135,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_FundamentalType 1)
   SET(KWSYS_USE_Terminal 1)
   SET(KWSYS_USE_IOStream 1)
+  SET(KWSYS_USE_DateStamp 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
 # Setup the large file support default.
@@ -628,14 +629,26 @@ SET(cppclasses
   )
 FOREACH(cpp ${cppclasses})
   IF(KWSYS_USE_${cpp})
+    # Use the corresponding class.
     SET(KWSYS_CLASSES ${KWSYS_CLASSES} ${cpp})
+
+    # Load component-specific CMake code.
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/${cpp}.cmake)
+      INCLUDE(${PROJECT_SOURCE_DIR}/kwsys${cpp}.cmake)
+    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/${cpp}.cmake)
   ENDIF(KWSYS_USE_${cpp})
 ENDFOREACH(cpp)
 
 # Add selected C components.
-FOREACH(c Process Base64 FundamentalType MD5 Terminal System)
+FOREACH(c Process Base64 FundamentalType MD5 Terminal System DateStamp)
   IF(KWSYS_USE_${c})
+    # Use the corresponding header file.
     SET(KWSYS_H_FILES ${KWSYS_H_FILES} ${c})
+
+    # Load component-specific CMake code.
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/${c}.cmake)
+      INCLUDE(${PROJECT_SOURCE_DIR}/kwsys${c}.cmake)
+    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/${c}.cmake)
   ENDIF(KWSYS_USE_${c})
 ENDFOREACH(c)
 

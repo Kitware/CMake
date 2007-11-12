@@ -1,0 +1,44 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef @KWSYS_NAMESPACE@_DateStamp_h
+#define @KWSYS_NAMESPACE@_DateStamp_h
+
+/**
+ * Version date year component.  The format is CCYY.
+ */
+#define @KWSYS_NAMESPACE@_VERSION_DATE_YEAR   @KWSYS_VERSION_DATE_YEAR@
+
+/**
+ * Version date month component.  The format is MM.
+ */
+#define @KWSYS_NAMESPACE@_VERSION_DATE_MONTH  @KWSYS_VERSION_DATE_MONTH@
+
+/**
+ * Version date day component.  The format is DD.
+ */
+#define @KWSYS_NAMESPACE@_VERSION_DATE_DAY    @KWSYS_VERSION_DATE_DAY@
+
+/**
+ * Version date accessible from preprocessor.
+ * This is an integer in the format CCYYMMDD.
+ */
+#define @KWSYS_NAMESPACE@_VERSION_DATE_FULL   @KWSYS_VERSION_DATE_YEAR@@KWSYS_VERSION_DATE_MONTH@@KWSYS_VERSION_DATE_DAY@
+
+/**
+ * Version date as a string literal.
+ * The format is "CCYY-MM-DD".
+ */
+#define @KWSYS_NAMESPACE@_VERSION_DATE_STRING "@KWSYS_VERSION_DATE_YEAR@-@KWSYS_VERSION_DATE_MONTH@-@KWSYS_VERSION_DATE_DAY@"
+
+#endif
