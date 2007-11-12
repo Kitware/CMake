@@ -3468,14 +3468,14 @@ static bool cmakeCheckStampFile(const char* stampName)
   // The build system is up to date.  The stamp file has been removed
   // by the VS IDE due to a "rebuild" request.  Just restore it.
   std::ofstream stamp(stampName);
-  stamp << "# CMake timestamp file for corresponding VS project.\n";
+  stamp << "# CMake generation timestamp file this directory.\n";
   if(stamp)
     {
     // Notify the user why CMake is not re-running.  It is safe to
     // just print to stdout here because this code is only reachable
     // through an undocumented flag used by the VS generator.
     std::cout << "CMake does not need to re-run because the "
-              << "project timestamp is up-to-date.\n";
+              << "generation timestamp is up-to-date.\n";
     return true;
     }
   else
