@@ -633,9 +633,9 @@ FOREACH(cpp ${cppclasses})
     SET(KWSYS_CLASSES ${KWSYS_CLASSES} ${cpp})
 
     # Load component-specific CMake code.
-    IF(EXISTS ${PROJECT_SOURCE_DIR}/${cpp}.cmake)
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/kwsys${cpp}.cmake)
       INCLUDE(${PROJECT_SOURCE_DIR}/kwsys${cpp}.cmake)
-    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/${cpp}.cmake)
+    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/kwsys${cpp}.cmake)
   ENDIF(KWSYS_USE_${cpp})
 ENDFOREACH(cpp)
 
@@ -646,9 +646,9 @@ FOREACH(c Process Base64 FundamentalType MD5 Terminal System DateStamp)
     SET(KWSYS_H_FILES ${KWSYS_H_FILES} ${c})
 
     # Load component-specific CMake code.
-    IF(EXISTS ${PROJECT_SOURCE_DIR}/${c}.cmake)
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/kwsys${c}.cmake)
       INCLUDE(${PROJECT_SOURCE_DIR}/kwsys${c}.cmake)
-    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/${c}.cmake)
+    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/kwsys${c}.cmake)
   ENDIF(KWSYS_USE_${c})
 ENDFOREACH(c)
 
