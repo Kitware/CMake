@@ -25,6 +25,8 @@
 #include <QDialogButtonBox>
 #include <QCloseEvent>
 #include <QCoreApplication>
+#include <QCompleter>
+#include <QDirModel>
 #include <QSettings>
 #include <QMenu>
 #include <QMenuBar>
@@ -117,6 +119,18 @@ CMakeSetupDialog::CMakeSetupDialog()
   // get the saved binary directories
   QStringList buildPaths = this->loadBuildPaths();
   this->BinaryDirectory->addItems(buildPaths);
+ 
+  QCompleter* compBinaryDir = new QCompleter(this);
+  QDirModel* modelBinaryDir = new QDirModel(compBinaryDir);
+  modelBinaryDir->setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
+  compBinaryDir->setModel(modelBinaryDir);
+  this->BinaryDirectory->setCompleter(compBinaryDir);
+  QCompleter* compSourceDir = new QCompleter(this);
+  QDirModel* modelSourceDir = new QDirModel(compSourceDir);
+  modelSourceDir->setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
+  compSourceDir->setModel(modelSourceDir);
+  this->SourceDirectory->setCompleter(compSourceDir);
+
 
   // start the cmake worker thread
   this->CMakeThread = new QCMakeThread(this);
