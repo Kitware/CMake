@@ -44,7 +44,9 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
   this->SearchFilter = new QSortFilterProxyModel(this);
   this->SearchFilter->setSourceModel(this->AdvancedFilter);
   this->SearchFilter->setFilterCaseSensitivity(Qt::CaseInsensitive);
+#if QT_VERSION >= 0x040300   // breaks search in Qt 4.2
   this->SearchFilter->setFilterKeyColumn(-1); // all columns
+#endif
   this->SearchFilter->setDynamicSortFilter(true);
   this->setModel(this->SearchFilter);
 
