@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "QCMake.h"  // include to disable MS warnings
 #include <QApplication>
+#include <QFileInfo>
+#include <QDir>
 
 #include "CMakeSetupDialog.h"
 
@@ -26,11 +28,26 @@ int main(int argc, char** argv)
   app.setOrganizationName("Kitware");
   app.setWindowIcon(QIcon(":/Icons/CMakeSetup.png"));
 
-  // TODO handle CMake args
-    
   CMakeSetupDialog dialog;
   dialog.setWindowTitle("CMakeSetup");
   dialog.show();
+ 
+  // for now: args support specifying build and/or source directory 
+  QStringList args = app.arguments();
+  if(args.count() == 2)
+    {
+    QFileInfo buildFileInfo(args[1], "CMakeCache.txt");
+    QFileInfo srcFileInfo(args[1], "CMakeLists.txt");
+    if(buildFileInfo.exists())
+      {
+      dialog.setBinaryDirectory(buildFileInfo.absolutePath());
+      }
+    else if(srcFileInfo.exists())
+      {
+      dialog.setSourceDirectory(srcFileInfo.absolutePath());
+      dialog.setBinaryDirectory(QDir::currentPath());
+      }
+    }
   
   return app.exec();
 }

@@ -113,6 +113,10 @@ CMakeSetupDialog::CMakeSetupDialog()
                    this, SLOT(doHelp()));
   
   this->setAcceptDrops(true);
+  
+  // get the saved binary directories
+  QStringList buildPaths = this->loadBuildPaths();
+  this->BinaryDirectory->addItems(buildPaths);
 
   // start the cmake worker thread
   this->CMakeThread = new QCMakeThread(this);
@@ -191,11 +195,6 @@ void CMakeSetupDialog::initialize()
   QObject::connect(this->AddEntry, SIGNAL(clicked(bool)), 
                    this, SLOT(addCacheEntry()));
 
-  // get the saved binary directories
-  QStringList buildPaths = this->loadBuildPaths();
-  this->BinaryDirectory->blockSignals(true);
-  this->BinaryDirectory->addItems(buildPaths);
-  this->BinaryDirectory->blockSignals(false);
   
   if(!this->SourceDirectory->text().isEmpty() ||
      !this->BinaryDirectory->lineEdit()->text().isEmpty())
