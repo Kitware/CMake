@@ -105,6 +105,8 @@ public:
   /// create our own editors for cache properties
   QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, 
       const QModelIndex& index ) const;
+  bool editorEvent (QEvent* event, QAbstractItemModel* model, 
+       const QStyleOptionViewItem& option, const QModelIndex& index);
 };
 
 /// Editor widget for editing paths or file paths

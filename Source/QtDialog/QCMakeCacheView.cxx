@@ -314,11 +314,14 @@ bool QCMakeCacheModel::setData (const QModelIndex& idx, const QVariant& value, i
   return false;
 }
 
-QModelIndex QCMakeCacheModel::buddy ( const QModelIndex& idx ) const
+QModelIndex QCMakeCacheModel::buddy(const QModelIndex& idx) const
 {
   if(idx.column() == 0)
     {
-    return this->index(idx.row(), 1);
+    if(this->Properties[idx.row()].Type != QCMakeCacheProperty::BOOL)
+      {
+      return this->index(idx.row(), 1);
+      }
     }
   return idx;
 }
@@ -385,6 +388,49 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
     }
 
   return new QLineEdit(p);
+}
+  
+bool QCMakeCacheModelDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, 
+       const QStyleOptionViewItem& option, const QModelIndex& index)
+{
+  Qt::ItemFlags flags = model->flags(index);
+  if (!(flags & Qt::ItemIsUserCheckable) || !(option.state & QStyle::State_Enabled)
+      || !(flags & Qt::ItemIsEnabled))
+    {
+    return false;
+    }
+
+  QVariant value = index.data(Qt::CheckStateRole);
+  if (!value.isValid())
+    {
+    return false;
+    }
+
+  if ((event->type() == QEvent::MouseButtonRelease)
+      || (event->type() == QEvent::MouseButtonDblClick))
+    {
+    // eat the double click events inside the check rect
+    if (event->type() == QEvent::MouseButtonDblClick)
+      {
+      return true;
+      }
+    } 
+  else if (event->type() == QEvent::KeyPress)
+    {
+    if(static_cast<QKeyEvent*>(event)->key() != Qt::Key_Space &&
+       static_cast<QKeyEvent*>(event)->key() != Qt::Key_Select)
+      {
+      return false;
+      }
+    } 
+  else 
+    {
+    return false;
+    }
+
+  Qt::CheckState state = (static_cast<Qt::CheckState>(value.toInt()) == Qt::Checked
+                          ? Qt::Unchecked : Qt::Checked);
+  return model->setData(index, state, Qt::CheckStateRole);
 }
   
 QCMakeCacheFileEditor::QCMakeCacheFileEditor(QWidget* p)
