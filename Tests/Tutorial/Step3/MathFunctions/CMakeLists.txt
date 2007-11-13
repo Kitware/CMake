@@ -1,4 +1,4 @@
 add_library(MathFunctions mysqrt.cxx)
 
-install_targets (/bin MathFunctions)
-install_files (/include FILES MathFunctions.h)
+install (TARGETS MathFunctions DESTINATION bin)
+install (FILES MathFunctions.h DESTINATION include)

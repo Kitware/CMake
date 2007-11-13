@@ -22,5 +22,5 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 # add the main library
 add_library(MathFunctions mysqrt.cxx)
 
-install_targets (/bin MathFunctions)
-install_files (/include FILES MathFunctions.h)
+install (TARGETS MathFunctions DESTINATION bin)
+install (FILES MathFunctions.h DESTINATION include)
