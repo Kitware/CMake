@@ -53,6 +53,8 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
   // our delegate for creating our editors
   QCMakeCacheModelDelegate* delegate = new QCMakeCacheModelDelegate(this);
   this->setItemDelegate(delegate);
+  
+  this->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
   // set up headers and sizes
   int h = 0;
