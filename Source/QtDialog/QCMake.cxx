@@ -148,9 +148,13 @@ void QCMake::generate()
   emit this->generateDone(err);
 }
   
-void QCMake::setProperties(const QCMakeCachePropertyList& props)
+void QCMake::setProperties(const QCMakeCachePropertyList& newProps)
 {
+  QCMakeCachePropertyList props = newProps;
+
   QStringList toremove;
+
+  // set the value of properties
   cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
   for(cmCacheManager::CacheIterator i = cachem->NewIterator();
       !i.IsAtEnd(); i.Next())
@@ -180,13 +184,48 @@ void QCMake::setProperties(const QCMakeCachePropertyList& props)
         {
         i.SetValue(prop.Value.toString().toAscii().data());
         }
+      props.removeAt(idx);
       }
 
     }
 
+  // remove some properites
   foreach(QString s, toremove)
     {
     cachem->RemoveCacheEntry(s.toAscii().data());
+    }
+  
+  // add some new properites
+  foreach(QCMakeCacheProperty s, props)
+    {
+    if(s.Type == QCMakeCacheProperty::BOOL)
+      {
+      this->CMakeInstance->AddCacheEntry(s.Key.toAscii().data(),
+                            s.Value.toBool() ? "ON" : "OFF",
+                            s.Help.toAscii().data(),
+                            cmCacheManager::BOOL);
+      }
+    else if(s.Type == QCMakeCacheProperty::STRING)
+      {
+      this->CMakeInstance->AddCacheEntry(s.Key.toAscii().data(),
+                            s.Value.toString().toAscii().data(),
+                            s.Help.toAscii().data(),
+                            cmCacheManager::STRING);
+      }
+    else if(s.Type == QCMakeCacheProperty::PATH)
+      {
+      this->CMakeInstance->AddCacheEntry(s.Key.toAscii().data(),
+                            s.Value.toString().toAscii().data(),
+                            s.Help.toAscii().data(),
+                            cmCacheManager::PATH);
+      }
+    else if(s.Type == QCMakeCacheProperty::FILEPATH)
+      {
+      this->CMakeInstance->AddCacheEntry(s.Key.toAscii().data(),
+                            s.Value.toString().toAscii().data(),
+                            s.Help.toAscii().data(),
+                            cmCacheManager::FILEPATH);
+      }
     }
   
   cachem->SaveCache(this->BinaryDirectory.toAscii().data());

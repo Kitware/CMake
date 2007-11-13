@@ -68,17 +68,18 @@ public slots:
   void clear();
   void setEditEnabled(bool);
   bool removeRows(int row, int count, const QModelIndex& idx = QModelIndex());
+  bool insertRows(int row, int num, const QModelIndex&);
 
 public:
   // satisfy [pure] virtuals
-  int columnCount ( const QModelIndex & parent ) const;
-  QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole) const;
-  QModelIndex parent ( const QModelIndex & index ) const;
-  int rowCount ( const QModelIndex & parent ) const;
-  QVariant headerData ( int section, Qt::Orientation orient, int role ) const;
-  Qt::ItemFlags flags ( const QModelIndex& index ) const;
-  bool setData ( const QModelIndex& index, const QVariant& value, int role );
-  QModelIndex buddy ( const QModelIndex& index ) const;
+  int columnCount (const QModelIndex& parent) const;
+  QVariant data (const QModelIndex& index, int role = Qt::DisplayRole) const;
+  QModelIndex parent (const QModelIndex& index) const;
+  int rowCount (const QModelIndex& parent = QModelIndex()) const;
+  QVariant headerData (int section, Qt::Orientation orient, int role) const;
+  Qt::ItemFlags flags (const QModelIndex& index) const;
+  bool setData (const QModelIndex& index, const QVariant& value, int role);
+  QModelIndex buddy (const QModelIndex& index) const;
 
   // get the properties
   QCMakeCachePropertyList properties() const;
@@ -107,17 +108,32 @@ public:
 };
 
 /// Editor widget for editing paths or file paths
-class QCMakeCachePathEditor : public QLineEdit
+class QCMakeCacheFileEditor : public QLineEdit
 {
   Q_OBJECT
 public:
-  QCMakeCachePathEditor(bool isFilePath, QWidget* p);
+  QCMakeCacheFileEditor(QWidget* p);
 protected slots:
-  void chooseFile();
+  virtual void chooseFile() = 0;
 protected:
   void resizeEvent(QResizeEvent* e);
-  bool IsFilePath;
   QToolButton* ToolButton;
+};
+
+class QCMakeCachePathEditor : public QCMakeCacheFileEditor
+{
+  Q_OBJECT
+public:
+  QCMakeCachePathEditor(QWidget* p = NULL);
+  void chooseFile();
+};
+
+class QCMakeCacheFilePathEditor : public QCMakeCacheFileEditor
+{
+  Q_OBJECT
+public:
+  QCMakeCacheFilePathEditor(QWidget* p = NULL);
+  void chooseFile();
 };
 
 #endif

@@ -34,6 +34,7 @@
 
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
+#include "AddCacheEntry.h"
 
 QCMakeThread::QCMakeThread(QObject* p) 
   : QThread(p), CMakeInstance(NULL)
@@ -82,6 +83,7 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->setCentralWidget(cont);
   this->ProgressBar->reset();
   this->RemoveEntry->setEnabled(false);
+  this->AddEntry->setEnabled(false);
 
   QMenu* FileMenu = this->menuBar()->addMenu(tr("&File"));
   this->ReloadCacheAction = FileMenu->addAction(tr("&Reload Cache"));
@@ -186,6 +188,8 @@ void CMakeSetupDialog::initialize()
                    this, SLOT(selectionChanged()));
   QObject::connect(this->RemoveEntry, SIGNAL(clicked(bool)), 
                    this, SLOT(removeSelectedCacheEntries()));
+  QObject::connect(this->AddEntry, SIGNAL(clicked(bool)), 
+                   this, SLOT(addCacheEntry()));
 
   // get the saved binary directories
   QStringList buildPaths = this->loadBuildPaths();
@@ -449,8 +453,8 @@ void CMakeSetupDialog::setEnabledState(bool enabled)
   this->DeleteCacheAction->setEnabled(enabled);
   this->ExitAction->setEnabled(enabled);
   this->ConfigureAction->setEnabled(enabled);
+  this->AddEntry->setEnabled(enabled);
   this->RemoveEntry->setEnabled(false);  // let selection re-enable it
-  // generate button/action are handled separately
 }
 
 void CMakeSetupDialog::promptForGenerator()
@@ -735,4 +739,38 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     }
 }
 
+void CMakeSetupDialog::addCacheEntry()
+{
+  QDialog dialog(this);
+  dialog.resize(400, 200);
+  dialog.setWindowTitle(tr("CMakeSetup Help"));
+  QVBoxLayout* l = new QVBoxLayout(&dialog);
+  AddCacheEntry* w = new AddCacheEntry(&dialog);
+  QDialogButtonBox* btns = new QDialogButtonBox(
+      QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+      Qt::Horizontal, &dialog);
+  QObject::connect(btns, SIGNAL(accepted()), &dialog, SLOT(accept()));
+  QObject::connect(btns, SIGNAL(rejected()), &dialog, SLOT(reject()));
+  l->addWidget(w);
+  l->addStretch();
+  l->addWidget(btns);
+  if(QDialog::Accepted == dialog.exec())
+    {
+    QCMakeCacheModel* m = this->CacheValues->cacheModel();
+    m->insertRows(0, 1, QModelIndex());
+    m->setData(m->index(0, 0), w->type(), QCMakeCacheModel::TypeRole);
+    m->setData(m->index(0, 0), w->name(), Qt::DisplayRole);
+    m->setData(m->index(0, 0), w->description(), QCMakeCacheModel::HelpRole);
+    m->setData(m->index(0, 0), 0, QCMakeCacheModel::AdvancedRole);
+    if(w->type() == QCMakeCacheProperty::BOOL)
+      {
+      m->setData(m->index(0, 1), w->value().toBool() ? 
+          Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+      }
+    else
+      {
+      m->setData(m->index(0, 1), w->value(), Qt::DisplayRole);
+      }
+    }
+}
 

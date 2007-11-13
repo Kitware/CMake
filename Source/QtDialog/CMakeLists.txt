@@ -9,6 +9,8 @@ ELSE(NOT QT4_FOUND)
   INCLUDE(${QT_USE_FILE})
 
   SET(SRCS
+    AddCacheEntry.cxx
+    AddCacheEntry.h
     CMakeSetup.cxx
     CMakeSetupDialog.cxx
     CMakeSetupDialog.h
@@ -19,8 +21,10 @@ ELSE(NOT QT4_FOUND)
     )
   QT4_WRAP_UI(UI_SRCS 
     CMakeSetupDialog.ui
+    AddCacheEntry.ui
     )
   QT4_WRAP_CPP(MOC_SRCS 
+    AddCacheEntry.h
     CMakeSetupDialog.h
     QCMake.h
     QCMakeCacheView.h

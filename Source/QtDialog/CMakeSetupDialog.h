@@ -69,6 +69,7 @@ protected slots:
   void setCacheModified();
   void removeSelectedCacheEntries();
   void selectionChanged();
+  void addCacheEntry();
 
 protected:
 

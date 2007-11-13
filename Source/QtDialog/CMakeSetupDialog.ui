@@ -150,6 +150,22 @@
           </spacer>
          </item>
          <item>
+          <widget class="QToolButton" name="AddEntry" >
+           <property name="toolTip" >
+            <string>Add New Entry</string>
+           </property>
+           <property name="text" >
+            <string>Add Entry</string>
+           </property>
+           <property name="icon" >
+            <iconset resource="CMakeSetup.qrc" >:/Icons/Plus16.png</iconset>
+           </property>
+           <property name="toolButtonStyle" >
+            <enum>Qt::ToolButtonTextBesideIcon</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="RemoveEntry" >
            <property name="toolTip" >
             <string>Remove Selected Entries</string>

@@ -40,10 +40,12 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
   this->AdvancedFilter->setSourceModel(this->CacheModel);
   this->AdvancedFilter->setFilterRole(QCMakeCacheModel::AdvancedRole);
   this->AdvancedFilter->setFilterRegExp(AdvancedRegExp[0]);
+  this->AdvancedFilter->setDynamicSortFilter(true);
   this->SearchFilter = new QSortFilterProxyModel(this);
   this->SearchFilter->setSourceModel(this->AdvancedFilter);
   this->SearchFilter->setFilterCaseSensitivity(Qt::CaseInsensitive);
   this->SearchFilter->setFilterKeyColumn(-1); // all columns
+  this->SearchFilter->setDynamicSortFilter(true);
   this->setModel(this->SearchFilter);
 
   // our delegate for creating our editors
@@ -296,6 +298,19 @@ bool QCMakeCacheModel::setData (const QModelIndex& idx, const QVariant& value, i
     this->Properties[idx.row()].Value = value.toInt() == Qt::Checked;
     emit this->dataChanged(idx, idx);
     }
+  else if(role == QCMakeCacheModel::HelpRole)
+    {
+    this->Properties[idx.row()].Help = value.toString();
+    emit this->dataChanged(idx, idx);
+    }
+  else if(role == QCMakeCacheModel::TypeRole)
+    {
+    this->Properties[idx.row()].Type = static_cast<QCMakeCacheProperty::PropertyType>(value.toInt());
+    }
+  else if(role == QCMakeCacheModel::AdvancedRole)
+    {
+    this->Properties[idx.row()].Advanced = value.toBool();
+    }
   return false;
 }
 
@@ -327,6 +342,26 @@ bool QCMakeCacheModel::removeRows(int row, int num, const QModelIndex&)
   return true;
 }
 
+bool QCMakeCacheModel::insertRows(int row, int num, const QModelIndex&)
+{
+  if(row < 0)
+    row = 0;
+  if(row > this->rowCount())
+    row = this->rowCount();
+
+  this->beginInsertRows(QModelIndex(), row, row+num-1);
+  for(int i=0; i<num; i++)
+    {
+    this->Properties.insert(row+i, QCMakeCacheProperty());
+    if(this->NewCount >= row)
+      {
+      this->NewCount++;
+      }
+    }
+  this->endInsertRows();
+  return true;
+}
+
 QCMakeCacheModelDelegate::QCMakeCacheModelDelegate(QObject* p)
   : QItemDelegate(p)
 {
@@ -342,18 +377,18 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
     }
   else if(type == QCMakeCacheProperty::PATH)
     {
-    return new QCMakeCachePathEditor(false, p);
+    return new QCMakeCachePathEditor(p);
     }
   else if(type == QCMakeCacheProperty::FILEPATH)
     {
-    return new QCMakeCachePathEditor(true, p);
+    return new QCMakeCacheFilePathEditor(p);
     }
 
   return new QLineEdit(p);
 }
   
-QCMakeCachePathEditor::QCMakeCachePathEditor(bool fp, QWidget* p)
-  : QLineEdit(p), IsFilePath(fp)
+QCMakeCacheFileEditor::QCMakeCacheFileEditor(QWidget* p)
+  : QLineEdit(p)
 {
   // this *is* instead of has a line edit so QAbstractItemView
   // doesn't get confused with what the editor really is
@@ -363,18 +398,28 @@ QCMakeCachePathEditor::QCMakeCachePathEditor(bool fp, QWidget* p)
   this->ToolButton->setCursor(QCursor(Qt::ArrowCursor));
   QObject::connect(this->ToolButton, SIGNAL(clicked(bool)),
                    this, SLOT(chooseFile()));
+}
+
+QCMakeCacheFilePathEditor::QCMakeCacheFilePathEditor(QWidget* p)
+ : QCMakeCacheFileEditor(p)
+{
   QCompleter* comp = new QCompleter(this);
   QDirModel* model = new QDirModel(comp);
-  if(!fp)
-    {
-    // only dirs
-    model->setFilter(QDir::AllDirs | QDir::Drives);
-    }
   comp->setModel(model);
   this->setCompleter(comp);
 }
 
-void QCMakeCachePathEditor::resizeEvent(QResizeEvent* e)
+QCMakeCachePathEditor::QCMakeCachePathEditor(QWidget* p)
+ : QCMakeCacheFileEditor(p)
+{
+  QCompleter* comp = new QCompleter(this);
+  QDirModel* model = new QDirModel(comp);
+  model->setFilter(QDir::AllDirs | QDir::Drives);
+  comp->setModel(model);
+  this->setCompleter(comp);
+}
+
+void QCMakeCacheFileEditor::resizeEvent(QResizeEvent* e)
 {
   // make the tool button fit on the right side
   int h = e->size().height();
@@ -383,21 +428,26 @@ void QCMakeCachePathEditor::resizeEvent(QResizeEvent* e)
   this->setContentsMargins(0, 0, h, 0);
 }
 
+void QCMakeCacheFilePathEditor::chooseFile()
+{
+  // choose a file and set it
+  QString path;
+  QFileInfo info(this->text());
+  path = QFileDialog::getOpenFileName(this, tr("Select File"), 
+      info.absolutePath());
+  
+  if(!path.isEmpty())
+    {
+    this->setText(path);
+    }
+}
+
 void QCMakeCachePathEditor::chooseFile()
 {
   // choose a file and set it
   QString path;
-  if(this->IsFilePath)
-    {
-    QFileInfo info(this->text());
-    path = QFileDialog::getOpenFileName(this, tr("Select File"), 
-        info.absolutePath());
-    }
-  else
-    {
-    path = QFileDialog::getExistingDirectory(this, tr("Select Path"), 
-        this->text());
-    }
+  path = QFileDialog::getExistingDirectory(this, tr("Select Path"), 
+      this->text());
   if(!path.isEmpty())
     {
     this->setText(path);
