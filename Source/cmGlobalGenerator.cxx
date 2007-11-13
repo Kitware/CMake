@@ -681,7 +681,7 @@ bool cmGlobalGenerator::IsDependedOn(const char* project,
 
 void cmGlobalGenerator::Configure()
 {
-  this->FirstTimeProgress = 0.0;
+  this->FirstTimeProgress = 0.0f;
   // Delete any existing cmLocalGenerators
   unsigned int i;
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -908,7 +908,7 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
     // we are in the first time progress and we have no
     // idea how long it will be.  So, just move 1/10th of the way
     // there each time, and don't go over 95%
-    this->FirstTimeProgress += ((1.0 - this->FirstTimeProgress) /30.0);
+    this->FirstTimeProgress += ((1.0f - this->FirstTimeProgress) /30.0f);
     if(this->FirstTimeProgress > 0.95f)
       {
       this->FirstTimeProgress = 0.95f;
@@ -1080,7 +1080,7 @@ void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
     // we are in the first time progress and we have no
     // idea how long it will be.  So, just move half way
     // there each time, and don't go over 95%
-    this->FirstTimeProgress += ((1.0 - this->FirstTimeProgress) /30.0);
+    this->FirstTimeProgress += ((1.0f - this->FirstTimeProgress) /30.0f);
     if(this->FirstTimeProgress > 0.95f)
       {
       this->FirstTimeProgress = 0.95f;
