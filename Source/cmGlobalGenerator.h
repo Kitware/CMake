@@ -270,6 +270,7 @@ protected:
   cmTargetManifest TargetManifest;
 
 private:
+  float FirstTimeProgress;
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator 
   std::map<cmStdString, bool> IgnoreExtensions;

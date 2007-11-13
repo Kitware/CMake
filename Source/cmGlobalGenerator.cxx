@@ -681,6 +681,7 @@ bool cmGlobalGenerator::IsDependedOn(const char* project,
 
 void cmGlobalGenerator::Configure()
 {
+  this->FirstTimeProgress = 0.0;
   // Delete any existing cmLocalGenerators
   unsigned int i;
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -896,6 +897,26 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
                                   const char *target,
                                   std::string *output, cmMakefile *mf)
 {
+  // if this is not set, then this is a first time configure
+  // and there is a good chance that the try compile stuff will
+  // take the bulk of the time, so try and guess some progress
+  // by getting closer and closer to 100 without actually getting there.
+  if (!this->CMakeInstance->GetCacheManager()->GetCacheValue
+      ("CMAKE_NUMBER_OF_LOCAL_GENERATORS"))
+    {
+    // If CMAKE_NUMBER_OF_LOCAL_GENERATORS is not set
+    // we are in the first time progress and we have no
+    // idea how long it will be.  So, just move 1/10th of the way
+    // there each time, and don't go over 95%
+    this->FirstTimeProgress += ((1.0 - this->FirstTimeProgress) /30.0);
+    if(this->FirstTimeProgress > 0.95f)
+      {
+      this->FirstTimeProgress = 0.95f;
+      }
+    this->CMakeInstance->UpdateProgress("Configuring", 
+                                        this->FirstTimeProgress);
+    }
+
   std::string makeCommand = this->CMakeInstance->
     GetCacheManager()->GetCacheValue("CMAKE_MAKE_PROGRAM");
   if(makeCommand.size() == 0)
@@ -1055,6 +1076,17 @@ void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
 
   if (!numGenC)
     {
+    // If CMAKE_NUMBER_OF_LOCAL_GENERATORS is not set
+    // we are in the first time progress and we have no
+    // idea how long it will be.  So, just move half way
+    // there each time, and don't go over 95%
+    this->FirstTimeProgress += ((1.0 - this->FirstTimeProgress) /30.0);
+    if(this->FirstTimeProgress > 0.95f)
+      {
+      this->FirstTimeProgress = 0.95f;
+      } 
+    this->CMakeInstance->UpdateProgress("Configuring", 
+                                        this->FirstTimeProgress);
     return;
     }
 
