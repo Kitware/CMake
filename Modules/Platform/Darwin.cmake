@@ -49,13 +49,19 @@ SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib" ".so" ".a")
 IF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
   SET(CMAKE_INSTALL_NAME_TOOL install_name_tool)
 ENDIF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
-
-
+# find installed SDKs
+FILE(GLOB _CMAKE_OSX_SDKS "/Developer/SDKs/*")
 # setup for universal binaries if sysroot exists
-IF(EXISTS /Developer/SDKs/MacOSX10.4u.sdk)
-  # set the sysroot to be used if CMAKE_OSX_ARCHITECTURES
-  # has more than one value
-  SET(CMAKE_OSX_SYSROOT /Developer/SDKs/MacOSX10.4u.sdk CACHE STRING
+IF(_CMAKE_OSX_SDKS) 
+  # find the most recent sdk for the default
+  LIST(SORT _CMAKE_OSX_SDKS)
+  LIST(REVERSE _CMAKE_OSX_SDKS)
+  LIST(GET _CMAKE_OSX_SDKS 0 _CMAKE_OSX_SDKS)
+  # use the environment variable CMAKE_OSX_SYSROOT if it is set
+  IF(NOT "$ENV{CMAKE_OSX_SYSROOT}" STREQUAL "") 
+    SET(_CMAKE_OSX_SDKS "$ENV{CMAKE_OSX_SYSROOT}")
+  ENDIF(NOT "$ENV{CMAKE_OSX_SYSROOT}" STREQUAL "") 
+  SET(CMAKE_OSX_SYSROOT ${_CMAKE_OSX_SDKS} CACHE STRING
     "isysroot used for universal binary support")
   # set _CMAKE_OSX_MACHINE to umame -m
   EXEC_PROGRAM(uname ARGS -m OUTPUT_VARIABLE _CMAKE_OSX_MACHINE)
@@ -74,7 +80,7 @@ IF(EXISTS /Developer/SDKs/MacOSX10.4u.sdk)
   # now put _CMAKE_OSX_MACHINE into the cache
   SET(CMAKE_OSX_ARCHITECTURES ${_CMAKE_OSX_MACHINE}
     CACHE STRING "Build architectures for OSX")
-ENDIF(EXISTS /Developer/SDKs/MacOSX10.4u.sdk)
+ENDIF(_CMAKE_OSX_SDKS)
 
 
 IF("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
