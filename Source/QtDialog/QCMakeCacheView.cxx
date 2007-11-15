@@ -394,7 +394,7 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
   return new QLineEdit(p);
 }
   
-bool QCMakeCacheModelDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, 
+bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model, 
        const QStyleOptionViewItem& option, const QModelIndex& index)
 {
   Qt::ItemFlags flags = model->flags(index);
@@ -410,19 +410,19 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* event, QAbstractItemModel* mo
     return false;
     }
 
-  if ((event->type() == QEvent::MouseButtonRelease)
-      || (event->type() == QEvent::MouseButtonDblClick))
+  if ((e->type() == QEvent::MouseButtonRelease)
+      || (e->type() == QEvent::MouseButtonDblClick))
     {
     // eat the double click events inside the check rect
-    if (event->type() == QEvent::MouseButtonDblClick)
+    if (e->type() == QEvent::MouseButtonDblClick)
       {
       return true;
       }
     } 
-  else if (event->type() == QEvent::KeyPress)
+  else if (e->type() == QEvent::KeyPress)
     {
-    if(static_cast<QKeyEvent*>(event)->key() != Qt::Key_Space &&
-       static_cast<QKeyEvent*>(event)->key() != Qt::Key_Select)
+    if(static_cast<QKeyEvent*>(e)->key() != Qt::Key_Space &&
+       static_cast<QKeyEvent*>(e)->key() != Qt::Key_Select)
       {
       return false;
       }
