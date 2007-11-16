@@ -199,6 +199,10 @@ void cmLocalVisualStudio7Generator
   cmGeneratedFileStream fout(fname.c_str());
   fout.SetCopyIfDifferent(true);
   this->WriteVCProjFile(fout,lname,target);
+  if (fout.Close())
+    {
+    this->GlobalGenerator->FileReplacedDuringGenerate(fname);
+    }
 }
 
 //----------------------------------------------------------------------------

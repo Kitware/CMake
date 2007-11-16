@@ -51,5 +51,12 @@ public:
   virtual void EnableLanguage(std::vector<std::string>const& languages, 
                               cmMakefile *, bool optional);
   virtual void WriteSLNHeader(std::ostream& fout);
+
+  /**
+   * Where does this version of Visual Studio look for macros for the
+   * current user? Returns the empty string if this version of Visual
+   * Studio does not implement support for VB macros.
+   */
+  virtual std::string GetUserMacrosDirectory();
 };
 #endif

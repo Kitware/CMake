@@ -72,6 +72,34 @@ void cmGlobalVisualStudio8Generator::Configure()
 }
 
 //----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio8Generator::GetUserMacrosDirectory()
+{
+  std::string base;
+  std::string path;
+
+  // base begins with the VisualStudioProjectsLocation reg value...
+  if (cmSystemTools::ReadRegistryValue(
+    "HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\8.0;VisualStudioProjectsLocation",
+    base))
+    {
+    cmSystemTools::ConvertToUnixSlashes(base);
+
+    // 7.0 macros folder:
+    //path = base + "/VSMacros";
+
+    // 7.1 macros folder:
+    //path = base + "/VSMacros71";
+
+    // 8.0 macros folder:
+    path = base + "/VSMacros80";
+    }
+
+  // path is (correctly) still empty if we did not read the base value from
+  // the Registry value
+  return path;
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::Generate()
 {
   // Add a special target on which all other targets depend that

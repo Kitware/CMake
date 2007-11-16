@@ -44,7 +44,7 @@ protected:
   // after the real stream is closed and Okay is set to whether the
   // real stream was still valid for writing when it was closed.
   void Open(const char* name);
-  void Close();
+  bool Close();
 
   // Internal file replacement implementation.
   int RenameFile(const char* oldname, const char* newname);
@@ -123,7 +123,7 @@ public:
    * destionation file if the stream is still valid when this method
    * is called.
    */
-  cmGeneratedFileStream& Close();
+  bool Close();
 
   /**
    * Set whether copy-if-different is done.

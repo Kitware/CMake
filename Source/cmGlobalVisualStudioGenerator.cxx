@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmGlobalVisualStudioGenerator.h"
 
+#include "cmCallVisualStudioMacro.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
@@ -57,8 +58,97 @@ void cmGlobalVisualStudioGenerator::Generate()
   // Fix utility dependencies to avoid linking to libraries.
   this->FixUtilityDepends();
 
+  // Configure CMake Visual Studio macros, for this user on this version
+  // of Visual Studio.
+  this->ConfigureCMakeVisualStudioMacros();
+
   // Run all the local generators.
   this->cmGlobalGenerator::Generate();
+}
+
+//----------------------------------------------------------------------------
+void RegisterVisualStudioMacros(const std::string& macrosFile);
+
+//----------------------------------------------------------------------------
+#define CMAKE_VSMACROS_FILENAME \
+  "CMakeVSMacros1.vsmacros"
+
+#define CMAKE_VSMACROS_RELOAD_MACRONAME \
+  "Macros.CMakeVSMacros1.Macros.ReloadProjects"
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
+{
+  cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
+  std::string dir = this->GetUserMacrosDirectory();
+
+  if (mf != 0 && dir != "")
+    {
+    std::string src = mf->GetRequiredDefinition("CMAKE_ROOT");
+    src += "/Templates/" CMAKE_VSMACROS_FILENAME;
+
+    std::string dst = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
+
+    // Only copy if dst does not already exist. Write this file initially,
+    // but never overwrite local mods.
+    if (!cmSystemTools::FileExists(dst.c_str()))
+      {
+      if (!cmSystemTools::CopyFileAlways(src.c_str(), dst.c_str()))
+        {
+        std::ostringstream oss;
+        oss << "Could not copy from: " << src << std::endl;
+        oss << "                 to: " << dst << std::endl;
+        cmSystemTools::Message(oss.str().c_str(), "Warning");
+        }
+      }
+
+    RegisterVisualStudioMacros(dst);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::CallVisualStudioReloadMacro()
+{
+  // If any solution or project files changed during the generation,
+  // tell Visual Studio to reload them...
+  cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
+  std::string dir = this->GetUserMacrosDirectory();
+
+  if (mf != 0 && dir != "")
+    {
+    std::vector<std::string> filenames;
+    this->GetFilesReplacedDuringGenerate(filenames);
+    if (filenames.size() > 0)
+      {
+      // Convert vector to semi-colon delimited string of filenames:
+      std::string projects;
+      std::vector<std::string>::iterator it = filenames.begin();
+      if (it != filenames.end())
+        {
+        projects = *it;
+        ++it;
+        }
+      for (; it != filenames.end(); ++it)
+        {
+        projects += ";";
+        projects += *it;
+        }
+
+      std::string topLevelSlnName = mf->GetStartOutputDirectory();
+      topLevelSlnName += "/";
+      topLevelSlnName += mf->GetProjectName();
+      topLevelSlnName += ".sln";
+
+      cmCallVisualStudioMacro::CallMacro(topLevelSlnName,
+        CMAKE_VSMACROS_RELOAD_MACRONAME, projects);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudioGenerator::GetUserMacrosDirectory()
+{
+  return "";
 }
 
 //----------------------------------------------------------------------------
@@ -223,4 +313,269 @@ cmGlobalVisualStudioGenerator::GetUtilityForTarget(cmTarget& target,
 
   // No special case.  Just use the original dependency name.
   return name;
+}
+
+//----------------------------------------------------------------------------
+#include <windows.h>
+
+//----------------------------------------------------------------------------
+bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
+  std::string& nextAvailableSubKeyName)
+{
+  bool macrosRegistered = false;
+
+  std::string s1;
+  std::string s2;
+
+  // Make lowercase local copies, convert to Unix slashes, and
+  // see if the resulting strings are the same:
+  s1 = cmSystemTools::LowerCase(macrosFile);
+  cmSystemTools::ConvertToUnixSlashes(s1);
+
+  std::string keyname;
+  HKEY hkey = NULL;
+  LONG result = ERROR_SUCCESS;
+  DWORD index = 0;
+
+  keyname = "Software\\Microsoft\\VisualStudio\\8.0\\vsmacros\\OtherProjects7";
+  hkey = NULL;
+  result = RegOpenKeyEx(HKEY_CURRENT_USER, keyname.c_str(), 0, KEY_READ, &hkey);
+  if (ERROR_SUCCESS == result)
+    {
+    // Iterate the subkeys and look for the values of interest in each subkey:
+    CHAR subkeyname[256];
+    DWORD cch_subkeyname = sizeof(subkeyname)/sizeof(subkeyname[0]);
+    CHAR keyclass[256];
+    DWORD cch_keyclass = sizeof(keyclass)/sizeof(keyclass[0]);
+    FILETIME lastWriteTime;
+    lastWriteTime.dwHighDateTime = 0;
+    lastWriteTime.dwLowDateTime = 0;
+
+    while (ERROR_SUCCESS == RegEnumKeyEx(hkey, index, subkeyname, &cch_subkeyname,
+      0, keyclass, &cch_keyclass, &lastWriteTime))
+      {
+      // Open the subkey and query the values of interest:
+      HKEY hsubkey = NULL;
+      result = RegOpenKeyEx(hkey, subkeyname, 0, KEY_READ, &hsubkey);
+      if (ERROR_SUCCESS == result)
+        {
+        DWORD valueType = REG_SZ;
+        CHAR data1[256];
+        DWORD cch_data1 = sizeof(data1)/sizeof(data1[0]);
+        RegQueryValueEx(hsubkey, "Path", 0, &valueType, (LPBYTE) &data1[0], &cch_data1);
+
+        DWORD data2 = 0;
+        DWORD cch_data2 = sizeof(data2);
+        RegQueryValueEx(hsubkey, "Security", 0, &valueType, (LPBYTE) &data2, &cch_data2);
+
+        DWORD data3 = 0;
+        DWORD cch_data3 = sizeof(data3);
+        RegQueryValueEx(hsubkey, "StorageFormat", 0, &valueType, (LPBYTE) &data3, &cch_data3);
+
+        s2 = cmSystemTools::LowerCase(data1);
+        cmSystemTools::ConvertToUnixSlashes(s2);
+        if (s2 == s1)
+          {
+          macrosRegistered = true;
+          }
+
+        std::string fullname(data1);
+        std::string filename;
+        std::string filepath;
+        std::string filepathname;
+        std::string filepathpath;
+        if (cmSystemTools::FileExists(fullname.c_str()))
+          {
+          filename = cmSystemTools::GetFilenameName(fullname);
+          filepath = cmSystemTools::GetFilenamePath(fullname);
+          filepathname = cmSystemTools::GetFilenameName(filepath);
+          filepathpath = cmSystemTools::GetFilenamePath(filepath);
+          }
+
+        //std::cout << keyname << "\\" << subkeyname << ":" << std::endl;
+        //std::cout << "  Path: " << data1 << std::endl;
+        //std::cout << "  Security: " << data2 << std::endl;
+        //std::cout << "  StorageFormat: " << data3 << std::endl;
+        //std::cout << "  filename: " << filename << std::endl;
+        //std::cout << "  filepath: " << filepath << std::endl;
+        //std::cout << "  filepathname: " << filepathname << std::endl;
+        //std::cout << "  filepathpath: " << filepathpath << std::endl;
+        //std::cout << std::endl;
+
+        RegCloseKey(hsubkey);
+        }
+      else
+        {
+        std::cout << "error opening subkey: " << subkeyname << std::endl;
+        std::cout << std::endl;
+        }
+
+      ++index;
+      cch_subkeyname = sizeof(subkeyname)/sizeof(subkeyname[0]);
+      cch_keyclass = sizeof(keyclass)/sizeof(keyclass[0]);
+      lastWriteTime.dwHighDateTime = 0;
+      lastWriteTime.dwLowDateTime = 0;
+      }
+
+    RegCloseKey(hkey);
+    }
+  else
+    {
+    std::cout << "error opening key: " << keyname << std::endl;
+    std::cout << std::endl;
+    }
+
+
+  // Pass back next available sub key name, assuming sub keys always
+  // follow the expected naming scheme. Expected naming scheme is that
+  // the subkeys of OtherProjects7 is 0 to n-1, so it's ok to use "n"
+  // as the name of the next subkey.
+  std::ostringstream ossNext;
+  ossNext << index;
+  nextAvailableSubKeyName = ossNext.str();
+
+
+  keyname = "Software\\Microsoft\\VisualStudio\\8.0\\vsmacros\\RecordingProject7";
+  hkey = NULL;
+  result = RegOpenKeyEx(HKEY_CURRENT_USER, keyname.c_str(), 0, KEY_READ, &hkey);
+  if (ERROR_SUCCESS == result)
+    {
+    DWORD valueType = REG_SZ;
+    CHAR data1[256];
+    DWORD cch_data1 = sizeof(data1)/sizeof(data1[0]);
+    RegQueryValueEx(hkey, "Path", 0, &valueType, (LPBYTE) &data1[0], &cch_data1);
+
+    DWORD data2 = 0;
+    DWORD cch_data2 = sizeof(data2);
+    RegQueryValueEx(hkey, "Security", 0, &valueType, (LPBYTE) &data2, &cch_data2);
+
+    DWORD data3 = 0;
+    DWORD cch_data3 = sizeof(data3);
+    RegQueryValueEx(hkey, "StorageFormat", 0, &valueType, (LPBYTE) &data3, &cch_data3);
+
+    s2 = cmSystemTools::LowerCase(data1);
+    cmSystemTools::ConvertToUnixSlashes(s2);
+    if (s2 == s1)
+      {
+      macrosRegistered = true;
+      }
+
+    //std::cout << keyname << ":" << std::endl;
+    //std::cout << "  Path: " << data1 << std::endl;
+    //std::cout << "  Security: " << data2 << std::endl;
+    //std::cout << "  StorageFormat: " << data3 << std::endl;
+    //std::cout << std::endl;
+
+    RegCloseKey(hkey);
+    }
+  else
+    {
+    std::cout << "error opening key: " << keyname << std::endl;
+    std::cout << std::endl;
+    }
+
+  return macrosRegistered;
+}
+
+//----------------------------------------------------------------------------
+void WriteVSMacrosFileRegistryEntry(
+  const std::string& nextAvailableSubKeyName,
+  const std::string& macrosFile)
+{
+  std::string keyname = "Software\\Microsoft\\VisualStudio\\8.0\\vsmacros\\OtherProjects7";
+  HKEY hkey = NULL;
+  LONG result = RegOpenKeyEx(HKEY_CURRENT_USER, keyname.c_str(), 0,
+    KEY_READ|KEY_WRITE, &hkey);
+  if (ERROR_SUCCESS == result)
+    {
+    // Create the subkey and set the values of interest:
+    HKEY hsubkey = NULL;
+    result = RegCreateKeyEx(hkey, nextAvailableSubKeyName.c_str(), 0, "", 0,
+      KEY_READ|KEY_WRITE, 0, &hsubkey, 0);
+    if (ERROR_SUCCESS == result)
+      {
+      DWORD dw = 0;
+
+      std::string s(macrosFile);
+      cmSystemTools::ReplaceString(s, "/", "\\");
+
+      result = RegSetValueEx(hsubkey, "Path", 0, REG_SZ, (LPBYTE) s.c_str(),
+        strlen(s.c_str()) + 1);
+      if (ERROR_SUCCESS != result)
+        {
+        std::cout << "error result 1: " << result << std::endl;
+        std::cout << std::endl;
+        }
+
+      // Security value is always "1" for sample macros files (seems to be "2"
+      // if you put the file somewhere outside the standard VSMacros folder)
+      dw = 1;
+      result = RegSetValueEx(hsubkey, "Security", 0, REG_DWORD, (LPBYTE) &dw, sizeof(DWORD));
+      if (ERROR_SUCCESS != result)
+        {
+        std::cout << "error result 2: " << result << std::endl;
+        std::cout << std::endl;
+        }
+
+      // StorageFormat value is always "0" for sample macros files
+      dw = 0;
+      result = RegSetValueEx(hsubkey, "StorageFormat", 0, REG_DWORD, (LPBYTE) &dw, sizeof(DWORD));
+      if (ERROR_SUCCESS != result)
+        {
+        std::cout << "error result 3: " << result << std::endl;
+        std::cout << std::endl;
+        }
+
+      RegCloseKey(hsubkey);
+      }
+    else
+      {
+      std::cout << "error creating subkey: " << nextAvailableSubKeyName << std::endl;
+      std::cout << std::endl;
+      }
+    RegCloseKey(hkey);
+    }
+  else
+    {
+    std::cout << "error opening key: " << keyname << std::endl;
+    std::cout << std::endl;
+    }
+}
+
+//----------------------------------------------------------------------------
+void RegisterVisualStudioMacros(const std::string& macrosFile)
+{
+  bool macrosRegistered;
+  std::string nextAvailableSubKeyName;
+
+  macrosRegistered = IsVisualStudioMacrosFileRegistered(macrosFile,
+    nextAvailableSubKeyName);
+
+  if (!macrosRegistered)
+    {
+    int count = cmCallVisualStudioMacro::
+      GetNumberOfRunningVisualStudioInstances("ALL");
+
+    // Only register the macros file if there are *no* instances of Visual
+    // Studio running. If we register it while one is running, first, it has
+    // no effect on the running instance; second, and worse, Visual Studio
+    // removes our newly added registration entry when it quits. Instead,
+    // emit a warning instructing the user to re-run the CMake configure step
+    // after exiting all running Visual Studio instances...
+    //
+    if (0 == count)
+      {
+      WriteVSMacrosFileRegistryEntry(nextAvailableSubKeyName, macrosFile);
+      }
+    else
+      {
+      std::ostringstream oss;
+      oss << "Could not register Visual Studio macros file '" << macrosFile
+        << "' with instances of Visual Studio running. Please exit all"
+        << " running instances of Visual Studio and rerun this CMake"
+        << " configure to register CMake's Visual Studio macros file."
+        << std::endl;
+      cmSystemTools::Message(oss.str().c_str(), "Warning");
+      }
+    }
 }

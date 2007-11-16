@@ -53,9 +53,36 @@ void cmGlobalVisualStudio9Generator
   entry.Full = "";
 }
 
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Generator
 ::EnableLanguage(std::vector<std::string>const &  lang, 
                  cmMakefile *mf, bool optional)
 {
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio9Generator::GetUserMacrosDirectory()
+{
+  std::string base;
+  std::string path;
+
+  // base begins with the VisualStudioProjectsLocation reg value...
+  if (cmSystemTools::ReadRegistryValue(
+    "HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\9.0;VisualStudioProjectsLocation",
+    base))
+    {
+    cmSystemTools::ConvertToUnixSlashes(base);
+
+    // 9.0 macros folder:
+    path = base + "/VSMacros80";
+      // *NOT* a typo; right now in Visual Studio 2008 beta the macros
+      // folder is VSMacros80... They may change it to 90 before final
+      // release of 2008 or they may not... we'll have to keep our eyes
+      // on it
+    }
+
+  // path is (correctly) still empty if we did not read the base value from
+  // the Registry value
+  return path;
 }

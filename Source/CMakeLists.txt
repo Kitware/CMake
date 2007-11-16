@@ -208,6 +208,11 @@ ENDIF(APPLE)
 
 
 IF (WIN32)
+  SET(SRCS ${SRCS}
+    cmCallVisualStudioMacro.cxx
+    cmCallVisualStudioMacro.h
+    )
+
   IF(NOT UNIX)
     SET(SRCS ${SRCS}
       cmGlobalBorlandMakefileGenerator.cxx

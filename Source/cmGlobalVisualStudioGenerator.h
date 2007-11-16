@@ -36,10 +36,30 @@ public:
    */
   virtual void Generate();
 
+  /**
+   * Configure CMake's Visual Studio macros file into the user's Visual
+   * Studio macros directory.
+   */
+  virtual void ConfigureCMakeVisualStudioMacros();
+
+  /**
+   * Where does this version of Visual Studio look for macros for the
+   * current user? Returns the empty string if this version of Visual
+   * Studio does not implement support for VB macros.
+   */
+  virtual std::string GetUserMacrosDirectory();
+
+  /**
+   * Call the ReloadProjects macro if necessary based on
+   * GetFilesReplacedDuringGenerate results.
+   */
+  virtual void CallVisualStudioReloadMacro();
+
 protected:
   virtual void CreateGUID(const char*) {}
   virtual void FixUtilityDepends();
   const char* GetUtilityForTarget(cmTarget& target, const char*);
+
 private:
   void FixUtilityDependsForTarget(cmTarget& target);
   void CreateUtilityDependTarget(cmTarget& target);

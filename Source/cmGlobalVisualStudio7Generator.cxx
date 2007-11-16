@@ -16,8 +16,8 @@
 =========================================================================*/
 #include "windows.h" // this must be first to define GetCurrentDirectory
 #include "cmGlobalVisualStudio7Generator.h"
-#include "cmLocalVisualStudio7Generator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmake.h"
 
@@ -202,7 +202,7 @@ void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
     configs += ";";
     configs += this->Configurations[i];
     }
-  
+
   mf->AddCacheDefinition(
     "CMAKE_CONFIGURATION_TYPES",
     configs.c_str(),
@@ -219,6 +219,13 @@ void cmGlobalVisualStudio7Generator::Generate()
 
   // Now write out the DSW
   this->OutputSLNFile();
+
+  // If any solution or project files changed during the generation,
+  // tell Visual Studio to reload them...
+  if(!cmSystemTools::GetErrorOccuredFlag())
+    {
+    this->CallVisualStudioReloadMacro();
+    }
 }
 
 void cmGlobalVisualStudio7Generator
@@ -241,11 +248,15 @@ void cmGlobalVisualStudio7Generator
     return;
     }
   this->WriteSLNFile(fout, root, generators);
+  if (fout.Close())
+    {
+    this->FileReplacedDuringGenerate(fname);
+    }
 }
 
 // output the SLN file
 void cmGlobalVisualStudio7Generator::OutputSLNFile()
-{ 
+{
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {

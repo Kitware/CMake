@@ -76,6 +76,10 @@
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
 
+#if defined(_WIN32)
+#include "cmCallVisualStudioMacro.h"
+#endif
+
 #if !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
 # include "cmExtraCodeBlocksGenerator.h"
 #endif
@@ -1321,6 +1325,31 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       return result;
       }
+
+#if defined(_WIN32)
+    // Internal CMake support for calling Visual Studio macros.
+    else if (args[1] == "cmake_call_visual_studio_macro" && args.size() >= 4)
+      {
+      // args[2] = full path to .sln file or "ALL"
+      // args[3] = name of Visual Studio macro to call
+      // args[4..args.size()-1] = [optional] args for Visual Studio macro
+
+      std::string macroArgs;
+
+      if (args.size() > 4)
+        {
+        macroArgs = args[4];
+
+        for (size_t i = 5; i < args.size(); ++i)
+          {
+          macroArgs += " ";
+          macroArgs += args[i];
+          }
+        }
+
+      return cmCallVisualStudioMacro::CallMacro(args[2], args[3], macroArgs);
+      }
+#endif
 
     // Internal CMake dependency scanning support.
     else if (args[1] == "cmake_depends" && args.size() >= 6)

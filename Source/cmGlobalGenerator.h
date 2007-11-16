@@ -230,6 +230,11 @@ public:
 
   const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
+
+  // track files replaced during a Generate
+  void FileReplacedDuringGenerate(const std::string& filename);
+  void GetFilesReplacedDuringGenerate(std::vector<std::string>& filenames);
+
 protected:
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);
@@ -287,6 +292,9 @@ private:
   std::map<cmStdString, std::vector<cmTarget *> > TargetDependencies;
 
   cmExternalMakefileProjectGenerator* ExtraGenerator;
+
+  // track files replaced during a Generate
+  std::vector<std::string> FilesReplacedDuringGenerate;
 };
 
 #endif

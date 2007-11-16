@@ -492,11 +492,11 @@ void SystemTools::ReplaceString(kwsys_stl::string& source,
 #if defined(_WIN32) && !defined(__CYGWIN__)
 bool SystemTools::ReadRegistryValue(const char *key, kwsys_stl::string &value)
 {
-
+  bool valueset = false;
   kwsys_stl::string primary = key;
   kwsys_stl::string second;
   kwsys_stl::string valuename;
- 
+
   size_t start = primary.find("\\");
   if (start == kwsys_stl::string::npos)
     {
@@ -558,12 +558,24 @@ bool SystemTools::ReadRegistryValue(const char *key, kwsys_stl::string &value)
       if (dwType == REG_SZ)
         {
         value = data;
-        RegCloseKey(hKey);
-        return true;
+        valueset = true;
+        }
+      else if (dwType == REG_EXPAND_SZ)
+        {
+        char expanded[1024];
+        DWORD dwExpandedSize = sizeof(expanded)/sizeof(expanded[0]);
+        if(ExpandEnvironmentStrings(data, expanded, dwExpandedSize))
+          {
+          value = expanded;
+          valueset = true;
+          }
         }
       }
+
+    RegCloseKey(hKey);
     }
-  return false;
+
+  return valueset;
 }
 #else
 bool SystemTools::ReadRegistryValue(const char *, kwsys_stl::string &)

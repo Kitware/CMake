@@ -49,6 +49,14 @@ public:
    */
   virtual void Configure();
   virtual void Generate();
+
+  /**
+   * Where does this version of Visual Studio look for macros for the
+   * current user? Returns the empty string if this version of Visual
+   * Studio does not implement support for VB macros.
+   */
+  virtual std::string GetUserMacrosDirectory();
+
 protected:
 
   // Utility target fix is not needed for VS8.

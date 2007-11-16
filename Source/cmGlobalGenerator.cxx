@@ -737,6 +737,10 @@ void cmGlobalGenerator::Configure()
 
 void cmGlobalGenerator::Generate()
 {
+  // Some generators track files replaced during the Generate.
+  // Start with an empty vector:
+  this->FilesReplacedDuringGenerate.clear();
+
   // For each existing cmLocalGenerator
   unsigned int i;
 
@@ -1784,4 +1788,18 @@ void cmGlobalGenerator::SetExternalMakefileProjectGenerator(
 const char* cmGlobalGenerator::GetExtraGeneratorName() const
 {
   return this->ExtraGenerator==0 ? 0 : this->ExtraGenerator->GetName();
+}
+
+void cmGlobalGenerator::FileReplacedDuringGenerate(const std::string& filename)
+{
+  this->FilesReplacedDuringGenerate.push_back(filename);
+}
+
+void cmGlobalGenerator::GetFilesReplacedDuringGenerate(std::vector<std::string>& filenames)
+{
+  filenames.clear();
+  std::copy(
+    this->FilesReplacedDuringGenerate.begin(),
+    this->FilesReplacedDuringGenerate.end(),
+    std::back_inserter(filenames));
 }
