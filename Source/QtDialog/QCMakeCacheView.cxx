@@ -31,6 +31,25 @@
 
 static QRegExp AdvancedRegExp[2] = { QRegExp("(false)"), QRegExp("(true|false)") };
 
+// filter for searches
+class QCMakeSearchFilter : public QSortFilterProxyModel
+{
+public:
+  QCMakeSearchFilter(QObject* o) : QSortFilterProxyModel(o) {}
+protected:
+  bool filterAcceptsRow(int row, const QModelIndex& p) const
+    {
+    // accept row if either column matches
+    QModelIndex idx0 = this->sourceModel()->index(row, 0, p);
+    QModelIndex idx1 = this->sourceModel()->index(row, 1, p);
+    QString str0 = this->sourceModel()->data(idx0).toString();
+    QString str1 = this->sourceModel()->data(idx1).toString();
+
+    return str0.contains(this->filterRegExp()) ||
+           str1.contains(this->filterRegExp());
+    }
+};
+
 QCMakeCacheView::QCMakeCacheView(QWidget* p)
   : QTableView(p), Init(false)
 {
@@ -41,12 +60,9 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
   this->AdvancedFilter->setFilterRole(QCMakeCacheModel::AdvancedRole);
   this->AdvancedFilter->setFilterRegExp(AdvancedRegExp[0]);
   this->AdvancedFilter->setDynamicSortFilter(true);
-  this->SearchFilter = new QSortFilterProxyModel(this);
+  this->SearchFilter = new QCMakeSearchFilter(this);
   this->SearchFilter->setSourceModel(this->AdvancedFilter);
   this->SearchFilter->setFilterCaseSensitivity(Qt::CaseInsensitive);
-#if QT_VERSION >= 0x040300   // breaks search in Qt 4.2
-  this->SearchFilter->setFilterKeyColumn(-1); // all columns
-#endif
   this->SearchFilter->setDynamicSortFilter(true);
   this->setModel(this->SearchFilter);
 
