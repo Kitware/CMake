@@ -1510,10 +1510,6 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
         cmet /= 2.0f;
         }
       cmet /= 100.0f;
-      // Hack for conversion of function to loc assume a function
-      // has 100 lines of code
-      functionsCalled *=100;
-      totalFunctions *=100;
       tmpLog << stdline.c_str() << "\n";
       tmpLog << fileName << "\n";
       tmpLog << "functionsCalled: " << functionsCalled/100 << "\n";
@@ -1528,9 +1524,25 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
                  << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
                    this->CTest->GetShortPathToFile(file.c_str()))
                  << "\" Covered=\"" << (cmet>0?"true":"false") << "\">\n"
-                 << "\t\t<LOCTested>" << functionsCalled << "</LOCTested>\n"
+                 << "\t\t<BranchesTested>"
+                 << branchCovered
+                 << "</BranchesTested>\n"
+                 << "\t\t<BranchesUnTested>" 
+                 << totalBranches - branchCovered
+                 << "</BranchesUnTested>\n"
+                 << "\t\t<FunctionsTested>"
+                 << functionsCalled
+                 << "</FunctionsTested>\n"
+                 << "\t\t<FunctionsUnTested>" 
+                 << totalFunctions - functionsCalled
+                 << "</FunctionsUnTested>\n"
+        // Hack for conversion of function to loc assume a function
+        // has 100 lines of code
+                 << "\t\t<LOCTested>" << functionsCalled *100
+                 << "</LOCTested>\n"
                  << "\t\t<LOCUnTested>" 
-                 << totalFunctions - functionsCalled << "</LOCUnTested>\n"
+                 << (totalFunctions - functionsCalled)*100
+                 << "</LOCUnTested>\n"
                  << "\t\t<PercentCoverage>";
       covSumFile.setf(std::ios::fixed, std::ios::floatfield);
       covSumFile.precision(2);
