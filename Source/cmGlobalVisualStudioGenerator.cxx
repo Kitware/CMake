@@ -67,6 +67,9 @@ void cmGlobalVisualStudioGenerator::Generate()
 }
 
 //----------------------------------------------------------------------------
+bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
+  std::string& nextAvailableSubKeyName);
+
 void RegisterVisualStudioMacros(const std::string& macrosFile);
 
 //----------------------------------------------------------------------------
@@ -114,33 +117,47 @@ void cmGlobalVisualStudioGenerator::CallVisualStudioReloadMacro()
   cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
   std::string dir = this->GetUserMacrosDirectory();
 
+  // Only really try to call the macro if:
+  //  - mf is non-NULL
+  //  - there is a UserMacrosDirectory
+  //  - the CMake vsmacros file exists
+  //  - the CMake vsmacros file is registered
+  //  - there were .sln/.vcproj files changed during generation
+  //
   if (mf != 0 && dir != "")
     {
-    std::vector<std::string> filenames;
-    this->GetFilesReplacedDuringGenerate(filenames);
-    if (filenames.size() > 0)
+    std::string macrosFile = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
+    std::string nextSubkeyName;
+    if (cmSystemTools::FileExists(macrosFile.c_str()) &&
+      IsVisualStudioMacrosFileRegistered(macrosFile, nextSubkeyName)
+      )
       {
-      // Convert vector to semi-colon delimited string of filenames:
-      std::string projects;
-      std::vector<std::string>::iterator it = filenames.begin();
-      if (it != filenames.end())
+      std::vector<std::string> filenames;
+      this->GetFilesReplacedDuringGenerate(filenames);
+      if (filenames.size() > 0)
         {
-        projects = *it;
-        ++it;
-        }
-      for (; it != filenames.end(); ++it)
-        {
-        projects += ";";
-        projects += *it;
-        }
+        // Convert vector to semi-colon delimited string of filenames:
+        std::string projects;
+        std::vector<std::string>::iterator it = filenames.begin();
+        if (it != filenames.end())
+          {
+          projects = *it;
+          ++it;
+          }
+        for (; it != filenames.end(); ++it)
+          {
+          projects += ";";
+          projects += *it;
+          }
 
-      std::string topLevelSlnName = mf->GetStartOutputDirectory();
-      topLevelSlnName += "/";
-      topLevelSlnName += mf->GetProjectName();
-      topLevelSlnName += ".sln";
+        std::string topLevelSlnName = mf->GetStartOutputDirectory();
+        topLevelSlnName += "/";
+        topLevelSlnName += mf->GetProjectName();
+        topLevelSlnName += ".sln";
 
-      cmCallVisualStudioMacro::CallMacro(topLevelSlnName,
-        CMAKE_VSMACROS_RELOAD_MACRONAME, projects);
+        cmCallVisualStudioMacro::CallMacro(topLevelSlnName,
+          CMAKE_VSMACROS_RELOAD_MACRONAME, projects);
+        }
       }
     }
 }
@@ -560,22 +577,46 @@ void RegisterVisualStudioMacros(const std::string& macrosFile)
     // Studio running. If we register it while one is running, first, it has
     // no effect on the running instance; second, and worse, Visual Studio
     // removes our newly added registration entry when it quits. Instead,
-    // emit a warning instructing the user to re-run the CMake configure step
-    // after exiting all running Visual Studio instances...
+    // emit a warning asking the user to exit all running Visual Studio
+    // instances...
+    //
+    if (0 != count)
+      {
+      std::ostringstream oss;
+      oss << "Could not register CMake's Visual Studio macros file '"
+        << CMAKE_VSMACROS_FILENAME "' while Visual Studio is running."
+        << " Please exit all running instances of Visual Studio before"
+        << " continuing." << std::endl
+        << std::endl
+        << "CMake needs to register Visual Studio macros when its macros"
+        << " file is updated or when it detects that its current macros file"
+        << " is no longer registered with Visual Studio."
+        << std::endl;
+      cmSystemTools::Message(oss.str().c_str(), "Warning");
+
+      // Count them again now that the warning is over. In the case of a GUI
+      // warning, the user may have gone to close Visual Studio and then come
+      // back to the CMake GUI and clicked ok on the above warning. If so,
+      // then register the macros *now* if the count is *now* 0...
+      //
+      count = cmCallVisualStudioMacro::
+        GetNumberOfRunningVisualStudioInstances("ALL");
+
+      // Also re-get the nextAvailableSubKeyName in case Visual Studio
+      // wrote out new registered macros information as it was exiting:
+      //
+      if (0 == count)
+        {
+        IsVisualStudioMacrosFileRegistered(macrosFile,
+          nextAvailableSubKeyName);
+        }
+      }
+
+    // Do another if check - 'count' may have changed inside the above if:
     //
     if (0 == count)
       {
       WriteVSMacrosFileRegistryEntry(nextAvailableSubKeyName, macrosFile);
-      }
-    else
-      {
-      std::ostringstream oss;
-      oss << "Could not register Visual Studio macros file '" << macrosFile
-        << "' with instances of Visual Studio running. Please exit all"
-        << " running instances of Visual Studio and rerun this CMake"
-        << " configure to register CMake's Visual Studio macros file."
-        << std::endl;
-      cmSystemTools::Message(oss.str().c_str(), "Warning");
       }
     }
 }
