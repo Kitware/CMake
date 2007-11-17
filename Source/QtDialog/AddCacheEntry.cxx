@@ -65,7 +65,6 @@ QVariant AddCacheEntry::value() const
     {
     return static_cast<QCheckBox*>(w)->isChecked();
     }
-  printf("didn't get anything %s\n", w->metaObject()->className());
   return QVariant();
 }
 
