@@ -139,6 +139,10 @@ bool cmListFile::ParseFile(const char* filename, bool requireProjectCommand)
       this->Functions.insert(this->Functions.begin(),project);
       }
     }
+  if(parseError)
+    {
+    return false;
+    }
   return true;
 }
 
