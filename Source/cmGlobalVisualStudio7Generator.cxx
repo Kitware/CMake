@@ -224,7 +224,7 @@ void cmGlobalVisualStudio7Generator::Generate()
   // tell Visual Studio to reload them...
   if(!cmSystemTools::GetErrorOccuredFlag())
     {
-    this->CallVisualStudioReloadMacro();
+    this->CallVisualStudioMacro(MacroReload);
     }
 }
 

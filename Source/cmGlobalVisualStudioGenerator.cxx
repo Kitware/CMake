@@ -79,6 +79,9 @@ void RegisterVisualStudioMacros(const std::string& macrosFile);
 #define CMAKE_VSMACROS_RELOAD_MACRONAME \
   "Macros.CMakeVSMacros1.Macros.ReloadProjects"
 
+#define CMAKE_VSMACROS_STOP_MACRONAME \
+  "Macros.CMakeVSMacros1.Macros.StopBuild"
+
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
 {
@@ -92,9 +95,14 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
 
     std::string dst = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
 
-    // Only copy if dst does not already exist. Write this file initially,
-    // but never overwrite local mods.
-    if (!cmSystemTools::FileExists(dst.c_str()))
+    // Copy the macros file to the user directory only if the
+    // destination does not exist or the source location is newer.
+    // This will allow the user to edit the macros for development
+    // purposes but newer versions distributed with CMake will replace
+    // older versions in user directories.
+    int res;
+    if(!cmSystemTools::FileTimeCompare(src.c_str(), dst.c_str(), &res) ||
+       res > 0)
       {
       if (!cmSystemTools::CopyFileAlways(src.c_str(), dst.c_str()))
         {
@@ -110,7 +118,10 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudioGenerator::CallVisualStudioReloadMacro()
+void
+cmGlobalVisualStudioGenerator
+::CallVisualStudioMacro(MacroName m,
+                        const char* vsSolutionFile)
 {
   // If any solution or project files changed during the generation,
   // tell Visual Studio to reload them...
@@ -132,31 +143,46 @@ void cmGlobalVisualStudioGenerator::CallVisualStudioReloadMacro()
       IsVisualStudioMacrosFileRegistered(macrosFile, nextSubkeyName)
       )
       {
-      std::vector<std::string> filenames;
-      this->GetFilesReplacedDuringGenerate(filenames);
-      if (filenames.size() > 0)
+      std::string topLevelSlnName;
+      if(vsSolutionFile)
         {
-        // Convert vector to semi-colon delimited string of filenames:
-        std::string projects;
-        std::vector<std::string>::iterator it = filenames.begin();
-        if (it != filenames.end())
-          {
-          projects = *it;
-          ++it;
-          }
-        for (; it != filenames.end(); ++it)
-          {
-          projects += ";";
-          projects += *it;
-          }
-
-        std::string topLevelSlnName = mf->GetStartOutputDirectory();
+        topLevelSlnName = vsSolutionFile;
+        }
+      else
+        {
+        topLevelSlnName = mf->GetStartOutputDirectory();
         topLevelSlnName += "/";
         topLevelSlnName += mf->GetProjectName();
         topLevelSlnName += ".sln";
+        }
 
+      if(m == MacroReload)
+        {
+        std::vector<std::string> filenames;
+        this->GetFilesReplacedDuringGenerate(filenames);
+        if (filenames.size() > 0)
+          {
+          // Convert vector to semi-colon delimited string of filenames:
+          std::string projects;
+          std::vector<std::string>::iterator it = filenames.begin();
+          if (it != filenames.end())
+            {
+            projects = *it;
+            ++it;
+            }
+          for (; it != filenames.end(); ++it)
+            {
+            projects += ";";
+            projects += *it;
+            }
+          cmCallVisualStudioMacro::CallMacro
+            (topLevelSlnName, CMAKE_VSMACROS_RELOAD_MACRONAME, projects);
+          }
+        }
+      else if(m == MacroStop)
+        {
         cmCallVisualStudioMacro::CallMacro(topLevelSlnName,
-          CMAKE_VSMACROS_RELOAD_MACRONAME, projects);
+          CMAKE_VSMACROS_STOP_MACRONAME, "");
         }
       }
     }

@@ -169,6 +169,8 @@ void cmGlobalVisualStudio8Generator::Generate()
         commandLine.push_back(argB);
         commandLine.push_back("--check-stamp-file");
         commandLine.push_back(stampName.c_str());
+        commandLine.push_back("--vs-solution-file");
+        commandLine.push_back("\"$(SolutionPath)\"");
         cmCustomCommandLines commandLines;
         commandLines.push_back(commandLine);
 

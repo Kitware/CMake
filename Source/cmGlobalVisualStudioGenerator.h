@@ -49,11 +49,14 @@ public:
    */
   virtual std::string GetUserMacrosDirectory();
 
+  enum MacroName {MacroReload, MacroStop};
+
   /**
    * Call the ReloadProjects macro if necessary based on
    * GetFilesReplacedDuringGenerate results.
    */
-  virtual void CallVisualStudioReloadMacro();
+  virtual void CallVisualStudioMacro(MacroName m,
+                                     const char* vsSolutionFile = 0);
 
 protected:
   virtual void CreateGUID(const char*) {}
