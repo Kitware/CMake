@@ -19,10 +19,14 @@ ENDIF(COMPLEX_TEST_CMAKELIB)
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 LINK_LIBRARIES(${COMPLEX_LIBS})
 
+# Test forcing a .cxx file to not build.
+SET_SOURCE_FILES_PROPERTIES(complex_nobuild.cxx PROPERTIES
+  HEADER_FILE_ONLY 1)
+
 ADD_EXECUTABLE(A A.cxx A.hh A.h A.txt)
 ADD_EXECUTABLE(complex complex testcflags.c )
 #  Sub1/NameConflictTest.c Sub2/NameConflictTest.c)
-ADD_EXECUTABLE(complex.file complex.file.cxx)
+ADD_EXECUTABLE(complex.file complex.file.cxx complex_nobuild.cxx)
 IF(COMPLEX_TEST_CMAKELIB)
   TARGET_LINK_LIBRARIES(complex CMakeLib cmsys cmexpat cmzlib cmtar)
 ENDIF(COMPLEX_TEST_CMAKELIB)
