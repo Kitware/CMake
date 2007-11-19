@@ -402,6 +402,7 @@ private:
   std::string CCEnvironment;
   std::string CheckBuildSystemArgument;
   std::string CheckStampFile;
+  std::string VSSolutionFile;
   std::string CTestCommand;
   std::string CPackCommand;
   bool ClearBuildSystem;

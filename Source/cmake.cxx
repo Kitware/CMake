@@ -530,6 +530,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       this->CheckStampFile = args[++i];
       }
+    else if((i < args.size()-1) && (arg.find("--vs-solution-file",0) == 0))
+      {
+      this->VSSolutionFile = args[++i];
+      }
     else if(arg.find("-V",0) == 0)
       {
         this->Verbose = true;
@@ -2099,6 +2103,20 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   int ret = this->Configure();
   if (ret || this->ScriptMode)
     {
+    if(!this->VSSolutionFile.empty() && this->GlobalGenerator)
+      {
+      // CMake is running to regenerate a Visual Studio build tree
+      // during a build from the VS IDE.  The build files cannot be
+      // regenerated, so we should stop the build.
+      cmSystemTools::Message(
+        "CMake Configure step failed.  "
+        "Build files cannot be regenerated correctly.  "
+        "Attempting to stop IDE build.");
+      cmGlobalVisualStudioGenerator* gg =
+        static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
+      gg->CallVisualStudioMacro(cmGlobalVisualStudioGenerator::MacroStop,
+                                this->VSSolutionFile.c_str());
+      }
     return ret;
     }
   ret = this->Generate();
