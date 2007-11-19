@@ -68,6 +68,7 @@
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalWatcomWMakeGenerator.h"
+#    define CMAKE_HAVE_VS_GENERATORS
 #  endif
 #  include "cmGlobalMSYSMakefileGenerator.h"
 #  include "cmGlobalMinGWMakefileGenerator.h"
@@ -530,10 +531,12 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       this->CheckStampFile = args[++i];
       }
+#if defined(CMAKE_HAVE_VS_GENERATORS)
     else if((i < args.size()-1) && (arg.find("--vs-solution-file",0) == 0))
       {
       this->VSSolutionFile = args[++i];
       }
+#endif
     else if(arg.find("-V",0) == 0)
       {
         this->Verbose = true;
@@ -2103,6 +2106,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   int ret = this->Configure();
   if (ret || this->ScriptMode)
     {
+#if defined(CMAKE_HAVE_VS_GENERATORS)
     if(!this->VSSolutionFile.empty() && this->GlobalGenerator)
       {
       // CMake is running to regenerate a Visual Studio build tree
@@ -2117,6 +2121,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
       gg->CallVisualStudioMacro(cmGlobalVisualStudioGenerator::MacroStop,
                                 this->VSSolutionFile.c_str());
       }
+#endif
     return ret;
     }
   ret = this->Generate();
