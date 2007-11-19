@@ -487,6 +487,16 @@ int do_cmake(int ac, char** av)
         }
       }
     }
-  return res;
+
+  // Always return a non-negative value.  Windows tools do not always
+  // interpret negative return values as errors.
+  if(res != 0)
+    {
+    return 1;
+    }
+  else
+    {
+    return 0;
+    }
 }
 
