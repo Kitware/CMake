@@ -427,6 +427,9 @@ void cmLocalVisualStudio6Generator
         compileFlags += " /TC ";
         }
       }
+
+    bool excludedFromBuild =
+      (lang && (*sf)->GetPropertyAsBool("HEADER_FILE_ONLY"));
       
     // Check for extra object-file dependencies.
     const char* dependsValue = (*sf)->GetProperty("OBJECT_DEPENDS");
@@ -460,7 +463,8 @@ void cmLocalVisualStudio6Generator
         const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
         this->WriteCustomRule(fout, source.c_str(), *command, flags);
         }
-      else if(!compileFlags.empty() || !objectNameDir.empty())
+      else if(!compileFlags.empty() || !objectNameDir.empty() ||
+              excludedFromBuild)
         {
         for(std::vector<std::string>::iterator i
               = this->Configurations.begin(); 
@@ -473,6 +477,10 @@ void cmLocalVisualStudio6Generator
           else 
             {
             fout << "!ELSEIF  \"$(CFG)\" == " << i->c_str() << std::endl;
+            }
+          if(excludedFromBuild)
+            {
+            fout << "# PROP Exclude_From_Build 1\n";
             }
           if(!compileFlags.empty())
             {
