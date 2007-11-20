@@ -1795,7 +1795,9 @@ void cmGlobalGenerator::FileReplacedDuringGenerate(const std::string& filename)
   this->FilesReplacedDuringGenerate.push_back(filename);
 }
 
-void cmGlobalGenerator::GetFilesReplacedDuringGenerate(std::vector<std::string>& filenames)
+void
+cmGlobalGenerator
+::GetFilesReplacedDuringGenerate(std::vector<std::string>& filenames)
 {
   filenames.clear();
   std::copy(

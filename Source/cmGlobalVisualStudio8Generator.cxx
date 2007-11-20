@@ -79,7 +79,8 @@ std::string cmGlobalVisualStudio8Generator::GetUserMacrosDirectory()
 
   // base begins with the VisualStudioProjectsLocation reg value...
   if (cmSystemTools::ReadRegistryValue(
-    "HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\8.0;VisualStudioProjectsLocation",
+    "HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\8.0;"
+    "VisualStudioProjectsLocation",
     base))
     {
     cmSystemTools::ConvertToUnixSlashes(base);

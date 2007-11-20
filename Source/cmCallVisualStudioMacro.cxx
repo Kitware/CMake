@@ -347,7 +347,8 @@ HRESULT FindVisualStudioInstances(
 
             //std::cout << "Found Visual Studio instance." << std::endl;
             //std::cout << "  ROT entry name: " << it->first << std::endl;
-            //std::cout << "  ROT entry object: " << (IUnknown*) it->second << std::endl;
+            //std::cout << "  ROT entry object: "
+            //          << (IUnknown*) it->second << std::endl;
             //std::cout << "  slnFile: " << slnFile << std::endl;
             //std::cout << "  slnName: " << slnName << std::endl;
             }
@@ -381,7 +382,7 @@ int cmCallVisualStudioMacro::GetNumberOfRunningVisualStudioInstances(
 
     if(SUCCEEDED(hr))
       {
-      count = instances.size();
+      count = static_cast<int>(instances.size());
       }
 
     // Force release all COM pointers before CoUninitialize:
@@ -389,6 +390,8 @@ int cmCallVisualStudioMacro::GetNumberOfRunningVisualStudioInstances(
 
     CoUninitialize();
     }
+#else
+  (void)slnFile;
 #endif
 
   return count;
@@ -449,6 +452,9 @@ int cmCallVisualStudioMacro::CallMacro(
     CoUninitialize();
     }
 #else
+  (void)slnFile;
+  (void)macro;
+  (void)args;
   cmSystemTools::Error("cmCallVisualStudioMacro::CallMacro is not "
     "supported on this platform");
 #endif
