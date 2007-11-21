@@ -1322,8 +1322,8 @@ const char* cmTarget::GetDirectory(const char* config, bool implib)
 const char* cmTarget::ImportedGetDirectory(const char* config, bool)
 {
   const char* location=this->GetLocation(config);
-  std::string directory=cmSystemTools::GetFilenamePath(location);
-  return directory.c_str();
+  this->Directory = cmSystemTools::GetFilenamePath(location);
+  return this->Directory.c_str();
 }
 
 //----------------------------------------------------------------------------
@@ -1362,7 +1362,7 @@ const char* cmTarget::ImportedGetLocation(const char* config)
 {
   if ((config) && (strlen(config)))
     {
-    std::string propertyName=config;
+    std::string propertyName=cmSystemTools::UpperCase(config);
     propertyName+="_LOCATION";
     const char* configLocation=this->GetProperty(propertyName.c_str());
     if ((configLocation) && (strlen(configLocation)))
