@@ -318,7 +318,8 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
       << "   Build name: " << this->GetCTestConfiguration("BuildName")
       << std::endl);
     cmCTestLog(this, DEBUG, "Produce XML is on" << std::endl);
-    if ( this->GetCTestConfiguration("NightlyStartTime").empty() )
+    if ( this->TestModel == cmCTest::NIGHTLY &&
+         this->GetCTestConfiguration("NightlyStartTime").empty() )
       {
       cmCTestLog(this, WARNING,
                  "WARNING: No nightly start time found please set in"
