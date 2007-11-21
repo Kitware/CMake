@@ -459,7 +459,15 @@ cmMakefileTargetGenerator
   compileRuleVar += "_COMPILE_OBJECT";
   std::string compileRule =
     this->Makefile->GetRequiredDefinition(compileRuleVar.c_str());
-  cmSystemTools::ExpandListArgument(compileRule, commands);
+  std::vector<std::string> compileCommands;
+  cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+
+  // Change the command working directory to the local build tree.
+  this->LocalGenerator->CreateCDCommand
+    (compileCommands,
+     this->Makefile->GetStartOutputDirectory(),
+     this->Makefile->GetHomeOutputDirectory());
+  commands.insert(commands.end(), compileCommands.begin(), compileCommands.end());
 
   std::string targetOutPathPDB;
   {
@@ -482,15 +490,11 @@ cmMakefileTargetGenerator
   vars.Language = lang;
   vars.TargetPDB = targetOutPathPDB.c_str();
   vars.Source = sourceFile.c_str();
-  std::string shellrelativeObj = 
-    this->Convert(relativeObj.c_str(), 
-                  cmLocalGenerator::NONE, 
+  std::string shellObj =
+    this->Convert(obj.c_str(),
+                  cmLocalGenerator::NONE,
                   cmLocalGenerator::SHELL).c_str();
-  vars.Object = shellrelativeObj.c_str();
-  std::string objdir = this->LocalGenerator->GetHomeRelativeOutputPath();
-  objdir = this->Convert(objdir.c_str(),
-                         cmLocalGenerator::START_OUTPUT,
-                         cmLocalGenerator::SHELL);
+  vars.Object = shellObj.c_str();
   std::string objectDir = cmSystemTools::GetFilenamePath(obj);
   vars.ObjectDir = objectDir.c_str();
   vars.Flags = flags.c_str();
@@ -548,16 +552,19 @@ cmMakefileTargetGenerator
     force_depends.push_back("cmake_force");
     std::string::size_type dot_pos = relativeObj.rfind(".");
     std::string relativeObjBase = relativeObj.substr(0, dot_pos);
+    dot_pos = obj.rfind(".");
+    std::string objBase = obj.substr(0, dot_pos);
 
     if(do_preprocess_rules)
       {
       commands.clear();
       std::string relativeObjI = relativeObjBase + ".i";
+      std::string objI = objBase + ".i";
 
       std::string preprocessEcho = "Preprocessing ";
       preprocessEcho += lang;
       preprocessEcho += " source to ";
-      preprocessEcho += relativeObjI;
+      preprocessEcho += objI;
       this->LocalGenerator->AppendEcho(
         commands, preprocessEcho.c_str(),
         cmLocalUnixMakefileGenerator3::EchoBuild
@@ -569,9 +576,17 @@ cmMakefileTargetGenerator
       if(const char* preprocessRule =
          this->Makefile->GetDefinition(preprocessRuleVar.c_str()))
         {
-        cmSystemTools::ExpandListArgument(preprocessRule, commands);
+        std::vector<std::string> preprocessCommands;
+        cmSystemTools::ExpandListArgument(preprocessRule, preprocessCommands);
+        this->LocalGenerator->CreateCDCommand
+          (preprocessCommands,
+           this->Makefile->GetStartOutputDirectory(),
+           this->Makefile->GetHomeOutputDirectory());
+        commands.insert(commands.end(),
+                        preprocessCommands.begin(),
+                        preprocessCommands.end());
 
-        vars.PreprocessedSource = relativeObjI.c_str();
+        vars.PreprocessedSource = objI.c_str();
 
         // Expand placeholders in the commands.
         for(std::vector<std::string>::iterator i = commands.begin();
@@ -596,11 +611,12 @@ cmMakefileTargetGenerator
       {
       commands.clear();
       std::string relativeObjS = relativeObjBase + ".s";
+      std::string objS = objBase + ".s";
 
       std::string assemblyEcho = "Compiling ";
       assemblyEcho += lang;
       assemblyEcho += " source to assembly ";
-      assemblyEcho += relativeObjS;
+      assemblyEcho += objS;
       this->LocalGenerator->AppendEcho(
         commands, assemblyEcho.c_str(),
         cmLocalUnixMakefileGenerator3::EchoBuild
@@ -612,9 +628,17 @@ cmMakefileTargetGenerator
       if(const char* assemblyRule =
          this->Makefile->GetDefinition(assemblyRuleVar.c_str()))
         {
-        cmSystemTools::ExpandListArgument(assemblyRule, commands);
+        std::vector<std::string> assemblyCommands;
+        cmSystemTools::ExpandListArgument(assemblyRule, assemblyCommands);
+        this->LocalGenerator->CreateCDCommand
+          (assemblyCommands,
+           this->Makefile->GetStartOutputDirectory(),
+           this->Makefile->GetHomeOutputDirectory());
+        commands.insert(commands.end(),
+                        assemblyCommands.begin(),
+                        assemblyCommands.end());
 
-        vars.AssemblySource = relativeObjS.c_str();
+        vars.AssemblySource = objS.c_str();
 
         // Expand placeholders in the commands.
         for(std::vector<std::string>::iterator i = commands.begin();
