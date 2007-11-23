@@ -107,7 +107,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn)
                                                depends,
                                                no_main_dependency,
                                                commandLines,
-                                               "QT Wrapped File",
+                                               "Qt Wrapped File",
                                                no_working_dir);
       }
     }
