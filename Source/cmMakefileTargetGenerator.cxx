@@ -467,7 +467,8 @@ cmMakefileTargetGenerator
     (compileCommands,
      this->Makefile->GetStartOutputDirectory(),
      this->Makefile->GetHomeOutputDirectory());
-  commands.insert(commands.end(), compileCommands.begin(), compileCommands.end());
+  commands.insert(commands.end(),
+                  compileCommands.begin(), compileCommands.end());
 
   std::string targetOutPathPDB;
   {
