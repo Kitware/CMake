@@ -818,6 +818,14 @@ bool SystemTools::FileExists(const char* filename)
 #ifndef R_OK
 # define R_OK 04
 #endif
+
+#ifdef __SYLLABLE__
+  if ((filename !=0) && (*filename == 0))
+    {
+    return false;
+  }
+#endif
+
   if ( access(filename, R_OK) != 0 )
     {
     return false;

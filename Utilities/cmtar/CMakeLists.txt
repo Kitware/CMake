@@ -112,6 +112,11 @@ FOREACH(func
   CHECK_SYMBOL_EXISTS_EX("${func}")
 ENDFOREACH(func)
 
+# on Syllable lchown() is there, but always returns "Not implemented"
+IF("${CMAKE_SYSTEM_NAME}" MATCHES syllable)
+  SET(HAVE_LCHOWN 0)
+ENDIF("${CMAKE_SYSTEM_NAME}" MATCHES syllable)
+
 CHECK_TYPE_SIZE("dev_t" SIZEOF_DEV_T)
 IF(HAVE_SIZEOF_DEV_T)
   SET (HAVE_DEV_T 1)

@@ -443,30 +443,61 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --test-command exec4
     )
 
-  ADD_TEST(JumpWithLibOut  ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Jump"
-    "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Executable"
-    --build-project Jump
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-options
-    -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Lib
-    --test-command jumpExecutable
-    )
+  IF("${CMAKE_SYSTEM_NAME}" MATCHES syllable)
 
-  ADD_TEST(JumpNoLibOut  ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Jump"
-    "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
-    --build-run-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
-    --build-project Jump
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --test-command jumpExecutable
-    )
+# RPATH isn't supported under Syllable, so the tests don't
+# find their libraries. In order to fix that LIBRARY_OUTPUT_DIR
+# in the tests would have to be adjusted to ${EXECUTABLE_OUTPUT_DIR}/lib .
+# For now we just require on Syllable that the user adjusts the DLL_PATH 
+# environment variable, so except the two tests below all other tests will succeed.
+
+    SET(_DLL_PATH "$ENV{DLL_PATH}")
+    IF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\@bindir\@/\\.(:.*)?$")
+      MESSAGE(FATAL_ERROR "In order to successfully run the CMake test suite on Syllable you need to add \"\@bindir\@/.\" to the DLL_PATH environment variable")
+    ENDIF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\@bindir\@/\\.(:.*)?$")
+    IF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\@bindir\@/\\.\\./lib(:.*)?$")
+      MESSAGE(FATAL_ERROR "In order to successfully run the CMake test suite on Syllable you need to add \"\@bindir\@/../lib\" to the DLL_PATH environment variable")
+    ENDIF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\@bindir\@/\\.\\./lib(:.*)?$")
+
+  ELSE("${CMAKE_SYSTEM_NAME}" MATCHES syllable)
+
+    ADD_TEST(JumpWithLibOut  ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Jump"
+      "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut"
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Executable"
+      --build-project Jump
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-options
+      -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Lib
+      --test-command jumpExecutable
+      )
+
+    ADD_TEST(JumpNoLibOut  ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Jump"
+      "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut"
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
+      --build-run-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
+      --build-project Jump
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --test-command jumpExecutable
+      )
+
+    ADD_TEST(Plugin ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Plugin"
+      "${CMake_BINARY_DIR}/Tests/Plugin"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project Plugin
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-two-config
+      --test-command bin/example)
+
+  ENDIF("${CMAKE_SYSTEM_NAME}" MATCHES syllable)
+
 
   ADD_TEST(linkorder1 ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -487,16 +518,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --build-project LinkLineOrder
     --test-command Exec2
     )
-
-  ADD_TEST(Plugin ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Plugin"
-    "${CMake_BINARY_DIR}/Tests/Plugin"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project Plugin
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-two-config
-    --test-command bin/example)
 
   IF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
     ADD_TEST(kwsys ${CMAKE_CTEST_COMMAND}
