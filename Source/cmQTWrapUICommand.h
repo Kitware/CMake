@@ -54,7 +54,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create QT user interfaces Wrappers.";
+    return "Create Qt user interfaces Wrappers.";
     }
   
   /**
