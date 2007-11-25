@@ -224,6 +224,7 @@ public:
   virtual const char* GetPackageSourceTargetName(){ return 0; }
   virtual const char* GetEditCacheTargetName()    { return 0; }
   virtual const char* GetRebuildCacheTargetName() { return 0; }
+  virtual const char* GetCleanTargetName()        { return 0; }
 
   // what targets does the specified target depend on
   std::vector<cmTarget *>& GetTargetDepends(cmTarget& target);

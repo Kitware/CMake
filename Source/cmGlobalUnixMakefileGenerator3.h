@@ -177,6 +177,7 @@ protected:
   virtual const char* GetPackageSourceTargetName(){ return "package_source"; }
   virtual const char* GetEditCacheTargetName()    { return "edit_cache"; }
   virtual const char* GetRebuildCacheTargetName() { return "rebuild_cache"; }
+  virtual const char* GetCleanTargetName()        { return "clean"; }
 
   // Some make programs (Borland) do not keep a rule if there are no
   // dependencies or commands.  This is a problem for creating rules
