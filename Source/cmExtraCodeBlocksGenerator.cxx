@@ -149,6 +149,7 @@ void cmExtraCodeBlocksGenerator
   bool testTargetCreated = false;
   bool packageTargetCreated = false;
   
+  // add all executable and library targets and some of the GLOBAL targets
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
        lg!=lgs.end(); lg++)
     {
@@ -160,6 +161,7 @@ void cmExtraCodeBlocksGenerator
         switch(ti->second.GetType())
         {
           case cmTarget::GLOBAL_TARGET:
+            // only add these global targets once
             if ((ti->first=="install") && (installTargetCreated==false)) 
             {
               installTargetCreated=true;
@@ -225,6 +227,11 @@ void cmExtraCodeBlocksGenerator
         "      </Target>\n";
             }
             break;
+          // ignore these:
+          case cmTarget::UTILITY:
+          case cmTarget::INSTALL_FILES:
+          case cmTarget::INSTALL_PROGRAMS:
+          case cmTarget::INSTALL_DIRECTORY:
           default:
             break;
         }
@@ -234,6 +241,7 @@ void cmExtraCodeBlocksGenerator
   fout<<"      </Build>\n";
 
 
+  // Collect all used source files in the project
   std::map<std::string, std::string> sourceFiles;
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
        lg!=lgs.end(); lg++)
@@ -263,6 +271,7 @@ void cmExtraCodeBlocksGenerator
       }
     }
 
+  // insert all used source files in the CodeBlocks project
   for (std::map<std::string, std::string>::const_iterator 
        sit=sourceFiles.begin();
        sit!=sourceFiles.end();
@@ -277,6 +286,7 @@ void cmExtraCodeBlocksGenerator
 }
 
 
+// Translate the cmake compiler id into the CodeBlocks compiler id
 std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 {
   // figure out which language to use
@@ -319,6 +329,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 }
 
 
+// Translate the cmake target type into the CodeBlocks target type id
 int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
 {
   if ( target->GetType()==cmTarget::EXECUTABLE)
@@ -345,6 +356,8 @@ int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
   return 4;
 }
 
+// Create the command line for building the given target using the selected
+// make
 std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
              const std::string& make, const char* makefile, const char* target)
 {
