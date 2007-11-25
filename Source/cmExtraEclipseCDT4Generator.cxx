@@ -537,7 +537,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     "<buildTargets>\n"
     ;
   emmited.clear();
-  // TODO: Check how to add 'clean' target...
   const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   cmGlobalGenerator* generator
     = const_cast<cmGlobalGenerator*>(this->GlobalGenerator);
@@ -554,6 +553,25 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     cmExtraEclipseCDT4Generator
     ::AppendTarget(fout, generator->GetPreinstallTargetName(), make);
     }
+
+  if (generator->GetCleanTargetName())
+    {
+    emmited.insert(generator->GetCleanTargetName());
+    cmExtraEclipseCDT4Generator
+    ::AppendTarget(fout, generator->GetCleanTargetName(), make);
+    }
+
+  bool installTargetCreated = false;
+  bool installStripTargetCreated = false;
+  bool testTargetCreated = false;
+  bool experimentalTargetCreated = false;
+  bool nightlyTargetCreated = false;
+  bool packageTargetCreated = false;
+  bool packageSourceTargetCreated = false;
+  bool rebuildCacheTargetCreated = false;
+
+  // add all executable and library targets and some of the GLOBAL 
+  // and UTILITY targets
   for (std::vector<cmLocalGenerator*>::const_iterator
         it = this->GlobalGenerator->GetLocalGenerators().begin();
        it != this->GlobalGenerator->GetLocalGenerators().end();
@@ -562,10 +580,71 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
     for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
       {
-      if(emmited.find(t->first) == emmited.end())
+      switch(t->second.GetType())
         {
-        emmited.insert(t->first);
-        cmExtraEclipseCDT4Generator::AppendTarget(fout, t->first, make);
+        case cmTarget::UTILITY:
+        case cmTarget::GLOBAL_TARGET:
+          {
+          // only add these global targets once
+          if ((t->first=="install") && (installTargetCreated==false)) 
+            {
+            installTargetCreated=true;
+            }
+          else if ((t->first=="install/strip") 
+                    && (installStripTargetCreated==false)) 
+            {
+            installStripTargetCreated=true;
+            }
+          else if ((t->first=="test") && (testTargetCreated==false)) 
+            {
+            testTargetCreated=true;
+            }
+          else if ((t->first=="Experimental") 
+                    && (experimentalTargetCreated==false)) 
+            {
+            experimentalTargetCreated=true;
+            }
+          else if ((t->first=="Nightly") && (nightlyTargetCreated==false)) 
+            {
+            nightlyTargetCreated=true;
+            }
+          else if ((t->first=="package") && (packageTargetCreated==false)) 
+            {
+            packageTargetCreated=true;
+            }
+          else if ((t->first=="package_source") 
+                    && (packageSourceTargetCreated==false)) 
+            {
+            packageSourceTargetCreated=true;
+            }
+          else if ((t->first=="rebuild_cache") 
+                    && (rebuildCacheTargetCreated==false)) 
+            {
+            rebuildCacheTargetCreated=true;
+            }
+          else  // in all cases above fallthrough
+            {
+            break;
+            }
+          }
+        case cmTarget::EXECUTABLE:
+        case cmTarget::STATIC_LIBRARY:
+        case cmTarget::SHARED_LIBRARY:
+        case cmTarget::MODULE_LIBRARY:
+          {
+          if(emmited.find(t->first) == emmited.end())
+            {
+            emmited.insert(t->first);
+            cmExtraEclipseCDT4Generator::AppendTarget(fout, t->first, make);
+            }
+           break;
+          }
+        // ignore these:
+        case cmTarget::INSTALL_FILES:
+        case cmTarget::INSTALL_PROGRAMS:
+        case cmTarget::INSTALL_DIRECTORY:
+        default:
+          break;
         }
       }
     }
