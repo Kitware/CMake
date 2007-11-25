@@ -452,12 +452,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
 # environment variable, so except the two tests below all other tests will succeed.
 
     SET(_DLL_PATH "$ENV{DLL_PATH}")
-    IF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\@bindir\@/\\.(:.*)?$")
-      MESSAGE(FATAL_ERROR "In order to successfully run the CMake test suite on Syllable you need to add \"\@bindir\@/.\" to the DLL_PATH environment variable")
-    ENDIF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\@bindir\@/\\.(:.*)?$")
-    IF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\@bindir\@/\\.\\./lib(:.*)?$")
-      MESSAGE(FATAL_ERROR "In order to successfully run the CMake test suite on Syllable you need to add \"\@bindir\@/../lib\" to the DLL_PATH environment variable")
-    ENDIF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\@bindir\@/\\.\\./lib(:.*)?$")
+    IF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\\@bindir\\@/\\.(:.*)?$")
+      MESSAGE(FATAL_ERROR "In order to successfully run the CMake test suite on Syllable you need to add \"\\@bindir\\@/.\" to the DLL_PATH environment variable")
+    ENDIF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\\@bindir\\@/\\.(:.*)?$")
+    IF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\\@bindir\\@/\\.\\./lib(:.*)?$")
+      MESSAGE(FATAL_ERROR "In order to successfully run the CMake test suite on Syllable you need to add \"\\@bindir\\@/../lib\" to the DLL_PATH environment variable")
+    ENDIF(NOT "${_DLL_PATH}" MATCHES "^(.*:)?\\@bindir\\@/\\.\\./lib(:.*)?$")
 
   ELSE("${CMAKE_SYSTEM_NAME}" MATCHES syllable)
 
