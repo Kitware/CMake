@@ -145,9 +145,15 @@ void cmExtraCodeBlocksGenerator
         "      <Option compiler=\"" << compiler << "\" />\n"
         "      <Build>\n";
 
+  bool preinstallTargetCreated = false;
   bool installTargetCreated = false;
+  bool installStripTargetCreated = false;
   bool testTargetCreated = false;
+  bool experimentalTargetCreated = false;
+  bool nightlyTargetCreated = false;
   bool packageTargetCreated = false;
+  bool packageSourceTargetCreated = false;
+  bool rebuildCacheTargetCreated = false;
   
   // add all executable and library targets and some of the GLOBAL targets
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
@@ -162,22 +168,50 @@ void cmExtraCodeBlocksGenerator
         {
           case cmTarget::GLOBAL_TARGET:
             // only add these global targets once
-            if ((ti->first=="install") && (installTargetCreated==false)) 
-            {
+            if ((ti->first=="preinstall") && (preinstallTargetCreated==false)) 
+              {
+              preinstallTargetCreated=true;
+              }
+            else if ((ti->first=="install") && (installTargetCreated==false)) 
+              {
               installTargetCreated=true;
-            }
-            else if ((ti->first=="package") && (packageTargetCreated==false)) 
-            {
-              packageTargetCreated=true;
-            }
+              }
+            else if ((ti->first=="install/strip") 
+                      && (installStripTargetCreated==false)) 
+              {
+              installStripTargetCreated=true;
+              }
             else if ((ti->first=="test") && (testTargetCreated==false)) 
-            {
+              {
               testTargetCreated=true;
-            }
+              }
+            else if ((ti->first=="Experimental") 
+                      && (experimentalTargetCreated==false)) 
+              {
+              experimentalTargetCreated=true;
+              }
+            else if ((ti->first=="Nightly") && (nightlyTargetCreated==false)) 
+              {
+              nightlyTargetCreated=true;
+              }
+            else if ((ti->first=="package") && (packageTargetCreated==false)) 
+              {
+              packageTargetCreated=true;
+              }
+            else if ((ti->first=="package_source") 
+                      && (packageSourceTargetCreated==false)) 
+              {
+              packageSourceTargetCreated=true;
+              }
+            else if ((ti->first=="rebuild_cache") 
+                      && (rebuildCacheTargetCreated==false)) 
+              {
+              rebuildCacheTargetCreated=true;
+              }
             else
-            {
+              {
               break;
-            }
+              }
           case cmTarget::EXECUTABLE:
           case cmTarget::STATIC_LIBRARY:
           case cmTarget::SHARED_LIBRARY:
