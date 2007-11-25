@@ -23,6 +23,7 @@
 class cmLocalGenerator;
 class cmMakefile;
 class cmTarget;
+class cmGeneratedFileStream;
 
 /** \class cmExtraCodeBlocksGenerator
  * \brief Write CodeBlocks project files for Makefile based projects
@@ -55,6 +56,12 @@ private:
   int GetCBTargetType(cmTarget* target);
   std::string BuildMakeCommand(const std::string& make, const char* makefile, 
                                const char* target);
+  void AppendTarget(cmGeneratedFileStream& fout,
+                    const char* targetName,
+                    cmTarget* target,
+                    const char* make,
+                    const cmMakefile* makefile,
+                    const char* compiler);
 
 };
 

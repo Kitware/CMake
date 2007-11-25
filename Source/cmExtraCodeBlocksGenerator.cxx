@@ -145,7 +145,6 @@ void cmExtraCodeBlocksGenerator
         "      <Option compiler=\"" << compiler << "\" />\n"
         "      <Build>\n";
 
-  bool preinstallTargetCreated = false;
   bool installTargetCreated = false;
   bool installStripTargetCreated = false;
   bool testTargetCreated = false;
@@ -154,8 +153,11 @@ void cmExtraCodeBlocksGenerator
   bool packageTargetCreated = false;
   bool packageSourceTargetCreated = false;
   bool rebuildCacheTargetCreated = false;
-  
-  // add all executable and library targets and some of the GLOBAL targets
+
+  this->AppendTarget(fout, "all", 0, make.c_str(), mf, compiler.c_str());
+
+  // add all executable and library targets and some of the GLOBAL 
+  // and UTILITY targets
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
        lg!=lgs.end(); lg++)
     {
@@ -166,13 +168,10 @@ void cmExtraCodeBlocksGenerator
       {
         switch(ti->second.GetType())
         {
+          case cmTarget::UTILITY:
           case cmTarget::GLOBAL_TARGET:
-            // only add these global targets once
-            if ((ti->first=="preinstall") && (preinstallTargetCreated==false)) 
-              {
-              preinstallTargetCreated=true;
-              }
-            else if ((ti->first=="install") && (installTargetCreated==false)) 
+            // only add these targets once
+            if ((ti->first=="install") && (installTargetCreated==false)) 
               {
               installTargetCreated=true;
               }
@@ -212,57 +211,23 @@ void cmExtraCodeBlocksGenerator
               {
               break;
               }
+            this->AppendTarget(fout, ti->first.c_str(), 0, 
+                               make.c_str(), makefile, compiler.c_str());
+            break;
           case cmTarget::EXECUTABLE:
           case cmTarget::STATIC_LIBRARY:
           case cmTarget::SHARED_LIBRARY:
           case cmTarget::MODULE_LIBRARY:
             {
-            int cbTargetType = this->GetCBTargetType(&ti->second);
-            std::string makefileName = makefile->GetStartOutputDirectory();
-            makefileName += "/Makefile";
-            makefileName = cmSystemTools::ConvertToOutputPath(
-                                                         makefileName.c_str());
-
-  fout<<"      <Target title=\"" << ti->first << "\">\n"
-        "         <Option output=\"" << ti->second.GetLocation(0) 
-                            << "\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
-        "         <Option working_dir=\"" <<makefile->GetStartOutputDirectory()
-                                                                    <<"\" />\n"
-        "         <Option object_output=\"./\" />\n"
-        "         <Option type=\"" << cbTargetType << "\" />\n"
-        "         <Option compiler=\"" << compiler << "\" />\n"
-        "         <Compiler>\n";
-
-            // the include directories for this target
-            const std::vector<std::string>& incDirs = 
-                             ti->second.GetMakefile()->GetIncludeDirectories();
-            for(std::vector<std::string>::const_iterator dirIt=incDirs.begin();
-                dirIt != incDirs.end();
-                ++dirIt)
-              {
-  fout <<"            <Add directory=\"" << dirIt->c_str() << "\" />\n";
-              }
-
-  fout<<"         </Compiler>\n"
-        "         <MakeCommands>\n"
-        "            <Build command=\"" 
-      << this->BuildMakeCommand(make, makefileName.c_str(), ti->first.c_str()) 
-      << "\" />\n"
-        "            <CompileFile command=\"" 
-      << this->BuildMakeCommand(make, makefileName.c_str(),"&quot;$file&quot;")
-      << "\" />\n"
-        "            <Clean command=\"" 
-      << this->BuildMakeCommand(make, makefileName.c_str(), "clean") 
-      << "\" />\n"
-        "            <DistClean command=\"" 
-      << this->BuildMakeCommand(make, makefileName.c_str(), "clean") 
-      << "\" />\n"
-        "         </MakeCommands>\n"
-        "      </Target>\n";
+            this->AppendTarget(fout, ti->first.c_str(), &ti->second, 
+                               make.c_str(), makefile, compiler.c_str());
+            std::string fastTarget = ti->first;
+            fastTarget += "/fast";
+            this->AppendTarget(fout, fastTarget.c_str(), &ti->second, 
+                               make.c_str(), makefile, compiler.c_str());
             }
             break;
           // ignore these:
-          case cmTarget::UTILITY:
           case cmTarget::INSTALL_FILES:
           case cmTarget::INSTALL_PROGRAMS:
           case cmTarget::INSTALL_DIRECTORY:
@@ -317,6 +282,67 @@ void cmExtraCodeBlocksGenerator
 
   fout<<"   </Project>\n"
         "</CodeBlocks_project_file>\n";
+}
+
+
+// Generate the xml code for one target.
+void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
+                                              const char* targetName,
+                                              cmTarget* target,
+                                              const char* make,
+                                              const cmMakefile* makefile,
+                                              const char* compiler)
+{
+  std::string makefileName = makefile->GetStartOutputDirectory();
+  makefileName += "/Makefile";
+  makefileName = cmSystemTools::ConvertToOutputPath(makefileName.c_str());
+
+  fout<<"      <Target title=\"" << targetName << "\">\n";
+  if (target!=0)
+    {
+    int cbTargetType = this->GetCBTargetType(target);
+    fout<<"         <Option output=\"" << target->GetLocation(0) 
+                            << "\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
+          "         <Option working_dir=\"" 
+                            << makefile->GetStartOutputDirectory() << "\" />\n"
+          "         <Option object_output=\"./\" />\n"
+          "         <Option type=\"" << cbTargetType << "\" />\n"
+          "         <Option compiler=\"" << compiler << "\" />\n"
+          "         <Compiler>\n";
+      // the include directories for this target
+      const std::vector<std::string>& incDirs = 
+          target->GetMakefile()->GetIncludeDirectories();
+      for(std::vector<std::string>::const_iterator dirIt=incDirs.begin();
+          dirIt != incDirs.end();
+          ++dirIt)
+        {
+        fout <<"            <Add directory=\"" << dirIt->c_str() << "\" />\n";
+        }
+      fout<<"         </Compiler>\n";
+      }
+    else // e.g. all and the GLOBAL and UTILITY targets
+    {
+    fout<<"         <Option working_dir=\"" 
+                            << makefile->GetStartOutputDirectory() << "\" />\n"
+        <<"         <Option type=\"" << 4 << "\" />\n";
+    }
+
+  fout<<"         <MakeCommands>\n"
+        "            <Build command=\"" 
+      << this->BuildMakeCommand(make, makefileName.c_str(), targetName)
+      << "\" />\n"
+        "            <CompileFile command=\"" 
+      << this->BuildMakeCommand(make, makefileName.c_str(),"&quot;$file&quot;")
+      << "\" />\n"
+        "            <Clean command=\"" 
+      << this->BuildMakeCommand(make, makefileName.c_str(), "clean") 
+      << "\" />\n"
+        "            <DistClean command=\"" 
+      << this->BuildMakeCommand(make, makefileName.c_str(), "clean") 
+      << "\" />\n"
+        "         </MakeCommands>\n"
+        "      </Target>\n";
+  
 }
 
 
