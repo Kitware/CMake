@@ -1724,8 +1724,8 @@ cmLocalUnixMakefileGenerator3
       }
     obj += fileTargetDirectory;
 
-    obj = cmSystemTools::RelativePath
-      (this->Makefile->GetHomeOutputDirectory(), obj.c_str());
+    // Object names are specified relative to the current build dir.
+    obj = this->Convert(obj.c_str(), START_OUTPUT);
     obj += "/";
     obj += objectName;
     return obj;
