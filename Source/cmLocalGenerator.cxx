@@ -1476,15 +1476,15 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
     }
 }
 
-/**
- * Output the linking rules on a command line.  For executables,
- * targetLibrary should be a NULL pointer.  For libraries, it should point
- * to the name of the library.  This will not link a library against itself.
- */
-void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
-                                           cmTarget& tgt,
-                                           bool relink)
+bool cmLocalGenerator::GetLinkerArgs(std::string& rpath, 
+                                     std::string& linkLibs,
+                                     cmTarget& tgt,
+                                     bool relink)
 {
+  rpath = "";
+  // collect all the flags needed for linking libraries
+  linkLibs = "";
+
   // Try to emit each search path once
   std::set<cmStdString> emitted;
   // Embed runtime search paths if possible and if required.
@@ -1494,13 +1494,13 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
 
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   const char* linkLanguage = 
-    tgt.GetLinkerLanguage(this->GetGlobalGenerator());
+      tgt.GetLinkerLanguage(this->GetGlobalGenerator());
   if(!linkLanguage)
     {
     cmSystemTools::
       Error("CMake can not determine linker language for target:",
             tgt.GetName());
-    return;
+    return false;
     }
   std::string runTimeFlagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
   runTimeFlagVar += linkLanguage;
@@ -1535,8 +1535,6 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     this->Makefile->GetSafeDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
   std::string libLinkFlag = 
     this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
-  // collect all the flags needed for linking libraries
-  std::string linkLibs;
   
   // Flags to link an executable to shared libraries.
   std::string linkFlagsVar = "CMAKE_SHARED_LIBRARY_LINK_";
@@ -1635,29 +1633,60 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     linkLibs += " ";
     }
 
-  fout << linkLibs;
-
   if(!runtimeDirs.empty())
     {
     // For the runtime search directories, do a "-Wl,-rpath,a:b:c" or
     // a "-R a -R b -R c" type link line
-    fout << runtimeFlag;
+    rpath += runtimeFlag;
     std::vector<std::string>::iterator itr = runtimeDirs.begin();
-    fout << *itr;
+    rpath += *itr;
     ++itr;
     for( ; itr != runtimeDirs.end(); ++itr )
       {
       if(runtimeConcatenate)
         {
-        fout << runtimeSep << *itr;
+        rpath += runtimeSep;
+        rpath += *itr;
         }
       else
         {
-        fout << " " << runtimeFlag << *itr;
+        rpath += " ";
+        rpath += runtimeFlag;
+        rpath += *itr;
         }
       }
-    fout << " ";
     }
+  return true;
+}
+
+/**
+ * Output the linking rules on a command line.  For executables,
+ * targetLibrary should be a NULL pointer.  For libraries, it should point
+ * to the name of the library.  This will not link a library against itself.
+ */
+void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
+                                           cmTarget& tgt,
+                                           bool relink)
+{
+  std::string rpath;
+  std::string linkLibs;
+  if (!this->GetLinkerArgs(rpath, linkLibs, tgt, relink))
+    {
+    return;
+    }
+
+  const char* linkLanguage = 
+    tgt.GetLinkerLanguage(this->GetGlobalGenerator());
+  if(!linkLanguage)
+    {
+    cmSystemTools::
+      Error("CMake can not determine linker language for target:",
+            tgt.GetName());
+    return;
+    }
+
+  fout << linkLibs;
+  fout << rpath << " ";
 
   // Add standard libraries for this language.
   std::string standardLibsVar = "CMAKE_";
