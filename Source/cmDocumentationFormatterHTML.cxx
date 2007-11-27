@@ -92,7 +92,7 @@ void cmDocumentationFormatterHTML
 {
   if(name)
     {
-    os << "<h2>" << name << "</h2>\n";
+    os << "<h2><a name=\"section_" << name << "\"/>" << name << "</h2>\n";
     }
 
   const std::vector<cmDocumentationEntry> &entries = 
