@@ -20,6 +20,44 @@
 #include <QDir>
 
 #include "CMakeSetupDialog.h"
+#include "cmDocumentation.h"
+#include "cmake.h"
+
+//----------------------------------------------------------------------------
+static const char * cmDocumentationName[][3] =
+{
+  {0,
+   "  CMakeSetup - CMake GUI.", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const char * cmDocumentationUsage[][3] =
+{
+  {0,
+   "  CMakeSetup [options]\n"
+   "  CMakeSetup [options] <path-to-source>\n"
+   "  CMakeSetup [options] <path-to-existing-build>", 0},
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const char * cmDocumentationDescription[][3] =
+{
+  {0,
+   "The \"CMakeSetup\" executable is the CMake GUI.  Project "
+   "configuration settings may be specified interactively.  "
+   "Brief instructions are provided at the bottom of the "
+   "window when the program is running.", 0},
+  CMAKE_STANDARD_INTRODUCTION,
+  {0,0,0}
+};
+
+//----------------------------------------------------------------------------
+static const char * cmDocumentationOptions[][3] =
+{
+  {0,0,0}
+};
 
 int main(int argc, char** argv)
 {
@@ -27,6 +65,36 @@ int main(int argc, char** argv)
   app.setApplicationName("CMakeSetup");
   app.setOrganizationName("Kitware");
   app.setWindowIcon(QIcon(":/Icons/CMakeSetup.png"));
+  
+  cmDocumentation doc;
+  if(app.arguments().size() > 1 &&
+     doc.CheckOptions(app.argc(), app.argv()))
+    {
+    // Construct and print requested documentation.
+    cmake hcm;
+    hcm.AddCMakePaths(app.argv()[0]);
+    doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
+    std::vector<cmDocumentationEntry> commands;
+    std::vector<cmDocumentationEntry> compatCommands;
+    std::map<std::string,cmDocumentationSection *> propDocs;
+
+    std::vector<cmDocumentationEntry> generators;
+    hcm.GetCommandDocumentation(commands, true, false);
+    hcm.GetCommandDocumentation(compatCommands, false, true);
+    hcm.GetGeneratorDocumentation(generators);
+    hcm.GetPropertiesDocumentation(propDocs);
+    doc.SetName("cmake");
+    doc.SetSection("Name",cmDocumentationName);
+    doc.SetSection("Usage",cmDocumentationUsage);
+    doc.SetSection("Description",cmDocumentationDescription);
+    doc.AppendSection("Generators",generators);
+    doc.PrependSection("Options",cmDocumentationOptions);
+    doc.SetSection("Commands",commands);
+    doc.SetSection("Compatilbility Commands", compatCommands);
+    doc.SetSections(propDocs);
+
+    return (doc.PrintRequestedDocumentation(std::cout)? 0:1);
+    }
 
   CMakeSetupDialog dialog;
   dialog.setWindowTitle("CMakeSetup");
