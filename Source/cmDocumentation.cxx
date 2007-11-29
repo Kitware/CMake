@@ -1059,17 +1059,23 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
       }
     }
 
-  if(!moduleName.empty()
-     && this->CreateSingleModule(moduleName.c_str(), 
+  if(!moduleName.empty())
+    {
+    cmDocumentationSection *sec = 
+      new cmDocumentationSection("Standard CMake Modules", "MODULES");
+    this->AllSections["Modules"] = sec;
+    if (this->CreateSingleModule(moduleName.c_str(), 
                                  this->CurrentArgument.c_str(),
                                  *this->AllSections["Modules"]))
-    {
-    this->PrintDocumentationCommand
-      (os,  this->AllSections["Modules"]->GetEntries()[0]);
-    os <<  "\n       Defined in: ";
-    os << moduleName << "\n";
-    return true;
+      {
+      this->PrintDocumentationCommand
+        (os,  this->AllSections["Modules"]->GetEntries()[0]);
+      os <<  "\n       Defined in: ";
+      os << moduleName << "\n";
+      return true;
+      }
     }
+
   // Argument was not a module.  Complain.
   os << "Argument \"" << this->CurrentArgument.c_str()
      << "\" to --help-module is not a CMake module.\n";
