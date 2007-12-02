@@ -640,3 +640,80 @@ DBG_MSG("wxWidgets_USE_FILE        : ${wxWidgets_USE_FILE}")
 #=====================================================================
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(wxWidgets DEFAULT_MSG wxWidgets_FOUND)
+
+#=====================================================================
+# Macros for use in wxWidgets apps.
+# - This module will not fail to find wxWidgets based on the code
+#   below. Hence, it's required to check for validity of:
+#
+# wxWidgets_wxrc_EXECUTABLE
+#=====================================================================
+
+# Resource file compiler.
+FIND_PROGRAM(wxWidgets_wxrc_EXECUTABLE wxrc
+  ${wxWidgets_ROOT_DIR}/utils/wxrc/vc_msw
+  )
+
+# 
+# WXWIDGETS_ADD_RESOURCES(<sources> <xrc_files>)
+# 
+# Adds a custom command for resource file compilation of the
+# <xrc_files> and appends the output files to <sources>.
+# 
+# Example usage: WXWIDGETS_ADD_RESOURCES(sources xrc/main_frame.xrc)
+#
+MACRO(WXWIDGETS_ADD_RESOURCES outfiles)
+  SET(_RC_INFILES)
+  SET(_RC_DEPENDS)
+  FOREACH(it ${ARGN})
+    GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
+    GET_FILENAME_COMPONENT(rc_path ${infile} PATH)
+    LIST(APPEND _RC_INFILES ${infile})
+
+    # parse file for dependencies; all files are absolute paths or
+    # relative to the location of the rc file
+    FILE(READ "${infile}" _RC_FILE_CONTENTS)
+
+    # get bitmap/bitmap2 files
+    STRING(REGEX MATCHALL "<bitmap[^<]+" _RC_FILES "${_RC_FILE_CONTENTS}")
+    FOREACH(_RC_FILE ${_RC_FILES})
+      STRING(REGEX REPLACE "^<bitmap[^>]*>" "" _RC_FILE "${_RC_FILE}")
+      STRING(REGEX MATCH "^/|([A-Za-z]:/)" _ABS_PATH_INDICATOR "${_RC_FILE}")
+      IF(NOT _ABS_PATH_INDICATOR)
+        SET(_RC_FILE "${rc_path}/${_RC_FILE}")
+      ENDIF(NOT _ABS_PATH_INDICATOR)
+      LIST(APPEND _RC_DEPENDS "${_RC_FILE}")
+    ENDFOREACH(_RC_FILE)
+
+    # get url files
+    STRING(REGEX MATCHALL "<url[^<]+" _RC_FILES "${_RC_FILE_CONTENTS}")
+    FOREACH(_RC_FILE ${_RC_FILES})
+      STRING(REGEX REPLACE "^<url[^>]*>" "" _RC_FILE "${_RC_FILE}")
+      STRING(REGEX MATCH "^/|([A-Za-z]:/)" _ABS_PATH_INDICATOR "${_RC_FILE}")
+      IF(NOT _ABS_PATH_INDICATOR)
+        SET(_RC_FILE "${rc_path}/${_RC_FILE}")
+      ENDIF(NOT _ABS_PATH_INDICATOR)
+      LIST(APPEND _RC_DEPENDS "${_RC_FILE}")
+    ENDFOREACH(_RC_FILE)
+
+    # get wxIcon files
+    STRING(REGEX MATCHALL "<object[^>]*class=\"wxIcon\"[^<]+" _RC_FILES "${_RC_FILE_CONTENTS}")
+    FOREACH(_RC_FILE ${_RC_FILES})
+      STRING(REGEX REPLACE "^<object[^>]*>" "" _RC_FILE "${_RC_FILE}")
+      STRING(REGEX MATCH "^/|([A-Za-z]:/)" _ABS_PATH_INDICATOR "${_RC_FILE}")
+      IF(NOT _ABS_PATH_INDICATOR)
+        SET(_RC_FILE "${rc_path}/${_RC_FILE}")
+      ENDIF(NOT _ABS_PATH_INDICATOR)
+      LIST(APPEND _RC_DEPENDS "${_RC_FILE}")
+    ENDFOREACH(_RC_FILE)
+  ENDFOREACH (it)
+
+  SET(outfile ${CMAKE_CURRENT_BINARY_DIR}/wxrc_resources.cxx)
+  ADD_CUSTOM_COMMAND(
+    OUTPUT ${outfile}
+    COMMAND ${wxWidgets_wxrc_EXECUTABLE}
+      --cpp-code --output=${outfile} ${_RC_INFILES}
+    DEPENDS ${_RC_INFILES} ${_RC_DEPENDS}
+    )
+  LIST(APPEND ${outfiles} ${outfile})
+ENDMACRO(WXWIDGETS_ADD_RESOURCES)
