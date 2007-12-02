@@ -531,15 +531,114 @@ IF(WIN32_STYLE_FIND)
 #=====================================================================
 ELSE(WIN32_STYLE_FIND)
   IF(UNIX_STYLE_FIND)
+    #-----------------------------------------------------------------
+    # UNIX: Helper MACROS
+    #-----------------------------------------------------------------
+    #
+    # Set the default values based on "wx-config --selected-config".
+    #
+    MACRO(WX_CONFIG_SELECT_GET_DEFAULT)
+      EXECUTE_PROCESS(
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --selected-config
+        OUTPUT_VARIABLE _wx_selected_config
+        RESULT_VARIABLE _wx_result
+        ERROR_QUIET
+        )
+      IF(_wx_result EQUAL 0)
+        FOREACH(_opt_name debug static unicode universal)
+          STRING(TOUPPER ${_opt_name} _upper_opt_name)
+          IF(_wx_selected_config MATCHES ".*${_opt_name}.*")
+            SET(wxWidgets_DEFAULT_${_upper_opt_name} ON)
+          ELSE(_wx_selected_config MATCHES ".*${_opt_name}.*")
+            SET(wxWidgets_DEFAULT_${_upper_opt_name} OFF)
+          ENDIF(_wx_selected_config MATCHES ".*${_opt_name}.*")
+        ENDFOREACH(_opt_name)
+      ELSE(_wx_result EQUAL 0)
+        FOREACH(_upper_opt_name DEBUG STATIC UNICODE UNIVERSAL)
+          SET(wxWidgets_DEFAULT_${_upper_opt_name} OFF)
+        ENDFOREACH(_opt_name)
+      ENDIF(_wx_result EQUAL 0)
+    ENDMACRO(WX_CONFIG_SELECT_GET_DEFAULT)
+
+    #
+    # Query a boolean configuration option to determine if the system
+    # has both builds available. If so, provide the selection option
+    # to the user.
+    #
+    MACRO(WX_CONFIG_SELECT_QUERY_BOOL _OPT_NAME _OPT_HELP)
+      EXECUTE_PROCESS(
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --${_OPT_NAME}=yes
+        RESULT_VARIABLE _wx_result_yes
+        OUTPUT_QUIET
+        ERROR_QUIET
+        )
+      EXECUTE_PROCESS(
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --${_OPT_NAME}=no
+        RESULT_VARIABLE _wx_result_no
+        OUTPUT_QUIET
+        ERROR_QUIET
+        )
+      STRING(TOUPPER ${_OPT_NAME} _UPPER_OPT_NAME)
+      IF(_wx_result_yes EQUAL 0 AND _wx_result_no EQUAL 0)
+        OPTION(wxWidgets_USE_${_UPPER_OPT_NAME}
+          ${_OPT_HELP} ${wxWidgets_DEFAULT_${_UPPER_OPT_NAME}})
+      ELSE(_wx_result_yes EQUAL 0 AND _wx_result_no EQUAL 0)
+        # If option exists (already in cache), force to available one.
+        IF(DEFINED wxWidgets_USE_${_UPPER_OPT_NAME})
+          IF(_wx_result_yes EQUAL 0)
+            SET(wxWidgets_USE_${_UPPER_OPT_NAME} ON  CACHE BOOL ${_OPT_HELP} FORCE)
+          ELSE(_wx_result_yes EQUAL 0)
+            SET(wxWidgets_USE_${_UPPER_OPT_NAME} OFF CACHE BOOL ${_OPT_HELP} FORCE)
+          ENDIF(_wx_result_yes EQUAL 0)
+        ENDIF(DEFINED wxWidgets_USE_${_UPPER_OPT_NAME})
+      ENDIF(_wx_result_yes EQUAL 0 AND _wx_result_no EQUAL 0)
+    ENDMACRO(WX_CONFIG_SELECT_QUERY_BOOL)
+
+    # 
+    # Set wxWidgets_SELECT_OPTIONS to wx-config options for selecting
+    # among multiple builds.
+    #
+    MACRO(WX_CONFIG_SELECT_SET_OPTIONS)
+      SET(wxWidgets_SELECT_OPTIONS "")
+      FOREACH(_opt_name debug static unicode universal)
+        STRING(TOUPPER ${_opt_name} _upper_opt_name)
+        IF(DEFINED wxWidgets_USE_${_upper_opt_name})
+          IF(wxWidgets_USE_${_upper_opt_name})
+            LIST(APPEND wxWidgets_SELECT_OPTIONS --${_opt_name}=yes)
+          ELSE(wxWidgets_USE_${_upper_opt_name})
+            LIST(APPEND wxWidgets_SELECT_OPTIONS --${_opt_name}=no)
+          ENDIF(wxWidgets_USE_${_upper_opt_name})
+        ENDIF(DEFINED wxWidgets_USE_${_upper_opt_name})
+      ENDFOREACH(_opt_name)
+    ENDMACRO(WX_CONFIG_SELECT_SET_OPTIONS)
+
+    #-----------------------------------------------------------------
+    # UNIX: Start actual work.
+    #-----------------------------------------------------------------
     FIND_PROGRAM(wxWidgets_CONFIG_EXECUTABLE wx-config)
     IF(wxWidgets_CONFIG_EXECUTABLE)
       SET(wxWidgets_FOUND TRUE)
 
+      # get defaults based on "wx-config --selected-config"
+      WX_CONFIG_SELECT_GET_DEFAULT()
+
+      # for each option: if both builds are available, provide option
+      WX_CONFIG_SELECT_QUERY_BOOL(debug "Use debug build?")
+      WX_CONFIG_SELECT_QUERY_BOOL(unicode "Use unicode build?")
+      WX_CONFIG_SELECT_QUERY_BOOL(universal "Use universal build?")
+      WX_CONFIG_SELECT_QUERY_BOOL(static "Link libraries statically?")
+
+      # process selection to set wxWidgets_SELECT_OPTIONS
+      WX_CONFIG_SELECT_SET_OPTIONS()
+      DBG_MSG("wxWidgets_SELECT_OPTIONS=${wxWidgets_SELECT_OPTIONS}")
+
       # run the wx-config program to get cxxflags
       EXECUTE_PROCESS(
-        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --cxxflags
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}"
+          ${wxWidgets_SELECT_OPTIONS} --cxxflags
         OUTPUT_VARIABLE wxWidgets_CXX_FLAGS
         RESULT_VARIABLE RET
+        ERROR_QUIET
         )
       IF(RET EQUAL 0)
         STRING(STRIP "${wxWidgets_CXX_FLAGS}" wxWidgets_CXX_FLAGS)
@@ -581,10 +680,11 @@ ELSE(WIN32_STYLE_FIND)
       STRING(REPLACE ";" ","
         wxWidgets_FIND_COMPONENTS "${wxWidgets_FIND_COMPONENTS}")
       EXECUTE_PROCESS(
-        COMMAND
-          sh "${wxWidgets_CONFIG_EXECUTABLE}" --libs ${wxWidgets_FIND_COMPONENTS}
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}"
+          ${wxWidgets_SELECT_OPTIONS} --libs ${wxWidgets_FIND_COMPONENTS}
         OUTPUT_VARIABLE wxWidgets_LIBRARIES
         RESULT_VARIABLE RET
+        ERROR_QUIET
         )
       IF(RET EQUAL 0)
         STRING(STRIP "${wxWidgets_LIBRARIES}" wxWidgets_LIBRARIES)
