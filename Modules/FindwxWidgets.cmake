@@ -376,6 +376,7 @@ IF(WIN32_STYLE_FIND)
       D:/
       $ENV{ProgramFiles}
     PATH_SUFFIXES 
+      wxWidgets-2.8.7
       wxWidgets-2.8.6
       wxWidgets-2.8.5
       wxWidgets-2.8.4
