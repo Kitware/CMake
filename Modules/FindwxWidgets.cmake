@@ -1,9 +1,16 @@
 # - Find a wxWidgets (a.k.a., wxWindows) installation.
 # This module finds if wxWidgets is installed and selects a default
-# configuration to use.
-#
-# The following variables are searched for and set to defaults in case
-# of multiple choices. Change them if the defaults are not desired:
+# configuration to use. wxWidgets is a modular library. To specify the
+# modules that you will use, you need to name them as components to
+# the package:
+# 
+# FIND_PACKAGE(wxWidgets COMPONENTS base core ...)
+# 
+# There are two search branches: a windows style and a unix style. For
+# windows, the following variables are searched for and set to
+# defaults in case of multiple choices. Change them if the defaults
+# are not desired (i.e., these are the only variables you should
+# change to select a configuration):
 #
 #  wxWidgets_ROOT_DIR      - Base wxWidgets directory
 #                            (e.g., C:/wxWidgets-2.6.3).
@@ -11,8 +18,19 @@
 #                            (e.g., C:/wxWidgets-2.6.3/lib/vc_lib).
 #  wxWidgets_CONFIGURATION - Configuration to use
 #                            (e.g., msw, mswd, mswu, mswunivud, etc.)
+# 
+# For unix style it uses the wx-config utility. You can select between
+# debug/release, unicode/ansi, universal/non-universal, and
+# static/shared in the QtDialog or ccmake interfaces by turning ON/OFF
+# the following variables:
 #
-# The following are set after configuration is done:
+#  wxWidgets_USE_DEBUG
+#  wxWidgets_USE_UNICODE
+#  wxWidgets_USE_UNIVERSAL
+#  wxWidgets_USE_STATIC
+#  
+# The following are set after the configuration is done for both
+# windows and unix style:
 #
 #  wxWidgets_FOUND            - Set to TRUE if wxWidgets was found.
 #  wxWidgets_INCLUDE_DIRS     - Include directories for WIN32
@@ -37,7 +55,14 @@
 #     TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
 #   ENDIF(wxWidgets_FOUND)
 #
+# If wxWidgets is required (i.e., not an optional part):
+#   FIND_PACKAGE(wxWidgets REQUIRED base core gl net)
+#   INCLUDE(${wxWidgets_USE_FILE})
+#   # and for each of your dependant executable/library targets:
+#   TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
 #
+
+# FIXME: check this and provide a correct sample usage...
 # Sample usage with monolithic wx build:
 #
 #   SET(wxWidgets_USE_LIBS msw26 expat jpeg gl png regex tiff zlib)
