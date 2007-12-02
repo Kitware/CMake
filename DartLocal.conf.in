@@ -64,7 +64,6 @@ ExpectedBuilds: \
 {midworld.kitware zRel24-DarwinG5-g++} \
 {pre.vision.cs.rpi.edu FreeBSD-CC-gmake} \
 {pre.vision.cs.rpi.edu FreeBSD-CC-make} \
-{pre.vision.cs.rpi.edu FreeBSD-CC-make} \
 {RogueResearch3 Mac10.5-CMake-gcc-dbg-ppc} \
 {RogueResearch3 Mac10.5-CMake-gcc-dbg-ppc64} \
 {RogueResearch3 Mac10.5-CMake-gcc-rel-ppc} \
@@ -78,9 +77,9 @@ ExpectedBuilds: \
 {tick.rz.uni-augsburg.de LinuxPPC-g++3.3} \
 {tick.rz.uni-augsburg.de LinuxPPC-g++3.4} \
 {trinsic.kitware Win32-mingw} \
-{v20n17.pbm.ihost.com AIX53-xlC} \
-{v20n17.pbm.ihost.com zRel24-AIX53-xlC} \
-{valhalla.kitware WIN32-wcl386}
+{r06n01.pbm.ihost.com AIX53-xlC} \
+{r06n01.pbm.ihost.com zRel24-AIX53-xlC} \
+{valhalla.kitware Win32-wcl386}
 
 #{devqnx.acfr.usyd.edu.au qnx-V3.3.5-gcc_ntox86 } \
 #{mr-orange.obtech.net gentoo-linux-x86\_64-gcc-4.0.2 } \
