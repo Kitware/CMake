@@ -317,9 +317,8 @@ IF(WIN32_STYLE_FIND)
         DBG_MSG_V("WX_${LIB}d : ${WX_${LIB}d}")
         IF(WX_${LIB} AND WX_${LIB}d)
           DBG_MSG_V("Found ${LIB} and ${LIB}d")
-          SET(wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES}
-            debug     ${WX_${LIB}d}
-            optimized ${WX_${LIB}}
+          LIST(APPEND wxWidgets_LIBRARIES
+            debug ${WX_${LIB}d} optimized ${WX_${LIB}}
             )
         ELSE(WX_${LIB} AND WX_${LIB}d)
           DBG_MSG_V("- not found due to missing WX_${LIB}=${WX_${LIB}} or WX_${LIB}d=${WX_${LIB}d}")
@@ -332,9 +331,7 @@ IF(WIN32_STYLE_FIND)
         DBG_MSG_V("WX_${LIB}${_DBG} : ${WX_${LIB}${_DBG}}")
         IF(WX_${LIB}${_DBG})
           DBG_MSG_V("Found ${LIB}${_DBG}")
-          SET(wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES}
-            ${WX_${LIB}${_DBG}}
-            )
+          LIST(APPEND wxWidgets_LIBRARIES ${WX_${LIB}${_DBG}})
         ELSE(WX_${LIB}${_DBG})
           DBG_MSG_V(
             "- not found due to missing WX_${LIB}${_DBG}=${WX_${LIB}${_DBG}}")
@@ -347,18 +344,10 @@ IF(WIN32_STYLE_FIND)
     LIST(FIND ${_LIBS} gl WX_USE_GL)
     IF(NOT WX_USE_GL EQUAL -1)
       DBG_MSG_V("- is required.")
-      SET(wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES}
-        opengl32
-        glu32
-        )
+      LIST(APPEND wxWidgets_LIBRARIES opengl32 glu32)
     ENDIF(NOT WX_USE_GL EQUAL -1)
 
-    SET(wxWidgets_LIBRARIES ${wxWidgets_LIBRARIES}
-      winmm
-      comctl32
-      rpcrt4
-      wsock32
-      )
+    LIST(APPEND wxWidgets_LIBRARIES winmm comctl32 rpcrt4 wsock32)
   ENDMACRO(WX_SET_LIBRARIES)
 
   #-------------------------------------------------------------------
@@ -451,7 +440,7 @@ IF(WIN32_STYLE_FIND)
       FOREACH(CFG mswunivud mswunivd mswud mswd mswunivu mswuniv mswu msw)
         SET(WX_${CFG}_FOUND FALSE)
         IF(EXISTS ${WX_LIB_DIR}/${CFG})
-          SET(WX_CONFIGURATION_LIST ${WX_CONFIGURATION_LIST} ${CFG})
+          LIST(APPEND WX_CONFIGURATION_LIST ${CFG})
           SET(WX_${CFG}_FOUND TRUE)
           SET(WX_CONFIGURATION ${CFG})
         ENDIF(EXISTS ${WX_LIB_DIR}/${CFG})
@@ -498,7 +487,7 @@ IF(WIN32_STYLE_FIND)
 
         # Set wxWidgets lib setup include directory.
         IF(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
-          SET(wxWidgets_INCLUDE_DIRS ${wxWidgets_INCLUDE_DIRS}
+          LIST(APPEND wxWidgets_INCLUDE_DIRS
             ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION})
         ELSE(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
           DBG_MSG("WXWIDGET_FOUND FALSE because ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h does not exists.")
