@@ -21,7 +21,6 @@
 #include "cmDefinePropertyCommand.cxx"
 #include "cmElseIfCommand.cxx"
 #include "cmEnableLanguageCommand.cxx"
-#include "cmEndMacroCommand.cxx"
 #include "cmEndWhileCommand.cxx"
 #include "cmExecuteProcessCommand.cxx"
 #include "cmExportCommand.cxx"
@@ -72,7 +71,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmDefinePropertyCommand);
   commands.push_back(new cmElseIfCommand);
   commands.push_back(new cmEnableLanguageCommand);
-  commands.push_back(new cmEndMacroCommand);
   commands.push_back(new cmEndWhileCommand);
   commands.push_back(new cmExecuteProcessCommand);
   commands.push_back(new cmExportCommand);

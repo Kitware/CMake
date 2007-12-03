@@ -737,6 +737,11 @@ public:
   // Define the properties
   static void DefineProperties(cmake *cm);
 
+  // push and pop variable scopes
+  void PushScope();
+  void PopScope();
+  void RaiseScope(const char *var);
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -787,7 +792,7 @@ protected:
   std::vector<cmSourceGroup> SourceGroups;
 #endif
 
-  DefinitionMap Definitions;
+  std::vector<DefinitionMap> DefinitionStack;
   std::vector<cmCommand*> UsedCommands;
   cmLocalGenerator* LocalGenerator;
   bool IsFunctionBlocked(const cmListFileFunction& lff);

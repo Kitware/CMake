@@ -42,6 +42,8 @@
 // default is not to be building executables
 cmMakefile::cmMakefile()
 {
+  this->DefinitionStack.push_back(DefinitionMap());
+
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
   // Setup the default include complaint regular expression (match nothing).
@@ -120,7 +122,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->SourceGroups = mf.SourceGroups;
 #endif
 
-  this->Definitions = mf.Definitions;
+  this->DefinitionStack.push_back(mf.DefinitionStack.back());
   this->LocalGenerator = mf.LocalGenerator;
   this->FunctionBlockers = mf.FunctionBlockers;
   this->DataMap = mf.DataMap;
@@ -1046,7 +1048,7 @@ void cmMakefile::InitializeFromParent()
   cmMakefile *parent = this->LocalGenerator->GetParent()->GetMakefile();
 
   // copy the definitions
-  this->Definitions = parent->Definitions;
+  this->DefinitionStack.front() = parent->DefinitionStack.back();
 
   // copy include paths
   this->IncludeDirectories = parent->IncludeDirectories;
@@ -1225,7 +1227,7 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 
   this->TemporaryDefinitionKey = name;
-  this->Definitions[this->TemporaryDefinitionKey] = value;
+  this->DefinitionStack.back()[this->TemporaryDefinitionKey] = value;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -1274,7 +1276,7 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
     }
   this->GetCacheManager()->AddCacheEntry(name, val, doc, type);
   // if there was a definition then remove it
-  this->Definitions.erase( DefinitionMap::key_type(name));
+  this->DefinitionStack.back().erase( DefinitionMap::key_type(name));
 }
 
 
@@ -1282,13 +1284,17 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 {
   if(value)
     {
-    this->Definitions.erase( DefinitionMap::key_type(name));
-    this->Definitions.insert(DefinitionMap::value_type(name, "ON"));
+    this->DefinitionStack.back()
+      .erase( DefinitionMap::key_type(name));
+    this->DefinitionStack.back()
+      .insert(DefinitionMap::value_type(name, "ON"));
     }
   else
     {
-    this->Definitions.erase( DefinitionMap::key_type(name));
-    this->Definitions.insert(DefinitionMap::value_type(name, "OFF"));
+    this->DefinitionStack.back()
+      .erase( DefinitionMap::key_type(name));
+    this->DefinitionStack.back()
+      .insert(DefinitionMap::value_type(name, "OFF"));
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -1319,7 +1325,7 @@ void cmMakefile::AddCacheDefinition(const char* name,
 
 void cmMakefile::RemoveDefinition(const char* name)
 {
-  this->Definitions.erase(DefinitionMap::key_type(name));
+  this->DefinitionStack.back().erase(DefinitionMap::key_type(name));
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -1653,8 +1659,9 @@ const char* cmMakefile::GetRequiredDefinition(const char* name) const
 bool cmMakefile::IsDefinitionSet(const char* name) const
 {
   const char* def = 0;
-  DefinitionMap::const_iterator pos = this->Definitions.find(name);
-  if(pos != this->Definitions.end())
+  DefinitionMap::const_iterator pos = 
+    this->DefinitionStack.back().find(name);
+  if(pos != this->DefinitionStack.back().end())
     {
     def = (*pos).second.c_str();
     }
@@ -1686,8 +1693,9 @@ const char* cmMakefile::GetDefinition(const char* name) const
     }
 #endif
   const char* def = 0;
-  DefinitionMap::const_iterator pos = this->Definitions.find(name);
-  if(pos != this->Definitions.end())
+  DefinitionMap::const_iterator pos = 
+    this->DefinitionStack.back().find(name);
+  if(pos != this->DefinitionStack.back().end())
     {
     def = (*pos).second.c_str();
     }
@@ -1708,8 +1716,9 @@ const char* cmMakefile::GetDefinition(const char* name) const
       {
       // are unknown access allowed
       DefinitionMap::const_iterator pos2 =
-        this->Definitions.find("CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS");
-      if (pos2 != this->Definitions.end() &&
+        this->DefinitionStack.back()
+        .find("CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS");
+      if (pos2 != this->DefinitionStack.back().end() &&
           cmSystemTools::IsOn((*pos2).second.c_str()))
         {
         vv->VariableAccessed(name,
@@ -1743,8 +1752,8 @@ std::vector<std::string> cmMakefile
   if ( !cacheonly )
     {
     DefinitionMap::const_iterator it;
-    for ( it = this->Definitions.begin();
-          it != this->Definitions.end(); it ++ )
+    for ( it = this->DefinitionStack.back().begin();
+          it != this->DefinitionStack.back().end(); it ++ )
       {
       definitions[it->first] = 1;
       }
@@ -2821,6 +2830,38 @@ std::string cmMakefile::GetListFileStack()
     }
   return tmp.str();
 }
+
+
+void cmMakefile::PushScope()
+{
+  this->DefinitionStack.push_back(this->DefinitionStack.back());
+}
+
+void cmMakefile::PopScope()
+{
+  this->DefinitionStack.pop_back();
+}
+
+void cmMakefile::RaiseScope(const char *var)
+{
+  const char *varDef = this->GetDefinition(var);
+
+  // multiple scopes in this directory?
+  if (this->DefinitionStack.size() > 1)
+    {
+    this->DefinitionStack[this->DefinitionStack.size()-2][var] = varDef;
+    }
+  // otherwise do the parent
+  else
+    {
+    cmMakefile *parent = this->LocalGenerator->GetParent()->GetMakefile();
+    if (parent)
+      {
+      parent->AddDefinition(var,varDef);
+      }
+    }
+}
+
 
 // define properties
 void cmMakefile::DefineProperties(cmake *cm)

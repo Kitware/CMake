@@ -36,7 +36,9 @@
 #include "cmElseCommand.cxx"
 #include "cmEnableTestingCommand.cxx"
 #include "cmEndForEachCommand.cxx"
+#include "cmEndFunctionCommand.cxx"
 #include "cmEndIfCommand.cxx"
+#include "cmEndMacroCommand.cxx"
 #include "cmExecProgramCommand.cxx"
 #include "cmExternalMakefileProjectGenerator.cxx"
 #include "cmFindBase.cxx"
@@ -47,6 +49,7 @@
 #include "cmFindPathCommand.cxx"
 #include "cmFindProgramCommand.cxx"
 #include "cmForEachCommand.cxx"
+#include "cmFunctionCommand.cxx"
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
 #include "cmGetSourceFilePropertyCommand.cxx"
@@ -66,6 +69,7 @@
 #include "cmMessageCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmProjectCommand.cxx"
+#include "cmRaiseScopeCommand.cxx"
 #include "cmSetCommand.cxx"
 #include "cmSetPropertiesCommand.cxx"
 #include "cmSetSourceFilesPropertiesCommand.cxx"
@@ -95,7 +99,9 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmElseCommand);
   commands.push_back(new cmEnableTestingCommand);  
   commands.push_back(new cmEndForEachCommand);
+  commands.push_back(new cmEndFunctionCommand);
   commands.push_back(new cmEndIfCommand);
+  commands.push_back(new cmEndMacroCommand);
   commands.push_back(new cmExecProgramCommand);
   commands.push_back(new cmFileCommand);
   commands.push_back(new cmFindFileCommand);
@@ -104,6 +110,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmFindPathCommand);
   commands.push_back(new cmFindProgramCommand);
   commands.push_back(new cmForEachCommand);
+  commands.push_back(new cmFunctionCommand);
   commands.push_back(new cmGetCMakePropertyCommand);
   commands.push_back(new cmGetFilenameComponentCommand);
   commands.push_back(new cmGetSourceFilePropertyCommand);
@@ -122,6 +129,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmMessageCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmProjectCommand);
+  commands.push_back(new cmRaiseScopeCommand);
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSetPropertiesCommand);
   commands.push_back(new cmSetSourceFilesPropertiesCommand);
