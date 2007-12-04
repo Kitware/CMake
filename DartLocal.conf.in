@@ -73,7 +73,6 @@ ExpectedBuilds: \
 {RogueResearch4 Mac10.5-CMake-gcc-dbg-i386} \
 {RogueResearch4 Mac10.5-CMake-gcc-dbg-rosetta} \
 {RogueResearch4 Mac10.5-CMake-gcc-rel-i386} \
-{Superior WIN32-BCB-5.8} \
 {tick.rz.uni-augsburg.de LinuxPPC-g++3.3} \
 {tick.rz.uni-augsburg.de LinuxPPC-g++3.4} \
 {trinsic.kitware Win32-mingw} \
