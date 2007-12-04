@@ -915,16 +915,22 @@ const char* cmTarget::GetDirectory(const char* config)
 
 const char* cmTarget::GetLocation(const char* config)
 {
-  this->Location = this->GetDirectory();
+  this->Location = this->GetDirectory(config);
   if(!this->Location.empty())
     {
     this->Location += "/";
     }
-  const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
-  if(cfgid && strcmp(cfgid, ".") != 0)
+  if(!config)
     {
-    this->Location += cfgid;
-    this->Location += "/";
+     // No specific configuration was given so it will not appear on
+     // the result of GetDirectory.  Add a name here to be replaced at
+     // build time.
+    const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
+    if(cfgid && strcmp(cfgid, ".") != 0)
+      {
+      this->Location += cfgid;
+      this->Location += "/";
+       }
     }
   this->Location += this->GetFullName(config, false);
   return this->Location.c_str();

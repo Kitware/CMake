@@ -1,3 +1,9 @@
+Changes in CMake 2.4.8 RC 3
+* fix for bug 5363: GET_TARGET_PROPERTY(... DEBUG_LOCATION) 
+  returns value containing $(OutDir)
+* Better error from ctest if nightly time not set
+* Fix for exception handling flags in VS 2003 and up
+* Avoid relinking exclude-from-all directory targets before install
 Changes in CMake 2.4.8 RC 2
 * fix for bug 5590 relative paths in windows not working across drives
 * fix warning/error with TAR_VERBOSE flag
@@ -22,11 +28,9 @@ Changes in CMake 2.4.8 RC 1
 Changes in CMake 2.4.7
 --- RC 11 ----
 * Fix bug 5238 for cygwin versioned executables 
-
-* Allow for platform choice of executable shared libs install
-
+* Fix bug 4805 Allow for platform choice of executable
+   shared libs install
 * Fix @ONLY issues with RC 10
-
 * Add -E make_directory to cmake executable
 --- RC 10 ----
 * Fix rebuild problem with makefiles and cmake vs CMakeSetup 

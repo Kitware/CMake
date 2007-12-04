@@ -258,6 +258,12 @@ static cmVS7FlagTable cmVS8ExtraFlagTable[] =
   {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
    cmVS7FlagTable::UserValueRequired},
   // There is no YX option in the VS8 IDE.
+
+  // Exception handling mode.  If no entries match, it will be FALSE.
+  {"ExceptionHandling", "GX", "enable c++ exceptions", "1", 0},
+  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "1", 0},
+  {"ExceptionHandling", "EHa", "enable SEH exceptions", "2", 0},
+
   {0,0,0,0,0}
 };
 cmVS7FlagTable const* cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8()
