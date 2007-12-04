@@ -222,7 +222,7 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
          << i->c_str() << " " << m.c_str() << ".mod.stamp\n";
       }
-    makeDepends << "\t@touch " << obj << ".provides.build\n";
+    makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj << ".provides.build\n";
     }
 
   /*
