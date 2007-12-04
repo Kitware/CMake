@@ -865,7 +865,7 @@ bool SystemTools::Touch(const char* filename, bool create)
     }
   struct utimbuf buf;
   buf.actime = fromStat.st_atime;
-  buf.modtime = SystemTools::GetTime();
+  buf.modtime = static_cast<time_t>(SystemTools::GetTime());
   if(utime(filename, &buf) < 0)
     {
     return false;
