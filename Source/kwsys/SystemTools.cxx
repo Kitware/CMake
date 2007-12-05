@@ -4265,7 +4265,7 @@ bool SystemTools::ParseURLProtocol( const kwsys_stl::string& URL,
   // match 0 entire url
   // match 1 protocol
   // match 2 dataglom following protocol://
-  vtksys::RegularExpression urlRe( VTK_URL_PROTOCOL_REGEX );
+  kwsys::RegularExpression urlRe( VTK_URL_PROTOCOL_REGEX );
 
   if ( ! urlRe.find( URL ) ) return false;
 
@@ -4284,7 +4284,7 @@ bool SystemTools::ParseURL( const kwsys_stl::string& URL,
                             kwsys_stl::string& dataport, 
                             kwsys_stl::string& database )
 {
-  vtksys::RegularExpression urlRe( VTK_URL_PROTOCOL_REGEX );
+  kwsys::RegularExpression urlRe( VTK_URL_PROTOCOL_REGEX );
   if ( ! urlRe.find( URL ) ) return false;
 
   // match 0 URL
