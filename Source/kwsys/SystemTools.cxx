@@ -12,6 +12,7 @@
 
 =========================================================================*/
 #include "kwsysPrivate.h"
+#include KWSYS_HEADER(RegularExpression.hxx)
 #include KWSYS_HEADER(SystemTools.hxx)
 #include KWSYS_HEADER(Directory.hxx)
 
@@ -76,11 +77,15 @@
 # define HAVE_TTY_INFO 1
 #endif
 
+#define VTK_URL_PROTOCOL_REGEX "([a-zA-Z0-9]*)://(.*)"
+#define VTK_URL_REGEX "([a-zA-Z0-9]*)://(([A-Za-z]+)(:([^:@]+))?@)?([^:@/]+)(:([0-9]+))?/(.+)?";
+
 #ifdef _MSC_VER
 #include <sys/utime.h>
 #else
 #include <utime.h>
 #endif
+
 
 // This is a hack to prevent warnings about these functions being
 // declared but not referenced.
@@ -4252,6 +4257,58 @@ kwsys_stl::string SystemTools::GetOperatingSystemNameAndVersion()
   return res;
 }
 
+// ----------------------------------------------------------------------
+bool SystemTools::ParseURLProtocol( const kwsys_stl::string& URL, 
+                                    kwsys_stl::string& protocol,
+                                    kwsys_stl::string& dataglom )
+{
+  // match 0 entire url
+  // match 1 protocol
+  // match 2 dataglom following protocol://
+  vtksys::RegularExpression urlRe( VTK_URL_PROTOCOL_REGEX );
+
+  if ( ! urlRe.find( URL ) ) return false;
+
+  protocol = urlRe.match( 1 );
+  dataglom = urlRe.match( 2 );
+
+  return true;
+}
+
+// ----------------------------------------------------------------------
+bool SystemTools::ParseURL( const kwsys_stl::string& URL, 
+                            kwsys_stl::string& protocol,
+                            kwsys_stl::string& username, 
+                            kwsys_stl::string& password, 
+                            kwsys_stl::string& hostname, 
+                            kwsys_stl::string& dataport, 
+                            kwsys_stl::string& database )
+{
+  vtksys::RegularExpression urlRe( VTK_URL_PROTOCOL_REGEX );
+  if ( ! urlRe.find( URL ) ) return false;
+
+  // match 0 URL
+  // match 1 protocol
+  // match 2 mangled user
+  // match 3 username
+  // match 4 mangled password
+  // match 5 password
+  // match 6 hostname
+  // match 7 mangled port
+  // match 8 dataport
+  // match 9 database name
+
+  protocol = urlRe.match( 1 );
+  username = urlRe.match( 3 );
+  password = urlRe.match( 5 );
+  hostname = urlRe.match( 6 );
+  dataport = urlRe.match( 8 );
+  database = urlRe.match( 9 );
+  
+  return true;
+}
+
+// ----------------------------------------------------------------------
 // These must NOT be initialized.  Default initialization to zero is
 // necessary.
 unsigned int SystemToolsManagerCount;

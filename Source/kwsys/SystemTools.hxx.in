@@ -783,6 +783,36 @@ public:
   static void ConvertWindowsCommandLineToUnixArguments(
     const char *cmd_line, int *argc, char ***argv);
 
+  /** -----------------------------------------------------------------
+   *               URL Manipulation Routines
+   *  -----------------------------------------------------------------
+   */
+
+  /**
+   * Parse a character string :
+   *       protocol://dataglom
+   * and fill protocol as appropriate.
+   * Return false if the URL does not have the required form, true otherwise.
+   */
+   static bool ParseURLProtocol( const kwsys_stl::string& URL,
+                                 kwsys_stl::string& protocol,
+                                 kwsys_stl::string& dataglom );
+
+  /**
+   * Parse a string (a URL without protocol prefix) with the form:
+   *  protocol://[[username[':'password]'@']hostname[':'dataport]]'/'[datapath]
+   * and fill protocol, username, password, hostname, dataport, and datapath
+   * when values are found.
+   * Return true if the string matches the format; false otherwise.
+   */
+  static bool ParseURL( const kwsys_stl::string& URL,
+                        kwsys_stl::string& protocol, 
+                        kwsys_stl::string& username, 
+                        kwsys_stl::string& password, 
+                        kwsys_stl::string& hostname, 
+                        kwsys_stl::string& dataport, 
+                        kwsys_stl::string& datapath );
+
 private:
   /**
    * Allocate the std::map that serve as the Path Translation table.
