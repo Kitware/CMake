@@ -1,3 +1,5 @@
+Changes in CMake 2.4.8 RC 4
+* fix for cpack and messing up PATH with NSIS
 Changes in CMake 2.4.8 RC 3
 * fix for bug 5363: GET_TARGET_PROPERTY(... DEBUG_LOCATION) 
   returns value containing $(OutDir)
