@@ -365,7 +365,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
   {"LinkIncremental", "INCREMENTAL:NO", "link incremental", "1", 0},
   {"LinkIncremental", "INCREMENTAL:YES", "link incremental", "2", 0},
   {"IgnoreDefaultLibraryNames", "NODEFAULTLIB:", "default libs to ignore", "",
-   cmVS7FlagTable::UserValue},
+  cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
   {"IgnoreAllDefaultLibraries", "NODEFAULTLIB", "ignore all default libs",
    "TRUE", 0},
   {"ModuleDefinitionFile", "DEF:", "add an export def file", "",
@@ -1807,6 +1807,23 @@ cmLocalVisualStudio7GeneratorOptions
           // Ignore the user-specified value.
           this->FlagMap[entry->IDEName] = entry->value;
           }
+        else if(entry->special & cmVS7FlagTable::SemicolonAppendable)
+          {
+          const char *new_value = flag+1+n;
+
+          std::map<cmStdString,cmStdString>::iterator itr;
+          itr = this->FlagMap.find(entry->IDEName);
+          if(itr != this->FlagMap.end())
+            {
+            // Append to old value (if present) with semicolons;
+            itr->second += ";";
+            itr->second += new_value;
+            }
+          else
+            {
+              this->FlagMap[entry->IDEName] = new_value;
+            }
+        }
         else
           {
           // Use the user-specified value.
