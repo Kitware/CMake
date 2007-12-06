@@ -78,7 +78,7 @@
 #endif
 
 #define VTK_URL_PROTOCOL_REGEX "([a-zA-Z0-9]*)://(.*)"
-#define VTK_URL_REGEX "([a-zA-Z0-9]*)://(([A-Za-z]+)(:([^:@]+))?@)?([^:@/]+)(:([0-9]+))?/(.+)?";
+#define VTK_URL_REGEX "([a-zA-Z0-9]*)://(([A-Za-z]+)(:([^:@]+))?@)?([^:@/]+)(:([0-9]+))?/(.+)?"
 
 #ifdef _MSC_VER
 #include <sys/utime.h>
@@ -4284,7 +4284,7 @@ bool SystemTools::ParseURL( const kwsys_stl::string& URL,
                             kwsys_stl::string& dataport, 
                             kwsys_stl::string& database )
 {
-  kwsys::RegularExpression urlRe( VTK_URL_PROTOCOL_REGEX );
+  kwsys::RegularExpression urlRe( VTK_URL_REGEX );
   if ( ! urlRe.find( URL ) ) return false;
 
   // match 0 URL
