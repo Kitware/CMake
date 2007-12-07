@@ -8,7 +8,7 @@ add_executable (COnly conly.c foo.c foo.h)
 target_link_libraries(COnly testc1 testc2)
 if(MSVC_VERSION)
   set_target_properties(COnly PROPERTIES
-    LINK_FLAGS " /NODEFAULTLIB:\"libc.lib\" /NODEFAULTLIB:\"libcmt.lib\" /NODEFAULTLIB:\"msvcrt.lib\" /NODEFAULTLIB:\"libcd.lib\" /NODEFAULTLIB:\"libcmtd.lib\"")
+    LINK_FLAGS " /NODEFAULTLIB:\"libcdg.lib\" /NODEFAULTLIB:\"libcmtg.lib\" /NODEFAULTLIB:\"foomsvcrt.lib\" /NODEFAULTLIB:\"libbar.lib\" /NODEFAULTLIB:\"libfooba.lib\"")
 endif(MSVC_VERSION)
 string(ASCII 35 32 67 77 97 107 101 ASCII_STRING)
 message(STATUS "String: ${ASCII_STRING}")
