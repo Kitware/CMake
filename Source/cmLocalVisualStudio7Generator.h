@@ -140,7 +140,8 @@ struct cmVS7FlagTable
     SemicolonAppendable = (1<<4), // a flag that if specified multiple times
                                   // should have its value appended to the
                                   // old value with semicolons (e.g.
-                                  // /NODEFAULTLIB: => IgnoreDefaultLibraryNames)
+                                  // /NODEFAULTLIB: => 
+                                  // IgnoreDefaultLibraryNames)
 
     UserValueIgnored  = UserValue | UserIgnored,
     UserValueRequired = UserValue | UserRequired
