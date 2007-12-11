@@ -136,6 +136,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_Terminal 1)
   SET(KWSYS_USE_IOStream 1)
   SET(KWSYS_USE_DateStamp 1)
+  SET(KWSYS_USE_String 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
 # Setup the large file support default.
@@ -640,7 +641,7 @@ FOREACH(cpp ${cppclasses})
 ENDFOREACH(cpp)
 
 # Add selected C components.
-FOREACH(c Process Base64 FundamentalType MD5 Terminal System DateStamp)
+FOREACH(c Process Base64 FundamentalType MD5 Terminal System DateStamp String)
   IF(KWSYS_USE_${c})
     # Use the corresponding header file.
     SET(KWSYS_H_FILES ${KWSYS_H_FILES} ${c})
@@ -683,7 +684,7 @@ IF(KWSYS_USE_Process)
 ENDIF(KWSYS_USE_Process)
 
 # Add selected C sources.
-FOREACH(c Base64 MD5 Terminal System)
+FOREACH(c Base64 MD5 Terminal System String)
   IF(KWSYS_USE_${c})
     SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ${c}.c)
   ENDIF(KWSYS_USE_${c})
