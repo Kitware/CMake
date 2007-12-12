@@ -580,8 +580,8 @@ void CMakeSetupDialog::addBinaryPath(const QString& path)
 
 void CMakeSetupDialog::dragEnterEvent(QDragEnterEvent* e)
 {
-  if(this->CurrentState != ReadyConfigure || 
-     this->CurrentState != ReadyGenerate)
+  if(!(this->CurrentState == ReadyConfigure || 
+     this->CurrentState == ReadyGenerate))
     {
     e->ignore();
     return;
@@ -604,8 +604,8 @@ void CMakeSetupDialog::dragEnterEvent(QDragEnterEvent* e)
 
 void CMakeSetupDialog::dropEvent(QDropEvent* e)
 {
-  if(this->CurrentState != ReadyConfigure || 
-     this->CurrentState != ReadyGenerate)
+  if(!(this->CurrentState == ReadyConfigure || 
+     this->CurrentState == ReadyGenerate))
     {
     return;
     }
