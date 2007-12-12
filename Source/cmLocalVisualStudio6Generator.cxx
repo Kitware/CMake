@@ -588,6 +588,11 @@ cmLocalVisualStudio6Generator
   std::vector<std::string>::iterator i;
   for(i = this->Configurations.begin(); i != this->Configurations.end(); ++i)
     {
+    // Strip the subdirectory name out of the configuration name.
+    std::string config = *i;
+    std::string::size_type pos = config.find_last_of(" ");
+    config = config.substr(pos+1, std::string::npos);
+    config = config.substr(0, config.size()-1);
     if (i == this->Configurations.begin())
       {
       fout << "!IF  \"$(CFG)\" == " << i->c_str() << std::endl;
@@ -606,7 +611,8 @@ cmLocalVisualStudio6Generator
         d != depends.end(); ++d)
       {
       // Lookup the real name of the dependency in case it is a CMake target.
-      std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
+      std::string dep = this->GetRealDependency(d->c_str(),
+                                                config.c_str());
       fout << "\\\n\t" <<
         this->ConvertToOptionallyRelativeOutputPath(dep.c_str());
       }

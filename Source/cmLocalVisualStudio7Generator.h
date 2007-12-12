@@ -144,7 +144,11 @@ struct cmVS7FlagTable
     UserIgnored  = (1<<1), // ignore any user value
     UserRequired = (1<<2), // match only when user value is non-empty
     Continue     = (1<<3), // continue looking for matching entries
-
+    SemicolonAppendable = (1<<4), // a flag that if specified multiple times
+                                  // should have its value appended to the
+                                  // old value with semicolons (e.g.
+                                  // /NODEFAULTLIB: => 
+                                  // IgnoreDefaultLibraryNames)
     UserValueIgnored  = UserValue | UserIgnored,
     UserValueRequired = UserValue | UserRequired
   };

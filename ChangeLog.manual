@@ -1,3 +1,11 @@
+Changes in CMake 2.4.8 RC 5
+* Fix bug 6106 FindPerlLibs.cmake missing escaped $
+* Allow NODEFAULTLIBS to have more than one value
+* Suppress regeneration of makefiles during try compile avoid infinite
+  loop in trycompile with some vs 2005 builds.
+* Rest of Fix for fix 5363, removes warning on vs 6
+* Allow for debug libraries in InstallRequiredSystemLibraries.cmake for vs8
+* Fix for bug 4605 JavaEmbedding.framework should not be used.
 Changes in CMake 2.4.8 RC 4
 * fix for cpack and messing up PATH with NSIS
 Changes in CMake 2.4.8 RC 3

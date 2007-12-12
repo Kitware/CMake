@@ -6,7 +6,7 @@
 #  JAVA_AWT_LIB_PATH     = the path to the jawt library
 #  JAVA_JVM_LIB_PATH     = the path to the jvm library
 #  JAVA_INCLUDE_PATH     = the include path to jni.h
-#  JAVA_INCLUDE_PATH2    = the include path to jni.h
+#  JAVA_INCLUDE_PATH2    = the include path to jni_md.h
 #  JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
 # 
 
@@ -79,17 +79,33 @@ IF(APPLE)
   IF(EXISTS /Library/Frameworks/JavaVM.framework)
     SET(JAVA_HAVE_FRAMEWORK 1)
   ENDIF(EXISTS /Library/Frameworks/JavaVM.framework)
+  IF(EXISTS /System/Library/Frameworks/JavaVM.framework)
+    SET(JAVA_HAVE_FRAMEWORK 1)
+  ENDIF(EXISTS /System/Library/Frameworks/JavaVM.framework)
+
   IF(JAVA_HAVE_FRAMEWORK)
     IF(NOT JAVA_AWT_LIBRARY)
       SET (JAVA_AWT_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
     ENDIF(NOT JAVA_AWT_LIBRARY)
+
     IF(NOT JAVA_JVM_LIBRARY)
       SET (JAVA_JVM_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
     ENDIF(NOT JAVA_JVM_LIBRARY)
-    SET(JAVA_AWT_INCLUDE_DIRECTORIES ${JAVA_AWT_INCLUDE_DIRECTORIES}
+
+    IF(NOT JAVA_AWT_INCLUDE_PATH)
+      IF(EXISTS /System/Library/Frameworks/JavaVM.framework/Headers/jawt.h)
+        SET (JAVA_AWT_INCLUDE_PATH "/System/Library/Frameworks/JavaVM.framework/Headers" CACHE FILEPATH "jawt.h location" FORCE)
+      ENDIF(EXISTS /System/Library/Frameworks/JavaVM.framework/Headers/jawt.h)
+    ENDIF(NOT JAVA_AWT_INCLUDE_PATH)
+
+    # If using "-framework JavaVM", prefer its headers *before* the others in
+    # JAVA_AWT_INCLUDE_DIRECTORIES... (*prepend* to the list here)
+    #
+    SET(JAVA_AWT_INCLUDE_DIRECTORIES
       ~/Library/Frameworks/JavaVM.framework/Headers
       /Library/Frameworks/JavaVM.framework/Headers
       /System/Library/Frameworks/JavaVM.framework/Headers
+      ${JAVA_AWT_INCLUDE_DIRECTORIES}
       )
   ENDIF(JAVA_HAVE_FRAMEWORK)
 ELSE(APPLE)
@@ -113,7 +129,9 @@ FIND_PATH(JAVA_INCLUDE_PATH2 jni_md.h
 )
 
 FIND_PATH(JAVA_AWT_INCLUDE_PATH jawt.h 
-          ${JAVA_AWT_INCLUDE_DIRECTORIES} ${JAVA_INCLUDE_PATH} )
+  ${JAVA_AWT_INCLUDE_DIRECTORIES}
+  ${JAVA_INCLUDE_PATH}
+)
 
 MARK_AS_ADVANCED(
   JAVA_AWT_LIBRARY
