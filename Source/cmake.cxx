@@ -224,7 +224,7 @@ void cmake::CleanupCommandsAndMacros()
   for(RegisteredCommandsMap::iterator j = this->Commands.begin();
       j != this->Commands.end(); ++j)
     {
-    if ( !j->second->IsA("cmMacroHelperCommand") && 
+    if ( !j->second->IsA("cmMacroHelpperCommand") && 
          !j->second->IsA("cmFunctionHelperCommand"))
       {
       commands.push_back(j->second);
@@ -1793,8 +1793,78 @@ int cmake::DoPreConfigureChecks()
     }
   return 1;
 }
+struct SaveCacheEntry
+{
+  std::string key;
+  std::string value;
+  std::string help;
+  cmCacheManager::CacheEntryType type;
+};
+
+int cmake::HandleDeleteCacheVariables(const char* var)
+{
+  std::vector<std::string> argsSplit;
+  cmSystemTools::ExpandListArgument(std::string(var), argsSplit);
+  // erase the property to avoid infinite recursion
+  this->SetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
+
+  cmCacheManager::CacheIterator ci = this->CacheManager->NewIterator();
+  std::vector<SaveCacheEntry> saved;
+  cmOStringStream warning;
+  warning 
+    << "You have changed variables that require your cache to be deleted.\n"
+    << "Configure will be re-run and you may have to reset some variables.\n"
+    << "The following variables have changed:\n";
+  for(std::vector<std::string>::iterator i = argsSplit.begin();
+      i != argsSplit.end(); ++i)
+    { 
+    SaveCacheEntry save;
+    save.key = *i;
+    warning << *i << "= ";
+    i++;
+    save.value = *i;
+    warning << *i << "\n";
+    if(ci.Find(save.key.c_str()))
+      {
+      save.type = ci.GetType();
+      save.help = ci.GetProperty("HELPSTRING");
+      }
+    saved.push_back(save);
+    }
+  
+  // remove the cache
+  this->CacheManager->DeleteCache(this->GetStartOutputDirectory());
+  // load the empty cache
+  this->LoadCache();
+  // restore the changed compilers
+  for(std::vector<SaveCacheEntry>::iterator i = saved.begin();
+      i != saved.end(); ++i)
+    {
+    this->AddCacheEntry(i->key.c_str(), i->value.c_str(),
+                        i->help.c_str(), i->type);
+    }
+  cmSystemTools::Message(warning.str().c_str());
+  // avoid reconfigure if there were errors
+  if(!cmSystemTools::GetErrorOccuredFlag())
+    {
+    // re-run configure
+    return this->Configure();
+    }
+}
 
 int cmake::Configure()
+{
+  int ret = this->ActualConfigure();
+  const char* delCacheVars = this->GetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
+  if(delCacheVars && delCacheVars[0] != 0)
+    {
+    return this->HandleDeleteCacheVariables(delCacheVars);
+    }
+  return ret;
+
+}
+
+int cmake::ActualConfigure()
 {
   // Construct right now our path conversion table before it's too late:
   this->UpdateConversionPathTable();
@@ -1955,7 +2025,6 @@ int cmake::Configure()
 
   // actually do the configure
   this->GlobalGenerator->Configure();
-  
   // Before saving the cache
   // if the project did not define one of the entries below, add them now
   // so users can edit the values in the cache:

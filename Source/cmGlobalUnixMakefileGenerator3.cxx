@@ -63,7 +63,7 @@ void cmGlobalUnixMakefileGenerator3
                            " not set, after EnableLanguage");
       continue;
       }
-    const char* name = mf->GetRequiredDefinition(langComp.c_str());
+    const char* name = mf->GetRequiredDefinition(langComp.c_str()); 
     if(!cmSystemTools::FileIsFullPath(name))
       {
       path = cmSystemTools::FindProgram(name);
@@ -87,6 +87,26 @@ void cmGlobalUnixMakefileGenerator3
       }
     std::string doc = lang;
     doc += " compiler.";
+    const char* cname = this->GetCMakeInstance()->
+      GetCacheManager()->GetCacheValue(langComp.c_str());
+    std::string changeVars;
+    if(cname && (path != cname))
+      {
+      const char* cvars = 
+        this->GetCMakeInstance()->GetProperty(
+          "__CMAKE_DELETE_CACHE_CHANGE_VARS_");
+      if(cvars)
+        {
+        changeVars += cvars;
+        changeVars += ";";
+        }
+      changeVars += langComp;
+      changeVars += ";";
+      changeVars += cname;
+      this->GetCMakeInstance()->SetProperty(
+        "__CMAKE_DELETE_CACHE_CHANGE_VARS_",
+        changeVars.c_str());
+      }
     mf->AddCacheDefinition(langComp.c_str(), path.c_str(),
                            doc.c_str(), cmCacheManager::FILEPATH);
     }

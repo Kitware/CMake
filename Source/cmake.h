@@ -142,6 +142,7 @@ class cmake
    * files for the tree. It will not produce any actual Makefiles, or
    * workspaces. Generate does that.  */
   int Configure();
+  int ActualConfigure();
 
   /**
    * Configure the cmMakefiles. This routine will create a GlobalGenerator if
@@ -328,6 +329,7 @@ class cmake
   static void DefineProperties(cmake *cm);
 
 protected:
+  int HandleDeleteCacheVariables(const char* var);
   cmPropertyMap Properties;
   std::set<std::pair<cmStdString,cmProperty::ScopeType> > AccessedProperties;
 

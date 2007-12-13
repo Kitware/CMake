@@ -236,6 +236,18 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
   // write language flags for target
   std::set<cmStdString> languages;
   this->Target->GetLanguages(languages);
+    // put the compiler in the rules.make file so that if it changes
+  // things rebuild
+  for(std::set<cmStdString>::const_iterator l = languages.begin();
+      l != languages.end(); ++l)
+    {
+    cmStdString compiler = "CMAKE_";
+    compiler += *l;
+    compiler += "_COMPILER";
+    *this->FlagFileStream << "# compile " << l->c_str() << " with " << 
+      this->Makefile->GetSafeDefinition(compiler.c_str()) << "\n";
+    }
+
   for(std::set<cmStdString>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
