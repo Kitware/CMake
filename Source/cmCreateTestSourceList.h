@@ -73,7 +73,7 @@ public:
       "the arguments consist of a list of test source files, can be "
       "semicolon separated.  Each test source file should have a function in "
       "it that is the same name as the file with no extension (foo.cxx "
-      "should have int foo();) DriverName will be able to call each of the "
+      "should have int foo(int, char*[]);) DriverName will be able to call each of the "
       "tests by name on the command line. If EXTRA_INCLUDE is specified, "
       "then the next argument is included into the generated file. If "
       "FUNCTION is specified, then the next argument is taken as a function "
