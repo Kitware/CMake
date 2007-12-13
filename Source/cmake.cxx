@@ -224,7 +224,7 @@ void cmake::CleanupCommandsAndMacros()
   for(RegisteredCommandsMap::iterator j = this->Commands.begin();
       j != this->Commands.end(); ++j)
     {
-    if ( !j->second->IsA("cmMacroHelpperCommand") && 
+    if ( !j->second->IsA("cmMacroHelperCommand") &&
          !j->second->IsA("cmFunctionHelperCommand"))
       {
       commands.push_back(j->second);
