@@ -1810,6 +1810,7 @@ int cmake::HandleDeleteCacheVariables(const char* var)
     // re-run configure
     return this->Configure();
     }
+  return 0;
 }
 
 int cmake::Configure()
