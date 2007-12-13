@@ -168,7 +168,7 @@ static const char * cmDocumentationOptions[][3] =
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML and plain text."},
-  {"--help-Variable-list [file]", "List documented variables and exit.",
+  {"--help-variable-list [file]", "List documented variables and exit.",
    "The list contains all variables for which help may be obtained by using "
    "the --help-variable argument followed by a variable name.  If a file is "
    "specified, the help is written into it."
