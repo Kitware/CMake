@@ -1810,7 +1810,7 @@ cmLocalVisualStudio7GeneratorOptions
         else if(entry->special & cmVS7FlagTable::SemicolonAppendable)
           {
           const char *new_value = flag+1+n;
-
+          
           std::map<cmStdString,cmStdString>::iterator itr;
           itr = this->FlagMap.find(entry->IDEName);
           if(itr != this->FlagMap.end())
@@ -1821,9 +1821,9 @@ cmLocalVisualStudio7GeneratorOptions
             }
           else
             {
-              this->FlagMap[entry->IDEName] = new_value;
+            this->FlagMap[entry->IDEName] = new_value;
             }
-        }
+          }
         else
           {
           // Use the user-specified value.
@@ -1838,18 +1838,18 @@ cmLocalVisualStudio7GeneratorOptions
       this->FlagMap[entry->IDEName] = entry->value;
       entry_found = true;
       }
-
+    
     // If the flag has been handled by an entry not requesting a
     // search continuation we are done.
     if(entry_found && !(entry->special & cmVS7FlagTable::Continue))
       {
       return true;
       }
-
+    
     // If the entry was found the flag has been handled.
     flag_handled = flag_handled || entry_found;
     }
-
+  
   return false;
 }
 
