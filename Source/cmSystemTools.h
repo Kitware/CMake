@@ -350,6 +350,14 @@ public:
       the first argument to that named by the second.  */
   static bool CopyFileTime(const char* fromFile, const char* toFile);
 
+  /** Find the directory containing the running executable.  Save it
+   in a global location to be queried by GetExecutableDirectory
+   later.  */
+  static void FindExecutableDirectory(const char* argv0);
+
+  /** Get the directory containing the currently running executable.  */
+  static const char* GetExecutableDirectory();
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

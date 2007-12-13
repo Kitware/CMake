@@ -21,6 +21,7 @@
 
 #include "CMakeSetupDialog.h"
 #include "cmDocumentation.h"
+#include "cmSystemTools.h"
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
@@ -61,6 +62,7 @@ static const char * cmDocumentationOptions[][3] =
 
 int main(int argc, char** argv)
 {
+  cmSystemTools::FindExecutableDirectory(argv[0]);
   QApplication app(argc, argv);
   app.setApplicationName("CMakeSetup");
   app.setOrganizationName("Kitware");
@@ -72,7 +74,7 @@ int main(int argc, char** argv)
     {
     // Construct and print requested documentation.
     cmake hcm;
-    hcm.AddCMakePaths(app.argv()[0]);
+    hcm.AddCMakePaths();
     doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
     std::vector<cmDocumentationEntry> commands;
     std::vector<cmDocumentationEntry> compatCommands;

@@ -105,6 +105,7 @@ void CMakeErrorHandler(const char* message, const char* title, bool&, void* clie
 
 int main(int argc, char** argv)
 {
+  cmSystemTools::FindExecutableDirectory(argv[0]);
   cmDocumentation doc;
   if(doc.CheckOptions(argc, argv))
     {

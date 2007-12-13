@@ -121,6 +121,7 @@ int DumpForCoverage(const char* outname)
 int main(int ac, char** av)
 {
   cmSystemTools::EnableMSVCDebugHook();
+  cmSystemTools::FindExecutableDirectory(av[0]);
   const char* outname = "cmake.html";
   bool coverage = false;
   if(ac > 1)

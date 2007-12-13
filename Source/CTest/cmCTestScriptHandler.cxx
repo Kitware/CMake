@@ -293,7 +293,7 @@ void cmCTestScriptHandler::CreateCMake()
     delete this->LocalGenerator;
     }
   this->CMake = new cmake;
-  this->CMake->AddCMakePaths(this->CTest->GetCTestExecutable());
+  this->CMake->AddCMakePaths();
   this->GlobalGenerator = new cmGlobalGenerator;
   this->GlobalGenerator->SetCMakeInstance(this->CMake);
 

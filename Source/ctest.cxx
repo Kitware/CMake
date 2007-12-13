@@ -210,6 +210,7 @@ int main (int argc, char *argv[])
 {
   cmSystemTools::DoNotInheritStdPipes();
   cmSystemTools::EnableMSVCDebugHook();
+  cmSystemTools::FindExecutableDirectory(argv[0]);
   int nocwd = 0;
   cmCTest inst;
 

@@ -19,8 +19,11 @@
 #include "FL/Fl.H"
 #include "FL/fl_ask.H"
 
+#include "cmSystemTools.h"
+
 int main(int argc, char * argv[] ) 
 {
+  cmSystemTools::FindExecutableDirectory(argv[0]);
 
   fl_message_font(FL_HELVETICA,11);
 

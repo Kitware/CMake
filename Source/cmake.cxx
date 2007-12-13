@@ -739,56 +739,16 @@ void cmake::SetDirectoriesFromFile(const char* arg)
 
 // at the end of this CMAKE_ROOT and CMAKE_COMMAND should be added to the
 // cache
-int cmake::AddCMakePaths(const char *arg0)
+int cmake::AddCMakePaths()
 {
   // Find the cmake executable
-  std::vector<cmStdString> failures;
-  std::string cMakeSelf = arg0;
-  cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
-  if ((strstr(arg0, "cpack")!=0) || (strstr(arg0, "ctest")!=0))
-    {
-    // when called from cpack or ctest CMAKE_COMMAND would otherwise point
-    // to cpack or ctest and not cmake
-    cMakeSelf = cmSystemTools::GetFilenamePath(cMakeSelf) +
-      "/cmake" + cmSystemTools::GetFilenameExtension(cMakeSelf);
-    }
-  failures.push_back(cMakeSelf);
-  cMakeSelf = cmSystemTools::FindProgram(cMakeSelf.c_str());
-  cmSystemTools::ConvertToUnixSlashes(cMakeSelf);
-  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
-    {
-#ifdef CMAKE_BUILD_DIR
-  std::string intdir = ".";
-#ifdef  CMAKE_INTDIR
-  intdir = CMAKE_INTDIR;
-#endif
-  cMakeSelf = CMAKE_BUILD_DIR;
-  cMakeSelf += "/bin/";
-  cMakeSelf += intdir;
+  std::string cMakeSelf = cmSystemTools::GetExecutableDirectory();
   cMakeSelf += "/cmake";
   cMakeSelf += cmSystemTools::GetExecutableExtension();
-#endif
-    }
-#ifdef CMAKE_PREFIX
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
-    failures.push_back(cMakeSelf);
-    cMakeSelf = CMAKE_PREFIX "/bin/cmake";
-    }
-#endif
-  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
-    {
-    failures.push_back(cMakeSelf);
-    cmOStringStream msg;
-    msg << "CMAKE can not find the command line program cmake.\n";
-    msg << "  argv[0] = \"" << arg0 << "\"\n";
-    msg << "  Attempted paths:\n";
-    std::vector<cmStdString>::iterator i;
-    for(i=failures.begin(); i != failures.end(); ++i)
-      {
-      msg << "    \"" << i->c_str() << "\"\n";
-      }
-    cmSystemTools::Error(msg.str().c_str());
+    cmSystemTools::Error("CMake executable cannot be found at ",
+                         cMakeSelf.c_str());
     return 0;
     }
   // Save the value in the cache
@@ -2157,7 +2117,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     }
   else
     {
-    this->AddCMakePaths(this->CMakeCommand.c_str());
+    this->AddCMakePaths();
     }
 
   // Add any cache args
@@ -2376,7 +2336,7 @@ int cmake::LoadCache()
     }
 
   // setup CMAKE_ROOT and CMAKE_COMMAND
-  if(!this->AddCMakePaths(this->CMakeCommand.c_str()))
+  if(!this->AddCMakePaths())
     {
     return -3;
     }
@@ -3503,7 +3463,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
 
 
   // we have to find the module directory, so we can copy the files
-  this->AddCMakePaths(args[0].c_str());
+  this->AddCMakePaths();
   std::string modulesPath = 
     this->CacheManager->GetCacheValue("CMAKE_ROOT");
   modulesPath += "/Modules";

@@ -2064,3 +2064,26 @@ bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
 #endif
   return true;
 }
+
+//----------------------------------------------------------------------------
+static std::string cmSystemToolsExecutableDirectory;
+void cmSystemTools::FindExecutableDirectory(const char* argv0)
+{
+  std::string errorMsg;
+  std::string exe;
+  if(cmSystemTools::FindProgramPath(argv0, exe, errorMsg))
+    {
+    cmSystemToolsExecutableDirectory =
+      cmSystemTools::GetFilenamePath(exe.c_str());
+    }
+  else
+    {
+    // ???
+    }
+}
+
+//----------------------------------------------------------------------------
+const char* cmSystemTools::GetExecutableDirectory()
+{
+  return cmSystemToolsExecutableDirectory.c_str();
+}

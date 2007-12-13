@@ -7,6 +7,7 @@
 #include "CMakeCommandLineInfo.h" 
 #include "../cmDocumentation.h"
 #include "../cmake.h"
+#include "../cmSystemTools.h"
 
 
 //----------------------------------------------------------------------------
@@ -101,6 +102,7 @@ BOOL CMakeSetup::InitInstance()
 #endif
   CMakeCommandLineInfo cmdInfo;
   ParseCommandLine(cmdInfo);
+  cmSystemTools::FindExecutableDirectory(cmdInfo.GetArgV()[0]);
 
   // Check for documentation options.  If there are no arguments skip
   // the check because the GUI should be displayed instead of showing
@@ -111,7 +113,7 @@ BOOL CMakeSetup::InitInstance()
     {
     // Construct and print requested documentation.
     cmake hcm;
-    hcm.AddCMakePaths(cmdInfo.GetArgV()[0]);
+    hcm.AddCMakePaths();
     doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
     std::vector<cmDocumentationEntry> commands;
     std::vector<cmDocumentationEntry> compatCommands;

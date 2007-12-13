@@ -288,7 +288,7 @@ class cmake
   /**
    * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
    */
-  int AddCMakePaths(const char *arg0);
+  int AddCMakePaths();
 
   /**
    * Get the file comparison class

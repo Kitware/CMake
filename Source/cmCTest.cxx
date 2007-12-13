@@ -1774,7 +1774,7 @@ void cmCTest::HandleScriptArguments(size_t &i,
 // the main entry point of ctest, called from main
 int cmCTest::Run(std::vector<std::string> &args, std::string* output)
 {
-  this->FindRunningCMake(args[0].c_str());
+  this->FindRunningCMake();
   const char* ctestExec = "ctest";
   bool cmakeAndTest = false;
   bool performSomeTest = true;
@@ -1970,70 +1970,25 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
 }
 
 //----------------------------------------------------------------------
-void cmCTest::FindRunningCMake(const char* arg0)
+void cmCTest::FindRunningCMake()
 {
   // Find our own executable.
-  std::vector<cmStdString> failures;
-  this->CTestSelf = arg0;
-  cmSystemTools::ConvertToUnixSlashes(this->CTestSelf);
-  failures.push_back(this->CTestSelf);
-  this->CTestSelf = cmSystemTools::FindProgram(this->CTestSelf.c_str());
+  this->CTestSelf = cmSystemTools::GetExecutableDirectory();
+  this->CTestSelf += "/ctest";
+  this->CTestSelf += cmSystemTools::GetExecutableExtension();
   if(!cmSystemTools::FileExists(this->CTestSelf.c_str()))
     {
-    failures.push_back(this->CTestSelf);
-    this->CTestSelf =  "/usr/local/bin/ctest";
+    cmSystemTools::Error("CTest executable cannot be found at ",
+                         this->CTestSelf.c_str());
     }
-  if(!cmSystemTools::FileExists(this->CTestSelf.c_str()))
-    {
-    failures.push_back(this->CTestSelf);
-    cmOStringStream msg;
-    msg << "CTEST can not find the command line program ctest.\n";
-    msg << "  argv[0] = \"" << arg0 << "\"\n";
-    msg << "  Attempted paths:\n";
-    std::vector<cmStdString>::iterator i;
-    for(i=failures.begin(); i != failures.end(); ++i)
-      {
-      msg << "    \"" << i->c_str() << "\"\n";
-      }
-    cmSystemTools::Error(msg.str().c_str());
-    }
-  std::string dir;
-  std::string file;
-  if(cmSystemTools::SplitProgramPath(this->CTestSelf.c_str(),
-                                     dir, file, true))
-    {
-    this->CMakeSelf = dir += "/cmake";
-    this->CMakeSelf += cmSystemTools::GetExecutableExtension();
-    if(cmSystemTools::FileExists(this->CMakeSelf.c_str()))
-      {
-      return;
-      }
-    }
-  failures.push_back(this->CMakeSelf);
-#ifdef CMAKE_BUILD_DIR
-  std::string intdir = ".";
-#ifdef  CMAKE_INTDIR
-  intdir = CMAKE_INTDIR;
-#endif
-  this->CMakeSelf = CMAKE_BUILD_DIR;
-  this->CMakeSelf += "/bin/";
-  this->CMakeSelf += intdir;
+
+  this->CMakeSelf = cmSystemTools::GetExecutableDirectory();
   this->CMakeSelf += "/cmake";
   this->CMakeSelf += cmSystemTools::GetExecutableExtension();
-#endif
   if(!cmSystemTools::FileExists(this->CMakeSelf.c_str()))
     {
-    failures.push_back(this->CMakeSelf);
-    cmOStringStream msg;
-    msg << "CTEST can not find the command line program cmake.\n";
-    msg << "  argv[0] = \"" << arg0 << "\"\n";
-    msg << "  Attempted paths:\n";
-    std::vector<cmStdString>::iterator i;
-    for(i=failures.begin(); i != failures.end(); ++i)
-      {
-      msg << "    \"" << i->c_str() << "\"\n";
-      }
-    cmSystemTools::Error(msg.str().c_str());
+    cmSystemTools::Error("CMake executable cannot be found at ",
+                         this->CMakeSelf.c_str());
     }
 }
 
