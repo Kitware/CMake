@@ -87,6 +87,11 @@ public:
       "REMOVE_AT will remove the items at the given indices.\n"
       "REVERSE reverses the contents of the list in-place.\n"
       "SORT sorts the list in-place alphabetically.\n"
+      "NOTE: A list in cmake is a ; separated group of strings. "
+      "To create a list the set command can be used. For example, "
+      "set(var a b c d e)  creates a list with a;b;c;d;e, and "
+      "set(var \"a b c d e\") creates a string or a list with one "
+      "item in it."
       ;
     }
 
