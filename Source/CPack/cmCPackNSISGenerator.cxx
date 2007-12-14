@@ -115,7 +115,7 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
     installerIconCode += this->GetOption("CPACK_NSIS_MUI_ICON");
     installerIconCode += "\"\n";
     installerIconCode += "!define MUI_UNICON \"";
-    installerIconCode += this->GetOption("CPACK_NSIS_MUI_ICON");
+    installerIconCode += this->GetOption("CPACK_NSIS_MUI_UNIICON");
     installerIconCode += "\"\n";
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_ICON_CODE",
                             installerIconCode.c_str());
