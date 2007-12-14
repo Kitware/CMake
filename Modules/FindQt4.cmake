@@ -28,9 +28,9 @@
 # All the libraries required are stored in a variable called QT_LIBRARIES.  
 # Add this variable to your TARGET_LINK_LIBRARIES.
 #  
-#  macro QT4_WRAP_CPP(outfiles inputfile ... )
-#  macro QT4_WRAP_UI(outfiles inputfile ... )
-#  macro QT4_ADD_RESOURCES(outfiles inputfile ... )
+#  macro QT4_WRAP_CPP(outfiles inputfile ... OPTIONS ...)
+#  macro QT4_WRAP_UI(outfiles inputfile ... OPTIONS ...)
+#  macro QT4_ADD_RESOURCES(outfiles inputfile ... OPTIONS ...)
 #  macro QT4_AUTOMOC(inputfile ... )
 #  macro QT4_GENERATE_MOC(inputfile outputfile )
 #
@@ -834,6 +834,22 @@ IF (QT4_QMAKE_FOUND)
   #
   ######################################
 
+  MACRO (QT4_EXTRACT_OPTIONS qt4_files qt4_options)
+    SET(${qt4_files} ${ARGN})
+    SET(${qt4_options})
+    LIST(FIND ${qt4_files} OPTIONS _index)
+    IF(NOT _index EQUAL -1)
+      LIST(REMOVE_ITEM ${qt4_files} OPTIONS)
+      LIST(LENGTH ${qt4_files} _length)
+      WHILE(_length GREATER ${_index})
+        LIST(GET ${qt4_files} ${_index} _opt_value)
+        LIST(REMOVE_AT ${qt4_files} ${_index})
+        LIST(APPEND ${qt4_options} ${_opt_value})
+        LIST(LENGTH ${qt4_files} _length)
+      ENDWHILE(_length GREATER ${_index})
+    ENDIF(NOT _index EQUAL -1)
+  ENDMACRO (QT4_EXTRACT_OPTIONS)
+
   MACRO (QT4_GET_MOC_INC_DIRS _moc_INC_DIRS)
      SET(${_moc_INC_DIRS})
      GET_DIRECTORY_PROPERTY(_inc_DIRS INCLUDE_DIRECTORIES)
@@ -862,20 +878,20 @@ IF (QT4_QMAKE_FOUND)
 
 
   # QT4_WRAP_CPP(outfiles inputfile ... )
-  # TODO  perhaps add support for -D, -U and other minor options
 
   MACRO (QT4_WRAP_CPP outfiles )
     # get include dirs
     QT4_GET_MOC_INC_DIRS(moc_includes)
+    QT4_EXTRACT_OPTIONS(moc_files moc_options ${ARGN})
 
-    FOREACH (it ${ARGN})
+    FOREACH (it ${moc_files})
       GET_FILENAME_COMPONENT(it ${it} ABSOLUTE)
       GET_FILENAME_COMPONENT(outfile ${it} NAME_WE)
 
       SET(outfile ${CMAKE_CURRENT_BINARY_DIR}/moc_${outfile}.cxx)
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
         COMMAND ${QT_MOC_EXECUTABLE}
-        ARGS ${moc_includes} -o ${outfile} ${it}
+        ARGS ${moc_includes} ${moc_options} -o ${outfile} ${it}
         DEPENDS ${it})
       SET(${outfiles} ${${outfiles}} ${outfile})
     ENDFOREACH(it)
@@ -886,14 +902,15 @@ IF (QT4_QMAKE_FOUND)
   # QT4_WRAP_UI(outfiles inputfile ... )
 
   MACRO (QT4_WRAP_UI outfiles )
+    QT4_EXTRACT_OPTIONS(ui_files ui_options ${ARGN})
 
-    FOREACH (it ${ARGN})
+    FOREACH (it ${ui_files})
       GET_FILENAME_COMPONENT(outfile ${it} NAME_WE)
       GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
       SET(outfile ${CMAKE_CURRENT_BINARY_DIR}/ui_${outfile}.h)
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
         COMMAND ${QT_UIC_EXECUTABLE}
-        ARGS -o ${outfile} ${infile}
+        ARGS ${ui_options} -o ${outfile} ${infile}
         MAIN_DEPENDENCY ${infile})
       SET(${outfiles} ${${outfiles}} ${outfile})
     ENDFOREACH (it)
@@ -902,11 +919,11 @@ IF (QT4_QMAKE_FOUND)
 
 
   # QT4_ADD_RESOURCES(outfiles inputfile ... )
-  # TODO  perhaps consider adding support for compression and root options to rcc
 
   MACRO (QT4_ADD_RESOURCES outfiles )
+    QT4_EXTRACT_OPTIONS(rcc_files rcc_options ${ARGN})
 
-    FOREACH (it ${ARGN})
+    FOREACH (it ${rcc_files})
       GET_FILENAME_COMPONENT(outfilename ${it} NAME_WE)
       GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
       GET_FILENAME_COMPONENT(rc_path ${infile} PATH)
@@ -926,7 +943,7 @@ IF (QT4_QMAKE_FOUND)
       ENDFOREACH(_RC_FILE)
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
         COMMAND ${QT_RCC_EXECUTABLE}
-        ARGS -name ${outfilename} -o ${outfile} ${infile}
+        ARGS ${rcc_options} -name ${outfilename} -o ${outfile} ${infile}
         MAIN_DEPENDENCY ${infile}
         DEPENDS ${_RC_DEPENDS})
       SET(${outfiles} ${${outfiles}} ${outfile})
