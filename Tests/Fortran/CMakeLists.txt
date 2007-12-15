@@ -22,4 +22,5 @@ IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     in_interface/main.f90
     in_interface/module.f90)
 
+  ADD_SUBDIRECTORY(Library)
 ENDIF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
