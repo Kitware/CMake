@@ -127,11 +127,12 @@ cmFindBase::cmFindBase()
     "   \"ONLY\"   - Only try to find application bundles.\n"
     "   \"NEVER\". - Never try to find application bundles.\n"
     "The CMake variable CMAKE_FIND_ROOT_PATH specifies one or more "
-    "directories which will be prefixed to all of the search directories. "
+    "directories to be prepended to all other search directories. "
+    "This effectively \"re-roots\" the entire search under given locations. "
     "By default it is empty. It is especially useful when "
     "cross-compiling to point to the root directory of the "
     "target environment and CMake will search there too. By default at first "
-    "the directories listed in CMAKE_FIND_ROOT_PATH and then the non-prefixed "
+    "the directories listed in CMAKE_FIND_ROOT_PATH and then the non-rooted "
     "directories will be searched. "
     "The default behavior can be adjusted by setting "
     "CMAKE_FIND_ROOT_PATH_MODE_XXX.  This behavior can be manually "
@@ -139,7 +140,7 @@ cmFindBase::cmFindBase()
     "By using CMAKE_FIND_ROOT_PATH_BOTH the search order will "
     "be as described above. If NO_CMAKE_FIND_ROOT_PATH is used "
     "then CMAKE_FIND_ROOT_PATH will not be used. If ONLY_CMAKE_FIND_ROOT_PATH "
-    "is used then only the prefixed directories will be searched.\n"
+    "is used then only the re-rooted directories will be searched.\n"
     "The reason the paths listed in the call to the command are searched "
     "last is that most users of CMake would expect things to be found "
     "first in the locations specified by their environment. Projects may "
@@ -520,29 +521,29 @@ void cmFindBase::HandleCMakeFindRootPath()
     return;
     }
 
-  std::vector<std::string> prefixes;
-  cmSystemTools::ExpandListArgument(rootPath, prefixes);
+  std::vector<std::string> roots;
+  cmSystemTools::ExpandListArgument(rootPath, roots);
 
-  std::vector<std::string> unprefixedPaths=this->SearchPaths;
+  std::vector<std::string> unrootedPaths=this->SearchPaths;
   this->SearchPaths.clear();
 
-  for (std::vector<std::string>::const_iterator prefixIt = prefixes.begin();
-       prefixIt != prefixes.end();
-       ++prefixIt )
+  for (std::vector<std::string>::const_iterator rootIt = roots.begin();
+       rootIt != roots.end();
+       ++rootIt )
     {
-    for (std::vector<std::string>::const_iterator it = unprefixedPaths.begin();
-       it != unprefixedPaths.end();
+    for (std::vector<std::string>::const_iterator it = unrootedPaths.begin();
+       it != unrootedPaths.end();
        ++it )
       {
-      std::string prefixedDir=*prefixIt;
-      prefixedDir+=*it;
-      this->SearchPaths.push_back(prefixedDir);
+      std::string rootedDir=*rootIt;
+      rootedDir+=*it;
+      this->SearchPaths.push_back(rootedDir);
       }
     }
 
   if (this->FindRootPathMode == RootPathModeBoth)
     {
-    this->AddPaths(unprefixedPaths);
+    this->AddPaths(unrootedPaths);
     }
 }
 
