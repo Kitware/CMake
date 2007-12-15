@@ -1816,7 +1816,8 @@ int cmake::HandleDeleteCacheVariables(const char* var)
 int cmake::Configure()
 {
   int ret = this->ActualConfigure();
-  const char* delCacheVars = this->GetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
+  const char* delCacheVars =
+    this->GetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
   if(delCacheVars && delCacheVars[0] != 0)
     {
     return this->HandleDeleteCacheVariables(delCacheVars);
