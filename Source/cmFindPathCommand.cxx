@@ -21,6 +21,7 @@
 
 cmFindPathCommand::cmFindPathCommand()
 {
+  this->EnvironmentPath = "INCLUDE";
   this->IncludeFileInPath = false;
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "FIND_XXX", "find_path");
