@@ -122,7 +122,7 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
     }
 
   // Get the directory in which stamp files will be stored.
-  std::string stamp_dir =
+  std::string mod_dir =
     this->LocalGenerator->GetMakefile()->GetCurrentOutputDirectory();
 
   // Create the parser object.
@@ -157,20 +157,35 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
     // Require only modules not provided in the same source.
     if(parser.Provides.find(*i) == parser.Provides.end())
       {
+      std::string proxy = mod_dir;
+      proxy += "/";
+      proxy += *i;
+      proxy += ".mod.proxy";
+      proxy = this->LocalGenerator->Convert(proxy.c_str(),
+                                            cmLocalGenerator::HOME_OUTPUT,
+                                            cmLocalGenerator::MAKEFILE);
+
       // since we require some things add them to our list of requirements
-      makeDepends << obj << ".requires: " << i->c_str() << ".mod.proxy"
-         << std::endl;
+      makeDepends << obj << ".requires: " << proxy << std::endl;
 
       // create an empty proxy in case no other source provides it
-      makeDepends << i->c_str() << ".mod.proxy:" << std::endl;
+      makeDepends << proxy << ":" << std::endl;
 
       // The object file should depend on timestamped files for the
       // modules it uses.
       std::string m = cmSystemTools::LowerCase(*i);
-      makeDepends << obj << ": " << m.c_str() << ".mod.stamp\n";
+      std::string stampFile = mod_dir;
+      stampFile += "/";
+      stampFile += m;
+      stampFile += ".mod.stamp";
+      stampFile =
+        this->LocalGenerator->Convert(stampFile.c_str(),
+                                      cmLocalGenerator::HOME_OUTPUT,
+                                      cmLocalGenerator::SHELL);
+      makeDepends << obj << ": " << stampFile << "\n";
 
       // Create a dummy timestamp file for the module.
-      std::string fullPath = stamp_dir;
+      std::string fullPath = mod_dir;
       fullPath += "/";
       fullPath += m;
       fullPath += ".mod.stamp";
@@ -204,13 +219,21 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
   for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
       i != parser.Provides.end(); ++i)
     {
-    makeDepends << i->c_str() << ".mod.proxy: " << obj
-      << ".provides" << std::endl;
+    std::string proxy = mod_dir;
+    proxy += "/";
+    proxy += *i;
+    proxy += ".mod.proxy";
+    proxy = this->LocalGenerator->Convert(proxy.c_str(),
+                                          cmLocalGenerator::HOME_OUTPUT,
+                                          cmLocalGenerator::MAKEFILE);
+    makeDepends << proxy << ": " << obj << ".provides" << std::endl;
     }
   
   // If any modules are provided then they must be converted to stamp files.
   if(!parser.Provides.empty())
     {
+    // Create a target to copy the module after the object file
+    // changes.
     makeDepends << obj << ".provides.build:\n";
     for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
         i != parser.Provides.end(); ++i)
@@ -219,11 +242,33 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
       // cmake_copy_f90_mod will call back to this class, which will
       // try various cases for the real mod file name.
       std::string m = cmSystemTools::LowerCase(*i);
+      std::string modFile = mod_dir;
+      modFile += "/";
+      modFile += *i;
+      modFile =
+        this->LocalGenerator->Convert(modFile.c_str(),
+                                      cmLocalGenerator::HOME_OUTPUT,
+                                      cmLocalGenerator::SHELL);
+      std::string stampFile = mod_dir;
+      stampFile += "/";
+      stampFile += m;
+      stampFile += ".mod.stamp";
+      stampFile =
+        this->LocalGenerator->Convert(stampFile.c_str(),
+                                      cmLocalGenerator::HOME_OUTPUT,
+                                      cmLocalGenerator::SHELL);
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
-         << i->c_str() << " " << m.c_str() << ".mod.stamp\n";
+                  << modFile << " " << stampFile << "\n";
       }
+    // After copying the modules update the timestamp file so that
+    // copying will not be done again until the source rebuilds.
     makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj 
                 << ".provides.build\n";
+
+    // Make sure the module timestamp rule is evaluated by the time
+    // the target finishes building.
+    makeDepends << cmSystemTools::GetFilenamePath(obj) << "/build: "
+                << obj << ".provides.build\n";
     }
 
   /*
@@ -297,12 +342,15 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
 
   std::string mod = args[2];
   std::string stamp = args[3];
-  std::string mod_upper = cmSystemTools::UpperCase(mod.c_str());
-  std::string mod_lower = cmSystemTools::LowerCase(mod.c_str());
+  std::string mod_dir = cmSystemTools::GetFilenamePath(mod);
+  if(!mod_dir.empty()) { mod_dir += "/"; }
+  std::string mod_upper = mod_dir;
+  mod_upper += cmSystemTools::UpperCase(cmSystemTools::GetFilenameName(mod));
+  std::string mod_lower = mod_dir;
+  mod_lower += cmSystemTools::LowerCase(cmSystemTools::GetFilenameName(mod));
   mod += ".mod";
   mod_upper += ".mod";
   mod_lower += ".mod";
-
   if(cmSystemTools::FileExists(mod_upper.c_str(), true))
     {
     if(!cmSystemTools::CopyFileIfDifferent(mod_upper.c_str(), stamp.c_str()))
