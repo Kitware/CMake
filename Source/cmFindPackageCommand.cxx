@@ -194,7 +194,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       f = "/" + f;
       f = this->Makefile->GetCurrentDirectory() + f;
       }
-    
+
     if(cmSystemTools::FileExists(f.c_str()))
       {
       if(this->ReadListFile(f.c_str()))
@@ -222,11 +222,11 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   else if(!quiet || required)
     {
     cmOStringStream e;
-    e << "FIND_PACKAGE could not find Find" << this->Name 
+    e << "FIND_PACKAGE could not find Find" << this->Name
       << ".cmake nor config file " << this->Config << ".\n"
-      << "Adjust CMAKE_MODULE_PATH to find Find" << this->Name 
-      << ".cmake or set " << this->Variable 
-      << "\nto the directory containing " << this->Config 
+      << "Adjust CMAKE_MODULE_PATH to find Find" << this->Name
+      << ".cmake or set " << this->Variable
+      << "\nto the directory containing " << this->Config
       << " in order to use " << this->Name << ".";
     cmSystemTools::Error(e.str().c_str());
     if(required)
@@ -446,17 +446,17 @@ bool cmFindPackageCommand::ReadListFile(const char* f)
 void cmFindPackageCommand::AppendToProperty(const char* propertyName)
 {
   std::string propertyValue;
-  const char *prop = 
+  const char *prop =
       this->Makefile->GetCMakeInstance()->GetProperty(propertyName);
   if (prop && *prop)
     {
     propertyValue = prop;
-    
+
     std::vector<std::string> contents;
     cmSystemTools::ExpandListArgument(propertyValue, contents, false);
-    
+
     bool alreadyInserted = false;
-    for(std::vector<std::string>::const_iterator it = contents.begin(); 
+    for(std::vector<std::string>::const_iterator it = contents.begin();
       it != contents.end(); ++ it )
       {
       if (*it == this->Name)
@@ -475,7 +475,7 @@ void cmFindPackageCommand::AppendToProperty(const char* propertyName)
     {
     propertyValue = this->Name;
     }
-  this->Makefile->GetCMakeInstance()->SetProperty(propertyName, 
+  this->Makefile->GetCMakeInstance()->SetProperty(propertyName,
                                                   propertyValue.c_str());
  }
 
