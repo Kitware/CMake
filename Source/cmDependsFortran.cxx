@@ -174,7 +174,7 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
       fullPath += "/";
       fullPath += m;
       fullPath += ".mod.stamp";
-      if(!cmSystemTools::FileExists(fullPath.c_str()))
+      if(!cmSystemTools::FileExists(fullPath.c_str(), true))
         {
         std::ofstream dummy(fullPath.c_str());
         dummy
@@ -303,7 +303,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   mod_upper += ".mod";
   mod_lower += ".mod";
 
-  if(cmSystemTools::FileExists(mod_upper.c_str()))
+  if(cmSystemTools::FileExists(mod_upper.c_str(), true))
     {
     if(!cmSystemTools::CopyFileIfDifferent(mod_upper.c_str(), stamp.c_str()))
       {
@@ -314,7 +314,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
       }
     return true;
     }
-  else if(cmSystemTools::FileExists(mod_lower.c_str()))
+  else if(cmSystemTools::FileExists(mod_lower.c_str(), true))
     {
     if(!cmSystemTools::CopyFileIfDifferent(mod_lower.c_str(), stamp.c_str()))
       {
@@ -341,7 +341,7 @@ bool cmDependsFortran::FindIncludeFile(const char* dir,
   if(cmSystemTools::FileIsFullPath(includeName))
     {
     fileName = includeName;
-    return cmSystemTools::FileExists(fileName.c_str());
+    return cmSystemTools::FileExists(fileName.c_str(), true);
     }
   else
     {
@@ -350,7 +350,7 @@ bool cmDependsFortran::FindIncludeFile(const char* dir,
     std::string fullName = dir;
     fullName += "/";
     fullName += includeName;
-    if(cmSystemTools::FileExists(fullName.c_str()))
+    if(cmSystemTools::FileExists(fullName.c_str(), true))
       {
       fileName = fullName;
       return true;
@@ -363,7 +363,7 @@ bool cmDependsFortran::FindIncludeFile(const char* dir,
       fullName = *i;
       fullName += "/";
       fullName += includeName;
-      if(cmSystemTools::FileExists(fullName.c_str()))
+      if(cmSystemTools::FileExists(fullName.c_str(), true))
         {
         fileName = fullName;
         return true;

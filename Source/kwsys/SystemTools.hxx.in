@@ -270,9 +270,12 @@ public:
   static kwsys_stl::string ConvertToWindowsOutputPath(const char*);
 
   /**
-   * Return true if a file exists in the current directory
+   * Return true if a file exists in the current directory.
+   * If isFile = true, then make sure the file is a file and 
+   * not a directory.  If isFile = false, then return true
+   * if it is a file or a directory.
    */
-  static bool FileExists(const char* filename);
+  static bool FileExists(const char* filename, bool isFile=false);
 
   /**
    * Return file length

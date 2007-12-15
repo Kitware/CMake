@@ -113,13 +113,13 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
     std::string fullName;
     if(first || cmSystemTools::FileIsFullPath(current.FileName.c_str()))
       {
-      if(cmSystemTools::FileExists(current.FileName.c_str()))
+      if(cmSystemTools::FileExists(current.FileName.c_str(), true))
         {
         fullName = current.FileName;
         }
       }
     else if(!current.QuotedLocation.empty() &&
-            cmSystemTools::FileExists(current.QuotedLocation.c_str()))
+            cmSystemTools::FileExists(current.QuotedLocation.c_str(), true))
       {
       // The include statement producing this entry was a double-quote
       // include and the included file is present in the directory of
@@ -167,7 +167,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
           }
 
         // Look for the file in this location.
-        if(cmSystemTools::FileExists(tempPathStr.c_str()))
+        if(cmSystemTools::FileExists(tempPathStr.c_str(), true))
           {
             fullName = tempPathStr;
             HeaderLocationCache[cacheKey]=fullName;

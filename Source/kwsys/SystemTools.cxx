@@ -821,7 +821,7 @@ bool SystemTools::SameFile(const char* file1, const char* file2)
 
 
 // return true if the file exists
-bool SystemTools::FileExists(const char* filename)
+bool SystemTools::FileExists(const char* filename, bool isFile)
 {
 #ifdef _MSC_VER
 # define access _access
@@ -843,6 +843,12 @@ bool SystemTools::FileExists(const char* filename)
     }
   else
     {
+    // If isFile is set return not FileIsDirectory,
+    // so this will only be true if it is a file
+    if(isFile)
+      {
+      return !SystemTools::FileIsDirectory(filename);
+      }
     return true;
     }
 }
