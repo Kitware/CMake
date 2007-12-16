@@ -247,6 +247,7 @@ MACRO(QT_QUERY_QMAKE outvar invar)
   ENDIF(_qmake_result)
 
 ENDMACRO(QT_QUERY_QMAKE)
+
 GET_FILENAME_COMPONENT(qt_install_version "[HKEY_CURRENT_USER\\Software\\trolltech\\Versions;DefaultQtVersion]" NAME)
 # check for qmake
 FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake qmake4 qmake-qt4 PATHS
@@ -261,6 +262,7 @@ IF (QT_QMAKE_EXECUTABLE)
   SET(QT4_QMAKE_FOUND FALSE)
   
   EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE} ARGS "-query QT_VERSION" OUTPUT_VARIABLE QTVERSION)
+
   # check for qt3 qmake and then try and find qmake4 or qmake-qt4 in the path
   IF("${QTVERSION}" MATCHES "Unknown")
     SET(QT_QMAKE_EXECUTABLE NOTFOUND CACHE FILEPATH "" FORCE)
@@ -857,6 +859,7 @@ IF (QT4_QMAKE_FOUND)
      FOREACH(_current ${_inc_DIRS})
         SET(${_moc_INC_DIRS} ${${_moc_INC_DIRS}} "-I" ${_current})
      ENDFOREACH(_current ${_inc_DIRS})
+
   ENDMACRO(QT4_GET_MOC_INC_DIRS)
 
 
@@ -974,11 +977,9 @@ IF (QT4_QMAKE_FOUND)
   MACRO(QT4_ADD_DBUS_INTERFACES _sources)
      FOREACH (_current_FILE ${ARGN})
         GET_FILENAME_COMPONENT(_infile ${_current_FILE} ABSOLUTE)
-  
-  # get the part before the ".xml" suffix
+        # get the part before the ".xml" suffix
         STRING(REGEX REPLACE "(.*[/\\.])?([^\\.]+)\\.xml" "\\2" _basename ${_current_FILE})
         STRING(TOLOWER ${_basename} _basename)
-  
         QT4_ADD_DBUS_INTERFACE(${_sources} ${_infile} ${_basename}interface)
      ENDFOREACH (_current_FILE)
   ENDMACRO(QT4_ADD_DBUS_INTERFACES)
