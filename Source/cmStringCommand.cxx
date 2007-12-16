@@ -675,8 +675,20 @@ bool cmStringCommand::HandleStripCommand(
     ++ ptr;
     }
 
-  size_t outLength = endPos - startPos + 1;
- 
+  size_t outLength = 0;
+
+  // if the input string didn't contain any non-space characters, return 
+  // an empty string
+  if (startPos > inStringLength)
+    {
+    outLength = 0;
+    startPos = 0;
+    }
+  else
+    {
+    outLength=endPos - startPos + 1;
+    }
+
   this->Makefile->AddDefinition(variableName.c_str(),
     stringValue.substr(startPos, outLength).c_str());
   return true;
