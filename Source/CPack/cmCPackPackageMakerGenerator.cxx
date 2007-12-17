@@ -112,7 +112,23 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
       << std::endl);
     return 0;
     }
-
+  // sometimes the pkgCmd finishes but the directory is not yet
+  // created, so try 10 times to see if it shows up
+  int tries = 10;
+  while(tries > 0 && 
+        !cmSystemTools::FileExists(packageDirFileName.c_str()))
+    {
+    cmSystemTools::Delay(500);
+    tries--;
+    }
+  if(!cmSystemTools::FileExists(packageDirFileName.c_str()))
+    {
+    cmCPackLogger(
+      cmCPackLog::LOG_ERROR,
+      "Problem running PackageMaker command: " << pkgCmd.str().c_str()
+      << std::endl << "Package not created: " << packageDirFileName.c_str()
+      << std::endl);
+    }
   tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   tmpFile += "/hdiutilOutput.log";
   cmOStringStream dmgCmd;
