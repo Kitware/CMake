@@ -208,18 +208,14 @@ keyword_stmt:
       }
     free($1);
     }
-| WORD STRING other EOSTMT
+| WORD STRING other EOSTMT /* Ignore */
+| include STRING other EOSTMT
     {
-    if (cmDependsFortranParserIsKeyword($1, "include"))
-      {
-      cmDependsFortranParser* parser =
-        cmDependsFortran_yyget_extra(yyscanner);
-      cmDependsFortranParser_RuleInclude(parser, $2);
-      }
-    free($1);
+    cmDependsFortranParser* parser =
+      cmDependsFortran_yyget_extra(yyscanner);
+    cmDependsFortranParser_RuleInclude(parser, $2);
     free($2);
     }
-| CPP_INCLUDE WORD other EOSTMT /* Ignore */
 | define WORD other EOSTMT
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
