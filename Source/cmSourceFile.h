@@ -53,10 +53,22 @@ public:
   bool GetPropertyAsBool(const char *prop) const;
 
   /**
-   * The full path to the file.
+   * The full path to the file.  The non-const version of this method
+   * may attempt to locate the file on disk and finalize its location.
+   * The const version of this method may return an empty string if
+   * the non-const version has not yet been called (yes this is a
+   * horrible interface, but is necessary for backwards
+   * compatibility).
    */
   std::string const& GetFullPath();
   std::string const& GetFullPath() const;
+
+  /**
+   * Get the information currently known about the source file
+   * location without attempting to locate the file as GetFullPath
+   * would.  See cmSourceFileLocation documentation.
+   */
+  cmSourceFileLocation const& GetLocation() const;
 
   /**
    * Get the file extension of this source file.

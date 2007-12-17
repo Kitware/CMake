@@ -76,6 +76,12 @@ const char* cmSourceFile::GetLanguage() const
 }
 
 //----------------------------------------------------------------------------
+cmSourceFileLocation const& cmSourceFile::GetLocation() const
+{
+    return this->Location;
+}
+
+//----------------------------------------------------------------------------
 std::string const& cmSourceFile::GetFullPath()
 {
   if(this->FullPath.empty())
