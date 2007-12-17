@@ -280,6 +280,11 @@ public:
   static unsigned long FileLength(const char *filename);
 
   /**
+     Change the modification time or create a file
+  */
+  static bool Touch(const char* filename, bool create);
+  
+  /**
    *  Compare file modification times.
    *  Return true for successful comparison and false for error.
    *  When true is returned, result has -1, 0, +1 for

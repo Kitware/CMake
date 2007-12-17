@@ -958,7 +958,8 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         }
 
       // Make sure the name is a directory.
-      if(!cmSystemTools::FileIsDirectory(dir.c_str()))
+      if(cmSystemTools::FileExists(dir.c_str()) &&
+         !cmSystemTools::FileIsDirectory(dir.c_str()))
         {
         cmOStringStream e;
         e << args[0] << " given non-directory \""

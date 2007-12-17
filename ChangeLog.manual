@@ -1,6 +1,12 @@
+Changes in CMake 2.4.8 RC 6
+* Fix for bug 6006 INSTALL DIRECTORY signature problem
+* Update FindQt4 from CVS Head for many bug fixes
+* Fix bug 5638 CMAKE_INSTALL_PREFIX not working on SunOS with CC
+* Fix bug 6117 FindPkgConfig can run twice now
+* Fix bug 6124 touch.exe was required for fortran
 Changes in CMake 2.4.8 RC 5
 * Fix bug 6106 FindPerlLibs.cmake missing escaped $
-* Allow NODEFAULTLIBS to have more than one value
+* Allow NODEFAULTLIBS to have more than one value bug 5455
 * Suppress regeneration of makefiles during try compile avoid infinite
   loop in trycompile with some vs 2005 builds.
 * Rest of Fix for fix 5363, removes warning on vs 6

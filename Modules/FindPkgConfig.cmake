@@ -328,7 +328,7 @@ endmacro(pkg_check_modules)
 ###
 macro(pkg_search_module _prefix _module0)
   # check cached value
-  if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})
+  if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
     set(_pkg_modules_found 0)
     _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required "${_module0}" ${ARGN})
 
@@ -352,7 +352,7 @@ macro(pkg_search_module _prefix _module0)
     endif(NOT ${_prefix}_FOUND)
     
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
-  endif(NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})  
+  endif(NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)  
 endmacro(pkg_search_module)
 
 ### Local Variables:

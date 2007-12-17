@@ -7,7 +7,7 @@ SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 4)
 SET(CMake_VERSION_PATCH 8)
 # for an actual release this should not be defined
-SET(CMake_VERSION_RC 5)
+SET(CMake_VERSION_RC 6)
 SET(CMake_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
 SET(CMake_VERSION_FULL "${CMake_VERSION}.${CMake_VERSION_PATCH}")
 

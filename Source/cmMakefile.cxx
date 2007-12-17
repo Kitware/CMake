@@ -1251,7 +1251,17 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
       }
 
     }
+  std::string saveValue;
+  if(val)
+    {
+    saveValue = val;
+    }
+  // make ivalidate the const char* 
   this->GetCacheManager()->AddCacheEntry(name, val, doc, type);
+  if(val)
+    {
+    val = saveValue.c_str();
+    }
   this->AddDefinition(name, val);
 }
 

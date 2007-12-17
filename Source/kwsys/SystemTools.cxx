@@ -64,6 +64,11 @@
 # include <windows.h>
 #endif
 
+#ifdef _MSC_VER
+#include <sys/utime.h>
+#else
+#include <utime.h>
+#endif
 // This is a hack to prevent warnings about these functions being
 // declared but not referenced.
 #if defined(__sgi) && !defined(__GNUC__)
@@ -769,6 +774,36 @@ bool SystemTools::FileExists(const char* filename)
     }
 }
 
+bool SystemTools::Touch(const char* filename, bool create)
+{
+  if(create && !SystemTools::FileExists(filename))
+    {
+    FILE* file = fopen(filename, "a+b");
+    if(file)
+      {
+      fclose(file);
+      return true;
+      }
+    return false;
+    }
+#ifdef _MSC_VER
+#define utime _utime
+#define utimbuf _utimbuf
+#endif
+  struct stat fromStat;
+  if(stat(filename, &fromStat) < 0)
+    {
+    return false;
+    }
+  struct utimbuf buf;
+  buf.actime = fromStat.st_atime;
+  buf.modtime = static_cast<time_t>(SystemTools::GetTime());
+  if(utime(filename, &buf) < 0)
+    {
+    return false;
+    }
+  return true;
+}
 
 bool SystemTools::FileTimeCompare(const char* f1, const char* f2,
                                   int* result)
