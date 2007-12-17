@@ -125,9 +125,12 @@ ENDFOREACH(type)
 # on the initial values computed in the platform/*.cmake files
 # use _INIT variables so that this only happens the first time
 # and you can set these flags in the cmake cache
-SET (CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} ${CMAKE_CXX_FLAGS_INIT}" CACHE STRING
+SET (CMAKE_CXX_FLAGS "$ENV{CXXFLAGS}" CACHE STRING
      "Flags used by the compiler during all build types.")
 
+IF (CMAKE_CXX_FLAGS_INIT)
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_INIT}")
+ENDIF (CMAKE_CXX_FLAGS_INIT)
 
 IF(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
   SET (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG_INIT}" CACHE STRING
