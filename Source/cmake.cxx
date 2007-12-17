@@ -64,6 +64,7 @@
 #    include "cmGlobalVisualStudio71Generator.h"
 #    include "cmGlobalVisualStudio8Generator.h"
 #    include "cmGlobalVisualStudio9Generator.h"
+#    include "cmGlobalVisualStudio9Win64Generator.h"
 #    include "cmGlobalVisualStudio8Win64Generator.h"
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
@@ -2289,6 +2290,8 @@ void cmake::AddDefaultGenerators()
     &cmGlobalVisualStudio8Generator::New;
   this->Generators[cmGlobalVisualStudio9Generator::GetActualName()] =
     &cmGlobalVisualStudio9Generator::New;
+  this->Generators[cmGlobalVisualStudio9Win64Generator::GetActualName()] =
+    &cmGlobalVisualStudio9Win64Generator::New;
   this->Generators[cmGlobalVisualStudio8Win64Generator::GetActualName()] =
     &cmGlobalVisualStudio8Win64Generator::New;
   this->Generators[cmGlobalBorlandMakefileGenerator::GetActualName()] =
@@ -3214,6 +3217,15 @@ void cmake::DefineProperties(cmake *cm)
      "List of packages which were not found during the CMake run. Whether a "
      "package has been found is determined using the <NAME>_FOUND variables.");
 
+  cm->DefineProperty
+    ("PACKAGES_NOT_FOUND", cmProperty::GLOBAL,
+     "List of packages which were not found during the CMake run.",
+     "List of packages which were not found during the CMake run. Whether a "
+     "package has been found is determined using the <NAME>_FOUND variables.");
+  cm->DefineProperty(
+    "__CMAKE_DELETE_CACHE_CHANGE_VARS_", cmProperty::GLOBAL,
+    "Internal property",
+    "Used to detect compiler changes, Do not set.");
 
   // ================================================================
   // define variables as well
