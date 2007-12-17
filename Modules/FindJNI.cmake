@@ -9,10 +9,13 @@
 #  JAVA_INCLUDE_PATH2    = the include path to jni_md.h
 #  JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
 # 
-
+GET_FILENAME_COMPONENT(java_install_version
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit;CurrentVersion]" NAME)
+message("${java_install_version}")
 SET(JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
   $ENV{JAVA_HOME}/jre/lib/i386
   $ENV{JAVA_HOME}/jre/lib/amd64
   /usr/lib
@@ -44,6 +47,7 @@ ENDFOREACH(dir)
 SET(JAVA_AWT_INCLUDE_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/include"
   $ENV{JAVA_HOME}/include
   /usr/include 
   /usr/local/include
