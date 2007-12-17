@@ -296,6 +296,13 @@ void cmTarget::DefineProperties(cmake *cm)
      "An internal property used by some generators to record the name of "
      "project or dsp file associated with this target.");
 
+  cm->DefineProperty
+    ("SOURCES", cmProperty::TARGET,
+     "Source names specified for a target.",
+     "Read-only list of sources specified for a target.  "
+     "The names returned are suitable for passing to the "
+     "set_source_files_properties command.");
+
 #if 0
   cm->DefineProperty
     ("OBJECT_FILES", cmProperty::TARGET,
@@ -1522,6 +1529,33 @@ const char *cmTarget::GetProperty(const char* prop,
   if (strcmp(prop,"IMPORTED") == 0)
     {
     return this->IsImported()?"TRUE":"FALSE";
+    }
+
+  if(!strcmp(prop,"SOURCES"))
+    {
+    cmOStringStream ss;
+    const char* sep = "";
+    for(std::vector<cmSourceFile*>::const_iterator
+          i = this->SourceFiles.begin();
+        i != this->SourceFiles.end(); ++i)
+      {
+      // Separate from the previous list entries.
+      ss << sep;
+      sep = ";";
+
+      // Construct what is known about this source file location.
+      cmSourceFileLocation const& location = (*i)->GetLocation();
+      std::string sname = location.GetDirectory();
+      if(!sname.empty())
+        {
+        sname += "/";
+        }
+      sname += location.GetName();
+
+      // Append this list entry.
+      ss << sname;
+      }
+    this->SetProperty("SOURCES", ss.str().c_str());
     }
 
   // the type property returns what type the target is

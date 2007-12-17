@@ -35,7 +35,7 @@ get_property(SOURCE_FILERESULT SOURCE_FILE SubDir/properties3.cxx SOURCETEST)
 
 if (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND 
     DIRECTORYRESULT AND SOURCE_FILERESULT)
-  add_executable (Properties SubDir/properties3.cxx)
+  add_executable (Properties SubDir/properties3.cxx properties)
 else (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND 
     DIRECTORYRESULT AND SOURCE_FILERESULT)
   message("Error: test results are RESULT1=${RESULT1} RESULT2=${RESULT2} "
@@ -51,3 +51,13 @@ get_property(TARGETRESULT TARGET Properties TARGETTEST)
 if (NOT TARGETRESULT)
     message("Error: target result is TARGETRESULT=${TARGETRESULT}")
 endif (NOT TARGETRESULT)
+
+# test the target SOURCES property
+get_property(Properties_SOURCES TARGET Properties SOURCES)
+set_source_files_properties(${Properties_SOURCES} PROPERTIES TEST4 1)
+get_source_file_property(RESULT4 properties.h TEST4)
+if(NOT RESULT4)
+  message("Error: target result is"
+    " RESULT4=${RESULT4}"
+    " Properties_SOURCES=[${Properties_SOURCES}]")
+endif(NOT RESULT4)
