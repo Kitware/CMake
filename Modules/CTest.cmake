@@ -20,17 +20,15 @@ IF(BUILD_TESTING)
   ENDMACRO(SET_IF_NOT_SET)
 
   MACRO(SET_IF_SET var val)
-    IF("${val}" MATCHES "^$")
-    ELSE("${val}" MATCHES "^$")
+    IF(NOT "${val}" MATCHES "^$")
       SET("${var}" "${val}")
-    ENDIF("${val}" MATCHES "^$")
+    ENDIF(NOT "${val}" MATCHES "^$")
   ENDMACRO(SET_IF_SET)
 
   MACRO(SET_IF_SET_AND_NOT_SET var val)
-    IF("${val}" MATCHES "^$")
-    ELSE("${val}" MATCHES "^$")
+    IF(NOT "${val}" MATCHES "^$")
       SET_IF_NOT_SET("${var}" "${val}")
-    ENDIF("${val}" MATCHES "^$")
+    ENDIF(NOT "${val}" MATCHES "^$")
   ENDMACRO(SET_IF_SET_AND_NOT_SET)
 
   # Make sure testing is enabled
