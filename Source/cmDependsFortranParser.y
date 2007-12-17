@@ -163,6 +163,9 @@ code: /* empty */ | code stmt;
 stmt: keyword_stmt | assignment_stmt;
 
 assignment_stmt: WORD ASSIGNMENT_OP other EOSTMT    /* Ignore */
+    {
+    free($1);
+    }
 
 keyword_stmt:
   WORD EOSTMT
@@ -182,21 +185,18 @@ keyword_stmt:
       cmDependsFortranParser* parser =
         cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_RuleUse(parser, $2);
-      free($2);
       }
     else if (cmDependsFortranParserIsKeyword($1, "module"))
       {
       cmDependsFortranParser* parser =
         cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_RuleModule(parser, $2);
-      free($2);
       }
     else if (cmDependsFortranParserIsKeyword($1, "interface"))
       {
       cmDependsFortranParser* parser =
         cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_SetInInterface(parser, true);
-      free($2);
       }
     else if (cmDependsFortranParserIsKeyword($2, "interface") &&
              cmDependsFortranParserIsKeyword($1, "end"))
@@ -204,11 +204,15 @@ keyword_stmt:
       cmDependsFortranParser* parser =
         cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_SetInInterface(parser, false);
-      free($2);
       }
     free($1);
+    free($2);
     }
 | WORD STRING other EOSTMT /* Ignore */
+    {
+    free($1);
+    free($2);
+    }
 | include STRING other EOSTMT
     {
     cmDependsFortranParser* parser =
@@ -261,6 +265,9 @@ keyword_stmt:
     cmDependsFortranParser_RuleEndif(parser);
     }
 | WORD GARBAGE other EOSTMT             /* Ignore */
+    {
+    free($1);
+    }
 | GARBAGE other EOSTMT
 | EOSTMT
 | error

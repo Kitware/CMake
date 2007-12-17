@@ -611,11 +611,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   161,   161,   161,   163,   163,   165,   168,   178,   211,
-     212,   219,   225,   231,   237,   243,   248,   253,   258,   263,
-     264,   265,   266,   271,   271,   271,   272,   272,   273,   273,
-     274,   274,   275,   275,   276,   276,   277,   277,   278,   278,
-     279,   279,   280,   280,   283,   284,   285,   286,   287
+       0,   161,   161,   161,   163,   163,   165,   171,   181,   211,
+     216,   223,   229,   235,   241,   247,   252,   257,   262,   267,
+     271,   272,   273,   278,   278,   278,   279,   279,   280,   280,
+     281,   281,   282,   282,   283,   283,   284,   284,   285,   285,
+     286,   286,   287,   287,   290,   291,   292,   293,   294
 };
 #endif
 
@@ -1580,8 +1580,15 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 7:
-#line 169 "cmDependsFortranParser.y"
+        case 6:
+#line 166 "cmDependsFortranParser.y"
+    {
+    free((yyvsp[(1) - (4)].string));
+    }
+    break;
+
+  case 7:
+#line 172 "cmDependsFortranParser.y"
     {
     if (cmDependsFortranParserIsKeyword((yyvsp[(1) - (2)].string), "interface"))
       {
@@ -1594,28 +1601,25 @@ yyreduce:
     break;
 
   case 8:
-#line 179 "cmDependsFortranParser.y"
+#line 182 "cmDependsFortranParser.y"
     {
     if (cmDependsFortranParserIsKeyword((yyvsp[(1) - (4)].string), "use"))
       {
       cmDependsFortranParser* parser =
         cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_RuleUse(parser, (yyvsp[(2) - (4)].string));
-      free((yyvsp[(2) - (4)].string));
       }
     else if (cmDependsFortranParserIsKeyword((yyvsp[(1) - (4)].string), "module"))
       {
       cmDependsFortranParser* parser =
         cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_RuleModule(parser, (yyvsp[(2) - (4)].string));
-      free((yyvsp[(2) - (4)].string));
       }
     else if (cmDependsFortranParserIsKeyword((yyvsp[(1) - (4)].string), "interface"))
       {
       cmDependsFortranParser* parser =
         cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_SetInInterface(parser, true);
-      free((yyvsp[(2) - (4)].string));
       }
     else if (cmDependsFortranParserIsKeyword((yyvsp[(2) - (4)].string), "interface") &&
              cmDependsFortranParserIsKeyword((yyvsp[(1) - (4)].string), "end"))
@@ -1623,14 +1627,22 @@ yyreduce:
       cmDependsFortranParser* parser =
         cmDependsFortran_yyget_extra(yyscanner);
       cmDependsFortranParser_SetInInterface(parser, false);
-      free((yyvsp[(2) - (4)].string));
       }
     free((yyvsp[(1) - (4)].string));
+    free((yyvsp[(2) - (4)].string));
+    }
+    break;
+
+  case 9:
+#line 212 "cmDependsFortranParser.y"
+    {
+    free((yyvsp[(1) - (4)].string));
+    free((yyvsp[(2) - (4)].string));
     }
     break;
 
   case 10:
-#line 213 "cmDependsFortranParser.y"
+#line 217 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser =
       cmDependsFortran_yyget_extra(yyscanner);
@@ -1640,7 +1652,7 @@ yyreduce:
     break;
 
   case 11:
-#line 220 "cmDependsFortranParser.y"
+#line 224 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleDefine(parser, (yyvsp[(2) - (4)].string));
@@ -1649,7 +1661,7 @@ yyreduce:
     break;
 
   case 12:
-#line 226 "cmDependsFortranParser.y"
+#line 230 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleUndef(parser, (yyvsp[(2) - (4)].string));
@@ -1658,7 +1670,7 @@ yyreduce:
     break;
 
   case 13:
-#line 232 "cmDependsFortranParser.y"
+#line 236 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleIfdef(parser, (yyvsp[(2) - (4)].string));
@@ -1667,7 +1679,7 @@ yyreduce:
     break;
 
   case 14:
-#line 238 "cmDependsFortranParser.y"
+#line 242 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleIfndef(parser, (yyvsp[(2) - (4)].string));
@@ -1676,7 +1688,7 @@ yyreduce:
     break;
 
   case 15:
-#line 244 "cmDependsFortranParser.y"
+#line 248 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleIf(parser);
@@ -1684,7 +1696,7 @@ yyreduce:
     break;
 
   case 16:
-#line 249 "cmDependsFortranParser.y"
+#line 253 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleElif(parser);
@@ -1692,7 +1704,7 @@ yyreduce:
     break;
 
   case 17:
-#line 254 "cmDependsFortranParser.y"
+#line 258 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleElse(parser);
@@ -1700,26 +1712,33 @@ yyreduce:
     break;
 
   case 18:
-#line 259 "cmDependsFortranParser.y"
+#line 263 "cmDependsFortranParser.y"
     {
     cmDependsFortranParser* parser = cmDependsFortran_yyget_extra(yyscanner);
     cmDependsFortranParser_RuleEndif(parser);
     }
     break;
 
+  case 19:
+#line 268 "cmDependsFortranParser.y"
+    {
+    free((yyvsp[(1) - (4)].string));
+    }
+    break;
+
   case 44:
-#line 283 "cmDependsFortranParser.y"
+#line 290 "cmDependsFortranParser.y"
     { free ((yyvsp[(1) - (1)].string)); }
     break;
 
   case 45:
-#line 284 "cmDependsFortranParser.y"
+#line 291 "cmDependsFortranParser.y"
     { free ((yyvsp[(1) - (1)].string)); }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1723 "cmDependsFortranParser.cxx"
+#line 1742 "cmDependsFortranParser.cxx"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1935,7 +1954,7 @@ yyreturn:
 }
 
 
-#line 290 "cmDependsFortranParser.y"
+#line 297 "cmDependsFortranParser.y"
 
 /* End of grammar */
 
