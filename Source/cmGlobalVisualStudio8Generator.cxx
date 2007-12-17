@@ -280,7 +280,14 @@ cmGlobalVisualStudio8Generator
 
 //----------------------------------------------------------------------------
 static cmVS7FlagTable cmVS8ExtraFlagTable[] =
-{
+{ 
+  {"CallingConvention", "Gd", "cdecl", "0", 0 },
+  {"CallingConvention", "Gr", "fastcall", "1", 0 },
+  {"CallingConvention", "Gz", "stdcall", "2", 0 },
+
+  {"Detect64BitPortabilityProblems", "Wp64", "Detect 64Bit Portability Problems", "true", 0 },
+  {"ErrorReporting", "errorReport:prompt", "Report immediately", "1", 0 },
+  {"ErrorReporting", "errorReport:queue", "Queue for next login", "2", 0 },
   // Precompiled header and related options.  Note that the
   // UsePrecompiledHeader entries are marked as "Continue" so that the
   // corresponding PrecompiledHeaderThrough entry can be found.
