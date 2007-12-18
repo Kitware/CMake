@@ -29,8 +29,20 @@
 # Add this variable to your TARGET_LINK_LIBRARIES.
 #  
 #  macro QT4_WRAP_CPP(outfiles inputfile ... OPTIONS ...)
+#        create moc code from a list of files containing Qt class with
+#        the Q_OBJECT declaration.  Options may be given to moc, such as those found
+#        when executing "moc -help"
+#
 #  macro QT4_WRAP_UI(outfiles inputfile ... OPTIONS ...)
+#        create code from a list of Qt designer ui files.
+#        Options may be given to uic, such as those found
+#        when executing "uic -help"
+#
 #  macro QT4_ADD_RESOURCES(outfiles inputfile ... OPTIONS ...)
+#        create code from a list of Qt resource files.
+#        Options may be given to rcc, such as those found
+#        when executing "rcc -help"
+#
 #  macro QT4_AUTOMOC(inputfile ... )
 #  macro QT4_GENERATE_MOC(inputfile outputfile )
 #
@@ -112,9 +124,9 @@
 #  QT_PLUGINS_DIR              Path to "plugins" for Qt4
 #                            
 # For every library of Qt there are three variables:
-#  QT_QTFOO_LIBRARY_RELEASE, which contains the full path to the release version
-#  QT_QTFOO_LIBRARY_DEBUG, which contains the full path to the debug version
-#  QT_QTFOO_LIBRARY, the full path to the release version if available, otherwise to the debug version
+#  QT_QTFOO_LIBRARY_RELEASE, which contains the full path to the release version, if it exists
+#  QT_QTFOO_LIBRARY_DEBUG, which contains the full path to the debug version, if it exists
+#  QT_QTFOO_LIBRARY, the full path to the release and/or debug version
 #
 # So there are the following variables:
 # The Qt3Support library:     QT_QT3SUPPORT_LIBRARY
