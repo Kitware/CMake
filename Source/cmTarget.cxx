@@ -2242,6 +2242,12 @@ bool cmTarget::NeedRelinkBeforeInstall()
     return false;
     }
 
+  if(this->Makefile->IsOn("CMAKE_USE_CHRPATH") 
+     && (this->IsChrpathAvailable()))
+    {
+    return false;
+    }
+
   // If skipping all rpaths completely then no relinking is needed.
   if(this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
     {
@@ -2517,4 +2523,43 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
       languages.insert(lang);
       }
     }
+}
+
+bool cmTarget::IsChrpathAvailable()
+{
+  //only return true if the flag is "-Wl,rpath," amd the separator is not empty
+  if (this->Makefile->IsSet("CMAKE_CHRPATH")==false)
+    {
+    return false;
+    }
+
+  const char* linkLanguage = this->GetLinkerLanguage(this->Makefile->
+                                    GetLocalGenerator()->GetGlobalGenerator());
+  if (linkLanguage==0)
+    {
+    return false;
+    }
+
+  std::string runTimeFlagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
+  runTimeFlagVar += linkLanguage;
+  runTimeFlagVar += "_FLAG";
+  std::string runTimeFlagSepVar = runTimeFlagVar + "_SEP";
+
+  std::string runtimeSep = 
+                  this->Makefile->GetSafeDefinition(runTimeFlagSepVar.c_str());
+
+  if (runtimeSep.size()<=0)
+    {
+    return 0;
+    }
+
+  std::string runtimeFlag = 
+                     this->Makefile->GetSafeDefinition(runTimeFlagVar.c_str());
+
+  if (runtimeFlag!="-Wl,-rpath,")
+    {
+    return false;
+    }
+
+  return true;
 }

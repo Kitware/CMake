@@ -54,6 +54,9 @@ protected:
   void AddInstallNamePatchRule(std::ostream& os, Indent const& indent,
                                const char* config,
                                const std::string& toDestDirPath);
+  void AddChrpathPatchRule(std::ostream& os, Indent const& indent,
+                         const char* config, std::string const& toDestDirPath);
+  
   void AddStripRule(std::ostream& os, Indent const& indent,
                     cmTarget::TargetType type,
                     const std::string& toDestDirPath);

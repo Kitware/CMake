@@ -305,6 +305,7 @@ cmInstallTargetGenerator
 
   os << indent << "IF(EXISTS \"" << toDestDirPath << "\")\n";
   this->AddInstallNamePatchRule(os, indent.Next(), config, toDestDirPath);
+  this->AddChrpathPatchRule(os, indent.Next(), config, toDestDirPath);
   this->AddRanlibRule(os, indent.Next(), type, toDestDirPath);
   this->AddStripRule(os, indent.Next(), type, toDestDirPath);
   os << indent << "ENDIF(EXISTS \"" << toDestDirPath << "\")\n";
@@ -502,6 +503,60 @@ cmInstallTargetGenerator
       }
     os << "\n" << indent << "  \"" << toDestDirPath << "\")\n";
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmInstallTargetGenerator
+::AddChrpathPatchRule(std::ostream& os, Indent const& indent,
+                          const char* config, std::string const& toDestDirPath)
+{
+  if(this->ImportLibrary ||
+     !(this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+       this->Target->GetType() == cmTarget::MODULE_LIBRARY ||
+       this->Target->GetType() == cmTarget::EXECUTABLE))
+    {
+    return;
+    }
+
+  if((this->Target->GetMakefile()->IsOn("CMAKE_USE_CHRPATH")==false)
+      || (this->Target->IsChrpathAvailable()==false))
+    {
+    return;
+    }
+
+  // Fix the RPATH in installed ELF binaries using chrpath.
+  std::string chrpathTool =
+    this->Target->GetMakefile()->GetSafeDefinition("CMAKE_CHRPATH");
+
+  std::string installRpath;
+  std::string dummy;
+  this->Target->GetMakefile()->GetLocalGenerator()->GetLinkerArgs(
+                                  installRpath, dummy, *this->Target, true, 0);
+
+  const char* linkLanguage = this->Target->GetLinkerLanguage(this->Target->
+                     GetMakefile()->GetLocalGenerator()->GetGlobalGenerator());
+  if (linkLanguage==0)
+    {
+    return;
+    }
+
+  std::string runTimeFlagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
+  runTimeFlagVar += linkLanguage;
+  runTimeFlagVar += "_FLAG";
+
+  std::string runtimeFlag = 
+        this->Target->GetMakefile()->GetSafeDefinition(runTimeFlagVar.c_str());
+
+  const char* newRpath=installRpath.c_str();
+  if (strstr(installRpath.c_str(), runtimeFlag.c_str())==installRpath.c_str())
+    {
+    newRpath = installRpath.c_str()+strlen(runtimeFlag.c_str());
+    }
+
+  // Write a rule to run chrpath to set the install-tree RPATH
+  os << indent << "EXECUTE_PROCESS(COMMAND \"" << chrpathTool;
+  os << "\" -r \"" << newRpath << "\" \"" << toDestDirPath << "\")\n";
 }
 
 //----------------------------------------------------------------------------

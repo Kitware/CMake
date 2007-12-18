@@ -242,6 +242,13 @@ public:
    */
   virtual std::string GetTargetDirectory(cmTarget const& target) const;
 
+  ///! Determine the arguments for the linker call, used also by 
+  /// cmInstallTargetGenerator
+  bool GetLinkerArgs(std::string& rpath, std::string& linkLibs,
+                     cmTarget& tgt, bool relink, int minRpathSize);
+  
+  bool IsChrpathAvailable(const cmTarget& target);
+
 protected:
 
   /** Construct a comment for a custom command.  */
@@ -258,10 +265,6 @@ protected:
   ///! put all the libraries for a target on into the given stream
   virtual void OutputLinkLibraries(std::ostream&, cmTarget&, bool relink);
   
-  ///! Determine the arguments for the linker call
-  bool GetLinkerArgs(std::string& rpath, std::string& linkLibs,
-                     cmTarget& tgt, bool relink);
-
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,
                            const RuleVariables& replaceValues);

@@ -277,6 +277,9 @@ public:
 
   bool HaveBuildTreeRPATH();
   bool HaveInstallTreeRPATH();
+  
+  /// return true if chrpath might work for this target
+  bool IsChrpathAvailable();
 
   std::string GetInstallNameDirForBuildTree(const char* config);
   std::string GetInstallNameDirForInstallTree(const char* config);
