@@ -48,17 +48,17 @@ cmLocalGenerator *cmGlobalVisualStudio9Generator::CreateLocalGenerator()
 void cmGlobalVisualStudio9Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.Name = this->GetName();
-  entry.Brief = "Generates Visual Studio 9 2008 project files.";
-  entry.Full = "";
+  entry.name = this->GetName();
+  entry.brief = "Generates Visual Studio 9 2008 project files.";
+  entry.full = "";
 }
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Generator
 ::EnableLanguage(std::vector<std::string>const &  lang, 
-                 cmMakefile *mf, bool optional)
+                 cmMakefile *mf)
 {
-  cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
+  cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf);
 }
 
 //----------------------------------------------------------------------------

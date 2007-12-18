@@ -49,7 +49,7 @@ public:
    * extension, pthreads, byte order etc.  
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages, 
-                              cmMakefile *, bool optional);
+                              cmMakefile *);
   virtual void WriteSLNHeader(std::ostream& fout);
 
   /**

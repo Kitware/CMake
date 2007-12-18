@@ -39,15 +39,15 @@ cmLocalGenerator *cmGlobalVisualStudio9Win64Generator::CreateLocalGenerator()
 void cmGlobalVisualStudio9Win64Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
-  entry.Name = this->GetName();
-  entry.Brief = "Generates Visual Studio 9 2008 Win64 project files.";
-  entry.Full = "";
+  entry.name = this->GetName();
+  entry.brief = "Generates Visual Studio 9 2008 Win64 project files.";
+  entry.full = "";
 }
 
 void cmGlobalVisualStudio9Win64Generator
 ::EnableLanguage(std::vector<std::string>const &  lang, 
-                 cmMakefile *mf, bool optional)
+                 cmMakefile *mf)
 {
   mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
-  cmGlobalVisualStudio9Generator::EnableLanguage(lang, mf, optional);
+  cmGlobalVisualStudio9Generator::EnableLanguage(lang, mf);
 }
