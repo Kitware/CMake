@@ -1355,6 +1355,12 @@ void cmLocalVisualStudio7Generator
     {
     if(!init)
       {
+      const char* comment = cr->GetComment();
+      if(comment && *comment)
+        {
+        fout << "\nDescription=\""
+             << this->EscapeForXML(comment) << "\"";
+        }
       fout << "\nCommandLine=\"";
       init = true;
       }
@@ -1385,6 +1391,12 @@ void cmLocalVisualStudio7Generator
     {
     if(!init)
       {
+      const char* comment = cr->GetComment();
+      if(comment && *comment)
+        {
+        fout << "\nDescription=\""
+             << this->EscapeForXML(comment) << "\"";
+        }
       fout << "\nCommandLine=\"";
       init = true;
       }
@@ -1415,6 +1427,12 @@ void cmLocalVisualStudio7Generator
     {
     if(!init)
       {
+      const char* comment = cr->GetComment();
+      if(comment && *comment)
+        {
+        fout << "\nDescription=\""
+             << this->EscapeForXML(comment) << "\"";
+        }
       fout << "\nCommandLine=\"";
       init = true;
       }

@@ -95,12 +95,14 @@ ADD_CUSTOM_COMMAND(
   TARGET TDocument PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E echo " Writing doc1pre.txt."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/doc1.tex ${PROJECT_BINARY_DIR}/doc1pre.txt
+  COMMENT "Running TDocument pre-build commands"
   )
 ADD_CUSTOM_COMMAND(
   TARGET TDocument POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1pre.txt to doc2post.txt."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1pre.txt
                                    ${PROJECT_BINARY_DIR}/doc2post.txt
+  COMMENT "Running TDocument post-build commands"
   )
 
 ################################################################

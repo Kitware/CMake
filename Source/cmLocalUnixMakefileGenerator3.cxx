@@ -902,7 +902,7 @@ cmLocalUnixMakefileGenerator3
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
       i != ccs.end(); ++i)
     {
-    this->AppendCustomCommand(commands, *i);
+    this->AppendCustomCommand(commands, *i, true);
     }
 }
 
@@ -910,8 +910,22 @@ cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomCommand(std::vector<std::string>& commands,
-                      const cmCustomCommand& cc)
+                      const cmCustomCommand& cc, bool echo_comment)
 {
+  // Optionally create a command to display the custom command's
+  // comment text.  This is used for pre-build, pre-link, and
+  // post-build command comments.  Custom build step commands have
+  // their comments generated elsewhere.
+  if(echo_comment)
+    {
+    const char* comment = cc.GetComment();
+    if(comment && *comment)
+      {
+      this->AppendEcho(commands, comment,
+                       cmLocalUnixMakefileGenerator3::EchoGenerate);
+      }
+    }
+
   // if the command specified a working directory use it.
   const char* dir  = this->Makefile->GetStartOutputDirectory();
   const char* workingDir = cc.GetWorkingDirectory();

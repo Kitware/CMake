@@ -313,7 +313,8 @@ protected:
   void AppendCustomCommands(std::vector<std::string>& commands,
                             const std::vector<cmCustomCommand>& ccs);
   void AppendCustomCommand(std::vector<std::string>& commands,
-                           const cmCustomCommand& cc);
+                           const cmCustomCommand& cc,
+                           bool echo_comment=false);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files,
                           cmTarget& target, const char* filename =0);
