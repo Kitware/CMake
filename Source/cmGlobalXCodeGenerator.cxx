@@ -213,7 +213,6 @@ std::string cmGlobalXCodeGenerator
     makeCommand += " ";
     makeCommand += additionalOptions;
     }
-  std::cerr << "**** build command " << makeCommand.c_str() << "\n";
   return makeCommand;
 }
 
