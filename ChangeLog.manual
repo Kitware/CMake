@@ -1,3 +1,8 @@
+Changes in CMake 2.4.8 RC 7
+* Fix tar long file path issue with cpack
+* Add beta support for VS 9 
+* Fix variable name in docs for FindPkgConfig bug 5722
+* Fix for bug 5645 ifort bad pic flag on linux
 Changes in CMake 2.4.8 RC 6
 * Fix for bug 6006 INSTALL DIRECTORY signature problem
 * Update FindQt4 from CVS Head for many bug fixes

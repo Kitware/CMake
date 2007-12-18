@@ -93,16 +93,16 @@ th_set_path(TAR *t, char *pathname)
   if (pathname[strlen(pathname) - 1] != '/' && TH_ISDIR(t))
     strcpy(suffix, "/");
 
-  if (strlen(pathname) > T_NAMELEN && (t->options & TAR_GNU))
+  if (strlen(pathname)+strlen(suffix) >= T_NAMELEN && (t->options & TAR_GNU))
   {
     /* GNU-style long name */
     t->th_buf.gnu_longname = strdup(pathname);
     strncpy(t->th_buf.name, t->th_buf.gnu_longname, T_NAMELEN);
   }
-  else if (strlen(pathname) > T_NAMELEN)
+  else if (strlen(pathname)+ strlen(suffix) >= T_NAMELEN)
   {
     /* POSIX-style prefix field */
-    tmp = strchr(&(pathname[strlen(pathname) - T_NAMELEN - 1]), '/');
+    tmp = strrchr(pathname, '/');
     if (tmp == NULL)
     {
       printf("!!! '/' not found in \"%s\"\n", pathname);
@@ -197,11 +197,13 @@ void
 th_set_mode(TAR *t, mode_t fmode)
 {
 #ifndef WIN32
+#ifndef __BEOS__
   if (S_ISSOCK(fmode))
   {
     fmode &= ~S_IFSOCK;
     fmode |= S_IFIFO;
   }
+#endif
 #endif
   /* Looks like on windows the st_mode is longer than 8 characters. */
   int_to_oct(fmode & 07777777, (t)->th_buf.mode, 8);
