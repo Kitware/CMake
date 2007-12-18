@@ -49,6 +49,11 @@ bool cmGetSourceFilePropertyCommand::InitialPass(
       // needs to be changed to be mutable etc. for computed properties to
       // work properly.
       sf->GetFullPath();
+      } 
+    else if(args[2] == "LANGUAGE")
+      {
+      this->Makefile->AddDefinition(var, sf->GetLanguage());
+      return true;
       }
     const char *prop = sf->GetProperty(args[2].c_str());
     if (prop)
