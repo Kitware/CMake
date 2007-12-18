@@ -1143,12 +1143,11 @@ IF (QT4_QMAKE_FOUND)
   SET(QT_GUI_LIB_DEPENDENCIES "")
   SET(QT_CORE_LIB_DEPENDENCIES "")
   
-  # shared build needs -DQT_SHARED
+  # build using shared Qt needs -DQT_DLL
   IF(NOT QT_CONFIG MATCHES "static")
     # warning currently only qconfig.pri on Windows potentially contains "static"
-    # so QT_SHARED might not get defined properly on Mac/X11 (which seems harmless right now)
-    # Trolltech said they'd consider exporting it for all platforms in future releases.
-    SET(QT_DEFINITIONS ${QT_DEFINITIONS} -DQT_SHARED)
+    # so QT_DLL might not get defined properly on other platforms.
+    SET(QT_DEFINITIONS ${QT_DEFINITIONS} -DQT_DLL)
   ENDIF(NOT QT_CONFIG MATCHES "static")
   
   ## system png
