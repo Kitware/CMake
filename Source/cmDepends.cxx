@@ -48,7 +48,7 @@ bool cmDepends::Write(const char *src, const char *obj,
 }
 
 //----------------------------------------------------------------------------
-void cmDepends::Check(const char *makeFile, const char *internalFile)
+bool cmDepends::Check(const char *makeFile, const char *internalFile)
 {
   // Dependency checks must be done in proper working directory.
   std::string oldcwd = ".";
@@ -61,12 +61,14 @@ void cmDepends::Check(const char *makeFile, const char *internalFile)
     }
 
   // Check whether dependencies must be regenerated.
+  bool okay = true;
   std::ifstream fin(internalFile);
   if(!(fin && this->CheckDependencies(fin)))
     {
     // Clear all dependencies so they will be regenerated.
     this->Clear(makeFile);
-    this->Clear(internalFile);
+    cmSystemTools::RemoveFile(internalFile);
+    okay = false;
     }
 
   // Restore working directory.
@@ -74,6 +76,8 @@ void cmDepends::Check(const char *makeFile, const char *internalFile)
     {
     cmSystemTools::ChangeDirectory(oldcwd.c_str());
     }
+
+  return okay;
 }
 
 //----------------------------------------------------------------------------
@@ -87,17 +91,19 @@ void cmDepends::Clear(const char *file)
     cmSystemTools::Stdout(msg.str().c_str());
     }
 
-  // Remove the dependency mark file to be sure dependencies will be
-  // regenerated.
-  std::string markFile = file;
-  markFile += ".mark";
-  cmSystemTools::RemoveFile(markFile.c_str());
-  
   // Write an empty dependency file.
   cmGeneratedFileStream depFileStream(file);
   depFileStream
     << "# Empty dependencies file\n"
     << "# This may be replaced when dependencies are built." << std::endl;
+}
+
+//----------------------------------------------------------------------------
+bool cmDepends::WriteDependencies(const char*, const char*,
+                                  std::ostream&, std::ostream&)
+{
+  // This should be implemented by the subclass.
+  return false;
 }
 
 //----------------------------------------------------------------------------

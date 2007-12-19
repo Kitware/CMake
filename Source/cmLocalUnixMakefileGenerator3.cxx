@@ -1224,6 +1224,40 @@ cmLocalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
+bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
+                                                       bool verbose)
+{
+  std::string dir = cmSystemTools::GetFilenamePath(tgtInfo);
+  std::string internalDependFile = dir + "/depend.internal";
+  std::string dependFile = dir + "/depend.make";
+
+  // Check the implicit dependencies to see if they are up to date.
+  // The build.make file may have explicit dependencies for the object
+  // files but these will not affect the scanning process so they need
+  // not be considered.
+  cmDependsC checker;
+  checker.SetVerbose(verbose);
+  checker.SetFileComparison
+    (this->GlobalGenerator->GetCMakeInstance()->GetFileComparison());
+  if(!checker.Check(dependFile.c_str(), internalDependFile.c_str()))
+    {
+    // The dependencies must be regenerated.
+
+    // TODO: Make this like cmLocalUnixMakefileGenerator3::EchoDepend
+    std::string targetName = cmSystemTools::GetFilenameName(dir);
+    targetName = targetName.substr(0, targetName.length()-4);
+    fprintf(stdout, "Scanning dependencies of target %s\n", targetName.c_str());
+
+    return this->ScanDependencies(tgtInfo);
+    }
+  else
+    {
+    // The dependencies are already up-to-date.
+    return true;
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
 {
   // The info file for this target
@@ -1403,11 +1437,6 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
       }
     }
 
-  // dependencies were generated, so touch the mark file
-  ruleFileNameFull += ".mark";
-  std::ofstream fmark(ruleFileNameFull.c_str());
-  fmark << "Dependencies updated>" << std::endl;
-  
   return true;
 }
 
@@ -1619,9 +1648,8 @@ void cmLocalUnixMakefileGenerator3
 
 
 //----------------------------------------------------------------------------
-void cmLocalUnixMakefileGenerator3::CheckDependencies(cmMakefile* mf, 
-                                                      bool verbose,
-                                                      bool clear)
+void cmLocalUnixMakefileGenerator3::ClearDependencies(cmMakefile* mf,
+                                                      bool verbose)
 {
   // Get the list of target files to check
   const char* infoDef = mf->GetDefinition("CMAKE_DEPEND_INFO_FILES");
@@ -1632,27 +1660,23 @@ void cmLocalUnixMakefileGenerator3::CheckDependencies(cmMakefile* mf,
   std::vector<std::string> files;
   cmSystemTools::ExpandListArgument(infoDef, files);
 
-  // For each info file run the check
-  cmDependsC checker;
-  checker.SetVerbose(verbose);
-  checker.SetFileComparison
-    (this->GlobalGenerator->GetCMakeInstance()->GetFileComparison());
+  // Each depend information file corresponds to a target.  Clear the
+  // dependencies for that target.
+  cmDepends clearer;
+  clearer.SetVerbose(verbose);
   for(std::vector<std::string>::iterator l = files.begin();
       l != files.end(); ++l)
     {
-    // either clear or check the files
     std::string dir = cmSystemTools::GetFilenamePath(l->c_str());
-    std::string internalDependFile = dir + "/depend.internal";
+
+    // Clear the implicit dependency makefile.
     std::string dependFile = dir + "/depend.make";
-    if (clear)
-      {
-      checker.Clear(internalDependFile.c_str());
-      checker.Clear(dependFile.c_str());
-      }
-    else
-      {
-      checker.Check(dependFile.c_str(), internalDependFile.c_str());
-      }
+    clearer.Clear(dependFile.c_str());
+
+    // Remove the internal dependency check file to force
+    // regeneration.
+    std::string internalDependFile = dir + "/depend.internal";
+    cmSystemTools::RemoveFile(internalDependFile.c_str());
     }
 }
 

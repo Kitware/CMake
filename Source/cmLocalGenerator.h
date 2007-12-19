@@ -157,13 +157,14 @@ public:
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char* p);
   
-  /** Called from command-line hook to check dependencies.  */
-  virtual void CheckDependencies(cmMakefile* /* mf */, 
-                                 bool /* verbose */,
-                                 bool /* clear */) {};
+  /** Called from command-line hook to clear dependencies.  */
+  virtual void ClearDependencies(cmMakefile* /* mf */, 
+                                 bool /* verbose */) {}
   
-  /** Called from command-line hook to scan dependencies.  */
-  virtual bool ScanDependencies(const char* /* tgtInfo */) { return true; }
+  /** Called from command-line hook to update dependencies.  */
+  virtual bool UpdateDependencies(const char* /* tgtInfo */,
+                                  bool /*verbose*/)
+    { return true; }
 
   /** Compute the list of link libraries and directories for the given
       target and configuration.  */

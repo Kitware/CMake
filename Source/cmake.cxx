@@ -1353,6 +1353,10 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Internal CMake dependency scanning support.
     else if (args[1] == "cmake_depends" && args.size() >= 6)
       {
+      // Use the make system's VERBOSE environment variable to enable
+      // verbose output.
+      bool verbose = cmSystemTools::GetEnv("VERBOSE") != 0;
+
       // Create a cmake object instance to process dependencies.
       cmake cm;
       std::string gen;
@@ -1416,7 +1420,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         lgd->GetMakefile()->MakeStartDirectoriesCurrent();
 
         // Actually scan dependencies.
-        return lgd->ScanDependencies(depInfo.c_str())? 0 : 2;
+        return lgd->UpdateDependencies(depInfo.c_str(), verbose)? 0 : 2;
         }
       return 1;
       }
@@ -2549,7 +2553,11 @@ int cmake::CheckBuildSystem()
     // Check the dependencies in case source files were removed.
     std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
     lgd->SetGlobalGenerator(ggd.get());
-    lgd->CheckDependencies(mf, verbose, this->ClearBuildSystem);
+
+    if(this->ClearBuildSystem)
+      {
+      lgd->ClearDependencies(mf, verbose);
+      }
 
     // Check for multiple output pairs.
     ggd->CheckMultipleOutputs(mf, verbose);
