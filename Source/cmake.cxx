@@ -2556,9 +2556,16 @@ int cmake::CheckBuildSystem()
     }
 
   // Get the set of dependencies and outputs.
+  std::vector<std::string> depends;
+  std::vector<std::string> outputs;
   const char* dependsStr = mf->GetDefinition("CMAKE_MAKEFILE_DEPENDS");
   const char* outputsStr = mf->GetDefinition("CMAKE_MAKEFILE_OUTPUTS");
-  if(!dependsStr || !outputsStr)
+  if(dependsStr && outputsStr)
+    {
+    cmSystemTools::ExpandListArgument(dependsStr, depends);
+    cmSystemTools::ExpandListArgument(outputsStr, outputs);
+    }
+  if(depends.empty() || outputs.empty())
     {
     // Not enough information was provided to do the test.  Just rerun.
     if(verbose)
@@ -2570,34 +2577,77 @@ int cmake::CheckBuildSystem()
       }
     return 1;
     }
-  std::vector<std::string> depends;
-  std::vector<std::string> outputs;
-  cmSystemTools::ExpandListArgument(dependsStr, depends);
-  cmSystemTools::ExpandListArgument(outputsStr, outputs);
 
-  // If any output is older than any dependency then rerun.
-  for(std::vector<std::string>::iterator dep = depends.begin();
-      dep != depends.end(); ++dep)
+  // Find find the newest dependency.
+  std::vector<std::string>::iterator dep = depends.begin();
+  std::string dep_newest = *dep++;
+  for(;dep != depends.end(); ++dep)
     {
-    for(std::vector<std::string>::iterator out = outputs.begin();
-        out != outputs.end(); ++out)
+    int result = 0;
+    if(this->FileComparison->FileTimeCompare(dep_newest.c_str(),
+                                             dep->c_str(), &result))
       {
-      int result = 0;
-      if(!this->FileComparison->FileTimeCompare(out->c_str(), 
-                                                dep->c_str(), &result) ||
-         result < 0)
+      if(result < 0)
         {
-        if(verbose)
-          {
-          cmOStringStream msg;
-          msg << "Re-run cmake file: " << out->c_str()
-              << " older than: " << dep->c_str() << "\n";
-          cmSystemTools::Stdout(msg.str().c_str());
-          }
-        return 1;
+        dep_newest = *dep;
         }
       }
+    else
+      {
+      if(verbose)
+        {
+        cmOStringStream msg;
+        msg << "Re-run cmake: build system dependency is missing\n";
+        cmSystemTools::Stdout(msg.str().c_str());
+        }
+      return 1;
+      }
     }
+
+  // Find find the oldest output.
+  std::vector<std::string>::iterator out = outputs.begin();
+  std::string out_oldest = *out++;
+  for(;out != outputs.end(); ++out)
+    {
+    int result = 0;
+    if(this->FileComparison->FileTimeCompare(out_oldest.c_str(),
+                                             out->c_str(), &result))
+      {
+      if(result > 0)
+        {
+        out_oldest = *out;
+        }
+      }
+    else
+      {
+      if(verbose)
+        {
+        cmOStringStream msg;
+        msg << "Re-run cmake: build system output is missing\n";
+        cmSystemTools::Stdout(msg.str().c_str());
+        }
+      return 1;
+      }
+    }
+
+  // If any output is older than any dependency then rerun.
+  {
+  int result = 0;
+  if(!this->FileComparison->FileTimeCompare(out_oldest.c_str(),
+                                            dep_newest.c_str(),
+                                            &result) ||
+     result < 0)
+    {
+    if(verbose)
+      {
+      cmOStringStream msg;
+      msg << "Re-run cmake file: " << out_oldest.c_str()
+          << " older than: " << dep_newest.c_str() << "\n";
+      cmSystemTools::Stdout(msg.str().c_str());
+      }
+    return 1;
+    }
+  }
 
   // No need to rerun.
   return 0;
