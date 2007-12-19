@@ -83,7 +83,7 @@ cmFindBase::cmFindBase()
     "1. Search cmake specific environment variables.  This "
     "can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
     ""
-    "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_FIND_PREFIX_PATH\n"
+    "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_PREFIX_PATH\n"
     "   CMAKE_FRAMEWORK_PATH\n"
     "   CMAKE_APPBUNDLE_PATH\n"
     "   CMAKE_XXX_PATH\n"
@@ -93,7 +93,7 @@ cmFindBase::cmFindBase()
     "-DVAR=value.  This can be skipped if NO_CMAKE_PATH "
     "is passed.\n"
     ""
-    "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_FIND_PREFIX_PATH\n"
+    "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_PREFIX_PATH\n"
     "   CMAKE_FRAMEWORK_PATH\n"
     "   CMAKE_APPBUNDLE_PATH\n"
     "   CMAKE_XXX_PATH\n"
@@ -553,7 +553,7 @@ void cmFindBase::AddEnvironmentVariables()
   std::vector<std::string> paths;
 
   std::vector<std::string> prefixPaths;
-  cmSystemTools::GetPath(prefixPaths, "CMAKE_FIND_PREFIX_PATH");
+  cmSystemTools::GetPath(prefixPaths, "CMAKE_PREFIX_PATH");
   this->AddFindPrefix(paths, prefixPaths);
 
   std::string var = "CMAKE_";
@@ -690,7 +690,7 @@ void cmFindBase::AddCMakeVariables()
   std::vector<std::string> paths;
 
   if(const char* prefixPath = 
-      this->Makefile->GetDefinition("CMAKE_FIND_PREFIX_PATH"))
+      this->Makefile->GetDefinition("CMAKE_PREFIX_PATH"))
     {
     std::vector<std::string> prefixPaths;
     cmSystemTools::ExpandListArgument(prefixPath, prefixPaths);
