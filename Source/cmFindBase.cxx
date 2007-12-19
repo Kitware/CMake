@@ -104,6 +104,7 @@ cmFindBase::cmFindBase()
     "4. Search cmake variables defined in the Platform files "
     "for the current system.  This can be skipped if NO_CMAKE_SYSTEM_PATH "
     "is passed.\n"
+    "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_SYSTEM_PREFIX_PATH\n"
     "   CMAKE_SYSTEM_FRAMEWORK_PATH\n"
     "   CMAKE_SYSTEM_APPBUNDLE_PATH\n"
     "   CMAKE_SYSTEM_XXX_PATH\n"
@@ -738,6 +739,13 @@ void cmFindBase::AddCMakeSystemVariables()
   var += this->CMakePathName;
   var += "_PATH";
   std::vector<std::string> paths;
+  if(const char* prefixPath =
+      this->Makefile->GetDefinition("CMAKE_SYSTEM_PREFIX_PATH"))
+    {
+    std::vector<std::string> prefixPaths;
+    cmSystemTools::ExpandListArgument(prefixPath, prefixPaths);
+    this->AddFindPrefix(paths, prefixPaths);
+    }
   if(const char* path = this->Makefile->GetDefinition(var.c_str()))
     {
     cmSystemTools::ExpandListArgument(path, paths);
