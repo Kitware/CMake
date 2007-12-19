@@ -141,6 +141,7 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
 
   // Write the include dependencies to the output stream.
   internalDepends << obj << std::endl;
+  internalDepends << " " << src << std::endl;
   for(std::set<cmStdString>::const_iterator i = parser.Includes.begin();
       i != parser.Includes.end(); ++i)
     {
