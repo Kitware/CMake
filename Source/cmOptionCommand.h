@@ -65,7 +65,12 @@ public:
       "Provide an option for the user to select as ON or OFF.  If no "
       "initial value is provided, OFF is used.";
     }
-  
+
+  /**
+   * This determines if the command is invoked when in script mode.
+   */
+  virtual bool IsScriptable() { return true; }
+
   cmTypeMacro(cmOptionCommand, cmCommand);
 };
 
