@@ -305,7 +305,7 @@ cmInstallTargetGenerator
 
   os << indent << "IF(EXISTS \"" << toDestDirPath << "\")\n";
   this->AddInstallNamePatchRule(os, indent.Next(), config, toDestDirPath);
-  this->AddChrpathPatchRule(os, indent.Next(), config, toDestDirPath);
+  this->AddChrpathPatchRule(os, indent.Next(), toDestDirPath);
   this->AddRanlibRule(os, indent.Next(), type, toDestDirPath);
   this->AddStripRule(os, indent.Next(), type, toDestDirPath);
   os << indent << "ENDIF(EXISTS \"" << toDestDirPath << "\")\n";
@@ -509,7 +509,7 @@ cmInstallTargetGenerator
 void
 cmInstallTargetGenerator
 ::AddChrpathPatchRule(std::ostream& os, Indent const& indent,
-                          const char* config, std::string const& toDestDirPath)
+                      std::string const& toDestDirPath)
 {
   if(this->ImportLibrary ||
      !(this->Target->GetType() == cmTarget::SHARED_LIBRARY ||

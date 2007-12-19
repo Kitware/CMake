@@ -1480,7 +1480,7 @@ bool cmLocalGenerator::GetLinkerArgs(std::string& rpath,
                                      std::string& linkLibs,
                                      cmTarget& tgt,
                                      bool relink,
-                                     int minRpathSize)
+                                     unsigned int minRpathSize)
 {
   rpath = "";
   // collect all the flags needed for linking libraries
@@ -1658,16 +1658,14 @@ bool cmLocalGenerator::GetLinkerArgs(std::string& rpath,
       }
     }
 
-  if (rpath.size()<minRpathSize)
+  while (rpath.size() < minRpathSize)
     {
     if (rpath.size()==0)
       {
       rpath += runtimeFlag;
       }
-    while (rpath.size() < minRpathSize)
-      {
-      rpath += runtimeSep;
-      }
+
+    rpath += runtimeSep;
     }
   return true;
 }

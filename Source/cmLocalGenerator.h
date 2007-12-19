@@ -245,7 +245,7 @@ public:
   ///! Determine the arguments for the linker call, used also by 
   /// cmInstallTargetGenerator
   bool GetLinkerArgs(std::string& rpath, std::string& linkLibs,
-                     cmTarget& tgt, bool relink, int minRpathSize);
+                     cmTarget& tgt, bool relink, unsigned int minRpathSize);
   
   bool IsChrpathAvailable(const cmTarget& target);
 
