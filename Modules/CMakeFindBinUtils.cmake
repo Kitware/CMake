@@ -77,7 +77,7 @@ ENDIF(APPLE)
 
 IF(UNIX  AND NOT  APPLE  AND NOT  WIN32)
   # on ELF platforms there might be chrpath, which works similar to install_name_tool
-  OPTION(CMAKE_USE_CHRPATH "Enable this to use chrpath if available" OFF)
+  SET(CMAKE_USE_CHRPATH OFF CACHE BOOL "Enable this to use chrpath if available")
 
   FIND_PROGRAM(CMAKE_CHRPATH chrpath PATHS ${_CMAKE_TOOLCHAIN_LOCATION} NO_DEFAULT_PATH)
   FIND_PROGRAM(CMAKE_CHRPATH chrpath)
