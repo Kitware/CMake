@@ -90,8 +90,9 @@ cmDependsFortran::cmDependsFortran():
 }
 
 //----------------------------------------------------------------------------
-cmDependsFortran::cmDependsFortran(std::vector<std::string> const& includes):
-  IncludePath(&includes)
+cmDependsFortran::cmDependsFortran(std::vector<std::string> const& includes,
+                                   std::string const& targetDirectory):
+  IncludePath(&includes), TargetDirectory(targetDirectory)
 {
 }
 
@@ -267,8 +268,12 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
 
     // Make sure the module timestamp rule is evaluated by the time
     // the target finishes building.
-    makeDepends << cmSystemTools::GetFilenamePath(obj) << "/build: "
-                << obj << ".provides.build\n";
+    std::string driver = this->TargetDirectory;
+    driver += "/build";
+    driver = this->LocalGenerator->Convert(driver.c_str(),
+                                           cmLocalGenerator::HOME_OUTPUT,
+                                           cmLocalGenerator::MAKEFILE);
+    makeDepends << driver << ": " << obj << ".provides.build\n";
     }
 
   /*

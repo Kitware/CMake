@@ -1367,7 +1367,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(const char* tgtInfo)
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")
       {
-      scanner = new cmDependsFortran(includes);
+      scanner = new cmDependsFortran(includes, dir);
       }
     else if(lang == "Java")
       {
