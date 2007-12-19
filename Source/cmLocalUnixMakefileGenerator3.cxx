@@ -1650,6 +1650,9 @@ void cmLocalUnixMakefileGenerator3
                            cmLocalGenerator::SHELL);
   runRule += " 1";
   commands.push_back(runRule);
+  this->CreateCDCommand(commands,
+                        this->Makefile->GetHomeOutputDirectory(),
+                        this->Makefile->GetStartOutputDirectory());
   this->WriteMakeRule(ruleFileStream, "clear depends", 
                       "depend", 
                       depends, commands, true);
