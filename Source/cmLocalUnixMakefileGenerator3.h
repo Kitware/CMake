@@ -200,7 +200,8 @@ public:
 
   /** Called from command-line hook to bring dependencies up to date
       for a target.  */
-  virtual bool UpdateDependencies(const char* tgtInfo, bool verbose);
+  virtual bool UpdateDependencies(const char* tgtInfo,
+                                  bool verbose, bool color);
 
   /** Called from command-line hook to scan dependencies.  */
   bool ScanDependencies(const char* tgtInfo);

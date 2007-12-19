@@ -1365,6 +1365,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string homeOutDir;
       std::string startOutDir;
       std::string depInfo;
+      bool color = true;
       if(args.size() >= 8)
         {
         // Full signature:
@@ -1372,7 +1373,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         //   -E cmake_depends <generator>
         //                    <home-src-dir> <start-src-dir>
         //                    <home-out-dir> <start-out-dir>
-        //                    <dep-info>
+        //                    <dep-info> [--color=$(COLOR)]
         //
         // All paths are provided.
         gen = args[2];
@@ -1381,6 +1382,13 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         homeOutDir = args[5];
         startOutDir = args[6];
         depInfo = args[7];
+        if(args.size() >= 9 &&
+           args[8].length() > 8 &&
+           args[8].substr(0, 8) == "--color=")
+          {
+          // Enable or disable color based on the switch value.
+          color = cmSystemTools::IsOn(args[8].substr(8).c_str());
+          }
         }
       else
         {
@@ -1420,7 +1428,8 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         lgd->GetMakefile()->MakeStartDirectoriesCurrent();
 
         // Actually scan dependencies.
-        return lgd->UpdateDependencies(depInfo.c_str(), verbose)? 0 : 2;
+        return lgd->UpdateDependencies(depInfo.c_str(),
+                                       verbose, color)? 0 : 2;
         }
       return 1;
       }
@@ -3020,21 +3029,6 @@ int cmake::ExecuteEchoColor(std::vector<std::string>& args)
   //   argv[0] == <cmake-executable>
   //   argv[1] == cmake_echo_color
 
-  // On some platforms (an MSYS prompt) cmsysTerminal may not be able
-  // to determine whether the stream is displayed on a tty.  In this
-  // case it assumes no unless we tell it otherwise.  Since we want
-  // color messages to be displayed for users we will assume yes.
-  // However, we can test for some situations when the answer is most
-  // likely no.
-  int assumeTTY = cmsysTerminal_Color_AssumeTTY;
-  if(cmSystemTools::GetEnv("DART_TEST_FROM_DART") ||
-     cmSystemTools::GetEnv("DASHBOARD_TEST_FROM_CTEST") ||
-     cmSystemTools::GetEnv("CTEST_INTERACTIVE_DEBUG_MODE"))
-    {
-    // Avoid printing color escapes during dashboard builds.
-    assumeTTY = 0;
-    }
-
   bool enabled = true;
   int color = cmsysTerminal_Color_Normal;
   bool newline = true;
@@ -3104,16 +3098,11 @@ int cmake::ExecuteEchoColor(std::vector<std::string>& args)
       {
       newline = true;
       }
-    else if(enabled)
-      {
-      // Color is enabled.  Print with the current color.
-      cmsysTerminal_cfprintf(color | assumeTTY, stdout, "%s%s",
-                             args[i].c_str(), newline? "\n" : "");
-      }
     else
       {
-      // Color is disabled.  Print without color.
-      fprintf(stdout, "%s%s", args[i].c_str(), newline? "\n" : "");
+      // Color is enabled.  Print with the current color.
+      cmSystemTools::MakefileColorEcho(color, args[i].c_str(),
+                                       newline, enabled);
       }
     }
 

@@ -805,7 +805,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   //   cmake -E cmake_depends <generator>
   //                          <home-src-dir> <start-src-dir>
   //                          <home-out-dir> <start-out-dir>
-  //                          <dep-info>
+  //                          <dep-info> --color=$(COLOR)
   //
   // This gives the dependency scanner enough information to recreate
   // the state of our local generator sufficiently for its needs.
@@ -824,7 +824,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
          << this->Convert(this->InfoFileNameFull.c_str(),
-                          cmLocalGenerator::FULL, cmLocalGenerator::SHELL);
+                          cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
+         << " --color=$(COLOR)";
   commands.push_back(depCmd.str());
 
   // Make sure all custom command outputs in this target are built.

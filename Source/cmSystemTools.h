@@ -358,6 +358,12 @@ public:
   /** Get the directory containing the currently running executable.  */
   static const char* GetExecutableDirectory();
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  /** Echo a message in color using KWSys's Terminal cprintf.  */
+  static void MakefileColorEcho(int color, const char* message,
+                                bool newline, bool enabled);
+#endif
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

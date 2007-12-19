@@ -163,7 +163,8 @@ public:
   
   /** Called from command-line hook to update dependencies.  */
   virtual bool UpdateDependencies(const char* /* tgtInfo */,
-                                  bool /*verbose*/)
+                                  bool /*verbose*/,
+                                  bool /*color*/)
     { return true; }
 
   /** Compute the list of link libraries and directories for the given
