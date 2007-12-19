@@ -347,7 +347,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
       error << "Error in cmake code at\n"
             << lff.FilePath << ":" << lff.Line << ":\n"
             << "Command " << usedCommand->GetName()
-            << " not scriptable" << std::endl;
+            << "() is not scriptable" << std::endl;
       cmSystemTools::Error(error.str().c_str());
       result = false;
       cmSystemTools::SetFatalErrorOccured();
