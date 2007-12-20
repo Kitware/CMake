@@ -361,7 +361,7 @@ public:
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /** Echo a message in color using KWSys's Terminal cprintf.  */
   static void MakefileColorEcho(int color, const char* message,
-                                bool newline, bool enabled);
+                                bool newLine, bool enabled);
 #endif
 
 private:
