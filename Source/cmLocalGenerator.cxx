@@ -1681,7 +1681,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
 {
   std::string rpath;
   std::string linkLibs;
-  int minBuildRpathSize = 0;
+  unsigned int minBuildRpathSize = 0;
   
   if ((relink==false) 
     && this->Makefile->IsOn("CMAKE_USE_CHRPATH") 
@@ -1690,7 +1690,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     std::string installRpath;
     std::string dummy;
     this->GetLinkerArgs(installRpath, dummy, tgt, true, 0);
-    minBuildRpathSize=installRpath.size();
+    minBuildRpathSize = static_cast<unsigned int>(installRpath.size());
     }
 
   if (!this->GetLinkerArgs(rpath, linkLibs, tgt, relink, minBuildRpathSize))
