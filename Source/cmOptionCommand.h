@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  option(OPTION_VAR \"help string describing option\"\n"
+      "  option(<option_variable> \"help string describing option\"\n"
       "         [initial value])\n"
       "Provide an option for the user to select as ON or OFF.  If no "
       "initial value is provided, OFF is used.";

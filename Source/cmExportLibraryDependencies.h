@@ -68,10 +68,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  export_library_dependencies(FILE [APPEND])\n"
-      "Create a file that can be included into a CMake listfile with the "
-      "INCLUDE command.  The file will contain a number of SET commands "
-      "that will set all the variables needed for library dependency "
+      "  export_library_dependencies(<file> [APPEND])\n"
+      "Create a file named <file> that can be included into a CMake listfile "
+      "with the INCLUDE command.  The file will contain a number of SET "
+      "commands that will set all the variables needed for library dependency "
       "information.  This should be the last command in the top level "
       "CMakeLists.txt file of the project.  If the APPEND option is "
       "specified, the SET commands will be appended to the given file "

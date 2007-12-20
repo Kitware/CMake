@@ -63,7 +63,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  export(TARGETS tgt1 tgt2 ...  [PREFIX <prefix>] FILE <filename> "
+      "  export(TARGETS tgt1 ... tgtN [PREFIX <prefix>] FILE <filename> "
       "[APPEND])\n"
       "Create a file that can be included into a CMake listfile with the "
       "INCLUDE command.  The file will contain a number of SET commands "

@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  create_test_sourcelist(SourceListName DriverName\n"
+      "  create_test_sourcelist(sourceListName driverName\n"
       "                         test1 test2 test3\n"
       "                         EXTRA_INCLUDE include.h\n"
       "                         FUNCTION function)\n"
@@ -68,7 +68,7 @@ public:
       "a single executable.  This is useful when building static executables "
       "with large libraries to shrink the total required size.  "
       "The list of source files "
-      "needed to build the test driver will be in SourceListName.  "
+      "needed to build the test driver will be in sourceListName.  "
       "DriverName is the name of the test driver program.  The rest of "
       "the arguments consist of a list of test source files, can be "
       "semicolon separated.  Each test source file should have a function in "
