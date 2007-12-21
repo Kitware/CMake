@@ -913,8 +913,7 @@ cmGlobalUnixMakefileGenerator3
     if(emitted.insert(lib->first).second)
       {
       // Add this dependency.
-      this->AppendAnyGlobalDepend(depends, lib->first.c_str(),
-                                  emitted, target);
+      this->AppendAnyGlobalDepend(depends, lib->first.c_str(), target);
       }
     }
 
@@ -927,7 +926,7 @@ cmGlobalUnixMakefileGenerator3
     if(emitted.insert(*util).second)
       {
       // Add this dependency.
-      this->AppendAnyGlobalDepend(depends, util->c_str(), emitted, target);
+      this->AppendAnyGlobalDepend(depends, util->c_str(), target);
       }
     }
 }
@@ -937,7 +936,7 @@ cmGlobalUnixMakefileGenerator3
 void
 cmGlobalUnixMakefileGenerator3
 ::AppendAnyGlobalDepend(std::vector<std::string>& depends, const char* name,
-                        std::set<cmStdString>& emitted, cmTarget &target)
+                        cmTarget &target)
 {
   cmTarget *result;
   cmLocalUnixMakefileGenerator3 *lg3;
