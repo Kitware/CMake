@@ -374,7 +374,7 @@ void cmGlobalUnixMakefileGenerator3
 
   // now list all the target info files
   cmakefileStream
-    << "# The set of files whose dependency integrity should be checked:\n";
+    << "# Dependency information for all targets:\n";
   cmakefileStream
     << "SET(CMAKE_DEPEND_INFO_FILES\n";
   for (unsigned int i = 0; i < lGenerators.size(); ++i)
@@ -387,7 +387,8 @@ void cmGlobalUnixMakefileGenerator3
       if((l->second.GetType() == cmTarget::EXECUTABLE) ||
          (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
          (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-         (l->second.GetType() == cmTarget::MODULE_LIBRARY) )
+         (l->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+         (l->second.GetType() == cmTarget::UTILITY))
         {
         std::string tname = lg->GetRelativeTargetDirectory(l->second);
         tname += "/DependInfo.cmake";
