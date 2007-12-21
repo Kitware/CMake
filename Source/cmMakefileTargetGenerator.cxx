@@ -837,7 +837,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       depTarget.c_str(),
-                                      depends, commands, false);
+                                      depends, commands, true);
 }
 
 //----------------------------------------------------------------------------
