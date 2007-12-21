@@ -60,8 +60,13 @@ public:
 
 protected:
   virtual void CreateGUID(const char*) {}
-  virtual void FixUtilityDepends();
+  void FixUtilityDepends();
   const char* GetUtilityForTarget(cmTarget& target, const char*);
+
+  // Does this VS version link targets to each other if there are
+  // dependencies in the SLN file?  This was done for VS versions
+  // below 8.
+  virtual bool VSLinksDependencies() const { return true; }
 
 private:
   void FixUtilityDependsForTarget(cmTarget& target);

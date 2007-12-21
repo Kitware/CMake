@@ -59,8 +59,7 @@ public:
 
 protected:
 
-  // Utility target fix is not needed for VS8.
-  virtual void FixUtilityDepends() {}
+  virtual bool VSLinksDependencies() const { return false; }
 
   static cmVS7FlagTable const* GetExtraFlagTableVS8();
   virtual void AddPlatformDefinitions(cmMakefile* mf);

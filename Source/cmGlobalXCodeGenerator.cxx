@@ -2006,34 +2006,33 @@ void cmGlobalXCodeGenerator
     }
 
   // Add dependencies on other CMake targets.
-  if(cmtarget->GetType() != cmTarget::STATIC_LIBRARY)
+  {
+  // Keep track of dependencies already listed.
+  std::set<cmStdString> emitted;
+
+  // A target should not depend on itself.
+  emitted.insert(cmtarget->GetName());
+
+  // Loop over all library dependencies.
+  const cmTarget::LinkLibraryVectorType& tlibs = 
+    cmtarget->GetLinkLibraries();
+  for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
+      lib != tlibs.end(); ++lib)
     {
-    // Keep track of dependencies already listed.
-    std::set<cmStdString> emitted;
-
-    // A target should not depend on itself.
-    emitted.insert(cmtarget->GetName());
-
-    // Loop over all library dependencies.
-    const cmTarget::LinkLibraryVectorType& tlibs = 
-      cmtarget->GetLinkLibraries();
-    for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
-        lib != tlibs.end(); ++lib)
+    // Don't emit the same library twice for this target.
+    if(emitted.insert(lib->first).second)
       {
-      // Don't emit the same library twice for this target.
-      if(emitted.insert(lib->first).second)
+      // Add this dependency.
+      cmTarget* t = this->FindTarget(this->CurrentProject.c_str(),
+                                     lib->first.c_str(), false);
+      cmXCodeObject* dptarget = this->FindXCodeTarget(t);
+      if(dptarget)
         {
-        // Add this dependency.
-        cmTarget* t = this->FindTarget(this->CurrentProject.c_str(),
-                                       lib->first.c_str(), false);
-        cmXCodeObject* dptarget = this->FindXCodeTarget(t);
-        if(dptarget)
-          {
-          this->AddDependTarget(target, dptarget);
-          }
+        this->AddDependTarget(target, dptarget);
         }
       }
     }
+  }
   
   // write utility dependencies.
   for(std::set<cmStdString>::const_iterator i

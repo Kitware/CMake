@@ -903,24 +903,21 @@ cmGlobalUnixMakefileGenerator3
 
   // A target should not depend on itself.
   emitted.insert(target.GetName());
-  
-  // Loop over all library dependencies but not for static libs
-  if (target.GetType() != cmTarget::STATIC_LIBRARY)
+
+  // Loop over all library dependencies.
+  const cmTarget::LinkLibraryVectorType& tlibs = target.GetLinkLibraries();
+  for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
+      lib != tlibs.end(); ++lib)
     {
-    const cmTarget::LinkLibraryVectorType& tlibs = target.GetLinkLibraries();
-    for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
-        lib != tlibs.end(); ++lib)
+    // Don't emit the same library twice for this target.
+    if(emitted.insert(lib->first).second)
       {
-      // Don't emit the same library twice for this target.
-      if(emitted.insert(lib->first).second)
-        {
-        // Add this dependency.
-        this->AppendAnyGlobalDepend(depends, lib->first.c_str(), 
-                                    emitted, target);
-        }
+      // Add this dependency.
+      this->AppendAnyGlobalDepend(depends, lib->first.c_str(),
+                                  emitted, target);
       }
     }
-  
+
   // Loop over all utility dependencies.
   const std::set<cmStdString>& tutils = target.GetUtilities();
   for(std::set<cmStdString>::const_iterator util = tutils.begin();
@@ -967,24 +964,6 @@ cmGlobalUnixMakefileGenerator3
     std::string tgtName = lg3->GetRelativeTargetDirectory(*result);
     tgtName += "/all";
     depends.push_back(tgtName);
-    if(result->GetType() == cmTarget::STATIC_LIBRARY)
-      {
-      // Since the static library itself does not list dependencies we
-      // need to chain its dependencies here.
-      const cmTarget::LinkLibraryVectorType& tlibs 
-        = result->GetLinkLibraries();
-      for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
-          lib != tlibs.end(); ++lib)
-        {
-        // Don't emit the same library twice for this target.
-        if(emitted.insert(lib->first).second)
-          {
-          // Add this dependency.
-          this->AppendAnyGlobalDepend(depends, lib->first.c_str(),
-                                      emitted, *result);
-          }
-        }
-      }
     return;
     }
 }
