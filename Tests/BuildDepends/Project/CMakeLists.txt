@@ -32,9 +32,12 @@ add_executable(bar bar.cxx
 IF("${CMAKE_GENERATOR}" MATCHES "Make")
   # Test the IMPLICIT_DEPENDS feature.
   SET(ZOT_DEPENDS IMPLICIT_DEPENDS CXX ${CMAKE_CURRENT_SOURCE_DIR}/dep.cxx)
+  SET(ZOT_CUSTOM_DEP
+    IMPLICIT_DEPENDS CXX ${CMAKE_CURRENT_SOURCE_DIR}/dep_custom.cxx)
 ELSE("${CMAKE_GENERATOR}" MATCHES "Make")
   # No IMPLICIT_DEPENDS...just depend directly.
   SET(ZOT_DEPENDS DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/zot.hxx.in)
+  SET(ZOT_CUSTOM_DEP DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/zot_custom.hxx.in)
 ENDIF("${CMAKE_GENERATOR}" MATCHES "Make")
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/zot.hxx
@@ -44,4 +47,15 @@ add_custom_command(
   ${ZOT_DEPENDS}
   )
 
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/zot_custom.hxx
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_BINARY_DIR}/zot_custom.hxx.in
+  ${CMAKE_CURRENT_BINARY_DIR}/zot_custom.hxx
+  ${ZOT_CUSTOM_DEP}
+  )
+add_custom_target(zot_custom ALL DEPENDS
+  ${CMAKE_CURRENT_BINARY_DIR}/zot_custom.hxx)
+
 add_executable(zot zot.cxx ${CMAKE_CURRENT_BINARY_DIR}/zot.hxx)
+add_dependencies(zot zot_custom)

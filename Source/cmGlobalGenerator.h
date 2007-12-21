@@ -211,9 +211,6 @@ public:
 
   void AddTarget(cmTargets::value_type &v);
 
-  /** Support for multiple custom command outputs.  */
-  virtual void CheckMultipleOutputs(cmMakefile* mf, bool verbose);
-
   virtual const char* GetAllTargetName()          { return "ALL_BUILD"; }
   virtual const char* GetInstallTargetName()      { return "INSTALL"; }
   virtual const char* GetInstallLocalTargetName() { return 0; }

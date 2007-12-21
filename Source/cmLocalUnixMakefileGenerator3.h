@@ -203,9 +203,6 @@ public:
   virtual bool UpdateDependencies(const char* tgtInfo,
                                   bool verbose, bool color);
 
-  /** Called from command-line hook to scan dependencies.  */
-  bool ScanDependencies(const char* tgtInfo);
-
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* mf, bool verbose);
   
@@ -324,6 +321,10 @@ protected:
                           cmTarget& target, const char* filename =0);
 
   std::map<cmStdString, std::vector<int> > ProgressFiles;
+
+  // Helper methods for dependeny updates.
+  bool ScanDependencies(const char* targetDir);
+  void CheckMultipleOutputs(bool verbose);
 
 private:
   friend class cmMakefileTargetGenerator;

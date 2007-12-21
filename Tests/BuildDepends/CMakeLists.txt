@@ -13,6 +13,8 @@ write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot.hxx.in
   "static const char* zot = \"zot\";\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_custom.hxx.in
+  "static const char* zot_custom = \"zot_custom\";\n")
 
 message("Building project first time")
 try_compile(RESULT 
@@ -70,11 +72,11 @@ execute_process(COMMAND ${zot} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
 string(REGEX REPLACE "[\r\n]" " " out "${out}")
 message("Run result: ${runResult} Output: \"${out}\"")
 
-if("${out}" STREQUAL "zot ")
+if("${out}" STREQUAL "[zot] [zot_custom] ")
   message("Worked!")
-else("${out}" STREQUAL "zot ")
+else("${out}" STREQUAL "[zot] [zot_custom] ")
   message(SEND_ERROR "Project did not initially build properly: ${out}")
-endif("${out}" STREQUAL "zot ")
+endif("${out}" STREQUAL "[zot] [zot_custom] ")
 
 message("Waiting 3 seconds...")
 # any additional argument will cause ${bar} to wait forever
@@ -85,6 +87,8 @@ write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
   "const char* foo() { return \"foo changed\";}" )
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot.hxx.in
   "static const char* zot = \"zot changed\";\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_custom.hxx.in
+  "static const char* zot_custom = \"zot_custom changed\";\n")
 
 message("Building project second time")
 try_compile(RESULT 
@@ -137,8 +141,8 @@ execute_process(COMMAND ${zot} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
 string(REGEX REPLACE "[\r\n]" " " out "${out}")
 message("Run result: ${runResult} Output: \"${out}\"")
 
-if("${out}" STREQUAL "zot changed ")
+if("${out}" STREQUAL "[zot changed] [zot_custom changed] ")
   message("Worked!")
-else("${out}" STREQUAL "zot changed ")
+else("${out}" STREQUAL "[zot changed] [zot_custom changed] ")
   message(SEND_ERROR "Project did not rebuild properly!")
-endif("${out}" STREQUAL "zot changed ")
+endif("${out}" STREQUAL "[zot changed] [zot_custom changed] ")

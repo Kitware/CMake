@@ -2547,29 +2547,24 @@ int cmake::CheckBuildSystem()
     return 1;
     }
 
-  // Now that we know the generator used to build the project, use it
-  // to check the dependency integrity.
-  const char* genName = mf->GetDefinition("CMAKE_DEPENDS_GENERATOR");
-  if (!genName || genName[0] == '\0')
+  if(this->ClearBuildSystem)
     {
-    genName = "Unix Makefiles";
-    }
-  // this global generator is never set to the cmake object so it is never
-  // deleted, so make it an auto_ptr
-  std::auto_ptr<cmGlobalGenerator> ggd(this->CreateGlobalGenerator(genName));
-  if (ggd.get())
-    {
-    // Check the dependencies in case source files were removed.
-    std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
-    lgd->SetGlobalGenerator(ggd.get());
-
-    if(this->ClearBuildSystem)
+    // Get the generator used for this build system.
+    const char* genName = mf->GetDefinition("CMAKE_DEPENDS_GENERATOR");
+    if(!genName || genName[0] == '\0')
       {
-      lgd->ClearDependencies(mf, verbose);
+      genName = "Unix Makefiles";
       }
 
-    // Check for multiple output pairs.
-    ggd->CheckMultipleOutputs(mf, verbose);
+    // Create the generator and use it to clear the dependencies.
+    std::auto_ptr<cmGlobalGenerator>
+      ggd(this->CreateGlobalGenerator(genName));
+    if(ggd.get())
+      {
+      std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
+      lgd->SetGlobalGenerator(ggd.get());
+      lgd->ClearDependencies(mf, verbose);
+      }
     }
 
   // Get the set of dependencies and outputs.

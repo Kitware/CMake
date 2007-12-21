@@ -119,6 +119,15 @@ protected:
   // append intertarget dependencies
   void AppendTargetDepends(std::vector<std::string>& depends);
 
+  /** In order to support parallel builds for custom commands with
+      multiple outputs the outputs are given a serial order, and only
+      the first output actually has the build rule.  Other outputs
+      just depend on the first one.  The check-build-system step must
+      remove a dependee if the depender is missing to make sure both
+      are regenerated properly.  This method is used by the local
+      makefile generators to register such pairs.  */
+  void AddMultipleOutputPair(const char* depender, const char* dependee);
+
   virtual void CloseFileStreams();
   void RemoveForbiddenFlags(const char* flagVar, const char* linkLang,
                             std::string& linkFlags);
@@ -166,6 +175,8 @@ protected:
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> ObjectFiles;
 
+  typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
+  MultipleOutputPairsType MultipleOutputPairs;
 
   //==================================================================
   // Convenience routines that do nothing more than forward to

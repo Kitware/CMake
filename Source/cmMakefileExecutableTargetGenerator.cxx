@@ -45,9 +45,6 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
   // write the per-target per-language flags
   this->WriteTargetLanguageFlags();
 
-  // Write the dependency generation rule.
-  this->WriteTargetDependRules();
-
   // write the link rules
   this->WriteExecutableRule(false);
   if(this->Target->NeedRelinkBeforeInstall())
@@ -61,6 +58,10 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 
   // Write clean target
   this->WriteTargetCleanRules();
+
+  // Write the dependency generation rule.  This must be done last so
+  // that multiple output pair information is available.
+  this->WriteTargetDependRules();
 
   // close the streams
   this->CloseFileStreams();

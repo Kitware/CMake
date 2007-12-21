@@ -1681,13 +1681,6 @@ void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CheckMultipleOutputs(cmMakefile*, bool)
-{
-  // Only certain generators need this check.  They define this
-  // method.
-}
-
-//----------------------------------------------------------------------------
 std::vector<cmTarget *>& cmGlobalGenerator
 ::GetTargetDepends(cmTarget& target)
 {

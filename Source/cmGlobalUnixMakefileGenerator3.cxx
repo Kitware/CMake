@@ -133,16 +133,6 @@ void cmGlobalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
-void
-cmGlobalUnixMakefileGenerator3
-::AddMultipleOutputPair(const char* depender, const char* dependee)
-{
-  MultipleOutputPairsType::value_type p(depender, dependee);
-  this->MultipleOutputPairs.insert(p);
-}
-
-
-//----------------------------------------------------------------------------
 void cmGlobalUnixMakefileGenerator3::Generate() 
 {
   // first do superclass method
@@ -373,62 +363,6 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
 
   this->WriteMainCMakefileLanguageRules(cmakefileStream, 
                                         this->LocalGenerators);
-
-  if(!this->MultipleOutputPairs.empty())
-    {
-    cmakefileStream
-      << "\n"
-      << "SET(CMAKE_MULTIPLE_OUTPUT_PAIRS\n";
-    for(MultipleOutputPairsType::const_iterator pi =
-          this->MultipleOutputPairs.begin();
-        pi != this->MultipleOutputPairs.end(); ++pi)
-      {
-      cmakefileStream << "  \"" << pi->first << "\" \""
-                      << pi->second << "\"\n";
-      }
-    cmakefileStream << "  )\n\n";
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalUnixMakefileGenerator3::CheckMultipleOutputs(cmMakefile* mf,
-                                                          bool verbose)
-{
-  // Get the string listing the multiple output pairs.
-  const char* pairs_string = mf->GetDefinition("CMAKE_MULTIPLE_OUTPUT_PAIRS");
-  if(!pairs_string)
-    {
-    return;
-    }
-
-  // Convert the string to a list and preserve empty entries.
-  std::vector<std::string> pairs;
-  cmSystemTools::ExpandListArgument(pairs_string, pairs, true);
-  for(std::vector<std::string>::const_iterator i = pairs.begin();
-      i != pairs.end(); ++i)
-    {
-    const std::string& depender = *i;
-    if(++i != pairs.end())
-      {
-      const std::string& dependee = *i;
-
-      // If the depender is missing then delete the dependee to make
-      // sure both will be regenerated.
-      if(cmSystemTools::FileExists(dependee.c_str()) &&
-         !cmSystemTools::FileExists(depender.c_str()))
-        {
-        if(verbose)
-          {
-          cmOStringStream msg;
-          msg << "Deleting primary custom command output \"" << dependee
-              << "\" because another output \""
-              << depender << "\" does not exist." << std::endl;
-          cmSystemTools::Stdout(msg.str().c_str());
-          }
-        cmSystemTools::RemoveFile(dependee.c_str());
-        }
-      }
-    }
 }
 
 void cmGlobalUnixMakefileGenerator3
@@ -763,21 +697,18 @@ cmGlobalUnixMakefileGenerator3
         << localName << "\n\n";
     
       commands.clear();        
-      if (t->second.GetType() != cmTarget::UTILITY)
+      makeTargetName = localName;
+      makeTargetName += "/depend";
+      commands.push_back(lg->GetRecursiveMakeCall
+                         (makefileName.c_str(),makeTargetName.c_str()));
+
+      // add requires if we need it for this generator
+      if (needRequiresStep)
         {
         makeTargetName = localName;
-        makeTargetName += "/depend";
+        makeTargetName += "/requires";
         commands.push_back(lg->GetRecursiveMakeCall
-                            (makefileName.c_str(),makeTargetName.c_str()));
-        
-        // add requires if we need it for this generator
-        if (needRequiresStep)
-          {
-          makeTargetName = localName;
-          makeTargetName += "/requires";
-          commands.push_back(lg->GetRecursiveMakeCall
-                              (makefileName.c_str(),makeTargetName.c_str()));
-          }
+                           (makefileName.c_str(),makeTargetName.c_str()));
         }
       makeTargetName = localName;
       makeTargetName += "/build";
