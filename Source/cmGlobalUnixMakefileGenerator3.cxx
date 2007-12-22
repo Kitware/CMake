@@ -905,7 +905,8 @@ cmGlobalUnixMakefileGenerator3
   emitted.insert(target.GetName());
 
   // Loop over all library dependencies.
-  const cmTarget::LinkLibraryVectorType& tlibs = target.GetLinkLibraries();
+  const cmTarget::LinkLibraryVectorType&
+    tlibs = target.GetOriginalLinkLibraries();
   for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
       lib != tlibs.end(); ++lib)
     {
@@ -960,6 +961,13 @@ cmGlobalUnixMakefileGenerator3
   // if a match was found then ...
   if (result)
     {
+    // Avoid creating cyclic dependencies.
+    if(!this->AllowTargetDepends(&target, result))
+      {
+      return;
+      }
+
+    // Create the target-level dependency.
     std::string tgtName = lg3->GetRelativeTargetDirectory(*result);
     tgtName += "/all";
     depends.push_back(tgtName);
@@ -1044,6 +1052,79 @@ bool cmGlobalUnixMakefileGenerator3
     var += "_FLAG";
     if(target.GetMakefile()->GetDefinition(var.c_str()))
       {
+      return true;
+      }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalUnixMakefileGenerator3
+::AllowTargetDepends(cmTarget const* depender, cmTarget const* dependee)
+{
+  // Check whether the depender is among the dependee's dependencies.
+  std::vector<cmTarget const*> steps;
+  if(this->FindDependency(depender, dependee, steps))
+    {
+    // This creates a cyclic dependency.
+    bool isStatic = depender->GetType() == cmTarget::STATIC_LIBRARY;
+    cmOStringStream e;
+    e << "Cyclic dependency among targets:\n"
+      << "  " << depender->GetName() << "\n";
+    for(unsigned int i = static_cast<unsigned int>(steps.size());
+        i > 0; --i)
+      {
+      cmTarget const* step = steps[i-1];
+      e << "    -> " << step->GetName() << "\n";
+      isStatic = isStatic && step->GetType() == cmTarget::STATIC_LIBRARY;
+      }
+    if(isStatic)
+      {
+      e << "  All targets are STATIC libraries.\n";
+      e << "  Dropping "
+        << depender->GetName() << " -> " << dependee->GetName()
+        << " to resolve.\n";
+      cmSystemTools::Message(e.str().c_str());
+      }
+    else
+      {
+      e << "  At least one target is not a STATIC library.\n";
+      cmSystemTools::Error(e.str().c_str());
+      }
+    return false;
+    }
+  else
+    {
+    // This does not create a cyclic dependency.
+    this->TargetDependencies[depender].insert(dependee);
+    return true;
+    }
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalUnixMakefileGenerator3
+::FindDependency(cmTarget const* goal, cmTarget const* current,
+                 std::vector<cmTarget const*>& steps)
+{
+  if(current == goal)
+    {
+    steps.push_back(current);
+    return true;
+    }
+  TargetDependMap::const_iterator i = this->TargetDependencies.find(current);
+  if(i == this->TargetDependencies.end())
+    {
+    return false;
+    }
+  TargetDependSet const& depends = i->second;
+  for(TargetDependSet::const_iterator j = depends.begin();
+      j != depends.end(); ++j)
+    {
+    if(this->FindDependency(goal, *j, steps))
+      {
+      steps.push_back(current);
       return true;
       }
     }

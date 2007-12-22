@@ -179,6 +179,14 @@ protected:
 
   std::map<cmStdString, int > TargetSourceFileCount;
   bool ForceVerboseMakefiles;
+
+  bool AllowTargetDepends(cmTarget const* depender,
+                          cmTarget const* dependee);
+  bool FindDependency(cmTarget const* goal, cmTarget const* current,
+                      std::vector<cmTarget const*>& steps);
+  class TargetDependSet: public std::set<cmTarget const*> {};
+  typedef std::map<cmTarget const*, TargetDependSet> TargetDependMap;
+  TargetDependMap TargetDependencies;
 };
 
 #endif
