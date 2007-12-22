@@ -6,6 +6,11 @@
 # and source files for the test project. 
 project(BuildDepends)
 
+# This entire test takes place during the initial
+# configure step.  It should not run again when the
+# project is built.
+set(CMAKE_SUPPRESS_REGENERATION 1)
+
 file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
 message("Creating Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx 
