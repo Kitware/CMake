@@ -60,13 +60,15 @@
 #   INCLUDE(${wxWidgets_USE_FILE})
 #   # and for each of your dependant executable/library targets:
 #   TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
-#
 
+#
 # FIXME: check this and provide a correct sample usage...
+#        Remember to connect back to the upper text.
 # Sample usage with monolithic wx build:
 #
-#   SET(wxWidgets_USE_LIBS msw26 expat jpeg gl png regex tiff zlib)
+#   FIND_PACKAGE(wxWidgets COMPONENTS mono)
 #   ...
+
 
 # NOTES
 #
@@ -130,7 +132,7 @@ SET(wxWidgets_LIBRARIES    "")
 SET(wxWidgets_LIBRARY_DIRS "")
 SET(wxWidgets_CXX_FLAGS    "")
 
-# FIXME: This is a patch to support the DEPRECATED use of
+# DEPRECATED: This is a patch to support the DEPRECATED use of
 # wxWidgets_USE_LIBS.
 #
 # If wxWidgets_USE_LIBS is set:
@@ -175,28 +177,20 @@ ENDIF(UNIX)
 # WIN32_STYLE_FIND
 #=====================================================================
 IF(WIN32_STYLE_FIND)
-  # FIXME: I think this should be removed... how difficult is it to
-  # do with out it?
-  #   FIND_PACKAGE(wxWidgets COMPONENTS msw25d)
-  # If the user knows enough to want monolithic, then he probably
-  # knows enough to do the above...
-  #
-  # BTW, what happens in this case?
-  #   FIND_PACKAGE(wxWidgets)
-  # Check these out and then remove comment. However, I think this
-  # will probably have to stay for backward compatibility, but in
-  # that case document it as a variable or list as deprecated.
-  # 
-  # global settings for std and common wx libs logic could determine
-  # _USE_MONOLITHIC automatically but let the user decide for now.
-  IF(wxWidgets_USE_MONOLITHIC)
-    SET(wxWidgets_STD_LIBRARIES mono)
-  ELSE(wxWidgets_USE_MONOLITHIC)
-    SET(wxWidgets_STD_LIBRARIES base core) # this is default
-  ENDIF(wxWidgets_USE_MONOLITHIC)
+  # Useful common wx libs needed by almost all components.
+  SET(wxWidgets_COMMON_LIBRARIES png tiff jpeg zlib regex expat)
 
-  #useful common wx libs needed by almost all components
-  SET(wxWidgets_COMMON_LIBRARIES  png tiff jpeg zlib regex expat)
+  # DEPRECATED: Use FIND_PACKAGE(wxWidgets COMPONENTS mono) instead.
+  IF(NOT wxWidgets_FIND_COMPONENTS)
+    IF(wxWidgets_USE_MONOLITHIC)
+      SET(wxWidgets_FIND_COMPONENTS mono)
+    ELSE(wxWidgets_USE_MONOLITHIC)
+      SET(wxWidgets_FIND_COMPONENTS base core) # this is default
+    ENDIF(wxWidgets_USE_MONOLITHIC)
+  ENDIF(NOT wxWidgets_FIND_COMPONENTS)
+
+  # Always add the common required libs.
+  LIST(APPEND wxWidgets_FIND_COMPONENTS ${wxWidgets_COMMON_LIBRARIES})
 
   #-------------------------------------------------------------------
   # WIN32: Helper MACROS
@@ -223,8 +217,10 @@ IF(WIN32_STYLE_FIND)
     DBG_MSG_V("m_ucd = ${_UCD}")
     DBG_MSG_V("m_dbg = ${_DBG}")
 
-    # Find wxWidgets common libraries
-    FOREACH(LIB png tiff jpeg zlib regex expat)
+    # FIXME: What if both regex libs are available. regex should be
+    # found outside the loop and only wx${LIB}${_UCD}${_DBG}.
+    # Find wxWidgets common libraries.
+    FOREACH(LIB ${wxWidgets_COMMON_LIBRARIES})
       FIND_LIBRARY(WX_${LIB}${_DBG}
         NAMES
         wx${LIB}${_UCD}${_DBG} # for regex
@@ -235,7 +231,7 @@ IF(WIN32_STYLE_FIND)
       MARK_AS_ADVANCED(WX_${LIB}${_DBG})
     ENDFOREACH(LIB)
 
-    # Find wxWidgets multilib base libraries
+    # Find wxWidgets multilib base libraries.
     FIND_LIBRARY(WX_base${_DBG}
       NAMES
       wxbase29${_UCD}${_DBG}
@@ -261,7 +257,7 @@ IF(WIN32_STYLE_FIND)
       MARK_AS_ADVANCED(WX_${LIB}${_DBG})
     ENDFOREACH(LIB)
 
-    # Find wxWidgets monolithic library
+    # Find wxWidgets monolithic library.
     FIND_LIBRARY(WX_mono${_DBG}
       NAMES
       wxmsw${_UNV}29${_UCD}${_DBG}
@@ -274,7 +270,7 @@ IF(WIN32_STYLE_FIND)
       )
     MARK_AS_ADVANCED(WX_mono${_DBG})
 
-    # Find wxWidgets multilib libraries
+    # Find wxWidgets multilib libraries.
     FOREACH(LIB core adv aui html media xrc dbgrid gl qa)
       FIND_LIBRARY(WX_${LIB}${_DBG}
         NAMES
@@ -301,21 +297,21 @@ IF(WIN32_STYLE_FIND)
   ENDMACRO(WX_CLEAR_LIB)
   # Clear all debug or release library paths (arguments are "d" or "").
   MACRO(WX_CLEAR_ALL_LIBS _DBG)
-    # Clear wxWidgets common libraries
-    FOREACH(LIB png tiff jpeg zlib regex expat)
+    # Clear wxWidgets common libraries.
+    FOREACH(LIB ${wxWidgets_COMMON_LIBRARIES})
       WX_CLEAR_LIB(WX_${LIB}${_DBG})
     ENDFOREACH(LIB)
 
-    # Clear wxWidgets multilib base libraries
+    # Clear wxWidgets multilib base libraries.
     WX_CLEAR_LIB(WX_base${_DBG})
     FOREACH(LIB net odbc xml)
       WX_CLEAR_LIB(WX_${LIB}${_DBG})
     ENDFOREACH(LIB)
 
-    # Clear wxWidgets monolithic library
+    # Clear wxWidgets monolithic library.
     WX_CLEAR_LIB(WX_mono${_DBG})
 
-    # Clear wxWidgets multilib libraries
+    # Clear wxWidgets multilib libraries.
     FOREACH(LIB core adv aui html media xrc dbgrid gl qa)
       WX_CLEAR_LIB(WX_${LIB}${_DBG})
     ENDFOREACH(LIB)
@@ -417,8 +413,10 @@ IF(WIN32_STYLE_FIND)
 
   # If wxWidgets_ROOT_DIR changed, clear lib dir.
   IF(NOT WX_ROOT_DIR STREQUAL wxWidgets_ROOT_DIR)
-    SET(WX_ROOT_DIR ${wxWidgets_ROOT_DIR} CACHE INTERNAL "wxWidgets_ROOT_DIR")
-    SET(wxWidgets_LIB_DIR "wxWidgets_LIB_DIR-NOTFOUND" CACHE PATH "Cleared." FORCE)
+    SET(WX_ROOT_DIR ${wxWidgets_ROOT_DIR}
+        CACHE INTERNAL "wxWidgets_ROOT_DIR")
+    SET(wxWidgets_LIB_DIR "wxWidgets_LIB_DIR-NOTFOUND"
+        CACHE PATH "Cleared." FORCE)
   ENDIF(NOT WX_ROOT_DIR STREQUAL wxWidgets_ROOT_DIR)
 
   IF(WX_ROOT_DIR)
@@ -524,15 +522,6 @@ IF(WIN32_STYLE_FIND)
         IF(WX_USE_REL_AND_DBG)
           WX_FIND_LIBS("${UNV}" "${UCD}" "d")
         ENDIF(WX_USE_REL_AND_DBG)
-
-        # If no library was requested, set default minimum set (i.e.,
-        # link to only core,base or mono).
-        IF(NOT wxWidgets_FIND_COMPONENTS)
-          SET(wxWidgets_FIND_COMPONENTS ${wxWidgets_STD_LIBRARIES})
-        ENDIF(NOT wxWidgets_FIND_COMPONENTS)
-
-        # Always add the common required libs.
-        LIST(APPEND wxWidgets_FIND_COMPONENTS ${wxWidgets_COMMON_LIBRARIES})
 
         # Settings for requested libs (i.e., include dir, libraries, etc.).
         WX_SET_LIBRARIES(wxWidgets_FIND_COMPONENTS "${DBG}")
@@ -755,6 +744,8 @@ DBG_MSG("wxWidgets_USE_FILE        : ${wxWidgets_USE_FILE}")
 #=====================================================================
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(wxWidgets DEFAULT_MSG wxWidgets_FOUND)
+# Maintain consistency with all other variables.
+SET(wxWidgets_FOUND ${WXWIDGETS_FOUND})
 
 #=====================================================================
 # Macros for use in wxWidgets apps.
