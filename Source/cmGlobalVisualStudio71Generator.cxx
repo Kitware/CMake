@@ -317,6 +317,7 @@ cmGlobalVisualStudio71Generator
                       const char* dspname,
                       const char*, cmTarget& target)
 {
+#if 0
   // Create inter-target dependencies in the solution file.  For VS
   // 7.1 and below we cannot let static libraries depend directly on
   // targets to which they "link" because the librarian tool will copy
@@ -324,7 +325,10 @@ cmGlobalVisualStudio71Generator
   // cmGlobalVisualStudioGenerator::FixUtilityDependsForTarget for a
   // work-around.  VS 8 and above do not have this problem.
   if (!this->VSLinksDependencies() ||
-      target.GetType() != cmTarget::STATIC_LIBRARY)
+      target.GetType() != cmTarget::STATIC_LIBRARY);
+#else
+  if (target.GetType() != cmTarget::STATIC_LIBRARY)
+#endif
     {
     cmTarget::LinkLibraryVectorType::const_iterator j, jend;
     j = target.GetLinkLibraries().begin();
