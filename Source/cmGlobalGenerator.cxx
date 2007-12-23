@@ -725,10 +725,6 @@ void cmGlobalGenerator::Configure()
   // so create the map from project name to vector of local generators
   this->FillProjectMap();
 
-  // Create a map from local generator to the complete set of targets
-  // it builds by default.
-  this->FillLocalGeneratorToTargetMap();
-
   if ( !this->CMakeInstance->GetScriptMode() )
     {
     this->CMakeInstance->UpdateProgress("Configuring done", -1);
@@ -790,6 +786,10 @@ void cmGlobalGenerator::Generate()
     {
     this->LocalGenerators[i]->GenerateTargetManifest(this->TargetManifest);
     }
+
+  // Create a map from local generator to the complete set of targets
+  // it builds by default.
+  this->FillLocalGeneratorToTargetMap();
 
   // Generate project files
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1264,6 +1264,7 @@ void cmGlobalGenerator::FillProjectMap()
 // generator directory level.
 void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
 {
+  this->LocalGeneratorToTargetMap.clear();
   // Loop over all targets in all local generators.
   for(std::vector<cmLocalGenerator*>::const_iterator
         lgi = this->LocalGenerators.begin();
@@ -1282,14 +1283,14 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
           clg = clg->GetParent())
         {
         // This local generator includes the target.
-        std::set<cmTarget*>& targetSet =
+        std::set<cmTarget const*>& targetSet =
           this->LocalGeneratorToTargetMap[clg];
         targetSet.insert(&target);
 
         // Add dependencies of the included target.  An excluded
         // target may still be included if it is a dependency of a
         // non-excluded target.
-        std::vector<cmTarget *>& tgtdeps = this->GetTargetDepends(target);
+        TargetDependSet const& tgtdeps = this->GetTargetDepends(target);
         targetSet.insert(tgtdeps.begin(), tgtdeps.end());
         }
       }
@@ -1681,79 +1682,147 @@ void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmTarget *>& cmGlobalGenerator
-::GetTargetDepends(cmTarget& target)
+cmGlobalGenerator::TargetDependSet const&
+cmGlobalGenerator::GetTargetDepends(cmTarget const& target)
 {
+  // Clarify the role of the input target.
+  cmTarget const* depender = &target;
+
   // if the depends are already in the map then return
-  std::map<cmStdString, std::vector<cmTarget *> >::iterator tgtI =
-    this->TargetDependencies.find(target.GetName());
-  if (tgtI != this->TargetDependencies.end())
+  TargetDependMap::const_iterator tgtI =
+    this->TargetDependencies.find(depender);
+  if(tgtI != this->TargetDependencies.end())
     {
     return tgtI->second;
     }
 
-  // A target should not depend on itself.
+  // Create an entry for this depender.
+  TargetDependSet& depender_depends = this->TargetDependencies[depender];
+
+  // Keep track of dependencies already listed.
   std::set<cmStdString> emitted;
-  emitted.insert(target.GetName());
 
-  // the vector of results
-  std::vector<cmTarget *>& result =
-    this->TargetDependencies[target.GetName()];
+  // A target should not depend on itself.
+  emitted.insert(depender->GetName());
 
-  // Loop over all library dependencies but not for static libs
-  if (target.GetType() != cmTarget::STATIC_LIBRARY)
+  // Loop over all targets linked directly.
+  cmTarget::LinkLibraryVectorType const& tlibs =
+    target.GetOriginalLinkLibraries();
+  for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
+      lib != tlibs.end(); ++lib)
     {
-    const cmTarget::LinkLibraryVectorType& tlibs = target.GetLinkLibraries();
-    for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
-        lib != tlibs.end(); ++lib)
+    // Don't emit the same library twice for this target.
+    if(emitted.insert(lib->first).second)
       {
-      // Don't emit the same library twice for this target.
-      if(emitted.insert(lib->first).second)
-        {
-        cmTarget *target2 =
-          target.GetMakefile()->FindTarget(lib->first.c_str(), false);
-
-        // search each local generator until a match is found
-        if (!target2)
-          {
-          target2 = this->FindTarget(0,lib->first.c_str(), false);
-          }
-
-        // if a match was found then ...
-        if (target2)
-          {
-          // Add this dependency.
-          result.push_back(target2);
-          }
-        }
+      this->ConsiderTargetDepends(depender, depender_depends,
+                                  lib->first.c_str());
       }
     }
 
   // Loop over all utility dependencies.
-  const std::set<cmStdString>& tutils = target.GetUtilities();
+  std::set<cmStdString> const& tutils = target.GetUtilities();
   for(std::set<cmStdString>::const_iterator util = tutils.begin();
       util != tutils.end(); ++util)
     {
     // Don't emit the same utility twice for this target.
     if(emitted.insert(*util).second)
       {
-      cmTarget *target2=target.GetMakefile()->FindTarget(util->c_str(), false);
-
-      // search each local generator until a match is found
-      if (!target2)
-        {
-        target2 = this->FindTarget(0,util->c_str(), false);
-        }
-
-      // if a match was found then ...
-      if (target2)
-        {
-        // Add this dependency.
-        result.push_back(target2);
-        }
+      this->ConsiderTargetDepends(depender, depender_depends,
+                                  util->c_str());
       }
     }
-  return result;
+
+  return depender_depends;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalGenerator::ConsiderTargetDepends(cmTarget const* depender,
+                                         TargetDependSet& depender_depends,
+                                         const char* dependee_name)
+{
+  // Check the target's makefile first.
+  cmTarget const* dependee =
+    depender->GetMakefile()->FindTarget(dependee_name, false);
+
+  // Then search globally.
+  if(!dependee)
+    {
+    dependee = this->FindTarget(0, dependee_name, false);
+    }
+
+  // If not found then skip then the dependee.
+  if(!dependee)
+    {
+    return false;
+    }
+
+  // Check whether the depender is among the dependee's dependencies.
+  std::vector<cmTarget const*> steps;
+  if(this->FindDependency(depender, dependee, steps))
+    {
+    // This creates a cyclic dependency.
+    bool isStatic = depender->GetType() == cmTarget::STATIC_LIBRARY;
+    cmOStringStream e;
+    e << "Cyclic dependency among targets:\n"
+      << "  " << depender->GetName() << "\n";
+    for(unsigned int i = static_cast<unsigned int>(steps.size());
+        i > 0; --i)
+      {
+      cmTarget const* step = steps[i-1];
+      e << "    -> " << step->GetName() << "\n";
+      isStatic = isStatic && step->GetType() == cmTarget::STATIC_LIBRARY;
+      }
+    if(isStatic)
+      {
+      e << "  All targets are STATIC libraries.\n";
+      e << "  Dropping "
+        << depender->GetName() << " -> " << dependee->GetName()
+        << " to resolve.\n";
+      cmSystemTools::Message(e.str().c_str());
+      }
+    else
+      {
+      e << "  At least one target is not a STATIC library.\n";
+      cmSystemTools::Error(e.str().c_str());
+      }
+    return false;
+    }
+  else
+    {
+    // This does not create a cyclic dependency.
+    depender_depends.insert(dependee);
+    return true;
+    }
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalGenerator
+::FindDependency(cmTarget const* goal, cmTarget const* current,
+                 std::vector<cmTarget const*>& steps)
+{
+  if(current == goal)
+    {
+    steps.push_back(current);
+    return true;
+    }
+  TargetDependMap::const_iterator i = this->TargetDependencies.find(current);
+  if(i == this->TargetDependencies.end())
+    {
+    return false;
+    }
+  TargetDependSet const& depends = i->second;
+  for(TargetDependSet::const_iterator j = depends.begin();
+      j != depends.end(); ++j)
+    {
+    if(this->FindDependency(goal, *j, steps))
+      {
+      steps.push_back(current);
+      return true;
+      }
+    }
+  return false;
 }
 
 void cmGlobalGenerator::AddTarget(cmTargets::value_type &v)

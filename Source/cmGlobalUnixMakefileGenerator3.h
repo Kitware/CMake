@@ -114,7 +114,7 @@ public:
    const char* config, bool ignoreErrors, bool fast);
 
   // returns some progress informaiton
-  int GetTargetTotalNumberOfActions(cmTarget& target,
+  int GetTargetTotalNumberOfActions(cmTarget const& target,
                                     std::set<cmStdString> &emitted);
   unsigned long GetNumberOfProgressActionsInAll
   (cmLocalUnixMakefileGenerator3 *lg);
@@ -145,9 +145,6 @@ protected:
 
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  cmTarget& target);
-  void AppendAnyGlobalDepend(std::vector<std::string>& depends, 
-                             const char* name, 
-                             cmTarget &target);
 
   // does this generator need a requires step for any of its targets
   bool NeedRequiresStep(cmTarget const&);
@@ -179,14 +176,6 @@ protected:
 
   std::map<cmStdString, int > TargetSourceFileCount;
   bool ForceVerboseMakefiles;
-
-  bool AllowTargetDepends(cmTarget const* depender,
-                          cmTarget const* dependee);
-  bool FindDependency(cmTarget const* goal, cmTarget const* current,
-                      std::vector<cmTarget const*>& steps);
-  class TargetDependSet: public std::set<cmTarget const*> {};
-  typedef std::map<cmTarget const*, TargetDependSet> TargetDependMap;
-  TargetDependMap TargetDependencies;
 };
 
 #endif

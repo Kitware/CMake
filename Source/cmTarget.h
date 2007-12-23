@@ -181,7 +181,7 @@ public:
    */
   void AddUtility(const char* u) { this->Utilities.insert(u);}
   ///! Get the utilities used by this target
-  std::set<cmStdString>const& GetUtilities() { return this->Utilities; }
+  std::set<cmStdString>const& GetUtilities() const { return this->Utilities; }
 
   void AnalyzeLibDependencies( const cmMakefile& mf );
 

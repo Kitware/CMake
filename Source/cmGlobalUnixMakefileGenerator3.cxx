@@ -848,7 +848,7 @@ cmGlobalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 int cmGlobalUnixMakefileGenerator3
-::GetTargetTotalNumberOfActions(cmTarget& target, 
+::GetTargetTotalNumberOfActions(cmTarget const& target,
                                 std::set<cmStdString> &emitted)
 {
   // do not double count
@@ -861,9 +861,9 @@ int cmGlobalUnixMakefileGenerator3
       (target.GetMakefile()->GetLocalGenerator());
     result = static_cast<int>(lg->ProgressFiles[target.GetName()].size());
     
-    std::vector<cmTarget *>& depends = this->GetTargetDepends(target);
+    TargetDependSet const& depends = this->GetTargetDepends(target);
     
-    std::vector<cmTarget *>::iterator i;
+    TargetDependSet::const_iterator i;
     for (i = depends.begin(); i != depends.end(); ++i)
       {
       result += this->GetTargetTotalNumberOfActions(**i, emitted);
@@ -877,11 +877,11 @@ unsigned long cmGlobalUnixMakefileGenerator3
 ::GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
 {
   unsigned long result = 0;
-  std::set<cmTarget*>& targets = this->LocalGeneratorToTargetMap[lg];
-  for(std::set<cmTarget*>::iterator t = targets.begin();
+  std::set<cmTarget const*>& targets = this->LocalGeneratorToTargetMap[lg];
+  for(std::set<cmTarget const*>::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    cmTarget* target = *t;
+    cmTarget const* target = *t;
     cmLocalUnixMakefileGenerator3 *lg3 =
       static_cast<cmLocalUnixMakefileGenerator3 *>
       (target->GetMakefile()->GetLocalGenerator());
@@ -898,80 +898,18 @@ cmGlobalUnixMakefileGenerator3
 ::AppendGlobalTargetDepends(std::vector<std::string>& depends,
                             cmTarget& target)
 {
-  // Keep track of dependencies already listed.
-  std::set<cmStdString> emitted;
-
-  // A target should not depend on itself.
-  emitted.insert(target.GetName());
-
-  // Loop over all library dependencies.
-  const cmTarget::LinkLibraryVectorType&
-    tlibs = target.GetOriginalLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
-      lib != tlibs.end(); ++lib)
+  TargetDependSet const& depends_set = this->GetTargetDepends(target);
+  for(TargetDependSet::const_iterator i = depends_set.begin();
+      i != depends_set.end(); ++i)
     {
-    // Don't emit the same library twice for this target.
-    if(emitted.insert(lib->first).second)
-      {
-      // Add this dependency.
-      this->AppendAnyGlobalDepend(depends, lib->first.c_str(), target);
-      }
-    }
-
-  // Loop over all utility dependencies.
-  const std::set<cmStdString>& tutils = target.GetUtilities();
-  for(std::set<cmStdString>::const_iterator util = tutils.begin();
-      util != tutils.end(); ++util)
-    {
-    // Don't emit the same utility twice for this target.
-    if(emitted.insert(*util).second)
-      {
-      // Add this dependency.
-      this->AppendAnyGlobalDepend(depends, util->c_str(), target);
-      }
-    }
-}
-
-
-//----------------------------------------------------------------------------
-void
-cmGlobalUnixMakefileGenerator3
-::AppendAnyGlobalDepend(std::vector<std::string>& depends, const char* name,
-                        cmTarget &target)
-{
-  cmTarget *result;
-  cmLocalUnixMakefileGenerator3 *lg3;
-
-  // first check the same dir as the current target
-  lg3 = static_cast<cmLocalUnixMakefileGenerator3 *>
-    (target.GetMakefile()->GetLocalGenerator());
-  result = target.GetMakefile()->FindTarget(name, false);
-  
-  // search each local generator until a match is found
-  if (!result)
-    {
-    result = this->FindTarget(0, name, false);
-    if (result)
-      {
-      lg3 = static_cast<cmLocalUnixMakefileGenerator3 *>
-        (result->GetMakefile()->GetLocalGenerator());
-      }
-    }
-  
-  // if a match was found then ...
-  if (result)
-    {
-    // Avoid creating cyclic dependencies.
-    if(!this->AllowTargetDepends(&target, result))
-      {
-      return;
-      }
-
     // Create the target-level dependency.
-    std::string tgtName = lg3->GetRelativeTargetDirectory(*result);
+    cmTarget const* dep = *i;
+    cmLocalUnixMakefileGenerator3* lg3 =
+      static_cast<cmLocalUnixMakefileGenerator3*>
+      (dep->GetMakefile()->GetLocalGenerator());
+    std::string tgtName = lg3->GetRelativeTargetDirectory(*dep);
     tgtName += "/all";
     depends.push_back(tgtName);
-    return;
     }
 }
 
@@ -1052,79 +990,6 @@ bool cmGlobalUnixMakefileGenerator3
     var += "_FLAG";
     if(target.GetMakefile()->GetDefinition(var.c_str()))
       {
-      return true;
-      }
-    }
-  return false;
-}
-
-//----------------------------------------------------------------------------
-bool
-cmGlobalUnixMakefileGenerator3
-::AllowTargetDepends(cmTarget const* depender, cmTarget const* dependee)
-{
-  // Check whether the depender is among the dependee's dependencies.
-  std::vector<cmTarget const*> steps;
-  if(this->FindDependency(depender, dependee, steps))
-    {
-    // This creates a cyclic dependency.
-    bool isStatic = depender->GetType() == cmTarget::STATIC_LIBRARY;
-    cmOStringStream e;
-    e << "Cyclic dependency among targets:\n"
-      << "  " << depender->GetName() << "\n";
-    for(unsigned int i = static_cast<unsigned int>(steps.size());
-        i > 0; --i)
-      {
-      cmTarget const* step = steps[i-1];
-      e << "    -> " << step->GetName() << "\n";
-      isStatic = isStatic && step->GetType() == cmTarget::STATIC_LIBRARY;
-      }
-    if(isStatic)
-      {
-      e << "  All targets are STATIC libraries.\n";
-      e << "  Dropping "
-        << depender->GetName() << " -> " << dependee->GetName()
-        << " to resolve.\n";
-      cmSystemTools::Message(e.str().c_str());
-      }
-    else
-      {
-      e << "  At least one target is not a STATIC library.\n";
-      cmSystemTools::Error(e.str().c_str());
-      }
-    return false;
-    }
-  else
-    {
-    // This does not create a cyclic dependency.
-    this->TargetDependencies[depender].insert(dependee);
-    return true;
-    }
-}
-
-//----------------------------------------------------------------------------
-bool
-cmGlobalUnixMakefileGenerator3
-::FindDependency(cmTarget const* goal, cmTarget const* current,
-                 std::vector<cmTarget const*>& steps)
-{
-  if(current == goal)
-    {
-    steps.push_back(current);
-    return true;
-    }
-  TargetDependMap::const_iterator i = this->TargetDependencies.find(current);
-  if(i == this->TargetDependencies.end())
-    {
-    return false;
-    }
-  TargetDependSet const& depends = i->second;
-  for(TargetDependSet::const_iterator j = depends.begin();
-      j != depends.end(); ++j)
-    {
-    if(this->FindDependency(goal, *j, steps))
-      {
-      steps.push_back(current);
       return true;
       }
     }

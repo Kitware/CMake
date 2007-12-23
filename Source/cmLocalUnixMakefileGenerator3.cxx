@@ -823,7 +823,8 @@ cmLocalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(cmTarget& target)
+cmLocalUnixMakefileGenerator3
+::GetRelativeTargetDirectory(cmTarget const& target)
 {
   std::string dir = this->HomeRelativeOutputPath;
   dir += this->GetTargetDirectory(target);
