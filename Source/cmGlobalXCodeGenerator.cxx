@@ -2015,7 +2015,7 @@ void cmGlobalXCodeGenerator
 
   // Loop over all library dependencies.
   const cmTarget::LinkLibraryVectorType& tlibs = 
-    cmtarget->GetOriginalLinkLibraries();
+    cmtarget->GetLinkLibraries();
   for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
       lib != tlibs.end(); ++lib)
     {
