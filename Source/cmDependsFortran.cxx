@@ -90,9 +90,8 @@ cmDependsFortran::cmDependsFortran():
 }
 
 //----------------------------------------------------------------------------
-cmDependsFortran::cmDependsFortran(std::vector<std::string> const& includes,
-                                   std::string const& targetDirectory):
-  IncludePath(&includes), TargetDirectory(targetDirectory)
+cmDependsFortran::cmDependsFortran(std::vector<std::string> const& includes):
+  IncludePath(&includes)
 {
 }
 

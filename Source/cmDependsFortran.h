@@ -33,8 +33,7 @@ public:
       path from the build directory to the target file, the source
       file from which to start scanning, the include file search
       path, and the target directory.  */
-  cmDependsFortran(std::vector<std::string> const& includes,
-                   std::string const& targetDirectory);
+  cmDependsFortran(std::vector<std::string> const& includes);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsFortran();
@@ -61,9 +60,6 @@ protected:
 
   // The include file search path.
   std::vector<std::string> const* IncludePath;
-
-  // The full path to the target's build directory.
-  std::string TargetDirectory;
 
 private:
   cmDependsFortran(cmDependsFortran const&); // Purposely not implemented.

@@ -45,6 +45,12 @@ public:
       directory.  */
   void SetLocalGenerator(cmLocalGenerator* lg) { this->LocalGenerator = lg; }
 
+  /** Set the specific language to be scanned.  */
+  void SetLanguage(const char* lang) { this->Language = lang; }
+
+  /** Set the target build directory.  */
+  void SetTargetDirectory(const char* dir) { this->TargetDirectory = dir; }
+
   /** should this be verbose in its output */
   void SetVerbose(bool verb) { this->Verbose = verb; }
     
@@ -52,8 +58,7 @@ public:
   virtual ~cmDepends();
 
   /** Write dependencies for the target file.  */
-  bool Write(const char *src, const char *obj,
-    std::ostream &makeDepends, std::ostream &internalDepends);
+  bool Write(std::ostream &makeDepends, std::ostream &internalDepends);
   
   /** Check dependencies for the target file.  Returns true if
       dependencies are okay and false if they must be generated.  If
@@ -89,6 +94,11 @@ protected:
   // Flag for verbose output.
   bool Verbose;
   cmFileTimeComparison* FileComparison;
+
+  std::string Language;
+
+  // The full path to the target's build directory.
+  std::string TargetDirectory;
 
   size_t MaxPath;
   char* Dependee;

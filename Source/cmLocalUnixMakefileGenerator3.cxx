@@ -1412,7 +1412,7 @@ cmLocalUnixMakefileGenerator3
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")
       {
-      scanner = new cmDependsFortran(includes, dir);
+      scanner = new cmDependsFortran(includes);
       }
     else if(lang == "Java")
       {
@@ -1425,23 +1425,9 @@ cmLocalUnixMakefileGenerator3
       scanner->SetLocalGenerator(this);
       scanner->SetFileComparison
         (this->GlobalGenerator->GetCMakeInstance()->GetFileComparison());
-      // for each file we need to scan
-      std::string srcLang = "CMAKE_DEPENDS_CHECK_";
-      srcLang += lang;
-      const char *srcStr = mf->GetSafeDefinition(srcLang.c_str());
-      std::vector<std::string> srcs;
-      cmSystemTools::ExpandListArgument(srcStr, srcs);
-      for (std::vector<std::string>::iterator si = 
-        srcs.begin(); si != srcs.end(); ++si)
-        {
-        std::string &src = *si;
-        ++si;
-        // make sure the object file is relative to home output
-        std::string obj = *si;
-        obj = this->Convert(obj.c_str(),HOME_OUTPUT,MAKEFILE);
-        scanner->Write(src.c_str(),obj.c_str(),
-                       ruleFileStream, internalRuleFileStream);
-        }
+      scanner->SetLanguage(lang.c_str());
+      scanner->SetTargetDirectory(dir.c_str());
+      scanner->Write(ruleFileStream, internalRuleFileStream);
 
       // free the scanner for this language
       delete scanner;

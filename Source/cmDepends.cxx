@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmDepends.h"
 
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSystemTools.h"
 #include "cmFileTimeComparison.h"
@@ -41,10 +43,39 @@ cmDepends::~cmDepends()
 }
 
 //----------------------------------------------------------------------------
-bool cmDepends::Write(const char *src, const char *obj,
-  std::ostream &makeDepends, std::ostream &internalDepends)
+bool cmDepends::Write(std::ostream &makeDepends,
+                      std::ostream &internalDepends)
 {
-  return this->WriteDependencies(src, obj, makeDepends, internalDepends);
+  // Lookup the set of sources to scan.
+  std::string srcLang = "CMAKE_DEPENDS_CHECK_";
+  srcLang += this->Language;
+  cmMakefile* mf = this->LocalGenerator->GetMakefile();
+  const char* srcStr = mf->GetSafeDefinition(srcLang.c_str());
+  std::vector<std::string> pairs;
+  cmSystemTools::ExpandListArgument(srcStr, pairs);
+
+  for(std::vector<std::string>::iterator si = pairs.begin();
+      si != pairs.end();)
+    {
+    // Get the source and object file.
+    std::string const& src = *si++;
+    if(si == pairs.end()) { break; }
+    std::string obj = *si++;
+
+    // Make sure the object file is relative to the top of the build tree.
+    obj = this->LocalGenerator->Convert(obj.c_str(),
+                                        cmLocalGenerator::HOME_OUTPUT,
+                                        cmLocalGenerator::MAKEFILE);
+
+    // Write the dependencies for this pair.
+    if(!this->WriteDependencies(src.c_str(), obj.c_str(),
+                                makeDepends, internalDepends))
+      {
+      return false;
+      }
+    }
+
+  return true;
 }
 
 //----------------------------------------------------------------------------
