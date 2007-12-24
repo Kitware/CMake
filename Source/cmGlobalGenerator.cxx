@@ -1291,7 +1291,11 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
         // target may still be included if it is a dependency of a
         // non-excluded target.
         TargetDependSet const& tgtdeps = this->GetTargetDepends(target);
-        targetSet.insert(tgtdeps.begin(), tgtdeps.end());
+        for(TargetDependSet::const_iterator ti = tgtdeps.begin();
+            ti != tgtdeps.end(); ++ti)
+          {
+          targetSet.insert(*ti);
+          }
         }
       }
     }
