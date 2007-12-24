@@ -54,7 +54,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Specify directories in which to search for libraries.";
+    return "Specify directories in which the linker will look for libraries.";
     }
   
   /**
@@ -64,7 +64,8 @@ public:
     {
     return
       "  link_directories(directory1 directory2 ...)\n"
-      "Specify the paths in which the linker should search for libraries.";
+      "Specify the paths in which the linker should search for libraries. "
+      "The command will apply only to targets created after it is called.";
     }
   
   cmTypeMacro(cmLinkDirectoriesCommand, cmCommand);
