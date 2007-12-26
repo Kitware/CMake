@@ -34,3 +34,7 @@ if(CPACK_GENERATOR MATCHES "CygwinSource")
     SET(CPACK_SOURCE_IGNORE_FILES
       "/CVS/" "/\\.build/" "/\\.svn/" "\\.swp$" "\\.#" "/#" "~$")
 endif(CPACK_GENERATOR MATCHES "CygwinSource")
+
+if("${CPACK_GENERATOR}" STREQUAL "PackageMaker")
+  SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+endif("${CPACK_GENERATOR}" STREQUAL "PackageMaker")

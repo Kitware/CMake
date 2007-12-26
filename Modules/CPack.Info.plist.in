@@ -12,7 +12,7 @@
 <key>IFPkgFlagAuthorizationAction</key>
 <string>AdminAuthorization</string>
 <key>IFPkgFlagDefaultLocation</key>
-<string>/</string>
+<string>@CPACK_PACKAGE_DEFAULT_LOCATION@</string>
 <key>IFPkgFlagInstallFat</key>
 <false/>
 <key>IFPkgFlagIsRequired</key>
@@ -20,7 +20,7 @@
 <key>IFPkgFlagOverwritePermissions</key>
 <true/>
 <key>IFPkgFlagRelocatable</key>
-<false/>
+<@CPACK_PACKAGE_RELOCATABLE@/>
 <key>IFPkgFlagRestartAction</key>
 <string>NoRestart</string>
 <key>IFPkgFlagRootVolumeOnly</key>

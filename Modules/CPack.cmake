@@ -78,6 +78,15 @@ cpack_set_if_not_set(CPACK_PACKAGE_INSTALL_DIRECTORY
   "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}")
 cpack_set_if_not_set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY
   "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}")
+cpack_set_if_not_set(CPACK_PACKAGE_DEFAULT_LOCATION "/")
+cpack_set_if_not_set(CPACK_PACKAGE_RELOCATABLE "true")
+
+# always force to exactly "true" or "false" for CPack.Info.plist.in:
+if(CPACK_PACKAGE_RELOCATABLE)
+  set(CPACK_PACKAGE_RELOCATABLE "true")
+else(CPACK_PACKAGE_RELOCATABLE)
+  set(CPACK_PACKAGE_RELOCATABLE "false")
+endif(CPACK_PACKAGE_RELOCATABLE)
 
 macro(cpack_check_file_exists file description)
   if(NOT EXISTS "${file}")
