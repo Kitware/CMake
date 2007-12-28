@@ -1,4 +1,6 @@
-Changes in CMake 2.4.8 RC 7
+Changes in CMake 2.4.8 RC 9
+* Add list(FIND) because it is used in new FindQt4.cmake
+Changes in CMake 2.4.8 RC 7/8
 * Fix tar long file path issue with cpack
 * Add beta support for VS 9 
 * Fix variable name in docs for FindPkgConfig bug 5722

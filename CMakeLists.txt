@@ -5,7 +5,7 @@ MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 # The CMake version number.
 SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 4)
-SET(CMake_VERSION_PATCH 8)
+SET(CMake_VERSION_PATCH 9)
 # for an actual release this should not be defined
 SET(CMake_VERSION_RC 7)
 SET(CMake_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
