@@ -603,6 +603,10 @@ void cmFindBase::AddFindPrefix(std::vector<std::string>& dest,
       dirWithSubdir += "/sbin";
       dest.push_back(dirWithSubdir);
       }
+    if(!subdir.empty())
+      {
+      dest.push_back(*it);
+      }
     }
 }
 
