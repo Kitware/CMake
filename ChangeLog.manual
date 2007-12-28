@@ -1,4 +1,5 @@
 Changes in CMake 2.4.8 RC 8
+* Add ability to select install location for mac
 * Add list(FIND) because it is used in new FindQt4.cmake
 Changes in CMake 2.4.8 RC 7
 * Fix tar long file path issue with cpack

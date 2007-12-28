@@ -20,7 +20,7 @@
 <key>IFPkgFlagOverwritePermissions</key>
 <true/>
 <key>IFPkgFlagRelocatable</key>
-<false/>
+<@CPACK_PACKAGE_RELOCATABLE@/>
 <key>IFPkgFlagRestartAction</key>
 <string>NoRestart</string>
 <key>IFPkgFlagRootVolumeOnly</key>
