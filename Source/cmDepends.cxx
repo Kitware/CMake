@@ -75,6 +75,13 @@ bool cmDepends::Write(std::ostream &makeDepends,
       }
     }
 
+  return this->Finalize(makeDepends, internalDepends);
+}
+
+//----------------------------------------------------------------------------
+bool cmDepends::Finalize(std::ostream&,
+                         std::ostream&)
+{
   return true;
 }
 

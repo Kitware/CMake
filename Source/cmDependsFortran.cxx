@@ -19,6 +19,7 @@
 #include "cmSystemTools.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmGeneratedFileStream.h"
 
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
 
@@ -28,6 +29,22 @@
 // TODO: Test compiler for the case of the mod file.  Some always
 // use lower case and some always use upper case.  I do not know if any
 // use the case from the source code.
+
+//----------------------------------------------------------------------------
+// Information about a single source file.
+class cmDependsFortranSourceInfo
+{
+public:
+  // The name of the soruce file.
+  std::string Source;
+
+  // Set of provided and required modules.
+  std::set<cmStdString> Provides;
+  std::set<cmStdString> Requires;
+
+  // Set of files included in the translation unit.
+  std::set<cmStdString> Includes;
+};
 
 //----------------------------------------------------------------------------
 // Parser methods not included in generated interface.
@@ -52,7 +69,8 @@ struct cmDependsFortranFile
 
 struct cmDependsFortranParser_s
 {
-  cmDependsFortranParser_s(cmDependsFortran* self);
+  cmDependsFortranParser_s(cmDependsFortran* self,
+                           cmDependsFortranSourceInfo& info);
   ~cmDependsFortranParser_s();
 
   // Pointer back to the main class.
@@ -75,29 +93,57 @@ struct cmDependsFortranParser_s
   std::vector<bool> SkipToEnd;
   int StepI;
 
-  // Set of provided and required modules.
-  std::set<cmStdString> Provides;
-  std::set<cmStdString> Requires;
+  // Information about the parsed source.
+  cmDependsFortranSourceInfo& Info;
+};
 
-  // Set of files included in the translation unit.
-  std::set<cmStdString> Includes;
+//----------------------------------------------------------------------------
+class cmDependsFortranInternals
+{
+public:
+  // The set of modules provided by this target.
+  std::set<cmStdString> TargetProvides;
+
+  // Map modules required by this target to locations.
+  typedef std::map<cmStdString, cmStdString> TargetRequiresMap;
+  TargetRequiresMap TargetRequires;
+
+  // Information about each object file.
+  typedef std::map<cmStdString, cmDependsFortranSourceInfo> ObjectInfoMap;
+  ObjectInfoMap ObjectInfo;
+
+  cmDependsFortranSourceInfo& CreateObjectInfo(const char* obj,
+                                               const char* src)
+    {
+    std::map<cmStdString, cmDependsFortranSourceInfo>::iterator i =
+      this->ObjectInfo.find(obj);
+    if(i == this->ObjectInfo.end())
+      {
+      std::map<cmStdString, cmDependsFortranSourceInfo>::value_type
+        entry(obj, cmDependsFortranSourceInfo());
+      i = this->ObjectInfo.insert(entry).first;
+      i->second.Source = src;
+      }
+    return i->second;
+    }
 };
 
 //----------------------------------------------------------------------------
 cmDependsFortran::cmDependsFortran():
-  IncludePath(0)
+  IncludePath(0), Internal(0)
 {
 }
 
 //----------------------------------------------------------------------------
 cmDependsFortran::cmDependsFortran(std::vector<std::string> const& includes):
-  IncludePath(&includes)
+  IncludePath(&includes), Internal(new cmDependsFortranInternals)
 {
 }
 
 //----------------------------------------------------------------------------
 cmDependsFortran::~cmDependsFortran()
 {
+  delete this->Internal;
 }
 
 //----------------------------------------------------------------------------
@@ -121,12 +167,12 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
     return false;
     }
 
-  // Get the directory in which stamp files will be stored.
-  std::string mod_dir =
-    this->LocalGenerator->GetMakefile()->GetCurrentOutputDirectory();
+  // Get the information object for this source.
+  cmDependsFortranSourceInfo& info =
+    this->Internal->CreateObjectInfo(obj, src);
 
   // Create the parser object.
-  cmDependsFortranParser parser(this);
+  cmDependsFortranParser parser(this, info);
 
   // Push on the starting file.
   cmDependsFortranParser_FilePush(&parser, src);
@@ -138,11 +184,189 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
     return false;
     }
 
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDependsFortran::Finalize(std::ostream& makeDepends,
+                                std::ostream& internalDepends)
+{
+  // Prepare the module search process.
+  this->LocateModules();
+
+  // Actually write dependencies to the streams.
+  typedef cmDependsFortranInternals::ObjectInfoMap ObjectInfoMap;
+  ObjectInfoMap const& objInfo = this->Internal->ObjectInfo;
+  for(ObjectInfoMap::const_iterator i = objInfo.begin();
+      i != objInfo.end(); ++i)
+    {
+    if(!this->WriteDependenciesReal(i->first.c_str(), i->second,
+                                    makeDepends, internalDepends))
+      {
+      return false;
+      }
+    }
+
+  // Store the list of modules provided by this target.
+  std::string fiName = this->TargetDirectory;
+  fiName += "/fortran.internal";
+  cmGeneratedFileStream fiStream(fiName.c_str());
+  fiStream << "# The fortran modules provided by this target.\n";
+  fiStream << "provides\n";
+  std::set<cmStdString> const& provides = this->Internal->TargetProvides;
+  for(std::set<cmStdString>::const_iterator i = provides.begin();
+      i != provides.end(); ++i)
+    {
+    fiStream << " " << *i << "\n";
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+void cmDependsFortran::LocateModules()
+{
+  // Collect the set of modules provided and required by all sources.
+  typedef cmDependsFortranInternals::ObjectInfoMap ObjectInfoMap;
+  ObjectInfoMap const& objInfo = this->Internal->ObjectInfo;
+  for(ObjectInfoMap::const_iterator infoI = objInfo.begin();
+      infoI != objInfo.end(); ++infoI)
+    {
+    cmDependsFortranSourceInfo const& info = infoI->second;
+    for(std::set<cmStdString>::const_iterator i = info.Provides.begin();
+        i != info.Provides.end(); ++i)
+      {
+      // Include this module in the set provided by this target.
+      this->Internal->TargetProvides.insert(*i);
+      }
+
+    for(std::set<cmStdString>::const_iterator i = info.Requires.begin();
+        i != info.Requires.end(); ++i)
+      {
+      // Include this module in the set required by this target.
+      this->Internal->TargetRequires[*i] = "";
+      }
+    }
+
+  // Short-circuit for simple targets.
+  if(this->Internal->TargetRequires.empty())
+    {
+    return;
+    }
+
+  // Match modules provided by this target to those it requires.
+  this->MatchLocalModules();
+
+  // Load information about other targets.
+  cmMakefile* mf = this->LocalGenerator->GetMakefile();
+  std::vector<std::string> infoFiles;
+  if(const char* infoFilesValue =
+     mf->GetDefinition("CMAKE_TARGET_LINKED_INFO_FILES"))
+    {
+    cmSystemTools::ExpandListArgument(infoFilesValue, infoFiles);
+    }
+  for(std::vector<std::string>::const_iterator i = infoFiles.begin();
+      i != infoFiles.end(); ++i)
+    {
+    std::string targetDir = cmSystemTools::GetFilenamePath(*i);
+    std::string fname = targetDir + "/fortran.internal";
+    std::ifstream fin(fname.c_str());
+    if(fin)
+      {
+      std::string moduleDir =
+        cmSystemTools::GetFilenamePath(
+          cmSystemTools::GetFilenamePath(targetDir));
+      this->MatchRemoteModules(fin, moduleDir.c_str());
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmDependsFortran::MatchLocalModules()
+{
+  const char* moduleDir =
+    this->LocalGenerator->GetMakefile()->GetCurrentOutputDirectory();
+  std::set<cmStdString> const& provides = this->Internal->TargetProvides;
+  for(std::set<cmStdString>::const_iterator i = provides.begin();
+      i != provides.end(); ++i)
+    {
+    this->ConsiderModule(i->c_str(), moduleDir);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmDependsFortran::MatchRemoteModules(std::istream& fin,
+                                          const char* moduleDir)
+{
+  std::string line;
+  bool doing_provides;
+  while(cmSystemTools::GetLineFromStream(fin, line))
+    {
+    // Ignore comments and empty lines.
+    if(line.empty() || line[0] == '#' || line[0] == '\r')
+      {
+      continue;
+      }
+
+    if(line[0] == ' ')
+      {
+      if(doing_provides)
+        {
+        this->ConsiderModule(line.c_str()+1, moduleDir);
+        }
+      }
+    else if(line == "provides")
+      {
+      doing_provides = true;
+      }
+    else
+      {
+      doing_provides = false;
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmDependsFortran::ConsiderModule(const char* name,
+                                      const char* moduleDir)
+{
+  // Locate each required module.
+  typedef cmDependsFortranInternals::TargetRequiresMap TargetRequiresMap;
+  TargetRequiresMap::iterator required =
+    this->Internal->TargetRequires.find(name);
+  if(required != this->Internal->TargetRequires.end() &&
+     required->second.empty())
+    {
+    // The module is provided by a CMake target.  It will have a stamp file.
+    std::string stampFile = moduleDir;
+    stampFile += "/";
+    stampFile += name;
+    stampFile += ".mod.stamp";
+    required->second = stampFile;
+    }
+}
+
+//----------------------------------------------------------------------------
+bool
+cmDependsFortran
+::WriteDependenciesReal(const char *obj,
+                        cmDependsFortranSourceInfo const& info,
+                        std::ostream& makeDepends,
+                        std::ostream& internalDepends)
+{
+  typedef cmDependsFortranInternals::TargetRequiresMap TargetRequiresMap;
+
+  // Get the source file for this object.
+  const char* src = info.Source.c_str();
+
+  // Get the directory in which stamp files will be stored.
+  std::string mod_dir =
+    this->LocalGenerator->GetMakefile()->GetCurrentOutputDirectory();
+
   // Write the include dependencies to the output stream.
   internalDepends << obj << std::endl;
   internalDepends << " " << src << std::endl;
-  for(std::set<cmStdString>::const_iterator i = parser.Includes.begin();
-      i != parser.Includes.end(); ++i)
+  for(std::set<cmStdString>::const_iterator i = info.Includes.begin();
+      i != info.Includes.end(); ++i)
     {
     makeDepends << obj << ": "
        << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
@@ -152,12 +376,23 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
   makeDepends << std::endl;
 
   // Write module requirements to the output stream.
-  for(std::set<cmStdString>::const_iterator i = parser.Requires.begin();
-      i != parser.Requires.end(); ++i)
+  for(std::set<cmStdString>::const_iterator i = info.Requires.begin();
+      i != info.Requires.end(); ++i)
     {
     // Require only modules not provided in the same source.
-    if(parser.Provides.find(*i) == parser.Provides.end())
+    if(info.Provides.find(*i) != info.Provides.end())
       {
+      continue;
+      }
+
+    // If the module is provided in this target special handling is
+    // needed.
+    if(this->Internal->TargetProvides.find(*i) !=
+       this->Internal->TargetProvides.end())
+      {
+      // The module is provided by a different source in the same
+      // target.  Add the proxy dependency to make sure the other
+      // source builds first.
       std::string proxy = mod_dir;
       proxy += "/";
       proxy += *i;
@@ -171,54 +406,41 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
 
       // create an empty proxy in case no other source provides it
       makeDepends << proxy << ":" << std::endl;
+      }
 
-      // The object file should depend on timestamped files for the
-      // modules it uses.
-      std::string m = cmSystemTools::LowerCase(*i);
-      std::string stampFile = mod_dir;
-      stampFile += "/";
-      stampFile += m;
-      stampFile += ".mod.stamp";
-      stampFile =
-        this->LocalGenerator->Convert(stampFile.c_str(),
+    // The object file should depend on timestamped files for the
+    // modules it uses.
+    TargetRequiresMap::const_iterator required =
+      this->Internal->TargetRequires.find(*i);
+    if(required == this->Internal->TargetRequires.end()) { abort(); }
+    if(!required->second.empty())
+      {
+      // This module is known.  Depend on its timestamp file.
+      std::string stampFile =
+        this->LocalGenerator->Convert(required->second.c_str(),
                                       cmLocalGenerator::HOME_OUTPUT,
                                       cmLocalGenerator::SHELL);
       makeDepends << obj << ": " << stampFile << "\n";
-
-      // Create a dummy timestamp file for the module.
-      std::string fullPath = mod_dir;
-      fullPath += "/";
-      fullPath += m;
-      fullPath += ".mod.stamp";
-      if(!cmSystemTools::FileExists(fullPath.c_str(), true))
+      }
+    else
+      {
+      // This module is not known to CMake.  Try to locate it where
+      // the compiler will and depend on that.
+      std::string module;
+      if(this->FindModule(*i, module))
         {
-        std::ofstream dummy(fullPath.c_str());
-        dummy
-          << "This is a fake module timestamp file created by CMake because\n"
-          << "  " << src << "\n"
-          << "requires the module and\n"
-          << "  " << obj << "\n"
-          << "depends on this timestamp file.\n"
-          << "\n"
-          << "If another source in the same directory provides the module\n"
-          << "this file will be overwritten with a real module timestamp\n"
-          << "that is updated when the module is rebuilt.\n"
-          << "\n"
-          << "If no source in the directory provides the module at least\n"
-          << "the project will build without failing to find the module\n"
-          << "timestamp.\n"
-          << "\n"
-          << "In the future CMake may be able to locate modules in other\n"
-          << "directories or outside the project and update this timestamp\n"
-          << "file as necessary.\n"
-          ;
+        module =
+          this->LocalGenerator->Convert(module.c_str(),
+                                        cmLocalGenerator::HOME_OUTPUT,
+                                        cmLocalGenerator::SHELL);
+        makeDepends << obj << ": " << module << "\n";
         }
       }
     }
 
   // Write provided modules to the output stream.
-  for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
-      i != parser.Provides.end(); ++i)
+  for(std::set<cmStdString>::const_iterator i = info.Provides.begin();
+      i != info.Provides.end(); ++i)
     {
     std::string proxy = mod_dir;
     proxy += "/";
@@ -229,16 +451,19 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
                                           cmLocalGenerator::MAKEFILE);
     makeDepends << proxy << ": " << obj << ".provides" << std::endl;
     }
-  
+
   // If any modules are provided then they must be converted to stamp files.
-  if(!parser.Provides.empty())
+  if(!info.Provides.empty())
     {
     // Create a target to copy the module after the object file
     // changes.
     makeDepends << obj << ".provides.build:\n";
-    for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
-        i != parser.Provides.end(); ++i)
+    for(std::set<cmStdString>::const_iterator i = info.Provides.begin();
+        i != info.Provides.end(); ++i)
       {
+      // Include this module in the set provided by this target.
+      this->Internal->TargetProvides.insert(*i);
+
       // Always use lower case for the mod stamp file name.  The
       // cmake_copy_f90_mod will call back to this class, which will
       // try various cases for the real mod file name.
@@ -263,7 +488,7 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
       }
     // After copying the modules update the timestamp file so that
     // copying will not be done again until the source rebuilds.
-    makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj 
+    makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj
                 << ".provides.build\n";
 
     // Make sure the module timestamp rule is evaluated by the time
@@ -276,61 +501,45 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
     makeDepends << driver << ": " << obj << ".provides.build\n";
     }
 
-  /*
-  // TODO:
-  What about .mod files provided in another directory and found with a
-  -M search path?  The stamp file will not be updated, so things might
-  not rebuild.  Possible solutions (not all thought through):
-
-  Solution 1: Have all the .o.requires in a directory depend on a
-  single .outside.requires that searches for .mod files in another
-  directory of the build tree and uses copy-if-different to produce
-  the local directory's stamp files. (won't work because the single
-  rule cannot know about the modules)
-
-  Solution 2: When the dependency is detected search the module
-  include path for a mark file indicating the module is provided.  If
-  not found just write the dummy stamp file.  If found, we need a rule
-  to copy-if-different the module file.  When a module is provided,
-  write this mark file.
-
-  Solution 3: Use a set of make rules like this:
-
-    # When required:
-    foo.mod.proxy: foo.mod.default
-    foo.mod.default:: foo.mod.hack
-      @echo foo.mod.default2 # Search for and copy-if-different the mod file.
-    foo.mod.hack:
-
-    # When provided:
-    foo.mod.proxy: foo.o.requires
-      @rm -f foo.mod.hack foo.mod.default
-    foo.o.requires: foo.mod.hack
-      @echo foo.o.requires
-    foo.mod.hack:
-      @touch foo.mod.hack
-      @touch foo.mod.default
-
-  Solution 4:
-
-  When scanning dependencies and providing a module:
-    - Create a .mod.provided.
-    - Add .mod.proxy rule depending on corresponding .o.requires.
-
-  When scanning dependencies and requiring a module:
-    - Search the module path for a .mod.provided or a .mod.
-    - If a .mod.provided is found depend on the corresponding .mod.stamp
-      (it is provided by CMake in another directory)
-    - Else, if a .mod is found depend on it directly
-      (it is provided in another directory by a non-CMake project)
-    - Else:
-      - Add the empty proxy rule (if it is provided locally this will hook it)
-      - Depend on a local .mod.stamp (it might be provided locally)
-      - Create the dummy local .mod.stamp (it might not be provided locally)
-
-  */
-
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDependsFortran::FindModule(std::string const& name,
+                                  std::string& module)
+{
+  // Construct possible names for the module file.
+  std::string mod_upper = cmSystemTools::UpperCase(name);
+  std::string mod_lower = name;
+  mod_upper += ".mod";
+  mod_lower += ".mod";
+
+  // Search the include path for the module.
+  std::string fullName;
+  for(std::vector<std::string>::const_iterator i =
+        this->IncludePath->begin(); i != this->IncludePath->end(); ++i)
+    {
+    // Try the lower-case name.
+    fullName = *i;
+    fullName += "/";
+    fullName += mod_lower;
+    if(cmSystemTools::FileExists(fullName.c_str(), true))
+      {
+      module = fullName;
+      return true;
+      }
+
+    // Try the upper-case name.
+    fullName = *i;
+    fullName += "/";
+    fullName += mod_upper;
+    if(cmSystemTools::FileExists(fullName.c_str(), true))
+      {
+      module = fullName;
+      return true;
+      }
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -427,8 +636,10 @@ bool cmDependsFortran::FindIncludeFile(const char* dir,
 }
 
 //----------------------------------------------------------------------------
-cmDependsFortranParser_s::cmDependsFortranParser_s(cmDependsFortran* self):
-  Self(self)
+cmDependsFortranParser_s
+::cmDependsFortranParser_s(cmDependsFortran* self,
+                           cmDependsFortranSourceInfo& info):
+  Self(self), Info(info)
 {
   this->InInterface = 0;
 
@@ -565,7 +776,7 @@ void cmDependsFortranParser_Error(cmDependsFortranParser*, const char*)
 void cmDependsFortranParser_RuleUse(cmDependsFortranParser* parser,
                                     const char* name)
 {
-  parser->Requires.insert(cmSystemTools::LowerCase(name) );
+  parser->Info.Requires.insert(cmSystemTools::LowerCase(name) );
 }
 
 //----------------------------------------------------------------------------
@@ -587,7 +798,7 @@ void cmDependsFortranParser_RuleInclude(cmDependsFortranParser* parser,
   if(parser->Self->FindIncludeFile(dir.c_str(), name, fullName))
     {
     // Found the included file.  Save it in the set of included files.
-    parser->Includes.insert(fullName);
+    parser->Info.Includes.insert(fullName);
 
     // Parse it immediately to translate the source inline.
     cmDependsFortranParser_FilePush(parser, fullName.c_str());
@@ -600,7 +811,7 @@ void cmDependsFortranParser_RuleModule(cmDependsFortranParser* parser,
 {
   if(!parser->InInterface )
     {
-    parser->Provides.insert(cmSystemTools::LowerCase(name));
+    parser->Info.Provides.insert(cmSystemTools::LowerCase(name));
     }
 }
 

@@ -85,6 +85,10 @@ protected:
   // otherwise.
   virtual bool CheckDependencies(std::istream& internalDepends);
 
+  // Finalize the dependency information for the target.
+  virtual bool Finalize(std::ostream& makeDepends,
+                        std::ostream& internalDepends);
+
   // The directory in which the build rule for the target file is executed.
   std::string CompileDirectory;
 
