@@ -339,14 +339,18 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands());
     }
 
+  // Determine whether a link script will be used.
+  bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
+
   // Construct the main link rule.
+  std::vector<std::string> real_link_commands;
   std::string linkRuleVar = "CMAKE_";
   linkRuleVar += linkLanguage;
   linkRuleVar += "_LINK_EXECUTABLE";
   std::string linkRule =
     this->Makefile->GetRequiredDefinition(linkRuleVar.c_str());
   std::vector<std::string> commands1;
-  cmSystemTools::ExpandListArgument(linkRule, commands1);
+  cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
   if(this->Target->GetPropertyAsBool("ENABLE_EXPORTS"))
     {
     // If a separate rule for creating an import library is specified
@@ -357,37 +361,12 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     if(const char* rule =
        this->Makefile->GetDefinition(implibRuleVar.c_str()))
       {
-      cmSystemTools::ExpandListArgument(rule, commands1);
+      cmSystemTools::ExpandListArgument(rule, real_link_commands);
       }
     }
-  this->LocalGenerator->CreateCDCommand
-    (commands1,
-     this->Makefile->GetStartOutputDirectory(),
-     this->Makefile->GetHomeOutputDirectory());
-  commands.insert(commands.end(), commands1.begin(), commands1.end());
 
-  // Add a rule to create necessary symlinks for the library.
-  if(targetOutPath != targetOutPathReal)
-    {
-    std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_executable ";
-    symlink += targetOutPathReal;
-    symlink += " ";
-    symlink += targetOutPath;
-    commands1.clear();
-    commands1.push_back(symlink);
-    this->LocalGenerator->CreateCDCommand(commands1,
-                                  this->Makefile->GetStartOutputDirectory(),
-                                  this->Makefile->GetHomeOutputDirectory());
-    commands.insert(commands.end(), commands1.begin(), commands1.end());
-    }
-
-  // Add the post-build rules when building but not when relinking.
-  if(!relink)
-    {
-    this->LocalGenerator->
-      AppendCustomCommands(commands, this->Target->GetPostBuildCommands());
-    }
-
+  // Expand the rule variables.
+  {
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
   this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target, relink);
@@ -397,11 +376,19 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string variableName;
   std::string variableNameExternal;
   this->WriteObjectsVariable(variableName, variableNameExternal);
-  std::string buildObjs = "$(";
-  buildObjs += variableName;
-  buildObjs += ") $(";
-  buildObjs += variableNameExternal;
-  buildObjs += ")";
+  std::string buildObjs;
+  if(useLinkScript)
+    {
+    this->WriteObjectsString(buildObjs);
+    }
+  else
+    {
+    buildObjs = "$(";
+    buildObjs += variableName;
+    buildObjs += ") $(";
+    buildObjs += variableNameExternal;
+    buildObjs += ")";
+    }
   std::string cleanObjs = "$(";
   cleanObjs += variableName;
   cleanObjs += ")";
@@ -435,12 +422,55 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   vars.LinkFlags = linkFlags.c_str();
   // Expand placeholders in the commands.
   this->LocalGenerator->TargetImplib = targetOutPathImport;
-  for(std::vector<std::string>::iterator i = commands.begin();
-      i != commands.end(); ++i)
+  for(std::vector<std::string>::iterator i = real_link_commands.begin();
+      i != real_link_commands.end(); ++i)
     {
     this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
   this->LocalGenerator->TargetImplib = "";
+  }
+
+  // Optionally convert the build rule to use a script to avoid long
+  // command lines in the make shell.
+  if(useLinkScript)
+    {
+    // Use a link script.
+    const char* name = (relink? "relink.txt" : "link.txt");
+    this->CreateLinkScript(name, real_link_commands, commands1);
+    }
+  else
+    {
+    // No link script.  Just use the link rule directly.
+    commands1 = real_link_commands;
+    }
+  this->LocalGenerator->CreateCDCommand
+    (commands1,
+     this->Makefile->GetStartOutputDirectory(),
+     this->Makefile->GetHomeOutputDirectory());
+  commands.insert(commands.end(), commands1.begin(), commands1.end());
+  commands1.clear();
+
+  // Add a rule to create necessary symlinks for the library.
+  if(targetOutPath != targetOutPathReal)
+    {
+    std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_executable ";
+    symlink += targetOutPathReal;
+    symlink += " ";
+    symlink += targetOutPath;
+    commands1.push_back(symlink);
+    this->LocalGenerator->CreateCDCommand(commands1,
+                                  this->Makefile->GetStartOutputDirectory(),
+                                  this->Makefile->GetHomeOutputDirectory());
+    commands.insert(commands.end(), commands1.begin(), commands1.end());
+    commands1.clear();
+    }
+
+  // Add the post-build rules when building but not when relinking.
+  if(!relink)
+    {
+    this->LocalGenerator->
+      AppendCustomCommands(commands, this->Target->GetPostBuildCommands());
+    }
 
   // Write the build rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream,

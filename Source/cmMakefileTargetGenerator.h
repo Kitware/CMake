@@ -128,6 +128,12 @@ protected:
       makefile generators to register such pairs.  */
   void AddMultipleOutputPair(const char* depender, const char* dependee);
 
+  /** Create a script to hold link rules and a command to invoke the
+      script at build time.  */
+  void CreateLinkScript(const char* name,
+                        std::vector<std::string> const& link_commands,
+                        std::vector<std::string>& makefile_commands);
+
   virtual void CloseFileStreams();
   void RemoveForbiddenFlags(const char* flagVar, const char* linkLang,
                             std::string& linkFlags);

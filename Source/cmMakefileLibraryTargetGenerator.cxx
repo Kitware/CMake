@@ -668,77 +668,16 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands());
     }
 
-  // Open the link script if it will be used.
-  bool useLinkScript = false;
-  std::string linkScriptName;
-  std::auto_ptr<cmGeneratedFileStream> linkScriptStream;
-  if(this->GlobalGenerator->GetUseLinkScript() &&
-     (this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
-      this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-      this->Target->GetType() == cmTarget::MODULE_LIBRARY))
-    {
-    useLinkScript = true;
-    linkScriptName = this->TargetBuildDirectoryFull;
-    if(relink)
-      {
-      linkScriptName += "/relink.txt";
-      }
-    else
-      {
-      linkScriptName += "/link.txt";
-      }
-    std::auto_ptr<cmGeneratedFileStream> lss(
-      new cmGeneratedFileStream(linkScriptName.c_str()));
-    linkScriptStream = lss;
-    }
-
-  std::vector<std::string> link_script_commands;
+  // Determine whether a link script will be used.
+  bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
 
   // Construct the main link rule.
+  std::vector<std::string> real_link_commands;
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
-  if(useLinkScript)
-    {
-    cmSystemTools::ExpandListArgument(linkRule, link_script_commands);
-    std::string link_command = "$(CMAKE_COMMAND) -E cmake_link_script ";
-    link_command += this->Convert(linkScriptName.c_str(),
-                                  cmLocalGenerator::START_OUTPUT,
-                                  cmLocalGenerator::SHELL);
-    link_command += " --verbose=$(VERBOSE)";
-    commands1.push_back(link_command);
-    }
-  else
-    {
-    cmSystemTools::ExpandListArgument(linkRule, commands1);
-    }
-  this->LocalGenerator->CreateCDCommand
-    (commands1,
-     this->Makefile->GetStartOutputDirectory(),
-     this->Makefile->GetHomeOutputDirectory());
-  commands.insert(commands.end(), commands1.begin(), commands1.end());
+  cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
 
-  // Add a rule to create necessary symlinks for the library.
-  if(targetOutPath != targetOutPathReal)
-    {
-    std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_library ";
-    symlink += targetOutPathReal;
-    symlink += " ";
-    symlink += targetOutPathSO;
-    symlink += " ";
-    symlink += targetOutPath;
-    commands1.clear();
-    commands1.push_back(symlink);
-    this->LocalGenerator->CreateCDCommand(commands1,
-                                  this->Makefile->GetStartOutputDirectory(),
-                                  this->Makefile->GetHomeOutputDirectory());
-    commands.insert(commands.end(), commands1.begin(), commands1.end());
-    }
-  // Add the post-build rules when building but not when relinking.
-  if(!relink)
-    {
-    this->LocalGenerator->
-      AppendCustomCommands(commands, this->Target->GetPostBuildCommands());
-    }
-
+  // Expand the rule variables.
+  {
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
   this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target, relink);
@@ -834,38 +773,55 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.LanguageCompileFlags = langFlags.c_str();
   // Expand placeholders in the commands.
   this->LocalGenerator->TargetImplib = targetOutPathImport;
-  if(useLinkScript)
+  for(std::vector<std::string>::iterator i = real_link_commands.begin();
+      i != real_link_commands.end(); ++i)
     {
-    for(std::vector<std::string>::iterator i = link_script_commands.begin();
-        i != link_script_commands.end(); ++i)
-      {
-      this->LocalGenerator->ExpandRuleVariables(*i, vars);
-      }
-    }
-  else
-    {
-    for(std::vector<std::string>::iterator i = commands.begin();
-        i != commands.end(); ++i)
-      {
-      this->LocalGenerator->ExpandRuleVariables(*i, vars);
-      }
+    this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
   this->LocalGenerator->TargetImplib = "";
+  }
 
   // Optionally convert the build rule to use a script to avoid long
   // command lines in the make shell.
   if(useLinkScript)
     {
-    for(std::vector<std::string>::iterator cmd = link_script_commands.begin();
-        cmd != link_script_commands.end(); ++cmd)
-      {
-      // Do not write out empty commands or commands beginning in the
-      // shell no-op ":".
-      if(!cmd->empty() && (*cmd)[0] != ':')
-        {
-        (*linkScriptStream) << *cmd << "\n";
-        }
-      }
+    // Use a link script.
+    const char* name = (relink? "relink.txt" : "link.txt");
+    this->CreateLinkScript(name, real_link_commands, commands1);
+    }
+  else
+    {
+    // No link script.  Just use the link rule directly.
+    commands1 = real_link_commands;
+    }
+  this->LocalGenerator->CreateCDCommand
+    (commands1,
+     this->Makefile->GetStartOutputDirectory(),
+     this->Makefile->GetHomeOutputDirectory());
+  commands.insert(commands.end(), commands1.begin(), commands1.end());
+  commands1.clear();
+
+  // Add a rule to create necessary symlinks for the library.
+  if(targetOutPath != targetOutPathReal)
+    {
+    std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_library ";
+    symlink += targetOutPathReal;
+    symlink += " ";
+    symlink += targetOutPathSO;
+    symlink += " ";
+    symlink += targetOutPath;
+    commands1.push_back(symlink);
+    this->LocalGenerator->CreateCDCommand(commands1,
+                                  this->Makefile->GetStartOutputDirectory(),
+                                  this->Makefile->GetHomeOutputDirectory());
+    commands.insert(commands.end(), commands1.begin(), commands1.end());
+    commands1.clear();
+    }
+  // Add the post-build rules when building but not when relinking.
+  if(!relink)
+    {
+    this->LocalGenerator->
+      AppendCustomCommands(commands, this->Target->GetPostBuildCommands());
     }
 
   // Write the build rule.
