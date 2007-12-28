@@ -219,6 +219,27 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
     {
     fiStream << " " << *i << "\n";
     }
+
+  // Create a script to clean the modules.
+  if(!provides.empty())
+    {
+    std::string fcName = this->TargetDirectory;
+    fcName += "/cmake_clean_Fortran.cmake";
+    cmGeneratedFileStream fcStream(fcName.c_str());
+    fcStream << "# Remove fortran modules provided by this target.\n";
+    fcStream << "FILE(REMOVE\n";
+    for(std::set<cmStdString>::const_iterator i = provides.begin();
+        i != provides.end(); ++i)
+      {
+      std::string mod_upper = cmSystemTools::UpperCase(*i);
+      std::string mod_lower = *i;
+      fcStream << " \"" << mod_lower << ".mod\""
+               << " \"" << mod_lower << ".mod.stamp\""
+               << " \"" << mod_upper << ".mod\""
+               << " \"" << mod_upper << ".mod.stamp\"\n";
+      }
+    fcStream << "  )\n";
+    }
   return true;
 }
 

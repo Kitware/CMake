@@ -1048,6 +1048,26 @@ cmLocalUnixMakefileGenerator3
       }
     fout << ")\n";
     commands.push_back(remove);
+
+    // For the main clean rule add per-language cleaning.
+    if(!filename)
+      {
+      // Get the set of source languages in the target.
+      std::set<cmStdString> languages;
+      target.GetLanguages(languages);
+      fout << "\n"
+           << "# Per-language clean rules from dependency scanning.\n"
+           << "FOREACH(lang";
+      for(std::set<cmStdString>::const_iterator l = languages.begin();
+          l != languages.end(); ++l)
+        {
+        fout << " " << *l;
+        }
+      fout << ")\n"
+           << "  INCLUDE(" << this->GetTargetDirectory(target)
+           << "/cmake_clean_${lang}.cmake OPTIONAL)\n"
+           << "ENDFOREACH(lang)\n";
+      }
     }
 }
 
