@@ -1,3 +1,5 @@
+Changes in CMake 2.4.8 RC 9
+* add some descriptive text to the mac installer
 Changes in CMake 2.4.8 RC 8
 * Add ability to select install location for mac
 * Add list(FIND) because it is used in new FindQt4.cmake
