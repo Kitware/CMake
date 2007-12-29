@@ -18,37 +18,26 @@ TRY_COMPILE(EXTERNAL_OBJECT_BUILT
   external
   OUTPUT_VARIABLE OUTPUT
   )
-SET(EXTERNAL_OBJECT_NAME "external_object${CMAKE_CXX_OUTPUT_EXTENSION}")
 IF(EXTERNAL_OBJECT_BUILT)
   MESSAGE(
-    "Building ${EXTERNAL_OBJECT_NAME} succeeded with the following output:\n"
+    "Building external_object.cxx succeeded with the following output:\n"
     "[${OUTPUT}]"
     )
 ELSE(EXTERNAL_OBJECT_BUILT)
   MESSAGE(FATAL_ERROR
-    "Building ${EXTERNAL_OBJECT_NAME} failed with the following output:\n"
+    "Building external_object.cxx failed with the following output:\n"
     "[${OUTPUT}]"
     )
 ENDIF(EXTERNAL_OBJECT_BUILT)
 
 # Find the external object file.
-SET(BASE ${ExternalOBJ_BINARY_DIR}/Object)
-SET(EXTERNAL_OBJECT)
-FOREACH(dir external.dir . ${CMAKE_CONFIGURATION_TYPES})
-  IF(NOT EXTERNAL_OBJECT)
-    IF(EXISTS ${BASE}/${dir}/${EXTERNAL_OBJECT_NAME})
-      SET(EXTERNAL_OBJECT ${BASE}/${dir}/${EXTERNAL_OBJECT_NAME})
-    ENDIF(EXISTS ${BASE}/${dir}/${EXTERNAL_OBJECT_NAME})
-  ENDIF(NOT EXTERNAL_OBJECT)
-ENDFOREACH(dir)
-IF(NOT EXTERNAL_OBJECT)
-  FILE(GLOB_RECURSE EXTERNAL_OBJECT
-    "${ExternalOBJ_BINARY_DIR}/Object/${EXTERNAL_OBJECT_NAME}")
-ENDIF(NOT EXTERNAL_OBJECT)
+SET(DIR ${ExternalOBJ_BINARY_DIR}/Object)
+FILE(GLOB_RECURSE EXTERNAL_OBJECT
+  "${DIR}/external_object*${CMAKE_CXX_OUTPUT_EXTENSION}")
 IF(EXTERNAL_OBJECT)
   MESSAGE("Found \"${EXTERNAL_OBJECT}\".")
 ELSE(EXTERNAL_OBJECT)
-  MESSAGE(FATAL_ERROR "Could not find ${EXTERNAL_OBJECT_NAME}.")
+  MESSAGE(FATAL_ERROR "Could not find external object.")
 ENDIF(EXTERNAL_OBJECT)
 
 # Test creation of external objects by custom commands.

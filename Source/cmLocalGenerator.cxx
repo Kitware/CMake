@@ -2753,11 +2753,14 @@ cmLocalGenerator
   // extension.
   if(!source.GetPropertyAsBool("KEEP_EXTENSION"))
     {
-    // Remove the original extension.
-    std::string::size_type dot_pos = objectName.rfind(".");
-    if(dot_pos != std::string::npos)
+    // Remove the original extension for CMake 2.4 compatibility.
+    if(this->NeedBackwardsCompatibility(2, 4))
       {
-      objectName = objectName.substr(0, dot_pos);
+      std::string::size_type dot_pos = objectName.rfind(".");
+      if(dot_pos != std::string::npos)
+        {
+        objectName = objectName.substr(0, dot_pos);
+        }
       }
 
     // Store the new extension.

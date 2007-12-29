@@ -6,7 +6,7 @@ ADD_EXECUTABLE(toclean toclean.cxx)
 # List some build-time-generated files.
 GET_TARGET_PROPERTY(TOCLEAN_FILES toclean LOCATION)
 SET(TOCLEAN_FILES ${TOCLEAN_FILES}
-  "${ToClean_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/toclean.dir/toclean${CMAKE_CXX_OUTPUT_EXTENSION}")
+  "${ToClean_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/toclean.dir/toclean.cxx${CMAKE_CXX_OUTPUT_EXTENSION}")
 
 # Create a file that must be registered for cleaning.
 FILE(WRITE "${ToClean_BINARY_DIR}/Registered.txt"
