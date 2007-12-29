@@ -38,6 +38,9 @@
   CMAKE_TO_STRING(CMake_VERSION_MINOR) "." \
   CMAKE_TO_STRING(CMake_VERSION_PATCH)
 
+#define CMake_VERSION_ENCODE(major, minor, patch) \
+  ((major)*0x10000u + (minor)*0x100u + (patch))
+
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )
 #pragma warning ( disable : 4503 )

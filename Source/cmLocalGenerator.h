@@ -251,6 +251,24 @@ public:
   
   bool IsChrpathAvailable(const cmTarget& target);
 
+  /**
+   * Get the level of backwards compatibility requested by the project
+   * in this directory.  This is the value of the CMake variable
+   * CMAKE_BACKWARDS_COMPATIBILITY whose format is
+   * "major.minor[.patch]".  The returned integer is encoded as
+   *
+   *   CMake_VERSION_ENCODE(major, minor, patch)
+   *
+   * and is monotonically increasing with the CMake version.
+   */
+  unsigned int GetBackwardsCompatibility();
+
+  /**
+   * Test whether compatibility is set to a given version or lower.
+   */
+  bool NeedBackwardsCompatibility(unsigned int major,
+                                  unsigned int minor,
+                                  unsigned int patch = 0xFFu);
 protected:
 
   /** Construct a comment for a custom command.  */
@@ -343,6 +361,9 @@ protected:
   std::string RelativePathTopBinary;
   bool RelativePathsConfigured;
   bool PathConversionsSetup;
+
+  unsigned int BackwardsCompatibility;
+  bool BackwardsCompatibilityFinal;
 };
 
 #endif
