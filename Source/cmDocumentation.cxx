@@ -317,6 +317,7 @@ void cmDocumentation::ClearSections()
 {
   this->PrintSections.erase(this->PrintSections.begin(), 
                             this->PrintSections.end());
+  this->ModulesFound.clear();
 }
 
 //----------------------------------------------------------------------------
@@ -452,6 +453,8 @@ void cmDocumentation
       if(fname.substr(fname.length()-6, 6) == ".cmake")
         {
         std::string moduleName = fname.substr(0, fname.length()-6);
+        // this check is to avoid creating documentation for the modules with
+        // the same name in multiple directories of CMAKE_MODULE_PATH
         if (this->ModulesFound.find(moduleName) == this->ModulesFound.end())
           {
           this->ModulesFound.insert(moduleName);
