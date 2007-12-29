@@ -7,6 +7,7 @@ MESSAGE("CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
 MESSAGE("CMAKE_Fortran_FLAGS = ${CMAKE_Fortran_FLAGS}")
 ADD_EXECUTABLE(testf hello.f)
 
+SET(TEST_MODULE_DEPENDS 0)
 IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
   ADD_EXECUTABLE(test_module
     test_module_main.f90
@@ -22,6 +23,12 @@ IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     in_interface/main.f90
     in_interface/module.f90)
 
+  IF(CMAKE_Fortran_COMPILER_ID MATCHES GNU)
+    SET(TEST_MODULE_DEPENDS 1)
+  ENDIF(CMAKE_Fortran_COMPILER_ID MATCHES GNU)
+ENDIF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+
+IF(TEST_MODULE_DEPENDS)
   # Build the external project separately using a custom target.
   # Make sure it uses the same build configuration as this test.
   IF(CMAKE_CONFIGURATION_TYPES)
@@ -52,4 +59,4 @@ IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 
   ADD_SUBDIRECTORY(Library)
   ADD_SUBDIRECTORY(Executable)
-ENDIF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+ENDIF(TEST_MODULE_DEPENDS)
