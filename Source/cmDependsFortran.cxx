@@ -148,7 +148,7 @@ cmDependsFortran::~cmDependsFortran()
 
 //----------------------------------------------------------------------------
 bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
-  std::ostream& makeDepends, std::ostream& internalDepends)
+                                         std::ostream&, std::ostream&)
 {
   // Make sure this is a scanning instance.
   if(!src || src[0] == '\0')
@@ -319,7 +319,7 @@ void cmDependsFortran::MatchRemoteModules(std::istream& fin,
                                           const char* moduleDir)
 {
   std::string line;
-  bool doing_provides;
+  bool doing_provides = false;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
     // Ignore comments and empty lines.
