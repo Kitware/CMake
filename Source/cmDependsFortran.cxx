@@ -424,9 +424,6 @@ cmDependsFortran
 
       // since we require some things add them to our list of requirements
       makeDepends << obj << ".requires: " << proxy << std::endl;
-
-      // create an empty proxy in case no other source provides it
-      makeDepends << proxy << ":" << std::endl;
       }
 
     // The object file should depend on timestamped files for the
