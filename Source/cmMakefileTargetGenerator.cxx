@@ -36,6 +36,7 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator()
   this->InfoFileStream = 0;
   this->FlagFileStream = 0;
   this->CustomCommandDriver = OnBuild;
+  this->FortranModuleDirectoryComputed = false;
 }
 
 cmMakefileTargetGenerator *
@@ -267,6 +268,12 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     this->LocalGenerator
       ->AddLanguageFlags(flags, lang,
                          this->LocalGenerator->ConfigurationName.c_str());
+
+    // Fortran-specific flags computed for this target.
+    if(*l == "Fortran")
+      {
+      this->AddFortranFlags(flags);
+      }
 
     // Add shared-library flags if needed.
     this->LocalGenerator->AddSharedFlags(flags, lang, shared);
@@ -822,6 +829,15 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   *this->InfoFileStream
     << "  )\n";
   }
+
+  // Check for a target-specific module output directory.
+  if(const char* mdir = this->GetFortranModuleDirectory())
+    {
+    *this->InfoFileStream
+      << "\n"
+      << "# Fortran module output directory.\n"
+      << "SET(CMAKE_Fortran_TARGET_MODULE_DIR \"" << mdir << "\")\n";
+    }
 
   // and now write the rule to use it
   std::vector<std::string> depends;
@@ -1422,4 +1438,83 @@ cmMakefileTargetGenerator
                                 cmLocalGenerator::SHELL);
   link_command += " --verbose=$(VERBOSE)";
   makefile_commands.push_back(link_command);
+}
+
+//----------------------------------------------------------------------------
+const char* cmMakefileTargetGenerator::GetFortranModuleDirectory()
+{
+  // Compute the module directory.
+  if(!this->FortranModuleDirectoryComputed)
+    {
+    const char* target_mod_dir =
+      this->Target->GetProperty("Fortran_MODULE_DIRECTORY");
+    const char* moddir_flag =
+      this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
+    if(target_mod_dir && moddir_flag)
+      {
+      // Compute the full path to the module directory.
+      if(cmSystemTools::FileIsFullPath(target_mod_dir))
+        {
+        // Already a full path.
+        this->FortranModuleDirectory = target_mod_dir;
+        }
+      else
+        {
+        // Interpret relative to the current output directory.
+        this->FortranModuleDirectory =
+          this->Makefile->GetCurrentOutputDirectory();
+        this->FortranModuleDirectory += "/";
+        this->FortranModuleDirectory += target_mod_dir;
+        }
+
+      // Make sure the module output directory exists.
+      cmSystemTools::MakeDirectory(this->FortranModuleDirectory.c_str());
+      }
+    this->FortranModuleDirectoryComputed = true;
+    }
+
+  // Return the computed directory.
+  if(this->FortranModuleDirectory.empty())
+    {
+    return 0;
+    }
+  else
+    {
+    return this->FortranModuleDirectory.c_str();
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
+{
+  // Add a module output directory flag if necessary.
+  if(const char* mod_dir = this->GetFortranModuleDirectory())
+    {
+    const char* moddir_flag =
+      this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG");
+    std::string modflag = moddir_flag;
+    modflag += this->Convert(mod_dir,
+                             cmLocalGenerator::START_OUTPUT,
+                             cmLocalGenerator::SHELL);
+    this->LocalGenerator->AppendFlags(flags, modflag.c_str());
+    }
+
+  // If there is a separate module path flag then duplicate the
+  // include path with it.  This compiler does not search the include
+  // path for modules.
+  if(const char* modpath_flag =
+     this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG"))
+    {
+    std::vector<std::string> includes;
+    this->LocalGenerator->GetIncludeDirectories(includes);
+    for(std::vector<std::string>::const_iterator idi = includes.begin();
+        idi != includes.end(); ++idi)
+      {
+      std::string flg = modpath_flag;
+      flg += this->Convert(idi->c_str(),
+                           cmLocalGenerator::NONE,
+                           cmLocalGenerator::SHELL);
+      this->LocalGenerator->AppendFlags(flags, flg.c_str());
+      }
+    }
 }

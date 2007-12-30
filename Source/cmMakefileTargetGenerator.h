@@ -184,6 +184,14 @@ protected:
   typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
 
+  // Target-wide Fortran module output directory.
+  bool FortranModuleDirectoryComputed;
+  std::string FortranModuleDirectory;
+  const char* GetFortranModuleDirectory();
+
+  // Compute target-specific Fortran language flags.
+  void AddFortranFlags(std::string& flags);
+
   //==================================================================
   // Convenience routines that do nothing more than forward to
   // implementaitons

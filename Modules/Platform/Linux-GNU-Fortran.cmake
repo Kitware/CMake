@@ -1,0 +1,1 @@
+SET(CMAKE_Fortran_MODDIR_FLAG -J)

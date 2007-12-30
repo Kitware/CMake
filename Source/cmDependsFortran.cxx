@@ -194,6 +194,23 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   // Prepare the module search process.
   this->LocateModules();
 
+  // Get the directory in which stamp files will be stored.
+  const char* stamp_dir =
+    this->LocalGenerator->GetMakefile()->GetCurrentOutputDirectory();
+
+  // Get the directory in which module files will be created.
+  const char* mod_dir;
+  cmMakefile* mf = this->LocalGenerator->GetMakefile();
+  if(const char* target_mod_dir =
+     mf->GetDefinition("CMAKE_Fortran_TARGET_MODULE_DIR"))
+    {
+    mod_dir = target_mod_dir;
+    }
+  else
+    {
+    mod_dir = stamp_dir;
+    }
+
   // Actually write dependencies to the streams.
   typedef cmDependsFortranInternals::ObjectInfoMap ObjectInfoMap;
   ObjectInfoMap const& objInfo = this->Internal->ObjectInfo;
@@ -201,6 +218,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
       i != objInfo.end(); ++i)
     {
     if(!this->WriteDependenciesReal(i->first.c_str(), i->second,
+                                    mod_dir, stamp_dir,
                                     makeDepends, internalDepends))
       {
       return false;
@@ -227,16 +245,35 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
     fcName += "/cmake_clean_Fortran.cmake";
     cmGeneratedFileStream fcStream(fcName.c_str());
     fcStream << "# Remove fortran modules provided by this target.\n";
-    fcStream << "FILE(REMOVE\n";
+    fcStream << "FILE(REMOVE";
     for(std::set<cmStdString>::const_iterator i = provides.begin();
         i != provides.end(); ++i)
       {
-      std::string mod_upper = cmSystemTools::UpperCase(*i);
-      std::string mod_lower = *i;
-      fcStream << " \"" << mod_lower << ".mod\""
-               << " \"" << mod_lower << ".mod.stamp\""
-               << " \"" << mod_upper << ".mod\""
-               << " \"" << mod_upper << ".mod.stamp\"\n";
+      std::string mod_upper = mod_dir;
+      mod_upper += "/";
+      mod_upper += cmSystemTools::UpperCase(*i);
+      mod_upper += ".mod";
+      std::string mod_lower = mod_dir;
+      mod_lower += "/";
+      mod_lower += *i;
+      mod_lower += ".mod";
+      std::string stamp = stamp_dir;
+      stamp += "/";
+      stamp += *i;
+      stamp += ".mod.stamp";
+      fcStream << "\n";
+      fcStream << "  \"" <<
+        this->LocalGenerator->Convert(mod_lower.c_str(),
+                                      cmLocalGenerator::START_OUTPUT)
+               << "\"\n";
+      fcStream << "  \"" <<
+        this->LocalGenerator->Convert(mod_upper.c_str(),
+                                      cmLocalGenerator::START_OUTPUT)
+               << "\"\n";
+      fcStream << "  \"" <<
+        this->LocalGenerator->Convert(stamp.c_str(),
+                                      cmLocalGenerator::START_OUTPUT)
+               << "\"\n";
       }
     fcStream << "  )\n";
     }
@@ -304,19 +341,19 @@ void cmDependsFortran::LocateModules()
 //----------------------------------------------------------------------------
 void cmDependsFortran::MatchLocalModules()
 {
-  const char* moduleDir =
+  const char* stampDir =
     this->LocalGenerator->GetMakefile()->GetCurrentOutputDirectory();
   std::set<cmStdString> const& provides = this->Internal->TargetProvides;
   for(std::set<cmStdString>::const_iterator i = provides.begin();
       i != provides.end(); ++i)
     {
-    this->ConsiderModule(i->c_str(), moduleDir);
+    this->ConsiderModule(i->c_str(), stampDir);
     }
 }
 
 //----------------------------------------------------------------------------
 void cmDependsFortran::MatchRemoteModules(std::istream& fin,
-                                          const char* moduleDir)
+                                          const char* stampDir)
 {
   std::string line;
   bool doing_provides = false;
@@ -332,7 +369,7 @@ void cmDependsFortran::MatchRemoteModules(std::istream& fin,
       {
       if(doing_provides)
         {
-        this->ConsiderModule(line.c_str()+1, moduleDir);
+        this->ConsiderModule(line.c_str()+1, stampDir);
         }
       }
     else if(line == "provides")
@@ -348,7 +385,7 @@ void cmDependsFortran::MatchRemoteModules(std::istream& fin,
 
 //----------------------------------------------------------------------------
 void cmDependsFortran::ConsiderModule(const char* name,
-                                      const char* moduleDir)
+                                      const char* stampDir)
 {
   // Locate each required module.
   typedef cmDependsFortranInternals::TargetRequiresMap TargetRequiresMap;
@@ -358,7 +395,7 @@ void cmDependsFortran::ConsiderModule(const char* name,
      required->second.empty())
     {
     // The module is provided by a CMake target.  It will have a stamp file.
-    std::string stampFile = moduleDir;
+    std::string stampFile = stampDir;
     stampFile += "/";
     stampFile += name;
     stampFile += ".mod.stamp";
@@ -371,6 +408,7 @@ bool
 cmDependsFortran
 ::WriteDependenciesReal(const char *obj,
                         cmDependsFortranSourceInfo const& info,
+                        const char* mod_dir, const char* stamp_dir,
                         std::ostream& makeDepends,
                         std::ostream& internalDepends)
 {
@@ -378,10 +416,6 @@ cmDependsFortran
 
   // Get the source file for this object.
   const char* src = info.Source.c_str();
-
-  // Get the directory in which stamp files will be stored.
-  std::string mod_dir =
-    this->LocalGenerator->GetMakefile()->GetCurrentOutputDirectory();
 
   // Write the include dependencies to the output stream.
   internalDepends << obj << std::endl;
@@ -414,7 +448,7 @@ cmDependsFortran
       // The module is provided by a different source in the same
       // target.  Add the proxy dependency to make sure the other
       // source builds first.
-      std::string proxy = mod_dir;
+      std::string proxy = stamp_dir;
       proxy += "/";
       proxy += *i;
       proxy += ".mod.proxy";
@@ -460,7 +494,7 @@ cmDependsFortran
   for(std::set<cmStdString>::const_iterator i = info.Provides.begin();
       i != info.Provides.end(); ++i)
     {
-    std::string proxy = mod_dir;
+    std::string proxy = stamp_dir;
     proxy += "/";
     proxy += *i;
     proxy += ".mod.proxy";
@@ -493,7 +527,7 @@ cmDependsFortran
         this->LocalGenerator->Convert(modFile.c_str(),
                                       cmLocalGenerator::HOME_OUTPUT,
                                       cmLocalGenerator::SHELL);
-      std::string stampFile = mod_dir;
+      std::string stampFile = stamp_dir;
       stampFile += "/";
       stampFile += m;
       stampFile += ".mod.stamp";

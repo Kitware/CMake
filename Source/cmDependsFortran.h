@@ -60,8 +60,8 @@ protected:
   // Find all the modules required by the target.
   void LocateModules();
   void MatchLocalModules();
-  void MatchRemoteModules(std::istream& fin, const char* moduleDir);
-  void ConsiderModule(const char* name, const char* moduleDir);
+  void MatchRemoteModules(std::istream& fin, const char* stampDir);
+  void ConsiderModule(const char* name, const char* stampDir);
   bool FindModule(std::string const& name, std::string& module);
 
   // Implement writing/checking methods required by superclass.
@@ -72,6 +72,7 @@ protected:
   // Actually write the depenencies to the streams.
   bool WriteDependenciesReal(const char *obj,
                              cmDependsFortranSourceInfo const& info,
+                             const char* mod_dir, const char* stamp_dir,
                              std::ostream& makeDepends,
                              std::ostream& internalDepends);
 

@@ -23,9 +23,7 @@ IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     in_interface/main.f90
     in_interface/module.f90)
 
-  IF(CMAKE_Fortran_COMPILER_ID MATCHES GNU)
-    SET(TEST_MODULE_DEPENDS 1)
-  ENDIF(CMAKE_Fortran_COMPILER_ID MATCHES GNU)
+  SET(TEST_MODULE_DEPENDS 1)
 ENDIF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 
 IF(TEST_MODULE_DEPENDS)
@@ -56,6 +54,13 @@ IF(TEST_MODULE_DEPENDS)
                          -DCMAKE_Fortran_FLAGS_RELWITHDEBINFO:STRING=${CMAKE_Fortran_FLAGS_RELWITHDEBINFO}
          )
   ADD_CUSTOM_TARGET(ExternalTarget ALL DEPENDS ${testf_BINARY_DIR}/ExternalProject)
+
+  # Test module output directory if available.
+  IF(CMAKE_Fortran_MODDIR_FLAG)
+    SET(Library_MODDIR "${testf_BINARY_DIR}/Library/modules")
+  ELSE(CMAKE_Fortran_MODDIR_FLAG)
+    SET(Library_MODDIR "${testf_BINARY_DIR}/Library")
+  ENDIF(CMAKE_Fortran_MODDIR_FLAG)
 
   ADD_SUBDIRECTORY(Library)
   ADD_SUBDIRECTORY(Executable)

@@ -680,6 +680,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_Fortran_MODULE_DIRECTORY", cmProperty::VARIABLE,
+     "Fortran module output directory.",
+     "This variable is used to initialize the "
+     "Fortran_MODULE_DIRECTORY property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_LIBRARY_OUTPUT_DIRECTORY", cmProperty::VARIABLE,
      "Where to put all the LIBRARY targets when built.",
      "This variable is used to initialize the "

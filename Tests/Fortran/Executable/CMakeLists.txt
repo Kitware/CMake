@@ -1,4 +1,4 @@
-include_directories(${testf_BINARY_DIR}/Library)
+include_directories(${Library_MODDIR})
 include_directories(${testf_BINARY_DIR}/External)
 link_directories(${testf_BINARY_DIR}/External)
 
