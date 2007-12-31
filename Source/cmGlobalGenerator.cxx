@@ -1421,6 +1421,15 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     {
     depends.push_back("preinstall");
     }
+  else
+    {
+    const char* noPackageAll =
+      mf->GetDefinition("CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY");
+    if(!noPackageAll || cmSystemTools::IsOff(noPackageAll))
+      {
+      depends.push_back(this->GetAllTargetName());
+      }
+    }
   if(cmSystemTools::FileExists(configFile.c_str()))
     {
     (*targets)[this->GetPackageTargetName()]
