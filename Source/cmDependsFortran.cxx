@@ -619,23 +619,29 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   mod_lower += ".mod";
   if(cmSystemTools::FileExists(mod_upper.c_str(), true))
     {
-    if(!cmSystemTools::CopyFileIfDifferent(mod_upper.c_str(), stamp.c_str()))
+    if(cmDependsFortran::ModulesDiffer(mod_upper.c_str(), stamp.c_str()))
       {
-      std::cerr << "Error copying Fortran module from \""
-                << mod_upper.c_str() << "\" to \"" << stamp.c_str()
-                << "\".\n";
-      return false;
+      if(!cmSystemTools::CopyFileAlways(mod_upper.c_str(), stamp.c_str()))
+        {
+        std::cerr << "Error copying Fortran module from \""
+                  << mod_upper.c_str() << "\" to \"" << stamp.c_str()
+                  << "\".\n";
+        return false;
+        }
       }
     return true;
     }
   else if(cmSystemTools::FileExists(mod_lower.c_str(), true))
     {
-    if(!cmSystemTools::CopyFileIfDifferent(mod_lower.c_str(), stamp.c_str()))
+    if(cmDependsFortran::ModulesDiffer(mod_lower.c_str(), stamp.c_str()))
       {
-      std::cerr << "Error copying Fortran module from \""
-                << mod_lower.c_str() << "\" to \"" << stamp.c_str()
-                << "\".\n";
-      return false;
+      if(!cmSystemTools::CopyFileAlways(mod_lower.c_str(), stamp.c_str()))
+        {
+        std::cerr << "Error copying Fortran module from \""
+                  << mod_lower.c_str() << "\" to \"" << stamp.c_str()
+                  << "\".\n";
+        return false;
+        }
       }
     return true;
     }
@@ -644,6 +650,102 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
             << "\".  Tried \"" << mod_upper.c_str()
             << "\" and \"" << mod_lower.c_str() << "\".\n";
   return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmDependsFortran::ModulesDiffer(const char* modFile,
+                                     const char* stampFile)
+{
+  /*
+  This following is valid for intel and gnu. For others this may be valid
+  too, but has to be proven.
+
+  ASSUMPTION: If one compiles the source foo.f90 which provides module bar,
+  two times then both generated bar.mod files will differ only before the
+  first linefeed (\n or 0x0A).
+
+  gnu:
+    A mod file is an ascii file.
+    <bar.mod>
+    FORTRAN module created from /path/to/foo.f90 on Sun Dec 30 22:47:58 2007
+    If you edit this, you'll get what you deserve.
+    ...
+    </bar.mod>
+    As you can see the first line contains the date.
+
+  intel:
+    A mod file is a binary file.
+    However, looking into both generated bar.mod files with a hex editor
+    shows that they differ only before a linefeed (0x0A) which is located
+    some bytes in front of the absoulte path to the source file.
+
+  sun:
+    A mod file is a binary file.  It always starts in the line of text
+    !<ftn.mod>
+    Compiling twice produces identical modules anyway, so the
+    assumption is valid.
+
+  others:
+    TODO: is this valid for every common fortran compiler?
+  */
+#if defined(_WIN32) || defined(__CYGWIN__)
+  std::ifstream finModFile(modFile, std::ios::in | std::ios::binary);
+  std::ifstream finStampFile(stampFile, std::ios::in | std::ios::binary);
+#else
+  std::ifstream finModFile(modFile, std::ios::in);
+  std::ifstream finStampFile(stampFile, std::ios::in);
+#endif
+  if(!finModFile || !finStampFile)
+    {
+    // At least one of the files does not exist.  The modules differ.
+    return true;
+    }
+
+  // Remove the first line from each file and make sure newlines were found.
+  std::string modLine;
+  bool modHasNewline = false;
+  if(!cmSystemTools::GetLineFromStream(finModFile, modLine,
+                                       &modHasNewline, 1024) ||
+     !modHasNewline)
+    {
+    std::cerr
+      << "WARNING in cmDependsFortran::ModulesDiffer:\n"
+      << "The fortran module \"" << modFile << "\" format is not known.\n"
+      << "Please report this at: http://www.cmake.org/Bug\n"
+      << "\n";
+    return true;
+    }
+  std::string stampLine;
+  bool stampHasNewline = false;
+  if(!cmSystemTools::GetLineFromStream(finStampFile, stampLine,
+                                       &stampHasNewline, 1024) ||
+     !stampHasNewline)
+    {
+    // The stamp file is invalid.
+    return true;
+    }
+
+  // Compare the remaining content.
+  for(;;)
+    {
+    int mod_c = finModFile.get();
+    int stamp_c = finStampFile.get();
+    if(!finModFile && !finStampFile)
+      {
+      // We have reached the end of both files simultaneously.
+      // The modules are identical.
+      return false;
+      }
+    else if(!finModFile || !finStampFile || mod_c != stamp_c)
+      {
+      // We have reached the end of one file before the other.
+      // The modules are different.
+      break;
+      }
+    }
+
+   // The modules are different.
+   return true;
 }
 
 //----------------------------------------------------------------------------
