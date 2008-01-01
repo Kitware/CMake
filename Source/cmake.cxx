@@ -3822,7 +3822,7 @@ int cmake::VisualStudioLinkIncremental(std::vector<std::string>& args,
       {
       std::cout << "Create empty: " << manifestFile.c_str() << "\n";
       }
-    std::ofstream fout(manifestFile.c_str());
+    std::ofstream foutTmp(manifestFile.c_str());
     }
   std::string resourceFile = manifestFile;
   resourceFile += ".res";
