@@ -18,6 +18,7 @@ SET(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
 # Skip the dependency that causes a build when installing.  This
 # avoids infinite loops when the post-build rule below installs.
 SET(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY 1)
+SET(CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY 1)
 
 SET(CMAKE_DEBUG_POSTFIX "_test_debug_postfix")
 
