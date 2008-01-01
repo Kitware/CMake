@@ -1020,8 +1020,12 @@ void cmMakefile::AddLinkDirectory(const char* dir)
   // much bigger than 20.  We cannot use a set because of order
   // dependency of the link search path.
 
+  if(!dir)
+    {
+    return;
+    }
   // remove trailing slashes
-  if(dir && dir[strlen(dir)-1] == '/')
+  if(dir[strlen(dir)-1] == '/')
     {
     std::string newdir = dir;
     newdir = newdir.substr(0, newdir.size()-1);

@@ -563,29 +563,16 @@ std::vector<cmStdString> cmSystemTools::ParseArguments(const char* command)
   return args;
 }
 
-bool cmSystemTools::RunSingleCommand(
-  const char* command, 
-  std::string* output,
-  int *retVal, 
-  const char* dir,
-  bool verbose,
-  double timeout)
+
+bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
+                                     std::string* output ,
+                                     int* retVal , const char* dir , 
+                                     bool verbose ,
+                                     double timeout )
 {
-  if(s_DisableRunCommandOutput)
-    {
-    verbose = false;
-    }
-
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
-
-  if(args.size() < 1)
-    {
-    return false;
-    }
-  
   std::vector<const char*> argv;
-  for(std::vector<cmStdString>::const_iterator a = args.begin();
-      a != args.end(); ++a)
+  for(std::vector<cmStdString>::const_iterator a = command.begin();
+      a != command.end(); ++a)
     {
     argv.push_back(a->c_str());
     }
@@ -699,6 +686,29 @@ bool cmSystemTools::RunSingleCommand(
   
   cmsysProcess_Delete(cp);
   return result;
+}
+
+bool cmSystemTools::RunSingleCommand(
+  const char* command, 
+  std::string* output,
+  int *retVal, 
+  const char* dir,
+  bool verbose,
+  double timeout)
+{
+  if(s_DisableRunCommandOutput)
+    {
+    verbose = false;
+    }
+
+  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
+
+  if(args.size() < 1)
+    {
+    return false;
+    }
+  return cmSystemTools::RunSingleCommand(args, output,retVal, 
+                                         dir, verbose, timeout);
 }
 bool cmSystemTools::RunCommand(const char* command, 
                                std::string& output,

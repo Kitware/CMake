@@ -209,6 +209,16 @@ public:
                                int* retVal = 0, const char* dir = 0, 
                                bool verbose = true,
                                double timeout = 0.0);
+  /** 
+   * In this version of RunSingleCommand, command[0] should be
+   * the command to run, and each argument to the command should
+   * be in comand[1]...command[command.size()]
+   */
+  static bool RunSingleCommand(std::vector<cmStdString> const& command,
+                               std::string* output = 0,
+                               int* retVal = 0, const char* dir = 0, 
+                               bool verbose = true,
+                               double timeout = 0.0);
 
   /**
    * Parse arguments out of a single string command

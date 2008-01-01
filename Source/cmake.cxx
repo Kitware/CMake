@@ -1451,7 +1451,14 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::cerr << std::endl;
       return 1;
       }
-
+    else if (args[1] == "vs_link_exe")
+      {
+      return cmake::VisualStudioLink(args, 1);
+      }
+    else if (args[1] == "vs_link_dll")
+      {
+      return cmake::VisualStudioLink(args, 2);
+      }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     // Internal CMake color makefile support.
     else if (args[1] == "cmake_echo_color")
@@ -3651,4 +3658,268 @@ static bool cmakeCheckStampFile(const char* stampName)
     cmSystemTools::Error("Cannot restore timestamp ", stampName);
     return false;
     }
+}
+
+// For visual studio 2005 and newer manifest files need to be embeded into
+// exe and dll's.  This code does that in such a way that incremental linking
+// still works.
+int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
+{
+  if(args.size() < 2)
+    {
+    return -1;
+    }
+  bool verbose = false;
+  if(cmSystemTools::GetEnv("VERBOSE"))
+    {
+    verbose = true;
+    }
+  // figure out if this is an incremental link or not and run the correct
+  // link function.
+  for(std::vector<std::string>::iterator i = args.begin();
+      i != args.end(); ++i)
+    {
+    if(cmSystemTools::Strucmp(i->c_str(), "/INCREMENTAL:YES") == 0)
+      {
+      return cmake::VisualStudioLinkIncremental(args, type, verbose);
+      }
+    }
+  return cmake::VisualStudioLinkNonIncremental(args, type, verbose);
+}
+
+int cmake::ParseVisualStudioLinkCommand(std::vector<std::string>& args, 
+                                        std::vector<cmStdString>& command,
+                                        std::string& targetName)
+{
+  std::vector<std::string>::iterator i = args.begin();
+  i++; // skip -E
+  i++; // skip vs_link_dll or vs_link_exe
+  command.push_back(*i);
+  i++; // move past link command
+  for(; i != args.end(); ++i)
+    {
+    command.push_back(*i);
+    if(i->find("/Fe") == 0)
+      {
+      targetName = i->substr(3);
+      }
+    if(i->find("/out:") == 0)
+      {
+      targetName = i->substr(5);
+      }
+    }
+  if(targetName.size() == 0 || command.size() == 0)
+    {
+    return -1;
+    }
+  return 0;
+}
+
+bool cmake::RunCommand(const char* comment,
+                       std::vector<cmStdString>& command,
+                       bool verbose,
+                       int* retCodeOut)
+{
+  if(verbose)
+    {
+    std::cout << comment << ":\n";
+    for(std::vector<cmStdString>::iterator i = command.begin();
+        i != command.end(); ++i)
+      {
+      std::cout << i->c_str() << " ";
+      }
+    std::cout << "\n";
+    }
+  std::string output;
+  int retCode =0;
+  // use rc command to create .res file
+  cmSystemTools::RunSingleCommand(command,
+                                  &output,
+                                  &retCode);
+  if(verbose)
+    {
+    std::cout << output << "\n";
+    }
+  // if retCodeOut is requested then always return true
+  // and set the retCodeOut to retCode
+  if(retCodeOut)
+    {
+    *retCodeOut = retCode;
+    return true;
+    }
+  if(retCode != 0)
+    {
+    std::cout << comment << " failed. with " << retCode << "\n";
+    }
+  return retCode == 0;
+}
+
+int cmake::VisualStudioLinkIncremental(std::vector<std::string>& args, 
+                                       int type, bool verbose)
+{
+  // This follows the steps listed here:
+  // http://blogs.msdn.com/zakramer/archive/2006/05/22/603558.aspx
+  
+  //    1.  Compiler compiles the application and generates the *.obj files.
+  //    2.  An empty manifest file is generated if this is a clean build and if
+  //    not the previous one is reused.
+  //    3.  The resource compiler (rc.exe) compiles the *.manifest file to a
+  //    *.res file.
+  //    4.  Linker generates the binary (EXE or DLL) with the /incremental
+  //    switch and embeds the dummy manifest file. The linker also generates
+  //    the real manifest file based on the binaries that your binary depends
+  //    on.
+  //    5.  The manifest tool (mt.exe) is then used to generate the final
+  //    manifest.
+  
+  // If the final manifest is changed, then 6 and 7 are run, if not
+  // they are skipped, and it is done.
+  
+  //    6.  The resource compiler is invoked one more time.
+  //    7.  Finally, the Linker does another incremental link, but since the
+  //    only thing that has changed is the *.res file that contains the
+  //    manifest it is a short link.
+  std::vector<cmStdString> linkCommand;
+  std::string targetName;
+  if(cmake::ParseVisualStudioLinkCommand(args, linkCommand, targetName) == -1)
+    {
+    return -1;
+    }
+  std::string manifestArg = "/MANIFESTFILE:";
+  std::vector<cmStdString> rcCommand;
+  rcCommand.push_back(cmSystemTools::FindProgram("rc.exe"));
+  std::vector<cmStdString> mtCommand;
+  mtCommand.push_back(cmSystemTools::FindProgram("mt.exe"));
+  std::string tempManifest;
+  tempManifest = targetName;
+  tempManifest += ".intermediate.manifest";
+  std::string resourceInputFile = targetName;
+  resourceInputFile += ".resource.txt";
+  if(verbose)
+    {
+    std::cout << "Create " << resourceInputFile.c_str() << "\n";
+    }
+  // Create input file for rc command
+  std::ofstream fout(resourceInputFile.c_str());
+  if(!fout)
+    {
+    return -1;
+    }
+  std::string manifestFile = targetName;
+  manifestFile += ".embed.manifest";
+  std::string fullPath=manifestFile;
+  fout << type << " /* CREATEPROCESS_MANIFEST_RESOURCE_ID "
+    "*/ 24 /* RT_MANIFEST */ " << "\"" << fullPath.c_str() << "\"";
+  fout.close();
+  manifestArg += tempManifest;
+  // add the manifest arg to the linkCommand
+  linkCommand.push_back(manifestArg);
+  // if manifestFile is not yet created, create an
+  // empty one
+  if(!cmSystemTools::FileExists(manifestFile.c_str()))
+    {
+    if(verbose)
+      {
+      std::cout << "Create empty: " << manifestFile.c_str() << "\n";
+      }
+    std::ofstream fout(manifestFile.c_str());
+    }
+  std::string resourceFile = manifestFile;
+  resourceFile += ".res";
+  // add the resource file to the end of the link command
+  linkCommand.push_back(resourceFile);
+  std::string outputOpt = "/fo";
+  outputOpt += resourceFile;
+  rcCommand.push_back(outputOpt);
+  rcCommand.push_back(resourceInputFile);
+  // Run rc command to create resource 
+  if(!cmake::RunCommand("RC Pass 1", rcCommand, verbose))
+    {
+    return -1;
+    }
+  // Now run the link command to link and create manifest
+  if(!cmake::RunCommand("LINK Pass 1", linkCommand, verbose))
+    {
+    return -1;
+    }
+  // create mt command 
+  std::string outArg("/out:");
+  outArg+= manifestFile;
+  mtCommand.push_back("/nologo");
+  mtCommand.push_back(outArg);
+  mtCommand.push_back("/notify_update");
+  mtCommand.push_back("/manifest");
+  mtCommand.push_back(tempManifest);
+  //  now run mt.exe to create the final manifest file
+  int mtRet =0;
+  cmake::RunCommand("MT", mtCommand, verbose, &mtRet);
+  // if mt returns 0, then the manifest was not changed and
+  // we do not need to do another link step
+  if(mtRet == 0)
+    {
+    return 0;
+    }
+  // check for magic mt return value if mt returns the magic number
+  // 1090650113 then it means that it updated the manifest file and we need
+  // to do the final link.  If mt has any value other than 0 or 1090650113
+  // then there was some problem with the command itself and there was an
+  // error so return the error code back out of cmake so make can report it.
+  if(mtRet != 1090650113)
+    {
+    return mtRet;
+    }
+  // update the resource file with the new manifest from the mt command.
+  if(!cmake::RunCommand("RC Pass 2", rcCommand, verbose))
+    {
+    return -1;
+    }
+  // Run the final incremental link that will put the new manifest resource
+  // into the file incrementally.
+  if(!cmake::RunCommand("FINAL LINK", linkCommand, verbose))
+    {
+    return -1;
+    }
+  return 0;
+}
+
+int cmake::VisualStudioLinkNonIncremental(std::vector<std::string>& args,
+                                          int type,
+                                          bool verbose)
+{
+  std::vector<cmStdString> linkCommand;
+  std::string targetName;
+  if(cmake::ParseVisualStudioLinkCommand(args, linkCommand, targetName) == -1)
+    {
+    return -1;
+    }
+  // Run the link command as given 
+  if(!cmake::RunCommand("LINK", linkCommand, verbose))
+    {
+    return -1;
+    }
+  std::vector<cmStdString> mtCommand;
+  mtCommand.push_back(cmSystemTools::FindProgram("mt.exe"));
+  mtCommand.push_back("/nologo");
+  mtCommand.push_back("/manifest");
+  std::string manifestFile = targetName;
+  manifestFile += ".manifest";
+  mtCommand.push_back(manifestFile);
+  std::string outresource = "/outputresource:";
+  outresource += targetName;
+  outresource += ";#";
+  if(type == 1)
+    {
+    outresource += "1";
+    }
+  else if(type == 2)
+    {
+    outresource += "2";
+    }
+  mtCommand.push_back(outresource);
+  // Now use the mt tool to embed the manifest into the exe or dll
+  if(!cmake::RunCommand("MT", mtCommand, verbose))
+    {
+    return -1;
+    }
+  return 0;
 }

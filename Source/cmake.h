@@ -387,7 +387,20 @@ protected:
 
   static int ExecuteEchoColor(std::vector<std::string>& args);
   static int ExecuteLinkScript(std::vector<std::string>& args);
-  
+  static int VisualStudioLink(std::vector<std::string>& args, int type);
+  static int VisualStudioLinkIncremental(std::vector<std::string>& args,
+                                         int type, 
+                                         bool verbose);
+  static int VisualStudioLinkNonIncremental(std::vector<std::string>& args,
+                                            int type,
+                                            bool verbose);
+  static int ParseVisualStudioLinkCommand(std::vector<std::string>& args, 
+                                          std::vector<cmStdString>& command, 
+                                          std::string& targetName);
+  static bool RunCommand(const char* comment,
+                         std::vector<cmStdString>& command,
+                         bool verbose,
+                         int* retCodeOut = 0);
   cmVariableWatch* VariableWatch;
   
   ///! Find the full path to one of the cmake programs like ctest, cpack, etc.
