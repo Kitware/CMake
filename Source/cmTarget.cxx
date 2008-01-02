@@ -2537,7 +2537,8 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
 
 bool cmTarget::IsChrpathAvailable()
 {
-  //only return true if the flag is "-Wl,rpath," amd the separator is not empty
+  //only return true if chrpath has been found (happens only if the executable 
+  // format is ELF) and if the separator is not empty
   if (this->Makefile->IsSet("CMAKE_CHRPATH")==false)
     {
     return false;
@@ -2550,10 +2551,9 @@ bool cmTarget::IsChrpathAvailable()
     return false;
     }
 
-  std::string runTimeFlagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
-  runTimeFlagVar += linkLanguage;
-  runTimeFlagVar += "_FLAG";
-  std::string runTimeFlagSepVar = runTimeFlagVar + "_SEP";
+  std::string runTimeFlagSepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
+  runTimeFlagSepVar += linkLanguage;
+  runTimeFlagSepVar += "_FLAG_SEP";
 
   std::string runtimeSep = 
                   this->Makefile->GetSafeDefinition(runTimeFlagSepVar.c_str());
@@ -2561,14 +2561,6 @@ bool cmTarget::IsChrpathAvailable()
   if (runtimeSep.size()<=0)
     {
     return 0;
-    }
-
-  std::string runtimeFlag = 
-                     this->Makefile->GetSafeDefinition(runTimeFlagVar.c_str());
-
-  if (runtimeFlag!="-Wl,-rpath,")
-    {
-    return false;
     }
 
   return true;
