@@ -74,6 +74,19 @@ void cmGlobalVisualStudio8Generator::Configure()
 //----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio8Generator::GetUserMacrosDirectory()
 {
+  // Some VS8 sp0 versions cannot run macros.
+  // See http://support.microsoft.com/kb/928209
+  const char* vc8sp1Registry =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\InstalledProducts\\KB926601;";
+  const char* vc8exSP1Registry =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\InstalledProducts\\KB926748;";
+  std::string vc8sp1;
+  if (!cmSystemTools::ReadRegistryValue(vc8sp1Registry, vc8sp1) &&
+      !cmSystemTools::ReadRegistryValue(vc8exSP1Registry, vc8sp1))
+    {
+    return "";
+    }
+
   std::string base;
   std::string path;
 
