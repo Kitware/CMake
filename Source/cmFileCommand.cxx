@@ -205,15 +205,38 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
     return false;
     }
 
-  std::string fileName = args[1];
-  if ( !cmsys::SystemTools::FileIsFullPath(args[1].c_str()) )
+  cmCommandArgumentsHelper argHelper;
+  cmCommandArgumentGroup group;
+
+  cmCAString readArg    (&argHelper, "READ");
+  cmCAString fileNameArg    (&argHelper, 0);
+  cmCAString resultArg      (&argHelper, 0);
+
+  cmCAString offsetArg      (&argHelper, "OFFSET", &group);
+  cmCAString limitArg       (&argHelper, "LIMIT", &group);
+  cmCAEnabler hexOutputArg  (&argHelper, "HEX", &group);
+  readArg.Follows(0);
+  fileNameArg.Follows(&readArg);
+  resultArg.Follows(&fileNameArg);
+  group.Follows(&resultArg);
+  argHelper.Parse(&args, 0);
+
+  std::string fileName = fileNameArg.GetString();
+  if ( !cmsys::SystemTools::FileIsFullPath(fileName.c_str()) )
     {
     fileName = this->Makefile->GetCurrentDirectory();
-    fileName += "/" + args[1];
+    fileName += "/" + fileNameArg.GetString();
     }
 
-  std::string variable = args[2];
+  std::string variable = resultArg.GetString();
+
+  // Open the specified file.
+#if defined(_WIN32) || defined(__CYGWIN__)
+  std::ifstream file(fileName.c_str(), std::ios::in | (hexOutputArg.IsEnabled()?std::ios::binary:0));
+#else
   std::ifstream file(fileName.c_str(), std::ios::in);
+#endif
+
   if ( !file )
     {
     std::string error = "Internal CMake error when trying to open file: ";
@@ -223,36 +246,64 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
     return false;
     }
 
-  // if there a limit?
+  // is there a limit?
   long sizeLimit = -1;
-  if (args.size() >= 5 && args[3] == "LIMIT")
+  if (limitArg.GetString().size() > 0)
     {
-    sizeLimit = atoi(args[4].c_str());
+    sizeLimit = atoi(limitArg.GetCString());
     }
 
-  std::string output;
-  std::string line;
-  bool has_newline = false;
-  while (sizeLimit != 0 &&
-         cmSystemTools::GetLineFromStream(file, line, &has_newline,
-                                          sizeLimit) )
+  // is there an offset?
+  long offset = 0;
+  if (offsetArg.GetString().size() > 0)
     {
-    if (sizeLimit > 0)
+    offset = atoi(offsetArg.GetCString());
+    }
+
+  file.seekg(offset);
+
+  std::string output;
+
+  if (hexOutputArg.IsEnabled())
+    {
+    // Convert part of the file into hex code
+    int c;
+    while((sizeLimit != 0) && (c = file.get(), file))
       {
-      sizeLimit = sizeLimit - static_cast<long>(line.size());
-      if (has_newline)
+      char hex[4];
+      sprintf(hex, "%x", c&0xff);
+      output += hex;
+      if (sizeLimit > 0)
         {
         sizeLimit--;
         }
-      if (sizeLimit < 0)
-        {
-        sizeLimit = 0;
-        }
       }
-    output += line;
-    if ( has_newline )
+    }
+  else
+    {
+    std::string line;
+    bool has_newline = false;
+    while (sizeLimit != 0 &&
+          cmSystemTools::GetLineFromStream(file, line, &has_newline,
+                                            sizeLimit) )
       {
-      output += "\n";
+      if (sizeLimit > 0)
+        {
+        sizeLimit = sizeLimit - static_cast<long>(line.size());
+        if (has_newline)
+          {
+          sizeLimit--;
+          }
+        if (sizeLimit < 0)
+          {
+          sizeLimit = 0;
+          }
+        }
+      output += line;
+      if ( has_newline )
+        {
+        output += "\n";
+        }
       }
     }
   this->Makefile->AddDefinition(variable.c_str(), output.c_str());
