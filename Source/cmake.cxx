@@ -3674,17 +3674,45 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
     {
     verbose = true;
     }
-  // figure out if this is an incremental link or not and run the correct
-  // link function.
+  std::vector<std::string> expandedArgs;
   for(std::vector<std::string>::iterator i = args.begin();
       i != args.end(); ++i)
     {
-    if(cmSystemTools::Strucmp(i->c_str(), "/INCREMENTAL:YES") == 0)
+    // check for nmake temporary files 
+    if((*i)[0] == '@')
       {
-      return cmake::VisualStudioLinkIncremental(args, type, verbose);
+      std::ifstream fin(i->substr(1).c_str());
+      std::string line;
+      while(cmSystemTools::GetLineFromStream(fin,
+                                             line))
+        {
+        cmSystemTools::ParseWindowsCommandLine(line.c_str(), expandedArgs);
+        }
+      }
+    else
+      {
+      expandedArgs.push_back(*i);
       }
     }
-  return cmake::VisualStudioLinkNonIncremental(args, type, verbose);
+  // figure out if this is an incremental link or not and run the correct
+  // link function.
+  for(std::vector<std::string>::iterator i = expandedArgs.begin();
+      i != expandedArgs.end(); ++i)
+    {
+    if(cmSystemTools::Strucmp(i->c_str(), "/INCREMENTAL:YES") == 0)
+      {
+      if(verbose)
+        {
+        std::cout << "Visual Studio Incremental Link\n";
+        }
+      return cmake::VisualStudioLinkIncremental(expandedArgs, type, verbose);
+      }
+    }
+  if(verbose)
+    {
+    std::cout << "Visual Studio Non-Incremental Link\n";
+    }
+  return cmake::VisualStudioLinkNonIncremental(expandedArgs, type, verbose);
 }
 
 int cmake::ParseVisualStudioLinkCommand(std::vector<std::string>& args, 
