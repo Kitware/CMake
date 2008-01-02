@@ -16,6 +16,13 @@ ELSE("${infile_strings}" STREQUAL "${infile_strings_goal}")
     "FILE(STRINGS) incorrectly read [${infile_strings}]")
 ENDIF("${infile_strings}" STREQUAL "${infile_strings_goal}")
 
+# test reading a file and getting its binary data as hex string
+FILE(READ "${CMAKE_CURRENT_SOURCE_DIR}/main.srec" infilehex LIMIT 4 HEX)
+IF(NOT "${infilehex}" STREQUAL "53313036")
+  MESSAGE(SEND_ERROR
+    "FILE(READ ... HEX) error, read: \"${infilehex}\", expected \"53313036\"")
+ENDIF(NOT "${infilehex}" STREQUAL "53313036")
+
 
 # test that FILE(STRINGS) also work with Intel hex and Motorola S-record files
 # this file has been created with "sdcc main.c"
