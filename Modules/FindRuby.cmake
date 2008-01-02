@@ -21,7 +21,7 @@ endif (RUBY_LIBRARY AND RUBY_INCLUDE_PATH)
 #   RUBY_LIBDIR=`$RUBY -r rbconfig -e 'printf("%s",Config::CONFIG@<:@"libdir"@:>@)'`
 #   RUBY_LIBRUBYARG=`$RUBY -r rbconfig -e 'printf("%s",Config::CONFIG@<:@"LIBRUBYARG_SHARED"@:>@)'`
 
-FIND_PROGRAM(RUBY_EXECUTABLE NAMES ruby ruby1.8 ruby18 )
+FIND_PROGRAM(RUBY_EXECUTABLE NAMES ruby ruby1.8 ruby18 ruby1.9 ruby19)
 
 EXECUTE_PROCESS(COMMAND ${RUBY_EXECUTABLE} -r rbconfig -e "puts Config::CONFIG['archdir']"
    OUTPUT_VARIABLE RUBY_ARCH_DIR)
@@ -45,8 +45,10 @@ FIND_PATH(RUBY_INCLUDE_PATH
    ${RUBY_ARCH_DIR}
   /usr/lib/ruby/1.8/i586-linux-gnu/ )
 
+# search the ruby library, the version for MSVC can have the "msvc" prefix and the "static" suffix
 FIND_LIBRARY(RUBY_LIBRARY
-  NAMES ruby ruby1.8
+  NAMES ruby ruby1.8 ruby1.9
+        msvcrt-ruby18 msvcrt-ruby19 msvcrt-ruby18-static msvcrt-ruby19-static
   PATHS ${RUBY_POSSIBLE_LIB_PATH}
   )
 
