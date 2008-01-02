@@ -48,7 +48,8 @@ public:
 
   /** Determine if a mod file and the corresponding mod.stamp file
       are representing  different module information. */
-  static bool  ModulesDiffer(const char* modFile, const char* stampFile);
+  static bool  ModulesDiffer(const char* modFile, const char* stampFile,
+                             const char* compilerId);
 
   /** Method to find an included file in the include path.  Fortran
       always searches the directory containing the including source

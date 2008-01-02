@@ -1780,6 +1780,18 @@ void cmLocalUnixMakefileGenerator3
       cmakefileStream << "\"" << pi->first << "\"\n";
       }
     cmakefileStream << "  )\n";
+
+    // Tell the dependency scanner what compiler is used.
+    std::string cidVar = "CMAKE_";
+    cidVar += l->first;
+    cidVar += "_COMPILER_ID";
+    const char* cid = this->Makefile->GetDefinition(cidVar.c_str());
+    if(cid && *cid)
+      {
+      cmakefileStream
+        << "SET(CMAKE_" << l->first.c_str() << "_COMPILER_ID \""
+        << cid << "\")\n";
+      }
     }
 }
 

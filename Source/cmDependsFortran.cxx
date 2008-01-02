@@ -536,7 +536,14 @@ cmDependsFortran
                                       cmLocalGenerator::HOME_OUTPUT,
                                       cmLocalGenerator::SHELL);
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
-                  << modFile << " " << stampFile << "\n";
+                  << modFile << " " << stampFile;
+      cmMakefile* mf = this->LocalGenerator->GetMakefile();
+      const char* cid = mf->GetDefinition("CMAKE_Fortran_COMPILER_ID");
+      if(cid && *cid)
+        {
+        makeDepends << " " << cid;
+        }
+      makeDepends << "\n";
       }
     // After copying the modules update the timestamp file so that
     // copying will not be done again until the source rebuilds.
@@ -600,6 +607,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   // Implements
   //
   //   $(CMAKE_COMMAND) -E cmake_copy_f90_mod input.mod output.mod.stamp
+  //                                          [compiler-id]
   //
   // Note that the case of the .mod file depends on the compiler.  In
   // the future this copy could also account for the fact that some
@@ -608,6 +616,11 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
 
   std::string mod = args[2];
   std::string stamp = args[3];
+  std::string compilerId;
+  if(args.size() >= 5)
+    {
+    compilerId = args[4];
+    }
   std::string mod_dir = cmSystemTools::GetFilenamePath(mod);
   if(!mod_dir.empty()) { mod_dir += "/"; }
   std::string mod_upper = mod_dir;
@@ -619,7 +632,8 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
   mod_lower += ".mod";
   if(cmSystemTools::FileExists(mod_upper.c_str(), true))
     {
-    if(cmDependsFortran::ModulesDiffer(mod_upper.c_str(), stamp.c_str()))
+    if(cmDependsFortran::ModulesDiffer(mod_upper.c_str(), stamp.c_str(),
+                                       compilerId.c_str()))
       {
       if(!cmSystemTools::CopyFileAlways(mod_upper.c_str(), stamp.c_str()))
         {
@@ -633,7 +647,8 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
     }
   else if(cmSystemTools::FileExists(mod_lower.c_str(), true))
     {
-    if(cmDependsFortran::ModulesDiffer(mod_lower.c_str(), stamp.c_str()))
+    if(cmDependsFortran::ModulesDiffer(mod_lower.c_str(), stamp.c_str(),
+                                       compilerId.c_str()))
       {
       if(!cmSystemTools::CopyFileAlways(mod_lower.c_str(), stamp.c_str()))
         {
@@ -654,8 +669,10 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
 
 //----------------------------------------------------------------------------
 bool cmDependsFortran::ModulesDiffer(const char* modFile,
-                                     const char* stampFile)
+                                     const char* stampFile,
+                                     const char* compilerId)
 {
+  (void)compilerId;
   /*
   This following is valid for intel and gnu. For others this may be valid
   too, but has to be proven.
