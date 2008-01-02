@@ -871,6 +871,29 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       doing_component = false;
       literal_args += " USE_SOURCE_PERMISSIONS";
       }
+    else if(args[i] == "FILES_MATCHING")
+      {
+      if(in_match_mode)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      // Add this option literally.
+      doing_dirs = false;
+      doing_destination = false;
+      doing_pattern = false;
+      doing_regex = false;
+      doing_permissions_file = false;
+      doing_permissions_dir = false;
+      doing_permissions_match = false;
+      doing_configurations = false;
+      doing_component = false;
+      literal_args += " FILES_MATCHING";
+      }
     else if(args[i] == "CONFIGURATIONS")
       {
       if(in_match_mode)

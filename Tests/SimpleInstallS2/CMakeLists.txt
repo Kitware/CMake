@@ -97,6 +97,12 @@ IF(STAGE2)
   IF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/CMakeLists.txt")
     MESSAGE(FATAL_ERROR "Directory installation installed CMakeLists.txt.")
   ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/CMakeLists.txt")
+  IF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/alt/TestSubDir/TSD.h")
+    MESSAGE(FATAL_ERROR "Directory installation did not install alternate TSD.h")
+  ENDIF(NOT EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/alt/TestSubDir/TSD.h")
+  IF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/alt/TestSubDir/TSD.cxx")
+    MESSAGE(FATAL_ERROR "Directory installation installed alternate TSD.cxx")
+  ENDIF(EXISTS "${CMAKE_INSTALL_PREFIX}/MyTest/share/alt/TestSubDir/TSD.cxx")
 
   # Check that scripts properly installed.
   IF(WIN32 AND NOT CYGWIN)
@@ -247,6 +253,13 @@ ELSE(STAGE2)
     USE_SOURCE_PERMISSIONS
     PATTERN "CVS" EXCLUDE
     REGEX "\\.txt$" EXCLUDE
+    )
+  INSTALL(
+    DIRECTORY TestSubDir DESTINATION MyTest/share/alt
+    FILE_PERMISSIONS OWNER_READ OWNER_WRITE
+    DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                          GROUP_READ GROUP_EXECUTE
+    FILES_MATCHING PATTERN "*.h"
     )
 
   # Test empty directory installation.

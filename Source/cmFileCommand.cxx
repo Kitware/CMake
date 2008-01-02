@@ -702,7 +702,7 @@ struct cmFileInstaller
 
   // All instances need the file command and makefile using them.
   cmFileInstaller(cmFileCommand* fc, cmMakefile* mf):
-    FileCommand(fc), Makefile(mf), DestDirLength(0)
+    FileCommand(fc), Makefile(mf), DestDirLength(0), MatchlessFiles(true)
     {
     // Get the current manifest.
     this->Manifest =
@@ -723,6 +723,9 @@ public:
 
   // The length of the destdir setting.
   int DestDirLength;
+
+  // Whether to install a file not matching any expression.
+  bool MatchlessFiles;
 
   // The current file manifest (semicolon separated list).
   std::string Manifest;
@@ -749,7 +752,8 @@ public:
   std::vector<MatchRule> MatchRules;
 
   // Get the properties from rules matching this input file.
-  MatchProperties CollectMatchProperties(const char* file)
+  MatchProperties CollectMatchProperties(const char* file,
+                                         bool isDirectory)
     {
     // Match rules are case-insensitive on some platforms.
 #if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
@@ -758,15 +762,21 @@ public:
 #endif
 
     // Collect properties from all matching rules.
+    bool matched = false;
     MatchProperties result;
     for(std::vector<MatchRule>::iterator mr = this->MatchRules.begin();
         mr != this->MatchRules.end(); ++mr)
       {
       if(mr->Regex.find(file))
         {
+        matched = true;
         result.Exclude |= mr->Properties.Exclude;
         result.Permissions |= mr->Properties.Permissions;
         }
+      }
+    if(!matched && !this->MatchlessFiles && !isDirectory)
+      {
+      result.Exclude = true;
       }
     return result;
     }
@@ -868,7 +878,8 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
                                   bool always)
 {
   // Collect any properties matching this file name.
-  MatchProperties match_properties = this->CollectMatchProperties(fromFile);
+  MatchProperties match_properties =
+    this->CollectMatchProperties(fromFile, false);
 
   // Skip the file if it is excluded.
   if(match_properties.Exclude)
@@ -946,7 +957,8 @@ bool cmFileInstaller::InstallDirectory(const char* source,
                                        bool always)
 {
   // Collect any properties matching this directory name.
-  MatchProperties match_properties = this->CollectMatchProperties(source);
+  MatchProperties match_properties =
+    this->CollectMatchProperties(source, true);
 
   // Skip the directory if it is excluded.
   if(match_properties.Exclude)
@@ -1462,6 +1474,22 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         doing_permissions_file = false;
         doing_permissions_dir = false;
         use_source_permissions = true;
+        }
+      else if ( *cstr == "FILES_MATCHING" )
+        {
+        if(current_match_rule)
+          {
+          cmOStringStream e;
+          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+
+        doing_properties = false;
+        doing_files = false;
+        doing_permissions_file = false;
+        doing_permissions_dir = false;
+        installer.MatchlessFiles = false;
         }
       else if ( *cstr == "COMPONENTS"  )
         {
