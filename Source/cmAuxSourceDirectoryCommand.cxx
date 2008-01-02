@@ -32,9 +32,17 @@ bool cmAuxSourceDirectoryCommand::InitialPass
   std::string sourceListValue;
   std::string templateDirectory = args[0];
   this->Makefile->AddExtraDirectory(templateDirectory.c_str());
-  std::string tdir = this->Makefile->GetCurrentDirectory();
-  tdir += "/";
-  tdir += templateDirectory;
+  std::string tdir;
+  if(!cmSystemTools::FileExists(templateDirectory.c_str()))
+    {
+    tdir = this->Makefile->GetCurrentDirectory();
+    tdir += "/";
+    tdir += templateDirectory;
+    }
+  else
+    {
+    tdir = templateDirectory;
+    }
 
   // was the list already populated
   const char *def = this->Makefile->GetDefinition(args[1].c_str());  
