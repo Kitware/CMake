@@ -75,13 +75,13 @@ IF(APPLE)
   MARK_AS_ADVANCED(CMAKE_INSTALL_NAME_TOOL)
 ENDIF(APPLE)
 
-IF(UNIX  AND NOT  APPLE  AND NOT  WIN32)
+# if we are on an ELF system, search for chrpath
+IF("${CMAKE_EXECUTABLE_FORMAT}" STREQUAL "ELF")
   # on ELF platforms there might be chrpath, which works similar to install_name_tool
-  SET(CMAKE_USE_CHRPATH OFF CACHE BOOL "Enable this to use chrpath if available")
+  OPTION(CMAKE_USE_CHRPATH "Enable this to use chrpath if available" OFF)
 
   FIND_PROGRAM(CMAKE_CHRPATH chrpath PATHS ${_CMAKE_TOOLCHAIN_LOCATION} NO_DEFAULT_PATH)
   FIND_PROGRAM(CMAKE_CHRPATH chrpath)
 
   MARK_AS_ADVANCED(CMAKE_CHRPATH)
-ENDIF(UNIX  AND NOT  APPLE  AND NOT  WIN32)
-
+ENDIF("${CMAKE_EXECUTABLE_FORMAT}" STREQUAL "ELF")

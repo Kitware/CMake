@@ -77,6 +77,31 @@ MACRO(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
         "Compilation of the ${lang} compiler identification source \""
         "${CMAKE_${lang}_COMPILER_ID_SRC}\" produced \""
         "${CMAKE_${lang}_COMPILER_ID_EXE}\"\n\n")
+
+      # try to figure out the executable format: ELF, COFF, Mach-O
+      IF(NOT CMAKE_EXECUTABLE_FORMAT)
+        FILE(READ ${CMAKE_${lang}_COMPILER_ID_EXE} CMAKE_EXECUTABLE_MAGIC LIMIT 4 HEX)
+
+        # ELF files start with 0x7f"ELF"
+        IF("${CMAKE_EXECUTABLE_MAGIC}" STREQUAL "7f454c46")
+          SET(CMAKE_EXECUTABLE_FORMAT "ELF" CACHE STRING "Executable file format")
+        ENDIF("${CMAKE_EXECUTABLE_MAGIC}" STREQUAL "7f454c46")
+
+#        # COFF (.exe) files start with "MZ"
+#        IF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "4d5a....")
+#          SET(CMAKE_EXECUTABLE_FORMAT "COFF" CACHE STRING "Executable file format")
+#        ENDIF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "4d5a....")
+#
+#        # Mach-O files start with CAFEBABE or FEEDFACE, according to http://radio.weblogs.com/0100490/2003/01/28.html
+#        IF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "cafebabe")
+#          SET(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE STRING "Executable file format")
+#        ENDIF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "cafebabe")
+#        IF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "feedface")
+#          SET(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE STRING "Executable file format")
+#        ENDIF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "feedface")
+
+      ENDIF(NOT CMAKE_EXECUTABLE_FORMAT)
+
       # only check if we don't have it yet
       IF(NOT CMAKE_${lang}_COMPILER_ID)
         # Read the compiler identification string from the executable file.
@@ -107,6 +132,13 @@ MACRO(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
         ENDIF(CMAKE_${lang}_COMPILER_ID)
       ENDIF(NOT CMAKE_${lang}_COMPILER_ID)
     ENDFOREACH(CMAKE_${lang}_COMPILER_ID_EXE)
+
+    # if the format is unknown after all files have been checked, put "Unknown" in the cache
+    IF(NOT CMAKE_EXECUTABLE_FORMAT)
+      SET(CMAKE_EXECUTABLE_FORMAT "Unknown" CACHE STRING "Executable file format")
+    ELSE(NOT CMAKE_EXECUTABLE_FORMAT)
+      MESSAGE(STATUS "The executable file format is ${CMAKE_EXECUTABLE_FORMAT}")
+    ENDIF(NOT CMAKE_EXECUTABLE_FORMAT)
 
     IF(NOT COMPILER_${lang}_PRODUCED_FILES)
       # No executable was found.
