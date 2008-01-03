@@ -44,16 +44,37 @@ FUNCTION(test_argn_function argument)
 ENDFUNCTION(test_argn_function)
 Test_Argn_Function(ignored 3)
 
+# test argument naming and raise scope
+function(track_find_variable cache_variable is_changed)
+ raise_scope("${is_changed}" changed)
+endfunction(track_find_variable)
+track_find_variable(testvar is_changed)
+if ("${is_changed}" STREQUAL changed)
+  pass("same argument name test")
+else ("${is_changed}" STREQUAL changed)
+  pass("same argument name test")
+endif ("${is_changed}" STREQUAL changed)
+
+include("Util.cmake")
+tester()
+if (tester_res STREQUAL "${CMAKE_CURRENT_LIST_FILE}")
+  pass("CMAKE_CURRENT_LIST_FILE test")
+else (tester_res STREQUAL "${CMAKE_CURRENT_LIST_FILE}")
+  pass("CMAKE_CURRENT_LIST_FILE test")
+endif (tester_res STREQUAL "${CMAKE_CURRENT_LIST_FILE}")
+
+
+
 # test recursion and return via raise_scope
 function (factorial argument result)
   if (argument LESS 2)
-    set (${result} 1)
+    set (lresult 1)
   else (argument LESS 2)
     math (EXPR temp "${argument} - 1")
     factorial (${temp} tresult)
-    math (EXPR ${result} "${argument}*${tresult}")
+    math (EXPR lresult "${argument}*${tresult}")
   endif (argument LESS 2)
-  raise_scope (${result})
+  raise_scope ("${result}" "${lresult}")
 endfunction (factorial)
 
 factorial (5 fresult)
@@ -67,8 +88,7 @@ endif (fresult EQUAL 120)
 
 # case test
 FUNCTION(strange_function m)
-  SET(${m} strange_function)
-  RAISE_SCOPE(${m})
+  RAISE_SCOPE("${m}" strange_function)
 ENDFUNCTION(strange_function m)
 STRANGE_FUNCTION(var)
 set(second_var "second_var")
@@ -85,8 +105,7 @@ ENDFUNCTION(ADD_EXECUTABLE)
 
 # var undef case
 FUNCTION(undef_var m)
-  SET(${m})
-  RAISE_SCOPE(${m})
+  RAISE_SCOPE("${m}")
 ENDFUNCTION(undef_var)
 SET(FUNCTION_UNDEFINED 1)
 undef_var(FUNCTION_UNDEFINED)

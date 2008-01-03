@@ -740,7 +740,7 @@ public:
   // push and pop variable scopes
   void PushScope();
   void PopScope();
-  void RaiseScope(const char *var);
+  void RaiseScope(const char *var, const char *value);
 
 protected:
   // add link libraries and directories to the target

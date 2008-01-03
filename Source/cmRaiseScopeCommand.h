@@ -61,12 +61,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  raise_scope(VAR VAR2 VAR...)\n"
-      "Pushes the current state of a variable into the scope above the "
+      "  raise_scope(VAR [VALUE])\n"
+      "Sets the value of a variable in the scope above the "
       "current scope. Each new directory or function creates a new scope. "
-      "This command will push the current state of a variable into the "
+      "This command will set the value of a variable into the "
       "parent directory or calling function (whichever is applicable to "
-      "the case at hand)";
+      "the case at hand) If VALUE is not specified then the variable is "
+      "removed from the parent scope.";
     }
 
   /**

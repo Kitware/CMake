@@ -2846,9 +2846,12 @@ void cmMakefile::PopScope()
   this->DefinitionStack.pop_back();
 }
 
-void cmMakefile::RaiseScope(const char *var)
+void cmMakefile::RaiseScope(const char *var, const char *varDef)
 {
-  const char *varDef = this->GetDefinition(var);
+  if (!var || !strlen(var))
+    {
+    return;
+    }
 
   // multiple scopes in this directory?
   if (this->DefinitionStack.size() > 1)

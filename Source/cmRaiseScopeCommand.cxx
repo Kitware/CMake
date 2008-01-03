@@ -20,10 +20,20 @@
 bool cmRaiseScopeCommand
 ::InitialPass(std::vector<std::string> const& args)
 {
-  unsigned int i =0;
-  for(; i < args.size(); ++i)
+  if (args.size() < 1)
     {
-    this->Makefile->RaiseScope(args[i].c_str());
+    this->SetError("called with incorrect number of arguments, "
+                   "raise scope must have at least one argument");
+    return false;
+    }
+
+  if (args.size() == 1)
+    {
+    this->Makefile->RaiseScope(args[0].c_str(), 0);
+    }
+  else
+    {
+    this->Makefile->RaiseScope(args[0].c_str(), args[1].c_str());
     }
   return true;
 }
