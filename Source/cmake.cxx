@@ -3835,7 +3835,7 @@ int cmake::VisualStudioLinkIncremental(std::vector<std::string>& args,
     }
   std::string manifestFile = targetName;
   manifestFile += ".embed.manifest";
-  std::string fullPath=manifestFile;
+  std::string fullPath= cmSystemTools::CollapseFullPath(manifestFile.c_str());
   fout << type << " /* CREATEPROCESS_MANIFEST_RESOURCE_ID "
     "*/ 24 /* RT_MANIFEST */ " << "\"" << fullPath.c_str() << "\"";
   fout.close();
