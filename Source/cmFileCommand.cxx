@@ -232,7 +232,8 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 
   // Open the specified file.
 #if defined(_WIN32) || defined(__CYGWIN__)
-  std::ifstream file(fileName.c_str(), std::ios::in | (hexOutputArg.IsEnabled()?std::ios::binary:0));
+  std::ifstream file(fileName.c_str(), std::ios::in | 
+                 (hexOutputArg.IsEnabled() ? std::ios::binary : std::ios::in));
 #else
   std::ifstream file(fileName.c_str(), std::ios::in);
 #endif
