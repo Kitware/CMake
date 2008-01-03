@@ -40,6 +40,12 @@ public:
    */
   bool FileTimeCompare(const char* f1, const char* f2, int* result);
 
+  /**
+   *  Compare file modification times.  Return true unless both files
+   *  exist and have modification times less than 1 second apart.
+   */
+  bool FileTimesDiffer(const char* f1, const char* f2);
+
 protected:
   
   cmFileTimeComparisonInternal* Internals;
