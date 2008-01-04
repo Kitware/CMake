@@ -17,8 +17,8 @@
 #                X11_dpms_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_dpms_FOUND
 #                X11_XShm_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_XShm_FOUND
 #                X11_Xshape_INCLUDE_PATH,       (in X11_Xext_LIB),  X11_Xshape_FOUND
-#                X11_Xf86misc_INCLUDE_PATH,     X11_Xxf86misc_LIB,  X11_Xf86misc_FOUND
-#                X11_xf86vmode_INCLUDE_PATH,                        X11_Xf86vmode_FOUND
+#                X11_xf86misc_INCLUDE_PATH,     X11_Xxf86misc_LIB,  X11_xf86misc_FOUND
+#                X11_xf86vmode_INCLUDE_PATH,                        X11_xf86vmode_FOUND
 #                X11_Xfixes_INCLUDE_PATH,       X11_Xfixes_LIB,     X11_Xfixes_FOUND
 #                X11_Xft_INCLUDE_PATH,          X11_Xft_LIB,        X11_Xft_FOUND
 #                X11_Xinerama_INCLUDE_PATH,     X11_Xinerama_LIB,   X11_Xinerama_FOUND
@@ -78,7 +78,7 @@ IF (UNIX)
   FIND_PATH(X11_Xdamage_INCLUDE_PATH X11/extensions/Xdamage.h        ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xdmcp_INCLUDE_PATH X11/Xdmcp.h                       ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_dpms_INCLUDE_PATH X11/extensions/dpms.h              ${X11_INC_SEARCH_PATH})
-  FIND_PATH(X11_Xf86misc_INCLUDE_PATH X11/extensions/xf86misc.h      ${X11_INC_SEARCH_PATH})
+  FIND_PATH(X11_xf86misc_INCLUDE_PATH X11/extensions/xf86misc.h      ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_xf86vmode_INCLUDE_PATH X11/extensions/xf86vmode.h    ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xfixes_INCLUDE_PATH X11/extensions/Xfixes.h          ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xft_INCLUDE_PATH X11/Xft/Xft.h                       ${X11_INC_SEARCH_PATH})
@@ -227,10 +227,10 @@ IF (UNIX)
      SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xrandr_INCLUDE_PATH})
   ENDIF (X11_Xrandr_INCLUDE_PATH AND X11_Xrandr_LIB)
 
-  IF (X11_Xxf86misc_INCLUDE_PATH AND X11_Xxf86misc_LIB)
-     SET(X11_Xxf86misc_FOUND TRUE)
-     SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xxf86misc_INCLUDE_PATH})
-  ENDIF (X11_Xxf86misc_INCLUDE_PATH  AND X11_Xxf86misc_LIB)
+  IF (X11_xf86misc_INCLUDE_PATH AND X11_Xxf86misc_LIB)
+     SET(X11_xf86misc_FOUND TRUE)
+     SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_xf86misc_INCLUDE_PATH})
+  ENDIF (X11_xf86misc_INCLUDE_PATH  AND X11_Xxf86misc_LIB)
 
   IF (X11_xf86vmode_INCLUDE_PATH)
      SET(X11_xf86vmode_FOUND TRUE)
@@ -377,7 +377,7 @@ IF (UNIX)
     X11_Xrender_LIB
     X11_Xrender_INCLUDE_PATH
     X11_Xxf86misc_LIB
-    X11_Xxf86misc_INCLUDE_PATH
+    X11_xf86misc_INCLUDE_PATH
     X11_xf86vmode_INCLUDE_PATH
     X11_Xinerama_LIB
     X11_Xinerama_INCLUDE_PATH
@@ -393,7 +393,6 @@ IF (UNIX)
     X11_Xaccessrules_INCLUDE_PATH
     X11_Xaccessstr_INCLUDE_PATH
     X11_Xdmcp_INCLUDE_PATH
-    X11_Xf86misc_INCLUDE_PATH
     X11_Xkb_INCLUDE_PATH
     X11_Xkblib_INCLUDE_PATH
     X11_Xscreensaver_INCLUDE_PATH
