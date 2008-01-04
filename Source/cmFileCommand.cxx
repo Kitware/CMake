@@ -949,11 +949,8 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
   bool copy = true;
   if(!always)
     {
-    // If both files exist and "fromFile" is not newer than "toFile"
-    // do not copy.
-    int timeResult;
-    if(this->FileTimes.FileTimeCompare(fromFile, toFile, &timeResult) &&
-       timeResult <= 0)
+    // If both files exist with the same time do not copy.
+    if(!this->FileTimes.FileTimesDiffer(fromFile, toFile))
       {
       copy = false;
       }
