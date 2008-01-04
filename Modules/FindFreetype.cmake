@@ -1,12 +1,12 @@
 # - Locate FreeType library
 # This module defines
-#  FREETYPE_LIBRARY, the library to link against
+#  FREETYPE_LIBRARIES, the library to link against
 #  FREETYPE_FOUND, if false, do not try to link to FREETYPE
 #  FREETYPE_INCLUDE_DIRS, where to find headers.
 #  This is the concatenation of the paths:
 #  FREETYPE_INCLUDE_DIR_ft2build
 #  FREETYPE_INCLUDE_DIR_freetype2
-#   
+#
 # $FREETYPE_DIR is an environment variable that would
 # correspond to the ./configure --prefix=$FREETYPE_DIR
 # used in building FREETYPE.
@@ -30,24 +30,18 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
   PATH_SUFFIXES include    
 )
 FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
+  PATHS ${CMAKE_PREFIX_PATH}/include # Unofficial: We are proposing this.
   NO_DEFAULT_PATH
-  PATH_SUFFIXES include
 )
+
 FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
   PATHS
-  /usr/local
-  /usr
-  /usr/local/X11R6
-  /usr/local/X11
-  /usr/X11R6
-  /usr/X11
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-  /usr/freeware
-  PATH_SUFFIXES include
+  /usr/local/X11R6/include
+  /usr/local/X11/include
+  /usr/X11/include
+  /sw/include
+  /opt/local/include
+  /usr/freeware/include
 )
 
 FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
@@ -55,38 +49,34 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h
   NO_DEFAULT_PATH
 )
 FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
+  PATHS ${CMAKE_PREFIX_PATH}/include # Unofficial: We are proposing this.
   NO_DEFAULT_PATH
-  PATH_SUFFIXES include/freetype2
+  PATH_SUFFIXES freetype2
 )
 FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
-  /usr/local/include/freetype2
-  /usr/include/freetype2
-  /usr/local/X11R6/include/freetype2
-  /usr/local/X11/include/freetype2
-  /usr/X11R6/include/freetype2
-  /usr/X11/include/freetype2
-  /sw/include/freetype2
-  /opt/local/include/freetype2
-  /opt/csw/include/freetype2
-  /opt/include/freetype2
-  /usr/freeware/include/freetype2
+  /usr/local/X11R6/include
+  /usr/local/X11/include
+  /usr/X11/include
+  /sw/include
+  /opt/local/include
+  /usr/freeware/include
+  PATH_SUFFIXES freetype2
 )
 
-FIND_LIBRARY(FREETYPE_LIBRARY 
+FIND_LIBRARY(FREETYPE_LIBRARY
   NAMES freetype libfreetype freetype219
   PATHS
   $ENV{FREETYPE_DIR}
   NO_DEFAULT_PATH
   PATH_SUFFIXES lib64 lib 
 )
-FIND_LIBRARY(FREETYPE_LIBRARY 
+FIND_LIBRARY(FREETYPE_LIBRARY
   NAMES freetype libfreetype freetype219
   PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
   NO_DEFAULT_PATH
   PATH_SUFFIXES lib64 lib 
 )
-FIND_LIBRARY(FREETYPE_LIBRARY 
+FIND_LIBRARY(FREETYPE_LIBRARY
   NAMES freetype libfreetype freetype219
   PATHS
   /usr/local
@@ -103,14 +93,16 @@ FIND_LIBRARY(FREETYPE_LIBRARY
   PATH_SUFFIXES lib64 lib
 )
 
+# set the user variables
 IF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
   SET(FREETYPE_INCLUDE_DIRS "${FREETYPE_INCLUDE_DIR_ft2build};${FREETYPE_INCLUDE_DIR_freetype2}")
 ENDIF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
+SET(FREETYPE_LIBRARIES "${FREETYPE_LIBRARY}")
+
+# handle the QUIETLY and REQUIRED arguments and set PERLLIBS_FOUND to TRUE if 
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Freetype  DEFAULT_MSG  FREETYPE_LIBRARY  FREETYPE_INCLUDE_DIRS)
 
 
-SET(FREETYPE_FOUND "NO")
-IF(FREETYPE_LIBRARY AND FREETYPE_INCLUDE_DIRS)
-  SET(FREETYPE_FOUND "YES")
-ENDIF(FREETYPE_LIBRARY AND FREETYPE_INCLUDE_DIRS)
-
-
+MARK_AS_ADVANCED(FREETYPE_LIBRARY FREETYPE_INCLUDE_DIR_freetype2 FREETYPE_INCLUDE_DIR_ft2build)
