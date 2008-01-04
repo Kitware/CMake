@@ -74,20 +74,20 @@ FIND_PATH(OPENAL_INCLUDE_DIR al.h
 )
 
 FIND_LIBRARY(OPENAL_LIBRARY 
-  NAMES OpenAL al OpenAL32
+  NAMES OpenAL al openal OpenAL32
   PATHS
   $ENV{OPENALDIR}
   NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
 )
 FIND_LIBRARY(OPENAL_LIBRARY 
-  NAMES OpenAL al OpenAL32
+  NAMES OpenAL al openal OpenAL32
   PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
     NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
 )
 FIND_LIBRARY(OPENAL_LIBRARY 
-  NAMES OpenAL al OpenAL32
+  NAMES OpenAL al openal OpenAL32
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
