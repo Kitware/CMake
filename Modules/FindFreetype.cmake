@@ -10,7 +10,11 @@
 # $FREETYPE_DIR is an environment variable that would
 # correspond to the ./configure --prefix=$FREETYPE_DIR
 # used in building FREETYPE.
+
 # Created by Eric Wing. 
+# Modifications by Alexander Neundorf.
+# This file has been renamed to "FindFreetype.cmake" instead of the correct
+# "FindFreeType.cmake" in order to be compatible with the one from KDE4, Alex.
 
 # Ugh, FreeType seems to use some #include trickery which 
 # makes this harder than it should be. It looks like they
@@ -27,11 +31,12 @@
 FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
   $ENV{FREETYPE_DIR}
   NO_DEFAULT_PATH
-  PATH_SUFFIXES include    
+  PATH_SUFFIXES include
 )
 FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
-  PATHS ${CMAKE_PREFIX_PATH}/include # Unofficial: We are proposing this.
+  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
   NO_DEFAULT_PATH
+  PATH_SUFFIXES include
 )
 
 FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
@@ -49,9 +54,9 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h
   NO_DEFAULT_PATH
 )
 FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
-  PATHS ${CMAKE_PREFIX_PATH}/include # Unofficial: We are proposing this.
+  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
   NO_DEFAULT_PATH
-  PATH_SUFFIXES freetype2
+  PATH_SUFFIXES include/freetype2
 )
 FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
   /usr/local/X11R6/include
@@ -79,16 +84,10 @@ FIND_LIBRARY(FREETYPE_LIBRARY
 FIND_LIBRARY(FREETYPE_LIBRARY
   NAMES freetype libfreetype freetype219
   PATHS
-  /usr/local
-  /usr
   /usr/local/X11R6
   /usr/local/X11
-  /usr/X11R6
   /usr/X11
   /sw
-  /opt/local
-  /opt/csw
-  /opt
   /usr/freeware
   PATH_SUFFIXES lib64 lib
 )
@@ -99,7 +98,7 @@ IF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
 ENDIF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
 SET(FREETYPE_LIBRARIES "${FREETYPE_LIBRARY}")
 
-# handle the QUIETLY and REQUIRED arguments and set PERLLIBS_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set FREETYPE_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Freetype  DEFAULT_MSG  FREETYPE_LIBRARY  FREETYPE_INCLUDE_DIRS)
