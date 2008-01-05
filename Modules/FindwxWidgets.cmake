@@ -761,65 +761,199 @@ FIND_PROGRAM(wxWidgets_wxrc_EXECUTABLE wxrc
   )
 
 # 
-# WXWIDGETS_ADD_RESOURCES(<sources> <xrc_files>)
+# WX_SPLIT_ARGUMENTS_ON(<keyword> <left> <right> <arg1> <arg2> ...)
+# 
+# Sets <left> and <right> to contain arguments to the left and right,
+# respectively, of <keyword>.
+# 
+# Example usage:
+#  FUNCTION(WXWIDGETS_ADD_RESOURCES outfiles)
+#    WX_SPLIT_ARGUMENTS_ON(OPTIONS wxrc_files wxrc_options ${ARGN})
+#    ...
+#  ENDFUNCTION(WXWIDGETS_ADD_RESOURCES)
+#
+#  WXWIDGETS_ADD_RESOURCES(sources ${xrc_files} OPTIONS -e -o file.C)
+# 
+# NOTE: This is a generic piece of code that should be renamed to
+# SPLIT_ARGUMENTS_ON and put in a file serving the same purpose as
+# FindPackageStandardArgs.cmake. At the time of this writing
+# FindQt4.cmake has a QT4_EXTRACT_OPTIONS, which I basically copied
+# here a bit more generalized. So, there are already two find modules
+# using this approach.
+#
+FUNCTION(WX_SPLIT_ARGUMENTS_ON _keyword _leftvar _rightvar)
+  # FIXME: Document that the input variables will be cleared.
+  #LIST(APPEND ${_leftvar}  "")
+  #LIST(APPEND ${_rightvar} "")
+  SET(${_leftvar}  "")
+  SET(${_rightvar} "")
+
+  SET(_doing_right FALSE)
+  FOREACH(element ${ARGN})
+    IF("${element}" STREQUAL "${_keyword}")
+      SET(_doing_right TRUE)
+    ELSE("${element}" STREQUAL "${_keyword}")
+      IF(_doing_right)
+        LIST(APPEND ${_rightvar} "${element}")
+      ELSE(_doing_right)
+        LIST(APPEND ${_leftvar} "${element}")
+      ENDIF(_doing_right)
+    ENDIF("${element}" STREQUAL "${_keyword}")
+  ENDFOREACH(element)
+
+  RAISE_SCOPE(${_leftvar})
+  RAISE_SCOPE(${_rightvar})
+ENDFUNCTION(WX_SPLIT_ARGUMENTS_ON)
+
+#
+# WX_GET_DEPENDENCIES_FROM_XML(
+#   <depends>
+#   <match_pattern>
+#   <clean_pattern>
+#   <xml_contents>
+#   <depends_path>
+#   )
+#
+# FIXME: Add documentation here...
+#
+FUNCTION(WX_GET_DEPENDENCIES_FROM_XML
+    _depends
+    _match_patt
+    _clean_patt
+    _xml_contents
+    _depends_path
+    )
+
+  STRING(REGEX MATCHALL
+    ${_match_patt}
+    dep_file_list
+    "${${_xml_contents}}"
+    )
+  FOREACH(dep_file ${dep_file_list})
+    STRING(REGEX REPLACE ${_clean_patt} "" dep_file "${dep_file}")
+
+    # make the file have an absolute path
+    IF(NOT IS_ABSOLUTE "${dep_file}")
+      SET(dep_file "${${_depends_path}}/${dep_file}")
+    ENDIF(NOT IS_ABSOLUTE "${dep_file}")
+
+    # append file to dependency list
+    LIST(APPEND ${_depends} "${dep_file}")
+  ENDFOREACH(dep_file)
+
+  RAISE_SCOPE(${_depends})
+ENDFUNCTION(WX_GET_DEPENDENCIES_FROM_XML)
+
+# 
+# WXWIDGETS_ADD_RESOURCES(<sources> <xrc_files>
+#                         OPTIONS <options> [NO_CPP_CODE])
 # 
 # Adds a custom command for resource file compilation of the
 # <xrc_files> and appends the output files to <sources>.
 # 
-# Example usage: WXWIDGETS_ADD_RESOURCES(sources xrc/main_frame.xrc)
+# Example usages:
+#   WXWIDGETS_ADD_RESOURCES(sources xrc/main_frame.xrc)
+#   WXWIDGETS_ADD_RESOURCES(sources ${xrc_files} OPTIONS -e -o altname.cxx)
 #
-MACRO(WXWIDGETS_ADD_RESOURCES outfiles)
-  SET(_RC_INFILES)
-  SET(_RC_DEPENDS)
-  FOREACH(it ${ARGN})
-    GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
-    GET_FILENAME_COMPONENT(rc_path ${infile} PATH)
-    LIST(APPEND _RC_INFILES ${infile})
+FUNCTION(WXWIDGETS_ADD_RESOURCES _outfiles)
+  WX_SPLIT_ARGUMENTS_ON(OPTIONS rc_file_list rc_options ${ARGN})
 
-    # parse file for dependencies; all files are absolute paths or
-    # relative to the location of the rc file
-    FILE(READ "${infile}" _RC_FILE_CONTENTS)
+  # Parse files for dependencies.
+  SET(rc_file_list_abs "")
+  SET(rc_depends       "")
+  FOREACH(rc_file ${rc_file_list})
+    GET_FILENAME_COMPONENT(depends_path ${rc_file} PATH)
+
+    GET_FILENAME_COMPONENT(rc_file_abs ${rc_file} ABSOLUTE)
+    LIST(APPEND rc_file_list_abs "${rc_file_abs}")
+
+    # All files have absolute paths or paths relative to the location
+    # of the rc file.
+    FILE(READ "${rc_file_abs}" rc_file_contents)
 
     # get bitmap/bitmap2 files
-    STRING(REGEX MATCHALL "<bitmap[^<]+" _RC_FILES "${_RC_FILE_CONTENTS}")
-    FOREACH(_RC_FILE ${_RC_FILES})
-      STRING(REGEX REPLACE "^<bitmap[^>]*>" "" _RC_FILE "${_RC_FILE}")
-      STRING(REGEX MATCH "^/|([A-Za-z]:/)" _ABS_PATH_INDICATOR "${_RC_FILE}")
-      IF(NOT _ABS_PATH_INDICATOR)
-        SET(_RC_FILE "${rc_path}/${_RC_FILE}")
-      ENDIF(NOT _ABS_PATH_INDICATOR)
-      LIST(APPEND _RC_DEPENDS "${_RC_FILE}")
-    ENDFOREACH(_RC_FILE)
+    WX_GET_DEPENDENCIES_FROM_XML(
+      rc_depends
+      "<bitmap[^<]+"
+      "^<bitmap[^>]*>"
+      rc_file_contents
+      depends_path
+      )
 
     # get url files
-    STRING(REGEX MATCHALL "<url[^<]+" _RC_FILES "${_RC_FILE_CONTENTS}")
-    FOREACH(_RC_FILE ${_RC_FILES})
-      STRING(REGEX REPLACE "^<url[^>]*>" "" _RC_FILE "${_RC_FILE}")
-      STRING(REGEX MATCH "^/|([A-Za-z]:/)" _ABS_PATH_INDICATOR "${_RC_FILE}")
-      IF(NOT _ABS_PATH_INDICATOR)
-        SET(_RC_FILE "${rc_path}/${_RC_FILE}")
-      ENDIF(NOT _ABS_PATH_INDICATOR)
-      LIST(APPEND _RC_DEPENDS "${_RC_FILE}")
-    ENDFOREACH(_RC_FILE)
+    WX_GET_DEPENDENCIES_FROM_XML(
+      rc_depends
+      "<url[^<]+"
+      "^<url[^>]*>"
+      rc_file_contents
+      depends_path
+      )
 
     # get wxIcon files
-    STRING(REGEX MATCHALL "<object[^>]*class=\"wxIcon\"[^<]+" _RC_FILES "${_RC_FILE_CONTENTS}")
-    FOREACH(_RC_FILE ${_RC_FILES})
-      STRING(REGEX REPLACE "^<object[^>]*>" "" _RC_FILE "${_RC_FILE}")
-      STRING(REGEX MATCH "^/|([A-Za-z]:/)" _ABS_PATH_INDICATOR "${_RC_FILE}")
-      IF(NOT _ABS_PATH_INDICATOR)
-        SET(_RC_FILE "${rc_path}/${_RC_FILE}")
-      ENDIF(NOT _ABS_PATH_INDICATOR)
-      LIST(APPEND _RC_DEPENDS "${_RC_FILE}")
-    ENDFOREACH(_RC_FILE)
-  ENDFOREACH (it)
+    WX_GET_DEPENDENCIES_FROM_XML(
+      rc_depends
+      "<object[^>]*class=\"wxIcon\"[^<]+"
+      "^<object[^>]*>"
+      rc_file_contents
+      depends_path
+      )
+  ENDFOREACH(rc_file)
 
-  SET(outfile ${CMAKE_CURRENT_BINARY_DIR}/wxrc_resources.cxx)
+  #
+  # Parse options.
+  # 
+  # If NO_CPP_CODE option specified, then produce .xrs file rather
+  # than a .cpp file (i.e., don't add the default --cpp-code option).
+  LIST(FIND rc_options NO_CPP_CODE index)
+  IF(index EQUAL -1)
+    LIST(APPEND rc_options --cpp-code)
+    # wxrc's default output filename for cpp code.
+    SET(outfile resource.cpp)
+  ELSE(index EQUAL -1)
+    LIST(REMOVE_AT rc_options ${index})
+    # wxrc's default output filename for xrs file.
+    SET(outfile resource.xrs)
+  ENDIF(index EQUAL -1)
+
+  # Get output name for use in ADD_CUSTOM_COMMAND.
+  # - short option scanning
+  LIST(FIND rc_options -o index)
+  IF(NOT index EQUAL -1)
+    MATH(EXPR filename_index "${index} + 1")
+    LIST(GET rc_options ${filename_index} outfile)
+    #LIST(REMOVE_AT rc_options ${index} ${filename_index})
+  ENDIF(NOT index EQUAL -1)
+  # - long option scanning
+  STRING(REGEX MATCH "--output=[^;]*" outfile_opt "${rc_options}")
+  IF(outfile_opt)
+    STRING(REPLACE "--output=" "" outfile "${outfile_opt}")
+  ENDIF(outfile_opt)
+  #STRING(REGEX REPLACE "--output=[^;]*;?" "" rc_options "${rc_options}")
+  #STRING(REGEX REPLACE ";$" "" rc_options "${rc_options}")
+  
+  IF(NOT IS_ABSOLUTE "${outfile}")
+    SET(outfile "${CMAKE_CURRENT_BINARY_DIR}/${outfile}")
+  ENDIF(NOT IS_ABSOLUTE "${outfile}")
   ADD_CUSTOM_COMMAND(
-    OUTPUT ${outfile}
-    COMMAND ${wxWidgets_wxrc_EXECUTABLE}
-      --cpp-code --output=${outfile} ${_RC_INFILES}
-    DEPENDS ${_RC_INFILES} ${_RC_DEPENDS}
+    OUTPUT "${outfile}"
+    COMMAND ${wxWidgets_wxrc_EXECUTABLE} ${rc_options} ${rc_file_list_abs}
+    DEPENDS ${rc_file_list_abs} ${rc_depends}
     )
-  LIST(APPEND ${outfiles} ${outfile})
-ENDMACRO(WXWIDGETS_ADD_RESOURCES)
+
+  # Add generated header to output file list.
+  LIST(FIND rc_options -e short_index)
+  LIST(FIND rc_options --extra-cpp-code long_index)
+  IF(NOT short_index EQUAL -1 OR NOT long_index EQUAL -1)
+    GET_FILENAME_COMPONENT(outfile_ext ${outfile} EXT)
+    STRING(REPLACE "${outfile_ext}" ".h" outfile_header "${outfile}")
+    LIST(APPEND ${_outfiles} "${outfile_header}")
+    SET_SOURCE_FILES_PROPERTIES(
+      "${outfile_header}" PROPERTIES GENERATED TRUE
+      )
+  ENDIF(NOT short_index EQUAL -1 OR NOT long_index EQUAL -1)
+
+  # Add generated file to output file list.
+  LIST(APPEND ${_outfiles} "${outfile}")
+
+  RAISE_SCOPE(${_outfiles})
+ENDFUNCTION(WXWIDGETS_ADD_RESOURCES)
