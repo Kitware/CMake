@@ -619,7 +619,11 @@ ELSE(WIN32_STYLE_FIND)
     #-----------------------------------------------------------------
     # UNIX: Start actual work.
     #-----------------------------------------------------------------
-    FIND_PROGRAM(wxWidgets_CONFIG_EXECUTABLE wx-config)
+    # Support cross-compiling, only search in the target platform.
+    FIND_PROGRAM(wxWidgets_CONFIG_EXECUTABLE wx-config
+      ONLY_CMAKE_FIND_ROOT_PATH
+      )
+
     IF(wxWidgets_CONFIG_EXECUTABLE)
       SET(wxWidgets_FOUND TRUE)
 
@@ -664,9 +668,6 @@ ELSE(WIN32_STYLE_FIND)
         STRING(REPLACE "-I" ""
           wxWidgets_INCLUDE_DIRS "${wxWidgets_INCLUDE_DIRS}")
 
-        # convert space to semicolons for list
-#        SEPARATE_ARGUMENTS(wxWidgets_INCLUDE_DIRS)
-
         DBG_MSG_V("wxWidgets_DEFINITIONS=${wxWidgets_DEFINITIONS}")
         DBG_MSG_V("wxWidgets_INCLUDE_DIRS=${wxWidgets_INCLUDE_DIRS}")
         DBG_MSG_V("wxWidgets_CXX_FLAGS=${wxWidgets_CXX_FLAGS}")
@@ -705,9 +706,6 @@ ELSE(WIN32_STYLE_FIND)
           wxWidgets_LIBRARY_DIRS "${wxWidgets_LIBRARIES}")
         STRING(REPLACE "-L" ""
           wxWidgets_LIBRARY_DIRS "${wxWidgets_LIBRARY_DIRS}")
-
-        # convert space to semicolons for list
-#        SEPARATE_ARGUMENTS(wxWidgets_LIBRARY_DIRS)
 
         DBG_MSG_V("wxWidgets_LIBRARIES=${wxWidgets_LIBRARIES}")
         DBG_MSG_V("wxWidgets_LIBRARY_DIRS=${wxWidgets_LIBRARY_DIRS}")
