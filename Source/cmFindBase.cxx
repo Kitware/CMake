@@ -536,8 +536,18 @@ void cmFindBase::HandleCMakeFindRootPath()
        it != unrootedPaths.end();
        ++it )
       {
-      std::string rootedDir=*rootIt;
-      rootedDir+=*it;
+      // if the current directory is already inside the current root, don't
+      // add the root again
+      std::string rootedDir;
+      if (cmSystemTools::IsSubDirectory(it->c_str(), rootIt->c_str()))
+        {
+        rootedDir = *it;
+        }
+      else
+        {
+        rootedDir=*rootIt;
+        rootedDir+=*it;
+        }
       this->SearchPaths.push_back(rootedDir);
       }
     }
