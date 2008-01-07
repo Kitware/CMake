@@ -1614,9 +1614,11 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
     // now check and postprocess what has been parsed
     if ( files.size() == 0 )
       {
-      this->SetError(
-                     "called with inapropriate arguments. No FILES provided.");
-      return false;
+      // nothing to do, no files were listed.
+      // if this is handled as error, INSTALL_FILES() creates an invalid
+      // cmake_install.cmake script with no FILES() arguments if no files were
+      // given to INSTALL_FILES(). This was accepted with CMake 2.4.x.
+      return true;
       }
 
     // Check rename form.
