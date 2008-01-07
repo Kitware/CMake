@@ -2700,7 +2700,8 @@ cmLocalGenerator
 std::string
 cmLocalGenerator
 ::GetObjectFileNameWithoutTarget(const cmSourceFile& source,
-                                 std::string::size_type dir_len)
+                                 std::string::size_type dir_len,
+                                 bool* hasSourceExtension)
 {
   // Construct the object file name using the full path to the source
   // file which is its only unique identification.
@@ -2751,11 +2752,25 @@ cmLocalGenerator
 
   // Replace the original source file extension with the object file
   // extension.
+  bool keptSourceExtension = true;
   if(!source.GetPropertyAsBool("KEEP_EXTENSION"))
     {
-    // Remove the original extension for CMake 2.4 compatibility.
-    if(this->NeedBackwardsCompatibility(2, 4))
+    // Decide whether this language wants to replace the source
+    // extension with the object extension.  For CMake 2.4
+    // compatibility do this by default.
+    bool replaceExt = this->NeedBackwardsCompatibility(2, 4);
+    if(!replaceExt)
       {
+      std::string repVar = "CMAKE_";
+      repVar += source.GetLanguage();
+      repVar += "_OUTPUT_EXTENSION_REPLACE";
+      replaceExt = this->Makefile->IsOn(repVar.c_str());
+      }
+
+    // Remove the source extension if it is to be replaced.
+    if(replaceExt)
+      {
+      keptSourceExtension = false;
       std::string::size_type dot_pos = objectName.rfind(".");
       if(dot_pos != std::string::npos)
         {
@@ -2766,6 +2781,10 @@ cmLocalGenerator
     // Store the new extension.
     objectName +=
       this->GlobalGenerator->GetLanguageOutputExtension(source);
+    }
+  if(hasSourceExtension)
+    {
+    *hasSourceExtension = keptSourceExtension;
     }
 
   // Convert to a safe name.

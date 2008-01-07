@@ -238,7 +238,10 @@ public:
     LocalObjectEntry(cmTarget* t, const char* lang):
       Target(t), Language(lang) {}
   };
-  class LocalObjectInfo: public std::vector<LocalObjectEntry> {};
+  struct LocalObjectInfo: public std::vector<LocalObjectEntry>
+  {
+    bool HasSourceExtension;
+  };
   std::map<cmStdString, LocalObjectInfo> const& GetLocalObjectFiles()
     { return this->LocalObjectFiles;}
 
@@ -299,11 +302,12 @@ protected:
                                const std::vector<std::string>& objects);
   void WriteObjectConvenienceRule(std::ostream& ruleFileStream,
                                   const char* comment, const char* output,
-                                  LocalObjectInfo const& targets);
+                                  LocalObjectInfo const& info);
   
   std::string GetObjectFileName(cmTarget& target,
                                 const cmSourceFile& source,
-                                std::string* nameWithoutTargetDir = 0);
+                                std::string* nameWithoutTargetDir = 0,
+                                bool* hasSourceExtension = 0);
 
   void AppendRuleDepend(std::vector<std::string>& depends,
                         const char* ruleFileName);

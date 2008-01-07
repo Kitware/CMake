@@ -38,6 +38,25 @@
 #include <queue>
 
 //----------------------------------------------------------------------------
+// Helper function used below.
+static std::string cmSplitExtension(std::string const& in, std::string& base)
+{
+  std::string ext;
+  std::string::size_type dot_pos = in.rfind(".");
+  if(dot_pos != std::string::npos)
+    {
+    // Remove the extension first in case &base == &in.
+    ext = in.substr(dot_pos, std::string::npos);
+    base = in.substr(0, dot_pos);
+    }
+  else
+    {
+    base = in;
+    }
+  return ext;
+}
+
+//----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
 {
   this->SilentNoColon = false;
@@ -298,12 +317,45 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteObjectConvenienceRule(std::ostream& ruleFileStream,
                              const char* comment, const char* output,
-                             LocalObjectInfo const& targets)
+                             LocalObjectInfo const& info)
 {
+  // If the rule includes the source file extension then create a
+  // version that has the extension removed.  The help should include
+  // only the version without source extension.
+  bool inHelp = true;
+  if(info.HasSourceExtension)
+    {
+    // Remove the last extension.  This should be kept.
+    std::string outBase1 = output;
+    std::string outExt1 = cmSplitExtension(outBase1, outBase1);
+
+    // Now remove the source extension and put back the last
+    // extension.
+    std::string outNoExt;
+    cmSplitExtension(outBase1, outNoExt);
+    outNoExt += outExt1;
+
+    // Add a rule to drive the rule below.
+    std::vector<std::string> depends;
+    depends.push_back(output);
+    std::vector<std::string> commands;
+    cmGlobalUnixMakefileGenerator3* gg =
+      static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+    std::string emptyCommand = gg->GetEmptyRuleHackCommand();
+    if(!emptyCommand.empty())
+      {
+      commands.push_back(emptyCommand);
+      }
+
+    this->WriteMakeRule(ruleFileStream, 0,
+                        outNoExt.c_str(), depends, commands, true, true);
+    inHelp = false;
+    }
+
   // Recursively make the rule for each target using the object file.
   std::vector<std::string> commands;
-  for(std::vector<LocalObjectEntry>::const_iterator t = targets.begin();
-      t != targets.end(); ++t)
+  for(std::vector<LocalObjectEntry>::const_iterator t = info.begin();
+      t != info.end(); ++t)
     {
     std::string tgtMakefileName =
       this->GetRelativeTargetDirectory(*(t->Target));
@@ -322,7 +374,7 @@ cmLocalUnixMakefileGenerator3
   // Write the rule to the makefile.
   std::vector<std::string> no_depends;
   this->WriteMakeRule(ruleFileStream, comment,
-                      output, no_depends, commands, true, true);
+                      output, no_depends, commands, true, inHelp);
 }
 
 //----------------------------------------------------------------------------
@@ -1800,13 +1852,16 @@ std::string
 cmLocalUnixMakefileGenerator3
 ::GetObjectFileName(cmTarget& target,
                     const cmSourceFile& source,
-                    std::string* nameWithoutTargetDir)
+                    std::string* nameWithoutTargetDir,
+                    bool* hasSourceExtension)
 {
   if(const char* fileTargetDirectory =
      source.GetProperty("MACOSX_PACKAGE_LOCATION"))
     {
     // Special handling for OSX package files.
-    std::string objectName = this->GetObjectFileNameWithoutTarget(source, 0);
+    std::string objectName =
+      this->GetObjectFileNameWithoutTarget(source, 0,
+                                           hasSourceExtension);
     if(nameWithoutTargetDir)
       {
       *nameWithoutTargetDir = objectName;
@@ -1857,7 +1912,8 @@ cmLocalUnixMakefileGenerator3
     dir_len += 1;
     dir_len += obj.size();
     std::string objectName =
-      this->GetObjectFileNameWithoutTarget(source, dir_len);
+      this->GetObjectFileNameWithoutTarget(source, dir_len,
+                                           hasSourceExtension);
     if(nameWithoutTargetDir)
       {
       *nameWithoutTargetDir = objectName;
