@@ -80,9 +80,16 @@ ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 IF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   SET(CMAKE_Fortran_COMPILER_ID_RUN 1)
 
+  # Each entry in this list is a set of extra flags to try
+  # adding to the compile line to see if it helps produce
+  # a valid identification executable.
+  SET(CMAKE_Fortran_COMPILER_ID_TEST_FLAGS
+    # Intel on windows does not preprocess by default.
+    "-fpp"
+    )
+
   # Try to identify the compiler.
   SET(CMAKE_Fortran_COMPILER_ID)
-  SET(CMAKE_Fortran_COMPILER_ID_ALLOW_FAIL 1)
   INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(Fortran FFLAGS ${CMAKE_ROOT}/Modules/CMakeFortranCompilerId.F90)
 
