@@ -664,19 +664,75 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
 }
 
 //----------------------------------------------------------------------------
+// Helper function to look for a short sequence in a stream.  If this
+// is later used for longer sequences it should be re-written using an
+// efficient string search algorithm such as Boyer-Moore.
+static
+bool cmDependsFortranStreamContainsSequence(std::ifstream& ifs,
+                                            const char* seq, int len)
+{
+  assert(len > 0);
+
+  int cur = 0;
+  while(cur < len)
+    {
+    // Get the next character.
+    int token = ifs.get();
+    if(!ifs)
+      {
+      return false;
+      }
+
+    // Check the character.
+    if(token == static_cast<int>(seq[cur]))
+      {
+      ++cur;
+      }
+    else
+      {
+      // Assume the sequence has no repeating subsequence.
+      cur = 0;
+      }
+    }
+
+  // The entire sequence was matched.
+  return true;
+}
+
+//----------------------------------------------------------------------------
+// Helper function to compare the remaining content in two streams.
+static bool cmDependsFortranStreamsDiffer(std::ifstream& ifs1,
+                                          std::ifstream& ifs2)
+{
+  // Compare the remaining content.
+  for(;;)
+    {
+    int ifs1_c = ifs1.get();
+    int ifs2_c = ifs2.get();
+    if(!ifs1 && !ifs2)
+      {
+      // We have reached the end of both streams simultaneously.
+      // The streams are identical.
+      return false;
+      }
+
+    if(!ifs1 || !ifs2 || ifs1_c != ifs2_c)
+      {
+      // We have reached the end of one stream before the other or
+      // found differing content.  The streams are different.
+      break;
+      }
+    }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
 bool cmDependsFortran::ModulesDiffer(const char* modFile,
                                      const char* stampFile,
                                      const char* compilerId)
 {
-  (void)compilerId;
   /*
-  This following is valid for intel and gnu. For others this may be valid
-  too, but has to be proven.
-
-  ASSUMPTION: If one compiles the source foo.f90 which provides module bar,
-  two times then both generated bar.mod files will differ only before the
-  first linefeed (\n or 0x0A).
-
   gnu:
     A mod file is an ascii file.
     <bar.mod>
@@ -689,18 +745,27 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
   intel:
     A mod file is a binary file.
     However, looking into both generated bar.mod files with a hex editor
-    shows that they differ only before a linefeed (0x0A) which is located
-    some bytes in front of the absoulte path to the source file.
+    shows that they differ only before a sequence linefeed-zero (0x0A 0x00)
+    which is located some bytes in front of the absoulte path to the source
+    file.
 
   sun:
-    A mod file is a binary file.  It always starts in the line of text
-    !<ftn.mod>
-    Compiling twice produces identical modules anyway, so the
-    assumption is valid.
+    A mod file is a binary file.  Compiling twice produces identical modules.
 
   others:
-    TODO: is this valid for every common fortran compiler?
+    TODO ...
   */
+
+
+  /* Compilers which do _not_ produce different mod content when the same
+   * source is compiled twice
+   *   -SunPro
+   */
+  if(std::strcmp(compilerId, "SunPro") == 0)
+    {
+    return cmSystemTools::FilesDiffer(modFile, stampFile);
+    }
+
 #if defined(_WIN32) || defined(__CYGWIN__)
   std::ifstream finModFile(modFile, std::ios::in | std::ios::binary);
   std::ifstream finStampFile(stampFile, std::ios::in | std::ios::binary);
@@ -714,47 +779,59 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
     return true;
     }
 
-  // Remove the first line from each file and make sure newlines were found.
-  std::string modLine;
-  bool modHasNewline = false;
-  if(!cmSystemTools::GetLineFromStream(finModFile, modLine,
-                                       &modHasNewline, 1024) ||
-     !modHasNewline)
+  /* Compilers which _do_ produce different mod content when the same
+   * source is compiled twice
+   *   -GNU
+   *   -Intel
+   *
+   * Eat the stream content until all recompile only realated changes
+   * are left bedind.
+   */
+  if (std::strcmp(compilerId, "GNU") == 0 )
     {
-    std::cerr
-      << "WARNING in cmDependsFortran::ModulesDiffer:\n"
-      << "The fortran module \"" << modFile << "\" format is not known.\n"
-      << "Please report this at: http://www.cmake.org/Bug\n"
-      << "\n";
-    return true;
+    const char seq[1] = {'\n'};
+    const int seqlen = 1;
+
+    if(!cmDependsFortranStreamContainsSequence(finModFile, seq, seqlen))
+      {
+      // The module is of unexpected format.  Assume it is different.
+      std::cerr << compilerId << " fortran module " << modFile
+                << " has unexpected format." << std::endl;
+      return true;
+      }
+
+    if(!cmDependsFortranStreamContainsSequence(finStampFile, seq, seqlen))
+      {
+      // The stamp must differ if the sequence is not contained.
+      return true;
+      }
     }
-  std::string stampLine;
-  bool stampHasNewline = false;
-  if(!cmSystemTools::GetLineFromStream(finStampFile, stampLine,
-                                       &stampHasNewline, 1024) ||
-     !stampHasNewline)
+  else if(std::strcmp(compilerId, "Intel") == 0)
     {
-    // The stamp file is invalid.
-    return true;
+    const char seq[2] = {'\n', '\0'};
+    const int seqlen = 2;
+
+    if(!cmDependsFortranStreamContainsSequence(finModFile, seq, seqlen))
+      {
+      // The module is of unexpected format.  Assume it is different.
+      std::cerr << compilerId << " fortran module " << modFile
+                << " has unexpected format." << std::endl;
+      return true;
+      }
+
+    if(!cmDependsFortranStreamContainsSequence(finStampFile, seq, seqlen))
+      {
+      // The stamp must differ if the sequence is not contained.
+      return true;
+      }
     }
 
-  // Compare the remaining content.
-  for(;;)
+  // Compare the remainng content.  If no compiler id matched above,
+  // including the case none was given, this will compare the whole
+  // content.
+  if(!cmDependsFortranStreamsDiffer(finModFile, finStampFile))
     {
-    int mod_c = finModFile.get();
-    int stamp_c = finStampFile.get();
-    if(!finModFile && !finStampFile)
-      {
-      // We have reached the end of both files simultaneously.
-      // The modules are identical.
-      return false;
-      }
-    else if(!finModFile || !finStampFile || mod_c != stamp_c)
-      {
-      // We have reached the end of one file before the other.
-      // The modules are different.
-      break;
-      }
+    return false;
     }
 
    // The modules are different.
