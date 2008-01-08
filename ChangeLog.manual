@@ -1,3 +1,5 @@
+Changes in CMake 2.4.8 RC 11
+* Remove ability to select install location for mac (it does not work)
 Changes in CMake 2.4.8 RC 10
 * Fix for FindQt4 and glib and gthread, if not found don't use
 Changes in CMake 2.4.8 RC 9
