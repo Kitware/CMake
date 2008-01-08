@@ -91,6 +91,22 @@
 #include <sys/param.h>
 #include <sys/pstat.h>
 #endif
+#include <@KWSYS_NAMESPACE@/FundamentalType.h>
+
+#if @KWSYS_NAMESPACE@_USE_LONG_LONG
+  namespace @KWSYS_NAMESPACE@
+  {
+    typedef long long LongLong;
+  }
+#elif @KWSYS_NAMESPACE@_USE_USE___INT64
+  namespace @KWSYS_NAMESPACE@
+  {
+    typedef __int64 LongLong;
+  }
+#else
+//# error "No Long long"
+#endif
+
 
 #include <@KWSYS_NAMESPACE@/stl/string>
 #include <@KWSYS_NAMESPACE@/stl/vector>
@@ -238,7 +254,7 @@ protected:
   unsigned char LogicalCPUPerPhysicalCPU();
   unsigned char GetAPICId();
   unsigned int IsHyperThreadingSupported();
-  long long GetCyclesDifference(DELAY_FUNC, unsigned int);
+  LongLong GetCyclesDifference(DELAY_FUNC, unsigned int);
 
   // For Linux
   int RetreiveInformationFromCpuInfoFile();

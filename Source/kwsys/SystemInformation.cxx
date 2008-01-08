@@ -516,7 +516,7 @@ bool SystemInformation::RetrieveCPUIdentity()
 {
 #ifdef WIN32
   int localCPUVendor[3];
-  int locallocalCPUSignature;
+  int localCPUSignature;
 
   // Use assembly to detect CPUID information...
   __try 
@@ -1946,7 +1946,7 @@ unsigned long SystemInformation::GetAvailablePhysicalMemory()
 }
 
 /** Get Cycle differences */
-long long SystemInformation::GetCyclesDifference (DELAY_FUNC DelayFunction,
+LongLong SystemInformation::GetCyclesDifference (DELAY_FUNC DelayFunction,
                                                   unsigned int uiParameter)
 {
 #ifdef WIN32
