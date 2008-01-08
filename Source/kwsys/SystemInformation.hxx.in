@@ -113,10 +113,10 @@ public:
 
   const char * GetVendorString();
   const char * GetVendorID();
-  const char * GetTypeID();
-  const char * GetFamilyID();
-  const char * GetModelID();
-  const char * GetSteppingCode();
+  kwsys_stl::string GetTypeID();
+  kwsys_stl::string GetFamilyID();
+  kwsys_stl::string GetModelID();
+  kwsys_stl::string GetSteppingCode();
   const char * GetExtendedProcessorName();
   const char * GetProcessorSerialNumber();
   int GetProcessorCacheSize();
