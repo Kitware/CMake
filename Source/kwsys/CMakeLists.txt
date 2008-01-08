@@ -137,7 +137,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_IOStream 1)
   SET(KWSYS_USE_DateStamp 1)
   SET(KWSYS_USE_String 1)
-  SET(KWSYS_USE_SystemInformation 1)
+#  SET(KWSYS_USE_SystemInformation 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
 # Setup the large file support default.
