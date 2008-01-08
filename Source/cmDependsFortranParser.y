@@ -210,6 +210,12 @@ keyword_stmt:
     }
 | WORD STRING other EOSTMT /* Ignore */
     {
+    if (cmDependsFortranParserIsKeyword($1, "include"))
+      {
+      cmDependsFortranParser* parser =
+        cmDependsFortran_yyget_extra(yyscanner);
+      cmDependsFortranParser_RuleInclude(parser, $2);
+      }
     free($1);
     free($2);
     }
