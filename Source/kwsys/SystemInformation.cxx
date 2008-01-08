@@ -346,6 +346,7 @@ void SystemInformation::Delay(unsigned int uiMS)
     QueryPerformanceCounter (&EndCounter);
     } while (EndCounter.QuadPart - StartCounter.QuadPart < x);
 #endif
+  (void)uiMS;
 }
 
 bool SystemInformation::DoesCPUSupportCPUID()
@@ -393,10 +394,10 @@ bool SystemInformation::DoesCPUSupportCPUID()
 
 bool SystemInformation::RetrieveCPUFeatures()
 {
-  int CPUFeatures = 0;
-  int CPUAdvanced = 0;
-
 #ifdef WIN32
+  int localCPUFeatures = 0;
+  int localCPUAdvanced = 0;
+
 
   // Use assembly to detect CPUID information...
   __try {
@@ -416,8 +417,8 @@ bool SystemInformation::RetrieveCPUFeatures()
       ;        edx: CPU feature flags
       mov eax,1
       CPUID_INSTRUCTION
-      mov CPUFeatures, edx
-      mov CPUAdvanced, ebx
+      mov localCPUFeatures, edx
+      mov localCPUAdvanced, ebx
 
 #ifdef CPUID_AWARE_COMPILER
       pop edx
@@ -433,18 +434,18 @@ bool SystemInformation::RetrieveCPUFeatures()
     }
 
   // Retrieve the features of CPU present.
-  this->Features.HasFPU =    ((CPUFeatures & 0x00000001) != 0);    // FPU Present --> Bit 0
-  this->Features.HasTSC =    ((CPUFeatures & 0x00000010) != 0);    // TSC Present --> Bit 4
-  this->Features.HasAPIC =    ((CPUFeatures & 0x00000200) != 0);    // APIC Present --> Bit 9
-  this->Features.HasMTRR =    ((CPUFeatures & 0x00001000) != 0);    // MTRR Present --> Bit 12
-  this->Features.HasCMOV =    ((CPUFeatures & 0x00008000) != 0);    // CMOV Present --> Bit 15
-  this->Features.HasSerial =  ((CPUFeatures & 0x00040000) != 0);    // Serial Present --> Bit 18
-  this->Features.HasACPI =    ((CPUFeatures & 0x00400000) != 0);    // ACPI Capable --> Bit 22
-  this->Features.HasMMX =    ((CPUFeatures & 0x00800000) != 0);    // MMX Present --> Bit 23
-  this->Features.HasSSE =    ((CPUFeatures & 0x02000000) != 0);    // SSE Present --> Bit 25
-  this->Features.HasSSE2 =    ((CPUFeatures & 0x04000000) != 0);    // SSE2 Present --> Bit 26
-  this->Features.HasThermal =  ((CPUFeatures & 0x20000000) != 0);    // Thermal Monitor Present --> Bit 29
-  this->Features.HasIA64 =    ((CPUFeatures & 0x40000000) != 0);    // IA64 Present --> Bit 30
+  this->Features.HasFPU =    ((localCPUFeatures & 0x00000001) != 0);    // FPU Present --> Bit 0
+  this->Features.HasTSC =    ((localCPUFeatures & 0x00000010) != 0);    // TSC Present --> Bit 4
+  this->Features.HasAPIC =    ((localCPUFeatures & 0x00000200) != 0);    // APIC Present --> Bit 9
+  this->Features.HasMTRR =    ((localCPUFeatures & 0x00001000) != 0);    // MTRR Present --> Bit 12
+  this->Features.HasCMOV =    ((localCPUFeatures & 0x00008000) != 0);    // CMOV Present --> Bit 15
+  this->Features.HasSerial =  ((localCPUFeatures & 0x00040000) != 0);    // Serial Present --> Bit 18
+  this->Features.HasACPI =    ((localCPUFeatures & 0x00400000) != 0);    // ACPI Capable --> Bit 22
+  this->Features.HasMMX =    ((localCPUFeatures & 0x00800000) != 0);    // MMX Present --> Bit 23
+  this->Features.HasSSE =    ((localCPUFeatures & 0x02000000) != 0);    // SSE Present --> Bit 25
+  this->Features.HasSSE2 =    ((localCPUFeatures & 0x04000000) != 0);    // SSE2 Present --> Bit 26
+  this->Features.HasThermal =  ((localCPUFeatures & 0x20000000) != 0);    // Thermal Monitor Present --> Bit 29
+  this->Features.HasIA64 =    ((localCPUFeatures & 0x40000000) != 0);    // IA64 Present --> Bit 30
 
   // Retrieve extended SSE capabilities if SSE is available.
   if (this->Features.HasSSE) {
@@ -478,13 +479,13 @@ bool SystemInformation::RetrieveCPUFeatures()
   // Retrieve Intel specific extended features.
   if (this->ChipManufacturer == Intel) 
     {
-    this->Features.ExtendedFeatures.SupportsHyperthreading =  ((CPUFeatures &  0x10000000) != 0);  // Intel specific: Hyperthreading --> Bit 28
-    this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical = (this->Features.ExtendedFeatures.SupportsHyperthreading) ? ((CPUAdvanced & 0x00FF0000) >> 16) : 1;
+    this->Features.ExtendedFeatures.SupportsHyperthreading =  ((localCPUFeatures &  0x10000000) != 0);  // Intel specific: Hyperthreading --> Bit 28
+    this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical = (this->Features.ExtendedFeatures.SupportsHyperthreading) ? ((localCPUAdvanced & 0x00FF0000) >> 16) : 1;
     
     if ((this->Features.ExtendedFeatures.SupportsHyperthreading) && (this->Features.HasAPIC))
       {
       // Retrieve APIC information if there is one present.
-      this->Features.ExtendedFeatures.APIC_ID = ((CPUAdvanced & 0xFF000000) >> 24);
+      this->Features.ExtendedFeatures.APIC_ID = ((localCPUAdvanced & 0xFF000000) >> 24);
       }
     }
 #endif
@@ -513,10 +514,10 @@ void SystemInformation::FindManufacturer()
 /** */
 bool SystemInformation::RetrieveCPUIdentity()
 {
-  int CPUVendor[3];
-  int CPUSignature;
-
 #ifdef WIN32
+  int localCPUVendor[3];
+  int locallocalCPUSignature;
+
   // Use assembly to detect CPUID information...
   __try 
     {
@@ -538,9 +539,9 @@ bool SystemInformation::RetrieveCPUIdentity()
       ;        ecx: part 3 of 3; CPU signature.
       mov eax, 0
       CPUID_INSTRUCTION
-      mov CPUVendor[0 * TYPE int], ebx
-      mov CPUVendor[1 * TYPE int], edx
-      mov CPUVendor[2 * TYPE int], ecx
+      mov localCPUVendor[0 * TYPE int], ebx
+      mov localCPUVendor[1 * TYPE int], edx
+      mov localCPUVendor[2 * TYPE int], ecx
 
       ; <<CPUID>> 
       ; eax = 1 --> eax: CPU ID - bits 31..16 - unused, bits 15..12 - type, bits 11..8 - family, bits 7..4 - model, bits 3..0 - mask revision
@@ -548,7 +549,7 @@ bool SystemInformation::RetrieveCPUIdentity()
       ;        edx: CPU feature flags
       mov eax,1
       CPUID_INSTRUCTION
-      mov CPUSignature, eax
+      mov localCPUSignature, eax
 
 #ifdef CPUID_AWARE_COMPILER
       pop edx
@@ -564,20 +565,20 @@ bool SystemInformation::RetrieveCPUIdentity()
     }
 
   // Process the returned information.
-  memcpy (this->ChipID.Vendor, &(CPUVendor[0]), sizeof (int));
-  memcpy (&(this->ChipID.Vendor[4]), &(CPUVendor[1]), sizeof (int));
-  memcpy (&(this->ChipID.Vendor[8]), &(CPUVendor[2]), sizeof (int));
+  memcpy (this->ChipID.Vendor, &(localCPUVendor[0]), sizeof (int));
+  memcpy (&(this->ChipID.Vendor[4]), &(localCPUVendor[1]), sizeof (int));
+  memcpy (&(this->ChipID.Vendor[8]), &(localCPUVendor[2]), sizeof (int));
   this->ChipID.Vendor[12] = '\0';
 
   this->FindManufacturer();
 
   // Retrieve the family of CPU present.
-  this->ChipID.ExtendedFamily =    ((CPUSignature & 0x0FF00000) >> 20);  // Bits 27..20 Used
-  this->ChipID.ExtendedModel =    ((CPUSignature & 0x000F0000) >> 16);  // Bits 19..16 Used
-  this->ChipID.Type =        ((CPUSignature & 0x0000F000) >> 12);  // Bits 15..12 Used
-  this->ChipID.Family =        ((CPUSignature & 0x00000F00) >> 8);    // Bits 11..8 Used
-  this->ChipID.Model =        ((CPUSignature & 0x000000F0) >> 4);    // Bits 7..4 Used
-  this->ChipID.Revision =      ((CPUSignature & 0x0000000F) >> 0);    // Bits 3..0 Used
+  this->ChipID.ExtendedFamily =    ((localCPUSignature & 0x0FF00000) >> 20);  // Bits 27..20 Used
+  this->ChipID.ExtendedModel =    ((localCPUSignature & 0x000F0000) >> 16);  // Bits 19..16 Used
+  this->ChipID.Type =        ((localCPUSignature & 0x0000F000) >> 12);  // Bits 15..12 Used
+  this->ChipID.Family =        ((localCPUSignature & 0x00000F00) >> 8);    // Bits 11..8 Used
+  this->ChipID.Model =        ((localCPUSignature & 0x000000F0) >> 4);    // Bits 7..4 Used
+  this->ChipID.Revision =      ((localCPUSignature & 0x0000000F) >> 0);    // Bits 3..0 Used
 #endif
 
   return true;
@@ -586,10 +587,10 @@ bool SystemInformation::RetrieveCPUIdentity()
 /** */
 bool SystemInformation::RetrieveCPUCacheDetails()
 {
+#ifdef WIN32
   int L1Cache[4] = { 0, 0, 0, 0 };
   int L2Cache[4] = { 0, 0, 0, 0 };
 
-#ifdef WIN32
   // Check to see if what we are about to do is supported...
   if (RetrieveCPUExtendedLevelSupport (0x80000005)) 
     {
@@ -703,12 +704,12 @@ bool SystemInformation::RetrieveCPUCacheDetails()
 /** */
 bool SystemInformation::RetrieveClassicalCPUCacheDetails()
 {
+#ifdef WIN32
   int TLBCode = -1, TLBData = -1, L1Code = -1, L1Data = -1, L1Trace = -1, L2Unified = -1, L3Unified = -1;
   int TLBCacheData[4] = { 0, 0, 0, 0 };
   int TLBPassCounter = 0;
   int TLBCacheUnit = 0;
 
-#ifdef WIN32
 
   do {
     // Use assembly to retrieve the L2 cache information ...
@@ -1090,7 +1091,6 @@ bool SystemInformation::RetrieveCPUExtendedLevelSupport(int CPULevelToCheck)
 /** */
 bool SystemInformation::RetrieveExtendedCPUFeatures()
 {
-  int CPUExtendedFeatures = 0;
 
   // Check that we are not using an Intel processor as it does not support this.
   if (this->ChipManufacturer == Intel) 
@@ -1104,6 +1104,7 @@ bool SystemInformation::RetrieveExtendedCPUFeatures()
     return false;
     }
 #ifdef WIN32
+  int localCPUExtendedFeatures = 0;
 
   // Use assembly to detect CPUID information...
   __try 
@@ -1125,7 +1126,7 @@ bool SystemInformation::RetrieveExtendedCPUFeatures()
       ;             edx: CPU feature flags
       mov eax,0x80000001
       CPUID_INSTRUCTION
-      mov CPUExtendedFeatures, edx
+      mov localCPUExtendedFeatures, edx
 
 #ifdef CPUID_AWARE_COMPILER
       pop edx
@@ -1141,21 +1142,21 @@ bool SystemInformation::RetrieveExtendedCPUFeatures()
     }
 
   // Retrieve the extended features of CPU present.
-  this->Features.ExtendedFeatures.Has3DNow = ((CPUExtendedFeatures & 0x80000000) != 0);  // 3DNow Present --> Bit 31.
-  this->Features.ExtendedFeatures.Has3DNowPlus = ((CPUExtendedFeatures & 0x40000000) != 0);  // 3DNow+ Present -- > Bit 30.
-  this->Features.ExtendedFeatures.HasSSEMMX = ((CPUExtendedFeatures & 0x00400000) != 0);  // SSE MMX Present --> Bit 22.
-  this->Features.ExtendedFeatures.SupportsMP = ((CPUExtendedFeatures & 0x00080000) != 0);  // MP Capable -- > Bit 19.
+  this->Features.ExtendedFeatures.Has3DNow = ((localCPUExtendedFeatures & 0x80000000) != 0);  // 3DNow Present --> Bit 31.
+  this->Features.ExtendedFeatures.Has3DNowPlus = ((localCPUExtendedFeatures & 0x40000000) != 0);  // 3DNow+ Present -- > Bit 30.
+  this->Features.ExtendedFeatures.HasSSEMMX = ((localCPUExtendedFeatures & 0x00400000) != 0);  // SSE MMX Present --> Bit 22.
+  this->Features.ExtendedFeatures.SupportsMP = ((localCPUExtendedFeatures & 0x00080000) != 0);  // MP Capable -- > Bit 19.
   
   // Retrieve AMD specific extended features.
   if (this->ChipManufacturer == AMD) 
     {
-    this->Features.ExtendedFeatures.HasMMXPlus = ((CPUExtendedFeatures &  0x00400000) != 0);  // AMD specific: MMX-SSE --> Bit 22
+    this->Features.ExtendedFeatures.HasMMXPlus = ((localCPUExtendedFeatures &  0x00400000) != 0);  // AMD specific: MMX-SSE --> Bit 22
     }
 
   // Retrieve Cyrix specific extended features.
   if (this->ChipManufacturer == Cyrix) 
     {
-    this->Features.ExtendedFeatures.HasMMXPlus = ((CPUExtendedFeatures &  0x01000000) != 0);  // Cyrix specific: Extended MMX --> Bit 24
+    this->Features.ExtendedFeatures.HasMMXPlus = ((localCPUExtendedFeatures &  0x01000000) != 0);  // Cyrix specific: Extended MMX --> Bit 24
     }
 #endif
 
@@ -1165,8 +1166,6 @@ bool SystemInformation::RetrieveExtendedCPUFeatures()
 /** */
 bool SystemInformation::RetrieveProcessorSerialNumber()
 {
-  int SerialNumber[3];
-
   // Check to see if the processor supports the processor serial number.
   if (!this->Features.HasSerial)
     {
@@ -1174,6 +1173,8 @@ bool SystemInformation::RetrieveProcessorSerialNumber()
     }
 
 #ifdef WIN32
+  int SerialNumber[3];
+
 
     // Use assembly to detect CPUID information...
   __try {
@@ -1232,8 +1233,6 @@ bool SystemInformation::RetrieveProcessorSerialNumber()
 /** */
 bool SystemInformation::RetrieveCPUPowerManagement()
 {  
-  int CPUPowerManagement = 0;
-
   // Check to see if what we are about to do is supported...
   if (!RetrieveCPUExtendedLevelSupport (0x80000007)) 
     {
@@ -1244,6 +1243,8 @@ bool SystemInformation::RetrieveCPUPowerManagement()
     }
 
 #ifdef WIN32
+  int localCPUPowerManagement = 0;
+
 
   // Use assembly to detect CPUID information...
   __try {
@@ -1261,7 +1262,7 @@ bool SystemInformation::RetrieveCPUPowerManagement()
       ; eax = 0x80000007 --> edx: get processor power management
       mov eax,0x80000007
       CPUID_INSTRUCTION
-      mov CPUPowerManagement, edx
+      mov localCPUPowerManagement, edx
       
 #ifdef CPUID_AWARE_COMPILER
       pop edx
@@ -1277,9 +1278,9 @@ bool SystemInformation::RetrieveCPUPowerManagement()
     }
 
   // Check for the power management capabilities of the CPU.
-  this->Features.ExtendedFeatures.PowerManagement.HasTempSenseDiode =  ((CPUPowerManagement & 0x00000001) != 0);
-  this->Features.ExtendedFeatures.PowerManagement.HasFrequencyID =    ((CPUPowerManagement & 0x00000002) != 0);
-  this->Features.ExtendedFeatures.PowerManagement.HasVoltageID =    ((CPUPowerManagement & 0x00000004) != 0);
+  this->Features.ExtendedFeatures.PowerManagement.HasTempSenseDiode =  ((localCPUPowerManagement & 0x00000001) != 0);
+  this->Features.ExtendedFeatures.PowerManagement.HasFrequencyID =    ((localCPUPowerManagement & 0x00000002) != 0);
+  this->Features.ExtendedFeatures.PowerManagement.HasVoltageID =    ((localCPUPowerManagement & 0x00000004) != 0);
 
 #endif
 
@@ -1289,15 +1290,15 @@ bool SystemInformation::RetrieveCPUPowerManagement()
 /** */
 bool SystemInformation::RetrieveExtendedCPUIdentity()
 {
-  int ProcessorNameStartPos = 0;
-  int CPUExtendedIdentity[12];
-
   // Check to see if what we are about to do is supported...
   if (!RetrieveCPUExtendedLevelSupport(0x80000002)) return false;
   if (!RetrieveCPUExtendedLevelSupport(0x80000003)) return false;
   if (!RetrieveCPUExtendedLevelSupport(0x80000004)) return false;
    
 #ifdef WIN32
+  int ProcessorNameStartPos = 0;
+  int CPUExtendedIdentity[12];
+
   // Use assembly to detect CPUID information...
   __try {
     _asm {
@@ -1945,7 +1946,8 @@ unsigned long SystemInformation::GetAvailablePhysicalMemory()
 }
 
 /** Get Cycle differences */
-long long SystemInformation::GetCyclesDifference (DELAY_FUNC DelayFunction, unsigned int uiParameter)
+long long SystemInformation::GetCyclesDifference (DELAY_FUNC DelayFunction,
+                                                  unsigned int uiParameter)
 {
 #ifdef WIN32
 
@@ -1984,6 +1986,8 @@ long long SystemInformation::GetCyclesDifference (DELAY_FUNC DelayFunction, unsi
   return ((((__int64) edx2 << 32) + eax2) - (((__int64) edx1 << 32) + eax1));
 
 #else
+  (void)DelayFunction;
+  (void)uiParameter;
   return -1;
 #endif
 }
@@ -2010,6 +2014,7 @@ void SystemInformation::DelayOverhead(unsigned int uiMS)
     QueryPerformanceCounter (&EndCounter);
   } while (EndCounter.QuadPart - StartCounter.QuadPart == x);
 #endif
+  (void)uiMS;
 }
 
 /** Return the number of logical CPU per physical CPUs Works only for windows */
@@ -2034,10 +2039,10 @@ unsigned char SystemInformation::LogicalCPUPerPhysicalCPU(void)
 /** Works only for windows */
 unsigned int SystemInformation::IsHyperThreadingSupported()
 {
+#ifdef WIN32
   unsigned int Regedx    = 0,
              Regeax      = 0,
              VendorId[3] = {0, 0, 0};
-#ifdef WIN32
   __try    // Verify cpuid instruction is supported
     {
       __asm
@@ -2202,6 +2207,8 @@ int SystemInformation::CPUCount()
     this->NumberOfLogicalCPU = 1;
     }
   return StatusFlag;
+#else
+  return 0;
 #endif
 }
 
@@ -2670,13 +2677,14 @@ bool SystemInformation::QueryOSInformation()
 
   struct utsname unameInfo;
   int errorFlag = uname(&unameInfo);
-  
-  this->OSName = unameInfo.sysname;
-  this->Hostname = unameInfo.nodename;
-  this->OSRelease = unameInfo.release;
-  this->OSVersion = unameInfo.version;
-  this->OSPlatform = unameInfo.machine;
-
+  if(errorFlag == 0)
+    {
+    this->OSName = unameInfo.sysname;
+    this->Hostname = unameInfo.nodename;
+    this->OSRelease = unameInfo.release;
+    this->OSVersion = unameInfo.version;
+    this->OSPlatform = unameInfo.machine;
+    }
 #endif
 
   return true;
