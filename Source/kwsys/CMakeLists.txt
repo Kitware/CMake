@@ -892,10 +892,12 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       testRegistry
       testIOS
       testSystemTools
-      testSystemInformation
       testCommandLineArguments
       testCommandLineArguments1
       )
+    IF(KWSYS_USE_SystemInformation)
+      SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS} testSystemInformation)
+    ENDIF(KWSYS_USE_SystemInformation)
     IF(KWSYS_USE_DynamicLoader)
       SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS} testDynamicLoader)
       # If kwsys contains the DynamicLoader, need extra library
