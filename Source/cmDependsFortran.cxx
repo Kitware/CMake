@@ -761,7 +761,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
    * source is compiled twice
    *   -SunPro
    */
-  if(std::strcmp(compilerId, "SunPro") == 0)
+  if(strcmp(compilerId, "SunPro") == 0)
     {
     return cmSystemTools::FilesDiffer(modFile, stampFile);
     }
@@ -787,7 +787,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
    * Eat the stream content until all recompile only realated changes
    * are left bedind.
    */
-  if (std::strcmp(compilerId, "GNU") == 0 )
+  if (strcmp(compilerId, "GNU") == 0 )
     {
     const char seq[1] = {'\n'};
     const int seqlen = 1;
@@ -806,7 +806,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
       return true;
       }
     }
-  else if(std::strcmp(compilerId, "Intel") == 0)
+  else if(strcmp(compilerId, "Intel") == 0)
     {
     const char seq[2] = {'\n', '\0'};
     const int seqlen = 2;
