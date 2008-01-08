@@ -137,6 +137,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_IOStream 1)
   SET(KWSYS_USE_DateStamp 1)
   SET(KWSYS_USE_String 1)
+#  SET(KWSYS_USE_SystemInformation 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
 
 # Setup the large file support default.
@@ -626,7 +627,7 @@ ENDIF(KWSYS_USE_Process)
 # Add selected C++ classes.
 SET(cppclasses
   Directory DynamicLoader Glob RegularExpression SystemTools
-  CommandLineArguments Registry IOStream
+  CommandLineArguments Registry IOStream SystemInformation
   )
 FOREACH(cpp ${cppclasses})
   IF(KWSYS_USE_${cpp})
@@ -757,6 +758,10 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
       TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ${CMAKE_DL_LIBS})
     ENDIF(UNIX)
   ENDIF(KWSYS_USE_DynamicLoader)
+  
+  IF(KWSYS_USE_SystemInformation AND WIN32)
+    TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ws2_32)
+  ENDIF(KWSYS_USE_SystemInformation AND WIN32)
 
   # Apply user-defined target properties to the library.
   IF(KWSYS_PROPERTIES_CXX)
@@ -887,6 +892,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       testRegistry
       testIOS
       testSystemTools
+      testSystemInformation
       testCommandLineArguments
       testCommandLineArguments1
       )
@@ -901,7 +907,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       )
     ADD_EXECUTABLE(${KWSYS_NAMESPACE}TestsCxx ${KWSYS_CXX_TEST_SRCS})
     TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE}TestsCxx ${KWSYS_NAMESPACE})
-
     SET(TEST_SYSTEMTOOLS_BIN_FILE
       "${CMAKE_CURRENT_SOURCE_DIR}/testSystemTools.bin")
     SET(TEST_SYSTEMTOOLS_SRC_FILE
