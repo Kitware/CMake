@@ -70,6 +70,7 @@ struct cmDependsFortranFile
 struct cmDependsFortranParser_s
 {
   cmDependsFortranParser_s(cmDependsFortran* self,
+                           std::set<std::string>& ppDefines,
                            cmDependsFortranSourceInfo& info);
   ~cmDependsFortranParser_s();
 
@@ -89,9 +90,9 @@ struct cmDependsFortranParser_s
   bool InInterface;
 
   int OldStartcond;
-  bool InPPFalseBranch;
-  std::vector<bool> SkipToEnd;
-  int StepI;
+  std::set<std::string> PPDefinitions;
+  std::size_t InPPFalseBranch;
+  std::stack<bool> SkipToEnd;
 
   // Information about the parsed source.
   cmDependsFortranSourceInfo& Info;
@@ -130,14 +131,39 @@ public:
 
 //----------------------------------------------------------------------------
 cmDependsFortran::cmDependsFortran():
-  IncludePath(0), Internal(0)
+  IncludePath(0), PPDefinitions(0), Internal(0)
 {
 }
 
 //----------------------------------------------------------------------------
-cmDependsFortran::cmDependsFortran(std::vector<std::string> const& includes):
-  IncludePath(&includes), Internal(new cmDependsFortranInternals)
+cmDependsFortran
+::cmDependsFortran(std::vector<std::string> const& includes,
+                   std::vector<std::string> const& definitions):
+  IncludePath(&includes),
+  Internal(new cmDependsFortranInternals)
 {
+  // translate i.e. -DFOO=BAR to FOO and add it to the list of defined
+  // preprocessor symbols
+  std::string def;
+  for(std::vector<std::string>::const_iterator
+      it = definitions.begin(); it != definitions.end(); ++it)
+    {
+    std::size_t match = it->find("-D");
+    if(match != std::string::npos)
+      {
+      std::size_t assignment = it->find("=");
+      if(assignment != std::string::npos)
+        {
+        std::size_t length = assignment - (match+2);
+        def = it->substr(match+2, length);
+        }
+      else
+        {
+        def = it->substr(match+2);
+        }
+      this->PPDefinitions.push_back(def);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -171,8 +197,13 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
   cmDependsFortranSourceInfo& info =
     this->Internal->CreateObjectInfo(obj, src);
 
-  // Create the parser object.
-  cmDependsFortranParser parser(this, info);
+  // Make a copy of the macros defined via ADD_DEFINITIONS
+  std::set<std::string> ppDefines(this->PPDefinitions.begin(),
+                                  this->PPDefinitions.end());
+
+  // Create the parser object. The constructor takes ppMacro and info per
+  // reference, so we may look into the resulting objects later.
+  cmDependsFortranParser parser(this, ppDefines, info);
 
   // Push on the starting file.
   cmDependsFortranParser_FilePush(&parser, src);
@@ -882,10 +913,12 @@ bool cmDependsFortran::FindIncludeFile(const char* dir,
 //----------------------------------------------------------------------------
 cmDependsFortranParser_s
 ::cmDependsFortranParser_s(cmDependsFortran* self,
+                           std::set<std::string>& ppDefines,
                            cmDependsFortranSourceInfo& info):
-  Self(self), Info(info)
+  Self(self), PPDefinitions(ppDefines), Info(info)
 {
   this->InInterface = 0;
+  this->InPPFalseBranch = 0;
 
   // Initialize the lexical scanner.
   cmDependsFortran_yylex_init(&this->Scanner);
@@ -986,6 +1019,11 @@ void cmDependsFortranParser_StringAppend(cmDependsFortranParser* parser,
 void cmDependsFortranParser_SetInInterface(cmDependsFortranParser* parser,
                                            bool in)
 {
+  if(parser->InPPFalseBranch)
+    {
+    return;
+    }
+
   parser->InInterface = in;
 }
 
@@ -1020,13 +1058,21 @@ void cmDependsFortranParser_Error(cmDependsFortranParser*, const char*)
 void cmDependsFortranParser_RuleUse(cmDependsFortranParser* parser,
                                     const char* name)
 {
-  parser->Info.Requires.insert(cmSystemTools::LowerCase(name) );
+  if(!parser->InPPFalseBranch)
+    {
+    parser->Info.Requires.insert(cmSystemTools::LowerCase(name) );
+    }
 }
 
 //----------------------------------------------------------------------------
 void cmDependsFortranParser_RuleInclude(cmDependsFortranParser* parser,
                                         const char* name)
 {
+  if(parser->InPPFalseBranch)
+    {
+    return;
+    }
+
   // If processing an include statement there must be an open file.
   assert(!parser->FileStack.empty());
 
@@ -1053,48 +1099,163 @@ void cmDependsFortranParser_RuleInclude(cmDependsFortranParser* parser,
 void cmDependsFortranParser_RuleModule(cmDependsFortranParser* parser,
                                        const char* name)
 {
-  if(!parser->InInterface )
+  if(!parser->InPPFalseBranch && !parser->InInterface)
     {
     parser->Info.Provides.insert(cmSystemTools::LowerCase(name));
     }
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleDefine(cmDependsFortranParser*, const char*)
+void cmDependsFortranParser_RuleDefine(cmDependsFortranParser* parser,
+                                       const char* macro)
 {
+  if(!parser->InPPFalseBranch)
+    {
+    parser->PPDefinitions.insert(macro);
+    }
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleUndef(cmDependsFortranParser*, const char*)
+void cmDependsFortranParser_RuleUndef(cmDependsFortranParser* parser,
+                                      const char* macro)
 {
+  if(!parser->InPPFalseBranch)
+    {
+    std::set<std::string>::iterator match;
+    match = parser->PPDefinitions.find(macro);
+    if(match != parser->PPDefinitions.end())
+      {
+      parser->PPDefinitions.erase(match);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleIfdef(cmDependsFortranParser*, const char*)
+void cmDependsFortranParser_RuleIfdef(cmDependsFortranParser* parser,
+                                      const char* macro)
 {
+  // A new PP branch has been opened
+  parser->SkipToEnd.push(false);
+
+  if (parser->InPPFalseBranch)
+    {
+    parser->InPPFalseBranch++;
+    }
+  else if(parser->PPDefinitions.find(macro) == parser->PPDefinitions.end())
+    {
+    parser->InPPFalseBranch=1;
+    }
+  else
+    {
+    parser->SkipToEnd.top() = true;
+    }
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleIfndef(cmDependsFortranParser*, const char*)
+void cmDependsFortranParser_RuleIfndef(cmDependsFortranParser* parser,
+  const char* macro)
 {
+  // A new PP branch has been opened
+  parser->SkipToEnd.push(false);
+
+  if (parser->InPPFalseBranch)
+    {
+    parser->InPPFalseBranch++;
+    }
+  else if(parser->PPDefinitions.find(macro) != parser->PPDefinitions.end())
+    {
+    parser->InPPFalseBranch = 1;
+    }
+  else
+    {
+    // ignore other branches
+    parser->SkipToEnd.top() = true;
+    }
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleIf(cmDependsFortranParser*)
+void cmDependsFortranParser_RuleIf(cmDependsFortranParser* parser)
 {
+  /* Note: The current parser is _not_ able to get statements like
+   *   #if 0
+   *   #if 1
+   *   #if MYSMBOL
+   *   #if defined(MYSYMBOL)
+   *   #if defined(MYSYMBOL) && ...
+   * right.  The same for #elif.  Thus in
+   *   #if SYMBOL_1
+   *     ..
+   *   #elif SYMBOL_2
+   *     ...
+   *     ...
+   *   #elif SYMBOL_N
+   *     ..
+   *   #else
+   *     ..
+   *   #endif
+   * _all_ N+1 branches are considered.  If you got something like this
+   *   #if defined(MYSYMBOL)
+   *   #if !defined(MYSYMBOL)
+   * use
+   *   #ifdef MYSYMBOL
+   *   #ifndef MYSYMBOL
+   * instead.
+   */
+
+  // A new PP branch has been opened
+  // Never skip!  See note above.
+  parser->SkipToEnd.push(false);
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleElif(cmDependsFortranParser*)
+void cmDependsFortranParser_RuleElif(cmDependsFortranParser* parser)
 {
+  /* Note: There are parser limitations.  See the note at
+   * cmDependsFortranParser_RuleIf(..)
+   */
+
+  // Allways taken unless an #ifdef or #ifndef-branch has been taken
+  // already.  If the second condition isn't meet already
+  // (parser->InPPFalseBranch == 0) correct it.
+  if(parser->SkipToEnd.top() && !parser->InPPFalseBranch)
+    {
+    parser->InPPFalseBranch = 1;
+    }
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleElse(cmDependsFortranParser*)
+void cmDependsFortranParser_RuleElse(cmDependsFortranParser* parser)
 {
+  // if the parent branch is false do nothing!
+  if(parser->InPPFalseBranch > 1)
+    {
+    return;
+    }
+
+  // parser->InPPFalseBranch is either 0 or 1.  We change it denpending on
+  // parser->SkipToEnd.top()
+  if(parser->SkipToEnd.top())
+    {
+    parser->InPPFalseBranch = 1;
+    }
+  else
+    {
+    parser->InPPFalseBranch = 0;
+    }
 }
 
 //----------------------------------------------------------------------------
-void cmDependsFortranParser_RuleEndif(cmDependsFortranParser*)
+void cmDependsFortranParser_RuleEndif(cmDependsFortranParser* parser)
 {
+  if(!parser->SkipToEnd.empty())
+    {
+    parser->SkipToEnd.pop();
+    }
+
+  // #endif doesn't know if there was a "#else" in before, so it
+  // always decreases InPPFalseBranch
+  if(parser->InPPFalseBranch)
+    {
+    parser->InPPFalseBranch--;
+    }
 }

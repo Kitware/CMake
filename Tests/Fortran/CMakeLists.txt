@@ -23,6 +23,9 @@ IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     in_interface/main.f90
     in_interface/module.f90)
 
+  ADD_DEFINITIONS(-DFOO -DBAR=1)
+  ADD_EXECUTABLE(test_preprocess test_preprocess.F90)
+
   SET(TEST_MODULE_DEPENDS 1)
 ENDIF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 

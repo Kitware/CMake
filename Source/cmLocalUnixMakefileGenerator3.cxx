@@ -1485,7 +1485,13 @@ cmLocalUnixMakefileGenerator3
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")
       {
-      scanner = new cmDependsFortran(includes);
+      std::vector<std::string> defines;
+      if(const char* c_defines = mf->GetDefinition("CMAKE_DEFINITIONS"))
+        {
+        cmSystemTools::ExpandListArgument(c_defines, defines);
+        }
+
+      scanner = new cmDependsFortran(includes, defines);
       }
     else if(lang == "Java")
       {
@@ -1845,6 +1851,14 @@ void cmLocalUnixMakefileGenerator3
         << cid << "\")\n";
       }
     }
+
+  cmakefileStream
+    << "\n"
+    << "# Preprocessor definitions for this directory.\n"
+    << "SET(CMAKE_DEFINITIONS\n"
+    << "  " << this->Makefile->GetDefineFlags() << "\n"
+    << "  )\n";
+
 }
 
 //----------------------------------------------------------------------------
