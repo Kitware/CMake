@@ -238,18 +238,9 @@ cmInstallTargetGenerator
       {
       // Compute the build tree location of the framework directory
       std::string from1 = fromDirConfig;
-      if(config && *config)
-        {
-        from1 += "/";
-        from1 += targetName;
-        from1 += ".framework";
-        }
-      else
-        {
-        // Remove trailing slashes... so that from1 ends with ".framework":
-        //
-        cmSystemTools::ConvertToUnixSlashes(from1);
-        }
+      // Remove trailing slashes... so that from1 ends with ".framework":
+      //
+      cmSystemTools::ConvertToUnixSlashes(from1);
       files.push_back(from1);
 
       type = cmTarget::INSTALL_DIRECTORY;

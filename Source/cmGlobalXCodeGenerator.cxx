@@ -294,11 +294,6 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     }
   cmCustomCommandLines commandLines;
   commandLines.push_back(makecommand);
-  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", true,
-                        no_working_directory,
-                        no_depends,
-                        commandLines);
-
   // Add Re-Run CMake rules
   this->CreateReRunCMakeFile(root);
 
@@ -316,13 +311,22 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
       {
       cmTarget& target = l->second;
-      // make all exe, shared libs and modules depend
-      // on the XCODE_DEPEND_HELPER target
+      // make all exe, shared libs and modules 
+      // run the depend check makefile as a post build rule
+      // this will make sure that when the next target is built
+      // things are up-to-date
       if((target.GetType() == cmTarget::EXECUTABLE ||
+          target.GetType() == cmTarget::STATIC_LIBRARY ||
           target.GetType() == cmTarget::SHARED_LIBRARY ||
           target.GetType() == cmTarget::MODULE_LIBRARY))
         {
-        target.AddUtility("XCODE_DEPEND_HELPER");
+        lg->GetMakefile()->AddCustomCommandToTarget(target.GetName(),
+                                                    no_depends,
+                                                    commandLines,
+                                                    cmTarget::POST_BUILD,
+                                                    "Depend check for xcode",
+                                                    dir.c_str());
+                                                    
         }
       if(!target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
@@ -2849,6 +2853,7 @@ cmGlobalXCodeGenerator
         newDir += "/";
         newDir += config;
         dir = newDir;
+        dir += framework;
         }
       else
         {
