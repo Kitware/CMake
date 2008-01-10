@@ -3,46 +3,54 @@
 #  SWIG_FOUND - set to true if SWIG is found
 #  SWIG_DIR - the directory where swig is installed
 #  SWIG_EXECUTABLE - the path to the swig executable
+#  SWIG_VERSION   - the version number of the swig executable
+#
+# All informations are collected from the SWIG_EXECUTABLE so the
+# version to be found can be changed from the command line by
+# means of setting SWIG_EXECUTABLE
+#
 
-SET(SWIG_FOUND FOOBAR)
-FIND_PATH(SWIG_DIR
-  SWIGConfig.cmake
-  /usr/share/swig1.3
-  /usr/lib/swig1.3
-  /usr/local/share/swig1.3)
-FIND_PATH(SWIG_DIR
-  swig.swg
-  /usr/share/swig1.3
-  /usr/lib/swig1.3
-  /usr/local/share/swig1.3)
-IF(EXISTS ${SWIG_DIR})
-  IF("x${SWIG_DIR}x" STREQUAL "x${CMAKE_ROOT}/Modulesx")
-    MESSAGE("SWIG_DIR should not be modules subdirectory of CMake")
-  ENDIF("x${SWIG_DIR}x" STREQUAL "x${CMAKE_ROOT}/Modulesx")
+SET(SWIG_FOUND FALSE)
 
-  IF(EXISTS ${SWIG_DIR}/SWIGConfig.cmake)
-    INCLUDE(${SWIG_DIR}/SWIGConfig.cmake)
-    SET(SWIG_FOUND 1)
-  ELSE(EXISTS ${SWIG_DIR}/SWIGConfig.cmake)
-    FIND_PROGRAM(SWIG_EXECUTABLE
-      NAMES swig-1.3 swig
-      PATHS ${SWIG_DIR} ${SWIG_DIR}/.. ${SWIG_DIR}/../../bin /usr/bin /usr/local/bin )
-    SET(SWIG_USE_FILE ${CMAKE_ROOT}/Modules/UseSWIG.cmake)
-  ENDIF(EXISTS ${SWIG_DIR}/SWIGConfig.cmake)
-ENDIF(EXISTS ${SWIG_DIR})
+FIND_PROGRAM(SWIG_EXECUTABLE swig)
 
-IF("x${SWIG_FOUND}x" STREQUAL "xFOOBARx")
-  SET(SWIG_FOUND 0)
-  IF(EXISTS ${SWIG_DIR})
-    IF(EXISTS ${SWIG_USE_FILE})
-      IF(EXISTS ${SWIG_EXECUTABLE})
-        SET(SWIG_FOUND 1)
-      ENDIF(EXISTS ${SWIG_EXECUTABLE})
-    ENDIF(EXISTS ${SWIG_USE_FILE})
-  ENDIF(EXISTS ${SWIG_DIR})
-  IF(NOT ${SWIG_FOUND})
-    IF(${SWIG_FIND_REQUIRED})
-      MESSAGE(FATAL_ERROR "Swig was not found on the system. Please specify the location of Swig.")
-    ENDIF(${SWIG_FIND_REQUIRED})
-  ENDIF(NOT ${SWIG_FOUND})
-ENDIF("x${SWIG_FOUND}x" STREQUAL "xFOOBARx")
+IF(SWIG_EXECUTABLE)
+  EXECUTE_PROCESS(COMMAND ${SWIG_EXECUTABLE} -swiglib
+    OUTPUT_VARIABLE SWIG_swiglib_output
+    ERROR_VARIABLE SWIG_swiglib_error
+    RESULT_VARIABLE SWIG_swiglib_result)
+
+  IF(SWIG_swiglib_result)
+    MESSAGE(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -swiglib\" failed with output:\n${SWIG_swiglib_error}")
+  ELSE(SWIG_swiglib_result)
+    STRING(REGEX REPLACE "[\n\r]+" ";" SWIG_swiglib_output ${SWIG_swiglib_output})
+    # force the path to be computed each time in case SWIG_EXECUTABLE has changed.
+    SET(SWIG_DIR SWIG_DIR-NOTFOUND)
+    FIND_PATH(SWIG_DIR swig.swg PATHS ${SWIG_swiglib_output})
+    IF(SWIG_DIR)
+      SET(SWIG_FOUND 1)
+      SET(SWIG_USE_FILE ${CMAKE_ROOT}/Modules/UseSWIG.cmake)
+      EXECUTE_PROCESS(COMMAND ${SWIG_EXECUTABLE} -version
+        OUTPUT_VARIABLE SWIG_version_output
+        ERROR_VARIABLE SWIG_version_output
+        RESULT_VARIABLE SWIG_version_result)
+      IF(SWIG_version_result)
+        MESSAGE(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -version\" failed with output:\n${SWIG_version_output}")
+      ELSE(SWIG_version_result)
+        STRING(REGEX REPLACE ".*SWIG Version[^0-9.]*\([0-9.]+\).*" "\\1"
+          SWIG_version_output "${SWIG_version_output}")
+        SET(SWIG_VERSION ${SWIG_version_output} CACHE STRING "Swig version" FORCE)
+      ENDIF(SWIG_version_result)
+    ENDIF(SWIG_DIR)
+  ENDIF(SWIG_swiglib_result)
+ENDIF(SWIG_EXECUTABLE)
+
+IF(NOT SWIG_FOUND)
+  IF(NOT SWIG_FIND_QUIETLY)
+    IF(SWIG_FIND_REQUIRED)
+      MESSAGE(FATAL_ERROR "SWIG was not found. Please specify Swig executable location")
+    ELSE(SWIG_FIND_REQUIRED)
+      MESSAGE(STATUS "SWIG was not found. Please specify Swig executable location")
+    ENDIF(SWIG_FIND_REQUIRED)
+  ENDIF(NOT SWIG_FIND_QUIETLY)
+ENDIF(NOT SWIG_FOUND)
