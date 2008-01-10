@@ -87,6 +87,7 @@ ENDIF(WIN32)
 SET(SUFFIX_FOR_PATH
  boost-1_34_1
  boost-1_34_0
+ boost-1_34
  boost-1_33_1
  boost-1_33_0
 )
