@@ -54,7 +54,7 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("CLEAN_DIRECT_OUTPUT", cmProperty::TARGET,
-     "Do not delete other varients of this target.",
+     "Do not delete other variants of this target.",
      "When a library is built CMake by default generates code to remove "
      "any existing library using all possible names.  This is needed "
      "to support libraries that switch between STATIC and SHARED by "
@@ -65,7 +65,7 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("COMPILE_FLAGS", cmProperty::TARGET,
-     "Additional flags to yse when compiling this target's sources.",
+     "Additional flags to use when compiling this target's sources.",
      "The COMPILE_FLAGS property sets additional compiler flags used "
      "to build sources within the target.  It may also be used to pass "
      "additional preprocessor definitions.");
@@ -84,7 +84,7 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("DEBUG_POSTFIX", cmProperty::TARGET,
      "A postfix that will be applied to this target when build debug.",
-     "A property on a target that sepcifies a postfix to add to the "
+     "A property on a target that specifies a postfix to add to the "
      "target name when built in debug mode. For example foo.dll "
      "versus fooD.dll");
 
@@ -175,7 +175,7 @@ void cmTarget::DefineProperties(cmake *cm)
     ("LOCATION", cmProperty::TARGET,
      "Where a target will be written on disk.",
      "A read only property on a target that indicates where that target "
-     "will be written. For libraries and execuatables this will be where "
+     "will be written. For libraries and executables this will be where "
      "the file is written on disk. This property is computed based on a "
      "number of other settings.");
 

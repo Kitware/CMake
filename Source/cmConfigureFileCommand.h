@@ -61,7 +61,7 @@ public:
       return
         "  configure_file(InputFile OutputFile\n"
         "                 [COPYONLY] [ESCAPE_QUOTES] [@ONLY])\n"
-        "The Input and Ouput files have to have full paths.  "
+        "The Input and Output files have to have full paths.  "
         "This command replaces any variables in the input file referenced as "
         "${VAR} or @VAR@ with their values as determined by CMake.  If a "
         "variable is not defined, it will be replaced with nothing.  "

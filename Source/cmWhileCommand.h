@@ -103,7 +103,7 @@ public:
       "All commands between while and the matching endwhile are recorded "
       "without being invoked.  Once the endwhile is evaluated, the "
       "recorded list of commands is invoked as long as the condition "
-      "is true. The condition is evaulated using the same logic as the "
+      "is true. The condition is evaluated using the same logic as the "
       "if command.";
     }
   

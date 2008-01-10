@@ -331,10 +331,10 @@ void cmSourceFile::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("ABSTRACT", cmProperty::SOURCE_FILE, 
      "Is this source file an abstract class.",
-     "A property ona source file that indicates if the source file "
+     "A property on a source file that indicates if the source file "
      "represents a class that is abstract. This only makes sense for "
      "languages that have a notion of an abstract class and it is "
-     "only used by somw tools that wrap classes into other languages.");
+     "only used by some tools that wrap classes into other languages.");
 
   cm->DefineProperty
     ("COMPILE_FLAGS", cmProperty::SOURCE_FILE, 
@@ -366,7 +366,7 @@ void cmSourceFile::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("HEADER_FILE_ONLY", cmProperty::SOURCE_FILE, 
      "Is this source file only a header file.",
-     "A property ona source file that indicates if the source file "
+     "A property on a source file that indicates if the source file "
      "is a header file with no associated implementation. This is "
      "set automatically based on the file extension and is used by "
      "CMake to determine is certain dependency information should be "
@@ -374,7 +374,7 @@ void cmSourceFile::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("KEEP_EXTENSION", cmProperty::SOURCE_FILE, 
-     "Make th eoutput file have the same extension as the source file.",
+     "Make the output file have the same extension as the source file.",
      "If this property is set then the file extension of the output "
      "file will be the same as that of the source file. Normally "
      "the output file extension is computed based on the language "

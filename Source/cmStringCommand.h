@@ -104,7 +104,7 @@ public:
       "subexpressions of the match using \\1, \\2, ..., \\9.  Note that "
       "two backslashes (\\\\1) are required in CMake code to get a "
       "backslash through argument parsing.\n"
-      "REPLACE will replace all occurences of match_string in the input with "
+      "REPLACE will replace all occurrences of match_string in the input with "
       "replace_string and store the result in the output.\n"
       "COMPARE EQUAL/NOTEQUAL/LESS/GREATER will compare the strings and "
       "store true or false in the output variable.\n"

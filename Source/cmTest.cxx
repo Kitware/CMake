@@ -98,14 +98,14 @@ void cmTest::DefineProperties(cmake *cm)
   // define properties
   cm->DefineProperty
     ("FAIL_REGULAR_EXPRESSION", cmProperty::TEST, 
-     "If the output matches this regular expression tes test will fail.",
+     "If the output matches this regular expression the test will fail.",
      "If set, if the output matches one of "
      "specified regular expressions, the test will fail."
      "For example: PASS_REGULAR_EXPRESSION \"[^a-z]Error;ERROR;Failed\"");
 
   cm->DefineProperty
     ("MEASUREMENT", cmProperty::TEST, 
-     "Specify a DART meansurement and value to be reported for a test.",
+     "Specify a DART measurement and value to be reported for a test.",
      "If set to a name then that name will be reported to DART as a "
      "named measurement with a value of 1. You may also specify a value "
      "by setting MEASUREMENT to \"measurement=value\".");
@@ -120,11 +120,11 @@ void cmTest::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("TIMEOUT", cmProperty::TEST, 
      "How many seconds to allow for this test.",
-     "This property if set will limit a test to nto take more than "
+     "This property if set will limit a test to not take more than "
      "the specified number of seconds to run. If it exceeds that the "
      "test process will be killed and ctest will move to the next test. "
      "This setting takes precedence over DART_TESTING_TIMEOUT and "
-     "CTEST_TESTING_TIMOUT.");
+     "CTEST_TESTING_TIMEOUT.");
 
   cm->DefineProperty
     ("WILL_FAIL", cmProperty::TEST, 

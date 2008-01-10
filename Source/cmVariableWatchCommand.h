@@ -76,7 +76,7 @@ public:
     return
       "  variable_watch(<variable name> [<command to execute>])\n"
       "If the specified variable changes, the message will be printed about "
-      "the variable being changed. If the command is spceified, the command "
+      "the variable being changed. If the command is specified, the command "
       "will be executed. The command will receive the following arguments:"
       " COMMAND(<variable> <access> <value> <current list file> <stack>)";
     }

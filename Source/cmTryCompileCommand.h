@@ -74,7 +74,7 @@ public:
       "              [COPY_FILE <filename> )\n"
       "Try compiling a srcfile.  In this case, the user need only supply a "
       "source file.  CMake will create the appropriate CMakeLists.txt file "
-      "to build the source. If COPY_FILE is used, the compiled file will be"
+      "to build the source. If COPY_FILE is used, the compiled file will be "
       "copied to the given file.\n"
       "In this version all files in bindir/CMakeFiles/CMakeTmp, "
       "will be cleaned automatically, for debugging a --debug-trycompile can "

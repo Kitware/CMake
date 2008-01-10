@@ -84,7 +84,7 @@ static const char *cmPropertiesDocumentationDescription[][3] =
    "This is the documentation for the properties supported by CMake. "
    "Properties can have different scopes. They can either be assigned to a "
    "source file, a directory, a target or globally to CMake. By modifying the "
-   "values of properties the behaviour of the buildsystem can be customized.",
+   "values of properties the behaviour of the build system can be customized.",
    0},
   {0,0,0}
 };

@@ -44,7 +44,7 @@ cmFindBase::cmFindBase()
     "is sufficient in many cases.  It is the same "
     "as FIND_XXX(<VAR> name1 PATHS path2 path2 ...)\n"
     "   FIND_XXX(\n"
-    "             <VAR> \n"
+    "             <VAR>\n"
     "             name | NAMES name1 [name2 ...]\n"
     "             PATHS path1 [path2 ... ENV var]\n"
     "             [PATH_SUFFIXES suffix1 [suffix2 ...]]\n"
