@@ -91,7 +91,7 @@ struct cmDependsFortranParser_s
 
   int OldStartcond;
   std::set<std::string> PPDefinitions;
-  std::size_t InPPFalseBranch;
+  size_t InPPFalseBranch;
   std::stack<bool> SkipToEnd;
 
   // Information about the parsed source.
@@ -148,13 +148,13 @@ cmDependsFortran
   for(std::vector<std::string>::const_iterator
       it = definitions.begin(); it != definitions.end(); ++it)
     {
-    std::size_t match = it->find("-D");
+    std::string::size_type match = it->find("-D");
     if(match != std::string::npos)
       {
-      std::size_t assignment = it->find("=");
+      std::string::size_type assignment = it->find("=");
       if(assignment != std::string::npos)
         {
-        std::size_t length = assignment - (match+2);
+        std::string::size_type length = assignment - (match+2);
         def = it->substr(match+2, length);
         }
       else
