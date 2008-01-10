@@ -11,7 +11,7 @@ PROGRAM CMakeFortranCompilerId
 !     This compiler is either not known or is too old to define an
 !     identification macro.  Try to identify the platform and guess that
 !     it is the native compiler.
-#elif defined(_AIX) || defined(__AIX) || defined(__AIX__) || defined(__aix) || defined(__aix__)
+#elif defined(_AIX) || defined(__AIX) || defined(__AIX__) || defined(__aix) || defined(__aix__) || defined ( __IBM__ ) || defined ( __IBMC__ )
    PRINT *, 'INFO:compiler[VisualAge]'
 #elif defined(__sgi) || defined(__sgi__) || defined(_SGI)
    PRINT *, 'INFO:compiler[MIPSpro]'
