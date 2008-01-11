@@ -270,7 +270,7 @@ public:
                                   unsigned int minor,
                                   unsigned int patch = 0xFFu);
 protected:
-
+  void FixDefineFlags(std::string& defineFlags, const char* lang);
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,
                                const char* default_comment = "");
