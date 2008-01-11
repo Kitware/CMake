@@ -79,6 +79,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   switch(type)
     {
     case cmTarget::SHARED_LIBRARY:
+    case cmTarget::MODULE_LIBRARY:
       {
       // Add shared library installation properties if this platform
       // supports them.
@@ -146,8 +147,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
       }
       break;
     case cmTarget::STATIC_LIBRARY:
-    case cmTarget::MODULE_LIBRARY:
-      // Nothing special for modules or static libraries.
+      // Nothing special for static libraries.
       break;
     default:
       break;

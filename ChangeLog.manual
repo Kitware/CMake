@@ -1,3 +1,6 @@
+Changes in CMake 2.4.8 RC 12
+* Fix vs 9 so cmake can find it
+* Fix bug 6230 MODULE install with versions was broken
 Changes in CMake 2.4.8 RC 11
 * Remove ability to select install location for mac (it does not work)
 Changes in CMake 2.4.8 RC 10
