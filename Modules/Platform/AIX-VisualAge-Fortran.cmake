@@ -1,1 +1,1 @@
-include(Platforms/xlf)
+include(Platform/xlf)
