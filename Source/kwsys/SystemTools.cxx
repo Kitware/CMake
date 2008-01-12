@@ -3081,9 +3081,9 @@ void SystemTools::SplitPath(const char* p,
     if(root.size() == 1)
       {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-      if(const char* h = getenv("USERPROFILE"))
+      if(const char* p = getenv("USERPROFILE"))
         {
-        homedir = h;
+        homedir = p;
         }
       else
 #endif
