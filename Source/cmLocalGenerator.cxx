@@ -1184,7 +1184,6 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     flags[flags.size()-1] = ' ';
     }
   std::string defineFlags = this->Makefile->GetDefineFlags();
-  std::cout << defineFlags << "\n";
   this->FixDefineFlags(defineFlags, lang);
   flags += defineFlags;
   this->LanguageToIncludeFlags[lang] = flags;
@@ -1228,8 +1227,6 @@ void cmLocalGenerator::FixDefineFlags(std::string& flags,
   flags = fixedFlags;
 }
 
-                                             
-                                             
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              bool filter_system_dirs)
