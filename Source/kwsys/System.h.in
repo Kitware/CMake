@@ -34,6 +34,7 @@
 #define kwsysSystem_Shell_Flag_EchoWindows           kwsys_ns(System_Shell_Flag_EchoWindows)
 #define kwsysSystem_Shell_Flag_WatcomWMake           kwsys_ns(System_Shell_Flag_WatcomWMake)
 #define kwsysSystem_Shell_Flag_MinGWMake             kwsys_ns(System_Shell_Flag_MinGWMake)
+#define kwsysSystem_Shell_Flag_NMake                 kwsys_ns(System_Shell_Flag_NMake)
 #define kwsysSystem_Shell_Flag_AllowMakeVariables    kwsys_ns(System_Shell_Flag_AllowMakeVariables)
 
 #if defined(__cplusplus)
@@ -90,6 +91,9 @@ enum kwsysSystem_Shell_Flag_e
   /** The target shell is in a MinGW Make makefile.  */
   kwsysSystem_Shell_Flag_MinGWMake          = (1<<4),
 
+  /** The target shell is in a NMake makefile.  */
+  kwsysSystem_Shell_Flag_NMake              = (1<<6),
+
   /** Make variable reference syntax $(MAKEVAR) should not be escaped
       to allow a build tool to replace it.  Replacement values
       containing spaces, quotes, backslashes, or other
@@ -117,6 +121,7 @@ enum kwsysSystem_Shell_Flag_e
 # undef kwsysSystem_Shell_Flag_EchoWindows
 # undef kwsysSystem_Shell_Flag_WatcomWMake
 # undef kwsysSystem_Shell_Flag_MinGWMake
+# undef kwsysSystem_Shell_Flag_NMake
 # undef kwsysSystem_Shell_Flag_AllowMakeVariables
 #endif
 

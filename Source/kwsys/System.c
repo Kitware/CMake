@@ -315,11 +315,21 @@ static int kwsysSystem_Shell__GetArgumentSize(const char* in,
       {
       if((flags & kwsysSystem_Shell_Flag_VSIDE) ||
          ((flags & kwsysSystem_Shell_Flag_Make) &&
-          (flags & kwsysSystem_Shell_Flag_MinGWMake)))
+          ((flags & kwsysSystem_Shell_Flag_MinGWMake) ||
+           (flags & kwsysSystem_Shell_Flag_NMake))))
         {
-        /* In the VS IDE or MinGW make a percent is written %% so we
-           need one extra characters.  */
+        /* In the VS IDE, NMake, or MinGW make a percent is written %%
+           so we need one extra characters.  */
         size += 1;
+        }
+      }
+    else if(*c == ';')
+      {
+      if(flags & kwsysSystem_Shell_Flag_VSIDE)
+        {
+        /* In a VS IDE a semicolon is written ";" so we need two extra
+           characters.  */
+        size += 2;
         }
       }
     }
@@ -471,9 +481,10 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
       {
       if((flags & kwsysSystem_Shell_Flag_VSIDE) ||
          ((flags & kwsysSystem_Shell_Flag_Make) &&
-          (flags & kwsysSystem_Shell_Flag_MinGWMake)))
+          ((flags & kwsysSystem_Shell_Flag_MinGWMake) ||
+           (flags & kwsysSystem_Shell_Flag_NMake))))
         {
-        /* In the VS IDE or MinGW make a percent is written %%.  */
+        /* In the VS IDE, NMake, or MinGW make a percent is written %%.  */
         *out++ = '%';
         *out++ = '%';
         }
@@ -481,6 +492,25 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
         {
         /* Otherwise a percent is written just %. */
         *out++ = '%';
+        }
+      }
+    else if(*c == ';')
+      {
+      if(flags & kwsysSystem_Shell_Flag_VSIDE)
+        {
+        /* In a VS IDE a semicolon is written ";".  If this is written
+           in an un-quoted argument it starts a quoted segment,
+           inserts the ; and ends the segment.  If it is written in a
+           quoted argument it ends quoting, inserts the ; and restarts
+           quoting.  Either way the ; is isolated.  */
+        *out++ = '"';
+        *out++ = ';';
+        *out++ = '"';
+        }
+      else
+        {
+        /* Otherwise a semicolon is written just ;. */
+        *out++ = ';';
         }
       }
     else

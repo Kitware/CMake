@@ -76,7 +76,8 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       {
       std::vector<std::string> no_depends;
       cmCustomCommandLine force_command;
-      force_command.push_back(";");
+      force_command.push_back("cd");
+      force_command.push_back(".");
       cmCustomCommandLines force_commands;
       force_commands.push_back(force_command);
       const char* no_main_dependency = 0;

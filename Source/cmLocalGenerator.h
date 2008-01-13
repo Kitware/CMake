@@ -341,6 +341,7 @@ protected:
   bool WindowsVSIDE;
   bool WatcomWMake;
   bool MinGWMake;
+  bool NMake;
   bool ForceUnixPath;
   bool MSYSShell;
   bool UseRelativePaths;

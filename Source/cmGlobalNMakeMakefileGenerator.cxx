@@ -47,6 +47,7 @@ cmLocalGenerator *cmGlobalNMakeMakefileGenerator::CreateLocalGenerator()
   lg->SetGlobalGenerator(this);
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(true);
+  lg->SetNMake(true);
   lg->SetUnixCD(false);
   return lg;
 }
