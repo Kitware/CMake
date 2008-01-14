@@ -2920,7 +2920,7 @@ void cmGlobalXCodeGenerator::AppendDefines(std::string& defs,
   // We escape everything as follows:
   //   - Place each definition in single quotes ''
   //   - Escape a single quote as \\'
-  //   - Escape a backslash as \\\\
+  //   - Escape a backslash as \\\\ since it itself is an escape
   // Note that in the code below we need one more level of escapes for
   // C string syntax in this source file.
   const char* sep = defs.empty()? "" : " ";
