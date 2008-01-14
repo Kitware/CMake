@@ -346,6 +346,15 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       this->PrintDocumentationList(os,"Compatibility Commands");
       return true;
     case cmDocumentation::ModuleList: 
+      // find the modules first, print the custom module docs only if 
+      // any custom modules have been found actually, Alex
+      this->CreateCustomModulesSection();
+      this->CreateModulesSection();
+      if (this->AllSections.find("Custom CMake Modules")
+         != this->AllSections.end())
+        {
+        this->PrintDocumentationList(os,"Custom CMake Modules");
+        }
       this->PrintDocumentationList(os,"Modules");
       return true;
     case cmDocumentation::PropertyList: 
