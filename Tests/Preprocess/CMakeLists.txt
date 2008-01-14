@@ -16,13 +16,16 @@ if("${CMAKE_GENERATOR}" MATCHES "Make" AND MSVC)
   set(NMAKE 1)
 endif("${CMAKE_GENERATOR}" MATCHES "Make" AND MSVC)
 
-if(NOT BORLAND)
-  # Borland: ;
+if(NOT BORLAND AND NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
+  # Borland, VS70 IDE: ;
   # The Borland compiler will simply not accept a non-escaped semicolon
   # on the command line.  If it is escaped \; then the escape character
   # shows up in the preprocessing output too.
+  #
+  # The VS 7.0 IDE separates definitions on semicolons and commas with
+  # no regard for quotes.  Fortunately VS 7.1 and above are okay.
   set(SEMICOLON "\;")
-endif(NOT BORLAND)
+endif(NOT BORLAND AND NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
 
 if(NOT BORLAND AND NOT WATCOM)
   # Borland, WMake: multiple spaces
