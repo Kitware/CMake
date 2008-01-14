@@ -173,6 +173,9 @@ private:
                           const char* varNameSuffix,
                           const char* default_flags);
 
+  void AppendDefines(std::string& defs, const char* defines_list,
+                     bool dflag = false);
+
 protected:
   virtual const char* GetInstallTargetName()      { return "install"; }
   virtual const char* GetPackageTargetName()      { return "package"; }

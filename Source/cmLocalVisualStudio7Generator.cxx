@@ -384,7 +384,8 @@ public:
     Compiler,
     Linker
   };
-  cmLocalVisualStudio7GeneratorOptions(Tool tool,
+  cmLocalVisualStudio7GeneratorOptions(cmLocalVisualStudio7Generator* lg,
+                                       Tool tool,
                                        cmVS7FlagTable const* extraTable = 0);
 
   // Store options from command line flags.
@@ -398,6 +399,7 @@ public:
 
   // Store definitions and flags.
   void AddDefine(const std::string& define);
+  void AddDefines(const char* defines);
   void AddFlag(const char* flag, const char* value);
 
   // Check for specific options.
@@ -413,6 +415,8 @@ public:
                                const char* suffix);
 
 private:
+  cmLocalVisualStudio7Generator* LocalGenerator;
+
   // create a map of xml tags to the values they should have in the output
   // for example, "BufferSecurityCheck" = "TRUE"
   // first fill this table with the values for the configuration
@@ -423,7 +427,7 @@ private:
   std::map<cmStdString, cmStdString> FlagMap;
 
   // Preprocessor definitions.
-  std::vector<cmStdString> Defines;
+  std::vector<std::string> Defines;
 
   // Unrecognized flags that get no special handling.
   cmStdString FlagString;
@@ -516,14 +520,20 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     flags += targetFlags;
     }
 
+  std::string configUpper = cmSystemTools::UpperCase(configName);
+  std::string defPropName = configUpper;
+  defPropName += "_COMPILE_DEFINITIONS";
+
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Makefile->GetDefineFlags();
 
   // Construct a set of build options for this target.
-  Options targetOptions(Options::Compiler, this->ExtraFlagTable);
+  Options targetOptions(this, Options::Compiler, this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
+  targetOptions.AddDefines(target.GetProperty("COMPILE_DEFINITIONS"));
+  targetOptions.AddDefines(target.GetProperty(defPropName.c_str()));
   targetOptions.SetVerboseMakefile(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
 
@@ -703,7 +713,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
     }
-  Options linkOptions(Options::Linker);
+  Options linkOptions(this, Options::Linker);
   linkOptions.Parse(extraLinkOptions.c_str());
   switch(target.GetType())
     {
@@ -1027,6 +1037,135 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   this->WriteVCProjFooter(fout);
 }
 
+struct cmLVS7GFileConfig
+{
+  std::string ObjectName;
+  std::string CompileFlags;
+  std::string CompileDefs;
+  std::string CompileDefsConfig;
+  std::string AdditionalDeps;
+  bool ExcludedFromBuild;
+};
+
+class cmLocalVisualStudio7GeneratorFCInfo
+{
+public:
+  cmLocalVisualStudio7GeneratorFCInfo(cmLocalVisualStudio7Generator* lg,
+                                      cmTarget& target,
+                                      cmSourceFile const& sf,
+                                      std::vector<std::string>* configs,
+                                      std::string::size_type dir_len);
+  std::map<cmStdString, cmLVS7GFileConfig> FileConfigMap;
+};
+
+cmLocalVisualStudio7GeneratorFCInfo
+::cmLocalVisualStudio7GeneratorFCInfo(cmLocalVisualStudio7Generator* lg,
+                                      cmTarget& target,
+                                      cmSourceFile const& sf,
+                                      std::vector<std::string>* configs,
+                                      std::string::size_type dir_len)
+{
+  std::string objectName;
+  if(lg->NeedObjectName.find(&sf) != lg->NeedObjectName.end())
+    {
+    objectName = lg->GetObjectFileNameWithoutTarget(sf, dir_len);
+    }
+
+  // Compute per-source, per-config information.
+  for(std::vector<std::string>::iterator i = configs->begin();
+      i != configs->end(); ++i)
+    {
+    std::string configUpper = cmSystemTools::UpperCase(*i);
+    cmLVS7GFileConfig fc;
+    bool needfc = false;
+    if(!objectName.empty())
+      {
+      fc.ObjectName = objectName;
+      needfc = true;
+      }
+    if(const char* cflags = sf.GetProperty("COMPILE_FLAGS"))
+      {
+      fc.CompileFlags = cflags;
+      needfc = true;
+      }
+    if(const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS"))
+      {
+      fc.CompileDefs = cdefs;
+      needfc = true;
+      }
+    std::string defPropName = configUpper;
+    defPropName += "_COMPILE_DEFINITIONS";
+    if(const char* ccdefs = sf.GetProperty(defPropName.c_str()))
+      {
+      fc.CompileDefsConfig = ccdefs;
+      needfc = true;
+      }
+
+    // Check for extra object-file dependencies.
+    if(const char* deps = sf.GetProperty("OBJECT_DEPENDS"))
+      {
+      std::vector<std::string> depends;
+      cmSystemTools::ExpandListArgument(deps, depends);
+      const char* sep = "";
+      for(std::vector<std::string>::iterator j = depends.begin();
+          j != depends.end(); ++j)
+        {
+        fc.AdditionalDeps += sep;
+        fc.AdditionalDeps += lg->ConvertToXMLOutputPath(j->c_str());
+        sep = ";";
+        needfc = true;
+        }
+      }
+
+    const char* lang =
+      lg->GlobalGenerator->GetLanguageFromExtension
+      (sf.GetExtension().c_str());
+    const char* sourceLang = lg->GetSourceFileLanguage(sf);
+    const char* linkLanguage = target.GetLinkerLanguage
+      (lg->GetGlobalGenerator());
+    bool needForceLang = false;
+    // source file does not match its extension language
+    if(lang && sourceLang && strcmp(lang, sourceLang) != 0)
+      {
+      needForceLang = true;
+      lang = sourceLang;
+      }
+    // If lang is set, the compiler will generate code automatically.
+    // If HEADER_FILE_ONLY is set, we must suppress this generation in
+    // the project file
+    fc.ExcludedFromBuild =
+      (lang && sf.GetPropertyAsBool("HEADER_FILE_ONLY"));
+    if(fc.ExcludedFromBuild)
+      {
+      needfc = true;
+      }
+
+    // if the source file does not match the linker language
+    // then force c or c++
+    if(needForceLang || (linkLanguage && lang
+                         && strcmp(lang, linkLanguage) != 0))
+      {
+      if(strcmp(lang, "CXX") == 0)
+        {
+        // force a C++ file type
+        fc.CompileFlags += " /TP ";
+        needfc = true;
+        }
+      else if(strcmp(lang, "C") == 0)
+        {
+        // force to c
+        fc.CompileFlags += " /TC ";
+        needfc = true;
+        }
+      }
+
+    if(needfc)
+      {
+      this->FileConfigMap[*i] = fc;
+      }
+    }
+}
+
 void cmLocalVisualStudio7Generator
 ::WriteGroup(const cmSourceGroup *sg, cmTarget target, 
              std::ostream &fout, const char *libName, 
@@ -1075,76 +1214,8 @@ void cmLocalVisualStudio7Generator
         sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
     {
     std::string source = (*sf)->GetFullPath();
-    const cmCustomCommand *command = (*sf)->GetCustomCommand();
-    std::string compileFlags;
-    std::string additionalDeps;
-    if(this->NeedObjectName.find(*sf) != this->NeedObjectName.end())
-      {
-      objectName = this->GetObjectFileNameWithoutTarget(*(*sf), dir_len);
-      }
-    else
-      {
-      objectName = "";
-      }
-    // Add per-source flags.
-    const char* cflags = (*sf)->GetProperty("COMPILE_FLAGS");
-    if(cflags)
-      {
-      compileFlags += " ";
-      compileFlags += cflags;
-      }
-    const char* lang =
-      this->GlobalGenerator->GetLanguageFromExtension
-      ((*sf)->GetExtension().c_str());
-    const char* sourceLang = this->GetSourceFileLanguage(*(*sf));
-    const char* linkLanguage = target.GetLinkerLanguage
-      (this->GetGlobalGenerator());
-    bool needForceLang = false;
-    // source file does not match its extension language
-    if(lang && sourceLang && strcmp(lang, sourceLang) != 0)
-      {
-      needForceLang = true;
-      lang = sourceLang;
-      }
-    // If lang is set, the compiler will generate code automatically.
-    // If HEADER_FILE_ONLY is set, we must suppress this generation in
-    // the project file
-    bool excludedFromBuild = 
-      (lang && (*sf)->GetPropertyAsBool("HEADER_FILE_ONLY")); 
+    FCInfo fcinfo(this, target, *(*sf), configs, dir_len);
 
-    // if the source file does not match the linker language
-    // then force c or c++
-    if(needForceLang || (linkLanguage && lang 
-                         && strcmp(lang, linkLanguage) != 0))
-      {
-      if(strcmp(lang, "CXX") == 0)
-        {
-        // force a C++ file type
-        compileFlags += " /TP ";
-        }
-      else if(strcmp(lang, "C") == 0)
-        {
-        // force to c 
-        compileFlags += " /TC ";
-        }
-      }
-    // Check for extra object-file dependencies.
-    const char* deps = (*sf)->GetProperty("OBJECT_DEPENDS");
-    if(deps)
-      {
-      std::vector<std::string> depends;
-      cmSystemTools::ExpandListArgument(deps, depends);
-      if(!depends.empty())
-        {
-        std::vector<std::string>::iterator i = depends.begin();
-        additionalDeps = this->ConvertToXMLOutputPath(i->c_str());
-        for(++i;i != depends.end(); ++i)
-          {
-          additionalDeps += ";";
-          additionalDeps += this->ConvertToXMLOutputPath(i->c_str());
-          }
-        }
-      }
     if (source != libName || target.GetType() == cmTarget::UTILITY ||
       target.GetType() == cmTarget::GLOBAL_TARGET )
       {
@@ -1153,13 +1224,11 @@ void cmLocalVisualStudio7Generator
       // Tell MS-Dev what the source is.  If the compiler knows how to
       // build it, then it will.
       fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
-      if (command)
+      if(cmCustomCommand const* command = (*sf)->GetCustomCommand())
         {
-        const char* flags = compileFlags.size() ? compileFlags.c_str(): 0;
-        this->WriteCustomRule(fout, source.c_str(), *command, flags);
+        this->WriteCustomRule(fout, source.c_str(), *command, fcinfo);
         }
-      else if(compileFlags.size() || additionalDeps.length() 
-              || objectName.size() || excludedFromBuild)
+      else if(!fcinfo.FileConfigMap.empty())
         {
         const char* aCompilerTool = "VCCLCompilerTool";
         std::string ext = (*sf)->GetExtension();
@@ -1176,37 +1245,44 @@ void cmLocalVisualStudio7Generator
           {
           aCompilerTool = "VCCustomBuildTool";
           }
-        for(std::vector<std::string>::iterator i = configs->begin();
-            i != configs->end(); ++i)
+        for(std::map<cmStdString, cmLVS7GFileConfig>::const_iterator
+              fci = fcinfo.FileConfigMap.begin();
+            fci != fcinfo.FileConfigMap.end(); ++fci)
           {
+          cmLVS7GFileConfig const& fc = fci->second;
           fout << "\t\t\t\t<FileConfiguration\n"
-               << "\t\t\t\t\tName=\""  << *i 
+               << "\t\t\t\t\tName=\""  << fci->first
                << "|" << this->PlatformName << "\"";
-          if(excludedFromBuild)
+          if(fc.ExcludedFromBuild)
             {
             fout << " ExcludedFromBuild=\"true\"";
             }
           fout << ">\n";
           fout << "\t\t\t\t\t<Tool\n"
                << "\t\t\t\t\tName=\"" << aCompilerTool << "\"\n";
-          if(!compileFlags.empty())
+          if(!fc.CompileFlags.empty() ||
+             !fc.CompileDefs.empty() ||
+             !fc.CompileDefsConfig.empty())
             {
-            Options fileOptions(Options::Compiler, this->ExtraFlagTable);
-            fileOptions.Parse(compileFlags.c_str());
+            Options fileOptions(this, Options::Compiler,
+                                this->ExtraFlagTable);
+            fileOptions.Parse(fc.CompileFlags.c_str());
+            fileOptions.AddDefines(fc.CompileDefs.c_str());
+            fileOptions.AddDefines(fc.CompileDefsConfig.c_str());
             fileOptions.OutputAdditionalOptions(fout, "\t\t\t\t\t", "\n");
             fileOptions.OutputFlagMap(fout, "\t\t\t\t\t");
             fileOptions.OutputPreprocessorDefinitions(fout,
                                                       "\t\t\t\t\t", "\n");
             }
-          if(additionalDeps.length())
+          if(!fc.AdditionalDeps.empty())
             {
             fout << "\t\t\t\t\tAdditionalDependencies=\""
-                 << additionalDeps.c_str() << "\"\n";
+                 << fc.AdditionalDeps.c_str() << "\"\n";
             }
-          if(objectName.size())
+          if(!fc.ObjectName.empty())
             {
             fout << "\t\t\t\t\tObjectFile=\"$(IntDir)/"
-                 << objectName.c_str() << "\"\n";
+                 << fc.ObjectName.c_str() << "\"\n";
             }
           fout << "\t\t\t\t\t/>\n"
                << "\t\t\t\t</FileConfiguration>\n";
@@ -1234,7 +1310,7 @@ void cmLocalVisualStudio7Generator::
 WriteCustomRule(std::ostream& fout,
                 const char* source,
                 const cmCustomCommand& command,
-                const char* compileFlags)
+                FCInfo& fcinfo)
 {
   std::string comment = this->ConstructComment(command);
   
@@ -1246,14 +1322,15 @@ WriteCustomRule(std::ostream& fout,
 
   for(i = configs->begin(); i != configs->end(); ++i)
     {
+    cmLVS7GFileConfig const& fc = fcinfo.FileConfigMap[*i];
     fout << "\t\t\t\t<FileConfiguration\n";
     fout << "\t\t\t\t\tName=\"" << *i << "|" << this->PlatformName << "\">\n";
-    if(compileFlags)
+    if(!fc.CompileFlags.empty())
       {
       fout << "\t\t\t\t\t<Tool\n"
            << "\t\t\t\t\tName=\"VCCLCompilerTool\"\n"
            << "\t\t\t\t\tAdditionalOptions=\""
-           << this->EscapeForXML(compileFlags) << "\"/>\n";
+           << this->EscapeForXML(fc.CompileFlags.c_str()) << "\"/>\n";
       }
 
     std::string script = 
@@ -1659,9 +1736,10 @@ std::string cmLocalVisualStudio7Generator
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudio7GeneratorOptions
-::cmLocalVisualStudio7GeneratorOptions(Tool tool,
+::cmLocalVisualStudio7GeneratorOptions(cmLocalVisualStudio7Generator* lg,
+                                       Tool tool,
                                        cmVS7FlagTable const* extraTable):
-  CurrentTool(tool),
+  LocalGenerator(lg), CurrentTool(tool),
   DoingDefine(false), FlagTable(0), ExtraFlagTable(extraTable)
 {
   // Choose the flag table for the requested tool.
@@ -1707,6 +1785,16 @@ void cmLocalVisualStudio7GeneratorOptions::AddDefine(const std::string& def)
 }
 
 //----------------------------------------------------------------------------
+void cmLocalVisualStudio7GeneratorOptions::AddDefines(const char* defines)
+{
+  if(defines)
+    {
+    // Expand the list of definitions.
+    cmSystemTools::ExpandListArgument(defines, this->Defines);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalVisualStudio7GeneratorOptions::AddFlag(const char* flag,
                                                    const char* value)
 {
@@ -1717,7 +1805,7 @@ void cmLocalVisualStudio7GeneratorOptions::AddFlag(const char* flag,
 bool cmLocalVisualStudio7GeneratorOptions::UsingUnicode()
 {
   // Look for the a _UNICODE definition.
-  for(std::vector<cmStdString>::const_iterator di = this->Defines.begin();
+  for(std::vector<std::string>::const_iterator di = this->Defines.begin();
       di != this->Defines.end(); ++di)
     {
     if(*di == "_UNICODE")
@@ -1886,29 +1974,18 @@ cmLocalVisualStudio7GeneratorOptions
 
   fout << prefix <<  "PreprocessorDefinitions=\"";
   const char* comma = "";
-  for(std::vector<cmStdString>::const_iterator di = this->Defines.begin();
+  for(std::vector<std::string>::const_iterator di = this->Defines.begin();
       di != this->Defines.end(); ++di)
     {
-    // Double-quotes in the value of the definition must be escaped
-    // with a backslash.
-    std::string define = di->c_str();
-    cmSystemTools::ReplaceString(define, "\"", "\\\"");
+    // Escape the definition for the compiler.
+    std::string define =
+      this->LocalGenerator->EscapeForShell(di->c_str(), true);
 
     // Escape this flag for the IDE.
     define = cmLocalVisualStudio7GeneratorEscapeForXML(define.c_str());
 
-    // Write this flag.  Quote it if the definition is not
-    // alphanumeric.
-    if(define.find_first_not_of(
-         "-_abcdefghigklmnopqrstuvwxyz1234567890ABCDEFGHIGKLMNOPQRSTUVWXYZ")
-       != define.npos)
-      {
-      fout << comma << "&quot;" << define << "&quot;";
-      }
-    else
-      {
-      fout << comma << define;
-      }
+    // Store the flag in the project file.
+    fout << comma << define;
     comma = ",";
     }
   fout << "\"" << suffix;

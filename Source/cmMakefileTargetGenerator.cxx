@@ -254,6 +254,7 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     {
     const char *lang = l->c_str();
     std::string flags;
+    std::string defines;
     bool shared = ((this->Target->GetType() == cmTarget::SHARED_LIBRARY) ||
                    (this->Target->GetType() == cmTarget::MODULE_LIBRARY));
 
@@ -263,6 +264,15 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
       flags += "-D";
       flags += exportMacro;
       }
+
+    // Add preprocessor definitions for this target and configuration.
+    this->LocalGenerator->AppendDefines
+      (defines, this->Target->GetProperty("COMPILE_DEFINITIONS"));
+    std::string defPropName =
+      cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
+    defPropName += "_COMPILE_DEFINITIONS";
+    this->LocalGenerator->AppendDefines
+      (defines, this->Target->GetProperty(defPropName.c_str()));
 
     // Add language-specific flags.
     this->LocalGenerator
@@ -286,6 +296,7 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
       AppendFlags(flags,this->GetFrameworkFlags().c_str());
 
     *this->FlagFileStream << lang << "_FLAGS = " << flags << "\n\n";
+    *this->FlagFileStream << lang << "_DEFINES = " << defines << "\n\n";
     }
 
   // Add target-specific flags.
@@ -437,6 +448,35 @@ cmMakefileTargetGenerator
                           << "\n";
     }
 
+  // Add language-specific defines.
+  std::string defines = "$(";
+  defines += lang;
+  defines += "_DEFINES)";
+
+  // Add source-sepcific preprocessor definitions.
+  if(const char* compile_defs = source.GetProperty("COMPILE_DEFINITIONS"))
+    {
+    this->LocalGenerator->AppendDefines(defines, compile_defs);
+    *this->FlagFileStream << "# Custom defines: "
+                          << relativeObj << "_DEFINES = "
+                          << compile_defs << "\n"
+                          << "\n";
+    }
+  std::string configUpper =
+    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
+  std::string defPropName = configUpper;
+  defPropName += "_COMPILE_DEFINITIONS";
+  if(const char* config_compile_defs =
+     source.GetProperty(defPropName.c_str()))
+    {
+    this->LocalGenerator->AppendDefines(defines, config_compile_defs);
+    *this->FlagFileStream
+      << "# Custom defines: "
+      << relativeObj << "_DEFINES_" << configUpper
+      << " = " << config_compile_defs << "\n"
+      << "\n";
+    }
+
   // Get the output paths for source and object files.
   std::string sourceFile = source.GetFullPath();
   if(this->LocalGenerator->UseRelativePaths)
@@ -522,6 +562,7 @@ cmMakefileTargetGenerator
   std::string objectDir = cmSystemTools::GetFilenamePath(obj);
   vars.ObjectDir = objectDir.c_str();
   vars.Flags = flags.c_str();
+  vars.Defines = defines.c_str();
 
   // Expand placeholders in the commands.
   for(std::vector<std::string>::iterator i = commands.begin();
@@ -601,7 +642,11 @@ cmMakefileTargetGenerator
                         preprocessCommands.begin(),
                         preprocessCommands.end());
 
-        vars.PreprocessedSource = objI.c_str();
+        std::string shellObjI =
+          this->Convert(objI.c_str(),
+                        cmLocalGenerator::NONE,
+                        cmLocalGenerator::SHELL).c_str();
+        vars.PreprocessedSource = shellObjI.c_str();
 
         // Expand placeholders in the commands.
         for(std::vector<std::string>::iterator i = commands.begin();
@@ -653,7 +698,11 @@ cmMakefileTargetGenerator
                         assemblyCommands.begin(),
                         assemblyCommands.end());
 
-        vars.AssemblySource = objS.c_str();
+        std::string shellObjS =
+          this->Convert(objS.c_str(),
+                        cmLocalGenerator::NONE,
+                        cmLocalGenerator::SHELL).c_str();
+        vars.AssemblySource = shellObjS.c_str();
 
         // Expand placeholders in the commands.
         for(std::vector<std::string>::iterator i = commands.begin();

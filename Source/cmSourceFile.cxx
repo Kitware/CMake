@@ -340,7 +340,33 @@ void cmSourceFile::DefineProperties(cmake *cm)
     ("COMPILE_FLAGS", cmProperty::SOURCE_FILE, 
      "Additional flags to be added when compiling this source file.",
      "These flags will be added to the list of compile flags when "
-     "this source file.");
+     "this source file builds.  Use COMPILE_DEFINITIONS to pass additional "
+     "preprocessor definitions.");
+
+  cm->DefineProperty
+    ("COMPILE_DEFINITIONS", cmProperty::SOURCE_FILE,
+     "Preprocessor definitions for compiling this source file.",
+     "The COMPILE_DEFINITIONS property may be set to a list of preprocessor "
+     "definitions using the syntax VAR or VAR=value.  Function-style "
+     "definitions are not supported.  CMake will automatically escape "
+     "the value correctly for the native build system (note that CMake "
+     "language syntax may require escapes to specify some values).  "
+     "This property may be set on a per-configuration basis using the name "
+     "<CONFIG>_COMPILE_DEFINITIONS where <CONFIG> is an upper-case name "
+     "(ex. \"DEBUG_COMPILE_DEFINITIONS\").\n"
+     "CMake will automatically drop some definitions that "
+     "are not supported by the native build tool.  "
+     "The VS6 IDE does not support definitions with values "
+     "(but NMake does).  Xcode does not support per-configuration "
+     "definitions on source files.\n"
+     "Dislaimer: Most native build tools have poor support for escaping "
+     "certain values.  CMake has work-arounds for many cases but some "
+     "values may just not be possible to pass correctly.  If a value "
+     "does not seem to be escaped correctly, do not attempt to "
+     "work-around the problem by adding escape sequences to the value.  "
+     "Your work-around may break in a future version of CMake that "
+     "has improved escape support.  Instead consider defining the macro "
+     "in a (configured) header file.  Then report the limitation.");
 
   cm->DefineProperty
     ("EXTERNAL_OBJECT", cmProperty::SOURCE_FILE, 

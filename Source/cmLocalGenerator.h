@@ -139,6 +139,12 @@ public:
   ///! Get the include flags for the current makefile and language
   const char* GetIncludeFlags(const char* lang); 
 
+  /**
+   * Encode a list of preprocessor definitions for the compiler
+   * command line.
+   */
+  void AppendDefines(std::string& defines, const char* defines_list);
+
   /** Translate a dependency as given in CMake code to the name to
       appear in a generated build file.  If the given name is that of
       a CMake target it will be transformed to the real output
@@ -207,6 +213,7 @@ public:
     const char* TargetInstallNameDir;
     const char* LinkFlags;
     const char* LanguageCompileFlags;
+    const char* Defines;
   };
 
   /** Escape the given string to be used as a command line argument in
@@ -323,6 +330,10 @@ protected:
   std::string FindRelativePathTopSource();
   std::string FindRelativePathTopBinary();
   void SetupPathConversions();
+
+  /** Check whether the native build system supports the given
+      definition.  Issues a warning.  */
+  virtual bool CheckDefinition(std::string const& define) const;
 
   cmMakefile *Makefile;
   cmGlobalGenerator *GlobalGenerator;

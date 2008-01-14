@@ -103,6 +103,9 @@ private:
   std::vector<std::string> Configurations;
 
   std::string GetConfigName(std::string const& configuration) const;
+
+  // Special definition check for VS6.
+  virtual bool CheckDefinition(std::string const& define) const;
 };
 
 #endif

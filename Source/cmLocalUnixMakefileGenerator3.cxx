@@ -338,17 +338,9 @@ cmLocalUnixMakefileGenerator3
     // Add a rule to drive the rule below.
     std::vector<std::string> depends;
     depends.push_back(output);
-    std::vector<std::string> commands;
-    cmGlobalUnixMakefileGenerator3* gg =
-      static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-    std::string emptyCommand = gg->GetEmptyRuleHackCommand();
-    if(!emptyCommand.empty())
-      {
-      commands.push_back(emptyCommand);
-      }
-
+    std::vector<std::string> no_commands;
     this->WriteMakeRule(ruleFileStream, 0,
-                        outNoExt.c_str(), depends, commands, true, true);
+                        outNoExt.c_str(), depends, no_commands, true, true);
     inHelp = false;
     }
 

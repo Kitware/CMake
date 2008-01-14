@@ -49,6 +49,7 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(Properties Properties)
   ADD_TEST_MACRO(Assembler HelloAsm)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
+  ADD_TEST_MACRO(Preprocess Preprocess)
   
   IF (CMAKE_STRICT)
     ADD_TEST_MACRO(DocTest DocTest)

@@ -63,12 +63,16 @@ SET(CMAKE_CXX_CREATE_STATIC_LIBRARY  "tlib ${CMAKE_START_TEMP_FILE}/p512 <LINK_F
 SET(CMAKE_C_CREATE_STATIC_LIBRARY ${CMAKE_CXX_CREATE_STATIC_LIBRARY})
 
 # compile a C++ file into an object file
+# place <DEFINES> outside the response file because Borland refuses
+# to parse quotes from the response file.
 SET(CMAKE_CXX_COMPILE_OBJECT
-    "<CMAKE_CXX_COMPILER>  ${CMAKE_START_TEMP_FILE}-DWIN32 -P  <FLAGS>  -o<OBJECT> -c <SOURCE>${CMAKE_END_TEMP_FILE}")
+    "<CMAKE_CXX_COMPILER> <DEFINES> ${CMAKE_START_TEMP_FILE}-DWIN32 -P <FLAGS> -o<OBJECT> -c <SOURCE>${CMAKE_END_TEMP_FILE}")
 
 # compile a C file into an object file
+# place <DEFINES> outside the response file because Borland refuses
+# to parse quotes from the response file.
 SET(CMAKE_C_COMPILE_OBJECT
-    "<CMAKE_C_COMPILER> ${CMAKE_START_TEMP_FILE}-DWIN32 -o<OBJECT>  <FLAGS> -c <SOURCE>${CMAKE_END_TEMP_FILE}")
+    "<CMAKE_C_COMPILER> <DEFINES> ${CMAKE_START_TEMP_FILE}-DWIN32 -o<OBJECT> <FLAGS> -c <SOURCE>${CMAKE_END_TEMP_FILE}")
 
 
 SET(CMAKE_C_LINK_EXECUTABLE

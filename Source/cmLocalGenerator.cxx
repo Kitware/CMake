@@ -856,6 +856,10 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       return replaceValues.ObjectsQuoted;
       }
     }
+  if(replaceValues.Defines && variable == "DEFINES")
+    {
+    return replaceValues.Defines;
+    }
   if(replaceValues.TargetPDB )
     {
     if(variable == "TARGET_PDB")
@@ -2214,6 +2218,77 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator::AppendDefines(std::string& defines,
+                                     const char* defines_list)
+{
+  // Short-circuit if there are no definitions.
+  if(!defines_list)
+    {
+    return;
+    }
+
+  // Expand the list of definitions.
+  std::vector<std::string> defines_vec;
+  cmSystemTools::ExpandListArgument(defines_list, defines_vec);
+
+  // Short-circuit if there are no definitions.
+  if(defines_vec.empty())
+    {
+    return;
+    }
+
+  // Separate from previous definitions with a space.
+  if(!defines.empty())
+    {
+    defines += " ";
+    }
+
+  // Add each definition to the command line with appropriate escapes.
+  const char* dsep = "-D";
+  for(std::vector<std::string>::const_iterator di = defines_vec.begin();
+      di != defines_vec.end(); ++di)
+    {
+    // Skip unsupported definitions.
+    if(!this->CheckDefinition(*di))
+      {
+      continue;
+      }
+
+    // Append the -D
+    defines += dsep;
+
+    // Append the definition with proper escaping.
+    if(this->WatcomWMake)
+      {
+      // The Watcom compiler does its own command line parsing instead
+      // of using the windows shell rules.  Definitions are one of
+      //   -DNAME
+      //   -DNAME=<cpp-token>
+      //   -DNAME="c-string with spaces and other characters(?@#$)"
+      //
+      // Watcom will properly parse each of these cases from the
+      // command line without any escapes.  However we still have to
+      // get the '$' and '#' characters through WMake as '$$' and
+      // '$#'.
+      for(const char* c = di->c_str(); *c; ++c)
+        {
+        if(*c == '$' || *c == '#')
+          {
+          defines += '$';
+          }
+        defines += *c;
+        }
+      }
+    else
+      {
+      // Make the definition appear properly on the command line.
+      defines += this->EscapeForShell(di->c_str(), true);
+      }
+    dsep = " -D";
+    }
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConstructComment(const cmCustomCommand& cc,
                                    const char* default_comment)
@@ -2962,4 +3037,46 @@ bool cmLocalGenerator::NeedBackwardsCompatibility(unsigned int major,
   unsigned int actual_compat = this->GetBackwardsCompatibility();
   return (actual_compat &&
           actual_compat <= CMake_VERSION_ENCODE(major, minor, patch));
+}
+
+//----------------------------------------------------------------------------
+bool cmLocalGenerator::CheckDefinition(std::string const& define) const
+{
+  // Many compilers do not support -DNAME(arg)=sdf so we disable it.
+  bool function_style = false;
+  for(const char* c = define.c_str(); *c && *c != '='; ++c)
+    {
+    if(*c == '(')
+      {
+      function_style = true;
+      break;
+      }
+    }
+  if(function_style)
+    {
+    cmOStringStream e;
+    e << "WARNING: Function-style preprocessor definitions may not be "
+      << "passed on the compiler command line because many compilers "
+      << "do not support it.\n"
+      << "CMake is dropping a preprocessor definition: " << define << "\n"
+      << "Consider defining the macro in a (configured) header file.\n";
+    cmSystemTools::Message(e.str().c_str());
+    return false;
+    }
+
+  // Many compilers do not support # in the value so we disable it.
+  if(define.find_first_of("#") != define.npos)
+    {
+    cmOStringStream e;
+    e << "WARNING: Peprocessor definitions containing '#' may not be "
+      << "passed on the compiler command line because many compilers "
+      << "do not support it.\n"
+      << "CMake is dropping a preprocessor definition: " << define << "\n"
+      << "Consider defining the macro in a (configured) header file.\n";
+    cmSystemTools::Message(e.str().c_str());
+    return false;
+    }
+
+  // Assume it is supported.
+  return true;
 }

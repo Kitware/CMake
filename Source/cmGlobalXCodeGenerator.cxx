@@ -453,6 +453,9 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   lg->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
   cmSystemTools::ReplaceString(flags, "\"", "\\\"");
 
+  // Add per-source definitions.
+  this->AppendDefines(flags, sf->GetProperty("COMPILE_DEFINITIONS"), true);
+
   // Using a map and the full path guarantees that we will always get the same
   // fileRef object for any given full path.
   //
@@ -1260,12 +1263,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
 
-  // Add the export symbol definition for shared library objects.
-  if(const char* exportMacro = target.GetExportMacro())
-    {
-    defFlags += "-D";
-    defFlags += exportMacro;
-    }
   const char* lang = target.GetLinkerLanguage(this);
   std::string cflags;
   if(lang)
@@ -1291,12 +1288,28 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   cmSystemTools::ReplaceString(defFlags, "\"", "\\\"");
   cmSystemTools::ReplaceString(flags, "\"", "\\\"");
   cmSystemTools::ReplaceString(cflags, "\"", "\\\"");
+
+  // Add preprocessor definitions for this target and configuration.
+  std::string ppDefs;
   if(this->XcodeVersion > 15)
     {
-    buildSettings->AddAttribute
-      ("GCC_PREPROCESSOR_DEFINITIONS", 
-       this->CreateString("CMAKE_INTDIR=\\\\\"$(CONFIGURATION)\\\\\""));
+    this->AppendDefines(ppDefs, "CMAKE_INTDIR=\"$(CONFIGURATION)\"");
     }
+  if(const char* exportMacro = target.GetExportMacro())
+    {
+    // Add the export symbol definition for shared library objects.
+    this->AppendDefines(ppDefs, exportMacro);
+    }
+  this->AppendDefines(ppDefs, target.GetProperty("COMPILE_DEFINITIONS"));
+  if(configName)
+    {
+    std::string defVarName = cmSystemTools::UpperCase(configName);
+    defVarName += "_COMPILE_DEFINITIONS";
+    this->AppendDefines(ppDefs, target.GetProperty(defVarName.c_str()));
+    }
+  buildSettings->AddAttribute
+    ("GCC_PREPROCESSOR_DEFINITIONS", this->CreateString(ppDefs.c_str()));
+
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
@@ -2886,4 +2899,65 @@ std::string cmGlobalXCodeGenerator::LookupFlags(const char* varNamePrefix,
       }
     }
   return default_flags;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::AppendDefines(std::string& defs,
+                                           const char* defines_list,
+                                           bool dflag)
+{
+  // Skip this if there are no definitions.
+  if(!defines_list)
+    {
+    return;
+    }
+
+  // Expand the list of definitions.
+  std::vector<std::string> defines;
+  cmSystemTools::ExpandListArgument(defines_list, defines);
+
+  // GCC_PREPROCESSOR_DEFINITIONS is a space-separated list of definitions.
+  // We escape everything as follows:
+  //   - Place each definition in single quotes ''
+  //   - Escape a single quote as \\'
+  //   - Escape a backslash as \\\\
+  // Note that in the code below we need one more level of escapes for
+  // C string syntax in this source file.
+  const char* sep = defs.empty()? "" : " ";
+  for(std::vector<std::string>::const_iterator di = defines.begin();
+      di != defines.end(); ++di)
+    {
+    // Separate from previous definition.
+    defs += sep;
+    sep = " ";
+
+    // Open single quote.
+    defs += "'";
+
+    // Add -D flag if requested.
+    if(dflag)
+      {
+      defs += "-D";
+      }
+
+    // Escaped definition string.
+    for(const char* c = di->c_str(); *c; ++c)
+      {
+      if(*c == '\'')
+        {
+        defs += "\\\\'";
+        }
+      else if(*c == '\\')
+        {
+        defs += "\\\\\\\\";
+        }
+      else
+        {
+        defs += *c;
+        }
+      }
+
+    // Close single quote.
+    defs += "'";
+    }
 }

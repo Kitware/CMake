@@ -28,6 +28,6 @@ FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
 ENDFOREACH(type)
 # force the language to be c++ since qnx only has gcc and not g++ and c++?
 SET(CMAKE_CXX_COMPILE_OBJECT
-  "<CMAKE_CXX_COMPILER> -x c++ <FLAGS> -o <OBJECT> -c <SOURCE>")
+  "<CMAKE_CXX_COMPILER> -x c++ <DEFINES> <FLAGS> -o <OBJECT> -c <SOURCE>")
 
 INCLUDE(Platform/UnixPaths)

@@ -413,6 +413,29 @@ void cmLocalVisualStudio6Generator
       compileFlags += cflags;
       }
 
+    // Add per-source and per-configuration preprocessor definitions.
+    std::map<cmStdString, cmStdString> cdmap;
+    this->AppendDefines(compileFlags,
+                        (*sf)->GetProperty("COMPILE_DEFINITIONS"));
+    if(const char* cdefs = (*sf)->GetProperty("DEBUG_COMPILE_DEFINITIONS"))
+      {
+      this->AppendDefines(cdmap["DEBUG"], cdefs);
+      }
+    if(const char* cdefs = (*sf)->GetProperty("RELEASE_COMPILE_DEFINITIONS"))
+      {
+      this->AppendDefines(cdmap["RELEASE"], cdefs);
+      }
+    if(const char* cdefs =
+       (*sf)->GetProperty("MINSIZEREL_COMPILE_DEFINITIONS"))
+      {
+      this->AppendDefines(cdmap["MINSIZEREL"], cdefs);
+      }
+    if(const char* cdefs =
+       (*sf)->GetProperty("RELWITHDEBINFO_COMPILE_DEFINITIONS"))
+      {
+      this->AppendDefines(cdmap["RELWITHDEBINFO"], cdefs);
+      }
+
     const char* lang = this->GetSourceFileLanguage(*(*sf));
     if(lang)
       {
@@ -464,12 +487,14 @@ void cmLocalVisualStudio6Generator
         this->WriteCustomRule(fout, source.c_str(), *command, flags);
         }
       else if(!compileFlags.empty() || !objectNameDir.empty() ||
-              excludedFromBuild)
+              excludedFromBuild || !cdmap.empty())
         {
         for(std::vector<std::string>::iterator i
               = this->Configurations.begin(); 
             i != this->Configurations.end(); ++i)
           { 
+          // Strip the subdirectory name out of the configuration name.
+          std::string config = this->GetConfigName(*i);
           if (i == this->Configurations.begin())
             {
             fout << "!IF  \"$(CFG)\" == " << i->c_str() << std::endl;
@@ -486,11 +511,14 @@ void cmLocalVisualStudio6Generator
             {
             fout << "\n# ADD CPP " << compileFlags << "\n\n";
             }
+          std::map<cmStdString, cmStdString>::iterator cdi =
+            cdmap.find(cmSystemTools::UpperCase(config));
+          if(cdi != cdmap.end() && !cdi->second.empty())
+            {
+            fout << "\n# ADD CPP " << cdi->second << "\n\n";
+            }
           if(!objectNameDir.empty())
             {
-            // Strip the subdirectory name out of the configuration name.
-            std::string config = this->GetConfigName(*i);
-
             // Setup an alternate object file directory.
             fout << "\n# PROP Intermediate_Dir \""
                  << config << "/" << objectNameDir << "\"\n\n";
@@ -1474,6 +1502,19 @@ void cmLocalVisualStudio6Generator
       flags += targetFlags;
       }
 
+    // Add per-target and per-configuration preprocessor definitions.
+    this->AppendDefines(flags, target.GetProperty("COMPILE_DEFINITIONS"));
+    this->AppendDefines(flagsDebug,
+                        target.GetProperty("DEBUG_COMPILE_DEFINITIONS"));
+    this->AppendDefines(flagsRelease,
+                        target.GetProperty("RELEASE_COMPILE_DEFINITIONS"));
+    this->AppendDefines
+      (flagsMinSize,
+       target.GetProperty("MINSIZEREL_COMPILE_DEFINITIONS"));
+    this->AppendDefines
+      (flagsDebugRel,
+       target.GetProperty("RELWITHDEBINFO_COMPILE_DEFINITIONS"));
+
     // The template files have CXX FLAGS in them, that need to be replaced.
     // There are not separate CXX and C template files, so we use the same
     // variable names.   The previous code sets up flags* variables to contain
@@ -1583,4 +1624,31 @@ cmLocalVisualStudio6Generator
   config = config.substr(pos+1, std::string::npos);
   config = config.substr(0, config.size()-1);
   return config;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmLocalVisualStudio6Generator
+::CheckDefinition(std::string const& define) const
+{
+  // Perform the standard check first.
+  if(!this->cmLocalGenerator::CheckDefinition(define))
+    {
+    return false;
+    }
+
+  // Now do the VS6-specific check.
+  if(define.find_first_of("=") != define.npos)
+    {
+    cmOStringStream e;
+    e << "WARNING: The VS6 IDE does not support preprocessor definitions "
+      << "with values.\n"
+      << "CMake is dropping a preprocessor definition: " << define << "\n"
+      << "Consider defining the macro in a (configured) header file.\n";
+    cmSystemTools::Message(e.str().c_str());
+    return false;
+    }
+
+  // Assume it is supported.
+  return true;
 }

@@ -67,8 +67,32 @@ void cmTarget::DefineProperties(cmake *cm)
     ("COMPILE_FLAGS", cmProperty::TARGET,
      "Additional flags to use when compiling this target's sources.",
      "The COMPILE_FLAGS property sets additional compiler flags used "
-     "to build sources within the target.  It may also be used to pass "
-     "additional preprocessor definitions.");
+     "to build sources within the target.  Use COMPILE_DEFINITIONS "
+     "to pass additional preprocessor definitions.");
+
+  cm->DefineProperty
+    ("COMPILE_DEFINITIONS", cmProperty::TARGET,
+     "Preprocessor definitions for compiling this target's sources.",
+     "The COMPILE_DEFINITIONS property may be set to a list of preprocessor "
+     "definitions using the syntax VAR or VAR=value.  Function-style "
+     "definitions are not supported.  CMake will automatically escape "
+     "the value correctly for the native build system (note that CMake "
+     "language syntax may require escapes to specify some values).  "
+     "This property may be set on a per-configuration basis using the name "
+     "<CONFIG>_COMPILE_DEFINITIONS where <CONFIG> is an upper-case name "
+     "(ex. \"DEBUG_COMPILE_DEFINITIONS\").\n"
+     "CMake will automatically drop some definitions that "
+     "are not supported by the native build tool.  "
+     "The VS6 IDE does not support definitions with values "
+     "(but NMake does).\n"
+     "Dislaimer: Most native build tools have poor support for escaping "
+     "certain values.  CMake has work-arounds for many cases but some "
+     "values may just not be possible to pass correctly.  If a value "
+     "does not seem to be escaped correctly, do not attempt to "
+     "work-around the problem by adding escape sequences to the value.  "
+     "Your work-around may break in a future version of CMake that "
+     "has improved escape support.  Instead consider defining the macro "
+     "in a (configured) header file.  Then report the limitation.");
 
   cm->DefineProperty
     ("DEFINE_SYMBOL", cmProperty::TARGET,

@@ -26,6 +26,7 @@ class cmSourceGroup;
 struct cmVS7FlagTable;
 
 class cmLocalVisualStudio7GeneratorOptions;
+class cmLocalVisualStudio7GeneratorFCInfo;
 
 /** \class cmLocalVisualStudio7Generator
  * \brief Write Visual Studio .NET project files.
@@ -68,6 +69,7 @@ public:
     { this->ExtraFlagTable = table; }
 private:
   typedef cmLocalVisualStudio7GeneratorOptions Options;
+  typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
   void ReadAndStoreExternalGUID(const char* name,
                                 const char* path);
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
@@ -109,13 +111,15 @@ private:
   void WriteCustomRule(std::ostream& fout,
                        const char* source,
                        const cmCustomCommand& command,
-                       const char* extraFlags);
+                       FCInfo& fcinfo);
   void WriteTargetVersionAttribute(std::ostream& fout, cmTarget& target);
 
   void WriteGroup(const cmSourceGroup *sg, 
                   cmTarget target, std::ostream &fout, 
                   const char *libName, std::vector<std::string> *configs);
   virtual std::string GetTargetDirectory(cmTarget const&) const;
+
+  friend class cmLocalVisualStudio7GeneratorFCInfo;
 
   cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;
