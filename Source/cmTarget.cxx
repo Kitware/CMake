@@ -95,6 +95,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "in a (configured) header file.  Then report the limitation.");
 
   cm->DefineProperty
+    ("<CONFIG>_COMPILE_DEFINITIONS", cmProperty::TARGET,
+     "Per-configuration preprocessor definitions on a target.",
+     "This is the configuration-specific version of COMPILE_DEFINITIONS.");
+
+  cm->DefineProperty
     ("DEFINE_SYMBOL", cmProperty::TARGET,
      "Define a symbol when compiling this target's sources.",
      "DEFINE_SYMBOL sets the name of the preprocessor symbol defined when "

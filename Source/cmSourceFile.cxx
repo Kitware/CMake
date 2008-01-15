@@ -368,6 +368,15 @@ void cmSourceFile::DefineProperties(cmake *cm)
      "has improved escape support.  Instead consider defining the macro "
      "in a (configured) header file.  Then report the limitation.");
 
+
+  cm->DefineProperty
+    ("<CONFIG>_COMPILE_DEFINITIONS", cmProperty::SOURCE_FILE,
+     "Per-configuration preprocessor definitions on a source file.",
+     "This is the configuration-specific version of "
+     "COMPILE_DEFINITIONS.  Note that Xcode does not support "
+     "per-configuration source file flags so this property will "
+     "be ignored by the Xcode generator."); 
+
   cm->DefineProperty
     ("EXTERNAL_OBJECT", cmProperty::SOURCE_FILE, 
      "If set to true then this is an object file.",
