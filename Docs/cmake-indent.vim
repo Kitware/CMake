@@ -25,6 +25,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=CMakeGetIndent(v:lnum)
+setlocal indentkeys+==ENDIF(,ENDFOREACH(,ENDMACRO(,ELSE(,ELSEIF(,ENDWHILE(
 
 " Only define the function once.
 if exists("*CMakeGetIndent")
