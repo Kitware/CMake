@@ -1461,14 +1461,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     }
   else
     {
-    if (this->Version == 8)
-      {
-      fout << "\tVersion=\"8.00\"\n";
-      }
-    else
-      {
-      fout << "\tVersion=\"7.00\"\n";
-      }
+    fout <<  "\tVersion=\"" << this->Version << ".00\"\n";
     }
   const char* projLabel = target.GetProperty("PROJECT_LABEL");
   if(!projLabel)

@@ -1,3 +1,7 @@
+Changes in CMake 2.4.8 RC 13
+* fix vs 9 so it works, again...
+* fix bug 6150, working directory can now change drives with vs custom commands
+* fix windows vista elevation issue with CMakeSetup.exe
 Changes in CMake 2.4.8 RC 12
 * Fix vs 9 so cmake can find it
 * Fix bug 6230 MODULE install with versions was broken

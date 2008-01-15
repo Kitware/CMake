@@ -126,6 +126,15 @@ cmLocalVisualStudioGenerator
     newline = newline_text;
     script += "cd ";
     script += this->Convert(workingDirectory, START_OUTPUT, SHELL);
+
+    // Change the working drive.
+    if(workingDirectory[0] && workingDirectory[1] == ':')
+      {
+      script += newline;
+      newline = newline_text;
+      script += workingDirectory[0];
+      script += workingDirectory[1];
+      }
     }
   // for visual studio IDE add extra stuff to the PATH
   // if CMAKE_MSVCIDE_RUN_PATH is set.
