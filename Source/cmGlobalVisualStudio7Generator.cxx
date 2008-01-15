@@ -284,6 +284,24 @@ void cmGlobalVisualStudio7Generator
   bool doneRebuildCache = false;
   bool donePackage = false;
   
+  
+  // 1.
+  // Collecte all targets in generators vector and the targets
+  // that they depend on
+  
+  // 2. loop over all targets and put .vcproj reference 
+  //   into .sln file. .vcproj files should already exist
+  //   from local generation step.  Do not add "pulled" in .vcproj
+  //   to ALL_BUILD.
+  // See: cmGlobalGenerator::GetTargetDepends
+  // cmGlobalGenerator::TargetDependSet myset;
+  // foreach t in all targets
+  //   cmGlobalGenerator::TargetDependSet const& tset = GetTargetDepends(t);
+  //    myset.insert(tset.begin(), tset.end());
+  //  foreach t in myset
+  //    t->GetMakefile()->GetLocalGenerator()->GetVCProjPath()
+  //  if t was not in original set of targets disable all for it
+  
   // For each cmMakefile, create a VCProj for it, and
   // add it to this SLN file
   unsigned int i;
