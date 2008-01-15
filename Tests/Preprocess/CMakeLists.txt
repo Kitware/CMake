@@ -3,6 +3,11 @@ project(Preprocess)
 # This test is meant both as a test and as a reference for supported
 # syntax on native tool command lines.
 
+# We need ansi C support.
+IF(CMAKE_ANSI_CFLAGS)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
+ENDIF(CMAKE_ANSI_CFLAGS)
+
 #-----------------------------------------------------------------------------
 # Construct a C-string literal to test passing through a definition on
 # the command line.  We configure the value into a header so it can be
