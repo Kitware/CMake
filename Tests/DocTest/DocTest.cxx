@@ -23,7 +23,7 @@ int main ()
     std::string line = buffer;
     if(line.size() && line.find("with scope VARIABLE") == std::string::npos)
       {
-      fprintf(stderr,line.c_str());
+      fprintf(stderr, "%s\n", line.c_str());
       result = 1;
       }
     }
