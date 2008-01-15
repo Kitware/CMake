@@ -76,7 +76,8 @@ IF(APPLE)
 ENDIF(APPLE)
 
 # if we are on an ELF system, search for chrpath
-IF("${CMAKE_EXECUTABLE_FORMAT}" STREQUAL "ELF")
+# according to 
+IF("${CMAKE_EXECUTABLE_FORMAT}" STREQUAL "ELF"  AND NOT  CMAKE_CROSSCOMPILING)
   # on ELF platforms there might be chrpath, which works similar to install_name_tool
   OPTION(CMAKE_USE_CHRPATH "Enable this to use chrpath if available" OFF)
 
@@ -84,4 +85,4 @@ IF("${CMAKE_EXECUTABLE_FORMAT}" STREQUAL "ELF")
   FIND_PROGRAM(CMAKE_CHRPATH chrpath)
 
   MARK_AS_ADVANCED(CMAKE_CHRPATH)
-ENDIF("${CMAKE_EXECUTABLE_FORMAT}" STREQUAL "ELF")
+ENDIF("${CMAKE_EXECUTABLE_FORMAT}" STREQUAL "ELF"  AND NOT  CMAKE_CROSSCOMPILING)
