@@ -19,6 +19,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
+#include "windows.h"
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator()
@@ -143,6 +144,13 @@ cmLocalVisualStudioGenerator
     script += newline;
     newline = newline_text;
     script += "cd ";
+    OSVERSIONINFO osv;
+    osv.dwOSVersionInfoSize = sizeof(osv);
+    GetVersionEx(&osv);
+    if(osv.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS)
+      {
+      script += "/d ";
+      }
     script += this->Convert(workingDirectory, START_OUTPUT, SHELL);
 
     // Change the working drive.
