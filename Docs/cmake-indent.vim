@@ -11,7 +11,7 @@
 " Vim indent file
 " Language:     CMake (ft=cmake)
 " Author:       Andy Cedilnik <andy.cedilnik@kitware.com>
-" Maintainer:   Andy Cedilnik <andy.cedilnik@kitware.com>
+" Maintainer:   Karthik Krishnan <karthik.krishnan@kitware.com>
 " Last Change:  $Date$
 " Version:      $Revision$
 "
@@ -66,8 +66,8 @@ fun! CMakeGetIndent(lnum)
                     \            ')\s*' .
                     \            '\(' . cmake_regex_comment . '\)\?$'
 
-  let cmake_indent_begin_regex = '^\s*\(IF\|MACRO\|FOREACH\|ELSE\|ELSEIF\|WHILE\)\s*('
-  let cmake_indent_end_regex = '^\s*\(ENDIF\|ENDFOREACH\|ENDMACRO\|ELSE\|ELSEIF\|ENDWHILE\)\s*('
+  let cmake_indent_begin_regex = '^\s*\(IF\|MACRO\|FOREACH\|ELSE\|ELSEIF\|WHILE\|FUNCTION\)\s*('
+  let cmake_indent_end_regex = '^\s*\(ENDIF\|ENDFOREACH\|ENDMACRO\|ELSE\|ELSEIF\|ENDWHILE\|ENDFUNCTION\)\s*('
 
   " Add
   if previous_line =~? cmake_indent_comment_line " Handle comments
