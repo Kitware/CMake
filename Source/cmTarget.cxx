@@ -72,15 +72,15 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("COMPILE_DEFINITIONS", cmProperty::TARGET,
-     "Preprocessor definitions for compiling this target's sources.",
+     "Preprocessor definitions for compiling a target's sources.",
      "The COMPILE_DEFINITIONS property may be set to a list of preprocessor "
      "definitions using the syntax VAR or VAR=value.  Function-style "
      "definitions are not supported.  CMake will automatically escape "
      "the value correctly for the native build system (note that CMake "
      "language syntax may require escapes to specify some values).  "
      "This property may be set on a per-configuration basis using the name "
-     "<CONFIG>_COMPILE_DEFINITIONS where <CONFIG> is an upper-case name "
-     "(ex. \"DEBUG_COMPILE_DEFINITIONS\").\n"
+     "COMPILE_DEFINITIONS_<CONFIG> where <CONFIG> is an upper-case name "
+     "(ex. \"COMPILE_DEFINITIONS_DEBUG\").\n"
      "CMake will automatically drop some definitions that "
      "are not supported by the native build tool.  "
      "The VS6 IDE does not support definitions with values "
@@ -95,7 +95,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "in a (configured) header file.  Then report the limitation.");
 
   cm->DefineProperty
-    ("<CONFIG>_COMPILE_DEFINITIONS", cmProperty::TARGET,
+    ("COMPILE_DEFINITIONS_<CONFIG>", cmProperty::TARGET,
      "Per-configuration preprocessor definitions on a target.",
      "This is the configuration-specific version of COMPILE_DEFINITIONS.");
 

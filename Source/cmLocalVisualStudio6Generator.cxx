@@ -417,21 +417,21 @@ void cmLocalVisualStudio6Generator
     std::map<cmStdString, cmStdString> cdmap;
     this->AppendDefines(compileFlags,
                         (*sf)->GetProperty("COMPILE_DEFINITIONS"));
-    if(const char* cdefs = (*sf)->GetProperty("DEBUG_COMPILE_DEFINITIONS"))
+    if(const char* cdefs = (*sf)->GetProperty("COMPILE_DEFINITIONS_DEBUG"))
       {
       this->AppendDefines(cdmap["DEBUG"], cdefs);
       }
-    if(const char* cdefs = (*sf)->GetProperty("RELEASE_COMPILE_DEFINITIONS"))
+    if(const char* cdefs = (*sf)->GetProperty("COMPILE_DEFINITIONS_RELEASE"))
       {
       this->AppendDefines(cdmap["RELEASE"], cdefs);
       }
     if(const char* cdefs =
-       (*sf)->GetProperty("MINSIZEREL_COMPILE_DEFINITIONS"))
+       (*sf)->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"))
       {
       this->AppendDefines(cdmap["MINSIZEREL"], cdefs);
       }
     if(const char* cdefs =
-       (*sf)->GetProperty("RELWITHDEBINFO_COMPILE_DEFINITIONS"))
+       (*sf)->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"))
       {
       this->AppendDefines(cdmap["RELWITHDEBINFO"], cdefs);
       }
@@ -1505,15 +1505,15 @@ void cmLocalVisualStudio6Generator
     // Add per-target and per-configuration preprocessor definitions.
     this->AppendDefines(flags, target.GetProperty("COMPILE_DEFINITIONS"));
     this->AppendDefines(flagsDebug,
-                        target.GetProperty("DEBUG_COMPILE_DEFINITIONS"));
+                        target.GetProperty("COMPILE_DEFINITIONS_DEBUG"));
     this->AppendDefines(flagsRelease,
-                        target.GetProperty("RELEASE_COMPILE_DEFINITIONS"));
+                        target.GetProperty("COMPILE_DEFINITIONS_RELEASE"));
     this->AppendDefines
       (flagsMinSize,
-       target.GetProperty("MINSIZEREL_COMPILE_DEFINITIONS"));
+       target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"));
     this->AppendDefines
       (flagsDebugRel,
-       target.GetProperty("RELWITHDEBINFO_COMPILE_DEFINITIONS"));
+       target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"));
 
     // The template files have CXX FLAGS in them, that need to be replaced.
     // There are not separate CXX and C template files, so we use the same

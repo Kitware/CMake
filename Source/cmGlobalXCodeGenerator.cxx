@@ -1303,8 +1303,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   this->AppendDefines(ppDefs, target.GetProperty("COMPILE_DEFINITIONS"));
   if(configName)
     {
-    std::string defVarName = cmSystemTools::UpperCase(configName);
-    defVarName += "_COMPILE_DEFINITIONS";
+    std::string defVarName = "COMPILE_DEFINITIONS_";
+    defVarName += cmSystemTools::UpperCase(configName);
     this->AppendDefines(ppDefs, target.GetProperty(defVarName.c_str()));
     }
   buildSettings->AddAttribute

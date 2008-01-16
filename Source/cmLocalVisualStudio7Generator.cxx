@@ -521,8 +521,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
 
   std::string configUpper = cmSystemTools::UpperCase(configName);
-  std::string defPropName = configUpper;
-  defPropName += "_COMPILE_DEFINITIONS";
+  std::string defPropName = "COMPILE_DEFINITIONS_";
+  defPropName += configUpper;
 
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Makefile->GetDefineFlags();
@@ -1093,8 +1093,8 @@ cmLocalVisualStudio7GeneratorFCInfo
       fc.CompileDefs = cdefs;
       needfc = true;
       }
-    std::string defPropName = configUpper;
-    defPropName += "_COMPILE_DEFINITIONS";
+    std::string defPropName = "COMPILE_DEFINITIONS_";
+    defPropName += configUpper;
     if(const char* ccdefs = sf.GetProperty(defPropName.c_str()))
       {
       fc.CompileDefsConfig = ccdefs;

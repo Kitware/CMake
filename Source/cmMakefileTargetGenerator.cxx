@@ -268,9 +268,9 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     // Add preprocessor definitions for this target and configuration.
     this->LocalGenerator->AppendDefines
       (defines, this->Target->GetProperty("COMPILE_DEFINITIONS"));
-    std::string defPropName =
+    std::string defPropName = "COMPILE_DEFINITIONS_";
+    defPropName +=
       cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
-    defPropName += "_COMPILE_DEFINITIONS";
     this->LocalGenerator->AppendDefines
       (defines, this->Target->GetProperty(defPropName.c_str()));
 
@@ -464,8 +464,8 @@ cmMakefileTargetGenerator
     }
   std::string configUpper =
     cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
-  std::string defPropName = configUpper;
-  defPropName += "_COMPILE_DEFINITIONS";
+  std::string defPropName = "COMPILE_DEFINITIONS_";
+  defPropName += configUpper;
   if(const char* config_compile_defs =
      source.GetProperty(defPropName.c_str()))
     {

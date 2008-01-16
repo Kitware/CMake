@@ -345,15 +345,15 @@ void cmSourceFile::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("COMPILE_DEFINITIONS", cmProperty::SOURCE_FILE,
-     "Preprocessor definitions for compiling this source file.",
+     "Preprocessor definitions for compiling a source file.",
      "The COMPILE_DEFINITIONS property may be set to a list of preprocessor "
      "definitions using the syntax VAR or VAR=value.  Function-style "
      "definitions are not supported.  CMake will automatically escape "
      "the value correctly for the native build system (note that CMake "
      "language syntax may require escapes to specify some values).  "
      "This property may be set on a per-configuration basis using the name "
-     "<CONFIG>_COMPILE_DEFINITIONS where <CONFIG> is an upper-case name "
-     "(ex. \"DEBUG_COMPILE_DEFINITIONS\").\n"
+     "COMPILE_DEFINITIONS_<CONFIG> where <CONFIG> is an upper-case name "
+     "(ex. \"COMPILE_DEFINITIONS_DEBUG\").\n"
      "CMake will automatically drop some definitions that "
      "are not supported by the native build tool.  "
      "The VS6 IDE does not support definitions with values "
@@ -370,12 +370,12 @@ void cmSourceFile::DefineProperties(cmake *cm)
 
 
   cm->DefineProperty
-    ("<CONFIG>_COMPILE_DEFINITIONS", cmProperty::SOURCE_FILE,
+    ("COMPILE_DEFINITIONS_<CONFIG>", cmProperty::SOURCE_FILE,
      "Per-configuration preprocessor definitions on a source file.",
      "This is the configuration-specific version of "
      "COMPILE_DEFINITIONS.  Note that Xcode does not support "
      "per-configuration source file flags so this property will "
-     "be ignored by the Xcode generator."); 
+     "be ignored by the Xcode generator.");
 
   cm->DefineProperty
     ("EXTERNAL_OBJECT", cmProperty::SOURCE_FILE, 
