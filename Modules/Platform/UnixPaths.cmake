@@ -5,10 +5,21 @@ SET(UNIX 1)
 GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${CMAKE_ROOT}" PATH)
 GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
 
-SET(CMAKE_SYSTEM_INCLUDE_PATH ${CMAKE_SYSTEM_INCLUDE_PATH}
+# List common installation prefixes.  These will be used for all
+# search types.
+LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
   # Standard
-  /include /usr/include /usr/local/include
+  / /usr /usr/local
 
+  # CMake install location
+  "${_CMAKE_INSTALL_DIR}"
+
+  # Project install destination.
+  "${CMAKE_INSTALL_PREFIX}"
+  )
+
+# List common include file locations not under the common prefixes.
+LIST(APPEND CMAKE_SYSTEM_INCLUDE_PATH
   # Windows API on Cygwin
   /usr/include/w32api
 
@@ -19,14 +30,9 @@ SET(CMAKE_SYSTEM_INCLUDE_PATH ${CMAKE_SYSTEM_INCLUDE_PATH}
   /opt/local/include /usr/pkg/include
   /opt/csw/include /opt/include  
   /usr/openwin/include
-  "${_CMAKE_INSTALL_DIR}/include"
-  "${CMAKE_INSTALL_PREFIX}/include"
   )
 
-SET(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
-  # Standard
-  /lib     /usr/lib     /usr/local/lib
-
+LIST(APPEND CMAKE_SYSTEM_LIBRARY_PATH
   # Windows API on Cygwin
   /usr/lib/w32api
 
@@ -37,18 +43,13 @@ SET(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH}
   /opt/local/lib /usr/pkg/lib
   /opt/csw/lib /opt/lib 
   /usr/openwin/lib
-  "${_CMAKE_INSTALL_DIR}/lib"
-  "${CMAKE_INSTALL_PREFIX}/lib"
   )
 
-SET(CMAKE_SYSTEM_PROGRAM_PATH ${CMAKE_SYSTEM_PROGRAM_PATH}
-  /bin /usr/bin /usr/local/bin /usr/pkg/bin /sbin
-  "${_CMAKE_INSTALL_DIR}/bin"
-  "${CMAKE_INSTALL_PREFIX}/bin"
+LIST(APPEND CMAKE_SYSTEM_PROGRAM_PATH
+  /usr/pkg/bin
   )
 
-SET(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
-  ${CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES}
+LIST(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
   /lib /usr/lib /usr/lib32 /usr/lib64
   )
 
