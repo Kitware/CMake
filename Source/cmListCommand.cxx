@@ -179,10 +179,16 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
 {
+  if(args.size() < 2)
+    {
+    this->SetError("sub-command APPEND requires at least one argument.");
+    return false;
+    }
+
+  // Skip if nothing to append.
   if(args.size() < 3)
     {
-    this->SetError("sub-command APPEND requires at least two arguments.");
-    return false;
+    return true;
     }
 
   const std::string& listName = args[1];
