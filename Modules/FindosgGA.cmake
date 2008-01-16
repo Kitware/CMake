@@ -34,11 +34,7 @@ FIND_PATH(OSGGA_INCLUDE_DIR osgGA/FlightManipulator
   NO_DEFAULT_PATH
   PATH_SUFFIXES include
 )
-FIND_PATH(OSGGA_INCLUDE_DIR osgGA/FlightManipulator
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include
-)
+
 FIND_PATH(OSGGA_INCLUDE_DIR osgGA/FlightManipulator
   PATHS
     ~/Library/Frameworks
@@ -63,12 +59,7 @@ FIND_LIBRARY(OSGGA_LIBRARY
   NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
 )
-FIND_LIBRARY(OSGGA_LIBRARY 
-  NAMES osgGA
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 FIND_LIBRARY(OSGGA_LIBRARY 
   NAMES osgGA
   PATHS

@@ -34,11 +34,7 @@ FIND_PATH(OSGMANIPULATOR_INCLUDE_DIR osgManipulator/TrackballDragger
   NO_DEFAULT_PATH
   PATH_SUFFIXES include
 )
-FIND_PATH(OSGMANIPULATOR_INCLUDE_DIR osgManipulator/TrackballDragger
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include
-)
+
 FIND_PATH(OSGMANIPULATOR_INCLUDE_DIR osgManipulator/TrackballDragger
   PATHS
     ~/Library/Frameworks
@@ -63,12 +59,7 @@ FIND_LIBRARY(OSGMANIPULATOR_LIBRARY
   NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
 )
-FIND_LIBRARY(OSGMANIPULATOR_LIBRARY 
-  NAMES osgManipulator
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 FIND_LIBRARY(OSGMANIPULATOR_LIBRARY 
   NAMES osgManipulator
   PATHS

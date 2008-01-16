@@ -37,10 +37,6 @@
 # If nothing is found, then the second find will search the
 # standard install paths.
 # Explicit -DVAR=value arguments should still be able to override everything.
-# Note: We have added an additional check for ${CMAKE_PREFIX_PATH}.
-# This is not an official CMake variable, but one we are proposing be
-# added to CMake. Be warned that this may go away or the variable name
-# may change.
 
 FIND_PATH(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
     PATHS
@@ -55,11 +51,7 @@ FIND_PATH(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
     NO_DEFAULT_PATH
 )
 
-FIND_PATH(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
-    PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES include
-)
+
 
 FIND_PATH(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
     ~/Library/Frameworks
@@ -92,12 +84,7 @@ FIND_LIBRARY(OPENTHREADS_LIBRARY
     NO_DEFAULT_PATH
 )
 
-FIND_LIBRARY(OPENTHREADS_LIBRARY 
-    NAMES OpenThreads OpenThreadsWin32 
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 
 FIND_LIBRARY(OPENTHREADS_LIBRARY 
     NAMES OpenThreads OpenThreadsWin32 
@@ -139,12 +126,7 @@ FIND_LIBRARY(OPENTHREADS_LIBRARY_DEBUG
     NO_DEFAULT_PATH
 )
 
-FIND_LIBRARY(OPENTHREADS_LIBRARY_DEBUG 
-    NAMES OpenThreadsd OpenThreadsWin32d
-    PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 
 FIND_LIBRARY(OPENTHREADS_LIBRARY_DEBUG 
     NAMES OpenThreadsd OpenThreadsWin32d

@@ -33,11 +33,7 @@ FIND_PATH(OSG_INCLUDE_DIR osg/PositionAttitudeTransform
   NO_DEFAULT_PATH
   PATH_SUFFIXES include
 )
-FIND_PATH(OSG_INCLUDE_DIR osg/PositionAttitudeTransform
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include
-)
+
 FIND_PATH(OSG_INCLUDE_DIR osg/PositionAttitudeTransform
   PATHS
     ~/Library/Frameworks
@@ -61,12 +57,7 @@ FIND_LIBRARY(OSG_LIBRARY
   NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
 )
-FIND_LIBRARY(OSG_LIBRARY 
-  NAMES osg
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 FIND_LIBRARY(OSG_LIBRARY 
   NAMES osg
   PATHS

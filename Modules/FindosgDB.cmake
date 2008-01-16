@@ -34,11 +34,7 @@ FIND_PATH(OSGDB_INCLUDE_DIR osgDB/DatabasePager
   NO_DEFAULT_PATH
   PATH_SUFFIXES include
 )
-FIND_PATH(OSGDB_INCLUDE_DIR osgDB/DatabasePager
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include
-)
+
 FIND_PATH(OSGDB_INCLUDE_DIR osgDB/DatabasePager
   PATHS
     ~/Library/Frameworks
@@ -63,12 +59,7 @@ FIND_LIBRARY(OSGDB_LIBRARY
   NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
 )
-FIND_LIBRARY(OSGDB_LIBRARY 
-  NAMES osgDB
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 FIND_LIBRARY(OSGDB_LIBRARY 
   NAMES osgDB
   PATHS

@@ -33,11 +33,7 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
   NO_DEFAULT_PATH
   PATH_SUFFIXES include
 )
-FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include
-)
+
 
 FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
   PATHS
@@ -53,11 +49,7 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h
   $ENV{FREETYPE_DIR}/include/freetype2
   NO_DEFAULT_PATH
 )
-FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include/freetype2
-)
+
 FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
   /usr/local/X11R6/include
   /usr/local/X11/include
@@ -75,12 +67,7 @@ FIND_LIBRARY(FREETYPE_LIBRARY
   NO_DEFAULT_PATH
   PATH_SUFFIXES lib64 lib 
 )
-FIND_LIBRARY(FREETYPE_LIBRARY
-  NAMES freetype libfreetype freetype219
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES lib64 lib 
-)
+
 FIND_LIBRARY(FREETYPE_LIBRARY
   NAMES freetype libfreetype freetype219
   PATHS

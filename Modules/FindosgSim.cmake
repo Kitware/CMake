@@ -34,11 +34,7 @@ FIND_PATH(OSGSIM_INCLUDE_DIR osgSim/ImpostorSprite
   NO_DEFAULT_PATH
   PATH_SUFFIXES include
 )
-FIND_PATH(OSGSIM_INCLUDE_DIR osgSim/ImpostorSprite
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include
-)
+
 FIND_PATH(OSGSIM_INCLUDE_DIR osgSim/ImpostorSprite
   PATHS
     ~/Library/Frameworks
@@ -63,12 +59,7 @@ FIND_LIBRARY(OSGSIM_LIBRARY
   NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
 )
-FIND_LIBRARY(OSGSIM_LIBRARY 
-  NAMES osgSim
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 FIND_LIBRARY(OSGSIM_LIBRARY 
   NAMES osgSim
   PATHS

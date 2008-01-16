@@ -34,11 +34,7 @@ FIND_PATH(OSGPRODUCER_INCLUDE_DIR osgProducer/OsgSceneHandler
   NO_DEFAULT_PATH
   PATH_SUFFIXES include
 )
-FIND_PATH(OSGPRODUCER_INCLUDE_DIR osgProducer/OsgSceneHandler
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include
-)
+
 FIND_PATH(OSGPRODUCER_INCLUDE_DIR osgProducer/OsgSceneHandler
   PATHS
     ~/Library/Frameworks
@@ -63,12 +59,7 @@ FIND_LIBRARY(OSGPRODUCER_LIBRARY
   NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
 )
-FIND_LIBRARY(OSGPRODUCER_LIBRARY 
-  NAMES osgProducer
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 FIND_LIBRARY(OSGPRODUCER_LIBRARY 
   NAMES osgProducer
   PATHS

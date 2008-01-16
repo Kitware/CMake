@@ -37,11 +37,7 @@ FIND_PATH(PRODUCER_INCLUDE_DIR Producer/CameraGroup
   NO_DEFAULT_PATH
   PATH_SUFFIXES include
 )
-FIND_PATH(PRODUCER_INCLUDE_DIR Producer/CameraGroup
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include
-)
+
 FIND_PATH(PRODUCER_INCLUDE_DIR Producer/CameraGroup
   PATHS
     ~/Library/Frameworks
@@ -65,12 +61,7 @@ FIND_LIBRARY(PRODUCER_LIBRARY
   NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
 )
-FIND_LIBRARY(PRODUCER_LIBRARY 
-  NAMES Producer
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 FIND_LIBRARY(PRODUCER_LIBRARY 
   NAMES Producer
   PATHS

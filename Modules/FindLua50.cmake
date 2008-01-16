@@ -18,11 +18,7 @@ FIND_PATH(LUA_INCLUDE_DIR lua.h
   NO_DEFAULT_PATH
   PATH_SUFFIXES include/lua50 include/lua5.0 include/lua5 include/lua include
 )
-FIND_PATH(LUA_INCLUDE_DIR lua.h
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include/lua50 include/lua5.0 include/lua5 include/lua include
-)
+
 FIND_PATH(LUA_INCLUDE_DIR lua.h
   PATHS
   ~/Library/Frameworks
@@ -43,12 +39,7 @@ FIND_LIBRARY(LUA_LIBRARY_lua
   NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
 )
-FIND_LIBRARY(LUA_LIBRARY_lua 
-  NAMES lua50 lua5.0 lua5 lua
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 FIND_LIBRARY(LUA_LIBRARY_lua
   NAMES lua50 lua5.0 lua5 lua
   PATHS
@@ -76,12 +67,7 @@ ELSE(${LUA_LIBRARY_lua} MATCHES "framework")
     NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
   )
-  FIND_LIBRARY(LUA_LIBRARY_lualib 
-    NAMES lualib50 lualib5.0 lualib5 lualib
-    PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-  )
+
   FIND_LIBRARY(LUA_LIBRARY_lualib 
     NAMES lualib50 lualib5.0 lualib5 lualib
     PATHS

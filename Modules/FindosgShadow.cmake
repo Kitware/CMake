@@ -34,11 +34,7 @@ FIND_PATH(OSGSHADOW_INCLUDE_DIR osgShadow/ShadowTexture
   NO_DEFAULT_PATH
   PATH_SUFFIXES include
 )
-FIND_PATH(OSGSHADOW_INCLUDE_DIR osgShadow/ShadowTexture
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include
-)
+
 FIND_PATH(OSGSHADOW_INCLUDE_DIR osgShadow/ShadowTexture
   PATHS
     ~/Library/Frameworks
@@ -63,12 +59,7 @@ FIND_LIBRARY(OSGSHADOW_LIBRARY
   NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
 )
-FIND_LIBRARY(OSGSHADOW_LIBRARY 
-  NAMES osgShadow
-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
+
 FIND_LIBRARY(OSGSHADOW_LIBRARY 
   NAMES osgShadow
   PATHS
