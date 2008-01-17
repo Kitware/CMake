@@ -144,38 +144,40 @@ endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
 # Test old-style definitions.
 add_definitions(-DOLD_DEF -DOLD_EXPR=2)
 
+add_executable(Preprocess preprocess.c preprocess${VS6}.cxx)
+
 set(FILE_PATH "${Preprocess_SOURCE_DIR}/file_def.h")
 set(TARGET_PATH "${Preprocess_SOURCE_DIR}/target_def.h")
 
-# Create a list of definition property strings.
-set(TARGET_DEFS "TARGET_DEF")
-set(FILE_DEFS "FILE_DEF")
+# Set some definition properties.
+foreach(c "" "_DEBUG" "_RELEASE")
+  set_property(
+    TARGET Preprocess
+    PROPERTY COMPILE_DEFINITIONS${c} "TARGET_DEF${c}"
+    )
+  set_property(
+    SOURCE preprocess.c preprocess${VS6}.cxx
+    PROPERTY COMPILE_DEFINITIONS${c} "FILE_DEF${c}"
+    )
+endforeach(c)
 
 # Add definitions with values.  VS6 does not support this.
 if(NOT PREPROCESS_VS6)
-  list(APPEND TARGET_DEFS
+  set_property(
+    TARGET Preprocess
+    APPEND PROPERTY COMPILE_DEFINITIONS
     "TARGET_STRING=\"${STRING_VALUE}${SEMICOLON}\""
     "TARGET_EXPR=${EXPR}"
     "TARGET_PATH=\"${TARGET_PATH}\""
     )
-  list(APPEND FILE_DEFS
+  set_property(
+    SOURCE preprocess.c preprocess${VS6}.cxx
+    APPEND PROPERTY COMPILE_DEFINITIONS
     "FILE_STRING=\"${STRING_VALUE}${SEMICOLON}\""
     "FILE_EXPR=${EXPR}"
     "FILE_PATH=\"${FILE_PATH}\""
     )
 endif(NOT PREPROCESS_VS6)
-
-add_executable(Preprocess preprocess.c preprocess${VS6}.cxx)
-set_target_properties(Preprocess PROPERTIES
-  COMPILE_DEFINITIONS "${TARGET_DEFS}"
-  COMPILE_DEFINITIONS_DEBUG "TARGET_DEF_DEBUG"
-  COMPILE_DEFINITIONS_RELEASE "TARGET_DEF_RELEASE"
-  )
-set_source_files_properties(preprocess.c preprocess${VS6}.cxx PROPERTIES
-  COMPILE_DEFINITIONS "${FILE_DEFS}"
-  COMPILE_DEFINITIONS_DEBUG "FILE_DEF_DEBUG"
-  COMPILE_DEFINITIONS_RELEASE "FILE_DEF_RELEASE"
-  )
 
 # Helper target for running test manually in build tree.
 add_custom_target(drive COMMAND Preprocess)
