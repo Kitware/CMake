@@ -39,8 +39,8 @@ IF(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
   SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386)
 ENDIF(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 
-# have a look at GET_PROPERTY(result GLOBAL ENABLED_FEATURES), this returns 
-# the successful FIND_PACKAGE() calls, maybe this can help
+# have a look at GET_PROPERTY(result GLOBAL PROPERTY ENABLED_FEATURES),
+# this returns the successful FIND_PACKAGE() calls, maybe this can help
 # Depends:
 IF(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
   MESSAGE(STATUS "CPACK_DEBIAN_PACKAGE_DEPENDS not set, the package will have no dependencies.")

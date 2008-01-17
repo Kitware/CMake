@@ -22,6 +22,8 @@
 class cmGetPropertyCommand : public cmCommand
 {
 public:
+  cmGetPropertyCommand();
+
   virtual cmCommand* Clone() 
     {
       return new cmGetPropertyCommand;
@@ -57,23 +59,57 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  get_property(VAR scope_value property)\n"
-        "  get_property(VAR scope_value property \n"
-        "               BRIEF_DOCS)\n"
-        "  get_property(VAR scope_value property \n"
-        "               FULL_DOCS)\n"
-        "Get a property from cmake.  The scope_value is either GLOBAL, "
-        "DIRECTORY dir_name, TARGET tgt_name, SOURCE_FILE src_name, "
-        "TEST test_name or VARIABLE var_name. The resulting value is "
-        "stored in the variable VAR. If the property is not found, "
-        "CMake will report an error. The second and third signatures "
-        "return the documentation for a property or variable instead of "
-        "its value.";
+        "  get_property(<variable>\n"
+        "               <GLOBAL             |\n"
+        "                DIRECTORY [dir]    |\n"
+        "                TARGET    <target> |\n"
+        "                SOURCE    <source> |\n"
+        "                TEST      <test>   |\n"
+        "                VARIABLE>\n"
+        "               PROPERTY <name>\n"
+        "               [DEFINED | BRIEF_DOCS | FULL_DOCS])\n"
+        "Get one property from one object in a scope.  "
+        "The first argument specifies the variable in which to store the "
+        "result.  "
+        "The second argument determines the scope from which to get the "
+        "property.  It must be one of the following:\n"
+        "GLOBAL scope is unique and does not accept a name.\n"
+        "DIRECTORY scope defaults to the current directory but another "
+        "directory (already processed by CMake) may be named by full or "
+        "relative path.\n"
+        "TARGET scope must name one existing target.\n"
+        "SOURCE scope must name one source file.\n"
+        "TEST scope must name one existing test.\n"
+        "VARIABLE scope is unique and does not accept a name.\n"
+        "The required PROPERTY option is immediately followed by the name "
+        "of the property to get.  "
+        "If the property is not set an empty value is returned.  "
+        "If the DEFINED option is given the variable is set to a boolean "
+        "value indicating whether the property has been set.  "
+        "If BRIEF_DOCS or FULL_DOCS is given then the variable is set to "
+        "a string containing documentation for the requested property.  "
+        "If documentation is requested for a property that has not been "
+        "defined NOTFOUND is returned.";
     }
   
   cmTypeMacro(cmGetPropertyCommand, cmCommand);
+private:
+  enum OutType { OutValue, OutDefined, OutBriefDoc, OutFullDoc };
+  std::string Variable;
+  std::string Name;
+  std::string PropertyName;
+  OutType InfoType;
+
+  // Implementation of result storage.
+  bool StoreResult(const char* value);
+
+  // Implementation of each property type.
+  bool HandleGlobalMode();
+  bool HandleDirectoryMode();
+  bool HandleTargetMode();
+  bool HandleSourceMode();
+  bool HandleTestMode();
+  bool HandleVariableMode();
 };
-
-
 
 #endif
