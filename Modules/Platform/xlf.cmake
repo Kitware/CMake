@@ -1,1 +1,1 @@
-set(CMAKE_DEFINE_FLAG_Fortran "-WF,-D")
+set(CMAKE_Fortran_DEFINE_FLAG "-WF,-D")

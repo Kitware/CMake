@@ -1202,8 +1202,9 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 void cmLocalGenerator::FixDefineFlags(std::string& flags, 
                                       const char* lang)
 {
-  std::string defineFlagVar = "CMAKE_DEFINE_FLAG_";
+  std::string defineFlagVar = "CMAKE_";
   defineFlagVar += lang;
+  defineFlagVar += "_DEFINE_FLAG";
   std::string defineFlag = 
     this->Makefile->GetSafeDefinition(defineFlagVar.c_str());
   if(defineFlag.size() == 0)
@@ -2219,7 +2220,8 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AppendDefines(std::string& defines,
-                                     const char* defines_list)
+                                     const char* defines_list,
+                                     const char* lang)
 {
   // Short-circuit if there are no definitions.
   if(!defines_list)
@@ -2237,14 +2239,22 @@ void cmLocalGenerator::AppendDefines(std::string& defines,
     return;
     }
 
-  // Separate from previous definitions with a space.
-  if(!defines.empty())
+  // Lookup the define flag for the current language.
+  std::string dflag = "-D";
+  if(lang)
     {
-    defines += " ";
+    std::string defineFlagVar = "CMAKE_";
+    defineFlagVar += lang;
+    defineFlagVar += "_DEFINE_FLAG";
+    const char* df = this->Makefile->GetDefinition(defineFlagVar.c_str());
+    if(df && *df)
+      {
+      dflag = df;
+      }
     }
 
   // Add each definition to the command line with appropriate escapes.
-  const char* dsep = "-D";
+  const char* dsep = defines.empty()? "" : " ";
   for(std::vector<std::string>::const_iterator di = defines_vec.begin();
       di != defines_vec.end(); ++di)
     {
@@ -2254,10 +2264,12 @@ void cmLocalGenerator::AppendDefines(std::string& defines,
       continue;
       }
 
-    // Append the -D
+    // Separate from previous definitions.
     defines += dsep;
+    dsep = " ";
 
     // Append the definition with proper escaping.
+    defines += dflag;
     if(this->WatcomWMake)
       {
       // The Watcom compiler does its own command line parsing instead
@@ -2284,7 +2296,6 @@ void cmLocalGenerator::AppendDefines(std::string& defines,
       // Make the definition appear properly on the command line.
       defines += this->EscapeForShell(di->c_str(), true);
       }
-    dsep = " -D";
     }
 }
 

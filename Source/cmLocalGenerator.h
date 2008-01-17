@@ -143,7 +143,8 @@ public:
    * Encode a list of preprocessor definitions for the compiler
    * command line.
    */
-  void AppendDefines(std::string& defines, const char* defines_list);
+  void AppendDefines(std::string& defines, const char* defines_list,
+                     const char* lang);
 
   /** Translate a dependency as given in CMake code to the name to
       appear in a generated build file.  If the given name is that of

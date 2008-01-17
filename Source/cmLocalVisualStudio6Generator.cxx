@@ -413,29 +413,6 @@ void cmLocalVisualStudio6Generator
       compileFlags += cflags;
       }
 
-    // Add per-source and per-configuration preprocessor definitions.
-    std::map<cmStdString, cmStdString> cdmap;
-    this->AppendDefines(compileFlags,
-                        (*sf)->GetProperty("COMPILE_DEFINITIONS"));
-    if(const char* cdefs = (*sf)->GetProperty("COMPILE_DEFINITIONS_DEBUG"))
-      {
-      this->AppendDefines(cdmap["DEBUG"], cdefs);
-      }
-    if(const char* cdefs = (*sf)->GetProperty("COMPILE_DEFINITIONS_RELEASE"))
-      {
-      this->AppendDefines(cdmap["RELEASE"], cdefs);
-      }
-    if(const char* cdefs =
-       (*sf)->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"))
-      {
-      this->AppendDefines(cdmap["MINSIZEREL"], cdefs);
-      }
-    if(const char* cdefs =
-       (*sf)->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"))
-      {
-      this->AppendDefines(cdmap["RELWITHDEBINFO"], cdefs);
-      }
-
     const char* lang = this->GetSourceFileLanguage(*(*sf));
     if(lang)
       {
@@ -443,12 +420,35 @@ void cmLocalVisualStudio6Generator
         {
         // force a C++ file type
         compileFlags += " /TP ";
-        } 
+        }
       else if(strcmp(lang, "C") == 0)
         {
         // force to c file type
         compileFlags += " /TC ";
         }
+      }
+
+    // Add per-source and per-configuration preprocessor definitions.
+    std::map<cmStdString, cmStdString> cdmap;
+    this->AppendDefines(compileFlags,
+                        (*sf)->GetProperty("COMPILE_DEFINITIONS"), lang);
+    if(const char* cdefs = (*sf)->GetProperty("COMPILE_DEFINITIONS_DEBUG"))
+      {
+      this->AppendDefines(cdmap["DEBUG"], cdefs, lang);
+      }
+    if(const char* cdefs = (*sf)->GetProperty("COMPILE_DEFINITIONS_RELEASE"))
+      {
+      this->AppendDefines(cdmap["RELEASE"], cdefs, lang);
+      }
+    if(const char* cdefs =
+       (*sf)->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"))
+      {
+      this->AppendDefines(cdmap["MINSIZEREL"], cdefs, lang);
+      }
+    if(const char* cdefs =
+       (*sf)->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"))
+      {
+      this->AppendDefines(cdmap["RELWITHDEBINFO"], cdefs, lang);
       }
 
     bool excludedFromBuild =
@@ -1503,17 +1503,17 @@ void cmLocalVisualStudio6Generator
       }
 
     // Add per-target and per-configuration preprocessor definitions.
-    this->AppendDefines(flags, target.GetProperty("COMPILE_DEFINITIONS"));
+    this->AppendDefines(flags, target.GetProperty("COMPILE_DEFINITIONS"), 0);
     this->AppendDefines(flagsDebug,
-                        target.GetProperty("COMPILE_DEFINITIONS_DEBUG"));
+                        target.GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
     this->AppendDefines(flagsRelease,
-                        target.GetProperty("COMPILE_DEFINITIONS_RELEASE"));
+                        target.GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
     this->AppendDefines
       (flagsMinSize,
-       target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"));
+       target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
     this->AppendDefines
       (flagsDebugRel,
-       target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"));
+       target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
 
     // The template files have CXX FLAGS in them, that need to be replaced.
     // There are not separate CXX and C template files, so we use the same
