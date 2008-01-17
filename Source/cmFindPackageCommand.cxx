@@ -965,6 +965,8 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
 class cmFileList;
 class cmFileListGeneratorBase
 {
+public:
+  virtual ~cmFileListGeneratorBase() {}
 protected:
   bool Consider(std::string const& fullPath, cmFileList& listing);
 private:
@@ -980,6 +982,7 @@ class cmFileList
 {
 public:
   cmFileList(): First(), Last(0) {}
+  virtual ~cmFileList() {}
   cmFileList& operator/(cmFileListGeneratorBase const& rhs)
     {
     if(this->Last)
