@@ -129,37 +129,6 @@ bool cmSetPropertyCommand::InitialPass(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-bool cmSetPropertyCommand::ConstructValue(std::string& value,
-                                          const char* old)
-{
-  if(this->AppendMode)
-    {
-    // This is an append.  Start with the original value.
-    if(old)
-      {
-      value = old;
-      }
-    }
-  else if(this->PropertyValue.empty())
-    {
-    // This is a set to no values.  Remove the property.
-    return false;
-    }
-
-  // Add the new value.
-  if(!this->PropertyValue.empty())
-    {
-    if(!value.empty())
-      {
-      value += ";";
-      }
-    value += this->PropertyValue;
-    }
-
-  return true;
-}
-
-//----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleGlobalMode()
 {
   if(!this->Names.empty())
@@ -171,16 +140,13 @@ bool cmSetPropertyCommand::HandleGlobalMode()
   // Set or append the property.
   cmake* cm = this->Makefile->GetCMakeInstance();
   const char* name = this->PropertyName.c_str();
-  std::string value;
-  if(this->ConstructValue(value, cm->GetProperty(name)))
+  if(this->AppendMode)
     {
-    // Set the new property.
-    cm->SetProperty(name, value.c_str());
+    cm->AppendProperty(name, this->PropertyValue.c_str());
     }
   else
     {
-    // Remove the property.
-    cm->SetProperty(name, 0);
+    cm->SetProperty(name, this->PropertyValue.c_str());
     }
 
   return true;
@@ -235,16 +201,13 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
 
   // Set or append the property.
   const char* name = this->PropertyName.c_str();
-  std::string value;
-  if(this->ConstructValue(value, mf->GetProperty(name)))
+  if(this->AppendMode)
     {
-    // Set the new property.
-    mf->SetProperty(name, value.c_str());
+    mf->AppendProperty(name, this->PropertyValue.c_str());
     }
   else
     {
-    // Remove the property.
-    mf->SetProperty(name, 0);
+    mf->SetProperty(name, this->PropertyValue.c_str());
     }
 
   return true;
@@ -283,16 +246,13 @@ bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
 {
   // Set or append the property.
   const char* name = this->PropertyName.c_str();
-  std::string value;
-  if(this->ConstructValue(value, target->GetProperty(name)))
+  if(this->AppendMode)
     {
-    // Set the new property.
-    target->SetProperty(name, value.c_str());
+    target->AppendProperty(name, this->PropertyValue.c_str());
     }
   else
     {
-    // Remove the property.
-    target->SetProperty(name, 0);
+    target->SetProperty(name, this->PropertyValue.c_str());
     }
 
   return true;
@@ -328,16 +288,13 @@ bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
 {
   // Set or append the property.
   const char* name = this->PropertyName.c_str();
-  std::string value;
-  if(this->ConstructValue(value, sf->GetProperty(name)))
+  if(this->AppendMode)
     {
-    // Set the new property.
-    sf->SetProperty(name, value.c_str());
+    sf->AppendProperty(name, this->PropertyValue.c_str());
     }
   else
     {
-    // Remove the property.
-    sf->SetProperty(name, 0);
+    sf->SetProperty(name, this->PropertyValue.c_str());
     }
 
   // TODO: MACOSX_PACKAGE_LOCATION special case in
@@ -392,16 +349,13 @@ bool cmSetPropertyCommand::HandleTest(cmTest* test)
 {
   // Set or append the property.
   const char* name = this->PropertyName.c_str();
-  std::string value;
-  if(this->ConstructValue(value, test->GetProperty(name)))
+  if(this->AppendMode)
     {
-    // Set the new property.
-    test->SetProperty(name, value.c_str());
+    test->AppendProperty(name, this->PropertyValue.c_str());
     }
   else
     {
-    // Remove the property.
-    test->SetProperty(name, 0);
+    test->SetProperty(name, this->PropertyValue.c_str());
     }
 
   return true;

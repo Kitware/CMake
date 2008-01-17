@@ -271,6 +271,16 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
 }
 
 //----------------------------------------------------------------------------
+void cmSourceFile::AppendProperty(const char* prop, const char* value)
+{
+  if (!prop)
+    {
+    return;
+    }
+  this->Properties.AppendProperty(prop, value, cmProperty::SOURCE_FILE);
+}
+
+//----------------------------------------------------------------------------
 const char* cmSourceFile::GetProperty(const char* prop) const
 {
   // Check for computed properties.

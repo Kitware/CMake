@@ -93,9 +93,6 @@ private:
   std::string PropertyValue;
   bool AppendMode;
 
-  // Implementation of value construction.
-  bool ConstructValue(std::string& value, const char* old);
-
   // Implementation of each property type.
   bool HandleGlobalMode();
   bool HandleDirectoryMode();

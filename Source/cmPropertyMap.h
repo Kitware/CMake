@@ -29,6 +29,9 @@ public:
   void SetProperty(const char *name, const char *value, 
                    cmProperty::ScopeType scope);
 
+  void AppendProperty(const char* name, const char* value,
+                      cmProperty::ScopeType scope);
+
   const char *GetPropertyValue(const char *name, 
                                cmProperty::ScopeType scope,
                                bool &chain) const;

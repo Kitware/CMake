@@ -2613,6 +2613,42 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop,value,cmProperty::DIRECTORY);
 }
 
+void cmMakefile::AppendProperty(const char* prop, const char* value)
+{
+  if (!prop)
+    {
+    return;
+    }
+
+  // handle special props
+  std::string propname = prop;
+  if ( propname == "INCLUDE_DIRECTORIES" )
+    {
+    std::vector<std::string> varArgsExpanded;
+    cmSystemTools::ExpandListArgument(value, varArgsExpanded);
+    for(std::vector<std::string>::const_iterator vi = varArgsExpanded.begin();
+        vi != varArgsExpanded.end(); ++vi)
+      {
+      this->AddIncludeDirectory(vi->c_str());
+      }
+    return;
+    }
+
+  if ( propname == "LINK_DIRECTORIES" )
+    {
+    std::vector<std::string> varArgsExpanded;
+    cmSystemTools::ExpandListArgument(value, varArgsExpanded);
+    for(std::vector<std::string>::const_iterator vi = varArgsExpanded.begin();
+        vi != varArgsExpanded.end(); ++vi)
+      {
+      this->AddLinkDirectory(vi->c_str());
+      }
+    return;
+    }
+
+  this->Properties.AppendProperty(prop,value,cmProperty::DIRECTORY);
+}
+
 const char *cmMakefile::GetPropertyOrDefinition(const char* prop)
 {
   const char *ret = this->GetProperty(prop, cmProperty::DIRECTORY);

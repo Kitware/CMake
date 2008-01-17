@@ -187,6 +187,7 @@ public:
 
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);
+  void AppendProperty(const char* prop, const char* value);
   const char *GetProperty(const char *prop);
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);

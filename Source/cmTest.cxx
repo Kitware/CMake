@@ -85,6 +85,16 @@ void cmTest::SetProperty(const char* prop, const char* value)
 }
 
 //----------------------------------------------------------------------------
+void cmTest::AppendProperty(const char* prop, const char* value)
+{
+  if (!prop)
+    {
+    return;
+    }
+  this->Properties.AppendProperty(prop, value, cmProperty::TEST);
+}
+
+//----------------------------------------------------------------------------
 void cmTest::SetMakefile(cmMakefile* mf)
 {
   // Set our makefile.

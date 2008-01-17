@@ -24,6 +24,17 @@ void cmProperty::Set(const char *name, const char *value)
   this->ValueHasBeenSet = true;
 }
 
+void cmProperty::Append(const char *name, const char *value)
+{
+  this->Name = name;
+  if(!this->Value.empty() && *value)
+    {
+    this->Value += ";";
+    }
+  this->Value += value;
+  this->ValueHasBeenSet = true;
+}
+
 const char *cmProperty::GetValue() const
 {
   if (this->ValueHasBeenSet)

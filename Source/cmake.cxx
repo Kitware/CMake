@@ -3435,6 +3435,15 @@ void cmake::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop, value, cmProperty::GLOBAL);
 }
 
+void cmake::AppendProperty(const char* prop, const char* value)
+{
+  if (!prop)
+    {
+    return;
+    }
+  this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL);
+}
+
 const char *cmake::GetProperty(const char* prop)
 {
   return this->GetProperty(prop, cmProperty::GLOBAL);

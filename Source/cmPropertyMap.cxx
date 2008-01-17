@@ -63,6 +63,32 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
   prop->Set(name,value);
 }
 
+void cmPropertyMap::AppendProperty(const char* name, const char* value,
+                                   cmProperty::ScopeType scope)
+{
+  // Skip if nothing to append.
+  if(!name || !value || !*value)
+    {
+    return;
+    }
+#ifdef CMAKE_STRICT
+  if (!this->CMakeInstance)
+    {
+    cmSystemTools::Error("CMakeInstance not set on a property map!");
+    abort();
+    }
+  else
+    {
+    this->CMakeInstance->RecordPropertyAccess(name,scope);
+    }
+#else
+  (void)scope;
+#endif
+
+  cmProperty *prop = this->GetOrCreateProperty(name);
+  prop->Append(name,value);
+}
+
 const char *cmPropertyMap
 ::GetPropertyValue(const char *name, 
                    cmProperty::ScopeType scope, 
