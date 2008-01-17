@@ -52,5 +52,5 @@ INCLUDE(Platform/UnixPaths)
 # Debian has lib64 paths only for compatibility so they should not be
 # searched.
 IF(EXISTS "/etc/debian_version")
-  SET_PROPERTIES(GLOBAL PROPERTIES FIND_LIBRARY_USE_LIB64_PATHS FALSE)
+  SET_PROPERTY(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
 ENDIF(EXISTS "/etc/debian_version")

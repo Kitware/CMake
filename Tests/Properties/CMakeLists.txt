@@ -24,10 +24,9 @@ include_directories("${Properties_SOURCE_DIR}" "${Properties_BINARY_DIR}")
 # test generic property interfaces
 define_property(GLOBALTEST GLOBAL "A test property" 
   "A long description of this test property" 0)
-set_properties(GLOBAL PROPERTIES GLOBALTEST 1)
-set_properties(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-  PROPERTIES DIRECTORYTEST 1)
-set_properties(SOURCE_FILE SubDir/properties3.cxx PROPERTIES SOURCETEST 1)
+set_property(GLOBAL PROPERTY GLOBALTEST 1)
+set_property(DIRECTORY PROPERTY DIRECTORYTEST 1)
+set_property(SOURCE SubDir/properties3.cxx PROPERTY SOURCETEST 1)
 get_property(GLOBALRESULT GLOBAL GLOBALTEST)
 get_property(DIRECTORYRESULT DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" 
   DIRECTORYTEST)
@@ -46,7 +45,7 @@ endif (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND
   DIRECTORYRESULT AND SOURCE_FILERESULT)
 
 # test the target property
-set_properties(TARGET Properties PROPERTIES TARGETTEST 1)
+set_property(TARGET Properties PROPERTY TARGETTEST 1)
 get_property(TARGETRESULT TARGET Properties TARGETTEST)
 if (NOT TARGETRESULT)
     message("Error: target result is TARGETRESULT=${TARGETRESULT}")

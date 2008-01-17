@@ -8,5 +8,4 @@
 # and/or ${CMAKE_SYSTEM_NAME}-<compiler_basename>-${CMAKE_SYSTEM_PROCESSOR}.cmake
 
 # (embedded) targets without operating system usually don't support shared libraries
-SET_PROPERTIES(GLOBAL PROPERTIES TARGET_SUPPORTS_SHARED_LIBS FALSE)
-
+SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
