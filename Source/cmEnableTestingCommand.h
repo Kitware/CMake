@@ -29,7 +29,7 @@
  * within the valid control structures are replicated in Testfile
  * (i.e. SUBDIRS() and ADD_TEST() commands within IF() commands that are
  * not entered by CMake are not replicated in Testfile).
- * Note that Dart expects to find this file in the build directory root; 
+ * Note that CTest expects to find this file in the build directory root; 
  * therefore, this command should be in the source directory root too.
  */
 class cmEnableTestingCommand : public cmCommand
@@ -76,9 +76,6 @@ public:
     }
   
   cmTypeMacro(cmEnableTestingCommand, cmCommand);
-
-  ///! method to recurse and write the DartTestfiles
-  void CreateDartTestfileForMakefile(cmMakefile *mf);
   
 };
 
