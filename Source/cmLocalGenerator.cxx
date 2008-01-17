@@ -174,14 +174,8 @@ void cmLocalGenerator::GenerateTestFiles()
     }
   std::string file = this->Makefile->GetStartOutputDirectory();
   file += "/";
-  if ( this->Makefile->IsSet("CTEST_NEW_FORMAT") )
-    {
-    file += "CTestTestfile.cmake";
-    }
-  else
-    {
-    file += "DartTestfile.txt";
-    }
+  file += "CTestTestfile.cmake";
+
   cmGeneratedFileStream fout(file.c_str());
   fout.SetCopyIfDifferent(true);
 
@@ -196,10 +190,7 @@ void cmLocalGenerator::GenerateTestFiles()
        << "# tree CMakeLists.txt file, skipping any SUBDIRS() or "
        << "ADD_TEST() commands" << std::endl
        << "# that are excluded by CMake control structures, i.e. IF() "
-       << "commands." << std::endl
-       << "#" << std::endl
-       << "# The next line is critical for Dart to work" << std::endl
-       << "# Duh :-)" << std::endl << std::endl;
+       << "commands." << std::endl;
   
   const char* testIncludeFile = 
     this->Makefile->GetProperty("TEST_INCLUDE_FILE");

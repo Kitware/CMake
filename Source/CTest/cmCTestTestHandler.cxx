@@ -98,14 +98,9 @@ bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
       // does the CTestTestfile.cmake exist ?
       testFilename = "CTestTestfile.cmake";
       }
-    else if( cmSystemTools::FileExists("DartTestfile.txt") )
-      {
-      // does the DartTestfile.txt exist ?
-      testFilename = "DartTestfile.txt";
-      }
     else
       {
-      // No DartTestfile.txt? Who cares...
+      // No CTestTestfile? Who cares...
       cmSystemTools::ChangeDirectory(cwd.c_str());
       continue;
       }
@@ -1281,11 +1276,6 @@ void cmCTestTestHandler::GetListOfTests()
     {
     // does the CTestTestfile.cmake exist ?
     testFilename = "CTestTestfile.cmake";
-    }
-  else if( cmSystemTools::FileExists("DartTestfile.txt") )
-    {
-    // does the DartTestfile.txt exist ?
-    testFilename = "DartTestfile.txt";
     }
   else
     {

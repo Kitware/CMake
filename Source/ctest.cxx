@@ -179,7 +179,7 @@ static const char * cmDocumentationOptions[][3] =
   {"--ctest-config", "The configuration file used to initialize CTest state "
   "when submitting dashboards.",
    "This option tells CTest to use different initialization file instead of "
-   "DartConfiguration.tcl. This way multiple initialization files can be "
+   "CTestConfiguration.tcl. This way multiple initialization files can be "
    "used for example to submit to multiple dashboards." },
   {"--overwrite", "Overwrite CTest configuration option.",
    "By default ctest uses configuration options from configuration file. "
@@ -224,8 +224,7 @@ int main (int argc, char *argv[])
   // If there is a testing input file, check for documentation options
   // only if there are actually arguments.  We want running without
   // arguments to run tests.
-  if(argc > 1 || !cmSystemTools::FileExists("DartTestfile.txt") &&
-    !cmSystemTools::FileExists("CTestTestfile.cmake"))
+  if(argc > 1 || !cmSystemTools::FileExists("CTestTestfile.cmake"))
     {
     if(argc == 1)
       {
