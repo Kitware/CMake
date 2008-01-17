@@ -26,7 +26,7 @@ cmFindBase::cmFindBase()
     "   FIND_XXX(<VAR> name1 path1 path2 ...)\n"
     "This is the short-hand signature for the command that "
     "is sufficient in many cases.  It is the same "
-    "as FIND_XXX(<VAR> name1 PATHS path2 path2 ...)\n"
+    "as FIND_XXX(<VAR> name1 PATHS path1 path2 ...)\n"
     "   FIND_XXX(\n"
     "             <VAR>\n"
     "             name | NAMES name1 [name2 ...]\n"
