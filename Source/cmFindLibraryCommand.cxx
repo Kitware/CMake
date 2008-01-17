@@ -24,6 +24,12 @@ cmFindLibraryCommand::cmFindLibraryCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_XXX_PATH", "CMAKE_LIBRARY_PATH");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_XXX_MAC_PATH",
+                               "CMAKE_FRAMEWORK_PATH");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_SYSTEM_XXX_MAC_PATH",
+                               "CMAKE_SYSTEM_FRAMEWORK_PATH");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SYSTEM", "LIB");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_SYSTEM_XXX_PATH", 

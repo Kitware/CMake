@@ -29,6 +29,12 @@ cmFindProgramCommand::cmFindProgramCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_XXX_PATH", "CMAKE_PROGRAM_PATH");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_XXX_MAC_PATH",
+                               "CMAKE_APPBUNDLE_PATH");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_SYSTEM_XXX_MAC_PATH",
+                               "CMAKE_SYSTEM_APPBUNDLE_PATH");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SYSTEM", "");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_SYSTEM_XXX_PATH", 

@@ -28,6 +28,12 @@ cmFindPathCommand::cmFindPathCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_XXX_PATH", "CMAKE_INCLUDE_PATH");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_XXX_MAC_PATH",
+                               "CMAKE_FRAMEWORK_PATH");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "CMAKE_SYSTEM_XXX_MAC_PATH",
+                               "CMAKE_SYSTEM_FRAMEWORK_PATH");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SYSTEM", "INCLUDE");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_SYSTEM_XXX_PATH", 

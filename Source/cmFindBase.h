@@ -17,15 +17,15 @@
 #ifndef cmFindBase_h
 #define cmFindBase_h
 
-#include "cmCommand.h"
+#include "cmFindCommon.h"
 
 /** \class cmFindBase
- * \brief Define a command to search for an executable program.
+ * \brief Base class for most FIND_XXX commands.
  *
  * cmFindBase is a parent class for cmFindProgramCommand, cmFindPathCommand,
- * and cmFindLibraryCommand, cmFindFile
+ * and cmFindLibraryCommand, cmFindFileCommand
  */
-class cmFindBase : public cmCommand
+class cmFindBase : public cmFindCommon
 {
 public:
   cmFindBase();
@@ -34,20 +34,15 @@ public:
    * the CMakeLists.txt file.
    */
   virtual bool ParseArguments(std::vector<std::string> const& args);
-  cmTypeMacro(cmFindBase, cmCommand);
+  cmTypeMacro(cmFindBase, cmFindCommon);
   
   virtual const char* GetFullDocumentation()
     {return this->GenericDocumentation.c_str();}
 
-  enum RootPathMode { RootPathModeBoth, 
-                      RootPathModeOnlyRootPath, 
-                      RootPathModeNoRootPath };
-  
 protected:
   void PrintFindStuff();
   void ExpandPaths(std::vector<std::string> userPaths);
-  void HandleCMakeFindRootPath();
-  
+
   // add to the SearchPaths
   void AddPaths(std::vector<std::string>& paths);
   void AddFrameWorkPaths();
@@ -70,29 +65,12 @@ protected:
   cmStdString VariableName;
   std::vector<std::string> Names;
   std::vector<std::string> SearchPaths;
-  std::vector<std::string> SearchPathSuffixes;
 
   // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
-  cmStdString CMakePathName; 
   cmStdString EnvironmentPath; // LIB,INCLUDE
 
   bool AlreadyInCache;
   bool AlreadyInCacheWithoutMetaInfo;
-  bool NoDefaultPath;
-  bool NoCMakePath;
-  bool NoCMakeEnvironmentPath;
-  bool NoSystemEnvironmentPath;
-  bool NoCMakeSystemPath;
-  RootPathMode FindRootPathMode;
-  
-  bool SearchFrameworkFirst;
-  bool SearchFrameworkOnly;
-  bool SearchFrameworkLast;
-  
-  bool SearchAppBundleFirst;
-  bool SearchAppBundleOnly;
-  bool SearchAppBundleLast;
-  
 };
 
 
