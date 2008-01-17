@@ -22,3 +22,62 @@ IF(NOT FOO_DIR)
   CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
 ENDIF(NOT FOO_DIR)
 
+#SET(CMAKE_FIND_DEBUG_MODE 1)
+
+# For purposes of the test wipe out previous find results.
+SET(PACKAGES foo Foo Bar TFramework Tframework TApp Tapp Special)
+FOREACH(p ${PACKAGES})
+  SET(${p}_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+ENDFOREACH(p)
+
+# Enable framework and bundle searching.  Make sure bundles are found
+# before unix-syle packages.
+SET(CMAKE_FIND_FRAMEWORK LAST)
+SET(CMAKE_FIND_APPBUNDLE FIRST)
+
+# Look for packages with new-style signatures.
+FIND_PACKAGE(foo NO_MODULE)
+FIND_PACKAGE(Foo CONFIGS FooConfig.cmake)
+FIND_PACKAGE(Bar)
+FIND_PACKAGE(TFramework CONFIGS TFrameworkConfig.cmake)
+FIND_PACKAGE(Tframework)
+FIND_PACKAGE(TApp)
+FIND_PACKAGE(Tapp CONFIGS tapp-config.cmake)
+FIND_PACKAGE(Special NAMES Suffix SuffixTest PATH_SUFFIXES test)
+
+# Expected locations at which packages should be found.
+SET(foo_EXPECTED "lib/foo-1.2/foo-config.cmake")
+SET(Foo_EXPECTED "lib/foo-1.2/CMake/FooConfig.cmake")
+SET(Bar_EXPECTED "lib/Bar/BarConfig.cmake")
+SET(Special_EXPECTED "lib/suffix/test/SuffixTestConfig.cmake")
+SET(TFramework_EXPECTED
+  "TFramework.framework/Versions/A/Resources/CMake/TFrameworkConfig.cmake")
+SET(Tframework_EXPECTED
+  "TFramework.framework/Versions/A/Resources/tframework-config.cmake")
+SET(TApp_EXPECTED
+  "TApp.app/Contents/Resources/TAppConfig.cmake")
+SET(Tapp_EXPECTED
+  "TApp.app/Contents/Resources/cmake/tapp-config.cmake")
+
+# Check the results.
+FOREACH(p ${PACKAGES})
+  IF(${p}_FOUND)
+    # Convert to relative path for comparison to expected location.
+    FILE(RELATIVE_PATH REL_${p}_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}"
+      "${${p}_CONFIG}")
+
+    # Debugging output.
+    IF(CMAKE_FIND_DEBUG_MODE)
+      MESSAGE("Package ${p} found [${REL_${p}_CONFIG}]")
+    ENDIF(CMAKE_FIND_DEBUG_MODE)
+
+    # Check and report failure.
+    IF(NOT "${REL_${p}_CONFIG}" STREQUAL "${${p}_EXPECTED}")
+      MESSAGE(SEND_ERROR
+        "Package ${p} should have been [${${p}_EXPECTED}] but "
+        "was [${REL_${p}_CONFIG}]")
+    ENDIF(NOT "${REL_${p}_CONFIG}" STREQUAL "${${p}_EXPECTED}")
+  ELSE(${p}_FOUND)
+    MESSAGE(SEND_ERROR "Package ${p} not found!")
+  ENDIF(${p}_FOUND)
+ENDFOREACH(p)
