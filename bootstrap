@@ -184,6 +184,7 @@ CMAKE_C_SOURCES="\
 if ${cmake_system_mingw}; then
   KWSYS_C_SOURCES="\
     ProcessWin32 \
+    String \
     System"
   KWSYS_C_MINGW_SOURCES="\
     ProcessFwd9x \
@@ -193,6 +194,7 @@ if ${cmake_system_mingw}; then
 else
   KWSYS_C_SOURCES="\
     ProcessUNIX \
+    String \
     System"
   KWSYS_C_MINGW_SOURCES=""
   KWSYS_C_GENERATED_SOURCES=""
@@ -205,10 +207,12 @@ KWSYS_CXX_SOURCES="\
   SystemTools"
 
 KWSYS_FILES="\
+  auto_ptr.hxx \
   Directory.hxx \
   Glob.hxx \
   Process.h \
   RegularExpression.hxx \
+  String.h \
   String.hxx \
   System.h \
   SystemTools.hxx"
