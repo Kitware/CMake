@@ -356,7 +356,7 @@ bool cmSetPropertyCommand::HandleTestMode()
       ti != tests.end(); ++ti)
     {
     cmTest* test = *ti;
-    std::set<cmStdString>::const_iterator ni =
+    std::set<cmStdString>::iterator ni =
       this->Names.find(test->GetName());
     if(ni != this->Names.end())
       {
