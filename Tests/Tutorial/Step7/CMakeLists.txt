@@ -71,10 +71,10 @@ do_test (0.0001 "0.0001 is 0.01")
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
-SET(CPACK_PACKAGE_VERSION_MAJOR "${Tutorial_VERSION_MAJOR}")
-SET(CPACK_PACKAGE_VERSION_MINOR "${Tutorial_VERSION_MINOR}")
-INCLUDE (CPack)
+set (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/License.txt")
+set (CPACK_PACKAGE_VERSION_MAJOR "${Tutorial_VERSION_MAJOR}")
+set (CPACK_PACKAGE_VERSION_MINOR "${Tutorial_VERSION_MINOR}")
+include (CPack)
 
 # enable dashboard scripting
-INCLUDE (CTest)
+include (CTest)

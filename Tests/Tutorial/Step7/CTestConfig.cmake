@@ -1,1 +1,1 @@
-SET(CTEST_PROJECT_NAME "Tutorial")
+set (CTEST_PROJECT_NAME "Tutorial")
