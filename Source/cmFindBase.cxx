@@ -23,14 +23,14 @@ cmFindBase::cmFindBase()
   this->AlreadyInCache = false;
   this->AlreadyInCacheWithoutMetaInfo = false;
   this->GenericDocumentation = 
-    "   FIND_XXX(<VAR> name1 path1 path2 ...)\n"
+    "   FIND_XXX(<VAR> name1 [path1 path2 ...])\n"
     "This is the short-hand signature for the command that "
     "is sufficient in many cases.  It is the same "
-    "as FIND_XXX(<VAR> name1 PATHS path1 path2 ...)\n"
+    "as FIND_XXX(<VAR> name1 [PATHS path1 path2 ...])\n"
     "   FIND_XXX(\n"
     "             <VAR>\n"
     "             name | NAMES name1 [name2 ...]\n"
-    "             PATHS path1 [path2 ... ENV var]\n"
+    "             [PATHS path1 [path2 ... ENV var]]\n"
     "             [PATH_SUFFIXES suffix1 [suffix2 ...]]\n"
     "             [DOC \"cache documentation string\"]\n"
     "             [NO_DEFAULT_PATH]\n"
