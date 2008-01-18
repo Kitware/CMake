@@ -1237,7 +1237,8 @@ class cmFileListGeneratorCaseInsensitive: public cmFileListGeneratorBase
 public:
   cmFileListGeneratorCaseInsensitive(std::string const& str):
     cmFileListGeneratorBase(), String(str) {}
-  cmFileListGeneratorCaseInsensitive(cmFileListGeneratorCaseInsensitive const& r):
+  cmFileListGeneratorCaseInsensitive(
+    cmFileListGeneratorCaseInsensitive const& r):
     cmFileListGeneratorBase(), String(r.String) {}
 private:
   std::string String;
