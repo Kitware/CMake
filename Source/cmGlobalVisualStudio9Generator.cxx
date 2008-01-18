@@ -27,6 +27,11 @@ cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator()
   this->FindMakeProgramFile = "CMakeVS9FindMake.cmake";
 }
 
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio9Generator::AddPlatformDefinitions(cmMakefile* mf)
+{
+  mf->AddDefinition("MSVC90", "1");
+}
 
 void cmGlobalVisualStudio9Generator::WriteSLNHeader(std::ostream& fout)
 {

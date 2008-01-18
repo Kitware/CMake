@@ -37,7 +37,8 @@ public:
   virtual const char* GetName() const {
     return cmGlobalVisualStudio9Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 9 2008";}
-
+  virtual void AddPlatformDefinitions(cmMakefile* mf);
+  
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
 
