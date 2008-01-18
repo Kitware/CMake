@@ -61,7 +61,11 @@ void cmPassed(const char* Message, const char* m2="")
 #endif
 
 #ifndef CMAKE_IS_REALLY_FUN
-This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
+# error This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
+#endif
+
+#if defined(NDEBUG) && !defined(CMAKE_IS_FUN_IN_RELEASE_MODE)
+# error Per-configuration directory-level definition not inherited.
 #endif
 
 #ifdef COMPLEX_TEST_CMAKELIB

@@ -1134,9 +1134,30 @@ void cmMakefile::InitializeFromParent()
   // define flags
   this->DefineFlags = parent->DefineFlags;
 
-  // compile definitions property
+  // compile definitions property and per-config versions
+  {
   this->SetProperty("COMPILE_DEFINITIONS",
                     parent->GetProperty("COMPILE_DEFINITIONS"));
+  std::vector<std::string> configs;
+  if(const char* configTypes =
+     this->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+    {
+    cmSystemTools::ExpandListArgument(configTypes, configs);
+    }
+  else if(const char* buildType =
+          this->GetDefinition("CMAKE_BUILD_TYPE"))
+    {
+    configs.push_back(buildType);
+    }
+  for(std::vector<std::string>::const_iterator ci = configs.begin();
+      ci != configs.end(); ++ci)
+    {
+    std::string defPropName = "COMPILE_DEFINITIONS_";
+    defPropName += cmSystemTools::UpperCase(*ci);
+    this->SetProperty(defPropName.c_str(),
+                      parent->GetProperty(defPropName.c_str()));
+    }
+  }
 
   // link libraries
   this->LinkLibraries = parent->LinkLibraries;
@@ -3046,7 +3067,9 @@ void cmMakefile::DefineProperties(cmake *cm)
      "language syntax may require escapes to specify some values).  "
      "This property may be set on a per-configuration basis using the name "
      "COMPILE_DEFINITIONS_<CONFIG> where <CONFIG> is an upper-case name "
-     "(ex. \"COMPILE_DEFINITIONS_DEBUG\").\n"
+     "(ex. \"COMPILE_DEFINITIONS_DEBUG\").  "
+     "This property will be initialized in each directory by its value "
+     "in the directory's parent.\n"
      "CMake will automatically drop some definitions that "
      "are not supported by the native build tool.  "
      "The VS6 IDE does not support definitions with values "
@@ -3063,7 +3086,9 @@ void cmMakefile::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("COMPILE_DEFINITIONS_<CONFIG>", cmProperty::DIRECTORY,
      "Per-configuration preprocessor definitions in a directory.",
-     "This is the configuration-specific version of COMPILE_DEFINITIONS.");
+     "This is the configuration-specific version of COMPILE_DEFINITIONS.  "
+     "This property will be initialized in each directory by its value "
+     "in the directory's parent.\n");
 
   cm->DefineProperty
     ("EXCLUDE_FROM_ALL", cmProperty::DIRECTORY,
