@@ -2948,6 +2948,38 @@ std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
 }
 
 //----------------------------------------------------------------------------
+std::string cmLocalGenerator::EscapeForCMake(const char* str)
+{
+  // Always double-quote the argument to take care of most escapes.
+  std::string result = "\"";
+  for(const char* c = str; *c; ++c)
+    {
+    if(*c == '"')
+      {
+      // Escape the double quote to avoid ending the argument.
+      result += "\\\"";
+      }
+    else if(*c == '$')
+      {
+      // Escape the dollar to avoid expanding variables.
+      result += "\\$";
+      }
+    else if(*c == '\\')
+      {
+      // Escape the backslash to avoid other escapes.
+      result += "\\\\";
+      }
+    else
+      {
+      // Other characters will be parsed correctly.
+      result += *c;
+      }
+    }
+  result += "\"";
+  return result;
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::GetTargetDirectory(cmTarget const&) const
 {

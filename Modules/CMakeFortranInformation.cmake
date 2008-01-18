@@ -124,7 +124,7 @@ ENDIF(NOT CMAKE_Fortran_CREATE_STATIC_LIBRARY)
 # compile a Fortran file into an object file
 IF(NOT CMAKE_Fortran_COMPILE_OBJECT)
   SET(CMAKE_Fortran_COMPILE_OBJECT
-    "<CMAKE_Fortran_COMPILER> -o <OBJECT>  <FLAGS> -c <SOURCE>")
+    "<CMAKE_Fortran_COMPILER> -o <OBJECT> <DEFINES> <FLAGS> -c <SOURCE>")
 ENDIF(NOT CMAKE_Fortran_COMPILE_OBJECT)
 
 # link a fortran program

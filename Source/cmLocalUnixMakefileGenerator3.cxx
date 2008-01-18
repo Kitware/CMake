@@ -1478,7 +1478,8 @@ cmLocalUnixMakefileGenerator3
     else if(lang == "Fortran")
       {
       std::vector<std::string> defines;
-      if(const char* c_defines = mf->GetDefinition("CMAKE_DEFINITIONS"))
+      if(const char* c_defines =
+         mf->GetDefinition("CMAKE_TARGET_DEFINITIONS"))
         {
         cmSystemTools::ExpandListArgument(c_defines, defines);
         }
@@ -1844,13 +1845,43 @@ void cmLocalUnixMakefileGenerator3
       }
     }
 
-  cmakefileStream
-    << "\n"
-    << "# Preprocessor definitions for this directory.\n"
-    << "SET(CMAKE_DEFINITIONS\n"
-    << "  " << this->Makefile->GetDefineFlags() << "\n"
-    << "  )\n";
-
+  // Build a list of preprocessor definitions for the target.
+  std::vector<std::string> defines;
+  {
+  std::string defPropName = "COMPILE_DEFINITIONS_";
+  defPropName += this->ConfigurationName;
+  if(const char* ddefs = this->Makefile->GetProperty("COMPILE_DEFINITIONS"))
+    {
+    cmSystemTools::ExpandListArgument(ddefs, defines);
+    }
+  if(const char* cdefs = target.GetProperty("COMPILE_DEFINITIONS"))
+    {
+    cmSystemTools::ExpandListArgument(cdefs, defines);
+    }
+  if(const char* dcdefs = this->Makefile->GetProperty(defPropName.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(dcdefs, defines);
+    }
+  if(const char* ccdefs = target.GetProperty(defPropName.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(ccdefs, defines);
+    }
+  }
+  if(!defines.empty())
+    {
+    cmakefileStream
+      << "\n"
+      << "# Preprocessor definitions for this target.\n"
+      << "SET(CMAKE_TARGET_DEFINITIONS\n";
+    for(std::vector<std::string>::const_iterator di = defines.begin();
+        di != defines.end(); ++di)
+      {
+      cmakefileStream
+        << "  " << this->EscapeForCMake(di->c_str()) << "\n";
+      }
+    cmakefileStream
+      << "  )\n";
+    }
 }
 
 //----------------------------------------------------------------------------

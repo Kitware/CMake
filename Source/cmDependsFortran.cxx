@@ -142,27 +142,18 @@ cmDependsFortran
   IncludePath(&includes),
   Internal(new cmDependsFortranInternals)
 {
-  // translate i.e. -DFOO=BAR to FOO and add it to the list of defined
+  // translate i.e. FOO=BAR to FOO and add it to the list of defined
   // preprocessor symbols
-  std::string def;
   for(std::vector<std::string>::const_iterator
       it = definitions.begin(); it != definitions.end(); ++it)
     {
-    std::string::size_type match = it->find("-D");
-    if(match != std::string::npos)
+    std::string def = *it;
+    std::string::size_type assignment = def.find("=");
+    if(assignment != std::string::npos)
       {
-      std::string::size_type assignment = it->find("=");
-      if(assignment != std::string::npos)
-        {
-        std::string::size_type length = assignment - (match+2);
-        def = it->substr(match+2, length);
-        }
-      else
-        {
-        def = it->substr(match+2);
-        }
-      this->PPDefinitions.push_back(def);
+      def = it->substr(0, assignment);
       }
+    this->PPDefinitions.push_back(def);
     }
 }
 
