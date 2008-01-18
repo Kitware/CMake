@@ -2999,8 +2999,8 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
       this->DefinitionStack[this->DefinitionStack.size()-2].erase(var);
       }
     }
-  // otherwise do the parent
-  else
+  // otherwise do the parent (if one exists)
+  else if (this->LocalGenerator->GetParent())
     {
     cmMakefile *parent = this->LocalGenerator->GetParent()->GetMakefile();
     if (parent)
