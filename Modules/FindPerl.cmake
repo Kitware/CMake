@@ -6,11 +6,15 @@
 
 INCLUDE(FindCygwin)
 
+GET_FILENAME_COMPONENT(
+  ActivePerl_CurrentVersion 
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl;CurrentVersion]" 
+  NAME)
+
 FIND_PROGRAM(PERL_EXECUTABLE
   perl
   "C:/Perl/bin" 
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl\\804]/bin
-  [HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl\\628]/bin
+  [HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl\\${ActivePerl_CurrentVersion}]/bin
   ${CYGWIN_INSTALL_PATH}/bin
   )
 
