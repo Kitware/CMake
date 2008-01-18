@@ -70,7 +70,6 @@
 #include "cmMessageCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmProjectCommand.cxx"
-#include "cmRaiseScopeCommand.cxx"
 #include "cmSetCommand.cxx"
 #include "cmSetPropertyCommand.cxx"
 #include "cmSetSourceFilesPropertiesCommand.cxx"
@@ -130,7 +129,6 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmMessageCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmProjectCommand);
-  commands.push_back(new cmRaiseScopeCommand);
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSetPropertyCommand);
   commands.push_back(new cmSetSourceFilesPropertiesCommand);

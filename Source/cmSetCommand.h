@@ -65,7 +65,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  set(<variable> <value> [CACHE <type> <docstring> [FORCE]])\n"
+      "  set(<variable> <value> [[CACHE <type> <docstring> [FORCE]] | "
+      "PARENT_SCOPE])\n"
       "Within CMake sets <variable> to the value <value>.  <value> is expanded"
       "  before <variable> is set to it.  If CACHE is present, then the "
       "<variable> is put in the cache. <type> and <docstring> are then "
@@ -81,6 +82,12 @@ public:
       "cache variable, then this always writes into the current makefile. The "
       "FORCE option will overwrite the cache value removing any changes by "
       "the user.\n"
+      "If PARENT_SCOPE is present, the variable will be set in the scope "
+      "above the current scope. Each new directory or function creates a new "
+      "scope. This command will set the value of a variable into the parent "
+      "directory or calling function (whichever is applicable to the case at "
+      "hand) If VALUE is not specified then the variable is removed from the "
+      "parent scope.\n"
       "  set(<variable> <value1> ... <valueN>)\n"
       "In this case <variable> is set to a semicolon separated list of "
       "values.\n"

@@ -799,8 +799,8 @@ FUNCTION(WX_SPLIT_ARGUMENTS_ON _keyword _leftvar _rightvar)
     ENDIF("${element}" STREQUAL "${_keyword}")
   ENDFOREACH(element)
 
-  RAISE_SCOPE(${_leftvar})
-  RAISE_SCOPE(${_rightvar})
+  SET(${_leftvar}  ${${_leftvar}}  PARENT_SCOPE)
+  SET(${_rightvar} ${${_rightvar}} PARENT_SCOPE)
 ENDFUNCTION(WX_SPLIT_ARGUMENTS_ON)
 
 #
@@ -839,7 +839,7 @@ FUNCTION(WX_GET_DEPENDENCIES_FROM_XML
     LIST(APPEND ${_depends} "${dep_file}")
   ENDFOREACH(dep_file)
 
-  RAISE_SCOPE(${_depends})
+  SET(${_depends} ${${_depends}} PARENT_SCOPE)
 ENDFUNCTION(WX_GET_DEPENDENCIES_FROM_XML)
 
 # 
@@ -953,5 +953,5 @@ FUNCTION(WXWIDGETS_ADD_RESOURCES _outfiles)
   # Add generated file to output file list.
   LIST(APPEND ${_outfiles} "${outfile}")
 
-  RAISE_SCOPE(${_outfiles})
+  SET(${_outfiles} ${${_outfiles}} PARENT_SCOPE)
 ENDFUNCTION(WXWIDGETS_ADD_RESOURCES)

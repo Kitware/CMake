@@ -1,4 +1,3 @@
 function(tester)
- set (tester_res "${CMAKE_CURRENT_LIST_FILE}")
- raise_scope(tester_res)
+ set (tester_res "${CMAKE_CURRENT_LIST_FILE}" PARENT_SCOPE)
 endfunction(tester)

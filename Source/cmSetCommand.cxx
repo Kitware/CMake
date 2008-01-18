@@ -74,35 +74,62 @@ bool cmSetCommand::InitialPass(std::vector<std::string> const& args)
   std::string value;  // optional
   bool cache = false; // optional
   bool force = false; // optional
+  bool parentScope = false;
   cmCacheManager::CacheEntryType type 
     = cmCacheManager::STRING; // required if cache
   const char* docstring = 0; // required if cache
   std::string::size_type cacheStart = 0;
   
-  // look for FORCE argument
-  if (args.size() > 4 && args[args.size()-1] == "FORCE")
+  unsigned int ignoreLastArgs = 0;
+  // look for PARENT_SCOPE argument
+  if (args.size() > 1 && args[args.size()-1] == "PARENT_SCOPE")
     {
-    force = true;
+    parentScope = true;
+    ignoreLastArgs++;
+    }
+  else
+    {
+    // look for FORCE argument
+    if (args.size() > 4 && args[args.size()-1] == "FORCE")
+      {
+      force = true;
+      ignoreLastArgs++;
+      }
+
+    // check for cache signature
+    if (args.size() > 3 && args[args.size() - 3 - (force ? 1 : 0)] == "CACHE")
+      {
+      cache = true;
+      ignoreLastArgs+=3;
+      }
     }
 
-  // check for cache signature
-  if (args.size() > 3 && args[args.size() - 3 - (force ? 1 : 0)] == "CACHE")
-    {
-    cache = true;
-    }
-  
   // collect any values into a single semi-colon seperated value list
   if(static_cast<unsigned short>(args.size()) >
-     static_cast<unsigned short>(1 + (cache ? 3 : 0) + (force ? 1 : 0)))
+     static_cast<unsigned short>(1 + ignoreLastArgs))
     {
     value = args[1];
-    size_t endPos = args.size() - (cache ? 3 : 0) - (force ? 1 : 0);
+    size_t endPos = args.size() - ignoreLastArgs;
     for(size_t i = 2; i < endPos; ++i)
       {
       value += ";";
       value += args[i];
       }
     }
+
+  if (parentScope)
+    {
+    if (value.empty())
+      {
+      this->Makefile->RaiseScope(variable, 0);
+      }
+    else
+      {
+      this->Makefile->RaiseScope(variable, value.c_str());
+      }
+      return true;
+    }
+
 
   // we should be nice and try to catch some simple screwups if the last or
   // next to last args are CACHE then they screwed up.  If they used FORCE

@@ -46,7 +46,7 @@ Test_Argn_Function(ignored 3)
 
 # test argument naming and raise scope
 function(track_find_variable cache_variable is_changed)
- raise_scope("${is_changed}" changed)
+ set("${is_changed}" changed PARENT_SCOPE)
 endfunction(track_find_variable)
 track_find_variable(testvar is_changed)
 if ("${is_changed}" STREQUAL changed)
@@ -65,7 +65,7 @@ endif (tester_res STREQUAL "${CMAKE_CURRENT_LIST_FILE}")
 
 
 
-# test recursion and return via raise_scope
+# test recursion and return via set(... PARENT_SCOPE)
 function (factorial argument result)
   if (argument LESS 2)
     set (lresult 1)
@@ -74,7 +74,7 @@ function (factorial argument result)
     factorial (${temp} tresult)
     math (EXPR lresult "${argument}*${tresult}")
   endif (argument LESS 2)
-  raise_scope ("${result}" "${lresult}")
+  set ("${result}" "${lresult}" PARENT_SCOPE)
 endfunction (factorial)
 
 factorial (5 fresult)
@@ -88,8 +88,9 @@ endif (fresult EQUAL 120)
 
 # case test
 FUNCTION(strange_function m)
-  RAISE_SCOPE("${m}" strange_function)
+  SET("${m}" strange_function PARENT_SCOPE)
 ENDFUNCTION(strange_function m)
+
 STRANGE_FUNCTION(var)
 set(second_var "second_var")
 IF("${var}" STREQUAL "strange_function" AND "${second_var}" STREQUAL "second_var")
@@ -105,8 +106,9 @@ ENDFUNCTION(ADD_EXECUTABLE)
 
 # var undef case
 FUNCTION(undef_var m)
-  RAISE_SCOPE("${m}")
+  SET("${m}" PARENT_SCOPE)
 ENDFUNCTION(undef_var)
+
 SET(FUNCTION_UNDEFINED 1)
 undef_var(FUNCTION_UNDEFINED)
 IF(DEFINED FUNCTION_UNDEFINED)
