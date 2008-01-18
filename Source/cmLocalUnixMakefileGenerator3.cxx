@@ -1849,7 +1849,7 @@ void cmLocalUnixMakefileGenerator3
   std::vector<std::string> defines;
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";
-  defPropName += this->ConfigurationName;
+  defPropName += cmSystemTools::UpperCase(this->ConfigurationName);
   if(const char* ddefs = this->Makefile->GetProperty("COMPILE_DEFINITIONS"))
     {
     cmSystemTools::ExpandListArgument(ddefs, defines);
