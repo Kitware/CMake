@@ -1134,6 +1134,10 @@ void cmMakefile::InitializeFromParent()
   // define flags
   this->DefineFlags = parent->DefineFlags;
 
+  // compile definitions property
+  this->SetProperty("COMPILE_DEFINITIONS",
+                    parent->GetProperty("COMPILE_DEFINITIONS"));
+
   // link libraries
   this->LinkLibraries = parent->LinkLibraries;
 
