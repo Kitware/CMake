@@ -1185,7 +1185,19 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string dirName = args[2];
       dirName += "/Progress";
       cmSystemTools::RemoveADirectory(dirName.c_str());
-      int count = atoi(args[3].c_str());
+
+      // is the last argument a filename that exists?
+      FILE *countFile = fopen(args[3].c_str(),"r");
+      int count;
+      if (countFile)
+        {
+        fscanf(countFile,"%i",&count);
+        fclose(countFile);
+        }
+      else
+        {
+        count = atoi(args[3].c_str());
+        }
       if (count)
         {
         cmSystemTools::MakeDirectory(dirName.c_str());

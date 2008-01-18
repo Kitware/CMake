@@ -210,8 +210,7 @@ void cmLocalUnixMakefileGenerator3::WriteAllProgressVariable()
   cmGlobalUnixMakefileGenerator3 *gg = 
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
 
-  ruleFileStream << "CMAKE_ALL_PROGRESS = " 
-                 << gg->GetNumberOfProgressActionsInAll(this) << "\n";
+  ruleFileStream << gg->GetNumberOfProgressActionsInAll(this) << "\n";
 }
 
 //----------------------------------------------------------------------------
@@ -1577,17 +1576,6 @@ void cmLocalUnixMakefileGenerator3
   this->WriteSpecialTargetsTop(ruleFileStream);
 
   // Include the progress variables for the target.
-  std::string progressFile = cmake::GetCMakeFilesDirectory();
-  progressFile += "/progress.make";
-  std::string progressFileNameFull =
-    this->ConvertToFullPath(progressFile.c_str());
-  ruleFileStream
-    << "# Include the progress variables for this target.\n"
-    << this->IncludeDirective << " "
-    << this->Convert(progressFileNameFull.c_str(),
-                     cmLocalGenerator::START_OUTPUT,
-                     cmLocalGenerator::MAKEFILE) << "\n\n";
-  
   // Write all global targets
   this->WriteDivider(ruleFileStream);
   ruleFileStream
@@ -1672,7 +1660,14 @@ void cmLocalUnixMakefileGenerator3
     progCmd << this->Convert(progressDir.c_str(),
                              cmLocalGenerator::FULL,
                              cmLocalGenerator::SHELL);
-    progCmd << " $(CMAKE_ALL_PROGRESS)";
+
+    std::string progressFile = cmake::GetCMakeFilesDirectory();
+    progressFile += "/progress.make";
+    std::string progressFileNameFull =
+      this->ConvertToFullPath(progressFile.c_str());
+    progCmd << " " << this->Convert(progressFileNameFull.c_str(),
+                                    cmLocalGenerator::FULL,
+                                    cmLocalGenerator::SHELL);
     commands.push_back(progCmd.str());
     }
   std::string mf2Dir = cmake::GetCMakeFilesDirectoryPostSlash();
