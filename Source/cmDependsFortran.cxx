@@ -453,7 +453,8 @@ cmDependsFortran
       i != info.Requires.end(); ++i)
     {
     // Require only modules not provided in the same source.
-    if(info.Provides.find(*i) != info.Provides.end())
+    if(std::set<cmStdString>::const_iterator(info.Provides.find(*i)) !=
+       info.Provides.end())
       {
       continue;
       }
