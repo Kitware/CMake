@@ -144,6 +144,17 @@ endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
 # Test old-style definitions.
 add_definitions(-DOLD_DEF -DOLD_EXPR=2)
 
+# Make sure old-style definitions are converted to directory property.
+if(PREPROCESS_VS6)
+  set(OLD_DEFS_EXPECTED "OLD_DEF")
+else(PREPROCESS_VS6)
+  set(OLD_DEFS_EXPECTED "OLD_DEF;OLD_EXPR=2")
+endif(PREPROCESS_VS6)
+get_property(OLD_DEFS DIRECTORY PROPERTY COMPILE_DEFINITIONS)
+if(NOT "${OLD_DEFS}" STREQUAL "${OLD_DEFS_EXPECTED}")
+  message(SEND_ERROR "add_definitions not converted to directory property!")
+endif(NOT "${OLD_DEFS}" STREQUAL "${OLD_DEFS_EXPECTED}")
+
 add_executable(Preprocess preprocess.c preprocess${VS6}.cxx)
 
 set(FILE_PATH "${Preprocess_SOURCE_DIR}/file_def.h")
@@ -151,6 +162,10 @@ set(TARGET_PATH "${Preprocess_SOURCE_DIR}/target_def.h")
 
 # Set some definition properties.
 foreach(c "" "_DEBUG" "_RELEASE")
+  set_property(
+    DIRECTORY .
+    APPEND PROPERTY COMPILE_DEFINITIONS${c} "DIRECTORY_DEF${c}"
+    )
   set_property(
     TARGET Preprocess
     PROPERTY COMPILE_DEFINITIONS${c} "TARGET_DEF${c}"

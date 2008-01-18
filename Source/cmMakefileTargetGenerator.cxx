@@ -267,10 +267,14 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 
     // Add preprocessor definitions for this target and configuration.
     this->LocalGenerator->AppendDefines
+      (defines, this->Makefile->GetProperty("COMPILE_DEFINITIONS"), lang);
+    this->LocalGenerator->AppendDefines
       (defines, this->Target->GetProperty("COMPILE_DEFINITIONS"), lang);
     std::string defPropName = "COMPILE_DEFINITIONS_";
     defPropName +=
       cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
+    this->LocalGenerator->AppendDefines
+      (defines, this->Makefile->GetProperty(defPropName.c_str()), lang);
     this->LocalGenerator->AppendDefines
       (defines, this->Target->GetProperty(defPropName.c_str()), lang);
 

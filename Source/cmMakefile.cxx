@@ -877,6 +877,12 @@ void cmMakefile::AddDefineFlag(const char* flag)
     return;
     }
 
+  // If this is really a definition, update COMPILE_DEFINITIONS.
+  if(this->ParseDefineFlag(flag, false))
+    {
+    return;
+    }
+
   // remove any \n\r
   std::string ret = flag;
   std::string::size_type pos = 0;
@@ -906,6 +912,12 @@ void cmMakefile::RemoveDefineFlag(const char* flag)
     return;
     }
 
+  // If this is really a definition, update COMPILE_DEFINITIONS.
+  if(this->ParseDefineFlag(flag, true))
+    {
+    return;
+    }
+
   // Remove all instances of the flag that are surrounded by
   // whitespace or the beginning/end of the string.
   for(std::string::size_type lpos = this->DefineFlags.find(flag, 0);
@@ -922,6 +934,67 @@ void cmMakefile::RemoveDefineFlag(const char* flag)
       ++lpos;
       }
     }
+}
+
+bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
+{
+  // Create a regular expression to match valid definitions.
+  // Definitions with non-trivial values must not be matched because
+  // escaping them could break compatibility with escapes added by
+  // users.
+  static cmsys::RegularExpression
+    regex("^[-/]D[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_.]+)?$");
+
+  // Make sure the definition matches.
+  if(!regex.find(def.c_str()))
+    {
+    return false;
+    }
+
+  // VS6 IDE does not support definitions with values.
+  if((strcmp(this->LocalGenerator->GetGlobalGenerator()->GetName(),
+             "Visual Studio 6") == 0) &&
+     (def.find("=") != def.npos))
+    {
+    return false;
+    }
+
+  // Get the definition part after the flag.
+  const char* define = def.c_str() + 2;
+
+  if(remove)
+    {
+    if(const char* cdefs = this->GetProperty("COMPILE_DEFINITIONS"))
+      {
+      // Expand the list.
+      std::vector<std::string> defs;
+      cmSystemTools::ExpandListArgument(cdefs, defs);
+
+      // Recompose the list without the definition.
+      std::string ndefs;
+      const char* sep = "";
+      for(std::vector<std::string>::const_iterator di = defs.begin();
+          di != defs.end(); ++di)
+        {
+        if(*di != define)
+          {
+          ndefs += sep;
+          sep = ";";
+          ndefs += *di;
+          }
+        }
+
+      // Store the new list.
+      this->SetProperty("COMPILE_DEFINITIONS", ndefs.c_str());
+      }
+    }
+  else
+    {
+    // Append the definition to the directory property.
+    this->AppendProperty("COMPILE_DEFINITIONS", define);
+    }
+
+  return true;
 }
 
 void cmMakefile::AddLinkLibrary(const char* lib,
@@ -2958,6 +3031,35 @@ void cmMakefile::DefineProperties(cmake *cm)
      "A cmake file that will be included when ctest is run.",
      "If you specify TEST_INCLUDE_FILE, that file will be "
      "included and processed when ctest is run on the directory.");
+
+  cm->DefineProperty
+    ("COMPILE_DEFINITIONS", cmProperty::DIRECTORY,
+     "Preprocessor definitions for compiling a directory's sources.",
+     "The COMPILE_DEFINITIONS property may be set to a list of preprocessor "
+     "definitions using the syntax VAR or VAR=value.  Function-style "
+     "definitions are not supported.  CMake will automatically escape "
+     "the value correctly for the native build system (note that CMake "
+     "language syntax may require escapes to specify some values).  "
+     "This property may be set on a per-configuration basis using the name "
+     "COMPILE_DEFINITIONS_<CONFIG> where <CONFIG> is an upper-case name "
+     "(ex. \"COMPILE_DEFINITIONS_DEBUG\").\n"
+     "CMake will automatically drop some definitions that "
+     "are not supported by the native build tool.  "
+     "The VS6 IDE does not support definitions with values "
+     "(but NMake does).\n"
+     "Dislaimer: Most native build tools have poor support for escaping "
+     "certain values.  CMake has work-arounds for many cases but some "
+     "values may just not be possible to pass correctly.  If a value "
+     "does not seem to be escaped correctly, do not attempt to "
+     "work-around the problem by adding escape sequences to the value.  "
+     "Your work-around may break in a future version of CMake that "
+     "has improved escape support.  Instead consider defining the macro "
+     "in a (configured) header file.  Then report the limitation.");
+
+  cm->DefineProperty
+    ("COMPILE_DEFINITIONS_<CONFIG>", cmProperty::DIRECTORY,
+     "Per-configuration preprocessor definitions in a directory.",
+     "This is the configuration-specific version of COMPILE_DEFINITIONS.");
 
   cm->DefineProperty
     ("EXCLUDE_FROM_ALL", cmProperty::DIRECTORY,

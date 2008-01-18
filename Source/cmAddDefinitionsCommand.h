@@ -52,7 +52,7 @@ public:
    */
   virtual const char* GetTerseDocumentation()
     {
-    return "Adds -D define flags to the command line of C and C++ compilers.";
+    return "Adds -D define flags to the compilation of source files.";
     }
 
   /**
@@ -62,13 +62,23 @@ public:
     {
     return
       "  add_definitions(-DFOO -DBAR ...)\n"
-      "Adds flags to command line of C and C++ compilers.  "
-      "This command can be used to add any flag to a compile line, "
-      "but the -D flag is accepted most C/C++ compilers.  "
-      "Other flags may not be as portable.";
+      "Adds flags to the compiler command line for sources in the current "
+      "directory and below.  This command can be used to add any flags, "
+      "but it was originally intended to add preprocessor definitions.  "
+      "Flags beginning in -D or /D that look like preprocessor definitions "
+      "are automatically added to the COMPILE_DEFINITIONS property for "
+      "the current directory.  Definitions with non-trival values may be "
+      "left in the set of flags instead of being converted for reasons of "
+      "backwards compatibility.  See documentation of the directory, "
+      "target, and source file COMPILE_DEFINITIONS properties for details "
+      "on adding preprocessor definitions to specific scopes and "
+      "configurations."
+      ;
     }
 
   cmTypeMacro(cmAddDefinitionsCommand, cmCommand);
+private:
+  bool ParseDefinition(std::string const& def);
 };
 
 

@@ -52,6 +52,12 @@ int check_defines_C(void)
   result = 0;
   }
 # endif
+# ifdef DIRECTORY_DEF_DEBUG
+  {
+  fprintf(stderr, "DIRECTORY_DEF_DEBUG should not be defined in C\n");
+  result = 0;
+  }
+# endif
 # ifndef FILE_DEF_RELEASE
 #  ifndef PREPROCESS_XCODE
   {
@@ -63,6 +69,12 @@ int check_defines_C(void)
 # ifndef TARGET_DEF_RELEASE
   {
   fprintf(stderr, "TARGET_DEF_RELEASE should be defined in C\n");
+  result = 0;
+  }
+# endif
+# ifndef DIRECTORY_DEF_RELEASE
+  {
+  fprintf(stderr, "DIRECTORY_DEF_RELEASE should be defined in C\n");
   result = 0;
   }
 # endif
@@ -82,6 +94,12 @@ int check_defines_C(void)
   result = 0;
   }
 # endif
+# ifndef DIRECTORY_DEF_DEBUG
+  {
+  fprintf(stderr, "DIRECTORY_DEF_DEBUG should be defined in C\n");
+  result = 0;
+  }
+# endif
 # ifdef FILE_DEF_RELEASE
   {
   fprintf(stderr, "FILE_DEF_RELEASE should not be defined in C\n");
@@ -91,6 +109,12 @@ int check_defines_C(void)
 # ifdef TARGET_DEF_RELEASE
   {
   fprintf(stderr, "TARGET_DEF_RELEASE should not be defined in C\n");
+  result = 0;
+  }
+# endif
+# ifdef DIRECTORY_DEF_RELEASE
+  {
+  fprintf(stderr, "DIRECTORY_DEF_RELEASE should not be defined in C\n");
   result = 0;
   }
 # endif
@@ -150,6 +174,12 @@ int check_defines_C(void)
 #ifndef TARGET_DEF
   {
   fprintf(stderr, "TARGET_DEF not defined in C\n");
+  result = 0;
+  }
+#endif
+#ifndef DIRECTORY_DEF
+  {
+  fprintf(stderr, "DIRECTORY_DEF not defined in C\n");
   result = 0;
   }
 #endif

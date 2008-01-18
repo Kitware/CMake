@@ -1300,11 +1300,15 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     // Add the export symbol definition for shared library objects.
     this->AppendDefines(ppDefs, exportMacro);
     }
+  this->AppendDefines
+    (ppDefs, this->CurrentMakefile->GetProperty("COMPILE_DEFINITIONS"));
   this->AppendDefines(ppDefs, target.GetProperty("COMPILE_DEFINITIONS"));
   if(configName)
     {
     std::string defVarName = "COMPILE_DEFINITIONS_";
     defVarName += cmSystemTools::UpperCase(configName);
+    this->AppendDefines
+      (ppDefs, this->CurrentMakefile->GetProperty(defVarName.c_str()));
     this->AppendDefines(ppDefs, target.GetProperty(defVarName.c_str()));
     }
   buildSettings->AddAttribute

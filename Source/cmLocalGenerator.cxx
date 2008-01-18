@@ -1179,7 +1179,6 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     flags[flags.size()-1] = ' ';
     }
   std::string defineFlags = this->Makefile->GetDefineFlags();
-  this->FixDefineFlags(defineFlags, lang);
   flags += defineFlags;
   this->LanguageToIncludeFlags[lang] = flags;
 
@@ -1187,40 +1186,6 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
   // bogus GCC 2.95 warning.
   const char* ret = this->LanguageToIncludeFlags[lang].c_str();
   return ret;
-}
-
-//----------------------------------------------------------------------------
-void cmLocalGenerator::FixDefineFlags(std::string& flags, 
-                                      const char* lang)
-{
-  std::string defineFlagVar = "CMAKE_";
-  defineFlagVar += lang;
-  defineFlagVar += "_DEFINE_FLAG";
-  std::string defineFlag = 
-    this->Makefile->GetSafeDefinition(defineFlagVar.c_str());
-  if(defineFlag.size() == 0)
-    {
-    return;
-    }
-  std::vector<std::string> args;
-  cmSystemTools::ParseWindowsCommandLine(flags.c_str(), args);
-  std::string fixedFlags;
-  const char* sep = 0;
-  for(std::vector<std::string>::iterator i = args.begin();
-      i != args.end(); ++i)
-    {
-    if(sep)
-      {
-      fixedFlags += sep;
-      }
-    else
-      {
-      sep = " ";
-      }
-    cmSystemTools::ReplaceString(*i, "-D", defineFlag.c_str());
-    fixedFlags += *i;
-    }
-  flags = fixedFlags;
 }
 
 //----------------------------------------------------------------------------

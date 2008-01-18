@@ -801,6 +801,8 @@ protected:
 private:
   void Initialize();
 
+  bool ParseDefineFlag(std::string const& definition, bool remove);
+
   void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;    // make depend needs direct access
                                 // to the Sources array 

@@ -1503,14 +1503,28 @@ void cmLocalVisualStudio6Generator
       }
 
     // Add per-target and per-configuration preprocessor definitions.
+    this->AppendDefines
+      (flags, this->Makefile->GetProperty("COMPILE_DEFINITIONS"), 0);
     this->AppendDefines(flags, target.GetProperty("COMPILE_DEFINITIONS"), 0);
+    this->AppendDefines
+      (flagsDebug,
+       this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
     this->AppendDefines(flagsDebug,
                         target.GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
+    this->AppendDefines
+      (flagsRelease,
+       this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
     this->AppendDefines(flagsRelease,
                         target.GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
     this->AppendDefines
       (flagsMinSize,
+       this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
+    this->AppendDefines
+      (flagsMinSize,
        target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
+    this->AppendDefines
+      (flagsDebugRel,
+       this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
     this->AppendDefines
       (flagsDebugRel,
        target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
