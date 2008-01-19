@@ -275,11 +275,7 @@ void cmLocalGenerator::GenerateTestFiles()
     size_t i;
     for(i = 0; i < this->Children.size(); ++i)
       {
-      fout << "ADD_SUBDIRECTORY(";
-      std::string srcP = 
-        this->Children[i]->GetMakefile()->GetStartDirectory();
-      fout << this->Convert(srcP.c_str(),START);
-      fout << " ";
+      fout << "SUBDIRS(";
       std::string outP = 
         this->Children[i]->GetMakefile()->GetStartOutputDirectory();
       fout << this->Convert(outP.c_str(),START_OUTPUT);

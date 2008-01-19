@@ -36,6 +36,92 @@
 #include <memory> // auto_ptr
 
 //----------------------------------------------------------------------
+class cmCTestSubdirCommand : public cmCommand
+{
+public:
+  /**
+   * This is a virtual constructor for the command.
+   */
+  virtual cmCommand* Clone()
+    {
+    cmCTestSubdirCommand* c = new cmCTestSubdirCommand;
+    c->TestHandler = this->TestHandler;
+    return c;
+    }
+
+  /**
+   * This is called when the command is first encountered in
+   * the CMakeLists.txt file.
+   */
+  virtual bool InitialPass(std::vector<std::string> const& args);
+
+  /**
+   * The name of the command as specified in CMakeList.txt.
+   */
+  virtual const char* GetName() { return "subdirs";}
+
+  // Unused methods
+  virtual const char* GetTerseDocumentation() { return ""; }
+  virtual const char* GetFullDocumentation() { return ""; }
+
+  cmTypeMacro(cmCTestSubdirCommand, cmCommand);
+
+  cmCTestTestHandler* TestHandler;
+};
+
+//----------------------------------------------------------------------
+bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
+{
+  if(args.size() < 1 )
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+  std::vector<std::string>::const_iterator it;
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  for ( it = args.begin(); it != args.end(); ++ it )
+    {
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    std::string fname = cwd;
+    fname += "/";
+    fname += *it;
+
+    if ( !cmSystemTools::FileExists(fname.c_str()) )
+      {
+      // No subdirectory? So what...
+      continue;
+      }
+    cmSystemTools::ChangeDirectory(fname.c_str());
+    const char* testFilename;
+    if( cmSystemTools::FileExists("CTestTestfile.cmake") )
+      {
+      // does the CTestTestfile.cmake exist ?
+      testFilename = "CTestTestfile.cmake";
+      }
+    else
+      {
+      // No CTestTestfile? Who cares...
+      cmSystemTools::ChangeDirectory(cwd.c_str());
+      continue;
+      }
+    fname += "/";
+    fname += testFilename;
+    bool readit = 
+      this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(),
+                                   fname.c_str());
+    cmSystemTools::ChangeDirectory(cwd.c_str());
+    if(!readit)
+      {
+      std::string m = "Could not find include file: ";
+      m += fname;
+      this->SetError(m.c_str());
+      return false;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------
 class cmCTestAddSubdirectoryCommand : public cmCommand
 {
 public:
@@ -1258,17 +1344,23 @@ void cmCTestTestHandler::GetListOfTests()
   newCom1->TestHandler = this;
   cm.AddCommand(newCom1);
 
-  // Add handler for ADD_SUBDIRECTORY
-  cmCTestAddSubdirectoryCommand* newCom2 = 
-    new cmCTestAddSubdirectoryCommand;
+  // Add handler for SUBDIRS
+  cmCTestSubdirCommand* newCom2 = 
+    new cmCTestSubdirCommand;
   newCom2->TestHandler = this;
   cm.AddCommand(newCom2);
 
-  // Add handler for SET_SOURCE_FILES_PROPERTIES
-  cmCTestSetTestsPropertiesCommand* newCom3
-    = new cmCTestSetTestsPropertiesCommand;
+  // Add handler for ADD_SUBDIRECTORY
+  cmCTestAddSubdirectoryCommand* newCom3 = 
+    new cmCTestAddSubdirectoryCommand;
   newCom3->TestHandler = this;
   cm.AddCommand(newCom3);
+
+  // Add handler for SET_SOURCE_FILES_PROPERTIES
+  cmCTestSetTestsPropertiesCommand* newCom4
+    = new cmCTestSetTestsPropertiesCommand;
+  newCom4->TestHandler = this;
+  cm.AddCommand(newCom4);
 
   const char* testFilename;
   if( cmSystemTools::FileExists("CTestTestfile.cmake") )
