@@ -29,6 +29,7 @@ GET_FILENAME_COMPONENT(
 
 FIND_PROGRAM(TK_WISH
   NAMES wish 
+  wish86 wish8.6
   wish85 wish8.5 
   wish84 wish8.4 
   wish83 wish8.3 
@@ -41,6 +42,7 @@ FIND_PROGRAM(TK_WISH
   "${TCL_LIBRARY_PATH_PARENT}/bin"
   "${TK_LIBRARY_PATH_PARENT}/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/bin"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/bin"

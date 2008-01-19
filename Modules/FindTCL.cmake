@@ -49,6 +49,7 @@ SET (TCLTK_POSSIBLE_LIB_PATHS
   "${TCL_INCLUDE_PATH_PARENT}/lib"
   "${TK_INCLUDE_PATH_PARENT}/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/lib"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/lib"
@@ -63,6 +64,7 @@ SET (TCLTK_POSSIBLE_LIB_PATHS
 
 FIND_LIBRARY(TCL_LIBRARY
   NAMES tcl 
+  tcl86 tcl8.6 
   tcl85 tcl8.5 
   tcl84 tcl8.4 
   tcl83 tcl8.3 
@@ -73,6 +75,8 @@ FIND_LIBRARY(TCL_LIBRARY
 
 FIND_LIBRARY(TCL_LIBRARY_DEBUG
   NAMES tcld 
+  tcl86d tcl8.6d 
+  tcl86g tcl8.6g 
   tcl85d tcl8.5d 
   tcl85g tcl8.5g 
   tcl84d tcl8.4d 
@@ -85,6 +89,7 @@ FIND_LIBRARY(TCL_LIBRARY_DEBUG
 
 FIND_LIBRARY(TCL_STUB_LIBRARY
   NAMES tclstub 
+  tclstub86 tclstub8.6
   tclstub85 tclstub8.5 
   tclstub84 tclstub8.4 
   tclstub83 tclstub8.3 
@@ -95,6 +100,8 @@ FIND_LIBRARY(TCL_STUB_LIBRARY
 
 FIND_LIBRARY(TCL_STUB_LIBRARY_DEBUG
   NAMES tclstubd 
+  tclstub86d tclstub8.6d 
+  tclstub86g tclstub8.6g 
   tclstub85d tclstub8.5d 
   tclstub85g tclstub8.5g 
   tclstub84d tclstub8.4d 
@@ -107,6 +114,7 @@ FIND_LIBRARY(TCL_STUB_LIBRARY_DEBUG
 
 FIND_LIBRARY(TK_LIBRARY 
   NAMES tk 
+  tk86 tk8.6
   tk85 tk8.5 
   tk84 tk8.4 
   tk83 tk8.3 
@@ -117,6 +125,8 @@ FIND_LIBRARY(TK_LIBRARY
 
 FIND_LIBRARY(TK_LIBRARY_DEBUG
   NAMES tkd 
+  tk86d tk8.6d 
+  tk86g tk8.6g 
   tk85d tk8.5d 
   tk85g tk8.5g 
   tk84d tk8.4d 
@@ -129,6 +139,7 @@ FIND_LIBRARY(TK_LIBRARY_DEBUG
 
 FIND_LIBRARY(TK_STUB_LIBRARY 
   NAMES tkstub 
+  tkstub86 tkstub8.6
   tkstub85 tkstub8.5 
   tkstub84 tkstub8.4 
   tkstub83 tkstub8.3 
@@ -139,6 +150,8 @@ FIND_LIBRARY(TK_STUB_LIBRARY
 
 FIND_LIBRARY(TK_STUB_LIBRARY_DEBUG
   NAMES tkstubd 
+  tkstub86d tkstub8.6d 
+  tkstub86g tkstub8.6g 
   tkstub85d tkstub8.5d 
   tkstub85g tkstub8.5g 
   tkstub84d tkstub8.4d 
@@ -177,6 +190,7 @@ SET (TCLTK_POSSIBLE_INCLUDE_PATHS
   "${TCL_LIBRARY_PATH_PARENT}/include"
   "${TK_LIBRARY_PATH_PARENT}/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/include"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/include"
@@ -187,6 +201,7 @@ SET (TCLTK_POSSIBLE_INCLUDE_PATHS
   "C:/Tcl/include"
   /usr/include
   /usr/local/include
+  /usr/include/tcl8.6
   /usr/include/tcl8.5
   /usr/include/tcl8.4
   /usr/include/tcl8.3

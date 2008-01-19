@@ -30,6 +30,7 @@ GET_FILENAME_COMPONENT(
 
 FIND_PROGRAM(TCL_TCLSH
   NAMES tclsh
+  tclsh86 tclsh8.6
   tclsh85 tclsh8.5
   tclsh84 tclsh8.4
   tclsh83 tclsh8.3
@@ -42,6 +43,7 @@ FIND_PROGRAM(TCL_TCLSH
   "${TCL_LIBRARY_PATH_PARENT}/bin"
   "${TK_LIBRARY_PATH_PARENT}/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/bin"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/bin"
