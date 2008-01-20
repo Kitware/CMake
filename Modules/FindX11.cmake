@@ -102,6 +102,7 @@ IF (UNIX)
 
   # Find additional X libraries. Keep list sorted by library name.
   FIND_LIBRARY(X11_ICE_LIB ICE               ${X11_LIB_SEARCH_PATH})
+  FIND_LIBRARY(X11_SM_LIB SM                 ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xau_LIB Xau               ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xcomposite_LIB Xcomposite ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xcursor_LIB Xcursor       ${X11_LIB_SEARCH_PATH})
@@ -343,7 +344,10 @@ IF (UNIX)
       CHECK_LIBRARY_EXISTS("ICE" "IceConnectionNumber" "${X11_LIBRARY_DIR}"
                             CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
       IF(CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
-        SET (X11_X_PRE_LIBS -lSM ${X11_ICE_LIB})
+        SET (X11_X_PRE_LIBS ${X11_ICE_LIB})
+        IF(X11_SM_LIB)
+          SET (X11_X_PRE_LIBS ${X11_SM_LIB} ${X11_X_PRE_LIBS})
+        ENDIF(X11_SM_LIB)
       ENDIF(CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER)
     ENDIF (X11_ICE_FOUND)
 
