@@ -78,7 +78,7 @@
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
 
-#if defined(_WIN32)
+#if defined(CMAKE_HAVE_VS_GENERATORS)
 #include "cmCallVisualStudioMacro.h"
 #endif
 
@@ -1337,7 +1337,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       return result;
       }
 
-#if defined(_WIN32)
+#if defined(CMAKE_HAVE_VS_GENERATORS)
     // Internal CMake support for calling Visual Studio macros.
     else if (args[1] == "cmake_call_visual_studio_macro" && args.size() >= 4)
       {
