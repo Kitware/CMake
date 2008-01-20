@@ -2112,13 +2112,22 @@ kwsys_stl::string SystemTools
     {
     path.push_back(*i);
     }
+  // Add a trailing slash to all paths to aid the search process.
+  for(kwsys_stl::vector<kwsys_stl::string>::iterator i = path.begin();
+      i != path.end(); ++i)
+    {
+    kwsys_stl::string& p = *i;
+    if(p[p.size()-1] != '/')
+      {
+      p += "/";
+      }
+    }
   // now look for the file
   kwsys_stl::string tryPath;
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
     tryPath = *p;
-    tryPath += "/";
     tryPath += name;
     if(SystemTools::FileExists(tryPath.c_str()))
       {
@@ -2235,6 +2244,16 @@ kwsys_stl::string SystemTools::FindProgram(
     {
     path.push_back(*i);
     }
+  // Add a trailing slash to all paths to aid the search process.
+  for(kwsys_stl::vector<kwsys_stl::string>::iterator i = path.begin();
+      i != path.end(); ++i)
+    {
+    kwsys_stl::string& p = *i;
+    if(p[p.size()-1] != '/')
+      {
+      p += "/";
+      }
+    }
   // Try each path
   for(kwsys_stl::vector<kwsys_stl::string>::iterator p = path.begin();
       p != path.end(); ++p)
@@ -2250,7 +2269,6 @@ kwsys_stl::string SystemTools::FindProgram(
             = extensions.begin(); ext != extensions.end(); ++ext)
         {
         tryPath = *p;
-        tryPath += "/";
         tryPath += name;
         tryPath += *ext;
         if(SystemTools::FileExists(tryPath.c_str()) &&
@@ -2262,7 +2280,6 @@ kwsys_stl::string SystemTools::FindProgram(
       }
     // now try it without them
     tryPath = *p;
-    tryPath += "/";
     tryPath += name;
     if(SystemTools::FileExists(tryPath.c_str()) &&
        !SystemTools::FileIsDirectory(tryPath.c_str()))
@@ -2319,13 +2336,22 @@ kwsys_stl::string SystemTools
     {
     path.push_back(*i);
     }
+  // Add a trailing slash to all paths to aid the search process.
+  for(kwsys_stl::vector<kwsys_stl::string>::iterator i = path.begin();
+      i != path.end(); ++i)
+    {
+    kwsys_stl::string& p = *i;
+    if(p[p.size()-1] != '/')
+      {
+      p += "/";
+      }
+    }
   kwsys_stl::string tryPath;
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
     {
 #if defined(__APPLE__)
     tryPath = *p;
-    tryPath += "/";
     tryPath += name;
     tryPath += ".framework";
     if(SystemTools::FileExists(tryPath.c_str())
@@ -2336,7 +2362,6 @@ kwsys_stl::string SystemTools
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
     tryPath = *p;
-    tryPath += "/";
     tryPath += name;
     tryPath += ".lib";
     if(SystemTools::FileExists(tryPath.c_str())
@@ -2346,7 +2371,7 @@ kwsys_stl::string SystemTools
       }
 #else
     tryPath = *p;
-    tryPath += "/lib";
+    tryPath += "lib";
     tryPath += name;
     tryPath += ".so";
     if(SystemTools::FileExists(tryPath.c_str())
@@ -2355,7 +2380,7 @@ kwsys_stl::string SystemTools
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath = *p;
-    tryPath += "/lib";
+    tryPath += "lib";
     tryPath += name;
     tryPath += ".a";
     if(SystemTools::FileExists(tryPath.c_str())
@@ -2364,7 +2389,7 @@ kwsys_stl::string SystemTools
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath = *p;
-    tryPath += "/lib";
+    tryPath += "lib";
     tryPath += name;
     tryPath += ".sl";
     if(SystemTools::FileExists(tryPath.c_str())
@@ -2373,7 +2398,7 @@ kwsys_stl::string SystemTools
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath = *p;
-    tryPath += "/lib";
+    tryPath += "lib";
     tryPath += name;
     tryPath += ".dylib";
     if(SystemTools::FileExists(tryPath.c_str())
@@ -2382,7 +2407,7 @@ kwsys_stl::string SystemTools
       return SystemTools::CollapseFullPath(tryPath.c_str());
       }
     tryPath = *p;
-    tryPath += "/lib";
+    tryPath += "lib";
     tryPath += name;
     tryPath += ".dll";
     if(SystemTools::FileExists(tryPath.c_str())
