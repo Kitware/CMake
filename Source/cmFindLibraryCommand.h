@@ -65,7 +65,8 @@ public:
   cmTypeMacro(cmFindLibraryCommand, cmFindBase);
   
 protected:
-  void AddLib64Paths();\
+  void AddLib32Paths();
+  void AddLib64Paths();
   std::string FindLibrary(const char* name);
 };
 

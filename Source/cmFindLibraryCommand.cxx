@@ -77,6 +77,16 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
     return true;
     }
 
+  if(const char* abi =
+     this->Makefile->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI"))
+    {
+    if(strncmp(abi, "ELF N32", 7) ==0)
+      {
+      // Convert /lib to /lib32 if the architecture requests it.
+      this->AddLib32Paths();
+      }
+    }
+
   if(this->Makefile->GetCMakeInstance()
      ->GetPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
     {
@@ -106,6 +116,45 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
   return true;
 }
 
+//----------------------------------------------------------------------------
+void cmFindLibraryCommand::AddLib32Paths()
+{
+  std::vector<std::string> path32;
+  bool found32 = false;
+  for(std::vector<std::string>::iterator i = this->SearchPaths.begin();
+      i != this->SearchPaths.end(); ++i)
+    {
+    std::string s = *i;
+    std::string s2 = *i;
+    cmSystemTools::ReplaceString(s, "lib/", "lib32/");
+    // try to replace lib with lib32 and see if it is there,
+    // then prepend it to the path
+    if((s != *i) && cmSystemTools::FileIsDirectory(s.c_str()))
+      {
+      path32.push_back(s);
+      found32 = true;
+      }
+    // now just add a 32 to the path name and if it is there,
+    // add it to the path
+    s2 += "32";
+    if(cmSystemTools::FileIsDirectory(s2.c_str()))
+      {
+      found32 = true;
+      path32.push_back(s2);
+      }
+    // now add the original unchanged path
+    if(cmSystemTools::FileIsDirectory(i->c_str()))
+      {
+      path32.push_back(*i);
+      }
+    }
+  // now replace the SearchPaths with the 32 bit converted path
+  // if any 32 bit paths were discovered
+  if(found32)
+    {
+    this->SearchPaths = path32;
+    }
+}
 
 void cmFindLibraryCommand::AddLib64Paths()
 {  
