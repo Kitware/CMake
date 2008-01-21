@@ -94,6 +94,11 @@ private:
   std::string CommandDocumentation;
   cmStdString Name;
   cmStdString Variable;
+  cmStdString Version;
+  unsigned int VersionMajor;
+  unsigned int VersionMinor;
+  unsigned int VersionPatch;
+  unsigned int VersionCount;
   cmStdString FileFound;
   bool Quiet;
   bool Required;

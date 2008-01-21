@@ -63,8 +63,12 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->NoBuilds = false;
   this->NoModule = false;
   this->DebugMode = false;
+  this->VersionMajor = 0;
+  this->VersionMinor = 0;
+  this->VersionPatch = 0;
+  this->VersionCount = 0;
   this->CommandDocumentation =
-    "  find_package(<package> [major.minor] [QUIET] [NO_MODULE]\n"
+    "  find_package(<package> [major[.minor[.patch]]] [QUIET] [NO_MODULE]\n"
     "               [[REQUIRED|COMPONENTS] [components...]]\n"
     "               [NAMES name1 [name2 ...]]\n"
     "               [CONFIGS config1 [config2 ...]]\n"
@@ -84,13 +88,15 @@ cmFindPackageCommand::cmFindPackageCommand()
     "can be used when <package>_FOUND is true are package-specific.  "
     "A package-specific list of components may be listed after the "
     "REQUIRED option, or after the COMPONENTS option if no REQUIRED "
-    "option is given.  The \"major.minor\" version argument is currently "
-    "a placeholder for future use and is ignored.  "
+    "option is given.  The \"[major[.minor[.patch]]]\" version argument "
+    "specifies a desired version with which the package found should be "
+    "compatible.  Version support is currently provided only on a "
+    "package-by-package basis and is not enforced by the command.  "
     "The command has two modes by which it searches for packages: "
     "\"Module\" mode and \"Config\" mode."
     "\n"
     "Module mode has a reduced signature:\n"
-    "  find_package(<package> [major.minor] [QUIET]\n"
+    "  find_package(<package> [major[.minor[.patch]]] [QUIET]\n"
     "               [[REQUIRED|COMPONENTS] [components...]])\n"
     "CMake searches for a file called \"Find<package>.cmake\" in "
     "the CMAKE_MODULE_PATH followed by the CMake installation.  "
@@ -104,6 +110,7 @@ cmFindPackageCommand::cmFindPackageCommand()
     "Config mode attempts to locate a configuration file provided by the "
     "package to be found.  A cache entry called <package>_DIR is created to "
     "hold the directory containing the file.  "
+    "Currently versioning is not implemented by Config mode.  "
     "By default the command searches for a package with the name <package>.  "
     "If the NAMES option is given the names following it are used instead "
     "of <package>.  "
@@ -338,6 +345,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     else if(!haveVersion && version.find(args[i].c_str()))
       {
       haveVersion = true;
+      this->Version = args[i];
       }
     else
       {
@@ -345,6 +353,24 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       e << "called with invalid argument \"" << args[i].c_str() << "\"";
       this->SetError(e.str().c_str());
       return false;
+      }
+    }
+
+  if(!this->Version.empty())
+    {
+    // Try to parse the version number and store the results that were
+    // successfully parsed.
+    unsigned int parsed_major;
+    unsigned int parsed_minor;
+    unsigned int parsed_patch;
+    this->VersionCount = sscanf(this->Version.c_str(), "%u.%u.%u",
+                                &parsed_major, &parsed_minor, &parsed_patch);
+    switch(this->VersionCount)
+      {
+      case 3: this->VersionPatch = parsed_patch; // no break!
+      case 2: this->VersionMinor = parsed_minor; // no break!
+      case 1: this->VersionMajor = parsed_major; // no break!
+      default: break;
       }
     }
 
@@ -426,6 +452,35 @@ bool cmFindPackageCommand::FindModule(bool& found)
       std::string req = this->Name;
       req += "_FIND_REQUIRED";
       this->Makefile->AddDefinition(req.c_str(), "1");
+      }
+
+    if(!this->Version.empty())
+      {
+      // Tell the module that is about to be read what version of the
+      // package has been requested.
+      std::string ver = this->Name;
+      ver += "_FIND_VERSION";
+      this->Makefile->AddDefinition(ver.c_str(), this->Version.c_str());
+      char buf[64];
+      switch(this->VersionCount)
+        {
+        case 3:
+          {
+          snprintf(buf, 64, "%u", this->VersionPatch);
+          this->Makefile->AddDefinition((ver+"_PATCH").c_str(), buf);
+          } // no break
+        case 2:
+          {
+          snprintf(buf, 64, "%u", this->VersionMinor);
+          this->Makefile->AddDefinition((ver+"_MINOR").c_str(), buf);
+          } // no break
+        case 1:
+          {
+          snprintf(buf, 64, "%u", this->VersionMajor);
+          this->Makefile->AddDefinition((ver+"_MAJOR").c_str(), buf);
+          } // no break
+        default: break;
+        }
       }
 
     // Load the module we found.

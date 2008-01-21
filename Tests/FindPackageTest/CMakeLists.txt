@@ -22,6 +22,13 @@ IF(NOT FOO_DIR)
   CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
 ENDIF(NOT FOO_DIR)
 
+LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+FIND_PACKAGE(VersionTestA 1)
+FIND_PACKAGE(VersionTestB 1.2)
+FIND_PACKAGE(VersionTestC 1.2.3)
+
+#-----------------------------------------------------------------------------
+
 #SET(CMAKE_FIND_DEBUG_MODE 1)
 
 # For purposes of the test wipe out previous find results.

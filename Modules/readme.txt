@@ -18,6 +18,10 @@ XXX_FOUND              	Set to false, or undefined, if we haven't found, or don'
 XXX_RUNTIME_LIBRARY_DIRS Optionally, the runtime library search path for use when running an executable linked to shared libraries.
                          The list should be used by user code to create the PATH on windows or LD_LIBRARY_PATH on unix.
                          This should not be a cache entry.
+XXX_VERSION_STRING      A human-readable string containing the version of the package found, if any.
+XXX_VERSION_MAJOR       The major version of the package found, if any.
+XXX_VERSION_MINOR       The minor version of the package found, if any.
+XXX_VERSION_PATCH       The patch version of the package found, if any.
 
 You do not have to provide all of the above variables. You should provide XXX_FOUND under most circumstances. If XXX is a library, then  XXX_LIBRARIES, should also be defined, and XXX_INCLUDE_DIRS should usually be defined (I guess libm.a might be an exception)
 
@@ -63,7 +67,19 @@ line.
 
 A FindXXX.cmake module will typically be loaded by the command
 
-  FIND_PACKAGE(XXX [QUIET] [REQUIRED [components...]])
+  FIND_PACKAGE(XXX [major[.minor[.patch]]]
+               [QUIET] [REQUIRED [components...]])
+
+If any version numbers are given to the command it will set the
+variable XXX_FIND_VERSION to contain the whole version.  The variables
+XXX_FIND_VERSION_MAJOR, XXX_FIND_VERSION_MINOR, and
+XXX_FIND_VERSION_PATCH will be set to contain the corresponding
+portions of the version number.  If the find module supports
+versioning it should locate a version of the package that is
+compatible with the version requested.  If a compatible version of the
+package cannot be found the module should not report success.  The
+version of the package found should be stored in the version variables
+named above.
 
 If the QUIET option is given to the command it will set the variable
 XXX_FIND_QUIETLY to true before loading the FindXXX.cmake module.  If
