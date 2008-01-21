@@ -34,4 +34,13 @@ ELSE(NOT CMAKE_CXX_COMPILER_WORKS)
       "the following output:\n${OUTPUT}\n\n")
   ENDIF(CXX_TEST_WAS_RUN)
   SET(CMAKE_CXX_COMPILER_WORKS 1 CACHE INTERNAL "")
+
+  # Try to identify the ABI and configure it into CMakeCXXCompiler.cmake
+  INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
+  CMAKE_DETERMINE_COMPILER_ABI(CXX ${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp)
+  CONFIGURE_FILE(
+    ${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
+    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake
+    @ONLY
+    )
 ENDIF(NOT CMAKE_CXX_COMPILER_WORKS)

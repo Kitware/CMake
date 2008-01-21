@@ -840,6 +840,27 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables for Languages");
 
   cm->DefineProperty
+    ("CMAKE_<LANG>_COMPILER_ABI", cmProperty::VARIABLE,
+     "An internal variable subject to change.",
+     "This is used in determining the compiler ABI and is subject to change.",
+     false,
+     "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_INTERNAL_PLATFORM_ABI", cmProperty::VARIABLE,
+     "An internal variable subject to change.",
+     "This is used in determining the compiler ABI and is subject to change.",
+     false,
+     "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_SIZEOF_DATA_PTR", cmProperty::VARIABLE,
+     "An internal variable subject to change.",
+     "This is used in determining the architecture and is subject to change.",
+     false,
+     "Variables for Languages");
+
+  cm->DefineProperty
     ("CMAKE_COMPILER_IS_GNU<LANG>", cmProperty::VARIABLE,
      "True if the compiler is GNU.",
      "If the selected <LANG> compiler is the GNU "
