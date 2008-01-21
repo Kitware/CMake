@@ -466,17 +466,17 @@ bool cmFindPackageCommand::FindModule(bool& found)
         {
         case 3:
           {
-          snprintf(buf, 64, "%u", this->VersionPatch);
+          sprintf(buf, "%u", this->VersionPatch);
           this->Makefile->AddDefinition((ver+"_PATCH").c_str(), buf);
           } // no break
         case 2:
           {
-          snprintf(buf, 64, "%u", this->VersionMinor);
+          sprintf(buf, "%u", this->VersionMinor);
           this->Makefile->AddDefinition((ver+"_MINOR").c_str(), buf);
           } // no break
         case 1:
           {
-          snprintf(buf, 64, "%u", this->VersionMajor);
+          sprintf(buf, "%u", this->VersionMajor);
           this->Makefile->AddDefinition((ver+"_MAJOR").c_str(), buf);
           } // no break
         default: break;
