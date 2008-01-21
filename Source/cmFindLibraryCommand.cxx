@@ -186,7 +186,7 @@ std::string cmFindLibraryCommand::FindLibrary(const char* name)
       i != this->SearchPaths.end(); ++i)
     {
     std::string& p = *i;
-    if(p[p.size()-1] != '/')
+    if(p.empty() || p[p.size()-1] != '/')
       {
       p += "/";
       }

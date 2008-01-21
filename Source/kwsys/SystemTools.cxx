@@ -2117,7 +2117,7 @@ kwsys_stl::string SystemTools
       i != path.end(); ++i)
     {
     kwsys_stl::string& p = *i;
-    if(p[p.size()-1] != '/')
+    if(p.empty() || p[p.size()-1] != '/')
       {
       p += "/";
       }
@@ -2249,7 +2249,7 @@ kwsys_stl::string SystemTools::FindProgram(
       i != path.end(); ++i)
     {
     kwsys_stl::string& p = *i;
-    if(p[p.size()-1] != '/')
+    if(p.empty() || p[p.size()-1] != '/')
       {
       p += "/";
       }
@@ -2341,7 +2341,7 @@ kwsys_stl::string SystemTools
       i != path.end(); ++i)
     {
     kwsys_stl::string& p = *i;
-    if(p[p.size()-1] != '/')
+    if(p.empty() || p[p.size()-1] != '/')
       {
       p += "/";
       }
