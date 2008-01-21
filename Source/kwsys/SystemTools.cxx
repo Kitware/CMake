@@ -2107,12 +2107,15 @@ kwsys_stl::string SystemTools
     SystemTools::GetPath(path);
     }
   // now add the additional paths
+  {
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator i = userPaths.begin();
         i != userPaths.end(); ++i)
     {
     path.push_back(*i);
     }
+  }
   // Add a trailing slash to all paths to aid the search process.
+  {
   for(kwsys_stl::vector<kwsys_stl::string>::iterator i = path.begin();
       i != path.end(); ++i)
     {
@@ -2122,6 +2125,7 @@ kwsys_stl::string SystemTools
       p += "/";
       }
     }
+  }
   // now look for the file
   kwsys_stl::string tryPath;
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
@@ -2239,12 +2243,15 @@ kwsys_stl::string SystemTools::FindProgram(
     SystemTools::GetPath(path);
     }
   // now add the additional paths
+  {
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator i = 
         userPaths.begin();  i != userPaths.end(); ++i)
     {
     path.push_back(*i);
     }
+  }
   // Add a trailing slash to all paths to aid the search process.
+  {
   for(kwsys_stl::vector<kwsys_stl::string>::iterator i = path.begin();
       i != path.end(); ++i)
     {
@@ -2254,6 +2261,7 @@ kwsys_stl::string SystemTools::FindProgram(
       p += "/";
       }
     }
+  }
   // Try each path
   for(kwsys_stl::vector<kwsys_stl::string>::iterator p = path.begin();
       p != path.end(); ++p)
@@ -2331,12 +2339,15 @@ kwsys_stl::string SystemTools
   kwsys_stl::vector<kwsys_stl::string> path;
   SystemTools::GetPath(path);
    // now add the additional paths
+  {
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator i = userPaths.begin();
         i != userPaths.end(); ++i)
     {
     path.push_back(*i);
     }
+  }
   // Add a trailing slash to all paths to aid the search process.
+  {
   for(kwsys_stl::vector<kwsys_stl::string>::iterator i = path.begin();
       i != path.end(); ++i)
     {
@@ -2346,6 +2357,7 @@ kwsys_stl::string SystemTools
       p += "/";
       }
     }
+  }
   kwsys_stl::string tryPath;
   for(kwsys_stl::vector<kwsys_stl::string>::const_iterator p = path.begin();
       p != path.end(); ++p)
