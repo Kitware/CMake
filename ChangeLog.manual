@@ -1,3 +1,5 @@
+Changes in CMake 2.4.8
+* MSVC90 now defined for vs 9
 Changes in CMake 2.4.8 RC 13
 * fix vs 9 so it works, again...
 * fix bug 6150, working directory can now change drives with vs custom commands
