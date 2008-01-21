@@ -535,7 +535,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   SET(MAKE_IS_GNU )
   IF(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
     EXEC_PROGRAM(
-      ${CMAKE_TEST_MAKEPROGRAM} ARGS --version
+      ${CMAKE_TEST_MAKEPROGRAM} ARGS --version no_such_target
       RETURN_VALUE res OUTPUT_VARIABLE out
       )
     IF("${res}" EQUAL 0)
