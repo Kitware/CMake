@@ -193,6 +193,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "for example, DEBUG, RELEASE, MINSIZEREL, RELWITHDEBINFO. ");
 
   cm->DefineProperty
+    ("LINK_FLAGS_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration linker flags for a target.",
+     "This is the configuration-specific version of LINK_FLAGS.");
+
+  cm->DefineProperty
     ("LINKER_LANGUAGE", cmProperty::TARGET,
      "What tool to use for linking, based on language.",
      "The LINKER_LANGUAGE property is used to change the tool "
@@ -393,7 +398,6 @@ void cmTarget::DefineProperties(cmake *cm)
   // define some properties without documentation
   cm->DefineProperty("DEBUG_OUTPUT_NAME", cmProperty::TARGET,0,0);
   cm->DefineProperty("RELEASE_OUTPUT_NAME", cmProperty::TARGET,0,0);
-  cm->DefineProperty("LINK_FLAGS_DEBUG", cmProperty::TARGET,0,0);
 }
 
 void cmTarget::SetType(TargetType type, const char* name)
