@@ -75,8 +75,8 @@ template <class _Key, class _Tp,
 class hash_map;
 
 template <class _Key, class _Tp, class _HashFn, class _EqKey, class _Alloc>
-inline bool operator==(const hash_map<_Key, _Tp, _HashFn, _EqKey, _Alloc>&,
-                       const hash_map<_Key, _Tp, _HashFn, _EqKey, _Alloc>&);
+bool operator==(const hash_map<_Key, _Tp, _HashFn, _EqKey, _Alloc>&,
+                const hash_map<_Key, _Tp, _HashFn, _EqKey, _Alloc>&);
 
 template <class _Key, class _Tp, class _HashFcn, class _EqualKey,
           class _Alloc>
