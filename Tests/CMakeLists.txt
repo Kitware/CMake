@@ -498,6 +498,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       --build-two-config
       --test-command bin/example)
 
+    IF(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG)
+      ADD_TEST_MACRO(RuntimePath RuntimePath)
+    ENDIF(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG)
   ENDIF("${CMAKE_SYSTEM_NAME}" MATCHES syllable)
 
 
