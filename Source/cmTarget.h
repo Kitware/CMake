@@ -271,6 +271,9 @@ public:
                                std::string& impName,
                                std::string& pdbName, const char* config);
 
+  /** Add the target output files to the global generator manifest.  */
+  void GenerateTargetManifest(const char* config);
+
   /**
    * Compute whether this target must be relinked before installing.
    */
@@ -414,10 +417,9 @@ private:
   LinkLibraryVectorType LinkLibraries;
   LinkLibraryVectorType PrevLinkedLibraries;
   bool LinkLibrariesAnalyzed;
-  bool LinkDirectoriesComputed;
   std::vector<std::string> Frameworks;
   std::vector<std::string> LinkDirectories;
-  std::vector<std::string> ExplicitLinkDirectories;
+  std::set<cmStdString> LinkDirectoriesEmmitted;
   bool HaveInstallRule;
   std::string InstallNameFixupPath;
   std::string InstallPath;

@@ -22,6 +22,7 @@ PURPOSE.  See the above copyright notices for more information.
 #include "cmXCode21Object.h"
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
+#include "cmComputeLinkInformation.h"
 #include "cmSourceFile.h"
 
 //----------------------------------------------------------------------------
@@ -2107,23 +2108,27 @@ void cmGlobalXCodeGenerator
       }
 
     // Compute the link library and directory information.
-    std::vector<cmStdString> libNames;
-    std::vector<cmStdString> libDirs;
-    std::vector<cmStdString> fullPathLibs;
-    this->CurrentLocalGenerator->ComputeLinkInformation(*cmtarget, configName,
-                                                    libNames, libDirs,
-                                                    &fullPathLibs);
+    cmComputeLinkInformation cli(cmtarget, configName);
+    if(!cli.Compute())
+      {
+      continue;
+      }
 
     // Add dependencies directly on library files.
-    for(std::vector<cmStdString>::iterator j = fullPathLibs.begin();
-        j != fullPathLibs.end(); ++j)
+    {
+    std::vector<std::string> const& libDeps = cli.GetDepends();
+    for(std::vector<std::string>::const_iterator j = libDeps.begin();
+        j != libDeps.end(); ++j)
       {
       target->AddDependLibrary(configName, j->c_str());
       }
+    }
 
-    std::string linkDirs;
     // add the library search paths
-    for(std::vector<cmStdString>::const_iterator libDir = libDirs.begin();
+    {
+    std::vector<std::string> const& libDirs = cli.GetDirectories();
+    std::string linkDirs;
+    for(std::vector<std::string>::const_iterator libDir = libDirs.begin();
         libDir != libDirs.end(); ++libDir)
       {
       if(libDir->size() && *libDir != "/usr/lib")
@@ -2141,45 +2146,50 @@ void cmGlobalXCodeGenerator
       }
     this->AppendBuildSettingAttribute(target, "LIBRARY_SEARCH_PATHS",
                                       linkDirs.c_str(), configName);
+    }
+
+    // add the framework search paths
+    {
+    const char* sep = "";
+    std::string fdirs;
+    std::vector<std::string> const& fwDirs = cli.GetFrameworkPaths();
+    for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
+        fdi != fwDirs.end(); ++fdi)
+      {
+      fdirs += sep;
+      sep = " ";
+      fdirs += this->XCodeEscapePath(fdi->c_str());
+      }
+    if(!fdirs.empty())
+      {
+      this->AppendBuildSettingAttribute(target, "FRAMEWORK_SEARCH_PATHS",
+                                        fdirs.c_str(), configName);
+      }
+    }
+
     // now add the link libraries
     if(cmtarget->GetType() != cmTarget::STATIC_LIBRARY)
       {
-      std::string fdirs;
-      std::set<cmStdString> emitted;
-      emitted.insert("/System/Library/Frameworks");
-      for(std::vector<cmStdString>::iterator lib = libNames.begin();
-          lib != libNames.end(); ++lib)
+      std::string linkLibs;
+      const char* sep = "";
+      typedef cmComputeLinkInformation::ItemVector ItemVector;
+      ItemVector const& libNames = cli.GetItems();
+      for(ItemVector::const_iterator li = libNames.begin();
+          li != libNames.end(); ++li)
         {
-        std::string& libString = *lib;
-        // check to see if this is a -F framework path and extract it if it is
-        // -F framework stuff should be in the FRAMEWORK_SEARCH_PATHS and not
-        // OTHER_LDFLAGS
-        if(libString.size() > 2 && libString[0] == '-'
-           && libString[1] == 'F')
+        linkLibs += sep;
+        sep = " ";
+        if(li->IsPath)
           {
-          std::string path = libString.substr(2);
-          // remove escaped spaces from the path
-          cmSystemTools::ReplaceString(path, "\\ ", " ");
-          if(emitted.insert(path).second)
-            {
-            if(fdirs.size())
-              {
-              fdirs += " ";
-              }
-            fdirs += this->XCodeEscapePath(path.c_str());
-            }
+          linkLibs += this->XCodeEscapePath(li->Value.c_str());
           }
         else
           {
-          this->AppendBuildSettingAttribute(target, "OTHER_LDFLAGS",
-                                            lib->c_str(), configName);
+          linkLibs += li->Value;
           }
         }
-      if(fdirs.size())
-        {
-        this->AppendBuildSettingAttribute(target, "FRAMEWORK_SEARCH_PATHS",
-                                          fdirs.c_str(), configName);
-        }
+      this->AppendBuildSettingAttribute(target, "OTHER_LDFLAGS",
+                                        linkLibs.c_str(), configName);
       }
     }
 }

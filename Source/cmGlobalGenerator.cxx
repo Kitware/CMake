@@ -27,6 +27,8 @@
 #include "cmVersion.h"
 #include "cmInstallExportGenerator.h"
 
+#include <cmsys/Directory.hxx>
+
 #include <stdlib.h> // required for atof
 
 #include <assert.h>
@@ -784,7 +786,7 @@ void cmGlobalGenerator::Generate()
   // Compute the manifest of main targets generated.
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    this->LocalGenerators[i]->GenerateTargetManifest(this->TargetManifest);
+    this->LocalGenerators[i]->GenerateTargetManifest();
     }
 
   // Create a map from local generator to the complete set of targets
@@ -1879,4 +1881,43 @@ cmGlobalGenerator
     this->FilesReplacedDuringGenerate.begin(),
     this->FilesReplacedDuringGenerate.end(),
     std::back_inserter(filenames));
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::AddToManifest(const char* config,
+                                      std::string const& f)
+{
+  // Add to the main manifest for this configuration.
+  this->TargetManifest[config].insert(f);
+
+  // Add to the content listing for the file's directory.
+  std::string dir = cmSystemTools::GetFilenamePath(f);
+  std::string file = cmSystemTools::GetFilenameName(f);
+  this->DirectoryContentMap[dir].insert(file);
+}
+
+//----------------------------------------------------------------------------
+std::set<cmStdString> const&
+cmGlobalGenerator::GetDirectoryContent(std::string const& dir, bool needDisk)
+{
+  DirectoryContent& dc = this->DirectoryContentMap[dir];
+  if(needDisk && !dc.LoadedFromDisk)
+    {
+    // Load the directory content from disk.
+    cmsys::Directory d;
+    if(d.Load(dir.c_str()))
+      {
+      unsigned long n = d.GetNumberOfFiles();
+      for(unsigned long i = 0; i < n; ++i)
+        {
+        const char* f = d.GetFile(i);
+        if(strcmp(f, ".") != 0 && strcmp(f, "..") != 0)
+          {
+          dc.insert(f);
+          }
+        }
+      }
+    dc.LoadedFromDisk = true;
+    }
+  return dc;
 }

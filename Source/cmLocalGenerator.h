@@ -75,7 +75,7 @@ public:
   /**
    * Generate a manifest of target files that will be built.
    */
-  virtual void GenerateTargetManifest(cmTargetManifest&);
+  virtual void GenerateTargetManifest();
 
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {
@@ -173,13 +173,6 @@ public:
                                   bool /*verbose*/,
                                   bool /*color*/)
     { return true; }
-
-  /** Compute the list of link libraries and directories for the given
-      target and configuration.  */
-  void ComputeLinkInformation(cmTarget& target, const char* config,
-                              std::vector<cmStdString>& outLibs,
-                              std::vector<cmStdString>& outDirs,
-                              std::vector<cmStdString>* fullPathLibs=0);
 
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs,

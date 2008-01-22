@@ -22,6 +22,8 @@
 #include "cmCacheManager.h"
 #include "cmake.h"
 
+#include "cmComputeLinkInformation.h"
+
 #include <cmsys/RegularExpression.hxx>
 
 cmLocalVisualStudio6Generator::cmLocalVisualStudio6Generator()
@@ -1569,12 +1571,17 @@ void cmLocalVisualStudio6Generator
                      std::string& options)
 {
   // Compute the link information for this configuration.
-  std::vector<cmStdString> linkLibs;
-  std::vector<cmStdString> linkDirs;
-  this->ComputeLinkInformation(target, configName, linkLibs, linkDirs);
+  cmComputeLinkInformation cli(&target, configName);
+  if(!cli.Compute())
+    {
+    return;
+    }
+  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  ItemVector const& linkLibs = cli.GetItems();
+  std::vector<std::string> const& linkDirs = cli.GetDirectories();
 
   // Build the link options code.
-  for(std::vector<cmStdString>::const_iterator d = linkDirs.begin();
+  for(std::vector<std::string>::const_iterator d = linkDirs.begin();
       d != linkDirs.end(); ++d)
     {
     std::string dir = *d;
@@ -1592,11 +1599,19 @@ void cmLocalVisualStudio6Generator
       options += "\n";
       }
     }
-  for(std::vector<cmStdString>::const_iterator l = linkLibs.begin();
+  for(ItemVector::const_iterator l = linkLibs.begin();
       l != linkLibs.end(); ++l)
     {
     options += "# ADD LINK32 ";
-    options += this->ConvertToOptionallyRelativeOutputPath(l->c_str());
+    if(l->IsPath)
+      {
+      options +=
+        this->ConvertToOptionallyRelativeOutputPath(l->Value.c_str());
+      }
+    else
+      {
+      options += l->Value;
+      }
     options += "\n";
     }
 

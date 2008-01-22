@@ -150,6 +150,9 @@ public:
   ///! Get the export target set with the   given name
   const std::vector<cmTargetExport*>* GetExportSet(const char* name) const;
 
+  /** Add a file to the manifest of generated targets for a configuration.  */
+  void AddToManifest(const char* config, std::string const& f);
+
   void EnableInstallTarget();
 
   int TryCompileTimeout;
@@ -208,6 +211,13 @@ public:
   /** Get the manifest of all targets that will be built for each
       configuration.  This is valid during generation only.  */
   cmTargetManifest const& GetTargetManifest() { return this->TargetManifest; }
+
+  /** Get the content of a directory on disk including the target
+      files to be generated.  This may be called only during the
+      generation step.  It is intended for use only by
+      cmComputeLinkInformation.  */
+  std::set<cmStdString> const& GetDirectoryContent(std::string const& dir,
+                                                   bool needDisk);
 
   void AddTarget(cmTargets::value_type &v);
 
@@ -304,6 +314,17 @@ private:
                       std::vector<cmTarget const*>& steps);
   typedef std::map<cmTarget const*, TargetDependSet> TargetDependMap;
   TargetDependMap TargetDependencies;
+
+  // Cache directory content and target files to be built.
+  struct DirectoryContent: public std::set<cmStdString>
+  {
+    typedef std::set<cmStdString> derived;
+    bool LoadedFromDisk;
+    DirectoryContent(): LoadedFromDisk(false) {}
+    DirectoryContent(DirectoryContent const& dc):
+      derived(dc), LoadedFromDisk(dc.LoadedFromDisk) {}
+  };
+  std::map<cmStdString, DirectoryContent> DirectoryContentMap;
 };
 
 #endif

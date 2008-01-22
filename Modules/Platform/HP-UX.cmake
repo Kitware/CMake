@@ -2,15 +2,18 @@ SET(CMAKE_SHARED_LIBRARY_SUFFIX ".sl")          # .so
 SET(CMAKE_DL_LIBS "dld")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".sl" ".so" ".a")
 
-SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")   # : or empty
+# The HP linker needs to find transitive shared library dependencies
+# in the -L path.  Therefore the runtime path must be added to the
+# link line with -L flags.
+SET(CMAKE_SHARED_LIBRARY_LINK_C_WITH_RUNTIME_PATH 1)
 
 # fortran
 IF(CMAKE_COMPILER_IS_GNUG77)
   SET(CMAKE_SHARED_LIBRARY_Fortran_FLAGS "-fPIC")            # -pic 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS "-shared -Wl,-E -Wl,-b")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-Wl,+s -Wl,-E")  # +s, flag for exe link to use shared lib
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,+b")       # -rpath
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")   # : or empty
+  SET(CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS "-shared -Wl,-E,-b,+nodefaultrpath")       # -shared
+  SET(CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS "-Wl,+s,-E,+nodefaultrpath")  # +s, flag for exe link to use shared lib
+  SET(CMAKE_SHARED_LIBRARY_RUNTIME_Fortran_FLAG "-Wl,+b")       # -rpath
+  SET(CMAKE_SHARED_LIBRARY_RUNTIME_Fortran_FLAG_SEP ":")   # : or empty
   SET(CMAKE_SHARED_LIBRARY_SONAME_Fortran_FLAG "-Wl,+h")
   SET(CMAKE_SHARED_LIBRARY_Fortran_FLAGS "-fPIC")     # -pic 
 ELSE(CMAKE_COMPILER_IS_GNUG77)
@@ -19,16 +22,19 @@ ELSE(CMAKE_COMPILER_IS_GNUG77)
       "ld <CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS> <CMAKE_SHARED_LIBRARY_SONAME_Fortran_FLAG><TARGET_SONAME> <LINK_FLAGS> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
   SET(CMAKE_SHARED_LIBRARY_Fortran_FLAGS "+Z")            # -pic 
   SET(CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS "-E -b -L/usr/lib")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-Wl,+s -Wl,-E")  # +s, flag for exe link to use shared lib
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "+b")       # -rpath
+  SET(CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS "-Wl,+s,-E,+nodefaultrpath")  # +s, flag for exe link to use shared lib
+  SET(CMAKE_SHARED_LIBRARY_RUNTIME_Fortran_FLAG "+b")       # -rpath
+  SET(CMAKE_SHARED_LIBRARY_RUNTIME_Fortran_FLAG_SEP ":")   # : or empty
   SET(CMAKE_SHARED_LIBRARY_SONAME_Fortran_FLAG "+h")
+  SET(CMAKE_EXECUTABLE_RUNTIME_Fortran_FLAG "-Wl,+b")       # -rpath
 ENDIF(CMAKE_COMPILER_IS_GNUG77)
+
 # C compiler
 IF(CMAKE_COMPILER_IS_GNUCC)
   # gnu gcc
   SET(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")            # -pic 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared -Wl,-E -Wl,-b")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-Wl,+s -Wl,-E")  # +s, flag for exe link to use shared lib
+  SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared -Wl,-E,-b,+nodefaultrpath")       # -shared
+  SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-Wl,+s,-E,+nodefaultrpath")  # +s, flag for exe link to use shared lib
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,+b")       # -rpath
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")   # : or empty
   SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,+h")
@@ -40,28 +46,33 @@ ELSE(CMAKE_COMPILER_IS_GNUCC)
   SET(CMAKE_C_CREATE_SHARED_LIBRARY
       "ld <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> <CMAKE_SHARED_LIBRARY_SONAME_C_FLAG><TARGET_SONAME> <LINK_FLAGS> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
   SET(CMAKE_SHARED_LIBRARY_C_FLAGS "+Z")            # -pic 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-E -b -L/usr/lib")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-Wl,+s -Wl,-E")  # +s, flag for exe link to use shared lib
+  SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-E -b +nodefaultrpath -L/usr/lib")       # -shared
+  SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-Wl,+s,-E,+nodefaultrpath")  # +s, flag for exe link to use shared lib
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "+b")       # -rpath
+  SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")   # : or empty
   SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "+h")
+  SET(CMAKE_EXECUTABLE_RUNTIME_C_FLAG "-Wl,+b")       # -rpath
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 # CXX compiler
 IF(CMAKE_COMPILER_IS_GNUCXX) 
   # for gnu C++
   SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "-fPIC")            # -pic 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-shared -Wl,-E -Wl,-b")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "-Wl,+s -Wl,-E")  # +s, flag for exe link to use shared lib
+  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-shared -Wl,-E,-b,+nodefaultrpath")       # -shared
+  SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "-Wl,+s,-E,+nodefaultrpath")  # +s, flag for exe link to use shared lib
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG "-Wl,+b")       # -rpath
+  SET(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG_SEP ":")   # : or empty
   SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "-fPIC")     # -pic 
   SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-Wl,+h")
 ELSE(CMAKE_COMPILER_IS_GNUCXX)
   # for hp aCC
   SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "+Z")            # -pic 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "+Z -Wl,-E -b -L/usr/lib")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "-Wl,+s -Wl,-E")  # +s, flag for exe link to use shared lib
+  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "+Z -Wl,-E -b +nodefaultrpath -L/usr/lib")       # -shared
+  SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "-Wl,+s,-E,+nodefaultrpath")  # +s, flag for exe link to use shared lib
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG "-Wl,+b")       # -rpath
+  SET(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG_SEP ":")   # : or empty
   SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-Wl,+h")
+  SET(CMAKE_EXECUTABLE_RUNTIME_CXX_FLAG "-Wl,+b")       # -rpath
   SET (CMAKE_CXX_FLAGS_INIT "")
   SET (CMAKE_CXX_FLAGS_DEBUG_INIT "-g")
   SET (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "+O3 -DNDEBUG")

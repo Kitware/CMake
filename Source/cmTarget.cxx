@@ -35,7 +35,6 @@ cmTarget::cmTarget()
 {
   this->Makefile = 0;
   this->LinkLibrariesAnalyzed = false;
-  this->LinkDirectoriesComputed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsImportedTarget = false;
@@ -843,71 +842,15 @@ void cmTarget::MergeLinkLibraries( cmMakefile& mf,
 void cmTarget::AddLinkDirectory(const char* d)
 {
   // Make sure we don't add unnecessary search directories.
-  if(std::find(this->ExplicitLinkDirectories.begin(),
-               this->ExplicitLinkDirectories.end(), d)
-     == this->ExplicitLinkDirectories.end() )
+  if(this->LinkDirectoriesEmmitted.insert(d).second)
     {
-    this->ExplicitLinkDirectories.push_back( d );
-    this->LinkDirectoriesComputed = false;
+    this->LinkDirectories.push_back(d);
     }
 }
 
 //----------------------------------------------------------------------------
 const std::vector<std::string>& cmTarget::GetLinkDirectories()
 {
-  // Make sure all library dependencies have been analyzed.
-  if(!this->LinkLibrariesAnalyzed && !this->LinkLibraries.empty())
-    {
-    cmSystemTools::Error(
-      "cmTarget::GetLinkDirectories called before "
-      "cmTarget::AnalyzeLibDependencies on target ",
-      this->Name.c_str());
-    }
-
-  // Make sure the complete set of link directories has been computed.
-  if(!this->LinkDirectoriesComputed)
-    {
-    // Check whether we should use an import library for linking a target.
-    bool implib =
-      this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX") != 0;
-
-    // Compute the full set of link directories including the
-    // locations of targets that have been linked in.  Start with the
-    // link directories given explicitly.
-    this->LinkDirectories = this->ExplicitLinkDirectories;
-    for(LinkLibraryVectorType::iterator ll = this->LinkLibraries.begin();
-        ll != this->LinkLibraries.end(); ++ll)
-      {
-      // If this library is a CMake target then add its location as a
-      // link directory.
-      std::string lib = ll->first;
-      cmTarget* tgt = 0;
-      if(this->Makefile && this->Makefile->GetLocalGenerator() &&
-         this->Makefile->GetLocalGenerator()->GetGlobalGenerator())
-        {
-        tgt = (this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-               ->FindTarget(0, lib.c_str(), false));
-        }
-      if(tgt)
-        {
-        // Add the directory only if it is not already present.  This
-        // is an N^2 algorithm for adding the directories, but N
-        // should not get very big.
-        const char* libpath = tgt->GetDirectory(0, implib);
-        if(std::find(this->LinkDirectories.begin(),
-                     this->LinkDirectories.end(),
-                     libpath) == this->LinkDirectories.end())
-          {
-          this->LinkDirectories.push_back(libpath);
-          }
-        }
-      }
-
-    // The complete set of link directories has now been computed.
-    this->LinkDirectoriesComputed = true;
-    }
-
-  // Return the complete set of link directories.
   return this->LinkDirectories;
 }
 
@@ -2242,6 +2185,76 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
 
   // The program database file name.
   pdbName = prefix+base+".pdb";
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GenerateTargetManifest(const char* config)
+{
+  cmMakefile* mf = this->Makefile;
+  cmLocalGenerator* lg = mf->GetLocalGenerator();
+  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
+
+  // Get the names.
+  std::string name;
+  std::string soName;
+  std::string realName;
+  std::string impName;
+  std::string pdbName;
+  if(this->GetType() == cmTarget::EXECUTABLE)
+    {
+    this->GetExecutableNames(name, realName, impName, pdbName, config);
+    }
+  else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
+          this->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
+    }
+  else
+    {
+    return;
+    }
+
+  // Get the directory.
+  std::string dir = this->GetDirectory(config, false);
+
+  // Add each name.
+  std::string f;
+  if(!name.empty())
+    {
+    f = dir;
+    f += "/";
+    f += name;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!soName.empty())
+    {
+    f = dir;
+    f += "/";
+    f += soName;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!realName.empty())
+    {
+    f = dir;
+    f += "/";
+    f += realName;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!pdbName.empty())
+    {
+    f = dir;
+    f += "/";
+    f += pdbName;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!impName.empty())
+    {
+    f = this->GetDirectory(config, true);
+    f += "/";
+    f += impName;
+    gg->AddToManifest(config? config:"", f);
+    }
 }
 
 //----------------------------------------------------------------------------

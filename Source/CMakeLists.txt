@@ -87,6 +87,8 @@ SET(SRCS
   cmCommandArgumentLexer.cxx
   cmCommandArgumentParser.cxx
   cmCommandArgumentParserHelper.cxx
+  cmComputeLinkInformation.cxx
+  cmComputeLinkInformation.h
   cmCustomCommand.cxx
   cmCustomCommand.h
   cmDepends.cxx
@@ -151,7 +153,6 @@ SET(SRCS
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
-  cmOrderLinkDirectories.cxx
   cmProperty.cxx
   cmProperty.h
   cmPropertyDefinition.cxx

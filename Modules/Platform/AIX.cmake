@@ -1,15 +1,23 @@
 SET(CMAKE_SHARED_LIBRARY_PREFIX "lib")          # lib
 SET(CMAKE_SHARED_LIBRARY_SUFFIX ".so")          # .so
 SET(CMAKE_DL_LIBS "-lld")
-SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-G -Wl,-brtl")  # -shared
-SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-Wl,-brtl,-bexpall")  # +s, flag for exe link to use shared lib
+
+# RPATH support on AIX is called libpath.  By default the runtime
+# libpath is paths specified by -L followed by /usr/lib and /lib.  In
+# order to prevent the -L paths from being used we must force use of
+# -Wl,-blibpath:/usr/lib:/lib whether RPATH support is on or not.
+# When our own RPATH is to be added it may be inserted before the
+# "always" paths.
+SET(CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH /usr/lib /lib)
+SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-blibpath:")
+SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
 
 # CXX Compiler
 IF(CMAKE_COMPILER_IS_GNUCXX) 
   SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-shared -Wl,-G")       # -shared
 ELSE(CMAKE_COMPILER_IS_GNUCXX) 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-G -Wl,-brtl")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "-Wl,-brtl,-bexpall")  # +s, flag for exe link to use shared lib
+  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-G -Wl,-brtl,-bnoipath")       # -shared
+  SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "-Wl,-brtl,-bnoipath,-bexpall")  # +s, flag for exe link to use shared lib
   SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS " ")
   SET(CMAKE_SHARED_MODULE_CXX_FLAGS  " ")
   SET (CMAKE_CXX_FLAGS_DEBUG_INIT "-g")
@@ -22,8 +30,8 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 IF(CMAKE_COMPILER_IS_GNUCC)
   SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared -Wl,-G")       # -shared
 ELSE(CMAKE_COMPILER_IS_GNUCC)
-  SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-G -Wl,-brtl")  # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-Wl,-brtl,-bexpall")  # +s, flag for exe link to use shared lib
+  SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-G -Wl,-brtl,-bnoipath")  # -shared
+  SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-Wl,-brtl,-bnoipath,-bexpall")  # +s, flag for exe link to use shared lib
   SET(CMAKE_SHARED_LIBRARY_C_FLAGS " ")
   SET(CMAKE_SHARED_MODULE_C_FLAGS  " ")
   SET (CMAKE_C_FLAGS_DEBUG_INIT "-g")

@@ -24,11 +24,23 @@
 #include "cmCacheManager.h"
 #include "cmake.h"
 
+#include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
 
 #include <cmsys/System.h>
 
 #include <ctype.h> // for isspace
+
+class cmLocalVisualStudio7GeneratorInternals
+{
+public:
+  cmLocalVisualStudio7GeneratorInternals(cmLocalVisualStudio7Generator* e):
+    LocalGenerator(e) {}
+  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  void OutputLibraries(std::ostream& fout, ItemVector const& libs);
+private:
+  cmLocalVisualStudio7Generator* LocalGenerator;
+};
 
 extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
 
@@ -38,10 +50,12 @@ cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
   this->Version = 7;
   this->PlatformName = "Win32";
   this->ExtraFlagTable = 0;
+  this->Internal = new cmLocalVisualStudio7GeneratorInternals(this);
 }
 
 cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
 {
+  delete this->Internal;
 }
 
 void cmLocalVisualStudio7Generator::AddHelperCommands()
@@ -748,20 +762,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                            targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
-    std::vector<cmStdString> linkLibs;
-    std::vector<cmStdString> linkDirs;
-    this->ComputeLinkInformation(target, configName, linkLibs, linkDirs);
-
-    // Get the language to use for linking.
-    const char* linkLanguage = 
-      target.GetLinkerLanguage(this->GetGlobalGenerator());
-    if(!linkLanguage)
+    cmComputeLinkInformation cli(&target, configName);
+    if(!cli.Compute())
       {
-      cmSystemTools::Error
-        ("CMake can not determine linker language for target:",
-         target.GetName());
       return;
       }
+    const char* linkLanguage = cli.GetLinkLanguage();
 
     // Compute the variable name to lookup standard libraries for this
     // language.
@@ -777,7 +783,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
          << this->Makefile->GetSafeDefinition(standardLibsVar.c_str())
          << " ";
-    this->OutputLibraries(fout, linkLibs);
+    this->Internal->OutputLibraries(fout, cli.GetItems());
     fout << "\"\n";
     temp = target.GetDirectory(configName);
     temp += "/";
@@ -787,7 +793,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     this->WriteTargetVersionAttribute(fout, target);
     linkOptions.OutputFlagMap(fout, "\t\t\t\t");
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
-    this->OutputLibraryDirectories(fout, linkDirs);
+    this->OutputLibraryDirectories(fout, cli.GetDirectories());
     fout << "\"\n";
     this->OutputModuleDefinitionFile(fout, target);
     temp = target.GetDirectory(configName);
@@ -825,20 +831,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                               targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
-    std::vector<cmStdString> linkLibs;
-    std::vector<cmStdString> linkDirs;
-    this->ComputeLinkInformation(target, configName, linkLibs, linkDirs);
-
-    // Get the language to use for linking.
-    const char* linkLanguage = 
-      target.GetLinkerLanguage(this->GetGlobalGenerator());
-    if(!linkLanguage)
+    cmComputeLinkInformation cli(&target, configName);
+    if(!cli.Compute())
       {
-      cmSystemTools::Error
-        ("CMake can not determine linker language for target:",
-         target.GetName());
       return;
       }
+    const char* linkLanguage = cli.GetLinkLanguage();
 
     // Compute the variable name to lookup standard libraries for this
     // language.
@@ -854,7 +852,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
          << this->Makefile->GetSafeDefinition(standardLibsVar.c_str())
          << " ";
-    this->OutputLibraries(fout, linkLibs);
+    this->Internal->OutputLibraries(fout, cli.GetItems());
     fout << "\"\n";
     temp = target.GetDirectory(configName);
     temp += "/";
@@ -864,7 +862,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     this->WriteTargetVersionAttribute(fout, target);
     linkOptions.OutputFlagMap(fout, "\t\t\t\t");
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
-    this->OutputLibraryDirectories(fout, linkDirs);
+    this->OutputLibraryDirectories(fout, cli.GetDirectories());
     fout << "\"\n";
     fout << "\t\t\t\tProgramDataBaseFile=\""
          << target.GetDirectory(configName) << "/" << targetNamePDB
@@ -936,14 +934,23 @@ void cmLocalVisualStudio7Generator
 
 //----------------------------------------------------------------------------
 void
-cmLocalVisualStudio7Generator
-::OutputLibraries(std::ostream& fout,
-                  std::vector<cmStdString> const& libs)
+cmLocalVisualStudio7GeneratorInternals
+::OutputLibraries(std::ostream& fout, ItemVector const& libs)
 {
-  for(std::vector<cmStdString>::const_iterator l = libs.begin();
-      l != libs.end(); ++l)
+  cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
+  for(ItemVector::const_iterator l = libs.begin(); l != libs.end(); ++l)
     {
-    fout << this->ConvertToXMLOutputPath(l->c_str()) << " ";
+    if(l->IsPath)
+      {
+      std::string rel = lg->Convert(l->Value.c_str(),
+                                    cmLocalGenerator::START_OUTPUT,
+                                    cmLocalGenerator::UNCHANGED);
+      fout << lg->ConvertToXMLOutputPath(rel.c_str()) << " ";
+      }
+    else
+      {
+      fout << l->Value << " ";
+      }
     }
 }
 
@@ -951,10 +958,10 @@ cmLocalVisualStudio7Generator
 void
 cmLocalVisualStudio7Generator
 ::OutputLibraryDirectories(std::ostream& fout,
-                           std::vector<cmStdString> const& dirs)
+                           std::vector<std::string> const& dirs)
 {
   const char* comma = "";
-  for(std::vector<cmStdString>::const_iterator d = dirs.begin();
+  for(std::vector<std::string>::const_iterator d = dirs.begin();
       d != dirs.end(); ++d)
     {
     // Remove any trailing slash and skip empty paths.

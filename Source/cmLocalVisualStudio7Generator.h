@@ -27,6 +27,7 @@ struct cmVS7FlagTable;
 
 class cmLocalVisualStudio7GeneratorOptions;
 class cmLocalVisualStudio7GeneratorFCInfo;
+class cmLocalVisualStudio7GeneratorInternals;
 
 /** \class cmLocalVisualStudio7Generator
  * \brief Write Visual Studio .NET project files.
@@ -96,10 +97,8 @@ private:
                          cmTarget &target, const char *libName);
   void OutputBuildTool(std::ostream& fout, const char* configName,
                        cmTarget& t);
-  void OutputLibraries(std::ostream& fout,
-                       std::vector<cmStdString> const& libs);
   void OutputLibraryDirectories(std::ostream& fout,
-                                std::vector<cmStdString> const& dirs);
+                                std::vector<std::string> const& dirs);
   void OutputModuleDefinitionFile(std::ostream& fout, cmTarget &target);
   void WriteProjectStart(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
@@ -120,11 +119,13 @@ private:
   virtual std::string GetTargetDirectory(cmTarget const&) const;
 
   friend class cmLocalVisualStudio7GeneratorFCInfo;
+  friend class cmLocalVisualStudio7GeneratorInternals;
 
   cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;
   int Version;
   std::string PlatformName; // Win32 or x64 
+  cmLocalVisualStudio7GeneratorInternals* Internal;
 };
 
 // This is a table mapping XML tag IDE names to command line options

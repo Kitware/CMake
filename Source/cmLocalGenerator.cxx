@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmLocalGenerator.h"
 
+#include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallGenerator.h"
@@ -23,7 +24,6 @@
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmMakefile.h"
-#include "cmOrderLinkDirectories.h"
 #include "cmSourceFile.h"
 #include "cmTest.h"
 #include "cmake.h"
@@ -477,7 +477,7 @@ void cmLocalGenerator::GenerateInstallRules()
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::GenerateTargetManifest(cmTargetManifest& manifest)
+void cmLocalGenerator::GenerateTargetManifest()
 {
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
@@ -500,34 +500,17 @@ void cmLocalGenerator::GenerateTargetManifest(cmTargetManifest& manifest)
   for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
     cmTarget& target = t->second;
-    cmTarget::TargetType type = target.GetType();
-    if(type == cmTarget::STATIC_LIBRARY ||
-       type == cmTarget::SHARED_LIBRARY ||
-       type == cmTarget::MODULE_LIBRARY ||
-       type == cmTarget::EXECUTABLE)
+    if(configNames.empty())
       {
-      if(configNames.empty())
+      target.GenerateTargetManifest(0);
+      }
+    else
+      {
+      for(std::vector<std::string>::iterator ci = configNames.begin();
+          ci != configNames.end(); ++ci)
         {
-        manifest[""].insert(target.GetFullPath(0, false));
-        if(type == cmTarget::SHARED_LIBRARY &&
-           this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
-          {
-          manifest[""].insert(target.GetFullPath(0, true));
-          }
-        }
-      else
-        {
-        for(std::vector<std::string>::iterator ci = configNames.begin();
-            ci != configNames.end(); ++ci)
-          {
-          const char* config = ci->c_str();
-          manifest[config].insert(target.GetFullPath(config, false));
-          if(type == cmTarget::SHARED_LIBRARY &&
-             this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
-            {
-            manifest[config].insert(target.GetFullPath(config, true));
-            }
-          }
+        const char* config = ci->c_str();
+        target.GenerateTargetManifest(config);
         }
       }
     }
@@ -1478,50 +1461,53 @@ bool cmLocalGenerator::GetLinkerArgs(std::string& rpath,
   // collect all the flags needed for linking libraries
   linkLibs = "";
 
-  // Try to emit each search path once
-  std::set<cmStdString> emitted;
-  // Embed runtime search paths if possible and if required.
-  bool outputRuntime = true;
-  std::string runtimeFlag;
-  std::string runtimeSep;
-
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  const char* linkLanguage = 
-      tgt.GetLinkerLanguage(this->GetGlobalGenerator());
-  if(!linkLanguage)
+
+  cmComputeLinkInformation cli(&tgt, config);
+  if(!cli.Compute())
     {
-    cmSystemTools::
-      Error("CMake can not determine linker language for target:",
-            tgt.GetName());
     return false;
     }
-  std::string runTimeFlagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
-  runTimeFlagVar += linkLanguage;
-  runTimeFlagVar += "_FLAG";
-  std::string runTimeFlagSepVar = runTimeFlagVar + "_SEP";
-  runtimeFlag = this->Makefile->GetSafeDefinition(runTimeFlagVar.c_str());
-  runtimeSep = this->Makefile->GetSafeDefinition(runTimeFlagSepVar.c_str());
-  
+
+  const char* linkLanguage = cli.GetLinkLanguage();
+
+  // Embed runtime search paths if possible and if required.
+  bool outputRuntime = !this->Makefile->IsOn("CMAKE_SKIP_RPATH");
+
+  // Lookup rpath specification flags.
+  std::string runtimeFlag;
+  std::string runtimeSep;
+  if(tgt.GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    std::string runTimeFlagVar = "CMAKE_";
+    if(tgt.GetType() == cmTarget::EXECUTABLE)
+      {
+      runTimeFlagVar += "EXECUTABLE";
+      }
+    else
+      {
+      runTimeFlagVar += "SHARED_LIBRARY";
+      }
+    runTimeFlagVar += "_RUNTIME_";
+    runTimeFlagVar += linkLanguage;
+    runTimeFlagVar += "_FLAG";
+    std::string runTimeFlagSepVar = runTimeFlagVar + "_SEP";
+    runtimeFlag = this->Makefile->GetSafeDefinition(runTimeFlagVar.c_str());
+    runtimeSep = this->Makefile->GetSafeDefinition(runTimeFlagSepVar.c_str());
+    }
   // concatenate all paths or no?
-  bool runtimeConcatenate = ( runtimeSep!="" );
-  if(runtimeFlag == "" || this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
+  bool runtimeConcatenate = !runtimeSep.empty();
+
+  const char* runtimeAlways =
+    this->Makefile->GetDefinition("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH");
+
+  // Turn off rpath support if no flag is available to specify it.
+  if(runtimeFlag.empty())
     {
     outputRuntime = false;
+    runtimeAlways = 0;
     }
 
-  // Some search paths should never be emitted
-  emitted.insert("");
-  if(const char* implicitLinks =
-     (this->Makefile->GetDefinition
-      ("CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES")))
-    {
-    std::vector<std::string> implicitLinkVec;
-    cmSystemTools::ExpandListArgument(implicitLinks, implicitLinkVec);
-    for(unsigned int k = 0; k < implicitLinkVec.size(); ++k)
-      {
-      emitted.insert(implicitLinkVec[k]);
-      }
-    }
   std::string libPathFlag = 
     this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
   std::string libPathTerminator = 
@@ -1539,10 +1525,43 @@ bool cmLocalGenerator::GetLinkerArgs(std::string& rpath,
     linkLibs += " ";
     }
 
-  // Compute the link library and directory information.
-  std::vector<cmStdString> libNames;
-  std::vector<cmStdString> libDirs;
-  this->ComputeLinkInformation(tgt, config, libNames, libDirs);
+  // Append the framework search path flags.
+  std::vector<std::string> const& fwDirs = cli.GetFrameworkPaths();
+  for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
+      fdi != fwDirs.end(); ++fdi)
+    {
+    linkLibs += "-F";
+    linkLibs += this->Convert(fdi->c_str(), NONE, SHELL, false);
+    linkLibs += " ";
+    }
+
+  // Append the library search path flags.
+  std::vector<std::string> const& libDirs = cli.GetDirectories();
+  for(std::vector<std::string>::const_iterator libDir = libDirs.begin();
+      libDir != libDirs.end(); ++libDir)
+    {
+    std::string libpath = this->ConvertToOutputForExisting(libDir->c_str());
+    linkLibs += libPathFlag;
+    linkLibs += libpath;
+    linkLibs += libPathTerminator;
+    linkLibs += " ";
+    }
+
+  // Append the link items.
+  typedef cmComputeLinkInformation::ItemVector ItemVector;
+  ItemVector const& items = cli.GetItems();
+  for(ItemVector::const_iterator li = items.begin(); li != items.end(); ++li)
+    {
+    if(li->IsPath)
+      {
+      linkLibs += this->Convert(li->Value.c_str(), START_OUTPUT, SHELL);
+      }
+    else
+      {
+      linkLibs += li->Value;
+      }
+    linkLibs += " ";
+    }
 
   // Select whether to generate an rpath for the install tree or the
   // build tree.
@@ -1562,68 +1581,46 @@ bool cmLocalGenerator::GetLinkerArgs(std::string& rpath,
     {
     const char* install_rpath = tgt.GetProperty("INSTALL_RPATH");
     cmSystemTools::ExpandListArgument(install_rpath, runtimeDirs);
-    for(unsigned int i=0; i < runtimeDirs.size(); ++i)
-      {
-      runtimeDirs[i] =
-        this->Convert(runtimeDirs[i].c_str(), FULL, SHELL, false);
-      }
     }
-
-  // Append the library search path flags.
-  for(std::vector<cmStdString>::const_iterator libDir = libDirs.begin();
-      libDir != libDirs.end(); ++libDir)
+  if(use_build_rpath || use_link_rpath)
     {
-   std::string libpath = this->ConvertToOutputForExisting(libDir->c_str());
-    if(emitted.insert(libpath).second)
+    std::vector<std::string> const& rdirs = cli.GetRuntimeSearchPath();
+    for(std::vector<std::string>::const_iterator ri = rdirs.begin();
+        ri != rdirs.end(); ++ri)
       {
-      std::string fullLibPath;
-      if(!this->WindowsShell && this->UseRelativePaths)
+      // Put this directory in the rpath if using build-tree rpath
+      // support or if using the link path as an rpath.
+      if(use_build_rpath)
         {
-        fullLibPath = "\"`cd ";
+        runtimeDirs.push_back(*ri);
         }
-      fullLibPath += libpath;
-      if(!this->WindowsShell && this->UseRelativePaths)
+      else if(use_link_rpath)
         {
-        fullLibPath += ";pwd`\"";
-        }
-      std::string::size_type pos = libDir->find(libPathFlag.c_str());
-      if((pos == std::string::npos || pos > 0)
-         && libDir->find("${") == std::string::npos)
-        {
-        linkLibs += libPathFlag;
-        linkLibs += fullLibPath;
-        linkLibs += libPathTerminator;
-        linkLibs += " ";
-
-        // Put this directory in the rpath if using build-tree rpath
-        // support or if using the link path as an rpath.
-        if(use_build_rpath)
+        // Do not add any path inside the source or build tree.
+        const char* topSourceDir = this->Makefile->GetHomeDirectory();
+        const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
+        if(!cmSystemTools::ComparePath(ri->c_str(), topSourceDir) &&
+           !cmSystemTools::ComparePath(ri->c_str(), topBinaryDir) &&
+           !cmSystemTools::IsSubDirectory(ri->c_str(), topSourceDir) &&
+           !cmSystemTools::IsSubDirectory(ri->c_str(), topBinaryDir))
           {
-          runtimeDirs.push_back(fullLibPath);
-          }
-        else if(use_link_rpath)
-          {
-          // Do not add any path inside the source or build tree.
-          const char* topSourceDir = this->Makefile->GetHomeDirectory();
-          const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
-          if(!cmSystemTools::ComparePath(libDir->c_str(), topSourceDir) &&
-             !cmSystemTools::ComparePath(libDir->c_str(), topBinaryDir) &&
-             !cmSystemTools::IsSubDirectory(libDir->c_str(), topSourceDir) &&
-             !cmSystemTools::IsSubDirectory(libDir->c_str(), topBinaryDir))
-            {
-            runtimeDirs.push_back(fullLibPath);
-            }
+          runtimeDirs.push_back(*ri);
           }
         }
       }
     }
-
-  // Append the link libraries.
-  for(std::vector<cmStdString>::iterator lib = libNames.begin();
-      lib != libNames.end(); ++lib)
+  if(runtimeAlways)
     {
-    linkLibs += *lib;
-    linkLibs += " ";
+    // Add runtime paths required by the platform to always be
+    // present.  This is done even when skipping rpath support.
+    cmSystemTools::ExpandListArgument(runtimeAlways, runtimeDirs);
+    }
+
+  // Convert the runtime directory names for use in the build file.
+  for(std::vector<std::string>::iterator ri = runtimeDirs.begin();
+      ri != runtimeDirs.end(); ++ri)
+    {
+    *ri = this->Convert(ri->c_str(), FULL, SHELL, false);
     }
 
   if(!runtimeDirs.empty())
@@ -1711,257 +1708,6 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
      this->Makefile->GetDefinition(standardLibsVar.c_str()))
     {
     fout << stdLibs << " ";
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmLocalGenerator
-::ComputeLinkInformation(cmTarget& target,
-                         const char* config,
-                         std::vector<cmStdString>& outLibs,
-                         std::vector<cmStdString>& outDirs,
-                         std::vector<cmStdString>* fullPathLibs)
-{
-  // Compute which library configuration to link.
-  cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
-  if(config && cmSystemTools::UpperCase(config) == "DEBUG")
-    {
-    linkType = cmTarget::DEBUG;
-    }
-
-  // Get the language used for linking.
-  const char* linkLanguage =
-    target.GetLinkerLanguage(this->GetGlobalGenerator());
-
-  // Check whether we should use an import library for linking a target.
-  bool implib =
-    this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")?true:false;
-
-  // On platforms without import libraries there may be a special flag
-  // to use when creating a plugin (module) that obtains symbols from
-  // the program that will load it.
-  const char* loader_flag = 0;
-  if(!implib && target.GetType() == cmTarget::MODULE_LIBRARY)
-    {
-    if(!linkLanguage)
-      {
-      cmSystemTools::
-        Error("CMake can not determine linker language for target:",
-          target.GetName());
-      return;
-      }
-    std::string loader_flag_var = "CMAKE_SHARED_MODULE_LOADER_";
-    loader_flag_var += linkLanguage;
-    loader_flag_var += "_FLAG";
-    loader_flag = this->Makefile->GetDefinition(loader_flag_var.c_str());
-    }
-
-  // Get the list of libraries against which this target wants to link.
-  std::vector<std::string> linkLibraries;
-  const cmTarget::LinkLibraryVectorType& inLibs = target.GetLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator j = inLibs.begin();
-      j != inLibs.end(); ++j)
-    {
-    // For backwards compatibility variables may have been expanded
-    // inside library names.  Clean up the resulting name.
-    std::string lib = j->first;
-    std::string::size_type pos = lib.find_first_not_of(" \t\r\n");
-    if(pos != lib.npos)
-      {
-      lib = lib.substr(pos, lib.npos);
-      }
-    pos = lib.find_last_not_of(" \t\r\n");
-    if(pos != lib.npos)
-      { 
-      lib = lib.substr(0, pos+1); 
-      }
-    if(lib.empty())
-      {
-      continue;
-      }
-    // Link to a library if it is not the same target and is meant for
-    // this configuration type.
-    if((target.GetType() == cmTarget::EXECUTABLE ||
-        lib != target.GetName()) &&
-       (j->second == cmTarget::GENERAL || j->second == linkType))
-      {
-      // Compute the proper name to use to link this library.
-      cmTarget* tgt = this->GlobalGenerator->FindTarget(0, lib.c_str(), false);
-      bool impexe = (tgt &&
-                     tgt->GetType() == cmTarget::EXECUTABLE &&
-                     tgt->GetPropertyAsBool("ENABLE_EXPORTS"));
-      if(impexe && !implib && !loader_flag)
-        {
-        // Skip linking to executables on platforms with no import
-        // libraries or loader flags.
-        continue;
-        }
-      else if(tgt && (tgt->GetType() == cmTarget::STATIC_LIBRARY ||
-                      tgt->GetType() == cmTarget::SHARED_LIBRARY ||
-                      tgt->GetType() == cmTarget::MODULE_LIBRARY ||
-                      impexe))
-        {
-        // This is a CMake target.  Ask the target for its real name.
-        std::string linkItem;
-        if(impexe && loader_flag)
-          {
-          // This link item is an executable that may provide symbols
-          // used by this target.  A special flag is needed on this
-          // platform.  Add it now.
-          std::string exe = tgt->GetFullPath(config, implib);
-          linkItem += loader_flag;
-          linkItem += this->Convert(exe.c_str(), NONE, SHELL, false);
-          }
-        else
-          {
-          // Pass the full path to the target file but purposely leave
-          // off the per-configuration subdirectory.  The link directory
-          // ordering knows how to deal with this.
-          linkItem += tgt->GetDirectory(0, implib);
-          // on apple if the FRAMEWORK prop is set, then
-          // do not add the target full name but just use the directory
-          // name
-#ifdef __APPLE__
-          if (!(tgt->GetType() == cmTarget::SHARED_LIBRARY &&
-                tgt->GetPropertyAsBool("FRAMEWORK")))
-#endif
-            { 
-            linkItem += "/";
-            linkItem += tgt->GetFullName(config, implib);
-            }
-          }
-        linkLibraries.push_back(linkItem);
-        // For full path, use the true location.
-        if(fullPathLibs)
-          {
-          fullPathLibs->push_back(tgt->GetFullPath(config, implib));
-          }
-        }
-      else
-        {
-        // This is not a CMake target.  Use the name given.
-        linkLibraries.push_back(lib);
-
-        // Add to the list of full paths if this library is one.
-        if(fullPathLibs &&
-           cmSystemTools::FileIsFullPath(lib.c_str()) &&
-           !cmSystemTools::FileIsDirectory(lib.c_str()))
-          {
-          fullPathLibs->push_back(lib);
-          }
-        }
-      }
-    }
-
-  // Get the list of directories the target wants to search for libraries.
-  const std::vector<std::string>&
-    linkDirectories = target.GetLinkDirectories();
-
-  // Lookup link type selection flags.
-  const char* static_link_type_flag = 0;
-  const char* shared_link_type_flag = 0;
-  const char* target_type_str = 0;
-  switch(target.GetType())
-    {
-    case cmTarget::EXECUTABLE:     target_type_str = "EXE"; break;
-    case cmTarget::SHARED_LIBRARY: target_type_str = "SHARED_LIBRARY"; break;
-    case cmTarget::MODULE_LIBRARY: target_type_str = "SHARED_MODULE"; break;
-    default: break;
-    }
-  if(target_type_str)
-    {
-    if(!linkLanguage)
-      {
-      cmSystemTools::
-        Error("CMake can not determine linker language for target:",
-          target.GetName());
-      return;
-      }
-    std::string static_link_type_flag_var = "CMAKE_";
-    static_link_type_flag_var += target_type_str;
-    static_link_type_flag_var += "_LINK_STATIC_";
-    static_link_type_flag_var += linkLanguage;
-    static_link_type_flag_var += "_FLAGS";
-    static_link_type_flag =
-      this->Makefile->GetDefinition(static_link_type_flag_var.c_str());
-
-    std::string shared_link_type_flag_var = "CMAKE_";
-    shared_link_type_flag_var += target_type_str;
-    shared_link_type_flag_var += "_LINK_DYNAMIC_";
-    shared_link_type_flag_var += linkLanguage;
-    shared_link_type_flag_var += "_FLAGS";
-    shared_link_type_flag =
-      this->Makefile->GetDefinition(shared_link_type_flag_var.c_str());
-    }
-
-  // Compute the link directory order needed to link the libraries.
-  cmOrderLinkDirectories orderLibs;
-  orderLibs.SetLinkTypeInformation(cmOrderLinkDirectories::LinkShared,
-                                   static_link_type_flag,
-                                   shared_link_type_flag);
-  orderLibs.AddLinkPrefix(
-    this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_PREFIX"));
-  orderLibs.AddLinkPrefix(
-    this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_PREFIX"));
-
-  // Import library names should be matched and treated as shared
-  // libraries for the purposes of linking.
-  orderLibs.AddLinkExtension(
-    this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"),
-    cmOrderLinkDirectories::LinkShared);
-  orderLibs.AddLinkExtension(
-    this->Makefile->GetDefinition("CMAKE_STATIC_LIBRARY_SUFFIX"),
-    cmOrderLinkDirectories::LinkStatic);
-  orderLibs.AddLinkExtension(
-    this->Makefile->GetDefinition("CMAKE_SHARED_LIBRARY_SUFFIX"),
-    cmOrderLinkDirectories::LinkShared);
-  orderLibs.AddLinkExtension(
-    this->Makefile->GetDefinition("CMAKE_LINK_LIBRARY_SUFFIX"));
-  if(const char* linkSuffixes =
-     this->Makefile->GetDefinition("CMAKE_EXTRA_LINK_EXTENSIONS"))
-    {
-    std::vector<std::string> linkSuffixVec;
-    cmSystemTools::ExpandListArgument(linkSuffixes, linkSuffixVec);
-    for(std::vector<std::string>::iterator i = linkSuffixVec.begin();
-        i != linkSuffixVec.end(); ++i)
-      {
-      orderLibs.AddLinkExtension(i->c_str());
-      }
-    }
-  std::string configSubdir;
-  cmGlobalGenerator* gg = this->GetGlobalGenerator();
-  gg->AppendDirectoryForConfig("", config, "", configSubdir);
-  orderLibs.SetLinkInformation(target.GetName(),
-                               linkLibraries,
-                               linkDirectories,
-                               gg->GetTargetManifest(),
-                               configSubdir.c_str());
-  orderLibs.DetermineLibraryPathOrder();
-  std::vector<cmStdString> orderedLibs;
-  orderLibs.GetLinkerInformation(outDirs, orderedLibs);
-
-  // Make sure libraries are linked with the proper syntax.
-  std::string libLinkFlag =
-    this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
-  std::string libLinkSuffix =
-    this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
-  for(std::vector<cmStdString>::iterator l = orderedLibs.begin();
-      l != orderedLibs.end(); ++l)
-    {
-    std::string lib = *l;
-    if(lib[0] == '-' || lib[0] == '$' || lib[0] == '`')
-      {
-      // The library is linked with special syntax by the user.
-      outLibs.push_back(lib);
-      }
-    else
-      {
-      // Generate the proper link syntax.
-      lib = libLinkFlag;
-      lib += *l;
-      lib += libLinkSuffix;
-      outLibs.push_back(lib);
-      }
     }
 }
 
