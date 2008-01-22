@@ -41,9 +41,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
 
   # if the format is unknown after all files have been checked, put "Unknown" in the cache
   IF(NOT CMAKE_EXECUTABLE_FORMAT)
-    SET(CMAKE_EXECUTABLE_FORMAT "Unknown" CACHE STRING "Executable file format")
-  ELSE(NOT CMAKE_EXECUTABLE_FORMAT)
-    MESSAGE(STATUS "The executable file format is ${CMAKE_EXECUTABLE_FORMAT}")
+    SET(CMAKE_EXECUTABLE_FORMAT "Unknown" CACHE INTERNAL "Executable file format")
   ENDIF(NOT CMAKE_EXECUTABLE_FORMAT)
 
   # Display the final identification result.
@@ -200,7 +198,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
 
     # ELF files start with 0x7f"ELF"
     IF("${CMAKE_EXECUTABLE_MAGIC}" STREQUAL "7f454c46")
-      SET(CMAKE_EXECUTABLE_FORMAT "ELF" CACHE STRING "Executable file format")
+      SET(CMAKE_EXECUTABLE_FORMAT "ELF" CACHE INTERNAL "Executable file format")
     ENDIF("${CMAKE_EXECUTABLE_MAGIC}" STREQUAL "7f454c46")
 
 #    # COFF (.exe) files start with "MZ"
