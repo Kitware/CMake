@@ -337,7 +337,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item)
       else
 #endif
         {
-        this->Items.push_back(Item(lib, true));
+        this->AddTargetItem(lib, tgt);
         this->AddLibraryRuntimeInfo(lib, tgt);
         }
       }
@@ -355,8 +355,8 @@ void cmComputeLinkInformation::AddItem(std::string const& item)
       else
         {
         // Use the full path given to the library file.
-        this->Items.push_back(Item(item, true));
         this->Depends.push_back(item);
+        this->AddFullItem(item);
         this->AddLibraryRuntimeInfo(item);
         }
       }
@@ -605,6 +605,53 @@ void cmComputeLinkInformation::SetCurrentLinkType(LinkType lt)
         }
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkInformation::AddTargetItem(std::string const& item,
+                                             cmTarget* target)
+{
+  // This is called to handle a link item that is a full path to a target.
+  // If the target is not a static library make sure the link type is
+  // shared.  This is because dynamic-mode linking can handle both
+  // shared and static libraries but static-mode can handle only
+  // static libraries.  If a previous user item changed the link type
+  // to static we need to make sure it is back to shared.
+  if(target->GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    this->SetCurrentLinkType(LinkShared);
+    }
+
+  // Now add the full path to the library.
+  this->Items.push_back(Item(item, true));
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkInformation::AddFullItem(std::string const& item)
+{
+  // This is called to handle a link item that is a full path.
+  // If the target is not a static library make sure the link type is
+  // shared.  This is because dynamic-mode linking can handle both
+  // shared and static libraries but static-mode can handle only
+  // static libraries.  If a previous user item changed the link type
+  // to static we need to make sure it is back to shared.
+  if(this->LinkTypeEnabled)
+    {
+    std::string name = cmSystemTools::GetFilenameName(item);
+    if(this->ExtractSharedLibraryName.find(name))
+      {
+      this->SetCurrentLinkType(LinkShared);
+      }
+    else if(!this->ExtractStaticLibraryName.find(item))
+      {
+      // We cannot determine the type.  Assume it is the target's
+      // default type.
+      this->SetCurrentLinkType(this->StartLinkType);
+      }
+    }
+
+  // Now add the full path to the library.
+  this->Items.push_back(Item(item, true));
 }
 
 //----------------------------------------------------------------------------

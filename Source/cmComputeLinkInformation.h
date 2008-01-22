@@ -102,6 +102,8 @@ private:
   std::string NoCaseExpression(const char* str);
 
   // Handling of link items that are not targets or full file paths.
+  void AddTargetItem(std::string const& item, cmTarget* target);
+  void AddFullItem(std::string const& item);
   void AddUserItem(std::string const& item);
   void AddDirectoryItem(std::string const& item);
   void AddFrameworkItem(std::string const& item);
