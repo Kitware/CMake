@@ -69,6 +69,26 @@
 #        interface file is constructed from the basename of the header with
 #        the suffix .xml appended.
 #
+#  macro QT4_CREATE_TRANSLATION( qm_files sources ... ts_files ... )
+#        out: qm_files
+#        in:  sources ts_files
+#        generates commands to create .ts (vie lupdate) and .qm
+#        (via lrelease) - files from sources. The ts files are 
+#        created and/or updated in the source tree (unless given with full paths).
+#        The qm files are generated in the build tree.
+#        Updating the translations can be done by adding the qm_files
+#        to the source list of your library/executable, so they are
+#        always updated, or by adding a custom target to control when
+#        they get updated/generated.
+#
+#  macro QT4_ADD_TRANSLATION( qm_files ts_files ... )
+#        out: qm_files
+#        in:  ts_files
+#        generates commands to create .qm from .ts - files. The generated
+#        filenames can be found in qm_files. The ts_files
+#        must exists and are not updated in any way.
+#
+#
 #  QT_FOUND         If false, don't try to use Qt.
 #  QT4_FOUND        If false, don't try to use Qt 4.
 #
@@ -208,6 +228,8 @@
 #  QT_RCC_EXECUTABLE          Where to find the rcc tool
 #  QT_DBUSCPP2XML_EXECUTABLE  Where to find the qdbuscpp2xml tool.
 #  QT_DBUSXML2CPP_EXECUTABLE  Where to find the qdbusxml2cpp tool.
+#  QT_LUPDATE_EXECUTABLE      Where to find the lupdate tool.
+#  QT_LRELEASE_EXECUTABLE     Where to find the lrelease tool.
 #  
 #  QT_DOC_DIR                 Path to "doc" of Qt4
 #  QT_MKSPECS_DIR             Path to "mkspecs" of Qt4
@@ -830,6 +852,18 @@ IF (QT4_QMAKE_FOUND)
     NO_DEFAULT_PATH
     )
 
+  FIND_PROGRAM(QT_LUPDATE_EXECUTABLE
+    NAMES lupdate
+    PATHS ${QT_BINARY_DIR}
+    NO_DEFAULT_PATH
+    )
+
+  FIND_PROGRAM(QT_LRELEASE_EXECUTABLE
+    NAMES lrelease
+    PATHS ${QT_BINARY_DIR}
+    NO_DEFAULT_PATH
+    )
+
   IF (QT_MOC_EXECUTABLE)
      SET(QT_WRAP_CPP "YES")
   ENDIF (QT_MOC_EXECUTABLE)
@@ -1096,6 +1130,44 @@ IF (QT4_QMAKE_FOUND)
          ENDIF ( NOT _skip AND EXISTS ${_abs_FILE} )
       ENDFOREACH (_current_FILE)
    ENDMACRO(QT4_AUTOMOC)
+
+   MACRO(QT4_CREATE_TRANSLATION _qm_files)
+      SET(_my_sources)
+      SET(_my_tsfiles)
+      FOREACH (_file ${ARGN})
+         GET_FILENAME_COMPONENT(_ext ${_file} EXT)
+         GET_FILENAME_COMPONENT(_abs_FILE ${_file} ABSOLUTE)
+         IF(_ext MATCHES "ts")
+           LIST(APPEND _my_tsfiles ${_abs_FILE})
+         ELSE(_ext MATCHES "ts")
+           LIST(APPEND _my_sources ${_abs_FILE})
+         ENDIF(_ext MATCHES "ts")
+      ENDFOREACH(_file)
+      FOREACH(_ts_file ${_my_tsfiles})
+        ADD_CUSTOM_COMMAND(OUTPUT ${_ts_file}
+           COMMAND ${QT_LUPDATE_EXECUTABLE}
+           ARGS ${_my_sources} -ts ${_ts_file}
+           DEPENDS ${_my_sources})
+      ENDFOREACH(_ts_file)
+      QT4_ADD_TRANSLATION(${_qm_files} ${_my_tsfiles})
+   ENDMACRO(QT4_CREATE_TRANSLATION)
+
+   MACRO(QT4_ADD_TRANSLATION _qm_files)
+      FOREACH (_current_FILE ${ARGN})
+         GET_FILENAME_COMPONENT(_abs_FILE ${_current_FILE} ABSOLUTE)
+         GET_FILENAME_COMPONENT(qm ${_abs_FILE} NAME_WE)
+         SET(qm "${CMAKE_CURRENT_BINARY_DIR}/${qm}.qm")
+
+         ADD_CUSTOM_COMMAND(OUTPUT ${qm}
+            COMMAND ${QT_LRELEASE_EXECUTABLE}
+            ARGS ${_abs_FILE} -qm ${qm}
+            DEPENDS ${_abs_FILE}
+         )
+         SET(${_qm_files} ${${_qm_files}} ${qm})
+      ENDFOREACH (_current_FILE)
+   ENDMACRO(QT4_ADD_TRANSLATION)
+
+
 
 
 
