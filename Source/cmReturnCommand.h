@@ -71,7 +71,7 @@ public:
       "encountered, it caused process of the current function or "
       "directory to stop and control is return to the caller of the "
       "function, or the parent directory if any. Note that a macro "
-      "is not a function and does not handle return liek a function does.";
+      "is not a function and does not handle return like a function does.";
     }
   
   cmTypeMacro(cmReturnCommand, cmCommand);
