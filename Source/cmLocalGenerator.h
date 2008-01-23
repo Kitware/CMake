@@ -327,6 +327,8 @@ protected:
   std::string FindRelativePathTopBinary();
   void SetupPathConversions();
 
+  std::string ConvertToLinkReference(std::string const& lib);
+
   /** Check whether the native build system supports the given
       definition.  Issues a warning.  */
   virtual bool CheckDefinition(std::string const& define) const;
