@@ -1454,10 +1454,9 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
 std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  // Work-ardound MSVC 6 command line bug.  This block is only needed
-  // on windows when we are really using the MSVC 6.0 compiler command
-  // line.
-  if(this->Makefile->IsOn("MSVC60"))
+  // Work-ardound command line parsing limitations in MSVC 6.0 and
+  // Watcom.
+  if(this->Makefile->IsOn("MSVC60") || this->Makefile->IsOn("WATCOM"))
     {
     // Search for the last space.
     std::string::size_type pos = lib.rfind(' ');

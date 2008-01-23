@@ -778,6 +778,12 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "On most compilers this is \"-l\".",false,
      "Variables that Control the Build");
   cm->DefineProperty
+    ("CMAKE_LINK_LIBRARY_FILE_FLAG", cmProperty::VARIABLE,
+     "Flag used to link a library specified by a path to its file.",
+     "The flag used before a library file path is given to the linker.  "
+     "This is needed only on very few platforms.", false,
+     "Variables that Control the Build");
+  cm->DefineProperty
     ("CMAKE_USE_RELATIVE_PATHS", cmProperty::VARIABLE,
      "Use relative paths (May not work!).",
      "If this is set to TRUE, then the CMake will use "

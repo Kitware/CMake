@@ -74,6 +74,7 @@ private:
   bool UseImportLibrary;
   const char* LoaderFlag;
   std::string LibLinkFlag;
+  std::string LibLinkFileFlag;
   std::string LibLinkSuffix;
 
   // Link type adjustment.
