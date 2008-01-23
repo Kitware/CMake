@@ -1079,7 +1079,8 @@ void cmComputeLinkInformation::FindDirectoriesForLib(unsigned int lri)
       std::set<cmStdString> const& files =
         (this->GlobalGenerator
          ->GetDirectoryContent(this->RuntimeDirectories[i], false));
-      if(files.find(re.SOName) != files.end() ||
+      if((std::set<cmStdString>::const_iterator(files.find(re.SOName)) !=
+          files.end()) ||
          cmSystemTools::FileExists(file.c_str(), true))
         {
         // The library will be found in this directory but this is not
