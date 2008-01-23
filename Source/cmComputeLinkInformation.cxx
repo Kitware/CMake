@@ -1025,7 +1025,7 @@ void cmComputeLinkInformation::CollectRuntimeDirectories()
     }
 
   // Add link directories specified for the target.
-  std::vector<std::string> const& dirs = this->GetDirectories();
+  std::vector<std::string> const& dirs = this->Target->GetLinkDirectories();
   for(std::vector<std::string>::const_iterator di = dirs.begin();
       di != dirs.end(); ++di)
     {
@@ -1168,39 +1168,41 @@ void cmComputeLinkInformation::OrderRuntimeSearchPath()
 {
   // Allow a cycle to be diagnosed once.
   this->CycleDiagnosed = false;
+  this->WalkId = 0;
 
   // Iterate through the directories in the original order.
   for(unsigned int i=0; i < this->RuntimeDirectories.size(); ++i)
     {
-    this->VisitRuntimeDirectory(i, true);
+    // Start a new DFS from this node.
+    ++this->WalkId;
+    this->VisitRuntimeDirectory(i);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkInformation::VisitRuntimeDirectory(unsigned int i,
-                                                     bool top)
+void cmComputeLinkInformation::VisitRuntimeDirectory(unsigned int i)
 {
   // Skip nodes already visited.
   if(this->RuntimeDirectoryVisited[i])
     {
-    if(!top)
+    if(this->RuntimeDirectoryVisited[i] == this->WalkId)
       {
-      // We have reached a previously visited node but were not called
-      // to start a new section of the graph.  There is a cycle.
+      // We have reached a node previously visited on this DFS.
+      // There is a cycle.
       this->DiagnoseCycle();
       }
     return;
     }
 
-  // We are not visiting this node so mark it.
-  this->RuntimeDirectoryVisited[i] = 1;
+  // We are now visiting this node so mark it.
+  this->RuntimeDirectoryVisited[i] = this->WalkId;
 
   // Visit the neighbors of the node first.
   RuntimeConflictList const& clist = this->RuntimeConflictGraph[i];
   for(RuntimeConflictList::const_iterator j = clist.begin();
       j != clist.end(); ++j)
     {
-    this->VisitRuntimeDirectory(j->first, false);
+    this->VisitRuntimeDirectory(j->first);
     }
 
   // Now that all directories required to come before this one have
