@@ -52,6 +52,17 @@ cmFindLibraryCommand::cmFindLibraryCommand()
     "When a full path to a framework is used as a library, "
     "CMake will use a -framework A, and a -F<fullPath> to "
     "link the framework to the target. ";
+  this->GenericDocumentation +=
+    "\n"
+    "Some platforms define implicit library directories such as "
+    "/lib and /usr/lib that are automatically searched by the linker.  "
+    "If this command finds a library in one of these directories "
+    "it will report only the name of the library file and not the path.  "
+    "When the name is used to link the library CMake will generate a "
+    "link line that asks the linker to search for it.  This allows "
+    "the system linker to automatically adjust the implicit directory "
+    "set based on the current architecture."
+    ;
 }
 
 // cmFindLibraryCommand
@@ -107,7 +118,8 @@ bool cmFindLibraryCommand
     {
     library = this->FindLibrary(i->c_str());
     if(library != "")
-      {  
+      {
+      library = this->FixForImplicitLocations(library);
       this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
                                          library.c_str(),
                                          this->VariableDocumentation.c_str(),
@@ -292,4 +304,44 @@ std::string cmFindLibraryCommand::FindLibrary(const char* name)
     }
   // Couldn't find the library.
   return "";
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmFindLibraryCommand::FixForImplicitLocations(std::string const& lib)
+{
+  // Get implicit link directories for the platform.
+  const char* implicitLinks =
+     (this->Makefile->GetDefinition
+      ("CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES"));
+  if(!implicitLinks)
+    {
+    // There are no implicit link directories.  No fix is needed.
+    return lib;
+    }
+  std::vector<std::string> implicitLinkVec;
+  cmSystemTools::ExpandListArgument(implicitLinks, implicitLinkVec);
+
+  // Get the path containing the library.
+  std::string libDir = cmSystemTools::GetFilenamePath(lib);
+
+  // Many system linkers support multiple architectures by
+  // automatically selecting the implicit linker search path for the
+  // current architecture.  If the library appears in an implicit link
+  // directory then just report the file name without the directory
+  // portion.  This will allow the system linker to locate the proper
+  // library for the architecture at link time.
+  for(std::vector<std::string>::const_iterator i = implicitLinkVec.begin();
+      i != implicitLinkVec.end(); ++i)
+    {
+    if(*i == libDir)
+      {
+      // The library appears in an implicit link directory.  Report
+      // only the file name.
+      return cmSystemTools::GetFilenameName(lib);
+      }
+    }
+
+  // No implicit link directory matched.  No fix is needed.
+  return lib;
 }
