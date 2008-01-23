@@ -521,10 +521,10 @@ bool cmCTest::UpdateCTestConfiguration()
   std::string fileName = this->CTestConfigFile;
   if ( fileName.empty() )
     {
-    fileName = this->BinaryDir + "/DartConfiguration.tcl";
+    fileName = this->BinaryDir + "/CTestConfiguration.ini";
     if ( !cmSystemTools::FileExists(fileName.c_str()) )
       {
-      fileName = this->BinaryDir + "/CTestConfiguration.ini";
+      fileName = this->BinaryDir + "/DartConfiguration.tcl";
       }
     }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "UpdateCTestConfiguration  from :"
