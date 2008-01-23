@@ -98,11 +98,6 @@ bool cmFindLibraryCommand
       // Convert lib to lib32.
       this->AddArchitecturePaths("32");
       }
-    else if(abi.find("SPARCV9") != abi.npos)
-      {
-      // Convert lib to lib/sparcv9.
-      this->AddArchitecturePaths("/sparcv9");
-      }
     }
 
   if(this->Makefile->GetCMakeInstance()
