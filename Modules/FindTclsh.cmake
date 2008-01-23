@@ -28,20 +28,12 @@ GET_FILENAME_COMPONENT(
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl;CurrentVersion]" 
   NAME)
 
-FIND_PROGRAM(TCL_TCLSH
-  NAMES tclsh
-  tclsh86 tclsh8.6
-  tclsh85 tclsh8.5
-  tclsh84 tclsh8.4
-  tclsh83 tclsh8.3
-  tclsh82 tclsh8.2
-  tclsh80 tclsh8.0
-  PATHS
-  "${TK_WISH_PATH_PARENT}/bin"
+SET(TCLTK_POSSIBLE_BIN_PATHS
   "${TCL_INCLUDE_PATH_PARENT}/bin"
   "${TK_INCLUDE_PATH_PARENT}/bin"
   "${TCL_LIBRARY_PATH_PARENT}/bin"
   "${TK_LIBRARY_PATH_PARENT}/bin"
+  "${TK_WISH_PATH_PARENT}/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/bin"
@@ -51,9 +43,20 @@ FIND_PROGRAM(TCL_TCLSH
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/bin"
 )
 
+FIND_PROGRAM(TCL_TCLSH
+  NAMES tclsh
+  tclsh86 tclsh8.6
+  tclsh85 tclsh8.5
+  tclsh84 tclsh8.4
+  tclsh83 tclsh8.3
+  tclsh82 tclsh8.2
+  tclsh80 tclsh8.0
+  PATHS ${TCLTK_POSSIBLE_BIN_PATHS}
+)
+
 # handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Tclsh DEFAULT_MSG TCL_TCLSH)
 
-MARK_AS_ADVANCED( TCL_TCLSH  )
+MARK_AS_ADVANCED(TCL_TCLSH)

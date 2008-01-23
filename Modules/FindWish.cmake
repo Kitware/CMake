@@ -27,20 +27,12 @@ GET_FILENAME_COMPONENT(
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl;CurrentVersion]" 
   NAME)
 
-FIND_PROGRAM(TK_WISH
-  NAMES wish 
-  wish86 wish8.6
-  wish85 wish8.5 
-  wish84 wish8.4 
-  wish83 wish8.3 
-  wish82 wish8.2 
-  wish80 wish8.0
-  PATHS
-  "${TCL_TCLSH_PATH_PARENT}/bin"
+SET(TCLTK_POSSIBLE_BIN_PATHS
   "${TCL_INCLUDE_PATH_PARENT}/bin"
   "${TK_INCLUDE_PATH_PARENT}/bin"
   "${TCL_LIBRARY_PATH_PARENT}/bin"
   "${TK_LIBRARY_PATH_PARENT}/bin"
+  "${TCL_TCLSH_PATH_PARENT}/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/bin"
@@ -50,4 +42,15 @@ FIND_PROGRAM(TK_WISH
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/bin"
 )
 
-MARK_AS_ADVANCED(TK_WISH  )
+FIND_PROGRAM(TK_WISH
+  NAMES wish 
+  wish86 wish8.6
+  wish85 wish8.5 
+  wish84 wish8.4 
+  wish83 wish8.3 
+  wish82 wish8.2 
+  wish80 wish8.0
+  PATHS ${TCLTK_POSSIBLE_BIN_PATHS}
+)
+
+MARK_AS_ADVANCED(TK_WISH)

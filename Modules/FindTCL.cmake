@@ -56,10 +56,12 @@ GET_FILENAME_COMPONENT(
   NAME)
 
 SET (TCLTK_POSSIBLE_LIB_PATHS
-  "${TCL_TCLSH_PATH_PARENT}/lib"
-  "${TK_WISH_PATH_PARENT}/lib"
   "${TCL_INCLUDE_PATH_PARENT}/lib"
   "${TK_INCLUDE_PATH_PARENT}/lib"
+  "${TCL_LIBRARY_PATH}"
+  "${TK_LIBRARY_PATH}"
+  "${TCL_TCLSH_PATH_PARENT}/lib"
+  "${TK_WISH_PATH_PARENT}/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/lib"
@@ -119,10 +121,12 @@ IF(Tk_FRAMEWORKS)
 ENDIF(Tk_FRAMEWORKS)
 
 SET (TCLTK_POSSIBLE_INCLUDE_PATHS
-  "${TCL_TCLSH_PATH_PARENT}/include"
-  "${TK_WISH_PATH_PARENT}/include"
   "${TCL_LIBRARY_PATH_PARENT}/include"
   "${TK_LIBRARY_PATH_PARENT}/include"
+  "${TCL_INCLUDE_PATH}"
+  "${TK_INCLUDE_PATH}"
+  "${TCL_TCLSH_PATH_PARENT}/include"
+  "${TK_WISH_PATH_PARENT}/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/include"
