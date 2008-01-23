@@ -17,6 +17,8 @@ const char info_sizeof_dptr[] =  {
 # define ABI_ID "ELF N32"
 #elif defined(__sgi) && defined(_ABI64)
 # define ABI_ID "ELF 64"
+#elif defined(__sparcv9)
+# define ABI_ID "SPARCV9"
 #elif defined(__ELF__)
 # define ABI_ID "ELF"
 #endif

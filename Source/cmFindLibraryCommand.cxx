@@ -77,13 +77,19 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
     return true;
     }
 
-  if(const char* abi =
+  if(const char* abi_name =
      this->Makefile->GetDefinition("CMAKE_INTERNAL_PLATFORM_ABI"))
     {
-    if(strncmp(abi, "ELF N32", 7) ==0)
+    std::string abi = abi_name;
+    if(abi.find("ELF N32") != abi.npos)
       {
-      // Convert /lib to /lib32 if the architecture requests it.
-      this->AddLib32Paths();
+      // Convert lib to lib32.
+      this->AddArchitecturePaths("32");
+      }
+    else if(abi.find("SPARCV9") != abi.npos)
+      {
+      // Convert lib to lib/sparcv9.
+      this->AddArchitecturePaths("/sparcv9");
       }
     }
 
@@ -117,42 +123,44 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 }
 
 //----------------------------------------------------------------------------
-void cmFindLibraryCommand::AddLib32Paths()
+void cmFindLibraryCommand::AddArchitecturePaths(const char* suffix)
 {
-  std::vector<std::string> path32;
-  bool found32 = false;
+  std::vector<std::string> newPaths;
+  bool found = false;
+  std::string subpath = "lib";
+  subpath += suffix;
+  subpath += "/";
   for(std::vector<std::string>::iterator i = this->SearchPaths.begin();
       i != this->SearchPaths.end(); ++i)
     {
+    // Try replacing lib/ with lib<suffix>/
     std::string s = *i;
-    std::string s2 = *i;
-    cmSystemTools::ReplaceString(s, "lib/", "lib32/");
-    // try to replace lib with lib32 and see if it is there,
-    // then prepend it to the path
+    cmSystemTools::ReplaceString(s, "lib/", subpath.c_str());
     if((s != *i) && cmSystemTools::FileIsDirectory(s.c_str()))
       {
-      path32.push_back(s);
-      found32 = true;
+      found = true;
+      newPaths.push_back(s);
       }
-    // now just add a 32 to the path name and if it is there,
-    // add it to the path
-    s2 += "32";
-    if(cmSystemTools::FileIsDirectory(s2.c_str()))
+
+    // Now look for lib<suffix>
+    s = *i;
+    s += suffix;
+    if(cmSystemTools::FileIsDirectory(s.c_str()))
       {
-      found32 = true;
-      path32.push_back(s2);
+      found = true;
+      newPaths.push_back(s);
       }
     // now add the original unchanged path
     if(cmSystemTools::FileIsDirectory(i->c_str()))
       {
-      path32.push_back(*i);
+      newPaths.push_back(*i);
       }
     }
-  // now replace the SearchPaths with the 32 bit converted path
-  // if any 32 bit paths were discovered
-  if(found32)
+
+  // If any new paths were found replace the original set.
+  if(found)
     {
-    this->SearchPaths = path32;
+    this->SearchPaths = newPaths;
     }
 }
 
