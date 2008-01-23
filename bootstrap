@@ -255,7 +255,7 @@ EOF
 }
 
 # Display CMake bootstrap usage
-cmake_version()
+cmake_version_display()
 {
   (
   # Get CMake version
@@ -482,7 +482,7 @@ for a in "$@"; do
     cmake_usage
   fi
   if echo $a | grep "^--version" > /dev/null 2> /dev/null; then
-    cmake_version
+    cmake_version_display
     exit 2
   fi
   if echo $a | grep "^--verbose" > /dev/null 2> /dev/null; then
@@ -505,7 +505,7 @@ fi
 
 echo "---------------------------------------------"
 # Get CMake version
-echo "`cmake_version`"
+echo "`cmake_version_display`"
 
 # Check for in-source build
 cmake_in_source_build=
