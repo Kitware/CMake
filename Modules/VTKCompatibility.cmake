@@ -31,6 +31,11 @@ SET(VTK_WGLEXT_FILE "${VTK_SOURCE_DIR}/Utilities/ParseOGLExt/headers/wglext.h"
 # work around an old bug in VTK
 SET(TIFF_RIGHT_VERSION 1)
 
+# vtkRendering links to X11 with "-lXt ${X11_LIBRARIES}" because CMake
+# 2.4 and below did not provide the X11_Xt_LIB variable.  We need the
+# linker search path compatiblity feature.
+SET(CMAKE_LINK_OLD_PATHS 1)
+
 # for very old VTK (versions prior to 4.2)
 MACRO(SOURCE_FILES)
   message (FATAL_ERROR "You are trying to build a very old version of VTK (prior to VTK 4.2). To do this you need to use CMake 2.0 as it was the last version of CMake to support VTK 4.0.")

@@ -203,6 +203,26 @@ cmComputeLinkInformation
 
   // Initial state.
   this->RuntimeSearchPathComputed = false;
+  this->HaveUserFlagItem = false;
+
+  // Decide whether to enable compatible library search path mode.
+  // There exists code that effectively does
+  //
+  //    /path/to/libA.so -lB
+  //
+  // where -lB is meant to link to /path/to/libB.so.  This is broken
+  // because it specified -lB without specifying a link directory (-L)
+  // in which to search for B.  This worked in CMake 2.4 and below
+  // because -L/path/to would be added by the -L/-l split for A.  In
+  // order to support such projects we need to add the directories
+  // containing libraries linked with a full path to the -L path.
+  this->OldLinkDirMode = false;
+  if(this->Makefile->IsOn("CMAKE_LINK_OLD_PATHS") ||
+     this->Makefile->GetLocalGenerator()
+     ->NeedBackwardsCompatibility(2, 4))
+    {
+    this->OldLinkDirMode = true;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -658,6 +678,13 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
       }
     }
 
+  // Record the directory in which the library appears because CMake
+  // 2.4 in below added these as -L paths.
+  if(this->OldLinkDirMode)
+    {
+    this->OldLinkDirs.push_back(cmSystemTools::GetFilenamePath(item));
+    }
+
   // If this platform wants a flag before the full path, add it.
   if(!this->LibLinkFileFlag.empty())
     {
@@ -738,8 +765,11 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item)
     }
   else if(item[0] == '-' || item[0] == '$' || item[0] == '`')
     {
-    // This is a linker option provided by the user.  Restore the
-    // target link type since this item does not specify one.
+    // This is a linker option provided by the user.
+    this->HaveUserFlagItem = true;
+
+    // Restore the target link type since this item does not specify
+    // one.
     this->SetCurrentLinkType(this->StartLinkType);
 
     // Use the item verbatim.
@@ -748,9 +778,12 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item)
     }
   else
     {
-    // This is a name specified by the user.  We must ask the linker
-    // to search for a library with this name.  Restore the target
-    // link type since this item does not specify one.
+    // This is a name specified by the user.
+    this->HaveUserFlagItem = true;
+
+    // We must ask the linker to search for a library with this name.
+    // Restore the target link type since this item does not specify
+    // one.
     this->SetCurrentLinkType(this->StartLinkType);
     lib = item;
     }
@@ -872,6 +905,12 @@ void cmComputeLinkInformation::ComputeLinkerSearchDirectories()
 
   // Get the search path entries requested by the user.
   this->AddLinkerSearchDirectories(this->Target->GetLinkDirectories());
+
+  // Support broken projects if necessary.
+  if(this->HaveUserFlagItem && this->OldLinkDirMode)
+    {
+    this->AddLinkerSearchDirectories(this->OldLinkDirs);
+    }
 }
 
 //----------------------------------------------------------------------------

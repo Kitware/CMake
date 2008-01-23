@@ -121,6 +121,11 @@ private:
   void AddLinkerSearchDirectories(std::vector<std::string> const& dirs);
   std::set<cmStdString> DirectoriesEmmitted;
 
+  // Linker search path compatibility mode.
+  std::vector<std::string> OldLinkDirs;
+  bool OldLinkDirMode;
+  bool HaveUserFlagItem;
+
   // Runtime path computation.
   struct LibraryRuntimeEntry
   {
