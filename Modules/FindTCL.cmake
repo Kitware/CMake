@@ -1,23 +1,35 @@
 # - Find Tcl includes and libraries.
-# This module finds if TCL is installed and determines where the
+# This module finds if Tcl is installed and determines where the
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
-#  TCL_FOUND          = Tcl was found
-#  TK_FOUND           = Tk was found
-#  TCLTK_FOUND        = Tcl and Tk were found
-#  TCL_LIBRARY        = path to Tcl library (tcl tcl80)
-#  TCL_LIBRARY_DEBUG  = path to Tcl library (debug)
-#  TCL_STUB_LIBRARY   = path to Tcl stub library
-#  TCL_STUB_LIBRARY_DEBUG = path to debug stub library
-#  TCL_INCLUDE_PATH   = path to where tcl.h can be found
-#  TCL_TCLSH          = path to tclsh binary (tcl tcl80)
-#  TK_LIBRARY         = path to Tk library (tk tk80 etc)
-#  TK_LIBRARY_DEBUG   = path to Tk library (debug)
-#  TK_STUB_LIBRARY    = path to Tk stub library
-#  TK_STUB_LIBRARY_DEBUG = path to debug Tk stub library
-#  TK_INCLUDE_PATH    = path to where tk.h can be found
-#  TK_INTERNAL_PATH   = path to where tkWinInt.h is found
-#  TK_WISH            = full path to the wish executable
+#  TCL_FOUND              = Tcl was found
+#  TK_FOUND               = Tk was found
+#  TCLTK_FOUND            = Tcl and Tk were found
+#  TCL_LIBRARY            = path to Tcl library (tcl tcl80)
+#  TCL_INCLUDE_PATH       = path to where tcl.h can be found
+#  TCL_TCLSH              = path to tclsh binary (tcl tcl80)
+#  TK_LIBRARY             = path to Tk library (tk tk80 etc)
+#  TK_INCLUDE_PATH        = path to where tk.h can be found
+#  TK_WISH                = full path to the wish executable
+#
+# In an effort to remove some clutter and clear up some issues for people
+# who are not necessarily Tcl/Tk gurus/developpers, some variables were
+# moved or removed. Changes compared to CMake 2.4 are:
+# - The stub libraries are now found in FindTclStub.cmake
+#   => they were only useful for people writing Tcl/Tk extensions.
+# - TCL_LIBRARY_DEBUG and TK_LIBRARY_DEBUG were removed.
+#   => these libs are not packaged by default with Tcl/Tk distributions. 
+#      Even when Tcl/Tk is built from source, several flavors of debug libs
+#      are created and there is no real reason to pick a single one
+#      specifically (say, amongst tcl84g, tcl84gs, or tcl84sgx). 
+#      Let's leave that choice to the user by allowing him to assign 
+#      TCL_LIBRARY to any Tcl library, debug or not.
+# - TK_INTERNAL_PATH was removed.
+#   => this ended up being only a Win32 variable, and there is a lot of
+#      confusion regarding the location of this file in an installed Tcl/Tk
+#      tree anyway (see 8.5 for example). If you need the internal path at
+#      this point it is safer you ask directly where the *source* tree is
+#      and dig from there.
 
 INCLUDE(CMakeFindFrameworks)
 INCLUDE(FindTclsh)
@@ -73,45 +85,6 @@ FIND_LIBRARY(TCL_LIBRARY
   PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
 )
 
-FIND_LIBRARY(TCL_LIBRARY_DEBUG
-  NAMES tcld 
-  tcl86d tcl8.6d 
-  tcl86g tcl8.6g 
-  tcl85d tcl8.5d 
-  tcl85g tcl8.5g 
-  tcl84d tcl8.4d 
-  tcl84g tcl8.4g 
-  tcl83d tcl8.3d 
-  tcl82d tcl8.2d 
-  tcl80d tcl8.0d
-  PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
-)
-
-FIND_LIBRARY(TCL_STUB_LIBRARY
-  NAMES tclstub 
-  tclstub86 tclstub8.6
-  tclstub85 tclstub8.5 
-  tclstub84 tclstub8.4 
-  tclstub83 tclstub8.3 
-  tclstub82 tclstub8.2 
-  tclstub80 tclstub8.0
-  PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
-)
-
-FIND_LIBRARY(TCL_STUB_LIBRARY_DEBUG
-  NAMES tclstubd 
-  tclstub86d tclstub8.6d 
-  tclstub86g tclstub8.6g 
-  tclstub85d tclstub8.5d 
-  tclstub85g tclstub8.5g 
-  tclstub84d tclstub8.4d 
-  tclstub84g tclstub8.4g 
-  tclstub83d tclstub8.3d 
-  tclstub82d tclstub8.2d 
-  tclstub80d tclstub8.0d
-  PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
-)
-
 FIND_LIBRARY(TK_LIBRARY 
   NAMES tk 
   tk86 tk8.6
@@ -120,45 +93,6 @@ FIND_LIBRARY(TK_LIBRARY
   tk83 tk8.3 
   tk82 tk8.2 
   tk80 tk8.0
-  PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
-)
-
-FIND_LIBRARY(TK_LIBRARY_DEBUG
-  NAMES tkd 
-  tk86d tk8.6d 
-  tk86g tk8.6g 
-  tk85d tk8.5d 
-  tk85g tk8.5g 
-  tk84d tk8.4d 
-  tk84g tk8.4g 
-  tk83d tk8.3d 
-  tk82d tk8.2d 
-  tk80d tk8.0d
-  PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
-)
-
-FIND_LIBRARY(TK_STUB_LIBRARY 
-  NAMES tkstub 
-  tkstub86 tkstub8.6
-  tkstub85 tkstub8.5 
-  tkstub84 tkstub8.4 
-  tkstub83 tkstub8.3 
-  tkstub82 tkstub8.2 
-  tkstub80 tkstub8.0
-  PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
-)
-
-FIND_LIBRARY(TK_STUB_LIBRARY_DEBUG
-  NAMES tkstubd 
-  tkstub86d tkstub8.6d 
-  tkstub86g tkstub8.6g 
-  tkstub85d tkstub8.5d 
-  tkstub85g tkstub8.5g 
-  tkstub84d tkstub8.4d 
-  tkstub84g tkstub8.4g 
-  tkstub83d tkstub8.3d 
-  tkstub82d tkstub8.2d 
-  tkstub80d tkstub8.0d
   PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
 )
 
@@ -217,14 +151,7 @@ FIND_PATH(TK_INCLUDE_PATH tk.h
   ${TK_FRAMEWORK_INCLUDES} ${TCLTK_POSSIBLE_INCLUDE_PATHS}
 )
 
-IF (WIN32)
-  FIND_PATH(TK_INTERNAL_PATH tkWinInt.h
-    ${TCLTK_POSSIBLE_INCLUDE_PATHS}
-  )
-  MARK_AS_ADVANCED(TK_INTERNAL_PATH)
-ENDIF(WIN32)
-
-# handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set TCL_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
 
@@ -236,20 +163,11 @@ SET(TK_FIND_REQUIRED ${TCL_FIND_REQUIRED})
 SET(TK_FIND_QUIETLY  ${TCL_FIND_QUIETLY})
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(TK DEFAULT_MSG TK_LIBRARY TK_INCLUDE_PATH)
 
-
 MARK_AS_ADVANCED(
   TCL_TCLSH_PATH
   TK_WISH_PATH
   TCL_INCLUDE_PATH
   TK_INCLUDE_PATH
   TCL_LIBRARY
-  TCL_LIBRARY_DEBUG
   TK_LIBRARY
-  TK_LIBRARY_DEBUG
-  TCL_STUB_LIBRARY
-  TCL_STUB_LIBRARY_DEBUG
-  TK_STUB_LIBRARY  
-  TK_STUB_LIBRARY
-  TK_STUB_LIBRARY_DEBUG
   )
-
