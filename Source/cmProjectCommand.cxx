@@ -17,7 +17,8 @@
 #include "cmProjectCommand.h"
 
 // cmProjectCommand
-bool cmProjectCommand::InitialPass(std::vector<std::string> const& args)
+bool cmProjectCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1 )
     {

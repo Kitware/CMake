@@ -21,7 +21,7 @@
 
 // cmUseMangledMesaCommand
 bool cmUseMangledMesaCommand
-::InitialPass(std::vector<std::string> const& args)
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 { 
   // expected two arguments:
   // arguement one: the full path to gl_mangle.h

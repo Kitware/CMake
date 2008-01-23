@@ -53,7 +53,8 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args);
+  virtual bool InitialPass(std::vector<std::string> const& args,
+                           cmExecutionStatus &);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -70,7 +71,8 @@ public:
 };
 
 //----------------------------------------------------------------------
-bool cmCTestSubdirCommand::InitialPass(std::vector<std::string> const& args)
+bool cmCTestSubdirCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1 )
     {
@@ -139,7 +141,8 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args);
+  virtual bool InitialPass(std::vector<std::string> const& args,
+                           cmExecutionStatus &);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -157,7 +160,7 @@ public:
 
 //----------------------------------------------------------------------
 bool cmCTestAddSubdirectoryCommand
-::InitialPass(std::vector<std::string> const& args)
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1 )
     {
@@ -223,7 +226,8 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const&);
+  virtual bool InitialPass(std::vector<std::string> const&,
+                           cmExecutionStatus &);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -240,7 +244,8 @@ public:
 };
 
 //----------------------------------------------------------------------
-bool cmCTestAddTestCommand::InitialPass(std::vector<std::string> const& args)
+bool cmCTestAddTestCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if ( args.size() < 2 )
     {
@@ -268,8 +273,9 @@ public:
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
-   */
-  virtual bool InitialPass(std::vector<std::string> const&);
+  */
+  virtual bool InitialPass(std::vector<std::string> const&,
+                           cmExecutionStatus &);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -286,8 +292,8 @@ public:
 };
 
 //----------------------------------------------------------------------
-bool cmCTestSetTestsPropertiesCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmCTestSetTestsPropertiesCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   return this->TestHandler->SetTestsProperties(args);
 }

@@ -18,8 +18,8 @@
 #include "cmCacheManager.h"
 
 // cmLibraryCommand
-bool cmVariableRequiresCommand::InitialPass(std::vector<std::string>const&
-                                            args)
+bool cmVariableRequiresCommand
+::InitialPass(std::vector<std::string>const& args, cmExecutionStatus &)
 {
   if(args.size() < 3 )
     {

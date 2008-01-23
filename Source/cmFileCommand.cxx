@@ -54,7 +54,8 @@ static mode_t mode_setgid = S_ISGID;
 #endif
 
 // cmLibraryCommand
-bool cmFileCommand::InitialPass(std::vector<std::string> const& args)
+bool cmFileCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 2 )
     {

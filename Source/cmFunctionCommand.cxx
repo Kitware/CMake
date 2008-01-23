@@ -48,9 +48,11 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args);
+  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
+                                 cmExecutionStatus &);
 
-  virtual bool InitialPass(std::vector<std::string> const&) { return false; };
+  virtual bool InitialPass(std::vector<std::string> const&,
+                           cmExecutionStatus &) { return false; };
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -83,7 +85,8 @@ public:
 
 
 bool cmFunctionHelperCommand::InvokeInitialPass
-(const std::vector<cmListFileArgument>& args)
+(const std::vector<cmListFileArgument>& args,
+ cmExecutionStatus &)
 {
   // Expand the argument list to the function.
   std::vector<std::string> expandedArgs;
@@ -153,7 +156,8 @@ bool cmFunctionHelperCommand::InvokeInitialPass
   // for each function
   for(unsigned int c = 0; c < this->Functions.size(); ++c)
     {
-    if (!this->Makefile->ExecuteCommand(this->Functions[c]))
+    cmExecutionStatus status;
+    if (!this->Makefile->ExecuteCommand(this->Functions[c],status))
       {
       cmOStringStream error;
       error << "Error in cmake code at\n"
@@ -167,6 +171,11 @@ bool cmFunctionHelperCommand::InvokeInitialPass
       this->Makefile->PopScope();
       return false;
       }
+    if (status.GetReturnInvoked())
+      {
+      this->Makefile->PopScope();
+      return true;
+      }
     }
 
   // pop scope on the makefile
@@ -175,7 +184,8 @@ bool cmFunctionHelperCommand::InvokeInitialPass
 }
 
 bool cmFunctionFunctionBlocker::
-IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
+IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
+                  cmExecutionStatus &)
 {
   // record commands until we hit the ENDFUNCTION
   // at the ENDFUNCTION call we shift gears and start looking for invocations
@@ -266,7 +276,8 @@ ScopeEnded(cmMakefile &mf)
     this->Args[0].c_str());
 }
 
-bool cmFunctionCommand::InitialPass(std::vector<std::string> const& args)
+bool cmFunctionCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1)
     {

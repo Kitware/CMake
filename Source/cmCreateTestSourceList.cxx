@@ -18,7 +18,8 @@
 #include "cmSourceFile.h"
 
 // cmCreateTestSourceList
-bool cmCreateTestSourceList::InitialPass(std::vector<std::string> const& args)
+bool cmCreateTestSourceList
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if (args.size() < 3)
     {

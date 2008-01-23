@@ -17,9 +17,10 @@
 #include "cmForEachCommand.h"
 
 bool cmForEachFunctionBlocker::
-IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf) 
+IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
+                  cmExecutionStatus &inStatus)
 {
-  // Prevent recusion and don't let this blobker block its own
+  // Prevent recusion and don't let this blocker block its own
   // commands.
   if (this->Executing)
     {
@@ -54,9 +55,26 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
         // set the variable to the loop value
         mf.AddDefinition(this->Args[0].c_str(),j->c_str());
         // Invoke all the functions that were collected in the block.
+        cmExecutionStatus status;
         for(unsigned int c = 0; c < this->Functions.size(); ++c)
           {
-          mf.ExecuteCommand(this->Functions[c]);
+          status.Clear();
+          mf.ExecuteCommand(this->Functions[c],status);
+          if (status.GetReturnInvoked())
+            {
+            inStatus.SetReturnInvoked(true);
+            // restore the variable to its prior value
+            mf.AddDefinition(this->Args[0].c_str(),oldDef.c_str());
+            mf.RemoveFunctionBlocker(lff);
+            return true;
+            }
+          if (status.GetBreakInvoked())
+            {
+            // restore the variable to its prior value
+            mf.AddDefinition(this->Args[0].c_str(),oldDef.c_str());
+            mf.RemoveFunctionBlocker(lff);
+            return true;
+            }
           }
         }
       // restore the variable to its prior value
@@ -105,7 +123,8 @@ ScopeEnded(cmMakefile &mf)
                        mf.GetCurrentDirectory());
 }
 
-bool cmForEachCommand::InitialPass(std::vector<std::string> const& args)
+bool cmForEachCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1)
     {

@@ -18,7 +18,7 @@
 
 // cmEnableLanguageCommand
 bool cmEnableLanguageCommand
-::InitialPass(std::vector<std::string> const& args)
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   bool optional = false;
   std::vector<std::string> languages;

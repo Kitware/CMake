@@ -48,9 +48,11 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args);
+  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args, 
+                                 cmExecutionStatus &);
 
-  virtual bool InitialPass(std::vector<std::string> const&) { return false; };
+  virtual bool InitialPass(std::vector<std::string> const&,
+                           cmExecutionStatus &) { return false; };
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -83,7 +85,8 @@ public:
 
 
 bool cmMacroHelperCommand::InvokeInitialPass
-(const std::vector<cmListFileArgument>& args)
+(const std::vector<cmListFileArgument>& args,
+ cmExecutionStatus &inStatus)
 {
   // Expand the argument list to the macro.
   std::vector<std::string> expandedArgs;
@@ -233,7 +236,8 @@ bool cmMacroHelperCommand::InvokeInitialPass
         }
       newLFF.Arguments.push_back(arg);
       }
-    if(!this->Makefile->ExecuteCommand(newLFF))
+    cmExecutionStatus status;
+    if(!this->Makefile->ExecuteCommand(newLFF,status))
       {
       if(args.size())
         {
@@ -253,12 +257,23 @@ bool cmMacroHelperCommand::InvokeInitialPass
       cmSystemTools::Error(error.str().c_str());
       return false;
       }
+    if (status.GetReturnInvoked())
+      {
+      inStatus.SetReturnInvoked(true);
+      return true;
+      }
+    if (status.GetBreakInvoked())
+      {
+      inStatus.SetBreakInvoked(true);
+      return true;
+      }
     }
   return true;
 }
 
 bool cmMacroFunctionBlocker::
-IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
+IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
+                  cmExecutionStatus &)
 {
   // record commands until we hit the ENDMACRO
   // at the ENDMACRO call we shift gears and start looking for invocations
@@ -337,7 +352,8 @@ ScopeEnded(cmMakefile &mf)
     this->Args[0].c_str());
 }
 
-bool cmMacroCommand::InitialPass(std::vector<std::string> const& args)
+bool cmMacroCommand::InitialPass(std::vector<std::string> const& args,
+                                 cmExecutionStatus &)
 {
   if(args.size() < 1)
     {

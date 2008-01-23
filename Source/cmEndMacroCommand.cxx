@@ -17,7 +17,8 @@
 #include "cmEndMacroCommand.h"
 
 bool cmEndMacroCommand
-::InvokeInitialPass(std::vector<cmListFileArgument> const&)
+::InvokeInitialPass(std::vector<cmListFileArgument> const&,
+                    cmExecutionStatus &)
 {
   this->SetError("An ENDMACRO command was found outside of a proper "
                  "MACRO ENDMACRO structure. Or its arguments did not "

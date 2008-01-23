@@ -27,6 +27,7 @@
 #include "cmAddLibraryCommand.cxx"
 #include "cmAddSubDirectoryCommand.cxx"
 #include "cmAddTestCommand.cxx"
+#include "cmBreakCommand.cxx"
 #include "cmBuildCommand.cxx"
 #include "cmCMakeMinimumRequired.cxx"
 #include "cmCommandArgumentsHelper.cxx"
@@ -70,6 +71,7 @@
 #include "cmMessageCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmProjectCommand.cxx"
+#include "cmReturnCommand.cxx"
 #include "cmSetCommand.cxx"
 #include "cmSetPropertyCommand.cxx"
 #include "cmSetSourceFilesPropertiesCommand.cxx"
@@ -92,6 +94,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmAddLibraryCommand);
   commands.push_back(new cmAddSubDirectoryCommand);
   commands.push_back(new cmAddTestCommand);
+  commands.push_back(new cmBreakCommand);
   commands.push_back(new cmBuildCommand);
   commands.push_back(new cmCMakeMinimumRequired);
   commands.push_back(new cmConfigureFileCommand);
@@ -129,6 +132,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmMessageCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmProjectCommand);
+  commands.push_back(new cmReturnCommand);
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSetPropertyCommand);
   commands.push_back(new cmSetSourceFilesPropertiesCommand);

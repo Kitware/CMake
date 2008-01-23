@@ -18,8 +18,8 @@
 #include "cmake.h"
 
 // cmDefinePropertiesCommand
-bool cmDefinePropertyCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmDefinePropertyCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 5 )
     {

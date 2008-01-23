@@ -19,7 +19,8 @@
 #include "cmVersion.h"
 
 // cmCMakeMinimumRequired
-bool cmCMakeMinimumRequired::InitialPass(std::vector<std::string> const& args)
+bool cmCMakeMinimumRequired
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   // Process arguments.
   std::string version_string;

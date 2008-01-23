@@ -19,8 +19,8 @@
 #include "cmGlobalGenerator.h"
 
 // cmDependenciesCommand
-bool cmAddDependenciesCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmAddDependenciesCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 2 )
     {

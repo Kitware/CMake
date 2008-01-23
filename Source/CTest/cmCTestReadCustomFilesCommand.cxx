@@ -18,8 +18,8 @@
 
 #include "cmCTest.h"
 
-bool cmCTestReadCustomFilesCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmCTestReadCustomFilesCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if (args.size() < 1)
     {

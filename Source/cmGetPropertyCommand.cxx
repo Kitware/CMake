@@ -27,7 +27,8 @@ cmGetPropertyCommand::cmGetPropertyCommand()
 }
 
 //----------------------------------------------------------------------------
-bool cmGetPropertyCommand::InitialPass(std::vector<std::string> const& args)
+bool cmGetPropertyCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 3 )
     {

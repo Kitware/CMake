@@ -17,7 +17,8 @@
 #include "cmTryCompileCommand.h"
 
 // cmTryCompileCommand
-bool cmTryCompileCommand::InitialPass(std::vector<std::string> const& argv)
+bool cmTryCompileCommand
+::InitialPass(std::vector<std::string> const& argv, cmExecutionStatus &)
 {
   if(argv.size() < 3)
     {

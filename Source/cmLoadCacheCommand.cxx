@@ -19,7 +19,8 @@
 #include <cmsys/RegularExpression.hxx>
 
 // cmLoadCacheCommand
-bool cmLoadCacheCommand::InitialPass(std::vector<std::string> const& args)
+bool cmLoadCacheCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if (args.size()< 1)
     {

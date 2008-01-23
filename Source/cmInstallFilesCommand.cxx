@@ -20,7 +20,7 @@
 
 // cmExecutableCommand
 bool cmInstallFilesCommand
-::InitialPass(std::vector<std::string> const& argsIn)
+::InitialPass(std::vector<std::string> const& argsIn, cmExecutionStatus &)
 {
   if(argsIn.size() < 2)
     {

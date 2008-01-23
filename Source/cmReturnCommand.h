@@ -14,16 +14,17 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#ifndef cmMathCommand_h
-#define cmMathCommand_h
+#ifndef cmReturnCommand_h
+#define cmReturnCommand_h
 
 #include "cmCommand.h"
 
-/** \class cmMathCommand
- * \brief Common string operations
+/** \class cmReturnCommand
+ * \brief Return from a directory or function
  *
+ * cmReturnCommand returns from a directory or function
  */
-class cmMathCommand : public cmCommand
+class cmReturnCommand : public cmCommand
 {
 public:
   /**
@@ -31,7 +32,7 @@ public:
    */
   virtual cmCommand* Clone() 
     {
-    return new cmMathCommand;
+    return new cmReturnCommand;
     }
 
   /**
@@ -49,14 +50,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "math";}
-
+  virtual const char* GetName() {return "return";}
+  
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Mathematical expressions.";
+    return "Return from a directory or function.";
     }
   
   /**
@@ -65,20 +66,17 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  math(EXPR <output variable> <math expression>)\n"
-      "EXPR evaluates mathematical expression and return result in the "
-      "output variable. Example mathematical expression is "
-      "'5 * ( 10 + 13 )'.  Supported operators are "
-      "+ - * / % | & ^ ~ << >> * / %.  They have the same meaning "
-      " as they do in c code.";
+      "  return()\n"
+      "Returns from a directory or function. When this command is "
+      "encountered, it caused process of the current function or "
+      "directory to stop and control is return to the caller of the "
+      "function, or the parent directory if any. Note that a macro "
+      "is not a function and does not handle return liek a function does.";
     }
   
-  cmTypeMacro(cmMathCommand, cmCommand);
-protected:
- 
-  bool HandleExprCommand(std::vector<std::string> const& args);
+  cmTypeMacro(cmReturnCommand, cmCommand);
 };
 
 
-#endif
 
+#endif

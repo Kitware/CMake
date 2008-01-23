@@ -19,7 +19,8 @@
 
 // we do this in the final pass so that we now the subdirs have all 
 // been defined
-bool cmEnableTestingCommand::InitialPass(std::vector<std::string> const&)
+bool cmEnableTestingCommand::InitialPass(std::vector<std::string> const&,
+                                         cmExecutionStatus &)
 {
   this->Makefile->AddDefinition("CMAKE_TESTING_ENABLED","1");
   return true;

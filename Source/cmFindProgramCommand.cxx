@@ -51,7 +51,8 @@ cmFindProgramCommand::cmFindProgramCommand()
 }
 
 // cmFindProgramCommand
-bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmFindProgramCommand
+::InitialPass(std::vector<std::string> const& argsIn, cmExecutionStatus &)
 {
   this->VariableDocumentation = "Path to a program.";
   this->CMakePathName = "PROGRAM";

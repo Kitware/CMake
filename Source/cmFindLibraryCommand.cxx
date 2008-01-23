@@ -55,7 +55,8 @@ cmFindLibraryCommand::cmFindLibraryCommand()
 }
 
 // cmFindLibraryCommand
-bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmFindLibraryCommand
+::InitialPass(std::vector<std::string> const& argsIn, cmExecutionStatus &)
 {
   this->VariableDocumentation = "Path to a library.";
   this->CMakePathName = "LIBRARY";

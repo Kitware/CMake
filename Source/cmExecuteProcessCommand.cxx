@@ -33,7 +33,7 @@ void cmExecuteProcessCommandAppend(std::vector<char>& output,
 
 // cmExecuteProcessCommand
 bool cmExecuteProcessCommand
-::InitialPass(std::vector<std::string> const& args)
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1 )
     {

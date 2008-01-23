@@ -16,7 +16,8 @@
 =========================================================================*/
 #include "cmEndIfCommand.h"
 #include <stdlib.h> // required for atof
-bool cmEndIfCommand::InitialPass(std::vector<std::string> const&)
+bool cmEndIfCommand::InitialPass(std::vector<std::string> const&,
+                                 cmExecutionStatus &)
 {
   const char* versionValue
     = this->Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION");

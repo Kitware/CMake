@@ -17,7 +17,8 @@
 #include "cmUtilitySourceCommand.h"
 
 // cmUtilitySourceCommand
-bool cmUtilitySourceCommand::InitialPass(std::vector<std::string> const& args)
+bool cmUtilitySourceCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 3)
     {

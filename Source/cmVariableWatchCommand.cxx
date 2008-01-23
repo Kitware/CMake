@@ -35,7 +35,8 @@ cmVariableWatchCommand::cmVariableWatchCommand()
 }
 
 //----------------------------------------------------------------------------
-bool cmVariableWatchCommand::InitialPass(std::vector<std::string> const& args)
+bool cmVariableWatchCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if ( args.size() < 1 )
     {
@@ -102,7 +103,8 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
     newLFF.Name = command; 
     newLFF.FilePath = "Some weird path";
     newLFF.Line = 9999;
-    if(!makefile->ExecuteCommand(newLFF))
+    cmExecutionStatus status;
+    if(!makefile->ExecuteCommand(newLFF,status))
       {
       arg.FilePath =  "Unknown";
       arg.Line = 0;

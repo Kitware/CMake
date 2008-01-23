@@ -21,7 +21,8 @@
 #include <stdlib.h> // required for atoi
 #include <ctype.h>
 //----------------------------------------------------------------------------
-bool cmListCommand::InitialPass(std::vector<std::string> const& args)
+bool cmListCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1)
     {

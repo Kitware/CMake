@@ -14,28 +14,13 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#include "cmCTestEmptyBinaryDirectoryCommand.h"
+#include "cmBreakCommand.h"
 
-#include "cmCTestScriptHandler.h"
-
-bool cmCTestEmptyBinaryDirectoryCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+// cmBreakCommand
+bool cmBreakCommand::InitialPass(std::vector<std::string> const&,
+                                  cmExecutionStatus &status)
 {
-  if(args.size() != 1 )
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
-
-  if ( !cmCTestScriptHandler::EmptyBinaryDirectory(args[0].c_str()) )
-    {
-    cmOStringStream ostr;
-    ostr << "problem removing the binary directory: " << args[0].c_str();
-    this->SetError(ostr.str().c_str());
-    return false;
-    }  
-  
+  status.SetBreakInvoked(true);
   return true;
 }
-
 

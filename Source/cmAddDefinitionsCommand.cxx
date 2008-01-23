@@ -17,8 +17,8 @@
 #include "cmAddDefinitionsCommand.h"
 
 // cmAddDefinitionsCommand
-bool cmAddDefinitionsCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmAddDefinitionsCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   // it is OK to have no arguments
   if(args.size() < 1 )

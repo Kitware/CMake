@@ -18,6 +18,7 @@
 #define cmFunctionBlocker_h
 
 #include "cmStandardIncludes.h"
+#include "cmExecutionStatus.h"
 class cmMakefile;
 
 /** \class cmFunctionBlocker
@@ -32,7 +33,8 @@ public:
    * should a function be blocked
    */
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
-                                 cmMakefile&mf) = 0;
+                                 cmMakefile&mf,
+                                 cmExecutionStatus &status) = 0;
 
   /**
    * should this function blocker be removed, useful when one function adds a

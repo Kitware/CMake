@@ -20,8 +20,8 @@
 #include "cmTest.h"
 
 // cmGetTestPropertyCommand
-bool cmGetTestPropertyCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmGetTestPropertyCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 3 )
     {

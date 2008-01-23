@@ -70,7 +70,8 @@ const char* cmFindPathCommand::GetFullDocumentation()
 }
 
 // cmFindPathCommand
-bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
+bool cmFindPathCommand
+::InitialPass(std::vector<std::string> const& argsIn, cmExecutionStatus &)
 {
   this->VariableDocumentation = "Path to a file.";
   this->CMakePathName = "INCLUDE";

@@ -22,89 +22,122 @@
 #include <cmsys/RegularExpression.hxx>
 
 bool cmIfFunctionBlocker::
-IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
+IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
+                  cmExecutionStatus &inStatus)
 {
-  // if we are blocking then all we need to do is keep track of 
-  // scope depth of nested if statements
-  if (this->IsBlocking)
+  // Prevent recusion and don't let this blocker block its own
+  // commands.
+  if (this->Executing)
     {
-    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"if"))
-      {
-      this->ScopeDepth++;
-      return true;
-      }
+    return false;
     }
 
-  if (this->IsBlocking && this->ScopeDepth)
+  // we start by recording all the functions
+  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"if"))
     {
-    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
-      {
-      this->ScopeDepth--;
-      }
-    return true;
+    this->ScopeDepth++;
     }
-      
-  // watch for our ELSE or ENDIF
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else") ||
-      !cmSystemTools::Strucmp(lff.Name.c_str(),"elseif") ||
-      !cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
+  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
     {
-    // if it was an else statement then we should change state
-    // and block this Else Command
-    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else"))
+    this->ScopeDepth--;
+    // if this is the endif for this if statement, then start executing
+    if (!this->ScopeDepth) 
       {
-      this->IsBlocking = this->HasRun;
-      return true;
-      }
-    // if it was an elseif statement then we should check state
-    // and possibly block this Else Command
-    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"elseif"))
-      {
-      if (!this->HasRun)
+      // execute the functions for the true parts of the if statement
+      this->Executing = true;
+      cmExecutionStatus status;
+      int scopeDepth = 0;
+      for(unsigned int c = 0; c < this->Functions.size(); ++c)
         {
-        char* errorString = 0;
-        
-        std::vector<std::string> expandedArguments;
-        mf.ExpandArguments(lff.Arguments, expandedArguments);
-        bool isTrue = 
-          cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
-        
-        if (errorString)
+        // keep track of scope depth
+        if (!cmSystemTools::Strucmp(this->Functions[c].Name.c_str(),"if"))
           {
-          std::string err = "had incorrect arguments: ";
-          unsigned int i;
-          for(i =0; i < lff.Arguments.size(); ++i)
-            {
-            err += (lff.Arguments[i].Quoted?"\"":"");
-            err += lff.Arguments[i].Value;
-            err += (lff.Arguments[i].Quoted?"\"":"");
-            err += " ";
-            }
-          err += "(";
-          err += errorString;
-          err += ").";
-          cmSystemTools::Error(err.c_str());
-          delete [] errorString;
-          return false;
+          scopeDepth++;
           }
-        
-        if (isTrue)
+        if (!cmSystemTools::Strucmp(this->Functions[c].Name.c_str(),"endif"))
           {
-          this->IsBlocking = false;
+          scopeDepth--;
+          }
+        // watch for our state change
+        if (scopeDepth == 0 &&
+            !cmSystemTools::Strucmp(this->Functions[c].Name.c_str(),"else"))
+          {
+          this->IsBlocking = this->HasRun;
           this->HasRun = true;
-          return true;
+          }
+        else if (scopeDepth == 0 && !cmSystemTools::Strucmp
+                 (this->Functions[c].Name.c_str(),"elseif"))
+          {
+          if (this->HasRun)
+            {
+            this->IsBlocking = true;
+            }
+          else
+            {
+            char* errorString = 0;
+            
+            std::vector<std::string> expandedArguments;
+            mf.ExpandArguments(this->Functions[c].Arguments, 
+                               expandedArguments);
+            bool isTrue = 
+              cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
+            
+            if (errorString)
+              {
+              std::string err = "had incorrect arguments: ";
+              unsigned int i;
+              for(i =0; i < this->Functions[c].Arguments.size(); ++i)
+                {
+                err += (this->Functions[c].Arguments[i].Quoted?"\"":"");
+                err += this->Functions[c].Arguments[i].Value;
+                err += (this->Functions[c].Arguments[i].Quoted?"\"":"");
+                err += " ";
+                }
+              err += "(";
+              err += errorString;
+              err += ").";
+              cmSystemTools::Error(err.c_str());
+              delete [] errorString;
+              return false;
+              }
+        
+            if (isTrue)
+              {
+              this->IsBlocking = false;
+              this->HasRun = true;
+              }
+            }
+          }
+            
+        // should we execute?
+        else if (!this->IsBlocking)
+          {
+          status.Clear();
+          mf.ExecuteCommand(this->Functions[c],status);
+          if (status.GetReturnInvoked())
+            {
+            inStatus.SetReturnInvoked(true);
+            mf.RemoveFunctionBlocker(lff);
+            return true;
+            }
+          if (status.GetBreakInvoked())
+            {
+            inStatus.SetBreakInvoked(true);
+            mf.RemoveFunctionBlocker(lff);
+            return true;
+            }
           }
         }
-      this->IsBlocking = true;
+      mf.RemoveFunctionBlocker(lff);
       return true;
       }
-    // otherwise it must be an ENDIF statement, in that case remove the
-    // function blocker
-    mf.RemoveFunctionBlocker(lff);
-    return true;
     }
   
-  return this->IsBlocking;
+  // record the command
+  this->Functions.push_back(lff);
+  
+  // always return true
+  return true;
 }
 
 bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
@@ -142,7 +175,8 @@ ScopeEnded(cmMakefile &mf)
 }
 
 bool cmIfCommand
-::InvokeInitialPass(const std::vector<cmListFileArgument>& args)
+::InvokeInitialPass(const std::vector<cmListFileArgument>& args, 
+                    cmExecutionStatus &)
 {
   char* errorString = 0;
   
@@ -172,6 +206,7 @@ bool cmIfCommand
   
   cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
   // if is isn't true block the commands
+  f->ScopeDepth = 1;
   f->IsBlocking = !isTrue;
   if (isTrue)
     {

@@ -18,7 +18,7 @@
 
 // cmAddSubDirectoryCommand
 bool cmAddSubDirectoryCommand::InitialPass
-(std::vector<std::string> const& args)
+(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1 )
     {

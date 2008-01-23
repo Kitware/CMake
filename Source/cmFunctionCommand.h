@@ -30,7 +30,9 @@ class cmFunctionFunctionBlocker : public cmFunctionBlocker
 public:
   cmFunctionFunctionBlocker() {this->Depth=0;}
   virtual ~cmFunctionFunctionBlocker() {}
-  virtual bool IsFunctionBlocked(const cmListFileFunction&, cmMakefile &mf);
+  virtual bool IsFunctionBlocked(const cmListFileFunction&, 
+                                 cmMakefile &mf,
+                                 cmExecutionStatus &);
   virtual bool ShouldRemove(const cmListFileFunction&, cmMakefile &mf);
   virtual void ScopeEnded(cmMakefile &mf);
   
@@ -59,7 +61,8 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args);
+  virtual bool InitialPass(std::vector<std::string> const& args,
+                           cmExecutionStatus &status);
 
   /**
    * This determines if the command is invoked when in script mode.

@@ -35,8 +35,8 @@ cmCTestHandlerCommand::cmCTestHandlerCommand()
   this->Last = ct_LAST;
 }
 
-bool cmCTestHandlerCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmCTestHandlerCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if ( !this->ProcessArguments(args, (unsigned int)this->Last, 
                                &*this->Arguments.begin(),this->Values) )

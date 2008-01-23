@@ -17,7 +17,8 @@
 #include "cmMessageCommand.h"
 
 // cmLibraryCommand
-bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
+bool cmMessageCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1 )
     {

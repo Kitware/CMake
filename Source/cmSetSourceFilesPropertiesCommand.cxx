@@ -19,8 +19,8 @@
 #include "cmSourceFile.h"
 
 // cmSetSourceFilesPropertiesCommand
-bool cmSetSourceFilesPropertiesCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmSetSourceFilesPropertiesCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 2 )
     {

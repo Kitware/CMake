@@ -21,7 +21,7 @@
 
 // cmAuxSourceDirectoryCommand
 bool cmAuxSourceDirectoryCommand::InitialPass
-(std::vector<std::string> const& args)
+(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 2 || args.size() > 2)
     {

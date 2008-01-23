@@ -65,7 +65,8 @@ public:
   cmCTestScriptFunctionBlocker() {}
   virtual ~cmCTestScriptFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
-                                 cmMakefile &mf);
+                                 cmMakefile &mf,
+                                 cmExecutionStatus &);
   //virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
   //virtual void ScopeEnded(cmMakefile &mf);
 
@@ -74,7 +75,8 @@ public:
 
 // simply update the time and don't block anything
 bool cmCTestScriptFunctionBlocker::
-IsFunctionBlocked(const cmListFileFunction& , cmMakefile &)
+IsFunctionBlocked(const cmListFileFunction& , cmMakefile &,
+                  cmExecutionStatus &)
 {
   this->CTestScriptHandler->UpdateElapsedTime();
   return false;

@@ -17,7 +17,8 @@
 #include "cmSubdirDependsCommand.h"
 
 // cmSubdirDependsCommand
-bool cmSubdirDependsCommand::InitialPass(std::vector<std::string> const& )
+bool cmSubdirDependsCommand::InitialPass(std::vector<std::string> const& ,
+                                         cmExecutionStatus &)
 {
   return true;
 }

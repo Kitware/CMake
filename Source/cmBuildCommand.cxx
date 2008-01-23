@@ -20,7 +20,8 @@
 #include "cmGlobalGenerator.h"
 
 // cmBuildCommand
-bool cmBuildCommand::InitialPass(std::vector<std::string> const& args)
+bool cmBuildCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 2 )
     {

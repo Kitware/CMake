@@ -19,7 +19,8 @@
 #include <cmsys/RegularExpression.hxx>
 
 // cmBuildNameCommand
-bool cmBuildNameCommand::InitialPass(std::vector<std::string> const& args)
+bool cmBuildNameCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1 )
     {

@@ -16,7 +16,8 @@
 =========================================================================*/
 #include "cmElseIfCommand.h"
 
-bool cmElseIfCommand::InitialPass(std::vector<std::string> const&)
+bool cmElseIfCommand::InitialPass(std::vector<std::string> const&,
+                                  cmExecutionStatus &)
 {
   this->SetError("An ELSEIF command was found outside of a proper "
                  "IF ENDIF structure.");

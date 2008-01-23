@@ -20,7 +20,8 @@
 
 
 // cmExecutableCommand
-bool cmAddTestCommand::InitialPass(std::vector<std::string> const& args)
+bool cmAddTestCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   // First argument is the name of the test Second argument is the name of
   // the executable to run (a target or external program) Remaining arguments

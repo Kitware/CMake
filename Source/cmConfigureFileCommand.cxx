@@ -19,7 +19,8 @@
 #include <cmsys/RegularExpression.hxx>
 
 // cmConfigureFileCommand
-bool cmConfigureFileCommand::InitialPass(std::vector<std::string> const& args)
+bool cmConfigureFileCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 2 )
     {

@@ -21,8 +21,8 @@
 #include "cmSourceFile.h"
 
 // cmAddCustomCommandCommand
-bool cmAddCustomCommandCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmAddCustomCommandCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   /* Let's complain at the end of this function about the lack of a particular
      arg. For the moment, let's say that COMMAND, and either TARGET or SOURCE

@@ -19,8 +19,8 @@
 #include "cmake.h"
 
 // cmGetCMakePropertyCommand
-bool cmGetCMakePropertyCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmGetCMakePropertyCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 2 )
     {

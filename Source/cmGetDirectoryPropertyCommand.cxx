@@ -19,8 +19,8 @@
 #include "cmake.h"
 
 // cmGetDirectoryPropertyCommand
-bool cmGetDirectoryPropertyCommand::InitialPass(
-  std::vector<std::string> const& args)
+bool cmGetDirectoryPropertyCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 2 )
     {

@@ -17,7 +17,8 @@
 #include "cmOptionCommand.h"
 
 // cmOptionCommand
-bool cmOptionCommand::InitialPass(std::vector<std::string> const& args)
+bool cmOptionCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   bool argError = false;
   if(args.size() < 2)

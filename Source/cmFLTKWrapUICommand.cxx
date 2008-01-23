@@ -19,7 +19,8 @@
 #include "cmSourceFile.h"
 
 // cmFLTKWrapUICommand
-bool cmFLTKWrapUICommand::InitialPass(std::vector<std::string> const& args)
+bool cmFLTKWrapUICommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 2 )
     {

@@ -14,16 +14,17 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#ifndef cmMathCommand_h
-#define cmMathCommand_h
+#ifndef cmBreakCommand_h
+#define cmBreakCommand_h
 
 #include "cmCommand.h"
 
-/** \class cmMathCommand
- * \brief Common string operations
+/** \class cmBreakCommand
+ * \brief Break from an enclosing foreach or while loop
  *
+ * cmBreakCommand returns from an enclosing foreach or while loop
  */
-class cmMathCommand : public cmCommand
+class cmBreakCommand : public cmCommand
 {
 public:
   /**
@@ -31,7 +32,7 @@ public:
    */
   virtual cmCommand* Clone() 
     {
-    return new cmMathCommand;
+    return new cmBreakCommand;
     }
 
   /**
@@ -49,14 +50,14 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "math";}
-
+  virtual const char* GetName() {return "break";}
+  
   /**
    * Succinct documentation.
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Mathematical expressions.";
+    return "Break from an enclosing foreach or while loop.";
     }
   
   /**
@@ -65,20 +66,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  math(EXPR <output variable> <math expression>)\n"
-      "EXPR evaluates mathematical expression and return result in the "
-      "output variable. Example mathematical expression is "
-      "'5 * ( 10 + 13 )'.  Supported operators are "
-      "+ - * / % | & ^ ~ << >> * / %.  They have the same meaning "
-      " as they do in c code.";
+      "  break()\n"
+      "Breaks from an enclosing foreach loop or while loop";
     }
   
-  cmTypeMacro(cmMathCommand, cmCommand);
-protected:
- 
-  bool HandleExprCommand(std::vector<std::string> const& args);
+  cmTypeMacro(cmBreakCommand, cmCommand);
 };
 
 
-#endif
 
+#endif

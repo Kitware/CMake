@@ -278,17 +278,20 @@ bool cmMakefile::CommandExists(const char* name) const
   return this->GetCMakeInstance()->CommandExists(name);
 }
 
-bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
+bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
+                                cmExecutionStatus &status)
 {
   bool result = true;
+
   // quick return if blocked
-  if(this->IsFunctionBlocked(lff))
+  if(this->IsFunctionBlocked(lff,status))
     {
     // No error.
     return result;
     }
-
+  
   std::string name = lff.Name;
+
   // execute the command
   cmCommand *rm =
     this->GetCMakeInstance()->GetCommand(name.c_str());
@@ -319,7 +322,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff)
        (!this->GetCMakeInstance()->GetScriptMode() ||
         usedCommand->IsScriptable()))
       {
-      if(!usedCommand->InvokeInitialPass(lff.Arguments))
+      if(!usedCommand->InvokeInitialPass(lff.Arguments,status))
         {
         cmOStringStream error;
         error << "Error in cmake code at\n"
@@ -478,8 +481,10 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   const size_t numberFunctions = cacheFile.Functions.size();
   for(size_t i =0; i < numberFunctions; ++i)
     {
-    this->ExecuteCommand(cacheFile.Functions[i]);
-    if ( cmSystemTools::GetFatalErrorOccured() )
+    cmExecutionStatus status;
+    this->ExecuteCommand(cacheFile.Functions[i],status);
+    if (status.GetReturnInvoked() ||
+        cmSystemTools::GetFatalErrorOccured() )
       {
       // pop the listfile off the stack
       this->ListFileStack.pop_back();
@@ -2110,7 +2115,8 @@ cmMakefile::FindSourceGroup(const char* source,
 }
 #endif
 
-bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff)
+bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
+                                   cmExecutionStatus &status)
 {
   // if there are no blockers get out of here
   if (this->FunctionBlockers.begin() == this->FunctionBlockers.end())
@@ -2124,7 +2130,7 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff)
   for (pos = this->FunctionBlockers.rbegin();
        pos != this->FunctionBlockers.rend(); ++pos)
     {
-    if((*pos)->IsFunctionBlocked(lff, *this))
+    if((*pos)->IsFunctionBlocked(lff, *this, status))
       {
       return true;
       }

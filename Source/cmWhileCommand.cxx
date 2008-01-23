@@ -18,7 +18,8 @@
 #include "cmIfCommand.h"
 
 bool cmWhileFunctionBlocker::
-IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf) 
+IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
+                  cmExecutionStatus &inStatus)
 {
   // Prevent recusion and don't let this blocker block its own
   // commands.
@@ -51,7 +52,19 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
         // Invoke all the functions that were collected in the block.
         for(unsigned int c = 0; c < this->Functions.size(); ++c)
           {
-          mf.ExecuteCommand(this->Functions[c]);
+          cmExecutionStatus status;
+          mf.ExecuteCommand(this->Functions[c],status);
+          if (status.GetReturnInvoked())
+            {
+            inStatus.SetReturnInvoked(true);
+            mf.RemoveFunctionBlocker(lff);
+            return true;
+            }
+          if (status.GetBreakInvoked())
+            {
+            mf.RemoveFunctionBlocker(lff);
+            return true;
+            }
           }
         expandedArguments.clear();
         mf.ExpandArguments(this->Args, expandedArguments);
@@ -99,8 +112,9 @@ ScopeEnded(cmMakefile &mf)
     mf.GetCurrentDirectory());
 }
 
-bool cmWhileCommand::InvokeInitialPass(
-  const std::vector<cmListFileArgument>& args)
+bool cmWhileCommand
+::InvokeInitialPass(const std::vector<cmListFileArgument>& args, 
+                    cmExecutionStatus &)
 {
   if(args.size() < 1)
     {

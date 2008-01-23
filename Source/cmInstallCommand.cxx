@@ -46,7 +46,8 @@ static cmInstallFilesGenerator* CreateInstallFilesGenerator(
 
 
 // cmInstallCommand
-bool cmInstallCommand::InitialPass(std::vector<std::string> const& args)
+bool cmInstallCommand::InitialPass(std::vector<std::string> const& args, 
+                                   cmExecutionStatus &)
 {
   // Allow calling with no arguments so that arguments may be built up
   // using a variable that may be left empty.

@@ -17,8 +17,8 @@
 #include "cmTargetLinkLibrariesCommand.h"
 
 // cmTargetLinkLibrariesCommand
-bool cmTargetLinkLibrariesCommand::InitialPass(std::vector<std::string> 
-                                               const& args)
+bool cmTargetLinkLibrariesCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   // must have one argument
   if(args.size() < 1)

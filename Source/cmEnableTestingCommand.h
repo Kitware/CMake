@@ -47,7 +47,8 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const&);
+  virtual bool InitialPass(std::vector<std::string> const&,
+                           cmExecutionStatus &);
 
   /**
    * The name of the command as specified in CMakeList.txt.

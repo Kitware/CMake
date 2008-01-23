@@ -39,13 +39,15 @@ public:
    * Override cmCommand::InvokeInitialPass to get arguments before
    * expansion.
    */
-  virtual bool InvokeInitialPass(std::vector<cmListFileArgument> const&);
+  virtual bool InvokeInitialPass(std::vector<cmListFileArgument> const&,
+                                 cmExecutionStatus &status);
   
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const&) {return false;}
+  virtual bool InitialPass(std::vector<std::string> const&,
+                           cmExecutionStatus &) {return false;}
 
   /**
    * This determines if the command is invoked when in script mode.

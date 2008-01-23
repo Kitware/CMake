@@ -430,7 +430,8 @@ int CCONV cmExecuteCommand(void *arg, const char *name,
     lff.Arguments.push_back(cmListFileArgument(args[i], true,
                                                "[CMake-Plugin]", 0));
     }
-  return mf->ExecuteCommand(lff);
+  cmExecutionStatus status;
+  return mf->ExecuteCommand(lff,status);
 }
 
 void CCONV cmExpandSourceListArguments(void *arg,

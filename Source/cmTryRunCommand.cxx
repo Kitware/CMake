@@ -19,14 +19,15 @@
 #include "cmTryCompileCommand.h"
 
 // cmTryRunCommand
-bool cmTryRunCommand::InitialPass(std::vector<std::string> const& argv)
+bool cmTryRunCommand
+::InitialPass(std::vector<std::string> const& argv, cmExecutionStatus &)
 {
   if(argv.size() < 4)
     {
     return false;
     }
 
-  // build an arg list for TryCompile and extract the runArgs
+  // build an arg list for TryCompile and extract the runArgs,
   std::vector<std::string> tryCompile;
 
   this->CompileResultVariable = "";

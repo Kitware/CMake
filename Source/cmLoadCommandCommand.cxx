@@ -58,7 +58,8 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args);
+  virtual bool InitialPass(std::vector<std::string> const& args, 
+                           cmExecutionStatus &);
 
   /**
    * This is called at the end after all the information
@@ -153,7 +154,8 @@ extern "C" void TrapsForSignalsCFunction(int sig)
 
 const char* cmLoadedCommand::LastName = 0;
 
-bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args)
+bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
+                                  cmExecutionStatus &)
 {
   if (!info.InitialPass)
     {
@@ -222,7 +224,8 @@ cmLoadedCommand::~cmLoadedCommand()
 }
 
 // cmLoadCommandCommand
-bool cmLoadCommandCommand::InitialPass(std::vector<std::string> const& args)
+bool cmLoadCommandCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
   if(args.size() < 1 )
     {
