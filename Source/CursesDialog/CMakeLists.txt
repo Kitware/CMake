@@ -16,7 +16,6 @@ SET( CURSES_SRCS
 
 INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source/CursesDialog/form
                     ${CMake_BINARY_DIR}/Source/CursesDialog/form)
-LINK_DIRECTORIES(${CMake_BINARY_DIR}/Source/CursesDialog/form)
 INCLUDE_DIRECTORIES(${CURSES_INCLUDE_PATH})
 
 
