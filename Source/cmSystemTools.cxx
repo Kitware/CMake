@@ -1129,6 +1129,17 @@ bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
 #endif
 }
 
+std::string cmSystemTools::ComputeStringMD5(const char* input)
+{
+  char md5out[32];
+  cmsysMD5* md5 = cmsysMD5_New();
+  cmsysMD5_Initialize(md5);
+  cmsysMD5_Append(md5, reinterpret_cast<unsigned char const*>(input), -1);
+  cmsysMD5_FinalizeHex(md5, md5out);
+  cmsysMD5_Delete(md5);
+  return std::string(md5out, 32);
+}
+
 void cmSystemTools::Glob(const char *directory, const char *regexp,
                          std::vector<std::string>& files)
 {

@@ -168,6 +168,9 @@ public:
   ///! Compute the md5sum of a file
   static bool ComputeFileMD5(const char* source, char* md5out);
 
+  /** Compute the md5sum of a string.  */
+  static std::string ComputeStringMD5(const char* input);
+
   /**
    * Run an executable command and put the stdout in output.
    * A temporary file is created in the binaryDir for storing the
