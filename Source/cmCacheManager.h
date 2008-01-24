@@ -142,6 +142,11 @@ public:
   ///! Get a value from the cache given a key
   const char* GetCacheValue(const char* key) const;
 
+  /** Get the version of CMake that wrote the cache.  */
+  unsigned int GetCacheMajorVersion() { return this->CacheMajorVersion; }
+  unsigned int GetCacheMinorVersion() { return this->CacheMinorVersion; }
+  bool NeedCacheCompatibility(int major, int minor);
+
 protected:
   ///! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, 
@@ -154,7 +159,10 @@ protected:
   CacheEntry *GetCacheEntry(const char *key);
   ///! Clean out the CMakeFiles directory if no CMakeCache.txt
   void CleanCMakeFiles(const char* path);
-  
+
+  // Cache version info
+  unsigned int CacheMajorVersion;
+  unsigned int CacheMinorVersion;
 private:
   typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
   static void OutputHelpString(std::ofstream& fout, 

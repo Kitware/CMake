@@ -320,10 +320,27 @@ bool cmCacheManager::LoadCache(const char* path,
                            ". Offending entry: ", realbuffer);
       }
     }
-  // if CMAKE version not found in the list file
-  // add them as version 0.0
-  if(!this->GetCacheValue("CMAKE_CACHE_MINOR_VERSION"))
+  this->CacheMajorVersion = 0;
+  this->CacheMinorVersion = 0;
+  if(const char* cmajor = this->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"))
     {
+    unsigned int v=0;
+    if(sscanf(cmajor, "%u", &v) == 1)
+      {
+      this->CacheMajorVersion = v;
+      }
+    if(const char* cminor = this->GetCacheValue("CMAKE_CACHE_MINOR_VERSION"))
+      {
+      if(sscanf(cminor, "%u", &v) == 1)
+        {
+        this->CacheMinorVersion = v;
+        }
+      }
+    }
+  else
+    {
+    // CMake version not found in the list file.
+    // Set as version 0.0
     this->AddCacheEntry("CMAKE_CACHE_MINOR_VERSION", "0",
                         "Minor version of cmake used to create the "
                         "current loaded cache", cmCacheManager::INTERNAL);
@@ -949,4 +966,22 @@ bool cmCacheManager::CacheIterator::PropertyExists(const char* property) const
     return false;
     }
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmCacheManager::NeedCacheCompatibility(int major, int minor)
+{
+  // Compatibility is not needed if the cache version is zero because
+  // the cache was created or modified by the user.
+  if(this->CacheMajorVersion == 0)
+    {
+    return false;
+    }
+
+  // Compatibility is needed if the cache version is equal to or lower
+  // than the given version.
+  unsigned int actual_compat =
+    CMake_VERSION_ENCODE(this->CacheMajorVersion, this->CacheMinorVersion, 0);
+  return (actual_compat &&
+          actual_compat <= CMake_VERSION_ENCODE(major, minor, 0));
 }

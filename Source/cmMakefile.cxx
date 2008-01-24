@@ -145,32 +145,18 @@ void cmMakefile::Initialize()
 
 unsigned int cmMakefile::GetCacheMajorVersion()
 {
-  if(const char* vstr =
-     this->GetCacheManager()->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"))
-    {
-    unsigned int v=0;
-    if(sscanf(vstr, "%u", &v) == 1)
-      {
-      return v;
-      }
-    }
-  return 0;
+  return this->GetCacheManager()->GetCacheMajorVersion();
 }
 
 unsigned int cmMakefile::GetCacheMinorVersion()
 {
-  if(const char* vstr =
-     this->GetCacheManager()->GetCacheValue("CMAKE_CACHE_MINOR_VERSION"))
-    {
-    unsigned int v=0;
-    if(sscanf(vstr, "%u", &v) == 1)
-      {
-      return v;
-      }
-    }
-  return 0;
+  return this->GetCacheManager()->GetCacheMinorVersion();
 }
 
+bool cmMakefile::NeedCacheCompatibility(int major, int minor)
+{
+  return this->GetCacheManager()->NeedCacheCompatibility(major, minor);
+}
 
 cmMakefile::~cmMakefile()
 {
