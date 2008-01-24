@@ -86,6 +86,26 @@ bool cmFindLibraryCommand
                                          this->VariableDocumentation.c_str(),
                                          cmCacheManager::FILEPATH);
       }
+
+    // If the existing value was loaded from a cache written by CMake
+    // 2.4 or below then force the implicit link directory fix on the
+    // value.
+    if(this->Makefile->NeedCacheCompatibility(2, 4))
+      {
+      if(const char* v =
+         this->Makefile->GetDefinition(this->VariableName.c_str()))
+        {
+        std::string nv = this->FixForImplicitLocations(v);
+        if(nv != v)
+          {
+          this->Makefile
+            ->AddCacheDefinition(this->VariableName.c_str(),
+                                 nv.c_str(),
+                                 this->VariableDocumentation.c_str(),
+                                 cmCacheManager::FILEPATH);
+          }
+        }
+      }
     return true;
     }
 
