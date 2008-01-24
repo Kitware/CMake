@@ -1027,7 +1027,8 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
 
     else if (args[1] == "remove_directory" && args.size() == 3)
       {
-      if(!cmSystemTools::RemoveADirectory(args[2].c_str()))
+      if(cmSystemTools::FileIsDirectory(args[2].c_str()) &&
+         !cmSystemTools::RemoveADirectory(args[2].c_str()))
         {
         std::cerr << "Error removing directory \"" << args[2].c_str()
                   << "\".\n";
