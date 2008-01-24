@@ -24,6 +24,8 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
 
+#include <limits.h> // USHRT_MAX
+
 // NOTE:
 // A debian package .deb is simply an 'ar' archive. The only subtle difference
 // is that debian uses the BSD ar style archive whereas most Linux distro have
