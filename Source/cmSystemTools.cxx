@@ -1131,6 +1131,7 @@ bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
 
 std::string cmSystemTools::ComputeStringMD5(const char* input)
 {
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   char md5out[32];
   cmsysMD5* md5 = cmsysMD5_New();
   cmsysMD5_Initialize(md5);
@@ -1138,6 +1139,10 @@ std::string cmSystemTools::ComputeStringMD5(const char* input)
   cmsysMD5_FinalizeHex(md5, md5out);
   cmsysMD5_Delete(md5);
   return std::string(md5out, 32);
+#else
+  (void)input;
+  cmSystemTools::Message("md5sum not supported in bootstrapping mode","Error");
+#endif
 }
 
 void cmSystemTools::Glob(const char *directory, const char *regexp,
