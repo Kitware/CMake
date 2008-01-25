@@ -50,31 +50,35 @@ GET_FILENAME_COMPONENT(TCL_LIBRARY_PATH_PARENT "${TCL_LIBRARY_PATH}" PATH)
 GET_FILENAME_COMPONENT(TK_LIBRARY_PATH "${TK_LIBRARY}" PATH)
 GET_FILENAME_COMPONENT(TK_LIBRARY_PATH_PARENT "${TK_LIBRARY_PATH}" PATH)
 
-GET_FILENAME_COMPONENT(
-  ActiveTcl_CurrentVersion 
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl;CurrentVersion]" 
-  NAME)
-
-SET (TCLTK_POSSIBLE_LIB_PATHS
+SET(TCLTK_POSSIBLE_LIB_PATHS
   "${TCL_INCLUDE_PATH_PARENT}/lib"
   "${TK_INCLUDE_PATH_PARENT}/lib"
   "${TCL_LIBRARY_PATH}"
   "${TK_LIBRARY_PATH}"
   "${TCL_TCLSH_PATH_PARENT}/lib"
   "${TK_WISH_PATH_PARENT}/lib"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/lib"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/lib"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/lib"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/lib"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/lib"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/lib"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/lib"
-  "$ENV{ProgramFiles}/Tcl/Lib"
-  "C:/Program Files/Tcl/lib" 
-  "C:/Tcl/lib" 
   /usr/lib 
   /usr/local/lib
-)
+  )
+
+IF(WIN32)
+  GET_FILENAME_COMPONENT(
+    ActiveTcl_CurrentVersion 
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl;CurrentVersion]" 
+    NAME)
+  SET(TCLTK_POSSIBLE_LIB_PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/lib"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/lib"
+    "$ENV{ProgramFiles}/Tcl/Lib"
+    "C:/Program Files/Tcl/lib" 
+    "C:/Tcl/lib" 
+    )
+ENDIF(WIN32)
 
 FIND_LIBRARY(TCL_LIBRARY
   NAMES tcl 
@@ -85,7 +89,7 @@ FIND_LIBRARY(TCL_LIBRARY
   tcl82 tcl8.2 
   tcl80 tcl8.0
   PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
-)
+  )
 
 FIND_LIBRARY(TK_LIBRARY 
   NAMES tk 
@@ -96,7 +100,7 @@ FIND_LIBRARY(TK_LIBRARY
   tk82 tk8.2 
   tk80 tk8.0
   PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
-)
+  )
 
 CMAKE_FIND_FRAMEWORKS(Tcl)
 CMAKE_FIND_FRAMEWORKS(Tk)
@@ -120,7 +124,7 @@ IF(Tk_FRAMEWORKS)
   ENDIF(NOT TK_INCLUDE_PATH)
 ENDIF(Tk_FRAMEWORKS)
 
-SET (TCLTK_POSSIBLE_INCLUDE_PATHS
+SET(TCLTK_POSSIBLE_INCLUDE_PATHS
   "${TCL_LIBRARY_PATH_PARENT}/include"
   "${TK_LIBRARY_PATH_PARENT}/include"
   "${TCL_INCLUDE_PATH}"
@@ -129,16 +133,6 @@ SET (TCLTK_POSSIBLE_INCLUDE_PATHS
   ${TK_FRAMEWORK_INCLUDES} 
   "${TCL_TCLSH_PATH_PARENT}/include"
   "${TK_WISH_PATH_PARENT}/include"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/include"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/include"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/include"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/include"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/include"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/include"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/include"
-  "$ENV{ProgramFiles}/Tcl/include"
-  "C:/Program Files/Tcl/include"
-  "C:/Tcl/include"
   /usr/include
   /usr/local/include
   /usr/include/tcl8.6
@@ -147,21 +141,42 @@ SET (TCLTK_POSSIBLE_INCLUDE_PATHS
   /usr/include/tcl8.3
   /usr/include/tcl8.2
   /usr/include/tcl8.0
-)
+  )
 
-FIND_PATH(TCL_INCLUDE_PATH tcl.h
-  ${TCLTK_POSSIBLE_INCLUDE_PATHS} NO_DEFAULT_PATH
-)
-FIND_PATH(TCL_INCLUDE_PATH tcl.h
-  ${TCLTK_POSSIBLE_INCLUDE_PATHS}
-)
+IF(WIN32)
+  SET(TCLTK_POSSIBLE_INCLUDE_PATHS ${TCLTK_POSSIBLE_INCLUDE_PATHS}
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/include"
+    "$ENV{ProgramFiles}/Tcl/include"
+    "C:/Program Files/Tcl/include"
+    "C:/Tcl/include"
+    )
+ENDIF(WIN32)
 
-FIND_PATH(TK_INCLUDE_PATH tk.h
-  ${TCLTK_POSSIBLE_INCLUDE_PATHS} NO_DEFAULT_PATH
-)
-FIND_PATH(TK_INCLUDE_PATH tk.h
-  ${TCLTK_POSSIBLE_INCLUDE_PATHS}
-)
+FIND_PATH(TCL_INCLUDE_PATH 
+  NAMES tcl.h
+  PATHS ${TCLTK_POSSIBLE_INCLUDE_PATHS} 
+  NO_DEFAULT_PATH
+  )
+FIND_PATH(TCL_INCLUDE_PATH 
+  NAMES tcl.h
+  PATHS ${TCLTK_POSSIBLE_INCLUDE_PATHS}
+  )
+
+FIND_PATH(TK_INCLUDE_PATH 
+  NAMES tk.h
+  PATHS ${TCLTK_POSSIBLE_INCLUDE_PATHS} 
+  NO_DEFAULT_PATH
+  )
+FIND_PATH(TK_INCLUDE_PATH 
+  NAMES tk.h
+  PATHS ${TCLTK_POSSIBLE_INCLUDE_PATHS}
+  )
 
 # handle the QUIETLY and REQUIRED arguments and set TCL_FOUND to TRUE if 
 # all listed variables are TRUE

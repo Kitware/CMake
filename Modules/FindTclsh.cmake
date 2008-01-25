@@ -23,25 +23,29 @@ GET_FILENAME_COMPONENT(TCL_LIBRARY_PATH_PARENT "${TCL_LIBRARY_PATH}" PATH)
 GET_FILENAME_COMPONENT(TK_LIBRARY_PATH "${TK_LIBRARY}" PATH)
 GET_FILENAME_COMPONENT(TK_LIBRARY_PATH_PARENT "${TK_LIBRARY_PATH}" PATH)
 
-GET_FILENAME_COMPONENT(
-  ActiveTcl_CurrentVersion 
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl;CurrentVersion]" 
-  NAME)
-
 SET(TCLTK_POSSIBLE_BIN_PATHS
   "${TCL_INCLUDE_PATH_PARENT}/bin"
   "${TK_INCLUDE_PATH_PARENT}/bin"
   "${TCL_LIBRARY_PATH_PARENT}/bin"
   "${TK_LIBRARY_PATH_PARENT}/bin"
   "${TK_WISH_PATH_PARENT}/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/bin"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/bin"
-)
+  )
+
+IF(WIN32)
+  GET_FILENAME_COMPONENT(
+    ActiveTcl_CurrentVersion 
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl;CurrentVersion]" 
+    NAME)
+  SET(TCLTK_POSSIBLE_BIN_PATHS ${TCLTK_POSSIBLE_BIN_PATHS}
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActiveTcl\\${ActiveTcl_CurrentVersion}]/bin"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.6;Root]/bin"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.5;Root]/bin"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.4;Root]/bin"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.3;Root]/bin"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/bin"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/bin"
+    )
+ENDIF(WIN32)
 
 SET(TCL_TCLSH_NAMES
   tclsh
@@ -51,16 +55,16 @@ SET(TCL_TCLSH_NAMES
   tclsh83 tclsh8.3
   tclsh82 tclsh8.2
   tclsh80 tclsh8.0
-)
+  )
 
 FIND_PROGRAM(TCL_TCLSH
   NAMES ${TCL_TCLSH_NAMES}
   PATHS ${TCLTK_POSSIBLE_BIN_PATHS} NO_DEFAULT_PATH
-)
+  )
 FIND_PROGRAM(TCL_TCLSH
   NAMES ${TCL_TCLSH_NAMES}
   PATHS ${TCLTK_POSSIBLE_BIN_PATHS}
-)
+  )
 
 # handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if 
 # all listed variables are TRUE
