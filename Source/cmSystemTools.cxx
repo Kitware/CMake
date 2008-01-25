@@ -1142,6 +1142,7 @@ std::string cmSystemTools::ComputeStringMD5(const char* input)
 #else
   (void)input;
   cmSystemTools::Message("md5sum not supported in bootstrapping mode","Error");
+  return "";
 #endif
 }
 
