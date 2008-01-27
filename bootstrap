@@ -1213,7 +1213,7 @@ cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_stl.hxx.in" \
 cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx.in" \
    "${cmake_bootstrap_dir}/cmsys/stl/stl.h.in" KWSYS_NAMESPACE cmsys
 
-for a in string vector map; do
+for a in string vector map algorithm; do
   cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.h.in" \
     "${cmake_bootstrap_dir}/cmsys/stl/${a}" KWSYS_STL_HEADER ${a}
 done

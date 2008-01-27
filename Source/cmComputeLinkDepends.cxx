@@ -21,7 +21,7 @@
 #include "cmMakefile.h"
 #include "cmTarget.h"
 
-#include <algorithm>
+#include <cmsys/stl/algorithm>
 
 /*
 
@@ -397,9 +397,9 @@ void cmComputeLinkDepends::InferDependencies()
     for(++i; i != sets->end(); ++i)
       {
       DependSet intersection;
-      set_intersection(common.begin(), common.end(),
-                       i->begin(), i->end(),
-                       std::inserter(intersection, intersection.begin()));
+      cmsys_stl::set_intersection
+        (common.begin(), common.end(), i->begin(), i->end(),
+         std::inserter(intersection, intersection.begin()));
       common = intersection;
       }
 
