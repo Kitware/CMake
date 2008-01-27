@@ -51,7 +51,7 @@ public:
   const char* GetLinkLanguage() const { return this->LinkLanguage; }
   std::vector<std::string> const& GetRuntimeSearchPath();
 private:
-  void AddItem(std::string const& item);
+  void AddItem(std::string const& item, cmTarget* tgt);
 
   // Output information.
   ItemVector Items;

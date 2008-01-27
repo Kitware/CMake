@@ -167,6 +167,7 @@ CMAKE_CXX_SOURCES="\
   cmDocumentVariables \
   cmCacheManager \
   cmListFileCache \
+  cmComputeLinkDepends \
   cmComputeLinkInformation \
 "
 

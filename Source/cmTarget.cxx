@@ -891,6 +891,7 @@ void cmTarget::AddLinkLibrary(const std::string& lib,
   tmp.first = lib;
   tmp.second = llt;
   this->LinkLibraries.push_back(tmp);
+  this->OriginalLinkLibraries.push_back(tmp);
 }
 
 //----------------------------------------------------------------------------
@@ -936,6 +937,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   tmp.first = lib;
   tmp.second = llt;
   this->LinkLibraries.push_back( tmp );
+  this->OriginalLinkLibraries.push_back(tmp);
 
   // Add the explicit dependency information for this target. This is
   // simply a set of libraries separated by ";". There should always
@@ -1067,11 +1069,6 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 
  // The dependency map.
  DependencyMap dep_map;
-
- if ( this->OriginalLinkLibraries.size() == 0 )
-   {
-   this->OriginalLinkLibraries = this->LinkLibraries;
-   }
 
  // 1. Build the dependency graph
  //

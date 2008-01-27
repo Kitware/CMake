@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmComputeLinkInformation.h"
 
+#include "cmComputeLinkDepends.h"
+
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -271,30 +273,17 @@ bool cmComputeLinkInformation::Compute()
     return false;
     }
 
-  // Compute which library configuration to link.
-  cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
-  if(this->Config && cmSystemTools::UpperCase(this->Config) == "DEBUG")
-    {
-    linkType = cmTarget::DEBUG;
-    }
+  // Compute the ordered link line items.
+  cmComputeLinkDepends cld(this->Target, this->Config);
+  cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
-  // Get the list of libraries against which this target wants to link.
-  {
-  const cmTarget::LinkLibraryVectorType& libs =
-    this->Target->GetLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
-      li != libs.end(); ++li)
+  // Add the link line items.
+  for(cmComputeLinkDepends::EntryVector::const_iterator
+        lei = linkEntries.begin();
+      lei != linkEntries.end(); ++lei)
     {
-    // Link to a library if it is not the same target and is meant for
-    // this configuration type.
-    if((this->Target->GetType() == cmTarget::EXECUTABLE ||
-        li->first != this->Target->GetName()) &&
-       (li->second == cmTarget::GENERAL || li->second == linkType))
-      {
-      this->AddItem(li->first);
-      }
+    this->AddItem(lei->Item, lei->Target);
     }
-  }
 
   // Restore the target link type so the correct system runtime
   // libraries are found.
@@ -307,11 +296,10 @@ bool cmComputeLinkInformation::Compute()
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkInformation::AddItem(std::string const& item)
+void cmComputeLinkInformation::AddItem(std::string const& item,
+                                       cmTarget* tgt)
 {
   // Compute the proper name to use to link this library.
-  // TODO: Change third argument to support imported libraries.
-  cmTarget* tgt = this->GlobalGenerator->FindTarget(0, item.c_str(), false);
   const char* config = this->Config;
   bool implib = this->UseImportLibrary;
   bool impexe = (tgt &&
@@ -1226,7 +1214,7 @@ void cmComputeLinkInformation::DiagnoseCycle()
     << this->Target->GetName()
     << " because there is a cycle in the constraint graph:\n";
 
-  // Clean up the conflict graph representation.
+  // Display the conflict graph.
   for(unsigned int i=0; i < this->RuntimeConflictGraph.size(); ++i)
     {
     RuntimeConflictList const& clist = this->RuntimeConflictGraph[i];

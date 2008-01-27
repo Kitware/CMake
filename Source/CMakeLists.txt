@@ -87,6 +87,8 @@ SET(SRCS
   cmCommandArgumentLexer.cxx
   cmCommandArgumentParser.cxx
   cmCommandArgumentParserHelper.cxx
+  cmComputeLinkDepends.cxx
+  cmComputeLinkDepends.h
   cmComputeLinkInformation.cxx
   cmComputeLinkInformation.h
   cmCustomCommand.cxx
