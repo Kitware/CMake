@@ -30,6 +30,8 @@
 class cmExportFileGenerator
 {
 public:
+  virtual ~cmExportFileGenerator() {}
+
   /** Set the full path to the export file to generate.  */
   void SetExportFile(const char* mainFile);
 
