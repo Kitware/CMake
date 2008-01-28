@@ -28,6 +28,8 @@ target_link_libraries(bar foo)
 install(TARGETS foo bar
   RUNTIME DESTINATION Applications/CMakeTestsFramework/bin
   FRAMEWORK DESTINATION Library/Frameworks
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 
   # These are ignored on the Mac... and things are automatically placed in
   # their appropriate Framework sub-folder at build time. (And then the built
