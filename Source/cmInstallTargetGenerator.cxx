@@ -176,8 +176,7 @@ cmInstallTargetGenerator
       from1 += targetName;
 
       // Handle OSX Bundles.
-      if(this->Target->GetMakefile()->IsOn("APPLE") &&
-         this->Target->GetPropertyAsBool("MACOSX_BUNDLE"))
+      if(this->Target->IsAppBundleOnApple())
         {
         // Compute the source locations of the bundle executable and
         // Info.plist file.

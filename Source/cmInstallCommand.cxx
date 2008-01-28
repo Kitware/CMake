@@ -451,9 +451,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         break;
       case cmTarget::EXECUTABLE:
         {
-        // Executables use the RUNTIME properties.
-        if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
+        if(target.IsAppBundleOnApple())
           {
+          // Application bundles use the BUNDLE properties.
           if (!bundleArgs.GetDestination().empty())
             {
             bundleGenerator = CreateInstallTargetGenerator(target, bundleArgs, 
@@ -470,6 +470,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           }
         else
           {
+          // Executables use the RUNTIME properties.
           if (!runtimeArgs.GetDestination().empty())
             {
             runtimeGenerator = CreateInstallTargetGenerator(target, 

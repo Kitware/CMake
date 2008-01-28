@@ -282,13 +282,18 @@ cmExportFileGenerator
        << " PROPERTY ENABLE_EXPORTS 1)\n";
     }
 
-  // Mark the imported framework.  This is done even on non-Apple
-  // platforms for reference and consistency purposes.
-  if(target->GetType() == cmTarget::SHARED_LIBRARY &&
-     target->GetPropertyAsBool("FRAMEWORK"))
+  // Mark the imported library if it is a framework.
+  if(target->IsFrameworkOnApple())
     {
     os << "SET_PROPERTY(TARGET " << targetName
        << " PROPERTY FRAMEWORK 1)\n";
+    }
+
+  // Mark the imported executable if it is an application bundle.
+  if(target->IsAppBundleOnApple())
+    {
+    os << "SET_PROPERTY(TARGET " << targetName
+       << " PROPERTY MACOSX_BUNDLE 1)\n";
     }
   os << "\n";
 }

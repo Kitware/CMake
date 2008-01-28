@@ -21,14 +21,18 @@ add_library(testLib3 SHARED testLib3.c)
 add_library(testLib4 SHARED testLib4.c)
 set_property(TARGET testLib4 PROPERTY FRAMEWORK 1)
 
+add_executable(testExe3 testExe3.c)
+set_property(TARGET testExe3 PROPERTY MACOSX_BUNDLE 1)
+
 # Install and export from install tree.
 install(
-  TARGETS testExe1 testLib1 testLib2 testExe2 testLib3 testLib4
+  TARGETS testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3
   EXPORT exp
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   FRAMEWORK DESTINATION Frameworks
+  BUNDLE DESTINATION Applications
   )
 install(EXPORT exp NAMESPACE exp_ DESTINATION lib/exp)
 
@@ -37,7 +41,7 @@ export(TARGETS testExe1 testLib1 testLib2
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
-export(TARGETS testExe2 testLib3 testLib4
+export(TARGETS testExe2 testLib3 testLib4 testExe3
   NAMESPACE bld_
   APPEND FILE ExportBuildTree.cmake
   )

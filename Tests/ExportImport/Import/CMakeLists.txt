@@ -17,10 +17,16 @@ add_custom_command(
   COMMAND exp_testExe1 ${Import_BINARY_DIR}/exp_generated.c
   DEPENDS exp_testExe1
   )
+add_custom_command(
+  OUTPUT ${Import_BINARY_DIR}/exp_generated3.c
+  COMMAND exp_testExe3 ${Import_BINARY_DIR}/exp_generated3.c
+  DEPENDS exp_testExe3
+  )
 
 add_executable(imp_testExe1
   imp_testExe1.c
   ${Import_BINARY_DIR}/exp_generated.c
+  ${Import_BINARY_DIR}/exp_generated3.c
   )
 
 # Try linking to a library imported from the install tree.
@@ -36,10 +42,16 @@ add_custom_command(
   COMMAND bld_testExe1 ${Import_BINARY_DIR}/bld_generated.c
   DEPENDS bld_testExe1
   )
+add_custom_command(
+  OUTPUT ${Import_BINARY_DIR}/bld_generated3.c
+  COMMAND bld_testExe3 ${Import_BINARY_DIR}/bld_generated3.c
+  DEPENDS bld_testExe3
+  )
 
 add_executable(imp_testExe1b
   imp_testExe1.c
   ${Import_BINARY_DIR}/bld_generated.c
+  ${Import_BINARY_DIR}/bld_generated3.c
   )
 
 # Try linking to a library imported from the build tree.

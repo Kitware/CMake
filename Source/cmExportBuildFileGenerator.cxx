@@ -84,6 +84,11 @@ cmExportBuildFileGenerator
   std::string prop = "IMPORTED_LOCATION";
   prop += suffix;
   std::string value = target->GetFullPath(config, false);
+  if(target->IsAppBundleOnApple())
+    {
+    value += ".app/Contents/MacOS/";
+    value += target->GetFullName(config, false);
+    }
   properties[prop] = value;
   }
 
