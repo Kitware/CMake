@@ -145,10 +145,10 @@ IF(STAGE2)
 # try to import the exported targets again
   SET(SimpleInstallS1_DIR ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
   FIND_PACKAGE(SimpleInstallS1 REQUIRED)
-  GET_TARGET_PROPERTY(simpleInstallLocation S1_SimpleInstall LOCATION)
-  IF(NOT simpleInstallLocation)
-    MESSAGE(FATAL_ERROR "Target S1_SimpleInstall could not be imported, location: ${simpleInstallLocation}")
-  ENDIF(NOT simpleInstallLocation)
+  GET_TARGET_PROPERTY(simpleInstallImported S1_SimpleInstall IMPORTED)
+  IF(NOT simpleInstallImported)
+    MESSAGE(FATAL_ERROR "Target S1_SimpleInstall could not be imported")
+  ENDIF(NOT simpleInstallImported)
 
 ELSE(STAGE2)
   # Wipe out the install directory to do a fresh test.
@@ -214,11 +214,11 @@ ELSE(STAGE2)
 # "export" the targets collected in "SimpleInstallS1"
   INSTALL(EXPORT SimpleInstallS1 FILE SimpleInstallS1Config.cmake 
                                  DESTINATION MyTest/lib 
-                                 PREFIX S1_ )
+                                 NAMESPACE S1_ )
 
   EXPORT(TARGETS SimpleInstall test1 test2 test3 
          FILE "${CMAKE_CURRENT_BINARY_DIR}/SimpleInstallS1Config.cmake"
-         PREFIX S2_ )
+         NAMESPACE S2_ )
 
   ADD_SUBDIRECTORY(scripts)
 
