@@ -26,6 +26,7 @@ cmExportCommand::cmExportCommand()
 :cmCommand()
 ,ArgumentGroup()
 ,Targets(&Helper, "TARGETS")
+,Append(&Helper, "APPEND", &ArgumentGroup)
 ,Namespace(&Helper, "NAMESPACE", &ArgumentGroup)
 ,Filename(&Helper, "FILE", &ArgumentGroup)
 {
@@ -146,6 +147,7 @@ bool cmExportCommand
   cmExportBuildFileGenerator ebfg;
   ebfg.SetExportFile(fname.c_str());
   ebfg.SetNamespace(this->Namespace.GetCString());
+  ebfg.SetAppendMode(this->Append.IsEnabled());
   ebfg.SetExports(&targets);
 
   // Compute the set of configurations exported.

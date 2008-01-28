@@ -35,6 +35,8 @@ public:
   void SetExports(std::vector<cmTarget*> const* exports)
     { this->Exports = exports; }
 
+  /** Set whether to append generated code to the output file.  */
+  void SetAppendMode(bool append) { this->AppendMode = append; }
 protected:
   // Implement virtual methods from the superclass.
   virtual bool GenerateMainFile(std::ostream& os);

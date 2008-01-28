@@ -31,7 +31,11 @@ install(
 install(EXPORT exp NAMESPACE exp_ DESTINATION lib/exp)
 
 # Export from build tree.
-export(TARGETS testExe1 testLib1 testLib2 testExe2 testLib3 testLib4
+export(TARGETS testExe1 testLib1 testLib2
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
+  )
+export(TARGETS testExe2 testLib3 testLib4
+  NAMESPACE bld_
+  APPEND FILE ExportBuildTree.cmake
   )

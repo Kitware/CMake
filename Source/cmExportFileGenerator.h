@@ -30,6 +30,7 @@
 class cmExportFileGenerator
 {
 public:
+  cmExportFileGenerator();
   virtual ~cmExportFileGenerator() {}
 
   /** Set the full path to the export file to generate.  */
@@ -90,6 +91,7 @@ protected:
   std::string FileDir;
   std::string FileBase;
   std::string FileExt;
+  bool AppendMode;
 
   // The set of targets included in the export.
   std::set<cmTarget*> ExportedTargets;
