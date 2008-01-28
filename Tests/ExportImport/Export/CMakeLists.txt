@@ -16,18 +16,22 @@ target_link_libraries(testLib2 testLib1)
 
 add_library(testLib3 SHARED testLib3.c)
 
+add_library(testLib4 SHARED testLib4.c)
+set_property(TARGET testLib4 PROPERTY FRAMEWORK 1)
+
 # Install and export from install tree.
 install(
-  TARGETS testExe1 testLib1 testLib2 testExe2 testLib3
+  TARGETS testExe1 testLib1 testLib2 testExe2 testLib3 testLib4
   EXPORT exp
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
+  FRAMEWORK DESTINATION Frameworks
   )
 install(EXPORT exp NAMESPACE exp_ DESTINATION lib/exp)
 
 # Export from build tree.
-export(TARGETS testExe1 testLib1 testLib2 testExe2 testLib3
+export(TARGETS testExe1 testLib1 testLib2 testExe2 testLib3 testLib4
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
