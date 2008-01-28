@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+extern int testExe1lib();
+
 int main(int argc, const char* argv[])
 {
   if(argc < 2)
@@ -20,5 +22,5 @@ int main(int argc, const char* argv[])
     return 1;
     }
   }
-  return 0;
+  return testExe1lib();
 }
