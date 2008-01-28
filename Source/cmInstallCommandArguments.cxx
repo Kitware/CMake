@@ -44,9 +44,9 @@ cmInstallCommandArguments::cmInstallCommandArguments()
 
 const std::string& cmInstallCommandArguments::GetDestination() const
 {
-  if (!this->AbsDestination.empty())
+  if (!this->DestinationString.empty())
     {
-    return this->AbsDestination;
+    return this->DestinationString;
     }
   if (this->GenericArguments!=0)
     {
@@ -128,8 +128,8 @@ bool cmInstallCommandArguments::Finalize()
     {
     return false;
     }
-  this->ComputeDestination(this->Destination.GetString(),this->AbsDestination);
-
+  this->DestinationString = this->Destination.GetString();
+  cmSystemTools::ConvertToUnixSlashes(this->DestinationString);
   return true;
 }
 
@@ -174,23 +174,3 @@ bool cmInstallCommandArguments::CheckPermissions(
   // This is not a valid permission.
   return false;
 }
-
-//----------------------------------------------------------------------------
-void cmInstallCommandArguments::ComputeDestination(const std::string& inDest, 
-                                                   std::string& absDest)
-{
-  if((inDest.size()>0) && !(cmSystemTools::FileIsFullPath(inDest.c_str())))
-    {
-    // Relative paths are treated with respect to the installation prefix.
-    absDest = "${CMAKE_INSTALL_PREFIX}/";
-    absDest += inDest;
-    }
-  else
-    {
-    // Full paths are absolute.
-    absDest = inDest;
-    }
-  // Format the path nicely.  Note this also removes trailing slashes.
-  cmSystemTools::ConvertToUnixSlashes(absDest);
-}
-

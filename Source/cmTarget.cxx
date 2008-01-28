@@ -154,6 +154,96 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \".lib\") on an import library name.");
 
   cm->DefineProperty
+    ("IMPORTED", cmProperty::TARGET,
+     "Read-only indication of whether a target is IMPORTED.",
+     "The boolean value of this property is true for targets created with "
+     "the IMPORTED option to add_executable or add_library.  "
+     "It is false for targets built within the project.");
+
+  cm->DefineProperty
+    ("IMPORTED_CONFIGURATIONS", cmProperty::TARGET,
+     "Configurations provided for an IMPORTED target.",
+     "Lists configuration names available for an IMPORTED target.  "
+     "The names correspond to configurations defined in the project from "
+     "which the target is imported.  "
+     "If the importing project uses a different set of configurations "
+     "the names may be mapped using the MAP_IMPORTED_CONFIG_<CONFIG> "
+     "property.  "
+     "Ignored for non-imported targets.");
+
+  cm->DefineProperty
+    ("IMPORTED_ENABLE_EXPORTS", cmProperty::TARGET,
+     "Enable linking to an IMPORTED executable target.",
+     "Indicates that an IMPORTED executable target exports symbols for "
+     "use by plugin modules.  "
+     "This is the imported target equivalent of the ENABLE_EXPORTS "
+     "property.");
+
+  cm->DefineProperty
+    ("IMPORTED_IMPLIB", cmProperty::TARGET,
+     "Full path to the import library for an IMPORTED target.",
+     "Specifies the location of the \".lib\" part of a windows DLL.  "
+     "Ignored for non-imported targets.");
+
+  cm->DefineProperty
+    ("IMPORTED_IMPLIB_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration version of IMPORTED_IMPLIB property.",
+     "This property is used when loading settings for the <CONFIG> "
+     "configuration of an imported target.  "
+     "Configuration names correspond to those provided by the project "
+     "from which the target is imported.");
+
+  cm->DefineProperty
+    ("IMPORTED_LINK_LIBRARIES", cmProperty::TARGET,
+     "Transitive link dependencies of an IMPORTED target.",
+     "Lists dependencies that must be linked when an IMPORTED library "
+     "target is linked to another target.  "
+     "Ignored for non-imported targets.");
+
+  cm->DefineProperty
+    ("IMPORTED_LINK_LIBRARIES_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration version of IMPORTED_LINK_LIBRARIES property.",
+     "This property is used when loading settings for the <CONFIG> "
+     "configuration of an imported target.  "
+     "Configuration names correspond to those provided by the project "
+     "from which the target is imported.");
+
+  cm->DefineProperty
+    ("IMPORTED_LOCATION", cmProperty::TARGET,
+     "Full path to the main file on disk for an IMPORTED target.",
+     "Specifies the location of an IMPORTED target file on disk.  "
+     "For executables this is the location of the executable file.  "
+     "For static libraries and modules this is the location of the "
+     "library or module.  "
+     "For shared libraries on non-DLL platforms this is the location of "
+     "the shared library.  "
+     "For DLLs this is the location of the \".dll\" part of the library.  "
+     "Ignored for non-imported targets.");
+
+  cm->DefineProperty
+    ("IMPORTED_LOCATION_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration version of IMPORTED_LOCATION property.",
+     "This property is used when loading settings for the <CONFIG> "
+     "configuration of an imported target.  "
+     "Configuration names correspond to those provided by the project "
+     "from which the target is imported.");
+
+  cm->DefineProperty
+    ("IMPORTED_SONAME", cmProperty::TARGET,
+     "The \"soname\" of an IMPORTED target of shared library type.",
+     "Specifies the \"soname\" embedded in an imported shared library.  "
+     "This is meaningful only on platforms supporting the feature.  "
+     "Ignored for non-imported targets.");
+
+  cm->DefineProperty
+    ("IMPORTED_SONAME_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration version of IMPORTED_SONAME property.",
+     "This property is used when loading settings for the <CONFIG> "
+     "configuration of an imported target.  "
+     "Configuration names correspond to those provided by the project "
+     "from which the target is imported.");
+
+  cm->DefineProperty
     ("EXCLUDE_FROM_ALL", cmProperty::TARGET,
      "Exclude the target from the all target.",
      "A property on a target that indicates if the target is excluded "
@@ -206,11 +296,37 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("LOCATION", cmProperty::TARGET,
-     "Where a target will be written on disk.",
-     "A read only property on a target that indicates where that target "
-     "will be written. For libraries and executables this will be where "
-     "the file is written on disk. This property is computed based on a "
-     "number of other settings.");
+     "Deprecated.  Use LOCATION_<CONFIG> or avoid altogether.",
+     "This property is provided for compatibility with CMake 2.4 and below. "
+     "It was meant to get the location of an executable target's output file "
+     "for use in add_custom_command.  "
+     "In CMake 2.6 and above add_custom_command automatically recognizes a "
+     "target name in its COMMAND and DEPENDS options and computes the "
+     "target location.  Therefore this property need not be used.  "
+     "This property is not defined for IMPORTED targets because they "
+     "were not available in CMake 2.4 or below anyway.");
+
+  cm->DefineProperty
+    ("LOCATION_<CONFIG>", cmProperty::TARGET,
+     "Read-only property providing a target location on disk.",
+     "A read-only property that indicates where a target's main file is "
+     "located on disk for the configuration <CONFIG>.  "
+     "The property is defined only for library and executable targets.");
+
+  cm->DefineProperty
+    ("MAP_IMPORTED_CONFIG_<CONFIG>", cmProperty::TARGET,
+     "Map from project configuration to IMPORTED target's configuration.",
+     "List configurations of an imported target that may be used for "
+     "the current project's <CONFIG> configuration.  "
+     "Targets imported from another project may not provide the same set "
+     "of configuration names available in the current project.  "
+     "Setting this property tells CMake what imported configurations are "
+     "suitable for use when building the <CONFIG> configuration.  "
+     "The first configuration in the list found to be provided by the "
+     "imported target is selected.  If no matching configurations are "
+     "available the imported target is considered to be not found.  "
+     "This property is ignored for non-imported targets.",
+     false /* TODO: make this chained */ );
 
   cm->DefineProperty
     ("OUTPUT_NAME", cmProperty::TARGET,
@@ -481,6 +597,25 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
+bool cmTarget::IsExecutableWithExports()
+{
+  if(this->GetType() == cmTarget::EXECUTABLE)
+    {
+    if(this->IsImported())
+      {
+      // The "IMPORTED_" namespace is used for properties exported
+      // from the project providing imported targets.
+      return this->GetPropertyAsBool("IMPORTED_ENABLE_EXPORTS");
+      }
+    else
+      {
+      return this->GetPropertyAsBool("ENABLE_EXPORTS");
+      }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
 class cmTargetTraceDependencies
 {
 public:
@@ -603,8 +738,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     }
 
   // Check for a non-imported target with this name.
-  if(cmTarget* t =
-     this->GlobalGenerator->FindTarget(0, util.c_str(), false))
+  if(cmTarget* t = this->GlobalGenerator->FindTarget(0, util.c_str()))
     {
     // If we find the target and the dep was given as a full path,
     // then make sure it was not a full path to something else, and
@@ -671,8 +805,7 @@ cmTargetTraceDependencies
     {
     std::string const& command = *cit->begin();
     // Look for a non-imported target with this name.
-    if(cmTarget* t =
-       this->GlobalGenerator->FindTarget(0, command.c_str(), false))
+    if(cmTarget* t = this->GlobalGenerator->FindTarget(0, command.c_str()))
       {
       if(t->GetType() == cmTarget::EXECUTABLE)
         {
@@ -1287,6 +1420,13 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     }
 
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
+
+  // If imported information is being set, wipe out cached
+  // information.
+  if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
+    {
+    this->ImportInfoMap.clear();
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1297,6 +1437,13 @@ void cmTarget::AppendProperty(const char* prop, const char* value)
     return;
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET);
+
+  // If imported information is being set, wipe out cached
+  // information.
+  if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
+    {
+    this->ImportInfoMap.clear();
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1319,10 +1466,11 @@ const char* cmTarget::GetDirectory(const char* config, bool implib)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::ImportedGetDirectory(const char* config, bool)
+const char* cmTarget::ImportedGetDirectory(const char* config, bool implib)
 {
-  const char* location=this->GetLocation(config);
-  this->Directory = cmSystemTools::GetFilenamePath(location);
+  this->Directory =
+    cmSystemTools::GetFilenamePath(
+      this->ImportedGetFullPath(config, implib));
   return this->Directory.c_str();
 }
 
@@ -1360,18 +1508,8 @@ const char* cmTarget::GetLocation(const char* config)
 //----------------------------------------------------------------------------
 const char* cmTarget::ImportedGetLocation(const char* config)
 {
-  if ((config) && (strlen(config)))
-    {
-    std::string propertyName=cmSystemTools::UpperCase(config);
-    propertyName+="_LOCATION";
-    const char* configLocation=this->GetProperty(propertyName.c_str());
-    if ((configLocation) && (strlen(configLocation)))
-      {
-      return configLocation;
-      }
-    }
-
-  return this->GetProperty("LOCATION");
+  this->Location = this->ImportedGetFullPath(config, false);
+  return this->Location.c_str();
 }
 
 //----------------------------------------------------------------------------
@@ -1484,38 +1622,41 @@ const char *cmTarget::GetProperty(const char* prop,
     return 0;
     }
 
-  // don't use GetLocation() for imported targets, because there this
-  // calls GetProperty() to get the location...
-  if (!this->IsImported())
+  // Watch for special "computed" properties that are dependent on
+  // other properties or variables.  Always recompute them.
+  if(this->GetType() == cmTarget::EXECUTABLE ||
+     this->GetType() == cmTarget::STATIC_LIBRARY ||
+     this->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->GetType() == cmTarget::MODULE_LIBRARY)
     {
-    // watch for special "computed" properties that are dependent on other
-    // properties or variables, always recompute them
-    if (!strcmp(prop,"LOCATION"))
+    if(!this->IsImported() && strcmp(prop,"LOCATION") == 0)
       {
       // Set the LOCATION property of the target.  Note that this
       // cannot take into account the per-configuration name of the
       // target because the configuration type may not be known at
-      // CMake time.  We should deprecate this feature and instead
-      // support transforming an executable target name given as the
-      // command part of custom commands into the proper path at
-      // build time.  Alternatively we could put environment
-      // variable settings in all custom commands that hold the name
-      // of the target for each configuration and then give a
-      // reference to the variable in the location.
+      // CMake time.  It is now deprecated as described in the
+      // documentation.
       this->SetProperty("LOCATION", this->GetLocation(0));
       }
 
-    // Per-configuration location can be computed.
-    int len = static_cast<int>(strlen(prop));
-    if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
+    // Support "LOCATION_<CONFIG>".
+    if(strncmp(prop, "LOCATION_", 9) == 0)
       {
-      std::string configName(prop, len-9);
+      std::string configName = prop+9;
       this->SetProperty(prop, this->GetLocation(configName.c_str()));
       }
-
-    if(strcmp(prop, "OBJECT_FILES") == 0)
+    else
       {
-      this->ComputeObjectFiles();
+      // Support "<CONFIG>_LOCATION" for compatiblity.
+      int len = static_cast<int>(strlen(prop));
+      if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
+        {
+        std::string configName(prop, len-9);
+        if(configName != "IMPORTED")
+          {
+          this->SetProperty(prop, this->GetLocation(configName.c_str()));
+          }
+        }
       }
     }
 
@@ -1750,15 +1891,57 @@ std::string cmTarget::GetPDBName(const char* config)
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetFullName(const char* config, bool implib)
+std::string cmTarget::GetSOName(const char* config)
 {
-  return this->GetFullNameInternal(this->GetType(), config, implib);
+  if(this->IsImported())
+    {
+    // Lookup the imported soname.
+    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
+      {
+      return info->SOName;
+      }
+    else
+      {
+      return "";
+      }
+    }
+  else
+    {
+    // Compute the soname that will be built.
+    std::string name;
+    std::string soName;
+    std::string realName;
+    std::string impName;
+    std::string pdbName;
+    this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
+    return soName;
+    }
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetFullName(std::string& prefix, std::string& base,
-                           std::string& suffix, const char* config,
-                           bool implib)
+std::string cmTarget::GetFullName(const char* config, bool implib)
+{
+  if(this->IsImported())
+    {
+    return this->GetFullNameImported(config, implib);
+    }
+  else
+    {
+    return this->GetFullNameInternal(this->GetType(), config, implib);
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetFullNameImported(const char* config, bool implib)
+{
+  return cmSystemTools::GetFilenameName(
+    this->ImportedGetFullPath(config, implib));
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetFullNameComponents(std::string& prefix, std::string& base,
+                                     std::string& suffix, const char* config,
+                                     bool implib)
 {
   this->GetFullNameInternal(this->GetType(), config, implib,
                             prefix, base, suffix);
@@ -1766,6 +1949,19 @@ void cmTarget::GetFullName(std::string& prefix, std::string& base,
 
 //----------------------------------------------------------------------------
 std::string cmTarget::GetFullPath(const char* config, bool implib)
+{
+  if(this->IsImported())
+    {
+    return this->ImportedGetFullPath(config, implib);
+    }
+  else
+    {
+    return this->NormalGetFullPath(config, implib);
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::NormalGetFullPath(const char* config, bool implib)
 {
   // Start with the output directory for the target.
   std::string fpath = this->GetDirectory(config, implib);
@@ -1777,8 +1973,31 @@ std::string cmTarget::GetFullPath(const char* config, bool implib)
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetFullNameInternal(TargetType type, const char* config,
-                                          bool implib)
+std::string cmTarget::ImportedGetFullPath(const char* config, bool implib)
+{
+  if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
+    {
+    if(implib)
+      {
+      return info->ImportLibrary;
+      }
+    else
+      {
+      return info->Location;
+      }
+    }
+  else
+    {
+    std::string result = this->GetName();
+    result += "-NOTFOUND";
+    return result;
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmTarget::GetFullNameInternal(TargetType type, const char* config,
+                              bool implib)
 {
   std::string prefix;
   std::string base;
@@ -1794,43 +2013,6 @@ void cmTarget::GetFullNameInternal(TargetType type,
                                    std::string& outPrefix,
                                    std::string& outBase,
                                    std::string& outSuffix)
-{
-  if (this->IsImported())
-    {
-    this->ImportedGetFullNameInternal(type, config, implib,
-                                      outPrefix, outBase, outSuffix);
-    }
-  else
-    {
-    this->NormalGetFullNameInternal(type, config, implib,
-                                    outPrefix, outBase, outSuffix);
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::ImportedGetFullNameInternal(TargetType ,
-                                           const char* config,
-                                           bool ,
-                                           std::string& outPrefix,
-                                           std::string& outBase,
-                                           std::string& outSuffix)
-{
-  // find the basename, suffix and prefix from getLocation()
-  // implib ?
-  std::string location=this->GetLocation(config);
-  outBase=cmSystemTools::GetFilenameWithoutExtension(location);
-  outSuffix = cmSystemTools::GetFilenameExtension(location);
-  outPrefix = "";
-}
-
-
-//----------------------------------------------------------------------------
-void cmTarget::NormalGetFullNameInternal(TargetType type,
-                                         const char* config,
-                                         bool implib,
-                                         std::string& outPrefix,
-                                         std::string& outBase,
-                                         std::string& outSuffix)
 {
   // Use just the target name for non-main target types.
   if(type != cmTarget::STATIC_LIBRARY &&
@@ -2019,6 +2201,14 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
                                        TargetType type,
                                        const char* config)
 {
+  // This should not be called for imported targets.
+  // TODO: Split cmTarget into a class hierarchy to get compile-time
+  // enforcement of the limited imported target API.
+  if(this->IsImported())
+    {
+    abort();
+    }
+
   // Construct the name of the soname flag variable for this language.
   const char* ll =
     this->GetLinkerLanguage(
@@ -2140,6 +2330,14 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
                                           TargetType type,
                                           const char* config)
 {
+  // This should not be called for imported targets.
+  // TODO: Split cmTarget into a class hierarchy to get compile-time
+  // enforcement of the limited imported target API.
+  if(this->IsImported())
+    {
+    abort();
+    }
+
   // This versioning is supported only for executables and then only
   // when the platform supports symbolic links.
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -2554,8 +2752,7 @@ const char* cmTarget::GetExportMacro()
   // Define the symbol for targets that export symbols.
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||
      this->GetType() == cmTarget::MODULE_LIBRARY ||
-     this->GetType() == cmTarget::EXECUTABLE &&
-     this->GetPropertyAsBool("ENABLE_EXPORTS"))
+     this->IsExecutableWithExports())
     {
     if(const char* custom_export_name = this->GetProperty("DEFINE_SYMBOL"))
       {
@@ -2617,4 +2814,209 @@ bool cmTarget::IsChrpathAvailable()
     }
 
   return true;
+}
+
+//----------------------------------------------------------------------------
+cmTarget::ImportInfo const*
+cmTarget::GetImportInfo(const char* config)
+{
+  // There is no imported information for non-imported targets.
+  if(!this->IsImported())
+    {
+    return 0;
+    }
+
+  // Lookup/compute/cache the import information for this
+  // configuration.
+  std::string config_upper;
+  if(config && *config)
+    {
+    config_upper = cmSystemTools::UpperCase(config);
+    }
+  else
+    {
+    config_upper = "NOCONFIG";
+    }
+  ImportInfoMapType::const_iterator i =
+    this->ImportInfoMap.find(config_upper);
+  if(i == this->ImportInfoMap.end())
+    {
+    ImportInfo info;
+    this->ComputeImportInfo(config_upper, info);
+    ImportInfoMapType::value_type entry(config_upper, info);
+    i = this->ImportInfoMap.insert(entry).first;
+    }
+
+  // If the location is empty then the target is not available for
+  // this configuration.
+  if(i->second.Location.empty())
+    {
+    return 0;
+    }
+
+  // Return the import information.
+  return &i->second;
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::ComputeImportInfo(std::string const& desired_config,
+                                 ImportInfo& info)
+{
+  // This method finds information about an imported target from its
+  // properties.  The "IMPORTED_" namespace is reserved for properties
+  // defined by the project exporting the target.
+
+  // Track the configuration-specific property suffix.
+  std::string suffix = "_";
+  suffix += desired_config;
+
+  // Look for a mapping from the current project's configuration to
+  // the imported project's configuration.
+  std::vector<std::string> mappedConfigs;
+  {
+  std::string mapProp = "MAP_IMPORTED_CONFIG_";
+  mapProp += desired_config;
+  if(const char* mapValue = this->GetProperty(mapProp.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(mapValue, mappedConfigs);
+    }
+  }
+
+  // If a mapping was found, check its configurations.
+  const char* loc = 0;
+  for(std::vector<std::string>::const_iterator mci = mappedConfigs.begin();
+      !loc && mci != mappedConfigs.end(); ++mci)
+    {
+    // Look for this configuration.
+    std::string mcUpper = cmSystemTools::UpperCase(mci->c_str());
+    std::string locProp = "IMPORTED_LOCATION_";
+    locProp += mcUpper;
+    loc = this->GetProperty(locProp.c_str());
+
+    // If it was found, use it for all properties below.
+    if(loc)
+      {
+      suffix = "_";
+      suffix += mcUpper;
+      }
+    }
+
+  // If we needed to find one of the mapped configurations but did not
+  // then the target is not found.  The project does not want any
+  // other configuration.
+  if(!mappedConfigs.empty() && !loc)
+    {
+    return;
+    }
+
+  // If we have not yet found it then there are no mapped
+  // configurations.  Look for an exact-match.
+  if(!loc)
+    {
+    std::string locProp = "IMPORTED_LOCATION";
+    locProp += suffix;
+    loc = this->GetProperty(locProp.c_str());
+    }
+
+  // If we have not yet found it then there are no mapped
+  // configurations and no exact match.
+  if(!loc)
+    {
+    // The suffix computed above is not useful.
+    suffix = "";
+
+    // Look for a configuration-less location.  This may be set by
+    // manually-written code.
+    loc = this->GetProperty("IMPORTED_LOCATION");
+    }
+
+  // If we have not yet found it then the project is willing to try
+  // any available configuration.
+  if(!loc)
+    {
+    std::vector<std::string> availableConfigs;
+    if(const char* iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS"))
+      {
+      cmSystemTools::ExpandListArgument(iconfigs, availableConfigs);
+      }
+    for(std::vector<std::string>::const_iterator
+          aci = availableConfigs.begin();
+        !loc && aci != availableConfigs.end(); ++aci)
+      {
+      suffix = "_";
+      suffix += cmSystemTools::UpperCase(availableConfigs[0]);
+      std::string locProp = "IMPORTED_LOCATION";
+      locProp += suffix;
+      loc = this->GetProperty(locProp.c_str());
+      }
+    }
+
+  // If we have not yet found it then the target is not available.
+  if(!loc)
+    {
+    return;
+    }
+
+  // A provided configuration has been chosen.  Load the
+  // configuration's properties.
+  info.Location = loc;
+
+  // Get the soname.
+  if(this->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    std::string soProp = "IMPORTED_SONAME";
+    soProp += suffix;
+    if(const char* config_soname = this->GetProperty(soProp.c_str()))
+      {
+      info.SOName = config_soname;
+      }
+    else if(const char* soname = this->GetProperty("IMPORTED_SONAME"))
+      {
+      info.SOName = soname;
+      }
+    }
+
+  // Get the import library.
+  if(this->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->IsExecutableWithExports())
+    {
+    std::string impProp = "IMPORTED_IMPLIB";
+    impProp += suffix;
+    if(const char* config_implib = this->GetProperty(impProp.c_str()))
+      {
+      info.ImportLibrary = config_implib;
+      }
+    else if(const char* implib = this->GetProperty("IMPORTED_IMPLIB"))
+      {
+      info.ImportLibrary = implib;
+      }
+    }
+
+  // Get the link dependencies.
+  {
+  std::string linkProp = "IMPORTED_LINK_LIBRARIES";
+  linkProp += suffix;
+  if(const char* config_libs = this->GetProperty(linkProp.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(config_libs, info.LinkLibraries);
+    }
+  else if(const char* libs = this->GetProperty("IMPORTED_LINK_LIBRARIES"))
+    {
+    cmSystemTools::ExpandListArgument(libs, info.LinkLibraries);
+    }
+  }
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> const*
+cmTarget::GetImportedLinkLibraries(const char* config)
+{
+  if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
+    {
+    return &info->LinkLibraries;
+    }
+  else
+    {
+    return 0;
+    }
 }

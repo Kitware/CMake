@@ -301,11 +301,8 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
 {
   // Compute the proper name to use to link this library.
   const char* config = this->Config;
-  bool implib = this->UseImportLibrary;
-  bool impexe = (tgt &&
-                 tgt->GetType() == cmTarget::EXECUTABLE &&
-                 tgt->GetPropertyAsBool("ENABLE_EXPORTS"));
-  if(impexe && !implib && !this->LoaderFlag)
+  bool impexe = (tgt && tgt->IsExecutableWithExports());
+  if(impexe && !this->UseImportLibrary && !this->LoaderFlag)
     {
     // Skip linking to executables on platforms with no import
     // libraries or loader flags.
@@ -325,13 +322,18 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // platform.  Add it now.
       std::string linkItem;
       linkItem = this->LoaderFlag;
-      std::string exe = tgt->GetFullPath(config, implib);
+      std::string exe = tgt->GetFullPath(config, this->UseImportLibrary);
       linkItem += exe;
       this->Items.push_back(Item(linkItem, true));
       this->Depends.push_back(exe);
       }
     else
       {
+      // Decide whether to use an import library.
+      bool implib =
+        (this->UseImportLibrary &&
+         (impexe || tgt->GetType() == cmTarget::SHARED_LIBRARY));
+
       // Pass the full path to the target file.
       std::string lib = tgt->GetFullPath(config, implib);
       this->Depends.push_back(lib);
@@ -950,18 +952,8 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
 
   // Try to get the soname of the library.  Only files with this name
   // could possibly conflict.
-  std::string soName;
-  const char* soname  = 0;
-  if(!target->IsImported())
-    {
-    std::string name;
-    std::string realName;
-    std::string impName;
-    std::string pdbName;
-    target->GetLibraryNames(name, soName, realName, impName, pdbName,
-                            this->Config);
-    soname = soName.c_str();
-    }
+  std::string soName = target->GetSOName(this->Config);
+  const char* soname = soName.empty()? 0 : soName.c_str();
 
   // Add the library runtime entry.
   this->AddLibraryRuntimeInfo(fullPath, soname);

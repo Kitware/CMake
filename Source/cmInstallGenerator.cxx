@@ -55,7 +55,6 @@ cmInstallGenerator
 void cmInstallGenerator
 ::AddInstallRule(
                  std::ostream& os,
-                 const char* dest,
                  int type,
                  std::vector<std::string> const& files,
                  bool optional /* = false */,
@@ -81,6 +80,7 @@ void cmInstallGenerator
     default:                         stype = "FILE"; break;
     }
   os << indent;
+  std::string dest = this->GetInstallDestination();
   os << "FILE(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype.c_str();
   if(optional)
     {
@@ -237,4 +237,41 @@ cmInstallGenerator::GenerateScriptConfigs(std::ostream& os,
 void cmInstallGenerator::GenerateScriptActions(std::ostream&, Indent const&)
 {
   // No actions for this generator.
+}
+
+//----------------------------------------------------------------------------
+bool cmInstallGenerator::InstallsForConfig(const char* config)
+{
+  // If this is not a configuration-specific rule then we install.
+  if(this->Configurations.empty())
+    {
+    return true;
+    }
+
+  // This is a configuration-specific rule.  Check if the config
+  // matches this rule.
+  std::string config_upper = cmSystemTools::UpperCase(config?config:"");
+  for(std::vector<std::string>::const_iterator i =
+        this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
+    {
+    if(cmSystemTools::UpperCase(*i) == config_upper)
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+std::string cmInstallGenerator::GetInstallDestination() const
+{
+  std::string result;
+  if(!this->Destination.empty() &&
+     !cmSystemTools::FileIsFullPath(this->Destination.c_str()))
+    {
+    result = "${CMAKE_INSTALL_PREFIX}/";
+    }
+  result += this->Destination;
+  return result;
 }

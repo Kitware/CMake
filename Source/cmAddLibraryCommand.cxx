@@ -46,6 +46,7 @@ bool cmAddLibraryCommand
   // If the second argument is "SHARED" or "STATIC", then it controls
   // the type of library.  Otherwise, it is treated as a source or
   // source list name. There may be two keyword arguments, check for them
+  bool haveSpecifiedType = false;
   while ( s != args.end() )
     {
     std::string libType = *s;
@@ -53,23 +54,26 @@ bool cmAddLibraryCommand
       {
       ++s;
       type = cmTarget::STATIC_LIBRARY;
+      haveSpecifiedType = true;
       }
     else if(libType == "SHARED")
       {
       ++s;
       type = cmTarget::SHARED_LIBRARY;
+      haveSpecifiedType = true;
       }
     else if(libType == "MODULE")
       {
       ++s;
       type = cmTarget::MODULE_LIBRARY;
+      haveSpecifiedType = true;
       }
     else if(*s == "EXCLUDE_FROM_ALL")
       {
       ++s;
       excludeFromAll = true;
       }
-    else if(*s == "IMPORT")
+    else if(*s == "IMPORTED")
       {
       ++s;
       importTarget = true;
@@ -98,10 +102,45 @@ bool cmAddLibraryCommand
     type = cmTarget::STATIC_LIBRARY;
     }
 
-  if (importTarget)
+  // The IMPORTED signature requires a type to be specified explicitly.
+  if(importTarget && !haveSpecifiedType)
     {
-    this->Makefile->AddNewTarget(type, libName.c_str(), true);
+    this->SetError("called with IMPORTED argument but no library type.");
+    return false;
+    }
+
+  // Check for an existing target with this name.
+  cmTarget* existing = this->Makefile->FindTargetToUse(libName.c_str());
+  if(importTarget)
+    {
+    // Make sure the target does not already exist.
+    if(existing)
+      {
+      cmOStringStream e;
+      e << "cannot create imported target \"" << libName
+        << "\" because another target with the same name already exists.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
+    // Create the imported target.
+    this->Makefile->AddImportedTarget(libName.c_str(), type);
     return true;
+    }
+  else
+    {
+    // Make sure the target does not conflict with an imported target.
+    // This should really enforce global name uniqueness for targets
+    // built within the project too, but that may break compatiblity
+    // with projects in which it was accidentally working.
+    if(existing && existing->IsImported())
+      {
+      cmOStringStream e;
+      e << "cannot create target \"" << libName
+        << "\" because an imported target with the same name already exists.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     }
 
   if (s == args.end())

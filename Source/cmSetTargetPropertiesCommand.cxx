@@ -95,9 +95,7 @@ bool cmSetTargetPropertiesCommand
                std::vector<std::string> &propertyPairs,
                cmMakefile *mf)
 {
-  cmTarget* target = 
-    mf->GetLocalGenerator()->GetGlobalGenerator()->FindTarget(0, tname, true);
-  if ( target)
+  if(cmTarget* target = mf->FindTargetToUse(tname))
     {
     // now loop through all the props and set them
     unsigned int k;

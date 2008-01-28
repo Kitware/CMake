@@ -19,42 +19,12 @@
 
 #include "cmInstallGenerator.h"
 
-class cmTarget;
-
-
-class cmInstallTargetGenerator;
+class cmExportInstallFileGenerator;
 class cmInstallFilesGenerator;
-
-/* cmInstallExportTarget is used in cmGlobalGenerator to collect the 
-install generators for the exported targets. These are then used by the 
-cmInstallExportGenerator.
-*/
-class cmTargetExport
-{
-public:
-  cmTargetExport(cmTarget* tgt, 
-                 cmInstallTargetGenerator* archive, 
-                 cmInstallTargetGenerator* runtime, 
-                 cmInstallTargetGenerator* library,
-                 cmInstallTargetGenerator* framework,
-                 cmInstallTargetGenerator* bundle,
-                 cmInstallFilesGenerator* headers
-                ) : Target(tgt), ArchiveGenerator(archive),
-                    RuntimeGenerator(runtime), LibraryGenerator(library),
-                    FrameworkGenerator(framework), BundleGenerator(bundle),
-                    HeaderGenerator(headers) {}
-
-  cmTarget* Target;
-  cmInstallTargetGenerator* ArchiveGenerator;
-  cmInstallTargetGenerator* RuntimeGenerator;
-  cmInstallTargetGenerator* LibraryGenerator;
-  cmInstallTargetGenerator* FrameworkGenerator;
-  cmInstallTargetGenerator* BundleGenerator;
-  cmInstallFilesGenerator* HeaderGenerator;
-private:
-  cmTargetExport();
-};
-
+class cmInstallTargetGenerator;
+class cmTarget;
+class cmTargetExport;
+class cmMakefile;
 
 /** \class cmInstallExportGenerator
  * \brief Generate rules for creating an export files.
@@ -62,45 +32,33 @@ private:
 class cmInstallExportGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallExportGenerator(const char* dest, const char* file_permissions,
+  cmInstallExportGenerator(const char* name,
+                           const char* dest, const char* file_permissions,
                            const std::vector<std::string>& configurations,
                            const char* component,
-                           const char* filename, const char* prefix, 
-                           const char* tempOutputDir);
-
-  bool SetExportSet(const char* name, 
-                    const std::vector<cmTargetExport*>* exportSet);
+                           const char* filename, const char* name_space,
+                           cmMakefile* mf);
+  ~cmInstallExportGenerator();
 protected:
-  // internal class which collects all the properties which will be set
-  // in the export file for the target
-  class cmTargetWithProperties
-  {
-  public:
-    cmTargetWithProperties(cmTarget* target):Target(target) {}
-    cmTarget* Target;
-    std::map<std::string, std::string> Properties;
-  private:
-    cmTargetWithProperties();
-  };
+  typedef std::vector<cmTargetExport*> ExportSet;
 
   typedef cmInstallGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);
+  virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
-  static bool AddInstallLocations(cmTargetWithProperties *twp, 
-                                  cmInstallTargetGenerator* generator,
-                                  const char* prefix);
-  static bool AddInstallLocations(cmTargetWithProperties* twp,
-                                           cmInstallFilesGenerator* generator,
-                                           const char* propertyName);
+  void GenerateImportFile(ExportSet const* exportSet);
+  void GenerateImportFile(const char* config, ExportSet const* exportSet);
+  void ComputeTempDir();
 
   std::string Name;
   std::string FilePermissions;
-  std::string Filename;
-  std::string Prefix;
-  std::string TempOutputDir;
-  std::string ExportFilename;
+  std::string FileName;
+  std::string Namespace;
+  cmMakefile* Makefile;
 
-  std::vector<cmTargetWithProperties*> Targets;
+  std::string TempDir;
+  std::string MainImportFile;
+  cmExportInstallFileGenerator* EFGen;
 };
 
 #endif

@@ -43,8 +43,6 @@ class cmInstallCommandArguments
     // once HandleDirectoryMode() is also switched to using 
     // cmInstallCommandArguments then these two functions can become non-static
     // private member functions without arguments
-    static void ComputeDestination(const std::string& inDest, 
-                                   std::string& absDest);
     static bool CheckPermissions(const std::string& onePerm, 
                                  std::string& perm);
     cmCommandArgumentsHelper Parser;
@@ -57,7 +55,7 @@ class cmInstallCommandArguments
     cmCAStringVector Configurations;
     cmCAEnabler Optional;
 
-    std::string AbsDestination;
+    std::string DestinationString;
     std::string PermissionsString;
 
     cmInstallCommandArguments* GenericArguments;

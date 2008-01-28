@@ -113,22 +113,11 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
 
   if(config && *config)
     {
-    std::string config_upper = cmSystemTools::UpperCase(config);
     // Skip this configuration for config-specific installation that
     // does not match it.
-    if(!this->Configurations.empty())
+    if(!this->InstallsForConfig(config))
       {
-      bool found = false;
-      for(std::vector<std::string>::const_iterator i =
-            this->Configurations.begin();
-          !found && i != this->Configurations.end(); ++i)
-        {
-        found = found || (cmSystemTools::UpperCase(*i) == config_upper);
-        }
-      if(!found)
-        {
-        return;
-        }
+      return;
       }
 
     // Generate a per-configuration block.
@@ -154,7 +143,7 @@ cmInstallTargetGenerator
                              Indent const& indent)
 {
   // Compute the full path to the main installed file for this target.
-  std::string toInstallPath = this->Destination;
+  std::string toInstallPath = this->GetInstallDestination();
   toInstallPath += "/";
   toInstallPath += this->GetInstallFilename(this->Target, config,
                                               this->ImportLibrary, false);
@@ -279,7 +268,7 @@ cmInstallTargetGenerator
   const char* no_rename = 0;
   const char* no_properties = 0;
   bool optional = this->Optional || this->ImportLibrary;
-  this->AddInstallRule(os, this->Destination.c_str(), type, files,
+  this->AddInstallRule(os, type, files,
                        optional, no_properties,
                        this->FilePermissions.c_str(), no_dir_permissions,
                        no_rename, literal_args.c_str(),
@@ -412,7 +401,7 @@ cmInstallTargetGenerator
       {
       if(cmTarget* tgt = this->Target->GetMakefile()->
          GetLocalGenerator()->GetGlobalGenerator()->
-         FindTarget(0, lib.c_str(), false))
+         FindTarget(0, lib.c_str()))
         {
         if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
           {

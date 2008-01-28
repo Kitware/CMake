@@ -172,9 +172,10 @@ public:
   void AddDefineFlag(const char* definition);
   void RemoveDefineFlag(const char* definition);
 
-  cmTarget* AddNewTarget(cmTarget::TargetType type, 
-                         const char* name, 
-                         bool isImported);
+  /** Create a new imported target with the name and type given.  */
+  cmTarget* AddImportedTarget(const char* name, cmTarget::TargetType type);
+
+  cmTarget* AddNewTarget(cmTarget::TargetType type, const char* name);
   
   /**
    * Add an executable to the build.
@@ -436,10 +437,12 @@ public:
    * Get the list of targets, const version
    */
   const cmTargets &GetTargets() const { return this->Targets; }
-  const cmTargets &GetImportedTargets() const { return this->ImportedTargets; }
 
-  cmTarget* FindTarget(const char* name, bool useImportedTargets);
+  cmTarget* FindTarget(const char* name);
 
+  /** Find a target to use in place of the given name.  The target
+      returned may be imported or built within the project.  */
+  cmTarget* FindTargetToUse(const char* name);
 
   /**
    * Get a list of include directories in the build.
@@ -766,7 +769,6 @@ protected:
 
   // libraries, classes, and executables
   cmTargets Targets;
-  cmTargets ImportedTargets;
   std::vector<cmSourceFile*> SourceFiles;
 
   // Tests
@@ -842,6 +844,10 @@ private:
 
   // stack of list files being read 
   std::deque<cmStdString> ListFileStack;
+
+  cmTarget* FindBasicTarget(const char* name);
+  std::vector<cmTarget*> ImportedTargetsOwned;
+  std::map<cmStdString, cmTarget*> ImportedTargets;
 };
 
 

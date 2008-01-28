@@ -37,6 +37,8 @@
 
 #include <cmsys/RegularExpression.hxx>
 
+#include <cmsys/auto_ptr.hxx>
+
 #include <ctype.h> // for isspace
 
 // default is not to be building executables
@@ -173,6 +175,12 @@ cmMakefile::~cmMakefile()
     }
   for(std::vector<cmTest*>::iterator i = this->Tests.begin();
       i != this->Tests.end(); ++i)
+    {
+    delete *i;
+    }
+  for(std::vector<cmTarget*>::iterator
+        i = this->ImportedTargetsOwned.begin();
+      i != this->ImportedTargetsOwned.end(); ++i)
     {
     delete *i;
     }
@@ -824,7 +832,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
                                    bool escapeOldStyle, const char* comment)
 {
   // Create a target instance for this utility.
-  cmTarget* target = this->AddNewTarget(cmTarget::UTILITY, utilityName, false);
+  cmTarget* target = this->AddNewTarget(cmTarget::UTILITY, utilityName);
   if (excludeFromAll)
     {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
@@ -1005,7 +1013,7 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
   if ( i != this->Targets.end())
     {
     cmTarget* tgt =
-      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0,lib,false);
+      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0,lib);
     if(tgt)
       {
       bool allowModules = true;
@@ -1018,8 +1026,7 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
       // if it is not a static or shared library then you can not link to it
       if(!((tgt->GetType() == cmTarget::STATIC_LIBRARY) ||
            (tgt->GetType() == cmTarget::SHARED_LIBRARY) ||
-           (tgt->GetType() == cmTarget::EXECUTABLE &&
-            tgt->GetPropertyAsBool("ENABLE_EXPORTS"))))
+           tgt->IsExecutableWithExports()))
         {
         cmOStringStream e;
         e << "Attempt to add link target " << lib << " of type: "
@@ -1162,6 +1169,9 @@ void cmMakefile::InitializeFromParent()
   // Copy include regular expressions.
   this->IncludeFileRegularExpression = parent->IncludeFileRegularExpression;
   this->ComplainFileRegularExpression = parent->ComplainFileRegularExpression;
+
+  // Imported targets.
+  this->ImportedTargets = parent->ImportedTargets;
 }
 
 void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
@@ -1467,7 +1477,7 @@ void cmMakefile::AddLibrary(const char* lname, cmTarget::TargetType type,
     type = cmTarget::STATIC_LIBRARY;
     }
 
-  cmTarget* target = this->AddNewTarget(type, lname, false);
+  cmTarget* target = this->AddNewTarget(type, lname);
   // Clear its dependencies. Otherwise, dependencies might persist
   // over changes in CMakeLists.txt, making the information stale and
   // hence useless.
@@ -1484,7 +1494,7 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
                                     const std::vector<std::string> &srcs,
                                     bool excludeFromAll)
 {
-  cmTarget* target = this->AddNewTarget(cmTarget::EXECUTABLE, exeName, false);
+  cmTarget* target = this->AddNewTarget(cmTarget::EXECUTABLE, exeName);
   if(excludeFromAll)
     {
     target->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
@@ -1494,26 +1504,16 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
   return target;
 }
 
-
-cmTarget* cmMakefile::AddNewTarget(cmTarget::TargetType type, 
-                                   const char* name, 
-                                   bool isImported)
+//----------------------------------------------------------------------------
+cmTarget*
+cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
 {
   cmTargets::iterator it;
   cmTarget target;
   target.SetType(type, name);
   target.SetMakefile(this);
-  if (isImported)
-    {
-    target.MarkAsImported();
-    it=this->ImportedTargets.insert(
-                        cmTargets::value_type(target.GetName(), target)).first;
-    }
-  else
-    {
-    it=this->Targets.insert(
-                        cmTargets::value_type(target.GetName(), target)).first;
-    }
+  it=this->Targets.insert(
+      cmTargets::value_type(target.GetName(), target)).first;
   this->LocalGenerator->GetGlobalGenerator()->AddTarget(*it);
   return &it->second;
 }
@@ -2869,7 +2869,7 @@ bool cmMakefile::GetPropertyAsBool(const char* prop)
 }
 
 
-cmTarget* cmMakefile::FindTarget(const char* name, bool useImportedTargets)
+cmTarget* cmMakefile::FindTarget(const char* name)
 {
   cmTargets& tgts = this->GetTargets();
 
@@ -2877,15 +2877,6 @@ cmTarget* cmMakefile::FindTarget(const char* name, bool useImportedTargets)
   if ( i != tgts.end() )
     {
     return &i->second;
-    }
-
-  if (useImportedTargets)
-    {
-    cmTargets::iterator impTarget = this->ImportedTargets.find(name);
-    if (impTarget != this->ImportedTargets.end())
-      {
-      return &impTarget->second;
-      }
     }
 
   return 0;
@@ -3090,4 +3081,38 @@ void cmMakefile::DefineProperties(cmake *cm)
      "for example typing make will cause the targets to be built. "
      "The same concept applies to the default build of other generators.",
      false);
+}
+
+//----------------------------------------------------------------------------
+cmTarget*
+cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type)
+{
+  // Create the target.
+  cmsys::auto_ptr<cmTarget> target(new cmTarget);
+  target->SetType(type, name);
+  target->SetMakefile(this);
+  target->MarkAsImported();
+
+  // Add to the set of available imported targets.
+  this->ImportedTargets[name] = target.get();
+
+  // Transfer ownership to this cmMakefile object.
+  this->ImportedTargetsOwned.push_back(target.get());
+  return target.release();
+}
+
+//----------------------------------------------------------------------------
+cmTarget* cmMakefile::FindTargetToUse(const char* name)
+{
+  // Look for an imported target.  These take priority because they
+  // are more local in scope and do not have to be globally unique.
+  std::map<cmStdString, cmTarget*>::const_iterator
+    imported = this->ImportedTargets.find(name);
+  if(imported != this->ImportedTargets.end())
+    {
+    return imported->second;
+    }
+
+  // Look for a target built in this project.
+  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0, name);
 }

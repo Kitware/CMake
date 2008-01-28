@@ -260,9 +260,7 @@ bool cmGetPropertyCommand::HandleTargetMode()
     return false;
     }
 
-  if(cmTarget* target =
-     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-     ->FindTarget(0, this->Name.c_str(), true))
+  if(cmTarget* target = this->Makefile->FindTargetToUse(this->Name.c_str()))
     {
     return this->StoreResult(target->GetProperty(this->PropertyName.c_str()));
     }

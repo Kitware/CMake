@@ -220,9 +220,7 @@ bool cmSetPropertyCommand::HandleTargetMode()
   for(std::set<cmStdString>::const_iterator ni = this->Names.begin();
       ni != this->Names.end(); ++ni)
     {
-    if(cmTarget* target =
-       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-       ->FindTarget(0, ni->c_str(), true))
+    if(cmTarget* target = this->Makefile->FindTargetToUse(ni->c_str()))
       {
       // Handle the current target.
       if(!this->HandleTarget(target))

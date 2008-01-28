@@ -62,8 +62,8 @@ public:
   void Generate(std::ostream& os, const char* config,
                 std::vector<std::string> const& configurationTypes);
 
-  static void AddInstallRule(
-    std::ostream& os, const char* dest, int type,
+  void AddInstallRule(
+    std::ostream& os, int type,
     std::vector<std::string> const& files,
     bool optional = false,
     const char* properties = 0,
@@ -78,6 +78,14 @@ public:
     { return this->Destination.c_str(); }
   const std::vector<std::string>& GetConfigurations() const
     { return this->Configurations; }
+
+  /** Get the install destination as it should appear in the
+      installation script.  */
+  std::string GetInstallDestination() const;
+
+  /** Test if this generator installs something for a given configuration.  */
+  bool InstallsForConfig(const char*);
+
 protected:
   typedef cmInstallGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);

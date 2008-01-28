@@ -40,6 +40,9 @@ public:
   static std::string GetInstallFilename(cmTarget*target, const char* config, 
                                         bool implib, bool useSOName);
 
+  cmTarget* GetTarget() const { return this->Target; }
+  bool IsImportLibrary() const { return this->ImportLibrary; }
+
 protected:
   typedef cmInstallGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);

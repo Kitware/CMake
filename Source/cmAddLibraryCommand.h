@@ -73,7 +73,26 @@ public:
       "to STATIC.\n"
       "If EXCLUDE_FROM_ALL is given the target will not be built by default. "
       "It will be built only if the user explicitly builds the target or "
-      "another target that requires the target depends on it.";
+      "another target that requires the target depends on it."
+      "\n"
+      "The add_library command can also create IMPORTED library "
+      "targets using this signature:\n"
+      "  add_library(<name> <SHARED|STATIC|MODULE> IMPORTED)\n"
+      "An IMPORTED library target references a library file located "
+      "outside the project.  "
+      "No rules are generated to build it.  "
+      "The target name has scope in the directory in which it is created "
+      "and below.  "
+      "It may be referenced like any target built within the project.  "
+      "IMPORTED libraries are useful for convenient reference from "
+      "commands like target_link_libraries.  "
+      "Details about the imported library are specified by setting "
+      "properties whose names begin in \"IMPORTED_\".  "
+      "The most important such property is IMPORTED_LOCATION "
+      "(and its per-configuration version IMPORTED_LOCATION_<CONFIG>) "
+      "which specifies the location of the main library file on disk.  "
+      "See documentation of the IMPORTED_* properties for more information."
+      ;
     }
   
   cmTypeMacro(cmAddLibraryCommand, cmCommand);

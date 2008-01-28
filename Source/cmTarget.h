@@ -194,6 +194,11 @@ public:
 
   bool IsImported() const {return this->IsImportedTarget;}
 
+  /** Get link libraries for the given configuration of an imported
+      target.  */
+  std::vector<std::string> const*
+  GetImportedLinkLibraries(const char* config);
+
   /** Get the directory in which this target will be built.  If the
       configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical
@@ -226,12 +231,15 @@ public:
   /** Get the full name of the target according to the settings in its
       makefile.  */
   std::string GetFullName(const char* config=0, bool implib = false);
-  void GetFullName(std::string& prefix,
-                   std::string& base, std::string& suffix,
-                   const char* config=0, bool implib = false);
+  void GetFullNameComponents(std::string& prefix,
+                             std::string& base, std::string& suffix,
+                             const char* config=0, bool implib = false);
 
   /** Get the name of the pdb file for the target.  */
   std::string GetPDBName(const char* config=0);
+
+  /** Get the soname of the target.  Allowed only for a shared library.  */
+  std::string GetSOName(const char* config);
 
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
@@ -307,6 +315,10 @@ public:
   // information to forward these property changes to the targets
   // until we have per-target object file properties.
   void GetLanguages(std::set<cmStdString>& languages) const;
+
+  /** Return whether this target is an executable with symbol exports
+      enabled.  */
+  bool IsExecutableWithExports();
 
 private:
   /**
@@ -393,19 +405,13 @@ private:
   const char* ImportedGetLocation(const char* config);
   const char* NormalGetLocation(const char* config);
 
-  void NormalGetFullNameInternal(TargetType type, const char* config,
-                                 bool implib,
-                                 std::string& outPrefix,
-                                 std::string& outBase,
-                                 std::string& outSuffix);
-  void ImportedGetFullNameInternal(TargetType type, const char* config,
-                                   bool implib,
-                                   std::string& outPrefix,
-                                   std::string& outBase,
-                                   std::string& outSuffix);
+  std::string GetFullNameImported(const char* config, bool implib);
 
   const char* ImportedGetDirectory(const char* config, bool implib);
   const char* NormalGetDirectory(const char* config, bool implib);
+
+  std::string ImportedGetFullPath(const char* config, bool implib);
+  std::string NormalGetFullPath(const char* config, bool implib);
 
 private:
   std::string Name;
@@ -435,6 +441,19 @@ private:
   LinkLibraryVectorType OriginalLinkLibraries;
   bool DLLPlatform;
   bool IsImportedTarget;
+
+  // Cache import information from properties for each configuration.
+  struct ImportInfo
+  {
+    std::string Location;
+    std::string SOName;
+    std::string ImportLibrary;
+    std::vector<std::string> LinkLibraries;
+  };
+  typedef std::map<cmStdString, ImportInfo> ImportInfoMapType;
+  ImportInfoMapType ImportInfoMap;
+  ImportInfo const* GetImportInfo(const char* config);
+  void ComputeImportInfo(std::string const& desired_config, ImportInfo& info);
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.

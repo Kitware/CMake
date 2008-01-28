@@ -138,7 +138,7 @@ void cmGlobalVisualStudio8Generator::Generate()
       mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
                             no_working_directory, no_depends,
                             noCommandLines);
-      cmTarget* tgt = mf->FindTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false);
+      cmTarget* tgt = mf->FindTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
       if(!tgt)
         {
         cmSystemTools::Error("Error adding target " 

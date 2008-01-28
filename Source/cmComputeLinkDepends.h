@@ -66,9 +66,12 @@ private:
   typedef cmTarget::LinkLibraryVectorType LinkLibraryVectorType;
 
   int AddLinkEntry(std::string const& item);
+  void AddImportedLinkEntries(int depender_index, cmTarget* target);
   void AddVarLinkEntries(int depender_index, const char* value);
+  void AddTargetLinkEntries(int depender_index,
+                            LinkLibraryVectorType const& libs);
   void AddLinkEntries(int depender_index,
-                      LinkLibraryVectorType const& libs);
+                      std::vector<std::string> const& libs);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;

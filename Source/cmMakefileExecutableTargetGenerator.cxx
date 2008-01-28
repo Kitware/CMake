@@ -259,7 +259,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
 
   // Add symbol export flags if necessary.
-  if(this->Target->GetPropertyAsBool("ENABLE_EXPORTS"))
+  if(this->Target->IsExecutableWithExports())
     {
     std::string export_flag_var = "CMAKE_EXE_EXPORTS_";
     export_flag_var += linkLanguage;
@@ -351,7 +351,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->Makefile->GetRequiredDefinition(linkRuleVar.c_str());
   std::vector<std::string> commands1;
   cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
-  if(this->Target->GetPropertyAsBool("ENABLE_EXPORTS"))
+  if(this->Target->IsExecutableWithExports())
     {
     // If a separate rule for creating an import library is specified
     // add it now.

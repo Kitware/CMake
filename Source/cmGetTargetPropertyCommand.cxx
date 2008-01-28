@@ -28,9 +28,7 @@ bool cmGetTargetPropertyCommand
   std::string var = args[0].c_str();
   const char* targetName = args[1].c_str();
 
-  cmTarget *tgt = this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-    ->FindTarget(0, targetName, true);
-  if (tgt)
+  if(cmTarget* tgt = this->Makefile->FindTargetToUse(targetName))
     {
     cmTarget& target = *tgt;
     const char *prop = target.GetProperty(args[2].c_str());

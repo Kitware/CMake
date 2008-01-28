@@ -47,7 +47,7 @@ void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
   // Write code to install the files.
   const char* no_properties = 0;
   const char* no_dir_permissions = 0;
-  this->AddInstallRule(os, this->Destination.c_str(),
+  this->AddInstallRule(os,
                        (this->Programs
                         ? cmTarget::INSTALL_PROGRAMS
                         : cmTarget::INSTALL_FILES),

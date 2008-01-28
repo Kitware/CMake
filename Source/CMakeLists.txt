@@ -121,6 +121,12 @@ SET(SRCS
   cmExprLexer.cxx
   cmExprParser.cxx
   cmExprParserHelper.cxx
+  cmExportBuildFileGenerator.h
+  cmExportBuildFileGenerator.cxx
+  cmExportFileGenerator.h
+  cmExportFileGenerator.cxx
+  cmExportInstallFileGenerator.h
+  cmExportInstallFileGenerator.cxx
   cmExtraEclipseCDT4Generator.cxx
   cmExtraEclipseCDT4Generator.h
   cmFileTimeComparison.cxx

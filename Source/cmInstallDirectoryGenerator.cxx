@@ -48,8 +48,7 @@ cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
   bool not_optional = false;
   const char* no_properties = 0;
   const char* no_rename = 0;
-  this->AddInstallRule(os, this->Destination.c_str(),
-                       cmTarget::INSTALL_DIRECTORY,
+  this->AddInstallRule(os, cmTarget::INSTALL_DIRECTORY,
                        this->Directories,
                        not_optional, no_properties,
                        this->FilePermissions.c_str(),

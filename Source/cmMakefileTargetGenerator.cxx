@@ -869,7 +869,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   for(cmTarget::LinkLibraryVectorType::const_iterator j = libs.begin();
       j != libs.end(); ++j)
     {
-    if(cmTarget const* linkee = gg->FindTarget(0, j->first.c_str(), false))
+    if(cmTarget const* linkee = gg->FindTarget(0, j->first.c_str()))
       {
       if(emitted.insert(linkee).second)
         {
@@ -1371,7 +1371,7 @@ void cmMakefileTargetGenerator
       {
       // Depend on other CMake targets.
       if(cmTarget* tgt =
-         this->GlobalGenerator->FindTarget(0, lib->first.c_str(), false))
+         this->GlobalGenerator->FindTarget(0, lib->first.c_str()))
         {
         if(const char* location =
            tgt->GetLocation(this->LocalGenerator->ConfigurationName.c_str()))

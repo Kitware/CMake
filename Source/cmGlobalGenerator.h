@@ -186,9 +186,7 @@ public:
   void FindMakeProgram(cmMakefile*);
 
   ///! Find a target by name by searching the local generators.
-  cmTarget* FindTarget(const char* project, 
-                       const char* name, 
-                       bool useImportedTargets);
+  cmTarget* FindTarget(const char* project, const char* name);
 
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
@@ -297,9 +295,8 @@ private:
   std::map<cmStdString, cmStdString> ExtensionToLanguage;
   std::map<cmStdString, int> LanguageToLinkerPreference; 
 
-  // this is used to improve performance 
+  // this is used to improve performance
   std::map<cmStdString,cmTarget *> TotalTargets;
-  std::map<cmStdString,cmTarget *> ImportedTotalTargets;
 
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 

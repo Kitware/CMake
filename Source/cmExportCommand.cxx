@@ -20,14 +20,13 @@
 #include "cmGeneratedFileStream.h"
 #include "cmake.h"
 
-#include <cmsys/auto_ptr.hxx>
+#include "cmExportBuildFileGenerator.h"
 
 cmExportCommand::cmExportCommand()
 :cmCommand()
 ,ArgumentGroup()
 ,Targets(&Helper, "TARGETS")
-,Append(&Helper, "APPEND", &ArgumentGroup)
-,Prefix(&Helper, "PREFIX", &ArgumentGroup)
+,Namespace(&Helper, "NAMESPACE", &ArgumentGroup)
 ,Filename(&Helper, "FILE", &ArgumentGroup)
 {
   // at first TARGETS
@@ -53,150 +52,130 @@ bool cmExportCommand
   if (!unknownArgs.empty())
     {
     this->SetError("Unknown arguments.");
-    cmSystemTools::SetFatalErrorOccured();
     return false;
     }
 
   if (this->Targets.WasFound() == false)
     {
     this->SetError("TARGETS option missing.");
-    cmSystemTools::SetFatalErrorOccured();
     return false;
     }
 
-
-  if ( !this->Makefile->CanIWriteThisFile(this->Filename.GetString().c_str()) )
+  if(!this->Filename.WasFound())
     {
-    std::string e = "attempted to write a file: " + this->Filename.GetString()
-      + " into a source directory.";
-    this->SetError(e.c_str());
-    cmSystemTools::SetFatalErrorOccured();
+    this->SetError("FILE <filename> option missing.");
     return false;
     }
 
-  if((this->Targets.GetVector().empty())||(this->Filename.GetString().empty()))
+  // Make sure the file has a .cmake extension.
+  if(cmSystemTools::GetFilenameLastExtension(this->Filename.GetCString())
+     != ".cmake")
     {
-    return true;
+    cmOStringStream e;
+    e << "FILE option given filename \"" << this->Filename.GetString()
+      << "\" which does not have an extension of \".cmake\".\n";
+    this->SetError(e.str().c_str());
+    return false;
     }
 
-  // Use copy-if-different if not appending.
-  cmsys::auto_ptr<std::ofstream> foutPtr;
-  if(this->Append.IsEnabled())
+  // Get the file to write.
+  std::string fname = this->Filename.GetString();
+  if(cmSystemTools::FileIsFullPath(fname.c_str()))
     {
-    cmsys::auto_ptr<std::ofstream> ap(
-      new std::ofstream(this->Filename.GetString().c_str(), std::ios::app));
-    foutPtr = ap;
+    if(!this->Makefile->CanIWriteThisFile(fname.c_str()))
+      {
+      cmOStringStream e;
+      e << "FILE option given filename \"" << fname
+        << "\" which is in the source tree.\n";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     }
   else
     {
-    cmsys::auto_ptr<cmGeneratedFileStream> ap(
-      new cmGeneratedFileStream(this->Filename.GetString().c_str(), true));
-    ap->SetCopyIfDifferent(true);
-    foutPtr = ap;
+    // Interpret relative paths with respect to the current build dir.
+    fname = this->Makefile->GetCurrentOutputDirectory();
+    fname += "/";
+    fname += this->Filename.GetString();
     }
-  std::ostream& fout = *foutPtr.get();
 
-  if (!fout)
+  // If no targets are to be exported we are done.
+  if(this->Targets.GetVector().empty())
     {
-    cmSystemTools::Error("Error Writing ", this->Filename.GetString().c_str());
-    cmSystemTools::ReportLastSystemError("");
     return true;
     }
 
-  // the following code may move into an "export generator"
-  // Compute the set of configurations.
-  std::vector<std::string> configurationTypes;
-  if(const char* types =
-     this->Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
-    {
-    cmSystemTools::ExpandListArgument(types, configurationTypes);
-    }
-  if(configurationTypes.empty())
-    {
-    const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-    if (config!=0)
-      {
-      configurationTypes.push_back(config);
-      }
-    }
-
-  for(std::vector<std::string>::const_iterator 
+  // Collect the targets to be exported.
+  std::vector<cmTarget*> targets;
+  for(std::vector<std::string>::const_iterator
       currentTarget = this->Targets.GetVector().begin();
       currentTarget != this->Targets.GetVector().end();
       ++currentTarget)
     {
-    cmTarget* target = this->Makefile->GetLocalGenerator()->
-             GetGlobalGenerator()->FindTarget(0, currentTarget->c_str(), true);
-    if (target == 0)
+    if(cmTarget* target =
+       this->Makefile->GetLocalGenerator()->
+       GetGlobalGenerator()->FindTarget(0, currentTarget->c_str()))
       {
-      std::string e = "detected unknown target: " + *currentTarget;
-      this->SetError(e.c_str());
-      cmSystemTools::SetFatalErrorOccured();
+      if((target->GetType() == cmTarget::EXECUTABLE) ||
+         (target->GetType() == cmTarget::STATIC_LIBRARY) ||
+         (target->GetType() == cmTarget::SHARED_LIBRARY) ||
+         (target->GetType() == cmTarget::MODULE_LIBRARY))
+        {
+        targets.push_back(target);
+        }
+      else
+        {
+        cmOStringStream e;
+        e << "given target \"" << *currentTarget
+          << "\" which is not an executable or library.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "given target \"" << *currentTarget
+        << "\" which is not built by this project.";
+      this->SetError(e.str().c_str());
       return false;
       }
     }
 
-  for(std::vector<std::string>::const_iterator 
-      currentTarget = this->Targets.GetVector().begin();
-      currentTarget != this->Targets.GetVector().end();
-      ++currentTarget)
-    {
-    // Look for a CMake target with the given name, which is an executable
-    // and which can be run
-    cmTarget* target = this->Makefile->GetLocalGenerator()->
-             GetGlobalGenerator()->FindTarget(0, currentTarget->c_str(), true);
-    if ((target != 0)
-       && ((target->GetType() == cmTarget::EXECUTABLE)
-        || (target->GetType() == cmTarget::STATIC_LIBRARY)
-        || (target->GetType() == cmTarget::SHARED_LIBRARY)
-        || (target->GetType() == cmTarget::MODULE_LIBRARY)))
-      {
-      switch (target->GetType())
-        {
-        case cmTarget::EXECUTABLE:
-          fout << "ADD_EXECUTABLE(" 
-               << this->Prefix.GetString().c_str() << currentTarget->c_str()
-               << " IMPORT )\n";
-          break;
-        case cmTarget::STATIC_LIBRARY:
-          fout << "ADD_LIBRARY(" 
-               << this->Prefix.GetString().c_str() << currentTarget->c_str()
-               << " STATIC IMPORT )\n";
-          break;
-        case cmTarget::SHARED_LIBRARY:
-          fout << "ADD_LIBRARY(" 
-               << this->Prefix.GetString().c_str() << currentTarget->c_str()
-               << " SHARED IMPORT )\n";
-          break;
-        case cmTarget::MODULE_LIBRARY:
-          fout << "ADD_LIBRARY(" 
-               << this->Prefix.GetString().c_str() << currentTarget->c_str()
-               << " MODULE IMPORT )\n";
-          break;
-        default:  // should never happen
-          break;
-        }
+  // Setup export file generation.
+  cmExportBuildFileGenerator ebfg;
+  ebfg.SetExportFile(fname.c_str());
+  ebfg.SetNamespace(this->Namespace.GetCString());
+  ebfg.SetExports(&targets);
 
-      fout << "SET_TARGET_PROPERTIES(" << this->Prefix.GetString().c_str()
-                                 << currentTarget->c_str() << " PROPERTIES \n"
-        <<"                      LOCATION \""<< target->GetLocation(0)<<"\"\n";
-      for(std::vector<std::string>::const_iterator
-          currentConfig = configurationTypes.begin();
-          currentConfig != configurationTypes.end();
-          ++currentConfig)
-        {
-        if (!currentConfig->empty())
-          {
-          const char* loc = target->GetLocation(currentConfig->c_str());
-          if (loc && *loc)
-            {
-            fout << "                      " << currentConfig->c_str()
-                                            << "_LOCATION \"" << loc << "\"\n";
-            }
-          }
-        }
-      fout << "                     )\n\n";
+  // Compute the set of configurations exported.
+  if(const char* types =
+     this->Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+    {
+    std::vector<std::string> configurationTypes;
+    cmSystemTools::ExpandListArgument(types, configurationTypes);
+    for(std::vector<std::string>::const_iterator
+          ci = configurationTypes.begin();
+        ci != configurationTypes.end(); ++ci)
+      {
+      ebfg.AddConfiguration(ci->c_str());
       }
+    }
+  else if(const char* config =
+          this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
+    {
+    ebfg.AddConfiguration(config);
+    }
+  else
+    {
+    ebfg.AddConfiguration("");
+    }
+
+  // Generate the import file.
+  if(!ebfg.GenerateImportFile())
+    {
+    this->SetError("could not write export file.");
+    return false;
     }
 
   return true;

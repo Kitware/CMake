@@ -25,7 +25,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
-#include "cmInstallExportGenerator.h"
+#include "cmExportInstallFileGenerator.h"
 
 #include <cmsys/Directory.hxx>
 
@@ -693,7 +693,6 @@ void cmGlobalGenerator::Configure()
   this->LocalGenerators.clear();
   this->TargetDependencies.clear();
   this->TotalTargets.clear();
-  this->ImportedTotalTargets.clear();
   this->LocalGeneratorToTargetMap.clear();
   this->ProjectMap.clear();
 
@@ -1321,9 +1320,8 @@ cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(const char* start_dir)
 
 
 //----------------------------------------------------------------------------
-cmTarget* cmGlobalGenerator::FindTarget(const char* project,
-                                        const char* name,
-                                        bool useImportedTargets)
+cmTarget*
+cmGlobalGenerator::FindTarget(const char* project, const char* name)
 {
   // if project specific
   if(project)
@@ -1331,8 +1329,7 @@ cmTarget* cmGlobalGenerator::FindTarget(const char* project,
     std::vector<cmLocalGenerator*>* gens = &this->ProjectMap[project];
     for(unsigned int i = 0; i < gens->size(); ++i)
       {
-      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name,
-                                                           useImportedTargets);
+      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name);
       if(ret)
         {
         return ret;
@@ -1348,16 +1345,6 @@ cmTarget* cmGlobalGenerator::FindTarget(const char* project,
       {
       return i->second;
       }
-
-    if ( useImportedTargets )
-      {
-      std::map<cmStdString,cmTarget *>::iterator importedTarget =
-        this->ImportedTotalTargets.find ( name );
-      if ( importedTarget != this->ImportedTotalTargets.end() )
-        {
-        return importedTarget->second;
-        }
-      }
     }
   return 0;
 }
@@ -1370,7 +1357,7 @@ bool cmGlobalGenerator::NameResolvesToFramework(const std::string& libname)
     return true;
     }
 
-  if(cmTarget* tgt = this->FindTarget(0, libname.c_str(), true))
+  if(cmTarget* tgt = this->FindTarget(0, libname.c_str()))
     {
     if(tgt->GetType() == cmTarget::SHARED_LIBRARY &&
        tgt->GetPropertyAsBool("FRAMEWORK"))
@@ -1758,12 +1745,12 @@ cmGlobalGenerator::ConsiderTargetDepends(cmTarget const* depender,
 {
   // Check the target's makefile first.
   cmTarget const* dependee =
-    depender->GetMakefile()->FindTarget(dependee_name, false);
+    depender->GetMakefile()->FindTarget(dependee_name);
 
   // Then search globally.
   if(!dependee)
     {
-    dependee = this->FindTarget(0, dependee_name, false);
+    dependee = this->FindTarget(0, dependee_name);
     }
 
   // If not found then skip then the dependee.
@@ -1842,14 +1829,8 @@ cmGlobalGenerator
 
 void cmGlobalGenerator::AddTarget(cmTargets::value_type &v)
 {
-  if (v.second.IsImported())
-    {
-    this->ImportedTotalTargets[v.first] = &v.second;
-    }
-  else
-    {
-    this->TotalTargets[v.first] = &v.second;
-    }
+  assert(!v.second.IsImported());
+  this->TotalTargets[v.first] = &v.second;
 }
 
 void cmGlobalGenerator::SetExternalMakefileProjectGenerator(

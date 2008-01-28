@@ -158,7 +158,7 @@ std::vector<cmComputeLinkDepends::LinkEntry> const&
 cmComputeLinkDepends::Compute()
 {
   // Follow the link dependencies of the target to be linked.
-  this->AddLinkEntries(-1, this->Target->GetOriginalLinkLibraries());
+  this->AddTargetLinkEntries(-1, this->Target->GetOriginalLinkLibraries());
 
   // Complete the breadth-first search of dependencies.
   while(!this->BFSQueue.empty())
@@ -222,8 +222,7 @@ int cmComputeLinkDepends::AddLinkEntry(std::string const& item)
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = item;
-  entry.Target =
-    this->GlobalGenerator->FindTarget(0, entry.Item.c_str(), false);
+  entry.Target = this->Makefile->FindTargetToUse(entry.Item.c_str());
 
   // If the item has dependencies queue it to follow them.
   if(entry.Target)
@@ -264,8 +263,15 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
   if(entry.Target)
     {
     // Follow the target dependencies.
-    this->AddLinkEntries(depender_index,
-                         entry.Target->GetOriginalLinkLibraries());
+    if(entry.Target->IsImported())
+      {
+      this->AddImportedLinkEntries(depender_index, entry.Target);
+      }
+    else
+      {
+      this->AddTargetLinkEntries(depender_index,
+                                 entry.Target->GetOriginalLinkLibraries());
+      }
     }
   else
     {
@@ -274,6 +280,18 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
     }
 }
 
+//----------------------------------------------------------------------------
+void cmComputeLinkDepends::AddImportedLinkEntries(int depender_index,
+                                                  cmTarget* target)
+{
+  if(std::vector<std::string> const* libs =
+     target->GetImportedLinkLibraries(this->Config))
+    {
+    this->AddLinkEntries(depender_index, *libs);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
                                              const char* value)
 {
@@ -283,39 +301,49 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
   std::vector<std::string> deplist;
   cmSystemTools::ExpandListArgument(value, deplist);
 
-  // Construct the vector of type/value pairs from the variable.
-  LinkLibraryVectorType libs;
-  cmTarget::LinkLibraryType linkType = cmTarget::GENERAL;
+  // Compute which library configuration to link.
+  cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
+  if(this->Config && cmSystemTools::UpperCase(this->Config) == "DEBUG")
+    {
+    linkType = cmTarget::DEBUG;
+    }
+
+  // Look for entries meant for this configuration.
+  std::vector<std::string> actual_libs;
+  cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
   for(std::vector<std::string>::const_iterator di = deplist.begin();
       di != deplist.end(); ++di)
     {
     if(*di == "debug")
       {
-      linkType = cmTarget::DEBUG;
+      llt = cmTarget::DEBUG;
       }
     else if(*di == "optimized")
       {
-      linkType = cmTarget::OPTIMIZED;
+      llt = cmTarget::OPTIMIZED;
       }
     else if(*di == "general")
       {
-      linkType = cmTarget::GENERAL;
+      llt = cmTarget::GENERAL;
       }
     else if(!di->empty())
       {
-      cmTarget::LibraryID lib(*di, linkType);
-      libs.push_back(lib);
+      if(llt == cmTarget::GENERAL || llt == linkType)
+        {
+        actual_libs.push_back(*di);
+        }
       linkType = cmTarget::GENERAL;
       }
     }
 
   // Add the entries from this list.
-  this->AddLinkEntries(depender_index, libs);
+  this->AddLinkEntries(depender_index, actual_libs);
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkDepends::AddLinkEntries(int depender_index,
-                                          LinkLibraryVectorType const& libs)
+void
+cmComputeLinkDepends::AddTargetLinkEntries(int depender_index,
+                                           LinkLibraryVectorType const& libs)
 {
   // Compute which library configuration to link.
   cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
@@ -324,23 +352,42 @@ void cmComputeLinkDepends::AddLinkEntries(int depender_index,
     linkType = cmTarget::DEBUG;
     }
 
-  // Track inferred dependency sets implied by this list.
-  std::map<int, DependSet> dependSets;
-
-  // Loop over the libraries linked directly by the target.
+  // Look for entries meant for this configuration.
+  std::vector<std::string> actual_libs;
   for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
       li != libs.end(); ++li)
     {
-    // Skip entries that will resolve to the target getting linked.
-    // Skip libraries not meant for the current configuration.
-    if(li->first == this->Target->GetName() || li->first.empty() ||
-       !(li->second == cmTarget::GENERAL || li->second == linkType))
+    if(li->second == cmTarget::GENERAL || li->second == linkType)
+      {
+      actual_libs.push_back(li->first);
+      }
+    }
+
+  // Add these entries.
+  this->AddLinkEntries(depender_index, actual_libs);
+}
+
+//----------------------------------------------------------------------------
+void
+cmComputeLinkDepends::AddLinkEntries(int depender_index,
+                                     std::vector<std::string> const& libs)
+{
+  // Track inferred dependency sets implied by this list.
+  std::map<int, DependSet> dependSets;
+
+  // Loop over the libraries linked directly by the depender.
+  for(std::vector<std::string>::const_iterator li = libs.begin();
+      li != libs.end(); ++li)
+    {
+    // Skip entries that will resolve to the target getting linked or
+    // are empty.
+    if(*li == this->Target->GetName() || li->empty())
       {
       continue;
       }
 
     // Add a link entry for this item.
-    int dependee_index = this->AddLinkEntry(li->first);
+    int dependee_index = this->AddLinkEntry(*li);
 
     // The depender must come before the dependee.
     if(depender_index >= 0)

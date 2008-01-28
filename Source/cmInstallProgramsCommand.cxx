@@ -80,9 +80,8 @@ void cmInstallProgramsCommand::FinalPass()
     }
 
   // Construct the destination.  This command always installs under
-  // the prefix.
-  std::string destination = "${CMAKE_INSTALL_PREFIX}";
-  destination += this->Destination;
+  // the prefix.  We skip the leading slash given by the user.
+  std::string destination = this->Destination.substr(1);
   cmSystemTools::ConvertToUnixSlashes(destination);
 
   // Use a file install generator.
