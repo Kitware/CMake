@@ -172,6 +172,8 @@ cmExportInstallFileGenerator
                                       te->Target, properties);
 
       // TOOD: PUBLIC_HEADER_LOCATION
+      // This should wait until the build feature propagation stuff
+      // is done.  Then this can be a propagated include directory.
       // this->GenerateImportProperty(config, te->HeaderGenerator,
       //                              properties);
 
