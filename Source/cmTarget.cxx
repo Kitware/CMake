@@ -358,6 +358,36 @@ void cmTarget::DefineProperties(cmake *cm)
      "INSTALL command instead.");
 
   cm->DefineProperty
+    ("PRIVATE_HEADER", cmProperty::TARGET,
+     "Specify private header files in a FRAMEWORK shared library target.",
+     "Shared library targets marked with the FRAMEWORK property generate "
+     "frameworks on OS X and normal shared libraries on other platforms.  "
+     "This property may be set to a list of header files to be placed "
+     "in the PrivateHeaders directory inside the framework folder.  "
+     "On non-Apple platforms these headers may be installed using the "
+     "PRIVATE_HEADER option to the install(TARGETS) command.");
+
+  cm->DefineProperty
+    ("PUBLIC_HEADER", cmProperty::TARGET,
+     "Specify public header files in a FRAMEWORK shared library target.",
+     "Shared library targets marked with the FRAMEWORK property generate "
+     "frameworks on OS X and normal shared libraries on other platforms.  "
+     "This property may be set to a list of header files to be placed "
+     "in the Headers directory inside the framework folder.  "
+     "On non-Apple platforms these headers may be installed using the "
+     "PUBLIC_HEADER option to the install(TARGETS) command.");
+
+  cm->DefineProperty
+    ("RESOURCE", cmProperty::TARGET,
+     "Specify resource files in a FRAMEWORK shared library target.",
+     "Shared library targets marked with the FRAMEWORK property generate "
+     "frameworks on OS X and normal shared libraries on other platforms.  "
+     "This property may be set to a list of files to be placed "
+     "in the Resources directory inside the framework folder.  "
+     "On non-Apple platforms these files may be installed using the "
+     "RESOURCE option to the install(TARGETS) command.");
+
+  cm->DefineProperty
     ("SKIP_BUILD_RPATH", cmProperty::TARGET,
      "Should rpaths be used for the build tree.",
      "SKIP_BUILD_RPATH is a boolean specifying whether to skip automatic "
