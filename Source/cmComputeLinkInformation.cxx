@@ -337,9 +337,8 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       // Pass the full path to the target file.
       std::string lib = tgt->GetFullPath(config, implib);
       this->Depends.push_back(lib);
-#ifdef __APPLE__
-      if(tgt->GetType() == cmTarget::SHARED_LIBRARY &&
-         tgt->GetPropertyAsBool("FRAMEWORK"))
+
+      if(tgt->IsFrameworkOnApple())
         {
         // Frameworks on OS X need only the framework directory to
         // link.
@@ -347,7 +346,6 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
         this->AddFrameworkItem(fw);
         }
       else
-#endif
         {
         this->AddTargetItem(lib, tgt);
         this->AddLibraryRuntimeInfo(lib, tgt);

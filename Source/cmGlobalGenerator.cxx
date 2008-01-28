@@ -1359,8 +1359,7 @@ bool cmGlobalGenerator::NameResolvesToFramework(const std::string& libname)
 
   if(cmTarget* tgt = this->FindTarget(0, libname.c_str()))
     {
-    if(tgt->GetType() == cmTarget::SHARED_LIBRARY &&
-       tgt->GetPropertyAsBool("FRAMEWORK"))
+    if(tgt->IsFrameworkOnApple())
        {
        return true;
        }

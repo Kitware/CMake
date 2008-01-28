@@ -320,6 +320,10 @@ public:
       enabled.  */
   bool IsExecutableWithExports();
 
+  /** Return whether this target is a shared library Framework on
+      Apple.  */
+  bool IsFrameworkOnApple();
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.

@@ -111,13 +111,11 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 {
-#ifdef __APPLE__
-  if (this->Target->GetPropertyAsBool("FRAMEWORK"))
+  if(this->Target->IsFrameworkOnApple())
     {
     this->WriteFrameworkRules(relink);
     return;
     }
-#endif
   const char* linkLanguage =
     this->Target->GetLinkerLanguage(this->GlobalGenerator);
   std::string linkRuleVar = "CMAKE_";
@@ -479,14 +477,13 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       outpathImp += "/";
       }
     }
-#if defined(__APPLE__)
+
   // If we're creating a framework, place the output into a framework directory
-  if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
-      this->Target->GetPropertyAsBool("FRAMEWORK"))
+  if(this->Target->IsFrameworkOnApple())
     {
     this->CreateFramework(targetName, outpath);
     }
-#endif
+
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathPDB = outpath + targetNamePDB;
   std::string targetFullPathSO = outpath + targetNameSO;

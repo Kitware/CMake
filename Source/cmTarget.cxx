@@ -125,7 +125,7 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("FRAMEWORK", cmProperty::TARGET,
      "This target is a framework on the Mac.",
-     "Is set to true then if this target is a shared library, it will "
+     "If a shared library target has this property set to true it will "
      "be built as a framework when built on the mac. It will have the "
      "directory structure required for a framework and will be suitable "
      "to be used with the -framework option");
@@ -172,14 +172,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "Ignored for non-imported targets.");
 
   cm->DefineProperty
-    ("IMPORTED_ENABLE_EXPORTS", cmProperty::TARGET,
-     "Enable linking to an IMPORTED executable target.",
-     "Indicates that an IMPORTED executable target exports symbols for "
-     "use by plugin modules.  "
-     "This is the imported target equivalent of the ENABLE_EXPORTS "
-     "property.");
-
-  cm->DefineProperty
     ("IMPORTED_IMPLIB", cmProperty::TARGET,
      "Full path to the import library for an IMPORTED target.",
      "Specifies the location of the \".lib\" part of a windows DLL.  "
@@ -217,6 +209,8 @@ void cmTarget::DefineProperties(cmake *cm)
      "library or module.  "
      "For shared libraries on non-DLL platforms this is the location of "
      "the shared library.  "
+     "For frameworks on OS X this is the location of the library file "
+     "symlink just inside the framework folder.  "
      "For DLLs this is the location of the \".dll\" part of the library.  "
      "Ignored for non-imported targets.");
 
@@ -599,20 +593,16 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 //----------------------------------------------------------------------------
 bool cmTarget::IsExecutableWithExports()
 {
-  if(this->GetType() == cmTarget::EXECUTABLE)
-    {
-    if(this->IsImported())
-      {
-      // The "IMPORTED_" namespace is used for properties exported
-      // from the project providing imported targets.
-      return this->GetPropertyAsBool("IMPORTED_ENABLE_EXPORTS");
-      }
-    else
-      {
-      return this->GetPropertyAsBool("ENABLE_EXPORTS");
-      }
-    }
-  return false;
+  return (this->GetType() == cmTarget::EXECUTABLE &&
+          this->GetPropertyAsBool("ENABLE_EXPORTS"));
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsFrameworkOnApple()
+{
+  return (this->GetType() == cmTarget::SHARED_LIBRARY &&
+          this->Makefile->IsOn("APPLE") &&
+          this->GetPropertyAsBool("FRAMEWORK"));
 }
 
 //----------------------------------------------------------------------------
@@ -2090,15 +2080,13 @@ void cmTarget::GetFullNameInternal(TargetType type,
     {
     targetSuffix = this->Makefile->GetSafeDefinition(suffixVar);
     }
-#if defined(__APPLE__)
+
   // frameworks do not have a prefix or a suffix
-  if (this->GetType() == cmTarget::SHARED_LIBRARY &&
-      this->GetPropertyAsBool("FRAMEWORK"))
+  if(this->IsFrameworkOnApple())
     {
     targetPrefix = 0;
     targetSuffix = 0;
     }
-#endif
 
   // Begin the final name with the prefix.
   outPrefix = targetPrefix?targetPrefix:"";
@@ -2715,16 +2703,12 @@ const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
       cmSystemTools::CollapseFullPath
       (out.c_str(), this->Makefile->GetStartOutputDirectory());
 
-#if defined(__APPLE__)
-    // frameworks do not have a prefix or a suffix
-    if (this->GetType() == cmTarget::SHARED_LIBRARY &&
-        this->GetPropertyAsBool("FRAMEWORK"))
+    if(this->IsFrameworkOnApple())
       {
       out += "/";
       out += this->GetFullName(0, implib);
       out += ".framework";
       }
-#endif
 
     // Optionally make sure the output path exists on disk.
     if(create)

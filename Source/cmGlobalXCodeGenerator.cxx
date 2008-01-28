@@ -498,8 +498,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   // Is this a "private" or "public" framework header file?
   // Set the ATTRIBUTES attribute appropriately...
   //
-  if(cmtarget.GetType() == cmTarget::SHARED_LIBRARY &&
-     cmtarget.GetPropertyAsBool("FRAMEWORK"))
+  if(cmtarget.IsFrameworkOnApple())
     {
     if(tsFlags.PrivateHeader)
       {
@@ -710,8 +709,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       }
 
     // some build phases only apply to bundles and/or frameworks
-    bool isFrameworkTarget = cmtarget.GetType() == cmTarget::SHARED_LIBRARY &&
-      cmtarget.GetPropertyAsBool("FRAMEWORK");
+    bool isFrameworkTarget = cmtarget.IsFrameworkOnApple();
     bool isBundleTarget = cmtarget.GetPropertyAsBool("MACOSX_BUNDLE");
 
     cmXCodeObject* buildFiles = 0;
@@ -1359,8 +1357,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
      target.GetType() == cmTarget::EXECUTABLE)
     {
     std::string pndir = target.GetDirectory();
-    if (target.GetType() == cmTarget::SHARED_LIBRARY &&
-        target.GetPropertyAsBool("FRAMEWORK"))
+    if(target.IsFrameworkOnApple())
       {
       pndir += "/..";
       pndir = cmSystemTools::CollapseFullPath(pndir.c_str());

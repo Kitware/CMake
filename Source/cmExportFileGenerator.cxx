@@ -237,10 +237,21 @@ cmExportFileGenerator
     default:  // should never happen
       break;
     }
+
+  // Mark the imported executable if it has exports.
   if(target->IsExecutableWithExports())
     {
     os << "SET_PROPERTY(TARGET " << targetName
-       << " PROPERTY IMPORTED_ENABLE_EXPORTS 1)\n";
+       << " PROPERTY ENABLE_EXPORTS 1)\n";
+    }
+
+  // Mark the imported framework.  This is done even on non-Apple
+  // platforms for reference and consistency purposes.
+  if(target->GetType() == cmTarget::SHARED_LIBRARY &&
+     target->GetPropertyAsBool("FRAMEWORK"))
+    {
+    os << "SET_PROPERTY(TARGET " << targetName
+       << " PROPERTY FRAMEWORK 1)\n";
     }
   os << "\n";
 }

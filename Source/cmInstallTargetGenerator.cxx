@@ -222,8 +222,7 @@ cmInstallTargetGenerator
       // An import library looks like a static library.
       type = cmTarget::STATIC_LIBRARY;
       }
-    else if(this->Target->GetMakefile()->IsOn("APPLE") &&
-            this->Target->GetPropertyAsBool("FRAMEWORK"))
+    else if(this->Target->IsFrameworkOnApple())
       {
       // Compute the build tree location of the framework directory
       std::string from1 = fromDirConfig;

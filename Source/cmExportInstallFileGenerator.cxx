@@ -158,8 +158,9 @@ cmExportInstallFileGenerator
                                     te->LibraryGenerator, properties);
     this->SetImportLocationProperty(config, suffix,
                                     te->RuntimeGenerator, properties);
+    this->SetImportLocationProperty(config, suffix,
+                                    te->FrameworkGenerator, properties);
 
-    // TODO: Frameworks?
     // TODO: Bundles?
 
     // If any file location was set for the target add it to the
@@ -223,7 +224,15 @@ cmExportInstallFileGenerator
   value += "/";
 
   // Append the installed file name.
-  value += itgen->GetInstallFilename(config);
+  std::string fname = itgen->GetInstallFilename(config);
+  value += fname;
+
+  // Fix name for frameworks.
+  if(itgen->GetTarget()->IsFrameworkOnApple())
+    {
+    value += ".framework/";
+    value += fname;
+    }
 
   // Store the property.
   properties[prop] = value;

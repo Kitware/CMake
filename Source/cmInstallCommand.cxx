@@ -376,7 +376,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           // This is a non-DLL platform.
           // If it is marked with FRAMEWORK property use the FRAMEWORK set of
           // INSTALL properties. Otherwise, use the LIBRARY properties.
-          if(target.GetPropertyAsBool("FRAMEWORK"))
+          if(target.IsFrameworkOnApple())
             {
             // Use the FRAMEWORK properties.
             if (!frameworkArgs.GetDestination().empty())
@@ -512,9 +512,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   //
   bool createInstallGeneratorsForTargetFileSets = true;
 
-  if(cmTarget::SHARED_LIBRARY == target.GetType() &&
-    target.GetPropertyAsBool("FRAMEWORK") &&
-    this->Makefile->IsOn("APPLE"))
+  if(target.IsFrameworkOnApple())
     {
     createInstallGeneratorsForTargetFileSets = false;
     }
