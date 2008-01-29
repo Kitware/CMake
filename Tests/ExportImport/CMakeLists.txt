@@ -31,7 +31,7 @@ add_custom_command(
       -DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELEASE}
       -DCMAKE_C_FLAGS_MINSIZEREL:STRING=${CMAKE_C_FLAGS_MINSIZEREL}
       -DCMAKE_C_FLAGS_RELWITHDEBINFO:STRING=${CMAKE_C_FLAGS_RELWITHDEBINFO}
-      -DCMAKE_INSTALL_PREFIX=${ExportImport_BINARY_DIR}/Root
+      -DCMAKE_INSTALL_PREFIX:STRING=${ExportImport_BINARY_DIR}/Root
        )
 add_custom_target(ExportTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/ExportProject)
 add_dependencies(ExportTarget CleanupTarget)
@@ -59,7 +59,7 @@ add_custom_command(
      -DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELEASE}
      -DCMAKE_C_FLAGS_MINSIZEREL:STRING=${CMAKE_C_FLAGS_MINSIZEREL}
      -DCMAKE_C_FLAGS_RELWITHDEBINFO:STRING=${CMAKE_C_FLAGS_RELWITHDEBINFO}
-     -DCMAKE_INSTALL_PREFIX=${ExportImport_BINARY_DIR}/Root
+     -DCMAKE_INSTALL_PREFIX:STRING=${ExportImport_BINARY_DIR}/Root
      )
 add_custom_target(ImportTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/ImportProject)
 add_dependencies(ImportTarget ExportTarget)
