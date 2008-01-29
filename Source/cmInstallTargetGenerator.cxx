@@ -382,56 +382,37 @@ cmInstallTargetGenerator
   // Build a map of build-tree install_name to install-tree install_name for
   // shared libraries linked to this target.
   std::map<cmStdString, cmStdString> install_name_remap;
-  cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
-  if(config && cmSystemTools::UpperCase(config) == "DEBUG")
+  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config))
     {
-    linkType = cmTarget::DEBUG;
-    }
-  // TODO: Merge with ComputeLinkInformation.
-  const cmTarget::LinkLibraryVectorType& inLibs = 
-    this->Target->GetLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator j = inLibs.begin();
-      j != inLibs.end(); ++j)
-    {
-    std::string lib = j->first;
-    if((this->Target->GetType() == cmTarget::EXECUTABLE ||
-        lib != this->Target->GetName()) &&
-       (j->second == cmTarget::GENERAL || j->second == linkType))
+    std::set<cmTarget*> const& sharedLibs = cli->GetSharedLibrariesLinked();
+    for(std::set<cmTarget*>::const_iterator j = sharedLibs.begin();
+        j != sharedLibs.end(); ++j)
       {
-      if(cmTarget* tgt = this->Target->GetMakefile()->
-         GetLocalGenerator()->GetGlobalGenerator()->
-         FindTarget(0, lib.c_str()))
+      // If the build tree and install tree use different path
+      // components of the install_name field then we need to create a
+      // mapping to be applied after installation.
+      cmTarget* tgt = *j;
+      std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
+      std::string for_install = tgt->GetInstallNameDirForInstallTree(config);
+      std::string fname = this->GetInstallFilename(tgt, config, false, true);
+
+      // Map from the build-tree install_name.
+      for_build += fname;
+
+      // Map to the install-tree install_name.
+      if (!for_install.empty())
         {
-        if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
-          {
-          // If the build tree and install tree use different path
-          // components of the install_name field then we need to create a
-          // mapping to be applied after installation.
-          std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
-          std::string for_install = 
-            tgt->GetInstallNameDirForInstallTree(config);
-          std::string fname =
-            this->GetInstallFilename(tgt, config, false, true);
+        for_install += fname;
+        }
+      else
+        {
+        for_install = tgt->GetInstallNameFixupPath();
+        }
 
-          // Map from the build-tree install_name.
-          for_build += fname;
-
-          // Map to the install-tree install_name.
-          if (!for_install.empty())
-            {
-            for_install += fname;
-            }
-          else
-            {
-            for_install = tgt->GetInstallNameFixupPath();
-            }
-
-          if(for_build != for_install)
-            {
-            // Store the mapping entry.
-            install_name_remap[for_build] = for_install;
-            }
-          }
+      if(for_build != for_install)
+        {
+        // Store the mapping entry.
+        install_name_remap[for_build] = for_install;
         }
       }
     }

@@ -56,6 +56,7 @@ public:
   std::string GetRPathString(bool for_install);
   std::string GetChrpathString();
   std::string GetChrpathTool();
+  std::set<cmTarget*> const& GetSharedLibrariesLinked();
 private:
   void AddItem(std::string const& item, cmTarget* tgt);
 
@@ -65,6 +66,7 @@ private:
   std::vector<std::string> Depends;
   std::vector<std::string> FrameworkPaths;
   std::vector<std::string> RuntimeSearchPath;
+  std::set<cmTarget*> SharedLibrariesLinked;
 
   // Context information.
   cmTarget* Target;

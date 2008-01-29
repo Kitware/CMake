@@ -284,6 +284,13 @@ std::vector<std::string> const& cmComputeLinkInformation::GetFrameworkPaths()
 }
 
 //----------------------------------------------------------------------------
+std::set<cmTarget*> const&
+cmComputeLinkInformation::GetSharedLibrariesLinked()
+{
+  return this->SharedLibrariesLinked;
+}
+
+//----------------------------------------------------------------------------
 bool cmComputeLinkInformation::Compute()
 {
   // Skip targets that do not link.
@@ -338,6 +345,12 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
     // Skip linking to executables on platforms with no import
     // libraries or loader flags.
     return;
+    }
+
+  // Keep track of shared libraries linked.
+  if(tgt && tgt->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    this->SharedLibrariesLinked.insert(tgt);
     }
 
   if(tgt && (tgt->GetType() == cmTarget::STATIC_LIBRARY ||
