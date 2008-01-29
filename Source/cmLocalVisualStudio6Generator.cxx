@@ -1570,11 +1570,12 @@ void cmLocalVisualStudio6Generator
                      std::string& options)
 {
   // Compute the link information for this configuration.
-  cmComputeLinkInformation cli(&target, configName);
-  if(!cli.Compute())
+  cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+  if(!pcli)
     {
     return;
     }
+  cmComputeLinkInformation& cli = *pcli;
   typedef cmComputeLinkInformation::ItemVector ItemVector;
   ItemVector const& linkLibs = cli.GetItems();
   std::vector<std::string> const& linkDirs = cli.GetDirectories();

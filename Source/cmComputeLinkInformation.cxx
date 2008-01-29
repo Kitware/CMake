@@ -168,6 +168,12 @@ cmComputeLinkInformation
   // Get the language used for linking this target.
   this->LinkLanguage =
     this->Target->GetLinkerLanguage(this->GlobalGenerator);
+  if(!this->LinkLanguage)
+    {
+    // The Compute method will do nothing, so skip the rest of the
+    // initialization.
+    return;
+    }
 
   // Check whether we should use an import library for linking a target.
   this->UseImportLibrary =
@@ -193,6 +199,31 @@ cmComputeLinkInformation
     this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FILE_FLAG");
   this->LibLinkSuffix =
     this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_SUFFIX");
+
+  // Get options needed to specify RPATHs.
+  this->RuntimeUseChrpath = false;
+  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    std::string rtVar = "CMAKE_";
+    if(this->Target->GetType() == cmTarget::EXECUTABLE)
+      {
+      rtVar += "EXECUTABLE";
+      }
+    else
+      {
+      rtVar += "SHARED_LIBRARY";
+      }
+    rtVar += "_RUNTIME_";
+    rtVar += this->LinkLanguage;
+    rtVar += "_FLAG";
+    std::string rtSepVar = rtVar + "_SEP";
+    this->RuntimeFlag = this->Makefile->GetSafeDefinition(rtVar.c_str());
+    this->RuntimeSep = this->Makefile->GetSafeDefinition(rtSepVar.c_str());
+    this->RuntimeAlways =
+      (this->Makefile->
+       GetSafeDefinition("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH"));
+    this->RuntimeUseChrpath = this->Target->IsChrpathUsed();
+    }
 
   // Get link type information.
   this->ComputeLinkTypeInfo();
@@ -1226,4 +1257,106 @@ void cmComputeLinkInformation::DiagnoseCycle()
       }
     }
   cmSystemTools::Message(e.str().c_str());
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
+                                        bool for_install)
+{
+  // Select whether to generate runtime search directories.
+  bool outputRuntime =
+    !this->Makefile->IsOn("CMAKE_SKIP_RPATH") && !this->RuntimeFlag.empty();
+
+  // Select whether to generate an rpath for the install tree or the
+  // build tree.
+  bool linking_for_install =
+    (for_install ||
+     this->Target->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"));
+  bool use_install_rpath =
+    (outputRuntime && this->Target->HaveInstallTreeRPATH() &&
+     linking_for_install);
+  bool use_build_rpath =
+    (outputRuntime && this->Target->HaveBuildTreeRPATH() &&
+     !linking_for_install);
+  bool use_link_rpath =
+    outputRuntime && linking_for_install &&
+    this->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
+
+  // Construct the RPATH.
+  if(use_install_rpath)
+    {
+    const char* install_rpath = this->Target->GetProperty("INSTALL_RPATH");
+    cmSystemTools::ExpandListArgument(install_rpath, runtimeDirs);
+    }
+  if(use_build_rpath || use_link_rpath)
+    {
+    std::vector<std::string> const& rdirs = this->GetRuntimeSearchPath();
+    for(std::vector<std::string>::const_iterator ri = rdirs.begin();
+        ri != rdirs.end(); ++ri)
+      {
+      // Put this directory in the rpath if using build-tree rpath
+      // support or if using the link path as an rpath.
+      if(use_build_rpath)
+        {
+        runtimeDirs.push_back(*ri);
+        }
+      else if(use_link_rpath)
+        {
+        // Do not add any path inside the source or build tree.
+        const char* topSourceDir = this->Makefile->GetHomeDirectory();
+        const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
+        if(!cmSystemTools::ComparePath(ri->c_str(), topSourceDir) &&
+           !cmSystemTools::ComparePath(ri->c_str(), topBinaryDir) &&
+           !cmSystemTools::IsSubDirectory(ri->c_str(), topSourceDir) &&
+           !cmSystemTools::IsSubDirectory(ri->c_str(), topBinaryDir))
+          {
+          runtimeDirs.push_back(*ri);
+          }
+        }
+      }
+    }
+
+  // Add runtime paths required by the platform to always be
+  // present.  This is done even when skipping rpath support.
+  cmSystemTools::ExpandListArgument(this->RuntimeAlways.c_str(), runtimeDirs);
+}
+
+//----------------------------------------------------------------------------
+std::string cmComputeLinkInformation::GetRPathString(bool for_install)
+{
+  // Get the directories to use.
+  std::vector<std::string> runtimeDirs;
+  this->GetRPath(runtimeDirs, for_install);
+
+  // Concatenate the paths.
+  std::string rpath;
+  const char* sep = "";
+  for(std::vector<std::string>::const_iterator ri = runtimeDirs.begin();
+      ri != runtimeDirs.end(); ++ri)
+    {
+    // Separate from previous path.
+    rpath += sep;
+    sep = this->GetRuntimeSep().c_str();
+
+    // Add this path.
+    rpath += *ri;
+    }
+  return rpath;
+}
+
+//----------------------------------------------------------------------------
+std::string cmComputeLinkInformation::GetChrpathString()
+{
+  if(!this->RuntimeUseChrpath)
+    {
+    return "";
+    }
+
+  return this->GetRPathString(true);
+}
+
+//----------------------------------------------------------------------------
+std::string cmComputeLinkInformation::GetChrpathTool()
+{
+  return this->Makefile->GetSafeDefinition("CMAKE_CHRPATH");
 }

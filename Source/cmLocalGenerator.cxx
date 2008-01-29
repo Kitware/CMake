@@ -1483,70 +1483,33 @@ std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
   return this->Convert(lib.c_str(), START_OUTPUT, SHELL);
 }
 
-bool cmLocalGenerator::GetLinkerArgs(std::string& rpath, 
-                                     std::string& linkLibs,
-                                     cmTarget& tgt,
-                                     bool relink,
-                                     unsigned int minRpathSize)
+/**
+ * Output the linking rules on a command line.  For executables,
+ * targetLibrary should be a NULL pointer.  For libraries, it should point
+ * to the name of the library.  This will not link a library against itself.
+ */
+void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
+                                           cmTarget& tgt,
+                                           bool relink)
 {
-  rpath = "";
-  // collect all the flags needed for linking libraries
-  linkLibs = "";
-
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-
-  cmComputeLinkInformation cli(&tgt, config);
-  if(!cli.Compute())
+  cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
+  if(!pcli)
     {
-    return false;
+    return;
     }
+  cmComputeLinkInformation& cli = *pcli;
+
+  // Collect library linking flags command line options.
+  std::string linkLibs;
 
   const char* linkLanguage = cli.GetLinkLanguage();
-
-  // Embed runtime search paths if possible and if required.
-  bool outputRuntime = !this->Makefile->IsOn("CMAKE_SKIP_RPATH");
-
-  // Lookup rpath specification flags.
-  std::string runtimeFlag;
-  std::string runtimeSep;
-  if(tgt.GetType() != cmTarget::STATIC_LIBRARY)
-    {
-    std::string runTimeFlagVar = "CMAKE_";
-    if(tgt.GetType() == cmTarget::EXECUTABLE)
-      {
-      runTimeFlagVar += "EXECUTABLE";
-      }
-    else
-      {
-      runTimeFlagVar += "SHARED_LIBRARY";
-      }
-    runTimeFlagVar += "_RUNTIME_";
-    runTimeFlagVar += linkLanguage;
-    runTimeFlagVar += "_FLAG";
-    std::string runTimeFlagSepVar = runTimeFlagVar + "_SEP";
-    runtimeFlag = this->Makefile->GetSafeDefinition(runTimeFlagVar.c_str());
-    runtimeSep = this->Makefile->GetSafeDefinition(runTimeFlagSepVar.c_str());
-    }
-  // concatenate all paths or no?
-  bool runtimeConcatenate = !runtimeSep.empty();
-
-  const char* runtimeAlways =
-    this->Makefile->GetDefinition("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH");
-
-  // Turn off rpath support if no flag is available to specify it.
-  if(runtimeFlag.empty())
-    {
-    outputRuntime = false;
-    runtimeAlways = 0;
-    }
 
   std::string libPathFlag = 
     this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
   std::string libPathTerminator = 
     this->Makefile->GetSafeDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
-  std::string libLinkFlag = 
-    this->Makefile->GetSafeDefinition("CMAKE_LINK_LIBRARY_FLAG");
-  
+
   // Flags to link an executable to shared libraries.
   std::string linkFlagsVar = "CMAKE_SHARED_LIBRARY_LINK_";
   linkFlagsVar += linkLanguage;
@@ -1595,146 +1558,55 @@ bool cmLocalGenerator::GetLinkerArgs(std::string& rpath,
     linkLibs += " ";
     }
 
-  // Select whether to generate an rpath for the install tree or the
-  // build tree.
-  bool linking_for_install =
-    relink || tgt.GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH");
-  bool use_install_rpath =
-    outputRuntime && tgt.HaveInstallTreeRPATH() && linking_for_install;
-  bool use_build_rpath =
-    outputRuntime && tgt.HaveBuildTreeRPATH() && !linking_for_install;
-  bool use_link_rpath =
-    outputRuntime && linking_for_install &&
-    tgt.GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
-
-  // Construct the RPATH.
-  std::vector<std::string> runtimeDirs;
-  if(use_install_rpath)
-    {
-    const char* install_rpath = tgt.GetProperty("INSTALL_RPATH");
-    cmSystemTools::ExpandListArgument(install_rpath, runtimeDirs);
-    }
-  if(use_build_rpath || use_link_rpath)
-    {
-    std::vector<std::string> const& rdirs = cli.GetRuntimeSearchPath();
-    for(std::vector<std::string>::const_iterator ri = rdirs.begin();
-        ri != rdirs.end(); ++ri)
-      {
-      // Put this directory in the rpath if using build-tree rpath
-      // support or if using the link path as an rpath.
-      if(use_build_rpath)
-        {
-        runtimeDirs.push_back(*ri);
-        }
-      else if(use_link_rpath)
-        {
-        // Do not add any path inside the source or build tree.
-        const char* topSourceDir = this->Makefile->GetHomeDirectory();
-        const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
-        if(!cmSystemTools::ComparePath(ri->c_str(), topSourceDir) &&
-           !cmSystemTools::ComparePath(ri->c_str(), topBinaryDir) &&
-           !cmSystemTools::IsSubDirectory(ri->c_str(), topSourceDir) &&
-           !cmSystemTools::IsSubDirectory(ri->c_str(), topBinaryDir))
-          {
-          runtimeDirs.push_back(*ri);
-          }
-        }
-      }
-    }
-  if(runtimeAlways)
-    {
-    // Add runtime paths required by the platform to always be
-    // present.  This is done even when skipping rpath support.
-    cmSystemTools::ExpandListArgument(runtimeAlways, runtimeDirs);
-    }
-
-  // Convert the runtime directory names for use in the build file.
-  for(std::vector<std::string>::iterator ri = runtimeDirs.begin();
-      ri != runtimeDirs.end(); ++ri)
-    {
-    *ri = this->Convert(ri->c_str(), FULL, SHELL, false);
-    }
-
-  if(!runtimeDirs.empty())
-    {
-    // For the runtime search directories, do a "-Wl,-rpath,a:b:c" or
-    // a "-R a -R b -R c" type link line
-    rpath += runtimeFlag;
-    std::vector<std::string>::iterator itr = runtimeDirs.begin();
-    rpath += *itr;
-    ++itr;
-    for( ; itr != runtimeDirs.end(); ++itr )
-      {
-      if(runtimeConcatenate)
-        {
-        rpath += runtimeSep;
-        rpath += *itr;
-        }
-      else
-        {
-        rpath += " ";
-        rpath += runtimeFlag;
-        rpath += *itr;
-        }
-      }
-    }
-
-  while (rpath.size() < minRpathSize)
-    {
-    if (rpath.size()==0)
-      {
-      rpath += runtimeFlag;
-      }
-
-    rpath += runtimeSep;
-    }
-  return true;
-}
-
-/**
- * Output the linking rules on a command line.  For executables,
- * targetLibrary should be a NULL pointer.  For libraries, it should point
- * to the name of the library.  This will not link a library against itself.
- */
-void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
-                                           cmTarget& tgt,
-                                           bool relink)
-{
-  std::string rpath;
-  std::string linkLibs;
-  unsigned int minBuildRpathSize = 0;
-  
-  if ((relink==false) 
-    && this->Makefile->IsOn("CMAKE_USE_CHRPATH") 
-    && (tgt.IsChrpathAvailable()))
-    {
-    std::string installRpath;
-    std::string dummy;
-    this->GetLinkerArgs(installRpath, dummy, tgt, true, 0);
-    minBuildRpathSize = static_cast<unsigned int>(installRpath.size());
-    }
-
-  if (!this->GetLinkerArgs(rpath, linkLibs, tgt, relink, minBuildRpathSize))
-    {
-    return;
-    }
-
-  const char* linkLanguage = 
-    tgt.GetLinkerLanguage(this->GetGlobalGenerator());
-  if(!linkLanguage)
-    {
-    cmSystemTools::
-      Error("CMake can not determine linker language for target:",
-            tgt.GetName());
-    return;
-    }
-
+  // Write the library flags to the build rule.
   fout << linkLibs;
-  fout << rpath << " ";
+
+  // Get the RPATH entries.
+  std::vector<std::string> runtimeDirs;
+  cli.GetRPath(runtimeDirs, relink);
+
+  // Check what kind of rpath flags to use.
+  if(cli.GetRuntimeSep().empty())
+    {
+    // Each rpath entry gets its own option ("-R a -R b -R c")
+    std::string rpath;
+    for(std::vector<std::string>::iterator ri = runtimeDirs.begin();
+        ri != runtimeDirs.end(); ++ri)
+      {
+      rpath += cli.GetRuntimeFlag();
+      rpath += this->Convert(ri->c_str(), FULL, SHELL, false);
+      rpath += " ";
+      }
+    fout << rpath;
+    }
+  else
+    {
+    // All rpath entries are combined ("-Wl,-rpath,a:b:c").
+    std::string rpath = cli.GetRPathString(relink);
+
+    // If not relinking, make sure the rpath string is long enough to
+    // support a subsequent chrpath on installation.
+    if(!relink)
+      {
+      std::string::size_type minLength = cli.GetChrpathString().size();
+      while(rpath.size() < minLength)
+        {
+        rpath += cli.GetRuntimeSep();
+        }
+      }
+
+    // Store the rpath option in the stream.
+    if(!rpath.empty())
+      {
+      fout << cli.GetRuntimeFlag();
+      fout << this->EscapeForShell(rpath.c_str(), true);
+      fout << " ";
+      }
+    }
 
   // Add standard libraries for this language.
   std::string standardLibsVar = "CMAKE_";
-  standardLibsVar += linkLanguage;
+  standardLibsVar += cli.GetLinkLanguage();
   standardLibsVar += "_STANDARD_LIBRARIES";
   if(const char* stdLibs =
      this->Makefile->GetDefinition(standardLibsVar.c_str()))

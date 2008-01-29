@@ -50,6 +50,12 @@ public:
   std::vector<std::string> const& GetFrameworkPaths();
   const char* GetLinkLanguage() const { return this->LinkLanguage; }
   std::vector<std::string> const& GetRuntimeSearchPath();
+  std::string const& GetRuntimeFlag() const { return this->RuntimeFlag; }
+  std::string const& GetRuntimeSep() const { return this->RuntimeSep; }
+  void GetRPath(std::vector<std::string>& runtimeDirs, bool for_install);
+  std::string GetRPathString(bool for_install);
+  std::string GetChrpathString();
+  std::string GetChrpathTool();
 private:
   void AddItem(std::string const& item, cmTarget* tgt);
 
@@ -76,6 +82,10 @@ private:
   std::string LibLinkFlag;
   std::string LibLinkFileFlag;
   std::string LibLinkSuffix;
+  std::string RuntimeFlag;
+  std::string RuntimeSep;
+  std::string RuntimeAlways;
+  bool RuntimeUseChrpath;
 
   // Link type adjustment.
   void ComputeLinkTypeInfo();

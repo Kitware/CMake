@@ -24,6 +24,7 @@ class cmake;
 class cmMakefile;
 class cmSourceFile;
 class cmGlobalGenerator;
+class cmComputeLinkInformation;
 
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.
@@ -35,6 +36,7 @@ class cmTarget
 {
 public:
   cmTarget();
+  ~cmTarget();
   enum TargetType { EXECUTABLE, STATIC_LIBRARY,
                     SHARED_LIBRARY, MODULE_LIBRARY, UTILITY, GLOBAL_TARGET,
                     INSTALL_FILES, INSTALL_PROGRAMS, INSTALL_DIRECTORY};
@@ -289,12 +291,14 @@ public:
 
   bool HaveBuildTreeRPATH();
   bool HaveInstallTreeRPATH();
-  
-  /// return true if chrpath might work for this target
-  bool IsChrpathAvailable();
+
+  /** Return true if chrpath might work for this target */
+  bool IsChrpathUsed();
 
   std::string GetInstallNameDirForBuildTree(const char* config);
   std::string GetInstallNameDirForInstallTree(const char* config);
+
+  cmComputeLinkInformation* GetLinkInformation(const char* config);
 
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
@@ -461,6 +465,8 @@ private:
   ImportInfoMapType ImportInfoMap;
   ImportInfo const* GetImportInfo(const char* config);
   void ComputeImportInfo(std::string const& desired_config, ImportInfo& info);
+
+  std::map<cmStdString, cmComputeLinkInformation*> LinkInformation;
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.

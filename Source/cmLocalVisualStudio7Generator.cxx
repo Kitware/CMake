@@ -762,11 +762,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                            targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
-    cmComputeLinkInformation cli(&target, configName);
-    if(!cli.Compute())
+    cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+    if(!pcli)
       {
       return;
       }
+    cmComputeLinkInformation& cli = *pcli;
     const char* linkLanguage = cli.GetLinkLanguage();
 
     // Compute the variable name to lookup standard libraries for this
@@ -831,11 +832,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                               targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
-    cmComputeLinkInformation cli(&target, configName);
-    if(!cli.Compute())
+    cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+    if(!pcli)
       {
       return;
       }
+    cmComputeLinkInformation& cli = *pcli;
     const char* linkLanguage = cli.GetLinkLanguage();
 
     // Compute the variable name to lookup standard libraries for this

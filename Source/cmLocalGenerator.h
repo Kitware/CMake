@@ -248,13 +248,6 @@ public:
    */
   virtual std::string GetTargetDirectory(cmTarget const& target) const;
 
-  ///! Determine the arguments for the linker call, used also by 
-  /// cmInstallTargetGenerator
-  bool GetLinkerArgs(std::string& rpath, std::string& linkLibs,
-                     cmTarget& tgt, bool relink, unsigned int minRpathSize);
-  
-  bool IsChrpathAvailable(const cmTarget& target);
-
   /**
    * Get the level of backwards compatibility requested by the project
    * in this directory.  This is the value of the CMake variable

@@ -20,6 +20,7 @@
 #include "cmSourceFile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmComputeLinkInformation.h"
 #include <map>
 #include <set>
 #include <queue>
@@ -38,6 +39,17 @@ cmTarget::cmTarget()
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsImportedTarget = false;
+}
+
+//----------------------------------------------------------------------------
+cmTarget::~cmTarget()
+{
+  for(std::map<cmStdString, cmComputeLinkInformation*>::iterator
+        i = this->LinkInformation.begin();
+      i != this->LinkInformation.end(); ++i)
+    {
+    delete i->second;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -2531,12 +2543,6 @@ bool cmTarget::NeedRelinkBeforeInstall()
     return false;
     }
 
-  if(this->Makefile->IsOn("CMAKE_USE_CHRPATH") 
-     && (this->IsChrpathAvailable()))
-    {
-    return false;
-    }
-
   // If skipping all rpaths completely then no relinking is needed.
   if(this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
     {
@@ -2545,6 +2551,12 @@ bool cmTarget::NeedRelinkBeforeInstall()
 
   // If building with the install-tree rpath no relinking is needed.
   if(this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
+    {
+    return false;
+    }
+
+  // If chrpath is going to be used no relinking is needed.
+  if(this->IsChrpathUsed())
     {
     return false;
     }
@@ -2809,35 +2821,28 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
     }
 }
 
-bool cmTarget::IsChrpathAvailable()
+//----------------------------------------------------------------------------
+bool cmTarget::IsChrpathUsed()
 {
-  //only return true if chrpath has been found (happens only if the executable 
-  // format is ELF) and if the separator is not empty
-  if (this->Makefile->IsSet("CMAKE_CHRPATH")==false)
+  // Enable use of "chrpath" if it is available, the user has turned
+  // on the feature, and the rpath flag uses a separator.
+  if(const char* ll = this->GetLinkerLanguage(
+       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()))
     {
-    return false;
+    std::string sepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
+    sepVar += ll;
+    sepVar += "_FLAG_SEP";
+    const char* sep = this->Makefile->GetDefinition(sepVar.c_str());
+    if(sep && *sep)
+      {
+      if(this->Makefile->IsSet("CMAKE_CHRPATH") &&
+         this->Makefile->IsOn("CMAKE_USE_CHRPATH"))
+        {
+        return true;
+        }
+      }
     }
-
-  const char* linkLanguage = this->GetLinkerLanguage(this->Makefile->
-                                    GetLocalGenerator()->GetGlobalGenerator());
-  if (linkLanguage==0)
-    {
-    return false;
-    }
-
-  std::string runTimeFlagSepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
-  runTimeFlagSepVar += linkLanguage;
-  runTimeFlagSepVar += "_FLAG_SEP";
-
-  std::string runtimeSep = 
-                  this->Makefile->GetSafeDefinition(runTimeFlagSepVar.c_str());
-
-  if (runtimeSep.size()<=0)
-    {
-    return 0;
-    }
-
-  return true;
+  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -3043,4 +3048,30 @@ cmTarget::GetImportedLinkLibraries(const char* config)
     {
     return 0;
     }
+}
+
+//----------------------------------------------------------------------------
+cmComputeLinkInformation*
+cmTarget::GetLinkInformation(const char* config)
+{
+  // Lookup any existing information for this configuration.
+  std::map<cmStdString, cmComputeLinkInformation*>::iterator
+    i = this->LinkInformation.find(config?config:"");
+  if(i == this->LinkInformation.end())
+    {
+    // Compute information for this configuration.
+    cmComputeLinkInformation* info =
+      new cmComputeLinkInformation(this, config);
+    if(!info || !info->Compute())
+      {
+      delete info;
+      info = 0;
+      }
+
+    // Store the information for this configuration.
+    std::map<cmStdString, cmComputeLinkInformation*>::value_type
+      entry(config?config:"", info);
+    i = this->LinkInformation.insert(entry).first;
+    }
+  return i->second;
 }

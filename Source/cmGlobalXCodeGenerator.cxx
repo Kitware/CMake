@@ -2105,11 +2105,12 @@ void cmGlobalXCodeGenerator
       }
 
     // Compute the link library and directory information.
-    cmComputeLinkInformation cli(cmtarget, configName);
-    if(!cli.Compute())
+    cmComputeLinkInformation* pcli = cmtarget->GetLinkInformation(configName);
+    if(!pcli)
       {
       continue;
       }
+    cmComputeLinkInformation& cli = *pcli;
 
     // Add dependencies directly on library files.
     {
