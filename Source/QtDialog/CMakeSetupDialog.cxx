@@ -453,7 +453,11 @@ void CMakeSetupDialog::showProgress(const QString& /*msg*/, float percent)
   
 void CMakeSetupDialog::error(const QString& message)
 {
-  this->Output->append(QString("<b><font color=red>%1</font></b>").arg(message));
+  QStringList messages = message.split('\n');
+  foreach(QString m, messages)
+    {
+    this->Output->append(QString("<b><font color=red>%1</font></b>").arg(m));
+    }
 }
 
 void CMakeSetupDialog::setEnabledState(bool enabled)
