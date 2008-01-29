@@ -80,12 +80,16 @@ private:
   bool FindFrameworkConfig();
   bool FindAppBundleConfig();
   bool ReadListFile(const char* f);
+  void StoreVersionFound();
 
   void AddUserPath(std::string const& p);
   void ComputePrefixes();
   bool SearchDirectory(std::string const& dir);
   bool CheckDirectory(std::string const& dir);
   bool FindConfigFile(std::string const& dir, std::string& file);
+  bool FindConfigFileToLoad(std::string const& dir, std::string& file);
+  bool CheckVersion(std::string const& config_file);
+  bool CheckVersionFile(std::string const& version_file);
   bool SearchPrefix(std::string const& prefix);
   bool SearchFrameworkPrefix(std::string const& prefix_in);
   bool SearchAppBundlePrefix(std::string const& prefix_in);
@@ -100,7 +104,13 @@ private:
   unsigned int VersionMinor;
   unsigned int VersionPatch;
   unsigned int VersionCount;
+  bool VersionExact;
   cmStdString FileFound;
+  cmStdString VersionFound;
+  unsigned int VersionFoundMajor;
+  unsigned int VersionFoundMinor;
+  unsigned int VersionFoundPatch;
+  unsigned int VersionFoundCount;
   bool Quiet;
   bool Required;
   bool Compatibility_1_6;

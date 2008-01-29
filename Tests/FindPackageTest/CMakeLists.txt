@@ -32,7 +32,10 @@ FIND_PACKAGE(VersionTestC 1.2.3)
 #SET(CMAKE_FIND_DEBUG_MODE 1)
 
 # For purposes of the test wipe out previous find results.
-SET(PACKAGES foo Foo Bar TFramework Tframework TApp Tapp Special)
+SET(PACKAGES
+  foo Foo Bar TFramework Tframework TApp Tapp Special
+  VersionedA VersionedB
+  )
 FOREACH(p ${PACKAGES})
   SET(${p}_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 ENDFOREACH(p)
@@ -51,6 +54,8 @@ FIND_PACKAGE(Tframework)
 FIND_PACKAGE(TApp)
 FIND_PACKAGE(Tapp CONFIGS tapp-config.cmake)
 FIND_PACKAGE(Special NAMES Suffix SuffixTest PATH_SUFFIXES test)
+FIND_PACKAGE(VersionedA 2 NAMES zot)
+FIND_PACKAGE(VersionedB 3.1 EXACT NAMES zot)
 
 # Expected locations at which packages should be found.
 SET(foo_EXPECTED "lib/foo-1.2/foo-config.cmake")
@@ -65,6 +70,8 @@ SET(TApp_EXPECTED
   "TApp.app/Contents/Resources/TAppConfig.cmake")
 SET(Tapp_EXPECTED
   "TApp.app/Contents/Resources/cmake/tapp-config.cmake")
+SET(VersionedA_EXPECTED "lib/zot-2.0/zot-config.cmake")
+SET(VersionedB_EXPECTED "lib/zot-3.1/zot-config.cmake")
 
 # Check the results.
 FOREACH(p ${PACKAGES})
@@ -88,3 +95,43 @@ FOREACH(p ${PACKAGES})
     MESSAGE(SEND_ERROR "Package ${p} not found!")
   ENDIF(${p}_FOUND)
 ENDFOREACH(p)
+
+# Check that version information was extracted.
+IF(NOT "${VersionedA_VERSION}" STREQUAL "2.0")
+  MESSAGE(SEND_ERROR
+    "Package VersionedA is version [${VersionedA_VERSION}], not [2.0]")
+ENDIF(NOT "${VersionedA_VERSION}" STREQUAL "2.0")
+IF(NOT "${VersionedA_VERSION_MAJOR}" STREQUAL "2")
+  MESSAGE(SEND_ERROR
+    "Package VersionedA is major version [${VersionedA_VERSION_MAJOR}], not [2]")
+ENDIF(NOT "${VersionedA_VERSION_MAJOR}" STREQUAL "2")
+IF(NOT "${VersionedA_VERSION_MINOR}" STREQUAL "0")
+  MESSAGE(SEND_ERROR
+    "Package VersionedA is minor version [${VersionedA_VERSION_MINOR}], not [0]")
+ENDIF(NOT "${VersionedA_VERSION_MINOR}" STREQUAL "0")
+
+IF(NOT "${VersionedB_VERSION}" STREQUAL "3.1")
+  MESSAGE(SEND_ERROR
+    "Package VersionedB is version [${VersionedB_VERSION}], not [3.1]")
+ENDIF(NOT "${VersionedB_VERSION}" STREQUAL "3.1")
+IF(NOT "${VersionedB_VERSION_MAJOR}" STREQUAL "3")
+  MESSAGE(SEND_ERROR
+    "Package VersionedB is major version [${VersionedB_VERSION_MAJOR}], not [3]")
+ENDIF(NOT "${VersionedB_VERSION_MAJOR}" STREQUAL "3")
+IF(NOT "${VersionedB_VERSION_MINOR}" STREQUAL "1")
+  MESSAGE(SEND_ERROR
+    "Package VersionedB is minor version [${VersionedB_VERSION_MINOR}], not [1]")
+ENDIF(NOT "${VersionedB_VERSION_MINOR}" STREQUAL "1")
+
+IF(NOT "${Special_VERSION}" STREQUAL "1.2")
+  MESSAGE(SEND_ERROR
+    "Package Special is version [${Special_VERSION}], not [1.2]")
+ENDIF(NOT "${Special_VERSION}" STREQUAL "1.2")
+IF(NOT "${Special_VERSION_MAJOR}" STREQUAL "1")
+  MESSAGE(SEND_ERROR
+    "Package Special is major version [${Special_VERSION_MAJOR}], not [1]")
+ENDIF(NOT "${Special_VERSION_MAJOR}" STREQUAL "1")
+IF(NOT "${Special_VERSION_MINOR}" STREQUAL "2")
+  MESSAGE(SEND_ERROR
+    "Package Special is minor version [${Special_VERSION_MINOR}], not [2]")
+ENDIF(NOT "${Special_VERSION_MINOR}" STREQUAL "2")

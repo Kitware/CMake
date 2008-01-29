@@ -67,19 +67,20 @@ line.
 
 A FindXXX.cmake module will typically be loaded by the command
 
-  FIND_PACKAGE(XXX [major[.minor[.patch]]]
+  FIND_PACKAGE(XXX [major[.minor[.patch]]] [EXACT]
                [QUIET] [REQUIRED [components...]])
 
 If any version numbers are given to the command it will set the
 variable XXX_FIND_VERSION to contain the whole version.  The variables
 XXX_FIND_VERSION_MAJOR, XXX_FIND_VERSION_MINOR, and
 XXX_FIND_VERSION_PATCH will be set to contain the corresponding
-portions of the version number.  If the find module supports
-versioning it should locate a version of the package that is
-compatible with the version requested.  If a compatible version of the
-package cannot be found the module should not report success.  The
-version of the package found should be stored in the version variables
-named above.
+portions of the version number.  The variable XXX_FIND_VERSION_EXACT
+will indicate whether an exact version is requested.
+If the find module supports versioning it should locate a version of
+the package that is compatible with the version requested.  If a
+compatible version of the package cannot be found the module should
+not report success.  The version of the package found should be stored
+in the version variables named above.
 
 If the QUIET option is given to the command it will set the variable
 XXX_FIND_QUIETLY to true before loading the FindXXX.cmake module.  If
