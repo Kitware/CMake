@@ -30,6 +30,7 @@ class cmMarkAsAdvancedCommand;
 class cmCacheManager
 {
 public:
+  cmCacheManager();
   class CacheIterator;
   friend class cmCacheManager::CacheIterator;
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC, 

@@ -42,6 +42,12 @@ const char* cmCacheManagerTypes[] =
   0
 };
 
+cmCacheManager::cmCacheManager()
+{
+  this->CacheMajorVersion = 0;
+  this->CacheMinorVersion = 0;
+}
+
 const char* cmCacheManager::TypeToString(cmCacheManager::CacheEntryType type)
 {
   if ( type > 6 )
