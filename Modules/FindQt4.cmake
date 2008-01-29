@@ -1312,12 +1312,30 @@ IF (QT4_QMAKE_FOUND)
   
   ## glib
   IF(QT_QCONFIG MATCHES "glib")
-    # Qt less than Qt 4.2.0 doesn't use glib
-    # Qt 4.2.0 uses glib-2.0 (wish we could ask Qt that it uses 2.0)
-    FIND_LIBRARY(QT_GLIB_LIBRARY NAMES glib-2.0)
-    FIND_LIBRARY(QT_GTHREAD_LIBRARY NAMES gthread-2.0)
-    SET(QT_CORE_LIB_DEPENDENCIES ${QT_CORE_LIB_DEPENDENCIES}
-        ${QT_GTHREAD_LIBRARY} ${QT_GLIB_LIBRARY})
+    # Qt 4.2.0+ uses glib-2.0
+    EXECUTE_PROCESS(COMMAND pkg-config --libs-only-L glib-2.0 gthread-2.0
+      OUTPUT_VARIABLE _glib_query_output
+      RESULT_VARIABLE _glib_result
+      ERROR_VARIABLE _glib_query_output )
+
+    IF(_glib_result MATCHES 0)
+      STRING(REPLACE "-L" "" _glib_query_output "${_glib_query_output}")
+      SEPARATE_ARGUMENTS(_glib_query_output)
+    ELSE(_glib_result MATCHES 0)
+      SET(_glib_query_output)
+      MESSAGE(WARNING "When querying pkg-config for glib-2.0.  An error was reported:\n${_glib_query_output}")
+    ENDIF(_glib_result MATCHES 0)
+
+    FIND_LIBRARY(QT_GLIB_LIBRARY NAMES glib-2.0 PATHS ${_glib_query_output} )
+    FIND_LIBRARY(QT_GTHREAD_LIBRARY NAMES gthread-2.0 PATHS ${_glib_query_output} )
+
+    IF(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
+      MESSAGE(WARNING "Unable to find glib 2.0 to satisfy Qt dependency.")
+    ELSE(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
+      SET(QT_CORE_LIB_DEPENDENCIES ${QT_CORE_LIB_DEPENDENCIES}
+          ${QT_GTHREAD_LIBRARY} ${QT_GLIB_LIBRARY})
+    ENDIF(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
+
     MARK_AS_ADVANCED(QT_GLIB_LIBRARY)
     MARK_AS_ADVANCED(QT_GTHREAD_LIBRARY)
   ENDIF(QT_QCONFIG MATCHES "glib")
