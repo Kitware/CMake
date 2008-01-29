@@ -351,7 +351,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
 }
 
 void cmLocalVisualStudio6Generator
-::WriteGroup(const cmSourceGroup *sg, cmTarget target, 
+::WriteGroup(const cmSourceGroup *sg, cmTarget& target,
              std::ostream &fout, const char *libName)
 {
   const std::vector<const cmSourceFile *> &sourceFiles = 

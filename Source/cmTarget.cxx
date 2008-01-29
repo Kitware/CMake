@@ -25,6 +25,7 @@
 #include <set>
 #include <queue>
 #include <stdlib.h> // required for atof
+#include <assert.h>
 const char* cmTarget::TargetTypeNames[] = {
   "EXECUTABLE", "STATIC_LIBRARY",
   "SHARED_LIBRARY", "MODULE_LIBRARY", "UTILITY", "GLOBAL_TARGET",
@@ -39,17 +40,6 @@ cmTarget::cmTarget()
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsImportedTarget = false;
-}
-
-//----------------------------------------------------------------------------
-cmTarget::~cmTarget()
-{
-  for(std::map<cmStdString, cmComputeLinkInformation*>::iterator
-        i = this->LinkInformation.begin();
-      i != this->LinkInformation.end(); ++i)
-    {
-    delete i->second;
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -3074,4 +3064,27 @@ cmTarget::GetLinkInformation(const char* config)
     i = this->LinkInformation.insert(entry).first;
     }
   return i->second;
+}
+
+//----------------------------------------------------------------------------
+cmTargetLinkInformationMap
+::cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r): derived()
+{
+  // Ideally cmTarget instances should never be copied.  However until
+  // we can make a sweep to remove that, this copy constructor avoids
+  // allowing the resources (LinkInformation) from getting copied.  In
+  // the worst case this will lead to extra cmComputeLinkInformation
+  // instances.  We also enforce in debug mode that the map be emptied
+  // when copied.
+  static_cast<void>(r);
+  assert(r.empty());
+}
+
+//----------------------------------------------------------------------------
+cmTargetLinkInformationMap::~cmTargetLinkInformationMap()
+{
+  for(derived::iterator i = this->begin(); i != this->end(); ++i)
+    {
+    delete i->second;
+    }
 }

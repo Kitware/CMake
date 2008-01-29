@@ -114,7 +114,7 @@ private:
   void WriteTargetVersionAttribute(std::ostream& fout, cmTarget& target);
 
   void WriteGroup(const cmSourceGroup *sg, 
-                  cmTarget target, std::ostream &fout, 
+                  cmTarget& target, std::ostream &fout,
                   const char *libName, std::vector<std::string> *configs);
   virtual std::string GetTargetDirectory(cmTarget const&) const;
 

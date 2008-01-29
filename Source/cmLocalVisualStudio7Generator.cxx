@@ -1179,7 +1179,7 @@ cmLocalVisualStudio7GeneratorFCInfo
 }
 
 void cmLocalVisualStudio7Generator
-::WriteGroup(const cmSourceGroup *sg, cmTarget target, 
+::WriteGroup(const cmSourceGroup *sg, cmTarget& target,
              std::ostream &fout, const char *libName, 
              std::vector<std::string> *configs)
 {
