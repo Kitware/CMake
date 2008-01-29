@@ -6,6 +6,10 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${ExportImport_BINARY_DIR}/Root
   )
 add_custom_target(CleanupTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/CleanupProject)
+set_property(
+  SOURCE ${ExportImport_BINARY_DIR}/CleanupProject
+  PROPERTY SYMBOLIC 1
+  )
 
 # Build and install the exporter.
 if(CMAKE_CONFIGURATION_TYPES)
@@ -35,6 +39,10 @@ add_custom_command(
        )
 add_custom_target(ExportTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/ExportProject)
 add_dependencies(ExportTarget CleanupTarget)
+set_property(
+  SOURCE ${ExportImport_BINARY_DIR}/ExportProject
+  PROPERTY SYMBOLIC 1
+  )
 
 # Build and install the importer.
 if(CMAKE_CONFIGURATION_TYPES)
@@ -63,6 +71,10 @@ add_custom_command(
      )
 add_custom_target(ImportTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/ImportProject)
 add_dependencies(ImportTarget ExportTarget)
+set_property(
+  SOURCE ${ExportImport_BINARY_DIR}/ImportProject
+  PROPERTY SYMBOLIC 1
+  )
 
 add_executable(ExportImport main.c)
 add_dependencies(ExportImport ImportTarget)
