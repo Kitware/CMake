@@ -2955,7 +2955,14 @@ std::string cmMakefile::GetListFileStack()
 
 void cmMakefile::PushScope()
 {
-  this->DefinitionStack.push_back(this->DefinitionStack.back());
+  // Get the index of the next stack entry.
+  std::vector<DefinitionMap>::size_type index = this->DefinitionStack.size();
+
+  // Allocate a new stack entry.
+  this->DefinitionStack.push_back(DefinitionMap());
+
+  // Copy the previous top to the new top.
+  this->DefinitionStack[index] = this->DefinitionStack[index-1];
 }
 
 void cmMakefile::PopScope()
