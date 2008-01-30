@@ -135,9 +135,18 @@ cmExportFileGenerator
     }
 
   // Add the transitive link dependencies for this configuration.
-  if(target->GetType() == cmTarget::STATIC_LIBRARY ||
-     target->GetType() == cmTarget::SHARED_LIBRARY)
+  if(cmTargetLinkInterface const* interface =
+     target->GetLinkInterface(config))
     {
+    // This target provides a link interface, so use it.
+    this->SetImportLinkProperties(config, suffix, target,
+                                  *interface, properties);
+    }
+  else if(target->GetType() == cmTarget::STATIC_LIBRARY ||
+          target->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    // The default link interface for static and shared libraries is
+    // their link implementation library list.
     this->SetImportLinkProperties(config, suffix, target, properties);
     }
 }
@@ -148,9 +157,6 @@ cmExportFileGenerator
 ::SetImportLinkProperties(const char* config, std::string const& suffix,
                           cmTarget* target, ImportPropertyMap& properties)
 {
-  // Get the makefile in which to lookup target information.
-  cmMakefile* mf = target->GetMakefile();
-
   // Compute which library configuration to link.
   cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
   if(config && cmSystemTools::UpperCase(config) == "DEBUG")
@@ -158,10 +164,10 @@ cmExportFileGenerator
     linkType = cmTarget::DEBUG;
     }
 
-  // Construct the property value.
+  // Construct the list of libs linked for this configuration.
+  std::vector<std::string> actual_libs;
   cmTarget::LinkLibraryVectorType const& libs =
     target->GetOriginalLinkLibraries();
-  std::string link_libs;
   const char* sep = "";
   for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
       li != libs.end(); ++li)
@@ -174,33 +180,66 @@ cmExportFileGenerator
       continue;
       }
 
-    // Separate this from the previous entry.
-    link_libs += sep;
-    sep = ";";
+    // Store this entry.
+    actual_libs.push_back(li->first);
+    }
 
+  // Store the entries in the property.
+  this->SetImportLinkProperties(config, suffix, target,
+                                actual_libs, properties);
+}
+
+//----------------------------------------------------------------------------
+void
+cmExportFileGenerator
+::SetImportLinkProperties(const char* config,
+                          std::string const& suffix,
+                          cmTarget* target,
+                          std::vector<std::string> const& libs,
+                          ImportPropertyMap& properties)
+{
+  // Get the makefile in which to lookup target information.
+  cmMakefile* mf = target->GetMakefile();
+
+  // Construct the property value.
+  std::string link_libs;
+  const char* sep = "";
+  for(std::vector<std::string>::const_iterator li = libs.begin();
+      li != libs.end(); ++li)
+    {
     // Append this entry.
-    if(cmTarget* tgt = mf->FindTargetToUse(li->first.c_str()))
+    if(cmTarget* tgt = mf->FindTargetToUse(li->c_str()))
       {
-      // This is a target.  Make sure it is included in the export.
-      if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
+      // This is a target.
+      if(tgt->IsImported())
+        {
+        // The target is imported (and therefore is not in the
+        // export).  Append the raw name.
+        link_libs += *li;
+        }
+      else if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
         {
         // The target is in the export.  Append it with the export
         // namespace.
         link_libs += this->Namespace;
-        link_libs += li->first;
+        link_libs += *li;
         }
       else
         {
-        // The target is not in the export.  This is probably
-        // user-error.  Warn but add it anyway.
-        this->ComplainAboutMissingTarget(target, li->first.c_str());
-        link_libs += li->first;
+        // The target is not in the export.
+        if(!this->AppendMode)
+          {
+          // We are not appending, so all exported targets should be
+          // known here.  This is probably user-error.
+          this->ComplainAboutMissingTarget(target, li->c_str());
+          }
+        link_libs += *li;
         }
       }
     else
       {
       // Append the raw name.
-      link_libs += li->first;
+      link_libs += *li;
       }
     }
 

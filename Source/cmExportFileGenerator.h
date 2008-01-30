@@ -70,6 +70,11 @@ protected:
   void SetImportLinkProperties(const char* config,
                                std::string const& suffix, cmTarget* target,
                                ImportPropertyMap& properties);
+  void SetImportLinkProperties(const char* config,
+                               std::string const& suffix,
+                               cmTarget* target,
+                               std::vector<std::string> const& libs,
+                               ImportPropertyMap& properties);
 
   /** Each subclass knows how to generate its kind of export file.  */
   virtual bool GenerateMainFile(std::ostream& os) = 0;

@@ -263,17 +263,22 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
   if(entry.Target)
     {
     // Follow the target dependencies.
-    if(entry.Target->GetType() != cmTarget::EXECUTABLE)
+    if(entry.Target->IsImported())
       {
-      if(entry.Target->IsImported())
-        {
-        this->AddImportedLinkEntries(depender_index, entry.Target);
-        }
-      else
-        {
-        this->AddTargetLinkEntries(depender_index,
-                                   entry.Target->GetOriginalLinkLibraries());
-        }
+      // Imported targets provide their own link information.
+      this->AddImportedLinkEntries(depender_index, entry.Target);
+      }
+    else if(cmTargetLinkInterface const* interface =
+            entry.Target->GetLinkInterface(this->Config))
+      {
+      // This target provides its own link interface information.
+      this->AddLinkEntries(depender_index, *interface);
+      }
+    else if(entry.Target->GetType() != cmTarget::EXECUTABLE)
+      {
+      // Use the target's link implementation as the interface.
+      this->AddTargetLinkEntries(depender_index,
+                                 entry.Target->GetOriginalLinkLibraries());
       }
     }
   else

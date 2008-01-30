@@ -312,6 +312,28 @@ void cmTarget::DefineProperties(cmake *cm)
      "The property is defined only for library and executable targets.");
 
   cm->DefineProperty
+    ("LINK_INTERFACE_LIBRARIES", cmProperty::TARGET,
+     "List public interface libraries for a shared library or executable.",
+     "By default linking to a shared library target transitively "
+     "links to targets with which the library itself was linked.  "
+     "For an executable with exports (see the ENABLE_EXPORTS property) "
+     "no default transitive link dependencies are used.  "
+     "This property replaces the default transitive link dependencies with "
+     "an explict list.  "
+     "When the target is linked into another target the libraries "
+     "listed (and recursively their link interface libraries) will be "
+     "provided to the other target also.  "
+     "If the list is empty then no transitive link dependencies will be "
+     "incorporated when this target is linked into another target even if "
+     "the default set is non-empty.");
+
+  cm->DefineProperty
+    ("LINK_INTERFACE_LIBRARIES_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration list of public interface libraries for a target.",
+     "This is the configuration-specific version of "
+     "LINK_INTERFACE_LIBRARIES.");
+
+  cm->DefineProperty
     ("MAP_IMPORTED_CONFIG_<CONFIG>", cmProperty::TARGET,
      "Map from project configuration to IMPORTED target's configuration.",
      "List configurations of an imported target that may be used for "
@@ -3041,6 +3063,80 @@ cmTarget::GetImportedLinkLibraries(const char* config)
 }
 
 //----------------------------------------------------------------------------
+cmTargetLinkInterface const* cmTarget::GetLinkInterface(const char* config)
+{
+  // Link interfaces are supported only for non-imported shared
+  // libraries and executables that export symbols.  Imported targets
+  // provide their own link information.
+  if(this->IsImported() ||
+     (this->GetType() != cmTarget::SHARED_LIBRARY &&
+      !this->IsExecutableWithExports()))
+    {
+    return 0;
+    }
+
+  // Lookup any existing link interface for this configuration.
+  std::map<cmStdString, cmTargetLinkInterface*>::iterator
+    i = this->LinkInterface.find(config?config:"");
+  if(i == this->LinkInterface.end())
+    {
+    // Compute the link interface for this configuration.
+    cmTargetLinkInterface* interface = this->ComputeLinkInterface(config);
+
+    // Store the information for this configuration.
+    std::map<cmStdString, cmTargetLinkInterface*>::value_type
+      entry(config?config:"", interface);
+    i = this->LinkInterface.insert(entry).first;
+    }
+
+  return i->second;
+}
+
+//----------------------------------------------------------------------------
+cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
+{
+  // Construct the property name suffix for this configuration.
+  std::string suffix = "_";
+  if(config && *config)
+    {
+    suffix += cmSystemTools::UpperCase(config);
+    }
+  else
+    {
+    suffix += "NOCONFIG";
+    }
+
+  // Lookup the link interface libraries.
+  const char* libs = 0;
+  {
+  // Lookup the per-configuration property.
+  std::string propName = "LINK_INTERFACE_LIBRARIES";
+  propName += suffix;
+  libs = this->GetProperty(propName.c_str());
+
+  // If not set, try the generic property.
+  if(!libs)
+    {
+    libs = this->GetProperty("LINK_INTERFACE_LIBRARIES");
+    }
+  }
+
+  // If still not set, there is no link interface.
+  if(!libs)
+    {
+    return 0;
+    }
+
+  // Return the interface libraries even if the list is empty.
+  if(cmTargetLinkInterface* interface = new cmTargetLinkInterface)
+    {
+    cmSystemTools::ExpandListArgument(libs, *interface);
+    return interface;
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
 cmComputeLinkInformation*
 cmTarget::GetLinkInformation(const char* config)
 {
@@ -3082,6 +3178,29 @@ cmTargetLinkInformationMap
 
 //----------------------------------------------------------------------------
 cmTargetLinkInformationMap::~cmTargetLinkInformationMap()
+{
+  for(derived::iterator i = this->begin(); i != this->end(); ++i)
+    {
+    delete i->second;
+    }
+}
+
+//----------------------------------------------------------------------------
+cmTargetLinkInterfaceMap
+::cmTargetLinkInterfaceMap(cmTargetLinkInterfaceMap const& r): derived()
+{
+  // Ideally cmTarget instances should never be copied.  However until
+  // we can make a sweep to remove that, this copy constructor avoids
+  // allowing the resources (LinkInterface) from getting copied.  In
+  // the worst case this will lead to extra cmTargetLinkInterface
+  // instances.  We also enforce in debug mode that the map be emptied
+  // when copied.
+  static_cast<void>(r);
+  assert(r.empty());
+}
+
+//----------------------------------------------------------------------------
+cmTargetLinkInterfaceMap::~cmTargetLinkInterfaceMap()
 {
   for(derived::iterator i = this->begin(); i != this->end(); ++i)
     {

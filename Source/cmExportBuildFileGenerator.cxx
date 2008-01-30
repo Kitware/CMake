@@ -16,6 +16,14 @@
 =========================================================================*/
 #include "cmExportBuildFileGenerator.h"
 
+#include "cmExportCommand.h"
+
+//----------------------------------------------------------------------------
+cmExportBuildFileGenerator::cmExportBuildFileGenerator()
+{
+  this->ExportCommand = 0;
+}
+
 //----------------------------------------------------------------------------
 bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 {
@@ -116,9 +124,19 @@ void
 cmExportBuildFileGenerator
 ::ComplainAboutMissingTarget(cmTarget* target, const char* dep)
 {
+  if(!this->ExportCommand || !this->ExportCommand->ErrorMessage.empty())
+    {
+    return;
+    }
+
   cmOStringStream e;
-  e << "WARNING: EXPORT(...) includes target " << target->GetName()
-    << " which links to target \"" << dep
-    << "\" that is not in the export set.";
-  cmSystemTools::Message(e.str().c_str());
+  e << "called with target \"" << target->GetName()
+    << "\" which links to target \"" << dep
+    << "\" that is not in the export list.\n"
+    << "If the link dependency is not part of the public interface "
+    << "consider setting the LINK_INTERFACE_LIBRARIES property on \""
+    << target->GetName() << "\".  Otherwise add it to the export list.  "
+    << "If the link dependency is not easy to reference in this call, "
+    << "consider using the APPEND option with multiple separate calls.";
+  this->ExportCommand->ErrorMessage = e.str();
 }

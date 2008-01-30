@@ -100,12 +100,6 @@ bool cmExportCommand
     fname += this->Filename.GetString();
     }
 
-  // If no targets are to be exported we are done.
-  if(this->Targets.GetVector().empty())
-    {
-    return true;
-    }
-
   // Collect the targets to be exported.
   std::vector<cmTarget*> targets;
   for(std::vector<std::string>::const_iterator
@@ -149,6 +143,7 @@ bool cmExportCommand
   ebfg.SetNamespace(this->Namespace.GetCString());
   ebfg.SetAppendMode(this->Append.IsEnabled());
   ebfg.SetExports(&targets);
+  ebfg.SetCommand(this);
 
   // Compute the set of configurations exported.
   if(const char* types =
@@ -177,6 +172,13 @@ bool cmExportCommand
   if(!ebfg.GenerateImportFile())
     {
     this->SetError("could not write export file.");
+    return false;
+    }
+
+  // Report generated error message if any.
+  if(!this->ErrorMessage.empty())
+    {
+    this->SetError(this->ErrorMessage.c_str());
     return false;
     }
 
