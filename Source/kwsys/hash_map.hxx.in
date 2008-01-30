@@ -236,7 +236,7 @@ public:
 };
 
 template <class _Key, class _Tp, class _HashFcn, class _EqlKey, class _Alloc>
-inline bool
+bool
 operator==(const hash_map<_Key,_Tp,_HashFcn,_EqlKey,_Alloc>& __hm1,
            const hash_map<_Key,_Tp,_HashFcn,_EqlKey,_Alloc>& __hm2)
 {
@@ -267,7 +267,7 @@ template <class _Key, class _Tp,
 class hash_multimap;
 
 template <class _Key, class _Tp, class _HF, class _EqKey, class _Alloc>
-inline bool
+bool
 operator==(const hash_multimap<_Key,_Tp,_HF,_EqKey,_Alloc>& __hm1,
            const hash_multimap<_Key,_Tp,_HF,_EqKey,_Alloc>& __hm2);
 
@@ -427,7 +427,7 @@ public:
 };
 
 template <class _Key, class _Tp, class _HF, class _EqKey, class _Alloc>
-inline bool
+bool
 operator==(const hash_multimap<_Key,_Tp,_HF,_EqKey,_Alloc>& __hm1,
            const hash_multimap<_Key,_Tp,_HF,_EqKey,_Alloc>& __hm2)
 {
