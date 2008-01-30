@@ -917,7 +917,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   cmCTestTestHandler::ListOfTests::size_type tmsize = this->TestList.size();
 
   this->StartTest = this->CTest->CurrentTime();
-  this->StartTestTime = cmSystemTools::GetTime();
+  this->StartTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
   double elapsed_time_start = cmSystemTools::GetTime();
 
   *this->LogFile << "Start testing: " << this->StartTest << std::endl
@@ -1000,7 +1000,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     }
 
   this->EndTest = this->CTest->CurrentTime();
-  this->EndTestTime = cmSystemTools::GetTime();
+  this->EndTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
   this->ElapsedTestingTime = cmSystemTools::GetTime() - elapsed_time_start;
   if ( this->LogFile )
     {
