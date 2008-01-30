@@ -168,7 +168,6 @@ cmExportFileGenerator
   std::vector<std::string> actual_libs;
   cmTarget::LinkLibraryVectorType const& libs =
     target->GetOriginalLinkLibraries();
-  const char* sep = "";
   for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
       li != libs.end(); ++li)
     {
@@ -207,6 +206,10 @@ cmExportFileGenerator
   for(std::vector<std::string>::const_iterator li = libs.begin();
       li != libs.end(); ++li)
     {
+    // Separate this from the previous entry.
+    link_libs += sep;
+    sep = ";";
+
     // Append this entry.
     if(cmTarget* tgt = mf->FindTargetToUse(li->c_str()))
       {
