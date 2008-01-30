@@ -50,6 +50,7 @@ cmLocalGenerator::cmLocalGenerator()
   this->MinGWMake = false;
   this->NMake = false;
   this->MSYSShell = false;
+  this->LinkScriptShell = false;
   this->IgnoreLibPrefix = false;
   this->UseRelativePaths = false;
   this->Configured = false;
@@ -1995,7 +1996,7 @@ std::string cmLocalGenerator::Convert(const char* source,
         // For the MSYS shell convert drive letters to posix paths, so
     // that c:/some/path becomes /c/some/path.  This is needed to
     // avoid problems with the shell path translation.
-    if(this->MSYSShell)
+    if(this->MSYSShell && !this->LinkScriptShell)
       {
       if(result.size() > 2 && result[1] == ':')
         {

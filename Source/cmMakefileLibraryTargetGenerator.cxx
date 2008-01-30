@@ -673,7 +673,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::vector<std::string> archiveAppendCommands;
   std::vector<std::string> archiveFinishCommands;
   std::string::size_type archiveCommandLimit = std::string::npos;
-  if(useLinkScript && this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+  if(this->Target->GetType() == cmTarget::STATIC_LIBRARY)
     {
     std::string arCreateVar = "CMAKE_";
     arCreateVar += linkLanguage;
@@ -696,18 +696,28 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       {
       cmSystemTools::ExpandListArgument(rule, archiveFinishCommands);
       }
+    }
+
+  // Decide whether to use archiving rules.
+  bool useArchiveRules =
+    !archiveCreateCommands.empty() && !archiveAppendCommands.empty();
+  if(useArchiveRules)
+    {
+    // Archiving rules are always run with a link script.
+    useLinkScript = true;
 
     // Limit the length of individual object lists to less than the
     // 32K command line length limit on Windows.  We could make this a
     // platform file variable but this should work everywhere.
     archiveCommandLimit = 30000;
     }
-  bool useArchiveRules =
-    !archiveCreateCommands.empty() && !archiveAppendCommands.empty();
 
   // Expand the rule variables.
   std::vector<std::string> real_link_commands;
   {
+  // Set path conversion for link script shells.
+  this->LocalGenerator->SetLinkScriptShell(useLinkScript);
+
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
   this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target, relink);
@@ -864,6 +874,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       }
     }
   this->LocalGenerator->TargetImplib = "";
+
+  // Restore path conversion to normal shells.
+  this->LocalGenerator->SetLinkScriptShell(false);
   }
 
   // Optionally convert the build rule to use a script to avoid long

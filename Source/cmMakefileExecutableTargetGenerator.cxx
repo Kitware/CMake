@@ -367,6 +367,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Expand the rule variables.
   {
+  // Set path conversion for link script shells.
+  this->LocalGenerator->SetLinkScriptShell(useLinkScript);
+
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
   this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target, relink);
@@ -428,6 +431,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
   this->LocalGenerator->TargetImplib = "";
+
+  // Restore path conversion to normal shells.
+  this->LocalGenerator->SetLinkScriptShell(false);
   }
 
   // Optionally convert the build rule to use a script to avoid long

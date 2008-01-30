@@ -210,6 +210,9 @@ public:
     const char* Defines;
   };
 
+  /** Set whether to treat conversions to SHELL as a link script shell.  */
+  void SetLinkScriptShell(bool b) { this->LinkScriptShell = b; }
+
   /** Escape the given string to be used as a command line argument in
       the native build system shell.  Optionally allow the build
       system to replace make variable references.  Optionally adjust
@@ -346,6 +349,7 @@ protected:
   bool NMake;
   bool ForceUnixPath;
   bool MSYSShell;
+  bool LinkScriptShell;
   bool UseRelativePaths;
   bool IgnoreLibPrefix;
   bool Configured;
