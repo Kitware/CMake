@@ -96,7 +96,7 @@ private:
   void OutputTargetRules(std::ostream& fout, const char* configName, 
                          cmTarget &target, const char *libName);
   void OutputBuildTool(std::ostream& fout, const char* configName,
-                       cmTarget& t);
+                       cmTarget& t, bool debug);
   void OutputLibraryDirectories(std::ostream& fout,
                                 std::vector<std::string> const& dirs);
   void OutputModuleDefinitionFile(std::ostream& fout, cmTarget &target);

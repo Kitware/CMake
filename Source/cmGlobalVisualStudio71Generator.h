@@ -56,7 +56,8 @@ protected:
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
                                           bool partOfDefaultBuild);
-  virtual void WriteExternalProject(std::ostream& fout, const char* name,
+  virtual void WriteExternalProject(std::ostream& fout,
+                                    const char* name,
                                     const char* path,
                                     const std::vector<std::string>& depends);
   virtual void WriteSLNFooter(std::ostream& fout);

@@ -419,6 +419,7 @@ public:
   // Check for specific options.
   bool UsingUnicode();
 
+  bool IsDebug();
   // Write options to output.
   void OutputPreprocessorDefinitions(std::ostream& fout,
                                      const char* prefix,
@@ -667,7 +668,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
 
   this->OutputTargetRules(fout, configName, target, libName);
-  this->OutputBuildTool(fout, configName, target);
+  this->OutputBuildTool(fout, configName, target, targetOptions.IsDebug());
   fout << "\t\t</Configuration>\n";
 }
 
@@ -689,7 +690,8 @@ cmLocalVisualStudio7Generator
 
 void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                                                     const char* configName,
-                                                    cmTarget &target)
+                                                    cmTarget &target,
+                                                    bool isDebug)
 {
   std::string temp;
   std::string extraLinkOptions;
@@ -802,8 +804,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += targetNamePDB;
     fout << "\t\t\t\tProgramDataBaseFile=\"" <<
       this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
-    if(strcmp(configName, "Debug") == 0
-       || strcmp(configName, "RelWithDebInfo") == 0)
+    if(isDebug)
       {
       fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
       }
@@ -869,8 +870,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t\tProgramDataBaseFile=\""
          << target.GetDirectory(configName) << "/" << targetNamePDB
          << "\"\n";
-    if(strcmp(configName, "Debug") == 0
-       || strcmp(configName, "RelWithDebInfo") == 0)
+    if(isDebug)
       {
       fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
       }
@@ -1811,6 +1811,12 @@ void cmLocalVisualStudio7GeneratorOptions::AddFlag(const char* flag,
                                                    const char* value)
 {
   this->FlagMap[flag] = value;
+}
+
+
+bool cmLocalVisualStudio7GeneratorOptions::IsDebug()
+{
+  return this->FlagMap.find("DebugInformationFormat") != this->FlagMap.end();
 }
 
 //----------------------------------------------------------------------------

@@ -1036,7 +1036,6 @@ int cmGlobalGenerator::Build(
   std::string makeCommand =
     this->GenerateBuildCommand(makeCommandCSTR, projectName,
                                0, target, config, false, fast);
-
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output,
                                        &retVal, 0, false, timeout))
     {
@@ -1291,7 +1290,7 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
         // Add dependencies of the included target.  An excluded
         // target may still be included if it is a dependency of a
         // non-excluded target.
-        TargetDependSet const& tgtdeps = this->GetTargetDepends(target);
+        TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
         for(TargetDependSet::const_iterator ti = tgtdeps.begin();
             ti != tgtdeps.end(); ++ti)
           {
@@ -1684,7 +1683,7 @@ void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
 
 //----------------------------------------------------------------------------
 cmGlobalGenerator::TargetDependSet const&
-cmGlobalGenerator::GetTargetDepends(cmTarget const& target)
+cmGlobalGenerator::GetTargetDirectDepends(cmTarget const& target)
 {
   // Clarify the role of the input target.
   cmTarget const* depender = &target;
@@ -1863,6 +1862,62 @@ cmGlobalGenerator
     std::back_inserter(filenames));
 }
 
+void
+cmGlobalGenerator
+::GetTargetSets(cmGlobalGenerator::TargetDependSet& projectTargets,
+                cmGlobalGenerator::TargetDependSet& originalTargets,
+                cmLocalGenerator* root,
+                std::vector<cmLocalGenerator*> const& generators)
+{
+  // loop over all local generators
+  for(std::vector<cmLocalGenerator*>::const_iterator i = generators.begin();
+      i != generators.end(); ++i)
+    {
+    // check to make sure generator is not excluded
+    if(this->IsExcluded(root, *i))
+      {
+      continue;
+      }
+    cmMakefile* mf = (*i)->GetMakefile();
+    // Get the targets in the makefile
+    cmTargets &tgts = mf->GetTargets();  
+    // loop over all the targets
+    for (cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
+      {
+      cmTarget* target = &l->second;
+      // put the target in the set of original targets
+      originalTargets.insert(target);
+      // Get the set of targets that depend on target
+      this->AddTargetDepends(target,
+                             projectTargets);
+      }
+    }
+}
+                
+void
+cmGlobalGenerator::AddTargetDepends(cmTarget* target,
+                                    cmGlobalGenerator::TargetDependSet&
+                                    projectTargets)
+{
+  // add the target itself
+  projectTargets.insert(target);
+  // get the direct depends of target
+  cmGlobalGenerator::TargetDependSet const& tset 
+    = this->GetTargetDirectDepends(*target);
+  if(tset.size())
+    {
+    // if there are targets that depend on target 
+    // add them and their depends as well
+    for(cmGlobalGenerator::TargetDependSet::const_iterator i =
+          tset.begin(); i != tset.end(); ++i)
+      {
+      cmTarget* dtarget = const_cast<cmTarget*>(*i);
+      this->AddTargetDepends(dtarget, projectTargets);
+      }
+    }
+}
+
+
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::AddToManifest(const char* config,
                                       std::string const& f)
@@ -1901,3 +1956,4 @@ cmGlobalGenerator::GetDirectoryContent(std::string const& dir, bool needDisk)
     }
   return dc;
 }
+

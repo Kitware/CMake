@@ -234,8 +234,9 @@ public:
   // Class to track a set of dependencies.
   class TargetDependSet: public std::set<cmTarget const*> {};
 
-  // what targets does the specified target depend on
-  TargetDependSet const& GetTargetDepends(cmTarget const& target);
+  // what targets does the specified target depend on directly
+  // via a target_link_libraries or add_dependencies
+  TargetDependSet const& GetTargetDirectDepends(cmTarget const& target);
 
   const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
@@ -245,6 +246,15 @@ public:
   void GetFilesReplacedDuringGenerate(std::vector<std::string>& filenames);
 
 protected:
+  // for a project collect all its targets by following depend
+  // information, and also collect all the targets
+  void GetTargetSets(cmGlobalGenerator::TargetDependSet& projectTargets,
+                     cmGlobalGenerator::TargetDependSet& originalTargets,
+                     cmLocalGenerator* root,
+                     std::vector<cmLocalGenerator*> const& generators);
+  void AddTargetDepends(cmTarget* target,
+                        cmGlobalGenerator::TargetDependSet&
+                        projectTargets);
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);
 

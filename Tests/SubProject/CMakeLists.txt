@@ -1,0 +1,5 @@
+project(SubProject)
+message("${CMAKE_IMPORT_LIBRARY_SUFFIX}")
+add_library(bar bar.cxx)
+add_executable(car car.cxx)
+add_subdirectory(foo)

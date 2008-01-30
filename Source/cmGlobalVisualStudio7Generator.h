@@ -114,11 +114,29 @@ protected:
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
+  virtual void WriteTargetsToSolution(
+    std::ostream& fout,
+    cmLocalGenerator* root,
+    cmGlobalGenerator::TargetDependSet& projectTargets,
+    cmGlobalGenerator::TargetDependSet& originalTargets);
+  virtual void WriteTargetDepends(
+    std::ostream& fout,
+    cmGlobalGenerator::TargetDependSet& projectTargets);
+  virtual void WriteTargetConfigurations(
+    std::ostream& fout,
+    cmLocalGenerator* root,
+    cmGlobalGenerator::TargetDependSet& projectTargets);
+  
+  void AddAllBuildDepends(cmLocalGenerator* root,
+                          cmTarget* target,
+                          cmGlobalGenerator::TargetDependSet& targets);
+                                       
   void GenerateConfigurations(cmMakefile* mf);
 
-  void WriteExternalProject(std::ostream& fout, 
-                            const char* name, const char* path,
-                            const std::vector<std::string>& dependencies);
+  virtual void WriteExternalProject(std::ostream& fout, 
+                                    const char* name, 
+                                    const char* path,
+                                    const std::vector<std::string>& dependencies);
 
   std::string ConvertToSolutionPath(const char* path);
 
