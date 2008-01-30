@@ -668,12 +668,45 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Determine whether a link script will be used.
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
 
-  // Construct the main link rule.
-  std::vector<std::string> real_link_commands;
-  std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
-  cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
+  // For static libraries there might be archiving rules.
+  std::vector<std::string> archiveCreateCommands;
+  std::vector<std::string> archiveAppendCommands;
+  std::vector<std::string> archiveFinishCommands;
+  std::string::size_type archiveCommandLimit = std::string::npos;
+  if(useLinkScript && this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    std::string arCreateVar = "CMAKE_";
+    arCreateVar += linkLanguage;
+    arCreateVar += "_ARCHIVE_CREATE";
+    if(const char* rule = this->Makefile->GetDefinition(arCreateVar.c_str()))
+      {
+      cmSystemTools::ExpandListArgument(rule, archiveCreateCommands);
+      }
+    std::string arAppendVar = "CMAKE_";
+    arAppendVar += linkLanguage;
+    arAppendVar += "_ARCHIVE_APPEND";
+    if(const char* rule = this->Makefile->GetDefinition(arAppendVar.c_str()))
+      {
+      cmSystemTools::ExpandListArgument(rule, archiveAppendCommands);
+      }
+    std::string arFinishVar = "CMAKE_";
+    arFinishVar += linkLanguage;
+    arFinishVar += "_ARCHIVE_FINISH";
+    if(const char* rule = this->Makefile->GetDefinition(arFinishVar.c_str()))
+      {
+      cmSystemTools::ExpandListArgument(rule, archiveFinishCommands);
+      }
+
+    // Limit the length of individual object lists to less than the
+    // 32K command line length limit on Windows.  We could make this a
+    // platform file variable but this should work everywhere.
+    archiveCommandLimit = 30000;
+    }
+  bool useArchiveRules =
+    !archiveCreateCommands.empty() && !archiveAppendCommands.empty();
 
   // Expand the rule variables.
+  std::vector<std::string> real_link_commands;
   {
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
@@ -687,7 +720,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string buildObjs;
   if(useLinkScript)
     {
-    this->WriteObjectsString(buildObjs);
+    if(!useArchiveRules)
+      {
+      this->WriteObjectsString(buildObjs);
+      }
     }
   else
     {
@@ -768,12 +804,64 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                                linkLanguage, langFlags);
     }
   vars.LanguageCompileFlags = langFlags.c_str();
-  // Expand placeholders in the commands.
+
+  // Construct the main link rule and expand placeholders.
   this->LocalGenerator->TargetImplib = targetOutPathImport;
-  for(std::vector<std::string>::iterator i = real_link_commands.begin();
-      i != real_link_commands.end(); ++i)
+  if(useArchiveRules)
     {
-    this->LocalGenerator->ExpandRuleVariables(*i, vars);
+    // Construct the individual object list strings.
+    std::vector<std::string> object_strings;
+    this->WriteObjectsStrings(object_strings, archiveCommandLimit);
+
+    // Create the archive with the first set of objects.
+    std::vector<std::string>::iterator osi = object_strings.begin();
+    {
+    vars.Objects = osi->c_str();
+    for(std::vector<std::string>::const_iterator
+          i = archiveCreateCommands.begin();
+        i != archiveCreateCommands.end(); ++i)
+      {
+      std::string cmd = *i;
+      this->LocalGenerator->ExpandRuleVariables(cmd, vars);
+      real_link_commands.push_back(cmd);
+      }
+    }
+    // Append to the archive with the other object sets.
+    for(++osi; osi != object_strings.end(); ++osi)
+      {
+      vars.Objects = osi->c_str();
+      for(std::vector<std::string>::const_iterator
+            i = archiveAppendCommands.begin();
+          i != archiveAppendCommands.end(); ++i)
+        {
+        std::string cmd = *i;
+        this->LocalGenerator->ExpandRuleVariables(cmd, vars);
+        real_link_commands.push_back(cmd);
+        }
+      }
+    // Finish the archive.
+    vars.Objects = "";
+    for(std::vector<std::string>::const_iterator
+          i = archiveFinishCommands.begin();
+        i != archiveFinishCommands.end(); ++i)
+      {
+      std::string cmd = *i;
+      this->LocalGenerator->ExpandRuleVariables(cmd, vars);
+      real_link_commands.push_back(cmd);
+      }
+    }
+  else
+    {
+    // Get the set of commands.
+    std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
+    cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
+
+    // Expand placeholders.
+    for(std::vector<std::string>::iterator i = real_link_commands.begin();
+        i != real_link_commands.end(); ++i)
+      {
+      this->LocalGenerator->ExpandRuleVariables(*i, vars);
+      }
     }
   this->LocalGenerator->TargetImplib = "";
   }

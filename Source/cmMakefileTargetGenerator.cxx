@@ -1200,10 +1200,80 @@ void
 cmMakefileTargetGenerator
 ::WriteObjectsString(std::string& buildObjs)
 {
-  std::string object;
-  const char* no_quoted =
-    this->Makefile->GetDefinition("CMAKE_NO_QUOTED_OBJECTS");
-  const char* space = "";
+  std::vector<std::string> objStrings;
+  this->WriteObjectsStrings(objStrings);
+  buildObjs = objStrings[0];
+}
+
+//----------------------------------------------------------------------------
+class cmMakefileTargetGeneratorObjectStrings
+{
+public:
+  cmMakefileTargetGeneratorObjectStrings(std::vector<std::string>& strings,
+                                         cmMakefile* mf,
+                                         cmLocalUnixMakefileGenerator3* lg,
+                                         std::string::size_type limit):
+    Strings(strings), Makefile(mf), LocalGenerator(lg), LengthLimit(limit)
+    {
+    this->NoQuotes = mf->IsOn("CMAKE_NO_QUOTED_OBJECTS");
+    this->Space = "";
+    }
+  void Feed(std::string const& obj)
+    {
+    // Construct the name of the next object.
+    if(this->NoQuotes)
+      {
+      this->NextObject =
+        this->LocalGenerator->Convert(obj.c_str(),
+                                      cmLocalGenerator::START_OUTPUT,
+                                      cmLocalGenerator::SHELL);
+      }
+    else
+      {
+      this->NextObject =
+        this->LocalGenerator->ConvertToQuotedOutputPath(obj.c_str());
+      }
+
+    // Roll over to next string if the limit will be exceeded.
+    if(this->LengthLimit != std::string::npos &&
+       (this->CurrentString.length() + 1 + this->NextObject.length()
+        > this->LengthLimit))
+      {
+      this->Strings.push_back(this->CurrentString);
+      this->CurrentString = "";
+      this->Space = "";
+      }
+
+    // Separate from previous object.
+    this->CurrentString += this->Space;
+    this->Space = " ";
+
+    // Append this object.
+    this->CurrentString += this->NextObject;
+    }
+  void Done()
+    {
+    this->Strings.push_back(this->CurrentString);
+    }
+private:
+  std::vector<std::string>& Strings;
+  cmMakefile* Makefile;
+  cmLocalUnixMakefileGenerator3* LocalGenerator;
+  std::string::size_type LengthLimit;
+  bool NoQuotes;
+  std::string CurrentString;
+  std::string NextObject;
+  const char* Space;
+};
+
+//----------------------------------------------------------------------------
+void
+cmMakefileTargetGenerator
+::WriteObjectsStrings(std::vector<std::string>& objStrings,
+                      std::string::size_type limit)
+{
+  cmMakefileTargetGeneratorObjectStrings
+    helper(objStrings, this->Makefile, this->LocalGenerator, limit);
   for(std::vector<std::string>::const_iterator i = this->Objects.begin();
       i != this->Objects.end(); ++i)
     {
@@ -1211,38 +1281,15 @@ cmMakefileTargetGenerator
       {
       continue;
       }
-    buildObjs += space;
-    space = " ";
-    if(no_quoted)
-      {
-      buildObjs +=
-        this->Convert(i->c_str(), cmLocalGenerator::START_OUTPUT,
-                      cmLocalGenerator::SHELL);
-      }
-    else
-      {
-      buildObjs +=
-        this->LocalGenerator->ConvertToQuotedOutputPath(i->c_str());
-      }
+    helper.Feed(*i);
     }
   for(std::vector<std::string>::const_iterator i =
         this->ExternalObjects.begin();
       i != this->ExternalObjects.end(); ++i)
     {
-    buildObjs += space;
-    space = " ";
-    if(no_quoted)
-      {
-      buildObjs +=
-        this->Convert(i->c_str(), cmLocalGenerator::START_OUTPUT,
-                      cmLocalGenerator::SHELL);
-      }
-    else
-      {
-      buildObjs +=
-        this->LocalGenerator->ConvertToQuotedOutputPath(i->c_str());
-      }
+    helper.Feed(*i);
     }
+  helper.Done();
 }
 
 //----------------------------------------------------------------------------

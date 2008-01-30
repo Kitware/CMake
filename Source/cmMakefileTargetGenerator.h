@@ -107,6 +107,8 @@ protected:
   void WriteObjectsVariable(std::string& variableName,
                             std::string& variableNameExternal);
   void WriteObjectsString(std::string& buildObjs);
+  void WriteObjectsStrings(std::vector<std::string>& objStrings,
+                           std::string::size_type limit = std::string::npos);
 
   // write the driver rule to build target outputs
   void WriteTargetDriverRule(const char* main_output, bool relink);

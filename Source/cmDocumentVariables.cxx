@@ -944,7 +944,34 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This is a rule variable that tells CMake how "
      "to create a static library for the language <LANG>.",false,
      "Variables for Languages");
-  
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_ARCHIVE_CREATE", cmProperty::VARIABLE,
+     "Rule variable to create a new static archive.",
+     "This is a rule variable that tells CMake how to create a static "
+     "archive.  It is used in place of CMAKE_<LANG>_CREATE_STATIC_LIBRARY "
+     "on some platforms in order to support large object counts.  "
+     "See also CMAKE_<LANG>_ARCHIVE_APPEND and CMAKE_<LANG>_ARCHIVE_FINISH.",
+     false, "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_ARCHIVE_APPEND", cmProperty::VARIABLE,
+     "Rule variable to append to a static archive.",
+     "This is a rule variable that tells CMake how to append to a static "
+     "archive.  It is used in place of CMAKE_<LANG>_CREATE_STATIC_LIBRARY "
+     "on some platforms in order to support large object counts.  "
+     "See also CMAKE_<LANG>_ARCHIVE_CREATE and CMAKE_<LANG>_ARCHIVE_FINISH.",
+     false, "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_ARCHIVE_FINISH", cmProperty::VARIABLE,
+     "Rule variable to finish an existing static archive.",
+     "This is a rule variable that tells CMake how to finish a static "
+     "archive.  It is used in place of CMAKE_<LANG>_CREATE_STATIC_LIBRARY "
+     "on some platforms in order to support large object counts.  "
+     "See also CMAKE_<LANG>_ARCHIVE_CREATE and CMAKE_<LANG>_ARCHIVE_APPEND.",
+     false, "Variables for Languages");
+
   cm->DefineProperty
     ("CMAKE_<LANG>_IGNORE_EXTENSIONS", cmProperty::VARIABLE,
      "File extensions that should be ignored by the build.",
