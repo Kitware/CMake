@@ -136,6 +136,8 @@ protected:
   std::vector<cmStdString> CustomTestsIgnore;
   std::string             StartTest;
   std::string             EndTest;
+  unsigned int            StartTestTime;
+  unsigned int            EndTestTime;
   bool MemCheck;
   int CustomMaximumPassedTestOutputSize;
   int CustomMaximumFailedTestOutputSize;

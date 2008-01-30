@@ -107,6 +107,11 @@
 //# error "No Long long"
 #endif
 
+/* Define these macros temporarily to keep the code readable.  */
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# define kwsys_stl @KWSYS_NAMESPACE@_stl
+# define kwsys_ios @KWSYS_NAMESPACE@_ios
+#endif
 
 #include <@KWSYS_NAMESPACE@/stl/string>
 #include <@KWSYS_NAMESPACE@/stl/vector>
@@ -294,4 +299,11 @@ protected:
   std::string OSPlatform; 
 };
 } // namespace @KWSYS_NAMESPACE@
+
+/* Undefine temporary macros.  */
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# undef kwsys_stl
+# undef kwsys_ios
+#endif
+
 #endif

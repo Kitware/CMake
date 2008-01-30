@@ -91,6 +91,8 @@ private:
 
   std::string             StartBuild;
   std::string             EndBuild;
+  double                  StartBuildTime;
+  double                  EndBuildTime;
 
   std::vector<cmStdString> CustomErrorMatches;
   std::vector<cmStdString> CustomErrorExceptions;

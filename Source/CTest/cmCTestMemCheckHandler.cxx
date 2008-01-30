@@ -306,7 +306,8 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
   os << "\">" << std::endl;
 
   os << "\t<StartDateTime>" << this->StartTest << "</StartDateTime>\n"
-    << "\t<TestList>\n";
+     << "\t<StartTestTime>" << this->StartTestTime << "</StartTestTime>\n"
+     << "\t<TestList>\n";
   cmCTestMemCheckHandler::TestResultsVector::size_type cc;
   for ( cc = 0; cc < this->TestResults.size(); cc ++ )
     {
@@ -405,6 +406,8 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
   os << "\t</DefectList>" << std::endl;
 
   os << "\t<EndDateTime>" << this->EndTest << "</EndDateTime>" << std::endl;
+  os << "\t<EndTestTime>" << this->EndTestTime
+     << "</EndTestTime>" << std::endl;
   os << "<ElapsedMinutes>"
      << static_cast<int>(this->ElapsedTestingTime/6)/10.0
      << "</ElapsedMinutes>\n";

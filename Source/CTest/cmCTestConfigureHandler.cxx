@@ -74,6 +74,8 @@ int cmCTestConfigureHandler::ProcessHandler()
       return 1;
       }
     std::string start_time = this->CTest->CurrentTime();
+    unsigned int start_time_time = static_cast<unsigned int>(
+      cmSystemTools::GetTime());
 
     cmGeneratedFileStream ofs;
     this->StartLogFile("Configure", ofs);
@@ -93,7 +95,10 @@ int cmCTestConfigureHandler::ProcessHandler()
       this->CTest->StartXML(os);
       os << "<Configure>\n"
          << "\t<StartDateTime>" << start_time << "</StartDateTime>"
-         << std::endl;
+         << std::endl
+         << "\t<StartConfigureTime>" << start_time_time
+         << "</StartConfigureTime>\n";
+           
       if ( res == cmsysProcess_State_Exited && retVal )
         {
         os << retVal;
@@ -105,6 +110,9 @@ int cmCTestConfigureHandler::ProcessHandler()
       std::string end_time = this->CTest->CurrentTime();
       os << "\t<ConfigureStatus>" << retVal << "</ConfigureStatus>\n"
          << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
+         << "\t<EndConfigureTime>" << 
+        static_cast<unsigned int>(cmSystemTools::GetTime())
+         << "</EndConfigureTime>\n"
          << "<ElapsedMinutes>"
          << static_cast<int>(
            (cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0

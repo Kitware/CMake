@@ -22,6 +22,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include <cmsys/Directory.hxx>
+#include <cmsys/SystemInformation.hxx>
 #include "cmDynamicLoader.h"
 #include "cmGeneratedFileStream.h"
 #include "cmCTestCommand.h"
@@ -1229,13 +1230,38 @@ void cmCTest::StartXML(std::ostream& ostr)
                " NightlStartTime was not set correctly." << std::endl);
     cmSystemTools::SetFatalErrorOccured();
     }
+  // find out about the system
+  cmsys::SystemInformation info;
+  info.RunCPUCheck();
+  info.RunOSCheck();
+  info.RunMemoryCheck();
   ostr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    << "<Site BuildName=\"" << this->GetCTestConfiguration("BuildName")
-    << "\" BuildStamp=\"" << this->CurrentTag << "-"
-    << this->GetTestModelString() << "\" Name=\""
-    << this->GetCTestConfiguration("Site") << "\" Generator=\"ctest"
-    << cmVersion::GetCMakeVersion()
-    << "\">" << std::endl;
+       << "<Site BuildName=\"" << this->GetCTestConfiguration("BuildName")
+       << "\"\n\tBuildStamp=\"" << this->CurrentTag << "-"
+       << this->GetTestModelString() << "\"\n\tName=\""
+       << this->GetCTestConfiguration("Site") << "\"\n\tGenerator=\"ctest"
+       << cmVersion::GetCMakeVersion()  << "\""
+       << "\tOSName=\"" << info.GetOSName() << "\"\n"
+       << "\tHostname=\"" << info.GetHostname() << "\"\n"
+       << "\tOSRelease=\"" << info.GetOSRelease() << "\"\n"
+       << "\tOSVersion=\"" << info.GetOSVersion() << "\"\n"
+       << "\tOSPlatform=\"" << info.GetOSPlatform() << "\"\n"
+       << "\tIs64Bits=\"" << info.Is64Bits() << "\"\n"
+       << "\tVendorString=\"" << info.GetVendorString() << "\"\n"
+       << "\tVendorID=\"" << info.GetVendorID() << "\"\n"
+       << "\tFamilyID=\"" << info.GetFamilyID() << "\"\n"
+       << "\tModelID=\"" << info.GetModelID() << "\"\n"
+       << "\tProcessorCacheSize=\"" << info.GetProcessorCacheSize() << "\"\n"
+       << "\tNumberOfLogicalCPU=\"" << info.GetNumberOfLogicalCPU() << "\"\n"
+       << "\tNumberOfPhysicalCPU=\""<< info.GetNumberOfPhysicalCPU() << "\"\n"
+       << "\tTotalVirtualMemory=\"" << info.GetTotalVirtualMemory() << "\"\n"
+       << "\tTotalPhysicalMemory=\""<< info.GetTotalPhysicalMemory() << "\"\n"
+       << "\tLogicalProcessorsPerPhysical=\"" 
+       << info.GetLogicalProcessorsPerPhysical() << "\"\n"
+       << "\tProcessorClockFrequency=\"" 
+       << info.GetProcessorClockFrequency() << "\"\n" 
+       << ">" << std::endl;
+  ostr << "<SystemInformation junk=1.0></SystemInformation>\n";
 }
 
 //----------------------------------------------------------------------
@@ -1266,6 +1292,7 @@ int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
     cmCTestLog(this, OUTPUT, "\tAdd file: " << it->c_str() << std::endl);
     std::string note_time = this->CurrentTime();
     os << "<Note Name=\"" << this->MakeXMLSafe(it->c_str()) << "\">\n"
+      << "<Time>" << cmSystemTools::GetTime() << "</Time>\n"
       << "<DateTime>" << note_time << "</DateTime>\n"
       << "<Text>" << std::endl;
     std::ifstream ifs(it->c_str());

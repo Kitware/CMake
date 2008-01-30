@@ -171,7 +171,10 @@ bool cmCTestCoverageHandler::StartCoverageLogFile(
   std::string local_start_time = this->CTest->CurrentTime();
   this->CTest->StartXML(covLogFile);
   covLogFile << "<CoverageLog>" << std::endl
-    << "\t<StartDateTime>" << local_start_time << "</StartDateTime>"
+             << "\t<StartDateTime>" << local_start_time << "</StartDateTime>"
+             << "\t<StartTime>" 
+             << static_cast<unsigned int>(cmSystemTools::GetTime())
+             << "</StartTime>"
     << std::endl;
   return true;
 }
@@ -182,6 +185,9 @@ void cmCTestCoverageHandler::EndCoverageLogFile(cmGeneratedFileStream& ostr,
 {
   std::string local_end_time = this->CTest->CurrentTime();
   ostr << "\t<EndDateTime>" << local_end_time << "</EndDateTime>" << std::endl
+       << "\t<EndTime>" << 
+       static_cast<unsigned int>(cmSystemTools::GetTime())
+       << "</EndTime>" << std::endl
     << "</CoverageLog>" << std::endl;
   this->CTest->EndXML(ostr);
   char covLogFilename[1024];
@@ -304,7 +310,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     }
   
   std::string coverage_start_time = this->CTest->CurrentTime();
-
+  unsigned int coverage_start_time_time = static_cast<unsigned int>(
+    cmSystemTools::GetTime());
   std::string sourceDir
     = this->CTest->GetCTestConfiguration("SourceDirectory");
   std::string binaryDir
@@ -386,6 +393,8 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   covSumFile << "<Coverage>" << std::endl
     << "\t<StartDateTime>" << coverage_start_time << "</StartDateTime>"
+    << std::endl
+    << "\t<StartTime>" << coverage_start_time_time << "</StartTime>"
     << std::endl;
   int logFileCount = 0;
   if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
@@ -577,7 +586,10 @@ int cmCTestCoverageHandler::ProcessHandler()
   covSumFile.setf(std::ios::fixed, std::ios::floatfield);
   covSumFile.precision(2);
   covSumFile << (percent_coverage)<< "</PercentCoverage>\n"
-    << "\t<EndDateTime>" << end_time << "</EndDateTime>\n";
+    << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
+    << "\t<EndTime>" << 
+         static_cast<unsigned int>(cmSystemTools::GetTime())
+    << "</EndTime>\n";
   covSumFile << "<ElapsedMinutes>" <<
     static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0
     << "</ElapsedMinutes>"
@@ -1410,6 +1422,10 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
   covSumFile << "<Coverage>" << std::endl
              << "\t<StartDateTime>" 
              << coverage_start_time << "</StartDateTime>"
+             << std::endl
+             << "\t<StartTime>" 
+             << static_cast<unsigned int>(cmSystemTools::GetTime())
+             << "</StartTime>"
              << std::endl;
   std::string stdline;
   std::string errline;
@@ -1561,9 +1577,13 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
     << "\t<PercentCoverage>";
   covSumFile.setf(std::ios::fixed, std::ios::floatfield);
   covSumFile.precision(2);
-  covSumFile << SAFEDIV(percent_coverage,number_files)<< "</PercentCoverage>\n"
-    << "\t<EndDateTime>" << end_time << "</EndDateTime>\n";
-  covSumFile << "<ElapsedMinutes>" <<
+  covSumFile 
+    << SAFEDIV(percent_coverage,number_files)<< "</PercentCoverage>\n"
+    << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
+    << "\t<EndTime>" << static_cast<unsigned int>(cmSystemTools::GetTime())
+    << "</EndTime>\n";
+  covSumFile 
+    << "<ElapsedMinutes>" <<
     static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0
     << "</ElapsedMinutes>"
     << "</Coverage>" << std::endl;
