@@ -5,8 +5,9 @@
 #endif
 
 testExe2_IMPORT int testExe2Func(void);
+testExe2_IMPORT int testExe2lib(void);
 
 int imp_mod1()
 {
-  return testExe2Func();
+  return testExe2Func() + testExe2lib();
 }

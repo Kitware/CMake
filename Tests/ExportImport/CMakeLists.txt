@@ -11,15 +11,20 @@ set_property(
   PROPERTY SYMBOLIC 1
   )
 
-# Build and install the exporter.
 if(CMAKE_CONFIGURATION_TYPES)
-  set(Export_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
+  set(NESTED_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
 else(CMAKE_CONFIGURATION_TYPES)
-  set(Export_CONFIG_TYPE)
+  if(CMAKE_BUILD_TYPE)
+    set(NESTED_CONFIG_TYPE -C "${CMAKE_BUILD_TYPE}")
+  else(CMAKE_BUILD_TYPE)
+    set(NESTED_CONFIG_TYPE)
+  endif(CMAKE_BUILD_TYPE)
 endif(CMAKE_CONFIGURATION_TYPES)
+
+# Build and install the exporter.
 add_custom_command(
   OUTPUT ${ExportImport_BINARY_DIR}/ExportProject
-  COMMAND ${CMAKE_CTEST_COMMAND} ${Export_CONFIG_TYPE}
+  COMMAND ${CMAKE_CTEST_COMMAND} ${NESTED_CONFIG_TYPE}
     --build-and-test
     ${ExportImport_SOURCE_DIR}/Export
     ${ExportImport_BINARY_DIR}/Export
@@ -45,14 +50,9 @@ set_property(
   )
 
 # Build and install the importer.
-if(CMAKE_CONFIGURATION_TYPES)
-  set(Import_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
-else(CMAKE_CONFIGURATION_TYPES)
-  set(Import_CONFIG_TYPE)
-endif(CMAKE_CONFIGURATION_TYPES)
 add_custom_command(
   OUTPUT ${ExportImport_BINARY_DIR}/ImportProject
-  COMMAND ${CMAKE_CTEST_COMMAND} ${Import_CONFIG_TYPE}
+  COMMAND ${CMAKE_CTEST_COMMAND} ${NESTED_CONFIG_TYPE}
    --build-and-test
    ${ExportImport_SOURCE_DIR}/Import
    ${ExportImport_BINARY_DIR}/Import
