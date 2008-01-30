@@ -287,7 +287,8 @@ bool cmGetPropertyCommand::HandleSourceMode()
   if(cmSourceFile* sf =
      this->Makefile->GetOrCreateSource(this->Name.c_str()))
     {
-    return this->StoreResult(sf->GetProperty(this->PropertyName.c_str()));
+    return
+      this->StoreResult(sf->GetPropertyForUser(this->PropertyName.c_str()));
     }
   else
     {

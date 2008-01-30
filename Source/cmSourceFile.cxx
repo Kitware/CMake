@@ -281,6 +281,33 @@ void cmSourceFile::AppendProperty(const char* prop, const char* value)
 }
 
 //----------------------------------------------------------------------------
+const char* cmSourceFile::GetPropertyForUser(const char *prop)
+{
+  // This method is a consequence of design history and backwards
+  // compatibility.  GetProperty is (and should be) a const method.
+  // Computed properties should not be stored back in the property map
+  // but instead reference information already known.  If they need to
+  // cache information in a mutable ivar to provide the return string
+  // safely then so be it.
+  //
+  // The LOCATION property is particularly problematic.  The CMake
+  // language has very loose restrictions on the names that will match
+  // a given source file (for historical reasons).  Implementing
+  // lookups correctly with such loose naming requires the
+  // cmSourceFileLocation class to commit to a particular full path to
+  // the source file as late as possible.  If the users requests the
+  // LOCATION property we must commit now.
+  if(strcmp(prop, "LOCATION") == 0)
+    {
+    // Commit to a location.
+    this->GetFullPath();
+    }
+
+  // Perform the normal property lookup.
+  return this->GetProperty(prop);
+}
+
+//----------------------------------------------------------------------------
 const char* cmSourceFile::GetProperty(const char* prop) const
 {
   // Check for computed properties.

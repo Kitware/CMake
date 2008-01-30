@@ -53,6 +53,10 @@ public:
   const char *GetProperty(const char *prop) const;
   bool GetPropertyAsBool(const char *prop) const;
 
+  /** Implement getting a property when called from a CMake language
+      command like get_property or get_source_file_property.  */
+  const char* GetPropertyForUser(const char *prop);
+
   /**
    * The full path to the file.  The non-const version of this method
    * may attempt to locate the file on disk and finalize its location.
