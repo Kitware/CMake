@@ -98,13 +98,13 @@
   {
     typedef long long LongLong;
   }
-#elif @KWSYS_NAMESPACE@_USE_USE___INT64
+#elif @KWSYS_NAMESPACE@_USE___INT64
   namespace @KWSYS_NAMESPACE@
   {
     typedef __int64 LongLong;
   }
 #else
-//# error "No Long long"
+# error "No Long Long"
 #endif
 
 /* Define these macros temporarily to keep the code readable.  */
