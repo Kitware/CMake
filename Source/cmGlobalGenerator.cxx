@@ -1283,14 +1283,14 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
           clg = clg->GetParent())
         {
         // This local generator includes the target.
-        std::set<cmTarget const*>& targetSet =
+        std::set<cmTarget*>& targetSet =
           this->LocalGeneratorToTargetMap[clg];
         targetSet.insert(&target);
 
         // Add dependencies of the included target.  An excluded
         // target may still be included if it is a dependency of a
         // non-excluded target.
-        TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
+        TargetDependSet & tgtdeps = this->GetTargetDirectDepends(target);
         for(TargetDependSet::const_iterator ti = tgtdeps.begin();
             ti != tgtdeps.end(); ++ti)
           {
@@ -1682,14 +1682,14 @@ void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
 }
 
 //----------------------------------------------------------------------------
-cmGlobalGenerator::TargetDependSet const&
-cmGlobalGenerator::GetTargetDirectDepends(cmTarget const& target)
+cmGlobalGenerator::TargetDependSet &
+cmGlobalGenerator::GetTargetDirectDepends(cmTarget & target)
 {
   // Clarify the role of the input target.
-  cmTarget const* depender = &target;
+  cmTarget * depender = &target;
 
   // if the depends are already in the map then return
-  TargetDependMap::const_iterator tgtI =
+  TargetDependMap::iterator tgtI =
     this->TargetDependencies.find(depender);
   if(tgtI != this->TargetDependencies.end())
     {
@@ -1737,12 +1737,12 @@ cmGlobalGenerator::GetTargetDirectDepends(cmTarget const& target)
 
 //----------------------------------------------------------------------------
 bool
-cmGlobalGenerator::ConsiderTargetDepends(cmTarget const* depender,
+cmGlobalGenerator::ConsiderTargetDepends(cmTarget * depender,
                                          TargetDependSet& depender_depends,
                                          const char* dependee_name)
 {
   // Check the target's makefile first.
-  cmTarget const* dependee =
+  cmTarget * dependee =
     depender->GetMakefile()->FindTarget(dependee_name);
 
   // Then search globally.
@@ -1758,7 +1758,7 @@ cmGlobalGenerator::ConsiderTargetDepends(cmTarget const* depender,
     }
 
   // Check whether the depender is among the dependee's dependencies.
-  std::vector<cmTarget const*> steps;
+  std::vector<cmTarget *> steps;
   if(this->FindDependency(depender, dependee, steps))
     {
     // This creates a cyclic dependency.
@@ -1769,7 +1769,7 @@ cmGlobalGenerator::ConsiderTargetDepends(cmTarget const* depender,
     for(unsigned int i = static_cast<unsigned int>(steps.size());
         i > 0; --i)
       {
-      cmTarget const* step = steps[i-1];
+      cmTarget * step = steps[i-1];
       e << "    -> " << step->GetName() << "\n";
       isStatic = isStatic && step->GetType() == cmTarget::STATIC_LIBRARY;
       }
@@ -1799,21 +1799,21 @@ cmGlobalGenerator::ConsiderTargetDepends(cmTarget const* depender,
 //----------------------------------------------------------------------------
 bool
 cmGlobalGenerator
-::FindDependency(cmTarget const* goal, cmTarget const* current,
-                 std::vector<cmTarget const*>& steps)
+::FindDependency(cmTarget * goal, cmTarget * current,
+                 std::vector<cmTarget*>& steps)
 {
   if(current == goal)
     {
     steps.push_back(current);
     return true;
     }
-  TargetDependMap::const_iterator i = this->TargetDependencies.find(current);
+  TargetDependMap::iterator i = this->TargetDependencies.find(current);
   if(i == this->TargetDependencies.end())
     {
     return false;
     }
-  TargetDependSet const& depends = i->second;
-  for(TargetDependSet::const_iterator j = depends.begin();
+  TargetDependSet & depends = i->second;
+  for(TargetDependSet::iterator j = depends.begin();
       j != depends.end(); ++j)
     {
     if(this->FindDependency(goal, *j, steps))

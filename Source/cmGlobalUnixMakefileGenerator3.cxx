@@ -848,7 +848,7 @@ cmGlobalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 int cmGlobalUnixMakefileGenerator3
-::GetTargetTotalNumberOfActions(cmTarget const& target,
+::GetTargetTotalNumberOfActions(cmTarget & target,
                                 std::set<cmStdString> &emitted)
 {
   // do not double count
@@ -861,9 +861,9 @@ int cmGlobalUnixMakefileGenerator3
       (target.GetMakefile()->GetLocalGenerator());
     result = static_cast<int>(lg->ProgressFiles[target.GetName()].size());
     
-    TargetDependSet const& depends = this->GetTargetDirectDepends(target);
+    TargetDependSet & depends = this->GetTargetDirectDepends(target);
     
-    TargetDependSet::const_iterator i;
+    TargetDependSet::iterator i;
     for (i = depends.begin(); i != depends.end(); ++i)
       {
       result += this->GetTargetTotalNumberOfActions(**i, emitted);
@@ -877,11 +877,11 @@ unsigned long cmGlobalUnixMakefileGenerator3
 ::GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
 {
   unsigned long result = 0;
-  std::set<cmTarget const*>& targets = this->LocalGeneratorToTargetMap[lg];
-  for(std::set<cmTarget const*>::iterator t = targets.begin();
+  std::set<cmTarget *>& targets = this->LocalGeneratorToTargetMap[lg];
+  for(std::set<cmTarget *>::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    cmTarget const* target = *t;
+    cmTarget * target = *t;
     cmLocalUnixMakefileGenerator3 *lg3 =
       static_cast<cmLocalUnixMakefileGenerator3 *>
       (target->GetMakefile()->GetLocalGenerator());

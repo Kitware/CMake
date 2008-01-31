@@ -232,11 +232,11 @@ public:
   virtual const char* GetCleanTargetName()        { return 0; }
 
   // Class to track a set of dependencies.
-  class TargetDependSet: public std::set<cmTarget const*> {};
+  class TargetDependSet: public std::set<cmTarget*> {};
 
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
-  TargetDependSet const& GetTargetDirectDepends(cmTarget const& target);
+  TargetDependSet & GetTargetDirectDepends(cmTarget & target);
 
   const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
@@ -281,7 +281,7 @@ protected:
   cmLocalGenerator* CurrentLocalGenerator;
   // map from project name to vector of local generators in that project
   std::map<cmStdString, std::vector<cmLocalGenerator*> > ProjectMap;
-  std::map<cmLocalGenerator*, std::set<cmTarget const*> >
+  std::map<cmLocalGenerator*, std::set<cmTarget *> >
   LocalGeneratorToTargetMap;
 
   // Set of named installation components requested by the project.
@@ -314,12 +314,12 @@ private:
   std::vector<std::string> FilesReplacedDuringGenerate;
 
   // Track inter-target dependencies.
-  bool ConsiderTargetDepends(cmTarget const* depender,
+  bool ConsiderTargetDepends(cmTarget * depender,
                              TargetDependSet& depender_depends,
                              const char* dependee_name);
-  bool FindDependency(cmTarget const* goal, cmTarget const* current,
-                      std::vector<cmTarget const*>& steps);
-  typedef std::map<cmTarget const*, TargetDependSet> TargetDependMap;
+  bool FindDependency(cmTarget * goal, cmTarget * current,
+                      std::vector<cmTarget *>& steps);
+  typedef std::map<cmTarget *, TargetDependSet> TargetDependMap;
   TargetDependMap TargetDependencies;
 
   // Cache directory content and target files to be built.
