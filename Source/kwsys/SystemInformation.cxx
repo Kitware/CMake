@@ -14,26 +14,6 @@
      PURPOSE.  See the above copyright notices for more information.
 =========================================================================*/
 #include "kwsysPrivate.h"
-#ifndef WIN32
-  #include <sys/utsname.h> // int uname(struct utsname *buf);
-#endif
-
-#ifdef _WIN32
-  #include <windows.h>
-#endif
-
-#ifdef __linux
-#include <sys/procfs.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <ctype.h> // int isdigit(int c);
-#include <errno.h> // extern int errno;
-#include <sys/time.h>
-#elif __hpux
-#include <sys/param.h>
-#include <sys/pstat.h>
-#endif
 #include KWSYS_HEADER(FundamentalType.h)
 #include KWSYS_HEADER(stl/string)
 #include KWSYS_HEADER(stl/vector)
@@ -54,6 +34,28 @@
 # include "kwsys_stl_iosfwd.in"
 # include "kwsys_ios_sstream.h.in"
 # include "kwsys_ios_iostream.h.in"
+#endif
+
+
+#ifndef WIN32
+# include <sys/utsname.h> // int uname(struct utsname *buf);
+#endif
+
+#ifdef _WIN32
+# include <windows.h>
+#endif
+
+#ifdef __linux
+# include <sys/procfs.h>
+# include <sys/types.h>
+# include <unistd.h>
+# include <fcntl.h>
+# include <ctype.h> // int isdigit(int c);
+# include <errno.h> // extern int errno;
+# include <sys/time.h>
+#elif __hpux
+# include <sys/param.h>
+# include <sys/pstat.h>
 #endif
 
 #include <memory.h>
