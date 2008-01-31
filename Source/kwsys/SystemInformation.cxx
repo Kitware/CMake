@@ -403,6 +403,12 @@ void SystemInformation::RunMemoryCheck()
 // --------------------------------------------------------------
 // SystemInformationImplementation starts here
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1300) && !defined(_WIN64)
+#define USE_ASM_INSTRUCTIONS 1
+#else
+#define USE_ASM_INSTRUCTIONS 0
+#endif
+
 #define STORE_TLBCACHE_INFO(x,y)  x = (x < y) ? y : x
 #define TLBCACHE_INFO_UNITS      (15)
 #define CLASSICAL_CPU_FREQ_LOOP    10000000
@@ -954,7 +960,7 @@ void SystemInformationImplementation::FindManufacturer()
 /** */
 bool SystemInformationImplementation::RetrieveCPUIdentity()
 {
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   int localCPUVendor[3];
   int localCPUSignature;
 
@@ -1027,7 +1033,7 @@ bool SystemInformationImplementation::RetrieveCPUIdentity()
 /** */
 bool SystemInformationImplementation::RetrieveCPUCacheDetails()
 {
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   int L1Cache[4] = { 0, 0, 0, 0 };
   int L2Cache[4] = { 0, 0, 0, 0 };
 
@@ -1144,7 +1150,7 @@ bool SystemInformationImplementation::RetrieveCPUCacheDetails()
 /** */
 bool SystemInformationImplementation::RetrieveClassicalCPUCacheDetails()
 {
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   int TLBCode = -1, TLBData = -1, L1Code = -1, L1Data = -1, L1Trace = -1, L2Unified = -1, L3Unified = -1;
   int TLBCacheData[4] = { 0, 0, 0, 0 };
   int TLBPassCounter = 0;
@@ -1344,7 +1350,7 @@ bool SystemInformationImplementation::RetrieveClassicalCPUCacheDetails()
 /** */
 bool SystemInformationImplementation::RetrieveCPUClockSpeed()
 {
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if _WIN32
   // First of all we check to see if the RDTSC (0x0F, 0x31) instruction is supported.
   if (!this->Features.HasTSC) 
     {
@@ -1358,8 +1364,11 @@ bool SystemInformationImplementation::RetrieveCPUClockSpeed()
 
   for (unsigned int nCounter = 0; nCounter < uiRepetitions; nCounter ++) 
     {
-    i64Total += GetCyclesDifference (SystemInformationImplementation::Delay, uiMSecPerRepetition);
-    i64Overhead += GetCyclesDifference (SystemInformationImplementation::DelayOverhead, uiMSecPerRepetition);
+    i64Total += GetCyclesDifference (SystemInformationImplementation::Delay,
+                                     uiMSecPerRepetition);
+    i64Overhead +=
+      GetCyclesDifference (SystemInformationImplementation::DelayOverhead,
+                           uiMSecPerRepetition);
     }
 
   // Calculate the MHz speed.
@@ -1380,7 +1389,7 @@ bool SystemInformationImplementation::RetrieveCPUClockSpeed()
 /** */
 bool SystemInformationImplementation::RetrieveClassicalCPUClockSpeed()
 {
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   LARGE_INTEGER liStart, liEnd, liCountsPerSecond;
   double dFrequency, dDifference;
 
@@ -1481,7 +1490,7 @@ bool SystemInformationImplementation::RetrieveCPUExtendedLevelSupport(int CPULev
       }
     }
     
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
 
   // Use assembly to detect CPUID information...
   __try {
@@ -1543,7 +1552,7 @@ bool SystemInformationImplementation::RetrieveExtendedCPUFeatures()
     {
     return false;
     }
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   int localCPUExtendedFeatures = 0;
 
   // Use assembly to detect CPUID information...
@@ -1612,7 +1621,7 @@ bool SystemInformationImplementation::RetrieveProcessorSerialNumber()
     return false;
     }
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   int SerialNumber[3];
 
 
@@ -1682,7 +1691,7 @@ bool SystemInformationImplementation::RetrieveCPUPowerManagement()
     return false;
     }
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   int localCPUPowerManagement = 0;
 
 
@@ -1735,7 +1744,7 @@ bool SystemInformationImplementation::RetrieveExtendedCPUIdentity()
   if (!RetrieveCPUExtendedLevelSupport(0x80000003)) return false;
   if (!RetrieveCPUExtendedLevelSupport(0x80000004)) return false;
    
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   int ProcessorNameStartPos = 0;
   int CPUExtendedIdentity[12];
 
@@ -2218,7 +2227,7 @@ int SystemInformationImplementation::QueryMemory()
   this->AvailablePhysicalMemory = 0;
 #ifdef __CYGWIN__
   return 0;
-#elif defined(_MSC_VER) && (_MSC_VER >= 1300)
+#elif _WIN32
   MEMORYSTATUS ms;
   GlobalMemoryStatus(&ms);
 
@@ -2389,7 +2398,7 @@ unsigned long SystemInformationImplementation::GetAvailablePhysicalMemory()
 LongLong SystemInformationImplementation::GetCyclesDifference (DELAY_FUNC DelayFunction,
                                                   unsigned int uiParameter)
 {
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
 
   unsigned int edx1, eax1;
   unsigned int edx2, eax2;
@@ -2435,7 +2444,7 @@ LongLong SystemInformationImplementation::GetCyclesDifference (DELAY_FUNC DelayF
 /** Compute the delay overhead */
 void SystemInformationImplementation::DelayOverhead(unsigned int uiMS)
 {
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if _WIN32
   LARGE_INTEGER Frequency, StartCounter, EndCounter;
   __int64 x;
 
@@ -2461,7 +2470,7 @@ void SystemInformationImplementation::DelayOverhead(unsigned int uiMS)
 unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
 {
   unsigned int Regebx = 0;
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   if (!this->IsHyperThreadingSupported()) 
     {
     return (unsigned char) 1;  // HT not supported
@@ -2479,7 +2488,7 @@ unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
 /** Works only for windows */
 unsigned int SystemInformationImplementation::IsHyperThreadingSupported()
 {
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   unsigned int Regedx    = 0,
              Regeax      = 0,
              VendorId[3] = {0, 0, 0};
@@ -2526,7 +2535,7 @@ unsigned int SystemInformationImplementation::IsHyperThreadingSupported()
 unsigned char SystemInformationImplementation::GetAPICId()
 {
   unsigned int Regebx = 0;
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if USE_ASM_INSTRUCTIONS
   if (!this->IsHyperThreadingSupported()) 
     {
     return (unsigned char) -1;  // HT not supported
@@ -2544,7 +2553,7 @@ unsigned char SystemInformationImplementation::GetAPICId()
 /** Count the number of CPUs. Works only on windows. */
 int SystemInformationImplementation::CPUCount()
 {
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if _WIN32
   unsigned char StatusFlag  = 0;
   SYSTEM_INFO info;
 
@@ -2917,7 +2926,7 @@ bool SystemInformationImplementation::QueryOSInformation()
     osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
     if (!GetVersionEx ((OSVERSIONINFO *) &osvi)) 
       {
-      return NULL;
+      return false;
       }
     }
 
