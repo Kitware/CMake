@@ -579,6 +579,15 @@ ENDFOREACH(header)
 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/kwsys_cstddef.hxx.in
                ${KWSYS_HEADER_DIR}/cstddef
                @ONLY IMMEDIATE)
+IF(KWSYS_INSTALL_INCLUDE_DIR)
+  INSTALL(FILES ${KWSYS_HEADER_DIR}/cstddef
+    DESTINATION ${KWSYS_INSTALL_INCLUDE_DIR}/${KWSYS_NAMESPACE}
+    ${KWSYS_INSTALL_INCLUDE_OPTIONS})
+  IF(KWSYS_HEADER_INSTALL_DIR)
+    INSTALL_FILES(${KWSYS_HEADER_INSTALL_DIR}/${KWSYS_NAMESPACE}
+      FILES ${KWSYS_HEADER_DIR}/cstddef)
+  ENDIF(KWSYS_HEADER_INSTALL_DIR)
+ENDIF(KWSYS_INSTALL_INCLUDE_DIR)
 
 #-----------------------------------------------------------------------------
 # Create streams header wrappers to give standard names by which they
