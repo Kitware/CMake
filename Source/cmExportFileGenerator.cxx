@@ -139,8 +139,7 @@ cmExportFileGenerator
      target->GetLinkInterface(config))
     {
     // This target provides a link interface, so use it.
-    this->SetImportLinkProperties(config, suffix, target,
-                                  *interface, properties);
+    this->SetImportLinkProperties(suffix, target, *interface, properties);
     }
   else if(target->GetType() == cmTarget::STATIC_LIBRARY ||
           target->GetType() == cmTarget::SHARED_LIBRARY)
@@ -184,15 +183,13 @@ cmExportFileGenerator
     }
 
   // Store the entries in the property.
-  this->SetImportLinkProperties(config, suffix, target,
-                                actual_libs, properties);
+  this->SetImportLinkProperties(suffix, target, actual_libs, properties);
 }
 
 //----------------------------------------------------------------------------
 void
 cmExportFileGenerator
-::SetImportLinkProperties(const char* config,
-                          std::string const& suffix,
+::SetImportLinkProperties(std::string const& suffix,
                           cmTarget* target,
                           std::vector<std::string> const& libs,
                           ImportPropertyMap& properties)
