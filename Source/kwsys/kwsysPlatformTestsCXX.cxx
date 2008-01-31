@@ -29,7 +29,7 @@
 
 #ifdef TEST_KWSYS_STL_HAVE_STD
 #include <list>
-void f(std::list<int>*) {}
+void f(std ::list<int>*) {}
 int main() { return 0; }
 #endif
 
@@ -40,7 +40,7 @@ int main() { return 0; }
 
 #ifdef TEST_KWSYS_IOS_HAVE_STD
 #include <iosfwd>
-void f(std::ostream*) {}
+void f(std ::ostream*) {}
 int main() { return 0; }
 #endif
 
@@ -50,8 +50,8 @@ int main() { return 0; }
 # error "GCC 2.96 stringstream is buggy"
 #endif
 int main()
-{ 
-  std::ostringstream ostr;
+{
+  std ::ostringstream ostr;
   ostr << "hello";
   if(ostr.str().size() == 5)
     {
