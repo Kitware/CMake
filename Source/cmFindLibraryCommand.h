@@ -69,7 +69,6 @@ protected:
   void AddArchitecturePaths(const char* suffix);
   void AddLib64Paths();
   std::string FindLibrary(const char* name);
-  std::string FixForImplicitLocations(std::string const& lib);
 };
 
 

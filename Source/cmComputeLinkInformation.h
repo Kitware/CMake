@@ -117,6 +117,7 @@ private:
   // Handling of link items that are not targets or full file paths.
   void AddTargetItem(std::string const& item, cmTarget* target);
   void AddFullItem(std::string const& item);
+  bool CheckImplicitDirItem(std::string const& item);
   void AddUserItem(std::string const& item);
   void AddDirectoryItem(std::string const& item);
   void AddFrameworkItem(std::string const& item);
@@ -132,6 +133,7 @@ private:
   void ComputeLinkerSearchDirectories();
   void AddLinkerSearchDirectories(std::vector<std::string> const& dirs);
   std::set<cmStdString> DirectoriesEmmitted;
+  std::set<cmStdString> ImplicitLinkDirs;
 
   // Linker search path compatibility mode.
   std::vector<std::string> OldLinkDirs;

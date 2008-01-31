@@ -234,6 +234,21 @@ cmComputeLinkInformation
   // Setup framework support.
   this->ComputeFrameworkInfo();
 
+  // Get the implicit link directories for this platform.
+  if(const char* implicitLinks =
+     (this->Makefile->GetDefinition
+      ("CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES")))
+    {
+    std::vector<std::string> implicitLinkVec;
+    cmSystemTools::ExpandListArgument(implicitLinks, implicitLinkVec);
+    for(std::vector<std::string>::const_iterator
+          i = implicitLinkVec.begin();
+        i != implicitLinkVec.end(); ++i)
+      {
+      this->ImplicitLinkDirs.insert(*i);
+      }
+    }
+
   // Initial state.
   this->RuntimeSearchPathComputed = false;
   this->HaveUserFlagItem = false;
@@ -689,6 +704,12 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddFullItem(std::string const& item)
 {
+  // Check for the implicit link directory special case.
+  if(this->CheckImplicitDirItem(item))
+    {
+    return;
+    }
+
   // This is called to handle a link item that is a full path.
   // If the target is not a static library make sure the link type is
   // shared.  This is because dynamic-mode linking can handle both
@@ -725,6 +746,37 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
 
   // Now add the full path to the library.
   this->Items.push_back(Item(item, true));
+}
+
+//----------------------------------------------------------------------------
+bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
+{
+  // We only switch to a pathless item if the link type may be
+  // enforced.  Fortunately only platforms that support link types
+  // seem to have magic per-architecture implicit link directories.
+  if(!this->LinkTypeEnabled)
+    {
+    return false;
+    }
+
+  // Check if this item is in an implicit link directory.
+  std::string dir = cmSystemTools::GetFilenamePath(item);
+  if(this->ImplicitLinkDirs.find(dir) == this->ImplicitLinkDirs.end())
+    {
+    // Only libraries in implicit link directories are converted to
+    // pathless items.
+    return false;
+    }
+
+  // Many system linkers support multiple architectures by
+  // automatically selecting the implicit linker search path for the
+  // current architecture.  If the library appears in an implicit link
+  // directory then just report the file name without the directory
+  // portion.  This will allow the system linker to locate the proper
+  // library for the architecture at link time.
+  std::string file = cmSystemTools::GetFilenameName(item);
+  this->AddUserItem(file);
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -907,20 +959,8 @@ void cmComputeLinkInformation::AddFrameworkPath(std::string const& p)
 void cmComputeLinkInformation::ComputeLinkerSearchDirectories()
 {
   // Some search paths should never be emitted.
+  this->DirectoriesEmmitted = this->ImplicitLinkDirs;
   this->DirectoriesEmmitted.insert("");
-  if(const char* implicitLinks =
-     (this->Makefile->GetDefinition
-      ("CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES")))
-    {
-    std::vector<std::string> implicitLinkVec;
-    cmSystemTools::ExpandListArgument(implicitLinks, implicitLinkVec);
-    for(std::vector<std::string>::const_iterator
-          i = implicitLinkVec.begin();
-        i != implicitLinkVec.end(); ++i)
-      {
-      this->DirectoriesEmmitted.insert(*i);
-      }
-    }
 
   // Check if we need to include the runtime search path at link time.
   std::string var = "CMAKE_SHARED_LIBRARY_LINK_";
