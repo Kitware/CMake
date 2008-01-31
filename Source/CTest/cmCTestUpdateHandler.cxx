@@ -541,7 +541,8 @@ int cmCTestUpdateHandler::ProcessHandler()
     return -1;
     }
   std::string start_time = this->CTest->CurrentTime();
-  unsigned int start_time_time = static_cast<unsigned int>(cmSystemTools::GetTime());
+  unsigned int start_time_time =
+    static_cast<unsigned int>(cmSystemTools::GetTime());
   double elapsed_time_start = cmSystemTools::GetTime();
 
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "* Update repository: "
