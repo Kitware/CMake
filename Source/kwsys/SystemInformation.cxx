@@ -1671,7 +1671,7 @@ bool SystemInformation::RetrieveClassicalCPUIdentity()
 }
 
 /** Extract a value from the CPUInfo file */
-std::string SystemInformation::ExtractValueFromCpuInfoFile(std::string buffer,const char* word,int init)
+kwsys_stl::string SystemInformation::ExtractValueFromCpuInfoFile(kwsys_stl::string buffer,const char* word,int init)
 {
   long int pos = buffer.find(word,init);
   if(pos != -1)
@@ -1693,12 +1693,12 @@ int SystemInformation::RetreiveInformationFromCpuInfoFile()
 {
   this->NumberOfLogicalCPU = 0;
   this->NumberOfPhysicalCPU = 0;
-  std::string buffer;
+  kwsys_stl::string buffer;
 
   FILE *fd = fopen("/proc/cpuinfo", "r" );
   if ( !fd ) 
     {
-    kwsys_ios::cout << "Problem opening /proc/cpuinfo" << std::endl;
+    kwsys_ios::cout << "Problem opening /proc/cpuinfo" << kwsys_stl::endl;
     return 0;
     }
   
@@ -1723,7 +1723,7 @@ int SystemInformation::RetreiveInformationFromCpuInfoFile()
 
   // Count the number of physical ids that are the same
   int currentId = -1;
-  std::string idc = this->ExtractValueFromCpuInfoFile(buffer,"physical id");
+  kwsys_stl::string idc = this->ExtractValueFromCpuInfoFile(buffer,"physical id");
 
   while(this->CurrentPositionInFile>0)
     {
@@ -1742,7 +1742,7 @@ int SystemInformation::RetreiveInformationFromCpuInfoFile()
      }
 
   // CPU speed (checking only the first proc
-  std::string CPUSpeed = this->ExtractValueFromCpuInfoFile(buffer,"cpu MHz");
+  kwsys_stl::string CPUSpeed = this->ExtractValueFromCpuInfoFile(buffer,"cpu MHz");
   this->CPUSpeedInMHz = (float)atof(CPUSpeed.c_str());
 
   // Chip family
@@ -1757,7 +1757,7 @@ int SystemInformation::RetreiveInformationFromCpuInfoFile()
   this->RetrieveClassicalCPUIdentity();
 
   // L1 Cache size
-  std::string cacheSize = this->ExtractValueFromCpuInfoFile(buffer,"cache size");
+  kwsys_stl::string cacheSize = this->ExtractValueFromCpuInfoFile(buffer,"cache size");
   pos = cacheSize.find(" KB");
   if(pos!=-1)
     {
@@ -1807,7 +1807,7 @@ int SystemInformation::QueryMemory()
   int errorFlag = uname(&unameInfo);
   if( errorFlag!=0 )
     {
-    std::cout << "Problem calling uname(): " << strerror(errno) << std::endl;
+    kwsys_stl::cout << "Problem calling uname(): " << strerror(errno) << kwsys_stl::endl;
     return 0;
     }
  
@@ -1831,7 +1831,7 @@ int SystemInformation::QueryMemory()
   FILE *fd = fopen("/proc/meminfo", "r" );
   if ( !fd ) 
     {
-    std::cout << "Problem opening /proc/meminfo" << std::endl;
+    kwsys_stl::cout << "Problem opening /proc/meminfo" << kwsys_stl::endl;
     return 0;
     }
   
@@ -2228,7 +2228,7 @@ unsigned int SystemInformation::GetNumberOfPhysicalCPU()
 bool SystemInformation::ParseSysCtl()
 {
   // Extract the arguments from the command line
-  std::vector<const char*> args;
+  kwsys_stl::vector<const char*> args;
   args.push_back("sysctl");
   args.push_back("-a");
   args.push_back(0);
@@ -2271,7 +2271,7 @@ bool SystemInformation::ParseSysCtl()
 }
 
 /** Extract a value from sysctl command */
-std::string SystemInformation::ExtractValueFromSysCtl(const char* word)
+kwsys_stl::string SystemInformation::ExtractValueFromSysCtl(const char* word)
 {
   long int pos = this->SysCtlBuffer.find(word);
   if(pos != -1)
@@ -2287,9 +2287,9 @@ std::string SystemInformation::ExtractValueFromSysCtl(const char* word)
 }
 
 /** Run a given process */
-std::string SystemInformation::RunProcess(std::vector<const char*> args)
+kwsys_stl::string SystemInformation::RunProcess(kwsys_stl::vector<const char*> args)
 { 
-  std::string buffer = "";
+  kwsys_stl::string buffer = "";
 
   // Run the application
   kwsysProcess* gp = kwsysProcess_New();
@@ -2320,12 +2320,12 @@ std::string SystemInformation::RunProcess(std::vector<const char*> args)
       } break;
     case kwsysProcess_State_Error:
       {
-      std::cerr << "Error: Could not run " << args[0] << ":\n";
-      std::cerr << kwsysProcess_GetErrorString(gp) << "\n";
+      kwsys_stl::cerr << "Error: Could not run " << args[0] << ":\n";
+      kwsys_stl::cerr << kwsysProcess_GetErrorString(gp) << "\n";
       } break;
     case kwsysProcess_State_Exception:
       {
-      std::cerr << "Error: " << args[0]
+      kwsys_stl::cerr << "Error: " << args[0]
                 << " terminated with an exception: "
                 << kwsysProcess_GetExceptionString(gp) << "\n";
       } break;
@@ -2335,8 +2335,8 @@ std::string SystemInformation::RunProcess(std::vector<const char*> args)
     case kwsysProcess_State_Killed:
       {
       // Should not get here.
-      std::cerr << "Unexpected ending state after running " << args[0]
-                << std::endl;
+      kwsys_stl::cerr << "Unexpected ending state after running " << args[0]
+                << kwsys_stl::endl;
       } break;
     }
   kwsysProcess_Delete(gp);
@@ -2345,14 +2345,14 @@ std::string SystemInformation::RunProcess(std::vector<const char*> args)
 }
   
 
-std::string SystemInformation::ParseValueFromKStat(const char* arguments)
+kwsys_stl::string SystemInformation::ParseValueFromKStat(const char* arguments)
 {
-  std::vector<const char*> args;
+  kwsys_stl::vector<const char*> args;
   args.clear();
   args.push_back("kstat");
   args.push_back("-p");
   
-  std::string command = arguments;
+  kwsys_stl::string command = arguments;
   long int start = -1;
   long int pos = command.find(' ',0);
   while(pos!=-1)
@@ -2374,7 +2374,7 @@ std::string SystemInformation::ParseValueFromKStat(const char* arguments)
     
     if(!inQuotes)
       {
-      std::string arg = command.substr(start+1,pos-start-1);
+      kwsys_stl::string arg = command.substr(start+1,pos-start-1);
 
       // Remove the quotes if any
       long int quotes = arg.find('"');
@@ -2388,14 +2388,14 @@ std::string SystemInformation::ParseValueFromKStat(const char* arguments)
       }
     pos = command.find(' ',pos+1);
     }
-  std::string lastArg = command.substr(start+1,command.size()-start-1);
+  kwsys_stl::string lastArg = command.substr(start+1,command.size()-start-1);
   args.push_back(lastArg.c_str());
 
   args.push_back(0);
 
-  std::string buffer = this->RunProcess(args);
+  kwsys_stl::string buffer = this->RunProcess(args);
 
-  std::string value = "";
+  kwsys_stl::string value = "";
   for(unsigned int i=buffer.size()-1;i>0;i--)
     {
     if(buffer[i] == ' ' || buffer[i] == '\t')
@@ -2404,7 +2404,7 @@ std::string SystemInformation::ParseValueFromKStat(const char* arguments)
       }   
     if(buffer[i] != '\n' && buffer[i] != '\r')
       {
-      std::string val = value;
+      kwsys_stl::string val = value;
       value = buffer[i];
       value += val;
       }          

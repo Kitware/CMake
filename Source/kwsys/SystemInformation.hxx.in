@@ -172,7 +172,6 @@ public:
   void RunMemoryCheck();
 
 
-protected:
 
   typedef struct tagID 
     {
@@ -233,6 +232,7 @@ protected:
     {
     AMD, Intel, NSC, UMC, Cyrix, NexGen, IDT, Rise, Transmeta, Sun, UnknownManufacturer
     };
+protected:
 
   // Functions.
   bool RetrieveCPUFeatures();
@@ -263,7 +263,7 @@ protected:
 
   // For Linux
   int RetreiveInformationFromCpuInfoFile();
-  std::string ExtractValueFromCpuInfoFile(std::string buffer,
+  kwsys_stl::string ExtractValueFromCpuInfoFile(kwsys_stl::string buffer,
                                           const char* word, int init=0);
 
   static void Delay (unsigned int);
@@ -273,13 +273,13 @@ protected:
 
   // For Mac
   bool ParseSysCtl();
-  std::string ExtractValueFromSysCtl(const char* word);
-  std::string SysCtlBuffer;
+  kwsys_stl::string ExtractValueFromSysCtl(const char* word);
+  kwsys_stl::string SysCtlBuffer;
 
   // For Solaris
   bool QuerySolarisInfo();
-  std::string ParseValueFromKStat(const char* arguments);
-  std::string RunProcess(std::vector<const char*> args);
+  kwsys_stl::string ParseValueFromKStat(const char* arguments);
+  kwsys_stl::string RunProcess(kwsys_stl::vector<const char*> args);
 
   // Evaluate the memory information.
   int QueryMemory();
@@ -292,11 +292,11 @@ protected:
 
   // Operating System information
   bool QueryOSInformation();
-  std::string OSName;
-  std::string Hostname;
-  std::string OSRelease ;
-  std::string OSVersion;
-  std::string OSPlatform; 
+  kwsys_stl::string OSName;
+  kwsys_stl::string Hostname;
+  kwsys_stl::string OSRelease ;
+  kwsys_stl::string OSVersion;
+  kwsys_stl::string OSPlatform; 
 };
 } // namespace @KWSYS_NAMESPACE@
 
