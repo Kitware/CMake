@@ -1807,7 +1807,7 @@ int SystemInformation::QueryMemory()
   int errorFlag = uname(&unameInfo);
   if( errorFlag!=0 )
     {
-    kwsys_stl::cout << "Problem calling uname(): " << strerror(errno) << kwsys_stl::endl;
+    kwsys_ios::cout << "Problem calling uname(): " << strerror(errno) << kwsys_stl::endl;
     return 0;
     }
  
@@ -1831,7 +1831,7 @@ int SystemInformation::QueryMemory()
   FILE *fd = fopen("/proc/meminfo", "r" );
   if ( !fd ) 
     {
-    kwsys_stl::cout << "Problem opening /proc/meminfo" << kwsys_stl::endl;
+    kwsys_ios::cout << "Problem opening /proc/meminfo" << kwsys_stl::endl;
     return 0;
     }
   
@@ -2320,12 +2320,12 @@ kwsys_stl::string SystemInformation::RunProcess(kwsys_stl::vector<const char*> a
       } break;
     case kwsysProcess_State_Error:
       {
-      kwsys_stl::cerr << "Error: Could not run " << args[0] << ":\n";
-      kwsys_stl::cerr << kwsysProcess_GetErrorString(gp) << "\n";
+      kwsys_ios::cerr << "Error: Could not run " << args[0] << ":\n";
+      kwsys_ios::cerr << kwsysProcess_GetErrorString(gp) << "\n";
       } break;
     case kwsysProcess_State_Exception:
       {
-      kwsys_stl::cerr << "Error: " << args[0]
+      kwsys_ios::cerr << "Error: " << args[0]
                 << " terminated with an exception: "
                 << kwsysProcess_GetExceptionString(gp) << "\n";
       } break;
@@ -2335,7 +2335,7 @@ kwsys_stl::string SystemInformation::RunProcess(kwsys_stl::vector<const char*> a
     case kwsysProcess_State_Killed:
       {
       // Should not get here.
-      kwsys_stl::cerr << "Unexpected ending state after running " << args[0]
+      kwsys_ios::cerr << "Unexpected ending state after running " << args[0]
                 << kwsys_stl::endl;
       } break;
     }
