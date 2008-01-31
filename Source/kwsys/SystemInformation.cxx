@@ -2581,7 +2581,7 @@ int SystemInformationImplementation::CPUCount()
 
       // Calculate the appropriate  shifts and mask based on the 
       // number of logical processors.
-      unsigned char i = 1;
+      unsigned int i = 1;
       unsigned char PHY_ID_MASK  = 0xFF;
       unsigned char PHY_ID_SHIFT = 0;
 
@@ -2614,12 +2614,11 @@ int SystemInformationImplementation::CPUCount()
           if (SetProcessAffinityMask(hCurrentProcessHandle,
                                      dwAffinityMask))
             {
-            unsigned char APIC_ID, LOG_ID, PHY_ID;
+            unsigned char APIC_ID, LOG_ID;
             Sleep(0); // Give OS time to switch CPU
 
             APIC_ID = GetAPICId();
             LOG_ID  = APIC_ID & ~PHY_ID_MASK;
-            PHY_ID  = APIC_ID >> PHY_ID_SHIFT;
  
             if (LOG_ID != 0) 
               {
@@ -2791,7 +2790,7 @@ kwsys_stl::string SystemInformationImplementation::RunProcess(kwsys_stl::vector<
       } break;
     }
   kwsysProcess_Delete(gp);
-
+  (void)result;
   return buffer;
 }
   
@@ -2954,6 +2953,8 @@ bool SystemInformationImplementation::QueryOSInformation()
         {
         if (osvi.wProductType == VER_NT_WORKSTATION) 
           {
+// VER_SUITE_PERSONAL may not be defined
+#ifdef VER_SUITE_PERSONAL
           if (osvi.wSuiteMask & VER_SUITE_PERSONAL)
             {
             this->OSRelease += " Personal";
@@ -2962,6 +2963,7 @@ bool SystemInformationImplementation::QueryOSInformation()
             {
             this->OSRelease += " Professional";
             }
+#endif
           } 
         else if (osvi.wProductType == VER_NT_SERVER)
           {
