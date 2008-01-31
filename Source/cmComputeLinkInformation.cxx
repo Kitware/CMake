@@ -340,7 +340,15 @@ bool cmComputeLinkInformation::Compute()
 
   // Restore the target link type so the correct system runtime
   // libraries are found.
-  this->SetCurrentLinkType(this->StartLinkType);
+  const char* lss = this->Target->GetProperty("LINK_SEARCH_END_STATIC");
+  if(cmSystemTools::IsOn(lss))
+    {
+    this->SetCurrentLinkType(LinkStatic);
+    }
+  else
+    {
+    this->SetCurrentLinkType(this->StartLinkType);
+    }
 
   // Compute the linker search path.
   this->ComputeLinkerSearchDirectories();

@@ -285,6 +285,18 @@ void cmTarget::DefineProperties(cmake *cm)
      "This is the configuration-specific version of LINK_FLAGS.");
 
   cm->DefineProperty
+    ("LINK_SEARCH_END_STATIC", cmProperty::TARGET,
+     "End a link line such that static system libraries are used.",
+     "Some linkers support switches such as -Bstatic and -Bdynamic "
+     "to determine whether to use static or shared libraries for -lXXX "
+     "options.  CMake uses these options to set the link type for "
+     "libraries whose full paths are not known or (in some cases) are in "
+     "implicit link directories for the platform.  By default the "
+     "linker search type is left at -Bdynamic by the end of the library "
+     "list.  This property switches the final linker search type to "
+     "-Bstatic.");
+
+  cm->DefineProperty
     ("LINKER_LANGUAGE", cmProperty::TARGET,
      "What tool to use for linking, based on language.",
      "The LINKER_LANGUAGE property is used to change the tool "
