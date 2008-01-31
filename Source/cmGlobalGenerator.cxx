@@ -1911,7 +1911,7 @@ cmGlobalGenerator::AddTargetDepends(cmTarget* target,
     for(cmGlobalGenerator::TargetDependSet::const_iterator i =
           tset.begin(); i != tset.end(); ++i)
       {
-      cmTarget* dtarget = const_cast<cmTarget*>(*i);
+      cmTarget* dtarget = *i;
       this->AddTargetDepends(dtarget, projectTargets);
       }
     }
