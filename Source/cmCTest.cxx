@@ -1261,7 +1261,6 @@ void cmCTest::StartXML(std::ostream& ostr)
        << "\tProcessorClockFrequency=\"" 
        << info.GetProcessorClockFrequency() << "\"\n" 
        << ">" << std::endl;
-  ostr << "<SystemInformation junk=1.0></SystemInformation>\n";
 }
 
 //----------------------------------------------------------------------
