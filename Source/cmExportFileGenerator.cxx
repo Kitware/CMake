@@ -139,7 +139,12 @@ cmExportFileGenerator
      target->GetLinkInterface(config))
     {
     // This target provides a link interface, so use it.
-    this->SetImportLinkProperties(suffix, target, *interface, properties);
+    this->SetImportLinkProperty(suffix, target,
+                                "IMPORTED_LINK_INTERFACE_LIBRARIES",
+                                interface->Libraries, properties);
+    this->SetImportLinkProperty(suffix, target,
+                                "IMPORTED_LINK_DEPENDENT_LIBRARIES",
+                                interface->SharedDeps, properties);
     }
   else if(target->GetType() == cmTarget::STATIC_LIBRARY ||
           target->GetType() == cmTarget::SHARED_LIBRARY)
@@ -183,17 +188,26 @@ cmExportFileGenerator
     }
 
   // Store the entries in the property.
-  this->SetImportLinkProperties(suffix, target, actual_libs, properties);
+  this->SetImportLinkProperty(suffix, target,
+                              "IMPORTED_LINK_INTERFACE_LIBRARIES",
+                              actual_libs, properties);
 }
 
 //----------------------------------------------------------------------------
 void
 cmExportFileGenerator
-::SetImportLinkProperties(std::string const& suffix,
-                          cmTarget* target,
-                          std::vector<std::string> const& libs,
-                          ImportPropertyMap& properties)
+::SetImportLinkProperty(std::string const& suffix,
+                        cmTarget* target,
+                        const char* propName,
+                        std::vector<std::string> const& libs,
+                        ImportPropertyMap& properties)
 {
+  // Skip the property if there are no libraries.
+  if(libs.empty())
+    {
+    return;
+    }
+
   // Get the makefile in which to lookup target information.
   cmMakefile* mf = target->GetMakefile();
 
@@ -233,6 +247,9 @@ cmExportFileGenerator
           // known here.  This is probably user-error.
           this->ComplainAboutMissingTarget(target, li->c_str());
           }
+        // Assume the target will be exported by another command.
+        // Append it with the export namespace.
+        link_libs += this->Namespace;
         link_libs += *li;
         }
       }
@@ -244,7 +261,7 @@ cmExportFileGenerator
     }
 
   // Store the property.
-  std::string prop = "IMPORTED_LINK_LIBRARIES";
+  std::string prop = propName;
   prop += suffix;
   properties[prop] = link_libs;
 }

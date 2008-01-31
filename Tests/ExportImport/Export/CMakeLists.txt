@@ -32,18 +32,12 @@ set_property(TARGET testLib4 PROPERTY FRAMEWORK 1)
 add_executable(testExe3 testExe3.c)
 set_property(TARGET testExe3 PROPERTY MACOSX_BUNDLE 1)
 
-# Install helper targets that are not part of the interface.
-install(
-  TARGETS testExe2libImp testLib3Imp
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
-
 # Install and export from install tree.
 install(
-  TARGETS testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3
-          testExe2lib
+  TARGETS
+  testExe2libImp testLib3Imp
+  testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3
+  testExe2lib
   EXPORT exp
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
@@ -55,6 +49,7 @@ install(EXPORT exp NAMESPACE exp_ DESTINATION lib/exp)
 
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
+  testExe2libImp testLib3Imp
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )

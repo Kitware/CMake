@@ -103,6 +103,12 @@ IF(XCODE)
   SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
 ENDIF(XCODE)
 
+# Need to list dependent shared libraries on link line.  When building
+# with -isysroot (for universal binaries), the linker always looks for
+# dependent libraries under the sysroot.  Listing them on the link
+# line works around the problem.
+SET(CMAKE_DEPENDENT_SHARED_LIBRARY_MODE "LINK")
+
 SET(CMAKE_MacOSX_Content_COMPILE_OBJECT "\"${CMAKE_COMMAND}\" -E copy_if_different <SOURCE> <OBJECT>")
 
 SET(CMAKE_C_CREATE_SHARED_LIBRARY_FORBIDDEN_FLAGS -w)

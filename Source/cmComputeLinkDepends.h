@@ -41,8 +41,10 @@ public:
   {
     std::string Item;
     cmTarget* Target;
-    LinkEntry(): Item(), Target(0) {}
-    LinkEntry(LinkEntry const& r): Item(r.Item), Target(r.Target) {}
+    bool IsSharedDep;
+    LinkEntry(): Item(), Target(0), IsSharedDep(false) {}
+    LinkEntry(LinkEntry const& r):
+      Item(r.Item), Target(r.Target), IsSharedDep(r.IsSharedDep) {}
   };
 
   typedef std::vector<LinkEntry> EntryVector;
@@ -65,8 +67,9 @@ private:
 
   typedef cmTarget::LinkLibraryVectorType LinkLibraryVectorType;
 
+  std::map<cmStdString, int>::iterator
+  AllocateLinkEntry(std::string const& item);
   int AddLinkEntry(std::string const& item);
-  void AddImportedLinkEntries(int depender_index, cmTarget* target);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddTargetLinkEntries(int depender_index,
                             LinkLibraryVectorType const& libs);
@@ -85,6 +88,19 @@ private:
   };
   std::queue<BFSEntry> BFSQueue;
   void FollowLinkEntry(BFSEntry const&);
+
+  // Shared libraries that are included only because they are
+  // dependencies of other shared libraries, not because they are part
+  // of the interface.
+  struct SharedDepEntry
+  {
+    std::string Item;
+    int DependerIndex;
+  };
+  std::queue<SharedDepEntry> SharedDepQueue;
+  void QueueSharedDependencies(int depender_index,
+                               std::vector<std::string> const& deps);
+  void HandleSharedDependency(SharedDepEntry const& dep);
 
   // Dependency inferral for each link item.
   struct DependSet: public std::set<int> {};

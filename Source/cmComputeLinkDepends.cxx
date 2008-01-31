@@ -171,6 +171,14 @@ cmComputeLinkDepends::Compute()
     this->FollowLinkEntry(qe);
     }
 
+  // Complete the search of shared library dependencies.
+  while(!this->SharedDepQueue.empty())
+    {
+    // Handle the next entry.
+    this->HandleSharedDependency(this->SharedDepQueue.front());
+    this->SharedDepQueue.pop();
+    }
+
   // Infer dependencies of targets for which they were not known.
   this->InferDependencies();
 
@@ -198,6 +206,20 @@ cmComputeLinkDepends::Compute()
 }
 
 //----------------------------------------------------------------------------
+std::map<cmStdString, int>::iterator
+cmComputeLinkDepends::AllocateLinkEntry(std::string const& item)
+{
+  std::map<cmStdString, int>::value_type
+    index_entry(item, static_cast<int>(this->EntryList.size()));
+  std::map<cmStdString, int>::iterator
+    lei = this->LinkEntryIndex.insert(index_entry).first;
+  this->EntryList.push_back(LinkEntry());
+  this->InferredDependSets.push_back(0);
+  this->EntryConstraintGraph.push_back(EntryConstraintSet());
+  return lei;
+}
+
+//----------------------------------------------------------------------------
 int cmComputeLinkDepends::AddLinkEntry(std::string const& item)
 {
   // Check if the item entry has already been added.
@@ -209,14 +231,7 @@ int cmComputeLinkDepends::AddLinkEntry(std::string const& item)
     }
 
   // Allocate a spot for the item entry.
-  {
-  std::map<cmStdString, int>::value_type
-    index_entry(item, static_cast<int>(this->EntryList.size()));
-  lei = this->LinkEntryIndex.insert(index_entry).first;
-  this->EntryList.push_back(LinkEntry());
-  this->InferredDependSets.push_back(0);
-  this->EntryConstraintGraph.push_back(EntryConstraintSet());
-  }
+  lei = this->AllocateLinkEntry(item);
 
   // Initialize the item entry.
   int index = lei->second;
@@ -263,18 +278,17 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
   if(entry.Target)
     {
     // Follow the target dependencies.
-    if(entry.Target->IsImported())
-      {
-      // Imported targets provide their own link information.
-      this->AddImportedLinkEntries(depender_index, entry.Target);
-      }
-    else if(cmTargetLinkInterface const* interface =
-            entry.Target->GetLinkInterface(this->Config))
+    if(cmTargetLinkInterface const* interface =
+       entry.Target->GetLinkInterface(this->Config))
       {
       // This target provides its own link interface information.
-      this->AddLinkEntries(depender_index, *interface);
+      this->AddLinkEntries(depender_index, interface->Libraries);
+
+      // Handle dependent shared libraries.
+      this->QueueSharedDependencies(depender_index, interface->SharedDeps);
       }
-    else if(entry.Target->GetType() != cmTarget::EXECUTABLE)
+    else if(!entry.Target->IsImported() &&
+            entry.Target->GetType() != cmTarget::EXECUTABLE)
       {
       // Use the target's link implementation as the interface.
       this->AddTargetLinkEntries(depender_index,
@@ -289,13 +303,60 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkDepends::AddImportedLinkEntries(int depender_index,
-                                                  cmTarget* target)
+void
+cmComputeLinkDepends
+::QueueSharedDependencies(int depender_index,
+                          std::vector<std::string> const& deps)
 {
-  if(std::vector<std::string> const* libs =
-     target->GetImportedLinkLibraries(this->Config))
+  for(std::vector<std::string>::const_iterator li = deps.begin();
+      li != deps.end(); ++li)
     {
-    this->AddLinkEntries(depender_index, *libs);
+    SharedDepEntry qe;
+    qe.Item = *li;
+    qe.DependerIndex = depender_index;
+    this->SharedDepQueue.push(qe);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
+{
+  // Check if the target already has an entry.
+  std::map<cmStdString, int>::iterator lei =
+    this->LinkEntryIndex.find(dep.Item);
+  if(lei == this->LinkEntryIndex.end())
+    {
+    // Allocate a spot for the item entry.
+    lei = this->AllocateLinkEntry(dep.Item);
+
+    // Initialize the item entry.
+    LinkEntry& entry = this->EntryList[lei->second];
+    entry.Item = dep.Item;
+    entry.Target = this->Makefile->FindTargetToUse(dep.Item.c_str());
+
+    // This item was added specifically because it is a dependent
+    // shared library.  It may get special treatment
+    // in cmComputeLinkInformation.
+    entry.IsSharedDep = true;
+    }
+
+  // Get the link entry for this target.
+  int index = lei->second;
+  LinkEntry& entry = this->EntryList[index];
+
+  // This shared library dependency must be preceded by the item that
+  // listed it.
+  this->EntryConstraintGraph[index].insert(dep.DependerIndex);
+
+  // Target items may have their own dependencies.
+  if(entry.Target)
+    {
+    if(cmTargetLinkInterface const* interface =
+       entry.Target->GetLinkInterface(this->Config))
+      {
+      // We use just the shared dependencies, not the interface.
+      this->QueueSharedDependencies(index, interface->SharedDeps);
+      }
     }
 }
 

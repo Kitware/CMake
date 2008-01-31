@@ -188,15 +188,38 @@ void cmTarget::DefineProperties(cmake *cm)
      "from which the target is imported.");
 
   cm->DefineProperty
-    ("IMPORTED_LINK_LIBRARIES", cmProperty::TARGET,
-     "Transitive link dependencies of an IMPORTED target.",
-     "Lists dependencies that must be linked when an IMPORTED library "
+    ("IMPORTED_LINK_DEPENDENT_LIBRARIES", cmProperty::TARGET,
+     "Dependent shared libraries of an imported shared library.",
+     "Shared libraries may be linked to other shared libraries as part "
+     "of their implementation.  On some platforms the linker searches "
+     "for the dependent libraries of shared libraries they are including "
+     "in the link.  CMake gives the paths to these libraries to the linker "
+     "by listing them on the link line explicitly.  This property lists "
+     "the dependent shared libraries of an imported library.  The list "
+     "should be disjoint from the list of interface libraries in the "
+     "IMPORTED_LINK_INTERFACE_LIBRARIES property.  On platforms requiring "
+     "dependent shared libraries to be found at link time CMake uses this "
+     "list to add the dependent libraries to the link command line.");
+
+  cm->DefineProperty
+    ("IMPORTED_LINK_DEPENDENT_LIBRARIES_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration version of IMPORTED_LINK_DEPENDENT_LIBRARIES.",
+     "This property is used when loading settings for the <CONFIG> "
+     "configuration of an imported target.  "
+     "Configuration names correspond to those provided by the project "
+     "from which the target is imported.");
+
+  cm->DefineProperty
+    ("IMPORTED_LINK_INTERFACE_LIBRARIES", cmProperty::TARGET,
+     "Transitive link interface of an IMPORTED target.",
+     "Lists libraries whose interface is included when an IMPORTED library "
      "target is linked to another target.  "
+     "The libraries will be included on the link line for the target.  "
      "Ignored for non-imported targets.");
 
   cm->DefineProperty
-    ("IMPORTED_LINK_LIBRARIES_<CONFIG>", cmProperty::TARGET,
-     "Per-configuration version of IMPORTED_LINK_LIBRARIES property.",
+    ("IMPORTED_LINK_INTERFACE_LIBRARIES_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration version of IMPORTED_LINK_INTERFACE_LIBRARIES.",
      "This property is used when loading settings for the <CONFIG> "
      "configuration of an imported target.  "
      "Configuration names correspond to those provided by the project "
@@ -3045,43 +3068,56 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
       }
     }
 
-  // Get the link dependencies.
+  // Get the link interface.
   {
-  std::string linkProp = "IMPORTED_LINK_LIBRARIES";
+  std::string linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
   linkProp += suffix;
   if(const char* config_libs = this->GetProperty(linkProp.c_str()))
     {
-    cmSystemTools::ExpandListArgument(config_libs, info.LinkLibraries);
+    cmSystemTools::ExpandListArgument(config_libs,
+                                      info.LinkInterface.Libraries);
     }
-  else if(const char* libs = this->GetProperty("IMPORTED_LINK_LIBRARIES"))
+  else if(const char* libs =
+          this->GetProperty("IMPORTED_LINK_INTERFACE_LIBRARIES"))
     {
-    cmSystemTools::ExpandListArgument(libs, info.LinkLibraries);
+    cmSystemTools::ExpandListArgument(libs,
+                                      info.LinkInterface.Libraries);
+    }
+  }
+
+  // Get the link dependencies.
+  {
+  std::string linkProp = "IMPORTED_LINK_DEPENDENT_LIBRARIES";
+  linkProp += suffix;
+  if(const char* config_libs = this->GetProperty(linkProp.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(config_libs,
+                                      info.LinkInterface.SharedDeps);
+    }
+  else if(const char* libs =
+          this->GetProperty("IMPORTED_LINK_DEPENDENT_LIBRARIES"))
+    {
+    cmSystemTools::ExpandListArgument(libs, info.LinkInterface.SharedDeps);
     }
   }
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string> const*
-cmTarget::GetImportedLinkLibraries(const char* config)
-{
-  if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
-    {
-    return &info->LinkLibraries;
-    }
-  else
-    {
-    return 0;
-    }
-}
-
-//----------------------------------------------------------------------------
 cmTargetLinkInterface const* cmTarget::GetLinkInterface(const char* config)
 {
-  // Link interfaces are supported only for non-imported shared
-  // libraries and executables that export symbols.  Imported targets
-  // provide their own link information.
-  if(this->IsImported() ||
-     (this->GetType() != cmTarget::SHARED_LIBRARY &&
+  // Imported targets have their own link interface.
+  if(this->IsImported())
+    {
+    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
+      {
+      return &info->LinkInterface;
+      }
+    return 0;
+    }
+
+  // Link interfaces are supported only for shared libraries and
+  // executables that export symbols.
+  if((this->GetType() != cmTarget::SHARED_LIBRARY &&
       !this->IsExecutableWithExports()))
     {
     return 0;
@@ -3139,13 +3175,77 @@ cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
     return 0;
     }
 
-  // Return the interface libraries even if the list is empty.
-  if(cmTargetLinkInterface* interface = new cmTargetLinkInterface)
+  // Allocate the interface.
+  cmTargetLinkInterface* interface = new cmTargetLinkInterface;
+  if(!interface)
     {
-    cmSystemTools::ExpandListArgument(libs, *interface);
-    return interface;
+    return 0;
     }
-  return 0;
+
+  // Expand the list of libraries in the interface.
+  cmSystemTools::ExpandListArgument(libs, interface->Libraries);
+
+  // Now we need to construct a list of shared library dependencies
+  // not included in the interface.
+  if(this->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    // Use a set to keep track of what libraries have been emitted to
+    // either list.
+    std::set<cmStdString> emitted;
+    for(std::vector<std::string>::const_iterator
+          li = interface->Libraries.begin();
+        li != interface->Libraries.end(); ++li)
+      {
+      emitted.insert(*li);
+      }
+
+    // Compute which library configuration to link.
+    cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
+    if(config && cmSystemTools::UpperCase(config) == "DEBUG")
+      {
+      linkType = cmTarget::DEBUG;
+      }
+
+    // Construct the list of libs linked for this configuration.
+    cmTarget::LinkLibraryVectorType const& libs =
+      this->GetOriginalLinkLibraries();
+    for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
+        li != libs.end(); ++li)
+      {
+      // Skip entries that will resolve to the target itself, are empty,
+      // or are not meant for this configuration.
+      if(li->first == this->GetName() || li->first.empty() ||
+         !(li->second == cmTarget::GENERAL || li->second == linkType))
+        {
+        continue;
+        }
+
+      // Skip entries that have already been emitted into either list.
+      if(!emitted.insert(li->first).second)
+        {
+        continue;
+        }
+
+      // Add this entry if it is a shared library.
+      if(cmTarget* tgt = this->Makefile->FindTargetToUse(li->first.c_str()))
+        {
+        if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
+          {
+          interface->SharedDeps.push_back(li->first);
+          }
+        }
+      else
+        {
+        // TODO: Recognize shared library file names.  Perhaps this
+        // should be moved to cmComputeLinkInformation, but that creates
+        // a chicken-and-egg problem since this list is needed for its
+        // construction.
+        }
+      }
+    }
+
+  // Return the completed interface.
+  return interface;
 }
 
 //----------------------------------------------------------------------------

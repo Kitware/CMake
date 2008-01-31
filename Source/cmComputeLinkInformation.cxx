@@ -234,6 +234,21 @@ cmComputeLinkInformation
   // Setup framework support.
   this->ComputeFrameworkInfo();
 
+  // Choose a mode for dealing with shared library dependencies.
+  this->SharedDependencyMode = SharedDepModeNone;
+  if(const char* mode =
+     this->Makefile->GetDefinition("CMAKE_DEPENDENT_SHARED_LIBRARY_MODE"))
+    {
+    if(strcmp(mode, "LINK") == 0)
+      {
+      this->SharedDependencyMode = SharedDepModeLink;
+      }
+    else if(strcmp(mode, "DIR") == 0)
+      {
+      this->SharedDependencyMode = SharedDepModeDir;
+      }
+    }
+
   // Get the implicit link directories for this platform.
   if(const char* implicitLinks =
      (this->Makefile->GetDefinition
@@ -335,7 +350,7 @@ bool cmComputeLinkInformation::Compute()
         lei = linkEntries.begin();
       lei != linkEntries.end(); ++lei)
     {
-    this->AddItem(lei->Item, lei->Target);
+    this->AddItem(lei->Item, lei->Target, lei->IsSharedDep);
     }
 
   // Restore the target link type so the correct system runtime
@@ -358,8 +373,14 @@ bool cmComputeLinkInformation::Compute()
 
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddItem(std::string const& item,
-                                       cmTarget* tgt)
+                                       cmTarget* tgt, bool isSharedDep)
 {
+  // If dropping shared library dependencies, ignore them.
+  if(isSharedDep && this->SharedDependencyMode == SharedDepModeNone)
+    {
+    return;
+    }
+
   // Compute the proper name to use to link this library.
   const char* config = this->Config;
   bool impexe = (tgt && tgt->IsExecutableWithExports());
@@ -368,12 +389,6 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
     // Skip linking to executables on platforms with no import
     // libraries or loader flags.
     return;
-    }
-
-  // Keep track of shared libraries linked.
-  if(tgt && tgt->GetType() == cmTarget::SHARED_LIBRARY)
-    {
-    this->SharedLibrariesLinked.insert(tgt);
     }
 
   if(tgt && (tgt->GetType() == cmTarget::STATIC_LIBRARY ||
@@ -401,6 +416,14 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
         (this->UseImportLibrary &&
          (impexe || tgt->GetType() == cmTarget::SHARED_LIBRARY));
 
+      // Handle shared dependencies in directory mode.
+      if(isSharedDep && this->SharedDependencyMode == SharedDepModeDir)
+        {
+        std::string dir = tgt->GetDirectory(config, implib);
+        this->SharedDependencyDirectories.push_back(dir);
+        return;
+        }
+
       // Pass the full path to the target file.
       std::string lib = tgt->GetFullPath(config, implib);
       this->Depends.push_back(lib);
@@ -411,6 +434,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
         // link.
         std::string fw = tgt->GetDirectory(config, implib);
         this->AddFrameworkItem(fw);
+        this->SharedLibrariesLinked.insert(tgt);
         }
       else
         {
@@ -705,6 +729,12 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
     this->Items.push_back(Item(this->LibLinkFileFlag, false));
     }
 
+  // Keep track of shared library targets linked.
+  if(target->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    this->SharedLibrariesLinked.insert(target);
+    }
+
   // Now add the full path to the library.
   this->Items.push_back(Item(item, true));
 }
@@ -991,6 +1021,18 @@ void cmComputeLinkInformation::ComputeLinkerSearchDirectories()
     {
     this->AddLinkerSearchDirectories(this->OldLinkDirs);
     }
+
+  // Help the linker find dependent shared libraries.
+  if(this->SharedDependencyMode == SharedDepModeDir)
+    {
+    // TODO: These directories should probably be added to the runtime
+    // path ordering analysis.  However they are a bit different.
+    // They should be placed both on the -L path and in the rpath.
+    // The link-with-runtime-path feature above should be replaced by
+    // this.
+    this->AddLinkerSearchDirectories(this->SharedDependencyDirectories);
+    }
+
 }
 
 //----------------------------------------------------------------------------
