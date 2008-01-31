@@ -793,7 +793,7 @@ bool SystemInformationImplementation::DoesCPUSupportCPUID()
 {
   int CPUIDPresent = 0;
 
-#ifdef _WIN32 
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   // Use SEH to determine CPUID presence
     __try {
         _asm {
@@ -834,7 +834,7 @@ bool SystemInformationImplementation::DoesCPUSupportCPUID()
 
 bool SystemInformationImplementation::RetrieveCPUFeatures()
 {
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   int localCPUFeatures = 0;
   int localCPUAdvanced = 0;
 
@@ -954,7 +954,7 @@ void SystemInformationImplementation::FindManufacturer()
 /** */
 bool SystemInformationImplementation::RetrieveCPUIdentity()
 {
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   int localCPUVendor[3];
   int localCPUSignature;
 
@@ -1027,7 +1027,7 @@ bool SystemInformationImplementation::RetrieveCPUIdentity()
 /** */
 bool SystemInformationImplementation::RetrieveCPUCacheDetails()
 {
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   int L1Cache[4] = { 0, 0, 0, 0 };
   int L2Cache[4] = { 0, 0, 0, 0 };
 
@@ -1144,7 +1144,7 @@ bool SystemInformationImplementation::RetrieveCPUCacheDetails()
 /** */
 bool SystemInformationImplementation::RetrieveClassicalCPUCacheDetails()
 {
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   int TLBCode = -1, TLBData = -1, L1Code = -1, L1Data = -1, L1Trace = -1, L2Unified = -1, L3Unified = -1;
   int TLBCacheData[4] = { 0, 0, 0, 0 };
   int TLBPassCounter = 0;
@@ -1344,7 +1344,7 @@ bool SystemInformationImplementation::RetrieveClassicalCPUCacheDetails()
 /** */
 bool SystemInformationImplementation::RetrieveCPUClockSpeed()
 {
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   // First of all we check to see if the RDTSC (0x0F, 0x31) instruction is supported.
   if (!this->Features.HasTSC) 
     {
@@ -1380,7 +1380,7 @@ bool SystemInformationImplementation::RetrieveCPUClockSpeed()
 /** */
 bool SystemInformationImplementation::RetrieveClassicalCPUClockSpeed()
 {
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   LARGE_INTEGER liStart, liEnd, liCountsPerSecond;
   double dFrequency, dDifference;
 
@@ -1481,7 +1481,7 @@ bool SystemInformationImplementation::RetrieveCPUExtendedLevelSupport(int CPULev
       }
     }
     
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
 
   // Use assembly to detect CPUID information...
   __try {
@@ -1543,7 +1543,7 @@ bool SystemInformationImplementation::RetrieveExtendedCPUFeatures()
     {
     return false;
     }
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   int localCPUExtendedFeatures = 0;
 
   // Use assembly to detect CPUID information...
@@ -1612,7 +1612,7 @@ bool SystemInformationImplementation::RetrieveProcessorSerialNumber()
     return false;
     }
 
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   int SerialNumber[3];
 
 
@@ -1682,7 +1682,7 @@ bool SystemInformationImplementation::RetrieveCPUPowerManagement()
     return false;
     }
 
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   int localCPUPowerManagement = 0;
 
 
@@ -1735,7 +1735,7 @@ bool SystemInformationImplementation::RetrieveExtendedCPUIdentity()
   if (!RetrieveCPUExtendedLevelSupport(0x80000003)) return false;
   if (!RetrieveCPUExtendedLevelSupport(0x80000004)) return false;
    
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   int ProcessorNameStartPos = 0;
   int CPUExtendedIdentity[12];
 
@@ -2218,7 +2218,7 @@ int SystemInformationImplementation::QueryMemory()
   this->AvailablePhysicalMemory = 0;
 #ifdef __CYGWIN__
   return 0;
-#elif _WIN32
+#elif defined(_MSC_VER) && (_MSC_VER >= 1300)
   MEMORYSTATUS ms;
   GlobalMemoryStatus(&ms);
 
@@ -2389,7 +2389,7 @@ unsigned long SystemInformationImplementation::GetAvailablePhysicalMemory()
 LongLong SystemInformationImplementation::GetCyclesDifference (DELAY_FUNC DelayFunction,
                                                   unsigned int uiParameter)
 {
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
 
   unsigned int edx1, eax1;
   unsigned int edx2, eax2;
@@ -2435,7 +2435,7 @@ LongLong SystemInformationImplementation::GetCyclesDifference (DELAY_FUNC DelayF
 /** Compute the delay overhead */
 void SystemInformationImplementation::DelayOverhead(unsigned int uiMS)
 {
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   LARGE_INTEGER Frequency, StartCounter, EndCounter;
   __int64 x;
 
@@ -2461,7 +2461,7 @@ void SystemInformationImplementation::DelayOverhead(unsigned int uiMS)
 unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
 {
   unsigned int Regebx = 0;
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   if (!this->IsHyperThreadingSupported()) 
     {
     return (unsigned char) 1;  // HT not supported
@@ -2479,7 +2479,7 @@ unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
 /** Works only for windows */
 unsigned int SystemInformationImplementation::IsHyperThreadingSupported()
 {
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   unsigned int Regedx    = 0,
              Regeax      = 0,
              VendorId[3] = {0, 0, 0};
@@ -2526,7 +2526,7 @@ unsigned int SystemInformationImplementation::IsHyperThreadingSupported()
 unsigned char SystemInformationImplementation::GetAPICId()
 {
   unsigned int Regebx = 0;
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   if (!this->IsHyperThreadingSupported()) 
     {
     return (unsigned char) -1;  // HT not supported
@@ -2544,7 +2544,7 @@ unsigned char SystemInformationImplementation::GetAPICId()
 /** Count the number of CPUs. Works only on windows. */
 int SystemInformationImplementation::CPUCount()
 {
-#ifdef WIN32
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
   unsigned char StatusFlag  = 0;
   SYSTEM_INFO info;
 
@@ -2899,7 +2899,7 @@ bool SystemInformationImplementation::QuerySolarisInfo()
 /** Query the operating system information */
 bool SystemInformationImplementation::QueryOSInformation()
 {
-#ifdef WIN32
+#if _WIN32
 
   this->OSName = "Windows";
 
