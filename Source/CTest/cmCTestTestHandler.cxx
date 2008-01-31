@@ -1388,7 +1388,7 @@ void cmCTestTestHandler::GetListOfTests()
     // does the CTestTestfile.cmake exist ?
     testFilename = "CTestTestfile.cmake";
     }
-  if( cmSystemTools::FileExists("DartTestfile.txt") )
+  else if( cmSystemTools::FileExists("DartTestfile.txt") )
     {
     // does the DartTestfile.txt exist ?
     testFilename = "DartTestfile.txt";
