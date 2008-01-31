@@ -52,7 +52,7 @@
 #  pragma warning(pop)
 # endif
 
-// Only have old std::strstream classes.  Wrap them to look like new
+// Only have old std strstream classes.  Wrap them to look like new
 // ostringstream and istringstream classes.
 
 # include <@KWSYS_NAMESPACE@/stl/string>

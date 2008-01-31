@@ -22,8 +22,8 @@ namespace @KWSYS_NAMESPACE@
 /** \class String
  * \brief Short-name version of the STL basic_string class template.
  *
- * The standard library "std::string" type is actually a typedef for
- * "std::basic_string<..long argument list..>".  This string class is
+ * The standard library "string" type is actually a typedef for
+ * "basic_string<..long argument list..>".  This string class is
  * simply a subclass of this type with the same interface so that the
  * name is shorter in debugging symbols and error messages.
  */

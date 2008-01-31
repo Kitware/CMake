@@ -27,12 +27,12 @@
 // Required for va_list
 #include <stdarg.h>
 #if @KWSYS_NAMESPACE@_STL_HAVE_STD && !defined(va_list)
-// Some compilers move va_list into the std:: namespace and there is no way to
+// Some compilers move va_list into the std namespace and there is no way to
 // tell that this has been done. Playing with things being included before or
 // after stdarg.h does not solve things because we do not have control over
 // what the user does. This hack solves this problem by moving va_list to our
 // own namespace that is local for kwsys.
-namespace std {} // Required for platforms that do not have std::
+namespace std {} // Required for platforms that do not have std namespace
 namespace @KWSYS_NAMESPACE@_VA_LIST
 {
   using namespace std;
@@ -834,12 +834,12 @@ public:
 
 private:
   /**
-   * Allocate the std::map that serve as the Path Translation table.
+   * Allocate the stl map that serve as the Path Translation table.
    */
   static void ClassInitialize();
 
   /**
-   * Deallocate the std::map that serve as the Path Translation table.
+   * Deallocate the stl map that serve as the Path Translation table.
    */
   static void ClassFinalize();
 
