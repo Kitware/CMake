@@ -224,7 +224,8 @@ int main (int argc, char *argv[])
   // If there is a testing input file, check for documentation options
   // only if there are actually arguments.  We want running without
   // arguments to run tests.
-  if(argc > 1 || !cmSystemTools::FileExists("CTestTestfile.cmake"))
+  if(argc > 1 || !(cmSystemTools::FileExists("CTestTestfile.cmake") || 
+                   cmSystemTools::FileExists("DartTestfile.txt")))
     {
     if(argc == 1)
       {
