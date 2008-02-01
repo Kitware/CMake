@@ -55,7 +55,7 @@ IF(BUILD_TESTING)
 
   # test for correct sub-project generation
   # not implemented in VS6 or Xcode
-  IF(NOT MSVC60 AND NOT XCODE)
+  IF(NOT MSVC60 AND NOT XCODE AND NOT MSVC70)
     # run cmake and configure all of SubProject
     # but only build the independent executable car
     ADD_TEST(SubProject ${CMAKE_CTEST_COMMAND}
@@ -84,7 +84,7 @@ IF(BUILD_TESTING)
       --build-target foo
       --test-command foo
       )
-  ENDIF(NOT MSVC60 AND NOT XCODE)
+  ENDIF(NOT MSVC60 AND NOT XCODE AND NOT MSVC70)
 
   IF (CMAKE_STRICT)
     ADD_TEST_MACRO(DocTest DocTest)
