@@ -2852,7 +2852,7 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
   kwsys_stl::string buffer = this->RunProcess(args);
 
   kwsys_stl::string value = "";
-  for(unsigned int i=buffer.size()-1;i>0;i--)
+  for(size_t i=buffer.size()-1;i>0;i--)
     {
     if(buffer[i] == ' ' || buffer[i] == '\t')
       {
