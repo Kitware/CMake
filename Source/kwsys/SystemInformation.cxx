@@ -2124,13 +2124,13 @@ bool SystemInformationImplementation::RetrieveClassicalCPUIdentity()
 /** Extract a value from the CPUInfo file */
 kwsys_stl::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(kwsys_stl::string buffer,const char* word,int init)
 {
-  long int pos = buffer.find(word,init);
-  if(pos != -1)
+  size_t pos = buffer.find(word,init);
+  if(pos != buffer.npos)
     {
     this->CurrentPositionInFile = pos;
     pos = buffer.find(":",pos);
-    long int pos2 = buffer.find("\n",pos);
-    if(pos!=-1 && pos2!=-1)
+    size_t pos2 = buffer.find("\n",pos);
+    if(pos!=buffer.npos && pos2!=buffer.npos)
       {
       return buffer.substr(pos+2,pos2-pos-2);
       }
@@ -2164,8 +2164,8 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   buffer.resize(fileSize-2);
 
   // Number of CPUs
-  long int pos = buffer.find("processor\t");
-  while(pos != -1)
+  size_t pos = buffer.find("processor\t");
+  while(pos != buffer.npos)
     {
     this->NumberOfLogicalCPU++;
     this->NumberOfPhysicalCPU++;
@@ -2575,8 +2575,11 @@ int SystemInformationImplementation::CPUCount()
     if (this->NumberOfLogicalCPU >= 1)    // >1 Doesn't mean HT is enabled in the BIOS
       {
       HANDLE hCurrentProcessHandle;
-      DWORD  dwProcessAffinity;
-      DWORD  dwSystemAffinity;
+#ifndef _WIN64
+# define DWORD_PTR DWORD
+#endif
+      DWORD_PTR  dwProcessAffinity;
+      DWORD_PTR  dwSystemAffinity;
       DWORD  dwAffinityMask;
 
       // Calculate the appropriate  shifts and mask based on the 
@@ -2723,12 +2726,12 @@ bool SystemInformationImplementation::ParseSysCtl()
 /** Extract a value from sysctl command */
 kwsys_stl::string SystemInformationImplementation::ExtractValueFromSysCtl(const char* word)
 {
-  long int pos = this->SysCtlBuffer.find(word);
-  if(pos != -1)
+  size_t pos = this->SysCtlBuffer.find(word);
+  if(pos != this->SysCtlBuffer.npos)
     {
     pos = this->SysCtlBuffer.find(": ",pos);
-    long int pos2 = this->SysCtlBuffer.find("\n",pos);
-    if(pos!=-1 && pos2!=-1)
+    size_t pos2 = this->SysCtlBuffer.find("\n",pos);
+    if(pos!=this->SysCtlBuffer.npos && pos2!=this->SysCtlBuffer.npos)
       {
       return this->SysCtlBuffer.substr(pos+2,pos2-pos-2);
       }
@@ -2807,14 +2810,14 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
   
   kwsys_stl::string command = arguments;
   long int start = -1;
-  long int pos = command.find(' ',0);
-  while(pos!=-1)
+  size_t pos = command.find(' ',0);
+  while(pos!=command.npos)
     {
     bool inQuotes = false;
     // Check if we are between quotes
-    long int b0 = command.find('"',0);
-    long int b1 = command.find('"',b0+1);
-    while(b0 != -1 && b1 != -1 && b1>b0)
+    size_t b0 = command.find('"',0);
+    size_t b1 = command.find('"',b0+1);
+    while(b0 != command.npos && b1 != command.npos && b1>b0)
       {
       if(pos>b0 && pos<b1)
         {
@@ -2830,7 +2833,7 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
       kwsys_stl::string arg = command.substr(start+1,pos-start-1);
 
       // Remove the quotes if any
-      long int quotes = arg.find('"');
+      size_t quotes = arg.find('"');
       while(quotes != -1)
         {
         arg.erase(quotes,1);
