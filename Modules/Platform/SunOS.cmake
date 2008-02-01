@@ -98,3 +98,9 @@ ELSE(CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_${type}_LINK_DYNAMIC_CXX_FLAGS "-Bdynamic")
   ENDFOREACH(type)
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+
+# The Sun linker needs to find transitive shared library dependencies
+# in the -L path.
+SET(CMAKE_LINK_DEPENDENT_LIBRARY_DIRS 1)
+
+

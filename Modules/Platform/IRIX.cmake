@@ -40,3 +40,7 @@ FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
   SET(CMAKE_${type}_LINK_STATIC_C_FLAGS "-Wl,-Bstatic")
   SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-Bdynamic")
 ENDFOREACH(type)
+
+# The IRIX linker needs to find transitive shared library dependencies
+# in the -L path.
+SET(CMAKE_LINK_DEPENDENT_LIBRARY_DIRS 1)

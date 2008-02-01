@@ -6,6 +6,7 @@ SET(CMAKE_FIND_LIBRARY_SUFFIXES ".sl" ".so" ".a")
 # in the -L path.  Therefore the runtime path must be added to the
 # link line with -L flags.
 SET(CMAKE_SHARED_LIBRARY_LINK_C_WITH_RUNTIME_PATH 1)
+SET(CMAKE_LINK_DEPENDENT_LIBRARY_DIRS 1)
 
 # fortran
 IF(CMAKE_COMPILER_IS_GNUG77)
