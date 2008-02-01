@@ -103,9 +103,6 @@ public:
 signals:  
   void cmakeInitialized();
 
-protected slots:
-  void processEvents();
-
 protected:
   virtual void run();
   QCMake* CMakeInstance;

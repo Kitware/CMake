@@ -18,6 +18,7 @@
 #include <QApplication>
 #include <QFileInfo>
 #include <QDir>
+#include <QTranslator>
 
 #include "CMakeSetupDialog.h"
 #include "cmDocumentation.h"
@@ -64,6 +65,12 @@ int main(int argc, char** argv)
 {
   cmSystemTools::FindExecutableDirectory(argv[0]);
   QApplication app(argc, argv);
+
+  QTranslator translator;
+  QString transfile = QString("cmake_%1").arg(QLocale::system().name());
+  translator.load(transfile, app.applicationDirPath());
+  app.installTranslator(&translator);
+  
   app.setApplicationName("CMakeSetup");
   app.setOrganizationName("Kitware");
   app.setWindowIcon(QIcon(":/Icons/CMakeSetup.png"));
@@ -99,7 +106,7 @@ int main(int argc, char** argv)
     }
 
   CMakeSetupDialog dialog;
-  dialog.setWindowTitle("CMakeSetup");
+  dialog.setWindowTitle(QApplication::applicationName());
   dialog.show();
  
   // for now: args support specifying build and/or source directory 

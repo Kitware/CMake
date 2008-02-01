@@ -48,19 +48,9 @@ QCMake* QCMakeThread::cmakeInstance() const
   return this->CMakeInstance;
 }
 
-void QCMakeThread::processEvents()
-{
-  QCoreApplication::processEvents();
-}
-
 void QCMakeThread::run()
 {
   this->CMakeInstance = new QCMake;
-  // make the cmake thread to process events it receives from the GUI thread
-  QObject::connect(this->CMakeInstance, SIGNAL(progressChanged(QString, float)),
-                   this, SLOT(processEvents()), Qt::DirectConnection);
-  QObject::connect(this->CMakeInstance, SIGNAL(outputMessage(QString)),
-                   this, SLOT(processEvents()), Qt::DirectConnection);
   // emit that this cmake thread is ready for use
   emit this->cmakeInitialized();
   this->exec();
@@ -233,7 +223,7 @@ CMakeSetupDialog::~CMakeSetupDialog()
 
   // wait for thread to stop
   this->CMakeThread->quit();
-  this->CMakeThread->wait();
+  this->CMakeThread->wait(2000);
 }
   
 void CMakeSetupDialog::doConfigure()
@@ -250,8 +240,9 @@ void CMakeSetupDialog::doConfigure()
   if(!dir.exists())
     {
     QString message = tr("Build directory does not exist, "
-                         "should I create it?\n\n"
-                         "Directory: ");
+                         "should I create it?")
+                      + "\n\n"
+                      + tr("Directory: ");
     message += bindir;
     QString title = tr("Create Directory");
     QMessageBox::StandardButton btn;
@@ -330,13 +321,7 @@ void CMakeSetupDialog::doGenerate()
   
 void CMakeSetupDialog::closeEvent(QCloseEvent* e)
 {
-  // don't close if we're busy
-  if(this->CurrentState == Configuring || this->CurrentState == Generating)
-    {
-    e->ignore();
-    }
-  
-  // prompt for close if there are unsaved changes
+  // prompt for close if there are unsaved changes, and we're not busy
   if(this->CacheModified)
     {
     QString message = tr("You have changed options but not rebuilt, "
@@ -349,6 +334,32 @@ void CMakeSetupDialog::closeEvent(QCloseEvent* e)
       {
       e->ignore();
       }
+    }
+
+  // don't close if we're busy, unless the user really wants to
+  if(this->CurrentState == Configuring)
+    {
+    QString message = "You are in the middle of a Configure.\n"
+                   "If you Exit now the configure information will be lost.\n"
+                   "Are you sure you want to Exit?";
+    QString title = tr("Confirm Exit");
+    QMessageBox::StandardButton btn;
+    btn = QMessageBox::critical(this, title, message,
+                                QMessageBox::Yes | QMessageBox::No);
+    if(btn == QMessageBox::No)
+      {
+      e->ignore();
+      }
+    else
+      {
+      this->doInterrupt();
+      }
+    }
+
+  // let the generate finish
+  if(this->CurrentState == Generating)
+    {
+    e->ignore();
     }
 }
 
@@ -373,7 +384,7 @@ void CMakeSetupDialog::doHelp()
     "directory.");
 
   QDialog dialog;
-  dialog.setWindowTitle(tr("CMakeSetup Help"));
+  dialog.setWindowTitle(tr("Help"));
   QVBoxLayout* l = new QVBoxLayout(&dialog);
   QLabel* lab = new QLabel(&dialog);
   l->addWidget(lab);
@@ -484,7 +495,7 @@ void CMakeSetupDialog::promptForGenerator()
 
   QStringList gens = this->CMakeThread->cmakeInstance()->availableGenerators();
   QDialog dialog;
-  dialog.setWindowTitle(tr("CMakeSetup choose generator"));
+  dialog.setWindowTitle(tr("Choose Generator"));
   QLabel* lab = new QLabel(&dialog);
   lab->setText(tr("Please select what build system you want CMake to generate files for.\n"
                     "You should select the tool that you will use to build the project.\n"
@@ -539,10 +550,10 @@ void CMakeSetupDialog::doDeleteCache()
 
 void CMakeSetupDialog::doAbout()
 {
-  QString msg = "CMakeSetup\nwww.cmake.org";
+  QString msg = QApplication::applicationName() + "\nwww.cmake.org";
 
   QDialog dialog;
-  dialog.setWindowTitle(tr("About CMakeSetup"));
+  dialog.setWindowTitle(tr("About"));
   QVBoxLayout* l = new QVBoxLayout(&dialog);
   QLabel* lab = new QLabel(&dialog);
   l->addWidget(lab);
@@ -762,7 +773,7 @@ void CMakeSetupDialog::addCacheEntry()
 {
   QDialog dialog(this);
   dialog.resize(400, 200);
-  dialog.setWindowTitle(tr("CMakeSetup Help"));
+  dialog.setWindowTitle(tr("Add Cache Entry"));
   QVBoxLayout* l = new QVBoxLayout(&dialog);
   AddCacheEntry* w = new AddCacheEntry(&dialog);
   QDialogButtonBox* btns = new QDialogButtonBox(

@@ -292,6 +292,7 @@ void QCMake::progressCallback(const char* msg, float percent, void* cd)
     {
     emit self->outputMessage(msg);
     }
+  QCoreApplication::processEvents();
 }
 
 void QCMake::errorCallback(const char* msg, const char* /*title*/,
@@ -299,6 +300,7 @@ void QCMake::errorCallback(const char* msg, const char* /*title*/,
 {
   QCMake* self = reinterpret_cast<QCMake*>(cd);
   emit self->errorMessage(msg);
+  QCoreApplication::processEvents();
 }
 
 QString QCMake::binaryDirectory() const
