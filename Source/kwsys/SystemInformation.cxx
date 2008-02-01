@@ -245,7 +245,7 @@ protected:
   unsigned long TotalPhysicalMemory;
   unsigned long AvailablePhysicalMemory;
 
-  long int CurrentPositionInFile;
+  size_t CurrentPositionInFile;
 
   // Operating System information
   bool QueryOSInformation();
@@ -2135,7 +2135,7 @@ kwsys_stl::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(k
       return buffer.substr(pos+2,pos2-pos-2);
       }
     }
-  this->CurrentPositionInFile = -1;
+  this->CurrentPositionInFile = buffer.npos;
   return "";
 }
 
