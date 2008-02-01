@@ -50,7 +50,8 @@ protected:
   virtual void GenerateImportTargetsConfig(std::ostream& os,
                                            const char* config,
                                            std::string const& suffix);
-  virtual void ComplainAboutMissingTarget(cmTarget* target, const char* dep);
+  virtual void ComplainAboutMissingTarget(cmTarget* depender,
+                                          cmTarget* dependee);
 
   /** Fill in properties indicating built file locations.  */
   void SetImportLocationProperty(const char* config,

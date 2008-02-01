@@ -25,6 +25,7 @@ class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
 class cmTarget;
+class cmOrderRuntimeDirectories;
 
 /** \class cmComputeLinkInformation
  * \brief Compute link information for a target in one configuration.
@@ -33,6 +34,7 @@ class cmComputeLinkInformation
 {
 public:
   cmComputeLinkInformation(cmTarget* target, const char* config);
+  ~cmComputeLinkInformation();
   bool Compute();
 
   struct Item
@@ -57,8 +59,12 @@ public:
   std::string GetChrpathString();
   std::string GetChrpathTool();
   std::set<cmTarget*> const& GetSharedLibrariesLinked();
+
+  std::string const& GetRPathLinkFlag() const { return this->RPathLinkFlag; }
+  std::string GetRPathLinkString();
 private:
-  void AddItem(std::string const& item, cmTarget* tgt, bool isSharedDep);
+  void AddItem(std::string const& item, cmTarget* tgt);
+  void AddSharedDepItem(std::string const& item, cmTarget* tgt);
 
   // Output information.
   ItemVector Items;
@@ -96,6 +102,7 @@ private:
   std::string RuntimeSep;
   std::string RuntimeAlways;
   bool RuntimeUseChrpath;
+  std::string RPathLinkFlag;
   SharedDepMode SharedDependencyMode;
 
   // Link type adjustment.
@@ -143,7 +150,6 @@ private:
   void AddLinkerSearchDirectories(std::vector<std::string> const& dirs);
   std::set<cmStdString> DirectoriesEmmitted;
   std::set<cmStdString> ImplicitLinkDirs;
-  std::vector<std::string> SharedDependencyDirectories;
 
   // Linker search path compatibility mode.
   std::vector<std::string> OldLinkDirs;
@@ -151,48 +157,13 @@ private:
   bool HaveUserFlagItem;
 
   // Runtime path computation.
-  struct LibraryRuntimeEntry
-  {
-    // The file name of the library.
-    std::string FileName;
-
-    // The soname of the shared library if it is known.
-    std::string SOName;
-
-    // The directory in which the library is supposed to be found.
-    std::string Directory;
-
-    // The index assigned to the directory.
-    int DirectoryIndex;
-  };
-  bool RuntimeSearchPathComputed;
-  std::vector<LibraryRuntimeEntry> LibraryRuntimeInfo;
-  std::set<cmStdString> LibraryRuntimeInfoEmmitted;
-  std::vector<std::string> RuntimeDirectories;
-  std::map<cmStdString, int> RuntimeDirectoryIndex;
-  std::vector<int> RuntimeDirectoryVisited;
+  cmOrderRuntimeDirectories* OrderRuntimeSearchPath;
   void AddLibraryRuntimeInfo(std::string const& fullPath, cmTarget* target);
   void AddLibraryRuntimeInfo(std::string const& fullPath,
                              const char* soname = 0);
-  void CollectRuntimeDirectories();
-  int AddRuntimeDirectory(std::string const& dir);
-  void FindConflictingLibraries();
-  void FindDirectoriesForLib(unsigned int lri);
-  void OrderRuntimeSearchPath();
-  void VisitRuntimeDirectory(unsigned int i);
-  void DiagnoseCycle();
-  bool CycleDiagnosed;
-  int WalkId;
 
-  // Adjacency-list representation of runtime path ordering graph.
-  // This maps from directory to those that must come *before* it.
-  // Each entry that must come before is a pair.  The first element is
-  // the index of the directory that must come first.  The second
-  // element is the index of the runtime library that added the
-  // constraint.
-  typedef std::pair<int, int> RuntimeConflictPair;
-  struct RuntimeConflictList: public std::vector<RuntimeConflictPair> {};
-  std::vector<RuntimeConflictList> RuntimeConflictGraph;
+  // Dependent library path computation.
+  cmOrderRuntimeDirectories* OrderDependentRPath;
 };
 
 #endif

@@ -1086,9 +1086,13 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_LIBRARY_RUNTIME_<LANG>_FLAG_SEP",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_LIBRARY_RPATH_LINK_<LANG>_FLAG",
+                     cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_EXECUTABLE_RUNTIME_<LANG>_FLAG",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_EXECUTABLE_RUNTIME_<LANG>_FLAG_SEP",
+                     cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_EXECUTABLE_RPATH_LINK_<LANG>_FLAG",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH",
                      cmProperty::VARIABLE,0,0);
@@ -1104,7 +1108,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_RUNTIME_<LANG>_FLAG_SEP",
                      cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_DEPENDENT_SHARED_LIBRARY_MODE",
+  cm->DefineProperty("CMAKE_LINK_DEPENDENT_LIBRARY_FILES",
                      cmProperty::VARIABLE,0,0);
-
+  cm->DefineProperty("CMAKE_LINK_DEPENDENT_LIBRARY_DIRS",
+                     cmProperty::VARIABLE,0,0);
 }

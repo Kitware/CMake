@@ -123,6 +123,14 @@ integer index with each link item.  When the graph is built outgoing
 edges are sorted by this index.  This preserves the original link
 order as much as possible subject to the dependencies.
 
+After the initial exploration of the link interface tree, any
+transitive (dependent) shared libraries that were encountered and not
+included in the interface are processed in their own BFS.  This BFS
+follows only the dependent library lists and not the link interfaces.
+They are added to the link items with a mark indicating that the are
+transitive dependencies.  Then cmComputeLinkInformation deals with
+them on a per-platform basis.
+
 */
 
 //----------------------------------------------------------------------------

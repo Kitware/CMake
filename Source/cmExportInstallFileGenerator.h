@@ -66,7 +66,8 @@ protected:
   virtual void GenerateImportTargetsConfig(std::ostream& os,
                                            const char* config,
                                            std::string const& suffix);
-  virtual void ComplainAboutMissingTarget(cmTarget* target, const char* dep);
+  virtual void ComplainAboutMissingTarget(cmTarget* depender,
+                                          cmTarget* dependee);
 
   /** Generate a per-configuration file for the targets.  */
   bool GenerateImportFileConfig(const char* config);

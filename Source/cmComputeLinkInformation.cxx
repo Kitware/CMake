@@ -17,13 +17,12 @@
 #include "cmComputeLinkInformation.h"
 
 #include "cmComputeLinkDepends.h"
+#include "cmOrderRuntimeDirectories.h"
 
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
-
-#include <algorithm>
 
 #include <ctype.h>
 
@@ -150,6 +149,68 @@ ld: 92453-07 linker ld HP Itanium(R) B.12.41  IPF/IPF
       or SHLIB_PATH, in searching for shared libraries.  This changes
       the default search order of LD_LIBRARY_PATH, SHLIB_PATH, and
       RPATH (embedded path).
+
+------------------------------------------------------------------------------
+Notes about dependent (transitive) shared libraries:
+
+On non-Windows systems shared libraries may have transitive
+dependencies.  In order to support LINK_INTERFACE_LIBRARIES we must
+support linking to a shared library without listing all the libraries
+to which it links.  Some linkers want to be able to find the
+transitive dependencies (dependent libraries) of shared libraries
+listed on the command line.
+
+  - On Windows, DLLs are not directly linked, and the import libraries
+    have no transitive dependencies.
+
+  - On Mac, we need to actually list the transitive dependencies.
+    Otherwise when using -isysroot for universal binaries it cannot
+    find the dependent libraries.  Listing them on the command line
+    tells the linker where to find them, but unfortunately also links
+    the library.
+
+  - On HP-UX, the linker wants to find the transitive dependencies of
+    shared libraries in the -L paths even if the dependent libraries
+    are given on the link line.
+
+  - On AIX the transitive dependencies are not needed.
+
+  - On SGI, the linker wants to find the transitive dependencies of
+    shared libraries in the -L paths if they are not given on the link
+    line.  Transitive linking can be disabled using the options
+
+      -no_transitive_link -Wl,-no_transitive_link
+
+    which disable it.  Both options must be given when invoking the
+    linker through the compiler.
+
+  - On Sun, the linker wants to find the transitive dependencies of
+    shared libraries in the -L paths if they are not given on the link
+    line.
+
+  - On Linux, FreeBSD, and QNX:
+
+    The linker wants to find the transitive dependencies of shared
+    libraries in the "-rpath-link" paths option if they have not been
+    given on the link line.  The option is like rpath but just for
+    link time:
+
+      -Wl,-rpath-link,"/path1:/path2"
+
+For -rpath-link, we need a separate runtime path ordering pass
+including just the dependent libraries that are not linked.
+
+For -L paths on non-HP, we can do the same thing as with rpath-link
+but put the results in -L paths.  The paths should be listed at the
+end to avoid conflicting with user search paths (?).
+
+For -L paths on HP, we should do a runtime path ordering pass with
+all libraries, both linked and non-linked.  Even dependent
+libraries that are also linked need to be listed in -L paths.
+
+In our implementation we add all dependent libraries to the runtime
+path computation.  Then the auto-generated RPATH will find everything.
+
 */
 
 //----------------------------------------------------------------------------
@@ -164,6 +225,12 @@ cmComputeLinkInformation
 
   // The configuration being linked.
   this->Config = config;
+
+  // Allocate internals.
+  this->OrderRuntimeSearchPath =
+    new cmOrderRuntimeDirectories(this->GlobalGenerator, target->GetName(),
+                                  "runtime path");
+  this->OrderDependentRPath = 0;
 
   // Get the language used for linking this target.
   this->LinkLanguage =
@@ -204,15 +271,11 @@ cmComputeLinkInformation
   this->RuntimeUseChrpath = false;
   if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
+    const char* tType =
+      ((this->Target->GetType() == cmTarget::EXECUTABLE)?
+       "EXECUTABLE" : "SHARED_LIBRARY");
     std::string rtVar = "CMAKE_";
-    if(this->Target->GetType() == cmTarget::EXECUTABLE)
-      {
-      rtVar += "EXECUTABLE";
-      }
-    else
-      {
-      rtVar += "SHARED_LIBRARY";
-      }
+    rtVar += tType;
     rtVar += "_RUNTIME_";
     rtVar += this->LinkLanguage;
     rtVar += "_FLAG";
@@ -223,6 +286,14 @@ cmComputeLinkInformation
       (this->Makefile->
        GetSafeDefinition("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH"));
     this->RuntimeUseChrpath = this->Target->IsChrpathUsed();
+
+    // Get options needed to help find dependent libraries.
+    std::string rlVar = "CMAKE_";
+    rlVar += tType;
+    rlVar += "_RPATH_LINK_";
+    rlVar += this->LinkLanguage;
+    rlVar += "_FLAG";
+    this->RPathLinkFlag = this->Makefile->GetSafeDefinition(rlVar.c_str());
     }
 
   // Get link type information.
@@ -236,17 +307,23 @@ cmComputeLinkInformation
 
   // Choose a mode for dealing with shared library dependencies.
   this->SharedDependencyMode = SharedDepModeNone;
-  if(const char* mode =
-     this->Makefile->GetDefinition("CMAKE_DEPENDENT_SHARED_LIBRARY_MODE"))
+  if(this->Makefile->IsOn("CMAKE_LINK_DEPENDENT_LIBRARY_FILES"))
     {
-    if(strcmp(mode, "LINK") == 0)
-      {
-      this->SharedDependencyMode = SharedDepModeLink;
-      }
-    else if(strcmp(mode, "DIR") == 0)
-      {
-      this->SharedDependencyMode = SharedDepModeDir;
-      }
+    this->SharedDependencyMode = SharedDepModeLink;
+    }
+  else if(this->Makefile->IsOn("CMAKE_LINK_DEPENDENT_LIBRARY_DIRS"))
+    {
+    this->SharedDependencyMode = SharedDepModeDir;
+    }
+  else if(!this->RPathLinkFlag.empty())
+    {
+    this->SharedDependencyMode = SharedDepModeDir;
+    }
+  if(this->SharedDependencyMode == SharedDepModeDir)
+    {
+    this->OrderDependentRPath =
+      new cmOrderRuntimeDirectories(this->GlobalGenerator, target->GetName(),
+                                    "dependent library path");
     }
 
   // Get the implicit link directories for this platform.
@@ -265,7 +342,6 @@ cmComputeLinkInformation
     }
 
   // Initial state.
-  this->RuntimeSearchPathComputed = false;
   this->HaveUserFlagItem = false;
 
   // Decide whether to enable compatible library search path mode.
@@ -289,6 +365,13 @@ cmComputeLinkInformation
 }
 
 //----------------------------------------------------------------------------
+cmComputeLinkInformation::~cmComputeLinkInformation()
+{
+  delete this->OrderRuntimeSearchPath;
+  delete this->OrderDependentRPath;
+}
+
+//----------------------------------------------------------------------------
 cmComputeLinkInformation::ItemVector const&
 cmComputeLinkInformation::GetItems()
 {
@@ -299,6 +382,31 @@ cmComputeLinkInformation::GetItems()
 std::vector<std::string> const& cmComputeLinkInformation::GetDirectories()
 {
   return this->Directories;
+}
+
+//----------------------------------------------------------------------------
+std::string cmComputeLinkInformation::GetRPathLinkString()
+{
+  // If there is no separate linker runtime search flag (-rpath-link)
+  // there is no reason to compute a string.
+  if(!this->OrderDependentRPath || this->RPathLinkFlag.empty())
+    {
+    return "";
+    }
+
+  // Construct the linker runtime search path.
+  std::string rpath_link;
+  const char* sep = "";
+  std::vector<std::string> const& dirs =
+    this->OrderDependentRPath->GetRuntimePath();
+  for(std::vector<std::string>::const_iterator di = dirs.begin();
+      di != dirs.end(); ++di)
+    {
+    rpath_link += sep;
+    sep = ":";
+    rpath_link += *di;
+    }
+  return rpath_link;
 }
 
 //----------------------------------------------------------------------------
@@ -350,7 +458,14 @@ bool cmComputeLinkInformation::Compute()
         lei = linkEntries.begin();
       lei != linkEntries.end(); ++lei)
     {
-    this->AddItem(lei->Item, lei->Target, lei->IsSharedDep);
+    if(lei->IsSharedDep)
+      {
+      this->AddSharedDepItem(lei->Item, lei->Target);
+      }
+    else
+      {
+      this->AddItem(lei->Item, lei->Target);
+      }
     }
 
   // Restore the target link type so the correct system runtime
@@ -372,15 +487,8 @@ bool cmComputeLinkInformation::Compute()
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkInformation::AddItem(std::string const& item,
-                                       cmTarget* tgt, bool isSharedDep)
+void cmComputeLinkInformation::AddItem(std::string const& item, cmTarget* tgt)
 {
-  // If dropping shared library dependencies, ignore them.
-  if(isSharedDep && this->SharedDependencyMode == SharedDepModeNone)
-    {
-    return;
-    }
-
   // Compute the proper name to use to link this library.
   const char* config = this->Config;
   bool impexe = (tgt && tgt->IsExecutableWithExports());
@@ -416,14 +524,6 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
         (this->UseImportLibrary &&
          (impexe || tgt->GetType() == cmTarget::SHARED_LIBRARY));
 
-      // Handle shared dependencies in directory mode.
-      if(isSharedDep && this->SharedDependencyMode == SharedDepModeDir)
-        {
-        std::string dir = tgt->GetDirectory(config, implib);
-        this->SharedDependencyDirectories.push_back(dir);
-        return;
-        }
-
       // Pass the full path to the target file.
       std::string lib = tgt->GetFullPath(config, implib);
       this->Depends.push_back(lib);
@@ -434,7 +534,6 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
         // link.
         std::string fw = tgt->GetDirectory(config, implib);
         this->AddFrameworkItem(fw);
-        this->SharedLibrariesLinked.insert(tgt);
         }
       else
         {
@@ -465,6 +564,84 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
       {
       // This is a library or option specified by the user.
       this->AddUserItem(item);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
+                                                cmTarget* tgt)
+{
+  // If dropping shared library dependencies, ignore them.
+  if(this->SharedDependencyMode == SharedDepModeNone)
+    {
+    return;
+    }
+
+  // The user may have incorrectly named an item.  Skip items that are
+  // not full paths to shared libraries.
+  if(tgt)
+    {
+    // The target will provide a full path.  Make sure it is a shared
+    // library.
+    if(tgt->GetType() != cmTarget::SHARED_LIBRARY)
+      {
+      return;
+      }
+    }
+  else
+    {
+    // Skip items that are not full paths.  We will not be able to
+    // reliably specify them.
+    if(!cmSystemTools::FileIsFullPath(item.c_str()))
+      {
+      return;
+      }
+
+    // Get the name of the library from the file name.
+    std::string file = cmSystemTools::GetFilenameName(item);
+    if(!this->ExtractSharedLibraryName.find(file.c_str()))
+      {
+      // This is not the name of a shared library.
+      return;
+      }
+    }
+
+  // If in linking mode, just link to the shared library.
+  if(this->SharedDependencyMode == SharedDepModeLink)
+    {
+    this->AddItem(item, tgt);
+    return;
+    }
+
+  // Get a full path to the dependent shared library.
+  // Add it to the runtime path computation so that the target being
+  // linked will be able to find it.
+  std::string lib;
+  if(tgt)
+    {
+    lib = tgt->GetFullPath(this->Config, this->UseImportLibrary);
+    this->AddLibraryRuntimeInfo(lib, tgt);
+    }
+  else
+    {
+    lib = item;
+    this->AddLibraryRuntimeInfo(lib);
+    }
+
+  // Add the item to the separate dependent library search path if
+  // this platform wants one.
+  if(this->OrderDependentRPath)
+    {
+    if(tgt)
+      {
+      std::string soName = tgt->GetSOName(this->Config);
+      const char* soname = soName.empty()? 0 : soName.c_str();
+      this->OrderDependentRPath->AddLibrary(lib, soname);
+      }
+    else
+      {
+      this->OrderDependentRPath->AddLibrary(lib);
       }
     }
 }
@@ -1022,17 +1199,14 @@ void cmComputeLinkInformation::ComputeLinkerSearchDirectories()
     this->AddLinkerSearchDirectories(this->OldLinkDirs);
     }
 
-  // Help the linker find dependent shared libraries.
-  if(this->SharedDependencyMode == SharedDepModeDir)
+  // If there is no separate linker runtime search flag (-rpath-link)
+  // and we have a search path for dependent libraries add it to the
+  // link directories.
+  if(this->OrderDependentRPath && this->RPathLinkFlag.empty())
     {
-    // TODO: These directories should probably be added to the runtime
-    // path ordering analysis.  However they are a bit different.
-    // They should be placed both on the -L path and in the rpath.
-    // The link-with-runtime-path feature above should be replaced by
-    // this.
-    this->AddLinkerSearchDirectories(this->SharedDependencyDirectories);
+    this->AddLinkerSearchDirectories
+      (this->OrderDependentRPath->GetRuntimePath());
     }
-
 }
 
 //----------------------------------------------------------------------------
@@ -1054,22 +1228,8 @@ cmComputeLinkInformation
 std::vector<std::string> const&
 cmComputeLinkInformation::GetRuntimeSearchPath()
 {
-  if(!this->RuntimeSearchPathComputed)
-    {
-    this->RuntimeSearchPathComputed = true;
-    this->CollectRuntimeDirectories();
-    this->FindConflictingLibraries();
-    this->OrderRuntimeSearchPath();
-    }
-  return this->RuntimeSearchPath;
+  return this->OrderRuntimeSearchPath->GetRuntimePath();
 }
-
-//============================================================================
-// Directory ordering computation.
-//   - Useful to compute a safe runtime library path order
-//   - Need runtime path for supporting INSTALL_RPATH_USE_LINK_PATH
-//   - Need runtime path at link time to pickup transitive link dependencies
-//     for shared libraries (in future when we do not always add them).
 
 //----------------------------------------------------------------------------
 void
@@ -1104,262 +1264,8 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
     return;
     }
 
-  // Add the runtime information at most once.
-  if(this->LibraryRuntimeInfoEmmitted.insert(fullPath).second)
-    {
-    // Construct the runtime information entry for this library.
-    LibraryRuntimeEntry entry;
-    entry.FileName =  cmSystemTools::GetFilenameName(fullPath);
-    entry.SOName = soname? soname : "";
-    entry.Directory = cmSystemTools::GetFilenamePath(fullPath);
-    this->LibraryRuntimeInfo.push_back(entry);
-    }
-  else
-    {
-    // This can happen if the same library is linked multiple times.
-    // In that case the runtime information check need be done only
-    // once anyway.  For shared libs we could add a check in AddItem
-    // to not repeat them.
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmComputeLinkInformation::CollectRuntimeDirectories()
-{
-  // Get all directories that should be in the runtime search path.
-
-  // Add directories containing libraries linked with full path.
-  for(std::vector<LibraryRuntimeEntry>::iterator
-        ei = this->LibraryRuntimeInfo.begin();
-      ei != this->LibraryRuntimeInfo.end(); ++ei)
-    {
-    ei->DirectoryIndex = this->AddRuntimeDirectory(ei->Directory);
-    }
-
-  // Add link directories specified for the target.
-  std::vector<std::string> const& dirs = this->Target->GetLinkDirectories();
-  for(std::vector<std::string>::const_iterator di = dirs.begin();
-      di != dirs.end(); ++di)
-    {
-    this->AddRuntimeDirectory(*di);
-    }
-}
-
-//----------------------------------------------------------------------------
-int cmComputeLinkInformation::AddRuntimeDirectory(std::string const& dir)
-{
-  // Add the runtime directory with a unique index.
-  std::map<cmStdString, int>::iterator i =
-    this->RuntimeDirectoryIndex.find(dir);
-  if(i == this->RuntimeDirectoryIndex.end())
-    {
-    std::map<cmStdString, int>::value_type
-      entry(dir, static_cast<int>(this->RuntimeDirectories.size()));
-    i = this->RuntimeDirectoryIndex.insert(entry).first;
-    this->RuntimeDirectories.push_back(dir);
-    }
-
-  return i->second;
-}
-
-//----------------------------------------------------------------------------
-struct cmCLIRuntimeConflictCompare
-{
-  typedef std::pair<int, int> RuntimeConflictPair;
-
-  // The conflict pair is unique based on just the directory
-  // (first).  The second element is only used for displaying
-  // information about why the entry is present.
-  bool operator()(RuntimeConflictPair const& l,
-                  RuntimeConflictPair const& r)
-    {
-    return l.first == r.first;
-    }
-};
-
-//----------------------------------------------------------------------------
-void cmComputeLinkInformation::FindConflictingLibraries()
-{
-  // Allocate the conflict graph.
-  this->RuntimeConflictGraph.resize(this->RuntimeDirectories.size());
-  this->RuntimeDirectoryVisited.resize(this->RuntimeDirectories.size(), 0);
-
-  // Find all runtime directories providing each library.
-  for(unsigned int lri = 0; lri < this->LibraryRuntimeInfo.size(); ++lri)
-    {
-    this->FindDirectoriesForLib(lri);
-    }
-
-  // Clean up the conflict graph representation.
-  for(std::vector<RuntimeConflictList>::iterator
-        i = this->RuntimeConflictGraph.begin();
-      i != this->RuntimeConflictGraph.end(); ++i)
-    {
-    // Sort the outgoing edges for each graph node so that the
-    // original order will be preserved as much as possible.
-    std::sort(i->begin(), i->end());
-
-    // Make the edge list unique so cycle detection will be reliable.
-    RuntimeConflictList::iterator last =
-      std::unique(i->begin(), i->end(), cmCLIRuntimeConflictCompare());
-    i->erase(last, i->end());
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmComputeLinkInformation::FindDirectoriesForLib(unsigned int lri)
-{
-  // Search through the runtime directories to find those providing
-  // this library.
-  LibraryRuntimeEntry& re = this->LibraryRuntimeInfo[lri];
-  for(unsigned int i = 0; i < this->RuntimeDirectories.size(); ++i)
-    {
-    // Skip the directory that is supposed to provide the library.
-    if(this->RuntimeDirectories[i] == re.Directory)
-      {
-      continue;
-      }
-
-    // Determine which type of check to do.
-    if(!re.SOName.empty())
-      {
-      // We have the library soname.  Check if it will be found.
-      std::string file = this->RuntimeDirectories[i];
-      file += "/";
-      file += re.SOName;
-      std::set<cmStdString> const& files =
-        (this->GlobalGenerator
-         ->GetDirectoryContent(this->RuntimeDirectories[i], false));
-      if((std::set<cmStdString>::const_iterator(files.find(re.SOName)) !=
-          files.end()) ||
-         cmSystemTools::FileExists(file.c_str(), true))
-        {
-        // The library will be found in this directory but this is not
-        // the directory named for it.  Add an entry to make sure the
-        // desired directory comes before this one.
-        RuntimeConflictPair p(re.DirectoryIndex, lri);
-        this->RuntimeConflictGraph[i].push_back(p);
-        }
-      }
-    else
-      {
-      // We do not have the soname.  Look for files in the directory
-      // that may conflict.
-      std::set<cmStdString> const& files =
-        (this->GlobalGenerator
-         ->GetDirectoryContent(this->RuntimeDirectories[i], true));
-
-      // Get the set of files that might conflict.  Since we do not
-      // know the soname just look at all files that start with the
-      // file name.  Usually the soname starts with the library name.
-      std::string base = re.FileName;
-      std::set<cmStdString>::const_iterator first = files.lower_bound(base);
-      ++base[base.size()-1];
-      std::set<cmStdString>::const_iterator last = files.upper_bound(base);
-      bool found = false;
-      for(std::set<cmStdString>::const_iterator fi = first;
-          !found && fi != last; ++fi)
-        {
-        found = true;
-        }
-
-      if(found)
-        {
-        // The library may be found in this directory but this is not
-        // the directory named for it.  Add an entry to make sure the
-        // desired directory comes before this one.
-        RuntimeConflictPair p(re.DirectoryIndex, lri);
-        this->RuntimeConflictGraph[i].push_back(p);
-        }
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmComputeLinkInformation::OrderRuntimeSearchPath()
-{
-  // Allow a cycle to be diagnosed once.
-  this->CycleDiagnosed = false;
-  this->WalkId = 0;
-
-  // Iterate through the directories in the original order.
-  for(unsigned int i=0; i < this->RuntimeDirectories.size(); ++i)
-    {
-    // Start a new DFS from this node.
-    ++this->WalkId;
-    this->VisitRuntimeDirectory(i);
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmComputeLinkInformation::VisitRuntimeDirectory(unsigned int i)
-{
-  // Skip nodes already visited.
-  if(this->RuntimeDirectoryVisited[i])
-    {
-    if(this->RuntimeDirectoryVisited[i] == this->WalkId)
-      {
-      // We have reached a node previously visited on this DFS.
-      // There is a cycle.
-      this->DiagnoseCycle();
-      }
-    return;
-    }
-
-  // We are now visiting this node so mark it.
-  this->RuntimeDirectoryVisited[i] = this->WalkId;
-
-  // Visit the neighbors of the node first.
-  RuntimeConflictList const& clist = this->RuntimeConflictGraph[i];
-  for(RuntimeConflictList::const_iterator j = clist.begin();
-      j != clist.end(); ++j)
-    {
-    this->VisitRuntimeDirectory(j->first);
-    }
-
-  // Now that all directories required to come before this one have
-  // been emmitted, emit this directory.
-  this->RuntimeSearchPath.push_back(this->RuntimeDirectories[i]);
-}
-
-//----------------------------------------------------------------------------
-void cmComputeLinkInformation::DiagnoseCycle()
-{
-  // Report the cycle at most once.
-  if(this->CycleDiagnosed)
-    {
-    return;
-    }
-  this->CycleDiagnosed = true;
-
-  // Construct the message.
-  cmOStringStream e;
-  e << "WARNING: Cannot generate a safe runtime path for target "
-    << this->Target->GetName()
-    << " because there is a cycle in the constraint graph:\n";
-
-  // Display the conflict graph.
-  for(unsigned int i=0; i < this->RuntimeConflictGraph.size(); ++i)
-    {
-    RuntimeConflictList const& clist = this->RuntimeConflictGraph[i];
-    e << "dir " << i << " is [" << this->RuntimeDirectories[i] << "]\n";
-    for(RuntimeConflictList::const_iterator j = clist.begin();
-        j != clist.end(); ++j)
-      {
-      e << "  dir " << j->first << " must precede it due to [";
-      LibraryRuntimeEntry const& re = this->LibraryRuntimeInfo[j->second];
-      if(re.SOName.empty())
-        {
-        e << re.FileName;
-        }
-      else
-        {
-        e << re.SOName;
-        }
-      e << "]\n";
-      }
-    }
-  cmSystemTools::Message(e.str().c_str());
+  // Include this library in the runtime path ordering.
+  this->OrderRuntimeSearchPath->AddLibrary(fullPath, soname);
 }
 
 //----------------------------------------------------------------------------

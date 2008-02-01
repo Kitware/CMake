@@ -161,6 +161,8 @@ SET(SRCS
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
+  cmOrderRuntimeDirectories.cxx
+  cmOrderRuntimeDirectories.h
   cmProperty.cxx
   cmProperty.h
   cmPropertyDefinition.cxx

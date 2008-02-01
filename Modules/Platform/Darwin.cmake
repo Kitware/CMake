@@ -107,7 +107,7 @@ ENDIF(XCODE)
 # with -isysroot (for universal binaries), the linker always looks for
 # dependent libraries under the sysroot.  Listing them on the link
 # line works around the problem.
-SET(CMAKE_DEPENDENT_SHARED_LIBRARY_MODE "LINK")
+SET(CMAKE_LINK_DEPENDENT_LIBRARY_FILES 1)
 
 SET(CMAKE_MacOSX_Content_COMPILE_OBJECT "\"${CMAKE_COMMAND}\" -E copy_if_different <SOURCE> <OBJECT>")
 

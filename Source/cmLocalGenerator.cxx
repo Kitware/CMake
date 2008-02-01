@@ -1605,6 +1605,15 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
       }
     }
 
+  // Add the linker runtime search path if any.
+  std::string rpath_link = cli.GetRPathLinkString();
+  if(!cli.GetRPathLinkFlag().empty() && !rpath_link.empty())
+    {
+    fout << cli.GetRPathLinkFlag();
+    fout << this->EscapeForShell(rpath_link.c_str(), true);
+    fout << " ";
+    }
+
   // Add standard libraries for this language.
   std::string standardLibsVar = "CMAKE_";
   standardLibsVar += cli.GetLinkLanguage();

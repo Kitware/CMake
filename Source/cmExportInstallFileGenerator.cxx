@@ -264,16 +264,12 @@ cmExportInstallFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportInstallFileGenerator
-::ComplainAboutMissingTarget(cmTarget* target, const char* dep)
+::ComplainAboutMissingTarget(cmTarget* depender, cmTarget* dependee)
 {
   cmOStringStream e;
   e << "INSTALL(EXPORT \"" << this->Name << "\" ...) "
-    << "includes target \"" << target->GetName()
-    << "\" which links to target \"" << dep
-    << "\" that is not in the export set.  "
-    << "If the link dependency is not part of the public interface "
-    << "consider setting the LINK_INTERFACE_LIBRARIES property on "
-    << "target \"" << target->GetName() << "\".  "
-    << "Otherwise add it to the export set.";
+    << "includes target \"" << depender->GetName()
+    << "\" which requires target \"" << depender->GetName()
+    << "\" that is not in the export set.";
   cmSystemTools::Error(e.str().c_str());
 }

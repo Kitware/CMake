@@ -245,7 +245,7 @@ cmExportFileGenerator
           {
           // We are not appending, so all exported targets should be
           // known here.  This is probably user-error.
-          this->ComplainAboutMissingTarget(target, li->c_str());
+          this->ComplainAboutMissingTarget(target, tgt);
           }
         // Assume the target will be exported by another command.
         // Append it with the export namespace.

@@ -85,7 +85,8 @@ protected:
 
   /** Each subclass knows how to complain about a target that is
       missing from an export set.  */
-  virtual void ComplainAboutMissingTarget(cmTarget*, const char* dep) = 0;
+  virtual void ComplainAboutMissingTarget(cmTarget* depender,
+                                          cmTarget* dependee) = 0;
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
