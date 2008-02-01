@@ -2210,7 +2210,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   // L1 Cache size
   kwsys_stl::string cacheSize = this->ExtractValueFromCpuInfoFile(buffer,"cache size");
   pos = cacheSize.find(" KB");
-  if(pos!=-1)
+  if(pos!=cacheSize.npos)
     {
     cacheSize = cacheSize.substr(0,pos);
     }
@@ -2834,7 +2834,7 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
 
       // Remove the quotes if any
       size_t quotes = arg.find('"');
-      while(quotes != -1)
+      while(quotes != arg.npos)
         {
         arg.erase(quotes,1);
         quotes = arg.find('"');
