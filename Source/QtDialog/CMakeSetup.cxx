@@ -24,6 +24,7 @@
 #include "cmDocumentation.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+#include "cmVersion.h"
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][3] =
@@ -106,7 +107,9 @@ int main(int argc, char** argv)
     }
 
   CMakeSetupDialog dialog;
-  dialog.setWindowTitle(QApplication::applicationName());
+  QString title = QString("CMake %1");
+  title = title.arg(cmVersion::GetCMakeVersion().c_str());
+  dialog.setWindowTitle(title);
   dialog.show();
  
   // for now: args support specifying build and/or source directory 

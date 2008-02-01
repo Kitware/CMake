@@ -550,7 +550,7 @@ void CMakeSetupDialog::doDeleteCache()
 
 void CMakeSetupDialog::doAbout()
 {
-  QString msg = QApplication::applicationName() + "\nwww.cmake.org";
+  QString msg = "CMake\nwww.cmake.org";
 
   QDialog dialog;
   dialog.setWindowTitle(tr("About"));
