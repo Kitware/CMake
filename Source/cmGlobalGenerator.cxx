@@ -998,31 +998,49 @@ int cmGlobalGenerator::Build(
   bool clean, bool fast,
   double timeout)
 {
-  *output += "\nTesting TryCompileWithoutMakefile\n";
-
   /**
    * Run an executable command and put the stdout in output.
    */
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(bindir);
+  if(output)
+    {
+    *output += "Change Dir: ";
+    *output += bindir;
+    *output += "\n";
+    }
 
   int retVal;
   bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
   cmSystemTools::SetRunCommandHideConsole(true);
-
+  std::string outputBuffer;
+  std::string* outputPtr = 0;
+  if(output)
+    {
+    outputPtr = &outputBuffer;
+    }
+    
   // should we do a clean first?
   if (clean)
     {
     std::string cleanCommand =
       this->GenerateBuildCommand(makeCommandCSTR, projectName,
       0, "clean", config, false, fast);
-    if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), output,
+    if(output)
+      {
+      *output += "\nRun Clean Command:";
+      *output += cleanCommand;
+      *output += "\n";
+      }
+
+    if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), outputPtr,
                                          &retVal, 0, false, timeout))
       {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
       if (output)
         {
+        *output += *outputPtr;
         *output += "\nGenerator: execution of make clean failed.\n";
         }
 
@@ -1030,13 +1048,24 @@ int cmGlobalGenerator::Build(
       cmSystemTools::ChangeDirectory(cwd.c_str());
       return 1;
       }
+    if (output)
+      {
+      *output += *outputPtr;
+      }
     }
 
   // now build
   std::string makeCommand =
     this->GenerateBuildCommand(makeCommandCSTR, projectName,
                                0, target, config, false, fast);
-  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), output,
+  if(output)
+    {
+    *output += "\nRun Build Command:";
+    *output += makeCommand;
+    *output += "\n";
+    }
+  
+  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), outputPtr,
                                        &retVal, 0, false, timeout))
     {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
@@ -1045,6 +1074,7 @@ int cmGlobalGenerator::Build(
        makeCommand.c_str());
     if (output)
       {
+      *output += *outputPtr;
       *output += "\nGenerator: execution of make failed. Make command was: "
         + makeCommand + "\n";
       }
@@ -1053,7 +1083,10 @@ int cmGlobalGenerator::Build(
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
-
+  if (output)
+    {
+    *output += *outputPtr;
+    }
   cmSystemTools::SetRunCommandHideConsole(hideconsole);
 
   // The SGI MipsPro 7.3 compiler does not return an error code when
