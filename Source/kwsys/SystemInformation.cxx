@@ -2153,7 +2153,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     return 0;
     }
   
-  long int fileSize = 0;
+  size_t fileSize = 0;
   while(!feof(fd))
     {
     buffer += fgetc(fd);
@@ -2809,7 +2809,7 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
   args.push_back("-p");
   
   kwsys_stl::string command = arguments;
-  long int start = -1;
+  size_t start = command.npos;
   size_t pos = command.find(' ',0);
   while(pos!=command.npos)
     {
