@@ -3207,10 +3207,10 @@ cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
       }
 
     // Construct the list of libs linked for this configuration.
-    cmTarget::LinkLibraryVectorType const& libs =
+    cmTarget::LinkLibraryVectorType const& llibs =
       this->GetOriginalLinkLibraries();
-    for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
-        li != libs.end(); ++li)
+    for(cmTarget::LinkLibraryVectorType::const_iterator li = llibs.begin();
+        li != llibs.end(); ++li)
       {
       // Skip entries that will resolve to the target itself, are empty,
       // or are not meant for this configuration.
