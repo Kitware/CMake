@@ -269,7 +269,7 @@ cmExportInstallFileGenerator
   cmOStringStream e;
   e << "INSTALL(EXPORT \"" << this->Name << "\" ...) "
     << "includes target \"" << depender->GetName()
-    << "\" which requires target \"" << depender->GetName()
+    << "\" which requires target \"" << dependee->GetName()
     << "\" that is not in the export set.";
   cmSystemTools::Error(e.str().c_str());
 }
