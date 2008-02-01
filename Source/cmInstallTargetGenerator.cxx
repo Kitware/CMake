@@ -280,8 +280,6 @@ cmInstallTargetGenerator
     }
   toDestDirPath += toInstallPath;
 
-  this->Target->SetInstallNameFixupPath(toInstallPath.c_str());
-
   os << indent << "IF(EXISTS \"" << toDestDirPath << "\")\n";
   this->AddInstallNamePatchRule(os, indent.Next(), config, toDestDirPath);
   this->AddChrpathPatchRule(os, indent.Next(), config, toDestDirPath);
@@ -394,23 +392,19 @@ cmInstallTargetGenerator
       cmTarget* tgt = *j;
       std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
       std::string for_install = tgt->GetInstallNameDirForInstallTree(config);
-      std::string fname = this->GetInstallFilename(tgt, config, false, true);
-
-      // Map from the build-tree install_name.
-      for_build += fname;
-
-      // Map to the install-tree install_name.
-      if (!for_install.empty())
-        {
-        for_install += fname;
-        }
-      else
-        {
-        for_install = tgt->GetInstallNameFixupPath();
-        }
-
       if(for_build != for_install)
         {
+        // The directory portions differ.  Append the filename to
+        // create the mapping.
+        std::string fname =
+          this->GetInstallFilename(tgt, config, false, true);
+
+        // Map from the build-tree install_name.
+        for_build += fname;
+
+        // Map to the install-tree install_name.
+        for_install += fname;
+
         // Store the mapping entry.
         install_name_remap[for_build] = for_install;
         }
@@ -421,26 +415,27 @@ cmInstallTargetGenerator
   std::string new_id;
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
     {
-    std::string for_build = 
+    std::string for_build =
       this->Target->GetInstallNameDirForBuildTree(config);
-    std::string for_install = 
+    std::string for_install =
       this->Target->GetInstallNameDirForInstallTree(config);
-    std::string fname =
-      this->GetInstallFilename(this->Target, config, this->ImportLibrary,
-                               true);
-    for_build += fname;
-    if (!for_install.empty())
+
+    if(this->Target->IsFrameworkOnApple() && for_install.empty())
       {
-      for_install += fname;
+      // Frameworks seem to have an id corresponding to their own full
+      // path.
+      // ...
+      // for_install = fullDestPath_without_DESTDIR_or_name;
       }
-    else
-      {
-      for_install = this->Target->GetInstallNameFixupPath();
-      }
+
+    // If the install name will change on installation set the new id
+    // on the installed file.
     if(for_build != for_install)
       {
       // Prepare to refer to the install-tree install_name.
       new_id = for_install;
+      new_id += this->GetInstallFilename(this->Target, config,
+                                         this->ImportLibrary, true);
       }
     }
 

@@ -37,14 +37,6 @@ set_property(TARGET testExe3 PROPERTY MACOSX_BUNDLE 1)
 # Install and export from install tree.
 install(
   TARGETS
-  testExe2libImp testLib3Imp
-  EXPORT exp
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib/impl
-  ARCHIVE DESTINATION lib/impl
-  )
-install(
-  TARGETS
   testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3
   testExe2lib
   EXPORT exp
@@ -53,6 +45,14 @@ install(
   ARCHIVE DESTINATION lib
   FRAMEWORK DESTINATION Frameworks
   BUNDLE DESTINATION Applications
+  )
+install(
+  TARGETS
+  testExe2libImp testLib3Imp
+  EXPORT exp
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib/impl
+  ARCHIVE DESTINATION lib/impl
   )
 install(EXPORT exp NAMESPACE exp_ DESTINATION lib/exp)
 
