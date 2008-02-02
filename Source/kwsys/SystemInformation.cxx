@@ -2176,7 +2176,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   int currentId = -1;
   kwsys_stl::string idc = this->ExtractValueFromCpuInfoFile(buffer,"physical id");
 
-  while(this->CurrentPositionInFile>0)
+  while(this->CurrentPositionInFile != buffer.npos)
     {
     int id = atoi(idc.c_str());
     if(id == currentId)
