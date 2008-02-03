@@ -2927,8 +2927,8 @@ bool SystemInformationImplementation::QueryOSInformation()
   // Try calling GetVersionEx using the OSVERSIONINFOEX structure.
   ZeroMemory (&osvi, sizeof (OSVERSIONINFOEX));
   osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOEX);
-
-  if (!(bOsVersionInfoEx = GetVersionEx ((OSVERSIONINFO *) &osvi))) 
+  bOsVersionInfoEx = GetVersionEx ((OSVERSIONINFO *) &osvi);
+  if (!bOsVersionInfoEx) 
     {
     osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
     if (!GetVersionEx ((OSVERSIONINFO *) &osvi)) 
