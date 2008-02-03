@@ -267,4 +267,17 @@ kwsys_ios::ostream& IOStreamPrint(kwsys_ios::ostream& os, IOStreamULL value)
 
 } // namespace KWSYS_NAMESPACE
 
+#else
+
+namespace KWSYS_NAMESPACE
+{
+
+// Create one public symbol in this object file to avoid warnings from
+// archivers.
+void IOStreamSymbolToAvoidWarning()
+{
+}
+
+} // namespace KWSYS_NAMESPACE
+
 #endif // KWSYS_IOS_NEED_OPERATORS_LL
