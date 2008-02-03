@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-extern int testExe1lib();
+extern int testExe1lib(void);
 
 int main(int argc, const char* argv[])
 {

@@ -1,4 +1,4 @@
 
-extern int testLib1();
+extern int testLib1(void);
 
-int testLib2() { return testLib1(); }
+int testLib2(void) { return testLib1(); }
