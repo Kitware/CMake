@@ -3154,11 +3154,7 @@ bool SystemInformationImplementation::QueryOSInformation()
 /** Return true if the machine is 64 bits */
 bool SystemInformationImplementation::Is64Bits()
 {
-  if(sizeof(long int) == 4)
-    {
-    return false;
-    }
-  return true;
+  return (sizeof(void*) == 8);
 }
 
 } // namespace @KWSYS_NAMESPACE@
