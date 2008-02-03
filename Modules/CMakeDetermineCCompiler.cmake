@@ -131,7 +131,8 @@ ENDIF(NOT CMAKE_C_COMPILER_ID_RUN)
 INCLUDE(CMakeFindBinUtils)
 
 # configure variables set in this file for fast reload later on
-CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in 
-               "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCCompiler.cmake" IMMEDIATE)
+CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
+               "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCCompiler.cmake"
+               @ONLY)
 
 SET(CMAKE_C_COMPILER_ENV_VAR "CC")

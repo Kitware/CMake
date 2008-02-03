@@ -42,13 +42,18 @@ ELSE(NOT CMAKE_C_COMPILER_WORKS)
   ENDIF(C_TEST_WAS_RUN)
   SET(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
 
-  # Try to identify the ABI and configure it into CMakeCCompiler.cmake
-  INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
-  CMAKE_DETERMINE_COMPILER_ABI(C ${CMAKE_ROOT}/Modules/CMakeCCompilerABI.c)
-  CONFIGURE_FILE(
-    ${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCCompiler.cmake
-    @ONLY
-    )
+  IF(CMAKE_C_COMPILER_FORCED)
+    # The compiler was forced by the CMAKE_FORCE_C_COMPILER macro.
+    # Assume the user has configured all compiler information.
+  ELSE(CMAKE_C_COMPILER_FORCED)
+    # Try to identify the ABI and configure it into CMakeCCompiler.cmake
+    INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
+    CMAKE_DETERMINE_COMPILER_ABI(C ${CMAKE_ROOT}/Modules/CMakeCCompilerABI.c)
+    CONFIGURE_FILE(
+      ${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCCompiler.cmake
+      @ONLY
+      )
+  ENDIF(CMAKE_C_COMPILER_FORCED)
 ENDIF(NOT CMAKE_C_COMPILER_WORKS)
 

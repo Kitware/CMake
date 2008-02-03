@@ -141,7 +141,8 @@ ENDIF(NOT CMAKE_CXX_COMPILER_ID_RUN)
 INCLUDE(CMakeFindBinUtils)
 
 # configure all variables set in this file
-CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in 
-               ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake IMMEDIATE)
+CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
+               ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake
+               @ONLY)
 
 SET(CMAKE_CXX_COMPILER_ENV_VAR "CXX")
