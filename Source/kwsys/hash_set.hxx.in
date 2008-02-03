@@ -73,7 +73,7 @@ template <class _Value,
 class hash_set;
 
 template <class _Value, class _HashFcn, class _EqualKey, class _Alloc>
-inline bool
+bool
 operator==(const hash_set<_Value,_HashFcn,_EqualKey,_Alloc>& __hs1,
            const hash_set<_Value,_HashFcn,_EqualKey,_Alloc>& __hs2);
 
@@ -232,7 +232,7 @@ public:
 };
 
 template <class _Value, class _HashFcn, class _EqualKey, class _Alloc>
-inline bool
+bool
 operator==(const hash_set<_Value,_HashFcn,_EqualKey,_Alloc>& __hs1,
            const hash_set<_Value,_HashFcn,_EqualKey,_Alloc>& __hs2)
 {
@@ -261,7 +261,7 @@ template <class _Value,
 class hash_multiset;
 
 template <class _Val, class _HashFcn, class _EqualKey, class _Alloc>
-inline bool
+bool
 operator==(const hash_multiset<_Val,_HashFcn,_EqualKey,_Alloc>& __hs1,
            const hash_multiset<_Val,_HashFcn,_EqualKey,_Alloc>& __hs2);
 
@@ -412,7 +412,7 @@ public:
 };
 
 template <class _Val, class _HashFcn, class _EqualKey, class _Alloc>
-inline bool
+bool
 operator==(const hash_multiset<_Val,_HashFcn,_EqualKey,_Alloc>& __hs1,
            const hash_multiset<_Val,_HashFcn,_EqualKey,_Alloc>& __hs2)
 {
