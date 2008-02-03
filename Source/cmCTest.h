@@ -92,7 +92,7 @@ public:
   int TestDirectory(bool memcheck);
 
   ///! what is the configuraiton type, e.g. Debug, Release etc.
-  std::string GetConfigType();
+  std::string const& GetConfigType();
   double GetTimeOut() { return this->TimeOut; }
   void SetTimeOut(double t) { this->TimeOut = t; }
 

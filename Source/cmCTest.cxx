@@ -2261,7 +2261,7 @@ std::string cmCTest::GetBinaryDir()
 }
 
 //----------------------------------------------------------------------
-std::string cmCTest::GetConfigType()
+std::string const& cmCTest::GetConfigType()
 {
   return this->ConfigType;
 }
