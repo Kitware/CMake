@@ -136,5 +136,6 @@ INCLUDE(CMakeFindBinUtils)
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in
   ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake
-  @ONLY)
+  @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
+  )
 SET(CMAKE_Fortran_COMPILER_ENV_VAR "FC")

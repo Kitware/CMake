@@ -45,7 +45,7 @@ ELSE(NOT CMAKE_CXX_COMPILER_WORKS)
     CONFIGURE_FILE(
       ${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake
-      @ONLY
+      @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
       )
   ENDIF(CMAKE_CXX_COMPILER_FORCED)
 ENDIF(NOT CMAKE_CXX_COMPILER_WORKS)
