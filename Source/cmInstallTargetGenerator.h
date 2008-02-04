@@ -36,6 +36,16 @@ public:
     );
   virtual ~cmInstallTargetGenerator();
 
+  /** Select the policy for installing shared library linkable name
+      symlinks.  */
+  enum NamelinkModeType
+  {
+    NamelinkModeNone,
+    NamelinkModeOnly,
+    NamelinkModeSkip
+  };
+  void SetNamelinkMode(NamelinkModeType mode) { this->NamelinkMode = mode; }
+
   std::string GetInstallFilename(const char* config) const;
   static std::string GetInstallFilename(cmTarget*target, const char* config, 
                                         bool implib, bool useSOName);
@@ -72,6 +82,7 @@ protected:
   bool ImportLibrary;
   std::string FilePermissions;
   bool Optional;
+  NamelinkModeType NamelinkMode;
 };
 
 #endif

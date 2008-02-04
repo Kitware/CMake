@@ -39,6 +39,8 @@ class cmInstallCommandArguments
     const std::string& GetPermissions() const;
     const std::vector<std::string>& GetConfigurations() const;
     bool GetOptional() const;
+    bool GetNamelinkOnly() const;
+    bool GetNamelinkSkip() const;
 
     // once HandleDirectoryMode() is also switched to using 
     // cmInstallCommandArguments then these two functions can become non-static
@@ -54,6 +56,8 @@ class cmInstallCommandArguments
     cmCAStringVector Permissions;
     cmCAStringVector Configurations;
     cmCAEnabler Optional;
+    cmCAEnabler NamelinkOnly;
+    cmCAEnabler NamelinkSkip;
 
     std::string DestinationString;
     std::string PermissionsString;

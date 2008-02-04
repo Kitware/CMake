@@ -283,6 +283,57 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     return false;
     }
 
+  // Enforce argument rules too complex to specify for the
+  // general-purpose parser.
+  if(archiveArgs.GetNamelinkOnly() ||
+     runtimeArgs.GetNamelinkOnly() ||
+     frameworkArgs.GetNamelinkOnly() ||
+     bundleArgs.GetNamelinkOnly() ||
+     privateHeaderArgs.GetNamelinkOnly() ||
+     publicHeaderArgs.GetNamelinkOnly() ||
+     resourceArgs.GetNamelinkOnly())
+    {
+    this->SetError(
+      "TARGETS given NAMELINK_ONLY option not in LIBRARY group.  "
+      "The NAMELINK_ONLY option may be specified only following LIBRARY."
+      );
+    return false;
+    }
+  if(archiveArgs.GetNamelinkSkip() ||
+     runtimeArgs.GetNamelinkSkip() ||
+     frameworkArgs.GetNamelinkSkip() ||
+     bundleArgs.GetNamelinkSkip() ||
+     privateHeaderArgs.GetNamelinkSkip() ||
+     publicHeaderArgs.GetNamelinkSkip() ||
+     resourceArgs.GetNamelinkSkip())
+    {
+    this->SetError(
+      "TARGETS given NAMELINK_SKIP option not in LIBRARY group.  "
+      "The NAMELINK_SKIP option may be specified only following LIBRARY."
+      );
+    return false;
+    }
+  if(libraryArgs.GetNamelinkOnly() && libraryArgs.GetNamelinkSkip())
+    {
+    this->SetError(
+      "TARGETS given NAMELINK_ONLY and NAMELINK_SKIP.  "
+      "At most one of these two options may be specified."
+      );
+    return false;
+    }
+
+  // Select the mode for installing symlinks to versioned shared libraries.
+  cmInstallTargetGenerator::NamelinkModeType
+    namelinkMode = cmInstallTargetGenerator::NamelinkModeNone;
+  if(libraryArgs.GetNamelinkOnly())
+    {
+    namelinkMode = cmInstallTargetGenerator::NamelinkModeOnly;
+    }
+  else if(libraryArgs.GetNamelinkSkip())
+    {
+    namelinkMode = cmInstallTargetGenerator::NamelinkModeSkip;
+    }
+
   // Check if there is something to do.
   if(targetList.GetVector().empty())
     {
@@ -352,6 +403,12 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // cygwin.  Currently no other platform is a DLL platform.
         if(dll_platform)
           {
+          // When in namelink only mode skip all libraries on Windows.
+          if(namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly)
+            {
+            continue;
+            }
+
           // This is a DLL platform.
           if(!archiveArgs.GetDestination().empty())
             {
@@ -378,6 +435,12 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           // INSTALL properties. Otherwise, use the LIBRARY properties.
           if(target.IsFrameworkOnApple())
             {
+            // When in namelink only mode skip frameworks.
+            if(namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly)
+              {
+              continue;
+              }
+
             // Use the FRAMEWORK properties.
             if (!frameworkArgs.GetDestination().empty())
               {
@@ -400,6 +463,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
               {
               libraryGenerator = CreateInstallTargetGenerator(target, 
                                                            libraryArgs, false);
+              libraryGenerator->SetNamelinkMode(namelinkMode);
               }
             else
               {
@@ -438,6 +502,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           {
           libraryGenerator = CreateInstallTargetGenerator(target, libraryArgs, 
                                                           false);
+          libraryGenerator->SetNamelinkMode(namelinkMode);
           }
         else
           {

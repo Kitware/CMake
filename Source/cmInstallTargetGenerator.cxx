@@ -22,9 +22,6 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-// TODO:
-//   - Skip IF(EXISTS) checks if nothing is done with the installed file
-
 //----------------------------------------------------------------------------
 cmInstallTargetGenerator
 ::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
@@ -34,6 +31,7 @@ cmInstallTargetGenerator
   cmInstallGenerator(dest, configurations, component), Target(&t),
   ImportLibrary(implib), FilePermissions(file_permissions), Optional(optional)
 {
+  this->NamelinkMode = NamelinkModeNone;
   this->Target->SetHaveInstallRule(true);
 }
 
@@ -149,12 +147,19 @@ cmInstallTargetGenerator
   toInstallPath += this->GetInstallFilename(this->Target, config,
                                               this->ImportLibrary, false);
 
+  // Track whether post-install operations should be added to the
+  // script.
+  bool tweakInstalledFile = true;
+
   // Compute the list of files to install for this target.
   std::vector<std::string> files;
   std::string literal_args;
   cmTarget::TargetType type = this->Target->GetType();
   if(type == cmTarget::EXECUTABLE)
     {
+    // There is a bug in cmInstallCommand if this fails.
+    assert(this->NamelinkMode == NamelinkModeNone);
+
     std::string targetName;
     std::string targetNameReal;
     std::string targetNameImport;
@@ -215,6 +220,9 @@ cmInstallTargetGenerator
                                   config);
     if(this->ImportLibrary)
       {
+      // There is a bug in cmInstallCommand if this fails.
+      assert(this->NamelinkMode == NamelinkModeNone);
+
       std::string from1 = fromDirConfig;
       from1 += targetNameImport;
       files.push_back(from1);
@@ -224,6 +232,9 @@ cmInstallTargetGenerator
       }
     else if(this->Target->IsFrameworkOnApple())
       {
+      // There is a bug in cmInstallCommand if this fails.
+      assert(this->NamelinkMode == NamelinkModeNone);
+
       // Compute the build tree location of the framework directory
       std::string from1 = fromDirConfig;
       // Remove trailing slashes... so that from1 ends with ".framework":
@@ -243,23 +254,80 @@ cmInstallTargetGenerator
       }
     else
       {
-      std::string from1 = fromDirConfig;
-      from1 += targetName;
-      files.push_back(from1);
+      // Operations done at install time on the installed file should
+      // be done on the real file and not any of the symlinks.
+      toInstallPath = this->GetInstallDestination();
+      toInstallPath += "/";
+      toInstallPath += targetNameReal;
+
+      // Construct the list of file names to install for this library.
+      bool haveNamelink = false;
+      std::string fromName;
+      std::string fromSOName;
+      std::string fromRealName;
+      fromName = fromDirConfig;
+      fromName += targetName;
       if(targetNameSO != targetName)
         {
-        std::string from2 = fromDirConfig;
-        from2 += targetNameSO;
-        files.push_back(from2);
+        haveNamelink = true;
+        fromSOName = fromDirConfig;
+        fromSOName += targetNameSO;
         }
       if(targetNameReal != targetName &&
          targetNameReal != targetNameSO)
         {
-        std::string from3 = fromDirConfig;
-        from3 += targetNameReal;
-        files.push_back(from3);
+        haveNamelink = true;
+        fromRealName = fromDirConfig;
+        fromRealName += targetNameReal;
+        }
+
+      // Add the names based on the current namelink mode.
+      if(haveNamelink)
+        {
+        // With a namelink we need to check the mode.
+        if(this->NamelinkMode == NamelinkModeOnly)
+          {
+          // Install the namelink only.
+          files.push_back(fromName);
+          tweakInstalledFile = false;
+          }
+        else
+          {
+          // Install the real file if it has its own name.
+          if(!fromRealName.empty())
+            {
+            files.push_back(fromRealName);
+            }
+
+          // Install the soname link if it has its own name.
+          if(!fromSOName.empty())
+            {
+            files.push_back(fromSOName);
+            }
+
+          // Install the namelink if it is not to be skipped.
+          if(this->NamelinkMode != NamelinkModeSkip)
+            {
+            files.push_back(fromName);
+            }
+          }
+        }
+      else
+        {
+        // Without a namelink there will be only one file.  Install it
+        // if this is not a namelink-only rule.
+        if(this->NamelinkMode != NamelinkModeOnly)
+          {
+          files.push_back(fromName);
+          }
         }
       }
+    }
+
+  // Skip this rule if no files are to be installed for the target.
+  if(files.empty())
+    {
+    return;
     }
 
   // Write code to install the target file.
@@ -273,19 +341,26 @@ cmInstallTargetGenerator
                        no_rename, literal_args.c_str(),
                        indent);
 
+  // Construct the path of the file on disk after installation on
+  // which tweaks may be performed.
   std::string toDestDirPath = "$ENV{DESTDIR}";
-  if(toInstallPath[0] != '/')
+  if(toInstallPath[0] != '/' && toInstallPath[0] != '$')
     {
     toDestDirPath += "/";
     }
   toDestDirPath += toInstallPath;
 
-  os << indent << "IF(EXISTS \"" << toDestDirPath << "\")\n";
-  this->AddInstallNamePatchRule(os, indent.Next(), config, toDestDirPath);
-  this->AddChrpathPatchRule(os, indent.Next(), config, toDestDirPath);
-  this->AddRanlibRule(os, indent.Next(), type, toDestDirPath);
-  this->AddStripRule(os, indent.Next(), type, toDestDirPath);
-  os << indent << "ENDIF(EXISTS \"" << toDestDirPath << "\")\n";
+  // TODO:
+  //   - Skip IF(EXISTS) checks if nothing is done with the installed file
+  if(tweakInstalledFile)
+    {
+    os << indent << "IF(EXISTS \"" << toDestDirPath << "\")\n";
+    this->AddInstallNamePatchRule(os, indent.Next(), config, toDestDirPath);
+    this->AddChrpathPatchRule(os, indent.Next(), config, toDestDirPath);
+    this->AddRanlibRule(os, indent.Next(), type, toDestDirPath);
+    this->AddStripRule(os, indent.Next(), type, toDestDirPath);
+    os << indent << "ENDIF(EXISTS \"" << toDestDirPath << "\")\n";
+    }
 }
 
 //----------------------------------------------------------------------------
