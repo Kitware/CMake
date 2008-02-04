@@ -3245,6 +3245,13 @@ void cmake::DefineProperties(cmake *cm)
      "platform supports shared libraries. Basically all current general "
      "general purpose OS do so, the exception are usually embedded systems "
      "with no or special OSs.");
+
+  cm->DefineProperty
+    ("TARGET_ARCHIVES_MAY_BE_SHARED_LIBS", cmProperty::GLOBAL,
+     "Set if shared libraries may be named like archives.",
+     "On AIX shared libraries may be named \"lib<name>.a\".  "
+     "This property is set to true on such platforms.");
+
   cm->DefineProperty
     ("FIND_LIBRARY_USE_LIB64_PATHS", cmProperty::GLOBAL,
      "Whether FIND_LIBRARY should automatically search lib64 directories.",

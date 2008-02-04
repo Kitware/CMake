@@ -21,6 +21,7 @@
 
 #include <cmsys/RegularExpression.hxx>
 
+class cmake;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
@@ -79,6 +80,7 @@ private:
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator* GlobalGenerator;
+  cmake* CMakeInstance;
 
   // Configuration information.
   const char* Config;
@@ -114,6 +116,7 @@ private:
   std::string SharedLinkTypeFlag;
   bool LinkTypeEnabled;
   void SetCurrentLinkType(LinkType lt);
+  bool ArchivesMayBeShared;
 
   // Link item parsing.
   void ComputeItemParserInfo();

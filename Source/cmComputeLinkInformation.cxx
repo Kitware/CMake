@@ -23,6 +23,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
+#include "cmake.h"
 
 #include <ctype.h>
 
@@ -222,6 +223,7 @@ cmComputeLinkInformation
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
+  this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
   // The configuration being linked.
   this->Config = config;
@@ -649,6 +651,11 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::ComputeLinkTypeInfo()
 {
+  // Check whether archives may actually be shared libraries.
+  this->ArchivesMayBeShared =
+    this->CMakeInstance->GetPropertyAsBool(
+      "TARGET_ARCHIVES_MAY_BE_SHARED_LIBS");
+
   // First assume we cannot do link type stuff.
   this->LinkTypeEnabled = false;
 
@@ -1260,8 +1267,20 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
   std::string file = cmSystemTools::GetFilenameName(fullPath);
   if(!this->ExtractSharedLibraryName.find(file.c_str()))
     {
-    // This is not the name of a shared library.
-    return;
+    // On some platforms (AIX) a shared library may look static.
+    if(this->ArchivesMayBeShared)
+      {
+      if(!this->ExtractStaticLibraryName.find(file.c_str()))
+        {
+        // This is not the name of a shared library or archive.
+        return;
+        }
+      }
+    else
+      {
+      // This is not the name of a shared library.
+      return;
+      }
     }
 
   // Include this library in the runtime path ordering.
