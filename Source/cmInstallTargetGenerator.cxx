@@ -22,6 +22,8 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
+#include <assert.h>
+
 //----------------------------------------------------------------------------
 cmInstallTargetGenerator
 ::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
