@@ -84,6 +84,7 @@ public:
       "  file(RELATIVE_PATH variable directory file)\n"
       "  file(TO_CMAKE_PATH path result)\n"
       "  file(TO_NATIVE_PATH path result)\n"
+      "  file(DOWNLOAD url file [TIMEOUT timeout] [STATUS status] [LOG log])\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
       "if it does not exist.\n"
@@ -145,7 +146,12 @@ public:
       " one argument.\n"
       "TO_NATIVE_PATH works just like TO_CMAKE_PATH, but will convert from "
       " a cmake style path into the native path style \\ for windows and / "
-      "for UNIX.";
+      "for UNIX.\n"
+      "DOWNLOAD will download the givin URL to the given file. "
+      "If LOG var is specified a log of the download will be put in var. "
+      "If STATUS var is specified the status of the operation will"
+      " be put in var. If TIMEOUT time is specified, the operation will "
+      "timeout after time seconds, time can be specified as a float.\n";
     }
 
   cmTypeMacro(cmFileCommand, cmCommand);
@@ -180,6 +186,7 @@ protected:
                  const std::vector<std::string>& files,
                  const bool optional
                 );
+  bool HandleDownloadCommand(std::vector<std::string> const& args);
   void GetTargetTypeFromString(const std::string& stype, int& itype) const;
   bool HandleInstallDestination(cmFileInstaller& installer,
                                 std::string& destination);
