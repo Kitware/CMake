@@ -170,6 +170,7 @@ CMAKE_CXX_SOURCES="\
   cmComputeLinkDepends \
   cmComputeLinkInformation \
   cmOrderRuntimeDirectories \
+  cmComputeTargetDepends \
 "
 
 if ${cmake_system_mingw}; then

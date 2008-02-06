@@ -91,6 +91,8 @@ SET(SRCS
   cmComputeLinkDepends.h
   cmComputeLinkInformation.cxx
   cmComputeLinkInformation.h
+  cmComputeTargetDepends.h
+  cmComputeTargetDepends.cxx
   cmCustomCommand.cxx
   cmCustomCommand.h
   cmDepends.cxx

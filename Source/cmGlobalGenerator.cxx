@@ -26,6 +26,7 @@
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmExportInstallFileGenerator.h"
+#include "cmComputeTargetDepends.h"
 
 #include <cmsys/Directory.hxx>
 
@@ -787,6 +788,18 @@ void cmGlobalGenerator::Generate()
     {
     this->LocalGenerators[i]->GenerateTargetManifest();
     }
+
+  // Compute the inter-target dependencies.
+  {
+  cmComputeTargetDepends ctd(this);
+  ctd.Compute();
+  std::vector<cmTarget*> const& targets = ctd.GetTargets();
+  for(std::vector<cmTarget*>::const_iterator ti = targets.begin();
+      ti != targets.end(); ++ti)
+    {
+    ctd.GetTargetDirectDepends(*ti, this->TargetDependencies[*ti]);
+    }
+  }
 
   // Create a map from local generator to the complete set of targets
   // it builds by default.
@@ -1718,144 +1731,7 @@ void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
 cmGlobalGenerator::TargetDependSet &
 cmGlobalGenerator::GetTargetDirectDepends(cmTarget & target)
 {
-  // Clarify the role of the input target.
-  cmTarget * depender = &target;
-
-  // if the depends are already in the map then return
-  TargetDependMap::iterator tgtI =
-    this->TargetDependencies.find(depender);
-  if(tgtI != this->TargetDependencies.end())
-    {
-    return tgtI->second;
-    }
-
-  // Create an entry for this depender.
-  TargetDependSet& depender_depends = this->TargetDependencies[depender];
-
-  // Keep track of dependencies already listed.
-  std::set<cmStdString> emitted;
-
-  // A target should not depend on itself.
-  emitted.insert(depender->GetName());
-
-  // Loop over all targets linked directly.
-  cmTarget::LinkLibraryVectorType const& tlibs =
-    target.GetOriginalLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
-      lib != tlibs.end(); ++lib)
-    {
-    // Don't emit the same library twice for this target.
-    if(emitted.insert(lib->first).second)
-      {
-      this->ConsiderTargetDepends(depender, depender_depends,
-                                  lib->first.c_str());
-      }
-    }
-
-  // Loop over all utility dependencies.
-  std::set<cmStdString> const& tutils = target.GetUtilities();
-  for(std::set<cmStdString>::const_iterator util = tutils.begin();
-      util != tutils.end(); ++util)
-    {
-    // Don't emit the same utility twice for this target.
-    if(emitted.insert(*util).second)
-      {
-      this->ConsiderTargetDepends(depender, depender_depends,
-                                  util->c_str());
-      }
-    }
-
-  return depender_depends;
-}
-
-//----------------------------------------------------------------------------
-bool
-cmGlobalGenerator::ConsiderTargetDepends(cmTarget * depender,
-                                         TargetDependSet& depender_depends,
-                                         const char* dependee_name)
-{
-  // Check the target's makefile first.
-  cmTarget * dependee =
-    depender->GetMakefile()->FindTarget(dependee_name);
-
-  // Then search globally.
-  if(!dependee)
-    {
-    dependee = this->FindTarget(0, dependee_name);
-    }
-
-  // If not found then skip then the dependee.
-  if(!dependee)
-    {
-    return false;
-    }
-
-  // Check whether the depender is among the dependee's dependencies.
-  std::vector<cmTarget *> steps;
-  if(this->FindDependency(depender, dependee, steps))
-    {
-    // This creates a cyclic dependency.
-    bool isStatic = depender->GetType() == cmTarget::STATIC_LIBRARY;
-    cmOStringStream e;
-    e << "Cyclic dependency among targets:\n"
-      << "  " << depender->GetName() << "\n";
-    for(unsigned int i = static_cast<unsigned int>(steps.size());
-        i > 0; --i)
-      {
-      cmTarget * step = steps[i-1];
-      e << "    -> " << step->GetName() << "\n";
-      isStatic = isStatic && step->GetType() == cmTarget::STATIC_LIBRARY;
-      }
-    if(isStatic)
-      {
-      e << "  All targets are STATIC libraries.\n";
-      e << "  Dropping "
-        << depender->GetName() << " -> " << dependee->GetName()
-        << " to resolve.\n";
-      cmSystemTools::Message(e.str().c_str());
-      }
-    else
-      {
-      e << "  At least one target is not a STATIC library.\n";
-      cmSystemTools::Error(e.str().c_str());
-      }
-    return false;
-    }
-  else
-    {
-    // This does not create a cyclic dependency.
-    depender_depends.insert(dependee);
-    return true;
-    }
-}
-
-//----------------------------------------------------------------------------
-bool
-cmGlobalGenerator
-::FindDependency(cmTarget * goal, cmTarget * current,
-                 std::vector<cmTarget*>& steps)
-{
-  if(current == goal)
-    {
-    steps.push_back(current);
-    return true;
-    }
-  TargetDependMap::iterator i = this->TargetDependencies.find(current);
-  if(i == this->TargetDependencies.end())
-    {
-    return false;
-    }
-  TargetDependSet & depends = i->second;
-  for(TargetDependSet::iterator j = depends.begin();
-      j != depends.end(); ++j)
-    {
-    if(this->FindDependency(goal, *j, steps))
-      {
-      steps.push_back(current);
-      return true;
-      }
-    }
-  return false;
+  return this->TargetDependencies[&target];
 }
 
 void cmGlobalGenerator::AddTarget(cmTargets::value_type &v)

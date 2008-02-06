@@ -313,12 +313,7 @@ private:
   // track files replaced during a Generate
   std::vector<std::string> FilesReplacedDuringGenerate;
 
-  // Track inter-target dependencies.
-  bool ConsiderTargetDepends(cmTarget * depender,
-                             TargetDependSet& depender_depends,
-                             const char* dependee_name);
-  bool FindDependency(cmTarget * goal, cmTarget * current,
-                      std::vector<cmTarget *>& steps);
+  // Store computed inter-target dependencies.
   typedef std::map<cmTarget *, TargetDependSet> TargetDependMap;
   TargetDependMap TargetDependencies;
 

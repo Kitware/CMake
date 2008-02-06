@@ -3296,6 +3296,13 @@ void cmake::DefineProperties(cmake *cm)
     "Internal property",
     "Used to detect compiler changes, Do not set.");
 
+  cm->DefineProperty(
+    "GLOBAL_DEPENDS_DEBUG_MODE", cmProperty::GLOBAL,
+    "Enable global target dependency graph debug mode.",
+    "CMake automatically analyzes the global inter-target dependency graph "
+    "at the beginning of native build system generation.  "
+    "This property causes it to display details of its analysis to stderr.");
+
   // ================================================================
   // define variables as well
   // ================================================================
