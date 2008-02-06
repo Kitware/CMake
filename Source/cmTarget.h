@@ -260,7 +260,8 @@ public:
 
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
-  std::string GetFullPath(const char* config=0, bool implib = false);
+  std::string GetFullPath(const char* config=0, bool implib = false,
+                          bool realname = false);
 
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
@@ -437,7 +438,14 @@ private:
   const char* NormalGetDirectory(const char* config, bool implib);
 
   std::string ImportedGetFullPath(const char* config, bool implib);
-  std::string NormalGetFullPath(const char* config, bool implib);
+  std::string NormalGetFullPath(const char* config, bool implib,
+                                bool realname);
+
+  /** Get the real name of the target.  Allowed only for non-imported
+      targets.  When a library or executable file is versioned this is
+      the full versioned name.  If the target is not versioned this is
+      the same as GetFullName.  */
+  std::string NormalGetRealName(const char* config);
 
 private:
   std::string Name;
