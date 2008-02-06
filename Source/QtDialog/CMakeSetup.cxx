@@ -30,7 +30,7 @@
 static const char * cmDocumentationName[][3] =
 {
   {0,
-   "  CMakeSetup - CMake GUI.", 0},
+   "  cmake-gui - CMake GUI.", 0},
   {0,0,0}
 };
 
@@ -38,9 +38,9 @@ static const char * cmDocumentationName[][3] =
 static const char * cmDocumentationUsage[][3] =
 {
   {0,
-   "  CMakeSetup [options]\n"
-   "  CMakeSetup [options] <path-to-source>\n"
-   "  CMakeSetup [options] <path-to-existing-build>", 0},
+   "  cmake-gui [options]\n"
+   "  cmake-gui [options] <path-to-source>\n"
+   "  cmake-gui [options] <path-to-existing-build>", 0},
   {0,0,0}
 };
 
@@ -48,7 +48,7 @@ static const char * cmDocumentationUsage[][3] =
 static const char * cmDocumentationDescription[][3] =
 {
   {0,
-   "The \"CMakeSetup\" executable is the CMake GUI.  Project "
+   "The \"cmake-gui\" executable is the CMake GUI.  Project "
    "configuration settings may be specified interactively.  "
    "Brief instructions are provided at the bottom of the "
    "window when the program is running.", 0},
