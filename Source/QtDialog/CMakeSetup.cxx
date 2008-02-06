@@ -64,8 +64,13 @@ static const char * cmDocumentationOptions[][3] =
 
 int main(int argc, char** argv)
 {
-  cmSystemTools::FindExecutableDirectory(argv[0]);
   QApplication app(argc, argv);
+ 
+  QDir cmExecDir(QApplication::applicationDirPath());
+#if defined(Q_OS_MAC)
+  cmExecDir.cd("../../../");
+#endif
+  cmSystemTools::FindExecutableDirectory(cmExecDir.filePath("cmake").toAscii().data());
 
   QTranslator translator;
   QString transfile = QString("cmake_%1").arg(QLocale::system().name());
