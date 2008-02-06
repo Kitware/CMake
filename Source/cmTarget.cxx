@@ -2093,13 +2093,17 @@ std::string cmTarget::NormalGetFullPath(const char* config, bool implib,
   fpath += "/";
 
   // Add the full name of the target.
-  if(realname)
+  if(implib)
+    {
+    fpath += this->GetFullName(config, true);
+    }
+  else if(realname)
     {
     fpath += this->NormalGetRealName(config);
     }
   else
     {
-    fpath += this->GetFullName(config, implib);
+    fpath += this->GetFullName(config, false);
     }
   return fpath;
 }
