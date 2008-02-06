@@ -418,66 +418,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --test-command TestDriverTest subdir/test3
     )
 
-  ADD_TEST(dependency_w_libout  ${CMAKE_CTEST_COMMAND}
+  ADD_TEST(Dependency ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Dependency"
-    "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec"
-    --build-project Dependency
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-options
-    -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib
-    --test-command exec
-    )
-
-  ADD_TEST(dependency_wo_lib_out   ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Dependency"
-    "${CMake_BINARY_DIR}/Tests/Dependency/WOLibOut"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WOLibOut/Exec"
+    "${CMake_BINARY_DIR}/Tests/Dependency"
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/Exec"
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project Dependency
     --test-command exec
-    )
-
-  ADD_TEST(dependency2  ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Dependency"
-    "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec2"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Dependency
-    --build-options
-    -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib
-    --test-command exec2
-    )
-
-  ADD_TEST(dependency3  ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Dependency"
-    "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec3"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Dependency
-    --build-options
-    -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib
-    --test-command exec3)
-
-  ADD_TEST(dependency4   ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/Dependency"
-    "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut"
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Exec4"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Dependency
-    --build-options
-    -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Dependency/WithLibOut/Lib
-    --test-command exec4
     )
 
   IF("${CMAKE_SYSTEM_NAME}" MATCHES syllable)
