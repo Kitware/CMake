@@ -2475,7 +2475,7 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
 #else
   // Check for executable version properties.
   const char* version = this->GetProperty("VERSION");
-  if(type != cmTarget::EXECUTABLE)
+  if(type != cmTarget::EXECUTABLE || this->Makefile->IsOn("XCODE"))
     {
     version = 0;
     }
