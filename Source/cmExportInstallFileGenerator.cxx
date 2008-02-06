@@ -36,8 +36,19 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       tei != this->ExportSet->end(); ++tei)
     {
     cmTargetExport* te = *tei;
-    this->ExportedTargets.insert(te->Target);
-    this->GenerateImportTargetCode(os, te->Target);
+    if(this->ExportedTargets.insert(te->Target).second)
+      {
+      this->GenerateImportTargetCode(os, te->Target);
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "INSTALL(EXPORT \"" << this->Name << "\" ...) "
+        << "includes target \"" << te->Target->GetName()
+        << "\" more than once in the export set.";
+      cmSystemTools::Error(e.str().c_str());
+      return false;
+      }
     }
 
   // Now load per-configuration properties for them.
@@ -204,11 +215,8 @@ cmExportInstallFileGenerator
     return;
     }
 
-  {
-  // Construct the property name.
-  std::string prop = (itgen->IsImportLibrary()?
-                      "IMPORTED_IMPLIB" : "IMPORTED_LOCATION");
-  prop += suffix;
+  // Get the target to be installed.
+  cmTarget* target = itgen->GetTarget();
 
   // Construct the installed location of the target.
   std::string dest = itgen->GetDestination();
@@ -225,25 +233,47 @@ cmExportInstallFileGenerator
   value += dest;
   value += "/";
 
-  // Append the installed file name.
-  std::string fname = itgen->GetInstallFilename(config);
-  value += fname;
-
-  // Fix name for frameworks and bundles.
-  if(itgen->GetTarget()->IsFrameworkOnApple())
+  if(itgen->IsImportLibrary())
     {
-    value += ".framework/";
-    value += fname;
-    }
-  else if(itgen->GetTarget()->IsAppBundleOnApple())
-    {
-    value += ".app/Contents/MacOS/";
-    value += fname;
-    }
+    // Construct the property name.
+    std::string prop = "IMPORTED_IMPLIB";
+    prop += suffix;
 
-  // Store the property.
-  properties[prop] = value;
-  }
+    // Append the installed file name.
+    value += itgen->GetInstallFilename(target, config,
+                                       cmInstallTargetGenerator::NameImplib);
+
+    // Store the property.
+    properties[prop] = value;
+    }
+  else
+    {
+    // Construct the property name.
+    std::string prop = "IMPORTED_LOCATION";
+    prop += suffix;
+
+    // Append the installed file name.
+    if(target->IsFrameworkOnApple())
+      {
+      value += itgen->GetInstallFilename(target, config);
+      value += ".framework/";
+      value += itgen->GetInstallFilename(target, config);
+      }
+    else if(target->IsAppBundleOnApple())
+      {
+      value += itgen->GetInstallFilename(target, config);
+      value += ".app/Contents/MacOS/";
+      value += itgen->GetInstallFilename(target, config);
+      }
+    else
+      {
+      value += itgen->GetInstallFilename(target, config,
+                                         cmInstallTargetGenerator::NameReal);
+      }
+
+    // Store the property.
+    properties[prop] = value;
+    }
 }
 
 //----------------------------------------------------------------------------

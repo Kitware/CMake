@@ -394,6 +394,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     cmInstallFilesGenerator* publicHeaderGenerator = 0;
     cmInstallFilesGenerator* resourceGenerator = 0;
 
+    // Track whether this is a namelink-only rule.
+    bool namelinkOnly = false;
+
     switch(target.GetType())
       {
       case cmTarget::SHARED_LIBRARY:
@@ -464,6 +467,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
               libraryGenerator = CreateInstallTargetGenerator(target, 
                                                            libraryArgs, false);
               libraryGenerator->SetNamelinkMode(namelinkMode);
+              namelinkOnly =
+                (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
               }
             else
               {
@@ -503,6 +508,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           libraryGenerator = CreateInstallTargetGenerator(target, libraryArgs, 
                                                           false);
           libraryGenerator->SetNamelinkMode(namelinkMode);
+          namelinkOnly =
+            (namelinkMode == cmInstallTargetGenerator::NamelinkModeOnly);
           }
         else
           {
@@ -583,7 +590,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     createInstallGeneratorsForTargetFileSets = false;
     }
 
-  if(createInstallGeneratorsForTargetFileSets)
+  if(createInstallGeneratorsForTargetFileSets && !namelinkOnly)
     {
     const char* files = target.GetProperty("PRIVATE_HEADER");
     if ((files) && (*files))
@@ -673,7 +680,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     this->Makefile->AddInstallGenerator(publicHeaderGenerator);
     this->Makefile->AddInstallGenerator(resourceGenerator);
 
-    if (!exports.GetString().empty())
+    // Add this install rule to an export if one was specified and
+    // this is not a namelink-only rule.
+    if(!exports.GetString().empty() && !namelinkOnly)
       {
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
         ->AddTargetToExports(exports.GetCString(), &target, 

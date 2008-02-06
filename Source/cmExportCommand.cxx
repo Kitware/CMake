@@ -169,7 +169,7 @@ bool cmExportCommand
     }
 
   // Generate the import file.
-  if(!ebfg.GenerateImportFile())
+  if(!ebfg.GenerateImportFile() && this->ErrorMessage.empty())
     {
     this->SetError("could not write export file.");
     return false;

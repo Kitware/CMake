@@ -33,8 +33,20 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       tei != this->Exports->end(); ++tei)
     {
     cmTarget* te = *tei;
-    this->ExportedTargets.insert(te);
-    this->GenerateImportTargetCode(os, te);
+    if(this->ExportedTargets.insert(te).second)
+      {
+      this->GenerateImportTargetCode(os, te);
+      }
+    else
+      {
+      if(this->ExportCommand && this->ExportCommand->ErrorMessage.empty())
+        {
+        cmOStringStream e;
+        e << "given target \"" << te->GetName() << "\" more than once.";
+        this->ExportCommand->ErrorMessage = e.str();
+        }
+      return false;
+      }
     }
 
   // Generate import file content for each configuration.
@@ -93,11 +105,20 @@ cmExportBuildFileGenerator
   {
   std::string prop = "IMPORTED_LOCATION";
   prop += suffix;
-  std::string value = target->GetFullPath(config, false);
-  if(target->IsAppBundleOnApple())
+  std::string value;
+  if(target->IsFrameworkOnApple())
     {
+    value = target->GetFullPath(config, false);
+    }
+  else if(target->IsAppBundleOnApple())
+    {
+    value = target->GetFullPath(config, false);
     value += ".app/Contents/MacOS/";
     value += target->GetFullName(config, false);
+    }
+  else
+    {
+    value = target->GetFullPath(config, false, true);
     }
   properties[prop] = value;
   }

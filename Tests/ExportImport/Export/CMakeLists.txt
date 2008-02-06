@@ -8,6 +8,7 @@ endif(CMAKE_ANSI_CFLAGS)
 add_library(testExe1lib STATIC testExe1lib.c) # not exported
 add_executable(testExe1 testExe1.c)
 target_link_libraries(testExe1 testExe1lib)
+set_property(TARGET testExe1 PROPERTY VERSION 4)
 
 add_library(testExe2libImp SHARED testExe2libImp.c)
 set_property(TARGET testExe2libImp PROPERTY LIBRARY_OUTPUT_DIRECTORY impl)
@@ -27,6 +28,8 @@ set_property(TARGET testLib3Imp PROPERTY LIBRARY_OUTPUT_DIRECTORY impl)
 add_library(testLib3 SHARED testLib3.c)
 target_link_libraries(testLib3 testLib3Imp)
 set_property(TARGET testLib3 PROPERTY LINK_INTERFACE_LIBRARIES "")
+set_property(TARGET testLib3 PROPERTY VERSION 1.2)
+set_property(TARGET testLib3 PROPERTY SOVERSION 3)
 
 add_library(testLib4 SHARED testLib4.c)
 set_property(TARGET testLib4 PROPERTY FRAMEWORK 1)
@@ -41,7 +44,7 @@ install(
   testExe2lib
   EXPORT exp
   RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
+  LIBRARY DESTINATION lib NAMELINK_SKIP
   ARCHIVE DESTINATION lib
   FRAMEWORK DESTINATION Frameworks
   BUNDLE DESTINATION Applications

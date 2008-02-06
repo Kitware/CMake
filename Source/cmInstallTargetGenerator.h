@@ -45,10 +45,20 @@ public:
     NamelinkModeSkip
   };
   void SetNamelinkMode(NamelinkModeType mode) { this->NamelinkMode = mode; }
+  NamelinkModeType GetNamelinkMode() const { return this->NamelinkMode; }
 
   std::string GetInstallFilename(const char* config) const;
-  static std::string GetInstallFilename(cmTarget*target, const char* config, 
-                                        bool implib, bool useSOName);
+
+  enum NameType
+  {
+    NameNormal,
+    NameImplib,
+    NameSO,
+    NameReal
+  };
+
+  static std::string GetInstallFilename(cmTarget*target, const char* config,
+                                        NameType nameType = NameNormal);
 
   cmTarget* GetTarget() const { return this->Target; }
   bool IsImportLibrary() const { return this->ImportLibrary; }

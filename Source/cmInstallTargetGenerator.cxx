@@ -144,10 +144,10 @@ cmInstallTargetGenerator
                              Indent const& indent)
 {
   // Compute the full path to the main installed file for this target.
+  NameType nameType = this->ImportLibrary? NameImplib : NameNormal;
   std::string toInstallPath = this->GetInstallDestination();
   toInstallPath += "/";
-  toInstallPath += this->GetInstallFilename(this->Target, config,
-                                              this->ImportLibrary, false);
+  toInstallPath += this->GetInstallFilename(this->Target, config, nameType);
 
   // Track whether post-install operations should be added to the
   // script.
@@ -194,8 +194,8 @@ cmInstallTargetGenerator
         // Need to apply install_name_tool and stripping to binary
         // inside bundle.
         toInstallPath += ".app/Contents/MacOS/";
-        toInstallPath += this->GetInstallFilename(this->Target, config,
-                                                  this->ImportLibrary, false);
+        toInstallPath +=
+          this->GetInstallFilename(this->Target, config, nameType);
         literal_args += " USE_SOURCE_PERMISSIONS";
         }
       else
@@ -250,7 +250,7 @@ cmInstallTargetGenerator
       // inside framework.
       toInstallPath += ".framework/";
       toInstallPath += this->GetInstallFilename(this->Target, config,
-                                                this->ImportLibrary, false);
+                                                NameNormal);
 
       literal_args += " USE_SOURCE_PERMISSIONS";
       }
@@ -369,16 +369,16 @@ cmInstallTargetGenerator
 std::string
 cmInstallTargetGenerator::GetInstallFilename(const char* config) const
 {
+  NameType nameType = this->ImportLibrary? NameImplib : NameNormal;
   return
     cmInstallTargetGenerator::GetInstallFilename(this->Target, config,
-                                                 this->ImportLibrary, false);
+                                                 nameType);
 }
 
 //----------------------------------------------------------------------------
 std::string cmInstallTargetGenerator::GetInstallFilename(cmTarget* target,
                                                          const char* config,
-                                                         bool implib,
-                                                         bool useSOName)
+                                                         NameType nameType)
 {
   std::string fname;
   // Compute the name of the library.
@@ -391,10 +391,15 @@ std::string cmInstallTargetGenerator::GetInstallFilename(cmTarget* target,
     target->GetExecutableNames(targetName, targetNameReal,
                                targetNameImport, targetNamePDB,
                                config);
-    if(implib)
+    if(nameType == NameImplib)
       {
       // Use the import library name.
       fname = targetNameImport;
+      }
+    else if(nameType == NameReal)
+      {
+      // Use the canonical name.
+      fname = targetNameReal;
       }
     else
       {
@@ -411,15 +416,20 @@ std::string cmInstallTargetGenerator::GetInstallFilename(cmTarget* target,
     std::string targetNamePDB;
     target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
                             targetNameImport, targetNamePDB, config);
-    if(implib)
+    if(nameType == NameImplib)
       {
       // Use the import library name.
       fname = targetNameImport;
       }
-    else if(useSOName)
+    else if(nameType == NameSO)
       {
       // Use the soname.
       fname = targetNameSO;
+      }
+    else if(nameType == NameReal)
+      {
+      // Use the real name.
+      fname = targetNameReal;
       }
     else
       {
@@ -474,7 +484,7 @@ cmInstallTargetGenerator
         // The directory portions differ.  Append the filename to
         // create the mapping.
         std::string fname =
-          this->GetInstallFilename(tgt, config, false, true);
+          this->GetInstallFilename(tgt, config, NameSO);
 
         // Map from the build-tree install_name.
         for_build += fname;
@@ -511,8 +521,7 @@ cmInstallTargetGenerator
       {
       // Prepare to refer to the install-tree install_name.
       new_id = for_install;
-      new_id += this->GetInstallFilename(this->Target, config,
-                                         this->ImportLibrary, true);
+      new_id += this->GetInstallFilename(this->Target, config, NameSO);
       }
     }
 
