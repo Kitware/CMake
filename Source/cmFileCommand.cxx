@@ -1918,7 +1918,6 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
   std::vector<std::string>::const_iterator i = args.begin();
   if(args.size() < 3)
     {
-    std::cout << args.size() << "\n";
     this->SetError("FILE(DOWNLOAD url file) must be called with "
                    "at least three arguments.");
     return false;
@@ -1971,11 +1970,6 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       }
     i++;
     }
-  std::cout << "log var: [" << verboseLog << "]\n"; 
-  std::cout << "Url: [" << url << "]\n";
-  std::cout << "file: [" << file << "]\n";
-  std::cout << "timeout: [" << timeout << "]\n";
-
   std::ofstream fout(file.c_str());
   if(!fout)
     {
@@ -2010,7 +2004,6 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout ); 
     }
   CURLcode res = curl_easy_perform(curl);
-  std::cout << "res = " << res << "\n";
   /* always cleanup */
   curl_easy_cleanup(curl);
   if(statusVar.size())
