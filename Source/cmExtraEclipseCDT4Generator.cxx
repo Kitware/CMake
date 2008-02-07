@@ -507,6 +507,52 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       }
     }
 
+  // add pre-processor definitions to allow eclipse to gray out sections
+  emmited.clear();
+  for (std::vector<cmLocalGenerator*>::const_iterator
+        it = this->GlobalGenerator->GetLocalGenerators().begin();
+       it != this->GlobalGenerator->GetLocalGenerators().end();
+       ++it)
+    {
+
+    if(const char* cdefs = (*it)->GetMakefile()->GetProperty(
+                                                        "COMPILE_DEFINITIONS"))
+      {
+      // Expand the list.
+      std::vector<std::string> defs;
+      cmSystemTools::ExpandListArgument(cdefs, defs);
+
+      for(std::vector<std::string>::const_iterator di = defs.begin();
+          di != defs.end(); ++di)
+        {
+        std::string::size_type equals = di->find('=', 0);
+        std::string::size_type enddef = di->length();
+      
+        std::string def;
+        std::string val;
+        if (equals != std::string::npos && equals < enddef)
+          {
+          // we have -DFOO=BAR
+          def = di->substr(0, equals);
+          val = di->substr(equals + 1, enddef - equals + 1);
+          }
+        else
+          {
+          // we have -DFOO
+          def = *di;
+          }
+          
+        // insert the definition if not already added.
+        if(emmited.find(def) == emmited.end())
+          {
+          emmited.insert(def);
+          fout << "<pathentry kind=\"mac\" name=\"" << def
+               << "\" path=\"\" value=\"" << val << "\"/>\n";
+          }
+        }
+      }
+    }
+
   // include dirs
   emmited.clear();
   for (std::vector<cmLocalGenerator*>::const_iterator
@@ -561,15 +607,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     ::AppendTarget(fout, generator->GetCleanTargetName(), make);
     }
 
-  bool installTargetCreated = false;
-  bool installStripTargetCreated = false;
-  bool testTargetCreated = false;
-  bool experimentalTargetCreated = false;
-  bool nightlyTargetCreated = false;
-  bool packageTargetCreated = false;
-  bool packageSourceTargetCreated = false;
-  bool rebuildCacheTargetCreated = false;
-
   // add all executable and library targets and some of the GLOBAL 
   // and UTILITY targets
   for (std::vector<cmLocalGenerator*>::const_iterator
@@ -585,44 +622,15 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         case cmTarget::UTILITY:
         case cmTarget::GLOBAL_TARGET:
           {
-          // only add these global targets once
-          if ((t->first=="install") && (installTargetCreated==false)) 
-            {
-            installTargetCreated=true;
-            }
-          else if ((t->first=="install/strip") 
-                    && (installStripTargetCreated==false)) 
-            {
-            installStripTargetCreated=true;
-            }
-          else if ((t->first=="test") && (testTargetCreated==false)) 
-            {
-            testTargetCreated=true;
-            }
-          else if ((t->first=="Experimental") 
-                    && (experimentalTargetCreated==false)) 
-            {
-            experimentalTargetCreated=true;
-            }
-          else if ((t->first=="Nightly") && (nightlyTargetCreated==false)) 
-            {
-            nightlyTargetCreated=true;
-            }
-          else if ((t->first=="package") && (packageTargetCreated==false)) 
-            {
-            packageTargetCreated=true;
-            }
-          else if ((t->first=="package_source") 
-                    && (packageSourceTargetCreated==false)) 
-            {
-            packageSourceTargetCreated=true;
-            }
-          else if ((t->first=="rebuild_cache") 
-                    && (rebuildCacheTargetCreated==false)) 
-            {
-            rebuildCacheTargetCreated=true;
-            }
-          else  // in all cases above fallthrough
+          // only add these global targets
+          if (!( (t->first=="install")
+              || (t->first=="install/strip")
+              || (t->first=="test")
+              || (t->first=="Experimental")
+              || (t->first=="Nightly")
+              || (t->first=="package")
+              || (t->first=="package_source")
+              || (t->first=="rebuild_cache") ))
             {
             break;
             }
