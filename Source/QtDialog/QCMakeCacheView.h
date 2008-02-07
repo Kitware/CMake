@@ -114,19 +114,20 @@ class QCMakeCacheFileEditor : public QLineEdit
 {
   Q_OBJECT
 public:
-  QCMakeCacheFileEditor(QWidget* p);
+  QCMakeCacheFileEditor(QWidget* p, const QString& var);
 protected slots:
   virtual void chooseFile() = 0;
 protected:
   void resizeEvent(QResizeEvent* e);
   QToolButton* ToolButton;
+  QString Variable;
 };
 
 class QCMakeCachePathEditor : public QCMakeCacheFileEditor
 {
   Q_OBJECT
 public:
-  QCMakeCachePathEditor(QWidget* p = NULL);
+  QCMakeCachePathEditor(QWidget* p = NULL, const QString& var = QString());
   void chooseFile();
 };
 
@@ -134,7 +135,7 @@ class QCMakeCacheFilePathEditor : public QCMakeCacheFileEditor
 {
   Q_OBJECT
 public:
-  QCMakeCacheFilePathEditor(QWidget* p = NULL);
+  QCMakeCacheFilePathEditor(QWidget* p = NULL, const QString& var = QString());
   void chooseFile();
 };
 

@@ -393,6 +393,8 @@ QCMakeCacheModelDelegate::QCMakeCacheModelDelegate(QObject* p)
 QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p, 
     const QStyleOptionViewItem&, const QModelIndex& idx) const
 {
+  const QAbstractItemModel* model = idx.model();
+  QModelIndex var = model->index(idx.row(), 0);
   QVariant type = idx.data(QCMakeCacheModel::TypeRole);
   if(type == QCMakeCacheProperty::BOOL)
     {
@@ -400,11 +402,13 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
     }
   else if(type == QCMakeCacheProperty::PATH)
     {
-    return new QCMakeCachePathEditor(p);
+    return new QCMakeCachePathEditor(p, 
+      var.data(Qt::DisplayRole).toString());
     }
   else if(type == QCMakeCacheProperty::FILEPATH)
     {
-    return new QCMakeCacheFilePathEditor(p);
+    return new QCMakeCacheFilePathEditor(p, 
+      var.data(Qt::DisplayRole).toString());
     }
 
   return new QLineEdit(p);
@@ -453,8 +457,8 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
   return model->setData(index, state, Qt::CheckStateRole);
 }
   
-QCMakeCacheFileEditor::QCMakeCacheFileEditor(QWidget* p)
-  : QLineEdit(p)
+QCMakeCacheFileEditor::QCMakeCacheFileEditor(QWidget* p, const QString& var)
+  : QLineEdit(p), Variable(var)
 {
   // this *is* instead of has a line edit so QAbstractItemView
   // doesn't get confused with what the editor really is
@@ -466,8 +470,8 @@ QCMakeCacheFileEditor::QCMakeCacheFileEditor(QWidget* p)
                    this, SLOT(chooseFile()));
 }
 
-QCMakeCacheFilePathEditor::QCMakeCacheFilePathEditor(QWidget* p)
- : QCMakeCacheFileEditor(p)
+QCMakeCacheFilePathEditor::QCMakeCacheFilePathEditor(QWidget* p, const QString& var)
+ : QCMakeCacheFileEditor(p, var)
 {
   QCompleter* comp = new QCompleter(this);
   QDirModel* model = new QDirModel(comp);
@@ -475,8 +479,8 @@ QCMakeCacheFilePathEditor::QCMakeCacheFilePathEditor(QWidget* p)
   this->setCompleter(comp);
 }
 
-QCMakeCachePathEditor::QCMakeCachePathEditor(QWidget* p)
- : QCMakeCacheFileEditor(p)
+QCMakeCachePathEditor::QCMakeCachePathEditor(QWidget* p, const QString& var)
+ : QCMakeCacheFileEditor(p, var)
 {
   QCompleter* comp = new QCompleter(this);
   QDirModel* model = new QDirModel(comp);
@@ -499,8 +503,17 @@ void QCMakeCacheFilePathEditor::chooseFile()
   // choose a file and set it
   QString path;
   QFileInfo info(this->text());
-  path = QFileDialog::getOpenFileName(this, tr("Select File"), 
-      info.absolutePath());
+  QString title;
+  if(this->Variable.isEmpty())
+    {
+    title = tr("Select File");
+    }
+  else
+    {
+    title = tr("Select File for %1");
+    title = title.arg(this->Variable);
+    }
+  path = QFileDialog::getOpenFileName(this, title, info.absolutePath());
   
   if(!path.isEmpty())
     {
@@ -512,8 +525,17 @@ void QCMakeCachePathEditor::chooseFile()
 {
   // choose a file and set it
   QString path;
-  path = QFileDialog::getExistingDirectory(this, tr("Select Path"), 
-      this->text());
+  QString title;
+  if(this->Variable.isEmpty())
+    {
+    title = tr("Select Path");
+    }
+  else
+    {
+    title = tr("Select Path for %1");
+    title = title.arg(this->Variable);
+    }
+  path = QFileDialog::getExistingDirectory(this, title, this->text());
   if(!path.isEmpty())
     {
     this->setText(path);
