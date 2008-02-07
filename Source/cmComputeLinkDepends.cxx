@@ -24,6 +24,8 @@
 
 #include <cmsys/stl/algorithm>
 
+#include <assert.h>
+
 /*
 
 This file computes an ordered list of link items to use when linking a
