@@ -328,6 +328,11 @@ cmComputeLinkInformation
                                     "dependent library path");
     }
 
+  // Add the search path entries requested by the user to the runtime
+  // path computation.
+  this->OrderRuntimeSearchPath->AddDirectories(
+     this->Target->GetLinkDirectories());
+
   // Get the implicit link directories for this platform.
   if(const char* implicitLinks =
      (this->Makefile->GetDefinition
