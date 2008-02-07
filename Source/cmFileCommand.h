@@ -150,7 +150,11 @@ public:
       "DOWNLOAD will download the givin URL to the given file. "
       "If LOG var is specified a log of the download will be put in var. "
       "If STATUS var is specified the status of the operation will"
-      " be put in var. If TIMEOUT time is specified, the operation will "
+      " be put in var. The status is returned in a list of length 2. "
+      "The first element is the numeric return value for the operation, "
+      "and the second element is a string value for the error. A 0 "
+      "numeric error means no error in the operation. "
+      "If TIMEOUT time is specified, the operation will "
       "timeout after time seconds, time can be specified as a float.\n";
     }
 

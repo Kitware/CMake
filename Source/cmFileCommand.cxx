@@ -1970,7 +1970,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       }
     i++;
     }
-  std::ofstream fout(file.c_str());
+  std::ofstream fout(file.c_str(), std::ios::binary);
   if(!fout)
     {
     this->SetError("FILE(DOWNLOAD url file TIMEOUT time) can not open "
@@ -2008,8 +2008,10 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
   curl_easy_cleanup(curl);
   if(statusVar.size())
     {
-    this->Makefile->AddDefinition(statusVar.c_str(),
-                                  curl_easy_strerror(res));
+    cmOStringStream result;
+    result << (int)res << ";\"" << curl_easy_strerror(res) << "\"";
+    this->Makefile->AddDefinition(statusVar.c_str(), 
+                                  result.str().c_str());
     }
   curl_global_cleanup();
   if(chunkDebug.size())
