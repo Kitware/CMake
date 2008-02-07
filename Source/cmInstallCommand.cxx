@@ -223,6 +223,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
   argHelper.Parse(&args, 0);
 
+  // now parse the generic args (i.e. the ones not specialized on LIBRARY/
+  // ARCHIVE, RUNTIME etc. (see above)
+  // These generic args also contain the targets and the export stuff
   std::vector<std::string> unknownArgs;
   cmInstallCommandArguments genericArgs;
   cmCAStringVector targetList(&genericArgs.Parser, "TARGETS");
@@ -241,6 +244,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   cmInstallCommandArguments publicHeaderArgs;
   cmInstallCommandArguments resourceArgs;
 
+  // now parse the args for specific parts of the target (e.g. LIBRARY, 
+  // RUNTIME, ARCHIVE etc.
   archiveArgs.Parse      (&archiveArgVector.GetVector(),       &unknownArgs);
   libraryArgs.Parse      (&libraryArgVector.GetVector(),       &unknownArgs);
   runtimeArgs.Parse      (&runtimeArgVector.GetVector(),       &unknownArgs);
