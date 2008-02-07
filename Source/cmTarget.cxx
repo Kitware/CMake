@@ -3299,6 +3299,9 @@ cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
 cmComputeLinkInformation*
 cmTarget::GetLinkInformation(const char* config)
 {
+  // Link information does not make sense for static libraries.
+  assert(this->GetType() != cmTarget::STATIC_LIBRARY);
+
   // Lookup any existing information for this configuration.
   std::map<cmStdString, cmComputeLinkInformation*>::iterator
     i = this->LinkInformation.find(config?config:"");

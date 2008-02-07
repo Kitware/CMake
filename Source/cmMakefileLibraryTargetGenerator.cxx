@@ -720,7 +720,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
-  this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target, relink);
+  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    this->LocalGenerator
+      ->OutputLinkLibraries(linklibs, *this->Target, relink);
+    }
 
   // Construct object file lists that may be needed to expand the
   // rule.
