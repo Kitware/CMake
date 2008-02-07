@@ -1,8 +1,8 @@
 project(CASE2 C)
 
-add_library(case2Foo1 STATIC foo1.c)
-add_library(case2Foo2 STATIC foo2.c)
-add_library(case2Foo3 STATIC foo3.c)
+add_library(case2Foo1 STATIC foo1.c foo1b.c)
+add_library(case2Foo2 STATIC foo2.c foo2b.c)
+add_library(case2Foo3 STATIC foo3.c foo3b.c)
 target_link_libraries(case2Foo1 case2Foo2)
 target_link_libraries(case2Foo2 case2Foo3)
 target_link_libraries(case2Foo3 case2Foo1)
@@ -18,3 +18,4 @@ add_executable(case2Zot zot.c)
 target_link_libraries(case2Zot case2Bar1)
 
 #set_property(GLOBAL PROPERTY GLOBAL_DEPENDS_DEBUG_MODE 1)
+#set(CMAKE_LINK_DEPENDS_DEBUG_MODE 1)
