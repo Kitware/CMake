@@ -1,4 +1,10 @@
+# This file is configured at cmake time, and loaded at cpack time.
+# To pass variables to cpack from cmake, they must be configured
+# in this file.  
+
 if(CPACK_GENERATOR MATCHES "NSIS")
+  SET(BUILD_QtDialog @BUILD_QtDialog@)
+  SET(CMAKE_QT_IS_STATIC @CMAKE_QT_IS_STATIC@)
   # set the install/unistall icon used for the installer itself
   # There is a bug in NSI that does not handle full unix paths properly. 
   SET(CPACK_NSIS_MUI_ICON "@CMake_SOURCE_DIR@/Utilities/Release\\CMakeLogo.ico")
@@ -27,6 +33,10 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\www.kitware.com")
   SET(CPACK_NSIS_CONTACT @CPACK_PACKAGE_CONTACT@)
   SET(CPACK_NSIS_MODIFY_PATH ON)
+  # only package cmake-gui if QT is static on windows
+  IF(BUILD_QtDialog AND CMAKE_QT_IS_STATIC)
+    SET(CPACK_PACKAGE_EXECUTABLES ${CPACK_PACKAGE_EXECUTABLES} "cmake-gui" "cmake-gui(beta)") 
+  ENDIF(BUILD_QtDialog AND CMAKE_QT_IS_STATIC)
 endif(CPACK_GENERATOR MATCHES "NSIS")
 
 if(CPACK_GENERATOR MATCHES "CygwinSource")

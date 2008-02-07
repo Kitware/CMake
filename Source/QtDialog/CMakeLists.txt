@@ -7,7 +7,9 @@ IF(NOT QT4_FOUND)
 ELSE(NOT QT4_FOUND)
 
   INCLUDE(${QT_USE_FILE})
-
+  IF(QT_CONFIG MATCHES "static")
+    SET(CMAKE_QT_IS_STATIC TRUE CACHE STATIC "")
+  ENDIF(QT_CONFIG MATCHES "static")
   SET(SRCS
     AddCacheEntry.cxx
     AddCacheEntry.h
@@ -47,8 +49,14 @@ ELSE(NOT QT4_FOUND)
 
   ADD_EXECUTABLE(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS})
   TARGET_LINK_LIBRARIES(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${QT_LIBRARIES})
-
-  INSTALL_TARGETS(/bin cmake-gui)
+  # if qt is not static and we are on windows then skip the install
+  # I don't want to distribute qt dlls
+  IF(WIN32 AND NOT CMAKE_QT_IS_STATIC)
+    SET(SKIP_INSTALL TRUE)
+  ENDIF(WIN32 AND NOT CMAKE_QT_IS_STATIC)
+  IF(NOT SKIP_INSTALL)
+    INSTALL_TARGETS(/bin cmake-gui)
+  ENDIF(NOT SKIP_INSTALL)
 
 ENDIF(NOT QT4_FOUND)
 
