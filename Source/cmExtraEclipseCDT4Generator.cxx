@@ -283,16 +283,21 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
          it != this->GlobalGenerator->GetProjectMap().end();
          ++it)
       {
-      fout <<
-        "\t\t<link>\n"
-        "\t\t\t<name>" << it->first << "</name>\n"
-        "\t\t\t<type>2</type>\n"
-        "\t\t\t<location>"
-        << this->GetEclipsePath(
-             it->second[0]->GetMakefile()->GetStartDirectory())
-        << "</location>\n"
-        "\t\t</link>\n"
-        ;
+      std::string linkSourceDirectory =this->GetEclipsePath(
+                            it->second[0]->GetMakefile()->GetStartDirectory());
+      if (!cmSystemTools::IsSubDirectory(homeOutputDirectory.c_str(),
+                                         linkSourceDirectory.c_str()))
+        {
+        fout <<
+          "\t\t<link>\n"
+          "\t\t\t<name>" << it->first << "</name>\n"
+          "\t\t\t<type>2</type>\n"
+          "\t\t\t<location>"
+          << this->GetEclipsePath(linkSourceDirectory)
+          << "</location>\n"
+          "\t\t</link>\n"
+          ;
+        }
       }
     // for EXECUTABLE_OUTPUT_PATH when not in binary dir
     std::string output_path = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
