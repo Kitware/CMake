@@ -20,8 +20,11 @@
 #include "cmStandardIncludes.h"
 #include "cmTarget.h"
 
+#include "cmGraphAdjacencyList.h"
+
 #include <queue>
 
+class cmComputeComponentGraph;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
@@ -109,16 +112,18 @@ private:
   void InferDependencies();
 
   // Ordering constraint graph adjacency list.
-  struct EntryConstraintSet: public std::set<int> {};
-  std::vector<EntryConstraintSet> EntryConstraintGraph;
+  typedef cmGraphNodeList NodeList;
+  typedef cmGraphAdjacencyList Graph;
+  Graph EntryConstraintGraph;
+  void CleanConstraintGraph();
   void DisplayConstraintGraph();
 
   // Ordering algorithm.
-  std::vector<int> EntryVisited;
-  std::set<int> EntryEmitted;
-  int WalkId;
   void OrderLinkEntires();
-  void VisitLinkEntry(unsigned int i);
+  std::vector<char> ComponentVisited;
+  void DisplayComponents(cmComputeComponentGraph const& ccg);
+  void VisitComponent(cmComputeComponentGraph const& ccg, unsigned int i);
+  void EmitComponent(NodeList const& nl);
   void DisplayFinalEntries();
 };
 

@@ -87,6 +87,8 @@ SET(SRCS
   cmCommandArgumentLexer.cxx
   cmCommandArgumentParser.cxx
   cmCommandArgumentParserHelper.cxx
+  cmComputeComponentGraph.cxx
+  cmComputeComponentGraph.h
   cmComputeLinkDepends.cxx
   cmComputeLinkDepends.h
   cmComputeLinkInformation.cxx
@@ -138,6 +140,7 @@ SET(SRCS
   cmGlobalGenerator.h
   cmGlobalUnixMakefileGenerator3.cxx
   cmGlobalUnixMakefileGenerator3.h
+  cmGraphAdjacencyList.h
   cmInstallGenerator.h
   cmInstallGenerator.cxx
   cmInstallExportGenerator.cxx

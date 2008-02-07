@@ -19,8 +19,11 @@
 
 #include "cmStandardIncludes.h"
 
+#include "cmGraphAdjacencyList.h"
+
 #include <stack>
 
+class cmComputeComponentGraph;
 class cmGlobalGenerator;
 class cmTarget;
 
@@ -46,7 +49,7 @@ private:
   void CollectDepends();
   void CollectTargetDepends(int depender_index);
   void AddTargetDepend(int depender_index, const char* dependee_name);
-  void ComputeFinalDepends();
+  void ComputeFinalDepends(cmComputeComponentGraph const& ccg);
 
   cmGlobalGenerator* GlobalGenerator;
   bool DebugMode;
@@ -58,33 +61,16 @@ private:
   // Represent the target dependency graph.  The entry at each
   // top-level index corresponds to a depender whose dependencies are
   // listed.
-  struct TargetDependList: public std::vector<int> {};
-  std::vector<TargetDependList> TargetDependGraph;
-  std::vector<TargetDependList> FinalDependGraph;
-  void DisplayGraph(std::vector<TargetDependList> const& graph,
-                    const char* name);
+  typedef cmGraphNodeList NodeList;
+  typedef cmGraphAdjacencyList Graph;
+  Graph InitialGraph;
+  Graph FinalGraph;
+  void DisplayGraph(Graph const& graph, const char* name);
 
-  // Tarjan's algorithm.
-  struct TarjanEntry
-  {
-    int Root;
-    int Component;
-    int VisitIndex;
-  };
-  int TarjanWalkId;
-  std::vector<int> TarjanVisited;
-  std::vector<TarjanEntry> TarjanEntries;
-  std::stack<int> TarjanStack;
-  int TarjanIndex;
-  void Tarjan();
-  void TarjanVisit(int i);
-
-  // Connected components.
-  struct ComponentList: public std::vector<int> {};
-  std::vector<ComponentList> Components;
-  void DisplayComponents();
-  bool CheckComponents();
-  void ComplainAboutBadComponent(int c);
+  // Deal with connected components.
+  void DisplayComponents(cmComputeComponentGraph const& ccg);
+  bool CheckComponents(cmComputeComponentGraph const& ccg);
+  void ComplainAboutBadComponent(cmComputeComponentGraph const& ccg, int c);
 };
 
 #endif

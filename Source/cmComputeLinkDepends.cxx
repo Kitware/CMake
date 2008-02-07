@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmComputeLinkDepends.h"
 
+#include "cmComputeComponentGraph.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -96,31 +97,47 @@ For the unknown items, we infer dependencies by looking at the
   B: intersect( {Y,C}   , {}    ) = {}    ; infer no edges
   C: intersect( {}      , {B}   ) = {}    ; infer no edges
 
+------------------------------------------------------------------------------
+
 Once the complete graph is formed from all known and inferred
-dependencies, we walk the graph with a series of depth-first-searches
-in order to emit link items.  When visiting a node all edges are
-followed first because the neighbors must precede the item.  Once
-neighbors across all edges have been emitted it is safe to emit the
-current node.
+dependencies we must use it to produce a valid link line.  If the
+dependency graph were known to be acyclic a simple depth-first-search
+would produce a correct link line.  Unfortunately we cannot make this
+assumption so the following technique is used.
 
-If a single DFS returns to a node it previously reached then a cycle
-is present.  Cyclic link dependencies are resolved simply by repeating
-one of the cycle entries at the beginning and end of the cycle
-members.  For example, the graph
+The original graph is converted to a directed acyclic graph in which
+each node corresponds to a strongly connected component of the
+original graph.  For example, the dependency graph
 
-  A <- B  ,  B <- C  ,  C <- A
+  X <- A <- B <- C <- A <- Y
 
-can be satisfied with the link item list
+contains strongly connected components {X}, {A,B,C}, and {Y}.  The
+implied directed acyclic graph (DAG) is
 
-  A B C A
+  {X} <- {A,B,C} <- {Y}
 
-When a node is reached a second time during the same DFS we make sure
-its item has been emitted and then skip following its outgoing edges
-again.
+The final list of link items is constructed by a series of
+depth-first-searches through this DAG of components.  When visiting a
+component all outgoing edges are followed first because the neighbors
+must precede it.  Once neighbors across all edges have been emitted it
+is safe to emit the current component.
+
+Trivial components (those with one item) are handled simply by
+emitting the item.  Non-trivial components (those with more than one
+item) are assumed to consist only of static libraries that may be
+safely repeated on the link line.  We emit members of the component
+multiple times (see code below for details).  The final link line for
+the example graph might be
+
+  X A B C A B C Y
+
+------------------------------------------------------------------------------
 
 The initial exploration of dependencies using a BFS associates an
 integer index with each link item.  When the graph is built outgoing
-edges are sorted by this index.  This preserves the original link
+edges are sorted by this index.
+
+This preserves the original link
 order as much as possible subject to the dependencies.
 
 After the initial exploration of the link interface tree, any
@@ -190,6 +207,9 @@ cmComputeLinkDepends::Compute()
   // Infer dependencies of targets for which they were not known.
   this->InferDependencies();
 
+  // Cleanup the constraint graph.
+  this->CleanConstraintGraph();
+
   // Display the constraint graph.
   if(this->DebugMode)
     {
@@ -223,7 +243,7 @@ cmComputeLinkDepends::AllocateLinkEntry(std::string const& item)
     lei = this->LinkEntryIndex.insert(index_entry).first;
   this->EntryList.push_back(LinkEntry());
   this->InferredDependSets.push_back(0);
-  this->EntryConstraintGraph.push_back(EntryConstraintSet());
+  this->EntryConstraintGraph.push_back(NodeList());
   return lei;
 }
 
@@ -354,7 +374,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 
   // This shared library dependency must be preceded by the item that
   // listed it.
-  this->EntryConstraintGraph[index].insert(dep.DependerIndex);
+  this->EntryConstraintGraph[index].push_back(dep.DependerIndex);
 
   // Target items may have their own dependencies.
   if(entry.Target)
@@ -469,7 +489,7 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
     // The depender must come before the dependee.
     if(depender_index >= 0)
       {
-      this->EntryConstraintGraph[dependee_index].insert(depender_index);
+      this->EntryConstraintGraph[dependee_index].push_back(depender_index);
       }
 
     // Update the inferred dependencies for earlier items.
@@ -531,22 +551,37 @@ void cmComputeLinkDepends::InferDependencies()
     for(DependSet::const_iterator j = common.begin(); j != common.end(); ++j)
       {
       int dependee_index = *j;
-      this->EntryConstraintGraph[dependee_index].insert(depender_index);
+      this->EntryConstraintGraph[dependee_index].push_back(depender_index);
       }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkDepends::CleanConstraintGraph()
+{
+  for(Graph::iterator i = this->EntryConstraintGraph.begin();
+      i != this->EntryConstraintGraph.end(); ++i)
+    {
+    // Sort the outgoing edges for each graph node so that the
+    // original order will be preserved as much as possible.
+    cmsys_stl::sort(i->begin(), i->end());
+
+    // Make the edge list unique.
+    NodeList::iterator last = cmsys_stl::unique(i->begin(), i->end());
+    i->erase(last, i->end());
     }
 }
 
 //----------------------------------------------------------------------------
 void cmComputeLinkDepends::DisplayConstraintGraph()
 {
-  // Display the conflict graph.
+  // Display the graph nodes and their edges.
   cmOStringStream e;
   for(unsigned int i=0; i < this->EntryConstraintGraph.size(); ++i)
     {
-    EntryConstraintSet const& cset = this->EntryConstraintGraph[i];
+    NodeList const& nl = this->EntryConstraintGraph[i];
     e << "item " << i << " is [" << this->EntryList[i].Item << "]\n";
-    for(EntryConstraintSet::const_iterator j = cset.begin();
-        j != cset.end(); ++j)
+    for(NodeList::const_iterator j = nl.begin(); j != nl.end(); ++j)
       {
       e << "  item " << *j << " must precede it\n";
       }
@@ -557,56 +592,107 @@ void cmComputeLinkDepends::DisplayConstraintGraph()
 //----------------------------------------------------------------------------
 void cmComputeLinkDepends::OrderLinkEntires()
 {
-  // Setup visit tracking.
-  this->EntryVisited.resize(this->EntryList.size(), 0);
-  this->WalkId = 0;
-
-  // Start a DFS from every entry.
-  for(unsigned int i=0; i < this->EntryList.size(); ++i)
+  // Compute the DAG of strongly connected components.  The algorithm
+  // used by cmComputeComponentGraph should identify the components in
+  // the same order in which the items were originally discovered in
+  // the BFS.  This should preserve the original order when no
+  // constraints disallow it.
+  cmComputeComponentGraph ccg(this->EntryConstraintGraph);
+  Graph const& cgraph = ccg.GetComponentGraph();
+  if(this->DebugMode)
     {
-    ++this->WalkId;
-    this->VisitLinkEntry(i);
+    this->DisplayComponents(ccg);
+    }
+
+  // Setup visit tracking.
+  this->ComponentVisited.resize(cgraph.size(), 0);
+
+  // The component graph is guaranteed to be acyclic.  Start a DFS
+  // from every entry.
+  for(unsigned int c=0; c < cgraph.size(); ++c)
+    {
+    this->VisitComponent(ccg, c);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkDepends::VisitLinkEntry(unsigned int i)
+void
+cmComputeLinkDepends::DisplayComponents(cmComputeComponentGraph const& ccg)
+{
+  fprintf(stderr, "The strongly connected components are:\n");
+  std::vector<NodeList> const& components = ccg.GetComponents();
+  for(unsigned int c=0; c < components.size(); ++c)
+    {
+    fprintf(stderr, "Component (%u):\n", c);
+    NodeList const& nl = components[c];
+    for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
+      {
+      int i = *ni;
+      fprintf(stderr, "  item %d [%s]\n", i,
+              this->EntryList[i].Item.c_str());
+      }
+    }
+  fprintf(stderr, "\n");
+}
+
+//----------------------------------------------------------------------------
+void
+cmComputeLinkDepends::VisitComponent(cmComputeComponentGraph const& ccg,
+                                     unsigned int c)
 {
   // Check if the node has already been visited.
-  if(this->EntryVisited[i])
+  if(this->ComponentVisited[c])
     {
-    if(this->EntryVisited[i] == this->WalkId)
-      {
-      // We have reached a node previously visited on this DFS.  There
-      // is a cycle.  In order to allow linking with cyclic
-      // dependencies we make sure the item is emitted but do not
-      // follow its outgoing edges again.
-      if(this->EntryEmitted.insert(i).second)
-        {
-        // The item has not been previously emitted so we emit it now.
-        // It will be emitted again when the stack unwinds back up to
-        // the beginning of the cycle.
-        this->FinalLinkEntries.push_back(this->EntryList[i]);
-        }
-      }
     return;
     }
 
-  // We are now visiting this node so mark it.
-  this->EntryVisited[i] = this->WalkId;
+  // We are now visiting this component so mark it.
+  this->ComponentVisited[c] = 1;
 
-  // Visit the neighbors of the node first.
-  EntryConstraintSet const& cset = this->EntryConstraintGraph[i];
-  for(EntryConstraintSet::const_iterator j = cset.begin();
-      j != cset.end(); ++j)
+  // Visit the neighbors of the component first.
+  NodeList const& nl = ccg.GetComponentGraphEdges(c);
+  for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
     {
-    this->VisitLinkEntry(*j);
+    this->VisitComponent(ccg, *ni);
     }
 
   // Now that all items required to come before this one have been
-  // emmitted, emit this item.
-  this->EntryEmitted.insert(i);
-  this->FinalLinkEntries.push_back(this->EntryList[i]);
+  // emmitted, emit this component's items.
+  this->EmitComponent(ccg.GetComponent(c));
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkDepends::EmitComponent(NodeList const& nl)
+{
+  assert(!nl.empty());
+
+  // Handle trivial components.
+  if(nl.size() == 1)
+    {
+    this->FinalLinkEntries.push_back(this->EntryList[nl[0]]);
+    return;
+    }
+
+  // This is a non-trivial strongly connected component of the
+  // original graph.  It consists of two or more libraries (archives)
+  // that mutually require objects from one another.  In the worst
+  // case we may have to repeat the list of libraries as many times as
+  // there are object files in the biggest archive.  For now we just
+  // list them twice.
+  //
+  // The list of items in the component has been sorted by the order
+  // of discovery in the original BFS of dependencies.  This has the
+  // advantage that the item directly linked by a target requiring
+  // this component will come first which minimizes the number of
+  // repeats needed.
+  for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
+    {
+    this->FinalLinkEntries.push_back(this->EntryList[*ni]);
+    }
+  for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
+    {
+    this->FinalLinkEntries.push_back(this->EntryList[*ni]);
+    }
 }
 
 //----------------------------------------------------------------------------
