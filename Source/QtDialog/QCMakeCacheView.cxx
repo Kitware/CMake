@@ -146,6 +146,7 @@ bool QCMakeCacheView::showAdvanced() const
 
 void QCMakeCacheView::setSearchFilter(const QString& s)
 {
+  this->selectionModel()->clear();
   this->SearchFilter->setFilterFixedString(s);
 }
 
