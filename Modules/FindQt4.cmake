@@ -937,9 +937,9 @@ IF (QT4_QMAKE_FOUND)
         FILE (APPEND ${_moc_parameters_file} "${arg}\n")
       ENDFOREACH(arg)
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
-                         COMMAND ${QT_MOC_EXECUTABLE}
-                         ARGS "@${_moc_parameters_file}"
-                         DEPENDS ${infile})
+                         COMMAND ${QT_MOC_EXECUTABLE} @${_moc_parameters_file}
+                         DEPENDS ${infile}
+                         VERBATIM)
     ELSE (WIN32)     
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
                          COMMAND ${QT_MOC_EXECUTABLE}
