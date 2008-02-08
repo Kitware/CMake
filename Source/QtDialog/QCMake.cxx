@@ -132,6 +132,7 @@ void QCMake::configure()
     this->CMakeInstance->CreateGlobalGenerator(this->Generator.toAscii().data()));
   this->CMakeInstance->SetCMakeCommand(this->CMakeExecutable.toAscii().data());
   this->CMakeInstance->LoadCache();
+  this->CMakeInstance->PreLoadCMakeFiles();
 
   cmSystemTools::ResetErrorOccuredFlag();
 
