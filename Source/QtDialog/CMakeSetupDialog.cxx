@@ -695,6 +695,7 @@ void CMakeSetupDialog::removeSelectedCacheEntries()
     {
     pidxs.append(i);
     }
+  this->CacheValues->selectionModel()->clear();
   foreach(QPersistentModelIndex pi, pidxs)
     {
     this->CacheValues->model()->removeRow(pi.row());
