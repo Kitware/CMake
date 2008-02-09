@@ -7,6 +7,8 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     MARK_AS_ADVANCED(CMAKE_INSTALL_DEBUG_LIBRARIES)
     INCLUDE(${CMake_SOURCE_DIR}/Modules/InstallRequiredSystemLibraries.cmake)
   ENDIF(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
+  # Set the options file that needs to be included inside CMakeCPackOptions.cmake
+  SET(QT_DIALOG_CPACK_OPTIONS_FILE ${CMake_BINARY_DIR}/Source/QtDialog/QtDialogCPack.cmake)
   CONFIGURE_FILE("${CMake_SOURCE_DIR}/CMakeCPackOptions.cmake.in"
     "${CMake_BINARY_DIR}/CMakeCPackOptions.cmake" @ONLY)
   SET(CPACK_PROJECT_CONFIG_FILE "${CMake_BINARY_DIR}/CMakeCPackOptions.cmake")

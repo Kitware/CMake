@@ -1,4 +1,4 @@
-
+PROJECT(QtDialog)
 SET(QT_MIN_VERSION "4.2.0")
 FIND_PACKAGE(Qt4 REQUIRED)
 
@@ -7,9 +7,14 @@ IF(NOT QT4_FOUND)
 ELSE(NOT QT4_FOUND)
 
   INCLUDE(${QT_USE_FILE})
-  IF(QT_CONFIG MATCHES "static")
-    SET(CMAKE_QT_IS_STATIC TRUE CACHE STATIC "")
-  ENDIF(QT_CONFIG MATCHES "static")
+  SET(CMAKE_PACKAGE_QTGUI TRUE)
+  # i don't want to install or package the qt gui on windows 
+  # unless qt is static
+  IF(WIN32 AND NOT QT_CONFIG MATCHES "static")
+    SET(CMAKE_PACKAGE_QTGUI FALSE)
+  ENDIF(WIN32 AND NOT QT_CONFIG MATCHES "static")
+  CONFIGURE_FILE("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
+    "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake")    
   SET(SRCS
     AddCacheEntry.cxx
     AddCacheEntry.h
@@ -51,12 +56,9 @@ ELSE(NOT QT4_FOUND)
   TARGET_LINK_LIBRARIES(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${QT_LIBRARIES})
   # if qt is not static and we are on windows then skip the install
   # I don't want to distribute qt dlls
-  IF(WIN32 AND NOT CMAKE_QT_IS_STATIC)
-    SET(SKIP_INSTALL TRUE)
-  ENDIF(WIN32 AND NOT CMAKE_QT_IS_STATIC)
-  IF(NOT SKIP_INSTALL)
+  IF(CMAKE_PACKAGE_QTGUI)
     INSTALL_TARGETS(/bin cmake-gui)
-  ENDIF(NOT SKIP_INSTALL)
+  ENDIF(CMAKE_PACKAGE_QTGUI)
 
 ENDIF(NOT QT4_FOUND)
 
