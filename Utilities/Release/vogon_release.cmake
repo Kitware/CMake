@@ -10,6 +10,8 @@ set(INITIAL_CACHE "CMAKE_BUILD_TYPE:STRING=Release
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
 CMAKE_GENERATOR:INTERNAL=NMake Makefiles
 CMAKE_MT_EXECUTABLE:STRING=mt
+BUILD_QtDialog:BOOL:=TRUE
+QT_QMAKE_EXECUTABLE:FILEPATH=c:/qt-win-commercial-src-4.3.3/bin/qmake.exe
 ")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)
