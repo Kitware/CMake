@@ -234,6 +234,24 @@ std::string cmFindLibraryCommand::FindLibrary(const char* name)
   std::vector<std::string> suffixes;
   cmSystemTools::ExpandListArgument(prefixes_list, prefixes, true);
   cmSystemTools::ExpandListArgument(suffixes_list, suffixes, true);
+
+  // If the original library name provided by the user matches one of
+  // the suffixes, try it first.
+  bool tryOrig = false;
+  {
+  std::string nm = name;
+  for(std::vector<std::string>::const_iterator si = suffixes.begin();
+      !tryOrig && si != suffixes.end(); ++si)
+    {
+    std::string const& suffix = *si;
+    if(nm.length() > suffix.length() &&
+       nm.substr(nm.size()-suffix.length()) == suffix)
+      {
+      tryOrig = true;
+      }
+    }
+  }
+
   // Add a trailing slash to all paths to aid the search process.
   for(std::vector<std::string>::iterator i = this->SearchPaths.begin();
       i != this->SearchPaths.end(); ++i)
@@ -264,13 +282,16 @@ std::string cmFindLibraryCommand::FindLibrary(const char* name)
     if(!onlyFrameworks)
       {
       // Try the original library name as specified by the user.
-      tryPath = *p;
-      tryPath += name;
-      if(cmSystemTools::FileExists(tryPath.c_str(), true))
+      if(tryOrig)
         {
-        tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-        cmSystemTools::ConvertToUnixSlashes(tryPath);
-        return tryPath;
+        tryPath = *p;
+        tryPath += name;
+        if(cmSystemTools::FileExists(tryPath.c_str(), true))
+          {
+          tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
+          cmSystemTools::ConvertToUnixSlashes(tryPath);
+          return tryPath;
+          }
         }
 
       // Try various library naming conventions.
