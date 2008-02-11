@@ -3303,6 +3303,11 @@ void cmake::DefineProperties(cmake *cm)
     "at the beginning of native build system generation.  "
     "This property causes it to display details of its analysis to stderr.");
 
+  cm->DefineProperty
+    ("IN_TRY_COMPILE", cmProperty::GLOBAL,
+     "Read-only property that is true during a try-compile configuration.",
+     "True when building a project inside a TRY_COMPILE or TRY_RUN command.");
+
   // ================================================================
   // define variables as well
   // ================================================================
@@ -3512,7 +3517,11 @@ const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
       }
     this->SetProperty("COMMANDS",output.c_str());
     }
-  
+  else if ( propname == "IN_TRY_COMPILE" )
+    {
+    this->SetProperty("IN_TRY_COMPILE",
+                      this->GetIsInTryCompile()? "1":"0");
+    }
   return this->Properties.GetPropertyValue(prop, scope, chain);
 }
 
