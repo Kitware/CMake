@@ -122,6 +122,14 @@ ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 IF(NOT CMAKE_CXX_COMPILER_ID_RUN)
   SET(CMAKE_CXX_COMPILER_ID_RUN 1)
 
+  # Each entry in this list is a set of extra flags to try
+  # adding to the compile line to see if it helps produce
+  # a valid identification file.
+  SET(CMAKE_CXX_COMPILER_ID_TEST_FLAGS
+    # Try compiling to an object file only.
+    "-c"
+    )
+
   # Try to identify the compiler.
   SET(CMAKE_CXX_COMPILER_ID)
   INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)

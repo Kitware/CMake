@@ -84,6 +84,9 @@ IF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   # adding to the compile line to see if it helps produce
   # a valid identification executable.
   SET(CMAKE_Fortran_COMPILER_ID_TEST_FLAGS
+    # Try compiling to an object file only.
+    "-c"
+
     # Intel on windows does not preprocess by default.
     "-fpp"
     )
