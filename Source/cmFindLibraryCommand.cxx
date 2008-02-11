@@ -167,8 +167,8 @@ void cmFindLibraryCommand::AddLib64Paths()
     {
     return;
     }
-  std::string voidsize = 
-    this->Makefile->GetRequiredDefinition("CMAKE_SIZEOF_VOID_P");
+  std::string voidsize =
+    this->Makefile->GetSafeDefinition("CMAKE_SIZEOF_VOID_P");
   int size = atoi(voidsize.c_str());
   if(size != 8)
     {
