@@ -527,6 +527,21 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
   this->LocalGenerator = lg;
 }
 
+bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
+                                            unsigned int minor,
+                                            unsigned int patch)
+{
+  if(this->LocalGenerator)
+    {
+    return
+      this->LocalGenerator->NeedBackwardsCompatibility(major, minor, patch);
+    }
+  else
+    {
+    return false;
+    }
+}
+
 void cmMakefile::FinalPass()
 {
   // do all the variable expansions here

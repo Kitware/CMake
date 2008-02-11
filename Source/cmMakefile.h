@@ -123,6 +123,13 @@ public:
     { return this->LocalGenerator;}
 
   /**
+   * Test whether compatibility is set to a given version or lower.
+   */
+  bool NeedBackwardsCompatibility(unsigned int major,
+                                  unsigned int minor,
+                                  unsigned int patch = 0xFFu);
+
+  /**
    * Perform FinalPass, Library dependency analysis etc before output of the
    * makefile.  
    */
