@@ -3138,3 +3138,42 @@ cmTarget* cmMakefile::FindTargetToUse(const char* name)
   // Look for a target built in this project.
   return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0, name);
 }
+
+//----------------------------------------------------------------------------
+bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg)
+{
+  if(cmTarget* existing = this->FindTargetToUse(name.c_str()))
+    {
+    // The name given conflicts with an existing target.  Produce an
+    // error in a compatible way.
+    if(existing->IsImported())
+      {
+      // Imported targets were not supported in previous versions.
+      // This is new code, so we can make it an error.
+      cmOStringStream e;
+      e << "cannot create target \"" << name
+        << "\" because an imported target with the same name already exists.";
+      msg = e.str();
+      return false;
+      }
+    else if(!this->NeedBackwardsCompatibility(2, 4))
+      {
+      // The conflict is with a non-imported target.  Produce an error
+      // that tells the user how to work around the problem.
+      cmOStringStream e;
+      e << "cannot create target \"" << name
+        << "\" because another target with the same name already exists.  "
+        << "Logical target names must be globally unique.  "
+        << "Consider using the OUTPUT_NAME target property to create "
+        << "two targets with the same physical name while keeping logical "
+        << "names distinct.\n"
+        << "If you are building an older project it is possible that "
+        << "it violated this rule but was working accidentally.  "
+        << "Set CMAKE_BACKWARDS_COMPATIBILITY to 2.4 or lower to disable "
+        << "this error.";
+      msg = e.str();
+      return false;
+      }
+    }
+  return true;
+}

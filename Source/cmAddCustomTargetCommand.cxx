@@ -158,6 +158,14 @@ bool cmAddCustomTargetCommand
     currentLine.clear();
     }
 
+  // Enforce name uniqueness.
+  std::string msg;
+  if(!this->Makefile->EnforceUniqueName(args[0], msg))
+    {
+    this->SetError(msg.c_str());
+    return false;
+    }
+
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
   this->Makefile->AddUtilityCommand(args[0].c_str(), excludeFromAll,

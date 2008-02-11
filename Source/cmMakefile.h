@@ -130,6 +130,11 @@ public:
                                   unsigned int patch = 0xFFu);
 
   /**
+   * Help enforce global target name uniqueness.
+   */
+  bool EnforceUniqueName(std::string const& name, std::string& msg);
+
+  /**
    * Perform FinalPass, Library dependency analysis etc before output of the
    * makefile.  
    */

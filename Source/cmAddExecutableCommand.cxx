@@ -82,12 +82,11 @@ bool cmAddExecutableCommand
     return false;
     }
 
-  // Check for an existing target with this name.
-  cmTarget* existing = this->Makefile->FindTargetToUse(exename.c_str());
+  // Handle imported target creation.
   if(importTarget)
     {
     // Make sure the target does not already exist.
-    if(existing)
+    if(this->Makefile->FindTargetToUse(exename.c_str()))
       {
       cmOStringStream e;
       e << "cannot create imported target \"" << exename
@@ -100,20 +99,13 @@ bool cmAddExecutableCommand
     this->Makefile->AddImportedTarget(exename.c_str(), cmTarget::EXECUTABLE);
     return true;
     }
-  else
+
+  // Enforce name uniqueness.
+  std::string msg;
+  if(!this->Makefile->EnforceUniqueName(exename, msg))
     {
-    // Make sure the target does not conflict with an imported target.
-    // This should really enforce global name uniqueness for targets
-    // built within the project too, but that may break compatiblity
-    // with projects in which it was accidentally working.
-    if(existing && existing->IsImported())
-      {
-      cmOStringStream e;
-      e << "cannot create target \"" << exename
-        << "\" because an imported target with the same name already exists.";
-      this->SetError(e.str().c_str());
-      return false;
-      }
+    this->SetError(msg.c_str());
+    return false;
     }
 
   if (s == args.end())

@@ -496,10 +496,21 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("WIN32_EXECUTABLE", cmProperty::TARGET,
-     "Used to specify Windows executable with a WinMain entry point.",
-     "This can be set to indicate that a target is a Windows executable "
-     "in contrast to a console application for example. This changes "
-     "how the executable will be linked.");
+     "Build an executable with a WinMain entry point on windows.",
+     "When this property is set to true the executable when linked "
+     "on Windows will be created with a WinMain() entry point instead "
+     "of of just main()."
+     "This makes it a GUI executable instead of a console application.  "
+     "See the CMAKE_MFC_FLAG variable documentation to configure use "
+     "of MFC for WinMain executables.");
+
+  cm->DefineProperty
+    ("MACOSX_BUNDLE", cmProperty::TARGET,
+     "Build an executable as an application bundle on Mac OS X.",
+     "When this property is set to true the executable when built "
+     "on Mac OS X will be created as an application bundle.  "
+     "This makes it a GUI executable that can be launched from "
+     "the Finder.");
 
   cm->DefineProperty
     ("ENABLE_EXPORTS", cmProperty::TARGET,
