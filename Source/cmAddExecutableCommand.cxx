@@ -101,12 +101,14 @@ bool cmAddExecutableCommand
     }
 
   // Enforce name uniqueness.
+  {
   std::string msg;
   if(!this->Makefile->EnforceUniqueName(exename, msg))
     {
     this->SetError(msg.c_str());
     return false;
     }
+  }
 
   if (s == args.end())
     {

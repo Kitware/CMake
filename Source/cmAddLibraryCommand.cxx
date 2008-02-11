@@ -128,12 +128,14 @@ bool cmAddLibraryCommand
     }
 
   // Enforce name uniqueness.
+  {
   std::string msg;
   if(!this->Makefile->EnforceUniqueName(libName, msg))
     {
     this->SetError(msg.c_str());
     return false;
     }
+  }
 
   if (s == args.end())
     {
