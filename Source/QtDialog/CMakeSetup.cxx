@@ -26,6 +26,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 #include "cmVersion.h"
+#include <cmsys/CommandLineArguments.hxx>
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][3] =
@@ -125,20 +126,39 @@ int main(int argc, char** argv)
   dialog.setWindowTitle(title);
   dialog.show();
  
-  // for now: args support specifying build and/or source directory 
-  QStringList args = app.arguments();
-  if(args.count() == 2)
+  cmsys::CommandLineArguments arg;
+  arg.Initialize(argc, argv);
+  std::string binaryDirectory;
+  std::string sourceDirectory;
+  typedef cmsys::CommandLineArguments argT;
+  arg.AddArgument("-B", argT::CONCAT_ARGUMENT, 
+                  &binaryDirectory, "Binary Directory");
+  arg.AddArgument("-H", argT::CONCAT_ARGUMENT,
+                  &sourceDirectory, "Source Directory");
+  // do not complain about unknown options
+  arg.StoreUnusedArguments(true);
+  arg.Parse();
+  if(!sourceDirectory.empty() && !binaryDirectory.empty())
     {
-    QFileInfo buildFileInfo(args[1], "CMakeCache.txt");
-    QFileInfo srcFileInfo(args[1], "CMakeLists.txt");
-    if(buildFileInfo.exists())
+    dialog.setSourceDirectory(sourceDirectory.c_str());
+    dialog.setBinaryDirectory(binaryDirectory.c_str());
+    }
+  else
+    {
+    QStringList args = app.arguments();
+    if(args.count() == 2)
       {
-      dialog.setBinaryDirectory(buildFileInfo.absolutePath());
-      }
-    else if(srcFileInfo.exists())
-      {
-      dialog.setSourceDirectory(srcFileInfo.absolutePath());
-      dialog.setBinaryDirectory(QDir::currentPath());
+      QFileInfo buildFileInfo(args[1], "CMakeCache.txt");
+      QFileInfo srcFileInfo(args[1], "CMakeLists.txt");
+      if(buildFileInfo.exists())
+        {
+        dialog.setBinaryDirectory(buildFileInfo.absolutePath());
+        }
+      else if(srcFileInfo.exists())
+        {
+        dialog.setSourceDirectory(srcFileInfo.absolutePath());
+        dialog.setBinaryDirectory(QDir::currentPath());
+        }
       }
     }
   

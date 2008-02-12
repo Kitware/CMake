@@ -47,6 +47,7 @@ QCMake::QCMake(QObject* p)
   cmSystemTools::SetErrorCallback(QCMake::errorCallback, this);
 
   this->CMakeInstance = new cmake;
+  this->CMakeInstance->SetCMakeEditCommand("cmake-gui");
   this->CMakeInstance->SetProgressCallback(QCMake::progressCallback, this);
 
   std::vector<std::string> generators;

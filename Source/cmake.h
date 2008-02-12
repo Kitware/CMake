@@ -329,6 +329,10 @@ class cmake
   // Define the properties
   static void DefineProperties(cmake *cm);
 
+  void SetCMakeEditCommand(const char* s)
+    {
+      this->CMakeEditCommand = s;
+    }
 protected:
   int HandleDeleteCacheVariables(const char* var);
   cmPropertyMap Properties;
@@ -413,6 +417,7 @@ private:
   bool InTryCompile;
   bool ScriptMode;
   bool DebugOutput;
+  std::string CMakeEditCommand;
   std::string CMakeCommand;
   std::string CXXEnvironment;
   std::string CCEnvironment;

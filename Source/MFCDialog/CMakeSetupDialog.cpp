@@ -170,6 +170,7 @@ CMakeSetupDialog::CMakeSetupDialog(const CMakeCommandLineInfo& cmdInfo,
   m_CacheEntriesList.m_CMakeSetupDialog = this;
 
   m_CMakeInstance = new cmake;
+  m_CMakeInstance->SetCMakeEditCommand("CMakeSetup");
   m_CMakeInstance->SetProgressCallback(updateProgress, (void *)this);
 
   //{{AFX_DATA_INIT(CMakeSetupDialog)

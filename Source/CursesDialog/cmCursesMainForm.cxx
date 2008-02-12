@@ -48,6 +48,7 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args,
   this->HelpMessage.push_back("");
   this->HelpMessage.push_back(s_ConstHelpMessage);
   this->CMakeInstance = new cmake;
+  this->CMakeInstance->SetCMakeEditCommand("ccmake");
 
   // create the arguments for the cmake object
   std::string whereCMake = cmSystemTools::GetProgramPath(this->Args[0].c_str());
