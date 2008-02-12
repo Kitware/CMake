@@ -14,7 +14,7 @@ ELSE(NOT QT4_FOUND)
     SET(CMAKE_PACKAGE_QTGUI FALSE)
   ENDIF(WIN32 AND NOT QT_CONFIG MATCHES "static")
   CONFIGURE_FILE("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
-    "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake")    
+    "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)    
   SET(SRCS
     AddCacheEntry.cxx
     AddCacheEntry.h
