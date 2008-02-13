@@ -70,7 +70,10 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
   QCMakeCacheModelDelegate* delegate = new QCMakeCacheModelDelegate(this);
   this->setItemDelegate(delegate);
   
-  this->setEditTriggers(QAbstractItemView::AllEditTriggers);
+  this->setEditTriggers(QAbstractItemView::DoubleClicked |
+                        QAbstractItemView::SelectedClicked |
+                        QAbstractItemView::EditKeyPressed |
+                        QAbstractItemView::AnyKeyPressed);
 
   // set up headers and sizes
   int h = 0;
@@ -146,7 +149,6 @@ bool QCMakeCacheView::showAdvanced() const
 
 void QCMakeCacheView::setSearchFilter(const QString& s)
 {
-  this->selectionModel()->clear();
   this->SearchFilter->setFilterFixedString(s);
 }
 
