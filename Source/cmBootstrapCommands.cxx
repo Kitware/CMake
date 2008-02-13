@@ -41,6 +41,7 @@
 #include "cmEndIfCommand.cxx"
 #include "cmEndMacroCommand.cxx"
 #include "cmExecProgramCommand.cxx"
+#include "cmExecuteProcessCommand.cxx"
 #include "cmExternalMakefileProjectGenerator.cxx"
 #include "cmFindBase.cxx"
 #include "cmFindCommon.cxx"
@@ -53,6 +54,7 @@
 #include "cmForEachCommand.cxx"
 #include "cmFunctionCommand.cxx"
 #include "cmGetCMakePropertyCommand.cxx"
+#include "cmGetDirectoryPropertyCommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
 #include "cmGetSourceFilePropertyCommand.cxx"
 #include "cmGetTargetPropertyCommand.cxx"
@@ -68,10 +70,12 @@
 #include "cmMacroCommand.cxx"
 #include "cmMakeDirectoryCommand.cxx"
 #include "cmMarkAsAdvancedCommand.cxx"
+#include "cmMathCommand.cxx"
 #include "cmMessageCommand.cxx"
 #include "cmOptionCommand.cxx"
 #include "cmProjectCommand.cxx"
 #include "cmReturnCommand.cxx"
+#include "cmSeparateArgumentsCommand.cxx"
 #include "cmSetCommand.cxx"
 #include "cmSetPropertyCommand.cxx"
 #include "cmSetSourceFilesPropertiesCommand.cxx"
@@ -106,6 +110,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmEndIfCommand);
   commands.push_back(new cmEndMacroCommand);
   commands.push_back(new cmExecProgramCommand);
+  commands.push_back(new cmExecuteProcessCommand);
   commands.push_back(new cmFileCommand);
   commands.push_back(new cmFindFileCommand);
   commands.push_back(new cmFindLibraryCommand);
@@ -115,6 +120,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmForEachCommand);
   commands.push_back(new cmFunctionCommand);
   commands.push_back(new cmGetCMakePropertyCommand);
+  commands.push_back(new cmGetDirectoryPropertyCommand);
   commands.push_back(new cmGetFilenameComponentCommand);
   commands.push_back(new cmGetSourceFilePropertyCommand);
   commands.push_back(new cmGetTargetPropertyCommand);
@@ -129,10 +135,12 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmMacroCommand);
   commands.push_back(new cmMakeDirectoryCommand);
   commands.push_back(new cmMarkAsAdvancedCommand);
+  commands.push_back(new cmMathCommand);
   commands.push_back(new cmMessageCommand);
   commands.push_back(new cmOptionCommand);
   commands.push_back(new cmProjectCommand);
   commands.push_back(new cmReturnCommand);
+  commands.push_back(new cmSeparateArgumentsCommand);
   commands.push_back(new cmSetCommand);
   commands.push_back(new cmSetPropertyCommand);
   commands.push_back(new cmSetSourceFilesPropertiesCommand);

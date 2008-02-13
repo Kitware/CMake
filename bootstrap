@@ -49,6 +49,8 @@ cmake_doc_dir="/doc/cmake-${cmake_version}"
 cmake_man_dir="/man"
 cmake_init_file=""
 cmake_bootstrap_system_libs=""
+cmake_bootstrap_qt_gui=""
+cmake_bootstrap_qt_qmake=""
 
 # Determine whether this is a MinGW environment.
 if echo "${cmake_system}" | grep MINGW >/dev/null 2>&1; then
@@ -172,6 +174,9 @@ CMAKE_CXX_SOURCES="\
   cmOrderRuntimeDirectories \
   cmComputeTargetDepends \
   cmComputeComponentGraph \
+  cmExprLexer \
+  cmExprParser \
+  cmExprParserHelper \
 "
 
 if ${cmake_system_mingw}; then
@@ -244,6 +249,9 @@ Configuration:
                           (for use only by package maintainers)
   --no-system-libs        use cmake-provided third-party libraries
                           (default)
+  --qt-gui                build the Qt-based GUI (requires Qt >= 4.2)
+  --no-qt-gui             do not build the Qt-based GUI (default)
+  --qt-qmake=<qmake>      use <qmake> as the qmake executable to find Qt
 
 Directory and file names:
   --prefix=PREFIX         install files in tree rooted at PREFIX
@@ -481,6 +489,15 @@ for a in "$@"; do
   fi
   if echo $a | grep "^--no-system-libs" > /dev/null 2> /dev/null; then
     cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_LIBRARIES=0"
+  fi
+  if echo $a | grep "^--qt-gui" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_qt_gui="1"
+  fi
+  if echo $a | grep "^--no-qt-gui" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_qt_gui="0"
+  fi
+  if echo $a | grep "^--qt-qmake=" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_qt_qmake=`echo $a | sed "s/^--qt-qmake=//"`
   fi
   if echo $a | grep "^--help" > /dev/null 2> /dev/null; then
     cmake_usage
@@ -1301,6 +1318,18 @@ SET (CMAKE_DOC_DIR "${cmake_doc_dir}" CACHE PATH "Install location for documenta
 SET (CMAKE_MAN_DIR "${cmake_man_dir}" CACHE PATH "Install location for man pages (relative to prefix)." FORCE)
 SET (CMAKE_DATA_DIR "${cmake_data_dir}" CACHE PATH "Install location for data (relative to prefix)." FORCE)
 EOF
+
+# Add configuration settings given as command-line options.
+if [ "x${cmake_bootstrap_qt_gui}" != "x" ]; then
+  cat >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake" <<EOF
+SET (BUILD_QtDialog ${cmake_bootstrap_qt_gui} CACHE BOOL "Build Qt dialog for CMake" FORCE)
+EOF
+fi
+if [ "x${cmake_bootstrap_qt_qmake}" != "x" ]; then
+  cat >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake" <<EOF
+SET (QT_QMAKE_EXECUTABLE "${cmake_bootstrap_qt_qmake}" CACHE FILEPATH "Location of Qt qmake" FORCE)
+EOF
+fi
 
 # Add user-specified settings.  Handle relative-path case for
 # specification of cmake_init_file.

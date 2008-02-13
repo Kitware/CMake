@@ -22,11 +22,9 @@
 #include "cmElseIfCommand.cxx"
 #include "cmEnableLanguageCommand.cxx"
 #include "cmEndWhileCommand.cxx"
-#include "cmExecuteProcessCommand.cxx"
 #include "cmExportCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
 #include "cmFLTKWrapUICommand.cxx"
-#include "cmGetDirectoryPropertyCommand.cxx"
 #include "cmGetPropertyCommand.cxx"
 #include "cmGetTestPropertyCommand.cxx"
 #include "cmIncludeExternalMSProjectCommand.cxx"
@@ -35,13 +33,11 @@
 #include "cmInstallProgramsCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmLoadCacheCommand.cxx"
-#include "cmMathCommand.cxx"
 #include "cmOutputRequiredFilesCommand.cxx"
 #include "cmQTWrapCPPCommand.cxx"
 #include "cmQTWrapUICommand.cxx"
 #include "cmRemoveCommand.cxx"
 #include "cmRemoveDefinitionsCommand.cxx"
-#include "cmSeparateArgumentsCommand.cxx"
 #include "cmSetDirectoryPropertiesCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
 #include "cmSubdirDependsCommand.cxx"
@@ -72,11 +68,9 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmElseIfCommand);
   commands.push_back(new cmEnableLanguageCommand);
   commands.push_back(new cmEndWhileCommand);
-  commands.push_back(new cmExecuteProcessCommand);
   commands.push_back(new cmExportCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
-  commands.push_back(new cmGetDirectoryPropertyCommand);
   commands.push_back(new cmGetPropertyCommand);
   commands.push_back(new cmGetTestPropertyCommand);
   commands.push_back(new cmIncludeExternalMSProjectCommand);
@@ -85,13 +79,11 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);
   commands.push_back(new cmLoadCommandCommand);
-  commands.push_back(new cmMathCommand);
   commands.push_back(new cmOutputRequiredFilesCommand);
   commands.push_back(new cmQTWrapCPPCommand);
   commands.push_back(new cmQTWrapUICommand);
   commands.push_back(new cmRemoveCommand);
   commands.push_back(new cmRemoveDefinitionsCommand);
-  commands.push_back(new cmSeparateArgumentsCommand);
   commands.push_back(new cmSetDirectoryPropertiesCommand);
   commands.push_back(new cmSourceGroupCommand);
   commands.push_back(new cmSubdirDependsCommand);
