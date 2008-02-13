@@ -78,6 +78,7 @@ private:
                             LinkLibraryVectorType const& libs);
   void AddLinkEntries(int depender_index,
                       std::vector<std::string> const& libs);
+  std::string CleanItemName(std::string const& item);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;

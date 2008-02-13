@@ -510,13 +510,14 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
     {
     // Skip entries that will resolve to the target getting linked or
     // are empty.
-    if(*li == this->Target->GetName() || li->empty())
+    std::string item = this->CleanItemName(*li);
+    if(item == this->Target->GetName() || item.empty())
       {
       continue;
       }
 
     // Add a link entry for this item.
-    int dependee_index = this->AddLinkEntry(*li);
+    int dependee_index = this->AddLinkEntry(item);
 
     // The depender must come before the dependee.
     if(depender_index >= 0)
@@ -548,6 +549,38 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
     {
     this->InferredDependSets[dsi->first]->push_back(dsi->second);
     }
+}
+
+//----------------------------------------------------------------------------
+std::string cmComputeLinkDepends::CleanItemName(std::string const& item)
+{
+  // Strip whitespace off the library names because we used to do this
+  // in case variables were expanded at generate time.  We no longer
+  // do the expansion but users link to libraries like " ${VAR} ".
+  std::string lib = item;
+  std::string::size_type pos = lib.find_first_not_of(" \t\r\n");
+  if(pos != lib.npos)
+    {
+    lib = lib.substr(pos, lib.npos);
+    }
+  pos = lib.find_last_not_of(" \t\r\n");
+  if(pos != lib.npos)
+    {
+    lib = lib.substr(0, pos+1);
+    }
+  if(lib != item && !this->Makefile->NeedBackwardsCompatibility(2,4))
+    {
+    cmOStringStream e;
+    e << "Target \"" << this->Target->GetName() << "\" links to item \""
+      << item << "\" which has leading or trailing whitespace.  "
+      << "CMake is stripping off the whitespace but this may not be "
+      << "supported in the future.  "
+      << "Update the CMakeLists.txt files to avoid adding the whitespace.  "
+      << "Set CMAKE_BACKWARDS_COMPATIBILITY to 2.4 or lower to disable this "
+      << "warning.";
+    cmSystemTools::Message(e.str().c_str());
+    }
+  return lib;
 }
 
 //----------------------------------------------------------------------------
