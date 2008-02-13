@@ -930,6 +930,16 @@ IF (QT4_QMAKE_FOUND)
   MACRO (QT4_CREATE_MOC_COMMAND infile outfile moc_includes moc_options)
     # For Windows, create a parameters file to work around command line length limit
     IF (WIN32)
+      # Pass the parameters in a file.  Set the working directory to
+      # be that containing the parameters file and reference it by
+      # just the file name.  This is necessary because the moc tool on
+      # MinGW builds does not seem to handle spaces in the path to the
+      # file given with the @ syntax.
+      GET_FILENAME_COMPONENT(_moc_outfile_name "${outfile}" NAME)
+      GET_FILENAME_COMPONENT(_moc_outfile_dir "${outfile}" PATH)
+      IF(_moc_outfile_dir)
+        SET(_moc_working_dir WORKING_DIRECTORY ${_moc_outfile_dir})
+      ENDIF(_moc_outfile_dir)
       SET (_moc_parameters_file ${outfile}_parameters)
       SET (_moc_parameters ${moc_includes} ${moc_options} -o "${outfile}" "${infile}")
       FILE (REMOVE ${_moc_parameters_file})
@@ -937,8 +947,9 @@ IF (QT4_QMAKE_FOUND)
         FILE (APPEND ${_moc_parameters_file} "${arg}\n")
       ENDFOREACH(arg)
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
-                         COMMAND ${QT_MOC_EXECUTABLE} @${_moc_parameters_file}
+                         COMMAND ${QT_MOC_EXECUTABLE} @${_moc_outfile_name}_parameters
                          DEPENDS ${infile}
+                         ${_moc_working_dir}
                          VERBATIM)
     ELSE (WIN32)     
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
