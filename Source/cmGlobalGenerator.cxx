@@ -733,11 +733,38 @@ void cmGlobalGenerator::Configure()
     }
 }
 
+bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
+{
+  // If the property is not enabled then okay.
+  if(!this->CMakeInstance
+     ->GetPropertyAsBool("ALLOW_DUPLICATE_CUSTOM_TARGETS"))
+    {
+    return true;
+    }
+
+  // This generator does not support duplicate custom targets.
+  cmOStringStream e;
+  e << "This project has enabled the ALLOW_DUPLICATE_CUSTOM_TARGETS "
+    << "global property.  "
+    << "The \"" << this->GetName() << "\" generator does not support "
+    << "duplicate custom targets.  "
+    << "Consider using a Makefiles generator or fix the project to not "
+    << "use duplicat target names.";
+  cmSystemTools::Error(e.str().c_str());
+  return false;
+}
+
 void cmGlobalGenerator::Generate()
 {
   // Some generators track files replaced during the Generate.
   // Start with an empty vector:
   this->FilesReplacedDuringGenerate.clear();
+
+  // Check whether this generator is allowed to run.
+  if(!this->CheckALLOW_DUPLICATE_CUSTOM_TARGETS())
+    {
+    return;
+    }
 
   // For each existing cmLocalGenerator
   unsigned int i;

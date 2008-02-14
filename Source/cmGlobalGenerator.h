@@ -258,6 +258,8 @@ protected:
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);
 
+  virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS();
+
   // Fill the ProjectMap, this must be called after LocalGenerators 
   // has been populated.
   void FillProjectMap();

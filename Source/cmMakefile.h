@@ -132,7 +132,8 @@ public:
   /**
    * Help enforce global target name uniqueness.
    */
-  bool EnforceUniqueName(std::string const& name, std::string& msg);
+  bool EnforceUniqueName(std::string const& name, std::string& msg,
+                         bool isCustom = false);
 
   /**
    * Perform FinalPass, Library dependency analysis etc before output of the

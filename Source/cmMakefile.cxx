@@ -3140,7 +3140,8 @@ cmTarget* cmMakefile::FindTargetToUse(const char* name)
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg)
+bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
+                                   bool isCustom)
 {
   if(cmTarget* existing = this->FindTargetToUse(name.c_str()))
     {
@@ -3158,21 +3159,76 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg)
       }
     else if(!this->NeedBackwardsCompatibility(2, 4))
       {
-      // The conflict is with a non-imported target.  Produce an error
-      // that tells the user how to work around the problem.
+      // The conflict is with a non-imported target.
+      // Allow this if the user has requested support.
+      cmake* cm =
+        this->LocalGenerator->GetGlobalGenerator()->GetCMakeInstance();
+      if(isCustom && existing->GetType() == cmTarget::UTILITY &&
+         this != existing->GetMakefile() &&
+         cm->GetPropertyAsBool("ALLOW_DUPLICATE_CUSTOM_TARGETS"))
+        {
+        return true;
+        }
+
+      // Produce an error that tells the user how to work around the
+      // problem.
       cmOStringStream e;
       e << "cannot create target \"" << name
         << "\" because another target with the same name already exists.  "
-        << "Logical target names must be globally unique.  "
-        << "For executables and libraries, consider using the OUTPUT_NAME "
-        << "target property to create two targets with the same physical "
-        << "name while keeping logical names distinct.  "
-        << "Custom targets must simply have globally unique names.\n"
-        << "If you are building an older project it is possible that "
-        << "it violated this rule but was working accidentally.  "
-        << "Set CMAKE_BACKWARDS_COMPATIBILITY to 2.4 or lower to disable "
-        << "this error.";
-      msg = e.str();
+        << "The existing target is ";
+      switch(existing->GetType())
+        {
+        case cmTarget::EXECUTABLE:
+          e << "an executable ";
+          break;
+        case cmTarget::STATIC_LIBRARY:
+          e << "a static library ";
+          break;
+        case cmTarget::SHARED_LIBRARY:
+          e << "a shared library ";
+          break;
+        case cmTarget::MODULE_LIBRARY:
+          e << "a module library ";
+          break;
+        case cmTarget::UTILITY:
+          e << "a custom target ";
+          break;
+        default: break;
+        }
+      e << "created in source directory \""
+        << existing->GetMakefile()->GetCurrentDirectory() << "\".\n"
+        << "\n";
+      e <<
+        "Logical target names must be globally unique because:\n"
+        "  - Unique names may be referenced unambiguously both in CMake\n"
+        "    code and on make tool command lines.\n"
+        "  - Logical names are used by Xcode and VS IDE generators\n"
+        "    to produce meaningful project names for the targets.\n"
+        "The logical name of executable and library targets does not "
+        "have to correspond to the physical file names built.  "
+        "Consider using the OUTPUT_NAME target property to create two "
+        "targets with the same physical name while keeping logical "
+        "names distinct.  "
+        "Custom targets must simply have globally unique names.\n"
+        "\n"
+        "If you are building an older project it is possible that "
+        "it violated this rule but was working accidentally because "
+        "CMake did not previously diagnose this problem.  "
+        "Set CMAKE_BACKWARDS_COMPATIBILITY to 2.4 or lower to disable "
+        "this error.\n";
+      if(isCustom && existing->GetType() == cmTarget::UTILITY)
+        {
+        e <<
+          "\n"
+          "For projects that care only about Makefile generators and do "
+          "not wish to support Xcode or VS IDE generators, one may add\n"
+          "  set_property(GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS 1)\n"
+          "to the top of the project to allow duplicate custom targets "
+          "(target names must still be unique within each directory).  "
+          "However, setting this property will cause non-Makefile generators "
+          "to produce an error and refuse to generate the project.";
+        }
+        msg = e.str();
       return false;
       }
     }

@@ -161,7 +161,7 @@ bool cmAddCustomTargetCommand
   // Enforce name uniqueness.
   {
   std::string msg;
-  if(!this->Makefile->EnforceUniqueName(args[0], msg))
+  if(!this->Makefile->EnforceUniqueName(args[0], msg, true))
     {
     this->SetError(msg.c_str());
     return false;

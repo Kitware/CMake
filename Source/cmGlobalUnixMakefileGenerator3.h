@@ -162,6 +162,8 @@ protected:
   virtual const char* GetRebuildCacheTargetName() { return "rebuild_cache"; }
   virtual const char* GetCleanTargetName()        { return "clean"; }
 
+  virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() { return true; }
+
   // Some make programs (Borland) do not keep a rule if there are no
   // dependencies or commands.  This is a problem for creating rules
   // that might not do anything but might have other dependencies
