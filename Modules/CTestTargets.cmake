@@ -37,10 +37,10 @@ ENDIF(CMAKE_CONFIGURATION_TYPES)
 
 # Add convenience targets.  Do this at most once in case of nested
 # projects.
-DEFINE_PROPERTY(CTEST_TARGETS_ADDED GLOBAL
-  "Internal property used by CTestTargets module."
-  "Set by the CTestTargets module to track addition of testing targets."
-  FALSE)
+DEFINE_PROPERTY(GLOBAL PROPERTY CTEST_TARGETS_ADDED
+  BRIEF_DOCS "Internal property used by CTestTargets module."
+  FULL_DOCS "Set by the CTestTargets module to track addition of testing targets."
+  )
 GET_PROPERTY(_CTEST_TARGETS_ADDED GLOBAL PROPERTY CTEST_TARGETS_ADDED)
 IF(NOT _CTEST_TARGETS_ADDED)
   SET_PROPERTY(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)

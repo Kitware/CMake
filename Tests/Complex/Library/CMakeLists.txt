@@ -46,8 +46,11 @@ ADD_LIBRARY(CMakeTestLibraryShared SHARED ${SharedLibrarySources})
 ADD_LIBRARY(CMakeTestModule MODULE moduleFile.c)
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
 ADD_LIBRARY(CMakeTestCLibraryShared SHARED testConly.c)
-DEFINE_PROPERTY(FOO TARGET "a test property"
-  "A simple etst proerty that means nothign and is used for nothing" 0)
+DEFINE_PROPERTY(
+  TARGET PROPERTY FOO
+  BRIEF_DOCS "a test property"
+  FULL_DOCS "A simple etst proerty that means nothign and is used for nothing"
+  )
 SET_TARGET_PROPERTIES(CMakeTestCLibraryShared PROPERTIES FOO BAR)
 IF(NOT BEOS)  # No libm on BeOS.
   SET_TARGET_PROPERTIES(CMakeTestCLibraryShared PROPERTIES LINK_FLAGS "-lm")

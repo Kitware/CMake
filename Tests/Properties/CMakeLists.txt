@@ -22,8 +22,10 @@ include_directories("${Properties_SOURCE_DIR}" "${Properties_BINARY_DIR}")
 
 
 # test generic property interfaces
-define_property(GLOBALTEST GLOBAL "A test property" 
-  "A long description of this test property" 0)
+define_property(GLOBAL PROPERTY GLOBALTEST
+  BRIEF_DOCS "A test property"
+  FULL_DOCS "A long description of this test property"
+  )
 set_property(GLOBAL PROPERTY GLOBALTEST 1)
 set_property(DIRECTORY PROPERTY DIRECTORYTEST 1)
 set_property(SOURCE SubDir/properties3.cxx PROPERTY SOURCETEST 1)
