@@ -543,9 +543,18 @@ void CMakeSetupDialog::doReloadCache()
 }
 
 void CMakeSetupDialog::doDeleteCache()
-{
+{   
+  QString title = tr("Delete Cache");
+  QString message = "Are you sure you want to delete the cache?";
+  QMessageBox::StandardButton btn;
+  btn = QMessageBox::information(this, title, message, 
+                                 QMessageBox::Yes | QMessageBox::No);
+  if(btn == QMessageBox::No)
+    {
+    return;
+    }
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
-    "deleteCache", Qt::QueuedConnection);
+                            "deleteCache", Qt::QueuedConnection);
 }
 
 void CMakeSetupDialog::doAbout()
