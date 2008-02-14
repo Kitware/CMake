@@ -71,6 +71,7 @@ protected slots:
   void removeSelectedCacheEntries();
   void selectionChanged();
   void addCacheEntry();
+  void startSearch();
 
 protected:
 

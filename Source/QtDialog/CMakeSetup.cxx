@@ -23,7 +23,6 @@
 
 #include "CMakeSetupDialog.h"
 #include "cmDocumentation.h"
-#include "cmSystemTools.h"
 #include "cmake.h"
 #include "cmVersion.h"
 #include <cmsys/CommandLineArguments.hxx>
@@ -73,7 +72,6 @@ int main(int argc, char** argv)
 #if defined(Q_OS_MAC)
   cmExecDir.cd("../../../");
 #endif
-  cmSystemTools::FindExecutableDirectory(cmExecDir.filePath("cmake").toAscii().data());
 
   // pick up translation files if they exists in the data directory
   QDir translationsDir = cmExecDir;

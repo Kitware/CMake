@@ -32,6 +32,7 @@
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <QUrl>
+#include <QShortcut>
 
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
@@ -96,6 +97,7 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->GenerateAction = ToolsMenu->addAction(tr("&Generate"));
   QObject::connect(this->GenerateAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doGenerate()));
+  
 
   QMenu* HelpMenu = this->menuBar()->addMenu(tr("&Help"));
   QAction* a = HelpMenu->addAction(tr("About"));
@@ -104,6 +106,10 @@ CMakeSetupDialog::CMakeSetupDialog()
   a = HelpMenu->addAction(tr("Help"));
   QObject::connect(a, SIGNAL(triggered(bool)),
                    this, SLOT(doHelp()));
+  
+  QShortcut* filterShortcut = new QShortcut(QKeySequence::Find, this);
+  QObject::connect(filterShortcut, SIGNAL(activated()), 
+                   this, SLOT(startSearch()));
   
   this->setAcceptDrops(true);
   
@@ -266,6 +272,7 @@ void CMakeSetupDialog::doConfigure()
   this->enterState(Configuring);
 
   this->Output->clear();
+  this->CacheValues->selectionModel()->clear();
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "setProperties", Qt::QueuedConnection, 
     Q_ARG(QCMakeCachePropertyList,
@@ -828,4 +835,11 @@ void CMakeSetupDialog::addCacheEntry()
       }
     }
 }
+
+void CMakeSetupDialog::startSearch()
+{
+  this->Search->setFocus(Qt::OtherFocusReason);
+  this->Search->selectAll();
+}
+
 

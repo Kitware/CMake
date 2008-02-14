@@ -31,22 +31,27 @@ QCMake::QCMake(QObject* p)
   qRegisterMetaType<QCMakeCacheProperty>();
   qRegisterMetaType<QCMakeCachePropertyList>();
   
-  QDir appDir(QCoreApplication::applicationDirPath());
-#if defined(Q_OS_WIN)
-  this->CMakeExecutable = appDir.filePath("cmake.exe");
-#elif defined(Q_OS_MAC)
-  appDir.cd("../../../");  // path to cmake in build directory (need to fix for deployment)
-  this->CMakeExecutable = appDir.filePath("cmake");
-#else
-  this->CMakeExecutable = appDir.filePath("cmake");
+  QDir execDir(QCoreApplication::applicationDirPath());
+  
+  QString cmakeGUICommand = QString("cmake-gui")+cmSystemTools::GetExecutableExtension();
+  cmakeGUICommand = execDir.filePath(cmakeGUICommand);
+
+#if defined(Q_OS_MAC)
+  execDir.cd("../../../");  // path to cmake in build directory (need to fix for deployment)
 #endif
-  // TODO: check for existence?
+  
+  QString cmakeCommand = QString("cmake")+cmSystemTools::GetExecutableExtension();
+  cmakeCommand = execDir.filePath(cmakeCommand);
+
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
   cmSystemTools::SetErrorCallback(QCMake::errorCallback, this);
+  cmSystemTools::FindExecutableDirectory(cmakeCommand.toAscii().data());
 
   this->CMakeInstance = new cmake;
+  this->CMakeInstance->SetCMakeCommand(cmakeCommand.toAscii().data());
+  //this->CMakeInstance->SetCMakeEditCommand(cmakeGUICommand.toAscii().data());
   this->CMakeInstance->SetCMakeEditCommand("cmake-gui");
   this->CMakeInstance->SetProgressCallback(QCMake::progressCallback, this);
 
@@ -131,7 +136,6 @@ void QCMake::configure()
   this->CMakeInstance->SetStartOutputDirectory(this->BinaryDirectory.toAscii().data());
   this->CMakeInstance->SetGlobalGenerator(
     this->CMakeInstance->CreateGlobalGenerator(this->Generator.toAscii().data()));
-  this->CMakeInstance->SetCMakeCommand(this->CMakeExecutable.toAscii().data());
   this->CMakeInstance->LoadCache();
   this->CMakeInstance->PreLoadCMakeFiles();
 
