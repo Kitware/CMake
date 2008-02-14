@@ -16,7 +16,6 @@
 =========================================================================*/
 
 #include "CMakeSetupDialog.h"
-
 #include <QFileDialog>
 #include <QProgressBar>
 #include <QMessageBox>
@@ -177,7 +176,7 @@ void CMakeSetupDialog::initialize()
 
   QObject::connect(this->CMakeThread->cmakeInstance(),
                    SIGNAL(outputMessage(QString)),
-                   this->Output, SLOT(append(QString)));
+                   this, SLOT(message(QString)));
 
   QObject::connect(this->Advanced, SIGNAL(clicked(bool)), 
                    this->CacheValues, SLOT(setShowAdvanced(bool)));
@@ -467,7 +466,24 @@ void CMakeSetupDialog::error(const QString& message)
   QStringList messages = message.split('\n');
   foreach(QString m, messages)
     {
+    // make sure we escape html tags in the cmake messages
+    m.replace(QString("&"), QString("&amp;"));
+    m.replace(QString("<"), QString("&lt;"));
+    m.replace(QString(">"), QString("&gt;"));
     this->Output->append(QString("<b><font color=red>%1</font></b>").arg(m));
+    }
+}
+
+void CMakeSetupDialog::message(const QString& message)
+{
+  QStringList messages = message.split('\n');
+  foreach(QString m, messages)
+    {
+    // make sure we escape html tags in the cmake messages
+    m.replace(QString("&"), QString("&amp;"));
+    m.replace(QString("<"), QString("&lt;"));
+    m.replace(QString(">"), QString("&gt;"));
+    this->Output->append(m);
     }
 }
 

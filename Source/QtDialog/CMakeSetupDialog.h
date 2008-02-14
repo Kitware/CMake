@@ -50,6 +50,7 @@ protected slots:
   void finishConfigure(int error);
   void finishGenerate(int error);
   void error(const QString& message);
+  void message(const QString& message);
   
   void doSourceBrowse();
   void doBinaryBrowse();
