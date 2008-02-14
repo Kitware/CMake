@@ -43,7 +43,7 @@ ELSE(NOT CMAKE_C_COMPILER_WORKS)
   SET(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
 
   IF(CMAKE_C_COMPILER_FORCED)
-    # The compiler was forced by the CMAKE_FORCE_C_COMPILER macro.
+    # The compiler configuration was forced by the user.
     # Assume the user has configured all compiler information.
   ELSE(CMAKE_C_COMPILER_FORCED)
     # Try to identify the ABI and configure it into CMakeCCompiler.cmake
