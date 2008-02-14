@@ -243,7 +243,8 @@ QCMakeCachePropertyList QCMake::properties() const
     {
 
     if(i.GetType() == cmCacheManager::INTERNAL ||
-       i.GetType() == cmCacheManager::STATIC)
+       i.GetType() == cmCacheManager::STATIC ||
+       i.GetType() == cmCacheManager::UNINITIALIZED)
       {
       continue;
       }
