@@ -903,12 +903,7 @@ IF (QT4_QMAKE_FOUND)
   
   # macro used to create the names of output files preserving relative dirs
   MACRO (QT4_MAKE_OUTPUT_FILE infile prefix ext outfile )
-    STRING(REGEX MATCH "${CMAKE_CURRENT_BINARY_DIR}" _match ${infile})
-    IF(_match)
-      FILE(RELATIVE_PATH rel ${CMAKE_CURRENT_BINARY_DIR} ${infile})
-    ELSE(_match)
-      FILE(RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${infile})
-    ENDIF(_match)
+    FILE(RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${infile})
     SET(_outfile "${CMAKE_CURRENT_BINARY_DIR}/${rel}")
     GET_FILENAME_COMPONENT(outpath ${_outfile} PATH)
     GET_FILENAME_COMPONENT(_outfile ${_outfile} NAME_WE)
