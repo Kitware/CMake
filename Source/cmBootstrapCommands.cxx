@@ -34,6 +34,7 @@
 #include "cmConfigureFileCommand.cxx"
 #include "cmCoreTryCompile.cxx"
 #include "cmCreateTestSourceList.cxx"
+#include "cmDefinePropertyCommand.cxx"
 #include "cmElseCommand.cxx"
 #include "cmEnableTestingCommand.cxx"
 #include "cmEndForEachCommand.cxx"
@@ -56,6 +57,7 @@
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
+#include "cmGetPropertyCommand.cxx"
 #include "cmGetSourceFilePropertyCommand.cxx"
 #include "cmGetTargetPropertyCommand.cxx"
 #include "cmHexFileConverter.cxx"
@@ -103,6 +105,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmCMakeMinimumRequired);
   commands.push_back(new cmConfigureFileCommand);
   commands.push_back(new cmCreateTestSourceList);
+  commands.push_back(new cmDefinePropertyCommand);
   commands.push_back(new cmElseCommand);
   commands.push_back(new cmEnableTestingCommand);  
   commands.push_back(new cmEndForEachCommand);
@@ -122,6 +125,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmGetCMakePropertyCommand);
   commands.push_back(new cmGetDirectoryPropertyCommand);
   commands.push_back(new cmGetFilenameComponentCommand);
+  commands.push_back(new cmGetPropertyCommand);
   commands.push_back(new cmGetSourceFilePropertyCommand);
   commands.push_back(new cmGetTargetPropertyCommand);
   commands.push_back(new cmIfCommand);

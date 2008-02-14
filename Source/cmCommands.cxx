@@ -18,14 +18,12 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildNameCommand.cxx"
-#include "cmDefinePropertyCommand.cxx"
 #include "cmElseIfCommand.cxx"
 #include "cmEnableLanguageCommand.cxx"
 #include "cmEndWhileCommand.cxx"
 #include "cmExportCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
 #include "cmFLTKWrapUICommand.cxx"
-#include "cmGetPropertyCommand.cxx"
 #include "cmGetTestPropertyCommand.cxx"
 #include "cmIncludeExternalMSProjectCommand.cxx"
 #include "cmInstallCommand.cxx"
@@ -64,14 +62,12 @@ void GetPredefinedCommands(std::list<cmCommand*>&
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildNameCommand);
-  commands.push_back(new cmDefinePropertyCommand);
   commands.push_back(new cmElseIfCommand);
   commands.push_back(new cmEnableLanguageCommand);
   commands.push_back(new cmEndWhileCommand);
   commands.push_back(new cmExportCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
-  commands.push_back(new cmGetPropertyCommand);
   commands.push_back(new cmGetTestPropertyCommand);
   commands.push_back(new cmIncludeExternalMSProjectCommand);
   commands.push_back(new cmInstallCommand);

@@ -35,32 +35,35 @@ IF(CMAKE_CONFIGURATION_TYPES)
   SET(__conf_types -C "${CMAKE_CFG_INTDIR}")
 ENDIF(CMAKE_CONFIGURATION_TYPES)
 
-# add testing targets
-IF(${CMAKE_MAKE_PROGRAM} MATCHES make)
+# Add convenience targets.  Do this at most once in case of nested
+# projects.
+DEFINE_PROPERTY(CTEST_TARGETS_ADDED GLOBAL
+  "Internal property used by CTestTargets module."
+  "Set by the CTestTargets module to track addition of testing targets."
+  FALSE)
+GET_PROPERTY(_CTEST_TARGETS_ADDED GLOBAL PROPERTY CTEST_TARGETS_ADDED)
+IF(NOT _CTEST_TARGETS_ADDED)
+  SET_PROPERTY(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
+
+  # For all generators add basic testing targets.
   FOREACH(mode Experimental Nightly Continuous NightlyMemoryCheck)
-    ADD_CUSTOM_TARGET(${mode} ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode})
+    ADD_CUSTOM_TARGET(${mode}
+      ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode}
+      )
   ENDFOREACH(mode)
-ELSE(${CMAKE_MAKE_PROGRAM} MATCHES make)
-  # for IDE only add them once for nested projects
-  IF (NOT DART_COMMON_TARGETS_ADDED)
-    FOREACH(mode Experimental Nightly Continuous NightlyMemoryCheck)
-      ADD_CUSTOM_TARGET(${mode} ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode})
+
+  # For Makefile generators add more granular targets.
+  IF("${CMAKE_GENERATOR}" MATCHES Make)
+    # Make targets for Experimental builds
+    FOREACH(mode Nightly Experimental Continuous)
+      FOREACH(testtype
+          Start Update Configure Build Test Coverage MemCheck Submit
+          # missing purify
+          )
+        ADD_CUSTOM_TARGET(${mode}${testtype}
+          ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode}${testtype}
+          )
+      ENDFOREACH(testtype)
     ENDFOREACH(mode)
-    SET (DART_COMMON_TARGETS_ADDED 1)
-  ENDIF (NOT DART_COMMON_TARGETS_ADDED)
-ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES make)
-
-
-# for non IDE based builds nmake and make 
-# add all these extra targets 
-IF(${CMAKE_MAKE_PROGRAM} MATCHES make)
-  # Make targets for Experimental builds
-  FOREACH(mode Nightly Experimental Continuous)
-    FOREACH(testtype Start Update Configure Build Test Coverage MemCheck Submit)
-      # missing purify
-      ADD_CUSTOM_TARGET(${mode}${testtype} 
-        ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode}${testtype})
-    ENDFOREACH(testtype)
-  ENDFOREACH(mode)
-ENDIF (${CMAKE_MAKE_PROGRAM} MATCHES make)
-
+  ENDIF("${CMAKE_GENERATOR}" MATCHES Make)
+ENDIF(NOT _CTEST_TARGETS_ADDED)
