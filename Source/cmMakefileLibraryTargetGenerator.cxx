@@ -364,22 +364,6 @@ void cmMakefileLibraryTargetGenerator::CreateFramework(
 
   //cmSystemTools::MakeDirectory((macdir + "Libraries").c_str());
   cmSystemTools::MakeDirectory((macdir + "Headers").c_str());
-  // Configure the Info.plist file.  Note that it needs the executable name
-  // to be set
-  std::string rsrcDir = macdir + "Resources/";
-  cmSystemTools::MakeDirectory(rsrcDir.c_str());
-  this->Makefile->AddDefinition("MACOSX_FRAMEWORK_NAME",
-                                targetName.c_str());
-  std::string f1 = 
-    this->Makefile->GetModulesFile("MacOSXFrameworkInfo.plist.in");
-  if ( f1.size() == 0 )
-    {
-    cmSystemTools::Error(
-      "could not find Mac OSX framework Info.plist template file.");
-    }
-  std::string f2 = rsrcDir + "Info.plist";
-  this->Makefile->ConfigureFile(f1.c_str(), f2.c_str(),
-                                false, false, false);
 
   this->CopyFrameworkSources(targetName, outpath, version,
     "PRIVATE_HEADER", "PrivateHeaders");

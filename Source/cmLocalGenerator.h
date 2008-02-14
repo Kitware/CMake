@@ -269,6 +269,12 @@ public:
   bool NeedBackwardsCompatibility(unsigned int major,
                                   unsigned int minor,
                                   unsigned int patch = 0xFFu);
+
+  /**
+   * Generate a Mac OS X application bundle Info.plist file.
+   */
+  void GenerateAppleInfoPList(cmTarget* target, const char* targetName,
+                              const char* fname);
 protected:
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,

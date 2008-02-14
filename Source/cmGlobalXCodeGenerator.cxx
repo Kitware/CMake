@@ -1482,18 +1482,15 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
       {
       productType = "com.apple.product-type.application";
-      std::string f1 =
-        this->CurrentMakefile->GetModulesFile("MacOSXBundleInfo.plist.in");
-      if ( f1.size() == 0 )
-        {
-        cmSystemTools::Error("could not find Mac OSX bundle template file.");
-        }
-      std::string f2 = this->CurrentMakefile->GetCurrentOutputDirectory();
-      f2 += "/Info.plist";
-      this->CurrentMakefile->ConfigureFile(f1.c_str(), f2.c_str(),
-                                       false, false, false);
-      std::string path = 
-        this->ConvertToRelativeForXCode(f2.c_str());
+      std::string plist = this->CurrentMakefile->GetCurrentOutputDirectory();
+      plist += cmake::GetCMakeFilesDirectory();
+      plist += "/";
+      plist += target.GetName();
+      plist += "Info.plist";
+      this->CurrentLocalGenerator
+        ->GenerateAppleInfoPList(&target, productName.c_str(), plist.c_str());
+      std::string path =
+        this->ConvertToRelativeForXCode(plist.c_str());
       buildSettings->AddAttribute("INFOPLIST_FILE", 
                                   this->CreateString(path.c_str()));
 

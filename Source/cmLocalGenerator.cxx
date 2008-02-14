@@ -2732,3 +2732,86 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
   // Assume it is supported.
   return true;
 }
+
+//----------------------------------------------------------------------------
+static std::string cmLGInfoProp(cmTarget* target, const char* prop)
+{
+  if(const char* val = target->GetProperty(prop))
+    {
+    return val;
+    }
+  else
+    {
+    // For compatibility check for a variable.
+    return target->GetMakefile()->GetSafeDefinition(prop);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::GenerateAppleInfoPList(cmTarget* target,
+                                              const char* targetName,
+                                              const char* fname)
+{
+  std::string info_EXECUTABLE_NAME = targetName;
+
+  // Lookup the properties.
+  std::string info_INFO_STRING =
+    cmLGInfoProp(target, "MACOSX_BUNDLE_INFO_STRING");
+  std::string info_ICON_FILE =
+    cmLGInfoProp(target, "MACOSX_BUNDLE_ICON_FILE");
+  std::string info_GUI_IDENTIFIER =
+    cmLGInfoProp(target, "MACOSX_BUNDLE_GUI_IDENTIFIER");
+  std::string info_LONG_VERSION_STRING =
+    cmLGInfoProp(target, "MACOSX_BUNDLE_LONG_VERSION_STRING");
+  std::string info_BUNDLE_NAME =
+    cmLGInfoProp(target, "MACOSX_BUNDLE_BUNDLE_NAME");
+  std::string info_SHORT_VERSION_STRING =
+    cmLGInfoProp(target, "MACOSX_BUNDLE_SHORT_VERSION_STRING");
+  std::string info_BUNDLE_VERSION =
+    cmLGInfoProp(target, "MACOSX_BUNDLE_BUNDLE_VERSION");
+  std::string info_COPYRIGHT =
+    cmLGInfoProp(target, "MACOSX_BUNDLE_COPYRIGHT");
+
+  // Generate the file.
+  cmGeneratedFileStream fout(fname);
+  fout.SetCopyIfDifferent(true);
+  fout <<
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\"\n"
+    "  \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+    "<plist version=\"1.0\">\n"
+    "<dict>\n"
+    "\t<key>CFBundleDevelopmentRegion</key>\n"
+    "\t<string>English</string>\n"
+    "\t<key>CFBundleExecutable</key>\n"
+    "\t<string>" << info_EXECUTABLE_NAME << "</string>\n"
+    "\t<key>CFBundleGetInfoString</key>\n"
+    "\t<string>" << info_INFO_STRING << "</string>\n"
+    "\t<key>CFBundleIconFile</key>\n"
+    "\t<string>" << info_ICON_FILE << "</string>\n"
+    "\t<key>CFBundleIdentifier</key>\n"
+    "\t<string>" << info_GUI_IDENTIFIER << "</string>\n"
+    "\t<key>CFBundleInfoDictionaryVersion</key>\n"
+    "\t<string>6.0</string>\n"
+    "\t<key>CFBundleLongVersionString</key>\n"
+    "\t<string>" << info_LONG_VERSION_STRING << "</string>\n"
+    "\t<key>CFBundleName</key>\n"
+    "\t<string>" << info_BUNDLE_NAME << "</string>\n"
+    "\t<key>CFBundlePackageType</key>\n"
+    "\t<string>APPL</string>\n"
+    "\t<key>CFBundleShortVersionString</key>\n"
+    "\t<string>" << info_SHORT_VERSION_STRING << "</string>\n"
+    "\t<key>CFBundleSignature</key>\n"
+    "\t<string>????" /* break string to avoid trigraph */ "</string>\n"
+    "\t<key>CFBundleVersion</key>\n"
+    "\t<string>" << info_BUNDLE_VERSION << "</string>\n"
+    "\t<key>CSResourcesFileMapped</key>\n"
+    "\t<true/>\n"
+    "\t<key>LSRequiresCarbon</key>\n"
+    "\t<true/>\n"
+    "\t<key>NSHumanReadableCopyright</key>\n"
+    "\t<string>" << info_COPYRIGHT << "</string>\n"
+    "</dict>\n"
+    "</plist>\n"
+    ;
+}
