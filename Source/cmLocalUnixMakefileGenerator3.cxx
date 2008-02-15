@@ -1080,7 +1080,7 @@ cmLocalUnixMakefileGenerator3
       {
       cmSystemTools::Error("Could not create ", cleanfilePath.c_str());
       }
-    fout << "FILE(REMOVE\n";
+    fout << "FILE(REMOVE_RECURSE\n";
     std::string remove = "$(CMAKE_COMMAND) -P ";
     remove += this->Convert(cleanfile.c_str(), START_OUTPUT, SHELL);
     for(std::vector<std::string>::const_iterator f = files.begin();
