@@ -52,7 +52,11 @@ QCMake::QCMake(QObject* p)
   this->CMakeInstance = new cmake;
   this->CMakeInstance->SetCMakeCommand(cmakeCommand.toAscii().data());
   //this->CMakeInstance->SetCMakeEditCommand(cmakeGUICommand.toAscii().data());
+#if defined(Q_OS_MAC)
+  this->CMakeInstance->SetCMakeEditCommand("cmake-gui.app/Contents/MacOS/cmake-gui");
+#else  
   this->CMakeInstance->SetCMakeEditCommand("cmake-gui");
+#endif
   this->CMakeInstance->SetProgressCallback(QCMake::progressCallback, this);
 
   std::vector<std::string> generators;
