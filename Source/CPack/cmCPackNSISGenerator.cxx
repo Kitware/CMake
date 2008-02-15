@@ -180,7 +180,7 @@ int cmCPackNSISGenerator::InitializeInternal()
       (cmCPackLog::LOG_ERROR, 
        "Cannot find NSIS registry value. This is usually caused by NSIS "
        "not being installed. Please install NSIS from "
-       "http://nsis.sourceforge.org"
+       "http://nsis.sourceforge.net"
        << std::endl);
     return 0;
     }
