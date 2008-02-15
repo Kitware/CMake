@@ -150,6 +150,11 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
           }
         }
       }
+    else if(const char* pkgloc =
+            (*source)->GetProperty("MACOSX_PACKAGE_LOCATION"))
+      {
+      this->WriteMacOSXContentRules(*(*source), pkgloc);
+      }
     else if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY"))
       {
       if(!this->GlobalGenerator->IgnoreFile
@@ -314,6 +319,62 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 }
 
 //----------------------------------------------------------------------------
+void cmMakefileTargetGenerator::WriteMacOSXContentRules(cmSourceFile& source,
+                                                        const char* pkgloc)
+{
+  // Skip OS X bundle content when not building a bundle.
+  if(!this->Target->IsAppBundleOnApple()) { return; }
+
+  // Create the directory in which the content is to be placed.
+  std::string targetName;
+  std::string targetNameReal;
+  std::string targetNameImport;
+  std::string targetNamePDB;
+  this->Target->GetExecutableNames
+    (targetName, targetNameReal, targetNameImport, targetNamePDB,
+     this->LocalGenerator->ConfigurationName.c_str());
+  std::string macdir = this->Target->GetDirectory();
+  macdir += "/";
+  macdir += targetName;
+  macdir += ".app/Contents/";
+  macdir += pkgloc;
+  cmSystemTools::MakeDirectory(macdir.c_str());
+
+  // Get the input file location.
+  std::string input = source.GetFullPath();
+
+  // Get the output file location.
+  std::string output = macdir;
+  output += "/";
+  output += cmSystemTools::GetFilenameName(input);
+  this->CleanFiles.push_back(this->Convert(output.c_str(),
+                                           cmLocalGenerator::START_OUTPUT));
+  output = this->Convert(output.c_str(), cmLocalGenerator::HOME_OUTPUT);
+
+  // Create a rule to copy the content into the bundle.
+  std::vector<std::string> depends;
+  std::vector<std::string> commands;
+  depends.push_back(input);
+  std::string copyEcho = "Copying Bundle content ";
+  copyEcho += output;
+  this->LocalGenerator->AppendEcho(commands, copyEcho.c_str(),
+                                   cmLocalUnixMakefileGenerator3::EchoBuild);
+  std::string copyCommand = "$(CMAKE_COMMAND) -E copy ";
+  copyCommand += this->Convert(input.c_str(),
+                               cmLocalGenerator::NONE,
+                               cmLocalGenerator::SHELL);
+  copyCommand += " ";
+  copyCommand += this->Convert(output.c_str(),
+                               cmLocalGenerator::NONE,
+                               cmLocalGenerator::SHELL);
+  commands.push_back(copyCommand);
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+                                      output.c_str(),
+                                      depends, commands, false);
+  this->ExtraFiles.insert(output);
+}
+
+//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
 {
   // Identify the language of the source file.
@@ -356,10 +417,6 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     (this->LocalGenerator->ConvertToFullPath(dir).c_str());
 
   // Save this in the target's list of object files.
-  if ( source.GetPropertyAsBool("EXTRA_CONTENT") )
-    {
-    this->ExtraContent.insert(obj);
-    }
   this->Objects.push_back(obj);
   this->CleanFiles.push_back(obj);
 
@@ -417,10 +474,6 @@ cmMakefileTargetGenerator
   this->WriteObjectDependRules(source, depends);
 
   std::string relativeObj = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if ( source.GetPropertyAsBool("MACOSX_CONTENT") )
-    {
-    relativeObj = "";
-    }
   relativeObj += obj;
   // Write the build rule.
 
@@ -1143,10 +1196,6 @@ cmMakefileTargetGenerator
   for(std::vector<std::string>::const_iterator i = this->Objects.begin();
       i != this->Objects.end(); ++i)
     {
-    if ( this->ExtraContent.find(i->c_str()) != this->ExtraContent.end() )
-      {
-      continue;
-      }
     *this->BuildFileStream << " " << lineContinue << "\n";
     if(objName)
       {
@@ -1277,10 +1326,6 @@ cmMakefileTargetGenerator
   for(std::vector<std::string>::const_iterator i = this->Objects.begin();
       i != this->Objects.end(); ++i)
     {
-    if ( this->ExtraContent.find(i->c_str()) != this->ExtraContent.end() )
-      {
-      continue;
-      }
     helper.Feed(*i);
     }
   for(std::vector<std::string>::const_iterator i =
@@ -1327,6 +1372,13 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
     if(this->CustomCommandDriver == OnBuild)
       {
       this->DriveCustomCommands(depends);
+      }
+
+    // Make sure the extra files are built.
+    for(std::set<cmStdString>::const_iterator i = this->ExtraFiles.begin();
+        i != this->ExtraFiles.end(); ++i)
+      {
+      depends.push_back(*i);
       }
     }
 

@@ -83,11 +83,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       obj != this->Objects.end(); ++obj)
     {
     objTarget = relPath;
-    // Handle extra content on Mac bundles
-    if ( this->ExtraContent.find(*obj) != this->ExtraContent.end() )
-      {
-      objTarget = "";
-      }
     objTarget += *obj;
     depends.push_back(objTarget);
     }
@@ -120,8 +115,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Construct the full path version of the names.
   std::string outpath = this->Target->GetDirectory();
   outpath += "/";
-#ifdef __APPLE__
-  if(this->Target->GetPropertyAsBool("MACOSX_BUNDLE"))
+  if(this->Target->IsAppBundleOnApple())
     {
     // Compute bundle directory names.
     std::string macdir = outpath;
@@ -132,27 +126,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
 
-    // Make bundle directories
-    std::vector<cmSourceFile*>::const_iterator sourceIt;
-    for ( sourceIt = this->Target->GetSourceFiles().begin();
-      sourceIt != this->Target->GetSourceFiles().end();
-      ++ sourceIt )
-      {
-      const char* subDir = 
-        (*sourceIt)->GetProperty("MACOSX_PACKAGE_LOCATION");
-      if ( subDir )
-        {
-        std::string newDir = macdir;
-        newDir += subDir;
-        if ( !cmSystemTools::MakeDirectory(newDir.c_str()) )
-          {
-          cmSystemTools::Error("Cannot create a subdirectory for \"",
-            newDir.c_str(), "\".");
-          return;
-          }
-        }
-      }
-
     // Configure the Info.plist file.  Note that it needs the executable name
     // to be set.
     std::string plist = macdir + "Info.plist";
@@ -160,7 +133,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                                  targetName.c_str(),
                                                  plist.c_str());
     }
-#endif
   std::string outpathImp;
   if(relink)
     {

@@ -295,11 +295,6 @@ bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
     {
     sf->SetProperty(name, this->PropertyValue.c_str());
     }
-
-  // TODO: MACOSX_PACKAGE_LOCATION special case in
-  // cmSetSourceFilesPropertiesCommand
-  // The logic should be moved to cmSourceFile.
-
   return true;
 }
 

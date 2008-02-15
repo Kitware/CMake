@@ -119,7 +119,6 @@ bool cmSetSourceFilesPropertiesCommand
       {
       // now loop through the rest of the arguments, new style
       ++j;
-      bool dontPush = false;
       while (j != propend)
         {
         propertyPairs.push_back(*j);
@@ -131,26 +130,6 @@ bool cmSetSourceFilesPropertiesCommand
             generated = true;
             }
           }
-        else if(*j == "MACOSX_PACKAGE_LOCATION")
-          {
-          ++j;
-          if(j == propend)
-            {
-            errors = "called with incorrect number of arguments "
-              "MACOSX_PACKAGE_LOCATION with no flags";
-            return false;
-            }
-          propertyPairs.push_back(*j);
-          propertyPairs.push_back("EXTRA_CONTENT");
-          propertyPairs.push_back("1");
-          propertyPairs.push_back("MACOSX_CONTENT");
-          propertyPairs.push_back("1");
-          propertyPairs.push_back("KEEP_EXTENSION");
-          propertyPairs.push_back("1");
-          propertyPairs.push_back("LANGUAGE");
-          propertyPairs.push_back("MacOSX_Content");
-          dontPush = true;
-          }
         else
           {
           ++j;
@@ -160,12 +139,8 @@ bool cmSetSourceFilesPropertiesCommand
           errors = "called with incorrect number of arguments.";
           return false;
           }
-        if ( !dontPush )
-          {
-          propertyPairs.push_back(*j);
-          }
+        propertyPairs.push_back(*j);
         ++j;
-        dontPush = false;
         }
       // break out of the loop because j is already == end
       break;

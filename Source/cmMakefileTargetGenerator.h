@@ -82,6 +82,9 @@ protected:
   // write the depend rules for this target
   void WriteTargetDependRules();
 
+  // write rules for Mac OS X Application Bundle content.
+  void WriteMacOSXContentRules(cmSourceFile& source, const char* pkgloc);
+
   // write the rules for an object
   void WriteObjectRuleFiles(cmSourceFile& source);
 
@@ -178,10 +181,12 @@ protected:
   // objects used by this target
   std::vector<std::string> Objects;
   std::vector<std::string> ExternalObjects;
-  std::set<std::string> ExtraContent;
 
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> ObjectFiles;
+
+  // Set of extra output files to be driven by the build.
+  std::set<cmStdString> ExtraFiles;
 
   typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
