@@ -59,5 +59,11 @@ public:
    * Studio does not implement support for VB macros.
    */
   virtual std::string GetUserMacrosDirectory();
+
+  /**
+   * What is the reg key path to "vsmacros" for this version of Visual
+   * Studio?
+   */
+  virtual std::string GetUserMacrosRegKeyBase();
 };
 #endif

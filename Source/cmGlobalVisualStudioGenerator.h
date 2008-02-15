@@ -49,6 +49,12 @@ public:
    */
   virtual std::string GetUserMacrosDirectory();
 
+  /**
+   * What is the reg key path to "vsmacros" for this version of Visual
+   * Studio?
+   */
+  virtual std::string GetUserMacrosRegKeyBase();
+
   enum MacroName {MacroReload, MacroStop};
 
   /**

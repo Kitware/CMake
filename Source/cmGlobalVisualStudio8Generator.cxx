@@ -20,8 +20,7 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-
-
+//----------------------------------------------------------------------------
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
 {
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
@@ -29,8 +28,7 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
   this->PlatformName = "Win32";
 }
 
-
-
+//----------------------------------------------------------------------------
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 {
@@ -40,8 +38,8 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
   lg->SetGlobalGenerator(this);
   return lg;
 }
-
   
+//----------------------------------------------------------------------------
 // ouput standard header for dsw file
 void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
 {
@@ -100,12 +98,6 @@ std::string cmGlobalVisualStudio8Generator::GetUserMacrosDirectory()
     {
     cmSystemTools::ConvertToUnixSlashes(base);
 
-    // 7.0 macros folder:
-    //path = base + "/VSMacros";
-
-    // 7.1 macros folder:
-    //path = base + "/VSMacros71";
-
     // 8.0 macros folder:
     path = base + "/VSMacros80";
     }
@@ -113,6 +105,12 @@ std::string cmGlobalVisualStudio8Generator::GetUserMacrosDirectory()
   // path is (correctly) still empty if we did not read the base value from
   // the Registry value
   return path;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio8Generator::GetUserMacrosRegKeyBase()
+{
+  return "Software\\Microsoft\\VisualStudio\\8.0\\vsmacros";
 }
 
 //----------------------------------------------------------------------------

@@ -68,19 +68,21 @@ void cmGlobalVisualStudioGenerator::Generate()
 
 //----------------------------------------------------------------------------
 bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
+  const std::string& regKeyBase,
   std::string& nextAvailableSubKeyName);
 
-void RegisterVisualStudioMacros(const std::string& macrosFile);
+void RegisterVisualStudioMacros(const std::string& macrosFile,
+  const std::string& regKeyBase);
 
 //----------------------------------------------------------------------------
 #define CMAKE_VSMACROS_FILENAME \
-  "CMakeVSMacros1.vsmacros"
+  "CMakeVSMacros2.vsmacros"
 
 #define CMAKE_VSMACROS_RELOAD_MACRONAME \
-  "Macros.CMakeVSMacros1.Macros.ReloadProjects"
+  "Macros.CMakeVSMacros2.Macros.ReloadProjects"
 
 #define CMAKE_VSMACROS_STOP_MACRONAME \
-  "Macros.CMakeVSMacros1.Macros.StopBuild"
+  "Macros.CMakeVSMacros2.Macros.StopBuild"
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
@@ -113,7 +115,7 @@ void cmGlobalVisualStudioGenerator::ConfigureCMakeVisualStudioMacros()
         }
       }
 
-    RegisterVisualStudioMacros(dst);
+    RegisterVisualStudioMacros(dst, this->GetUserMacrosRegKeyBase());
     }
 }
 
@@ -140,7 +142,8 @@ cmGlobalVisualStudioGenerator
     std::string macrosFile = dir + "/CMakeMacros/" CMAKE_VSMACROS_FILENAME;
     std::string nextSubkeyName;
     if (cmSystemTools::FileExists(macrosFile.c_str()) &&
-      IsVisualStudioMacrosFileRegistered(macrosFile, nextSubkeyName)
+      IsVisualStudioMacrosFileRegistered(macrosFile,
+        this->GetUserMacrosRegKeyBase(), nextSubkeyName)
       )
       {
       std::string topLevelSlnName;
@@ -190,6 +193,12 @@ cmGlobalVisualStudioGenerator
 
 //----------------------------------------------------------------------------
 std::string cmGlobalVisualStudioGenerator::GetUserMacrosDirectory()
+{
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudioGenerator::GetUserMacrosRegKeyBase()
 {
   return "";
 }
@@ -396,6 +405,7 @@ cmGlobalVisualStudioGenerator::GetUtilityForTarget(cmTarget& target,
 
 //----------------------------------------------------------------------------
 bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
+  const std::string& regKeyBase,
   std::string& nextAvailableSubKeyName)
 {
   bool macrosRegistered = false;
@@ -413,8 +423,7 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
   LONG result = ERROR_SUCCESS;
   DWORD index = 0;
 
-  keyname =
-    "Software\\Microsoft\\VisualStudio\\8.0\\vsmacros\\OtherProjects7";
+  keyname = regKeyBase + "\\OtherProjects7";
   hkey = NULL;
   result = RegOpenKeyEx(HKEY_CURRENT_USER, keyname.c_str(),
                         0, KEY_READ, &hkey);
@@ -517,8 +526,7 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
   nextAvailableSubKeyName = ossNext.str();
 
 
-  keyname =
-    "Software\\Microsoft\\VisualStudio\\8.0\\vsmacros\\RecordingProject7";
+  keyname = regKeyBase + "\\RecordingProject7";
   hkey = NULL;
   result = RegOpenKeyEx(HKEY_CURRENT_USER, keyname.c_str(),
                         0, KEY_READ, &hkey);
@@ -567,10 +575,10 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
 //----------------------------------------------------------------------------
 void WriteVSMacrosFileRegistryEntry(
   const std::string& nextAvailableSubKeyName,
-  const std::string& macrosFile)
+  const std::string& macrosFile,
+  const std::string& regKeyBase)
 {
-  std::string keyname =
-    "Software\\Microsoft\\VisualStudio\\8.0\\vsmacros\\OtherProjects7";
+  std::string keyname = regKeyBase + "\\OtherProjects7";
   HKEY hkey = NULL;
   LONG result = RegOpenKeyEx(HKEY_CURRENT_USER, keyname.c_str(), 0,
     KEY_READ|KEY_WRITE, &hkey);
@@ -634,13 +642,14 @@ void WriteVSMacrosFileRegistryEntry(
 }
 
 //----------------------------------------------------------------------------
-void RegisterVisualStudioMacros(const std::string& macrosFile)
+void RegisterVisualStudioMacros(const std::string& macrosFile,
+  const std::string& regKeyBase)
 {
   bool macrosRegistered;
   std::string nextAvailableSubKeyName;
 
   macrosRegistered = IsVisualStudioMacrosFileRegistered(macrosFile,
-    nextAvailableSubKeyName);
+    regKeyBase, nextAvailableSubKeyName);
 
   if (!macrosRegistered)
     {
@@ -681,7 +690,7 @@ void RegisterVisualStudioMacros(const std::string& macrosFile)
       //
       if (0 == count)
         {
-        IsVisualStudioMacrosFileRegistered(macrosFile,
+        IsVisualStudioMacrosFileRegistered(macrosFile, regKeyBase,
           nextAvailableSubKeyName);
         }
       }
@@ -690,7 +699,8 @@ void RegisterVisualStudioMacros(const std::string& macrosFile)
     //
     if (0 == count)
       {
-      WriteVSMacrosFileRegistryEntry(nextAvailableSubKeyName, macrosFile);
+      WriteVSMacrosFileRegistryEntry(nextAvailableSubKeyName, macrosFile,
+        regKeyBase);
       }
     }
 }

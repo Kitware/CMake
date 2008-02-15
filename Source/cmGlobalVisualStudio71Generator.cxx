@@ -20,16 +20,14 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-
-
+//----------------------------------------------------------------------------
 cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator()
 {
   this->FindMakeProgramFile = "CMakeVS71FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
 }
 
-
-
+//----------------------------------------------------------------------------
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
 {
@@ -40,12 +38,66 @@ cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
   return lg;
 }
 
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio71Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   mf->AddDefinition("MSVC71", "1");
 }
 
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio71Generator::GetUserMacrosDirectory()
+{
+  // Macros not supported on Visual Studio 7.1 and earlier because
+  // they do not appear to work *during* a build when called by an
+  // outside agent...
+  //
+  return "";
 
+#if 0
+  //
+  // The COM result from calling a Visual Studio macro with 7.1 indicates
+  // that the call succeeds, but the macro does not appear to execute...
+  //
+  // So, I am leaving this code here to show how to do it, but have not
+  // yet figured out what the issue is in terms of why the macro does not
+  // appear to execute...
+  //
+  std::string base;
+  std::string path;
+
+  // base begins with the VisualStudioProjectsLocation reg value...
+  if (cmSystemTools::ReadRegistryValue(
+    "HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\7.1;"
+    "VisualStudioProjectsLocation",
+    base))
+    {
+    cmSystemTools::ConvertToUnixSlashes(base);
+
+    // 7.1 macros folder:
+    path = base + "/VSMacros71";
+    }
+
+  // path is (correctly) still empty if we did not read the base value from
+  // the Registry value
+  return path;
+#endif
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio71Generator::GetUserMacrosRegKeyBase()
+{
+  // Macros not supported on Visual Studio 7.1 and earlier because
+  // they do not appear to work *during* a build when called by an
+  // outside agent...
+  //
+  return "";
+
+#if 0
+  return "Software\\Microsoft\\VisualStudio\\7.1\\vsmacros";
+#endif
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio71Generator
 ::WriteSLNFile(std::ostream& fout,
                cmLocalGenerator* root,
@@ -77,7 +129,7 @@ void cmGlobalVisualStudio71Generator
   this->WriteSLNFooter(fout);
 }
 
-
+//----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio71Generator
 ::WriteSolutionConfigurations(std::ostream& fout)
@@ -91,6 +143,7 @@ cmGlobalVisualStudio71Generator
   fout << "\tEndGlobalSection\n";
 }
 
+//----------------------------------------------------------------------------
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 
 // the libraries it uses are also done here
@@ -112,8 +165,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
   fout <<"EndProject\n";
 }
 
-
-
+//----------------------------------------------------------------------------
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 
 // the libraries it uses are also done here
@@ -179,6 +231,7 @@ cmGlobalVisualStudio71Generator
     }
 }
 
+//----------------------------------------------------------------------------
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
@@ -219,7 +272,7 @@ void cmGlobalVisualStudio71Generator
 
 }
 
-
+//----------------------------------------------------------------------------
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
@@ -240,9 +293,7 @@ void cmGlobalVisualStudio71Generator
     }
 }
 
-
-
-
+//----------------------------------------------------------------------------
 // Standard end of dsw file
 void cmGlobalVisualStudio71Generator::WriteSLNFooter(std::ostream& fout)
 {
@@ -253,7 +304,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFooter(std::ostream& fout)
        << "EndGlobal\n";
 }
 
-  
+//----------------------------------------------------------------------------
 // ouput standard header for dsw file
 void cmGlobalVisualStudio71Generator::WriteSLNHeader(std::ostream& fout)
 {

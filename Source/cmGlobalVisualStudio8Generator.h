@@ -57,6 +57,12 @@ public:
    */
   virtual std::string GetUserMacrosDirectory();
 
+  /**
+   * What is the reg key path to "vsmacros" for this version of Visual
+   * Studio?
+   */
+  virtual std::string GetUserMacrosRegKeyBase();
+
 protected:
 
   virtual bool VSLinksDependencies() const { return false; }

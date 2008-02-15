@@ -33,6 +33,7 @@ void cmGlobalVisualStudio9Generator::AddPlatformDefinitions(cmMakefile* mf)
   mf->AddDefinition("MSVC90", "1");
 }
 
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";
@@ -91,4 +92,10 @@ std::string cmGlobalVisualStudio9Generator::GetUserMacrosDirectory()
   // path is (correctly) still empty if we did not read the base value from
   // the Registry value
   return path;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio9Generator::GetUserMacrosRegKeyBase()
+{
+  return "Software\\Microsoft\\VisualStudio\\9.0\\vsmacros";
 }
