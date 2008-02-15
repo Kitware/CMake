@@ -25,6 +25,7 @@
 #include <QLineEdit>
 #include <QItemDelegate>
 #include <QSortFilterProxyModel>
+#include <QCompleter>
 
 class QCMakeCacheModel;
 class QToolButton;
@@ -137,6 +138,14 @@ class QCMakeCacheFilePathEditor : public QCMakeCacheFileEditor
 public:
   QCMakeCacheFilePathEditor(QWidget* p = NULL, const QString& var = QString());
   void chooseFile();
+};
+
+/// completer class that returns native cmake paths
+class QCMakeFileCompleter : public QCompleter
+{
+public:
+  QCMakeFileCompleter(QObject* o, bool dirs);
+  virtual QString pathFromIndex(const QModelIndex& idx) const;
 };
 
 #endif
