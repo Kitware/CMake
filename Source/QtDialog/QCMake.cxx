@@ -33,11 +33,8 @@ QCMake::QCMake(QObject* p)
   
   QDir execDir(QCoreApplication::applicationDirPath());
   
-  QString cmakeGUICommand = QString("cmake-gui")+cmSystemTools::GetExecutableExtension();
-  cmakeGUICommand = execDir.filePath(cmakeGUICommand);
-
 #if defined(Q_OS_MAC)
-  execDir.cd("../../../");  // path to cmake in build directory (need to fix for deployment)
+  execDir.cd("../../../");
 #endif
   
   QString cmakeCommand = QString("cmake")+cmSystemTools::GetExecutableExtension();
@@ -51,7 +48,6 @@ QCMake::QCMake(QObject* p)
 
   this->CMakeInstance = new cmake;
   this->CMakeInstance->SetCMakeCommand(cmakeCommand.toAscii().data());
-  //this->CMakeInstance->SetCMakeEditCommand(cmakeGUICommand.toAscii().data());
 #if defined(Q_OS_MAC)
   this->CMakeInstance->SetCMakeEditCommand("cmake-gui.app/Contents/MacOS/cmake-gui");
 #else  
