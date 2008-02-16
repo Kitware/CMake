@@ -15,7 +15,7 @@
 
 =========================================================================*/
 #include "cmInstallProgramsCommand.h"
-
+#include "cmInstallFilesGenerator.h"
 // cmExecutableCommand
 bool cmInstallProgramsCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)

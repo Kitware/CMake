@@ -34,12 +34,18 @@ QCMake::QCMake(QObject* p)
   QDir execDir(QCoreApplication::applicationDirPath());
   
 #if defined(Q_OS_MAC)
-  execDir.cd("../../../");
+  if(execDir.exists("../bin/cmake"))
+    {
+    execDir.cd("../bin");
+    }
+  else
+    {
+    execDir.cd("../../../");  // path to cmake in build directory (need to fix for deployment)
+    }
 #endif
   
   QString cmakeCommand = QString("cmake")+cmSystemTools::GetExecutableExtension();
   cmakeCommand = execDir.filePath(cmakeCommand);
-
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);

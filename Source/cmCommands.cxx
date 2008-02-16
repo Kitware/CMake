@@ -26,8 +26,6 @@
 #include "cmFLTKWrapUICommand.cxx"
 #include "cmGetTestPropertyCommand.cxx"
 #include "cmIncludeExternalMSProjectCommand.cxx"
-#include "cmInstallCommand.cxx"
-#include "cmInstallCommandArguments.cxx"
 #include "cmInstallProgramsCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
 #include "cmLoadCacheCommand.cxx"
@@ -70,7 +68,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmGetTestPropertyCommand);
   commands.push_back(new cmIncludeExternalMSProjectCommand);
-  commands.push_back(new cmInstallCommand);
   commands.push_back(new cmInstallProgramsCommand);
   commands.push_back(new cmLinkLibrariesCommand);
   commands.push_back(new cmLoadCacheCommand);

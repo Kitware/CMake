@@ -143,10 +143,14 @@ CMAKE_CXX_SOURCES="\
   cmPropertyDefinitionMap \
   cmMakeDepend \
   cmMakefile \
+  cmExportFileGenerator \
+  cmExportInstallFileGenerator \
+  cmInstallDirectoryGenerator \
   cmGeneratedFileStream \
   cmGlobalGenerator \
   cmLocalGenerator \
   cmInstallGenerator \
+  cmInstallExportGenerator \
   cmInstallFilesGenerator \
   cmInstallScriptGenerator \
   cmInstallTargetGenerator \

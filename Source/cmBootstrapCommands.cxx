@@ -66,6 +66,8 @@
 #include "cmIncludeDirectoryCommand.cxx"
 #include "cmIncludeRegularExpressionCommand.cxx"
 #include "cmInstallFilesCommand.cxx"
+#include "cmInstallCommandArguments.cxx"
+#include "cmInstallCommand.cxx"
 #include "cmInstallTargetsCommand.cxx"
 #include "cmLinkDirectoriesCommand.cxx"
 #include "cmListCommand.cxx"
@@ -132,6 +134,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmIncludeCommand);
   commands.push_back(new cmIncludeDirectoryCommand);
   commands.push_back(new cmIncludeRegularExpressionCommand);
+  commands.push_back(new cmInstallCommand);
   commands.push_back(new cmInstallFilesCommand);
   commands.push_back(new cmInstallTargetsCommand);
   commands.push_back(new cmLinkDirectoriesCommand);
