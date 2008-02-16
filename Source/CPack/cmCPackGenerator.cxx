@@ -395,13 +395,12 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
         // underneath the tempInstallDirectory. The value of the project's
         // CMAKE_INSTALL_PREFIX is sent in here as the value of the
         // CPACK_INSTALL_PREFIX variable.
-        std::string dir = tempInstallDirectory;
+       std::string dir;
         if (this->GetOption("CPACK_INSTALL_PREFIX"))
           {
           dir += this->GetOption("CPACK_INSTALL_PREFIX");
           }
         this->SetOption("CMAKE_INSTALL_PREFIX", dir.c_str());
-
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
           "- Using DESTDIR + CPACK_INSTALL_PREFIX... (this->SetOption)"
           << std::endl);
@@ -555,7 +554,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         // underneath the tempInstallDirectory. The value of the project's
         // CMAKE_INSTALL_PREFIX is sent in here as the value of the
         // CPACK_INSTALL_PREFIX variable.
-        std::string dir = tempInstallDirectory;
+        std::string dir;
         if (this->GetOption("CPACK_INSTALL_PREFIX"))
           {
           dir += this->GetOption("CPACK_INSTALL_PREFIX");
