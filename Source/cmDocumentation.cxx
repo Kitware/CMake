@@ -1215,7 +1215,7 @@ bool cmDocumentation::PrintDocumentationCustomModules(std::ostream& os)
   this->ClearSections();
   this->CreateCustomModulesSection();
   this->AddSectionToPrint("Description");
-  this->AddSectionToPrint("Custom Modules");
+  this->AddSectionToPrint("Custom CMake Modules");
   this->AddSectionToPrint("Copyright");
   this->AddSectionToPrint("See Also");
 
