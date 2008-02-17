@@ -32,11 +32,14 @@ static bool cmDocumentationIsHyperlinkChar(char c)
 static void cmDocumentationPrintHTMLChar(std::ostream& os, char c)
 {
   // Use an escape sequence if necessary.
-  std::map<char,std::string> escapes;
-  escapes['<'] = "&lt;";
-  escapes['>'] = "&gt;";
-  escapes['&'] = "&amp;";
-  escapes['\n'] = "<br>";
+  static std::map<char,std::string> escapes;
+  if (escapes.empty())
+    {
+    escapes['<'] = "&lt;";
+    escapes['>'] = "&gt;";
+    escapes['&'] = "&amp;";
+    escapes['\n'] = "<br>";
+    }
 
   if (escapes.find(c) == escapes.end())
     {
