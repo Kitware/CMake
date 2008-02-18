@@ -536,6 +536,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
         "- Install project: " << installProjectName << std::endl);
       cmake cm;
+      cm.AddCMakePaths();
       cm.SetProgressCallback(cmCPackGeneratorProgress, this);
       cmGlobalGenerator gg;
       gg.SetCMakeInstance(&cm);
@@ -596,7 +597,6 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         {
         mf->AddDefinition("CMAKE_INSTALL_DO_STRIP", "1");
         }
-
       int res = mf->ReadListFile(0, installFile.c_str());
       if ( cmSystemTools::GetErrorOccuredFlag() || !res )
         {

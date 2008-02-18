@@ -40,7 +40,7 @@ otool -L output.
 
 ")
 ENDIF(NOT DEFINED input_file)
-
+message("ingest ${input_file}")
 SET(eol_char "E")
 
 IF(APPLE)
@@ -48,7 +48,6 @@ IF(APPLE)
   SET(dep_cmd_args "-L")
   SET(dep_regex "^\t([^\t]+) \\(compatibility version ([0-9]+.[0-9]+.[0-9]+), current version ([0-9]+.[0-9]+.[0-9]+)\\)${eol_char}$")
 ENDIF(APPLE)
-
 
 MESSAGE("")
 MESSAGE("# Script \"${CMAKE_CURRENT_LIST_FILE}\" running...")
@@ -151,6 +150,20 @@ FOREACH(d ${deps})
     IF(d_is_embedded_lib)
       SET(embedded_deps ${embedded_deps} "${d}")
     ELSE(d_is_embedded_lib)
+      # if the non system lib is not found then try to look for it
+      # in the standard framework search path for OSX
+      IF(NOT EXISTS "${d}")
+        SET(FRAMEWORK_SEARCH "/Library/Frameworks"
+          "/System/Library/Frameworks" )
+        SET(__FOUND )
+        FOREACH(f ${FRAMEWORK_SEARCH})
+          SET(newd "${f}/${d}")
+          IF(EXISTS "${newd}" AND NOT __FOUND)
+            SET(d "${newd}")
+            SET(__FOUND TRUE)
+          ENDIF(EXISTS "${newd}" AND NOT __FOUND)
+        ENDFOREACH(f)
+      ENDIF(NOT EXISTS "${d}")
       SET(nonsystem_deps ${nonsystem_deps} "${d}")
     ENDIF(d_is_embedded_lib)
   ENDIF(d_is_system_lib)
@@ -214,6 +227,7 @@ MACRO(COPY_LIBRARY_INTO_BUNDLE clib_bundle clib_libsrc clib_dstlibs clib_fixups)
     # (This technique will not work for frameworks that have necessary
     # resource or auxiliary files...)
     #
+    MESSAGE("Copy: ${CMAKE_COMMAND} -E copy \"${fw_src}\"  \"${fw_dstdir}/${fwlibname}\"")
     EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy
       "${fw_src}" "${fw_dstdir}/${fwlibname}"
     )
