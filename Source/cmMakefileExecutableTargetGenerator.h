@@ -22,7 +22,7 @@
 class cmMakefileExecutableTargetGenerator: public cmMakefileTargetGenerator
 {
 public:
-  cmMakefileExecutableTargetGenerator();
+  cmMakefileExecutableTargetGenerator(cmTarget* target);
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
@@ -30,7 +30,7 @@ public:
   
 protected:
   virtual void WriteExecutableRule(bool relink);
-  
+  void CreateAppBundle(std::string& targetName, std::string& outpath);
 };
 
 #endif

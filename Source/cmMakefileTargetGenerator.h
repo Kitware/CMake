@@ -37,13 +37,11 @@ class cmMakefileTargetGenerator
 {
 public:
   // constructor to set the ivars
-  cmMakefileTargetGenerator();
+  cmMakefileTargetGenerator(cmTarget* target);
   virtual ~cmMakefileTargetGenerator() {};
 
   // construct using this factory call
-  static cmMakefileTargetGenerator *New(cmLocalUnixMakefileGenerator3 *lg,
-                                        cmStdString tgtName,
-                                        cmTarget *tgt);
+  static cmMakefileTargetGenerator *New(cmTarget *tgt);
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
@@ -58,7 +56,6 @@ public:
   virtual unsigned long GetNumberOfProgressActions() {
     return this->NumberOfProgressActions;}
 
-  const char *GetTargetName() { return this->TargetName.c_str(); }
   cmTarget* GetTarget() { return this->Target;}
 protected:
 
@@ -142,7 +139,6 @@ protected:
   virtual void CloseFileStreams();
   void RemoveForbiddenFlags(const char* flagVar, const char* linkLang,
                             std::string& linkFlags);
-  cmStdString TargetName;
   cmTarget *Target;
   cmLocalUnixMakefileGenerator3 *LocalGenerator;
   cmGlobalUnixMakefileGenerator3 *GlobalGenerator;
@@ -190,6 +186,16 @@ protected:
 
   typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
+
+  // Target name info.
+  std::string TargetNameOut;
+  std::string TargetNameSO;
+  std::string TargetNameReal;
+  std::string TargetNameImport;
+  std::string TargetNamePDB;
+
+  // Mac OS X content info.
+  std::string MacContentDirectory;
 
   // Target-wide Fortran module output directory.
   bool FortranModuleDirectoryComputed;

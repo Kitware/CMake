@@ -128,8 +128,8 @@ void cmLocalUnixMakefileGenerator3::Generate()
   std::string empty;
   for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    cmMakefileTargetGenerator *tg = 
-      cmMakefileTargetGenerator::New(this, t->first, &(t->second));
+    cmMakefileTargetGenerator *tg =
+      cmMakefileTargetGenerator::New(&(t->second));
     if (tg)
       {
       this->TargetGenerators.push_back(tg);
@@ -168,7 +168,7 @@ unsigned long cmLocalUnixMakefileGenerator3
          this->TargetGenerators.begin();
        mtgIter != this->TargetGenerators.end(); ++mtgIter)
     {
-    if (!strcmp(name,(*mtgIter)->GetTargetName()))
+    if (!strcmp(name,(*mtgIter)->GetTarget()->GetName()))
       {
       return (*mtgIter)->GetNumberOfProgressActions();
       }

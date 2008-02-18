@@ -493,21 +493,21 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   // Is this a resource file in this target? Add it to the resources group...
   //
   cmTarget::SourceFileFlags tsFlags = cmtarget.GetTargetSourceFileFlags(sf);
-  bool isResource = tsFlags.Resource;
+  bool isResource = (tsFlags.Type == cmTarget::SourceFileTypeResource);
 
   // Is this a "private" or "public" framework header file?
   // Set the ATTRIBUTES attribute appropriately...
   //
   if(cmtarget.IsFrameworkOnApple())
     {
-    if(tsFlags.PrivateHeader)
+    if(tsFlags.Type == cmTarget::SourceFileTypePrivateHeader)
       {
       cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Private"));
       settings->AddAttribute("ATTRIBUTES", attrs);
       isResource = true;
       }
-    else if(tsFlags.PublicHeader)
+    else if(tsFlags.Type == cmTarget::SourceFileTypePublicHeader)
       {
       cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Public"));
@@ -698,7 +698,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         {
         headerFiles.push_back(xsf);
         }
-      else if(tsFlags.Resource)
+      else if(tsFlags.Type == cmTarget::SourceFileTypeResource)
         {
         resourceFiles.push_back(xsf);
         }
@@ -785,12 +785,12 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
           i != classes.end(); ++i)
         {
-        const char* contentLoc = (*i)->GetProperty("MACOSX_PACKAGE_LOCATION");
-        if ( !contentLoc || cmStdString(contentLoc) == "Resources" )
+        cmTarget::SourceFileFlags tsFlags =
+          cmtarget.GetTargetSourceFileFlags(*i);
+        if(tsFlags.Type == cmTarget::SourceFileTypeMacContent)
           {
-          continue;
+          bundleFiles[tsFlags.MacFolder].push_back(*i);
           }
-        bundleFiles[contentLoc].push_back(*i);
         }
       mapOfVectorOfSourceFiles::iterator mit;
       for ( mit = bundleFiles.begin(); mit != bundleFiles.end(); ++ mit )

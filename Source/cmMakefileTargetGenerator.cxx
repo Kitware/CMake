@@ -30,45 +30,45 @@
 #include "cmMakefileUtilityTargetGenerator.h"
 
 
-cmMakefileTargetGenerator::cmMakefileTargetGenerator()
+cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
 {
   this->BuildFileStream = 0;
   this->InfoFileStream = 0;
   this->FlagFileStream = 0;
   this->CustomCommandDriver = OnBuild;
   this->FortranModuleDirectoryComputed = false;
+  this->Target = target;
+  this->Makefile = this->Target->GetMakefile();
+  this->LocalGenerator =
+    static_cast<cmLocalUnixMakefileGenerator3*>(
+      this->Makefile->GetLocalGenerator());
+  this->GlobalGenerator =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(
+      this->LocalGenerator->GetGlobalGenerator());
 }
 
 cmMakefileTargetGenerator *
-cmMakefileTargetGenerator::New(cmLocalUnixMakefileGenerator3 *lg,
-                               cmStdString tgtName, cmTarget *tgt)
+cmMakefileTargetGenerator::New(cmTarget *tgt)
 {
   cmMakefileTargetGenerator *result = 0;
 
   switch (tgt->GetType())
     {
     case cmTarget::EXECUTABLE:
-      result = new cmMakefileExecutableTargetGenerator;
+      result = new cmMakefileExecutableTargetGenerator(tgt);
       break;
     case cmTarget::STATIC_LIBRARY:
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
-      result = new cmMakefileLibraryTargetGenerator;
+      result = new cmMakefileLibraryTargetGenerator(tgt);
       break;
     case cmTarget::UTILITY:
-      result = new cmMakefileUtilityTargetGenerator;
+      result = new cmMakefileUtilityTargetGenerator(tgt);
       break;
     default:
       return result;
       // break; /* unreachable */
     }
-
-  result->TargetName = tgtName;
-  result->Target = tgt;
-  result->LocalGenerator = lg;
-  result->GlobalGenerator =
-    static_cast<cmGlobalUnixMakefileGenerator3*>(lg->GetGlobalGenerator());
-  result->Makefile = lg->GetMakefile();
   return result;
 }
 
@@ -134,6 +134,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {
+    cmTarget::SourceFileFlags tsFlags =
+      this->Target->GetTargetSourceFileFlags(*source);
     if(cmCustomCommand* cc = (*source)->GetCustomCommand())
       {
       this->GenerateCustomRuleFile(*cc);
@@ -150,10 +152,9 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
           }
         }
       }
-    else if(const char* pkgloc =
-            (*source)->GetProperty("MACOSX_PACKAGE_LOCATION"))
+    else if(tsFlags.Type != cmTarget::SourceFileTypeNormal)
       {
-      this->WriteMacOSXContentRules(*(*source), pkgloc);
+      this->WriteMacOSXContentRules(*(*source), tsFlags.MacFolder);
       }
     else if(!(*source)->GetPropertyAsBool("HEADER_FILE_ONLY"))
       {
@@ -322,21 +323,14 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 void cmMakefileTargetGenerator::WriteMacOSXContentRules(cmSourceFile& source,
                                                         const char* pkgloc)
 {
-  // Skip OS X bundle content when not building a bundle.
-  if(!this->Target->IsAppBundleOnApple()) { return; }
+  // Skip OS X content when not building a Framework or Bundle.
+  if(this->MacContentDirectory.empty())
+    {
+    return;
+    }
 
-  // Create the directory in which the content is to be placed.
-  std::string targetName;
-  std::string targetNameReal;
-  std::string targetNameImport;
-  std::string targetNamePDB;
-  this->Target->GetExecutableNames
-    (targetName, targetNameReal, targetNameImport, targetNamePDB,
-     this->LocalGenerator->ConfigurationName.c_str());
-  std::string macdir = this->Target->GetDirectory();
-  macdir += "/";
-  macdir += targetName;
-  macdir += ".app/Contents/";
+  // Construct the full path to the content subdirectory.
+  std::string macdir = this->MacContentDirectory;
   macdir += pkgloc;
   cmSystemTools::MakeDirectory(macdir.c_str());
 
@@ -355,7 +349,7 @@ void cmMakefileTargetGenerator::WriteMacOSXContentRules(cmSourceFile& source,
   std::vector<std::string> depends;
   std::vector<std::string> commands;
   depends.push_back(input);
-  std::string copyEcho = "Copying Bundle content ";
+  std::string copyEcho = "Copying OS X content ";
   copyEcho += output;
   this->LocalGenerator->AppendEcho(commands, copyEcho.c_str(),
                                    cmLocalUnixMakefileGenerator3::EchoBuild);

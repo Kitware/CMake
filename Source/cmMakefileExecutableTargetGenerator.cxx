@@ -25,9 +25,22 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
-cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator()
+cmMakefileExecutableTargetGenerator
+::cmMakefileExecutableTargetGenerator(cmTarget* target):
+  cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnDepends;
+  this->Target->GetExecutableNames(
+    this->TargetNameOut, this->TargetNameReal, this->TargetNameImport,
+    this->TargetNamePDB, this->LocalGenerator->ConfigurationName.c_str());
+
+  if(this->Target->IsAppBundleOnApple())
+    {
+    this->MacContentDirectory = this->Target->GetDirectory();
+    this->MacContentDirectory += "/";
+    this->MacContentDirectory += this->TargetNameOut;
+    this->MacContentDirectory += ".app/Contents/";
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -117,21 +130,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   outpath += "/";
   if(this->Target->IsAppBundleOnApple())
     {
-    // Compute bundle directory names.
-    std::string macdir = outpath;
-    macdir += targetName;
-    macdir += ".app/Contents/";
-    outpath = macdir;
-    outpath += "MacOS";
-    cmSystemTools::MakeDirectory(outpath.c_str());
-    outpath += "/";
-
-    // Configure the Info.plist file.  Note that it needs the executable name
-    // to be set.
-    std::string plist = macdir + "Info.plist";
-    this->LocalGenerator->GenerateAppleInfoPList(this->Target,
-                                                 targetName.c_str(),
-                                                 plist.c_str());
+    this->CreateAppBundle(targetName, outpath);
     }
   std::string outpathImp;
   if(relink)
@@ -468,4 +467,23 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->CleanFiles.insert(this->CleanFiles.end(),
                           exeCleanFiles.begin(),
                           exeCleanFiles.end());
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefileExecutableTargetGenerator::CreateAppBundle(std::string& targetName,
+                                                     std::string& outpath)
+{
+  // Compute bundle directory names.
+  outpath = this->MacContentDirectory;
+  outpath += "MacOS";
+  cmSystemTools::MakeDirectory(outpath.c_str());
+  outpath += "/";
+
+  // Configure the Info.plist file.  Note that it needs the executable name
+  // to be set.
+  std::string plist = this->MacContentDirectory + "Info.plist";
+  this->LocalGenerator->GenerateAppleInfoPList(this->Target,
+                                               targetName.c_str(),
+                                               plist.c_str());
 }

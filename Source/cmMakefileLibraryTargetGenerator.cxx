@@ -27,9 +27,35 @@
 #include <memory> // auto_ptr
 
 //----------------------------------------------------------------------------
-cmMakefileLibraryTargetGenerator::cmMakefileLibraryTargetGenerator()
+cmMakefileLibraryTargetGenerator
+::cmMakefileLibraryTargetGenerator(cmTarget* target):
+  cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnDepends;
+  this->Target->GetLibraryNames(
+    this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
+    this->TargetNameImport, this->TargetNamePDB,
+    this->LocalGenerator->ConfigurationName.c_str());
+
+  if(this->Target->IsFrameworkOnApple())
+    {
+    if(const char* fversion = this->Target->GetProperty("FRAMEWORK_VERSION"))
+      {
+      this->FrameworkVersion = fversion;
+      }
+    else if(const char* tversion = this->Target->GetProperty("VERSION"))
+      {
+      this->FrameworkVersion = tversion;
+      }
+    else
+      {
+      this->FrameworkVersion = "A";
+      }
+    this->MacContentDirectory = this->Target->GetDirectory();
+    this->MacContentDirectory += "/Versions/";
+    this->MacContentDirectory += this->FrameworkVersion;
+    this->MacContentDirectory += "/";
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -218,10 +244,9 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 }
 
 //----------------------------------------------------------------------------
-void cmMakefileLibraryTargetGenerator::CreateFrameworkLinksAndDirs(
+void cmMakefileLibraryTargetGenerator::CreateFramework(
   std::string& targetName,
-  std::string& outpath,
-  const char* version)
+  std::string& outpath)
 {
   std::string symlink;
   std::string symlink2;
@@ -233,7 +258,7 @@ void cmMakefileLibraryTargetGenerator::CreateFrameworkLinksAndDirs(
   // cd foo.framework to setup symlinks with relative paths
   cmSystemTools::ChangeDirectory((outpath+"Versions").c_str());
   // Current -> version
-  symlink = version;
+  symlink = this->FrameworkVersion;
   symlink2 = "Current";
   cmSystemTools::RemoveFile("Current");
   cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
@@ -263,116 +288,6 @@ void cmMakefileLibraryTargetGenerator::CreateFrameworkLinksAndDirs(
   this->Makefile->AddCMakeOutputFile((outpath + "PrivateHeaders").c_str());
   // go back to where we were
   cmSystemTools::ChangeDirectory(cwd.c_str());
-}
-
-//----------------------------------------------------------------------------
-void cmMakefileLibraryTargetGenerator::CopyFrameworkSources(
-  std::string& targetName,
-  std::string& outpath,
-  const char* /*version*/ ,
-  const char* propertyName,
-  const char* subdir)
-{
-  std::string fullOutput = outpath + targetName;
-  cmCustomCommandLines commandLines;
-  std::vector<std::string> depends;
-  const std::vector<cmSourceFile*>& sources =
-    this->Target->GetSourceFiles();
-
-  std::string propName(propertyName);
-
-  for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
-      i != sources.end(); ++i)
-    {
-    cmSourceFile* sf = *i;
-
-    if(!sf)
-      {
-      cmSystemTools::Error(
-        "could not find framework source file", "");
-      continue;
-      }
-
-    cmTarget::SourceFileFlags tsFlags =
-      this->Target->GetTargetSourceFileFlags(sf);
-
-    // If processing public headers, skip headers also marked with the private
-    // property. Private wins.
-    //
-    if(tsFlags.PrivateHeader && (propName == "PUBLIC_HEADER"))
-      {
-      continue;
-      }
-
-    if(tsFlags.PrivateHeader && (propName == "PRIVATE_HEADER") ||
-      tsFlags.PublicHeader && (propName == "PUBLIC_HEADER") ||
-      tsFlags.Resource && (propName == "RESOURCE"))
-      {
-      cmCustomCommandLine line;
-      std::string dest = outpath + subdir + "/";
-      dest += cmSystemTools::GetFilenameName(sf->GetFullPath());
-      line.push_back("$(CMAKE_COMMAND)");
-      line.push_back("-E");
-      line.push_back("copy_if_different");
-      line.push_back(sf->GetFullPath());
-      depends.push_back(sf->GetFullPath());
-      line.push_back(dest);
-      commandLines.push_back(line);
-      // make sure the target gets rebuilt if any of the headers is removed
-      this->GenerateExtraOutput(dest.c_str(), fullOutput.c_str());
-      }
-    }
-
-  // add a set of prebuild commands to run on the target
-  if(!commandLines.empty())
-    {
-    this->Makefile->
-      AddCustomCommandToTarget(this->Target->GetName(),
-                               depends,
-                               commandLines,
-                               cmTarget::PRE_BUILD,
-                               "copy files",
-                               this->Makefile->GetCurrentOutputDirectory());
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmMakefileLibraryTargetGenerator::CreateFramework(
-  std::string& targetName,
-  std::string& outpath)
-{
-  std::string macdir = outpath;
-  const char* version = this->Target->GetProperty("FRAMEWORK_VERSION");
-  if(!version)
-    {
-    version = this->Target->GetProperty("VERSION");
-    }
-  if(!version)
-    {
-    version = "A";
-    }
-  // create the symbolic links and directories
-  this->CreateFrameworkLinksAndDirs(targetName,
-                                          outpath,
-                                          version);
-  macdir += "Versions/";
-  macdir += version;
-  macdir += "/";
-  outpath += "Versions/";
-  outpath += version;
-  outpath += "/";
-
-  //cmSystemTools::MakeDirectory((macdir + "Libraries").c_str());
-  cmSystemTools::MakeDirectory((macdir + "Headers").c_str());
-
-  this->CopyFrameworkSources(targetName, outpath, version,
-    "PRIVATE_HEADER", "PrivateHeaders");
-
-  this->CopyFrameworkSources(targetName, outpath, version,
-    "PUBLIC_HEADER", "Headers");
-
-  this->CopyFrameworkSources(targetName, outpath, version,
-    "RESOURCE", "Resources");
 }
 
 //----------------------------------------------------------------------------

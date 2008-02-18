@@ -23,7 +23,7 @@ class cmMakefileLibraryTargetGenerator:
   public cmMakefileTargetGenerator
 {
 public:
-  cmMakefileLibraryTargetGenerator();
+  cmMakefileLibraryTargetGenerator(cmTarget* target);
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
@@ -39,14 +39,9 @@ protected:
   void WriteFrameworkRules(bool relink);
   void CreateFramework(std::string& targetName,
                        std::string& outpath);
-  void CreateFrameworkLinksAndDirs(std::string& targetName,
-                                   std::string& outpath,
-                                   const char* version);
-  void CopyFrameworkSources(std::string& targetName,
-                            std::string& outpath,
-                            const char* version,
-                            const char* propertyName,
-                            const char* subdir);
+
+  // Store the computd framework version for OS X Frameworks.
+  std::string FrameworkVersion;
 };
 
 #endif

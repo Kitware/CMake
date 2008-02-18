@@ -23,7 +23,7 @@ class cmMakefileUtilityTargetGenerator:
   public cmMakefileTargetGenerator
 {
 public:
-  cmMakefileUtilityTargetGenerator();
+  cmMakefileUtilityTargetGenerator(cmTarget* target);
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */

@@ -24,7 +24,9 @@
 #include "cmTarget.h"
 
 //----------------------------------------------------------------------------
-cmMakefileUtilityTargetGenerator::cmMakefileUtilityTargetGenerator()
+cmMakefileUtilityTargetGenerator
+::cmMakefileUtilityTargetGenerator(cmTarget* target):
+  cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnUtility;
 }

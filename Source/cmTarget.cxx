@@ -33,6 +33,19 @@ const char* cmTarget::TargetTypeNames[] = {
 };
 
 //----------------------------------------------------------------------------
+class cmTargetInternals
+{
+public:
+  cmTargetInternals()
+    {
+    this->SourceFileFlagsConstructed = false;
+    }
+  typedef cmTarget::SourceFileFlags SourceFileFlags;
+  std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
+  bool SourceFileFlagsConstructed;
+};
+
+//----------------------------------------------------------------------------
 cmTarget::cmTarget()
 {
   this->Makefile = 0;
@@ -994,76 +1007,101 @@ struct cmTarget::SourceFileFlags
 cmTarget::GetTargetSourceFileFlags(const cmSourceFile* sf)
 {
   struct SourceFileFlags flags;
-  const char* files;
-  std::vector<std::string>::iterator it;
+  this->ConstructSourceFileFlags();
+  std::map<cmSourceFile const*, SourceFileFlags>::iterator si =
+    this->Internal->SourceFlagsMap.find(sf);
+  if(si != this->Internal->SourceFlagsMap.end())
+    {
+    flags = si->second;
+    }
+  return flags;
+}
 
-  flags.PrivateHeader = false;
-  flags.PublicHeader = false;
-  flags.Resource = false;
+//----------------------------------------------------------------------------
+void cmTarget::ConstructSourceFileFlags()
+{
+  if(this->Internal->SourceFileFlagsConstructed)
+    {
+    return;
+    }
+  this->Internal->SourceFileFlagsConstructed = true;
 
-  files = this->GetProperty("PRIVATE_HEADER");
-  if ((files) && (*files))
+  // Process public headers to mark the source files.
+  if(const char* files = this->GetProperty("PUBLIC_HEADER"))
     {
     std::vector<std::string> relFiles;
     cmSystemTools::ExpandListArgument(files, relFiles);
-    for(it = relFiles.begin(); it != relFiles.end(); ++it)
+    for(std::vector<std::string>::iterator it = relFiles.begin();
+        it != relFiles.end(); ++it)
       {
-      if(sf == this->GetMakefile()->GetSource(it->c_str()))
+      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
         {
-        flags.PrivateHeader = true;
-        break;
+        SourceFileFlags& flags = this->Internal->SourceFlagsMap[sf];
+        flags.MacFolder = "Headers";
+        flags.Type = cmTarget::SourceFileTypePublicHeader;
         }
       }
     }
 
-  // Only consider marking it as a public header if it is *NOT* already marked
-  // as a private header:
-  //
-  if(!flags.PrivateHeader)
+  // Process private headers after public headers so that they take
+  // precedence if a file is listed in both.
+  if(const char* files = this->GetProperty("PRIVATE_HEADER"))
     {
-    files = this->GetProperty("PUBLIC_HEADER");
-    if ((files) && (*files))
+    std::vector<std::string> relFiles;
+    cmSystemTools::ExpandListArgument(files, relFiles);
+    for(std::vector<std::string>::iterator it = relFiles.begin();
+        it != relFiles.end(); ++it)
       {
-      std::vector<std::string> relFiles;
-      cmSystemTools::ExpandListArgument(files, relFiles);
-      for(it = relFiles.begin(); it != relFiles.end(); ++it)
+      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
         {
-        if(sf == this->GetMakefile()->GetSource(it->c_str()))
+        SourceFileFlags& flags = this->Internal->SourceFlagsMap[sf];
+        flags.MacFolder = "PrivateHeaders";
+        flags.Type = cmTarget::SourceFileTypePrivateHeader;
+        }
+      }
+    }
+
+  // Mark sources listed as resources.
+  if(const char* files = this->GetProperty("RESOURCE"))
+    {
+    std::vector<std::string> relFiles;
+    cmSystemTools::ExpandListArgument(files, relFiles);
+    for(std::vector<std::string>::iterator it = relFiles.begin();
+        it != relFiles.end(); ++it)
+      {
+      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
+        {
+        SourceFileFlags& flags = this->Internal->SourceFlagsMap[sf];
+        flags.MacFolder = "Resources";
+        flags.Type = cmTarget::SourceFileTypeResource;
+        }
+      }
+    }
+
+  // Handle the MACOSX_PACKAGE_LOCATION property on source files that
+  // were not listed in one of the other lists.
+  std::vector<cmSourceFile*> const& sources = this->GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
+      si != sources.end(); ++si)
+    {
+    cmSourceFile* sf = *si;
+    if(const char* location = sf->GetProperty("MACOSX_PACKAGE_LOCATION"))
+      {
+      SourceFileFlags& flags = this->Internal->SourceFlagsMap[sf];
+      if(flags.Type == cmTarget::SourceFileTypeNormal)
+        {
+        flags.MacFolder = location;
+        if(strcmp(location, "Resources") == 0)
           {
-          flags.PublicHeader = true;
-          break;
+          flags.Type = cmTarget::SourceFileTypeResource;
+          }
+        else
+          {
+          flags.Type = cmTarget::SourceFileTypeMacContent;
           }
         }
       }
     }
-
-  const char* location = sf->GetProperty("MACOSX_PACKAGE_LOCATION");
-  if(location && cmStdString(location) == "Resources")
-    {
-    flags.Resource = true;
-    }
-
-  // Don't bother with the loop if it's already marked as a resource:
-  //
-  if(!flags.Resource)
-    {
-    files = this->GetProperty("RESOURCE");
-    if ((files) && (*files))
-      {
-      std::vector<std::string> relFiles;
-      cmSystemTools::ExpandListArgument(files, relFiles);
-      for(it = relFiles.begin(); it != relFiles.end(); ++it)
-        {
-        if(sf == this->GetMakefile()->GetSource(it->c_str()))
-          {
-          flags.Resource = true;
-          break;
-          }
-        }
-      }
-    }
-
-  return flags;
 }
 
 //----------------------------------------------------------------------------
@@ -2872,6 +2910,10 @@ const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
       cmSystemTools::CollapseFullPath
       (out.c_str(), this->Makefile->GetStartOutputDirectory());
 
+    // TODO: Make AppBundle and Framework directory computation in
+    // target consistent.  Why do we add the .framework part here for
+    // frameworks but not the .app part for bundles?  We should
+    // probably not add it for either.
     if(this->IsFrameworkOnApple())
       {
       out += "/";
@@ -3391,4 +3433,37 @@ cmTargetLinkInterfaceMap::~cmTargetLinkInterfaceMap()
     {
     delete i->second;
     }
+}
+
+//----------------------------------------------------------------------------
+cmTargetInternalPointer::cmTargetInternalPointer()
+{
+  this->Pointer = new cmTargetInternals;
+}
+
+//----------------------------------------------------------------------------
+cmTargetInternalPointer
+::cmTargetInternalPointer(cmTargetInternalPointer const&)
+{
+  // Ideally cmTarget instances should never be copied.  However until
+  // we can make a sweep to remove that, this copy constructor avoids
+  // allowing the resources (Internals) to be copied.
+  this->Pointer = new cmTargetInternals;
+}
+
+//----------------------------------------------------------------------------
+cmTargetInternalPointer::~cmTargetInternalPointer()
+{
+  delete this->Pointer;
+}
+
+//----------------------------------------------------------------------------
+cmTargetInternalPointer&
+cmTargetInternalPointer::operator=(cmTargetInternalPointer const&)
+{
+  // Ideally cmTarget instances should never be copied.  However until
+  // we can make a sweep to remove that, this copy constructor avoids
+  // allowing the resources (Internals) to be copied.
+  this->Pointer = new cmTargetInternals;
+  return *this;
 }
