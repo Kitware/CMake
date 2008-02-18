@@ -3,7 +3,6 @@
 # in this file.  
 
 if(CPACK_GENERATOR MATCHES "NSIS")
-  SET(QT_DIALOG_OPTIONS_FILE @QT_DIALOG_OPTIONS_FILE@)
   # set the install/unistall icon used for the installer itself
   # There is a bug in NSI that does not handle full unix paths properly. 
   SET(CPACK_NSIS_MUI_ICON "@CMake_SOURCE_DIR@/Utilities/Release\\CMakeLogo.ico")
@@ -43,5 +42,9 @@ if(CPACK_GENERATOR MATCHES "CygwinSource")
 endif(CPACK_GENERATOR MATCHES "CygwinSource")
 
 if("${CPACK_GENERATOR}" STREQUAL "PackageMaker")
-  SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+  if(CMAKE_PACKAGE_QTGUI)                       
+    set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
+  else(CMAKE_PACKAGE_QTGUI)                     
+    set(CPACK_PACKAGE_DEFAULT_LOCATION "/usr")
+  endif(CMAKE_PACKAGE_QTGUI)                    
 endif("${CPACK_GENERATOR}" STREQUAL "PackageMaker")
