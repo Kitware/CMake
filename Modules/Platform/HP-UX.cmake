@@ -70,7 +70,7 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 ELSE(CMAKE_COMPILER_IS_GNUCXX)
   # for hp aCC
   SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "+Z")            # -pic 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "+Z -Wl,-E -b +nodefaultrpath -L/usr/lib")       # -shared
+  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "+Z -Wl,-E,+nodefaultrpath -b -L/usr/lib")       # -shared
   SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "-Wl,+s,-E,+nodefaultrpath")  # +s, flag for exe link to use shared lib
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG "-Wl,+b")       # -rpath
   SET(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG_SEP ":")   # : or empty
