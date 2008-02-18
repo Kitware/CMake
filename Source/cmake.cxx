@@ -842,14 +842,6 @@ int cmake::AddCMakePaths()
     modules = cMakeRoot + "/Modules/CMake.cmake";
     }
 #endif
-#ifdef CMAKE_PREFIX
-  if (!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // try compiled in install prefix
-    cMakeRoot = CMAKE_PREFIX CMAKE_DATA_DIR;
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    }
-#endif
   if (!cmSystemTools::FileExists(modules.c_str()))
     {
     // try
