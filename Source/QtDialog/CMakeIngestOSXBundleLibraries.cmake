@@ -66,6 +66,24 @@ message("bundle: '${bundle}'")
 
 find_program(dep_cmd ${dep_tool})
 
+# find the full path to the framework in path set the result
+# in pathout
+macro(find_framework_full_path path pathout)
+  set(${pathout} "${path}")
+  if(NOT EXISTS "${path}")
+    set(FRAMEWORK_SEARCH "/Library/Frameworks"
+      "/System/Library/Frameworks" )
+    set(__FOUND FALSE)
+    foreach(f ${FRAMEWORK_SEARCH})
+      set(newd "${f}/${path}")
+      if(EXISTS "${newd}" AND NOT __FOUND)
+        set(${pathout} "${newd}")
+        set(__FOUND TRUE)
+      endif(EXISTS "${newd}" AND NOT __FOUND)
+    endforeach(f)
+  endif(NOT EXISTS "${path}")
+endmacro(find_framework_full_path)
+
 
 macro(append_unique au_list_var au_value)
   set(${au_list_var} ${${au_list_var}} "${au_value}")
@@ -150,20 +168,6 @@ foreach(d ${deps})
     if(d_is_embedded_lib)
       set(embedded_deps ${embedded_deps} "${d}")
     else(d_is_embedded_lib)
-      # if the non system lib is not found then try to look for it
-      # in the standard framework search path for OSX
-      if(NOT EXISTS "${d}")
-        set(FRAMEWORK_SEARCH "/Library/Frameworks"
-          "/System/Library/Frameworks" )
-        set(__FOUND )
-        foreach(f ${FRAMEWORK_SEARCH})
-          set(newd "${f}/${d}")
-          if(EXISTS "${newd}" AND NOT __FOUND)
-            set(d "${newd}")
-            set(__FOUND TRUE)
-          endif(EXISTS "${newd}" AND NOT __FOUND)
-        endforeach(f)
-      endif(NOT EXISTS "${d}")
       set(nonsystem_deps ${nonsystem_deps} "${d}")
     endif(d_is_embedded_lib)
   endif(d_is_system_lib)
@@ -198,22 +202,25 @@ macro(copy_library_into_bundle clib_bundle clib_libsrc clib_dstlibs clib_fixups)
   # "${clib_bundle}/Contents/MacOS"
   #
   if("${clib_libsrc}" MATCHES ".framework/.*/.*/.*")
-    get_filename_component(fw_src "${clib_libsrc}" ABSOLUTE)
+    # make sure clib_libsrc is a full path to the framework as a framework
+    # maybe linked in with relative paths in some cases
+    find_framework_full_path("${clib_libsrc}" fw_full_src)
+    get_filename_component(fw_src "${fw_full_src}" ABSOLUTE)
     get_filename_component(fw_srcdir "${clib_libsrc}/../../.." ABSOLUTE)
     get_filename_component(fwdirname "${fw_srcdir}" NAME)
     string(REGEX REPLACE "^(.*)\\.framework$" "\\1" fwname "${fwdirname}")
     string(REGEX REPLACE "^.*/${fwname}\\.framework/(.*)$" "\\1" fwlibname "${clib_libsrc}")
     set(fw_dstdir "${clib_bundle}/Contents/Frameworks/${fwdirname}")
 
-#    message("")
-#    message("fwdirname: '${fwdirname}'")
-#    message("fwname: '${fwname}'")
-#    message("fwlibname: '${fwlibname}'")
-#    message("fw_src: '${fw_src}'")
-#    message("fw_srcdir: '${fw_srcdir}'")
-#    message("fw_dstdir: '${fw_dstdir}'")
-#    message("new_name: '@executable_path/../Frameworks/${fwdirname}/${fwlibname}'")
-#    message("")
+#     message("")
+#     message("fwdirname: '${fwdirname}'")
+#     message("fwname: '${fwname}'")
+#     message("fwlibname: '${fwlibname}'")
+#     message("fw_src: '${fw_src}'")
+#     message("fw_srcdir: '${fw_srcdir}'")
+#     message("fw_dstdir: '${fw_dstdir}'")
+#     message("new_name: '@executable_path/../Frameworks/${fwdirname}/${fwlibname}'")
+#     message("")
 
     message("Copying ${fw_srcdir} into bundle...")
 
@@ -227,6 +234,7 @@ macro(copy_library_into_bundle clib_bundle clib_libsrc clib_dstlibs clib_fixups)
     # (This technique will not work for frameworks that have necessary
     # resource or auxiliary files...)
     #
+    message("fw_src = [${fw_src}]   fw_full_src = [${fw_full_src}]")
     message("Copy: ${CMAKE_COMMAND} -E copy \"${fw_src}\"  \"${fw_dstdir}/${fwlibname}\"")
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy
       "${fw_src}" "${fw_dstdir}/${fwlibname}"
@@ -288,6 +296,7 @@ set(srclibs ${nonsystem_deps} ${extra_libs})
 set(dstlibs "")
 set(fixups "")
 foreach(d ${srclibs})
+  message("copy it --- ${d}")
   copy_library_into_bundle("${bundle}" "${d}" dstlibs fixups)
 endforeach(d)
 
@@ -323,8 +332,8 @@ message("")
 
 # Output file:
 #
-get_filename_component(script_name "${CMAKE_CURRENT_LIST_FILE}" NAME)
-file(WRITE "${input_file_full}_${script_name}" "# Script \"${CMAKE_CURRENT_LIST_FILE}\" completed.\n")
+#get_filename_component(script_name "${CMAKE_CURRENT_LIST_FILE}" NAME)
+#file(WRITE "${input_file_full}_${script_name}" "# Script \"${CMAKE_CURRENT_LIST_FILE}\" completed.\n")
 message("")
 message("# Script \"${CMAKE_CURRENT_LIST_FILE}\" completed.")
 message("")
