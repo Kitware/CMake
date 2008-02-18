@@ -1252,7 +1252,6 @@ bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer,
     {
     std::string sdestdir = destdir;
     cmSystemTools::ConvertToUnixSlashes(sdestdir);
-
     char ch1 = destination[0];
     char ch2 = destination[1];
     char ch3 = 0;
@@ -1294,9 +1293,12 @@ bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer,
       if ( ch2 == '/' )
         {
         // looks like a network path.
-        this->SetError("called with network path DESTINATION. This "
-            "does not make sense when using DESTDIR. Specify local "
-            "absolute path or remove DESTDIR environment variable.");
+        std::string message = "called with network path DESTINATION. This "
+          "does not make sense when using DESTDIR. Specify local "
+          "absolute path or remove DESTDIR environment variable."
+          "\nDESTINATION=\n";
+        message += destination;
+        this->SetError(message.c_str());
         return false;
         }
       }
