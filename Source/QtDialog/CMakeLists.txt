@@ -25,16 +25,20 @@ ELSE(NOT QT4_FOUND)
     QCMake.h
     QCMakeCacheView.cxx
     QCMakeCacheView.h
+    QMacInstallDialog.cxx
+    QMacInstallDialog.h
     )
   QT4_WRAP_UI(UI_SRCS 
     CMakeSetupDialog.ui
     AddCacheEntry.ui
+    MacInstallDialog.ui
     )
   QT4_WRAP_CPP(MOC_SRCS 
     AddCacheEntry.h
     CMakeSetupDialog.h
     QCMake.h
     QCMakeCacheView.h
+    QMacInstallDialog.h
     )
   QT4_ADD_RESOURCES(RC_SRCS CMakeSetup.qrc)
 

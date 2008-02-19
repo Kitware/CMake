@@ -20,6 +20,7 @@
 #include <QDir>
 #include <QTranslator>
 #include <QLocale>
+#include "QMacInstallDialog.h"
 
 #include "CMakeSetupDialog.h"
 #include "cmDocumentation.h"
@@ -66,7 +67,17 @@ static const char * cmDocumentationOptions[][3] =
 int main(int argc, char** argv)
 {
   QApplication app(argc, argv);
-
+  
+  // if arg for install 
+  for(int i =0; i < argc; i++)
+    {
+    if(strcmp(argv[i], "--mac-install") == 0)
+      {
+      QMacInstallDialog setupdialog(0);
+      setupdialog.exec();
+      return 0;
+      }
+    }
   // tell the cmake library where cmake is 
   QDir cmExecDir(QApplication::applicationDirPath());
 #if defined(Q_OS_MAC)
