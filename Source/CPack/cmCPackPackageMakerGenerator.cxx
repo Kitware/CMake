@@ -38,6 +38,22 @@ cmCPackPackageMakerGenerator::~cmCPackPackageMakerGenerator()
 {
 }
 
+int cmCPackPackageMakerGenerator::CopyInstallScript(const char* resdir,
+                                                    const char* script,
+                                                    const char* name)
+{
+  std::string dst = resdir;
+  dst += "/";
+  dst += name;
+  cmSystemTools::CopyFileAlways(script, dst.c_str());
+  cmSystemTools::SetPermissions(dst.c_str(),0777);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                "copy script : " << script << "\ninto " << dst.c_str() << 
+                std::endl);
+
+  return 1;
+}
+
 //----------------------------------------------------------------------
 int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
   const char* toplevel,
@@ -50,15 +66,51 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
   resDir += "/Resources";
   std::string preflightDirName = resDir + "/PreFlight";
   std::string postflightDirName = resDir + "/PostFlight";
-
-  if ( !cmsys::SystemTools::MakeDirectory(preflightDirName.c_str())
-    || !cmsys::SystemTools::MakeDirectory(postflightDirName.c_str()) )
+  const char* preflight = this->GetOption("CPACK_PREFLIGHT_SCRIPT");
+  const char* postflight = this->GetOption("CPACK_POSTFLIGHT_SCRIPT");
+  const char* postupgrade = this->GetOption("CPACK_POSTUPGRADE_SCRIPT");
+  // if preflight or postflight scripts not there create directories
+  // of the same name, I think this makes it work
+  if(!preflight)
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Problem creating installer directories: "
-      << preflightDirName.c_str() << " and "
-      << postflightDirName.c_str() << std::endl);
-    return 0;
+    if ( !cmsys::SystemTools::MakeDirectory(preflightDirName.c_str()))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Problem creating installer directory: "
+                    << preflightDirName.c_str() << std::endl);
+      return 0;
+      }
+    }
+  if(!postflight)
+    {
+    if ( !cmsys::SystemTools::MakeDirectory(postflightDirName.c_str()))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Problem creating installer directory: "
+                    << postflightDirName.c_str() << std::endl);
+      return 0;
+      }
+    }
+  // if preflight, postflight, or postupgrade are set 
+  // then copy them into the resource directory and make
+  // them executable
+  if(preflight)
+    {
+      this->CopyInstallScript(resDir.c_str(),
+                              preflight,
+                              "preflight");
+    }
+  if(postflight)
+    {
+      this->CopyInstallScript(resDir.c_str(),
+                              postflight,
+                              "postflight");
+    }
+  if(postupgrade)
+    {
+      this->CopyInstallScript(resDir.c_str(),
+                              postupgrade,
+                              "postupgrade");
     }
 
   if ( !this->CopyCreateResourceFile("License")

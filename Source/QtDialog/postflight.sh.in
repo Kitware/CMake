@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "$2/@CMAKE_INSTALL_SUBDIR@/cmake-gui.app/Contents/MacOS/cmake-gui" >>/tmp/mylog
+"$2/@CMAKE_INSTALL_SUBDIR@/cmake-gui.app/Contents/MacOS/cmake-gui" --mac-install
+exit 0

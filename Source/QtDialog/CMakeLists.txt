@@ -13,8 +13,6 @@ ELSE(NOT QT4_FOUND)
   IF(WIN32 AND NOT QT_CONFIG MATCHES "static")
     SET(CMAKE_PACKAGE_QTGUI FALSE)
   ENDIF(WIN32 AND NOT QT_CONFIG MATCHES "static")
-  CONFIGURE_FILE("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
-    "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)    
   SET(SRCS
     AddCacheEntry.cxx
     AddCacheEntry.h
@@ -69,9 +67,19 @@ ELSE(NOT QT4_FOUND)
     ${CMAKE_INSTALL_DESTINATION_ARGS})
   ENDIF(CMAKE_PACKAGE_QTGUI)
   IF(APPLE)
+    SET(CMAKE_POSTFLIGHT_SCRIPT
+      "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
+    SET(CMAKE_POSTUPGRADE_SCRIPT
+      "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
+    configure_file("${CMake_SOURCE_DIR}/Source/QtDialog/postflight.sh.in"
+      "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
+    configure_file("${CMake_SOURCE_DIR}/Source/QtDialog/postupgrade.sh.in"
+      "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
     INSTALL(CODE "set(input_file 
        \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/MacOS/cmake-gui\")")
     INSTALL(SCRIPT "${CMake_SOURCE_DIR}/Source/QtDialog/CMakeIngestOSXBundleLibraries.cmake")
   ENDIF(APPLE)
+  CONFIGURE_FILE("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
+    "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)    
 ENDIF(NOT QT4_FOUND)
 

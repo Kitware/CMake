@@ -39,6 +39,9 @@ public:
   virtual ~cmCPackPackageMakerGenerator();
 
 protected:
+  int CopyInstallScript(const char* resdir,
+                        const char* script,
+                        const char* name);
   virtual int InitializeInternal();
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);

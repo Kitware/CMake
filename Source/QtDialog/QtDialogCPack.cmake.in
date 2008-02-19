@@ -3,11 +3,15 @@ SET(CMAKE_PACKAGE_QTGUI @CMAKE_PACKAGE_QTGUI@)
 
 IF(CMAKE_PACKAGE_QTGUI)
   SET(CPACK_PACKAGE_EXECUTABLES ${CPACK_PACKAGE_EXECUTABLES} "cmake-gui" "cmake-gui(beta)") 
-IF(IS_APPLE)
-  # for apple install we set the install prefix to /Applications and then install
-  # cmake into the bundle for cmake-gui
-  SET(CPACK_SET_DESTDIR TRUE)
-ENDIF(IS_APPLE)
+  IF(IS_APPLE)
+    # for apple install we set the install prefix to
+    # / and then install
+    # cmake into the bundle for cmake-gui and must use DESTDIR
+    SET(CPACK_SET_DESTDIR TRUE)
+    # we also want to run post install stuff to setup command line
+    SET(CPACK_POSTFLIGHT_SCRIPT "@CMAKE_POSTFLIGHT_SCRIPT@")
+    SET(CPACK_POSTUPGRADE_SCRIPT "@CMAKE_POSTUPGRADE_SCRIPT@")
+  ENDIF(IS_APPLE)
 ENDIF(CMAKE_PACKAGE_QTGUI)
 
 
