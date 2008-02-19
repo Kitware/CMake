@@ -339,7 +339,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
          it != this->GlobalGenerator->GetProjectMap().end();
          ++it)
       {
-      std::string linkSourceDirectory =this->GetEclipsePath(
+      std::string linkSourceDirectory = this->GetEclipsePath(
                             it->second[0]->GetMakefile()->GetStartDirectory());
       // .project dir can't be subdir of a linked resource dir
       if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
@@ -351,11 +351,11 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
         }
       }
     // for EXECUTABLE_OUTPUT_PATH when not in binary dir
-    std::string output_path = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-    if (!cmSystemTools::IsSubDirectory(output_path.c_str(),
-                                       this->HomeOutputDirectory.c_str()))
+    std::string outputPath = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    if (!outputPath.empty() && !cmSystemTools::IsSubDirectory(
+                        outputPath.c_str(), this->HomeOutputDirectory.c_str()))
       {
-      std::string name = this->GetPathBasename(output_path);
+      std::string name = this->GetPathBasename(outputPath);
 
       // make sure linked resource name is unique
       while (this->GlobalGenerator->GetProjectMap().find(name)
@@ -364,17 +364,17 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
         name += "_";
         }
         this->AppendLinkedResource(fout, name,
-                                   this->GetEclipsePath(output_path));
+                                   this->GetEclipsePath(outputPath));
         this->OutLinkedResources.push_back(name);
       }
     // for LIBRARY_OUTPUT_PATH when not in binary dir
-    if (output_path != mf->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    if (outputPath != mf->GetDefinition("LIBRARY_OUTPUT_PATH"))
       {
-      output_path = mf->GetDefinition("LIBRARY_OUTPUT_PATH");
-      if (!cmSystemTools::IsSubDirectory(output_path.c_str(),
-                                         this->HomeOutputDirectory.c_str()))
+      outputPath = mf->GetDefinition("LIBRARY_OUTPUT_PATH");
+      if (!outputPath.empty() && !cmSystemTools::IsSubDirectory(
+                        outputPath.c_str(), this->HomeOutputDirectory.c_str()))
         {
-        std::string name = this->GetPathBasename(output_path);
+        std::string name = this->GetPathBasename(outputPath);
 
         // make sure linked resource name is unique
         while (this->GlobalGenerator->GetProjectMap().find(name)
@@ -383,7 +383,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
           name += "_";
           }
         this->AppendLinkedResource(fout, name,
-                                   this->GetEclipsePath(output_path));
+                                   this->GetEclipsePath(outputPath));
         this->OutLinkedResources.push_back(name);
         }
       }
@@ -502,7 +502,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // for each sub project with a linked resource to the source dir:
   // - make it type 'src'
   // - and exclude it from type 'out'
-  std::string exclude_from_out;
+  std::string excludeFromOut;
   for (std::vector<std::string>::const_iterator
        it = this->SrcLinkedResources.begin();
        it != this->SrcLinkedResources.end();
@@ -515,11 +515,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     if (!cmSystemTools::FileIsDirectory(
            std::string(this->HomeOutputDirectory + "/" + *it).c_str()))
       {
-      exclude_from_out += *it + "/|";
+      excludeFromOut += *it + "/|";
       }
     }
-  exclude_from_out += "**/CMakeFiles/";
-  fout << "<pathentry excluding=\"" << exclude_from_out
+  excludeFromOut += "**/CMakeFiles/";
+  fout << "<pathentry excluding=\"" << excludeFromOut
        << "\" kind=\"out\" path=\"\"/>\n";
   // add output entry for EXECUTABLE_OUTPUT_PATH and LIBRARY_OUTPUT_PATH
   // - if it is a subdir of homeOutputDirectory, there is no need to add it
