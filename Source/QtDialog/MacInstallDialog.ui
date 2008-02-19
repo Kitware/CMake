@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>525</width>
-    <height>134</height>
+    <width>470</width>
+    <height>159</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -19,32 +19,18 @@
    <property name="spacing" >
     <number>6</number>
    </property>
-   <item row="1" column="0" colspan="3" >
-    <widget class="QLabel" name="label_2" >
-     <property name="text" >
-      <string>This will create symbolic links to the command line tools of cmake into the specified install folder.</string>
+   <item row="3" column="1" >
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
      </property>
-     <property name="wordWrap" >
-      <bool>true</bool>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
      </property>
-    </widget>
-   </item>
-   <item row="0" column="1" >
-    <widget class="QLineEdit" name="InstallPrefix" />
-   </item>
-   <item row="0" column="0" >
-    <widget class="QLabel" name="label" >
-     <property name="text" >
-      <string>Install Folder:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="2" >
-    <widget class="QPushButton" name="choosePathButton" >
-     <property name="text" >
-      <string>Choose...</string>
-     </property>
-    </widget>
+    </spacer>
    </item>
    <item row="2" column="0" colspan="3" >
     <layout class="QHBoxLayout" >
@@ -82,6 +68,33 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item row="0" column="2" >
+    <widget class="QPushButton" name="choosePathButton" >
+     <property name="text" >
+      <string>Choose...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" >
+    <widget class="QLabel" name="label" >
+     <property name="text" >
+      <string>Install Folder:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" >
+    <widget class="QLineEdit" name="InstallPrefix" />
+   </item>
+   <item row="1" column="0" colspan="3" >
+    <widget class="QLabel" name="label_2" >
+     <property name="text" >
+      <string>This will create symbolic links to the command line tools of cmake into the specified install folder.</string>
+     </property>
+     <property name="wordWrap" >
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
