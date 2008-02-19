@@ -105,81 +105,81 @@ static const char * cmDocumentationOptions[][3] =
    "Full documentation specific to the given command is displayed. "
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-command-list [file]", "List available listfile commands and exit.",
    "The list contains all commands for which help may be obtained by using "
    "the --help-command argument followed by a command name. "
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-commands [file]", "Print help for all commands and exit.",
    "Full documentation specific for all current command is displayed."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-compatcommands [file]", "Print help for compatibility commands. ",
    "Full documentation specific for all compatibility commands is displayed."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-module module [file]", "Print help for a single module and exit.",
    "Full documentation specific to the given module is displayed."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-module-list [file]", "List available modules and exit.",
    "The list contains all modules for which help may be obtained by using "
    "the --help-module argument followed by a module name. "
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-modules [file]", "Print help for all modules and exit.",
    "Full documentation for all modules is displayed. "
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-custom-modules [file]" , "Print help for all custom modules and "
    "exit.",
    "Full documentation for all custom modules is displayed. "
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-property prop [file]", 
    "Print help for a single property and exit.",
    "Full documentation specific to the given property is displayed."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-property-list [file]", "List available properties and exit.",
    "The list contains all properties for which help may be obtained by using "
    "the --help-property argument followed by a property name.  If a file is "
    "specified, the help is written into it."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-properties [file]", "Print help for all properties and exit.",
    "Full documentation for all properties is displayed."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-variable var [file]", 
    "Print help for a single variable and exit.",
    "Full documentation specific to the given variable is displayed."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-variable-list [file]", "List documented variables and exit.",
    "The list contains all variables for which help may be obtained by using "
    "the --help-variable argument followed by a variable name.  If a file is "
    "specified, the help is written into it."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {"--help-variables [file]", "Print help for all variables and exit.",
    "Full documentation for all variables is displayed."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML and plain text."},
+   "page, HTML, DocBook and plain text."},
   {0,0,0}
 };
 
@@ -187,7 +187,13 @@ static const char * cmDocumentationOptions[][3] =
 static const char * cmDocumentationSeeAlso[][3] =
 {
   {0, "ccmake", 0},
+  {0, "cpack", 0},
   {0, "ctest", 0},
+  {0, "cmakecommands", 0},
+  {0, "cmakecompat", 0},
+  {0, "cmakemodules", 0},
+  {0, "cmakeprops", 0},
+  {0, "cmakevars", 0},
   {0, 0, 0}
 };
 

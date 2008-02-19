@@ -21,6 +21,7 @@
 #include "cmProperty.h"
 #include "cmDocumentationFormatter.h"
 #include "cmDocumentationFormatterHTML.h"
+#include "cmDocumentationFormatterDocbook.h"
 #include "cmDocumentationFormatterMan.h"
 #include "cmDocumentationFormatterText.h"
 #include "cmDocumentationFormatterUsage.h"
@@ -176,6 +177,7 @@ private:
   std::vector<RequestedHelpItem> RequestedHelpItems;
   cmDocumentationFormatter* CurrentFormatter;
   cmDocumentationFormatterHTML HTMLFormatter;
+  cmDocumentationFormatterDocbook DocbookFormatter;
   cmDocumentationFormatterMan ManFormatter;
   cmDocumentationFormatterText TextFormatter;
   cmDocumentationFormatterUsage UsageFormatter;

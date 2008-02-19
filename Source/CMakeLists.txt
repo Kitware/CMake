@@ -115,6 +115,7 @@ SET(SRCS
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
   cmDocumentationFormatterHTML.cxx
+  cmDocumentationFormatterDocbook.cxx
   cmDocumentationFormatterMan.cxx
   cmDocumentationFormatterText.cxx
   cmDocumentationFormatterUsage.cxx
