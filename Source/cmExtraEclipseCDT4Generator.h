@@ -76,6 +76,11 @@ private:
   // Extract basename.
   static std::string GetPathBasename(const std::string& path);
 
+  // Generate the project name as: <name>-<type>@<path>
+  static std::string GenerateProjectName(const std::string& name,
+                                         const std::string& type,
+                                         const std::string& path);
+
   // Helper functions
   static void AppendStorageScanners(cmGeneratedFileStream& fout);
   static void AppendTarget         (cmGeneratedFileStream& fout,
@@ -91,6 +96,10 @@ private:
                                     const std::string&   runActionCommand,
                                     bool                 runActionUseDefault,
                                     bool                 sipParserEnabled);
+
+  std::string HomeDirectory;
+  std::string HomeOutputDirectory;
+
 };
 
 #endif

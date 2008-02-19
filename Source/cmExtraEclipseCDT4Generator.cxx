@@ -71,6 +71,13 @@ void cmExtraEclipseCDT4Generator
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::Generate()
 {
+  const cmMakefile* mf
+    = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+
+  // TODO: Decide if these are local or member variables
+  this->HomeDirectory       = mf->GetHomeDirectory();
+  this->HomeOutputDirectory = mf->GetHomeOutputDirectory();
+
   // create a .project file
   this->CreateProjectFile();
 
@@ -83,10 +90,11 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
 {
   const cmMakefile* mf
     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+  // set up the project name: <project>-Source@<baseSourcePathName>
+  std::string name = this->GenerateProjectName(mf->GetProjectName(), "Source",
+                                   this->GetPathBasename(this->HomeDirectory));
 
-  const std::string homeDirectory(mf->GetHomeDirectory());
-  const std::string homeOutputDirectory(mf->GetHomeOutputDirectory());
-  const std::string filename = homeOutputDirectory + "/.project";
+  const std::string filename = this->HomeOutputDirectory + "/.project";
 
   cmGeneratedFileStream fout(filename.c_str());
   if (!fout)
@@ -97,7 +105,11 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
   fout << 
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<projectDescription>\n"
-    "\t<name>" << this->GetPathBasename(homeOutputDirectory) << "</name>\n"
+    "\t<name>" <<
+    this->GenerateProjectName(mf->GetProjectName(),
+                              mf->GetDefinition("CMAKE_BUILD_TYPE"),
+                              this->GetPathBasename(this->HomeOutputDirectory))
+    << "</name>\n"
     "\t<comment></comment>\n"
     "\t<projects>\n"
     "\t</projects>\n"
@@ -154,7 +166,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.buildLocation</key>\n"
     "\t\t\t\t\t<value>"
-     << this->GetEclipsePath(homeOutputDirectory) << "</value>\n"
+     << this->GetEclipsePath(this->HomeOutputDirectory) << "</value>\n"
     "\t\t\t\t</dictionary>\n"
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.useDefaultBuildCmd</key>\n"
@@ -222,7 +234,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.location</key>\n"
     "\t\t\t\t\t<value>"
-    << this->GetEclipsePath(homeOutputDirectory) << "</value>\n"
+    << this->GetEclipsePath(this->HomeOutputDirectory) << "</value>\n"
     "\t\t\t\t</dictionary>\n"
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.autoBuildTarget</key>\n"
@@ -273,7 +285,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
 
   // TODO: refactor this
   // create linked resources
-  if (homeDirectory != homeOutputDirectory)
+  if (this->HomeDirectory != this->HomeOutputDirectory)
     {
     fout << "\t<linkedResources>\n";
     // for each sub project create a linked resource to the source dir
@@ -285,7 +297,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
       {
       std::string linkSourceDirectory =this->GetEclipsePath(
                             it->second[0]->GetMakefile()->GetStartDirectory());
-      if (!cmSystemTools::IsSubDirectory(homeOutputDirectory.c_str(),
+      if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
                                          linkSourceDirectory.c_str()))
         {
         fout <<
@@ -302,7 +314,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
     // for EXECUTABLE_OUTPUT_PATH when not in binary dir
     std::string output_path = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
     if (!cmSystemTools::IsSubDirectory(output_path.c_str(),
-                                       homeOutputDirectory.c_str()))
+                                       this->HomeOutputDirectory.c_str()))
       {
       std::string name = this->GetPathBasename(output_path);
       while (this->GlobalGenerator->GetProjectMap().find(name)
@@ -325,7 +337,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile() const
       {
       output_path = mf->GetDefinition("LIBRARY_OUTPUT_PATH");
       if (!cmSystemTools::IsSubDirectory(output_path.c_str(),
-                                         homeOutputDirectory.c_str()))
+                                         this->HomeOutputDirectory.c_str()))
         {
         std::string name = this->GetPathBasename(output_path);
         while (this->GlobalGenerator->GetProjectMap().find(name)
@@ -358,8 +370,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   const cmMakefile* mf
     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
 
-  const std::string homeOutputDirectory(mf->GetHomeOutputDirectory());
-  const std::string filename = homeOutputDirectory + "/.cproject";
+  const std::string filename = this->HomeOutputDirectory + "/.cproject";
 
   cmGeneratedFileStream fout(filename.c_str());
   if (!fout)
@@ -471,7 +482,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     // exlude source directory from output search path
     // - only if not named the same as an output directory
     if (!cmSystemTools::FileIsDirectory(
-           std::string(homeOutputDirectory + "/" + it->first).c_str()))
+           std::string(this->HomeOutputDirectory + "/" + it->first).c_str()))
       {
       exclude_from_out += it->first + "/|";
       }
@@ -485,7 +496,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   //   but check it doesn't conflict with other linked resources names
   std::string output_path = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
   if (!cmSystemTools::IsSubDirectory(output_path.c_str(),
-                                     homeOutputDirectory.c_str()))
+                                     this->HomeOutputDirectory.c_str()))
     {
     std::string name = this->GetPathBasename(output_path);
     while (this->GlobalGenerator->GetProjectMap().find(name)
@@ -500,7 +511,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     {
     output_path = mf->GetDefinition("LIBRARY_OUTPUT_PATH");
     if (!cmSystemTools::IsSubDirectory(output_path.c_str(),
-                                       homeOutputDirectory.c_str()))
+                                       this->HomeOutputDirectory.c_str()))
       {
       std::string name = this->GetPathBasename(output_path);
       while (this->GlobalGenerator->GetProjectMap().find(name)
@@ -749,6 +760,14 @@ cmExtraEclipseCDT4Generator::GetPathBasename(const std::string& path)
     }
 
   return outputBasename;
+}
+
+std::string
+cmExtraEclipseCDT4Generator::GenerateProjectName(const std::string& name,
+                                                 const std::string& type,
+                                                 const std::string& path)
+{
+  return name + (type.empty() ? "" : "-") + type + "@" + path;
 }
 
 //----------------------------------------------------------------------------
