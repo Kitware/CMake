@@ -3459,8 +3459,9 @@ cmTargetInternalPointer::~cmTargetInternalPointer()
 
 //----------------------------------------------------------------------------
 cmTargetInternalPointer&
-cmTargetInternalPointer::operator=(cmTargetInternalPointer const&)
+cmTargetInternalPointer::operator=(cmTargetInternalPointer const& r)
 {
+  if(this == &r) { return *this; } // avoid warning on HP about self check
   // Ideally cmTarget instances should never be copied.  However until
   // we can make a sweep to remove that, this copy constructor avoids
   // allowing the resources (Internals) to be copied.
