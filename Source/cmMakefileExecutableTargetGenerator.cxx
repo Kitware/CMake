@@ -405,7 +405,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     {
     // Use a link script.
     const char* name = (relink? "relink.txt" : "link.txt");
-    this->CreateLinkScript(name, real_link_commands, commands1);
+    this->CreateLinkScript(name, real_link_commands, commands1, depends);
     }
   else
     {

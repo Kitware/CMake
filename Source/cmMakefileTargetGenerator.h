@@ -134,7 +134,8 @@ protected:
       script at build time.  */
   void CreateLinkScript(const char* name,
                         std::vector<std::string> const& link_commands,
-                        std::vector<std::string>& makefile_commands);
+                        std::vector<std::string>& makefile_commands,
+                        std::vector<std::string>& makefile_depends);
 
   virtual void CloseFileStreams();
   void RemoveForbiddenFlags(const char* flagVar, const char* linkLang,
