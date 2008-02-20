@@ -80,8 +80,8 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
 
   // Collect dependency information about all library targets built in
   // the project.
-  const cmake* cm = this->Makefile->GetCMakeInstance();
-  const cmGlobalGenerator* global = cm->GetGlobalGenerator();
+  cmake* cm = this->Makefile->GetCMakeInstance();
+  cmGlobalGenerator* global = cm->GetGlobalGenerator();
   const std::vector<cmLocalGenerator *>& locals = global->GetLocalGenerators();
   std::map<cmStdString, cmStdString> libDepsOld;
   std::map<cmStdString, cmStdString> libDepsNew;
@@ -137,9 +137,20 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
             ltValue = "optimized";
             break;
           }
-        valueOld += li->first;
+        std::string lib = li->first;
+        if(cmTarget* libtgt = global->FindTarget(0, lib.c_str()))
+          {
+          // Handle simple output name changes.  This command is
+          // deprecated so we do not support full target name
+          // translation (which requires per-configuration info).
+          if(const char* outname = libtgt->GetProperty("OUTPUT_NAME"))
+            {
+            lib = outname;
+            }
+          }
+        valueOld += lib;
         valueOld += ";";
-        valueNew += li->first;
+        valueNew += lib;
         valueNew += ";";
 
         std::string& ltEntry = libTypes[ltVar];

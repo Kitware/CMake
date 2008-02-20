@@ -59,8 +59,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return 
-      "Write out the dependency information for all targets of a project.";
+    return "Deprecated.  Use INSTALL(EXPORT) or EXPORT command.";
     }
   
   /**
@@ -69,6 +68,14 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
+      "This command generates an old-style library dependencies file.  "
+      "Projects requiring CMake 2.6 or later should not use the command.  "
+      "Use instead the install(EXPORT) command to help export targets "
+      "from an installation tree and the export() command to export targets "
+      "from a build tree.\n"
+      "The old-style library dependencies file does not take into account "
+      "per-configuration names of libraries or the LINK_INTERFACE_LIBRARIES "
+      "target property.\n"
       "  export_library_dependencies(<file> [APPEND])\n"
       "Create a file named <file> that can be included into a CMake listfile "
       "with the INCLUDE command.  The file will contain a number of SET "
@@ -77,6 +84,12 @@ public:
       "CMakeLists.txt file of the project.  If the APPEND option is "
       "specified, the SET commands will be appended to the given file "
       "instead of replacing it.";
+    }
+
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
     }
   
   cmTypeMacro(cmExportLibraryDependenciesCommand, cmCommand);
