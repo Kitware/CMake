@@ -377,6 +377,10 @@ public:
                                 bool newLine, bool enabled);
 #endif
 
+  /** Try to guess the soname of a shared library.  */
+  static bool GuessLibrarySOName(std::string const& fullPath,
+                                 std::string& soname);
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

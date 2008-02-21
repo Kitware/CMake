@@ -27,6 +27,8 @@
 
 #include <ctype.h>
 
+//#define CM_COMPUTE_LINK_INFO_DEBUG
+
 /*
 Notes about linking on various platforms:
 
@@ -905,7 +907,7 @@ cmComputeLinkInformation
     }
 
   // Finish the list.
-  libext += ").*";
+  libext += ")$";
   return libext;
 }
 
@@ -1067,6 +1069,13 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
     {
     // Only libraries in implicit link directories are converted to
     // pathless items.
+    return false;
+    }
+
+  // Only apply the policy below if the library file is one that can
+  // be found by the linker.
+  if(!this->ExtractAnyLibraryName.find(item))
+    {
     return false;
     }
 
@@ -1262,13 +1271,19 @@ bool cmComputeLinkInformation::CheckSharedLibNoSOName(std::string const& item)
 {
   // This platform will use the path to a library as its soname if the
   // library is given via path and was not built with an soname.  If
-  // this is a shared library that might be the case.  TODO: Check if
-  // the lib is a symlink to detect that it actually has an soname.
+  // this is a shared library that might be the case.
   std::string file = cmSystemTools::GetFilenameName(item);
   if(this->ExtractSharedLibraryName.find(file))
     {
-    this->AddSharedLibNoSOName(item);
-    return true;
+    // If we can guess the soname fairly reliably then assume the
+    // library has one.  Otherwise assume the library has no builtin
+    // soname.
+    std::string soname;
+    if(!cmSystemTools::GuessLibrarySOName(item, soname))
+      {
+      this->AddSharedLibNoSOName(item);
+      return true;
+      }
     }
   return false;
 }
