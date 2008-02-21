@@ -12,6 +12,10 @@ IF(EXISTS /usr/include/dlfcn.h)
   SET(CMAKE_EXE_EXPORTS_CXX_FLAG "-Wl,--export-dynamic")
 ENDIF(EXISTS /usr/include/dlfcn.h)
 
+# Shared libraries with no builtin soname may not be linked safely by
+# specifying the file path.
+SET(CMAKE_PLATFORM_USES_PATH_WHEN_NO_SONAME 1)
+
 # Initialize C link type selection flags.  These flags are used when
 # building a shared library, shared module, or executable that links
 # to other libraries to select whether to use the static or shared

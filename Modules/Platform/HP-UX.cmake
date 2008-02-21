@@ -8,6 +8,10 @@ SET(CMAKE_FIND_LIBRARY_SUFFIXES ".sl" ".so" ".a")
 SET(CMAKE_SHARED_LIBRARY_LINK_C_WITH_RUNTIME_PATH 1)
 SET(CMAKE_LINK_DEPENDENT_LIBRARY_DIRS 1)
 
+# Shared libraries with no builtin soname may not be linked safely by
+# specifying the file path.
+SET(CMAKE_PLATFORM_USES_PATH_WHEN_NO_SONAME 1)
+
 # fortran
 IF(CMAKE_COMPILER_IS_GNUG77)
   SET(CMAKE_SHARED_LIBRARY_Fortran_FLAGS "-fPIC")            # -pic 

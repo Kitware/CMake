@@ -17,7 +17,7 @@
 #include "cmComputeLinkInformation.h"
 
 #include "cmComputeLinkDepends.h"
-#include "cmOrderRuntimeDirectories.h"
+#include "cmOrderDirectories.h"
 
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -212,6 +212,30 @@ libraries that are also linked need to be listed in -L paths.
 In our implementation we add all dependent libraries to the runtime
 path computation.  Then the auto-generated RPATH will find everything.
 
+------------------------------------------------------------------------------
+Notes about shared libraries with not builtin soname:
+
+Some UNIX shared libraries may be created with no builtin soname.  On
+some platforms such libraries cannot be linked using the path to their
+location because the linker will copy the path into the field used to
+find the library at runtime.
+
+  Apple:    ../libfoo.dylib  ==>  libfoo.dylib  # ok, uses install_name
+  SGI:      ../libfoo.so     ==>  libfoo.so     # ok
+  AIX:      ../libfoo.so     ==>  libfoo.so     # ok
+  Linux:    ../libfoo.so     ==>  ../libfoo.so  # bad
+  HP-UX:    ../libfoo.so     ==>  ../libfoo.so  # bad
+  Sun:      ../libfoo.so     ==>  ../libfoo.so  # bad
+  FreeBSD:  ../libfoo.so     ==>  ../libfoo.so  # bad
+
+In order to link these libraries we need to use the old-style split
+into -L.. and -lfoo options.  This should be fairly safe because most
+problems with -lfoo options were related to selecting shared libraries
+instead of static but in this case we want the shared lib.  Link
+directory ordering needs to be done to make sure these shared
+libraries are found first.  There should be very few restrictions
+because this need be done only for shared libraries without soname-s.
+
 */
 
 //----------------------------------------------------------------------------
@@ -229,9 +253,12 @@ cmComputeLinkInformation
   this->Config = config;
 
   // Allocate internals.
+  this->OrderLinkerSearchPath =
+    new cmOrderDirectories(this->GlobalGenerator, target->GetName(),
+                           "linker search path");
   this->OrderRuntimeSearchPath =
-    new cmOrderRuntimeDirectories(this->GlobalGenerator, target->GetName(),
-                                  "runtime path");
+    new cmOrderDirectories(this->GlobalGenerator, target->GetName(),
+                           "runtime search path");
   this->OrderDependentRPath = 0;
 
   // Get the language used for linking this target.
@@ -298,6 +325,18 @@ cmComputeLinkInformation
     this->RPathLinkFlag = this->Makefile->GetSafeDefinition(rlVar.c_str());
     }
 
+  // Check if we need to include the runtime search path at link time.
+  {
+  std::string var = "CMAKE_SHARED_LIBRARY_LINK_";
+  var += this->LinkLanguage;
+  var += "_WITH_RUNTIME_PATH";
+  this->LinkWithRuntimePath = this->Makefile->IsOn(var.c_str());
+  }
+
+  // Check the platform policy for missing soname case.
+  this->NoSONameUsesPath =
+    this->Makefile->IsOn("CMAKE_PLATFORM_USES_PATH_WHEN_NO_SONAME");
+
   // Get link type information.
   this->ComputeLinkTypeInfo();
 
@@ -315,23 +354,15 @@ cmComputeLinkInformation
     }
   else if(this->Makefile->IsOn("CMAKE_LINK_DEPENDENT_LIBRARY_DIRS"))
     {
-    this->SharedDependencyMode = SharedDepModeDir;
+    this->SharedDependencyMode = SharedDepModeLibDir;
     }
   else if(!this->RPathLinkFlag.empty())
     {
     this->SharedDependencyMode = SharedDepModeDir;
-    }
-  if(this->SharedDependencyMode == SharedDepModeDir)
-    {
     this->OrderDependentRPath =
-      new cmOrderRuntimeDirectories(this->GlobalGenerator, target->GetName(),
-                                    "dependent library path");
+      new cmOrderDirectories(this->GlobalGenerator, target->GetName(),
+                             "dependent library path");
     }
-
-  // Add the search path entries requested by the user to the runtime
-  // path computation.
-  this->OrderRuntimeSearchPath->AddDirectories(
-     this->Target->GetLinkDirectories());
 
   // Get the implicit link directories for this platform.
   if(const char* implicitLinks =
@@ -346,6 +377,21 @@ cmComputeLinkInformation
       {
       this->ImplicitLinkDirs.insert(*i);
       }
+    }
+
+  // Add the search path entries requested by the user to path ordering.
+  this->OrderLinkerSearchPath
+    ->AddUserDirectories(this->Target->GetLinkDirectories());
+  this->OrderRuntimeSearchPath
+    ->AddUserDirectories(this->Target->GetLinkDirectories());
+  this->OrderLinkerSearchPath
+    ->SetImplicitDirectories(this->ImplicitLinkDirs);
+  this->OrderRuntimeSearchPath
+    ->SetImplicitDirectories(this->ImplicitLinkDirs);
+  if(this->OrderDependentRPath)
+    {
+    this->OrderDependentRPath
+      ->SetImplicitDirectories(this->ImplicitLinkDirs);
     }
 
   // Initial state.
@@ -374,6 +420,7 @@ cmComputeLinkInformation
 //----------------------------------------------------------------------------
 cmComputeLinkInformation::~cmComputeLinkInformation()
 {
+  delete this->OrderLinkerSearchPath;
   delete this->OrderRuntimeSearchPath;
   delete this->OrderDependentRPath;
 }
@@ -388,7 +435,7 @@ cmComputeLinkInformation::GetItems()
 //----------------------------------------------------------------------------
 std::vector<std::string> const& cmComputeLinkInformation::GetDirectories()
 {
-  return this->Directories;
+  return this->OrderLinkerSearchPath->GetOrderedDirectories();
 }
 
 //----------------------------------------------------------------------------
@@ -396,7 +443,7 @@ std::string cmComputeLinkInformation::GetRPathLinkString()
 {
   // If there is no separate linker runtime search flag (-rpath-link)
   // there is no reason to compute a string.
-  if(!this->OrderDependentRPath || this->RPathLinkFlag.empty())
+  if(!this->OrderDependentRPath)
     {
     return "";
     }
@@ -405,7 +452,7 @@ std::string cmComputeLinkInformation::GetRPathLinkString()
   std::string rpath_link;
   const char* sep = "";
   std::vector<std::string> const& dirs =
-    this->OrderDependentRPath->GetRuntimePath();
+    this->OrderDependentRPath->GetOrderedDirectories();
   for(std::vector<std::string>::const_iterator di = dirs.begin();
       di != dirs.end(); ++di)
     {
@@ -487,8 +534,8 @@ bool cmComputeLinkInformation::Compute()
     this->SetCurrentLinkType(this->StartLinkType);
     }
 
-  // Compute the linker search path.
-  this->ComputeLinkerSearchDirectories();
+  // Finish setting up linker search directories.
+  this->FinishLinkerSearchDirectories();
 
   return true;
 }
@@ -637,19 +684,31 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     this->AddLibraryRuntimeInfo(lib);
     }
 
-  // Add the item to the separate dependent library search path if
-  // this platform wants one.
-  if(this->OrderDependentRPath)
+  // Check if we need to include the dependent shared library in other
+  // path ordering.
+  cmOrderDirectories* order = 0;
+  if(this->SharedDependencyMode == SharedDepModeLibDir &&
+     !this->LinkWithRuntimePath /* AddLibraryRuntimeInfo adds it */)
+    {
+    // Add the item to the linker search path.
+    order = this->OrderLinkerSearchPath;
+    }
+  else if(this->SharedDependencyMode == SharedDepModeDir)
+    {
+    // Add the item to the separate dependent library search path.
+    order = this->OrderDependentRPath;
+    }
+  if(order)
     {
     if(tgt)
       {
       std::string soName = tgt->GetSOName(this->Config);
       const char* soname = soName.empty()? 0 : soName.c_str();
-      this->OrderDependentRPath->AddLibrary(lib, soname);
+      order->AddRuntimeLibrary(lib, soname);
       }
     else
       {
-      this->OrderDependentRPath->AddLibrary(lib);
+      order->AddRuntimeLibrary(lib);
       }
     }
 }
@@ -747,7 +806,8 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
   // Create regex to remove any library extension.
   std::string reg("(.*)");
   reg += libext;
-  this->RemoveLibraryExtension.compile(reg.c_str());
+  this->OrderLinkerSearchPath->SetLinkExtensionInfo(this->LinkExtensions,
+                                                    reg);
 
   // Create a regex to match a library name.  Match index 1 will be
   // the prefix if it exists and empty otherwise.  Match index 2 will
@@ -913,16 +973,24 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
     this->SetCurrentLinkType(LinkShared);
     }
 
-  // If this platform wants a flag before the full path, add it.
-  if(!this->LibLinkFileFlag.empty())
-    {
-    this->Items.push_back(Item(this->LibLinkFileFlag, false));
-    }
-
   // Keep track of shared library targets linked.
   if(target->GetType() == cmTarget::SHARED_LIBRARY)
     {
     this->SharedLibrariesLinked.insert(target);
+    }
+
+  // Handle case of an imported shared library with no soname.
+  if(this->NoSONameUsesPath &&
+     target->IsImportedSharedLibWithoutSOName(this->Config))
+    {
+    this->AddSharedLibNoSOName(item);
+    return;
+    }
+
+  // If this platform wants a flag before the full path, add it.
+  if(!this->LibLinkFileFlag.empty())
+    {
+    this->Items.push_back(Item(this->LibLinkFileFlag, false));
     }
 
   // Now add the full path to the library.
@@ -934,6 +1002,12 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
 {
   // Check for the implicit link directory special case.
   if(this->CheckImplicitDirItem(item))
+    {
+    return;
+    }
+
+  // Check for case of shared library with no builtin soname.
+  if(this->NoSONameUsesPath && this->CheckSharedLibNoSOName(item))
     {
     return;
     }
@@ -959,11 +1033,11 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
       }
     }
 
-  // Record the directory in which the library appears because CMake
-  // 2.4 in below added these as -L paths.
+  // For compatibility with CMake 2.4 include the item's directory in
+  // the linker search path.
   if(this->OldLinkDirMode)
     {
-    this->OldLinkDirs.push_back(cmSystemTools::GetFilenamePath(item));
+    this->OldLinkDirItems.push_back(item);
     }
 
   // If this platform wants a flag before the full path, add it.
@@ -1184,55 +1258,47 @@ void cmComputeLinkInformation::AddFrameworkPath(std::string const& p)
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkInformation::ComputeLinkerSearchDirectories()
+bool cmComputeLinkInformation::CheckSharedLibNoSOName(std::string const& item)
 {
-  // Some search paths should never be emitted.
-  this->DirectoriesEmmitted = this->ImplicitLinkDirs;
-  this->DirectoriesEmmitted.insert("");
-
-  // Check if we need to include the runtime search path at link time.
-  std::string var = "CMAKE_SHARED_LIBRARY_LINK_";
-  var += this->LinkLanguage;
-  var += "_WITH_RUNTIME_PATH";
-  if(this->Makefile->IsOn(var.c_str()))
+  // This platform will use the path to a library as its soname if the
+  // library is given via path and was not built with an soname.  If
+  // this is a shared library that might be the case.  TODO: Check if
+  // the lib is a symlink to detect that it actually has an soname.
+  std::string file = cmSystemTools::GetFilenameName(item);
+  if(this->ExtractSharedLibraryName.find(file))
     {
-    // This platform requires the runtime library path for shared
-    // libraries to be specified at link time as -L paths.  It needs
-    // them so that transitive dependencies of the libraries linked
-    // may be found by the linker.
-    this->AddLinkerSearchDirectories(this->GetRuntimeSearchPath());
+    this->AddSharedLibNoSOName(item);
+    return true;
     }
-
-  // Get the search path entries requested by the user.
-  this->AddLinkerSearchDirectories(this->Target->GetLinkDirectories());
-
-  // Support broken projects if necessary.
-  if(this->HaveUserFlagItem && this->OldLinkDirMode)
-    {
-    this->AddLinkerSearchDirectories(this->OldLinkDirs);
-    }
-
-  // If there is no separate linker runtime search flag (-rpath-link)
-  // and we have a search path for dependent libraries add it to the
-  // link directories.
-  if(this->OrderDependentRPath && this->RPathLinkFlag.empty())
-    {
-    this->AddLinkerSearchDirectories
-      (this->OrderDependentRPath->GetRuntimePath());
-    }
+  return false;
 }
 
 //----------------------------------------------------------------------------
-void
-cmComputeLinkInformation
-::AddLinkerSearchDirectories(std::vector<std::string> const& dirs)
+void cmComputeLinkInformation::AddSharedLibNoSOName(std::string const& item)
 {
-  for(std::vector<std::string>::const_iterator i = dirs.begin();
-      i != dirs.end(); ++i)
+  // We have a full path to a shared library with no soname.  We need
+  // to ask the linker to locate the item because otherwise the path
+  // we give to it will be embedded in the target linked.  Then at
+  // runtime the dynamic linker will search for the library using the
+  // path instead of just the name.
+  std::string file = cmSystemTools::GetFilenameName(item);
+  this->AddUserItem(file);
+
+  // Make sure the link directory ordering will find the library.
+  this->OrderLinkerSearchPath->AddLinkLibrary(item);
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkInformation::FinishLinkerSearchDirectories()
+{
+  // Support broken projects if necessary.
+  if(this->HaveUserFlagItem && this->OldLinkDirMode)
     {
-    if(this->DirectoriesEmmitted.insert(*i).second)
+    for(std::vector<std::string>::const_iterator
+          i = this->OldLinkDirItems.begin();
+        i != this->OldLinkDirItems.end(); ++i)
       {
-      this->Directories.push_back(*i);
+      this->OrderLinkerSearchPath->AddLinkLibrary(*i);
       }
     }
 }
@@ -1241,7 +1307,7 @@ cmComputeLinkInformation
 std::vector<std::string> const&
 cmComputeLinkInformation::GetRuntimeSearchPath()
 {
-  return this->OrderRuntimeSearchPath->GetRuntimePath();
+  return this->OrderRuntimeSearchPath->GetOrderedDirectories();
 }
 
 //----------------------------------------------------------------------------
@@ -1261,7 +1327,11 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
   const char* soname = soName.empty()? 0 : soName.c_str();
 
   // Include this library in the runtime path ordering.
-  this->OrderRuntimeSearchPath->AddLibrary(fullPath, soname);
+  this->OrderRuntimeSearchPath->AddRuntimeLibrary(fullPath, soname);
+  if(this->LinkWithRuntimePath)
+    {
+    this->OrderLinkerSearchPath->AddRuntimeLibrary(fullPath, soname);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1289,7 +1359,11 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath)
     }
 
   // Include this library in the runtime path ordering.
-  this->OrderRuntimeSearchPath->AddLibrary(fullPath);
+  this->OrderRuntimeSearchPath->AddRuntimeLibrary(fullPath);
+  if(this->LinkWithRuntimePath)
+    {
+    this->OrderLinkerSearchPath->AddRuntimeLibrary(fullPath);
+    }
 }
 
 //----------------------------------------------------------------------------

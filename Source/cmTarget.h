@@ -281,6 +281,10 @@ public:
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const char* config);
 
+  /** Test for special case of a third-party shared library that has
+      no soname at all.  */
+  bool IsImportedSharedLibWithoutSOName(const char* config);
+
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
   std::string GetFullPath(const char* config=0, bool implib = false,
@@ -501,6 +505,7 @@ private:
   // Cache import information from properties for each configuration.
   struct ImportInfo
   {
+    bool NoSOName;
     std::string Location;
     std::string SOName;
     std::string ImportLibrary;

@@ -103,4 +103,6 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 # in the -L path.
 SET(CMAKE_LINK_DEPENDENT_LIBRARY_DIRS 1)
 
-
+# Shared libraries with no builtin soname may not be linked safely by
+# specifying the file path.
+SET(CMAKE_PLATFORM_USES_PATH_WHEN_NO_SONAME 1)

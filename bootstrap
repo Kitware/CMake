@@ -175,7 +175,7 @@ CMAKE_CXX_SOURCES="\
   cmListFileCache \
   cmComputeLinkDepends \
   cmComputeLinkInformation \
-  cmOrderRuntimeDirectories \
+  cmOrderDirectories \
   cmComputeTargetDepends \
   cmComputeComponentGraph \
   cmExprLexer \

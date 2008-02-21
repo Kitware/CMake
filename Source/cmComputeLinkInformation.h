@@ -26,7 +26,7 @@ class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
 class cmTarget;
-class cmOrderRuntimeDirectories;
+class cmOrderDirectories;
 
 /** \class cmComputeLinkInformation
  * \brief Compute link information for a target in one configuration.
@@ -89,9 +89,10 @@ private:
   // Modes for dealing with dependent shared libraries.
   enum SharedDepMode
   {
-    SharedDepModeNone, // Drop
-    SharedDepModeDir,  // Use in runtime information
-    SharedDepModeLink  // List file on link line
+    SharedDepModeNone,   // Drop
+    SharedDepModeDir,    // List dir in -rpath-link flag
+    SharedDepModeLibDir, // List dir in linker search path
+    SharedDepModeLink    // List file on link line
   };
 
   // System info.
@@ -104,6 +105,8 @@ private:
   std::string RuntimeSep;
   std::string RuntimeAlways;
   bool RuntimeUseChrpath;
+  bool NoSONameUsesPath;
+  bool LinkWithRuntimePath;
   std::string RPathLinkFlag;
   SharedDepMode SharedDependencyMode;
 
@@ -124,7 +127,6 @@ private:
   std::vector<std::string> SharedLinkExtensions;
   std::vector<std::string> LinkExtensions;
   std::set<cmStdString> LinkPrefixes;
-  cmsys::RegularExpression RemoveLibraryExtension;
   cmsys::RegularExpression ExtractStaticLibraryName;
   cmsys::RegularExpression ExtractSharedLibraryName;
   cmsys::RegularExpression ExtractAnyLibraryName;
@@ -133,7 +135,7 @@ private:
   std::string CreateExtensionRegex(std::vector<std::string> const& exts);
   std::string NoCaseExpression(const char* str);
 
-  // Handling of link items that are not targets or full file paths.
+  // Handling of link items.
   void AddTargetItem(std::string const& item, cmTarget* target);
   void AddFullItem(std::string const& item);
   bool CheckImplicitDirItem(std::string const& item);
@@ -141,6 +143,8 @@ private:
   void AddDirectoryItem(std::string const& item);
   void AddFrameworkItem(std::string const& item);
   void DropDirectoryItem(std::string const& item);
+  bool CheckSharedLibNoSOName(std::string const& item);
+  void AddSharedLibNoSOName(std::string const& item);
 
   // Framework info.
   void ComputeFrameworkInfo();
@@ -149,23 +153,22 @@ private:
   cmsys::RegularExpression SplitFramework;
 
   // Linker search path computation.
-  void ComputeLinkerSearchDirectories();
-  void AddLinkerSearchDirectories(std::vector<std::string> const& dirs);
-  std::set<cmStdString> DirectoriesEmmitted;
+  cmOrderDirectories* OrderLinkerSearchPath;
+  void FinishLinkerSearchDirectories();
   std::set<cmStdString> ImplicitLinkDirs;
 
   // Linker search path compatibility mode.
-  std::vector<std::string> OldLinkDirs;
+  std::vector<std::string> OldLinkDirItems;
   bool OldLinkDirMode;
   bool HaveUserFlagItem;
 
   // Runtime path computation.
-  cmOrderRuntimeDirectories* OrderRuntimeSearchPath;
+  cmOrderDirectories* OrderRuntimeSearchPath;
   void AddLibraryRuntimeInfo(std::string const& fullPath, cmTarget* target);
   void AddLibraryRuntimeInfo(std::string const& fullPath);
 
   // Dependent library path computation.
-  cmOrderRuntimeDirectories* OrderDependentRPath;
+  cmOrderDirectories* OrderDependentRPath;
 };
 
 #endif

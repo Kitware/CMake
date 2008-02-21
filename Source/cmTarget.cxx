@@ -2048,7 +2048,17 @@ std::string cmTarget::GetSOName(const char* config)
     // Lookup the imported soname.
     if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
       {
-      return info->SOName;
+      if(info->NoSOName)
+        {
+        // The imported library has no builtin soname so the name
+        // searched at runtime will be just the filename.
+        return cmSystemTools::GetFilenameName(info->Location);
+        }
+      else
+        {
+        // Use the soname given if any.
+        return info->SOName;
+        }
       }
     else
       {
@@ -2066,6 +2076,19 @@ std::string cmTarget::GetSOName(const char* config)
     this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
     return soName;
     }
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsImportedSharedLibWithoutSOName(const char* config)
+{
+  if(this->IsImported() && this->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
+      {
+      return info->NoSOName;
+      }
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -3054,6 +3077,9 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   // properties.  The "IMPORTED_" namespace is reserved for properties
   // defined by the project exporting the target.
 
+  // Initialize members.
+  info.NoSOName = false;
+
   // Track the configuration-specific property suffix.
   std::string suffix = "_";
   suffix += desired_config;
@@ -3161,6 +3187,21 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
     else if(const char* soname = this->GetProperty("IMPORTED_SONAME"))
       {
       info.SOName = soname;
+      }
+    }
+
+  // Get the "no-soname" mark.
+  if(this->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    std::string soProp = "IMPORTED_NO_SONAME";
+    soProp += suffix;
+    if(const char* config_no_soname = this->GetProperty(soProp.c_str()))
+      {
+      info.NoSOName = cmSystemTools::IsOn(config_no_soname);
+      }
+    else if(const char* no_soname = this->GetProperty("IMPORTED_NO_SONAME"))
+      {
+      info.NoSOName = cmSystemTools::IsOn(no_soname);
       }
     }
 
