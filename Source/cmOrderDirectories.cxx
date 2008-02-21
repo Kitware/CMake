@@ -177,7 +177,6 @@ bool cmOrderDirectoriesConstraintSOName::FindConflict(std::string const& dir)
     std::set<cmStdString>::const_iterator first = files.lower_bound(base);
     ++base[base.size()-1];
     std::set<cmStdString>::const_iterator last = files.upper_bound(base);
-    bool found = false;
     for(std::set<cmStdString>::const_iterator fi = first; fi != last; ++fi)
       {
       return true;
