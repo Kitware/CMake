@@ -1258,24 +1258,15 @@ public:
                                          std::string::size_type limit):
     Strings(strings), Makefile(mf), LocalGenerator(lg), LengthLimit(limit)
     {
-    this->NoQuotes = mf->IsOn("CMAKE_NO_QUOTED_OBJECTS");
     this->Space = "";
     }
   void Feed(std::string const& obj)
     {
     // Construct the name of the next object.
-    if(this->NoQuotes)
-      {
-      this->NextObject =
-        this->LocalGenerator->Convert(obj.c_str(),
-                                      cmLocalGenerator::START_OUTPUT,
-                                      cmLocalGenerator::SHELL);
-      }
-    else
-      {
-      this->NextObject =
-        this->LocalGenerator->ConvertToQuotedOutputPath(obj.c_str());
-      }
+    this->NextObject =
+      this->LocalGenerator->Convert(obj.c_str(),
+                                    cmLocalGenerator::START_OUTPUT,
+                                    cmLocalGenerator::SHELL);
 
     // Roll over to next string if the limit will be exceeded.
     if(this->LengthLimit != std::string::npos &&
@@ -1303,7 +1294,6 @@ private:
   cmMakefile* Makefile;
   cmLocalUnixMakefileGenerator3* LocalGenerator;
   std::string::size_type LengthLimit;
-  bool NoQuotes;
   std::string CurrentString;
   std::string NextObject;
   const char* Space;
