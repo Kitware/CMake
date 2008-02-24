@@ -135,16 +135,16 @@ cmExportFileGenerator
     }
 
   // Add the transitive link dependencies for this configuration.
-  if(cmTargetLinkInterface const* interface =
+  if(cmTargetLinkInterface const* iface =
      target->GetLinkInterface(config))
     {
     // This target provides a link interface, so use it.
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
-                                interface->Libraries, properties);
+                                iface->Libraries, properties);
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
-                                interface->SharedDeps, properties);
+                                iface->SharedDeps, properties);
     }
   else if(target->GetType() == cmTarget::STATIC_LIBRARY ||
           target->GetType() == cmTarget::SHARED_LIBRARY)

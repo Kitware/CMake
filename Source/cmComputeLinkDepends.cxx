@@ -308,14 +308,14 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
   if(entry.Target)
     {
     // Follow the target dependencies.
-    if(cmTargetLinkInterface const* interface =
+    if(cmTargetLinkInterface const* iface =
        entry.Target->GetLinkInterface(this->Config))
       {
       // This target provides its own link interface information.
-      this->AddLinkEntries(depender_index, interface->Libraries);
+      this->AddLinkEntries(depender_index, iface->Libraries);
 
       // Handle dependent shared libraries.
-      this->QueueSharedDependencies(depender_index, interface->SharedDeps);
+      this->QueueSharedDependencies(depender_index, iface->SharedDeps);
       }
     else if(!entry.Target->IsImported() &&
             entry.Target->GetType() != cmTarget::EXECUTABLE)
@@ -381,11 +381,11 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // Target items may have their own dependencies.
   if(entry.Target)
     {
-    if(cmTargetLinkInterface const* interface =
+    if(cmTargetLinkInterface const* iface =
        entry.Target->GetLinkInterface(this->Config))
       {
       // We use just the shared dependencies, not the interface.
-      this->QueueSharedDependencies(index, interface->SharedDeps);
+      this->QueueSharedDependencies(index, iface->SharedDeps);
       }
     }
 }

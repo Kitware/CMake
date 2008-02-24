@@ -3282,11 +3282,11 @@ cmTargetLinkInterface const* cmTarget::GetLinkInterface(const char* config)
   if(i == this->LinkInterface.end())
     {
     // Compute the link interface for this configuration.
-    cmTargetLinkInterface* interface = this->ComputeLinkInterface(config);
+    cmTargetLinkInterface* iface = this->ComputeLinkInterface(config);
 
     // Store the information for this configuration.
     std::map<cmStdString, cmTargetLinkInterface*>::value_type
-      entry(config?config:"", interface);
+      entry(config?config:"", iface);
     i = this->LinkInterface.insert(entry).first;
     }
 
@@ -3329,14 +3329,14 @@ cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
     }
 
   // Allocate the interface.
-  cmTargetLinkInterface* interface = new cmTargetLinkInterface;
-  if(!interface)
+  cmTargetLinkInterface* iface = new cmTargetLinkInterface;
+  if(!iface)
     {
     return 0;
     }
 
   // Expand the list of libraries in the interface.
-  cmSystemTools::ExpandListArgument(libs, interface->Libraries);
+  cmSystemTools::ExpandListArgument(libs, iface->Libraries);
 
   // Now we need to construct a list of shared library dependencies
   // not included in the interface.
@@ -3346,8 +3346,8 @@ cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
     // either list.
     std::set<cmStdString> emitted;
     for(std::vector<std::string>::const_iterator
-          li = interface->Libraries.begin();
-        li != interface->Libraries.end(); ++li)
+          li = iface->Libraries.begin();
+        li != iface->Libraries.end(); ++li)
       {
       emitted.insert(*li);
       }
@@ -3384,7 +3384,7 @@ cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
         {
         if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
           {
-          interface->SharedDeps.push_back(li->first);
+          iface->SharedDeps.push_back(li->first);
           }
         }
       else
@@ -3398,7 +3398,7 @@ cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
     }
 
   // Return the completed interface.
-  return interface;
+  return iface;
 }
 
 //----------------------------------------------------------------------------
