@@ -3,7 +3,14 @@
 #endif
 
 /* Provide main() so the program can link.  */
+#if defined(__18CXX)
+# define ID_VOID_MAIN
+#endif
+#ifdef ID_VOID_MAIN
+void main() {}
+#else
 int main() { return 0; }
+#endif
 
 #if defined(__INTEL_COMPILER) || defined(__ICC)
 # define COMPILER_ID "Intel"
