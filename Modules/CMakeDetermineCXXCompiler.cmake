@@ -132,8 +132,10 @@ IF(NOT CMAKE_CXX_COMPILER_ID_RUN)
 
   # Try to identify the compiler.
   SET(CMAKE_CXX_COMPILER_ID)
+  FILE(READ ${CMAKE_ROOT}/Modules/CMakePlatformId.h.in
+    CMAKE_CXX_COMPILER_ID_PLATFORM_CONTENT)
   INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
-  CMAKE_DETERMINE_COMPILER_ID(CXX CXXFLAGS ${CMAKE_ROOT}/Modules/CMakeCXXCompilerId.cpp)
+  CMAKE_DETERMINE_COMPILER_ID(CXX CXXFLAGS CMakeCXXCompilerId.cpp)
 
   # Set old compiler and platform id variables.
   IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")

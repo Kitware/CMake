@@ -2,9 +2,8 @@
 # error "A C++ compiler has been selected for C."
 #endif
 
-#ifdef __CLASSIC_C__
-# define const
-#endif
+/* Provide main() so the program can link.  */
+int main() { return 0; }
 
 #if defined(__INTEL_COMPILER) || defined(__ICC)
 # define COMPILER_ID "Intel"
@@ -37,7 +36,7 @@
 # define COMPILER_ID "MSVC"
 
 #elif defined(__ADSPBLACKFIN__) || defined(__ADSPTS__) || defined(__ADSP21000__)
-/* Analog Devices C++ compiler for Blackfin, TigerSHARC and 
+/* Analog Devices C++ compiler for Blackfin, TigerSHARC and
    SHARC (21000) DSPs */
 # define COMPILER_ID "ADSP"
 
@@ -47,7 +46,7 @@
 #elif defined(__IAR_SYSTEMS_ICC__)
 # define COMPILER_ID "IAR" */
 
-/* sdcc, the small devices C compiler for embedded systems, 
+/* sdcc, the small devices C compiler for embedded systems,
    http://sdcc.sourceforge.net  */
 #elif defined(SDCC)
 # define COMPILER_ID "SDCC"
@@ -69,13 +68,6 @@
 
 #endif
 
-static char const info_compiler[] = "INFO:compiler[" COMPILER_ID "]";
+char info_compiler[] = "INFO:compiler[" COMPILER_ID "]";
 
-/* Include the platform identification source.  */
-#include "CMakePlatformId.h"
-
-/* Make sure the information strings are referenced.  */
-int main()
-{
-  return (&info_compiler[0] != &info_platform[0]);
-}
+@CMAKE_C_COMPILER_ID_PLATFORM_CONTENT@

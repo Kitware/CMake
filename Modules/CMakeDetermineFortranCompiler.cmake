@@ -94,7 +94,7 @@ IF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   # Try to identify the compiler.
   SET(CMAKE_Fortran_COMPILER_ID)
   INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
-  CMAKE_DETERMINE_COMPILER_ID(Fortran FFLAGS ${CMAKE_ROOT}/Modules/CMakeFortranCompilerId.F90)
+  CMAKE_DETERMINE_COMPILER_ID(Fortran FFLAGS CMakeFortranCompilerId.F90)
 
   # Fall back to old is-GNU test.
   IF(NOT CMAKE_Fortran_COMPILER_ID)

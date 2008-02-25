@@ -4,16 +4,6 @@
 # If successful, sets CMAKE_<lang>_COMPILER_ID and CMAKE_<lang>_PLATFORM_ID
 
 FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
-  # Store the compiler identification source file.
-  SET(CMAKE_${lang}_COMPILER_ID_SRC "${src}")
-  IF(CMAKE_HOST_WIN32 AND NOT CMAKE_HOST_UNIX)
-    # This seems to escape spaces:
-    #FILE(TO_NATIVE_PATH "${CMAKE_${lang}_COMPILER_ID_SRC}"
-    #  CMAKE_${lang}_COMPILER_ID_SRC)
-    STRING(REGEX REPLACE "/" "\\\\" CMAKE_${lang}_COMPILER_ID_SRC
-      "${CMAKE_${lang}_COMPILER_ID_SRC}")
-  ENDIF(CMAKE_HOST_WIN32 AND NOT CMAKE_HOST_UNIX)
-
   # Make sure the compiler arguments are clean.
   STRING(STRIP "${CMAKE_${lang}_COMPILER_ARG1}" CMAKE_${lang}_COMPILER_ID_ARG1)
 
@@ -32,9 +22,9 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # of helper flags.  Stop when the compiler is identified.
   FOREACH(flags "" ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
     IF(NOT CMAKE_${lang}_COMPILER_ID)
-      CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${flags}")
+      CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${flags}" "${src}")
       FOREACH(file ${COMPILER_${lang}_PRODUCED_FILES})
-        CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${file}")
+        CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${CMAKE_${lang}_COMPILER_ID_DIR}/${file}" "${src}")
       ENDFOREACH(file)
     ENDIF(NOT CMAKE_${lang}_COMPILER_ID)
   ENDFOREACH(flags)
@@ -57,19 +47,28 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
 ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID)
 
 #-----------------------------------------------------------------------------
+# Function to write the compiler id source file.
+FUNCTION(CMAKE_DETERMINE_COMPILER_ID_WRITE lang src)
+  FILE(READ ${CMAKE_ROOT}/Modules/${src}.in ID_CONTENT_IN)
+  STRING(CONFIGURE "${ID_CONTENT_IN}" ID_CONTENT_OUT @ONLY)
+  FILE(WRITE ${CMAKE_${lang}_COMPILER_ID_DIR}/${src} "${ID_CONTENT_OUT}")
+ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_WRITE)
+
+#-----------------------------------------------------------------------------
 # Function to build the compiler id source file and look for output
 # files.
-FUNCTION(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags)
+FUNCTION(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags src)
   # Create a clean working directory.
   FILE(REMOVE_RECURSE ${CMAKE_${lang}_COMPILER_ID_DIR})
   FILE(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR})
+  CMAKE_DETERMINE_COMPILER_ID_WRITE("${lang}" "${src}")
 
   # Construct a description of this test case.
   SET(COMPILER_DESCRIPTION
-    "Compiler: ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_ARG1}\n"
-    "Build flags: ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}\n"
-    "Id flags: ${testflags}\n"
-    )
+    "Compiler: ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_ARG1}
+Build flags: ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
+Id flags: ${testflags}
+")
 
   # Compile the compiler identification source.
   IF(COMMAND EXECUTE_PROCESS)
@@ -78,7 +77,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags)
               ${CMAKE_${lang}_COMPILER_ID_ARG1}
               ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
               ${testflags}
-              ${CMAKE_${lang}_COMPILER_ID_SRC}
+              "${src}"
       WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
       OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
       ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
@@ -90,7 +89,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags)
       ARGS ${CMAKE_${lang}_COMPILER_ID_ARG1}
            ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
            ${testflags}
-           \"${CMAKE_${lang}_COMPILER_ID_SRC}\"
+           \"${src}\"
       OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
       RETURN_VALUE CMAKE_${lang}_COMPILER_ID_RESULT
       )
@@ -100,13 +99,13 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags)
   IF(CMAKE_${lang}_COMPILER_ID_RESULT)
     # Compilation failed.
     SET(MSG
-      "Compiling the ${lang} compiler identification source file \""
-      "${CMAKE_${lang}_COMPILER_ID_SRC}\" failed.\n"
-      ${COMPILER_DESCRIPTION}
-      "The output was:\n"
-      "${CMAKE_${lang}_COMPILER_ID_RESULT}\n"
-      "${CMAKE_${lang}_COMPILER_ID_OUTPUT}\n\n"
-      )
+      "Compiling the ${lang} compiler identification source file \"${src}\" failed.
+${COMPILER_DESCRIPTION}
+The output was:
+${CMAKE_${lang}_COMPILER_ID_RESULT}
+${CMAKE_${lang}_COMPILER_ID_OUTPUT}
+
+")
     FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log "${MSG}")
     #IF(NOT CMAKE_${lang}_COMPILER_ID_ALLOW_FAIL)
     #  MESSAGE(FATAL_ERROR "${MSG}")
@@ -117,35 +116,38 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags)
   ELSE(CMAKE_${lang}_COMPILER_ID_RESULT)
     # Compilation succeeded.
     FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-      "Compiling the ${lang} compiler identification source file \""
-      "${CMAKE_${lang}_COMPILER_ID_SRC}\" succeeded.\n"
-      ${COMPILER_DESCRIPTION}
-      "The output was:\n"
-      "${CMAKE_${lang}_COMPILER_ID_RESULT}\n"
-      "${CMAKE_${lang}_COMPILER_ID_OUTPUT}\n\n"
-      )
+      "Compiling the ${lang} compiler identification source file \"${src}\" succeeded.
+${COMPILER_DESCRIPTION}
+The output was:
+${CMAKE_${lang}_COMPILER_ID_RESULT}
+${CMAKE_${lang}_COMPILER_ID_OUTPUT}
+
+")
 
     # Find the executable produced by the compiler, try all files in the
     # binary dir.
-    FILE(GLOB COMPILER_${lang}_PRODUCED_FILES ${CMAKE_${lang}_COMPILER_ID_DIR}/*)
+    FILE(GLOB COMPILER_${lang}_PRODUCED_FILES
+      RELATIVE ${CMAKE_${lang}_COMPILER_ID_DIR}
+      ${CMAKE_${lang}_COMPILER_ID_DIR}/*)
+    LIST(REMOVE_ITEM COMPILER_${lang}_PRODUCED_FILES "${src}")
     FOREACH(file ${COMPILER_${lang}_PRODUCED_FILES})
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Compilation of the ${lang} compiler identification source \""
-        "${CMAKE_${lang}_COMPILER_ID_SRC}\" produced \"${file}\"\n\n")
+        "${src}\" produced \"${file}\"\n\n")
     ENDFOREACH(file)
 
     IF(NOT COMPILER_${lang}_PRODUCED_FILES)
       # No executable was found.
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Compilation of the ${lang} compiler identification source \""
-        "${CMAKE_${lang}_COMPILER_ID_SRC}\" did not produce an executable in \""
+        "${src}\" did not produce an executable in \""
         "${CMAKE_${lang}_COMPILER_ID_DIR}\".\n\n")
     ENDIF(NOT COMPILER_${lang}_PRODUCED_FILES)
   ENDIF(CMAKE_${lang}_COMPILER_ID_RESULT)
 
   # Return the files produced by the compilation.
   SET(COMPILER_${lang}_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
-ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags)
+ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags src)
 
 #-----------------------------------------------------------------------------
 # Function to extract the compiler id from an executable.

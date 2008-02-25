@@ -76,4 +76,4 @@
 
 #endif
 
-static char const info_platform[] = "INFO:platform[" PLATFORM_ID "]";
+char info_platform[] = "INFO:platform[" PLATFORM_ID "]";
