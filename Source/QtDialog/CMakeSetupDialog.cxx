@@ -261,7 +261,6 @@ void CMakeSetupDialog::doConfigure()
     
   this->enterState(Configuring);
 
-  this->Output->clear();
   this->CacheValues->selectionModel()->clear();
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "setProperties", Qt::QueuedConnection, 
@@ -437,6 +436,7 @@ void CMakeSetupDialog::setBinaryDirectory(const QString& dir)
 
 void CMakeSetupDialog::onSourceDirectoryChanged(const QString& dir)
 {
+  this->Output->clear();
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "setSourceDirectory", Qt::QueuedConnection, Q_ARG(QString, dir));
 }
@@ -765,7 +765,6 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
   else if(s == Generating)
     {
     this->CacheModified = false;
-    this->Output->clear();
     this->setEnabledState(false);
     this->ConfigureButton->setEnabled(false);
     this->GenerateAction->setEnabled(false);
