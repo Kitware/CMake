@@ -138,6 +138,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_DateStamp 1)
   SET(KWSYS_USE_String 1)
   SET(KWSYS_USE_SystemInformation 1)
+  SET(KWSYS_USE_CPU 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   
 # Setup the large file support default.
@@ -651,7 +652,9 @@ FOREACH(cpp ${cppclasses})
 ENDFOREACH(cpp)
 
 # Add selected C components.
-FOREACH(c Process Base64 FundamentalType MD5 Terminal System DateStamp String)
+FOREACH(c
+    Process Base64 FundamentalType MD5 Terminal System DateStamp String CPU
+    )
   IF(KWSYS_USE_${c})
     # Use the corresponding header file.
     SET(KWSYS_H_FILES ${KWSYS_H_FILES} ${c})
