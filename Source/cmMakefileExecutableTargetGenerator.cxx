@@ -328,6 +328,18 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       }
     }
 
+  // Select whether to use a response file for objects.
+  bool useResponseFile = false;
+  {
+  std::string responseVar = "CMAKE_";
+  responseVar += linkLanguage;
+  responseVar += "_USE_RESPONSE_FILE_FOR_OBJECTS";
+  if(this->Makefile->IsOn(responseVar.c_str()))
+    {
+    useResponseFile = true;
+    }
+  }
+
   // Expand the rule variables.
   {
   // Set path conversion for link script shells.
@@ -343,7 +355,18 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string variableNameExternal;
   this->WriteObjectsVariable(variableName, variableNameExternal);
   std::string buildObjs;
-  if(useLinkScript)
+  if(useResponseFile)
+    {
+    std::string objects;
+    this->WriteObjectsString(objects);
+    std::string objects_rsp =
+      this->CreateResponseFile("objects.rsp", objects, depends);
+    buildObjs = "@";
+    buildObjs += this->Convert(objects_rsp.c_str(),
+                               cmLocalGenerator::NONE,
+                               cmLocalGenerator::SHELL);
+    }
+  else if(useLinkScript)
     {
     this->WriteObjectsString(buildObjs);
     }

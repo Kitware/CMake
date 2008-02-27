@@ -1584,6 +1584,30 @@ cmMakefileTargetGenerator
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmMakefileTargetGenerator
+::CreateResponseFile(const char* name, std::string const& options,
+                     std::vector<std::string>& makefile_depends)
+{
+  // Create the response file.
+  std::string responseFileNameFull = this->TargetBuildDirectoryFull;
+  responseFileNameFull += "/";
+  responseFileNameFull += name;
+  cmGeneratedFileStream responseStream(responseFileNameFull.c_str());
+  responseStream << options << "\n";
+
+  // Add a dependency so the target will rebuild when the set of
+  // objects changes.
+  makefile_depends.push_back(responseFileNameFull);
+
+  // Construct the name to be used on the command line.
+  std::string responseFileName = this->TargetBuildDirectory;
+  responseFileName += "/";
+  responseFileName += name;
+  return responseFileName;
+}
+
+//----------------------------------------------------------------------------
 const char* cmMakefileTargetGenerator::GetFortranModuleDirectory()
 {
   // Compute the module directory.

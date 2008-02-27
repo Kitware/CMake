@@ -567,6 +567,18 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Determine whether a link script will be used.
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
 
+  // Select whether to use a response file for objects.
+  bool useResponseFile = false;
+  {
+  std::string responseVar = "CMAKE_";
+  responseVar += linkLanguage;
+  responseVar += "_USE_RESPONSE_FILE_FOR_OBJECTS";
+  if(this->Makefile->IsOn(responseVar.c_str()))
+    {
+    useResponseFile = true;
+    }
+  }
+
   // For static libraries there might be archiving rules.
   std::vector<std::string> archiveCreateCommands;
   std::vector<std::string> archiveAppendCommands;
@@ -605,6 +617,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     // Archiving rules are always run with a link script.
     useLinkScript = true;
 
+    // Archiving rules never use a response file.
+    useResponseFile = false;
+
     // Limit the length of individual object lists to less than the
     // 32K command line length limit on Windows.  We could make this a
     // platform file variable but this should work everywhere.
@@ -631,7 +646,18 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string variableNameExternal;
   this->WriteObjectsVariable(variableName, variableNameExternal);
   std::string buildObjs;
-  if(useLinkScript)
+  if(useResponseFile)
+    {
+    std::string objects;
+    this->WriteObjectsString(objects);
+    std::string objects_rsp =
+      this->CreateResponseFile("objects.rsp", objects, depends);
+    buildObjs = "@";
+    buildObjs += this->Convert(objects_rsp.c_str(),
+                               cmLocalGenerator::NONE,
+                               cmLocalGenerator::SHELL);
+    }
+  else if(useLinkScript)
     {
     if(!useArchiveRules)
       {
