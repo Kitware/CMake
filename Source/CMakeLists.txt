@@ -1,3 +1,11 @@
+# Check if we can build support for ELF parsing.
+CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
+IF(HAVE_ELF_H)
+  SET(CMAKE_USE_ELF_PARSER 1)
+ELSE(HAVE_ELF_H)
+  SET(CMAKE_USE_ELF_PARSER)
+ENDIF(HAVE_ELF_H)
+
 # configure the .h file
 CONFIGURE_FILE(
   "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"
@@ -75,6 +83,12 @@ IF(CMAKE_REGENERATE_YACCLEX)
   ENDIF(FLEX_EXECUTABLE)
 
 ENDIF(CMAKE_REGENERATE_YACCLEX)
+
+# Check if we can build the ELF parser.
+IF(CMAKE_USE_ELF_PARSER)
+  SET(ELF_SRCS cmELF.h cmELF.cxx)
+ENDIF(CMAKE_USE_ELF_PARSER)
+
 #
 # Sources for CMakeLib
 #
@@ -123,6 +137,7 @@ SET(SRCS
   cmDocumentVariables.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
+  ${ELF_SRCS}
   cmExprLexer.cxx
   cmExprParser.cxx
   cmExprParserHelper.cxx

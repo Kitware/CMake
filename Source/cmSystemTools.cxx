@@ -52,6 +52,10 @@
 #  include <cmsys/MD5.h>
 #endif
 
+#if defined(CMAKE_USE_ELF_PARSER)
+# include "cmELF.h"
+#endif
+
 #if defined(__sgi) && !defined(__GNUC__)
 # pragma set woff 1375 /* base class destructor not virtual */
 #endif
@@ -2155,6 +2159,16 @@ void cmSystemTools::MakefileColorEcho(int color, const char* message,
 bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
                                        std::string& soname)
 {
+  // For ELF shared libraries use a real parser to get the correct
+  // soname.
+#if defined(CMAKE_USE_ELF_PARSER)
+  cmELF elf(fullPath.c_str());
+  if(elf)
+    {
+    return elf.GetSOName(soname);
+    }
+#endif
+
   // If the file is not a symlink we have no guess for its soname.
   if(!cmSystemTools::FileIsSymlink(fullPath.c_str()))
     {
