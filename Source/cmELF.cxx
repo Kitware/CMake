@@ -24,6 +24,9 @@
 
 // Include the ELF format information system header.
 #include <elf.h>
+#if defined(__sun)
+# include <sys/link.h> // For dynamic section information
+#endif
 
 //----------------------------------------------------------------------------
 // Low-level byte swapping implementation.
