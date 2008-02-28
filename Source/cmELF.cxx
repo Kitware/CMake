@@ -85,7 +85,7 @@ public:
     }
 
   // Destruct and delete the file stream object.
-  ~cmELFInternal()
+  virtual ~cmELFInternal()
     {
     delete &this->Stream;
     }
@@ -187,6 +187,9 @@ public:
       }
     switch(this->ELFType)
       {
+      case cmELF::FileTypeInvalid:
+        os << " invalid file";
+        break;
       case cmELF::FileTypeRelocatableObject:
         os << " relocatable object";
         break;
