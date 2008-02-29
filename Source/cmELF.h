@@ -54,6 +54,16 @@ public:
     FileTypeCore
   };
 
+  /** Represent string table entries.  */
+  struct StringEntry
+  {
+    // The string value itself.
+    std::string Value;
+
+    // The position in the file at which the string appears.
+    unsigned long Position;
+  };
+
   /** Get the type of the file opened.  */
   FileType GetFileType() const;
 
@@ -62,6 +72,13 @@ public:
 
   /** Get the SONAME field if any.  */
   bool GetSOName(std::string& soname);
+  StringEntry const* GetSOName();
+
+  /** Get the RPATH field if any.  */
+  StringEntry const* GetRPath();
+
+  /** Get the RUNPATH field if any.  */
+  StringEntry const* GetRunPath();
 
   /** Print human-readable information about the ELF file.  */
   void PrintInfo(std::ostream& os) const;

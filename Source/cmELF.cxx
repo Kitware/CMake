@@ -65,6 +65,7 @@ void cmELFByteSwap(T& x)
 class cmELFInternal
 {
 public:
+  typedef cmELF::StringEntry StringEntry;
   enum ByteOrderType { ByteOrderMSB, ByteOrderLSB };
 
   // Construct and take ownership of the file stream object.
@@ -95,8 +96,30 @@ public:
 
   // Forward to the per-class implementation.
   virtual unsigned int GetNumberOfSections() const = 0;
-  virtual bool GetSOName(std::string& soname) = 0;
+  virtual StringEntry const* GetDynamicSectionString(int tag) = 0;
   virtual void PrintInfo(std::ostream& os) const = 0;
+
+  // Lookup the SONAME in the DYNAMIC section.
+  StringEntry const* GetSOName()
+    {
+    return this->GetDynamicSectionString(DT_SONAME);
+    }
+
+  // Lookup the RPATH in the DYNAMIC section.
+  StringEntry const* GetRPath()
+    {
+    return this->GetDynamicSectionString(DT_RPATH);
+    }
+
+  // Lookup the RUNPATH in the DYNAMIC section.
+  StringEntry const* GetRunPath()
+    {
+#if defined(DT_RUNPATH)
+    return this->GetDynamicSectionString(DT_RUNPATH);
+#else
+    return 0;
+#endif
+    }
 
   // Return the recorded ELF type.
   cmELF::FileType GetFileType() const { return this->ELFType; }
@@ -127,6 +150,9 @@ protected:
     this->External->ErrorMessage = msg;
     this->ELFType = cmELF::FileTypeInvalid;
     }
+
+  // Store string table entry states.
+  std::map<int, StringEntry> DynamicSectionStrings;
 };
 
 //----------------------------------------------------------------------------
@@ -173,8 +199,8 @@ public:
     return static_cast<unsigned int>(this->ELFHeader.e_shnum);
     }
 
-  // Lookup the SONAME in the DYNAMIC section.
-  virtual bool GetSOName(std::string& soname);
+  // Lookup a string from the dynamic section with the given tag.
+  virtual StringEntry const* GetDynamicSectionString(int tag);
 
   // Print information about the ELF file.
   virtual void PrintInfo(std::ostream& os) const
@@ -270,6 +296,33 @@ private:
       case DT_DEBUG:    cmELFByteSwap(dyn.d_un.d_ptr); break;
       case DT_TEXTREL:  /* dyn.d_un ignored */         break;
       case DT_JMPREL:   cmELFByteSwap(dyn.d_un.d_ptr); break;
+#ifdef T_BIND_NOW
+      case T_BIND_NOW:         /* dyn.d_un ignored */         break;
+#endif
+#ifdef DT_INIT_ARRAY
+      case DT_INIT_ARRAY:      cmELFByteSwap(dyn.d_un.d_ptr); break;
+#endif
+#ifdef DT_FINI_ARRAY
+      case DT_FINI_ARRAY:      cmELFByteSwap(dyn.d_un.d_ptr); break;
+#endif
+#ifdef DT_INIT_ARRAYSZ
+      case DT_INIT_ARRAYSZ:    cmELFByteSwap(dyn.d_un.d_val); break;
+#endif
+#ifdef DT_FINI_ARRAYSZ
+      case DT_FINI_ARRAYSZ:    cmELFByteSwap(dyn.d_un.d_val); break;
+#endif
+#ifdef DT_RUNPATH
+      case DT_RUNPATH:         cmELFByteSwap(dyn.d_un.d_val); break;
+#endif
+#ifdef DT_FLAGS
+      case DT_FLAGS:           cmELFByteSwap(dyn.d_un.d_val); break;
+#endif
+#ifdef DT_PREINIT_ARRAY
+      case DT_PREINIT_ARRAY:   cmELFByteSwap(dyn.d_un.d_ptr); break;
+#endif
+#ifdef DT_PREINIT_ARRAYSZ
+      case DT_PREINIT_ARRAYSZ: cmELFByteSwap(dyn.d_un.d_val); break;
+#endif
       }
     }
 
@@ -329,10 +382,6 @@ private:
 
   // Store all entries of the DYNAMIC section.
   std::vector<ELF_Dyn> DynamicSectionEntries;
-
-  // Store the SOName if it has been loaded.
-  std::string SOName;
-  bool SONameChecked;
 };
 
 //----------------------------------------------------------------------------
@@ -343,9 +392,6 @@ cmELFInternalImpl<Types>
                     ByteOrderType order):
   cmELFInternal(external, fin, order)
 {
-  // Initialize state.
-  this->SONameChecked = false;
-
   // Read the main header.
   if(!this->Read(this->ELFHeader))
     {
@@ -424,20 +470,29 @@ bool cmELFInternalImpl<Types>::LoadDynamicSection()
 
 //----------------------------------------------------------------------------
 template <class Types>
-bool cmELFInternalImpl<Types>::GetSOName(std::string& soname)
+cmELF::StringEntry const*
+cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
 {
   // Short-circuit if already checked.
-  if(this->SONameChecked)
+  std::map<int, StringEntry>::iterator dssi =
+    this->DynamicSectionStrings.find(tag);
+  if(dssi != this->DynamicSectionStrings.end())
     {
-    soname = this->SOName;
-    return !soname.empty();
+    if(dssi->second.Position > 0)
+      {
+      return &dssi->second;
+      }
+    return 0;
     }
-  this->SONameChecked = true;
+
+  // Create an entry for this tag.  Assume it is missing until found.
+  StringEntry& se = this->DynamicSectionStrings[tag];
+  se.Position = 0;
 
   // Try reading the dynamic section.
   if(!this->LoadDynamicSection())
     {
-    return false;
+    return 0;
     }
 
   // Get the string table referenced by the DYNAMIC section.
@@ -445,35 +500,43 @@ bool cmELFInternalImpl<Types>::GetSOName(std::string& soname)
   if(sec.sh_link >= this->SectionHeaders.size())
     {
     this->SetErrorMessage("Section DYNAMIC has invalid string table index.");
-    return false;
+    return 0;
     }
   ELF_Shdr const& strtab = this->SectionHeaders[sec.sh_link];
 
-  // Look for the soname entry.
+  // Look for the requested entry.
   for(typename std::vector<ELF_Dyn>::iterator
         di = this->DynamicSectionEntries.begin();
       di != this->DynamicSectionEntries.end(); ++di)
     {
     ELF_Dyn& dyn = *di;
-    if(dyn.d_tag == DT_SONAME)
+    if(dyn.d_tag == tag)
       {
+      // Seek to the position reported by the entry.
       this->Stream.seekg(strtab.sh_offset + dyn.d_un.d_val);
+
+      // Read the string.
       char c;
       while(this->Stream.get(c) && c != 0)
         {
-        this->SOName += c;
+        se.Value += c;
         }
+
+      // Make sure the whole value was read.
       if(!this->Stream)
         {
-        this->SetErrorMessage("Dynamic section specifies unreadable SONAME.");
-        this->SOName = "";
-        return false;
+        this->SetErrorMessage("Dynamic section specifies unreadable RPATH.");
+        se.Value = "";
+        return 0;
         }
-      soname = this->SOName;
-      return true;
+
+      // The value has been read successfully.  Report it.
+      se.Position =
+        static_cast<unsigned long>(strtab.sh_offset + dyn.d_un.d_val);
+      return &se;
       }
     }
-  return false;
+  return 0;
 }
 
 //============================================================================
@@ -593,14 +656,58 @@ unsigned int cmELF::GetNumberOfSections() const
 //----------------------------------------------------------------------------
 bool cmELF::GetSOName(std::string& soname)
 {
-  if(this->Valid() &&
-     this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)
+  if(StringEntry const* se = this->GetSOName())
     {
-    return this->Internal->GetSOName(soname);
+    soname = se->Value;
+    return true;
     }
   else
     {
     return false;
+    }
+}
+
+//----------------------------------------------------------------------------
+cmELF::StringEntry const* cmELF::GetSOName()
+{
+  if(this->Valid() &&
+     this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)
+    {
+    return this->Internal->GetSOName();
+    }
+  else
+    {
+    return 0;
+    }
+}
+
+//----------------------------------------------------------------------------
+cmELF::StringEntry const* cmELF::GetRPath()
+{
+  if(this->Valid() &&
+     this->Internal->GetFileType() == cmELF::FileTypeExecutable ||
+     this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)
+    {
+    return this->Internal->GetRPath();
+    }
+  else
+    {
+    return 0;
+    }
+}
+
+//----------------------------------------------------------------------------
+cmELF::StringEntry const* cmELF::GetRunPath()
+{
+  if(this->Valid() &&
+     this->Internal->GetFileType() == cmELF::FileTypeExecutable ||
+     this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)
+    {
+    return this->Internal->GetRunPath();
+    }
+  else
+    {
+    return 0;
     }
 }
 
