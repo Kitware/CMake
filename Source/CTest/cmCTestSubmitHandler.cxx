@@ -68,11 +68,13 @@ cmCTestSubmitHandler::cmCTestSubmitHandler() : HTTPProxy(), FTPProxy()
 
   this->FTPProxy = "";
   this->FTPProxyType = 0;
+  this->CDash = false;
 }
 
 //----------------------------------------------------------------------------
 void cmCTestSubmitHandler::Initialize()
 {
+  this->CDash = false;
   this->Superclass::Initialize();
   this->HTTPProxy = "";
   this->HTTPProxyType = 0;
@@ -755,6 +757,13 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
 //----------------------------------------------------------------------------
 int cmCTestSubmitHandler::ProcessHandler()
 {
+  std::string iscdash = this->CTest->GetCTestConfiguration("IsCDash");
+  // cdash does not need to trigger so just return true
+  if(iscdash.size())
+    {
+    this->CDash = true;
+    }
+
   const std::string &buildDirectory
     = this->CTest->GetCTestConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
@@ -947,23 +956,26 @@ int cmCTestSubmitHandler::ProcessHandler()
       ofs << "   Problems when submitting via FTP" << std::endl;
       return -1;
       }
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using HTTP trigger method"
-      << std::endl
-      << "   Trigger site: "
-      << this->CTest->GetCTestConfiguration("TriggerSite")
-      << std::endl);
-    if ( !this->TriggerUsingHTTP(files, prefix,
-        this->CTest->GetCTestConfiguration("TriggerSite")) )
+    if(!this->CDash)
       {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-        "   Problems when triggering via HTTP" << std::endl);
-      ofs << "   Problems when triggering via HTTP" << std::endl;
-      return -1;
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using HTTP trigger method"
+                 << std::endl
+                 << "   Trigger site: "
+                 << this->CTest->GetCTestConfiguration("TriggerSite")
+                 << std::endl);
+      if ( !this->TriggerUsingHTTP(files, prefix,
+                                   this->CTest->GetCTestConfiguration("TriggerSite")) )
+        {
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "   Problems when triggering via HTTP" << std::endl);
+        ofs << "   Problems when triggering via HTTP" << std::endl;
+        return -1;
+        }
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Submission successful"
+                 << std::endl);
+      ofs << "   Submission successful" << std::endl;
+      return 0;
       }
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Submission successful"
-      << std::endl);
-    ofs << "   Submission successful" << std::endl;
-    return 0;
     }
   else if ( this->CTest->GetCTestConfiguration("DropMethod") == "http" )
     {
@@ -998,21 +1010,24 @@ int cmCTestSubmitHandler::ProcessHandler()
       ofs << "   Problems when submitting via HTTP" << std::endl;
       return -1;
       }
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using HTTP trigger method"
-      << std::endl
-      << "   Trigger site: "
-      << this->CTest->GetCTestConfiguration("TriggerSite")
-      << std::endl);
-    if ( !this->TriggerUsingHTTP(files, prefix,
-        this->CTest->GetCTestConfiguration("TriggerSite")) )
+    if(!this->CDash)
       {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-        "   Problems when triggering via HTTP" << std::endl);
-      ofs << "   Problems when triggering via HTTP" << std::endl;
-      return -1;
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using HTTP trigger method"
+                 << std::endl
+                 << "   Trigger site: "
+                 << this->CTest->GetCTestConfiguration("TriggerSite")
+                 << std::endl);
+      if ( !this->TriggerUsingHTTP(files, prefix,
+                                   this->CTest->GetCTestConfiguration("TriggerSite")) )
+        {
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "   Problems when triggering via HTTP" << std::endl);
+        ofs << "   Problems when triggering via HTTP" << std::endl;
+        return -1;
+        }
       }
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Submission successful"
-      << std::endl);
+               << std::endl);
     ofs << "   Submission successful" << std::endl;
     return 0;
     }

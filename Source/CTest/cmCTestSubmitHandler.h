@@ -77,6 +77,7 @@ private:
   cmStdString   FTPProxy;
   int           FTPProxyType;
   std::ostream* LogFile;
+  bool CDash;
 };
 
 #endif
