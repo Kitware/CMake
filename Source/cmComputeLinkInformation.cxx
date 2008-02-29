@@ -1074,7 +1074,8 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
 
   // Only apply the policy below if the library file is one that can
   // be found by the linker.
-  if(!this->ExtractAnyLibraryName.find(item))
+  std::string file = cmSystemTools::GetFilenameName(item);
+  if(!this->ExtractAnyLibraryName.find(file))
     {
     return false;
     }
@@ -1085,7 +1086,6 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   // directory then just report the file name without the directory
   // portion.  This will allow the system linker to locate the proper
   // library for the architecture at link time.
-  std::string file = cmSystemTools::GetFilenameName(item);
   this->AddUserItem(file);
   return true;
 }
