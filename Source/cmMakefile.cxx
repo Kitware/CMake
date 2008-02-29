@@ -3039,15 +3039,6 @@ void cmMakefile::DefineProperties(cmake *cm)
      "directory will not be removed during the \"make clean\" stage. ");
 
   cm->DefineProperty
-    ("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS", cmProperty::DIRECTORY,
-     "Allow loops to have non-matching closing statements.",
-     "If this is set then the closing statement of control "
-     "structures in CMake will not require an exact match to the "
-     "opening statement. For example  IF(foo) will not require "
-     "ENDIF(foo) but simple ENDIF() will work.",
-     true);
-
-  cm->DefineProperty
     ("LISTFILE_STACK", cmProperty::DIRECTORY,
      "The current stack of listfiles being processed.",
      "This property is mainly useful when trying to debug errors "

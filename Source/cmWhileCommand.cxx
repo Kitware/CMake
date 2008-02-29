@@ -93,9 +93,10 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
 {
   if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endwhile"))
     {
-    if (lff.Arguments == this->Args
-        || cmSystemTools::IsOn
-        (mf.GetPropertyOrDefinition("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS")))
+    // if the endwhile has arguments, then make sure
+    // they match the arguments of the matching while
+    if (lff.Arguments.size() == 0 ||
+        lff.Arguments == this->Args)
       {
       return true;
       }

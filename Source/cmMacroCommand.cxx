@@ -329,10 +329,10 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
     {
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.Arguments, expandedArguments);
-    if ((!expandedArguments.empty() && 
-        (expandedArguments[0] == this->Args[0]))
-        || cmSystemTools::IsOn
-        (mf.GetPropertyOrDefinition("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS")))
+    // if the endmacro has arguments make sure they
+    // match the arguments of the macro
+    if ((expandedArguments.empty() ||
+         (expandedArguments[0] == this->Args[0])))
       {
       return true;
       }

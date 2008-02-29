@@ -145,9 +145,10 @@ bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
 {
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
     {
-    if (cmSystemTools::IsOn
-        (mf.GetPropertyOrDefinition("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS"))
-        || lff.Arguments == this->Args)
+    // if the endif has arguments, then make sure
+    // they match the arguments of the matching if
+    if (lff.Arguments.size() == 0 ||
+        lff.Arguments == this->Args)
       {
       return true;
       }

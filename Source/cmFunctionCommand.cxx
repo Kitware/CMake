@@ -252,11 +252,11 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
   if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endfunction"))
     {
     std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments);
-    if ((!expandedArguments.empty() && 
-        (expandedArguments[0] == this->Args[0]))
-        || cmSystemTools::IsOn
-        (mf.GetPropertyOrDefinition("CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS")))
+    mf.ExpandArguments(lff.Arguments, expandedArguments); 
+    // if the endfunction has arguments then make sure
+    // they match the ones in the openeing function command
+    if ((expandedArguments.empty() ||
+         (expandedArguments[0] == this->Args[0])))
       {
       return true;
       }
