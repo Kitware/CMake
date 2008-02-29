@@ -55,6 +55,35 @@ IF(MSVC)
     ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
 
   ENDIF(MSVC80)
+  IF(MSVC90)
+    # Find the runtime library redistribution directory.
+    FIND_PATH(MSVC90_REDIST_DIR NAMES x86/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest
+      PATHS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]/../../VC/redist"
+      
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0;InstallDir]/../../VC/redist"
+      )
+    MARK_AS_ADVANCED(MSVC90_REDIST_DIR)
+    SET(MSVC90_CRT_DIR "${MSVC90_REDIST_DIR}/x86/Microsoft.VC90.CRT")
+    
+    # Install the manifest that allows DLLs to be loaded from the
+    # directory containing the executable.
+    SET(__install__libs
+      "${MSVC90_CRT_DIR}/Microsoft.VC90.CRT.manifest"
+      "${MSVC90_CRT_DIR}/msvcm90.dll"
+      "${MSVC90_CRT_DIR}/msvcp90.dll"
+      "${MSVC90_CRT_DIR}/msvcr90.dll"
+      ) 
+    IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
+      SET(MSVC90_CRT_DIR
+        "${MSVC90_REDIST_DIR}/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT")
+      SET(__install__libs ${__install__libs}
+        "${MSVC90_CRT_DIR}/Microsoft.VC90.DebugCRT.manifest"
+        "${MSVC90_CRT_DIR}/msvcm90d.dll"
+        "${MSVC90_CRT_DIR}/msvcp90d.dll"
+        "${MSVC90_CRT_DIR}/msvcr90d.dll"
+        )
+    ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES) 
+  ENDIF(MSVC90) 
   IF(CMAKE_INSTALL_MFC_LIBRARIES)
     IF(MSVC70)
       SET(__install__libs ${__install__libs}
