@@ -11,9 +11,9 @@ ENDIF(CMAKE_ANSI_CFLAGS)
 # Determine the build tool being used.  Not all characters can be
 # escaped for all build tools.  This test checks all characters known
 # to work with each tool and documents those known to not work.
-if("${CMAKE_GENERATOR}" MATCHES "XCode")
+if("${CMAKE_GENERATOR}" MATCHES "Xcode")
   set(PP_XCODE 1)
-endif("${CMAKE_GENERATOR}" MATCHES "XCode")
+endif("${CMAKE_GENERATOR}" MATCHES "Xcode")
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
   set(PP_VS6 1)
 endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
