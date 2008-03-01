@@ -48,6 +48,7 @@ bool cmAddCustomTargetCommand
         return false;
         break;
       case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
         this->SetError(
           this->Makefile->GetPolicies()->GetRequiredPolicyError
             (cmPolicies::CMP_0001).c_str());

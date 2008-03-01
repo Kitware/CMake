@@ -3149,6 +3149,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         case cmPolicies::OLD:
           return true;
         case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
           msg = this->GetPolicies()->
             GetRequiredPolicyError(cmPolicies::CMP_0002);
           return false;
@@ -3235,7 +3236,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
 cmPolicies::PolicyStatus cmMakefile
 ::GetPolicyStatus(cmPolicies::PolicyID id)
 {
-  cmPolicies::PolicyStatus status;
+  cmPolicies::PolicyStatus status = cmPolicies::REQUIRED_IF_USED;
   PolicyMap::iterator mappos;
   unsigned int vecpos;
   bool done = false;
