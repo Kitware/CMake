@@ -2281,6 +2281,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 #else
   (void)file;
   (void)newRPath;
+  (void)emsg;
   return false;
 #endif
 }
