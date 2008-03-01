@@ -8,6 +8,42 @@ IF(CMAKE_ANSI_CFLAGS)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
 ENDIF(CMAKE_ANSI_CFLAGS)
 
+# Determine the build tool being used.  Not all characters can be
+# escaped for all build tools.  This test checks all characters known
+# to work with each tool and documents those known to not work.
+if("${CMAKE_GENERATOR}" MATCHES "XCode")
+  set(PP_XCODE 1)
+endif("${CMAKE_GENERATOR}" MATCHES "XCode")
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+  set(PP_VS6 1)
+endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+if("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles")
+  set(PP_UMAKE 1)
+endif("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles")
+if("${CMAKE_GENERATOR}" MATCHES "NMake Makefiles")
+  set(PP_NMAKE 1)
+endif("${CMAKE_GENERATOR}" MATCHES "NMake Makefiles")
+if("${CMAKE_GENERATOR}" MATCHES "MinGW Makefiles")
+  set(PP_MINGW 1)
+endif("${CMAKE_GENERATOR}" MATCHES "MinGW Makefiles")
+if("${CMAKE_GENERATOR}" MATCHES "Borland Makefiles")
+  set(PP_BORLAND 1)
+endif("${CMAKE_GENERATOR}" MATCHES "Borland Makefiles")
+if("${CMAKE_GENERATOR}" MATCHES "Watcom WMake")
+  set(PP_WATCOM 1)
+endif("${CMAKE_GENERATOR}" MATCHES "Watcom WMake")
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
+  set(PP_VS70 1)
+endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+  set(PP_VS 1)
+endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+
+# Some tests below check the PP_* variables set above.  They are meant
+# to test the case that the build tool is at fault.  Other tests below
+# check the compiler that will be used when the compiler is at fault
+# (does not work even from a command shell).
+
 #-----------------------------------------------------------------------------
 # Construct a C-string literal to test passing through a definition on
 # the command line.  We configure the value into a header so it can be
@@ -17,11 +53,7 @@ ENDIF(CMAKE_ANSI_CFLAGS)
 # must not have it escaped inside the configured header.
 set(STRING_EXTRA "")
 
-if("${CMAKE_GENERATOR}" MATCHES "Make" AND MSVC)
-  set(NMAKE 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Make" AND MSVC)
-
-if(NOT BORLAND AND NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
+if(NOT BORLAND AND NOT PP_VS70)
   # Borland, VS70 IDE: ;
   # The Borland compiler will simply not accept a non-escaped semicolon
   # on the command line.  If it is escaped \; then the escape character
@@ -30,52 +62,68 @@ if(NOT BORLAND AND NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
   # The VS 7.0 IDE separates definitions on semicolons and commas with
   # no regard for quotes.  Fortunately VS 7.1 and above are okay.
   set(SEMICOLON "\;")
-endif(NOT BORLAND AND NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
+endif(NOT BORLAND AND NOT PP_VS70)
 
-if(NOT BORLAND AND NOT WATCOM)
+if(NOT PP_BORLAND AND NOT PP_WATCOM)
   # Borland, WMake: multiple spaces
   # The make tool seems to remove extra whitespace from inside
   # quoted strings when passing to the compiler.  It does not have
   # trouble passing to other tools, and the compiler may be directly
   # invoked from the command line.
   set(STRING_EXTRA "${STRING_EXTRA}  ")
-endif(NOT BORLAND AND NOT WATCOM)
+endif(NOT PP_BORLAND AND NOT PP_WATCOM)
 
-if(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+if(NOT PP_VS)
   # VS: ,
   # Visual Studio will not accept a comma in the value of a definition.
   # The comma-separated list of PreprocessorDefinitions in the project
   # file seems to be parsed before the content of entries is examined.
   set(STRING_EXTRA "${STRING_EXTRA},")
-endif(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+endif(NOT PP_VS)
 
-if(NOT MINGW)
+if(NOT PP_MINGW)
   # MinGW: &
   # When inside -D"FOO=\"a & b\"" MinGW make wants -D"FOO=\"a "&" b\""
   # but it does not like quoted ampersand elsewhere.
   set(STRING_EXTRA "${STRING_EXTRA}&")
-endif(NOT MINGW)
+endif(NOT PP_MINGW)
 
-if(NOT MINGW)
+if(NOT PP_MINGW)
   # MinGW: |
   # When inside -D"FOO=\"a | b\"" MinGW make wants -D"FOO=\"a "|" b\""
   # but it does not like quoted pipe elsewhere.
   set(STRING_EXTRA "${STRING_EXTRA}|")
-endif(NOT MINGW)
+endif(NOT PP_MINGW)
 
-if(NOT BORLAND AND NOT MINGW AND NOT NMAKE)
+if(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
   # Borland, NMake, MinGW: ^
-  # When inside -D"FOO=\"a ^ b\"" they make wants -D"FOO=\"a "^" b\""
+  # When inside -D"FOO=\"a ^ b\"" the make tools want -D"FOO=\"a "^" b\""
   # but do not like quoted carrot elsewhere.  In NMake the non-quoted
   # syntax works when the flags are not in a make variable.
   set(STRING_EXTRA "${STRING_EXTRA}^")
-endif(NOT BORLAND AND NOT MINGW AND NOT NMAKE)
+endif(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
 
-if(NOT BORLAND AND NOT MINGW AND NOT NMAKE)
+if(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
   # Borland, MinGW: < >
   # Angle-brackets have funny behavior that is hard to escape.
   set(STRING_EXTRA "${STRING_EXTRA}<>")
-endif(NOT BORLAND AND NOT MINGW AND NOT NMAKE)
+endif(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
+
+set(EXPR_OP1 "/")
+if(NOT MSVC OR PP_NMAKE)
+  # MSVC cl: %
+  # When the cl compiler is invoked from the command line then % must
+  # be written %% (to distinguish from %ENV% syntax).  However cl does
+  # not seem to accept the syntax when it is invoked from inside a
+  # make tool (nmake, mingw32-make, etc.).  Instead the argument must
+  # be placed inside a response file.  Then cl accepts it because it
+  # parses the response file as it would the normal windows command
+  # line.  Currently only NMake supports running cl with a response
+  # file.  Supporting other make tools would require CMake to generate
+  # response files explicitly for each object file.
+  set(STRING_EXTRA "${STRING_EXTRA}%")
+  set(EXPR_OP1 "%")
+endif(NOT MSVC OR PP_NMAKE)
 
 # General: \"
 # Make tools do not reliably accept \\\" syntax:
@@ -84,9 +132,9 @@ endif(NOT BORLAND AND NOT MINGW AND NOT NMAKE)
 #    or $(BACKSLASH)\" where BACKSLASH is a variable set to \\
 #  - VS IDE gets confused about the bounds of the definition value \\\"
 #  - NMake is okay with just \\\"
-if(NMAKE OR "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles")
+if(PP_NMAKE OR PP_UMAKE)
   set(STRING_EXTRA "${STRING_EXTRA}\\\"")
-endif(NMAKE OR "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles")
+endif(PP_NMAKE OR PP_UMAKE)
 
 # General: #
 # MSVC will not accept a # in the value of a string definition on the
@@ -103,7 +151,7 @@ endif(NMAKE OR "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles")
 # support it and it is not an operator it is not worthwhile.
 
 # Compose the final test string.
-set(STRING_VALUE "hello `~!@$%*)(_+-=}{][:'.?/ ${STRING_EXTRA}world")
+set(STRING_VALUE "hello `~!@$*)(_+-=}{][:'.?/ ${STRING_EXTRA}world")
 
 #-----------------------------------------------------------------------------
 # Function-style macro command-line support:
@@ -118,7 +166,7 @@ set(STRING_VALUE "hello `~!@$%*)(_+-=}{][:'.?/ ${STRING_EXTRA}world")
 #-----------------------------------------------------------------------------
 # Construct a sample expression to pass as a macro definition.
 
-set(EXPR "x*y+!(x==(y+1*2))*f(x%2)")
+set(EXPR "x*y+!(x==(y+1*2))*f(x${EXPR_OP1}2)")
 
 if(NOT WATCOM)
   # Watcom does not support - or / because it parses them as options.
@@ -133,13 +181,13 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DPREPROCESS_DEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPREPROCESS_DEBUG")
 
 # Inform the test if it built from Xcode or VS6 IDE.
-if(XCODE)
+if(PP_XCODE)
   set(PREPROCESS_XCODE 1)
-endif(XCODE)
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+endif(PP_XCODE)
+if(PP_VS6)
   set(PREPROCESS_VS6 1)
   set(VS6 _vs6)
-endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+endif(PP_VS6)
 
 # Test old-style definitions.
 add_definitions(-DOLD_DEF -DOLD_EXPR=2)
