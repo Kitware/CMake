@@ -3238,8 +3238,9 @@ cmPolicies::PolicyStatus cmMakefile
 {
   cmPolicies::PolicyStatus status = cmPolicies::REQUIRED_IF_USED;
   PolicyMap::iterator mappos;
-  unsigned int vecpos;
+  int vecpos;
   bool done = false;
+
   // check our policy stack first
   for (vecpos = this->PolicyStack.size(); vecpos >= 0 && !done; vecpos--)
   {
