@@ -488,6 +488,7 @@ cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
   // Create an entry for this tag.  Assume it is missing until found.
   StringEntry& se = this->DynamicSectionStrings[tag];
   se.Position = 0;
+  se.Size = 0;
 
   // Try reading the dynamic section.
   if(!this->LoadDynamicSection())
@@ -512,14 +513,39 @@ cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
     ELF_Dyn& dyn = *di;
     if(dyn.d_tag == tag)
       {
-      // Seek to the position reported by the entry.
-      this->Stream.seekg(strtab.sh_offset + dyn.d_un.d_val);
-
-      // Read the string.
-      char c;
-      while(this->Stream.get(c) && c != 0)
+      // We found the tag requested.
+      // Make sure the position given is within the string section.
+      if(dyn.d_un.d_val >= strtab.sh_size)
         {
-        se.Value += c;
+        this->SetErrorMessage("Section DYNAMIC references string beyond "
+                              "the end of its string section.");
+        return 0;
+        }
+
+      // Seek to the position reported by the entry.
+      unsigned long first = static_cast<unsigned long>(dyn.d_un.d_val);
+      unsigned long last = first;
+      unsigned long end = static_cast<unsigned long>(strtab.sh_size);
+      this->Stream.seekg(strtab.sh_offset + first);
+
+      // Read the string.  It may be followed by more than one NULL
+      // terminator.  Count the total size of the region allocated to
+      // the string.  This assumes that the next string in the table
+      // is non-empty, but the "chrpath" tool makes the same
+      // assumption.
+      bool terminated = false;
+      char c;
+      while(last != end && this->Stream.get(c) && !(terminated && c))
+        {
+        ++last;
+        if(c)
+          {
+          se.Value += c;
+          }
+        else
+          {
+          terminated = true;
+          }
         }
 
       // Make sure the whole value was read.
@@ -531,8 +557,8 @@ cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
         }
 
       // The value has been read successfully.  Report it.
-      se.Position =
-        static_cast<unsigned long>(strtab.sh_offset + dyn.d_un.d_val);
+      se.Position = static_cast<unsigned long>(strtab.sh_offset + first);
+      se.Size = last - first;
       return &se;
       }
     }

@@ -62,6 +62,10 @@ public:
 
     // The position in the file at which the string appears.
     unsigned long Position;
+
+    // The size of the string table entry.  This includes the space
+    // allocated for one or more null terminators.
+    unsigned long Size;
   };
 
   /** Get the type of the file opened.  */
