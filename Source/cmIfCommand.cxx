@@ -141,7 +141,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
 }
 
 bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
-                                       cmMakefile& mf)
+                                       cmMakefile&)
 {
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
     {

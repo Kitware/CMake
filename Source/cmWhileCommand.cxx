@@ -89,7 +89,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
 }
 
 bool cmWhileFunctionBlocker::
-ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
+ShouldRemove(const cmListFileFunction& lff, cmMakefile& )
 {
   if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endwhile"))
     {
