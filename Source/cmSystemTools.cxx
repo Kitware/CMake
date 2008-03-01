@@ -2211,6 +2211,12 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     rpathPosition = se->Position;
     rpathSize = se->Size;
     }
+  else if(newRPath.empty())
+    {
+    // The new rpath is empty and there is no rpath anyway so it is
+    // okay.
+    return true;
+    }
   else
     {
     if(emsg)
