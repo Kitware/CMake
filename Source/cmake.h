@@ -53,6 +53,7 @@ class cmVariableWatch;
 class cmFileTimeComparison;
 class cmExternalMakefileProjectGenerator;
 class cmDocumentationSection;
+class cmPolicies;
 
 class cmake
 {
@@ -238,6 +239,8 @@ class cmake
   ///! this is called by generators to update the progress
   void UpdateProgress(const char *msg, float prog);
 
+  ///!  get the cmake policies instance
+  cmPolicies *GetPolicies() {return this->Policies;} ;
 
   ///! Get the variable watch object
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
@@ -358,6 +361,7 @@ protected:
   void AddExtraGenerator(const char* name, 
                          CreateExtraGeneratorFunctionType newFunction);
 
+  cmPolicies *Policies;                       
   cmGlobalGenerator *GlobalGenerator;
   cmCacheManager *CacheManager;
   std::string cmHomeDirectory; 

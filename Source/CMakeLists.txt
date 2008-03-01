@@ -184,6 +184,8 @@ SET(SRCS
   cmMakefileUtilityTargetGenerator.cxx
   cmOrderDirectories.cxx
   cmOrderDirectories.h
+  cmPolicies.h
+  cmPolicies.cxx
   cmProperty.cxx
   cmProperty.h
   cmPropertyDefinition.cxx

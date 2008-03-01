@@ -134,9 +134,7 @@ ENDMACRO(CMAKE_TEST_FOR_MFC)
 # for testing. Simply to improve readability of the main script.
 #-----------------------------------------------------------------------
 MACRO(CMAKE_SETUP_TESTING)
-  IF (NOT DART_ROOT)
-    SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
-  ENDIF (NOT DART_ROOT)
+  SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
   
   IF(BUILD_TESTING)
     SET(CMAKE_TEST_GENERATOR "" CACHE STRING 
@@ -190,11 +188,6 @@ MACRO(CMAKE_SETUP_TESTING)
     ${CMake_BINARY_DIR}/CTestCustom.cmake @ONLY)
   CONFIGURE_FILE(${CMake_SOURCE_DIR}/CTestCustom.ctest.in
     ${CMake_BINARY_DIR}/CTestCustom.ctest @ONLY)
-  IF(BUILD_TESTING AND DART_ROOT)
-    CONFIGURE_FILE(${CMake_SOURCE_DIR}/CMakeLogo.gif 
-      ${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
-  ENDIF(BUILD_TESTING AND DART_ROOT)
-  MARK_AS_ADVANCED(DART_ROOT)
   MARK_AS_ADVANCED(CURL_TESTING)
 ENDMACRO(CMAKE_SETUP_TESTING)
 
@@ -365,7 +358,7 @@ SET(CMake_VERSION_FULL "${CMake_VERSION}.${CMake_VERSION_PATCH}")
 
 # Include the standard Dart testing module
 ENABLE_TESTING()
-INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
+INCLUDE (${CMAKE_ROOT}/Modules/CTest.cmake)
 
 # where to write the resulting executables and libraries
 SET(BUILD_SHARED_LIBS OFF)

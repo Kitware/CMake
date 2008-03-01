@@ -61,7 +61,7 @@ bool cmIncludeDirectoryCommand
       else
         {
         this->SetError(errorMessage);
-        return 0;
+        return false;
         }
       }
 

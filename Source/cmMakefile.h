@@ -21,6 +21,7 @@
 #include "cmData.h"
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
+#include "cmPolicies.h"
 #include "cmPropertyMap.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -322,7 +323,24 @@ public:
                       const char* regex=0);
 
 #endif
-  
+
+  //@{
+  /**
+     * Set, Push, Pop policy values for CMake.   
+     */
+  bool SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
+  bool SetPolicy(const char *id, cmPolicies::PolicyStatus status);
+  cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
+  bool PushPolicy();
+  bool PopPolicy();
+  bool SetPolicyVersion(const char *version);
+  //@}
+
+  /**
+    * Get the Policies Instance
+    */
+ cmPolicies *GetPolicies();
+   
   /**
    * Add an auxiliary directory to the build.
    */
@@ -861,6 +879,11 @@ private:
   cmTarget* FindBasicTarget(const char* name);
   std::vector<cmTarget*> ImportedTargetsOwned;
   std::map<cmStdString, cmTarget*> ImportedTargets;
+  
+  // stack of policy settings
+  typedef std::map<cmPolicies::PolicyID,
+                   cmPolicies::PolicyStatus> PolicyMap;
+  std::vector<PolicyMap> PolicyStack;
 };
 
 

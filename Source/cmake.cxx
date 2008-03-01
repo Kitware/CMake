@@ -143,6 +143,8 @@ cmake::cmake()
   this->ClearBuildSystem = false;
   this->FileComparison = new cmFileTimeComparison;
 
+  this->Policies = new cmPolicies();
+
   this->Properties.SetCMakeInstance(this);
 
   // initialize properties
@@ -181,7 +183,7 @@ cmake::cmake()
   this->ProgressCallback = 0;
   this->ProgressCallbackClientData = 0;
   this->ScriptMode = false;
-
+  
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->VariableWatch = new cmVariableWatch;
   this->VariableWatch->AddWatch("CMAKE_WORDS_BIGENDIAN",
@@ -203,6 +205,7 @@ cmake::cmake()
 cmake::~cmake()
 {
   delete this->CacheManager;
+  delete this->Policies;
   if (this->GlobalGenerator)
     {
     delete this->GlobalGenerator;

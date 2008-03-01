@@ -97,14 +97,6 @@ public:
     }
 
   /**
-   * This determines if the method is deprecated or not. 
-   */
-  virtual bool IsDeprecated(int /*major*/, int /*minor*/)
-    {
-    return false;
-    }
-
-  /**
    * This determines if usage of the method is discouraged or not.
    * This is currently only used for generating the documentation.
    */
