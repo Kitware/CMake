@@ -58,7 +58,6 @@ public:
   void GetRPath(std::vector<std::string>& runtimeDirs, bool for_install);
   std::string GetRPathString(bool for_install);
   std::string GetChrpathString();
-  std::string GetChrpathTool();
   std::set<cmTarget*> const& GetSharedLibrariesLinked();
 
   std::string const& GetRPathLinkFlag() const { return this->RPathLinkFlag; }

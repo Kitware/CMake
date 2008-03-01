@@ -74,16 +74,3 @@ IF(APPLE)
 
   MARK_AS_ADVANCED(CMAKE_INSTALL_NAME_TOOL)
 ENDIF(APPLE)
-
-# if we are on an ELF system, search for chrpath
-# according to the binutils mailing list chrpath has problems when cross compiling
-# i.e. if the target has different endianness than the host
-IF("${CMAKE_EXECUTABLE_FORMAT}" STREQUAL "ELF"  AND NOT  CMAKE_CROSSCOMPILING)
-  # on ELF platforms there might be chrpath, which works similar to install_name_tool
-  OPTION(CMAKE_USE_CHRPATH "Enable this to use chrpath if available" OFF)
-
-  FIND_PROGRAM(CMAKE_CHRPATH chrpath PATHS ${_CMAKE_TOOLCHAIN_LOCATION} NO_DEFAULT_PATH)
-  FIND_PROGRAM(CMAKE_CHRPATH chrpath)
-
-  MARK_AS_ADVANCED(CMAKE_CHRPATH CMAKE_USE_CHRPATH)
-ENDIF("${CMAKE_EXECUTABLE_FORMAT}" STREQUAL "ELF"  AND NOT  CMAKE_CROSSCOMPILING)

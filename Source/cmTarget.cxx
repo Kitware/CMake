@@ -3006,8 +3006,9 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
 //----------------------------------------------------------------------------
 bool cmTarget::IsChrpathUsed()
 {
-  // Enable use of "chrpath" if it is available, the user has turned
-  // on the feature, and the rpath flag uses a separator.
+#if defined(CMAKE_USE_ELF_PARSER)
+  // Enable if the rpath flag uses a separator and the target uses ELF
+  // binaries.
   if(const char* ll = this->GetLinkerLanguage(
        this->Makefile->GetLocalGenerator()->GetGlobalGenerator()))
     {
@@ -3017,13 +3018,16 @@ bool cmTarget::IsChrpathUsed()
     const char* sep = this->Makefile->GetDefinition(sepVar.c_str());
     if(sep && *sep)
       {
-      if(this->Makefile->IsSet("CMAKE_CHRPATH") &&
-         this->Makefile->IsOn("CMAKE_USE_CHRPATH"))
+      // TODO: Add ELF check to ABI detection and get rid of
+      // CMAKE_EXECUTABLE_FORMAT.
+      if(const char* fmt =
+         this->Makefile->GetDefinition("CMAKE_EXECUTABLE_FORMAT"))
         {
-        return true;
+        return strcmp(fmt, "ELF") == 0;
         }
       }
     }
+#endif
   return false;
 }
 

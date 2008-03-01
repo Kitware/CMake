@@ -2195,3 +2195,86 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
     }
   return false;
 }
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::ChangeRPath(std::string const& file,
+                                std::string const& newRPath,
+                                std::string* emsg)
+{
+#if defined(CMAKE_USE_ELF_PARSER)
+  unsigned long rpathPosition = 0;
+  unsigned long rpathSize = 0;
+  {
+  cmELF elf(file.c_str());
+  if(cmELF::StringEntry const* se = elf.GetRPath())
+    {
+    rpathPosition = se->Position;
+    rpathSize = se->Size;
+    }
+  else
+    {
+    if(emsg)
+      {
+      *emsg = "No valid ELF RPATH entry exists in the file.";
+      }
+    return false;
+    }
+  }
+  // Make sure there is enough room to store the new rpath and at
+  // least one null terminator.
+  if(rpathSize < newRPath.length()+1)
+    {
+    if(emsg)
+      {
+      *emsg = "The replacement RPATH is too long.";
+      }
+    return false;
+    }
+
+  // Open the file for update and seek to the RPATH position.
+  std::ofstream f(file.c_str(),
+                  std::ios::in | std::ios::out | std::ios::binary);
+  if(!f)
+    {
+    if(emsg)
+      {
+      *emsg = "Error opening file for update.";
+      }
+    return false;
+    }
+  if(!f.seekp(rpathPosition))
+    {
+    if(emsg)
+      {
+      *emsg = "Error seeking to RPATH position.";
+      }
+    return false;
+    }
+
+  // Write the new rpath.  Follow it with enough null terminators to
+  // fill the string table entry.
+  f << newRPath;
+  for(unsigned long i=newRPath.length(); i < rpathSize; ++i)
+    {
+    f << '\0';
+    }
+
+  // Make sure everything was okay.
+  if(f)
+    {
+    return true;
+    }
+  else
+    {
+    if(emsg)
+      {
+      *emsg = "Error writing the new rpath to the file.";
+      }
+    return false;
+    }
+#else
+  (void)file;
+  (void)newRPath;
+  return false;
+#endif
+}

@@ -381,6 +381,11 @@ public:
   static bool GuessLibrarySOName(std::string const& fullPath,
                                  std::string& soname);
 
+  /** Try to set the RPATH in an ELF binary.  */
+  static bool ChangeRPath(std::string const& file,
+                          std::string const& newRPath,
+                          std::string* emsg = 0);
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

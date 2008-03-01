@@ -112,6 +112,10 @@ bool cmFileCommand
     {
     return this->HandleInstallCommand(args);
     }
+  else if ( subCommand == "CHRPATH" )
+    {
+    return this->HandleChrpathCommand(args);
+    }
   else if ( subCommand == "RELATIVE_PATH" )
     {
     return this->HandleRelativePathCommand(args);
@@ -1324,6 +1328,34 @@ bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer,
     return false;
     }
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleChrpathCommand(std::vector<std::string> const& args)
+{
+  if(args.size() != 3)
+    {
+    this->SetError("CHRPATH must be given a file and a new rpath.");
+    return false;
+    }
+  if(!cmSystemTools::FileExists(args[1].c_str(), true))
+    {
+    this->SetError("CHRPATH given file that does not exist.");
+    return false;
+    }
+  std::string emsg;
+  if(cmSystemTools::ChangeRPath(args[1], args[2], &emsg))
+    {
+    return true;
+    }
+  else
+    {
+    cmOStringStream e;
+    e << "CHRPATH could not write new RPATH to the file: "
+      << emsg;
+    this->SetError(e.str().c_str());
+    return false;
+    }
 }
 
 //----------------------------------------------------------------------------

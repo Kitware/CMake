@@ -1476,9 +1476,3 @@ std::string cmComputeLinkInformation::GetChrpathString()
 
   return this->GetRPathString(true);
 }
-
-//----------------------------------------------------------------------------
-std::string cmComputeLinkInformation::GetChrpathTool()
-{
-  return this->Makefile->GetSafeDefinition("CMAKE_CHRPATH");
-}

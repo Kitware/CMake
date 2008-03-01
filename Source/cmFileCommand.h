@@ -171,6 +171,7 @@ protected:
   bool HandleRelativePathCommand(std::vector<std::string> const& args);
   bool HandleCMakePathCommand(std::vector<std::string> const& args,
                               bool nativePath);
+  bool HandleChrpathCommand(std::vector<std::string> const& args);
 
   // file(INSTALL ...) related functions
   bool HandleInstallCommand(std::vector<std::string> const& args);

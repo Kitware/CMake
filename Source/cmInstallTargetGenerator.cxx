@@ -576,12 +576,9 @@ cmInstallTargetGenerator
   // Get the install RPATH from the link information.
   std::string newRpath = cli->GetChrpathString();
 
-  // Fix the RPATH in installed ELF binaries using chrpath.
-  std::string chrpathTool = cli->GetChrpathTool();
-
   // Write a rule to run chrpath to set the install-tree RPATH
-  os << indent << "EXECUTE_PROCESS(COMMAND \"" << chrpathTool;
-  os << "\" -r \"" << newRpath << "\" \"" << toDestDirPath << "\")\n";
+  os << indent
+     << "FILE(CHRPATH \"" << toDestDirPath << "\" \"" << newRpath << "\")\n";
 }
 
 //----------------------------------------------------------------------------
