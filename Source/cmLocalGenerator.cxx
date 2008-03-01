@@ -938,6 +938,12 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       return replaceValues.LinkLibraries;
       }
     }
+  if(variable == "CMAKE_COMMAND")
+    {
+    const char* cmcommand =
+      this->GlobalGenerator->GetCMakeInstance()->GetCMakeCommand();
+    return this->Convert(cmcommand, FULL, SHELL);
+    }
   std::vector<std::string> enabledLanguages;
   this->GlobalGenerator->GetEnabledLanguages(enabledLanguages);
   // loop over language specific replace variables
