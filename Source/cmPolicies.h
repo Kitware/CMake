@@ -26,7 +26,8 @@ class cmPolicy;
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies
  *
- * See the cmake wiki section on policies for an overview of this class's purpose
+ * See the cmake wiki section on policies for an overview of this class's
+ * purpose
  */
 class cmPolicies
 {

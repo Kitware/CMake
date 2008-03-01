@@ -186,7 +186,8 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   }
  
   // now loop over all the policies and set them as appropriate
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i = this->Policies.begin();
+  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
+    = this->Policies.begin();
   for (;i != this->Policies.end(); ++i)
   {
     if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer))
@@ -211,8 +212,8 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
 bool cmPolicies::IsValidPolicyStatus(cmPolicies::PolicyID id, 
                                      cmPolicies::PolicyStatus status)
 {
-  // if they are setting a feature to anything other than OLD or WARN and the feature is not known about
-  // then that is an error
+  // if they are setting a feature to anything other than OLD or WARN and the
+  // feature is not known about then that is an error
   if (this->Policies.find(id) == this->Policies.end())
   {
     if (status == cmPolicies::WARN ||
@@ -230,8 +231,8 @@ bool cmPolicies::IsValidPolicyStatus(cmPolicies::PolicyID id,
     return false;  
   }
 
-  // now we know the feature is defined, so the only issue is if someone is setting it to 
-  // WARN or OLD when the feature is REQUIRED_ALWAYS
+  // now we know the feature is defined, so the only issue is if someone is
+  // setting it to WARN or OLD when the feature is REQUIRED_ALWAYS
   if ((status == cmPolicies::WARN || 
       status == cmPolicies::OLD) && 
       this->Policies[id]->Status == cmPolicies::REQUIRED_ALWAYS)
@@ -260,8 +261,8 @@ bool cmPolicies::IsValidPolicyStatus(cmPolicies::PolicyID id,
 bool cmPolicies::IsValidUsedPolicyStatus(cmPolicies::PolicyID id, 
                                          cmPolicies::PolicyStatus status)
 {
-  // if they are setting a feature to anything other than OLD or WARN and the feature is not known about
-  // then that is an error
+  // if they are setting a feature to anything other than OLD or WARN and the
+  // feature is not known about then that is an error
   if (this->Policies.find(id) == this->Policies.end())
   {
     if (status == cmPolicies::WARN ||
@@ -279,8 +280,8 @@ bool cmPolicies::IsValidUsedPolicyStatus(cmPolicies::PolicyID id,
     return false;  
   }
 
-  // now we know the feature is defined, so the only issue is if someone is setting it to 
-  // WARN or OLD when the feature is REQUIRED_ALWAYS
+  // now we know the feature is defined, so the only issue is if someone is
+  // setting it to WARN or OLD when the feature is REQUIRED_ALWAYS
   if ((status == cmPolicies::WARN || 
       status == cmPolicies::OLD) && 
       (this->Policies[id]->Status == cmPolicies::REQUIRED_ALWAYS ||
