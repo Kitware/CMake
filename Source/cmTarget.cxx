@@ -3007,6 +3007,18 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
 bool cmTarget::IsChrpathUsed()
 {
 #if defined(CMAKE_USE_ELF_PARSER)
+  // Skip chrpath if skipping rpath altogether.
+  if(this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
+    {
+    return false;
+    }
+
+  // Skip chrpath if it does not need to be changed at install time.
+  if(this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
+    {
+    return false;
+    }
+
   // Enable if the rpath flag uses a separator and the target uses ELF
   // binaries.
   if(const char* ll = this->GetLinkerLanguage(
