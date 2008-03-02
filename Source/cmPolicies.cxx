@@ -118,8 +118,8 @@ cmPolicies::~cmPolicies()
 {
   // free the policies
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
-    = this->Policies.begin();
-  for (;i != this->Policies.end(); ++i)
+    = this->PolicyMap.begin();
+  for (;i != this->PolicyMap.end(); ++i)
   {
     delete i->second;
   }
@@ -135,14 +135,14 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                               cmPolicies::PolicyStatus status)
 {
   // a policy must be unique and can only be defined once
-  if (this->Policies.find(iD) != this->Policies.end())
+  if (this->PolicyMap.find(iD) != this->PolicyMap.end())
   {
     cmSystemTools::Error("Attempt to redefine a CMake policy for policy "
       "ID ", this->GetPolicyIDString(iD).c_str());
     return;
   }
   
-  this->Policies[iD] = new cmPolicy(iD, idString,
+  this->PolicyMap[iD] = new cmPolicy(iD, idString,
                                     shortDescription,
                                     longDescription,
                                     majorVersionIntroduced,
@@ -187,8 +187,8 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
  
   // now loop over all the policies and set them as appropriate
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
-    = this->Policies.begin();
-  for (;i != this->Policies.end(); ++i)
+    = this->PolicyMap.begin();
+  for (;i != this->PolicyMap.end(); ++i)
   {
     if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer))
     {
@@ -214,7 +214,7 @@ bool cmPolicies::IsValidPolicyStatus(cmPolicies::PolicyID id,
 {
   // if they are setting a feature to anything other than OLD or WARN and the
   // feature is not known about then that is an error
-  if (this->Policies.find(id) == this->Policies.end())
+  if (this->PolicyMap.find(id) == this->PolicyMap.end())
   {
     if (status == cmPolicies::WARN ||
         status == cmPolicies::OLD)
@@ -235,7 +235,7 @@ bool cmPolicies::IsValidPolicyStatus(cmPolicies::PolicyID id,
   // setting it to WARN or OLD when the feature is REQUIRED_ALWAYS
   if ((status == cmPolicies::WARN || 
       status == cmPolicies::OLD) && 
-      this->Policies[id]->Status == cmPolicies::REQUIRED_ALWAYS)
+      this->PolicyMap[id]->Status == cmPolicies::REQUIRED_ALWAYS)
   {
     cmOStringStream error;
     error << 
@@ -244,7 +244,7 @@ bool cmPolicies::IsValidPolicyStatus(cmPolicies::PolicyID id,
       "question is feature " <<
       id <<
       " which had new behavior introduced in CMake version " <<
-      this->Policies[id]->GetVersionString() <<
+      this->PolicyMap[id]->GetVersionString() <<
       " please either update your CMakeLists files to conform to " <<
       "the new behavior " <<
       "or use an older version of CMake that still supports " <<
@@ -263,7 +263,7 @@ bool cmPolicies::IsValidUsedPolicyStatus(cmPolicies::PolicyID id,
 {
   // if they are setting a feature to anything other than OLD or WARN and the
   // feature is not known about then that is an error
-  if (this->Policies.find(id) == this->Policies.end())
+  if (this->PolicyMap.find(id) == this->PolicyMap.end())
   {
     if (status == cmPolicies::WARN ||
         status == cmPolicies::OLD)
@@ -284,8 +284,8 @@ bool cmPolicies::IsValidUsedPolicyStatus(cmPolicies::PolicyID id,
   // setting it to WARN or OLD when the feature is REQUIRED_ALWAYS
   if ((status == cmPolicies::WARN || 
       status == cmPolicies::OLD) && 
-      (this->Policies[id]->Status == cmPolicies::REQUIRED_ALWAYS ||
-       this->Policies[id]->Status == cmPolicies::REQUIRED_IF_USED))
+      (this->PolicyMap[id]->Status == cmPolicies::REQUIRED_ALWAYS ||
+       this->PolicyMap[id]->Status == cmPolicies::REQUIRED_IF_USED))
   {
     cmOStringStream error;
     error << 
@@ -294,7 +294,7 @@ bool cmPolicies::IsValidUsedPolicyStatus(cmPolicies::PolicyID id,
       "question is feature " <<
       id <<
       " which had new behavior introduced in CMake version " <<
-      this->Policies[id]->GetVersionString() <<
+      this->PolicyMap[id]->GetVersionString() <<
       " please either update your CMakeLists files to conform to " <<
       "the new behavior " <<
       "or use an older version of CMake that still supports " <<
@@ -326,8 +326,8 @@ bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
 std::string cmPolicies::GetPolicyIDString(cmPolicies::PolicyID pid)
 {
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos = 
-    this->Policies.find(pid);
-  if (pos == this->Policies.end())
+    this->PolicyMap.find(pid);
+  if (pos == this->PolicyMap.end())
   {
     return "";
   }
@@ -339,8 +339,8 @@ std::string cmPolicies::GetPolicyIDString(cmPolicies::PolicyID pid)
 std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 {
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos = 
-    this->Policies.find(id);
-  if (pos == this->Policies.end())
+    this->PolicyMap.find(id);
+  if (pos == this->PolicyMap.end())
   {
     cmSystemTools::Error(
       "Request for warning text for undefined policy!");
@@ -367,8 +367,8 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 {
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos = 
-    this->Policies.find(id);
-  if (pos == this->Policies.end())
+    this->PolicyMap.find(id);
+  if (pos == this->PolicyMap.end())
   {
     cmSystemTools::Error(
       "Request for error text for undefined policy!");
@@ -399,8 +399,8 @@ cmPolicies::GetPolicyStatus(cmPolicies::PolicyID id)
 {
   // if the policy is not know then what?
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos = 
-    this->Policies.find(id);
-  if (pos == this->Policies.end())
+    this->PolicyMap.find(id);
+  if (pos == this->PolicyMap.end())
   {
     // TODO is this right?
     return cmPolicies::WARN;

@@ -46,7 +46,6 @@ bool cmAddCustomTargetCommand
           "this is not allowed according to policy CMP_0001. Run "
           "cmake --help-policy CMP_0001 for more information.");
         return false;
-        break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         this->SetError(
