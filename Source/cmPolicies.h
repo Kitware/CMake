@@ -78,7 +78,7 @@ public:
   std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
 
   private:
-  std::map<cmPolicies::PolicyID,cmPolicy *> PolicyMap;
+  std::map<cmPolicies::PolicyID,cmPolicy *> Policies;
   std::map<std::string,cmPolicies::PolicyID> PolicyStringMap;
   
 };
