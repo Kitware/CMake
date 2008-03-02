@@ -572,6 +572,12 @@ cmInstallTargetGenerator
   // Get the install RPATH from the link information.
   std::string newRpath = cli->GetChrpathString();
 
+  // Skip the rule if the paths are identical
+  if(oldRpath == newRpath)
+    {
+    return;
+    }
+
   // Write a rule to run chrpath to set the install-tree RPATH
   os << indent << "FILE(CHRPATH FILE \"" << toDestDirPath << "\"\n"
      << indent << "     OLD_RPATH \"" << oldRpath << "\"\n"
