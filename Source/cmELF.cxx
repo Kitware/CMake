@@ -77,7 +77,9 @@ public:
     ByteOrder(order),
     ELFType(cmELF::FileTypeInvalid)
     {
-    // Decide whether we need to byte swap fields.
+    // In most cases the processor-specific byte order will match that
+    // of the target execution environment.  If we choose wrong here
+    // it is fixed when the header is read.
 #if cmsys_CPU_ENDIAN_ID == cmsys_CPU_ENDIAN_ID_LITTLE
     this->NeedSwap = (this->ByteOrder == ByteOrderMSB);
 #elif cmsys_CPU_ENDIAN_ID == cmsys_CPU_ENDIAN_ID_BIG
@@ -231,6 +233,12 @@ public:
       case cmELF::FileTypeCore:
         os << " core file";
         break;
+      case cmELF::FileTypeSpecificOS:
+        os << " os-specific type";
+        break;
+      case cmELF::FileTypeSpecificProc:
+        os << " processor-specific type";
+        break;
       }
     os << "\n";
     }
@@ -328,12 +336,46 @@ private:
 
   bool Read(ELF_Ehdr& x)
     {
-    if(this->Stream.read(reinterpret_cast<char*>(&x), sizeof(x)) &&
-       this->NeedSwap)
+    // Read the header from the file.
+    if(!this->Stream.read(reinterpret_cast<char*>(&x), sizeof(x)))
+      {
+      return false;
+      }
+
+    // The byte order of ELF header fields may not match that of the
+    // processor-specific data.  The header fields are ordered to
+    // match the target execution environment, so we may need to
+    // memorize the order of all platforms based on the e_machine
+    // value.  As a heuristic, if the type is invalid but its
+    // swapped value is okay then flip our swap mode.
+    ELF_Half et = x.e_type;
+    if(this->NeedSwap)
+      {
+      cmELFByteSwap(et);
+      }
+    unsigned int eti = static_cast<unsigned int>(et);
+    if(!(eti == ET_NONE || eti == ET_REL || eti == ET_EXEC ||
+         eti == ET_DYN || eti == ET_CORE ||
+         (eti >= ET_LOOS && eti <= ET_HIOS) ||
+         (eti >= ET_LOPROC && eti <= ET_HIPROC)))
+      {
+      cmELFByteSwap(et);
+      if(eti == ET_NONE || eti == ET_REL || eti == ET_EXEC ||
+         eti == ET_DYN || eti == ET_CORE ||
+         (eti >= ET_LOOS && eti <= ET_HIOS) ||
+         (eti >= ET_LOPROC && eti <= ET_HIPROC))
+        {
+        // The previous byte order guess was wrong.  Flip it.
+        this->NeedSwap = !this->NeedSwap;
+        }
+      }
+
+    // Fix the byte order of the header.
+    if(this->NeedSwap)
       {
       ByteSwap(x);
       }
-    return this->Stream? true:false;
+    return true;
     }
   bool Read(ELF_Shdr& x)
     {
@@ -395,26 +437,45 @@ cmELFInternalImpl<Types>
   // Read the main header.
   if(!this->Read(this->ELFHeader))
     {
+    this->SetErrorMessage("Failed to read main ELF header.");
     return;
     }
 
   // Determine the ELF file type.
   switch(this->ELFHeader.e_type)
     {
-    case 1:
+    case ET_NONE:
+      this->SetErrorMessage("No ELF file type.");
+      return;
+    case ET_REL:
       this->ELFType = cmELF::FileTypeRelocatableObject;
       break;
-    case 2:
+    case ET_EXEC:
       this->ELFType = cmELF::FileTypeExecutable;
       break;
-    case 3:
+    case ET_DYN:
       this->ELFType = cmELF::FileTypeSharedLibrary;
       break;
-    case 4:
+    case ET_CORE:
       this->ELFType = cmELF::FileTypeCore;
       break;
     default:
-      return;
+      unsigned int et = static_cast<unsigned int>(this->ELFHeader.e_type);
+      if(et >= ET_LOOS && et <= ET_HIOS)
+        {
+        this->ELFType = cmELF::FileTypeSpecificOS;
+        break;
+        }
+      else if(et >= ET_LOPROC && et <= ET_HIPROC)
+        {
+        this->ELFType = cmELF::FileTypeSpecificProc;
+        break;
+        }
+      else
+        {
+        this->SetErrorMessage("Unknown ELF file type.");
+        return;
+        }
     }
 
   // Load the section headers.
@@ -423,7 +484,7 @@ cmELFInternalImpl<Types>
     {
     if(!this->LoadSectionHeader(i))
       {
-      this->ELFType = cmELF::FileTypeInvalid;
+      this->SetErrorMessage("Failed to load section headers.");
       return;
       }
     }

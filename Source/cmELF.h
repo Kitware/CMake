@@ -51,7 +51,9 @@ public:
     FileTypeRelocatableObject,
     FileTypeExecutable,
     FileTypeSharedLibrary,
-    FileTypeCore
+    FileTypeCore,
+    FileTypeSpecificOS,
+    FileTypeSpecificProc
   };
 
   /** Represent string table entries.  */
