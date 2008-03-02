@@ -1591,17 +1591,6 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     // All rpath entries are combined ("-Wl,-rpath,a:b:c").
     std::string rpath = cli.GetRPathString(relink);
 
-    // If not relinking, make sure the rpath string is long enough to
-    // support a subsequent chrpath on installation.
-    if(!relink)
-      {
-      std::string::size_type minLength = cli.GetChrpathString().size();
-      while(rpath.size() < minLength)
-        {
-        rpath += cli.GetRuntimeSep();
-        }
-      }
-
     // Store the rpath option in the stream.
     if(!rpath.empty())
       {

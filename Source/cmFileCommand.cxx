@@ -1333,25 +1333,81 @@ bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer,
 //----------------------------------------------------------------------------
 bool cmFileCommand::HandleChrpathCommand(std::vector<std::string> const& args)
 {
-  if(args.size() != 3)
+  // Evaluate arguments.
+  const char* file = 0;
+  const char* oldRPath = 0;
+  const char* newRPath = 0;
+  enum Doing { DoingNone, DoingFile, DoingOld, DoingNew };
+  Doing doing = DoingNone;
+  for(unsigned int i=1; i < args.size(); ++i)
     {
-    this->SetError("CHRPATH must be given a file and a new rpath.");
+    if(args[i] == "OLD_RPATH")
+      {
+      doing = DoingOld;
+      }
+    else if(args[i] == "NEW_RPATH")
+      {
+      doing = DoingNew;
+      }
+    else if(args[i] == "FILE")
+      {
+      doing = DoingFile;
+      }
+    else if(doing == DoingFile)
+      {
+      file = args[i].c_str();
+      doing = DoingNone;
+      }
+    else if(doing == DoingOld)
+      {
+      oldRPath = args[i].c_str();
+      doing = DoingNone;
+      }
+    else if(doing == DoingNew)
+      {
+      newRPath = args[i].c_str();
+      doing = DoingNone;
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "CHRPATH given unknown argument " << args[i];
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+  if(!file)
+    {
+    this->SetError("CHRPATH not given FILE option.");
     return false;
     }
-  if(!cmSystemTools::FileExists(args[1].c_str(), true))
+  if(!oldRPath)
     {
-    this->SetError("CHRPATH given file that does not exist.");
+    this->SetError("CHRPATH not given OLD_RPATH option.");
+    return false;
+    }
+  if(!newRPath)
+    {
+    this->SetError("CHRPATH not given NEW_RPATH option.");
+    return false;
+    }
+  if(!cmSystemTools::FileExists(file, true))
+    {
+    cmOStringStream e;
+    e << "CHRPATH given FILE \"" << file << "\" that does not exist.";
+    this->SetError(e.str().c_str());
     return false;
     }
   std::string emsg;
-  if(cmSystemTools::ChangeRPath(args[1], args[2], &emsg))
+  if(cmSystemTools::ChangeRPath(file, oldRPath, newRPath, &emsg))
     {
     return true;
     }
   else
     {
     cmOStringStream e;
-    e << "CHRPATH could not write new RPATH to the file: "
+    e << "CHRPATH could not write new RPATH \""
+      << newRPath << "\" to the file \"" << file << "\": "
       << emsg;
     this->SetError(e.str().c_str());
     return false;

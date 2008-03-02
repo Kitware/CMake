@@ -2198,18 +2198,41 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 
 //----------------------------------------------------------------------------
 bool cmSystemTools::ChangeRPath(std::string const& file,
+                                std::string const& oldRPath,
                                 std::string const& newRPath,
                                 std::string* emsg)
 {
 #if defined(CMAKE_USE_ELF_PARSER)
   unsigned long rpathPosition = 0;
   unsigned long rpathSize = 0;
+  std::string rpathSuffix;
   {
   cmELF elf(file.c_str());
   if(cmELF::StringEntry const* se = elf.GetRPath())
     {
+    // Make sure the current rpath begins with the old rpath.
+    if(se->Value.length() < oldRPath.length() ||
+       se->Value.substr(0, oldRPath.length()) != oldRPath)
+      {
+      // If it begins with the new rpath instead then it is okay.
+      if(se->Value.length() >= newRPath.length() &&
+         se->Value.substr(0, newRPath.length()) == newRPath)
+        {
+        return true;
+        }
+      if(emsg)
+        {
+        *emsg = "The current RPATH does not begin with that specified.";
+        }
+      return false;
+      }
+
+    // Store information about the entry.
     rpathPosition = se->Position;
     rpathSize = se->Size;
+
+    // Store the part of the path we must preserve.
+    rpathSuffix = se->Value.substr(oldRPath.length(), oldRPath.npos);
     }
   else if(newRPath.empty())
     {
@@ -2221,14 +2244,19 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     {
     if(emsg)
       {
-      *emsg = "No valid ELF RPATH entry exists in the file.";
+      *emsg = "No valid ELF RPATH entry exists in the file; ";
+      *emsg += elf.GetErrorMessage();
       }
     return false;
     }
   }
+  // Compute the full new rpath.
+  std::string rpath = newRPath;
+  rpath += rpathSuffix;
+
   // Make sure there is enough room to store the new rpath and at
   // least one null terminator.
-  if(rpathSize < newRPath.length()+1)
+  if(rpathSize < rpath.length()+1)
     {
     if(emsg)
       {
@@ -2259,8 +2287,8 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 
   // Write the new rpath.  Follow it with enough null terminators to
   // fill the string table entry.
-  f << newRPath;
-  for(unsigned long i=newRPath.length(); i < rpathSize; ++i)
+  f << rpath;
+  for(unsigned long i=rpath.length(); i < rpathSize; ++i)
     {
     f << '\0';
     }
@@ -2280,6 +2308,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     }
 #else
   (void)file;
+  (void)oldRPath;
   (void)newRPath;
   (void)emsg;
   return false;

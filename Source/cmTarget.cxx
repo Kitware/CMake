@@ -3007,6 +3007,21 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
 bool cmTarget::IsChrpathUsed()
 {
 #if defined(CMAKE_USE_ELF_PARSER)
+  // Only certain target types have an rpath.
+  if(!(this->GetType() == cmTarget::SHARED_LIBRARY ||
+       this->GetType() == cmTarget::MODULE_LIBRARY ||
+       this->GetType() == cmTarget::EXECUTABLE))
+    {
+    return false;
+    }
+
+  // If the target will not be installed we do not need to change its
+  // rpath.
+  if(!this->GetHaveInstallRule())
+    {
+    return false;
+    }
+
   // Skip chrpath if skipping rpath altogether.
   if(this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
     {

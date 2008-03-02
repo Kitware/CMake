@@ -1463,6 +1463,18 @@ std::string cmComputeLinkInformation::GetRPathString(bool for_install)
     // Add this path.
     rpath += *ri;
     }
+
+  // If the rpath will be replaced at install time make sure it is
+  // long enough now.
+  if(!for_install && this->RuntimeUseChrpath)
+    {
+    std::string::size_type minLength = this->GetChrpathString().length();
+    while(rpath.length() < minLength)
+      {
+      rpath += this->GetRuntimeSep();
+      }
+    }
+
   return rpath;
 }
 
