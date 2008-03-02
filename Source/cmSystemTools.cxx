@@ -2208,7 +2208,12 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   std::string rpathSuffix;
   {
   cmELF elf(file.c_str());
-  if(cmELF::StringEntry const* se = elf.GetRPath())
+  cmELF::StringEntry const* se = elf.GetRPath();
+  if(!se)
+    {
+    se = elf.GetRunPath();
+    }
+  if(se)
     {
     // Make sure the current rpath begins with the old rpath.
     if(se->Value.length() < oldRPath.length() ||
