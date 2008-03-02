@@ -3242,7 +3242,8 @@ cmPolicies::PolicyStatus cmMakefile
   bool done = false;
 
   // check our policy stack first
-  for (vecpos = this->PolicyStack.size(); vecpos >= 0 && !done; vecpos--)
+  for (vecpos = static_cast<int>(this->PolicyStack.size()); 
+       vecpos >= 0 && !done; vecpos--)
   {
     mappos = this->PolicyStack[vecpos].find(id);
     if (mappos != this->PolicyStack[vecpos].end())
