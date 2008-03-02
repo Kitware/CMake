@@ -3034,6 +3034,12 @@ bool cmTarget::IsChrpathUsed()
     return false;
     }
 
+  // Allow the user to disable builtin chrpath explicitly.
+  if(this->Makefile->IsOn("CMAKE_NO_BUILTIN_CHRPATH"))
+    {
+    return false;
+    }
+
   // Enable if the rpath flag uses a separator and the target uses ELF
   // binaries.
   if(const char* ll = this->GetLinkerLanguage(
