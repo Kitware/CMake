@@ -78,8 +78,9 @@ public:
   std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
 
   private:
-  std::map<cmPolicies::PolicyID,cmPolicy *> Policies;
-  std::map<std::string,cmPolicies::PolicyID> PolicyStringMap;
+  // might have to make these internal for VS6 not sure yet
+  std::map<PolicyID,cmPolicy *> Policies;
+  std::map<std::string,PolicyID> PolicyStringMap;
   
 };
 
