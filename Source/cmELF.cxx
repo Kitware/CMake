@@ -360,6 +360,7 @@ private:
          (eti >= ET_LOPROC && eti <= ET_HIPROC)))
       {
       cmELFByteSwap(et);
+      eti = static_cast<unsigned int>(et);
       if(eti == ET_NONE || eti == ET_REL || eti == ET_EXEC ||
          eti == ET_DYN || eti == ET_CORE ||
          (eti >= ET_LOOS && eti <= ET_HIOS) ||
