@@ -20,6 +20,18 @@
 bool cmAddCustomTargetCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
+  // This enum must be before an enum is used in a switch statment. 
+  // If not there is an ICE on the itanium version of gcc we are running
+  // on dash8
+  
+  // Keep track of parser state.
+  enum tdoing {
+    doing_command,
+    doing_depends,
+    doing_working_directory,
+    doing_comment,
+    doing_verbatim
+  };
   if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
@@ -69,13 +81,6 @@ bool cmAddCustomTargetCommand
   const char* comment = 0;
 
   // Keep track of parser state.
-  enum tdoing {
-    doing_command,
-    doing_depends,
-    doing_working_directory,
-    doing_comment,
-    doing_verbatim
-  };
   tdoing doing = doing_command;
 
   // Look for the ALL option.
