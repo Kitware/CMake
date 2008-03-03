@@ -1,18 +1,18 @@
-# 
+#
 # This convenience include finds if wxWindows is installed
-# and set the appropriate libs, incdirs, flags etc. 
+# and set the appropriate libs, incdirs, flags etc.
 # author Jan Woetzel <jw -at- mip.informatik.uni-kiel.de> (07/2003)
 ##
 # -----------------------------------------------------
-# USAGE: 
-#   just include Use_wxWindows.cmake 
+# USAGE:
+#   just include Use_wxWindows.cmake
 #   in your projects CMakeLists.txt
 # INCLUDE( ${CMAKE_MODULE_PATH}/Use_wxWindows.cmake)
 ##
 #   if you are sure you need GL then
 # SET(WXWINDOWS_USE_GL 1)
 #   *before* you include this file.
-# 
+#
 # -----------------------------------------------------
 # 16.Feb.2004: changed INCLUDE to FIND_PACKAGE to read from users own non-system CMAKE_MODULE_PATH (Jan Woetzel JW)
 # 07/2006: rewrite as FindwxWidgets.cmake, kept for backward compatibilty JW
