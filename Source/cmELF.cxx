@@ -334,6 +334,29 @@ private:
       }
     }
 
+  bool FileTypeValid(ELF_Half et)
+    {
+    unsigned int eti = static_cast<unsigned int>(et);
+    if(eti == ET_NONE || eti == ET_REL || eti == ET_EXEC ||
+       eti == ET_DYN || eti == ET_CORE)
+      {
+      return true;
+      }
+#if defined(ET_LOOS) && defined(ET_HIOS)
+    if(eti >= ET_LOOS && eti <= ET_HIOS)
+      {
+      return true;
+      }
+#endif
+#if defined(ET_LOPROC) && defined(ET_HIPROC)
+    if(eti >= ET_LOPROC && eti <= ET_HIPROC)
+      {
+      return true;
+      }
+#endif
+    return false;
+    }
+
   bool Read(ELF_Ehdr& x)
     {
     // Read the header from the file.
@@ -353,18 +376,10 @@ private:
       {
       cmELFByteSwap(et);
       }
-    unsigned int eti = static_cast<unsigned int>(et);
-    if(!(eti == ET_NONE || eti == ET_REL || eti == ET_EXEC ||
-         eti == ET_DYN || eti == ET_CORE ||
-         (eti >= ET_LOOS && eti <= ET_HIOS) ||
-         (eti >= ET_LOPROC && eti <= ET_HIPROC)))
+    if(!this->FileTypeValid(et))
       {
       cmELFByteSwap(et);
-      eti = static_cast<unsigned int>(et);
-      if(eti == ET_NONE || eti == ET_REL || eti == ET_EXEC ||
-         eti == ET_DYN || eti == ET_CORE ||
-         (eti >= ET_LOOS && eti <= ET_HIOS) ||
-         (eti >= ET_LOPROC && eti <= ET_HIPROC))
+      if(this->FileTypeValid(et))
         {
         // The previous byte order guess was wrong.  Flip it.
         this->NeedSwap = !this->NeedSwap;
@@ -446,7 +461,7 @@ cmELFInternalImpl<Types>
   switch(this->ELFHeader.e_type)
     {
     case ET_NONE:
-      this->SetErrorMessage("No ELF file type.");
+      this->SetErrorMessage("ELF file type is NONE.");
       return;
     case ET_REL:
       this->ELFType = cmELF::FileTypeRelocatableObject;
@@ -461,22 +476,27 @@ cmELFInternalImpl<Types>
       this->ELFType = cmELF::FileTypeCore;
       break;
     default:
-      unsigned int et = static_cast<unsigned int>(this->ELFHeader.e_type);
-      if(et >= ET_LOOS && et <= ET_HIOS)
+      {
+      unsigned int eti = static_cast<unsigned int>(this->ELFHeader.e_type);
+#if defined(ET_LOOS) && defined(ET_HIOS)
+      if(eti >= ET_LOOS && eti <= ET_HIOS)
         {
         this->ELFType = cmELF::FileTypeSpecificOS;
         break;
         }
-      else if(et >= ET_LOPROC && et <= ET_HIPROC)
+#endif
+#if defined(ET_LOPROC) && defined(ET_HIPROC)
+      if(eti >= ET_LOPROC && eti <= ET_HIPROC)
         {
         this->ELFType = cmELF::FileTypeSpecificProc;
         break;
         }
-      else
-        {
-        this->SetErrorMessage("Unknown ELF file type.");
-        return;
-        }
+#endif
+      cmOStringStream e;
+      e << "Unknown ELF file type " << eti;
+      this->SetErrorMessage(e.str().c_str());
+      return;
+      }
     }
 
   // Load the section headers.
