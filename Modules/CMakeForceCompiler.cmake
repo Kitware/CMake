@@ -1,27 +1,47 @@
-MESSAGE(FATAL_ERROR
-  "Do not include the CMakeForceCompiler module.  "
-  "It is no longer necessary.  "
-  "Update your toolchain file as follows.
+# This module defines macros intended for use by cross-compiling
+# toolchain files when CMake is not able to automatically detect the
+# compiler identification.
+#
+# Macro CMAKE_FORCE_C_COMPILER has the following signature:
+#   CMAKE_FORCE_C_COMPILER(<compiler> <compiler-id>)
+# It sets CMAKE_C_COMPILER to the given compiler and the cmake
+# internal variable CMAKE_C_COMPILER_ID to the given compiler-id.
+# It also bypasses ???
+#
+# Macro CMAKE_FORCE_CXX_COMPILER has the following signature:
+#   CMAKE_FORCE_CXX_COMPILER(<compiler> <compiler-id>)
+# It sets CMAKE_CXX_COMPILER to the given compiler and the cmake
+# internal variable CMAKE_CXX_COMPILER_ID to the given compiler-id.
+# It also bypasses ???
+#
+# So a simple toolchain file could look like this:
+#   INCLUDE (CMakeForceCompiler)
+#   SET(CMAKE_SYSTEM_NAME Generic)
+#   CMAKE_FORCE_C_COMPILER   (chc12 MetrowerksHicross)
+#   CMAKE_FORCE_CXX_COMPILER (chc12 MetrowerksHicross)
 
-Use of the CMAKE_FORCE_SYSTEM macro:
+MACRO(CMAKE_FORCE_C_COMPILER compiler id)
+  SET(CMAKE_C_COMPILER "${compiler}")
+  SET(CMAKE_C_COMPILER_ID_RUN TRUE)
+  SET(CMAKE_C_COMPILER_ID ${id})
+  SET(CMAKE_C_COMPILER_WORKS TRUE)
+  SET(CMAKE_C_COMPILER_FORCED TRUE)
 
-  CMAKE_FORCE_SYSTEM(\"<name>\" \"<version>\" \"<processor>\")
+  # Set old compiler id variables.
+  IF("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
+    SET(CMAKE_COMPILER_IS_GNUCC 1)
+  ENDIF("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
+ENDMACRO(CMAKE_FORCE_C_COMPILER)
 
-may be replaced by just
+MACRO(CMAKE_FORCE_CXX_COMPILER compiler id)
+  SET(CMAKE_CXX_COMPILER "${compiler}")
+  SET(CMAKE_CXX_COMPILER_ID_RUN TRUE)
+  SET(CMAKE_CXX_COMPILER_ID ${id})
+  SET(CMAKE_CXX_COMPILER_WORKS TRUE)
+  SET(CMAKE_CXX_COMPILER_FORCED TRUE)
 
-  SET(CMAKE_SYSTEM_NAME \"<name>\")
-  SET(CMAKE_SYSTEM_VERSION \"<version>\")
-  SET(CMAKE_SYSTEM_PROCESSOR \"<processor>\")
-
-Use of the CMAKE_FORCE_C_COMPILER and CMAKE_FORCE_CXX_COMPILER macros:
-
-  CMAKE_FORCE_C_COMPILER   (/path/to/cc <id> <sizeof_void_p>)
-  CMAKE_FORCE_CXX_COMPILER (/path/to/CC <id>)
-
-may be replaced by just
-
-  SET(CMAKE_C_COMPILER /path/to/cc)
-  SET(CMAKE_CXX_COMPILER /path/to/CC)
-
-CMake will automatically detect known compiler IDs and sizeof(void*).
-")
+  # Set old compiler id variables.
+  IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+    SET(CMAKE_COMPILER_IS_GNUCXX 1)
+  ENDIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+ENDMACRO(CMAKE_FORCE_CXX_COMPILER)
