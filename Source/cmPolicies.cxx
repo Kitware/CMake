@@ -184,7 +184,21 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   {
     patchVer = atoi(patch.c_str());
   }
- 
+
+  // add in the old CMAKE_BACKWARDS_COMPATIBILITY var for old CMake compatibility
+  if ((majorVer == 2 && minorVer <= 4) || majorVer < 2)
+  {
+    if (!mf->GetCacheManager()->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
+    {
+      mf->AddCacheDefinition
+        ("CMAKE_BACKWARDS_COMPATIBILITY",version, 
+         "For backwards compatibility, what version of CMake commands and "
+         "syntax should this version of CMake try to support.",
+         cmCacheManager::STRING);
+    }
+  }
+
+  
   // now loop over all the policies and set them as appropriate
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
     = this->Policies.begin();
