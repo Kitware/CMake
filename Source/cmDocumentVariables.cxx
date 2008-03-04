@@ -825,7 +825,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("LIBRARY_OUTPUT_PATH", cmProperty::VARIABLE,
      "Old library location variable.",
      "This variable should no longer be used as of CMake 2.6.  "
-     "Use the ARCHIVE_OUTPUT_DIRECTORY, LIBRARY_OUTPUT_PATH, and "
+     "Use the ARCHIVE_OUTPUT_DIRECTORY, LIBRARY_OUTPUT_DIRECTORY, and "
      "RUNTIME_OUTPUT_DIRECTORY target properties instead.  "
      "They will override this variable if they are set.\n"
      "If set, this is the directory where all the libraries "
