@@ -50,11 +50,9 @@ bool cmIncludeDirectoryCommand
       }
     if(i->size() == 0)
       {
-      const char* versionValue =
-        this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
       const char* errorMessage
         = "Empty Include Directory Passed into INCLUDE_DIRECTORIES command.";
-      if(atof(versionValue) < 2.5)
+      if(this->Makefile->NeedBackwardsCompatibility(2,4))
         {
         cmSystemTools::Error(errorMessage);
         }

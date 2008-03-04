@@ -464,9 +464,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
           // backwards compatibility files they have to load
           // These files have a bunch of try compiles in them so
           // should only be done
-          const char* versionValue
-            = mf->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-          if (atof(versionValue) <= 1.4)
+          if (mf->NeedBackwardsCompatibility(1,4))
             {
             if(strcmp(lang, "C") == 0)
               {
