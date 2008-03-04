@@ -2444,6 +2444,11 @@ void cmake::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v,
     }
 }
 
+void cmake::GetPolicyDocumentation(std::vector<cmDocumentationEntry>& v)
+{
+  this->Policies->GetDocumentation(v);
+}
+
 void cmake::GetPropertiesDocumentation(std::map<std::string,
                                        cmDocumentationSection *>& v)
 {

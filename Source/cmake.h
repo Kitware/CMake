@@ -258,6 +258,7 @@ class cmake
   void GetPropertiesDocumentation(std::map<std::string,
                                   cmDocumentationSection *>&);
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
+  void GetPolicyDocumentation(std::vector<cmDocumentationEntry>& entries);
 
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);

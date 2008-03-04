@@ -409,3 +409,23 @@ cmPolicies::GetPolicyStatus(cmPolicies::PolicyID id)
   return pos->second->Status;
 }
 
+void cmPolicies::GetDocumentation(std::vector<cmDocumentationEntry>& v)
+{
+  // now loop over all the policies and set them as appropriate
+  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
+    = this->Policies.begin();
+  for (;i != this->Policies.end(); ++i)
+  {
+    std::string full;
+    full += i->second->LongDescription;
+    // add in some more text here based on status
+    // switch (i->second->Status)
+    // {
+      // case cmPolicies::WARN:
+          
+    cmDocumentationEntry e(i->second->IDString.c_str(),
+                           i->second->ShortDescription.c_str(),
+                           full.c_str());
+    v.push_back(e);
+  }
+}

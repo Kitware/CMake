@@ -138,11 +138,13 @@ private:
   bool PrintDocumentationSingle(std::ostream& os);
   bool PrintDocumentationSingleModule(std::ostream& os);
   bool PrintDocumentationSingleProperty(std::ostream& os);
+  bool PrintDocumentationSinglePolicy(std::ostream& os);
   bool PrintDocumentationSingleVariable(std::ostream& os);
   bool PrintDocumentationUsage(std::ostream& os);
   bool PrintDocumentationFull(std::ostream& os);
   bool PrintDocumentationModules(std::ostream& os);
   bool PrintDocumentationCustomModules(std::ostream& os);
+  bool PrintDocumentationPolicies(std::ostream& os);
   bool PrintDocumentationProperties(std::ostream& os);
   bool PrintDocumentationVariables(std::ostream& os);
   bool PrintDocumentationCurrentCommands(std::ostream& os);

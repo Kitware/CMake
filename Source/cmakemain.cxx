@@ -324,10 +324,12 @@ int do_cmake(int ac, char** av)
       }
 
     std::vector<cmDocumentationEntry> commands;
+    std::vector<cmDocumentationEntry> policies;
     std::vector<cmDocumentationEntry> compatCommands;
     std::vector<cmDocumentationEntry> generators;
     std::map<std::string,cmDocumentationSection *> propDocs;
 
+    hcm.GetPolicyDocumentation(policies);
     hcm.GetCommandDocumentation(commands, true, false);
     hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetPropertiesDocumentation(propDocs);
@@ -340,6 +342,7 @@ int do_cmake(int ac, char** av)
     doc.AppendSection("Generators",generators);
     doc.PrependSection("Options",cmDocumentationOptions);
     doc.SetSection("Commands",commands);
+    doc.SetSection("Policies",policies);
     doc.AppendSection("Compatibility Commands",compatCommands);
     doc.SetSections(propDocs);
 
