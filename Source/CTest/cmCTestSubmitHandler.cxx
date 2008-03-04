@@ -963,8 +963,9 @@ int cmCTestSubmitHandler::ProcessHandler()
                  << "   Trigger site: "
                  << this->CTest->GetCTestConfiguration("TriggerSite")
                  << std::endl);
-      if ( !this->TriggerUsingHTTP(files, prefix,
-                                   this->CTest->GetCTestConfiguration("TriggerSite")) )
+      if ( !this->
+           TriggerUsingHTTP(files, prefix,
+                            this->CTest->GetCTestConfiguration("TriggerSite")))
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
                    "   Problems when triggering via HTTP" << std::endl);
@@ -1017,8 +1018,9 @@ int cmCTestSubmitHandler::ProcessHandler()
                  << "   Trigger site: "
                  << this->CTest->GetCTestConfiguration("TriggerSite")
                  << std::endl);
-      if ( !this->TriggerUsingHTTP(files, prefix,
-                                   this->CTest->GetCTestConfiguration("TriggerSite")) )
+      if ( !this->
+           TriggerUsingHTTP(files, prefix,
+                            this->CTest->GetCTestConfiguration("TriggerSite")))
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
                    "   Problems when triggering via HTTP" << std::endl);
