@@ -1,6 +1,6 @@
 # - Convenience include for using wxWidgets library
-# Finds if wxWidgets is installed 
-# and set the appropriate libs, incdirs, flags etc. 
+# Finds if wxWidgets is installed
+# and set the appropriate libs, incdirs, flags etc.
 # INCLUDE_DIRECTORIES, LINK_DIRECTORIES and ADD_DEFINITIONS
 # are called.
 #
@@ -10,7 +10,7 @@
 #  INCLUDE( ${xWidgets_USE_FILE} )
 #  ... add your targets here, e.g. ADD_EXECUTABLE/ ADD_LIBRARY ...
 #  TARGET_LINK_LIBRARIERS( <yourWxDependantTarget>  ${wxWidgets_LIBRARIES})
-# 
+#
 # DEPRECATED
 #  LINK_LIBRARIES is not called in favor of adding dependencies per target.
 #
@@ -18,7 +18,7 @@
 #  Jan Woetzel <jw -at- mip.informatik.uni-kiel.de>
 
 
-# debug message and logging. 
+# debug message and logging.
 # comment these out for distribution
 IF    (NOT LOGFILE )
   #  SET(LOGFILE "${PROJECT_BINARY_DIR}/CMakeOutput.log")
@@ -48,7 +48,7 @@ IF   (wxWidgets_FOUND)
   IF   (wxWidgets_DEFINITIONS)
     ADD_DEFINITIONS( ${wxWidgets_DEFINITIONS} )
     MSG("wxWidgets_DEFINITIONS=${wxWidgets_DEFINITIONS}")
-  ENDIF(wxWidgets_DEFINITIONS)  
+  ENDIF(wxWidgets_DEFINITIONS)
 
   IF   (wxWidgets_CXX_FLAGS)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${wxWidgets_CXX_FLAGS}")
@@ -64,8 +64,8 @@ IF   (wxWidgets_FOUND)
   #  IF(LOGFILE)
   #    FILE(APPEND ${LOGFILE} "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}):   ${wxWidgets_LIBRARIES}\n")
   #  ENDIF(LOGFILE)
-  #ENDIF(wxWidgets_LIBRARIES)  
-  
+  #ENDIF(wxWidgets_LIBRARIES)
+
 ELSE (wxWidgets_FOUND)
   MESSAGE("wxWidgets requested but not found.")
 ENDIF(wxWidgets_FOUND)
