@@ -3543,6 +3543,8 @@ cmTargetInternalPointer::operator=(cmTargetInternalPointer const& r)
   // Ideally cmTarget instances should never be copied.  However until
   // we can make a sweep to remove that, this copy constructor avoids
   // allowing the resources (Internals) to be copied.
+  cmTargetInternals* oldPointer = this->Pointer;
   this->Pointer = new cmTargetInternals;
+  delete oldPointer;
   return *this;
 }
