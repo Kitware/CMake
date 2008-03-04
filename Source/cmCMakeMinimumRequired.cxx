@@ -25,7 +25,6 @@ bool cmCMakeMinimumRequired
   // Process arguments.
   std::string version_string;
   bool doing_version = false;
-  bool fatal_error = false;
   for(unsigned int i=0; i < args.size(); ++i)
     {
     if(args[i] == "VERSION")
@@ -40,7 +39,6 @@ bool cmCMakeMinimumRequired
         return false;
         }
       doing_version = false;
-      fatal_error = true;
       }
     else if(doing_version)
       {
@@ -101,24 +99,13 @@ bool cmCMakeMinimumRequired
     {
     // The current version is too low.
     cmOStringStream e;
-    if(!fatal_error)
-      {
-      e << "WARNING: ";
-      }
     e << "This project requires version " << version_string.c_str()
       << " of CMake.  "
       << "You are running version "
       << current_major << "." << current_minor << "." << current_patch
       << ".\n";
-    if(fatal_error)
-      {
-      cmSystemTools::Error(e.str().c_str());
-      cmSystemTools::SetFatalErrorOccured();
-      }
-    else
-      {
-      cmSystemTools::Message(e.str().c_str());
-      }
+    cmSystemTools::Error(e.str().c_str());
+    cmSystemTools::SetFatalErrorOccured();
     }
 
   // set the policy version as well

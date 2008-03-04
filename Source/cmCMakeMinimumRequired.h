@@ -66,12 +66,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  cmake_minimum_required(VERSION versionNumber [FATAL_ERROR])\n"
-      "Let cmake know that the project requires a certain version of a "
-      "cmake, or newer.  CMake will also try to be backwards compatible to "
-      "the version of cmake specified, if a newer version of cmake is "
-      "running.  If FATAL_ERROR is given then failure to meet the "
-      "requirements will be considered an error instead of a warning.";
+      "  cmake_minimum_required(VERSION major[.minor[.patch]]\n"
+      "                         [FATAL_ERROR])\n"
+      "If the current version of CMake is lower than that required "
+      "it will stop processing the project and report an error.\n"
+      "The FATAL_ERROR option is accepted but ignored.  It is left from "
+      "CMake versions 2.4 and lower in which failure to meet the minimum "
+      "version was a warning by default.";
     }
   
   cmTypeMacro(cmCMakeMinimumRequired, cmCommand);
