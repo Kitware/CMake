@@ -46,6 +46,9 @@ cmMakefile::cmMakefile()
 {
   this->DefinitionStack.push_back(DefinitionMap());
 
+  // Enter a policy level for this directory.
+  this->PushPolicy();
+
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
   // Setup the default include complaint regular expression (match nothing).
@@ -3314,7 +3317,7 @@ bool cmMakefile::PushPolicy()
 
 bool cmMakefile::PopPolicy()
 {
-  if (PolicyStack.size() == 0)
+  if (PolicyStack.size() == 1)
   {
     cmSystemTools::Error("Attempt to pop the policy stack past "
       "it's beginning.");
