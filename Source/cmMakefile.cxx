@@ -138,6 +138,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->PreOrder = mf.PreOrder;
   this->ListFileStack = mf.ListFileStack;
   this->Initialize();
+  this->PushPolicy();
 }
 
 //----------------------------------------------------------------------------
@@ -207,6 +208,7 @@ cmMakefile::~cmMakefile()
     delete b;
     }
   this->FunctionBlockers.clear();
+  this->PolicyStack.pop_back();
 }
 
 void cmMakefile::PrintStringVector(const char* s,
@@ -3245,7 +3247,7 @@ cmPolicies::PolicyStatus cmMakefile
   bool done = false;
 
   // check our policy stack first
-  for (vecpos = static_cast<int>(this->PolicyStack.size()); 
+  for (vecpos = static_cast<int>(this->PolicyStack.size()) - 1; 
        vecpos >= 0 && !done; vecpos--)
   {
     mappos = this->PolicyStack[vecpos].find(id);

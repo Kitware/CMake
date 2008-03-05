@@ -40,7 +40,9 @@ public:
 
   enum PolicyID {CMP_0000, CMP_POLICY_SPECIFICATION = CMP_0000,
                  CMP_0001, CMP_TARGET_NAMES_WITH_SLASHES = CMP_0001,
-                 CMP_0002, CMP_REQUIRE_UNIQUE_TARGET_NAMES = CMP_0002};
+                 CMP_0002, CMP_REQUIRE_UNIQUE_TARGET_NAMES = CMP_0002,
+                 CMP_0003, CMP_CONFIGURE_FILE_IMMEDIATE = CMP_0003
+                 };
 
 
   ///! convert a string policy ID into a number

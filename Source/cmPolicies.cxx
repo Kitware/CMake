@@ -112,7 +112,17 @@ cmPolicies::cmPolicies()
     2,6,0, cmPolicies::WARN);
   this->PolicyStringMap["CMP_REQUIRE_UNIQUE_TARGET_NAMES"] = CMP_0002;
 
-}
+  this->DefinePolicy(CMP_0003, "CMP_0003",
+    "CMake configures file immediately after 2.0.",
+    "In CMake 2.0 and earlier the configure_file command would not "
+    "configure the file until after processing all CMakeLists files. "
+    "In CMake 2.2 and later the default behavior is that it will "
+    "configure the file right when the command is invoked."
+    ,
+    2,2,0, cmPolicies::NEW);
+  this->PolicyStringMap["CMP_CONFIGURE_FILE_IMMEDIATE"] = CMP_0003;
+
+  }
 
 cmPolicies::~cmPolicies()
 {
@@ -188,7 +198,8 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   // add in the old CMAKE_BACKWARDS_COMPATIBILITY var for old CMake compatibility
   if ((majorVer == 2 && minorVer <= 4) || majorVer < 2)
   {
-    if (!mf->GetCacheManager()->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
+    if (!mf->GetCacheManager()->
+        GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
     {
       mf->AddCacheDefinition
         ("CMAKE_BACKWARDS_COMPATIBILITY",version, 
