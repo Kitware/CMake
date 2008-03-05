@@ -383,32 +383,32 @@ IF (QT4_QMAKE_FOUND)
   ENDIF (APPLE)
   
   # ask qmake for the binary dir
-  IF (NOT QT_BINARY_DIR)
+  IF (QT_LIBRARY_DIR AND NOT QT_BINARY_DIR)
      EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
         ARGS "-query QT_INSTALL_BINS"
         OUTPUT_VARIABLE qt_bins )
      SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "")
-  ENDIF (NOT QT_BINARY_DIR)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_BINARY_DIR)
 
   # ask qmake for the include dir
-  IF (NOT QT_HEADERS_DIR)
+  IF (QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR)
       EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
         ARGS "-query QT_INSTALL_HEADERS" 
         OUTPUT_VARIABLE qt_headers )
       SET(QT_HEADERS_DIR ${qt_headers} CACHE INTERNAL "")
-  ENDIF(NOT QT_HEADERS_DIR)
+  ENDIF(QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR)
 
 
   # ask qmake for the documentation directory
-  IF (NOT QT_DOC_DIR)
+  IF (QT_LIBRARY_DIR AND NOT QT_DOC_DIR)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_DOCS"
       OUTPUT_VARIABLE qt_doc_dir )
     SET(QT_DOC_DIR ${qt_doc_dir} CACHE PATH "The location of the Qt docs")
-  ENDIF (NOT QT_DOC_DIR)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_DOC_DIR)
 
   # ask qmake for the mkspecs directory
-  IF (NOT QT_MKSPECS_DIR)
+  IF (QT_LIBRARY_DIR AND NOT QT_MKSPECS_DIR)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QMAKE_MKSPECS"
       OUTPUT_VARIABLE qt_mkspecs_dirs )
@@ -416,15 +416,15 @@ IF (QT4_QMAKE_FOUND)
     FIND_PATH(QT_MKSPECS_DIR qconfig.pri PATHS ${qt_mkspecs_dirs}
       DOC "The location of the Qt mkspecs containing qconfig.pri"
       NO_DEFAULT_PATH )
-  ENDIF (NOT QT_MKSPECS_DIR)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_MKSPECS_DIR)
 
   # ask qmake for the plugins directory
-  IF (NOT QT_PLUGINS_DIR)
+  IF (QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_PLUGINS"
       OUTPUT_VARIABLE qt_plugins_dir )
     SET(QT_PLUGINS_DIR ${qt_plugins_dir} CACHE PATH "The location of the Qt plugins")
-  ENDIF (NOT QT_PLUGINS_DIR)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR)
   ########################################
   #
   #       Setting the INCLUDE-Variables
