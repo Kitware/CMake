@@ -206,3 +206,18 @@ void cmDocumentationFormatterHTML::PrintHTMLEscapes(std::ostream& os,
       }
     }
 }
+
+void cmDocumentationFormatterHTML
+::PrintIndex(std::ostream& os,
+             std::vector<const cmDocumentationSection *>& sections)
+{
+  os << "<h2><a name=\"section_Index\"/>Master Index</h2>\n";
+  os << "<ul>\n";
+  for(unsigned int i=0; i < sections.size(); ++i)
+    {
+    std::string name = sections[i]->
+      GetName((this->GetForm()));
+    os << "  <li><a href=\"#section_" << name << "\"<b>" << name << "</b></a></li>\n";
+    }
+  os << "</ul>\n";
+}

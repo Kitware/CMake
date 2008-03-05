@@ -846,6 +846,9 @@ void cmDocumentation::Print(Form f, std::ostream& os)
 //----------------------------------------------------------------------------
 void cmDocumentation::Print(std::ostream& os)
 {
+  // if the formatter supports it, print a master index for 
+  // all sections
+  this->CurrentFormatter->PrintIndex(os, this->PrintSections);
   for(unsigned int i=0; i < this->PrintSections.size(); ++i)
     {
     std::string name = this->PrintSections[i]->

@@ -59,6 +59,9 @@ public:
                     const char* name) = 0;
   virtual void PrintPreformatted(std::ostream& os, const char* text) = 0;
   virtual void PrintParagraph(std::ostream& os, const char* text) = 0;
+  virtual void PrintIndex(std::ostream& ,
+                          std::vector<const cmDocumentationSection *>&)
+    {}
 };
 
 #endif
