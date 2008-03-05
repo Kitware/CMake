@@ -66,7 +66,7 @@ FIND_PATH(OPENAL_INCLUDE_DIR al.h
   /opt/csw # Blastwave
   /opt
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
-  PATH_SUFFIXES include include/lua51 include/lua5.1 include/lua
+  PATH_SUFFIXES include/AL include/OpenAL include
 )
 
 FIND_LIBRARY(OPENAL_LIBRARY 
