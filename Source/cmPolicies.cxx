@@ -362,19 +362,14 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
     return "Request for warning text for undefined policy!";
   }
 
-  cmOStringStream error;
-  error << 
-    "Warning " <<
-    pos->second->IDString << ": " <<
-    pos->second->ShortDescription <<
-    " You can suppress this warning by adding either\n" <<
-    "cmake_policy (OLD " <<
-    pos->second->IDString << ") for the old behavior or " <<
-    "cmake_policy(NEW " <<
-    pos->second->IDString << ") for the new behavior. " <<
-    "Run cmake --help-policy " <<
-    pos->second->IDString << " for more information.";
-  return error.str();
+  cmOStringStream msg;
+  msg <<
+    "WARNING: Policy " << pos->second->IDString << " is not set: "
+    "" << pos->second->ShortDescription << "\n"
+    "Run \"cmake --help-policy " << pos->second->IDString << "\" for "
+    "policy details.  Use the cmake_policy command to set the policy "
+    "and suppress this warning.";
+  return msg.str();
 }
   
   
