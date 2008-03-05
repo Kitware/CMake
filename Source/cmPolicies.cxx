@@ -175,25 +175,10 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   unsigned int majorVer = 2;
   unsigned int minorVer = 0;
   unsigned int patchVer = 0;
-  
+
   // parse the string
-  std::string major = ver.substr(0,ver.find('.'));
-  std::string patch = ver.substr(ver.find('.'));
-  std::string minor = patch.substr(0,patch.find('.'));
-  patch = patch.substr(patch.find('.'));
-  
-  if (major.size())
-  {
-    majorVer = atoi(major.c_str());
-  }
-  if (minor.size())
-  {
-    minorVer = atoi(minor.c_str());
-  }
-  if (patch.size())
-  {
-    patchVer = atoi(patch.c_str());
-  }
+  sscanf(ver.c_str(), "%u.%u.%u",
+         &majorVer, &minorVer, &patchVer);
 
   // add in the old CMAKE_BACKWARDS_COMPATIBILITY var for old CMake compatibility
   if ((majorVer == 2 && minorVer <= 4) || majorVer < 2)
