@@ -177,8 +177,11 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   unsigned int patchVer = 0;
 
   // parse the string
-  sscanf(ver.c_str(), "%u.%u.%u",
-         &majorVer, &minorVer, &patchVer);
+  if(sscanf(ver.c_str(), "%u.%u.%u",
+            &majorVer, &minorVer, &patchVer) < 2)
+    {
+    return false;
+    }
 
   // add in the old CMAKE_BACKWARDS_COMPATIBILITY var for old CMake compatibility
   if ((majorVer == 2 && minorVer <= 4) || majorVer < 2)
@@ -186,8 +189,10 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     if (!mf->GetCacheManager()->
         GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
     {
+      cmOStringStream v;
+      v << majorVer << "." << minorVer << "." << patchVer;
       mf->AddCacheDefinition
-        ("CMAKE_BACKWARDS_COMPATIBILITY",version, 
+        ("CMAKE_BACKWARDS_COMPATIBILITY", v.str().c_str(),
          "For backwards compatibility, what version of CMake commands and "
          "syntax should this version of CMake try to support.",
          cmCacheManager::STRING);
