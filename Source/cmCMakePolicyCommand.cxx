@@ -22,37 +22,108 @@
 bool cmCMakePolicyCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
-  if (args.size() < 1)
-  {
-    this->SetError("cmake_policy requires at least one argument.");
+  if(args.size() < 1)
+    {
+    this->SetError("requires at least one argument.");
     return false;
-  }
+    }
 
-  if (args[0] == "OLD" && args.size() == 2)
-  {
-    return this->Makefile->SetPolicy(args[1].c_str(),cmPolicies::OLD);
-  }
-  
-  if (args[0] == "NEW" && args.size() == 2)
-  {
-    return this->Makefile->SetPolicy(args[1].c_str(),cmPolicies::NEW);
-  }
-  
-  if (args[0] == "VERSION" && args.size() == 2)
-  {
-    return this->Makefile->SetPolicyVersion(args[1].c_str());
-  }
-
-  if (args[0] == "PUSH" && args.size() == 1)
-  {
+  if(args[0] == "SET")
+    {
+    return this->HandleSetMode(args);
+    }
+  else if(args[0] == "PUSH")
+    {
+    if(args.size() > 1)
+      {
+      this->SetError("PUSH may not be given additional arguments.");
+      return false;
+      }
     return this->Makefile->PushPolicy();
-  }
-  
-  if (args[0] == "POP" && args.size() == 1)
-  {
-    return this->Makefile->PopPolicy();
-  }
+    }
+  else if(args[0] == "POP")
+    {
+    if(args.size() > 1)
+      {
+      this->SetError("POP may not be given additional arguments.");
+      return false;
+      }
+    if(this->Makefile->PopPolicy(false))
+      {
+      return true;
+      }
+    else
+      {
+      this->SetError("POP without matching PUSH");
+      return false;
+      }
+    }
+  else if(args[0] == "VERSION")
+    {
+    return this->HandleVersionMode(args);
+    }
 
-  this->SetError("incorrect arguments for cmake_policy.");  
+  cmOStringStream e;
+  e << "given unknown first argument \"" << args[0] << "\"";
+  this->SetError(e.str().c_str());
   return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
+{
+  if(args.size() != 3)
+    {
+    this->SetError("SET must be given exactly 2 additional arguments.");
+    return false;
+    }
+
+  cmPolicies::PolicyStatus status;
+  if(args[2] == "OLD")
+    {
+    status = cmPolicies::OLD;
+    }
+  else if(args[2] == "NEW")
+    {
+    status = cmPolicies::NEW;
+    }
+  else
+    {
+    cmOStringStream e;
+    e << "SET given unrecognized policy status \"" << args[2] << "\"";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  if(!this->Makefile->SetPolicy(args[1].c_str(), status))
+    {
+    this->SetError("SET failed to set policy.");
+    return false;
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmCMakePolicyCommand::HandleVersionMode(std::vector<std::string> const& args)
+{
+  if(args.size() <= 1)
+    {
+    this->SetError("VERSION not given an argument");
+    return false;
+    }
+  else if(args.size() >= 3)
+    {
+    this->SetError("VERSION given too many arguments");
+    return false;
+    }
+  if(!this->Makefile->SetPolicyVersion(args[1].c_str()))
+    {
+    cmOStringStream e;
+    e << "VERSION given invalid value \"" << args[1] << "\".  "
+      << "A numeric major.minor[.patch] must be given.";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+  return true;
 }

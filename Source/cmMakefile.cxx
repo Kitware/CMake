@@ -3317,14 +3317,17 @@ bool cmMakefile::PushPolicy()
   return true;
 }
 
-bool cmMakefile::PopPolicy()
+bool cmMakefile::PopPolicy(bool reportError)
 {
-  if (PolicyStack.size() == 1)
-  {
-    cmSystemTools::Error("Attempt to pop the policy stack past "
-      "it's beginning.");
+  if(this->PolicyStack.size() == 1)
+    {
+    if(reportError)
+      {
+      cmSystemTools::Error("Attempt to pop the policy stack past "
+                           "it's beginning.");
+      }
     return false;
-  }
+    }
   this->PolicyStack.pop_back();
   return true;
 }

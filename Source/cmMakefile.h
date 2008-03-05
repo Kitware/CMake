@@ -332,7 +332,7 @@ public:
   bool SetPolicy(const char *id, cmPolicies::PolicyStatus status);
   cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
   bool PushPolicy();
-  bool PopPolicy();
+  bool PopPolicy(bool reportError = true);
   bool SetPolicyVersion(const char *version);
   //@}
 

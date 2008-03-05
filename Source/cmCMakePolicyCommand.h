@@ -58,7 +58,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Set how CMake should handle policies.";
+    return "Manage CMake policy settings.";
     }
   
   /**
@@ -67,30 +67,39 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  cmake_policy(NEW id)\n"
-      "  cmake_policy(OLD id)\n"
-      "  cmake_policy(VERSION version)\n"
+      "  cmake_policy(VERSION major.minor[.patch])\n"
+      "Specify that the current CMake list file is written for the "
+      "given version of CMake.  "
+      "All policies introduced in the specified version or earlier "
+      "will be set NEW.  "
+      "All policies introduced after the specified version will be set "
+      "to WARN, which is like OLD but also produces a warning.  "
+      "This effectively requests behavior preferred as of a given CMake "
+      "version and tells newer CMake versions to warn about their new "
+      "policies."
+      "\n"
+      "  cmake_policy(SET <CMP_NNNN> NEW)\n"
+      "  cmake_policy(SET <CMP_NNNN> OLD)\n"
+      "Tell CMake to use the OLD or NEW behavior for a given policy.  "
+      "Projects depending on the old behavior of a given policy may "
+      "silence a policy warning by setting the policy state to OLD.  "
+      "Alternatively one may fix the project to work with the new behavior "
+      "and set the policy state to NEW."
+      "\n"
       "  cmake_policy(PUSH)\n"
       "  cmake_policy(POP)\n"
-      "The first two forms of this command sets a specified policy to "
-      "use the OLD or NEW implementation respectively. For example "
-      "if a new policy is created in CMake 2.6 then you could use "
-      "this command to tell the running CMake to use the OLD behavior "
-      "(before the change in 2.6) or the NEW behavior.\n"
-      "The third form of this command indicates that the CMake List file "
-      "has been written to the specified version of CMake and to the "
-      "policies of that version of CMake. All policies introduced in "
-      "the specified version of CMake or earlier will be set to NEW. "
-      "All policies introduced after the specified version of CMake will "
-      "be set to WARN (WARN is like OLD but also produces a warning) if "
-      "that is possible.\n"
-      "The last two forms of this command push and pop the current "
-      "handling of policies in CMake. This is useful when mixing multiple "
-      "projects that may have been written to different versions of CMake."
+      "Push and pop the current policy setting state on a stack.  "
+      "Each PUSH must have a matching POP.  "
+      "This is useful when mixing multiple projects, subprojects, and "
+      "files included from external projects that may each have been "
+      "written for a different version of CMake."
       ;
     }
   
   cmTypeMacro(cmCMakePolicyCommand, cmCommand);
+private:
+  bool HandleSetMode(std::vector<std::string> const& args);
+  bool HandleVersionMode(std::vector<std::string> const& args);
 };
 
 
