@@ -143,7 +143,7 @@ bool cmListFile::ParseFile(const char* filename,
           GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
       {
         mf->AddCacheDefinition
-          ("CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
+          ("CMAKE_BACKWARDS_COMPATIBILITY", "2.5",
            "For backwards compatibility, what version of CMake commands and "
            "syntax should this version of CMake try to support.",
            cmCacheManager::STRING);
