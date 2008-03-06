@@ -217,7 +217,8 @@ void cmDocumentationFormatterHTML
     {
     std::string name = sections[i]->
       GetName((this->GetForm()));
-    os << "  <li><a href=\"#section_" << name << "\"<b>" << name << "</b></a></li>\n";
+    os << "  <li><a href=\"#section_" 
+       << name << "\"<b>" << name << "</b></a></li>\n";
     }
   os << "</ul>\n";
 }
