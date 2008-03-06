@@ -134,11 +134,6 @@ bool cmListFile::ParseFile(const char* filename,
         hasPolicy = true;
         break;
       }
-      if (cmSystemTools::LowerCase(i->Name) == "cmake_minimum_required")
-      {
-        hasPolicy = true;
-        break;
-      }
     }
     // if no policy command is found this is an error
     if(!hasPolicy)
@@ -148,7 +143,7 @@ bool cmListFile::ParseFile(const char* filename,
           GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
       {
         mf->AddCacheDefinition
-          ("CMAKE_BACKWARDS_COMPATIBILITY", "2.6",
+          ("CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
            "For backwards compatibility, what version of CMake commands and "
            "syntax should this version of CMake try to support.",
            cmCacheManager::STRING);

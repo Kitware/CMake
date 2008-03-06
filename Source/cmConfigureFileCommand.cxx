@@ -47,10 +47,21 @@ bool cmConfigureFileCommand
   const char* versionValue
     = this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
   if (versionValue && atof(versionValue) > 2.0)
-    {
+  {
     this->Immediate = true;
-    }
+  }
 
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP_0003))
+  {
+    case cmPolicies::WARN:
+    case cmPolicies::OLD:
+      break;
+    case cmPolicies::NEW:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      this->Immediate = true;
+  }
+    
   
   this->AtOnly = false;
   for(unsigned int i=2;i < args.size();++i)

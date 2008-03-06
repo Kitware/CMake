@@ -120,7 +120,7 @@ cmPolicies::cmPolicies()
     "In CMake 2.2 and later the default behavior is that it will "
     "configure the file right when the command is invoked."
     ,
-    2,2,0, cmPolicies::NEW);
+    2,6,0, cmPolicies::NEW);
 //  this->PolicyStringMap["CMP_CONFIGURE_FILE_IMMEDIATE"] = CMP_0003;
 
   }
