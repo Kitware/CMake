@@ -108,9 +108,6 @@ bool cmCMakeMinimumRequired
     cmSystemTools::SetFatalErrorOccured();
     }
 
-  // set the policy version as well
-  this->Makefile->SetPolicyVersion(version_string.c_str());
-
   return true;
 }
 

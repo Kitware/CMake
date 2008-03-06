@@ -26,6 +26,8 @@
  * cmake list files.
  */
 
+class cmMakefile;
+ 
 struct cmListFileArgument
 {
   cmListFileArgument(): Value(), Quoted(false), FilePath(0), Line(0) {}
@@ -62,7 +64,9 @@ struct cmListFile
     :ModifiedTime(0) 
     {
     }
-  bool ParseFile(const char* path, bool requireProjectCommand);
+  bool ParseFile(const char* path, 
+                 bool topLevel,
+                 cmMakefile *mf);
 
   long int ModifiedTime;
   std::vector<cmListFileFunction> Functions;

@@ -46,9 +46,6 @@ cmMakefile::cmMakefile()
 {
   this->DefinitionStack.push_back(DefinitionMap());
 
-  // Enter a policy level for this directory.
-  this->PushPolicy();
-
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
   // Setup the default include complaint regular expression (match nothing).
@@ -138,7 +135,6 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->PreOrder = mf.PreOrder;
   this->ListFileStack = mf.ListFileStack;
   this->Initialize();
-  this->PushPolicy();
 }
 
 //----------------------------------------------------------------------------
@@ -147,6 +143,9 @@ void cmMakefile::Initialize()
   this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
   this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
   this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
+
+  // Enter a policy level for this directory.
+  this->PushPolicy();
 }
 
 unsigned int cmMakefile::GetCacheMajorVersion()
@@ -208,7 +207,11 @@ cmMakefile::~cmMakefile()
     delete b;
     }
   this->FunctionBlockers.clear();
-  this->PolicyStack.pop_back();
+  if (this->PolicyStack.size() != 1)
+  {
+    cmSystemTools::Error("Internal CMake Error, Policy Stack has not been"
+      " popped properly");
+  }
 }
 
 void cmMakefile::PrintStringVector(const char* s,
@@ -453,7 +456,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     *fullPath=filenametoread;
     }
   cmListFile cacheFile;
-  if( !cacheFile.ParseFile(filenametoread, requireProjectCommand) )
+  if( !cacheFile.ParseFile(filenametoread, requireProjectCommand, this) )
     {
     // pop the listfile off the stack
     this->ListFileStack.pop_back();

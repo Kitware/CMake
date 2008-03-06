@@ -42,19 +42,15 @@ bool cmConfigureFileCommand
 
   
   // for CMake 2.0 and earlier CONFIGURE_FILE defaults to the FinalPass,
-  // after 2.0 it only does InitialPass, this is policy CMP_0003
-  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP_0003))
-  {
-    case cmPolicies::WARN:
-      cmSystemTools::Message(
-        this->Makefile->GetPolicies()->GetPolicyWarning
-            (cmPolicies::CMP_0003).c_str(),"Warning");
-    case cmPolicies::OLD:
-      this->Immediate = false;
-      break; 
-    default:
-      this->Immediate = true;
-  }
+  // after 2.0 it only does InitialPass
+  this->Immediate = false;
+  const char* versionValue
+    = this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
+  if (versionValue && atof(versionValue) > 2.0)
+    {
+    this->Immediate = true;
+    }
+
   
   this->AtOnly = false;
   for(unsigned int i=2;i < args.size();++i)

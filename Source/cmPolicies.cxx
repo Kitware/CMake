@@ -89,12 +89,13 @@ cmPolicies::cmPolicies()
     "or cmake_minimum_required call.",
     "CMake requires that projects specify what version of CMake they have "
     "been written to. The easiest way to do this is by placing a call to "
-    "cmake_policy such as the following cmake_policy(VERSION 2.6) Replace "
+    "cmake_policy at the top of your CMakeLists file. For example: "
+    "cmake_policy(VERSION 2.6) Replace "
     "2.6 in that example with the verison of CMake you are writing to. "
     "This policy is being put in place because it aids us in detecting "
     "and maintaining backwards compatibility.",
     2,6,0, cmPolicies::WARN);
-  this->PolicyStringMap["CMP_POLICY_SPECIFICATION"] = CMP_0000;
+//  this->PolicyStringMap["CMP_POLICY_SPECIFICATION"] = CMP_0000;
   
   this->DefinePolicy(CMP_0001, "CMP_0001",
     "CMake does not allow target names to include slash characters.",
@@ -102,7 +103,7 @@ cmPolicies::cmPolicies()
     "please change the name of any targets to not use such characters."
     ,
     2,4,0, cmPolicies::REQUIRED_IF_USED); 
-  this->PolicyStringMap["CMP_TARGET_NAMES_WITH_SLASHES"] = CMP_0001;
+//  this->PolicyStringMap["CMP_TARGET_NAMES_WITH_SLASHES"] = CMP_0001;
     
   this->DefinePolicy(CMP_0002, "CMP_0002",
     "CMake requires that target names be globaly unique.",
@@ -110,7 +111,7 @@ cmPolicies::cmPolicies()
     "please change the name of any targets to not use such characters."
     ,
     2,6,0, cmPolicies::WARN);
-  this->PolicyStringMap["CMP_REQUIRE_UNIQUE_TARGET_NAMES"] = CMP_0002;
+//  this->PolicyStringMap["CMP_REQUIRE_UNIQUE_TARGET_NAMES"] = CMP_0002;
 
   this->DefinePolicy(CMP_0003, "CMP_0003",
     "CMake configures file immediately after 2.0.",
@@ -120,7 +121,7 @@ cmPolicies::cmPolicies()
     "configure the file right when the command is invoked."
     ,
     2,2,0, cmPolicies::NEW);
-  this->PolicyStringMap["CMP_CONFIGURE_FILE_IMMEDIATE"] = CMP_0003;
+//  this->PolicyStringMap["CMP_CONFIGURE_FILE_IMMEDIATE"] = CMP_0003;
 
   }
 
@@ -182,23 +183,6 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     {
     return false;
     }
-
-  // add in the old CMAKE_BACKWARDS_COMPATIBILITY var for old CMake compatibility
-  if ((majorVer == 2 && minorVer <= 4) || majorVer < 2)
-  {
-    if (!mf->GetCacheManager()->
-        GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
-    {
-      cmOStringStream v;
-      v << majorVer << "." << minorVer << "." << patchVer;
-      mf->AddCacheDefinition
-        ("CMAKE_BACKWARDS_COMPATIBILITY", v.str().c_str(),
-         "For backwards compatibility, what version of CMake commands and "
-         "syntax should this version of CMake try to support.",
-         cmCacheManager::STRING);
-    }
-  }
-
   
   // now loop over all the policies and set them as appropriate
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
@@ -365,7 +349,7 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
   cmOStringStream msg;
   msg <<
     "WARNING: Policy " << pos->second->IDString << " is not set: "
-    "" << pos->second->ShortDescription << "\n"
+    "" << pos->second->ShortDescription << " "
     "Run \"cmake --help-policy " << pos->second->IDString << "\" for "
     "policy details.  Use the cmake_policy command to set the policy "
     "and suppress this warning.";
@@ -428,10 +412,40 @@ void cmPolicies::GetDocumentation(std::vector<cmDocumentationEntry>& v)
   {
     std::string full;
     full += i->second->LongDescription;
+    full += "\nThis policy was introduced in CMake version ";
+    full += i->second->GetVersionString();
+    full += ". The version of CMake you are running ";
     // add in some more text here based on status
-    // switch (i->second->Status)
-    // {
-      // case cmPolicies::WARN:
+    switch (i->second->Status)
+    {
+      case cmPolicies::WARN:
+        full += "defaults to warning about this policy. You can either "
+        "suppress the warning without fixing the issue by adding a "
+        "cmake_policy(SET ";
+        full += i->second->IDString;
+        full += " OLD) command to the top of your CMakeLists file or "
+        "you can change your code to use the new behavior and add "
+        "cmake_policy(SET ";
+        full += i->second->IDString;
+        full += " NEW) to your CMakeList file. If you are fixing all "
+        "issues with a new version of CMake you can add "
+        "cmake_policy(VERSION #.#) where #.# is the verison of CMake "
+        "you are updating to. This will tell CMake that you have fixed "
+        "all issues to use the new behavior.";
+      case cmPolicies::OLD:
+        full += "defaults to the old behavior for this policy.";
+        break;
+      case cmPolicies::NEW:
+        full += "defaults to the new behavior for this policy.";
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+        full += "requires the new behavior for this policy."
+          "if you usee it.";
+        break;
+      case cmPolicies::REQUIRED_ALWAYS:
+        full += "requires the new behavior for this policy.";
+        break;
+    }
           
     cmDocumentationEntry e(i->second->IDString.c_str(),
                            i->second->ShortDescription.c_str(),

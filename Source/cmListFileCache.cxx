@@ -18,6 +18,7 @@
 
 #include "cmListFileLexer.h"
 #include "cmSystemTools.h"
+#include "cmMakefile.h"
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -29,7 +30,9 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
                                   cmListFileFunction& function,
                                   const char* filename);
 
-bool cmListFile::ParseFile(const char* filename, bool requireProjectCommand)
+bool cmListFile::ParseFile(const char* filename, 
+                           bool topLevel,
+                           cmMakefile *mf)
 {
   if(!cmSystemTools::FileExists(filename))
     {
@@ -115,7 +118,60 @@ bool cmListFile::ParseFile(const char* filename, bool requireProjectCommand)
 
   cmListFileLexer_Delete(lexer);
 
-  if(requireProjectCommand)
+  // do we need a cmake_policy(VERSION call?
+  if(topLevel)
+  {
+    bool hasPolicy = false;
+    // search for the right policy command
+    for(std::vector<cmListFileFunction>::iterator i 
+          = this->Functions.begin();
+        i != this->Functions.end(); ++i)
+    {
+      if (cmSystemTools::LowerCase(i->Name) == "cmake_policy" &&
+          i->Arguments.size() && 
+          cmSystemTools::LowerCase(i->Arguments[0].Value) == "version")
+      {
+        hasPolicy = true;
+        break;
+      }
+      if (cmSystemTools::LowerCase(i->Name) == "cmake_minimum_required")
+      {
+        hasPolicy = true;
+        break;
+      }
+    }
+    // if no policy command is found this is an error
+    if(!hasPolicy)
+    {
+      // add in the old CMAKE_BACKWARDS_COMPATIBILITY var for old CMake compatibility
+      if (!mf->GetCacheManager()->
+          GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
+      {
+        mf->AddCacheDefinition
+          ("CMAKE_BACKWARDS_COMPATIBILITY", "2.6",
+           "For backwards compatibility, what version of CMake commands and "
+           "syntax should this version of CMake try to support.",
+           cmCacheManager::STRING);
+      }
+
+      switch (mf->GetPolicyStatus(cmPolicies::CMP_0000))
+      {
+        case cmPolicies::WARN:
+          cmSystemTools::Message(
+            mf->GetPolicies()->GetPolicyWarning
+              (cmPolicies::CMP_0000).c_str(),"Warning");
+        case cmPolicies::OLD:
+          break; 
+        default:
+          cmSystemTools::Error(
+            mf->GetPolicies()->GetRequiredPolicyError
+              (cmPolicies::CMP_0000).c_str());
+          return false;
+      }
+    }
+  }
+
+  if(topLevel)
     {
     bool hasProject = false;
     // search for a project command
