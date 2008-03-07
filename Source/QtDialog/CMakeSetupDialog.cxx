@@ -118,6 +118,9 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->BinaryDirectory->setCompleter(new QCMakeFileCompleter(this, true));
   this->SourceDirectory->setCompleter(new QCMakeFileCompleter(this, true));
 
+  // fixed pitch font in output window
+  QFont outputFont("Courier");
+  this->Output->setFont(outputFont);
 
   // start the cmake worker thread
   this->CMakeThread = new QCMakeThread(this);
