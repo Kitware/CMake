@@ -84,7 +84,8 @@ public:
 cmPolicies::cmPolicies()
 {
   // define all the policies
-  this->DefinePolicy(CMP_0000, "CMP_0000",
+  this->DefinePolicy(
+    CMP_0000, "CMP_0000",
     "Missing a CMake version specification. You must have a cmake_policy "
     "call.",
     "CMake requires that projects specify what version of CMake they have "
@@ -94,36 +95,32 @@ cmPolicies::cmPolicies()
     "2.6 in that example with the verison of CMake you are writing to. "
     "This policy is being put in place because it aids us in detecting "
     "and maintaining backwards compatibility.",
-    2,6,0, cmPolicies::WARN);
-//  this->PolicyStringMap["CMP_POLICY_SPECIFICATION"] = CMP_0000;
-  
-  this->DefinePolicy(CMP_0001, "CMP_0001",
-    "CMake does not allow target names to include slash characters.",
-    "CMake requires that target names not include any / or \\ characters "
-    "please change the name of any targets to not use such characters."
-    ,
-    2,4,0, cmPolicies::REQUIRED_IF_USED); 
-//  this->PolicyStringMap["CMP_TARGET_NAMES_WITH_SLASHES"] = CMP_0001;
-    
-  this->DefinePolicy(CMP_0002, "CMP_0002",
+    2,6,0, cmPolicies::WARN
+    );
+
+  this->DefinePolicy(
+    CMP_0001, "CMP_0001",
+    "CMAKE_BACKWARDS_COMPATIBILITY should no longer be used.",
+    "The OLD behavior is to check CMAKE_BACKWARDS_COMPATIBILITY and present "
+    "it to the user.  "
+    "The NEW behavior is to ignore CMAKE_BACKWARDS_COMPATIBILITY "
+    "completely.\n"
+    "In CMake 2.4 and below the variable CMAKE_BACKWARDS_COMPATIBILITY was "
+    "used to request compatibility with earlier versions of CMake.  "
+    "In CMake 2.6 and above all compatibility issues are handled by policies "
+    "and the cmake_policy command.  "
+    "However, CMake must still check CMAKE_BACKWARDS_COMPATIBILITY for "
+    "projects written for CMake 2.4 and below.",
+    2,6,0, cmPolicies::WARN
+    );
+
+  this->DefinePolicy(
+    CMP_0002, "CMP_0002",
     "CMake requires that target names be globaly unique.",
-    "CMake requires that target names not include any / or \\ characters "
-    "please change the name of any targets to not use such characters."
-    ,
-    2,6,0, cmPolicies::WARN);
-//  this->PolicyStringMap["CMP_REQUIRE_UNIQUE_TARGET_NAMES"] = CMP_0002;
-
-  this->DefinePolicy(CMP_0003, "CMP_0003",
-    "CMake configures file immediately after 2.0.",
-    "In CMake 2.0 and earlier the configure_file command would not "
-    "configure the file until after processing all CMakeLists files. "
-    "In CMake 2.2 and later the default behavior is that it will "
-    "configure the file right when the command is invoked."
-    ,
-    2,6,0, cmPolicies::NEW);
-//  this->PolicyStringMap["CMP_CONFIGURE_FILE_IMMEDIATE"] = CMP_0003;
-
-  }
+    "....",
+    2,6,0, cmPolicies::WARN
+    );
+}
 
 cmPolicies::~cmPolicies()
 {
@@ -187,27 +184,18 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   // it is an error if the policy version is less than 2.4
   if (majorVer < 2 || majorVer == 2 && minorVer < 4)
   {
-    mf->IssueError("An attempt was made to set the policy version of "
-      "CMake to something earlier than 2.4, this is an error!");
+    mf->IssueError(
+      "An attempt was made to set the policy version of CMake to something "
+      "earlier than \"2.4\".  "
+      "In CMake 2.4 and below backwards compatibility was handled with the "
+      "CMAKE_BACKWARDS_COMPATIBILITY variable.  "
+      "In order to get compatibility features supporting versions earlier "
+      "than 2.4 set policy CMP_0001 to OLD to tell CMake to check the "
+      "CMAKE_BACKWARDS_COMPATIBILITY variable.  "
+      "One way to so this is to set the policy version to 2.4 exactly."
+      );
   }
-  
-  // if the version is 2.4 then make sure the backwards compatibility variable is visible
-  if (majorVer == 2 && minorVer == 4)
-  {
-    // set the default BACKWARDS compatibility to be visible
-    mf->GetCacheManager()->GetCacheIterator(
-      "CMAKE_BACKWARDS_COMPATIBILITY").SetType
-        (cmCacheManager::STRING);
-    // const char *cbcValue = 
-      // mf->GetCacheManager()->
-        // GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY");
-    // mf->AddCacheDefinition
-      // ("CMAKE_BACKWARDS_COMPATIBILITY",cbcValue, 
-       // "For backwards compatibility, what version of CMake commands and "
-       // "syntax should this version of CMake allow.",
-       // cmCacheManager::STRING);
-  }
-  
+
   // now loop over all the policies and set them as appropriate
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
     = this->Policies.begin();

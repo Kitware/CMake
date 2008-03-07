@@ -1,3 +1,4 @@
+cmake_policy(VERSION 2.6)
 PROJECT(ToClean)
 
 # Build a simple project.

@@ -21,18 +21,6 @@ bool cmAddCustomTargetCommand
 ::InitialPass(std::vector<std::string> const& args,
               cmExecutionStatus& status)
 {
-  // This enum must be before an enum is used in a switch statment. 
-  // If not there is an ICE on the itanium version of gcc we are running
-  // on dash8
-  
-  // Keep track of parser state.
-  enum tdoing {
-    doing_command,
-    doing_depends,
-    doing_working_directory,
-    doing_comment,
-    doing_verbatim
-  };
   if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");
@@ -41,34 +29,20 @@ bool cmAddCustomTargetCommand
 
   // Check the target name.
   if(args[0].find_first_of("/\\") != args[0].npos)
-  {
-    // slashes are not allowed anymore in taret names CMP_0001
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP_0001))
     {
-      case cmPolicies::WARN:
-        this->Makefile->IssueWarning(
-          this->Makefile->GetPolicies()->GetPolicyWarning
-            (cmPolicies::CMP_0001));
-      case cmPolicies::OLD:
-//        if (this->Makefile->IsBWCompatibilityLessThan(2,2))
-//        {
-//          break;
-//        }
-      case cmPolicies::NEW:
-        this->SetError("You included a / or \\ in your target name and "
-          "this is not allowed according to policy CMP_0001. Run "
-          "cmake --help-policy CMP_0001 for more information.");
-        return false;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        this->Makefile->IssueError(
-          this->Makefile->GetPolicies()->GetRequiredPolicyError
-            (cmPolicies::CMP_0001).c_str()
-          );
-        return false;
+    if(!this->Makefile->NeedBackwardsCompatibility(2,2))
+      {
+      cmOStringStream e;
+      e << "called with invalid target name \"" << args[0]
+        << "\".  Target names may not contain a slash.  "
+        << "Use ADD_CUSTOM_COMMAND to generate files.  "
+        << "Set CMAKE_BACKWARDS_COMPATIBILITY to 2.2 "
+        << "or lower to skip this check.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     }
-  }
-    
+
   // Accumulate one command line at a time.
   cmCustomCommandLine currentLine;
 
@@ -83,6 +57,13 @@ bool cmAddCustomTargetCommand
   const char* comment = 0;
 
   // Keep track of parser state.
+  enum tdoing {
+    doing_command,
+    doing_depends,
+    doing_working_directory,
+    doing_comment,
+    doing_verbatim
+  };
   tdoing doing = doing_command;
 
   // Look for the ALL option.

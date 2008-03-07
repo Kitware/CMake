@@ -1143,13 +1143,8 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
       this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0,lib);
     if(tgt)
       {
-      bool allowModules = true;
-      const char* versionValue
-        = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-      if (versionValue &&  (atof(versionValue) >= 2.4) )
-        {
-        allowModules = false;
-        }
+      // CMake versions below 2.4 allowed linking to modules.
+      bool allowModules = this->NeedBackwardsCompatibility(2,3);
       // if it is not a static or shared library then you can not link to it
       if(!((tgt->GetType() == cmTarget::STATIC_LIBRARY) ||
            (tgt->GetType() == cmTarget::SHARED_LIBRARY) ||
@@ -2092,15 +2087,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
           << ":" << line << ":\n"
           << parser.GetError() << ", when parsing string \""
           << source.c_str() << "\"";
-    const char* versionValue
-      = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-    int major = 0;
-    int minor = 0;
-    if ( versionValue )
-      {
-      sscanf(versionValue, "%d.%d", &major, &minor);
-      }
-    if ( major < 2 || major == 2 && minor < 1 )
+    if(this->NeedBackwardsCompatibility(2,0))
       {
       cmSystemTools::Error(error.str().c_str());
       cmSystemTools::SetFatalErrorOccured();
@@ -3333,9 +3320,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         "\n"
         "If you are building an older project it is possible that "
         "it violated this rule but was working accidentally because "
-        "CMake did not previously diagnose this problem.  "
-        "Set CMAKE_BACKWARDS_COMPATIBILITY to 2.4 or lower to disable "
-        "this error.\n";
+        "CMake did not previously diagnose this problem.\n";
       if(isCustom && existing->GetType() == cmTarget::UTILITY)
         {
         e <<
@@ -3422,6 +3407,26 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
       IsValidPolicyStatus(id,status))
   {
     this->PolicyStack.back()[id] = status;
+
+    // Special hook for presenting compatibility variable as soon as
+    // the user requests it.
+    if(id == cmPolicies::CMP_0001 &&
+       (status == cmPolicies::WARN || status == cmPolicies::OLD))
+      {
+      if(!(this->GetCacheManager()
+           ->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY")))
+        {
+        // Set it to 2.4 because that is the last version where the
+        // variable had meaning.
+        this->AddCacheDefinition
+          ("CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
+           "For backwards compatibility, what version of CMake "
+           "commands and "
+           "syntax should this version of CMake try to support.",
+           cmCacheManager::STRING);
+        }
+      }
+
     return true;
   }
   return false;

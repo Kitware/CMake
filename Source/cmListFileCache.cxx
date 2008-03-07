@@ -149,6 +149,9 @@ bool cmListFile::ParseFile(const char* filename,
           mf->IssueWarning(
             mf->GetPolicies()->GetPolicyWarning(cmPolicies::CMP_0000)
             );
+
+          // Implicitly set the version for the user.
+          mf->SetPolicyVersion("2.4");
         case cmPolicies::OLD:
           break; 
         default:

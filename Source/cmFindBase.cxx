@@ -109,19 +109,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   // CMake versions below 2.3 did not search all these extra
   // locations.  Preserve compatibility unless a modern argument is
   // passed.
-  bool compatibility = false;
-  const char* versionValue =
-    this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-  int major = 0;
-  int minor = 0;
-  if(versionValue && sscanf(versionValue, "%d.%d", &major, &minor) != 2)
-    {
-    versionValue = 0;
-    }
-  if(versionValue && (major < 2 || major == 2 && minor < 3))
-    {
-    compatibility = true;
-    }
+  bool compatibility = this->Makefile->NeedBackwardsCompatibility(2,3);
 
   // copy argsIn into args so it can be modified,
   // in the process extract the DOC "documentation" 

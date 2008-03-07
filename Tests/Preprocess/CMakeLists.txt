@@ -1,3 +1,4 @@
+cmake_policy(VERSION 2.6)
 project(Preprocess)
 
 # This test is meant both as a test and as a reference for supported

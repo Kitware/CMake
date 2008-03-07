@@ -1195,15 +1195,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
 
   // CMake versions below 2.0 would add the source tree to the -I path
   // automatically.  Preserve compatibility.
-  const char* versionValue =
-    this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-  int major = 0;
-  int minor = 0;
-  if(versionValue && sscanf(versionValue, "%d.%d", &major, &minor) != 2)
-    {
-    versionValue = 0;
-    }
-  if(versionValue && major < 2)
+  if(this->NeedBackwardsCompatibility(1,9))
     {
     includeSourceDir = true;
     }
@@ -2679,6 +2671,28 @@ bool cmLocalGenerator::NeedBackwardsCompatibility(unsigned int major,
                                                   unsigned int minor,
                                                   unsigned int patch)
 {
+  // Check the policy to decide whether to pay attention to this
+  // variable.
+  switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP_0001))
+    {
+    case cmPolicies::WARN:
+      // WARN is just OLD without warning because user code does not
+      // always affect whether this check is done.
+    case cmPolicies::OLD:
+      // Old behavior is to check the variable.
+      break;
+    case cmPolicies::NEW:
+      // New behavior is to ignore the variable.
+      return false;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      // This will never be the case because the only way to require
+      // the setting is to require the user to specify version policy
+      // 2.6 or higher.  Once we add that requirement then this whole
+      // method can be removed anyway.
+      return false;
+    }
+
   // Compatibility is needed if CMAKE_BACKWARDS_COMPATIBILITY is set
   // equal to or lower than the given version.
   unsigned int actual_compat = this->GetBackwardsCompatibility();
