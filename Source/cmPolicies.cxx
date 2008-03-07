@@ -86,7 +86,7 @@ cmPolicies::cmPolicies()
   // define all the policies
   this->DefinePolicy(CMP_0000, "CMP_0000",
     "Missing a CMake version specification. You must have a cmake_policy "
-    "or cmake_minimum_required call.",
+    "call.",
     "CMake requires that projects specify what version of CMake they have "
     "been written to. The easiest way to do this is by placing a call to "
     "cmake_policy at the top of your CMakeLists file. For example: "
@@ -348,10 +348,11 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 
   cmOStringStream msg;
   msg <<
-    "WARNING: Policy " << pos->second->IDString << " is not set: "
-    "" << pos->second->ShortDescription << " "
+    "Policy " << pos->second->IDString << " is not set: "
+    "" << pos->second->ShortDescription << "\n"
     "Run \"cmake --help-policy " << pos->second->IDString << "\" for "
-    "policy details.  Use the cmake_policy command to set the policy "
+    "policy details.\n"
+    "Use the cmake_policy command to set the policy "
     "and suppress this warning.";
   return msg.str();
 }
@@ -370,21 +371,19 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
   }
 
   cmOStringStream error;
-  error << 
-    "Error " <<
-    pos->second->IDString << ": " <<
-    pos->second->ShortDescription <<
-    " This behavior is required now. You can suppress this message by "
-    "specifying that your listfile is written to handle this new "
-    "behavior by adding either\n" <<
-    "cmake_policy (NEW " <<
-    pos->second->IDString << ")\n or \n. " <<
-    "cmake_policy (VERSION " << 
-    pos->second->GetVersionString() << " ) or later."
-    "Run cmake --help-policy " <<
-    pos->second->IDString << " for more information.";
+  error <<
+    "Policy " << pos->second->IDString << " is not set to NEW: "
+    "" << pos->second->ShortDescription << "\n"
+    "Run \"cmake --help-policy " << pos->second->IDString << "\" for "
+    "policy details.\n"
+    "CMake now requires this policy to be set to NEW by the project.  "
+    "The policy may be set explicitly using the code\n"
+    "  cmake_policy(SET " << pos->second->IDString << " NEW)\n"
+    "or by upgrading all policies with the code\n"
+    "  cmake_policy(VERSION " << pos->second->GetVersionString() <<
+    ") # or later\n"
+    "Run \"cmake --help-command cmake_policy\" for more information.";
   return error.str();
-  
 }
 
 ///! Get the default status for a policy

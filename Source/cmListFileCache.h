@@ -50,12 +50,16 @@ struct cmListFileArgument
   long Line;
 };
 
-struct cmListFileFunction
+struct cmListFileContext
 {
   std::string Name;
-  std::vector<cmListFileArgument> Arguments;
   std::string FilePath;
   long Line;
+};
+
+struct cmListFileFunction: public cmListFileContext
+{
+  std::vector<cmListFileArgument> Arguments;
 };
 
 struct cmListFile

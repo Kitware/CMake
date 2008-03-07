@@ -18,7 +18,8 @@
 
 // cmAddCustomTargetCommand
 bool cmAddCustomTargetCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+::InitialPass(std::vector<std::string> const& args,
+              cmExecutionStatus& status)
 {
   // This enum must be before an enum is used in a switch statment. 
   // If not there is an ICE on the itanium version of gcc we are running
@@ -45,9 +46,9 @@ bool cmAddCustomTargetCommand
     switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP_0001))
     {
       case cmPolicies::WARN:
-        cmSystemTools::Message(
+        this->Makefile->IssueWarning(
           this->Makefile->GetPolicies()->GetPolicyWarning
-            (cmPolicies::CMP_0001).c_str(),"Warning");
+            (cmPolicies::CMP_0001));
       case cmPolicies::OLD:
 //        if (this->Makefile->IsBWCompatibilityLessThan(2,2))
 //        {
@@ -60,10 +61,11 @@ bool cmAddCustomTargetCommand
         return false;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
-        this->SetError(
+        this->Makefile->IssueError(
           this->Makefile->GetPolicies()->GetRequiredPolicyError
-            (cmPolicies::CMP_0001).c_str());
-        return false;      
+            (cmPolicies::CMP_0001).c_str()
+          );
+        return false;
     }
   }
     

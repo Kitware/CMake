@@ -280,6 +280,134 @@ bool cmMakefile::CommandExists(const char* name) const
   return this->GetCMakeInstance()->CommandExists(name);
 }
 
+//----------------------------------------------------------------------------
+// Helper function to print a block of text with every line following
+// a given prefix.
+void cmMakefilePrintPrefixed(std::ostream& os,  const char* prefix,
+                             std::string const& msg)
+{
+  bool newline = true;
+  for(const char* c = msg.c_str(); *c; ++c)
+    {
+    if(newline)
+      {
+      os << prefix;
+      newline = false;
+      }
+    os << *c;
+    if(*c == '\n')
+      {
+      newline = true;
+      }
+    }
+  if(!newline)
+    {
+    os << "\n";
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::IssueError(std::string const& msg) const
+{
+  this->IssueMessage(msg, true);
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::IssueWarning(std::string const& msg) const
+{
+  this->IssueMessage(msg, false);
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::IssueMessage(std::string const& text, bool isError) const
+{
+  cmOStringStream msg;
+
+  // Construct the message header.
+  if(isError)
+    {
+    msg << "CMake Error:";
+    }
+  else
+    {
+    msg << "CMake Warning:";
+    }
+
+  // Add the immediate context.
+  CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
+  if(i != this->CallStack.rend())
+    {
+    if(isError)
+      {
+      i->Status->SetNestedError(true);
+      }
+    cmListFileContext const& lfc = *i->Context;
+    msg
+      << " at "
+      << this->LocalGenerator->Convert(lfc.FilePath.c_str(),
+                                       cmLocalGenerator::HOME)
+      << ":" << lfc.Line << " " << lfc.Name;
+    ++i;
+    }
+
+  // Add the message text.
+  msg << " {\n";
+  cmMakefilePrintPrefixed(msg, "  ", text);
+  msg << "}";
+
+  // Add the rest of the context.
+  if(i != this->CallStack.rend())
+    {
+    msg << " with call stack {\n";
+    while(i != this->CallStack.rend())
+      {
+      cmListFileContext const& lfc = *i->Context;
+      msg << "  "
+          << this->LocalGenerator->Convert(lfc.FilePath.c_str(),
+                                           cmLocalGenerator::HOME)
+          << ":" << lfc.Line << " " << lfc.Name << "\n";
+      ++i;
+      }
+    msg << "}\n";
+    }
+  else
+    {
+    msg << "\n";
+    }
+
+  // Output the message.
+  if(isError)
+    {
+    cmSystemTools::SetErrorOccured();
+    cmSystemTools::Message(msg.str().c_str(), "Error");
+    }
+  else
+    {
+    cmSystemTools::Message(msg.str().c_str(), "Warning");
+    }
+}
+
+//----------------------------------------------------------------------------
+// Helper class to make sure the call stack is valid.
+class cmMakefileCall
+{
+public:
+  cmMakefileCall(cmMakefile* mf,
+                 cmListFileContext const& lfc,
+                 cmExecutionStatus& status): Makefile(mf)
+    {
+    cmMakefile::CallStackEntry entry = {&lfc, &status};
+    this->Makefile->CallStack.push_back(entry);
+    }
+  ~cmMakefileCall()
+    {
+    this->Makefile->CallStack.pop_back();
+    }
+private:
+  cmMakefile* Makefile;
+};
+
+//----------------------------------------------------------------------------
 bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
                                 cmExecutionStatus &status)
 {
@@ -294,34 +422,30 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   
   std::string name = lff.Name;
 
-  // execute the command
-  cmCommand *rm =
-    this->GetCMakeInstance()->GetCommand(name.c_str());
-  if(rm)
+  // Place this call on the call stack.
+  cmMakefileCall stack_manager(this, lff, status);
+  static_cast<void>(stack_manager);
+
+  // Lookup the command prototype.
+  if(cmCommand* proto = this->GetCMakeInstance()->GetCommand(name.c_str()))
     {
-    // const char* versionValue
-      // = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-    // int major = 0;
-    // int minor = 0;
-    // if ( versionValue )
-      // {
-      // sscanf(versionValue, "%d.%d", &major, &minor);
-      // }
-    cmCommand* usedCommand = rm->Clone();
-    usedCommand->SetMakefile(this);
-    bool keepCommand = false;
-    if(usedCommand->GetEnabled() && !cmSystemTools::GetFatalErrorOccured()  &&
-       (!this->GetCMakeInstance()->GetScriptMode() ||
-        usedCommand->IsScriptable()))
+    // Clone the prototype.
+    cmsys::auto_ptr<cmCommand> pcmd(proto->Clone());
+    pcmd->SetMakefile(this);
+
+    // Decide whether to invoke the command.
+    if(pcmd->GetEnabled() && !cmSystemTools::GetFatalErrorOccured()  &&
+       (!this->GetCMakeInstance()->GetScriptMode() || pcmd->IsScriptable()))
       {
-      if(!usedCommand->InvokeInitialPass(lff.Arguments,status))
+      // Try invoking the command.
+      if(!pcmd->InvokeInitialPass(lff.Arguments,status) ||
+         status.GetNestedError())
         {
-        cmOStringStream error;
-        error << "Error in cmake code at\n"
-              << lff.FilePath << ":" << lff.Line << ":\n"
-              << usedCommand->GetError() << std::endl
-              << "   Called from: " << this->GetListFileStack().c_str();
-        cmSystemTools::Error(error.str().c_str());
+        if(!status.GetNestedError())
+          {
+          // The command invocation requested that we report an error.
+          this->IssueError(pcmd->GetError());
+          }
         result = false;
         if ( this->GetCMakeInstance()->GetScriptMode() )
           {
@@ -331,38 +455,28 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       else
         {
         // use the command
-        keepCommand = true;
-        this->UsedCommands.push_back(usedCommand);
+        this->UsedCommands.push_back(pcmd.release());
         }
       }
     else if ( this->GetCMakeInstance()->GetScriptMode()
-              && !usedCommand->IsScriptable() )
+              && !pcmd->IsScriptable() )
       {
-      cmOStringStream error;
-      error << "Error in cmake code at\n"
-            << lff.FilePath << ":" << lff.Line << ":\n"
-            << "Command " << usedCommand->GetName()
-            << "() is not scriptable" << std::endl;
-      cmSystemTools::Error(error.str().c_str());
+      std::string error = "Command ";
+      error += pcmd->GetName();
+      error += "() is not scriptable";
+      this->IssueError(error);
       result = false;
       cmSystemTools::SetFatalErrorOccured();
-      }
-    // if the Cloned command was not used
-    // then delete it
-    if(!keepCommand)
-      {
-      delete usedCommand;
       }
     }
   else
     {
     if(!cmSystemTools::GetFatalErrorOccured())
       {
-      cmOStringStream error;
-      error << "Error in cmake code at\n"
-            << lff.FilePath << ":" << lff.Line << ":\n"
-            << "Unknown CMake command \"" << lff.Name.c_str() << "\".";
-      cmSystemTools::Error(error.str().c_str());
+      std::string error = "Unknown CMake command \"";
+      error += lff.Name;
+      error += "\".";
+      this->IssueError(error);
       result = false;
       cmSystemTools::SetFatalErrorOccured();
       }
@@ -3152,8 +3266,8 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       switch (this->GetPolicyStatus(cmPolicies::CMP_0002))
         {
         case cmPolicies::WARN:
-          msg = this->GetPolicies()->
-            GetPolicyWarning(cmPolicies::CMP_0002);
+          this->IssueWarning(this->GetPolicies()->
+                             GetPolicyWarning(cmPolicies::CMP_0002));
         case cmPolicies::OLD:
           return true;
         case cmPolicies::REQUIRED_IF_USED:

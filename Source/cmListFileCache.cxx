@@ -152,15 +152,15 @@ bool cmListFile::ParseFile(const char* filename,
       switch (mf->GetPolicyStatus(cmPolicies::CMP_0000))
       {
         case cmPolicies::WARN:
-          cmSystemTools::Message(
-            mf->GetPolicies()->GetPolicyWarning
-              (cmPolicies::CMP_0000).c_str(),"Warning");
+          mf->IssueWarning(
+            mf->GetPolicies()->GetPolicyWarning(cmPolicies::CMP_0000)
+            );
         case cmPolicies::OLD:
           break; 
         default:
-          cmSystemTools::Error(
-            mf->GetPolicies()->GetRequiredPolicyError
-              (cmPolicies::CMP_0000).c_str());
+          mf->IssueError(
+            mf->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP_0000)
+            );
           return false;
       }
     }

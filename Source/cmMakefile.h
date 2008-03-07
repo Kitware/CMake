@@ -41,6 +41,7 @@ class cmSourceFile;
 class cmTest;
 class cmVariableWatch;
 class cmake;
+class cmMakefileCall;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
@@ -783,6 +784,10 @@ public:
   void PopScope();
   void RaiseScope(const char *var, const char *value);
 
+  /** Issue messages with the given text plus context information.  */
+  void IssueWarning(std::string const& msg) const;
+  void IssueError(std::string const& msg) const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -875,6 +880,18 @@ private:
 
   // stack of list files being read 
   std::deque<cmStdString> ListFileStack;
+
+  // stack of commands being invoked.
+  struct CallStackEntry
+  {
+    cmListFileContext const* Context;
+    cmExecutionStatus* Status;
+  };
+  typedef std::deque<CallStackEntry> CallStackType;
+  CallStackType CallStack;
+  friend class cmMakefileCall;
+
+  void IssueMessage(std::string const& text, bool isError) const;
 
   cmTarget* FindBasicTarget(const char* name);
   std::vector<cmTarget*> ImportedTargetsOwned;

@@ -42,12 +42,19 @@ public:
   { return this->BreakInvoked; }
             
   virtual void Clear()
-  { this->ReturnInvoked = false; this->BreakInvoked = false; }
+    {
+    this->ReturnInvoked = false;
+    this->BreakInvoked = false;
+    this->NestedError = false;
+    }
+  virtual void SetNestedError(bool val) { this->NestedError = val; }
+  virtual bool GetNestedError() { return this->NestedError; }
 
                                         
 protected:
   bool ReturnInvoked;
   bool BreakInvoked;
+  bool NestedError;
 };
 
 #endif

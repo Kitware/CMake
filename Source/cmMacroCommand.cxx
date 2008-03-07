@@ -237,24 +237,12 @@ bool cmMacroHelperCommand::InvokeInitialPass
       newLFF.Arguments.push_back(arg);
       }
     cmExecutionStatus status;
-    if(!this->Makefile->ExecuteCommand(newLFF,status))
+    if(!this->Makefile->ExecuteCommand(newLFF, status) ||
+       status.GetNestedError())
       {
-      if(args.size())
-        {
-        arg.FilePath = args[0].FilePath;
-        arg.Line = args[0].Line;
-        }
-      else
-        {
-        arg.FilePath =  "Unknown";
-        arg.Line = 0;
-        }
-      cmOStringStream error;
-      error << "Error in cmake code at\n"
-            << arg.FilePath << ":" << arg.Line << ":\n"
-            << "A command failed during the invocation of macro \""
-            << this->Args[0].c_str() << "\".";
-      cmSystemTools::Error(error.str().c_str());
+      // The error message should have already included the call stack
+      // so we do not need to report an error here.
+      inStatus.SetNestedError(true);
       return false;
       }
     if (status.GetReturnInvoked())
