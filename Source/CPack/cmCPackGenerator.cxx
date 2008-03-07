@@ -59,7 +59,9 @@ void cmCPackGenerator::DisplayVerboseOutput(const char* msg,
 
 //----------------------------------------------------------------------
 int cmCPackGenerator::PrepareNames()
-{
+{  
+  cmCPackLogger(cmCPackLog::LOG_DEBUG,
+    "Create temp directory." << std::endl);
 
   std::string tempDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   tempDirectory += "/_CPack_Packages/";
@@ -71,16 +73,34 @@ int cmCPackGenerator::PrepareNames()
     }
   tempDirectory += this->GetOption("CPACK_GENERATOR");
   std::string topDirectory = tempDirectory;
-
-  std::string outName = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  const char* pfname = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  if(!pfname)
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "CPACK_PACKAGE_FILE_NAME not specified" << std::endl);
+    return 0;
+    }
+  std::string outName = pfname; 
   tempDirectory += "/" + outName;
+  if(!this->GetOutputExtension())
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "No output extension specified" << std::endl);
+    return 0;
+    }
   outName += this->GetOutputExtension();
+  const char* pdir = this->GetOption("CPACK_PACKAGE_DIRECTORY");
+  if(!pdir)
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "CPACK_PACKAGE_DIRECTORY not specified" << std::endl);
+    return 0;
+    }
 
-  std::string destFile = this->GetOption("CPACK_PACKAGE_DIRECTORY");
+  std::string destFile = pdir;
   destFile += "/" + outName;
-
   std::string outFile = topDirectory + "/" + outName;
-
   bool setDestDir = cmSystemTools::IsOn(this->GetOption("CPACK_SET_DESTDIR"));
   std::string installPrefix = tempDirectory;
   if (!setDestDir)
@@ -653,6 +673,7 @@ int cmCPackGenerator::DoPackage()
     {
     return 0;
     }
+
   if ( cmSystemTools::IsOn(
       this->GetOption("CPACK_REMOVE_TOPLEVEL_DIRECTORY")) )
     {
@@ -672,10 +693,16 @@ int cmCPackGenerator::DoPackage()
         }
       }
     }
+  cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                "About to install project " << std::endl);
+
   if ( !this->InstallProject() )
     {
     return 0;
     }
+  cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                "Done install project " << std::endl);
+
 
   const char* tempPackageFileName = this->GetOption(
     "CPACK_TEMPORARY_PACKAGE_FILE_NAME");
@@ -789,7 +816,7 @@ bool cmCPackGenerator::IsSet(const char* name) const
 
 //----------------------------------------------------------------------
 const char* cmCPackGenerator::GetOption(const char* op)
-{
+{ 
   return this->MakefileMap->GetDefinition(op);
 }
 

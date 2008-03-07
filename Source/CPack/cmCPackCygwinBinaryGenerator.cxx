@@ -98,7 +98,15 @@ int cmCPackCygwinBinaryGenerator::CompressFiles(const char* outFileName,
 const char* cmCPackCygwinBinaryGenerator::GetOutputExtension()
 {
   this->OutputExtension = "-";
-  this->OutputExtension += this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
+  const char* patchNumber =this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
+  if(!patchNumber)
+    {
+    patchNumber = "1";  
+    cmCPackLogger(cmCPackLog::LOG_WARNING, 
+                  "CPACK_CYGWIN_PATCH_NUMBER not specified using 1"
+                  << std::endl);
+    }
+  this->OutputExtension += 
   this->OutputExtension += ".tar.bz2";
   return this->OutputExtension.c_str();
 }
