@@ -137,6 +137,8 @@ CMAKE_CXX_SOURCES="\
   cmCommandArgumentParserHelper \
   cmDepends \
   cmDependsC \
+  cmDocumentationFormatter \
+  cmDocumentationFormatterText \
   cmPolicies \
   cmProperty \
   cmPropertyMap \
