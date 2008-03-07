@@ -289,7 +289,7 @@ void cmMakefilePrintPrefixed(std::ostream& os,  const char* prefix,
   bool newline = true;
   for(const char* c = msg.c_str(); *c; ++c)
     {
-    if(newline)
+    if(newline && *c != '\n')
       {
       os << prefix;
       newline = false;
