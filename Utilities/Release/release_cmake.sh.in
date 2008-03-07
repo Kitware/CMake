@@ -79,9 +79,15 @@ if [ ! -z "@CONFIGURE_WITH_CMAKE@" ]; then
     @CMAKE_CONFIGURE_PATH@ ../@CMAKE_VERSION@
     check_exit_value $? "Configure cmake" || exit 1
 else
-    echo  "Run cmake bootstrap --parallel=@PROCESSORS@"
-    ../@CMAKE_VERSION@/bootstrap --parallel=@PROCESSORS@
-    check_exit_value $? "Bootstrap cmake" || exit 1
+    if [ -z "@INSTALL_PREFIX@" ]; then
+	echo  "Run cmake bootstrap --parallel=@PROCESSORS@"
+	../@CMAKE_VERSION@/bootstrap --parallel=@PROCESSORS@
+	check_exit_value $? "Bootstrap cmake" || exit 1
+    else
+	echo  "Run cmake bootstrap --prefix=@INSTALL_PREFIX@ --parallel=@PROCESSORS@"
+	../@CMAKE_VERSION@/bootstrap --prefix=@INSTALL_PREFIX@ --parallel=@PROCESSORS@
+	check_exit_value $? "Bootstrap cmake" || exit 1
+    fi
 fi
 
 echo "Build cmake with @MAKE@"
