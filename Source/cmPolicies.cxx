@@ -116,8 +116,23 @@ cmPolicies::cmPolicies()
 
   this->DefinePolicy(
     CMP_0002, "CMP_0002",
-    "CMake requires that target names be globaly unique.",
-    "....",
+    "Logical target names must be globally unique.",
+    "Targets names created with "
+    "add_executable, add_library, or add_custom_target "
+    "are logical build target names.  "
+    "Logical target names must be globally unique because:\n"
+    "  - Unique names may be referenced unambiguously both in CMake\n"
+    "    code and on make tool command lines.\n"
+    "  - Logical names are used by Xcode and VS IDE generators\n"
+    "    to produce meaningful project names for the targets.\n"
+    "The logical name of executable and library targets does not "
+    "have to correspond to the physical file names built.  "
+    "Consider using the OUTPUT_NAME target property to create two "
+    "targets with the same physical name while keeping logical "
+    "names distinct.  "
+    "Custom targets must simply have globally unique names (unless one "
+    "uses the global property ALLOW_DUPLICATE_CUSTOM_TARGETS with a "
+    "Makefiles generator).",
     2,6,0, cmPolicies::WARN
     );
 }

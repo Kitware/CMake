@@ -3283,36 +3283,9 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         default: break;
         }
       e << "created in source directory \""
-        << existing->GetMakefile()->GetCurrentDirectory() << "\"."
-        << "\n";
-      e <<
-        "Logical target names must be globally unique because:\n"
-        "  - Unique names may be referenced unambiguously both in CMake\n"
-        "    code and on make tool command lines.\n"
-        "  - Logical names are used by Xcode and VS IDE generators\n"
-        "    to produce meaningful project names for the targets.\n"
-        "The logical name of executable and library targets does not "
-        "have to correspond to the physical file names built.  "
-        "Consider using the OUTPUT_NAME target property to create two "
-        "targets with the same physical name while keeping logical "
-        "names distinct.  "
-        "Custom targets must simply have globally unique names."
-        "\n"
-        "If you are building an older project it is possible that "
-        "it violated this rule but was working accidentally because "
-        "CMake did not previously diagnose this problem.\n";
-      if(isCustom && existing->GetType() == cmTarget::UTILITY)
-        {
-        e <<
-          "For projects that care only about Makefile generators and do "
-          "not wish to support Xcode or VS IDE generators, one may add\n"
-          "  set_property(GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS 1)\n"
-          "to the top of the project to allow duplicate custom targets "
-          "(target names must still be unique within each directory).  "
-          "However, setting this property will cause non-Makefile generators "
-          "to produce an error and refuse to generate the project.";
-        }
-        msg = e.str();
+        << existing->GetMakefile()->GetCurrentDirectory() << "\".  "
+        << "See documentation for policy CMP_0002 for more details.";
+      msg = e.str();
       return false;
       }
     }

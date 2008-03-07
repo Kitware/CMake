@@ -42,7 +42,11 @@ public:
   {
     CMP_0000, // Policy version specification
     CMP_0001, // Ignore old compatibility variable
-    CMP_0002
+    CMP_0002, // Target names must be unique
+
+    // Always the last entry.  Useful mostly to avoid adding a comma
+    // the last policy when adding a new one.
+    CMP_COUNT
   };
 
   ///! convert a string policy ID into a number
