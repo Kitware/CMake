@@ -35,6 +35,8 @@
 #include "cmake.h"
 #include <stdlib.h> // required for atoi
 
+#include "cmDocumentationFormatterText.h"
+
 #include <cmsys/RegularExpression.hxx>
 
 #include <cmsys/auto_ptr.hxx>
@@ -281,32 +283,6 @@ bool cmMakefile::CommandExists(const char* name) const
 }
 
 //----------------------------------------------------------------------------
-// Helper function to print a block of text with every line following
-// a given prefix.
-void cmMakefilePrintPrefixed(std::ostream& os,  const char* prefix,
-                             std::string const& msg)
-{
-  bool newline = true;
-  for(const char* c = msg.c_str(); *c; ++c)
-    {
-    if(newline && *c != '\n')
-      {
-      os << prefix;
-      newline = false;
-      }
-    os << *c;
-    if(*c == '\n')
-      {
-      newline = true;
-      }
-    }
-  if(!newline)
-    {
-    os << "\n";
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmMakefile::IssueError(std::string const& msg) const
 {
   this->IssueMessage(msg, true);
@@ -351,9 +327,13 @@ void cmMakefile::IssueMessage(std::string const& text, bool isError) const
     }
 
   // Add the message text.
+  {
   msg << " {\n";
-  cmMakefilePrintPrefixed(msg, "  ", text);
+  cmDocumentationFormatterText formatter;
+  formatter.SetIndent("  ");
+  formatter.PrintFormatted(msg, text.c_str());
   msg << "}";
+  }
 
   // Add the rest of the context.
   if(i != this->CallStack.rend())
@@ -3303,7 +3283,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         default: break;
         }
       e << "created in source directory \""
-        << existing->GetMakefile()->GetCurrentDirectory() << "\".\n"
+        << existing->GetMakefile()->GetCurrentDirectory() << "\"."
         << "\n";
       e <<
         "Logical target names must be globally unique because:\n"
@@ -3316,7 +3296,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         "Consider using the OUTPUT_NAME target property to create two "
         "targets with the same physical name while keeping logical "
         "names distinct.  "
-        "Custom targets must simply have globally unique names.\n"
+        "Custom targets must simply have globally unique names."
         "\n"
         "If you are building an older project it is possible that "
         "it violated this rule but was working accidentally because "
@@ -3324,7 +3304,6 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       if(isCustom && existing->GetType() == cmTarget::UTILITY)
         {
         e <<
-          "\n"
           "For projects that care only about Makefile generators and do "
           "not wish to support Xcode or VS IDE generators, one may add\n"
           "  set_property(GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS 1)\n"

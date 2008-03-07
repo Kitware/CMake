@@ -69,7 +69,7 @@ void cmDocumentationFormatterText::PrintPreformatted(std::ostream& os,
   bool newline = true;
   for(const char* ptr = text; *ptr; ++ptr)
     {
-    if(newline)
+    if(newline && *ptr != '\n')
       {
       os << this->TextIndent;
       newline = false;
