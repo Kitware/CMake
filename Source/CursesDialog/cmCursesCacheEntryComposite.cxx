@@ -30,7 +30,8 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key,
 {
   this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
   this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
-  this->Entry = 0;
+  this->Entry = 0; 
+  this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(

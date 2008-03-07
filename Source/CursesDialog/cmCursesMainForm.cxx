@@ -218,7 +218,6 @@ void cmCursesMainForm::RePost()
     this->Form = 0;
     }
   delete[] this->Fields;
-
   if (this->AdvancedMode)
     {
     this->NumberOfVisibleEntries = this->Entries->size();
@@ -239,7 +238,11 @@ void cmCursesMainForm::RePost()
       this->NumberOfVisibleEntries++;
       }
     }
-
+  // there is always one even if it is the dummy one
+  if(this->NumberOfVisibleEntries == 0)
+    {
+    this->NumberOfVisibleEntries = 1;
+    }
   // Assign the fields: 3 for each entry: label, new entry marker
   // ('*' or ' ') and entry widget
   this->Fields = new FIELD*[3*this->NumberOfVisibleEntries+1];
@@ -265,7 +268,15 @@ void cmCursesMainForm::RePost()
     this->Fields[3*j+2]  = (*it)->Entry->Field;
     j++;
     }
-
+  // if no cache entries there should still be one dummy field
+  if(j == 0)
+    {
+    it = this->Entries->begin();
+    this->Fields[0]    = (*it)->Label->Field;
+    this->Fields[1]  = (*it)->IsNewLabel->Field;
+    this->Fields[2]  = (*it)->Entry->Field;
+    this->NumberOfVisibleEntries = 1;
+    }
   // Has to be null terminated.
   this->Fields[3*this->NumberOfVisibleEntries] = 0;
 }
