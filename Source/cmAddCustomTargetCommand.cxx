@@ -19,7 +19,7 @@
 // cmAddCustomTargetCommand
 bool cmAddCustomTargetCommand
 ::InitialPass(std::vector<std::string> const& args,
-              cmExecutionStatus& status)
+              cmExecutionStatus&)
 {
   if(args.size() < 1 )
     {
