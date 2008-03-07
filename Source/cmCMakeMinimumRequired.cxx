@@ -108,6 +108,15 @@ bool cmCMakeMinimumRequired
     cmSystemTools::SetFatalErrorOccured();
     }
 
+  if (required_major < 2 || required_major == 2 && required_minor < 4)
+  {
+    this->Makefile->SetPolicyVersion("2.4");
+  }
+  else
+  {
+    this->Makefile->SetPolicyVersion(version_string.c_str());
+  }
+  
   return true;
 }
 

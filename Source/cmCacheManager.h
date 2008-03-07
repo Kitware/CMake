@@ -66,6 +66,7 @@ public:
     bool GetValueAsBool() const;
     void SetValue(const char*);
     CacheEntryType GetType() const { return this->GetEntry().Type; }
+    void SetType(CacheEntryType ty) { this->GetEntry().Type = ty; }
     bool Initialized() { return this->GetEntry().Initialized; }
     cmCacheManager &Container;
     std::map<cmStdString, CacheEntry>::iterator Position;

@@ -134,22 +134,15 @@ bool cmListFile::ParseFile(const char* filename,
         hasPolicy = true;
         break;
       }
+      if (cmSystemTools::LowerCase(i->Name) == "cmake_minimum_required")
+      {
+        hasPolicy = true;
+        break;
+      }
     }
     // if no policy command is found this is an error
     if(!hasPolicy)
     {
-      // add in the old CMAKE_BACKWARDS_COMPATIBILITY var for old CMake compatibility
-      if (!mf->GetCacheManager()->
-          GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
-      {
-        mf->AddCacheDefinition
-          ("CMAKE_BACKWARDS_COMPATIBILITY", "2.5",
-           "For backwards compatibility, what version of CMake "
-           "commands and "
-           "syntax should this version of CMake try to support.",
-           cmCacheManager::STRING);
-      }
-
       switch (mf->GetPolicyStatus(cmPolicies::CMP_0000))
       {
         case cmPolicies::WARN:
@@ -164,20 +157,6 @@ bool cmListFile::ParseFile(const char* filename,
             );
           return false;
       }
-    }
-    else
-    {
-      // add in the old CMAKE_BACKWARDS_COMPATIBILITY var for old CMake compatibility
-      if (!mf->GetCacheManager()->
-          GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
-      {
-        mf->AddCacheDefinition
-          ("CMAKE_BACKWARDS_COMPATIBILITY", "2.5",
-           "For backwards compatibility, what version of CMake "
-           "commands and "
-           "syntax should this version of CMake try to support.",
-           cmCacheManager::INTERNAL);
-      }      
     }
   }
 

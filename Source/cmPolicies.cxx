@@ -184,6 +184,30 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     return false;
     }
   
+  // it is an error if the policy version is less than 2.4
+  if (majorVer < 2 || majorVer == 2 && minorVer < 4)
+  {
+    mf->IssueError("An attempt was made to set the policy version of "
+      "CMake to something earlier than 2.4, this is an error!");
+  }
+  
+  // if the version is 2.4 then make sure the backwards compatibility variable is visible
+  if (majorVer == 2 && minorVer == 4)
+  {
+    // set the default BACKWARDS compatibility to be visible
+    mf->GetCacheManager()->GetCacheIterator(
+      "CMAKE_BACKWARDS_COMPATIBILITY").SetType
+        (cmCacheManager::STRING);
+    // const char *cbcValue = 
+      // mf->GetCacheManager()->
+        // GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY");
+    // mf->AddCacheDefinition
+      // ("CMAKE_BACKWARDS_COMPATIBILITY",cbcValue, 
+       // "For backwards compatibility, what version of CMake commands and "
+       // "syntax should this version of CMake allow.",
+       // cmCacheManager::STRING);
+  }
+  
   // now loop over all the policies and set them as appropriate
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
     = this->Policies.begin();
