@@ -315,9 +315,9 @@ void cmMakefile::IssueMessage(std::string const& text, bool isError) const
     {
     if(isError)
       {
-      i->Status->SetNestedError(true);
+      (*i).Status->SetNestedError(true);
       }
-    cmListFileContext const& lfc = *i->Context;
+    cmListFileContext const& lfc = *(*i).Context;
     msg
       << " at "
       << this->LocalGenerator->Convert(lfc.FilePath.c_str(),
@@ -341,7 +341,7 @@ void cmMakefile::IssueMessage(std::string const& text, bool isError) const
     msg << " with call stack {\n";
     while(i != this->CallStack.rend())
       {
-      cmListFileContext const& lfc = *i->Context;
+      cmListFileContext const& lfc = *(*i).Context;
       msg << "  "
           << this->LocalGenerator->Convert(lfc.FilePath.c_str(),
                                            cmLocalGenerator::HOME)
