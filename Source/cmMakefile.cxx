@@ -3239,9 +3239,10 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
           return true;
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
-          msg = this->GetPolicies()->
-            GetRequiredPolicyError(cmPolicies::CMP_0002);
-          return false;
+          this->IssueError(
+            this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP_0002)
+            );
+          return true;
         case cmPolicies::NEW:
           break;
         }
