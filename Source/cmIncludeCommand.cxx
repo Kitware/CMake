@@ -95,7 +95,9 @@ bool cmIncludeCommand
 
   if(!optional && !readit && !cmSystemTools::GetFatalErrorOccured())
     {
-    std::string m = "Could not find include file: ";
+    std::string m =
+      "could not find load file:\n"
+      "  ";
     m += fname;
     this->SetError(m.c_str());
     return false;
