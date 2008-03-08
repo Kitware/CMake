@@ -50,17 +50,8 @@ bool cmIncludeDirectoryCommand
       }
     if(i->size() == 0)
       {
-      const char* errorMessage
-        = "Empty Include Directory Passed into INCLUDE_DIRECTORIES command.";
-      if(this->Makefile->NeedBackwardsCompatibility(2,4))
-        {
-        cmSystemTools::Error(errorMessage);
-        }
-      else
-        {
-        this->SetError(errorMessage);
-        return false;
-        }
+      this->SetError("given empty-string as include directory.");
+      return false;
       }
 
     this->AddDirectory(i->c_str(),before,system);
