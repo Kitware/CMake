@@ -161,17 +161,17 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
       CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 2 REGEX "INFO:")
     SET(HAVE_COMPILER_TWICE 0)
     FOREACH(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
-      IF("${info}" MATCHES ".*INFO:compiler\\[([^]]*)\\].*")
+      IF("${info}" MATCHES ".*INFO:compiler\\[([^]\"]*)\\].*")
         IF(COMPILER_ID)
           SET(COMPILER_ID_TWICE 1)
         ENDIF(COMPILER_ID)
         STRING(REGEX REPLACE ".*INFO:compiler\\[([^]]*)\\].*" "\\1"
           COMPILER_ID "${info}")
-      ENDIF("${info}" MATCHES ".*INFO:compiler\\[([^]]*)\\].*")
-      IF("${info}" MATCHES ".*INFO:platform\\[([^]]*)\\].*")
+      ENDIF("${info}" MATCHES ".*INFO:compiler\\[([^]\"]*)\\].*")
+      IF("${info}" MATCHES ".*INFO:platform\\[([^]\"]*)\\].*")
         STRING(REGEX REPLACE ".*INFO:platform\\[([^]]*)\\].*" "\\1"
           PLATFORM_ID "${info}")
-      ENDIF("${info}" MATCHES ".*INFO:platform\\[([^]]*)\\].*")
+      ENDIF("${info}" MATCHES ".*INFO:platform\\[([^]\"]*)\\].*")
     ENDFOREACH(info)
 
     # Check if a valid compiler and platform were found.
