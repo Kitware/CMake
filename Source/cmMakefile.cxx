@@ -325,6 +325,21 @@ void cmMakefile::IssueMessage(std::string const& text, bool isError) const
       << ":" << lfc.Line << " " << lfc.Name;
     ++i;
     }
+  else if(!this->ListFileStack.empty())
+    {
+    // We are processing the project but are not currently executing a
+    // command.  Add whatever context information we have.
+    if(this->LocalGenerator->GetParent())
+      {
+      msg << " in directory "
+          << this->LocalGenerator->Convert(this->GetCurrentDirectory(),
+                                           cmLocalGenerator::HOME);
+      }
+    else
+      {
+      msg << " in top-level directory";
+      }
+    }
 
   // Add the message text.
   {
