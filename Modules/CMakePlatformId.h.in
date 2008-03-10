@@ -76,4 +76,8 @@
 
 #endif
 
-char info_platform[] = "INFO:platform[" PLATFORM_ID "]";
+/* Construct the string literal in pieces to prevent the source from
+   getting matched.  Store it in a pointer rather than an array
+   because some compilers will just produce instructions to fill the
+   array rather than assigning a pointer to a static array.  */
+char* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";

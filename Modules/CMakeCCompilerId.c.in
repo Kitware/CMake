@@ -75,6 +75,10 @@ int main() { return 0; }
 
 #endif
 
-char info_compiler[] = "INFO:compiler[" COMPILER_ID "]";
+/* Construct the string literal in pieces to prevent the source from
+   getting matched.  Store it in a pointer rather than an array
+   because some compilers will just produce instructions to fill the
+   array rather than assigning a pointer to a static array.  */
+char* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
 
 @CMAKE_C_COMPILER_ID_PLATFORM_CONTENT@
