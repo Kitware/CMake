@@ -1,13 +1,13 @@
 # Locate Lua library
 # This module defines
-# LUA_LIBRARIES, both lua and lualib
-# LUA_FOUND, if false, do not try to link to Lua 
-# LUA_INCLUDE_DIR, where to find lua.h and lualib.h (and probably lauxlib.h)
+#  LUA_LIBRARIES, both lua and lualib
+#  LUA_FOUND, if false, do not try to link to Lua 
+#  LUA_INCLUDE_DIR, where to find lua.h and lualib.h (and probably lauxlib.h)
 #
 # Note that the expected include convention is
-# #include "lua.h"
+#  #include "lua.h"
 # and not
-# #include <lua/lua.h>
+#  #include <lua/lua.h>
 # This is because, the lua location is not standardized and may exist
 # in locations other than lua/
 
@@ -92,9 +92,10 @@ ELSE(${LUA_LIBRARY_lua} MATCHES "framework")
 ENDIF(${LUA_LIBRARY_lua} MATCHES "framework")
 
 
+INCLUDE(FindPackageHandleStandardArgs)
+# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if 
+# all listed variables are TRUE
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua50  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
 
-SET(LUA_FOUND "NO")
-IF(LUA_LIBRARIES AND LUA_INCLUDE_DIR)
-  SET(LUA_FOUND "YES")
-ENDIF(LUA_LIBRARIES AND LUA_INCLUDE_DIR)
+MARK_AS_ADVANCED(LUA_INCLUDE_DIR LUA_LIBRARIES)
 
