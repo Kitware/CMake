@@ -44,7 +44,7 @@ find_program(CVS_EXECUTABLE cvs
   ${WinCVS_Folder_Command}
   ${CVSNT_Services_EventMessagePath}
   ${CVSNT_TypeLib_Win32}
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\CVS\\Pserver;InstallPath2]"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\CVS\\Pserver;InstallPath]"
   DOC "CVS command line client"
   )
 mark_as_advanced(CVS_EXECUTABLE)
