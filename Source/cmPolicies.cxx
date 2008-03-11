@@ -202,8 +202,8 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   
   // it is an error if the policy version is less than 2.4
   if (majorVer < 2 || majorVer == 2 && minorVer < 4)
-  {
-    mf->IssueError(
+    {
+    mf->IssueMessage(cmake::FATAL_ERROR,
       "An attempt was made to set the policy version of CMake to something "
       "earlier than \"2.4\".  "
       "In CMake 2.4 and below backwards compatibility was handled with the "
@@ -213,7 +213,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
       "CMAKE_BACKWARDS_COMPATIBILITY variable.  "
       "One way to so this is to set the policy version to 2.4 exactly."
       );
-  }
+    }
 
   // now loop over all the policies and set them as appropriate
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 

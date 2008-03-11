@@ -25,6 +25,7 @@
 #include "cmPropertyMap.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmSourceGroup.h"
@@ -784,9 +785,8 @@ public:
   void PopScope();
   void RaiseScope(const char *var, const char *value);
 
-  /** Issue messages with the given text plus context information.  */
-  void IssueWarning(std::string const& msg) const;
-  void IssueError(std::string const& msg) const;
+  void IssueMessage(cmake::MessageType t,
+                    std::string const& text) const;
 
 protected:
   // add link libraries and directories to the target
@@ -890,8 +890,6 @@ private:
   typedef std::deque<CallStackEntry> CallStackType;
   CallStackType CallStack;
   friend class cmMakefileCall;
-
-  void IssueMessage(std::string const& text, bool isError) const;
 
   cmTarget* FindBasicTarget(const char* name);
   std::vector<cmTarget*> ImportedTargetsOwned;

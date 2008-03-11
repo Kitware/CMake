@@ -58,6 +58,13 @@ class cmPolicies;
 class cmake
 {
  public:
+  enum MessageType
+  { AUTHOR_WARNING,
+    FATAL_ERROR,
+    MESSAGE,
+    WARNING,
+    LOG
+  };
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
 
   ///! construct an instance of cmake

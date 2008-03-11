@@ -146,7 +146,7 @@ bool cmListFile::ParseFile(const char* filename,
       switch (mf->GetPolicyStatus(cmPolicies::CMP_0000))
       {
         case cmPolicies::WARN:
-          mf->IssueWarning(
+          mf->IssueMessage(cmake::AUTHOR_WARNING,
             mf->GetPolicies()->GetPolicyWarning(cmPolicies::CMP_0000)
             );
 
@@ -155,7 +155,7 @@ bool cmListFile::ParseFile(const char* filename,
         case cmPolicies::OLD:
           break; 
         default:
-          mf->IssueError(
+          mf->IssueMessage(cmake::FATAL_ERROR,
             mf->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP_0000)
             );
           return false;

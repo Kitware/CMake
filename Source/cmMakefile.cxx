@@ -282,26 +282,16 @@ bool cmMakefile::CommandExists(const char* name) const
   return this->GetCMakeInstance()->CommandExists(name);
 }
 
-//----------------------------------------------------------------------------
-void cmMakefile::IssueError(std::string const& msg) const
-{
-  this->IssueMessage(msg, true);
-}
 
 //----------------------------------------------------------------------------
-void cmMakefile::IssueWarning(std::string const& msg) const
-{
-  this->IssueMessage(msg, false);
-}
-
-//----------------------------------------------------------------------------
-void cmMakefile::IssueMessage(std::string const& text, bool isError) const
+void cmMakefile::IssueMessage(cmake::MessageType t, std::string const& text) const
 {
   cmOStringStream msg;
-
+  bool isError = false;
   // Construct the message header.
-  if(isError)
+  if(t == cmake::FATAL_ERROR)
     {
+    isError = true;
     msg << "CMake Error:";
     }
   else
@@ -439,7 +429,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         if(!status.GetNestedError())
           {
           // The command invocation requested that we report an error.
-          this->IssueError(pcmd->GetError());
+          this->IssueMessage(cmake::FATAL_ERROR, pcmd->GetError());
           }
         result = false;
         if ( this->GetCMakeInstance()->GetScriptMode() )
@@ -459,7 +449,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       std::string error = "Command ";
       error += pcmd->GetName();
       error += "() is not scriptable";
-      this->IssueError(error);
+      this->IssueMessage(cmake::FATAL_ERROR, error);
       result = false;
       cmSystemTools::SetFatalErrorOccured();
       }
@@ -471,7 +461,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       std::string error = "Unknown CMake command \"";
       error += lff.Name;
       error += "\".";
-      this->IssueError(error);
+      this->IssueMessage(cmake::FATAL_ERROR, error);
       result = false;
       cmSystemTools::SetFatalErrorOccured();
       }
@@ -619,7 +609,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       {
       if(endScopeNicely)
         {
-        this->IssueError("cmake_policy PUSH without matching POP");
+        this->IssueMessage(cmake::FATAL_ERROR, "cmake_policy PUSH without matching POP");
         }
       this->PopPolicy(false);
       }
@@ -3260,13 +3250,13 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       switch (this->GetPolicyStatus(cmPolicies::CMP_0002))
         {
         case cmPolicies::WARN:
-          this->IssueWarning(this->GetPolicies()->
+          this->IssueMessage(cmake::AUTHOR_WARNING, this->GetPolicies()->
                              GetPolicyWarning(cmPolicies::CMP_0002));
         case cmPolicies::OLD:
           return true;
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
-          this->IssueError(
+          this->IssueMessage(cmake::FATAL_ERROR,
             this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP_0002)
             );
           return true;
