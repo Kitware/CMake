@@ -81,12 +81,6 @@ static const char * cmDocumentationOptions[][3] =
    "variables being created. If A is specified, then it will display also "
    "advanced variables. If H is specified, it will also display help for "
    "each variable."},
-  {"-Wno-dev", "Suppress developer warnings.",
-   "Suppress warnings that are meant for the author"
-   " of the CMakeLists.txt files."},
-  {"-Wdev", "Enable developer warnings.",
-   "Enable warnings that are meant for the author"
-   " of the CMakeLists.txt files."},
   {"-N", "View mode only.",
    "Only load the cache. Do not actually run configure and generate steps."},
   {"-P <file>", "Process script mode.",
