@@ -66,6 +66,15 @@ ELSE(NOT QT4_FOUND)
     INSTALL(TARGETS cmake-gui RUNTIME DESTINATION bin
     ${CMAKE_INSTALL_DESTINATION_ARGS})
   ENDIF(CMAKE_PACKAGE_QTGUI)
+
+  IF(UNIX)
+    # install a desktop file so CMake appears in the application start menu
+    # with an icon
+    INSTALL(FILES CMake.desktop DESTINATION share/applications )
+    INSTALL(FILES CMakeSetup.png DESTINATION share/pixmaps )
+    INSTALL(FILES cmakecache.xml DESTINATION share/mime/packages )
+  ENDIF(UNIX)
+
   IF(APPLE)
     SET(CMAKE_POSTFLIGHT_SCRIPT
       "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
