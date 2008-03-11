@@ -373,6 +373,23 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         return false;
         }
       }
+    else if(arg.find("-Wno-dev",0) == 0)
+      {
+      this->CacheManager->
+        AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "TRUE",
+                      "Suppress Warnings that are meant for"
+                      " the author of the CMakeLists.txt files.",
+                      cmCacheManager::INTERNAL);
+      }
+    else if(arg.find("-Wdev",0) == 0)
+      {
+      this->CacheManager->
+        AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS", "FALSE",
+                      "Suppress Warnings that are meant for"
+                      " the author of the CMakeLists.txt files.",
+                      cmCacheManager::INTERNAL);
+      
+      }
     else if(arg.find("-U",0) == 0)
       {
       std::string entryPattern = arg.substr(2);

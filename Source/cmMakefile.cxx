@@ -296,7 +296,16 @@ void cmMakefile::IssueMessage(cmake::MessageType t, std::string const& text) con
     }
   else
     {
-    msg << "CMake Warning:";
+    msg << "CMake Warning";
+    if(t == cmake::AUTHOR_WARNING)
+      {
+      if(this->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS"))
+        {
+        return;
+        }
+      msg << "(Code)";
+      }
+    msg << ":";
     }
 
   // Add the immediate context.
@@ -2462,7 +2471,16 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   // to save time we pass the EnableLanguage info directly
   gg->EnableLanguagesFromGenerator
     (this->LocalGenerator->GetGlobalGenerator());
-
+  if(this->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS"))
+    {
+    cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS",
+                     "TRUE", "", cmCacheManager::INTERNAL);
+    }
+  else
+    {
+    cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS",
+                     "FALSE", "", cmCacheManager::INTERNAL);
+    }    
   if (cm.Configure() != 0)
     {
     cmSystemTools::Error(
