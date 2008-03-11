@@ -111,6 +111,7 @@
 #include <memory> // auto_ptr
 
 static bool cmakeCheckStampFile(const char* stampName);
+static bool cmakeCheckStampList(const char* stampName);
 
 void cmNeedBackwardsCompatibility(const std::string& variable,
   int access_type, void*, const char*, const cmMakefile*)
@@ -552,6 +553,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     else if((i < args.size()-1) && (arg.find("--check-stamp-file",0) == 0))
       {
       this->CheckStampFile = args[++i];
+      }
+    else if((i < args.size()-1) && (arg.find("--check-stamp-list",0) == 0))
+      {
+      this->CheckStampList = args[++i];
       }
 #if defined(CMAKE_HAVE_VS_GENERATORS)
     else if((i < args.size()-1) && (arg.find("--vs-solution-file",0) == 0))
@@ -2150,6 +2155,13 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     return -1;
     }
 
+  // If we are given a stamp list file check if it is really out of date.
+  if(!this->CheckStampList.empty() &&
+     cmakeCheckStampList(this->CheckStampList.c_str()))
+    {
+    return 0;
+    }
+
   // If we are given a stamp file check if it is really out of date.
   if(!this->CheckStampFile.empty() &&
      cmakeCheckStampFile(this->CheckStampFile.c_str()))
@@ -3697,6 +3709,10 @@ static bool cmakeCheckStampFile(const char* stampName)
   // date.
   if(cmSystemTools::FileExists(stampName))
     {
+    // Notify the user why CMake is re-running.  It is safe to
+    // just print to stdout here because this code is only reachable
+    // through an undocumented flag used by the VS generator.
+    std::cout << "CMake is re-running due to explicit user request.\n";
     return false;
     }
 
@@ -3744,8 +3760,8 @@ static bool cmakeCheckStampFile(const char* stampName)
     // Notify the user why CMake is not re-running.  It is safe to
     // just print to stdout here because this code is only reachable
     // through an undocumented flag used by the VS generator.
-    std::cout << "CMake does not need to re-run because the "
-              << "generation timestamp is up-to-date.\n";
+    std::cout << "CMake does not need to re-run because "
+              << stampName << " is up-to-date.\n";
     return true;
     }
   else
@@ -3753,6 +3769,36 @@ static bool cmakeCheckStampFile(const char* stampName)
     cmSystemTools::Error("Cannot restore timestamp ", stampName);
     return false;
     }
+}
+
+//----------------------------------------------------------------------------
+static bool cmakeCheckStampList(const char* stampList)
+{
+  // If the stamp list does not exist CMake must rerun to generate it.
+  if(!cmSystemTools::FileExists(stampList))
+    {
+    std::cout << "CMake is re-running because generate.stamp.list "
+              << "is missing.\n";
+    return false;
+    }
+  std::ifstream fin(stampList);
+  if(!fin)
+    {
+    std::cout << "CMake is re-running because generate.stamp.list "
+              << "could not be read.\n";
+    return false;
+    }
+
+  // Check each stamp.
+  std::string stampName;
+  while(cmSystemTools::GetLineFromStream(fin, stampName))
+    {
+    if(!cmakeCheckStampFile(stampName.c_str()))
+      {
+      return false;
+      }
+    }
+  return true;
 }
 
 // For visual studio 2005 and newer manifest files need to be embeded into

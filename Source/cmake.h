@@ -435,6 +435,7 @@ private:
   std::string CCEnvironment;
   std::string CheckBuildSystemArgument;
   std::string CheckStampFile;
+  std::string CheckStampList;
   std::string VSSolutionFile;
   std::string CTestCommand;
   std::string CPackCommand;
