@@ -31,7 +31,7 @@ namespace @KWSYS_NAMESPACE@
 // forward declare the implementation class  
 class SystemInformationImplementation;
   
-class SystemInformation 
+class @KWSYS_NAMESPACE@_EXPORT SystemInformation 
 {
 
 public:
