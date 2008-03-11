@@ -153,6 +153,26 @@
 ;------------------------------------------------------------------------------
 
 ;;
+;; Helper functions for buffer
+;;
+(defun unscreamify-cmake-buffer ()
+  "Convert all CMake commands to lowercase in buffer."
+  (interactive)
+  (setq save-point (point))
+  (goto-char (point-min))
+  (while (re-search-forward "^\\([ \t]*\\)\\(\\w+\\)\\([ \t]*(\\)" nil t)
+    (replace-match 
+     (concat 
+      (match-string 1) 
+      (downcase (match-string 2)) 
+      (match-string 3)) 
+     t))
+  (goto-char save-point)
+  )
+
+;------------------------------------------------------------------------------
+
+;;
 ;; Keyword highlighting regex-to-face map.
 ;;
 (defconst cmake-font-lock-keywords
