@@ -303,7 +303,7 @@ void cmMakefile::IssueMessage(cmake::MessageType t, std::string const& text) con
         {
         return;
         }
-      msg << "(Code)";
+      msg << "(dev)";
       }
     msg << ":";
     }
@@ -333,6 +333,10 @@ void cmMakefile::IssueMessage(cmake::MessageType t, std::string const& text) con
       msg << " in directory "
           << this->LocalGenerator->Convert(this->GetCurrentDirectory(),
                                            cmLocalGenerator::HOME);
+      }
+    else if(this->GetCMakeInstance()->GetIsInTryCompile())
+      {
+      msg << " in directory " << this->GetCurrentDirectory();
       }
     else
       {
