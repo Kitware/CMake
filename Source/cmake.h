@@ -349,6 +349,7 @@ class cmake
       this->SuppressDevWarnings = v;
     }
 protected:
+  void InitializeProperties();
   int HandleDeleteCacheVariables(const char* var);
   cmPropertyMap Properties;
   std::set<std::pair<cmStdString,cmProperty::ScopeType> > AccessedProperties;

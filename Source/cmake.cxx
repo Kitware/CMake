@@ -146,15 +146,7 @@ cmake::cmake()
   this->FileComparison = new cmFileTimeComparison;
 
   this->Policies = new cmPolicies();
-
-  this->Properties.SetCMakeInstance(this);
-
-  // initialize properties
-  cmSourceFile::DefineProperties(this);
-  cmTarget::DefineProperties(this);
-  cmMakefile::DefineProperties(this);
-  cmTest::DefineProperties(this);
-  cmake::DefineProperties(this);
+  this->InitializeProperties();
 
 #ifdef __APPLE__
   struct rlimit rlp;
@@ -224,8 +216,24 @@ cmake::~cmake()
   delete this->FileComparison;
 }
 
+void cmake::InitializeProperties()
+{
+  this->Properties.clear();
+  this->Properties.SetCMakeInstance(this);
+
+  // initialize properties
+  cmSourceFile::DefineProperties(this);
+  cmTarget::DefineProperties(this);
+  cmMakefile::DefineProperties(this);
+  cmTest::DefineProperties(this);
+  cmake::DefineProperties(this);
+  this->AccessedProperties.clear();
+  this->PropertyDefinitions.clear();
+}
+
 void cmake::CleanupCommandsAndMacros()
 {
+  this->InitializeProperties();
   std::vector<cmCommand*> commands;
   for(RegisteredCommandsMap::iterator j = this->Commands.begin();
       j != this->Commands.end(); ++j)
