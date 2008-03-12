@@ -224,6 +224,8 @@ void CMakeSetupDialog::DoDataExchange(CDataExchange* pDX)
   CDialog::DoDataExchange(pDX);
   //{{AFX_DATA_MAP(CMakeSetupDialog)
         DDX_Control(pDX, IDC_AdvancedValues, m_AdvancedValuesControl);
+        DDX_Control(pDX, IDC_SUPPRESS_DEV_WARNINGS, m_SuppressDevWarningsControl);
+        DDX_Check(pDX, IDC_SUPPRESS_DEV_WARNINGS, m_SuppressDevValue);
         DDX_Control(pDX, IDC_BROWSE_SOURCE, m_BrowseSource);
         DDX_Control(pDX, IDC_BROWSE_BUILD, m_BrowseBuild);
         DDX_Control(pDX, IDC_DELETE_BUTTON, m_DeleteButton);
@@ -261,6 +263,8 @@ BEGIN_MESSAGE_MAP(CMakeSetupDialog, CDialog)
   ON_BN_CLICKED(IDC_DELETE_BUTTON, OnDeleteButton)
   ON_BN_CLICKED(IDC_HELP_BUTTON, OnHelpButton)
   ON_BN_CLICKED(IDC_AdvancedValues, OnAdvancedValues)
+  ON_BN_CLICKED(IDC_SUPPRESS_DEV_WARNINGS, OnSuppressDevValue)
+  ON_BN_DOUBLECLICKED(IDC_SUPPRESS_DEV_WARNINGS, OnDoubleclickedSuppressDevValue)
   ON_BN_DOUBLECLICKED(IDC_AdvancedValues, OnDoubleclickedAdvancedValues)
   ON_WM_DROPFILES()
   ON_BN_CLICKED(IDCANCEL, OnCancel)
@@ -671,6 +675,7 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
       m_CMakeInstance->CreateGlobalGenerator(m_GeneratorDialog.m_GeneratorChoiceString));
     m_CMakeInstance->SetCMakeCommand(m_PathToExecutable);
     m_CMakeInstance->LoadCache();
+    m_CMakeInstance->SetSuppressDevWarnings(m_SuppressDevValue);
     if(m_CMakeInstance->Configure() != 0)
       {
       cmSystemTools::Error(
@@ -1073,6 +1078,13 @@ void CMakeSetupDialog::OnSize(UINT nType, int cx, int cy)
                                          0, 0,
                                          SWP_NOCOPYBITS | 
                                          SWP_NOSIZE | SWP_NOZORDER);
+    m_SuppressDevWarningsControl.GetWindowRect(&cRect);
+    this->ScreenToClient(&cRect);
+    m_SuppressDevWarningsControl.SetWindowPos(&wndTop, cRect.left + deltax, 
+                                         cRect.top, 
+                                         0, 0,
+                                         SWP_NOCOPYBITS | 
+                                         SWP_NOSIZE | SWP_NOZORDER);
     m_BrowseSource.GetWindowRect(&cRect);
     this->ScreenToClient(&cRect);
     m_BrowseSource.SetWindowPos(&wndTop, cRect.left + deltax, 
@@ -1382,6 +1394,15 @@ void CMakeSetupDialog::RemoveAdvancedValues()
   m_CacheEntriesList.HideAdvanced();
 }
 
+
+void CMakeSetupDialog::OnSuppressDevValue() 
+{
+}
+
+void CMakeSetupDialog::OnDoubleclickedSuppressDevValue() 
+{
+  this->OnSuppressDevValue();
+}
 
 void CMakeSetupDialog::OnAdvancedValues() 
 {

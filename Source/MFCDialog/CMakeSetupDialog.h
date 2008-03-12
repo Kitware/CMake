@@ -63,6 +63,7 @@ protected:
   //{{AFX_DATA(CMakeSetupDialog)
   enum { IDD = IDD_CMakeSetupDialog_DIALOG };
   CButton       m_AdvancedValuesControl;
+  CButton       m_SuppressDevWarningsControl;
   CButton       m_BrowseSource;
   CButton       m_BrowseBuild;
   CButton m_HelpButton;
@@ -80,6 +81,7 @@ protected:
   CStatic       m_StatusDisplay;
   CButton       m_Configure;
   BOOL    m_AdvancedValues;
+  BOOL    m_SuppressDevValue;
   //}}AFX_DATA
   
   // ClassWizard generated virtual function overrides
@@ -125,6 +127,8 @@ protected:
   afx_msg void OnDeleteButton();
   afx_msg void OnAdvancedValues();
   afx_msg void OnDoubleclickedAdvancedValues();
+  afx_msg void OnSuppressDevValue();
+  afx_msg void OnDoubleclickedSuppressDevValue();
   afx_msg void OnDropFiles(HDROP);
   afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
   //}}AFX_MSG

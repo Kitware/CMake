@@ -59,6 +59,7 @@ void QCMakeThread::run()
 CMakeSetupDialog::CMakeSetupDialog()
   : ExitAfterGenerate(true), CacheModified(false), CurrentState(Interrupting)
 {
+  this->SuppressDevWarnings = false;
   // create the GUI
   QSettings settings;
   settings.beginGroup("Settings/StartPath");
@@ -95,8 +96,11 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->GenerateAction = ToolsMenu->addAction(tr("&Generate"));
   QObject::connect(this->GenerateAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doGenerate()));
+  this->SuppressDevWarningsAction = ToolsMenu->addAction(tr("&Suppress dev Warnings"));
+  QObject::connect(this->SuppressDevWarningsAction, SIGNAL(triggered(bool)), 
+                   this, SLOT(doSuppressDev()));
+  this->SuppressDevWarningsAction->setCheckable(true);
   
-
   QMenu* HelpMenu = this->menuBar()->addMenu(tr("&Help"));
   QAction* a = HelpMenu->addAction(tr("About"));
   QObject::connect(a, SIGNAL(triggered(bool)),
@@ -302,6 +306,14 @@ void CMakeSetupDialog::finishGenerate(int err)
       tr("Error in generation process, project files may be invalid"),
       QMessageBox::Ok);
     }
+}
+
+#include <iostream>
+void CMakeSetupDialog::doSuppressDev()
+{
+  this->SuppressDevWarnings = !this->SuppressDevWarnings;
+  this->CMakeThread->cmakeInstance()->
+    SetSuppressDevWarnings(this->SuppressDevWarnings);
 }
 
 void CMakeSetupDialog::doGenerate()

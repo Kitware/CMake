@@ -33,6 +33,8 @@
 #define IDC_AdvancedValues              1027
 #define IDC_PROGRESS                    1028
 #define IDC_BuildForLabel               1029
+#define IDC_CHECK1                      1030
+#define IDC_SUPPRESS_DEV_WARNINGS       1030
 
 // Next default values for new objects
 // 
@@ -40,7 +42,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        135
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1030
+#define _APS_NEXT_CONTROL_VALUE         1031
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
 #endif

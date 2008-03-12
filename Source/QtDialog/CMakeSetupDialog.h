@@ -44,6 +44,7 @@ protected slots:
   void initialize();
   void doConfigure();
   void doGenerate();
+  void doSuppressDev();
   void doHelp();
   void doAbout();
   void doInterrupt();
@@ -85,11 +86,13 @@ protected:
   QCMakeThread* CMakeThread;
   bool ExitAfterGenerate;
   bool CacheModified;
+  bool SuppressDevWarnings;
   QAction* ReloadCacheAction;
   QAction* DeleteCacheAction;
   QAction* ExitAction;
   QAction* ConfigureAction;
   QAction* GenerateAction;
+  QAction* SuppressDevWarningsAction;
   State CurrentState;
 
 };

@@ -65,7 +65,7 @@ class QCMake : public QObject
 public:
   QCMake(QObject* p=0);
   ~QCMake();
-
+  void SetSuppressDevWarnings(bool value);
 public slots:
   /// load the cache file in a directory
   void loadCache(const QString& dir);
@@ -125,7 +125,7 @@ protected:
   static void progressCallback(const char* msg, float percent, void* cd);
   static void errorCallback(const char* msg, const char* title, 
                             bool&, void* cd);
-
+  bool SuppressDevWarnings;
   QString SourceDirectory;
   QString BinaryDirectory;
   QString Generator;
