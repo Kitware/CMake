@@ -284,7 +284,8 @@ bool cmMakefile::CommandExists(const char* name) const
 
 
 //----------------------------------------------------------------------------
-void cmMakefile::IssueMessage(cmake::MessageType t, std::string const& text) const
+void cmMakefile::IssueMessage(cmake::MessageType t,
+                              std::string const& text) const
 {
   cmOStringStream msg;
   bool isError = false;
@@ -622,7 +623,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       {
       if(endScopeNicely)
         {
-        this->IssueMessage(cmake::FATAL_ERROR, "cmake_policy PUSH without matching POP");
+        this->IssueMessage(cmake::FATAL_ERROR, 
+                           "cmake_policy PUSH without matching POP");
         }
       this->PopPolicy(false);
       }
