@@ -344,6 +344,10 @@ class cmake
     {
       this->CMakeEditCommand = s;
     }
+  void SetSuppressDevWarnings(bool v)
+    {
+      this->SuppressDevWarnings = v;
+    }
 protected:
   int HandleDeleteCacheVariables(const char* var);
   cmPropertyMap Properties;
@@ -376,7 +380,7 @@ protected:
   std::string HomeOutputDirectory;
   std::string cmStartDirectory; 
   std::string StartOutputDirectory;
-
+  bool SuppressDevWarnings;
   std::set<cmStdString> WrittenFiles;
 
   ///! return true if the same cmake was used to make the cache.
