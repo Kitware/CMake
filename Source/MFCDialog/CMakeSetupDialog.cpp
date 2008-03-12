@@ -675,7 +675,14 @@ void CMakeSetupDialog::RunCMake(bool generateProjectFiles)
       m_CMakeInstance->CreateGlobalGenerator(m_GeneratorDialog.m_GeneratorChoiceString));
     m_CMakeInstance->SetCMakeCommand(m_PathToExecutable);
     m_CMakeInstance->LoadCache();
-    m_CMakeInstance->SetSuppressDevWarnings(m_SuppressDevValue);
+    if(m_SuppressDevValue)
+      {
+      m_CMakeInstance->SetSuppressDevWarnings(true);
+      }
+    else
+      {
+      m_CMakeInstance->SetSuppressDevWarnings(false);
+      }
     if(m_CMakeInstance->Configure() != 0)
       {
       cmSystemTools::Error(
