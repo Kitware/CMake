@@ -308,7 +308,6 @@ void CMakeSetupDialog::finishGenerate(int err)
     }
 }
 
-#include <iostream>
 void CMakeSetupDialog::doSuppressDev()
 {
   this->SuppressDevWarnings = !this->SuppressDevWarnings;
