@@ -82,3 +82,7 @@ TEST("SORT result" "andy;bill;brad;ken")
 SET(result andy bill brad ken)
 LIST(REVERSE result)
 TEST("REVERSE result" "ken;brad;bill;andy")
+
+SET(result bill andy bill brad ken ken ken)
+LIST(REMOVE_DUPLICATES result)
+TEST("REMOVE_DUPLICATES result" "bill;andy;brad;ken")
