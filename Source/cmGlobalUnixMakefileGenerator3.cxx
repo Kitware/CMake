@@ -877,16 +877,12 @@ unsigned long cmGlobalUnixMakefileGenerator3
 ::GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
 {
   unsigned long result = 0;
+  std::set<cmStdString> emitted;
   std::set<cmTarget *>& targets = this->LocalGeneratorToTargetMap[lg];
   for(std::set<cmTarget *>::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    cmTarget * target = *t;
-    cmLocalUnixMakefileGenerator3 *lg3 =
-      static_cast<cmLocalUnixMakefileGenerator3 *>
-      (target->GetMakefile()->GetLocalGenerator());
-    std::vector<int> &progFiles = lg3->ProgressFiles[target->GetName()];
-    result += static_cast<unsigned long>(progFiles.size());
+    result += this->GetTargetTotalNumberOfActions(**t,emitted);
     }
   return result;
 }
