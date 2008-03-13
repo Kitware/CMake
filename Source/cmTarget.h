@@ -19,6 +19,7 @@
 
 #include "cmCustomCommand.h"
 #include "cmPropertyMap.h"
+#include "cmPolicies.h"
 
 class cmake;
 class cmMakefile;
@@ -104,6 +105,10 @@ public:
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
   cmMakefile *GetMakefile() const { return this->Makefile;};
+
+  /** Get the status of policy CMP0003 when the target was created.  */
+  cmPolicies::PolicyStatus GetPolicyStatusCMP0003() const
+    { return this->PolicyStatusCMP0003; }
 
   /**
    * Get the list of the custom commands for this target
@@ -529,6 +534,9 @@ private:
   // The cmMakefile instance that owns this target.  This should
   // always be set.
   cmMakefile* Makefile;
+
+  // Policy status recorded when target was created.
+  cmPolicies::PolicyStatus PolicyStatusCMP0003;
 
   // Internal representation details.
   friend class cmTargetInternals;

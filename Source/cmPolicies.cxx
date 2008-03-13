@@ -139,6 +139,67 @@ cmPolicies::cmPolicies()
     "Makefiles generator).",
     2,6,0, cmPolicies::WARN
     );
+
+  this->DefinePolicy(
+    CMP0003, "CMP0003",
+    "Libraries linked via full path no longer produce linker search paths.",
+    "This policy affects how libraries whose full paths are NOT known "
+    "are found at link time, but was created due to a change in how CMake "
+    "deals with libraries whose full paths are known.  "
+    "Consider the code\n"
+    "  target_link_libraries(myexe /path/to/libA.so)\n"
+    "CMake 2.4 and below implemented linking to libraries whose full paths "
+    "are known by splitting them on the link line into separate components "
+    "consisting of the linker search path and the library name.  "
+    "The example code might have produced something like\n"
+    "  ... -L/path/to -lA ...\n"
+    "in order to link to library A.  "
+    "An analysis was performed to order multiple link directories such that "
+    "the linker would find library A in the desired location, but there "
+    "are cases in which this does not work.  "
+    "CMake versions 2.6 and above use the more reliable approach of passing "
+    "the full path to libraries directly to the linker in most cases.  "
+    "The example code now produces something like\n"
+    "  ... /path/to/libA.so ....\n"
+    "Unfortunately this change can break code like\n"
+    "  target_link_libraries(myexe /path/to/libA.so B)\n"
+    "where \"B\" is meant to find \"/path/to/libB.so\".  "
+    "This code is wrong because the user is asking the linker to find "
+    "library B but has not provided a linker search path (which may be "
+    "added with the link_directories command).  "
+    "However, with the old linking implementation the code would work "
+    "accidentally because the linker search path added for library A "
+    "allowed library B to be found."
+    "\n"
+    "In order to support projects depending on linker search paths "
+    "added by linking to libraries with known full paths, the OLD "
+    "behavior for this policy will add the linker search paths even "
+    "though they are not needed for their own libraries.  "
+    "When this policy is set to OLD, CMake will produce a link line such as\n"
+    "  ... -L/path/to /path/to/libA.so -lB ...\n"
+    "which will allow library B to be found as it was previously.  "
+    "When this policy is set to NEW, CMake will produce a link line such as\n"
+    "  ... /path/to/libA.so -lB ...\n"
+    "which more accurately matches what the project specified."
+    "\n"
+    "The setting for this policy used when generating the link line is that "
+    "in effect when the target is created by an add_executable or "
+    "add_library command.  For the example described above, the code\n"
+    "  cmake_policy(SET CMP0003 OLD) # or cmake_policy(VERSION 2.4)\n"
+    "  add_executable(myexe myexe.c)\n"
+    "  target_link_libraries(myexe /path/to/libA.so B)\n"
+    "will work and suppress the warning for this policy.  "
+    "It may also be updated to work with the corrected linking approach:\n"
+    "  cmake_policy(SET CMP0003 NEW) # or cmake_policy(VERSION 2.6)\n"
+    "  link_directories(/path/to) # needed to find library B\n"
+    "  add_executable(myexe myexe.c)\n"
+    "  target_link_libraries(myexe /path/to/libA.so B)\n"
+    "Even better, library B may be specified with a full path:\n"
+    "  add_executable(myexe myexe.c)\n"
+    "  target_link_libraries(myexe /path/to/libA.so /path/to/libB.so)\n"
+    "When all items on the link line have known paths CMake does not check "
+    "this policy so it has no effect.",
+    2,6,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

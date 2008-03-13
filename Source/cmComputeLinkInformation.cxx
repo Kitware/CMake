@@ -396,9 +396,6 @@ cmComputeLinkInformation
       ->SetImplicitDirectories(this->ImplicitLinkDirs);
     }
 
-  // Initial state.
-  this->HaveUserFlagItem = false;
-
   // Decide whether to enable compatible library search path mode.
   // There exists code that effectively does
   //
@@ -410,12 +407,18 @@ cmComputeLinkInformation
   // because -L/path/to would be added by the -L/-l split for A.  In
   // order to support such projects we need to add the directories
   // containing libraries linked with a full path to the -L path.
-  this->OldLinkDirMode = false;
-  if(this->Makefile->IsOn("CMAKE_LINK_OLD_PATHS") ||
-     this->Makefile->GetLocalGenerator()
-     ->NeedBackwardsCompatibility(2, 4))
+  this->OldLinkDirMode =
+    this->Target->GetPolicyStatusCMP0003() != cmPolicies::NEW;
+  if(this->OldLinkDirMode)
     {
-    this->OldLinkDirMode = true;
+    // Construct a mask to not bother with this behavior for link
+    // directories already specified by the user.
+    std::vector<std::string> const& dirs = this->Target->GetLinkDirectories();
+    for(std::vector<std::string>::const_iterator di = dirs.begin();
+        di != dirs.end(); ++di)
+      {
+      this->OldLinkDirMask.insert(*di);
+      }
     }
 }
 
@@ -537,7 +540,10 @@ bool cmComputeLinkInformation::Compute()
     }
 
   // Finish setting up linker search directories.
-  this->FinishLinkerSearchDirectories();
+  if(!this->FinishLinkerSearchDirectories())
+    {
+    return false;
+    }
 
   return true;
 }
@@ -1037,7 +1043,9 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
 
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
-  if(this->OldLinkDirMode)
+  if(this->OldLinkDirMode &&
+     this->OldLinkDirMask.find(cmSystemTools::GetFilenamePath(item)) ==
+     this->OldLinkDirMask.end())
     {
     this->OldLinkDirItems.push_back(item);
     }
@@ -1161,7 +1169,7 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item)
   else if(item[0] == '-' || item[0] == '$' || item[0] == '`')
     {
     // This is a linker option provided by the user.
-    this->HaveUserFlagItem = true;
+    this->OldUserFlagItems.push_back(item);
 
     // Restore the target link type since this item does not specify
     // one.
@@ -1174,7 +1182,7 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item)
   else
     {
     // This is a name specified by the user.
-    this->HaveUserFlagItem = true;
+    this->OldUserFlagItems.push_back(item);
 
     // We must ask the linker to search for a library with this name.
     // Restore the target link type since this item does not specify
@@ -1304,18 +1312,115 @@ void cmComputeLinkInformation::AddSharedLibNoSOName(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkInformation::FinishLinkerSearchDirectories()
+bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
 {
   // Support broken projects if necessary.
-  if(this->HaveUserFlagItem && this->OldLinkDirMode)
+  if(this->OldLinkDirItems.empty() || this->OldUserFlagItems.empty() ||
+     !this->OldLinkDirMode)
     {
-    for(std::vector<std::string>::const_iterator
-          i = this->OldLinkDirItems.begin();
-        i != this->OldLinkDirItems.end(); ++i)
-      {
-      this->OrderLinkerSearchPath->AddLinkLibrary(*i);
-      }
+    return true;
     }
+
+  // Enforce policy constraints.
+  switch(this->Target->GetPolicyStatusCMP0003())
+    {
+    case cmPolicies::WARN:
+      {
+      cmOStringStream w;
+      w << (this->Makefile->GetPolicies()
+            ->GetPolicyWarning(cmPolicies::CMP0003)) << "\n";
+      this->PrintLinkPolicyDiagnosis(w);
+      this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+                                        this->Target->GetBacktrace());
+      }
+    case cmPolicies::OLD:
+      // OLD behavior is to add the paths containing libraries with
+      // known full paths as link directories.
+      break;
+    case cmPolicies::NEW:
+      // Should never happen due to assignment of OldLinkDirMode
+      return true;
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      {
+      cmOStringStream e;
+      e << (this->Makefile->GetPolicies()->
+            GetRequiredPolicyError(cmPolicies::CMP0003)) << "\n";
+      this->PrintLinkPolicyDiagnosis(e);
+      this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                        this->Target->GetBacktrace());
+      return false;
+      }
+      break;
+    }
+
+  // Add the link directories for full path items.
+  for(std::vector<std::string>::const_iterator
+        i = this->OldLinkDirItems.begin();
+      i != this->OldLinkDirItems.end(); ++i)
+    {
+    this->OrderLinkerSearchPath->AddLinkLibrary(*i);
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
+{
+  // Name the target.
+  os << "Target \"" << this->Target->GetName() << "\" ";
+
+  // List the items that would add paths in old behavior.
+  os << " links to some items with known full path:\n";
+  for(std::vector<std::string>::const_iterator
+        i = this->OldLinkDirItems.begin();
+      i != this->OldLinkDirItems.end(); ++i)
+    {
+    os << "  " << *i << "\n";
+    }
+
+  // List the items that might need the old-style paths.
+  os << "and to some items with no path known:\n";
+  {
+  // Format the list of unknown items to be as short as possible while
+  // still fitting in the allowed width (a true solution would be the
+  // bin packing problem if we were allowed to change the order).
+  std::string::size_type max_size = 76;
+  std::string line;
+  const char* sep = "  ";
+  for(std::vector<std::string>::const_iterator
+        i = this->OldUserFlagItems.begin();
+      i != this->OldUserFlagItems.end(); ++i)
+    {
+    // If the addition of another item will exceed the limit then
+    // output the current line and reset it.  Note that the separator
+    // is either " " or ", " which is always 2 characters.
+    if(!line.empty() && (line.size() + i->size() + 2) > max_size)
+      {
+      os << line << "\n";
+      sep = "  ";
+      line = "";
+      }
+    line += sep;
+    line += *i;
+
+    // Convert to the other separator.
+    sep = ", ";
+    }
+  if(!line.empty())
+    {
+    os << line << "\n";
+    }
+  }
+
+  // Tell the user what is wrong.
+  os << "The linker will search for libraries in the second list.  "
+     << "Finding them may depend on linker search paths earlier CMake "
+     << "versions added as an implementation detail for linking to the "
+     << "libraries in the first list.  "
+     << "For compatibility CMake is including the extra linker search "
+     << "paths, but policy CMP0003 should be set by the project.";
 }
 
 //----------------------------------------------------------------------------

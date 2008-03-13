@@ -53,6 +53,7 @@ public:
 cmTarget::cmTarget()
 {
   this->Makefile = 0;
+  this->PolicyStatusCMP0003 = cmPolicies::WARN;
   this->LinkLibrariesAnalyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
@@ -726,6 +727,10 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
   // Save the backtrace of target construction.
   this->Makefile->GetBacktrace(this->Internal->Backtrace);
+
+  // Record current policies for later use.
+  this->PolicyStatusCMP0003 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0003);
 }
 
 //----------------------------------------------------------------------------

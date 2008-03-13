@@ -43,6 +43,7 @@ public:
     CMP0000, // Policy version specification
     CMP0001, // Ignore old compatibility variable
     CMP0002, // Target names must be unique
+    CMP0003, // Linking does not include extra -L paths
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.
