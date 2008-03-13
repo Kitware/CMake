@@ -221,6 +221,8 @@ void cmake::InitializeProperties()
 {
   this->Properties.clear();
   this->Properties.SetCMakeInstance(this);
+  this->AccessedProperties.clear();
+  this->PropertyDefinitions.clear();
 
   // initialize properties
   cmSourceFile::DefineProperties(this);
@@ -228,8 +230,6 @@ void cmake::InitializeProperties()
   cmMakefile::DefineProperties(this);
   cmTest::DefineProperties(this);
   cmake::DefineProperties(this);
-  this->AccessedProperties.clear();
-  this->PropertyDefinitions.clear();
 }
 
 void cmake::CleanupCommandsAndMacros()
