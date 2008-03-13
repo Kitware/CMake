@@ -295,6 +295,11 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
     isError = true;
     msg << "CMake Error:";
     }
+  else if(t == cmake::INTERNAL_ERROR)
+    {
+    isError = true;
+    msg << "CMake Internal Error, please report a bug: ";
+    }
   else
     {
     msg << "CMake Warning";
@@ -2029,7 +2034,9 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
       {
       // This case should never be called.  At-only is for
       // configure-file/string which always does no escapes.
-      abort();
+      this->IssueMessage(cmake::INTERNAL_ERROR,
+                         "ExpandVariablesInString @ONLY called "
+                         "on something with escapes.");
       }
 
     // Store an original copy of the input.

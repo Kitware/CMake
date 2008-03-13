@@ -61,6 +61,7 @@ class cmake
   enum MessageType
   { AUTHOR_WARNING,
     FATAL_ERROR,
+    INTERNAL_ERROR,
     MESSAGE,
     WARNING,
     LOG

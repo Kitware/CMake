@@ -643,7 +643,11 @@ void cmTarget::SetType(TargetType type, const char* name)
      type == cmTarget::INSTALL_PROGRAMS ||
      type == cmTarget::INSTALL_DIRECTORY)
     {
-    abort();
+    this->Makefile->
+      IssueMessage(cmake::INTERNAL_ERROR,
+                   "SetType called on cmTarget for INSTALL_FILES, "
+                   "INSTALL_PROGRAMS, or INSTALL_DIRECTORY ");
+    return;
     }
   // only add dependency information for library targets
   this->TargetTypeValue = type;
@@ -2099,7 +2103,11 @@ std::string cmTarget::NormalGetRealName(const char* config)
   // enforcement of the limited imported target API.
   if(this->IsImported())
     {
-    abort();
+    std::string msg =  "NormalGetRealName called on imported target: ";
+    msg += this->GetName();
+    this->GetMakefile()->
+      IssueMessage(cmake::INTERNAL_ERROR,
+                   msg.c_str());
     }
 
   if(this->GetType() == cmTarget::EXECUTABLE)
@@ -2424,7 +2432,11 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
   // enforcement of the limited imported target API.
   if(this->IsImported())
     {
-    abort();
+    std::string msg =  "GetLibraryNamesInternal called on imported target: ";
+    msg += this->GetName();
+    this->Makefile->IssueMessage(cmake::INTERNAL_ERROR,
+                                 msg.c_str());
+    return;
     }
 
   // Construct the name of the soname flag variable for this language.
@@ -2553,7 +2565,11 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
   // enforcement of the limited imported target API.
   if(this->IsImported())
     {
-    abort();
+    std::string msg =  "GetExecutableNamesInternal called on imported target: ";
+    msg += this->GetName();
+    this->GetMakefile()->
+      IssueMessage(cmake::INTERNAL_ERROR,
+                   msg.c_str());
     }
 
   // This versioning is supported only for executables and then only
@@ -2828,11 +2844,21 @@ const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
   if(implib &&
      !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
     {
-    abort();
+    std::string msg =  "GetAndCreateOutputDir, imlib set but there is no "
+      "CMAKE_IMPORT_LIBRARY_SUFFIX for target: ";
+    msg += this->GetName();
+    this->GetMakefile()->
+      IssueMessage(cmake::INTERNAL_ERROR,
+                   msg.c_str());
     }
   if(implib && !this->DLLPlatform)
     {
-    abort();
+    std::string msg =  "implib set for platform that does not "
+      " support DLL's for target: ";
+    msg += this->GetName();
+    this->GetMakefile()->
+      IssueMessage(cmake::INTERNAL_ERROR,
+                   msg.c_str());
     }
 
   // Select whether we are constructing the directory for the main

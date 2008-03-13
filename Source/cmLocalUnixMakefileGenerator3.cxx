@@ -1915,7 +1915,10 @@ cmLocalUnixMakefileGenerator3
   // Make sure we never hit this old case.
   if(source.GetProperty("MACOSX_PACKAGE_LOCATION"))
     {
-    abort();
+    std::string msg = "MACOSX_PACKAGE_LOCATION set on source file: ";
+    msg += source.GetFullPath();
+    this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR,
+                                      msg.c_str());
     }
 
   // Start with the target directory.
