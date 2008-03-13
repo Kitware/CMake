@@ -90,15 +90,22 @@ cmPolicies::cmPolicies()
     "A policy version number must be specified.",
     "CMake requires that projects specify the version of CMake to which "
     "they have been written.  "
-    "This policy has been put in place to help CMake maintain backwards "
-    "compatibility with existing projects while allowing it to evolve "
-    "more rapidly.\n"
+    "This policy has been put in place to help existing projects build with "
+    "new CMake versions as it evolves.  "
     "The easiest way to specify a policy version number is to "
-    "call the cmake_policy command at the top of your CMakeLists file:\n"
+    "call the cmake_minimum_required command at the top of "
+    "your CMakeLists.txt file:\n"
+    "  cmake_minimum_required(VERSION <major>.<minor>)\n"
+    "where \"<major>.<minor>\" is the version of CMake you want to support "
+    "(such as \"2.6\").  "
+    "The command will ensure that at least the given version of CMake is "
+    "running and set the policy version.  "
+    "See documentation of cmake_minimum_required for details.  "
+    "The cmake_policy command may be used at any time to set the "
+    "policy version:\n"
     "  cmake_policy(VERSION <major>.<minor>)\n"
-    "where <major>.<minor> is the version of CMake you want to support.  "
-    "The cmake_minimum_required command may also be used; see its "
-    "documentation for details.",
+    "This is the recommended way to set the policy version except at "
+    "the very top of a project.",
     2,6,0, cmPolicies::WARN
     );
 
