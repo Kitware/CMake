@@ -2060,6 +2060,17 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       }
     i++;
     }
+
+  std::string dir = cmSystemTools::GetFilenamePath(file.c_str());
+  if(!cmSystemTools::FileExists(dir.c_str()) &&
+     !cmSystemTools::MakeDirectory(dir.c_str()))
+    {
+    std::string errstring = "FILE(DOWNLOAD ) error; cannot create directory: "
+      + dir + ". Maybe need administrative privileges.";
+    this->SetError(errstring.c_str());
+    return false;
+    }
+
   std::ofstream fout(file.c_str(), std::ios::binary);
   if(!fout)
     {
