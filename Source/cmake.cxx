@@ -586,6 +586,16 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       // skip for now
       i++;
       }
+    else if(arg.find("-Wno-dev",0) == 0)
+      {
+      // skip for now
+      i++;
+      }
+    else if(arg.find("-Wdev",0) == 0)
+      {
+      // skip for now
+      i++;
+      }
     else if(arg.find("--graphviz=",0) == 0)
       {
       std::string path = arg.substr(strlen("--graphviz="));
@@ -4170,6 +4180,12 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
       msg << "  " << lfc << "\n";
       ++i;
       }
+    }
+
+  // Add a note about warning suppression.
+  if(t == cmake::AUTHOR_WARNING)
+    {
+    msg << "This warning may be suppressed using the -Wno-dev option.";
     }
 
   // Add a terminating blank line.
