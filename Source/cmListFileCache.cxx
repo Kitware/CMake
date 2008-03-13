@@ -143,11 +143,11 @@ bool cmListFile::ParseFile(const char* filename,
     // if no policy command is found this is an error
     if(!hasPolicy)
     {
-      switch (mf->GetPolicyStatus(cmPolicies::CMP_0000))
+      switch (mf->GetPolicyStatus(cmPolicies::CMP0000))
       {
         case cmPolicies::WARN:
           mf->IssueMessage(cmake::AUTHOR_WARNING,
-            mf->GetPolicies()->GetPolicyWarning(cmPolicies::CMP_0000)
+            mf->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0000)
             );
 
           // Implicitly set the version for the user.
@@ -156,7 +156,7 @@ bool cmListFile::ParseFile(const char* filename,
           break; 
         default:
           mf->IssueMessage(cmake::FATAL_ERROR,
-            mf->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP_0000)
+            mf->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0000)
             );
           return false;
       }

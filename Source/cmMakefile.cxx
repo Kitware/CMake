@@ -3278,17 +3278,17 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
     else 
       {
       // target names must be globally unique
-      switch (this->GetPolicyStatus(cmPolicies::CMP_0002))
+      switch (this->GetPolicyStatus(cmPolicies::CMP0002))
         {
         case cmPolicies::WARN:
           this->IssueMessage(cmake::AUTHOR_WARNING, this->GetPolicies()->
-                             GetPolicyWarning(cmPolicies::CMP_0002));
+                             GetPolicyWarning(cmPolicies::CMP0002));
         case cmPolicies::OLD:
           return true;
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
           this->IssueMessage(cmake::FATAL_ERROR,
-            this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP_0002)
+            this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0002)
             );
           return true;
         case cmPolicies::NEW:
@@ -3333,7 +3333,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         }
       e << "created in source directory \""
         << existing->GetMakefile()->GetCurrentDirectory() << "\".  "
-        << "See documentation for policy CMP_0002 for more details.";
+        << "See documentation for policy CMP0002 for more details.";
       msg = e.str();
       return false;
       }
@@ -3411,7 +3411,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 
     // Special hook for presenting compatibility variable as soon as
     // the user requests it.
-    if(id == cmPolicies::CMP_0001 &&
+    if(id == cmPolicies::CMP0001 &&
        (status == cmPolicies::WARN || status == cmPolicies::OLD))
       {
       if(!(this->GetCacheManager()

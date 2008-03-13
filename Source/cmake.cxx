@@ -3344,7 +3344,7 @@ void cmake::DefineProperties(cmake *cm)
     "ALLOW_DUPLICATE_CUSTOM_TARGETS", cmProperty::GLOBAL,
     "Allow duplicate custom targets to be created.",
     "Normally CMake requires that all targets built in a project have "
-    "globally unique logical names (see policy CMP_0002).  "
+    "globally unique logical names (see policy CMP0002).  "
     "This is necessary to generate meaningful project file names in "
     "Xcode and VS IDE generators.  "
     "It also allows the target names to be referenced unambiguously.\n"

@@ -86,7 +86,7 @@ cmPolicies::cmPolicies()
 {
   // define all the policies
   this->DefinePolicy(
-    CMP_0000, "CMP_0000",
+    CMP0000, "CMP0000",
     "A policy version number must be specified.",
     "CMake requires that projects specify the version of CMake to which "
     "they have been written.  "
@@ -103,7 +103,7 @@ cmPolicies::cmPolicies()
     );
 
   this->DefinePolicy(
-    CMP_0001, "CMP_0001",
+    CMP0001, "CMP0001",
     "CMAKE_BACKWARDS_COMPATIBILITY should no longer be used.",
     "The OLD behavior is to check CMAKE_BACKWARDS_COMPATIBILITY and present "
     "it to the user.  "
@@ -119,7 +119,7 @@ cmPolicies::cmPolicies()
     );
 
   this->DefinePolicy(
-    CMP_0002, "CMP_0002",
+    CMP0002, "CMP0002",
     "Logical target names must be globally unique.",
     "Targets names created with "
     "add_executable, add_library, or add_custom_target "
@@ -209,7 +209,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
       "In CMake 2.4 and below backwards compatibility was handled with the "
       "CMAKE_BACKWARDS_COMPATIBILITY variable.  "
       "In order to get compatibility features supporting versions earlier "
-      "than 2.4 set policy CMP_0001 to OLD to tell CMake to check the "
+      "than 2.4 set policy CMP0001 to OLD to tell CMake to check the "
       "CMAKE_BACKWARDS_COMPATIBILITY variable.  "
       "One way to so this is to set the policy version to 2.4 exactly."
       );

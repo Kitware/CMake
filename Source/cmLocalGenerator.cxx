@@ -2673,7 +2673,7 @@ bool cmLocalGenerator::NeedBackwardsCompatibility(unsigned int major,
 {
   // Check the policy to decide whether to pay attention to this
   // variable.
-  switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP_0001))
+  switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0001))
     {
     case cmPolicies::WARN:
       // WARN is just OLD without warning because user code does not
