@@ -1024,7 +1024,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
 {
   // Create a regular expression to match valid definitions.
   static cmsys::RegularExpression
-    valid("^[-/]D[A-Za-z_][A-Za-z0-9_]*(=.*)$");
+    valid("^[-/]D[A-Za-z_][A-Za-z0-9_]*(=.*)?$");
 
   // Make sure the definition matches.
   if(!valid.find(def.c_str()))
