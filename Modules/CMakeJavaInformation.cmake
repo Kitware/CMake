@@ -14,16 +14,22 @@ ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
 
 # this is a place holder if java needed flags for javac they would go here.
 IF(NOT CMAKE_Java_CREATE_STATIC_LIBRARY)
+  IF(WIN32)
+    SET(class_files_mask "*.class")
+  ELSE(WIN32)
+    SET(class_files_mask ".")
+  ENDIF(WIN32)
+
   SET(CMAKE_Java_CREATE_STATIC_LIBRARY
-      "<CMAKE_Java_ARCHIVE> -cf <TARGET> -C <OBJECT_DIR> *.class")
-  # "*.class" should really be "<OBJECTS>" but compling a java file can create
-  # more than one .class file, so for now get all of them
+      "<CMAKE_Java_ARCHIVE> -cf <TARGET> -C <OBJECT_DIR> ${class_files_mask}")
+    # "${class_files_mask}" should really be "<OBJECTS>" but compling a *.java
+    # file can create more than one *.class file...
 ENDIF(NOT CMAKE_Java_CREATE_STATIC_LIBRARY)
 
 # compile a Java file into an object file
 IF(NOT CMAKE_Java_COMPILE_OBJECT)
   SET(CMAKE_Java_COMPILE_OBJECT
-    "<CMAKE_Java_COMPILER>   <FLAGS> <SOURCE> -d <OBJECT_DIR>")
+    "<CMAKE_Java_COMPILER> <FLAGS> <SOURCE> -d <OBJECT_DIR>")
 ENDIF(NOT CMAKE_Java_COMPILE_OBJECT)
 
 # set java include flag option and the separator for multiple include paths
