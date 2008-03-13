@@ -483,6 +483,7 @@ void CMakeSetupDialog::error(const QString& message)
     m.replace(QString("&"), QString("&amp;"));
     m.replace(QString("<"), QString("&lt;"));
     m.replace(QString(">"), QString("&gt;"));
+    m.replace(QString(" "), QString("&nbsp;"));
     this->Output->append(QString("<b><font color=red>%1</font></b>").arg(m));
     }
 }
