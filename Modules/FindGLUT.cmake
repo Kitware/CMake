@@ -8,63 +8,46 @@
 #  GLUT_Xi_LIBRARY   = the full path to the Xi Library.
 
 IF (WIN32)
-
-  IF(CYGWIN)
-
-    FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h )
-
-    FIND_LIBRARY( GLUT_glut_LIBRARY glut32
-      ${OPENGL_LIBRARY_DIR}
+  FIND_PATH( GLUT_INCLUDE_DIR NAMES GL/glut.h 
+    PATHS  ${GLUT_ROOT_PATH}/include )
+  FIND_LIBRARY( GLUT_glut_LIBRARY NAMES glut glut32
+    ${OPENGL_LIBRARY_DIR}
+    ${GLUT_ROOT_PATH}/Release
     )
-
-
-  ELSE(CYGWIN)
-
-    FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
-      ${GLUT_ROOT_PATH}/include
-    )
-
-    FIND_LIBRARY( GLUT_glut_LIBRARY glut
-      ${GLUT_ROOT_PATH}/Release
-      ${OPENGL_LIBRARY_DIR}
-    )
-
-  ENDIF(CYGWIN)
-
 ELSE (WIN32)
-
+  
   IF (APPLE)
-# These values for Apple could probably do with improvement.
+    # These values for Apple could probably do with improvement.
     FIND_PATH( GLUT_INCLUDE_DIR glut.h
       /System/Library/Frameworks/GLUT.framework/Versions/A/Headers
       ${OPENGL_LIBRARY_DIR}
-    )
+      )
     SET(GLUT_glut_LIBRARY "-framework GLUT" CACHE STRING "GLUT library for OSX") 
     SET(GLUT_cocoa_LIBRARY "-framework Cocoa" CACHE STRING "Cocoa framework for OSX")
   ELSE (APPLE)
-
+    
     FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
       /usr/include/GL
       /usr/openwin/share/include
       /usr/openwin/include
       /opt/graphics/OpenGL/include
       /opt/graphics/OpenGL/contrib/libglut
-    )
-
+      )
+  
     FIND_LIBRARY( GLUT_glut_LIBRARY glut
       /usr/openwin/lib
-    )
-
+      )
+    
     FIND_LIBRARY( GLUT_Xi_LIBRARY Xi
       /usr/openwin/lib
-    )
-
+      )
+    
     FIND_LIBRARY( GLUT_Xmu_LIBRARY Xmu
       /usr/openwin/lib
-    )
-
+      )
+    
   ENDIF (APPLE)
-
+  
 ENDIF (WIN32)
 
 SET( GLUT_FOUND "NO" )
@@ -77,13 +60,13 @@ IF(GLUT_INCLUDE_DIR)
       ${GLUT_Xmu_LIBRARY}
       ${GLUT_Xi_LIBRARY} 
       ${GLUT_cocoa_LIBRARY}
-    )
+      )
     SET( GLUT_FOUND "YES" )
-
-#The following deprecated settings are for backwards compatibility with CMake1.4
+    
+    #The following deprecated settings are for backwards compatibility with CMake1.4
     SET (GLUT_LIBRARY ${GLUT_LIBRARIES})
     SET (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIR})
-
+    
   ENDIF(GLUT_glut_LIBRARY)
 ENDIF(GLUT_INCLUDE_DIR)
 
@@ -92,4 +75,4 @@ MARK_AS_ADVANCED(
   GLUT_glut_LIBRARY
   GLUT_Xmu_LIBRARY
   GLUT_Xi_LIBRARY
-)
+  )
