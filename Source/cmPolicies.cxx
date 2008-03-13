@@ -380,7 +380,7 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
   cmOStringStream msg;
   msg <<
     "Policy " << pos->second->IDString << " is not set: "
-    "" << pos->second->ShortDescription << "\n"
+    "" << pos->second->ShortDescription << "  "
     "Run \"cmake --help-policy " << pos->second->IDString << "\" for "
     "policy details.  "
     "Use the cmake_policy command to set the policy "
@@ -404,7 +404,7 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
   cmOStringStream error;
   error <<
     "Policy " << pos->second->IDString << " is not set to NEW: "
-    "" << pos->second->ShortDescription << "\n"
+    "" << pos->second->ShortDescription << "  "
     "Run \"cmake --help-policy " << pos->second->IDString << "\" for "
     "policy details.  "
     "CMake now requires this policy to be set to NEW by the project.  "
