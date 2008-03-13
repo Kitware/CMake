@@ -3332,11 +3332,12 @@ bool cmMakefile::SetPolicy(const char *id,
 {
   cmPolicies::PolicyID pid;
   if (!this->GetPolicies()->GetPolicyID(id, /* out */ pid))
-  {
-    cmSystemTools::Error("Invalid policy string used. Invalid string was "
-      , id);
+    {
+    cmOStringStream e;
+    e << "Policy \"" << id << "\" is not known to this version of CMake.";
+    this->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
-  }
+    }
   return this->SetPolicy(pid,status);
 }
 
