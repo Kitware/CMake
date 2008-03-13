@@ -106,7 +106,7 @@ const char* cmCPackCygwinBinaryGenerator::GetOutputExtension()
                   "CPACK_CYGWIN_PATCH_NUMBER not specified using 1"
                   << std::endl);
     }
-  this->OutputExtension += 
+  this->OutputExtension += patchNumber;
   this->OutputExtension += ".tar.bz2";
   return this->OutputExtension.c_str();
 }

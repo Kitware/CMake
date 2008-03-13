@@ -32,8 +32,9 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   SET(CPACK_NSIS_CONTACT @CPACK_PACKAGE_CONTACT@)
   SET(CPACK_NSIS_MODIFY_PATH ON)
 endif(CPACK_GENERATOR MATCHES "NSIS")
-# include the cpack options 
-INCLUDE("@QT_DIALOG_CPACK_OPTIONS_FILE@")
+# include the cpack options for qt dialog if they exisit
+# they might not if qt was not enabled for the build
+INCLUDE("@QT_DIALOG_CPACK_OPTIONS_FILE@" OPTIONAL)
 
 if(CPACK_GENERATOR MATCHES "CygwinSource")
   # when packaging source make sure the .build directory is not included

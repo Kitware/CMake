@@ -817,7 +817,15 @@ bool cmCPackGenerator::IsSet(const char* name) const
 //----------------------------------------------------------------------
 const char* cmCPackGenerator::GetOption(const char* op)
 { 
-  return this->MakefileMap->GetDefinition(op);
+  const char* ret = this->MakefileMap->GetDefinition(op);
+  if(!ret)
+    { 
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, 
+                  "Warning, GetOption return NULL for: "
+                  << op 
+                  << std::endl);
+    }
+  return ret;
 }
 
 //----------------------------------------------------------------------
