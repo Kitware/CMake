@@ -139,17 +139,7 @@ bool cmSetCommand
       args.size() > 1 && args[args.size() - 2] == "CACHE" ||
       force && !cache)
     {
-    std::string message;
-    message += "Syntax error in SET:\n";
-    message += "See the help for the SET command:\n";
-    message += "SET (";
-    for(std::vector<std::string>::const_iterator i = args.begin();
-        i != args.end(); ++i)
-      {
-      message += *i;
-      }
-    message += ")\n";
-    this->SetError(message.c_str());
+    this->SetError("given invalid arguments for CACHE mode.");
     return false;
     }
   
