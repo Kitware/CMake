@@ -25,6 +25,7 @@ class cmMakefile;
 class cmSourceFile;
 class cmGlobalGenerator;
 class cmComputeLinkInformation;
+class cmListFileBacktrace;
 
 struct cmTargetLinkInformationMap:
   public std::map<cmStdString, cmComputeLinkInformation*>
@@ -373,6 +374,9 @@ public:
 
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple();
+
+  /** Get a backtrace from the creation of the target.  */
+  cmListFileBacktrace const& GetBacktrace() const;
 
 private:
   /**

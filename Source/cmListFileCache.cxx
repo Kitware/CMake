@@ -268,3 +268,18 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
 
   return false;
 }
+
+//----------------------------------------------------------------------------
+std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
+{
+  os << lfc.FilePath;
+  if(lfc.Line)
+    {
+    os << ":" << lfc.Line;
+    if(!lfc.Name.empty())
+      {
+      os << " (" << lfc.Name << ")";
+      }
+    }
+  return os;
+}

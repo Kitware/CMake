@@ -28,6 +28,7 @@
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmTest.h"
+#include "cmDocumentationFormatterText.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
@@ -4107,4 +4108,81 @@ int cmake::VisualStudioLinkNonIncremental(std::vector<std::string>& args,
     return -1;
     }
   return 0;
+}
+
+//----------------------------------------------------------------------------
+void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
+                         cmListFileBacktrace const& backtrace)
+{
+  cmOStringStream msg;
+  bool isError = false;
+  // Construct the message header.
+  if(t == cmake::FATAL_ERROR)
+    {
+    isError = true;
+    msg << "CMake Error";
+    }
+  else if(t == cmake::INTERNAL_ERROR)
+    {
+    isError = true;
+    msg << "CMake Internal Error (please report a bug)";
+    }
+  else
+    {
+    msg << "CMake Warning";
+    if(t == cmake::AUTHOR_WARNING)
+      {
+      // Allow suppression of these warnings.
+      cmCacheManager::CacheIterator it = this->CacheManager
+        ->GetCacheIterator("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
+      if(!it.IsAtEnd() && it.GetValueAsBool())
+        {
+        return;
+        }
+      msg << " (dev)";
+      }
+    }
+
+  // Add the immediate context.
+  cmListFileBacktrace::const_iterator i = backtrace.begin();
+  if(i != backtrace.end())
+    {
+    cmListFileContext const& lfc = *i;
+    msg << (lfc.Line? " at ": " in ") << lfc;
+    ++i;
+    }
+
+  // Add the message text.
+  {
+  msg << ":\n";
+  cmDocumentationFormatterText formatter;
+  formatter.SetIndent("  ");
+  formatter.PrintFormatted(msg, text.c_str());
+  }
+
+  // Add the rest of the context.
+  if(i != backtrace.end())
+    {
+    msg << "Call Stack (most recent call first):\n";
+    while(i != backtrace.end())
+      {
+      cmListFileContext const& lfc = *i;
+      msg << "  " << lfc << "\n";
+      ++i;
+      }
+    }
+
+  // Add a terminating blank line.
+  msg << "\n";
+
+  // Output the message.
+  if(isError)
+    {
+    cmSystemTools::SetErrorOccured();
+    cmSystemTools::Message(msg.str().c_str(), "Error");
+    }
+  else
+    {
+    cmSystemTools::Message(msg.str().c_str(), "Warning");
+    }
 }

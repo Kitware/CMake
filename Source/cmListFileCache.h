@@ -57,10 +57,14 @@ struct cmListFileContext
   long Line;
 };
 
+std::ostream& operator<<(std::ostream&, cmListFileContext const&);
+
 struct cmListFileFunction: public cmListFileContext
 {
   std::vector<cmListFileArgument> Arguments;
 };
+
+class cmListFileBacktrace: public std::vector<cmListFileContext> {};
 
 struct cmListFile
 {

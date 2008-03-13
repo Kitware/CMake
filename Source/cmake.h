@@ -54,6 +54,7 @@ class cmFileTimeComparison;
 class cmExternalMakefileProjectGenerator;
 class cmDocumentationSection;
 class cmPolicies;
+class cmListFileBacktrace;
 
 class cmake
 {
@@ -349,6 +350,10 @@ class cmake
     {
       this->SuppressDevWarnings = v;
     }
+
+  /** Display a message to the user.  */
+  void IssueMessage(cmake::MessageType t, std::string const& text,
+                    cmListFileBacktrace const& backtrace);
 protected:
   void InitializeProperties();
   int HandleDeleteCacheVariables(const char* var);

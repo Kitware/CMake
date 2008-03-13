@@ -607,6 +607,11 @@ public:
     std::string GetListFileStack();
 
   /**
+   * Get the current context backtrace.
+   */
+  bool GetBacktrace(cmListFileBacktrace& backtrace) const;
+
+  /**
    * Get the vector of  files created by this makefile
    */
   const std::vector<std::string>& GetOutputFiles() const

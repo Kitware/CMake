@@ -35,8 +35,6 @@
 #include "cmake.h"
 #include <stdlib.h> // required for atoi
 
-#include "cmDocumentationFormatterText.h"
-
 #include <cmsys/RegularExpression.hxx>
 
 #include <cmsys/auto_ptr.hxx>
@@ -287,108 +285,51 @@ bool cmMakefile::CommandExists(const char* name) const
 void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
 {
-  cmOStringStream msg;
-  bool isError = false;
-  // Construct the message header.
-  if(t == cmake::FATAL_ERROR)
+  // Collect context information.
+  cmListFileBacktrace backtrace;
+  if(!this->CallStack.empty())
     {
-    isError = true;
-    msg << "CMake Error:";
-    }
-  else if(t == cmake::INTERNAL_ERROR)
-    {
-    isError = true;
-    msg << "CMake Internal Error, please report a bug: ";
-    }
-  else
-    {
-    msg << "CMake Warning";
-    if(t == cmake::AUTHOR_WARNING)
+    if((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR))
       {
-      if(this->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS"))
-        {
-        return;
-        }
-      msg << "(dev)";
+      this->CallStack.back().Status->SetNestedError(true);
       }
-    msg << ":";
-    }
-
-  // Add the immediate context.
-  CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
-  if(i != this->CallStack.rend())
-    {
-    if(isError)
-      {
-      (*i).Status->SetNestedError(true);
-      }
-    cmListFileContext const& lfc = *(*i).Context;
-    msg
-      << " at "
-      << this->LocalGenerator->Convert(lfc.FilePath.c_str(),
-                                       cmLocalGenerator::HOME)
-      << ":" << lfc.Line << " " << lfc.Name;
-    ++i;
+    this->GetBacktrace(backtrace);
     }
   else if(!this->ListFileStack.empty())
     {
     // We are processing the project but are not currently executing a
     // command.  Add whatever context information we have.
-    if(this->LocalGenerator->GetParent())
+    cmListFileContext lfc;
+    lfc.FilePath = this->ListFileStack.back();
+    lfc.Line = 0;
+    if(!this->GetCMakeInstance()->GetIsInTryCompile())
       {
-      msg << " in directory "
-          << this->LocalGenerator->Convert(this->GetCurrentDirectory(),
-                                           cmLocalGenerator::HOME);
+      lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath.c_str(),
+                                                   cmLocalGenerator::HOME);
       }
-    else if(this->GetCMakeInstance()->GetIsInTryCompile())
-      {
-      msg << " in directory " << this->GetCurrentDirectory();
-      }
-    else
-      {
-      msg << " in top-level directory";
-      }
+    backtrace.push_back(lfc);
     }
 
-  // Add the message text.
-  {
-  msg << " {\n";
-  cmDocumentationFormatterText formatter;
-  formatter.SetIndent("  ");
-  formatter.PrintFormatted(msg, text.c_str());
-  msg << "}";
-  }
+  // Issue the message.
+  this->GetCMakeInstance()->IssueMessage(t, text, backtrace);
+}
 
-  // Add the rest of the context.
-  if(i != this->CallStack.rend())
+//----------------------------------------------------------------------------
+bool cmMakefile::GetBacktrace(cmListFileBacktrace& backtrace) const
+{
+  if(this->CallStack.empty())
     {
-    msg << " with call stack {\n";
-    while(i != this->CallStack.rend())
-      {
-      cmListFileContext const& lfc = *(*i).Context;
-      msg << "  "
-          << this->LocalGenerator->Convert(lfc.FilePath.c_str(),
-                                           cmLocalGenerator::HOME)
-          << ":" << lfc.Line << " " << lfc.Name << "\n";
-      ++i;
-      }
-    msg << "}\n";
+    return false;
     }
-  else
+  for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
+      i != this->CallStack.rend(); ++i)
     {
-    msg << "\n";
+    cmListFileContext lfc = *(*i).Context;
+    lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath.c_str(),
+                                                 cmLocalGenerator::HOME);
+    backtrace.push_back(lfc);
     }
-
-  // Output the message.
-  if(isError)
-    {
-    cmSystemTools::SetErrorOccured();
-    cmSystemTools::Message(msg.str().c_str(), "Error");
-    }
-  else
-    {
-    cmSystemTools::Message(msg.str().c_str(), "Warning");
-    }
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -1647,12 +1588,11 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
 cmTarget*
 cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
 {
-  cmTargets::iterator it;
-  cmTarget target;
+  cmTargets::iterator it =
+    this->Targets.insert(cmTargets::value_type(name, cmTarget())).first;
+  cmTarget& target = it->second;
   target.SetType(type, name);
   target.SetMakefile(this);
-  it=this->Targets.insert(
-      cmTargets::value_type(target.GetName(), target)).first;
   this->LocalGenerator->GetGlobalGenerator()->AddTarget(*it);
   return &it->second;
 }

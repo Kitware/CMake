@@ -21,6 +21,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmComputeLinkInformation.h"
+#include "cmListFileCache.h"
 #include <map>
 #include <set>
 #include <queue>
@@ -43,6 +44,9 @@ public:
   typedef cmTarget::SourceFileFlags SourceFileFlags;
   std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
   bool SourceFileFlagsConstructed;
+
+  // The backtrace when the target was created.
+  cmListFileBacktrace Backtrace;
 };
 
 //----------------------------------------------------------------------------
@@ -719,6 +723,15 @@ void cmTarget::SetMakefile(cmMakefile* mf)
       this->SetPropertyDefault(property.c_str(), 0);
       }
     }
+
+  // Save the backtrace of target construction.
+  this->Makefile->GetBacktrace(this->Internal->Backtrace);
+}
+
+//----------------------------------------------------------------------------
+cmListFileBacktrace const& cmTarget::GetBacktrace() const
+{
+  return this->Internal->Backtrace;
 }
 
 //----------------------------------------------------------------------------
