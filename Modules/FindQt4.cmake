@@ -28,6 +28,7 @@
 #                    QT_USE_QTHELP
 #                    QT_USE_QTWEBKIT
 #                    QT_USE_QTXMLPATTERNS
+#                    QT_USE_PHONON
 #
 # All the libraries required are stored in a variable called QT_LIBRARIES.  
 # Add this variable to your TARGET_LINK_LIBRARIES.  Inlcudes and definitions
@@ -120,6 +121,7 @@
 #  QT_QTHELP_FOUND          True if QtHelp was found.
 #  QT_QTWEBKIT_FOUND        True if QtWebKit was found.
 #  QT_QTXMLPATTERNS_FOUND   True if QtXmlPatterns was found.
+#  QT_PHONON_FOUND          True if phonon was found.
 #                      
 #  QT_DEFINITIONS   Definitions to use when compiling code that uses Qt.
 #                  
@@ -151,6 +153,7 @@
 #  QT_QTHELP_INCLUDE_DIR       Path to "include/QtHelp"
 #  QT_QTWEBKIT_INCLUDE_DIR     Path to "include/QtWebKit"
 #  QT_QTXMLPATTERNS_INCLUDE_DIR  Path to "include/QtXmlPatterns"
+#  QT_PHONON_INCLUDE_DIR       Path to "include/phonon"
 #                            
 #  QT_LIBRARY_DIR              Path to "lib" of Qt4
 # 
@@ -182,6 +185,7 @@
 #  QT_QTHELP_LIBRARY                The QtHelp library
 #  QT_QTWEBKIT_LIBRARY              The QtWebKit library
 #  QT_QTXMLPATTERNS_LIBRARY         The QtXmlPatterns library
+#  QT_PHONON_LIBRARY                The phonon library
 #  
 # also defined, but NOT for general use are
 #  QT_MOC_EXECUTABLE          Where to find the moc tool.
@@ -618,6 +622,13 @@ IF (QT4_QMAKE_FOUND)
     ${QT_LIBRARY_DIR}/QtXmlPatterns.framework/Headers
     NO_DEFAULT_PATH
     )
+  
+  # Set QT_PHONON_INCLUDE_DIR
+  FIND_PATH(QT_PHONON_INCLUDE_DIR phonon
+    PATHS
+    ${QT_INCLUDE_DIR}/phonon
+    NO_DEFAULT_PATH
+    )
 
   # Make variables changeble to the advanced user
   MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_INCLUDE_DIR QT_QT_INCLUDE_DIR QT_DOC_DIR QT_MKSPECS_DIR QT_PLUGINS_DIR)
@@ -730,6 +741,10 @@ IF (QT4_QMAKE_FOUND)
   # Set QT_QTXMLPATTERNS_LIBRARY
   FIND_LIBRARY(QT_QTXMLPATTERNS_LIBRARY_RELEASE NAMES QtXmlPatterns QtXmlPatterns4 PATHS ${QT_LIBRARY_DIR}        NO_DEFAULT_PATH)
   FIND_LIBRARY(QT_QTXMLPATTERNS_LIBRARY_DEBUG   NAMES QtXmlPatterns_debug QtXmlPatternsd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
+  
+  # Set QT_PHONON_LIBRARY
+  FIND_LIBRARY(QT_PHONON_LIBRARY_RELEASE NAMES phonon phonon4 PATHS ${QT_LIBRARY_DIR}        NO_DEFAULT_PATH)
+  FIND_LIBRARY(QT_PHONON_LIBRARY_DEBUG   NAMES phonon_debug phonond4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
 
   ############################################
   #
@@ -807,6 +822,7 @@ IF (QT4_QMAKE_FOUND)
   _QT4_ADJUST_LIB_VARS(QTHELP)
   _QT4_ADJUST_LIB_VARS(QTWEBKIT)
   _QT4_ADJUST_LIB_VARS(QTXMLPATTERNS)
+  _QT4_ADJUST_LIB_VARS(PHONON)
 
   # platform dependent libraries
   IF(Q_WS_X11)
