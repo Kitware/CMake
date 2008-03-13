@@ -200,6 +200,22 @@ cmPolicies::cmPolicies()
     "When all items on the link line have known paths CMake does not check "
     "this policy so it has no effect.",
     2,6,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0004, "CMP0004",
+    "Libraries linked may not have leading or trailing whitespace.",
+    "CMake versions 2.4 and below silently removed leading and trailing "
+    "whitespace from libraries linked with code like\n"
+    "  target_link_libraries(myexe \" A \")\n"
+    "This could lead to subtle errors in user projects.\n"
+    "The OLD behavior for this policy is to silently remove leading and "
+    "trailing whitespace.  "
+    "The NEW behavior for this policy is to diagnose the existence of "
+    "such whitespace as an error.  "
+    "The setting for this policy used when checking the library names is "
+    "that in effect when the target is created by an add_executable or "
+    "add_library command.",
+    2,6,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

@@ -44,6 +44,7 @@ public:
     CMP0001, // Ignore old compatibility variable
     CMP0002, // Target names must be unique
     CMP0003, // Linking does not include extra -L paths
+    CMP0004, // Libraries linked may not have leading or trailing whitespace
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.

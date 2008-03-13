@@ -21,6 +21,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
+#include "cmake.h"
 
 #include <cmsys/stl/algorithm>
 
@@ -161,6 +162,7 @@ cmComputeLinkDepends
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
+  this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
   // The configuration being linked.
   this->Config = config;
@@ -568,17 +570,45 @@ std::string cmComputeLinkDepends::CleanItemName(std::string const& item)
     {
     lib = lib.substr(0, pos+1);
     }
-  if(lib != item && !this->Makefile->NeedBackwardsCompatibility(2,4))
+  if(lib != item)
     {
-    cmOStringStream e;
-    e << "Target \"" << this->Target->GetName() << "\" links to item \""
-      << item << "\" which has leading or trailing whitespace.  "
-      << "CMake is stripping off the whitespace but this may not be "
-      << "supported in the future.  "
-      << "Update the CMakeLists.txt files to avoid adding the whitespace.  "
-      << "Set CMAKE_BACKWARDS_COMPATIBILITY to 2.4 or lower to disable this "
-      << "warning.";
-    cmSystemTools::Message(e.str().c_str());
+    switch(this->Target->GetPolicyStatusCMP0004())
+      {
+      case cmPolicies::WARN:
+        {
+        cmOStringStream w;
+        w << (this->Makefile->GetPolicies()
+              ->GetPolicyWarning(cmPolicies::CMP0004)) << "\n"
+          << "Target \"" << this->Target->GetName() << "\" links to item \""
+          << item << "\" which has leading or trailing whitespace.";
+        this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+                                          this->Target->GetBacktrace());
+        }
+      case cmPolicies::OLD:
+        break;
+      case cmPolicies::NEW:
+        {
+        cmOStringStream e;
+        e << "Target \"" << this->Target->GetName() << "\" links to item \""
+          << item << "\" which has leading or trailing whitespace.  "
+          << "This is now an error according to policy CMP0004.";
+        this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                          this->Target->GetBacktrace());
+        }
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        {
+        cmOStringStream e;
+        e << (this->Makefile->GetPolicies()
+              ->GetRequiredPolicyError(cmPolicies::CMP0004)) << "\n"
+          << "Target \"" << this->Target->GetName() << "\" links to item \""
+          << item << "\" which has leading or trailing whitespace.";
+        this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                          this->Target->GetBacktrace());
+        }
+        break;
+      }
     }
   return lib;
 }

@@ -29,6 +29,7 @@ class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
 class cmTarget;
+class cmake;
 
 /** \class cmComputeLinkDepends
  * \brief Compute link dependencies for targets.
@@ -60,6 +61,7 @@ private:
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator* GlobalGenerator;
+  cmake* CMakeInstance;
   bool DebugMode;
 
   // Configuration information.
