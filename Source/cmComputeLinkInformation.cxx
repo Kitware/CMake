@@ -1001,6 +1001,15 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
     this->Items.push_back(Item(this->LibLinkFileFlag, false));
     }
 
+  // For compatibility with CMake 2.4 include the item's directory in
+  // the linker search path.
+  if(this->OldLinkDirMode &&
+     this->OldLinkDirMask.find(cmSystemTools::GetFilenamePath(item)) ==
+     this->OldLinkDirMask.end())
+    {
+    this->OldLinkDirItems.push_back(item);
+    }
+
   // Now add the full path to the library.
   this->Items.push_back(Item(item, true));
 }
@@ -1372,16 +1381,21 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
   os << "Target \"" << this->Target->GetName() << "\" ";
 
   // List the items that would add paths in old behavior.
-  os << " links to some items with known full path:\n";
+  std::set<cmStdString> emitted;
+  os << " links to some items by full path not located in any linker search "
+     << "directory added by a link_directories command:\n";
   for(std::vector<std::string>::const_iterator
         i = this->OldLinkDirItems.begin();
       i != this->OldLinkDirItems.end(); ++i)
     {
-    os << "  " << *i << "\n";
+    if(emitted.insert(cmSystemTools::GetFilenamePath(*i)).second)
+      {
+      os << "  " << *i << "\n";
+      }
     }
 
   // List the items that might need the old-style paths.
-  os << "and to some items with no path known:\n";
+  os << "This is okay but it also links to some items with no path known:\n";
   {
   // Format the list of unknown items to be as short as possible while
   // still fitting in the allowed width (a true solution would be the
