@@ -1349,7 +1349,6 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
     case cmPolicies::NEW:
       // Should never happen due to assignment of OldLinkDirMode
       return true;
-      break;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
       {
@@ -1361,7 +1360,6 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
                                         this->Target->GetBacktrace());
       return false;
       }
-      break;
     }
 
   // Add the link directories for full path items.
