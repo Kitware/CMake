@@ -2586,11 +2586,10 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
   // enforcement of the limited imported target API.
   if(this->IsImported())
     {
-    std::string msg =  "GetExecutableNamesInternal called on imported target: ";
+    std::string msg =
+      "GetExecutableNamesInternal called on imported target: ";
     msg += this->GetName();
-    this->GetMakefile()->
-      IssueMessage(cmake::INTERNAL_ERROR,
-                   msg.c_str());
+    this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg.c_str());
     }
 
   // This versioning is supported only for executables and then only

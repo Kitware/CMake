@@ -173,12 +173,12 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
     // Each side has a directory relative to a different location.
     // This can occur when referencing a source file from a different
     // directory.  This is not yet allowed.
-    this->Makefile->
-      IssueMessage(cmake::INTERNAL_ERROR,
-                   "Matches error: Each side has a directory relative to a different"
-                   " location. This can occur when referencing a "
-                   "source file from a different directory.  "
-                   "This is not yet allowed.");
+    this->Makefile->IssueMessage(
+      cmake::INTERNAL_ERROR,
+      "Matches error: Each side has a directory relative to a different "
+      "location. This can occur when referencing a source file from a "
+      "different directory.  This is not yet allowed."
+      );
     return false;
     }
   else if(this->AmbiguousDirectory)
