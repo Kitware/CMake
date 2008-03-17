@@ -104,7 +104,10 @@ IF(BUILD_TESTING)
   ENDIF(NOT UPDATE_TYPE)
 
   IF(NOT UPDATE_TYPE)
-    MESSAGE(STATUS "Cannot determine repository type. Please set UPDATE_TYPE to 'cvs' or 'svn'. CTest update will not work.")
+    IF(NOT __CTEST_UPDATE_TYPE_COMPLAINED)
+      SET(__CTEST_UPDATE_TYPE_COMPLAINED 1 CACHE INTERNAL "Already complained about update type.")
+      MESSAGE(STATUS "CTest cannot determine repository type. Please set UPDATE_TYPE to 'cvs' or 'svn'. CTest update will not work.")
+    ENDIF(NOT __CTEST_UPDATE_TYPE_COMPLAINED)
   ENDIF(NOT UPDATE_TYPE)
 
   IF(UPDATE_TYPE MATCHES "[Cc][Vv][Ss]")
