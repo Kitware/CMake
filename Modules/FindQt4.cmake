@@ -1444,7 +1444,18 @@ IF (QT4_QMAKE_FOUND)
   ENDIF(Q_WS_WIN)
   
   IF(Q_WS_MAC)
-    SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework Carbon" "-framework QuickTime")
+    SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework Carbon")
+    
+    # Qt 4.0, 4.1, 4.2 use QuickTime
+    IF(found_qt_minor_vers LESS 3)
+      SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework QuickTime")
+    ENDIF(found_qt_minor_vers LESS 3)
+    
+    # Qt 4.2+ use AppKit
+    IF(found_qt_minor_vers GREATER 1)
+      SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework AppKit")
+    ENDIF(found_qt_minor_vers LESS 1)
+
     SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} "-framework ApplicationServices")
   ENDIF(Q_WS_MAC)
 
