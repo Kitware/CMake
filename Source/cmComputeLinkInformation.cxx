@@ -1338,9 +1338,18 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
       cmOStringStream w;
       w << (this->Makefile->GetPolicies()
             ->GetPolicyWarning(cmPolicies::CMP0003)) << "\n";
-      this->PrintLinkPolicyDiagnosis(w);
-      this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                        this->Target->GetBacktrace());
+      std::string libs = "CMP0003-WARNING-FOR-";
+      this->PrintLinkPolicyDiagnosis(w, libs);
+      const char* def = this->CMakeInstance->GetCacheDefinition(libs.c_str());
+      if(!def)
+        {
+        this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+                                          this->Target->GetBacktrace());
+        this->CMakeInstance->AddCacheEntry(libs.c_str(),
+                                           "TRUE",
+                                           "",
+                                           cmCacheManager::INTERNAL);
+        }
       }
     case cmPolicies::OLD:
       // OLD behavior is to add the paths containing libraries with
@@ -1355,7 +1364,8 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
       cmOStringStream e;
       e << (this->Makefile->GetPolicies()->
             GetRequiredPolicyError(cmPolicies::CMP0003)) << "\n";
-      this->PrintLinkPolicyDiagnosis(e);
+      std::string libs;
+      this->PrintLinkPolicyDiagnosis(e, libs);
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
                                         this->Target->GetBacktrace());
       return false;
@@ -1373,8 +1383,13 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
+void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os, 
+                                                        std::string& libs)
 {
+  os << "The best way to remove this warning is to set policy CMP0003 "
+     << "to NEW. Then, try to build the project, if you get linker errors, "
+     << "either use the full paths to the libraries that can not be "
+     << "found, or use link_directories to add the missing directories.\n";
   // Name the target.
   os << "Target \"" << this->Target->GetName() << "\" ";
 
@@ -1416,7 +1431,7 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
       }
     line += sep;
     line += *i;
-
+    libs += *i;
     // Convert to the other separator.
     sep = ", ";
     }
@@ -1427,12 +1442,13 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
   }
 
   // Tell the user what is wrong.
-  os << "The linker will search for libraries in the second list.  "
+  os << "This maybe OK as well.  However, the linker will search "
+     << "for libraries in the second list.  "
      << "Finding them may depend on linker search paths earlier CMake "
      << "versions added as an implementation detail for linking to the "
      << "libraries in the first list.  "
      << "For compatibility CMake is including the extra linker search "
-     << "paths, but policy CMP0003 should be set by the project.";
+     << "paths, but policy CMP0003 should be set by the project. ";
 }
 
 //----------------------------------------------------------------------------

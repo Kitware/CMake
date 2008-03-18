@@ -154,7 +154,7 @@ private:
   // Linker search path computation.
   cmOrderDirectories* OrderLinkerSearchPath;
   bool FinishLinkerSearchDirectories();
-  void PrintLinkPolicyDiagnosis(std::ostream&);
+  void PrintLinkPolicyDiagnosis(std::ostream&, std::string& libs);
   std::set<cmStdString> ImplicitLinkDirs;
 
   // Linker search path compatibility mode.
