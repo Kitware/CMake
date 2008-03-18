@@ -402,7 +402,8 @@ bool cmListCommand
 {
   if(args.size() < 2)
     {
-    this->SetError("sub-command REMOVE_DUPLICATES requires a list as an argument.");
+    this->SetError(
+      "sub-command REMOVE_DUPLICATES requires a list as an argument.");
     return false;
     }
 
@@ -411,7 +412,8 @@ bool cmListCommand
   std::vector<std::string> varArgsExpanded;
   if ( !this->GetList(varArgsExpanded, listName.c_str()) )
     {
-    this->SetError("sub-command REMOVE_DUPLICATES requires list to be present.");
+    this->SetError(
+      "sub-command REMOVE_DUPLICATES requires list to be present.");
     return false;
     }
 

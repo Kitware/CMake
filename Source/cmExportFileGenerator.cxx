@@ -20,6 +20,7 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmVersion.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -79,6 +80,11 @@ bool cmExportFileGenerator::GenerateImportFile()
   std::ostream& os = *foutPtr;
 
   // Start with the import file header.
+  os << "CMAKE_POLICY(PUSH)\n"
+     << "CMAKE_POLICY(VERSION "
+     << cmVersion::GetMajorVersion() << "."
+     << cmVersion::GetMinorVersion() << "."
+     << cmVersion::GetPatchVersion() << ")\n";
   this->GenerateImportHeaderCode(os);
 
   // Create all the imported targets.
@@ -86,6 +92,7 @@ bool cmExportFileGenerator::GenerateImportFile()
 
   // End with the import file footer.
   this->GenerateImportFooterCode(os);
+  os << "CMAKE_POLICY(POP)\n";
 
   return result;
 }

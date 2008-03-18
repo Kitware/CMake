@@ -1023,14 +1023,11 @@ void cmMakefile::RemoveDefineFlag(const char* flag)
 bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
 {
   // Create a regular expression to match valid definitions.
-  // Definitions with non-trivial values must not be matched because
-  // escaping them could break compatibility with escapes added by
-  // users.
   static cmsys::RegularExpression
-    regex("^[-/]D[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_.]+)?$");
+    valid("^[-/]D[A-Za-z_][A-Za-z0-9_]*(=.*)?$");
 
   // Make sure the definition matches.
-  if(!regex.find(def.c_str()))
+  if(!valid.find(def.c_str()))
     {
     return false;
     }
@@ -1041,6 +1038,37 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
      (def.find("=") != def.npos))
     {
     return false;
+    }
+
+  // Definitions with non-trivial values require a policy check.
+  static cmsys::RegularExpression
+    trivial("^[-/]D[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_.]+)?$");
+  if(!trivial.find(def.c_str()))
+    {
+    // This definition has a non-trivial value.
+    switch(this->GetPolicyStatus(cmPolicies::CMP0005))
+      {
+      case cmPolicies::WARN:
+        this->IssueMessage(
+          cmake::AUTHOR_WARNING,
+          this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0005)
+          );
+      case cmPolicies::OLD:
+        // OLD behavior is to not escape the value.  We should not
+        // convert the definition to use the property.
+        return false;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        this->IssueMessage(
+          cmake::FATAL_ERROR,
+          this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0005)
+          );
+        return false;
+      case cmPolicies::NEW:
+        // NEW behavior is to escape the value.  Proceed to convert it
+        // to an entry in the property.
+        break;
+      }
     }
 
   // Get the definition part after the flag.

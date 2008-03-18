@@ -17,6 +17,7 @@
 #    be "Could NOT find LibXml2", if you don't like this message you can specify
 #    your own custom failure message there.
 
+INCLUDE(FindPackageMessage)
 FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FAIL_MSG _VAR1 )
 
   IF("${_FAIL_MSG}" STREQUAL "DEFAULT_MSG")
@@ -27,22 +28,25 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FAIL_MSG _VAR1 )
 
   STRING(TOUPPER ${_NAME} _NAME_UPPER)
 
+  SET(DETAILS "")
   SET(${_NAME_UPPER}_FOUND TRUE)
   IF(NOT ${_VAR1})
     SET(${_NAME_UPPER}_FOUND FALSE)
+  ELSE(NOT ${_VAR1})
+    SET(DETAILS "${DETAILS}[${${_VAR1}}]")
   ENDIF(NOT ${_VAR1})
 
   # check if all passed variables are valid
   FOREACH(_CURRENT_VAR ${ARGN})
     IF(NOT ${_CURRENT_VAR})
       SET(${_NAME_UPPER}_FOUND FALSE)
+    ELSE(NOT ${_CURRENT_VAR})
+      SET(DETAILS "${DETAILS}[${${_CURRENT_VAR}}]")
     ENDIF(NOT ${_CURRENT_VAR})
   ENDFOREACH(_CURRENT_VAR)
 
   IF (${_NAME_UPPER}_FOUND)
-    IF (NOT ${_NAME}_FIND_QUIETLY)
-        MESSAGE(STATUS "Found ${_NAME}: ${${_VAR1}}")
-    ENDIF (NOT ${_NAME}_FIND_QUIETLY)
+    FIND_PACKAGE_MESSAGE(${_NAME} "Found ${_NAME}: ${${_VAR1}}" "${DETAILS}")
   ELSE (${_NAME_UPPER}_FOUND)
     IF (${_NAME}_FIND_REQUIRED)
         MESSAGE(FATAL_ERROR "${_FAIL_MESSAGE}")

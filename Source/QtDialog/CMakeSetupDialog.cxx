@@ -96,7 +96,7 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->GenerateAction = ToolsMenu->addAction(tr("&Generate"));
   QObject::connect(this->GenerateAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doGenerate()));
-  this->SuppressDevWarningsAction = ToolsMenu->addAction(tr("&Suppress dev Warnings"));
+  this->SuppressDevWarningsAction = ToolsMenu->addAction(tr("&Suppress dev Warnings (-Wno-dev)"));
   QObject::connect(this->SuppressDevWarningsAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doSuppressDev()));
   this->SuppressDevWarningsAction->setCheckable(true);
@@ -483,6 +483,7 @@ void CMakeSetupDialog::error(const QString& message)
     m.replace(QString("&"), QString("&amp;"));
     m.replace(QString("<"), QString("&lt;"));
     m.replace(QString(">"), QString("&gt;"));
+    m.replace(QString(" "), QString("&nbsp;"));
     this->Output->append(QString("<b><font color=red>%1</font></b>").arg(m));
     }
 }

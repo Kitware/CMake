@@ -68,6 +68,13 @@ int main(int argc, char** argv)
 {
   QApplication app(argc, argv);
   
+  // clean out standard Qt paths for plugins, which we don't use anyway
+  // when creating Mac bundles, it potentially causes problems
+  foreach(QString p, QApplication::libraryPaths())
+    {
+    QApplication::removeLibraryPath(p);
+    }
+  
   // if arg for install 
   for(int i =0; i < argc; i++)
     {

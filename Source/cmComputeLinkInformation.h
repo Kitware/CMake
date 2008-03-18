@@ -153,13 +153,15 @@ private:
 
   // Linker search path computation.
   cmOrderDirectories* OrderLinkerSearchPath;
-  void FinishLinkerSearchDirectories();
+  bool FinishLinkerSearchDirectories();
+  void PrintLinkPolicyDiagnosis(std::ostream&);
   std::set<cmStdString> ImplicitLinkDirs;
 
   // Linker search path compatibility mode.
+  std::set<cmStdString> OldLinkDirMask;
   std::vector<std::string> OldLinkDirItems;
+  std::vector<std::string> OldUserFlagItems;
   bool OldLinkDirMode;
-  bool HaveUserFlagItem;
 
   // Runtime path computation.
   cmOrderDirectories* OrderRuntimeSearchPath;

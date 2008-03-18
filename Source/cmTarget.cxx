@@ -53,6 +53,8 @@ public:
 cmTarget::cmTarget()
 {
   this->Makefile = 0;
+  this->PolicyStatusCMP0003 = cmPolicies::WARN;
+  this->PolicyStatusCMP0004 = cmPolicies::WARN;
   this->LinkLibrariesAnalyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
@@ -726,6 +728,12 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
   // Save the backtrace of target construction.
   this->Makefile->GetBacktrace(this->Internal->Backtrace);
+
+  // Record current policies for later use.
+  this->PolicyStatusCMP0003 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0003);
+  this->PolicyStatusCMP0004 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0004);
 }
 
 //----------------------------------------------------------------------------
@@ -2578,11 +2586,10 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
   // enforcement of the limited imported target API.
   if(this->IsImported())
     {
-    std::string msg =  "GetExecutableNamesInternal called on imported target: ";
+    std::string msg =
+      "GetExecutableNamesInternal called on imported target: ";
     msg += this->GetName();
-    this->GetMakefile()->
-      IssueMessage(cmake::INTERNAL_ERROR,
-                   msg.c_str());
+    this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg.c_str());
     }
 
   // This versioning is supported only for executables and then only
