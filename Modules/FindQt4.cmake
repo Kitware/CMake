@@ -2,11 +2,11 @@
 # This module can be used to find Qt4.
 # The most important issue is that the Qt4 qmake is available via the system path.
 # This qmake is then used to detect basically everything else.
-# This module defines a number of key variables and macros. First is 
-# QT_USE_FILE which is the path to a CMake file that can be included to compile
-# Qt 4 applications and libraries.  By default, the QtCore and QtGui 
+# This module defines a number of key variables and macros. 
+# First is QT_USE_FILE which is the path to a CMake file that can be included 
+# to compile Qt 4 applications and libraries.  By default, the QtCore and QtGui 
 # libraries are loaded. This behavior can be changed by setting one or more 
-# of the following variables to true:
+# of the following variables to true before doing INCLUDE(${QT_USE_FILE}):
 #                    QT_DONT_USE_QTCORE
 #                    QT_DONT_USE_QTGUI
 #                    QT_USE_QT3SUPPORT
@@ -30,10 +30,21 @@
 #                    QT_USE_QTXMLPATTERNS
 #                    QT_USE_PHONON
 #
-# If you are using Qt4 via UseQt4.cmake instead of FIND_PACKAGE(Qt4), all the 
-# libraries required are stored in the variable QT_LIBRARIES.
-# Add this variable to your TARGET_LINK_LIBRARIES.  Includes and definitions
-# needed for compiling Qt code are then already set up by including the QT_USE_FILE.
+# The file pointed to by QT_USE_FILE will set up your compile environment
+# by adding include directories, preprocessor defines, and populate a
+# QT_LIBRARIES variable containing all the Qt libraries and their dependencies.
+# Add the QT_LIBRARIES variable to your TARGET_LINK_LIBRARIES.
+#
+# Typical usage could be something like:
+#   FIND_PACKAGE(Qt4)
+#   SET(QT_USE_QTXML 1)
+#   INCLUDE(${QT_USE_FILE})
+#   ADD_EXECUTABLE(myexe main.cpp)
+#   TARGET_LINK_LIBRARIES(myexe ${QT_LIBRARIES})
+#
+#
+# There are also some files that need processing by some Qt tools such as moc
+# and uic.  Listed below are macros that may be used to process those files.
 #  
 #  macro QT4_WRAP_CPP(outfiles inputfile ... OPTIONS ...)
 #        create moc code from a list of files containing Qt class with
@@ -123,15 +134,25 @@
 #  QT_QTWEBKIT_FOUND        True if QtWebKit was found.
 #  QT_QTXMLPATTERNS_FOUND   True if QtXmlPatterns was found.
 #  QT_PHONON_FOUND          True if phonon was found.
-#                      
+#
+#
 #  QT_DEFINITIONS   Definitions to use when compiling code that uses Qt.
+#                   You do not need to use this if you include QT_USE_FILE.
+#                   The QT_USE_FILE will also define QT_DEBUG and QT_NO_DEBUG
+#                   to fit your current build type.  Those are not contained
+#                   in QT_DEFINITIONS.
 #                  
 #  QT_INCLUDES      List of paths to all include directories of 
 #                   Qt4 QT_INCLUDE_DIR and QT_QTCORE_INCLUDE_DIR are
 #                   always in this variable even if NOTFOUND,
 #                   all other INCLUDE_DIRS are
 #                   only added if they are found.
+#                   You do not need to use this if you include QT_USE_FILE.
 #   
+#
+#  Include directories for the Qt modules are listed here.
+#  You do not need to use these variables if you include QT_USE_FILE.
+#
 #  QT_INCLUDE_DIR              Path to "include" of Qt4
 #  QT_QT_INCLUDE_DIR           Path to "include/Qt" 
 #  QT_QT3SUPPORT_INCLUDE_DIR   Path to "include/Qt3Support" 
@@ -162,7 +183,9 @@
 #                            
 #
 # The Qt toolkit may contain both debug and release libraries.
-#  In that case, the following library variables will contain both.
+# In that case, the following library variables will contain both.
+# You do not need to use these variables if you include QT_USE_FILE,
+# and use QT_LIBRARIES.
 #
 #  QT_QT3SUPPORT_LIBRARY            The Qt3Support library
 #  QT_QTASSISTANT_LIBRARY           The QtAssistant library
