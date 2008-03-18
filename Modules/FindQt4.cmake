@@ -30,8 +30,7 @@
 #                    QT_USE_QTXMLPATTERNS
 #                    QT_USE_PHONON
 #
-# All the libraries required are stored in a variable called QT_LIBRARIES.  
-# Add this variable to your TARGET_LINK_LIBRARIES.  Inlcudes and definitions
+# Includes and definitions
 # needed for compiling Qt code is already set up by including the QT_USE_FILE.
 #  
 #  macro QT4_WRAP_CPP(outfiles inputfile ... OPTIONS ...)
