@@ -1271,6 +1271,7 @@ IF (QT4_QMAKE_FOUND)
   SET(QT_QTCORE_LIB_DEPENDENCIES "")
   SET(QT_QTNETWORK_LIB_DEPENDENCIES "")
   SET(QT_QTOPENGL_LIB_DEPENDENCIES "")
+  SET(QT_QTDBUS_LIB_DEPENDENCIES "")
   SET(QT_QTHELP_LIB_DEPENDENCIES ${QT_QTCLUCENE_LIBRARY})
   
   # build using shared Qt needs -DQT_DLL
@@ -1370,10 +1371,38 @@ IF (QT4_QMAKE_FOUND)
   ENDIF(QT_QCONFIG MATCHES "system-zlib")
 
   ## openssl
-  IF(QT_QCONFIG MATCHES "openssl")
+  IF(QT_QCONFIG MATCHES "openssl" AND NOT Q_WS_WIN)
     FIND_PACKAGE(OpenSSL)
     SET(QT_QTNETWORK_LIB_DEPENDENCIES ${QT_QTNETWORK_LIB_DEPENDENCIES} ${OPENSSL_LIBRARIES})
-  ENDIF(QT_QCONFIG MATCHES "openssl")
+  ENDIF(QT_QCONFIG MATCHES "openssl" AND NOT Q_WS_WIN)
+  
+  ## qdbus
+  IF(QT_QCONFIG MATCHES "qdbus")
+
+    EXECUTE_PROCESS(COMMAND pkg-config --libs-only-L dbus-1
+      OUTPUT_VARIABLE _dbus_query_output
+      RESULT_VARIABLE _dbus_result
+      ERROR_VARIABLE _dbus_query_output )
+    
+    IF(_dbus_result MATCHES 0)
+      STRING(REPLACE "-L" "" _dbus_query_output "${_dbus_query_output}")
+      SEPARATE_ARGUMENTS(_dbus_query_output)
+    ELSE(_dbus_result MATCHES 0)
+      SET(_dbus_query_output)
+      MESSAGE(WARNING " When querying pkg-config for dbus-1.  An error was reported:\n${_dbus_query_output}")
+    ENDIF(_dbus_result MATCHES 0)
+
+    FIND_LIBRARY(QT_DBUS_LIBRARY NAMES dbus-1 PATHS ${_dbus_query_output} )
+
+    IF(NOT QT_DBUS_LIBRARY)
+      MESSAGE(WARNING " Unable to find dbus-1 to satisfy Qt dependency.")
+    ELSE(NOT QT_DBUS_LIBRARY)
+      SET(QT_QTDBUS_LIB_DEPENDENCIES ${QT_QTDBUS_LIB_DEPENDENCIES} ${QT_DBUS_LIBRARY})
+    ENDIF(NOT QT_DBUS_LIBRARY)
+
+    MARK_AS_ADVANCED(QT_DBUS_LIBRARY)
+
+  ENDIF(QT_QCONFIG MATCHES "qdbus")
   
   ## glib
   IF(QT_QCONFIG MATCHES "glib")
@@ -1388,14 +1417,14 @@ IF (QT4_QMAKE_FOUND)
       SEPARATE_ARGUMENTS(_glib_query_output)
     ELSE(_glib_result MATCHES 0)
       SET(_glib_query_output)
-      MESSAGE(WARNING "When querying pkg-config for glib-2.0.  An error was reported:\n${_glib_query_output}")
+      MESSAGE(WARNING " When querying pkg-config for glib-2.0.  An error was reported:\n${_glib_query_output}")
     ENDIF(_glib_result MATCHES 0)
 
     FIND_LIBRARY(QT_GLIB_LIBRARY NAMES glib-2.0 PATHS ${_glib_query_output} )
     FIND_LIBRARY(QT_GTHREAD_LIBRARY NAMES gthread-2.0 PATHS ${_glib_query_output} )
 
     IF(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
-      MESSAGE(WARNING "Unable to find glib 2.0 to satisfy Qt dependency.")
+      MESSAGE(WARNING " Unable to find glib 2.0 to satisfy Qt dependency.")
     ELSE(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
       SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES}
           ${QT_GTHREAD_LIBRARY} ${QT_GLIB_LIBRARY})
