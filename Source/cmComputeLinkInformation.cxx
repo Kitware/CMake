@@ -1177,8 +1177,11 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item)
     }
   else if(item[0] == '-' || item[0] == '$' || item[0] == '`')
     {
-    // This is a linker option provided by the user.
-    this->OldUserFlagItems.push_back(item);
+    if(item.find("-framework") != 0)
+      {
+      // This is a linker option provided by the user.
+      this->OldUserFlagItems.push_back(item);
+      }
 
     // Restore the target link type since this item does not specify
     // one.
