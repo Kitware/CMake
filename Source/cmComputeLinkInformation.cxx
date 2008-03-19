@@ -1386,13 +1386,16 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os, 
+void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os,
                                                         std::string& libs)
 {
-  os << "The best way to remove this warning is to set policy CMP0003 "
-     << "to NEW. Then, try to build the project, if you get linker errors, "
-     << "either use the full paths to the libraries that can not be "
-     << "found, or use link_directories to add the missing directories.\n";
+  // Give the user some help.
+  os << "The easiest way to avoid this warning is to set policy CMP0003 "
+     << "to NEW and try to build the project.  "
+     << "If any libraries in the second list below cannot be found then "
+     << "either convert them to be specified with a full path or use the "
+     << "link_directories command to add the missing linker search path.\n";
+
   // Name the target.
   os << "Target \"" << this->Target->GetName() << "\" ";
 
@@ -1445,9 +1448,9 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os,
   }
 
   // Tell the user what is wrong.
-  os << "This maybe OK as well.  However, the linker will search "
-     << "for libraries in the second list.  "
-     << "Finding them may depend on linker search paths earlier CMake "
+  os << "This may be okay too because the linker will search for the "
+     << "libraries in the second list.  However, "
+     << "finding them may depend on linker search paths earlier CMake "
      << "versions added as an implementation detail for linking to the "
      << "libraries in the first list.  "
      << "For compatibility CMake is including the extra linker search "
