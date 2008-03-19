@@ -19,6 +19,7 @@
 #include "cmListFileLexer.h"
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
+#include "cmVersion.h"
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -121,46 +122,46 @@ bool cmListFile::ParseFile(const char* filename,
   // do we need a cmake_policy(VERSION call?
   if(topLevel)
   {
-    bool hasPolicy = false;
+    bool hasVersion = false;
     // search for the right policy command
     for(std::vector<cmListFileFunction>::iterator i 
           = this->Functions.begin();
         i != this->Functions.end(); ++i)
     {
-      if (cmSystemTools::LowerCase(i->Name) == "cmake_policy" &&
-          i->Arguments.size() && 
-          cmSystemTools::LowerCase(i->Arguments[0].Value) == "version")
-      {
-        hasPolicy = true;
-        break;
-      }
       if (cmSystemTools::LowerCase(i->Name) == "cmake_minimum_required")
       {
-        hasPolicy = true;
+        hasVersion = true;
         break;
       }
     }
-    // if no policy command is found this is an error
-    if(!hasPolicy)
-    {
-      switch (mf->GetPolicyStatus(cmPolicies::CMP0000))
+    // if no version command is found this is a warning or error
+    if(!hasVersion)
       {
+      cmOStringStream msg;
+      msg << "No cmake_minimum_required command is present.  "
+          << "A line of code such as\n"
+          << "  cmake_minimum_required(VERSION "
+          << cmVersion::GetMajorVersion() << "."
+          << cmVersion::GetMinorVersion()
+          << ")\n"
+          << "should be added at the top of the file.  "
+          << "The version specified may be lower if you wish to "
+          << "support older CMake versions for this project.  "
+          << "For more information run "
+          << "\"cmake --help-policy CMP0000\".";
+      switch (mf->GetPolicyStatus(cmPolicies::CMP0000))
+        {
         case cmPolicies::WARN:
-          mf->IssueMessage(cmake::AUTHOR_WARNING,
-            mf->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0000)
-            );
-
+          mf->IssueMessage(cmake::AUTHOR_WARNING, msg.str().c_str());
+        case cmPolicies::OLD:
           // Implicitly set the version for the user.
           mf->SetPolicyVersion("2.4");
-        case cmPolicies::OLD:
-          break; 
+          break;
         default:
-          mf->IssueMessage(cmake::FATAL_ERROR,
-            mf->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0000)
-            );
+          mf->IssueMessage(cmake::FATAL_ERROR, msg.str().c_str());
           return false;
+        }
       }
-    }
   }
 
   if(topLevel)
