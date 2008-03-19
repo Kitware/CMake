@@ -352,7 +352,7 @@ ENDMACRO (CMAKE_BUILD_UTILITIES)
 #-----------------------------------------------------------------------
 # The CMake version number.
 SET(CMake_VERSION_MAJOR 2)
-SET(CMake_VERSION_MINOR 5)
+SET(CMake_VERSION_MINOR 7)
 SET(CMake_VERSION_PATCH 0)
 
 # CVS versions are odd, if this is an odd minor version
