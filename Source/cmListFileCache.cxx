@@ -163,7 +163,8 @@ bool cmListFile::ParseFile(const char* filename,
           std::string name = cmSystemTools::LowerCase(i->Name);
           if (allowedCommands.find(name) == allowedCommands.end())
           {
-          isProblem = true;
+            isProblem = true;
+            break;
           }       
         }
       }
