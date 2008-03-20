@@ -1,4 +1,4 @@
-cmake_policy(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(ToClean)
 
 # Build a simple project.
