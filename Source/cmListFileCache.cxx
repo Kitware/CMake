@@ -134,8 +134,41 @@ bool cmListFile::ParseFile(const char* filename,
         break;
       }
     }
-    // if no version command is found this is a warning or error
+    // if no policy command is found this is an error if they use any non advanced functions or a lot of functions
     if(!hasVersion)
+    {
+      bool isProblem = true;
+      if (this->Functions.size() < 30)
+      {
+        // the list of simple commands DO NOT ADD TO THIS LIST!!!!!
+        // these commands must have backwards compatibility forever and
+        // and that is a lot longer than your tiny mind can comprehend mortal
+        std::set<std::string> allowedCommands;
+        allowedCommands.insert("project");
+        allowedCommands.insert("set");
+        allowedCommands.insert("if");
+        allowedCommands.insert("endif");
+        allowedCommands.insert("else");
+        allowedCommands.insert("elseif");
+        allowedCommands.insert("add_executable");
+        allowedCommands.insert("add_library");
+        allowedCommands.insert("target_link_libraries");
+        allowedCommands.insert("option");
+        allowedCommands.insert("message");
+        isProblem = false;
+        for(std::vector<cmListFileFunction>::iterator i 
+              = this->Functions.begin();
+            i != this->Functions.end(); ++i)
+        {
+          std::string name = cmSystemTools::LowerCase(i->Name);
+          if (allowedCommands.find(name) == allowedCommands.end())
+          {
+          isProblem = true;
+          }       
+        }
+      }
+      
+      if (isProblem)
       {
       cmOStringStream msg;
       msg << "No cmake_minimum_required command is present.  "
@@ -162,6 +195,7 @@ bool cmListFile::ParseFile(const char* filename,
           return false;
         }
       }
+    }
   }
 
   if(topLevel)
