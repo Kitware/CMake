@@ -357,6 +357,23 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
+      // does a policy exist
+      if (*arg == "POLICY" && argP1 != newArgs.end())
+        {
+        cmPolicies::PolicyID pid;
+        if(makefile->GetPolicies()->GetPolicyID((argP1)->c_str(), pid))
+          {
+          *arg = "1";
+          }
+        else
+          {
+          *arg = "0";
+          }
+        newArgs.erase(argP1);
+        argP1 = arg;
+        IncrementArguments(newArgs,argP1,argP2);
+        reducible = 1;
+        }
       // is a variable defined
       if (*arg == "DEFINED" && argP1  != newArgs.end())
         {
