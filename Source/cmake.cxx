@@ -4185,7 +4185,8 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
   // Add a note about warning suppression.
   if(t == cmake::AUTHOR_WARNING)
     {
-    msg << "This warning may be suppressed using the -Wno-dev option.";
+    msg <<
+      "This warning is for project developers.  Use -Wno-dev to suppress it.";
     }
 
   // Add a terminating blank line.
