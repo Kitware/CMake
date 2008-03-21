@@ -1337,23 +1337,14 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
   switch(this->Target->GetPolicyStatusCMP0003())
     {
     case cmPolicies::WARN:
-      {
-      cmOStringStream w;
-      w << (this->Makefile->GetPolicies()
-            ->GetPolicyWarning(cmPolicies::CMP0003)) << "\n";
-      std::string libs = "CMP0003-WARNING-FOR-";
-      this->PrintLinkPolicyDiagnosis(w, libs);
-      const char* def = this->CMakeInstance->GetCacheDefinition(libs.c_str());
-      if(!def)
+      if(!this->CMakeInstance->GetPropertyAsBool("CMP0003-WARNING-GIVEN"))
         {
+        this->CMakeInstance->SetProperty("CMP0003-WARNING-GIVEN", "1");
+        cmOStringStream w;
+        this->PrintLinkPolicyDiagnosis(w);
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
                                           this->Target->GetBacktrace());
-        this->CMakeInstance->AddCacheEntry(libs.c_str(),
-                                           "TRUE",
-                                           "",
-                                           cmCacheManager::INTERNAL);
         }
-      }
     case cmPolicies::OLD:
       // OLD behavior is to add the paths containing libraries with
       // known full paths as link directories.
@@ -1367,8 +1358,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
       cmOStringStream e;
       e << (this->Makefile->GetPolicies()->
             GetRequiredPolicyError(cmPolicies::CMP0003)) << "\n";
-      std::string libs;
-      this->PrintLinkPolicyDiagnosis(e, libs);
+      this->PrintLinkPolicyDiagnosis(e);
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
                                         this->Target->GetBacktrace());
       return false;
@@ -1386,35 +1376,21 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os,
-                                                        std::string& libs)
+void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
 {
-  // Give the user some help.
-  os << "The easiest way to avoid this warning is to set policy CMP0003 "
-     << "to NEW and try to build the project.  "
-     << "If any libraries in the second list below cannot be found then "
-     << "either convert them to be specified with a full path or use the "
-     << "link_directories command to add the missing linker search path.\n";
-
-  // Name the target.
-  os << "Target \"" << this->Target->GetName() << "\" ";
-
-  // List the items that would add paths in old behavior.
-  std::set<cmStdString> emitted;
-  os << " links to some items by full path not located in any linker search "
-     << "directory added by a link_directories command:\n";
-  for(std::vector<std::string>::const_iterator
-        i = this->OldLinkDirItems.begin();
-      i != this->OldLinkDirItems.end(); ++i)
-    {
-    if(emitted.insert(cmSystemTools::GetFilenamePath(*i)).second)
-      {
-      os << "  " << *i << "\n";
-      }
-    }
+  // Tell the user what to do.
+  os << "Policy CMP0003 should be set before this line.  "
+     << "Add code such as\n"
+     << "  if(COMMAND cmake_policy)\n"
+     << "    cmake_policy(SET CMP0003 NEW)\n"
+     << "  endif(COMMAND cmake_policy)\n"
+     << "as early as possible but after the most recent call to "
+     << "cmake_minimum_required or cmake_policy(VERSION).  ";
 
   // List the items that might need the old-style paths.
-  os << "This is okay but it also links to some items with no path known:\n";
+  os << "This warning appears because target \""
+     << this->Target->GetName() << "\" "
+     << "links to some libraries for which the linker must search:\n";
   {
   // Format the list of unknown items to be as short as possible while
   // still fitting in the allowed width (a true solution would be the
@@ -1437,7 +1413,6 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os,
       }
     line += sep;
     line += *i;
-    libs += *i;
     // Convert to the other separator.
     sep = ", ";
     }
@@ -1447,14 +1422,26 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os,
     }
   }
 
-  // Tell the user what is wrong.
-  os << "This may be okay too because the linker will search for the "
-     << "libraries in the second list.  However, "
-     << "finding them may depend on linker search paths earlier CMake "
-     << "versions added as an implementation detail for linking to the "
-     << "libraries in the first list.  "
-     << "For compatibility CMake is including the extra linker search "
-     << "paths, but policy CMP0003 should be set by the project. ";
+  // List the paths old behavior is adding.
+  os << "and other libraries with known full path:\n";
+  std::set<cmStdString> emitted;
+  for(std::vector<std::string>::const_iterator
+        i = this->OldLinkDirItems.begin();
+      i != this->OldLinkDirItems.end(); ++i)
+    {
+    if(emitted.insert(cmSystemTools::GetFilenamePath(*i)).second)
+      {
+      os << "  " << *i << "\n";
+      }
+    }
+
+  // Explain.
+  os << "CMake is adding directories in the second list to the linker "
+     << "search path in case they are needed to find libraries from the "
+     << "first list (for backwards compatibility with CMake 2.4).  "
+     << "Set policy CMP0003 to OLD or NEW to enable or disable this "
+     << "behavior explicitly.  "
+     << "Run \"cmake --help-policy CMP0003\" for more information.";
 }
 
 //----------------------------------------------------------------------------

@@ -201,7 +201,10 @@ cmPolicies::cmPolicies()
     "  add_executable(myexe myexe.c)\n"
     "  target_link_libraries(myexe /path/to/libA.so /path/to/libB.so)\n"
     "When all items on the link line have known paths CMake does not check "
-    "this policy so it has no effect.",
+    "this policy so it has no effect.\n"
+    "Note that the warning for this policy will be issued for at most "
+    "one target.  This avoids flooding users with messages for every "
+    "target when setting the policy once will probably fix all targets.",
     2,6,0, cmPolicies::WARN);
 
   this->DefinePolicy(
