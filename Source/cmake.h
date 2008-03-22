@@ -388,6 +388,7 @@ protected:
   std::string cmStartDirectory; 
   std::string StartOutputDirectory;
   bool SuppressDevWarnings;
+  bool DoSuppressDevWarnings;
   std::set<cmStdString> WrittenFiles;
 
   ///! return true if the same cmake was used to make the cache.
