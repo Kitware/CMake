@@ -638,8 +638,11 @@ cmLocalUnixMakefileGenerator3
     replace = *i;
     os << "\t" << replace.c_str() << "\n";
     }
+  if(symbolic)
+    {
+    os << ".PHONY : " << tgt.c_str() << "\n";
+    }
   os << "\n";
-
   // Add the output to the local help if requested.
   if(in_help)
     {

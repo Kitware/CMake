@@ -967,7 +967,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
       }
     }
   lg->WriteMakeRule(ruleFileStream, "Help Target",
-                    "help:",
+                    "help",
                     no_depends, commands, true);
   ruleFileStream << "\n\n";
 }
