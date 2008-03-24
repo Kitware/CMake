@@ -12,8 +12,11 @@
 #    and -L).
 #  LAPACK_LIBRARIES - uncached list of libraries (using full path name) to 
 #    link against to use LAPACK
-#
+#  LAPACK95_LIBRARIES - uncached list of libraries (using full path name) to 
+#    link against to use LAPACK95
 
+#
+ 
 include(CheckFortranFunctionExists)
 set(LAPACK_FOUND FALSE)
 
@@ -36,6 +39,13 @@ foreach(_library ${_list})
   set(_combined_name ${_combined_name}_${_library})
 
   if(_libraries_work)
+IF (WIN32)
+    find_library(${_prefix}_${_library}_LIBRARY
+    NAMES ${_library}
+    PATHS ENV LIB 
+    )
+ENDIF (WIN32)
+
   if(APPLE)
     find_library(${_prefix}_${_library}_LIBRARY
     NAMES ${_library}
@@ -74,6 +84,7 @@ endmacro(Check_Lapack_Libraries)
 
 set(LAPACK_LINKER_FLAGS)
 set(LAPACK_LIBRARIES)
+set(LAPACK95_LIBRARIES)
 
 
 if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
@@ -98,7 +109,16 @@ if(BLAS_FOUND)
   )
   endif(NOT LAPACK_LIBRARIES)
 
-
+  if(NOT LAPACK95_LIBRARIES)
+  check_lapack_libraries(
+  LAPACK95_LIBRARIES
+  LAPACK
+  cheev
+  ""
+  "mkl_lapack95"
+ "${BLAS_LIBRARIES}"
+  )
+  endif(NOT LAPACK95_LIBRARIES)
 
 #acml lapack
   if(NOT LAPACK_LIBRARIES)
@@ -136,10 +156,6 @@ if(NOT LAPACK_LIBRARIES)
     "${BLAS_LIBRARIES}"
     )
   endif ( NOT LAPACK_LIBRARIES )
-
-
-
-
 
 # Generic LAPACK library?
   if ( NOT LAPACK_LIBRARIES )
