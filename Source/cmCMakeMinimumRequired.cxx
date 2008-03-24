@@ -99,13 +99,12 @@ bool cmCMakeMinimumRequired
     {
     // The current version is too low.
     cmOStringStream e;
-    e << "This project requires version " << version_string.c_str()
-      << " of CMake.  "
-      << "You are running version "
-      << current_major << "." << current_minor << "." << current_patch
-      << ".\n";
-    cmSystemTools::Error(e.str().c_str());
+    e << "CMake " << version_string.c_str()
+      << " or higher is required.  You are running version "
+      << current_major << "." << current_minor << "." << current_patch;
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
+    return true;
     }
 
   if (required_major < 2 || required_major == 2 && required_minor < 4)

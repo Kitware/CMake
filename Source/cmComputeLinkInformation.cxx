@@ -1177,8 +1177,11 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item)
     }
   else if(item[0] == '-' || item[0] == '$' || item[0] == '`')
     {
-    // This is a linker option provided by the user.
-    this->OldUserFlagItems.push_back(item);
+    if(item.find("-framework") != 0)
+      {
+      // This is a linker option provided by the user.
+      this->OldUserFlagItems.push_back(item);
+      }
 
     // Restore the target link type since this item does not specify
     // one.
@@ -1334,14 +1337,14 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
   switch(this->Target->GetPolicyStatusCMP0003())
     {
     case cmPolicies::WARN:
-      {
-      cmOStringStream w;
-      w << (this->Makefile->GetPolicies()
-            ->GetPolicyWarning(cmPolicies::CMP0003)) << "\n";
-      this->PrintLinkPolicyDiagnosis(w);
-      this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                        this->Target->GetBacktrace());
-      }
+      if(!this->CMakeInstance->GetPropertyAsBool("CMP0003-WARNING-GIVEN"))
+        {
+        this->CMakeInstance->SetProperty("CMP0003-WARNING-GIVEN", "1");
+        cmOStringStream w;
+        this->PrintLinkPolicyDiagnosis(w);
+        this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+                                          this->Target->GetBacktrace());
+        }
     case cmPolicies::OLD:
       // OLD behavior is to add the paths containing libraries with
       // known full paths as link directories.
@@ -1375,25 +1378,19 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
 {
-  // Name the target.
-  os << "Target \"" << this->Target->GetName() << "\" ";
-
-  // List the items that would add paths in old behavior.
-  std::set<cmStdString> emitted;
-  os << " links to some items by full path not located in any linker search "
-     << "directory added by a link_directories command:\n";
-  for(std::vector<std::string>::const_iterator
-        i = this->OldLinkDirItems.begin();
-      i != this->OldLinkDirItems.end(); ++i)
-    {
-    if(emitted.insert(cmSystemTools::GetFilenamePath(*i)).second)
-      {
-      os << "  " << *i << "\n";
-      }
-    }
+  // Tell the user what to do.
+  os << "Policy CMP0003 should be set before this line.  "
+     << "Add code such as\n"
+     << "  if(COMMAND cmake_policy)\n"
+     << "    cmake_policy(SET CMP0003 NEW)\n"
+     << "  endif(COMMAND cmake_policy)\n"
+     << "as early as possible but after the most recent call to "
+     << "cmake_minimum_required or cmake_policy(VERSION).  ";
 
   // List the items that might need the old-style paths.
-  os << "This is okay but it also links to some items with no path known:\n";
+  os << "This warning appears because target \""
+     << this->Target->GetName() << "\" "
+     << "links to some libraries for which the linker must search:\n";
   {
   // Format the list of unknown items to be as short as possible while
   // still fitting in the allowed width (a true solution would be the
@@ -1416,7 +1413,6 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
       }
     line += sep;
     line += *i;
-
     // Convert to the other separator.
     sep = ", ";
     }
@@ -1426,13 +1422,26 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
     }
   }
 
-  // Tell the user what is wrong.
-  os << "The linker will search for libraries in the second list.  "
-     << "Finding them may depend on linker search paths earlier CMake "
-     << "versions added as an implementation detail for linking to the "
-     << "libraries in the first list.  "
-     << "For compatibility CMake is including the extra linker search "
-     << "paths, but policy CMP0003 should be set by the project.";
+  // List the paths old behavior is adding.
+  os << "and other libraries with known full path:\n";
+  std::set<cmStdString> emitted;
+  for(std::vector<std::string>::const_iterator
+        i = this->OldLinkDirItems.begin();
+      i != this->OldLinkDirItems.end(); ++i)
+    {
+    if(emitted.insert(cmSystemTools::GetFilenamePath(*i)).second)
+      {
+      os << "  " << *i << "\n";
+      }
+    }
+
+  // Explain.
+  os << "CMake is adding directories in the second list to the linker "
+     << "search path in case they are needed to find libraries from the "
+     << "first list (for backwards compatibility with CMake 2.4).  "
+     << "Set policy CMP0003 to OLD or NEW to enable or disable this "
+     << "behavior explicitly.  "
+     << "Run \"cmake --help-policy CMP0003\" for more information.";
 }
 
 //----------------------------------------------------------------------------

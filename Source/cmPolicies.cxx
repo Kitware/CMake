@@ -87,25 +87,21 @@ cmPolicies::cmPolicies()
   // define all the policies
   this->DefinePolicy(
     CMP0000, "CMP0000",
-    "A policy version number must be specified.",
+    "A minimum required CMake version must be specified.",
     "CMake requires that projects specify the version of CMake to which "
     "they have been written.  "
-    "This policy has been put in place to help existing projects build with "
-    "new CMake versions as it evolves.  "
-    "The easiest way to specify a policy version number is to "
-    "call the cmake_minimum_required command at the top of "
-    "your CMakeLists.txt file:\n"
+    "This policy has been put in place so users trying to build the project "
+    "may be told when they need to update their CMake.  "
+    "Specifying a version also helps the project build with CMake versions "
+    "newer than that specified.  "
+    "Use the cmake_minimum_required command at the top of your main "
+    " CMakeLists.txt file:\n"
     "  cmake_minimum_required(VERSION <major>.<minor>)\n"
     "where \"<major>.<minor>\" is the version of CMake you want to support "
     "(such as \"2.6\").  "
     "The command will ensure that at least the given version of CMake is "
-    "running and set the policy version.  "
-    "See documentation of cmake_minimum_required for details.  "
-    "The cmake_policy command may be used at any time to set the "
-    "policy version:\n"
-    "  cmake_policy(VERSION <major>.<minor>)\n"
-    "This is the recommended way to set the policy version except at "
-    "the very top of a project.",
+    "running and help newer versions be compatible with the project.  "
+    "See documentation of cmake_minimum_required for details.",
     2,6,0, cmPolicies::WARN
     );
 
@@ -205,7 +201,10 @@ cmPolicies::cmPolicies()
     "  add_executable(myexe myexe.c)\n"
     "  target_link_libraries(myexe /path/to/libA.so /path/to/libB.so)\n"
     "When all items on the link line have known paths CMake does not check "
-    "this policy so it has no effect.",
+    "this policy so it has no effect.\n"
+    "Note that the warning for this policy will be issued for at most "
+    "one target.  This avoids flooding users with messages for every "
+    "target when setting the policy once will probably fix all targets.",
     2,6,0, cmPolicies::WARN);
 
   this->DefinePolicy(
@@ -302,6 +301,10 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   if(sscanf(ver.c_str(), "%u.%u.%u",
             &majorVer, &minorVer, &patchVer) < 2)
     {
+    cmOStringStream e;
+    e << "Invalid policy version value \"" << ver << "\".  "
+      << "A numeric major.minor[.patch] must be given.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
   
@@ -318,6 +321,26 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
       "CMAKE_BACKWARDS_COMPATIBILITY variable.  "
       "One way to so this is to set the policy version to 2.4 exactly."
       );
+    return false;
+    }
+
+  // It is an error if the policy version is greater than the running
+  // CMake.
+  if (majorVer > cmVersion::GetMajorVersion() ||
+      (majorVer == cmVersion::GetMajorVersion() &&
+       minorVer > cmVersion::GetMinorVersion()) ||
+      (majorVer == cmVersion::GetMajorVersion() &&
+       minorVer == cmVersion::GetMinorVersion() &&
+       patchVer > cmVersion::GetPatchVersion()))
+    {
+    cmOStringStream e;
+    e << "An attempt was made to set the policy version of CMake to \""
+      << version << "\" which is greater than this version of CMake.  "
+      << "This is not allowed because the greater version may have new "
+      << "policies not known to this CMake.  "
+      << "You may need a newer CMake version to build this project.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
     }
 
   // now loop over all the policies and set them as appropriate
@@ -548,32 +571,36 @@ void cmPolicies::GetDocumentation(std::vector<cmDocumentationEntry>& v)
     cmOStringStream full;
     full << i->second->LongDescription;
     full << "\nThis policy was introduced in CMake version ";
-    full << i->second->GetVersionString() << ".  ";
-    full << "CMake version " << cmVersion::GetMajorVersion()
-         << "." << cmVersion::GetMinorVersion() << " ";
-    // add in some more text here based on status
-    switch (i->second->Status)
-    {
-      case cmPolicies::WARN:
-        full << "defaults to WARN for this policy.  "
-             << "Use the cmake_policy command to set it to OLD or NEW.";
-        break;
-      case cmPolicies::OLD:
-        full << "defaults to the OLD behavior for this policy.";
-        break;
-      case cmPolicies::NEW:
-        full << "defaults to the NEW behavior for this policy.";
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-        full << "requires the policy to be set to NEW if you use it.  "
-             << "Use the cmake_policy command to set it to NEW.";
-        break;
-      case cmPolicies::REQUIRED_ALWAYS:
-        full << "requires the policy to be set to NEW.  "
-             << "Use the cmake_policy command to set it to NEW.";
-        break;
-    }
-          
+    full << i->second->GetVersionString() << ".";
+    if(i->first != cmPolicies::CMP0000)
+      {
+      full << "  "
+           << "CMake version " << cmVersion::GetMajorVersion()
+           << "." << cmVersion::GetMinorVersion() << " ";
+      // add in some more text here based on status
+      switch (i->second->Status)
+        {
+        case cmPolicies::WARN:
+          full << "warns when the policy is not set and uses OLD behavior.  "
+               << "Use the cmake_policy command to set it to OLD or NEW "
+               << "explicitly.";
+          break;
+        case cmPolicies::OLD:
+          full << "defaults to the OLD behavior for this policy.";
+          break;
+        case cmPolicies::NEW:
+          full << "defaults to the NEW behavior for this policy.";
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+          full << "requires the policy to be set to NEW if you use it.  "
+               << "Use the cmake_policy command to set it to NEW.";
+          break;
+        case cmPolicies::REQUIRED_ALWAYS:
+          full << "requires the policy to be set to NEW.  "
+               << "Use the cmake_policy command to set it to NEW.";
+          break;
+        }
+      }
     cmDocumentationEntry e(i->second->IDString.c_str(),
                            i->second->ShortDescription.c_str(),
                            full.str().c_str());

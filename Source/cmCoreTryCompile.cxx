@@ -175,7 +175,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     const char* lang =(this->Makefile->GetCMakeInstance()->GetGlobalGenerator()
                         ->GetLanguageFromExtension(ext.c_str()));
     const char* def = this->Makefile->GetDefinition("CMAKE_MODULE_PATH");
-    fprintf(fout, "cmake_policy(VERSION %u.%u)\n",
+    fprintf(fout, "cmake_minimum_required(VERSION %u.%u)\n",
             cmVersion::GetMajorVersion(), cmVersion::GetMinorVersion());
     if(def)
       {

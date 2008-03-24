@@ -62,6 +62,7 @@ static const char* cmCTestErrorMatches[] = {
   "^fatal error C[0-9]+:",
   ": syntax error ",
   "^collect2: ld returned 1 exit status",
+  "ld terminated with signal",
   "Unsatisfied symbols:",
   "^Unresolved:",
   "Undefined symbols:",

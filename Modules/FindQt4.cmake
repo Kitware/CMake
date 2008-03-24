@@ -2,11 +2,11 @@
 # This module can be used to find Qt4.
 # The most important issue is that the Qt4 qmake is available via the system path.
 # This qmake is then used to detect basically everything else.
-# This module defines a number of key variables and macros. First is 
-# QT_USE_FILE which is the path to a CMake file that can be included to compile
-# Qt 4 applications and libraries.  By default, the QtCore and QtGui 
+# This module defines a number of key variables and macros. 
+# First is QT_USE_FILE which is the path to a CMake file that can be included 
+# to compile Qt 4 applications and libraries.  By default, the QtCore and QtGui 
 # libraries are loaded. This behavior can be changed by setting one or more 
-# of the following variables to true:
+# of the following variables to true before doing INCLUDE(${QT_USE_FILE}):
 #                    QT_DONT_USE_QTCORE
 #                    QT_DONT_USE_QTGUI
 #                    QT_USE_QT3SUPPORT
@@ -30,9 +30,21 @@
 #                    QT_USE_QTXMLPATTERNS
 #                    QT_USE_PHONON
 #
-# All the libraries required are stored in a variable called QT_LIBRARIES.  
-# Add this variable to your TARGET_LINK_LIBRARIES.  Inlcudes and definitions
-# needed for compiling Qt code is already set up by including the QT_USE_FILE.
+# The file pointed to by QT_USE_FILE will set up your compile environment
+# by adding include directories, preprocessor defines, and populate a
+# QT_LIBRARIES variable containing all the Qt libraries and their dependencies.
+# Add the QT_LIBRARIES variable to your TARGET_LINK_LIBRARIES.
+#
+# Typical usage could be something like:
+#   FIND_PACKAGE(Qt4)
+#   SET(QT_USE_QTXML 1)
+#   INCLUDE(${QT_USE_FILE})
+#   ADD_EXECUTABLE(myexe main.cpp)
+#   TARGET_LINK_LIBRARIES(myexe ${QT_LIBRARIES})
+#
+#
+# There are also some files that need processing by some Qt tools such as moc
+# and uic.  Listed below are macros that may be used to process those files.
 #  
 #  macro QT4_WRAP_CPP(outfiles inputfile ... OPTIONS ...)
 #        create moc code from a list of files containing Qt class with
@@ -122,15 +134,25 @@
 #  QT_QTWEBKIT_FOUND        True if QtWebKit was found.
 #  QT_QTXMLPATTERNS_FOUND   True if QtXmlPatterns was found.
 #  QT_PHONON_FOUND          True if phonon was found.
-#                      
+#
+#
 #  QT_DEFINITIONS   Definitions to use when compiling code that uses Qt.
+#                   You do not need to use this if you include QT_USE_FILE.
+#                   The QT_USE_FILE will also define QT_DEBUG and QT_NO_DEBUG
+#                   to fit your current build type.  Those are not contained
+#                   in QT_DEFINITIONS.
 #                  
 #  QT_INCLUDES      List of paths to all include directories of 
 #                   Qt4 QT_INCLUDE_DIR and QT_QTCORE_INCLUDE_DIR are
 #                   always in this variable even if NOTFOUND,
 #                   all other INCLUDE_DIRS are
 #                   only added if they are found.
+#                   You do not need to use this if you include QT_USE_FILE.
 #   
+#
+#  Include directories for the Qt modules are listed here.
+#  You do not need to use these variables if you include QT_USE_FILE.
+#
 #  QT_INCLUDE_DIR              Path to "include" of Qt4
 #  QT_QT_INCLUDE_DIR           Path to "include/Qt" 
 #  QT_QT3SUPPORT_INCLUDE_DIR   Path to "include/Qt3Support" 
@@ -161,7 +183,9 @@
 #                            
 #
 # The Qt toolkit may contain both debug and release libraries.
-#  In that case, the following library variables will contain both.
+# In that case, the following library variables will contain both.
+# You do not need to use these variables if you include QT_USE_FILE,
+# and use QT_LIBRARIES.
 #
 #  QT_QT3SUPPORT_LIBRARY            The Qt3Support library
 #  QT_QTASSISTANT_LIBRARY           The QtAssistant library
@@ -1271,6 +1295,7 @@ IF (QT4_QMAKE_FOUND)
   SET(QT_QTCORE_LIB_DEPENDENCIES "")
   SET(QT_QTNETWORK_LIB_DEPENDENCIES "")
   SET(QT_QTOPENGL_LIB_DEPENDENCIES "")
+  SET(QT_QTDBUS_LIB_DEPENDENCIES "")
   SET(QT_QTHELP_LIB_DEPENDENCIES ${QT_QTCLUCENE_LIBRARY})
   
   # build using shared Qt needs -DQT_DLL
@@ -1370,39 +1395,71 @@ IF (QT4_QMAKE_FOUND)
   ENDIF(QT_QCONFIG MATCHES "system-zlib")
 
   ## openssl
-  IF(QT_QCONFIG MATCHES "openssl")
+  IF(QT_QCONFIG MATCHES "openssl" AND NOT Q_WS_WIN)
     FIND_PACKAGE(OpenSSL)
     SET(QT_QTNETWORK_LIB_DEPENDENCIES ${QT_QTNETWORK_LIB_DEPENDENCIES} ${OPENSSL_LIBRARIES})
-  ENDIF(QT_QCONFIG MATCHES "openssl")
+  ENDIF(QT_QCONFIG MATCHES "openssl" AND NOT Q_WS_WIN)
+  
+  ## qdbus
+  IF(QT_QCONFIG MATCHES "qdbus")
+
+    # if the dbus library isn't found, we'll assume its not required to build
+    # shared Qt on Linux doesn't require it
+    IF(NOT QT_DBUS_LIBRARY)
+      EXECUTE_PROCESS(COMMAND pkg-config --libs-only-L dbus-1
+        OUTPUT_VARIABLE _dbus_query_output
+        RESULT_VARIABLE _dbus_result
+        ERROR_VARIABLE _dbus_query_output )
+      
+      IF(_dbus_result MATCHES 0)
+        STRING(REPLACE "-L" "" _dbus_query_output "${_dbus_query_output}")
+        SEPARATE_ARGUMENTS(_dbus_query_output)
+      ELSE(_dbus_result MATCHES 0)
+        SET(_dbus_query_output)
+      ENDIF(_dbus_result MATCHES 0)
+
+      FIND_LIBRARY(QT_DBUS_LIBRARY NAMES dbus-1 PATHS ${_dbus_query_output} )
+
+      IF(QT_DBUS_LIBRARY)
+        SET(QT_QTDBUS_LIB_DEPENDENCIES ${QT_QTDBUS_LIB_DEPENDENCIES} ${QT_DBUS_LIBRARY})
+      ENDIF(QT_DBUS_LIBRARY)
+
+      MARK_AS_ADVANCED(QT_DBUS_LIBRARY)
+    ENDIF(NOT QT_DBUS_LIBRARY)
+
+  ENDIF(QT_QCONFIG MATCHES "qdbus")
   
   ## glib
   IF(QT_QCONFIG MATCHES "glib")
+    
+    # if the glib libraries aren't found, we'll assume its not required to build
+    # shared Qt on Linux doesn't require it
+
     # Qt 4.2.0+ uses glib-2.0
-    EXECUTE_PROCESS(COMMAND pkg-config --libs-only-L glib-2.0 gthread-2.0
-      OUTPUT_VARIABLE _glib_query_output
-      RESULT_VARIABLE _glib_result
-      ERROR_VARIABLE _glib_query_output )
-
-    IF(_glib_result MATCHES 0)
-      STRING(REPLACE "-L" "" _glib_query_output "${_glib_query_output}")
-      SEPARATE_ARGUMENTS(_glib_query_output)
-    ELSE(_glib_result MATCHES 0)
-      SET(_glib_query_output)
-      MESSAGE(WARNING "When querying pkg-config for glib-2.0.  An error was reported:\n${_glib_query_output}")
-    ENDIF(_glib_result MATCHES 0)
-
-    FIND_LIBRARY(QT_GLIB_LIBRARY NAMES glib-2.0 PATHS ${_glib_query_output} )
-    FIND_LIBRARY(QT_GTHREAD_LIBRARY NAMES gthread-2.0 PATHS ${_glib_query_output} )
-
     IF(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
-      MESSAGE(WARNING "Unable to find glib 2.0 to satisfy Qt dependency.")
-    ELSE(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
-      SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES}
-          ${QT_GTHREAD_LIBRARY} ${QT_GLIB_LIBRARY})
-    ENDIF(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
+      EXECUTE_PROCESS(COMMAND pkg-config --libs-only-L glib-2.0 gthread-2.0
+        OUTPUT_VARIABLE _glib_query_output
+        RESULT_VARIABLE _glib_result
+        ERROR_VARIABLE _glib_query_output )
 
-    MARK_AS_ADVANCED(QT_GLIB_LIBRARY)
-    MARK_AS_ADVANCED(QT_GTHREAD_LIBRARY)
+      IF(_glib_result MATCHES 0)
+        STRING(REPLACE "-L" "" _glib_query_output "${_glib_query_output}")
+        SEPARATE_ARGUMENTS(_glib_query_output)
+      ELSE(_glib_result MATCHES 0)
+        SET(_glib_query_output)
+      ENDIF(_glib_result MATCHES 0)
+
+      FIND_LIBRARY(QT_GLIB_LIBRARY NAMES glib-2.0 PATHS ${_glib_query_output} )
+      FIND_LIBRARY(QT_GTHREAD_LIBRARY NAMES gthread-2.0 PATHS ${_glib_query_output} )
+
+      IF(QT_GLIB_LIBRARY AND QT_GTHREAD_LIBRARY)
+        SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES}
+            ${QT_GTHREAD_LIBRARY} ${QT_GLIB_LIBRARY})
+      ENDIF(QT_GLIB_LIBRARY AND QT_GTHREAD_LIBRARY)
+
+      MARK_AS_ADVANCED(QT_GLIB_LIBRARY)
+      MARK_AS_ADVANCED(QT_GTHREAD_LIBRARY)
+    ENDIF(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
   ENDIF(QT_QCONFIG MATCHES "glib")
   
   ## clock-monotonic, just see if we need to link with rt
@@ -1454,7 +1511,7 @@ IF (QT4_QMAKE_FOUND)
     # Qt 4.2+ use AppKit
     IF(found_qt_minor_vers GREATER 1)
       SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework AppKit")
-    ENDIF(found_qt_minor_vers LESS 1)
+    ENDIF(found_qt_minor_vers GREATER 1)
 
     SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} "-framework ApplicationServices")
   ENDIF(Q_WS_MAC)
