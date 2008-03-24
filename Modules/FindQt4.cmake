@@ -1511,7 +1511,7 @@ IF (QT4_QMAKE_FOUND)
     # Qt 4.2+ use AppKit
     IF(found_qt_minor_vers GREATER 1)
       SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework AppKit")
-    ENDIF(found_qt_minor_vers LESS 1)
+    ENDIF(found_qt_minor_vers GREATER 1)
 
     SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} "-framework ApplicationServices")
   ENDIF(Q_WS_MAC)
