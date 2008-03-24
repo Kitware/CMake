@@ -117,13 +117,6 @@ cmCMakePolicyCommand::HandleVersionMode(std::vector<std::string> const& args)
     this->SetError("VERSION given too many arguments");
     return false;
     }
-  if(!this->Makefile->SetPolicyVersion(args[1].c_str()))
-    {
-    cmOStringStream e;
-    e << "VERSION given invalid value \"" << args[1] << "\".  "
-      << "A numeric major.minor[.patch] must be given.";
-    this->SetError(e.str().c_str());
-    return false;
-    }
+  this->Makefile->SetPolicyVersion(args[1].c_str());
   return true;
 }

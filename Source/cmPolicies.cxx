@@ -301,6 +301,10 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   if(sscanf(ver.c_str(), "%u.%u.%u",
             &majorVer, &minorVer, &patchVer) < 2)
     {
+    cmOStringStream e;
+    e << "Invalid policy version value \"" << ver << "\".  "
+      << "A numeric major.minor[.patch] must be given.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
   
@@ -317,6 +321,26 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
       "CMAKE_BACKWARDS_COMPATIBILITY variable.  "
       "One way to so this is to set the policy version to 2.4 exactly."
       );
+    return false;
+    }
+
+  // It is an error if the policy version is greater than the running
+  // CMake.
+  if (majorVer > cmVersion::GetMajorVersion() ||
+      (majorVer == cmVersion::GetMajorVersion() &&
+       minorVer > cmVersion::GetMinorVersion()) ||
+      (majorVer == cmVersion::GetMajorVersion() &&
+       minorVer == cmVersion::GetMinorVersion() &&
+       patchVer > cmVersion::GetPatchVersion()))
+    {
+    cmOStringStream e;
+    e << "An attempt was made to set the policy version of CMake to \""
+      << version << "\" which is greater than this version of CMake.  "
+      << "This is not allowed because the greater version may have new "
+      << "policies not known to this CMake.  "
+      << "You may need a newer CMake version to build this project.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
     }
 
   // now loop over all the policies and set them as appropriate
