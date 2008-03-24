@@ -12,6 +12,7 @@
 #    and -L).
 #  BLAS_LIBRARIES - uncached list of libraries (using full path name) to 
 #    link against to use BLAS
+#  BLAS95_LIBRARIES - uncached list of libraries (using full path name) # to link against to use BLAS95 interface
 #
 
 include(CheckFortranFunctionExists)
@@ -35,6 +36,13 @@ foreach(_library ${_list})
   set(_combined_name ${_combined_name}_${_library})
 
   if(_libraries_work)
+
+   if ( WIN32 )
+    find_library(${_prefix}_${_library}_LIBRARY
+    NAMES ${_library}
+    PATHS ENV LIB 
+    )
+   endif ( WIN32 )
     
    if ( APPLE ) 
     find_library(${_prefix}_${_library}_LIBRARY
@@ -70,6 +78,7 @@ endmacro(Check_Fortran_Libraries)
 
 set(BLAS_LINKER_FLAGS)
 set(BLAS_LIBRARIES)
+set(BLAS95_LIBRARIES)
 
 
 
@@ -168,6 +177,63 @@ endif(NOT BLAS_LIBRARIES)
 
 
 
+#BLAS in intel mkl 10 library? (em64t 64bit)
+if(NOT BLAS_LIBRARIES)
+check_fortran_libraries(
+BLAS_LIBRARIES
+BLAS
+sgemm
+""
+"mkl_intel_lp64;mkl_intel_thread;mkl_core;guide;pthread"
+)
+endif(NOT BLAS_LIBRARIES)
+if(NOT BLAS95_LIBRARIES)
+check_fortran_libraries(
+BLAS95_LIBRARIES
+BLAS
+sgemm
+""
+"mkl_blas95;mkl_intel_lp64;mkl_intel_thread;mkl_core;guide;pthread"
+)
+endif(NOT BLAS95_LIBRARIES)
+
+### windows version of intel mkl 10
+
+if(NOT BLAS_LIBRARIES)
+check_fortran_libraries(
+BLAS_LIBRARIES
+BLAS
+SGEMM
+""
+"mkl_c_dll;mkl_intel_thread_dll;mkl_core_dll;libguide40"
+)
+endif(NOT BLAS_LIBRARIES)
+
+if(NOT BLAS95_LIBRARIES)
+check_fortran_libraries(
+BLAS95_LIBRARIES
+BLAS
+sgemm
+""
+"mkl_blas95;mkl_intel_c;mkl_intel_thread;mkl_core;libguide40"
+)
+endif(NOT BLAS95_LIBRARIES)
+
+
+# linux 32 bit
+if(NOT BLAS95_LIBRARIES)
+check_fortran_libraries(
+BLAS95_LIBRARIES
+BLAS
+sgemm
+""
+"mkl_blas95;mkl_intel;mkl_intel_thread;mkl_core;guide;pthread"
+)
+endif(NOT BLAS95_LIBRARIES)
+
+
+#older vesions of intel mkl libs
+
 # BLAS in intel mkl library? (shared)
 if(NOT BLAS_LIBRARIES)
   check_fortran_libraries(
@@ -178,6 +244,7 @@ if(NOT BLAS_LIBRARIES)
   "mkl;guide;pthread"
   )
 endif(NOT BLAS_LIBRARIES)
+
 
 #BLAS in intel mkl library? (static, 32bit)
 if(NOT BLAS_LIBRARIES)
@@ -212,8 +279,6 @@ sgemm
 "acml"
 )
 endif(NOT BLAS_LIBRARIES)
-
-
 
 # Apple BLAS library?
 if(NOT BLAS_LIBRARIES)
