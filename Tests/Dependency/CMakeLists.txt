@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT( Dependency )
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")

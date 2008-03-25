@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 project(SubProject)
 message("${CMAKE_IMPORT_LIBRARY_SUFFIX}")
 add_library(bar bar.cxx)

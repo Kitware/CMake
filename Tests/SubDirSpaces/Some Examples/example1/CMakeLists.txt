@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(example1)
 ADD_EXECUTABLE(example1 example1.cxx)
 

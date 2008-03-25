@@ -1,4 +1,5 @@
 # test forcing a source file language to c++ from c
+cmake_minimum_required (VERSION 2.6)
 project(SetLang)
 # force this to be verbose so I can debug a dashboard entry
 SET(CMAKE_VERBOSE_MAKEFILE 1)

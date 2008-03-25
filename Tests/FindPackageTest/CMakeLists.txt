@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(FindPackageTest)
 
 # Look for a package that has a find module and may be found.

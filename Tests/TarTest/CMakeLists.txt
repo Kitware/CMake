@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(TarTest)
 
 # this is macro that we will be running

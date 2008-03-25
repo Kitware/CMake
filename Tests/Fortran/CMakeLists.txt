@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(testf Fortran)
 SET(CMAKE_VERBOSE_MAKEFILE 1)
 MESSAGE("ENV_FLAGS = $ENV{FFLAGS}")

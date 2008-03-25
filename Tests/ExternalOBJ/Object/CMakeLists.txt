@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(Object)
 IF(APPLE)
   # set _CMAKE_OSX_MACHINE to umame -m
