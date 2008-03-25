@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 project(SimpleExclude C)
 
 set(EXECUTABLE_OUTPUT_PATH "${SimpleExclude_BINARY_DIR}" CACHE INTERNAL "" FORCE)

@@ -1,6 +1,7 @@
 #
 # Wrapping
 #
+cmake_minimum_required (VERSION 2.6)
 PROJECT (Wrapping)
 
 # Disable cleaning of custom command outputs to preserve the hacks

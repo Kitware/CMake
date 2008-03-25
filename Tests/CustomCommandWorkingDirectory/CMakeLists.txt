@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(TestWorkingDir)
 
 ADD_CUSTOM_COMMAND(

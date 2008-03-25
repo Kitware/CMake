@@ -1,4 +1,5 @@
 # a simple CXX only test case
+cmake_minimum_required (VERSION 2.6)
 project (Properties)
 
 # these first three tests really test both properties and the management of 

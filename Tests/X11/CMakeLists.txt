@@ -1,4 +1,5 @@
 # a simple C only test case
+cmake_minimum_required (VERSION 2.6)
 PROJECT (UseX11 C)
 
 INCLUDE (${CMAKE_ROOT}/Modules/FindX11.cmake)

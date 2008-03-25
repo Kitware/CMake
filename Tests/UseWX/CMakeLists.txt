@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT (UsewxWidgets)
 
 FIND_PACKAGE(wxWidgets REQUIRED)

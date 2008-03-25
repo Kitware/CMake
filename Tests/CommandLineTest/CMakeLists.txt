@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(CommandLineTest)
 
 GET_FILENAME_COMPONENT(CMAKE_BIN_DIR ${CMAKE_COMMAND} PATH)

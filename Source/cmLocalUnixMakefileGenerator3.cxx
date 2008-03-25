@@ -638,7 +638,7 @@ cmLocalUnixMakefileGenerator3
     replace = *i;
     os << "\t" << replace.c_str() << "\n";
     }
-  if(symbolic)
+  if(symbolic && !this->WatcomWMake)
     {
     os << ".PHONY : " << tgt.c_str() << "\n";
     }

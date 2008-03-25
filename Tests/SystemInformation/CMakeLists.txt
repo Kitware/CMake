@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(SystemInformation)
 
 INCLUDE_DIRECTORIES("This does not exists")

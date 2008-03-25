@@ -1,4 +1,5 @@
 # a simple C only test case
+cmake_minimum_required (VERSION 2.6)
 project (COnly C)
 
 set(CMAKE_DEBUG_POSTFIX "_test_debug_postfix")

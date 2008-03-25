@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 project(ExportImport C)
 
 # Wipe out the install tree to make sure the exporter works.

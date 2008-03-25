@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(VSExternalInclude)
 
 IF(${CMAKE_GENERATOR} MATCHES "Visual Studio 6")

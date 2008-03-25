@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(CTestTest2)
 
 SET(DART_ROOT "" CACHE STRING "" FORCE)

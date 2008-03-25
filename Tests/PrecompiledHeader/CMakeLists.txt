@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(PrecompiledHeader C)
 
 # Make sure the proper compiler is in use.

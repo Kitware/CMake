@@ -1,4 +1,5 @@
 # a simple C only test case
+cmake_minimum_required (VERSION 2.6)
 PROJECT (MacroTest)
 
 SET(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")

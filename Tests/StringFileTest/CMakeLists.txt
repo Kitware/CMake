@@ -1,3 +1,4 @@
+cmake_minimum_required (VERSION 2.6)
 PROJECT(StringFileTest)
 INCLUDE_DIRECTORIES(${StringFileTest_BINARY_DIR})
 
@@ -100,7 +101,7 @@ STRING(STRIP "
   ST1
   " ST1)
 STRING(STRIP "ST2 " ST2)
-STRING(STRIP " 	ST3" ST3)
+STRING(STRIP "  ST3" ST3)
 
 FOREACH(var ST1 ST2 ST3)
   IF("${var}" STREQUAL "${${var}}")
