@@ -371,6 +371,7 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
                 {
                 removed = true;
                 }
+              numAttempts++;
               }
             if(!removed)
               {
