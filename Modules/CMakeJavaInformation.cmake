@@ -14,11 +14,11 @@ ENDIF(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
 
 # this is a place holder if java needed flags for javac they would go here.
 IF(NOT CMAKE_Java_CREATE_STATIC_LIBRARY)
-  IF(WIN32)
-    SET(class_files_mask "*.class")
-  ELSE(WIN32)
+#  IF(WIN32)
+#    SET(class_files_mask "*.class")
+#  ELSE(WIN32)
     SET(class_files_mask ".")
-  ENDIF(WIN32)
+#  ENDIF(WIN32)
 
   SET(CMAKE_Java_CREATE_STATIC_LIBRARY
       "<CMAKE_Java_ARCHIVE> -cf <TARGET> -C <OBJECT_DIR> ${class_files_mask}")
