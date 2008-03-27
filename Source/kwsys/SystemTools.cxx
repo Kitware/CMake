@@ -2434,6 +2434,13 @@ kwsys_stl::string SystemTools
   return "";
 }
 
+kwsys_stl::string SystemTools::GetRealPath(const char* path)
+{
+  kwsys_stl::string ret;
+  Realpath(path, ret);
+  return ret;
+}
+
 bool SystemTools::FileIsDirectory(const char* name)
 {
   // Remove any trailing slash from the name.
