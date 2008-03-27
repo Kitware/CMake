@@ -37,7 +37,6 @@ class cmGlobalKdevelopGenerator : public cmExternalMakefileProjectGenerator
 {
 public:
   cmGlobalKdevelopGenerator();
-  virtual void SetGlobalGenerator(cmGlobalGenerator* generator);
 
   virtual const char* GetName() const
                           { return cmGlobalKdevelopGenerator::GetActualName();}
