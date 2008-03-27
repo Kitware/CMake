@@ -110,6 +110,10 @@
 #  QT_FOUND         If false, don't try to use Qt.
 #  QT4_FOUND        If false, don't try to use Qt 4.
 #
+#  QT_VERSION_MAJOR The major version of Qt found.
+#  QT_VERSION_MINOR The minor version of Qt found.
+#  QT_VERSION_PATCH The patch version of Qt found.
+#
 #  QT_EDITION               Set to the edition of Qt (i.e. DesktopLight)
 #  QT_EDITION_DESKTOPLIGHT  True if QT_EDITION == DesktopLight
 #  QT_QTCORE_FOUND          True if QtCore was found.
@@ -326,13 +330,13 @@ IF (QT_QMAKE_EXECUTABLE)
     ENDIF (NOT req_qt_major_vers EQUAL 4)
 
     # and now the version string given by qmake
-    STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" found_qt_major_vers "${QTVERSION}")
-    STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+.*" "\\1" found_qt_minor_vers "${QTVERSION}")
-    STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" found_qt_patch_vers "${QTVERSION}")
+    STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" QT_VERSION_MAJOR "${QTVERSION}")
+    STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+.*" "\\1" QT_VERSION_MINOR "${QTVERSION}")
+    STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" QT_VERSION_PATCH "${QTVERSION}")
 
     # compute an overall version number which can be compared at once
     MATH(EXPR req_vers "${req_qt_major_vers}*10000 + ${req_qt_minor_vers}*100 + ${req_qt_patch_vers}")
-    MATH(EXPR found_vers "${found_qt_major_vers}*10000 + ${found_qt_minor_vers}*100 + ${found_qt_patch_vers}")
+    MATH(EXPR found_vers "${QT_VERSION_MAJOR}*10000 + ${QT_VERSION_MINOR}*100 + ${QT_VERSION_PATCH}")
 
     IF (found_vers LESS req_vers)
       SET(QT4_QMAKE_FOUND FALSE)
@@ -1504,14 +1508,14 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework Carbon")
     
     # Qt 4.0, 4.1, 4.2 use QuickTime
-    IF(found_qt_minor_vers LESS 3)
+    IF(QT_VERSION_MINOR LESS 3)
       SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework QuickTime")
-    ENDIF(found_qt_minor_vers LESS 3)
+    ENDIF(QT_VERSION_MINOR LESS 3)
     
     # Qt 4.2+ use AppKit
-    IF(found_qt_minor_vers GREATER 1)
+    IF(QT_VERSION_MINOR GREATER 1)
       SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework AppKit")
-    ENDIF(found_qt_minor_vers GREATER 1)
+    ENDIF(QT_VERSION_MINOR GREATER 1)
 
     SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} "-framework ApplicationServices")
   ENDIF(Q_WS_MAC)
