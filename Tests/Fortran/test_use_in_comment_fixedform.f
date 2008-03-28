@@ -1,7 +1,7 @@
       PROGRAM foo
-C     USE bar       
-C     use bar       
-C     Use bar       
+!     USE bar
+!     use bar
+!     Use bar
 
       WRITE(*,*) 'Hello, Fortran world.'
       END PROGRAM
