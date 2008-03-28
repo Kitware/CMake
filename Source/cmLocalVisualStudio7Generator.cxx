@@ -354,6 +354,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   // boolean flags
   {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE", 0},
   {"BufferSecurityCheck", "GS-", "Turn off Buffer security check", "FALSE", 0},
+  {"Detect64BitPortabilityProblems", "Wp64", 
+   "Detect 64-bit Portability Problems", "TRUE", 0},
   {"EnableFibreSafeOptimization", "GT", "OmitFramePointers", "TRUE", 0},
   {"EnableFunctionLevelLinking", "Gy",
    "EnableFunctionLevelLinking", "TRUE", 0},
