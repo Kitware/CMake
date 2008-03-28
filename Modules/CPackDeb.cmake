@@ -34,14 +34,17 @@ ENDIF(NOT CPACK_DEBIAN_PACKAGE_VERSION)
 
 # Architecture: (mandatory)
 IF(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
-# There is no such thing as i686 architecture on debian, you should use i386 instead
-# $ dpkg --print-architecture
-  SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386)
+  # There is no such thing as i686 architecture on debian, you should use i386 instead
+  # $ dpkg --print-architecture
+  EXECUTE_PROCESS(COMMAND dpkg --print-architecture
+    OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 ENDIF(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 
 # have a look at GET_PROPERTY(result GLOBAL PROPERTY ENABLED_FEATURES),
 # this returns the successful FIND_PACKAGE() calls, maybe this can help
 # Depends:
+# You should set: DEBIAN_PACKAGE_DEPENDS
+# TODO: automate 'objdump -p | grep NEEDED'
 IF(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
   MESSAGE(STATUS "CPACK_DEBIAN_PACKAGE_DEPENDS not set, the package will have no dependencies.")
 ENDIF(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
