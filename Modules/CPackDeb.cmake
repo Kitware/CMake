@@ -38,7 +38,8 @@ IF(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
   # $ dpkg --print-architecture
   FIND_PROGRAM(DPKG_CMD dpkg)
   IF(NOT DPKG_CMD)
-    MESSAGE(FATAL_ERROR "Can not find dpkg in your path.")
+    MESSAGE("Can not find dpkg in your path default to i386.")
+    SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386)
   ENDIF(NOT DPKG_CMD)
   EXECUTE_PROCESS(COMMAND "${DPKG_CMD}" --print-architecture
     OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
