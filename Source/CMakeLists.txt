@@ -1,3 +1,4 @@
+INCLUDE(CheckIncludeFile)
 # Check if we can build support for ELF parsing.
 CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
 IF(HAVE_ELF_H)
