@@ -36,7 +36,11 @@ ENDIF(NOT CPACK_DEBIAN_PACKAGE_VERSION)
 IF(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
   # There is no such thing as i686 architecture on debian, you should use i386 instead
   # $ dpkg --print-architecture
-  EXECUTE_PROCESS(COMMAND dpkg --print-architecture
+  FIND_PROGRAM(DPKG_CMD dpkg)
+  IF(NOT DPKG_CMD)
+    MESSAGE(FATAL_ERROR "Can not find dpkg in your path.")
+  ENDIF(NOT DPKG_CMD)
+  EXECUTE_PROCESS(COMMAND "${DPKG_CMD}" --print-architecture
     OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 ENDIF(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
 
