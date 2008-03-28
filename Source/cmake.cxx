@@ -858,8 +858,8 @@ int cmake::AddCMakePaths()
   if(!cmSystemTools::FileExists(modules.c_str()))
     {
     // next try exe/..
-    cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
-    cMakeRoot = cmSystemTools::GetRealPath(cMakeRoot.c_str());
+    cMakeRoot = cmSystemTools::GetRealPath(cMakeSelf.c_str());
+    cMakeRoot = cmSystemTools::GetProgramPath(cMakeRoot.c_str());
     std::string::size_type slashPos = cMakeRoot.rfind("/");
     if(slashPos != std::string::npos)
       {
