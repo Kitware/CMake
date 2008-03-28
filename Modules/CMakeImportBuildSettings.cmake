@@ -119,6 +119,14 @@ MACRO(CMAKE_IMPORT_BUILD_SETTINGS SETTINGS_FILE)
     ENDIF(WIN32)
 
     # Enforce the C++ compiler setting.
+    # CMAKE_OVERRIDE_COMPILER_MISMATCH allow advanced user to override cmake detection of
+    # compiler mismatch between imported projects. Typical case on UNIX could be:
+    # 1. Compile a project with g++-3.3 while the imported project was configured
+    # using the 'c++' alias (which at the time meant g++-3.3)
+    # 2. This variable also becomes handy when the project your are importing has been
+    # compiled with a compiler you do not have access to, but offer a compatible ABI with
+    # yours.
+    # WARNING: Do not use this variable with C++ compiler with incompatible ABI
     IF(CMAKE_CXX_COMPILER_MISMATCH AND NOT CMAKE_OVERRIDE_COMPILER_MISMATCH)
       MESSAGE("Warning: CMake is forcing CMAKE_CXX_COMPILER to "
               "\"${CMAKE_BUILD_SETTING_CXX_COMPILER}\" to match that imported "
