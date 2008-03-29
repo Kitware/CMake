@@ -347,7 +347,8 @@ class cmake
     }
   void SetSuppressDevWarnings(bool v)
     {
-      this->SuppressDevWarnings = v;
+      this->SuppressDevWarnings = v; 
+      this->DoSuppressDevWarnings = true;
     }
 
   /** Display a message to the user.  */
