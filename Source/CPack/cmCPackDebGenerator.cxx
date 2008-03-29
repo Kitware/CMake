@@ -124,7 +124,27 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   std::string cmd;
   cmd = "\"";
   cmd += cmakeExecutable;
-  cmd += "\" -E tar cfz data.tar.gz ./usr";
+  cmd += "\" -E tar cfz data.tar.gz ";
+
+  // now add all directories which have to be compressed
+  // collect all top level install dirs for that
+  // e.g. /opt/bin/foo, /usr/bin/bar and /usr/bin/baz would give /usr and /opt
+  int topLevelLength = strlen(toplevel);
+  std::set<std::string> installDirs;
+  for (std::vector<std::string>::const_iterator fileIt = files.begin(); 
+       fileIt != files.end(); ++ fileIt )
+    {
+    std::string::size_type slashPos = fileIt->find('/', topLevelLength+1);
+    std::string relativeDir = fileIt->substr(topLevelLength, 
+                                             slashPos - topLevelLength);
+    if (installDirs.find(relativeDir) == installDirs.end())
+      {
+      installDirs.insert(relativeDir);
+      cmd += " .";
+      cmd += relativeDir;
+      }
+    }
+
   std::string output;
   int retVal = -1;
   int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
