@@ -52,17 +52,6 @@ cmGlobalKdevelopGenerator::cmGlobalKdevelopGenerator()
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
 }
 
-
-void cmGlobalKdevelopGenerator::SetGlobalGenerator(
-                                                  cmGlobalGenerator* generator)
-{
-  cmExternalMakefileProjectGenerator::SetGlobalGenerator(generator);
-  cmGlobalUnixMakefileGenerator3* mf = (cmGlobalUnixMakefileGenerator3*)
-                                                                     generator;
-  mf->SetToolSupportsColor(false);
-  mf->SetForceVerboseMakefiles(true);
-}
-
 void cmGlobalKdevelopGenerator::Generate()
 {
   // for each sub project in the project create 
@@ -474,13 +463,15 @@ void cmGlobalKdevelopGenerator
         "    </run>\n"
         "    <build>\n"
         "      <buildtool>make</buildtool>\n"; //this one is important
-  fout<<"      <builddir>"<<outputDir.c_str()<<"</builddir>\n"; //and this one
+  fout<<"      <builddir>"<<outputDir.c_str()<<"</builddir>\n";  //and this one
   fout<<"    </build>\n"
         "    <make>\n"
         "      <abortonerror>false</abortonerror>\n"
         "      <numberofjobs>1</numberofjobs>\n"
         "      <dontact>false</dontact>\n"
-        "      <makebin></makebin>\n"
+        "      <makebin>" << this->GlobalGenerator->GetLocalGenerators()[0]->
+            GetMakefile()->GetRequiredDefinition("CMAKE_BUILD_TOOL") 
+            << " VERBOSE=1 </makebin>\n"
         "      <selectedenvironment>default</selectedenvironment>\n"
         "      <environments>\n"
         "        <default/>\n"

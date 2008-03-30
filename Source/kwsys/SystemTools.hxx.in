@@ -350,6 +350,11 @@ public:
   static kwsys_stl::string CollapseFullPath(const char* in_relative,
                                             const char* in_base);
 
+  /** 
+   * Get the real path for a given path, removing all symlinks.
+   */
+  static kwsys_stl::string GetRealPath(const char* path);
+
   /**
    * Split a path name into its root component and the rest of the
    * path.  The root component is one of the following:

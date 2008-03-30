@@ -314,7 +314,6 @@ class cmake
    */
   const char* GetCTestCommand();
   const char* GetCPackCommand();
-  const char* GetCMakeCommand() const { return this->CMakeCommand.c_str(); }
 
   // Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
@@ -348,7 +347,8 @@ class cmake
     }
   void SetSuppressDevWarnings(bool v)
     {
-      this->SuppressDevWarnings = v;
+      this->SuppressDevWarnings = v; 
+      this->DoSuppressDevWarnings = true;
     }
 
   /** Display a message to the user.  */

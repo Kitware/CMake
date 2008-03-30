@@ -1,0 +1,40 @@
+Changes in CMake 2.6.0 RC 6
+
+- Added ChangeLog.manual
+- Allow CMakeImportBuildSettings force compiler to be optional
+- Change cpack deb packager to detect the architecture
+- Fix FindCurses to be backwards compatible with cache variable CURSES_LIBRARY
+- Add version variables to FindQt4.cmake
+- Fix CPack Deb generator to not hard code /usr
+- Better default size for cmake-gui help dialog
+- Fix problem where incorrect path was used for cmake.exe when 
+  used to do incremental linking on windows nmake or make
+- Fix build with system libraries on
+- Add color output in kdevelop
+- Create non-verbose makefiles in kdevelop
+- Fix some missing flags for vs IDE flag map
+- Fix MacOSX install symlink crash problem
+- Fix turning of Dev warnings with gui's
+
+Changes in CMake 2.6.0 
+
+- Documentation for all variables
+- Direct CDash submit support
+- Bullseye coverage support
+- Use full paths for linking to libraries on all platforms. No longer
+  separate into -L and -l.
+- Enhance the install command
+- export command and ability to have imported targets
+- CPack support for rpm and deb
+- Cross compile support
+- New Qt GUI
+- Introduction of the cmake_policy command
+- Much better Fortran support
+- Mac OSX Framework creation support
+- Project generators for Eclipse and CodeBlocks
+- Beta support for asm in makefiles
+- Enhanced find_package() command with support for project-installed 
+  FooConfig.cmake files
+- New CMAKE_PREFIX_PATH environment variable to specify user search dirs 
+  for find_xxx()
+- Lots of bug fixes

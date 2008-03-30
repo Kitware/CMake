@@ -2107,6 +2107,8 @@ void cmSystemTools::FindExecutableDirectory(const char* argv0)
   std::string exe;
   if(cmSystemTools::FindProgramPath(argv0, exe, errorMsg))
     {
+    // remove symlinks
+    exe = cmSystemTools::GetRealPath(exe.c_str());
     cmSystemToolsExecutableDirectory =
       cmSystemTools::GetFilenamePath(exe.c_str());
     }

@@ -353,7 +353,11 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
 
   // boolean flags
   {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE", 0},
-  {"EnableFibreSafeOptimization", "GT", "OmitFramePointers", "TRUE", 0},
+  {"BufferSecurityCheck", "GS-", "Turn off Buffer security check", "FALSE", 0},
+  {"Detect64BitPortabilityProblems", "Wp64", 
+   "Detect 64-bit Portability Problems", "TRUE", 0},
+  {"EnableFiberSafeOptimization", "GT", "Enable Fiber-safe Optimizations",
+   "TRUE", 0},
   {"EnableFunctionLevelLinking", "Gy",
    "EnableFunctionLevelLinking", "TRUE", 0},
   {"EnableIntrinsicFunctions", "Oi", "EnableIntrinsicFunctions", "TRUE", 0},
@@ -365,6 +369,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"OptimizeForWindowsApplication", "GA", "Optimize for windows", "TRUE", 0},
   {"RuntimeTypeInfo", "GR",
    "Turn on Run time type information for c++", "TRUE", 0},
+  {"RuntimeTypeInfo", "GR-",
+   "Turn off Run time type information for c++", "FALSE", 0},
   {"SmallerTypeCheck", "RTCc", "smaller type check", "TRUE", 0},
   {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "TRUE", 0},
   {"WarnAsError", "WX", "Treat warnings as errors", "TRUE", 0},

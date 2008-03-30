@@ -783,6 +783,7 @@ int cmake::AddCMakePaths()
 {
   // Find the cmake executable
   std::string cMakeSelf = cmSystemTools::GetExecutableDirectory();
+  cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
   cMakeSelf += "/cmake";
   cMakeSelf += cmSystemTools::GetExecutableExtension();
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
@@ -857,7 +858,8 @@ int cmake::AddCMakePaths()
   if(!cmSystemTools::FileExists(modules.c_str()))
     {
     // next try exe/..
-    cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
+    cMakeRoot = cmSystemTools::GetRealPath(cMakeSelf.c_str());
+    cMakeRoot = cmSystemTools::GetProgramPath(cMakeRoot.c_str());
     std::string::size_type slashPos = cMakeRoot.rfind("/");
     if(slashPos != std::string::npos)
       {
