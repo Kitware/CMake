@@ -79,12 +79,14 @@ bool cmExportFileGenerator::GenerateImportFile()
     }
   std::ostream& os = *foutPtr;
 
-  // Start with the import file header.
+  // Isolate the file policy level.
+  // We use 2.6 here instead of the current version because newer
+  // versions of CMake should be able to export files imported by 2.6
+  // until the import format changes.
   os << "CMAKE_POLICY(PUSH)\n"
-     << "CMAKE_POLICY(VERSION "
-     << cmVersion::GetMajorVersion() << "."
-     << cmVersion::GetMinorVersion() << "."
-     << cmVersion::GetPatchVersion() << ")\n";
+     << "CMAKE_POLICY(VERSION 2.6)\n";
+
+  // Start with the import file header.
   this->GenerateImportHeaderCode(os);
 
   // Create all the imported targets.
