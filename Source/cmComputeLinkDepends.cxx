@@ -169,6 +169,9 @@ cmComputeLinkDepends
 
   // Enable debug mode if requested.
   this->DebugMode = this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE");
+
+  // Assume no compatibility until set.
+  this->OldLinkDirMode = false;
 }
 
 //----------------------------------------------------------------------------
@@ -180,6 +183,12 @@ cmComputeLinkDepends::~cmComputeLinkDepends()
     {
     delete *i;
     }
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkDepends::SetOldLinkDirMode(bool b)
+{
+  this->OldLinkDirMode = b;
 }
 
 //----------------------------------------------------------------------------
@@ -460,6 +469,10 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
         {
         actual_libs.push_back(*di);
         }
+      else if(this->OldLinkDirMode)
+        {
+        this->CheckWrongConfigItem(*di);
+        }
 
       // Reset the link type until another explicit type is given.
       llt = cmTarget::GENERAL;
@@ -491,6 +504,10 @@ cmComputeLinkDepends::AddTargetLinkEntries(int depender_index,
     if(li->second == cmTarget::GENERAL || li->second == linkType)
       {
       actual_libs.push_back(li->first);
+      }
+    else if(this->OldLinkDirMode)
+      {
+      this->CheckWrongConfigItem(li->first);
       }
     }
 
@@ -808,4 +825,24 @@ void cmComputeLinkDepends::DisplayFinalEntries()
       }
     }
   fprintf(stderr, "\n");
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkDepends::CheckWrongConfigItem(std::string const& item)
+{
+  if(!this->OldLinkDirMode)
+    {
+    return;
+    }
+
+  // For CMake 2.4 bug-compatibility we need to consider the output
+  // directories of targets linked in another configuration as link
+  // directories.
+  if(cmTarget* tgt = this->Makefile->FindTargetToUse(item.c_str()))
+    {
+    if(!tgt->IsImported())
+      {
+      this->OldWrongConfigItems.insert(tgt);
+      }
+    }
 }

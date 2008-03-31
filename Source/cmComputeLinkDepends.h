@@ -54,6 +54,10 @@ public:
   typedef std::vector<LinkEntry> EntryVector;
   EntryVector const& Compute();
 
+  void SetOldLinkDirMode(bool b);
+  std::set<cmTarget*> const& GetOldWrongConfigItems() const
+    { return this->OldWrongConfigItems; }
+
 private:
 
   // Context information.
@@ -128,6 +132,11 @@ private:
   void VisitComponent(cmComputeComponentGraph const& ccg, unsigned int i);
   void EmitComponent(NodeList const& nl);
   void DisplayFinalEntries();
+
+  // Compatibility help.
+  bool OldLinkDirMode;
+  void CheckWrongConfigItem(std::string const& item);
+  std::set<cmTarget*> OldWrongConfigItems;
 };
 
 #endif

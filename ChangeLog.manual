@@ -15,6 +15,12 @@ Changes in CMake 2.6.0 RC 6
 - Fix some missing flags for vs IDE flag map
 - Fix MacOSX install symlink crash problem
 - Fix turning of Dev warnings with gui's
+- Fix backwards compatibility issue with FindMPI.cmake
+- Fix for bug 6605, add -L path for optimized in debug sometimes for
+  backwards compatibility
+- Allow for CMP0000 to be set before any warnings happen
+- Do not use FAT32 hack in VS 2005 and 2008 unless on a FAT32 disk,
+  causes try-compiles to be 3 times slower if FAT hack is present.
 
 Changes in CMake 2.6.0 
 
