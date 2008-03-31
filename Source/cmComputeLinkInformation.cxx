@@ -510,6 +510,7 @@ bool cmComputeLinkInformation::Compute()
 
   // Compute the ordered link line items.
   cmComputeLinkDepends cld(this->Target, this->Config);
+  cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
   // Add the link line items.
@@ -537,6 +538,25 @@ bool cmComputeLinkInformation::Compute()
   else
     {
     this->SetCurrentLinkType(this->StartLinkType);
+    }
+
+  // Finish listing compatibility paths.
+  if(this->OldLinkDirMode)
+    {
+    // For CMake 2.4 bug-compatibility we need to consider the output
+    // directories of targets linked in another configuration as link
+    // directories.
+    std::set<cmTarget*> const& wrongItems = cld.GetOldWrongConfigItems();
+    for(std::set<cmTarget*>::const_iterator i = wrongItems.begin();
+        i != wrongItems.end(); ++i)
+      {
+      cmTarget* tgt = *i;
+      bool implib =
+        (this->UseImportLibrary &&
+         (tgt->GetType() == cmTarget::SHARED_LIBRARY));
+      std::string lib = tgt->GetFullPath(this->Config , implib, true);
+      this->OldLinkDirItems.push_back(lib);
+      }
     }
 
   // Finish setting up linker search directories.
