@@ -146,6 +146,10 @@ void cmMakefile::Initialize()
 
   // Enter a policy level for this directory.
   this->PushPolicy();
+
+  // By default the check is not done.  It is enabled by
+  // cmListFileCache in the top level if necessary.
+  this->CheckCMP0000 = false;
 }
 
 unsigned int cmMakefile::GetCacheMajorVersion()
@@ -561,19 +565,11 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       }
     }
 
-  // If this is the directory-level CMakeLists.txt file then enforce
-  // policy stack depth.
+  // If this is the directory-level CMakeLists.txt file then perform
+  // some extra checks.
   if(this->ListFileStack.size() == 1)
     {
-    while(this->PolicyStack.size() > 1)
-      {
-      if(endScopeNicely)
-        {
-        this->IssueMessage(cmake::FATAL_ERROR, 
-                           "cmake_policy PUSH without matching POP");
-        }
-      this->PopPolicy(false);
-      }
+    this->EnforceDirectoryLevelRules(endScopeNicely);
     }
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
@@ -585,6 +581,55 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   return true;
 }
 
+//----------------------------------------------------------------------------
+void cmMakefile::EnforceDirectoryLevelRules(bool endScopeNicely)
+{
+  // Enforce policy stack depth.
+  while(this->PolicyStack.size() > 1)
+    {
+    if(endScopeNicely)
+      {
+      this->IssueMessage(cmake::FATAL_ERROR,
+                         "cmake_policy PUSH without matching POP");
+      }
+    this->PopPolicy(false);
+    }
+
+  // Diagnose a violation of CMP0000 if necessary.
+  if(this->CheckCMP0000)
+    {
+    cmOStringStream msg;
+    msg << "No cmake_minimum_required command is present.  "
+        << "A line of code such as\n"
+        << "  cmake_minimum_required(VERSION "
+        << cmVersion::GetMajorVersion() << "."
+        << cmVersion::GetMinorVersion()
+        << ")\n"
+        << "should be added at the top of the file.  "
+        << "The version specified may be lower if you wish to "
+        << "support older CMake versions for this project.  "
+        << "For more information run "
+        << "\"cmake --help-policy CMP0000\".";
+    switch (this->GetPolicyStatus(cmPolicies::CMP0000))
+      {
+      case cmPolicies::WARN:
+        // Warn because the user did not provide a mimimum required
+        // version.
+        this->IssueMessage(cmake::AUTHOR_WARNING, msg.str().c_str());
+      case cmPolicies::OLD:
+        // OLD behavior is to use policy version 2.4 set in
+        // cmListFileCache.
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::NEW:
+        // NEW behavior is to issue an error.
+        this->IssueMessage(cmake::FATAL_ERROR, msg.str().c_str());
+        cmSystemTools::SetFatalErrorOccured();
+        return;
+      }
+    }
+}
 
 void cmMakefile::AddCommand(cmCommand* wg)
 {

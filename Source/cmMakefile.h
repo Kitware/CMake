@@ -793,6 +793,9 @@ public:
   void IssueMessage(cmake::MessageType t,
                     std::string const& text) const;
 
+  /** Set whether or not to report a CMP0000 violation.  */
+  void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -904,6 +907,11 @@ private:
   typedef std::map<cmPolicies::PolicyID,
                    cmPolicies::PolicyStatus> PolicyMap;
   std::vector<PolicyMap> PolicyStack;
+
+  bool CheckCMP0000;
+
+  // Enforce rules about CMakeLists.txt files.
+  void EnforceDirectoryLevelRules(bool endScopeNicely);
 };
 
 

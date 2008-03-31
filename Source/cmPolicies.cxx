@@ -101,7 +101,15 @@ cmPolicies::cmPolicies()
     "(such as \"2.6\").  "
     "The command will ensure that at least the given version of CMake is "
     "running and help newer versions be compatible with the project.  "
-    "See documentation of cmake_minimum_required for details.",
+    "See documentation of cmake_minimum_required for details.\n"
+    "Note that the command invocation must appear in the CMakeLists.txt "
+    "file itself; a call in an included file is not sufficient.  "
+    "However, the cmake_policy command may be called to set policy "
+    "CMP0000 to OLD or NEW behavior explicitly.  "
+    "The OLD behavior is to silently ignore the missing invocation.  "
+    "The NEW behavior is to issue an error instead of a warning.  "
+    "An included file may set CMP0000 explicitly to affect how this "
+    "policy is enforced for the main CMakeLists.txt file.",
     2,6,0, cmPolicies::WARN
     );
 
