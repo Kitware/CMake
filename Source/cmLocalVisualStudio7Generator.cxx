@@ -31,6 +31,8 @@
 
 #include <ctype.h> // for isspace
 
+static bool cmLVS6G_IsFAT(const char* dir);
+
 class cmLocalVisualStudio7GeneratorInternals
 {
 public:
@@ -661,16 +663,21 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\t\t\t\tInterfaceIdentifierFileName=\"$(InputName)_i.c\"\n";
   fout << "\t\t\t\tProxyFileName=\"$(InputName)_p.c\"/>\n";
   // end of <Tool Name=VCMIDLTool
-  
-  // If we are building a version 8 project file, add a flag telling the
-  // manifest tool to use a workaround for FAT32 file systems, which can cause
-  // an empty manifest to be embedded into the resulting executable.
-  // See CMake bug #2617.
+
+  // Check if we need the FAT32 workaround.
   if ( this->Version >= 8 )
     {
-    fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCManifestTool\"\n"
-         << "\t\t\t\tUseFAT32Workaround=\"true\"\n"
-         << "\t\t\t/>\n";
+    // Check the filesystem type where the target will be written.
+    if(cmLVS6G_IsFAT(target.GetDirectory(configName)))
+      {
+      // Add a flag telling the manifest tool to use a workaround
+      // for FAT32 file systems, which can cause an empty manifest
+      // to be embedded into the resulting executable.  See CMake
+      // bug #2617.
+      fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCManifestTool\"\n"
+           << "\t\t\t\tUseFAT32Workaround=\"true\"\n"
+           << "\t\t\t/>\n";
+      }
     }
 
   this->OutputTargetRules(fout, configName, target, libName);
@@ -2053,4 +2060,22 @@ GetTargetObjectFileDirectories(cmTarget* target,
   dir += "/";
   dir += this->GetGlobalGenerator()->GetCMakeCFGInitDirectory();
   dirs.push_back(dir);
+}
+
+//----------------------------------------------------------------------------
+#include <windows.h>
+static bool cmLVS6G_IsFAT(const char* dir)
+{
+  if(dir[0] && dir[1] == ':')
+    {
+    char volRoot[4] = "_:/";
+    volRoot[0] = dir[0];
+    char fsName[16];
+    if(GetVolumeInformation(volRoot, 0, 0, 0, 0, 0, fsName, 16) &&
+       strstr(fsName, "FAT") != 0)
+      {
+      return true;
+      }
+    }
+  return false;
 }
