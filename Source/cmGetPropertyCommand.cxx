@@ -166,7 +166,6 @@ bool cmGetPropertyCommand
   else if(this->InfoType == OutDefined)
     {
     // Lookup if the property is defined
-    const char *value;
     if(this->Makefile->GetCMakeInstance()->
        GetPropertyDefinition(this->PropertyName.c_str(), scope))
       {
