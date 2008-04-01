@@ -61,8 +61,23 @@
 #        Options may be given to rcc, such as those found
 #        when executing "rcc -help"
 #
-#  macro QT4_AUTOMOC(inputfile ... )
 #  macro QT4_GENERATE_MOC(inputfile outputfile )
+#        creates a rule to run moc on infile and create outfile.
+#        Use this if for some reason QT4_WRAP_CPP() isn't appropriate, e.g.
+#        because you need a custom filename for the moc file or something similar.
+#
+#  macro QT4_AUTOMOC(sourcefile1 sourcefile2 ... )
+#        This macro is still experimental.
+#        It can be used to have moc automatically handled.
+#        So if you have the files foo.h and foo.cpp, and in foo.h a 
+#        a class uses the Q_OBJECT macro, moc has to run on it. If you don't
+#        want to use QT4_WRAP_CPP() (which is reliable and mature), you can insert
+#        #include "foo.moc"
+#        in foo.cpp and then give foo.cpp as argument to QT4_AUTOMOC(). This will the
+#        scan all listed files at cmake-time for such included moc files and if it finds
+#        them cause a rule to be generated to run moc at build time on the 
+#        accompanying header file foo.h.
+#        If a source file has the SKIP_AUTOMOC property set it will be ignored by this macro.
 #
 #  macro QT4_ADD_DBUS_INTERFACE(outfiles interface basename)
 #        create a the interface header and implementation files with the 
@@ -1182,7 +1197,7 @@ IF (QT4_QMAKE_FOUND)
 
          GET_FILENAME_COMPONENT(_abs_FILE ${_current_FILE} ABSOLUTE)
          # if "SKIP_AUTOMOC" is set to true, we will not handle this file here.
-         # here. this is required to make bouic work correctly:
+         # This is required to make uic work correctly:
          # we need to add generated .cpp files to the sources (to compile them),
          # but we cannot let automoc handle them, as the .cpp files don't exist yet when
          # cmake is run for the very first time on them -> however the .cpp files might
