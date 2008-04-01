@@ -162,7 +162,7 @@ void cmGlobalVisualStudio8Generator::Generate()
       stampListFile += "/";
       stampListFile += stampList;
       std::string stampFile;
-      cmGeneratedFileStream fout(stampList.c_str());
+      cmGeneratedFileStream fout(stampListFile.c_str());
       for(std::vector<cmLocalGenerator*>::const_iterator
             gi = generators.begin(); gi != generators.end(); ++gi)
         {
