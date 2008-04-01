@@ -88,6 +88,17 @@ ENDIF(NOT CPACK_DEBIAN_PACKAGE_PRIORITY )
 # Suggests:
 # You should set: CPACK_DEBIAN_PACKAGE_SUGGESTS
 
+# CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+# This variable allow advanced user to add custom script to the control.tar.gz (inside the .deb archive)
+# Typical examples are: 
+# - conffiles
+# - postinst
+# - postrm
+# - prerm"
+# Usage:
+# SET(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA 
+#    "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
+
 
 # For debian source packages:
 # debian/control
