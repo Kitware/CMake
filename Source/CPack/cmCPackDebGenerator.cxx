@@ -200,6 +200,30 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   cmd = "\"";
   cmd += cmakeExecutable;
   cmd += "\" -E tar cfz control.tar.gz ./control ./md5sums";
+  const char* controlExtra = 
+    this->GetOption("CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA");
+  if( controlExtra )
+    { 
+    std::vector<std::string> controlExtraList;
+    cmSystemTools::ExpandListArgument(controlExtra, controlExtraList);
+    for(std::vector<std::string>::iterator i = 
+          controlExtraList.begin(); i != controlExtraList.end(); ++i)
+      {
+      std::string filenamename = 
+        cmsys::SystemTools::GetFilenameName(i->c_str());
+      std::string localcopy = toplevel;
+      localcopy += "/";
+      localcopy += filenamename;
+      // if we can copy the file, it means it does exist, let's add it:
+      if( cmsys::SystemTools::CopyFileIfDifferent(
+            i->c_str(), localcopy.c_str()) )
+        {
+        // debian is picky and need relative to ./ path in the tar.gz
+        cmd += " ./";
+        cmd += filenamename;
+        }
+      }
+    }
   res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
     &retVal, toplevel, this->GeneratorVerbose, 0);
 
