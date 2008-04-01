@@ -92,6 +92,7 @@ private:
   std::set<cmStdString> Names;
   std::string PropertyName;
   std::string PropertyValue;
+  bool Remove;
   bool AppendMode;
 
   // Implementation of each property type.

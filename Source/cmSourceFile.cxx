@@ -262,10 +262,6 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
     {
     return;
     }
-  if (!value)
-    {
-    value = "NOTFOUND";
-    }
 
   this->Properties.SetProperty(prop, value, cmProperty::SOURCE_FILE);
 }

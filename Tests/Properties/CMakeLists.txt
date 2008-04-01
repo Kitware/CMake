@@ -23,10 +23,23 @@ include_directories("${Properties_SOURCE_DIR}" "${Properties_BINARY_DIR}")
 
 
 # test generic property interfaces
+get_property(GLOBALRESULT GLOBAL PROPERTY GLOBALTEST DEFINED)
+if (GLOBALRESULT)
+    message(SEND_ERROR "Error: global prop defined when it should not be, "
+            "result is GLOBALRESULT=${GLOBALRESULT}")
+endif (GLOBALRESULT)
+
 define_property(GLOBAL PROPERTY GLOBALTEST
   BRIEF_DOCS "A test property"
   FULL_DOCS "A long description of this test property"
   )
+
+get_property(GLOBALRESULT GLOBAL PROPERTY GLOBALTEST DEFINED)
+if (NOT GLOBALRESULT)
+    message(SEND_ERROR "Error: global prop not defined "
+            "result is GLOBALRESULT=${GLOBALRESULT}")
+endif (NOT GLOBALRESULT)
+  
 set_property(GLOBAL PROPERTY GLOBALTEST 1)
 set_property(DIRECTORY PROPERTY DIRECTORYTEST 1)
 set_property(SOURCE SubDir/properties3.cxx PROPERTY SOURCETEST 1)
@@ -42,7 +55,8 @@ if (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND
   add_executable (Properties SubDir/properties3.cxx properties)
 else (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND 
     DIRECTORYRESULT AND SOURCERESULT)
-  message("Error: test results are RESULT1=${RESULT1} RESULT2=${RESULT2} "
+  message(SEND_ERROR 
+    "Error: test results are RESULT1=${RESULT1} RESULT2=${RESULT2} "
     "RESULT3=${RESULT3} GLOBALRESULT=${GLOBALRESULT} "
     "DIRECTORYRESULT=${DIRECTORYRESULT} "
     "SOURCERESULT=${SOURCERESULT}")
@@ -53,15 +67,33 @@ endif (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND
 set_property(TARGET Properties PROPERTY TARGETTEST 1)
 get_property(TARGETRESULT TARGET Properties PROPERTY TARGETTEST)
 if (NOT TARGETRESULT)
-    message("Error: target result is TARGETRESULT=${TARGETRESULT}")
+    message(SEND_ERROR 
+      "Error: target result is TARGETRESULT=${TARGETRESULT}")
 endif (NOT TARGETRESULT)
+
+# test get_property SET
+get_property(TARGETRESULT TARGET Properties PROPERTY TARGETTEST SET)
+if (NOT TARGETRESULT)
+    message(SEND_ERROR 
+      "Error: target prop not set, result is TARGETRESULT=${TARGETRESULT}")
+endif (NOT TARGETRESULT)
+
+# test unsetting a property
+set_property(TARGET Properties PROPERTY TARGETTEST)
+get_property(TARGETRESULT TARGET Properties PROPERTY TARGETTEST SET)
+if (TARGETRESULT)
+    message(SEND_ERROR "Error: target prop not unset, "
+            "result is TARGETRESULT=${TARGETRESULT}")
+endif (TARGETRESULT)
+
+
 
 # test the target SOURCES property
 get_property(Properties_SOURCES TARGET Properties PROPERTY SOURCES)
 set_source_files_properties(${Properties_SOURCES} PROPERTIES TEST4 1)
 get_source_file_property(RESULT4 properties.h TEST4)
 if(NOT RESULT4)
-  message("Error: target result is"
+  message(SEND_ERROR "Error: target result is"
     " RESULT4=${RESULT4}"
     " Properties_SOURCES=[${Properties_SOURCES}]")
 endif(NOT RESULT4)
