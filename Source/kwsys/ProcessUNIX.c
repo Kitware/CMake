@@ -2408,7 +2408,7 @@ static void kwsysProcessKill(pid_t process_id)
         {
         if(ppid == process_id)
           {
-          /* Recursively kill this child aned its children.  */
+          /* Recursively kill this child and its children.  */
           kwsysProcessKill(pid);
           }
         }
