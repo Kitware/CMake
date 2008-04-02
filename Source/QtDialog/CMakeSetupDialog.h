@@ -60,7 +60,7 @@ protected slots:
   void updateSourceDirectory(const QString& dir);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
-  void promptForGenerator();
+  bool promptForGenerator();
   void updateGeneratorLabel(const QString& gen);
   void setExitAfterGenerate(bool);
   void addBinaryPath(const QString&);
