@@ -618,7 +618,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     else if(arg.find("--debug-output",0) == 0)
       {
       std::cout << "Running with debug output on.\n";
-      this->DebugOutputOn();
+      this->SetDebugOutputOn(true);
       }
     else if(arg.find("-G",0) == 0)
       {

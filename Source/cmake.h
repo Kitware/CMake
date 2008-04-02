@@ -317,7 +317,7 @@ class cmake
 
   // Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
-  void DebugOutputOn() { this->DebugOutput = true;}
+  void SetDebugOutputOn(bool b) { this->DebugOutput = b;}
 
   // Define a property
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
