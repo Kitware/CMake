@@ -25,6 +25,7 @@ Changes in CMake 2.6.0 RC 6
 - Can now check if a proprty is SET or not
 - Fix for generate with vs 2005 and vista not being able to create stamp file
 - set_property with an empty value unsets that property now
+- Fix FindQt4 on windows with some \ style paths
 
 Changes in CMake 2.6.0 
 
