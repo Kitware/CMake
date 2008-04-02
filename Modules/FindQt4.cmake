@@ -371,6 +371,8 @@ IF (QT4_QMAKE_FOUND)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_LIBS"
       OUTPUT_VARIABLE QT_LIBRARY_DIR_TMP )
+    # make sure we have / and not \ as qmake gives on windows
+    FILE(TO_CMAKE_PATH "${QT_LIBRARY_DIR_TMP}" QT_LIBRARY_DIR_TMP)
     IF(EXISTS "${QT_LIBRARY_DIR_TMP}")
       SET(QT_LIBRARY_DIR ${QT_LIBRARY_DIR_TMP} CACHE PATH "Qt library dir")
     ELSE(EXISTS "${QT_LIBRARY_DIR_TMP}")
@@ -394,8 +396,10 @@ IF (QT4_QMAKE_FOUND)
   # ask qmake for the binary dir
   IF (QT_LIBRARY_DIR AND NOT QT_BINARY_DIR)
      EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
-        ARGS "-query QT_INSTALL_BINS"
-        OUTPUT_VARIABLE qt_bins )
+       ARGS "-query QT_INSTALL_BINS"
+       OUTPUT_VARIABLE qt_bins )
+     # make sure we have / and not \ as qmake gives on windows
+     FILE(TO_CMAKE_PATH "${qt_bins}" qt_bins)
      SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "")
   ENDIF (QT_LIBRARY_DIR AND NOT QT_BINARY_DIR)
 
@@ -403,7 +407,9 @@ IF (QT4_QMAKE_FOUND)
   IF (QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR)
       EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
         ARGS "-query QT_INSTALL_HEADERS" 
-        OUTPUT_VARIABLE qt_headers )
+        OUTPUT_VARIABLE qt_headers ) 
+      # make sure we have / and not \ as qmake gives on windows
+      FILE(TO_CMAKE_PATH "${qt_headers}" qt_headers)
       SET(QT_HEADERS_DIR ${qt_headers} CACHE INTERNAL "")
   ENDIF(QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR)
 
@@ -413,6 +419,8 @@ IF (QT4_QMAKE_FOUND)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_DOCS"
       OUTPUT_VARIABLE qt_doc_dir )
+    # make sure we have / and not \ as qmake gives on windows
+    FILE(TO_CMAKE_PATH "${qt_doc_dir}" qt_doc_dir)
     SET(QT_DOC_DIR ${qt_doc_dir} CACHE PATH "The location of the Qt docs")
   ENDIF (QT_LIBRARY_DIR AND NOT QT_DOC_DIR)
 
@@ -421,7 +429,11 @@ IF (QT4_QMAKE_FOUND)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QMAKE_MKSPECS"
       OUTPUT_VARIABLE qt_mkspecs_dirs )
-    STRING(REPLACE ":" ";" qt_mkspecs_dirs "${qt_mkspecs_dirs}")
+    # do not replace : on windows as it might be a drive letter
+    # and windows should already use ; as a separator
+    IF(UNIX)
+      STRING(REPLACE ":" ";" qt_mkspecs_dirs "${qt_mkspecs_dirs}")
+    ENDIF(UNIX)
     FIND_PATH(QT_MKSPECS_DIR qconfig.pri PATHS ${qt_mkspecs_dirs}
       DOC "The location of the Qt mkspecs containing qconfig.pri"
       NO_DEFAULT_PATH )
@@ -432,6 +444,8 @@ IF (QT4_QMAKE_FOUND)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_PLUGINS"
       OUTPUT_VARIABLE qt_plugins_dir )
+    # make sure we have / and not \ as qmake gives on windows
+    FILE(TO_CMAKE_PATH "${qt_plugins_dir}" qt_plugins_dir)
     SET(QT_PLUGINS_DIR ${qt_plugins_dir} CACHE PATH "The location of the Qt plugins")
   ENDIF (QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR)
   ########################################
@@ -891,8 +905,10 @@ IF (QT4_QMAKE_FOUND)
   QT_QUERY_QMAKE(QT_MOC_EXECUTABLE_INTERNAL "QMAKE_MOC")
   QT_QUERY_QMAKE(QT_UIC_EXECUTABLE_INTERNAL "QMAKE_UIC")
 
+  # make sure we have / and not \ as qmake gives on windows
   FILE(TO_CMAKE_PATH 
     "${QT_MOC_EXECUTABLE_INTERNAL}" QT_MOC_EXECUTABLE_INTERNAL)
+  # make sure we have / and not \ as qmake gives on windows
   FILE(TO_CMAKE_PATH 
     "${QT_UIC_EXECUTABLE_INTERNAL}" QT_UIC_EXECUTABLE_INTERNAL)
 
