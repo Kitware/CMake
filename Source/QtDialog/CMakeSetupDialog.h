@@ -73,6 +73,7 @@ protected slots:
   void selectionChanged();
   void addCacheEntry();
   void startSearch();
+  void setDebugOutput(bool);
 
 protected:
 

@@ -96,10 +96,16 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->GenerateAction = ToolsMenu->addAction(tr("&Generate"));
   QObject::connect(this->GenerateAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doGenerate()));
-  this->SuppressDevWarningsAction = ToolsMenu->addAction(tr("&Suppress dev Warnings (-Wno-dev)"));
-  QObject::connect(this->SuppressDevWarningsAction, SIGNAL(triggered(bool)), 
+  
+  QMenu* OptionsMenu = this->menuBar()->addMenu(tr("&Options"));
+  QAction* supressDevWarningsAction = OptionsMenu->addAction(tr("&Suppress dev Warnings (-Wno-dev)"));
+  QObject::connect(supressDevWarningsAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doSuppressDev()));
-  this->SuppressDevWarningsAction->setCheckable(true);
+  supressDevWarningsAction->setCheckable(true);
+  QAction* debugAction = OptionsMenu->addAction(tr("&Debug Output"));
+  debugAction->setCheckable(true);
+  QObject::connect(debugAction, SIGNAL(toggled(bool)), 
+                   this, SLOT(setDebugOutput(bool)));
   
   QMenu* HelpMenu = this->menuBar()->addMenu(tr("&Help"));
   QAction* a = HelpMenu->addAction(tr("About"));
@@ -861,4 +867,9 @@ void CMakeSetupDialog::startSearch()
   this->Search->selectAll();
 }
 
+void CMakeSetupDialog::setDebugOutput(bool flag)
+{
+  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
+    "setDebugOutput", Qt::QueuedConnection, Q_ARG(bool, flag));
+}
 

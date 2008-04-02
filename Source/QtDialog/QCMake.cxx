@@ -362,6 +362,21 @@ void QCMake::reloadCache()
   props = this->properties();
   emit this->propertiesChanged(props);
 }
+  
+void QCMake::setDebugOutput(bool flag)
+{
+  if(flag != this->CMakeInstance->GetDebugOutput())
+    {
+    this->CMakeInstance->SetDebugOutputOn(flag);
+    emit this->debugOutputChanged(flag);
+    }
+}
+
+bool QCMake::getDebugOutput() const
+{
+  return this->CMakeInstance->GetDebugOutput();
+}
+
 
 void QCMake::SetSuppressDevWarnings(bool value)
 {
