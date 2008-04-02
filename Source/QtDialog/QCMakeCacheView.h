@@ -108,6 +108,11 @@ public:
       const QModelIndex& index ) const;
   bool editorEvent (QEvent* event, QAbstractItemModel* model, 
        const QStyleOptionViewItem& option, const QModelIndex& index);
+  bool eventFilter(QObject* object, QEvent* event);
+protected slots:
+  void setFileDialogFlag(bool);
+protected:
+  bool FileDialogFlag;
 };
 
 /// Editor widget for editing paths or file paths
@@ -118,6 +123,8 @@ public:
   QCMakeCacheFileEditor(QWidget* p, const QString& var);
 protected slots:
   virtual void chooseFile() = 0;
+signals:
+  void fileDialogExists(bool);
 protected:
   void resizeEvent(QResizeEvent* e);
   QToolButton* ToolButton;
