@@ -76,10 +76,6 @@ void cmTest::SetProperty(const char* prop, const char* value)
     {
     return;
     }
-  if (!value)
-    {
-    value = "NOTFOUND";
-    }
 
   this->Properties.SetProperty(prop, value, cmProperty::TEST);
 }

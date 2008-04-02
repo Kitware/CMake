@@ -94,6 +94,11 @@ bool cmGetPropertyCommand
       doing = DoingNone;
       this->InfoType = OutFullDoc;
       }
+    else if(args[i] == "SET")
+      {
+      doing = DoingNone;
+      this->InfoType = OutSet;
+      }
     else if(args[i] == "DEFINED")
       {
       doing = DoingNone;
@@ -158,6 +163,19 @@ bool cmGetPropertyCommand
       }
     this->Makefile->AddDefinition(this->Variable.c_str(), output.c_str());
     }
+  else if(this->InfoType == OutDefined)
+    {
+    // Lookup if the property is defined
+    if(this->Makefile->GetCMakeInstance()->
+       GetPropertyDefinition(this->PropertyName.c_str(), scope))
+      {
+      this->Makefile->AddDefinition(this->Variable.c_str(), "1");
+      }
+    else
+      {
+      this->Makefile->AddDefinition(this->Variable.c_str(), "0");
+      }
+    }
   else
     {
     // Dispatch property getting.
@@ -181,7 +199,7 @@ bool cmGetPropertyCommand
 //----------------------------------------------------------------------------
 bool cmGetPropertyCommand::StoreResult(const char* value)
 {
-  if(this->InfoType == OutDefined)
+  if(this->InfoType == OutSet)
     {
     this->Makefile->AddDefinition(this->Variable.c_str(), value? "1":"0");
     }

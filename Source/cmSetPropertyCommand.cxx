@@ -23,6 +23,7 @@
 cmSetPropertyCommand::cmSetPropertyCommand()
 {
   this->AppendMode = false;
+  this->Remove = true;
 }
 
 //----------------------------------------------------------------------------
@@ -96,6 +97,7 @@ bool cmSetPropertyCommand
       this->PropertyValue += sep;
       sep = ";";
       this->PropertyValue += *arg;
+      this->Remove = false;
       }
     else
       {
@@ -141,13 +143,18 @@ bool cmSetPropertyCommand::HandleGlobalMode()
   // Set or append the property.
   cmake* cm = this->Makefile->GetCMakeInstance();
   const char* name = this->PropertyName.c_str();
+  const char *value = this->PropertyValue.c_str();
+  if (this->Remove)
+    {
+    value = 0;
+    }
   if(this->AppendMode)
     {
-    cm->AppendProperty(name, this->PropertyValue.c_str());
+    cm->AppendProperty(name, value);
     }
   else
     {
-    cm->SetProperty(name, this->PropertyValue.c_str());
+    cm->SetProperty(name, value);
     }
 
   return true;
@@ -202,13 +209,18 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
 
   // Set or append the property.
   const char* name = this->PropertyName.c_str();
+  const char *value = this->PropertyValue.c_str();
+  if (this->Remove)
+    {
+    value = 0;
+    }
   if(this->AppendMode)
     {
-    mf->AppendProperty(name, this->PropertyValue.c_str());
+    mf->AppendProperty(name, value);
     }
   else
     {
-    mf->SetProperty(name, this->PropertyValue.c_str());
+    mf->SetProperty(name, value);
     }
 
   return true;
@@ -245,13 +257,18 @@ bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
 {
   // Set or append the property.
   const char* name = this->PropertyName.c_str();
+  const char *value = this->PropertyValue.c_str();
+  if (this->Remove)
+    {
+    value = 0;
+    }
   if(this->AppendMode)
     {
-    target->AppendProperty(name, this->PropertyValue.c_str());
+    target->AppendProperty(name, value);
     }
   else
     {
-    target->SetProperty(name, this->PropertyValue.c_str());
+    target->SetProperty(name, value);
     }
 
   return true;
@@ -287,13 +304,19 @@ bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
 {
   // Set or append the property.
   const char* name = this->PropertyName.c_str();
+  const char *value = this->PropertyValue.c_str();
+  if (this->Remove)
+    {
+    value = 0;
+    }
+
   if(this->AppendMode)
     {
-    sf->AppendProperty(name, this->PropertyValue.c_str());
+    sf->AppendProperty(name, value);
     }
   else
     {
-    sf->SetProperty(name, this->PropertyValue.c_str());
+    sf->SetProperty(name, value);
     }
   return true;
 }
@@ -343,13 +366,18 @@ bool cmSetPropertyCommand::HandleTest(cmTest* test)
 {
   // Set or append the property.
   const char* name = this->PropertyName.c_str();
+  const char *value = this->PropertyValue.c_str();
+  if (this->Remove)
+    {
+    value = 0;
+    }
   if(this->AppendMode)
     {
-    test->AppendProperty(name, this->PropertyValue.c_str());
+    test->AppendProperty(name, value);
     }
   else
     {
-    test->SetProperty(name, this->PropertyValue.c_str());
+    test->SetProperty(name, value);
     }
 
   return true;

@@ -106,7 +106,7 @@ kwsysEXPORT void kwsysProcess_Delete(kwsysProcess* cp);
 
 /**
  * Set the command line to be executed.  Argument is an array of
- * pointers to the command and each argument.  Ths array must end with
+ * pointers to the command and each argument.  The array must end with
  * a NULL pointer.  Any previous command lines are removed.  Returns
  * 1 for success and 0 otherwise.
  */
@@ -115,7 +115,7 @@ kwsysEXPORT int kwsysProcess_SetCommand(kwsysProcess* cp,
 
 /**
  * Add a command line to be executed.  Argument is an array of
- * pointers to the command and each argument.  Ths array must end with
+ * pointers to the command and each argument.  The array must end with
  * a NULL pointer.  If this is not the first command added, its
  * standard input will be connected to the standard output of the
  * previous command.  Returns 1 for success and 0 otherwise.

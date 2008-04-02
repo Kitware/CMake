@@ -21,10 +21,16 @@ Changes in CMake 2.6.0 RC 6
 - Allow for CMP0000 to be set before any warnings happen
 - Do not use FAT32 hack in VS 2005 and 2008 unless on a FAT32 disk,
   causes try-compiles to be 3 times slower if FAT hack is present.
+- Fixes to debian cpack 
+- Can now check if a proprty is SET or not
+- Fix for generate with vs 2005 and vista not being able to create stamp file
+- set_property with an empty value unsets that property now
 
 Changes in CMake 2.6.0 
 
 - Documentation for all variables
+- Automatic reload of projects in visual stuido 7 and greater
+  when cmake is re-run.
 - Direct CDash submit support
 - Bullseye coverage support
 - Use full paths for linking to libraries on all platforms. No longer
