@@ -40,18 +40,22 @@ void QMacInstallDialog::DoInstall()
     {
     QFileInfo fileInfo = list.at(i);
     std::string filename = fileInfo.fileName().toStdString();
+    if(filename.size() && filename[0] == '.')
+      {
+      continue;
+      }
     std::string file = fileInfo.absoluteFilePath().toStdString();
     std::string newName = installTo;
     newName += "/";
     newName += filename;
-    std::cout << "ln -s [" << file << "] [";
-    std::cout << newName << "]\n";
     // Remove the old files
     if(cmSystemTools::FileExists(newName.c_str()))
       {
       std::cout << "rm [" << newName << "]\n";
       cmSystemTools::RemoveFile(newName.c_str());
       }
+    std::cout << "ln -s [" << file << "] [";
+    std::cout << newName << "]\n";
     cmSystemTools::CreateSymlink(file.c_str(),
                                  newName.c_str());
     }
