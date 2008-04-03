@@ -97,7 +97,7 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->GenerateAction = ToolsMenu->addAction(tr("&Generate"));
   QObject::connect(this->GenerateAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doGenerate()));
-#if defined(__APPLE__)
+#if defined(Q_WS_MAC)
   this->InstallForCommandLineAction 
     = ToolsMenu->addAction(tr("&Install For Command Line Use"));
   QObject::connect(this->InstallForCommandLineAction, SIGNAL(triggered(bool)), 
@@ -807,7 +807,7 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->setEnabledState(false);
     this->GenerateButton->setEnabled(false);
     this->GenerateAction->setEnabled(false);
-    this->ConfigureButton->setText(tr("Stop"));
+    this->ConfigureButton->setText(tr("&Stop"));
     }
   else if(s == Generating)
     {
@@ -815,7 +815,7 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->setEnabledState(false);
     this->ConfigureButton->setEnabled(false);
     this->GenerateAction->setEnabled(false);
-    this->GenerateButton->setText(tr("Stop"));
+    this->GenerateButton->setText(tr("&Stop"));
     }
   else if(s == ReadyConfigure)
     {
@@ -824,8 +824,8 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->GenerateButton->setEnabled(false);
     this->GenerateAction->setEnabled(false);
     this->ConfigureButton->setEnabled(true);
-    this->ConfigureButton->setText(tr("Configure"));
-    this->GenerateButton->setText(tr("Generate"));
+    this->ConfigureButton->setText(tr("&Configure"));
+    this->GenerateButton->setText(tr("&Generate"));
     }
   else if(s == ReadyGenerate)
     {
@@ -834,8 +834,8 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);
     this->ConfigureButton->setEnabled(true);
-    this->ConfigureButton->setText(tr("Configure"));
-    this->GenerateButton->setText(tr("Generate"));
+    this->ConfigureButton->setText(tr("&Configure"));
+    this->GenerateButton->setText(tr("&Generate"));
     }
 }
 
