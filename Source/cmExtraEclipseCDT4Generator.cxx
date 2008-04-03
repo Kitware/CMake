@@ -654,11 +654,23 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
               || (t->first=="test")
               || (t->first=="Experimental")
               || (t->first=="Nightly")
+              || (t->first=="edit_cache")
               || (t->first=="package")
               || (t->first=="package_source")
               || (t->first=="rebuild_cache") ))
             {
             break;
+            }
+          // add the edit_cache target only if it's not ccmake
+          // otherwise ccmake will be executed in the log view of Eclipse,
+          // which is no terminal, so curses don't work there, Alex
+          if (t->first=="edit_cache") 
+            {
+            if (strstr(mf->GetRequiredDefinition("CMAKE_EDIT_COMMAND"), 
+                                                 "ccmake")!=NULL)
+              {
+              break;
+              }
             }
           }
         case cmTarget::EXECUTABLE:
