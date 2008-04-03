@@ -1594,6 +1594,7 @@ cmMakefileTargetGenerator
   responseFileNameFull += "/";
   responseFileNameFull += name;
   cmGeneratedFileStream responseStream(responseFileNameFull.c_str());
+  responseStream.SetCopyIfDifferent(true);
   responseStream << options << "\n";
 
   // Add a dependency so the target will rebuild when the set of
