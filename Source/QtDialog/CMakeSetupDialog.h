@@ -45,6 +45,7 @@ protected slots:
   void doConfigure();
   void doGenerate();
   void doSuppressDev();
+  void doInstallForCommandLine();
   void doHelp();
   void doAbout();
   void doInterrupt();
@@ -94,6 +95,7 @@ protected:
   QAction* ConfigureAction;
   QAction* GenerateAction;
   QAction* SuppressDevWarningsAction;
+  QAction* InstallForCommandLineAction;
   State CurrentState;
 
 };

@@ -31,6 +31,7 @@
 #include <QMimeData>
 #include <QUrl>
 #include <QShortcut>
+#include <QMacInstallDialog.h>
 
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
@@ -96,17 +97,23 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->GenerateAction = ToolsMenu->addAction(tr("&Generate"));
   QObject::connect(this->GenerateAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doGenerate()));
-  
+#if defined(__APPLE__)
+  this->InstallForCommandLineAction 
+    = ToolsMenu->addAction(tr("&Install For Command Line Use"));
+  QObject::connect(this->InstallForCommandLineAction, SIGNAL(triggered(bool)), 
+                   this, SLOT(doInstallForCommandLine()));
+#endif  
   QMenu* OptionsMenu = this->menuBar()->addMenu(tr("&Options"));
   QAction* supressDevWarningsAction = OptionsMenu->addAction(tr("&Suppress dev Warnings (-Wno-dev)"));
   QObject::connect(supressDevWarningsAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doSuppressDev()));
+
   supressDevWarningsAction->setCheckable(true);
   QAction* debugAction = OptionsMenu->addAction(tr("&Debug Output"));
   debugAction->setCheckable(true);
   QObject::connect(debugAction, SIGNAL(toggled(bool)), 
                    this, SLOT(setDebugOutput(bool)));
-  
+
   QMenu* HelpMenu = this->menuBar()->addMenu(tr("&Help"));
   QAction* a = HelpMenu->addAction(tr("About"));
   QObject::connect(a, SIGNAL(triggered(bool)),
@@ -323,6 +330,12 @@ void CMakeSetupDialog::doSuppressDev()
   this->SuppressDevWarnings = !this->SuppressDevWarnings;
   this->CMakeThread->cmakeInstance()->
     SetSuppressDevWarnings(this->SuppressDevWarnings);
+}
+
+void CMakeSetupDialog::doInstallForCommandLine()
+{
+  QMacInstallDialog setupdialog(0);
+  setupdialog.exec();
 }
 
 void CMakeSetupDialog::doGenerate()

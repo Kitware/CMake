@@ -46,6 +46,12 @@ void QMacInstallDialog::DoInstall()
     newName += filename;
     std::cout << "ln -s [" << file << "] [";
     std::cout << newName << "]\n";
+    // Remove the old files
+    if(cmSystemTools::FileExists(newName.c_str()))
+      {
+      std::cout << "rm [" << newName << "]\n";
+      cmSystemTools::RemoveFile(newName.c_str());
+      }
     cmSystemTools::CreateSymlink(file.c_str(),
                                  newName.c_str());
     }
