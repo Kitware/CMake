@@ -129,7 +129,7 @@
          <item>
           <widget class="QCheckBox" name="Advanced" >
            <property name="text" >
-            <string>Show Advanced Entries</string>
+            <string>Show Ad&amp;vanced Entries</string>
            </property>
           </widget>
          </item>

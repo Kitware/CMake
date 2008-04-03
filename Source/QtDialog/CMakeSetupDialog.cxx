@@ -84,7 +84,7 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->DeleteCacheAction = FileMenu->addAction(tr("&Delete Cache"));
   QObject::connect(this->DeleteCacheAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doDeleteCache()));
-  this->ExitAction = FileMenu->addAction(tr("&Exit"));
+  this->ExitAction = FileMenu->addAction(tr("E&xit"));
   QObject::connect(this->ExitAction, SIGNAL(triggered(bool)), 
                    this, SLOT(close()));
 
