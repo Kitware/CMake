@@ -1244,7 +1244,8 @@ void cmFileCommand
 bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer,
                                              std::string& destination)
 {
-  if ( destination.size() < 2 )
+  // allow for / to be a valid destination
+  if ( destination.size() < 2 && destination != "/" )
     {
     this->SetError("called with inapropriate arguments. "
         "No DESTINATION provided or .");

@@ -66,6 +66,7 @@ static const char * cmDocumentationOptions[][3] =
 
 int main(int argc, char** argv)
 {
+  cmSystemTools::FindExecutableDirectory(argv[0]);
   QApplication app(argc, argv);
   
   // clean out standard Qt paths for plugins, which we don't use anyway
@@ -113,7 +114,12 @@ int main(int argc, char** argv)
     // Construct and print requested documentation.
     cmake hcm;
     hcm.AddCMakePaths();
-    doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
+    // just incase the install is bad avoid a seg fault
+    const char* root = hcm.GetCacheDefinition("CMAKE_ROOT");
+    if(root)
+      {
+      doc.SetCMakeRoot(root);
+      }
     std::vector<cmDocumentationEntry> commands;
     std::vector<cmDocumentationEntry> compatCommands;
     std::map<std::string,cmDocumentationSection *> propDocs;

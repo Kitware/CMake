@@ -1,4 +1,5 @@
 #include "QMacInstallDialog.h"
+#include <QMessageBox>
 #include "cmSystemTools.h"
 #include <iostream>
 #include <QFileDialog>
@@ -33,6 +34,22 @@ void QMacInstallDialog::DoInstall()
 {  
   QDir installDir(this->Internals->InstallPrefix->text());
   std::string installTo = installDir.path().toStdString();
+  if(!cmSystemTools::FileExists(installTo.c_str()))
+    {
+    QString message = tr("Build install does not exist, "
+                         "should I create it?")
+                      + "\n\n"
+                      + tr("Directory: ");
+    message += installDir.path();
+    QString title = tr("Create Directory");
+    QMessageBox::StandardButton btn;
+    btn = QMessageBox::information(this, title, message, 
+                                   QMessageBox::Yes | QMessageBox::No);
+    if(btn == QMessageBox::Yes)
+      {
+      cmSystemTools::MakeDirectory(installTo.c_str());
+      }
+    }
   QDir cmExecDir(QApplication::applicationDirPath());
   cmExecDir.cd("../bin");
   QFileInfoList list = cmExecDir.entryInfoList();
