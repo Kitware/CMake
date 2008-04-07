@@ -2229,7 +2229,13 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
         }
       if(emsg)
         {
-        *emsg = "The current RPATH does not begin with that specified.";
+        cmOStringStream e;
+        e << "The current RPATH is:\n"
+          << "  " << se->Value << "\n"
+          << "which does not begin with:\n"
+          << "  " << oldRPath << "\n"
+          << "as was expected.";
+        *emsg = e.str();
         }
       return false;
       }
