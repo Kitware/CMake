@@ -112,6 +112,8 @@ signals:
   /// signal when the source directory changes (binary directory already
   /// containing a CMakeCache.txt file)
   void sourceDirChanged(const QString& dir);
+  /// signal when the binary directory changes
+  void binaryDirChanged(const QString& dir);
   /// signal for progress events
   void progressChanged(const QString& msg, float percent);
   /// signal when configure is done

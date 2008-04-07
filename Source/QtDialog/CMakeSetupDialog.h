@@ -59,6 +59,7 @@ protected slots:
   void doReloadCache();
   void doDeleteCache();
   void updateSourceDirectory(const QString& dir);
+  void updateBinaryDirectory(const QString& dir);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
   bool promptForGenerator();

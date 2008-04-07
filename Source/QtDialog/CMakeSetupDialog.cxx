@@ -181,7 +181,10 @@ void CMakeSetupDialog::initialize()
   QObject::connect(this->CMakeThread->cmakeInstance(),
                    SIGNAL(sourceDirChanged(QString)),
                    this, SLOT(updateSourceDirectory(QString)));
- 
+  QObject::connect(this->CMakeThread->cmakeInstance(),
+                   SIGNAL(binaryDirChanged(QString)),
+                   this, SLOT(updateBinaryDirectory(QString)));
+  
   QObject::connect(this->CMakeThread->cmakeInstance(),
                    SIGNAL(progressChanged(QString, float)),
                    this, SLOT(showProgress(QString,float)));
@@ -445,7 +448,7 @@ void CMakeSetupDialog::doSourceBrowse()
     tr("Enter Path to Source"), this->SourceDirectory->text());
   if(!dir.isEmpty())
     {
-    this->setSourceDirectory(QDir::fromNativeSeparators(dir));
+    this->setSourceDirectory(dir);
     }
 }
 
@@ -459,13 +462,23 @@ void CMakeSetupDialog::updateSourceDirectory(const QString& dir)
     }
 }
 
+void CMakeSetupDialog::updateBinaryDirectory(const QString& dir)
+{
+  if(this->BinaryDirectory->currentText() != dir)
+    {
+    this->BinaryDirectory->blockSignals(true);
+    this->BinaryDirectory->setEditText(dir);
+    this->BinaryDirectory->blockSignals(false);
+    }
+}
+
 void CMakeSetupDialog::doBinaryBrowse()
 {
   QString dir = QFileDialog::getExistingDirectory(this, 
     tr("Enter Path to Build"), this->BinaryDirectory->currentText());
   if(!dir.isEmpty() && dir != this->BinaryDirectory->currentText())
     {
-    this->setBinaryDirectory(QDir::fromNativeSeparators(dir));
+    this->setBinaryDirectory(dir);
     }
 }
 
