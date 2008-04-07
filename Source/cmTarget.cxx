@@ -1653,7 +1653,7 @@ const char* cmTarget::NormalGetDirectory(const char* config, bool implib)
   if(config && *config)
     {
     // Do not create the directory when config is given:
-    this->Directory = this->GetAndCreateOutputDir(implib, true);
+    this->Directory = this->GetOutputDir(implib);
     // Add the configuration's subdirectory.
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", config, "", this->Directory);
@@ -2845,7 +2845,7 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char*)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
+const char* cmTarget::GetOutputDir(bool implib)
 {
   // The implib option is only allowed for shared libraries, module
   // libraries, and executables.
@@ -2862,7 +2862,7 @@ const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
   if(implib &&
      !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
     {
-    std::string msg =  "GetAndCreateOutputDir, imlib set but there is no "
+    std::string msg =  "GetOutputDir, imlib set but there is no "
       "CMAKE_IMPORT_LIBRARY_SUFFIX for target: ";
     msg += this->GetName();
     this->GetMakefile()->
@@ -2987,25 +2987,9 @@ const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
       out += this->GetFullName(0, implib);
       out += ".framework";
       }
-
-    // Optionally make sure the output path exists on disk.
-    if(create)
-      {
-      if(!cmSystemTools::MakeDirectory(out.c_str()))
-        {
-        cmSystemTools::Error("Error failed to create output directory: ",
-                             out.c_str());
-        }
-      }
   }
 
   return out.c_str();
-}
-
-//----------------------------------------------------------------------------
-const char* cmTarget::GetOutputDir(bool implib)
-{
-  return this->GetAndCreateOutputDir(implib, true);
 }
 
 //----------------------------------------------------------------------------

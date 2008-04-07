@@ -147,9 +147,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
   else
     {
+    cmSystemTools::MakeDirectory(outpath.c_str());
     if(!targetNameImport.empty())
       {
       outpathImp = this->Target->GetDirectory(0, true);
+      cmSystemTools::MakeDirectory(outpathImp.c_str());
       outpathImp += "/";
       }
     }

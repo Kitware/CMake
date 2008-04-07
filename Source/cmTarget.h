@@ -464,9 +464,6 @@ private:
   void SetPropertyDefault(const char* property, const char* default_value);
 
   // Get the full path to the target output directory.
-  const char* GetAndCreateOutputDir(bool implib, bool create);
-
-  // Get the full path to the target output directory.
   const char* GetOutputDir(bool implib);
 
   const char* ImportedGetLocation(const char* config);

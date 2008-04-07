@@ -369,10 +369,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   else
     {
     outpath = this->Target->GetDirectory();
+    cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
     if(!targetNameImport.empty())
       {
       outpathImp = this->Target->GetDirectory(0, true);
+      cmSystemTools::MakeDirectory(outpathImp.c_str());
       outpathImp += "/";
       }
     }
