@@ -1270,7 +1270,10 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
         } break;
       case ']':
         {
-        --squareNesting;
+        if(squareNesting)
+          {
+          --squareNesting;
+          }
         newArgVec.push_back(*c);
         } break;
       case ';':
