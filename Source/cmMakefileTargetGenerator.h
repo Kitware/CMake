@@ -204,6 +204,7 @@ protected:
 
   // Mac OS X content info.
   std::string MacContentDirectory;
+  std::set<cmStdString> MacContentFolders;
 
   // Target-wide Fortran module output directory.
   bool FortranModuleDirectoryComputed;

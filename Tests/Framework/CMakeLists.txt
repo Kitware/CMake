@@ -10,8 +10,11 @@ add_library(foo SHARED
   fooNeither.h
   fooBoth.h
   test.lua
+  fooDeepPublic.h
 )
-
+set_property(SOURCE fooDeepPublic.h
+  PROPERTY MACOSX_PACKAGE_LOCATION Headers/Deep
+  )
 set(foo_ver ver4)
 
 set_target_properties(foo PROPERTIES
@@ -20,6 +23,7 @@ set_target_properties(foo PROPERTIES
   PRIVATE_HEADER "fooPrivate.h;fooBoth.h"
   PUBLIC_HEADER "foo.h;foo2.h;fooPublic.h;fooBoth.h"
   RESOURCE "test.lua"
+  INSTALL_NAME_DIR "@executable_path/../../../Library/Frameworks"
 )
 # fooBoth.h is listed as both public and private... (private wins...)
 # fooNeither.h is listed as neither public nor private...

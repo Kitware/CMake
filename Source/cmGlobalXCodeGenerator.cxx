@@ -803,8 +803,14 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
           this->CreateString("6"));
         cmOStringStream ostr;
-        if ( mit->first != "MacOS" )
+        if (cmtarget.IsFrameworkOnApple())
           {
+          // dstPath in frameworks is relative to Versions/<version>
+          ostr << mit->first;
+          }
+        else if ( mit->first != "MacOS" )
+          {
+          // dstPath in bundles is relative to Contents/MacOS
           ostr << "../" << mit->first.c_str();
           }
         copyFilesBuildPhase->AddAttribute("dstPath",
@@ -1357,11 +1363,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
      target.GetType() == cmTarget::EXECUTABLE)
     {
     std::string pndir = target.GetDirectory();
-    if(target.IsFrameworkOnApple())
-      {
-      pndir += "/..";
-      pndir = cmSystemTools::CollapseFullPath(pndir.c_str());
-      }
     buildSettings->AddAttribute("SYMROOT", 
                                 this->CreateString(pndir.c_str()));
     buildSettings->AddAttribute("EXECUTABLE_PREFIX", 
@@ -1429,17 +1430,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       fileType = "wrapper.framework";
       productType = "com.apple.product-type.framework";
 
-      const char* version = target.GetProperty("FRAMEWORK_VERSION");
-      if(!version)
-        {
-        version = target.GetProperty("VERSION");
-        }
-      if(!version)
-        {
-        version = "A";
-        }
+      std::string version = target.GetFrameworkVersion();
       buildSettings->AddAttribute("FRAMEWORK_VERSION",
-                                  this->CreateString(version));
+                                  this->CreateString(version.c_str()));
       }
     else
       {
@@ -1649,18 +1642,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
     // Get the install_name directory for the build tree.
-    install_name_dir = target.GetInstallNameDirForBuildTree(configName);
-    if(target.GetPropertyAsBool("FRAMEWORK"))
-      {
-      if(install_name_dir.find(".framework") != install_name_dir.npos)
-        {
-        install_name_dir = install_name_dir + "/..";
-        install_name_dir = 
-            cmSystemTools::CollapseFullPath(install_name_dir.c_str());
-        //std::cerr << "new install name " << install_name_dir << "\n";
-        }
-      }
-    
+    install_name_dir = target.GetInstallNameDirForBuildTree(configName, true);
     if(install_name_dir.empty())
       {
       // Xcode will not pass the -install_name option at all if INSTALL_PATH
@@ -2868,26 +2850,9 @@ cmGlobalXCodeGenerator
     {
     if(config)
       {
-      if(dir.find(".framework") != dir.npos)
-        {
-        // Remove trailing slashes (so that the rfind does not find the one at
-        // the very end...!)
-        //
-        cmSystemTools::ConvertToUnixSlashes(dir);
-        std::string::size_type pos = dir.rfind("/");
-        std::string framework = dir.substr(pos);
-        std::string newDir = dir.substr(0, pos);
-        newDir += "/";
-        newDir += config;
-        dir = newDir;
-        dir += framework;
-        }
-      else
-        {
-        dir += prefix;
-        dir += config;
-        dir += suffix;
-        }
+      dir += prefix;
+      dir += config;
+      dir += suffix;
       }
     }
 }

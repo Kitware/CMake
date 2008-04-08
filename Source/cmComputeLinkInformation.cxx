@@ -611,18 +611,8 @@ void cmComputeLinkInformation::AddItem(std::string const& item, cmTarget* tgt)
       std::string lib = tgt->GetFullPath(config, implib, true);
       this->Depends.push_back(lib);
 
-      if(tgt->IsFrameworkOnApple())
-        {
-        // Frameworks on OS X need only the framework directory to
-        // link.
-        std::string fw = tgt->GetDirectory(config, implib);
-        this->AddFrameworkItem(fw);
-        }
-      else
-        {
-        this->AddTargetItem(lib, tgt);
-        this->AddLibraryRuntimeInfo(lib, tgt);
-        }
+      this->AddTargetItem(lib, tgt);
+      this->AddLibraryRuntimeInfo(lib, tgt);
       }
     }
   else
@@ -1023,7 +1013,7 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
 
   // For compatibility with CMake 2.4 include the item's directory in
   // the linker search path.
-  if(this->OldLinkDirMode &&
+  if(this->OldLinkDirMode && !target->IsFrameworkOnApple() &&
      this->OldLinkDirMask.find(cmSystemTools::GetFilenamePath(item)) ==
      this->OldLinkDirMask.end())
     {

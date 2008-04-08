@@ -668,7 +668,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if ( this->Version >= 8 )
     {
     // Check the filesystem type where the target will be written.
-    if(cmLVS6G_IsFAT(target.GetDirectory(configName)))
+    if(cmLVS6G_IsFAT(target.GetDirectory(configName).c_str()))
       {
       // Add a flag telling the manifest tool to use a workaround
       // for FAT32 file systems, which can cause an empty manifest

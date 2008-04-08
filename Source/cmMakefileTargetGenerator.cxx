@@ -334,6 +334,9 @@ void cmMakefileTargetGenerator::WriteMacOSXContentRules(cmSourceFile& source,
   macdir += pkgloc;
   cmSystemTools::MakeDirectory(macdir.c_str());
 
+  // Record use of this content location.
+  this->MacContentFolders.insert(pkgloc);
+
   // Get the input file location.
   std::string input = source.GetFullPath();
 
@@ -1456,11 +1459,8 @@ void cmMakefileTargetGenerator
       if(cmTarget* tgt =
          this->GlobalGenerator->FindTarget(0, lib->first.c_str()))
         {
-        if(const char* location =
-           tgt->GetLocation(this->LocalGenerator->ConfigurationName.c_str()))
-          {
-          depends.push_back(location);
-          }
+        const char* config = this->LocalGenerator->ConfigurationName.c_str();
+        depends.push_back(tgt->GetFullPath(config, false));
         }
       // depend on full path libs as well
       else if(cmSystemTools::FileIsFullPath(lib->first.c_str()))
