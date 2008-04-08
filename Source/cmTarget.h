@@ -471,7 +471,7 @@ private:
 
   // Get the full path to the target output directory.
   std::string GetOutputDir(bool implib);
-  std::string const& cmTarget::ComputeBaseOutputDir(bool implib);
+  std::string const& ComputeBaseOutputDir(bool implib);
 
   const char* ImportedGetLocation(const char* config);
   const char* NormalGetLocation(const char* config);
