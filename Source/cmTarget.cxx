@@ -1626,42 +1626,30 @@ void cmTarget::MarkAsImported()
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetDirectory(const char* config, bool implib)
+std::string cmTarget::GetDirectory(const char* config, bool implib)
 {
   if (this->IsImported())
     {
-    return this->ImportedGetDirectory(config, implib);
-    }
-  else
-    {
-    return this->NormalGetDirectory(config, implib);
-    }
-}
-
-//----------------------------------------------------------------------------
-const char* cmTarget::ImportedGetDirectory(const char* config, bool implib)
-{
-  this->Directory =
-    cmSystemTools::GetFilenamePath(
+    // Return the directory from which the target is imported.
+    return
+      cmSystemTools::GetFilenamePath(
       this->ImportedGetFullPath(config, implib));
-  return this->Directory.c_str();
-}
-
-//----------------------------------------------------------------------------
-const char* cmTarget::NormalGetDirectory(const char* config, bool implib)
-{
-  if(config && *config)
-    {
-    // Do not create the directory when config is given:
-    this->Directory = this->GetAndCreateOutputDir(implib, true);
-    // Add the configuration's subdirectory.
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
-      AppendDirectoryForConfig("/", config, "", this->Directory);
-    return this->Directory.c_str();
     }
   else
     {
-    return this->GetOutputDir(implib);
+    // Return the directory in which the target will be built.
+    if(config && *config)
+      {
+      // Add the configuration's subdirectory.
+      std::string dir = this->GetOutputDir(implib);
+      this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+        AppendDirectoryForConfig("/", config, "", dir);
+      return dir;
+      }
+    else
+      {
+      return this->GetOutputDir(implib);
+      }
     }
 }
 
@@ -1688,22 +1676,31 @@ const char* cmTarget::ImportedGetLocation(const char* config)
 //----------------------------------------------------------------------------
 const char* cmTarget::NormalGetLocation(const char* config)
 {
-  this->Location = this->GetDirectory(config);
+  // Handle the configuration-specific case first.
+  if(config)
+    {
+    this->Location = this->GetFullPath(config, false);
+    return this->Location.c_str();
+    }
+
+  // Now handle the deprecated build-time configuration location.
+  this->Location = this->GetDirectory();
   if(!this->Location.empty())
     {
     this->Location += "/";
     }
-  if(!config)
+  const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
+  if(cfgid && strcmp(cfgid, ".") != 0)
     {
-    // No specific configuration was given so it will not appear on
-    // the result of GetDirectory.  Add a name here to be replaced at
-    // build time.
-    const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
-    if(cfgid && strcmp(cfgid, ".") != 0)
-      {
-      this->Location += cfgid;
-      this->Location += "/";
-      }
+    this->Location += cfgid;
+    this->Location += "/";
+    }
+   if(this->IsFrameworkOnApple())
+    {
+    this->Location += this->GetFullName(config, false);
+    this->Location += ".framework/Versions/";
+    this->Location += this->GetFrameworkVersion();
+    this->Location += "/";
     }
   this->Location += this->GetFullName(config, false);
   return this->Location.c_str();
@@ -2203,6 +2200,14 @@ std::string cmTarget::NormalGetFullPath(const char* config, bool implib,
   std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
 
+  if(this->IsFrameworkOnApple())
+    {
+    fpath += this->GetFullName(config, false);
+    fpath += ".framework/Versions/";
+    fpath += this->GetFrameworkVersion();
+    fpath += "/";
+    }
+
   // Add the full name of the target.
   if(implib)
     {
@@ -2474,7 +2479,8 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
   const char* version = this->GetProperty("VERSION");
   const char* soversion = this->GetProperty("SOVERSION");
   if((type != cmTarget::SHARED_LIBRARY && type != cmTarget::MODULE_LIBRARY) ||
-     !this->Makefile->GetDefinition(sonameFlag.c_str()))
+     !this->Makefile->GetDefinition(sonameFlag.c_str()) ||
+     this->IsFrameworkOnApple())
     {
     // Versioning is supported only for shared libraries and modules,
     // and then only when the platform supports an soname flag.
@@ -2801,13 +2807,14 @@ bool cmTarget::NeedRelinkBeforeInstall()
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetInstallNameDirForBuildTree(const char* config)
+std::string cmTarget::GetInstallNameDirForBuildTree(const char* config,
+                                                    bool for_xcode)
 {
   // If building directly for installation then the build tree install_name
   // is the same as the install tree.
   if(this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
     {
-    return GetInstallNameDirForInstallTree(config);
+    return GetInstallNameDirForInstallTree(config, for_xcode);
     }
 
   // Use the build tree directory for the target.
@@ -2817,6 +2824,13 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config)
     {
     std::string dir = this->GetDirectory(config);
     dir += "/";
+    if(this->IsFrameworkOnApple() && !for_xcode)
+      {
+      dir += this->GetFullName(config, false);
+      dir += ".framework/Versions/";
+      dir += this->GetFrameworkVersion();
+      dir += "/";
+      }
     return dir;
     }
   else
@@ -2826,7 +2840,8 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config)
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetInstallNameDirForInstallTree(const char*)
+std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
+                                                      bool for_xcode)
 {
   // Lookup the target property.
   const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
@@ -2836,6 +2851,13 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char*)
     {
     std::string dir = install_name_dir;
     dir += "/";
+    if(this->IsFrameworkOnApple() && !for_xcode)
+      {
+      dir += this->GetFullName(config, false);
+      dir += ".framework/Versions/";
+      dir += this->GetFrameworkVersion();
+      dir += "/";
+      }
     return dir;
     }
   else
@@ -2845,7 +2867,7 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char*)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
+std::string cmTarget::GetOutputDir(bool implib)
 {
   // The implib option is only allowed for shared libraries, module
   // libraries, and executables.
@@ -2862,7 +2884,7 @@ const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
   if(implib &&
      !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
     {
-    std::string msg =  "GetAndCreateOutputDir, imlib set but there is no "
+    std::string msg =  "GetOutputDir, imlib set but there is no "
       "CMAKE_IMPORT_LIBRARY_SUFFIX for target: ";
     msg += this->GetName();
     this->GetMakefile()->
@@ -2879,62 +2901,36 @@ const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
                    msg.c_str());
     }
 
+  return this->ComputeBaseOutputDir(implib);
+}
+
+//----------------------------------------------------------------------------
+std::string const& cmTarget::ComputeBaseOutputDir(bool implib)
+{
   // Select whether we are constructing the directory for the main
   // target or the import library.
-  std::string& out = implib? this->OutputDirImplib : this->OutputDir;
+  std::string& out = implib? this->BaseOutputDirImplib : this->BaseOutputDir;
 
-  if(out.empty())
+  // Return immediately if the directory has already been computed.
+  if(!out.empty())
     {
-    // Look for a target property defining the target output directory
-    // based on the target type.
-    const char* propertyName = 0;
-    switch(this->GetType())
+    return out;
+    }
+
+  // Look for a target property defining the target output directory
+  // based on the target type.
+  const char* propertyName = 0;
+  switch(this->GetType())
+    {
+    case cmTarget::SHARED_LIBRARY:
       {
-      case cmTarget::SHARED_LIBRARY:
+      // For non-DLL platforms shared libraries are treated as
+      // library targets.  For DLL platforms the DLL part of a
+      // shared library is treated as a runtime target and the
+      // corresponding import library is treated as an archive
+      // target.
+      if(this->DLLPlatform)
         {
-        // For non-DLL platforms shared libraries are treated as
-        // library targets.  For DLL platforms the DLL part of a
-        // shared library is treated as a runtime target and the
-        // corresponding import library is treated as an archive
-        // target.
-        if(this->DLLPlatform)
-          {
-          if(implib)
-            {
-            propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
-            }
-          else
-            {
-            propertyName = "RUNTIME_OUTPUT_DIRECTORY";
-            }
-          }
-        else
-          {
-          propertyName = "LIBRARY_OUTPUT_DIRECTORY";
-          }
-        } break;
-      case cmTarget::STATIC_LIBRARY:
-        {
-        // Static libraries are always treated as archive targets.
-        propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
-        } break;
-      case cmTarget::MODULE_LIBRARY:
-        {
-        // Module libraries are always treated as library targets.
-        // Module import libraries are treated as archive targets.
-        if(implib)
-          {
-          propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
-          }
-        else
-          {
-          propertyName = "LIBRARY_OUTPUT_DIRECTORY";
-          }
-        } break;
-      case cmTarget::EXECUTABLE:
-        {
-        // Executables are always treated as runtime targets.
-        // Executable import libraries are treated as archive targets.
         if(implib)
           {
           propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
@@ -2943,69 +2939,93 @@ const char* cmTarget::GetAndCreateOutputDir(bool implib, bool create)
           {
           propertyName = "RUNTIME_OUTPUT_DIRECTORY";
           }
-        } break;
-      default: break;
-      }
-
-    // Select an output directory.
-    if(const char* outdir = this->GetProperty(propertyName))
-      {
-      // Use the user-specified output directory.
-      out = outdir;
-      }
-    else if(this->GetType() == cmTarget::EXECUTABLE)
-      {
-      // Lookup the output path for executables.
-      out = this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-      }
-    else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
-            this->GetType() == cmTarget::SHARED_LIBRARY ||
-            this->GetType() == cmTarget::MODULE_LIBRARY)
-      {
-      // Lookup the output path for libraries.
-      out = this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
-      }
-    if(out.empty())
-      {
-      // Default to the current output directory.
-      out = ".";
-      }
-    // Convert the output path to a full path in case it is
-    // specified as a relative path.  Treat a relative path as
-    // relative to the current output directory for this makefile.
-    out =
-      cmSystemTools::CollapseFullPath
-      (out.c_str(), this->Makefile->GetStartOutputDirectory());
-
-    // TODO: Make AppBundle and Framework directory computation in
-    // target consistent.  Why do we add the .framework part here for
-    // frameworks but not the .app part for bundles?  We should
-    // probably not add it for either.
-    if(this->IsFrameworkOnApple())
-      {
-      out += "/";
-      out += this->GetFullName(0, implib);
-      out += ".framework";
-      }
-
-    // Optionally make sure the output path exists on disk.
-    if(create)
-      {
-      if(!cmSystemTools::MakeDirectory(out.c_str()))
-        {
-        cmSystemTools::Error("Error failed to create output directory: ",
-                             out.c_str());
         }
-      }
-  }
+      else
+        {
+        propertyName = "LIBRARY_OUTPUT_DIRECTORY";
+        }
+      } break;
+    case cmTarget::STATIC_LIBRARY:
+      {
+      // Static libraries are always treated as archive targets.
+      propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
+      } break;
+    case cmTarget::MODULE_LIBRARY:
+      {
+      // Module libraries are always treated as library targets.
+      // Module import libraries are treated as archive targets.
+      if(implib)
+        {
+        propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
+        }
+      else
+        {
+        propertyName = "LIBRARY_OUTPUT_DIRECTORY";
+        }
+      } break;
+    case cmTarget::EXECUTABLE:
+      {
+      // Executables are always treated as runtime targets.
+      // Executable import libraries are treated as archive targets.
+      if(implib)
+        {
+        propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
+        }
+      else
+        {
+        propertyName = "RUNTIME_OUTPUT_DIRECTORY";
+        }
+      } break;
+    default: break;
+    }
 
-  return out.c_str();
+  // Select an output directory.
+  if(const char* outdir = this->GetProperty(propertyName))
+    {
+    // Use the user-specified output directory.
+    out = outdir;
+    }
+  else if(this->GetType() == cmTarget::EXECUTABLE)
+    {
+    // Lookup the output path for executables.
+    out = this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
+    }
+  else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
+          this->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    // Lookup the output path for libraries.
+    out = this->Makefile->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
+    }
+  if(out.empty())
+    {
+    // Default to the current output directory.
+    out = ".";
+    }
+
+  // Convert the output path to a full path in case it is
+  // specified as a relative path.  Treat a relative path as
+  // relative to the current output directory for this makefile.
+  out = (cmSystemTools::CollapseFullPath
+         (out.c_str(), this->Makefile->GetStartOutputDirectory()));
+  return out;
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetOutputDir(bool implib)
+std::string cmTarget::GetFrameworkVersion()
 {
-  return this->GetAndCreateOutputDir(implib, true);
+  if(const char* fversion = this->GetProperty("FRAMEWORK_VERSION"))
+    {
+    return fversion;
+    }
+  else if(const char* tversion = this->GetProperty("VERSION"))
+    {
+    return tversion;
+    }
+  else
+    {
+    return "A";
+    }
 }
 
 //----------------------------------------------------------------------------

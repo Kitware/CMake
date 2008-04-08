@@ -37,7 +37,7 @@
      <item row="0" column="2" >
       <widget class="QPushButton" name="BrowseSourceDirectoryButton" >
        <property name="text" >
-        <string>Browse...</string>
+        <string>Browse &amp;Source...</string>
        </property>
       </widget>
      </item>
@@ -66,7 +66,7 @@
      <item row="1" column="2" >
       <widget class="QPushButton" name="BrowseBinaryDirectoryButton" >
        <property name="text" >
-        <string>Browse...</string>
+        <string>Browse &amp;Build...</string>
        </property>
       </widget>
      </item>
@@ -129,7 +129,7 @@
          <item>
           <widget class="QCheckBox" name="Advanced" >
            <property name="text" >
-            <string>Show Advanced Entries</string>
+            <string>Show Ad&amp;vanced Entries</string>
            </property>
           </widget>
          </item>
@@ -155,7 +155,7 @@
             <string>Add New Entry</string>
            </property>
            <property name="text" >
-            <string>Add Entry</string>
+            <string>&amp;Add Entry</string>
            </property>
            <property name="icon" >
             <iconset resource="CMakeSetup.qrc" >:/Icons/Plus16.png</iconset>
@@ -171,7 +171,7 @@
             <string>Remove Selected Entries</string>
            </property>
            <property name="text" >
-            <string>Remove Entry</string>
+            <string>&amp;Remove Entry</string>
            </property>
            <property name="icon" >
             <iconset resource="CMakeSetup.qrc" >:/Icons/Delete16.png</iconset>
@@ -220,14 +220,14 @@
          <item>
           <widget class="QPushButton" name="ConfigureButton" >
            <property name="text" >
-            <string>Configure</string>
+            <string>&amp;Configure</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="GenerateButton" >
            <property name="text" >
-            <string>Generate</string>
+            <string>&amp;Generate</string>
            </property>
           </widget>
          </item>

@@ -253,7 +253,7 @@ public:
       configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical
       output directory is given.  */
-  const char* GetDirectory(const char* config = 0, bool implib = false);
+  std::string GetDirectory(const char* config = 0, bool implib = false);
 
   /** Get the location of the target in the build tree for the given
       configuration.  This location is suitable for use as the LOCATION
@@ -348,8 +348,10 @@ public:
   /** Return true if builtin chrpath will work for this target */
   bool IsChrpathUsed();
 
-  std::string GetInstallNameDirForBuildTree(const char* config);
-  std::string GetInstallNameDirForInstallTree(const char* config);
+  std::string GetInstallNameDirForBuildTree(const char* config,
+                                            bool for_xcode = false);
+  std::string GetInstallNameDirForInstallTree(const char* config,
+                                              bool for_xcode = false);
 
   cmComputeLinkInformation* GetLinkInformation(const char* config);
 
@@ -383,6 +385,10 @@ public:
 
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple();
+
+  /** Return the framework version string.  Undefined if
+      IsFrameworkOnApple returns false.  */
+  std::string GetFrameworkVersion();
 
   /** Get a backtrace from the creation of the target.  */
   cmListFileBacktrace const& GetBacktrace() const;
@@ -464,18 +470,13 @@ private:
   void SetPropertyDefault(const char* property, const char* default_value);
 
   // Get the full path to the target output directory.
-  const char* GetAndCreateOutputDir(bool implib, bool create);
-
-  // Get the full path to the target output directory.
-  const char* GetOutputDir(bool implib);
+  std::string GetOutputDir(bool implib);
+  std::string const& cmTarget::ComputeBaseOutputDir(bool implib);
 
   const char* ImportedGetLocation(const char* config);
   const char* NormalGetLocation(const char* config);
 
   std::string GetFullNameImported(const char* config, bool implib);
-
-  const char* ImportedGetDirectory(const char* config, bool implib);
-  const char* NormalGetDirectory(const char* config, bool implib);
 
   std::string ImportedGetFullPath(const char* config, bool implib);
   std::string NormalGetFullPath(const char* config, bool implib,
@@ -503,9 +504,8 @@ private:
   bool HaveInstallRule;
   std::string InstallPath;
   std::string RuntimeInstallPath;
-  std::string OutputDir;
-  std::string OutputDirImplib;
-  std::string Directory;
+  std::string BaseOutputDir;
+  std::string BaseOutputDirImplib;
   std::string Location;
   std::string ExportMacro;
   std::set<cmStdString> Utilities;

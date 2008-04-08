@@ -1,4 +1,5 @@
 #include "QMacInstallDialog.h"
+#include <QMessageBox>
 #include "cmSystemTools.h"
 #include <iostream>
 #include <QFileDialog>
@@ -33,6 +34,22 @@ void QMacInstallDialog::DoInstall()
 {  
   QDir installDir(this->Internals->InstallPrefix->text());
   std::string installTo = installDir.path().toStdString();
+  if(!cmSystemTools::FileExists(installTo.c_str()))
+    {
+    QString message = tr("Build install does not exist, "
+                         "should I create it?")
+                      + "\n\n"
+                      + tr("Directory: ");
+    message += installDir.path();
+    QString title = tr("Create Directory");
+    QMessageBox::StandardButton btn;
+    btn = QMessageBox::information(this, title, message, 
+                                   QMessageBox::Yes | QMessageBox::No);
+    if(btn == QMessageBox::Yes)
+      {
+      cmSystemTools::MakeDirectory(installTo.c_str());
+      }
+    }
   QDir cmExecDir(QApplication::applicationDirPath());
   cmExecDir.cd("../bin");
   QFileInfoList list = cmExecDir.entryInfoList();
@@ -40,10 +57,20 @@ void QMacInstallDialog::DoInstall()
     {
     QFileInfo fileInfo = list.at(i);
     std::string filename = fileInfo.fileName().toStdString();
+    if(filename.size() && filename[0] == '.')
+      {
+      continue;
+      }
     std::string file = fileInfo.absoluteFilePath().toStdString();
     std::string newName = installTo;
     newName += "/";
     newName += filename;
+    // Remove the old files
+    if(cmSystemTools::FileExists(newName.c_str()))
+      {
+      std::cout << "rm [" << newName << "]\n";
+      cmSystemTools::RemoveFile(newName.c_str());
+      }
     std::cout << "ln -s [" << file << "] [";
     std::cout << newName << "]\n";
     cmSystemTools::CreateSymlink(file.c_str(),

@@ -45,6 +45,7 @@ protected slots:
   void doConfigure();
   void doGenerate();
   void doSuppressDev();
+  void doInstallForCommandLine();
   void doHelp();
   void doAbout();
   void doInterrupt();
@@ -58,9 +59,10 @@ protected slots:
   void doReloadCache();
   void doDeleteCache();
   void updateSourceDirectory(const QString& dir);
+  void updateBinaryDirectory(const QString& dir);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
-  void promptForGenerator();
+  bool promptForGenerator();
   void updateGeneratorLabel(const QString& gen);
   void setExitAfterGenerate(bool);
   void addBinaryPath(const QString&);
@@ -73,6 +75,7 @@ protected slots:
   void selectionChanged();
   void addCacheEntry();
   void startSearch();
+  void setDebugOutput(bool);
 
 protected:
 
@@ -93,6 +96,7 @@ protected:
   QAction* ConfigureAction;
   QAction* GenerateAction;
   QAction* SuppressDevWarningsAction;
+  QAction* InstallForCommandLineAction;
   State CurrentState;
 
 };

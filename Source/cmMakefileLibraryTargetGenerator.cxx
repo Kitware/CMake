@@ -39,20 +39,11 @@ cmMakefileLibraryTargetGenerator
 
   if(this->Target->IsFrameworkOnApple())
     {
-    if(const char* fversion = this->Target->GetProperty("FRAMEWORK_VERSION"))
-      {
-      this->FrameworkVersion = fversion;
-      }
-    else if(const char* tversion = this->Target->GetProperty("VERSION"))
-      {
-      this->FrameworkVersion = tversion;
-      }
-    else
-      {
-      this->FrameworkVersion = "A";
-      }
+    this->FrameworkVersion = this->Target->GetFrameworkVersion();
     this->MacContentDirectory = this->Target->GetDirectory();
-    this->MacContentDirectory += "/Versions/";
+    this->MacContentDirectory += "/";
+    this->MacContentDirectory += this->TargetNameOut;
+    this->MacContentDirectory += ".framework/Versions/";
     this->MacContentDirectory += this->FrameworkVersion;
     this->MacContentDirectory += "/";
     }
@@ -244,50 +235,82 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 }
 
 //----------------------------------------------------------------------------
-void cmMakefileLibraryTargetGenerator::CreateFramework(
-  std::string& targetName,
-  std::string& outpath)
+void cmMakefileLibraryTargetGenerator::CreateFramework()
 {
-  std::string symlink;
-  std::string symlink2;
+  // TODO: Use the cmMakefileTargetGenerator::ExtraFiles vector to
+  // drive rules to create these files at build time.
+  std::string oldName;
+  std::string newName;
+
+  // Compute the location of the top-level foo.framework directory.
+  std::string top = this->Target->GetDirectory();
+  top += "/";
+  top += this->TargetNameOut;
+  top += ".framework/";
+
   // Make foo.framework/Versions
-  std::string dir = outpath;
-  dir += "Versions";
-  cmSystemTools::MakeDirectory(dir.c_str());
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  // cd foo.framework to setup symlinks with relative paths
-  cmSystemTools::ChangeDirectory((outpath+"Versions").c_str());
+  std::string versions = top;
+  versions += "Versions";
+  cmSystemTools::MakeDirectory(versions.c_str());
+
+  // Make foo.framework/Versions/version
+  std::string version = versions;
+  version += "/";
+  version += this->FrameworkVersion;
+  cmSystemTools::MakeDirectory(version.c_str());
+
   // Current -> version
-  symlink = this->FrameworkVersion;
-  symlink2 = "Current";
-  cmSystemTools::RemoveFile("Current");
-  cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
-  this->Makefile->AddCMakeOutputFile((outpath + "Versions/Current").c_str());
-  // change to top level of framework to create next set of symlinks
-  cmSystemTools::ChangeDirectory(outpath.c_str());
+  oldName = this->FrameworkVersion;
+  newName = versions;
+  newName += "/Current";
+  cmSystemTools::RemoveFile(newName.c_str());
+  cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
+  this->Makefile->AddCMakeOutputFile(newName.c_str());
+
   // foo -> Versions/Current/foo
-  symlink = "Versions/Current/";
-  symlink += targetName;
-  symlink2 = targetName;
-  cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
-  this->Makefile->AddCMakeOutputFile((outpath + targetName).c_str());
-  // Resources -> Versions/Current/Resources 
-  symlink = "Versions/Current/Resources";
-  symlink2 = "Resources";
-  cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
-  this->Makefile->AddCMakeOutputFile((outpath + "Resources").c_str());
+  oldName = "Versions/Current/";
+  oldName += this->TargetNameOut;
+  newName = top;
+  newName += this->TargetNameOut;
+  cmSystemTools::RemoveFile(newName.c_str());
+  cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
+  this->Makefile->AddCMakeOutputFile(newName.c_str());
+
+  // Resources -> Versions/Current/Resources
+  if(this->MacContentFolders.find("Resources") !=
+     this->MacContentFolders.end())
+    {
+    oldName = "Versions/Current/Resources";
+    newName = top;
+    newName += "Resources";
+    cmSystemTools::RemoveFile(newName.c_str());
+    cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
+    this->Makefile->AddCMakeOutputFile(newName.c_str());
+    }
+
   // Headers -> Versions/Current/Headers
-  symlink = "Versions/Current/Headers";
-  symlink2 = "Headers";
-  cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
-  this->Makefile->AddCMakeOutputFile((outpath + "Headers").c_str());
+  if(this->MacContentFolders.find("Headers") !=
+     this->MacContentFolders.end())
+    {
+    oldName = "Versions/Current/Headers";
+    newName = top;
+    newName += "Headers";
+    cmSystemTools::RemoveFile(newName.c_str());
+    cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
+    this->Makefile->AddCMakeOutputFile(newName.c_str());
+    }
+
   // PrivateHeaders -> Versions/Current/PrivateHeaders
-  symlink = "Versions/Current/PrivateHeaders";
-  symlink2 = "PrivateHeaders";
-  cmSystemTools::CreateSymlink(symlink.c_str(), symlink2.c_str());
-  this->Makefile->AddCMakeOutputFile((outpath + "PrivateHeaders").c_str());
-  // go back to where we were
-  cmSystemTools::ChangeDirectory(cwd.c_str());
+  if(this->MacContentFolders.find("PrivateHeaders") !=
+     this->MacContentFolders.end())
+    {
+    oldName = "Versions/Current/PrivateHeaders";
+    newName = top;
+    newName += "PrivateHeaders";
+    cmSystemTools::RemoveFile(newName.c_str());
+    cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
+    this->Makefile->AddCMakeOutputFile(newName.c_str());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -354,7 +377,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Construct the full path version of the names.
   std::string outpath;
   std::string outpathImp;
-  if(relink)
+  if(this->Target->IsFrameworkOnApple())
+    {
+    outpath = this->MacContentDirectory;
+    this->CreateFramework();
+    }
+  else if(relink)
     {
     outpath = this->Makefile->GetStartOutputDirectory();
     outpath += cmake::GetCMakeFilesDirectory();
@@ -369,18 +397,14 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   else
     {
     outpath = this->Target->GetDirectory();
+    cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
     if(!targetNameImport.empty())
       {
       outpathImp = this->Target->GetDirectory(0, true);
+      cmSystemTools::MakeDirectory(outpathImp.c_str());
       outpathImp += "/";
       }
-    }
-
-  // If we're creating a framework, place the output into a framework directory
-  if(this->Target->IsFrameworkOnApple())
-    {
-    this->CreateFramework(targetName, outpath);
     }
 
   std::string targetFullPath = outpath + targetName;

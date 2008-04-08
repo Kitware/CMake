@@ -618,7 +618,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     else if(arg.find("--debug-output",0) == 0)
       {
       std::cout << "Running with debug output on.\n";
-      this->DebugOutputOn();
+      this->SetDebugOutputOn(true);
       }
     else if(arg.find("-G",0) == 0)
       {
@@ -786,6 +786,19 @@ int cmake::AddCMakePaths()
   cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
   cMakeSelf += "/cmake";
   cMakeSelf += cmSystemTools::GetExecutableExtension();
+#if __APPLE__
+  // on the apple this might be the gui bundle
+  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
+    {
+    cMakeSelf = cmSystemTools::GetExecutableDirectory();
+    cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
+    cMakeSelf += "../../../..";
+    cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
+    cMakeSelf = cmSystemTools::CollapseFullPath(cMakeSelf.c_str());
+    cMakeSelf += "/cmake";
+    std::cerr << cMakeSelf.c_str() << "\n";
+    }
+#endif 
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
     cmSystemTools::Error("CMake executable cannot be found at ",

@@ -86,8 +86,8 @@ void QCMake::setSourceDirectory(const QString& dir)
 {
   if(this->SourceDirectory != dir)
     {
-    this->SourceDirectory = dir;
-    emit this->sourceDirChanged(dir);
+    this->SourceDirectory = QDir::fromNativeSeparators(dir);
+    emit this->sourceDirChanged(this->SourceDirectory);
     }
 }
 
@@ -95,12 +95,14 @@ void QCMake::setBinaryDirectory(const QString& dir)
 {
   if(this->BinaryDirectory != dir)
     {
+    this->BinaryDirectory = QDir::fromNativeSeparators(dir);
+    emit this->binaryDirChanged(this->BinaryDirectory);
     cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
-    this->BinaryDirectory = dir;
     this->setGenerator(QString());
-    if(!this->CMakeInstance->GetCacheManager()->LoadCache(dir.toLocal8Bit().data()))
+    if(!this->CMakeInstance->GetCacheManager()->LoadCache(
+      this->BinaryDirectory.toLocal8Bit().data()))
       {
-      QDir testDir(dir);
+      QDir testDir(this->BinaryDirectory);
       if(testDir.exists("CMakeCache.txt"))
         {
         cmSystemTools::Error("There is a CMakeCache.txt file for the current binary "
@@ -362,6 +364,21 @@ void QCMake::reloadCache()
   props = this->properties();
   emit this->propertiesChanged(props);
 }
+  
+void QCMake::setDebugOutput(bool flag)
+{
+  if(flag != this->CMakeInstance->GetDebugOutput())
+    {
+    this->CMakeInstance->SetDebugOutputOn(flag);
+    emit this->debugOutputChanged(flag);
+    }
+}
+
+bool QCMake::getDebugOutput() const
+{
+  return this->CMakeInstance->GetDebugOutput();
+}
+
 
 void QCMake::SetSuppressDevWarnings(bool value)
 {

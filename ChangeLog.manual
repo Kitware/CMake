@@ -1,3 +1,12 @@
+Changes in CMake 2.6.0 RC 61
+- Change install location on mac for cmake-gui
+- Fix for bugs 6730 and 6720 in FindQt4 configured headers in binary dir
+- Add VS9 support to InstallRequiredSystemLibraries.cmake
+- Fix some bugs in framework support
+- Have make edit_cache work with cmake-gui and eclipse generator
+- Fix find_* to not mistakenly construct network paths on windows
+- Several bug fixes in cmake-gui Qt program.
+
 Changes in CMake 2.6.0 RC 6
 
 - Added ChangeLog.manual

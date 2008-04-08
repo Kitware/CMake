@@ -372,8 +372,13 @@ bool QCMakeCacheModel::insertRows(int row, int num, const QModelIndex&)
 }
 
 QCMakeCacheModelDelegate::QCMakeCacheModelDelegate(QObject* p)
-  : QItemDelegate(p)
+  : QItemDelegate(p), FileDialogFlag(false)
 {
+}
+
+void QCMakeCacheModelDelegate::setFileDialogFlag(bool f)
+{
+  this->FileDialogFlag = f;
 }
 
 QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p, 
@@ -388,13 +393,21 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
     }
   else if(type == QCMakeCacheProperty::PATH)
     {
-    return new QCMakeCachePathEditor(p, 
+    QCMakeCachePathEditor* editor =
+      new QCMakeCachePathEditor(p, 
       var.data(Qt::DisplayRole).toString());
+    QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
+        SLOT(setFileDialogFlag(bool)));
+    return editor;
     }
   else if(type == QCMakeCacheProperty::FILEPATH)
     {
-    return new QCMakeCacheFilePathEditor(p, 
+    QCMakeCacheFilePathEditor* editor =
+      new QCMakeCacheFilePathEditor(p, 
       var.data(Qt::DisplayRole).toString());
+    QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
+        SLOT(setFileDialogFlag(bool)));
+    return editor;
     }
 
   return new QLineEdit(p);
@@ -442,6 +455,17 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
                           ? Qt::Unchecked : Qt::Checked);
   return model->setData(index, state, Qt::CheckStateRole);
 }
+  
+bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* event)
+{
+  // workaround for what looks like a bug in Qt on Mac OS X
+  if(event->type() == QEvent::FocusOut && this->FileDialogFlag)
+  {
+    return false;
+  }
+  return QItemDelegate::eventFilter(object, event);
+}
+
   
 QCMakeCacheFileEditor::QCMakeCacheFileEditor(QWidget* p, const QString& var)
   : QLineEdit(p), Variable(var)
@@ -492,7 +516,9 @@ void QCMakeCacheFilePathEditor::chooseFile()
     title = tr("Select File for %1");
     title = title.arg(this->Variable);
     }
+  this->fileDialogExists(true);
   path = QFileDialog::getOpenFileName(this, title, info.absolutePath());
+  this->fileDialogExists(false);
   
   if(!path.isEmpty())
     {
@@ -514,7 +540,9 @@ void QCMakeCachePathEditor::chooseFile()
     title = tr("Select Path for %1");
     title = title.arg(this->Variable);
     }
+  this->fileDialogExists(true);
   path = QFileDialog::getExistingDirectory(this, title, this->text());
+  this->fileDialogExists(false);
   if(!path.isEmpty())
     {
     this->setText(QDir::fromNativeSeparators(path));

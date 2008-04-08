@@ -37,8 +37,7 @@ protected:
                          bool relink);
   // MacOSX Framework support methods
   void WriteFrameworkRules(bool relink);
-  void CreateFramework(std::string& targetName,
-                       std::string& outpath);
+  void CreateFramework();
 
   // Store the computd framework version for OS X Frameworks.
   std::string FrameworkVersion;

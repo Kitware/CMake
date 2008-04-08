@@ -495,7 +495,15 @@ void cmFindBase::ExpandRegistryAndCleanPath(std::vector<std::string>& paths)
           this->SearchPathSuffixes.begin();
         j != this->SearchPathSuffixes.end(); ++j)
       {
-      std::string p = *i + std::string("/") + *j;
+      // if *i is only / then do not add a //
+      // this will get incorrectly considered a network
+      // path on windows and cause huge delays.
+      std::string p = *i;
+      if(p.size() && p[p.size()-1] != '/')
+        {
+        p += std::string("/");
+        }
+      p +=  *j;
       // add to all paths because the search path may be modified 
       // later with lib being replaced for lib64 which may exist
       paths.push_back(p);

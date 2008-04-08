@@ -1244,7 +1244,8 @@ void cmFileCommand
 bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer,
                                              std::string& destination)
 {
-  if ( destination.size() < 2 )
+  // allow for / to be a valid destination
+  if ( destination.size() < 2 && destination != "/" )
     {
     this->SetError("called with inapropriate arguments. "
         "No DESTINATION provided or .");
@@ -1406,8 +1407,10 @@ bool cmFileCommand::HandleChrpathCommand(std::vector<std::string> const& args)
   else
     {
     cmOStringStream e;
-    e << "CHRPATH could not write new RPATH \""
-      << newRPath << "\" to the file \"" << file << "\": "
+    e << "CHRPATH could not write new RPATH:\n"
+      << "  " << newRPath << "\n"
+      << "to the file:\n"
+      << "  " << file << "\n"
       << emsg;
     this->SetError(e.str().c_str());
     return false;

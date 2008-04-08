@@ -57,6 +57,10 @@ ELSE(NOT QT4_FOUND)
   ADD_EXECUTABLE(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS})
   TARGET_LINK_LIBRARIES(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${QT_LIBRARIES})
   IF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
+    IF(APPLE)
+      SET_TARGET_PROPERTIES(cmake-gui PROPERTIES
+       OUTPUT_NAME ${CMAKE_BUNDLE_NAME})
+    ENDIF(APPLE)
     SET(CMAKE_INSTALL_DESTINATION_ARGS 
       BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}")
   ENDIF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
@@ -84,8 +88,10 @@ ELSE(NOT QT4_FOUND)
       "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
     configure_file("${CMake_SOURCE_DIR}/Source/QtDialog/postupgrade.sh.in"
       "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
-    INSTALL(CODE "set(input_file 
-       \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/MacOS/cmake-gui\")")
+    INSTALL(CODE "execute_process(COMMAND ln -s \"../MacOS/${CMAKE_BUNDLE_NAME}\" cmake-gui
+                  WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)")
+    INSTALL(CODE "set(input_file
+       \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/MacOS/${CMAKE_BUNDLE_NAME}\")")
     INSTALL(SCRIPT "${CMake_SOURCE_DIR}/Source/QtDialog/CMakeIngestOSXBundleLibraries.cmake")
   ENDIF(APPLE)
   CONFIGURE_FILE("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
