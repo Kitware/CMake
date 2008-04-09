@@ -1,4 +1,7 @@
-Changes in CMake 2.6.0 RC 61
+Changes in CMake 2.6.0 RC 7
+
+- Fix for chrpath on sun with gcc
+- Fix FindJNI on unix with HKEY issue bug 6688
 - Change install location on mac for cmake-gui
 - Fix for bugs 6730 and 6720 in FindQt4 configured headers in binary dir
 - Add VS9 support to InstallRequiredSystemLibraries.cmake

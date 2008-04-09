@@ -149,8 +149,19 @@ void cmSystemTools::ExpandRegistryValues(std::string& source)
     }
 }
 #else
-void cmSystemTools::ExpandRegistryValues(std::string&)
+void cmSystemTools::ExpandRegistryValues(std::string& source)
 {
+  cmsys::RegularExpression regEntry("\\[(HKEY[^]]*)\\]");
+  while (regEntry.find(source))
+    {
+    // the arguments are the second match
+    std::string key = regEntry.match(1);
+    std::string val;
+    std::string reg = "[";
+    reg += key + "]";
+    cmSystemTools::ReplaceString(source, reg.c_str(), "/registry");
+    }
+
 }
 #endif
 
@@ -2199,6 +2210,52 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 }
 
 //----------------------------------------------------------------------------
+#if defined(CMAKE_USE_ELF_PARSER)
+std::string::size_type cmSystemToolsFindRPath(std::string const& have,
+                                              std::string const& want)
+{
+  // Search for the desired rpath.
+  std::string::size_type pos = have.find(want);
+
+  // If the path is not present we are done.
+  if(pos == std::string::npos)
+    {
+    return pos;
+    }
+
+  // Build a regex to match a properly separated path instance.
+  std::string regex_str = "(^|:)(";
+  for(std::string::const_iterator i = want.begin(); i != want.end(); ++i)
+    {
+    int ch = *i;
+    if(!(('a' <= ch && ch <= 'z') ||
+         ('A' <= ch && ch <= 'Z') ||
+         ('0' <= ch && ch <= '9')))
+      {
+      // Escape the non-alphanumeric character.
+      regex_str += "\\";
+      }
+    // Store the character.
+    regex_str.append(1, static_cast<char>(ch));
+    }
+  regex_str += ")(:|$)";
+
+  // Look for the separated path.
+  cmsys::RegularExpression regex(regex_str.c_str());
+  if(regex.find(have))
+    {
+    // Return the position of the path portion.
+    return regex.start(2);
+    }
+  else
+    {
+    // The desired rpath was not found.
+    return std::string::npos;
+    }
+}
+#endif
+
+//----------------------------------------------------------------------------
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
                                 std::string const& newRPath,
@@ -2207,23 +2264,27 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 #if defined(CMAKE_USE_ELF_PARSER)
   unsigned long rpathPosition = 0;
   unsigned long rpathSize = 0;
+  std::string rpathPrefix;
   std::string rpathSuffix;
   {
+  // Parse the ELF binary.
   cmELF elf(file.c_str());
+
+  // Get the RPATH or RUNPATH entry from it.
   cmELF::StringEntry const* se = elf.GetRPath();
   if(!se)
     {
     se = elf.GetRunPath();
     }
+
   if(se)
     {
-    // Make sure the current rpath begins with the old rpath.
-    if(se->Value.length() < oldRPath.length() ||
-       se->Value.substr(0, oldRPath.length()) != oldRPath)
+    // Make sure the current rpath contains the old rpath.
+    std::string::size_type pos = cmSystemToolsFindRPath(se->Value, oldRPath);
+    if(pos == std::string::npos)
       {
-      // If it begins with the new rpath instead then it is okay.
-      if(se->Value.length() >= newRPath.length() &&
-         se->Value.substr(0, newRPath.length()) == newRPath)
+      // If it contains the new rpath instead then it is okay.
+      if(cmSystemToolsFindRPath(se->Value, newRPath) != std::string::npos)
         {
         return true;
         }
@@ -2232,7 +2293,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
         cmOStringStream e;
         e << "The current RPATH is:\n"
           << "  " << se->Value << "\n"
-          << "which does not begin with:\n"
+          << "which does not contain:\n"
           << "  " << oldRPath << "\n"
           << "as was expected.";
         *emsg = e.str();
@@ -2245,7 +2306,8 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     rpathSize = se->Size;
 
     // Store the part of the path we must preserve.
-    rpathSuffix = se->Value.substr(oldRPath.length(), oldRPath.npos);
+    rpathPrefix = se->Value.substr(0, pos);
+    rpathSuffix = se->Value.substr(pos+oldRPath.length(), oldRPath.npos);
     }
   else if(newRPath.empty())
     {
@@ -2264,7 +2326,8 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     }
   }
   // Compute the full new rpath.
-  std::string rpath = newRPath;
+  std::string rpath = rpathPrefix;
+  rpath += newRPath;
   rpath += rpathSuffix;
 
   // Make sure there is enough room to store the new rpath and at
