@@ -1,7 +1,10 @@
-Changes in CMake 2.6.0 RC 7
+Changes in CMake 2.6.0 RC 8
 
 - Fix sun make very poor performance
 - Fix includes for automoc in FindQt4
+
+Changes in CMake 2.6.0 RC 7
+
 - Fix for chrpath on sun with gcc
 - Fix FindJNI on unix with HKEY issue bug 6688
 - Change install location on mac for cmake-gui
