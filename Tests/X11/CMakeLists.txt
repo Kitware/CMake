@@ -1,6 +1,6 @@
 # a simple C only test case
 cmake_minimum_required (VERSION 2.6)
-PROJECT (UseX11 C)
+PROJECT (UseX11 CXX C)
 
 INCLUDE (${CMAKE_ROOT}/Modules/FindX11.cmake)
 MESSAGE("X11_FOUND: ${X11_FOUND}")
@@ -23,4 +23,13 @@ IF(X11_FOUND)
   ADD_DEFINITIONS(-DCMAKE_HAS_X)
   INCLUDE_DIRECTORIES(${X11_INCLUDE_DIR})
   TARGET_LINK_LIBRARIES(UseX11 ${X11_LIBRARIES})
+  IF(APPLE)
+    ADD_EXECUTABLE(HelloWorldX11 HelloWorldX11.cxx)
+    TARGET_LINK_LIBRARIES(HelloWorldX11 ${X11_LIBRARIES})
+    install( TARGETS HelloWorldX11 DESTINATION bin)
+    # build a CPack driven installer package
+    set(CPACK_PACKAGE_NAME HelloWorldX11Package)
+    set(CPACK_PACKAGE_EXECUTABLES HelloWorldX11 HelloWorldX11)
+    include(CPack)
+  ENDIF(APPLE)
 ENDIF(X11_FOUND)
