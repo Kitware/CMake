@@ -68,6 +68,9 @@ public:
     // The size of the string table entry.  This includes the space
     // allocated for one or more null terminators.
     unsigned long Size;
+
+    // The index of the section entry referencing the string.
+    int IndexInSection;
   };
 
   /** Get the type of the file opened.  */
@@ -75,6 +78,17 @@ public:
 
   /** Get the number of ELF sections present.  */
   unsigned int GetNumberOfSections() const;
+
+  /** Get the number of DYNAMIC section entries before the first
+      DT_NULL.  Returns zero on error.  */
+  unsigned int GetDynamicEntryCount() const;
+
+  /** Get the position of a DYNAMIC section header entry.  Returns
+      zero on error.  */
+  unsigned long GetDynamicEntryPosition(int index) const;
+
+  /** Read bytes from the file.  */
+  bool ReadBytes(unsigned long pos, unsigned long size, char* buf) const;
 
   /** Get the SONAME field if any.  */
   bool GetSOName(std::string& soname);
