@@ -251,6 +251,24 @@ cmPolicies::cmPolicies()
     "See documentation of the COMPILE_DEFINITIONS target property for "
     "limitations of the escaping implementation.",
     2,6,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0006, "CMP0006",
+    "Installing MACOSX_BUNDLE targets requires a BUNDLE DESTINATION.",
+    "This policy determines whether the install(TARGETS) command must be "
+    "given a BUNDLE DESTINATION when asked to install a target with the "
+    "MACOSX_BUNDLE property set.  "
+    "CMake 2.4 and below did not distinguish application bundles from "
+    "normal executables when installing targets.  "
+    "CMake 2.6 provides a BUNDLE option to the install(TARGETS) command "
+    "that specifies rules specific to application bundles on the Mac.  "
+    "Projects should use this option when installing a target with the "
+    "MACOSX_BUNDLE property set.\n"
+    "The OLD behavior for this policy is to fall back to the RUNTIME "
+    "DESTINATION if a BUNDLE DESTINATION is not given.  "
+    "The NEW behavior for this policy is to produce an error if a bundle "
+    "target is installed without a BUNDLE DESTINATION.",
+    2,6,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

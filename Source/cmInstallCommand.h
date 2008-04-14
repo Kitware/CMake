@@ -346,6 +346,7 @@ private:
   bool MakeFilesFullPath(const char* modeName, 
                          const std::vector<std::string>& relFiles,
                          std::vector<std::string>& absFiles);
+  bool CheckCMP0006(bool& failure);
 };
 
 
