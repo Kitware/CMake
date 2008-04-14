@@ -333,6 +333,32 @@ cmInstallTargetGenerator
     return;
     }
 
+  // Construct the path of the file on disk after installation on
+  // which tweaks may be performed.
+  std::string toDestDirPath = "$ENV{DESTDIR}";
+  if(toInstallPath[0] != '/' && toInstallPath[0] != '$')
+    {
+    toDestDirPath += "/";
+    }
+  toDestDirPath += toInstallPath;
+
+  // Add pre-installation tweaks.
+  if(tweakInstalledFile)
+    {
+    // Collect tweaking rules.
+    cmOStringStream tw;
+    this->AddRPathCheckRule(tw, indent.Next(), config, toDestDirPath);
+    std::string tws = tw.str();
+
+    // Add the rules, if any.
+    if(!tws.empty())
+      {
+      os << indent << "IF(EXISTS \"" << toDestDirPath << "\")\n";
+      os << tws;
+      os << indent << "ENDIF(EXISTS \"" << toDestDirPath << "\")\n";
+      }
+    }
+
   // Write code to install the target file.
   const char* no_dir_permissions = 0;
   const char* no_rename = 0;
@@ -344,25 +370,24 @@ cmInstallTargetGenerator
                        no_rename, literal_args.c_str(),
                        indent);
 
-  // Construct the path of the file on disk after installation on
-  // which tweaks may be performed.
-  std::string toDestDirPath = "$ENV{DESTDIR}";
-  if(toInstallPath[0] != '/' && toInstallPath[0] != '$')
-    {
-    toDestDirPath += "/";
-    }
-  toDestDirPath += toInstallPath;
-
-  // TODO:
-  //   - Skip IF(EXISTS) checks if nothing is done with the installed file
+  // Add post-installation tweaks.
   if(tweakInstalledFile)
     {
-    os << indent << "IF(EXISTS \"" << toDestDirPath << "\")\n";
-    this->AddInstallNamePatchRule(os, indent.Next(), config, toDestDirPath);
-    this->AddChrpathPatchRule(os, indent.Next(), config, toDestDirPath);
-    this->AddRanlibRule(os, indent.Next(), type, toDestDirPath);
-    this->AddStripRule(os, indent.Next(), type, toDestDirPath);
-    os << indent << "ENDIF(EXISTS \"" << toDestDirPath << "\")\n";
+    // Collect tweaking rules.
+    cmOStringStream tw;
+    this->AddInstallNamePatchRule(tw, indent.Next(), config, toDestDirPath);
+    this->AddChrpathPatchRule(tw, indent.Next(), config, toDestDirPath);
+    this->AddRanlibRule(tw, indent.Next(), type, toDestDirPath);
+    this->AddStripRule(tw, indent.Next(), type, toDestDirPath);
+    std::string tws = tw.str();
+
+    // Add the rules, if any.
+    if(!tws.empty())
+      {
+      os << indent << "IF(EXISTS \"" << toDestDirPath << "\")\n";
+      os << tws;
+      os << indent << "ENDIF(EXISTS \"" << toDestDirPath << "\")\n";
+      }
     }
 }
 
@@ -550,6 +575,37 @@ cmInstallTargetGenerator
 //----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
+::AddRPathCheckRule(std::ostream& os, Indent const& indent,
+                    const char* config, std::string const& toDestDirPath)
+{
+  // Skip the chrpath if the target does not need it.
+  if(this->ImportLibrary || !this->Target->IsChrpathUsed())
+    {
+    return;
+    }
+
+  // Get the link information for this target.
+  // It can provide the RPATH.
+  cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config);
+  if(!cli)
+    {
+    return;
+    }
+
+  // Get the install RPATH from the link information.
+  std::string newRpath = cli->GetChrpathString();
+
+  // Write a rule to remove the installed file if its rpath is not the
+  // new rpath.  This is needed for existing build/install trees when
+  // the installed rpath changes but the file is not rebuilt.
+  os << indent << "FILE(RPATH_CHECK\n"
+     << indent << "     FILE \"" << toDestDirPath << "\"\n"
+     << indent << "     RPATH \"" << newRpath << "\")\n";
+}
+
+//----------------------------------------------------------------------------
+void
+cmInstallTargetGenerator
 ::AddChrpathPatchRule(std::ostream& os, Indent const& indent,
                       const char* config, std::string const& toDestDirPath)
 {
@@ -580,9 +636,18 @@ cmInstallTargetGenerator
     }
 
   // Write a rule to run chrpath to set the install-tree RPATH
-  os << indent << "FILE(CHRPATH FILE \"" << toDestDirPath << "\"\n"
-     << indent << "     OLD_RPATH \"" << oldRpath << "\"\n"
-     << indent << "     NEW_RPATH \"" << newRpath << "\")\n";
+  if(newRpath.empty())
+    {
+    os << indent << "FILE(RPATH_REMOVE\n"
+       << indent << "     FILE \"" << toDestDirPath << "\")\n";
+    }
+  else
+    {
+    os << indent << "FILE(RPATH_CHANGE\n"
+       << indent << "     FILE \"" << toDestDirPath << "\"\n"
+       << indent << "     OLD_RPATH \"" << oldRpath << "\"\n"
+       << indent << "     NEW_RPATH \"" << newRpath << "\")\n";
+    }
 }
 
 //----------------------------------------------------------------------------

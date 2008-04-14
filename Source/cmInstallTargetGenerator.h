@@ -80,6 +80,9 @@ protected:
   void AddChrpathPatchRule(std::ostream& os, Indent const& indent,
                            const char* config,
                            std::string const& toDestDirPath);
+  void AddRPathCheckRule(std::ostream& os, Indent const& indent,
+                         const char* config,
+                         std::string const& toDestDirPath);
   
   void AddStripRule(std::ostream& os, Indent const& indent,
                     cmTarget::TargetType type,
