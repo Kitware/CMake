@@ -56,6 +56,18 @@
 # include "cmELF.h"
 #endif
 
+class cmSystemToolsFileTime
+{
+public:
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  FILETIME timeCreation;
+  FILETIME timeLastAccess;
+  FILETIME timeLastWrite;
+#else
+  struct utimbuf timeBuf;
+#endif
+};
+
 #if defined(__sgi) && !defined(__GNUC__)
 # pragma set woff 1375 /* base class destructor not virtual */
 #endif
@@ -2103,6 +2115,67 @@ bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
   buf.actime = fromStat.st_atime;
   buf.modtime = fromStat.st_mtime;
   if(utime(toFile, &buf) < 0)
+    {
+    return false;
+    }
+#endif
+  return true;
+}
+
+//----------------------------------------------------------------------------
+cmSystemToolsFileTime* cmSystemTools::FileTimeNew()
+{
+  return new cmSystemToolsFileTime;
+}
+
+//----------------------------------------------------------------------------
+void cmSystemTools::FileTimeDelete(cmSystemToolsFileTime* t)
+{
+  delete t;
+}
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::FileTimeGet(const char* fname, cmSystemToolsFileTime* t)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  cmSystemToolsWindowsHandle h =
+    CreateFile(fname, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+  if(!h)
+    {
+    return false;
+    }
+  if(!GetFileTime(h, &t->timeCreation, &t->timeLastAccess, &t->timeLastWrite))
+    {
+    return false;
+    }
+#else
+  struct stat st;
+  if(stat(fname, &st) < 0)
+    {
+    return false;
+    }
+  t->timeBuf.actime = st.st_atime;
+  t->timeBuf.modtime = st.st_mtime;
+#endif
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  cmSystemToolsWindowsHandle h =
+    CreateFile(toFile, GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+  if(!h)
+    {
+    return false;
+    }
+  if(!SetFileTime(h, &t->timeCreation, &t->timeLastAccess, &t->timeLastWrite))
+    {
+    return false;
+    }
+#else
+  if(utime(fname, &t->timeBuf) < 0)
     {
     return false;
     }

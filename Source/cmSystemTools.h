@@ -22,7 +22,7 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Process.h>
 
-
+class cmSystemToolsFileTime;
 
 /** \class cmSystemTools
  * \brief A collection of useful functions for CMake.
@@ -362,6 +362,12 @@ public:
   /** Copy the file create/access/modify times from the file named by
       the first argument to that named by the second.  */
   static bool CopyFileTime(const char* fromFile, const char* toFile);
+
+  /** Save and restore file times.  */
+  static cmSystemToolsFileTime* FileTimeNew();
+  static void FileTimeDelete(cmSystemToolsFileTime*);
+  static bool FileTimeGet(const char* fname, cmSystemToolsFileTime* t);
+  static bool FileTimeSet(const char* fname, cmSystemToolsFileTime* t);
 
   /** Find the directory containing the running executable.  Save it
    in a global location to be queried by GetExecutableDirectory
