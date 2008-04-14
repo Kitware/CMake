@@ -2165,7 +2165,7 @@ bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   cmSystemToolsWindowsHandle h =
-    CreateFile(toFile, GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+    CreateFile(fname, GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
   if(!h)
     {
     return false;
