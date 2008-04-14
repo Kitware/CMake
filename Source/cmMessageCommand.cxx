@@ -60,7 +60,7 @@ bool cmMessageCommand
 
   if (send_error || fatal_error)
     {
-    cmSystemTools::Error(message.c_str());
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, message.c_str());
     }
   else
     {
