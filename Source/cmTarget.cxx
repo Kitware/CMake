@@ -134,8 +134,8 @@ void cmTarget::DefineProperties(cmake *cm)
     ("DEBUG_POSTFIX", cmProperty::TARGET,
      "A postfix that will be applied to this target when build debug.",
      "A property on a target that specifies a postfix to add to the "
-     "target name when built in debug mode. For example foo.dll "
-     "versus fooD.dll");
+     "target name when built in debug mode. For example \"foo.dll\" "
+     "versus \"fooD.dll\".  Ignored for Mac Frameworks and App Bundles.");
 
   cm->DefineProperty
     ("EchoString", cmProperty::TARGET,
@@ -2311,6 +2311,12 @@ void cmTarget::GetFullNameInternal(TargetType type,
     std::string configProp = cmSystemTools::UpperCase(config);
     configProp += "_POSTFIX";
     configPostfix = this->GetProperty(configProp.c_str());
+    // Mac application bundles and frameworks have no postfix.
+    if(configPostfix &&
+       (this->IsAppBundleOnApple() || this->IsFrameworkOnApple()))
+      {
+      configPostfix = 0;
+      }
     }
   const char* prefixVar = this->GetPrefixVariableInternal(type, implib);
   const char* suffixVar = this->GetSuffixVariableInternal(type, implib);
