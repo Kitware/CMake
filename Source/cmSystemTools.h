@@ -393,6 +393,14 @@ public:
                           std::string const& newRPath,
                           std::string* emsg = 0);
 
+  /** Try to remove the RPATH from an ELF binary.  */
+  static bool RemoveRPath(std::string const& file, std::string* emsg = 0);
+
+  /** Check whether the RPATH in an ELF binary contains the path
+      given.  */
+  static bool CheckRPath(std::string const& file,
+                         std::string const& newRPath);
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
