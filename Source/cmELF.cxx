@@ -589,7 +589,7 @@ unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
     {
     return 0;
     }
-  if(j < 0 || j >= this->DynamicSectionEntries.size())
+  if(j < 0 || j >= static_cast<int>(this->DynamicSectionEntries.size()))
     {
     return 0;
     }
