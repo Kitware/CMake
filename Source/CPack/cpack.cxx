@@ -29,6 +29,7 @@
 #include "cmCPackLog.h"
 
 #include <cmsys/CommandLineArguments.hxx>
+#include <memory> // auto_ptr
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][3] =
