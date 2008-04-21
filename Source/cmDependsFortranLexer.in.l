@@ -16,9 +16,9 @@
 
 =========================================================================*/
 /*-------------------------------------------------------------------------
-  Portions of this source have been derived from makefdep90 version 2.8.8,
+  Portions of this source have been derived from makedepf90 version 2.8.8,
 
-   Copyright (C) 2000,2001 Erik Edelmann <eedelman@beam.helsinki.fi>.
+   Copyright (C) 2000--2006 Erik Edelmann <erik.edelmann@iki.fi>
 
   The code was originally distributed under the GPL but permission
   from the copyright holder has been obtained to distribute this
@@ -119,22 +119,22 @@ Modify cmDependsFortranLexer.h:
 !.*\n                   { return EOSTMT; } /* Treat comments like */
 <fixed_fmt>^[cC*dD].*\n { return EOSTMT; } /* empty lines */
 
-#[ \t]*include  { return CPP_INCLUDE; }
+^[ \t]*#[ \t]*include  { return CPP_INCLUDE; }
 \$[ \t]*include { return F90PPR_INCLUDE; }
 \?\?[ \t]*include { return COCO_INCLUDE; }
 
-#[ \t]*define   { return CPP_DEFINE; }
+^[ \t]*#[ \t]*define   { return CPP_DEFINE; }
 \$[ \t]*DEFINE   { return F90PPR_DEFINE; }
 
-#[ \t]*undef    { return CPP_UNDEF; }
+^[ \t]*#[ \t]*undef    { return CPP_UNDEF; }
 \$[ \t]*UNDEF   { return F90PPR_UNDEF; }
 
-#[ \t]*ifdef    { return CPP_IFDEF; }
-#[ \t]*ifndef   { return CPP_IFNDEF; }
-#[ \t]*if       { return CPP_IF; }
-#[ \t]*elif     { return CPP_ELIF; }
-#[ \t]*else     { return CPP_ELSE; }
-#[ \t]*endif    { return CPP_ENDIF; }
+^[ \t]*#[ \t]*ifdef    { return CPP_IFDEF; }
+^[ \t]*#[ \t]*ifndef   { return CPP_IFNDEF; }
+^[ \t]*#[ \t]*if       { return CPP_IF; }
+^[ \t]*#[ \t]*elif     { return CPP_ELIF; }
+^[ \t]*#[ \t]*else     { return CPP_ELSE; }
+^[ \t]*#[ \t]*endif    { return CPP_ENDIF; }
 
 $[ \t]*ifdef    { return F90PPR_IFDEF; }
 $[ \t]*ifndef   { return F90PPR_IFNDEF; }

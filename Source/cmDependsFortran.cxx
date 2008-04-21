@@ -1209,7 +1209,8 @@ void cmDependsFortranParser_RuleElif(cmDependsFortranParser* parser)
   // Allways taken unless an #ifdef or #ifndef-branch has been taken
   // already.  If the second condition isn't meet already
   // (parser->InPPFalseBranch == 0) correct it.
-  if(parser->SkipToEnd.top() && !parser->InPPFalseBranch)
+  if(!parser->SkipToEnd.empty() &&
+     parser->SkipToEnd.top() && !parser->InPPFalseBranch)
     {
     parser->InPPFalseBranch = 1;
     }
@@ -1226,7 +1227,8 @@ void cmDependsFortranParser_RuleElse(cmDependsFortranParser* parser)
 
   // parser->InPPFalseBranch is either 0 or 1.  We change it denpending on
   // parser->SkipToEnd.top()
-  if(parser->SkipToEnd.top())
+  if(!parser->SkipToEnd.empty() &&
+     parser->SkipToEnd.top())
     {
     parser->InPPFalseBranch = 1;
     }
