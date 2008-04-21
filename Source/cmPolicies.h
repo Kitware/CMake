@@ -47,6 +47,7 @@ public:
     CMP0004, // Libraries linked may not have leading or trailing whitespace
     CMP0005, // Definition value escaping
     CMP0006, // BUNDLE install rules needed for MACOSX_BUNDLE targets
+    CMP0007, // list command handling of empty elements
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.
