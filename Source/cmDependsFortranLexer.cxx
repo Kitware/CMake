@@ -636,9 +636,9 @@ static yyconst flex_int16_t yy_chk[531] =
 
 =========================================================================*/
 /*-------------------------------------------------------------------------
-  Portions of this source have been derived from makefdep90 version 2.8.8,
+  Portions of this source have been derived from makedepf90 version 2.8.8,
 
-   Copyright (C) 2000,2001 Erik Edelmann <eedelman@beam.helsinki.fi>.
+   Copyright (C) 2000--2006 Erik Edelmann <erik.edelmann@iki.fi>
 
   The code was originally distributed under the GPL but permission
   from the copyright holder has been obtained to distribute this
