@@ -24,6 +24,7 @@ set_target_properties(foo PROPERTIES
   PUBLIC_HEADER "foo.h;foo2.h;fooPublic.h;fooBoth.h"
   RESOURCE "test.lua"
   INSTALL_NAME_DIR "@executable_path/../../../Library/Frameworks"
+  DEBUG_POSTFIX -d
 )
 # fooBoth.h is listed as both public and private... (private wins...)
 # fooNeither.h is listed as neither public nor private...

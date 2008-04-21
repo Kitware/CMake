@@ -112,9 +112,17 @@ bool cmFileCommand
     {
     return this->HandleInstallCommand(args);
     }
-  else if ( subCommand == "CHRPATH" )
+  else if ( subCommand == "RPATH_CHANGE" || subCommand == "CHRPATH" )
     {
-    return this->HandleChrpathCommand(args);
+    return this->HandleRPathChangeCommand(args);
+    }
+  else if ( subCommand == "RPATH_CHECK" )
+    {
+    return this->HandleRPathCheckCommand(args);
+    }
+  else if ( subCommand == "RPATH_REMOVE" )
+    {
+    return this->HandleRPathRemoveCommand(args);
     }
   else if ( subCommand == "RELATIVE_PATH" )
     {
@@ -1332,7 +1340,8 @@ bool cmFileCommand::HandleInstallDestination(cmFileInstaller& installer,
 }
 
 //----------------------------------------------------------------------------
-bool cmFileCommand::HandleChrpathCommand(std::vector<std::string> const& args)
+bool
+cmFileCommand::HandleRPathChangeCommand(std::vector<std::string> const& args)
 {
   // Evaluate arguments.
   const char* file = 0;
@@ -1372,49 +1381,174 @@ bool cmFileCommand::HandleChrpathCommand(std::vector<std::string> const& args)
     else
       {
       cmOStringStream e;
-      e << "CHRPATH given unknown argument " << args[i];
+      e << "RPATH_CHANGE given unknown argument " << args[i];
       this->SetError(e.str().c_str());
       return false;
       }
     }
   if(!file)
     {
-    this->SetError("CHRPATH not given FILE option.");
+    this->SetError("RPATH_CHANGE not given FILE option.");
     return false;
     }
   if(!oldRPath)
     {
-    this->SetError("CHRPATH not given OLD_RPATH option.");
+    this->SetError("RPATH_CHANGE not given OLD_RPATH option.");
     return false;
     }
   if(!newRPath)
     {
-    this->SetError("CHRPATH not given NEW_RPATH option.");
+    this->SetError("RPATH_CHANGE not given NEW_RPATH option.");
     return false;
     }
   if(!cmSystemTools::FileExists(file, true))
     {
     cmOStringStream e;
-    e << "CHRPATH given FILE \"" << file << "\" that does not exist.";
+    e << "RPATH_CHANGE given FILE \"" << file << "\" that does not exist.";
     this->SetError(e.str().c_str());
     return false;
     }
+  bool success = true;
+  cmSystemToolsFileTime* ft = cmSystemTools::FileTimeNew();
+  bool have_ft = cmSystemTools::FileTimeGet(file, ft);
   std::string emsg;
-  if(cmSystemTools::ChangeRPath(file, oldRPath, newRPath, &emsg))
-    {
-    return true;
-    }
-  else
+  if(!cmSystemTools::ChangeRPath(file, oldRPath, newRPath, &emsg))
     {
     cmOStringStream e;
-    e << "CHRPATH could not write new RPATH:\n"
+    e << "RPATH_CHANGE could not write new RPATH:\n"
       << "  " << newRPath << "\n"
       << "to the file:\n"
       << "  " << file << "\n"
       << emsg;
     this->SetError(e.str().c_str());
+    success = false;
+    }
+  if(success && have_ft)
+    {
+    cmSystemTools::FileTimeSet(file, ft);
+    }
+  cmSystemTools::FileTimeDelete(ft);
+  return success;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmFileCommand::HandleRPathRemoveCommand(std::vector<std::string> const& args)
+{
+  // Evaluate arguments.
+  const char* file = 0;
+  enum Doing { DoingNone, DoingFile };
+  Doing doing = DoingNone;
+  for(unsigned int i=1; i < args.size(); ++i)
+    {
+    if(args[i] == "FILE")
+      {
+      doing = DoingFile;
+      }
+    else if(doing == DoingFile)
+      {
+      file = args[i].c_str();
+      doing = DoingNone;
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "RPATH_REMOVE given unknown argument " << args[i];
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+  if(!file)
+    {
+    this->SetError("RPATH_REMOVE not given FILE option.");
     return false;
     }
+  if(!cmSystemTools::FileExists(file, true))
+    {
+    cmOStringStream e;
+    e << "RPATH_REMOVE given FILE \"" << file << "\" that does not exist.";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+  bool success = true;
+  cmSystemToolsFileTime* ft = cmSystemTools::FileTimeNew();
+  bool have_ft = cmSystemTools::FileTimeGet(file, ft);
+  std::string emsg;
+  if(!cmSystemTools::RemoveRPath(file, &emsg))
+    {
+    cmOStringStream e;
+    e << "RPATH_REMOVE could not remove RPATH from file:\n"
+      << "  " << file << "\n"
+      << emsg;
+    this->SetError(e.str().c_str());
+    success = false;
+    }
+  if(success && have_ft)
+    {
+    cmSystemTools::FileTimeSet(file, ft);
+    }
+  cmSystemTools::FileTimeDelete(ft);
+  return success;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmFileCommand::HandleRPathCheckCommand(std::vector<std::string> const& args)
+{
+  // Evaluate arguments.
+  const char* file = 0;
+  const char* rpath = 0;
+  enum Doing { DoingNone, DoingFile, DoingRPath };
+  Doing doing = DoingNone;
+  for(unsigned int i=1; i < args.size(); ++i)
+    {
+    if(args[i] == "RPATH")
+      {
+      doing = DoingRPath;
+      }
+    else if(args[i] == "FILE")
+      {
+      doing = DoingFile;
+      }
+    else if(doing == DoingFile)
+      {
+      file = args[i].c_str();
+      doing = DoingNone;
+      }
+    else if(doing == DoingRPath)
+      {
+      rpath = args[i].c_str();
+      doing = DoingNone;
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "RPATH_CHECK given unknown argument " << args[i];
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+  if(!file)
+    {
+    this->SetError("RPATH_CHECK not given FILE option.");
+    return false;
+    }
+  if(!rpath)
+    {
+    this->SetError("RPATH_CHECK not given RPATH option.");
+    return false;
+    }
+
+  // If the file exists but does not have the desired RPath then
+  // delete it.  This is used during installation to re-install a file
+  // if its RPath will change.
+  if(cmSystemTools::FileExists(file, true) &&
+     !cmSystemTools::CheckRPath(file, rpath))
+    {
+    cmSystemTools::RemoveFile(file);
+    }
+
+  return true;
 }
 
 //----------------------------------------------------------------------------

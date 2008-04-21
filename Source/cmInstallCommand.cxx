@@ -536,7 +536,22 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             bundleGenerator = CreateInstallTargetGenerator(target, bundleArgs, 
                                                            false);
             }
-          else
+          if(!runtimeArgs.GetDestination().empty())
+            {
+            bool failure = false;
+            if(this->CheckCMP0006(failure))
+              {
+              // For CMake 2.4 compatibility fallback to the RUNTIME
+              // properties.
+              bundleGenerator =
+                CreateInstallTargetGenerator(target, runtimeArgs, false);
+              }
+            else if(failure)
+              {
+              return false;
+              }
+            }
+          if(!bundleGenerator)
             {
             cmOStringStream e;
             e << "TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE "
@@ -1283,4 +1298,35 @@ bool cmInstallCommand::MakeFilesFullPath(const char* modeName,
     absFiles.push_back(file);
     }
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmInstallCommand::CheckCMP0006(bool& failure)
+{
+  switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0006))
+    {
+    case cmPolicies::WARN:
+      {
+      this->Makefile->IssueMessage(
+        cmake::AUTHOR_WARNING,
+        this->Makefile->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0006)
+        );
+      }
+    case cmPolicies::OLD:
+      // OLD behavior is to allow compatibility
+      return true;
+    case cmPolicies::NEW:
+      // NEW behavior is to disallow compatibility
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      failure = true;
+      this->Makefile->IssueMessage(
+        cmake::FATAL_ERROR,
+        this->Makefile->GetPolicies()
+        ->GetRequiredPolicyError(cmPolicies::CMP0006)
+        );
+      break;
+    }
+  return false;
 }

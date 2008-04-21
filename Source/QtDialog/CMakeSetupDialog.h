@@ -99,6 +99,9 @@ protected:
   QAction* InstallForCommandLineAction;
   State CurrentState;
 
+  QTextCharFormat ErrorFormat;
+  QTextCharFormat MessageFormat;
+
 };
 
 // QCMake instance on a thread

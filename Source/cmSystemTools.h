@@ -22,7 +22,7 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Process.h>
 
-
+class cmSystemToolsFileTime;
 
 /** \class cmSystemTools
  * \brief A collection of useful functions for CMake.
@@ -363,6 +363,12 @@ public:
       the first argument to that named by the second.  */
   static bool CopyFileTime(const char* fromFile, const char* toFile);
 
+  /** Save and restore file times.  */
+  static cmSystemToolsFileTime* FileTimeNew();
+  static void FileTimeDelete(cmSystemToolsFileTime*);
+  static bool FileTimeGet(const char* fname, cmSystemToolsFileTime* t);
+  static bool FileTimeSet(const char* fname, cmSystemToolsFileTime* t);
+
   /** Find the directory containing the running executable.  Save it
    in a global location to be queried by GetExecutableDirectory
    later.  */
@@ -386,6 +392,14 @@ public:
                           std::string const& oldRPath,
                           std::string const& newRPath,
                           std::string* emsg = 0);
+
+  /** Try to remove the RPATH from an ELF binary.  */
+  static bool RemoveRPath(std::string const& file, std::string* emsg = 0);
+
+  /** Check whether the RPATH in an ELF binary contains the path
+      given.  */
+  static bool CheckRPath(std::string const& file,
+                         std::string const& newRPath);
 
 private:
   static bool s_ForceUnixPaths;

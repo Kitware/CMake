@@ -5,7 +5,7 @@
 
 FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
   IF(NOT DEFINED CMAKE_DETERMINE_${lang}_ABI_COMPILED)
-    MESSAGE(STATUS "Detecting ${lang} compiler info")
+    MESSAGE(STATUS "Detecting ${lang} compiler ABI info")
 
     # Compile the ABI identification source.
     SET(BIN "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeDetermineCompilerABI_${lang}.bin")
@@ -17,9 +17,9 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
 
     # Load the resulting information strings.
     IF(CMAKE_DETERMINE_${lang}_ABI_COMPILED)
-      MESSAGE(STATUS "Detecting ${lang} compiler info - done")
+      MESSAGE(STATUS "Detecting ${lang} compiler ABI info - done")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Detecting ${lang} compiler info compiled with the following output:\n${OUTPUT}\n\n")
+        "Detecting ${lang} compiler ABI info compiled with the following output:\n${OUTPUT}\n\n")
       FILE(STRINGS "${BIN}" ABI_STRINGS LIMIT_COUNT 2 REGEX "INFO:[^[]*\\[")
       FOREACH(info ${ABI_STRINGS})
         IF("${info}" MATCHES ".*INFO:sizeof_dptr\\[0*([^]]*)\\].*")
@@ -41,9 +41,9 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
       ENDIF(ABI_NAME)
 
     ELSE(CMAKE_DETERMINE_${lang}_ABI_COMPILED)
-      MESSAGE(STATUS "Detecting ${lang} compiler info - failed")
+      MESSAGE(STATUS "Detecting ${lang} compiler ABI info - failed")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Detecting ${lang} compiler info failed to compile with the following output:\n${OUTPUT}\n\n")
+        "Detecting ${lang} compiler ABI info failed to compile with the following output:\n${OUTPUT}\n\n")
     ENDIF(CMAKE_DETERMINE_${lang}_ABI_COMPILED)
   ENDIF(NOT DEFINED CMAKE_DETERMINE_${lang}_ABI_COMPILED)
 ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ABI)

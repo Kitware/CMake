@@ -56,6 +56,18 @@
 # include "cmELF.h"
 #endif
 
+class cmSystemToolsFileTime
+{
+public:
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  FILETIME timeCreation;
+  FILETIME timeLastAccess;
+  FILETIME timeLastWrite;
+#else
+  struct utimbuf timeBuf;
+#endif
+};
+
 #if defined(__sgi) && !defined(__GNUC__)
 # pragma set woff 1375 /* base class destructor not virtual */
 #endif
@@ -2111,6 +2123,67 @@ bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
 }
 
 //----------------------------------------------------------------------------
+cmSystemToolsFileTime* cmSystemTools::FileTimeNew()
+{
+  return new cmSystemToolsFileTime;
+}
+
+//----------------------------------------------------------------------------
+void cmSystemTools::FileTimeDelete(cmSystemToolsFileTime* t)
+{
+  delete t;
+}
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::FileTimeGet(const char* fname, cmSystemToolsFileTime* t)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  cmSystemToolsWindowsHandle h =
+    CreateFile(fname, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+  if(!h)
+    {
+    return false;
+    }
+  if(!GetFileTime(h, &t->timeCreation, &t->timeLastAccess, &t->timeLastWrite))
+    {
+    return false;
+    }
+#else
+  struct stat st;
+  if(stat(fname, &st) < 0)
+    {
+    return false;
+    }
+  t->timeBuf.actime = st.st_atime;
+  t->timeBuf.modtime = st.st_mtime;
+#endif
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  cmSystemToolsWindowsHandle h =
+    CreateFile(fname, GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+  if(!h)
+    {
+    return false;
+    }
+  if(!SetFileTime(h, &t->timeCreation, &t->timeLastAccess, &t->timeLastWrite))
+    {
+    return false;
+    }
+#else
+  if(utime(fname, &t->timeBuf) < 0)
+    {
+    return false;
+    }
+#endif
+  return true;
+}
+
+//----------------------------------------------------------------------------
 static std::string cmSystemToolsExecutableDirectory;
 void cmSystemTools::FindExecutableDirectory(const char* argv0)
 {
@@ -2387,6 +2460,176 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   (void)oldRPath;
   (void)newRPath;
   (void)emsg;
+  return false;
+#endif
+}
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg)
+{
+#if defined(CMAKE_USE_ELF_PARSER)
+  unsigned long rpathPosition = 0;
+  unsigned long rpathSize = 0;
+  unsigned long rpathEntryPosition = 0;
+  std::vector<char> bytes;
+  {
+  // Parse the ELF binary.
+  cmELF elf(file.c_str());
+
+  // Get the RPATH or RUNPATH entry from it.
+  cmELF::StringEntry const* se = elf.GetRPath();
+  if(!se)
+    {
+    se = elf.GetRunPath();
+    }
+
+  if(se)
+    {
+    // Store information about the entry.
+    rpathPosition = se->Position;
+    rpathSize = se->Size;
+    rpathEntryPosition = elf.GetDynamicEntryPosition(se->IndexInSection);
+
+    // Get the file range containing the rest of the DYNAMIC table
+    // after the RPATH entry.
+    unsigned long nextEntryPosition =
+      elf.GetDynamicEntryPosition(se->IndexInSection+1);
+    unsigned int count = elf.GetDynamicEntryCount();
+    if(count == 0)
+      {
+      // This should happen only for invalid ELF files where a DT_NULL
+      // appears before the end of the table.
+      if(emsg)
+        {
+        *emsg = "DYNAMIC section contains a DT_NULL before the end.";
+        }
+      return false;
+      }
+    unsigned long nullEntryPosition = elf.GetDynamicEntryPosition(count);
+
+    // Allocate and fill a buffer with zeros.
+    bytes.resize(nullEntryPosition - rpathEntryPosition, 0);
+
+    // Read the part of the DYNAMIC section header that will move.
+    // The remainder of the buffer will be left with zeros which
+    // represent a DT_NULL entry.
+    if(!elf.ReadBytes(nextEntryPosition,
+                      nullEntryPosition - nextEntryPosition,
+                      &bytes[0]))
+      {
+      if(emsg)
+        {
+        *emsg = "Failed to read DYNAMIC section header.";
+        }
+      return false;
+      }
+    }
+  else
+    {
+    // There is no RPATH or RUNPATH anyway.
+    return true;
+    }
+  }
+
+  // Open the file for update.
+  std::ofstream f(file.c_str(),
+                  std::ios::in | std::ios::out | std::ios::binary);
+  if(!f)
+    {
+    if(emsg)
+      {
+      *emsg = "Error opening file for update.";
+      }
+    return false;
+    }
+
+  // Write the new DYNAMIC table header.
+  if(!f.seekp(rpathEntryPosition))
+    {
+    if(emsg)
+      {
+      *emsg = "Error seeking to DYNAMIC table header for RPATH.";
+      }
+    return false;
+    }
+  if(!f.write(&bytes[0], bytes.size()))
+    {
+    if(emsg)
+      {
+      *emsg = "Error replacing DYNAMIC table header.";
+      }
+    return false;
+    }
+
+  // Fill the RPATH string with zero bytes.
+  if(!f.seekp(rpathPosition))
+    {
+    if(emsg)
+      {
+      *emsg = "Error seeking to RPATH position.";
+      }
+    return false;
+    }
+  for(unsigned long i=0; i < rpathSize; ++i)
+    {
+    f << '\0';
+    }
+
+  // Make sure everything was okay.
+  if(f)
+    {
+    return true;
+    }
+  else
+    {
+    if(emsg)
+      {
+      *emsg = "Error writing the empty rpath to the file.";
+      }
+    return false;
+    }
+#else
+  (void)file;
+  (void)emsg;
+  return false;
+#endif
+}
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::CheckRPath(std::string const& file,
+                               std::string const& newRPath)
+{
+#if defined(CMAKE_USE_ELF_PARSER)
+  // Parse the ELF binary.
+  cmELF elf(file.c_str());
+
+  // Get the RPATH or RUNPATH entry from it.
+  cmELF::StringEntry const* se = elf.GetRPath();
+  if(!se)
+    {
+    se = elf.GetRunPath();
+    }
+
+  // Make sure the current rpath contains the new rpath.
+  if(newRPath.empty())
+    {
+    if(!se)
+      {
+      return true;
+      }
+    }
+  else
+    {
+    if(se &&
+       cmSystemToolsFindRPath(se->Value, newRPath) != std::string::npos)
+      {
+      return true;
+      }
+    }
+  return false;
+#else
+  (void)file;
+  (void)newRPath;
   return false;
 #endif
 }

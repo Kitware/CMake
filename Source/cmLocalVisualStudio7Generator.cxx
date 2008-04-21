@@ -407,6 +407,7 @@ public:
     Linker
   };
   cmLocalVisualStudio7GeneratorOptions(cmLocalVisualStudio7Generator* lg,
+                                       int version,
                                        Tool tool,
                                        cmVS7FlagTable const* extraTable = 0);
 
@@ -439,6 +440,7 @@ public:
 
 private:
   cmLocalVisualStudio7Generator* LocalGenerator;
+  int Version;
 
   // create a map of xml tags to the values they should have in the output
   // for example, "BufferSecurityCheck" = "TRUE"
@@ -551,7 +553,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::string defineFlags = this->Makefile->GetDefineFlags();
 
   // Construct a set of build options for this target.
-  Options targetOptions(this, Options::Compiler, this->ExtraFlagTable);
+  Options targetOptions(this, this->Version, Options::Compiler, this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
@@ -745,7 +747,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
     }
-  Options linkOptions(this, Options::Linker);
+  Options linkOptions(this, this->Version, Options::Linker);
   linkOptions.Parse(extraLinkOptions.c_str());
   switch(target.GetType())
     {
@@ -1289,7 +1291,7 @@ void cmLocalVisualStudio7Generator
              !fc.CompileDefs.empty() ||
              !fc.CompileDefsConfig.empty())
             {
-            Options fileOptions(this, Options::Compiler,
+            Options fileOptions(this, this->Version, Options::Compiler,
                                 this->ExtraFlagTable);
             fileOptions.Parse(fc.CompileFlags.c_str());
             fileOptions.AddDefines(fc.CompileDefs.c_str());
@@ -1762,9 +1764,10 @@ std::string cmLocalVisualStudio7Generator
 //----------------------------------------------------------------------------
 cmLocalVisualStudio7GeneratorOptions
 ::cmLocalVisualStudio7GeneratorOptions(cmLocalVisualStudio7Generator* lg,
+                                       int version,
                                        Tool tool,
                                        cmVS7FlagTable const* extraTable):
-  LocalGenerator(lg), CurrentTool(tool),
+  LocalGenerator(lg), Version(version), CurrentTool(tool),
   DoingDefine(false), FlagTable(0), ExtraFlagTable(extraTable)
 {
   // Choose the flag table for the requested tool.
@@ -1786,7 +1789,17 @@ void cmLocalVisualStudio7GeneratorOptions::FixExceptionHandlingDefault()
   // initialization to off, but the user has the option of removing
   // the flag to disable exception handling.  When the user does
   // remove the flag we need to override the IDE default of on.
-  this->FlagMap["ExceptionHandling"] = "FALSE";
+  switch (this->Version)
+    {
+    case 7:
+    case 71:
+      this->FlagMap["ExceptionHandling"] = "FALSE";
+    break;
+
+    default:
+      this->FlagMap["ExceptionHandling"] = "0";
+    break;
+    }
 }
 
 //----------------------------------------------------------------------------

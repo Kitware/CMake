@@ -98,8 +98,17 @@ public:
 
   // Forward to the per-class implementation.
   virtual unsigned int GetNumberOfSections() const = 0;
+  virtual unsigned int GetDynamicEntryCount() = 0;
+  virtual unsigned long GetDynamicEntryPosition(int j) = 0;
   virtual StringEntry const* GetDynamicSectionString(int tag) = 0;
   virtual void PrintInfo(std::ostream& os) const = 0;
+
+  bool ReadBytes(unsigned long pos, unsigned long size, char* buf)
+    {
+    this->Stream.seekg(pos);
+    this->Stream.read(buf, size);
+    return this->Stream?true:false;
+    }
 
   // Lookup the SONAME in the DYNAMIC section.
   StringEntry const* GetSOName()
@@ -200,6 +209,10 @@ public:
     {
     return static_cast<unsigned int>(this->ELFHeader.e_shnum);
     }
+
+  // Get the file position and size of a dynamic section entry.
+  virtual unsigned int GetDynamicEntryCount();
+  virtual unsigned long GetDynamicEntryPosition(int j);
 
   // Lookup a string from the dynamic section with the given tag.
   virtual StringEntry const* GetDynamicSectionString(int tag);
@@ -552,6 +565,40 @@ bool cmELFInternalImpl<Types>::LoadDynamicSection()
 
 //----------------------------------------------------------------------------
 template <class Types>
+unsigned int cmELFInternalImpl<Types>::GetDynamicEntryCount()
+{
+  if(!this->LoadDynamicSection())
+    {
+    return 0;
+    }
+  for(unsigned int i = 0; i < this->DynamicSectionEntries.size(); ++i)
+    {
+    if(this->DynamicSectionEntries[i].d_tag == DT_NULL)
+      {
+      return i;
+      }
+    }
+  return this->DynamicSectionEntries.size();
+}
+
+//----------------------------------------------------------------------------
+template <class Types>
+unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
+{
+  if(!this->LoadDynamicSection())
+    {
+    return 0;
+    }
+  if(j < 0 || j >= static_cast<int>(this->DynamicSectionEntries.size()))
+    {
+    return 0;
+    }
+  ELF_Shdr const& sec = this->SectionHeaders[this->DynamicSectionIndex];
+  return sec.sh_offset + sec.sh_entsize*j;
+}
+
+//----------------------------------------------------------------------------
+template <class Types>
 cmELF::StringEntry const*
 cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
 {
@@ -571,6 +618,7 @@ cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
   StringEntry& se = this->DynamicSectionStrings[tag];
   se.Position = 0;
   se.Size = 0;
+  se.IndexInSection = -1;
 
   // Try reading the dynamic section.
   if(!this->LoadDynamicSection())
@@ -641,6 +689,7 @@ cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
       // The value has been read successfully.  Report it.
       se.Position = static_cast<unsigned long>(strtab.sh_offset + first);
       se.Size = last - first;
+      se.IndexInSection = di - this->DynamicSectionEntries.begin();
       return &se;
       }
     }
@@ -758,6 +807,45 @@ unsigned int cmELF::GetNumberOfSections() const
   else
     {
     return 0;
+    }
+}
+
+//----------------------------------------------------------------------------
+unsigned int cmELF::GetDynamicEntryCount() const
+{
+  if(this->Valid())
+    {
+    return this->Internal->GetDynamicEntryCount();
+    }
+  else
+    {
+    return 0;
+    }
+}
+
+//----------------------------------------------------------------------------
+unsigned long cmELF::GetDynamicEntryPosition(int index) const
+{
+  if(this->Valid())
+    {
+    return this->Internal->GetDynamicEntryPosition(index);
+    }
+  else
+    {
+    return 0;
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmELF::ReadBytes(unsigned long pos, unsigned long size, char* buf) const
+{
+  if(this->Valid())
+    {
+    return this->Internal->ReadBytes(pos, size, buf);
+    }
+  else
+    {
+    return false;
     }
 }
 

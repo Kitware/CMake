@@ -109,19 +109,19 @@ public:
       "          ] [...])\n"
       "The TARGETS form specifies rules for installing targets from a "
       "project.  There are five kinds of target files that may be "
-      "installed: archive, library, runtime, framework, and bundle.  "
+      "installed: ARCHIVE, LIBRARY, RUNTIME, FRAMEWORK, and BUNDLE.  "
 
-      "Executables are treated as runtime targets, except that those "
-      "marked with the MACOSX_BUNDLE property are treated as bundle "
+      "Executables are treated as RUNTIME targets, except that those "
+      "marked with the MACOSX_BUNDLE property are treated as BUNDLE "
       "targets on OS X. "
-      "Static libraries are always treated as archive targets. "
-      "Module libraries are always treated as library targets. "
-      "For non-DLL platforms shared libraries are treated as library "
+      "Static libraries are always treated as ARCHIVE targets. "
+      "Module libraries are always treated as LIBRARY targets. "
+      "For non-DLL platforms shared libraries are treated as LIBRARY "
       "targets, except that those marked with the FRAMEWORK property "
-      "are treated as framework targets on OS X.  "
+      "are treated as FRAMEWORK targets on OS X.  "
       "For DLL platforms the DLL part of a shared library is treated as "
-      "a runtime target and the corresponding import library is treated as "
-      "an archive target. "
+      "a RUNTIME target and the corresponding import library is treated as "
+      "an ARCHIVE target. "
       "All Windows-based systems including Cygwin are DLL platforms. "
       "The ARCHIVE, LIBRARY, RUNTIME, and FRAMEWORK "
       "arguments change the type of target to which the subsequent "
@@ -346,6 +346,7 @@ private:
   bool MakeFilesFullPath(const char* modeName, 
                          const std::vector<std::string>& relFiles,
                          std::vector<std::string>& absFiles);
+  bool CheckCMP0006(bool& failure);
 };
 
 

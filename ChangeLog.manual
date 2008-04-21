@@ -1,3 +1,18 @@
+Changes in CMake 2.6.0 RC 9
+
+- Better message in compiler ABI detect
+- Fixes for cpack x11 packages on leopard
+- Changes to cpack options names 
+- Fixes for FindMPI on 64 bit MS MPI
+- Fix for -isystem for wxWidgets
+- Some fixes to chrpath during installation
+- Fix compatibility with CMake 2.4 for installation of MACOSX_BUNDLE (CMP0006)
+- Do not use debug postfix when building frameworks on the Mac
+- Fix exception handling off/on issue with visual studio IDE generators
+- Fix <OBJECT_DIR> to be native path style 
+- Fix leak in cpack
+- Some Qt GUI style changes
+
 Changes in CMake 2.6.0 RC 8
 
 - Fix sun make very poor performance

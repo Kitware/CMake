@@ -724,7 +724,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string objdir = cmake::GetCMakeFilesDirectoryPostSlash();
   objdir += this->Target->GetName();
   objdir += ".dir";
-  vars.ObjectDir = objdir.c_str(); 
+  objdir = this->Convert(objdir.c_str(),
+                         cmLocalGenerator::START_OUTPUT,
+                         cmLocalGenerator::SHELL);
+  vars.ObjectDir = objdir.c_str();
   vars.Target = targetOutPathReal.c_str();
   std::string linkString = linklibs.str();
   vars.LinkLibraries = linkString.c_str();
