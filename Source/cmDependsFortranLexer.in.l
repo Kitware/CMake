@@ -119,22 +119,22 @@ Modify cmDependsFortranLexer.h:
 !.*\n                   { return EOSTMT; } /* Treat comments like */
 <fixed_fmt>^[cC*dD].*\n { return EOSTMT; } /* empty lines */
 
-#[ \t]*include  { return CPP_INCLUDE; }
+^[ \t]*#[ \t]*include  { return CPP_INCLUDE; }
 \$[ \t]*include { return F90PPR_INCLUDE; }
 \?\?[ \t]*include { return COCO_INCLUDE; }
 
-#[ \t]*define   { return CPP_DEFINE; }
+^[ \t]*#[ \t]*define   { return CPP_DEFINE; }
 \$[ \t]*DEFINE   { return F90PPR_DEFINE; }
 
-#[ \t]*undef    { return CPP_UNDEF; }
+^[ \t]*#[ \t]*undef    { return CPP_UNDEF; }
 \$[ \t]*UNDEF   { return F90PPR_UNDEF; }
 
-#[ \t]*ifdef    { return CPP_IFDEF; }
-#[ \t]*ifndef   { return CPP_IFNDEF; }
-#[ \t]*if       { return CPP_IF; }
-#[ \t]*elif     { return CPP_ELIF; }
-#[ \t]*else     { return CPP_ELSE; }
-#[ \t]*endif    { return CPP_ENDIF; }
+^[ \t]*#[ \t]*ifdef    { return CPP_IFDEF; }
+^[ \t]*#[ \t]*ifndef   { return CPP_IFNDEF; }
+^[ \t]*#[ \t]*if       { return CPP_IF; }
+^[ \t]*#[ \t]*elif     { return CPP_ELIF; }
+^[ \t]*#[ \t]*else     { return CPP_ELSE; }
+^[ \t]*#[ \t]*endif    { return CPP_ENDIF; }
 
 $[ \t]*ifdef    { return F90PPR_IFDEF; }
 $[ \t]*ifndef   { return F90PPR_IFNDEF; }
