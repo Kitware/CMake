@@ -161,6 +161,13 @@ elseif (MPI_COMPILE_CMDLINE)
     endif (MPI_COMPILER_MAY_HAVE_INCLIBDIRS)
   endif (NOT MPI_INCLUDE_PATH_WORK)
 
+  if (NOT MPI_INCLUDE_PATH_WORK)
+    # If all else fails, just search for mpi.h in the normal include
+    # paths.
+    find_path(MPI_INCLUDE_PATH mpi.h)
+    set(MPI_INCLUDE_PATH_WORK ${MPI_INCLUDE_PATH})
+  endif (NOT MPI_INCLUDE_PATH_WORK)
+
   # Extract linker paths from the link command line
   string(REGEX MATCHALL "-L([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
   set(MPI_LINK_PATH)
