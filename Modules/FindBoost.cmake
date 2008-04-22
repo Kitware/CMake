@@ -147,6 +147,7 @@ MACRO (_Boost_ADJUST_LIB_VARS basename)
     IF (Boost_${basename}_LIBRARY)
       SET(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE FILEPATH "The Boost ${basename} library")
       GET_FILENAME_COMPONENT(Boost_LIBRARY_DIRS "${Boost_${basename}_LIBRARY}" PATH)
+      SET(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} CACHE FILEPATH "Boost library directory")
       SET(Boost_${basename}_FOUND ON CACHE INTERNAL "Was the boost boost ${basename} library found")
     ENDIF (Boost_${basename}_LIBRARY)
 
@@ -517,7 +518,7 @@ ELSE (_boost_IN_CACHE)
       ENDIF(EXISTS "${_boost_LIB_DIR}/lib")
     
       IF(_boost_LIB_DIR AND EXISTS "${_boost_LIB_DIR}")
-        SET(Boost_LIBRARY_DIRS ${_boost_LIB_DIR})
+        SET(Boost_LIBRARY_DIRS ${_boost_LIB_DIR} CACHE FILEPATH "Boost library directory")
       ENDIF(_boost_LIB_DIR AND EXISTS "${_boost_LIB_DIR}")
 
     ENDIF( NOT Boost_LIBRARY_DIRS AND NOT _boost_CHECKED_COMPONENT )
