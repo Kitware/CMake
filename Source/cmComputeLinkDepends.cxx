@@ -143,8 +143,11 @@ The initial exploration of dependencies using a BFS associates an
 integer index with each link item.  When the graph is built outgoing
 edges are sorted by this index.
 
-This preserves the original link
-order as much as possible subject to the dependencies.
+This preserves the original link order as much as possible subject to
+the dependencies.  We then further preserve the original link line by
+appending items to make sure all those that might be static libraries
+appear in the order and multiplicity that they do in the original
+line.
 
 After the initial exploration of the link interface tree, any
 transitive (dependent) shared libraries that were encountered and not
@@ -237,8 +240,16 @@ cmComputeLinkDepends::Compute()
     this->DisplayConstraintGraph();
     }
 
-  // Compute the final set of link entries.
+  // Compute the final ordering.
   this->OrderLinkEntires();
+  this->PreserveOriginalEntries();
+
+  // Compute the final set of link entries.
+  for(std::vector<int>::const_iterator li = this->FinalLinkOrder.begin();
+      li != this->FinalLinkOrder.end(); ++li)
+    {
+    this->FinalLinkEntries.push_back(this->EntryList[*li]);
+    }
 
   // Display the final set.
   if(this->DebugMode)
@@ -546,6 +557,11 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
       {
       this->EntryConstraintGraph[dependee_index].push_back(depender_index);
       }
+    else
+      {
+      // This is a direct dependency of the target being linked.
+      this->OriginalEntries.push_back(dependee_index);
+      }
 
     // Update the inferred dependencies for earlier items.
     for(std::map<int, DependSet>::iterator dsi = dependSets.begin();
@@ -789,7 +805,7 @@ void cmComputeLinkDepends::EmitComponent(NodeList const& nl)
   // Handle trivial components.
   if(nl.size() == 1)
     {
-    this->FinalLinkEntries.push_back(this->EntryList[nl[0]]);
+    this->FinalLinkOrder.push_back(nl[0]);
     return;
     }
 
@@ -807,11 +823,11 @@ void cmComputeLinkDepends::EmitComponent(NodeList const& nl)
   // repeats needed.
   for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
     {
-    this->FinalLinkEntries.push_back(this->EntryList[*ni]);
+    this->FinalLinkOrder.push_back(*ni);
     }
   for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
     {
-    this->FinalLinkEntries.push_back(this->EntryList[*ni]);
+    this->FinalLinkOrder.push_back(*ni);
     }
 }
 
@@ -851,6 +867,52 @@ void cmComputeLinkDepends::CheckWrongConfigItem(std::string const& item)
     if(!tgt->IsImported())
       {
       this->OldWrongConfigItems.insert(tgt);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkDepends::PreserveOriginalEntries()
+{
+  // Skip the part of the input sequence that already appears in the
+  // output.
+  std::vector<int>::const_iterator in = this->OriginalEntries.begin();
+  std::vector<int>::const_iterator out = this->FinalLinkOrder.begin();
+  while(in != this->OriginalEntries.end() &&
+        out != this->FinalLinkOrder.end())
+    {
+    cmTarget* tgt = this->EntryList[*in].Target;
+    if(tgt && tgt->GetType() != cmTarget::STATIC_LIBRARY)
+      {
+      // Skip input items known to not be static libraries.
+      ++in;
+      }
+    else if(*in == *out)
+      {
+      // The input and output items match.  Move on to the next items.
+      ++in;
+      ++out;
+      }
+    else
+      {
+      // The output item does not match the next input item.  Skip it.
+      ++out;
+      }
+    }
+
+  // Append the part of the input sequence that does not already
+  // appear in the output.
+  while(in != this->OriginalEntries.end())
+    {
+    cmTarget* tgt = this->EntryList[*in].Target;
+    if(tgt && tgt->GetType() != cmTarget::STATIC_LIBRARY)
+      {
+      // Skip input items known to not be static libraries.
+      ++in;
+      }
+    else
+      {
+      this->FinalLinkOrder.push_back(*in++);
       }
     }
 }
