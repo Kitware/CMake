@@ -100,6 +100,9 @@ For the unknown items, we infer dependencies by looking at the
   B: intersect( {Y,C}   , {}    ) = {}    ; infer no edges
   C: intersect( {}      , {B}   ) = {}    ; infer no edges
 
+Note that targets are never inferred as dependees because outside
+libraries should not depend on them.
+
 ------------------------------------------------------------------------------
 
 Once the complete graph is formed from all known and inferred
@@ -548,7 +551,12 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
     for(std::map<int, DependSet>::iterator dsi = dependSets.begin();
         dsi != dependSets.end(); ++dsi)
       {
-      if(dependee_index != dsi->first)
+      // Add this item to the inferred dependencies of other items.
+      // Target items are never inferred dependees because unknown
+      // items are outside libraries that should not be depending on
+      // targets.
+      if(!this->EntryList[dependee_index].Target &&
+         dependee_index != dsi->first)
         {
         dsi->second.insert(dependee_index);
         }
