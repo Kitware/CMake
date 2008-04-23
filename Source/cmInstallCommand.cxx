@@ -536,7 +536,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             bundleGenerator = CreateInstallTargetGenerator(target, bundleArgs, 
                                                            false);
             }
-          if(!runtimeArgs.GetDestination().empty())
+          else if(!runtimeArgs.GetDestination().empty())
             {
             bool failure = false;
             if(this->CheckCMP0006(failure))
