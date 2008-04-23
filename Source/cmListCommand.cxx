@@ -103,6 +103,11 @@ bool cmListCommand::GetList(std::vector<std::string>& list, const char* var)
     {
     return false;
     }
+  // if the size of the list 
+  if(listString.size() == 0)
+    {
+    return true;
+    }
   // expand the variable into a list
   cmSystemTools::ExpandListArgument(listString, list, true);
   // check the list for empty values
