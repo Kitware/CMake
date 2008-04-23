@@ -103,8 +103,62 @@ bool cmListCommand::GetList(std::vector<std::string>& list, const char* var)
     {
     return false;
     }
-  // expand the variable
-  cmSystemTools::ExpandListArgument(listString, list);
+  // expand the variable into a list
+  cmSystemTools::ExpandListArgument(listString, list, true);
+  // check the list for empty values
+  bool hasEmpty = false;
+  for(std::vector<std::string>::iterator i = list.begin(); 
+      i != list.end(); ++i)
+    {
+    if(i->size() == 0)
+      {
+      hasEmpty = true;
+      break;
+      }
+    }
+  // if no empty elements then just return 
+  if(!hasEmpty)
+    {
+    return true;
+    }
+  // if we have empty elements we need to check policy CMP0007
+  switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0007))
+    {
+    case cmPolicies::WARN: 
+      {
+      // Default is to warn and use old behavior
+      // OLD behavior is to allow compatibility, so recall
+      // ExpandListArgument without the true which will remove
+      // empty values
+      list.clear();
+      cmSystemTools::ExpandListArgument(listString, list);
+      std::string warn = this->Makefile->GetPolicies()->
+        GetPolicyWarning(cmPolicies::CMP0007);
+      warn += " List has value = [";
+      warn += listString;
+      warn += "].";
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+                                   warn);
+      return true;
+      }
+    case cmPolicies::OLD:
+      // OLD behavior is to allow compatibility, so recall
+      // ExpandListArgument without the true which will remove
+      // empty values
+      list.clear();
+      cmSystemTools::ExpandListArgument(listString, list);
+      return true;
+    case cmPolicies::NEW:
+      return true;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      this->Makefile->IssueMessage(
+        cmake::FATAL_ERROR,
+        this->Makefile->GetPolicies()
+        ->GetRequiredPolicyError(cmPolicies::CMP0007)
+        );
+      return false;
+    }
   return true;
 }
 

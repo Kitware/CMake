@@ -269,6 +269,18 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to produce an error if a bundle "
     "target is installed without a BUNDLE DESTINATION.",
     2,6,0, cmPolicies::WARN);
+  
+  this->DefinePolicy(
+    CMP0007, "CMP0007",
+    "list command no longer ignores empty elements.",
+    "This policy determines whether the list command will "
+    "ignore empty elements in the list. " 
+    "CMake 2.4 and below list commands ignored all empty elements"
+    " in the list.  For example, a;b;;c would have length 3 and not 4. "
+    "The OLD behavior for this policy is to ignore empty list elements. "
+    "The NEW behavior for this policy is to correctly count empty "
+    "elements in a list. ",
+    2,6,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

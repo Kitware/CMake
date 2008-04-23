@@ -106,7 +106,7 @@ ENDIF(NOT CMAKE_INCLUDE_FLAG_SEP_Fortran)
 
 SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.")
 
-SET(CMAKE_Fortran_FLAGS_INIT "$ENV{FFFLAGS} ${CMAKE_Fortran_FLAGS_INIT}")
+SET(CMAKE_Fortran_FLAGS_INIT "$ENV{FFLAGS} ${CMAKE_Fortran_FLAGS_INIT}")
 # avoid just having a space as the initial value for the cache 
 IF(CMAKE_Fortran_FLAGS_INIT STREQUAL " ")
   SET(CMAKE_Fortran_FLAGS_INIT)

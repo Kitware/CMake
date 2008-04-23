@@ -491,8 +491,33 @@ cmMakefileTargetGenerator
   // Add target-specific flags.
   if(this->Target->GetProperty("COMPILE_FLAGS"))
     {
-    this->LocalGenerator->AppendFlags
-      (flags, this->Target->GetProperty("COMPILE_FLAGS"));
+    std::string langIncludeExpr = "CMAKE_";
+    langIncludeExpr += lang;
+    langIncludeExpr += "_FLAG_REGEX";
+    const char* regex = this->Makefile->
+      GetDefinition(langIncludeExpr.c_str());
+    if(regex)
+      {
+      cmsys::RegularExpression r(regex);
+      std::vector<std::string> args;
+      cmSystemTools::ParseWindowsCommandLine(
+        this->Target->GetProperty("COMPILE_FLAGS"),
+        args);
+      for(std::vector<std::string>::iterator i = args.begin();
+          i != args.end(); ++i)
+        {
+        if(r.find(i->c_str()))
+          {
+          this->LocalGenerator->AppendFlags
+            (flags, i->c_str());
+          }
+        }
+      }
+    else
+      {
+      this->LocalGenerator->AppendFlags
+        (flags, this->Target->GetProperty("COMPILE_FLAGS"));
+      }
     }
 
   // Add flags from source file properties.

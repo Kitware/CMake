@@ -12,7 +12,10 @@ INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
 SET (CMAKE_RC_FLAGS "$ENV{RCFLAGS} ${CMAKE_RC_FLAGS_INIT}" CACHE STRING
      "Flags for Fortran compiler.")
 
-
+# These are the only types of flags that should be passed to the rc
+# command, if COMPILE_FLAGS is used on a target this will be used
+# to filter out any other flags
+SET(CMAKE_RC_FLAG_REGEX "^[-/](D|I)")
 
 # now define the following rule variables
 # CMAKE_RC_COMPILE_OBJECT

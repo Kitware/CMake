@@ -1,4 +1,14 @@
+Changes in CMake 2.6.0 RC 83
+
+- Use c compiler path to find asm compiler
+- Allow RC compiler to not get all COMPILE_FLAGS
+- Complete overhaul for FindBoost.cmake
+- Minor fixes for FindMPI.cmake
+- Fix for list command and empty list elements CMP0007
+- Fix for VS6 and sub-groups
+
 Changes in CMake 2.6.0 RC 82
+
 - Fix bug 6440, and make sure _INIT flags do not overright cache values
 - Do not report CMP0003 for anything other than -l
 - Fix crash in fortran depend scanning, bug 6855

@@ -88,6 +88,10 @@ elseif (MPI_COMPILER)
       ARGS -showme:link
       OUTPUT_VARIABLE MPI_LINK_CMDLINE
       RETURN_VALUE MPI_COMPILER_RETURN)
+
+    # Note that we probably have -showme:incdirs and -showme:libdirs
+    # as well.
+    set(MPI_COMPILER_MAY_HAVE_INCLIBDIRS TRUE)
   endif (MPI_COMPILER_RETURN EQUAL 0)
 
   if (MPI_COMPILER_RETURN EQUAL 0)
@@ -145,6 +149,25 @@ elseif (MPI_COMPILE_CMDLINE)
     list(APPEND MPI_INCLUDE_PATH_WORK ${IPATH})
   endforeach(IPATH)
   
+  if (NOT MPI_INCLUDE_PATH_WORK)
+    if (MPI_COMPILER_MAY_HAVE_INCLIBDIRS)
+      # The compile command line didn't have any include paths on it,
+      # but we may have -showme:incdirs. Use it.
+      exec_program(${MPI_COMPILER} 
+        ARGS -showme:incdirs
+        OUTPUT_VARIABLE MPI_INCLUDE_PATH_WORK
+        RETURN_VALUE MPI_COMPILER_RETURN)
+      separate_arguments(MPI_INCLUDE_PATH_WORK)
+    endif (MPI_COMPILER_MAY_HAVE_INCLIBDIRS)
+  endif (NOT MPI_INCLUDE_PATH_WORK)
+
+  if (NOT MPI_INCLUDE_PATH_WORK)
+    # If all else fails, just search for mpi.h in the normal include
+    # paths.
+    find_path(MPI_INCLUDE_PATH mpi.h)
+    set(MPI_INCLUDE_PATH_WORK ${MPI_INCLUDE_PATH})
+  endif (NOT MPI_INCLUDE_PATH_WORK)
+
   # Extract linker paths from the link command line
   string(REGEX MATCHALL "-L([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
   set(MPI_LINK_PATH)
@@ -153,6 +176,18 @@ elseif (MPI_COMPILE_CMDLINE)
     string(REGEX REPLACE "//" "/" LPATH ${LPATH})
     list(APPEND MPI_LINK_PATH ${LPATH})
   endforeach(LPATH)
+
+  if (NOT MPI_LINK_PATH)
+    if (MPI_COMPILER_MAY_HAVE_INCLIBDIRS)
+      # The compile command line didn't have any linking paths on it,
+      # but we may have -showme:libdirs. Use it.
+      exec_program(${MPI_COMPILER} 
+        ARGS -showme:libdirs
+        OUTPUT_VARIABLE MPI_LINK_PATH
+        RETURN_VALUE MPI_COMPILER_RETURN)
+      separate_arguments(MPI_LINK_PATH)
+    endif (MPI_COMPILER_MAY_HAVE_INCLIBDIRS)
+  endif (NOT MPI_LINK_PATH)
 
   # Extract linker flags from the link command line
   string(REGEX MATCHALL "-Wl,([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE}")
