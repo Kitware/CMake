@@ -69,12 +69,38 @@ void QMacInstallDialog::DoInstall()
     if(cmSystemTools::FileExists(newName.c_str()))
       {
       std::cout << "rm [" << newName << "]\n";
-      cmSystemTools::RemoveFile(newName.c_str());
+      if(!cmSystemTools::RemoveFile(newName.c_str()))
+        {
+        QString message = tr("Failed to remove file "
+                             "installation may be incomplete: ");
+        message += newName.c_str();
+        QString title = tr("Error Removing file");
+        QMessageBox::StandardButton btn =
+          QMessageBox::critical(this, title, message, 
+                                QMessageBox::Ok|QMessageBox::Abort);
+        if(btn == QMessageBox::Abort)
+          {
+          return;
+          }
+        }
       }
     std::cout << "ln -s [" << file << "] [";
     std::cout << newName << "]\n";
-    cmSystemTools::CreateSymlink(file.c_str(),
-                                 newName.c_str());
+    if(!cmSystemTools::CreateSymlink(file.c_str(),
+                                     newName.c_str()))
+      {
+      QString message = tr("Failed create symlink "
+                           "installation may be incomplete: ");
+      message += newName.c_str();
+      QString title = tr("Error Creating Symlink");
+      QMessageBox::StandardButton btn =
+        QMessageBox::critical(this, title, message, 
+                              QMessageBox::Ok|QMessageBox::Abort);
+      if(btn == QMessageBox::Abort)
+        {
+        return;
+        }
+      }
     }
   this->done(0);
 }

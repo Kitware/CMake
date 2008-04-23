@@ -1,3 +1,9 @@
+Changes in CMake 2.6.0 RC 85
+
+- Fix bug in install command with BUNDLE DESTINATION
+- Make mac install symlinks check for errors
+- Fix for CMP0007, to not warn about empty lists
+
 Changes in CMake 2.6.0 RC 84
 
 - Preserve static libraries when linked multiple times 
