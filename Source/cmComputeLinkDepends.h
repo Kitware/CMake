@@ -128,10 +128,15 @@ private:
   // Ordering algorithm.
   void OrderLinkEntires();
   std::vector<char> ComponentVisited;
+  std::vector<int> FinalLinkOrder;
   void DisplayComponents(cmComputeComponentGraph const& ccg);
   void VisitComponent(cmComputeComponentGraph const& ccg, unsigned int i);
   void EmitComponent(NodeList const& nl);
   void DisplayFinalEntries();
+
+  // Preservation of original link line.
+  std::vector<int> OriginalEntries;
+  void PreserveOriginalEntries();
 
   // Compatibility help.
   bool OldLinkDirMode;

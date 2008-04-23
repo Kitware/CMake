@@ -1,3 +1,7 @@
+Changes in CMake 2.6.0 RC 84
+
+- Preserve static libraries when linked multiple times 
+
 Changes in CMake 2.6.0 RC 83
 
 - Use c compiler path to find asm compiler
