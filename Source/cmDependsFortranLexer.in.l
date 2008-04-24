@@ -147,6 +147,10 @@ $[ \t]*endif    { return F90PPR_ENDIF; }
 &([ \t\n]*|!.*)*
 &([ \t\n]*|!.*)*&
 
+, { return COMMA; }
+
+:: { return DCOLON; }
+
 <fixed_fmt>\n[ ]{5}[^ ]  { return GARBAGE; }
 
 =|=>                     { return ASSIGNMENT_OP; }
