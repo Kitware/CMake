@@ -1963,16 +1963,16 @@ bool SystemInformationImplementation::RetrieveClassicalCPUIdentity()
         case 6:
           switch (this->ChipID.Model) 
             {
-            case 1: sprintf (this->ChipID.ProcessorName,"Athlon™ (0.25 micron)"); break;
-            case 2: sprintf (this->ChipID.ProcessorName,"Athlon™ (0.18 micron)"); break;
-            case 3: sprintf (this->ChipID.ProcessorName,"Duron™ (SF core)"); break;
-            case 4: sprintf (this->ChipID.ProcessorName,"Athlon™ (Thunderbird core)"); break;
-            case 6: sprintf (this->ChipID.ProcessorName,"Athlon™ (Palomino core)"); break;
-            case 7: sprintf (this->ChipID.ProcessorName,"Duron™ (Morgan core)"); break;
+            case 1: sprintf (this->ChipID.ProcessorName,"Athlon- (0.25 micron)"); break;
+            case 2: sprintf (this->ChipID.ProcessorName,"Athlon- (0.18 micron)"); break;
+            case 3: sprintf (this->ChipID.ProcessorName,"Duron- (SF core)"); break;
+            case 4: sprintf (this->ChipID.ProcessorName,"Athlon- (Thunderbird core)"); break;
+            case 6: sprintf (this->ChipID.ProcessorName,"Athlon- (Palomino core)"); break;
+            case 7: sprintf (this->ChipID.ProcessorName,"Duron- (Morgan core)"); break;
             case 8: 
               if (this->Features.ExtendedFeatures.SupportsMP)
-                sprintf (this->ChipID.ProcessorName,"Athlon™ MP (Thoroughbred core)"); 
-              else sprintf (this->ChipID.ProcessorName,"Athlon™ XP (Thoroughbred core)");
+                sprintf (this->ChipID.ProcessorName,"Athlon - MP (Thoroughbred core)"); 
+              else sprintf (this->ChipID.ProcessorName,"Athlon - XP (Thoroughbred core)");
               break;
             default: sprintf (this->ChipID.ProcessorName,"Unknown K7 family"); return false;
             }
