@@ -150,6 +150,7 @@ static bool cmDependsFortranParserIsKeyword(const char* word,
 %token CPP_IFDEF CPP_IFNDEF CPP_IF CPP_ELSE CPP_ELIF CPP_ENDIF
 %token F90PPR_IFDEF F90PPR_IFNDEF F90PPR_IF
 %token F90PPR_ELSE F90PPR_ELIF F90PPR_ENDIF
+%token COMMA DCOLON
 %token <string> CPP_TOENDL
 %token <number> UNTERMINATED_STRING
 %token <string> STRING WORD
@@ -207,6 +208,30 @@ keyword_stmt:
       }
     free($1);
     free($2);
+    }
+| WORD DCOLON WORD other EOSTMT
+    {
+    if (cmDependsFortranParserIsKeyword($1, "use"))
+      {
+      cmDependsFortranParser* parser =
+        cmDependsFortran_yyget_extra(yyscanner);
+      cmDependsFortranParser_RuleUse(parser, $3);
+      }
+    free($1);
+    free($3);
+    }
+| WORD COMMA WORD DCOLON WORD other EOSTMT
+    {
+    if (cmDependsFortranParserIsKeyword($1, "use") &&
+        cmDependsFortranParserIsKeyword($3, "non_intrinsic") )
+      {
+      cmDependsFortranParser* parser =
+        cmDependsFortran_yyget_extra(yyscanner);
+      cmDependsFortranParser_RuleUse(parser, $5);
+      }
+    free($1);
+    free($3);
+    free($5);
     }
 | WORD STRING other EOSTMT /* Ignore */
     {
@@ -297,6 +322,8 @@ misc_code:
 | STRING              { free ($1); }
 | GARBAGE
 | ASSIGNMENT_OP
+| DCOLON
+| COMMA
 | UNTERMINATED_STRING
 ;
 

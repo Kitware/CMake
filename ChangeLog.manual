@@ -1,5 +1,6 @@
 Changes in CMake 2.6.0 RC 9
 
+- Fix for fortran mod:: support 
 - Fix bug in install command with BUNDLE DESTINATION
 - Make mac install symlinks check for errors
 - Fix for CMP0007, to not warn about empty lists

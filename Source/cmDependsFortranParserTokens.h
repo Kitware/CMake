@@ -61,10 +61,12 @@
      F90PPR_ELSE = 277,
      F90PPR_ELIF = 278,
      F90PPR_ENDIF = 279,
-     CPP_TOENDL = 280,
-     UNTERMINATED_STRING = 281,
-     STRING = 282,
-     WORD = 283
+     COMMA = 280,
+     DCOLON = 281,
+     CPP_TOENDL = 282,
+     UNTERMINATED_STRING = 283,
+     STRING = 284,
+     WORD = 285
    };
 #endif
 /* Tokens.  */
@@ -90,22 +92,24 @@
 #define F90PPR_ELSE 277
 #define F90PPR_ELIF 278
 #define F90PPR_ENDIF 279
-#define CPP_TOENDL 280
-#define UNTERMINATED_STRING 281
-#define STRING 282
-#define WORD 283
+#define COMMA 280
+#define DCOLON 281
+#define CPP_TOENDL 282
+#define UNTERMINATED_STRING 283
+#define STRING 284
+#define WORD 285
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 81 "cmDependsFortranParser.y"
+#line 141 "cmDependsFortranParser.y"
 {
   char* string;
 }
 /* Line 1489 of yacc.c.  */
-#line 109 "cmDependsFortranParserTokens.h"
+#line 113 "cmDependsFortranParserTokens.h"
         YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
