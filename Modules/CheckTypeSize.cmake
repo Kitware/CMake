@@ -1,7 +1,11 @@
 # - Check sizeof a type
 #  CHECK_TYPE_SIZE(TYPE VARIABLE)
 # Check if the type exists and determine size of type.  if the type
-# exists, the size will be stored to the variable.
+# exists, the size will be stored to the variable. This also
+# calls check_include_file for sys/types.h stdint.h
+# and stddef.h, setting HAVE_SYS_TYPES_H, HAVE_STDINT_H, 
+# and HAVE_STDDEF_H.  This is because many types are stored
+# in these include files.  
 #  VARIABLE - variable to store size if the type exists.
 #  HAVE_${VARIABLE} - does the variable exists or not
 # The following variables may be set before calling this macro to
@@ -11,6 +15,14 @@
 #  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
 #  CMAKE_REQUIRED_INCLUDES = list of include directories
 #  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+
+# These variables are referenced in CheckTypeSizeC.c so we have 
+# to check for them.
+
+include(CheckIncludeFile)
+check_include_file(sys/types.h HAVE_SYS_TYPES_H)
+check_include_file(stdint.h HAVE_STDINT_H)
+check_include_file(stddef.h HAVE_STDDEF_H)
 
 MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
   IF("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")
