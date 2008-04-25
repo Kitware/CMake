@@ -1,5 +1,5 @@
 # - Check sizeof a type
-#  CHECK_TYPE_SIZE(TYPE VARIABLE)
+#  CHECK_TYPE_SIZE(TYPE VARIABLE [BUILTIN_TYPES_ONLY])
 # Check if the type exists and determine size of type.  if the type
 # exists, the size will be stored to the variable. This also
 # calls check_include_file for sys/types.h stdint.h
@@ -8,6 +8,9 @@
 # in these include files.  
 #  VARIABLE - variable to store size if the type exists.
 #  HAVE_${VARIABLE} - does the variable exists or not
+#  BUILTIN_TYPES_ONLY - The third argument is optional and if 
+#                       it is set to the string BUILTIN_TYPES_ONLY
+#                       this macro will not check for any header files.
 # The following variables may be set before calling this macro to
 # modify the way the check is run:
 #
@@ -20,11 +23,14 @@
 # to check for them.
 
 include(CheckIncludeFile)
-check_include_file(sys/types.h HAVE_SYS_TYPES_H)
-check_include_file(stdint.h HAVE_STDINT_H)
-check_include_file(stddef.h HAVE_STDDEF_H)
 
 MACRO(CHECK_TYPE_SIZE TYPE VARIABLE)
+  IF(NOT "${ARGV2}" STREQUAL "BUILTIN_TYPES_ONLY")
+    check_include_file(sys/types.h HAVE_SYS_TYPES_H)
+    check_include_file(stdint.h HAVE_STDINT_H)
+    check_include_file(stddef.h HAVE_STDDEF_H)
+  ENDIF(NOT "${ARGV2}" STREQUAL "BUILTIN_TYPES_ONLY")
+    
   IF("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")
     MESSAGE(STATUS "Check size of ${TYPE}")
     SET(CHECK_TYPE_SIZE_TYPE "${TYPE}")
