@@ -167,6 +167,16 @@ bool cmSourceFile::FindFullPath()
       }
     }
 
+  // If the user provided a full path, trust it.  If the file is not
+  // there the native tool will complain at build time.
+  if(!this->Location.DirectoryIsAmbiguous())
+    {
+    this->FullPath = this->Location.GetDirectory();
+    this->FullPath += "/";
+    this->FullPath += this->Location.GetName();
+    return true;
+    }
+
   cmOStringStream e;
   e << "Cannot find source file \"" << this->Location.GetName() << "\"";
   e << "\n\nTried extensions";
