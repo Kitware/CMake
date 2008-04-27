@@ -134,7 +134,8 @@ bool cmListFile::ParseFile(const char* filename,
         break;
       }
     }
-    // if no policy command is found this is an error if they use any non advanced functions or a lot of functions
+    // if no policy command is found this is an error if they use any 
+    // non advanced functions or a lot of functions
     if(!hasVersion)
     {
       bool isProblem = true;
