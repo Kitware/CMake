@@ -1627,6 +1627,9 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       this->Makefile->GetDefinition("CMAKE_OSX_ARCHITECTURES");
     const char* sysroot = 
       this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
+    const char* sysrootDefault = 
+      this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT_DEFAULT");
+    bool flagsUsed = false;
     if(osxArch && sysroot  && lang && lang[0] =='C')
       { 
       std::vector<std::string> archs;
@@ -1656,10 +1659,17 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
           }
         flags += " -isysroot ";
         flags += sysroot;
+        flagsUsed = true;
         }
       }
+    if(!flagsUsed && sysroot && sysrootDefault &&
+       strcmp(sysroot, sysrootDefault) != 0)
+      {
+      flags += " -isysroot ";
+      flags += sysroot;
+      }
+    this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
     }
-  this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
 }
 
 //----------------------------------------------------------------------------
