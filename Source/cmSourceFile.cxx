@@ -179,7 +179,7 @@ bool cmSourceFile::FindFullPath()
 
   cmOStringStream e;
   e << "Cannot find source file \"" << this->Location.GetName() << "\"";
-  e << "\n\nTried extensions";
+  e << ".  Tried extensions";
   for(std::vector<std::string>::const_iterator ext = srcExts.begin();
       ext != srcExts.end(); ++ext)
     {
@@ -190,7 +190,7 @@ bool cmSourceFile::FindFullPath()
     {
     e << " ." << *ext;
     }
-  cmSystemTools::Error(e.str().c_str());
+  this->Location.GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
   this->FindFullPathFailed = true;
   return false;
 }
