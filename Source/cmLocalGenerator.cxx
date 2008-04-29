@@ -1668,8 +1668,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       flags += " -isysroot ";
       flags += sysroot;
       }
-    this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
     }
+  this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
 }
 
 //----------------------------------------------------------------------------
