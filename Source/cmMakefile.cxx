@@ -299,12 +299,21 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
       }
     this->GetBacktrace(backtrace);
     }
-  else if(!this->ListFileStack.empty())
+  else
     {
-    // We are processing the project but are not currently executing a
-    // command.  Add whatever context information we have.
     cmListFileContext lfc;
-    lfc.FilePath = this->ListFileStack.back();
+    if(this->ListFileStack.empty())
+      {
+      // We are not processing the project.  Add the directory-level context.
+      lfc.FilePath = this->GetCurrentDirectory();
+      lfc.FilePath += "/CMakeLists.txt";
+      }
+    else
+      {
+      // We are processing the project but are not currently executing a
+      // command.  Add whatever context information we have.
+      lfc.FilePath = this->ListFileStack.back();
+      }
     lfc.Line = 0;
     if(!this->GetCMakeInstance()->GetIsInTryCompile())
       {
