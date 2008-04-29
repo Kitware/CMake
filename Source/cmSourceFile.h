@@ -116,6 +116,7 @@ private:
   bool FindFullPath();
   bool TryFullPath(const char* tryPath, const char* ext);
   void CheckExtension();
+  void CheckLanguage(std::string const& ext);
 
   std::vector<std::string> Depends;
 };
