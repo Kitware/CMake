@@ -2545,9 +2545,32 @@ std::string cmLocalGenerator::EscapeForShellOldStyle(const char* str)
 }
 
 //----------------------------------------------------------------------------
+static bool cmLocalGeneratorIsShellOperator(const char* str)
+{
+  if(strcmp(str, "<") == 0 ||
+     strcmp(str, ">") == 0 ||
+     strcmp(str, "<<") == 0 ||
+     strcmp(str, ">>") == 0 ||
+     strcmp(str, "|") == 0 ||
+     strcmp(str, "&>") == 0 ||
+     strcmp(str, "2>&1") == 0 ||
+     strcmp(str, "1>&2") == 0)
+    {
+    return true;
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
 std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
                                              bool forEcho)
 {
+  // Do not escape shell operators.
+  if(cmLocalGeneratorIsShellOperator(str))
+    {
+    return str;
+    }
+
   // Compute the flags for the target shell environment.
   int flags = 0;
   if(this->WindowsVSIDE)

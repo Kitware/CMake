@@ -150,6 +150,7 @@ ADD_EXECUTABLE(CustomCommand
   ${PROJECT_BINARY_DIR}/wrapped_help.c
   ${PROJECT_BINARY_DIR}/generated.c
   ${PROJECT_BINARY_DIR}/not_included.h
+  gen_redirect.c # default location for custom commands is in build tree
   )
 
 # Add the rule to create generated.c at build time.  This is placed
@@ -191,6 +192,17 @@ ADD_CUSTOM_COMMAND(TARGET CustomCommandUsingTargetTest POST_BUILD
 
 ADD_SUBDIRECTORY(GeneratorInExtraDir)
 
+##############################################################################
+# Test shell operators in custom commands.
+
+ADD_EXECUTABLE(tcat tcat.cxx)
+
+ADD_CUSTOM_COMMAND(OUTPUT gen_redirect.c
+  DEPENDS tcat gen_redirect_in.c
+  COMMAND tcat < ${CMAKE_CURRENT_SOURCE_DIR}/gen_redirect_in.c > gen_redirect.c
+  COMMAND ${CMAKE_COMMAND} -E echo "#endif" >> gen_redirect.c
+  VERBATIM
+  )
 
 ##############################################################################
 # Test non-trivial command line arguments in custom commands.
@@ -303,8 +315,8 @@ SET(CHECK_ARGS
   "one|pipe w s"
   "#two-pounds# w s"
   "one#pound w s"
-  ~ ` ! @ \# $ % ^ & _ - + = | : "\;" \" ' , . ? "(" ")" { } []
-#  < > << >> &> 2>&1 1>&2
+  ~ ` ! @ \# $ % ^ & _ - + = : "\;" \" ' , . ? "(" ")" { } []
+# | < > << >> &> 2>&1 1>&2
 # \\ # Need to test last to avoid ; escape in list.
 #    # Make tools need help when this is the last argument.
   )
