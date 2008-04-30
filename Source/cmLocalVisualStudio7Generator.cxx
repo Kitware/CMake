@@ -68,6 +68,7 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
   lang.insert("RC");
   lang.insert("IDL");
   lang.insert("DEF");
+  lang.insert("Fortran");
   this->CreateCustomTargetsAndCommands(lang);
   this->FixGlobalTargets();
 }
@@ -200,6 +201,9 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
 void cmLocalVisualStudio7Generator
 ::CreateSingleVCProj(const char *lname, cmTarget &target)
 {
+  this->FortranProject =
+    static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
+    ->TargetIsFortranOnly(target);
   // add to the list of projects
   std::string pname = lname;
   target.SetProperty("GENERATOR_FILE_NAME",lname);
@@ -208,7 +212,14 @@ void cmLocalVisualStudio7Generator
   fname = this->Makefile->GetStartOutputDirectory();
   fname += "/";
   fname += lname;
-  fname += ".vcproj";
+  if(this->FortranProject)
+    {
+    fname += ".vfproj";
+    }
+  else
+    {
+    fname += ".vcproj";
+    }
 
   // Generate the project file and replace it atomically with
   // copy-if-different.  We use a separate timestamp so that the IDE
@@ -286,7 +297,61 @@ void cmLocalVisualStudio7Generator::WriteConfigurations(std::ostream& fout,
     }
   fout << "\t</Configurations>\n";
 }
+cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranFlagTable[] =
+{ 
+  {"Preprocess", "fpp", "Run Preprocessor on files", "preprocessYes", 0}, 
+  {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "true", 0},
+  {"DebugInformationFormat", "Zi", "full debug", "debugEnabled", 0},
+  {"DebugInformationFormat", "debug:full", "full debug", "debugEnabled", 0},
+  {"DebugInformationFormat", "Z7", "c7 compat", "debugOldStyleInfo", 0},
+  {"DebugInformationFormat", "Zd", "line numbers", "debugLineInfoOnly", 0},
+  {"Optimization", "Od", "disable optimization", "optimizeDisabled", 0},
+  {"Optimization", "O1", "min space", "optimizeMinSpace", 0},
+  {"Optimization", "O3", "full optimize", "optimizeFull", 0},
+  {"GlobalOptimizations", "Og", "global optimize", "true", 0},
+  {"InlineFunctionExpansion", "Ob0", "", "expandDisable", 0},
+  {"InlineFunctionExpansion", "Ob1", "", "expandOnlyInline", 0},
+  {"FavorSizeOrSpeed", "Os", "", "favorSize", 0},
+  {"OmitFramePointers", "Oy-", "", "false", 0},
+  {"OptimizeForProcessor", "GB", "", "procOptimizeBlended", 0},
+  {"OptimizeForProcessor", "G5", "", "procOptimizePentium", 0},
+  {"OptimizeForProcessor", "G6", "", "procOptimizePentiumProThruIII", 0},
+  {"UseProcessorExtensions", "QzxK", "", "codeForStreamingSIMD", 0},
+  {"OptimizeForProcessor", "QaxN", "", "codeForPentium4", 0},
+  {"OptimizeForProcessor", "QaxB", "", "codeForPentiumM", 0},
+  {"OptimizeForProcessor", "QaxP", "", "codeForCodeNamedPrescott", 0},
+  {"OptimizeForProcessor", "QaxT", "", "codeForCore2Duo", 0},
+  {"OptimizeForProcessor", "QxK", "", "codeExclusivelyStreamingSIMD", 0},
+  {"OptimizeForProcessor", "QxN", "", "codeExclusivelyPentium4", 0},
+  {"OptimizeForProcessor", "QxB", "", "codeExclusivelyPentiumM", 0},
+  {"OptimizeForProcessor", "QxP", "", "codeExclusivelyCodeNamedPrescott", 0},
+  {"OptimizeForProcessor", "QxT", "", "codeExclusivelyCore2Duo", 0},
+  {"OptimizeForProcessor", "QxO", "", "codeExclusivelyCore2StreamingSIMD", 0},
+  {"OptimizeForProcessor", "QxS", "", "codeExclusivelyCore2StreamingSIMD4", 0},
 
+  {"ModulePath", "module:", "", "", 
+   cmVS7FlagTable::UserValueRequired},
+  {"LoopUnrolling", "Qunroll:", "", "", 
+   cmVS7FlagTable::UserValueRequired},
+  {"AutoParallelThreshold", "Qpar-threshold:", "", "", 
+   cmVS7FlagTable::UserValueRequired},
+  {"HeapArrays", "heap-arrays:", "", "", 
+   cmVS7FlagTable::UserValueRequired},
+  {"ObjectText", "bintext:", "", "", 
+   cmVS7FlagTable::UserValueRequired},
+  {"Parallelization", "Qparallel", "", "true", 0},
+  {"PrefetchInsertion", "Qprefetch-", "", "false", 0},
+  {"BufferedIO", "assume:buffered_io", "", "true", 0},
+  {"CallingConvention", "iface:stdcall", "", "callConventionStdCall", 0},
+  {"CallingConvention", "iface:cref", "", "callConventionCRef", 0},
+  {"CallingConvention", "iface:stdref", "", "callConventionStdRef", 0},
+  {"CallingConvention", "iface:stdcall", "", "callConventionStdCall", 0},
+  {"CallingConvention", "iface:cvf", "", "callConventionCVF", 0},
+  {"EnableRecursion", "recursive", "", "true", 0},
+  {"ReentrantCode", "reentrancy", "", "true", 0},
+  // done up to Language
+  {0,0,0,0,0}
+};
 // fill the table here currently the comment field is not used for
 // anything other than documentation NOTE: Make sure the longer
 // commandFlag comes FIRST!
@@ -379,6 +444,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {0,0,0,0,0}
 };
 
+
+
 cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
 {
   // option flags (some flags map to the same option)
@@ -404,7 +471,8 @@ public:
   enum Tool
   {
     Compiler,
-    Linker
+    Linker,
+    FortranCompiler
   };
   cmLocalVisualStudio7GeneratorOptions(cmLocalVisualStudio7Generator* lg,
                                        int version,
@@ -485,13 +553,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // 1 == executable
   // 10 == utility
   const char* configType = "10";
+  const char* projectType = 0;
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
+      projectType = "typeStaticLibrary";
       configType = "4";
       break;
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
+      projectType = "typeDynamicLibrary";
       configType = "2";
       break;
     case cmTarget::EXECUTABLE:
@@ -503,7 +574,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     default:
       break;
     }
-
+  if(this->FortranProject && projectType)
+    {
+    configType = projectType;
+    }
   std::string flags;
   if(strcmp(configType, "10") != 0)
     {
@@ -516,7 +590,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
          target.GetName());
       return;
       }
-    if(strcmp(linkLanguage, "C") == 0 || strcmp(linkLanguage, "CXX") == 0)
+    if(strcmp(linkLanguage, "C") == 0 || strcmp(linkLanguage, "CXX") == 0
+      || strcmp(linkLanguage, "Fortran") == 0)
       {
       std::string baseFlagVar = "CMAKE_";
       baseFlagVar += linkLanguage;
@@ -551,9 +626,12 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Makefile->GetDefineFlags();
-
-  // Construct a set of build options for this target.
-  Options targetOptions(this, this->Version, Options::Compiler, this->ExtraFlagTable);
+  Options::Tool t = Options::Compiler;
+  if(this->FortranProject)
+    {
+    t = Options::FortranCompiler;
+    }
+  Options targetOptions(this, this->Version, t, this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
@@ -599,9 +677,31 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     fout << "\t\t\tCharacterSet=\"2\">\n";
     }
-
+  const char* tool = "VCCLCompilerTool";
+  if(this->FortranProject)
+    {
+    tool = "VFFortranCompilerTool";
+    }
   fout << "\t\t\t<Tool\n"
-       << "\t\t\t\tName=\"VCCLCompilerTool\"\n";
+       << "\t\t\t\tName=\"" << tool << "\"\n";
+  if(this->FortranProject)
+    {
+    const char* target_mod_dir =
+      target.GetProperty("Fortran_MODULE_DIRECTORY"); 
+    std::string modDir;
+    if(target_mod_dir)
+      {
+      modDir = this->Convert(target_mod_dir,
+                             cmLocalGenerator::START_OUTPUT,
+                             cmLocalGenerator::UNCHANGED);
+      }
+    else
+      {
+      modDir = ".";
+      }
+    fout << "\t\t\t\tModulePath=\"" 
+         << this->ConvertToXMLOutputPath(modDir.c_str()) << "\\$(ConfigurationName)\"\n";
+    }
   targetOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
   std::vector<std::string> includes;
@@ -609,8 +709,18 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::vector<std::string>::iterator i = includes.begin();
   for(;i != includes.end(); ++i)
     {
+    // output the include path
     std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
     fout << ipath << ";";
+    // if this is fortran then output the include with 
+    // a ConfigurationName on the end of it.
+    if(this->FortranProject)
+      {
+      ipath = i->c_str();
+      ipath += "/$(ConfigurationName)";
+      ipath = this->ConvertToXMLOutputPath(ipath.c_str());
+      fout << ipath << ";";
+      }
     }
   fout << "\"\n";
   targetOptions.OutputFlagMap(fout, "\t\t\t\t");
@@ -629,8 +739,18 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
          << target.GetPDBName(configName) << "\"\n";
     }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCCustomBuildTool\"/>\n";
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCResourceCompilerTool\"\n"
+  tool = "VCCustomBuildTool";
+  if(this->FortranProject)
+    {
+    tool = "VFCustomBuildTool";
+    }
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"/>\n";
+  tool = "VCResourceCompilerTool";
+  if(this->FortranProject)
+    {
+    tool = "VFResourceCompilerTool";
+    }
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n"
        << "\t\t\t\tAdditionalIncludeDirectories=\"";
   for(i = includes.begin();i != includes.end(); ++i)
     {
@@ -641,8 +761,12 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\"";
   targetOptions.OutputPreprocessorDefinitions(fout, "\n\t\t\t\t", "");
   fout << "/>\n";
-
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCMIDLTool\"\n";
+  tool = "VCMIDLTool";
+  if(this->FortranProject)
+    {
+    tool = "VFMIDLTool";
+    }
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n";
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tMkTypLibCompatible=\"FALSE\"\n";
   if( this->PlatformName == "x64" )
@@ -675,8 +799,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       // Add a flag telling the manifest tool to use a workaround
       // for FAT32 file systems, which can cause an empty manifest
       // to be embedded into the resulting executable.  See CMake
-      // bug #2617.
-      fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCManifestTool\"\n"
+      // bug #2617. 
+      const char* tool  = "VCManifestTool";
+      if(this->FortranProject)
+        {
+        tool = "VFManifestTool";
+        }
+      fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n"
            << "\t\t\t\tUseFAT32Workaround=\"true\"\n"
            << "\t\t\t/>\n";
       }
@@ -757,8 +886,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     std::string libpath = target.GetDirectory(configName);
     libpath += "/";
     libpath += targetNameFull;
+    const char* tool = "VCLibrarianTool";
+    if(this->FortranProject)
+      {
+      tool = "VFLibrarianTool";
+      }
     fout << "\t\t\t<Tool\n"
-         << "\t\t\t\tName=\"VCLibrarianTool\"\n";
+         << "\t\t\t\tName=\"" << tool << "\"\n";
     if(const char* libflags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
       {
       fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
@@ -792,9 +926,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     std::string standardLibsVar = "CMAKE_";
     standardLibsVar += linkLanguage;
     standardLibsVar += "_STANDARD_LIBRARIES";
-
+    const char* tool = "VCLinkerTool";
+    if(this->FortranProject)
+      {
+      tool = "VFLinkerTool";
+      }
     fout << "\t\t\t<Tool\n"
-         << "\t\t\t\tName=\"VCLinkerTool\"\n";
+         << "\t\t\t\tName=\"" << tool << "\"\n";
     linkOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
     // Use the NOINHERIT macro to avoid getting VS project default
     // libraries which may be set by the user to something bad.
@@ -861,9 +999,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     std::string standardLibsVar = "CMAKE_";
     standardLibsVar += linkLanguage;
     standardLibsVar += "_STANDARD_LIBRARIES";
-
+    const char* tool = "VCLinkerTool";
+    if(this->FortranProject)
+      {
+      tool = "VFLinkerTool";
+      }
     fout << "\t\t\t<Tool\n"
-         << "\t\t\t\tName=\"VCLinkerTool\"\n";
+         << "\t\t\t\tName=\"" << tool << "\"\n";
     linkOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
     // Use the NOINHERIT macro to avoid getting VS project default
     // libraries which may be set by the user to something bad.
@@ -1263,14 +1405,26 @@ void cmLocalVisualStudio7Generator
         if(ext == "idl")
           {
           aCompilerTool = "VCMIDLTool";
+          if(this->FortranProject)
+            {
+            aCompilerTool = "VFMIDLTool";
+            }
           }
         if(ext == "rc")
           {
-          aCompilerTool = "VCResourceCompilerTool";
+          aCompilerTool = "VCResourceCompilerTool";  
+          if(this->FortranProject)
+            {
+            aCompilerTool = "VFResourceCompilerTool";
+            }
           }
         if(ext == "def")
           {
           aCompilerTool = "VCCustomBuildTool";
+          if(this->FortranProject)
+            {
+            aCompilerTool = "VFCustomBuildTool";
+            }
           }
         for(std::map<cmStdString, cmLVS7GFileConfig>::const_iterator
               fci = fcinfo.FileConfigMap.begin();
@@ -1346,7 +1500,16 @@ WriteCustomRule(std::ostream& fout,
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
-
+  const char* compileTool = "VCCLCompilerTool";
+  if(this->FortranProject)
+    {
+    compileTool = "VFCLCompilerTool";
+    }
+  const char* customTool = "VCCustomBuildTool";
+  if(this->FortranProject)
+    {
+    customTool = "VFCustomBuildTool";
+    }
   for(i = configs->begin(); i != configs->end(); ++i)
     {
     cmLVS7GFileConfig const& fc = fcinfo.FileConfigMap[*i];
@@ -1355,7 +1518,7 @@ WriteCustomRule(std::ostream& fout,
     if(!fc.CompileFlags.empty())
       {
       fout << "\t\t\t\t\t<Tool\n"
-           << "\t\t\t\t\tName=\"VCCLCompilerTool\"\n"
+           << "\t\t\t\t\tName=\"" << compileTool << "\"\n"
            << "\t\t\t\t\tAdditionalOptions=\""
            << this->EscapeForXML(fc.CompileFlags.c_str()) << "\"/>\n";
       }
@@ -1367,7 +1530,7 @@ WriteCustomRule(std::ostream& fout,
                             command.GetEscapeOldStyle(),
                             command.GetEscapeAllowMakeVars());
     fout << "\t\t\t\t\t<Tool\n"
-         << "\t\t\t\t\tName=\"VCCustomBuildTool\"\n"
+         << "\t\t\t\t\tName=\"" << customTool << "\"\n"
          << "\t\t\t\t\tDescription=\"" 
          << this->EscapeForXML(comment.c_str()) << "\"\n"
          << "\t\t\t\t\tCommandLine=\"" 
@@ -1450,9 +1613,13 @@ void cmLocalVisualStudio7Generator
     {
     return;
     }
-
+  const char* tool = "VCPreBuildEventTool";
+  if(this->FortranProject)
+    {
+    tool = "VFPreBuildEventTool";
+    }
   // add the pre build rules
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPreBuildEventTool\"";
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"";
   bool init = false;
   for (std::vector<cmCustomCommand>::const_iterator cr =
          target.GetPreBuildCommands().begin();
@@ -1488,7 +1655,12 @@ void cmLocalVisualStudio7Generator
   fout << "/>\n";
 
   // add the pre Link rules
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPreLinkEventTool\"";
+  tool = "VCPreLinkEventTool";
+  if(this->FortranProject)
+    {
+    tool = "VFPreLinkEventTool";
+    }
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"";
   init = false;
   for (std::vector<cmCustomCommand>::const_iterator cr =
          target.GetPreLinkCommands().begin();
@@ -1524,7 +1696,12 @@ void cmLocalVisualStudio7Generator
   fout << "/>\n";
 
   // add the PostBuild rules
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"VCPostBuildEventTool\"";
+  tool = "VCPostBuildEventTool";
+  if(this->FortranProject)
+    {
+    tool = "VFPostBuildEventTool";
+    }
+  fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"";
   init = false;
   for (std::vector<cmCustomCommand>::const_iterator cr =
          target.GetPostBuildCommands().begin();
@@ -1561,11 +1738,76 @@ void cmLocalVisualStudio7Generator
 }
 
 void
+cmLocalVisualStudio7Generator
+::WriteProjectStartFortran(std::ostream& fout,
+                           const char *libName,
+                           cmTarget & target)
+{
+  
+  cmGlobalVisualStudio7Generator* gg =
+    static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
+  fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
+       << "<VisualStudioProject\n"
+       << "\tProjectCreator=\"Intel Fortran\"\n"
+       << "\tVersion=\"9.10\"\n";
+  const char* keyword = target.GetProperty("VS_KEYWORD");
+  if(!keyword)
+    {
+    keyword = "Console Application";
+    } 
+  const char* projectType = 0;
+  switch(target.GetType())
+    {
+    case cmTarget::STATIC_LIBRARY:
+      projectType = "typeStaticLibrary";
+      if(keyword)
+        {
+        keyword = "Static Library";
+        }
+      break;
+    case cmTarget::SHARED_LIBRARY:
+    case cmTarget::MODULE_LIBRARY:
+      projectType = "typeDynamicLibrary";
+      if(!keyword)
+        {
+        keyword = "Dll";
+        }
+      break;
+    case cmTarget::EXECUTABLE:
+      if(!keyword)
+        {
+        keyword = "Console Application";
+        }
+      projectType = 0;
+      break;
+    case cmTarget::UTILITY:
+    case cmTarget::GLOBAL_TARGET:
+    default:
+      break;
+    }
+  if(projectType)
+    {
+    fout << "\tProjectType=\"" << projectType << "\">\n";
+    }
+  fout<< "\tKeyword=\"" << keyword << "\">\n" 
+       << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\">\n"
+       << "\t<Platforms>\n"
+       << "\t\t<Platform\n\t\t\tName=\"" << this->PlatformName << "\"/>\n"
+       << "\t</Platforms>\n";
+}
+
+
+void
 cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
                                                  const char *libName,
                                                  cmTarget & target,
                                                  std::vector<cmSourceGroup> &)
 {
+  if(this->FortranProject)
+    {
+    this->WriteProjectStartFortran(fout, libName, target);
+    return;
+    }
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectType=\"Visual C++\"\n";
@@ -1777,6 +2019,8 @@ cmLocalVisualStudio7GeneratorOptions
       this->FlagTable = cmLocalVisualStudio7GeneratorFlagTable; break;
     case Linker:
       this->FlagTable = cmLocalVisualStudio7GeneratorLinkFlagTable; break;
+    case FortranCompiler:
+      this->FlagTable = cmLocalVisualStudio7GeneratorFortranFlagTable;
     default: break;
     }
 }

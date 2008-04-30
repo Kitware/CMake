@@ -102,6 +102,8 @@ private:
   void OutputModuleDefinitionFile(std::ostream& fout, cmTarget &target);
   void WriteProjectStart(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
+  void WriteProjectStartFortran(std::ostream& fout, const char *libName,
+                                cmTarget &tgt);
   void WriteVCProjBeginGroup(std::ostream& fout, 
                           const char* group,
                           const char* filter);
@@ -124,6 +126,7 @@ private:
   cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;
   int Version;
+  bool FortranProject;
   std::string PlatformName; // Win32 or x64 
   cmLocalVisualStudio7GeneratorInternals* Internal;
 };

@@ -2616,7 +2616,7 @@ std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
   else
     {
     cmsysSystem_Shell_GetArgumentForUnix(str, &arg[0], flags);
-    }
+    }  
   return std::string(&arg[0]);
 }
 
