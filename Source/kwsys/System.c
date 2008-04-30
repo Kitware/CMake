@@ -75,6 +75,13 @@ static int kwsysSystem_Shell__CharNeedsQuotesOnUnix(char c)
 }
 
 /*--------------------------------------------------------------------------*/
+static int kwsysSystem_Shell__CharNeedsQuotesOnWindows(char c)
+{
+  return ((c == '\'') || (c == '#') || (c == '&') ||
+          (c == '<') || (c == '>') || (c == '|') || (c == '^'));
+}
+
+/*--------------------------------------------------------------------------*/
 static int kwsysSystem_Shell__CharNeedsQuotes(char c, int isUnix, int flags)
 {
   /* On Windows the built-in command shell echo never needs quotes.  */
@@ -99,14 +106,10 @@ static int kwsysSystem_Shell__CharNeedsQuotes(char c, int isUnix, int flags)
     }
   else
     {
-    /* On Windows single-quotes must be escaped in some make
-       environments, such as in mingw32-make.  */
-    if(flags & kwsysSystem_Shell_Flag_Make)
+    /* On Windows several special characters need quotes to preserve them.  */
+    if(kwsysSystem_Shell__CharNeedsQuotesOnWindows(c))
       {
-      if(c == '\'')
-        {
-        return 1;
-        }
+      return 1;
       }
     }
   return 0;
