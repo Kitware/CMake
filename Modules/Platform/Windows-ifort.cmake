@@ -42,7 +42,7 @@ ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 7" OR CMAKE_GENERATOR MATCHES "Visu
 # does the compiler support pdbtype and is it the newer compiler
 
 SET(CMAKE_BUILD_TYPE_INIT Debug)
-SET (CMAKE_Fortran_FLAGS_INIT "/W1")
+SET (CMAKE_Fortran_FLAGS_INIT "/W1 /nologo /fpp")
 SET (CMAKE_Fortran_FLAGS_DEBUG_INIT "/debug:full")
 SET (CMAKE_Fortran_FLAGS_MINSIZEREL_INIT "/O2 /D NDEBUG")
 SET (CMAKE_Fortran_FLAGS_RELEASE_INIT "/MD /O1 /D NDEBUG")
