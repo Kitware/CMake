@@ -511,6 +511,7 @@ bool cmComputeLinkInformation::Compute()
   // Compute the ordered link line items.
   cmComputeLinkDepends cld(this->Target, this->Config);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
+  cld.SetSharedRegex(this->SharedRegexString);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
   // Add the link line items.
@@ -864,7 +865,9 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
   if(!this->SharedLinkExtensions.empty())
     {
     std::string reg_shared = reg;
-    reg_shared += this->CreateExtensionRegex(this->SharedLinkExtensions);
+    this->SharedRegexString =
+      this->CreateExtensionRegex(this->SharedLinkExtensions);
+    reg_shared += this->SharedRegexString;
 #ifdef CM_COMPUTE_LINK_INFO_DEBUG
   fprintf(stderr, "shared regex [%s]\n", reg_shared.c_str());
 #endif
