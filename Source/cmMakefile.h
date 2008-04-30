@@ -94,18 +94,6 @@ public:
   void RemoveFunctionBlocker(const cmListFileFunction& lff);
 
   /**
-   * Add file to the written file list. These file should not be in the list
-   * of dependencies because they cause infinite loops.
-   */
-  void AddWrittenFile(const char* file);
-  bool HasWrittenFile(const char* file);
-
-  /**
-   * Check if there are any infinite loops
-   */
-  bool CheckInfiniteLoops();
-  
-  /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
    */

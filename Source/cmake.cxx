@@ -2081,8 +2081,6 @@ int cmake::ActualConfigure()
     this->GlobalGenerator->ClearEnabledLanguages();
     }
 
-  this->CleanupWrittenFiles();
-
   // Truncate log files
   if (!this->InTryCompile)
     {
@@ -2531,21 +2529,6 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
     delete generator;
     v.push_back(e);
     }
-}
-
-void cmake::AddWrittenFile(const char* file)
-{
-  this->WrittenFiles.insert(file);
-}
-
-bool cmake::HasWrittenFile(const char* file)
-{
-  return this->WrittenFiles.find(file) != this->WrittenFiles.end();
-}
-
-void cmake::CleanupWrittenFiles()
-{
-  this->WrittenFiles.clear();
 }
 
 void cmake::UpdateConversionPathTable()

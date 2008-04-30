@@ -97,7 +97,6 @@ bool cmWriteFileCommand
   file << message << std::endl;
   file.close();
   cmSystemTools::SetPermissions(fileName.c_str(), mode);
-  this->Makefile->AddWrittenFile(fileName.c_str());
 
   return true;
 }
