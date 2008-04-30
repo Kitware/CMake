@@ -380,6 +380,10 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
           *out++ = *c++;
           }
 
+        /* The make variable reference eliminates any escaping needed
+           for preceding backslashes.  */
+        windows_backslashes = 0;
+
         /* Stop if we have reached the end of the string.  */
         if(!*c)
           {
