@@ -294,11 +294,6 @@ class cmake
   bool GetDebugTryCompile(){return this->DebugTryCompile;}
   void DebugTryCompileOn(){this->DebugTryCompile = true;}
 
-  ///! Get the list of files written by CMake using FILE(WRITE / WRITE_FILE
-  void AddWrittenFile(const char* file);
-  bool HasWrittenFile(const char* file);
-  void CleanupWrittenFiles();
-
   /**
    * Generate CMAKE_ROOT and CMAKE_COMMAND cache entries
    */
@@ -389,7 +384,6 @@ protected:
   std::string StartOutputDirectory;
   bool SuppressDevWarnings;
   bool DoSuppressDevWarnings;
-  std::set<cmStdString> WrittenFiles;
 
   ///! return true if the same cmake was used to make the cache.
   bool CacheVersionMatches();

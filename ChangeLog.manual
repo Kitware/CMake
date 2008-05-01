@@ -1,3 +1,19 @@
+Changes in CMake 2.6.0 RC 10
+- Do not duplicate .so libraries on the link line
+- Add more system library paths to sun builds
+- Add BETA support for Intel Fortran IDE files in visual studio
+- Fix FindCurses to work if ncurses is the only option
+- Fix shell escapes on some systems
+- Remove check for file write as input to cmake, as it is no longer needed
+- Make check_type_size automatically check for headers that it uses
+- Remove minimum required from FindBoost.cmake
+- Fix FindSDL so that it can be run more than once
+- Fix find required for VTK package
+- Allow for CMAKE_OSX_SYSROOT to work with single architecture
+- Add context information when a source file cannot be found.
+- Report the directory-level context even if no list file 
+  is currently being processed.
+
 Changes in CMake 2.6.0 RC 9
 
 - Fix for fortran mod:: support 

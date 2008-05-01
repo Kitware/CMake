@@ -1019,6 +1019,19 @@ cmLocalUnixMakefileGenerator3
         // without the current directory being in the search path.
         cmd = "./" + cmd;
         }
+      if(this->WatcomWMake &&
+         cmSystemTools::FileIsFullPath(cmd.c_str()) &&
+         cmd.find(" ") != cmd.npos)
+        {
+        // On Watcom WMake use the windows short path for the command
+        // name.  This is needed to avoid funny quoting problems on
+        // lines with shell redirection operators.
+        std::string scmd;
+        if(cmSystemTools::GetShortPath(cmd.c_str(), scmd))
+          {
+          cmd = scmd;
+          }
+        }
       cmd = this->Convert(cmd.c_str(),NONE,SHELL);
       for(unsigned int j=1; j < commandLine.size(); ++j)
         {

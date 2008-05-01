@@ -150,6 +150,7 @@ ADD_EXECUTABLE(CustomCommand
   ${PROJECT_BINARY_DIR}/wrapped_help.c
   ${PROJECT_BINARY_DIR}/generated.c
   ${PROJECT_BINARY_DIR}/not_included.h
+  gen_redirect.c # default location for custom commands is in build tree
   )
 
 # Add the rule to create generated.c at build time.  This is placed
@@ -191,18 +192,27 @@ ADD_CUSTOM_COMMAND(TARGET CustomCommandUsingTargetTest POST_BUILD
 
 ADD_SUBDIRECTORY(GeneratorInExtraDir)
 
+##############################################################################
+# Test shell operators in custom commands.
+
+ADD_EXECUTABLE(tcat tcat.cxx)
+
+ADD_CUSTOM_COMMAND(OUTPUT gen_redirect.c
+  DEPENDS tcat gen_redirect_in.c
+  COMMAND tcat < ${CMAKE_CURRENT_SOURCE_DIR}/gen_redirect_in.c > gen_redirect.c
+  COMMAND ${CMAKE_COMMAND} -E echo "#endif" >> gen_redirect.c
+  VERBATIM
+  )
 
 ##############################################################################
 # Test non-trivial command line arguments in custom commands.
 SET(EXPECTED_ARGUMENTS)
-# TODO: Check shell operators < > << >> | 2>&1 1>&2 &> ! &
 SET(CHECK_ARGS
   c:/posix/path
   c:\\windows\\path
   'single-quotes'
   single'quote
   \"double-quotes\"
-  double\"quote
   "\\;semi-colons\\;"
   "semi\\;colon"
   `back-ticks`
@@ -213,15 +223,15 @@ SET(CHECK_ARGS
   {curly}
   {lcurly}
   rcurly}
-  #<angle> # angle-brackets are inconsistent on windows right now
-  #<langle
-  #rangle>
+  <angle>
+  <langle
+  rangle>
   [square]
   [lsquare # these have funny behavior due to special cases for
   rsquare] # windows registry value names in list expansion
   $dollar-signs$
   dollar$sign
-  &ampersands&
+  &ampersands&x # Borland make does not like trailing ampersand
   one&ampersand
   @two-ats@
   one@at
@@ -256,7 +266,6 @@ SET(CHECK_ARGS
   "'single quotes with space'"
   "single'quote with space"
   "\"double-quotes with space\""
-  "double\"quote with space"
   "\\;semi-colons w s\\;"
   "semi\\;colon w s"
   "`back-ticks` w s"
@@ -267,9 +276,9 @@ SET(CHECK_ARGS
   "{curly} w s"
   "{lcurly w s"
   "rcurly} w s"
-  #"<angle> w s" # angle-brackets are inconsistent on windows right now
-  #"<langle w s"
-  #"rangle> w s"
+  "<angle> w s"
+  "<langle w s"
+  "rangle> w s"
   "[square] w s"
   "[lsquare w s" # these have funny behavior due to special cases for
   "rsquare] w s" # windows registry value names in list expansion
@@ -303,16 +312,27 @@ SET(CHECK_ARGS
   "one|pipe w s"
   "#two-pounds# w s"
   "one#pound w s"
-  ~ ` ! @ \# $ % ^ & _ - + = | : "\;" \" ' , . ? "(" ")" { } []
-#  < > << >> &> 2>&1 1>&2
-# \\ # Need to test last to avoid ; escape in list.
-#    # Make tools need help when this is the last argument.
+  ~ ` ! @ \# $ % ^ & _ - + = : "\;" \" ' , . ? "(" ")" { } []
   )
 IF(NOT MINGW)
   # *  # MinGW programs on windows always expands the wildcard!
   # /  # MSys make converts a leading slash to the mingw home directory
   LIST(APPEND CHECK_ARGS * /)
 ENDIF(NOT MINGW)
+
+# The windows command shell does not support a double quote by itself:
+#   double\"quote
+# without messing up quoting of arguments following it.
+
+# Make tools need help with escaping a single backslash
+#   \
+# at the end of a command because they think it is a continuation
+# character.
+
+# We now have special cases for shell operators:
+#   | < > << >> &> 2>&1 1>&2
+# to allow custom commands to perform redirection.
+
 FOREACH(arg ${CHECK_ARGS})
   SET(ARG "${arg}")
   STRING(REGEX REPLACE "\\\\" "\\\\\\\\" ARG "${ARG}")

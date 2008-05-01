@@ -213,7 +213,6 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   file << message;
   file.close();
   cmSystemTools::SetPermissions(fileName.c_str(), mode);
-  this->Makefile->AddWrittenFile(fileName.c_str());
   return true;
 }
 

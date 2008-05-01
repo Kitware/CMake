@@ -129,6 +129,7 @@ private:
   cmsys::RegularExpression ExtractStaticLibraryName;
   cmsys::RegularExpression ExtractSharedLibraryName;
   cmsys::RegularExpression ExtractAnyLibraryName;
+  std::string SharedRegexString;
   void AddLinkPrefix(const char* p);
   void AddLinkExtension(const char* e, LinkType type);
   std::string CreateExtensionRegex(std::vector<std::string> const& exts);

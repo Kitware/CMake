@@ -83,7 +83,7 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("", "^.*$");
   this->AddSourceGroup
     ("Source Files",
-     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|m|mm|rc|def|r|odl|idl|hpj|bat)$");
+     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
   this->AddSourceGroup("Header Files",
                        "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddSourceGroup("CMake Rules", "\\.rule$");
@@ -299,12 +299,21 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
       }
     this->GetBacktrace(backtrace);
     }
-  else if(!this->ListFileStack.empty())
+  else
     {
-    // We are processing the project but are not currently executing a
-    // command.  Add whatever context information we have.
     cmListFileContext lfc;
-    lfc.FilePath = this->ListFileStack.back();
+    if(this->ListFileStack.empty())
+      {
+      // We are not processing the project.  Add the directory-level context.
+      lfc.FilePath = this->GetCurrentDirectory();
+      lfc.FilePath += "/CMakeLists.txt";
+      }
+    else
+      {
+      // We are processing the project but are not currently executing a
+      // command.  Add whatever context information we have.
+      lfc.FilePath = this->ListFileStack.back();
+      }
     lfc.Line = 0;
     if(!this->GetCMakeInstance()->GetIsInTryCompile())
       {
@@ -2785,33 +2794,6 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     cmSystemTools::RemoveFile(tempOutputFile.c_str());
     }
   return res;
-}
-
-void cmMakefile::AddWrittenFile(const char* file)
-{ this->GetCMakeInstance()->AddWrittenFile(file); }
-
-bool cmMakefile::HasWrittenFile(const char* file)
-{ return this->GetCMakeInstance()->HasWrittenFile(file); }
-
-bool cmMakefile::CheckInfiniteLoops()
-{
-  std::vector<std::string>::iterator it;
-  for ( it = this->ListFiles.begin();
-        it != this->ListFiles.end();
-        ++ it )
-    {
-    if ( this->HasWrittenFile(it->c_str()) )
-      {
-      cmOStringStream str;
-      str << "File " << it->c_str() <<
-        " is written by WRITE_FILE (or FILE WRITE) command and should "
-        "not be used as input to CMake. Please use CONFIGURE_FILE to "
-        "be safe. Refer to the note next to FILE WRITE command.";
-      cmSystemTools::Error(str.str().c_str());
-      return false;
-      }
-    }
-  return true;
 }
 
 void cmMakefile::SetProperty(const char* prop, const char* value)

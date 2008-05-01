@@ -912,7 +912,6 @@ void cmGlobalGenerator::CheckLocalGenerators()
       }
     this->CMakeInstance->UpdateProgress
       ("Configuring", 0.9f+0.1f*(i+1.0f)/this->LocalGenerators.size());
-    this->LocalGenerators[i]->GetMakefile()->CheckInfiniteLoops();
     }
 
   if(notFoundMap.size())

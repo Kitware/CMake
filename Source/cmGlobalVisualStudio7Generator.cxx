@@ -35,7 +35,7 @@ void cmGlobalVisualStudio7Generator
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
-  mf->AddDefinition("CMAKE_GENERATOR_Fortran", "ifort");
+  mf->AddDefinition("CMAKE_GENERATOR_FC", "ifort");
 
   this->AddPlatformDefinitions(mf);
   
@@ -482,12 +482,21 @@ cmGlobalVisualStudio7Generator::ConvertToSolutionPath(const char* path)
 // the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout, 
                                const char* dspname,
-                               const char* dir, cmTarget&)
-{
-  fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
+                               const char* dir, cmTarget& target)
+{ 
+   // check to see if this is a fortran build
+  const char* ext = ".vcproj";
+  const char* project = "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"";
+  if(this->TargetIsFortranOnly(target))
+    {
+    ext = ".vfproj";
+    project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";
+    }
+
+  fout << project
        << dspname << "\", \""
        << this->ConvertToSolutionPath(dir)
-       << "\\" << dspname << ".vcproj\", \"{"
+       << "\\" << dspname << ext << "\", \"{"
        << this->GetGUID(dspname) << "}\"\nEndProject\n";
 }
 

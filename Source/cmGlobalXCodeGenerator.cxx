@@ -2451,14 +2451,29 @@ void cmGlobalXCodeGenerator
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_ARCHITECTURES");
   const char* sysroot = 
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
+  const char* sysrootDefault = 
+    this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT_DEFAULT");
   if(osxArch && sysroot)
     {
+    bool flagsUsed = false;
     // recompute this as it may have been changed since enable language
     this->Architectures.clear();
     cmSystemTools::ExpandListArgument(std::string(osxArch),
                                       this->Architectures);
-    if(this->Architectures.size() > 1)
+    bool addArchFlag = true;
+    if(this->Architectures.size() == 1)
       {
+      const char* archOrig = 
+        this->
+        CurrentMakefile->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES_DEFAULT");
+      if(this->Architectures[0] == archOrig)
+        {
+        addArchFlag = false;
+        }
+      }
+    if(addArchFlag)
+      {
+      flagsUsed = true;
       buildSettings->AddAttribute("SDKROOT", 
                                   this->CreateString(sysroot));
       std::string archString;
@@ -2471,6 +2486,12 @@ void cmGlobalXCodeGenerator
         }
       buildSettings->AddAttribute("ARCHS", 
                                   this->CreateString(archString.c_str()));
+      }
+    if(!flagsUsed && sysrootDefault &&
+       strcmp(sysroot, sysrootDefault) != 0)
+      {
+      buildSettings->AddAttribute("SDKROOT", 
+                                  this->CreateString(sysroot));
       }
     }
   for( std::vector<cmXCodeObject*>::iterator i = configs.begin();

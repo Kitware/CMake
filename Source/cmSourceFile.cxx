@@ -46,10 +46,28 @@ std::string const& cmSourceFile::GetExtension() const
 //----------------------------------------------------------------------------
 const char* cmSourceFile::GetLanguage()
 {
-  // Compute the final location of the file if necessary.
-  if(this->FullPath.empty())
+  // If the language was set explicitly by the user then use it.
+  if(const char* lang = this->GetProperty("LANGUAGE"))
     {
-    this->GetFullPath();
+    return lang;
+    }
+
+  // Perform computation needed to get the language if necessary.
+  if(this->FullPath.empty() && this->Language.empty())
+    {
+    if(this->Location.ExtensionIsAmbiguous())
+      {
+      // Finalize the file location to get the extension and set the
+      // language.
+      this->GetFullPath();
+      }
+    else
+      {
+      // Use the known extension to get the language if possible.
+      std::string ext =
+        cmSystemTools::GetFilenameLastExtension(this->Location.GetName());
+      this->CheckLanguage(ext);
+      }
     }
 
   // Now try to determine the language.
@@ -167,9 +185,19 @@ bool cmSourceFile::FindFullPath()
       }
     }
 
+  // If the user provided a full path, trust it.  If the file is not
+  // there the native tool will complain at build time.
+  if(!this->Location.DirectoryIsAmbiguous())
+    {
+    this->FullPath = this->Location.GetDirectory();
+    this->FullPath += "/";
+    this->FullPath += this->Location.GetName();
+    return true;
+    }
+
   cmOStringStream e;
   e << "Cannot find source file \"" << this->Location.GetName() << "\"";
-  e << "\n\nTried extensions";
+  e << ".  Tried extensions";
   for(std::vector<std::string>::const_iterator ext = srcExts.begin();
       ext != srcExts.end(); ++ext)
     {
@@ -180,7 +208,7 @@ bool cmSourceFile::FindFullPath()
     {
     e << " ." << *ext;
     }
-  cmSystemTools::Error(e.str().c_str());
+  this->Location.GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
   this->FindFullPathFailed = true;
   return false;
 }
@@ -242,8 +270,19 @@ void cmSourceFile::CheckExtension()
     }
 
   // Try to identify the source file language from the extension.
+  if(this->Language.empty())
+    {
+    this->CheckLanguage(this->Extension);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmSourceFile::CheckLanguage(std::string const& ext)
+{
+  // Try to identify the source file language from the extension.
+  cmMakefile* mf = this->Location.GetMakefile();
   cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
-  if(const char* l = gg->GetLanguageFromExtension(this->Extension.c_str()))
+  if(const char* l = gg->GetLanguageFromExtension(ext.c_str()))
     {
     this->Language = l;
     }
