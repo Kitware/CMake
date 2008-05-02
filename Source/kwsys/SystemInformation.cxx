@@ -2228,13 +2228,13 @@ int SystemInformationImplementation::QueryMemory()
 #ifdef __CYGWIN__
   return 0;
 #elif _WIN32
-  MEMORYSTATUS ms;
-  GlobalMemoryStatus(&ms);
+  MEMORYSTATUSEX ms;
+  GlobalMemoryStatusEx(&ms);
 
-  unsigned long tv = ms.dwTotalVirtual;
-  unsigned long tp = ms.dwTotalPhys;
-  unsigned long av = ms.dwAvailVirtual;
-  unsigned long ap = ms.dwAvailPhys;
+  unsigned long tv = ms.ullTotalVirtual;
+  unsigned long tp = ms.ullTotalPhys;
+  unsigned long av = ms.ullAvailVirtual;
+  unsigned long ap = ms.ullAvailPhys;
   this->TotalVirtualMemory = tv>>10>>10;
   this->TotalPhysicalMemory = tp>>10>>10;
   this->AvailableVirtualMemory = av>>10>>10;
