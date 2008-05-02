@@ -11,6 +11,18 @@
 
 OPTION(BUILD_TESTING "Build the testing tree." ON)
 
+# function to turn generator name into a version string
+# like vs7 vs71 vs8 vs9 
+FUNCTION(GET_VS_VERSION_STRING generator var)
+  STRING(REGEX REPLACE "Visual Studio ([0-9][0-9]?)($|.*)" "\\1" NUMBER "${generator}") 
+  IF("${generator}" MATCHES "Visual Studio 7 .NET 2003")
+    SET(ver_string "vs71")
+  ELSE("${generator}" MATCHES "Visual Studio 7 .NET 2003")
+    SET(ver_string "vs${NUMBER}")
+  ENDIF("${generator}" MATCHES "Visual Studio 7 .NET 2003")
+  SET(${var} ${ver_string} PARENT_SCOPE)
+ENDFUNCTION(GET_VS_VERSION_STRING)
+
 IF(BUILD_TESTING)
   # Setup some auxilary macros
   MACRO(SET_IF_NOT_SET var val)
@@ -171,15 +183,7 @@ IF(BUILD_TESTING)
       SET(DART_CXX_NAME "vs60")
     ENDIF(DART_CXX_NAME MATCHES "msdev")
     IF(DART_CXX_NAME MATCHES "devenv")
-      IF(CMAKE_GENERATOR MATCHES "^Visual Studio 7$")
-        SET(DART_CXX_NAME "vs70")
-      ELSE(CMAKE_GENERATOR MATCHES "^Visual Studio 7$")
-        IF(CMAKE_GENERATOR MATCHES "^Visual Studio 7 .NET 2003$")
-          SET(DART_CXX_NAME "vs71")
-        ELSE(CMAKE_GENERATOR MATCHES "^Visual Studio 7 .NET 2003$")
-          SET(DART_CXX_NAME "vs8")
-        ENDIF(CMAKE_GENERATOR MATCHES "^Visual Studio 7 .NET 2003$")
-      ENDIF(CMAKE_GENERATOR MATCHES "^Visual Studio 7$")
+      GET_VS_VERSION_STRING("${CMAKE_GENERATOR}" DART_CXX_NAME)
     ENDIF(DART_CXX_NAME MATCHES "devenv")
     SET(BUILDNAME "${BUILD_NAME_SYSTEM_NAME}-${DART_CXX_NAME}")
   ENDIF(NOT BUILDNAME)
