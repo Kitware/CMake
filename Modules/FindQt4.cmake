@@ -645,6 +645,7 @@ IF (QT4_QMAKE_FOUND)
   FIND_PATH(QT_QTDBUS_INCLUDE_DIR QtDBus
     PATHS
     ${QT_INCLUDE_DIR}/QtDBus
+    ${QT_LIBRARY_DIR}/QtDBus.framework/Headers
     NO_DEFAULT_PATH
     )
   
@@ -684,6 +685,7 @@ IF (QT4_QMAKE_FOUND)
   FIND_PATH(QT_PHONON_INCLUDE_DIR phonon
     PATHS
     ${QT_INCLUDE_DIR}/phonon
+    ${QT_LIBRARY_DIR}/phonon.framework/Headers
     NO_DEFAULT_PATH
     )
 
