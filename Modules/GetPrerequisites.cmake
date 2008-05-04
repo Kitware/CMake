@@ -251,6 +251,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse)
     set(gp_regex "^    ([^ ].*[Dd][Ll][Ll])${eol_char}$")
     set(gp_regex_cmp_count 1)
     set(gp_tool_known 1)
+    set(ENV{VS_UNICODE_OUTPUT} "") # Block extra output from inside VS IDE.
   endif("${gp_tool}" STREQUAL "dumpbin")
 
   if(NOT gp_tool_known)

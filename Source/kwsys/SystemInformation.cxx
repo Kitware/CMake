@@ -799,8 +799,6 @@ void SystemInformationImplementation::Delay(unsigned int uiMS)
 
 bool SystemInformationImplementation::DoesCPUSupportCPUID()
 {
-  int CPUIDPresent = 0;
-
 #if USE_ASM_INSTRUCTIONS
   // Use SEH to determine CPUID presence
     __try {
@@ -829,15 +827,15 @@ bool SystemInformationImplementation::DoesCPUSupportCPUID()
   __except(1) 
     {
     // Stop the class from trying to use CPUID again!
-    CPUIDPresent = false;
     return false;
     }
-#else
-   CPUIDPresent = false;
-#endif
 
-  // Return true to indicate support or false to indicate lack.
-  return (CPUIDPresent == 0) ? true : false;
+  // The cpuid instruction succeeded.
+  return true;
+#else
+  // Assume no cpuid instruction.
+  return false;
+#endif
 }
 
 bool SystemInformationImplementation::RetrieveCPUFeatures()
@@ -2230,13 +2228,19 @@ int SystemInformationImplementation::QueryMemory()
 #ifdef __CYGWIN__
   return 0;
 #elif _WIN32
+#if  _MSC_VER < 1300
   MEMORYSTATUS ms;
   GlobalMemoryStatus(&ms);
-
-  unsigned long tv = ms.dwTotalVirtual;
-  unsigned long tp = ms.dwTotalPhys;
-  unsigned long av = ms.dwAvailVirtual;
-  unsigned long ap = ms.dwAvailPhys;
+#define MEM_VAL(value) dw##value
+#else
+  MEMORYSTATUSEX ms;
+  GlobalMemoryStatusEx(&ms);
+#define MEM_VAL(value) ull##value
+#endif
+  unsigned long tv = ms.MEM_VAL(TotalVirtual);
+  unsigned long tp = ms.MEM_VAL(TotalPhys);
+  unsigned long av = ms.MEM_VAL(AvailVirtual);
+  unsigned long ap = ms.MEM_VAL(AvailPhys);
   this->TotalVirtualMemory = tv>>10>>10;
   this->TotalPhysicalMemory = tp>>10>>10;
   this->AvailableVirtualMemory = av>>10>>10;
@@ -2586,13 +2590,13 @@ int SystemInformationImplementation::CPUCount()
       // number of logical processors.
       unsigned int i = 1;
       unsigned char PHY_ID_MASK  = 0xFF;
-      unsigned char PHY_ID_SHIFT = 0;
+      //unsigned char PHY_ID_SHIFT = 0;
 
       while (i < this->NumberOfLogicalCPU)
         {
         i *= 2;
          PHY_ID_MASK  <<= 1;
-        PHY_ID_SHIFT++;
+         // PHY_ID_SHIFT++;
         }
       
       hCurrentProcessHandle = GetCurrentProcess();
@@ -2922,7 +2926,7 @@ bool SystemInformationImplementation::QueryOSInformation()
   OSVERSIONINFOEX osvi;
   BOOL bIsWindows64Bit;
   BOOL bOsVersionInfoEx;
-  char * operatingSystem = new char [256];
+  char operatingSystem[256];
 
   // Try calling GetVersionEx using the OSVERSIONINFOEX structure.
   ZeroMemory (&osvi, sizeof (OSVERSIONINFOEX));
@@ -3117,8 +3121,6 @@ bool SystemInformationImplementation::QueryOSInformation()
       this->OSRelease = "Unknown";
       break;
   }
-  delete [] operatingSystem;
-  operatingSystem = 0;
 
   // Get the hostname
   WORD wVersionRequested;

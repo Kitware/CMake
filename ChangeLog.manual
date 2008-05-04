@@ -1,3 +1,7 @@
+Changes in CMake 2.6.0
+- Fix for FindQt and some mac frameworks
+- Fix for ctest to report more than 2 gigs system memory on windows
+- Fix CTest build name for vs 9, and fix memory size on windows
 Changes in CMake 2.6.0 RC 10
 - Do not duplicate .so libraries on the link line
 - Add more system library paths to sun builds
