@@ -52,6 +52,31 @@ static void cmDocumentationPrintHTMLChar(std::ostream& os, char c)
 }
 
 //----------------------------------------------------------------------------
+bool cmDocumentationHTMLIsIdChar(char c)
+{
+  // From the HTML specification:
+  //   ID and NAME tokens must begin with a letter ([A-Za-z]) and may
+  //   be followed by any number of letters, digits ([0-9]), hyphens
+  //   ("-"), underscores ("_"), colons (":"), and periods (".").
+  return ((c >= 'A' && c <= 'Z') ||
+          (c >= 'a' && c <= 'z') ||
+          (c >= '0' && c <= '9') ||
+          c == '-' || c == '_' || c == ':' || c == '.');
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentationPrintHTMLId(std::ostream& os, const char* begin)
+{
+  for(const char* c = begin; *c; ++c)
+    {
+    if(cmDocumentationHTMLIsIdChar(*c))
+      {
+      os << *c;
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 const char* cmDocumentationPrintHTMLLink(std::ostream& os, const char* begin)
 {
   // Look for the end of the link.
@@ -97,6 +122,8 @@ void cmDocumentationFormatterHTML
     os << "<h2><a name=\"section_" << name << "\"/>" << name << "</h2>\n";
     }
 
+  std::string prefix = this->ComputeSectionLinkPrefix(name);
+
   const std::vector<cmDocumentationEntry> &entries = 
     section.GetEntries();
 
@@ -106,8 +133,9 @@ void cmDocumentationFormatterHTML
     {
     if(op->Name.size())
       {
-      os << "    <li><a href=\"#command_"
-         << op->Name.c_str() << "\"><b><code>";
+      os << "    <li><a href=\"#" << prefix << ":";
+      cmDocumentationPrintHTMLId(os, op->Name.c_str());
+      os << "\"><b><code>";
       this->PrintHTMLEscapes(os, op->Name.c_str());
       os << "</code></b></a></li>";
       }
@@ -125,8 +153,9 @@ void cmDocumentationFormatterHTML
         os << "  <li>\n";
         if(op->Name.size())
           {
-          os << "    <a name=\"command_"<< 
-            op->Name.c_str() << "\"><b><code>";
+          os << "    <a name=\"" << prefix << ":";
+          cmDocumentationPrintHTMLId(os, op->Name.c_str());
+          os << "\"><b><code>";
           this->PrintHTMLEscapes(os, op->Name.c_str());
           os << "</code></b></a>: ";
           }

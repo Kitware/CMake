@@ -129,6 +129,8 @@ void cmDocumentationFormatterDocbook
       }
     }
 
+  std::string prefix = this->ComputeSectionLinkPrefix(name);
+
   const std::vector<cmDocumentationEntry> &entries = 
     section.GetEntries();
 
@@ -138,7 +140,7 @@ void cmDocumentationFormatterDocbook
     {
     if(op->Name.size())
       {
-      os << "    <listitem><link linkend=\"command_";
+      os << "    <listitem><link linkend=\"" << prefix << "_";
       cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
       os << "\"><emphasis><literal>";
       cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
@@ -156,15 +158,15 @@ void cmDocumentationFormatterDocbook
         {
         if(op->Name.size())
           {
-          os << "    <para id=\"command_";
+          os << "    <para id=\"" << prefix << "_";
           cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
 
-          // make sure that each id exists only once, e.g. 
-          // command_COMPILE_DEFINITIONS exists at least twice. Since it seems
+          // make sure that each id exists only once.  Since it seems
           // not easily possible to determine which link refers to which id, 
           // we have at least to make sure that the duplicated id's get a 
           // different name (by appending an increasing number), Alex
-          std::string id = "command_";
+          std::string id = prefix;
+          id += "_";
           id += op->Name;
           if (this->EmittedLinkIds.find(id) == this->EmittedLinkIds.end())
             {

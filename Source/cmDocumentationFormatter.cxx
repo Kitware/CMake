@@ -71,3 +71,86 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
     }
 }
 
+//----------------------------------------------------------------------------
+std::string
+cmDocumentationFormatter::ComputeSectionLinkPrefix(std::string const& name)
+{
+  // Map from section name to a prefix for links pointing within the
+  // section.  For example, the commands section should have HTML
+  // links to each command with names like #command:ADD_EXECUTABLE.
+  if(name.find("Command") != name.npos)
+    {
+    return "command";
+    }
+  else if(name.find("Propert") != name.npos)
+    {
+    if(name.find("Global") != name.npos)
+      {
+      return "prop_global";
+      }
+    else if(name.find("Direct") != name.npos)
+      {
+      return "prop_dir";
+      }
+    else if(name.find("Target") != name.npos)
+      {
+      return "prop_tgt";
+      }
+    else if(name.find("Test") != name.npos)
+      {
+      return "prop_test";
+      }
+    else if(name.find("Source") != name.npos)
+      {
+      return "prop_sf";
+      }
+    return "property";
+    }
+  else if(name.find("Variable") != name.npos)
+    {
+    return "variable";
+    }
+  else if(name.find("Polic") != name.npos)
+    {
+    return "policy";
+    }
+  else if(name.find("Module") != name.npos)
+    {
+    return "module";
+    }
+  else if(name.find("Name") != name.npos)
+    {
+    return "name";
+    }
+  else if(name.find("Usage") != name.npos)
+    {
+    return "usage";
+    }
+  else if(name.find("Description") != name.npos)
+    {
+    return "desc";
+    }
+  else if(name.find("Generators") != name.npos)
+    {
+    return "gen";
+    }
+  else if(name.find("Options") != name.npos)
+    {
+    return "opt";
+    }
+  else if(name.find("Copyright") != name.npos)
+    {
+    return "copy";
+    }
+  else if(name.find("See Also") != name.npos)
+    {
+    return "see";
+    }
+  else
+    {
+    std::cerr
+      << "WARNING: ComputeSectionLinkPrefix failed for \"" << name << "\""
+      << std::endl;
+    return "other";
+    }
+}

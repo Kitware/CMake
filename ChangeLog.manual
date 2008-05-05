@@ -1,4 +1,5 @@
 Changes in CMake 2.6.0
+- Fix links in generated documentation
 - Fix for FindQt and some mac frameworks
 - Fix for ctest to report more than 2 gigs system memory on windows
 - Fix CTest build name for vs 9, and fix memory size on windows

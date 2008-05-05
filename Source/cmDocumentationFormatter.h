@@ -62,6 +62,9 @@ public:
   virtual void PrintIndex(std::ostream& ,
                           std::vector<const cmDocumentationSection *>&)
     {}
+
+  /** Compute a prefix for links into a section (#<prefix>_SOMETHING).  */
+  std::string ComputeSectionLinkPrefix(std::string const& name);
 };
 
 #endif
