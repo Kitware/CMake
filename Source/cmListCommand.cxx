@@ -544,6 +544,12 @@ bool cmListCommand
   std::vector<std::string>::iterator it;
   for ( it = varArgsExpanded.begin(); it != varArgsExpanded.end(); ++ it )
     {
+    if(value.size() == 0 && 
+       this->Makefile->GetPolicyStatus(cmPolicies::CMP0007) ==
+       cmPolicies::NEW)
+      {
+      value += ";";
+      }
     if (value.size())
       {
       value += ";";
