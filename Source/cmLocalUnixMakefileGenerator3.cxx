@@ -1437,9 +1437,9 @@ cmLocalUnixMakefileGenerator3
 
   // create the file stream for the depends file
   std::string dir = targetDir;
-  
-  // Open the rule file.  This should be copy-if-different because the
-  // rules may depend on this file itself.
+
+  // Open the make depends file.  This should be copy-if-different
+  // because the make tool may try to reload it needlessly otherwise.
   std::string ruleFileNameFull = dir;
   ruleFileNameFull += "/depend.make";
   cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
@@ -1448,11 +1448,14 @@ cmLocalUnixMakefileGenerator3
     {
     return false;
     }
+
+  // Open the cmake dependency tracking file.  This should not be
+  // copy-if-different because dependencies are re-scanned when it is
+  // older than the DependInfo.cmake.
   std::string internalRuleFileNameFull = dir;
   internalRuleFileNameFull += "/depend.internal";
-  cmGeneratedFileStream 
+  cmGeneratedFileStream
     internalRuleFileStream(internalRuleFileNameFull.c_str());
-  internalRuleFileStream.SetCopyIfDifferent(true);
   if(!internalRuleFileStream)
     {
     return false;
