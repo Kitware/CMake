@@ -33,7 +33,8 @@ bool cmSetSourceFilesPropertiesCommand
   std::vector<std::string>::const_iterator j;
   j = args.begin();
   // old style allows for specifier before PROPERTIES keyword
-  while (*j != "ABSTRACT" &&
+  while (j != args.end() &&
+         *j != "ABSTRACT" &&
          *j != "WRAP_EXCLUDE" &&
          *j != "GENERATED" &&
          *j != "COMPILE_FLAGS" &&
