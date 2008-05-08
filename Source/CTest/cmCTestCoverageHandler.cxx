@@ -538,7 +538,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     covSumFile << "\t<File Name=\"" << this->CTest->MakeXMLSafe(fileName)
       << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
         this->CTest->GetShortPathToFile(fullFileName.c_str()))
-      << "\" Covered=\"" << (tested==0?"true":"false") << "\">\n"
+      << "\" Covered=\"" << (tested > 0 ? "true":"false") << "\">\n"
       << "\t\t<LOCTested>" << tested << "</LOCTested>\n"
       << "\t\t<LOCUnTested>" << untested << "</LOCUnTested>\n"
       << "\t\t<PercentCoverage>";
