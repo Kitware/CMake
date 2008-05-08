@@ -34,7 +34,7 @@ class cmDepends
 public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
-  cmDepends();
+  cmDepends(cmLocalGenerator* lg=0, const char* targetDir="");
   
   /** at what level will the compile be done from */
   void SetCompileDirectory(const char *dir) {this->CompileDirectory = dir;};
@@ -107,6 +107,11 @@ protected:
   size_t MaxPath;
   char* Dependee;
   char* Depender;
+
+  // The include file search path.
+  std::vector<std::string> IncludePath;
+
+  void SetIncludePathFromLanguage(const char* lang);
 
 private:
   cmDepends(cmDepends const&); // Purposely not implemented.

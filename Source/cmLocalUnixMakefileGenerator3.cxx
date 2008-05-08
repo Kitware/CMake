@@ -1473,68 +1473,18 @@ cmLocalUnixMakefileGenerator3
     {
     // construct the checker
     std::string lang = li->c_str();
-    
-    // Get the set of include directories.
-    std::vector<std::string> includes;
-    if(haveDirectoryInfo)
-      {
-      std::string includePathVar = "CMAKE_";
-      includePathVar += lang;
-      includePathVar += "_INCLUDE_PATH";
-      if(const char* includePath = mf->GetDefinition(includePathVar.c_str()))
-        {
-        cmSystemTools::ExpandListArgument(includePath, includes);
-        }
-      }
-    
-    // Get the include file regular expression.
-    std::string includeRegexScan = "^.*$";
-    std::string includeRegexComplain = "^$";
-    if(haveDirectoryInfo)
-      {
-      std::string scanRegexVar = "CMAKE_";
-      scanRegexVar += lang;
-      scanRegexVar += "_INCLUDE_REGEX_SCAN";
-      if(const char* scanRegex = mf->GetDefinition(scanRegexVar.c_str()))
-        {
-        includeRegexScan = scanRegex;
-        }
-      std::string complainRegexVar = "CMAKE_";
-      complainRegexVar += lang;
-      complainRegexVar += "_INCLUDE_REGEX_COMPLAIN";
-      if(const char* complainRegex = 
-         mf->GetDefinition(complainRegexVar.c_str()))
-        {
-        includeRegexComplain = complainRegex;
-        }
-      }
 
     // Create the scanner for this language
     cmDepends *scanner = 0;
     if(lang == "C" || lang == "CXX" || lang == "RC")
       {
-      std::string includeCacheFileName = dir;
-      includeCacheFileName += "/";
-      includeCacheFileName += lang;
-      includeCacheFileName += ".includecache";
-      
       // TODO: Handle RC (resource files) dependencies correctly.
-      scanner = new cmDependsC(includes,
-                               includeRegexScan.c_str(),
-                               includeRegexComplain.c_str(),
-                               includeCacheFileName);
+      scanner = new cmDependsC(this, targetDir, lang.c_str());
       }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")
       {
-      std::vector<std::string> defines;
-      if(const char* c_defines =
-         mf->GetDefinition("CMAKE_TARGET_DEFINITIONS"))
-        {
-        cmSystemTools::ExpandListArgument(c_defines, defines);
-        }
-
-      scanner = new cmDependsFortran(includes, defines);
+      scanner = new cmDependsFortran(this);
       }
     else if(lang == "Java")
       {

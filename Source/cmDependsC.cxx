@@ -18,6 +18,7 @@
 
 #include "cmFileTimeComparison.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 
 #include <ctype.h> // isspace
@@ -31,25 +32,53 @@
 #define INCLUDE_REGEX_COMPLAIN_MARKER "#IncludeRegexComplain: "
 
 //----------------------------------------------------------------------------
-cmDependsC::cmDependsC():
-  IncludePath(0)
+cmDependsC::cmDependsC()
 {
 }
+
 //----------------------------------------------------------------------------
-// yummy look at all those constructor arguments
-cmDependsC::cmDependsC(std::vector<std::string> const& includes,
-                       const char* scanRegex, const char* complainRegex,
-                       const cmStdString& cacheFileName):
-  IncludePath(&includes),
-  IncludeRegexLine(INCLUDE_REGEX_LINE),
-  IncludeRegexScan(scanRegex),
-  IncludeRegexComplain(complainRegex),
-  IncludeRegexLineString(INCLUDE_REGEX_LINE_MARKER INCLUDE_REGEX_LINE),
-  IncludeRegexScanString(std::string(INCLUDE_REGEX_SCAN_MARKER)+scanRegex),
-  IncludeRegexComplainString(
-    std::string(INCLUDE_REGEX_COMPLAIN_MARKER)+complainRegex),
-  CacheFileName(cacheFileName)
+cmDependsC::cmDependsC(cmLocalGenerator* lg, const char* targetDir,
+                       const char* lang): cmDepends(lg, targetDir)
 {
+  cmMakefile* mf = lg->GetMakefile();
+
+  // Configure the include file search path.
+  this->SetIncludePathFromLanguage(lang);
+
+  // Configure regular expressions.
+  std::string scanRegex = "^.*$";
+  std::string complainRegex = "^$";
+  {
+  std::string scanRegexVar = "CMAKE_";
+  scanRegexVar += lang;
+  scanRegexVar += "_INCLUDE_REGEX_SCAN";
+  if(const char* sr = mf->GetDefinition(scanRegexVar.c_str()))
+    {
+    scanRegex = sr;
+    }
+  std::string complainRegexVar = "CMAKE_";
+  complainRegexVar += lang;
+  complainRegexVar += "_INCLUDE_REGEX_COMPLAIN";
+  if(const char* cr = mf->GetDefinition(complainRegexVar.c_str()))
+    {
+    complainRegex = cr;
+    }
+  }
+
+  this->IncludeRegexLine.compile(INCLUDE_REGEX_LINE);
+  this->IncludeRegexScan.compile(scanRegex.c_str());
+  this->IncludeRegexComplain.compile(complainRegex.c_str());
+  this->IncludeRegexLineString = INCLUDE_REGEX_LINE_MARKER INCLUDE_REGEX_LINE;
+  this->IncludeRegexScanString = INCLUDE_REGEX_SCAN_MARKER;
+  this->IncludeRegexScanString += scanRegex;
+  this->IncludeRegexComplainString = INCLUDE_REGEX_COMPLAIN_MARKER;
+  this->IncludeRegexComplainString += complainRegex;
+
+  this->CacheFileName = this->TargetDirectory;
+  this->CacheFileName += "/";
+  this->CacheFileName += lang;
+  this->CacheFileName += ".includecache";
+
   this->ReadCacheFile();
 }
 
@@ -78,11 +107,6 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
   if(!obj || obj[0] == '\0')
     {
     cmSystemTools::Error("Cannot scan dependencies without an object file.");
-    return false;
-    }
-  if(!this->IncludePath)
-    {
-    cmSystemTools::Error("Cannot scan dependencies without an include path.");
     return false;
     }
 
@@ -138,7 +162,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
       cacheKey += current.FileName;
 
       for(std::vector<std::string>::const_iterator i = 
-            this->IncludePath->begin(); i != this->IncludePath->end(); ++i)
+            this->IncludePath.begin(); i != this->IncludePath.end(); ++i)
         {
         cacheKey+=*i;
         }
@@ -149,7 +173,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
         fullName=headerLocationIt->second;
         }
       else for(std::vector<std::string>::const_iterator i =
-            this->IncludePath->begin(); i != this->IncludePath->end(); ++i)
+            this->IncludePath.begin(); i != this->IncludePath.end(); ++i)
         {
         // Construct the name of the file as if it were in the current
         // include directory.  Avoid using a leading "./".

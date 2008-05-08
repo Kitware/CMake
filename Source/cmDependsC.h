@@ -30,9 +30,7 @@ public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
   cmDependsC();
-  cmDependsC(std::vector<std::string> const& includes,
-             const char* scanRegex, const char* complainRegex,
-             const cmStdString& cachFileName);
+  cmDependsC(cmLocalGenerator* lg, const char* targetDir, const char* lang);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsC();
@@ -50,9 +48,6 @@ protected:
   void Scan(std::istream& is, const char* directory,
     const cmStdString& fullName);
 
-  // The include file search path.
-  std::vector<std::string> const* IncludePath;
-
   // Regular expression to identify C preprocessor include directives.
   cmsys::RegularExpression IncludeRegexLine;
 
@@ -60,9 +55,9 @@ protected:
   // recursively and which to complain about not finding.
   cmsys::RegularExpression IncludeRegexScan;
   cmsys::RegularExpression IncludeRegexComplain;
-  const std::string IncludeRegexLineString;
-  const std::string IncludeRegexScanString;
-  const std::string IncludeRegexComplainString;
+  std::string IncludeRegexLineString;
+  std::string IncludeRegexScanString;
+  std::string IncludeRegexComplainString;
 
 public:
   // Data structures for dependency graph walk.

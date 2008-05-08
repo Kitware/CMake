@@ -131,17 +131,25 @@ public:
 
 //----------------------------------------------------------------------------
 cmDependsFortran::cmDependsFortran():
-  IncludePath(0), PPDefinitions(0), Internal(0)
+  PPDefinitions(0), Internal(0)
 {
 }
 
 //----------------------------------------------------------------------------
 cmDependsFortran
-::cmDependsFortran(std::vector<std::string> const& includes,
-                   std::vector<std::string> const& definitions):
-  IncludePath(&includes),
+::cmDependsFortran(cmLocalGenerator* lg):
+  cmDepends(lg),
   Internal(new cmDependsFortranInternals)
 {
+  // Get the list of definitions.
+  std::vector<std::string> definitions;
+  cmMakefile* mf = this->LocalGenerator->GetMakefile();
+  if(const char* c_defines =
+     mf->GetDefinition("CMAKE_TARGET_DEFINITIONS"))
+    {
+    cmSystemTools::ExpandListArgument(c_defines, definitions);
+    }
+
   // translate i.e. FOO=BAR to FOO and add it to the list of defined
   // preprocessor symbols
   for(std::vector<std::string>::const_iterator
@@ -176,11 +184,6 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
   if(!obj || obj[0] == '\0')
     {
     cmSystemTools::Error("Cannot scan dependencies without an object file.");
-    return false;
-    }
-  if(!this->IncludePath)
-    {
-    cmSystemTools::Error("Cannot scan dependencies without an include path.");
     return false;
     }
 
@@ -595,7 +598,7 @@ bool cmDependsFortran::FindModule(std::string const& name,
   // Search the include path for the module.
   std::string fullName;
   for(std::vector<std::string>::const_iterator i =
-        this->IncludePath->begin(); i != this->IncludePath->end(); ++i)
+        this->IncludePath.begin(); i != this->IncludePath.end(); ++i)
     {
     // Try the lower-case name.
     fullName = *i;
@@ -887,7 +890,7 @@ bool cmDependsFortran::FindIncludeFile(const char* dir,
 
     // Search the include path for the file.
     for(std::vector<std::string>::const_iterator i = 
-          this->IncludePath->begin(); i != this->IncludePath->end(); ++i)
+          this->IncludePath.begin(); i != this->IncludePath.end(); ++i)
       {
       fullName = *i;
       fullName += "/";
