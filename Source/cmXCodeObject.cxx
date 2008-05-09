@@ -69,6 +69,10 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
       this->Id += "0";
       }
     }
+  if(this->Id.size() > 24)
+    {
+    this->Id = this->Id.substr(0,24);
+    }
   this->TypeValue = type;
   if(this->TypeValue == OBJECT)
     {
