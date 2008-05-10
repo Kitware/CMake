@@ -706,6 +706,8 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     "   Processing coverage (each . represents one file):" << std::endl);
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "    ");
   int file_count = 0;
+  // make sure output from gcov is in English!
+  cmSystemTools::PutEnv("LC_ALL=POSIX");
   for ( it = files.begin(); it != files.end(); ++ it )
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
