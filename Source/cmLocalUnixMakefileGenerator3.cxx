@@ -1110,8 +1110,8 @@ cmLocalUnixMakefileGenerator3
     for(std::vector<std::string>::const_iterator f = files.begin();
         f != files.end(); ++f)
       {
-      fout << "\"" << this->Convert(f->c_str(),START_OUTPUT,UNCHANGED) 
-           << "\"\n";
+      std::string fc = this->Convert(f->c_str(),START_OUTPUT,UNCHANGED);
+      fout << "  " << this->EscapeForCMake(fc.c_str()) << "\n";
       }
     fout << ")\n";
     commands.push_back(remove);
