@@ -1525,28 +1525,25 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
   std::vector<std::string> pairs;
   cmSystemTools::ExpandListArgument(pairs_string, pairs, true);
   for(std::vector<std::string>::const_iterator i = pairs.begin();
-      i != pairs.end(); ++i)
+      i != pairs.end() && (i+1) != pairs.end();)
     {
-    const std::string& depender = *i;
-    if(++i != pairs.end())
-      {
-      const std::string& dependee = *i;
+    const std::string& depender = *i++;
+    const std::string& dependee = *i++;
 
-      // If the depender is missing then delete the dependee to make
-      // sure both will be regenerated.
-      if(cmSystemTools::FileExists(dependee.c_str()) &&
-         !cmSystemTools::FileExists(depender.c_str()))
+    // If the depender is missing then delete the dependee to make
+    // sure both will be regenerated.
+    if(cmSystemTools::FileExists(dependee.c_str()) &&
+       !cmSystemTools::FileExists(depender.c_str()))
+      {
+      if(verbose)
         {
-        if(verbose)
-          {
-          cmOStringStream msg;
-          msg << "Deleting primary custom command output \"" << dependee
-              << "\" because another output \""
-              << depender << "\" does not exist." << std::endl;
-          cmSystemTools::Stdout(msg.str().c_str());
-          }
-        cmSystemTools::RemoveFile(dependee.c_str());
+        cmOStringStream msg;
+        msg << "Deleting primary custom command output \"" << dependee
+            << "\" because another output \""
+            << depender << "\" does not exist." << std::endl;
+        cmSystemTools::Stdout(msg.str().c_str());
         }
+      cmSystemTools::RemoveFile(dependee.c_str());
       }
     }
 }
