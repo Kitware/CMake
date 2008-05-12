@@ -764,6 +764,12 @@ void cmGlobalGenerator::Generate()
     return;
     }
 
+  // Check that all targets are valid.
+  if(!this->CheckTargets())
+    {
+    return;
+    }
+
   // For each existing cmLocalGenerator
   unsigned int i;
 
@@ -848,6 +854,34 @@ void cmGlobalGenerator::Generate()
     }
 
   this->CMakeInstance->UpdateProgress("Generating done", -1);
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalGenerator::CheckTargets()
+{
+  // Make sure all targets can find their source files.
+  for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmTargets& targets =
+      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    for(cmTargets::iterator ti = targets.begin();
+        ti != targets.end(); ++ti)
+      {
+      cmTarget& target = ti->second;
+      if(target.GetType() == cmTarget::EXECUTABLE ||
+         target.GetType() == cmTarget::STATIC_LIBRARY ||
+         target.GetType() == cmTarget::SHARED_LIBRARY ||
+         target.GetType() == cmTarget::MODULE_LIBRARY ||
+         target.GetType() == cmTarget::UTILITY)
+        {
+        if(!target.FindSourceFiles())
+          {
+          return false;
+          }
+        }
+      }
+    }
+  return true;
 }
 
 void cmGlobalGenerator::CheckLocalGenerators()

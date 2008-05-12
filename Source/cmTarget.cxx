@@ -1006,6 +1006,21 @@ void cmTarget::TraceDependencies(const char* vsProjectFile)
 }
 
 //----------------------------------------------------------------------------
+bool cmTarget::FindSourceFiles()
+{
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = this->SourceFiles.begin();
+      si != this->SourceFiles.end(); ++si)
+    {
+    if((*si)->GetFullPath().empty())
+      {
+      return false;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
   for(std::vector<std::string>::const_iterator i = srcs.begin();
