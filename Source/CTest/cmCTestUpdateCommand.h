@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CTEST_UPDATE";}
+  virtual const char* GetName() { return "ctest_update";}
 
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_UPDATE([SOURCE source] [RETURN_VALUE res])\n"
+      "  ctest_update([SOURCE source] [RETURN_VALUE res])\n"
       "Updates the given source directory and stores results in Update.xml. "
       "The second argument is a variable that will hold the number of files "
       "modified. If there is a problem, the variable will be -1.";

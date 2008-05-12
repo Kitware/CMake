@@ -45,7 +45,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CTEST_SUBMIT";}
+  virtual const char* GetName() { return "ctest_submit";}
 
   /**
    * Succinct documentation.
@@ -61,7 +61,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_SUBMIT([RETURN_VALUE res])\n"
+      "  ctest_submit([RETURN_VALUE res])\n"
       "Submits the test results for the project.";
     }
 

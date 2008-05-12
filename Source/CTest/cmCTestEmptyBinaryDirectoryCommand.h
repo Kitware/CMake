@@ -53,7 +53,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CTEST_EMPTY_BINARY_DIRECTORY";}
+  virtual const char* GetName() { return "ctest_empty_binary_directory";}
 
   /**
    * Succinct documentation.
@@ -69,7 +69,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_EMPTY_BINARY_DIRECTORY( directory )\n"
+      "  ctest_empty_binary_directory( directory )\n"
       "Removes a binary directory. This command will perform some checks "
       "prior to deleting the directory in an attempt to avoid malicious "
       "or accidental directory deletion.";

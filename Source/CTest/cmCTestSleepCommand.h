@@ -52,7 +52,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CTEST_SLEEP";}
+  virtual const char* GetName() { return "ctest_sleep";}
 
   /**
    * Succinct documentation.
@@ -68,8 +68,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_SLEEP( seconds )\n"
-      "  CTEST_SLEEP( time1 duration time2 )\n"
+      "  ctest_sleep( seconds )\n"
+      "  ctest_sleep( time1 duration time2 )\n"
       "With one argument it will sleep for a given number of seconds. "
       "With three arguments it will wait for time2 - time1 - duration "
       "seconds.";

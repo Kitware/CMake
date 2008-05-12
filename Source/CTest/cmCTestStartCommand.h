@@ -51,7 +51,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CTEST_START";}
+  virtual const char* GetName() { return "ctest_start";}
 
   /**
    * Succinct documentation.
@@ -67,7 +67,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_START(Model [TRACK <track>] [source [binary]])\n"
+      "  ctest_start(Model [TRACK <track>] [source [binary]])\n"
       "Starts the testing for a given model. The command should be called "
       "after the binary directory is initialized. If the 'source' and "
       "'binary' directory are not specified, it reads the "

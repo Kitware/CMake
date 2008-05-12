@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CTEST_COVERAGE";}
+  virtual const char* GetName() { return "ctest_coverage";}
 
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_COVERAGE([BUILD build_dir] [RETURN_VALUE res])\n"
+      "  ctest_coverage([BUILD build_dir] [RETURN_VALUE res])\n"
       "Perform the coverage of the given build directory and stores results "
       "in Coverage.xml. The second argument is a variable that will hold "
       "value.";
