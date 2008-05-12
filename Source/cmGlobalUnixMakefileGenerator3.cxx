@@ -90,7 +90,7 @@ void cmGlobalUnixMakefileGenerator3
     const char* cname = this->GetCMakeInstance()->
       GetCacheManager()->GetCacheValue(langComp.c_str());
     std::string changeVars;
-    if(cname && (path != cname))
+    if(cname && (path != cname) && (optional==false))
       {
       const char* cvars = 
         this->GetCMakeInstance()->GetProperty(
