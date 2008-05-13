@@ -20,6 +20,7 @@
 #include <cmsys/auto_ptr.hxx>
 
 // Need the native byte order of the running CPU.
+#define cmsys_CPU_UNKNOWN_OKAY // We can decide at runtime if not known.
 #include <cmsys/CPU.h>
 
 // Include the ELF format information system header.
