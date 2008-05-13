@@ -16,6 +16,7 @@ MACRO(ADD_DOCS target dependency)
       ARGS --help-full ${CMake_BINARY_DIR}/Docs/${target}.txt
            --help-full ${CMake_BINARY_DIR}/Docs/${target}.html
            --help-full ${CMake_BINARY_DIR}/Docs/${target}.1
+           --help-full ${CMake_BINARY_DIR}/Docs/${target}.docbook
       DEPENDS ${target}
       MAIN_DEPENDENCY ${dependency}
       )
@@ -23,6 +24,7 @@ MACRO(ADD_DOCS target dependency)
     INSTALL_FILES(${CMAKE_DOC_DIR} FILES
       ${CMake_BINARY_DIR}/Docs/${target}.txt
       ${CMake_BINARY_DIR}/Docs/${target}.html
+      ${CMake_BINARY_DIR}/Docs/${target}.docbook
       )
     SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/${target}.txt)
   ENDIF(CMD)
@@ -44,6 +46,10 @@ ADD_CUSTOM_COMMAND(
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.txt
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.html
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.1
+       --help-full ${CMake_BINARY_DIR}/Docs/cmake.docbook
+       --help-policies ${CMake_BINARY_DIR}/Docs/cmake-policies.txt
+       --help-policies ${CMake_BINARY_DIR}/Docs/cmake-policies.html
+       --help-policies ${CMake_BINARY_DIR}/Docs/cmakepolicies.1
        --help-properties ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
        --help-properties ${CMake_BINARY_DIR}/Docs/cmake-properties.html
        --help-properties ${CMake_BINARY_DIR}/Docs/cmakeprops.1
@@ -68,17 +74,21 @@ INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
               ${CMake_BINARY_DIR}/Docs/cmakecommands.1
               ${CMake_BINARY_DIR}/Docs/cmakecompat.1
               ${CMake_BINARY_DIR}/Docs/cmakeprops.1
+              ${CMake_BINARY_DIR}/Docs/cmakepolicies.1
               ${CMake_BINARY_DIR}/Docs/cmakevars.1
               ${CMake_BINARY_DIR}/Docs/cmakemodules.1)
 
 INSTALL_FILES(${CMAKE_DOC_DIR} FILES
     ${CMake_BINARY_DIR}/Docs/cmake.txt
     ${CMake_BINARY_DIR}/Docs/cmake.html
+    ${CMake_BINARY_DIR}/Docs/cmake.docbook
+    ${CMake_BINARY_DIR}/Docs/cmake-policies.txt
+    ${CMake_BINARY_DIR}/Docs/cmake-policies.html
     ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
     ${CMake_BINARY_DIR}/Docs/cmake-properties.html
     ${CMake_BINARY_DIR}/Docs/cmake-variables.txt
     ${CMake_BINARY_DIR}/Docs/cmake-variables.html 
-   ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
+    ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
     ${CMake_BINARY_DIR}/Docs/cmake-modules.html
     ${CMake_BINARY_DIR}/Docs/cmake-commands.txt
     ${CMake_BINARY_DIR}/Docs/cmake-commands.html
