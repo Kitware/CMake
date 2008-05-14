@@ -1875,6 +1875,32 @@ void cmLocalUnixMakefileGenerator3
     cmakefileStream
       << "  )\n";
     }
+
+  // Store include transform rule properties.  Write the directory
+  // rules first because they may be overridden by later target rules.
+  std::vector<std::string> transformRules;
+  if(const char* xform =
+     this->Makefile->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM"))
+    {
+    cmSystemTools::ExpandListArgument(xform, transformRules);
+    }
+  if(const char* xform =
+     target.GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM"))
+    {
+    cmSystemTools::ExpandListArgument(xform, transformRules);
+    }
+  if(!transformRules.empty())
+    {
+    cmakefileStream
+      << "SET(CMAKE_INCLUDE_TRANSFORMS\n";
+    for(std::vector<std::string>::const_iterator tri = transformRules.begin();
+        tri != transformRules.end(); ++tri)
+      {
+      cmakefileStream << "  " << this->EscapeForCMake(tri->c_str()) << "\n";
+      }
+    cmakefileStream
+      << "  )\n";
+    }
 }
 
 //----------------------------------------------------------------------------
