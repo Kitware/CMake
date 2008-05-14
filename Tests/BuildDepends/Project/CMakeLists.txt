@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 2.6)
 project(testRebuild)
 add_library(foo STATIC ${testRebuild_BINARY_DIR}/foo.cxx)
 
@@ -57,5 +58,17 @@ add_custom_command(
 add_custom_target(zot_custom ALL DEPENDS
   ${CMAKE_CURRENT_BINARY_DIR}/zot_custom.hxx)
 
-add_executable(zot zot.cxx ${CMAKE_CURRENT_BINARY_DIR}/zot.hxx)
+add_executable(zot zot.cxx ${CMAKE_CURRENT_BINARY_DIR}/zot.hxx
+  zot_macro_dir.cxx zot_macro_tgt.cxx)
 add_dependencies(zot zot_custom)
+
+# Test the #include line macro transformation rule support.
+set_property(
+  TARGET zot
+  PROPERTY IMPLICIT_DEPENDS_INCLUDE_TRANSFORM "ZOT_TGT(%)=<zot_%_tgt.hxx>"
+  )
+
+set_property(
+  DIRECTORY
+  PROPERTY IMPLICIT_DEPENDS_INCLUDE_TRANSFORM "ZOT_DIR(%)=<zot_%_dir.hxx>"
+  )
