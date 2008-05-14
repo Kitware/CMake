@@ -59,6 +59,15 @@ protected:
   std::string IncludeRegexScanString;
   std::string IncludeRegexComplainString;
 
+  // Regex to transform #include lines.
+  std::string IncludeRegexTransformString;
+  cmsys::RegularExpression IncludeRegexTransform;
+  typedef std::map<cmStdString, cmStdString> TransformRulesType;
+  TransformRulesType TransformRules;
+  void SetupTransforms();
+  void ParseTransform(std::string const& xform);
+  void TransformLine(std::string& line);
+
 public:
   // Data structures for dependency graph walk.
   struct UnscannedEntry

@@ -30,6 +30,7 @@
 #define INCLUDE_REGEX_LINE_MARKER "#IncludeRegexLine: "
 #define INCLUDE_REGEX_SCAN_MARKER "#IncludeRegexScan: "
 #define INCLUDE_REGEX_COMPLAIN_MARKER "#IncludeRegexComplain: "
+#define INCLUDE_REGEX_TRANSFORM_MARKER "#IncludeRegexTransform: "
 
 //----------------------------------------------------------------------------
 cmDependsC::cmDependsC()
@@ -73,6 +74,8 @@ cmDependsC::cmDependsC(cmLocalGenerator* lg, const char* targetDir,
   this->IncludeRegexScanString += scanRegex;
   this->IncludeRegexComplainString = INCLUDE_REGEX_COMPLAIN_MARKER;
   this->IncludeRegexComplainString += complainRegex;
+
+  this->SetupTransforms();
 
   this->CacheFileName = this->TargetDirectory;
   this->CacheFileName += "/";
@@ -341,6 +344,13 @@ void cmDependsC::ReadCacheFile()
             return;
             }
           }
+        else if (line.find(INCLUDE_REGEX_TRANSFORM_MARKER) == 0)
+          {
+          if (line != this->IncludeRegexTransformString)
+            {
+            return;
+            }
+          }
         }
       }
     else if (cacheEntry!=0)
@@ -375,6 +385,7 @@ void cmDependsC::WriteCacheFile() const
   cacheOut << this->IncludeRegexLineString << "\n\n";
   cacheOut << this->IncludeRegexScanString << "\n\n";
   cacheOut << this->IncludeRegexComplainString << "\n\n";
+  cacheOut << this->IncludeRegexTransformString << "\n\n";
 
   for (std::map<cmStdString, cmIncludeLines*>::const_iterator fileIt=
          this->FileCache.begin();
@@ -415,6 +426,12 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
   std::string line;
   while(cmSystemTools::GetLineFromStream(is, line))
     {
+    // Transform the line content first.
+    if(!this->TransformRules.empty())
+      {
+      this->TransformLine(line);
+      }
+
     // Match include directives.
     if(this->IncludeRegexLine.find(line.c_str()))
       {
@@ -450,4 +467,101 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
         }
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmDependsC::SetupTransforms()
+{
+  // Get the transformation rules.
+  std::vector<std::string> transformRules;
+  cmMakefile* mf = this->LocalGenerator->GetMakefile();
+  if(const char* xform =
+     mf->GetDefinition("CMAKE_INCLUDE_TRANSFORMS"))
+    {
+    cmSystemTools::ExpandListArgument(xform, transformRules, true);
+    }
+  for(std::vector<std::string>::const_iterator tri = transformRules.begin();
+      tri != transformRules.end(); ++tri)
+    {
+    this->ParseTransform(*tri);
+    }
+
+  this->IncludeRegexTransformString = INCLUDE_REGEX_TRANSFORM_MARKER;
+  if(!this->TransformRules.empty())
+    {
+    // Construct the regular expression to match lines to be
+    // transformed.
+    std::string xform = "^([ \t]*#[ \t]*(include|import)[ \t]*)(";
+    const char* sep = "";
+    for(TransformRulesType::const_iterator tri = this->TransformRules.begin();
+        tri != this->TransformRules.end(); ++tri)
+      {
+      xform += sep;
+      xform += tri->first;
+      sep = "|";
+      }
+    xform += ")[ \t]*\\(([^),]*)\\)";
+    this->IncludeRegexTransform.compile(xform.c_str());
+
+    // Build a string that encodes all transformation rules and will
+    // change when rules are changed.
+    this->IncludeRegexTransformString += xform;
+    for(TransformRulesType::const_iterator tri = this->TransformRules.begin();
+        tri != this->TransformRules.end(); ++tri)
+      {
+      this->IncludeRegexTransformString += " ";
+      this->IncludeRegexTransformString += tri->first;
+      this->IncludeRegexTransformString += "(%)=";
+      this->IncludeRegexTransformString += tri->second;
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmDependsC::ParseTransform(std::string const& xform)
+{
+  // A transform rule is of the form SOME_MACRO(%)=value-with-%
+  // We can simply separate with "(%)=".
+  std::string::size_type pos = xform.find("(%)=");
+  if(pos == xform.npos || pos == 0)
+    {
+    return;
+    }
+  std::string name = xform.substr(0, pos);
+  std::string value = xform.substr(pos+4, xform.npos);
+  this->TransformRules[name] = value;
+}
+
+//----------------------------------------------------------------------------
+void cmDependsC::TransformLine(std::string& line)
+{
+  // Check for a transform rule match.  Return if none.
+  if(!this->IncludeRegexTransform.find(line.c_str()))
+    {
+    return;
+    }
+  TransformRulesType::const_iterator tri =
+    this->TransformRules.find(this->IncludeRegexTransform.match(3));
+  if(tri == this->TransformRules.end())
+    {
+    return;
+    }
+
+  // Construct the transformed line.
+  std::string newline = this->IncludeRegexTransform.match(1);
+  std::string arg = this->IncludeRegexTransform.match(4);
+  for(const char* c = tri->second.c_str(); *c; ++c)
+    {
+    if(*c == '%')
+      {
+      newline += arg;
+      }
+    else
+      {
+      newline += *c;
+      }
+    }
+
+  // Return the transformed line.
+  line = newline;
 }
