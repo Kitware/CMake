@@ -1122,8 +1122,11 @@ void cmMakefileTargetGenerator
   this->LocalGenerator->AppendCustomDepend(depends, cc);
 
   // Add a dependency on the rule file itself.
-  this->LocalGenerator->AppendRuleDepend(depends,
-                                         this->BuildFileNameFull.c_str());
+  if(!cc.GetSkipRuleDepends())
+    {
+    this->LocalGenerator->AppendRuleDepend(depends,
+                                           this->BuildFileNameFull.c_str());
+    }
 
   // Check whether we need to bother checking for a symbolic output.
   bool need_symbolic = this->GlobalGenerator->GetNeedSymbolicMark();

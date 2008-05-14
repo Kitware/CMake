@@ -68,6 +68,10 @@ public:
   bool GetEscapeAllowMakeVars() const;
   void SetEscapeAllowMakeVars(bool b);
 
+  /** Set/Get whether to skip the dependency on the rule itself.  */
+  bool GetSkipRuleDepends() const;
+  void SetSkipRuleDepends(bool b);
+
   typedef std::pair<cmStdString, cmStdString> ImplicitDependsPair;
   class ImplicitDependsList: public std::vector<ImplicitDependsPair> {};
   void SetImplicitDepends(ImplicitDependsList const&);
@@ -83,6 +87,7 @@ private:
   std::string WorkingDirectory;
   bool EscapeAllowMakeVars;
   bool EscapeOldStyle;
+  bool SkipRuleDepends;
   ImplicitDependsList ImplicitDepends;
 };
 

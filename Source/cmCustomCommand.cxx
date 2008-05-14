@@ -22,6 +22,7 @@ cmCustomCommand::cmCustomCommand()
   this->HaveComment = false;
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
+  this->SkipRuleDepends = false;
 }
 
 //----------------------------------------------------------------------------
@@ -50,10 +51,9 @@ cmCustomCommand::cmCustomCommand(const std::vector<std::string>& outputs,
   Comment(comment?comment:""),
   WorkingDirectory(workingDirectory?workingDirectory:""),
   EscapeAllowMakeVars(false),
-  EscapeOldStyle(true)
+  EscapeOldStyle(true),
+  SkipRuleDepends(false)
 {
-  this->EscapeOldStyle = true;
-  this->EscapeAllowMakeVars = false;
 }
 
 //----------------------------------------------------------------------------
@@ -133,6 +133,18 @@ bool cmCustomCommand::GetEscapeAllowMakeVars() const
 void cmCustomCommand::SetEscapeAllowMakeVars(bool b)
 {
   this->EscapeAllowMakeVars = b;
+}
+
+//----------------------------------------------------------------------------
+bool cmCustomCommand::GetSkipRuleDepends() const
+{
+  return this->SkipRuleDepends;
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::SetSkipRuleDepends(bool b)
+{
+  this->SkipRuleDepends = b;
 }
 
 //----------------------------------------------------------------------------
