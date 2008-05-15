@@ -88,14 +88,17 @@ IF (NOT _CMAKE_TOOLCHAIN_LOCATION)
   GET_FILENAME_COMPONENT(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_C_COMPILER}" PATH)
 ENDIF (NOT _CMAKE_TOOLCHAIN_LOCATION)
 
-# if we have a gcc cross compiler, they have usually some prefix, like 
-# e.g. powerpc-linux-gcc, arm-elf-gcc or i586-mingw32msvc-gcc
-# the other tools of the toolchain usually have the same prefix
+# If we have a gcc cross compiler, they have usually some prefix, like 
+# e.g. powerpc-linux-gcc, arm-elf-gcc or i586-mingw32msvc-gcc .
+# The other tools of the toolchain usually have the same prefix
+# NAME_WE cannot be used since then this test will fail for names lile
+# "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be 
+# "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
 IF (NOT _CMAKE_TOOLCHAIN_PREFIX)
-  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME_WE)
-  IF (COMPILER_BASENAME MATCHES "^(.+-)g?cc")
-    STRING(REGEX REPLACE "^(.+-)g?cc"  "\\1" _CMAKE_TOOLCHAIN_PREFIX "${COMPILER_BASENAME}")
-  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)g?cc")
+  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
+  IF (COMPILER_BASENAME MATCHES "^(.+-)g?cc(\\.exe)?$")
+    STRING(REGEX REPLACE "^(.+-)g?cc(\\.exe)?$"  "\\1" _CMAKE_TOOLCHAIN_PREFIX "${COMPILER_BASENAME}")
+  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)g?cc(\\.exe)?$")
 ENDIF (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
 
