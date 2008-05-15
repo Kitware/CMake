@@ -122,6 +122,14 @@ ENDIF(KWSYS_STANDALONE)
 # The project name is that of the specified namespace.
 PROJECT(${KWSYS_NAMESPACE})
 
+# Tell CMake how to follow dependencies of sources in this directory.
+IF(COMMAND SET_PROPERTY)
+  SET_PROPERTY(DIRECTORY
+    PROPERTY IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
+    "KWSYS_HEADER(%)=<${KWSYS_NAMESPACE}/%>"
+    )
+ENDIF(COMMAND SET_PROPERTY)
+
 # Select library components.
 IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_ENABLE_C 1)

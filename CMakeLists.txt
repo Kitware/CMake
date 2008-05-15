@@ -353,8 +353,8 @@ ENDMACRO (CMAKE_BUILD_UTILITIES)
 # The CMake version number.
 SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 6)
-SET(CMake_VERSION_PATCH 0)
-#SET(CMake_VERSION_RC 1)
+SET(CMake_VERSION_PATCH 1)
+SET(CMake_VERSION_RC 1)
 # CVS versions are odd, if this is an odd minor version
 # then set the CMake_VERSION_DATE variable
 IF("${CMake_VERSION_MINOR}" MATCHES "[13579]$")

@@ -271,6 +271,11 @@ public:
    */
   void TraceDependencies(const char* vsProjectFile);
 
+  /**
+   * Make sure the full path to all source files is known.
+   */
+  bool FindSourceFiles();
+
   ///! Return the prefered linker language for this target
   const char* GetLinkerLanguage(cmGlobalGenerator*);
 

@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CTEST_CONFIGURE";}
+  virtual const char* GetName() { return "ctest_configure";}
 
   /**
    * Succinct documentation.
@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_CONFIGURE(BUILD build_dir RETURN_VALUE res)\n"
+      "  ctest_configure(BUILD build_dir RETURN_VALUE res)\n"
       "Configures the given build directory and stores results in "
       "Configure.xml. The second argument is a variable that will hold "
       "return value.";

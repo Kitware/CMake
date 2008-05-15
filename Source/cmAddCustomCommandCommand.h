@@ -71,7 +71,7 @@ public:
       "                     COMMAND command1 [ARGS] [args1...]\n"
       "                     [COMMAND command2 [ARGS] [args2...] ...]\n"
       "                     [MAIN_DEPENDENCY depend]\n"
-      "                     [DEPENDS [depends...]]\n"
+      "                     [DEPENDS [depends...]] [SKIP_RULE_DEPENDS]\n"
       "                     [IMPLICIT_DEPENDS <lang1> depend1 ...]\n"
       "                     [WORKING_DIRECTORY dir]\n"
       "                     [COMMENT comment] [VERBATIM] [APPEND])\n"
@@ -133,6 +133,12 @@ public:
       "If the output of the custom command is not actually "
       "created as a file on disk it should be marked as SYMBOLIC with "
       "SET_SOURCE_FILES_PROPERTIES.\n"
+
+      "The SKIP_RULE_DEPENDS option prevents the custom build rule from "
+      "having a dependency on itself.  This prevents the rule from running "
+      "again just because the command changed but is useful to create "
+      "rules that have absolutely no dependencies.  Such rules run only "
+      "when the output file is missing.\n"
 
       "The IMPLICIT_DEPENDS option requests scanning of implicit "
       "dependencies of an input file.  The language given specifies the "

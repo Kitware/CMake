@@ -40,6 +40,7 @@ bool cmAddCustomCommandCommand
   std::vector<std::string> depends, outputs, output;
   bool verbatim = false;
   bool append = false;
+  bool skip_rule_depends = false;
   std::string implicit_depends_lang;
   cmCustomCommand::ImplicitDependsList implicit_depends;
 
@@ -102,6 +103,11 @@ bool cmAddCustomCommandCommand
     else if(copy == "VERBATIM")
       {
       verbatim = true;
+      }
+    else if(copy == "SKIP_RULE_DEPENDS")
+      {
+      doing = doing_nothing;
+      skip_rule_depends = true;
       }
     else if(copy == "APPEND")
       {
@@ -310,8 +316,8 @@ bool cmAddCustomCommandCommand
                                              working.c_str(), false,
                                              escapeOldStyle);
 
-    // Add implicit dependency scanning requests if any were given.
-    if(!implicit_depends.empty())
+    // Get the rule object to add some extra information.
+    if(!implicit_depends.empty() || skip_rule_depends)
       {
       bool okay = false;
       if(cmSourceFile* sf =
@@ -320,7 +326,16 @@ bool cmAddCustomCommandCommand
         if(cmCustomCommand* cc = sf->GetCustomCommand())
           {
           okay = true;
-          cc->SetImplicitDepends(implicit_depends);
+
+          // Add implicit dependency scanning requests if any were
+          // given.
+          if(!implicit_depends.empty())
+            {
+            cc->SetImplicitDepends(implicit_depends);
+            }
+
+          // Set the rule dependency state.
+          cc->SetSkipRuleDepends(skip_rule_depends);
           }
         }
       if(!okay)

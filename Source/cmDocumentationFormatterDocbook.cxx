@@ -144,7 +144,7 @@ void cmDocumentationFormatterDocbook
       cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
       os << "\"><emphasis><literal>";
       cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
-      os << "</literal></emphasis></link></listitem>";
+      os << "</literal></emphasis></link></listitem>\n";
       }
     }
   os << "</itemizedlist>\n" ;

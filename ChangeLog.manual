@@ -1,3 +1,23 @@
+Changes in CMake 2.6.1 RC 1
+- Add a way to modify depend scanning with the property:
+  IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
+- Add a way for custom commands to skip depending on the rule.make file
+- Fix ENABLE_LANGUAGE(ASM-ATT OPTIONAL)  to work
+- Fix gcov in ctest in French or other non-English runs
+- Fix help for ctest commands to be lower case
+- Find QtCLucene on Qt/Mac binary
+- Fix for build on ARM
+- Fix for docbook to add newlines
+- Fix -Wno-dev to not eat path to source tree
+- Fix bug in NSIS CPack where CPACK_NSIS_MODIFY_PATH did modify the path
+- Fix FindBoost version variable names to correct bug in Boost version 
+- Fix Add/Remove program name for CMake install on windows
+- Fix bug 0006988 coverage not reported on dashboards
+- Fix bug 0006990 CMake crashes with bad input to set_source_files_properties
+- Fix bug in FindCurses where you could not run cmake twice
+- Fix 64 bit cmake creation of Xcode projects
+- Add --help-policy to --help
+
 Changes in CMake 2.6.0
 - Fix links in generated documentation
 - Fix for FindQt and some mac frameworks

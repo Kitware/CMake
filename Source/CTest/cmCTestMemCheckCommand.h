@@ -46,7 +46,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CTEST_MEMCHECK";}
+  virtual const char* GetName() { return "ctest_memcheck";}
 
   /**
    * Succinct documentation.
@@ -62,7 +62,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_MEMCHECK([BUILD build_dir] [RETURN_VALUE res])\n"
+      "  ctest_memcheck([BUILD build_dir] [RETURN_VALUE res])\n"
       "Performs a memory checking of tests in the given build directory and "
       "stores results in MemCheck.xml. The second argument is a variable "
       "that will hold value.";

@@ -1110,8 +1110,8 @@ cmLocalUnixMakefileGenerator3
     for(std::vector<std::string>::const_iterator f = files.begin();
         f != files.end(); ++f)
       {
-      fout << "\"" << this->Convert(f->c_str(),START_OUTPUT,UNCHANGED) 
-           << "\"\n";
+      std::string fc = this->Convert(f->c_str(),START_OUTPUT,UNCHANGED);
+      fout << "  " << this->EscapeForCMake(fc.c_str()) << "\n";
       }
     fout << ")\n";
     commands.push_back(remove);
@@ -1437,9 +1437,9 @@ cmLocalUnixMakefileGenerator3
 
   // create the file stream for the depends file
   std::string dir = targetDir;
-  
-  // Open the rule file.  This should be copy-if-different because the
-  // rules may depend on this file itself.
+
+  // Open the make depends file.  This should be copy-if-different
+  // because the make tool may try to reload it needlessly otherwise.
   std::string ruleFileNameFull = dir;
   ruleFileNameFull += "/depend.make";
   cmGeneratedFileStream ruleFileStream(ruleFileNameFull.c_str());
@@ -1448,11 +1448,14 @@ cmLocalUnixMakefileGenerator3
     {
     return false;
     }
+
+  // Open the cmake dependency tracking file.  This should not be
+  // copy-if-different because dependencies are re-scanned when it is
+  // older than the DependInfo.cmake.
   std::string internalRuleFileNameFull = dir;
   internalRuleFileNameFull += "/depend.internal";
-  cmGeneratedFileStream 
+  cmGeneratedFileStream
     internalRuleFileStream(internalRuleFileNameFull.c_str());
-  internalRuleFileStream.SetCopyIfDifferent(true);
   if(!internalRuleFileStream)
     {
     return false;
@@ -1470,68 +1473,18 @@ cmLocalUnixMakefileGenerator3
     {
     // construct the checker
     std::string lang = li->c_str();
-    
-    // Get the set of include directories.
-    std::vector<std::string> includes;
-    if(haveDirectoryInfo)
-      {
-      std::string includePathVar = "CMAKE_";
-      includePathVar += lang;
-      includePathVar += "_INCLUDE_PATH";
-      if(const char* includePath = mf->GetDefinition(includePathVar.c_str()))
-        {
-        cmSystemTools::ExpandListArgument(includePath, includes);
-        }
-      }
-    
-    // Get the include file regular expression.
-    std::string includeRegexScan = "^.*$";
-    std::string includeRegexComplain = "^$";
-    if(haveDirectoryInfo)
-      {
-      std::string scanRegexVar = "CMAKE_";
-      scanRegexVar += lang;
-      scanRegexVar += "_INCLUDE_REGEX_SCAN";
-      if(const char* scanRegex = mf->GetDefinition(scanRegexVar.c_str()))
-        {
-        includeRegexScan = scanRegex;
-        }
-      std::string complainRegexVar = "CMAKE_";
-      complainRegexVar += lang;
-      complainRegexVar += "_INCLUDE_REGEX_COMPLAIN";
-      if(const char* complainRegex = 
-         mf->GetDefinition(complainRegexVar.c_str()))
-        {
-        includeRegexComplain = complainRegex;
-        }
-      }
 
     // Create the scanner for this language
     cmDepends *scanner = 0;
     if(lang == "C" || lang == "CXX" || lang == "RC")
       {
-      std::string includeCacheFileName = dir;
-      includeCacheFileName += "/";
-      includeCacheFileName += lang;
-      includeCacheFileName += ".includecache";
-      
       // TODO: Handle RC (resource files) dependencies correctly.
-      scanner = new cmDependsC(includes,
-                               includeRegexScan.c_str(),
-                               includeRegexComplain.c_str(),
-                               includeCacheFileName);
+      scanner = new cmDependsC(this, targetDir, lang.c_str());
       }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     else if(lang == "Fortran")
       {
-      std::vector<std::string> defines;
-      if(const char* c_defines =
-         mf->GetDefinition("CMAKE_TARGET_DEFINITIONS"))
-        {
-        cmSystemTools::ExpandListArgument(c_defines, defines);
-        }
-
-      scanner = new cmDependsFortran(includes, defines);
+      scanner = new cmDependsFortran(this);
       }
     else if(lang == "Java")
       {
@@ -1572,28 +1525,25 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
   std::vector<std::string> pairs;
   cmSystemTools::ExpandListArgument(pairs_string, pairs, true);
   for(std::vector<std::string>::const_iterator i = pairs.begin();
-      i != pairs.end(); ++i)
+      i != pairs.end() && (i+1) != pairs.end();)
     {
-    const std::string& depender = *i;
-    if(++i != pairs.end())
-      {
-      const std::string& dependee = *i;
+    const std::string& depender = *i++;
+    const std::string& dependee = *i++;
 
-      // If the depender is missing then delete the dependee to make
-      // sure both will be regenerated.
-      if(cmSystemTools::FileExists(dependee.c_str()) &&
-         !cmSystemTools::FileExists(depender.c_str()))
+    // If the depender is missing then delete the dependee to make
+    // sure both will be regenerated.
+    if(cmSystemTools::FileExists(dependee.c_str()) &&
+       !cmSystemTools::FileExists(depender.c_str()))
+      {
+      if(verbose)
         {
-        if(verbose)
-          {
-          cmOStringStream msg;
-          msg << "Deleting primary custom command output \"" << dependee
-              << "\" because another output \""
-              << depender << "\" does not exist." << std::endl;
-          cmSystemTools::Stdout(msg.str().c_str());
-          }
-        cmSystemTools::RemoveFile(dependee.c_str());
+        cmOStringStream msg;
+        msg << "Deleting primary custom command output \"" << dependee
+            << "\" because another output \""
+            << depender << "\" does not exist." << std::endl;
+        cmSystemTools::Stdout(msg.str().c_str());
         }
+      cmSystemTools::RemoveFile(dependee.c_str());
       }
     }
 }
@@ -1921,6 +1871,32 @@ void cmLocalUnixMakefileGenerator3
       {
       cmakefileStream
         << "  " << this->EscapeForCMake(di->c_str()) << "\n";
+      }
+    cmakefileStream
+      << "  )\n";
+    }
+
+  // Store include transform rule properties.  Write the directory
+  // rules first because they may be overridden by later target rules.
+  std::vector<std::string> transformRules;
+  if(const char* xform =
+     this->Makefile->GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM"))
+    {
+    cmSystemTools::ExpandListArgument(xform, transformRules);
+    }
+  if(const char* xform =
+     target.GetProperty("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM"))
+    {
+    cmSystemTools::ExpandListArgument(xform, transformRules);
+    }
+  if(!transformRules.empty())
+    {
+    cmakefileStream
+      << "SET(CMAKE_INCLUDE_TRANSFORMS\n";
+    for(std::vector<std::string>::const_iterator tri = transformRules.begin();
+        tri != transformRules.end(); ++tri)
+      {
+      cmakefileStream << "  " << this->EscapeForCMake(tri->c_str()) << "\n";
       }
     cmakefileStream
       << "  )\n";

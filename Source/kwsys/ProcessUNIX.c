@@ -2807,7 +2807,7 @@ static char** kwsysProcessParseVerbatimCommand(const char* command)
           }
         }
       }
-    else if(isspace(*c))
+    else if(isspace((unsigned char) *c))
       {
       if(in_argument)
         {

@@ -933,8 +933,10 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
           this->MultipleOutputPairs.begin();
         pi != this->MultipleOutputPairs.end(); ++pi)
       {
-      *this->InfoFileStream << "  \"" << pi->first << "\" \""
-                            << pi->second << "\"\n";
+      *this->InfoFileStream
+        << "  " << this->LocalGenerator->EscapeForCMake(pi->first.c_str())
+        << " "  << this->LocalGenerator->EscapeForCMake(pi->second.c_str())
+        << "\n";
       }
     *this->InfoFileStream << "  )\n\n";
     }
@@ -1120,8 +1122,11 @@ void cmMakefileTargetGenerator
   this->LocalGenerator->AppendCustomDepend(depends, cc);
 
   // Add a dependency on the rule file itself.
-  this->LocalGenerator->AppendRuleDepend(depends,
-                                         this->BuildFileNameFull.c_str());
+  if(!cc.GetSkipRuleDepends())
+    {
+    this->LocalGenerator->AppendRuleDepend(depends,
+                                           this->BuildFileNameFull.c_str());
+    }
 
   // Check whether we need to bother checking for a symbolic output.
   bool need_symbolic = this->GlobalGenerator->GetNeedSymbolicMark();

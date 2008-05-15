@@ -1294,6 +1294,12 @@ void cmMakefile::InitializeFromParent()
   // define flags
   this->DefineFlags = parent->DefineFlags;
 
+  // Include transform property.  There is no per-config version.
+  {
+  const char* prop = "IMPLICIT_DEPENDS_INCLUDE_TRANSFORM";
+  this->SetProperty(prop, parent->GetProperty(prop));
+  }
+
   // compile definitions property and per-config versions
   {
   this->SetProperty("COMPILE_DEFINITIONS",
@@ -3207,6 +3213,26 @@ void cmMakefile::DefineProperties(cmake *cm)
      "This is the configuration-specific version of COMPILE_DEFINITIONS.  "
      "This property will be initialized in each directory by its value "
      "in the directory's parent.\n");
+
+  cm->DefineProperty
+    ("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM", cmProperty::DIRECTORY,
+     "Specify #include line transforms for dependencies in a directory.",
+     "This property specifies rules to transform macro-like #include lines "
+     "during implicit dependency scanning of C and C++ source files.  "
+     "The list of rules must be semicolon-separated with each entry of "
+     "the form \"A_MACRO(%)=value-with-%\" (the % must be literal).  "
+     "During dependency scanning occurrences of A_MACRO(...) on #include "
+     "lines will be replaced by the value given with the macro argument "
+     "substituted for '%'.  For example, the entry\n"
+     "  MYDIR(%)=<mydir/%>\n"
+     "will convert lines of the form\n"
+     "  #include MYDIR(myheader.h)\n"
+     "to\n"
+     "  #include <mydir/myheader.h>\n"
+     "allowing the dependency to be followed.\n"
+     "This property applies to sources in all targets within a directory.  "
+     "The property value is initialized in each directory by its value "
+     "in the directory's parent.");
 
   cm->DefineProperty
     ("EXCLUDE_FROM_ALL", cmProperty::DIRECTORY,

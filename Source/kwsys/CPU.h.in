@@ -32,6 +32,14 @@
 #elif defined(__alpha) || defined(__alpha__) || defined(_M_ALPHA)
 # define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_LITTLE
 
+/* Arm */
+#elif defined(__arm__)
+# if !defined(__ARMEB__)
+#  define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_LITTLE
+# else
+#  define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG
+# endif
+
 /* Intel x86 */
 #elif defined(__i386) || defined(__i386__) || defined(_M_IX86)
 # define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_LITTLE

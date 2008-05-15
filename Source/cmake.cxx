@@ -592,12 +592,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     else if(arg.find("-Wno-dev",0) == 0)
       {
       // skip for now
-      i++;
       }
     else if(arg.find("-Wdev",0) == 0)
       {
       // skip for now
-      i++;
       }
     else if(arg.find("--graphviz=",0) == 0)
       {
@@ -3507,7 +3505,7 @@ void cmake::ReportUndefinedPropertyAccesses(const char *filename)
           scopeStr = "unknown";
         break;
         }
-      fprintf(progFile,"%s with scope %s\n",ap->first.c_str(),scopeStr);
+      fprintf(progFile, "%s with scope %s\n", ap->first.c_str(), scopeStr);
       }
     }
   fclose(progFile);

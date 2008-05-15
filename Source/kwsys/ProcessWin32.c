@@ -379,7 +379,7 @@ kwsysProcess* kwsysProcess_New(void)
 
     /* Construct the executable name from the process id and kwsysProcess
        instance.  This should be unique.  */
-    sprintf(fwdName, KWSYS_NAMESPACE_STRING "pew9xfwd_%u_%p.exe",
+    sprintf(fwdName, KWSYS_NAMESPACE_STRING "pew9xfwd_%ld_%p.exe",
             GetCurrentProcessId(), cp);
 
     /* If we have a temp directory, use it.  */

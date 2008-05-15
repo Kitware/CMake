@@ -12,6 +12,22 @@ project(BuildDepends)
 # project is built.
 set(CMAKE_SUPPRESS_REGENERATION 1)
 
+# Xcode needs some help with the fancy dependencies in this test.
+if("${CMAKE_GENERATOR}" MATCHES "Xcode")
+  set(HELP_XCODE 1)
+endif("${CMAKE_GENERATOR}" MATCHES "Xcode")
+function(help_xcode_depends)
+  if(HELP_XCODE)
+    file(GLOB_RECURSE MACRO_OBJS
+      ${BuildDepends_BINARY_DIR}/Project/zot_macro_*.o*
+      )
+    if(MACRO_OBJS)
+      message("Helping Xcode by removing objects [${MACRO_OBJS}]")
+      file(REMOVE ${MACRO_OBJS})
+    endif(MACRO_OBJS)
+  endif(HELP_XCODE)
+endfunction(help_xcode_depends)
+
 file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
 message("Creating Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx 
@@ -21,6 +37,12 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot.hxx.in
   "static const char* zot = \"zot\";\n")
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_custom.hxx.in
   "static const char* zot_custom = \"zot_custom\";\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_dir.hxx
+  "static const char* zot_macro_dir = \"zot_macro_dir\";\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_tgt.hxx
+  "static const char* zot_macro_tgt = \"zot_macro_tgt\";\n")
+
+help_xcode_depends()
 
 message("Building project first time")
 try_compile(RESULT 
@@ -28,7 +50,7 @@ try_compile(RESULT
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
   OUTPUT_VARIABLE OUTPUT)
-if("${CMAKE_GENERATOR}" MATCHES "Xcode")
+if(HELP_XCODE)
   try_compile(RESULT 
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
@@ -39,7 +61,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Xcode")
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
     OUTPUT_VARIABLE OUTPUT)
-endif("${CMAKE_GENERATOR}" MATCHES "Xcode")
+endif(HELP_XCODE)
 
 if(NOT RESULT)
   message(SEND_ERROR "Could not build test project: ${OUTPUT}")
@@ -78,11 +100,12 @@ execute_process(COMMAND ${zot} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
 string(REGEX REPLACE "[\r\n]" " " out "${out}")
 message("Run result: ${runResult} Output: \"${out}\"")
 
-if("${out}" STREQUAL "[zot] [zot_custom] ")
+set(VALUE_UNCHANGED "[zot] [zot_custom] [zot_macro_dir] [zot_macro_tgt] ")
+if("${out}" STREQUAL "${VALUE_UNCHANGED}")
   message("Worked!")
-else("${out}" STREQUAL "[zot] [zot_custom] ")
+else("${out}" STREQUAL "${VALUE_UNCHANGED}")
   message(SEND_ERROR "Project did not initially build properly: ${out}")
-endif("${out}" STREQUAL "[zot] [zot_custom] ")
+endif("${out}" STREQUAL "${VALUE_UNCHANGED}")
 
 message("Waiting 3 seconds...")
 # any additional argument will cause ${bar} to wait forever
@@ -95,6 +118,12 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot.hxx.in
   "static const char* zot = \"zot changed\";\n")
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_custom.hxx.in
   "static const char* zot_custom = \"zot_custom changed\";\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_dir.hxx
+  "static const char* zot_macro_dir = \"zot_macro_dir changed\";\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_tgt.hxx
+  "static const char* zot_macro_tgt = \"zot_macro_tgt changed\";\n")
+
+help_xcode_depends()
 
 message("Building project second time")
 try_compile(RESULT 
@@ -104,7 +133,7 @@ try_compile(RESULT
   OUTPUT_VARIABLE OUTPUT)
 
 # Xcode is in serious need of help here
-if("${CMAKE_GENERATOR}" MATCHES "Xcode")
+if(HELP_XCODE)
   try_compile(RESULT 
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
@@ -115,7 +144,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Xcode")
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
     OUTPUT_VARIABLE OUTPUT)
-endif("${CMAKE_GENERATOR}" MATCHES "Xcode")
+endif(HELP_XCODE)
 
 if(NOT RESULT)
   message(SEND_ERROR "Could not build test project: ${OUTPUT}")
@@ -147,8 +176,11 @@ execute_process(COMMAND ${zot} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
 string(REGEX REPLACE "[\r\n]" " " out "${out}")
 message("Run result: ${runResult} Output: \"${out}\"")
 
-if("${out}" STREQUAL "[zot changed] [zot_custom changed] ")
+set(VALUE_CHANGED
+  "[zot changed] [zot_custom changed] [zot_macro_dir changed] [zot_macro_tgt changed] "
+  )
+if("${out}" STREQUAL "${VALUE_CHANGED}")
   message("Worked!")
-else("${out}" STREQUAL "[zot changed] [zot_custom changed] ")
+else("${out}" STREQUAL "${VALUE_CHANGED}")
   message(SEND_ERROR "Project did not rebuild properly!")
-endif("${out}" STREQUAL "[zot changed] [zot_custom changed] ")
+endif("${out}" STREQUAL "${VALUE_CHANGED}")

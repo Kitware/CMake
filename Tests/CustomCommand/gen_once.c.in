@@ -1,0 +1,1 @@
+int gen_once(void) { return 11; }

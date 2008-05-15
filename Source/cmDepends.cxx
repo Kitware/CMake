@@ -24,11 +24,12 @@
 #include <string.h>
 
 //----------------------------------------------------------------------------
-cmDepends::cmDepends():
+cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir):
   CompileDirectory(),
-  LocalGenerator(0),
+  LocalGenerator(lg),
   Verbose(false),
   FileComparison(0),
+  TargetDirectory(targetDir),
   MaxPath(cmSystemTools::GetMaximumFilePathLength()),
   Dependee(new char[MaxPath]),
   Depender(new char[MaxPath])
@@ -231,4 +232,15 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
   return okay;
 }
 
-
+//----------------------------------------------------------------------------
+void cmDepends::SetIncludePathFromLanguage(const char* lang)
+{
+  std::string includePathVar = "CMAKE_";
+  includePathVar += lang;
+  includePathVar += "_INCLUDE_PATH";
+  cmMakefile* mf = this->LocalGenerator->GetMakefile();
+  if(const char* includePath = mf->GetDefinition(includePathVar.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(includePath, this->IncludePath);
+    }
+}

@@ -159,6 +159,24 @@ void cmTarget::DefineProperties(cmake *cm)
      "target has no C++ code in it.");
 
   cm->DefineProperty
+    ("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM", cmProperty::TARGET,
+     "Specify #include line transforms for dependencies in a target.",
+     "This property specifies rules to transform macro-like #include lines "
+     "during implicit dependency scanning of C and C++ source files.  "
+     "The list of rules must be semicolon-separated with each entry of "
+     "the form \"A_MACRO(%)=value-with-%\" (the % must be literal).  "
+     "During dependency scanning occurrences of A_MACRO(...) on #include "
+     "lines will be replaced by the value given with the macro argument "
+     "substituted for '%'.  For example, the entry\n"
+     "  MYDIR(%)=<mydir/%>\n"
+     "will convert lines of the form\n"
+     "  #include MYDIR(myheader.h)\n"
+     "to\n"
+     "  #include <mydir/myheader.h>\n"
+     "allowing the dependency to be followed.\n"
+     "This property applies to sources in the target on which it is set.");
+
+  cm->DefineProperty
     ("IMPORT_PREFIX", cmProperty::TARGET,
      "What comes before the import library name.",
      "Similar to the target property PREFIX, but used for import libraries "
@@ -1003,6 +1021,21 @@ void cmTarget::TraceDependencies(const char* vsProjectFile)
   // Use a helper object to trace the dependencies.
   cmTargetTraceDependencies tracer(this, vsProjectFile);
   tracer.Trace();
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::FindSourceFiles()
+{
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = this->SourceFiles.begin();
+      si != this->SourceFiles.end(); ++si)
+    {
+    if((*si)->GetFullPath().empty())
+      {
+      return false;
+      }
+    }
+  return true;
 }
 
 //----------------------------------------------------------------------------

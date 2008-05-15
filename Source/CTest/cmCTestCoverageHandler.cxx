@@ -538,7 +538,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     covSumFile << "\t<File Name=\"" << this->CTest->MakeXMLSafe(fileName)
       << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
         this->CTest->GetShortPathToFile(fullFileName.c_str()))
-      << "\" Covered=\"" << (tested==0?"true":"false") << "\">\n"
+      << "\" Covered=\"" << (tested > 0 ? "true":"false") << "\">\n"
       << "\t\t<LOCTested>" << tested << "</LOCTested>\n"
       << "\t\t<LOCUnTested>" << untested << "</LOCUnTested>\n"
       << "\t\t<PercentCoverage>";
@@ -706,6 +706,8 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     "   Processing coverage (each . represents one file):" << std::endl);
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "    ");
   int file_count = 0;
+  // make sure output from gcov is in English!
+  cmSystemTools::PutEnv("LC_ALL=POSIX");
   for ( it = files.begin(); it != files.end(); ++ it )
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
