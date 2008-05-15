@@ -31,9 +31,9 @@
 
 class cmake;
 
-/// struct to represent cache properties in Qt
+/// struct to represent cmake properties in Qt
 /// Value is of type String or Bool
-struct QCMakeCacheProperty
+struct QCMakeProperty
 {
   enum PropertyType { BOOL, PATH, FILEPATH, STRING };
   QString Key;
@@ -41,20 +41,22 @@ struct QCMakeCacheProperty
   QString Help;
   PropertyType Type;
   bool Advanced;
-  bool operator==(const QCMakeCacheProperty& other) const 
+  bool operator==(const QCMakeProperty& other) const 
     { 
     return this->Key == other.Key;
     }
-  bool operator<(const QCMakeCacheProperty& other) const 
+  bool operator<(const QCMakeProperty& other) const 
     { 
     return this->Key < other.Key;
     }
 };
 
-// make types usable with QVariant
-Q_DECLARE_METATYPE(QCMakeCacheProperty)
-typedef QList<QCMakeCacheProperty> QCMakeCachePropertyList;
-Q_DECLARE_METATYPE(QCMakeCachePropertyList)
+// list of properties
+typedef QList<QCMakeProperty> QCMakePropertyList;
+
+// allow QVariant to be a property or list of properties
+Q_DECLARE_METATYPE(QCMakeProperty)
+Q_DECLARE_METATYPE(QCMakePropertyList)
 
 /// Qt API for CMake library.
 /// Wrapper like class allows for easier integration with 
@@ -65,7 +67,6 @@ class QCMake : public QObject
 public:
   QCMake(QObject* p=0);
   ~QCMake();
-  void SetSuppressDevWarnings(bool value);
 public slots:
   /// load the cache file in a directory
   void loadCache(const QString& dir);
@@ -80,7 +81,7 @@ public slots:
   /// generate the files
   void generate();
   /// set the property values
-  void setProperties(const QCMakeCachePropertyList&);
+  void setProperties(const QCMakePropertyList&);
   /// interrupt the configure or generate process
   void interrupt();
   /// delete the cache in binary directory
@@ -89,10 +90,12 @@ public slots:
   void reloadCache();
   /// set whether to do debug output
   void setDebugOutput(bool);
+  /// set whether to do suppress dev warnings
+  void setSuppressDevWarnings(bool value);
 
 public:
   /// get the list of cache properties
-  QCMakeCachePropertyList properties() const;
+  QCMakePropertyList properties() const;
   /// get the current binary directory
   QString binaryDirectory() const;
   /// get the current source directory
@@ -106,7 +109,7 @@ public:
 
 signals:
   /// signal when properties change (during read from disk or configure process)
-  void propertiesChanged(const QCMakeCachePropertyList& vars);
+  void propertiesChanged(const QCMakePropertyList& vars);
   /// signal when the generator changes
   void generatorChanged(const QString& gen);
   /// signal when the source directory changes (binary directory already
