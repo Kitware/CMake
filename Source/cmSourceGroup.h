@@ -22,6 +22,8 @@
 
 class cmSourceFile;
 
+class cmSourceGroupInternals;
+
 /** \class cmSourceGroup
  * \brief Hold a group of sources as specified by a SOURCE_GROUP command.
  *
@@ -36,7 +38,9 @@ class cmSourceGroup
 {
 public:
   cmSourceGroup(const char* name, const char* regex);
-  ~cmSourceGroup() {}
+  cmSourceGroup(cmSourceGroup const& r);
+  ~cmSourceGroup();
+  cmSourceGroup& operator=(cmSourceGroup const&);
   
   /**
    * Set the regular expression for this group.
@@ -97,7 +101,7 @@ public:
   const std::vector<const cmSourceFile*>& GetSourceFiles() const;
   std::vector<const cmSourceFile*>& GetSourceFiles();
   
-  std::vector<cmSourceGroup> GetGroupChildren() const;
+  std::vector<cmSourceGroup> const& GetGroupChildren() const;
 private:
   /**
    * The name of the source group.
@@ -120,7 +124,7 @@ private:
    */
   std::vector<const cmSourceFile*> SourceFiles;
 
-  std::vector<cmSourceGroup> GroupChildren;
+  cmSourceGroupInternals* Internal;
 };
 
 #endif
