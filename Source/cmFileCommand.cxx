@@ -533,12 +533,16 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
         (limit_input < 0 || static_cast<int>(fin.tellg()) < limit_input) &&
         (c = fin.get(), fin))
     {
-    if(c == '\0')
+    if(c == '\0' || c == '\f')
       {
-      // A terminating null character has been found.  Check if the
-      // current string matches the requirements.  Since it was
-      // terminated by a null character, we require that the length be
-      // at least one no matter what the user specified.
+      // A terminating character has been found.  In most cases it is
+      // a NULL character, but at least one compiler (Portland Group
+      // Fortran) produces binaries that terminate strings with a form
+      // feed.
+
+      // Check if the current string matches the requirements.  Since
+      // it was terminated by a null character, we require that the
+      // length be at least one no matter what the user specified.
       if(s.length() >= minlen && s.length() >= 1 &&
          (!have_regex || regex.find(s.c_str())))
         {
