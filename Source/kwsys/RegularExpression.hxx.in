@@ -234,6 +234,11 @@ public:
   inline kwsys_stl::string::size_type end() const;
 
   /**
+   * Copy the given regular expression.
+   */
+  RegularExpression& operator= (const RegularExpression& rxp);
+
+  /**
    * Returns true if two regular expressions have the same
    * compiled program for pattern matching.
    */
