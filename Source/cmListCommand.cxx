@@ -259,11 +259,12 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
   std::string listString;
   this->GetListString(listString, listName.c_str());
   size_t cc;
-  const char* sep = "";
   for ( cc = 2; cc < args.size(); ++ cc )
     {
-    listString += sep;
-    sep = ";";
+    if(listString.size())
+      {
+      listString += ";";
+      }
     listString += args[cc];
     }
 
