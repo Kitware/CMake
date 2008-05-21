@@ -95,7 +95,7 @@ MACRO(CMAKE_IMPORT_BUILD_SETTINGS SETTINGS_FILE)
 
     # Build tool must match on Windows.
     IF(WIN32)
-      IF(CMAKE_BUILD_TOOL_MISMATCH)
+      IF(CMAKE_BUILD_TOOL_MISMATCH AND NOT CMAKE_OVERRIDE_COMPILER_MISMATCH)
         MESSAGE(SEND_ERROR
                 "This project, ${PROJECT_NAME}, depends on the project "
                 "${CMAKE_BUILD_SETTING_PROJECT_NAME}. Unfortunately "
@@ -115,7 +115,7 @@ MACRO(CMAKE_IMPORT_BUILD_SETTINGS SETTINGS_FILE)
                 "${CMAKE_BUILD_SETTING_PROJECT_NAME} or rebuild "
                 "${CMAKE_BUILD_SETTING_PROJECT_NAME} with the correct "
                 "generator. ")
-      ENDIF(CMAKE_BUILD_TOOL_MISMATCH)
+      ENDIF(CMAKE_BUILD_TOOL_MISMATCH AND NOT CMAKE_OVERRIDE_COMPILER_MISMATCH)
     ENDIF(WIN32)
 
     # Enforce the C++ compiler setting.
