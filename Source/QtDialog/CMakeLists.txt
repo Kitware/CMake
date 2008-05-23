@@ -1,5 +1,5 @@
 PROJECT(QtDialog)
-SET(QT_MIN_VERSION "4.2.0")
+SET(QT_MIN_VERSION "4.3.0")
 FIND_PACKAGE(Qt4 REQUIRED)
 
 IF(NOT QT4_FOUND)
@@ -16,6 +16,8 @@ ELSE(NOT QT4_FOUND)
   SET(SRCS
     AddCacheEntry.cxx
     AddCacheEntry.h
+    CMakeFirstConfigure.cxx
+    CMakeFirstConfigure.h
     CMakeSetup.cxx
     CMakeSetupDialog.cxx
     CMakeSetupDialog.h
@@ -23,19 +25,24 @@ ELSE(NOT QT4_FOUND)
     QCMake.h
     QCMakeCacheView.cxx
     QCMakeCacheView.h
+    QCMakeWidgets.cxx
+    QCMakeWidgets.h
     QMacInstallDialog.cxx
     QMacInstallDialog.h
     )
   QT4_WRAP_UI(UI_SRCS 
+    CMakeFirstConfigure.ui
     CMakeSetupDialog.ui
     AddCacheEntry.ui
     MacInstallDialog.ui
     )
   QT4_WRAP_CPP(MOC_SRCS 
     AddCacheEntry.h
+    CMakeFirstConfigure.h
     CMakeSetupDialog.h
     QCMake.h
     QCMakeCacheView.h
+    QCMakeWidgets.h
     QMacInstallDialog.h
     )
   QT4_ADD_RESOURCES(RC_SRCS CMakeSetup.qrc)

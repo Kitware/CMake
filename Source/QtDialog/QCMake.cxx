@@ -29,8 +29,8 @@ QCMake::QCMake(QObject* p)
   : QObject(p)
 {
   this->SuppressDevWarnings = false;
-  qRegisterMetaType<QCMakeCacheProperty>();
-  qRegisterMetaType<QCMakeCachePropertyList>();
+  qRegisterMetaType<QCMakeProperty>();
+  qRegisterMetaType<QCMakePropertyList>();
   
   QDir execDir(QCoreApplication::applicationDirPath());
   
@@ -111,7 +111,7 @@ void QCMake::setBinaryDirectory(const QString& dir)
         }
       }
     
-    QCMakeCachePropertyList props = this->properties();
+    QCMakePropertyList props = this->properties();
     emit this->propertiesChanged(props);
     cmCacheManager::CacheIterator itm = cachem->NewIterator();
     if ( itm.Find("CMAKE_HOME_DIRECTORY"))
@@ -165,9 +165,9 @@ void QCMake::generate()
   emit this->generateDone(err);
 }
   
-void QCMake::setProperties(const QCMakeCachePropertyList& newProps)
+void QCMake::setProperties(const QCMakePropertyList& newProps)
 {
-  QCMakeCachePropertyList props = newProps;
+  QCMakePropertyList props = newProps;
 
   QStringList toremove;
 
@@ -183,7 +183,7 @@ void QCMake::setProperties(const QCMakeCachePropertyList& newProps)
       continue;
       }
 
-    QCMakeCacheProperty prop;
+    QCMakeProperty prop;
     prop.Key = i.GetName();
     int idx = props.indexOf(prop);
     if(idx == -1)
@@ -213,30 +213,30 @@ void QCMake::setProperties(const QCMakeCachePropertyList& newProps)
     }
   
   // add some new properites
-  foreach(QCMakeCacheProperty s, props)
+  foreach(QCMakeProperty s, props)
     {
-    if(s.Type == QCMakeCacheProperty::BOOL)
+    if(s.Type == QCMakeProperty::BOOL)
       {
       this->CMakeInstance->AddCacheEntry(s.Key.toAscii().data(),
                             s.Value.toBool() ? "ON" : "OFF",
                             s.Help.toAscii().data(),
                             cmCacheManager::BOOL);
       }
-    else if(s.Type == QCMakeCacheProperty::STRING)
+    else if(s.Type == QCMakeProperty::STRING)
       {
       this->CMakeInstance->AddCacheEntry(s.Key.toAscii().data(),
                             s.Value.toString().toAscii().data(),
                             s.Help.toAscii().data(),
                             cmCacheManager::STRING);
       }
-    else if(s.Type == QCMakeCacheProperty::PATH)
+    else if(s.Type == QCMakeProperty::PATH)
       {
       this->CMakeInstance->AddCacheEntry(s.Key.toAscii().data(),
                             s.Value.toString().toAscii().data(),
                             s.Help.toAscii().data(),
                             cmCacheManager::PATH);
       }
-    else if(s.Type == QCMakeCacheProperty::FILEPATH)
+    else if(s.Type == QCMakeProperty::FILEPATH)
       {
       this->CMakeInstance->AddCacheEntry(s.Key.toAscii().data(),
                             s.Value.toString().toAscii().data(),
@@ -248,9 +248,9 @@ void QCMake::setProperties(const QCMakeCachePropertyList& newProps)
   cachem->SaveCache(this->BinaryDirectory.toAscii().data());
 }
 
-QCMakeCachePropertyList QCMake::properties() const
+QCMakePropertyList QCMake::properties() const
 {
-  QCMakeCachePropertyList ret;
+  QCMakePropertyList ret;
 
   cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
   for(cmCacheManager::CacheIterator i = cachem->NewIterator();
@@ -264,7 +264,7 @@ QCMakeCachePropertyList QCMake::properties() const
       continue;
       }
 
-    QCMakeCacheProperty prop;
+    QCMakeProperty prop;
     prop.Key = i.GetName();
     prop.Help = i.GetProperty("HELPSTRING");
     prop.Value = i.GetValue();
@@ -272,20 +272,20 @@ QCMakeCachePropertyList QCMake::properties() const
 
     if(i.GetType() == cmCacheManager::BOOL)
       {
-      prop.Type = QCMakeCacheProperty::BOOL;
+      prop.Type = QCMakeProperty::BOOL;
       prop.Value = cmSystemTools::IsOn(i.GetValue());
       }
     else if(i.GetType() == cmCacheManager::PATH)
       {
-      prop.Type = QCMakeCacheProperty::PATH;
+      prop.Type = QCMakeProperty::PATH;
       }
     else if(i.GetType() == cmCacheManager::FILEPATH)
       {
-      prop.Type = QCMakeCacheProperty::FILEPATH;
+      prop.Type = QCMakeProperty::FILEPATH;
       }
     else if(i.GetType() == cmCacheManager::STRING)
       {
-      prop.Type = QCMakeCacheProperty::STRING;
+      prop.Type = QCMakeProperty::STRING;
       }
 
     ret.append(prop);
@@ -349,14 +349,14 @@ void QCMake::deleteCache()
   this->CMakeInstance->GetCacheManager()->LoadCache(this->BinaryDirectory.toAscii().data());
   // emit no generator and no properties
   this->setGenerator(QString());
-  QCMakeCachePropertyList props = this->properties();
+  QCMakePropertyList props = this->properties();
   emit this->propertiesChanged(props);
 }
 
 void QCMake::reloadCache()
 {
   // emit that the cache was cleaned out
-  QCMakeCachePropertyList props;
+  QCMakePropertyList props;
   emit this->propertiesChanged(props);
   // reload
   this->CMakeInstance->GetCacheManager()->LoadCache(this->BinaryDirectory.toAscii().data());
@@ -380,7 +380,7 @@ bool QCMake::getDebugOutput() const
 }
 
 
-void QCMake::SetSuppressDevWarnings(bool value)
+void QCMake::setSuppressDevWarnings(bool value)
 {
   this->SuppressDevWarnings = value;
 }

@@ -16,10 +16,44 @@
 =========================================================================*/
 #include "cmSourceGroup.h"
 
+class cmSourceGroupInternals
+{
+public:
+  std::vector<cmSourceGroup> GroupChildren;
+};
+
 //----------------------------------------------------------------------------
 cmSourceGroup::cmSourceGroup(const char* name, const char* regex): Name(name)
 {
+  this->Internal = new cmSourceGroupInternals;
   this->SetGroupRegex(regex);
+}
+
+//----------------------------------------------------------------------------
+cmSourceGroup::~cmSourceGroup()
+{
+  delete this->Internal;
+}
+
+//----------------------------------------------------------------------------
+cmSourceGroup::cmSourceGroup(cmSourceGroup const& r)
+{
+  this->Name = r.Name;
+  this->GroupRegex = r.GroupRegex;
+  this->GroupFiles = r.GroupFiles;
+  this->SourceFiles = r.SourceFiles;
+  this->Internal = new cmSourceGroupInternals(*r.Internal);
+}
+
+//----------------------------------------------------------------------------
+cmSourceGroup& cmSourceGroup::operator=(cmSourceGroup const& r)
+{
+  this->Name = r.Name;
+  this->GroupRegex = r.GroupRegex;
+  this->GroupFiles = r.GroupFiles;
+  this->SourceFiles = r.SourceFiles;
+  *(this->Internal) = *(r.Internal);
+  return *this;
 }
 
 //----------------------------------------------------------------------------
@@ -85,15 +119,17 @@ std::vector<const cmSourceFile*>& cmSourceGroup::GetSourceFiles()
 //----------------------------------------------------------------------------
 void cmSourceGroup::AddChild(cmSourceGroup child)
 {
-  this->GroupChildren.push_back(child);
+  this->Internal->GroupChildren.push_back(child);
 }
 
 //----------------------------------------------------------------------------
 cmSourceGroup *cmSourceGroup::lookupChild(const char* name)
 {
   // initializing iterators
-  std::vector<cmSourceGroup>::iterator iter = this->GroupChildren.begin();
-  std::vector<cmSourceGroup>::iterator end = this->GroupChildren.end();
+  std::vector<cmSourceGroup>::iterator iter =
+    this->Internal->GroupChildren.begin();
+  std::vector<cmSourceGroup>::iterator end =
+    this->Internal->GroupChildren.end();
 
   // st
   for(;iter!=end; ++iter)
@@ -114,8 +150,10 @@ cmSourceGroup *cmSourceGroup::lookupChild(const char* name)
 cmSourceGroup *cmSourceGroup::MatchChildrenFiles(const char *name)
 {
   // initializing iterators
-  std::vector<cmSourceGroup>::iterator iter = this->GroupChildren.begin();
-  std::vector<cmSourceGroup>::iterator end = this->GroupChildren.end();
+  std::vector<cmSourceGroup>::iterator iter =
+    this->Internal->GroupChildren.begin();
+  std::vector<cmSourceGroup>::iterator end =
+    this->Internal->GroupChildren.end();
 
   if(this->MatchesFiles(name))
     {
@@ -136,8 +174,10 @@ cmSourceGroup *cmSourceGroup::MatchChildrenFiles(const char *name)
 cmSourceGroup *cmSourceGroup::MatchChildrenRegex(const char *name)
 {
   // initializing iterators
-  std::vector<cmSourceGroup>::iterator iter = this->GroupChildren.begin();
-  std::vector<cmSourceGroup>::iterator end = this->GroupChildren.end();
+  std::vector<cmSourceGroup>::iterator iter =
+    this->Internal->GroupChildren.begin();
+  std::vector<cmSourceGroup>::iterator end =
+    this->Internal->GroupChildren.end();
 
   if(this->MatchesRegex(name))
     {
@@ -154,7 +194,8 @@ cmSourceGroup *cmSourceGroup::MatchChildrenRegex(const char *name)
   return 0;
 }
 
-std::vector<cmSourceGroup> cmSourceGroup::GetGroupChildren() const
+std::vector<cmSourceGroup> const&
+cmSourceGroup::GetGroupChildren() const
 {
-  return this->GroupChildren;
+  return this->Internal->GroupChildren;
 }

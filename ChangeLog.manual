@@ -1,3 +1,20 @@
+Changes in CMake 2.6.1 RC 2
+
+- FindQt4 - report an error when trying to use MSVC with Qt built by mingw.
+- FindQt4 - make Qt not found if the QtCore library can't be found.
+- UseQt4 - only add flags for modles that are used
+- Log file and LC_ALL fix for FindSubversion
+- Make MacOSXBundleInfo.plist.in a configured file again
+- Fix makefile generator targets to depend on full path link libraries
+- Allow CMakeImportBuildSettings to not match tools if 
+  CMAKE_OVERRIDE_COMPILER_MISMATCH is set
+- Fix incorrect extension extraction in gcc cross compiler check
+- Add support for Portand Fortran
+- Fix list command with empty list values
+- Add support for setting compiler and toolchain in qt cmake-gui
+- Fix Bug 7011, FindQt4 was slow on a mac, find_path should not glob in /
+- Fix install directories for cygwin package of CMake
+
 Changes in CMake 2.6.1 RC 1
 - Add a way to modify depend scanning with the property:
   IMPLICIT_DEPENDS_INCLUDE_TRANSFORM

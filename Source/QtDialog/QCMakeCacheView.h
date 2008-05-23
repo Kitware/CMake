@@ -21,14 +21,10 @@
 #include "QCMake.h"
 #include <QTableView>
 #include <QAbstractTableModel>
-#include <QCheckBox>
-#include <QLineEdit>
 #include <QItemDelegate>
-#include <QSortFilterProxyModel>
-#include <QCompleter>
 
+class QSortFilterProxyModel;
 class QCMakeCacheModel;
-class QToolButton;
 
 
 /// Qt view class for cache properties
@@ -65,11 +61,17 @@ public:
   enum { HelpRole = Qt::UserRole, TypeRole, AdvancedRole };
 
 public slots:
-  void setProperties(const QCMakeCachePropertyList& props);
+  void setProperties(const QCMakePropertyList& props);
   void clear();
   void setEditEnabled(bool);
   bool removeRows(int row, int count, const QModelIndex& idx = QModelIndex());
   bool insertRows(int row, int num, const QModelIndex&);
+  
+  // insert a property at a row specifying all the information about the
+  // property
+  bool insertProperty(int row, QCMakeProperty::PropertyType t,
+                      const QString& name, const QString& description,
+                      const QVariant& value, bool advanced);
 
 public:
   // satisfy [pure] virtuals
@@ -83,7 +85,7 @@ public:
   QModelIndex buddy (const QModelIndex& index) const;
 
   // get the properties
-  QCMakeCachePropertyList properties() const;
+  QCMakePropertyList properties() const;
   
   // editing enabled
   bool editEnabled() const;
@@ -91,7 +93,7 @@ public:
   int newCount() const;
 
 protected:
-  QCMakeCachePropertyList Properties;
+  QCMakePropertyList Properties;
   int NewCount;
   bool EditEnabled;
 };
@@ -113,46 +115,6 @@ protected slots:
   void setFileDialogFlag(bool);
 protected:
   bool FileDialogFlag;
-};
-
-/// Editor widget for editing paths or file paths
-class QCMakeCacheFileEditor : public QLineEdit
-{
-  Q_OBJECT
-public:
-  QCMakeCacheFileEditor(QWidget* p, const QString& var);
-protected slots:
-  virtual void chooseFile() = 0;
-signals:
-  void fileDialogExists(bool);
-protected:
-  void resizeEvent(QResizeEvent* e);
-  QToolButton* ToolButton;
-  QString Variable;
-};
-
-class QCMakeCachePathEditor : public QCMakeCacheFileEditor
-{
-  Q_OBJECT
-public:
-  QCMakeCachePathEditor(QWidget* p = NULL, const QString& var = QString());
-  void chooseFile();
-};
-
-class QCMakeCacheFilePathEditor : public QCMakeCacheFileEditor
-{
-  Q_OBJECT
-public:
-  QCMakeCacheFilePathEditor(QWidget* p = NULL, const QString& var = QString());
-  void chooseFile();
-};
-
-/// completer class that returns native cmake paths
-class QCMakeFileCompleter : public QCompleter
-{
-public:
-  QCMakeFileCompleter(QObject* o, bool dirs);
-  virtual QString pathFromIndex(const QModelIndex& idx) const;
 };
 
 #endif

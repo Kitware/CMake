@@ -578,7 +578,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       {
       // Ignore CR character to make output always have UNIX newlines.
       }
-    else if(c >= 0x20 && c < 0x7F || c == '\t' ||
+    else if(c >= 0x20 && c < 0x7F || c == '\t' || c == '\f' ||
             (c == '\n' && newline_consume))
       {
       // This is an ASCII character that may be part of a string.

@@ -65,14 +65,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCMakeCachePathEditor</class>
+   <class>QCMakePathEditor</class>
    <extends>QLineEdit</extends>
-   <header>QCMakeCacheView.h</header>
+   <header>QCMakeWidgets.h</header>
   </customwidget>
   <customwidget>
-   <class>QCMakeCacheFilePathEditor</class>
+   <class>QCMakeFilePathEditor</class>
    <extends>QLineEdit</extends>
-   <header>QCMakeCacheView.h</header>
+   <header>QCMakeWidgets.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

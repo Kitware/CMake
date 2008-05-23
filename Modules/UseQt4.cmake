@@ -36,7 +36,7 @@ IF (QT_USE_QT3SUPPORT)
   ADD_DEFINITIONS(-DQT3_SUPPORT)
 ENDIF (QT_USE_QT3SUPPORT)
 
-# list dependent modules, so their modules are automatically on
+# list dependent modules, so dependent libraries are added
 SET(QT_QT3SUPPORT_MODULE_DEPENDS QTGUI QTSQL QTXML QTNETWORK QTCORE)
 SET(QT_QTSVG_MODULE_DEPENDS QTGUI QTXML QTCORE)
 SET(QT_QTUITOOLS_MODULE_DEPENDS QTGUI QTXML QTCORE)
@@ -50,7 +50,7 @@ FOREACH(module QT3SUPPORT QTOPENGL QTASSISTANT QTDESIGNER QTMOTIF QTNSPLUGIN
                QTSCRIPT QTSVG QTUITOOLS QTHELP QTWEBKIT PHONON QTGUI QTTEST 
                QTDBUS QTXML QTSQL QTXMLPATTERNS QTNETWORK QTCORE)
 
-  IF (QT_USE_${module})
+  IF (QT_USE_${module} OR QT_USE_${module}_DEPENDS)
     IF (QT_${module}_FOUND)
       IF(QT_USE_${module})
         STRING(REPLACE "QT" "" qt_module_def "${module}")
@@ -59,12 +59,12 @@ FOREACH(module QT3SUPPORT QTOPENGL QTASSISTANT QTDESIGNER QTMOTIF QTNSPLUGIN
       ENDIF(QT_USE_${module})
       SET(QT_LIBRARIES ${QT_LIBRARIES} ${QT_${module}_LIBRARY} ${QT_${module}_LIB_DEPENDENCIES})
       FOREACH(depend_module ${QT_${module}_MODULE_DEPENDS})
-        SET(QT_USE_${depend_module} 1)
+        SET(QT_USE_${depend_module}_DEPENDS 1)
       ENDFOREACH(depend_module ${QT_${module}_MODULE_DEPENDS})
     ELSE (QT_${module}_FOUND)
       MESSAGE("Qt ${module} library not found.")
     ENDIF (QT_${module}_FOUND)
-  ENDIF (QT_USE_${module})
+  ENDIF (QT_USE_${module} OR QT_USE_${module}_DEPENDS)
   
 ENDFOREACH(module)
 

@@ -91,11 +91,14 @@ ENDIF (NOT _CMAKE_TOOLCHAIN_LOCATION)
 # if we have a g++ cross compiler, they have usually some prefix, like 
 # e.g. powerpc-linux-g++, arm-elf-g++ or i586-mingw32msvc-g++
 # the other tools of the toolchain usually have the same prefix
+# NAME_WE cannot be used since then this test will fail for names lile
+# "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be 
+# "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
 IF (NOT _CMAKE_TOOLCHAIN_PREFIX)
-  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME_WE)
-  IF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+")
-    STRING(REGEX REPLACE "^(.+-)[gc]\\+\\+"  "\\1" _CMAKE_TOOLCHAIN_PREFIX "${COMPILER_BASENAME}")
-  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+")
+  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
+  IF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(\\.exe)?$")
+    STRING(REGEX REPLACE "^(.+-)[gc]\\+\\+(\\.exe)?$"  "\\1" _CMAKE_TOOLCHAIN_PREFIX "${COMPILER_BASENAME}")
+  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(\\.exe)?$")
 ENDIF (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
 # This block was used before the compiler was identified by building a

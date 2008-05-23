@@ -1473,7 +1473,7 @@ void cmLocalVisualStudio7Generator
       }
     }
 
-  std::vector<cmSourceGroup> children  = sg->GetGroupChildren();
+  std::vector<cmSourceGroup> const& children  = sg->GetGroupChildren();
 
   for(unsigned int i=0;i<children.size();++i)
     {

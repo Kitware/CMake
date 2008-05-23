@@ -44,7 +44,6 @@ protected slots:
   void initialize();
   void doConfigure();
   void doGenerate();
-  void doSuppressDev();
   void doInstallForCommandLine();
   void doHelp();
   void doAbout();
@@ -62,7 +61,7 @@ protected slots:
   void updateBinaryDirectory(const QString& dir);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
-  bool promptForGenerator();
+  bool setupFirstConfigure();
   void updateGeneratorLabel(const QString& gen);
   void setExitAfterGenerate(bool);
   void addBinaryPath(const QString&);
@@ -89,7 +88,6 @@ protected:
   QCMakeThread* CMakeThread;
   bool ExitAfterGenerate;
   bool CacheModified;
-  bool SuppressDevWarnings;
   QAction* ReloadCacheAction;
   QAction* DeleteCacheAction;
   QAction* ExitAction;

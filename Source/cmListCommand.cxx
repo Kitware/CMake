@@ -212,13 +212,12 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
 
   std::string value;
   size_t cc;
+  const char* sep = "";
   for ( cc = 2; cc < args.size()-1; cc ++ )
     {
     int item = atoi(args[cc].c_str());
-    if (value.size())
-      {
-      value += ";";
-      }
+    value += sep;
+    sep = ";";
     size_t nitem = varArgsExpanded.size();
     if ( item < 0 )
       {
@@ -262,7 +261,7 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
   size_t cc;
   for ( cc = 2; cc < args.size(); ++ cc )
     {
-    if ( listString.size() )
+    if(listString.size())
       {
       listString += ";";
       }
@@ -358,13 +357,12 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
     }
 
   std::string value;
+  const char* sep = "";
   for ( cc = 0; cc < varArgsExpanded.size(); cc ++ )
     {
-    if (value.size())
-      {
-      value += ";";
-      }
+    value += sep;
     value += varArgsExpanded[cc];
+    sep = ";";
     }
 
   this->Makefile->AddDefinition(listName.c_str(), value.c_str());
@@ -408,13 +406,12 @@ bool cmListCommand
     }
 
   std::string value;
+  const char* sep = "";
   for ( cc = 0; cc < varArgsExpanded.size(); cc ++ )
     {
-    if (value.size())
-      {
-      value += ";";
-      }
+    value += sep;
     value += varArgsExpanded[cc];
+    sep = ";";
     }
 
   this->Makefile->AddDefinition(listName.c_str(), value.c_str());
@@ -442,13 +439,12 @@ bool cmListCommand
 
   std::string value;
   std::vector<std::string>::reverse_iterator it;
+  const char* sep = "";
   for ( it = varArgsExpanded.rbegin(); it != varArgsExpanded.rend(); ++ it )
     {
-    if (value.size())
-      {
-      value += ";";
-      }
+    value += sep;
     value += it->c_str();
+    sep = ";";
     }
 
   this->Makefile->AddDefinition(listName.c_str(), value.c_str());
@@ -478,26 +474,10 @@ bool cmListCommand
 
   std::string value;
 
-#if 0 
-  // Fast version, but does not keep the ordering
-
-  std::set<std::string> unique(varArgsExpanded.begin(), varArgsExpanded.end());
-  std::set<std::string>::iterator it;
-  for ( it = unique.begin(); it != unique.end(); ++ it )
-    {
-    if (value.size())
-      {
-      value += ";";
-      }
-    value += it->c_str();
-    }
-
-#else
-
-  // Slower version, keep the ordering
 
   std::set<std::string> unique;
   std::vector<std::string>::iterator it;
+  const char* sep = "";
   for ( it = varArgsExpanded.begin(); it != varArgsExpanded.end(); ++ it )
     {
     if (unique.find(*it) != unique.end())
@@ -505,14 +485,10 @@ bool cmListCommand
       continue;
       }
     unique.insert(*it);
-
-    if (value.size())
-      {
-      value += ";";
-      }
+    value += sep;
     value += it->c_str();
+    sep = ";";
     }
-#endif
 
 
   this->Makefile->AddDefinition(listName.c_str(), value.c_str());
@@ -542,19 +518,12 @@ bool cmListCommand
 
   std::string value;
   std::vector<std::string>::iterator it;
+  const char* sep = "";
   for ( it = varArgsExpanded.begin(); it != varArgsExpanded.end(); ++ it )
     {
-    if(value.size() == 0 && 
-       this->Makefile->GetPolicyStatus(cmPolicies::CMP0007) ==
-       cmPolicies::NEW)
-      {
-      value += ";";
-      }
-    if (value.size())
-      {
-      value += ";";
-      }
+    value += sep;
     value += it->c_str();
+    sep = ";";
     }
 
   this->Makefile->AddDefinition(listName.c_str(), value.c_str());
@@ -604,6 +573,7 @@ bool cmListCommand::HandleRemoveAtCommand(
     }
 
   std::string value;
+  const char* sep = "";
   for ( cc = 0; cc < varArgsExpanded.size(); ++ cc )
     {
     size_t kk;
@@ -618,11 +588,9 @@ bool cmListCommand::HandleRemoveAtCommand(
 
     if ( !found )
       {
-      if (value.size())
-        {
-        value += ";";
-        }
+      value += sep;
       value += varArgsExpanded[cc];
+      sep = ";";
       }
     }
 

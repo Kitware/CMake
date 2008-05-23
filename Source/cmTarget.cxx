@@ -547,10 +547,21 @@ void cmTarget::DefineProperties(cmake *cm)
      "When this property is set to true the executable when built "
      "on Mac OS X will be created as an application bundle.  "
      "This makes it a GUI executable that can be launched from "
-     "the Finder.\n"
-     "The bundle Info.plist file is generated automatically.  "
-     "The following target properties may be set to specify "
-     "its content:"
+     "the Finder.  "
+     "See the MACOSX_BUNDLE_INFO_PLIST target property for information "
+     "about creation of the Info.plist file for the application bundle.");
+
+  cm->DefineProperty
+    ("MACOSX_BUNDLE_INFO_PLIST", cmProperty::TARGET,
+     "Specify a custom Info.plist template for a Mac OS X App Bundle.",
+     "An executable target with MACOSX_BUNDLE enabled will be built as an "
+     "application bundle on Mac OS X.  "
+     "By default its Info.plist file is created by configuring a template "
+     "called MacOSXBundleInfo.plist.in located in the CMAKE_MODULE_PATH.  "
+     "This property specifies an alternative template file name which "
+     "may be a full path.\n"
+     "The following target properties may be set to specify content to "
+     "be configured into the file:\n"
      "  MACOSX_BUNDLE_INFO_STRING\n"
      "  MACOSX_BUNDLE_ICON_FILE\n"
      "  MACOSX_BUNDLE_GUI_IDENTIFIER\n"
@@ -559,7 +570,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "  MACOSX_BUNDLE_SHORT_VERSION_STRING\n"
      "  MACOSX_BUNDLE_BUNDLE_VERSION\n"
      "  MACOSX_BUNDLE_COPYRIGHT\n"
-      );
+     "CMake variables of the same name may be set to affect all targets "
+     "in a directory that do not have each specific property set.  "
+     "If a custom Info.plist is specified by this property it may of course "
+     "hard-code all the settings instead of using the target properties.");
 
   cm->DefineProperty
     ("ENABLE_EXPORTS", cmProperty::TARGET,

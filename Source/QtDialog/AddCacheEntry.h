@@ -33,7 +33,7 @@ public:
   QString name() const;
   QVariant value() const;
   QString description() const;
-  QCMakeCacheProperty::PropertyType type() const;
+  QCMakeProperty::PropertyType type() const;
 };
 
 #endif

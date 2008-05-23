@@ -32,7 +32,13 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
       "${CPACK_SOURCE_PACKAGE_FILE_NAME}-RC-${CMake_VERSION_RC}")
   ENDIF(CMake_VERSION_RC)
   IF(NOT DEFINED CPACK_SYSTEM_NAME)
-    SET(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
+    # make sure package is not Cygwin-unknown, for Cygwin just
+    # cygwin is good for the system name
+    IF("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
+      SET(CPACK_SYSTEM_NAME Cygwin)
+    ELSE("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
+      SET(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
+    ENDIF("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
   ENDIF(NOT DEFINED CPACK_SYSTEM_NAME)
   IF(${CPACK_SYSTEM_NAME} MATCHES Windows)
     IF(CMAKE_CL_64)
@@ -42,7 +48,15 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     ENDIF(CMAKE_CL_64)
   ENDIF(${CPACK_SYSTEM_NAME} MATCHES Windows)
   IF(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
-    SET(CPACK_PACKAGE_FILE_NAME "${CPACK_SOURCE_PACKAGE_FILE_NAME}-${CPACK_SYSTEM_NAME}")
+    # if the CPACK_PACKAGE_FILE_NAME is not defined by the cache
+    # default to source package - system, on cygwin system is not 
+    # needed
+    IF(CYGWIN)
+      SET(CPACK_PACKAGE_FILE_NAME "${CPACK_SOURCE_PACKAGE_FILE_NAME}")
+    ELSE(CYGWIN)
+      SET(CPACK_PACKAGE_FILE_NAME 
+        "${CPACK_SOURCE_PACKAGE_FILE_NAME}-${CPACK_SYSTEM_NAME}")
+    ENDIF(CYGWIN)
   ENDIF(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
   SET(CPACK_PACKAGE_CONTACT "cmake@cmake.org")
   IF(UNIX)
@@ -52,6 +66,7 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   ENDIF(UNIX)
 # cygwin specific packaging stuff
   IF(CYGWIN)
+    
     # if we are on cygwin and have cpack, then force the 
     # doc, data and man dirs to conform to cygwin style directories
     SET(CMAKE_DOC_DIR "/share/doc/${CPACK_PACKAGE_FILE_NAME}")

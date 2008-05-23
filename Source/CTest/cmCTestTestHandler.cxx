@@ -1543,6 +1543,11 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
     SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
     SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
     SPACE_REGEX "*>([^<]*)</DartMeasurement>");
+  cmsys::RegularExpression cdatameasurement(
+    "<DartMeasurement"
+    SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
+    SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
+    SPACE_REGEX "*>(<!\\[CDATA\\[([^]]*\\]?[^]]+)*]]>)</DartMeasurement>");
   cmsys::RegularExpression measurementfile(
     "<DartMeasurementFile"
     SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
@@ -1601,6 +1606,21 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
         << std::endl;
       cxml.erase(fourattributes.start(),
         fourattributes.end() - fourattributes.start());
+      }
+    else if ( cdatameasurement.find(cxml) )
+      {
+      ostr
+        << "\t\t\t<NamedMeasurement"
+        << " " << cdatameasurement.match(1) << "=\""
+        << cdatameasurement.match(2) << "\""
+        << " " << cdatameasurement.match(3) << "=\""
+        << cdatameasurement.match(4) << "\""
+        << "><Value>" << cdatameasurement.match(5)
+        << "</Value></NamedMeasurement>"
+        << std::endl;
+
+      cxml.erase(cdatameasurement.start(),
+        cdatameasurement.end() - cdatameasurement.start());
       }
     else if ( measurementfile.find(cxml) )
       {
