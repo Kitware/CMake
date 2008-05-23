@@ -378,12 +378,19 @@ void cmFindBase::AddFindPrefix(std::vector<std::string>& dest,
       {
       dir += "/";
       }
-    dest.push_back(dir + subdir);
+    if(subdir != "/")
+      {
+      std::string add = dir + subdir;
+      if(add != "/")
+        {
+        dest.push_back(add);
+        }
+      }
     if (subdir == "bin")
       {
       dest.push_back(dir + "sbin");
       }
-    if(!subdir.empty())
+    if(!subdir.empty() && *it != "/")
       {
       dest.push_back(*it);
       }
