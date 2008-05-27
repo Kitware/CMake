@@ -478,14 +478,21 @@ void cmFindBase::ExpandRegistryAndCleanPath(std::vector<std::string>& paths)
   // We should view the registry as the target application would view
   // it.
   cmSystemTools::KeyWOW64 view = cmSystemTools::KeyWOW64_Default;
+  cmSystemTools::KeyWOW64 other_view = cmSystemTools::KeyWOW64_Default;
   {
   if(const char* psize =
      this->Makefile->GetDefinition("CMAKE_SIZEOF_VOID_P"))
     {
     switch(atoi(psize))
       {
-      case 4: view = cmSystemTools::KeyWOW64_32; break;
-      case 8: view = cmSystemTools::KeyWOW64_64; break;
+      case 4:
+        view = cmSystemTools::KeyWOW64_32;
+        other_view = cmSystemTools::KeyWOW64_64;
+        break;
+      case 8:
+        view = cmSystemTools::KeyWOW64_64;
+        other_view = cmSystemTools::KeyWOW64_32;
+        break;
       default: break;
       }
     }
@@ -497,8 +504,17 @@ void cmFindBase::ExpandRegistryAndCleanPath(std::vector<std::string>& paths)
   for(i = paths.begin();
       i != paths.end(); ++i)
     {
-    cmSystemTools::ExpandRegistryValues(*i, view);
-    cmSystemTools::GlobDirs(i->c_str(), finalPath);
+    std::string expanded = *i;
+    cmSystemTools::ExpandRegistryValues(expanded, view);
+    cmSystemTools::GlobDirs(expanded.c_str(), finalPath);
+    if(view != other_view && expanded != *i &&
+       this->CMakePathName == "PROGRAM")
+      {
+      // Executables can be either 32-bit or 64-bit.
+      expanded = *i;
+      cmSystemTools::ExpandRegistryValues(expanded, other_view);
+      cmSystemTools::GlobDirs(expanded.c_str(), finalPath);
+      }
     }
   // clear the path
   paths.clear();
