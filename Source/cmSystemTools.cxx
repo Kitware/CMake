@@ -2332,9 +2332,14 @@ std::string::size_type cmSystemToolsFindRPath(std::string const& have,
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
                                 std::string const& newRPath,
-                                std::string* emsg)
+                                std::string* emsg,
+                                bool* changed)
 {
 #if defined(CMAKE_USE_ELF_PARSER)
+  if(changed)
+    {
+    *changed = false;
+    }
   unsigned long rpathPosition = 0;
   unsigned long rpathSize = 0;
   std::string rpathPrefix;
@@ -2445,6 +2450,10 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   // Make sure everything was okay.
   if(f)
     {
+    if(changed)
+      {
+      *changed = true;
+      }
     return true;
     }
   else
@@ -2460,6 +2469,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   (void)oldRPath;
   (void)newRPath;
   (void)emsg;
+  (void)changed;
   return false;
 #endif
 }

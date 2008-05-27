@@ -391,7 +391,8 @@ public:
   static bool ChangeRPath(std::string const& file,
                           std::string const& oldRPath,
                           std::string const& newRPath,
-                          std::string* emsg = 0);
+                          std::string* emsg = 0,
+                          bool* changed = 0);
 
   /** Try to remove the RPATH from an ELF binary.  */
   static bool RemoveRPath(std::string const& file, std::string* emsg = 0);
