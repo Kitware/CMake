@@ -293,6 +293,7 @@ protected:
   bool InstallTargetEnabled;
   // Sets of named target exports
   std::map<cmStdString, std::vector<cmTargetExport*> > ExportSets;
+  void ClearExportSets();
 
   // Manifest of all targets that will be built for each configuration.
   // This is computed just before local generators generate.

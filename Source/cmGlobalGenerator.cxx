@@ -72,16 +72,7 @@ cmGlobalGenerator::~cmGlobalGenerator()
     delete this->ExtraGenerator;
     }
 
-  for (std::map<cmStdString, std::vector<cmTargetExport*> >::iterator 
-       setIt = this->ExportSets.begin();
-       setIt != this->ExportSets.end();
-       ++setIt)
-    {
-      for (unsigned int i = 0; i < setIt->second.size(); ++i)
-        {
-        delete setIt->second[i];
-        }
-    }
+  this->ClearExportSets();
 }
 
 // Find the make program for the generator, required for try compiles
@@ -683,6 +674,7 @@ bool cmGlobalGenerator::IsDependedOn(const char* project,
 void cmGlobalGenerator::Configure()
 {
   this->FirstTimeProgress = 0.0f;
+  this->ClearExportSets();
   // Delete any existing cmLocalGenerators
   unsigned int i;
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1230,6 +1222,21 @@ void cmGlobalGenerator::AddTargetToExports(const char* exportSetName,
                                             framework, bundle, headers);
     this->ExportSets[exportSetName].push_back(te);
     }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::ClearExportSets()
+{
+  for(std::map<cmStdString, std::vector<cmTargetExport*> >::iterator
+        setIt = this->ExportSets.begin();
+      setIt != this->ExportSets.end(); ++setIt)
+    {
+    for(unsigned int i = 0; i < setIt->second.size(); ++i)
+      {
+      delete setIt->second[i];
+      }
+    }
+  this->ExportSets.clear();
 }
 
 const std::vector<cmTargetExport*>* cmGlobalGenerator::GetExportSet(
