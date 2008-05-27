@@ -475,6 +475,21 @@ void cmFindBase::AddCMakeSystemVariables()
 
 void cmFindBase::ExpandRegistryAndCleanPath(std::vector<std::string>& paths)
 {
+  // We should view the registry as the target application would view
+  // it.
+  cmSystemTools::KeyWOW64 view = cmSystemTools::KeyWOW64_Default;
+  {
+  if(const char* psize =
+     this->Makefile->GetDefinition("CMAKE_SIZEOF_VOID_P"))
+    {
+    switch(atoi(psize))
+      {
+      case 4: view = cmSystemTools::KeyWOW64_32; break;
+      case 8: view = cmSystemTools::KeyWOW64_64; break;
+      default: break;
+      }
+    }
+  }
   std::vector<std::string> finalPath;
   std::vector<std::string>::iterator i;
   // glob and expand registry stuff from paths and put
@@ -482,7 +497,7 @@ void cmFindBase::ExpandRegistryAndCleanPath(std::vector<std::string>& paths)
   for(i = paths.begin();
       i != paths.end(); ++i)
     {
-    cmSystemTools::ExpandRegistryValues(*i);
+    cmSystemTools::ExpandRegistryValues(*i, view);
     cmSystemTools::GlobDirs(i->c_str(), finalPath);
     }
   // clear the path
