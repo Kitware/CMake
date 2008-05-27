@@ -200,6 +200,12 @@ cmInstallTargetGenerator
         }
       else
         {
+        // Operations done at install time on the installed file should
+        // be done on the real file and not any of the symlinks.
+        toInstallPath = this->GetInstallDestination();
+        toInstallPath += "/";
+        toInstallPath += targetNameReal;
+
         files.push_back(from1);
         if(targetNameReal != targetName)
           {
