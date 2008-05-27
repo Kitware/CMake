@@ -493,6 +493,30 @@ void SystemTools::ReplaceString(kwsys_stl::string& source,
   free(orig);
 }
 
+#if defined(KEY_WOW64_32KEY) && defined(KEY_WOW64_64KEY)
+# define KWSYS_ST_KEY_WOW64_32KEY KEY_WOW64_32KEY
+# define KWSYS_ST_KEY_WOW64_64KEY KEY_WOW64_64KEY
+#else
+# define KWSYS_ST_KEY_WOW64_32KEY 0x0200
+# define KWSYS_ST_KEY_WOW64_64KEY 0x0100
+#endif
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+static DWORD SystemToolsMakeRegistryMode(DWORD mode,
+                                         SystemTools::KeyWOW64 view)
+{
+  if(view == SystemTools::KeyWOW64_32)
+    {
+    return mode | KWSYS_ST_KEY_WOW64_32KEY;
+    }
+  else if(view == SystemTools::KeyWOW64_64)
+    {
+    return mode | KWSYS_ST_KEY_WOW64_64KEY;
+    }
+  return mode;
+}
+#endif
+
 // Read a registry value.
 // Example : 
 //      HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.1\InstallPath
@@ -501,7 +525,8 @@ void SystemTools::ReplaceString(kwsys_stl::string& source,
 //      =>  will return the data of the "Root" value of the key
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-bool SystemTools::ReadRegistryValue(const char *key, kwsys_stl::string &value)
+bool SystemTools::ReadRegistryValue(const char *key, kwsys_stl::string &value,
+                                    KeyWOW64 view)
 {
   bool valueset = false;
   kwsys_stl::string primary = key;
@@ -549,7 +574,7 @@ bool SystemTools::ReadRegistryValue(const char *key, kwsys_stl::string &value)
   if(RegOpenKeyEx(primaryKey, 
                   second.c_str(), 
                   0, 
-                  KEY_READ, 
+                  SystemToolsMakeRegistryMode(KEY_READ, view),
                   &hKey) != ERROR_SUCCESS)
     {
     return false;
@@ -589,7 +614,8 @@ bool SystemTools::ReadRegistryValue(const char *key, kwsys_stl::string &value)
   return valueset;
 }
 #else
-bool SystemTools::ReadRegistryValue(const char *, kwsys_stl::string &)
+bool SystemTools::ReadRegistryValue(const char *, kwsys_stl::string &,
+                                    KeyWOW64)
 {
   return false;
 }
@@ -604,7 +630,8 @@ bool SystemTools::ReadRegistryValue(const char *, kwsys_stl::string &)
 //      =>  will set the data of the "Root" value of the key
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-bool SystemTools::WriteRegistryValue(const char *key, const char *value)
+bool SystemTools::WriteRegistryValue(const char *key, const char *value,
+                                     KeyWOW64 view)
 {
   kwsys_stl::string primary = key;
   kwsys_stl::string second;
@@ -654,7 +681,7 @@ bool SystemTools::WriteRegistryValue(const char *key, const char *value)
                     0, 
                     "",
                     REG_OPTION_NON_VOLATILE,
-                    KEY_WRITE,
+                    SystemToolsMakeRegistryMode(KEY_WRITE, view),
                     NULL,
                     &hKey,
                     &dwDummy) != ERROR_SUCCESS)
@@ -674,7 +701,7 @@ bool SystemTools::WriteRegistryValue(const char *key, const char *value)
   return false;
 }
 #else
-bool SystemTools::WriteRegistryValue(const char *, const char *)
+bool SystemTools::WriteRegistryValue(const char *, const char *, KeyWOW64)
 {
   return false;
 }
@@ -688,7 +715,7 @@ bool SystemTools::WriteRegistryValue(const char *, const char *)
 //      =>  will delete  the data of the "Root" value of the key
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-bool SystemTools::DeleteRegistryValue(const char *key)
+bool SystemTools::DeleteRegistryValue(const char *key, KeyWOW64 view)
 {
   kwsys_stl::string primary = key;
   kwsys_stl::string second;
@@ -735,7 +762,7 @@ bool SystemTools::DeleteRegistryValue(const char *key)
   if(RegOpenKeyEx(primaryKey, 
                   second.c_str(), 
                   0, 
-                  KEY_WRITE, 
+                  SystemToolsMakeRegistryMode(KEY_WRITE, view),
                   &hKey) != ERROR_SUCCESS)
     {
     return false;
@@ -752,7 +779,7 @@ bool SystemTools::DeleteRegistryValue(const char *key)
   return false;
 }
 #else
-bool SystemTools::DeleteRegistryValue(const char *)
+bool SystemTools::DeleteRegistryValue(const char *, KeyWOW64)
 {
   return false;
 }

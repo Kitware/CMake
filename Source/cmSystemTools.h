@@ -48,7 +48,8 @@ public:
   /**
    * Look for and replace registry values in a string
    */
-  static void ExpandRegistryValues(std::string& source);
+  static void ExpandRegistryValues(std::string& source,
+                                   KeyWOW64 view = KeyWOW64_Default);
 
   /**
    * Platform independent escape spaces, unix uses backslash,
