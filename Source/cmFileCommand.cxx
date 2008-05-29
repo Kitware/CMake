@@ -1411,7 +1411,8 @@ cmFileCommand::HandleRPathChangeCommand(std::vector<std::string> const& args)
   cmSystemToolsFileTime* ft = cmSystemTools::FileTimeNew();
   bool have_ft = cmSystemTools::FileTimeGet(file, ft);
   std::string emsg;
-  if(!cmSystemTools::ChangeRPath(file, oldRPath, newRPath, &emsg))
+  bool changed;
+  if(!cmSystemTools::ChangeRPath(file, oldRPath, newRPath, &emsg, &changed))
     {
     cmOStringStream e;
     e << "RPATH_CHANGE could not write new RPATH:\n"
@@ -1422,9 +1423,21 @@ cmFileCommand::HandleRPathChangeCommand(std::vector<std::string> const& args)
     this->SetError(e.str().c_str());
     success = false;
     }
-  if(success && have_ft)
+  if(success)
     {
-    cmSystemTools::FileTimeSet(file, ft);
+    if(changed)
+      {
+      std::string message = "Set runtime path of \"";
+      message += file;
+      message += "\" to \"";
+      message += newRPath;
+      message += "\"";
+      this->Makefile->DisplayStatus(message.c_str(), -1);
+      }
+    if(have_ft)
+      {
+      cmSystemTools::FileTimeSet(file, ft);
+      }
     }
   cmSystemTools::FileTimeDelete(ft);
   return success;

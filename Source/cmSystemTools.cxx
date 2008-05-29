@@ -130,7 +130,7 @@ void* cmSystemTools::s_StdoutCallbackClientData = 0;
 // replace replace with with as many times as it shows up in source.
 // write the result into source.
 #if defined(_WIN32) && !defined(__CYGWIN__)
-void cmSystemTools::ExpandRegistryValues(std::string& source)
+void cmSystemTools::ExpandRegistryValues(std::string& source, KeyWOW64 view)
 {
   // Regular expression to match anything inside [...] that begins in HKEY.
   // Note that there is a special rule for regular expressions to match a
@@ -146,7 +146,7 @@ void cmSystemTools::ExpandRegistryValues(std::string& source)
     // the arguments are the second match
     std::string key = regEntry.match(1);
     std::string val;
-    if (ReadRegistryValue(key.c_str(), val))
+    if (ReadRegistryValue(key.c_str(), val, view))
       {
       std::string reg = "[";
       reg += key + "]";
@@ -161,7 +161,7 @@ void cmSystemTools::ExpandRegistryValues(std::string& source)
     }
 }
 #else
-void cmSystemTools::ExpandRegistryValues(std::string& source)
+void cmSystemTools::ExpandRegistryValues(std::string& source, KeyWOW64)
 {
   cmsys::RegularExpression regEntry("\\[(HKEY[^]]*)\\]");
   while (regEntry.find(source))
@@ -2332,9 +2332,14 @@ std::string::size_type cmSystemToolsFindRPath(std::string const& have,
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
                                 std::string const& newRPath,
-                                std::string* emsg)
+                                std::string* emsg,
+                                bool* changed)
 {
 #if defined(CMAKE_USE_ELF_PARSER)
+  if(changed)
+    {
+    *changed = false;
+    }
   unsigned long rpathPosition = 0;
   unsigned long rpathSize = 0;
   std::string rpathPrefix;
@@ -2445,6 +2450,10 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   // Make sure everything was okay.
   if(f)
     {
+    if(changed)
+      {
+      *changed = true;
+      }
     return true;
     }
   else
@@ -2460,6 +2469,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   (void)oldRPath;
   (void)newRPath;
   (void)emsg;
+  (void)changed;
   return false;
 #endif
 }

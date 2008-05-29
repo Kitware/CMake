@@ -1,3 +1,10 @@
+Changes in CMake 2.6.1 RC 3
+- FindQt4 - Find qt debug libraries on windows with d postfix.
+- Find 64 bit windows registry stuff with 32 bit cmake
+- Give a message if rpath is changed during install
+- rpath changer during install understands symlinks now
+- If a source file is not found and is a full path cmake complains again
+- 
 Changes in CMake 2.6.1 RC 2
 
 - FindQt4 - report an error when trying to use MSVC with Qt built by mingw.

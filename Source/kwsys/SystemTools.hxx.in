@@ -708,19 +708,29 @@ public:
    */
 
   /**
+   * Specify access to the 32-bit or 64-bit application view of
+   * registry values.  The default is to match the currently running
+   * binary type.
+   */
+  enum KeyWOW64 { KeyWOW64_Default, KeyWOW64_32, KeyWOW64_64 };
+
+  /**
    * Read a registry value
    */
-  static bool ReadRegistryValue(const char *key, kwsys_stl::string &value);
+  static bool ReadRegistryValue(const char *key, kwsys_stl::string &value,
+                                KeyWOW64 view = KeyWOW64_Default);
 
   /**
    * Write a registry value
    */
-  static bool WriteRegistryValue(const char *key, const char *value);
+  static bool WriteRegistryValue(const char *key, const char *value,
+                                 KeyWOW64 view = KeyWOW64_Default);
 
   /**
    * Delete a registry value
    */
-  static bool DeleteRegistryValue(const char *key);
+  static bool DeleteRegistryValue(const char *key,
+                                  KeyWOW64 view = KeyWOW64_Default);
 
   /** -----------------------------------------------------------------
    *               Environment Manipulation Routines
