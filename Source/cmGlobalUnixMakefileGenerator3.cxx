@@ -771,7 +771,7 @@ cmGlobalUnixMakefileGenerator3
                               cmLocalGenerator::FULL,
                               cmLocalGenerator::SHELL);
       //
-      std::set<cmStdString> emitted;
+      std::set<cmTarget *> emitted;
       progCmd << " " 
               << this->GetTargetTotalNumberOfActions(t->second,
                                                       emitted);
@@ -848,13 +848,13 @@ cmGlobalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 int cmGlobalUnixMakefileGenerator3
-::GetTargetTotalNumberOfActions(cmTarget & target,
-                                std::set<cmStdString> &emitted)
+::GetTargetTotalNumberOfActions(cmTarget &target,
+                                std::set<cmTarget *> &emitted)
 {
   // do not double count
   int result = 0;
 
-  if(emitted.insert(target.GetName()).second)
+  if(emitted.insert(&target).second)
     {
     cmLocalUnixMakefileGenerator3 *lg = 
       static_cast<cmLocalUnixMakefileGenerator3 *>
@@ -877,7 +877,7 @@ unsigned long cmGlobalUnixMakefileGenerator3
 ::GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
 {
   unsigned long result = 0;
-  std::set<cmStdString> emitted;
+  std::set<cmTarget *> emitted;
   std::set<cmTarget *>& targets = this->LocalGeneratorToTargetMap[lg];
   for(std::set<cmTarget *>::iterator t = targets.begin();
       t != targets.end(); ++t)

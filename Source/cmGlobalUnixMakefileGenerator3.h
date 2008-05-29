@@ -115,7 +115,7 @@ public:
 
   // returns some progress informaiton
   int GetTargetTotalNumberOfActions(cmTarget & target,
-                                    std::set<cmStdString> &emitted);
+                                    std::set<cmTarget *> &emitted);
   unsigned long GetNumberOfProgressActionsInAll
   (cmLocalUnixMakefileGenerator3 *lg);
 
