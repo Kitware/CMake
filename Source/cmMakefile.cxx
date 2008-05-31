@@ -487,13 +487,14 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       {
       this->cmCurrentListFile = filename;
       }
-    // loop over current function blockers and record them
-    std::list<cmFunctionBlocker *>::iterator pos;
-    for (pos = this->FunctionBlockers.begin();
-         pos != this->FunctionBlockers.end(); ++pos)
-      {
-      originalBlockers.insert(*pos);
-      }
+    }
+
+  // loop over current function blockers and record them
+  std::list<cmFunctionBlocker *>::iterator pos;
+  for (pos = this->FunctionBlockers.begin();
+       pos != this->FunctionBlockers.end(); ++pos)
+    {
+    originalBlockers.insert(*pos);
     }
 
   // Now read the input file
@@ -542,7 +543,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
   // add this list file to the list of dependencies
   this->ListFiles.push_back( filenametoread);
-  bool endScopeNicely = filename? true: false;
+  bool endScopeNicely = true;
   const size_t numberFunctions = cacheFile.Functions.size();
   for(size_t i =0; i < numberFunctions; ++i)
     {
