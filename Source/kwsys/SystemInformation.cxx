@@ -218,7 +218,7 @@ protected:
   unsigned int IsHyperThreadingSupported();
   LongLong GetCyclesDifference(DELAY_FUNC, unsigned int);
 
-  // For Linux
+  // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
   int RetreiveInformationFromCpuInfoFile();
   kwsys_stl::string ExtractValueFromCpuInfoFile(kwsys_stl::string buffer,
                                           const char* word, size_t init=0);
@@ -2168,6 +2168,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     pos = buffer.find("processor\t",pos+1);
     }
 
+#ifdef __linux
   // Find the largest physical id.
   int maxId = -1;
   kwsys_stl::string idc =
@@ -2185,15 +2186,18 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   // Physical ids returned by Linux don't distinguish cores.
   // We want to record the total number of cores in this->NumberOfPhysicalCPU
   // (checking only the first proc)
+
   kwsys_stl::string cores =
                         this->ExtractValueFromCpuInfoFile(buffer,"cpu cores");
   int numberOfCoresPerCPU=atoi(cores.c_str());
   this->NumberOfPhysicalCPU=numberOfCoresPerCPU*(maxId+1);
-  // have to have one, and need to avoid divied by zero
-  if(this->NumberOfPhysicalCPU <= 0)
-    {
-    this->NumberOfPhysicalCPU = 1;
-    }
+
+#else // __CYGWIN__
+  // does not have "physical id" entries, neither "cpu cores"
+  // this has to be fixed for hyper-threading.
+  this->NumberOfPhysicalCPU=this->NumberOfLogicalCPU;
+#endif
+
   // LogicalProcessorsPerPhysical>1 => hyperthreading.
   this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical=
                             this->NumberOfLogicalCPU/this->NumberOfPhysicalCPU;
