@@ -2158,9 +2158,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     fileSize++;
     }
   fclose( fd );
-  
   buffer.resize(fileSize-2);
-
   // Number of logical CPUs (combination of multiple processors, multi-core
   // and hyperthreading)
   size_t pos = buffer.find("processor\t");
@@ -2184,16 +2182,18 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     idc = this->ExtractValueFromCpuInfoFile(buffer,"physical id",
                                             this->CurrentPositionInFile+1);
     }
-
   // Physical ids returned by Linux don't distinguish cores.
   // We want to record the total number of cores in this->NumberOfPhysicalCPU
   // (checking only the first proc)
   kwsys_stl::string cores =
                         this->ExtractValueFromCpuInfoFile(buffer,"cpu cores");
   int numberOfCoresPerCPU=atoi(cores.c_str());
-
   this->NumberOfPhysicalCPU=numberOfCoresPerCPU*(maxId+1);
-
+  // have to have one, and need to avoid divied by zero
+  if(this->NumberOfPhysicalCPU <= 0)
+    {
+    this->NumberOfPhysicalCPU = 1;
+    }
   // LogicalProcessorsPerPhysical>1 => hyperthreading.
   this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical=
                             this->NumberOfLogicalCPU/this->NumberOfPhysicalCPU;
@@ -2221,8 +2221,6 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     cacheSize = cacheSize.substr(0,pos);
     }
   this->Features.L1CacheSize = atoi(cacheSize.c_str());
-
-
   return 1;
 }
 
