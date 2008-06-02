@@ -245,6 +245,10 @@ public:
   void FileReplacedDuringGenerate(const std::string& filename);
   void GetFilesReplacedDuringGenerate(std::vector<std::string>& filenames);
 
+  void AddRuleHash(const std::vector<std::string>& outputs,
+                   const std::vector<std::string>& depends,
+                   const std::vector<std::string>& commands);
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -312,6 +316,11 @@ private:
 
   // this is used to improve performance
   std::map<cmStdString,cmTarget *> TotalTargets;
+
+  // Record hashes for rules and outputs.
+  struct RuleHash { char Data[32]; };
+  std::map<cmStdString, RuleHash> RuleHashes;
+  void CheckRuleHashes();
 
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 

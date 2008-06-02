@@ -1122,13 +1122,6 @@ void cmMakefileTargetGenerator
   std::vector<std::string> depends;
   this->LocalGenerator->AppendCustomDepend(depends, cc);
 
-  // Add a dependency on the rule file itself.
-  if(!cc.GetSkipRuleDepends())
-    {
-    this->LocalGenerator->AppendRuleDepend(depends,
-                                           this->BuildFileNameFull.c_str());
-    }
-
   // Check whether we need to bother checking for a symbolic output.
   bool need_symbolic = this->GlobalGenerator->GetNeedSymbolicMark();
 
@@ -1147,6 +1140,12 @@ void cmMakefileTargetGenerator
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       o->c_str(), depends, commands,
                                       symbolic);
+
+  // If the rule has changed make sure the output is rebuilt.
+  if(!symbolic)
+    {
+    this->GlobalGenerator->AddRuleHash(cc.GetOutputs(), depends, commands);
+    }
   }
 
   // Write rules to drive building any outputs beyond the first.

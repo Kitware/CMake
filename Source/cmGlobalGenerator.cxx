@@ -27,8 +27,13 @@
 #include "cmVersion.h"
 #include "cmExportInstallFileGenerator.h"
 #include "cmComputeTargetDepends.h"
+#include "cmGeneratedFileStream.h"
 
 #include <cmsys/Directory.hxx>
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include <cmsys/MD5.h>
+#endif
 
 #include <stdlib.h> // required for atof
 
@@ -686,6 +691,7 @@ void cmGlobalGenerator::Configure()
   this->TotalTargets.clear();
   this->LocalGeneratorToTargetMap.clear();
   this->ProjectMap.clear();
+  this->RuleHashes.clear();
 
   // start with this directory
   cmLocalGenerator *lg = this->CreateLocalGenerator();
@@ -839,6 +845,9 @@ void cmGlobalGenerator::Generate()
                                     (i+1.0f)/this->LocalGenerators.size());
     }
   this->SetCurrentLocalGenerator(0);
+
+  // Update rule hashes.
+  this->CheckRuleHashes();
 
   if (this->ExtraGenerator != 0)
     {
@@ -1931,3 +1940,143 @@ cmGlobalGenerator::GetDirectoryContent(std::string const& dir, bool needDisk)
   return dc;
 }
 
+//----------------------------------------------------------------------------
+void
+cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
+                               const std::vector<std::string>& depends,
+                               const std::vector<std::string>& commands)
+{
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  // Ignore if there are no outputs.
+  if(outputs.empty())
+    {
+    return;
+    }
+
+  // Compute a hash of the rule.
+  RuleHash hash;
+  {
+  unsigned char const* data;
+  int length;
+  cmsysMD5* sum = cmsysMD5_New();
+  cmsysMD5_Initialize(sum);
+  for(std::vector<std::string>::const_iterator i = outputs.begin();
+      i != outputs.end(); ++i)
+    {
+    data = reinterpret_cast<unsigned char const*>(i->c_str());
+    length = static_cast<int>(i->length());
+    cmsysMD5_Append(sum, data, length);
+    }
+  for(std::vector<std::string>::const_iterator i = depends.begin();
+      i != depends.end(); ++i)
+    {
+    data = reinterpret_cast<unsigned char const*>(i->c_str());
+    length = static_cast<int>(i->length());
+    cmsysMD5_Append(sum, data, length);
+    }
+  for(std::vector<std::string>::const_iterator i = commands.begin();
+      i != commands.end(); ++i)
+    {
+    data = reinterpret_cast<unsigned char const*>(i->c_str());
+    length = static_cast<int>(i->length());
+    cmsysMD5_Append(sum, data, length);
+    }
+  cmsysMD5_FinalizeHex(sum, hash.Data);
+  cmsysMD5_Delete(sum);
+  }
+
+  // Shorten the output name (in expected use case).
+  cmLocalGenerator* lg = this->GetLocalGenerators()[0];
+  std::string fname = lg->Convert(outputs[0].c_str(),
+                                  cmLocalGenerator::HOME_OUTPUT);
+
+  // Associate the hash with this output.
+  this->RuleHashes[fname] = hash;
+#else
+  (void)outputs;
+  (void)depends;
+  (void)commands;
+#endif
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::CheckRuleHashes()
+{
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  std::string home = this->GetCMakeInstance()->GetHomeOutputDirectory();
+  std::string pfile = home;
+  pfile += this->GetCMakeInstance()->GetCMakeFilesDirectory();
+  pfile += "/CMakeRuleHashes.txt";
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+  std::ifstream fin(pfile.c_str(), std::ios::in | std::ios::binary);
+#else
+  std::ifstream fin(pfile.c_str(), std::ios::in);
+#endif
+  std::string line;
+  std::string fname;
+  while(cmSystemTools::GetLineFromStream(fin, line))
+    {
+    // Line format is a 32-byte hex string followed by a space
+    // followed by a file name (with no escaping).
+
+    // Skip blank and comment lines.
+    if(line.size() < 34 || line[0] == '#')
+      {
+      continue;
+      }
+
+    // Get the filename.
+    fname = line.substr(33, line.npos);
+
+    // Look for a hash for this file's rule.
+    std::map<cmStdString, RuleHash>::const_iterator rhi =
+      this->RuleHashes.find(fname);
+    if(rhi != this->RuleHashes.end())
+      {
+      // Compare the rule hash in the file to that we were given.
+      if(strncmp(line.c_str(), rhi->second.Data, 32) != 0)
+        {
+        // The rule has changed.  Delete the output so it will be
+        // built again.
+        fname = cmSystemTools::CollapseFullPath(fname.c_str(), home.c_str());
+        cmSystemTools::RemoveFile(fname.c_str());
+        }
+      }
+    else
+      {
+      // We have no hash for a rule previously listed.  This may be a
+      // case where a user has turned off a build option and might
+      // want to turn it back on later, so do not delete the file.
+      // Instead, we keep the rule hash as long as the file exists so
+      // that if the feature is turned back on and the rule has
+      // changed the file is still rebuilt.
+      std::string fpath =
+        cmSystemTools::CollapseFullPath(fname.c_str(), home.c_str());
+      if(cmSystemTools::FileExists(fpath.c_str()))
+        {
+        RuleHash hash;
+        strncpy(hash.Data, line.c_str(), 32);
+        this->RuleHashes[fname] = hash;
+        }
+      }
+    }
+
+  // Now generate a new persistence file with the current hashes.
+  if(this->RuleHashes.empty())
+    {
+    cmSystemTools::RemoveFile(pfile.c_str());
+    }
+  else
+    {
+    cmGeneratedFileStream fout(pfile.c_str());
+    fout << "# Hashes of file build rules.\n";
+    for(std::map<cmStdString, RuleHash>::const_iterator
+          rhi = this->RuleHashes.begin(); rhi != this->RuleHashes.end(); ++rhi)
+      {
+      fout.write(rhi->second.Data, 32);
+      fout << " " << rhi->first << "\n";
+      }
+    }
+#endif
+}
