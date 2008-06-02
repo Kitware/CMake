@@ -151,14 +151,6 @@ ADD_EXECUTABLE(CustomCommand
   ${PROJECT_BINARY_DIR}/generated.c
   ${PROJECT_BINARY_DIR}/not_included.h
   gen_redirect.c # default location for custom commands is in build tree
-  gen_once.c
-  )
-
-# Add a rule with no dependencies.
-ADD_CUSTOM_COMMAND(
-  OUTPUT gen_once.c
-  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/gen_once.c.in ${PROJECT_BINARY_DIR}/gen_once.c
-  SKIP_RULE_DEPENDS
   )
 
 # Add the rule to create generated.c at build time.  This is placed
