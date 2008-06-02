@@ -2199,7 +2199,12 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   this->NumberOfPhysicalCPU=
     this->NumberOfLogicalCPU = atoi(cpucount.c_str());
 #endif
-
+  // gotta have one, and if this is 0 then we get a / by 0n 
+  // beter to have a bad answer than a crash
+  if(this->NumberOfPhysicalCPU <= 0)
+    {
+    this->NumberOfPhysicalCPU = 1;
+    }
   // LogicalProcessorsPerPhysical>1 => hyperthreading.
   this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical=
                             this->NumberOfLogicalCPU/this->NumberOfPhysicalCPU;
