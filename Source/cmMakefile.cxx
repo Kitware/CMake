@@ -490,8 +490,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
 
   // loop over current function blockers and record them
-  std::list<cmFunctionBlocker *>::iterator pos;
-  for (pos = this->FunctionBlockers.begin();
+  for (std::list<cmFunctionBlocker *>::iterator pos 
+        = this->FunctionBlockers.begin();
        pos != this->FunctionBlockers.end(); ++pos)
     {
     originalBlockers.insert(*pos);
@@ -562,8 +562,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   if (endScopeNicely)
     {
     // loop over all function blockers to see if any block this command
-    std::list<cmFunctionBlocker *>::iterator pos;
-    for (pos = this->FunctionBlockers.begin();
+    for (std::list<cmFunctionBlocker *>::iterator pos 
+         = this->FunctionBlockers.begin();
          pos != this->FunctionBlockers.end(); ++pos)
       {
       // if this blocker was not in the original then send a
