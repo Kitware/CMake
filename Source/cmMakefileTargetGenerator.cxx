@@ -1116,6 +1116,10 @@ void cmMakefileTargetGenerator
       ->AppendEcho(commands, comment.c_str(),
                    cmLocalUnixMakefileGenerator3::EchoGenerate);
     }
+  // Below we need to skip over the echo and progress commands.
+  unsigned int skip = static_cast<unsigned int>(commands.size());
+
+  // Now append the actual user-specified commands.
   this->LocalGenerator->AppendCustomCommand(commands, cc);
 
   // Collect the dependencies.
@@ -1144,7 +1148,9 @@ void cmMakefileTargetGenerator
   // If the rule has changed make sure the output is rebuilt.
   if(!symbolic)
     {
-    this->GlobalGenerator->AddRuleHash(cc.GetOutputs(), depends, commands);
+    this->GlobalGenerator->AddRuleHash(cc.GetOutputs(),
+                                       commands.begin()+skip,
+                                       commands.end());
     }
   }
 

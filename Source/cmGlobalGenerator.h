@@ -246,8 +246,8 @@ public:
   void GetFilesReplacedDuringGenerate(std::vector<std::string>& filenames);
 
   void AddRuleHash(const std::vector<std::string>& outputs,
-                   const std::vector<std::string>& depends,
-                   const std::vector<std::string>& commands);
+                   std::vector<std::string>::const_iterator first,
+                   std::vector<std::string>::const_iterator last);
 
 protected:
   // for a project collect all its targets by following depend

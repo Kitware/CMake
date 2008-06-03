@@ -1943,8 +1943,8 @@ cmGlobalGenerator::GetDirectoryContent(std::string const& dir, bool needDisk)
 //----------------------------------------------------------------------------
 void
 cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
-                               const std::vector<std::string>& depends,
-                               const std::vector<std::string>& commands)
+                               std::vector<std::string>::const_iterator first,
+                               std::vector<std::string>::const_iterator last)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   // Ignore if there are no outputs.
@@ -1960,22 +1960,7 @@ cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
   int length;
   cmsysMD5* sum = cmsysMD5_New();
   cmsysMD5_Initialize(sum);
-  for(std::vector<std::string>::const_iterator i = outputs.begin();
-      i != outputs.end(); ++i)
-    {
-    data = reinterpret_cast<unsigned char const*>(i->c_str());
-    length = static_cast<int>(i->length());
-    cmsysMD5_Append(sum, data, length);
-    }
-  for(std::vector<std::string>::const_iterator i = depends.begin();
-      i != depends.end(); ++i)
-    {
-    data = reinterpret_cast<unsigned char const*>(i->c_str());
-    length = static_cast<int>(i->length());
-    cmsysMD5_Append(sum, data, length);
-    }
-  for(std::vector<std::string>::const_iterator i = commands.begin();
-      i != commands.end(); ++i)
+  for(std::vector<std::string>::const_iterator i = first; i != last; ++i)
     {
     data = reinterpret_cast<unsigned char const*>(i->c_str());
     length = static_cast<int>(i->length());
