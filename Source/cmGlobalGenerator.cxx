@@ -1979,8 +1979,8 @@ cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
   this->RuleHashes[fname] = hash;
 #else
   (void)outputs;
-  (void)depends;
-  (void)commands;
+  (void)first;
+  (void)last;
 #endif
 }
 
