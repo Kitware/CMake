@@ -721,6 +721,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
     std::vector<std::string> no_output;
     cmCustomCommand cc(no_output, depends, commandLines, comment, workingDir);
     cc.SetEscapeOldStyle(escapeOldStyle);
+    cc.SetEscapeAllowMakeVars(true);
     switch(type)
       {
       case cmTarget::PRE_BUILD:
@@ -834,6 +835,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
       new cmCustomCommand(outputs, depends2, commandLines,
                           comment, workingDir);
     cc->SetEscapeOldStyle(escapeOldStyle);
+    cc->SetEscapeAllowMakeVars(true);
     file->SetCustomCommand(cc);
     }
 }
