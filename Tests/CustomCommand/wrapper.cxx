@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 int main(int argc, char *argv[])
 {
@@ -14,5 +15,16 @@ int main(int argc, char *argv[])
   fp = fopen(argv[2],"w");
   fprintf(fp,"int wrapped_help() { return 5; }\n");
   fclose(fp);
+#ifdef CMAKE_INTDIR
+  const char* cfg = (argc >= 4)? argv[3] : "";
+  if(strcmp(cfg, CMAKE_INTDIR) != 0)
+    {
+    fprintf(stderr,
+            "Did not receive expected configuration argument:\n"
+            "  expected [" CMAKE_INTDIR "]\n"
+            "  received [%s]\n", cfg);
+    return 1;
+    }
+#endif
   return 0;
 }

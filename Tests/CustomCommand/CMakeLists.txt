@@ -42,6 +42,8 @@ ADD_CUSTOM_COMMAND(
   MAIN_DEPENDENCY ${PROJECT_SOURCE_DIR}/wrapped.h
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/wrapper
   ${PROJECT_BINARY_DIR}/wrapped.c ${PROJECT_BINARY_DIR}/wrapped_help.c
+  ${CMAKE_CFG_INTDIR} # this argument tests passing of the configuration
+  VERBATIM # passing of configuration should work in this mode
   )
 
 ################################################################
