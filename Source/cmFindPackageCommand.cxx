@@ -821,8 +821,9 @@ void cmFindPackageCommand::FindConfig()
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindPrefixedConfig()
 {
-  for(std::vector<std::string>::const_iterator pi = this->Prefixes.begin();
-      pi != this->Prefixes.end(); ++pi)
+  std::vector<std::string>& prefixes = this->SearchPaths;
+  for(std::vector<std::string>::const_iterator pi = prefixes.begin();
+      pi != prefixes.end(); ++pi)
     {
     if(this->SearchPrefix(*pi))
       {
@@ -835,8 +836,9 @@ bool cmFindPackageCommand::FindPrefixedConfig()
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindFrameworkConfig()
 {
-  for(std::vector<std::string>::const_iterator i = this->Prefixes.begin();
-      i != this->Prefixes.end(); ++i)
+  std::vector<std::string>& prefixes = this->SearchPaths;
+  for(std::vector<std::string>::const_iterator i = prefixes.begin();
+      i != prefixes.end(); ++i)
     {
     if(this->SearchFrameworkPrefix(*i))
       {
@@ -849,8 +851,9 @@ bool cmFindPackageCommand::FindFrameworkConfig()
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::FindAppBundleConfig()
 {
-  for(std::vector<std::string>::const_iterator i = this->Prefixes.begin();
-      i != this->Prefixes.end(); ++i)
+  std::vector<std::string>& prefixes = this->SearchPaths;
+  for(std::vector<std::string>::const_iterator i = prefixes.begin();
+      i != prefixes.end(); ++i)
     {
     if(this->SearchAppBundlePrefix(*i))
       {
@@ -939,19 +942,20 @@ void cmFindPackageCommand::AppendSuccessInformation()
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddUserPath(std::string const& p)
+void cmFindPackageCommand::ComputePrefixes()
 {
-  std::string userPath = p;
-  cmSystemTools::ExpandRegistryValues(userPath);
-  this->UserPaths.push_back(userPath);
+  this->AddPrefixesCMakeEnvironment();
+  this->AddPrefixesCMakeVariable();
+  this->AddPrefixesSystemEnvironment();
+  this->AddPrefixesBuilds();
+  this->AddPrefixesCMakeSystemVariable();
+  this->AddPrefixesUser();
+  this->ComputeFinalPrefixes();
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::ComputePrefixes()
+void cmFindPackageCommand::AddPrefixesCMakeEnvironment()
 {
-  std::vector<std::string>& prefixes = this->Prefixes;
-  std::set<cmStdString> emmitted;
-
   if(!this->NoCMakeEnvironmentPath && !this->NoDefaultPath)
     {
     // Check the environment variable with the same name as the cache
@@ -960,21 +964,29 @@ void cmFindPackageCommand::ComputePrefixes()
     if(cmSystemTools::GetEnv(this->Variable.c_str(), env) && env.length() > 0)
       {
       cmSystemTools::ConvertToUnixSlashes(env);
-      this->AddPathInternal(prefixes, env, EnvPath, &emmitted);
+      this->AddPathInternal(env, EnvPath);
       }
 
-    this->AddEnvPath(prefixes, "CMAKE_PREFIX_PATH", &emmitted);
-    this->AddEnvPath(prefixes, "CMAKE_FRAMEWORK_PATH", &emmitted);
-    this->AddEnvPath(prefixes, "CMAKE_APPBUNDLE_PATH", &emmitted);
+    this->AddEnvPath("CMAKE_PREFIX_PATH");
+    this->AddEnvPath("CMAKE_FRAMEWORK_PATH");
+    this->AddEnvPath("CMAKE_APPBUNDLE_PATH");
     }
+}
 
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AddPrefixesCMakeVariable()
+{
   if(!this->NoCMakePath && !this->NoDefaultPath)
     {
-    this->AddCMakePath(prefixes, "CMAKE_PREFIX_PATH", &emmitted);
-    this->AddCMakePath(prefixes, "CMAKE_FRAMEWORK_PATH", &emmitted);
-    this->AddCMakePath(prefixes, "CMAKE_APPBUNDLE_PATH", &emmitted);
+    this->AddCMakePath("CMAKE_PREFIX_PATH");
+    this->AddCMakePath("CMAKE_FRAMEWORK_PATH");
+    this->AddCMakePath("CMAKE_APPBUNDLE_PATH");
     }
+}
 
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AddPrefixesSystemEnvironment()
+{
   if(!this->NoSystemEnvironmentPath && !this->NoDefaultPath)
     {
     // Use the system search path to generate prefixes.
@@ -991,17 +1003,19 @@ void cmFindPackageCommand::ComputePrefixes()
       if(d.size() >= 4 && strcmp(d.c_str()+d.size()-4, "/bin") == 0 ||
          d.size() >= 5 && strcmp(d.c_str()+d.size()-5, "/sbin") == 0)
         {
-        this->AddPathInternal(prefixes,
-                              cmSystemTools::GetFilenamePath(d),
-                              EnvPath, &emmitted);
+        this->AddPathInternal(cmSystemTools::GetFilenamePath(d), EnvPath);
         }
       else
         {
-        this->AddPathInternal(prefixes, d, EnvPath, &emmitted);
+        this->AddPathInternal(d, EnvPath);
         }
       }
     }
+}
 
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AddPrefixesBuilds()
+{
   if(!this->NoBuilds && !this->NoDefaultPath)
     {
     // It is likely that CMake will have recently built the project.
@@ -1017,23 +1031,37 @@ void cmFindPackageCommand::ComputePrefixes()
       if(cmSystemTools::FileIsFullPath(f.c_str()) &&
          cmSystemTools::FileIsDirectory(f.c_str()))
         {
-        this->AddPathInternal(prefixes, f, FullPath, &emmitted);
+        this->AddPathInternal(f, FullPath);
         }
       }
     }
+}
 
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AddPrefixesCMakeSystemVariable()
+{
   if(!this->NoCMakeSystemPath && !this->NoDefaultPath)
     {
-    this->AddCMakePath(prefixes, "CMAKE_SYSTEM_PREFIX_PATH", &emmitted);
-    this->AddCMakePath(prefixes, "CMAKE_SYSTEM_FRAMEWORK_PATH", &emmitted);
-    this->AddCMakePath(prefixes, "CMAKE_SYSTEM_APPBUNDLE_PATH", &emmitted);
+    this->AddCMakePath("CMAKE_SYSTEM_PREFIX_PATH");
+    this->AddCMakePath("CMAKE_SYSTEM_FRAMEWORK_PATH");
+    this->AddCMakePath("CMAKE_SYSTEM_APPBUNDLE_PATH");
     }
+}
 
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AddPrefixesUser()
+{
   if(!this->UserPaths.empty())
     {
     // Add paths specified by the caller.
-    this->AddPathsInternal(prefixes, this->UserPaths, CMakePath, &emmitted);
+    this->AddPathsInternal(this->UserPaths, CMakePath);
     }
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::ComputeFinalPrefixes()
+{
+  std::vector<std::string>& prefixes = this->SearchPaths;
 
   // Construct the final set of prefixes.
   this->RerootPaths(prefixes);
