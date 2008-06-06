@@ -386,19 +386,19 @@ void cmFindBase::AddMacPath(const char* var, const char* sysvar)
   // first environment variables
   if(!this->NoCMakeEnvironmentPath)
     {
-    this->AddEnvPath("CMAKE_FRAMEWORK_PATH");
+    this->AddEnvPath(var);
     }
 
   // add cmake variables
   if(!this->NoCMakePath)
     {
-    this->AddCMakePath("CMAKE_FRAMEWORK_PATH");
+    this->AddCMakePath(var);
     }
 
   // add cmake system variables
   if(!this->NoCMakeSystemPath)
     {
-    this->AddCMakePath("CMAKE_SYSTEM_FRAMEWORK_PATH");
+    this->AddCMakePath(sysvar);
     }
 }
 
