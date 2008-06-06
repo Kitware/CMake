@@ -956,15 +956,15 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
             }
           }
         }
-      std::vector<cmStdString> const& localHelp = lg->GetLocalHelp();
-      for(std::vector<cmStdString>::const_iterator o = localHelp.begin();
-          o != localHelp.end(); ++o)
-        {
-        path = "... ";
-        path += *o;
-        lg->AppendEcho(commands, path.c_str());
-        }
       }
+    }
+  std::vector<cmStdString> const& localHelp = lg->GetLocalHelp();
+  for(std::vector<cmStdString>::const_iterator o = localHelp.begin();
+      o != localHelp.end(); ++o)
+    {
+    path = "... ";
+    path += *o;
+    lg->AppendEcho(commands, path.c_str());
     }
   lg->WriteMakeRule(ruleFileStream, "Help Target",
                     "help",
