@@ -1,5 +1,9 @@
 set(MY_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
 
+# The find_* commands do path normalization so we should do so too
+# before comparing results.
+get_filename_component(MY_SOURCE_DIR "${MY_SOURCE_DIR}" ABSOLUTE)
+
 set(_HEADER cmake_i_do_not_exist_in_the_system.h)
 set(_HEADER_FULL "${MY_SOURCE_DIR}/include/${_HEADER}")
 
