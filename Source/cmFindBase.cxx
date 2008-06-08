@@ -204,6 +204,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       doingPaths = false;
       doingPathSuf = false;
       doingNames = false;
+      newStyle = true;
       }
     else
       {
