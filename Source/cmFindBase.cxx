@@ -66,18 +66,15 @@ cmFindBase::cmFindBase()
     "If NO_DEFAULT_PATH is specified, then no additional paths are "
     "added to the search. "
     "If NO_DEFAULT_PATH is not specified, the search process is as follows:\n"
-    "1. Search cmake specific environment variables.  This "
-    "can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
-    ""
+    "1. Search paths specified in cmake-specific cache variables.  "
+    "These are intended to be used on the command line with a -DVAR=value.  "
+    "This can be skipped if NO_CMAKE_PATH is passed.\n"
     "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_PREFIX_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "   CMAKE_XXX_MAC_PATH\n"
-    "2. Search cmake variables with the same names as "
-    "the cmake specific environment variables.  These "
-    "are intended to be used on the command line with a "
-    "-DVAR=value.  This can be skipped if NO_CMAKE_PATH "
-    "is passed.\n"
-    ""
+    "2. Search paths specified in cmake-specific environment variables.  "
+    "These are intended to be set in the user's shell configuration.  "
+    "This can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
     "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_PREFIX_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "   CMAKE_XXX_MAC_PATH\n"
@@ -282,8 +279,8 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 
 void cmFindBase::ExpandPaths()
 {
-  this->AddCMakeEnvironmentPath();
   this->AddCMakeVariablePath();
+  this->AddCMakeEnvironmentPath();
   this->AddUserHintsPath();
   this->AddSystemEnvironmentPath();
   this->AddCMakeSystemVariablePath();

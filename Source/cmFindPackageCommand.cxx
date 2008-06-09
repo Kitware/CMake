@@ -239,16 +239,16 @@ cmFindPackageCommand::cmFindPackageCommand()
     "CMAKE_FIND_APPBUNDLE determine the order of preference "
     "as specified below.\n"
     "The set of installation prefixes is constructed using the following "
-    "steps.  If NO_DEFAULT_PATH is specified steps 1-5 are skipped.\n"
-    "1. Search cmake specific environment variables.  This "
-    "can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
+    "steps.  If NO_DEFAULT_PATH is specified all NO_* options are enabled.\n"
+    "1. Search paths specified in cmake-specific cache variables.  "
+    "These are intended to be used on the command line with a -DVAR=value.  "
+    "This can be skipped if NO_CMAKE_PATH is passed.\n"
     "   CMAKE_PREFIX_PATH\n"
     "   CMAKE_FRAMEWORK_PATH\n"
     "   CMAKE_APPBUNDLE_PATH\n"
-    "2. Search cmake variables with the same names as the cmake specific "
-    "environment variables.  These are intended to be used on the command "
-    "line with a -DVAR=value.  This can be skipped if NO_CMAKE_PATH "
-    "is passed.\n"
+    "2. Search paths specified in cmake-specific environment variables.  "
+    "These are intended to be set in the user's shell configuration.  "
+    "This can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
     "   CMAKE_PREFIX_PATH\n"
     "   CMAKE_FRAMEWORK_PATH\n"
     "   CMAKE_APPBUNDLE_PATH\n"
@@ -960,8 +960,8 @@ void cmFindPackageCommand::AppendSuccessInformation()
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::ComputePrefixes()
 {
-  this->AddPrefixesCMakeEnvironment();
   this->AddPrefixesCMakeVariable();
+  this->AddPrefixesCMakeEnvironment();
   this->AddPrefixesUserHints();
   this->AddPrefixesSystemEnvironment();
   this->AddPrefixesBuilds();
