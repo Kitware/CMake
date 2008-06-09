@@ -176,9 +176,9 @@ cmFindPathCommand::FindHeaderInFramework(std::string const& file,
       }
     }
   // if it is not found yet or not a framework header, then do a glob search
-  // for all files in dir/*/Headers/
+  // for all frameworks in the directory: dir/*.framework/Headers/<file>
   cmStdString glob = dir;
-  glob += "*/Headers/";
+  glob += "*.framework/Headers/";
   glob += file;
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
