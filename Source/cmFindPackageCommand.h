@@ -88,7 +88,8 @@ private:
   void AddPrefixesSystemEnvironment();
   void AddPrefixesBuilds();
   void AddPrefixesCMakeSystemVariable();
-  void AddPrefixesUser();
+  void AddPrefixesUserGuess();
+  void AddPrefixesUserHints();
   void ComputeFinalPrefixes();
   bool SearchDirectory(std::string const& dir);
   bool CheckDirectory(std::string const& dir);

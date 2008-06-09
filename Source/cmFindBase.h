@@ -66,6 +66,8 @@ private:
   void AddCMakeVariablePath();
   void AddSystemEnvironmentPath();
   void AddCMakeSystemVariablePath();
+  void AddUserHintsPath();
+  void AddUserGuessPath();
 
   // Helpers.
   void AddCMakePrefixPath(const char* variable);

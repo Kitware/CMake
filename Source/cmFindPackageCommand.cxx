@@ -112,6 +112,7 @@ cmFindPackageCommand::cmFindPackageCommand()
     "               [[REQUIRED|COMPONENTS] [components...]] [NO_MODULE]\n"
     "               [NAMES name1 [name2 ...]]\n"
     "               [CONFIGS config1 [config2 ...]]\n"
+    "               [HINTS path1 [path2 ... ]]\n"
     "               [PATHS path1 [path2 ... ]]\n"
     "               [PATH_SUFFIXES suffix1 [suffix2 ...]]\n"
     "               [NO_DEFAULT_PATH]\n"
@@ -251,22 +252,27 @@ cmFindPackageCommand::cmFindPackageCommand()
     "   CMAKE_PREFIX_PATH\n"
     "   CMAKE_FRAMEWORK_PATH\n"
     "   CMAKE_APPBUNDLE_PATH\n"
-    "3. Search the standard system environment variables. "
+    "3. Search paths specified by the HINTS option.  "
+    "These should be paths computed by system introspection, such as a "
+    "hint provided by the location of another item already found.  "
+    "Hard-coded guesses should be specified with the PATHS option.\n"
+    "4. Search the standard system environment variables. "
     "This can be skipped if NO_SYSTEM_ENVIRONMENT_PATH is passed.  "
     "Path entries ending in \"/bin\" or \"/sbin\" are automatically "
     "converted to their parent directories.\n"
     "   PATH\n"
-    "4. Search project build trees recently configured in a CMake GUI.  "
+    "5. Search project build trees recently configured in a CMake GUI.  "
     "This can be skipped if NO_CMAKE_BUILDS_PATH is passed.  "
     "It is intended for the case when a user is building multiple "
     "dependent projects one after another.\n"
-    "5. Search cmake variables defined in the Platform files "
+    "6. Search cmake variables defined in the Platform files "
     "for the current system.  This can be skipped if NO_CMAKE_SYSTEM_PATH "
     "is passed.\n"
     "   CMAKE_SYSTEM_PREFIX_PATH\n"
     "   CMAKE_SYSTEM_FRAMEWORK_PATH\n"
     "   CMAKE_SYSTEM_APPBUNDLE_PATH\n"
-    "6. Search paths specified by the PATHS option.\n"
+    "7. Search paths specified by the PATHS option.  "
+    "These are typically hard-coded guesses.\n"
     ;
   this->CommandDocumentation += this->GenericDocumentationMacPolicy;
   this->CommandDocumentation += this->GenericDocumentationRootPath;
@@ -313,7 +319,7 @@ bool cmFindPackageCommand
 
   // Parse the arguments.
   enum Doing { DoingNone, DoingComponents, DoingNames, DoingPaths,
-               DoingPathSuffixes, DoingConfigs };
+               DoingPathSuffixes, DoingConfigs, DoingHints };
   Doing doing = DoingNone;
   cmsys::RegularExpression version("^[0-9.]+$");
   bool haveVersion = false;
@@ -356,6 +362,12 @@ bool cmFindPackageCommand
       this->NoModule = true;
       this->Compatibility_1_6 = false;
       doing = DoingPaths;
+      }
+    else if(args[i] == "HINTS")
+      {
+      this->NoModule = true;
+      this->Compatibility_1_6 = false;
+      doing = DoingHints;
       }
     else if(args[i] == "PATH_SUFFIXES")
       {
@@ -400,7 +412,11 @@ bool cmFindPackageCommand
       }
     else if(doing == DoingPaths)
       {
-      this->AddUserPath(args[i]);
+      this->AddUserPath(args[i], this->UserPaths);
+      }
+    else if(doing == DoingHints)
+      {
+      this->AddUserPath(args[i], this->UserHints);
       }
     else if(doing == DoingPathSuffixes)
       {
@@ -946,10 +962,11 @@ void cmFindPackageCommand::ComputePrefixes()
 {
   this->AddPrefixesCMakeEnvironment();
   this->AddPrefixesCMakeVariable();
+  this->AddPrefixesUserHints();
   this->AddPrefixesSystemEnvironment();
   this->AddPrefixesBuilds();
   this->AddPrefixesCMakeSystemVariable();
-  this->AddPrefixesUser();
+  this->AddPrefixesUserGuess();
   this->ComputeFinalPrefixes();
 }
 
@@ -1049,13 +1066,17 @@ void cmFindPackageCommand::AddPrefixesCMakeSystemVariable()
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesUser()
+void cmFindPackageCommand::AddPrefixesUserGuess()
 {
-  if(!this->UserPaths.empty())
-    {
-    // Add paths specified by the caller.
-    this->AddPathsInternal(this->UserPaths, CMakePath);
-    }
+  // Add guesses specified by the caller.
+  this->AddPathsInternal(this->UserPaths, CMakePath);
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AddPrefixesUserHints()
+{
+  // Add hints specified by the caller.
+  this->AddPathsInternal(this->UserHints, CMakePath);
 }
 
 //----------------------------------------------------------------------------

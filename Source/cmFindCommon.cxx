@@ -76,14 +76,14 @@ cmFindCommon::cmFindCommon()
     "then CMAKE_FIND_ROOT_PATH will not be used. If ONLY_CMAKE_FIND_ROOT_PATH "
     "is used then only the re-rooted directories will be searched.\n";
   this->GenericDocumentationPathsOrder =
-    "The reason the paths listed in the call to the command are searched "
-    "last is that most users of CMake would expect things to be found "
-    "first in the locations specified by their environment.  Projects may "
-    "override this behavior by simply calling the command twice:\n"
+    "The default search order is designed to be most-specific to "
+    "least-specific for common use cases.  "
+    "Projects may override the order by simply calling the command "
+    "multiple times and using the NO_* options:\n"
     "   FIND_XXX(FIND_ARGS_XXX PATHS paths... NO_DEFAULT_PATH)\n"
     "   FIND_XXX(FIND_ARGS_XXX)\n"
-    "Once one of these calls succeeds the result variable will be set "
-    "and stored in the cache so that neither call will search again.";
+    "Once one of the calls succeeds the result variable will be set "
+    "and stored in the cache so that no call will search again.";
 }
 
 //----------------------------------------------------------------------------
@@ -322,7 +322,8 @@ void cmFindCommon::AddPathSuffix(std::string const& arg)
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddUserPath(std::string const& p)
+void cmFindCommon::AddUserPath(std::string const& p,
+                               std::vector<std::string>& paths)
 {
   // We should view the registry as the target application would view
   // it.
@@ -341,7 +342,7 @@ void cmFindCommon::AddUserPath(std::string const& p)
   // Expand using the view of the target application.
   std::string expanded = p;
   cmSystemTools::ExpandRegistryValues(expanded, view);
-  cmSystemTools::GlobDirs(expanded.c_str(), this->UserPaths);
+  cmSystemTools::GlobDirs(expanded.c_str(), paths);
 
   // Executables can be either 32-bit or 64-bit, so expand using the
   // alternative view.
@@ -349,7 +350,7 @@ void cmFindCommon::AddUserPath(std::string const& p)
     {
     expanded = p;
     cmSystemTools::ExpandRegistryValues(expanded, other_view);
-    cmSystemTools::GlobDirs(expanded.c_str(), this->UserPaths);
+    cmSystemTools::GlobDirs(expanded.c_str(), paths);
     }
 }
 

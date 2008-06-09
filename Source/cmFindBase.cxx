@@ -30,6 +30,7 @@ cmFindBase::cmFindBase()
     "   FIND_XXX(\n"
     "             <VAR>\n"
     "             name | NAMES name1 [name2 ...]\n"
+    "             [HINTS path1 [path2 ... ENV var]]\n"
     "             [PATHS path1 [path2 ... ENV var]]\n"
     "             [PATH_SUFFIXES suffix1 [suffix2 ...]]\n"
     "             [DOC \"cache documentation string\"]\n"
@@ -55,7 +56,7 @@ cmFindBase::cmFindBase()
     "is searched for is specified by the names listed "
     "after the NAMES argument.   Additional search locations "
     "can be specified after the PATHS argument.  If ENV var is "
-    "found in the PATHS section the environment variable var "
+    "found in the HINTS or PATHS section the environment variable var "
     "will be read and converted from a system environment variable to "
     "a cmake style list of paths.  For example ENV PATH would be a way "
     "to list the system path variable. The argument "
@@ -80,18 +81,23 @@ cmFindBase::cmFindBase()
     "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_PREFIX_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "   CMAKE_XXX_MAC_PATH\n"
-    "3. Search the standard system environment variables. "
+    "3. Search the paths specified by the HINTS option.  "
+    "These should be paths computed by system introspection, such as a "
+    "hint provided by the location of another item already found.  "
+    "Hard-coded guesses should be specified with the PATHS option.\n"
+    "4. Search the standard system environment variables. "
     "This can be skipped if NO_SYSTEM_ENVIRONMENT_PATH is an argument.\n"
     "   PATH\n"
     "   XXX_SYSTEM\n"  // replace with "", LIB, or INCLUDE
-    "4. Search cmake variables defined in the Platform files "
+    "5. Search cmake variables defined in the Platform files "
     "for the current system.  This can be skipped if NO_CMAKE_SYSTEM_PATH "
     "is passed.\n"
     "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_SYSTEM_PREFIX_PATH\n"
     "   CMAKE_SYSTEM_XXX_PATH\n"
     "   CMAKE_SYSTEM_XXX_MAC_PATH\n"
-    "5. Search the paths specified after PATHS or in the short-hand version "
-    "of the command.\n"
+    "6. Search the paths specified by the PATHS option "
+    "or in the short-hand version of the command.  "
+    "These are typically hard-coded guesses.\n"
     ;
   this->GenericDocumentation += this->GenericDocumentationMacPolicy;
   this->GenericDocumentation += this->GenericDocumentationRootPath;
@@ -161,65 +167,59 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   // Find the current bundle/framework search policy.
   this->SelectDefaultMacMode();
 
-  std::string doc;
-  bool doingNames = true; // assume it starts with a name
-  bool doingPaths = false;
-  bool doingPathSuf = false;
   bool newStyle = false;
-  
+  enum Doing { DoingNone, DoingNames, DoingPaths, DoingPathSuffixes,
+               DoingHints };
+  Doing doing = DoingNames; // assume it starts with a name
   for (unsigned int j = 1; j < args.size(); ++j)
     {
     if(args[j] == "NAMES")
       {
-      doingNames = true;
+      doing = DoingNames;
       newStyle = true;
-      doingPathSuf = false;
-      doingPaths = false;
       }
     else if (args[j] == "PATHS")
       {
-      doingPaths = true;
+      doing = DoingPaths;
       newStyle = true;
-      doingNames = false;
-      doingPathSuf = false;
+      }
+    else if (args[j] == "HINTS")
+      {
+      doing = DoingHints;
+      newStyle = true;
       }
     else if (args[j] == "PATH_SUFFIXES")
       {
+      doing = DoingPathSuffixes;
       compatibility = false;
-      doingPathSuf = true;
       newStyle = true;
-      doingNames = false;
-      doingPaths = false;
       }
     else if (args[j] == "NO_SYSTEM_PATH")
       {
-      doingPaths = false;
-      doingPathSuf = false;
-      doingNames = false;
+      doing = DoingNone;
       this->NoDefaultPath = true;
       }
     else if (this->CheckCommonArgument(args[j]))
       {
+      doing = DoingNone;
       compatibility = false;
-      doingPaths = false;
-      doingPathSuf = false;
-      doingNames = false;
       newStyle = true;
       }
-    else
+    else if(doing == DoingNames)
       {
-      if(doingNames)
-        {
-        this->Names.push_back(args[j]);
-        }
-      else if(doingPaths)
-        {
-        this->AddUserPath(args[j]);
-        }
-      else if(doingPathSuf)
-        {
-        this->AddPathSuffix(args[j]);
-        }
+      this->Names.push_back(args[j]);
+      }
+    else if(doing == DoingPaths)
+      {
+      this->AddUserPath(args[j], this->UserPaths);
+      }
+    else if(doing == DoingHints)
+      {
+      this->AddUserPath(args[j], this->UserHints);
+      }
+    else if(doing == DoingPathSuffixes)
+      {
+      this->AddPathSuffix(args[j]);
       }
     }
 
@@ -266,7 +266,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     this->Names.push_back(args[1]);
     for(unsigned int j = 2; j < args.size(); ++j)
       {
-      this->AddUserPath(args[j]);
+      this->AddUserPath(args[j], this->UserPaths);
       }
     }
   this->ExpandPaths();
@@ -284,11 +284,10 @@ void cmFindBase::ExpandPaths()
 {
   this->AddCMakeEnvironmentPath();
   this->AddCMakeVariablePath();
+  this->AddUserHintsPath();
   this->AddSystemEnvironmentPath();
   this->AddCMakeSystemVariablePath();
-
-  // Add paths specified by the caller.
-  this->AddPathsInternal(this->UserPaths, CMakePath);
+  this->AddUserGuessPath();
 
   // Add suffixes and clean up paths.
   this->AddPathSuffixes();
@@ -442,6 +441,18 @@ void cmFindBase::AddCMakeSystemVariablePath()
       this->AddCMakePath("CMAKE_SYSTEM_FRAMEWORK_PATH");
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmFindBase::AddUserHintsPath()
+{
+  this->AddPathsInternal(this->UserHints, CMakePath);
+}
+
+//----------------------------------------------------------------------------
+void cmFindBase::AddUserGuessPath()
+{
+  this->AddPathsInternal(this->UserPaths, CMakePath);
 }
 
 //----------------------------------------------------------------------------
