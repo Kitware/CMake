@@ -6,7 +6,7 @@ CWD="`dirname \"$0\"`"
 TMP=/tmp/$UID/TemporaryItems
 
 version=`sw_vers -productVersion`
-if [ "$?" == "0" ]; then
+if [ "$?" = "0" ]; then
   major=${version%%\.*}
   rest=${version#*\.}
   minor=${rest%%\.*}
@@ -36,7 +36,7 @@ cat << __END_OF_GETDISPLAY_SCRIPT__ > "$TMP/getdisplay.sh"
 #!/bin/sh
 mkdir -p "$TMP"
 
-if [ "\$DISPLAY"x == "x" ]; then
+if [ "\$DISPLAY"x = "x" ]; then
     echo :0 > "$TMP/display"
 else
     echo \$DISPLAY > "$TMP/display"
@@ -48,7 +48,7 @@ open-x11 $TMP/getdisplay.sh || \
 open -a XDarwin $TMP/getdisplay.sh || \
 echo ":0" > $TMP/display
 
-while [ "$?" == "0" -a ! -f $TMP/display ];
+while [ "$?" = "0" -a ! -f $TMP/display ];
 do
   #echo "Waiting for display $TMP/display"
   sleep 1;
