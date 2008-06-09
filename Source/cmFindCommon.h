@@ -44,6 +44,9 @@ protected:
   /** Place a set of search paths under the search roots.  */
   void RerootPaths(std::vector<std::string>& paths);
 
+  /** Add trailing slashes to all search paths.  */
+  void AddTrailingSlashes(std::vector<std::string>& paths);
+
   /** Compute the current default root path mode.  */
   void SelectDefaultRootPathMode();
 

@@ -102,16 +102,6 @@ bool cmFindPathCommand
     supportFrameworks = false;
     }
   std::string framework;
-  // Add a trailing slash to all paths to aid the search process.
-  for(std::vector<std::string>::iterator i = this->SearchPaths.begin();
-      i != this->SearchPaths.end(); ++i)
-    {
-    std::string& p = *i;
-    if(p.empty() || p[p.size()-1] != '/')
-      {
-      p += "/";
-      }
-    }
   // Use the search path to find the file.
   unsigned int k;
   std::string result;

@@ -417,3 +417,18 @@ void cmFindCommon::AddPathInternal(std::string const& in_path,
     this->SearchPaths.push_back(fullPath.c_str());
     }
 }
+
+//----------------------------------------------------------------------------
+void cmFindCommon::AddTrailingSlashes(std::vector<std::string>& paths)
+{
+  // Add a trailing slash to all paths to aid the search process.
+  for(std::vector<std::string>::iterator i = paths.begin();
+      i != paths.end(); ++i)
+    {
+    std::string& p = *i;
+    if(!p.empty() && p[p.size()-1] != '/')
+      {
+      p += "/";
+      }
+    }
+}

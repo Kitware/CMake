@@ -1067,15 +1067,7 @@ void cmFindPackageCommand::ComputeFinalPrefixes()
   this->RerootPaths(prefixes);
 
   // Add a trailing slash to all prefixes to aid the search process.
-  for(std::vector<std::string>::iterator i = prefixes.begin();
-      i != prefixes.end(); ++i)
-    {
-    std::string& prefix = *i;
-    if(prefix[prefix.size()-1] != '/')
-      {
-      prefix += "/";
-      }
-    }
+  this->AddTrailingSlashes(prefixes);
 }
 
 //----------------------------------------------------------------------------

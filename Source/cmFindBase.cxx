@@ -273,6 +273,10 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 
   // Handle search root stuff.
   this->RerootPaths(this->SearchPaths);
+
+  // Add a trailing slash to all prefixes to aid the search process.
+  this->AddTrailingSlashes(this->SearchPaths);
+
   return true;
 }
 

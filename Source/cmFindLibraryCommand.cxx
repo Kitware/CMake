@@ -252,16 +252,6 @@ std::string cmFindLibraryCommand::FindLibrary(const char* name)
     }
   }
 
-  // Add a trailing slash to all paths to aid the search process.
-  for(std::vector<std::string>::iterator i = this->SearchPaths.begin();
-      i != this->SearchPaths.end(); ++i)
-    {
-    std::string& p = *i;
-    if(p.empty() || p[p.size()-1] != '/')
-      {
-      p += "/";
-      }
-    }
   std::string tryPath;
   for(std::vector<std::string>::const_iterator p = this->SearchPaths.begin();
       p != this->SearchPaths.end(); ++p)
