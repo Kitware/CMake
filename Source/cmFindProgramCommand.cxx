@@ -97,8 +97,7 @@ std::string cmFindProgramCommand::FindProgram(std::vector<std::string> names)
 {
   std::string program = "";
 
-  // First/last order taken care of in cmFindBase when the paths are setup.
-  if(this->SearchAppBundleFirst || this->SearchAppBundleLast)
+  if(this->SearchAppBundleFirst || this->SearchAppBundleOnly)
     {
     program = FindAppBundle(names);
     }
@@ -107,6 +106,10 @@ std::string cmFindProgramCommand::FindProgram(std::vector<std::string> names)
     program = cmSystemTools::FindProgram(names, this->SearchPaths, true);
     }
 
+  if(program.empty() && this->SearchAppBundleLast)
+    {
+    program = this->FindAppBundle(names);
+    }
   return program;
 }
 

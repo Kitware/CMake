@@ -282,31 +282,10 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 
 void cmFindBase::ExpandPaths()
 {
-  // if NO Default paths was not specified add the
-  // standard search paths.
-  if(!this->NoDefaultPath)
-    {
-    if(this->SearchFrameworkFirst || this->SearchFrameworkOnly)
-      {
-      this->AddFrameworkPath();
-      }
-    if(this->SearchAppBundleFirst || this->SearchAppBundleOnly)
-      {
-      this->AddAppBundlePath();
-      }
-    this->AddCMakeEnvironmentPath();
-    this->AddCMakeVariablePath();
-    this->AddSystemEnvironmentPath();
-    this->AddCMakeSystemVariablePath();
-    if(this->SearchAppBundleLast)
-      {
-      this->AddAppBundlePath();
-      }
-    if(this->SearchFrameworkLast)
-      {
-      this->AddFrameworkPath();
-      }
-    }
+  this->AddCMakeEnvironmentPath();
+  this->AddCMakeVariablePath();
+  this->AddSystemEnvironmentPath();
+  this->AddCMakeSystemVariablePath();
 
   // Add paths specified by the caller.
   this->AddPathsInternal(this->UserPaths, CMakePath);
@@ -381,49 +360,9 @@ void cmFindBase::AddEnvPrefixPath(const char* variable)
 }
 
 //----------------------------------------------------------------------------
-void cmFindBase::AddMacPath(const char* var, const char* sysvar)
-{
-  if(this->NoDefaultPath)
-    {
-    return;
-    }
-
-  // first environment variables
-  if(!this->NoCMakeEnvironmentPath)
-    {
-    this->AddEnvPath(var);
-    }
-
-  // add cmake variables
-  if(!this->NoCMakePath)
-    {
-    this->AddCMakePath(var);
-    }
-
-  // add cmake system variables
-  if(!this->NoCMakeSystemPath)
-    {
-    this->AddCMakePath(sysvar);
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmFindBase::AddFrameworkPath()
-{
-  this->AddMacPath("CMAKE_FRAMEWORK_PATH", "CMAKE_SYSTEM_FRAMEWORK_PATH");
-}
-
-//----------------------------------------------------------------------------
-void cmFindBase::AddAppBundlePath()
-{
-  this->AddMacPath("CMAKE_APPBUNDLE_PATH", "CMAKE_SYSTEM_APPBUNDLE_PATH");
-}
-
-//----------------------------------------------------------------------------
 void cmFindBase::AddCMakeEnvironmentPath()
 {
-  if(!this->NoCMakeEnvironmentPath &&
-     !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
+  if(!this->NoCMakeEnvironmentPath && !this->NoDefaultPath)
     {
     // Add CMAKE_*_PATH environment variables
     std::string var = "CMAKE_";
@@ -431,14 +370,22 @@ void cmFindBase::AddCMakeEnvironmentPath()
     var += "_PATH";
     this->AddEnvPrefixPath("CMAKE_PREFIX_PATH");
     this->AddEnvPath(var.c_str());
+
+    if(this->CMakePathName == "PROGRAM")
+      {
+      this->AddEnvPath("CMAKE_APPBUNDLE_PATH");
+      }
+    else
+      {
+      this->AddEnvPath("CMAKE_FRAMEWORK_PATH");
+      }
     }
 }
 
 //----------------------------------------------------------------------------
 void cmFindBase::AddCMakeVariablePath()
 {
-  if(!this->NoCMakePath &&
-     !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
+  if(!this->NoCMakePath && !this->NoDefaultPath)
     {
     // Add CMake varibles of the same name as the previous environment
     // varibles CMAKE_*_PATH to be used most of the time with -D
@@ -448,14 +395,22 @@ void cmFindBase::AddCMakeVariablePath()
     var += "_PATH";
     this->AddCMakePrefixPath("CMAKE_PREFIX_PATH");
     this->AddCMakePath(var.c_str());
+
+    if(this->CMakePathName == "PROGRAM")
+      {
+      this->AddCMakePath("CMAKE_APPBUNDLE_PATH");
+      }
+    else
+      {
+      this->AddCMakePath("CMAKE_FRAMEWORK_PATH");
+      }
     }
 }
 
 //----------------------------------------------------------------------------
 void cmFindBase::AddSystemEnvironmentPath()
 {
-  if(!this->NoSystemEnvironmentPath &&
-     !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
+  if(!this->NoSystemEnvironmentPath && !this->NoDefaultPath)
     {
     // Add LIB or INCLUDE
     if(!this->EnvironmentPath.empty())
@@ -470,14 +425,22 @@ void cmFindBase::AddSystemEnvironmentPath()
 //----------------------------------------------------------------------------
 void cmFindBase::AddCMakeSystemVariablePath()
 {
-  if(!this->NoCMakeSystemPath &&
-     !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
+  if(!this->NoCMakeSystemPath && !this->NoDefaultPath)
     {
     std::string var = "CMAKE_SYSTEM_";
     var += this->CMakePathName;
     var += "_PATH";
     this->AddCMakePrefixPath("CMAKE_SYSTEM_PREFIX_PATH");
     this->AddCMakePath(var.c_str());
+
+    if(this->CMakePathName == "PROGRAM")
+      {
+      this->AddCMakePath("CMAKE_SYSTEM_APPBUNDLE_PATH");
+      }
+    else
+      {
+      this->AddCMakePath("CMAKE_SYSTEM_FRAMEWORK_PATH");
+      }
     }
 }
 

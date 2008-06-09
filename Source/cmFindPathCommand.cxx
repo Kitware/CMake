@@ -95,57 +95,16 @@ bool cmFindPathCommand
       }
     return true;
     }
-  std::string ff = this->Makefile->GetSafeDefinition("CMAKE_FIND_FRAMEWORK");
-  bool supportFrameworks = true;
-  if( ff.size() == 0 || ff == "NEVER" )
+
+  std::string result = this->FindHeader();
+  if(result.size() != 0)
     {
-    supportFrameworks = false;
-    }
-  std::string framework;
-  // Use the search path to find the file.
-  unsigned int k;
-  std::string result;
-  for(k=0; k < this->SearchPaths.size(); k++)
-    {
-    for(unsigned int j =0; j < this->Names.size(); ++j)
-      {
-      // if frameworks are supported try to find the header in a framework
-      std::string tryPath;
-      if(supportFrameworks)
-        {
-        tryPath = this->FindHeaderInFramework(this->Names[j],
-                                              this->SearchPaths[k]);
-        if(tryPath.size())
-          {
-          result = tryPath;
-          }
-        }
-      if(result.size() == 0)
-        {
-        tryPath = this->SearchPaths[k];
-        tryPath += this->Names[j];
-        if(cmSystemTools::FileExists(tryPath.c_str()))
-          {
-          if(this->IncludeFileInPath)
-            {
-            result = tryPath;
-            }
-          else
-            {
-            result = this->SearchPaths[k];
-            }
-          }
-        }
-      if(result.size() != 0)
-        {
-        this->Makefile->AddCacheDefinition
-          (this->VariableName.c_str(), result.c_str(),
-           this->VariableDocumentation.c_str(),
-           (this->IncludeFileInPath) ? 
-           cmCacheManager::FILEPATH :cmCacheManager::PATH);
-        return true;
-        }
-      }
+    this->Makefile->AddCacheDefinition
+      (this->VariableName.c_str(), result.c_str(),
+       this->VariableDocumentation.c_str(),
+       (this->IncludeFileInPath) ?
+       cmCacheManager::FILEPATH :cmCacheManager::PATH);
+    return true;
     }
   this->Makefile->AddCacheDefinition
     (this->VariableName.c_str(),
@@ -156,8 +115,28 @@ bool cmFindPathCommand
   return true;
 }
 
-std::string cmFindPathCommand::FindHeaderInFramework(std::string& file,
-                                                     std::string& dir)
+//----------------------------------------------------------------------------
+std::string cmFindPathCommand::FindHeader()
+{
+  std::string header;
+  if(this->SearchFrameworkFirst || this->SearchFrameworkOnly)
+    {
+    header = this->FindFrameworkHeader();
+    }
+  if(header.empty() && !this->SearchFrameworkOnly)
+    {
+    header = this->FindNormalHeader();
+    }
+  if(header.empty() && this->SearchFrameworkLast)
+    {
+    header = this->FindFrameworkHeader();
+    }
+  return header;
+}
+
+std::string
+cmFindPathCommand::FindHeaderInFramework(std::string const& file,
+                                         std::string const& dir)
 {
   cmStdString fileName = file;
   cmStdString frameWorkName;
@@ -217,3 +196,51 @@ std::string cmFindPathCommand::FindHeaderInFramework(std::string& file,
   return "";
 }
 
+//----------------------------------------------------------------------------
+std::string cmFindPathCommand::FindNormalHeader()
+{
+  std::string tryPath;
+  for(std::vector<std::string>::const_iterator ni = this->Names.begin();
+      ni != this->Names.end() ; ++ni)
+    {
+    for(std::vector<std::string>::const_iterator
+          p = this->SearchPaths.begin();
+        p != this->SearchPaths.end(); ++p)
+      {
+      tryPath = *p;
+      tryPath += *ni;
+      if(cmSystemTools::FileExists(tryPath.c_str()))
+        {
+        if(this->IncludeFileInPath)
+          {
+          return tryPath;
+          }
+        else
+          {
+          return *p;
+          }
+        }
+      }
+    }
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindPathCommand::FindFrameworkHeader()
+{
+  for(std::vector<std::string>::const_iterator ni = this->Names.begin();
+      ni != this->Names.end() ; ++ni)
+    {
+    for(std::vector<std::string>::const_iterator
+          p = this->SearchPaths.begin();
+        p != this->SearchPaths.end(); ++p)
+      {
+      std::string fwPath = this->FindHeaderInFramework(*ni, *p);
+      if(!fwPath.empty())
+        {
+        return fwPath;
+        }
+      }
+    }
+  return "";
+}

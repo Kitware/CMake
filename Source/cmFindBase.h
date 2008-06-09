@@ -62,15 +62,12 @@ protected:
   bool AlreadyInCacheWithoutMetaInfo;
 private:
   // Add pieces of the search.
-  void AddFrameworkPath();
-  void AddAppBundlePath();
   void AddCMakeEnvironmentPath();
   void AddCMakeVariablePath();
   void AddSystemEnvironmentPath();
   void AddCMakeSystemVariablePath();
 
   // Helpers.
-  void AddMacPath(const char* var, const char* sysvar);
   void AddCMakePrefixPath(const char* variable);
   void AddEnvPrefixPath(const char* variable);
   void AddPrefixPaths(std::vector<std::string> const& in_paths,
