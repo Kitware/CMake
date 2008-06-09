@@ -27,15 +27,11 @@
 
 # Try the user's environment request before anything else.
 FIND_PATH(OSGFX_INCLUDE_DIR osgFX/BumpMapping
-  PATHS
+  HINTS
   $ENV{OSGFX_DIR}
   $ENV{OSG_DIR}
   $ENV{OSGDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-FIND_PATH(OSGFX_INCLUDE_DIR osgFX/BumpMapping
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -47,21 +43,15 @@ FIND_PATH(OSGFX_INCLUDE_DIR osgFX/BumpMapping
     /opt
     [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
     [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-  PATH_SUFFIXES include
 )
 
 FIND_LIBRARY(OSGFX_LIBRARY 
   NAMES osgFX
-  PATHS
+  HINTS
   $ENV{OSGFX_DIR}
   $ENV{OSG_DIR}
   $ENV{OSGDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(OSGFX_LIBRARY 
-  NAMES osgFX
+  PATH_SUFFIXES lib64 lib
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -71,7 +61,6 @@ FIND_LIBRARY(OSGFX_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 SET(OSGFX_FOUND "NO")

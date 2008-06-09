@@ -49,13 +49,9 @@
 # CMAKE_INCLUDE_PATH to modify the search paths.
 
 FIND_PATH(OPENAL_INCLUDE_DIR al.h
-  PATHS
+  HINTS
   $ENV{OPENALDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include/AL include/OpenAL include
-)
-
-FIND_PATH(OPENAL_INCLUDE_DIR al.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -66,19 +62,13 @@ FIND_PATH(OPENAL_INCLUDE_DIR al.h
   /opt/csw # Blastwave
   /opt
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
-  PATH_SUFFIXES include/AL include/OpenAL include
 )
 
 FIND_LIBRARY(OPENAL_LIBRARY 
   NAMES OpenAL al openal OpenAL32
-  PATHS
+  HINTS
   $ENV{OPENALDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
-)
-
-FIND_LIBRARY(OPENAL_LIBRARY 
-  NAMES OpenAL al openal OpenAL32
+  PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -89,7 +79,6 @@ FIND_LIBRARY(OPENAL_LIBRARY
   /opt/csw
   /opt
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
-  PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
 )
 
 

@@ -10,15 +10,9 @@
 # Modifications by Alexander Neundorf
 
 FIND_PATH(GIF_INCLUDE_DIR gif_lib.h
-  PATHS
+  HINTS
   $ENV{GIF_DIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-
-
-FIND_PATH(GIF_INCLUDE_DIR gif_lib.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -32,16 +26,9 @@ SET(POTENTIAL_GIF_LIBS gif libgif ungif libungif giflib)
 
 FIND_LIBRARY(GIF_LIBRARY 
   NAMES ${POTENTIAL_GIF_LIBS}
-  PATHS
+  HINTS
   $ENV{GIF_DIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES lib64 lib
-)
-
-
-
-FIND_LIBRARY(GIF_LIBRARY 
-  NAMES ${POTENTIAL_GIF_LIBS}
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -53,7 +40,6 @@ FIND_LIBRARY(GIF_LIBRARY
   /opt
   [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
   /usr/freeware
-  PATH_SUFFIXES lib64 lib
 )
 
 # see readme.txt

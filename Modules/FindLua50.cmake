@@ -13,13 +13,9 @@
 
 
 FIND_PATH(LUA_INCLUDE_DIR lua.h
-  PATHS
+  HINTS
   $ENV{LUA_DIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include/lua50 include/lua5.0 include/lua5 include/lua include
-)
-
-FIND_PATH(LUA_INCLUDE_DIR lua.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -29,19 +25,13 @@ FIND_PATH(LUA_INCLUDE_DIR lua.h
   /opt/local # DarwinPorts
   /opt/csw # Blastwave
   /opt
-  PATH_SUFFIXES include/lua50 include/lua5.0 include/lua5 include/lua include
 )
 
 FIND_LIBRARY(LUA_LIBRARY_lua 
   NAMES lua50 lua5.0 lua5 lua
-  PATHS
+  HINTS
   $ENV{LUA_DIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(LUA_LIBRARY_lua
-  NAMES lua50 lua5.0 lua5 lua
+  PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -51,7 +41,6 @@ FIND_LIBRARY(LUA_LIBRARY_lua
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 # In an OS X framework, lualib is usually included as part of the framework
@@ -61,15 +50,10 @@ IF(${LUA_LIBRARY_lua} MATCHES "framework")
 ELSE(${LUA_LIBRARY_lua} MATCHES "framework")
   FIND_LIBRARY(LUA_LIBRARY_lualib 
     NAMES lualib50 lualib5.0 lualib5 lualib
-    PATHS
+    HINTS
     $ENV{LUALIB_DIR}
     $ENV{LUA_DIR}
-    NO_DEFAULT_PATH
     PATH_SUFFIXES lib64 lib
-  )
-
-  FIND_LIBRARY(LUA_LIBRARY_lualib 
-    NAMES lualib50 lualib5.0 lualib5 lualib
     PATHS
     /usr/local
     /usr
@@ -77,7 +61,6 @@ ELSE(${LUA_LIBRARY_lua} MATCHES "framework")
     /opt/local
     /opt/csw
     /opt
-    PATH_SUFFIXES lib64 lib
   )
   IF(LUA_LIBRARY_lualib AND LUA_LIBRARY_lua)
     # include the math library for Unix

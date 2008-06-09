@@ -14,14 +14,10 @@
 
 
 FIND_PATH(SDLNET_INCLUDE_DIR SDL_net.h
-  PATHS
+  HINTS
   $ENV{SDLNETDIR}
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-FIND_PATH(SDLNET_INCLUDE_DIR SDL_net.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -44,15 +40,10 @@ FIND_PATH(SDLNET_INCLUDE_DIR SDL_net.h
 )
 FIND_LIBRARY(SDLNET_LIBRARY 
   NAMES SDL_net
-  PATHS
+  HINTS
   $ENV{SDLNETDIR}
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(SDLNET_LIBRARY 
-  NAMES SDL_net
+  PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -62,7 +53,6 @@ FIND_LIBRARY(SDLNET_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 SET(SDLNET_FOUND "NO")

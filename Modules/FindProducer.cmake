@@ -30,15 +30,11 @@
 
 # Try the user's environment request before anything else.
 FIND_PATH(PRODUCER_INCLUDE_DIR Producer/CameraGroup
-  PATHS
+  HINTS
   $ENV{PRODUCER_DIR}
   $ENV{OSG_DIR}
   $ENV{OSGDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-FIND_PATH(PRODUCER_INCLUDE_DIR Producer/CameraGroup
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -54,16 +50,11 @@ FIND_PATH(PRODUCER_INCLUDE_DIR Producer/CameraGroup
 
 FIND_LIBRARY(PRODUCER_LIBRARY 
   NAMES Producer
-  PATHS
+  HINTS
   $ENV{PRODUCER_DIR}
   $ENV{OSG_DIR}
   $ENV{OSGDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(PRODUCER_LIBRARY 
-  NAMES Producer
+  PATH_SUFFIXES lib64 lib
   PATHS
   /usr/local
   /usr
@@ -71,7 +62,6 @@ FIND_LIBRARY(PRODUCER_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 SET(PRODUCER_FOUND "NO")

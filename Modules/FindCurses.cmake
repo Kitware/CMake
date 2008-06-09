@@ -66,12 +66,10 @@ ELSE(NOT CURSES_USE_NCURSES)
   FIND_FILE(CURSES_HAVE_NCURSES_H         ncurses.h)
   FIND_FILE(CURSES_HAVE_NCURSES_NCURSES_H ncurses/ncurses.h)
   FIND_FILE(CURSES_HAVE_NCURSES_CURSES_H  ncurses/curses.h)
-  FIND_FILE(CURSES_HAVE_CURSES_H          curses.h  PATHS "${_cursesParentDir}/include" NO_DEFAULT_PATH)
-  FIND_FILE(CURSES_HAVE_CURSES_H          curses.h)
+  FIND_FILE(CURSES_HAVE_CURSES_H          curses.h  HINTS "${_cursesParentDir}/include")
 
   FIND_PATH(CURSES_NCURSES_INCLUDE_PATH ncurses.h ncurses/ncurses.h  ncurses/curses.h)
-  FIND_PATH(CURSES_NCURSES_INCLUDE_PATH curses.h  PATHS "${_cursesParentDir}/include" NO_DEFAULT_PATH)
-  FIND_PATH(CURSES_NCURSES_INCLUDE_PATH curses.h)
+  FIND_PATH(CURSES_NCURSES_INCLUDE_PATH curses.h  HINTS "${_cursesParentDir}/include")
 
   # for compatibility with older FindCurses.cmake this has to be in the cache
   # FORCE must not be used since this would break builds which preload a cache wqith these variables set
@@ -81,10 +79,10 @@ ENDIF(NOT CURSES_USE_NCURSES)
 
 
 
-FIND_LIBRARY(CURSES_EXTRA_LIBRARY cur_colr PATHS "${_cursesLibDir}" NO_DEFAULT_PATH)
+FIND_LIBRARY(CURSES_EXTRA_LIBRARY cur_colr HINTS "${_cursesLibDir}")
 FIND_LIBRARY(CURSES_EXTRA_LIBRARY cur_colr )
 
-FIND_LIBRARY(CURSES_FORM_LIBRARY form PATHS "${_cursesLibDir}" NO_DEFAULT_PATH)
+FIND_LIBRARY(CURSES_FORM_LIBRARY form HINTS "${_cursesLibDir}")
 FIND_LIBRARY(CURSES_FORM_LIBRARY form )
 
 # for compatibility with older FindCurses.cmake this has to be in the cache

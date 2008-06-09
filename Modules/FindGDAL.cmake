@@ -20,14 +20,9 @@
 # #include "gdal.h"
 
 FIND_PATH(GDAL_INCLUDE_DIR gdal.h
+  HINTS
   $ENV{GDAL_DIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES include
-)
-
-
-
-FIND_PATH(GDAL_INCLUDE_DIR gdal.h
+  PATH_SUFFIXES include
   PATHS
   ~/Library/Frameworks/gdal.framework/Headers
   /Library/Frameworks/gdal.framework/Headers
@@ -53,14 +48,9 @@ FIND_PATH(GDAL_INCLUDE_DIR gdal.h
 
 FIND_LIBRARY(GDAL_LIBRARY 
   NAMES gdal GDAL
-  PATHS
+  HINTS
   $ENV{GDAL_DIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(GDAL_LIBRARY 
-  NAMES gdal GDAL
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -72,7 +62,6 @@ FIND_LIBRARY(GDAL_LIBRARY
     /opt
     /usr/freeware
     [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;GDAL_ROOT]/lib
-  PATH_SUFFIXES lib64 lib
 )
 
 SET(GDAL_FOUND "NO")
