@@ -211,23 +211,44 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 QString QCMakeCacheModel::prefix(const QString& s)
 {
   QString prefix = s.section('_', 0, 0);
+  if(prefix == s)
+    {
+    prefix = QString();
+    }
   return prefix;
 }
 
 void QCMakeCacheModel::breakProperties(const QSet<QCMakeProperty>& props,
                      QMap<QString, QCMakePropertyList>& result)
 {
+  QMap<QString, QCMakePropertyList> tmp;
   // return a map of properties grouped by prefixes, and sorted
   foreach(QCMakeProperty p, props)
     {
     QString prefix = QCMakeCacheModel::prefix(p.Key);
-    result[prefix].append(p);
+    tmp[prefix].append(p);
     }
+  // sort it and re-org any properties with only one sub item
+  QCMakePropertyList reorgProps;
   QMap<QString, QCMakePropertyList>::iterator iter;
-  for(iter = result.begin(); iter != result.end(); ++iter)
+  for(iter = tmp.begin(); iter != tmp.end();)
     {
-    qSort(*iter);
+    if(iter->count() == 1)
+      {
+      reorgProps.append((*iter)[0]);
+      iter = tmp.erase(iter);
+      }
+    else
+      {
+      qSort(*iter);
+      ++iter;
+      }
     }
+  if(reorgProps.count())
+    {
+    tmp[QCMakeCacheModel::prefix("NOPREFIX")] += reorgProps;
+    }
+  result = tmp;
 }
   
 QCMakePropertyList QCMakeCacheModel::properties() const
