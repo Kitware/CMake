@@ -36,19 +36,46 @@ public:
 protected:
   bool filterAcceptsRow(int row, const QModelIndex& p) const
     {
-    // accept row if either column matches
-    QModelIndex idx0 = this->sourceModel()->index(row, 0, p);
-    QModelIndex idx1 = this->sourceModel()->index(row, 1, p);
-    QString str0 = this->sourceModel()->data(idx0).toString();
-    QString str1 = this->sourceModel()->data(idx1).toString();
+    QStringList strs;
+    const QAbstractItemModel* m = this->sourceModel();
+    QModelIndex idx = m->index(row, 0, p);
 
-    return str0.contains(this->filterRegExp()) ||
-           str1.contains(this->filterRegExp());
+    // if there are no children, get strings for column 0 and 1
+    if(!m->hasChildren(idx))
+      {
+      strs.append(m->data(idx).toString());
+      idx = m->index(row, 1, p);
+      strs.append(m->data(idx).toString());
+      }
+    else
+      {
+      // get strings for children entries to compare with
+      // instead of comparing with the parent
+      int num = m->rowCount(idx);
+      for(int i=0; i<num; i++)
+        {
+        QModelIndex tmpidx = m->index(i, 0, idx);
+        strs.append(m->data(tmpidx).toString());
+        tmpidx = m->index(i, 1, idx);
+        strs.append(m->data(tmpidx).toString());
+        }
+      }
+
+    // check all strings for a match
+    foreach(QString str, strs)
+      {
+      if(str.contains(this->filterRegExp()))
+        {
+        return true;
+        }
+      }
+    
+    return false;
     }
 };
 
 QCMakeCacheView::QCMakeCacheView(QWidget* p)
-  : QTableView(p), Init(false)
+  : QTreeView(p), Init(false)
 {
   // hook up our model and search/filter proxies
   this->CacheModel = new QCMakeCacheModel(this);
@@ -79,9 +106,7 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
   int h = 0;
   QFontMetrics met(this->font());
   h = qMax(met.height(), this->style()->pixelMetric(QStyle::PM_IndicatorHeight));
-  this->verticalHeader()->setDefaultSectionSize(h + 4);
-  this->horizontalHeader()->setStretchLastSection(true);
-  this->verticalHeader()->hide();
+  this->header()->setDefaultSectionSize(h + 4);
 }
 
 void QCMakeCacheView::showEvent(QShowEvent* e)
@@ -94,7 +119,7 @@ void QCMakeCacheView::showEvent(QShowEvent* e)
     this->setColumnWidth(1, colWidth/2);
     this->Init = true;
     }
-  return QTableView::showEvent(e);
+  return QTreeView::showEvent(e);
 }
   
 QCMakeCacheModel* QCMakeCacheView::cacheModel() const
@@ -114,7 +139,7 @@ QModelIndex QCMakeCacheView::moveCursor(CursorAction act,
     {
     return this->model()->index(this->model()->rowCount()-1, 1);
     }
-  return QTableView::moveCursor(act, mod);
+  return QTreeView::moveCursor(act, mod);
 }
   
 void QCMakeCacheView::setShowAdvanced(bool s)
@@ -134,8 +159,8 @@ void QCMakeCacheView::setSearchFilter(const QString& s)
 }
 
 QCMakeCacheModel::QCMakeCacheModel(QObject* p)
-  : QAbstractTableModel(p),
-    NewCount(0), EditEnabled(true)
+  : QAbstractItemModel(p),
+    EditEnabled(true)
 {
 }
 
@@ -156,55 +181,139 @@ void QCMakeCacheModel::clear()
 void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 {
   QSet<QCMakeProperty> newProps = props.toSet();
-  QSet<QCMakeProperty> newProps2 = props.toSet();
-  QSet<QCMakeProperty> oldProps = this->Properties.toSet();
+  QSet<QCMakeProperty> newProps2 = newProps;
+  QSet<QCMakeProperty> oldProps = this->properties().toSet();
   
   oldProps.intersect(newProps);
   newProps.subtract(oldProps);
   newProps2.subtract(newProps);
 
-  this->NewCount = newProps.count();
   this->Properties.clear();
+  this->NewProperties.clear();
 
-  this->Properties = newProps.toList();
-  qSort(this->Properties);
-  QCMakePropertyList tmp = newProps2.toList();
-  qSort(tmp);
-  this->Properties += tmp;
-  
+  QMap<QString, QCMakePropertyList> result;
+  this->breakProperties(newProps, result);
+  foreach(QString key, result.keys())
+    {
+    this->NewProperties.append(QPair<QString, QCMakePropertyList>(key, result.value(key)));
+    }
+  result.clear();
+  this->breakProperties(newProps2, result);
+  foreach(QString key, result.keys())
+    {
+    this->Properties.append(QPair<QString, QCMakePropertyList>(key, result.value(key)));
+    }
+
+  // tell everyone to discard whatever they knew (cached) about this model
   this->reset();
+}
+
+QString QCMakeCacheModel::prefix(const QString& s)
+{
+  QString prefix = s.section('_', 0, 0);
+  return prefix;
+}
+
+void QCMakeCacheModel::breakProperties(const QSet<QCMakeProperty>& props,
+                     QMap<QString, QCMakePropertyList>& result)
+{
+  // return a map of properties grouped by prefixes, and sorted
+  foreach(QCMakeProperty p, props)
+    {
+    QString prefix = QCMakeCacheModel::prefix(p.Key);
+    result[prefix].append(p);
+    }
+  QMap<QString, QCMakePropertyList>::iterator iter;
+  for(iter = result.begin(); iter != result.end(); ++iter)
+    {
+    qSort(*iter);
+    }
 }
   
 QCMakePropertyList QCMakeCacheModel::properties() const
 {
-  return this->Properties;
+  QCMakePropertyList props;
+  QPair<QString, QCMakePropertyList> l;
+  foreach(l, this->NewProperties)
+    {
+    props += l.second;
+    }
+  foreach(l, this->Properties)
+    {
+    props += l.second;
+    }
+  return props;
 }
   
-bool QCMakeCacheModel::insertProperty(int row, QCMakeProperty::PropertyType t,
+bool QCMakeCacheModel::insertProperty(QCMakeProperty::PropertyType t,
                       const QString& name, const QString& description,
                       const QVariant& value, bool advanced)
 {
-  if(this->insertRows(row, 1, QModelIndex()))
+  QCMakeProperty prop;
+  prop.Key = name;
+  prop.Value = value;
+  prop.Help = description;
+  prop.Type = t;
+  prop.Advanced = advanced;
+
+  // find where to insert it in the new properties section
+  QString prefix = this->prefix(name);
+  QList<QPair<QString, QCMakePropertyList> >::iterator iter = this->NewProperties.begin();
+  while(iter != this->NewProperties.end() && prefix > iter->first)
     {
-    QModelIndex idx1 = this->index(row, 0);
-    QModelIndex idx2 = this->index(row, 1);
-    
-    this->setData(idx1, t, QCMakeCacheModel::TypeRole);
-    this->setData(idx1, name, Qt::DisplayRole);
-    this->setData(idx1, description, QCMakeCacheModel::HelpRole);
-    this->setData(idx1, advanced, QCMakeCacheModel::AdvancedRole);
-    if(t == QCMakeProperty::BOOL)
-      {
-      this->setData(idx2, value.toBool() ? Qt::Checked : Qt::Unchecked,
-        Qt::CheckStateRole);
-      }
-    else
-      {
-      this->setData(idx2, value, Qt::DisplayRole);
-      }
-    return true;
+    ++iter;
     }
-  return false;
+
+  bool insertedParent = false;
+
+  // insert a new parent item for this group of properties with this prefix
+  // if there isn't one
+  if(iter == this->NewProperties.end() || iter->first != prefix)
+    {
+    int row = iter - this->NewProperties.begin();
+    this->beginInsertRows(QModelIndex(), row, row);
+    iter = this->NewProperties.insert(iter, QPair<QString, QCMakePropertyList>(prefix, QCMakePropertyList()));
+    insertedParent = true;
+    }
+
+  // find where to insert the property in the group of properties
+  QCMakePropertyList::iterator jter = iter->second.begin();
+  while(jter != iter->second.end() && name > jter->Key)
+    {
+    ++jter;
+    }
+  
+  QModelIndex idxp = this->index(iter - this->NewProperties.begin(), 0);
+
+  if(jter != iter->second.end() && jter->Key == name)
+    {
+    // replace existing item
+    *jter = prop;
+    QModelIndex idx1 = this->index(jter - iter->second.begin(), 0, idxp);
+    QModelIndex idx2 = this->index(jter - iter->second.begin(), 1, idxp);
+    this->dataChanged(idx1, idx2);
+    }
+  else
+    {
+    // add new item
+    int row = jter - iter->second.begin();
+    if(!insertedParent)
+      {
+      this->beginInsertRows(idxp, row, row);
+      }
+    jter = iter->second.insert(jter, prop);
+    if(!insertedParent)
+      {
+      this->endInsertRows();
+      }
+    }
+    
+  if(insertedParent)
+  {
+    this->endInsertRows();
+  }
+
+  return true;
 }
 
 void QCMakeCacheModel::setEditEnabled(bool e)
@@ -217,9 +326,9 @@ bool QCMakeCacheModel::editEnabled() const
   return this->EditEnabled;
 }
 
-int QCMakeCacheModel::newCount() const
+bool QCMakeCacheModel::hasNewProperties() const
 {
-  return this->NewCount;
+  return !this->NewProperties.isEmpty();
 }
 
 int QCMakeCacheModel::columnCount (const QModelIndex& /*p*/ ) const
@@ -227,62 +336,177 @@ int QCMakeCacheModel::columnCount (const QModelIndex& /*p*/ ) const
   return 2;
 }
 
+bool QCMakeCacheModel::isNewProperty(const QModelIndex& idx) const
+{
+  if(idx.isValid() && idx.internalId())
+    {
+    return (idx.internalId() - 1) < this->NewProperties.count();
+    }
+  else if(idx.isValid())
+    {
+    return idx.row() < this->NewProperties.count();
+    }
+  return false;
+}
+  
+const QCMakeProperty* QCMakeCacheModel::propertyForIndex(const QModelIndex& idx) const
+{
+  const QPair<QString, QCMakePropertyList>* l = this->propertyListForIndex(idx);
+  if(l && idx.internalId())
+    {
+    if(idx.row() < l->second.count())
+      {
+      return &l->second[idx.row()];
+      }
+    }
+  return NULL;
+}
+
+const QPair<QString, QCMakePropertyList>* QCMakeCacheModel::propertyListForIndex(const QModelIndex& idx) const
+{
+  int row = -1;
+  if(idx.isValid() && idx.internalId() > 0)
+    {
+    row = idx.internalId() - 1;
+    }
+  else if(idx.isValid())
+    {
+    row = idx.row();
+    }
+  if(row != -1)
+    {
+    if(row < this->NewProperties.count())
+      {
+      return &this->NewProperties[row];
+      }
+    row -= this->NewProperties.count();
+    if(row < this->Properties.count())
+      {
+      return &this->Properties[row];
+      }
+    }
+  return NULL;
+}
+
 QVariant QCMakeCacheModel::data (const QModelIndex& idx, int role) const
 {
-  if(idx.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
+  const QPair<QString, QCMakePropertyList>* l = this->propertyListForIndex(idx);
+  const QCMakeProperty* p = propertyForIndex(idx);
+  if(l && !p)
     {
-    return this->Properties[idx.row()].Key;
-    }
-  else if(idx.column() == 0 && role == Qt::ToolTipRole)
-    {
-    return this->data(idx, Qt::DisplayRole).toString() + "\n" +
-           this->data(idx, QCMakeCacheModel::HelpRole).toString();
-    }
-  else if(idx.column() == 1 && (role == Qt::DisplayRole || role == Qt::EditRole))
-    {
-    if(this->Properties[idx.row()].Type != QCMakeProperty::BOOL)
+    if(idx.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
       {
-      return this->Properties[idx.row()].Value;
+      return l->first;
+      }
+    else if(role == QCMakeCacheModel::AdvancedRole)
+      {
+      // return true if all subitems are advanced
+      foreach(QCMakeProperty p, l->second)
+        {
+        if(!p.Advanced)
+          {
+          return false;
+          }
+        }
+      return true;
       }
     }
-  else if(idx.column() == 1 && role == Qt::CheckStateRole)
+  if(l && p)
     {
-    if(this->Properties[idx.row()].Type == QCMakeProperty::BOOL)
+    if(idx.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
       {
-      return this->Properties[idx.row()].Value.toBool() ? Qt::Checked : Qt::Unchecked;
+      return p->Key;
+      }
+    else if(idx.column() == 0 && role == Qt::ToolTipRole)
+      {
+      return p->Key + "\n" + p->Help;
+      }
+    else if(idx.column() == 1 && (role == Qt::DisplayRole || role == Qt::EditRole))
+      {
+      if(p->Type != QCMakeProperty::BOOL)
+        {
+        return p->Value;
+        }
+      }
+    else if(idx.column() == 1 && role == Qt::CheckStateRole)
+      {
+      if(p->Type == QCMakeProperty::BOOL)
+        {
+        return p->Value.toBool() ? Qt::Checked : Qt::Unchecked;
+        }
+      }
+    else if(role == QCMakeCacheModel::HelpRole)
+      {
+      return p->Help;
+      }
+    else if(role == QCMakeCacheModel::TypeRole)
+      {
+      return p->Type;
+      }
+    else if(role == QCMakeCacheModel::AdvancedRole)
+      {
+      return p->Advanced;
       }
     }
-  else if(role == QCMakeCacheModel::HelpRole)
-    {
-    return this->Properties[idx.row()].Help;
-    }
-  else if(role == QCMakeCacheModel::TypeRole)
-    {
-    return this->Properties[idx.row()].Type;
-    }
-  else if(role == QCMakeCacheModel::AdvancedRole)
-    {
-    return this->Properties[idx.row()].Advanced;
-    }
-  else if(role == Qt::BackgroundRole && idx.row()+1 <= this->NewCount)
+  
+  if(role == Qt::BackgroundRole && this->isNewProperty(idx))
     {
     return QBrush(QColor(255,100,100));
     }
+
   return QVariant();
 }
 
-QModelIndex QCMakeCacheModel::parent (const QModelIndex& /*idx*/) const
+QModelIndex QCMakeCacheModel::parent (const QModelIndex& idx) const
 {
+  if(idx.isValid() && idx.internalId())
+    {
+    return this->createIndex(idx.internalId()-1, 0);
+    }
   return QModelIndex();
 }
 
-int QCMakeCacheModel::rowCount (const QModelIndex& p) const
+QModelIndex QCMakeCacheModel::index (int row, int column, const QModelIndex& idx) const
 {
-  if(p.isValid())
+  if(!idx.isValid() && row < this->rowCount(idx) && column < this->columnCount(idx))
     {
-    return 0;
+    // index at root level
+    return this->createIndex(row, column);
     }
-  return this->Properties.count();
+  else if(idx.isValid() && !idx.internalId() && row < this->rowCount(idx) && column < this->columnCount(idx))
+    {
+    // index at sub-item
+    return this->createIndex(row, column, idx.row()+1);
+    }
+  return QModelIndex();
+}
+
+bool QCMakeCacheModel::hasChildren (const QModelIndex& idx) const
+{
+  if(idx.isValid() && idx.internalId())
+    {
+    return false;
+    }
+  return true;
+}
+
+int QCMakeCacheModel::rowCount (const QModelIndex& idx) const
+{
+  if(!idx.isValid())
+    {
+    int num = this->Properties.count() + this->NewProperties.count();
+    return num;
+    }
+  
+  const QPair<QString, QCMakePropertyList>* l = this->propertyListForIndex(idx);
+  const QCMakeProperty* p = this->propertyForIndex(idx);
+
+  if(l && !p)
+    {
+    return l->second.count();
+    }
+  
+  return 0;
 }
 
 QVariant QCMakeCacheModel::headerData (int section, Qt::Orientation orient, int role) const
@@ -298,12 +522,14 @@ QVariant QCMakeCacheModel::headerData (int section, Qt::Orientation orient, int 
 Qt::ItemFlags QCMakeCacheModel::flags (const QModelIndex& idx) const
 {
   Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+  const QCMakeProperty* p = this->propertyForIndex(idx);
+
   // all column 1's are editable
-  if(idx.column() == 1 && this->EditEnabled)
+  if(p && idx.column() == 1 && this->EditEnabled)
     {
     f |= Qt::ItemIsEditable;
     // booleans are editable in place
-    if(this->Properties[idx.row()].Type == QCMakeProperty::BOOL)
+    if(p->Type == QCMakeProperty::BOOL)
       {
       f |= Qt::ItemIsUserCheckable;
       }
@@ -314,86 +540,83 @@ Qt::ItemFlags QCMakeCacheModel::flags (const QModelIndex& idx) const
 
 bool QCMakeCacheModel::setData (const QModelIndex& idx, const QVariant& value, int role)
 {
-  if(idx.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
+  QCMakeProperty* p = const_cast<QCMakeProperty*>(this->propertyForIndex(idx));
+  if(p)
     {
-    this->Properties[idx.row()].Key = value.toString();
-    emit this->dataChanged(idx, idx);
-    }
-  else if(idx.column() == 1 && (role == Qt::DisplayRole || role == Qt::EditRole))
-    {
-    this->Properties[idx.row()].Value = value.toString();
-    emit this->dataChanged(idx, idx);
-    }
-  else if(idx.column() == 1 && (role == Qt::CheckStateRole))
-    {
-    this->Properties[idx.row()].Value = value.toInt() == Qt::Checked;
-    emit this->dataChanged(idx, idx);
-    }
-  else if(role == QCMakeCacheModel::HelpRole)
-    {
-    this->Properties[idx.row()].Help = value.toString();
-    emit this->dataChanged(idx, idx);
-    }
-  else if(role == QCMakeCacheModel::TypeRole)
-    {
-    this->Properties[idx.row()].Type = static_cast<QCMakeProperty::PropertyType>(value.toInt());
-    }
-  else if(role == QCMakeCacheModel::AdvancedRole)
-    {
-    this->Properties[idx.row()].Advanced = value.toBool();
+    if(idx.column() == 1 && (role == Qt::DisplayRole || role == Qt::EditRole))
+      {
+      p->Value = value.toString();
+      emit this->dataChanged(idx, idx);
+      return true;
+      }
+    else if(idx.column() == 1 && (role == Qt::CheckStateRole))
+      {
+      p->Value = value.toInt() == Qt::Checked;
+      emit this->dataChanged(idx, idx);
+      return true;
+      }
     }
   return false;
 }
 
 QModelIndex QCMakeCacheModel::buddy(const QModelIndex& idx) const
 {
-  if(idx.column() == 0)
+  const QCMakeProperty* p = this->propertyForIndex(idx);
+  if(p && idx.column() == 0)
     {
-    if(this->Properties[idx.row()].Type != QCMakeProperty::BOOL)
+    if(p->Type != QCMakeProperty::BOOL)
       {
-      return this->index(idx.row(), 1);
+      return this->index(idx.row(), 1, idx.parent());
       }
     }
   return idx;
 }
   
-bool QCMakeCacheModel::removeRows(int row, int num, const QModelIndex&)
+bool QCMakeCacheModel::removeRows(int row, int count, const QModelIndex& p)
 {
-  if(row < 0 || row+num > this->Properties.count())
+  // remove parent items
+  if(!p.isValid())
+    {
+    this->beginRemoveRows(p, row, row-1+count);
+    while(count != 0 && row < this->NewProperties.count())
+      {
+      this->NewProperties.removeAt(row);
+      count--;
+      }
+    row -= this->NewProperties.count();
+    while(count != 0 && row < this->Properties.count())
+      {
+      this->Properties.removeAt(row);
+      count--;
+      }
+    this->endRemoveRows();
+    return true;
+    }
+
+  // get the parent item containing the item to remove
+  QPair<QString, QCMakePropertyList>* l = 
+    const_cast<QPair<QString, QCMakePropertyList>*>(this->propertyListForIndex(p));
+  if(!l || l->second.count() < row)
     {
     return false;
     }
-  this->beginRemoveRows(QModelIndex(), row, row+num-1);
-  for(int i=0; i<num; i++)
-    {
-    this->Properties.removeAt(row);
-    if(this->NewCount >= row+1)
-      {
-      this->NewCount--;
-      }
-    }
-  this->endRemoveRows();
-  return true;
-}
 
-bool QCMakeCacheModel::insertRows(int row, int num, const QModelIndex&)
-{
-  if(row < 0)
-    row = 0;
-  if(row > this->rowCount())
-    row = this->rowCount();
-
-  this->beginInsertRows(QModelIndex(), row, row+num-1);
-  for(int i=0; i<num; i++)
+  // all items under parent item are being removed, remove the parent item too
+  if(l->second.count() == count && row == 0)
     {
-    this->Properties.insert(row+i, QCMakeProperty());
-    if(this->NewCount >= row)
-      {
-      this->NewCount++;
-      }
+    return this->removeRows(p.row(), 1, QModelIndex());
     }
-  this->endInsertRows();
-  return true;
+
+  // remove the sub items
+  if(l->second.count() >= count + row)
+    {
+    this->beginRemoveRows(p, row, row-1+count);
+    l->second.erase(l->second.begin()+row, l->second.begin()+row+count);
+    this->endRemoveRows();
+    return true;
+    }
+
+  return false;
 }
 
 QCMakeCacheModelDelegate::QCMakeCacheModelDelegate(QObject* p)
@@ -484,10 +707,12 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
 bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* event)
 {
   // workaround for what looks like a bug in Qt on Mac OS X
+  // where it doesn't create a QWidget wrapper for the native file dialog
+  // so the Qt library ends up assuming the focus was lost to something else
   if(event->type() == QEvent::FocusOut && this->FileDialogFlag)
-  {
+    {
     return false;
-  }
+    }
   return QItemDelegate::eventFilter(object, event);
 }
 

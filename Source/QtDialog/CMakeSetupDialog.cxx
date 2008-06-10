@@ -300,7 +300,7 @@ void CMakeSetupDialog::doConfigure()
 
 void CMakeSetupDialog::finishConfigure(int err)
 {
-  if(0 == err && 0 == this->CacheValues->cacheModel()->newCount())
+  if(0 == err && !this->CacheValues->cacheModel()->hasNewProperties())
     {
     this->enterState(ReadyGenerate);
     }
@@ -559,20 +559,20 @@ bool CMakeSetupDialog::setupFirstConfigure()
       QString fortranCompiler = dialog.getFortranCompiler();
       if(!fortranCompiler.isEmpty())
         {
-        m->insertProperty(0, QCMakeProperty::FILEPATH, "CMAKE_Fortran_COMPILER", 
+        m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_Fortran_COMPILER", 
                           "Fortran compiler.", fortranCompiler, false);
         }
       QString cxxCompiler = dialog.getCXXCompiler();
       if(!cxxCompiler.isEmpty())
         {
-        m->insertProperty(0, QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER", 
+        m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER", 
                           "CXX compiler.", cxxCompiler, false);
         }
       
       QString cCompiler = dialog.getCCompiler();
       if(!cCompiler.isEmpty())
         {
-        m->insertProperty(0, QCMakeProperty::FILEPATH, "CMAKE_C_COMPILER", 
+        m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_C_COMPILER", 
                           "C compiler.", cCompiler, false);
         }
       }
@@ -581,7 +581,7 @@ bool CMakeSetupDialog::setupFirstConfigure()
       QString toolchainFile = dialog.crossCompilerToolChainFile();
       if(!toolchainFile.isEmpty())
         {
-        m->insertProperty(0, QCMakeProperty::FILEPATH, "CMAKE_TOOLCHAIN_FILE", 
+        m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_TOOLCHAIN_FILE", 
                           "Cross Compile ToolChain File", toolchainFile, false);
         }
       else
@@ -589,32 +589,32 @@ bool CMakeSetupDialog::setupFirstConfigure()
         QString fortranCompiler = dialog.getFortranCompiler();
         if(!fortranCompiler.isEmpty())
           {
-          m->insertProperty(0, QCMakeProperty::FILEPATH, "CMAKE_Fortran_COMPILER", 
+          m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_Fortran_COMPILER", 
                             "Fortran compiler.", fortranCompiler, false);
           }
 
         QString mode = dialog.getCrossIncludeMode();
-        m->insertProperty(0, QCMakeProperty::STRING, "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE", 
+        m->insertProperty(QCMakeProperty::STRING, "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE", 
                           "CMake Find Include Mode", mode, false);
         mode = dialog.getCrossLibraryMode();
-        m->insertProperty(0, QCMakeProperty::STRING, "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY", 
+        m->insertProperty(QCMakeProperty::STRING, "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY", 
                           "CMake Find Library Mode", mode, false);
         mode = dialog.getCrossProgramMode();
-        m->insertProperty(0, QCMakeProperty::STRING, "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM", 
+        m->insertProperty(QCMakeProperty::STRING, "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM", 
                           "CMake Find Program Mode", mode, false);
         
         QString rootPath = dialog.getCrossRoot();
-        m->insertProperty(0, QCMakeProperty::PATH, "CMAKE_FIND_ROOT_PATH", 
+        m->insertProperty(QCMakeProperty::PATH, "CMAKE_FIND_ROOT_PATH", 
                           "CMake Find Root Path", rootPath, false);
 
         QString systemName = dialog.getSystemName();
-        m->insertProperty(0, QCMakeProperty::STRING, "CMAKE_SYSTEM_NAME", 
+        m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_NAME", 
                           "CMake System Name", systemName, false);
         QString cxxCompiler = dialog.getCXXCompiler();
-        m->insertProperty(0, QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER", 
+        m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER", 
                           "CXX compiler.", cxxCompiler, false);
         QString cCompiler = dialog.getCCompiler();
-        m->insertProperty(0, QCMakeProperty::FILEPATH, "CMAKE_C_COMPILER", 
+        m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_C_COMPILER", 
                           "C compiler.", cCompiler, false);
         }
       }
@@ -808,7 +808,7 @@ void CMakeSetupDialog::removeSelectedCacheEntries()
     }
   foreach(QPersistentModelIndex pi, pidxs)
     {
-    this->CacheValues->model()->removeRow(pi.row());
+    this->CacheValues->model()->removeRow(pi.row(), pi.parent());
     }
 }
 
@@ -897,7 +897,7 @@ void CMakeSetupDialog::addCacheEntry()
   if(QDialog::Accepted == dialog.exec())
     {
     QCMakeCacheModel* m = this->CacheValues->cacheModel();
-    m->insertProperty(0, w->type(), w->name(), w->description(), w->value(), false);
+    m->insertProperty(w->type(), w->name(), w->description(), w->value(), false);
     }
 }
 
