@@ -410,11 +410,16 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       fpath = "CMake";
       fpath +=  lang;
       fpath += "Information.cmake";
-      fpath = mf->GetModulesFile(fpath.c_str());
-      if(!mf->ReadListFile(0,fpath.c_str()))
+      std::string informationFile = mf->GetModulesFile(fpath.c_str());
+      if (informationFile.empty())
         {
         cmSystemTools::Error("Could not find cmake module file:",
                              fpath.c_str());
+        }
+      else if(!mf->ReadListFile(0, informationFile.c_str()))
+        {
+        cmSystemTools::Error("Could not process cmake module file:",
+                             informationFile.c_str());
         }
       }
     if (needSetLanguageEnabledMaps[lang])
@@ -422,11 +427,26 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       this->SetLanguageEnabledMaps(lang, mf);
       }
 
+    std::string compilerName = "CMAKE_";
+    compilerName += lang;
+    compilerName += "_COMPILER";
+    std::string compilerLangFile = rootBin;
+    compilerLangFile += "/CMake";
+    compilerLangFile += lang;
+    compilerLangFile += "Compiler.cmake";
     // Test the compiler for the language just setup
+    // (but only if a compiler has been actually found)
     // At this point we should have enough info for a try compile
     // which is used in the backward stuff
     // If the language is untested then test it now with a try compile.
-    if(needTestLanguage[lang])
+    if (!mf->IsSet(compilerName.c_str()))
+      {
+      // if the compiler did not work, then remove the
+      // CMake(LANG)Compiler.cmake file so that it will get tested the
+      // next time cmake is run
+      cmSystemTools::RemoveFile(compilerLangFile.c_str());
+      }
+    else if(needTestLanguage[lang])
       {
       if (!this->CMakeInstance->GetIsInTryCompile())
         {
@@ -447,11 +467,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         // next time cmake is run
         if(!mf->IsOn(compilerWorks.c_str()))
           {
-          fpath = rootBin;
-          fpath += "/CMake";
-          fpath += lang;
-          fpath += "Compiler.cmake";
-          cmSystemTools::RemoveFile(fpath.c_str());
+          cmSystemTools::RemoveFile(compilerLangFile.c_str());
           }
         else
           {
