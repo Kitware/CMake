@@ -200,7 +200,9 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       {
       doing = DoingNone;
       compatibility = false;
-      newStyle = true;
+      // Some common arguments were accidentally supported by CMake
+      // 2.4 and 2.6.0 in the short-hand form of the command, so we
+      // must support it even though it is not documented.
       }
     else if(doing == DoingNames)
       {
@@ -259,11 +261,13 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   // FIND_*(VAR name path1 path2 ...)
   if(!newStyle)
     {
+    // All the short-hand arguments have been recorded as names.
+    std::vector<std::string> shortArgs = this->Names;
     this->Names.clear(); // clear out any values in Names
-    this->Names.push_back(args[1]);
-    for(unsigned int j = 2; j < args.size(); ++j)
+    this->Names.push_back(shortArgs[0]);
+    for(unsigned int j = 1; j < shortArgs.size(); ++j)
       {
-      this->AddUserPath(args[j], this->UserPaths);
+      this->AddUserPath(shortArgs[j], this->UserPaths);
       }
     }
   this->ExpandPaths();
