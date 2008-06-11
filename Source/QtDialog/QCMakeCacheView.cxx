@@ -417,6 +417,10 @@ QVariant QCMakeCacheModel::data (const QModelIndex& idx, int role) const
     {
     if(idx.column() == 0 && (role == Qt::DisplayRole || role == Qt::EditRole))
       {
+      if(l->first == QString())
+        {
+        return tr("Ungrouped Properties");
+        }
       return l->first;
       }
     else if(role == QCMakeCacheModel::AdvancedRole)
