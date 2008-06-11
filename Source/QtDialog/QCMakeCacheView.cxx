@@ -144,6 +144,11 @@ QModelIndex QCMakeCacheView::moveCursor(CursorAction act,
   
 void QCMakeCacheView::setShowAdvanced(bool s)
 {
+#if QT_VERSION >= 040300
+  // new 4.3 api that needs to be called.  what about an older Qt?
+  this->SearchFilter->invalidate();
+#endif
+
   this->AdvancedFilter->setFilterRegExp(
     s ? AdvancedRegExp[1] : AdvancedRegExp[0]);
 }
