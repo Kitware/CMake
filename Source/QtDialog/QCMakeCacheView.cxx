@@ -424,7 +424,7 @@ QVariant QCMakeCacheModel::data (const QModelIndex& idx, int role) const
       {
       if(l->first == QString())
         {
-        return tr("Ungrouped Properties");
+        return tr("Ungrouped Entries");
         }
       return l->first;
       }
