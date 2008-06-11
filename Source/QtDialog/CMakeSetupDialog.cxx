@@ -111,6 +111,13 @@ CMakeSetupDialog::CMakeSetupDialog()
   debugAction->setCheckable(true);
   QObject::connect(debugAction, SIGNAL(toggled(bool)), 
                    this, SLOT(setDebugOutput(bool)));
+  
+  QAction* expandAction = OptionsMenu->addAction(tr("&Expand Variables Tree"));
+  QObject::connect(expandAction, SIGNAL(triggered(bool)), 
+                   this->CacheValues, SLOT(expandAll()));
+  QAction* collapseAction = OptionsMenu->addAction(tr("&Collapse Variables Tree"));
+  QObject::connect(collapseAction, SIGNAL(triggered(bool)), 
+                   this->CacheValues, SLOT(collapseAll()));
 
   QMenu* HelpMenu = this->menuBar()->addMenu(tr("&Help"));
   QAction* a = HelpMenu->addAction(tr("About"));
