@@ -305,7 +305,7 @@ const char* DynamicLoader::LibExtension()
 //----------------------------------------------------------------------------
 const char* DynamicLoader::LastError()
 {
-  LPVOID lpMsgBuf;
+  LPVOID lpMsgBuf=NULL;
 
   FormatMessage(
     FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -316,6 +316,11 @@ const char* DynamicLoader::LastError()
     0,
     NULL
     );
+
+  if(!lpMsgBuf)
+    {
+    return NULL;
+    }
 
   static char* str = 0;
   delete [] str;

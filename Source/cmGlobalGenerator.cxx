@@ -27,8 +27,13 @@
 #include "cmVersion.h"
 #include "cmExportInstallFileGenerator.h"
 #include "cmComputeTargetDepends.h"
+#include "cmGeneratedFileStream.h"
 
 #include <cmsys/Directory.hxx>
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include <cmsys/MD5.h>
+#endif
 
 #include <stdlib.h> // required for atof
 
@@ -405,11 +410,16 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       fpath = "CMake";
       fpath +=  lang;
       fpath += "Information.cmake";
-      fpath = mf->GetModulesFile(fpath.c_str());
-      if(!mf->ReadListFile(0,fpath.c_str()))
+      std::string informationFile = mf->GetModulesFile(fpath.c_str());
+      if (informationFile.empty())
         {
         cmSystemTools::Error("Could not find cmake module file:",
                              fpath.c_str());
+        }
+      else if(!mf->ReadListFile(0, informationFile.c_str()))
+        {
+        cmSystemTools::Error("Could not process cmake module file:",
+                             informationFile.c_str());
         }
       }
     if (needSetLanguageEnabledMaps[lang])
@@ -417,11 +427,26 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       this->SetLanguageEnabledMaps(lang, mf);
       }
 
+    std::string compilerName = "CMAKE_";
+    compilerName += lang;
+    compilerName += "_COMPILER";
+    std::string compilerLangFile = rootBin;
+    compilerLangFile += "/CMake";
+    compilerLangFile += lang;
+    compilerLangFile += "Compiler.cmake";
     // Test the compiler for the language just setup
+    // (but only if a compiler has been actually found)
     // At this point we should have enough info for a try compile
     // which is used in the backward stuff
     // If the language is untested then test it now with a try compile.
-    if(needTestLanguage[lang])
+    if (!mf->IsSet(compilerName.c_str()))
+      {
+      // if the compiler did not work, then remove the
+      // CMake(LANG)Compiler.cmake file so that it will get tested the
+      // next time cmake is run
+      cmSystemTools::RemoveFile(compilerLangFile.c_str());
+      }
+    else if(needTestLanguage[lang])
       {
       if (!this->CMakeInstance->GetIsInTryCompile())
         {
@@ -442,11 +467,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         // next time cmake is run
         if(!mf->IsOn(compilerWorks.c_str()))
           {
-          fpath = rootBin;
-          fpath += "/CMake";
-          fpath += lang;
-          fpath += "Compiler.cmake";
-          cmSystemTools::RemoveFile(fpath.c_str());
+          cmSystemTools::RemoveFile(compilerLangFile.c_str());
           }
         else
           {
@@ -686,6 +707,7 @@ void cmGlobalGenerator::Configure()
   this->TotalTargets.clear();
   this->LocalGeneratorToTargetMap.clear();
   this->ProjectMap.clear();
+  this->RuleHashes.clear();
 
   // start with this directory
   cmLocalGenerator *lg = this->CreateLocalGenerator();
@@ -839,6 +861,9 @@ void cmGlobalGenerator::Generate()
                                     (i+1.0f)/this->LocalGenerators.size());
     }
   this->SetCurrentLocalGenerator(0);
+
+  // Update rule hashes.
+  this->CheckRuleHashes();
 
   if (this->ExtraGenerator != 0)
     {
@@ -1931,3 +1956,128 @@ cmGlobalGenerator::GetDirectoryContent(std::string const& dir, bool needDisk)
   return dc;
 }
 
+//----------------------------------------------------------------------------
+void
+cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
+                               std::vector<std::string>::const_iterator first,
+                               std::vector<std::string>::const_iterator last)
+{
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  // Ignore if there are no outputs.
+  if(outputs.empty())
+    {
+    return;
+    }
+
+  // Compute a hash of the rule.
+  RuleHash hash;
+  {
+  unsigned char const* data;
+  int length;
+  cmsysMD5* sum = cmsysMD5_New();
+  cmsysMD5_Initialize(sum);
+  for(std::vector<std::string>::const_iterator i = first; i != last; ++i)
+    {
+    data = reinterpret_cast<unsigned char const*>(i->c_str());
+    length = static_cast<int>(i->length());
+    cmsysMD5_Append(sum, data, length);
+    }
+  cmsysMD5_FinalizeHex(sum, hash.Data);
+  cmsysMD5_Delete(sum);
+  }
+
+  // Shorten the output name (in expected use case).
+  cmLocalGenerator* lg = this->GetLocalGenerators()[0];
+  std::string fname = lg->Convert(outputs[0].c_str(),
+                                  cmLocalGenerator::HOME_OUTPUT);
+
+  // Associate the hash with this output.
+  this->RuleHashes[fname] = hash;
+#else
+  (void)outputs;
+  (void)first;
+  (void)last;
+#endif
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::CheckRuleHashes()
+{
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  std::string home = this->GetCMakeInstance()->GetHomeOutputDirectory();
+  std::string pfile = home;
+  pfile += this->GetCMakeInstance()->GetCMakeFilesDirectory();
+  pfile += "/CMakeRuleHashes.txt";
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+  std::ifstream fin(pfile.c_str(), std::ios::in | std::ios::binary);
+#else
+  std::ifstream fin(pfile.c_str(), std::ios::in);
+#endif
+  std::string line;
+  std::string fname;
+  while(cmSystemTools::GetLineFromStream(fin, line))
+    {
+    // Line format is a 32-byte hex string followed by a space
+    // followed by a file name (with no escaping).
+
+    // Skip blank and comment lines.
+    if(line.size() < 34 || line[0] == '#')
+      {
+      continue;
+      }
+
+    // Get the filename.
+    fname = line.substr(33, line.npos);
+
+    // Look for a hash for this file's rule.
+    std::map<cmStdString, RuleHash>::const_iterator rhi =
+      this->RuleHashes.find(fname);
+    if(rhi != this->RuleHashes.end())
+      {
+      // Compare the rule hash in the file to that we were given.
+      if(strncmp(line.c_str(), rhi->second.Data, 32) != 0)
+        {
+        // The rule has changed.  Delete the output so it will be
+        // built again.
+        fname = cmSystemTools::CollapseFullPath(fname.c_str(), home.c_str());
+        cmSystemTools::RemoveFile(fname.c_str());
+        }
+      }
+    else
+      {
+      // We have no hash for a rule previously listed.  This may be a
+      // case where a user has turned off a build option and might
+      // want to turn it back on later, so do not delete the file.
+      // Instead, we keep the rule hash as long as the file exists so
+      // that if the feature is turned back on and the rule has
+      // changed the file is still rebuilt.
+      std::string fpath =
+        cmSystemTools::CollapseFullPath(fname.c_str(), home.c_str());
+      if(cmSystemTools::FileExists(fpath.c_str()))
+        {
+        RuleHash hash;
+        strncpy(hash.Data, line.c_str(), 32);
+        this->RuleHashes[fname] = hash;
+        }
+      }
+    }
+
+  // Now generate a new persistence file with the current hashes.
+  if(this->RuleHashes.empty())
+    {
+    cmSystemTools::RemoveFile(pfile.c_str());
+    }
+  else
+    {
+    cmGeneratedFileStream fout(pfile.c_str());
+    fout << "# Hashes of file build rules.\n";
+    for(std::map<cmStdString, RuleHash>::const_iterator
+          rhi = this->RuleHashes.begin(); rhi != this->RuleHashes.end(); ++rhi)
+      {
+      fout.write(rhi->second.Data, 32);
+      fout << " " << rhi->first << "\n";
+      }
+    }
+#endif
+}

@@ -44,6 +44,9 @@ protected:
   /** Place a set of search paths under the search roots.  */
   void RerootPaths(std::vector<std::string>& paths);
 
+  /** Add trailing slashes to all search paths.  */
+  void AddTrailingSlashes(std::vector<std::string>& paths);
+
   /** Compute the current default root path mode.  */
   void SelectDefaultRootPathMode();
 
@@ -55,21 +58,13 @@ protected:
 
   bool CheckCommonArgument(std::string const& arg);
   void AddPathSuffix(std::string const& arg);
-  void GetAppBundlePaths(std::vector<std::string>& paths);
-  void GetFrameworkPaths(std::vector<std::string>& paths);
-
-  void AddCMakePath(std::vector<std::string>& out_paths,
-                    const char* variable, std::set<cmStdString>* emmitted = 0);
-  void AddEnvPath(std::vector<std::string>& out_paths,
-                  const char* variable, std::set<cmStdString>* emmitted = 0);
-  void AddPathsInternal(std::vector<std::string>& out_paths,
-                        std::vector<std::string> const& in_paths,
-                        PathType pathType,
-                        std::set<cmStdString>* emmitted = 0);
-  void AddPathInternal(std::vector<std::string>& out_paths,
-                       std::string const& in_path,
-                       PathType pathType,
-                       std::set<cmStdString>* emmitted = 0);
+  void AddUserPath(std::string const& p,
+                   std::vector<std::string>& paths);
+  void AddCMakePath(const char* variable);
+  void AddEnvPath(const char* variable);
+  void AddPathsInternal(std::vector<std::string> const& in_paths,
+                        PathType pathType);
+  void AddPathInternal(std::string const& in_path, PathType pathType);
 
   bool NoDefaultPath;
   bool NoCMakePath;
@@ -78,6 +73,10 @@ protected:
   bool NoCMakeSystemPath;
 
   std::vector<std::string> SearchPathSuffixes;
+  std::vector<std::string> UserPaths;
+  std::vector<std::string> UserHints;
+  std::vector<std::string> SearchPaths;
+  std::set<cmStdString> SearchPathsEmitted;
 
   std::string GenericDocumentationMacPolicy;
   std::string GenericDocumentationRootPath;

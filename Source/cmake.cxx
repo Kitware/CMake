@@ -3740,7 +3740,7 @@ static bool cmakeCheckStampFile(const char* stampName)
     // Notify the user why CMake is re-running.  It is safe to
     // just print to stdout here because this code is only reachable
     // through an undocumented flag used by the VS generator.
-    std::cout << "CMake is re-running due to explicit user request.\n";
+    std::cout << "CMake is re-running because build system is out-of-date.\n";
     return false;
     }
 
@@ -3760,6 +3760,8 @@ static bool cmakeCheckStampFile(const char* stampName)
     {
     // The stamp dependencies file cannot be read.  Just assume the
     // build system is really out of date.
+    std::cout << "CMake is re-running because " << stampName
+              << " dependency file is missing.\n";
     return false;
     }
 
@@ -3775,6 +3777,8 @@ static bool cmakeCheckStampFile(const char* stampName)
       {
       // The stamp depends file is older than this dependency.  The
       // build system is really out of date.
+      std::cout << "CMake is re-running because " << stampName
+                << " is out-of-date.\n";
       return false;
       }
     }

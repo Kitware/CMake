@@ -13,13 +13,9 @@
 
 
 FIND_PATH(LUA_INCLUDE_DIR lua.h
-  PATHS
+  HINTS
   $ENV{LUA_DIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include/lua51 include/lua5.1 include/lua include
-)
-
-FIND_PATH(LUA_INCLUDE_DIR lua.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -29,19 +25,13 @@ FIND_PATH(LUA_INCLUDE_DIR lua.h
   /opt/local # DarwinPorts
   /opt/csw # Blastwave
   /opt
-  PATH_SUFFIXES include/lua51 include/lua5.1 include/lua include
 )
 
 FIND_LIBRARY(LUA_LIBRARY 
   NAMES lua51 lua5.1 lua
-  PATHS
+  HINTS
   $ENV{LUA_DIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(LUA_LIBRARY
-  NAMES lua51 lua5.1 lua
+  PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -51,7 +41,6 @@ FIND_LIBRARY(LUA_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 IF(LUA_LIBRARY)
@@ -68,7 +57,7 @@ ENDIF(LUA_LIBRARY)
 INCLUDE(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if 
 # all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua50  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua51  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
 
 MARK_AS_ADVANCED(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_MATH_LIBRARY)
 

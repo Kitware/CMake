@@ -11,13 +11,9 @@
 # Created by Eric Wing. 
 
 FIND_PATH(PHYSFS_INCLUDE_DIR physfs.h
-  PATHS
+  HINTS
   $ENV{PHYSFSDIR}
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES include
-)
-
-FIND_PATH(PHYSFS_INCLUDE_DIR physfs.h
+  PATH_SUFFIXES include/physfs include
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -27,19 +23,13 @@ FIND_PATH(PHYSFS_INCLUDE_DIR physfs.h
   /opt/local # DarwinPorts
   /opt/csw # Blastwave
   /opt
-  PATH_SUFFIXES include/physfs include
 )
 
 FIND_LIBRARY(PHYSFS_LIBRARY 
   NAMES physfs
-  PATHS
+  HINTS
   $ENV{PHYSFSDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(PHYSFS_LIBRARY 
-  NAMES physfs
+  PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -49,7 +39,6 @@ FIND_LIBRARY(PHYSFS_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 SET(PHYSFS_FOUND "NO")

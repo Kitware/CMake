@@ -1,13 +1,31 @@
 set(MY_SOURCE_DIR "@CMAKE_CURRENT_SOURCE_DIR@")
 
+# The find_* commands do path normalization so we should do so too
+# before comparing results.
+get_filename_component(MY_SOURCE_DIR "${MY_SOURCE_DIR}" ABSOLUTE)
+
 set(_HEADER cmake_i_do_not_exist_in_the_system.h)
 set(_HEADER_FULL "${MY_SOURCE_DIR}/include/${_HEADER}")
+set(_HEADER_FULL_A "${MY_SOURCE_DIR}/A/include/${_HEADER}")
 
 # at first check that the header isn't found without special measures
 find_file(FOO_H_1 ${_HEADER})
 if(FOO_H_1)
    message(FATAL_ERROR "${_HEADER} found: ${FOO_H_1}, it should not exist !")
 endif(FOO_H_1)
+
+# The HINTS option should override the system but the PATHS option
+# should not.
+set(CMAKE_SYSTEM_PREFIX_PATH ${MY_SOURCE_DIR})
+find_file(TEST_H_1 ${_HEADER} HINTS ${MY_SOURCE_DIR}/A/include)
+find_file(TEST_H_2 ${_HEADER} PATHS ${MY_SOURCE_DIR}/A/include)
+if(NOT "${TEST_H_1}" STREQUAL "${_HEADER_FULL_A}")
+   message(FATAL_ERROR "Did not find \"${_HEADER_FULL_A}\"\ngot \"${TEST_H_1}\" instead!")
+endif(NOT "${TEST_H_1}" STREQUAL "${_HEADER_FULL_A}")
+if(NOT "${TEST_H_2}" STREQUAL "${_HEADER_FULL}")
+   message(FATAL_ERROR "Did not find \"${_HEADER_FULL}\"\ngot \"${TEST_H_2}\" instead!")
+endif(NOT "${TEST_H_2}" STREQUAL "${_HEADER_FULL}")
+set(CMAKE_SYSTEM_PREFIX_PATH)
 
 # with this it still should not be found, since the include/ subdir is still missing
 set(CMAKE_INCLUDE_PATH "${MY_SOURCE_DIR}")

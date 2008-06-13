@@ -122,13 +122,8 @@ FIND_LIBRARY(QT_QASSISTANTCLIENT_LIBRARY
 # qt 3 should prefer QTDIR over the PATH
 FIND_PROGRAM(QT_MOC_EXECUTABLE
   NAMES moc moc-qt3
-  PATHS
+  HINTS
   $ENV{QTDIR}/bin
-  NO_DEFAULT_PATH
-)
-
-FIND_PROGRAM(QT_MOC_EXECUTABLE
-  NAMES moc moc-qt3
   PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
@@ -150,15 +145,12 @@ ENDIF(QT_MOC_EXECUTABLE)
 
 # qt 3 should prefer QTDIR over the PATH
 FIND_PROGRAM(QT_UIC_EXECUTABLE uic
-  PATHS
+  HINTS
   $ENV{QTDIR}/bin
-  NO_DEFAULT_PATH
-)
-FIND_PROGRAM(QT_UIC_EXECUTABLE uic
+  PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"
-  $ENV{QTDIR}/bin
   ${GLOB_PATHS_BIN}
   /usr/local/qt/bin
   /usr/lib/qt/bin

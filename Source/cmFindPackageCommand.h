@@ -82,8 +82,15 @@ private:
   bool ReadListFile(const char* f);
   void StoreVersionFound();
 
-  void AddUserPath(std::string const& p);
   void ComputePrefixes();
+  void AddPrefixesCMakeEnvironment();
+  void AddPrefixesCMakeVariable();
+  void AddPrefixesSystemEnvironment();
+  void AddPrefixesBuilds();
+  void AddPrefixesCMakeSystemVariable();
+  void AddPrefixesUserGuess();
+  void AddPrefixesUserHints();
+  void ComputeFinalPrefixes();
   bool SearchDirectory(std::string const& dir);
   bool CheckDirectory(std::string const& dir);
   bool FindConfigFile(std::string const& dir, std::string& file);
@@ -119,8 +126,6 @@ private:
   bool DebugMode;
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
-  std::vector<std::string> Prefixes;
-  std::vector<std::string> UserPaths;
 };
 
 #endif

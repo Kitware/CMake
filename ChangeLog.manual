@@ -1,10 +1,29 @@
+Changes in CMake 2.6.1 RC 4
+- Change to find_*, a new HINTS keyword was added to avoid the
+  need for NO_DEFAULT_PATH, and a repeated call to find_*
+- Update all NO_DEFAULT_PATH usage in Modules/Find*
+- Fix for cpack self extracting .sh files to work with more shells
+- FindQt4 now finds dependencies for some qt modules
+- ctest cpu information fixes for cygwin and linux
+- Recognize more color terminals for color output
+- Remove SKIP_RULE_DEPENDS from custom command because CMake
+  now can detect when a cutom command actually changes and only
+  re-run the rule then.  This fixes the problem of custom commands 
+  re-running every time a file is added to a target.
+- Fix for very slow find_path on OSX because of framework searchs
+- Fix for bug 6364, extra help targets when there are subdirectories 
+  of the top level.
+- Fix for Xcode generator to not eat some flags by mistake.
+- Add end of file checking for close if, foreach, macro, functions 
+  etc enabled.
+
 Changes in CMake 2.6.1 RC 3
 - FindQt4 - Find qt debug libraries on windows with d postfix.
 - Find 64 bit windows registry stuff with 32 bit cmake
 - Give a message if rpath is changed during install
 - rpath changer during install understands symlinks now
-- If a source file is not found and is a full path cmake complains again
-- 
+- If a source file is not found and is a full path cmake complains.
+
 Changes in CMake 2.6.1 RC 2
 
 - FindQt4 - report an error when trying to use MSVC with Qt built by mingw.

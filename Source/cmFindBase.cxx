@@ -30,6 +30,7 @@ cmFindBase::cmFindBase()
     "   FIND_XXX(\n"
     "             <VAR>\n"
     "             name | NAMES name1 [name2 ...]\n"
+    "             [HINTS path1 [path2 ... ENV var]]\n"
     "             [PATHS path1 [path2 ... ENV var]]\n"
     "             [PATH_SUFFIXES suffix1 [suffix2 ...]]\n"
     "             [DOC \"cache documentation string\"]\n"
@@ -55,7 +56,7 @@ cmFindBase::cmFindBase()
     "is searched for is specified by the names listed "
     "after the NAMES argument.   Additional search locations "
     "can be specified after the PATHS argument.  If ENV var is "
-    "found in the PATHS section the environment variable var "
+    "found in the HINTS or PATHS section the environment variable var "
     "will be read and converted from a system environment variable to "
     "a cmake style list of paths.  For example ENV PATH would be a way "
     "to list the system path variable. The argument "
@@ -65,33 +66,35 @@ cmFindBase::cmFindBase()
     "If NO_DEFAULT_PATH is specified, then no additional paths are "
     "added to the search. "
     "If NO_DEFAULT_PATH is not specified, the search process is as follows:\n"
-    "1. Search cmake specific environment variables.  This "
-    "can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
-    ""
+    "1. Search paths specified in cmake-specific cache variables.  "
+    "These are intended to be used on the command line with a -DVAR=value.  "
+    "This can be skipped if NO_CMAKE_PATH is passed.\n"
     "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_PREFIX_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "   CMAKE_XXX_MAC_PATH\n"
-    "2. Search cmake variables with the same names as "
-    "the cmake specific environment variables.  These "
-    "are intended to be used on the command line with a "
-    "-DVAR=value.  This can be skipped if NO_CMAKE_PATH "
-    "is passed.\n"
-    ""
+    "2. Search paths specified in cmake-specific environment variables.  "
+    "These are intended to be set in the user's shell configuration.  "
+    "This can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
     "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_PREFIX_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "   CMAKE_XXX_MAC_PATH\n"
-    "3. Search the standard system environment variables. "
+    "3. Search the paths specified by the HINTS option.  "
+    "These should be paths computed by system introspection, such as a "
+    "hint provided by the location of another item already found.  "
+    "Hard-coded guesses should be specified with the PATHS option.\n"
+    "4. Search the standard system environment variables. "
     "This can be skipped if NO_SYSTEM_ENVIRONMENT_PATH is an argument.\n"
     "   PATH\n"
     "   XXX_SYSTEM\n"  // replace with "", LIB, or INCLUDE
-    "4. Search cmake variables defined in the Platform files "
+    "5. Search cmake variables defined in the Platform files "
     "for the current system.  This can be skipped if NO_CMAKE_SYSTEM_PATH "
     "is passed.\n"
     "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_SYSTEM_PREFIX_PATH\n"
     "   CMAKE_SYSTEM_XXX_PATH\n"
     "   CMAKE_SYSTEM_XXX_MAC_PATH\n"
-    "5. Search the paths specified after PATHS or in the short-hand version "
-    "of the command.\n"
+    "6. Search the paths specified by the PATHS option "
+    "or in the short-hand version of the command.  "
+    "These are typically hard-coded guesses.\n"
     ;
   this->GenericDocumentation += this->GenericDocumentationMacPolicy;
   this->GenericDocumentation += this->GenericDocumentationRootPath;
@@ -161,65 +164,61 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   // Find the current bundle/framework search policy.
   this->SelectDefaultMacMode();
 
-  std::vector<std::string> userPaths;
-  std::string doc;
-  bool doingNames = true; // assume it starts with a name
-  bool doingPaths = false;
-  bool doingPathSuf = false;
   bool newStyle = false;
-  
+  enum Doing { DoingNone, DoingNames, DoingPaths, DoingPathSuffixes,
+               DoingHints };
+  Doing doing = DoingNames; // assume it starts with a name
   for (unsigned int j = 1; j < args.size(); ++j)
     {
     if(args[j] == "NAMES")
       {
-      doingNames = true;
+      doing = DoingNames;
       newStyle = true;
-      doingPathSuf = false;
-      doingPaths = false;
       }
     else if (args[j] == "PATHS")
       {
-      doingPaths = true;
+      doing = DoingPaths;
       newStyle = true;
-      doingNames = false;
-      doingPathSuf = false;
+      }
+    else if (args[j] == "HINTS")
+      {
+      doing = DoingHints;
+      newStyle = true;
       }
     else if (args[j] == "PATH_SUFFIXES")
       {
+      doing = DoingPathSuffixes;
       compatibility = false;
-      doingPathSuf = true;
       newStyle = true;
-      doingNames = false;
-      doingPaths = false;
       }
     else if (args[j] == "NO_SYSTEM_PATH")
       {
-      doingPaths = false;
-      doingPathSuf = false;
-      doingNames = false;
+      doing = DoingNone;
       this->NoDefaultPath = true;
       }
     else if (this->CheckCommonArgument(args[j]))
       {
+      doing = DoingNone;
       compatibility = false;
-      doingPaths = false;
-      doingPathSuf = false;
-      doingNames = false;
+      // Some common arguments were accidentally supported by CMake
+      // 2.4 and 2.6.0 in the short-hand form of the command, so we
+      // must support it even though it is not documented.
       }
-    else
+    else if(doing == DoingNames)
       {
-      if(doingNames)
-        {
-        this->Names.push_back(args[j]);
-        }
-      else if(doingPaths)
-        { 
-        userPaths.push_back(args[j]);
-        }
-      else if(doingPathSuf)
-        {
-        this->AddPathSuffix(args[j]);
-        }
+      this->Names.push_back(args[j]);
+      }
+    else if(doing == DoingPaths)
+      {
+      this->AddUserPath(args[j], this->UserPaths);
+      }
+    else if(doing == DoingHints)
+      {
+      this->AddUserPath(args[j], this->UserHints);
+      }
+    else if(doing == DoingPathSuffixes)
+      {
+      this->AddPathSuffix(args[j]);
       }
     }
 
@@ -262,96 +261,42 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   // FIND_*(VAR name path1 path2 ...)
   if(!newStyle)
     {
+    // All the short-hand arguments have been recorded as names.
+    std::vector<std::string> shortArgs = this->Names;
     this->Names.clear(); // clear out any values in Names
-    this->Names.push_back(args[1]);
-    for(unsigned int j = 2; j < args.size(); ++j)
+    this->Names.push_back(shortArgs[0]);
+    for(unsigned int j = 1; j < shortArgs.size(); ++j)
       {
-      userPaths.push_back(args[j]);
+      this->AddUserPath(shortArgs[j], this->UserPaths);
       }
     }
-  this->ExpandPaths(userPaths);
+  this->ExpandPaths();
 
   // Handle search root stuff.
   this->RerootPaths(this->SearchPaths);
+
+  // Add a trailing slash to all prefixes to aid the search process.
+  this->AddTrailingSlashes(this->SearchPaths);
+
   return true;
 }
 
-void cmFindBase::ExpandPaths(std::vector<std::string> userPaths)
+void cmFindBase::ExpandPaths()
 {
-  // if NO Default paths was not specified add the
-  // standard search paths.
-  if(!this->NoDefaultPath)
-    {
-    if(this->SearchFrameworkFirst || this->SearchFrameworkOnly)
-      {
-      this->AddFrameWorkPaths();
-      }
-    if(this->SearchAppBundleFirst || this->SearchAppBundleOnly)
-      {
-      this->AddAppBundlePaths();
-      }
-    if(!this->NoCMakeEnvironmentPath && 
-       !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
-      {
-      // Add CMAKE_*_PATH environment variables
-      this->AddEnvironmentVariables();
-      }
-    if(!this->NoCMakePath && 
-       !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
-      {
-      // Add CMake varibles of the same name as the previous environment
-      // varibles CMAKE_*_PATH to be used most of the time with -D
-      // command line options
-      this->AddCMakeVariables();
-      }
-    if(!this->NoSystemEnvironmentPath && 
-       !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
-      {
-      // add System environment PATH and (LIB or INCLUDE)
-      this->AddSystemEnvironmentVariables();
-      }
-    if(!this->NoCMakeSystemPath && 
-       !(this->SearchFrameworkOnly || this->SearchAppBundleOnly))
-      {
-      // Add CMAKE_SYSTEM_*_PATH variables which are defined in platform files
-      this->AddCMakeSystemVariables();
-      }
-    if(this->SearchAppBundleLast)
-      {
-      this->AddAppBundlePaths();
-      }
-    if(this->SearchFrameworkLast)
-      {
-      this->AddFrameWorkPaths();
-      }
-    }
-  std::vector<std::string> paths;
-  // add the paths specified in the FIND_* call 
-  for(unsigned int i =0; i < userPaths.size(); ++i)
-    {
-    paths.push_back(userPaths[i]);
-    }
-  this->AddPaths(paths);
+  this->AddCMakeVariablePath();
+  this->AddCMakeEnvironmentPath();
+  this->AddUserHintsPath();
+  this->AddSystemEnvironmentPath();
+  this->AddCMakeSystemVariablePath();
+  this->AddUserGuessPath();
+
+  // Add suffixes and clean up paths.
+  this->AddPathSuffixes();
 }
 
 //----------------------------------------------------------------------------
-void cmFindBase::AddEnvironmentVariables()
-{ 
-  std::vector<std::string> paths;
-
-  std::vector<std::string> prefixPaths;
-  cmSystemTools::GetPath(prefixPaths, "CMAKE_PREFIX_PATH");
-  this->AddFindPrefix(paths, prefixPaths);
-
-  std::string var = "CMAKE_";
-  var += this->CMakePathName;
-  var += "_PATH";
-  cmSystemTools::GetPath(paths, var.c_str());
-  this->AddPaths(paths);
-}
-
-void cmFindBase::AddFindPrefix(std::vector<std::string>& dest, 
-                               const std::vector<std::string>& src)
+void cmFindBase::AddPrefixPaths(std::vector<std::string> const& in_paths,
+                                PathType pathType)
 {
   // default for programs
   std::string subdir = "bin";
@@ -369,9 +314,8 @@ void cmFindBase::AddFindPrefix(std::vector<std::string>& dest,
     subdir = "";  // ? what to do for frameworks ?
     }
 
-  for (std::vector<std::string>::const_iterator it = src.begin();
-       it != src.end();
-       ++it)
+  for(std::vector<std::string>::const_iterator it = in_paths.begin();
+      it != in_paths.end(); ++it)
     {
     std::string dir = it->c_str();
     if(!subdir.empty() && !dir.empty() && dir[dir.size()-1] != '/')
@@ -381,141 +325,143 @@ void cmFindBase::AddFindPrefix(std::vector<std::string>& dest,
     std::string add = dir + subdir;
     if(add != "/")
       {
-      dest.push_back(add);
+      this->AddPathInternal(add, pathType);
       }
     if (subdir == "bin")
       {
-      dest.push_back(dir + "sbin");
+      this->AddPathInternal(dir+"sbin", pathType);
       }
     if(!subdir.empty() && *it != "/")
       {
-      dest.push_back(*it);
+      this->AddPathInternal(*it, pathType);
       }
     }
 }
 
-void cmFindBase::AddFrameWorkPaths()
+//----------------------------------------------------------------------------
+void cmFindBase::AddCMakePrefixPath(const char* variable)
 {
-  std::vector<std::string> paths;
-  this->GetFrameworkPaths(paths);
-  this->AddPaths(paths);
-}
-
-void cmFindBase::AddPaths(std::vector<std::string> & paths)
-{
-  // add suffixes and clean up paths
-  this->ExpandRegistryAndCleanPath(paths);
-  // add the paths to the search paths
-  this->SearchPaths.insert(this->SearchPaths.end(),
-                           paths.begin(),
-                           paths.end());
-}
-
-void cmFindBase::AddAppBundlePaths()
-{
-  std::vector<std::string> paths;
-  this->GetAppBundlePaths(paths);
-  this->AddPaths(paths);
-}
-
-void cmFindBase::AddCMakeVariables()
-{ 
-  std::string var = "CMAKE_";
-  var += this->CMakePathName;
-  var += "_PATH";
-  std::vector<std::string> paths;
-
-  if(const char* prefixPath = 
-      this->Makefile->GetDefinition("CMAKE_PREFIX_PATH"))
+  // Get a path from a CMake variable.
+  if(const char* varPath = this->Makefile->GetDefinition(variable))
     {
-    std::vector<std::string> prefixPaths;
-    cmSystemTools::ExpandListArgument(prefixPath, prefixPaths);
-    this->AddFindPrefix(paths, prefixPaths);
+    std::vector<std::string> tmp;
+    cmSystemTools::ExpandListArgument(varPath, tmp);
+    this->AddPrefixPaths(tmp, CMakePath);
     }
-
-  if(const char* path = this->Makefile->GetDefinition(var.c_str()))
-    {
-    cmSystemTools::ExpandListArgument(path, paths);
-    } 
-  this->AddPaths(paths);
 }
 
-void cmFindBase::AddSystemEnvironmentVariables()
+//----------------------------------------------------------------------------
+void cmFindBase::AddEnvPrefixPath(const char* variable)
 {
-  // Add LIB or INCLUDE
-  std::vector<std::string> paths;
-  if(this->EnvironmentPath.size())
-    {
-    cmSystemTools::GetPath(paths, this->EnvironmentPath.c_str());
-    }
-  // Add PATH 
-  cmSystemTools::GetPath(paths);
-  this->AddPaths(paths);
+  // Get a path from the environment.
+  std::vector<std::string> tmp;
+  cmSystemTools::GetPath(tmp, variable);
+  this->AddPrefixPaths(tmp, EnvPath);
 }
 
-void cmFindBase::AddCMakeSystemVariables()
-{  
-  std::string var = "CMAKE_SYSTEM_";
-  var += this->CMakePathName;
-  var += "_PATH";
-  std::vector<std::string> paths;
-  if(const char* prefixPath =
-      this->Makefile->GetDefinition("CMAKE_SYSTEM_PREFIX_PATH"))
-    {
-    std::vector<std::string> prefixPaths;
-    cmSystemTools::ExpandListArgument(prefixPath, prefixPaths);
-    this->AddFindPrefix(paths, prefixPaths);
-    }
-  if(const char* path = this->Makefile->GetDefinition(var.c_str()))
-    {
-    cmSystemTools::ExpandListArgument(path, paths);
-    }  
-  this->AddPaths(paths);
-}
-
-void cmFindBase::ExpandRegistryAndCleanPath(std::vector<std::string>& paths)
+//----------------------------------------------------------------------------
+void cmFindBase::AddCMakeEnvironmentPath()
 {
-  // We should view the registry as the target application would view
-  // it.
-  cmSystemTools::KeyWOW64 view = cmSystemTools::KeyWOW64_Default;
-  cmSystemTools::KeyWOW64 other_view = cmSystemTools::KeyWOW64_Default;
-  {
-  if(const char* psize =
-     this->Makefile->GetDefinition("CMAKE_SIZEOF_VOID_P"))
+  if(!this->NoCMakeEnvironmentPath && !this->NoDefaultPath)
     {
-    switch(atoi(psize))
+    // Add CMAKE_*_PATH environment variables
+    std::string var = "CMAKE_";
+    var += this->CMakePathName;
+    var += "_PATH";
+    this->AddEnvPrefixPath("CMAKE_PREFIX_PATH");
+    this->AddEnvPath(var.c_str());
+
+    if(this->CMakePathName == "PROGRAM")
       {
-      case 4:
-        view = cmSystemTools::KeyWOW64_32;
-        other_view = cmSystemTools::KeyWOW64_64;
-        break;
-      case 8:
-        view = cmSystemTools::KeyWOW64_64;
-        other_view = cmSystemTools::KeyWOW64_32;
-        break;
-      default: break;
+      this->AddEnvPath("CMAKE_APPBUNDLE_PATH");
+      }
+    else
+      {
+      this->AddEnvPath("CMAKE_FRAMEWORK_PATH");
       }
     }
-  }
-  std::vector<std::string> finalPath;
+}
+
+//----------------------------------------------------------------------------
+void cmFindBase::AddCMakeVariablePath()
+{
+  if(!this->NoCMakePath && !this->NoDefaultPath)
+    {
+    // Add CMake varibles of the same name as the previous environment
+    // varibles CMAKE_*_PATH to be used most of the time with -D
+    // command line options
+    std::string var = "CMAKE_";
+    var += this->CMakePathName;
+    var += "_PATH";
+    this->AddCMakePrefixPath("CMAKE_PREFIX_PATH");
+    this->AddCMakePath(var.c_str());
+
+    if(this->CMakePathName == "PROGRAM")
+      {
+      this->AddCMakePath("CMAKE_APPBUNDLE_PATH");
+      }
+    else
+      {
+      this->AddCMakePath("CMAKE_FRAMEWORK_PATH");
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmFindBase::AddSystemEnvironmentPath()
+{
+  if(!this->NoSystemEnvironmentPath && !this->NoDefaultPath)
+    {
+    // Add LIB or INCLUDE
+    if(!this->EnvironmentPath.empty())
+      {
+      this->AddEnvPath(this->EnvironmentPath.c_str());
+      }
+    // Add PATH
+    this->AddEnvPath(0);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmFindBase::AddCMakeSystemVariablePath()
+{
+  if(!this->NoCMakeSystemPath && !this->NoDefaultPath)
+    {
+    std::string var = "CMAKE_SYSTEM_";
+    var += this->CMakePathName;
+    var += "_PATH";
+    this->AddCMakePrefixPath("CMAKE_SYSTEM_PREFIX_PATH");
+    this->AddCMakePath(var.c_str());
+
+    if(this->CMakePathName == "PROGRAM")
+      {
+      this->AddCMakePath("CMAKE_SYSTEM_APPBUNDLE_PATH");
+      }
+    else
+      {
+      this->AddCMakePath("CMAKE_SYSTEM_FRAMEWORK_PATH");
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmFindBase::AddUserHintsPath()
+{
+  this->AddPathsInternal(this->UserHints, CMakePath);
+}
+
+//----------------------------------------------------------------------------
+void cmFindBase::AddUserGuessPath()
+{
+  this->AddPathsInternal(this->UserPaths, CMakePath);
+}
+
+//----------------------------------------------------------------------------
+void cmFindBase::AddPathSuffixes()
+{
+  std::vector<std::string>& paths = this->SearchPaths;
+  std::vector<std::string> finalPath = paths;
   std::vector<std::string>::iterator i;
-  // glob and expand registry stuff from paths and put
-  // into finalPath
-  for(i = paths.begin();
-      i != paths.end(); ++i)
-    {
-    std::string expanded = *i;
-    cmSystemTools::ExpandRegistryValues(expanded, view);
-    cmSystemTools::GlobDirs(expanded.c_str(), finalPath);
-    if(view != other_view && expanded != *i &&
-       this->CMakePathName == "PROGRAM")
-      {
-      // Executables can be either 32-bit or 64-bit.
-      expanded = *i;
-      cmSystemTools::ExpandRegistryValues(expanded, other_view);
-      cmSystemTools::GlobDirs(expanded.c_str(), finalPath);
-      }
-    }
   // clear the path
   paths.clear();
   // convert all paths to unix slashes and add search path suffixes

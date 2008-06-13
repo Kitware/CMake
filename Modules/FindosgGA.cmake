@@ -27,15 +27,11 @@
 
 # Try the user's environment request before anything else.
 FIND_PATH(OSGGA_INCLUDE_DIR osgGA/FlightManipulator
-  PATHS
+  HINTS
   $ENV{OSGGA_DIR}
   $ENV{OSG_DIR}
   $ENV{OSGDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-FIND_PATH(OSGGA_INCLUDE_DIR osgGA/FlightManipulator
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -47,21 +43,15 @@ FIND_PATH(OSGGA_INCLUDE_DIR osgGA/FlightManipulator
     /opt
     [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
     [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-  PATH_SUFFIXES include
 )
 
 FIND_LIBRARY(OSGGA_LIBRARY 
   NAMES osgGA
-  PATHS
+  HINTS
   $ENV{OSGGA_DIR}
   $ENV{OSG_DIR}
   $ENV{OSGDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(OSGGA_LIBRARY 
-  NAMES osgGA
+  PATH_SUFFIXES lib64 lib
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -71,7 +61,6 @@ FIND_LIBRARY(OSGGA_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 SET(OSGGA_FOUND "NO")

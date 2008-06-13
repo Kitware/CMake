@@ -1116,18 +1116,15 @@ void cmMakefileTargetGenerator
       ->AppendEcho(commands, comment.c_str(),
                    cmLocalUnixMakefileGenerator3::EchoGenerate);
     }
+  // Below we need to skip over the echo and progress commands.
+  unsigned int skip = static_cast<unsigned int>(commands.size());
+
+  // Now append the actual user-specified commands.
   this->LocalGenerator->AppendCustomCommand(commands, cc);
 
   // Collect the dependencies.
   std::vector<std::string> depends;
   this->LocalGenerator->AppendCustomDepend(depends, cc);
-
-  // Add a dependency on the rule file itself.
-  if(!cc.GetSkipRuleDepends())
-    {
-    this->LocalGenerator->AppendRuleDepend(depends,
-                                           this->BuildFileNameFull.c_str());
-    }
 
   // Check whether we need to bother checking for a symbolic output.
   bool need_symbolic = this->GlobalGenerator->GetNeedSymbolicMark();
@@ -1147,6 +1144,14 @@ void cmMakefileTargetGenerator
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       o->c_str(), depends, commands,
                                       symbolic);
+
+  // If the rule has changed make sure the output is rebuilt.
+  if(!symbolic)
+    {
+    this->GlobalGenerator->AddRuleHash(cc.GetOutputs(),
+                                       commands.begin()+skip,
+                                       commands.end());
+    }
   }
 
   // Write rules to drive building any outputs beyond the first.

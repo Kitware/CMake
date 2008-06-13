@@ -487,13 +487,14 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       {
       this->cmCurrentListFile = filename;
       }
-    // loop over current function blockers and record them
-    std::list<cmFunctionBlocker *>::iterator pos;
-    for (pos = this->FunctionBlockers.begin();
-         pos != this->FunctionBlockers.end(); ++pos)
-      {
-      originalBlockers.insert(*pos);
-      }
+    }
+
+  // loop over current function blockers and record them
+  for (std::list<cmFunctionBlocker *>::iterator pos 
+        = this->FunctionBlockers.begin();
+       pos != this->FunctionBlockers.end(); ++pos)
+    {
+    originalBlockers.insert(*pos);
     }
 
   // Now read the input file
@@ -542,7 +543,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
   // add this list file to the list of dependencies
   this->ListFiles.push_back( filenametoread);
-  bool endScopeNicely = filename? true: false;
+  bool endScopeNicely = true;
   const size_t numberFunctions = cacheFile.Functions.size();
   for(size_t i =0; i < numberFunctions; ++i)
     {
@@ -561,8 +562,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   if (endScopeNicely)
     {
     // loop over all function blockers to see if any block this command
-    std::list<cmFunctionBlocker *>::iterator pos;
-    for (pos = this->FunctionBlockers.begin();
+    for (std::list<cmFunctionBlocker *>::iterator pos 
+         = this->FunctionBlockers.begin();
          pos != this->FunctionBlockers.end(); ++pos)
       {
       // if this blocker was not in the original then send a
@@ -720,6 +721,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
     std::vector<std::string> no_output;
     cmCustomCommand cc(no_output, depends, commandLines, comment, workingDir);
     cc.SetEscapeOldStyle(escapeOldStyle);
+    cc.SetEscapeAllowMakeVars(true);
     switch(type)
       {
       case cmTarget::PRE_BUILD:
@@ -833,6 +835,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
       new cmCustomCommand(outputs, depends2, commandLines,
                           comment, workingDir);
     cc->SetEscapeOldStyle(escapeOldStyle);
+    cc->SetEscapeAllowMakeVars(true);
     file->SetCustomCommand(cc);
     }
 }

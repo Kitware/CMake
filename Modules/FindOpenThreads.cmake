@@ -39,7 +39,7 @@
 # Explicit -DVAR=value arguments should still be able to override everything.
 
 FIND_PATH(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
-    PATHS
+    HINTS
     $ENV{OPENTHREADS_INCLUDE_DIR}
     $ENV{OPENTHREADS_DIR}/include
     $ENV{OPENTHREADS_DIR}
@@ -48,12 +48,7 @@ FIND_PATH(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
     $ENV{OSG_DIR}
     $ENV{OSGDIR}/include
     $ENV{OSGDIR}
-    NO_DEFAULT_PATH
-)
-
-
-
-FIND_PATH(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
+    PATHS
     ~/Library/Frameworks
     /Library/Frameworks
     /usr/local/include
@@ -69,7 +64,7 @@ FIND_PATH(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
 
 FIND_LIBRARY(OPENTHREADS_LIBRARY 
     NAMES OpenThreads OpenThreadsWin32 
-    PATHS
+    HINTS
     $ENV{OPENTHREADS_LIBRARY_DIR}
     $ENV{OPENTHREADS_DIR}/lib64
     $ENV{OPENTHREADS_DIR}/lib
@@ -81,13 +76,6 @@ FIND_LIBRARY(OPENTHREADS_LIBRARY
     $ENV{OSGDIR}/lib64
     $ENV{OSGDIR}/lib
     $ENV{OSGDIR}
-    NO_DEFAULT_PATH
-)
-
-
-
-FIND_LIBRARY(OPENTHREADS_LIBRARY 
-    NAMES OpenThreads OpenThreadsWin32 
     PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -110,7 +98,7 @@ FIND_LIBRARY(OPENTHREADS_LIBRARY
 
 FIND_LIBRARY(OPENTHREADS_LIBRARY_DEBUG 
     NAMES OpenThreadsd OpenThreadsWin32d
-    PATHS
+    HINTS
     $ENV{OPENTHREADS_DEBUG_LIBRARY_DIR}
     $ENV{OPENTHREADS_LIBRARY_DIR}
     $ENV{OPENTHREADS_DIR}/lib64
@@ -123,13 +111,6 @@ FIND_LIBRARY(OPENTHREADS_LIBRARY_DEBUG
     $ENV{OSGDIR}/lib64
     $ENV{OSGDIR}/lib
     $ENV{OSGDIR}
-    NO_DEFAULT_PATH
-)
-
-
-
-FIND_LIBRARY(OPENTHREADS_LIBRARY_DEBUG 
-    NAMES OpenThreadsd OpenThreadsWin32d
     PATHS
     /usr/local/lib64
     /usr/local/lib

@@ -27,15 +27,11 @@
 
 # Try the user's environment request before anything else.
 FIND_PATH(OSGPRODUCER_INCLUDE_DIR osgProducer/OsgSceneHandler
-  PATHS
+  HINTS
   $ENV{OSGPRODUCER_DIR}
   $ENV{OSG_DIR}
   $ENV{OSGDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-FIND_PATH(OSGPRODUCER_INCLUDE_DIR osgProducer/OsgSceneHandler
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -47,21 +43,15 @@ FIND_PATH(OSGPRODUCER_INCLUDE_DIR osgProducer/OsgSceneHandler
     /opt
     [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
     [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-  PATH_SUFFIXES include
 )
 
 FIND_LIBRARY(OSGPRODUCER_LIBRARY 
   NAMES osgProducer
-  PATHS
+  HINTS
   $ENV{OSGPRODUCER_DIR}
   $ENV{OSG_DIR}
   $ENV{OSGDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(OSGPRODUCER_LIBRARY 
-  NAMES osgProducer
+  PATH_SUFFIXES lib64 lib
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -71,7 +61,6 @@ FIND_LIBRARY(OSGPRODUCER_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 SET(OSGPRODUCER_FOUND "NO")

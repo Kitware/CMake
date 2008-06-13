@@ -1165,7 +1165,7 @@ std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
                                             failedPaths);
 }
 
-// add additional configuraitons to the search path
+// add additional configurations to the search path
 void cmCTestTestHandler
 ::AddConfigurations(cmCTest *ctest, 
                     std::vector<std::string> &attempted,
@@ -1175,7 +1175,8 @@ void cmCTestTestHandler
 {   
   std::string tempPath;
 
-  if (filepath.size())
+  if (filepath.size() && 
+      filepath[filepath.size()-1] != '/')
     {
     filepath += "/";
     }
@@ -1259,6 +1260,16 @@ std::string cmCTestTestHandler
                                         attemptedConfigs,
                                         filepath,filename);
 
+  // even if a fullpath was specified also try it relative to the current directory
+  if (filepath.size() && filepath[0] == '/')
+    {
+    std::string localfilepath = filepath.substr(1,filepath.size()-1);
+    cmCTestTestHandler::AddConfigurations(ctest, attempted,
+                                          attemptedConfigs,
+                                          localfilepath,filename);
+    }
+    
+  
   // if extraPaths are provided and we were not passed a full path, try them,
   // try any extra paths
   if (filepath.size() == 0)
@@ -1274,8 +1285,8 @@ std::string cmCTestTestHandler
                                             filepathExtra,
                                             filenameExtra);
       }
-    }
-
+    }  
+    
   // store the final location in fullPath
   std::string fullPath;
 

@@ -13,14 +13,10 @@
 # additional Unix paths (FreeBSD, etc).
 
 FIND_PATH(SDLMIXER_INCLUDE_DIR SDL_mixer.h
-  PATHS
+  HINTS
   $ENV{SDLMIXERDIR}
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-FIND_PATH(SDLMIXER_INCLUDE_DIR SDL_mixer.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -44,15 +40,10 @@ FIND_PATH(SDLMIXER_INCLUDE_DIR SDL_mixer.h
 
 FIND_LIBRARY(SDLMIXER_LIBRARY 
   NAMES SDL_mixer
-  PATHS
+  HINTS
   $ENV{SDLMIXERDIR}
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(SDLMIXER_LIBRARY 
-  NAMES SDL_mixer
+  PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -62,7 +53,6 @@ FIND_LIBRARY(SDLMIXER_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 SET(SDLMIXER_FOUND "NO")

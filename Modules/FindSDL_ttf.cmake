@@ -12,16 +12,11 @@
 # module, but with modifications to recognize OS X frameworks and 
 # additional Unix paths (FreeBSD, etc).
 
-
 FIND_PATH(SDLTTF_INCLUDE_DIR SDL_ttf.h
-  PATHS
+  HINTS
   $ENV{SDLTTFDIR}
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-FIND_PATH(SDLTTF_INCLUDE_DIR SDL_ttf.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -45,15 +40,9 @@ FIND_PATH(SDLTTF_INCLUDE_DIR SDL_ttf.h
 
 FIND_LIBRARY(SDLTTF_LIBRARY 
   NAMES SDL_ttf
-  PATHS
+  HINTS
   $ENV{SDLTTFDIR}
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(SDLTTF_LIBRARY 
-  NAMES SDL_ttf
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks

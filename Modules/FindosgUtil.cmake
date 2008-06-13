@@ -27,15 +27,11 @@
 
 # Try the user's environment request before anything else.
 FIND_PATH(OSGUTIL_INCLUDE_DIR osgUtil/SceneView
-  PATHS
+  HINTS
   $ENV{OSGUTIL_DIR}
   $ENV{OSG_DIR}
   $ENV{OSGDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-FIND_PATH(OSGUTIL_INCLUDE_DIR osgUtil/SceneView
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -47,21 +43,15 @@ FIND_PATH(OSGUTIL_INCLUDE_DIR osgUtil/SceneView
     /opt
     [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
     [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-  PATH_SUFFIXES include
 )
 
 FIND_LIBRARY(OSGUTIL_LIBRARY 
   NAMES osgUtil
-  PATHS
+  HINTS
   $ENV{OSGUTIL_DIR}
   $ENV{OSG_DIR}
   $ENV{OSGDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(OSGUTIL_LIBRARY 
-  NAMES osgUtil
+  PATH_SUFFIXES lib64 lib
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
@@ -71,7 +61,6 @@ FIND_LIBRARY(OSGUTIL_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 SET(OSGUTIL_FOUND "NO")

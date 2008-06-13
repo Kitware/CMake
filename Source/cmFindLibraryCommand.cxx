@@ -96,19 +96,15 @@ bool cmFindLibraryCommand
     this->AddLib64Paths();
     }
 
-  std::string library;
-  for(std::vector<std::string>::iterator i = this->Names.begin();
-      i != this->Names.end() ; ++i)
+  std::string library = this->FindLibrary();
+  if(library != "")
     {
-    library = this->FindLibrary(i->c_str());
-    if(library != "")
-      {
-      this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
-                                         library.c_str(),
-                                         this->VariableDocumentation.c_str(),
-                                         cmCacheManager::FILEPATH);
-      return true;
-      } 
+    // Save the value in the cache
+    this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
+                                       library.c_str(),
+                                       this->VariableDocumentation.c_str(),
+                                       cmCacheManager::FILEPATH);
+    return true;
     }
   std::string notfound = this->VariableName + "-NOTFOUND";
   this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
@@ -211,21 +207,29 @@ void cmFindLibraryCommand::AddLib64Paths()
     }
 }
 
-std::string cmFindLibraryCommand::FindLibrary(const char* name)
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindLibrary()
 {
-  bool supportFrameworks = false;
-  bool onlyFrameworks = false;
-  std::string ff = this->Makefile->GetSafeDefinition("CMAKE_FIND_FRAMEWORK");
-  if(ff == "FIRST" || ff == "LAST")
+  std::string library;
+  if(this->SearchFrameworkFirst || this->SearchFrameworkOnly)
     {
-    supportFrameworks = true;
+    library = this->FindFrameworkLibrary();
     }
-  if(ff == "ONLY")
+  if(library.empty() && !this->SearchFrameworkOnly)
     {
-    onlyFrameworks = true;
-    supportFrameworks = true;
+    library = this->FindNormalLibrary();
     }
-  
+  if(library.empty() && this->SearchFrameworkLast)
+    {
+    library = this->FindFrameworkLibrary();
+    }
+  return library;
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindNormalLibrary()
+{
+  // Collect the list of library name prefixes/suffixes to try.
   const char* prefixes_list =
     this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
   const char* suffixes_list =
@@ -235,51 +239,29 @@ std::string cmFindLibraryCommand::FindLibrary(const char* name)
   cmSystemTools::ExpandListArgument(prefixes_list, prefixes, true);
   cmSystemTools::ExpandListArgument(suffixes_list, suffixes, true);
 
-  // If the original library name provided by the user matches one of
-  // the suffixes, try it first.
-  bool tryOrig = false;
-  {
-  std::string nm = name;
-  for(std::vector<std::string>::const_iterator si = suffixes.begin();
-      !tryOrig && si != suffixes.end(); ++si)
-    {
-    std::string const& suffix = *si;
-    if(nm.length() > suffix.length() &&
-       nm.substr(nm.size()-suffix.length()) == suffix)
-      {
-      tryOrig = true;
-      }
-    }
-  }
-
-  // Add a trailing slash to all paths to aid the search process.
-  for(std::vector<std::string>::iterator i = this->SearchPaths.begin();
-      i != this->SearchPaths.end(); ++i)
-    {
-    std::string& p = *i;
-    if(p.empty() || p[p.size()-1] != '/')
-      {
-      p += "/";
-      }
-    }
+  // Search the entire path for each name.
   std::string tryPath;
-  for(std::vector<std::string>::const_iterator p = this->SearchPaths.begin();
-      p != this->SearchPaths.end(); ++p)
+  for(std::vector<std::string>::const_iterator ni = this->Names.begin();
+      ni != this->Names.end() ; ++ni)
     {
-    if(supportFrameworks)
+    // If the original library name provided by the user matches one of
+    // the suffixes, try it first.
+    bool tryOrig = false;
+    std::string const& name = *ni;
+    for(std::vector<std::string>::const_iterator si = suffixes.begin();
+        !tryOrig && si != suffixes.end(); ++si)
       {
-      tryPath = *p;
-      tryPath += name;
-      tryPath += ".framework";
-      if(cmSystemTools::FileExists(tryPath.c_str())
-         && cmSystemTools::FileIsDirectory(tryPath.c_str()))
+      std::string const& suffix = *si;
+      if(name.length() > suffix.length() &&
+         name.substr(name.size()-suffix.length()) == suffix)
         {
-        tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-        cmSystemTools::ConvertToUnixSlashes(tryPath);
-        return tryPath;
+        tryOrig = true;
         }
       }
-    if(!onlyFrameworks)
+
+    for(std::vector<std::string>::const_iterator
+          p = this->SearchPaths.begin();
+        p != this->SearchPaths.end(); ++p)
       {
       // Try the original library name as specified by the user.
       if(tryOrig)
@@ -317,5 +299,28 @@ std::string cmFindLibraryCommand::FindLibrary(const char* name)
       }
     }
   // Couldn't find the library.
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindFrameworkLibrary()
+{
+  // Search for a framework of each name in the entire search path.
+  for(std::vector<std::string>::const_iterator ni = this->Names.begin();
+      ni != this->Names.end() ; ++ni)
+    {
+    // Search the paths for a framework with this name.
+    std::string fwName = *ni;
+    fwName += ".framework";
+    std::string fwPath = cmSystemTools::FindDirectory(fwName.c_str(),
+                                                      this->SearchPaths,
+                                                      true);
+    if(!fwPath.empty())
+      {
+      return fwPath;
+      }
+    }
+
+  // No framework found.
   return "";
 }

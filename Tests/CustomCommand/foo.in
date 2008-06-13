@@ -6,11 +6,10 @@
 
 int generated();
 int wrapped();
-int gen_once(void);
 
 int main ()
 {
-  if (generated()*wrapped()*doc()*gen_once() == 3*5*7*11)
+  if (generated()*wrapped()*doc() == 3*5*7)
     {
     FILE* fin = fopen(PROJECT_BINARY_DIR "/not_included.h", "r");
     if(fin)

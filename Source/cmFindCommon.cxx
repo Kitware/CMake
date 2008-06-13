@@ -76,14 +76,14 @@ cmFindCommon::cmFindCommon()
     "then CMAKE_FIND_ROOT_PATH will not be used. If ONLY_CMAKE_FIND_ROOT_PATH "
     "is used then only the re-rooted directories will be searched.\n";
   this->GenericDocumentationPathsOrder =
-    "The reason the paths listed in the call to the command are searched "
-    "last is that most users of CMake would expect things to be found "
-    "first in the locations specified by their environment.  Projects may "
-    "override this behavior by simply calling the command twice:\n"
+    "The default search order is designed to be most-specific to "
+    "least-specific for common use cases.  "
+    "Projects may override the order by simply calling the command "
+    "multiple times and using the NO_* options:\n"
     "   FIND_XXX(FIND_ARGS_XXX PATHS paths... NO_DEFAULT_PATH)\n"
     "   FIND_XXX(FIND_ARGS_XXX)\n"
-    "Once one of these calls succeeds the result variable will be set "
-    "and stored in the cache so that neither call will search again.";
+    "Once one of the calls succeeds the result variable will be set "
+    "and stored in the cache so that no call will search again.";
 }
 
 //----------------------------------------------------------------------------
@@ -322,93 +322,40 @@ void cmFindCommon::AddPathSuffix(std::string const& arg)
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::GetAppBundlePaths(std::vector<std::string>& paths)
+void cmFindCommon::AddUserPath(std::string const& p,
+                               std::vector<std::string>& paths)
 {
-  if(this->NoDefaultPath)
+  // We should view the registry as the target application would view
+  // it.
+  cmSystemTools::KeyWOW64 view = cmSystemTools::KeyWOW64_32;
+  cmSystemTools::KeyWOW64 other_view = cmSystemTools::KeyWOW64_64;
+  if(const char* psize =
+     this->Makefile->GetDefinition("CMAKE_SIZEOF_VOID_P"))
     {
-    return;
-    }
-  std::vector<std::string> tmp;
-
-  // first environment variables
-  if(!this->NoCMakeEnvironmentPath)
-    {
-    cmSystemTools::GetPath(tmp, "CMAKE_APPBUNDLE_PATH");
-    this->AddPathsInternal(paths, tmp, EnvPath);
-    tmp.clear();
-    }
-
-  // add cmake variables
-  if(!this->NoCMakePath)
-    {
-    if(const char* path =
-       this->Makefile->GetDefinition("CMAKE_APPBUNDLE_PATH"))
+    if(atoi(psize) == 8)
       {
-      cmSystemTools::ExpandListArgument(path, tmp);
-      this->AddPathsInternal(paths, tmp, CMakePath);
-      tmp.clear();
+      view = cmSystemTools::KeyWOW64_64;
+      other_view = cmSystemTools::KeyWOW64_32;
       }
     }
 
-  // add cmake system variables
-  if(!this->NoCMakeSystemPath)
+  // Expand using the view of the target application.
+  std::string expanded = p;
+  cmSystemTools::ExpandRegistryValues(expanded, view);
+  cmSystemTools::GlobDirs(expanded.c_str(), paths);
+
+  // Executables can be either 32-bit or 64-bit, so expand using the
+  // alternative view.
+  if(expanded != p && this->CMakePathName == "PROGRAM")
     {
-    if(const char* path =
-       this->Makefile->GetDefinition("CMAKE_SYSTEM_APPBUNDLE_PATH"))
-      {
-      cmSystemTools::ExpandListArgument(path, tmp);
-      this->AddPathsInternal(paths, tmp, CMakePath);
-      tmp.clear();
-      }
+    expanded = p;
+    cmSystemTools::ExpandRegistryValues(expanded, other_view);
+    cmSystemTools::GlobDirs(expanded.c_str(), paths);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::GetFrameworkPaths(std::vector<std::string>& paths)
-{
-  if(this->NoDefaultPath)
-    {
-    return;
-    }
-  std::vector<std::string> tmp;
-
-  // first environment variables
-  if(!this->NoCMakeEnvironmentPath)
-    {
-    cmSystemTools::GetPath(tmp, "CMAKE_FRAMEWORK_PATH");
-    this->AddPathsInternal(paths, tmp, EnvPath);
-    tmp.clear();
-    }
-
-  // add cmake variables
-  if(!this->NoCMakePath)
-    {
-    if(const char* path =
-       this->Makefile->GetDefinition("CMAKE_FRAMEWORK_PATH"))
-      {
-      cmSystemTools::ExpandListArgument(path, tmp);
-      this->AddPathsInternal(paths, tmp, CMakePath);
-      tmp.clear();
-      }
-    }
-
-  // add cmake system variables
-  if(!this->NoCMakeSystemPath)
-    {
-    if(const char* path =
-       this->Makefile->GetDefinition("CMAKE_SYSTEM_FRAMEWORK_PATH"))
-      {
-      cmSystemTools::ExpandListArgument(path, tmp);
-      this->AddPathsInternal(paths, tmp, CMakePath);
-      tmp.clear();
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmFindCommon::AddCMakePath(std::vector<std::string>& out_paths,
-                                const char* variable,
-                                std::set<cmStdString>* emmitted)
+void cmFindCommon::AddCMakePath(const char* variable)
 {
   // Get a path from a CMake variable.
   if(const char* varPath = this->Makefile->GetDefinition(variable))
@@ -418,14 +365,12 @@ void cmFindCommon::AddCMakePath(std::vector<std::string>& out_paths,
 
     // Relative paths are interpreted with respect to the current
     // source directory.
-    this->AddPathsInternal(out_paths, tmp, CMakePath, emmitted);
+    this->AddPathsInternal(tmp, CMakePath);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddEnvPath(std::vector<std::string>& out_paths,
-                              const char* variable,
-                              std::set<cmStdString>* emmitted)
+void cmFindCommon::AddEnvPath(const char* variable)
 {
   // Get a path from the environment.
   std::vector<std::string> tmp;
@@ -433,27 +378,23 @@ void cmFindCommon::AddEnvPath(std::vector<std::string>& out_paths,
 
   // Relative paths are interpreted with respect to the current
   // working directory.
-  this->AddPathsInternal(out_paths, tmp, EnvPath, emmitted);
+  this->AddPathsInternal(tmp, EnvPath);
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddPathsInternal(std::vector<std::string>& out_paths,
-                                    std::vector<std::string> const& in_paths,
-                                    PathType pathType,
-                                    std::set<cmStdString>* emmitted)
+void cmFindCommon::AddPathsInternal(std::vector<std::string> const& in_paths,
+                                    PathType pathType)
 {
   for(std::vector<std::string>::const_iterator i = in_paths.begin();
       i != in_paths.end(); ++i)
     {
-    this->AddPathInternal(out_paths, *i, pathType, emmitted);
+    this->AddPathInternal(*i, pathType);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddPathInternal(std::vector<std::string>& out_paths,
-                                   std::string const& in_path,
-                                   PathType pathType,
-                                   std::set<cmStdString>* emmitted)
+void cmFindCommon::AddPathInternal(std::string const& in_path,
+                                   PathType pathType)
 {
   if(in_path.empty())
     {
@@ -471,9 +412,24 @@ void cmFindCommon::AddPathInternal(std::vector<std::string>& out_paths,
   std::string fullPath =
     cmSystemTools::CollapseFullPath(in_path.c_str(), relbase);
 
-  // Insert the path if has not already been emmitted.
-  if(!emmitted || emmitted->insert(fullPath).second)
+  // Insert the path if has not already been emitted.
+  if(this->SearchPathsEmitted.insert(fullPath).second)
     {
-    out_paths.push_back(fullPath.c_str());
+    this->SearchPaths.push_back(fullPath.c_str());
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmFindCommon::AddTrailingSlashes(std::vector<std::string>& paths)
+{
+  // Add a trailing slash to all paths to aid the search process.
+  for(std::vector<std::string>::iterator i = paths.begin();
+      i != paths.end(); ++i)
+    {
+    std::string& p = *i;
+    if(!p.empty() && p[p.size()-1] != '/')
+      {
+      p += "/";
+      }
     }
 }

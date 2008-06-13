@@ -29,13 +29,9 @@
 # I'm going to attempt to cut out the middleman and hope 
 # everything still works.
 FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
+  HINTS
   $ENV{FREETYPE_DIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-
-FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
   PATHS
   /usr/local/X11R6/include
   /usr/local/X11/include
@@ -46,11 +42,9 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
 )
 
 FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
+  HINTS
   $ENV{FREETYPE_DIR}/include/freetype2
-  NO_DEFAULT_PATH
-)
-
-FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
+  PATHS
   /usr/local/X11R6/include
   /usr/local/X11/include
   /usr/X11/include
@@ -62,21 +56,15 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h
 
 FIND_LIBRARY(FREETYPE_LIBRARY
   NAMES freetype libfreetype freetype219
-  PATHS
+  HINTS
   $ENV{FREETYPE_DIR}
-  NO_DEFAULT_PATH
-  PATH_SUFFIXES lib64 lib 
-)
-
-FIND_LIBRARY(FREETYPE_LIBRARY
-  NAMES freetype libfreetype freetype219
+  PATH_SUFFIXES lib64 lib
   PATHS
   /usr/local/X11R6
   /usr/local/X11
   /usr/X11
   /sw
   /usr/freeware
-  PATH_SUFFIXES lib64 lib
 )
 
 # set the user variables

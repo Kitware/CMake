@@ -13,14 +13,10 @@
 # additional Unix paths (FreeBSD, etc).
 
 FIND_PATH(SDLIMAGE_INCLUDE_DIR SDL_image.h
-  PATHS
+  HINTS
   $ENV{SDLIMAGEDIR}
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-FIND_PATH(SDLIMAGE_INCLUDE_DIR SDL_image.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -44,15 +40,10 @@ FIND_PATH(SDLIMAGE_INCLUDE_DIR SDL_image.h
 
 FIND_LIBRARY(SDLIMAGE_LIBRARY 
   NAMES SDL_image
-  PATHS
+  HINTS
   $ENV{SDLIMAGEDIR}
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(SDLIMAGE_LIBRARY 
-  NAMES SDL_image
+  PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -62,7 +53,6 @@ FIND_LIBRARY(SDLIMAGE_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 SET(SDLIMAGE_FOUND "NO")

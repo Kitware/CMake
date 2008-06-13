@@ -41,19 +41,9 @@ public:
 
 protected:
   void PrintFindStuff();
-  void ExpandPaths(std::vector<std::string> userPaths);
+  void ExpandPaths();
+  void AddPathSuffixes();
 
-  // add to the SearchPaths
-  void AddPaths(std::vector<std::string>& paths);
-  void AddFrameWorkPaths();
-  void AddAppBundlePaths();
-  void AddEnvironmentVariables();
-  void AddFindPrefix(std::vector<std::string>& dest, 
-                     const std::vector<std::string>& src);
-  void AddCMakeVariables();
-  void AddSystemEnvironmentVariables();
-  void AddCMakeSystemVariables();
-  void ExpandRegistryAndCleanPath(std::vector<std::string>& paths);
   // see if the VariableName is already set in the cache,
   // also copy the documentation from the cache to VariableDocumentation
   // if it has documentation in the cache
@@ -64,13 +54,26 @@ protected:
   cmStdString VariableDocumentation;
   cmStdString VariableName;
   std::vector<std::string> Names;
-  std::vector<std::string> SearchPaths;
 
   // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
   cmStdString EnvironmentPath; // LIB,INCLUDE
 
   bool AlreadyInCache;
   bool AlreadyInCacheWithoutMetaInfo;
+private:
+  // Add pieces of the search.
+  void AddCMakeEnvironmentPath();
+  void AddCMakeVariablePath();
+  void AddSystemEnvironmentPath();
+  void AddCMakeSystemVariablePath();
+  void AddUserHintsPath();
+  void AddUserGuessPath();
+
+  // Helpers.
+  void AddCMakePrefixPath(const char* variable);
+  void AddEnvPrefixPath(const char* variable);
+  void AddPrefixPaths(std::vector<std::string> const& in_paths,
+                      PathType pathType);
 };
 
 

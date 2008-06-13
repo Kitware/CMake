@@ -53,13 +53,9 @@
 # reasons because not all systems place things in SDL/ (see FreeBSD).
 
 FIND_PATH(SDL_INCLUDE_DIR SDL.h
-  PATHS
+  HINTS
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
   PATH_SUFFIXES include
-)
-
-FIND_PATH(SDL_INCLUDE_DIR SDL.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -86,14 +82,9 @@ FIND_PATH(SDL_INCLUDE_DIR SDL.h
 # don't confuse it for the version number.
 FIND_LIBRARY(SDL_LIBRARY_TEMP 
   NAMES SDL SDL-1.1
-  PATHS
+  HINTS
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
-    PATH_SUFFIXES lib64 lib
-)
-
-FIND_LIBRARY(SDL_LIBRARY_TEMP 
-  NAMES SDL SDL-1.1
+  PATH_SUFFIXES lib64 lib
   PATHS
   /usr/local
   /usr
@@ -101,7 +92,6 @@ FIND_LIBRARY(SDL_LIBRARY_TEMP
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
 )
 
 #MESSAGE("SDL_LIBRARY_TEMP is ${SDL_LIBRARY_TEMP}")
@@ -114,14 +104,9 @@ IF(NOT SDL_BUILDING_LIBRARY)
     # necessarily need it.
     FIND_LIBRARY(SDLMAIN_LIBRARY 
       NAMES SDLmain SDLmain-1.1
-      PATHS
+      HINTS
       $ENV{SDLDIR}
-      NO_DEFAULT_PATH
       PATH_SUFFIXES lib64 lib
-    )
-
-    FIND_LIBRARY(SDLMAIN_LIBRARY 
-      NAMES SDLmain SDLmain-1.1
       PATHS
       /usr/local
       /usr
@@ -129,7 +114,6 @@ IF(NOT SDL_BUILDING_LIBRARY)
       /opt/local
       /opt/csw
       /opt
-      PATH_SUFFIXES lib64 lib
     )
   ENDIF(NOT ${SDL_INCLUDE_DIR} MATCHES ".framework")
 ENDIF(NOT SDL_BUILDING_LIBRARY)

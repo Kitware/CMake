@@ -64,12 +64,16 @@ public:
     return "Find the directory containing a file.";
     }
 
-  std::string FindHeaderInFramework( std::string& file,
-                                     std::string& dir);
   virtual const char* GetFullDocumentation();
   cmTypeMacro(cmFindPathCommand, cmFindBase);
   bool IncludeFileInPath;
   bool ExtraDocAdded;
+private:
+  std::string FindHeaderInFramework(std::string const& file,
+                                    std::string const& dir);
+  std::string FindHeader();
+  std::string FindNormalHeader();
+  std::string FindFrameworkHeader();
 };
 
 

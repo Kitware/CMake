@@ -62,16 +62,12 @@ MARK_AS_ADVANCED(SDL_SOUND_EXTRAS)
 
 # Find SDL_sound.h
 FIND_PATH(SDL_SOUND_INCLUDE_DIR SDL_sound.h
+  HINTS
   $ENV{SDLSOUNDDIR}/include
   $ENV{SDLSOUNDDIR}
   $ENV{SDLDIR}/include
   $ENV{SDLDIR}
-  NO_DEFAULT_PATH
-)
-FIND_PATH(SDL_SOUND_INCLUDE_DIR SDL_sound.h
-  NO_DEFAULT_PATH
-)
-FIND_PATH(SDL_SOUND_INCLUDE_DIR SDL_sound.h
+  PATHS
   /usr/local/include/SDL
   /usr/include/SDL
   /usr/local/include/SDL12
@@ -92,11 +88,12 @@ FIND_PATH(SDL_SOUND_INCLUDE_DIR SDL_sound.h
 
 FIND_LIBRARY(SDL_SOUND_LIBRARY 
   NAMES SDL_sound
-  PATHS
+  HINTS
   $ENV{SDLSOUNDDIR}/lib
   $ENV{SDLSOUNDDIR}
   $ENV{SDLDIR}/lib
   $ENV{SDLDIR}
+  PATHS
   /usr/local/lib
   /usr/lib
   /sw/lib

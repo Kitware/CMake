@@ -218,7 +218,7 @@ protected:
   unsigned int IsHyperThreadingSupported();
   LongLong GetCyclesDifference(DELAY_FUNC, unsigned int);
 
-  // For Linux
+  // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
   int RetreiveInformationFromCpuInfoFile();
   kwsys_stl::string ExtractValueFromCpuInfoFile(kwsys_stl::string buffer,
                                           const char* word, size_t init=0);
@@ -2158,41 +2158,60 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     fileSize++;
     }
   fclose( fd );
-  
   buffer.resize(fileSize-2);
-
-  // Number of CPUs
+  // Number of logical CPUs (combination of multiple processors, multi-core
+  // and hyperthreading)
   size_t pos = buffer.find("processor\t");
   while(pos != buffer.npos)
     {
     this->NumberOfLogicalCPU++;
-    this->NumberOfPhysicalCPU++;
     pos = buffer.find("processor\t",pos+1);
     }
 
-  // Count the number of physical ids that are the same
-  int currentId = -1;
-  kwsys_stl::string idc = this->ExtractValueFromCpuInfoFile(buffer,"physical id");
-
+#ifdef __linux
+  // Find the largest physical id.
+  int maxId = -1;
+  kwsys_stl::string idc =
+                       this->ExtractValueFromCpuInfoFile(buffer,"physical id");
   while(this->CurrentPositionInFile != buffer.npos)
     {
-    int id = atoi(idc.c_str());
-    if(id == currentId)
+      int id = atoi(idc.c_str());
+      if(id > maxId)
       {
-      this->NumberOfPhysicalCPU--;
+       maxId=id;
       }
-    currentId = id;
-    idc = this->ExtractValueFromCpuInfoFile(buffer,"physical id",this->CurrentPositionInFile+1);
+    idc = this->ExtractValueFromCpuInfoFile(buffer,"physical id",
+                                            this->CurrentPositionInFile+1);
     }
+  // Physical ids returned by Linux don't distinguish cores.
+  // We want to record the total number of cores in this->NumberOfPhysicalCPU
+  // (checking only the first proc)
+  kwsys_stl::string cores =
+                        this->ExtractValueFromCpuInfoFile(buffer,"cpu cores");
+  int numberOfCoresPerCPU=atoi(cores.c_str());
+  this->NumberOfPhysicalCPU=numberOfCoresPerCPU*(maxId+1);
 
-   if(this->NumberOfPhysicalCPU>0)
-     {
-     this->NumberOfLogicalCPU /= this->NumberOfPhysicalCPU;
-     }
+#else // __CYGWIN__
+  // does not have "physical id" entries, neither "cpu cores"
+  // this has to be fixed for hyper-threading.  
+  kwsys_stl::string cpucount =
+    this->ExtractValueFromCpuInfoFile(buffer,"cpu count");
+  this->NumberOfPhysicalCPU=
+    this->NumberOfLogicalCPU = atoi(cpucount.c_str());
+#endif
+  // gotta have one, and if this is 0 then we get a / by 0n 
+  // beter to have a bad answer than a crash
+  if(this->NumberOfPhysicalCPU <= 0)
+    {
+    this->NumberOfPhysicalCPU = 1;
+    }
+  // LogicalProcessorsPerPhysical>1 => hyperthreading.
+  this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical=
+                            this->NumberOfLogicalCPU/this->NumberOfPhysicalCPU;
 
   // CPU speed (checking only the first proc
   kwsys_stl::string CPUSpeed = this->ExtractValueFromCpuInfoFile(buffer,"cpu MHz");
-  this->CPUSpeedInMHz = (float)atof(CPUSpeed.c_str());
+  this->CPUSpeedInMHz = static_cast<float>(atof(CPUSpeed.c_str()));
 
   // Chip family
   this->ChipID.Family = atoi(this->ExtractValueFromCpuInfoFile(buffer,"cpu family").c_str());
@@ -2213,8 +2232,6 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     cacheSize = cacheSize.substr(0,pos);
     }
   this->Features.L1CacheSize = atoi(cacheSize.c_str());
-
-
   return 1;
 }
 
