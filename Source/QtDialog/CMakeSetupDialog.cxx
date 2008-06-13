@@ -77,6 +77,11 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->RemoveEntry->setEnabled(false);
   this->AddEntry->setEnabled(false);
 
+  bool groupView = settings.value("GroupView", false).toBool();
+  this->CacheValues->cacheModel()->setViewType(groupView ? 
+      QCMakeCacheModel::GroupView : QCMakeCacheModel::FlatView);
+  this->CacheValues->setRootIsDecorated(groupView);
+
   QMenu* FileMenu = this->menuBar()->addMenu(tr("&File"));
   this->ReloadCacheAction = FileMenu->addAction(tr("&Reload Cache"));
   QObject::connect(this->ReloadCacheAction, SIGNAL(triggered(bool)), 
@@ -112,10 +117,16 @@ CMakeSetupDialog::CMakeSetupDialog()
   QObject::connect(debugAction, SIGNAL(toggled(bool)), 
                    this, SLOT(setDebugOutput(bool)));
   
-  QAction* expandAction = OptionsMenu->addAction(tr("&Expand Variables Tree"));
+  OptionsMenu->addSeparator();
+  QAction* groupAction = OptionsMenu->addAction(tr("&Group Entries"));
+  groupAction->setCheckable(true);
+  groupAction->setChecked(this->CacheValues->cacheModel()->viewType() == QCMakeCacheModel::GroupView);
+  QObject::connect(groupAction, SIGNAL(toggled(bool)), 
+                   this, SLOT(toggleGroupView(bool)));
+  QAction* expandAction = OptionsMenu->addAction(tr("&Expand Grouped Entries"));
   QObject::connect(expandAction, SIGNAL(triggered(bool)), 
                    this->CacheValues, SLOT(expandAll()));
-  QAction* collapseAction = OptionsMenu->addAction(tr("&Collapse Variables Tree"));
+  QAction* collapseAction = OptionsMenu->addAction(tr("&Collapse Grouped Entries"));
   QObject::connect(collapseAction, SIGNAL(triggered(bool)), 
                    this->CacheValues, SLOT(collapseAll()));
 
@@ -307,7 +318,7 @@ void CMakeSetupDialog::doConfigure()
 
 void CMakeSetupDialog::finishConfigure(int err)
 {
-  if(0 == err && !this->CacheValues->cacheModel()->hasNewProperties())
+  if(0 == err && !this->CacheValues->cacheModel()->newPropertyCount())
     {
     this->enterState(ReadyGenerate);
     }
@@ -918,5 +929,15 @@ void CMakeSetupDialog::setDebugOutput(bool flag)
 {
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "setDebugOutput", Qt::QueuedConnection, Q_ARG(bool, flag));
+}
+
+void CMakeSetupDialog::toggleGroupView(bool f)
+{
+  this->CacheValues->cacheModel()->setViewType(f ? QCMakeCacheModel::GroupView : QCMakeCacheModel::FlatView);
+  this->CacheValues->setRootIsDecorated(f);
+  
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+  settings.setValue("GroupView", this->CacheValues->cacheModel()->viewType() == QCMakeCacheModel::GroupView);
 }
 

@@ -20,12 +20,12 @@
 
 #include "QCMake.h"
 #include <QTreeView>
-#include <QAbstractTableModel>
+#include <QStandardItemModel>
 #include <QItemDelegate>
 
 class QSortFilterProxyModel;
 class QCMakeCacheModel;
-
+class QCMakeAdvancedFilter;
 
 /// Qt view class for cache properties
 class QCMakeCacheView : public QTreeView
@@ -41,6 +41,8 @@ public:
   // get whether to show advanced entries
   bool showAdvanced() const;
 
+  QSize sizeHint(int) { return QSize(200,200); }
+
 public slots:
   // set whether to show advanced entries
   void setShowAdvanced(bool);
@@ -50,15 +52,14 @@ public slots:
 
 protected:
   QModelIndex moveCursor(CursorAction, Qt::KeyboardModifiers);
-  void showEvent(QShowEvent* e);
-  bool Init;
+  bool event(QEvent* e);
   QCMakeCacheModel* CacheModel;
-  QSortFilterProxyModel* AdvancedFilter;
+  QCMakeAdvancedFilter* AdvancedFilter;
   QSortFilterProxyModel* SearchFilter;
 };
 
 /// Qt model class for cache properties
-class QCMakeCacheModel : public QAbstractItemModel
+class QCMakeCacheModel : public QStandardItemModel
 {
   Q_OBJECT
 public:
@@ -67,7 +68,11 @@ public:
 
   // roles used to retrieve extra data such has help strings, types of
   // properties, and the advanced flag
-  enum { HelpRole = Qt::UserRole, TypeRole, AdvancedRole };
+  enum { HelpRole = Qt::ToolTipRole,
+         TypeRole = Qt::UserRole, 
+         AdvancedRole };
+
+  enum ViewType { FlatView, GroupView };
 
 public slots:
   // set a list of properties.  This list will be sorted and grouped according
@@ -82,46 +87,41 @@ public slots:
   // set flag whether the model can currently be edited.
   void setEditEnabled(bool);
 
-  // remove properties from the model
-  bool removeRows(int row, int count, const QModelIndex& idx);
-  
   // insert a new property at a row specifying all the information about the
   // property
   bool insertProperty(QCMakeProperty::PropertyType t,
                       const QString& name, const QString& description,
                       const QVariant& value, bool advanced);
 
-public:
-  // satisfy [pure] virtuals
-  QModelIndex index (int row, int column, const QModelIndex& parent = QModelIndex()) const;
-  int columnCount (const QModelIndex& parent) const;
-  QVariant data (const QModelIndex& index, int role = Qt::DisplayRole) const;
-  QModelIndex parent (const QModelIndex& index) const;
-  int rowCount (const QModelIndex& parent = QModelIndex()) const;
-  QVariant headerData (int section, Qt::Orientation orient, int role) const;
-  Qt::ItemFlags flags (const QModelIndex& index) const;
-  bool setData (const QModelIndex& index, const QVariant& value, int role);
-  QModelIndex buddy (const QModelIndex& index) const;
-  bool hasChildren (const QModelIndex& index) const;
+  // set the view type
+  void setViewType(ViewType t);
+  ViewType viewType() const;
 
+public:
   // get the properties
   QCMakePropertyList properties() const;
   
   // editing enabled
   bool editEnabled() const;
 
-  // returns if there are any new properties
-  bool hasNewProperties() const;
-  
-protected:
-  QList<QPair<QString, QCMakePropertyList> > NewProperties;
-  QList<QPair<QString, QCMakePropertyList> > Properties;
-  bool EditEnabled;
+  // returns how many new properties there are
+  int newPropertyCount() const;
 
-  // gets the internal data for a model index, if it exists
-  const QCMakeProperty* propertyForIndex(const QModelIndex& idx) const;
-  const QPair<QString,QCMakePropertyList>* propertyListForIndex(const QModelIndex& idx) const;
-  bool isNewProperty(const QModelIndex& idx) const;
+  // return flags (overloaded to modify flag based on EditEnabled flag)
+  Qt::ItemFlags flags (const QModelIndex& index) const;
+  QModelIndex buddy(const QModelIndex& idx) const;
+
+protected:
+  bool EditEnabled;
+  int NewPropertyCount;
+  ViewType View;
+
+  // set the data in the model for this property
+  void setPropertyData(const QModelIndex& idx1, 
+                       const QCMakeProperty& p, bool isNew);
+  // get the data in the model for this property
+  void getPropertyData(const QModelIndex& idx1,
+                       QCMakeProperty& prop) const;
 
   // breaks up he property list into groups
   // where each group has the same prefix up to the first underscore
