@@ -572,7 +572,7 @@ ELSE(WIN32_STYLE_FIND)
       ELSE(_wx_result EQUAL 0)
         FOREACH(_upper_opt_name DEBUG STATIC UNICODE UNIVERSAL)
           SET(wxWidgets_DEFAULT_${_upper_opt_name} OFF)
-        ENDFOREACH(_opt_name)
+        ENDFOREACH(_upper_opt_name)
       ENDIF(_wx_result EQUAL 0)
     ENDMACRO(WX_CONFIG_SELECT_GET_DEFAULT)
 
