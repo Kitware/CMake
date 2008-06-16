@@ -63,17 +63,21 @@
 #
 # Author: Alexander Neundorf <neundorf@kde.org>
 
-IF(NOT UNIX)
+IF(NOT UNIX AND KDE3_FIND_REQUIRED)
    MESSAGE(FATAL_ERROR "Compiling KDE3 applications and libraries under Windows is not supported")
-ENDIF(NOT UNIX)
+ENDIF(NOT UNIX AND KDE3_FIND_REQUIRED)
 
 
 SET(QT_MT_REQUIRED TRUE)
 #SET(QT_MIN_VERSION "3.0.0")
 
 #this line includes FindQt.cmake, which searches the Qt library and headers
-FIND_PACKAGE(Qt3 REQUIRED)
-FIND_PACKAGE(X11 REQUIRED)
+IF(KDE3_FIND_REQUIRED)
+  SET(_REQ_STRING_KDE3 "REQUIRED")
+ENDIF(KDE3_FIND_REQUIRED)
+  
+FIND_PACKAGE(Qt3 ${_REQ_STRING_KDE3})
+FIND_PACKAGE(X11 ${_REQ_STRING_KDE3})
 
 
 #add some KDE specific stuff
