@@ -174,21 +174,18 @@ ENDIF(EXISTS "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
 
 #=====================================================================
 #=====================================================================
-IF(WIN32)
-  SET(WIN32_STYLE_FIND 1)
-ENDIF(WIN32)
-IF(MINGW)
-  SET(WIN32_STYLE_FIND 0)
-  SET(UNIX_STYLE_FIND 1)
-ENDIF(MINGW)
-IF(UNIX)
-  SET(UNIX_STYLE_FIND 1)
-ENDIF(UNIX)
+IF(WIN32 AND NOT CYGWIN)
+  SET(wxWidgets_FIND_STYLE "win32")
+ELSE(WIN32 AND NOT CYGWIN)
+  IF(UNIX)
+    SET(wxWidgets_FIND_STYLE "unix")
+  ENDIF(UNIX)
+ENDIF(WIN32 AND NOT CYGWIN)
 
 #=====================================================================
-# WIN32_STYLE_FIND
+# WIN32_FIND_STYLE
 #=====================================================================
-IF(WIN32_STYLE_FIND)
+IF(wxWidgets_FIND_STYLE STREQUAL "win32")
   # Useful common wx libs needed by almost all components.
   SET(wxWidgets_COMMON_LIBRARIES png tiff jpeg zlib regex expat)
 
@@ -543,10 +540,10 @@ IF(WIN32_STYLE_FIND)
   ENDIF(WX_ROOT_DIR)
 
 #=====================================================================
-# UNIX_STYLE_FIND
+# UNIX_FIND_STYLE
 #=====================================================================
-ELSE(WIN32_STYLE_FIND)
-  IF(UNIX_STYLE_FIND)
+ELSE(wxWidgets_FIND_STYLE STREQUAL "win32")
+  IF(wxWidgets_FIND_STYLE STREQUAL "unix")
     #-----------------------------------------------------------------
     # UNIX: Helper MACROS
     #-----------------------------------------------------------------
@@ -729,18 +726,18 @@ ELSE(WIN32_STYLE_FIND)
     ENDIF(wxWidgets_CONFIG_EXECUTABLE)
 
 #=====================================================================
-# Neither UNIX_STYLE_FIND, nor WIN32_STYLE_FIND
+# Neither UNIX_FIND_STYLE, nor WIN32_FIND_STYLE
 #=====================================================================
-  ELSE(UNIX_STYLE_FIND)
+  ELSE(wxWidgets_FIND_STYLE STREQUAL "unix")
     IF(NOT wxWidgets_FIND_QUIETLY)
       MESSAGE(STATUS
         "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}): \n"
         "  Platform unknown/unsupported. It's neither WIN32 nor UNIX "
-        "style find."
+        "find style."
         )
     ENDIF(NOT wxWidgets_FIND_QUIETLY)
-  ENDIF(UNIX_STYLE_FIND)
-ENDIF(WIN32_STYLE_FIND)
+  ENDIF(wxWidgets_FIND_STYLE STREQUAL "unix")
+ENDIF(wxWidgets_FIND_STYLE STREQUAL "win32")
 
 # Debug output:
 DBG_MSG("wxWidgets_FOUND           : ${wxWidgets_FOUND}")
