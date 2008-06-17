@@ -3375,6 +3375,11 @@ void cmake::DefineProperties(cmake *cm)
     ("IN_TRY_COMPILE", cmProperty::GLOBAL,
      "Read-only property that is true during a try-compile configuration.",
      "True when building a project inside a TRY_COMPILE or TRY_RUN command.");
+  cm->DefineProperty
+    ("ENABLED_LANGUAGES", cmProperty::GLOBAL,
+     "Read-only property that contains the list of currently "
+     "enabled languages",
+     "Set to list of currently enabled lanauges.");
 
   // ================================================================
   // define variables as well
@@ -3589,6 +3594,24 @@ const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
     {
     this->SetProperty("IN_TRY_COMPILE",
                       this->GetIsInTryCompile()? "1":"0");
+    }
+  else if ( propname == "ENABLED_LANGUAGES" )
+    {
+    std::string lang;
+    if(this->GlobalGenerator)
+      {
+      std::vector<std::string> enLangs;
+      this->GlobalGenerator->GetEnabledLanguages(enLangs);
+      const char* sep = "";
+      for(std::vector<std::string>::iterator i = enLangs.begin();
+          i != enLangs.end(); ++i)
+        {
+        lang += sep;
+        sep = ";";
+        lang += *i;
+        }
+      }
+    this->SetProperty("ENABLED_LANGUAGES", lang.c_str());
     }
   return this->Properties.GetPropertyValue(prop, scope, chain);
 }
