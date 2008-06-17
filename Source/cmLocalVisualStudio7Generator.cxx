@@ -423,7 +423,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"BufferSecurityCheck", "GS-", "Turn off Buffer security check", "FALSE", 0},
   {"Detect64BitPortabilityProblems", "Wp64", 
    "Detect 64-bit Portability Problems", "TRUE", 0},
-  {"EnableFiberSafeOptimization", "GT", "Enable Fiber-safe Optimizations",
+  {"EnableFiberSafeOptimizations", "GT", "Enable Fiber-safe Optimizations",
    "TRUE", 0},
   {"EnableFunctionLevelLinking", "Gy",
    "EnableFunctionLevelLinking", "TRUE", 0},
