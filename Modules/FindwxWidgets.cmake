@@ -174,13 +174,13 @@ ENDIF(EXISTS "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
 
 #=====================================================================
 #=====================================================================
-IF(WIN32 AND NOT CYGWIN)
+IF(WIN32 AND NOT CYGWIN AND NOT MSYS)
   SET(wxWidgets_FIND_STYLE "win32")
-ELSE(WIN32 AND NOT CYGWIN)
-  IF(UNIX)
+ELSE(WIN32 AND NOT CYGWIN AND NOT MSYS)
+  IF(UNIX OR MSYS)
     SET(wxWidgets_FIND_STYLE "unix")
-  ENDIF(UNIX)
-ENDIF(WIN32 AND NOT CYGWIN)
+  ENDIF(UNIX OR MSYS)
+ENDIF(WIN32 AND NOT CYGWIN AND NOT MSYS)
 
 #=====================================================================
 # WIN32_FIND_STYLE
