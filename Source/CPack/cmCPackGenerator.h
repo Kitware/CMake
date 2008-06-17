@@ -22,6 +22,10 @@
 #include <map>
 #include <vector>
 
+#include "cmCPackComponentGroup.h" // cmCPackComponent and friends
+  // Forward declarations are insufficient since we use them in
+  // std::map data members below...
+
 #define cmCPackTypeMacro(class, superclass) \
   cmTypeMacro(class, superclass); \
   static cmCPackGenerator* CreateGenerator() { return new class; }
@@ -46,9 +50,6 @@
 
 class cmMakefile;
 class cmCPackLog;
-class cmCPackInstallationType;
-class cmCPackComponent;
-class cmCPackComponentGroup;
 
 /** \class cmCPackGenerator
  * \brief A superclass of all CPack Generators
