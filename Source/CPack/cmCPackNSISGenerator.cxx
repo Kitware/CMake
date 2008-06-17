@@ -578,7 +578,7 @@ CreateComponentDescription(cmCPackComponent *component) const
     }
   else if (!component->InstallationTypes.empty())
     {
-    std::ostringstream out;
+    cmOStringStream out;
     std::vector<cmCPackInstallationType *>::iterator installTypeIter;
     for (installTypeIter = component->InstallationTypes.begin();
          installTypeIter != component->InstallationTypes.end();
@@ -637,7 +637,7 @@ std::string cmCPackNSISGenerator::CreateSelectionDependenciesDescription
     }
   visited.insert(component);
 
-  std::ostringstream out;
+  cmOStringStream out;
   std::vector<cmCPackComponent *>::iterator dependIt;
   for (dependIt = component->Dependencies.begin();
        dependIt != component->Dependencies.end();
@@ -668,7 +668,7 @@ std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription
     }
   visited.insert(component);
 
-  std::ostringstream out;
+  cmOStringStream out;
   std::vector<cmCPackComponent *>::iterator dependIt;
   for (dependIt = component->ReverseDependencies.begin();
        dependIt != component->ReverseDependencies.end();
