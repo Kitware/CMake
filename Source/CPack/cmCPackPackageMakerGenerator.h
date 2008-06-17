@@ -21,6 +21,8 @@
 
 #include "cmCPackGenerator.h"
 
+class cmCPackComponent;
+
 /** \class cmCPackPackageMakerGenerator
  * \brief A generator for PackageMaker files
  *
@@ -38,6 +40,8 @@ public:
   cmCPackPackageMakerGenerator();
   virtual ~cmCPackPackageMakerGenerator();
 
+  virtual bool SupportsComponentInstallation() const;
+
 protected:
   int CopyInstallScript(const char* resdir,
                         const char* script,
@@ -49,8 +53,63 @@ protected:
   virtual const char* GetOutputPostfix() { return "darwin"; }
 
   bool CopyCreateResourceFile(const char* name);
-  bool CopyResourcePlistFile(const char* name);
+  bool CopyResourcePlistFile(const char* name, const char* outName = 0);
 
+  // Run PackageMaker with the given command line, which will (if
+  // successful) produce the given package file. Returns true if
+  // PackageMaker succeeds, false otherwise.
+  bool RunPackageMaker(const char *command, const char *packageFile);
+
+  // Retrieve the name of package file that will be generated for this
+  // component. The name is just the file name with extension, and
+  // does not include the subdirectory.
+  std::string GetPackageName(const cmCPackComponent& component);
+
+  // Generate a package in the file packageFile for the given
+  // component.  All of the files within this component are stored in
+  // the directory packageDir. Returns true if successful, false
+  // otherwise. 
+  bool GenerateComponentPackage(const char *packageFile, 
+                                const char *packageDir,
+                                const cmCPackComponent& component);
+
+  // Writes a distribution.dist file, which turns a metapackage into a
+  // full-fledged distribution. This file is used to describe
+  // inter-component dependencies. metapackageFile is the name of the
+  // metapackage for the distribution. Only valid for a
+  // component-based install.
+  void WriteDistributionFile(const char* metapackageFile);
+
+  // Subroutine of WriteDistributionFile that writes out the
+  // dependency attributes for inter-component dependencies.
+  void AddDependencyAttributes(const cmCPackComponent& component,
+                               cmOStringStream& out);
+
+  // Subroutine of WriteDistributionFile that writes out the
+  // reverse dependency attributes for inter-component dependencies.
+  void AddReverseDependencyAttributes(const cmCPackComponent& component,
+                                      cmOStringStream& out);
+
+  // Generates XML that encodes the hierarchy of component groups and
+  // their components in a form that can be used by distribution
+  // metapackages. 
+  void CreateChoiceOutline(const cmCPackComponentGroup& group,
+                           cmOStringStream& out);
+
+  /// Create the "choice" XML element to describe a component group
+  /// for the installer GUI.
+  void CreateChoice(const cmCPackComponentGroup& group,
+                    cmOStringStream& out);
+
+  /// Create the "choice" XML element to describe a component for the
+  /// installer GUI.
+  void CreateChoice(const cmCPackComponent& component,
+                    cmOStringStream& out);
+
+  // Escape the given string to make it usable as an XML attribute
+  // value.
+  std::string EscapeForXML(std::string str);
+  
   double PackageMakerVersion;
 };
 

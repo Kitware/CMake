@@ -19,6 +19,8 @@
 #define cmCPackGenerator_h
 
 #include "cmObject.h"
+#include <map>
+#include <vector>
 
 #define cmCPackTypeMacro(class, superclass) \
   cmTypeMacro(class, superclass); \
@@ -44,6 +46,9 @@
 
 class cmMakefile;
 class cmCPackLog;
+class cmCPackInstallationType;
+class cmCPackComponent;
+class cmCPackComponentGroup;
 
 /** \class cmCPackGenerator
  * \brief A superclass of all CPack Generators
@@ -120,6 +125,11 @@ protected:
   virtual int InstallProjectViaInstallCMakeProjects(
     bool setDestDir, const char* tempInstallDirectory);
 
+  virtual bool SupportsComponentInstallation() const;
+  virtual cmCPackInstallationType* GetInstallationType(const char *projectName, const char* name);
+  virtual cmCPackComponent* GetComponent(const char *projectName, const char* name);
+  virtual cmCPackComponentGroup* GetComponentGroup(const char *projectName, const char* name);
+
   bool GeneratorVerbose;
   std::string Name;
 
@@ -128,6 +138,10 @@ protected:
   std::string CPackSelf;
   std::string CMakeSelf;
   std::string CMakeRoot;
+
+  std::map<std::string, cmCPackInstallationType> InstallationTypes;
+  std::map<std::string, cmCPackComponent> Components;
+  std::map<std::string, cmCPackComponentGroup> ComponentGroups;
 
   cmCPackLog* Logger;
 private:

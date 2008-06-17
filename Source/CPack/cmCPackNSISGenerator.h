@@ -20,6 +20,7 @@
 
 
 #include "cmCPackGenerator.h"
+#include <set>
 
 /** \class cmCPackNSISGenerator
  * \brief A generator for NSIS files
@@ -48,6 +49,32 @@ protected:
 
   bool GetListOfSubdirectories(const char* dir,
     std::vector<std::string>& dirs);
+
+  virtual bool SupportsComponentInstallation() const;
+
+  /// Produce a string that contains the NSIS code to describe a 
+  /// particular component.
+  std::string CreateComponentDescription(cmCPackComponent *component) const;
+
+  /// Produce NSIS code that selects all of the components that this component
+  /// depends on, recursively.
+  std::string CreateSelectionDependenciesDescription
+                (cmCPackComponent *component,
+                 std::set<cmCPackComponent *>& visited) const;
+
+  /// Produce NSIS code that de-selects all of the components that are dependent
+  /// on this component, recursively.
+  std::string CreateDeselectionDependenciesDescription
+                (cmCPackComponent *component,
+                 std::set<cmCPackComponent *>& visited) const;
+
+  /// Produce a string that contains the NSIS code to describe a 
+  /// particular component group, including its components.
+  std::string CreateComponentGroupDescription(cmCPackComponentGroup *group) const;
+
+  /// Translations any newlines found in the string into \r\n, so that the 
+  /// resulting string can be used within NSIS.
+  static std::string TranslateNewlines(std::string str);
 };
 
 #endif
