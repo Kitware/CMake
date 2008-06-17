@@ -192,7 +192,7 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
       {
       installTypesCode += "InstType \"";
       installTypesCode += (*installTypeIt2)->DisplayName;
-      installTypesCode += + "\"\n";
+      installTypesCode += "\"\n";
       }
 
     // Create installation groups first

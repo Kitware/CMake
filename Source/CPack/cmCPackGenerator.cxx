@@ -245,6 +245,7 @@ int cmCPackGenerator::InstallProject()
 int cmCPackGenerator::InstallProjectViaInstallCommands(
   bool setDestDir, const char* tempInstallDirectory)
 {
+  (void) setDestDir;
   const char* installCommands = this->GetOption("CPACK_INSTALL_COMMANDS");
   if ( installCommands && *installCommands )
     {
@@ -1199,6 +1200,7 @@ bool cmCPackGenerator::SupportsComponentInstallation() const
 cmCPackInstallationType*
 cmCPackGenerator::GetInstallationType(const char *projectName, const char *name)
 {
+  (void) projectName;
   bool hasInstallationType = this->InstallationTypes.count(name) != 0;
   cmCPackInstallationType *installType = &this->InstallationTypes[name];
   if (!hasInstallationType) 
@@ -1311,6 +1313,7 @@ cmCPackGenerator::GetComponent(const char *projectName, const char *name)
 cmCPackComponentGroup*
 cmCPackGenerator::GetComponentGroup(const char *projectName, const char *name)
 {
+  (void) projectName;
   std::string macroPrefix = "CPACK_COMPONENT_GROUP_" 
         + cmsys::SystemTools::UpperCase(name);
   bool hasGroup = this->ComponentGroups.count(name) != 0;
