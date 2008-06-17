@@ -6,7 +6,7 @@
 #
 # I guess more things could be added, like checking whether variables are
 # defined after running the modules (e.g. FOO_FOUND etc.).
-
+project(FindModulesExecuteAll)
 cmake_minimum_required(VERSION 2.7)
 
 file(GLOB all_modules "${CMAKE_CURRENT_SOURCE_DIR}/../../Modules/Find*cmake")
