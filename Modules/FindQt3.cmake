@@ -186,7 +186,7 @@ IF (QT_MIN_VERSION)
   #now parse the parts of the user given version string into variables
   STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+$" req_qt_major_vers "${QT_MIN_VERSION}")
   IF (NOT req_qt_major_vers)
-    MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", expected e.g. \"3.1.5\"")
+    error_message(  "Invalid Qt version string given: \"${QT_MIN_VERSION}\", expected e.g. \"3.1.5\"")
   ENDIF (NOT req_qt_major_vers)
 
   STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_qt_major_vers "${QT_MIN_VERSION}")
@@ -194,21 +194,28 @@ IF (QT_MIN_VERSION)
   STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
 
   # req = "6.5.4", qt = "3.2.1"
+  macro(error_message msg)
+    IF(QT3_REQUIRED)
+      MESSAGE( FATAL_ERROR ${msg})
+    ELSE(QT3_REQUIRED)
+      MESSAGE( STATUS ${msg})
+    ENDIF(QT3_REQUIRED)
+  endmacro(error_message)
 
   IF (req_qt_major_vers GREATER qt_major_vers)                  # (6 > 3) ?
-    MESSAGE(  FATAL_ERROR "Qt major version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")            # yes
+    error_message(  "Qt major version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")            # yes
   ELSE  (req_qt_major_vers GREATER qt_major_vers)               # no
     IF (req_qt_major_vers LESS qt_major_vers)                  # (6 < 3) ?
       SET( QT_VERSION_BIG_ENOUGH "YES" )                      # yes
     ELSE (req_qt_major_vers LESS qt_major_vers)                # ( 6==3) ?
       IF (req_qt_minor_vers GREATER qt_minor_vers)            # (5>2) ?
-        MESSAGE(  FATAL_ERROR "Qt minor version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")      # yes
+        error_message(  "Qt minor version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")      # yes
       ELSE (req_qt_minor_vers GREATER qt_minor_vers)          # no
         IF (req_qt_minor_vers LESS qt_minor_vers)            # (5<2) ?
           SET( QT_VERSION_BIG_ENOUGH "YES" )                # yes
         ELSE (req_qt_minor_vers LESS qt_minor_vers)          # (5==2)
           IF (req_qt_patch_vers GREATER qt_patch_vers)      # (4>1) ?
-            MESSAGE( FATAL_ERROR "Qt patch level not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")  # yes
+            error_message(  "Qt patch level not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")  # yes
           ELSE (req_qt_patch_vers GREATER qt_patch_vers)    # (4>1) ?
             SET( QT_VERSION_BIG_ENOUGH "YES" )             # yes
           ENDIF (req_qt_patch_vers GREATER qt_patch_vers)   # (4>1) ?

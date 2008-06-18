@@ -84,17 +84,17 @@ FIND_PACKAGE(X11 ${_REQ_STRING_KDE3})
 SET(KDE3_DEFINITIONS -DQT_CLEAN_NAMESPACE -D_GNU_SOURCE)
 
 #only on linux, but NOT e.g. on FreeBSD:
-IF(CMAKE_SYSTEM_NAME MATCHES "Linux")
+IF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND CMAKE_COMPILER_IS_GNUCXX)
    SET (KDE3_DEFINITIONS ${KDE3_DEFINITIONS} -D_XOPEN_SOURCE=500 -D_BSD_SOURCE)
    SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
    SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -fno-exceptions -fno-check-new -fno-common")
-ENDIF(CMAKE_SYSTEM_NAME MATCHES "Linux")
+ENDIF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND CMAKE_COMPILER_IS_GNUCXX)
 
 # works on FreeBSD, NOT tested on NetBSD and OpenBSD
-IF (CMAKE_SYSTEM_NAME MATCHES BSD)
+IF (CMAKE_SYSTEM_NAME MATCHES BSD AND CMAKE_COMPILER_IS_GNUCXX)
    SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
    SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-exceptions -fno-check-new -fno-common")
-ENDIF (CMAKE_SYSTEM_NAME MATCHES BSD)
+ENDIF (CMAKE_SYSTEM_NAME MATCHES BSD AND CMAKE_COMPILER_IS_GNUCXX)
 
 # if no special buildtype is selected, add -O2 as default optimization
 IF (NOT CMAKE_BUILD_TYPE)
