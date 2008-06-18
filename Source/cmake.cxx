@@ -3875,7 +3875,7 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
       i != args.end(); ++i)
     {
     // check for nmake temporary files 
-    if((*i)[0] == '@')
+    if((*i)[0] == '@' && i->find("@CMakeFiles") != 0 )
       {
       std::ifstream fin(i->substr(1).c_str());
       std::string line;
