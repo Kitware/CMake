@@ -82,17 +82,17 @@ FIND_PACKAGE(X11 ${_REQ_STRING_KDE3})
 
 # add some KDE specific stuff
 SET(KDE3_DEFINITIONS -DQT_CLEAN_NAMESPACE -D_GNU_SOURCE)
-set(_KDE3_USE_FLAGS FALSE)
-if(CMAKE_COMPILER_IS_GNUCXX)
-  set(_KDE3_USE_FLAGS TRUE) # use flags for gnu compiler
-  execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
+SET(_KDE3_USE_FLAGS FALSE)
+IF(CMAKE_COMPILER_IS_GNUCXX)
+  SET(_KDE3_USE_FLAGS TRUE) # use flags for gnu compiler
+  EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} --version
                   OUTPUT_VARIABLE out)
   # gnu gcc 2.96 does not work with flags
 # I guess 2.95 also doesn't then
-  if("${out}" MATCHES "2.9[56]")
-    set(_KDE3_USE_FLAGS FALSE)
-  endif("${out}" out MATCHES "2.9[56]")
-endif(CMAKE_COMPILER_IS_GNUCXX)
+  IF("${out}" MATCHES "2.9[56]")
+    SET(_KDE3_USE_FLAGS FALSE)
+  ENDIF("${out}" out MATCHES "2.9[56]")
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 #only on linux, but NOT e.g. on FreeBSD:
 IF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND _KDE3_USE_FLAGS)
