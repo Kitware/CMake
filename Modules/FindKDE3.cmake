@@ -94,23 +94,23 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
 #only on linux, but NOT e.g. on FreeBSD:
-IF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND _KDE3_NO_FLAGS)
+IF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND _KDE3_USE_FLAGS)
    SET (KDE3_DEFINITIONS ${KDE3_DEFINITIONS} -D_XOPEN_SOURCE=500 -D_BSD_SOURCE)
    SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
    SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -fno-exceptions -fno-check-new -fno-common")
-ENDIF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND _KDE3_NO_FLAGS)
+ENDIF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND _KDE3_USE_FLAGS)
 
 # works on FreeBSD, NOT tested on NetBSD and OpenBSD
-IF (CMAKE_SYSTEM_NAME MATCHES BSD AND _KDE3_NO_FLAGS)
+IF (CMAKE_SYSTEM_NAME MATCHES BSD AND _KDE3_USE_FLAGS)
    SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
    SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-exceptions -fno-check-new -fno-common")
-ENDIF (CMAKE_SYSTEM_NAME MATCHES BSD AND _KDE3_NO_FLAGS)
+ENDIF (CMAKE_SYSTEM_NAME MATCHES BSD AND _KDE3_USE_FLAGS)
 
 # if no special buildtype is selected, add -O2 as default optimization
-IF (NOT CMAKE_BUILD_TYPE AND _KDE3_NO_FLAGS)
+IF (NOT CMAKE_BUILD_TYPE AND _KDE3_USE_FLAGS)
    SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -O2")
    SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-ENDIF (NOT CMAKE_BUILD_TYPE AND _KDE3_NO_FLAGS)
+ENDIF (NOT CMAKE_BUILD_TYPE AND _KDE3_USE_FLAGS)
 
 
 #SET(CMAKE_SHARED_LINKER_FLAGS "-avoid-version -module -Wl,--no-undefined -Wl,--allow-shlib-undefined")
