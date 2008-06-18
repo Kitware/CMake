@@ -1221,7 +1221,8 @@ cmCPackGenerator::GetInstallationType(const char *projectName, const char *name)
       installType->DisplayName = installType->Name;
       }
 
-    installType->Index = this->InstallationTypes.size();
+    installType->Index = static_cast<unsigned>(
+      this->InstallationTypes.size());
     }
   return installType;
 }
