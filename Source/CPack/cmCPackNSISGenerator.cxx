@@ -308,7 +308,8 @@ int cmCPackNSISGenerator::InitializeInternal()
 
 #ifdef _WIN32
   if ( !cmsys::SystemTools::ReadRegistryValue(
-      "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath) )
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath,
+      cmsys::SystemTools::KeyWOW64_32) )
     {
     cmCPackLogger
       (cmCPackLog::LOG_ERROR, 
