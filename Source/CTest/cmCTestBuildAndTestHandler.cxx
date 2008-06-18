@@ -143,6 +143,13 @@ void CMakeMessageCallback(const char* m, const char*, bool&, void* s)
   *out += "\n";
 }
 
+void CMakeProgressCallback(const char*msg, float , void * s)
+{
+  std::string* out = (std::string*)s;
+  *out += msg;
+  *out += "\n";
+}
+
 //----------------------------------------------------------------------
 void CMakeStdoutCallback(const char* m, int len, void* s)
 {
@@ -210,6 +217,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   // should we cmake?
   cmake cm;
+  cm.SetProgressCallback(CMakeProgressCallback, &cmakeOutString); 
   cm.SetGlobalGenerator(cm.CreateGlobalGenerator(
       this->BuildGenerator.c_str()));
 
