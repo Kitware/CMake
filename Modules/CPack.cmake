@@ -114,6 +114,7 @@ if(NOT CPACK_GENERATOR)
       option(CPACK_BINARY_CYGWIN "Enable to build Cygwin binary packages" ON)
     else(CYGWIN)
       if(APPLE)
+        option(CPACK_BINARY_BUNDLE       "Enable to build OSX bundles"      OFF)
         option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages" ON)
         option(CPACK_BINARY_OSXX11       "Enable to build OSX X11 packages"      OFF)
       else(APPLE)
@@ -131,6 +132,7 @@ if(NOT CPACK_GENERATOR)
     option(CPACK_BINARY_ZIP  "Enable to build ZIP packages" ON)
   endif(UNIX)
   
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_BUNDLE       Bundle)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PACKAGEMAKER PackageMaker)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_OSXX11       OSXX11)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_CYGWIN       CygwinBinary)
@@ -171,7 +173,7 @@ endif(NOT CPACK_SOURCE_GENERATOR)
 mark_as_advanced(CPACK_BINARY_CYGWIN CPACK_BINARY_PACKAGEMAKER CPACK_BINARY_OSXX11
                  CPACK_BINARY_STGZ   CPACK_BINARY_TGZ          CPACK_BINARY_TBZ2 
                  CPACK_BINARY_DEB    CPACK_BINARY_RPM          CPACK_BINARY_TZ     
-                 CPACK_BINARY_NSIS CPACK_BINARY_ZIP 
+                 CPACK_BINARY_NSIS CPACK_BINARY_ZIP CPACK_BINARY_BUNDLE
                  CPACK_SOURCE_CYGWIN CPACK_SOURCE_TBZ2 CPACK_SOURCE_TGZ 
                  CPACK_SOURCE_TZ CPACK_SOURCE_ZIP)
 
