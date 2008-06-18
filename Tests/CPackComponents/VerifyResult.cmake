@@ -17,7 +17,7 @@ if(WIN32)
     DOC "makensis.exe location"
     )
   if(NSIS_MAKENSIS_EXECUTABLE)
-    set(expected_file_mask "${CPackComponents_BINARY_DIR}/*.exe")
+    set(expected_file_mask "${CPackComponents_BINARY_DIR}/MyLib-*.exe")
   endif(NSIS_MAKENSIS_EXECUTABLE)
 endif(WIN32)
 
@@ -25,7 +25,7 @@ if(APPLE)
   # Always expect the *.dmg installer - PackageMaker should always
   # be installed on a development Mac:
   #
-  set(expected_file_mask "${CPackComponents_BINARY_DIR}/*.dmg")
+  set(expected_file_mask "${CPackComponents_BINARY_DIR}/MyLib-*.dmg")
 endif(APPLE)
 
 if(expected_file_mask)
