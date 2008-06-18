@@ -20,8 +20,12 @@ IF(SWIG_EXECUTABLE)
     ERROR_VARIABLE SWIG_swiglib_error
     RESULT_VARIABLE SWIG_swiglib_result)
 
-  IF(SWIG_swiglib_result)
-    MESSAGE(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -swiglib\" failed with output:\n${SWIG_swiglib_error}")
+  IF(SWIG_swiglib_result) 
+    IF(SWIG_FIND_REQUIRED)
+      MESSAGE(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -swiglib\" failed with output:\n${SWIG_swiglib_error}")
+    ELSE(SWIG_FIND_REQUIRED)
+      MESSAGE(STATUS "Command \"${SWIG_EXECUTABLE} -swiglib\" failed with output:\n${SWIG_swiglib_error}")
+    ENDIF(SWIG_FIND_REQUIRED)
   ELSE(SWIG_swiglib_result)
     STRING(REGEX REPLACE "[\n\r]+" ";" SWIG_swiglib_output ${SWIG_swiglib_output})
     # force the path to be computed each time in case SWIG_EXECUTABLE has changed.
