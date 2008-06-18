@@ -69,9 +69,51 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
 {
   (void) files; // TODO: Fix api to not need files.
   (void) toplevel; // TODO: Use toplevel
+
+  std::string resDir; // Where this package's resources will go.
+  std::string packageDirFileName
+    = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+  if (this->Components.empty())
+    {
+    packageDirFileName += ".pkg";
+    resDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    resDir += "/Resources";
+    }
+  else
+    {
+    packageDirFileName += ".mpkg";
+    if ( !cmsys::SystemTools::MakeDirectory(packageDirFileName.c_str()))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "unable to create package directory " 
+                    << packageDirFileName << std::endl);
+        return 0;
+      }
+
+    resDir = packageDirFileName;
+    resDir += "/Contents";
+    if ( !cmsys::SystemTools::MakeDirectory(resDir.c_str()))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "unable to create package subdirectory " << resDir 
+                    << std::endl);
+        return 0;
+      }
+
+    resDir += "/Resources";
+    if ( !cmsys::SystemTools::MakeDirectory(resDir.c_str()))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "unable to create package subdirectory " << resDir 
+                    << std::endl);
+        return 0;
+      }
+
+    resDir += "/en.lproj";
+    }
+
+
   // Create directory structure
-  std::string resDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  resDir += "/Resources";
   std::string preflightDirName = resDir + "/PreFlight";
   std::string postflightDirName = resDir + "/PostFlight";
   const char* preflight = this->GetOption("CPACK_PREFLIGHT_SCRIPT");
@@ -124,8 +166,8 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
   if (!this->Components.empty())
     {
     // Create the directory where component packages will be installed.
-    std::string basePackageDir = toplevel;
-    basePackageDir += "/packages";
+    std::string basePackageDir = packageDirFileName;
+    basePackageDir += "/Contents/Packages";
     if (!cmsys::SystemTools::MakeDirectory(basePackageDir.c_str()))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -157,59 +199,49 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
   this->SetOption("CPACK_MODULE_VERSION_SUFFIX", "");
 
   // Copy or create all of the resource files we need.
-  if ( !this->CopyCreateResourceFile("License")
-    || !this->CopyCreateResourceFile("ReadMe")
-    || !this->CopyCreateResourceFile("Welcome")
-    || !this->CopyResourcePlistFile("Info.plist")
-    || !this->CopyResourcePlistFile("Description.plist") )
+  if ( !this->CopyCreateResourceFile("License", resDir.c_str())
+       || !this->CopyCreateResourceFile("ReadMe", resDir.c_str())
+       || !this->CopyCreateResourceFile("Welcome", resDir.c_str())
+       || !this->CopyResourcePlistFile("Info.plist")
+       || !this->CopyResourcePlistFile("Description.plist") )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files"
       << std::endl);
     return 0;
     }
 
-  std::string packageDirFileName
-    = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   if (this->Components.empty())
     {
-    packageDirFileName += ".pkg";
-    }
-  else
-    {
-    packageDirFileName += ".mpkg";
-    if (this->PackageMakerVersion == 3.0)
+    // Use PackageMaker to build the package.
+    cmOStringStream pkgCmd;
+    pkgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
+           << "\" -build -p \"" << packageDirFileName << "\"";
+    if (this->Components.empty())
       {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-         "PackageMaker 3.0 cannot build component-based installations."
-         << std::endl << "Please use PackageMaker 2.5 instead." << std::endl);
+      pkgCmd << " -f \"" << this->GetOption("CPACK_TEMPORARY_DIRECTORY");
       }
-    }
-
-  cmOStringStream pkgCmd;
-  pkgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
-         << "\" -build -p \"" << packageDirFileName << "\"";
-  if (this->Components.empty())
-    {
-    pkgCmd << " -f \"" << this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+    else
+      {
+      pkgCmd << " -mi \"" << this->GetOption("CPACK_TEMPORARY_DIRECTORY")
+             << "/packages/";
+      }
+    pkgCmd << "\" -r \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY")
+           << "/Resources\" -i \""
+           << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") 
+           << "/Info.plist\" -d \""
+           << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") 
+           << "/Description.plist\"";
+    if ( this->PackageMakerVersion > 2.0 )
+      {
+      pkgCmd << " -v";
+      }
+    if (!RunPackageMaker(pkgCmd.str().c_str(), packageDirFileName.c_str()))
+      return 0;
     }
   else
     {
-    pkgCmd << " -mi \"" << this->GetOption("CPACK_TEMPORARY_DIRECTORY")
-           << "/packages/";
-    }
-  pkgCmd << "\" -r \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY")
-         << "/Resources\" -i \""
-         << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Info.plist\" -d \""
-         << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/Description.plist\"";
-  if ( this->PackageMakerVersion > 2.0 )
-    {
-    pkgCmd << " -v";
-    }
-  if (!RunPackageMaker(pkgCmd.str().c_str(), packageDirFileName.c_str()))
-    return 0;
-
-  if (!this->Components.empty())
-    {
+    // We have built the package in place. Generate the
+    // distribution.dist file to describe it for the installer.
     WriteDistributionFile(packageDirFileName.c_str());
     }
 
@@ -331,7 +363,8 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name)
+bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
+                                                          const char* dirName)
 {
   std::string uname = cmSystemTools::UpperCase(name);
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
@@ -361,10 +394,14 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name)
     return false;
     }
 
-  std::string destFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  destFileName += "/Resources/";
+  std::string destFileName = dirName;
+  destFileName += '/';
   destFileName += name + ext;
 
+  // Set this so that distribution.dist gets the right name (without
+  // the path).
+  this->SetOption(("CPACK_RESOURCE_FILE_" + uname + "_NOPATH").c_str(),
+                  (name + ext).c_str());
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " 
                 << (inFileName ? inFileName : "(NULL)")
@@ -509,9 +546,9 @@ GenerateComponentPackage(const char *packageFile,
   pkgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
          << "\" -build -p \"" << packageFile << "\""
          << " -f \"" << packageDir << "\""
-         << "-i \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") 
+         << " -i \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") 
          << "/" << infoFileName << "\""
-         << "-d \"" << descriptionFile << "\""; 
+         << " -d \"" << descriptionFile << "\""; 
   return RunPackageMaker(pkgCmd.str().c_str(), packageFile);
 }
 

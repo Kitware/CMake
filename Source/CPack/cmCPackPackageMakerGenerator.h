@@ -52,7 +52,12 @@ protected:
   virtual const char* GetOutputExtension() { return ".dmg"; }
   virtual const char* GetOutputPostfix() { return "darwin"; }
 
-  bool CopyCreateResourceFile(const char* name);
+  // Copies or creates the resource file with the given name to the
+  // package or package staging directory dirName. The variable
+  // CPACK_RESOURCE_FILE_${NAME} (where ${NAME} is the uppercased
+  // version of name) specifies the input file to use for this file,
+  // which will be configured via ConfigureFile.
+  bool CopyCreateResourceFile(const char* name, const char *dirName);
   bool CopyResourcePlistFile(const char* name, const char* outName = 0);
 
   // Run PackageMaker with the given command line, which will (if
