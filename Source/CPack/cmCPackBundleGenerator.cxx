@@ -75,6 +75,8 @@ const char* cmCPackBundleGenerator::GetPackagingInstallPrefix()
 int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {
+  (void) files;
+
   // The staging directory contains everything that will end-up inside the
   // final disk image ...
   cmOStringStream staging;
