@@ -287,7 +287,27 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     "-DSTAGE2:BOOL=1"
     --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExeS2)
 
-  IF(CTEST_TEST_CPACK)
+  # By default, run the CPackComponents test if the CTEST_TEST_CPACK
+  # option is ON:
+  #
+  set(CTEST_RUN_CPackComponents ${CTEST_TEST_CPACK})
+
+  # But on Windows, only run the CPackComponents test if the NSIS
+  # installer builder is available:
+  #
+  if(WIN32)
+    find_program(NSIS_MAKENSIS_EXECUTABLE NAMES makensis
+      PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS]
+      DOC "makensis.exe location"
+      )
+    if(NSIS_MAKENSIS_EXECUTABLE)
+      set(CTEST_RUN_CPackComponents ON)
+    else(NSIS_MAKENSIS_EXECUTABLE)
+      set(CTEST_RUN_CPackComponents OFF)
+    endif(NSIS_MAKENSIS_EXECUTABLE)
+  endif(WIN32)
+
+  IF(CTEST_RUN_CPackComponents)
     ADD_TEST(CPackComponents ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/CPackComponents"
@@ -300,7 +320,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       --test-command ${CMAKE_CMAKE_COMMAND}
         "-DCPackComponents_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponents"
         -P "${CMake_SOURCE_DIR}/Tests/CPackComponents/VerifyResult.cmake")
-  ENDIF(CTEST_TEST_CPACK)
+  ENDIF(CTEST_RUN_CPackComponents)
 
   ADD_TEST(X11  ${CMAKE_CTEST_COMMAND}
     --build-and-test
