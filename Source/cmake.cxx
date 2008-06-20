@@ -3890,25 +3890,40 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
       expandedArgs.push_back(*i);
       }
     }
-  // figure out if this is an incremental link or not and run the correct
-  // link function.
+  bool hasIncremental = false;
+  bool hasManifest = true;
   for(std::vector<std::string>::iterator i = expandedArgs.begin();
       i != expandedArgs.end(); ++i)
     {
     if(cmSystemTools::Strucmp(i->c_str(), "/INCREMENTAL:YES") == 0)
       {
-      if(verbose)
-        {
-        std::cout << "Visual Studio Incremental Link\n";
-        }
-      return cmake::VisualStudioLinkIncremental(expandedArgs, type, verbose);
+      hasIncremental = true;
       }
+    if(cmSystemTools::Strucmp(i->c_str(), "/MANIFEST:NO") == 0)
+      {
+      hasManifest = false;
+      }
+    }
+  if(hasIncremental && hasManifest)
+    {
+    if(verbose)
+      {
+      std::cout << "Visual Studio Incremental Link with embeded manifests\n";
+      }
+    return cmake::VisualStudioLinkIncremental(expandedArgs, type, verbose);
     }
   if(verbose)
     {
-    std::cout << "Visual Studio Non-Incremental Link\n";
+    if(!hasIncremental)
+      {
+      std::cout << "Visual Studio Non-Incremental Link\n";
+      }
+    else
+      {
+      std::cout << "Visual Studio Incremental Link without manifests\n";
+      }
     }
-  return cmake::VisualStudioLinkNonIncremental(expandedArgs, type, verbose);
+  return cmake::VisualStudioLinkNonIncremental(expandedArgs, type, hasManifest, verbose);
 }
 
 int cmake::ParseVisualStudioLinkCommand(std::vector<std::string>& args, 
@@ -4113,6 +4128,7 @@ int cmake::VisualStudioLinkIncremental(std::vector<std::string>& args,
 
 int cmake::VisualStudioLinkNonIncremental(std::vector<std::string>& args,
                                           int type,
+                                          bool hasManifest,
                                           bool verbose)
 {
   std::vector<cmStdString> linkCommand;
@@ -4125,6 +4141,10 @@ int cmake::VisualStudioLinkNonIncremental(std::vector<std::string>& args,
   if(!cmake::RunCommand("LINK", linkCommand, verbose))
     {
     return -1;
+    }
+  if(!hasManifest)
+    {
+    return 0;
     }
   std::vector<cmStdString> mtCommand;
   mtCommand.push_back(cmSystemTools::FindProgram("mt.exe"));

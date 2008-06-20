@@ -416,6 +416,7 @@ protected:
                                          bool verbose);
   static int VisualStudioLinkNonIncremental(std::vector<std::string>& args,
                                             int type,
+                                            bool hasManifest,
                                             bool verbose);
   static int ParseVisualStudioLinkCommand(std::vector<std::string>& args, 
                                           std::vector<cmStdString>& command, 
@@ -428,7 +429,9 @@ protected:
   
   ///! Find the full path to one of the cmake programs like ctest, cpack, etc.
   std::string FindCMakeProgram(const char* name) const;
-private:
+private: 
+  cmake(const cmake&);  // Not implemented.
+  void operator=(const cmake&);  // Not implemented.
   ProgressCallbackType ProgressCallback;
   void* ProgressCallbackClientData;
   bool Verbose;
