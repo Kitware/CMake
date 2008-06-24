@@ -29,7 +29,7 @@ ENDIF(CMAKE_GENERATOR MATCHES  "Visual Studio 9")
 
 
 # make sure to enable languages after setting configuration types
-ENABLE_LANGUAGE(RC OPTIONAL)
+ENABLE_LANGUAGE(RC)
 IF(NOT CMAKE_RC_COMPILER_WORKS )
   MESSAGE(STATUS "Warning: RC not found, this build will not be able to compile resource files.")
 ENDIF(NOT CMAKE_RC_COMPILER_WORKS )
