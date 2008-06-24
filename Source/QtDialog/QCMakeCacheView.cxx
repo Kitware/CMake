@@ -439,6 +439,11 @@ QCMakePropertyList QCMakeCacheModel::properties() const
 {
   QCMakePropertyList props;
 
+  if(!this->rowCount())
+    {
+    return props;
+    }
+
   QList<QModelIndex> idxs;
   idxs.append(this->index(0,0));
 
