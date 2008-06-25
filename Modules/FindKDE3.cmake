@@ -63,45 +63,22 @@
 #
 # Author: Alexander Neundorf <neundorf@kde.org>
 
-IF(NOT UNIX)
+IF(NOT UNIX AND KDE3_FIND_REQUIRED)
    MESSAGE(FATAL_ERROR "Compiling KDE3 applications and libraries under Windows is not supported")
-ENDIF(NOT UNIX)
+ENDIF(NOT UNIX AND KDE3_FIND_REQUIRED)
 
 
 SET(QT_MT_REQUIRED TRUE)
 #SET(QT_MIN_VERSION "3.0.0")
 
 #this line includes FindQt.cmake, which searches the Qt library and headers
-FIND_PACKAGE(Qt3 REQUIRED)
-FIND_PACKAGE(X11 REQUIRED)
+IF(KDE3_FIND_REQUIRED)
+  SET(_REQ_STRING_KDE3 "REQUIRED")
+ENDIF(KDE3_FIND_REQUIRED)
+  
+FIND_PACKAGE(Qt3 ${_REQ_STRING_KDE3})
+FIND_PACKAGE(X11 ${_REQ_STRING_KDE3})
 
-
-#add some KDE specific stuff
-SET(KDE3_DEFINITIONS -DQT_CLEAN_NAMESPACE -D_GNU_SOURCE)
-
-#only on linux, but NOT e.g. on FreeBSD:
-IF(CMAKE_SYSTEM_NAME MATCHES "Linux")
-   SET (KDE3_DEFINITIONS ${KDE3_DEFINITIONS} -D_XOPEN_SOURCE=500 -D_BSD_SOURCE)
-   SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
-   SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -fno-exceptions -fno-check-new -fno-common")
-ENDIF(CMAKE_SYSTEM_NAME MATCHES "Linux")
-
-# works on FreeBSD, NOT tested on NetBSD and OpenBSD
-IF (CMAKE_SYSTEM_NAME MATCHES BSD)
-   SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
-   SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-exceptions -fno-check-new -fno-common")
-ENDIF (CMAKE_SYSTEM_NAME MATCHES BSD)
-
-# if no special buildtype is selected, add -O2 as default optimization
-IF (NOT CMAKE_BUILD_TYPE)
-   SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -O2")
-   SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-ENDIF (NOT CMAKE_BUILD_TYPE)
-
-
-#SET(CMAKE_SHARED_LINKER_FLAGS "-avoid-version -module -Wl,--no-undefined -Wl,--allow-shlib-undefined")
-#SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--fatal-warnings -avoid-version -Wl,--no-undefined -lc")
-#SET(CMAKE_MODULE_LINKER_FLAGS "-Wl,--fatal-warnings -avoid-version -Wl,--no-undefined -lc")
 
 #now try to find some kde stuff
 FIND_PROGRAM(KDECONFIG_EXECUTABLE NAMES kde-config
@@ -191,9 +168,6 @@ FIND_PROGRAM(KDE3_KCFGC_EXECUTABLE NAMES kconfig_compiler
   /opt/kde/bin
   )
 
-# KDE3Macros.cmake contains all the KDE specific macros
-INCLUDE(KDE3Macros)
-
 
 #SET KDE3_FOUND
 IF (KDE3_INCLUDE_DIR AND KDE3_LIB_DIR AND KDE3_DCOPIDL_EXECUTABLE AND KDE3_DCOPIDL2CPP_EXECUTABLE AND KDE3_KCFGC_EXECUTABLE)
@@ -201,6 +175,51 @@ IF (KDE3_INCLUDE_DIR AND KDE3_LIB_DIR AND KDE3_DCOPIDL_EXECUTABLE AND KDE3_DCOPI
 ELSE (KDE3_INCLUDE_DIR AND KDE3_LIB_DIR AND KDE3_DCOPIDL_EXECUTABLE AND KDE3_DCOPIDL2CPP_EXECUTABLE AND KDE3_KCFGC_EXECUTABLE)
    SET(KDE3_FOUND FALSE)
 ENDIF (KDE3_INCLUDE_DIR AND KDE3_LIB_DIR AND KDE3_DCOPIDL_EXECUTABLE AND KDE3_DCOPIDL2CPP_EXECUTABLE AND KDE3_KCFGC_EXECUTABLE)
+
+# add some KDE specific stuff
+SET(KDE3_DEFINITIONS -DQT_CLEAN_NAMESPACE -D_GNU_SOURCE)
+
+# set compiler flags only if KDE3 has actually been found
+IF(KDE3_FOUND)
+   SET(_KDE3_USE_FLAGS FALSE)
+   IF(CMAKE_COMPILER_IS_GNUCXX)
+      SET(_KDE3_USE_FLAGS TRUE) # use flags for gnu compiler
+      EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} --version
+                      OUTPUT_VARIABLE out)
+      # gnu gcc 2.96 does not work with flags
+      # I guess 2.95 also doesn't then
+      IF("${out}" MATCHES "2.9[56]")
+         SET(_KDE3_USE_FLAGS FALSE)
+      ENDIF("${out}" out MATCHES "2.9[56]")
+   ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+
+   #only on linux, but NOT e.g. on FreeBSD:
+   IF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND _KDE3_USE_FLAGS)
+      SET (KDE3_DEFINITIONS ${KDE3_DEFINITIONS} -D_XOPEN_SOURCE=500 -D_BSD_SOURCE)
+      SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
+      SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -fno-exceptions -fno-check-new -fno-common")
+   ENDIF(CMAKE_SYSTEM_NAME MATCHES "Linux" AND _KDE3_USE_FLAGS)
+
+   # works on FreeBSD, NOT tested on NetBSD and OpenBSD
+   IF (CMAKE_SYSTEM_NAME MATCHES BSD AND _KDE3_USE_FLAGS)
+      SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
+      SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-exceptions -fno-check-new -fno-common")
+   ENDIF (CMAKE_SYSTEM_NAME MATCHES BSD AND _KDE3_USE_FLAGS)
+
+   # if no special buildtype is selected, add -O2 as default optimization
+   IF (NOT CMAKE_BUILD_TYPE AND _KDE3_USE_FLAGS)
+      SET ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -O2")
+      SET ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+   ENDIF (NOT CMAKE_BUILD_TYPE AND _KDE3_USE_FLAGS)
+
+#SET(CMAKE_SHARED_LINKER_FLAGS "-avoid-version -module -Wl,--no-undefined -Wl,--allow-shlib-undefined")
+#SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--fatal-warnings -avoid-version -Wl,--no-undefined -lc")
+#SET(CMAKE_MODULE_LINKER_FLAGS "-Wl,--fatal-warnings -avoid-version -Wl,--no-undefined -lc")
+ENDIF(KDE3_FOUND)
+
+
+# KDE3Macros.cmake contains all the KDE specific macros
+INCLUDE(KDE3Macros)
 
 
 MACRO (KDE3_PRINT_RESULTS)

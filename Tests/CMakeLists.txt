@@ -19,13 +19,41 @@ IF(BUILD_TESTING)
   OPTION(CMAKE_RUN_LONG_TESTS 
     "Should the long tests be run (such as Bootstrap)." ON)
   MARK_AS_ADVANCED(CMAKE_RUN_LONG_TESTS)
-  
+
   IF (CMAKE_RUN_LONG_TESTS)
     OPTION(CTEST_TEST_CTEST 
       "Should the tests that run a full sub ctest process be run?" 
       OFF)
     MARK_AS_ADVANCED(CTEST_TEST_CTEST)
   ENDIF (CMAKE_RUN_LONG_TESTS)
+
+  # Should CPack tests be run? By default, yes, but...
+  #
+  # Disable packaging test on Apple 10.3 and below. PackageMaker starts
+  # DiskManagementTool as root and disowns it
+  # (http://lists.apple.com/archives/installer-dev/2005/Jul/msg00005.html).
+  # It is left holding open pipe handles and preventing ProcessUNIX from
+  # detecting end-of-data even after its immediate child exits. Then
+  # the test hangs until it times out and is killed. This is a
+  # well-known bug in kwsys process execution that I would love to get
+  # time to fix.
+  #
+  OPTION(CTEST_TEST_CPACK
+    "Should the tests that use '--build-target package' be run?"
+    ON)
+  MARK_AS_ADVANCED(CTEST_TEST_CPACK)
+  IF(APPLE AND CTEST_TEST_CPACK)
+    EXECUTE_PROCESS(
+      COMMAND sw_vers -productVersion
+      OUTPUT_VARIABLE OSX_VERSION
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+    IF(OSX_VERSION MATCHES "^10\\.[0123]" OR OSX_VERSION MATCHES "ProductVersion:\t10\\.[0123]")
+      MESSAGE(STATUS "Forcing CTEST_TEST_CPACK=OFF on OSX < 10.4")
+      MESSAGE(STATUS "OSX_VERSION='${OSX_VERSION}'")
+      SET(CTEST_TEST_CPACK OFF)
+    ENDIF(OSX_VERSION MATCHES "^10\\.[0123]" OR OSX_VERSION MATCHES "ProductVersion:\t10\\.[0123]")
+  ENDIF(APPLE AND CTEST_TEST_CPACK)
 
   # Use 1500 or CTEST_TEST_TIMEOUT for long test timeout value,
   # whichever is greater.
@@ -40,6 +68,7 @@ IF(BUILD_TESTING)
   # add a bunch of standard build-and-test style tests
   ADD_TEST_MACRO(CommandLineTest CommandLineTest)
   ADD_TEST_MACRO(FindPackageTest FindPackageTest)
+  ADD_TEST_MACRO(FindModulesExecuteAll FindModulesExecuteAll)
   ADD_TEST_MACRO(StringFileTest StringFileTest)
   ADD_TEST_MACRO(TryCompile TryCompile)
   ADD_TEST_MACRO(TarTest TarTest)
@@ -257,6 +286,41 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
     "-DSTAGE2:BOOL=1"
     --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExeS2)
+
+  # By default, run the CPackComponents test if the CTEST_TEST_CPACK
+  # option is ON:
+  #
+  set(CTEST_RUN_CPackComponents ${CTEST_TEST_CPACK})
+
+  # But on Windows, only run the CPackComponents test if the NSIS
+  # installer builder is available:
+  #
+  if(WIN32)
+    find_program(NSIS_MAKENSIS_EXECUTABLE NAMES makensis
+      PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS]
+      DOC "makensis.exe location"
+      )
+    if(NSIS_MAKENSIS_EXECUTABLE)
+      set(CTEST_RUN_CPackComponents ON)
+    else(NSIS_MAKENSIS_EXECUTABLE)
+      set(CTEST_RUN_CPackComponents OFF)
+    endif(NSIS_MAKENSIS_EXECUTABLE)
+  endif(WIN32)
+
+  IF(CTEST_RUN_CPackComponents)
+    ADD_TEST(CPackComponents ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackComponents"
+      "${CMake_BINARY_DIR}/Tests/CPackComponents"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project CPackComponents
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-two-config
+      --build-target package
+      --test-command ${CMAKE_CMAKE_COMMAND}
+        "-DCPackComponents_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponents"
+        -P "${CMake_SOURCE_DIR}/Tests/CPackComponents/VerifyResult.cmake")
+  ENDIF(CTEST_RUN_CPackComponents)
 
   ADD_TEST(X11  ${CMAKE_CTEST_COMMAND}
     --build-and-test

@@ -374,6 +374,7 @@ ENDIF(UNIX)
 
 IF(APPLE)
   SET(CPACK_SRCS ${CPACK_SRCS}
+    CPack/cmCPackBundleGenerator.cxx
     CPack/cmCPackOSXX11Generator.cxx
     CPack/cmCPackPackageMakerGenerator.cxx
     )

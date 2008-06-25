@@ -121,8 +121,20 @@ void cmFLTKWrapUICommand::FinalPass()
   // people should add the srcs to the target themselves, but the old command
   // didn't support that, so check and see if they added the files in and if
   // they didn;t then print a warning and add then anyhow
+  cmTarget* target = this->Makefile->FindTarget(this->Target.c_str());
+  if(!target)
+    {
+    std::string msg = 
+      "FLTK_WRAP_UI was called with a target that was never created: ";
+    msg += this->Target;
+    msg +=".  The problem was found while processing the source directory: ";
+    msg += this->Makefile->GetStartDirectory();
+    msg += ".  This FLTK_WRAP_UI call will be ignored.";
+    cmSystemTools::Message(msg.c_str(),"Warning");
+    return;
+    }
   std::vector<cmSourceFile*> const& srcs = 
-    this->Makefile->GetTargets()[this->Target].GetSourceFiles();
+    target->GetSourceFiles();
   bool found = false;
   for (unsigned int i = 0; i < srcs.size(); ++i)
     {

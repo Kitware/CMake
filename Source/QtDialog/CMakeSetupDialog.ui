@@ -295,7 +295,7 @@
  <customwidgets>
   <customwidget>
    <class>QCMakeCacheView</class>
-   <extends>QTableView</extends>
+   <extends>QTreeView</extends>
    <header>QCMakeCacheView.h</header>
   </customwidget>
  </customwidgets>

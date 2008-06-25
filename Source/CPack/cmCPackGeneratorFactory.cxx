@@ -25,6 +25,7 @@
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackNSISGenerator.h"
 #ifdef __APPLE__
+#  include "cmCPackBundleGenerator.h"
 #  include "cmCPackPackageMakerGenerator.h"
 #  include "cmCPackOSXX11Generator.h"
 #endif
@@ -66,6 +67,8 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
   this->RegisterGenerator("TZ", "Tar Compress compression",
     cmCPackTarCompressGenerator::CreateGenerator);
 #ifdef __APPLE__
+  this->RegisterGenerator("Bundle", "Mac OSX bundle",
+    cmCPackBundleGenerator::CreateGenerator);
   this->RegisterGenerator("PackageMaker", "Mac OSX Package Maker installer",
     cmCPackPackageMakerGenerator::CreateGenerator);
   this->RegisterGenerator("OSXX11", "Mac OSX X11 bundle",

@@ -3375,6 +3375,11 @@ void cmake::DefineProperties(cmake *cm)
     ("IN_TRY_COMPILE", cmProperty::GLOBAL,
      "Read-only property that is true during a try-compile configuration.",
      "True when building a project inside a TRY_COMPILE or TRY_RUN command.");
+  cm->DefineProperty
+    ("ENABLED_LANGUAGES", cmProperty::GLOBAL,
+     "Read-only property that contains the list of currently "
+     "enabled languages",
+     "Set to list of currently enabled lanauges.");
 
   // ================================================================
   // define variables as well
@@ -3589,6 +3594,24 @@ const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
     {
     this->SetProperty("IN_TRY_COMPILE",
                       this->GetIsInTryCompile()? "1":"0");
+    }
+  else if ( propname == "ENABLED_LANGUAGES" )
+    {
+    std::string lang;
+    if(this->GlobalGenerator)
+      {
+      std::vector<std::string> enLangs;
+      this->GlobalGenerator->GetEnabledLanguages(enLangs);
+      const char* sep = "";
+      for(std::vector<std::string>::iterator i = enLangs.begin();
+          i != enLangs.end(); ++i)
+        {
+        lang += sep;
+        sep = ";";
+        lang += *i;
+        }
+      }
+    this->SetProperty("ENABLED_LANGUAGES", lang.c_str());
     }
   return this->Properties.GetPropertyValue(prop, scope, chain);
 }
@@ -3852,7 +3875,7 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
       i != args.end(); ++i)
     {
     // check for nmake temporary files 
-    if((*i)[0] == '@')
+    if((*i)[0] == '@' && i->find("@CMakeFiles") != 0 )
       {
       std::ifstream fin(i->substr(1).c_str());
       std::string line;
@@ -3867,25 +3890,40 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
       expandedArgs.push_back(*i);
       }
     }
-  // figure out if this is an incremental link or not and run the correct
-  // link function.
+  bool hasIncremental = false;
+  bool hasManifest = true;
   for(std::vector<std::string>::iterator i = expandedArgs.begin();
       i != expandedArgs.end(); ++i)
     {
     if(cmSystemTools::Strucmp(i->c_str(), "/INCREMENTAL:YES") == 0)
       {
-      if(verbose)
-        {
-        std::cout << "Visual Studio Incremental Link\n";
-        }
-      return cmake::VisualStudioLinkIncremental(expandedArgs, type, verbose);
+      hasIncremental = true;
       }
+    if(cmSystemTools::Strucmp(i->c_str(), "/MANIFEST:NO") == 0)
+      {
+      hasManifest = false;
+      }
+    }
+  if(hasIncremental && hasManifest)
+    {
+    if(verbose)
+      {
+      std::cout << "Visual Studio Incremental Link with embeded manifests\n";
+      }
+    return cmake::VisualStudioLinkIncremental(expandedArgs, type, verbose);
     }
   if(verbose)
     {
-    std::cout << "Visual Studio Non-Incremental Link\n";
+    if(!hasIncremental)
+      {
+      std::cout << "Visual Studio Non-Incremental Link\n";
+      }
+    else
+      {
+      std::cout << "Visual Studio Incremental Link without manifests\n";
+      }
     }
-  return cmake::VisualStudioLinkNonIncremental(expandedArgs, type, verbose);
+  return cmake::VisualStudioLinkNonIncremental(expandedArgs, type, hasManifest, verbose);
 }
 
 int cmake::ParseVisualStudioLinkCommand(std::vector<std::string>& args, 
@@ -4090,6 +4128,7 @@ int cmake::VisualStudioLinkIncremental(std::vector<std::string>& args,
 
 int cmake::VisualStudioLinkNonIncremental(std::vector<std::string>& args,
                                           int type,
+                                          bool hasManifest,
                                           bool verbose)
 {
   std::vector<cmStdString> linkCommand;
@@ -4102,6 +4141,10 @@ int cmake::VisualStudioLinkNonIncremental(std::vector<std::string>& args,
   if(!cmake::RunCommand("LINK", linkCommand, verbose))
     {
     return -1;
+    }
+  if(!hasManifest)
+    {
+    return 0;
     }
   std::vector<cmStdString> mtCommand;
   mtCommand.push_back(cmSystemTools::FindProgram("mt.exe"));

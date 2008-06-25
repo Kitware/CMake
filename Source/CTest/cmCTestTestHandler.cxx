@@ -1554,11 +1554,15 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
     SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
     SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
     SPACE_REGEX "*>([^<]*)</DartMeasurement>");
-  cmsys::RegularExpression cdatameasurement(
+  cmsys::RegularExpression cdatastart(
     "<DartMeasurement"
     SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
     SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
-    SPACE_REGEX "*>(<!\\[CDATA\\[([^]]*\\]?[^]]+)*]]>)</DartMeasurement>");
+    SPACE_REGEX "*>"
+    SPACE_REGEX "*<!\\[CDATA\\[");
+  cmsys::RegularExpression cdataend(
+    "]]>"
+    SPACE_REGEX "*</DartMeasurement>");
   cmsys::RegularExpression measurementfile(
     "<DartMeasurementFile"
     SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
@@ -1618,20 +1622,20 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
       cxml.erase(fourattributes.start(),
         fourattributes.end() - fourattributes.start());
       }
-    else if ( cdatameasurement.find(cxml) )
+    else if ( cdatastart.find(cxml) && cdataend.find(cxml) )
       {
       ostr
         << "\t\t\t<NamedMeasurement"
-        << " " << cdatameasurement.match(1) << "=\""
-        << cdatameasurement.match(2) << "\""
-        << " " << cdatameasurement.match(3) << "=\""
-        << cdatameasurement.match(4) << "\""
-        << "><Value>" << cdatameasurement.match(5)
-        << "</Value></NamedMeasurement>"
+        << " " << cdatastart.match(1) << "=\""
+        << cdatastart.match(2) << "\""
+        << " " << cdatastart.match(3) << "=\""
+        << cdatastart.match(4) << "\""
+        << "><Value><![CDATA["
+        << cxml.substr(cdatastart.end(), cdataend.start() - cdatastart.end())
+        << "]]></Value></NamedMeasurement>"
         << std::endl;
-
-      cxml.erase(cdatameasurement.start(),
-        cdatameasurement.end() - cdatameasurement.start());
+      cxml.erase(cdatastart.start(),
+        cdataend.end() - cdatastart.start());
       }
     else if ( measurementfile.find(cxml) )
       {

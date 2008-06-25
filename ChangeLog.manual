@@ -1,3 +1,19 @@
+Changes in CMake 2.6.1 RC 5
+- Add support for component based packages in cpack.
+- Fix FindBLAS.cmake if no fortran compiler is found
+- Fix FindFLTK.cmake to pass new module test
+- Fix FindKDE3.cmake to not add flags if kde3 is not found
+- Fix FindMatlab.cmake, FindOpenSSL.cmake, FindQt3.cmake,
+  FindSWIG.cmake, to only error if it is required
+- Fix FindwxWidgets.cmake to work on msys
+- Add a beta OSX bundle generator for CPack
+- Fix bug in cmake --build-and-test where cmake output was lost
+- Fix ctest handling of CDash dart measurement support
+- Add a group view to cmake-gui
+- Fix nmake/make with visual studio compiler to handle long link lines
+- Fix FLTK_WRAP_UI to better notice when mistakes are made with the target name
+- Fix spelling error EnableFiberSafeOptimizations
+- 
 Changes in CMake 2.6.1 RC 4
 - Change to find_*, a new HINTS keyword was added to avoid the
   need for NO_DEFAULT_PATH, and a repeated call to find_*

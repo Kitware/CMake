@@ -11,6 +11,11 @@
 #  FLTK_FORMS_LIBRARY  = the full path to fltk_forms.lib
 #  FLTK_IMAGES_LIBRARY = the full path to fltk_images.lib
 
+IF (FLTK_INCLUDE_DIR)
+  # Already in cache, be silent
+  SET(FLTK_FIND_QUIETLY TRUE)
+ENDIF (FLTK_INCLUDE_DIR)
+
 #  Platform dependent libraries required by FLTK
 IF(WIN32)
   IF(NOT CYGWIN)
@@ -24,7 +29,8 @@ ENDIF(WIN32)
 
 IF(UNIX)
   INCLUDE(${CMAKE_ROOT}/Modules/FindX11.cmake)
-  SET( FLTK_PLATFORM_DEPENDENT_LIBS ${X11_LIBRARIES} -lm)
+  FIND_LIBRARY(FLTK_MATH_LIBRARY m)
+  SET( FLTK_PLATFORM_DEPENDENT_LIBS ${X11_LIBRARIES} ${FLTK_MATH_LIBRARY})
 ENDIF(UNIX)
 
 IF(APPLE)
@@ -32,7 +38,8 @@ IF(APPLE)
 ENDIF(APPLE)
 
 IF(CYGWIN)
-  SET( FLTK_PLATFORM_DEPENDENT_LIBS ole32 uuid comctl32 wsock32 supc++ -lm -lgdi32)
+  FIND_LIBRARY(FLTK_MATH_LIBRARY m)
+  SET( FLTK_PLATFORM_DEPENDENT_LIBS ole32 uuid comctl32 wsock32 supc++ ${FLTK_MATH_LIBRARY} -lgdi32)
 ENDIF(CYGWIN)
 
 # If FLTK_INCLUDE_DIR is already defined we assigne its value to FLTK_DIR
@@ -95,10 +102,6 @@ IF(NOT FLTK_DIR)
     DOC "The ${FLTK_DIR_STRING}"
     )
 ENDIF(NOT FLTK_DIR)
-
-# If FLTK was found, load the configuration file to get the rest of the
-# settings.
-IF(FLTK_DIR)
 
   # Check if FLTK was built using CMake
   IF(EXISTS ${FLTK_DIR}/FLTKConfig.cmake)
@@ -170,8 +173,6 @@ IF(FLTK_DIR)
     ENDIF(FLTK_FLUID_EXECUTABLE)
 
     SET(FLTK_INCLUDE_SEARCH_PATH ${FLTK_INCLUDE_SEARCH_PATH}
-      /usr/local/include
-      /usr/include
       /usr/local/fltk
       /usr/X11R6/include
       )
@@ -179,8 +180,6 @@ IF(FLTK_DIR)
     FIND_PATH(FLTK_INCLUDE_DIR FL/Fl.h ${FLTK_INCLUDE_SEARCH_PATH})
 
     SET(FLTK_LIBRARY_SEARCH_PATH ${FLTK_LIBRARY_SEARCH_PATH}
-      /usr/lib
-      /usr/local/lib
       /usr/local/fltk/lib
       /usr/X11R6/lib
       ${FLTK_INCLUDE_DIR}/lib
@@ -215,7 +214,6 @@ IF(FLTK_DIR)
     ENDIF(UNIX)
 
   ENDIF(FLTK_BUILT_WITH_CMAKE)
-ENDIF(FLTK_DIR)
 
 
 SET(FLTK_FOUND 1)
@@ -242,3 +240,6 @@ IF(FLTK_FOUND)
   SET (FLTK_FLUID_EXE ${FLTK_FLUID_EXECUTABLE})
   SET (FLTK_LIBRARY ${FLTK_LIBRARIES})
 ENDIF(FLTK_FOUND)
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(FLTK DEFAULT_MSG FLTK_LIBRARIES FLTK_INCLUDE_DIR)
