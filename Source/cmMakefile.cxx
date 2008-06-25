@@ -2954,8 +2954,21 @@ const char *cmMakefile::GetProperty(const char* prop,
     return output.c_str();
     }
   else if (!strcmp("DEFINITIONS",prop))
-    {
-    output = this->GetDefineFlags();
+    { 
+    if(const char* cdefs = this->GetProperty("COMPILE_DEFINITIONS"))
+      {
+      // Expand the list.
+      std::vector<std::string> defs;
+      cmSystemTools::ExpandListArgument(cdefs, defs);
+      for(std::vector<std::string>::iterator i = defs.begin();
+          i != defs.end(); ++i)
+        {
+        output += "-D";
+        output += *i;
+        output += " ";
+        }
+      }
+    output += this->GetDefineFlags();
     return output.c_str();
     }
   else if (!strcmp("INCLUDE_DIRECTORIES",prop) )
