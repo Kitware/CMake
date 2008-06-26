@@ -42,10 +42,13 @@ IF(NOT KDE4_DATA_DIR)
       GET_FILENAME_COMPONENT(KDE4_DATA_DIR "${KDE4_DATA_DIR}" PATH)
    ELSE(CMAKE_CROSSCOMPILING)
       # then ask kde4-config for the kde data dirs
-      EXECUTE_PROCESS(COMMAND "${KDE4_KDECONFIG_EXECUTABLE}" --path data OUTPUT_VARIABLE _data_DIR ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-      FILE(TO_CMAKE_PATH "${_data_DIR}" _data_DIR)
-      # then check the data dirs for FindKDE4Internal.cmake
-      FIND_PATH(KDE4_DATA_DIR cmake/modules/FindKDE4Internal.cmake ${_data_DIR})
+
+      IF(KDE4_KDECONFIG_EXECUTABLE)
+        EXECUTE_PROCESS(COMMAND "${KDE4_KDECONFIG_EXECUTABLE}" --path data OUTPUT_VARIABLE _data_DIR ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+        FILE(TO_CMAKE_PATH "${_data_DIR}" _data_DIR)
+        # then check the data dirs for FindKDE4Internal.cmake
+        FIND_PATH(KDE4_DATA_DIR cmake/modules/FindKDE4Internal.cmake ${_data_DIR})
+      ENDIF(KDE4_KDECONFIG_EXECUTABLE)
    ENDIF(CMAKE_CROSSCOMPILING)
 ENDIF(NOT KDE4_DATA_DIR)
 
