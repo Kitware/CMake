@@ -49,7 +49,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Get a property of the directory.";
+    return "Get a property of DIRECTORY scope.";
     }
   
   /**
@@ -58,17 +58,20 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  get_directory_property(VAR [DIRECTORY dir] property)\n"
-        "Get a property from the Directory.  The value of the property is " 
-        "stored in the variable VAR. If the property is not found, "
-        "CMake will report an error. The properties include: VARIABLES, "
-        "CACHE_VARIABLES, COMMANDS, MACROS, INCLUDE_DIRECTORIES, "
-        "LINK_DIRECTORIES, DEFINITIONS, INCLUDE_REGULAR_EXPRESSION, "
-        "LISTFILE_STACK, PARENT_DIRECTORY, and "
-        "DEFINITION varname.  If the DIRECTORY argument is provided then "
-        "the property of the provided directory will be retrieved "
-        "instead of the current directory. You can only get properties "
-        "of a directory during or after it has been traversed by cmake.";
+        "  get_directory_property(<variable> [DIRECTORY <dir>] <prop-name>)\n"
+        "Store a property of directory scope in the named variable.  "
+        "If the property is not defined the empty-string is returned.  "
+        "The DIRECTORY argument specifies another directory from which "
+        "to retrieve the property value.  "
+        "The specified directory must have already been traversed by "
+        "CMake."
+        "\n"
+        "  get_directory_property(<variable> [DIRECTORY <dir>]\n"
+        "                         DEFINITION <var-name>)\n"
+        "Get a variable definition from a directory.  "
+        "This form is useful to get a variable definition from another "
+        "directory."
+        ;
     }
   
   cmTypeMacro(cmGetDirectoryPropertyCommand, cmCommand);
