@@ -242,11 +242,26 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
 
   // Arguments.
   unsigned long lastLine = cmListFileLexer_GetCurrentLine(lexer);
+  unsigned long parenDepth = 0;
   while((token = cmListFileLexer_Scan(lexer)))
     {
-    if(token->type == cmListFileLexer_Token_ParenRight)
+    if(token->type == cmListFileLexer_Token_ParenLeft)
       {
-      return true;
+      parenDepth++;
+      cmListFileArgument a("(",
+                           false, filename, token->line);
+      function.Arguments.push_back(a);
+      }
+    else if(token->type == cmListFileLexer_Token_ParenRight)
+      {
+      if (parenDepth == 0)
+        {
+        return true;
+        }
+      parenDepth--;
+      cmListFileArgument a(")",
+                           false, filename, token->line);
+      function.Arguments.push_back(a);        
       }
     else if(token->type == cmListFileLexer_Token_Identifier ||
             token->type == cmListFileLexer_Token_ArgumentUnquoted)

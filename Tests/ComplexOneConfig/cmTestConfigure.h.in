@@ -81,3 +81,7 @@
 
 // test elseif
 #cmakedefine ELSEIF_RESULT
+
+// test parenthesis in conditionals
+#cmakedefine CONDITIONAL_PARENTHESES
+

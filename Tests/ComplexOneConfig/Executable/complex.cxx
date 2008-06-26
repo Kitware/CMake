@@ -369,6 +369,12 @@ int main()
   cmFailed("ELSEIF did not work");
 #endif
 
+#ifdef CONDITIONAL_PARENTHESES
+  cmPassed("CONDITIONAL_PARENTHESES did work");
+#else
+  cmFailed("CONDITIONAL_PARENTHESES did not work");
+#endif
+
   if(file2() != 1)
     {
     cmFailed("Call to file2 function from library failed.");
