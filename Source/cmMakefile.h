@@ -829,6 +829,11 @@ protected:
   std::vector<std::string> HeaderFileExtensions;
   std::string DefineFlags;
 
+  // Track the value of the computed DEFINITIONS property.
+  void AddDefineFlag(const char*, std::string&);
+  void RemoveDefineFlag(const char*, std::string::size_type, std::string&);
+  std::string DefineFlagsOrig;
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::vector<cmSourceGroup> SourceGroups;
 #endif

@@ -1018,12 +1018,21 @@ void cmMakefile::AddDefineFlag(const char* flag)
     return;
     }
 
+  // Update the string used for the old DEFINITIONS property.
+  this->AddDefineFlag(flag, this->DefineFlagsOrig);
+
   // If this is really a definition, update COMPILE_DEFINITIONS.
   if(this->ParseDefineFlag(flag, false))
     {
     return;
     }
 
+  // Add this flag that does not look like a definition.
+  this->AddDefineFlag(flag, this->DefineFlags);
+}
+
+void cmMakefile::AddDefineFlag(const char* flag, std::string& dflags)
+{
   // remove any \n\r
   std::string ret = flag;
   std::string::size_type pos = 0;
@@ -1039,8 +1048,8 @@ void cmMakefile::AddDefineFlag(const char* flag)
     pos++;
     }
 
-  this->DefineFlags += " ";
-  this->DefineFlags += ret;
+  dflags += " ";
+  dflags += ret;
 }
 
 
@@ -1053,22 +1062,33 @@ void cmMakefile::RemoveDefineFlag(const char* flag)
     return;
     }
 
+  // Update the string used for the old DEFINITIONS property.
+  this->RemoveDefineFlag(flag, len, this->DefineFlagsOrig);
+
   // If this is really a definition, update COMPILE_DEFINITIONS.
   if(this->ParseDefineFlag(flag, true))
     {
     return;
     }
 
+  // Remove this flag that does not look like a definition.
+  this->RemoveDefineFlag(flag, len, this->DefineFlags);
+}
+
+void cmMakefile::RemoveDefineFlag(const char* flag,
+                                  std::string::size_type len,
+                                  std::string& dflags)
+{
   // Remove all instances of the flag that are surrounded by
   // whitespace or the beginning/end of the string.
-  for(std::string::size_type lpos = this->DefineFlags.find(flag, 0);
-      lpos != std::string::npos; lpos = this->DefineFlags.find(flag, lpos))
+  for(std::string::size_type lpos = dflags.find(flag, 0);
+      lpos != std::string::npos; lpos = dflags.find(flag, lpos))
     {
     std::string::size_type rpos = lpos + len;
-    if((lpos <= 0 || isspace(this->DefineFlags[lpos-1])) &&
-       (rpos >= this->DefineFlags.size() || isspace(this->DefineFlags[rpos])))
+    if((lpos <= 0 || isspace(dflags[lpos-1])) &&
+       (rpos >= dflags.size() || isspace(dflags[rpos])))
       {
-      this->DefineFlags.erase(lpos, len);
+      dflags.erase(lpos, len);
       }
     else
       {
@@ -2957,20 +2977,7 @@ const char *cmMakefile::GetProperty(const char* prop,
     }
   else if (!strcmp("DEFINITIONS",prop))
     { 
-    if(const char* cdefs = this->GetProperty("COMPILE_DEFINITIONS"))
-      {
-      // Expand the list.
-      std::vector<std::string> defs;
-      cmSystemTools::ExpandListArgument(cdefs, defs);
-      for(std::vector<std::string>::iterator i = defs.begin();
-          i != defs.end(); ++i)
-        {
-        output += "-D";
-        output += *i;
-        output += " ";
-        }
-      }
-    output += this->GetDefineFlags();
+    output += this->DefineFlagsOrig;
     return output.c_str();
     }
   else if (!strcmp("INCLUDE_DIRECTORIES",prop) )
