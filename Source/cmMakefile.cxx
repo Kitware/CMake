@@ -2908,8 +2908,10 @@ const char *cmMakefile::GetProperty(const char* prop,
   output = "";
   if (!strcmp("PARENT_DIRECTORY",prop))
     {
-    output = this->LocalGenerator->GetParent()
-      ->GetMakefile()->GetStartDirectory();
+    if(cmLocalGenerator* plg = this->LocalGenerator->GetParent())
+      {
+      output = plg->GetMakefile()->GetStartDirectory();
+      }
     return output.c_str();
     }
   else if (!strcmp("INCLUDE_REGULAR_EXPRESSION",prop) )
