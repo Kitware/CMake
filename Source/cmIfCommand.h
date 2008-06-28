@@ -184,7 +184,7 @@ public:
   // arguments were valid, and if so, was the response true. If there is
   // an error, the errorString will be set.
   static bool IsTrue(const std::vector<std::string> &args, 
-    char** errorString, cmMakefile *mf);
+    std::string &errorString, cmMakefile *mf);
   
   // Get a definition from the makefile.  If it doesn't exist,
   // return the original string.

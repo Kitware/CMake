@@ -76,15 +76,15 @@ IsFunctionBlocked(const cmListFileFunction& lff,
             }
           else
             {
-            char* errorString = 0;
+            std::string errorString;
             
             std::vector<std::string> expandedArguments;
             mf.ExpandArguments(this->Functions[c].Arguments, 
                                expandedArguments);
             bool isTrue = 
-              cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
+              cmIfCommand::IsTrue(expandedArguments,errorString,&mf);
             
-            if (errorString)
+            if (errorString.size())
               {
               std::string err = "had incorrect arguments: ";
               unsigned int i;
@@ -99,7 +99,6 @@ IsFunctionBlocked(const cmListFileFunction& lff,
               err += errorString;
               err += ").";
               cmSystemTools::Error(err.c_str());
-              delete [] errorString;
               return false;
               }
         
@@ -183,14 +182,14 @@ bool cmIfCommand
 ::InvokeInitialPass(const std::vector<cmListFileArgument>& args, 
                     cmExecutionStatus &)
 {
-  char* errorString = 0;
+  std::string errorString;
   
   std::vector<std::string> expandedArguments;
   this->Makefile->ExpandArguments(args, expandedArguments);
   bool isTrue = 
-    cmIfCommand::IsTrue(expandedArguments,&errorString,this->Makefile);
+    cmIfCommand::IsTrue(expandedArguments,errorString,this->Makefile);
   
-  if (errorString)
+  if (errorString.size())
     {
     std::string err = "had incorrect arguments: ";
     unsigned int i;
@@ -205,7 +204,6 @@ bool cmIfCommand
     err += errorString;
     err += ").";
     this->SetError(err.c_str());
-    delete [] errorString;
     return false;
     }
   
@@ -290,7 +288,7 @@ namespace
   // level 0 processes parenthetical expressions
   bool HandleLevel0(std::list<std::string> &newArgs,
                     cmMakefile *makefile,
-                    char **errorString)
+                    std::string &errorString)
   {
   int reducible;
   do
@@ -320,11 +318,7 @@ namespace
           }
         if (depth)
           {
-          cmOStringStream error;
-          error << "mismatched parenthesis in condition";
-          delete [] *errorString;
-          *errorString = new char[error.str().size() + 1];
-          strcpy(*errorString, error.str().c_str());
+          errorString = "mismatched parenthesis in condition";
           return false;
           }
         // store the reduced args in this vector
@@ -365,7 +359,7 @@ namespace
   // level one handles most predicates except for NOT
   bool HandleLevel1(std::list<std::string> &newArgs,
                     cmMakefile *makefile,
-                    char **)
+                    std::string &)
   {
   int reducible;
   do
@@ -442,7 +436,7 @@ namespace
   // level two handles most binary operations except for AND  OR
   bool HandleLevel2(std::list<std::string> &newArgs,
                     cmMakefile *makefile,
-                    char **errorString)
+                    std::string &errorString)
   {
   int reducible;
   const char *def;
@@ -468,9 +462,7 @@ namespace
           {
           cmOStringStream error;
           error << "Regular expression \"" << rex << "\" cannot compile";
-          delete [] *errorString;
-          *errorString = new char[error.str().size() + 1];
-          strcpy(*errorString, error.str().c_str());
+          errorString = error.str();
           return false;
           }
         if (regEntry.find(def))
@@ -577,7 +569,7 @@ namespace
   // level 3 handles NOT
   bool HandleLevel3(std::list<std::string> &newArgs,
                     cmMakefile *makefile,
-                    char **)
+                    std::string &)
   {
   int reducible;
   const char *def;
@@ -608,7 +600,7 @@ namespace
   // level 4 handles AND OR
   bool HandleLevel4(std::list<std::string> &newArgs,
                     cmMakefile *makefile,
-                    char **)
+                    std::string &)
   {
   int reducible;
   const char *def;
@@ -669,19 +661,14 @@ namespace
 
 
 bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
-                         char **errorString, cmMakefile *makefile)
+                         std::string &errorString, cmMakefile *makefile)
 {
-  // check for the different signatures
   const char *def;
-  const char* msg = "Unknown arguments specified";
-  *errorString = new char[strlen(msg) + 1];
-  strcpy(*errorString, msg);
+  errorString = "";
 
   // handle empty invocation
   if (args.size() < 1)
     {
-    delete [] *errorString;
-    *errorString = 0;
     return false;
     }
 
@@ -720,8 +707,6 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   // now at the end there should only be one argument left
   if (newArgs.size() == 1)
     {
-    delete [] *errorString;
-    *errorString = 0;
     if (*newArgs.begin() == "0")
       {
       return false;
@@ -736,7 +721,12 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
       return false;
       }
     }
-
+  else
+    {
+    errorString = "Unknown arguments specified";
+    return false;
+    }
+    
   return true;
 }
 
