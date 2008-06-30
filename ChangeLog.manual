@@ -1,3 +1,7 @@
+Changes in CMake 2.6.1 RC 6
+- Fix DEFINITIONS property to be compatible with 2.4
+- Fix escaping of $ for visual studio
+- FindGettext.cmake  fix bug #7230: don't ignore first parameter if it's not ALL
 Changes in CMake 2.6.1 RC 5
 - Add support for component based packages in cpack.
 - Fix FindBLAS.cmake if no fortran compiler is found

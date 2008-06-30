@@ -30,7 +30,7 @@ MACRO(GETTEXT_CREATE_TRANSLATIONS _potFile _firstPoFile)
       SET(_firstPoFile)
    ENDIF(${_firstPoFile} STREQUAL "ALL")
 
-   FOREACH (_currentPoFile ${ARGN})
+   FOREACH (_currentPoFile ${_firstPoFile} ${ARGN})
       GET_FILENAME_COMPONENT(_absFile ${_currentPoFile} ABSOLUTE)
       GET_FILENAME_COMPONENT(_abs_PATH ${_absFile} PATH)
       GET_FILENAME_COMPONENT(_lang ${_absFile} NAME_WE)
