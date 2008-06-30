@@ -2173,8 +2173,10 @@ void cmLocalVisualStudio7GeneratorOptions::HandleFlag(const char* flag)
   // This option is not known.  Store it in the output flags.
   this->FlagString += " ";
   this->FlagString +=
-    cmSystemTools::EscapeWindowsShellArgument(flag,
-                                              cmsysSystem_Shell_Flag_VSIDE);
+    cmSystemTools::EscapeWindowsShellArgument(
+      flag,
+      cmsysSystem_Shell_Flag_AllowMakeVariables |
+      cmsysSystem_Shell_Flag_VSIDE);
 }
 
 //----------------------------------------------------------------------------
