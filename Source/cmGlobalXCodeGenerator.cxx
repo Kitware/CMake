@@ -1480,8 +1480,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       plist += "/";
       plist += target.GetName();
       plist += "Info.plist";
+      // Xcode will create the final version of Info.plist at build time,
+      // so let it replace the executable name.  This avoids creating
+      // a per-configuration Info.plist file.
       this->CurrentLocalGenerator
-        ->GenerateAppleInfoPList(&target, productName.c_str(), plist.c_str());
+        ->GenerateAppleInfoPList(&target, "$(EXECUTABLE_NAME)",
+                                 plist.c_str());
       std::string path =
         this->ConvertToRelativeForXCode(plist.c_str());
       buildSettings->AddAttribute("INFOPLIST_FILE", 
