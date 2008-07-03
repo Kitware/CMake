@@ -59,8 +59,11 @@ void cmGlobalUnixMakefileGenerator3
     
     if(!mf->GetDefinition(langComp.c_str()))
       {
-      cmSystemTools::Error(langComp.c_str(), 
-                           " not set, after EnableLanguage");
+      if(!optional)
+        {
+        cmSystemTools::Error(langComp.c_str(), 
+                             " not set, after EnableLanguage");
+        }
       continue;
       }
     const char* name = mf->GetRequiredDefinition(langComp.c_str()); 

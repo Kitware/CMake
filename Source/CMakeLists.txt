@@ -314,6 +314,7 @@ INCLUDE_DIRECTORIES(
 # Sources for CTestLib
 #
 SET(CTEST_SRCS cmCTest.cxx
+  CTest/cmProcess.cxx
   CTest/cmCTestBuildAndTestHandler.cxx
   CTest/cmCTestBuildCommand.cxx
   CTest/cmCTestBuildHandler.cxx
@@ -326,6 +327,7 @@ SET(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestHandlerCommand.cxx
   CTest/cmCTestMemCheckCommand.cxx
   CTest/cmCTestMemCheckHandler.cxx
+  CTest/cmCTestMultiProcessHandler.cxx
   CTest/cmCTestReadCustomFilesCommand.cxx
   CTest/cmCTestRunScriptCommand.cxx
   CTest/cmCTestScriptHandler.cxx
@@ -458,3 +460,4 @@ IF(APPLE)
 ENDIF(APPLE)
 
 INSTALL_FILES(${CMAKE_DATA_DIR}/include cmCPluginAPI.h)
+

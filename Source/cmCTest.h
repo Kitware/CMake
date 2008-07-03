@@ -95,6 +95,18 @@ public:
   std::string const& GetConfigType();
   double GetTimeOut() { return this->TimeOut; }
   void SetTimeOut(double t) { this->TimeOut = t; }
+  // how many test to run at the same time
+  int GetParallelLevel() { return this->ParallelLevel; }
+  void SetParallelLevel(int t) { this->ParallelLevel = t; }
+
+  bool GetParallelSubprocess() { return this->ParallelSubprocess; }
+  void SetParallelSubprocess() { this->ParallelSubprocess = true; }
+
+  void SetParallelSubprocessId(int id) { this->ParallelSubprocessId = id;}
+  int GetParallelSubprocessId() { return this->ParallelSubprocessId;}
+  const char* GetParallelCacheFile()
+    { return this->ParallelCacheFile.c_str();}
+  void SetParallelCacheFile(const char* c) { this->ParallelCacheFile = c; }
 
   /**
    * Check if CTest file exists
@@ -310,6 +322,8 @@ public:
   void SetSpecificTrack(const char* track);
   const char* GetSpecificTrack();
 
+  bool GetVerbose() { return this->Verbose;}
+  bool GetExtraVerbose() { return this->ExtraVerbose;}
 private:
   std::string ConfigType;
   bool Verbose;
@@ -359,6 +373,10 @@ private:
 
   double                  TimeOut;
 
+  std::string             ParallelCacheFile;
+  int                     ParallelLevel;
+  int                     ParallelSubprocessId;
+  bool                    ParallelSubprocess;
   int                     CompatibilityMode;
 
   // information for the --build-and-test options

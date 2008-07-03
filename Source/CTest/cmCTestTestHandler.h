@@ -80,6 +80,7 @@ public:
     cmStdString Name;
     cmStdString Directory;
     std::vector<std::string> Args;
+    std::vector<std::string> Depends;
     std::vector<std::pair<cmsys::RegularExpression,
                           std::string> > ErrorRegularExpressions;
     std::vector<std::pair<cmsys::RegularExpression,
@@ -88,6 +89,7 @@ public:
     bool IsInBasedOnREOptions;
     bool WillFail;
     double Timeout;
+    int Index;
   };
 
   struct cmCTestTestResult
@@ -120,6 +122,7 @@ public:
                                     std::vector<std::string> &failed);
 
 protected:
+  // comput a final test list
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
   virtual void GenerateTestCommand(std::vector<const char*>& args);
@@ -152,7 +155,7 @@ protected:
 
 
 
-private:
+public:
   enum { // Program statuses
     NOT_RUN = 0,
     TIMEOUT,
@@ -166,7 +169,7 @@ private:
     COMPLETED
   };
 
-
+private:
   /**
    * Generate the Dart compatible output
    */
@@ -183,7 +186,32 @@ private:
    * Get the list of tests in directory and subdirectories.
    */
   void GetListOfTests();
-
+  // compute the lists of tests that will actually run
+  // based on union regex and -I stuff
+  void ComputeTestList();
+  
+  // Save the state of the test list and return the file
+  // name it was saved to
+  std::string SaveTestList();
+  void LoadTestList();
+  bool GetValue(const char* tag,
+                std::string& value,
+                std::ifstream& fin);
+  bool GetValue(const char* tag,
+                int& value,
+                std::ifstream& fin);
+  bool GetValue(const char* tag,
+                size_t& value,
+                std::ifstream& fin);
+  bool GetValue(const char* tag,
+                bool& value,
+                std::ifstream& fin);
+  bool GetValue(const char* tag,
+                double& value,
+                std::ifstream& fin);
+  // run in -j N mode
+  void ProcessParallel(std::vector<cmStdString> &passed,
+                       std::vector<cmStdString> &failed);
   /**
    * Find the executable for a test
    */
@@ -210,6 +238,7 @@ private:
   std::string TestsToRunString;
   bool UseUnion;
   ListOfTests TestList;
+  size_t TotalNumberOfTests;
   cmsys::RegularExpression DartStuff;
 
   std::ostream* LogFile;

@@ -196,7 +196,7 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
 
 void
 cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
-                                  cmMakefile *mf, bool)
+                                  cmMakefile *mf, bool optional)
 {
   if(languages.size() == 0)
     {

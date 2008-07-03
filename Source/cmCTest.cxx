@@ -229,10 +229,13 @@ std::string cmCTest::MakeURLSafe(const std::string& str)
 //----------------------------------------------------------------------
 cmCTest::cmCTest()
 {
+  this->ParallelSubprocess     = false;
+  this->ParallelLevel          = 0;
   this->SubmitIndex            = 0;
   this->ForceNewCTestProcess   = false;
   this->TomorrowTag            = false;
   this->Verbose                = false;
+  
   this->Debug                  = false;
   this->ShowLineNumbers        = false;
   this->Quiet                  = false;
@@ -802,7 +805,11 @@ int cmCTest::ProcessTests()
   int cc;
   int update_count = 0;
 
-  cmCTestLog(this, OUTPUT, "Start processing tests" << std::endl);
+  // do not output startup if this is a sub-process for parallel tests
+  if(!this->GetParallelSubprocess())
+    {
+    cmCTestLog(this, OUTPUT, "Start processing tests" << std::endl);
+    }
 
   for ( cc = 0; cc < LAST_TEST; cc ++ )
     {
@@ -915,8 +922,11 @@ int cmCTest::ProcessTests()
     }
   if ( res != 0 )
     {
-    cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest"
-      << std::endl);
+    if(!this->GetParallelSubprocess())
+      {
+      cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest"
+                 << std::endl);
+      }
     }
   return res;
 }
@@ -1626,10 +1636,31 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
                                          std::vector<std::string> &args)
 {
   std::string arg = args[i];
-  if(this->CheckArgument(arg, "--ctest-config") && i < args.size() - 1)
+
+  if(this->CheckArgument(arg, "-j", "--parallel") && i < args.size() - 1)
     {
     i++;
-    this->CTestConfigFile= args[i];
+    int plevel = atoi(args[i].c_str());
+    this->SetParallelLevel(plevel);
+    }
+  else if(arg.find("-j") == 0)
+    {
+    int plevel = atoi(arg.substr(2).c_str());
+    this->SetParallelLevel(plevel);
+    }
+  if(this->CheckArgument(arg, "--internal-ctest-parallel") && i < args.size() - 1)
+    {
+    i++;
+    int pid = atoi(args[i].c_str());
+    this->SetParallelSubprocessId(pid);
+    this->SetParallelSubprocess();
+    }
+  
+  if(this->CheckArgument(arg, "--parallel-cache") && i < args.size() - 1)
+    {
+    i++;
+    int plevel = atoi(args[i].c_str());
+    this->SetParallelCacheFile(args[i].c_str());
     }
   
   if(this->CheckArgument(arg, "-C", "--build-config") &&
@@ -1966,6 +1997,8 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
       }
     else
       {
+      // What is this?  -V seems to be the same as -VV, 
+      // and Verbose is always on in this case
       this->ExtraVerbose = this->Verbose;
       this->Verbose = true;
       cmCTest::t_TestingHandlers::iterator it;
