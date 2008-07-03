@@ -16,7 +16,6 @@
 =========================================================================*/
 
 #include <cmProcess.h>
-#include <iostream>
 
 cmProcess::cmProcess()
 {
