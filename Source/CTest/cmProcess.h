@@ -17,10 +17,8 @@
 #ifndef cmProcess_h
 #define cmProcess_h
 
-#include <set>
-#include <map>
-#include <string>
-#include <vector>
+
+#include "cmStandardIncludes.h"
 #include <cmsys/Process.h>
 
 
