@@ -1475,11 +1475,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
       {
       productType = "com.apple.product-type.application";
-      std::string plist = this->CurrentMakefile->GetCurrentOutputDirectory();
-      plist += cmake::GetCMakeFilesDirectory();
-      plist += "/";
-      plist += target.GetName();
-      plist += "Info.plist";
+      std::string plist = this->ComputeInfoPListLocation(target);
       // Xcode will create the final version of Info.plist at build time,
       // so let it replace the executable name.  This avoids creating
       // a per-configuration Info.plist file.
@@ -2213,11 +2209,8 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
       // MACOSX_BUNDLE file
       if(cmtarget.GetPropertyAsBool("MACOSX_BUNDLE"))
         {
-        std::string plistFile =
-          this->CurrentMakefile->GetCurrentOutputDirectory();
-        plistFile += "/Info.plist";
-        cmSourceFile* sf =
-          this->CurrentMakefile->GetOrCreateSource(plistFile.c_str(), true);
+        std::string plist = this->ComputeInfoPListLocation(cmtarget);
+        cmSourceFile* sf = mf->GetOrCreateSource(plist.c_str(), true);
         cmtarget.AddSourceFile(sf);
         }
 
@@ -2964,4 +2957,16 @@ void cmGlobalXCodeGenerator::AppendDefines(std::string& defs,
     // Close single quote.
     defs += "'";
     }
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGlobalXCodeGenerator::ComputeInfoPListLocation(cmTarget& target)
+{
+  std::string plist = target.GetMakefile()->GetCurrentOutputDirectory();
+  plist += cmake::GetCMakeFilesDirectory();
+  plist += "/";
+  plist += target.GetName();
+  plist += ".dir/Info.plist";
+  return plist;
 }
