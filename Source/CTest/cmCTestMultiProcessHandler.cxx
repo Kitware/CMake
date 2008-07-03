@@ -242,7 +242,7 @@ void cmCTestMultiProcessHandler::EndTest(cmProcess* p)
   cres.Status = cmCTestTestHandler::COMPLETED;
   cres.TestCount = test;  
   cres.Name = this->TestNames[test];
-  cres.Path.clear();
+  cres.Path = "";
   if(exitVal)
     {
     cres.Status = cmCTestTestHandler::FAILED;
