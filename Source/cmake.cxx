@@ -2091,22 +2091,30 @@ int cmake::ActualConfigure()
   // Before saving the cache
   // if the project did not define one of the entries below, add them now
   // so users can edit the values in the cache:
-  // LIBRARY_OUTPUT_PATH
-  // EXECUTABLE_OUTPUT_PATH
-  if(!this->CacheManager->GetCacheValue("LIBRARY_OUTPUT_PATH"))
+
+  // We used to always present LIBRARY_OUTPUT_PATH and
+  // EXECUTABLE_OUTPUT_PATH.  They are now documented as old-style and
+  // should no longer be used.  Therefore we present them only if the
+  // project requires compatibility with CMake 2.4.  We detect this
+  // here by looking for the old CMAKE_BACKWARDS_COMPATABILITY
+  // variable created when CMP0001 is not set to NEW.
+  if(this->GetCacheManager()->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
     {
-    this->CacheManager->AddCacheEntry
-      ("LIBRARY_OUTPUT_PATH", "",
-       "Single output directory for building all libraries.",
-       cmCacheManager::PATH);
-    } 
-  if(!this->CacheManager->GetCacheValue("EXECUTABLE_OUTPUT_PATH"))
-    {
-    this->CacheManager->AddCacheEntry
-      ("EXECUTABLE_OUTPUT_PATH", "",
-       "Single output directory for building all executables.",
-       cmCacheManager::PATH);
-    }  
+    if(!this->CacheManager->GetCacheValue("LIBRARY_OUTPUT_PATH"))
+      {
+      this->CacheManager->AddCacheEntry
+        ("LIBRARY_OUTPUT_PATH", "",
+         "Single output directory for building all libraries.",
+         cmCacheManager::PATH);
+      }
+    if(!this->CacheManager->GetCacheValue("EXECUTABLE_OUTPUT_PATH"))
+      {
+      this->CacheManager->AddCacheEntry
+        ("EXECUTABLE_OUTPUT_PATH", "",
+         "Single output directory for building all executables.",
+         cmCacheManager::PATH);
+      }
+    }
   if(!this->CacheManager->GetCacheValue("CMAKE_USE_RELATIVE_PATHS"))
     {
     this->CacheManager->AddCacheEntry
