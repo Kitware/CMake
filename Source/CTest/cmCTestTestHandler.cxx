@@ -1237,8 +1237,8 @@ void cmCTestTestHandler::ProcessParallel(std::vector<cmStdString> &passed,
   cmCTestMultiProcessHandler parallel;
   parallel.SetCTest(this->CTest);
   parallel.SetParallelLevel(this->CTest->GetParallelLevel()); 
-  std::set<int> depends;
-  std::map<int, std::set<int> > tests; 
+  cmCTestMultiProcessHandler::TestSet depends;
+  cmCTestMultiProcessHandler::TestMap tests;
   std::map<int, cmStdString> testnames;
   for (ListOfTests::iterator it = this->TestList.begin();
        it != this->TestList.end(); it ++ )

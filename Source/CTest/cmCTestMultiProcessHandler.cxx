@@ -27,11 +27,11 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 }
   // Set the tests
 void 
-cmCTestMultiProcessHandler::SetTests(std::map<int, std::set<int> >& tests,
-                                          std::map<int,cmStdString>& testNames)
+cmCTestMultiProcessHandler::SetTests(TestMap& tests,
+                                     std::map<int,cmStdString>& testNames)
 {
   // set test run map to false for all
-  for(std::map<int, std::set<int> >::iterator i = this->Tests.begin();
+  for(TestMap::iterator i = this->Tests.begin();
       i != this->Tests.end(); ++i)
     {
     this->TestRunningMap[i->first] = false;
@@ -118,11 +118,11 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
   // copy the depend tests locally because when 
   // a test is finished it will be removed from the depend list
   // and we don't want to be iterating a list while removing from it
-  std::set<int> depends = this->Tests[test];
+  TestSet depends = this->Tests[test];
   size_t totalDepends = depends.size();
   if(totalDepends)
     {
-    for(std::set<int>::const_iterator i = depends.begin();
+    for(TestSet::const_iterator i = depends.begin();
         i != depends.end(); ++i)
       {
       // if the test is not already running then start it
@@ -166,8 +166,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
     {
     return;
     }
-  std::map<int, std::set<int> > tests = this->Tests;
-  for(std::map<int, std::set<int> >::iterator i = tests.begin();
+  TestMap tests = this->Tests;
+  for(TestMap::iterator i = tests.begin();
       i !=  tests.end(); ++i)
     {
     // start test should start only one test
@@ -254,7 +254,7 @@ void cmCTestMultiProcessHandler::EndTest(cmProcess* p)
     }
   this->TestResults->push_back(cres);
   // remove test from depend of all other tests
-  for( std::map<int, std::set<int> >::iterator i = this->Tests.begin();
+  for(TestMap::iterator i = this->Tests.begin();
        i!=  this->Tests.end(); ++i)
     {
     i->second.erase(test);
@@ -271,11 +271,11 @@ void cmCTestMultiProcessHandler::EndTest(cmProcess* p)
 void cmCTestMultiProcessHandler::PrintTests()
 {
 #undef cout
-  for( std::map<int, std::set<int> >::iterator i = this->Tests.begin();
+  for( TestMap::iterator i = this->Tests.begin();
        i!=  this->Tests.end(); ++i)
     {
     std::cout << "Test " << i->first << "  (";
-    for(std::set<int>::iterator j = i->second.begin(); 
+    for(TestSet::iterator j = i->second.begin(); 
         j != i->second.end(); ++j)
       {
       std::cout << *j << " ";

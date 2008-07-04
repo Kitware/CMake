@@ -33,9 +33,11 @@ class cmProcess;
 class cmCTestMultiProcessHandler 
 {
 public:
+  struct TestSet : public std::set<int> {};
+  struct TestMap : public std::map<int, TestSet> {};
   cmCTestMultiProcessHandler();
   // Set the tests
-  void SetTests(std::map<int, std::set<int> >& tests,
+  void SetTests(TestMap& tests,
                 std::map<int, cmStdString>& testNames);
   // Set the max number of tests that can be run at the same time.
   void SetParallelLevel(size_t);
@@ -66,7 +68,7 @@ protected:
   // check all running processes for output and exit case
   bool CheckOutput();
   // map from test number to set of depend tests
-  std::map<int, std::set<int> > Tests;
+  TestMap Tests;
   std::map<int, cmStdString> TestNames;
   std::map<int, bool> TestRunningMap;
   std::map<int, bool> TestFinishMap;
