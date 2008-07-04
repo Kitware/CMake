@@ -1122,7 +1122,7 @@ void cmCTestTestHandler::LoadTestList()
     return;
     }
   bool ok = true;
-  int numTestsToRun;
+  int numTestsToRun = 0;
   ok = ok && this->GetValue("TotalNumberOfTests:", 
                             this->TotalNumberOfTests, fin);
   ok = ok && this->GetValue("NumberOfTestsToRun:", numTestsToRun, fin);
