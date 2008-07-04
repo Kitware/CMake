@@ -1143,7 +1143,7 @@ void cmCTestTestHandler::LoadTestList()
     {
     cmCTestTestProperties p;
     int numArgs;
-    bool ok = this->GetValue("Name:", p.Name, fin);
+    ok = this->GetValue("Name:", p.Name, fin);
     ok = ok && this->GetValue("Directory:", p.Directory, fin);
     ok = ok && this->GetValue("Args:", numArgs, fin);
     for(int j =0; j < numArgs; ++j)
@@ -2196,7 +2196,6 @@ bool cmCTestTestHandler::SetTestsProperties(
             std::vector<std::string>::iterator crit;
             for ( crit = lval.begin(); crit != lval.end(); ++ crit )
               {
-              cmCTestTestProperties* tp = &(*rtit);
               rtit->Depends.push_back(*crit);
               }
             }

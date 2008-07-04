@@ -1659,7 +1659,6 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
   if(this->CheckArgument(arg, "--parallel-cache") && i < args.size() - 1)
     {
     i++;
-    int plevel = atoi(args[i].c_str());
     this->SetParallelCacheFile(args[i].c_str());
     }
   
