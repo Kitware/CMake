@@ -1004,20 +1004,21 @@ bool cmCTestTestHandler::GetValue(const char* tag,
                                   std::ifstream& fin)
 {
   std::string line;
+  bool ret = true;
   cmSystemTools::GetLineFromStream(fin, line);
   if(line == tag)
     {
     fin >> value;
-    cmSystemTools::GetLineFromStream(fin, line); // read blank line
+    ret = cmSystemTools::GetLineFromStream(fin, line); // read blank line
     }
   else
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "parse error: missing tag: "
                << tag << " found [" << line << "]" << std::endl);
-    return false;
+    ret = false;
     }
-  return true;
+  return ret;
 }
 
 bool cmCTestTestHandler::GetValue(const char* tag,
@@ -1026,19 +1027,20 @@ bool cmCTestTestHandler::GetValue(const char* tag,
 {
   std::string line;
   cmSystemTools::GetLineFromStream(fin, line);
+  bool ret = true;
   if(line == tag)
     {
     fin >> value;
-    cmSystemTools::GetLineFromStream(fin, line); // read blank line
+    ret = cmSystemTools::GetLineFromStream(fin, line); // read blank line
     }
   else
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "parse error: missing tag: "
                << tag << " found [" << line << "]" << std::endl);
-    return false;
+    ret = false;
     }
-  return true;
+  return ret;
 }
 
 bool cmCTestTestHandler::GetValue(const char* tag,
@@ -1047,19 +1049,20 @@ bool cmCTestTestHandler::GetValue(const char* tag,
 {
   std::string line;
   cmSystemTools::GetLineFromStream(fin, line);
+  bool ret = true;
   if(line == tag)
     {
     fin >> value;
-    cmSystemTools::GetLineFromStream(fin, line); // read blank line
+    ret = cmSystemTools::GetLineFromStream(fin, line); // read blank line
     }
   else
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "parse error: missing tag: "
                << tag << " found [" << line << "]" << std::endl);
-    return false;
+    ret = false;
     }
-  return true;
+  return ret;
 }
 
 bool cmCTestTestHandler::GetValue(const char* tag,
@@ -1068,19 +1071,20 @@ bool cmCTestTestHandler::GetValue(const char* tag,
 {
   std::string line;
   cmSystemTools::GetLineFromStream(fin, line);
+  bool ret = true;
   if(line == tag)
     {
     fin >> value;
-    cmSystemTools::GetLineFromStream(fin, line); // read blank line
+    ret = cmSystemTools::GetLineFromStream(fin, line); // read blank line
     }
   else
     { 
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "parse error: missing tag: "
                << tag << " found [" << line.c_str() << "]" << std::endl);
-    return false;
+    ret = false;
     }
-  return true;
+  return ret;
 }
 
 bool cmCTestTestHandler::GetValue(const char* tag,
@@ -1089,18 +1093,19 @@ bool cmCTestTestHandler::GetValue(const char* tag,
 {
   std::string line;
   cmSystemTools::GetLineFromStream(fin, line);
+  bool ret = true;
   if(line == tag)
     {
-    return cmSystemTools::GetLineFromStream(fin, value);
+    ret =  cmSystemTools::GetLineFromStream(fin, value);
     }
   else
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "parse error: missing tag: "
                << tag << " found [" << line << "]" << std::endl);
-    return false;
+    ret = false;
     }
-  return true;
+  return ret;
 }
 
 
