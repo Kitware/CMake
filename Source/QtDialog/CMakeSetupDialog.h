@@ -75,7 +75,7 @@ protected slots:
   void addCacheEntry();
   void startSearch();
   void setDebugOutput(bool);
-  void toggleGroupView(bool);
+  void setViewType(int);
 
 protected:
 
