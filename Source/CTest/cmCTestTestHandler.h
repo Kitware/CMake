@@ -218,7 +218,7 @@ private:
   std::string FindTheExecutable(const char *exe);
 
   const char* GetTestStatus(int status);
-  void ExpandTestsToRunInformation(int numPossibleTests);
+  void ExpandTestsToRunInformation(size_t numPossibleTests);
 
   std::vector<cmStdString> CustomPreTest;
   std::vector<cmStdString> CustomPostTest;

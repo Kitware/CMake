@@ -1147,7 +1147,7 @@ void cmCTestTestHandler::LoadTestList()
   for(int i =0; i < numTestsToRun; i++)
     {
     cmCTestTestProperties p;
-    int numArgs;
+    int numArgs = 0;
     ok = this->GetValue("Name:", p.Name, fin);
     ok = ok && this->GetValue("Directory:", p.Directory, fin);
     ok = ok && this->GetValue("Args:", numArgs, fin);
@@ -1763,7 +1763,7 @@ const char* cmCTestTestHandler::GetTestStatus(int status)
 }
 
 //----------------------------------------------------------------------
-void cmCTestTestHandler::ExpandTestsToRunInformation(int numTests)
+void cmCTestTestHandler::ExpandTestsToRunInformation(size_t numTests)
 {
   if (this->TestsToRunString.empty())
     {
