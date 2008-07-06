@@ -280,7 +280,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     MARK_AS_ADVANCED(WX_mono${_DBG})
 
     # Find wxWidgets multilib libraries.
-    FOREACH(LIB core adv aui html media xrc dbgrid gl qa)
+    FOREACH(LIB core adv aui html media xrc dbgrid gl qa richtext)
       FIND_LIBRARY(WX_${LIB}${_DBG}
         NAMES
         wxmsw${_UNV}29${_UCD}${_DBG}_${LIB}
@@ -321,7 +321,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     WX_CLEAR_LIB(WX_mono${_DBG})
 
     # Clear wxWidgets multilib libraries.
-    FOREACH(LIB core adv aui html media xrc dbgrid gl qa)
+    FOREACH(LIB core adv aui html media xrc dbgrid gl qa richtext)
       WX_CLEAR_LIB(WX_${LIB}${_DBG})
     ENDFOREACH(LIB)
   ENDMACRO(WX_CLEAR_ALL_LIBS)
@@ -395,6 +395,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
       D:/
       $ENV{ProgramFiles}
     PATH_SUFFIXES 
+      wxWidgets-2.8.8
       wxWidgets-2.8.7
       wxWidgets-2.8.6
       wxWidgets-2.8.5
