@@ -2399,6 +2399,13 @@ void cmGlobalXCodeGenerator
   this->RootObject->AddAttribute("buildStyles", listObjs);
   this->RootObject->AddAttribute("hasScannedForEncodings",
                              this->CreateString("0"));
+  // Point Xcode at the top of the source tree.
+  {
+  std::string proot = root->GetMakefile()->GetCurrentDirectory();
+  proot = this->ConvertToRelativeForXCode(proot.c_str());
+  this->RootObject->AddAttribute("projectRoot",
+                                 this->CreateString(proot.c_str()));
+  }
   cmXCodeObject* configlist = 
     this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =
