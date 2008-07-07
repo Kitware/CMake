@@ -704,7 +704,14 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         }
       else
         {
-        sourceFiles.push_back(xsf);
+        // Include this file in the build if it has a known language
+        // and has not been listed as an ignored extension for this
+        // generator.
+        if(this->CurrentLocalGenerator->GetSourceFileLanguage(**i) &&
+           !this->IgnoreFile((*i)->GetExtension().c_str()))
+          {
+          sourceFiles.push_back(xsf);
+          }
         }
       }
 
