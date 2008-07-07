@@ -12,16 +12,6 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
     --test-command ${COMMAND})
 ENDMACRO(ADD_TEST_MACRO)
 
-# Support bootstrap builds.  When CMake 2.6 is required we can switch
-# to using the get_property command which is in bootstrap.  Note that
-# that command will return empty instead of NOTFOUND if the property
-# is not set.
-IF(NOT COMMAND GET_TEST_PROPERTY)
-  MACRO(GET_TEST_PROPERTY test prop var)
-    SET(${var} "")
-  ENDMACRO(GET_TEST_PROPERTY)
-ENDIF(NOT COMMAND GET_TEST_PROPERTY)
-
 # Testing
 IF(BUILD_TESTING)
   # Should the long tests be run?
