@@ -1804,7 +1804,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformation(size_t numTests)
   // if end isnot specified then we assume we end with the last test
   if(end == -1)
     {
-    end = numTests;
+    end = static_cast<int>(numTests);
     }
 
   // if the stride wasn't specified then it defaults to 1
