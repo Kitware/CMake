@@ -17,10 +17,6 @@
 #ifndef cmCTestMultiProcessHandler_h
 #define cmCTestMultiProcessHandler_h
 
-#include <set>
-#include <map>
-#include <string>
-#include <vector>
 class cmProcess;
 #include <cmStandardIncludes.h>
 #include <cmCTestTestHandler.h>
