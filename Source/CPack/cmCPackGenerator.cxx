@@ -653,6 +653,14 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             }
           mf->AddDefinition("CMAKE_INSTALL_PREFIX", dir.c_str());
 
+          if ( !cmsys::SystemTools::MakeDirectory(dir.c_str()))
+            {
+            cmCPackLogger(cmCPackLog::LOG_ERROR,
+                          "Problem creating temporary directory: " 
+                          << dir << std::endl);
+            return 0;
+            }
+
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "- Using DESTDIR + CPACK_INSTALL_PREFIX... (mf->AddDefinition)"
                         << std::endl);
@@ -663,6 +671,14 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         else
           {
           mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory.c_str());
+
+          if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory.c_str()))
+            {
+            cmCPackLogger(cmCPackLog::LOG_ERROR,
+                          "Problem creating temporary directory: " 
+                          << tempInstallDirectory << std::endl);
+            return 0;
+            }
 
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "- Using non-DESTDIR install... (mf->AddDefinition)" << std::endl);
@@ -1255,6 +1271,16 @@ cmCPackGenerator::GetComponent(const char *projectName, const char *name)
       = this->IsSet((macroPrefix + "_REQUIRED").c_str());
     component->IsDisabledByDefault
       = this->IsSet((macroPrefix + "_DISABLED").c_str());
+    component->IsDownloaded
+      = this->IsSet((macroPrefix + "_DOWNLOADED").c_str())
+        || cmSystemTools::IsOn(this->GetOption("CPACK_DOWNLOAD_ALL"));
+
+    const char* archiveFile = this->GetOption((macroPrefix + "_ARCHIVE_FILE").c_str());
+    if (archiveFile && *archiveFile)
+      {
+      component->ArchiveFile = archiveFile;
+      }
+
     const char* groupName = this->GetOption((macroPrefix + "_GROUP").c_str());
     if (groupName && *groupName) 
       {
@@ -1344,6 +1370,17 @@ cmCPackGenerator::GetComponentGroup(const char *projectName, const char *name)
       = this->IsSet((macroPrefix + "_BOLD_TITLE").c_str());
     group->IsExpandedByDefault
       = this->IsSet((macroPrefix + "_EXPANDED").c_str());
+    const char* parentGroupName 
+      = this->GetOption((macroPrefix + "_PARENT_GROUP").c_str());
+    if (parentGroupName && *parentGroupName)
+      {
+      group->ParentGroup = GetComponentGroup(projectName, parentGroupName);
+      group->ParentGroup->Subgroups.push_back(group);
+      }
+    else
+      {
+      group->ParentGroup = 0;
+      }
     }
   return group;
 }

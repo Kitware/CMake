@@ -31,7 +31,7 @@ public:
     const char* file_permissions = "",
     std::vector<std::string> const& configurations 
     = std::vector<std::string>(),
-    const char* component = "",
+    const char* component = "Unspecified",
     bool optional = false
     );
   virtual ~cmInstallTargetGenerator();

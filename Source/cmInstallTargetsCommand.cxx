@@ -62,6 +62,9 @@ bool cmInstallTargetsCommand
       }
     }
 
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                       ->AddInstallComponent("Unspecified");
+
   return true;
 }
 

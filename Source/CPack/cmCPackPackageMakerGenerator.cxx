@@ -580,7 +580,10 @@ WriteDistributionFile(const char* metapackageFile)
        groupIt != this->ComponentGroups.end(); 
        ++groupIt)
     {
-    CreateChoiceOutline(groupIt->second, choiceOut);
+    if (groupIt->second.ParentGroup == 0)
+      {
+      CreateChoiceOutline(groupIt->second, choiceOut);
+      }
     }
 
   // Emit the outline for the non-grouped components
@@ -622,6 +625,13 @@ cmCPackPackageMakerGenerator::
 CreateChoiceOutline(const cmCPackComponentGroup& group, cmOStringStream& out)
 {
   out << "<line choice=\"" << group.Name << "Choice\">" << std::endl;
+  std::vector<cmCPackComponentGroup*>::const_iterator groupIt;
+  for (groupIt = group.Subgroups.begin(); groupIt != group.Subgroups.end();
+       ++groupIt)
+    {
+    CreateChoiceOutline(**groupIt, out);
+    }
+
   std::vector<cmCPackComponent*>::const_iterator compIt;
   for (compIt = group.Components.begin(); compIt != group.Components.end();
        ++compIt)

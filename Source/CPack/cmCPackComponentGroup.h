@@ -70,11 +70,19 @@ public:
   /// Whether this component defaults to "disabled".
   bool IsDisabledByDefault : 1;
 
+  /// Whether this component should be downloaded on-the-fly. If false,
+  /// the component will be a part of the installation package.
+  bool IsDownloaded : 1;
+
   /// A description of this component.
   std::string Description;
 
   /// The installation types that this component is a part of.
   std::vector<cmCPackInstallationType *> InstallationTypes;
+
+  /// If IsDownloaded is true, the name of the archive file that
+  /// contains the files that are part of this component.
+  std::string ArchiveFile;
 
   /// The components that this component depends on.
   std::vector<cmCPackComponent *> Dependencies;
@@ -95,6 +103,8 @@ public:
 class cmCPackComponentGroup
 {
 public:
+ cmCPackComponentGroup() : ParentGroup(0) { }
+
   /// The name of the group (used to reference the group).
   std::string Name;
 
@@ -112,6 +122,12 @@ public:
 
   /// The components within this group.
   std::vector<cmCPackComponent*> Components;
+
+  /// The parent group of this component group (if any).
+  cmCPackComponentGroup *ParentGroup;
+
+  /// The subgroups of this group.
+  std::vector<cmCPackComponentGroup*> Subgroups;
 };
 
 #endif

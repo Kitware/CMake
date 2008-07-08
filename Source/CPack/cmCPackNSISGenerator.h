@@ -53,24 +53,30 @@ protected:
   virtual bool SupportsComponentInstallation() const;
 
   /// Produce a string that contains the NSIS code to describe a 
-  /// particular component.
-  std::string CreateComponentDescription(cmCPackComponent *component) const;
+  /// particular component. Any added macros will be emitted via 
+  /// macrosOut.
+  std::string 
+  CreateComponentDescription(cmCPackComponent *component,
+                             cmOStringStream& macrosOut);
 
   /// Produce NSIS code that selects all of the components that this component
   /// depends on, recursively.
   std::string CreateSelectionDependenciesDescription
                 (cmCPackComponent *component,
-                 std::set<cmCPackComponent *>& visited) const;
+                 std::set<cmCPackComponent *>& visited);
 
   /// Produce NSIS code that de-selects all of the components that are dependent
   /// on this component, recursively.
   std::string CreateDeselectionDependenciesDescription
                 (cmCPackComponent *component,
-                 std::set<cmCPackComponent *>& visited) const;
+                 std::set<cmCPackComponent *>& visited);
 
   /// Produce a string that contains the NSIS code to describe a 
-  /// particular component group, including its components.
-  std::string CreateComponentGroupDescription(cmCPackComponentGroup *group) const;
+  /// particular component group, including its components. Any
+  /// added macros will be emitted via macrosOut.
+  std::string 
+  CreateComponentGroupDescription(cmCPackComponentGroup *group,
+                                  cmOStringStream& macrosOut);
 
   /// Translations any newlines found in the string into \r\n, so that the 
   /// resulting string can be used within NSIS.
