@@ -39,54 +39,34 @@ set(CPACK_PACKAGE_VERSION_MINOR "0")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "CPack Component Example")
 
-# Tell CPack all of the components to install. The "ALL"
-# refers to the fact that this is the set of components that
-# will be included when CPack is instructed to put everything
-# into the binary installer (the default behavior).
-set(CPACK_COMPONENTS_ALL applications libraries headers)
-
-# Set the displayed names for each of the components to install.
-# These will be displayed in the list of components inside the installer.
-set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "MyLib Application")
-set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "Libraries")
-set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "C++ Headers")
-
-# Provide descriptions for each of the components to install.
-# When the user hovers the mouse over the name of a component,
-# the description will be shown in the "Description" box in the
-# installer. If no descriptions are provided, the "Description"
-# box will be removed.
-set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION
-  "An extremely useful application that makes use of MyLib")
-set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION
-  "Static libraries used to build programs with MyLib")
-set(CPACK_COMPONENT_HEADERS_DESCRIPTION
-  "C/C++ header files for use with MyLib")
-
-# Put the components into two different groups: "Runtime" and "Development"
-set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
-set(CPACK_COMPONENT_LIBRARIES_GROUP "Development")
-set(CPACK_COMPONENT_HEADERS_GROUP "Development")
-
-# Expand the "Development" group by default, since we have so few components.
-# Also, provide this group with a description.
-set(CPACK_COMPONENT_GROUP_DEVELOPMENT_EXPANDED ON)
-set(CPACK_COMPONENT_GROUP_DEVELOPMENT_DESCRIPTION
-  "All of the tools you'll ever need to develop software")
-
-# It doesn't make sense to install the headers without the libraries
-# (because you could never use the headers!), so make the headers component
-# depend on the libraries component.
-set(CPACK_COMPONENT_HEADERS_DEPENDS libraries)
-
-# Create two installation types with pre-selected components.
-# The "Developer" installation has just the library and headers,
-# while the "Full" installation has everything.
-set(CPACK_ALL_INSTALL_TYPES Full Developer)
-set(CPACK_INSTALL_TYPE_FULL_DISPLAY_NAME "Everything")
-set(CPACK_COMPONENT_LIBRARIES_INSTALL_TYPES Developer Full)
-set(CPACK_COMPONENT_HEADERS_INSTALL_TYPES Developer Full)
-set(CPACK_COMPONENT_APPLICATIONS_INSTALL_TYPES Full)
-
 # Include CPack to introduce the appropriate targets
 include(CPack)
+
+# Installation types
+cpack_add_install_type(Full
+  DISPLAY_NAME "Everything")
+cpack_add_install_type(Developer)
+
+# Component groups
+cpack_add_component_group(Runtime)
+cpack_add_component_group(Development
+  EXPANDED
+  DESCRIPTION "All of the tools you'll ever need to develop software")
+
+# Components
+cpack_add_component(applications
+  DISPLAY_NAME "MyLib Application"
+  DESCRIPTION "An extremely useful application that makes use of MyLib"
+  GROUP Runtime
+  INSTALL_TYPES Full)
+cpack_add_component(libraries
+  DISPLAY_NAME "Libraries"
+  DESCRIPTION "Static libraries used to build programs with MyLib"
+  GROUP Development
+  INSTALL_TYPES Developer Full)
+cpack_add_component(headers
+  DISPLAY_NAME "C++ Headers"
+  DESCRIPTION "C/C++ header files for use with MyLib"
+  GROUP Development
+  DEPENDS libraries
+  INSTALL_TYPES Developer Full)
