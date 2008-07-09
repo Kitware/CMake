@@ -18,9 +18,7 @@
 #ifndef cmCPackComponentGroup_h
 #define cmCPackComponentGroup_h
 
-#include <map>
-#include <string>
-#include <vector>
+#include "cmStandardIncludes.h"
 
 class cmCPackComponentGroup;
 
