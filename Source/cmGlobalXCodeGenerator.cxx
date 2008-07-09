@@ -1459,10 +1459,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
     buildSettings->AddAttribute("LIBRARY_STYLE",
                                 this->CreateString("DYNAMIC"));
-    buildSettings->AddAttribute("DYLIB_COMPATIBILITY_VERSION",
-                                this->CreateString("1"));
-    buildSettings->AddAttribute("DYLIB_CURRENT_VERSION",
-                                this->CreateString("1"));
     break;
     }
     case cmTarget::EXECUTABLE:
@@ -1680,6 +1676,38 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString(
                                 "-Wmost -Wno-four-char-constants"
                                 " -Wno-unknown-pragmas"));
+
+  // Runtime version information.
+  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    int major;
+    int minor;
+    int patch;
+
+    // VERSION -> current_version
+    target.GetTargetVersion(false, major, minor, patch);
+    if(major == 0 && minor == 0 && patch == 0)
+      {
+      // Xcode always wants at least 1.0.0
+      major = 1;
+      }
+    cmOStringStream v;
+    v << major << "." << minor << "." << patch;
+    buildSettings->AddAttribute("DYLIB_CURRENT_VERSION",
+                                this->CreateString(v.str().c_str()));
+
+    // SOVERSION -> compatibility_version
+    target.GetTargetVersion(true, major, minor, patch);
+    if(major == 0 && minor == 0 && patch == 0)
+      {
+      // Xcode always wants at least 1.0.0
+      major = 1;
+      }
+    cmOStringStream vso;
+    vso << major << "." << minor << "." << patch;
+    buildSettings->AddAttribute("DYLIB_COMPATIBILITY_VERSION",
+                                this->CreateString(vso.str().c_str()));
+    }
 }
 
 //----------------------------------------------------------------------------
