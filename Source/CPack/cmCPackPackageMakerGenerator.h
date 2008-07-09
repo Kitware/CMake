@@ -116,6 +116,7 @@ protected:
   std::string EscapeForXML(std::string str);
   
   double PackageMakerVersion;
+  double PackageCompatibilityVersion;
 };
 
 #endif

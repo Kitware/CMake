@@ -107,7 +107,7 @@
 #   that won't be packaged when building a source package. This is a
 #   list of patterns, e.g., /CVS/;/\\.svn/;\\.swp$;\\.#;/#;.*~;cscope.*
 #
-# The following variables are specific to the graphical installers build
+# The following variables are specific to the graphical installers built
 # on Windows using the Nullsoft Installation System.
 #
 #   CPACK_PACKAGE_INSTALL_REGISTRY_KEY - Registry key used when
@@ -156,6 +156,22 @@
 #
 #   CPACK_NSIS_DELETE_ICONS_EXTRA -Additional NSIS commands to
 #   uninstall start menu shortcuts.
+#
+# The following variable is specific to installers build on Mac OS X
+# using PackageMaker:
+#
+#   CPACK_OSX_PACKAGE_VERSION - The version of Mac OS X that the
+#   resulting PackageMaker archive should be compatible
+#   with. Different versions of Mac OS X support different
+#   features. For example, CPack can only build component-based
+#   installers for Mac OS X 10.4 or newer, and can only build
+#   installers that download component son-the-fly for Mac OS X 10.5
+#   or newer. If left blank, this value will be set to the minimum
+#   version of Mac OS X that supports the requested features. Set this
+#   variable to some value (e.g., 10.4) only if you want to guarantee
+#   that your installer will work on that version of Mac OS X, and
+#   don't mind missing extra features available in the installer
+#   shipping with later versions of Mac OS X.
 #
 # The following variables are for advanced uses of CPack:
 #
@@ -251,9 +267,9 @@
 #   installer itself. For more information, see the cpack_configure_downloads
 #   command.
 #
-#   ARCHIVE_FILE provides a name for the ZIP file created by CPack to
-#   be used for downloaded components. If not supplied, CPack will
-#   create ZIP file with some name based on CPACK_PACKAGE_FILE_NAME and
+#   ARCHIVE_FILE provides a name for the archive file created by CPack
+#   to be used for downloaded components. If not supplied, CPack will
+#   create a file with some name based on CPACK_PACKAGE_FILE_NAME and
 #   the name of the component. See cpack_configure_downloads for more
 #   information.
 #
@@ -330,30 +346,34 @@
 #
 #   The cpack_configure_downloads command configures installation-time
 #   downloads of selected components. For each downloadable component,
-#   CPack will create a ZIP file containing the contents of that component,
-#   which should be uploaded to the given site. When the user selects that
-#   component for installation, the installer will download and extract
-#   the component in place. This feature is useful for creating small
-#   installers that only download the requested components, saving
-#   bandwidth. Additionally, the installers are small enough that they
-#   will be installed as part of the normal installation process, and the 
-#   "Change" button in Windows Add/Remove Programs control panel will
-#   allow one to add or remove parts of the application after the original
-#   installation. The downloaded-components functionality is currently
-#   only available with the NSIS generator on Windows. It requires the
-#   ZipDLL plug-in for NSIS, available at:
+#   CPack will create an archive containing the contents of that
+#   component, which should be uploaded to the given site. When the
+#   user selects that component for installation, the installer will
+#   download and extract the component in place. This feature is
+#   useful for creating small installers that only download the
+#   requested components, saving bandwidth. Additionally, the
+#   installers are small enough that they will be installed as part of
+#   the normal installation process, and the "Change" button in
+#   Windows Add/Remove Programs control panel will allow one to add or
+#   remove parts of the application after the original
+#   installation. On Windows, the downloaded-components functionality
+#   requires the ZipDLL plug-in for NSIS, available at:
 #
 #     http://nsis.sourceforge.net/ZipDLL_plug-in
 #
-#   The site argument is a URL where the ZIP files for downloadable 
+#   On Mac OS X, installers that download components on-the-fly can
+#   only be built and installed on system using Mac OS X 10.5 or
+#   later.
+#
+#   The site argument is a URL where the archives for downloadable 
 #   components will reside, e.g., http://www.cmake.org/files/2.6.1/installer/
-#   All of the ZIP files produced by CPack should be uploaded to that location.
+#   All of the archives produced by CPack should be uploaded to that location.
 #
 #   UPLOAD_DIRECTORY is the local directory where CPack will create the 
-#   various .ZIP archives for each of the components. The contents of this
+#   various archives for each of the components. The contents of this
 #   directory should be uploaded to a location accessible by the URL given
 #   in the site argument. If omitted, CPack will use the directory CPackUploads
-#   inside the CMake binary directory to store the generated ZIP files.
+#   inside the CMake binary directory to store the generated archives.
 #
 #   The ALL flag indicates that all components be downloaded. Otherwise, only 
 #   those components explicitly marked as DOWNLOADED or that have a specified 
@@ -363,7 +383,7 @@
 #   ADD_REMOVE indicates that CPack should install a copy of the installer
 #   that can be called from Windows' Add/Remove Programs dialog (via the 
 #   "Modify" button) to change the set of installed components. NO_ADD_REMOVE
-#   turns off this behavior.
+#   turns off this behavior. This option is ignored on Mac OS X.
 
 
 # Pick a configuration file

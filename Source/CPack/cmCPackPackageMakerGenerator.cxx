@@ -32,6 +32,7 @@
 cmCPackPackageMakerGenerator::cmCPackPackageMakerGenerator()
 {
   this->PackageMakerVersion = 0.0;
+  this->PackageCompatibilityVersion = 10.4;
 }
 
 //----------------------------------------------------------------------
@@ -42,7 +43,7 @@ cmCPackPackageMakerGenerator::~cmCPackPackageMakerGenerator()
 //----------------------------------------------------------------------
 bool cmCPackPackageMakerGenerator::SupportsComponentInstallation() const
 {
-  return true;
+  return this->PackageCompatibilityVersion >= 10.4;
 }
 
 //----------------------------------------------------------------------
@@ -165,7 +166,7 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
 
   if (!this->Components.empty())
     {
-    // Create the directory where component packages will be installed.
+    // Create the directory where component packages will be built.
     std::string basePackageDir = packageDirFileName;
     basePackageDir += "/Contents/Packages";
     if (!cmsys::SystemTools::MakeDirectory(basePackageDir.c_str()))
@@ -176,12 +177,78 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
       return 0;
       }
 
+    // Create the directory where downloaded component packages will
+    // be placed.
+    const char* userUploadDirectory = this->GetOption("CPACK_UPLOAD_DIRECTORY");
+    std::string uploadDirectory;
+    if (userUploadDirectory && *userUploadDirectory)
+      {
+      uploadDirectory = userUploadDirectory;
+      }
+    else
+      {
+      uploadDirectory= this->GetOption("CPACK_PACKAGE_DIRECTORY");
+      uploadDirectory += "/CPackUploads";
+      }
+
     // Create packages for each component
+    bool warnedAboutDownloadCompatibility = false;
+
     std::map<std::string, cmCPackComponent>::iterator compIt;
     for (compIt = this->Components.begin(); compIt != this->Components.end();
          ++compIt)
       {
-      std::string packageFile = basePackageDir;
+      std::string packageFile;
+      if (compIt->second.IsDownloaded)
+        {
+        if (this->PackageCompatibilityVersion >= 10.5 &&
+            this->PackageMakerVersion >= 3.0)
+          {
+          // Build this package within the upload directory.
+          packageFile = uploadDirectory;
+
+          if(!cmSystemTools::FileExists(uploadDirectory.c_str()))
+            {
+            if (!cmSystemTools::MakeDirectory(uploadDirectory.c_str()))
+              {
+              cmCPackLogger(cmCPackLog::LOG_ERROR,
+                            "Unable to create package upload directory " 
+                            << uploadDirectory << std::endl);
+              return 0;
+              }
+            }
+          }
+        else if (!warnedAboutDownloadCompatibility)
+          {
+          if (this->PackageCompatibilityVersion < 10.5)
+            {
+            cmCPackLogger(cmCPackLog::LOG_WARNING,
+                        "CPack warning: please set CPACK_OSX_PACKAGE_VERSION to 10.5 or greater enable downloaded packages. CPack will build a non-downloaded package."
+                          << std::endl);
+            }
+
+          if (this->PackageMakerVersion < 3)
+            {
+            cmCPackLogger(cmCPackLog::LOG_WARNING,
+                        "CPack warning: unable to build downloaded packages with PackageMaker versions prior to 3.0. CPack will build a non-downloaded package."
+                          << std::endl);
+            }
+
+          warnedAboutDownloadCompatibility = true;
+          }
+        }
+
+      if (packageFile.empty())
+        {
+        // Build this package within the overall distribution
+        // metapackage.
+        packageFile = basePackageDir;
+
+        // We're not downloading this component, even if the user
+        // requested it.
+        compIt->second.IsDownloaded = false;
+        }
+
       packageFile += '/';
       packageFile += GetPackageName(compIt->second);
 
@@ -229,7 +296,7 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
            << "/Resources\" -i \""
            << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") 
            << "/Info.plist\" -d \""
-           << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") 
+           << this->GetOption("CPACK_TOPLEVEL_DIRECTORY")
            << "/Description.plist\"";
     if ( this->PackageMakerVersion > 2.0 )
       {
@@ -338,6 +405,30 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
     }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "PackageMaker version is: "
     << this->PackageMakerVersion << std::endl);
+
+  // Determine the package compatibility version. If it wasn't
+  // specified by the user, we define it based on which features the
+  // user requested.
+  const char *packageCompat = this->GetOption("CPACK_OSX_PACKAGE_VERSION");
+  if (packageCompat && *packageCompat)
+    {
+    this->PackageCompatibilityVersion = atof(packageCompat);  
+    }
+  else if (this->GetOption("CPACK_DOWNLOAD_SITE"))
+    {
+    this->SetOption("CPACK_OSX_PACKAGE_VERSION", "10.5");
+    this->PackageCompatibilityVersion = 10.5;
+    }
+  else if (this->GetOption("CPACK_COMPONENTS_ALL"))
+    {
+    this->SetOption("CPACK_OSX_PACKAGE_VERSION", "10.4");
+    this->PackageCompatibilityVersion = 10.4;
+    }
+  else
+    {
+    this->SetOption("CPACK_OSX_PACKAGE_VERSION", "10.3");
+    this->PackageCompatibilityVersion = 10.3;
+    }
 
   pkgPath += "/MacOS";
   path.push_back(pkgPath);
@@ -491,12 +582,19 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char *command,
 std::string 
 cmCPackPackageMakerGenerator::GetPackageName(const cmCPackComponent& component)
 {
-  std::string packagesDir = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  packagesDir += ".dummy";
-  cmOStringStream out;
-  out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir)
-      << "-" << component.Name << ".pkg";
-  return out.str();
+  if (component.ArchiveFile.empty())
+    {
+    std::string packagesDir = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+    packagesDir += ".dummy";
+    cmOStringStream out;
+    out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir)
+        << "-" << component.Name << ".pkg";
+    return out.str();
+    }
+  else
+    {
+    return component.ArchiveFile + ".pkg";
+    }
 }
 
 //----------------------------------------------------------------------
@@ -509,46 +607,74 @@ GenerateComponentPackage(const char *packageFile,
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                 "-   Building component package: " << packageFile << std::endl);
 
-  // Create the description file for this component.
-  std::string descriptionFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
-  descriptionFile += '/' + component.Name + "-Description.plist";
-  std::ofstream out(descriptionFile.c_str());
-  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl
-      << "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\""
-      << "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << std::endl
-      << "<plist version=\"1.4\">" << std::endl
-      << "<dict>" << std::endl
-      << "  <key>IFPkgDescriptionTitle</key>" << std::endl
-      << "  <string>" << component.DisplayName << "</string>" << std::endl
-      << "  <key>IFPkgDescriptionVersion</key>" << std::endl
-      << "  <string>" << this->GetOption("CPACK_PACKAGE_VERSION") 
-      << "</string>" << std::endl
-      << "  <key>IFPkgDescriptionDescription</key>" << std::endl
-      << "  <string>" + this->EscapeForXML(component.Description) 
-      << "</string>" << std::endl
-      << "</dict>" << std::endl
-      << "</plist>" << std::endl;
-  out.close();
+  // The command that will be used to run PackageMaker
+  cmOStringStream pkgCmd;
 
-  // Create the Info.plist file for this component
-  std::string moduleVersionSuffix = ".";
-  moduleVersionSuffix += component.Name;
-  this->SetOption("CPACK_MODULE_VERSION_SUFFIX", moduleVersionSuffix.c_str());
-  std::string infoFileName = component.Name;
-  infoFileName += "-Info.plist";
-  if (!this->CopyResourcePlistFile("Info.plist", infoFileName.c_str()))
+  if (this->PackageCompatibilityVersion < 10.5 || 
+      this->PackageMakerVersion < 3.0)
     {
-    return false;
+    // Create Description.plist and Info.plist files for normal Mac OS
+    // X packages, which work on Mac OS X 10.3 and newer.
+    std::string descriptionFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    descriptionFile += '/' + component.Name + "-Description.plist";
+    std::ofstream out(descriptionFile.c_str());
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl
+        << "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\""
+        << "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << std::endl
+        << "<plist version=\"1.4\">" << std::endl
+        << "<dict>" << std::endl
+        << "  <key>IFPkgDescriptionTitle</key>" << std::endl
+        << "  <string>" << component.DisplayName << "</string>" << std::endl
+        << "  <key>IFPkgDescriptionVersion</key>" << std::endl
+        << "  <string>" << this->GetOption("CPACK_PACKAGE_VERSION") 
+        << "</string>" << std::endl
+        << "  <key>IFPkgDescriptionDescription</key>" << std::endl
+        << "  <string>" + this->EscapeForXML(component.Description) 
+        << "</string>" << std::endl
+        << "</dict>" << std::endl
+        << "</plist>" << std::endl;
+    out.close();
+
+    // Create the Info.plist file for this component
+    std::string moduleVersionSuffix = ".";
+    moduleVersionSuffix += component.Name;
+    this->SetOption("CPACK_MODULE_VERSION_SUFFIX", moduleVersionSuffix.c_str());
+    std::string infoFileName = component.Name;
+    infoFileName += "-Info.plist";
+    if (!this->CopyResourcePlistFile("Info.plist", infoFileName.c_str()))
+      {
+      return false;
+      }
+
+    pkgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
+           << "\" -build -p \"" << packageFile << "\""
+           << " -f \"" << packageDir << "\""
+           << " -i \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") 
+           << "/" << infoFileName << "\""
+           << " -d \"" << descriptionFile << "\""; 
+    }
+  else
+    {
+    // Create a "flat" package on Mac OS X 10.5 and newer. Flat
+    // packages are stored in a single file, rather than a directory
+    // like normal packages, and can be downloaded by the installer
+    // on-the-fly in Mac OS X 10.5 or newer. Thus, we need to create
+    // flat packages when the packages will be downloaded on the fly.
+    std::string pkgId = "com.";
+    pkgId += this->GetOption("CPACK_PACKAGE_VENDOR");
+    pkgId += '.';
+    pkgId += this->GetOption("CPACK_PACKAGE_NAME");
+    pkgId += '.';
+    pkgId += component.Name;
+
+    pkgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
+           << "\" --root \"" << packageDir << "\""
+           << " --id " << pkgId
+           << " --target " << this->GetOption("CPACK_OSX_PACKAGE_VERSION")
+           << " --out \"" << packageFile << "\"";
     }
 
   // Run PackageMaker  
-  cmOStringStream pkgCmd;
-  pkgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
-         << "\" -build -p \"" << packageFile << "\""
-         << " -f \"" << packageDir << "\""
-         << " -i \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") 
-         << "/" << infoFileName << "\""
-         << " -d \"" << descriptionFile << "\""; 
   return RunPackageMaker(pkgCmd.str().c_str(), packageFile);
 }
 
@@ -670,8 +796,6 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
   packageId += '.'; 
   packageId += this->GetOption("CPACK_PACKAGE_NAME");
   packageId += '.';
-  packageId += this->GetOption("CPACK_PACKAGE_VERSION");
-  packageId += '.';
   packageId += component.Name;
 
   out << "<choice id=\"" << component.Name << "Choice\" " 
@@ -716,60 +840,29 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
   // Create a description of the package associated with this
   // component.
   std::string relativePackageLocation = "Contents/Packages/";
-  relativePackageLocation += GetPackageName(component);
+  relativePackageLocation += this->GetPackageName(component);
 
-  // Determine the installed size of the package. To do so, we dig
-  // into the Info.plist file from the generated package to retrieve
-  // this size.
-  int installedSize = 0;
-  std::string infoPlistFile = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  infoPlistFile += ".mpkg/";
-  infoPlistFile += relativePackageLocation;
-  infoPlistFile += "/Contents/Info.plist";
-  bool foundFlagInstalledSize = false;
-  std::string line;
-  std::ifstream ifs(infoPlistFile.c_str());
-  while ( cmSystemTools::GetLineFromStream(ifs, line) )
-    {
-      if (foundFlagInstalledSize)
-        {
-        std::string::size_type pos = line.find("<integer>");
-        if (pos == std::string::npos)
-          {
-          cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot parse package size in "
-                        << infoPlistFile << std::endl
-                        << "String is \"" << line << "\"" << std::endl);
-          }
-        else
-          {
-          line.erase(0, pos + 9);
-          pos = line.find("</integer>");
-          if (pos == std::string::npos)
-            {
-            cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot parse package size in "
-                          << infoPlistFile << std::endl);
-            }
-          else
-            {
-            line.erase(pos, std::string::npos);
-            installedSize = atoi(line.c_str());
-            }
-          }
-        foundFlagInstalledSize = false;
-        }
-      else 
-        {
-        foundFlagInstalledSize 
-          = line.find("IFPkgFlagInstalledSize") != std::string::npos;
-        }
-    }
-  
+  // Determine the installed size of the package.
+  std::string dirName = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+  dirName += '/';
+  dirName += component.Name;
+  unsigned long installedSize 
+    = component.GetInstalledSizeInKbytes(dirName.c_str());
 
   out << "<pkg-ref id=\"" << packageId << "\" "
       << "version=\"" << this->GetOption("CPACK_PACKAGE_VERSION") << "\" "
       << "installKBytes=\"" << installedSize << "\" "
-      << "auth=\"Admin\" onConclusion=\"None\">"
-      << "file:./" << relativePackageLocation << "</pkg-ref>" << std::endl;
+      << "auth=\"Admin\" onConclusion=\"None\">";
+  if (component.IsDownloaded)
+    {
+    out << this->GetOption("CPACK_DOWNLOAD_SITE") 
+        << this->GetPackageName(component);
+    }
+  else
+    {
+    out << "file:./" << relativePackageLocation;
+    }
+  out << "</pkg-ref>" << std::endl;
 }
 
 //----------------------------------------------------------------------

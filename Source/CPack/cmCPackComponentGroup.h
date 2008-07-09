@@ -49,7 +49,7 @@ public:
 class cmCPackComponent
 {
 public:
-  cmCPackComponent() : Group(0) { }
+ cmCPackComponent() : Group(0), TotalSize(0) { }
 
   /// The name of the component (used to reference the component).
   std::string Name;
@@ -95,6 +95,18 @@ public:
 
   /// The list of installed directories that are part of this component.
   std::vector<std::string> Directories;
+
+  /// Get the total installed size of all of the files in this
+  /// component, in bytes. installDir is the directory into which the 
+  /// component was installed.
+  unsigned long GetInstalledSize(const char* installDir) const;
+
+  /// Identical to GetInstalledSize, but returns the result in
+  /// kilobytes.
+  unsigned long GetInstalledSizeInKbytes(const char* installDir) const;
+
+ private:
+  mutable unsigned long TotalSize;
 };
 
 /** \class cmCPackComponentGroup
