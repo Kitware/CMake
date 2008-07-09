@@ -84,6 +84,7 @@ RegularExpression& RegularExpression::operator= (const RegularExpression& rxp)
     }
   int ind;
   this->progsize = rxp.progsize;                // Copy regular expression size
+  delete [] this->program;
   this->program = new char[this->progsize];     // Allocate storage
   for(ind=this->progsize; ind-- != 0;)          // Copy regular expresion
     this->program[ind] = rxp.program[ind];
