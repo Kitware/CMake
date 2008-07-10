@@ -77,6 +77,10 @@ RegularExpression::RegularExpression (const RegularExpression& rxp) {
 // operator= -- Copies the given regular expression.
 RegularExpression& RegularExpression::operator= (const RegularExpression& rxp)
 {
+  if(this == &rxp)
+    {
+    return *this;
+    }
   if ( !rxp.program )
     {
     this->program = 0;
