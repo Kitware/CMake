@@ -395,6 +395,11 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
       D:/
       $ENV{ProgramFiles}
     PATH_SUFFIXES 
+      wxWidgets-2.9.4
+      wxWidgets-2.9.3
+      wxWidgets-2.9.2
+      wxWidgets-2.9.1
+      wxWidgets-2.9.0
       wxWidgets-2.8.8
       wxWidgets-2.8.7
       wxWidgets-2.8.6
@@ -410,6 +415,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
       wxWidgest-2.7.1
       wxWidgets-2.7.0
       wxWidgets-2.7.0-1
+      wxWidgets-2.6.4
       wxWidgets-2.6.3
       wxWidgets-2.6.2
       wxWidgets-2.6.1
@@ -433,21 +439,26 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     # Select one default tree inside the already determined wx tree.
     # Prefer static/shared order usually consistent with build
     # settings.
+    IF(MINGW)
+      SET(WX_LIB_DIR_PREFIX gcc)
+    ELSE(MINGW)
+      SET(WX_LIB_DIR_PREFIX vc)
+    ENDIF(MINGW)
     IF(BUILD_SHARED_LIBS)
       FIND_PATH(wxWidgets_LIB_DIR
-        NAMES wxpng.lib wxpngd.lib
+        NAMES msw/build.cfg mswd/build.cfg
         PATHS
-        ${WX_ROOT_DIR}/lib/vc_dll   # prefer shared
-        ${WX_ROOT_DIR}/lib/vc_lib
+        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_dll   # prefer shared
+        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_lib
         DOC "Path to wxWidgets libraries?"
         NO_DEFAULT_PATH
         )
     ELSE(BUILD_SHARED_LIBS)
       FIND_PATH(wxWidgets_LIB_DIR
-        NAMES wxpng.lib wxpngd.lib
+        NAMES msw/build.cfg mswd/build.cfg
         PATHS
-        ${WX_ROOT_DIR}/lib/vc_lib   # prefer static
-        ${WX_ROOT_DIR}/lib/vc_dll
+        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_lib   # prefer static
+        ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_dll
         DOC "Path to wxWidgets libraries?"
         NO_DEFAULT_PATH
         )
