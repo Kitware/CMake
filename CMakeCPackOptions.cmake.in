@@ -26,7 +26,7 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   # tell cpack to create a desktop link to CMakeSetup
   SET(CPACK_CREATE_DESKTOP_LINKS "CMakeSetup")
   SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\CMakeSetup.exe")
-  SET(CPACK_NSIS_DISPLAY_NAME "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR} a cross-platform, open-source build system")
+  SET(CPACK_NSIS_DISPLAY_NAME "CMake @CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@ a cross-platform, open-source build system")
   SET(CPACK_NSIS_HELP_LINK "http:\\\\www.cmake.org")
   SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\www.kitware.com")
   SET(CPACK_NSIS_CONTACT @CPACK_PACKAGE_CONTACT@)

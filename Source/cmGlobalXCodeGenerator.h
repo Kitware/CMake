@@ -103,6 +103,8 @@ private:
                             cmXCodeObject* frameworkBuildPhase,
                             cmTarget& cmtarget);
 
+  std::string ComputeInfoPListLocation(cmTarget& target);
+
   void AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                cmTarget& target,
                                std::vector<cmCustomCommand> 

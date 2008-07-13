@@ -127,10 +127,22 @@
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="Advanced" >
+         <widget class="QComboBox" name="ViewType" >
+          <item>
            <property name="text" >
-            <string>Show Ad&amp;vanced Entries</string>
+            <string>Simple View</string>
            </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Advanced View</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Grouped View</string>
+           </property>
+          </item>
           </widget>
          </item>
          <item>

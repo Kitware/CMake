@@ -77,6 +77,10 @@ RegularExpression::RegularExpression (const RegularExpression& rxp) {
 // operator= -- Copies the given regular expression.
 RegularExpression& RegularExpression::operator= (const RegularExpression& rxp)
 {
+  if(this == &rxp)
+    {
+    return *this;
+    }
   if ( !rxp.program )
     {
     this->program = 0;
@@ -84,6 +88,7 @@ RegularExpression& RegularExpression::operator= (const RegularExpression& rxp)
     }
   int ind;
   this->progsize = rxp.progsize;                // Copy regular expression size
+  delete [] this->program;
   this->program = new char[this->progsize];     // Allocate storage
   for(ind=this->progsize; ind-- != 0;)          // Copy regular expresion
     this->program[ind] = rxp.program[ind];

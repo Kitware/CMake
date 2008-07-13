@@ -384,6 +384,17 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         }
     }
 
+  // Keep track of whether we will be performing an installation of
+  // any files of the given type.
+  bool installsArchive = false;
+  bool installsLibrary = false;
+  bool installsRuntime = false;
+  bool installsFramework = false;
+  bool installsBundle = false;
+  bool installsPrivateHeader = false;
+  bool installsPublicHeader = false;
+  bool installsResource = false;
+
   // Generate install script code to install the given targets.
   for(std::vector<cmTarget*>::iterator ti = targets.begin();
       ti != targets.end(); ++ti)
@@ -691,6 +702,16 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       }
     }
 
+    // Keep track of whether we're installing anything in each category
+    installsArchive = installsArchive || archiveGenerator != 0;
+    installsLibrary = installsLibrary || libraryGenerator != 0;
+    installsRuntime = installsRuntime || runtimeGenerator != 0;
+    installsFramework = installsFramework || frameworkGenerator != 0;
+    installsBundle = installsBundle || bundleGenerator != 0;
+    installsPrivateHeader = installsPrivateHeader || privateHeaderGenerator != 0;
+    installsPublicHeader = installsPublicHeader || publicHeaderGenerator != 0;
+    installsResource = installsResource || resourceGenerator;
+
     this->Makefile->AddInstallGenerator(archiveGenerator);
     this->Makefile->AddInstallGenerator(libraryGenerator);
     this->Makefile->AddInstallGenerator(runtimeGenerator);
@@ -713,22 +734,46 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     }
 
   // Tell the global generator about any installation component names specified
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                     ->AddInstallComponent(archiveArgs.GetComponent().c_str());
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                     ->AddInstallComponent(libraryArgs.GetComponent().c_str());
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                     ->AddInstallComponent(runtimeArgs.GetComponent().c_str());
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                   ->AddInstallComponent(frameworkArgs.GetComponent().c_str());
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                      ->AddInstallComponent(bundleArgs.GetComponent().c_str());
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-               ->AddInstallComponent(privateHeaderArgs.GetComponent().c_str());
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                ->AddInstallComponent(publicHeaderArgs.GetComponent().c_str());
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                    ->AddInstallComponent(resourceArgs.GetComponent().c_str());
+  if (installsArchive)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                       ->AddInstallComponent(archiveArgs.GetComponent().c_str());
+    }
+  if (installsLibrary)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                       ->AddInstallComponent(libraryArgs.GetComponent().c_str());
+    }
+  if (installsRuntime)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                       ->AddInstallComponent(runtimeArgs.GetComponent().c_str());
+    }
+  if (installsFramework)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                     ->AddInstallComponent(frameworkArgs.GetComponent().c_str());
+    }
+  if (installsBundle)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                        ->AddInstallComponent(bundleArgs.GetComponent().c_str());
+    }
+  if (installsPrivateHeader)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                 ->AddInstallComponent(privateHeaderArgs.GetComponent().c_str());
+    }
+  if (installsPublicHeader)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                  ->AddInstallComponent(publicHeaderArgs.GetComponent().c_str());
+    }
+  if (installsResource)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                      ->AddInstallComponent(resourceArgs.GetComponent().c_str());
+    }
 
   return true;
 }

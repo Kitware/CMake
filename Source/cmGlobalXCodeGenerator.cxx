@@ -704,7 +704,14 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         }
       else
         {
-        sourceFiles.push_back(xsf);
+        // Include this file in the build if it has a known language
+        // and has not been listed as an ignored extension for this
+        // generator.
+        if(this->CurrentLocalGenerator->GetSourceFileLanguage(**i) &&
+           !this->IgnoreFile((*i)->GetExtension().c_str()))
+          {
+          sourceFiles.push_back(xsf);
+          }
         }
       }
 
@@ -1475,13 +1482,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
       {
       productType = "com.apple.product-type.application";
-      std::string plist = this->CurrentMakefile->GetCurrentOutputDirectory();
-      plist += cmake::GetCMakeFilesDirectory();
-      plist += "/";
-      plist += target.GetName();
-      plist += "Info.plist";
+      std::string plist = this->ComputeInfoPListLocation(target);
+      // Xcode will create the final version of Info.plist at build time,
+      // so let it replace the executable name.  This avoids creating
+      // a per-configuration Info.plist file.
       this->CurrentLocalGenerator
-        ->GenerateAppleInfoPList(&target, productName.c_str(), plist.c_str());
+        ->GenerateAppleInfoPList(&target, "$(EXECUTABLE_NAME)",
+                                 plist.c_str());
       std::string path =
         this->ConvertToRelativeForXCode(plist.c_str());
       buildSettings->AddAttribute("INFOPLIST_FILE", 
@@ -2209,11 +2216,8 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
       // MACOSX_BUNDLE file
       if(cmtarget.GetPropertyAsBool("MACOSX_BUNDLE"))
         {
-        std::string plistFile =
-          this->CurrentMakefile->GetCurrentOutputDirectory();
-        plistFile += "/Info.plist";
-        cmSourceFile* sf =
-          this->CurrentMakefile->GetOrCreateSource(plistFile.c_str(), true);
+        std::string plist = this->ComputeInfoPListLocation(cmtarget);
+        cmSourceFile* sf = mf->GetOrCreateSource(plist.c_str(), true);
         cmtarget.AddSourceFile(sf);
         }
 
@@ -2402,6 +2406,13 @@ void cmGlobalXCodeGenerator
   this->RootObject->AddAttribute("buildStyles", listObjs);
   this->RootObject->AddAttribute("hasScannedForEncodings",
                              this->CreateString("0"));
+  // Point Xcode at the top of the source tree.
+  {
+  std::string proot = root->GetMakefile()->GetCurrentDirectory();
+  proot = this->ConvertToRelativeForXCode(proot.c_str());
+  this->RootObject->AddAttribute("projectRoot",
+                                 this->CreateString(proot.c_str()));
+  }
   cmXCodeObject* configlist = 
     this->CreateObject(cmXCodeObject::XCConfigurationList);
   cmXCodeObject* buildConfigurations =
@@ -2582,9 +2593,14 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
          t->GetType() == cmTarget::SHARED_LIBRARY ||
          t->GetType() == cmTarget::MODULE_LIBRARY)
         {
+        std::string tfull = t->GetFullPath(configName);
+        if(t->IsAppBundleOnApple())
+          {
+          tfull += ".app/Contents/MacOS/";
+          tfull += t->GetFullName(configName);
+          }
         makefileStream << "\\\n\t" <<
-          this->ConvertToRelativeForMake(
-            t->GetFullPath(configName).c_str());
+          this->ConvertToRelativeForMake(tfull.c_str());
         }
       }
     makefileStream << "\n\n"; 
@@ -2640,6 +2656,11 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         {
         // Create a rule for this target.
         std::string tfull = t->GetFullPath(configName);
+        if(t->IsAppBundleOnApple())
+          {
+          tfull += ".app/Contents/MacOS/";
+          tfull += t->GetFullName(configName);
+          }
         makefileStream << this->ConvertToRelativeForMake(tfull.c_str()) 
                        << ":";
 
@@ -2960,4 +2981,16 @@ void cmGlobalXCodeGenerator::AppendDefines(std::string& defs,
     // Close single quote.
     defs += "'";
     }
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGlobalXCodeGenerator::ComputeInfoPListLocation(cmTarget& target)
+{
+  std::string plist = target.GetMakefile()->GetCurrentOutputDirectory();
+  plist += cmake::GetCMakeFilesDirectory();
+  plist += "/";
+  plist += target.GetName();
+  plist += ".dir/Info.plist";
+  return plist;
 }

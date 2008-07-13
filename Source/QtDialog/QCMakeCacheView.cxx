@@ -151,7 +151,7 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
 
 bool QCMakeCacheView::event(QEvent* e)
 {
-  if(e->type() == QEvent::Resize)
+  if(e->type() == QEvent::Show)
     {
     this->header()->setDefaultSectionSize(this->viewport()->width()/2);
     }

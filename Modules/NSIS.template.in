@@ -37,6 +37,8 @@
   ;Set compression
   SetCompressor @CPACK_NSIS_COMPRESSOR@
    
+@CPACK_NSIS_DEFINES@   
+   
   !include Sections.nsh
   
 ;--- Component support macros: ---
@@ -60,6 +62,11 @@ Var AR_RegFlags
   IntOp $R0 0 + $${VarName}
 !macroend
 
+; Sets the value of a variable
+!macro StoreVar VarName IntValue
+  IntOp $${VarName} 0 + ${IntValue}
+!macroend
+
 !macro InitSection SecName
   ;  This macro reads component installed flag from the registry and
   ;changes checked state of the section on the components page.
@@ -76,9 +83,13 @@ Var AR_RegFlags
   IntOp $AR_SecFlags $AR_SecFlags & 0xFFFE  ;Turn lowest (enabled) bit off
   IntOp $AR_SecFlags $AR_RegFlags | $AR_SecFlags      ;Change lowest bit
 
+  ; Note whether this component was installed before
+  !insertmacro StoreVar ${SecName}_was_installed $AR_RegFlags
+  IntOp $R0 $AR_RegFlags & $AR_RegFlags
+  
   ;Writing modified flags
   SectionSetFlags ${${SecName}} $AR_SecFlags
- 
+  
  "default_${SecName}:"
  !insertmacro LoadSectionSelectedIntoVar ${SecName} ${SecName}_selected
 !macroend
@@ -461,6 +472,33 @@ Function ConditionalAddToRegisty
 FunctionEnd
 
 ;--------------------------------
+
+!ifdef CPACK_USES_DOWNLOAD
+Function DownloadFile
+    IfFileExists $INSTDIR\* +2
+    CreateDirectory $INSTDIR
+    Pop $0
+
+    ; Skip if already downloaded
+    IfFileExists $INSTDIR\$0 0 +2
+    Return
+
+    StrCpy $1 "@CPACK_DOWNLOAD_SITE@"
+
+  try_again:
+    NSISdl::download "$1/$0" "$INSTDIR\$0"
+    
+    Pop $1
+    StrCmp $1 "success" success
+    StrCmp $1 "Cancelled" cancel
+    MessageBox MB_OK "Download failed: $1"
+  cancel:
+    Return
+  success:
+FunctionEnd
+!endif
+
+;--------------------------------
 ; Installation types
 @CPACK_NSIS_INSTALLATION_TYPES@
 
@@ -519,7 +557,7 @@ Section "-Core installation"
   ;list of directories here in sync with the RMDir commands below.
   SetOutPath "$INSTDIR"
   @CPACK_NSIS_FULL_INSTALL@
-
+  
   ;Store installation folder
   WriteRegStr SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "" $INSTDIR
   
@@ -537,7 +575,20 @@ Section "-Core installation"
   Push "UninstallString"
   Push "$INSTDIR\Uninstall.exe"
   Call ConditionalAddToRegisty
+  Push "NoRepair"
+  Push "1"
+  Call ConditionalAddToRegisty
+  
+  !ifdef CPACK_NSIS_ADD_REMOVE
+  ;Create add/remove functionality
   Push "ModifyPath"
+  Push "$INSTDIR\AddRemove.exe"
+  Call ConditionalAddToRegisty
+  !else
+  Push "NoModify"
+  Push "1"
+  Call ConditionalAddToRegisty
+  !endif
   
   ; Optional registration
   Push "DisplayIcon"
@@ -640,6 +691,23 @@ FunctionEnd
 Section -FinishComponents
   ;Removes unselected components and writes component status to registry
   !insertmacro SectionList "FinishSection"
+  
+!ifdef CPACK_NSIS_ADD_REMOVE  
+  ; Get the name of the installer executable
+  System::Call 'kernel32::GetModuleFileNameA(i 0, t .R0, i 1024) i r1'
+  StrCpy $R3 $R0
+  
+  ; Strip off the last 13 characters, to see if we have AddRemove.exe
+  StrLen $R1 $R0
+  IntOp $R1 $R0 - 13
+  StrCpy $R2 $R0 13 $R1
+  StrCmp $R2 "AddRemove.exe" addremove_installed
+  
+  ; We're not running AddRemove.exe, so install it
+  CopyFiles $R3 $INSTDIR\AddRemove.exe
+  
+  addremove_installed:
+!endif
 SectionEnd
 ;--- End of Add/Remove callback functions ---
 
@@ -673,6 +741,11 @@ Section "Uninstall"
   ;Keep the list of directories here in sync with the File commands above.
 @CPACK_NSIS_DELETE_FILES@
 @CPACK_NSIS_DELETE_DIRECTORIES@
+
+!ifdef CPACK_NSIS_ADD_REMOVE  
+  ;Remove the add/remove program
+  Delete "$INSTDIR\AddRemove.exe"
+!endif
 
   ;Remove the uninstaller itself.
   Delete "$INSTDIR\Uninstall.exe"

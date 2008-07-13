@@ -1,3 +1,18 @@
+Changes in CMake 2.6.1 RC 7
+- More fixes for CPack components functionality
+- Fixes for Xcode generater #7277 #7044, do not compile foo.txt.
+  Rebuild application bundles when a library changes. Set the project
+  location for Xcode 3.1
+- Do not automatically add EXECUTABLE_OUTPUT_PATH to cache.
+- New tree view in cmake-gui
+- FindBoost.cmake, find boost as installed by the BoostPro/Boost Consulting 
+  installers on Windows. And cleanup FindBoost module, fixing several small 
+  bugs and providing better diagnostic information when things go wrong.
+- Fix FindwxWidgets.cmake to find richtext library
+- Fix FindQt4.cmake with empty qconfig.pri files.  Fixes #7287.
+- Fix add/remove program version string again...
+- Fix column width in cmake-gui
+
 Changes in CMake 2.6.1 RC 6
 - Fix DEFINITIONS property to be compatible with 2.4
 - Fix escaping of $ for visual studio
@@ -17,7 +32,7 @@ Changes in CMake 2.6.1 RC 5
 - Fix nmake/make with visual studio compiler to handle long link lines
 - Fix FLTK_WRAP_UI to better notice when mistakes are made with the target name
 - Fix spelling error EnableFiberSafeOptimizations
-- 
+
 Changes in CMake 2.6.1 RC 4
 - Change to find_*, a new HINTS keyword was added to avoid the
   need for NO_DEFAULT_PATH, and a repeated call to find_*

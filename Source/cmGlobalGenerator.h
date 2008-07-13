@@ -139,6 +139,9 @@ public:
 
   void AddInstallComponent(const char* component);
 
+  const std::set<cmStdString>* GetInstallComponents() const 
+  { return &InstallComponents; }
+
   ///! Add one installed target to the sets of the exports
   void AddTargetToExports(const char* exportSet, cmTarget* target, 
                           cmInstallTargetGenerator* archive,

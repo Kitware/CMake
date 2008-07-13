@@ -38,6 +38,9 @@ bool cmInstallProgramsCommand
     this->FinalArgs.push_back(*s);
     }  
   
+  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+                       ->AddInstallComponent("Unspecified");
+
   return true;
 }
 
@@ -87,7 +90,7 @@ void cmInstallProgramsCommand::FinalPass()
   // Use a file install generator.
   const char* no_permissions = "";
   const char* no_rename = "";
-  const char* no_component = "";
+  const char* no_component = "Unspecified";
   std::vector<std::string> no_configurations;
   this->Makefile->AddInstallGenerator(
     new cmInstallFilesGenerator(this->Files,
