@@ -452,7 +452,6 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     lg->AppendFlags(flags, cmtarget.GetProperty("COMPILE_FLAGS"));
     }
   lg->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
-  cmSystemTools::ReplaceString(flags, "\"", "\\\"");
 
   // Add per-source definitions.
   this->AppendDefines(flags, sf->GetProperty("COMPILE_DEFINITIONS"), true);
@@ -1297,9 +1296,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   this->CurrentLocalGenerator->
     AppendFlags(defFlags,
                 this->CurrentMakefile->GetDefineFlags());
-  cmSystemTools::ReplaceString(defFlags, "\"", "\\\"");
-  cmSystemTools::ReplaceString(flags, "\"", "\\\"");
-  cmSystemTools::ReplaceString(cflags, "\"", "\\\"");
 
   // Add preprocessor definitions for this target and configuration.
   std::string ppDefs;
