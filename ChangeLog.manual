@@ -1,3 +1,6 @@
+Changes in CMake 2.6.1 RC 8
+- Fix build problem with missing cpack file
+
 Changes in CMake 2.6.1 RC 7
 - More fixes for CPack components functionality
 - Fixes for Xcode generater #7277 #7044, do not compile foo.txt.
