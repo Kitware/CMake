@@ -12,8 +12,8 @@
 # when new Boost versions are released.
 #
 # Currently this module searches for the following version numbers:
-# 1.33, 1.33.0, 1.33.1, 1.34, 1.34.0, 1.34.1, 1.35, 1.35.0, 1.35.1, 1.36.0,
-# 1.36.1
+# 1.33, 1.33.0, 1.33.1, 1.34, 1.34.0, 1.34.1, 1.35, 1.35.0, 1.35.1, 1.36, 
+# 1.36.0, 1.36.1
 #
 # The components list needs to be the actual names of boost libraries, that is
 # the part of the actual library files that differ on different libraries. So
@@ -36,7 +36,7 @@
 #                                the boost include directory. The default list
 #                                of version numbers is:
 #                                1.33, 1.33.0, 1.33.1, 1.34, 1.34.0, 1.34.1, 
-#                                1.35, 1.35.0, 1.35.1, 1.36.0, 1.36.1
+#                                1.35, 1.35.0, 1.35.1, 1.36, 1.36.0, 1.36.1
 #                                If you want to look for an older or newer
 #                                version set this variable to a list of
 #                                strings, where each string contains a number, i.e.
@@ -105,8 +105,8 @@ if (Boost_FIND_VERSION_EXACT)
   endif (Boost_FIND_VERSION_PATCH)
 else (Boost_FIND_VERSION_EXACT)
   set( _boost_TEST_VERSIONS ${Boost_ADDITIONAL_VERSIONS} 
-    "1.36.1" "1.36.0" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0" "1.34" "1.33.1"
-    "1.33.0" "1.33" )
+    "1.36.1" "1.36.0" "1.36" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0" 
+    "1.34" "1.33.1" "1.33.0" "1.33" )
 endif (Boost_FIND_VERSION_EXACT)
 
 # The reason that we failed to find Boost. This will be set to a

@@ -1,3 +1,6 @@
+Changes in CMake 2.6.1 RC 9
+- Fix bug # 7316 Xcode double escaped define strings
+- FindBoost can now find the upcoming Boost 1.46
 Changes in CMake 2.6.1 RC 8
 - Fix build problem with missing cpack file
 
