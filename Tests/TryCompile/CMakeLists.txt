@@ -26,38 +26,6 @@ MACRO(TEST_EXPECT_CONTAINS command expected)
 ENDMACRO(TEST_EXPECT_CONTAINS command expected)
 
 
-# Write a simple test program with an include file
-WRITE_FILE( ${CMAKE_BINARY_DIR}/CMakeTmp/my_include.h "#define TEST_VALUE 0\n")
-WRITE_FILE( ${CMAKE_BINARY_DIR}/my_test.cxx "#include \"my_include.h\"\nint main() { return TEST_VALUE; }")
-
-SET(INC_STRING "-I  \"${CMAKE_BINARY_DIR}/CMakeTmp\"")
-# Removing the quotes fixes the Xcode 3 bug, but this
-# will fail if ${CMAKE_BINARY_DIR} contains an spaces
-# SET(INC_STRING "-I ${CMAKE_BINARY_DIR}/CMakeTmp")
-
-TRY_RUN(my_test my_test_COMPILED
-        ${CMAKE_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}/my_test.cxx
-        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${INC_STRING}
-        OUTPUT_VARIABLE OUTPUT)
-
-
-# Display the results of the test and write compilation errors to a log
-IF(NOT my_test_COMPILED)
-  MESSAGE(FATAL_ERROR "Performing Try-Run - Test Compilation Failed")
-  WRITE_FILE(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-    "Performing Try-Run my_test failed to compile with the following output:\n"
-    "${OUTPUT}\n" APPEND)
-ELSE(NOT my_test_COMPILED)
-  IF(my_test)
-    MESSAGE("The test compiled but failed at run time")
-  ELSE(my_test)
-    MESSAGE("The test compiled and passed")
-  ENDIF(my_test)
-ENDIF(NOT my_test_COMPILED)
-
-
-
 # try to compile a file that should compile
 # also check that COPY_FILE works
 TRY_COMPILE(SHOULD_PASS
