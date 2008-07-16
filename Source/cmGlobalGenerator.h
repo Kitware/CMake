@@ -264,6 +264,7 @@ protected:
                         projectTargets);
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);
+  void FillExtensionToLanguageMap(const char* l, cmMakefile* mf);
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS();
 
