@@ -1,3 +1,7 @@
+Changes in CMake 2.6.1 RC 10
+- Add a fix for bug # 7340, CMAKE_USER_MAKE_RULES_OVERRIDE was
+  not able to support a try-compile in cmake 2.6
+- Remove bad test for bug  # 7316 
 Changes in CMake 2.6.1 RC 9
 - Fix bug # 7316 Xcode double escaped define strings
 - FindBoost can now find the upcoming Boost 1.46

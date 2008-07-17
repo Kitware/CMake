@@ -559,6 +559,11 @@ for checking whether the language is already enabled. After setting this
 flag still the values from the cmake variables have to be copied into the
 internal maps, this is done in SetLanguageEnabledMaps() which is called
 after the system- and compiler specific files have been loaded.
+
+This split was done originally so that compiler-specific configuration
+files could change the object file extension
+(CMAKE_<LANG>_OUTPUT_EXTENSION) before the CMake variables were copied
+to the C++ maps.
 */
 void cmGlobalGenerator::SetLanguageEnabled(const char* l, cmMakefile* mf)
 {
@@ -566,9 +571,16 @@ void cmGlobalGenerator::SetLanguageEnabled(const char* l, cmMakefile* mf)
   this->SetLanguageEnabledMaps(l, mf);
 }
 
-void cmGlobalGenerator::SetLanguageEnabledFlag(const char* l, cmMakefile*)
+void cmGlobalGenerator::SetLanguageEnabledFlag(const char* l, cmMakefile* mf)
 {
   this->LanguageEnabled[l] = true;
+
+  // Fill the language-to-extension map with the current variable
+  // settings to make sure it is available for the try_compile()
+  // command source file signature.  In SetLanguageEnabledMaps this
+  // will be done again to account for any compiler- or
+  // platform-specific entries.
+  this->FillExtensionToLanguageMap(l, mf);
 }
 
 void cmGlobalGenerator::SetLanguageEnabledMaps(const char* l, cmMakefile* mf)
@@ -627,11 +639,29 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const char* l, cmMakefile* mf)
       }
     }
 
-  std::string extensionsVar = std::string("CMAKE_") +
-    std::string(l) + std::string("_SOURCE_FILE_EXTENSIONS");
+  // The map was originally filled by SetLanguageEnabledFlag, but
+  // since then the compiler- and platform-specific files have been
+  // loaded which might have added more entries.
+  this->FillExtensionToLanguageMap(l, mf);
+
   std::string ignoreExtensionsVar = std::string("CMAKE_") +
     std::string(l) + std::string("_IGNORE_EXTENSIONS");
   std::string ignoreExts = mf->GetSafeDefinition(ignoreExtensionsVar.c_str());
+  std::vector<std::string> extensionList;
+  cmSystemTools::ExpandListArgument(ignoreExts, extensionList);
+  for(std::vector<std::string>::iterator i = extensionList.begin();
+      i != extensionList.end(); ++i)
+    {
+    this->IgnoreExtensions[*i] = true;
+    }
+
+}
+
+void cmGlobalGenerator::FillExtensionToLanguageMap(const char* l,
+                                                   cmMakefile* mf)
+{
+  std::string extensionsVar = std::string("CMAKE_") +
+    std::string(l) + std::string("_SOURCE_FILE_EXTENSIONS");
   std::string exts = mf->GetSafeDefinition(extensionsVar.c_str());
   std::vector<std::string> extensionList;
   cmSystemTools::ExpandListArgument(exts, extensionList);
@@ -640,13 +670,6 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const char* l, cmMakefile* mf)
     {
     this->ExtensionToLanguage[*i] = l;
     }
-  cmSystemTools::ExpandListArgument(ignoreExts, extensionList);
-  for(std::vector<std::string>::iterator i = extensionList.begin();
-      i != extensionList.end(); ++i)
-    {
-    this->IgnoreExtensions[*i] = true;
-    }
-
 }
 
 bool cmGlobalGenerator::IgnoreFile(const char* l)
