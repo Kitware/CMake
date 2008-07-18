@@ -1,3 +1,5 @@
+Changes in CMake 2.6.1 RC 11
+- Fix curl build issue with Xcode 3.1
 Changes in CMake 2.6.1 RC 10
 - Add a fix for bug # 7340, CMAKE_USER_MAKE_RULES_OVERRIDE was
   not able to support a try-compile in cmake 2.6

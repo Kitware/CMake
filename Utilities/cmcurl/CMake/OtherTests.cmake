@@ -1,4 +1,4 @@
-INCLUDE(CheckCSourceCompiles)
+INCLUDE(CurlCheckCSourceCompiles)
 SET(EXTRA_DEFINES "__unused1\n#undef inline\n#define __unused2")
 SET(HEADER_INCLUDES)
 SET(headers_hack)
@@ -28,7 +28,7 @@ ENDIF(HAVE_WINDOWS_H)
 
 SET(EXTRA_DEFINES_BACKUP "${EXTRA_DEFINES}")
 SET(EXTRA_DEFINES "${EXTRA_DEFINES_BACKUP}\n${headers_hack}\n${extern_line}\n#define __unused5")
-CHECK_C_SOURCE_COMPILES("recv(0, 0, 0, 0)" curl_cv_recv)
+CURL_CHECK_C_SOURCE_COMPILES("recv(0, 0, 0, 0)" curl_cv_recv)
 IF(curl_cv_recv)
   #    AC_CACHE_CHECK([types of arguments and return type for recv],
   #[curl_cv_func_recv_args], [
@@ -44,7 +44,7 @@ IF(curl_cv_recv)
                 SET(curl_cv_func_recv_test "UNKNOWN")
                 SET(extern_line "extern ${recv_retv} ${signature_call_conv} recv(${recv_arg1}, ${recv_arg2}, ${recv_arg3}, ${recv_arg4})\;")
                 SET(EXTRA_DEFINES "${EXTRA_DEFINES_BACKUP}\n${headers_hack}\n${extern_line}\n#define __unused5")
-                CHECK_C_SOURCE_COMPILES("
+                CURL_CHECK_C_SOURCE_COMPILES("
                     ${recv_arg1} s=0;
                     ${recv_arg2} buf=0;
                     ${recv_arg3} len=0;
@@ -91,7 +91,7 @@ ENDIF(curl_cv_recv)
 SET(curl_cv_func_recv_args "${curl_cv_func_recv_args}" CACHE INTERNAL "Arguments for recv")
 SET(HAVE_RECV 1)
 
-CHECK_C_SOURCE_COMPILES("send(0, 0, 0, 0)" curl_cv_send)
+CURL_CHECK_C_SOURCE_COMPILES("send(0, 0, 0, 0)" curl_cv_send)
 IF(curl_cv_send)
   #    AC_CACHE_CHECK([types of arguments and return type for send],
   #[curl_cv_func_send_args], [
@@ -107,7 +107,7 @@ IF(curl_cv_send)
                 SET(curl_cv_func_send_test "UNKNOWN")
                 SET(extern_line "extern ${send_retv} ${signature_call_conv} send(${send_arg1}, ${send_arg2}, ${send_arg3}, ${send_arg4})\;")
                 SET(EXTRA_DEFINES "${EXTRA_DEFINES_BACKUP}\n${headers_hack}\n${extern_line}\n#define __unused5")
-                CHECK_C_SOURCE_COMPILES("
+                CURL_CHECK_C_SOURCE_COMPILES("
                     ${send_arg1} s=0;
                     ${send_arg2} buf=0;
                     ${send_arg3} len=0;
@@ -161,7 +161,7 @@ SET(curl_cv_func_send_args "${curl_cv_func_send_args}" CACHE INTERNAL "Arguments
 SET(HAVE_SEND 1)
 
 SET(EXTRA_DEFINES "${EXTRA_DEFINES}\n${headers_hack}\n#define __unused5")
-CHECK_C_SOURCE_COMPILES("int flag = MSG_NOSIGNAL" HAVE_MSG_NOSIGNAL)
+CURL_CHECK_C_SOURCE_COMPILES("int flag = MSG_NOSIGNAL" HAVE_MSG_NOSIGNAL)
 
 SET(EXTRA_DEFINES "__unused1\n#undef inline\n#define __unused2")
 SET(HEADER_INCLUDES)
@@ -190,16 +190,16 @@ ELSE(HAVE_WINDOWS_H)
   add_header_include(HAVE_TIME_H "time.h")
 ENDIF(HAVE_WINDOWS_H)
 SET(EXTRA_DEFINES "${EXTRA_DEFINES}\n${headers_hack}\n#define __unused5")
-CHECK_C_SOURCE_COMPILES("struct timeval ts;\nts.tv_sec  = 0;\nts.tv_usec = 0" HAVE_STRUCT_TIMEVAL)
+CURL_CHECK_C_SOURCE_COMPILES("struct timeval ts;\nts.tv_sec  = 0;\nts.tv_usec = 0" HAVE_STRUCT_TIMEVAL)
 
 
-INCLUDE(CheckCSourceRuns)
+INCLUDE(CurlCheckCSourceRuns)
 SET(EXTRA_DEFINES)
 SET(HEADER_INCLUDES)
 IF(HAVE_SYS_POLL_H)
   SET(HEADER_INCLUDES "sys/poll.h")
 ENDIF(HAVE_SYS_POLL_H)
-CHECK_C_SOURCE_RUNS("return poll((void *)0, 0, 10 /*ms*/)" HAVE_POLL_FINE)
+CURL_CHECK_C_SOURCE_RUNS("return poll((void *)0, 0, 10 /*ms*/)" HAVE_POLL_FINE)
 
 SET(HAVE_SIG_ATOMIC_T 1)
 SET(EXTRA_DEFINES)
@@ -210,7 +210,7 @@ IF(HAVE_SIGNAL_H)
 ENDIF(HAVE_SIGNAL_H)
 CHECK_TYPE_SIZE("sig_atomic_t" SIZEOF_SIG_ATOMIC_T)
 IF(HAVE_SIZEOF_SIG_ATOMIC_T)
-  CHECK_C_SOURCE_COMPILES("static volatile sig_atomic_t dummy = 0" HAVE_SIG_ATOMIC_T_NOT_VOLATILE)
+  CURL_CHECK_C_SOURCE_COMPILES("static volatile sig_atomic_t dummy = 0" HAVE_SIG_ATOMIC_T_NOT_VOLATILE)
   IF(NOT HAVE_SIG_ATOMIC_T_NOT_VOLATILE)
     SET(HAVE_SIG_ATOMIC_T_VOLATILE 1)
   ENDIF(NOT HAVE_SIG_ATOMIC_T_NOT_VOLATILE)
