@@ -79,6 +79,13 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      " on the final build environment. ", false, 
      "Variables that Provide Information");
   cm->DefineProperty
+    ("CMAKE_CROSSCOMPILING", cmProperty::VARIABLE,
+     "Is CMake currently cross compiling.",
+     "This variable will be set to true by CMake if CMake is cross "
+     "compiling. Specifically if the build platform is different "
+     "from the target platform.", false,
+     "Variables that Provide Information");
+  cm->DefineProperty
     ("CMAKE_CACHEFILE_DIR", cmProperty::VARIABLE,
      "The directory with the CMakeCache.txt file.",
      "This is the full path to the directory that has the "
@@ -418,14 +425,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Change Behavior");
 
   cm->DefineProperty
-    ("CMAKE_CROSSCOMPILING", cmProperty::VARIABLE,
-     "Is CMake currently cross compiling.",
-     "This variable will be set to true by CMake if CMake is cross "
-     "compiling. Specifically if the build platform is different "
-     "from the target platform.", false,
-     "Variables That Change Behavior");
-
-  cm->DefineProperty
     ("CMAKE_INSTALL_PREFIX", cmProperty::VARIABLE,
      "Install directory used by install.",
      "If \"make install\" is invoked or INSTALL is built"
@@ -441,6 +440,97 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "CMake modules. For example include commands will look "
      "in this path first for modules to include.",
      false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_PREFIX_PATH", cmProperty::VARIABLE,
+     "Path used for searching by FIND_XXX(), with appropriate suffixes added.",
+     "Specifies a path which will be used by the FIND_XXX() commands. It "
+     "contains the \"base\" directories, the FIND_XXX() commands append "
+     "appropriate subdirectories to the base directories. So FIND_PROGRAM() "
+     "adds /bin to each of the directories in the path, FIND_LIBRARY() "
+     "appends /lib to each of the directories, and FIND_PATH() and "
+     "FIND_FILE() append /include . By default it is empty, it is intended "
+     "to be set by the project. See also CMAKE_SYSTEM_PREFIX_PATH, "
+     "CMAKE_INCLUDE_PATH, CMAKE_LIBRARY_PATH, CMAKE_PROGRAM_PATH.", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_INCLUDE_PATH", cmProperty::VARIABLE,
+     "Path used for searching by FIND_FILE() and FIND_PATH().",
+     "Specifies a path which will be used both by FIND_FILE() and "
+     "FIND_PATH(). Both commands will check each of the contained directories "
+     "for the existence of the file which is currently searched. By default "
+     "it is empty, it is intended to be set by the project. See also "
+     "CMAKE_SYSTEM_INCLUDE_PATH, CMAKE_PREFIX_PATH.", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_LIBRARY_PATH", cmProperty::VARIABLE,
+     "Path used for searching by FIND_LIBRARY().",
+     "Specifies a path which will be used by FIND_LIBRARY(). FIND_LIBRARY() "
+     "will check each of the contained directories for the existence of the "
+     "library which is currently searched. By default it is empty, it is "
+     "intended to be set by the project. See also CMAKE_SYSTEM_LIBRARY_PATH, "
+     "CMAKE_PREFIX_PATH.", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_PROGRAM_PATH", cmProperty::VARIABLE,
+     "Path used for searching by FIND_PROGRAM().",
+     "Specifies a path which will be used by FIND_PROGRAM(). FIND_PROGRAM() "
+     "will check each of the contained directories for the existence of the "
+     "program which is currently searched. By default it is empty, it is "
+     "intended to be set by the project. See also CMAKE_SYSTEM_PROGRAM_PATH, "
+     " CMAKE_PREFIX_PATH.", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_SYSTEM_PREFIX_PATH", cmProperty::VARIABLE,
+     "Path used for searching by FIND_XXX(), with appropriate suffixes added.",
+     "Specifies a path which will be used by the FIND_XXX() commands. It "
+     "contains the \"base\" directories, the FIND_XXX() commands append "
+     "appropriate subdirectories to the base directories. So FIND_PROGRAM() "
+     "adds /bin to each of the directories in the path, FIND_LIBRARY() "
+     "appends /lib to each of the directories, and FIND_PATH() and "
+     "FIND_FILE() append /include . By default this contains the standard "
+     "directories for the current system. It is NOT intended "
+     "to be modified by the project, use CMAKE_PREFIX_PATH for this. See also "
+     "CMAKE_SYSTEM_INCLUDE_PATH, CMAKE_SYSTEM_LIBRARY_PATH, "
+     "CMAKE_SYSTEM_PROGRAM_PATH.", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_SYSTEM_INCLUDE_PATH", cmProperty::VARIABLE,
+     "Path used for searching by FIND_FILE() and FIND_PATH().",
+     "Specifies a path which will be used both by FIND_FILE() and "
+     "FIND_PATH(). Both commands will check each of the contained directories "
+     "for the existence of the file which is currently searched. By default "
+     "it contains the standard directories for the current system. It is "
+     "NOT intended to be modified by the project, use CMAKE_INCLUDE_PATH "
+     "for this. See also CMAKE_SYSTEM_PREFIX_PATH.", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_SYSTEM_LIBRARY_PATH", cmProperty::VARIABLE,
+     "Path used for searching by FIND_LIBRARY().",
+     "Specifies a path which will be used by FIND_LIBRARY(). FIND_LIBRARY() "
+     "will check each of the contained directories for the existence of the "
+     "library which is currently searched. By default it contains the "
+     "standard directories for the current system. It is NOT intended to be "
+     "modified by the project, use CMAKE_SYSTEM_LIBRARY_PATH for this. See "
+     "also CMAKE_SYSTEM_PREFIX_PATH.", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_SYSTEM_PROGRAM_PATH", cmProperty::VARIABLE,
+     "Path used for searching by FIND_PROGRAM().",
+     "Specifies a path which will be used by FIND_PROGRAM(). FIND_PROGRAM() "
+     "will check each of the contained directories for the existence of the "
+     "program which is currently searched. By default it contains the "
+     "standard directories for the current system. It is NOT intended to be "
+     "modified by the project, use CMAKE_PROGRAM_PATH for this. See also "
+     "CMAKE_SYSTEM_PREFIX_PATH.", false,
      "Variables That Change Behavior");
 
   cm->DefineProperty
