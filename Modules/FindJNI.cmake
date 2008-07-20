@@ -21,6 +21,7 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
   $ENV{JAVA_HOME}/jre/lib/i386
   $ENV{JAVA_HOME}/jre/lib/amd64
+  $ENV{JAVA_HOME}/jre/lib/ppc
   /usr/lib
   /usr/local/lib
   /usr/lib/java/jre/lib/i386
@@ -29,12 +30,17 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/j2sdk1.4-sun/jre/lib/i386
   /usr/lib/j2sdk1.5-sun/jre/lib/i386
   /opt/sun-jdk-1.5.0.04/jre/lib/amd64
-  /usr/lib/java/jre/lib/amd64
   /usr/lib/jvm/java-6-sun-1.6.0.00/jre/lib/amd64
+  /usr/lib/java/jre/lib/amd64
   /usr/local/lib/java/jre/lib/amd64
   /usr/local/share/java/jre/lib/amd64
   /usr/lib/j2sdk1.4-sun/jre/lib/amd64
   /usr/lib/j2sdk1.5-sun/jre/lib/amd64
+  /usr/lib/java/jre/lib/ppc
+  /usr/local/lib/java/jre/lib/ppc
+  /usr/local/share/java/jre/lib/ppc
+  /usr/lib/j2sdk1.4-sun/jre/lib/ppc
+  /usr/lib/j2sdk1.5-sun/jre/lib/ppc
   )
 
 SET(JAVA_JVM_LIBRARY_DIRECTORIES)
@@ -135,6 +141,7 @@ FIND_PATH(JAVA_INCLUDE_PATH2 jni_md.h
   ${JAVA_AWT_INCLUDE_DIRECTORIES}
   ${JAVA_INCLUDE_PATH}/win32
   ${JAVA_INCLUDE_PATH}/linux
+  ${JAVA_INCLUDE_PATH}/freebsd
 )
 
 FIND_PATH(JAVA_AWT_INCLUDE_PATH jawt.h
