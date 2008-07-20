@@ -3,14 +3,18 @@
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
 #   
-#  JAVA_AWT_LIB_PATH     = the path to the jawt library
-#  JAVA_JVM_LIB_PATH     = the path to the jvm library
+#  JNI_INCLUDE_DIRS      = the include dirs to use
+#  JNI_LIBRARIES         = the libraries to use
+#  JAVA_AWT_LIBRARY      = the path to the jawt library
+#  JAVA_JVM_LIBRARY      = the path to the jvm library
 #  JAVA_INCLUDE_PATH     = the include path to jni.h
 #  JAVA_INCLUDE_PATH2    = the include path to jni_md.h
 #  JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
-# 
+#
+
 GET_FILENAME_COMPONENT(java_install_version
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit;CurrentVersion]" NAME)
+
 SET(JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
@@ -32,6 +36,7 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/j2sdk1.4-sun/jre/lib/amd64
   /usr/lib/j2sdk1.5-sun/jre/lib/amd64
   )
+
 SET(JAVA_JVM_LIBRARY_DIRECTORIES)
 FOREACH(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
   SET(JAVA_JVM_LIBRARY_DIRECTORIES
@@ -144,3 +149,15 @@ MARK_AS_ADVANCED(
   JAVA_INCLUDE_PATH
   JAVA_INCLUDE_PATH2
 )
+
+SET(JNI_LIBRARIES
+  ${JAVA_AWT_LIBRARY}
+  ${JAVA_JVM_LIBRARY}
+)
+
+SET(JNI_INCLUDE_DIRS
+  ${JAVA_INCLUDE_PATH}
+  ${JAVA_INCLUDE_PATH2}
+  ${JAVA_AWT_INCLUDE_PATH}
+)
+
