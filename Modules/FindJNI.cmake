@@ -24,6 +24,7 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   $ENV{JAVA_HOME}/jre/lib/ppc
   /usr/lib
   /usr/local/lib
+  /usr/lib/jvm/java/lib
   /usr/lib/java/jre/lib/i386
   /usr/local/lib/java/jre/lib/i386
   /usr/local/share/java/jre/lib/i386
@@ -63,6 +64,7 @@ SET(JAVA_AWT_INCLUDE_DIRECTORIES
   /usr/local/include
   /usr/lib/java/include
   /usr/local/lib/java/include
+  /usr/lib/jvm/java/include
   /usr/lib/jvm/java-6-sun-1.6.0.00/include
   /usr/local/share/java/include
   /usr/lib/j2sdk1.4-sun/include
