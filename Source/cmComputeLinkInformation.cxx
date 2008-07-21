@@ -1078,8 +1078,47 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
     this->Items.push_back(Item(this->LibLinkFileFlag, false));
     }
 
+  // Full path libraries should have an extension.  CMake 2.4 would
+  // add the extension after splitting the file off of the directory.
+  // Some existing projects depended on this to build correctly
+  // because they left off the extension of an otherwise full-path
+  // library.  This worked with CMake 2.4 but only for VS IDE builds
+  // because the file-level dependency added to the Makefile would not
+  // be found.  Nevertheless, some projects have this mistake but work
+  // because they build only with the VS IDE.  We need to support them
+  // here by adding the missing extension.
+  std::string final_item = item;
+  if(strstr(this->GlobalGenerator->GetName(), "Visual Studio") &&
+     this->Makefile->NeedBackwardsCompatibility(2,4) &&
+     !cmSystemTools::ComparePath(
+       cmSystemTools::GetFilenameLastExtension(item).c_str(),
+       this->LibLinkSuffix.c_str()))
+    {
+    // Issue the warning at most once.
+    std::string wid = "VSIDE-LINK-EXT-";
+    wid += item;
+    if(!this->Target->GetPropertyAsBool(wid.c_str()))
+      {
+      this->Target->SetProperty(wid.c_str(), "1");
+      cmOStringStream w;
+      w << "Target \"" << this->Target->GetName() << "\" links to "
+        << "full-path item\n"
+        << "  " << item << "\n"
+        << "which does not have the proper link extension \""
+        << this->LibLinkSuffix << "\".  "
+        << "CMake is adding the missing extension because compatibility "
+        << "with CMake 2.4 is currently enabled and this case worked "
+        << "accidentally in that version.  "
+        << "The link extension should be added by the project developer.";
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      }
+
+    // Add the missing extension.
+    final_item += this->LibLinkSuffix;
+    }
+
   // Now add the full path to the library.
-  this->Items.push_back(Item(item, true));
+  this->Items.push_back(Item(final_item, true));
 }
 
 //----------------------------------------------------------------------------
