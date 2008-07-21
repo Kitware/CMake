@@ -20,7 +20,12 @@
  
 get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
 if(NOT _LANGUAGES_ MATCHES Fortran)
-  message(FATAL_ERROR "FindLAPACK is Fortran-only so Fortran must be enabled.")
+  if(LAPACK_FIND_REQUIRED)
+    message(FATAL_ERROR 
+      "FindLAPACK is Fortran-only so Fortran must be enabled.")
+  else(LAPACK_FIND_REQUIRED)
+    MESSAGE(STATUS "Looking for LAPACK... - NOT found (Fortran not enabled)")
+  endif(LAPACK_FIND_REQUIRED)
 endif(NOT _LANGUAGES_ MATCHES Fortran)
 
 include(CheckFortranFunctionExists)
