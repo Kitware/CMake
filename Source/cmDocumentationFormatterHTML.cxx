@@ -117,30 +117,37 @@ void cmDocumentationFormatterHTML
                const cmDocumentationSection &section,
                const char* name)
 {
-  if(name)
-    {
-    os << "<h2><a name=\"section_" << name << "\"/>" << name << "</h2>\n";
-    }
-
   std::string prefix = this->ComputeSectionLinkPrefix(name);
 
   const std::vector<cmDocumentationEntry> &entries = 
     section.GetEntries();
 
-  os << "<ul>\n";
-  for(std::vector<cmDocumentationEntry>::const_iterator op 
-        = entries.begin(); op != entries.end(); ++ op )
+  // skip the index if the help for only a single item (--help-command,
+  // --help-policy, --help-property, --help-module) is printed
+  bool isSingleItemHelp = ((name!=0) && (strcmp(name, "SingleItem")==0));
+
+  if (!isSingleItemHelp)
     {
-    if(op->Name.size())
+    if (name)
       {
-      os << "    <li><a href=\"#" << prefix << ":";
-      cmDocumentationPrintHTMLId(os, op->Name.c_str());
-      os << "\"><b><code>";
-      this->PrintHTMLEscapes(os, op->Name.c_str());
-      os << "</code></b></a></li>";
+      os << "<h2><a name=\"section_" << name << "\"/>" << name << "</h2>\n";
       }
+
+    os << "<ul>\n";
+    for(std::vector<cmDocumentationEntry>::const_iterator op 
+         = entries.begin(); op != entries.end(); ++ op )
+      {
+      if(op->Name.size())
+         {
+         os << "    <li><a href=\"#" << prefix << ":";
+         cmDocumentationPrintHTMLId(os, op->Name.c_str());
+         os << "\"><b><code>";
+         this->PrintHTMLEscapes(os, op->Name.c_str());
+         os << "</code></b></a></li>";
+         }
+      }
+    os << "</ul>\n" ;
     }
-  os << "</ul>\n" ;
 
   for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
       op != entries.end();)
@@ -240,6 +247,14 @@ void cmDocumentationFormatterHTML
 ::PrintIndex(std::ostream& os,
              std::vector<const cmDocumentationSection *>& sections)
 {
+  // skip the index if only the help for a single item is printed
+  if ((sections.size() == 1) 
+       && (sections[0]->GetName(this->GetForm()) != 0 )
+       && (std::string(sections[0]->GetName(this->GetForm())) == "SingleItem"))
+    {
+    return;
+    }
+
   os << "<h2><a name=\"section_Index\"/>Master Index</h2>\n";
   os << "<ul>\n";
   for(unsigned int i=0; i < sections.size(); ++i)
