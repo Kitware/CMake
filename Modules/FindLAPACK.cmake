@@ -24,7 +24,8 @@ if(NOT _LANGUAGES_ MATCHES Fortran)
     message(FATAL_ERROR 
       "FindLAPACK is Fortran-only so Fortran must be enabled.")
   else(LAPACK_FIND_REQUIRED)
-    MESSAGE(STATUS "Looking for LAPACK... - NOT found (Fortran not enabled)")
+    message(STATUS "Looking for LAPACK... - NOT found (Fortran not enabled)")
+    return()
   endif(LAPACK_FIND_REQUIRED)
 endif(NOT _LANGUAGES_ MATCHES Fortran)
 

@@ -21,7 +21,8 @@ if(NOT _LANGUAGES_ MATCHES Fortran)
   if(BLAS_FIND_REQUIRED)
     message(FATAL_ERROR "FindBLAS is Fortran-only so Fortran must be enabled.")
   else(BLAS_FIND_REQUIRED)
-    MESSAGE(STATUS "Looking for BLAS... - NOT found (Fortran not enabled)")
+    message(STATUS "Looking for BLAS... - NOT found (Fortran not enabled)") #
+    return()
   endif(BLAS_FIND_REQUIRED)
 endif(NOT _LANGUAGES_ MATCHES Fortran)
 
