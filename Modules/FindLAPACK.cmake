@@ -75,9 +75,12 @@ if(_libraries_work)
   #message("DEBUG: ${LIBRARIES} = ${${LIBRARIES}}")
 endif(_libraries_work)
 
-if(NOT _libraries_work)
-  set(${LIBRARIES} FALSE)
-endif(NOT _libraries_work)
+
+ if(_libraries_work)
+   set(${LIBRARIES} ${${LIBRARIES}} ${_blas})
+ else(_libraries_work)
+    set(${LIBRARIES} FALSE)
+ endif(_libraries_work)
 
 endmacro(Check_Lapack_Libraries)
 

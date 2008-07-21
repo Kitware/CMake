@@ -8,7 +8,6 @@
 # modify the way the check is run:
 #
 #  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
-#
 
 macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
   if(NOT DEFINED ${VARIABLE})
@@ -24,6 +23,7 @@ macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
     "
       program TESTFortran
       external ${FUNCTION}
+      call ${FUNCTION}()
       end
     "
     )
