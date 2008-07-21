@@ -1,4 +1,5 @@
-# - Find LAPACK library
+# - Find a Fortran LAPACK library
+# N.B. Fortran only.  This module cannot be used to find a C LAPACK library.
 # This module finds an installed fortran library that implements the LAPACK
 # linear-algebra interface (see http://www.netlib.org/lapack/).
 #
@@ -17,6 +18,11 @@
 
 #
  
+get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
+if(NOT _LANGUAGES_ MATCHES Fortran)
+  message(FATAL_ERROR "FindLAPACK is Fortran-only so Fortran must be enabled.")
+endif(NOT _LANGUAGES_ MATCHES Fortran)
+
 include(CheckFortranFunctionExists)
 set(LAPACK_FOUND FALSE)
 

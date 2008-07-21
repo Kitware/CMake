@@ -1,4 +1,5 @@
-# - Find BLAS library
+# - Find a Fortran BLAS library
+# N.B. Fortran only.  This module cannot be used to find a C BLAS library.
 # This module finds an installed fortran library that implements the BLAS 
 # linear-algebra interface (see http://www.netlib.org/blas/).  
 # The list of libraries searched for is taken
@@ -14,6 +15,11 @@
 #    link against to use BLAS
 #  BLAS95_LIBRARIES - uncached list of libraries (using full path name) # to link against to use BLAS95 interface
 #
+
+get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
+if(NOT _LANGUAGES_ MATCHES Fortran)
+  message(FATAL_ERROR "FindBLAS is Fortran-only so Fortran must be enabled.")
+endif(NOT _LANGUAGES_ MATCHES Fortran)
 
 include(CheckFortranFunctionExists)
 
@@ -65,10 +71,7 @@ macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list)
     # Test this combination of libraries.
     set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}})
     #message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-    get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
-    if(_LANGUAGES_ MATCHES Fortran)
-      check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
-    endif(_LANGUAGES_ MATCHES Fortran)
+    check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
     set(CMAKE_REQUIRED_LIBRARIES)
     mark_as_advanced(${_prefix}${_combined_name}_WORKS)
     set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
