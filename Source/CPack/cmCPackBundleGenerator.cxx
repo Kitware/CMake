@@ -36,7 +36,8 @@ int cmCPackBundleGenerator::InitializeInternal()
     std::vector<std::string>(), false);
   if(hdiutil_path.empty())
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot locate hdiutil command"
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Cannot locate hdiutil command"
       << std::endl);
     return 0;
     }
@@ -46,7 +47,8 @@ int cmCPackBundleGenerator::InitializeInternal()
     std::vector<std::string>(1, "/Developer/Tools"), false);
   if(setfile_path.empty())
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot locate SetFile command"
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Cannot locate SetFile command"
       << std::endl);
     return 0;
     }
@@ -77,13 +79,57 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
 {
   (void) files;
 
+  // Get required arguments ...
+  const std::string cpack_bundle_name = this->GetOption("CPACK_BUNDLE_NAME") ? this->GetOption("CPACK_BUNDLE_NAME") : "";
+  if(cpack_bundle_name.empty())
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "CPACK_BUNDLE_NAME must be set."
+      << std::endl);
+
+    return 0;
+    }
+
+  const std::string cpack_bundle_plist = this->GetOption("CPACK_BUNDLE_PLIST") ? this->GetOption("CPACK_BUNDLE_PLIST") : "";
+  if(cpack_bundle_plist.empty())
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "CPACK_BUNDLE_PLIST must be set."
+      << std::endl);
+
+    return 0;
+    }
+
+  const std::string cpack_bundle_icon = this->GetOption("CPACK_BUNDLE_ICON") ? this->GetOption("CPACK_BUNDLE_ICON") : "";
+  if(cpack_bundle_icon.empty())
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "CPACK_BUNDLE_ICON must be set."
+      << std::endl);
+
+    return 0;
+    }
+
+  const std::string cpack_bundle_startup_command = this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") ? this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") : "";
+  if(cpack_bundle_startup_command.empty())
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "CPACK_BUNDLE_STARTUP_COMMAND must be set."
+      << std::endl);
+
+    return 0;
+    }
+
+  // Get optional arguments ...
+  const std::string cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON") ? this->GetOption("CPACK_PACKAGE_ICON") : "";
+
   // The staging directory contains everything that will end-up inside the
   // final disk image ...
   cmOStringStream staging;
   staging << toplevel;
 
   cmOStringStream contents;
-  contents << staging.str() << "/" << this->GetOption("CPACK_BUNDLE_NAME")
+  contents << staging.str() << "/" << cpack_bundle_name
     << ".app/" << "Contents";
 
   cmOStringStream application;
@@ -92,55 +138,56 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
   cmOStringStream resources;
   resources << contents.str() << "/" << "Resources";
 
-  // Install a user-provided bundle metadata file ...
-  if(this->GetOption("CPACK_BUNDLE_PLIST"))
+  // Install a required, user-provided bundle metadata file ...
+  cmOStringStream plist_source;
+  plist_source << cpack_bundle_plist;
+
+  cmOStringStream plist_target;
+  plist_target << contents.str() << "/" << "Info.plist";
+
+  if(!this->CopyFile(plist_source, plist_target))
     {
-    cmOStringStream plist_source;
-    plist_source << this->GetOption("CPACK_BUNDLE_PLIST");
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Error copying plist.  Check the value of CPACK_BUNDLE_PLIST."
+      << std::endl);
 
-    cmOStringStream plist_target;
-    plist_target << contents.str() << "/" << "Info.plist";
-
-    if(!this->CopyFile(plist_source, plist_target))
-      {
-      return 0;
-      }
+    return 0;
     }
 
   // Install a user-provided bundle icon ...
-  if(this->GetOption("CPACK_BUNDLE_ICON"))
+  cmOStringStream icon_source;
+  icon_source << cpack_bundle_icon;
+
+  cmOStringStream icon_target;
+  icon_target << resources.str() << "/" << cpack_bundle_name << ".icns";
+
+  if(!this->CopyFile(icon_source, icon_target))
     {
-    cmOStringStream icon_source;
-    icon_source << this->GetOption("CPACK_BUNDLE_ICON");
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Error copying bundle icon.  Check the value of CPACK_BUNDLE_ICON."
+      << std::endl);
 
-    cmOStringStream icon_target;
-    icon_target << resources.str() << "/"
-      << this->GetOption("CPACK_BUNDLE_NAME") << ".icns";
-
-    if(!this->CopyFile(icon_source, icon_target))
-      {
-      return 0;
-      }
+    return 0;
     }
 
   // Install a user-provided startup command (could be an executable or a
   // script) ...
-  if(this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND"))
+  cmOStringStream command_source;
+  command_source << cpack_bundle_startup_command;
+
+  cmOStringStream command_target;
+  command_target << application.str() << "/" << cpack_bundle_name;
+
+  if(!this->CopyFile(command_source, command_target))
     {
-    cmOStringStream command_source;
-    command_source << this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND");
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Error copying startup command.  Check the value of CPACK_BUNDLE_STARTUP_COMMAND."
+      << std::endl);
 
-    cmOStringStream command_target;
-    command_target << application.str() << "/"
-      << this->GetOption("CPACK_BUNDLE_NAME");
-
-    if(!this->CopyFile(command_source, command_target))
-      {
-      return 0;
-      }
-
-    cmSystemTools::SetPermissions(command_target.str().c_str(), 0777);
+    return 0;
     }
+
+  cmSystemTools::SetPermissions(command_target.str().c_str(), 0777);
 
   // Add a symlink to /Applications so users can drag-and-drop the bundle
   // into it
@@ -150,16 +197,20 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
     application_link.str().c_str());
 
   // Optionally add a custom volume icon ...
-  if(this->GetOption("CPACK_PACKAGE_ICON"))
+  if(!cpack_package_icon.empty())
     {
     cmOStringStream package_icon_source;
-    package_icon_source << this->GetOption("CPACK_PACKAGE_ICON");
+    package_icon_source << cpack_package_icon;
 
     cmOStringStream package_icon_destination;
     package_icon_destination << staging.str() << "/.VolumeIcon.icns";
 
     if(!this->CopyFile(package_icon_source, package_icon_destination))
       {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error copying disk volume icon.  Check the value of CPACK_PACKAGE_ICON."
+        << std::endl);
+
       return 0;
       }
     }
@@ -180,11 +231,15 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
 
   if(!this->RunCommand(temp_image_command))
     {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error generating temporary disk image."
+        << std::endl);
+
     return 0;
     }
 
   // Optionally set the custom icon flag for the image ...
-  if(this->GetOption("CPACK_PACKAGE_ICON"))
+  if(!cpack_package_icon.empty())
     {
     cmOStringStream temp_mount;
     temp_mount << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/mnt";
@@ -198,6 +253,10 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
 
     if(!this->RunCommand(attach_command))
       {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error attaching temporary disk image."
+        << std::endl);
+
       return 0;
       }
 
@@ -208,6 +267,10 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
 
     if(!this->RunCommand(setfile_command))
       {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error assigning custom icon to temporary disk image."
+        << std::endl);
+
       return 0;
       }
 
@@ -218,6 +281,10 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
 
     if(!this->RunCommand(detach_command))
       {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error detaching temporary disk image."
+        << std::endl);
+
       return 0;
       }
     }
@@ -233,63 +300,12 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
 
   if(!this->RunCommand(final_image_command))
     {
-    return 0;
-    }
-
-/*
-  // Disk image directories
-  std::string diskImageDirectory = toplevel;
-  std::string diskImageBackgroundImageDir = diskImageDirectory
-    + "/.background";
-
-  // App bundle directories
-  std::string packageDirFileName = toplevel;
-  packageDirFileName += "/";
-  packageDirFileName += this->GetOption("CPACK_PACKAGE_FILE_NAME");
-  packageDirFileName += ".app";
-  std::string contentsDirectory = packageDirFileName + "/Contents";
-  std::string resourcesDirectory = contentsDirectory + "/Resources";
-  std::string appDirectory = contentsDirectory + "/MacOS";
-
-  const char* dir = resourcesDirectory.c_str();
-  const char* appdir = appDirectory.c_str();
-  const char* contDir = contentsDirectory.c_str();
-  const char* iconFile = this->GetOption("CPACK_PACKAGE_ICON");
-  if ( iconFile )
-    {
-    std::string iconFileName = cmsys::SystemTools::GetFilenameName(iconFile);
-    if ( !cmSystemTools::FileExists(iconFile) )
-      {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find icon file: "
-        << iconFile << ". Please check CPACK_PACKAGE_ICON setting."
-        << std::endl);
-      return 0;
-      }
-    std::string destFileName = resourcesDirectory + "/" + iconFileName;
-    this->ConfigureFile(iconFile, destFileName.c_str(), true);
-    this->SetOptionIfNotSet("CPACK_APPLE_GUI_ICON", iconFileName.c_str());
-    }
-
-  if (
-    !this->CopyResourcePlistFile("VolumeIcon.icns", 
-                                 diskImageDirectory.c_str(),
-                                 ".VolumeIcon.icns", true ) ||
-    !this->CopyResourcePlistFile("DS_Store", diskImageDirectory.c_str(),
-      ".DS_Store", true ) ||
-    !this->CopyResourcePlistFile("background.png",
-      diskImageBackgroundImageDir.c_str(), "background.png", true ) ||
-    !this->CopyResourcePlistFile("RuntimeScript", dir) ||
-    !this->CopyResourcePlistFile("Bundle.Info.plist", contDir,
-      "Info.plist" ) ||
-    !this->CopyResourcePlistFile("OSXScriptLauncher", appdir, 
-      this->GetOption("CPACK_PACKAGE_FILE_NAME"), true)
-  )
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files"
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Error compressing disk image."
       << std::endl);
+
     return 0;
     }
-*/
 
   return 1;
 }
@@ -298,8 +314,21 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
 bool cmCPackBundleGenerator::CopyFile(cmOStringStream& source,
   cmOStringStream& target)
 {
-  return cmSystemTools::CopyFileIfDifferent(source.str().c_str(),
-    target.str().c_str());
+  if(!cmSystemTools::CopyFileIfDifferent(
+    source.str().c_str(),
+    target.str().c_str()))
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Error copying "
+      << source.str()
+      << " to "
+      << target.str()
+      << std::endl);
+
+    return false;
+    }
+
+  return true;
 }
 
 //----------------------------------------------------------------------
@@ -308,12 +337,21 @@ bool cmCPackBundleGenerator::RunCommand(cmOStringStream& command)
   std::string output;
   int exit_code = 1;
 
-  bool result = cmSystemTools::RunSingleCommand(command.str().c_str(),
-    &output, &exit_code, 0, this->GeneratorVerbose, 0);
+  bool result = cmSystemTools::RunSingleCommand(
+    command.str().c_str(),
+    &output,
+    &exit_code,
+    0,
+    this->GeneratorVerbose,
+    0);
+
   if(!result || exit_code)
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running command: "
-      << command.str().c_str() << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Error executing: "
+      << command.str()
+      << std::endl);
+
     return false;
     }
 

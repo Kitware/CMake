@@ -2365,7 +2365,9 @@ cmLocalGenerator
 
     // Avoid full paths by removing leading slashes.
     std::string::size_type pos = 0;
-    for(;pos < ssin.size() && ssin[pos] == '/'; ++pos);
+    for(;pos < ssin.size() && ssin[pos] == '/'; ++pos)
+      {
+      }
     ssin = ssin.substr(pos);
 
     // Avoid full paths by removing colons.

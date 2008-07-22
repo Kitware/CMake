@@ -1350,7 +1350,9 @@ void cmDocumentation
 ::PrintDocumentationCommand(std::ostream& os,
                             const cmDocumentationEntry &entry)
 {
-  cmDocumentationSection *sec = new cmDocumentationSection("","");
+  // the string "SingleItem" will be used in a few places to detect the case
+  // that only the documentation for a single item is printed
+  cmDocumentationSection *sec = new cmDocumentationSection("SingleItem","");
   sec->Append(entry);
   this->AllSections["temp"] = sec;
   this->ClearSections();

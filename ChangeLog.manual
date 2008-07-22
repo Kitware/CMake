@@ -1,3 +1,26 @@
+Changes in CMake 2.6.1 RC 12
+- Fix issue with .lib being seen as .obj with VS due to a full path
+  to a library given without the file extension.  This only worked 
+  with the VS generator, but some projects had worked around it with
+  if statements. It now issues a warning, but should link.
+- Update cpack stuff for beta OSX bundle generator for CPack
+- CheckFortranFunctionExists.cmake now calls the function.
+-  FindBLAS.cmake, FindLAPACK.cmake modules were redesigned so 
+   now you have three new variables BLA_VENDOR (you can specify the VENDOR),
+   BLA_STATIC (gets the static version of libs), BLA_F95 
+   (gets the fortran 95 interface). BLA_VENDOR can be specified as 
+    an environment variable. Intel mkls libs need FindThreads to 
+    be found correctly so you will need to enable the C/CXX
+- FindMPI: Use the HINTS feature of find_library to find the right 
+  libraries for MPI, and act a bit more intelligently when MPI cannot be found.
+- Improved support for finding wxWidgets in MinGW environment.
+- CMAKE[_SYSTEM]_(LIBRARY|PROGRAM|INCLUDE|PREFIX)_PATH variables
+  moved CMAKE_CROSSCOMPILING from "Variables that modify behaviour" to
+  "variables that Provide Information"
+- handle HTML documentation for single items better: no warning about
+  ComputeSectionLinkPrefix, don't create an index for only one item.
+- Better error messages in CPackBundleGenerator
+
 Changes in CMake 2.6.1 RC 11
 - Fix curl build issue with Xcode 3.1
 Changes in CMake 2.6.1 RC 10
@@ -6,7 +29,7 @@ Changes in CMake 2.6.1 RC 10
 - Remove bad test for bug  # 7316 
 Changes in CMake 2.6.1 RC 9
 - Fix bug # 7316 Xcode double escaped define strings
-- FindBoost can now find the upcoming Boost 1.46
+- FindBoost can now find the upcoming Boost 1.36
 Changes in CMake 2.6.1 RC 8
 - Fix build problem with missing cpack file
 
