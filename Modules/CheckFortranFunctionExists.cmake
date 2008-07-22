@@ -24,7 +24,7 @@ macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
       program TESTFortran
       external ${FUNCTION}
       call ${FUNCTION}()
-      end
+      end program TESTFortran
     "
     )
     try_compile(${VARIABLE}
@@ -33,6 +33,7 @@ macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
     CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
     OUTPUT_VARIABLE OUTPUT
     )
+#    message(STATUS "${OUTPUT}")
     if(${VARIABLE})
       set(${VARIABLE} 1 CACHE INTERNAL "Have Fortran function ${FUNCTION}")
       message(STATUS "Looking for Fortran ${FUNCTION} - found")
