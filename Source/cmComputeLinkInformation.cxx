@@ -637,7 +637,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item, cmTarget* tgt)
     else
       {
       // This is a library or option specified by the user.
-      this->AddUserItem(item);
+      this->AddUserItem(item, true);
       }
     }
 }
@@ -1155,12 +1155,13 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   // directory then just report the file name without the directory
   // portion.  This will allow the system linker to locate the proper
   // library for the architecture at link time.
-  this->AddUserItem(file);
+  this->AddUserItem(file, false);
   return true;
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkInformation::AddUserItem(std::string const& item)
+void cmComputeLinkInformation::AddUserItem(std::string const& item,
+                                           bool pathNotKnown)
 {
   // This is called to handle a link item that does not match a CMake
   // target and is not a full path.  We check here if it looks like a
@@ -1250,7 +1251,10 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item)
   else
     {
     // This is a name specified by the user.
-    this->OldUserFlagItems.push_back(item);
+    if(pathNotKnown)
+      {
+      this->OldUserFlagItems.push_back(item);
+      }
 
     // We must ask the linker to search for a library with this name.
     // Restore the target link type since this item does not specify
@@ -1373,7 +1377,7 @@ void cmComputeLinkInformation::AddSharedLibNoSOName(std::string const& item)
   // runtime the dynamic linker will search for the library using the
   // path instead of just the name.
   std::string file = cmSystemTools::GetFilenameName(item);
-  this->AddUserItem(file);
+  this->AddUserItem(file, false);
 
   // Make sure the link directory ordering will find the library.
   this->OrderLinkerSearchPath->AddLinkLibrary(item);
