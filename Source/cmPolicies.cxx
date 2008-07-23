@@ -281,6 +281,32 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to correctly count empty "
     "elements in a list. ",
     2,6,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0008, "CMP0008",
+    "Libraries linked by full-path must have a valid library file name.",
+    "In CMake 2.4 and below it is possible to write code like\n"
+    "  target_link_libraries(myexe /full/path/to/somelib)\n"
+    "where \"somelib\" is supposed to be a valid library file name "
+    "such as \"libsomelib.a\" or \"somelib.lib\".  "
+    "For Makefile generators this produces an error at build time "
+    "because the dependency on the full path cannot be found.  "
+    "For VS IDE and Xcode generators this used to work by accident because "
+    "CMake would always split off the library directory and ask the "
+    "linker to search for the library by name (-lsomelib or somelib.lib).  "
+    "Despite the failure with Makefiles, some projects have code like this "
+    "and build only with VS and/or Xcode.  "
+    "This version of CMake prefers to pass the full path directly to the "
+    "native build tool, which will fail in this case because it does "
+    "not name a valid library file."
+    "\n"
+    "This policy determines what to do with full paths that do not appear "
+    "to name a valid library file.  "
+    "The OLD behavior for this policy is to split the library name from the "
+    "path and ask the linker to search for it.  "
+    "The NEW behavior for this policy is to trust the given path and "
+    "pass it directly to the native build tool unchanged.",
+    2,6,1, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

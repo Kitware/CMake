@@ -145,6 +145,7 @@ private:
   void DropDirectoryItem(std::string const& item);
   bool CheckSharedLibNoSOName(std::string const& item);
   void AddSharedLibNoSOName(std::string const& item);
+  void HandleBadFullItem(std::string const& item, std::string const& file);
 
   // Framework info.
   void ComputeFrameworkInfo();

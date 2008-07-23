@@ -1042,6 +1042,20 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
     return;
     }
 
+  // Full path libraries should specify a valid library file name.
+  // See documentation of CMP0008.
+  if(this->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
+     (strstr(this->GlobalGenerator->GetName(), "Visual Studio") ||
+      strstr(this->GlobalGenerator->GetName(), "Xcode")))
+    {
+    std::string file = cmSystemTools::GetFilenameName(item);
+    if(!this->ExtractAnyLibraryName.find(file.c_str()))
+      {
+      this->HandleBadFullItem(item, file);
+      return;
+      }
+    }
+
   // This is called to handle a link item that is a full path.
   // If the target is not a static library make sure the link type is
   // shared.  This is because dynamic-mode linking can handle both
@@ -1078,47 +1092,8 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
     this->Items.push_back(Item(this->LibLinkFileFlag, false));
     }
 
-  // Full path libraries should have an extension.  CMake 2.4 would
-  // add the extension after splitting the file off of the directory.
-  // Some existing projects depended on this to build correctly
-  // because they left off the extension of an otherwise full-path
-  // library.  This worked with CMake 2.4 but only for VS IDE builds
-  // because the file-level dependency added to the Makefile would not
-  // be found.  Nevertheless, some projects have this mistake but work
-  // because they build only with the VS IDE.  We need to support them
-  // here by adding the missing extension.
-  std::string final_item = item;
-  if(strstr(this->GlobalGenerator->GetName(), "Visual Studio") &&
-     this->Makefile->NeedBackwardsCompatibility(2,4) &&
-     !cmSystemTools::ComparePath(
-       cmSystemTools::GetFilenameLastExtension(item).c_str(),
-       this->LibLinkSuffix.c_str()))
-    {
-    // Issue the warning at most once.
-    std::string wid = "VSIDE-LINK-EXT-";
-    wid += item;
-    if(!this->Target->GetPropertyAsBool(wid.c_str()))
-      {
-      this->Target->SetProperty(wid.c_str(), "1");
-      cmOStringStream w;
-      w << "Target \"" << this->Target->GetName() << "\" links to "
-        << "full-path item\n"
-        << "  " << item << "\n"
-        << "which does not have the proper link extension \""
-        << this->LibLinkSuffix << "\".  "
-        << "CMake is adding the missing extension because compatibility "
-        << "with CMake 2.4 is currently enabled and this case worked "
-        << "accidentally in that version.  "
-        << "The link extension should be added by the project developer.";
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-      }
-
-    // Add the missing extension.
-    final_item += this->LibLinkSuffix;
-    }
-
   // Now add the full path to the library.
-  this->Items.push_back(Item(final_item, true));
+  this->Items.push_back(Item(item, true));
 }
 
 //----------------------------------------------------------------------------
@@ -1381,6 +1356,59 @@ void cmComputeLinkInformation::AddSharedLibNoSOName(std::string const& item)
 
   // Make sure the link directory ordering will find the library.
   this->OrderLinkerSearchPath->AddLinkLibrary(item);
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
+                                                 std::string const& file)
+{
+  // Tell the linker to search for the item and provide the proper
+  // path for it.  Do not contribute to any CMP0003 warning (do not
+  // put in OldLinkDirItems or OldUserFlagItems).
+  this->AddUserItem(file, false);
+  this->OrderLinkerSearchPath->AddLinkLibrary(item);
+
+  // Produce any needed message.
+  switch(this->Target->GetPolicyStatusCMP0008())
+    {
+    case cmPolicies::WARN:
+      {
+      // Print the warning at most once for this item.
+      std::string wid = "CMP0008-WARNING-GIVEN-";
+      wid += item;
+      if(!this->CMakeInstance->GetPropertyAsBool(wid.c_str()))
+        {
+        this->CMakeInstance->SetProperty(wid.c_str(), "1");
+        cmOStringStream w;
+        w << (this->Makefile->GetPolicies()
+              ->GetPolicyWarning(cmPolicies::CMP0008)) << "\n"
+          << "Target \"" << this->Target->GetName() << "\" links to item\n"
+          << "  " << item << "\n"
+          << "which is a full-path but not a valid library file name.";
+        this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+                                          this->Target->GetBacktrace());
+        }
+      }
+    case cmPolicies::OLD:
+      // OLD behavior does not warn.
+      break;
+    case cmPolicies::NEW:
+      // NEW behavior will not get here.
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      {
+      cmOStringStream e;
+      e << (this->Makefile->GetPolicies()->
+            GetRequiredPolicyError(cmPolicies::CMP0008)) << "\n"
+          << "Target \"" << this->Target->GetName() << "\" links to item\n"
+          << "  " << item << "\n"
+          << "which is a full-path but not a valid library file name.";
+      this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                        this->Target->GetBacktrace());
+      }
+      break;
+    }
 }
 
 //----------------------------------------------------------------------------
