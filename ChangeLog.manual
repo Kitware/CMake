@@ -1,4 +1,7 @@
 Changes in CMake 2.6.1 RC 12
+- More find locations for FindJNI.
+- Fix bug with source files ending in .l and .l.cpp, causing cmake
+  to think they were the same file in some cases.
 - Fix issue with .lib being seen as .obj with VS due to a full path
   to a library given without the file extension.  This only worked 
   with the VS generator, but some projects had worked around it with
