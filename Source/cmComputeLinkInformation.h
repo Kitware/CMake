@@ -139,12 +139,13 @@ private:
   void AddTargetItem(std::string const& item, cmTarget* target);
   void AddFullItem(std::string const& item);
   bool CheckImplicitDirItem(std::string const& item);
-  void AddUserItem(std::string const& item);
+  void AddUserItem(std::string const& item, bool pathNotKnown);
   void AddDirectoryItem(std::string const& item);
   void AddFrameworkItem(std::string const& item);
   void DropDirectoryItem(std::string const& item);
   bool CheckSharedLibNoSOName(std::string const& item);
   void AddSharedLibNoSOName(std::string const& item);
+  void HandleBadFullItem(std::string const& item, std::string const& file);
 
   // Framework info.
   void ComputeFrameworkInfo();

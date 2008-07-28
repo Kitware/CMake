@@ -48,6 +48,7 @@ public:
     CMP0005, // Definition value escaping
     CMP0006, // BUNDLE install rules needed for MACOSX_BUNDLE targets
     CMP0007, // list command handling of empty elements
+    CMP0008, // Full-path libraries must be a valid library file name
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.
