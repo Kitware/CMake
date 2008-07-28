@@ -364,25 +364,31 @@ ELSE (_boost_IN_CACHE)
     SET (_boost_COMPILER "-mgw${_boost_COMPILER_VERSION}")
   ENDIF(MINGW)
   IF (UNIX)
-    IF (APPLE)
-      # Due to a quirk in Boost.Build, there is no compiler name
-      # mangled into library names on Mac OS X/Darwin.
-      SET (_boost_COMPILER "")
-    ELSE (APPLE)
-      IF (NOT CMAKE_COMPILER_IS_GNUCC)
-        # We assume that we have the Intel compiler.
-        SET (_boost_COMPILER "-il")
-      ELSE (NOT CMAKE_COMPILER_IS_GNUCC)
-        # Determine which version of GCC we have.
-        EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
-            ARGS -dumpversion
-            OUTPUT_VARIABLE _boost_COMPILER_VERSION
+    IF (NOT CMAKE_COMPILER_IS_GNUCC)
+      # We assume that we have the Intel compiler.
+      SET (_boost_COMPILER "-il")
+    ELSE (NOT CMAKE_COMPILER_IS_GNUCC)
+      # Determine which version of GCC we have.
+      EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
+        ARGS -dumpversion
+        OUTPUT_VARIABLE _boost_COMPILER_VERSION
         )
-        STRING(REGEX REPLACE "([0-9])\\.([0-9])\\.[0-9]" "\\1\\2"
-               _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
+      STRING(REGEX REPLACE "([0-9])\\.([0-9])\\.[0-9]" "\\1\\2"
+        _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
+      IF(APPLE)
+        IF (${Boost_MINOR_VERSION} GREATER 35)
+          # In Boost 1.36.0 and newer, the mangled compiler name used
+          # on Mac OS X/Darwin is "xgcc".
+          SET (_boost_COMPILER "-xgcc${_boost_COMPILER_VERSION}")
+        ELSE()
+          # In Boost <= 1.35.0, there is no mangled compiler name for
+          # the Mac OS X/Darwin version of GCC.
+          SET (_boost_COMPILER "")
+        ENDIF()
+      ELSE()
         SET (_boost_COMPILER "-gcc${_boost_COMPILER_VERSION}")
-      ENDIF (NOT CMAKE_COMPILER_IS_GNUCC)
-    ENDIF (APPLE)
+      ENDIF()
+    ENDIF (NOT CMAKE_COMPILER_IS_GNUCC)
   ENDIF(UNIX)
 
   SET (_boost_MULTITHREADED "-mt")
