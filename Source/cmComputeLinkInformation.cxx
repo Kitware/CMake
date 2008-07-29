@@ -1362,6 +1362,14 @@ void cmComputeLinkInformation::AddSharedLibNoSOName(std::string const& item)
 void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
                                                  std::string const& file)
 {
+  // Do not depend on things that do not exist.
+  std::vector<std::string>::iterator i =
+    std::find(this->Depends.begin(), this->Depends.end(), item);
+  if(i != this->Depends.end())
+    {
+    this->Depends.erase(i);
+    }
+
   // Tell the linker to search for the item and provide the proper
   // path for it.  Do not contribute to any CMP0003 warning (do not
   // put in OldLinkDirItems or OldUserFlagItems).
