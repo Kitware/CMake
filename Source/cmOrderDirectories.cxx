@@ -56,7 +56,7 @@ public:
     {
     for(unsigned int i=0; i < this->OD->OriginalDirectories.size(); ++i)
       {
-      // Check if this directory conflicts with they entry.
+      // Check if this directory conflicts with the entry.
       std::string const& dir = this->OD->OriginalDirectories[i];
       if(dir != this->Directory && this->FindConflict(dir))
         {
