@@ -1131,6 +1131,10 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   // portion.  This will allow the system linker to locate the proper
   // library for the architecture at link time.
   this->AddUserItem(file, false);
+
+  // Make sure the link directory ordering will find the library.
+  this->OrderLinkerSearchPath->AddLinkLibrary(item);
+
   return true;
 }
 

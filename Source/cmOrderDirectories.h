@@ -54,6 +54,7 @@ private:
 
   bool OrderedDirectoriesComputed;
   std::vector<cmOrderDirectoriesConstraint*> ConstraintEntries;
+  std::vector<cmOrderDirectoriesConstraint*> ImplicitDirEntries;
   std::vector<std::string> UserDirectories;
   cmsys::RegularExpression RemoveLibraryExtension;
   std::vector<std::string> LinkExtensions;
@@ -66,6 +67,7 @@ private:
   void CollectOriginalDirectories();
   int AddOriginalDirectory(std::string const& dir);
   void FindConflicts();
+  void FindImplicitConflicts();
   void OrderDirectories();
   void VisitDirectory(unsigned int i);
   void DiagnoseCycle();
