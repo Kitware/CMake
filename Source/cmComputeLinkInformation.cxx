@@ -256,10 +256,10 @@ cmComputeLinkInformation
 
   // Allocate internals.
   this->OrderLinkerSearchPath =
-    new cmOrderDirectories(this->GlobalGenerator, target->GetName(),
+    new cmOrderDirectories(this->GlobalGenerator, target,
                            "linker search path");
   this->OrderRuntimeSearchPath =
-    new cmOrderDirectories(this->GlobalGenerator, target->GetName(),
+    new cmOrderDirectories(this->GlobalGenerator, target,
                            "runtime search path");
   this->OrderDependentRPath = 0;
 
@@ -362,7 +362,7 @@ cmComputeLinkInformation
     {
     this->SharedDependencyMode = SharedDepModeDir;
     this->OrderDependentRPath =
-      new cmOrderDirectories(this->GlobalGenerator, target->GetName(),
+      new cmOrderDirectories(this->GlobalGenerator, target,
                              "dependent library path");
     }
 

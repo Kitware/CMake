@@ -18,6 +18,7 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 #include <assert.h>
 
@@ -239,11 +240,11 @@ bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
 
 //----------------------------------------------------------------------------
 cmOrderDirectories::cmOrderDirectories(cmGlobalGenerator* gg,
-                                       const char* name,
+                                       cmTarget* target,
                                        const char* purpose)
 {
   this->GlobalGenerator = gg;
-  this->Name = name;
+  this->Target = target;
   this->Purpose = purpose;
   this->Computed = false;
 }
@@ -510,22 +511,24 @@ void cmOrderDirectories::DiagnoseCycle()
 
   // Construct the message.
   cmOStringStream e;
-  e << "WARNING: Cannot generate a safe " << this->Purpose
-    << " for target " << this->Name
+  e << "Cannot generate a safe " << this->Purpose
+    << " for target " << this->Target->GetName()
     << " because there is a cycle in the constraint graph:\n";
 
   // Display the conflict graph.
   for(unsigned int i=0; i < this->ConflictGraph.size(); ++i)
     {
     ConflictList const& clist = this->ConflictGraph[i];
-    e << "dir " << i << " is [" << this->OriginalDirectories[i] << "]\n";
+    e << "  dir " << i << " is [" << this->OriginalDirectories[i] << "]\n";
     for(ConflictList::const_iterator j = clist.begin();
         j != clist.end(); ++j)
       {
-      e << "  dir " << j->first << " must precede it due to ";
+      e << "    dir " << j->first << " must precede it due to ";
       this->ConstraintEntries[j->second]->Report(e);
       e << "\n";
       }
     }
-  cmSystemTools::Message(e.str().c_str());
+  e << "Some of these libraries may not be found correctly.";
+  this->GlobalGenerator->GetCMakeInstance()
+    ->IssueMessage(cmake::WARNING, e.str(), this->Target->GetBacktrace());
 }
