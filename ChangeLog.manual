@@ -1,6 +1,25 @@
+Changes in CMake 2.6.1 RC 15
+- Fix bug 7426 FindJPEG module causes error when setting JPEG_LIBRARY to blank
+- Fix bug 7414 PackageMaker generator crashes when given components
+  with circular dependencies
+- Fix source files to not add extra /, and look for extensions for
+  all enabled languages.
+- Change link line to preserve input given to target_link_libraries even
+  if a shared library is repeated.  
+- Fix for bug 7421, fortran did not get arch flags on the mac
+- For CMP0008 do not depend on the files that are not there, which
+  makes the Xcode generator delete executables after they are built.
+- Work around Boost 1.36.0 bug fix on Darwin by setting the mangled 
+  compiler name to -xgccVERSION
+- Updated FindImageMagick to:
+  - Find newer additions such as animate, compare, etc.
+  - Find development api: Magick++, MagickCore, MagickWand
+  - Use FindPackageHandleStandardArgs to output standard messages.
+
 Changes in CMake 2.6.1 RC 14
 - Change dashboard submission to go directly to CDash.
 - Add policy CMP0008- Full-path libraries must be a valid library file name
+
 Changes in CMake 2.6.1 RC 12
 - More find locations for FindJNI.
 - Fix bug with source files ending in .l and .l.cpp, causing cmake

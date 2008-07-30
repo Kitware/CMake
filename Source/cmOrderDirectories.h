@@ -24,6 +24,7 @@
 class cmGlobalGenerator;
 class cmOrderDirectoriesConstraint;
 class cmOrderDirectoriesConstraintLibrary;
+class cmTarget;
 
 /** \class cmOrderDirectories
  * \brief Compute a safe runtime path order for a set of shared libraries.
@@ -31,7 +32,7 @@ class cmOrderDirectoriesConstraintLibrary;
 class cmOrderDirectories
 {
 public:
-  cmOrderDirectories(cmGlobalGenerator* gg, const char* name,
+  cmOrderDirectories(cmGlobalGenerator* gg, cmTarget* target,
                      const char* purpose);
   ~cmOrderDirectories();
   void AddRuntimeLibrary(std::string const& fullPath, const char* soname = 0);
@@ -44,7 +45,7 @@ public:
   std::vector<std::string> const& GetOrderedDirectories();
 private:
   cmGlobalGenerator* GlobalGenerator;
-  std::string Name;
+  cmTarget* Target;
   std::string Purpose;
 
   bool Computed;
@@ -53,6 +54,7 @@ private:
 
   bool OrderedDirectoriesComputed;
   std::vector<cmOrderDirectoriesConstraint*> ConstraintEntries;
+  std::vector<cmOrderDirectoriesConstraint*> ImplicitDirEntries;
   std::vector<std::string> UserDirectories;
   cmsys::RegularExpression RemoveLibraryExtension;
   std::vector<std::string> LinkExtensions;
@@ -65,6 +67,7 @@ private:
   void CollectOriginalDirectories();
   int AddOriginalDirectory(std::string const& dir);
   void FindConflicts();
+  void FindImplicitConflicts();
   void OrderDirectories();
   void VisitDirectory(unsigned int i);
   void DiagnoseCycle();

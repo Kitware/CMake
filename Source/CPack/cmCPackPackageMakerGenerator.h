@@ -88,12 +88,15 @@ protected:
   // Subroutine of WriteDistributionFile that writes out the
   // dependency attributes for inter-component dependencies.
   void AddDependencyAttributes(const cmCPackComponent& component,
+                               std::set<const cmCPackComponent *>& visited,
                                cmOStringStream& out);
 
   // Subroutine of WriteDistributionFile that writes out the
   // reverse dependency attributes for inter-component dependencies.
-  void AddReverseDependencyAttributes(const cmCPackComponent& component,
-                                      cmOStringStream& out);
+  void 
+  AddReverseDependencyAttributes(const cmCPackComponent& component,
+                                 std::set<const cmCPackComponent *>& visited,
+                                 cmOStringStream& out);
 
   // Generates XML that encodes the hierarchy of component groups and
   // their components in a form that can be used by distribution

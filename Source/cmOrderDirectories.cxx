@@ -18,6 +18,7 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
+#include "cmake.h"
 
 #include <assert.h>
 
@@ -56,7 +57,7 @@ public:
     {
     for(unsigned int i=0; i < this->OD->OriginalDirectories.size(); ++i)
       {
-      // Check if this directory conflicts with they entry.
+      // Check if this directory conflicts with the entry.
       std::string const& dir = this->OD->OriginalDirectories[i];
       if(dir != this->Directory && this->FindConflict(dir))
         {
@@ -65,6 +66,29 @@ public:
         // desired directory comes before this one.
         cmOrderDirectories::ConflictPair p(this->DirectoryIndex, index);
         this->OD->ConflictGraph[i].push_back(p);
+        }
+      }
+    }
+
+  void FindImplicitConflicts(cmOStringStream& w)
+    {
+    bool first = true;
+    for(unsigned int i=0; i < this->OD->OriginalDirectories.size(); ++i)
+      {
+      // Check if this directory conflicts with the entry.
+      std::string const& dir = this->OD->OriginalDirectories[i];
+      if(dir != this->Directory && this->FindConflict(dir))
+        {
+        // The library will be found in this directory but it is
+        // supposed to be found in an implicit search directory.
+        if(first)
+          {
+          first = false;
+          w << "  ";
+          this->Report(w);
+          w << " in " << this->Directory << " may be hidden by files in:\n";
+          }
+        w << "    " << dir << "\n";
         }
       }
     }
@@ -239,11 +263,11 @@ bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
 
 //----------------------------------------------------------------------------
 cmOrderDirectories::cmOrderDirectories(cmGlobalGenerator* gg,
-                                       const char* name,
+                                       cmTarget* target,
                                        const char* purpose)
 {
   this->GlobalGenerator = gg;
-  this->Name = name;
+  this->Target = target;
   this->Purpose = purpose;
   this->Computed = false;
 }
@@ -254,6 +278,12 @@ cmOrderDirectories::~cmOrderDirectories()
   for(std::vector<cmOrderDirectoriesConstraint*>::iterator
         i = this->ConstraintEntries.begin();
       i != this->ConstraintEntries.end(); ++i)
+    {
+    delete *i;
+    }
+  for(std::vector<cmOrderDirectoriesConstraint*>::iterator
+        i = this->ImplicitDirEntries.begin();
+      i != this->ImplicitDirEntries.end(); ++i)
     {
     delete *i;
     }
@@ -279,13 +309,15 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
   // Add the runtime library at most once.
   if(this->EmmittedConstraintSOName.insert(fullPath).second)
     {
-    // Avoid dealing with implicit directories.
+    // Implicit link directories need special handling.
     if(!this->ImplicitDirectories.empty())
       {
       std::string dir = cmSystemTools::GetFilenamePath(fullPath);
       if(this->ImplicitDirectories.find(dir) !=
          this->ImplicitDirectories.end())
         {
+        this->ImplicitDirEntries.push_back(
+          new cmOrderDirectoriesConstraintSOName(this, fullPath, soname));
         return;
         }
       }
@@ -312,13 +344,15 @@ void cmOrderDirectories::AddLinkLibrary(std::string const& fullPath)
   // Add the link library at most once.
   if(this->EmmittedConstraintLibrary.insert(fullPath).second)
     {
-    // Avoid dealing with implicit directories.
+    // Implicit link directories need special handling.
     if(!this->ImplicitDirectories.empty())
       {
       std::string dir = cmSystemTools::GetFilenamePath(fullPath);
       if(this->ImplicitDirectories.find(dir) !=
          this->ImplicitDirectories.end())
         {
+        this->ImplicitDirEntries.push_back(
+          new cmOrderDirectoriesConstraintLibrary(this, fullPath));
         return;
         }
       }
@@ -366,7 +400,7 @@ void cmOrderDirectories::CollectOriginalDirectories()
         di = this->UserDirectories.begin();
       di != this->UserDirectories.end(); ++di)
     {
-    // Avoid dealing with implicit directories.
+    // We never explicitly specify implicit link directories.
     if(this->ImplicitDirectories.find(*di) !=
        this->ImplicitDirectories.end())
       {
@@ -449,6 +483,39 @@ void cmOrderDirectories::FindConflicts()
       std::unique(i->begin(), i->end(), cmOrderDirectoriesCompare());
     i->erase(last, i->end());
     }
+
+  // Check items in implicit link directories.
+  this->FindImplicitConflicts();
+}
+
+//----------------------------------------------------------------------------
+void cmOrderDirectories::FindImplicitConflicts()
+{
+  // Check for items in implicit link directories that have conflicts
+  // in the explicit directories.
+  cmOStringStream conflicts;
+  for(unsigned int i=0; i < this->ImplicitDirEntries.size(); ++i)
+    {
+    this->ImplicitDirEntries[i]->FindImplicitConflicts(conflicts);
+    }
+
+  // Skip warning if there were no conflicts.
+  std::string text = conflicts.str();
+  if(text.empty())
+    {
+    return;
+    }
+
+  // Warn about the conflicts.
+  cmOStringStream w;
+  w << "Cannot generate a safe " << this->Purpose
+    << " for target " << this->Target->GetName()
+    << " because files in some directories may conflict with "
+    << " libraries in implicit directories:\n"
+    << text
+    << "Some of these libraries may not be found correctly.";
+  this->GlobalGenerator->GetCMakeInstance()
+    ->IssueMessage(cmake::WARNING, w.str(), this->Target->GetBacktrace());
 }
 
 //----------------------------------------------------------------------------
@@ -510,22 +577,24 @@ void cmOrderDirectories::DiagnoseCycle()
 
   // Construct the message.
   cmOStringStream e;
-  e << "WARNING: Cannot generate a safe " << this->Purpose
-    << " for target " << this->Name
+  e << "Cannot generate a safe " << this->Purpose
+    << " for target " << this->Target->GetName()
     << " because there is a cycle in the constraint graph:\n";
 
   // Display the conflict graph.
   for(unsigned int i=0; i < this->ConflictGraph.size(); ++i)
     {
     ConflictList const& clist = this->ConflictGraph[i];
-    e << "dir " << i << " is [" << this->OriginalDirectories[i] << "]\n";
+    e << "  dir " << i << " is [" << this->OriginalDirectories[i] << "]\n";
     for(ConflictList::const_iterator j = clist.begin();
         j != clist.end(); ++j)
       {
-      e << "  dir " << j->first << " must precede it due to ";
+      e << "    dir " << j->first << " must precede it due to ";
       this->ConstraintEntries[j->second]->Report(e);
       e << "\n";
       }
     }
-  cmSystemTools::Message(e.str().c_str());
+  e << "Some of these libraries may not be found correctly.";
+  this->GlobalGenerator->GetCMakeInstance()
+    ->IssueMessage(cmake::WARNING, e.str(), this->Target->GetBacktrace());
 }

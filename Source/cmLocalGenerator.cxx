@@ -1630,7 +1630,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     const char* sysrootDefault = 
       this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT_DEFAULT");
     bool flagsUsed = false;
-    if(osxArch && sysroot  && lang && lang[0] =='C')
+    if(osxArch && sysroot  && lang && (lang[0] =='C' || lang[0] == 'F'))
       { 
       std::vector<std::string> archs;
       cmSystemTools::ExpandListArgument(std::string(osxArch),

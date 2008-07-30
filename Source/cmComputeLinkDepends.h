@@ -58,10 +58,6 @@ public:
   std::set<cmTarget*> const& GetOldWrongConfigItems() const
     { return this->OldWrongConfigItems; }
 
-  /** Set a regular expression that matches strings ending in a shared
-      library extension.  */
-  void SetSharedRegex(std::string const& regex);
-
 private:
 
   // Context information.
@@ -141,7 +137,6 @@ private:
   // Preservation of original link line.
   std::vector<int> OriginalEntries;
   void PreserveOriginalEntries();
-  std::string SharedRegexString;
 
   // Compatibility help.
   bool OldLinkDirMode;
