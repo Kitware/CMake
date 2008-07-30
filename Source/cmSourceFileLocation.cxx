@@ -113,8 +113,11 @@ void cmSourceFileLocation::UpdateExtension(const char* name)
       tryPath = this->Makefile->GetCurrentDirectory();
       tryPath += "/";
       }
-    tryPath += this->Directory;
-    tryPath += "/";
+    if(!this->Directory.empty())
+      {
+      tryPath += this->Directory;
+      tryPath += "/";
+      }
     tryPath += this->Name;
     if(cmSystemTools::FileExists(tryPath.c_str(), true))
       {
