@@ -17,6 +17,8 @@
 #include "cmSourceFileLocation.h"
 
 #include "cmMakefile.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
 
 //----------------------------------------------------------------------------
@@ -89,11 +91,14 @@ void cmSourceFileLocation::UpdateExtension(const char* name)
   std::string ext = cmSystemTools::GetFilenameLastExtension(name);
   if(!ext.empty()) { ext = ext.substr(1); }
 
-  // TODO: Let enable-language specify extensions for each language.
-  cmMakefile const* mf = this->Makefile;
+  // The global generator checks extensions of enabled languages.
+  cmGlobalGenerator* gg =
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  cmMakefile* mf = this->Makefile;
   const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
   const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
-  if(std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end() ||
+  if(gg->GetLanguageFromExtension(ext.c_str()) ||
+     std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end() ||
      std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end())
     {
     // This is a known extension.  Use the given filename with extension.
