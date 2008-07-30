@@ -26,13 +26,20 @@ IF(MSVC)
       "${SYSTEMROOT}/system32/msvcr71.dll"
       )
   ENDIF(MSVC71)
+
+  IF(CMAKE_CL_64)
+    SET(CMAKE_MSVC_ARCH amd64)
+  ELSE(CMAKE_CL_64)
+    SET(CMAKE_MSVC_ARCH x86)
+  ENDIF(CMAKE_CL_64)
+
   IF(MSVC80)
     # Find the runtime library redistribution directory.
-    FIND_PATH(MSVC80_REDIST_DIR NAMES x86/Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest
+    FIND_PATH(MSVC80_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest
       PATHS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0;InstallDir]/../../VC/redist"
       )
     MARK_AS_ADVANCED(MSVC80_REDIST_DIR)
-    SET(MSVC80_CRT_DIR "${MSVC80_REDIST_DIR}/x86/Microsoft.VC80.CRT")
+    SET(MSVC80_CRT_DIR "${MSVC80_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.CRT")
 
     # Install the manifest that allows DLLs to be loaded from the
     # directory containing the executable.
@@ -45,7 +52,7 @@ IF(MSVC)
 
     IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
       SET(MSVC80_CRT_DIR
-        "${MSVC80_REDIST_DIR}/Debug_NonRedist/x86/Microsoft.VC80.DebugCRT")
+        "${MSVC80_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC80.DebugCRT")
       SET(__install__libs ${__install__libs}
         "${MSVC80_CRT_DIR}/Microsoft.VC80.DebugCRT.manifest"
         "${MSVC80_CRT_DIR}/msvcm80d.dll"
@@ -57,13 +64,13 @@ IF(MSVC)
   ENDIF(MSVC80)
   IF(MSVC90)
     # Find the runtime library redistribution directory.
-    FIND_PATH(MSVC90_REDIST_DIR NAMES x86/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest
+    FIND_PATH(MSVC90_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest
       PATHS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]/../../VC/redist"
       
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0;InstallDir]/../../VC/redist"
       )
     MARK_AS_ADVANCED(MSVC90_REDIST_DIR)
-    SET(MSVC90_CRT_DIR "${MSVC90_REDIST_DIR}/x86/Microsoft.VC90.CRT")
+    SET(MSVC90_CRT_DIR "${MSVC90_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.CRT")
     
     # Install the manifest that allows DLLs to be loaded from the
     # directory containing the executable.
@@ -75,7 +82,7 @@ IF(MSVC)
       ) 
     IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
       SET(MSVC90_CRT_DIR
-        "${MSVC90_REDIST_DIR}/Debug_NonRedist/x86/Microsoft.VC90.DebugCRT")
+        "${MSVC90_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC90.DebugCRT")
       SET(__install__libs ${__install__libs}
         "${MSVC90_CRT_DIR}/Microsoft.VC90.DebugCRT.manifest"
         "${MSVC90_CRT_DIR}/msvcm90d.dll"
@@ -98,7 +105,7 @@ IF(MSVC)
     IF(MSVC80)
       IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
         SET(MSVC80_MFC_DIR
-          "${MSVC80_REDIST_DIR}/Debug_NonRedist/x86/Microsoft.VC80.DebugMFC")
+          "${MSVC80_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC80.DebugMFC")
         SET(__install__libs ${__install__libs}
           "${MSVC80_MFC_DIR}/Microsoft.VC80.DebugMFC.manifest"
           "${MSVC80_MFC_DIR}/mfc80d.dll"
@@ -108,7 +115,7 @@ IF(MSVC)
           )
       ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
         
-      SET(MSVC80_MFC_DIR "${MSVC80_REDIST_DIR}/x86/Microsoft.VC80.MFC")
+      SET(MSVC80_MFC_DIR "${MSVC80_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.MFC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
       SET(__install__libs ${__install__libs}
@@ -119,7 +126,7 @@ IF(MSVC)
         "${MSVC80_MFC_DIR}/mfcm80u.dll"
         )
       # include the language dll's for vs8 as well as the actuall dll's
-      SET(MSVC80_MFCLOC_DIR "${MSVC80_REDIST_DIR}/x86/Microsoft.VC80.MFCLOC")
+      SET(MSVC80_MFCLOC_DIR "${MSVC80_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.MFCLOC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
       SET(__install__libs ${__install__libs}
@@ -138,7 +145,7 @@ IF(MSVC)
     IF(MSVC90)
       IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
         SET(MSVC90_MFC_DIR
-          "${MSVC90_REDIST_DIR}/Debug_NonRedist/x86/Microsoft.VC90.DebugMFC")
+          "${MSVC90_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC90.DebugMFC")
         SET(__install__libs ${__install__libs}
           "${MSVC90_MFC_DIR}/Microsoft.VC90.DebugMFC.manifest"
           "${MSVC90_MFC_DIR}/mfc90d.dll"
@@ -148,7 +155,7 @@ IF(MSVC)
           )
       ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
         
-      SET(MSVC90_MFC_DIR "${MSVC90_REDIST_DIR}/x86/Microsoft.VC90.MFC")
+      SET(MSVC90_MFC_DIR "${MSVC90_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.MFC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
       SET(__install__libs ${__install__libs}
@@ -159,7 +166,7 @@ IF(MSVC)
         "${MSVC90_MFC_DIR}/mfcm90u.dll"
         )
       # include the language dll's for vs9 as well as the actuall dll's
-      SET(MSVC90_MFCLOC_DIR "${MSVC90_REDIST_DIR}/x86/Microsoft.VC90.MFCLOC")
+      SET(MSVC90_MFCLOC_DIR "${MSVC90_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.MFCLOC")
       # Install the manifest that allows DLLs to be loaded from the
       # directory containing the executable.
       SET(__install__libs ${__install__libs}
