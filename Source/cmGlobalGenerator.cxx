@@ -1565,7 +1565,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   cpackCommandLines.push_back(singleLine);
   if ( this->GetPreinstallTargetName() )
     {
-    depends.push_back("preinstall");
+    depends.push_back(this->GetPreinstallTargetName());
     }
   else
     {
