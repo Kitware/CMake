@@ -1181,7 +1181,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         << " s. (clock)"
         << "\n";
       return 0;
-    }
+      }
 
     // Command to calculate the md5sum of a file
     else if (args[1] == "md5sum" && args.size() >= 3)
@@ -1422,7 +1422,8 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
           }
         }
 
-      return cmCallVisualStudioMacro::CallMacro(args[2], args[3], macroArgs);
+      return cmCallVisualStudioMacro::CallMacro(args[2], args[3],
+        macroArgs, true);
       }
 #endif
 
