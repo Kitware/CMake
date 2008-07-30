@@ -829,8 +829,10 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
     // on (B and A), while selecting something that depends on C--either D
     // or E--will automatically cause C to get selected.
     out << "selected=\"my.choice.selected";
-    AddDependencyAttributes(component, out);
-    AddReverseDependencyAttributes(component, out);
+    std::set<const cmCPackComponent *> visited;
+    AddDependencyAttributes(component, visited, out);
+    visited.clear();
+    AddReverseDependencyAttributes(component, visited, out);
     out << "\"";
     }
   out << ">" << std::endl;
@@ -868,15 +870,23 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
 //----------------------------------------------------------------------
 void 
 cmCPackPackageMakerGenerator::
-AddDependencyAttributes(const cmCPackComponent& component, cmOStringStream& out)
+AddDependencyAttributes(const cmCPackComponent& component, 
+                        std::set<const cmCPackComponent *>& visited,
+                        cmOStringStream& out)
 {
+  if (visited.find(&component) != visited.end())
+    {
+    return;
+    }
+  visited.insert(&component);
+
   std::vector<cmCPackComponent *>::const_iterator dependIt;
   for (dependIt = component.Dependencies.begin();
        dependIt != component.Dependencies.end();
        ++dependIt)
     {
     out << " &amp;&amp; choices['" << (*dependIt)->Name << "Choice'].selected";
-    AddDependencyAttributes(**dependIt, out);
+    AddDependencyAttributes(**dependIt, visited, out);
     }
 }
 
@@ -884,15 +894,22 @@ AddDependencyAttributes(const cmCPackComponent& component, cmOStringStream& out)
 void 
 cmCPackPackageMakerGenerator::
 AddReverseDependencyAttributes(const cmCPackComponent& component, 
+                               std::set<const cmCPackComponent *>& visited,
                                cmOStringStream& out)
 {
+  if (visited.find(&component) != visited.end())
+    {
+    return;
+    }
+  visited.insert(&component);
+
   std::vector<cmCPackComponent *>::const_iterator dependIt;
   for (dependIt = component.ReverseDependencies.begin();
        dependIt != component.ReverseDependencies.end();
        ++dependIt)
     {
     out << " || choices['" << (*dependIt)->Name << "Choice'].selected";
-    AddReverseDependencyAttributes(**dependIt, out);
+    AddReverseDependencyAttributes(**dependIt, visited, out);
     }
 }
 
