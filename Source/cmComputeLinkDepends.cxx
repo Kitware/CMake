@@ -881,6 +881,11 @@ void cmComputeLinkDepends::CheckWrongConfigItem(std::string const& item)
 //----------------------------------------------------------------------------
 void cmComputeLinkDepends::PreserveOriginalEntries()
 {
+  // In CMake 2.4 and below all link items were included in order
+  // preservation.  In CMake 2.6 and above we know it is safe to skip
+  // shared libraries.
+  bool skipShared = !this->LocalGenerator->NeedBackwardsCompatibility(2,4);
+
   // Regular expression to match shared libraries.
   cmsys::RegularExpression shared_lib(this->SharedRegexString.c_str());
 
@@ -893,7 +898,7 @@ void cmComputeLinkDepends::PreserveOriginalEntries()
     {
     cmTarget* tgt = this->EntryList[*in].Target;
     if((tgt && tgt->GetType() != cmTarget::STATIC_LIBRARY) ||
-       (!tgt && shared_lib.find(this->EntryList[*in].Item)))
+       (skipShared && !tgt && shared_lib.find(this->EntryList[*in].Item)))
       {
       // Skip input items known to not be static libraries.
       ++in;
@@ -917,7 +922,7 @@ void cmComputeLinkDepends::PreserveOriginalEntries()
     {
     cmTarget* tgt = this->EntryList[*in].Target;
     if((tgt && tgt->GetType() != cmTarget::STATIC_LIBRARY) ||
-       (!tgt && shared_lib.find(this->EntryList[*in].Item)))
+       (skipShared && !tgt && shared_lib.find(this->EntryList[*in].Item)))
       {
       // Skip input items known to not be static libraries.
       ++in;
