@@ -511,7 +511,6 @@ bool cmComputeLinkInformation::Compute()
   // Compute the ordered link line items.
   cmComputeLinkDepends cld(this->Target, this->Config);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
-  cld.SetSharedRegex(this->SharedRegexString);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
   // Add the link line items.
