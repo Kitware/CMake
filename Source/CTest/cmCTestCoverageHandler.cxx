@@ -1016,15 +1016,18 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
             {
             cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
               "Something went wrong" << std::endl);
-            cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "File: ["
+            cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+              "Cannot find file: ["
               << sourceFile.c_str() << "]" << std::endl);
-            cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "s: ["
-              << sourceFile.substr(0, cont->SourceDir.size()) << "]"
+            cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+              " in source dir: ["
+              << cont->SourceDir.c_str() << "]"
               << std::endl);
-            cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "b: ["
-              << sourceFile.substr(0, cont->BinaryDir.size()) << "]"
+            cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+              " or binary dir: ["
+              << cont->BinaryDir.size() << "]"
               << std::endl);
-            *cont->OFS << "  Something went wrong. Cannot find: "
+            *cont->OFS << "  Something went wrong. Cannot find file: "
               << sourceFile.c_str()
               << " in source dir: " << cont->SourceDir.c_str()
               << " or binary dir: " << cont->BinaryDir.c_str() << std::endl;
