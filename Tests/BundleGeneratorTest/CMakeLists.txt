@@ -1,6 +1,6 @@
 PROJECT(BundleGeneratorTest)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.7)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 # Build a shared library and install it in lib/
 ADD_LIBRARY(Library SHARED Library.cxx)
