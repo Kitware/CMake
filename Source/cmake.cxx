@@ -857,7 +857,7 @@ int cmake::AddCMakePaths()
     }
   std::string cpackCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
     "/cpack" + cmSystemTools::GetFilenameExtension(cMakeSelf);
-  if(cmSystemTools::FileExists(ctestCommand.c_str()))
+  if(cmSystemTools::FileExists(cpackCommand.c_str()))
     {
     this->CacheManager->AddCacheEntry
       ("CMAKE_CPACK_COMMAND", cpackCommand.c_str(),
