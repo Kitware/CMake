@@ -1422,7 +1422,8 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
           }
         }
 
-      return cmCallVisualStudioMacro::CallMacro(args[2], args[3], macroArgs);
+      return cmCallVisualStudioMacro::CallMacro(args[2], args[3],
+        macroArgs, true);
       }
 #endif
 

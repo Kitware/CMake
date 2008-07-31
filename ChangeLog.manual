@@ -1,3 +1,10 @@
+Changes in CMake 2.6.1 RC 16
+- Fix for bug 7427, preinstall target name hard coded
+- Fix issue #7088 - do not emit error messages when attempts to run 
+  Visual Studio macros fail. You can still get the error output
+  as messages if you want using --debug-output from the cmake command line.
+- Fix InstallRequiredSystemLibraries.cmake to work with win64
+
 Changes in CMake 2.6.1 RC 15
 - Fix bug 7426 FindJPEG module causes error when setting JPEG_LIBRARY to blank
 - Fix bug 7414 PackageMaker generator crashes when given components

@@ -178,14 +178,16 @@ cmGlobalVisualStudioGenerator
             projects += ";";
             projects += *it;
             }
-          cmCallVisualStudioMacro::CallMacro
-            (topLevelSlnName, CMAKE_VSMACROS_RELOAD_MACRONAME, projects);
+          cmCallVisualStudioMacro::CallMacro(topLevelSlnName,
+            CMAKE_VSMACROS_RELOAD_MACRONAME, projects,
+            this->GetCMakeInstance()->GetDebugOutput());
           }
         }
       else if(m == MacroStop)
         {
         cmCallVisualStudioMacro::CallMacro(topLevelSlnName,
-          CMAKE_VSMACROS_STOP_MACRONAME, "");
+          CMAKE_VSMACROS_STOP_MACRONAME, "",
+          this->GetCMakeInstance()->GetDebugOutput());
         }
       }
     }
