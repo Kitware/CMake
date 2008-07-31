@@ -716,7 +716,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       "${CMake_BINARY_DIR}/Tests/BundleGeneratorTest"
       --build-two-config
       --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM} 
+      --build-project BundleGeneratorTest
       --build-target package
       --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/BundleGeneratorTest/InstallDirectory"
       )
