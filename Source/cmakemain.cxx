@@ -101,6 +101,9 @@ static const char * cmDocumentationOptions[][3] =
   {"--debug-output", "Put cmake in a debug mode.",
    "Print extra stuff during the cmake run like stack traces with "
    "message(send_error ) calls."},
+  {"--trace", "Put cmake in trace mode.",
+   "Print a trace of all calls made and from where with "
+   "message(send_error ) calls."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed. "
    "If a file is specified, the documentation is written into and the output "

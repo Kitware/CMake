@@ -395,6 +395,21 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     if(pcmd->GetEnabled() && !cmSystemTools::GetFatalErrorOccured()  &&
        (!this->GetCMakeInstance()->GetScriptMode() || pcmd->IsScriptable()))
       {
+      // if trace is one, print out invoke information
+      if(this->GetCMakeInstance()->GetTrace())
+        {
+        cmOStringStream msg;
+        msg << lff.FilePath << "(" << lff.Line << "):  ";
+        msg << lff.Name << "(";
+        for(std::vector<cmListFileArgument>::const_iterator i = 
+              lff.Arguments.begin(); i != lff.Arguments.end(); ++i)
+          {
+          msg << i->Value;
+          msg << " ";
+          }
+        msg << ")";
+        cmSystemTools::Message(msg.str().c_str());
+        }
       // Try invoking the command.
       if(!pcmd->InvokeInitialPass(lff.Arguments,status) ||
          status.GetNestedError())

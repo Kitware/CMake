@@ -140,6 +140,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 
 cmake::cmake()
 {
+  this->Trace = false;
   this->SuppressDevWarnings = false;
   this->DoSuppressDevWarnings = false;
   this->DebugOutput = false;
@@ -617,6 +618,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       std::cout << "Running with debug output on.\n";
       this->SetDebugOutputOn(true);
+      }
+    else if(arg.find("--trace",0) == 0)
+      {
+      std::cout << "Running with trace output on.\n";
+      this->SetTrace(true);
       }
     else if(arg.find("-G",0) == 0)
       {
