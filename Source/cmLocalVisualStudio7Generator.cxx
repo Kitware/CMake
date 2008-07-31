@@ -399,6 +399,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"StructMemberAlignment", "Zp2", "struct align 2 byte ",     "2", 0},
   {"StructMemberAlignment", "Zp4", "struct align 4 byte ",     "3", 0},
   {"StructMemberAlignment", "Zp8", "struct align 8 byte ",     "4", 0},
+  {"WarningLevel", "W0", "Warning level", "0", 0},
   {"WarningLevel", "W1", "Warning level", "1", 0},
   {"WarningLevel", "W2", "Warning level", "2", 0},
   {"WarningLevel", "W3", "Warning level", "3", 0},
