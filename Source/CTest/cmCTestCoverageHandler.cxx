@@ -640,6 +640,18 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile *mf)
 }
 
 //----------------------------------------------------------------------
+// Fix for issue #4971 where the case of the drive letter component of
+// the filenames might be different when analyzing gcov output.
+//
+// Compare file names: fnc(fn1) == fnc(fn2) // fnc == file name compare
+//
+#ifdef _WIN32
+#define fnc(s) cmSystemTools::LowerCase(s)
+#else
+#define fnc(s) s
+#endif
+
+//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleGCovCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -969,9 +981,11 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
       if ( !sourceFile.empty() && actualSourceFile.empty() )
         {
         gcovFile = "";
+
         // Is it in the source dir?
         if ( sourceFile.size() > cont->SourceDir.size() &&
-          sourceFile.substr(0, cont->SourceDir.size()) == cont->SourceDir &&
+          (fnc(sourceFile.substr(0, cont->SourceDir.size())) ==
+            fnc(cont->SourceDir)) &&
           sourceFile[cont->SourceDir.size()] == '/' )
           {
           cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   produced s: "
@@ -981,9 +995,11 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           actualSourceFile
             = cmSystemTools::CollapseFullPath(sourceFile.c_str());
           }
+
         // Binary dir?
         if ( sourceFile.size() > cont->BinaryDir.size() &&
-          sourceFile.substr(0, cont->BinaryDir.size()) == cont->BinaryDir &&
+          (fnc(sourceFile.substr(0, cont->BinaryDir.size())) ==
+            fnc(cont->BinaryDir)) &&
           sourceFile[cont->BinaryDir.size()] == '/' )
           {
           cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   produced b: "
@@ -993,6 +1009,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           actualSourceFile
             = cmSystemTools::CollapseFullPath(sourceFile.c_str());
           }
+
         if ( actualSourceFile.empty() )
           {
           if ( missingFiles.find(actualSourceFile) == missingFiles.end() )
