@@ -307,7 +307,12 @@ ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
 # _MSC_VER and HAVE_COMDEF_H are defined...
 #
 IF(MSVC)
-  TARGET_LINK_LIBRARIES(CMakeLib optimized comsupp debug comsuppd)
+  IF(MSVC60)
+    # comsuppd did not yet exist in VS6
+    TARGET_LINK_LIBRARIES(CMakeLib comsupp)
+  ELSE(MSVC60)
+    TARGET_LINK_LIBRARIES(CMakeLib optimized comsupp debug comsuppd)
+  ENDIF(MSVC60)
 ENDIF(MSVC)
 
 #
