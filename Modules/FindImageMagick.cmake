@@ -29,7 +29,7 @@
 #
 #  Magick++
 #  MagickWand
-#  Magick
+#  MagickCore
 #
 # For these components the following variables are set:
 #
