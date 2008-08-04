@@ -612,12 +612,15 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   }
 
   // For static libraries there might be archiving rules.
+  bool haveStaticLibraryRule = false;
   std::vector<std::string> archiveCreateCommands;
   std::vector<std::string> archiveAppendCommands;
   std::vector<std::string> archiveFinishCommands;
   std::string::size_type archiveCommandLimit = std::string::npos;
   if(this->Target->GetType() == cmTarget::STATIC_LIBRARY)
     {
+    haveStaticLibraryRule =
+      this->Makefile->GetDefinition(linkRuleVar)? true:false;
     std::string arCreateVar = "CMAKE_";
     arCreateVar += linkLanguage;
     arCreateVar += "_ARCHIVE_CREATE";
@@ -643,6 +646,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Decide whether to use archiving rules.
   bool useArchiveRules =
+    !haveStaticLibraryRule &&
     !archiveCreateCommands.empty() && !archiveAppendCommands.empty();
   if(useArchiveRules)
     {
