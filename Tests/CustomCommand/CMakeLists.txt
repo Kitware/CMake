@@ -83,12 +83,22 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.h
 # Add the location of foo.h to the include path.
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 
+# Test generation of a file to the build tree without full path.  As
+# of CMake 2.6 custom command outputs specified by relative path go in
+# the build tree.
+ADD_CUSTOM_COMMAND(
+  OUTPUT doc1.txt
+  COMMAND ${CMAKE_COMMAND} -E echo "Example Document Target" > doc1.txt
+  DEPENDS doc1.tex
+  VERBATIM
+  )
+
 # Add a custom target to drive generation of doc1.h.
 ADD_CUSTOM_TARGET(TDocument ALL
   COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1.h to doc2.h."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1.h
                                    ${PROJECT_BINARY_DIR}/doc2.h
-  DEPENDS ${PROJECT_BINARY_DIR}/doc1.h
+  DEPENDS ${PROJECT_BINARY_DIR}/doc1.h doc1.txt
   COMMENT "Running top-level TDocument commands"
   )
 
