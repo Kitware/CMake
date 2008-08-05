@@ -2579,7 +2579,7 @@ std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
     {
     flags |= cmsysSystem_Shell_Flag_VSIDE;
     }
-  else
+  else if(!this->LinkScriptShell)
     {
     flags |= cmsysSystem_Shell_Flag_Make;
     }
