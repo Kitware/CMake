@@ -1573,7 +1573,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
         ri != runtimeDirs.end(); ++ri)
       {
       rpath += cli.GetRuntimeFlag();
-      rpath += this->Convert(ri->c_str(), FULL, SHELL, false);
+      rpath += this->Convert(ri->c_str(), NONE, SHELL, false);
       rpath += " ";
       }
     fout << rpath;
