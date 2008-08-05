@@ -152,37 +152,75 @@ void cmSourceFileLocation::UpdateDirectory(const char* name)
 }
 
 //----------------------------------------------------------------------------
+bool
+cmSourceFileLocation
+::MatchesAmbiguousExtension(cmSourceFileLocation const& loc) const
+{
+  // This location's extension is not ambiguous but loc's extension
+  // is.  See if the names match as-is.
+  if(this->Name == loc.Name)
+    {
+    return true;
+    }
+
+  // Check if loc's name could possibly be extended to our name by
+  // adding an extension.
+  if(!(this->Name.size() > loc.Name.size() &&
+       this->Name.substr(0, loc.Name.size()) == loc.Name &&
+       this->Name[loc.Name.size()] == '.'))
+    {
+    return false;
+    }
+
+  // Only a fixed set of extensions will be tried to match a file on
+  // disk.  One of these must match if loc refers to this source file.
+  std::string ext = this->Name.substr(loc.Name.size()+1);
+  cmMakefile* mf = this->Makefile;
+  const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
+  if(std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end())
+    {
+    return true;
+    }
+  const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
+  if(std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end())
+    {
+    return true;
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
 bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
 {
-  if(this->AmbiguousExtension || loc.AmbiguousExtension)
+  if(this->AmbiguousExtension && loc.AmbiguousExtension)
     {
-    // Need to compare without the file extension.
-    std::string thisName;
-    if(this->AmbiguousExtension)
+    // Both extensions are ambiguous.  Since only the old fixed set of
+    // extensions will be tried, the names must match at this point to
+    // be the same file.
+    if(this->Name != loc.Name)
       {
-      thisName = this->Name;
+      return false;
       }
-    else
+    }
+  else if(this->AmbiguousExtension)
+    {
+    // Only "this" extension is ambiguous.
+    if(!loc.MatchesAmbiguousExtension(*this))
       {
-      thisName = cmSystemTools::GetFilenameWithoutLastExtension(this->Name);
+      return false;
       }
-    std::string locName;
-    if(loc.AmbiguousExtension)
-      {
-      locName = loc.Name;
-      }
-    else
-      {
-      locName = cmSystemTools::GetFilenameWithoutLastExtension(loc.Name);
-      }
-    if(thisName != locName)
+    }
+  else if(loc.AmbiguousExtension)
+    {
+    // Only "loc" extension is ambiguous.
+    if(!this->MatchesAmbiguousExtension(loc))
       {
       return false;
       }
     }
   else
     {
-    // Compare with extension.
+    // Neither extension is ambiguous.
     if(this->Name != loc.Name)
       {
       return false;
