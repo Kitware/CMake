@@ -365,7 +365,7 @@ cmComputeTargetDepends
     cmTarget* depender = this->Targets[i];
 
     // Describe the depender.
-    e << "  " << depender->GetName() << " of type "
+    e << "  \"" << depender->GetName() << "\" of type "
       << cmTarget::TargetTypeNames[depender->GetType()] << "\n";
 
     // List its dependencies that are inside the component.
@@ -376,7 +376,7 @@ cmComputeTargetDepends
       if(cmap[j] == c)
         {
         cmTarget* dependee = this->Targets[j];
-        e << "    depends on " << dependee->GetName() << "\n";
+        e << "    depends on \"" << dependee->GetName() << "\"\n";
         }
       }
     }
