@@ -136,7 +136,7 @@ IF(BUILD_TESTING)
          --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
          --build-project Simple
          --test-command Simple)
-    ENDIF ("${cmakeOutput}" MATCHES CodeBlocks)
+    ENDIF ("${cmakeOutput}" MATCHES KDevelop3)
 
   ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Unix Makefiles"  OR  ${CMAKE_TEST_GENERATOR} MATCHES "KDevelop")
 
