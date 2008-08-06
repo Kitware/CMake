@@ -91,6 +91,55 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(Preprocess Preprocess)
   ADD_TEST_MACRO(ExportImport ExportImport)
 
+
+  # If we are running right now with a UnixMakefiles based generator,
+  # build the "Simple" test with the ExtraGenerators, if available
+  # This doesn't test whether the generated project files work (unfortunately), 
+  # mainly it tests that cmake doesn't crash when generating these project files.
+  IF(${CMAKE_TEST_GENERATOR} MATCHES "Unix Makefiles"  OR  ${CMAKE_TEST_GENERATOR} MATCHES "KDevelop")
+    # check which generators we have
+    EXEC_PROGRAM(${CMAKE_CMAKE_COMMAND} ARGS --help OUTPUT_VARIABLE cmakeOutput )
+    # check for the Eclipse generator
+    IF ("${cmakeOutput}" MATCHES Eclipse)
+      ADD_TEST(Simple_EclipseGenerator ${CMAKE_CTEST_COMMAND}
+         --build-and-test
+         "${CMake_SOURCE_DIR}/Tests/Simple"
+         "${CMake_BINARY_DIR}/Tests/Simple_EclipseGenerator"
+         --build-two-config
+         --build-generator "Eclipse CDT4 - Unix Makefiles"
+         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+         --build-project Simple
+         --test-command Simple)
+    ENDIF ("${cmakeOutput}" MATCHES Eclipse)
+
+    # check for the CodeBlocks generator
+    IF ("${cmakeOutput}" MATCHES CodeBlocks)
+      ADD_TEST(Simple_CodeBlocksGenerator ${CMAKE_CTEST_COMMAND}
+         --build-and-test
+         "${CMake_SOURCE_DIR}/Tests/Simple"
+         "${CMake_BINARY_DIR}/Tests/Simple_CodeBlocksGenerator"
+         --build-two-config
+         --build-generator "CodeBlocks - Unix Makefiles"
+         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+         --build-project Simple
+         --test-command Simple)
+    ENDIF ("${cmakeOutput}" MATCHES CodeBlocks)
+
+    # check for the KDevelop3 generator
+    IF ("${cmakeOutput}" MATCHES KDevelop3)
+      ADD_TEST(Simple_KDevelop3Generator ${CMAKE_CTEST_COMMAND}
+         --build-and-test
+         "${CMake_SOURCE_DIR}/Tests/Simple"
+         "${CMake_BINARY_DIR}/Tests/Simple_KDevelop3Generator"
+         --build-two-config
+         --build-generator "KDevelop3 - Unix Makefiles"
+         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+         --build-project Simple
+         --test-command Simple)
+    ENDIF ("${cmakeOutput}" MATCHES CodeBlocks)
+
+  ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Unix Makefiles"  OR  ${CMAKE_TEST_GENERATOR} MATCHES "KDevelop")
+
   # test for correct sub-project generation
   # not implemented in VS6 or Xcode
   IF(NOT MSVC60 AND NOT XCODE AND NOT MSVC70)
