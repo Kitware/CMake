@@ -860,7 +860,10 @@ void cmGlobalGenerator::Generate()
   // Compute the inter-target dependencies.
   {
   cmComputeTargetDepends ctd(this);
-  ctd.Compute();
+  if(!ctd.Compute())
+    {
+    return;
+    }
   std::vector<cmTarget*> const& targets = ctd.GetTargets();
   for(std::vector<cmTarget*>::const_iterator ti = targets.begin();
       ti != targets.end(); ++ti)
