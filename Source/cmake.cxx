@@ -140,6 +140,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 
 cmake::cmake()
 {
+  this->Trace = false;
   this->SuppressDevWarnings = false;
   this->DoSuppressDevWarnings = false;
   this->DebugOutput = false;
@@ -618,6 +619,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       std::cout << "Running with debug output on.\n";
       this->SetDebugOutputOn(true);
       }
+    else if(arg.find("--trace",0) == 0)
+      {
+      std::cout << "Running with trace output on.\n";
+      this->SetTrace(true);
+      }
     else if(arg.find("-G",0) == 0)
       {
       std::string value = arg.substr(2);
@@ -851,7 +857,7 @@ int cmake::AddCMakePaths()
     }
   std::string cpackCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
     "/cpack" + cmSystemTools::GetFilenameExtension(cMakeSelf);
-  if(cmSystemTools::FileExists(ctestCommand.c_str()))
+  if(cmSystemTools::FileExists(cpackCommand.c_str()))
     {
     this->CacheManager->AddCacheEntry
       ("CMAKE_CPACK_COMMAND", cpackCommand.c_str(),
@@ -1181,7 +1187,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         << " s. (clock)"
         << "\n";
       return 0;
-    }
+      }
 
     // Command to calculate the md5sum of a file
     else if (args[1] == "md5sum" && args.size() >= 3)

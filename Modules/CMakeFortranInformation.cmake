@@ -119,7 +119,6 @@ INCLUDE(CMakeCommonLanguageInclude)
 # now define the following rule variables
 # CMAKE_Fortran_CREATE_SHARED_LIBRARY
 # CMAKE_Fortran_CREATE_SHARED_MODULE
-# CMAKE_Fortran_CREATE_STATIC_LIBRARY
 # CMAKE_Fortran_COMPILE_OBJECT
 # CMAKE_Fortran_LINK_EXECUTABLE
 
@@ -134,12 +133,11 @@ IF(NOT CMAKE_Fortran_CREATE_SHARED_MODULE)
   SET(CMAKE_Fortran_CREATE_SHARED_MODULE ${CMAKE_Fortran_CREATE_SHARED_LIBRARY})
 ENDIF(NOT CMAKE_Fortran_CREATE_SHARED_MODULE)
 
-# create a Fortran static library
-IF(NOT CMAKE_Fortran_CREATE_STATIC_LIBRARY)
-  SET(CMAKE_Fortran_CREATE_STATIC_LIBRARY
-      "<CMAKE_AR> cr <TARGET> <LINK_FLAGS> <OBJECTS> "
-      "<CMAKE_RANLIB> <TARGET> ")
-ENDIF(NOT CMAKE_Fortran_CREATE_STATIC_LIBRARY)
+# Create a static archive incrementally for large object file counts.
+# If CMAKE_Fortran_CREATE_STATIC_LIBRARY is set it will override these.
+SET(CMAKE_Fortran_ARCHIVE_CREATE "<CMAKE_AR> cr <TARGET> <LINK_FLAGS> <OBJECTS>")
+SET(CMAKE_Fortran_ARCHIVE_APPEND "<CMAKE_AR> r  <TARGET> <LINK_FLAGS> <OBJECTS>")
+SET(CMAKE_Fortran_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
 
 # compile a Fortran file into an object file
 IF(NOT CMAKE_Fortran_COMPILE_OBJECT)

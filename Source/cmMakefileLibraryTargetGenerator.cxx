@@ -364,6 +364,14 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string linkFlags;
   this->LocalGenerator->AppendFlags(linkFlags, extraFlags);
 
+  // Add OSX version flags, if any.
+  if(this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    this->AppendOSXVerFlag(linkFlags, linkLanguage, "COMPATIBILITY", true);
+    this->AppendOSXVerFlag(linkFlags, linkLanguage, "CURRENT", false);
+    }
+
   // Construct the name of the library.
   std::string targetName;
   std::string targetNameSO;
@@ -604,12 +612,15 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   }
 
   // For static libraries there might be archiving rules.
+  bool haveStaticLibraryRule = false;
   std::vector<std::string> archiveCreateCommands;
   std::vector<std::string> archiveAppendCommands;
   std::vector<std::string> archiveFinishCommands;
   std::string::size_type archiveCommandLimit = std::string::npos;
   if(this->Target->GetType() == cmTarget::STATIC_LIBRARY)
     {
+    haveStaticLibraryRule =
+      this->Makefile->GetDefinition(linkRuleVar)? true:false;
     std::string arCreateVar = "CMAKE_";
     arCreateVar += linkLanguage;
     arCreateVar += "_ARCHIVE_CREATE";
@@ -635,6 +646,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Decide whether to use archiving rules.
   bool useArchiveRules =
+    !haveStaticLibraryRule &&
     !archiveCreateCommands.empty() && !archiveAppendCommands.empty();
   if(useArchiveRules)
     {
@@ -904,4 +916,38 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Clean all the possible library names and symlinks.
   this->CleanFiles.insert(this->CleanFiles.end(),
                           libCleanFiles.begin(),libCleanFiles.end());
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefileLibraryTargetGenerator
+::AppendOSXVerFlag(std::string& flags, const char* lang,
+                   const char* name, bool so)
+{
+  // Lookup the flag to specify the version.
+  std::string fvar = "CMAKE_";
+  fvar += lang;
+  fvar += "_OSX_";
+  fvar += name;
+  fvar += "_VERSION_FLAG";
+  const char* flag = this->Makefile->GetDefinition(fvar.c_str());
+
+  // Skip if no such flag.
+  if(!flag)
+    {
+    return;
+    }
+
+  // Lookup the target version information.
+  int major;
+  int minor;
+  int patch;
+  this->Target->GetTargetVersion(so, major, minor, patch);
+  if(major > 0 || minor > 0 || patch > 0)
+    {
+    // Append the flag since a non-zero version is specified.
+    cmOStringStream vflag;
+    vflag << flag << major << "." << minor << "." << patch;
+    this->LocalGenerator->AppendFlags(flags, vflag.str().c_str());
+    }
 }

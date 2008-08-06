@@ -884,8 +884,8 @@ cmELF::StringEntry const* cmELF::GetSOName()
 cmELF::StringEntry const* cmELF::GetRPath()
 {
   if(this->Valid() &&
-     this->Internal->GetFileType() == cmELF::FileTypeExecutable ||
-     this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)
+     (this->Internal->GetFileType() == cmELF::FileTypeExecutable ||
+      this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary))
     {
     return this->Internal->GetRPath();
     }
@@ -899,8 +899,8 @@ cmELF::StringEntry const* cmELF::GetRPath()
 cmELF::StringEntry const* cmELF::GetRunPath()
 {
   if(this->Valid() &&
-     this->Internal->GetFileType() == cmELF::FileTypeExecutable ||
-     this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary)
+     (this->Internal->GetFileType() == cmELF::FileTypeExecutable ||
+      this->Internal->GetFileType() == cmELF::FileTypeSharedLibrary))
     {
     return this->Internal->GetRunPath();
     }

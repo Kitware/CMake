@@ -1573,7 +1573,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
         ri != runtimeDirs.end(); ++ri)
       {
       rpath += cli.GetRuntimeFlag();
-      rpath += this->Convert(ri->c_str(), FULL, SHELL, false);
+      rpath += this->Convert(ri->c_str(), NONE, SHELL, false);
       rpath += " ";
       }
     fout << rpath;
@@ -1740,6 +1740,15 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
     // This is a full path.  Return it as given.
     return inName;
     }
+
+  // Check for a source file in this directory that matches the
+  // dependency.
+  if(cmSourceFile* sf = this->Makefile->GetSource(inName))
+    {
+    name = sf->GetFullPath();
+    return name;
+    }
+
   // Treat the name as relative to the source directory in which it
   // was given.
   name = this->Makefile->GetCurrentDirectory();
@@ -2579,7 +2588,7 @@ std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
     {
     flags |= cmsysSystem_Shell_Flag_VSIDE;
     }
-  else
+  else if(!this->LinkScriptShell)
     {
     flags |= cmsysSystem_Shell_Flag_Make;
     }

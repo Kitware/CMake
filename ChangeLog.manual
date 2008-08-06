@@ -1,3 +1,19 @@
+Changes in CMake 2.6.2 RC 1
+- Fix abort in eclipse generator with empty EXECUTABLE_OUTPUT_PATH
+- Fix FindKDE3.cmake syntax error
+- Fix custom command output by relative path not always working
+- Fix bug, Do not convert RPATH entries to full path.
+- Allow for "$ORIGIN" into the RPATH
+- Allow for static libraries with lots of objects using archive append
+- Fix documentation for FindImageMagick.cmake
+- Fix link error with MS compiler and comdef
+- Fix crash when attempting to load the RPATH out of a non-ELF file
+- Add --trace option to cmake allowing for the tracing of a cmake run
+- Fix for issue #4971 where the case of the drive letter component of
+  the filenames might be different when analyzing gcov output.
+- Add warning level W0 to visual studio
+- Add support for OSX library version flags
+
 Changes in CMake 2.6.1 RC 16
 - Fix for bug 7427, preinstall target name hard coded
 - Fix issue #7088 - do not emit error messages when attempts to run 

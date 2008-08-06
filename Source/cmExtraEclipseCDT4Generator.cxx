@@ -351,7 +351,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
         }
       }
     // for EXECUTABLE_OUTPUT_PATH when not in binary dir
-    std::string outputPath = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
+    std::string outputPath = mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
     if (!outputPath.empty() && !cmSystemTools::IsSubDirectory(
                         outputPath.c_str(), this->HomeOutputDirectory.c_str()))
       {
@@ -368,9 +368,9 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
         this->OutLinkedResources.push_back(name);
       }
     // for LIBRARY_OUTPUT_PATH when not in binary dir
-    if (outputPath != mf->GetDefinition("LIBRARY_OUTPUT_PATH"))
+    if (outputPath != mf->GetSafeDefinition("LIBRARY_OUTPUT_PATH"))
       {
-      outputPath = mf->GetDefinition("LIBRARY_OUTPUT_PATH");
+      outputPath = mf->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
       if (!outputPath.empty() && !cmSystemTools::IsSubDirectory(
                         outputPath.c_str(), this->HomeOutputDirectory.c_str()))
         {

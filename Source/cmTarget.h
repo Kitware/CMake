@@ -269,6 +269,11 @@ public:
       not set or cannot be parsed.  */
   void GetTargetVersion(int& major, int& minor);
 
+  /** Get the target major, minor, and patch version numbers
+      interpreted from the VERSION or SOVERSION property.  Version 0
+      is returned if the property is not set or cannot be parsed.  */
+  void GetTargetVersion(bool soversion, int& major, int& minor, int& patch);
+
   /**
    * Trace through the source files in this target and add al source files
    * that they depend on, used by all generators

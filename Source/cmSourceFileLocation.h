@@ -94,6 +94,8 @@ private:
   std::string Directory;
   std::string Name;
 
+  bool MatchesAmbiguousExtension(cmSourceFileLocation const& loc) const;
+
   // Update the location with additional knowledge.
   void Update(cmSourceFileLocation const& loc);
   void Update(const char* name);

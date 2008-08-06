@@ -302,6 +302,19 @@ IF(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
   TARGET_LINK_LIBRARIES(CMakeLib rpcrt4)
 ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
 
+# With the Microsoft compiler (for _bstr_t support used from
+# cmCallVisualStudioMacro) we need the comsupp lib. Needed when
+# _MSC_VER and HAVE_COMDEF_H are defined...
+#
+IF(MSVC)
+  IF(MSVC60)
+    # comsuppd did not yet exist in VS6
+    TARGET_LINK_LIBRARIES(CMakeLib comsupp)
+  ELSE(MSVC60)
+    TARGET_LINK_LIBRARIES(CMakeLib optimized comsupp debug comsuppd)
+  ENDIF(MSVC60)
+ENDIF(MSVC)
+
 #
 # CTestLib
 #

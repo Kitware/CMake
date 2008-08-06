@@ -190,7 +190,7 @@ IF(KDE3_FOUND)
       # I guess 2.95 also doesn't then
       IF("${out}" MATCHES "2.9[56]")
          SET(_KDE3_USE_FLAGS FALSE)
-      ENDIF("${out}" out MATCHES "2.9[56]")
+      ENDIF("${out}" MATCHES "2.9[56]")
    ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
    #only on linux, but NOT e.g. on FreeBSD:
