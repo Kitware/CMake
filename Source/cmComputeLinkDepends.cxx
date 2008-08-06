@@ -292,7 +292,7 @@ int cmComputeLinkDepends::AddLinkEntry(std::string const& item)
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = item;
-  entry.Target = this->Makefile->FindTargetToUse(entry.Item.c_str());
+  entry.Target = this->FindTargetToLink(entry.Item.c_str());
 
   // If the item has dependencies queue it to follow them.
   if(entry.Target)
@@ -387,7 +387,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
     // Initialize the item entry.
     LinkEntry& entry = this->EntryList[lei->second];
     entry.Item = dep.Item;
-    entry.Target = this->Makefile->FindTargetToUse(dep.Item.c_str());
+    entry.Target = this->FindTargetToLink(dep.Item.c_str());
 
     // This item was added specifically because it is a dependent
     // shared library.  It may get special treatment
@@ -655,6 +655,25 @@ std::string cmComputeLinkDepends::CleanItemName(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
+cmTarget* cmComputeLinkDepends::FindTargetToLink(const char* name)
+{
+  // Look for a target.
+  cmTarget* tgt = this->Makefile->FindTargetToUse(name);
+
+  // Skip targets that will not really be linked.  This is probably a
+  // name conflict between an external library and an executable
+  // within the project.
+  if(tgt && tgt->GetType() == cmTarget::EXECUTABLE &&
+     !tgt->IsExecutableWithExports())
+    {
+    tgt = 0;
+    }
+
+  // Return the target found, if any.
+  return tgt;
+}
+
+//----------------------------------------------------------------------------
 void cmComputeLinkDepends::InferDependencies()
 {
   // The inferred dependency sets for each item list the possible
@@ -862,7 +881,7 @@ void cmComputeLinkDepends::CheckWrongConfigItem(std::string const& item)
   // For CMake 2.4 bug-compatibility we need to consider the output
   // directories of targets linked in another configuration as link
   // directories.
-  if(cmTarget* tgt = this->Makefile->FindTargetToUse(item.c_str()))
+  if(cmTarget* tgt = this->FindTargetToLink(item.c_str()))
     {
     if(!tgt->IsImported())
       {

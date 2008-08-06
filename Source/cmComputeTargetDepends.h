@@ -48,7 +48,8 @@ private:
   void CollectTargets();
   void CollectDepends();
   void CollectTargetDepends(int depender_index);
-  void AddTargetDepend(int depender_index, const char* dependee_name);
+  void AddTargetDepend(int depender_index, const char* dependee_name,
+                       bool linking);
   void ComputeFinalDepends(cmComputeComponentGraph const& ccg);
 
   cmGlobalGenerator* GlobalGenerator;
