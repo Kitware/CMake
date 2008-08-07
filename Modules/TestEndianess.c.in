@@ -10,11 +10,14 @@ const cmakeint16 info_little[] =  {0x4854, 0x5349, 0x4920, 0x2053, 0x494c, 0x545
 const cmakeint16 info_big[] =     {0x5448, 0x4953, 0x2049, 0x5320, 0x4249, 0x4720, 0x454e, 0x4449, 0x414e, 0x2e2e, 0x0000};
 
 #ifdef __CLASSIC_C__
-int main(){
-  int ac;
-  char*av[];
+int main(argc, argv) int argc; char *argv[];
 #else
-int main(int ac, char*av[]){
+int main(int argc, char *argv[])
 #endif
-   return (&info_little[0] != &info_big[0]);
+{
+  int require = 0;
+  require += info_little[argc];
+  require += info_big[argc];
+  (void)argv;
+  return require;
 }

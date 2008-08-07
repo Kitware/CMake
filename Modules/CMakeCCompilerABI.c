@@ -12,17 +12,17 @@
 
 /*--------------------------------------------------------------------------*/
 
-/* Make sure the information strings are referenced.  */
-#define REQUIRE(x) (&x[0] != &require)
-
-int main()
-{
-  const char require = 0;
-  return
-    (
-      REQUIRE(info_sizeof_dptr)
-#if defined(ABI_ID)
-      && REQUIRE(info_abi)
+#ifdef __CLASSIC_C__
+int main(argc, argv) int argc; char *argv[];
+#else
+int main(int argc, char *argv[])
 #endif
-      );
+{
+  int require = 0;
+  require += info_sizeof_dptr[argc];
+#if defined(ABI_ID)
+  require += info_abi[argc];
+#endif
+  (void)argv;
+  return require;
 }

@@ -2,14 +2,8 @@
 # error "A C++ compiler has been selected for C."
 #endif
 
-/* Provide main() so the program can link.  */
 #if defined(__18CXX)
 # define ID_VOID_MAIN
-#endif
-#ifdef ID_VOID_MAIN
-void main() {}
-#else
-int main() { return 0; }
 #endif
 
 #if defined(__INTEL_COMPILER) || defined(__ICC)
@@ -82,3 +76,18 @@ int main() { return 0; }
 char* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
 
 @CMAKE_C_COMPILER_ID_PLATFORM_CONTENT@
+
+/*--------------------------------------------------------------------------*/
+
+#ifdef ID_VOID_MAIN
+void main() {}
+#else
+int main(int argc, char* argv[])
+{
+  int require = 0;
+  require += info_compiler[argc];
+  require += info_platform[argc];
+  (void)argv;
+  return require;
+}
+#endif
