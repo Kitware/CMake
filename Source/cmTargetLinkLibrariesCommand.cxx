@@ -16,6 +16,13 @@
 =========================================================================*/
 #include "cmTargetLinkLibrariesCommand.h"
 
+const char* cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[3] =
+{
+  "general",
+  "debug",
+  "optimized"
+};
+
 // cmTargetLinkLibrariesCommand
 bool cmTargetLinkLibrariesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -32,57 +39,60 @@ bool cmTargetLinkLibrariesCommand
     {
     return true;
     }
+
+  // Keep track of link configuration specifiers.
+  cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
+  bool haveLLT = false;
+
   // add libraries, nothe that there is an optional prefix 
   // of debug and optimized than can be used
   std::vector<std::string>::const_iterator i = args.begin();
   
   for(++i; i != args.end(); ++i)
     {
-    if (*i == "debug")
+    if(*i == "debug")
       {
-      ++i;
-      if(i == args.end())
+      if(haveLLT)
         {
-        this->SetError
-          ("The \"debug\" argument must be followed by a library");
-        return false;
+        this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::DEBUG);
         }
-      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
-                                          cmTarget::DEBUG);
+      llt = cmTarget::DEBUG;
+      haveLLT = true;
       }
-    else if (*i == "optimized")
+    else if(*i == "optimized")
       {
-      ++i;
-      if(i == args.end())
+      if(haveLLT)
         {
-        this->SetError(
-          "The \"optimized\" argument must be followed by a library");
-        return false;
+        this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::OPTIMIZED);
         }
-      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
-                                 cmTarget::OPTIMIZED);
+      llt = cmTarget::OPTIMIZED;
+      haveLLT = true;
       }
-    else if (*i == "general")
+    else if(*i == "general")
       {
-      ++i;
-      if(i == args.end())
+      if(haveLLT)
         {
-        this->SetError(
-          "The \"general\" argument must be followed by a library");
-        return false;
+        this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::GENERAL);
         }
-      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
-                                 cmTarget::GENERAL);
+      llt = cmTarget::GENERAL;
+      haveLLT = true;
+      }
+    else if(haveLLT)
+      {
+      // The link type was specified by the previous argument.
+      haveLLT = false;
+      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),
+                                              i->c_str(), llt);
       }
     else
       {
-      // make sure the type is correct if it is currently general.  So if you
+      // Lookup old-style cache entry if type is unspecified.  So if you
       // do a target_link_libraries(foo optimized bar) it will stay optimized
       // and not use the lookup.  As there maybe the case where someone has
       // specifed that a library is both debug and optimized.  (this check is
       // only there for backwards compatibility when mixing projects built
       // with old versions of CMake and new)
-      cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
+      llt = cmTarget::GENERAL;
       std::string linkType = args[0];
       linkType += "_LINK_TYPE";
       const char* linkTypeString = 
@@ -101,5 +111,29 @@ bool cmTargetLinkLibrariesCommand
       this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),llt);
       }
     } 
+
+  // Make sure the last argument was not a library type specifier.
+  if(haveLLT)
+    {
+    cmOStringStream e;
+    e << "The \"" << this->LinkLibraryTypeNames[llt]
+      << "\" argument must be followed by a library.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    }
+
   return true;
+}
+
+//----------------------------------------------------------------------------
+void
+cmTargetLinkLibrariesCommand
+::LinkLibraryTypeSpecifierWarning(int left, int right)
+{
+  cmOStringStream w;
+  w << "Link library type specifier \""
+    << this->LinkLibraryTypeNames[left] << "\" is followed by specifier \""
+    << this->LinkLibraryTypeNames[right] << "\" instead of a library name.  "
+    << "The first specifier will be ignored.";
+  this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
 }
