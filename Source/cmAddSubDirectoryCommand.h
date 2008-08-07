@@ -79,13 +79,21 @@ public:
       "be processed immediately by CMake before processing in the current "
       "input file continues beyond this command.\n"
 
-      "If the EXCLUDE_FROM_ALL argument is provided then this subdirectory "
-      "will not be included in build by default. Users will have to "
-      "explicitly start a build in the generated output directory. "
-      "This is useful for having cmake create a build system for a "
-      "set of examples in a project. One would want cmake to generate "
-      "a single build system for all the examples, but one may not want "
-      "the targets to show up in the main build system.";
+      "If the EXCLUDE_FROM_ALL argument is provided then targets in the "
+      "subdirectory will not be included in the ALL target of the parent "
+      "directory by default, and will be excluded from IDE project files.  "
+      "Users must explicitly build targets in the subdirectory.  "
+      "This is meant for use when the subdirectory contains a separate part "
+      "of the project that is useful but not necessary, such as a set of "
+      "examples.  "
+      "Typically the subdirectory should contain its own project() command "
+      "invocation so that a full build system will be generated in the "
+      "subdirectory (such as a VS IDE solution file).  "
+      "Note that inter-target dependencies supercede this exclusion.  "
+      "If a target built by the parent project depends on a target in the "
+      "subdirectory, the dependee target will be included in the parent "
+      "project build system to satisfy the dependency."
+      ;
     }
   
   cmTypeMacro(cmAddSubDirectoryCommand, cmCommand);
