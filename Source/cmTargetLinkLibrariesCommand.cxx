@@ -40,9 +40,27 @@ bool cmTargetLinkLibrariesCommand
     return true;
     }
 
+  // Lookup the target for which libraries are specified.
+  this->Target =
+    this->Makefile->GetCMakeInstance()
+    ->GetGlobalGenerator()->FindTarget(0, args[0].c_str());
+  if(!this->Target)
+    {
+    cmOStringStream e;
+    e << "Cannot specify link libraries for target \"" << args[0] << "\" "
+      << "which is not built by this project.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return true;
+    }
+
   // Keep track of link configuration specifiers.
   cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
   bool haveLLT = false;
+
+  // Start with primary linking and switch to link interface
+  // specification when the keyword is encountered.
+  this->DoingInterface = false;
 
   // add libraries, nothe that there is an optional prefix 
   // of debug and optimized than can be used
@@ -50,7 +68,11 @@ bool cmTargetLinkLibrariesCommand
   
   for(++i; i != args.end(); ++i)
     {
-    if(*i == "debug")
+    if(*i == "INTERFACE")
+      {
+      this->DoingInterface = true;
+      }
+    else if(*i == "debug")
       {
       if(haveLLT)
         {
@@ -81,8 +103,7 @@ bool cmTargetLinkLibrariesCommand
       {
       // The link type was specified by the previous argument.
       haveLLT = false;
-      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),
-                                              i->c_str(), llt);
+      this->HandleLibrary(i->c_str(), llt);
       }
     else
       {
@@ -108,7 +129,7 @@ bool cmTargetLinkLibrariesCommand
           llt = cmTarget::OPTIMIZED;
           }
         }
-      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),llt);
+      this->HandleLibrary(i->c_str(), llt);
       }
     } 
 
@@ -120,6 +141,15 @@ bool cmTargetLinkLibrariesCommand
       << "\" argument must be followed by a library.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
+    }
+
+  // If the INTERFACE option was given, make sure the
+  // LINK_INTERFACE_LIBRARIES property exists.  This allows the
+  // command to be used to specify an empty link interface.
+  if(this->DoingInterface &&
+     !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES"))
+    {
+    this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
     }
 
   return true;
@@ -136,4 +166,43 @@ cmTargetLinkLibrariesCommand
     << this->LinkLibraryTypeNames[right] << "\" instead of a library name.  "
     << "The first specifier will be ignored.";
   this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+}
+
+//----------------------------------------------------------------------------
+void
+cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
+                                            cmTarget::LinkLibraryType llt)
+{
+  // Handle normal case first.
+  if(!this->DoingInterface)
+    {
+    this->Makefile
+      ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
+    return;
+    }
+
+  // Include this library in the link interface for the target.
+  if(llt == cmTarget::DEBUG)
+    {
+    // Put in only the DEBUG configuration interface.
+    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES_DEBUG", lib);
+    }
+  else if(llt == cmTarget::OPTIMIZED)
+    {
+    // Put in only the non-DEBUG configuration interface.
+    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
+
+    // Make sure the DEBUG configuration interface exists so that this
+    // one will not be used as a fall-back.
+    if(!this->Target->GetProperty("LINK_INTERFACE_LIBRARIES_DEBUG"))
+      {
+      this->Target->SetProperty("LINK_INTERFACE_LIBRARIES_DEBUG", "");
+      }
+    }
+  else
+    {
+    // Put in both the DEBUG and non-DEBUG configuration interfaces.
+    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
+    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES_DEBUG", lib);
+    }
 }

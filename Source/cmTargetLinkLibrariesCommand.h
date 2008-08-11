@@ -64,23 +64,53 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  target_link_libraries(target library1\n"
-      "                        <debug | optimized | general> library2\n"
-      "                        ...)\n"
+      "  target_link_libraries(<target> [INTERFACE]\n"
+      "                        [[debug|optimized|general] <lib>] ...)\n"
       "Specify a list of libraries to be linked into the specified target.  "
-      "The debug and optimized strings may be used to indicate that "
-      "the next library listed is to be used only for that specific "
-      "type of build. general indicates it is used for all build types "
-      "and is assumed if not specified.\n"
       "If any library name matches that of a target in the current project "
       "a dependency will automatically be added in the build system to make "
-      "sure the library being linked is up-to-date before the target links.";
+      "sure the library being linked is up-to-date before the target links."
+      "\n"
+      "A \"debug\", \"optimized\", or \"general\" keyword indicates that "
+      "the library immediately following it is to be used only for the "
+      "corresponding build configuration.  "
+      "The \"debug\" keyword corresponds to the Debug configuration.  "
+      "The \"optimized\" keyword corresponds to all other configurations.  "
+      "The \"general\" keyword corresponds to all configurations, and is "
+      "purely optional (assumed if omitted).  "
+      "Higher granularity may be achieved for per-configuration rules "
+      "by creating and linking to IMPORTED library targets.  "
+      "See the IMPORTED mode of the add_library command for more "
+      "information.  "
+      "\n"
+      "Library dependencies are transitive by default.  "
+      "When this target is linked into another target then the libraries "
+      "linked to this target will appear on the link line for the other "
+      "target too.  "
+      "See the LINK_INTERFACE_LIBRARIES target property to override the "
+      "set of transitive link dependencies for a target."
+      "\n"
+      "The INTERFACE option tells the command to append the libraries "
+      "to the LINK_INTERFACE_LIBRARIES and LINK_INTERFACE_LIBRARIES_DEBUG "
+      "target properties instead of using them for linking.  "
+      "Libraries specified as \"debug\" are appended to the "
+      "the LINK_INTERFACE_LIBRARIES_DEBUG property.  "
+      "Libraries specified as \"optimized\" are appended to the "
+      "the LINK_INTERFACE_LIBRARIES property.  "
+      "Libraries specified as \"general\" (or without any keyword) are "
+      "appended to both properties."
+      ;
     }
   
   cmTypeMacro(cmTargetLinkLibrariesCommand, cmCommand);
 private:
   void LinkLibraryTypeSpecifierWarning(int left, int right);
   static const char* LinkLibraryTypeNames[3];
+
+  cmTarget* Target;
+  bool DoingInterface;
+
+  void HandleLibrary(const char* lib, cmTarget::LinkLibraryType llt);
 };
 
 
