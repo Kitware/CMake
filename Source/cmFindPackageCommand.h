@@ -124,6 +124,7 @@ private:
   bool NoModule;
   bool NoBuilds;
   bool DebugMode;
+  bool UseLib64Paths;
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
 };
