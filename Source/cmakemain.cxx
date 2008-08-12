@@ -303,9 +303,6 @@ int main(int ac, char** av)
 
 int do_cmake(int ac, char** av)
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  cmDocumentation doc;
-#endif
   int nocwd = 0;
 
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
@@ -316,6 +313,7 @@ int do_cmake(int ac, char** av)
     }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
+  cmDocumentation doc;
   if(doc.CheckOptions(ac, av) || nocwd)
     { 
     // Construct and print requested documentation.
