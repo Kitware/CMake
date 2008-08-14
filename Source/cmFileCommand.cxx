@@ -1486,7 +1486,8 @@ cmFileCommand::HandleRPathRemoveCommand(std::vector<std::string> const& args)
   cmSystemToolsFileTime* ft = cmSystemTools::FileTimeNew();
   bool have_ft = cmSystemTools::FileTimeGet(file, ft);
   std::string emsg;
-  if(!cmSystemTools::RemoveRPath(file, &emsg))
+  bool removed;
+  if(!cmSystemTools::RemoveRPath(file, &emsg, &removed))
     {
     cmOStringStream e;
     e << "RPATH_REMOVE could not remove RPATH from file:\n"
@@ -1495,9 +1496,19 @@ cmFileCommand::HandleRPathRemoveCommand(std::vector<std::string> const& args)
     this->SetError(e.str().c_str());
     success = false;
     }
-  if(success && have_ft)
+  if(success)
     {
-    cmSystemTools::FileTimeSet(file, ft);
+    if(removed)
+      {
+      std::string message = "Removed runtime path from \"";
+      message += file;
+      message += "\"";
+      this->Makefile->DisplayStatus(message.c_str(), -1);
+      }
+    if(have_ft)
+      {
+      cmSystemTools::FileTimeSet(file, ft);
+      }
     }
   cmSystemTools::FileTimeDelete(ft);
   return success;

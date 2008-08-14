@@ -2525,9 +2525,14 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 }
 
 //----------------------------------------------------------------------------
-bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg)
+bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
+                                bool* removed)
 {
 #if defined(CMAKE_USE_ELF_PARSER)
+  if(removed)
+    {
+    *removed = false;
+    }
   int zeroCount = 0;
   unsigned long zeroPosition[2] = {0,0};
   unsigned long zeroSize[2] = {0,0};
@@ -2676,10 +2681,15 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg)
     }
 
   // Everything was updated successfully.
+  if(removed)
+    {
+    *removed = true;
+    }
   return true;
 #else
   (void)file;
   (void)emsg;
+  (void)removed;
   return false;
 #endif
 }
