@@ -2329,6 +2329,16 @@ std::string::size_type cmSystemToolsFindRPath(std::string const& have,
 }
 #endif
 
+#if defined(CMAKE_USE_ELF_PARSER)
+struct cmSystemToolsRPathInfo
+{
+  unsigned long Position;
+  unsigned long Size;
+  std::string Name;
+  std::string Value;
+};
+#endif
+
 //----------------------------------------------------------------------------
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
@@ -2341,37 +2351,71 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     {
     *changed = false;
     }
-  unsigned long rpathPosition = 0;
-  unsigned long rpathSize = 0;
-  std::string rpathPrefix;
-  std::string rpathSuffix;
+  int rp_count = 0;
+  cmSystemToolsRPathInfo rp[2];
   {
   // Parse the ELF binary.
   cmELF elf(file.c_str());
 
-  // Get the RPATH or RUNPATH entry from it.
-  cmELF::StringEntry const* se = elf.GetRPath();
-  if(!se)
+  // Get the RPATH and RUNPATH entries from it.
+  int se_count = 0;
+  cmELF::StringEntry const* se[2] = {0, 0};
+  const char* se_name[2] = {0, 0};
+  if(cmELF::StringEntry const* se_rpath = elf.GetRPath())
     {
-    se = elf.GetRunPath();
+    se[se_count] = se_rpath;
+    se_name[se_count] = "RPATH";
+    ++se_count;
+    }
+  if(cmELF::StringEntry const* se_runpath = elf.GetRunPath())
+    {
+    se[se_count] = se_runpath;
+    se_name[se_count] = "RUNPATH";
+    ++se_count;
+    }
+  if(se_count == 0)
+    {
+    if(newRPath.empty())
+      {
+      // The new rpath is empty and there is no rpath anyway so it is
+      // okay.
+      return true;
+      }
+    else
+      {
+      if(emsg)
+        {
+        *emsg = "No valid ELF RPATH or RUNPATH entry exists in the file; ";
+        *emsg += elf.GetErrorMessage();
+        }
+      return false;
+      }
     }
 
-  if(se)
+  for(int i=0; i < se_count; ++i)
     {
+    // If both RPATH and RUNPATH refer to the same string literal it
+    // needs to be changed only once.
+    if(rp_count && rp[0].Position == se[i]->Position)
+      {
+      continue;
+      }
+
     // Make sure the current rpath contains the old rpath.
-    std::string::size_type pos = cmSystemToolsFindRPath(se->Value, oldRPath);
+    std::string::size_type pos =
+      cmSystemToolsFindRPath(se[i]->Value, oldRPath);
     if(pos == std::string::npos)
       {
       // If it contains the new rpath instead then it is okay.
-      if(cmSystemToolsFindRPath(se->Value, newRPath) != std::string::npos)
+      if(cmSystemToolsFindRPath(se[i]->Value, newRPath) != std::string::npos)
         {
-        return true;
+        continue;
         }
       if(emsg)
         {
         cmOStringStream e;
-        e << "The current RPATH is:\n"
-          << "  " << se->Value << "\n"
+        e << "The current " << se_name[i] << " is:\n"
+          << "  " << se[i]->Value << "\n"
           << "which does not contain:\n"
           << "  " << oldRPath << "\n"
           << "as was expected.";
@@ -2380,47 +2424,43 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       return false;
       }
 
-    // Store information about the entry.
-    rpathPosition = se->Position;
-    rpathSize = se->Size;
+    // Store information about the entry in the file.
+    rp[rp_count].Position = se[i]->Position;
+    rp[rp_count].Size = se[i]->Size;
+    rp[rp_count].Name = se_name[i];
 
-    // Store the part of the path we must preserve.
-    rpathPrefix = se->Value.substr(0, pos);
-    rpathSuffix = se->Value.substr(pos+oldRPath.length(), oldRPath.npos);
-    }
-  else if(newRPath.empty())
-    {
-    // The new rpath is empty and there is no rpath anyway so it is
-    // okay.
-    return true;
-    }
-  else
-    {
-    if(emsg)
+    // Construct the new value which preserves the part of the path
+    // not being changed.
+    rp[rp_count].Value = se[i]->Value.substr(0, pos);
+    rp[rp_count].Value += newRPath;
+    rp[rp_count].Value += se[i]->Value.substr(pos+oldRPath.length(),
+                                              oldRPath.npos);
+
+    // Make sure there is enough room to store the new rpath and at
+    // least one null terminator.
+    if(rp[rp_count].Size < rp[rp_count].Value.length()+1)
       {
-      *emsg = "No valid ELF RPATH entry exists in the file; ";
-      *emsg += elf.GetErrorMessage();
+      if(emsg)
+        {
+        *emsg = "The replacement path is too long for the ";
+        *emsg += se_name[i];
+        *emsg += " entry.";
+        }
+      return false;
       }
-    return false;
+
+    // This entry is ready for update.
+    ++rp_count;
     }
   }
-  // Compute the full new rpath.
-  std::string rpath = rpathPrefix;
-  rpath += newRPath;
-  rpath += rpathSuffix;
 
-  // Make sure there is enough room to store the new rpath and at
-  // least one null terminator.
-  if(rpathSize < rpath.length()+1)
+  // If no runtime path needs to be changed, we are done.
+  if(rp_count == 0)
     {
-    if(emsg)
-      {
-      *emsg = "The replacement RPATH is too long.";
-      }
-    return false;
+    return true;
     }
 
-  // Open the file for update and seek to the RPATH position.
+  // Open the file for update.
   std::ofstream f(file.c_str(),
                   std::ios::in | std::ios::out | std::ios::binary);
   if(!f)
@@ -2431,40 +2471,49 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       }
     return false;
     }
-  if(!f.seekp(rpathPosition))
+
+  // Store the new RPATH and RUNPATH strings.
+  for(int i=0; i < rp_count; ++i)
     {
-    if(emsg)
+    // Seek to the RPATH position.
+    if(!f.seekp(rp[i].Position))
       {
-      *emsg = "Error seeking to RPATH position.";
+      if(emsg)
+        {
+        *emsg = "Error seeking to ";
+        *emsg += rp[i].Name;
+        *emsg += " position.";
+        }
+      return false;
       }
-    return false;
+
+    // Write the new rpath.  Follow it with enough null terminators to
+    // fill the string table entry.
+    f << rp[i].Value;
+    for(unsigned long j=rp[i].Value.length(); j < rp[i].Size; ++j)
+      {
+      f << '\0';
+      }
+
+    // Make sure it wrote correctly.
+    if(!f)
+      {
+      if(emsg)
+        {
+        *emsg = "Error writing the new ";
+        *emsg += rp[i].Name;
+        *emsg += " string to the file.";
+        }
+      return false;
+      }
     }
 
-  // Write the new rpath.  Follow it with enough null terminators to
-  // fill the string table entry.
-  f << rpath;
-  for(unsigned long i=rpath.length(); i < rpathSize; ++i)
+  // Everything was updated successfully.
+  if(changed)
     {
-    f << '\0';
+    *changed = true;
     }
-
-  // Make sure everything was okay.
-  if(f)
-    {
-    if(changed)
-      {
-      *changed = true;
-      }
-    return true;
-    }
-  else
-    {
-    if(emsg)
-      {
-      *emsg = "Error writing the new rpath to the file.";
-      }
-    return false;
-    }
+  return true;
 #else
   (void)file;
   (void)oldRPath;
