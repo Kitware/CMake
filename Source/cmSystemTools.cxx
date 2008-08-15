@@ -2460,6 +2460,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     return true;
     }
 
+  {
   // Open the file for update.
   std::ofstream f(file.c_str(),
                   std::ios::in | std::ios::out | std::ios::binary);
@@ -2507,6 +2508,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       return false;
       }
     }
+  }
 
   // Everything was updated successfully.
   if(changed)
