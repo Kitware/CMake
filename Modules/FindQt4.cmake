@@ -256,6 +256,19 @@
 # (They make no sense in Qt4)
 #  QT_QT_LIBRARY        Qt-Library is now split
 
+# If Qt3 has already been found, fail.
+IF(QT_QT_LIBRARY)
+  IF(Qt4_FIND_REQUIRED)
+    MESSAGE( FATAL_ERROR "Qt3 and Qt4 cannot be used together in one project.")
+  ELSE(Qt4_FIND_REQUIRED)
+    IF(NOT Qt4_FIND_QUIETLY)
+      MESSAGE( STATUS    "Qt3 and Qt4 cannot be used together in one project.")
+    ENDIF(NOT Qt4_FIND_QUIETLY)
+    RETURN()
+  ENDIF(Qt4_FIND_REQUIRED)
+ENDIF(QT_QTCORE_LIBRARY)
+
+
 INCLUDE(CheckSymbolExists)
 INCLUDE(MacroAddFileDependencies)
 
@@ -474,9 +487,9 @@ IF (QT4_QMAKE_FOUND)
   ENDIF( QT_QTCORE_INCLUDE_DIR AND NOT QT_INCLUDE_DIR)
 
   IF( NOT QT_INCLUDE_DIR)
-    IF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
+    IF(Qt4_FIND_REQUIRED)
       MESSAGE( FATAL_ERROR "Could NOT find QtGlobal header")
-    ENDIF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
+    ENDIF(Qt4_FIND_REQUIRED)
   ENDIF( NOT QT_INCLUDE_DIR)
 
   #############################################
@@ -771,9 +784,9 @@ IF (QT4_QMAKE_FOUND)
       ENDIF(EXISTS ${QT_LIBRARY_DIR}/libqtmain.a)
     ENDIF(QT_LIBRARY_DIR AND MSVC)
 
-    IF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
+    IF(Qt4_FIND_REQUIRED)
       MESSAGE( FATAL_ERROR "Could NOT find QtCore. Check ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log for more details.")
-    ENDIF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
+    ENDIF(Qt4_FIND_REQUIRED)
   ENDIF( NOT QT_QTCORE_LIBRARY_DEBUG AND NOT QT_QTCORE_LIBRARY_RELEASE )
 
   # Set QT_QTASSISTANT_LIBRARY

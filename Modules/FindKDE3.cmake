@@ -67,6 +67,18 @@ IF(NOT UNIX AND KDE3_FIND_REQUIRED)
    MESSAGE(FATAL_ERROR "Compiling KDE3 applications and libraries under Windows is not supported")
 ENDIF(NOT UNIX AND KDE3_FIND_REQUIRED)
 
+# If Qt4 has already been found, fail.
+IF(QT4_FOUND)
+  IF(KDE3_FIND_REQUIRED)
+    MESSAGE( FATAL_ERROR "KDE3/Qt3 and Qt4 cannot be used together in one project.")
+  ELSE(KDE3_FIND_REQUIRED)
+    IF(NOT KDE3_FIND_QUIETLY)
+      MESSAGE( STATUS    "KDE3/Qt3 and Qt4 cannot be used together in one project.")
+    ENDIF(NOT KDE3_FIND_QUIETLY)
+    RETURN()
+  ENDIF(KDE3_FIND_REQUIRED)
+ENDIF(QT4_FOUND)
+
 
 SET(QT_MT_REQUIRED TRUE)
 #SET(QT_MIN_VERSION "3.0.0")

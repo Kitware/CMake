@@ -20,6 +20,19 @@
 #  QT_WRAP_CPP, set true if QT_MOC_EXECUTABLE is found
 #  QT_WRAP_UI set true if QT_UIC_EXECUTABLE is found
 
+# If Qt4 has already been found, fail.
+IF(QT4_FOUND)
+  IF(Qt3_FIND_REQUIRED)
+    MESSAGE( FATAL_ERROR "Qt3 and Qt4 cannot be used together in one project.")
+  ELSE(Qt3_FIND_REQUIRED)
+    IF(NOT Qt3_FIND_QUIETLY)
+      MESSAGE( STATUS    "Qt3 and Qt4 cannot be used together in one project.")
+    ENDIF(NOT Qt3_FIND_QUIETLY)
+    RETURN()
+  ENDIF(Qt3_FIND_REQUIRED)
+ENDIF(QT4_FOUND)
+
+
 FILE(GLOB GLOB_PATHS_BIN /usr/lib/qt-3*/bin/)
 FIND_PATH(QT_INCLUDE_DIR qt.h
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
@@ -39,7 +52,7 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
 # if qglobal.h is not in the qt_include_dir then set
 # QT_INCLUDE_DIR to NOTFOUND
 IF(NOT EXISTS ${QT_INCLUDE_DIR}/qglobal.h)
-  SET(QT_INCLUDE_DIR QT_INCLUDE_DIR-NOTFOUND CACHE PATH "path to qt3 include directory" FORCE)
+  SET(QT_INCLUDE_DIR QT_INCLUDE_DIR-NOTFOUND CACHE PATH "path to Qt3 include directory" FORCE)
 ENDIF(NOT EXISTS ${QT_INCLUDE_DIR}/qglobal.h)
 
 IF(QT_INCLUDE_DIR)
@@ -51,7 +64,6 @@ IF(QT_INCLUDE_DIR)
   # Under windows the qt library (MSVC) has the format qt-mtXYZ where XYZ is the
   # version X.Y.Z, so we need to remove the dots from version
   STRING(REGEX REPLACE "\\." "" qt_version_str_lib "${qt_version_str}")
-ELSE(QT_INCLUDE_DIR)
 ENDIF(QT_INCLUDE_DIR)
 
 FILE(GLOB GLOB_PATHS_LIB /usr/lib/qt-3*/lib/)
