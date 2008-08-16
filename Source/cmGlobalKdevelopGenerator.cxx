@@ -476,10 +476,12 @@ void cmGlobalKdevelopGenerator
         "      <dontact>false</dontact>\n"
         "      <makebin>" << this->GlobalGenerator->GetLocalGenerators()[0]->
             GetMakefile()->GetRequiredDefinition("CMAKE_BUILD_TOOL") 
-            << " VERBOSE=1 </makebin>\n"
+            << " </makebin>\n"
         "      <selectedenvironment>default</selectedenvironment>\n"
         "      <environments>\n"
-        "        <default/>\n"
+        "        <default>\n"
+        "          <envvar value=\"1\" name=\"VERBOSE\" />\n"
+        "        </default>\n"
         "      </environments>\n"
         "    </make>\n";
 
