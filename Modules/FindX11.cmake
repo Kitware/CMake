@@ -46,20 +46,18 @@ IF (UNIX)
   SET(X11_INC_SEARCH_PATH
     /usr/pkg/xorg/include
     /usr/X11R6/include 
-    /usr/local/include 
+    /usr/X11R7/include 
     /usr/include/X11
     /usr/openwin/include 
     /usr/openwin/share/include 
     /opt/graphics/OpenGL/include
-    /usr/include
   )
 
   SET(X11_LIB_SEARCH_PATH
     /usr/pkg/xorg/lib
     /usr/X11R6/lib
-    /usr/local/lib 
+    /usr/X11R7/lib
     /usr/openwin/lib 
-    /usr/lib 
   )
 
   FIND_PATH(X11_X11_INCLUDE_PATH X11/X.h                             ${X11_INC_SEARCH_PATH})
