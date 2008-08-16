@@ -84,6 +84,14 @@ else ("${subdirResult}" EQUAL 1)
   failed ("subdir got: ${subdirResult}")
 endif ("${subdirResult}" EQUAL 1)
 
+# check return from a file
+include(include_return.cmake)
+if ("${include_returnResult}" EQUAL 1)
+  pass ("include_return")
+else ("${include_returnResult}" EQUAL 1)
+  failed ("include_return got: ${include_returnResult}")
+endif ("${include_returnResult}" EQUAL 1)
+
 # check return from within a macro
 macro (mymacro)
   set (foo 1)
