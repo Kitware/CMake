@@ -900,6 +900,7 @@ private:
   typedef std::map<cmPolicies::PolicyID,
                    cmPolicies::PolicyStatus> PolicyMap;
   std::vector<PolicyMap> PolicyStack;
+  cmPolicies::PolicyStatus GetPolicyStatusInternal(cmPolicies::PolicyID id);
 
   bool CheckCMP0000;
 

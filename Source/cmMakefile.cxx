@@ -3460,50 +3460,59 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
   return true;
 }
 
-cmPolicies::PolicyStatus cmMakefile
-::GetPolicyStatus(cmPolicies::PolicyID id)
+//----------------------------------------------------------------------------
+cmPolicies::PolicyStatus
+cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id)
 {
-  cmPolicies::PolicyStatus status = cmPolicies::REQUIRED_IF_USED;
-  PolicyMap::iterator mappos;
-  int vecpos;
-  bool done = false;
+  // Get the current setting of the policy.
+  cmPolicies::PolicyStatus cur = this->GetPolicyStatusInternal(id);
 
-  // check our policy stack first
-  for (vecpos = static_cast<int>(this->PolicyStack.size()) - 1; 
-       vecpos >= 0 && !done; vecpos--)
-  {
-    mappos = this->PolicyStack[vecpos].find(id);
-    if (mappos != this->PolicyStack[vecpos].end())
+  // If the policy is required to be set to NEW but is not, ignore the
+  // current setting and tell the caller.
+  if(cur != cmPolicies::NEW)
     {
-      status = mappos->second;
-      done = true;
+    if(cur == cmPolicies::REQUIRED_ALWAYS ||
+       cur == cmPolicies::REQUIRED_IF_USED)
+      {
+      return cur;
+      }
+    cmPolicies::PolicyStatus def = this->GetPolicies()->GetPolicyStatus(id);
+    if(def == cmPolicies::REQUIRED_ALWAYS ||
+       def == cmPolicies::REQUIRED_IF_USED)
+      {
+      return def;
+      }
     }
-  }
-  
-  // if not found then 
-  if (!done)
-  {
-    // pass the buck to our parent if we have one
-    if (this->LocalGenerator->GetParent())
+
+  // The current setting is okay.
+  return cur;
+}
+
+//----------------------------------------------------------------------------
+cmPolicies::PolicyStatus
+cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id)
+{
+  // Is the policy set in our stack?
+  for(std::vector<PolicyMap>::reverse_iterator
+        psi = this->PolicyStack.rbegin();
+      psi != this->PolicyStack.rend(); ++psi)
     {
-      cmMakefile *parent = 
-        this->LocalGenerator->GetParent()->GetMakefile();
-      return parent->GetPolicyStatus(id);
+    PolicyMap::const_iterator pse = psi->find(id);
+    if(pse != psi->end())
+      {
+      return pse->second;
+      }
     }
-    // otherwise use the default
-    else
+
+  // If we have a parent directory, recurse up to it.
+  if(this->LocalGenerator->GetParent())
     {
-      status = this->GetPolicies()->GetPolicyStatus(id);
+    cmMakefile* parent = this->LocalGenerator->GetParent()->GetMakefile();
+    return parent->GetPolicyStatusInternal(id);
     }
-  }
-  
-  // warn if we see a REQUIRED_IF_USED above a OLD or WARN
-  if (!this->GetPolicies()->IsValidUsedPolicyStatus(id,status))
-  {
-    return cmPolicies::REQUIRED_IF_USED;
-  }
-  
-  return status;
+
+  // The policy is not set.  Use the default for this CMake version.
+  return this->GetPolicies()->GetPolicyStatus(id);
 }
 
 bool cmMakefile::SetPolicy(const char *id, 
@@ -3520,37 +3529,44 @@ bool cmMakefile::SetPolicy(const char *id,
   return this->SetPolicy(pid,status);
 }
 
-bool cmMakefile::SetPolicy(cmPolicies::PolicyID id, 
+//----------------------------------------------------------------------------
+bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
                            cmPolicies::PolicyStatus status)
 {
-  // setting a REQUIRED_ALWAYS policy to WARN or OLD is an insta error
-  if (this->GetPolicies()->
-      IsValidPolicyStatus(id,status))
-  {
-    this->PolicyStack.back()[id] = status;
+  // A REQUIRED_ALWAYS policy may be set only to NEW.
+  if(status != cmPolicies::NEW &&
+     this->GetPolicies()->GetPolicyStatus(id) ==
+     cmPolicies::REQUIRED_ALWAYS)
+    {
+    std::string msg =
+      this->GetPolicies()->GetRequiredAlwaysPolicyError(id);
+    this->IssueMessage(cmake::FATAL_ERROR, msg.c_str());
+    return false;
+    }
 
-    // Special hook for presenting compatibility variable as soon as
-    // the user requests it.
-    if(id == cmPolicies::CMP0001 &&
-       (status == cmPolicies::WARN || status == cmPolicies::OLD))
+  // Store the setting.
+  this->PolicyStack.back()[id] = status;
+
+  // Special hook for presenting compatibility variable as soon as
+  // the user requests it.
+  if(id == cmPolicies::CMP0001 &&
+     (status == cmPolicies::WARN || status == cmPolicies::OLD))
+    {
+    if(!(this->GetCacheManager()
+         ->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY")))
       {
-      if(!(this->GetCacheManager()
-           ->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY")))
-        {
-        // Set it to 2.4 because that is the last version where the
-        // variable had meaning.
-        this->AddCacheDefinition
-          ("CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
-           "For backwards compatibility, what version of CMake "
-           "commands and "
-           "syntax should this version of CMake try to support.",
-           cmCacheManager::STRING);
-        }
+      // Set it to 2.4 because that is the last version where the
+      // variable had meaning.
+      this->AddCacheDefinition
+        ("CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
+         "For backwards compatibility, what version of CMake "
+         "commands and "
+         "syntax should this version of CMake try to support.",
+         cmCacheManager::STRING);
       }
+    }
 
-    return true;
-  }
-  return false;
+  return true;
 }
 
 bool cmMakefile::PushPolicy()

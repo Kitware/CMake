@@ -75,19 +75,14 @@ public:
   ///! Set a policy level for this listfile
   bool ApplyPolicyVersion(cmMakefile *mf, const char *version);
 
-  ///! test to see if setting a policy to a specific value is valid
-  bool IsValidPolicyStatus(cmPolicies::PolicyID id, 
-                           cmPolicies::PolicyStatus status);
-
-  ///! test to see if setting a policy to a specific value is valid, when used
-  bool IsValidUsedPolicyStatus(cmPolicies::PolicyID id, 
-                               cmPolicies::PolicyStatus status);
-
   ///! return a warning string for a given policy
   std::string GetPolicyWarning(cmPolicies::PolicyID id);
   
   ///! return an error string for when a required policy is unspecified
   std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
+
+  ///! return an error string for when a required policy is unspecified
+  std::string GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id);
 
   ///! Get docs for policies
   void GetDocumentation(std::vector<cmDocumentationEntry>& v);
@@ -96,7 +91,10 @@ public:
   // might have to make these internal for VS6 not sure yet
   std::map<PolicyID,cmPolicy *> Policies;
   std::map<std::string,PolicyID> PolicyStringMap;
-  
+
+  void DiagnoseAncientPolicies(std::vector<PolicyID> const& ancient,
+                               unsigned int majorVer, unsigned int minorVer,
+                               unsigned int patchVer, cmMakefile* mf);
 };
 
 #endif
