@@ -723,11 +723,7 @@ void cmLocalGenerator
           }
         }
         break; 
-      case cmTarget::UTILITY:
-      case cmTarget::GLOBAL_TARGET:
-      case cmTarget::INSTALL_FILES:
-      case cmTarget::INSTALL_PROGRAMS:
-      case cmTarget::INSTALL_DIRECTORY:
+      default:
         break;
       }
     }
@@ -1441,11 +1437,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         }
       }
       break; 
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
-    case cmTarget::INSTALL_FILES:
-    case cmTarget::INSTALL_PROGRAMS:
-    case cmTarget::INSTALL_DIRECTORY:
+    default:
       break;
     }
 }

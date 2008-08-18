@@ -2043,11 +2043,7 @@ const char* cmTarget::GetCreateRuleVariable()
       return "_CREATE_SHARED_MODULE";
     case cmTarget::EXECUTABLE:
       return "_LINK_EXECUTABLE";
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
-    case cmTarget::INSTALL_FILES:
-    case cmTarget::INSTALL_PROGRAMS:
-    case cmTarget::INSTALL_DIRECTORY:
+    default:
       break;
     }
   return "";
@@ -2073,11 +2069,7 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type,
       return (implib
               ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
               : "CMAKE_EXECUTABLE_SUFFIX");
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
-    case cmTarget::INSTALL_FILES:
-    case cmTarget::INSTALL_PROGRAMS:
-    case cmTarget::INSTALL_DIRECTORY:
+    default:
       break;
     }
   return "";
@@ -2102,11 +2094,7 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type,
               : "CMAKE_SHARED_MODULE_PREFIX");
     case cmTarget::EXECUTABLE:
       return (implib? "CMAKE_IMPORT_LIBRARY_PREFIX" : "");
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
-    case cmTarget::INSTALL_FILES:
-    case cmTarget::INSTALL_PROGRAMS:
-    case cmTarget::INSTALL_DIRECTORY:
+    default:
       break;
     }
   return "";
