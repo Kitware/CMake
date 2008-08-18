@@ -64,7 +64,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  target_link_libraries(<target> [INTERFACE]\n"
+      "  target_link_libraries(<target> [lib1 [lib2 [...]]]\n"
       "                        [[debug|optimized|general] <lib>] ...)\n"
       "Specify a list of libraries to be linked into the specified target.  "
       "If any library name matches that of a target in the current project "
@@ -90,7 +90,9 @@ public:
       "See the LINK_INTERFACE_LIBRARIES target property to override the "
       "set of transitive link dependencies for a target."
       "\n"
-      "The INTERFACE option tells the command to append the libraries "
+      "  target_link_libraries(<target> LINK_INTERFACE_LIBRARIES\n"
+      "                        [[debug|optimized|general] <lib>] ...)\n"
+      "The LINK_INTERFACE_LIBRARIES mode appends the libraries "
       "to the LINK_INTERFACE_LIBRARIES and LINK_INTERFACE_LIBRARIES_DEBUG "
       "target properties instead of using them for linking.  "
       "Libraries specified as \"debug\" are appended to the "

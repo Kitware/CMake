@@ -64,15 +64,22 @@ bool cmTargetLinkLibrariesCommand
 
   // add libraries, nothe that there is an optional prefix 
   // of debug and optimized than can be used
-  std::vector<std::string>::const_iterator i = args.begin();
-  
-  for(++i; i != args.end(); ++i)
+  for(unsigned int i=1; i < args.size(); ++i)
     {
-    if(*i == "INTERFACE")
+    if(args[i] == "LINK_INTERFACE_LIBRARIES")
       {
       this->DoingInterface = true;
+      if(i != 1)
+        {
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR,
+          "The LINK_INTERFACE_LIBRARIES option must appear as the second "
+          "argument, just after the target name."
+          );
+        return true;
+        }
       }
-    else if(*i == "debug")
+    else if(args[i] == "debug")
       {
       if(haveLLT)
         {
@@ -81,7 +88,7 @@ bool cmTargetLinkLibrariesCommand
       llt = cmTarget::DEBUG;
       haveLLT = true;
       }
-    else if(*i == "optimized")
+    else if(args[i] == "optimized")
       {
       if(haveLLT)
         {
@@ -90,7 +97,7 @@ bool cmTargetLinkLibrariesCommand
       llt = cmTarget::OPTIMIZED;
       haveLLT = true;
       }
-    else if(*i == "general")
+    else if(args[i] == "general")
       {
       if(haveLLT)
         {
@@ -103,7 +110,7 @@ bool cmTargetLinkLibrariesCommand
       {
       // The link type was specified by the previous argument.
       haveLLT = false;
-      this->HandleLibrary(i->c_str(), llt);
+      this->HandleLibrary(args[i].c_str(), llt);
       }
     else
       {
@@ -129,7 +136,7 @@ bool cmTargetLinkLibrariesCommand
           llt = cmTarget::OPTIMIZED;
           }
         }
-      this->HandleLibrary(i->c_str(), llt);
+      this->HandleLibrary(args[i].c_str(), llt);
       }
     } 
 

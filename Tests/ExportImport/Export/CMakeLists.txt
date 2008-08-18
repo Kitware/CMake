@@ -54,7 +54,8 @@ add_library(testLib4libopt STATIC testLib4libdbg.c testLib4libopt${VS6}.c)
 set_property(TARGET testLib4libdbg PROPERTY COMPILE_DEFINITIONS LIB_DBG)
 set_property(TARGET testLib4libopt PROPERTY COMPILE_DEFINITIONS LIB_OPT)
 target_link_libraries(testLib4
-  INTERFACE testLib4lib debug testLib4libdbg optimized testLib4libopt
+  LINK_INTERFACE_LIBRARIES
+  testLib4lib debug testLib4libdbg optimized testLib4libopt
   )
 
 add_executable(testExe3 testExe3.c)
