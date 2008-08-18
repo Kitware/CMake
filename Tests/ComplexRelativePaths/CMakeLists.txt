@@ -7,6 +7,11 @@ PROJECT (Complex)
 # Try setting a new policy.  The IF test is for coverage.
 IF(POLICY CMP0003)
   CMAKE_POLICY(SET CMP0003 NEW)
+
+  CMAKE_POLICY(GET CMP0003 P3)
+  IF(NOT "${P3}" STREQUAL "NEW")
+    MESSAGE(FATAL_ERROR "CMAKE_POLICY(GET) did not report NEW!")
+  ENDIF(NOT "${P3}" STREQUAL "NEW")
 ENDIF(POLICY CMP0003)
 
 # Choose whether to test CMakeLib.
