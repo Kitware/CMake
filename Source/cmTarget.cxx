@@ -30,7 +30,8 @@
 const char* cmTarget::TargetTypeNames[] = {
   "EXECUTABLE", "STATIC_LIBRARY",
   "SHARED_LIBRARY", "MODULE_LIBRARY", "UTILITY", "GLOBAL_TARGET",
-  "INSTALL_FILES", "INSTALL_PROGRAMS", "INSTALL_DIRECTORY"
+  "INSTALL_FILES", "INSTALL_PROGRAMS", "INSTALL_DIRECTORY",
+  "UNKNOWN_LIBRARY"
 };
 
 //----------------------------------------------------------------------------
@@ -277,6 +278,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "For frameworks on OS X this is the location of the library file "
      "symlink just inside the framework folder.  "
      "For DLLs this is the location of the \".dll\" part of the library.  "
+     "For UNKNOWN libraries this is the location of the file to be linked.  "
      "Ignored for non-imported targets.");
 
   cm->DefineProperty
@@ -784,6 +786,16 @@ bool cmTarget::IsExecutableWithExports()
 {
   return (this->GetType() == cmTarget::EXECUTABLE &&
           this->GetPropertyAsBool("ENABLE_EXPORTS"));
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsLinkable()
+{
+  return (this->GetType() == cmTarget::STATIC_LIBRARY ||
+          this->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->GetType() == cmTarget::MODULE_LIBRARY ||
+          this->GetType() == cmTarget::UNKNOWN_LIBRARY ||
+          this->IsExecutableWithExports());
 }
 
 //----------------------------------------------------------------------------
@@ -1860,7 +1872,8 @@ const char *cmTarget::GetProperty(const char* prop,
   if(this->GetType() == cmTarget::EXECUTABLE ||
      this->GetType() == cmTarget::STATIC_LIBRARY ||
      this->GetType() == cmTarget::SHARED_LIBRARY ||
-     this->GetType() == cmTarget::MODULE_LIBRARY)
+     this->GetType() == cmTarget::MODULE_LIBRARY ||
+     this->GetType() == cmTarget::UNKNOWN_LIBRARY)
     {
     if(!this->IsImported() && strcmp(prop,"LOCATION") == 0)
       {
@@ -1956,6 +1969,9 @@ const char *cmTarget::GetProperty(const char* prop,
         // break; /* unreachable */
       case cmTarget::INSTALL_DIRECTORY:
         return "INSTALL_DIRECTORY";
+        // break; /* unreachable */
+      case cmTarget::UNKNOWN_LIBRARY:
+        return "UNKNOWN_LIBRARY";
         // break; /* unreachable */
       }
     return 0;

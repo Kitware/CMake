@@ -891,6 +891,14 @@ void cmComputeLinkDepends::CheckWrongConfigItem(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
+static bool cmComputeLinkDependsNotStatic(cmTarget* tgt)
+{
+  return (tgt &&
+          tgt->GetType() != cmTarget::STATIC_LIBRARY &&
+          tgt->GetType() != cmTarget::UNKNOWN_LIBRARY);
+}
+
+//----------------------------------------------------------------------------
 void cmComputeLinkDepends::PreserveOriginalEntries()
 {
   // Skip the part of the input sequence that already appears in the
@@ -901,7 +909,7 @@ void cmComputeLinkDepends::PreserveOriginalEntries()
         out != this->FinalLinkOrder.end())
     {
     cmTarget* tgt = this->EntryList[*in].Target;
-    if(tgt && tgt->GetType() != cmTarget::STATIC_LIBRARY)
+    if(cmComputeLinkDependsNotStatic(tgt))
       {
       // Skip input items known to not be static libraries.
       ++in;
@@ -924,7 +932,7 @@ void cmComputeLinkDepends::PreserveOriginalEntries()
   while(in != this->OriginalEntries.end())
     {
     cmTarget* tgt = this->EntryList[*in].Target;
-    if(tgt && tgt->GetType() != cmTarget::STATIC_LIBRARY)
+    if(cmComputeLinkDependsNotStatic(tgt))
       {
       // Skip input items known to not be static libraries.
       ++in;

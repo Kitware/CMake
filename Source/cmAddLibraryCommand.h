@@ -100,7 +100,7 @@ public:
       "\n"
       "The add_library command can also create IMPORTED library "
       "targets using this signature:\n"
-      "  add_library(<name> <SHARED|STATIC|MODULE> IMPORTED)\n"
+      "  add_library(<name> <SHARED|STATIC|MODULE|UNKNOWN> IMPORTED)\n"
       "An IMPORTED library target references a library file located "
       "outside the project.  "
       "No rules are generated to build it.  "

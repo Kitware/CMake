@@ -1706,6 +1706,7 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
       case cmTarget::STATIC_LIBRARY:
       case cmTarget::SHARED_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
+      case cmTarget::UNKNOWN_LIBRARY:
         {
         // Get the location of the target's output file and depend on it.
         if(const char* location = target->GetLocation(config))
