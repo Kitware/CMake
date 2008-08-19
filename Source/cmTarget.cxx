@@ -246,7 +246,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "This property is used when loading settings for the <CONFIG> "
      "configuration of an imported target.  "
      "Configuration names correspond to those provided by the project "
-     "from which the target is imported.");
+     "from which the target is imported.  "
+     "If set, this property completely overrides the generic property "
+     "for the named configuration.");
 
   cm->DefineProperty
     ("IMPORTED_LINK_INTERFACE_LIBRARIES", cmProperty::TARGET,
@@ -254,7 +256,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "Lists libraries whose interface is included when an IMPORTED library "
      "target is linked to another target.  "
      "The libraries will be included on the link line for the target.  "
-     "Ignored for non-imported targets.");
+     "Unlike the LINK_INTERFACE_LIBRARIES property, this property applies "
+     "to all imported target types, including STATIC libraries.  "
+     "This property is ignored for non-imported targets.");
 
   cm->DefineProperty
     ("IMPORTED_LINK_INTERFACE_LIBRARIES_<CONFIG>", cmProperty::TARGET,
@@ -262,7 +266,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "This property is used when loading settings for the <CONFIG> "
      "configuration of an imported target.  "
      "Configuration names correspond to those provided by the project "
-     "from which the target is imported.");
+     "from which the target is imported.  "
+     "If set, this property completely overrides the generic property "
+     "for the named configuration.");
 
   cm->DefineProperty
     ("IMPORTED_LOCATION", cmProperty::TARGET,
@@ -400,13 +406,16 @@ void cmTarget::DefineProperties(cmake *cm)
      "provided to the other target also.  "
      "If the list is empty then no transitive link dependencies will be "
      "incorporated when this target is linked into another target even if "
-     "the default set is non-empty.");
+     "the default set is non-empty.  "
+     "This property is ignored for STATIC libraries.");
 
   cm->DefineProperty
     ("LINK_INTERFACE_LIBRARIES_<CONFIG>", cmProperty::TARGET,
      "Per-configuration list of public interface libraries for a target.",
      "This is the configuration-specific version of "
-     "LINK_INTERFACE_LIBRARIES.");
+     "LINK_INTERFACE_LIBRARIES.  "
+     "If set, this property completely overrides the generic property "
+     "for the named configuration.");
 
   cm->DefineProperty
     ("MAP_IMPORTED_CONFIG_<CONFIG>", cmProperty::TARGET,
