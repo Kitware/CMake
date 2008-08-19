@@ -764,7 +764,12 @@ void cmGlobalGenerator::Configure()
 
   if ( !this->CMakeInstance->GetScriptMode() )
     {
-    this->CMakeInstance->UpdateProgress("Configuring done", -1);
+    const char* msg = "Configuring done";
+    if(cmSystemTools::GetErrorOccuredFlag())
+      {
+      msg = "Configuring incomplete, errors occurred!";
+      }
+    this->CMakeInstance->UpdateProgress(msg, -1);
     }
 }
 
