@@ -1222,24 +1222,27 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
     if(tgt)
       {
       // CMake versions below 2.4 allowed linking to modules.
-      bool allowModules = this->NeedBackwardsCompatibility(2,3);
+      bool allowModules = this->NeedBackwardsCompatibility(2,2);
       // if it is not a static or shared library then you can not link to it
       if(!((tgt->GetType() == cmTarget::STATIC_LIBRARY) ||
            (tgt->GetType() == cmTarget::SHARED_LIBRARY) ||
            tgt->IsExecutableWithExports()))
         {
         cmOStringStream e;
-        e << "Attempt to add link target " << lib << " of type: "
+        e << "Target \"" << lib << "\" of type "
           << cmTarget::TargetTypeNames[static_cast<int>(tgt->GetType())]
-          << "\nto target " << target
-          << ". One can only link to STATIC or SHARED libraries, or "
+          << " may not be linked into another target.  "
+          << "One may link only to STATIC or SHARED libraries, or "
           << "to executables with the ENABLE_EXPORTS property set.";
         // in older versions of cmake linking to modules was allowed
         if( tgt->GetType() == cmTarget::MODULE_LIBRARY )
           {
-          e <<
-            "\nTo allow linking of modules set "
-            "CMAKE_BACKWARDS_COMPATIBILITY to 2.2 or lower\n";
+          e << "\n"
+            << "If you are developing a new project, re-organize it to avoid "
+            << "linking to modules.  "
+            << "If you are just trying to build an existing project, "
+            << "set CMAKE_BACKWARDS_COMPATIBILITY to 2.2 or lower to allow "
+            << "linking to modules.";
           }
         // if no modules are allowed then this is always an error
         if(!allowModules ||
@@ -1247,7 +1250,7 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
            // still an error
            (allowModules && tgt->GetType() != cmTarget::MODULE_LIBRARY))
           {
-          cmSystemTools::Error(e.str().c_str());
+          this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
           }
         }
       }
