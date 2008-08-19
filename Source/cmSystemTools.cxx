@@ -1393,7 +1393,9 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
     }
   //std::string ext = cmSystemTools::LowerCase(cext);
   std::string ext = cext;
-  if ( ext == "c" || ext == ".c" ) { return cmSystemTools::C_FILE_FORMAT; }
+  if ( ext == "c" || ext == ".c" || 
+       ext == "m" || ext == ".m" 
+    ) { return cmSystemTools::C_FILE_FORMAT; }
   if ( 
     ext == "C" || ext == ".C" ||
     ext == "M" || ext == ".M" ||
@@ -1401,7 +1403,6 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
     ext == "cc" || ext == ".cc" ||
     ext == "cpp" || ext == ".cpp" ||
     ext == "cxx" || ext == ".cxx" ||
-    ext == "m" || ext == ".m" ||
     ext == "mm" || ext == ".mm"
     ) { return cmSystemTools::CXX_FILE_FORMAT; }
   if ( 
