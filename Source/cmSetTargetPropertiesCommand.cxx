@@ -103,6 +103,7 @@ bool cmSetTargetPropertiesCommand
       {
       target->SetProperty(propertyPairs[k].c_str(),
                           propertyPairs[k+1].c_str());
+      target->CheckProperty(propertyPairs[k].c_str(), mf);
       }
     }
   // if file is not already in the makefile, then add it

@@ -22,6 +22,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmComputeLinkInformation.h"
 #include "cmListFileCache.h"
+#include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <set>
 #include <queue>
@@ -1687,6 +1688,69 @@ void cmTarget::AppendProperty(const char* prop, const char* value)
   if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
     {
     this->ImportInfoMap.clear();
+    }
+}
+
+//----------------------------------------------------------------------------
+static void cmTargetCheckLINK_INTERFACE_LIBRARIES(
+  const char* prop, const char* value, cmMakefile* context, bool imported
+  )
+{
+  // Look for link-type keywords in the value.
+  static cmsys::RegularExpression
+    keys("(^|;)(debug|optimized|general)(;|$)");
+  if(!keys.find(value))
+    {
+    return;
+    }
+
+  // Support imported and non-imported versions of the property.
+  const char* base = (imported?
+                      "IMPORTED_LINK_INTERFACE_LIBRARIES" :
+                      "LINK_INTERFACE_LIBRARIES");
+
+  // Report an error.
+  cmOStringStream e;
+  e << "Property " << prop << " may not contain link-type keyword \""
+    << keys.match(2) << "\".  "
+    << "The " << base << " property has a per-configuration "
+    << "version called " << base << "_<CONFIG> which may be "
+    << "used to specify per-configuration rules.";
+  if(!imported)
+    {
+    e << "  "
+      << "Alternatively, an IMPORTED library may be created, configured "
+      << "with a per-configuration location, and then named in the "
+      << "property value.  "
+      << "See the add_library command's IMPORTED mode for details."
+      << "\n"
+      << "If you have a list of libraries that already contains the "
+      << "keyword, use the target_link_libraries command with its "
+      << "LINK_INTERFACE_LIBRARIES mode to set the property.  "
+      << "The command automatically recognizes link-type keywords and sets "
+      << "the LINK_INTERFACE_LIBRARIES and LINK_INTERFACE_LIBRARIES_DEBUG "
+      << "properties accordingly.";
+    }
+  context->IssueMessage(cmake::FATAL_ERROR, e.str());
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::CheckProperty(const char* prop, cmMakefile* context)
+{
+  // Certain properties need checking.
+  if(strncmp(prop, "LINK_INTERFACE_LIBRARIES", 24) == 0)
+    {
+    if(const char* value = this->GetProperty(prop))
+      {
+      cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, false);
+      }
+    }
+  if(strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES", 33) == 0)
+    {
+    if(const char* value = this->GetProperty(prop))
+      {
+      cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, true);
+      }
     }
 }
 

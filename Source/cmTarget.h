@@ -245,6 +245,7 @@ public:
   const char *GetProperty(const char *prop);
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);
+  void CheckProperty(const char* prop, cmMakefile* context);
 
   bool IsImported() const {return this->IsImportedTarget;}
 
