@@ -57,20 +57,20 @@ ELSE (WIN32)
     FIND_PATH(OPENGL_INCLUDE_DIR GL/gl.h
       /usr/share/doc/NVIDIA_GLX-1.0/include
       /usr/openwin/share/include
-      /opt/graphics/OpenGL/include
+      /opt/graphics/OpenGL/include /usr/X11R6/include
     )
 
     FIND_PATH(OPENGL_xmesa_INCLUDE_DIR GL/xmesa.h
       /usr/share/doc/NVIDIA_GLX-1.0/include
       /usr/openwin/share/include
-      /opt/graphics/OpenGL/include
+      /opt/graphics/OpenGL/include /usr/X11R6/include
     )
 
     FIND_LIBRARY(OPENGL_gl_LIBRARY
       NAMES GL MesaGL
       PATHS /opt/graphics/OpenGL/lib
             /usr/openwin/lib
-            /usr/shlib
+            /usr/shlib /usr/X11R6/lib
     )
 
     # On Unix OpenGL most certainly always requires X11.
@@ -94,7 +94,7 @@ ELSE (WIN32)
       PATHS ${OPENGL_gl_LIBRARY}
             /opt/graphics/OpenGL/lib
             /usr/openwin/lib
-            /usr/shlib
+            /usr/shlib /usr/X11R6/lib
     )
 
   ENDIF(APPLE)
