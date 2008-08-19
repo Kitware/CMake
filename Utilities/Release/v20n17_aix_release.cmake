@@ -7,6 +7,7 @@ set(EXTRA_HOP "rsh v20n17" )
 set(MAKE_PROGRAM "make")
 set(CC "xlc")
 set(CXX "xlC")
+set(FC "xlf")
 set(INITIAL_CACHE "
 CMAKE_BUILD_TYPE:STRING=Release
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
