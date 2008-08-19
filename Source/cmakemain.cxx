@@ -314,7 +314,7 @@ int do_cmake(int ac, char** av)
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDocumentation doc;
-  if(doc.CheckOptions(ac, av) || nocwd)
+  if(doc.CheckOptions(ac, av, "-E") || nocwd)
     { 
     // Construct and print requested documentation.
     cmake hcm;
@@ -416,29 +416,29 @@ int do_cmake(int ac, char** av)
       {
       command = true;
       }
-    else if (strcmp(av[i], "-N") == 0)
+    else if (!command && strcmp(av[i], "-N") == 0)
       {
       view_only = true;
       }
-    else if (strcmp(av[i], "-L") == 0)
+    else if (!command && strcmp(av[i], "-L") == 0)
       {
       list_cached = true;
       }
-    else if (strcmp(av[i], "-LA") == 0)
+    else if (!command && strcmp(av[i], "-LA") == 0)
       {
       list_all_cached = true;
       }
-    else if (strcmp(av[i], "-LH") == 0)
+    else if (!command && strcmp(av[i], "-LH") == 0)
       {
       list_cached = true;
       list_help = true;
       }
-    else if (strcmp(av[i], "-LAH") == 0)
+    else if (!command && strcmp(av[i], "-LAH") == 0)
       {
       list_all_cached = true;
       list_help = true;
       }
-    else if (strncmp(av[i], "-P", strlen("-P")) == 0)
+    else if (!command && strncmp(av[i], "-P", strlen("-P")) == 0)
       {
       if ( i == ac -1 )
         {
@@ -457,7 +457,6 @@ int do_cmake(int ac, char** av)
       args.push_back(av[i]);
       }
     }
-
   if(command)
     {
     int ret = cmake::ExecuteCMakeCommand(args);

@@ -45,9 +45,12 @@ public:
    * Check command line arguments for documentation options.  Returns
    * true if documentation options are found, and false otherwise.
    * When true is returned, PrintRequestedDocumentation should be
-   * called.
+   * called.  exitOpt can be used for things like cmake -E, so that 
+   * all arguments after the -E are ignored and not searched for
+   * help arguments.
    */
-  bool CheckOptions(int argc, const char* const* argv);
+  bool CheckOptions(int argc, const char* const* argv, 
+                    const char* exitOpt =0);
   
   /**
    * Print help requested on the command line.  Call after

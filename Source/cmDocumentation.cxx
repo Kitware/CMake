@@ -656,7 +656,8 @@ cmDocumentation::Form cmDocumentation::GetFormFromFilename(
 }
 
 //----------------------------------------------------------------------------
-bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
+bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
+                                   const char* exitOpt)
 {
   // Providing zero arguments gives usage information.
   if(argc == 1)
@@ -673,6 +674,10 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv)
   bool result = false;
   for(int i=1; i < argc; ++i)
     {
+    if(exitOpt && strcmp(argv[i], exitOpt) == 0)
+      {
+      return result;
+      }
     RequestedHelpItem help;
     // Check if this is a supported help option.
     if((strcmp(argv[i], "-help") == 0) ||
