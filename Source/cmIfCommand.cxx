@@ -408,6 +408,13 @@ namespace
           makefile->GetPolicies()->GetPolicyID((argP1)->c_str(), pid),
           reducible, arg, newArgs, argP1, argP2);
         }
+      // does a target exist
+      if (*arg == "TARGET" && argP1 != newArgs.end())
+        {
+        HandlePredicate(
+          makefile->FindTargetToUse((argP1)->c_str())? true:false,
+          reducible, arg, newArgs, argP1, argP2);
+        }
       // is a variable defined
       if (*arg == "DEFINED" && argP1  != newArgs.end())
         {

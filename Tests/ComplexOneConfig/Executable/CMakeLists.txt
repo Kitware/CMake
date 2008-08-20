@@ -16,6 +16,23 @@ IF(COMPLEX_TEST_CMAKELIB)
   LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmtar)
 ENDIF(COMPLEX_TEST_CMAKELIB)
 
+# Create an imported target for if(TARGET) test below.
+ADD_LIBRARY(ExeImportedTarget UNKNOWN IMPORTED)
+
+# Test if(TARGET) command.
+IF(NOT TARGET CMakeTestLibrary)
+  MESSAGE(FATAL_ERROR "IF(NOT TARGET CMakeTestLibrary) returned true!")
+ENDIF(NOT TARGET CMakeTestLibrary)
+IF(NOT TARGET ExeImportedTarget)
+  MESSAGE(FATAL_ERROR "IF(NOT TARGET ExeImportedTarget) returned true!")
+ENDIF(NOT TARGET ExeImportedTarget)
+IF(TARGET LibImportedTarget)
+  MESSAGE(FATAL_ERROR "IF(TARGET LibImportedTarget) returned true!")
+ENDIF(TARGET LibImportedTarget)
+IF(TARGET NotATarget)
+  MESSAGE(FATAL_ERROR "IF(TARGET NotATarget) returned true!")
+ENDIF(TARGET NotATarget)
+
   # Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to 
 SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 LINK_LIBRARIES(${COMPLEX_LIBS})

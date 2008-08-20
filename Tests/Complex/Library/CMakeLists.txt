@@ -114,6 +114,10 @@ INSTALL_FILES(/tmp .cxx ${Complex_BINARY_DIR}/cmTestConfigure.h)
 # Test creating a library that is not built by default.
 ADD_LIBRARY(notInAllLib EXCLUDE_FROM_ALL notInAllLib.cxx)
 
+# Create an imported target for if(TARGET) test in Executable dir.
+# That test should not see this target.
+ADD_LIBRARY(LibImportedTarget UNKNOWN IMPORTED)
+
 # Test generation of preprocessed sources.
 IF("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
   IF(CMAKE_CXX_CREATE_PREPROCESSED_SOURCE)
