@@ -770,14 +770,14 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     return;
     }
 
-#if !KWSYSPE_USE_SELECT
+  /* Set to non-blocking in case select lies, or for the polling
+     implementation.  */
   if(!kwsysProcessSetNonBlocking(p[0]))
     {
     kwsysProcessCleanup(cp, 1);
     kwsysProcessCleanupDescriptor(&si.StdErr);
     return;
     }
-#endif
   }
 
   /* Replace the stderr pipe with a file if requested.  In this case
@@ -830,14 +830,12 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       failed = 1;
       }
 
-#if !KWSYSPE_USE_SELECT
-    /* Set the output pipe of the last process to be non-blocking so
-       we can poll it.  */
-    if(i == cp->NumberOfCommands-1 && !kwsysProcessSetNonBlocking(readEnd))
+    /* Set the output pipe of the last process to be non-blocking in
+       case select lies, or for the polling implementation.  */
+    if(i == (cp->NumberOfCommands-1) && !kwsysProcessSetNonBlocking(readEnd))
       {
       failed = 1;
       }
-#endif
 
     if(failed)
       {
@@ -1056,6 +1054,11 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
             };
           return 1;
           }
+        }
+      else if(n < 0 && errno == EAGAIN)
+        {
+        /* No data are really ready.  The select call lied.  See the
+           "man select" page on Linux for cases when this occurs.  */
         }
       else
         {
