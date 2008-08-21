@@ -101,6 +101,43 @@ void cmLocalGenerator::Configure()
   // relative paths.
   this->UseRelativePaths = this->Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
 
+  // Choose a maximum object file name length.
+  {
+#if defined(_WIN32) || defined(__CYGWIN__)
+  this->ObjectPathMax = 250;
+#else
+  this->ObjectPathMax = 1000;
+#endif
+  const char* plen = this->Makefile->GetDefinition("CMAKE_OBJECT_PATH_MAX");
+  if(plen && *plen)
+    {
+    unsigned int pmax;
+    if(sscanf(plen, "%u", &pmax) == 1)
+      {
+      if(pmax >= 128)
+        {
+        this->ObjectPathMax = pmax;
+        }
+      else
+        {
+        cmOStringStream w;
+        w << "CMAKE_OBJECT_PATH_MAX is set to " << pmax
+          << ", which is less than the minimum of 128.  "
+          << "The value will be ignored.";
+        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        }
+      }
+    else
+      {
+      cmOStringStream w;
+      w << "CMAKE_OBJECT_PATH_MAX is set to \"" << plen
+        << "\", which fails to parse as a positive integer.  "
+        << "The value will be ignored.";
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      }
+    }
+  }
+
   this->Configured = true;
 
   this->GetGlobalGenerator()->SetCurrentLocalGenerator(previousLg);
@@ -2314,16 +2351,11 @@ cmLocalGeneratorShortenObjectName(std::string& objName,
     }
 }
 
-static bool cmLocalGeneratorCheckObjectName(std::string& objName,
-                                            std::string::size_type dir_len)
+static
+bool cmLocalGeneratorCheckObjectName(std::string& objName,
+                                     std::string::size_type dir_len,
+                                     std::string::size_type max_total_len)
 {
-  // Choose a maximum file name length.
-#if defined(_WIN32) || defined(__CYGWIN__)
-  std::string::size_type const max_total_len = 250;
-#else
-  std::string::size_type const max_total_len = 1000;
-#endif
-
   // Enforce the maximum file name length if possible.
   std::string::size_type max_obj_len = max_total_len;
   if(dir_len < max_total_len)
@@ -2414,7 +2446,7 @@ cmLocalGenerator
       }
 
 #if defined(CM_LG_ENCODE_OBJECT_NAMES)
-    cmLocalGeneratorCheckObjectName(ssin, dir_len);
+    cmLocalGeneratorCheckObjectName(ssin, dir_len, this->ObjectPathMax);
 #else
     (void)dir_len;
 #endif

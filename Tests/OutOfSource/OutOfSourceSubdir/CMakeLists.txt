@@ -10,8 +10,11 @@ IF ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
   GET_FILENAME_COMPONENT(DEEPDIR
     ${OutOfSource_BINARY_DIR}/../OutOfSourceDeep/deeper ABSOLUTE)
 
-  # The maximum allowed path length on Windows is near this value.
-  SET(MAXPATH "250")
+  # Test giving the generator a custom limit.
+  SET(CMAKE_OBJECT_PATH_MAX 220)
+
+  # Use a separate variable for computation.
+  SET(MAXPATH "${CMAKE_OBJECT_PATH_MAX}")
 
   # VS8 adds "OutOfSource/SubDir/OutOfSourceSubdir/../../../" to the
   # path of the source file for no good reason.  Reduce the length

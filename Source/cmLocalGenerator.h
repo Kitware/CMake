@@ -348,6 +348,7 @@ protected:
   std::vector<cmLocalGenerator*> Children;
   std::map<cmStdString, cmStdString> LanguageToIncludeFlags;
   std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
+  std::string::size_type ObjectPathMax;
   bool WindowsShell;
   bool WindowsVSIDE;
   bool WatcomWMake;
