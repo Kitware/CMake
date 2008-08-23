@@ -127,7 +127,7 @@ public:
       "GLOB_RECURSE will generate similar list as the regular GLOB, except "
       "it will traverse all the subdirectories of the matched directory and "
       "match the files. Subdirectories that are symlinks are traversed by "
-      "default to match the behavior or older CMake releases. Use "
+      "default to match the behavior of older CMake releases. Use "
       "RECURSE_SYMLINKS_OFF to prevent recursion through symlinks.\n"
       "Examples of recursive globbing include:\n"
       "   /dir/*.py  - match all python files in /dir and subdirectories\n"
