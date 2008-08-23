@@ -672,6 +672,18 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   bool first = true;
   for ( ; i != args.end(); ++i )
     {
+    if ( *i == "RECURSE_SYMLINKS_OFF" )
+      {
+      g.RecurseThroughSymlinksOff();
+      ++i;
+      if ( i == args.end() )
+        {
+        this->SetError(
+          "GLOB requires a glob expression after RECURSE_SYMLINKS_OFF");
+        return false;
+        }
+      }
+
     if ( *i == "RELATIVE" )
       {
       ++i; // skip RELATIVE
@@ -688,6 +700,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         return false;
         }
       }
+
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
       std::string expr = this->Makefile->GetCurrentDirectory();
@@ -706,6 +719,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       {
       g.FindFiles(*i);
       }
+
     std::vector<std::string>::size_type cc;
     std::vector<std::string>& files = g.GetFiles();
     for ( cc = 0; cc < files.size(); cc ++ )
