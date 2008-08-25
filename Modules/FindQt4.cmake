@@ -525,10 +525,6 @@ IF (QT4_QMAKE_FOUND)
   #
   #############################################
 
-  IF (QT_USE_FRAMEWORKS)
-    SET(QT_DEFINITIONS ${QT_DEFINITIONS} -F${QT_LIBRARY_DIR} -L${QT_LIBRARY_DIR} )
-  ENDIF (QT_USE_FRAMEWORKS)
-
   # Set QT_QT3SUPPORT_INCLUDE_DIR
   FIND_PATH(QT_QT3SUPPORT_INCLUDE_DIR Qt3Support
     PATHS
@@ -1041,18 +1037,22 @@ IF (QT4_QMAKE_FOUND)
     SET(${outfile} ${outpath}/${prefix}${_outfile}.${ext})
   ENDMACRO (QT4_MAKE_OUTPUT_FILE )
 
-  MACRO (QT4_GET_MOC_INC_DIRS _moc_INC_DIRS)
-     SET(${_moc_INC_DIRS})
+  MACRO (QT4_GET_MOC_FLAGS _moc_flags)
+     SET(${_moc_flags})
      GET_DIRECTORY_PROPERTY(_inc_DIRS INCLUDE_DIRECTORIES)
 
      FOREACH(_current ${_inc_DIRS})
-        SET(${_moc_INC_DIRS} ${${_moc_INC_DIRS}} "-I" ${_current})
+        SET(${_moc_flags} ${${_moc_flags}} "-I" ${_current})
      ENDFOREACH(_current ${_inc_DIRS})
+     
+     GET_DIRECTORY_PROPERTY(_defines DEFINITIONS)
+     SEPARATE_ARGUMENTS(_defines)
+     SET(${_moc_flags} ${${_moc_flags}} ${_defines})
 
-  ENDMACRO(QT4_GET_MOC_INC_DIRS)
+  ENDMACRO(QT4_GET_MOC_FLAGS)
 
   # helper macro to set up a moc rule
-  MACRO (QT4_CREATE_MOC_COMMAND infile outfile moc_includes moc_options)
+  MACRO (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options)
     # For Windows, create a parameters file to work around command line length limit
     IF (WIN32)
       # Pass the parameters in a file.  Set the working directory to
@@ -1066,7 +1066,7 @@ IF (QT4_QMAKE_FOUND)
         SET(_moc_working_dir WORKING_DIRECTORY ${_moc_outfile_dir})
       ENDIF(_moc_outfile_dir)
       SET (_moc_parameters_file ${outfile}_parameters)
-      SET (_moc_parameters ${moc_includes} ${moc_options} -o "${outfile}" "${infile}")
+      SET (_moc_parameters ${moc_flags} ${moc_options} -o "${outfile}" "${infile}")
       FILE (REMOVE ${_moc_parameters_file})
       FOREACH(arg ${_moc_parameters})
         FILE (APPEND ${_moc_parameters_file} "${arg}\n")
@@ -1079,16 +1079,16 @@ IF (QT4_QMAKE_FOUND)
     ELSE (WIN32)     
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
                          COMMAND ${QT_MOC_EXECUTABLE}
-                         ARGS ${moc_includes} ${moc_options} -o ${outfile} ${infile}
+                         ARGS ${moc_flags} ${moc_options} -o ${outfile} ${infile}
                          DEPENDS ${infile})     
     ENDIF (WIN32)
   ENDMACRO (QT4_CREATE_MOC_COMMAND)
 
   
   MACRO (QT4_GENERATE_MOC infile outfile )
-     QT4_GET_MOC_INC_DIRS(moc_includes)
+     QT4_GET_MOC_FLAGS(moc_flags)
      GET_FILENAME_COMPONENT(abs_infile ${infile} ABSOLUTE)
-     QT4_CREATE_MOC_COMMAND(${abs_infile} ${outfile} "${moc_includes}" "")
+     QT4_CREATE_MOC_COMMAND(${abs_infile} ${outfile} "${moc_flags}" "")
      SET_SOURCE_FILES_PROPERTIES(${outfile} PROPERTIES SKIP_AUTOMOC TRUE)  # dont run automoc on this file
   ENDMACRO (QT4_GENERATE_MOC)
 
@@ -1097,13 +1097,13 @@ IF (QT4_QMAKE_FOUND)
 
   MACRO (QT4_WRAP_CPP outfiles )
     # get include dirs
-    QT4_GET_MOC_INC_DIRS(moc_includes)
+    QT4_GET_MOC_FLAGS(moc_flags)
     QT4_EXTRACT_OPTIONS(moc_files moc_options ${ARGN})
 
     FOREACH (it ${moc_files})
       GET_FILENAME_COMPONENT(it ${it} ABSOLUTE)
       QT4_MAKE_OUTPUT_FILE(${it} moc_ cxx outfile)
-      QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_includes}" "${moc_options}")
+      QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_flags}" "${moc_options}")
       SET(${outfiles} ${${outfiles}} ${outfile})
     ENDFOREACH(it)
 
@@ -1247,7 +1247,7 @@ IF (QT4_QMAKE_FOUND)
   ENDMACRO(QT4_ADD_DBUS_ADAPTOR)
 
    MACRO(QT4_AUTOMOC)
-      QT4_GET_MOC_INC_DIRS(_moc_INCS)
+      QT4_GET_MOC_FLAGS(_moc_INCS)
 
       SET(_matching_FILES )
       FOREACH (_current_FILE ${ARGN})
