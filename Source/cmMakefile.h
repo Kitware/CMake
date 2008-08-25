@@ -278,6 +278,8 @@ public:
    * for cache entries, and will only affect the current makefile.
    */
   void RemoveDefinition(const char* name);
+  ///! Remove a definition from the cache.
+  void RemoveCacheDefinition(const char* name);
   
   /**
    * Specify the name of the project for this build.

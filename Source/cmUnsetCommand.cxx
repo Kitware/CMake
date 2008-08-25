@@ -1,0 +1,64 @@
+/*=========================================================================
+
+  Program:   CMake - Cross-Platform Makefile Generator
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#include "cmUnsetCommand.h"
+
+// cmUnsetCommand
+bool cmUnsetCommand::InitialPass(std::vector<std::string> const& args,
+                                 cmExecutionStatus &)
+{
+  if(args.size() < 1 || args.size() > 2)
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
+
+  const char* variable = args[0].c_str();
+
+  // unset(ENV{VAR})
+  if (!strncmp(variable,"ENV{",4) && strlen(variable) > 5)
+    {
+    // what is the variable name
+    char *envVarName = new char [strlen(variable)];
+    strncpy(envVarName,variable+4,strlen(variable)-5);
+    envVarName[strlen(variable)-5] = '\0';
+
+#ifdef CMAKE_BUILD_WITH_CMAKE
+    cmSystemTools::UnsetEnv(envVarName);
+#endif
+    delete[] envVarName;
+    return true;
+    }
+  // unset(VAR)
+  else if (args.size() == 1)
+    {
+    this->Makefile->RemoveDefinition(variable);
+    return true;
+    }
+  // unset(VAR CACHE)
+  else if ((args.size() == 2) && (args[1] == "CACHE"))
+    {
+    this->Makefile->RemoveCacheDefinition(variable);
+    return true;
+    }
+  // ERROR: second argument isn't CACHE
+  else
+    {
+    this->SetError("called with an invalid second argument");
+    return false;
+    }
+}
+

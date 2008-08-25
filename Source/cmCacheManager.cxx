@@ -714,10 +714,6 @@ void cmCacheManager::RemoveCacheEntry(const char* key)
     {
     this->Cache.erase(i);
     }
-  else
-    {
-    std::cerr << "Failed to remove entry:" << key << std::endl;
-    }
 }
 
 

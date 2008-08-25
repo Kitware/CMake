@@ -94,6 +94,7 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
   ADD_TEST_MACRO(Preprocess Preprocess)
   ADD_TEST_MACRO(ExportImport ExportImport)
+  ADD_TEST_MACRO(Unset Unset)
 
 
   # If we are running right now with a UnixMakefiles based generator,

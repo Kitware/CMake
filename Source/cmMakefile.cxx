@@ -1648,6 +1648,11 @@ void cmMakefile::RemoveDefinition(const char* name)
 #endif
 }
 
+void cmMakefile::RemoveCacheDefinition(const char* name)
+{
+  this->GetCacheManager()->RemoveCacheEntry(name);
+}
+
 void cmMakefile::SetProjectName(const char* p)
 {
   this->ProjectName = p;
