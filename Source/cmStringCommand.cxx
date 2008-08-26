@@ -222,7 +222,7 @@ bool cmStringCommand::HandleRegexCommand(std::vector<std::string> const& args)
     {
     if(args.size() < 6)
       {
-      this->SetError("sub-command REGEX, mode MATCH needs "
+      this->SetError("sub-command REGEX, mode REPLACE needs "
                      "at least 6 arguments total to command.");
       return false;
       }
