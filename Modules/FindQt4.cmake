@@ -1042,12 +1042,14 @@ IF (QT4_QMAKE_FOUND)
      GET_DIRECTORY_PROPERTY(_inc_DIRS INCLUDE_DIRECTORIES)
 
      FOREACH(_current ${_inc_DIRS})
-        SET(${_moc_flags} ${${_moc_flags}} "-I" ${_current})
+        SET(${_moc_flags} ${${_moc_flags}} "-I${_current}")
      ENDFOREACH(_current ${_inc_DIRS})
      
-     GET_DIRECTORY_PROPERTY(_defines DEFINITIONS)
-     SEPARATE_ARGUMENTS(_defines)
-     SET(${_moc_flags} ${${_moc_flags}} ${_defines})
+     GET_DIRECTORY_PROPERTY(_defines COMPILE_DEFINITIONS)
+     FOREACH(_current ${_defines})
+        SET(${_moc_flags} ${${_moc_flags}} "-D${_current}")
+     ENDFOREACH(_current ${_defines})
+
      IF(Q_WS_WIN)
        SET(${_moc_flags} ${${_moc_flags}} -DWIN32)
      ENDIF(Q_WS_WIN)
