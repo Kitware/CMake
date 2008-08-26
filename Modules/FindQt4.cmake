@@ -48,8 +48,9 @@
 #  
 #  macro QT4_WRAP_CPP(outfiles inputfile ... OPTIONS ...)
 #        create moc code from a list of files containing Qt class with
-#        the Q_OBJECT declaration.  Options may be given to moc, such as those found
-#        when executing "moc -help"
+#        the Q_OBJECT declaration.  Per-direcotry preprocessor definitions 
+#        are also added.  Options may be given to moc, such as those found
+#        when executing "moc -help".  
 #
 #  macro QT4_WRAP_UI(outfiles inputfile ... OPTIONS ...)
 #        create code from a list of Qt designer ui files.
