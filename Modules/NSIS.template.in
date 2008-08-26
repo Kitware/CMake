@@ -533,10 +533,10 @@ FunctionEnd
 
   !insertmacro MUI_UNPAGE_CONFIRM
   !insertmacro MUI_UNPAGE_INSTFILES
-  
+
 ;--------------------------------
 ;Languages
- 
+
   !insertmacro MUI_LANGUAGE "English" ;first language is the default language
   !insertmacro MUI_LANGUAGE "Albanian"
   !insertmacro MUI_LANGUAGE "Arabic"
@@ -549,9 +549,7 @@ FunctionEnd
   !insertmacro MUI_LANGUAGE "Croatian"
   !insertmacro MUI_LANGUAGE "Czech"
   !insertmacro MUI_LANGUAGE "Danish"
-  !insertmacro MUI_LANGUAGE "Default"
   !insertmacro MUI_LANGUAGE "Dutch"
-  !insertmacro MUI_LANGUAGE "English"
   !insertmacro MUI_LANGUAGE "Estonian"
   !insertmacro MUI_LANGUAGE "Farsi"
   !insertmacro MUI_LANGUAGE "Finnish"
@@ -574,7 +572,6 @@ FunctionEnd
   !insertmacro MUI_LANGUAGE "Malay"
   !insertmacro MUI_LANGUAGE "Mongolian"
   !insertmacro MUI_LANGUAGE "Norwegian"
-  !insertmacro MUI_LANGUAGE "NorwegianNynorsk"
   !insertmacro MUI_LANGUAGE "Polish"
   !insertmacro MUI_LANGUAGE "Portuguese"
   !insertmacro MUI_LANGUAGE "PortugueseBR"
@@ -591,9 +588,8 @@ FunctionEnd
   !insertmacro MUI_LANGUAGE "TradChinese"
   !insertmacro MUI_LANGUAGE "Turkish"
   !insertmacro MUI_LANGUAGE "Ukrainian"
-  !insertmacro MUI_LANGUAGE "Uzbek"
-  !insertmacro MUI_LANGUAGE "Valencian"
   !insertmacro MUI_LANGUAGE "Welsh"
+
 
 ;--------------------------------
 ;Reserve Files
