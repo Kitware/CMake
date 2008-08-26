@@ -1048,6 +1048,9 @@ IF (QT4_QMAKE_FOUND)
      GET_DIRECTORY_PROPERTY(_defines DEFINITIONS)
      SEPARATE_ARGUMENTS(_defines)
      SET(${_moc_flags} ${${_moc_flags}} ${_defines})
+     IF(Q_WS_WIN)
+       SET(${_moc_flags} ${${_moc_flags}} -DWIN32)
+     ENDIF(Q_WS_WIN)
 
   ENDMACRO(QT4_GET_MOC_FLAGS)
 
