@@ -46,9 +46,11 @@ public:
     std::string Item;
     cmTarget* Target;
     bool IsSharedDep;
-    LinkEntry(): Item(), Target(0), IsSharedDep(false) {}
+    bool IsFlag;
+    LinkEntry(): Item(), Target(0), IsSharedDep(false), IsFlag(false) {}
     LinkEntry(LinkEntry const& r):
-      Item(r.Item), Target(r.Target), IsSharedDep(r.IsSharedDep) {}
+      Item(r.Item), Target(r.Target), IsSharedDep(r.IsSharedDep),
+      IsFlag(r.IsFlag) {}
   };
 
   typedef std::vector<LinkEntry> EntryVector;

@@ -50,7 +50,9 @@ those without known dependencies.  We will call the two types "known
 items" and "unknown items", respecitvely.  Known items are those whose
 names correspond to targets (built or imported) and those for which an
 old-style <item>_LIB_DEPENDS variable is defined.  All other items are
-unknown and we must infer dependencies for them.
+unknown and we must infer dependencies for them.  For items that look
+like flags (beginning with '-') we trivially infer no dependencies,
+and do not include them in the dependencies of other items.
 
 Known items have dependency lists ordered based on how the user
 specified them.  We can use this order to infer potential dependencies
@@ -293,6 +295,7 @@ int cmComputeLinkDepends::AddLinkEntry(std::string const& item)
   LinkEntry& entry = this->EntryList[index];
   entry.Item = item;
   entry.Target = this->FindTargetToLink(entry.Item.c_str());
+  entry.IsFlag = !entry.Target && item[0] == '-';
 
   // If the item has dependencies queue it to follow them.
   if(entry.Target)
@@ -312,7 +315,7 @@ int cmComputeLinkDepends::AddLinkEntry(std::string const& item)
       BFSEntry qe = {index, val};
       this->BFSQueue.push(qe);
       }
-    else
+    else if(!entry.IsFlag)
       {
       // The item dependencies are not known.  We need to infer them.
       this->InferredDependSets[index] = new DependSetList;
@@ -555,7 +558,10 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
     // The depender must come before the dependee.
     if(depender_index >= 0)
       {
-      this->EntryConstraintGraph[dependee_index].push_back(depender_index);
+      if(!this->EntryList[dependee_index].IsFlag)
+        {
+        this->EntryConstraintGraph[dependee_index].push_back(depender_index);
+        }
       }
     else
       {
@@ -572,6 +578,7 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
       // items are outside libraries that should not be depending on
       // targets.
       if(!this->EntryList[dependee_index].Target &&
+         !this->EntryList[dependee_index].IsFlag &&
          dependee_index != dsi->first)
         {
         dsi->second.insert(dependee_index);
