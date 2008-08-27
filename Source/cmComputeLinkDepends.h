@@ -145,7 +145,7 @@ private:
     int Count;
 
     // The entries yet to be seen to complete the component.
-    DependSet Entries;
+    std::set<int> Entries;
   };
   std::map<int, PendingComponent> PendingComponents;
   cmComputeComponentGraph* CCG;
