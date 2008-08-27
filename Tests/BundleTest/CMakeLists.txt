@@ -17,7 +17,7 @@ SET_SOURCE_FILES_PROPERTIES(
 
 SET_SOURCE_FILES_PROPERTIES(
   SomeRandomFile.txt
-  "${CMake_SOURCE_DIR}/ChangeLog.txt"
+  "${BundleTest_SOURCE_DIR}/../../ChangeLog.txt"
   PROPERTIES
   MACOSX_PACKAGE_LOCATION MacOS
   )
@@ -30,7 +30,7 @@ ADD_EXECUTABLE(BundleTest
   MACOSX_BUNDLE
   BundleTest.cxx
   SomeRandomFile.txt
-  "${CMake_SOURCE_DIR}/ChangeLog.txt"
+  "${BundleTest_SOURCE_DIR}/../../ChangeLog.txt"
   "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
   )
 
