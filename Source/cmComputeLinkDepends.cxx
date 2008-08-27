@@ -171,7 +171,7 @@ cmComputeLinkDepends
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
   // The configuration being linked.
-  this->Config = config;
+  this->Config = (config && *config)? config : 0;
 
   // Enable debug mode if requested.
   this->DebugMode = this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE");
