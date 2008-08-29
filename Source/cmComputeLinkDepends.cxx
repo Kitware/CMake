@@ -576,10 +576,7 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
     // The dependee must come after the depender.
     if(depender_index >= 0)
       {
-      if(!this->EntryList[dependee_index].IsFlag)
-        {
-        this->EntryConstraintGraph[depender_index].push_back(dependee_index);
-        }
+      this->EntryConstraintGraph[depender_index].push_back(dependee_index);
       }
     else
       {
