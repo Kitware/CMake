@@ -312,7 +312,8 @@ int cmComputeLinkDepends::AddLinkEntry(std::string const& item)
   LinkEntry& entry = this->EntryList[index];
   entry.Item = item;
   entry.Target = this->FindTargetToLink(entry.Item.c_str());
-  entry.IsFlag = !entry.Target && item[0] == '-' && item[1] != 'l';
+  entry.IsFlag = (!entry.Target && item[0] == '-' && item[1] != 'l' &&
+                  item.substr(0, 10) != "-framework");
 
   // If the item has dependencies queue it to follow them.
   if(entry.Target)
