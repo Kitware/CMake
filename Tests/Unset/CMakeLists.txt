@@ -1,4 +1,5 @@
-project(Unset)
+cmake_minimum_required(VERSION 2.6)
+project(Unset C)
 
 # Local variable
 set(x 42)
@@ -37,4 +38,4 @@ if(DEFINED BAR)
 endif(DEFINED BAR)
 
 
-add_executable(Unset unset.cc)
+add_executable(Unset unset.c)
