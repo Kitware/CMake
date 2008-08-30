@@ -103,11 +103,11 @@
 #        interface file is constructed from the basename of the header with
 #        the suffix .xml appended.
 #
-#  macro QT4_CREATE_TRANSLATION( qm_files sources ... ts_files ... )
+#  macro QT4_CREATE_TRANSLATION( qm_files directories ... sources ... ts_files ... )
 #        out: qm_files
-#        in:  sources ts_files
+#        in:  directories sources ts_files
 #        generates commands to create .ts (vie lupdate) and .qm
-#        (via lrelease) - files from sources. The ts files are 
+#        (via lrelease) - files from directories and/or sources. The ts files are 
 #        created and/or updated in the source tree (unless given with full paths).
 #        The qm files are generated in the build tree.
 #        Updating the translations can be done by adding the qm_files
