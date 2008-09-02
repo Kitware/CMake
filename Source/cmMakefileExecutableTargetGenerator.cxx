@@ -504,6 +504,7 @@ cmMakefileExecutableTargetGenerator::CreateAppBundle(std::string& targetName,
   outpath += "MacOS";
   cmSystemTools::MakeDirectory(outpath.c_str());
   outpath += "/";
+  this->Makefile->AddCMakeDependFile(outpath.c_str());
 
   // Configure the Info.plist file.  Note that it needs the executable name
   // to be set.
@@ -511,4 +512,5 @@ cmMakefileExecutableTargetGenerator::CreateAppBundle(std::string& targetName,
   this->LocalGenerator->GenerateAppleInfoPList(this->Target,
                                                targetName.c_str(),
                                                plist.c_str());
+  this->Makefile->AddCMakeDependFile(plist.c_str());
 }
