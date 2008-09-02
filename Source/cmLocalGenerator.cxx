@@ -2863,3 +2863,43 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmTarget* target,
   mf->ConfigureFile(inFile.c_str(), fname, false, false, false);
   mf->PopScope();
 }
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::GenerateFrameworkInfoPList(cmTarget* target,
+                                                  const char* targetName,
+                                                  const char* fname)
+{
+  // Find the Info.plist template.
+  const char* in = target->GetProperty("MACOSX_FRAMEWORK_INFO_PLIST");
+  std::string inFile = (in && *in)? in : "MacOSXFrameworkInfo.plist.in";
+  if(!cmSystemTools::FileIsFullPath(inFile.c_str()))
+    {
+    std::string inMod = this->Makefile->GetModulesFile(inFile.c_str());
+    if(!inMod.empty())
+      {
+      inFile = inMod;
+      }
+    }
+  if(!cmSystemTools::FileExists(inFile.c_str(), true))
+    {
+    cmOStringStream e;
+    e << "Target " << target->GetName() << " Info.plist template \""
+      << inFile << "\" could not be found.";
+    cmSystemTools::Error(e.str().c_str());
+    return;
+    }
+
+  // Convert target properties to variables in an isolated makefile
+  // scope to configure the file.  If properties are set they will
+  // override user make variables.  If not the configuration will fall
+  // back to the directory-level values set by the user.
+  cmMakefile* mf = this->Makefile;
+  mf->PushScope();
+  mf->AddDefinition("MACOSX_FRAMEWORK_NAME", targetName);
+  cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_ICON_FILE");
+  cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_IDENTIFIER");
+  cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_SHORT_VERSION_STRING");
+  cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_BUNDLE_VERSION");
+  mf->ConfigureFile(inFile.c_str(), fname, false, false, false);
+  mf->PopScope();
+}

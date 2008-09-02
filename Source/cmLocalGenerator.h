@@ -275,6 +275,13 @@ public:
    */
   void GenerateAppleInfoPList(cmTarget* target, const char* targetName,
                               const char* fname);
+
+  /**
+   * Generate a Mac OS X framework Info.plist file.
+   */
+  void GenerateFrameworkInfoPList(cmTarget* target,
+                                  const char* targetName,
+                                  const char* fname);
 protected:
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,

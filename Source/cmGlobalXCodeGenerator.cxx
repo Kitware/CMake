@@ -1436,6 +1436,18 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       std::string version = target.GetFrameworkVersion();
       buildSettings->AddAttribute("FRAMEWORK_VERSION",
                                   this->CreateString(version.c_str()));
+
+      std::string plist = this->ComputeInfoPListLocation(target);
+      // Xcode will create the final version of Info.plist at build time,
+      // so let it replace the framework name.  This avoids creating
+      // a per-configuration Info.plist file.
+      this->CurrentLocalGenerator
+        ->GenerateFrameworkInfoPList(&target, "$(EXECUTABLE_NAME)",
+                                     plist.c_str());
+      std::string path =
+        this->ConvertToRelativeForXCode(plist.c_str());
+      buildSettings->AddAttribute("INFOPLIST_FILE",
+                                  this->CreateString(path.c_str()));
       }
     else
       {
