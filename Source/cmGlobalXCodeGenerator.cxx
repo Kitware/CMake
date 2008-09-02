@@ -689,7 +689,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       cmTarget::SourceFileFlags tsFlags =
         cmtarget.GetTargetSourceFileFlags(*i);
 
-      if(strcmp(filetype->GetString(), "\"compiled.mach-o.objfile\"") == 0)
+      if(strcmp(filetype->GetString(), "compiled.mach-o.objfile") == 0)
         {
         externalObjFiles.push_back(xsf);
         }
@@ -1957,22 +1957,8 @@ void cmGlobalXCodeGenerator::AppendOrAddBuildSetting(cmXCodeObject* settings,
     else
       {
       std::string oldValue = attr->GetString();
-
-      // unescape escaped quotes internal to the string:
-      cmSystemTools::ReplaceString(oldValue, "\\\"", "\"");
-
-      // remove surrounding quotes, if any:
-      std::string::size_type len = oldValue.length();
-      if(oldValue[0] == '\"' && oldValue[len-1] == '\"')
-        {
-        oldValue = oldValue.substr(1, len-2);
-        }
-
       oldValue += " ";
       oldValue += value;
-
-      // SetString automatically escapes internal quotes and then surrounds
-      // the result with quotes if necessary...
       attr->SetString(oldValue.c_str());
       }
     }
