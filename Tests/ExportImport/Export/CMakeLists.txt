@@ -35,6 +35,29 @@ set_property(TARGET testLib3 PROPERTY SOVERSION 3)
 add_library(testLib4 SHARED testLib4.c)
 set_property(TARGET testLib4 PROPERTY FRAMEWORK 1)
 
+# Work-around: Visual Studio 6 does not support per-target object files.
+set(VS6)
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+  set(VS6 1)
+endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+
+# Test using the target_link_libraries command to set the
+# LINK_INTERFACE_LIBRARIES* properties.  We construct two libraries
+# providing the same two symbols.  In each library one of the symbols
+# will work and the other one will fail to link.  The import part of
+# this test will try to use the symbol corresponding to the
+# configuration in which it is built.  If the proper library is not
+# used via the link interface the import test will fail to link.
+add_library(testLib4lib STATIC testLib4lib.c)
+add_library(testLib4libdbg STATIC testLib4libopt.c testLib4libdbg${VS6}.c)
+add_library(testLib4libopt STATIC testLib4libdbg.c testLib4libopt${VS6}.c)
+set_property(TARGET testLib4libdbg PROPERTY COMPILE_DEFINITIONS LIB_DBG)
+set_property(TARGET testLib4libopt PROPERTY COMPILE_DEFINITIONS LIB_OPT)
+target_link_libraries(testLib4
+  LINK_INTERFACE_LIBRARIES
+  testLib4lib debug testLib4libdbg optimized testLib4libopt
+  )
+
 add_executable(testExe3 testExe3.c)
 set_property(TARGET testExe3 PROPERTY MACOSX_BUNDLE 1)
 
@@ -42,7 +65,7 @@ set_property(TARGET testExe3 PROPERTY MACOSX_BUNDLE 1)
 install(
   TARGETS
   testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3
-  testExe2lib
+  testExe2lib testLib4lib testLib4libdbg testLib4libopt
   EXPORT exp
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib NAMELINK_SKIP
@@ -67,6 +90,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   FILE ExportBuildTree.cmake
   )
 export(TARGETS testExe2 testLib4 testExe3 testExe2lib
+  testLib4lib testLib4libdbg testLib4libopt
   NAMESPACE bld_
   APPEND FILE ExportBuildTree.cmake
   )

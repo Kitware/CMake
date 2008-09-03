@@ -80,7 +80,8 @@ public:
   cmTarget();
   enum TargetType { EXECUTABLE, STATIC_LIBRARY,
                     SHARED_LIBRARY, MODULE_LIBRARY, UTILITY, GLOBAL_TARGET,
-                    INSTALL_FILES, INSTALL_PROGRAMS, INSTALL_DIRECTORY};
+                    INSTALL_FILES, INSTALL_PROGRAMS, INSTALL_DIRECTORY,
+                    UNKNOWN_LIBRARY};
   static const char* TargetTypeNames[];
   enum CustomCommandType { PRE_BUILD, PRE_LINK, POST_BUILD };
 
@@ -244,6 +245,7 @@ public:
   const char *GetProperty(const char *prop);
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);
+  void CheckProperty(const char* prop, cmMakefile* context);
 
   bool IsImported() const {return this->IsImportedTarget;}
 
@@ -392,6 +394,9 @@ public:
   /** Return whether this target is an executable with symbol exports
       enabled.  */
   bool IsExecutableWithExports();
+
+  /** Return whether this target may be used to link another target.  */
+  bool IsLinkable();
 
   /** Return whether this target is a shared library Framework on
       Apple.  */

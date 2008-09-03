@@ -5,9 +5,6 @@
 # error "A C compiler has been selected for C++."
 #endif
 
-/* Provide main() so the program can link.  */
-int main() { return 0; }
-
 #if defined(__COMO__)
 # define COMPILER_ID "Comeau"
 
@@ -70,3 +67,14 @@ int main() { return 0; }
 char* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
 
 @CMAKE_CXX_COMPILER_ID_PLATFORM_CONTENT@
+
+/*--------------------------------------------------------------------------*/
+
+int main(int argc, char* argv[])
+{
+  int require = 0;
+  require += info_compiler[argc];
+  require += info_platform[argc];
+  (void)argv;
+  return require;
+}

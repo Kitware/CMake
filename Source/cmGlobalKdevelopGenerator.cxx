@@ -280,9 +280,9 @@ void cmGlobalKdevelopGenerator
     }
   else
     {
-    // add all subdirectories to the kdevelop blacklist
-    // so they are not monitored for added or removed files
-    // since this is basically handled by adding files to the cmake files
+    // add all subdirectories which are cmake build directories to the 
+    // kdevelop blacklist so they are not monitored for added or removed files
+    // since this is handled by adding files to the cmake files
     cmsys::Directory d;
     if (d.Load(projectDir.c_str()))
       {
@@ -297,7 +297,12 @@ void cmGlobalKdevelopGenerator
           tmp += nextFile;
           if (cmSystemTools::FileIsDirectory(tmp.c_str()))
             {
-            this->Blacklist.push_back(nextFile);
+            tmp += "/CMakeCache.txt";
+            if ((nextFile == "CMakeFiles") 
+                || (cmSystemTools::FileExists(tmp.c_str())))
+              {
+              this->Blacklist.push_back(nextFile);
+              }
             }
           }
         }
@@ -471,10 +476,12 @@ void cmGlobalKdevelopGenerator
         "      <dontact>false</dontact>\n"
         "      <makebin>" << this->GlobalGenerator->GetLocalGenerators()[0]->
             GetMakefile()->GetRequiredDefinition("CMAKE_BUILD_TOOL") 
-            << " VERBOSE=1 </makebin>\n"
+            << " </makebin>\n"
         "      <selectedenvironment>default</selectedenvironment>\n"
         "      <environments>\n"
-        "        <default/>\n"
+        "        <default>\n"
+        "          <envvar value=\"1\" name=\"VERBOSE\" />\n"
+        "        </default>\n"
         "      </environments>\n"
         "    </make>\n";
 

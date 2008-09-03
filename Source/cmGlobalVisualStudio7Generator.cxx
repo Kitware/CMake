@@ -743,6 +743,7 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] =
    cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
    cmVS7FlagTable::UserValueRequired},
+  {"WholeProgramOptimization", "LTCG", "WholeProgramOptimization", "TRUE", 0},
 
   // Exception handling mode.  If no entries match, it will be FALSE.
   {"ExceptionHandling", "GX", "enable c++ exceptions", "TRUE", 0},

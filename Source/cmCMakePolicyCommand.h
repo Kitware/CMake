@@ -108,6 +108,11 @@ public:
       "Alternatively one may fix the project to work with the new behavior "
       "and set the policy state to NEW."
       "\n"
+      "  cmake_policy(GET CMP<NNNN> <variable>)\n"
+      "Check whether a given policy is set to OLD or NEW behavior.  "
+      "The output variable value will be \"OLD\" or \"NEW\" if the "
+      "policy is set, and empty otherwise."
+      "\n"
       "  cmake_policy(PUSH)\n"
       "  cmake_policy(POP)\n"
       "Push and pop the current policy setting state on a stack.  "
@@ -123,6 +128,7 @@ public:
   cmTypeMacro(cmCMakePolicyCommand, cmCommand);
 private:
   bool HandleSetMode(std::vector<std::string> const& args);
+  bool HandleGetMode(std::vector<std::string> const& args);
   bool HandleVersionMode(std::vector<std::string> const& args);
 };
 

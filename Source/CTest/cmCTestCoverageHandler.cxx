@@ -685,6 +685,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
   cmsys::Glob gl;
   gl.RecurseOn();
+  gl.RecurseThroughSymlinksOff();
   std::string daGlob = cont->BinaryDir + "/*.da";
   gl.FindFiles(daGlob);
   std::vector<std::string> files = gl.GetFiles();
@@ -1054,6 +1055,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
 {
   cmsys::Glob gl;
   gl.RecurseOn();
+  gl.RecurseThroughSymlinksOff();
   std::string daGlob = cont->BinaryDir + "/*.cover";
   gl.FindFiles(daGlob);
   std::vector<std::string> files = gl.GetFiles();

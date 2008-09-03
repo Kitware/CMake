@@ -46,9 +46,11 @@ public:
     std::string Item;
     cmTarget* Target;
     bool IsSharedDep;
-    LinkEntry(): Item(), Target(0), IsSharedDep(false) {}
+    bool IsFlag;
+    LinkEntry(): Item(), Target(0), IsSharedDep(false), IsFlag(false) {}
     LinkEntry(LinkEntry const& r):
-      Item(r.Item), Target(r.Target), IsSharedDep(r.IsSharedDep) {}
+      Item(r.Item), Target(r.Target), IsSharedDep(r.IsSharedDep),
+      IsFlag(r.IsFlag) {}
   };
 
   typedef std::vector<LinkEntry> EntryVector;
@@ -85,6 +87,7 @@ private:
   void AddLinkEntries(int depender_index,
                       std::vector<std::string> const& libs);
   std::string CleanItemName(std::string const& item);
+  cmTarget* FindTargetToLink(const char* name);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;
@@ -128,15 +131,33 @@ private:
   // Ordering algorithm.
   void OrderLinkEntires();
   std::vector<char> ComponentVisited;
+  std::vector<int> ComponentOrder;
+  int ComponentOrderId;
+  struct PendingComponent
+  {
+    // The real component id.  Needed because the map is indexed by
+    // component topological index.
+    int Id;
+
+    // The number of times the component needs to be seen.  This is
+    // always 1 for trivial components and is initially 2 for
+    // non-trivial components.
+    int Count;
+
+    // The entries yet to be seen to complete the component.
+    std::set<int> Entries;
+  };
+  std::map<int, PendingComponent> PendingComponents;
+  cmComputeComponentGraph* CCG;
   std::vector<int> FinalLinkOrder;
-  void DisplayComponents(cmComputeComponentGraph const& ccg);
-  void VisitComponent(cmComputeComponentGraph const& ccg, unsigned int i);
-  void EmitComponent(NodeList const& nl);
+  void DisplayComponents();
+  void VisitComponent(unsigned int c);
+  void VisitEntry(int index);
+  PendingComponent& MakePendingComponent(unsigned int component);
   void DisplayFinalEntries();
 
-  // Preservation of original link line.
+  // Record of the original link line.
   std::vector<int> OriginalEntries;
-  void PreserveOriginalEntries();
 
   // Compatibility help.
   bool OldLinkDirMode;

@@ -1871,7 +1871,10 @@ int cmake::HandleDeleteCacheVariables(const char* var)
   cmSystemTools::ExpandListArgument(std::string(var), argsSplit);
   // erase the property to avoid infinite recursion
   this->SetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
-
+  if(this->GetIsInTryCompile())
+    {
+    return 0;
+    }
   cmCacheManager::CacheIterator ci = this->CacheManager->NewIterator();
   std::vector<SaveCacheEntry> saved;
   cmOStringStream warning;

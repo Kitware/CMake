@@ -147,6 +147,8 @@ public:
   std::vector<cmXCodeObject*> const& GetObjectList() { return this->List;}
   void SetComment(const char* c) { this->Comment = c;}
 protected:
+  void PrintString(std::ostream& os) const;
+
   cmTarget* Target;
   Type TypeValue;
   cmStdString Id;

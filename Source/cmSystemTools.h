@@ -396,7 +396,8 @@ public:
                           bool* changed = 0);
 
   /** Try to remove the RPATH from an ELF binary.  */
-  static bool RemoveRPath(std::string const& file, std::string* emsg = 0);
+  static bool RemoveRPath(std::string const& file, std::string* emsg = 0,
+                          bool* removed = 0);
 
   /** Check whether the RPATH in an ELF binary contains the path
       given.  */

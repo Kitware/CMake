@@ -271,6 +271,9 @@ bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
     target->SetProperty(name, value);
     }
 
+  // Check the resulting value.
+  target->CheckProperty(name, this->Makefile);
+
   return true;
 }
 

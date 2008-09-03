@@ -672,6 +672,18 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   bool first = true;
   for ( ; i != args.end(); ++i )
     {
+    if ( *i == "RECURSE_SYMLINKS_OFF" )
+      {
+      g.RecurseThroughSymlinksOff();
+      ++i;
+      if ( i == args.end() )
+        {
+        this->SetError(
+          "GLOB requires a glob expression after RECURSE_SYMLINKS_OFF");
+        return false;
+        }
+      }
+
     if ( *i == "RELATIVE" )
       {
       ++i; // skip RELATIVE
@@ -688,6 +700,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         return false;
         }
       }
+
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
       std::string expr = this->Makefile->GetCurrentDirectory();
@@ -706,6 +719,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       {
       g.FindFiles(*i);
       }
+
     std::vector<std::string>::size_type cc;
     std::vector<std::string>& files = g.GetFiles();
     for ( cc = 0; cc < files.size(); cc ++ )
@@ -1486,7 +1500,8 @@ cmFileCommand::HandleRPathRemoveCommand(std::vector<std::string> const& args)
   cmSystemToolsFileTime* ft = cmSystemTools::FileTimeNew();
   bool have_ft = cmSystemTools::FileTimeGet(file, ft);
   std::string emsg;
-  if(!cmSystemTools::RemoveRPath(file, &emsg))
+  bool removed;
+  if(!cmSystemTools::RemoveRPath(file, &emsg, &removed))
     {
     cmOStringStream e;
     e << "RPATH_REMOVE could not remove RPATH from file:\n"
@@ -1495,9 +1510,19 @@ cmFileCommand::HandleRPathRemoveCommand(std::vector<std::string> const& args)
     this->SetError(e.str().c_str());
     success = false;
     }
-  if(success && have_ft)
+  if(success)
     {
-    cmSystemTools::FileTimeSet(file, ft);
+    if(removed)
+      {
+      std::string message = "Removed runtime path from \"";
+      message += file;
+      message += "\"";
+      this->Makefile->DisplayStatus(message.c_str(), -1);
+      }
+    if(have_ft)
+      {
+      cmSystemTools::FileTimeSet(file, ft);
+      }
     }
   cmSystemTools::FileTimeDelete(ft);
   return success;

@@ -22,6 +22,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmComputeLinkInformation.h"
 #include "cmListFileCache.h"
+#include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <set>
 #include <queue>
@@ -30,7 +31,8 @@
 const char* cmTarget::TargetTypeNames[] = {
   "EXECUTABLE", "STATIC_LIBRARY",
   "SHARED_LIBRARY", "MODULE_LIBRARY", "UTILITY", "GLOBAL_TARGET",
-  "INSTALL_FILES", "INSTALL_PROGRAMS", "INSTALL_DIRECTORY"
+  "INSTALL_FILES", "INSTALL_PROGRAMS", "INSTALL_DIRECTORY",
+  "UNKNOWN_LIBRARY"
 };
 
 //----------------------------------------------------------------------------
@@ -245,7 +247,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "This property is used when loading settings for the <CONFIG> "
      "configuration of an imported target.  "
      "Configuration names correspond to those provided by the project "
-     "from which the target is imported.");
+     "from which the target is imported.  "
+     "If set, this property completely overrides the generic property "
+     "for the named configuration.");
 
   cm->DefineProperty
     ("IMPORTED_LINK_INTERFACE_LIBRARIES", cmProperty::TARGET,
@@ -253,7 +257,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "Lists libraries whose interface is included when an IMPORTED library "
      "target is linked to another target.  "
      "The libraries will be included on the link line for the target.  "
-     "Ignored for non-imported targets.");
+     "Unlike the LINK_INTERFACE_LIBRARIES property, this property applies "
+     "to all imported target types, including STATIC libraries.  "
+     "This property is ignored for non-imported targets.");
 
   cm->DefineProperty
     ("IMPORTED_LINK_INTERFACE_LIBRARIES_<CONFIG>", cmProperty::TARGET,
@@ -261,7 +267,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "This property is used when loading settings for the <CONFIG> "
      "configuration of an imported target.  "
      "Configuration names correspond to those provided by the project "
-     "from which the target is imported.");
+     "from which the target is imported.  "
+     "If set, this property completely overrides the generic property "
+     "for the named configuration.");
 
   cm->DefineProperty
     ("IMPORTED_LOCATION", cmProperty::TARGET,
@@ -277,6 +285,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "For frameworks on OS X this is the location of the library file "
      "symlink just inside the framework folder.  "
      "For DLLs this is the location of the \".dll\" part of the library.  "
+     "For UNKNOWN libraries this is the location of the file to be linked.  "
      "Ignored for non-imported targets.");
 
   cm->DefineProperty
@@ -398,13 +407,16 @@ void cmTarget::DefineProperties(cmake *cm)
      "provided to the other target also.  "
      "If the list is empty then no transitive link dependencies will be "
      "incorporated when this target is linked into another target even if "
-     "the default set is non-empty.");
+     "the default set is non-empty.  "
+     "This property is ignored for STATIC libraries.");
 
   cm->DefineProperty
     ("LINK_INTERFACE_LIBRARIES_<CONFIG>", cmProperty::TARGET,
      "Per-configuration list of public interface libraries for a target.",
      "This is the configuration-specific version of "
-     "LINK_INTERFACE_LIBRARIES.");
+     "LINK_INTERFACE_LIBRARIES.  "
+     "If set, this property completely overrides the generic property "
+     "for the named configuration.");
 
   cm->DefineProperty
     ("MAP_IMPORTED_CONFIG_<CONFIG>", cmProperty::TARGET,
@@ -571,6 +583,26 @@ void cmTarget::DefineProperties(cmake *cm)
      "  MACOSX_BUNDLE_SHORT_VERSION_STRING\n"
      "  MACOSX_BUNDLE_BUNDLE_VERSION\n"
      "  MACOSX_BUNDLE_COPYRIGHT\n"
+     "CMake variables of the same name may be set to affect all targets "
+     "in a directory that do not have each specific property set.  "
+     "If a custom Info.plist is specified by this property it may of course "
+     "hard-code all the settings instead of using the target properties.");
+
+  cm->DefineProperty
+    ("MACOSX_FRAMEWORK_INFO_PLIST", cmProperty::TARGET,
+     "Specify a custom Info.plist template for a Mac OS X Framework.",
+     "An library target with FRAMEWORK enabled will be built as a "
+     "framework on Mac OS X.  "
+     "By default its Info.plist file is created by configuring a template "
+     "called MacOSXFrameworkInfo.plist.in located in the CMAKE_MODULE_PATH.  "
+     "This property specifies an alternative template file name which "
+     "may be a full path.\n"
+     "The following target properties may be set to specify content to "
+     "be configured into the file:\n"
+     "  MACOSX_FRAMEWORK_ICON_FILE\n"
+     "  MACOSX_FRAMEWORK_IDENTIFIER\n"
+     "  MACOSX_FRAMEWORK_SHORT_VERSION_STRING\n"
+     "  MACOSX_FRAMEWORK_BUNDLE_VERSION\n"
      "CMake variables of the same name may be set to affect all targets "
      "in a directory that do not have each specific property set.  "
      "If a custom Info.plist is specified by this property it may of course "
@@ -784,6 +816,16 @@ bool cmTarget::IsExecutableWithExports()
 {
   return (this->GetType() == cmTarget::EXECUTABLE &&
           this->GetPropertyAsBool("ENABLE_EXPORTS"));
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsLinkable()
+{
+  return (this->GetType() == cmTarget::STATIC_LIBRARY ||
+          this->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->GetType() == cmTarget::MODULE_LIBRARY ||
+          this->GetType() == cmTarget::UNKNOWN_LIBRARY ||
+          this->IsExecutableWithExports());
 }
 
 //----------------------------------------------------------------------------
@@ -1670,6 +1712,69 @@ void cmTarget::AppendProperty(const char* prop, const char* value)
 }
 
 //----------------------------------------------------------------------------
+static void cmTargetCheckLINK_INTERFACE_LIBRARIES(
+  const char* prop, const char* value, cmMakefile* context, bool imported
+  )
+{
+  // Look for link-type keywords in the value.
+  static cmsys::RegularExpression
+    keys("(^|;)(debug|optimized|general)(;|$)");
+  if(!keys.find(value))
+    {
+    return;
+    }
+
+  // Support imported and non-imported versions of the property.
+  const char* base = (imported?
+                      "IMPORTED_LINK_INTERFACE_LIBRARIES" :
+                      "LINK_INTERFACE_LIBRARIES");
+
+  // Report an error.
+  cmOStringStream e;
+  e << "Property " << prop << " may not contain link-type keyword \""
+    << keys.match(2) << "\".  "
+    << "The " << base << " property has a per-configuration "
+    << "version called " << base << "_<CONFIG> which may be "
+    << "used to specify per-configuration rules.";
+  if(!imported)
+    {
+    e << "  "
+      << "Alternatively, an IMPORTED library may be created, configured "
+      << "with a per-configuration location, and then named in the "
+      << "property value.  "
+      << "See the add_library command's IMPORTED mode for details."
+      << "\n"
+      << "If you have a list of libraries that already contains the "
+      << "keyword, use the target_link_libraries command with its "
+      << "LINK_INTERFACE_LIBRARIES mode to set the property.  "
+      << "The command automatically recognizes link-type keywords and sets "
+      << "the LINK_INTERFACE_LIBRARIES and LINK_INTERFACE_LIBRARIES_DEBUG "
+      << "properties accordingly.";
+    }
+  context->IssueMessage(cmake::FATAL_ERROR, e.str());
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::CheckProperty(const char* prop, cmMakefile* context)
+{
+  // Certain properties need checking.
+  if(strncmp(prop, "LINK_INTERFACE_LIBRARIES", 24) == 0)
+    {
+    if(const char* value = this->GetProperty(prop))
+      {
+      cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, false);
+      }
+    }
+  if(strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES", 33) == 0)
+    {
+    if(const char* value = this->GetProperty(prop))
+      {
+      cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, true);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::MarkAsImported()
 {
   this->IsImportedTarget = true;
@@ -1860,7 +1965,8 @@ const char *cmTarget::GetProperty(const char* prop,
   if(this->GetType() == cmTarget::EXECUTABLE ||
      this->GetType() == cmTarget::STATIC_LIBRARY ||
      this->GetType() == cmTarget::SHARED_LIBRARY ||
-     this->GetType() == cmTarget::MODULE_LIBRARY)
+     this->GetType() == cmTarget::MODULE_LIBRARY ||
+     this->GetType() == cmTarget::UNKNOWN_LIBRARY)
     {
     if(!this->IsImported() && strcmp(prop,"LOCATION") == 0)
       {
@@ -1957,6 +2063,9 @@ const char *cmTarget::GetProperty(const char* prop,
       case cmTarget::INSTALL_DIRECTORY:
         return "INSTALL_DIRECTORY";
         // break; /* unreachable */
+      case cmTarget::UNKNOWN_LIBRARY:
+        return "UNKNOWN_LIBRARY";
+        // break; /* unreachable */
       }
     return 0;
     }
@@ -2043,11 +2152,7 @@ const char* cmTarget::GetCreateRuleVariable()
       return "_CREATE_SHARED_MODULE";
     case cmTarget::EXECUTABLE:
       return "_LINK_EXECUTABLE";
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
-    case cmTarget::INSTALL_FILES:
-    case cmTarget::INSTALL_PROGRAMS:
-    case cmTarget::INSTALL_DIRECTORY:
+    default:
       break;
     }
   return "";
@@ -2073,11 +2178,7 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type,
       return (implib
               ? "CMAKE_IMPORT_LIBRARY_SUFFIX"
               : "CMAKE_EXECUTABLE_SUFFIX");
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
-    case cmTarget::INSTALL_FILES:
-    case cmTarget::INSTALL_PROGRAMS:
-    case cmTarget::INSTALL_DIRECTORY:
+    default:
       break;
     }
   return "";
@@ -2102,11 +2203,7 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type,
               : "CMAKE_SHARED_MODULE_PREFIX");
     case cmTarget::EXECUTABLE:
       return (implib? "CMAKE_IMPORT_LIBRARY_PREFIX" : "");
-    case cmTarget::UTILITY:
-    case cmTarget::GLOBAL_TARGET:
-    case cmTarget::INSTALL_FILES:
-    case cmTarget::INSTALL_PROGRAMS:
-    case cmTarget::INSTALL_DIRECTORY:
+    default:
       break;
     }
   return "";

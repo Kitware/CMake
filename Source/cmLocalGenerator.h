@@ -275,6 +275,13 @@ public:
    */
   void GenerateAppleInfoPList(cmTarget* target, const char* targetName,
                               const char* fname);
+
+  /**
+   * Generate a Mac OS X framework Info.plist file.
+   */
+  void GenerateFrameworkInfoPList(cmTarget* target,
+                                  const char* targetName,
+                                  const char* fname);
 protected:
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,
@@ -348,6 +355,7 @@ protected:
   std::vector<cmLocalGenerator*> Children;
   std::map<cmStdString, cmStdString> LanguageToIncludeFlags;
   std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
+  std::string::size_type ObjectPathMax;
   bool WindowsShell;
   bool WindowsVSIDE;
   bool WatcomWMake;

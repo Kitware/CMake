@@ -9,6 +9,18 @@
 #
 # Author: Alexander Neundorf <neundorf@kde.org>
 
+# If Qt3 has already been found, fail.
+IF(QT_QT_LIBRARY)
+  IF(KDE4_FIND_REQUIRED)
+    MESSAGE( FATAL_ERROR "KDE4/Qt4 and Qt3 cannot be used together in one project.")
+  ELSE(KDE4_FIND_REQUIRED)
+    IF(NOT KDE4_FIND_QUIETLY)
+      MESSAGE( STATUS    "KDE4/Qt4 and Qt3 cannot be used together in one project.")
+    ENDIF(NOT KDE_FIND_QUIETLY)
+    RETURN()
+  ENDIF(KDE4_FIND_REQUIRED)
+ENDIF(QT_QT_LIBRARY)
+
 FILE(TO_CMAKE_PATH "$ENV{KDEDIRS}" _KDEDIRS)
 
 # when cross compiling, searching kde4-config in order to run it later on

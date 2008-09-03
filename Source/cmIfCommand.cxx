@@ -340,11 +340,27 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         argP1 = arg;
         IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
-        }
+        } 
       // does a command exist
       if (*arg == "COMMAND" && argP1  != newArgs.end())
         {
         if(makefile->CommandExists((argP1)->c_str()))
+          {
+          *arg = "1";
+          }
+        else 
+          {
+          *arg = "0";
+          }
+        newArgs.erase(argP1);
+        argP1 = arg;
+        IncrementArguments(newArgs,argP1,argP2);
+        reducible = 1;
+        }
+      // does a target exist
+      if (*arg == "TARGET" && argP1  != newArgs.end())
+        {
+        if(makefile->FindTargetToUse((argP1)->c_str()))
           {
           *arg = "1";
           }

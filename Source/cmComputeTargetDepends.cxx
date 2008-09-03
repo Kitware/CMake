@@ -214,7 +214,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     // Don't emit the same library twice for this target.
     if(emitted.insert(lib->first).second)
       {
-      this->AddTargetDepend(depender_index, lib->first.c_str());
+      this->AddTargetDepend(depender_index, lib->first.c_str(), true);
       }
     }
 
@@ -226,14 +226,15 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     // Don't emit the same utility twice for this target.
     if(emitted.insert(*util).second)
       {
-      this->AddTargetDepend(depender_index, util->c_str());
+      this->AddTargetDepend(depender_index, util->c_str(), false);
       }
     }
 }
 
 //----------------------------------------------------------------------------
 void cmComputeTargetDepends::AddTargetDepend(int depender_index,
-                                             const char* dependee_name)
+                                             const char* dependee_name,
+                                             bool linking)
 {
   // Get the depender.
   cmTarget* depender = this->Targets[depender_index];
@@ -246,6 +247,16 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
   if(!dependee)
     {
     dependee = this->GlobalGenerator->FindTarget(0, dependee_name);
+    }
+
+  // Skip targets that will not really be linked.  This is probably a
+  // name conflict between an external library and an executable
+  // within the project.
+  if(linking && dependee &&
+     dependee->GetType() == cmTarget::EXECUTABLE &&
+     !dependee->IsExecutableWithExports())
+    {
+    dependee = 0;
     }
 
   // If not found then skip then the dependee.
@@ -365,7 +376,7 @@ cmComputeTargetDepends
     cmTarget* depender = this->Targets[i];
 
     // Describe the depender.
-    e << "  " << depender->GetName() << " of type "
+    e << "  \"" << depender->GetName() << "\" of type "
       << cmTarget::TargetTypeNames[depender->GetType()] << "\n";
 
     // List its dependencies that are inside the component.
@@ -376,7 +387,7 @@ cmComputeTargetDepends
       if(cmap[j] == c)
         {
         cmTarget* dependee = this->Targets[j];
-        e << "    depends on " << dependee->GetName() << "\n";
+        e << "    depends on \"" << dependee->GetName() << "\"\n";
         }
       }
     }

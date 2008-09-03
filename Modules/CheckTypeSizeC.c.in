@@ -29,15 +29,16 @@ const char info_sizeof[] =  {'I', 'N', 'F', 'O', ':', 's','i','z','e','o','f','[
   ('0' +  (SIZE    % 10)), 
   ']','\0'};
 
-
 #ifdef __CLASSIC_C__
-int main(){
-  int ac;
-  char*av[];
+int main(argc, argv) int argc; char *argv[];
 #else
-int main(int ac, char*av[]){
+int main(int argc, char *argv[])
 #endif
-  return (&info_sizeof[0] != &info_sizeof[0]);
+{
+  int require = 0;
+  require += info_sizeof[argc];
+  (void)argv;
+  return require;
 }
 
 #else  /* CHECK_TYPE_SIZE_TYPE */

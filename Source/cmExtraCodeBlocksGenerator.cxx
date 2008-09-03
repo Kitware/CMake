@@ -93,14 +93,12 @@ void cmExtraCodeBlocksGenerator::Generate()
 }
 
 
-/* create the project file, if it already exists, merge it with the
-existing one, otherwise create a new one */
+/* create the project file */
 void cmExtraCodeBlocksGenerator::CreateProjectFile(
                                      const std::vector<cmLocalGenerator*>& lgs)
 {
   const cmMakefile* mf=lgs[0]->GetMakefile();
   std::string outputDir=mf->GetStartOutputDirectory();
-  std::string projectDir=mf->GetHomeDirectory();
   std::string projectName=mf->GetProjectName();
 
   std::string filename=outputDir+"/";
@@ -108,16 +106,7 @@ void cmExtraCodeBlocksGenerator::CreateProjectFile(
   std::string sessionFilename=outputDir+"/";
   sessionFilename+=projectName+".layout";
 
-/*  if (cmSystemTools::FileExists(filename.c_str()))
-    {
-    this->MergeProjectFiles(outputDir, projectDir, filename,
-                            cmakeFilePattern, sessionFilename);
-    }
-  else */
-    {
-    this->CreateNewProjectFile(lgs, filename);
-    }
-
+  this->CreateNewProjectFile(lgs, filename);
 }
 
 

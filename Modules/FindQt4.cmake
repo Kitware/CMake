@@ -48,8 +48,9 @@
 #  
 #  macro QT4_WRAP_CPP(outfiles inputfile ... OPTIONS ...)
 #        create moc code from a list of files containing Qt class with
-#        the Q_OBJECT declaration.  Options may be given to moc, such as those found
-#        when executing "moc -help"
+#        the Q_OBJECT declaration.  Per-direcotry preprocessor definitions 
+#        are also added.  Options may be given to moc, such as those found
+#        when executing "moc -help".  
 #
 #  macro QT4_WRAP_UI(outfiles inputfile ... OPTIONS ...)
 #        create code from a list of Qt designer ui files.
@@ -102,11 +103,11 @@
 #        interface file is constructed from the basename of the header with
 #        the suffix .xml appended.
 #
-#  macro QT4_CREATE_TRANSLATION( qm_files sources ... ts_files ... )
+#  macro QT4_CREATE_TRANSLATION( qm_files directories ... sources ... ts_files ... )
 #        out: qm_files
-#        in:  sources ts_files
+#        in:  directories sources ts_files
 #        generates commands to create .ts (vie lupdate) and .qm
-#        (via lrelease) - files from sources. The ts files are 
+#        (via lrelease) - files from directories and/or sources. The ts files are 
 #        created and/or updated in the source tree (unless given with full paths).
 #        The qm files are generated in the build tree.
 #        Updating the translations can be done by adding the qm_files
@@ -255,6 +256,19 @@
 # These variables are set to "" Because Qt structure changed 
 # (They make no sense in Qt4)
 #  QT_QT_LIBRARY        Qt-Library is now split
+
+# If Qt3 has already been found, fail.
+IF(QT_QT_LIBRARY)
+  IF(Qt4_FIND_REQUIRED)
+    MESSAGE( FATAL_ERROR "Qt3 and Qt4 cannot be used together in one project.")
+  ELSE(Qt4_FIND_REQUIRED)
+    IF(NOT Qt4_FIND_QUIETLY)
+      MESSAGE( STATUS    "Qt3 and Qt4 cannot be used together in one project.")
+    ENDIF(NOT Qt4_FIND_QUIETLY)
+    RETURN()
+  ENDIF(Qt4_FIND_REQUIRED)
+ENDIF(QT_QT_LIBRARY)
+
 
 INCLUDE(CheckSymbolExists)
 INCLUDE(MacroAddFileDependencies)
@@ -474,9 +488,9 @@ IF (QT4_QMAKE_FOUND)
   ENDIF( QT_QTCORE_INCLUDE_DIR AND NOT QT_INCLUDE_DIR)
 
   IF( NOT QT_INCLUDE_DIR)
-    IF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
+    IF(Qt4_FIND_REQUIRED)
       MESSAGE( FATAL_ERROR "Could NOT find QtGlobal header")
-    ENDIF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
+    ENDIF(Qt4_FIND_REQUIRED)
   ENDIF( NOT QT_INCLUDE_DIR)
 
   #############################################
@@ -511,10 +525,6 @@ IF (QT4_QMAKE_FOUND)
   SET(CMAKE_REQUIRED_FLAGS    ${CMAKE_REQUIRED_FLAGS_SAVE})
   #
   #############################################
-
-  IF (QT_USE_FRAMEWORKS)
-    SET(QT_DEFINITIONS ${QT_DEFINITIONS} -F${QT_LIBRARY_DIR} -L${QT_LIBRARY_DIR} )
-  ENDIF (QT_USE_FRAMEWORKS)
 
   # Set QT_QT3SUPPORT_INCLUDE_DIR
   FIND_PATH(QT_QT3SUPPORT_INCLUDE_DIR Qt3Support
@@ -771,9 +781,9 @@ IF (QT4_QMAKE_FOUND)
       ENDIF(EXISTS ${QT_LIBRARY_DIR}/libqtmain.a)
     ENDIF(QT_LIBRARY_DIR AND MSVC)
 
-    IF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
+    IF(Qt4_FIND_REQUIRED)
       MESSAGE( FATAL_ERROR "Could NOT find QtCore. Check ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log for more details.")
-    ENDIF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
+    ENDIF(Qt4_FIND_REQUIRED)
   ENDIF( NOT QT_QTCORE_LIBRARY_DEBUG AND NOT QT_QTCORE_LIBRARY_RELEASE )
 
   # Set QT_QTASSISTANT_LIBRARY
@@ -1028,18 +1038,27 @@ IF (QT4_QMAKE_FOUND)
     SET(${outfile} ${outpath}/${prefix}${_outfile}.${ext})
   ENDMACRO (QT4_MAKE_OUTPUT_FILE )
 
-  MACRO (QT4_GET_MOC_INC_DIRS _moc_INC_DIRS)
-     SET(${_moc_INC_DIRS})
+  MACRO (QT4_GET_MOC_FLAGS _moc_flags)
+     SET(${_moc_flags})
      GET_DIRECTORY_PROPERTY(_inc_DIRS INCLUDE_DIRECTORIES)
 
      FOREACH(_current ${_inc_DIRS})
-        SET(${_moc_INC_DIRS} ${${_moc_INC_DIRS}} "-I" ${_current})
+        SET(${_moc_flags} ${${_moc_flags}} "-I${_current}")
      ENDFOREACH(_current ${_inc_DIRS})
+     
+     GET_DIRECTORY_PROPERTY(_defines COMPILE_DEFINITIONS)
+     FOREACH(_current ${_defines})
+        SET(${_moc_flags} ${${_moc_flags}} "-D${_current}")
+     ENDFOREACH(_current ${_defines})
 
-  ENDMACRO(QT4_GET_MOC_INC_DIRS)
+     IF(Q_WS_WIN)
+       SET(${_moc_flags} ${${_moc_flags}} -DWIN32)
+     ENDIF(Q_WS_WIN)
+
+  ENDMACRO(QT4_GET_MOC_FLAGS)
 
   # helper macro to set up a moc rule
-  MACRO (QT4_CREATE_MOC_COMMAND infile outfile moc_includes moc_options)
+  MACRO (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options)
     # For Windows, create a parameters file to work around command line length limit
     IF (WIN32)
       # Pass the parameters in a file.  Set the working directory to
@@ -1053,7 +1072,7 @@ IF (QT4_QMAKE_FOUND)
         SET(_moc_working_dir WORKING_DIRECTORY ${_moc_outfile_dir})
       ENDIF(_moc_outfile_dir)
       SET (_moc_parameters_file ${outfile}_parameters)
-      SET (_moc_parameters ${moc_includes} ${moc_options} -o "${outfile}" "${infile}")
+      SET (_moc_parameters ${moc_flags} ${moc_options} -o "${outfile}" "${infile}")
       FILE (REMOVE ${_moc_parameters_file})
       FOREACH(arg ${_moc_parameters})
         FILE (APPEND ${_moc_parameters_file} "${arg}\n")
@@ -1066,16 +1085,16 @@ IF (QT4_QMAKE_FOUND)
     ELSE (WIN32)     
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
                          COMMAND ${QT_MOC_EXECUTABLE}
-                         ARGS ${moc_includes} ${moc_options} -o ${outfile} ${infile}
+                         ARGS ${moc_flags} ${moc_options} -o ${outfile} ${infile}
                          DEPENDS ${infile})     
     ENDIF (WIN32)
   ENDMACRO (QT4_CREATE_MOC_COMMAND)
 
   
   MACRO (QT4_GENERATE_MOC infile outfile )
-     QT4_GET_MOC_INC_DIRS(moc_includes)
+     QT4_GET_MOC_FLAGS(moc_flags)
      GET_FILENAME_COMPONENT(abs_infile ${infile} ABSOLUTE)
-     QT4_CREATE_MOC_COMMAND(${abs_infile} ${outfile} "${moc_includes}" "")
+     QT4_CREATE_MOC_COMMAND(${abs_infile} ${outfile} "${moc_flags}" "")
      SET_SOURCE_FILES_PROPERTIES(${outfile} PROPERTIES SKIP_AUTOMOC TRUE)  # dont run automoc on this file
   ENDMACRO (QT4_GENERATE_MOC)
 
@@ -1084,13 +1103,13 @@ IF (QT4_QMAKE_FOUND)
 
   MACRO (QT4_WRAP_CPP outfiles )
     # get include dirs
-    QT4_GET_MOC_INC_DIRS(moc_includes)
+    QT4_GET_MOC_FLAGS(moc_flags)
     QT4_EXTRACT_OPTIONS(moc_files moc_options ${ARGN})
 
     FOREACH (it ${moc_files})
       GET_FILENAME_COMPONENT(it ${it} ABSOLUTE)
       QT4_MAKE_OUTPUT_FILE(${it} moc_ cxx outfile)
-      QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_includes}" "${moc_options}")
+      QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_flags}" "${moc_options}")
       SET(${outfiles} ${${outfiles}} ${outfile})
     ENDFOREACH(it)
 
@@ -1234,7 +1253,7 @@ IF (QT4_QMAKE_FOUND)
   ENDMACRO(QT4_ADD_DBUS_ADAPTOR)
 
    MACRO(QT4_AUTOMOC)
-      QT4_GET_MOC_INC_DIRS(_moc_INCS)
+      QT4_GET_MOC_FLAGS(_moc_INCS)
 
       SET(_matching_FILES )
       FOREACH (_current_FILE ${ARGN})

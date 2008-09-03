@@ -1,9 +1,51 @@
+Changes in CMake 2.6.2 RC 2
+- allow tool chains to limit object path length
+- add info.plist to frameworks
+- better preservation of user link lines
+- add a get command for cmake policies
+- support for imported libraries of unknown type
+- support link interface in target_link_libraries
+- Do not hang when select lies
+- .m compiled with gcc and g++ on mac
+- Fix issue when application bundle dir is removed cmake 
+  needs to re-run automatically
+- Report an error when configure has one error
+- Fix bug where -E commands stole command line options
+- Fix infinite recursion bug with try-compile and change of compilers
+- Fix delete and backspace in ccmake
+- Fix coverage not to follow symlinks
+- Add more possible languages for NSIS in cpack
+- FindQt4.cmake fix bug #7433, add documentation that 
+  directories also can be specified to update the translation files.
+- Add standard arg handling to FindPHP4.cmake
+- Add X11R6 to search path for FindOpenGL
+- update cmake-syntax.vim to have more keywords
+- BUG: fix #7477, set VERBOSE=1 in the kdevelop setting for
+  the environment, not together with the make executable
+- UsePkgConfig.cmake - clean up, add a status message in case 
+  pkgconfig didn't find the package, sync with kde
+- FindX11 look in more places
+- FindTIFF look for more names
+- FindQt3, make sure qt4 is not found and some style stuff
+- FindPNG add more names of linpng (sync with the KDE version)
+- FindKDE3/KDE4 sanity checks on qt versions found
+- FindLibXMl2 also search for xmllint, which comes with libxml2 
+  (sync with FindLibXml2.cmake from KDE)
+- Fix sizeof, and other compiler INFO string checks with 
+  GNU linker's --gc-sections
+- Fix bogus dependency on executable targets when a linked library 
+  happended to match the name of an executable target
+- Improve readability of circular depends error
+- Fix crash on circular target dependencies
+- find_package now knows about lib64 paths
+- Fix gentoo elf security issue with RPATH and RUNPATH
+
 Changes in CMake 2.6.2 RC 1
 - Fix abort in eclipse generator with empty EXECUTABLE_OUTPUT_PATH
 - Fix FindKDE3.cmake syntax error
 - Fix custom command output by relative path not always working
 - Fix bug, Do not convert RPATH entries to full path.
-- Allow for "$ORIGIN" into the RPATH
+- Allow for "$ORIGIN" into the RPATH>
 - Allow for static libraries with lots of objects using archive append
 - Fix documentation for FindImageMagick.cmake
 - Fix link error with MS compiler and comdef

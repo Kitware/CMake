@@ -12,7 +12,7 @@ SET_SOURCE_FILES_PROPERTIES(
 
 SET_SOURCE_FILES_PROPERTIES(
   "${BundleTest_SOURCE_DIR}/SomeRandomFile.txt"
-  "${CMake_SOURCE_DIR}/ChangeLog.txt"
+  "${BundleTest_SOURCE_DIR}/../../ChangeLog.txt"
   PROPERTIES
   MACOSX_PACKAGE_LOCATION MacOS
   )
@@ -21,11 +21,11 @@ ADD_EXECUTABLE(SecondBundle
   MACOSX_BUNDLE
   "${BundleTest_SOURCE_DIR}/BundleTest.cxx"
   "${BundleTest_SOURCE_DIR}/SomeRandomFile.txt"
-  "${CMake_SOURCE_DIR}/ChangeLog.txt"
+  "${BundleTest_SOURCE_DIR}/../../ChangeLog.txt"
   "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
   )
 TARGET_LINK_LIBRARIES(SecondBundle BundleTestLib)
- 
+
 # Test bundle installation.
 INSTALL(TARGETS SecondBundle DESTINATION Applications)
 

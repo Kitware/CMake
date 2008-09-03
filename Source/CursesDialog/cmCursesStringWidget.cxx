@@ -170,12 +170,19 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
       {
       form_driver(form, REQ_END_FIELD);
       }
-    else if ( key == ctrl('d') || key == 127 || 
-              key == KEY_BACKSPACE || key == KEY_DC )
+    else if ( key == 127 || 
+              key == KEY_BACKSPACE )
       {
       if ( form->curcol > 0 )
         {
         form_driver(form, REQ_DEL_PREV);
+        }
+      }
+    else if ( key == ctrl('d') ||key == KEY_DC )
+      {
+      if ( form->curcol > 0 )
+        {
+        form_driver(form, REQ_DEL_CHAR);
         }
       }
     else

@@ -68,6 +68,12 @@ bool cmAddLibraryCommand
       type = cmTarget::MODULE_LIBRARY;
       haveSpecifiedType = true;
       }
+    else if(libType == "UNKNOWN")
+      {
+      ++s;
+      type = cmTarget::UNKNOWN_LIBRARY;
+      haveSpecifiedType = true;
+      }
     else if(*s == "EXCLUDE_FROM_ALL")
       {
       ++s;
@@ -124,6 +130,16 @@ bool cmAddLibraryCommand
 
     // Create the imported target.
     this->Makefile->AddImportedTarget(libName.c_str(), type);
+    return true;
+    }
+
+  // A non-imported target may not have UNKNOWN type.
+  if(type == cmTarget::UNKNOWN_LIBRARY)
+    {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "The UNKNOWN library type may be used only for IMPORTED libraries."
+      );
     return true;
     }
 

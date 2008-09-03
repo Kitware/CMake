@@ -63,6 +63,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->NoBuilds = false;
   this->NoModule = false;
   this->DebugMode = false;
+  this->UseLib64Paths = false;
   this->VersionMajor = 0;
   this->VersionMinor = 0;
   this->VersionPatch = 0;
@@ -297,6 +298,18 @@ bool cmFindPackageCommand
 
   // Check for debug mode.
   this->DebugMode = this->Makefile->IsOn("CMAKE_FIND_DEBUG_MODE");
+
+  // Lookup whether lib64 paths should be used.
+  if(const char* sizeof_dptr =
+     this->Makefile->GetDefinition("CMAKE_SIZEOF_VOID_P"))
+    {
+    if(atoi(sizeof_dptr) == 8 &&
+       this->Makefile->GetCMakeInstance()
+       ->GetPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
+      {
+      this->UseLib64Paths = true;
+      }
+    }
 
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
@@ -1457,16 +1470,12 @@ private:
 class cmFileListGeneratorEnumerate: public cmFileListGeneratorBase
 {
 public:
-  cmFileListGeneratorEnumerate(const char* p1, const char* p2):
-    cmFileListGeneratorBase()
-    {
-    this->Vector.push_back(p1);
-    this->Vector.push_back(p2);
-    }
+  cmFileListGeneratorEnumerate(std::vector<std::string> const& v):
+    cmFileListGeneratorBase(), Vector(v) {}
   cmFileListGeneratorEnumerate(cmFileListGeneratorEnumerate const& r):
     cmFileListGeneratorBase(), Vector(r.Vector) {}
 private:
-  std::vector<std::string> Vector;
+  std::vector<std::string> const& Vector;
   virtual bool Search(std::string const& parent, cmFileList& lister)
     {
     for(std::vector<std::string>::const_iterator i = this->Vector.begin();
@@ -1716,12 +1725,21 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
   }
 
+  // Construct list of common install locations (lib and share).
+  std::vector<std::string> common;
+  if(this->UseLib64Paths)
+    {
+    common.push_back("lib64");
+    }
+  common.push_back("lib");
+  common.push_back("share");
+
   //  PREFIX/(share|lib)/(Foo|foo|FOO).*/
   {
   cmFindPackageFileList lister(this);
   lister
     / cmFileListGeneratorFixed(prefix)
-    / cmFileListGeneratorEnumerate("lib", "share")
+    / cmFileListGeneratorEnumerate(common)
     / cmFileListGeneratorProject(this->Names);
   if(lister.Search())
     {
@@ -1734,7 +1752,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   cmFindPackageFileList lister(this);
   lister
     / cmFileListGeneratorFixed(prefix)
-    / cmFileListGeneratorEnumerate("lib", "share")
+    / cmFileListGeneratorEnumerate(common)
     / cmFileListGeneratorProject(this->Names)
     / cmFileListGeneratorCaseInsensitive("cmake");
   if(lister.Search())

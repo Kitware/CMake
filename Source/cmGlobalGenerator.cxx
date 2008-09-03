@@ -764,7 +764,12 @@ void cmGlobalGenerator::Configure()
 
   if ( !this->CMakeInstance->GetScriptMode() )
     {
-    this->CMakeInstance->UpdateProgress("Configuring done", -1);
+    const char* msg = "Configuring done";
+    if(cmSystemTools::GetErrorOccuredFlag())
+      {
+      msg = "Configuring incomplete, errors occurred!";
+      }
+    this->CMakeInstance->UpdateProgress(msg, -1);
     }
 }
 
@@ -860,7 +865,10 @@ void cmGlobalGenerator::Generate()
   // Compute the inter-target dependencies.
   {
   cmComputeTargetDepends ctd(this);
-  ctd.Compute();
+  if(!ctd.Compute())
+    {
+    return;
+    }
   std::vector<cmTarget*> const& targets = ctd.GetTargets();
   for(std::vector<cmTarget*>::const_iterator ti = targets.begin();
       ti != targets.end(); ++ti)

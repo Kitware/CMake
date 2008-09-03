@@ -20,6 +20,19 @@
 #  QT_WRAP_CPP, set true if QT_MOC_EXECUTABLE is found
 #  QT_WRAP_UI set true if QT_UIC_EXECUTABLE is found
 
+# If Qt4 has already been found, fail.
+IF(QT4_FOUND)
+  IF(Qt3_FIND_REQUIRED)
+    MESSAGE( FATAL_ERROR "Qt3 and Qt4 cannot be used together in one project.")
+  ELSE(Qt3_FIND_REQUIRED)
+    IF(NOT Qt3_FIND_QUIETLY)
+      MESSAGE( STATUS    "Qt3 and Qt4 cannot be used together in one project.")
+    ENDIF(NOT Qt3_FIND_QUIETLY)
+    RETURN()
+  ENDIF(Qt3_FIND_REQUIRED)
+ENDIF(QT4_FOUND)
+
+
 FILE(GLOB GLOB_PATHS_BIN /usr/lib/qt-3*/bin/)
 FIND_PATH(QT_INCLUDE_DIR qt.h
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
@@ -34,13 +47,12 @@ FIND_PATH(QT_INCLUDE_DIR qt.h
   /usr/share/qt3/include
   C:/Progra~1/qt/include
   /usr/include/qt3
-  /usr/X11R6/include
   )
 
 # if qglobal.h is not in the qt_include_dir then set
 # QT_INCLUDE_DIR to NOTFOUND
 IF(NOT EXISTS ${QT_INCLUDE_DIR}/qglobal.h)
-  SET(QT_INCLUDE_DIR QT_INCLUDE_DIR-NOTFOUND CACHE PATH "path to qt3 include directory" FORCE)
+  SET(QT_INCLUDE_DIR QT_INCLUDE_DIR-NOTFOUND CACHE PATH "path to Qt3 include directory" FORCE)
 ENDIF(NOT EXISTS ${QT_INCLUDE_DIR}/qglobal.h)
 
 IF(QT_INCLUDE_DIR)
@@ -52,7 +64,6 @@ IF(QT_INCLUDE_DIR)
   # Under windows the qt library (MSVC) has the format qt-mtXYZ where XYZ is the
   # version X.Y.Z, so we need to remove the dots from version
   STRING(REGEX REPLACE "\\." "" qt_version_str_lib "${qt_version_str}")
-ELSE(QT_INCLUDE_DIR)
 ENDIF(QT_INCLUDE_DIR)
 
 FILE(GLOB GLOB_PATHS_LIB /usr/lib/qt-3*/lib/)
@@ -73,7 +84,6 @@ IF (QT_MT_REQUIRED)
     /usr/lib/qt3/lib64
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
-    /usr/X11R6/lib
     )
 
 ELSE (QT_MT_REQUIRED)
@@ -94,13 +104,8 @@ ELSE (QT_MT_REQUIRED)
     /usr/lib/qt3/lib64
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
-    /usr/X11R6/lib
     )
 ENDIF (QT_MT_REQUIRED)
-
-IF(QT_QT_LIBRARY)
-ELSE(QT_QT_LIBRARY)
-ENDIF(QT_QT_LIBRARY)
 
 
 FIND_LIBRARY(QT_QASSISTANTCLIENT_LIBRARY
@@ -116,7 +121,6 @@ FIND_LIBRARY(QT_QASSISTANTCLIENT_LIBRARY
   /usr/lib/qt3/lib64
   /usr/share/qt3/lib
   C:/Progra~1/qt/lib
-  /usr/X11R6/lib
   )
 
 # qt 3 should prefer QTDIR over the PATH
@@ -140,7 +144,6 @@ FIND_PROGRAM(QT_MOC_EXECUTABLE
 
 IF(QT_MOC_EXECUTABLE)
   SET ( QT_WRAP_CPP "YES")
-ELSE(QT_MOC_EXECUTABLE)
 ENDIF(QT_MOC_EXECUTABLE)
 
 # qt 3 should prefer QTDIR over the PATH
@@ -162,7 +165,6 @@ FIND_PROGRAM(QT_UIC_EXECUTABLE uic
 
 IF(QT_UIC_EXECUTABLE)
   SET ( QT_WRAP_UI "YES")
-ELSE(QT_UIC_EXECUTABLE)
 ENDIF(QT_UIC_EXECUTABLE)
 
 IF (WIN32)
@@ -194,28 +196,28 @@ IF (QT_MIN_VERSION)
   STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
 
   # req = "6.5.4", qt = "3.2.1"
-  macro(error_message msg)
+  MACRO(error_message msg)
     IF(QT3_REQUIRED)
       MESSAGE( FATAL_ERROR ${msg})
     ELSE(QT3_REQUIRED)
       MESSAGE( STATUS ${msg})
     ENDIF(QT3_REQUIRED)
-  endmacro(error_message)
+  ENDMACRO(error_message)
 
   IF (req_qt_major_vers GREATER qt_major_vers)                  # (6 > 3) ?
-    error_message(  "Qt major version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")            # yes
+    ERROR_MESSAGE(  "Qt major version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")            # yes
   ELSE  (req_qt_major_vers GREATER qt_major_vers)               # no
     IF (req_qt_major_vers LESS qt_major_vers)                  # (6 < 3) ?
       SET( QT_VERSION_BIG_ENOUGH "YES" )                      # yes
     ELSE (req_qt_major_vers LESS qt_major_vers)                # ( 6==3) ?
       IF (req_qt_minor_vers GREATER qt_minor_vers)            # (5>2) ?
-        error_message(  "Qt minor version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")      # yes
+        ERROR_MESSAGE(  "Qt minor version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")      # yes
       ELSE (req_qt_minor_vers GREATER qt_minor_vers)          # no
         IF (req_qt_minor_vers LESS qt_minor_vers)            # (5<2) ?
           SET( QT_VERSION_BIG_ENOUGH "YES" )                # yes
         ELSE (req_qt_minor_vers LESS qt_minor_vers)          # (5==2)
           IF (req_qt_patch_vers GREATER qt_patch_vers)      # (4>1) ?
-            error_message(  "Qt patch level not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")  # yes
+            ERROR_MESSAGE(  "Qt patch level not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")  # yes
           ELSE (req_qt_patch_vers GREATER qt_patch_vers)    # (4>1) ?
             SET( QT_VERSION_BIG_ENOUGH "YES" )             # yes
           ENDIF (req_qt_patch_vers GREATER qt_patch_vers)   # (4>1) ?
@@ -226,11 +228,9 @@ IF (QT_MIN_VERSION)
 ENDIF (QT_MIN_VERSION)
 
 # if the include a library are found then we have it
-IF(QT_INCLUDE_DIR)
-  IF(QT_QT_LIBRARY)
-    SET( QT_FOUND "YES" )
-  ENDIF(QT_QT_LIBRARY)
-ENDIF(QT_INCLUDE_DIR)
+IF(QT_INCLUDE_DIR AND QT_QT_LIBRARY)
+  SET( QT_FOUND "YES" )
+ENDIF(QT_INCLUDE_DIR AND QT_QT_LIBRARY)
 
 IF(QT_FOUND)
   SET( QT_LIBRARIES ${QT_LIBRARIES} ${QT_QT_LIBRARY} )
@@ -293,18 +293,14 @@ IF("${QTVERSION_MOC}" MATCHES ".* 3..*")
 ENDIF("${QTVERSION_MOC}" MATCHES ".* 3..*")
 
 SET(QT_WRAP_CPP FALSE)
-IF (QT_MOC_EXECUTABLE)
-  IF(_QT_MOC_VERSION_3)
-    SET ( QT_WRAP_CPP TRUE)
-  ENDIF(_QT_MOC_VERSION_3)
-ENDIF (QT_MOC_EXECUTABLE)
+IF (QT_MOC_EXECUTABLE AND _QT_MOC_VERSION_3)
+  SET ( QT_WRAP_CPP TRUE)
+ENDIF (QT_MOC_EXECUTABLE AND _QT_MOC_VERSION_3)
 
 SET(QT_WRAP_UI FALSE)
-IF (QT_UIC_EXECUTABLE)
-  IF(_QT_UIC_VERSION_3)
-    SET ( QT_WRAP_UI TRUE)
-  ENDIF(_QT_UIC_VERSION_3)
-ENDIF (QT_UIC_EXECUTABLE)
+IF (QT_UIC_EXECUTABLE AND _QT_UIC_VERSION_3)
+  SET ( QT_WRAP_UI TRUE)
+ENDIF (QT_UIC_EXECUTABLE AND _QT_UIC_VERSION_3)
 
 MARK_AS_ADVANCED(
   QT_INCLUDE_DIR

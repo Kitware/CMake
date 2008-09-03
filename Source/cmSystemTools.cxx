@@ -26,6 +26,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include <cmsys/Terminal.h>
 #endif
+#include <cmsys/stl/algorithm>
 
 #if defined(_WIN32)
 # include <windows.h>
@@ -1392,7 +1393,9 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
     }
   //std::string ext = cmSystemTools::LowerCase(cext);
   std::string ext = cext;
-  if ( ext == "c" || ext == ".c" ) { return cmSystemTools::C_FILE_FORMAT; }
+  if ( ext == "c" || ext == ".c" || 
+       ext == "m" || ext == ".m" 
+    ) { return cmSystemTools::C_FILE_FORMAT; }
   if ( 
     ext == "C" || ext == ".C" ||
     ext == "M" || ext == ".M" ||
@@ -1400,7 +1403,6 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
     ext == "cc" || ext == ".cc" ||
     ext == "cpp" || ext == ".cpp" ||
     ext == "cxx" || ext == ".cxx" ||
-    ext == "m" || ext == ".m" ||
     ext == "mm" || ext == ".mm"
     ) { return cmSystemTools::CXX_FILE_FORMAT; }
   if ( 
@@ -2328,6 +2330,16 @@ std::string::size_type cmSystemToolsFindRPath(std::string const& have,
 }
 #endif
 
+#if defined(CMAKE_USE_ELF_PARSER)
+struct cmSystemToolsRPathInfo
+{
+  unsigned long Position;
+  unsigned long Size;
+  std::string Name;
+  std::string Value;
+};
+#endif
+
 //----------------------------------------------------------------------------
 bool cmSystemTools::ChangeRPath(std::string const& file,
                                 std::string const& oldRPath,
@@ -2340,37 +2352,71 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
     {
     *changed = false;
     }
-  unsigned long rpathPosition = 0;
-  unsigned long rpathSize = 0;
-  std::string rpathPrefix;
-  std::string rpathSuffix;
+  int rp_count = 0;
+  cmSystemToolsRPathInfo rp[2];
   {
   // Parse the ELF binary.
   cmELF elf(file.c_str());
 
-  // Get the RPATH or RUNPATH entry from it.
-  cmELF::StringEntry const* se = elf.GetRPath();
-  if(!se)
+  // Get the RPATH and RUNPATH entries from it.
+  int se_count = 0;
+  cmELF::StringEntry const* se[2] = {0, 0};
+  const char* se_name[2] = {0, 0};
+  if(cmELF::StringEntry const* se_rpath = elf.GetRPath())
     {
-    se = elf.GetRunPath();
+    se[se_count] = se_rpath;
+    se_name[se_count] = "RPATH";
+    ++se_count;
+    }
+  if(cmELF::StringEntry const* se_runpath = elf.GetRunPath())
+    {
+    se[se_count] = se_runpath;
+    se_name[se_count] = "RUNPATH";
+    ++se_count;
+    }
+  if(se_count == 0)
+    {
+    if(newRPath.empty())
+      {
+      // The new rpath is empty and there is no rpath anyway so it is
+      // okay.
+      return true;
+      }
+    else
+      {
+      if(emsg)
+        {
+        *emsg = "No valid ELF RPATH or RUNPATH entry exists in the file; ";
+        *emsg += elf.GetErrorMessage();
+        }
+      return false;
+      }
     }
 
-  if(se)
+  for(int i=0; i < se_count; ++i)
     {
+    // If both RPATH and RUNPATH refer to the same string literal it
+    // needs to be changed only once.
+    if(rp_count && rp[0].Position == se[i]->Position)
+      {
+      continue;
+      }
+
     // Make sure the current rpath contains the old rpath.
-    std::string::size_type pos = cmSystemToolsFindRPath(se->Value, oldRPath);
+    std::string::size_type pos =
+      cmSystemToolsFindRPath(se[i]->Value, oldRPath);
     if(pos == std::string::npos)
       {
       // If it contains the new rpath instead then it is okay.
-      if(cmSystemToolsFindRPath(se->Value, newRPath) != std::string::npos)
+      if(cmSystemToolsFindRPath(se[i]->Value, newRPath) != std::string::npos)
         {
-        return true;
+        continue;
         }
       if(emsg)
         {
         cmOStringStream e;
-        e << "The current RPATH is:\n"
-          << "  " << se->Value << "\n"
+        e << "The current " << se_name[i] << " is:\n"
+          << "  " << se[i]->Value << "\n"
           << "which does not contain:\n"
           << "  " << oldRPath << "\n"
           << "as was expected.";
@@ -2379,47 +2425,44 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       return false;
       }
 
-    // Store information about the entry.
-    rpathPosition = se->Position;
-    rpathSize = se->Size;
+    // Store information about the entry in the file.
+    rp[rp_count].Position = se[i]->Position;
+    rp[rp_count].Size = se[i]->Size;
+    rp[rp_count].Name = se_name[i];
 
-    // Store the part of the path we must preserve.
-    rpathPrefix = se->Value.substr(0, pos);
-    rpathSuffix = se->Value.substr(pos+oldRPath.length(), oldRPath.npos);
-    }
-  else if(newRPath.empty())
-    {
-    // The new rpath is empty and there is no rpath anyway so it is
-    // okay.
-    return true;
-    }
-  else
-    {
-    if(emsg)
+    // Construct the new value which preserves the part of the path
+    // not being changed.
+    rp[rp_count].Value = se[i]->Value.substr(0, pos);
+    rp[rp_count].Value += newRPath;
+    rp[rp_count].Value += se[i]->Value.substr(pos+oldRPath.length(),
+                                              oldRPath.npos);
+
+    // Make sure there is enough room to store the new rpath and at
+    // least one null terminator.
+    if(rp[rp_count].Size < rp[rp_count].Value.length()+1)
       {
-      *emsg = "No valid ELF RPATH entry exists in the file; ";
-      *emsg += elf.GetErrorMessage();
+      if(emsg)
+        {
+        *emsg = "The replacement path is too long for the ";
+        *emsg += se_name[i];
+        *emsg += " entry.";
+        }
+      return false;
       }
-    return false;
+
+    // This entry is ready for update.
+    ++rp_count;
     }
   }
-  // Compute the full new rpath.
-  std::string rpath = rpathPrefix;
-  rpath += newRPath;
-  rpath += rpathSuffix;
 
-  // Make sure there is enough room to store the new rpath and at
-  // least one null terminator.
-  if(rpathSize < rpath.length()+1)
+  // If no runtime path needs to be changed, we are done.
+  if(rp_count == 0)
     {
-    if(emsg)
-      {
-      *emsg = "The replacement RPATH is too long.";
-      }
-    return false;
+    return true;
     }
 
-  // Open the file for update and seek to the RPATH position.
+  {
+  // Open the file for update.
   std::ofstream f(file.c_str(),
                   std::ios::in | std::ios::out | std::ios::binary);
   if(!f)
@@ -2430,40 +2473,50 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
       }
     return false;
     }
-  if(!f.seekp(rpathPosition))
-    {
-    if(emsg)
-      {
-      *emsg = "Error seeking to RPATH position.";
-      }
-    return false;
-    }
 
-  // Write the new rpath.  Follow it with enough null terminators to
-  // fill the string table entry.
-  f << rpath;
-  for(unsigned long i=rpath.length(); i < rpathSize; ++i)
+  // Store the new RPATH and RUNPATH strings.
+  for(int i=0; i < rp_count; ++i)
     {
-    f << '\0';
-    }
+    // Seek to the RPATH position.
+    if(!f.seekp(rp[i].Position))
+      {
+      if(emsg)
+        {
+        *emsg = "Error seeking to ";
+        *emsg += rp[i].Name;
+        *emsg += " position.";
+        }
+      return false;
+      }
 
-  // Make sure everything was okay.
-  if(f)
-    {
-    if(changed)
+    // Write the new rpath.  Follow it with enough null terminators to
+    // fill the string table entry.
+    f << rp[i].Value;
+    for(unsigned long j=rp[i].Value.length(); j < rp[i].Size; ++j)
       {
-      *changed = true;
+      f << '\0';
       }
-    return true;
-    }
-  else
-    {
-    if(emsg)
+
+    // Make sure it wrote correctly.
+    if(!f)
       {
-      *emsg = "Error writing the new rpath to the file.";
+      if(emsg)
+        {
+        *emsg = "Error writing the new ";
+        *emsg += rp[i].Name;
+        *emsg += " string to the file.";
+        }
+      return false;
       }
-    return false;
     }
+  }
+
+  // Everything was updated successfully.
+  if(changed)
+    {
+    *changed = true;
+    }
+  return true;
 #else
   (void)file;
   (void)oldRPath;
@@ -2475,57 +2528,95 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 }
 
 //----------------------------------------------------------------------------
-bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg)
+bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
+                                bool* removed)
 {
 #if defined(CMAKE_USE_ELF_PARSER)
-  unsigned long rpathPosition = 0;
-  unsigned long rpathSize = 0;
-  unsigned long rpathEntryPosition = 0;
+  if(removed)
+    {
+    *removed = false;
+    }
+  int zeroCount = 0;
+  unsigned long zeroPosition[2] = {0,0};
+  unsigned long zeroSize[2] = {0,0};
+  unsigned long bytesBegin = 0;
   std::vector<char> bytes;
   {
   // Parse the ELF binary.
   cmELF elf(file.c_str());
 
-  // Get the RPATH or RUNPATH entry from it.
-  cmELF::StringEntry const* se = elf.GetRPath();
-  if(!se)
+  // Get the RPATH and RUNPATH entries from it and sort them by index
+  // in the dynamic section header.
+  int se_count = 0;
+  cmELF::StringEntry const* se[2] = {0, 0};
+  if(cmELF::StringEntry const* se_rpath = elf.GetRPath())
     {
-    se = elf.GetRunPath();
+    se[se_count++] = se_rpath;
+    }
+  if(cmELF::StringEntry const* se_runpath = elf.GetRunPath())
+    {
+    se[se_count++] = se_runpath;
+    }
+  if(se_count == 0)
+    {
+    // There is no RPATH or RUNPATH anyway.
+    return true;
+    }
+  if(se_count == 2 && se[1]->IndexInSection < se[0]->IndexInSection)
+    {
+    cmsys_stl::swap(se[0], se[1]);
     }
 
-  if(se)
+  // Get the size of the dynamic section header.
+  unsigned int count = elf.GetDynamicEntryCount();
+  if(count == 0)
     {
-    // Store information about the entry.
-    rpathPosition = se->Position;
-    rpathSize = se->Size;
-    rpathEntryPosition = elf.GetDynamicEntryPosition(se->IndexInSection);
-
-    // Get the file range containing the rest of the DYNAMIC table
-    // after the RPATH entry.
-    unsigned long nextEntryPosition =
-      elf.GetDynamicEntryPosition(se->IndexInSection+1);
-    unsigned int count = elf.GetDynamicEntryCount();
-    if(count == 0)
+    // This should happen only for invalid ELF files where a DT_NULL
+    // appears before the end of the table.
+    if(emsg)
       {
-      // This should happen only for invalid ELF files where a DT_NULL
-      // appears before the end of the table.
-      if(emsg)
-        {
-        *emsg = "DYNAMIC section contains a DT_NULL before the end.";
-        }
-      return false;
+      *emsg = "DYNAMIC section contains a DT_NULL before the end.";
       }
-    unsigned long nullEntryPosition = elf.GetDynamicEntryPosition(count);
+    return false;
+    }
 
-    // Allocate and fill a buffer with zeros.
-    bytes.resize(nullEntryPosition - rpathEntryPosition, 0);
+  // Save information about the string entries to be zeroed.
+  zeroCount = se_count;
+  for(int i=0; i < se_count; ++i)
+    {
+    zeroPosition[i] = se[i]->Position;
+    zeroSize[i] = se[i]->Size;
+    }
 
-    // Read the part of the DYNAMIC section header that will move.
-    // The remainder of the buffer will be left with zeros which
-    // represent a DT_NULL entry.
-    if(!elf.ReadBytes(nextEntryPosition,
-                      nullEntryPosition - nextEntryPosition,
-                      &bytes[0]))
+  // Get the range of file positions corresponding to each entry and
+  // the rest of the table after them.
+  unsigned long entryBegin[3] = {0,0,0};
+  unsigned long entryEnd[2] = {0,0};
+  for(int i=0; i < se_count; ++i)
+    {
+    entryBegin[i] = elf.GetDynamicEntryPosition(se[i]->IndexInSection);
+    entryEnd[i] = elf.GetDynamicEntryPosition(se[i]->IndexInSection+1);
+    }
+  entryBegin[se_count] = elf.GetDynamicEntryPosition(count);
+
+  // The data are to be written over the old table entries starting at
+  // the first one being removed.
+  bytesBegin = entryBegin[0];
+  unsigned long bytesEnd = entryBegin[se_count];
+
+  // Allocate a buffer to hold the part of the file to be written.
+  // Initialize it with zeros.
+  bytes.resize(bytesEnd - bytesBegin, 0);
+
+  // Read the part of the DYNAMIC section header that will move.
+  // The remainder of the buffer will be left with zeros which
+  // represent a DT_NULL entry.
+  char* data = &bytes[0];
+  for(int i=0; i < se_count; ++i)
+    {
+    // Read data between the entries being removed.
+    unsigned long sz = entryBegin[i+1] - entryEnd[i];
+    if(sz > 0 && !elf.ReadBytes(entryEnd[i], sz, data))
       {
       if(emsg)
         {
@@ -2533,11 +2624,7 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg)
         }
       return false;
       }
-    }
-  else
-    {
-    // There is no RPATH or RUNPATH anyway.
-    return true;
+    data += sz;
     }
   }
 
@@ -2554,7 +2641,7 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg)
     }
 
   // Write the new DYNAMIC table header.
-  if(!f.seekp(rpathEntryPosition))
+  if(!f.seekp(bytesBegin))
     {
     if(emsg)
       {
@@ -2571,36 +2658,41 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg)
     return false;
     }
 
-  // Fill the RPATH string with zero bytes.
-  if(!f.seekp(rpathPosition))
+  // Fill the RPATH and RUNPATH strings with zero bytes.
+  for(int i=0; i < zeroCount; ++i)
     {
-    if(emsg)
+    if(!f.seekp(zeroPosition[i]))
       {
-      *emsg = "Error seeking to RPATH position.";
+      if(emsg)
+        {
+        *emsg = "Error seeking to RPATH position.";
+        }
+      return false;
       }
-    return false;
-    }
-  for(unsigned long i=0; i < rpathSize; ++i)
-    {
-    f << '\0';
+    for(unsigned long j=0; j < zeroSize[i]; ++j)
+      {
+      f << '\0';
+      }
+    if(!f)
+      {
+      if(emsg)
+        {
+        *emsg = "Error writing the empty rpath string to the file.";
+        }
+      return false;
+      }
     }
 
-  // Make sure everything was okay.
-  if(f)
+  // Everything was updated successfully.
+  if(removed)
     {
-    return true;
+    *removed = true;
     }
-  else
-    {
-    if(emsg)
-      {
-      *emsg = "Error writing the empty rpath to the file.";
-      }
-    return false;
-    }
+  return true;
 #else
   (void)file;
   (void)emsg;
+  (void)removed;
   return false;
 #endif
 }

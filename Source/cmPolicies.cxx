@@ -347,6 +347,7 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
   this->PolicyStringMap[idString] = iD;
 }
 
+//----------------------------------------------------------------------------
 bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf, 
                                     const char *version)
 {
@@ -408,13 +409,18 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     }
 
   // now loop over all the policies and set them as appropriate
+  std::vector<cmPolicies::PolicyID> ancientPolicies;
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
     = this->Policies.begin();
   for (;i != this->Policies.end(); ++i)
   {
     if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer))
     {
-      if (!mf->SetPolicy(i->second->ID, cmPolicies::WARN))
+      if(i->second->Status == cmPolicies::REQUIRED_ALWAYS)
+      {
+        ancientPolicies.push_back(i->first);
+      }
+      else if (!mf->SetPolicy(i->second->ID, cmPolicies::WARN))
       {
         return false;
       }
@@ -427,105 +433,16 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
       }
     }
   }
-  return true;
-}
 
-// is this a valid status the listfile can set this policy to?
-bool cmPolicies::IsValidPolicyStatus(cmPolicies::PolicyID id, 
-                                     cmPolicies::PolicyStatus status)
-{
-  // if they are setting a feature to anything other than OLD or WARN and the
-  // feature is not known about then that is an error
-  if (this->Policies.find(id) == this->Policies.end())
-  {
-    if (status == cmPolicies::WARN ||
-        status == cmPolicies::OLD)
+  // Make sure the project does not use any ancient policies.
+  if(!ancientPolicies.empty())
     {
-      return true;
-    }
-    cmOStringStream error;
-    error << 
-      "Error: an attempt was made to enable the new behavior for " <<
-      "a new feature that is in a later version of CMake than "
-      "what you are runing, please upgrade to a newer version "
-      "of CMake.";
-    cmSystemTools::Error(error.str().c_str());
-    return false;  
-  }
-
-  // now we know the feature is defined, so the only issue is if someone is
-  // setting it to WARN or OLD when the feature is REQUIRED_ALWAYS
-  if ((status == cmPolicies::WARN || 
-      status == cmPolicies::OLD) && 
-      this->Policies[id]->Status == cmPolicies::REQUIRED_ALWAYS)
-  {
-    cmOStringStream error;
-    error << 
-      "Error: an attempt was made to enable the old behavior for " <<
-      "a feature that is no longer supported. The feature in " <<
-      "question is feature " <<
-      id <<
-      " which had new behavior introduced in CMake version " <<
-      this->Policies[id]->GetVersionString() <<
-      " please either update your CMakeLists files to conform to " <<
-      "the new behavior " <<
-      "or use an older version of CMake that still supports " <<
-      "the old behavior. Run cmake --help-policies " <<
-      id << " for more information.";
-    cmSystemTools::Error(error.str().c_str());
+    this->DiagnoseAncientPolicies(ancientPolicies,
+                                  majorVer, minorVer, patchVer, mf);
+    cmSystemTools::SetFatalErrorOccured();
     return false;
-  }
-  
-  return true;
-}
-
-// is this a valid status the listfile can set this policy to?
-bool cmPolicies::IsValidUsedPolicyStatus(cmPolicies::PolicyID id, 
-                                         cmPolicies::PolicyStatus status)
-{
-  // if they are setting a feature to anything other than OLD or WARN and the
-  // feature is not known about then that is an error
-  if (this->Policies.find(id) == this->Policies.end())
-  {
-    if (status == cmPolicies::WARN ||
-        status == cmPolicies::OLD)
-    {
-      return true;
     }
-    cmOStringStream error;
-    error << 
-      "Error: an attempt was made to enable the new behavior for " <<
-      "a new feature that is in a later version of CMake than "
-      "what you are runing, please upgrade to a newer version "
-      "of CMake.";
-    cmSystemTools::Error(error.str().c_str());
-    return false;  
-  }
 
-  // now we know the feature is defined, so the only issue is if someone is
-  // setting it to WARN or OLD when the feature is REQUIRED_ALWAYS
-  if ((status == cmPolicies::WARN || 
-      status == cmPolicies::OLD) && 
-      (this->Policies[id]->Status == cmPolicies::REQUIRED_ALWAYS ||
-       this->Policies[id]->Status == cmPolicies::REQUIRED_IF_USED))
-  {
-    cmOStringStream error;
-    error << 
-      "Error: an attempt was made to enable the old behavior for " <<
-      "a feature that is no longer supported. The feature in " <<
-      "question is feature " <<
-      id <<
-      " which had new behavior introduced in CMake version " <<
-      this->Policies[id]->GetVersionString() <<
-      " please either update your CMakeLists files to conform to " <<
-      "the new behavior " <<
-      "or use an older version of CMake that still supports " <<
-      "the old behavior. Run cmake --help-policies " <<
-      id << " for more information.";
-    cmSystemTools::Error(error.str().c_str());
-    return false;
-  }
-  
   return true;
 }
 
@@ -670,4 +587,49 @@ void cmPolicies::GetDocumentation(std::vector<cmDocumentationEntry>& v)
                            full.str().c_str());
     v.push_back(e);
   }
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
+{
+  std::string pid = this->GetPolicyIDString(id);
+  cmOStringStream e;
+  e << "Policy " << pid << " may not be set to OLD behavior because this "
+    << "version of CMake no longer supports it.  "
+    << "The policy was introduced in "
+    << "CMake version " << this->Policies[id]->GetVersionString()
+    << ", and use of NEW behavior is now required."
+    << "\n"
+    << "Please either update your CMakeLists.txt files to conform to "
+    << "the new behavior or use an older version of CMake that still "
+    << "supports the old behavior.  "
+    << "Run cmake --help-policy " << pid << " for more information.";
+  return e.str();
+}
+
+//----------------------------------------------------------------------------
+void
+cmPolicies::DiagnoseAncientPolicies(std::vector<PolicyID> const& ancient,
+                                    unsigned int majorVer,
+                                    unsigned int minorVer,
+                                    unsigned int patchVer,
+                                    cmMakefile* mf)
+{
+  cmOStringStream e;
+  e << "The project requests behavior compatible with CMake version \""
+    << majorVer << "." << minorVer << "." << patchVer
+    << "\", which requires OLD the behavior for some policies:\n";
+  for(std::vector<PolicyID>::const_iterator
+        i = ancient.begin(); i != ancient.end(); ++i)
+    {
+    cmPolicy const* policy = this->Policies[*i];
+    e << "  " << policy->IDString << ": " << policy->ShortDescription << "\n";
+    }
+  e << "However, this version of CMake no longer supports the OLD "
+    << "behavior for these policies.  "
+    << "Please either update your CMakeLists.txt files to conform to "
+    << "the new behavior or use an older version of CMake that still "
+    << "supports the old behavior.";
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
 }

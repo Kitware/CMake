@@ -142,6 +142,8 @@ public:
       "  if(POLICY policy-id)\n"
       "True if the given name is an existing policy "
       "(of the form CMP<NNNN>).\n"
+      "  if(TARGET target-name)\n"
+      "True if the given name is an existing target, built or imported.\n"
       "  if(EXISTS file-name)\n"
       "  if(EXISTS directory-name)\n"
       "True if the named file or directory exists.  "

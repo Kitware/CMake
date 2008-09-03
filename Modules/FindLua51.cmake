@@ -1,7 +1,7 @@
 # Locate Lua library
 # This module defines
+#  LUA51_FOUND, if false, do not try to link to Lua 
 #  LUA_LIBRARIES
-#  LUA_FOUND, if false, do not try to link to Lua 
 #  LUA_INCLUDE_DIR, where to find lua.h 
 #
 # Note that the expected include convention is

@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <Carbon/Carbon.h>
+
 int fileExists(char* filename)
 {
 #ifndef R_OK
@@ -49,6 +51,11 @@ int findBundleFile(char* exec, const char* file)
 
 int foo(char *exec)
 {
+  // Call a "Carbon" function...
+  //
+  CFBundleRef br = CFBundleGetMainBundle();
+  (void) br;
+
   int res1 = findBundleFile(exec, "Resources/randomResourceFile.plist");
   int res2 = findBundleFile(exec, "MacOS/SomeRandomFile.txt");
   int res3 = findBundleFile(exec, "MacOS/ChangeLog.txt");

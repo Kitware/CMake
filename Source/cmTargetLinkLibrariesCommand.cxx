@@ -16,6 +16,13 @@
 =========================================================================*/
 #include "cmTargetLinkLibrariesCommand.h"
 
+const char* cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[3] =
+{
+  "general",
+  "debug",
+  "optimized"
+};
+
 // cmTargetLinkLibrariesCommand
 bool cmTargetLinkLibrariesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -32,57 +39,88 @@ bool cmTargetLinkLibrariesCommand
     {
     return true;
     }
+
+  // Lookup the target for which libraries are specified.
+  this->Target =
+    this->Makefile->GetCMakeInstance()
+    ->GetGlobalGenerator()->FindTarget(0, args[0].c_str());
+  if(!this->Target)
+    {
+    cmOStringStream e;
+    e << "Cannot specify link libraries for target \"" << args[0] << "\" "
+      << "which is not built by this project.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return true;
+    }
+
+  // Keep track of link configuration specifiers.
+  cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
+  bool haveLLT = false;
+
+  // Start with primary linking and switch to link interface
+  // specification when the keyword is encountered.
+  this->DoingInterface = false;
+
   // add libraries, nothe that there is an optional prefix 
   // of debug and optimized than can be used
-  std::vector<std::string>::const_iterator i = args.begin();
-  
-  for(++i; i != args.end(); ++i)
+  for(unsigned int i=1; i < args.size(); ++i)
     {
-    if (*i == "debug")
+    if(args[i] == "LINK_INTERFACE_LIBRARIES")
       {
-      ++i;
-      if(i == args.end())
+      this->DoingInterface = true;
+      if(i != 1)
         {
-        this->SetError
-          ("The \"debug\" argument must be followed by a library");
-        return false;
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR,
+          "The LINK_INTERFACE_LIBRARIES option must appear as the second "
+          "argument, just after the target name."
+          );
+        return true;
         }
-      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
-                                          cmTarget::DEBUG);
       }
-    else if (*i == "optimized")
+    else if(args[i] == "debug")
       {
-      ++i;
-      if(i == args.end())
+      if(haveLLT)
         {
-        this->SetError(
-          "The \"optimized\" argument must be followed by a library");
-        return false;
+        this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::DEBUG);
         }
-      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
-                                 cmTarget::OPTIMIZED);
+      llt = cmTarget::DEBUG;
+      haveLLT = true;
       }
-    else if (*i == "general")
+    else if(args[i] == "optimized")
       {
-      ++i;
-      if(i == args.end())
+      if(haveLLT)
         {
-        this->SetError(
-          "The \"general\" argument must be followed by a library");
-        return false;
+        this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::OPTIMIZED);
         }
-      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),
-                                 cmTarget::GENERAL);
+      llt = cmTarget::OPTIMIZED;
+      haveLLT = true;
+      }
+    else if(args[i] == "general")
+      {
+      if(haveLLT)
+        {
+        this->LinkLibraryTypeSpecifierWarning(llt, cmTarget::GENERAL);
+        }
+      llt = cmTarget::GENERAL;
+      haveLLT = true;
+      }
+    else if(haveLLT)
+      {
+      // The link type was specified by the previous argument.
+      haveLLT = false;
+      this->HandleLibrary(args[i].c_str(), llt);
       }
     else
       {
-      // make sure the type is correct if it is currently general.  So if you
+      // Lookup old-style cache entry if type is unspecified.  So if you
       // do a target_link_libraries(foo optimized bar) it will stay optimized
       // and not use the lookup.  As there maybe the case where someone has
       // specifed that a library is both debug and optimized.  (this check is
       // only there for backwards compatibility when mixing projects built
       // with old versions of CMake and new)
-      cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
+      llt = cmTarget::GENERAL;
       std::string linkType = args[0];
       linkType += "_LINK_TYPE";
       const char* linkTypeString = 
@@ -98,8 +136,80 @@ bool cmTargetLinkLibrariesCommand
           llt = cmTarget::OPTIMIZED;
           }
         }
-      this->Makefile->AddLinkLibraryForTarget(args[0].c_str(),i->c_str(),llt);
+      this->HandleLibrary(args[i].c_str(), llt);
       }
     } 
+
+  // Make sure the last argument was not a library type specifier.
+  if(haveLLT)
+    {
+    cmOStringStream e;
+    e << "The \"" << this->LinkLibraryTypeNames[llt]
+      << "\" argument must be followed by a library.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    }
+
+  // If the INTERFACE option was given, make sure the
+  // LINK_INTERFACE_LIBRARIES property exists.  This allows the
+  // command to be used to specify an empty link interface.
+  if(this->DoingInterface &&
+     !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES"))
+    {
+    this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
+    }
+
   return true;
+}
+
+//----------------------------------------------------------------------------
+void
+cmTargetLinkLibrariesCommand
+::LinkLibraryTypeSpecifierWarning(int left, int right)
+{
+  cmOStringStream w;
+  w << "Link library type specifier \""
+    << this->LinkLibraryTypeNames[left] << "\" is followed by specifier \""
+    << this->LinkLibraryTypeNames[right] << "\" instead of a library name.  "
+    << "The first specifier will be ignored.";
+  this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+}
+
+//----------------------------------------------------------------------------
+void
+cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
+                                            cmTarget::LinkLibraryType llt)
+{
+  // Handle normal case first.
+  if(!this->DoingInterface)
+    {
+    this->Makefile
+      ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
+    return;
+    }
+
+  // Include this library in the link interface for the target.
+  if(llt == cmTarget::DEBUG)
+    {
+    // Put in only the DEBUG configuration interface.
+    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES_DEBUG", lib);
+    }
+  else if(llt == cmTarget::OPTIMIZED)
+    {
+    // Put in only the non-DEBUG configuration interface.
+    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
+
+    // Make sure the DEBUG configuration interface exists so that this
+    // one will not be used as a fall-back.
+    if(!this->Target->GetProperty("LINK_INTERFACE_LIBRARIES_DEBUG"))
+      {
+      this->Target->SetProperty("LINK_INTERFACE_LIBRARIES_DEBUG", "");
+      }
+    }
+  else
+    {
+    // Put in both the DEBUG and non-DEBUG configuration interfaces.
+    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
+    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES_DEBUG", lib);
+    }
 }

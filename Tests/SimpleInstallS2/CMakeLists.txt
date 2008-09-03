@@ -66,9 +66,13 @@ IF(STAGE2)
     PATHS ${LIBPATHS}
     DOC "Fourth library")
 
+  # Test importing a library found on disk.
+  ADD_LIBRARY(lib_test4 UNKNOWN IMPORTED)
+  SET_PROPERTY(TARGET lib_test4 PROPERTY IMPORTED_LOCATION ${TEST4_LIBRARY})
+
   INCLUDE_DIRECTORIES(${CMAKE_INSTALL_PREFIX}/MyTest/include)
   ADD_EXECUTABLE (SimpleInstExeS2 inst2.cxx foo.c foo.h)
-  TARGET_LINK_LIBRARIES(SimpleInstExeS2 ${TEST1_LIBRARY} ${TEST2_LIBRARY} ${TEST4_LIBRARY})
+  TARGET_LINK_LIBRARIES(SimpleInstExeS2 ${TEST1_LIBRARY} ${TEST2_LIBRARY} lib_test4)
   SET(install_target SimpleInstExeS2)
 
   IF("${TEST1_LIBRARY}" MATCHES "static")

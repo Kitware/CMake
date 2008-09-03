@@ -235,8 +235,17 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 }
 
 //----------------------------------------------------------------------------
-void cmMakefileLibraryTargetGenerator::CreateFramework()
+void
+cmMakefileLibraryTargetGenerator
+::CreateFramework(std::string const& targetName)
 {
+  // Configure the Info.plist file into the Resources directory.
+  this->MacContentFolders.insert("Resources");
+  std::string plist = this->MacContentDirectory + "Resources/Info.plist";
+  this->LocalGenerator->GenerateFrameworkInfoPList(this->Target,
+                                                   targetName.c_str(),
+                                                   plist.c_str());
+
   // TODO: Use the cmMakefileTargetGenerator::ExtraFiles vector to
   // drive rules to create these files at build time.
   std::string oldName;
@@ -388,7 +397,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(this->Target->IsFrameworkOnApple())
     {
     outpath = this->MacContentDirectory;
-    this->CreateFramework();
+    this->CreateFramework(targetName);
     }
   else if(relink)
     {
