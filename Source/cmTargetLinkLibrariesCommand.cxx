@@ -188,28 +188,39 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
     return;
     }
 
-  // Include this library in the link interface for the target.
-  if(llt == cmTarget::DEBUG)
-    {
-    // Put in only the DEBUG configuration interface.
-    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES_DEBUG", lib);
-    }
-  else if(llt == cmTarget::OPTIMIZED)
-    {
-    // Put in only the non-DEBUG configuration interface.
-    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
+  // Get the list of configurations considered to be DEBUG.
+  std::vector<std::string> const& debugConfigs =
+    this->Makefile->GetCMakeInstance()->GetDebugConfigs();
+  std::string prop;
 
-    // Make sure the DEBUG configuration interface exists so that this
-    // one will not be used as a fall-back.
-    if(!this->Target->GetProperty("LINK_INTERFACE_LIBRARIES_DEBUG"))
+  // Include this library in the link interface for the target.
+  if(llt == cmTarget::DEBUG || llt == cmTarget::GENERAL)
+    {
+    // Put in the DEBUG configuration interfaces.
+    for(std::vector<std::string>::const_iterator i = debugConfigs.begin();
+        i != debugConfigs.end(); ++i)
       {
-      this->Target->SetProperty("LINK_INTERFACE_LIBRARIES_DEBUG", "");
+      prop = "LINK_INTERFACE_LIBRARIES_";
+      prop += *i;
+      this->Target->AppendProperty(prop.c_str(), lib);
       }
     }
-  else
+  if(llt == cmTarget::OPTIMIZED || llt == cmTarget::GENERAL)
     {
-    // Put in both the DEBUG and non-DEBUG configuration interfaces.
+    // Put in the non-DEBUG configuration interfaces.
     this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
-    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES_DEBUG", lib);
+
+    // Make sure the DEBUG configuration interfaces exist so that the
+    // general one will not be used as a fall-back.
+    for(std::vector<std::string>::const_iterator i = debugConfigs.begin();
+        i != debugConfigs.end(); ++i)
+      {
+      prop = "LINK_INTERFACE_LIBRARIES_";
+      prop += *i;
+      if(!this->Target->GetProperty(prop.c_str()))
+        {
+        this->Target->SetProperty(prop.c_str(), "");
+        }
+      }
     }
 }

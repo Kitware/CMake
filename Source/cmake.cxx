@@ -3364,6 +3364,19 @@ void cmake::DefineProperties(cmake *cm)
     "Used to detect compiler changes, Do not set.");
 
   cm->DefineProperty(
+    "DEBUG_CONFIGURATIONS", cmProperty::GLOBAL,
+    "Specify which configurations are for debugging.",
+    "The value must be a semi-colon separated list of configuration names.  "
+    "Currently this property is used only by the target_link_libraries "
+    "command (see its documentation for details).  "
+    "Additional uses may be defined in the future.  "
+    "\n"
+    "This property must be set at the top level of the project and before "
+    "the first target_link_libraries command invocation.  "
+    "If any entry in the list does not match a valid configuration for "
+    "the project the behavior is undefined.");
+
+  cm->DefineProperty(
     "GLOBAL_DEPENDS_DEBUG_MODE", cmProperty::GLOBAL,
     "Enable global target dependency graph debug mode.",
     "CMake automatically analyzes the global inter-target dependency graph "
@@ -3551,6 +3564,12 @@ void cmake::SetProperty(const char* prop, const char* value)
     return;
     }
 
+  // Special hook to invalidate cached value.
+  if(strcmp(prop, "DEBUG_CONFIGURATIONS") == 0)
+    {
+    this->DebugConfigs.clear();
+    }
+
   this->Properties.SetProperty(prop, value, cmProperty::GLOBAL);
 }
 
@@ -3560,6 +3579,13 @@ void cmake::AppendProperty(const char* prop, const char* value)
     {
     return;
     }
+
+  // Special hook to invalidate cached value.
+  if(strcmp(prop, "DEBUG_CONFIGURATIONS") == 0)
+    {
+    this->DebugConfigs.clear();
+    }
+
   this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL);
 }
 
@@ -4269,4 +4295,29 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
     {
     cmSystemTools::Message(msg.str().c_str(), "Warning");
     }
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> const& cmake::GetDebugConfigs()
+{
+  // Compute on-demand.
+  if(this->DebugConfigs.empty())
+    {
+    if(const char* config_list = this->GetProperty("DEBUG_CONFIGURATIONS"))
+      {
+      // Expand the specified list and convert to upper-case.
+      cmSystemTools::ExpandListArgument(config_list, this->DebugConfigs);
+      for(std::vector<std::string>::iterator i = this->DebugConfigs.begin();
+          i != this->DebugConfigs.end(); ++i)
+        {
+        *i = cmSystemTools::UpperCase(*i);
+        }
+      }
+    // If no configurations were specified, use a default list.
+    if(this->DebugConfigs.empty())
+      {
+      this->DebugConfigs.push_back("DEBUG");
+      }
+    }
+  return this->DebugConfigs;
 }

@@ -188,6 +188,7 @@ cmComputeLinkDepends
 
   // The configuration being linked.
   this->Config = (config && *config)? config : 0;
+  this->LinkType = this->Target->ComputeLinkType(this->Config);
 
   // Enable debug mode if requested.
   this->DebugMode = this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE");
@@ -446,13 +447,6 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
   std::vector<std::string> deplist;
   cmSystemTools::ExpandListArgument(value, deplist);
 
-  // Compute which library configuration to link.
-  cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
-  if(this->Config && cmSystemTools::UpperCase(this->Config) == "DEBUG")
-    {
-    linkType = cmTarget::DEBUG;
-    }
-
   // Look for entries meant for this configuration.
   std::vector<std::string> actual_libs;
   cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
@@ -500,7 +494,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
         }
 
       // If the library is meant for this link type then use it.
-      if(llt == cmTarget::GENERAL || llt == linkType)
+      if(llt == cmTarget::GENERAL || llt == this->LinkType)
         {
         actual_libs.push_back(*di);
         }
@@ -524,19 +518,12 @@ void
 cmComputeLinkDepends::AddTargetLinkEntries(int depender_index,
                                            LinkLibraryVectorType const& libs)
 {
-  // Compute which library configuration to link.
-  cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
-  if(this->Config && cmSystemTools::UpperCase(this->Config) == "DEBUG")
-    {
-    linkType = cmTarget::DEBUG;
-    }
-
   // Look for entries meant for this configuration.
   std::vector<std::string> actual_libs;
   for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
       li != libs.end(); ++li)
     {
-    if(li->second == cmTarget::GENERAL || li->second == linkType)
+    if(li->second == cmTarget::GENERAL || li->second == this->LinkType)
       {
       actual_libs.push_back(li->first);
       }

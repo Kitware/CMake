@@ -32,7 +32,6 @@ add_executable(imp_testExe1
 
 # Try linking to a library imported from the install tree.
 target_link_libraries(imp_testExe1 exp_testLib2 exp_testLib3 exp_testLib4)
-set_property(TARGET imp_testExe1 PROPERTY COMPILE_DEFINITIONS_DEBUG EXE_DBG)
 
 # Try building a plugin to an executable imported from the install tree.
 add_library(imp_mod1 MODULE imp_mod1.c)
@@ -58,8 +57,14 @@ add_executable(imp_testExe1b
 
 # Try linking to a library imported from the build tree.
 target_link_libraries(imp_testExe1b bld_testLib2 bld_testLib3 bld_testLib4)
-set_property(TARGET imp_testExe1b PROPERTY COMPILE_DEFINITIONS_DEBUG EXE_DBG)
 
 # Try building a plugin to an executable imported from the build tree.
 add_library(imp_mod1b MODULE imp_mod1.c)
 target_link_libraries(imp_mod1b bld_testExe2)
+
+# Export/CMakeLists.txt pretends the RelWithDebInfo (as well as Debug)
+# configuration should link to debug libs.
+foreach(c DEBUG RELWITHDEBINFO)
+  set_property(TARGET imp_testExe1 PROPERTY COMPILE_DEFINITIONS_${c} EXE_DBG)
+  set_property(TARGET imp_testExe1b PROPERTY COMPILE_DEFINITIONS_${c} EXE_DBG)
+endforeach(c)

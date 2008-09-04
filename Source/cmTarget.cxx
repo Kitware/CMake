@@ -1257,6 +1257,34 @@ const std::vector<std::string>& cmTarget::GetLinkDirectories()
 }
 
 //----------------------------------------------------------------------------
+cmTarget::LinkLibraryType cmTarget::ComputeLinkType(const char* config)
+{
+  // No configuration is always optimized.
+  if(!(config && *config))
+    {
+    return cmTarget::OPTIMIZED;
+    }
+
+  // Get the list of configurations considered to be DEBUG.
+  std::vector<std::string> const& debugConfigs =
+    this->Makefile->GetCMakeInstance()->GetDebugConfigs();
+
+  // Check if any entry in the list matches this configuration.
+  std::string configUpper = cmSystemTools::UpperCase(config);
+  for(std::vector<std::string>::const_iterator i = debugConfigs.begin();
+      i != debugConfigs.end(); ++i)
+    {
+    if(*i == configUpper)
+      {
+      return cmTarget::DEBUG;
+      }
+    }
+
+  // The current configuration is not a debug configuration.
+  return cmTarget::OPTIMIZED;
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::ClearDependencyInformation( cmMakefile& mf,
                                            const char* target )
 {
@@ -3620,11 +3648,7 @@ cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
       }
 
     // Compute which library configuration to link.
-    cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
-    if(config && cmSystemTools::UpperCase(config) == "DEBUG")
-      {
-      linkType = cmTarget::DEBUG;
-      }
+    cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
 
     // Construct the list of libs linked for this configuration.
     cmTarget::LinkLibraryVectorType const& llibs =
