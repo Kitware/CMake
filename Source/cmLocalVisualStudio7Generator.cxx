@@ -1788,7 +1788,7 @@ cmLocalVisualStudio7Generator
     }
   if(projectType)
     {
-    fout << "\tProjectType=\"" << projectType << "\">\n";
+    fout << "\tProjectType=\"" << projectType << "\"\n";
     }
   fout<< "\tKeyword=\"" << keyword << "\">\n" 
        << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\">\n"

@@ -1,3 +1,9 @@
+Changes in CMake 2.6.2 RC 3
+- Fix bug, and remove extra closing > in visual fortran projects.
+- Fix bug in ctest -C where it was sometimes ignored.
+- Fix crash with exec_process when cmake is being debugged on windows
+- Fix unsetting of global properties
+
 Changes in CMake 2.6.2 RC 2
 - allow tool chains to limit object path length
 - add info.plist to frameworks

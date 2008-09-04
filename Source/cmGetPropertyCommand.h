@@ -86,7 +86,7 @@ public:
         "of the property to get.  "
         "If the property is not set an empty value is returned.  "
         "If the SET option is given the variable is set to a boolean "
-        "value indicating whether the property has been set."
+        "value indicating whether the property has been set.  "
         "If the DEFINED option is given the variable is set to a boolean "
         "value indicating whether the property has been defined "
         "such as with define_property. "
