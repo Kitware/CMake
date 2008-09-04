@@ -79,7 +79,10 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     config = this->CTest->GetConfigType().c_str();
     }
 #ifdef CMAKE_INTDIR
-  config = CMAKE_INTDIR;
+  if(!config)
+    {
+    config = CMAKE_INTDIR;
+    }
 #endif
   
   if ( config )
@@ -259,7 +262,10 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       config = this->CTest->GetConfigType().c_str();
       }
 #ifdef CMAKE_INTDIR
-    config = CMAKE_INTDIR;
+    if(!config)
+      {
+      config = CMAKE_INTDIR;
+      }
 #endif
     if(!config)
       {
