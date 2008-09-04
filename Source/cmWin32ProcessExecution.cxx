@@ -715,18 +715,24 @@ bool cmWin32ProcessExecution::CloseHandles()
 {
   if(this->pStdErr != -1 )
     {
+    // this will close this as well: this->hChildStderrRdDup
     _close(this->pStdErr);
     this->pStdErr = -1;
+    this->hChildStderrRdDup = 0;
     }
   if(this->pStdIn != -1 )
     {
+    // this will close this as well: this->hChildStdinWrDup
     _close(this->pStdIn);
     this->pStdIn = -1;
+    this->hChildStdinWrDup = 0;
     }
   if(this->pStdOut != -1 )
     {
+    // this will close this as well: this->hChildStdoutRdDup
     _close(this->pStdOut);
     this->pStdOut = -1;
+    this->hChildStdoutRdDup = 0;
     }
 
   bool ret = true;
@@ -735,21 +741,7 @@ bool cmWin32ProcessExecution::CloseHandles()
     ret = false;
     }
   this->hChildStdinRd = 0;
-  if(this->hChildStdoutRdDup && !CloseHandle(this->hChildStdoutRdDup))
-    {
-    ret = false;
-    }
-  this->hChildStdoutRdDup = 0;
-  if(this->hChildStderrRdDup && !CloseHandle(this->hChildStderrRdDup))
-    {
-    ret = false;
-    }
-  this->hChildStderrRdDup = 0;
-  if(this->hChildStdinWrDup && !CloseHandle(this->hChildStdinWrDup))
-    {
-    ret = false;
-    }
-  this->hChildStdinWrDup = 0;
+  // now close these two
   if (this->hChildStdoutWr && !CloseHandle(this->hChildStdoutWr))
     {
     ret = false;
