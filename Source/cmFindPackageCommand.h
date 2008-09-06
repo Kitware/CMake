@@ -73,6 +73,7 @@ public:
 private:
   void AppendSuccessInformation();
   void AppendToProperty(const char* propertyName);
+  bool SetModuleVariables(const std::string& components);
   bool FindModule(bool& found);
   bool HandlePackageMode();
   void FindConfig();
