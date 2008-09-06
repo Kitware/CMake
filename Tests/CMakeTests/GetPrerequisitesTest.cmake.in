@@ -68,7 +68,7 @@ function(test_cmake_executables)
   message(STATUS "")
 
   get_filename_component(cmake_bin_dir "${CMAKE_COMMAND}" PATH)
-  list_prerequisites_by_glob(GLOB "${cmake_bin_dir}/*" 0 0 1)
+  list_prerequisites_by_glob(GLOB_RECURSE "${cmake_bin_dir}/*" 1 0 1)
 endfunction(test_cmake_executables)
 
 
