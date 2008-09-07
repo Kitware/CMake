@@ -97,8 +97,15 @@ ENDIF (NOT _CMAKE_TOOLCHAIN_LOCATION)
 IF (NOT _CMAKE_TOOLCHAIN_PREFIX)
   GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
   IF (COMPILER_BASENAME MATCHES "^(.+-)g?cc(\\.exe)?$")
-    STRING(REGEX REPLACE "^(.+-)g?cc(\\.exe)?$"  "\\1" _CMAKE_TOOLCHAIN_PREFIX "${COMPILER_BASENAME}")
+    SET(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
   ENDIF (COMPILER_BASENAME MATCHES "^(.+-)g?cc(\\.exe)?$")
+
+  # if "llvm-" is part of the prefix, remove it, since llvm doesn't have its own binutils
+  # but uses the regular ar, objcopy, etc. (instead of llvm-objcopy etc.)
+  IF ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
+    SET(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
+  ENDIF ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
+
 ENDIF (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
 
