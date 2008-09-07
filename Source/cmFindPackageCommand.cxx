@@ -533,7 +533,7 @@ bool cmFindPackageCommand
 
 
 //----------------------------------------------------------------------------
-bool cmFindPackageCommand::SetModuleVariables(const std::string& components)
+void cmFindPackageCommand::SetModuleVariables(const std::string& components)
 {
   // Store the list of components.
   std::string components_var = this->Name + "_FIND_COMPONENTS";
