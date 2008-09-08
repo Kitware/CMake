@@ -699,7 +699,7 @@ bool cmFindPackageCommand::HandlePackageMode()
     {
     // The variable is not set.
     cmOStringStream e;
-    e << "could not find ";
+    e << "Could not find ";
     if(!this->NoModule)
       {
       e << "module Find" << this->Name << ".cmake or ";
@@ -729,15 +729,8 @@ bool cmFindPackageCommand::HandlePackageMode()
         e << "  " << *ci << "\n";
         }
       }
-    if(this->Required)
-      {
-      this->SetError(e.str().c_str());
-      result = false;
-      }
-    else
-      {
-      cmSystemTools::Error("find_package ", e.str().c_str());
-      }
+    this->Makefile->IssueMessage(
+      this->Required? cmake::FATAL_ERROR : cmake::WARNING, e.str());
     }
 
   // Set a variable marking whether the package was found.
