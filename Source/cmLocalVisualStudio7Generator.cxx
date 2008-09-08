@@ -460,7 +460,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
   {"IgnoreAllDefaultLibraries", "NODEFAULTLIB", "ignore all default libs",
    "TRUE", 0},
   {"ModuleDefinitionFile", "DEF:", "add an export def file", "",
-   cmVS7FlagTable::UserValue},
+   cmVS7FlagTable::UserValue}, 
+  {"GenerateMapFile", "MAP", "enable generation of map file", "TRUE", 0},
   {0,0,0,0,0}
 };
 
