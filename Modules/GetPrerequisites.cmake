@@ -377,7 +377,6 @@ endfunction(gp_resolve_item)
 #
 function(get_prerequisites target prerequisites_var exclude_system recurse exepath dirs)
   set(verbose 0)
-
   set(eol_char "E")
 
   if(NOT IS_ABSOLUTE "${target}")
@@ -461,7 +460,10 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     get_filename_component(gp_cmd_dir "${gp_cmd}" PATH)
     get_filename_component(gp_cmd_dlls_dir "${gp_cmd_dir}/../../Common7/IDE" ABSOLUTE)
     if(EXISTS "${gp_cmd_dlls_dir}")
-      set(ENV{PATH} "$ENV{PATH};${gp_cmd_dlls_dir}")
+      # only add to the path if it is not already in the path
+      if(NOT "$ENV{PATH}" MATCHES "${gp_cmd_dlls_dir}")
+        set(ENV{PATH} "$ENV{PATH};${gp_cmd_dlls_dir}")
+      endif(NOT "$ENV{PATH}" MATCHES "${gp_cmd_dlls_dir}")
     endif(EXISTS "${gp_cmd_dlls_dir}")
   endif("${gp_tool}" STREQUAL "dumpbin")
   #
