@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "CTEST_TEST";}
+  virtual const char* GetName() { return "ctest_test";}
 
   /**
    * Succinct documentation.
@@ -60,9 +60,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_TEST([BUILD build_dir] [RETURN_VALUE res])\n"
+      "  CTEST_TEST([BUILD build_dir]\n"
+      "             [START start number] [END end number]\n"
+      "             [STRIDE stride number] [EXCLUDE exclude regex ]\n"
+      "             [INCLUDE include regex] [RETURN_VALUE res] )\n"
       "Tests the given build directory and stores results in Test.xml. The "
-      "second argument is a variable that will hold value.";
+      "second argument is a variable that will hold value. Optionally, "
+      "you can specify the starting test number START, the ending test number "
+      "END, the number of tests to skip between each test STRIDE, a regular "
+      "expression for tests to run INCLUDE, or a regular expression for tests "
+      "to not run EXCLUDE.";
     }
 
   cmTypeMacro(cmCTestTestCommand, cmCTestHandlerCommand);
@@ -77,6 +84,8 @@ protected:
     ctt_START,
     ctt_END,
     ctt_STRIDE,
+    ctt_EXCLUDE,
+    ctt_INCLUDE,
     ctt_LAST
   };
 };
