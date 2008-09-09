@@ -3,6 +3,10 @@
 #
 #  FLAG - the compiler flag
 #  VARIABLE - variable to store the result
+# 
+#  This actually calls the check_c_source_compiles macro.
+#  See help for CheckCSourceCompiles for a listing of variables
+#  that can modify the build.
 
 # Copyright (c) 2006, Alexander Neundorf, <neundorf@kde.org>
 #
