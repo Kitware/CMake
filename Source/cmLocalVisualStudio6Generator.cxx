@@ -1314,6 +1314,13 @@ void cmLocalVisualStudio6Generator
     }
 
   std::string line;
+  std::string libnameExports;
+  if(exportSymbol.size())
+    {
+    libnameExports = "/D \"";
+    libnameExports += exportSymbol;
+    libnameExports += "\"";
+    }
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
     const char* mfcFlag = this->Makefile->GetDefinition("CMAKE_MFC_FLAG");
@@ -1322,7 +1329,7 @@ void cmLocalVisualStudio6Generator
       mfcFlag = "0";
       }
     cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME_EXPORTS",
-                                 exportSymbol.c_str());
+                                 libnameExports.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
                                  mfcFlag);
     if(target.GetType() == cmTarget::STATIC_LIBRARY )
