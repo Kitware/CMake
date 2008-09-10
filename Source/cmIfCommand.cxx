@@ -285,6 +285,34 @@ namespace
   }
 
   //=========================================================================
+  enum Op { OpLess, OpEqual, OpGreater };
+  bool HandleVersionCompare(Op op, const char* lhs_str, const char* rhs_str)
+  {
+  // Parse out up to 4 components.
+  unsigned int lhs[4] = {0,0,0,0};
+  unsigned int rhs[4] = {0,0,0,0};
+  sscanf(lhs_str, "%u.%u.%u.%u", &lhs[0], &lhs[1], &lhs[2], &lhs[3]);
+  sscanf(rhs_str, "%u.%u.%u.%u", &rhs[0], &rhs[1], &rhs[2], &rhs[3]);
+
+  // Do component-wise comparison.
+  for(unsigned int i=0; i < 4; ++i)
+    {
+    if(lhs[i] < rhs[i])
+      {
+      // lhs < rhs, so true if operation is LESS
+      return op == OpLess;
+      }
+    else if(lhs[i] > rhs[i])
+      {
+      // lhs > rhs, so true if operation is GREATER
+      return op == OpGreater;
+      }
+    }
+  // lhs == rhs, so true if operation is EQUAL
+  return op == OpEqual;
+  }
+
+  //=========================================================================
   // level 0 processes parenthetical expressions
   bool HandleLevel0(std::list<std::string> &newArgs,
                     cmMakefile *makefile,
@@ -548,6 +576,26 @@ namespace
           {
           result = (val == 0);
           }
+        HandleBinaryOp(result,
+          reducible, arg, newArgs, argP1, argP2);
+        }
+
+      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
+        (*(argP1) == "VERSION_LESS" || *(argP1) == "VERSION_GREATER" ||
+         *(argP1) == "VERSION_EQUAL"))
+        {
+        def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
+        def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
+        Op op = OpEqual;
+        if(*argP1 == "VERSION_LESS")
+          {
+          op = OpLess;
+          }
+        else if(*argP1 == "VERSION_GREATER")
+          {
+          op = OpGreater;
+          }
+        bool result = HandleVersionCompare(op, def, def2);
         HandleBinaryOp(result,
           reducible, arg, newArgs, argP1, argP2);
         }
