@@ -27,6 +27,7 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 FIND_PACKAGE(VersionTestA 1)
 FIND_PACKAGE(VersionTestB 1.2)
 FIND_PACKAGE(VersionTestC 1.2.3)
+FIND_PACKAGE(VersionTestD 1.2.3.4)
 
 #-----------------------------------------------------------------------------
 
