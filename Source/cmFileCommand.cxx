@@ -668,18 +668,39 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   i++;
   cmsys::Glob g;
   g.SetRecurse(recurse);
+
+  bool explicitFollowSymlinks = false;
+  cmPolicies::PolicyStatus status =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0009);
+  if(recurse)
+    {
+    switch(status)
+      {
+      case cmPolicies::NEW:
+        g.RecurseThroughSymlinksOff();
+        break;
+      case cmPolicies::OLD:
+      case cmPolicies::WARN:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        g.RecurseThroughSymlinksOn();
+        break;
+      }
+    }
+
   std::string output = "";
   bool first = true;
   for ( ; i != args.end(); ++i )
     {
-    if ( *i == "RECURSE_SYMLINKS_OFF" )
+    if ( recurse && (*i == "FOLLOW_SYMLINKS") )
       {
-      g.RecurseThroughSymlinksOff();
+      explicitFollowSymlinks = true;
+      g.RecurseThroughSymlinksOn();
       ++i;
       if ( i == args.end() )
         {
         this->SetError(
-          "GLOB requires a glob expression after RECURSE_SYMLINKS_OFF");
+          "GLOB_RECURSE requires a glob expression after FOLLOW_SYMLINKS");
         return false;
         }
       }
@@ -732,6 +753,37 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       first = false;
       }
     }
+
+  if(recurse && !explicitFollowSymlinks)
+    {
+    switch (status)
+      {
+      case cmPolicies::NEW:
+        // Correct behavior, yay!
+        break;
+      case cmPolicies::OLD:
+        // Probably not really the expected behavior, but the author explicitly
+        // asked for the old behavior... no warning.
+      case cmPolicies::WARN:
+        // Possibly unexpected old behavior *and* we actually traversed
+        // symlinks without being explicitly asked to: warn the author.
+        if(g.GetFollowedSymlinkCount() != 0)
+          {
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+            this->Makefile->GetPolicies()->
+              GetPolicyWarning(cmPolicies::CMP0009));
+          }
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        this->SetError("policy CMP0009 error");
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+          this->Makefile->GetPolicies()->
+            GetRequiredPolicyError(cmPolicies::CMP0009));
+        return false;
+      }
+    }
+
   this->Makefile->AddDefinition(variable.c_str(), output.c_str());
   return true;
 }

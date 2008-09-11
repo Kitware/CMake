@@ -64,6 +64,9 @@ public:
   void SetRecurseThroughSymlinks(bool i) { this->RecurseThroughSymlinks = i; }
   bool GetRecurseThroughSymlinks() { return this->RecurseThroughSymlinks; }
 
+  //! Get the number of symlinks followed through recursion
+  unsigned int GetFollowedSymlinkCount() { return this->FollowedSymlinkCount; }
+
   //! Set relative to true to only show relative path to files.
   void SetRelative(const char* dir);
   const char* GetRelative();
@@ -98,6 +101,7 @@ protected:
   bool Recurse;
   kwsys_stl::string Relative;
   bool RecurseThroughSymlinks;
+  unsigned int FollowedSymlinkCount;
 
 private:
   Glob(const Glob&);  // Not implemented.

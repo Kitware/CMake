@@ -307,6 +307,22 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to trust the given path and "
     "pass it directly to the native build tool unchanged.",
     2,6,1, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0009, "CMP0009",
+    "FILE GLOB_RECURSE calls should not follow symlinks by default.",
+    "In CMake 2.6.1 and below, FILE GLOB_RECURSE calls would follow "
+    "through symlinks, sometimes coming up with unexpectedly large "
+    "result sets because of symlinks to top level directories that "
+    "contain hundreds of thousands of files."
+    "\n"
+    "This policy determines whether or not to follow symlinks "
+    "encountered during a FILE GLOB_RECURSE call. "
+    "The OLD behavior for this policy is to follow the symlinks. "
+    "The NEW behavior for this policy is not to follow the symlinks "
+    "by default, but only if FOLLOW_SYMLINKS is given as an additional "
+    "argument to the FILE command.",
+    2,6,2, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
@@ -384,7 +400,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
       "In order to get compatibility features supporting versions earlier "
       "than 2.4 set policy CMP0001 to OLD to tell CMake to check the "
       "CMAKE_BACKWARDS_COMPATIBILITY variable.  "
-      "One way to so this is to set the policy version to 2.4 exactly."
+      "One way to do this is to set the policy version to 2.4 exactly."
       );
     return false;
     }
