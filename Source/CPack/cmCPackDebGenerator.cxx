@@ -116,6 +116,17 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
       {
       out << "Suggests: " << debian_pkg_sug << "\n";
       }
+    unsigned long totalSize = 0;
+    {
+      std::string dirName = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
+      dirName += '/';
+      for (std::vector<std::string>::const_iterator fileIt = files.begin();
+              fileIt != files.end(); ++ fileIt )
+        {
+        totalSize += cmSystemTools::FileLength(fileIt->c_str());
+        }
+    }
+    out << "Installed-Size: " << totalSize << "\n";
     out << "Maintainer: " << maintainer << "\n";
     out << "Description: " << desc << "\n";
     out << std::endl;
