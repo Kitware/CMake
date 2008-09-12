@@ -1,3 +1,18 @@
+Changes in CMake 2.6.2 RC 4
+- Fix bug #7359 make llvm-gcc work, by explicitely excluding
+  "llvm-" from _CMAKE_TOOLCHAIN_PREFIX
+- Fix bug 7046: OS X Framework support: extensionless headers were
+  being ignored when specified as public headers
+- Fix documentation in CheckCCompilerFlag.cmake
+- Add better version support to find_package command
+- Fix Xcode debug not working
+- Add VERSION compare to if command
+- Make FindThreads sete THREADS_FOUND
+- Deb cpack generator sets Installed-Size for the package
+- Do not add an empty /D"" at the end of VS 6 .dsp compile lines
+- Recognize /MAP in VS 7 and greater
+- Add new policy CMP0009 - GLOB_RECURSE should not follow symlinks by default
+
 Changes in CMake 2.6.2 RC 3
 - Fix bug, and remove extra closing > in visual fortran projects.
 - Fix bug in ctest -C where it was sometimes ignored.

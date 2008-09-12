@@ -5,8 +5,11 @@ add_library(foo SHARED
   foo.cxx
   foo.h
   foo2.h
+  fooExtensionlessResource
   fooPublic.h
+  fooPublicExtensionlessHeader
   fooPrivate.h
+  fooPrivateExtensionlessHeader
   fooNeither.h
   fooBoth.h
   test.lua
@@ -20,9 +23,9 @@ set(foo_ver ver4)
 set_target_properties(foo PROPERTIES
   FRAMEWORK TRUE
   FRAMEWORK_VERSION ${foo_ver}
-  PRIVATE_HEADER "fooPrivate.h;fooBoth.h"
-  PUBLIC_HEADER "foo.h;foo2.h;fooPublic.h;fooBoth.h"
-  RESOURCE "test.lua"
+  PRIVATE_HEADER "fooPrivate.h;fooBoth.h;fooPrivateExtensionlessHeader"
+  PUBLIC_HEADER "foo.h;foo2.h;fooPublic.h;fooBoth.h;fooPublicExtensionlessHeader"
+  RESOURCE "fooExtensionlessResource;test.lua"
   INSTALL_NAME_DIR "@executable_path/../../../Library/Frameworks"
   DEBUG_POSTFIX -d
 )
@@ -57,11 +60,15 @@ add_library(fooStatic STATIC
   foo.cxx
   foo.h
   foo2.h
+  fooExtensionlessResource
   fooPublic.h
+  fooPublicExtensionlessHeader
   fooPrivate.h
+  fooPrivateExtensionlessHeader
   fooNeither.h
   fooBoth.h
   test.lua
+  fooDeepPublic.h
 )
 set_target_properties(fooStatic PROPERTIES
   FRAMEWORK TRUE

@@ -88,19 +88,6 @@ IF (NOT _CMAKE_TOOLCHAIN_LOCATION)
   GET_FILENAME_COMPONENT(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_CXX_COMPILER}" PATH)
 ENDIF (NOT _CMAKE_TOOLCHAIN_LOCATION)
 
-# if we have a g++ cross compiler, they have usually some prefix, like 
-# e.g. powerpc-linux-g++, arm-elf-g++ or i586-mingw32msvc-g++
-# the other tools of the toolchain usually have the same prefix
-# NAME_WE cannot be used since then this test will fail for names lile
-# "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be 
-# "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
-IF (NOT _CMAKE_TOOLCHAIN_PREFIX)
-  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
-  IF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(\\.exe)?$")
-    STRING(REGEX REPLACE "^(.+-)[gc]\\+\\+(\\.exe)?$"  "\\1" _CMAKE_TOOLCHAIN_PREFIX "${COMPILER_BASENAME}")
-  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(\\.exe)?$")
-ENDIF (NOT _CMAKE_TOOLCHAIN_PREFIX)
-
 # This block was used before the compiler was identified by building a
 # source file.  Unless g++ crashes when building a small C++
 # executable this should no longer be needed.
@@ -150,6 +137,30 @@ IF(NOT CMAKE_CXX_COMPILER_ID_RUN)
     SET(CMAKE_COMPILER_IS_CYGWIN 1)
   ENDIF("${CMAKE_CXX_PLATFORM_ID}" MATCHES "MinGW")
 ENDIF(NOT CMAKE_CXX_COMPILER_ID_RUN)
+
+# if we have a g++ cross compiler, they have usually some prefix, like 
+# e.g. powerpc-linux-g++, arm-elf-g++ or i586-mingw32msvc-g++
+# the other tools of the toolchain usually have the same prefix
+# NAME_WE cannot be used since then this test will fail for names lile
+# "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be 
+# "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
+IF (CMAKE_CROSSCOMPILING  
+    AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU"
+    AND NOT _CMAKE_TOOLCHAIN_PREFIX)
+  GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
+  IF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(\\.exe)?$")
+    SET(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
+  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(\\.exe)?$")
+
+  # if "llvm-" is part of the prefix, remove it, since llvm doesn't have its own binutils
+  # but uses the regular ar, objcopy, etc. (instead of llvm-objcopy etc.)
+  IF ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
+    SET(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
+  ENDIF ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
+
+ENDIF (CMAKE_CROSSCOMPILING  
+    AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU"
+    AND NOT _CMAKE_TOOLCHAIN_PREFIX)
 
 INCLUDE(CMakeFindBinUtils)
 

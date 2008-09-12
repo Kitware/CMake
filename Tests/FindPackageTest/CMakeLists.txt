@@ -27,6 +27,7 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 FIND_PACKAGE(VersionTestA 1)
 FIND_PACKAGE(VersionTestB 1.2)
 FIND_PACKAGE(VersionTestC 1.2.3)
+FIND_PACKAGE(VersionTestD 1.2.3.4)
 
 #-----------------------------------------------------------------------------
 
@@ -144,3 +145,20 @@ IF(NOT "${Special_VERSION_MINOR}" STREQUAL "2")
   MESSAGE(SEND_ERROR
     "Package Special is minor version [${Special_VERSION_MINOR}], not [2]")
 ENDIF(NOT "${Special_VERSION_MINOR}" STREQUAL "2")
+
+# Test version number comparison.
+IF(NOT "1.2.3.4" VERSION_LESS "1.2.3.5")
+  MESSAGE(SEND_ERROR "1.2.3.4 VERSION_LESS 1.2.3.5 is not true!")
+ENDIF()
+IF(NOT "1.2" VERSION_LESS "1.10")
+  MESSAGE(SEND_ERROR "1.2 VERSION_LESS 1.10 is not true!")
+ENDIF()
+IF(NOT "1.02" VERSION_GREATER "1.1")
+  MESSAGE(SEND_ERROR "1.02 VERSION_GREATER 1.1 is not true!")
+ENDIF()
+IF("1.2.3" VERSION_GREATER "1.2.3.4")
+  MESSAGE(SEND_ERROR "1.2.3 VERSION_GREATER 1.2.3.4 is not false!")
+ENDIF()
+IF(NOT "1.2" VERSION_EQUAL "1.2.0.0")
+  MESSAGE(SEND_ERROR "1.2 VERSION_EQUAL 1.2.0.0 is not true!")
+ENDIF()

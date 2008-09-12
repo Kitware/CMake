@@ -67,6 +67,7 @@ Glob::Glob()
   this->RecurseThroughSymlinks = true;
     // RecurseThroughSymlinks is true by default for backwards compatibility,
     // not because it's a good idea...
+  this->FollowedSymlinkCount = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -266,9 +267,13 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
       }
     if ( kwsys::SystemTools::FileIsDirectory(realname.c_str()) )
       {
-      if (!kwsys::SystemTools::FileIsSymlink(realname.c_str()) ||
-        this->RecurseThroughSymlinks)
+      bool isSymLink = kwsys::SystemTools::FileIsSymlink(realname.c_str());
+      if (!isSymLink || this->RecurseThroughSymlinks)
         {
+        if (isSymLink)
+          {
+          ++this->FollowedSymlinkCount;
+          }
         this->RecurseDirectory(start+1, realname, dir_only);
         }
       }

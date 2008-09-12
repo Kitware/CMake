@@ -73,6 +73,7 @@ public:
 private:
   void AppendSuccessInformation();
   void AppendToProperty(const char* propertyName);
+  void SetModuleVariables(const std::string& components);
   bool FindModule(bool& found);
   bool HandlePackageMode();
   void FindConfig();
@@ -110,6 +111,7 @@ private:
   unsigned int VersionMajor;
   unsigned int VersionMinor;
   unsigned int VersionPatch;
+  unsigned int VersionTweak;
   unsigned int VersionCount;
   bool VersionExact;
   cmStdString FileFound;
@@ -117,6 +119,7 @@ private:
   unsigned int VersionFoundMajor;
   unsigned int VersionFoundMinor;
   unsigned int VersionFoundPatch;
+  unsigned int VersionFoundTweak;
   unsigned int VersionFoundCount;
   bool Quiet;
   bool Required;

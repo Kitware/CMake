@@ -526,11 +526,13 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 
   buildFile->AddAttribute("settings", settings);
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
+
   const char* lang = 
     this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
   std::string sourcecode = "sourcecode";
   std::string ext = sf->GetExtension();
   ext = cmSystemTools::LowerCase(ext);
+
   if(ext == "o")
     {
     sourcecode = "compiled.mach-o.objfile";
@@ -541,41 +543,50 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     }
   else if(ext == "m")
     {
-    sourcecode += ".cpp.objc";
+    sourcecode += ".c.objc";
     }
   else if(ext == "plist")
     {
     sourcecode += ".text.plist";
     }
-  else if(!lang)
+  else if(ext == "h" || ext == "hxx" || ext == "hpp")
     {
-    sourcecode += ext;
-    sourcecode += ".";
-    sourcecode += ext;
+    const char* linkLanguage = cmtarget.GetLinkerLanguage(this);
+    if(linkLanguage && (std::string(linkLanguage) == "CXX"))
+      {
+      sourcecode += ".cpp.h";
+      }
+    else
+      {
+      sourcecode += ".c.h";
+      }
     }
-  else if(strcmp(lang, "C") == 0)
-    {
-    sourcecode += ".c.c";
-    }
-  else if(strcmp(lang, "CXX") == 0)
+  else if(lang && strcmp(lang, "CXX") == 0)
     {
     sourcecode += ".cpp.cpp";
     }
-  else
+  else if(lang && strcmp(lang, "C") == 0)
     {
-    sourcecode += ext;
-    sourcecode += ".";
-    sourcecode += ext;
+    sourcecode += ".c.c";
     }
+  //else
+  //  {
+  //  // Already specialized above or we leave sourcecode == "sourcecode"
+  //  // which is probably the most correct choice. Extensionless headers,
+  //  // for example... Or file types unknown to Xcode that do not map to a
+  //  // valid lastKnownFileType value.
+  //  }
+
   fileRef->AddAttribute("lastKnownFileType", 
                         this->CreateString(sourcecode.c_str()));
-  std::string path = 
+
+  std::string path =
     this->ConvertToRelativeForXCode(sf->GetFullPath().c_str());
   std::string dir;
   std::string file;
   cmSystemTools::SplitProgramPath(sf->GetFullPath().c_str(),
                                   dir, file);
-  
+
   fileRef->AddAttribute("name", this->CreateString(file.c_str()));
   fileRef->AddAttribute("path", this->CreateString(path.c_str()));
   if(this->XcodeVersion == 15)
@@ -590,6 +601,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     {
     fileRef->AddAttribute("sourceTree", this->CreateString("<absolute>"));
     }
+
   return buildFile;
 }
 
@@ -693,7 +705,9 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         {
         externalObjFiles.push_back(xsf);
         }
-      else if((*i)->GetPropertyAsBool("HEADER_FILE_ONLY"))
+      else if((*i)->GetPropertyAsBool("HEADER_FILE_ONLY") ||
+        (tsFlags.Type == cmTarget::SourceFileTypePrivateHeader) ||
+        (tsFlags.Type == cmTarget::SourceFileTypePublicHeader))
         {
         headerFiles.push_back(xsf);
         }
@@ -1003,7 +1017,7 @@ std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
 {
   std::string retFlag;
   std::string::size_type pos = flags.find(flag);
-  if(pos != flags.npos && (pos ==0 || flags[pos]==' '))
+  if(pos != flags.npos && (pos ==0 || flags[pos-1]==' '))
     {
     while(pos < flags.size() && flags[pos] != ' ')
       {
