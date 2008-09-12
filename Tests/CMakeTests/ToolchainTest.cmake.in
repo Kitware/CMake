@@ -5,7 +5,6 @@
 # which will complain that it can"t be used in script mode
 macro(MARK_AS_ADVANCED)
 endmacro(MARK_AS_ADVANCED)
-
 # set this to a place where we are allowed to write
 set(CMAKE_PLATFORM_ROOT_BIN "${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -62,6 +61,9 @@ set(CMAKE_HOST_SYSTEM_PROCESSOR)
 set(CMAKE_TOOLCHAIN_FILE "${MY_SOURCE_DIR}/DummyToolchain.cmake")
 
 include(CMakeDetermineSystem)
+# make cmake think we are cross compiling for test to work
+set(CMAKE_CROSSCOMPILING TRUE)
+set(CMAKE_C_COMPILER_ID "GNU")
 include(CMakeDetermineCCompiler)
 include(CMakeDetermineCXXCompiler)
 
