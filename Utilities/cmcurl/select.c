@@ -39,7 +39,7 @@
 #error "We can't compile without select() support!"
 #endif
 
-#ifdef __BEOS__
+#if defined(__BEOS__) && !defined(__HAIKU__)
 /* BeOS has FD_SET defined in socket.h */
 #include <socket.h>
 #endif
