@@ -948,16 +948,16 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     << "\n"
     << "# Targets to which this target links.\n"
     << "SET(CMAKE_TARGET_LINKED_INFO_FILES\n";
-  cmGlobalGenerator* gg = this->GlobalGenerator;
   std::set<cmTarget const*> emitted;
-  cmTarget::LinkLibraryVectorType const& libs =
-    this->Target->GetLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator j = libs.begin();
-      j != libs.end(); ++j)
+  const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
+  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
     {
-    if(cmTarget const* linkee = gg->FindTarget(0, j->first.c_str()))
+    cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
+    for(cmComputeLinkInformation::ItemVector::const_iterator
+          i = items.begin(); i != items.end(); ++i)
       {
-      if(emitted.insert(linkee).second)
+      cmTarget const* linkee = i->Target;
+      if(linkee && !linkee->IsImported() && emitted.insert(linkee).second)
         {
         cmMakefile* mf = linkee->GetMakefile();
         cmLocalGenerator* lg = mf->GetLocalGenerator();
