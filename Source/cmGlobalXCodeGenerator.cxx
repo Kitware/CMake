@@ -2047,71 +2047,13 @@ void cmGlobalXCodeGenerator
     }
 
   // Add dependencies on other CMake targets.
-  {
-  // Keep track of dependencies already listed.
-  std::set<cmStdString> emitted;
-
-  // A target should not depend on itself.
-  emitted.insert(cmtarget->GetName());
-
-  // Loop over all library dependencies.
-  const cmTarget::LinkLibraryVectorType& tlibs = 
-    cmtarget->GetLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
-      lib != tlibs.end(); ++lib)
+  TargetDependSet const& deps = this->GetTargetDirectDepends(*cmtarget);
+  for(TargetDependSet::const_iterator i = deps.begin(); i != deps.end(); ++i)
     {
-    // Don't emit the same library twice for this target.
-    if(emitted.insert(lib->first).second)
+    if(cmXCodeObject* dptarget = this->FindXCodeTarget(*i))
       {
-      // Add this dependency.
-      cmTarget* t = this->FindTarget(this->CurrentProject.c_str(),
-                                     lib->first.c_str());
-      cmXCodeObject* dptarget = this->FindXCodeTarget(t);
-      if(dptarget)
-        {
-        this->AddDependTarget(target, dptarget);
-        }
+      this->AddDependTarget(target, dptarget);
       }
-    }
-  }
-  
-  // write utility dependencies.
-  for(std::set<cmStdString>::const_iterator i
-        = cmtarget->GetUtilities().begin();
-      i != cmtarget->GetUtilities().end(); ++i)
-    {
-    cmTarget* t = this->FindTarget(this->CurrentProject.c_str(),
-                                   i->c_str());
-    // if the target is in this project then make target depend
-    // on it.  It may not be in this project if this is a sub
-    // project from the top.
-    if(t)
-      {
-      cmXCodeObject* dptarget = this->FindXCodeTarget(t);
-      if(dptarget)
-        {
-        this->AddDependTarget(target, dptarget);
-        }
-      else
-        {
-        std::string m = "Error Utility: ";
-        m += i->c_str();
-        m += "\n";
-        m += "cmtarget ";
-        if(t)
-          {
-          m += t->GetName();
-          }
-        m += "\n";
-        m += "Is on the target ";
-        m += cmtarget->GetName();
-        m += "\n";
-        m += "But it has no xcode target created yet??\n";
-        m += "Current project is ";
-        m += this->CurrentProject.c_str();
-        cmSystemTools::Error(m.c_str());
-        }
-      } 
     }
 
   // Skip link information for static libraries.
