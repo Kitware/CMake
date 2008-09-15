@@ -49,9 +49,14 @@
 
 #include <memory> // auto_ptr
 
-#if defined(__BEOS__)
+#if defined(__BEOS__) && !defined(__HAIKU__)
 #include <be/kernel/OS.h>   /* disable_debugger() API. */
 #endif
+
+#if defined(__HAIKU__)
+#include <os/kernel/OS.h>   /* disable_debugger() API. */
+#endif
+
 
 #define DEBUGOUT std::cout << __LINE__ << " "; std::cout
 #define DEBUGERR std::cerr << __LINE__ << " "; std::cerr
@@ -610,7 +615,7 @@ void cmCTest::BlockTestErrorDiagnostics()
   cmSystemTools::PutEnv("DASHBOARD_TEST_FROM_CTEST=" CMake_VERSION);
 #if defined(_WIN32)
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-#elif defined(__BEOS__)
+#elif defined(__BEOS__) || defined(__HAIKU__)
   disable_debugger(1);
 #endif
 }

@@ -73,6 +73,13 @@ else
   cmake_system_beos=false
 fi
 
+# Determine whether this is Haiku 
+if echo "${cmake_system}" | grep Haiku >/dev/null 2>&1; then
+  cmake_system_haiku=true
+else
+  cmake_system_haiku=false
+fi
+
 # Choose the generator to use for bootstrapping.
 if ${cmake_system_mingw}; then
   # Bootstrapping from an MSYS prompt.
@@ -600,6 +607,11 @@ fi
 
 # Add BeOS toolkits...
 if ${cmake_system_beos}; then
+  cmake_ld_flags="${LDFLAGS} -lroot -lbe"
+fi
+
+# Add Haiku toolkits...
+if ${cmake_system_haiku}; then
   cmake_ld_flags="${LDFLAGS} -lroot -lbe"
 fi
 

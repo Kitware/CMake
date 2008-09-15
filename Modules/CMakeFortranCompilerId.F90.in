@@ -50,6 +50,10 @@ PROGRAM CMakeFortranCompilerId
    PRINT *, 'INFO:platform[IRIX]'
 #elif defined(__hpux) || defined(__hpux__)
    PRINT *, 'INFO:platform[HP-UX]'
+#elif defined(__HAIKU) || defined(__HAIKU__) || defined(_HAIKU)
+   PRINT *, 'INFO:platform[Haiku]'
+! Haiku also defines __BEOS__ so we must 
+! put it prior to the check for __BEOS__
 #elif defined(__BeOS) || defined(__BEOS__) || defined(_BEOS)
    PRINT *, 'INFO:platform[BeOS]'
 #elif defined(__QNX__) || defined(__QNXNTO__)

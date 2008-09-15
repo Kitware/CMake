@@ -75,7 +75,7 @@ typedef ssize_t kwsysProcess_ssize_t;
 typedef int kwsysProcess_ssize_t;
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__)
+#if defined(__BEOS__) && !defined(__ZETA__) 
 /* BeOS 5 doesn't have usleep(), but it has snooze(), which is identical. */
 # include <be/kernel/OS.h>
 static inline void kwsysProcess_usleep(unsigned int msec)

@@ -1052,7 +1052,17 @@ bool cmCTestTestHandler::GetValue(const char* tag,
   bool ret = true;
   if(line == tag)
     {
+#ifdef __HAIKU__
+    int tmp = 0;
+    fin >> tmp;
+    value = false;
+    if(tmp)
+      {
+      value = true;
+      }
+#else
     fin >> value;
+#endif
     ret = cmSystemTools::GetLineFromStream(fin, line); // read blank line
     }
   else

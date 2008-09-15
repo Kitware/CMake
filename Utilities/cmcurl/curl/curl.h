@@ -1133,7 +1133,7 @@ typedef enum {
 }
 #endif
 
-#ifdef __BEOS__
+#if defined __BEOS__ || defined __HAIKU__
 #include <support/SupportDefs.h>
 #endif
 

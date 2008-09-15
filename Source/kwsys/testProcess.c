@@ -34,7 +34,7 @@
 # pragma warn -8060 /* possibly incorrect assignment */
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__)
+#if defined(__BEOS__) && !defined(__ZETA__) && !defined(__HAIKU__)
 /* BeOS 5 doesn't have usleep(), but it has snooze(), which is identical. */
 # include <be/kernel/OS.h>
 static inline void testProcess_usleep(unsigned int msec)

@@ -932,6 +932,7 @@ bool RunCommandViaPopen(const char* command,
       cmSystemTools::Stdout(buffer);
       }
     output += buffer;
+    buffer[0] = 0;
     fgets(buffer, BUFFER_SIZE, cpipe);
     }
 
@@ -971,10 +972,12 @@ bool RunCommandViaPopen(const char* command,
         error << "SIGFPE";
         break;
 #endif
+#ifndef __HAIKU__
 #ifdef SIGBUS
       case SIGBUS:
         error << "SIGBUS";
         break;
+#endif
 #endif
 #ifdef SIGSEGV
       case SIGSEGV:
@@ -1698,7 +1701,7 @@ int cmSystemToolsGZStructOpen(void* call_data, const char *pathname,
     }
 
 // no fchmod on BeOS 5...do pathname instead.
-#if defined(__BEOS__) && !defined(__ZETA__) 
+#if defined(__BEOS__) && !defined(__ZETA__) && !defined(__HAIKU__)
   if ((oflags & O_CREAT) && chmod(pathname, mode))
     {
     return -1;
