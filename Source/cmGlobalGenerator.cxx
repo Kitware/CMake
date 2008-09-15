@@ -947,7 +947,8 @@ void cmGlobalGenerator::CheckLocalGenerators()
     for (cmTargets::const_iterator l = targets.begin();
          l != targets.end(); l++)
       {
-      const cmTarget::LinkLibraryVectorType& libs=l->second.GetLinkLibraries();
+      const cmTarget::LinkLibraryVectorType& libs =
+        l->second.GetOriginalLinkLibraries();
       for(cmTarget::LinkLibraryVectorType::const_iterator lib = libs.begin();
           lib != libs.end(); ++lib)
         {
