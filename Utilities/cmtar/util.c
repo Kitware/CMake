@@ -110,6 +110,13 @@ mkdirhier(char *path)
     if (dst[0] != '\0')
       strcat(dst, "/");
     strcat(dst, dirp);
+
+#if defined(_WIN32)
+    /* On some Windows machine, trying to mkdir("C:") would fail miserably */
+    if (dst[strlen(dst) - 1] == ':')
+      continue;
+#endif
+
     if (
 #if defined(_WIN32) && !defined(__CYGWIN__)
       mkdir(dst) == -1
