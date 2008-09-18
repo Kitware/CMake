@@ -103,9 +103,12 @@
 #        interface file is constructed from the basename of the header with
 #        the suffix .xml appended.
 #
-#  macro QT4_CREATE_TRANSLATION( qm_files directories ... sources ... ts_files ... )
+#  macro QT4_CREATE_TRANSLATION( qm_files directories ... sources ... 
+#                                ts_files ... OPTIONS ...)
 #        out: qm_files
 #        in:  directories sources ts_files
+#        options: flags to pass to lupdate, such as -extensions to specify
+#        extensions for a directory scan.
 #        generates commands to create .ts (vie lupdate) and .qm
 #        (via lrelease) - files from directories and/or sources. The ts files are 
 #        created and/or updated in the source tree (unless given with full paths).
@@ -1290,9 +1293,12 @@ IF (QT4_QMAKE_FOUND)
    ENDMACRO(QT4_AUTOMOC)
 
    MACRO(QT4_CREATE_TRANSLATION _qm_files)
+      QT4_EXTRACT_OPTIONS(_lupdate_files _lupdate_options ${ARGN})
+      MESSAGE("lupdate_files ${_lupdate_files}")
+      MESSAGE("lupdate_options ${_lupdate_options}")
       SET(_my_sources)
       SET(_my_tsfiles)
-      FOREACH (_file ${ARGN})
+      FOREACH (_file ${_lupdate_files})
          GET_FILENAME_COMPONENT(_ext ${_file} EXT)
          GET_FILENAME_COMPONENT(_abs_FILE ${_file} ABSOLUTE)
          IF(_ext MATCHES "ts")
@@ -1304,7 +1310,7 @@ IF (QT4_QMAKE_FOUND)
       FOREACH(_ts_file ${_my_tsfiles})
         ADD_CUSTOM_COMMAND(OUTPUT ${_ts_file}
            COMMAND ${QT_LUPDATE_EXECUTABLE}
-           ARGS ${_my_sources} -ts ${_ts_file}
+           ARGS ${_lupdate_options} ${_my_sources} -ts ${_ts_file}
            DEPENDS ${_my_sources})
       ENDFOREACH(_ts_file)
       QT4_ADD_TRANSLATION(${_qm_files} ${_my_tsfiles})
