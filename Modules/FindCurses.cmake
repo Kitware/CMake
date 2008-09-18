@@ -36,10 +36,12 @@ ENDIF(CURSES_NCURSES_LIBRARY  AND NOT  CURSES_CURSES_LIBRARY)
 # default search paths.
 IF(CURSES_CURSES_LIBRARY  AND  CURSES_NEED_NCURSES)
   INCLUDE(CheckLibraryExists)
-  CHECK_LIBRARY_EXISTS("${CURSES_CURSES_LIBRARY}" wsyncup "" CURSES_CURSES_HAS_WSYNCUP)
+  CHECK_LIBRARY_EXISTS("${CURSES_CURSES_LIBRARY}" 
+    wsyncup "" CURSES_CURSES_HAS_WSYNCUP)
 
   IF(CURSES_NCURSES_LIBRARY  AND NOT  CURSES_CURSES_HAS_WSYNCUP)
-    CHECK_LIBRARY_EXISTS("${CURSES_NCURSES_LIBRARY}" wsyncup "" CURSES_NCURSES_HAS_WSYNCUP)
+    CHECK_LIBRARY_EXISTS("${CURSES_NCURSES_LIBRARY}" 
+      wsyncup "" CURSES_NCURSES_HAS_WSYNCUP)
     IF( CURSES_NCURSES_HAS_WSYNCUP)
       SET(CURSES_USE_NCURSES TRUE)
     ENDIF( CURSES_NCURSES_HAS_WSYNCUP)
@@ -56,8 +58,10 @@ IF(NOT CURSES_USE_NCURSES)
 
   # for compatibility with older FindCurses.cmake this has to be in the cache
   # FORCE must not be used since this would break builds which preload a cache wqith these variables set
-  SET(CURSES_INCLUDE_PATH "${CURSES_CURSES_H_PATH}" CACHE FILEPATH "The curses include path")
-  SET(CURSES_LIBRARY "${CURSES_CURSES_LIBRARY}" CACHE FILEPATH "The curses library")
+  SET(CURSES_INCLUDE_PATH "${CURSES_CURSES_H_PATH}" 
+    CACHE FILEPATH "The curses include path")
+  SET(CURSES_LIBRARY "${CURSES_CURSES_LIBRARY}"
+    CACHE FILEPATH "The curses library")
 ELSE(NOT CURSES_USE_NCURSES)
 # we need to find ncurses
   GET_FILENAME_COMPONENT(_cursesLibDir "${CURSES_NCURSES_LIBRARY}" PATH)
@@ -66,15 +70,27 @@ ELSE(NOT CURSES_USE_NCURSES)
   FIND_FILE(CURSES_HAVE_NCURSES_H         ncurses.h)
   FIND_FILE(CURSES_HAVE_NCURSES_NCURSES_H ncurses/ncurses.h)
   FIND_FILE(CURSES_HAVE_NCURSES_CURSES_H  ncurses/curses.h)
-  FIND_FILE(CURSES_HAVE_CURSES_H          curses.h  HINTS "${_cursesParentDir}/include")
+  FIND_FILE(CURSES_HAVE_CURSES_H          curses.h 
+    HINTS "${_cursesParentDir}/include")
 
-  FIND_PATH(CURSES_NCURSES_INCLUDE_PATH ncurses.h ncurses/ncurses.h  ncurses/curses.h)
-  FIND_PATH(CURSES_NCURSES_INCLUDE_PATH curses.h  HINTS "${_cursesParentDir}/include")
+  FIND_PATH(CURSES_NCURSES_INCLUDE_PATH ncurses.h ncurses/ncurses.h 
+    ncurses/curses.h)
+  FIND_PATH(CURSES_NCURSES_INCLUDE_PATH curses.h
+    HINTS "${_cursesParentDir}/include")
 
   # for compatibility with older FindCurses.cmake this has to be in the cache
-  # FORCE must not be used since this would break builds which preload a cache wqith these variables set
-  SET(CURSES_INCLUDE_PATH "${CURSES_NCURSES_INCLUDE_PATH}" CACHE FILEPATH "The curses include path")
-  SET(CURSES_LIBRARY "${CURSES_NCURSES_LIBRARY}" CACHE FILEPATH "The curses library")
+  # FORCE must not be used since this would break builds which preload
+  # a cache wqith these variables set
+  # only put ncurses include and library into 
+  # variables if they are found
+  IF(CURSES_NCURSES_INCLUDE_PATH AND CURSES_NCURSES_LIBRARY)
+
+    SET(CURSES_INCLUDE_PATH "${CURSES_NCURSES_INCLUDE_PATH}" 
+      CACHE FILEPATH "The curses include path")
+    SET(CURSES_LIBRARY "${CURSES_NCURSES_LIBRARY}" 
+      CACHE FILEPATH "The curses library")
+  ENDIF(CURSES_NCURSES_INCLUDE_PATH AND CURSES_NCURSES_LIBRARY)
+
 ENDIF(NOT CURSES_USE_NCURSES)
 
 
@@ -86,9 +102,10 @@ FIND_LIBRARY(CURSES_FORM_LIBRARY form HINTS "${_cursesLibDir}")
 FIND_LIBRARY(CURSES_FORM_LIBRARY form )
 
 # for compatibility with older FindCurses.cmake this has to be in the cache
-# FORCE must not be used since this would break builds which preload a cache wqith these variables set
-SET(FORM_LIBRARY "${CURSES_FORM_LIBRARY}"            CACHE FILEPATH "The curses form library")
-
+# FORCE must not be used since this would break builds which preload a cache
+# qith these variables set
+SET(FORM_LIBRARY "${CURSES_FORM_LIBRARY}"         
+  CACHE FILEPATH "The curses form library")
 
 # Need to provide the *_LIBRARIES
 SET(CURSES_LIBRARIES ${CURSES_LIBRARY})
@@ -107,7 +124,8 @@ SET(CURSES_INCLUDE_DIR ${CURSES_INCLUDE_PATH})
 # handle the QUIETLY and REQUIRED arguments and set CURSES_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Curses DEFAULT_MSG CURSES_LIBRARY CURSES_INCLUDE_PATH)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Curses DEFAULT_MSG
+  CURSES_LIBRARY CURSES_INCLUDE_PATH)
 
 MARK_AS_ADVANCED(
   CURSES_INCLUDE_PATH
