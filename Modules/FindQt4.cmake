@@ -1294,8 +1294,6 @@ IF (QT4_QMAKE_FOUND)
 
    MACRO(QT4_CREATE_TRANSLATION _qm_files)
       QT4_EXTRACT_OPTIONS(_lupdate_files _lupdate_options ${ARGN})
-      MESSAGE("lupdate_files ${_lupdate_files}")
-      MESSAGE("lupdate_options ${_lupdate_options}")
       SET(_my_sources)
       SET(_my_tsfiles)
       FOREACH (_file ${_lupdate_files})
