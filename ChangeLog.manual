@@ -1,3 +1,11 @@
+Changes in CMake 2.6.2 RC 5
+- Add beta BundleUtilities.cmake file
+- CPackRPM 7435 fixes to add optional post-install
+- Fix Bug #7456, FindBoost versioned find not working
+- Fix FindCurses to be able to work without ncurses.h
+- FindQt4 fix bug #7433, add a bit more documentation and add ability
+  to specify extra flags to lupdate.
+
 Changes in CMake 2.6.2 RC 4
 - Fix bug #7359 make llvm-gcc work, by explicitely excluding
   "llvm-" from _CMAKE_TOOLCHAIN_PREFIX

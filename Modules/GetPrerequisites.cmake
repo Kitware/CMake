@@ -12,13 +12,16 @@
 #   gp_append_unique
 #   gp_file_type
 #   is_file_executable
+#   gp_item_default_embedded_path
+#     (projects can override with gp_item_default_embedded_path_override)
+#   gp_resolve_item
+#     (projects can override with gp_resolve_item_override)
 #   get_prerequisites
 #   list_prerequisites
+#   list_prerequisites_by_glob
 #
-# Requires CMake 2.5 or greater because it uses function, break, return and
+# Requires CMake 2.6 or greater because it uses function, break, return and
 # PARENT_SCOPE.
-#
-cmake_minimum_required(VERSION 2.5 FATAL_ERROR)
 
 
 # gp_append_unique list_var value
@@ -135,7 +138,7 @@ function(is_file_executable file result_var)
     endif("${file_full_lower}" MATCHES "\\.(exe|dll)$")
 
     # A clause could be added here that uses output or return value of dumpbin
-    # to determine ${result_var}. In 95%+ practical cases, the exe|dll name
+    # to determine ${result_var}. In 99%+? practical cases, the exe|dll name
     # match will be sufficient...
     #
   endif(WIN32)
@@ -184,7 +187,171 @@ function(is_file_executable file result_var)
 endfunction(is_file_executable)
 
 
-# get_prerequisites target prerequisites_var exclude_system recurse
+# gp_item_default_embedded_path item default_embedded_path_var
+#
+# Return the path that others should refer to the item by when the item
+# is embedded inside a bundle.
+#
+# Override on a per-project basis by providing a project-specific
+# gp_item_default_embedded_path_override function.
+#
+function(gp_item_default_embedded_path item default_embedded_path_var)
+  #
+  # The assumption here is that all executables in the bundle will be
+  # in same-level-directories inside the bundle. The parent directory
+  # of an executable inside the bundle should be MacOS or a sibling of
+  # MacOS and all embedded paths returned from here will begin with
+  # "@executable_path/../" and will work from all executables in all
+  # such same-level-directories inside the bundle.
+  #
+
+  # By default, embed things right next to the main bundle executable:
+  #
+  set(path "@executable_path/../../Contents/MacOS")
+
+  set(overridden 0)
+
+  # Embed .dylibs right next to the main bundle executable:
+  #
+  if(item MATCHES "\\.dylib$")
+    set(path "@executable_path/../MacOS")
+    set(overridden 1)
+  endif(item MATCHES "\\.dylib$")
+
+  # Embed frameworks in the embedded "Frameworks" directory (sibling of MacOS):
+  #
+  if(NOT overridden)
+    if(item MATCHES "[^/]+\\.framework/")
+      set(path "@executable_path/../Frameworks")
+      set(overridden 1)
+    endif(item MATCHES "[^/]+\\.framework/")
+  endif(NOT overridden)
+
+  # Provide a hook so that projects can override the default embedded location of
+  # any given library by whatever logic they choose:
+  #
+  if(COMMAND gp_item_default_embedded_path_override)
+    gp_item_default_embedded_path_override("${item}" path)
+  endif(COMMAND gp_item_default_embedded_path_override)
+
+  set(${default_embedded_path_var} "${path}" PARENT_SCOPE)
+endfunction(gp_item_default_embedded_path)
+
+
+# gp_resolve_item context item exepath dirs resolved_item_var
+#
+# Resolve an item into an existing full path file.
+#
+# Override on a per-project basis by providing a project-specific
+# gp_resolve_item_override function.
+#
+function(gp_resolve_item context item exepath dirs resolved_item_var)
+  set(resolved 0)
+  set(resolved_item "${item}")
+
+  # Is it already resolved?
+  #
+  if(EXISTS "${resolved_item}")
+    set(resolved 1)
+  endif(EXISTS "${resolved_item}")
+
+  if(NOT resolved)
+    if(item MATCHES "@executable_path")
+      #
+      # @executable_path references are assumed relative to exepath
+      #
+      string(REPLACE "@executable_path" "${exepath}" ri "${item}")
+      get_filename_component(ri "${ri}" ABSOLUTE)
+
+      if(EXISTS "${ri}")
+        #message(STATUS "info: embedded item exists (${ri})")
+        set(resolved 1)
+        set(resolved_item "${ri}")
+      else(EXISTS "${ri}")
+        message(STATUS "info: embedded item does not exist '${ri}'")
+      endif(EXISTS "${ri}")
+    endif(item MATCHES "@executable_path")
+  endif(NOT resolved)
+
+  if(NOT resolved)
+    if(item MATCHES "@loader_path")
+      #
+      # @loader_path references are assumed relative to the
+      # PATH of the given "context" (presumably another library)
+      #
+      get_filename_component(contextpath "${context}" PATH)
+      string(REPLACE "@loader_path" "${contextpath}" ri "${item}")
+      get_filename_component(ri "${ri}" ABSOLUTE)
+
+      if(EXISTS "${ri}")
+        #message(STATUS "info: embedded item exists (${ri})")
+        set(resolved 1)
+        set(resolved_item "${ri}")
+      else(EXISTS "${ri}")
+        message(STATUS "info: embedded item does not exist '${ri}'")
+      endif(EXISTS "${ri}")
+    endif(item MATCHES "@loader_path")
+  endif(NOT resolved)
+
+  if(NOT resolved)
+    set(ri "ri-NOTFOUND")
+    find_file(ri "${item}" ${dirs})
+    if(ri)
+      #message(STATUS "info: found item in dirs (${ri})")
+      set(resolved 1)
+      set(resolved_item "${ri}")
+      set(ri "ri-NOTFOUND")
+    endif(ri)
+  endif(NOT resolved)
+
+  if(NOT resolved)
+    if(item MATCHES "[^/]+\\.framework/")
+      set(fw "fw-NOTFOUND")
+      find_file(fw "${item}"
+        "~/Library/Frameworks"
+        "/Library/Frameworks"
+        "/System/Library/Frameworks"
+      )
+      if(fw)
+        #message(STATUS "info: found framework (${fw})")
+        set(resolved 1)
+        set(resolved_item "${fw}")
+        set(fw "fw-NOTFOUND")
+      endif(fw)
+    endif(item MATCHES "[^/]+\\.framework/")
+  endif(NOT resolved)
+
+  # Using find_program on Windows will find dll files that are in the PATH.
+  # (Converting simple file names into full path names if found.)
+  #
+  if(WIN32)
+  if(NOT resolved)
+    set(ri "ri-NOTFOUND")
+    find_program(ri "${item}" PATHS "${dirs}")
+    if(ri)
+      set(resolved 1)
+      set(resolved_item "${ri}")
+      set(ri "ri-NOTFOUND")
+    endif(ri)
+  endif(NOT resolved)
+  endif(WIN32)
+
+  # Provide a hook so that projects can override item resolution
+  # by whatever logic they choose:
+  #
+  if(COMMAND gp_resolve_item_override)
+    gp_resolve_item_override("${context}" "${item}" "${exepath}" "${dirs}" resolved_item resolved)
+  endif(COMMAND gp_resolve_item_override)
+
+  if(NOT resolved)
+    message(STATUS "warning: cannot resolve item '${item}'")
+  endif(NOT resolved)
+
+  set(${resolved_item_var} "${resolved_item}" PARENT_SCOPE)
+endfunction(gp_resolve_item)
+
+
+# get_prerequisites target prerequisites_var exclude_system recurse dirs
 #
 # Get the list of shared library files required by ${target}. The list in
 # the variable named ${prerequisites_var} should be empty on first entry to
@@ -201,19 +368,24 @@ endfunction(is_file_executable)
 #  recurse is 0 or 1: 0 for direct prerequisites only, 1 for all prerequisites
 #   recursively
 #
-#  optional ARGV4 (verbose) is 0 or 1: 0 to skip informational message output,
-#   1 to print it
+#  exepath is the path to the top level executable used for @executable_path
+#   replacment on the Mac
 #
-function(get_prerequisites target prerequisites_var exclude_system recurse)
-#  set(verbose 0)
-#  if(NOT "${ARGV4}" STREQUAL "")
-#    message(STATUS "ARGV4='${ARGV4}'")
-#    set(verbose "${ARGV4}")
-#  endif(NOT "${ARGV4}" STREQUAL "")
-#  message(STATUS "verbose='${verbose}'")
+#  dirs is a list of paths where libraries might be found: these paths are
+#   searched first when a target without any path info is given. Then standard
+#   system locations are also searched: PATH, Framework locations, /usr/lib...
+#
+function(get_prerequisites target prerequisites_var exclude_system recurse exepath dirs)
   set(verbose 0)
-
   set(eol_char "E")
+
+  if(NOT IS_ABSOLUTE "${target}")
+    message("warning: target '${target}' is not absolute...")
+  endif(NOT IS_ABSOLUTE "${target}")
+
+  if(NOT EXISTS "${target}")
+    message("warning: target '${target}' does not exist...")
+  endif(NOT EXISTS "${target}")
 
   # <setup-gp_tool-vars>
   #
@@ -288,7 +460,10 @@ function(get_prerequisites target prerequisites_var exclude_system recurse)
     get_filename_component(gp_cmd_dir "${gp_cmd}" PATH)
     get_filename_component(gp_cmd_dlls_dir "${gp_cmd_dir}/../../Common7/IDE" ABSOLUTE)
     if(EXISTS "${gp_cmd_dlls_dir}")
-      set(ENV{PATH} "$ENV{PATH};${gp_cmd_dlls_dir}")
+      # only add to the path if it is not already in the path
+      if(NOT "$ENV{PATH}" MATCHES "${gp_cmd_dlls_dir}")
+        set(ENV{PATH} "$ENV{PATH};${gp_cmd_dlls_dir}")
+      endif(NOT "$ENV{PATH}" MATCHES "${gp_cmd_dlls_dir}")
     endif(EXISTS "${gp_cmd_dlls_dir}")
   endif("${gp_tool}" STREQUAL "dumpbin")
   #
@@ -340,19 +515,11 @@ function(get_prerequisites target prerequisites_var exclude_system recurse)
       string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\3" current_patch_version "${raw_current_version}")
     endif(gp_regex_cmp_count GREATER 2)
 
-    # Using find_program on Windows will find dll files that are in the PATH.
-    # (Converting simple file names into full path names if found.)
+    # Use the raw_item as the list entries returned by this function. Use the
+    # gp_resolve_item function to resolve it to an actual full path file if
+    # necessary.
     #
-    set(item "item-NOTFOUND")
-    find_program(item "${raw_item}" PATHS "${target_dir}")
-    if(NOT item)
-      set(item "${raw_item}")
-    endif(NOT item)
-
-    if(verbose)
-      message(STATUS "raw_item='${raw_item}'")
-      message(STATUS "item='${item}'")
-    endif(verbose)
+    set(item "${raw_item}")
 
     # Add each item unless it is excluded:
     #
@@ -377,8 +544,12 @@ function(get_prerequisites target prerequisites_var exclude_system recurse)
         # Add it to unseen_prereqs so that we can recursively add *its*
         # prerequisites...
         #
+        # But first: resolve its name to an absolute full path name such
+        # that the analysis tools can simply accept it as input.
+        #
         if(NOT list_length_before_append EQUAL list_length_after_append)
-          set(unseen_prereqs ${unseen_prereqs} "${item}")
+          gp_resolve_item("${target}" "${item}" "${exepath}" "${dirs}" resolved_item)
+          set(unseen_prereqs ${unseen_prereqs} "${resolved_item}")
         endif(NOT list_length_before_append EQUAL list_length_after_append)
       endif(${recurse})
     endif(add_item)
@@ -394,7 +565,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse)
   if(${recurse})
     set(more_inputs ${unseen_prereqs})
     foreach(input ${more_inputs})
-      get_prerequisites("${input}" ${prerequisites_var} ${exclude_system} ${recurse})
+      get_prerequisites("${input}" ${prerequisites_var} ${exclude_system} ${recurse} "${exepath}" "${dirs}")
     endforeach(input)
   endif(${recurse})
 
@@ -441,8 +612,10 @@ function(list_prerequisites target)
   set(print_target "${verbose}")
   set(type_str "")
 
+  get_filename_component(exepath "${target}" PATH)
+
   set(prereqs "")
-  get_prerequisites("${target}" prereqs ${exclude_system} ${all})
+  get_prerequisites("${target}" prereqs ${exclude_system} ${all} "${exepath}" "")
 
   if(print_target)
     message(STATUS "File '${target}' depends on:")

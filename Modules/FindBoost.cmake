@@ -286,8 +286,10 @@ ELSE (_boost_IN_CACHE)
 
   # Try to find Boost by stepping backwards through the Boost versions
   # we know about.
-  FOREACH(_boost_VER ${_boost_TEST_VERSIONS})
-    IF( NOT Boost_INCLUDE_DIR )
+  IF( NOT Boost_INCLUDE_DIR )
+    # Build a list of path suffixes for each version.
+    SET(_boost_PATH_SUFFIXES)
+    FOREACH(_boost_VER ${_boost_TEST_VERSIONS})
       # Add in a path suffix, based on the required version, ideally
       # we could read this from version.hpp, but for that to work we'd
       # need to know the include dir already
@@ -304,15 +306,16 @@ ELSE (_boost_IN_CACHE)
           STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)" "\\1_\\2" 
             _boost_PATH_SUFFIX ${_boost_PATH_SUFFIX})
       ENDIF(_boost_PATH_SUFFIX MATCHES "[0-9]+\\.[0-9]+\\.[0-9]+")
+      LIST(APPEND _boost_PATH_SUFFIXES "${_boost_PATH_SUFFIX}")
+    ENDFOREACH(_boost_VER)
 
-      FIND_PATH(Boost_INCLUDE_DIR
-          NAMES         boost/config.hpp
-          HINTS         ${_boost_INCLUDE_SEARCH_DIRS}
-          PATH_SUFFIXES ${_boost_PATH_SUFFIX}
+    # Look for a standard boost header file.
+    FIND_PATH(Boost_INCLUDE_DIR
+      NAMES         boost/config.hpp
+      HINTS         ${_boost_INCLUDE_SEARCH_DIRS}
+      PATH_SUFFIXES ${_boost_PATH_SUFFIXES}
       )
-
-    ENDIF( NOT Boost_INCLUDE_DIR )
-  ENDFOREACH(_boost_VER)
+  ENDIF( NOT Boost_INCLUDE_DIR )
 
   IF(Boost_INCLUDE_DIR)
     # Extract Boost_VERSION and Boost_LIB_VERSION from version.hpp
