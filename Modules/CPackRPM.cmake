@@ -25,11 +25,6 @@ IF(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
   MESSAGE(FATAL_ERROR "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory without spaces for building RPMs.")
 ENDIF(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
 
-IF(NOT CPACK_SET_DESTDIR)
-  MESSAGE("CPackRPM:Warning: You did not set CPACK_SET_DESTDIR to ON")
-  MESSAGE("CPackRPM:Warning: this will make CPackRPM fail if you have installed files with absolute path")
-ENDIF(NOT CPACK_SET_DESTDIR)
-
 # If rpmbuild is found 
 # we try to discover alien since we may be on non RPM distro like Debian.
 # In this case we may try to to use more advanced features
