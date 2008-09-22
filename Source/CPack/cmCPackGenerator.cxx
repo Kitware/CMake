@@ -944,163 +944,27 @@ const char* cmCPackGenerator::GetOption(const char* op)
 //----------------------------------------------------------------------
 int cmCPackGenerator::FindRunningCMake(const char* arg0)
 {
-  int found = 0;
-  // Find our own executable.
-  std::vector<cmStdString> failures;
-  this->CPackSelf = arg0;
-  cmSystemTools::ConvertToUnixSlashes(this->CPackSelf);
-  failures.push_back(this->CPackSelf);
-  this->CPackSelf = cmSystemTools::FindProgram(this->CPackSelf.c_str());
-  if(!cmSystemTools::FileExists(this->CPackSelf.c_str()))
-    {
-    failures.push_back(this->CPackSelf);
-    this->CPackSelf =  "/usr/local/bin/ctest";
-    }
-  if(!cmSystemTools::FileExists(this->CPackSelf.c_str()))
-    {
-    failures.push_back(this->CPackSelf);
-    cmOStringStream msg;
-    msg << "CPack can not find the command line program ctest.\n";
-    msg << "  argv[0] = \"" << arg0 << "\"\n";
-    msg << "  Attempted paths:\n";
-    std::vector<cmStdString>::iterator i;
-    for(i=failures.begin(); i != failures.end(); ++i)
-      {
-      msg << "    \"" << i->c_str() << "\"\n";
-      }
-    cmCPackLogger(cmCPackLog::LOG_ERROR, msg.str().c_str()
-      << std::endl);
-    return 0;
-    }
-  std::string dir;
-  std::string file;
-  if(cmSystemTools::SplitProgramPath(this->CPackSelf.c_str(),
-      dir, file, true))
-    {
-    this->CMakeSelf = dir += "/cmake";
-    this->CMakeSelf += cmSystemTools::GetExecutableExtension();
-    if(cmSystemTools::FileExists(this->CMakeSelf.c_str()))
-      {
-      found = 1;
-      }
-    }
-  if ( !found )
-    {
-    failures.push_back(this->CMakeSelf);
-#ifdef CMAKE_BUILD_DIR
-    std::string intdir = ".";
-#ifdef  CMAKE_INTDIR
-    intdir = CMAKE_INTDIR;
-#endif
-    this->CMakeSelf = CMAKE_BUILD_DIR;
-    this->CMakeSelf += "/bin/";
-    this->CMakeSelf += intdir;
-    this->CMakeSelf += "/cmake";
-    this->CMakeSelf += cmSystemTools::GetExecutableExtension();
-#endif
-    if(!cmSystemTools::FileExists(this->CMakeSelf.c_str()))
-      {
-      failures.push_back(this->CMakeSelf);
-      cmOStringStream msg;
-      msg << "CPack can not find the command line program cmake.\n";
-      msg << "  argv[0] = \"" << arg0 << "\"\n";
-      msg << "  Attempted paths:\n";
-      std::vector<cmStdString>::iterator i;
-      for(i=failures.begin(); i != failures.end(); ++i)
-        {
-        msg << "    \"" << i->c_str() << "\"\n";
-        }
-      cmCPackLogger(cmCPackLog::LOG_ERROR, msg.str().c_str()
-        << std::endl);
-      return 0;
-      }
-    }
-  // do CMAKE_ROOT, look for the environment variable first
-  std::string cMakeRoot;
-  std::string modules;
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT" << std::endl);
-  if (getenv("CMAKE_ROOT"))
-    {
-    cMakeRoot = getenv("CMAKE_ROOT");
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    }
-  if(modules.empty() || !cmSystemTools::FileExists(modules.c_str()))
-    {
-    // next try exe/..
-    cMakeRoot  = cmSystemTools::GetProgramPath(this->CMakeSelf.c_str());
-    std::string::size_type slashPos = cMakeRoot.rfind("/");
-    if(slashPos != std::string::npos)
-      {
-      cMakeRoot = cMakeRoot.substr(0, slashPos);
-      }
-    // is there no Modules direcory there?
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
-      << modules.c_str() << std::endl);
-    }
+  // use the CMAKE_ROOT from cmake which should have been
+  // found by now
+  const char* root=
+    this->MakefileMap->GetDefinition("CMAKE_ROOT");
 
-  if (!cmSystemTools::FileExists(modules.c_str()))
+  if(root)
     {
-    // try exe/../share/cmake
-    cMakeRoot += CMAKE_DATA_DIR;
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
-      << modules.c_str() << std::endl);
+      this->CMakeRoot = root;
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
+                    << this->CMakeRoot.c_str() << std::endl);
+      this->SetOption("CMAKE_ROOT", this->CMakeRoot.c_str());
+      return 1;
     }
-#ifdef CMAKE_ROOT_DIR
-  if (!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // try compiled in root directory
-    cMakeRoot = CMAKE_ROOT_DIR;
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
-      << modules.c_str() << std::endl);
-    }
-#endif
-#ifdef CMAKE_PREFIX
-  if (!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // try compiled in install prefix
-    cMakeRoot = CMAKE_PREFIX CMAKE_DATA_DIR;
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
-      << modules.c_str() << std::endl);
-    }
-#endif
-  if (!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // try
-    cMakeRoot  = cmSystemTools::GetProgramPath(this->CMakeSelf.c_str());
-    cMakeRoot += CMAKE_DATA_DIR;
-    modules = cMakeRoot +  "/Modules/CMake.cmake";
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
-      << modules.c_str() << std::endl);
-    }
-  if(!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // next try exe
-    cMakeRoot  = cmSystemTools::GetProgramPath(this->CMakeSelf.c_str());
-    // is there no Modules direcory there?
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
-      << modules.c_str() << std::endl);
-    }
-  if (!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // couldn't find modules
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Could not find CMAKE_ROOT !!!" << std::endl
-      << "CMake has most likely not been installed correctly." << std::endl
-      <<"Modules directory not found in" << std::endl
-      << cMakeRoot.c_str()
-      << std::endl);
-    return 0;
-    }
-  this->CMakeRoot = cMakeRoot;
-  cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
-    << this->CMakeRoot.c_str() << std::endl);
-  this->SetOption("CMAKE_ROOT", this->CMakeRoot.c_str());
-  return 1;
+  cmCPackLogger(cmCPackLog::LOG_ERROR,
+                "Could not find CMAKE_ROOT !!!" 
+                << std::endl
+                << "CMake has most likely not been installed correctly."
+                << std::endl
+                <<"Modules directory not found in"
+                << std::endl);
+  return 0;
 }
 
 //----------------------------------------------------------------------
