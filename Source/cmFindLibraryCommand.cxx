@@ -249,6 +249,11 @@ struct cmFindLibraryHelper
   size_type BestPrefix;
   size_type BestSuffix;
 
+  // Support for OpenBSD shared library naming: lib<name>.so.<major>.<minor>
+  bool OpenBSD;
+  unsigned int BestMajor;
+  unsigned int BestMinor;
+
   // Current name under consideration.
   cmsys::RegularExpression NameRegex;
   bool TryRawName;
@@ -290,11 +295,18 @@ cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
   this->RegexFromList(this->PrefixRegexStr, this->Prefixes);
   this->RegexFromList(this->SuffixRegexStr, this->Suffixes);
 
+  // Check whether to use OpenBSD-style library version comparisons.
+  this->OpenBSD =
+    this->Makefile->GetCMakeInstance()
+    ->GetPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
+
   this->TryRawName = false;
 
   // No library file has yet been found.
   this->BestPrefix = this->Prefixes.size();
   this->BestSuffix = this->Suffixes.size();
+  this->BestMajor = 0;
+  this->BestMinor = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -368,6 +380,10 @@ void cmFindLibraryHelper::SetName(std::string const& name)
   regex += this->PrefixRegexStr;
   this->RegexFromLiteral(regex, name);
   regex += this->SuffixRegexStr;
+  if(this->OpenBSD)
+    {
+    regex += "(\\.[0-9]+\\.[0-9]+)?";
+    }
   regex += "$";
   this->NameRegex.compile(regex.c_str());
 }
@@ -414,15 +430,27 @@ bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
         {
         // This is a matching file.  Check if it is better than the
         // best name found so far.  Earlier prefixes are preferred,
-        // followed by earlier suffixes.
+        // followed by earlier suffixes.  For OpenBSD, shared library
+        // version extensions are compared.
         size_type prefix = this->GetPrefixIndex(this->NameRegex.match(1));
         size_type suffix = this->GetSuffixIndex(this->NameRegex.match(2));
+        unsigned int major = 0;
+        unsigned int minor = 0;
+        if(this->OpenBSD)
+          {
+          sscanf(this->NameRegex.match(3).c_str(), ".%u.%u", &major, &minor);
+          }
         if(this->BestPath.empty() || prefix < this->BestPrefix ||
-           (prefix == this->BestPrefix && suffix < this->BestSuffix))
+           (prefix == this->BestPrefix && suffix < this->BestSuffix) ||
+           (prefix == this->BestPrefix && suffix == this->BestSuffix &&
+            (major > this->BestMajor ||
+             (major == this->BestMajor && minor > this->BestMinor))))
           {
           this->BestPath = this->TestPath;
           this->BestPrefix = prefix;
           this->BestSuffix = suffix;
+          this->BestMajor = major;
+          this->BestMinor = minor;
           }
         }
       }
