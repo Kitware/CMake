@@ -63,6 +63,10 @@ do.
 #include <dirent.h>    /* DIR, dirent */
 #include <ctype.h>     /* isspace */
 
+#ifdef __HAIKU__
+#undef __BEOS__
+#endif
+
 #if defined(KWSYS_C_HAS_PTRDIFF_T) && KWSYS_C_HAS_PTRDIFF_T
 typedef ptrdiff_t kwsysProcess_ptrdiff_t;
 #else

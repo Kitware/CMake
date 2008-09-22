@@ -87,7 +87,7 @@ int test4(int argc, const char* argv[])
 #if defined(_WIN32)
   /* Avoid error diagnostic popups since we are crashing on purpose.  */
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-#elif defined(__BEOS__)
+#elif defined(__BEOS__) || defined(__HAIKU__)
   /* Avoid error diagnostic popups since we are crashing on purpose.  */
   disable_debugger(1);
 #endif
