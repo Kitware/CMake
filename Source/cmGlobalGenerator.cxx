@@ -731,6 +731,7 @@ void cmGlobalGenerator::Configure()
   this->LocalGeneratorToTargetMap.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
+  this->DirectoryContentMap.clear();
 
   // start with this directory
   cmLocalGenerator *lg = this->CreateLocalGenerator();
