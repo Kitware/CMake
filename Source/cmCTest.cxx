@@ -249,6 +249,7 @@ cmCTest::cmCTest()
   this->ShowOnly               = false;
   this->RunConfigurationScript = false;
   this->TestModel              = cmCTest::EXPERIMENTAL;
+  this->MaxTestNameWidth       = 30;
   this->InteractiveDebugMode   = true;
   this->TimeOut                = 0;
   this->CompressXMLFiles       = false;
@@ -1721,6 +1722,11 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     {
     this->ForceNewCTestProcess = true;
     }
+  if(this->CheckArgument(arg, "-W", "--max-width") && i < args.size() - 1)
+    {
+    i++;
+    this->MaxTestNameWidth = atoi(args[i].c_str());
+    }
   if(this->CheckArgument(arg, "--interactive-debug-mode") &&
      i < args.size() - 1 )
     {
@@ -2307,6 +2313,12 @@ std::string const& cmCTest::GetConfigType()
 bool cmCTest::GetShowOnly()
 {
   return this->ShowOnly;
+}
+
+//----------------------------------------------------------------------
+int cmCTest::GetMaxTestNameWidth() const
+{
+  return this->MaxTestNameWidth;
 }
 
 //----------------------------------------------------------------------

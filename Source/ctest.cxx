@@ -128,8 +128,11 @@ static const char * cmDocumentationOptions[][3] =
   {"-U, --union", "Take the Union of -I and -R",
    "When both -R and -I are specified by default the intersection of "
    "tests are run. By specifying -U the union of tests is run instead."},
+  {"--max-width <width>", "Set the max width for a test name to output",
+   "Set the maximum width for each test name to show in the output.  This "
+   "allows the user to widen the output to avoid cliping the test name which "
+   "can be very annoying."},
   {"--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1.",
-
    "This option causes ctest to run tests in either an interactive mode or "
    "a non-interactive mode. On Windows this means that in non-interactive "
    "mode, all system debug pop up windows are blocked. In dashboard mode "

@@ -168,7 +168,11 @@ public:
   ///! Should we only show what we would do?
   bool GetShowOnly();
 
-   /**
+
+  ///! The max output width
+  int GetMaxTestNameWidth() const;
+
+  /**
    * Run a single executable command and put the stdout and stderr
    * in output.
    *
@@ -372,6 +376,8 @@ private:
   std::string             SpecificTrack;
 
   double                  TimeOut;
+
+  int                     MaxTestNameWidth;
 
   std::string             ParallelCacheFile;
   int                     ParallelLevel;

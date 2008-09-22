@@ -644,8 +644,9 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "Testing");
     }
   cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
-  std::string outname = testname;
-  outname.resize(30, ' ');
+  const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
+  std::string outname = testname + " ";
+  outname.resize(maxTestNameWidth, '.');
   *this->LogFile << cnt << "/" << tmsize << " Testing: " << testname
                  << std::endl;
   
