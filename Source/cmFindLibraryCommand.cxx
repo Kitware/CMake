@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmFindLibraryCommand.h"
 #include "cmCacheManager.h"
+#include <cmsys/Directory.hxx>
+#include <cmsys/stl/algorithm>
 
 cmFindLibraryCommand::cmFindLibraryCommand()
 { 
@@ -227,74 +229,229 @@ std::string cmFindLibraryCommand::FindLibrary()
 }
 
 //----------------------------------------------------------------------------
-std::string cmFindLibraryCommand::FindNormalLibrary()
+struct cmFindLibraryHelper
 {
+  cmFindLibraryHelper(cmMakefile* mf);
+
+  // Context information.
+  cmMakefile* Makefile;
+  cmGlobalGenerator* GG;
+
+  // List of valid prefixes and suffixes.
+  std::vector<std::string> Prefixes;
+  std::vector<std::string> Suffixes;
+  std::string PrefixRegexStr;
+  std::string SuffixRegexStr;
+
+  // Keep track of the best library file found so far.
+  typedef std::vector<std::string>::size_type size_type;
+  std::string BestPath;
+  size_type BestPrefix;
+  size_type BestSuffix;
+
+  // Current name under consideration.
+  cmsys::RegularExpression NameRegex;
+  bool TryRawName;
+  std::string RawName;
+
+  // Current full path under consideration.
+  std::string TestPath;
+
+  void RegexFromLiteral(std::string& out, std::string const& in);
+  void RegexFromList(std::string& out, std::vector<std::string> const& in);
+  size_type GetPrefixIndex(std::string const& prefix)
+    {
+    return cmsys_stl::find(this->Prefixes.begin(), this->Prefixes.end(),
+                           prefix) - this->Prefixes.begin();
+    }
+  size_type GetSuffixIndex(std::string const& suffix)
+    {
+    return cmsys_stl::find(this->Suffixes.begin(), this->Suffixes.end(),
+                           suffix) - this->Suffixes.begin();
+    }
+  bool HasValidSuffix(std::string const& name);
+  void SetName(std::string const& name);
+  bool CheckDirectory(std::string const& path);
+};
+
+//----------------------------------------------------------------------------
+cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
+  Makefile(mf)
+{
+  this->GG = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+
   // Collect the list of library name prefixes/suffixes to try.
   const char* prefixes_list =
     this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_PREFIXES");
   const char* suffixes_list =
     this->Makefile->GetRequiredDefinition("CMAKE_FIND_LIBRARY_SUFFIXES");
-  std::vector<std::string> prefixes;
-  std::vector<std::string> suffixes;
-  cmSystemTools::ExpandListArgument(prefixes_list, prefixes, true);
-  cmSystemTools::ExpandListArgument(suffixes_list, suffixes, true);
+  cmSystemTools::ExpandListArgument(prefixes_list, this->Prefixes, true);
+  cmSystemTools::ExpandListArgument(suffixes_list, this->Suffixes, true);
+  this->RegexFromList(this->PrefixRegexStr, this->Prefixes);
+  this->RegexFromList(this->SuffixRegexStr, this->Suffixes);
 
+  this->TryRawName = false;
+
+  // No library file has yet been found.
+  this->BestPrefix = this->Prefixes.size();
+  this->BestSuffix = this->Suffixes.size();
+}
+
+//----------------------------------------------------------------------------
+void cmFindLibraryHelper::RegexFromLiteral(std::string& out,
+                                           std::string const& in)
+{
+  for(std::string::const_iterator ci = in.begin(); ci != in.end(); ++ci)
+    {
+    char ch = *ci;
+    if(ch == '[' || ch == ']' || ch == '(' || ch == ')' || ch == '\\' ||
+       ch == '.' || ch == '*' || ch == '+' || ch == '?' || ch == '-' ||
+       ch == '^' || ch == '$')
+      {
+      out += "\\";
+      }
+#if defined(_WIN32) || defined(__APPLE__)
+    out += tolower(ch);
+#else
+    out += ch;
+#endif
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmFindLibraryHelper::RegexFromList(std::string& out,
+                                        std::vector<std::string> const& in)
+{
+  // Surround the list in parens so the '|' does not apply to anything
+  // else and the result can be checked after matching.
+  out += "(";
+  const char* sep = "";
+  for(std::vector<std::string>::const_iterator si = in.begin();
+      si != in.end(); ++si)
+    {
+    // Separate from previous item.
+    out += sep;
+    sep = "|";
+
+    // Append this item.
+    this->RegexFromLiteral(out, *si);
+    }
+  out += ")";
+}
+
+//----------------------------------------------------------------------------
+bool cmFindLibraryHelper::HasValidSuffix(std::string const& name)
+{
+  // Check if the given name ends in a valid library suffix.
+  for(std::vector<std::string>::const_iterator si = this->Suffixes.begin();
+      si != this->Suffixes.end(); ++si)
+    {
+    std::string const& suffix = *si;
+    if(name.length() > suffix.length() &&
+       name.substr(name.size()-suffix.length()) == suffix)
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+void cmFindLibraryHelper::SetName(std::string const& name)
+{
+  // Consider checking the raw name too.
+  this->TryRawName = this->HasValidSuffix(name);
+  this->RawName = name;
+
+  // Build a regular expression to match library names.
+  std::string regex = "^";
+  regex += this->PrefixRegexStr;
+  this->RegexFromLiteral(regex, name);
+  regex += this->SuffixRegexStr;
+  regex += "$";
+  this->NameRegex.compile(regex.c_str());
+}
+
+//----------------------------------------------------------------------------
+bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
+{
+  // If the original library name provided by the user matches one of
+  // the suffixes, try it first.  This allows users to search
+  // specifically for a static library on some platforms (on MS tools
+  // one cannot tell just from the library name whether it is a static
+  // library or an import library).
+  if(this->TryRawName)
+    {
+    this->TestPath = path;
+    this->TestPath += this->RawName;
+    if(cmSystemTools::FileExists(this->TestPath.c_str(), true))
+      {
+      this->BestPath =
+        cmSystemTools::CollapseFullPath(this->TestPath.c_str());
+      cmSystemTools::ConvertToUnixSlashes(this->BestPath);
+      return true;
+      }
+    }
+
+  // Search for a file matching the library name regex.
+  std::string dir = path;
+  cmSystemTools::ConvertToUnixSlashes(dir);
+  std::set<cmStdString> const& files = this->GG->GetDirectoryContent(dir);
+  for(std::set<cmStdString>::const_iterator fi = files.begin();
+      fi != files.end(); ++fi)
+    {
+    std::string const& origName = *fi;
+#if defined(_WIN32) || defined(__APPLE__)
+    std::string testName = cmSystemTools::LowerCase(origName);
+#else
+    std::string const& testName = origName;
+#endif
+    if(this->NameRegex.find(testName))
+      {
+      this->TestPath = path;
+      this->TestPath += origName;
+      if(!cmSystemTools::FileIsDirectory(this->TestPath.c_str()))
+        {
+        // This is a matching file.  Check if it is better than the
+        // best name found so far.  Earlier prefixes are preferred,
+        // followed by earlier suffixes.
+        size_type prefix = this->GetPrefixIndex(this->NameRegex.match(1));
+        size_type suffix = this->GetSuffixIndex(this->NameRegex.match(2));
+        if(this->BestPath.empty() || prefix < this->BestPrefix ||
+           (prefix == this->BestPrefix && suffix < this->BestSuffix))
+          {
+          this->BestPath = this->TestPath;
+          this->BestPrefix = prefix;
+          this->BestSuffix = suffix;
+          }
+        }
+      }
+    }
+
+  // Use the best candidate found in this directory, if any.
+  return !this->BestPath.empty();
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindNormalLibrary()
+{
   // Search the entire path for each name.
-  std::string tryPath;
+  cmFindLibraryHelper helper(this->Makefile);
   for(std::vector<std::string>::const_iterator ni = this->Names.begin();
       ni != this->Names.end() ; ++ni)
     {
-    // If the original library name provided by the user matches one of
-    // the suffixes, try it first.
-    bool tryOrig = false;
+    // Switch to searching for this name.
     std::string const& name = *ni;
-    for(std::vector<std::string>::const_iterator si = suffixes.begin();
-        !tryOrig && si != suffixes.end(); ++si)
-      {
-      std::string const& suffix = *si;
-      if(name.length() > suffix.length() &&
-         name.substr(name.size()-suffix.length()) == suffix)
-        {
-        tryOrig = true;
-        }
-      }
+    helper.SetName(name);
 
+    // Search every directory.
     for(std::vector<std::string>::const_iterator
           p = this->SearchPaths.begin();
         p != this->SearchPaths.end(); ++p)
       {
-      // Try the original library name as specified by the user.
-      if(tryOrig)
+      if(helper.CheckDirectory(*p))
         {
-        tryPath = *p;
-        tryPath += name;
-        if(cmSystemTools::FileExists(tryPath.c_str(), true))
-          {
-          tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-          cmSystemTools::ConvertToUnixSlashes(tryPath);
-          return tryPath;
-          }
-        }
-
-      // Try various library naming conventions.
-      for(std::vector<std::string>::iterator prefix = prefixes.begin();
-          prefix != prefixes.end(); ++prefix)
-        {
-        for(std::vector<std::string>::iterator suffix = suffixes.begin();
-            suffix != suffixes.end(); ++suffix)
-          {
-          tryPath = *p;
-          tryPath += *prefix;
-          tryPath += name;
-          tryPath += *suffix;
-          if(cmSystemTools::FileExists(tryPath.c_str())
-             && !cmSystemTools::FileIsDirectory(tryPath.c_str()))
-            {
-            tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str());
-            cmSystemTools::ConvertToUnixSlashes(tryPath);
-            return tryPath;
-            }
-          }
+        return helper.BestPath;
         }
       }
     }
