@@ -24,6 +24,7 @@ IF(HAVE_WINDOWS_H)
 ELSE(HAVE_WINDOWS_H)
   add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
   add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
+  add_header_include(HAVE_SYS_TIME_H "sys/time.h")
 ENDIF(HAVE_WINDOWS_H)
 
 SET(EXTRA_DEFINES_BACKUP "${EXTRA_DEFINES}")
