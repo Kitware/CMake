@@ -88,7 +88,7 @@ public:
   bool IsSet(const char* name) const;
 
   //! Set all the variables
-  int FindRunningCMake(const char* arg0);
+  int SetCMakeRoot();
 
   //! Set the logger
   void SetLogger(cmCPackLog* log) { this->Logger = log; }
