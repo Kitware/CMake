@@ -1,0 +1,4 @@
+This works:
+
+       cl.exe /O2 /DNDEBUG /MD /DCURL_STATICLIB /I. /I../include /nologo /W3 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL /Fo"release\select.obj"  .\select.c
+select.c
