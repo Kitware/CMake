@@ -98,7 +98,7 @@ int testDynamicLoader(int argc, char *argv[])
 {
 #if defined(_WIN32)
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-#elif defined(__BEOS__)
+#elif defined(__BEOS__) || defined(__HAIKU__)
   disable_debugger(1);
 #endif
   int res = 0;
