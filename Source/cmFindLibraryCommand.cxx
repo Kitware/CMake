@@ -182,6 +182,7 @@ void cmFindLibraryCommand::AddLib64Paths()
     cmSystemTools::ReplaceString(s, "lib/", "lib64/");
     // try to replace lib with lib64 and see if it is there,
     // then prepend it to the path
+    // Note that all paths have trailing slashes.
     if((s != *i) && cmSystemTools::FileIsDirectory(s.c_str()))
       {
       path64.push_back(s);
@@ -189,7 +190,7 @@ void cmFindLibraryCommand::AddLib64Paths()
       }  
     // now just add a 64 to the path name and if it is there,
     // add it to the path
-    s2 += "64";
+    s2 += "64/";
     if(cmSystemTools::FileIsDirectory(s2.c_str()))
       {
       found64 = true;
