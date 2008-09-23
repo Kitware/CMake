@@ -886,7 +886,7 @@ int cmCPackGenerator::Initialize(const char* name, cmMakefile* mf,
 {
   this->MakefileMap = mf;
   this->Name = name;
-  if ( !this->FindRunningCMake(argv0) )
+  if ( !this->SetCMakeRoot() )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
       "Cannot initialize the generator" << std::endl);
@@ -942,7 +942,7 @@ const char* cmCPackGenerator::GetOption(const char* op)
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenerator::FindRunningCMake(const char* arg0)
+int cmCPackGenerator::SetCMakeRoot()
 {
   // use the CMAKE_ROOT from cmake which should have been
   // found by now
