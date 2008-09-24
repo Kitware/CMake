@@ -73,7 +73,7 @@ public:
   /**
    * Initialize generator
    */
-  int Initialize(const char* name, cmMakefile* mf, const char* argv0);
+  int Initialize(const char* name, cmMakefile* mf);
 
   /**
    * Construct generator

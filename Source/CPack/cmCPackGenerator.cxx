@@ -881,8 +881,7 @@ int cmCPackGenerator::DoPackage()
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenerator::Initialize(const char* name, cmMakefile* mf,
- const char* argv0)
+int cmCPackGenerator::Initialize(const char* name, cmMakefile* mf)
 {
   this->MakefileMap = mf;
   this->Name = name;
