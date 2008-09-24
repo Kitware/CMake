@@ -2168,28 +2168,60 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   parser.SetReplaceAtSyntax(replaceAt);
   parser.SetRemoveEmpty(removeEmpty);
   int res = parser.ParseString(source.c_str(), 0);
-  if ( res )
+  const char* emsg = parser.GetError();
+  if ( res && !emsg[0] )
     {
     source = parser.GetResult();
     }
   else
     {
+    // Construct the main error message.
     cmOStringStream error;
-    error << "Syntax error in cmake code at\n"
-          << (filename?filename:"(no filename given)")
-          << ":" << line << ":\n"
-          << parser.GetError() << ", when parsing string \""
-          << source.c_str() << "\"";
-    if(this->NeedBackwardsCompatibility(2,0))
+    error << "Syntax error in cmake code ";
+    if(filename && line > 0)
       {
-      cmSystemTools::Error(error.str().c_str());
-      cmSystemTools::SetFatalErrorOccured();
-      return source.c_str();
+      // This filename and line number may be more specific than the
+      // command context because one command invocation can have
+      // arguments on multiple lines.
+      error << "at\n"
+            << "  " << filename << ":" << line << "\n";
       }
-    else
+    error << "when parsing string\n"
+          << "  " << source.c_str() << "\n";
+    error << emsg;
+
+    // If the parser failed ("res" is false) then this is a real
+    // argument parsing error, so the policy applies.  Otherwise the
+    // parser reported an error message without failing because the
+    // helper implementation is unhappy, which has always reported an
+    // error.
+    cmake::MessageType mtype = cmake::FATAL_ERROR;
+    if(!res)
       {
-      cmSystemTools::Message(error.str().c_str());
+      // This is a real argument parsing error.  Use policy CMP0010 to
+      // decide whether it is an error.
+      switch(this->GetPolicyStatus(cmPolicies::CMP0010))
+        {
+        case cmPolicies::WARN:
+          error << "\n"
+                << (this->GetPolicies()
+                    ->GetPolicyWarning(cmPolicies::CMP0010));
+        case cmPolicies::OLD:
+          // OLD behavior is to just warn and continue.
+          mtype = cmake::AUTHOR_WARNING;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+          error << "\n"
+                << (this->GetPolicies()
+                    ->GetRequiredPolicyError(cmPolicies::CMP0010));
+        case cmPolicies::NEW:
+          // NEW behavior is to report the error.
+          cmSystemTools::SetFatalErrorOccured();
+          break;
+        }
       }
+    this->IssueMessage(mtype, error.str());
     }
   return source.c_str();
 }

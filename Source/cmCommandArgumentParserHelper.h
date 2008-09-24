@@ -95,6 +95,7 @@ private:
   char* AddString(const char* str);
 
   void CleanupParser();
+  void SetError(std::string const& msg);
 
   std::vector<char*> Variables;
   const cmMakefile* Makefile;
