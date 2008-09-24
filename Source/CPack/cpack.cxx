@@ -382,7 +382,7 @@ int main (int argc, char *argv[])
               << gen << std::endl);
             parsed = 0;
             }
-          if ( parsed && !cpackGenerator->Initialize(gen, mf, argv[0]) )
+          if ( parsed && !cpackGenerator->Initialize(gen, mf) )
             {
             cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
               "Cannot initialize the generator " << gen << std::endl);
