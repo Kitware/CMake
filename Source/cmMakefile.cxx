@@ -2364,7 +2364,7 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
   return false;
 }
 
-void cmMakefile::ExpandArguments(
+bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
   std::vector<std::string>& outArgs)
 {
@@ -2390,6 +2390,7 @@ void cmMakefile::ExpandArguments(
       cmSystemTools::ExpandListArgument(value, outArgs);
       }
     }
+  return !cmSystemTools::GetFatalErrorOccured();
 }
 
 void cmMakefile::RemoveFunctionBlocker(const cmListFileFunction& lff)

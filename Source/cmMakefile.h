@@ -702,7 +702,7 @@ public:
    * Expand the given list file arguments into the full set after
    * variable replacement and list expansion.
    */
-  void ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
+  bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
                        std::vector<std::string>& outArgs);
   /**
    * Get the instance
