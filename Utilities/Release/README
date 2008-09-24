@@ -6,6 +6,8 @@ cmake -DCMAKE_VERSION=CMake-2-4 -P ../create-cmake-release.cmake
 ./create-CMake-2-4.sh
 
 If that works:
+EDIT CMakeLists.txt and remove the RC setting!
+commit that.
 
 Then tag the minor release:
 cvs tag 2-4-7
