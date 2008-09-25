@@ -97,7 +97,11 @@ static const char * cmDocumentationOptions[][3] =
    "additional information such as the cache, log files etc."},
   {"--debug-trycompile", "Do not delete the try compile directories..",
    "Do not delete the files and directories created for try_compile calls. "
-   "This is useful in debugging failed try_compiles."},
+   "This is useful in debugging failed try_compiles. It may however "
+   "change the results of the try-compiles as old junk from a previous "
+   "try-compile may cause a different test to either pass or fail "
+   "incorrectly.  This option is best used for one try-compile at a time, "
+   "and only when debugging." },
   {"--debug-output", "Put cmake in a debug mode.",
    "Print extra stuff during the cmake run like stack traces with "
    "message(send_error ) calls."},
