@@ -87,9 +87,24 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
       }
     return this->EmptyVariable;
     }
+  if ( strcmp(key, "CACHE") == 0 )
+    {
+    if(const char* c = this->Makefile->GetCacheManager()->GetCacheValue(var))
+      {
+      if(this->EscapeQuotes)
+        {
+        return this->AddString(cmSystemTools::EscapeQuotes(c).c_str());
+        }
+      else
+        {
+        return this->AddString(c);
+        }
+      }
+    return this->EmptyVariable;
+    }
   cmOStringStream e;
   e << "Syntax $" << key << "{} is not supported.  "
-    << "Only ${} and ENV{} are allowed.";
+    << "Only ${}, $ENV{}, and $CACHE{} are allowed.";
   this->SetError(e.str());
   return 0;
 }

@@ -32,6 +32,20 @@ if(NOT DEFINED BAR)
   message(FATAL_ERROR "BAR not defined")
 endif(NOT DEFINED BAR)
 
+# Test interaction of cache entries with variables.
+set(BAR "test-var")
+if(NOT "$CACHE{BAR}" STREQUAL "test")
+  message(FATAL_ERROR "\$CACHE{BAR} changed by variable BAR")
+endif(NOT "$CACHE{BAR}" STREQUAL "test")
+if(NOT "${BAR}" STREQUAL "test-var")
+  message(FATAL_ERROR "\${BAR} not separate from \$CACHE{BAR}")
+endif(NOT "${BAR}" STREQUAL "test-var")
+unset(BAR)
+if(NOT "${BAR}" STREQUAL "test")
+  message(FATAL_ERROR "\${BAR} does not fall through to \$CACHE{BAR}")
+endif(NOT "${BAR}" STREQUAL "test")
+
+# Test unsetting of CACHE entry.
 unset(BAR CACHE)
 if(DEFINED BAR)
   message(FATAL_ERROR "BAR still defined")
