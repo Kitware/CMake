@@ -563,7 +563,7 @@ configure_file(${CURL_SOURCE_DIR}/lib/config.cmake.h.in
   ${CURL_BINARY_DIR}/lib/config.h)
 set(CURL_SIZEOF_LONG ${SIZEOF_LONG})
 configure_file(${CURL_SOURCE_DIR}/include/curl/curlbuild.cmake.h.in
-  ${CURL_BINARY_DIR}/include/curl/configbuild.h)
+  ${CURL_BINARY_DIR}/include/curl/curlbuild.h)
 
 add_library(cmcurl ${libCurl_SRCS})
 target_link_libraries(cmcurl ${CURL_LIBS})

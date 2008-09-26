@@ -35,29 +35,163 @@ curl_check_c_source_compiles(
   ts.tv_usec = 0;"
 HAVE_STRUCT_TIMEVAL)
 
-foreach(TYPE_8_SIZE "long" "__int64" "long long"
-    "int64_t" "__longlong" "__longlog_t")
-  if(NOT CURL_TYPEOF_CURL_OFF_T)
+
+# function to find and set curl_typeof_curl_off_t
+# trytypes should be the name of a variable that 
+# has the list of types to try, and size is the size in bytes
+# we are trying to find
+function(curl_find_curl_off_t trytypes size)
+  if(DEFINED curl_typeof_curl_off_t)
+    return()
+  endif(DEFINED curl_typeof_curl_off_t)
+  message("${size}")
+  foreach(type ${${trytypes}}) 
+    # force the try compile to try until it works
+    set(curl_typeof_curl_off_t "UNKNOWN")
+    set(EXTRA_DEFINES 
+      "${EXTRA_DEFINES_BACKUP}\n${headers_hack}\n${extern_line}\n#define __unused5")
     curl_check_c_source_compiles(
       "
-     typedef ${TYPE_8_SIZE} curl_off_t;
-     typedef char dummy_arr[sizeof(curl_off_t) == 8 ? 1 : -1];
-
-     int
-     main ()
-      {
+        typedef ${type} curl_off_t;
+        typedef char dummy_arr[sizeof(curl_off_t) == ${size} ? 1 : -1];
         curl_off_t dummy;
-        return 0;
-       }
-    "
-      CURL_TYPEOF_CURL_OFF_T)
-    if(CURL_TYPEOF_CURL_OFF_T)
-      set(CURL_TYPEOF_CURL_OFF_T "${TYPE_8_SIZE}")
-      set(type_of_curl_off_t "${TYPE_8_SIZE}")
-      check_type_size("${type_of_curl_off_t}" CURL_SIZEOF_CURL_OFF_T)
-    endif(CURL_TYPEOF_CURL_OFF_T)
-  endif(NOT CURL_TYPEOF_CURL_OFF_T)
-endforeach(TYPE_8_SIZE)
+       "
+      curl_typeof_curl_off_t
+      )
+    if(curl_typeof_curl_off_t)
+      # this means it found the type and we can return
+      set(CURL_TYPEOF_CURL_OFF_T "${type}" CACHE INTERNAL "type of curl_off_t")
+      return()
+    endif(curl_typeof_curl_off_t)
+  endforeach(type)
+endfunction(curl_find_curl_off_t)
+
+
+if(NOT DEFINED curl_typeof_curl_off_t)
+  set(curl_show_typeof_status 1)
+endif(NOT DEFINED curl_typeof_curl_off_t)
+# check for an 8 byte off_t type
+set(try_types_8 "long" "__int64" "long long"
+    "int64_t" "__longlong" "__longlog_t")
+curl_find_curl_off_t(try_types_8 8 )
+# check for a 4 byte off_t type
+set(try_types_4 "long" "int32_t" "__int32" "int")
+curl_find_curl_off_t(try_types_4 4 )
+set(try_types_2 "long" "ubt16_t" "__int16" "int")
+curl_find_curl_off_t(try_types_2 2 )
+if(curl_show_typeof_status)
+  message(STATUS "curl_typeof_curl_off_t = ${curl_typeof_curl_off_t}") 
+  check_type_size("${CURL_TYPEOF_CURL_OFF_T}" CURL_SIZEOF_CURL_OFF_T)
+  message(STATUS "sizeof curl_typeof_curl_off_t = ${CURL_SIZEOF_CURL_OFF_T}") 
+endif(curl_show_typeof_status)
+
+
+# need to set the format strings used in printf for off_t
+# curl_format_curl_off_t   - signed 
+# curl_format_curl_off_tu  - unsigned
+# 
+# First see if the type is 2 4 or 8 bytes
+if(CURL_SIZEOF_CURL_OFF_T EQUAL 2)
+  set(PRI_MACRO "PRId16")
+endif(CURL_SIZEOF_CURL_OFF_T EQUAL 2)
+if(CURL_SIZEOF_CURL_OFF_T EQUAL 4)
+  set(PRI_MACRO "PRId32")
+endif(CURL_SIZEOF_CURL_OFF_T EQUAL 4)
+if(CURL_SIZEOF_CURL_OFF_T EQUAL 8)
+  set(PRI_MACRO "PRId64")
+endif(CURL_SIZEOF_CURL_OFF_T EQUAL 8)
+# now see if PRI macros are defined for printing
+set(EXTRA_DEFINES "${EXTRA_DEFINES_BACKUP}\n${headers_hack}\n${extern_line}\n#define __unused5")
+curl_check_c_source_compiles("char f[] = ${PRI_MACRO};" curl_pri_macro)
+if(curl_pri_macro)
+  string(REPLACE i u "${PRI_MACRO}" PRI_MACROU)
+  string(REPLACE d u "${PRI_MACRO}" PRI_MACROU)
+  string(REPLACE D U "${PRI_MACRO}" PRI_MACROU)
+  set(CURL_FORMAT_CURL_OFF_T "${PRI_MACRO}" CACHE INTERNAL "print curl_off_t format string")
+  set(CURL_FORMAT_CURL_OFF_TU "${PRI_MACROU}" CACHE INTERNAL "print curl_off_t format string")
+else(curl_pri_macro)
+  if(CURL_TYPEOF_CURL_OFF_T MATCHES "long.*long")
+    set(CURL_FORMAT_CURL_OFF_T  "lld" CACHE INTERNAL "print curl_off_t format string")
+    set(CURL_FORMAT_CURL_OFF_TU "llu" CACHE INTERNAL "print curl_off_t format string")
+  endif()
+  if(CURL_TYPEOF_CURL_OFF_T STREQUAL "long")
+    set(CURL_FORMAT_CURL_OFF_T  "ld" CACHE INTERNAL "print curl_off_t format string")
+    set(CURL_FORMAT_CURL_OFF_TU "lu" CACHE INTERNAL "print curl_off_t format string")
+  endif()
+  if(CURL_TYPEOF_CURL_OFF_T STREQUAL "int")
+    set(CURL_FORMAT_CURL_OFF_T  "d" CACHE INTERNAL "print curl_off_t format string")
+    set(CURL_FORMAT_CURL_OFF_TU "u" CACHE INTERNAL "print curl_off_t format string")
+  endif()
+  if(CURL_TYPEOF_CURL_OFF_T STREQUAL "__int64")
+    set(CURL_FORMAT_CURL_OFF_T  "I64d" CACHE INTERNAL "print curl_off_t format string")
+    set(CURL_FORMAT_CURL_OFF_TU "I64u" CACHE INTERNAL "print curl_off_t format string")
+  endif()
+  if(CURL_TYPEOF_CURL_OFF_T STREQUAL "__int32")
+    set(CURL_FORMAT_CURL_OFF_T  "I32d" CACHE INTERNAL "print curl_off_t format string")
+    set(CURL_FORMAT_CURL_OFF_TU "I32u" CACHE INTERNAL "print curl_off_t format string")
+  endif()
+  if(CURL_TYPEOF_CURL_OFF_T STREQUAL "__int16")
+    set(CURL_FORMAT_CURL_OFF_T  "I16d" CACHE INTERNAL "print curl_off_t format string")
+    set(CURL_FORMAT_CURL_OFF_TU "I16u" CACHE INTERNAL "print curl_off_t format string")
+  endif()
+  message(STATUS "CURL_FORMAT_CURL_OFF_T = ${CURL_FORMAT_CURL_OFF_T}")
+  message(STATUS "CURL_FORMAT_CURL_OFF_TU = ${CURL_FORMAT_CURL_OFF_TU}")
+endif(curl_pri_macro)
+
+function (check_curl_off_t_suffix )
+  if(DEFINED curl_suffix_curl_off_t)
+    return()
+  endif(DEFINED curl_suffix_curl_off_t)
+  if(CURL_TYPEOF_CURL_OFF_T MATCHES "long.*long")
+    set(curl_test_suffix "LL")
+  endif()
+  if(CURL_TYPEOF_CURL_OFF_T STREQUAL "long")
+    set(curl_test_suffix "L")
+  endif()
+  if(CURL_TYPEOF_CURL_OFF_T)
+    set(curl_test_suffix "")
+  endif()
+  if(CURL_TYPEOF_CURL_OFF_T STREQUAL "__int64")
+    set(curl_test_suffix "LL" "i64")
+  endif()
+  if(CURL_TYPEOF_CURL_OFF_T STREQUAL "__int32")
+    set(curl_test_suffix "L" "i32")
+  endif()
+  if(CURL_TYPEOF_CURL_OFF_T STREQUAL "__int16")
+    set(curl_test_suffix "L" "i16")
+  endif()
+  foreach (suffix ${curl_test_suffix})
+    set(curl_suffix_curl_off_t_test "unknown")
+    if(suffix MATCHES "i64|i32|i16")
+      set(curl_test_suffix_u "u${suffix}")
+    endif(suffix MATCHES "i64|i32|i16")
+    if(suffix MATCHES "LL|L")
+      set(curl_test_suffix_u "U${suffix}")
+    endif(suffix MATCHES "LL|L")
+    message(STATUS "testing ${suffix} ${curl_test_suffix_u}") 
+    set(EXTRA_DEFINES "${EXTRA_DEFINES_BACKUP}\n${headers_hack}\n${extern_line}")
+    curl_check_c_source_compiles("
+    typedef ${curl_typeof_curl_off_t} new_t;
+    new_t s1;
+    new_t s2;
+    s1 = -10${suffix};
+    s2 = 20${suffix};
+    if(s1 > s2)
+      return 1;
+    " curl_suffix_curl_off_t_test)
+    if(curl_suffix_curl_off_t_test)
+      set(CURL_SUFFIX_CURL_OFF_T ${suffix} CACHE INTERNAL "signed suffix for off_t")
+      set(CURL_SUFFIX_CURL_OFF_TU ${curl_test_suffix_u} CACHE INTERNAL "unsigned suffix for off_t")
+    endif(curl_suffix_curl_off_t_test)
+  endforeach(suffix)
+endfunction(check_curl_off_t_suffix)
+# find the suffix to add to a literal number for the off_t type
+check_curl_off_t_suffix()
+message(STATUS "CURL_SUFFIX_CURL_OFF_T = ${CURL_SUFFIX_CURL_OFF_T} ")
+message(STATUS "CURL_SUFFIX_CURL_OFF_TU = ${CURL_SUFFIX_CURL_OFF_TU} ")
+message(STATUS "CURL_TYPEOF_CURL_OFF_T = ${CURL_TYPEOF_CURL_OFF_T} ")
+message(STATUS "CURL_FORMAT_CURL_OFF_T = ${CURL_FORMAT_CURL_OFF_T} ")
+message(STATUS "CURL_FORMAT_OFF_T = ${CURL_FORMAT_OFF_T}")
 curl_check_c_source_compiles("recv(0, 0, 0, 0)" curl_cv_recv)
 if(curl_cv_recv)
   #    AC_CACHE_CHECK([types of arguments and return type for recv],

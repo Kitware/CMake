@@ -32,6 +32,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES AIX)
 endif(${CMAKE_SYSTEM_NAME} MATCHES AIX)
 
 include_directories(
+  ${CURL_BINARY_DIR}/include
   ${CURL_SOURCE_DIR}/include
   ${CURL_SOURCE_DIR}/lib
   ${CURL_BINARY_DIR}/lib)
