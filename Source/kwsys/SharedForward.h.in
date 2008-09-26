@@ -159,6 +159,7 @@
 # include <process.h>
 #else
 # include <unistd.h>
+# include <sys/stat.h>
 #endif
 
 /*--------------------------------------------------------------------------*/
@@ -280,6 +281,37 @@ static int kwsys_shared_forward_realpath(const char* in_path, char* out_path)
 #else
   /* Implementation for UNIX.  */
   return realpath(in_path, out_path) != 0;
+#endif
+}
+
+/*--------------------------------------------------------------------------*/
+static int kwsys_shared_forward_samepath(const char* file1, const char* file2)
+{
+#if defined(_WIN32)
+  int result = 0;
+  HANDLE h1 = CreateFile(file1, GENERIC_READ, FILE_SHARE_READ, NULL,
+                         OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+  HANDLE h2 = CreateFile(file2, GENERIC_READ, FILE_SHARE_READ, NULL,
+                         OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+  if(h1 != INVALID_HANDLE_VALUE && h2 != INVALID_HANDLE_VALUE)
+    {
+    BY_HANDLE_FILE_INFORMATION fi1;
+    BY_HANDLE_FILE_INFORMATION fi2;
+    GetFileInformationByHandle(h1, &fi1);
+    GetFileInformationByHandle(h2, &fi2);
+    result = (fi1.dwVolumeSerialNumber == fi2.dwVolumeSerialNumber &&
+              fi1.nFileIndexHigh == fi2.nFileIndexHigh &&
+              fi1.nFileIndexLow == fi2.nFileIndexLow);
+    }
+   CloseHandle(h1);
+   CloseHandle(h2);
+   return result;
+#else
+  struct stat fs1, fs2;
+  return (stat(file1, &fs1) == 0 && stat(file2, &fs2) == 0 &&
+          memcmp(&fs2.st_dev, &fs1.st_dev, sizeof(fs1.st_dev)) == 0 &&
+          memcmp(&fs2.st_ino, &fs1.st_ino, sizeof(fs1.st_ino)) == 0 &&
+          fs2.st_size == fs1.st_size);
 #endif
 }
 
@@ -535,7 +567,7 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
 
   /* Check whether we are running in the build tree or an install tree.  */
   if(kwsys_shared_forward_realpath(build_path, build_path_real) &&
-     strcmp(self_path_real, build_path_real) == 0)
+     kwsys_shared_forward_samepath(self_path_real, build_path_real))
     {
     /* Running in build tree.  Use the build path and exe.  */
     search_path = search_path_build;
