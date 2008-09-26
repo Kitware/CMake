@@ -992,6 +992,13 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       ADD_TEST(kwsys.testProcess-${n} ${EXEC_DIR}/${KWSYS_NAMESPACE}TestProcess ${n})
     ENDFOREACH(n)
 
+    # Test SharedForward
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/testSharedForward.c.in
+                   ${PROJECT_BINARY_DIR}/testSharedForward.c @ONLY IMMEDIATE)
+    ADD_EXECUTABLE(${KWSYS_NAMESPACE}TestSharedForward
+                   ${PROJECT_BINARY_DIR}/testSharedForward.c)
+    ADD_TEST(kwsys.testSharedForward ${EXEC_DIR}/${KWSYS_NAMESPACE}TestSharedForward 1)
+
     # Configure some test properties.
     IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY AND KWSYS_STANDALONE)
       # We expect test to fail
