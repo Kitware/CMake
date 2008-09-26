@@ -329,7 +329,7 @@ static void kwsys_shared_forward_dirname(const char* begin, char* result)
     {
     if(*end == '/' || *end == '\\')
       {
-      last_slash_index = end-begin;
+      last_slash_index = (int)(end-begin);
       }
     }
 
@@ -428,7 +428,7 @@ static int kwsys_shared_forward_self_path(const char* argv0, char* result)
       if(first < last)
         {
         /* Determine the length without trailing slash.  */
-        int length = last-first;
+        int length = (int)(last-first);
         if(*(last-1) == '/' || *(last-1) == '\\')
           {
           --length;
