@@ -157,6 +157,7 @@
 # include <io.h>
 # include <windows.h>
 # include <process.h>
+# define KWSYS_SHARED_FORWARD_ESCAPE_ARGV /* re-escape argv for execvp */
 #else
 # include <unistd.h>
 # include <sys/stat.h>
@@ -269,6 +270,146 @@ static const char kwsys_shared_forward_path_slash[2] = {KWSYS_SHARED_FORWARD_PAT
 # define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY_PATH"
 #endif
 
+#ifdef KWSYS_SHARED_FORWARD_ESCAPE_ARGV
+/*--------------------------------------------------------------------------*/
+typedef struct kwsys_sf_arg_info_s
+{
+  const char* arg;
+  int size;
+  int quote;
+} kwsys_sf_arg_info;
+
+/*--------------------------------------------------------------------------*/
+static kwsys_sf_arg_info kwsys_sf_get_arg_info(const char* in)
+{
+  /* Initialize information.  */
+  kwsys_sf_arg_info info;
+
+  /* String iterator.  */
+  const char* c;
+
+  /* Keep track of how many backslashes have been encountered in a row.  */
+  int windows_backslashes = 0;
+
+  /* Start with the length of the original argument, plus one for
+     either a terminating null or a separating space.  */
+  info.arg = in;
+  info.size = (int)strlen(in) + 1;
+  info.quote = 0;
+
+  /* Scan the string for characters that require escaping or quoting.  */
+  for(c=in; *c; ++c)
+    {
+    /* Check whether this character needs quotes.  */
+    if(strchr(" \t?'#&<>|^", *c))
+      {
+      info.quote = 1;
+      }
+
+    /* On Windows only backslashes and double-quotes need escaping.  */
+    if(*c == '\\')
+      {
+      /* Found a backslash.  It may need to be escaped later.  */
+      ++windows_backslashes;
+      }
+    else if(*c == '"')
+      {
+      /* Found a double-quote.  We need to escape it and all
+         immediately preceding backslashes.  */
+      info.size += windows_backslashes + 1;
+      windows_backslashes = 0;
+      }
+    else
+      {
+      /* Found another character.  This eliminates the possibility
+         that any immediately preceding backslashes will be
+         escaped.  */
+      windows_backslashes = 0;
+      }
+    }
+
+  /* Check whether the argument needs surrounding quotes.  */
+  if(info.quote)
+    {
+    /* Surrounding quotes are needed.  Allocate space for them.  */
+    info.size += 2;
+
+    /* We must escape all ending backslashes when quoting on windows.  */
+    info.size += windows_backslashes;
+    }
+
+  return info;
+}
+
+/*--------------------------------------------------------------------------*/
+static char* kwsys_sf_get_arg(kwsys_sf_arg_info info, char* out)
+{
+  /* String iterator.  */
+  const char* c;
+
+  /* Keep track of how many backslashes have been encountered in a row.  */
+  int windows_backslashes = 0;
+
+  /* Whether the argument must be quoted.  */
+  if(info.quote)
+    {
+    /* Add the opening quote for this argument.  */
+    *out++ = '"';
+    }
+
+  /* Scan the string for characters that require escaping or quoting.  */
+  for(c=info.arg; *c; ++c)
+    {
+    /* On Windows only backslashes and double-quotes need escaping.  */
+    if(*c == '\\')
+      {
+      /* Found a backslash.  It may need to be escaped later.  */
+      ++windows_backslashes;
+      }
+    else if(*c == '"')
+      {
+      /* Found a double-quote.  Escape all immediately preceding
+         backslashes.  */
+      while(windows_backslashes > 0)
+        {
+        --windows_backslashes;
+        *out++ = '\\';
+        }
+
+      /* Add the backslash to escape the double-quote.  */
+      *out++ = '\\';
+      }
+    else
+      {
+      /* We encountered a normal character.  This eliminates any
+         escaping needed for preceding backslashes.  */
+      windows_backslashes = 0;
+      }
+
+    /* Store this character.  */
+    *out++ = *c;
+    }
+
+  if(info.quote)
+    {
+    /* Add enough backslashes to escape any trailing ones.  */
+    while(windows_backslashes > 0)
+      {
+      --windows_backslashes;
+      *out++ = '\\';
+      }
+
+    /* Add the closing quote for this argument.  */
+    *out++ = '"';
+    }
+
+  /* Store a terminating null without incrementing.  */
+  *out = 0;
+
+  return out;
+}
+#endif
+
 /*--------------------------------------------------------------------------*/
 /* Function to convert a logical or relative path to a physical full path.  */
 static int kwsys_shared_forward_realpath(const char* in_path, char* out_path)
@@ -341,8 +482,34 @@ static void kwsys_shared_forward_strerror(char* message)
 
 /*--------------------------------------------------------------------------*/
 /* Functions to execute a child process.  */
-static void kwsys_shared_forward_execvp(const char* cmd, char* const argv[])
+static void kwsys_shared_forward_execvp(const char* cmd, char* const* argv)
 {
+#ifdef KWSYS_SHARED_FORWARD_ESCAPE_ARGV
+  /* Count the number of arguments.  */
+  int argc = 0;
+  {
+  char* const* argvc;
+  for(argvc = argv; *argvc; ++argvc,++argc) {}
+  }
+
+  /* Create the escaped arguments.  */
+  {
+  char** nargv = (char**)malloc((argc+1) * sizeof(char*));
+  int i;
+  for(i=0; i < argc; ++i)
+    {
+    kwsys_sf_arg_info info = kwsys_sf_get_arg_info(argv[i]);
+    nargv[i] = (char*)malloc(info.size);
+    kwsys_sf_get_arg(info, nargv[i]);
+    }
+  nargv[argc] = 0;
+
+  /* Replace the command line to be used.  */
+  argv = nargv;
+  }
+#endif
+
+  /* Invoke the child process.  */
 #if defined(_MSC_VER)
   _execvp(cmd, argv);
 #else
