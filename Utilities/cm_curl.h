@@ -24,7 +24,7 @@
 #else
 # ifdef CMAKE_USE_NEW_CURL
 #   include <cmcurl-7.19.0/include/curl/curl.h>
-# else CMAKE_USE_NEW_CURL
+# else
 #   include <cmcurl/curl/curl.h>
 # endif
 #endif
