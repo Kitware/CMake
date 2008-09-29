@@ -32,7 +32,7 @@
  */
 
 #include "curlver.h"         /* libcurl version defines   */
-#include "curl/curlbuild.h"  /* libcurl build definitions */
+#include "cmcurl-7.19.0/include/curl/curlbuild.h"  /* libcurl build definitions */
 #include "curlrules.h"       /* libcurl rules enforcement */
 
 /*

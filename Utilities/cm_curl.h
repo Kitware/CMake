@@ -22,7 +22,11 @@
 #ifdef CMAKE_USE_SYSTEM_CURL
 # include <curl/curl.h>
 #else
-# include <cmcurl/curl/curl.h>
+# ifdef CMAKE_USE_NEW_CURL
+#   include <cmcurl-7.19.0/include/curl/curl.h>
+# else CMAKE_USE_NEW_CURL
+#   include <cmcurl/curl/curl.h>
+# endif
 #endif
 
 #endif

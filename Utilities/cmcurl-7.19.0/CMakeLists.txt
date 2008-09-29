@@ -42,7 +42,7 @@ if(CMAKE_COMPILER_2005)
 endif(CMAKE_COMPILER_2005) 
 add_definitions(-DHAVE_CONFIG_H
   -DCURL_STATICLIB)
-
+option(CURL_SKIP_EXAMPLES "Skip building the curl examples" FALSE)
 add_subdirectory(lib)
 add_subdirectory(src)
 add_subdirectory(docs)

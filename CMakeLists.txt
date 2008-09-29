@@ -227,8 +227,8 @@ MACRO (CMAKE_BUILD_UTILITIES)
   # Everything in the tree should be able to include files from the
   # Utilities directory.
   INCLUDE_DIRECTORIES(
-    ${CMake_SOURCE_DIR}/Utilities
     ${CMake_BINARY_DIR}/Utilities
+    ${CMake_SOURCE_DIR}/Utilities
     )
   
   # check for the use of system libraries versus builtin ones
@@ -269,7 +269,13 @@ MACRO (CMAKE_BUILD_UTILITIES)
     ADD_DEFINITIONS(-DCURL_STATICLIB)
     SET(CMAKE_CURL_INCLUDES)
     SET(CMAKE_CURL_LIBRARIES cmcurl)
-    SUBDIRS(Utilities/cmcurl)
+    IF(CMAKE_USE_NEW_CURL)
+      # for cmake never build examples
+      SET(CURL_SKIP_EXAMPLES TRUE)
+      ADD_SUBDIRECTORY(Utilities/cmcurl-7.19.0)
+    ELSE(CMAKE_USE_NEW_CURL)
+      SUBDIRS(Utilities/cmcurl)
+    ENDIF(CMAKE_USE_NEW_CURL)
   ENDIF(CMAKE_USE_SYSTEM_CURL)
 
   #---------------------------------------------------------------------
