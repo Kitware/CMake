@@ -661,9 +661,10 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             return 0;
             }
 
-          cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                        "- Using DESTDIR + CPACK_INSTALL_PREFIX... (mf->AddDefinition)"
-                        << std::endl);
+          cmCPackLogger(
+            cmCPackLog::LOG_DEBUG,
+            "- Using DESTDIR + CPACK_INSTALL_PREFIX... (mf->AddDefinition)"
+            << std::endl);
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "- Setting CMAKE_INSTALL_PREFIX to '" << dir << "'" 
                         << std::endl);
@@ -681,9 +682,11 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             }
 
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                        "- Using non-DESTDIR install... (mf->AddDefinition)" << std::endl);
+                        "- Using non-DESTDIR install... (mf->AddDefinition)"
+                        << std::endl);
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                        "- Setting CMAKE_INSTALL_PREFIX to '" << tempInstallDirectory
+                        "- Setting CMAKE_INSTALL_PREFIX to '"
+                        << tempInstallDirectory
                         << "'" << std::endl);
           }
 
@@ -770,7 +773,8 @@ int cmCPackGenerator::DoPackage()
       = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     if ( cmSystemTools::FileExists(toplevelDirectory) )
       {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Remove toplevel directory: "
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE, 
+                    "Remove toplevel directory: "
         << toplevelDirectory << std::endl);
       if ( !cmSystemTools::RemoveADirectory(toplevelDirectory) )
         {
@@ -1077,7 +1081,8 @@ bool cmCPackGenerator::SupportsComponentInstallation() const
 
 //----------------------------------------------------------------------
 cmCPackInstallationType*
-cmCPackGenerator::GetInstallationType(const char *projectName, const char *name)
+cmCPackGenerator::GetInstallationType(const char *projectName,
+                                      const char *name)
 {
   (void) projectName;
   bool hasInstallationType = this->InstallationTypes.count(name) != 0;
@@ -1138,7 +1143,8 @@ cmCPackGenerator::GetComponent(const char *projectName, const char *name)
       = this->IsSet((macroPrefix + "_DOWNLOADED").c_str())
         || cmSystemTools::IsOn(this->GetOption("CPACK_DOWNLOAD_ALL"));
 
-    const char* archiveFile = this->GetOption((macroPrefix + "_ARCHIVE_FILE").c_str());
+    const char* archiveFile = this->GetOption((macroPrefix + 
+                                               "_ARCHIVE_FILE").c_str());
     if (archiveFile && *archiveFile)
       {
       component->ArchiveFile = archiveFile;
@@ -1190,7 +1196,8 @@ cmCPackGenerator::GetComponent(const char *projectName, const char *name)
            dependIt != dependsVector.end(); 
            ++dependIt)
         {
-        cmCPackComponent *child = GetComponent(projectName, dependIt->c_str());
+        cmCPackComponent *child = GetComponent(projectName, 
+                                               dependIt->c_str());
         component->Dependencies.push_back(child);
         child->ReverseDependencies.push_back(component);
         }

@@ -1654,7 +1654,8 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     int plevel = atoi(arg.substr(2).c_str());
     this->SetParallelLevel(plevel);
     }
-  if(this->CheckArgument(arg, "--internal-ctest-parallel") && i < args.size() - 1)
+  if(this->CheckArgument(arg, "--internal-ctest-parallel") 
+     && i < args.size() - 1)
     {
     i++;
     int pid = atoi(args[i].c_str());

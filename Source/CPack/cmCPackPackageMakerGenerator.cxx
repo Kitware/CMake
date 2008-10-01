@@ -179,7 +179,8 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
 
     // Create the directory where downloaded component packages will
     // be placed.
-    const char* userUploadDirectory = this->GetOption("CPACK_UPLOAD_DIRECTORY");
+    const char* userUploadDirectory =
+      this->GetOption("CPACK_UPLOAD_DIRECTORY");
     std::string uploadDirectory;
     if (userUploadDirectory && *userUploadDirectory)
       {
@@ -222,15 +223,20 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
           {
           if (this->PackageCompatibilityVersion < 10.5)
             {
-            cmCPackLogger(cmCPackLog::LOG_WARNING,
-                        "CPack warning: please set CPACK_OSX_PACKAGE_VERSION to 10.5 or greater enable downloaded packages. CPack will build a non-downloaded package."
-                          << std::endl);
+            cmCPackLogger(
+              cmCPackLog::LOG_WARNING,
+              "CPack warning: please set CPACK_OSX_PACKAGE_VERSION to 10.5 "
+              "or greater enable downloaded packages. CPack will build a "
+              "non-downloaded package."
+              << std::endl);
             }
 
           if (this->PackageMakerVersion < 3)
             {
             cmCPackLogger(cmCPackLog::LOG_WARNING,
-                        "CPack warning: unable to build downloaded packages with PackageMaker versions prior to 3.0. CPack will build a non-downloaded package."
+                        "CPack warning: unable to build downloaded "
+                          "packages with PackageMaker versions prior "
+                          "to 3.0. CPack will build a non-downloaded package."
                           << std::endl);
             }
 
@@ -605,7 +611,8 @@ GenerateComponentPackage(const char *packageFile,
                          const cmCPackComponent& component)
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-                "-   Building component package: " << packageFile << std::endl);
+                "-   Building component package: " <<
+                packageFile << std::endl);
 
   // The command that will be used to run PackageMaker
   cmOStringStream pkgCmd;
@@ -638,7 +645,8 @@ GenerateComponentPackage(const char *packageFile,
     // Create the Info.plist file for this component
     std::string moduleVersionSuffix = ".";
     moduleVersionSuffix += component.Name;
-    this->SetOption("CPACK_MODULE_VERSION_SUFFIX", moduleVersionSuffix.c_str());
+    this->SetOption("CPACK_MODULE_VERSION_SUFFIX", 
+                    moduleVersionSuffix.c_str());
     std::string infoFileName = component.Name;
     infoFileName += "-Info.plist";
     if (!this->CopyResourcePlistFile("Info.plist", infoFileName.c_str()))
@@ -801,7 +809,8 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
   out << "<choice id=\"" << component.Name << "Choice\" " 
       << "title=\"" << component.DisplayName << "\" "
       << "start_selected=\"" 
-      << (component.IsDisabledByDefault && !component.IsRequired? "false" : "true")
+      << (component.IsDisabledByDefault && 
+          !component.IsRequired? "false" : "true")
       << "\" "
       << "start_enabled=\""
       << (component.IsRequired? "false" : "true")
@@ -812,7 +821,8 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
     out << "description=\"" << EscapeForXML(component.Description)
         << "\" ";
     }
-  if (!component.Dependencies.empty() || !component.ReverseDependencies.empty())
+  if (!component.Dependencies.empty() ||
+      !component.ReverseDependencies.empty())
     {
     // The "selected" expression is evaluated each time any choice is
     // selected, for all choices *except* the one that the user
@@ -885,7 +895,8 @@ AddDependencyAttributes(const cmCPackComponent& component,
        dependIt != component.Dependencies.end();
        ++dependIt)
     {
-    out << " &amp;&amp; choices['" << (*dependIt)->Name << "Choice'].selected";
+    out << " &amp;&amp; choices['" << 
+      (*dependIt)->Name << "Choice'].selected";
     AddDependencyAttributes(**dependIt, visited, out);
     }
 }

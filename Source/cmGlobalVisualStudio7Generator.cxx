@@ -486,7 +486,8 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
 { 
    // check to see if this is a fortran build
   const char* ext = ".vcproj";
-  const char* project = "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"";
+  const char* project =
+    "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"";
   if(this->TargetIsFortranOnly(target))
     {
     ext = ".vfproj";

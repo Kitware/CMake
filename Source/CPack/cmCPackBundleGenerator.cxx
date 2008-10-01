@@ -80,7 +80,8 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
   (void) files;
 
   // Get required arguments ...
-  const std::string cpack_bundle_name = this->GetOption("CPACK_BUNDLE_NAME") ? this->GetOption("CPACK_BUNDLE_NAME") : "";
+  const std::string cpack_bundle_name = this->GetOption("CPACK_BUNDLE_NAME")
+    ? this->GetOption("CPACK_BUNDLE_NAME") : "";
   if(cpack_bundle_name.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -90,7 +91,8 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
     return 0;
     }
 
-  const std::string cpack_bundle_plist = this->GetOption("CPACK_BUNDLE_PLIST") ? this->GetOption("CPACK_BUNDLE_PLIST") : "";
+  const std::string cpack_bundle_plist = this->GetOption("CPACK_BUNDLE_PLIST")
+    ? this->GetOption("CPACK_BUNDLE_PLIST") : "";
   if(cpack_bundle_plist.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -100,7 +102,8 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
     return 0;
     }
 
-  const std::string cpack_bundle_icon = this->GetOption("CPACK_BUNDLE_ICON") ? this->GetOption("CPACK_BUNDLE_ICON") : "";
+  const std::string cpack_bundle_icon = this->GetOption("CPACK_BUNDLE_ICON")
+    ? this->GetOption("CPACK_BUNDLE_ICON") : "";
   if(cpack_bundle_icon.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -110,7 +113,9 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
     return 0;
     }
 
-  const std::string cpack_bundle_startup_command = this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") ? this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") : "";
+  const std::string cpack_bundle_startup_command = 
+    this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") ? 
+    this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") : "";
   if(cpack_bundle_startup_command.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -121,7 +126,8 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
     }
 
   // Get optional arguments ...
-  const std::string cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON") ? this->GetOption("CPACK_PACKAGE_ICON") : "";
+  const std::string cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON") 
+    ? this->GetOption("CPACK_PACKAGE_ICON") : "";
 
   // The staging directory contains everything that will end-up inside the
   // final disk image ...

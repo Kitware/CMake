@@ -702,7 +702,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       modDir = ".";
       }
     fout << "\t\t\t\tModulePath=\"" 
-         << this->ConvertToXMLOutputPath(modDir.c_str()) << "\\$(ConfigurationName)\"\n";
+         << this->ConvertToXMLOutputPath(modDir.c_str())
+         << "\\$(ConfigurationName)\"\n";
     }
   targetOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";

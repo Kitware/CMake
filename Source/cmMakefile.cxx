@@ -83,7 +83,8 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("", "^.*$");
   this->AddSourceGroup
     ("Source Files",
-     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
+     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp"
+     "|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
   this->AddSourceGroup("Header Files",
                        "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddSourceGroup("CMake Rules", "\\.rule$");

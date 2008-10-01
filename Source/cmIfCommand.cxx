@@ -360,7 +360,8 @@ namespace
           newArgs2.push_back(*argP1);
           }
         newArgs2.pop_back();
-        // now recursively invoke IsTrue to handle the values inside the parenthetical expression
+        // now recursively invoke IsTrue to handle the values inside the
+        // parenthetical expression
         bool value = 
           cmIfCommand::IsTrue(newArgs2, errorString, makefile);
         if(value)

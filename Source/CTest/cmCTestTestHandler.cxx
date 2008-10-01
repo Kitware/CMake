@@ -577,8 +577,10 @@ int cmCTestTestHandler::ProcessHandler()
             {
             ofs << ftit->TestCount << ":" << ftit->Name << std::endl;
             cmCTestLog(this->CTest, HANDLER_OUTPUT, "\t" << std::setw(3)
-                       << ftit->TestCount << " - " << ftit->Name.c_str() << " ("
-                       << this->GetTestStatus(ftit->Status) << ")" << std::endl);
+                       << ftit->TestCount << " - " 
+                       << ftit->Name.c_str() << " ("
+                       << this->GetTestStatus(ftit->Status) << ")" 
+                       << std::endl);
             }
           }
         
@@ -1575,7 +1577,8 @@ std::string cmCTestTestHandler
                                         attemptedConfigs,
                                         filepath,filename);
 
-  // even if a fullpath was specified also try it relative to the current directory
+  // even if a fullpath was specified also try it relative to the current
+  // directory
   if (filepath.size() && filepath[0] == '/')
     {
     std::string localfilepath = filepath.substr(1,filepath.size()-1);
