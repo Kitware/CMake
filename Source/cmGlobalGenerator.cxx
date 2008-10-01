@@ -1559,6 +1559,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   const char* cmakeCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
 
   // CPack
+  std::string workingDir =  mf->GetStartOutputDirectory();
   cmCustomCommandLines cpackCommandLines;
   std::vector<std::string> depends;
   cmCustomCommandLine singleLine;
@@ -1571,7 +1572,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   singleLine.push_back("--config");
   std::string configFile = mf->GetStartOutputDirectory();;
   configFile += "/CPackConfig.cmake";
-  singleLine.push_back(configFile);
+  std::string relConfigFile = "./CPackConfig.cmake";
+  singleLine.push_back(relConfigFile);
   cpackCommandLines.push_back(singleLine);
   if ( this->GetPreinstallTargetName() )
     {
@@ -1591,7 +1593,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     (*targets)[this->GetPackageTargetName()]
       = this->CreateGlobalTarget(this->GetPackageTargetName(),
                                  "Run CPack packaging tool...",
-                                 &cpackCommandLines, depends);
+                                 &cpackCommandLines, depends,
+                                 workingDir.c_str());
     }
   // CPack source
   const char* packageSourceTargetName = this->GetPackageSourceTargetName();
@@ -1603,8 +1606,10 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     depends.erase(depends.begin(), depends.end());
     singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
     singleLine.push_back("--config");
-    configFile = mf->GetStartOutputDirectory();;
-    configFile += "/CPackSourceConfig.cmake";
+    std::string configFile = mf->GetStartOutputDirectory();;
+    configFile += "/CPackSourceCConfig.cmake";
+    std::string relConfigFile = "./CPackSourceConfig.cmake";
+    singleLine.push_back(relConfigFile);
     if(cmSystemTools::FileExists(configFile.c_str()))
       {
       singleLine.push_back(configFile);
@@ -1612,7 +1617,9 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)[packageSourceTargetName]
         = this->CreateGlobalTarget(packageSourceTargetName,
                                    "Run CPack packaging tool for source...",
-                                   &cpackCommandLines, depends);
+                                   &cpackCommandLines, depends,
+                                   workingDir.c_str()
+                                   );
       }
     }
 
@@ -1637,7 +1644,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     cpackCommandLines.push_back(singleLine);
     (*targets)[this->GetTestTargetName()]
       = this->CreateGlobalTarget(this->GetTestTargetName(),
-        "Running tests...", &cpackCommandLines, depends);
+        "Running tests...", &cpackCommandLines, depends, 0);
     }
 
   //Edit Cache
@@ -1660,7 +1667,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)[editCacheTargetName] =
         this->CreateGlobalTarget(
           editCacheTargetName, "Running CMake cache editor...",
-          &cpackCommandLines, depends);
+          &cpackCommandLines, depends, 0);
       }
     else
       {
@@ -1672,7 +1679,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
         this->CreateGlobalTarget(
           editCacheTargetName,
           "Running interactive CMake command-line interface...",
-          &cpackCommandLines, depends);
+          &cpackCommandLines, depends, 0);
       }
     }
 
@@ -1691,7 +1698,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     (*targets)[rebuildCacheTargetName] =
       this->CreateGlobalTarget(
         rebuildCacheTargetName, "Running CMake to regenerate build system...",
-        &cpackCommandLines, depends);
+        &cpackCommandLines, depends, 0);
     }
 
   //Install
@@ -1724,7 +1731,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)["list_install_components"]
         = this->CreateGlobalTarget("list_install_components",
           ostr.str().c_str(),
-          &cpackCommandLines, depends);
+          &cpackCommandLines, depends, 0);
       }
     std::string cmd;
     cpackCommandLines.erase(cpackCommandLines.begin(),
@@ -1773,7 +1780,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     (*targets)[this->GetInstallTargetName()] =
       this->CreateGlobalTarget(
         this->GetInstallTargetName(), "Install the project...",
-        &cpackCommandLines, depends);
+        &cpackCommandLines, depends, 0);
 
     // install_local
     if(const char* install_local = this->GetInstallLocalTargetName())
@@ -1789,7 +1796,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)[install_local] =
         this->CreateGlobalTarget(
           install_local, "Installing only the local directory...",
-          &cpackCommandLines, depends);
+          &cpackCommandLines, depends, 0);
       }
 
     // install_strip
@@ -1806,7 +1813,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)[install_strip] =
         this->CreateGlobalTarget(
           install_strip, "Installing the project stripped...",
-          &cpackCommandLines, depends);
+          &cpackCommandLines, depends, 0);
       }
     }
 }
@@ -1815,6 +1822,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   const char* name, const char* message,
   const cmCustomCommandLines* commandLines,
   std::vector<std::string> depends,
+  const char* workingDirectory,
   bool depends_on_all /* = false */)
 {
   // Package
@@ -1826,7 +1834,8 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   std::vector<std::string> no_outputs;
   std::vector<std::string> no_depends;
   // Store the custom command in the target.
-  cmCustomCommand cc(no_outputs, no_depends, *commandLines, 0, 0);
+  cmCustomCommand cc(no_outputs, no_depends, *commandLines, 0,
+                     workingDirectory);
   target.GetPostBuildCommands().push_back(cc);
   target.SetProperty("EchoString", message);
   if ( depends_on_all )
