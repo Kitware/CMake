@@ -187,7 +187,8 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
   if(!this->CopyFile(command_source, command_target))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Error copying startup command.  Check the value of CPACK_BUNDLE_STARTUP_COMMAND."
+                  "Error copying startup command. "
+                  " Check the value of CPACK_BUNDLE_STARTUP_COMMAND."
       << std::endl);
 
     return 0;
@@ -214,7 +215,8 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
     if(!this->CopyFile(package_icon_source, package_icon_destination))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-        "Error copying disk volume icon.  Check the value of CPACK_PACKAGE_ICON."
+        "Error copying disk volume icon.  "
+                    "Check the value of CPACK_PACKAGE_ICON."
         << std::endl);
 
       return 0;

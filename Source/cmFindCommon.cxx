@@ -372,10 +372,18 @@ void cmFindCommon::AddCMakePath(const char* variable)
 //----------------------------------------------------------------------------
 void cmFindCommon::AddEnvPath(const char* variable)
 {
+  if(variable)
+    {
+    std::cerr << variable << "\n";
+    }
   // Get a path from the environment.
   std::vector<std::string> tmp;
   cmSystemTools::GetPath(tmp, variable);
-
+  for(std::vector<std::string>::iterator i = tmp.begin();
+      i != tmp.end(); ++i)
+    {
+    std::cerr << i->c_str() << "\n";
+    }
   // Relative paths are interpreted with respect to the current
   // working directory.
   this->AddPathsInternal(tmp, EnvPath);

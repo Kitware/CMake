@@ -642,10 +642,10 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
 
         if ( setDestDir )
           {
-          // For DESTDIR based packaging, use the *project* CMAKE_INSTALL_PREFIX
-          // underneath the tempInstallDirectory. The value of the project's
-          // CMAKE_INSTALL_PREFIX is sent in here as the value of the
-          // CPACK_INSTALL_PREFIX variable.
+          // For DESTDIR based packaging, use the *project*
+          // CMAKE_INSTALL_PREFIX underneath the tempInstallDirectory. The
+          // value of the project's CMAKE_INSTALL_PREFIX is sent in here as
+          // the value of the CPACK_INSTALL_PREFIX variable.
           std::string dir;
           if (this->GetOption("CPACK_INSTALL_PREFIX"))
             {
@@ -671,9 +671,11 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
         else
           {
-          mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory.c_str());
+          mf->AddDefinition("CMAKE_INSTALL_PREFIX",
+                            tempInstallDirectory.c_str());
 
-          if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory.c_str()))
+          if ( !cmsys::SystemTools::MakeDirectory(
+                 tempInstallDirectory.c_str()))
             {
             cmCPackLogger(cmCPackLog::LOG_ERROR,
                           "Problem creating temporary directory: " 
