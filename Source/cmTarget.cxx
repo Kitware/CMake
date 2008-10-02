@@ -528,6 +528,13 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \".so\") on a library name.");
 
   cm->DefineProperty
+    ("TYPE", cmProperty::TARGET,
+     "The type of the target.",
+     "This read-only property can be used to test the type of the given "
+     "target. It will be one of STATIC_LIBRARY, MODULE_LIBRARY, "
+     "SHARED_LIBRARY, EXECUTABLE or one of the internal target types.");
+
+  cm->DefineProperty
     ("VERSION", cmProperty::TARGET,
      "What version number is this target.",
      "For shared libraries VERSION and SOVERSION can be used to specify "
