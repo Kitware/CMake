@@ -190,6 +190,7 @@ cmFindPackageCommand::cmFindPackageCommand()
     "  PACKAGE_VERSION            = full provided version string\n"
     "  PACKAGE_VERSION_EXACT      = true if version is exact match\n"
     "  PACKAGE_VERSION_COMPATIBLE = true if version is compatible\n"
+    "  PACKAGE_VERSION_UNSUITABLE = true if unsuitable as any version\n"
     "These variables are checked by the find_package command to determine "
     "whether the configuration file provides an acceptable version.  "
     "They are not available after the find_package call returns.  "
@@ -1273,6 +1274,7 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
 
   // Clear the output variables.
   this->Makefile->RemoveDefinition("PACKAGE_VERSION");
+  this->Makefile->RemoveDefinition("PACKAGE_VERSION_UNSUITABLE");
   this->Makefile->RemoveDefinition("PACKAGE_VERSION_COMPATIBLE");
   this->Makefile->RemoveDefinition("PACKAGE_VERSION_EXACT");
 
@@ -1293,16 +1295,21 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
   this->Makefile->AddDefinition("PACKAGE_FIND_VERSION_COUNT", buf);
 
   // Load the version check file.
-  bool found = false;
+  bool suitable = false;
   if(this->ReadListFile(version_file.c_str()))
     {
     // Check the output variables.
-    found = this->Makefile->IsOn("PACKAGE_VERSION_EXACT");
-    if(!found && !this->VersionExact)
+    bool okay = this->Makefile->IsOn("PACKAGE_VERSION_EXACT");
+    bool unsuitable = this->Makefile->IsOn("PACKAGE_VERSION_UNSUITABLE");
+    if(!okay && !this->VersionExact)
       {
-      found = this->Makefile->IsOn("PACKAGE_VERSION_COMPATIBLE");
+      okay = this->Makefile->IsOn("PACKAGE_VERSION_COMPATIBLE");
       }
-    if(found || this->Version.empty())
+
+    // The package is suitable if the version is okay and not
+    // explicitly unsuitable.
+    suitable = !unsuitable && (okay || this->Version.empty());
+    if(suitable)
       {
       // Get the version found.
       this->VersionFound =
@@ -1332,8 +1339,8 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
   // Restore the original scope.
   this->Makefile->PopScope();
 
-  // Succeed if the version was found or no version was requested.
-  return found || this->Version.empty();
+  // Succeed if the version is suitable.
+  return suitable;
 }
 
 //----------------------------------------------------------------------------
