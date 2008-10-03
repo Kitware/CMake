@@ -66,14 +66,11 @@ public:
 protected:
   typedef cmInstallGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);
+  virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
+  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
   void GenerateScriptForConfig(std::ostream& os,
-                               const char* fromDir,
                                const char* config,
                                Indent const& indent);
-  void GenerateScriptForConfigDir(std::ostream& os,
-                                  const char* fromDirConfig,
-                                  const char* config,
-                                  Indent const& indent);
   void AddInstallNamePatchRule(std::ostream& os, Indent const& indent,
                                const char* config,
                                const std::string& toDestDirPath);
@@ -96,6 +93,7 @@ protected:
   std::string FilePermissions;
   bool Optional;
   NamelinkModeType NamelinkMode;
+  std::string FromDir;
 };
 
 #endif
