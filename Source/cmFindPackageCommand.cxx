@@ -468,6 +468,14 @@ bool cmFindPackageCommand
       }
     }
 
+  // Ignore EXACT with no version.
+  if(this->Version.empty() && this->VersionExact)
+    {
+    this->VersionExact = false;
+    this->Makefile->IssueMessage(
+      cmake::AUTHOR_WARNING, "Ignoring EXACT since no version is requested.");
+    }
+
   if(!this->Version.empty())
     {
     // Try to parse the version number and store the results that were
