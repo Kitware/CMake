@@ -129,7 +129,8 @@ cmFindPackageCommand::cmFindPackageCommand()
     "                NO_CMAKE_FIND_ROOT_PATH])\n"
     "The NO_MODULE option may be used to skip Module mode explicitly.  "
     "It is also implied by use of options not specified in the reduced "
-    "signature.  "
+    "signature, or when the command is invoked recursively inside a "
+    "find-module for the package."
     "\n"
     "Config mode attempts to locate a configuration file provided by the "
     "package to be found.  A cache entry called <package>_DIR is created to "
@@ -160,6 +161,10 @@ cmFindPackageCommand::cmFindPackageCommand()
     "version (format is major[.minor[.patch[.tweak]]]).  "
     "If the EXACT option is given only a version of the package claiming "
     "an exact match of the requested version may be found.  "
+    "If no [version] is given to a recursive invocation inside a "
+    "find-module, the [version] and EXACT arguments are forwarded "
+    "automatically from the outer call."
+    "\n"
     "CMake does not establish any convention for the meaning of version "
     "numbers.  "
     "Package version numbers are checked by \"version\" files provided by "
@@ -476,6 +481,33 @@ bool cmFindPackageCommand
       cmake::AUTHOR_WARNING, "Ignoring EXACT since no version is requested.");
     }
 
+  if(!this->NoModule || this->Version.empty())
+    {
+    // Check whether we are recursing inside "Find<name>.cmake" within
+    // another find_package(<name>) call.
+    std::string mod = this->Name;
+    mod += "_FIND_MODULE";
+    if(this->Makefile->IsOn(mod.c_str()))
+      {
+      // Avoid recursing back into the module.
+      this->NoModule = true;
+
+      // Get version information from the outer call if necessary.
+      if(this->Version.empty())
+        {
+        // Requested version string.
+        std::string ver = this->Name;
+        ver += "_FIND_VERSION";
+        this->Version = this->Makefile->GetSafeDefinition(ver.c_str());
+
+        // Whether an exact version is required.
+        std::string exact = this->Name;
+        exact += "_FIND_VERSION_EXACT";
+        this->VersionExact = this->Makefile->IsOn(exact.c_str());
+        }
+      }
+    }
+
   if(!this->Version.empty())
     {
     // Try to parse the version number and store the results that were
@@ -611,9 +643,15 @@ bool cmFindPackageCommand::FindModule(bool& found)
   std::string mfile = this->Makefile->GetModulesFile(module.c_str());
   if ( mfile.size() )
     {
-    // Load the module we found.
+    // Load the module we found, and set "<name>_FIND_MODULE" to true
+    // while inside it.
     found = true;
-    return this->ReadListFile(mfile.c_str());
+    std::string var = this->Name;
+    var += "_FIND_MODULE";
+    this->Makefile->AddDefinition(var.c_str(), "1");
+    bool result = this->ReadListFile(mfile.c_str());
+    this->Makefile->RemoveDefinition(var.c_str());
+    return result;
     }
   return true;
 }
