@@ -358,10 +358,10 @@ cmLocalUnixMakefileGenerator3
     commands.push_back(
       this->GetRecursiveMakeCall(tgtMakefileName.c_str(), targetName.c_str())
       );
-    this->CreateCDCommand(commands,
-                          this->Makefile->GetHomeOutputDirectory(),
-                          this->Makefile->GetStartOutputDirectory());
     }
+  this->CreateCDCommand(commands,
+                        this->Makefile->GetHomeOutputDirectory(),
+                        this->Makefile->GetStartOutputDirectory());
 
   // Write the rule to the makefile.
   std::vector<std::string> no_depends;
