@@ -662,6 +662,32 @@ void cmTarget::DefineProperties(cmake *cm)
      "The names returned are suitable for passing to the "
      "set_source_files_properties command.");
 
+  cm->DefineProperty
+    ("PROJECT_LABEL", cmProperty::TARGET,
+     "Change the name of a target in an IDE.",
+     "Can be used to change the name of the target in an IDE "
+     "like visual stuido. ");
+  cm->DefineProperty
+    ("VS_KEYWORD", cmProperty::TARGET,
+     "Visual Studio project keyword.",
+     "Can be set to change the visual studio keyword, for example "
+     "QT integration works better if this is set to Qt4VSv1.0. ");
+  cm->DefineProperty
+    ("VS_SCC_PROVIDER", cmProperty::TARGET,
+     "Visual Studio Source Code Control Provider.",
+     "Can be set to change the visual studio source code control "
+     "provider property.");
+  cm->DefineProperty
+    ("VS_SCC_LOCALPATH", cmProperty::TARGET,
+     "Visual Studio Source Code Control Provider.",
+     "Can be set to change the visual studio source code control "
+     "local path property.");
+  cm->DefineProperty
+    ("VS_SCC_PROJECTNAME", cmProperty::TARGET,
+     "Visual Studio Source Code Control Project.",
+     "Can be set to change the visual studio source code control "
+     "project name property.");
+
 #if 0
   cm->DefineProperty
     ("OBJECT_FILES", cmProperty::TARGET,
