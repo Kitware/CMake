@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  CTEST_TEST([BUILD build_dir]\n"
+      "  ctest_test([BUILD build_dir]\n"
       "             [START start number] [END end number]\n"
       "             [STRIDE stride number] [EXCLUDE exclude regex ]\n"
       "             [INCLUDE include regex] [RETURN_VALUE res] )\n"
