@@ -1,1 +1,1 @@
-FIND_PACKAGE(RecursiveA)
+FIND_PACKAGE(RecursiveA NO_MODULE)
