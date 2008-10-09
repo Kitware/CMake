@@ -120,6 +120,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->SourceFileExtensions = mf.SourceFileExtensions;
   this->HeaderFileExtensions = mf.HeaderFileExtensions;
   this->DefineFlags = mf.DefineFlags;
+  this->DefineFlagsOrig = mf.DefineFlagsOrig;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   this->SourceGroups = mf.SourceGroups;
@@ -1337,6 +1338,7 @@ void cmMakefile::InitializeFromParent()
 
   // define flags
   this->DefineFlags = parent->DefineFlags;
+  this->DefineFlagsOrig = parent->DefineFlagsOrig;
 
   // Include transform property.  There is no per-config version.
   {
