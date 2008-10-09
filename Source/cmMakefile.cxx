@@ -982,12 +982,13 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddUtilityCommand(const char* utilityName,
-                                   bool excludeFromAll,
-                                   const char* workingDirectory,
-                                   const std::vector<std::string>& depends,
-                                   const cmCustomCommandLines& commandLines,
-                                   bool escapeOldStyle, const char* comment)
+cmTarget*
+cmMakefile::AddUtilityCommand(const char* utilityName,
+                              bool excludeFromAll,
+                              const char* workingDirectory,
+                              const std::vector<std::string>& depends,
+                              const cmCustomCommandLines& commandLines,
+                              bool escapeOldStyle, const char* comment)
 {
   // Create a target instance for this utility.
   cmTarget* target = this->AddNewTarget(cmTarget::UTILITY, utilityName);
@@ -1025,6 +1026,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
     cmSystemTools::Error("Could not get source file entry for ",
                          force.c_str());
     }
+  return target;
 }
 
 void cmMakefile::AddDefineFlag(const char* flag)
