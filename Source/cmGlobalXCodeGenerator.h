@@ -152,6 +152,7 @@ private:
   virtual void  WriteXCodePBXProj(std::ostream& fout,
                                   cmLocalGenerator* root,
                                   std::vector<cmLocalGenerator*>& generators);
+  cmXCodeObject* CreateXCodeFileReference(cmSourceFile* sf, cmTarget& cmtarget);
   cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, 
                                        cmSourceFile* sf,
                                        cmTarget& cmtarget);

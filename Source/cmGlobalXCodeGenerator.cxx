@@ -281,6 +281,12 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                         "echo", "Build all projects");
   cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
 
+  // Refer to the main build configuration file for easy editing.
+  std::string listfile = mf->GetStartDirectory();
+  listfile += "/";
+  listfile += "CMakeLists.txt";
+  allbuild->AddSource(listfile.c_str());
+
   // Add XCODE depend helper 
   std::string dir = mf->GetCurrentOutputDirectory();
   cmCustomCommandLine makecommand;
@@ -333,6 +339,12 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
         {
         allbuild->AddUtility(target.GetName());
         }
+
+      // Refer to the build configuration file for easy editing.
+      listfile = lg->GetMakefile()->GetStartDirectory();
+      listfile += "/";
+      listfile += "CMakeLists.txt";
+      target.AddSource(listfile.c_str());
       }
     }
 }
@@ -459,27 +471,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   // Using a map and the full path guarantees that we will always get the same
   // fileRef object for any given full path.
   //
-  std::string fname = sf->GetFullPath();
-  cmXCodeObject* fileRef = this->FileRefs[fname];
-  if(!fileRef)
-    {
-    fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-    std::string comment = fname;
-    comment += " in ";
-    //std::string gname = group->GetObject("name")->GetString();
-    //comment += gname.substr(1, gname.size()-2);
-    fileRef->SetComment(fname.c_str());
-
-    this->FileRefs[fname] = fileRef;
-    }
-
-  cmStdString key = GetGroupMapKey(cmtarget, sf);
-  cmXCodeObject* group = this->GroupMap[key];
-  cmXCodeObject* children = group->GetObject("children");
-  if (!children->HasObject(fileRef))
-    {
-    children->AddObject(fileRef);
-    }
+  cmXCodeObject* fileRef = this->CreateXCodeFileReference(sf, cmtarget);
 
   cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
   buildFile->SetComment(fileRef->GetComment());
@@ -525,6 +517,33 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     }
 
   buildFile->AddAttribute("settings", settings);
+  return buildFile;
+}
+
+//----------------------------------------------------------------------------
+cmXCodeObject*
+cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
+                                                 cmTarget& cmtarget)
+{
+  std::string fname = sf->GetFullPath();
+  cmXCodeObject* fileRef = this->FileRefs[fname];
+  if(!fileRef)
+    {
+    fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
+    std::string comment = fname;
+    //comment += " in ";
+    //std::string gname = group->GetObject("name")->GetString();
+    //comment += gname.substr(1, gname.size()-2);
+    fileRef->SetComment(fname.c_str());
+    this->FileRefs[fname] = fileRef;
+    }
+  cmStdString key = GetGroupMapKey(cmtarget, sf);
+  cmXCodeObject* group = this->GroupMap[key];
+  cmXCodeObject* children = group->GetObject("children");
+  if (!children->HasObject(fileRef))
+    {
+    children->AddObject(fileRef);
+    }
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
 
   const char* lang = 
@@ -569,6 +588,10 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     {
     sourcecode += ".c.c";
     }
+  else if(ext == "txt")
+    {
+    sourcecode += ".text";
+    }
   //else
   //  {
   //  // Already specialized above or we leave sourcecode == "sourcecode"
@@ -602,7 +625,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     fileRef->AddAttribute("sourceTree", this->CreateString("<absolute>"));
     }
 
-  return buildFile;
+  return fileRef;
 }
 
 //----------------------------------------------------------------------------
@@ -1784,6 +1807,21 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   target->AddAttribute("name", this->CreateString(productName.c_str()));
   target->AddAttribute("productName",this->CreateString(productName.c_str()));
   target->SetTarget(&cmtarget);
+
+  // Add source files without build rules for editing convenience.
+  if(cmtarget.GetType() == cmTarget::UTILITY)
+    {
+    std::vector<cmSourceFile*> const& sources = cmtarget.GetSourceFiles();
+    for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
+        i != sources.end(); ++i)
+      {
+      if(!(*i)->GetPropertyAsBool("GENERATED"))
+        {
+        this->CreateXCodeFileReference(*i, cmtarget);
+        }
+      }
+    }
+
   return target;
 }
 
@@ -2182,8 +2220,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
       // end up with (empty anyhow) ALL_BUILD and XCODE_DEPEND_HELPER source
       // groups:
       //
-      if(cmtarget.GetType() == cmTarget::UTILITY ||
-         cmtarget.GetType() == cmTarget::GLOBAL_TARGET)
+      if(cmtarget.GetType() == cmTarget::GLOBAL_TARGET)
         {
         continue;
         }
