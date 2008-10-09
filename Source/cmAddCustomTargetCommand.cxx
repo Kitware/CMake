@@ -55,6 +55,7 @@ bool cmAddCustomTargetCommand
   bool verbatim = false;
   std::string comment_buffer;
   const char* comment = 0;
+  std::vector<std::string> sources;
 
   // Keep track of parser state.
   enum tdoing {
@@ -62,6 +63,7 @@ bool cmAddCustomTargetCommand
     doing_depends,
     doing_working_directory,
     doing_comment,
+    doing_source,
     doing_verbatim
   };
   tdoing doing = doing_command;
@@ -111,6 +113,10 @@ bool cmAddCustomTargetCommand
         currentLine.clear();
         }
       }
+    else if(copy == "SOURCES")
+      {
+      doing = doing_source;
+      }
     else
       {
       switch (doing)
@@ -128,6 +134,9 @@ bool cmAddCustomTargetCommand
            comment_buffer = copy;
            comment = comment_buffer.c_str();
            break;
+        case doing_source:
+          sources.push_back(copy);
+          break;
         default:
           this->SetError("Wrong syntax. Unknown type of argument.");
           return false;
@@ -164,9 +173,13 @@ bool cmAddCustomTargetCommand
 
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
-  this->Makefile->AddUtilityCommand(args[0].c_str(), excludeFromAll,
-                                    working_directory.c_str(), depends,
-                                    commandLines, escapeOldStyle, comment);
+  cmTarget* target =
+    this->Makefile->AddUtilityCommand(args[0].c_str(), excludeFromAll,
+                                      working_directory.c_str(), depends,
+                                      commandLines, escapeOldStyle, comment);
+
+  // Add additional user-specified source files to the target.
+  target->AddSources(sources);
 
   return true;
 }

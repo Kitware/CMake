@@ -100,6 +100,7 @@ ADD_CUSTOM_TARGET(TDocument ALL
                                    ${PROJECT_BINARY_DIR}/doc2.h
   DEPENDS ${PROJECT_BINARY_DIR}/doc1.h doc1.txt
   COMMENT "Running top-level TDocument commands"
+  SOURCES doc1.tex
   )
 
 # Setup a pre- and post-build pair that will fail if not run in the
