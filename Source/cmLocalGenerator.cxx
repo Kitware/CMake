@@ -1155,9 +1155,11 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
       if(emitted.insert(frameworkDir).second)
         {
-        includeFlags 
-          << "-F" 
-          << this->ConvertToOutputForExisting(frameworkDir.c_str()) << " ";
+        includeFlags
+          << "-F" << this->Convert(frameworkDir.c_str(),
+                                   cmLocalGenerator::START_OUTPUT,
+                                   cmLocalGenerator::SHELL, true)
+          << " ";
         }
       continue;
       }

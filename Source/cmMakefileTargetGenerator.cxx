@@ -1452,7 +1452,9 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags()
     if(emitted.insert(*i).second)
       {
       flags += "-F";
-      flags += this->LocalGenerator->ConvertToOutputForExisting(i->c_str());
+      flags += this->Convert(i->c_str(),
+                             cmLocalGenerator::START_OUTPUT,
+                             cmLocalGenerator::SHELL, true);
       flags += " ";
       }
     }
