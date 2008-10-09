@@ -697,13 +697,13 @@ cmLocalUnixMakefileGenerator3
     << " -E remove -f\n"
     << "\n";
   
-  if(this->Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
+  if(const char* edit_cmd =
+     this->Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
     {
     makefileStream
       << "# The program to use to edit the cache.\n"
       << "CMAKE_EDIT_COMMAND = "
-      << (this->ConvertToOutputForExisting(
-            this->Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))) << "\n"
+      << this->Convert(edit_cmd,FULL,SHELL) << "\n"
       << "\n";
     }
 
