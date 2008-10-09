@@ -197,7 +197,8 @@ public:
 
     // create a command that cds to the start dir then runs the commands
   void CreateCDCommand(std::vector<std::string>& commands, 
-                       const char *targetDir, const char *returnDir);
+                       const char *targetDir,
+                       cmLocalGenerator::RelativeRoot returnDir);
 
   static std::string ConvertToQuotedOutputPath(const char* p);
 
@@ -321,10 +322,14 @@ protected:
   void AppendCustomDepend(std::vector<std::string>& depends,
                           const cmCustomCommand& cc);
   void AppendCustomCommands(std::vector<std::string>& commands,
-                            const std::vector<cmCustomCommand>& ccs);
+                            const std::vector<cmCustomCommand>& ccs,
+                            cmLocalGenerator::RelativeRoot relative =
+                            cmLocalGenerator::HOME_OUTPUT);
   void AppendCustomCommand(std::vector<std::string>& commands,
                            const cmCustomCommand& cc,
-                           bool echo_comment=false);
+                           bool echo_comment=false,
+                           cmLocalGenerator::RelativeRoot relative =
+                           cmLocalGenerator::HOME_OUTPUT);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files,
                           cmTarget& target, const char* filename =0);

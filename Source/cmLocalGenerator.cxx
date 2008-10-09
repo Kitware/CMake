@@ -1074,22 +1074,54 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
   s = expandedInput;
 }
 
-
-std::string 
-cmLocalGenerator::ConvertToOutputForExisting(const char* p)
+//----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::ConvertToOutputForExistingCommon(const char* remote,
+                                                   std::string const& result)
 {
-  std::string ret = p;
-  if(this->WindowsShell && ret.find(' ') != ret.npos 
-     && cmSystemTools::FileExists(p))
+  // If this is a windows shell, the result has a space, and the path
+  // already exists, we can use a short-path to reference it without a
+  // space.
+  if(this->WindowsShell && result.find(' ') != result.npos &&
+     cmSystemTools::FileExists(remote))
     {
-    if(cmSystemTools::GetShortPath(p, ret))
+    std::string tmp;
+    if(cmSystemTools::GetShortPath(remote, tmp))
       {
-      return  this->Convert(ret.c_str(), NONE, SHELL, true);
+      return this->Convert(tmp.c_str(), NONE, SHELL, true);
       }
     }
-  return this->Convert(p, START_OUTPUT, SHELL, true);
+
+  // Otherwise, leave it unchanged.
+  return result;
 }
 
+//----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::ConvertToOutputForExisting(const char* remote,
+                                             RelativeRoot local)
+{
+  // Perform standard conversion.
+  std::string result = this->Convert(remote, local, SHELL, true);
+
+  // Consider short-path.
+  return this->ConvertToOutputForExistingCommon(remote, result);
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::ConvertToOutputForExisting(RelativeRoot remote,
+                                             const char* local)
+{
+  // Perform standard conversion.
+  std::string result = this->Convert(remote, local, SHELL, true);
+
+  // Consider short-path.
+  const char* remotePath = this->GetRelativeRootPath(remote);
+  return this->ConvertToOutputForExistingCommon(remotePath, result);
+}
+
+//----------------------------------------------------------------------------
 const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 {
   if(!lang)
@@ -1985,7 +2017,21 @@ cmLocalGenerator::ConvertToOptionallyRelativeOutputPath(const char* remote)
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::Convert(const char* source, 
+const char* cmLocalGenerator::GetRelativeRootPath(RelativeRoot relroot)
+{
+  switch (relroot)
+    {
+    case HOME:         return this->Makefile->GetHomeDirectory();
+    case START:        return this->Makefile->GetStartDirectory();
+    case HOME_OUTPUT:  return this->Makefile->GetHomeOutputDirectory();
+    case START_OUTPUT: return this->Makefile->GetStartOutputDirectory();
+    default: break;
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::Convert(const char* source,
                                       RelativeRoot relative,
                                       OutputFormat output,
                                       bool optional)
@@ -2033,7 +2079,15 @@ std::string cmLocalGenerator::Convert(const char* source,
         break;
       }
     }
-  // Now convert it to an output path.
+  return this->ConvertToOutputFormat(result.c_str(), output);
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::ConvertToOutputFormat(const char* source,
+                                                    OutputFormat output)
+{
+  std::string result = source;
+  // Convert it to an output path.
   if (output == MAKEFILE)
     {
     result = cmSystemTools::ConvertToOutputPath(result.c_str());
@@ -2063,6 +2117,40 @@ std::string cmLocalGenerator::Convert(const char* source,
     result = this->EscapeForShell(result.c_str(), true, false);
     }
   return result;
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalGenerator::Convert(RelativeRoot remote,
+                                      const char* local,
+                                      OutputFormat output,
+                                      bool optional)
+{
+  const char* remotePath = this->GetRelativeRootPath(remote);
+  if(local && (!optional || this->UseRelativePaths))
+    {
+    std::vector<std::string> components;
+    std::string result;
+    switch(remote)
+      {
+      case HOME:
+      case HOME_OUTPUT:
+      case START:
+      case START_OUTPUT:
+        cmSystemTools::SplitPath(local, components);
+        result = this->ConvertToRelativePath(components, remotePath);
+        break;
+      case FULL:
+        result = remotePath;
+        break;
+      case NONE:
+        break;
+      }
+    return this->ConvertToOutputFormat(result.c_str(), output);
+    }
+  else
+    {
+    return this->ConvertToOutputFormat(remotePath, output);
+    }
 }
 
 //----------------------------------------------------------------------------

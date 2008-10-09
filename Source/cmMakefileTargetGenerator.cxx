@@ -567,7 +567,7 @@ cmMakefileTargetGenerator
   if(this->LocalGenerator->UseRelativePaths)
     {
     sourceFile = this->Convert(sourceFile.c_str(),
-                               cmLocalGenerator::HOME_OUTPUT);
+                               cmLocalGenerator::START_OUTPUT);
     }
   sourceFile = this->Convert(sourceFile.c_str(),
                              cmLocalGenerator::NONE,
@@ -614,7 +614,7 @@ cmMakefileTargetGenerator
   this->LocalGenerator->CreateCDCommand
     (compileCommands,
      this->Makefile->GetStartOutputDirectory(),
-     this->Makefile->GetHomeOutputDirectory());
+     cmLocalGenerator::HOME_OUTPUT);
   commands.insert(commands.end(),
                   compileCommands.begin(), compileCommands.end());
 
@@ -725,7 +725,7 @@ cmMakefileTargetGenerator
         this->LocalGenerator->CreateCDCommand
           (preprocessCommands,
            this->Makefile->GetStartOutputDirectory(),
-           this->Makefile->GetHomeOutputDirectory());
+           cmLocalGenerator::HOME_OUTPUT);
         commands.insert(commands.end(),
                         preprocessCommands.begin(),
                         preprocessCommands.end());
@@ -781,7 +781,7 @@ cmMakefileTargetGenerator
         this->LocalGenerator->CreateCDCommand
           (assemblyCommands,
            this->Makefile->GetStartOutputDirectory(),
-           this->Makefile->GetHomeOutputDirectory());
+           cmLocalGenerator::HOME_OUTPUT);
         commands.insert(commands.end(),
                         assemblyCommands.begin(),
                         assemblyCommands.end());
@@ -895,7 +895,7 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
   this->LocalGenerator->CreateCDCommand
     (commands,
      this->Makefile->GetStartOutputDirectory(),
-     this->Makefile->GetHomeOutputDirectory());
+     cmLocalGenerator::HOME_OUTPUT);
 
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
