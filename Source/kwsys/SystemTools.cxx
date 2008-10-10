@@ -3387,7 +3387,7 @@ kwsys_stl::string SystemTools::GetFilenameExtension(const kwsys_stl::string& fil
 
 /**
  * Return file extension of a full filename (dot included).
- * Warning: this is the shortest extension (for example: .tar.gz)
+ * Warning: this is the shortest extension (for example: .gz of .tar.gz)
  */
 kwsys_stl::string SystemTools::GetFilenameLastExtension(const kwsys_stl::string& filename)
 {
