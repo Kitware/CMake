@@ -634,7 +634,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
 cmDocumentation::Form cmDocumentation::GetFormFromFilename(
                                                    const std::string& filename)
 {
-  std::string ext = cmSystemTools::GetFilenameExtension(filename);
+  std::string ext = cmSystemTools::GetFilenameLastExtension(filename);
   ext = cmSystemTools::UpperCase(ext);
   if ((ext == ".HTM") || (ext == ".HTML"))
     {
