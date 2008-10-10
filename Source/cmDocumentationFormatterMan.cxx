@@ -57,30 +57,44 @@ void cmDocumentationFormatterMan
     }
 }
 
+void cmDocumentationFormatterMan::EscapeText(std::string& man_text)
+{
+  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
+  cmSystemTools::ReplaceString(man_text, "-", "\\-");
+}
+
 void cmDocumentationFormatterMan::PrintPreformatted(std::ostream& os, 
                                                     const char* text)
 {
   std::string man_text = text;
-  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
-  os << man_text << "\n";
+  this->EscapeText(man_text);
+  os << ".nf\n" << man_text;
+  if (*text && man_text.at(man_text.length()-1) != '\n')
+      os << "\n";
+  os << ".fi\n";
 }
 
 void cmDocumentationFormatterMan::PrintParagraph(std::ostream& os, 
                                                  const char* text)
 {
   std::string man_text = text;
-  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
+  this->EscapeText(man_text);
   os << man_text << "\n\n";
 }
 
 
 //----------------------------------------------------------------------------
-void cmDocumentationFormatterMan::PrintHeader(const char* name, 
+void cmDocumentationFormatterMan::PrintHeader(const char* docname,
+                                              const char* appname,
                                               std::ostream& os)
 {
-  os << ".TH " << name << " 1 \""
+  std::string s_docname(docname), s_appname(appname);
+
+  this->EscapeText(s_docname);
+  this->EscapeText(s_appname);
+  os << ".TH " << s_docname << " 1 \""
     << cmSystemTools::GetCurrentDateTime("%B %d, %Y").c_str()
-    << "\" \"" << name
+    << "\" \"" << s_appname
     << " " << cmVersion::GetCMakeVersion()
     << "\"\n";
 }

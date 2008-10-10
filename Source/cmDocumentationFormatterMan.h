@@ -30,12 +30,16 @@ public:
   virtual cmDocumentationEnums::Form GetForm() const
                                       { return cmDocumentationEnums::ManForm;}
 
-  virtual void PrintHeader(const char* name, std::ostream& os);
+  virtual void PrintHeader(const char* docname, const char* appname,
+                           std::ostream& os);
   virtual void PrintSection(std::ostream& os,
                     const cmDocumentationSection& section,
                     const char* name);
   virtual void PrintPreformatted(std::ostream& os, const char* text);
   virtual void PrintParagraph(std::ostream& os, const char* text);
+
+private:
+  void EscapeText(std::string& man_text);
 };
 
 #endif

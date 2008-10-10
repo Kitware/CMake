@@ -61,7 +61,7 @@ public:
   bool PrintRequestedDocumentation(std::ostream& os);
   
   /** Print help of the given type.  */
-  bool PrintDocumentation(Type ht, std::ostream& os);
+  bool PrintDocumentation(Type ht, std::ostream& os, const char* docname=0);
   
   /** Set the program name for standard document generation.  */
   void SetName(const char* name);
@@ -124,6 +124,7 @@ public:
 
 private:
   void SetForm(Form f);
+  void SetDocName(const char* docname);
 
   bool CreateSingleModule(const char* fname, 
                           const char* moduleName,
@@ -133,6 +134,8 @@ private:
   bool CreateModulesSection();
   bool CreateCustomModulesSection();
   void CreateFullDocumentation();
+
+  void AddDocumentIntroToPrint(const char* intro[2]);
 
   bool PrintCopyright(std::ostream& os);
   bool PrintVersion(std::ostream& os);
@@ -157,9 +160,12 @@ private:
 
 
   const char* GetNameString() const;
+  const char* GetDocName(bool fallbackToNameString = true) const;
+  const char* GetDefaultDocName(Type ht) const;
   bool IsOption(const char* arg) const;
 
   std::string NameString;
+  std::string DocName;
   std::map<std::string,cmDocumentationSection*> AllSections;
   
   std::string SeeAlsoString;

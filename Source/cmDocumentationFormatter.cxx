@@ -118,7 +118,8 @@ cmDocumentationFormatter::ComputeSectionLinkPrefix(std::string const& name)
     {
     return "module";
     }
-  else if(name.find("Name") != name.npos)
+  else if(name.find("Name") != name.npos ||
+          name.find("Introduction") != name.npos)
     {
     return "name";
     }
