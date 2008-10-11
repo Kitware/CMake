@@ -343,8 +343,8 @@ void cmDocumentation::ClearSections()
 //----------------------------------------------------------------------------
 void cmDocumentation::AddDocumentIntroToPrint(const char* intro[2])
 {
-  const char* docname;
-  if (intro && (docname = this->GetDocName(false)))
+  const char* docname = this->GetDocName(false);
+  if(intro && docname)
     {
     cmDocumentationSection* section;
     std::string desc("");
