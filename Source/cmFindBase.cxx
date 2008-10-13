@@ -489,13 +489,7 @@ void cmFindBase::AddPathSuffixes()
       // later with lib being replaced for lib64 which may exist
       paths.push_back(p);
       }
-    }
-  // now put the path without the path suffixes in the SearchPaths
-  for(i = finalPath.begin();
-      i != finalPath.end(); ++i)
-    {
-    // put all search paths in because it may later be replaced
-    // by lib64 stuff fixes bug 4009
+    // now put the path without the path suffixes in the SearchPaths
     paths.push_back(*i);
     }
 }
