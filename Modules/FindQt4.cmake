@@ -1535,8 +1535,8 @@ IF (QT4_QMAKE_FOUND)
     ENDIF(OPENSSL_LIBRARIES)
   ENDIF(QT_QCONFIG MATCHES "openssl" AND NOT Q_WS_WIN)
   
-  ## qdbus
-  IF(QT_QCONFIG MATCHES "qdbus")
+  ## dbus
+  IF(QT_QCONFIG MATCHES "dbus")
 
     # if the dbus library isn't found, we'll assume its not required to build
     # shared Qt on Linux doesn't require it
@@ -1562,7 +1562,7 @@ IF (QT4_QMAKE_FOUND)
       MARK_AS_ADVANCED(QT_DBUS_LIBRARY)
     ENDIF(NOT QT_DBUS_LIBRARY)
 
-  ENDIF(QT_QCONFIG MATCHES "qdbus")
+  ENDIF(QT_QCONFIG MATCHES "dbus")
   
   ## glib
   IF(QT_QCONFIG MATCHES "glib")
