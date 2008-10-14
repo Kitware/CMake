@@ -29,10 +29,7 @@ ENDIF(CMAKE_GENERATOR MATCHES  "Visual Studio 9")
 
 
 # make sure to enable languages after setting configuration types
-IF(NOT ENABLE_LANGUAGE_RC_CALLED AND NOT CMAKE_DO_TRY_COMPILE)
-  ENABLE_LANGUAGE(RC)
-ENDIF(NOT ENABLE_LANGUAGE_RC_CALLED AND NOT CMAKE_DO_TRY_COMPILE)
-SET(ENABLE_LANGUAGE_RC_CALLED TRUE)
+ENABLE_LANGUAGE(RC)
 SET(CMAKE_COMPILE_RESOURCE "rc <FLAGS> /fo<OBJECT> <SOURCE>")
 
 # for nmake we need to compute some information about the compiler 

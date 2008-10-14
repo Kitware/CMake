@@ -3,10 +3,13 @@
 # It also loads the available platform file for the system-compiler
 # if it exists.
 
+# make sure we don't use CMAKE_BASE_NAME from somewhere else
+SET(CMAKE_BASE_NAME)
 GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_RC_COMPILER} NAME_WE)
 SET(CMAKE_SYSTEM_AND_RC_COMPILER_INFO_FILE
   ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}.cmake)
 INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
+
 
 
 SET (CMAKE_RC_FLAGS "$ENV{RCFLAGS} ${CMAKE_RC_FLAGS_INIT}" CACHE STRING
