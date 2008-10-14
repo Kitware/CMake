@@ -28,13 +28,6 @@ bool cmEnableLanguageCommand
       ("called with incorrect number of arguments");
     return false;
     } 
-  if(this->Makefile->GetCMakeInstance()->GetIsInTryCompile())
-    {
-    this->SetError
-      ("called from a try_compile, "
-       "all languages must be enabled before trying them.");
-    return false;
-    }
   for (std::vector<std::string>::const_iterator it = args.begin();
        it != args.end();
        ++it)
