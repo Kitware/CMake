@@ -380,9 +380,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     buildObjs += variableNameExternal;
     buildObjs += ")";
     }
-  std::string cleanObjs = "$(";
-  cleanObjs += variableName;
-  cleanObjs += ")";
 
   cmLocalGenerator::RuleVariables vars;
   vars.Language = linkLanguage;

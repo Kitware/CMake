@@ -717,9 +717,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     buildObjs += variableNameExternal;
     buildObjs += ")";
     }
-  std::string cleanObjs = "$(";
-  cleanObjs += variableName;
-  cleanObjs += ")";
   cmLocalGenerator::RuleVariables vars;
   vars.TargetPDB = targetOutPathPDB.c_str();
 
