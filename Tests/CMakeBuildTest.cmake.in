@@ -2,7 +2,8 @@
 make_directory("@CMAKE_BUILD_TEST_BINARY_DIR@")
 
 # run cmake in the binary directory 
-execute_process(COMMAND "@CMAKE_CMAKE_COMMAND@"
+message("running: ${CMAKE_COMMAND}")
+execute_process(COMMAND "${CMAKE_COMMAND}"
   "@CMAKE_BUILD_TEST_SOURCE_DIR@"  
   "-G@CMAKE_TEST_GENERATOR@"
   WORKING_DIRECTORY "@CMAKE_BUILD_TEST_BINARY_DIR@"
@@ -12,7 +13,8 @@ if(RESULT)
 endif(RESULT)
 
 # Now use the --build option to build the project
-execute_process(COMMAND "@CMAKE_CMAKE_COMMAND@" 
+message("running: ${CMAKE_COMMAND} --build")
+execute_process(COMMAND "${CMAKE_COMMAND}" 
   --build "@CMAKE_BUILD_TEST_BINARY_DIR@" --config Debug
   RESULT_VARIABLE RESULT)
 if(RESULT)
