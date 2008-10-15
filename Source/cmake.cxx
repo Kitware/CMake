@@ -34,9 +34,9 @@
 # include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
 # include "cmVariableWatch.h"
 # include <cmsys/Terminal.h>
+# include <cmsys/CommandLineArguments.hxx>
 #endif
 
-#include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Process.h>
 #include <cmsys/Glob.hxx>
@@ -4380,11 +4380,16 @@ int cmake::Build(const std::string& dir,
                     projName.c_str(), target.c_str(),
                     &output, 
                     makeProgram.c_str(),
-                    config.c_str(), clean, false, 0, true);
+                    config.c_str(), clean, false, 0, true,
+                    extraBuildOptions.c_str());
 }
 
 int cmake::DoBuild(int ac, char* av[])
 {
+#ifndef CMAKE_BUILD_WITH_CMAKE
+  std::cerr << "This cmake does not support --build\n";
+  return -1;
+#else
   std::string target;
   std::string config = "Debug";
   std::string extraBuildOptions;
@@ -4414,4 +4419,5 @@ int cmake::DoBuild(int ac, char* av[])
     }
   cmake cm;
   return cm.Build(dir, target, config, extraBuildOptions, clean);
+#endif
 }
