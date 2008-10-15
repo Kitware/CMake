@@ -1031,8 +1031,11 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
          << this->Convert(this->InfoFileNameFull.c_str(),
-                          cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
-         << " --color=$(COLOR)";
+                          cmLocalGenerator::FULL, cmLocalGenerator::SHELL);
+  if(this->LocalGenerator->GetColorMakefile())
+    {
+    depCmd << " --color=$(COLOR)";
+    }
   commands.push_back(depCmd.str());
 
   // Make sure all custom command outputs in this target are built.
