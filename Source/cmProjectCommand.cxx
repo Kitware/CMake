@@ -57,6 +57,10 @@ bool cmProjectCommand
   if(!this->Makefile->GetDefinition("CMAKE_PROJECT_NAME"))
     {
     this->Makefile->AddDefinition("CMAKE_PROJECT_NAME", args[0].c_str());
+    this->Makefile->AddCacheDefinition
+      ("CMAKE_PROJECT_NAME",
+       args[0].c_str(),
+       "Value Computed by CMake", cmCacheManager::STATIC);
     }
 
   std::vector<std::string> languages;

@@ -1117,7 +1117,9 @@ int cmGlobalGenerator::Build(
   const char *makeCommandCSTR,
   const char *config,
   bool clean, bool fast,
-  double timeout)
+  double timeout,
+  bool verbose,
+  const char* extraOptions)
 {
   /**
    * Run an executable command and put the stdout in output.
@@ -1155,7 +1157,7 @@ int cmGlobalGenerator::Build(
       }
 
     if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), outputPtr,
-                                         &retVal, 0, false, timeout))
+                                         &retVal, 0, verbose, timeout))
       {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
@@ -1178,7 +1180,8 @@ int cmGlobalGenerator::Build(
   // now build
   std::string makeCommand =
     this->GenerateBuildCommand(makeCommandCSTR, projectName,
-                               0, target, config, false, fast);
+                               extraOptions, target, 
+                               config, false, fast);
   if(output)
     {
     *output += "\nRun Build Command:";
@@ -1187,7 +1190,7 @@ int cmGlobalGenerator::Build(
     }
   
   if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), outputPtr,
-                                       &retVal, 0, false, timeout))
+                                       &retVal, 0, verbose, timeout))
     {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     cmSystemTools::Error

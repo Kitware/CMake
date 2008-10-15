@@ -85,6 +85,11 @@ static const char * cmDocumentationOptions[][3] =
    "variables being created. If A is specified, then it will display also "
    "advanced variables. If H is specified, it will also display help for "
    "each variable."},
+  {"--build dir", "Build a configured cmake tree found in dir.",
+   "This option will use the native build tool from the command line to"
+   " build the project. Other options that can be specified with this one" 
+   " are --target, --config, --extra-options, and --clean.  For complete "
+   "help run --build with no options."},
   {"-N", "View mode only.",
    "Only load the cache. Do not actually run configure and generate steps."},
   {"-P <file>", "Process script mode.",
@@ -407,12 +412,17 @@ int do_cmake(int ac, char** av)
   bool list_help = false;
   bool view_only = false;
   bool script_mode = false;
+  bool build = false;
   std::vector<std::string> args;
   for(int i =0; i < ac; ++i)
     {
     if(strcmp(av[i], "-i") == 0)
       {
       wiz = true;
+      }
+    else if(!command && strcmp(av[i], "--build") == 0)
+      {
+      return cmake::DoBuild(ac, av);
       }
     else if(!command && strcmp(av[i], "--system-information") == 0)
       {
@@ -464,6 +474,11 @@ int do_cmake(int ac, char** av)
       {
       args.push_back(av[i]);
       }
+    }
+  if(build)
+    {
+    int ret = cmake::DoBuild(ac, av);
+    return ret;
     }
   if(command)
     {

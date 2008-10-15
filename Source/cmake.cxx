@@ -36,6 +36,7 @@
 # include <cmsys/Terminal.h>
 #endif
 
+#include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Process.h>
 #include <cmsys/Glob.hxx>
@@ -947,7 +948,8 @@ void CMakeCommandUsage(const char* program)
   errorStream
     << "cmake bootstrap\n";
 #endif
-
+  // If you add new commands, change here, 
+  // and in cmakemain.cxx in the options table
   errorStream
     << "Usage: " << program << " -E [command] [arguments ...]\n"
     << "Available commands: \n"
@@ -973,6 +975,7 @@ void CMakeCommandUsage(const char* program)
     << "  time command [args] ...   - run command and return elapsed time\n"
     << "  touch file                - touch a file.\n"
     << "  touch_nocreate file       - touch a file but do not create it.\n"
+    << "  build build_dir           - build the project in build_dir.\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
     << "  write_regv key value      - write registry value\n"
     << "  delete_regv key           - delete registry value\n"
@@ -987,6 +990,7 @@ void CMakeCommandUsage(const char* program)
 
 int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
 {
+  // IF YOU ADD A NEW COMMAND, DOCUMENT IT ABOVE and in cmakemain.cxx
   if (args.size() > 1)
     {
     // Copy file
@@ -1188,7 +1192,6 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         << "\n";
       return ret;
       }
-
     // Command to calculate the md5sum of a file
     else if (args[1] == "md5sum" && args.size() >= 3)
       {
@@ -4328,4 +4331,87 @@ std::vector<std::string> const& cmake::GetDebugConfigs()
       }
     }
   return this->DebugConfigs;
+}
+
+
+int cmake::Build(const std::string& dir,
+                 const std::string& target,
+                 const std::string& config,
+                 const std::string& extraBuildOptions,
+                 bool clean)
+{ 
+  if(!cmSystemTools::FileIsDirectory(dir.c_str()))
+    {
+    std::cerr << "Error: " << dir << " is not a directory\n";
+    return 1;
+    }
+  std::string cachePath = dir;
+  cmSystemTools::ConvertToUnixSlashes(cachePath);
+  cmCacheManager* cachem = this->GetCacheManager();
+  cmCacheManager::CacheIterator it = cachem->NewIterator();
+  if(!cachem->LoadCache(cachePath.c_str()))
+    {
+    std::cerr << "Error: could not load cache\n";
+    return 1;
+    }
+  if(!it.Find("CMAKE_GENERATOR"))
+    {
+    std::cerr << "Error: could find generator in Cache\n";
+    return 1;
+    }
+  cmGlobalGenerator* gen =
+    this->CreateGlobalGenerator(it.GetValue());
+  std::string output;
+  std::string projName;
+  std::string makeProgram;
+  if(!it.Find("CMAKE_PROJECT_NAME"))
+    {
+    std::cerr << "Error: could not find CMAKE_PROJECT_NAME in Cache\n";
+    return 1;
+    }
+  projName = it.GetValue();
+  if(!it.Find("CMAKE_MAKE_PROGRAM"))
+    {
+    std::cerr << "Error: could not find CMAKE_MAKE_PROGRAM in Cache\n";
+    return 1;
+    }
+  makeProgram = it.GetValue();
+  return gen->Build(0, dir.c_str(),
+                    projName.c_str(), target.c_str(),
+                    &output, 
+                    makeProgram.c_str(),
+                    config.c_str(), clean, false, 0, true);
+}
+
+int cmake::DoBuild(int ac, char* av[])
+{
+  std::string target;
+  std::string config = "Debug";
+  std::string extraBuildOptions;
+  std::string dir;
+  bool clean = false;
+  cmsys::CommandLineArguments arg;
+  arg.Initialize(ac, av);
+  typedef cmsys::CommandLineArguments argT;
+  arg.AddArgument("--build", argT::SPACE_ARGUMENT, &dir, 
+                  "Build a configured cmake project --build dir.");
+  arg.AddArgument("--target", argT::SPACE_ARGUMENT, &target, 
+                  "Specifiy the target to build,"
+                  " if missing, all targets are built.");
+  arg.AddArgument("--config", argT::SPACE_ARGUMENT, &config, 
+                  "Specify configuration to build"
+                  " if missing Debug is built.");
+  arg.AddArgument("--extra-options", argT::SPACE_ARGUMENT, &extraBuildOptions, 
+                  "Specify extra options to pass to build program,"
+                  " for example with gmake -jN.");
+  arg.AddArgument("--clean", argT::NO_ARGUMENT, &clean, 
+                  "Clean before building.");
+  if ( !arg.Parse() )
+    {
+    std::cerr << "Problem parsing --build arguments:\n";
+    std::cerr << arg.GetHelp() << "\n";
+    return 1;
+    }
+  cmake cm;
+  return cm.Build(dir, target, config, extraBuildOptions, clean);
 }

@@ -356,7 +356,14 @@ class cmake
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
                     cmListFileBacktrace const& backtrace);
+  //  * run the --build option
+  static int DoBuild(int ac, char* av[]);
 protected:
+  int Build(const std::string& dir,
+            const std::string& target,
+            const std::string& config,
+            const std::string& extraBuildOptions,
+            bool clean);
   void InitializeProperties();
   int HandleDeleteCacheVariables(const char* var);
   cmPropertyMap Properties;

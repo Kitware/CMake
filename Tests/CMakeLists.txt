@@ -96,6 +96,12 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(ExportImport ExportImport)
   ADD_TEST_MACRO(Unset Unset)
 
+  SET(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
+  SET(CMAKE_BUILD_TEST_BINARY_DIR "${CMake_BINARY_DIR}/Tests/CMakeBuildCOnly")
+  CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CMakeBuildTest.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CMakeBuildTest.cmake" @ONLY)
+  ADD_TEST(CMakeBuildTest ${CMAKE_CMAKE_COMMAND} -P
+    "${CMake_BINARY_DIR}/Tests/CMakeBuildTest.cmake")
 
   # If we are running right now with a UnixMakefiles based generator,
   # build the "Simple" test with the ExtraGenerators, if available

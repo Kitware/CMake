@@ -105,13 +105,15 @@ public:
                     std::string *output, 
                     const char *makeProgram, const char *config,
                     bool clean, bool fast,
-                    double timeout);
-  virtual std::string GenerateBuildCommand
-  (const char* makeProgram,
-   const char *projectName, const char* additionalOptions, 
-   const char *targetName,
-   const char* config, bool ignoreErrors, bool fast);
-
+                    double timeout, bool verbose=false,
+                    const char* extraOptions = 0);
+  
+  virtual std::string GenerateBuildCommand(
+    const char* makeProgram,
+    const char *projectName, const char* additionalOptions, 
+    const char *targetName,
+    const char* config, bool ignoreErrors, bool fast);
+  
 
   ///! Set the CMake instance
   void SetCMakeInstance(cmake *cm);
