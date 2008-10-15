@@ -1634,14 +1634,35 @@ cmMakefileTargetGenerator
   this->WriteObjectsVariable(variableName, variableNameExternal);
   if(useResponseFile)
     {
-    std::string objects;
-    this->WriteObjectsString(objects);
-    std::string objects_rsp =
-      this->CreateResponseFile("objects.rsp", objects, makefile_depends);
-    buildObjs = "@";
-    buildObjs += this->Convert(objects_rsp.c_str(),
-                               cmLocalGenerator::NONE,
-                               cmLocalGenerator::SHELL);
+    // MSVC response files cannot exceed 128K.
+    std::string::size_type const responseFileLimit = 131000;
+
+    // Construct the individual object list strings.
+    std::vector<std::string> object_strings;
+    this->WriteObjectsStrings(object_strings, responseFileLimit);
+
+    // Write a response file for each string.
+    const char* sep = "";
+    for(unsigned int i = 0; i < object_strings.size(); ++i)
+      {
+      // Number the response files.
+      char rsp[32];
+      sprintf(rsp, "objects%u.rsp", i+1);
+
+      // Create this response file.
+      std::string objects_rsp =
+        this->CreateResponseFile(rsp, object_strings[i], makefile_depends);
+
+      // Separate from previous response file references.
+      buildObjs += sep;
+      sep = " ";
+
+      // Reference the response file.
+      buildObjs += "@";
+      buildObjs += this->Convert(objects_rsp.c_str(),
+                                 cmLocalGenerator::NONE,
+                                 cmLocalGenerator::SHELL);
+      }
     }
   else if(useLinkScript)
     {
