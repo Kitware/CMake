@@ -1623,6 +1623,44 @@ cmMakefileTargetGenerator
 }
 
 //----------------------------------------------------------------------------
+void
+cmMakefileTargetGenerator
+::CreateObjectLists(bool useLinkScript, bool useArchiveRules,
+                    bool useResponseFile, std::string& buildObjs,
+                    std::vector<std::string>& makefile_depends)
+{
+  std::string variableName;
+  std::string variableNameExternal;
+  this->WriteObjectsVariable(variableName, variableNameExternal);
+  if(useResponseFile)
+    {
+    std::string objects;
+    this->WriteObjectsString(objects);
+    std::string objects_rsp =
+      this->CreateResponseFile("objects.rsp", objects, makefile_depends);
+    buildObjs = "@";
+    buildObjs += this->Convert(objects_rsp.c_str(),
+                               cmLocalGenerator::NONE,
+                               cmLocalGenerator::SHELL);
+    }
+  else if(useLinkScript)
+    {
+    if(!useArchiveRules)
+      {
+      this->WriteObjectsString(buildObjs);
+      }
+    }
+  else
+    {
+    buildObjs = "$(";
+    buildObjs += variableName;
+    buildObjs += ") $(";
+    buildObjs += variableNameExternal;
+    buildObjs += ")";
+    }
+}
+
+//----------------------------------------------------------------------------
 const char* cmMakefileTargetGenerator::GetFortranModuleDirectory()
 {
   // Compute the module directory.

@@ -353,33 +353,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Construct object file lists that may be needed to expand the
   // rule.
-  std::string variableName;
-  std::string variableNameExternal;
-  this->WriteObjectsVariable(variableName, variableNameExternal);
   std::string buildObjs;
-  if(useResponseFile)
-    {
-    std::string objects;
-    this->WriteObjectsString(objects);
-    std::string objects_rsp =
-      this->CreateResponseFile("objects.rsp", objects, depends);
-    buildObjs = "@";
-    buildObjs += this->Convert(objects_rsp.c_str(),
-                               cmLocalGenerator::NONE,
-                               cmLocalGenerator::SHELL);
-    }
-  else if(useLinkScript)
-    {
-    this->WriteObjectsString(buildObjs);
-    }
-  else
-    {
-    buildObjs = "$(";
-    buildObjs += variableName;
-    buildObjs += ") $(";
-    buildObjs += variableNameExternal;
-    buildObjs += ")";
-    }
+  this->CreateObjectLists(useLinkScript, false, useResponseFile,
+                          buildObjs, depends);
 
   cmLocalGenerator::RuleVariables vars;
   vars.Language = linkLanguage;

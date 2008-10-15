@@ -144,6 +144,11 @@ protected:
                                  std::string const& options,
                                  std::vector<std::string>& makefile_depends);
 
+  /** Create lists of object files for linking and cleaning.  */
+  void CreateObjectLists(bool useLinkScript, bool useArchiveRules,
+                         bool useResponseFile, std::string& buildObjs,
+                         std::vector<std::string>& makefile_depends);
+
   virtual void CloseFileStreams();
   void RemoveForbiddenFlags(const char* flagVar, const char* linkLang,
                             std::string& linkFlags);
