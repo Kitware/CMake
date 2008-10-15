@@ -646,20 +646,13 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           // CMAKE_INSTALL_PREFIX underneath the tempInstallDirectory. The
           // value of the project's CMAKE_INSTALL_PREFIX is sent in here as
           // the value of the CPACK_INSTALL_PREFIX variable.
+          //
           std::string dir;
           if (this->GetOption("CPACK_INSTALL_PREFIX"))
             {
             dir += this->GetOption("CPACK_INSTALL_PREFIX");
             }
           mf->AddDefinition("CMAKE_INSTALL_PREFIX", dir.c_str());
-
-          if ( !cmsys::SystemTools::MakeDirectory(dir.c_str()))
-            {
-            cmCPackLogger(cmCPackLog::LOG_ERROR,
-                          "Problem creating temporary directory: " 
-                          << dir << std::endl);
-            return 0;
-            }
 
           cmCPackLogger(
             cmCPackLog::LOG_DEBUG,
@@ -668,6 +661,29 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "- Setting CMAKE_INSTALL_PREFIX to '" << dir << "'" 
                         << std::endl);
+
+          // Make sure that DESTDIR + CPACK_INSTALL_PREFIX directory
+          // exists:
+          //
+          if (cmSystemTools::StringStartsWith(dir.c_str(), "/"))
+            {
+            dir = tempInstallDirectory + dir;
+            }
+          else
+            {
+            dir = tempInstallDirectory + "/" + dir;
+            }
+
+          cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                        "- Creating directory: '" << dir << "'" << std::endl);
+
+          if ( !cmsys::SystemTools::MakeDirectory(dir.c_str()))
+            {
+            cmCPackLogger(cmCPackLog::LOG_ERROR,
+                          "Problem creating temporary directory: " 
+                          << dir << std::endl);
+            return 0;
+            }
           }
         else
           {
