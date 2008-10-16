@@ -4182,7 +4182,7 @@ kwsys_stl::string SystemTools::GetOperatingSystemNameAndVersion()
           res += "Microsoft Windows Server 2008 family";
           }
 #else
-        res += "Microsoft Windows Vista or Windows Server 2003";
+        res += "Microsoft Windows Vista or Windows Server 2008";
 #endif
         }
 

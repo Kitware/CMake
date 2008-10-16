@@ -2980,15 +2980,22 @@ bool SystemInformationImplementation::QueryOSInformation()
         {
         if (osvi.wProductType == VER_NT_WORKSTATION) 
           {
+          if (osvi.dwMajorVersion == 6) 
+            {
+            this->OSRelease = "Vista";
+            }
 // VER_SUITE_PERSONAL may not be defined
 #ifdef VER_SUITE_PERSONAL
-          if (osvi.wSuiteMask & VER_SUITE_PERSONAL)
+          else
             {
-            this->OSRelease += " Personal";
-            }
-          else 
-            {
-            this->OSRelease += " Professional";
+            if (osvi.wSuiteMask & VER_SUITE_PERSONAL)
+              {
+              this->OSRelease += " Personal";
+              }
+            else 
+              {
+              this->OSRelease += " Professional";
+              }
             }
 #endif
           } 
@@ -3015,7 +3022,7 @@ bool SystemInformationImplementation::QueryOSInformation()
             }
           }
 
-        sprintf (operatingSystem, "%s(Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
+        sprintf (operatingSystem, "%s (Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
         this->OSVersion = operatingSystem; 
         }
       else 
@@ -3095,7 +3102,7 @@ bool SystemInformationImplementation::QueryOSInformation()
       else 
         { 
         // Windows 2000 and everything else.
-        sprintf (operatingSystem,"%s(Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
+        sprintf (operatingSystem,"%s (Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
         this->OSVersion = operatingSystem;
         }
       break;
