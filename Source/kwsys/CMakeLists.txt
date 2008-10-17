@@ -154,7 +154,20 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_SystemInformation 1)
   SET(KWSYS_USE_CPU 1)
 ENDIF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
-  
+
+# Enforce component dependencies.
+IF(KWSYS_USE_SystemTools)
+  SET(KWSYS_USE_Directory 1)
+ENDIF(KWSYS_USE_SystemTools)
+IF(KWSYS_USE_Glob)
+  SET(KWSYS_USE_Directory 1)
+  SET(KWSYS_USE_SystemTools 1)
+  SET(KWSYS_USE_RegularExpression 1)
+ENDIF(KWSYS_USE_Glob)
+IF(KWSYS_USE_Process)
+  SET(KWSYS_USE_System 1)
+ENDIF(KWSYS_USE_Process)
+
 # Setup the large file support default.
 IF(KWSYS_LFS_DISABLE)
   SET(KWSYS_LFS_REQUESTED 0)
@@ -634,19 +647,6 @@ SET(KWSYS_HXX_FILES Configure String
   hashtable hash_fun hash_map hash_set
   auto_ptr
   )
-
-# Enforce component dependencies.
-IF(KWSYS_USE_SystemTools)
-  SET(KWSYS_USE_Directory 1)
-ENDIF(KWSYS_USE_SystemTools)
-IF(KWSYS_USE_Glob)
-  SET(KWSYS_USE_Directory 1)
-  SET(KWSYS_USE_SystemTools 1)
-  SET(KWSYS_USE_RegularExpression 1)
-ENDIF(KWSYS_USE_Glob)
-IF(KWSYS_USE_Process)
-  SET(KWSYS_USE_System 1)
-ENDIF(KWSYS_USE_Process)
 
 # Add selected C++ classes.
 SET(cppclasses
