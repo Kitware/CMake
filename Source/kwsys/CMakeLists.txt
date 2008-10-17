@@ -167,6 +167,10 @@ ENDIF(KWSYS_USE_Glob)
 IF(KWSYS_USE_Process)
   SET(KWSYS_USE_System 1)
 ENDIF(KWSYS_USE_Process)
+IF(KWSYS_USE_SystemInformation)
+  SET(KWSYS_USE_FundamentalType 1)
+  SET(KWSYS_USE_Process 1)
+ENDIF(KWSYS_USE_SystemInformation)
 
 # Setup the large file support default.
 IF(KWSYS_LFS_DISABLE)
