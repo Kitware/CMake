@@ -13,6 +13,10 @@
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
      PURPOSE.  See the above copyright notices for more information.
 =========================================================================*/
+#ifdef _WIN32
+# include <winsock.h> // WSADATA, include before sys/types.h
+#endif
+
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(FundamentalType.h)
 #include KWSYS_HEADER(stl/string)
@@ -2147,7 +2151,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   FILE *fd = fopen("/proc/cpuinfo", "r" );
   if ( !fd ) 
     {
-    kwsys_ios::cout << "Problem opening /proc/cpuinfo" << kwsys_stl::endl;
+    kwsys_ios::cout << "Problem opening /proc/cpuinfo" << kwsys_ios::endl;
     return 0;
     }
   
@@ -2279,7 +2283,7 @@ int SystemInformationImplementation::QueryMemory()
   int errorFlag = uname(&unameInfo);
   if( errorFlag!=0 )
     {
-    kwsys_ios::cout << "Problem calling uname(): " << strerror(errno) << kwsys_stl::endl;
+    kwsys_ios::cout << "Problem calling uname(): " << strerror(errno) << kwsys_ios::endl;
     return 0;
     }
  
@@ -2303,7 +2307,7 @@ int SystemInformationImplementation::QueryMemory()
   FILE *fd = fopen("/proc/meminfo", "r" );
   if ( !fd ) 
     {
-    kwsys_ios::cout << "Problem opening /proc/meminfo" << kwsys_stl::endl;
+    kwsys_ios::cout << "Problem opening /proc/meminfo" << kwsys_ios::endl;
     return 0;
     }
   
@@ -2810,7 +2814,7 @@ kwsys_stl::string SystemInformationImplementation::RunProcess(kwsys_stl::vector<
       {
       // Should not get here.
       kwsys_ios::cerr << "Unexpected ending state after running " << args[0]
-                << kwsys_stl::endl;
+                << kwsys_ios::endl;
       } break;
     }
   kwsysProcess_Delete(gp);
