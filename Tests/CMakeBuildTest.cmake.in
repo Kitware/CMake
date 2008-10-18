@@ -1,6 +1,12 @@
 # create the binary directory
 make_directory("@CMAKE_BUILD_TEST_BINARY_DIR@")
 
+# remove the CMakeCache.txt file from the source dir
+# if there is one, so that in-source cmake tests
+# still pass
+message("Remove: @CMAKE_BUILD_TEST_SOURCE_DIR@/CMakeCache.txt")
+file(REMOVE "@CMAKE_BUILD_TEST_SOURCE_DIR@/CMakeCache.txt")
+
 # run cmake in the binary directory 
 message("running: ${CMAKE_COMMAND}")
 execute_process(COMMAND "${CMAKE_COMMAND}"
