@@ -653,7 +653,9 @@ int cmCTestUpdateHandler::ProcessHandler()
     "(Updated to|At) revision ([0-9]+)\\.");
 
   cmsys::RegularExpression file_removed_line(
-    "cvs update: `(.*)' is no longer in the repository");
+    "cvs update: `?([^']*)'? is no longer in the repository");
+  cmsys::RegularExpression file_removed_line2(
+    "cvs update: warning: `?([^']*)'? is not \\(any longer\\) pertinent");
   cmsys::RegularExpression file_update_line("([A-Z])  *(.*)");
   std::string current_path = "<no-path>";
   bool first_file = true;
@@ -700,6 +702,11 @@ int cmCTestUpdateHandler::ProcessHandler()
     if ( file_removed_line.find(line) )
       {
       removed_line = "D " + file_removed_line.match(1);
+      line = removed_line.c_str();
+      }
+    else if ( file_removed_line2.find(line) )
+      {
+      removed_line = "D " + file_removed_line2.match(1);
       line = removed_line.c_str();
       }
     if ( file_update_line.find(line) )
