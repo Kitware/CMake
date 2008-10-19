@@ -820,6 +820,57 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleGeneratorTest")
   ENDIF(APPLE AND CTEST_TEST_CPACK)
 
+  SET(CTEST_TEST_UPDATE 1)
+  IF(CTEST_TEST_UPDATE)
+    # Test CTest Update with Subversion
+    FIND_PACKAGE(Subversion QUIET)
+    IF(Subversion_FOUND)
+      GET_FILENAME_COMPONENT(_Subversion_BIN_DIR
+        ${Subversion_SVN_EXECUTABLE} PATH)
+      FIND_PROGRAM(Subversion_SVNADMIN_EXECUTABLE svnadmin
+        HINTS ${_Subversion_BIN_DIR}
+        )
+      MARK_AS_ADVANCED(Subversion_SVNADMIN_EXECUTABLE)
+      IF(NOT Subversion_SVNADMIN_EXECUTABLE)
+        SET(Subversion_FOUND FALSE)
+      ENDIF(NOT Subversion_SVNADMIN_EXECUTABLE)
+    ENDIF(Subversion_FOUND)
+    IF(Subversion_FOUND)
+      SET(CTestUpdateSVN_DIR "CTest UpdateSVN")
+      CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestUpdateSVN.cmake.in"
+        "${CMake_BINARY_DIR}/Tests/CTestUpdateSVN.cmake" @ONLY)
+      ADD_TEST(CTest.UpdateSVN ${CMAKE_CMAKE_COMMAND}
+        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateSVN.cmake"
+        )
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateSVN_DIR}")
+    ENDIF(Subversion_FOUND)
+
+    # Test CTest Update with CVS
+    IF(UNIX)
+      # The test is expected to work by default on UNIX-like systems.
+      SET(CTEST_TEST_UPDATE_CVS 1)
+    ELSE(UNIX)
+      # Special CVS configuration is needed for test to pass on Windows.
+      OPTION(CTEST_TEST_UPDATE_CVS
+        "Enable CTest.UpdateCVS test.  Requires extra CVS setup on windows."
+        OFF)
+      MARK_AS_ADVANCED(CTEST_TEST_UPDATE_CVS)
+    ENDIF(UNIX)
+    IF(CTEST_TEST_UPDATE_CVS)
+      FIND_PACKAGE(CVS QUIET)
+    ENDIF(CTEST_TEST_UPDATE_CVS)
+    IF(CTEST_TEST_UPDATE_CVS AND CVS_FOUND)
+      SET(CTestUpdateCVS_DIR "CTest UpdateCVS")
+      CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestUpdateCVS.cmake.in"
+        "${CMake_BINARY_DIR}/Tests/CTestUpdateCVS.cmake" @ONLY)
+      ADD_TEST(CTest.UpdateCVS ${CMAKE_CMAKE_COMMAND}
+        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateCVS.cmake"
+        )
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateCVS_DIR}")
+    ENDIF(CTEST_TEST_UPDATE_CVS AND CVS_FOUND)
+
+  ENDIF(CTEST_TEST_UPDATE)
+
   IF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" @ONLY ESCAPE_QUOTES)
