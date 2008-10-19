@@ -259,11 +259,11 @@ int cmCTestUpdateHandler::ProcessHandler()
     {
     saveLCMessages = lcmess;
     }
-  // if LC_MESSAGES is not set to en_EN, then 
-  // set it, so that svn/cvs info will be in english
-  if(! (lcmess && strcmp(lcmess, "en_EN") == 0))
+  // if LC_MESSAGES is not set to C, then 
+  // set it, so that svn/cvs info will be in english ascii
+  if(! (lcmess && strcmp(lcmess, "C") == 0))
     {
-    cmSystemTools::PutEnv("LC_MESSAGES=en_EN");
+    cmSystemTools::PutEnv("LC_MESSAGES=C");
     }
   std::string checkoutErrorMessages;
   int retVal = 0;
