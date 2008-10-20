@@ -400,6 +400,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
       wxWidgets-2.9.2
       wxWidgets-2.9.1
       wxWidgets-2.9.0
+      wxWidgets-2.8.9
       wxWidgets-2.8.8
       wxWidgets-2.8.7
       wxWidgets-2.8.6
@@ -446,7 +447,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     ENDIF(MINGW)
     IF(BUILD_SHARED_LIBS)
       FIND_PATH(wxWidgets_LIB_DIR
-        NAMES msw/build.cfg mswd/build.cfg
+        NAMES msw/build.cfg mswd/build.cfg msuw/build.cfg mswud/build.cfg
         PATHS
         ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_dll   # prefer shared
         ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_lib
@@ -455,7 +456,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
         )
     ELSE(BUILD_SHARED_LIBS)
       FIND_PATH(wxWidgets_LIB_DIR
-        NAMES msw/build.cfg mswd/build.cfg
+        NAMES msw/build.cfg mswd/build.cfg msuw/build.cfg mswud/build.cfg
         PATHS
         ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_lib   # prefer static
         ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_dll
