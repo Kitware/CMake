@@ -213,12 +213,12 @@ public:
       configuration.  This is valid during generation only.  */
   cmTargetManifest const& GetTargetManifest() { return this->TargetManifest; }
 
-  /** Get the content of a directory on disk including the target
-      files to be generated.  This may be called only during the
-      generation step.  It is intended for use only by
-      cmComputeLinkInformation.  */
+  /** Get the content of a directory.  Directory listings are loaded
+      from disk at most once and cached.  During the generation step
+      the content will include the target files to be built even if
+      they do not yet exist.  */
   std::set<cmStdString> const& GetDirectoryContent(std::string const& dir,
-                                                   bool needDisk);
+                                                   bool needDisk = true);
 
   void AddTarget(cmTargets::value_type &v);
 
@@ -280,7 +280,8 @@ protected:
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const char* name, const char* message,
     const cmCustomCommandLines* commandLines,
-    std::vector<std::string> depends, bool depends_on_all = false);
+    std::vector<std::string> depends, const char* workingDir,
+                              bool depends_on_all = false);
 
   bool NeedSymbolicMark;
   bool UseLinkScript;

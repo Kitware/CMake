@@ -702,7 +702,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       modDir = ".";
       }
     fout << "\t\t\t\tModulePath=\"" 
-         << this->ConvertToXMLOutputPath(modDir.c_str()) << "\\$(ConfigurationName)\"\n";
+         << this->ConvertToXMLOutputPath(modDir.c_str())
+         << "\\$(ConfigurationName)\"\n";
     }
   targetOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
@@ -1831,6 +1832,26 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     {
     keyword = "Win32Proj";
     }
+  const char* vsProjectname = target.GetProperty("VS_SCC_PROJECTNAME");
+  if (!vsProjectname)
+    {
+    vsProjectname = "";
+    }
+  const char* vsLocalpath = target.GetProperty("VS_SCC_LOCALPATH");
+  if (!vsLocalpath)
+    {
+    vsLocalpath = "";
+    }
+  const char* vsProvider = target.GetProperty("VS_SCC_PROVIDER");
+  std::string providerString;
+  if (!vsProvider)
+    {
+    providerString = "";
+    }
+  else
+    {
+    providerString = "\tSccProvider=\"" + std::string(vsProvider) + "\"\n";
+    }
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   fout << "\tName=\"" << projLabel << "\"\n";
@@ -1838,9 +1859,15 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     {
     fout << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\"\n";
     }
-  fout << "\tSccProjectName=\"\"\n"
-       << "\tSccLocalPath=\"\"\n"
-       << "\tKeyword=\"" << keyword << "\">\n"
+  // if we have all the required Source code control tags
+  // then add that to the project
+  if(vsProvider && vsLocalpath && vsProjectname)
+    {
+    fout << "\tSccProjectName=\"" << vsProjectname << "\"\n"
+         << "\tSccLocalPath=\"" << vsLocalpath << "\"\n"
+         << "\tSccProvider=\"" << providerString << "\"\n";
+    }
+  fout << "\tKeyword=\"" << keyword << "\">\n"
        << "\t<Platforms>\n"
        << "\t\t<Platform\n\t\t\tName=\"" << this->PlatformName << "\"/>\n"
        << "\t</Platforms>\n";

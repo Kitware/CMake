@@ -683,14 +683,15 @@ int cmCursesMainForm::Configure(int noconfigure)
       {
       this->OkToGenerate = false;
       }
-    // reset error condition
-    cmSystemTools::ResetErrorOccuredFlag();
     int xx,yy;
     getmaxyx(stdscr, yy, xx);
     cmCursesLongMessageForm* msgs = new cmCursesLongMessageForm(
       this->Errors,
-      cmSystemTools::GetErrorOccuredFlag() ? "Errors occurred during the last pass." :
-                                             "CMake produced the following output.");
+      cmSystemTools::GetErrorOccuredFlag()
+      ? "Errors occurred during the last pass." :
+      "CMake produced the following output.");
+    // reset error condition
+    cmSystemTools::ResetErrorOccuredFlag();
     CurrentForm = msgs;
     msgs->Render(1,1,xx,yy);
     msgs->HandleInput();

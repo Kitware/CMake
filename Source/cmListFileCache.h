@@ -55,6 +55,7 @@ struct cmListFileContext
   std::string Name;
   std::string FilePath;
   long Line;
+  cmListFileContext(): Name(), FilePath(), Line(0) {}
 };
 
 std::ostream& operator<<(std::ostream&, cmListFileContext const&);

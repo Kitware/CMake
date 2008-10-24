@@ -202,6 +202,26 @@ static const char *cmDocumentationCopyright[][3] =
 };
 
 //----------------------------------------------------------------------------
+#define DOCUMENT_INTRO(type, default_name, desc) \
+  static char const *cmDocumentation##type##Intro[2] = { default_name, desc };
+#define GET_DOCUMENT_INTRO(type) cmDocumentation##type##Intro
+
+DOCUMENT_INTRO(Modules, "cmakemodules",
+  "Reference of available CMake modules.");
+DOCUMENT_INTRO(CustomModules, "cmakecustommodules",
+  "Reference of available CMake custom modules.");
+DOCUMENT_INTRO(Policies, "cmakepolicies",
+  "Reference of CMake policies.");
+DOCUMENT_INTRO(Properties, "cmakeprops",
+  "Reference of CMake properties.");
+DOCUMENT_INTRO(Variables, "cmakevars",
+  "Reference of CMake variables.");
+DOCUMENT_INTRO(Commands, "cmakecommands",
+  "Reference of available CMake commands.");
+DOCUMENT_INTRO(CompatCommands, "cmakecompat",
+  "Reference of CMake compatibility commands.");
+
+//----------------------------------------------------------------------------
 cmDocumentation::cmDocumentation()
 :CurrentFormatter(0)
 {
@@ -321,13 +341,43 @@ void cmDocumentation::ClearSections()
 }
 
 //----------------------------------------------------------------------------
-bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
+void cmDocumentation::AddDocumentIntroToPrint(const char* intro[2])
+{
+  const char* docname = this->GetDocName(false);
+  if(intro && docname)
+    {
+    cmDocumentationSection* section;
+    std::string desc("");
+
+    desc += docname;
+    desc += " - ";
+    desc += intro[1];
+
+    section = new cmDocumentationSection("Introduction", "NAME");
+    section->Append(0, desc.c_str(), 0);
+    this->PrintSections.push_back(section);
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
+                                         const char* docname)
 {
   if ((this->CurrentFormatter->GetForm() != HTMLForm) 
        && (this->CurrentFormatter->GetForm() != DocbookForm)
        && (this->CurrentFormatter->GetForm() != ManForm))
     {
     this->PrintVersion(os);
+    }
+
+  // Handle Document Name. docname==0 disables intro.
+  this->SetDocName("");
+  if (docname)
+    {
+    if (*docname)
+      this->SetDocName(docname);
+    else // empty string was given. select default if possible
+      this->SetDocName(this->GetDefaultDocName(ht));
     }
 
   switch (ht)
@@ -595,6 +645,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
     // given stream.
     std::ofstream* fout = 0;
     std::ostream* s = &os;
+    std::string docname("");
     if(i->Filename.length() > 0)
       {
       fout = new std::ofstream(i->Filename.c_str(), std::ios::out);
@@ -606,10 +657,14 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
         {
         result = false;
         }
+      if(i->Filename != "-")
+        {
+        docname = cmSystemTools::GetFilenameWithoutLastExtension(i->Filename);
+        }
       }
     
     // Print this documentation type to the stream.
-    if(!this->PrintDocumentation(i->HelpType, *s) || !*s)
+    if(!this->PrintDocumentation(i->HelpType, *s, docname.c_str()) || !*s)
       {
       result = false;
       }
@@ -634,7 +689,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
 cmDocumentation::Form cmDocumentation::GetFormFromFilename(
                                                    const std::string& filename)
 {
-  std::string ext = cmSystemTools::GetFilenameExtension(filename);
+  std::string ext = cmSystemTools::GetFilenameLastExtension(filename);
   ext = cmSystemTools::UpperCase(ext);
   if ((ext == ".HTM") || (ext == ".HTML"))
     {
@@ -867,6 +922,12 @@ void cmDocumentation::Print(std::ostream& os)
 void cmDocumentation::SetName(const char* name)
 {
   this->NameString = name?name:"";
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::SetDocName(const char *docname)
+{
+  this->DocName = docname?docname:"";
 }
 
 //----------------------------------------------------------------------------
@@ -1233,7 +1294,7 @@ bool cmDocumentation::PrintDocumentationUsage(std::ostream& os)
 bool cmDocumentation::PrintDocumentationFull(std::ostream& os)
 {
   this->CreateFullDocumentation();
-  this->CurrentFormatter->PrintHeader(GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetNameString(), GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1244,11 +1305,12 @@ bool cmDocumentation::PrintDocumentationModules(std::ostream& os)
 {
   this->ClearSections();
   this->CreateModulesSection();
+  this->AddDocumentIntroToPrint(GET_DOCUMENT_INTRO(Modules));
   this->AddSectionToPrint("Description");
   this->AddSectionToPrint("Modules");
   this->AddSectionToPrint("Copyright");
   this->AddSectionToPrint("See Also");
-  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetDocName(), GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1259,13 +1321,14 @@ bool cmDocumentation::PrintDocumentationCustomModules(std::ostream& os)
 {
   this->ClearSections();
   this->CreateCustomModulesSection();
+  this->AddDocumentIntroToPrint(GET_DOCUMENT_INTRO(CustomModules));
   this->AddSectionToPrint("Description");
   this->AddSectionToPrint("Custom CMake Modules");
 // the custom modules are most probably not under Kitware's copyright, Alex
 //  this->AddSectionToPrint("Copyright");
   this->AddSectionToPrint("See Also");
 
-  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetDocName(), GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1275,12 +1338,13 @@ bool cmDocumentation::PrintDocumentationCustomModules(std::ostream& os)
 bool cmDocumentation::PrintDocumentationPolicies(std::ostream& os)
 {
   this->ClearSections();
+  this->AddDocumentIntroToPrint(GET_DOCUMENT_INTRO(Policies));
   this->AddSectionToPrint("Description");
   this->AddSectionToPrint("Policies");
   this->AddSectionToPrint("Copyright");
   this->AddSectionToPrint("See Also");
 
-  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetDocName(), GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1290,6 +1354,7 @@ bool cmDocumentation::PrintDocumentationPolicies(std::ostream& os)
 bool cmDocumentation::PrintDocumentationProperties(std::ostream& os)
 {
   this->ClearSections();
+  this->AddDocumentIntroToPrint(GET_DOCUMENT_INTRO(Properties));
   this->AddSectionToPrint("Properties Description");
   for (std::vector<std::string>::iterator i = 
          this->PropertySections.begin();
@@ -1299,7 +1364,7 @@ bool cmDocumentation::PrintDocumentationProperties(std::ostream& os)
     }
   this->AddSectionToPrint("Copyright");
   this->AddSectionToPrint("Standard See Also");
-  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetDocName(), GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1309,6 +1374,7 @@ bool cmDocumentation::PrintDocumentationProperties(std::ostream& os)
 bool cmDocumentation::PrintDocumentationVariables(std::ostream& os)
 {
   this->ClearSections();
+  this->AddDocumentIntroToPrint(GET_DOCUMENT_INTRO(Variables));
   for (std::vector<std::string>::iterator i = 
          this->VariableSections.begin();
        i != this->VariableSections.end(); ++i)
@@ -1317,7 +1383,7 @@ bool cmDocumentation::PrintDocumentationVariables(std::ostream& os)
     }
   this->AddSectionToPrint("Copyright");
   this->AddSectionToPrint("Standard See Also");
-  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetDocName(), GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1327,10 +1393,11 @@ bool cmDocumentation::PrintDocumentationVariables(std::ostream& os)
 bool cmDocumentation::PrintDocumentationCurrentCommands(std::ostream& os)
 {
   this->ClearSections();
+  this->AddDocumentIntroToPrint(GET_DOCUMENT_INTRO(Commands));
   this->AddSectionToPrint("Commands");
   this->AddSectionToPrint("Copyright");
   this->AddSectionToPrint("Standard See Also");
-  this->CurrentFormatter->PrintHeader(this->GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetDocName(), GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1340,11 +1407,12 @@ bool cmDocumentation::PrintDocumentationCurrentCommands(std::ostream& os)
 bool cmDocumentation::PrintDocumentationCompatCommands(std::ostream& os)
 {
   this->ClearSections();
+  this->AddDocumentIntroToPrint(GET_DOCUMENT_INTRO(CompatCommands));
   this->AddSectionToPrint("Compatibility Commands Description");
   this->AddSectionToPrint("Compatibility Commands");
   this->AddSectionToPrint("Copyright");
   this->AddSectionToPrint("Standard See Also");
-  this->CurrentFormatter->PrintHeader(GetNameString(), os);
+  this->CurrentFormatter->PrintHeader(GetDocName(), GetNameString(), os);
   this->Print(os);
   this->CurrentFormatter->PrintFooter(os);
   return true;
@@ -1463,6 +1531,41 @@ const char* cmDocumentation::GetNameString() const
     {
     return "CMake";
     }
+}
+
+//----------------------------------------------------------------------------
+const char* cmDocumentation::GetDocName(bool fallbackToNameString) const
+{
+  if (this->DocName.length() > 0)
+    {
+    return this->DocName.c_str();
+    }
+  else if (fallbackToNameString)
+    {
+    return this->GetNameString();
+    }
+  else
+    return 0;
+}
+
+//----------------------------------------------------------------------------
+#define CASE_DEFAULT_DOCNAME(doctype) \
+  case cmDocumentation::doctype : \
+    return GET_DOCUMENT_INTRO(doctype)[0];
+const char* cmDocumentation::GetDefaultDocName(Type ht) const
+{
+  switch (ht)
+    {
+    CASE_DEFAULT_DOCNAME(Modules)
+    CASE_DEFAULT_DOCNAME(CustomModules)
+    CASE_DEFAULT_DOCNAME(Policies)
+    CASE_DEFAULT_DOCNAME(Properties)
+    CASE_DEFAULT_DOCNAME(Variables)
+    CASE_DEFAULT_DOCNAME(Commands)
+    CASE_DEFAULT_DOCNAME(CompatCommands)
+    default: break;
+    }
+  return 0;
 }
 
 //----------------------------------------------------------------------------

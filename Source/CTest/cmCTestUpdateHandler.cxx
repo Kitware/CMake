@@ -252,6 +252,19 @@ int cmCTestUpdateHandler::ProcessHandler()
   std::string goutput;
   std::string errors;
 
+  // make sure 
+  std::string saveLCMessages;
+  const char* lcmess = cmSystemTools::GetEnv("LC_MESSAGES");
+  if(lcmess)
+    {
+    saveLCMessages = lcmess;
+    }
+  // if LC_MESSAGES is not set to C, then 
+  // set it, so that svn/cvs info will be in english ascii
+  if(! (lcmess && strcmp(lcmess, "C") == 0))
+    {
+    cmSystemTools::PutEnv("LC_MESSAGES=C");
+    }
   std::string checkoutErrorMessages;
   int retVal = 0;
 
@@ -640,7 +653,9 @@ int cmCTestUpdateHandler::ProcessHandler()
     "(Updated to|At) revision ([0-9]+)\\.");
 
   cmsys::RegularExpression file_removed_line(
-    "cvs update: `(.*)' is no longer in the repository");
+    "cvs update: `?([^']*)'? is no longer in the repository");
+  cmsys::RegularExpression file_removed_line2(
+    "cvs update: warning: `?([^']*)'? is not \\(any longer\\) pertinent");
   cmsys::RegularExpression file_update_line("([A-Z])  *(.*)");
   std::string current_path = "<no-path>";
   bool first_file = true;
@@ -689,6 +704,11 @@ int cmCTestUpdateHandler::ProcessHandler()
       removed_line = "D " + file_removed_line.match(1);
       line = removed_line.c_str();
       }
+    else if ( file_removed_line2.find(line) )
+      {
+      removed_line = "D " + file_removed_line2.match(1);
+      line = removed_line.c_str();
+      }
     if ( file_update_line.find(line) )
       {
       if ( file_count == 0 )
@@ -700,7 +720,7 @@ int cmCTestUpdateHandler::ProcessHandler()
       std::string upFile = file_update_line.match(2);
       char mod = upChar[0];
       bool modifiedOrConflict = false;
-      if ( mod == 'X')
+      if ( mod == 'X' || mod == 'L')
         {
         continue;
         }
@@ -1102,7 +1122,18 @@ int cmCTestUpdateHandler::ProcessHandler()
     }
   os << "</UpdateReturnStatus>" << std::endl;
   os << "</Update>" << std::endl;
-
+  // restore the value of LC_MESSAGES after running the version control
+  // commands
+  if(saveLCMessages.size())
+    {
+    std::string put = "LC_MESSAGES=";
+    put += saveLCMessages;
+    cmSystemTools::PutEnv(put.c_str());
+    }
+  else
+    {
+    cmSystemTools::UnsetEnv("LC_MESSAGES");
+    }
   if (! res  )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,

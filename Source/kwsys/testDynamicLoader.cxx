@@ -17,8 +17,12 @@
 #include KWSYS_HEADER(ios/iostream)
 #include KWSYS_HEADER(stl/string)
 
-#if defined(__BEOS__)
+#if defined(__BEOS__) && !defined(__HAIKU__)
 #include <be/kernel/OS.h>  /* disable_debugger() API. */
+#endif
+
+#if defined(__HAIKU__)
+#include <os/kernel/OS.h>  /* disable_debugger() API. */
 #endif
 
 // Work-around CMake dependency scanning limitation.  This must
@@ -94,7 +98,7 @@ int testDynamicLoader(int argc, char *argv[])
 {
 #if defined(_WIN32)
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-#elif defined(__BEOS__)
+#elif defined(__BEOS__) || defined(__HAIKU__)
   disable_debugger(1);
 #endif
   int res = 0;

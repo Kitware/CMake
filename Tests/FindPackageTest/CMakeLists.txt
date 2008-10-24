@@ -38,6 +38,7 @@ SET(PACKAGES
   foo Foo Bar TFramework Tframework TApp Tapp Special
   VersionedA VersionedB
   wibbleA wibbleB
+  RecursiveA RecursiveB RecursiveC
   )
 FOREACH(p ${PACKAGES})
   SET(${p}_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
@@ -65,6 +66,11 @@ LIST(INSERT CMAKE_SYSTEM_PREFIX_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/A")
 FIND_PACKAGE(wibbleA NAMES wibble PATHS B)
 FIND_PACKAGE(wibbleB NAMES wibble HINTS B)
 
+# Look for package with recursive find-modules.
+FIND_PACKAGE(RecursiveA)
+FIND_PACKAGE(RecursiveB 2)
+FIND_PACKAGE(RecursiveC 3.1 EXACT)
+
 # Expected locations at which packages should be found.
 SET(foo_EXPECTED "lib/foo-1.2/foo-config.cmake")
 SET(Foo_EXPECTED "lib/foo-1.2/CMake/FooConfig.cmake")
@@ -82,6 +88,9 @@ SET(VersionedA_EXPECTED "lib/zot-2.0/zot-config.cmake")
 SET(VersionedB_EXPECTED "lib/zot-3.1/zot-config.cmake")
 SET(wibbleA_EXPECTED "A/wibble-config.cmake")
 SET(wibbleB_EXPECTED "B/wibble-config.cmake")
+SET(RecursiveA_EXPECTED "lib/RecursiveA/recursivea-config.cmake")
+SET(RecursiveB_EXPECTED "lib/zot-2.0/zot-config.cmake")
+SET(RecursiveC_EXPECTED "lib/zot-3.1/zot-config.cmake")
 
 # Check the results.
 FOREACH(p ${PACKAGES})

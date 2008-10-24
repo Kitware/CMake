@@ -52,7 +52,9 @@ public:
 
   virtual cmDocumentationEnums::Form GetForm() const = 0;
   
-  virtual void PrintHeader(const char* /*name*/, std::ostream& /*os*/) {}
+  virtual void PrintHeader(const char* /*docname*/,
+                           const char* /*appname*/,
+                           std::ostream& /*os*/) {}
   virtual void PrintFooter(std::ostream& /*os*/) {}
   virtual void PrintSection(std::ostream& os,
                     const cmDocumentationSection& section,

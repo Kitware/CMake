@@ -68,7 +68,8 @@ public:
       "                    [COMMAND command2 [args2...] ...]\n"
       "                    [DEPENDS depend depend depend ... ]\n"
       "                    [WORKING_DIRECTORY dir]\n"
-      "                    [COMMENT comment] [VERBATIM])\n"
+      "                    [COMMENT comment] [VERBATIM]\n"
+      "                    [SOURCES src1 [src2...]])\n"
       "Adds a target with the given name that executes the given commands. "
       "The target has no output file and is ALWAYS CONSIDERED OUT OF DATE "
       "even if the commands try to create a file with the name of the "
@@ -94,7 +95,13 @@ public:
       "Use of VERBATIM is recommended as it enables correct behavior. "
       "When VERBATIM is not given the behavior is platform specific. "
       "In the future VERBATIM may be enabled by default. The only reason "
-      "it is an option is to preserve compatibility with older CMake code.";
+      "it is an option is to preserve compatibility with older CMake code."
+      "\n"
+      "The SOURCES option specifies additional source files to be included "
+      "in the custom target.  "
+      "Specified source files will be added to IDE project files for "
+      "convenience in editing even if they have not build rules."
+      ;
     }
   
   cmTypeMacro(cmAddCustomTargetCommand, cmCommand);

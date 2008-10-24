@@ -83,7 +83,8 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("", "^.*$");
   this->AddSourceGroup
     ("Source Files",
-     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
+     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp"
+     "|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
   this->AddSourceGroup("Header Files",
                        "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddSourceGroup("CMake Rules", "\\.rule$");
@@ -119,6 +120,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->SourceFileExtensions = mf.SourceFileExtensions;
   this->HeaderFileExtensions = mf.HeaderFileExtensions;
   this->DefineFlags = mf.DefineFlags;
+  this->DefineFlagsOrig = mf.DefineFlagsOrig;
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   this->SourceGroups = mf.SourceGroups;
@@ -981,12 +983,13 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddUtilityCommand(const char* utilityName,
-                                   bool excludeFromAll,
-                                   const char* workingDirectory,
-                                   const std::vector<std::string>& depends,
-                                   const cmCustomCommandLines& commandLines,
-                                   bool escapeOldStyle, const char* comment)
+cmTarget*
+cmMakefile::AddUtilityCommand(const char* utilityName,
+                              bool excludeFromAll,
+                              const char* workingDirectory,
+                              const std::vector<std::string>& depends,
+                              const cmCustomCommandLines& commandLines,
+                              bool escapeOldStyle, const char* comment)
 {
   // Create a target instance for this utility.
   cmTarget* target = this->AddNewTarget(cmTarget::UTILITY, utilityName);
@@ -1024,6 +1027,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
     cmSystemTools::Error("Could not get source file entry for ",
                          force.c_str());
     }
+  return target;
 }
 
 void cmMakefile::AddDefineFlag(const char* flag)
@@ -1334,6 +1338,7 @@ void cmMakefile::InitializeFromParent()
 
   // define flags
   this->DefineFlags = parent->DefineFlags;
+  this->DefineFlagsOrig = parent->DefineFlagsOrig;
 
   // Include transform property.  There is no per-config version.
   {
@@ -2163,28 +2168,60 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   parser.SetReplaceAtSyntax(replaceAt);
   parser.SetRemoveEmpty(removeEmpty);
   int res = parser.ParseString(source.c_str(), 0);
-  if ( res )
+  const char* emsg = parser.GetError();
+  if ( res && !emsg[0] )
     {
     source = parser.GetResult();
     }
   else
     {
+    // Construct the main error message.
     cmOStringStream error;
-    error << "Syntax error in cmake code at\n"
-          << (filename?filename:"(no filename given)")
-          << ":" << line << ":\n"
-          << parser.GetError() << ", when parsing string \""
-          << source.c_str() << "\"";
-    if(this->NeedBackwardsCompatibility(2,0))
+    error << "Syntax error in cmake code ";
+    if(filename && line > 0)
       {
-      cmSystemTools::Error(error.str().c_str());
-      cmSystemTools::SetFatalErrorOccured();
-      return source.c_str();
+      // This filename and line number may be more specific than the
+      // command context because one command invocation can have
+      // arguments on multiple lines.
+      error << "at\n"
+            << "  " << filename << ":" << line << "\n";
       }
-    else
+    error << "when parsing string\n"
+          << "  " << source.c_str() << "\n";
+    error << emsg;
+
+    // If the parser failed ("res" is false) then this is a real
+    // argument parsing error, so the policy applies.  Otherwise the
+    // parser reported an error message without failing because the
+    // helper implementation is unhappy, which has always reported an
+    // error.
+    cmake::MessageType mtype = cmake::FATAL_ERROR;
+    if(!res)
       {
-      cmSystemTools::Message(error.str().c_str());
+      // This is a real argument parsing error.  Use policy CMP0010 to
+      // decide whether it is an error.
+      switch(this->GetPolicyStatus(cmPolicies::CMP0010))
+        {
+        case cmPolicies::WARN:
+          error << "\n"
+                << (this->GetPolicies()
+                    ->GetPolicyWarning(cmPolicies::CMP0010));
+        case cmPolicies::OLD:
+          // OLD behavior is to just warn and continue.
+          mtype = cmake::AUTHOR_WARNING;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+          error << "\n"
+                << (this->GetPolicies()
+                    ->GetRequiredPolicyError(cmPolicies::CMP0010));
+        case cmPolicies::NEW:
+          // NEW behavior is to report the error.
+          cmSystemTools::SetFatalErrorOccured();
+          break;
+        }
       }
+    this->IssueMessage(mtype, error.str());
     }
   return source.c_str();
 }
@@ -2327,7 +2364,7 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
   return false;
 }
 
-void cmMakefile::ExpandArguments(
+bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
   std::vector<std::string>& outArgs)
 {
@@ -2353,6 +2390,7 @@ void cmMakefile::ExpandArguments(
       cmSystemTools::ExpandListArgument(value, outArgs);
       }
     }
+  return !cmSystemTools::GetFatalErrorOccured();
 }
 
 void cmMakefile::RemoveFunctionBlocker(const cmListFileFunction& lff)

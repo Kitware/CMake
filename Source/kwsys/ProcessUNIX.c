@@ -63,6 +63,10 @@ do.
 #include <dirent.h>    /* DIR, dirent */
 #include <ctype.h>     /* isspace */
 
+#ifdef __HAIKU__
+#undef __BEOS__
+#endif
+
 #if defined(KWSYS_C_HAS_PTRDIFF_T) && KWSYS_C_HAS_PTRDIFF_T
 typedef ptrdiff_t kwsysProcess_ptrdiff_t;
 #else
@@ -75,7 +79,7 @@ typedef ssize_t kwsysProcess_ssize_t;
 typedef int kwsysProcess_ssize_t;
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__)
+#if defined(__BEOS__) && !defined(__ZETA__) 
 /* BeOS 5 doesn't have usleep(), but it has snooze(), which is identical. */
 # include <be/kernel/OS.h>
 static inline void kwsysProcess_usleep(unsigned int msec)

@@ -229,8 +229,9 @@ void cmDocumentationFormatterDocbook::PrintParagraph(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentationFormatterDocbook::PrintHeader(const char* name, 
-                                               std::ostream& os)
+void cmDocumentationFormatterDocbook::PrintHeader(const char* docname,
+                                                  const char* appname,
+                                                  std::ostream& os)
 {
   // this one is used to ensure that we don't create multiple link targets
   // with the same name. We can clear it here since we are at the 
@@ -244,7 +245,7 @@ void cmDocumentationFormatterDocbook::PrintHeader(const char* name,
         "<!ENTITY % English \"INCLUDE\"> ]>\n"
         "<article>\n"
         "<articleinfo>\n"
-        "<title>" << name << "</title>\n"
+        "<title>" << docname << " - " << appname << "</title>\n"
         "</articleinfo>\n";
 }
 

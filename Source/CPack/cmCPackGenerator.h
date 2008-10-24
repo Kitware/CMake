@@ -127,9 +127,12 @@ protected:
     bool setDestDir, const char* tempInstallDirectory);
 
   virtual bool SupportsComponentInstallation() const;
-  virtual cmCPackInstallationType* GetInstallationType(const char *projectName, const char* name);
-  virtual cmCPackComponent* GetComponent(const char *projectName, const char* name);
-  virtual cmCPackComponentGroup* GetComponentGroup(const char *projectName, const char* name);
+  virtual cmCPackInstallationType* GetInstallationType(const char *projectName,
+                                                       const char* name);
+  virtual cmCPackComponent* GetComponent(const char *projectName,
+                                         const char* name);
+  virtual cmCPackComponentGroup* GetComponentGroup(const char *projectName,
+                                                   const char* name);
 
   bool GeneratorVerbose;
   std::string Name;

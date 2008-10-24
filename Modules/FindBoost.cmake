@@ -94,20 +94,37 @@
 OPTION(Boost_USE_MULTITHREADED 
   "Use the multithreaded versions of the Boost libraries" ON)
 
-if (Boost_FIND_VERSION_EXACT)
-  if (Boost_FIND_VERSION_PATCH)
-    set( _boost_TEST_VERSIONS 
-      "${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}.${Boost_FIND_VERSION_PATCH}")
-  else (Boost_FIND_VERSION_PATCH)
-    set( _boost_TEST_VERSIONS 
-      "${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}.0"
-      "${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}")
-  endif (Boost_FIND_VERSION_PATCH)
-else (Boost_FIND_VERSION_EXACT)
-  set( _boost_TEST_VERSIONS ${Boost_ADDITIONAL_VERSIONS} 
-    "1.36.1" "1.36.0" "1.36" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0" 
-    "1.34" "1.33.1" "1.33.0" "1.33" )
-endif (Boost_FIND_VERSION_EXACT)
+if(Boost_FIND_VERSION_EXACT)
+  # The version may appear in a directory with or without the patch
+  # level, even when the patch level is non-zero.
+  set(_boost_TEST_VERSIONS
+    "${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}.${Boost_FIND_VERSION_PATCH}"
+    "${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}")
+else(Boost_FIND_VERSION_EXACT)
+  # The user has not requested an exact version.  Among known
+  # versions, find those that are acceptable to the user request.
+  set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
+    "1.36.1" "1.36.0" "1.36" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0"
+    "1.34" "1.33.1" "1.33.0" "1.33")
+  set(_boost_TEST_VERSIONS)
+  if(Boost_FIND_VERSION)
+    set(_Boost_FIND_VERSION_SHORT "${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}")
+    # Select acceptable versions.
+    foreach(version ${_Boost_KNOWN_VERSIONS})
+      if(NOT "${version}" VERSION_LESS "${Boost_FIND_VERSION}")
+        # This version is high enough.
+        list(APPEND _boost_TEST_VERSIONS "${version}")
+      elseif("${version}.99" VERSION_EQUAL "${_Boost_FIND_VERSION_SHORT}.99")
+        # This version is a short-form for the requested version with
+        # the patch level dropped.
+        list(APPEND _boost_TEST_VERSIONS "${version}")
+      endif()
+    endforeach(version)
+  else(Boost_FIND_VERSION)
+    # Any version is acceptable.
+    set(_boost_TEST_VERSIONS "${_Boost_KNOWN_VERSIONS}")
+  endif(Boost_FIND_VERSION)
+endif(Boost_FIND_VERSION_EXACT)
 
 # The reason that we failed to find Boost. This will be set to a
 # user-friendly message when we fail to find some necessary piece of

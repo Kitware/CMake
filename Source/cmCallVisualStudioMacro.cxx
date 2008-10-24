@@ -36,6 +36,31 @@ static bool LogErrorsAsMessages;
 
 
 //----------------------------------------------------------------------------
+// Copied from a correct comdef.h to avoid problems with deficient versions
+// of comdef.h that exist in the wild... Fixes issue #7533.
+//
+#if ( _MSC_VER >= 1300 )
+// VS7 and later:
+#ifdef _NATIVE_WCHAR_T_DEFINED
+# ifdef _DEBUG
+# pragma comment(lib, "comsuppwd.lib")
+# else
+# pragma comment(lib, "comsuppw.lib")
+# endif
+#else
+# ifdef _DEBUG
+# pragma comment(lib, "comsuppd.lib")
+# else
+# pragma comment(lib, "comsupp.lib")
+# endif
+#endif
+#else
+// VS6 only had comsupp.lib:
+# pragma comment(lib, "comsupp.lib")
+#endif
+
+
+//----------------------------------------------------------------------------
 ///! Use ReportHRESULT to make a cmSystemTools::Message after calling
 ///! a COM method that may have failed.
 #define ReportHRESULT(hr, context) \

@@ -528,6 +528,13 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \".so\") on a library name.");
 
   cm->DefineProperty
+    ("TYPE", cmProperty::TARGET,
+     "The type of the target.",
+     "This read-only property can be used to test the type of the given "
+     "target. It will be one of STATIC_LIBRARY, MODULE_LIBRARY, "
+     "SHARED_LIBRARY, EXECUTABLE or one of the internal target types.");
+
+  cm->DefineProperty
     ("VERSION", cmProperty::TARGET,
      "What version number is this target.",
      "For shared libraries VERSION and SOVERSION can be used to specify "
@@ -654,6 +661,32 @@ void cmTarget::DefineProperties(cmake *cm)
      "Read-only list of sources specified for a target.  "
      "The names returned are suitable for passing to the "
      "set_source_files_properties command.");
+
+  cm->DefineProperty
+    ("PROJECT_LABEL", cmProperty::TARGET,
+     "Change the name of a target in an IDE.",
+     "Can be used to change the name of the target in an IDE "
+     "like visual stuido. ");
+  cm->DefineProperty
+    ("VS_KEYWORD", cmProperty::TARGET,
+     "Visual Studio project keyword.",
+     "Can be set to change the visual studio keyword, for example "
+     "QT integration works better if this is set to Qt4VSv1.0. ");
+  cm->DefineProperty
+    ("VS_SCC_PROVIDER", cmProperty::TARGET,
+     "Visual Studio Source Code Control Provider.",
+     "Can be set to change the visual studio source code control "
+     "provider property.");
+  cm->DefineProperty
+    ("VS_SCC_LOCALPATH", cmProperty::TARGET,
+     "Visual Studio Source Code Control Provider.",
+     "Can be set to change the visual studio source code control "
+     "local path property.");
+  cm->DefineProperty
+    ("VS_SCC_PROJECTNAME", cmProperty::TARGET,
+     "Visual Studio Source Code Control Project.",
+     "Can be set to change the visual studio source code control "
+     "project name property.");
 
 #if 0
   cm->DefineProperty
@@ -3672,9 +3705,6 @@ cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
 cmComputeLinkInformation*
 cmTarget::GetLinkInformation(const char* config)
 {
-  // Link information does not make sense for static libraries.
-  assert(this->GetType() != cmTarget::STATIC_LIBRARY);
-
   // Lookup any existing information for this configuration.
   std::map<cmStdString, cmComputeLinkInformation*>::iterator
     i = this->LinkInformation.find(config?config:"");

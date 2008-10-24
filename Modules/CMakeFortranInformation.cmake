@@ -3,6 +3,7 @@
 # It also loads the available platform file for the system-compiler
 # if it exists.
 
+SET(CMAKE_BASE_NAME)
 GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_Fortran_COMPILER} NAME_WE)
 # since the gnu compiler has several names force g++
 IF(CMAKE_COMPILER_IS_GNUG77)

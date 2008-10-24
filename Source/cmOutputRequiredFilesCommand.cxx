@@ -199,6 +199,13 @@ bool cmOutputRequiredFilesCommand
     {
     // write them out
     FILE *fout = fopen(this->OutputFile.c_str(),"w");
+    if(!fout)
+      {
+      std::string err = "Can not open output file: ";
+      err += this->OutputFile;
+      this->SetError(err.c_str());
+      return false;
+      }
     std::set<cmDependInformation const*> visited;
     this->ListDependencies(info,fout, &visited);
     fclose(fout);

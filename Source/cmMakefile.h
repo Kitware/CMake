@@ -200,12 +200,12 @@ public:
                          const char* arg2=0,
                          const char* arg3=0,
                          const char* arg4=0);
-  void AddUtilityCommand(const char* utilityName, bool excludeFromAll,
-                         const char* workingDirectory,
-                         const std::vector<std::string>& depends,
-                         const cmCustomCommandLines& commandLines,
-                         bool escapeOldStyle = true,
-                         const char* comment = 0);
+  cmTarget* AddUtilityCommand(const char* utilityName, bool excludeFromAll,
+                              const char* workingDirectory,
+                              const std::vector<std::string>& depends,
+                              const cmCustomCommandLines& commandLines,
+                              bool escapeOldStyle = true,
+                              const char* comment = 0);
 
   /**
    * Add a link library to the build.
@@ -700,7 +700,7 @@ public:
    * Expand the given list file arguments into the full set after
    * variable replacement and list expansion.
    */
-  void ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
+  bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
                        std::vector<std::string>& outArgs);
   /**
    * Get the instance

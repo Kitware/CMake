@@ -607,8 +607,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         break;
       }
 
-//       if(target.GetProperty("ASSOCIATED_FILES");
-
   // These well-known sets of files are installed *automatically* for FRAMEWORK
   // SHARED library targets on the Mac as part of installing the FRAMEWORK.
   // For other target types or on other platforms, they are not installed
@@ -708,7 +706,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     installsRuntime = installsRuntime || runtimeGenerator != 0;
     installsFramework = installsFramework || frameworkGenerator != 0;
     installsBundle = installsBundle || bundleGenerator != 0;
-    installsPrivateHeader = installsPrivateHeader || privateHeaderGenerator != 0;
+    installsPrivateHeader = installsPrivateHeader 
+      || privateHeaderGenerator != 0;
     installsPublicHeader = installsPublicHeader || publicHeaderGenerator != 0;
     installsResource = installsResource || resourceGenerator;
 
@@ -733,46 +732,48 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       }
     }
 
-  // Tell the global generator about any installation component names specified
+  // Tell the global generator about any installation component names
+  // specified
   if (installsArchive)
     {
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                       ->AddInstallComponent(archiveArgs.GetComponent().c_str());
+    this->Makefile->GetLocalGenerator()->
+      GetGlobalGenerator()
+      ->AddInstallComponent(archiveArgs.GetComponent().c_str());
     }
   if (installsLibrary)
     {
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                       ->AddInstallComponent(libraryArgs.GetComponent().c_str());
+      ->AddInstallComponent(libraryArgs.GetComponent().c_str());
     }
   if (installsRuntime)
     {
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                       ->AddInstallComponent(runtimeArgs.GetComponent().c_str());
+      ->AddInstallComponent(runtimeArgs.GetComponent().c_str());
     }
   if (installsFramework)
     {
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                     ->AddInstallComponent(frameworkArgs.GetComponent().c_str());
+      ->AddInstallComponent(frameworkArgs.GetComponent().c_str());
     }
   if (installsBundle)
     {
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                        ->AddInstallComponent(bundleArgs.GetComponent().c_str());
+      ->AddInstallComponent(bundleArgs.GetComponent().c_str());
     }
   if (installsPrivateHeader)
     {
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                 ->AddInstallComponent(privateHeaderArgs.GetComponent().c_str());
+      ->AddInstallComponent(privateHeaderArgs.GetComponent().c_str());
     }
   if (installsPublicHeader)
     {
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                  ->AddInstallComponent(publicHeaderArgs.GetComponent().c_str());
+      ->AddInstallComponent(publicHeaderArgs.GetComponent().c_str());
     }
   if (installsResource)
     {
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                      ->AddInstallComponent(resourceArgs.GetComponent().c_str());
+      ->AddInstallComponent(resourceArgs.GetComponent().c_str());
     }
 
   return true;

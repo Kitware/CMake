@@ -375,7 +375,6 @@ void cmFindCommon::AddEnvPath(const char* variable)
   // Get a path from the environment.
   std::vector<std::string> tmp;
   cmSystemTools::GetPath(tmp, variable);
-
   // Relative paths are interpreted with respect to the current
   // working directory.
   this->AddPathsInternal(tmp, EnvPath);

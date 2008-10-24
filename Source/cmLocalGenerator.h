@@ -108,10 +108,18 @@ public:
    */
   enum RelativeRoot { NONE, FULL, HOME, START, HOME_OUTPUT, START_OUTPUT };
   enum OutputFormat { UNCHANGED, MAKEFILE, SHELL };
-  std::string Convert(const char* source, 
-                      RelativeRoot relative, 
+  std::string ConvertToOutputFormat(const char* source, OutputFormat output);
+  std::string Convert(const char* remote, RelativeRoot local,
                       OutputFormat output = UNCHANGED,
                       bool optional = false);
+  std::string Convert(RelativeRoot remote, const char* local,
+                      OutputFormat output = UNCHANGED,
+                      bool optional = false);
+
+  /**
+    * Get path for the specified relative root.
+    */
+  const char* GetRelativeRootPath(RelativeRoot relroot);
   
   /**
    * Convert the given path to an output path that is optionally
@@ -162,7 +170,13 @@ public:
   std::string GetRealLocation(const char* inName, const char* config);
 
   ///! for existing files convert to output path and short path if spaces
-  std::string ConvertToOutputForExisting(const char* p);
+  std::string ConvertToOutputForExisting(const char* remote,
+                                         RelativeRoot local = START_OUTPUT);
+
+  /** For existing path identified by RelativeRoot convert to output
+      path and short path if spaces.  */
+  std::string ConvertToOutputForExisting(RelativeRoot remote,
+                                         const char* local = 0);
   
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* /* mf */, 
@@ -386,6 +400,9 @@ protected:
 
   unsigned int BackwardsCompatibility;
   bool BackwardsCompatibilityFinal;
+private:
+  std::string ConvertToOutputForExistingCommon(const char* remote,
+                                               std::string const& result);
 };
 
 #endif

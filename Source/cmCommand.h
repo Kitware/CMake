@@ -64,7 +64,12 @@ public:
                                  cmExecutionStatus &status)
     {
     std::vector<std::string> expandedArguments;
-    this->Makefile->ExpandArguments(args, expandedArguments);
+    if(!this->Makefile->ExpandArguments(args, expandedArguments))
+      {
+      // There was an error expanding arguments.  It was already
+      // reported, so we can skip this command without error.
+      return true;
+      }
     return this->InitialPass(expandedArguments,status);
     }
 

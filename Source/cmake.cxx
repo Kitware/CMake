@@ -1173,8 +1173,8 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
 
       time(&time_start);
       clock_start = clock();
-
-      cmSystemTools::RunSingleCommand(command.c_str());
+      int ret =0;
+      cmSystemTools::RunSingleCommand(command.c_str(), 0, &ret);
 
       clock_finish = clock();
       time(&time_finish);
@@ -1186,7 +1186,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         << static_cast<double>(clock_finish - clock_start) / clocks_per_sec
         << " s. (clock)"
         << "\n";
-      return 0;
+      return ret;
       }
 
     // Command to calculate the md5sum of a file

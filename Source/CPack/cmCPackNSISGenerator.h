@@ -65,8 +65,8 @@ protected:
                 (cmCPackComponent *component,
                  std::set<cmCPackComponent *>& visited);
 
-  /// Produce NSIS code that de-selects all of the components that are dependent
-  /// on this component, recursively.
+  /// Produce NSIS code that de-selects all of the components that are
+  /// dependent on this component, recursively.
   std::string CreateDeselectionDependenciesDescription
                 (cmCPackComponent *component,
                  std::set<cmCPackComponent *>& visited);

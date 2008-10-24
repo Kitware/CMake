@@ -34,6 +34,19 @@ void cmGlobalNMakeMakefileGenerator
   // pick a default 
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
+  if(!(cmSystemTools::GetEnv("INCLUDE") && 
+       cmSystemTools::GetEnv("LIB") &&
+       cmSystemTools::GetEnv("LIBPATH"))
+    )
+    {
+    std::string message = "To use the NMake generator, cmake must be run "
+      "from a shell that can use the compiler cl from the command line. "
+      "This environment does not contain INCLUDE, LIB, or LIBPATH, and "
+      "these must be set for the cl compiler to work. ";
+    mf->IssueMessage(cmake::WARNING,
+                     message);
+    }
+  
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 

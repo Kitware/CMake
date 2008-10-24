@@ -25,7 +25,7 @@ bool cmEnableLanguageCommand
   if(args.size() < 1 )
     {
     this->SetError
-      ("ENABLE_LANGUAGE called with incorrect number of arguments");
+      ("called with incorrect number of arguments");
     return false;
     } 
   for (std::vector<std::string>::const_iterator it = args.begin();

@@ -594,7 +594,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item, cmTarget* tgt)
       std::string exe = tgt->GetFullPath(config, this->UseImportLibrary,
                                          true);
       linkItem += exe;
-      this->Items.push_back(Item(linkItem, true));
+      this->Items.push_back(Item(linkItem, true, tgt));
       this->Depends.push_back(exe);
       }
     else
@@ -1020,7 +1020,7 @@ void cmComputeLinkInformation::AddTargetItem(std::string const& item,
     }
 
   // Now add the full path to the library.
-  this->Items.push_back(Item(item, true));
+  this->Items.push_back(Item(item, true, target));
 }
 
 //----------------------------------------------------------------------------

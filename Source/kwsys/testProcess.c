@@ -34,7 +34,7 @@
 # pragma warn -8060 /* possibly incorrect assignment */
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__)
+#if defined(__BEOS__) && !defined(__ZETA__) && !defined(__HAIKU__)
 /* BeOS 5 doesn't have usleep(), but it has snooze(), which is identical. */
 # include <be/kernel/OS.h>
 static inline void testProcess_usleep(unsigned int msec)
@@ -87,7 +87,7 @@ int test4(int argc, const char* argv[])
 #if defined(_WIN32)
   /* Avoid error diagnostic popups since we are crashing on purpose.  */
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-#elif defined(__BEOS__)
+#elif defined(__BEOS__) || defined(__HAIKU__)
   /* Avoid error diagnostic popups since we are crashing on purpose.  */
   disable_debugger(1);
 #endif

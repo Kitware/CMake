@@ -131,7 +131,12 @@ public:
 #define _chdir chdir
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__)
+#if defined(__HAIKU__)
+#include <os/kernel/OS.h>
+#include <os/storage/Path.h>
+#endif
+
+#if defined(__BEOS__) && !defined(__ZETA__) && !defined(__HAIKU__)
 #include <be/kernel/OS.h>
 #include <be/storage/Path.h>
 
@@ -3382,7 +3387,7 @@ kwsys_stl::string SystemTools::GetFilenameExtension(const kwsys_stl::string& fil
 
 /**
  * Return file extension of a full filename (dot included).
- * Warning: this is the shortest extension (for example: .tar.gz)
+ * Warning: this is the shortest extension (for example: .gz of .tar.gz)
  */
 kwsys_stl::string SystemTools::GetFilenameLastExtension(const kwsys_stl::string& filename)
 {
@@ -4165,6 +4170,22 @@ kwsys_stl::string SystemTools::GetOperatingSystemNameAndVersion()
       
       // Test for the specific product family.
 
+      if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0)
+        {
+#if (_MSC_VER >= 1300) 
+        if (osvi.wProductType == VER_NT_WORKSTATION)
+          {
+          res += "Microsoft Windows Vista";
+          }
+        else
+          {
+          res += "Microsoft Windows Server 2008 family";
+          }
+#else
+        res += "Microsoft Windows Vista or Windows Server 2008";
+#endif
+        }
+
       if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2)
         {
         res += "Microsoft Windows Server 2003 family";
@@ -4198,13 +4219,16 @@ kwsys_stl::string SystemTools::GetOperatingSystemNameAndVersion()
             {
             res += " Workstation 4.0";
             }
-          else if (osvi.wSuiteMask & VER_SUITE_PERSONAL)
+          else if (osvi.dwMajorVersion == 5)
             {
-            res += " Home Edition";
-            }
-          else
-            {
-            res += " Professional";
+            if (osvi.wSuiteMask & VER_SUITE_PERSONAL)
+              {
+              res += " Home Edition";
+              }
+            else
+              {
+              res += " Professional";
+              }
             }
           }
             
@@ -4248,7 +4272,7 @@ kwsys_stl::string SystemTools::GetOperatingSystemNameAndVersion()
               }
             }
 
-          else  // Windows NT 4.0 
+          else if (osvi.dwMajorVersion <= 4)  // Windows NT 4.0 
             {
             if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE)
               {

@@ -1,3 +1,37 @@
+Changes in CMake 2.6.3 RC 1
+- Better reporting when nmake compiler environment is not correct
+- Fix bug #5936 set locale when running cvs and svn
+- Teach find_library to find OpenBSD-style libs (issue #3470).
+- Fix lib/ to lib/64/ search path conversion
+- Fix CPack DESTDIR issue
+- Support longer command lines with windows nmake and make
+- Fix bug with color check for dependency scanning
+- Use new link info during dependency scanning
+- Fix find_* search order with path suffixes
+- Fix install with multiple configurations and makefiles.
+- Improve find_package interface for recursive find modules.
+- Fix build issues with older visual studio versions
+- Fix Xcode release builds 
+- Put custom target sources in Xcode projects
+- Fix return value from cmake -E time commands
+- Fix documentation for cmake --debug-trycompile
+- Add Haiku support
+- Fix bug, allow enable_language to be called for C after CXX
+- Add FindCoin3D.cmake
+- Fix bug in FindGLUT.cmake
+- Better find of perl in FindPerlLibs.cmake
+- FindQt4 Fix #7784, Fix #7433
+- FindQt4 refind qt when qmake changes
+- Fix to find wxWidgets_LIB_DIR for windows platform more generally.
+- Find ttkstup in FindTclStub.cmake
+- Skip a command if its arguments fail to parse
+- Fix convenience rule working directory
+- Add support for source code control and visual stuido
+- Add parenthetical expressions to if 
+- Fix Rc command with -D options and nmake
+- Fix NSIS detection on windows 2000
+- Display an error message in ccmake when there are errors
+
 Changes in CMake 2.6.2 RC 6
 - Fix bug#7669 cpack did not work when sym-linked after install
 

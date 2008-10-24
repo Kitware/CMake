@@ -341,6 +341,12 @@ if (NOT ELSEIF_RESULT EQUAL 2)
   set (ELSEIF_RESULT 0)
 endif (NOT ELSEIF_RESULT EQUAL 2)
 
+# test handling of parenthetical groups in conditionals
+if (2 GREATER 1 AND (4 LESS 3 OR 5 LESS 6) AND NOT (7 GREATER 8))
+  set(CONDITIONAL_PARENTHESES 1)
+endif()
+
+
 #
 # Configure file 
 # (plug vars to #define so that they can be tested)

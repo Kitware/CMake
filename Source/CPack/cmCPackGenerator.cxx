@@ -642,16 +642,40 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
 
         if ( setDestDir )
           {
-          // For DESTDIR based packaging, use the *project* CMAKE_INSTALL_PREFIX
-          // underneath the tempInstallDirectory. The value of the project's
-          // CMAKE_INSTALL_PREFIX is sent in here as the value of the
-          // CPACK_INSTALL_PREFIX variable.
+          // For DESTDIR based packaging, use the *project*
+          // CMAKE_INSTALL_PREFIX underneath the tempInstallDirectory. The
+          // value of the project's CMAKE_INSTALL_PREFIX is sent in here as
+          // the value of the CPACK_INSTALL_PREFIX variable.
+          //
           std::string dir;
           if (this->GetOption("CPACK_INSTALL_PREFIX"))
             {
             dir += this->GetOption("CPACK_INSTALL_PREFIX");
             }
           mf->AddDefinition("CMAKE_INSTALL_PREFIX", dir.c_str());
+
+          cmCPackLogger(
+            cmCPackLog::LOG_DEBUG,
+            "- Using DESTDIR + CPACK_INSTALL_PREFIX... (mf->AddDefinition)"
+            << std::endl);
+          cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                        "- Setting CMAKE_INSTALL_PREFIX to '" << dir << "'" 
+                        << std::endl);
+
+          // Make sure that DESTDIR + CPACK_INSTALL_PREFIX directory
+          // exists:
+          //
+          if (cmSystemTools::StringStartsWith(dir.c_str(), "/"))
+            {
+            dir = tempInstallDirectory + dir;
+            }
+          else
+            {
+            dir = tempInstallDirectory + "/" + dir;
+            }
+
+          cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                        "- Creating directory: '" << dir << "'" << std::endl);
 
           if ( !cmsys::SystemTools::MakeDirectory(dir.c_str()))
             {
@@ -660,19 +684,14 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                           << dir << std::endl);
             return 0;
             }
-
-          cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                        "- Using DESTDIR + CPACK_INSTALL_PREFIX... (mf->AddDefinition)"
-                        << std::endl);
-          cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                        "- Setting CMAKE_INSTALL_PREFIX to '" << dir << "'" 
-                        << std::endl);
           }
         else
           {
-          mf->AddDefinition("CMAKE_INSTALL_PREFIX", tempInstallDirectory.c_str());
+          mf->AddDefinition("CMAKE_INSTALL_PREFIX",
+                            tempInstallDirectory.c_str());
 
-          if ( !cmsys::SystemTools::MakeDirectory(tempInstallDirectory.c_str()))
+          if ( !cmsys::SystemTools::MakeDirectory(
+                 tempInstallDirectory.c_str()))
             {
             cmCPackLogger(cmCPackLog::LOG_ERROR,
                           "Problem creating temporary directory: " 
@@ -681,9 +700,11 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             }
 
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                        "- Using non-DESTDIR install... (mf->AddDefinition)" << std::endl);
+                        "- Using non-DESTDIR install... (mf->AddDefinition)"
+                        << std::endl);
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                        "- Setting CMAKE_INSTALL_PREFIX to '" << tempInstallDirectory
+                        "- Setting CMAKE_INSTALL_PREFIX to '"
+                        << tempInstallDirectory
                         << "'" << std::endl);
           }
 
@@ -770,7 +791,8 @@ int cmCPackGenerator::DoPackage()
       = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     if ( cmSystemTools::FileExists(toplevelDirectory) )
       {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Remove toplevel directory: "
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE, 
+                    "Remove toplevel directory: "
         << toplevelDirectory << std::endl);
       if ( !cmSystemTools::RemoveADirectory(toplevelDirectory) )
         {
@@ -1077,7 +1099,8 @@ bool cmCPackGenerator::SupportsComponentInstallation() const
 
 //----------------------------------------------------------------------
 cmCPackInstallationType*
-cmCPackGenerator::GetInstallationType(const char *projectName, const char *name)
+cmCPackGenerator::GetInstallationType(const char *projectName,
+                                      const char *name)
 {
   (void) projectName;
   bool hasInstallationType = this->InstallationTypes.count(name) != 0;
@@ -1138,7 +1161,8 @@ cmCPackGenerator::GetComponent(const char *projectName, const char *name)
       = this->IsSet((macroPrefix + "_DOWNLOADED").c_str())
         || cmSystemTools::IsOn(this->GetOption("CPACK_DOWNLOAD_ALL"));
 
-    const char* archiveFile = this->GetOption((macroPrefix + "_ARCHIVE_FILE").c_str());
+    const char* archiveFile = this->GetOption((macroPrefix + 
+                                               "_ARCHIVE_FILE").c_str());
     if (archiveFile && *archiveFile)
       {
       component->ArchiveFile = archiveFile;
@@ -1190,7 +1214,8 @@ cmCPackGenerator::GetComponent(const char *projectName, const char *name)
            dependIt != dependsVector.end(); 
            ++dependIt)
         {
-        cmCPackComponent *child = GetComponent(projectName, dependIt->c_str());
+        cmCPackComponent *child = GetComponent(projectName, 
+                                               dependIt->c_str());
         component->Dependencies.push_back(child);
         child->ReverseDependencies.push_back(component);
         }

@@ -202,10 +202,13 @@ void cmDocumentationFormatterHTML::PrintParagraph(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentationFormatterHTML::PrintHeader(const char* /*name*/, 
+void cmDocumentationFormatterHTML::PrintHeader(const char* docname,
+                                               const char* appname,
                                                std::ostream& os)
 {
-  os << "<html><body>\n";
+  os << "<html><head><title>";
+  os << docname << " - " << appname;
+  os << "</title></head><body>\n";
 }
 
 //----------------------------------------------------------------------------

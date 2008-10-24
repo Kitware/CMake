@@ -39,12 +39,12 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endwhile for this while loop then execute
     if (!this->Depth) 
       {
-      char* errorString = 0;
+      std::string errorString;
     
       std::vector<std::string> expandedArguments;
       mf.ExpandArguments(this->Args, expandedArguments);
       bool isTrue = 
-        cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
+        cmIfCommand::IsTrue(expandedArguments,errorString,&mf);
 
       this->Executing = true;
       while (isTrue)
@@ -69,7 +69,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
         expandedArguments.clear();
         mf.ExpandArguments(this->Args, expandedArguments);
         isTrue = 
-          cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
+          cmIfCommand::IsTrue(expandedArguments,errorString,&mf);
         }
       mf.RemoveFunctionBlocker(lff);
       return true;

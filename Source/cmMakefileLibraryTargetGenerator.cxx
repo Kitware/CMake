@@ -591,7 +591,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     this->LocalGenerator->CreateCDCommand
       (commands1,
        this->Makefile->GetStartOutputDirectory(),
-       this->Makefile->GetHomeOutputDirectory());
+       cmLocalGenerator::HOME_OUTPUT);
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
     }
@@ -687,39 +687,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Construct object file lists that may be needed to expand the
   // rule.
-  std::string variableName;
-  std::string variableNameExternal;
-  this->WriteObjectsVariable(variableName, variableNameExternal);
   std::string buildObjs;
-  if(useResponseFile)
-    {
-    std::string objects;
-    this->WriteObjectsString(objects);
-    std::string objects_rsp =
-      this->CreateResponseFile("objects.rsp", objects, depends);
-    buildObjs = "@";
-    buildObjs += this->Convert(objects_rsp.c_str(),
-                               cmLocalGenerator::NONE,
-                               cmLocalGenerator::SHELL);
-    }
-  else if(useLinkScript)
-    {
-    if(!useArchiveRules)
-      {
-      this->WriteObjectsString(buildObjs);
-      }
-    }
-  else
-    {
-    buildObjs = "$(";
-    buildObjs += variableName;
-    buildObjs += ") $(";
-    buildObjs += variableNameExternal;
-    buildObjs += ")";
-    }
-  std::string cleanObjs = "$(";
-  cleanObjs += variableName;
-  cleanObjs += ")";
+  this->CreateObjectLists(useLinkScript, useArchiveRules, useResponseFile,
+                          buildObjs, depends);
+
   cmLocalGenerator::RuleVariables vars;
   vars.TargetPDB = targetOutPathPDB.c_str();
 
@@ -872,7 +843,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   this->LocalGenerator->CreateCDCommand
     (commands1,
      this->Makefile->GetStartOutputDirectory(),
-     this->Makefile->GetHomeOutputDirectory());
+     cmLocalGenerator::HOME_OUTPUT);
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
 
@@ -888,7 +859,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     commands1.push_back(symlink);
     this->LocalGenerator->CreateCDCommand(commands1,
                                   this->Makefile->GetStartOutputDirectory(),
-                                  this->Makefile->GetHomeOutputDirectory());
+                                  cmLocalGenerator::HOME_OUTPUT);
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
     }

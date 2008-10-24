@@ -91,6 +91,9 @@ cmFindPackageCommand::cmFindPackageCommand()
     "The [version] argument requests a version with which the package found "
     "should be compatible (format is major[.minor[.patch[.tweak]]]).  "
     "The EXACT option requests that the version be matched exactly.  "
+    "If no [version] is given to a recursive invocation inside a "
+    "find-module, the [version] and EXACT arguments are forwarded "
+    "automatically from the outer call.  "
     "Version support is currently provided only on a package-by-package "
     "basis (details below).\n"
     "User code should generally look for packages using the above simple "
@@ -185,6 +188,7 @@ cmFindPackageCommand::cmFindPackageCommand()
     "  PACKAGE_VERSION            = full provided version string\n"
     "  PACKAGE_VERSION_EXACT      = true if version is exact match\n"
     "  PACKAGE_VERSION_COMPATIBLE = true if version is compatible\n"
+    "  PACKAGE_VERSION_UNSUITABLE = true if unsuitable as any version\n"
     "These variables are checked by the find_package command to determine "
     "whether the configuration file provides an acceptable version.  "
     "They are not available after the find_package call returns.  "
@@ -468,6 +472,35 @@ bool cmFindPackageCommand
       }
     }
 
+  // Ignore EXACT with no version.
+  if(this->Version.empty() && this->VersionExact)
+    {
+    this->VersionExact = false;
+    this->Makefile->IssueMessage(
+      cmake::AUTHOR_WARNING, "Ignoring EXACT since no version is requested.");
+    }
+
+  if(this->Version.empty())
+    {
+    // Check whether we are recursing inside "Find<name>.cmake" within
+    // another find_package(<name>) call.
+    std::string mod = this->Name;
+    mod += "_FIND_MODULE";
+    if(this->Makefile->IsOn(mod.c_str()))
+      {
+      // Get version information from the outer call if necessary.
+      // Requested version string.
+      std::string ver = this->Name;
+      ver += "_FIND_VERSION";
+      this->Version = this->Makefile->GetSafeDefinition(ver.c_str());
+
+      // Whether an exact version is required.
+      std::string exact = this->Name;
+      exact += "_FIND_VERSION_EXACT";
+      this->VersionExact = this->Makefile->IsOn(exact.c_str());
+      }
+    }
+
   if(!this->Version.empty())
     {
     // Try to parse the version number and store the results that were
@@ -603,9 +636,15 @@ bool cmFindPackageCommand::FindModule(bool& found)
   std::string mfile = this->Makefile->GetModulesFile(module.c_str());
   if ( mfile.size() )
     {
-    // Load the module we found.
+    // Load the module we found, and set "<name>_FIND_MODULE" to true
+    // while inside it.
     found = true;
-    return this->ReadListFile(mfile.c_str());
+    std::string var = this->Name;
+    var += "_FIND_MODULE";
+    this->Makefile->AddDefinition(var.c_str(), "1");
+    bool result = this->ReadListFile(mfile.c_str());
+    this->Makefile->RemoveDefinition(var.c_str());
+    return result;
     }
   return true;
 }
@@ -1227,6 +1266,7 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
 
   // Clear the output variables.
   this->Makefile->RemoveDefinition("PACKAGE_VERSION");
+  this->Makefile->RemoveDefinition("PACKAGE_VERSION_UNSUITABLE");
   this->Makefile->RemoveDefinition("PACKAGE_VERSION_COMPATIBLE");
   this->Makefile->RemoveDefinition("PACKAGE_VERSION_EXACT");
 
@@ -1247,16 +1287,21 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
   this->Makefile->AddDefinition("PACKAGE_FIND_VERSION_COUNT", buf);
 
   // Load the version check file.
-  bool found = false;
+  bool suitable = false;
   if(this->ReadListFile(version_file.c_str()))
     {
     // Check the output variables.
-    found = this->Makefile->IsOn("PACKAGE_VERSION_EXACT");
-    if(!found && !this->VersionExact)
+    bool okay = this->Makefile->IsOn("PACKAGE_VERSION_EXACT");
+    bool unsuitable = this->Makefile->IsOn("PACKAGE_VERSION_UNSUITABLE");
+    if(!okay && !this->VersionExact)
       {
-      found = this->Makefile->IsOn("PACKAGE_VERSION_COMPATIBLE");
+      okay = this->Makefile->IsOn("PACKAGE_VERSION_COMPATIBLE");
       }
-    if(found || this->Version.empty())
+
+    // The package is suitable if the version is okay and not
+    // explicitly unsuitable.
+    suitable = !unsuitable && (okay || this->Version.empty());
+    if(suitable)
       {
       // Get the version found.
       this->VersionFound =
@@ -1286,8 +1331,8 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
   // Restore the original scope.
   this->Makefile->PopScope();
 
-  // Succeed if the version was found or no version was requested.
-  return found || this->Version.empty();
+  // Succeed if the version is suitable.
+  return suitable;
 }
 
 //----------------------------------------------------------------------------

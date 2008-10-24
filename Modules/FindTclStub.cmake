@@ -8,6 +8,7 @@
 # This code sets the following variables:
 #  TCL_STUB_LIBRARY       = path to Tcl stub library
 #  TK_STUB_LIBRARY        = path to Tk stub library
+#  TTK_STUB_LIBRARY       = path to ttk stub library
 #
 # In an effort to remove some clutter and clear up some issues for people
 # who are not necessarily Tcl/Tk gurus/developpers, some variables were
@@ -98,6 +99,17 @@ FIND_LIBRARY(TK_STUB_LIBRARY
   tkstub83 tkstub8.3 
   tkstub82 tkstub8.2 
   tkstub80 tkstub8.0
+  PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
+)
+
+FIND_LIBRARY(TTK_STUB_LIBRARY 
+  NAMES 
+  ttkstub 
+  ttkstub${TCL_LIBRARY_VERSION} ttkstub${TCL_TCLSH_VERSION} ttkstub${TK_WISH_VERSION}
+  ttkstub88 ttkstub8.8
+  ttkstub87 ttkstub8.7
+  ttkstub86 ttkstub8.6
+  ttkstub85 ttkstub8.5 
   PATHS ${TCLTK_POSSIBLE_LIB_PATHS}
 )
 
