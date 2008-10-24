@@ -15,11 +15,7 @@ AddCMakeTest(Include "")
 AddCMakeTest(FindBase "")
 AddCMakeTest(Toolchain "")
 
-# Not ready for Unix testing yet. Coming "soon"...
-#
-IF(WIN32 OR APPLE)
-  SET(GetPrerequisites_PreArgs
-    "-DCTEST_CONFIGURATION_TYPE:STRING=\\\${CTEST_CONFIGURATION_TYPE}"
-    )
-  AddCMakeTest(GetPrerequisites "${GetPrerequisites_PreArgs}")
-ENDIF(WIN32 OR APPLE)
+SET(GetPrerequisites_PreArgs
+  "-DCTEST_CONFIGURATION_TYPE:STRING=\\\${CTEST_CONFIGURATION_TYPE}"
+  )
+AddCMakeTest(GetPrerequisites "${GetPrerequisites_PreArgs}")
