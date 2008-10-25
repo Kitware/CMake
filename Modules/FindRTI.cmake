@@ -15,8 +15,6 @@
 #
 # Report problems to <certi-devel@nongnu.org>
 
-INCLUDE(CMakeFindFrameworks)
-
 MACRO(RTI_MESSAGE_QUIETLY QUIET TYPE MSG)
   IF(NOT ${QUIET})
     MESSAGE(${TYPE} "${MSG}")
