@@ -1843,14 +1843,9 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     vsLocalpath = "";
     }
   const char* vsProvider = target.GetProperty("VS_SCC_PROVIDER");
-  std::string providerString;
   if (!vsProvider)
     {
-    providerString = "";
-    }
-  else
-    {
-    providerString = "\tSccProvider=\"" + std::string(vsProvider) + "\"\n";
+    vsProvider = "";
     }
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
@@ -1865,7 +1860,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     {
     fout << "\tSccProjectName=\"" << vsProjectname << "\"\n"
          << "\tSccLocalPath=\"" << vsLocalpath << "\"\n"
-         << "\tSccProvider=\"" << providerString << "\"\n";
+         << "\tSccProvider=\"" << vsProvider << "\"\n";
     }
   fout << "\tKeyword=\"" << keyword << "\">\n"
        << "\t<Platforms>\n"
