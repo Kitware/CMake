@@ -1833,20 +1833,8 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     keyword = "Win32Proj";
     }
   const char* vsProjectname = target.GetProperty("VS_SCC_PROJECTNAME");
-  if (!vsProjectname)
-    {
-    vsProjectname = "";
-    }
   const char* vsLocalpath = target.GetProperty("VS_SCC_LOCALPATH");
-  if (!vsLocalpath)
-    {
-    vsLocalpath = "";
-    }
   const char* vsProvider = target.GetProperty("VS_SCC_PROVIDER");
-  if (!vsProvider)
-    {
-    vsProvider = "";
-    }
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   fout << "\tName=\"" << projLabel << "\"\n";
