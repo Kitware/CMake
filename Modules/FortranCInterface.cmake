@@ -16,9 +16,21 @@
 #  discover_fortran_mangling - loop over all combos of fortran
 #   name mangling and call test_fortran_mangling until one of them
 #   works.
+#  discover_fortran_module_mangling - try different types of 
+#  fortran modle name mangling to find one that works
 #
-
-function(test_fortran_mangling PREFIX ISUPPER POSTFIX RESULT)
+#
+#
+# this function tests a single fortran mangling.  
+# CODE - test code to try should define a subroutine called "sub"
+# PREFIX - string to put in front of sub
+# POSTFIX - string to put after sub
+# ISUPPER - if TRUE then sub will be called as SUB
+# DOC - string used in status checking Fortran ${DOC} linkage
+# RESULT place to store result TRUE if this linkage works, FALSE
+#        if not.
+#
+function(test_fortran_mangling CODE PREFIX ISUPPER POSTFIX DOC RESULT)
   if(ISUPPER)
     set(FUNCTION "${PREFIX}SUB${POSTFIX}")
   else(ISUPPER)
@@ -29,13 +41,8 @@ function(test_fortran_mangling PREFIX ISUPPER POSTFIX RESULT)
   set(TMP_DIR
     "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckFortranLink")
   file(REMOVE_RECURSE "${TMP_DIR}")
-  file(WRITE "${TMP_DIR}/test.f"
-    "
-      subroutine sub
-      end subroutine sub
-    "
-    )
-  message(STATUS "checking Fortran linkage: ${FUNCTION}")
+  file(WRITE "${TMP_DIR}/test.f" "${CODE}"    )
+  message(STATUS "checking Fortran ${DOC} linkage: ${FUNCTION}")
   file(WRITE "${TMP_DIR}/ctof.c"
     "
       extern ${FUNCTION}();
@@ -61,14 +68,52 @@ function(test_fortran_mangling PREFIX ISUPPER POSTFIX RESULT)
   endif()
 endfunction(test_fortran_mangling)
 
+# this function discovers the name mangling scheme used
+# for functions in a fortran module.  
+function(discover_fortran_module_mangling prefix suffix found)
+  set(CODE 
+    "
+      module test_interface
+      interface dummy
+         module procedure sub
+      end interface
+      contains
+        subroutine sub
+        end subroutine
+      end module test_interface
+    ")
+  
+  foreach(interface 
+      "test_interface$" 
+      ".__test_interface_NMOD_" 
+      "__test_interface_MOD_")
+    test_fortran_mangling("${CODE}" "${interface}"
+      ${FORTRAN_C_MANGLING_UPPERCASE} "" "module" worked)
+    if(worked)
+      string(REGEX REPLACE "(.*)test_interface(.*)" "\\1" pre "${interface}")
+      string(REGEX REPLACE "(.*)test_interface(.*)" "\\2" post "${interface}")
+      set(${prefix} "${pre}" PARENT_SCOPE)
+      set(${suffix} "${post}" PARENT_SCOPE)
+      set(${found} TRUE PARENT_SCOPE)
+      return()
+    endif(worked)
+  endforeach(interface)
+endfunction(discover_fortran_module_mangling)
+
+
 function(discover_fortran_mangling prefix isupper suffix found )
+  set(CODE 
+    "
+      subroutine sub
+      end subroutine sub
+    ")
   foreach(pre "_" "" "__")
     foreach(isup TRUE FALSE)
       foreach(post "" "_")
         set(worked FALSE)
-        test_fortran_mangling("${pre}" ${isup} "${post}" worked )
+        test_fortran_mangling("${CODE}" "${pre}" ${isup} "${post}" "function" worked )
         if(worked)
-          message(STATUS "found Fotran linkage")
+          message(STATUS "found Fortran function linkage")
           set(${isupper} "${isup}" PARENT_SCOPE)
           set(${prefix} "${pre}" PARENT_SCOPE)
           set(${suffix} "${post}" PARENT_SCOPE)
@@ -83,11 +128,13 @@ endfunction(discover_fortran_mangling)
 
 function(create_fortran_c_interface NAMESPACE FUNCTIONS HEADER)
   if(NOT FORTRAN_C_MANGLING_FOUND)
+    # find regular fortran function mangling
     discover_fortran_mangling(prefix isupper suffix found)
     if(NOT found)
       message(SEND_ERROR "Could not find fortran c name mangling.")
       return()
     endif(NOT found)
+    # find fortran module function mangling
     set(FORTRAN_C_PREFIX "${prefix}" CACHE INTERNAL
       "PREFIX for Fortran to c name mangling")
     set(FORTRAN_C_SUFFIX "${suffix}" CACHE INTERNAL
@@ -96,6 +143,22 @@ function(create_fortran_c_interface NAMESPACE FUNCTIONS HEADER)
       "Was fortran to c mangling found" )
     set(FORTRAN_C_MANGLING_FOUND TRUE CACHE INTERNAL 
       "Was fortran to c mangling found" )
+    set(prefix )
+    set(suffix )
+    set(found FALSE)
+    discover_fortran_module_mangling(prefix suffix found)
+    if(found)
+      message(STATUS "found Fortran module linkage")
+      set(FORTRAN_C_MODULE_PREFIX "${prefix}" CACHE INTERNAL
+        "PREFIX for Fortran to c name mangling")
+      set(FORTRAN_C_MODULE_SUFFIX "${suffix}" CACHE INTERNAL
+        "SUFFIX for Fortran to c name mangling")
+      set(FORTRAN_C_MODULE_MANGLING_FOUND TRUE CACHE INTERNAL
+        "SUFFIX for Fortran to c name mangling")
+    else(found)
+      set(FORTRAN_C_MODULE_MANGLING_FOUND FALSE CACHE INTERNAL
+        "SUFFIX for Fortran to c name mangling")
+    endif(found)
   endif(NOT FORTRAN_C_MANGLING_FOUND)
   foreach(f ${${FUNCTIONS}})
     if(${FORTRAN_C_MANGLING_UPPERCASE})
@@ -103,10 +166,18 @@ function(create_fortran_c_interface NAMESPACE FUNCTIONS HEADER)
     else()
       string(TOLOWER "${f}" ff)
     endif()
-    set(function "${FORTRAN_C_PREFIX}${ff}${FORTRAN_C_SUFFIX}")
-    set(HEADER_CONTENT "${HEADER_CONTENT}
+    if("${f}" MATCHES ":")
+      string(REGEX REPLACE "(.*):(.*)" "\\1" module "${f}")
+      string(REGEX REPLACE "(.*):(.*)" "\\2" function "${f}")
+      set(HEADER_CONTENT "${HEADER_CONTENT}
+#define ${NAMESPACE}${module}_${function} ${FORTRAN_C_MODULE_PREFIX}${module}${FORTRAN_C_MODULE_SUFFIX}${function}
+")
+    else("${f}" MATCHES ":")
+      set(function "${FORTRAN_C_PREFIX}${ff}${FORTRAN_C_SUFFIX}")
+      set(HEADER_CONTENT "${HEADER_CONTENT}
 #define ${NAMESPACE}${f} ${function}
 ")
+    endif("${f}" MATCHES ":")
   endforeach(f)
   configure_file(
     "${CMAKE_ROOT}/Modules/FortranCInterface.h.in"
@@ -114,22 +185,3 @@ function(create_fortran_c_interface NAMESPACE FUNCTIONS HEADER)
   message(STATUS "created ${HEADER}")
 endfunction()
 
-#  TODO
-# need to add support for module linking
-# module test_interface
-#
-#    interface dummy
-#        module procedure module_function
-#    end interface
-#
-# contains
-#
-#    subroutine module_function
-#    end subroutine
-#
-# end module test_interface
-#
-# produces this:
-# __test_interface_MOD_module_function
-#
-# 
