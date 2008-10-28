@@ -27,15 +27,17 @@
 # POSTFIX - string to put after sub
 # ISUPPER - if TRUE then sub will be called as SUB
 # DOC - string used in status checking Fortran ${DOC} linkage
+# SUB - the name of the SUB to call
 # RESULT place to store result TRUE if this linkage works, FALSE
 #        if not.
 #
-function(test_fortran_mangling CODE PREFIX ISUPPER POSTFIX DOC RESULT)
+function(test_fortran_mangling CODE PREFIX ISUPPER POSTFIX DOC SUB RESULT)
   if(ISUPPER)
-    set(FUNCTION "${PREFIX}SUB${POSTFIX}")
-  else(ISUPPER)
-    set(FUNCTION "${PREFIX}sub${POSTFIX}")
+    string(TOUPPER "${SUB}" sub)
+  else(ISUPPER) 
+    string(TOLOWER "${SUB}" sub)
   endif(ISUPPER)
+  set(FUNCTION "${PREFIX}${sub}${POSTFIX}")
   # create a fortran file with sub called sub
   # 
   set(TMP_DIR
@@ -88,7 +90,7 @@ function(discover_fortran_module_mangling prefix suffix found)
       ".__test_interface_NMOD_" 
       "__test_interface_MOD_")
     test_fortran_mangling("${CODE}" "${interface}"
-      ${FORTRAN_C_MANGLING_UPPERCASE} "" "module" worked)
+      ${FORTRAN_C_MANGLING_UPPERCASE} "" "module" "sub" worked)
     if(worked)
       string(REGEX REPLACE "(.*)test_interface(.*)" "\\1" pre "${interface}")
       string(REGEX REPLACE "(.*)test_interface(.*)" "\\2" post "${interface}")
@@ -101,7 +103,8 @@ function(discover_fortran_module_mangling prefix suffix found)
 endfunction(discover_fortran_module_mangling)
 
 
-function(discover_fortran_mangling prefix isupper suffix found )
+function(discover_fortran_mangling prefix isupper suffix extra_under_score
+    found )
   set(CODE 
     "
       subroutine sub
@@ -111,14 +114,32 @@ function(discover_fortran_mangling prefix isupper suffix found )
     foreach(isup TRUE FALSE)
       foreach(post "" "_")
         set(worked FALSE)
-        test_fortran_mangling("${CODE}" "${pre}" ${isup} "${post}" "function" worked )
+        test_fortran_mangling("${CODE}" "${pre}" ${isup}
+          "${post}" "function" sub worked )
         if(worked)
           message(STATUS "found Fortran function linkage")
           set(${isupper} "${isup}" PARENT_SCOPE)
           set(${prefix} "${pre}" PARENT_SCOPE)
           set(${suffix} "${post}" PARENT_SCOPE)
           set(${found} TRUE PARENT_SCOPE)
-          return()
+          set(CODE 
+            "
+      subroutine my_sub
+      end subroutine my_sub
+    ")
+          set(worked FALSE)
+          test_fortran_mangling("${CODE}" "${pre}" ${isup}
+            "${post}" "function with _ " my_sub worked )
+          if(worked)
+            set(${extra_under_score} FALSE PARENT_SCOPE)
+          else(worked)
+            test_fortran_mangling("${CODE}" "${pre}" ${isup}
+              "${post}_" "function with _ " my_sub worked )
+            if(worked)
+              set(${extra_under_score} TRUE PARENT_SCOPE)
+            endif(worked)
+          endif(worked)
+        return()
         endif()
       endforeach()
     endforeach()
@@ -129,7 +150,7 @@ endfunction(discover_fortran_mangling)
 function(create_fortran_c_interface NAMESPACE FUNCTIONS HEADER)
   if(NOT FORTRAN_C_MANGLING_FOUND)
     # find regular fortran function mangling
-    discover_fortran_mangling(prefix isupper suffix found)
+    discover_fortran_mangling(prefix isupper suffix extra_under found)
     if(NOT found)
       message(SEND_ERROR "Could not find fortran c name mangling.")
       return()
@@ -141,6 +162,8 @@ function(create_fortran_c_interface NAMESPACE FUNCTIONS HEADER)
       "SUFFIX for Fortran to c name mangling")
     set(FORTRAN_C_MANGLING_UPPERCASE ${isupper} CACHE INTERNAL 
       "Was fortran to c mangling found" )
+    set(FORTRAN_C_MANGLING_EXTRA_UNDERSCORE ${extra_under} CACHE INTERNAL 
+      "If a function has a _ in the name does the compiler append an extra _" )
     set(FORTRAN_C_MANGLING_FOUND TRUE CACHE INTERNAL 
       "Was fortran to c mangling found" )
     set(prefix )
@@ -174,6 +197,9 @@ function(create_fortran_c_interface NAMESPACE FUNCTIONS HEADER)
 ")
     else("${f}" MATCHES ":")
       set(function "${FORTRAN_C_PREFIX}${ff}${FORTRAN_C_SUFFIX}")
+      if("${f}" MATCHES "_" AND FORTRAN_C_MANGLING_EXTRA_UNDERSCORE)
+        set(function "${function}_")
+      endif("${f}" MATCHES "_" AND FORTRAN_C_MANGLING_EXTRA_UNDERSCORE)
       set(HEADER_CONTENT "${HEADER_CONTENT}
 #define ${NAMESPACE}${f} ${function}
 ")
