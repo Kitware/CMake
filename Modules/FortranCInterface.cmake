@@ -110,9 +110,9 @@ function(discover_fortran_mangling prefix isupper suffix extra_under_score
       subroutine sub
       end subroutine sub
     ")
-  foreach(pre "_" "" "__")
-    foreach(isup TRUE FALSE)
-      foreach(post "" "_")
+  foreach(post "_" "")
+    foreach(isup FALSE TRUE)
+      foreach(pre "" "_" "__")
         set(worked FALSE)
         test_fortran_mangling("${CODE}" "${pre}" ${isup}
           "${post}" "function" sub worked )

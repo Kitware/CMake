@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-PROJECT(testf Fortran)
+PROJECT(testf C Fortran)
 SET(CMAKE_VERBOSE_MAKEFILE 1)
 MESSAGE("ENV_FLAGS = $ENV{FFLAGS}")
 MESSAGE("CMAKE_Fortran_COMPILER_INIT = ${CMAKE_Fortran_COMPILER_INIT}")
@@ -7,6 +7,21 @@ MESSAGE("CMAKE_Fortran_COMPILER_FULLPATH = ${CMAKE_Fortran_COMPILER_FULLPATH}")
 MESSAGE("CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
 MESSAGE("CMAKE_Fortran_FLAGS = ${CMAKE_Fortran_FLAGS}")
 ADD_EXECUTABLE(testf hello.f)
+
+# test the C to Fortran interface module
+include(FortranCInterface)
+if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+  set(srcs foo.f)
+  set(FORTRAN_FUNCTIONS test_mod:sub)
+endif()
+set(FORTRAN_FUNCTIONS ${FORTRAN_FUNCTIONS} my_sub mysub )
+set(srcs ${srcs} mysub.f foo.c)
+create_fortran_c_interface("F_" FORTRAN_FUNCTIONS "${testf_BINARY_DIR}/foo.h")
+include_directories("${testf_BINARY_DIR}")
+add_executable(foo ${srcs})
+
+
+
 
 SET(TEST_MODULE_DEPENDS 0)
 IF(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
