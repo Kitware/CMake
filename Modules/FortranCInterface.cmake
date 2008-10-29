@@ -93,6 +93,7 @@ function(discover_fortran_module_mangling prefix suffix found)
     test_fortran_mangling("${CODE}" "${interface}"
       ${FORTRAN_C_MANGLING_UPPERCASE} "" "module" "sub" worked)
     if(worked)
+      string(TOLOWER "${interface}" interface)
       string(REGEX REPLACE "(.*)test_interface(.*)" "\\1" pre "${interface}")
       string(REGEX REPLACE "(.*)test_interface(.*)" "\\2" post "${interface}")
       set(${prefix} "${pre}" PARENT_SCOPE)
