@@ -87,7 +87,7 @@ function(discover_fortran_module_mangling prefix suffix found)
   
   foreach(interface 
       "test_interface$" 
-      ".__test_interface_NMOD_" 
+      "__test_interface_NMOD_" 
       "__test_interface_MOD_")
     test_fortran_mangling("${CODE}" "${interface}"
       ${FORTRAN_C_MANGLING_UPPERCASE} "" "module" "sub" worked)
