@@ -169,7 +169,10 @@ function(create_fortran_c_interface NAMESPACE FUNCTIONS HEADER)
     set(prefix )
     set(suffix )
     set(found FALSE)
-    discover_fortran_module_mangling(prefix suffix found)
+    # only try this if the compiler is F90 compatible
+    if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+      discover_fortran_module_mangling(prefix suffix found)
+    endif(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     if(found)
       message(STATUS "found Fortran module linkage")
       set(FORTRAN_C_MODULE_PREFIX "${prefix}" CACHE INTERNAL
