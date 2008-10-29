@@ -391,6 +391,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-two-config
       --build-target package
+      --build-options
+        -DCPACK_BINARY_DEB:BOOL=${CPACK_BINARY_DEB}
+        -DCPACK_BINARY_RPM:BOOL=${CPACK_BINARY_RPM}
       --test-command ${CMAKE_CMAKE_COMMAND}
         "-DCPackComponents_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponents"
         -P "${CMake_SOURCE_DIR}/Tests/CPackComponents/VerifyResult.cmake")
