@@ -19,7 +19,35 @@ set(srcs ${srcs} mysub.f foo.c)
 create_fortran_c_interface("F_" FORTRAN_FUNCTIONS "${testf_BINARY_DIR}/foo.h")
 include_directories("${testf_BINARY_DIR}")
 add_executable(foo ${srcs})
+# print out some stuff to help debug on machines via cdash
+message("CTEST_FULL_OUTPUT ")
+file(READ "${testf_BINARY_DIR}/foo.h" fooh)
+message("foo.h contents:\n${fooh}")
 
+# if the name mangling is not found for an F90 compiler
+# print out some diagnostic stuff for the dashboard
+if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+  if(NOT FORTRAN_C_MODULE_MANGLING_FOUND)
+    file(GLOB_RECURSE O_OBJFILES
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckFortranLink/*.o"
+      "*.o" )
+    file(GLOB_RECURSE OBJ_OBJFILES 
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckFortranLink/*.obj")
+    find_program(DUMPBIN dumpbin)
+    find_program(NM nm)
+    foreach(ofile ${O_OBJFILES} ${OBJ_OBJFILES})
+      if(DEPENDS)
+        execute_process(COMMAND ${DUMPBIN} /symbols "${ofile}" 
+          OUTPUT_VARIABLE out)
+        message("symbols in ${ofile}:\n${out}")
+      endif()
+      if(NM)
+        execute_process(COMMAND ${NM} "${ofile}" OUTPUT_VARIABLE out)
+        message("symbols in ${ofile}:\n${out}")
+      endif()
+    endforeach()
+  endif()
+endif()
 
 
 
