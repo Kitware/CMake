@@ -84,7 +84,7 @@ function(discover_fortran_module_mangling prefix suffix found)
         end subroutine
       end module test_interface
     ")
-  
+  set(worked FALSE)
   foreach(interface 
       "test_interface$" 
       "TEST_INTERFACE_mp_" 
@@ -106,6 +106,12 @@ function(discover_fortran_module_mangling prefix suffix found)
       return()
     endif(worked)
   endforeach(interface)
+  if(NOT worked)
+    message(STATUS "Failed to find C binding to Fortran module functions.")
+    set(${prefix} "BROKEN_C_FORTRAN_MODULE_BINDING" PARENT_SCOPE)
+    set(${suffix} "BROKEN_C_FORTRAN_MODULE_BINDING" PARENT_SCOPE)
+    set(${found} FALSE PARENT_SCOPE)
+  endif(NOT worked)
 endfunction(discover_fortran_module_mangling)
 
 
@@ -189,23 +195,25 @@ function(create_fortran_c_interface NAMESPACE FUNCTIONS HEADER)
         "SUFFIX for Fortran to c name mangling")
     else(found)
       set(FORTRAN_C_MODULE_MANGLING_FOUND FALSE CACHE INTERNAL
-        "SUFFIX for Fortran to c name mangling")
+        "Fortran to C Module calling not availible.")
     endif(found)
   endif(NOT FORTRAN_C_MANGLING_FOUND)
   foreach(f ${${FUNCTIONS}})
     if(FORTRAN_C_MANGLING_UPPERCASE)
-      string(TOUPPER "${f}" f)
+      string(TOUPPER "${f}" fcase)
     else()
-      string(TOLOWER "${f}" f)
+      string(TOLOWER "${f}" fcase)
     endif()
     if("${f}" MATCHES ":")
       string(REGEX REPLACE "(.*):(.*)" "\\1" module "${f}")
       string(REGEX REPLACE "(.*):(.*)" "\\2" function "${f}")
+      string(REGEX REPLACE "(.*):(.*)" "\\1" module_case "${fcase}")
+      string(REGEX REPLACE "(.*):(.*)" "\\2" function_case "${fcase}")
       set(HEADER_CONTENT "${HEADER_CONTENT}
-#define ${NAMESPACE}${module}_${function} ${FORTRAN_C_MODULE_PREFIX}${module}${FORTRAN_C_MODULE_SUFFIX}${function}
+#define ${NAMESPACE}${module}_${function} ${FORTRAN_C_MODULE_PREFIX}${module_case}${FORTRAN_C_MODULE_SUFFIX}${function_case}
 ")
     else("${f}" MATCHES ":")
-      set(function "${FORTRAN_C_PREFIX}${f}${FORTRAN_C_SUFFIX}")
+      set(function "${FORTRAN_C_PREFIX}${fcase}${FORTRAN_C_SUFFIX}")
       if("${f}" MATCHES "_" AND FORTRAN_C_MANGLING_EXTRA_UNDERSCORE)
         set(function "${function}_")
       endif("${f}" MATCHES "_" AND FORTRAN_C_MANGLING_EXTRA_UNDERSCORE)
