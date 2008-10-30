@@ -187,16 +187,15 @@ function(create_fortran_c_interface NAMESPACE FUNCTIONS HEADER)
     endif(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     if(found)
       message(STATUS "found Fortran module linkage")
-      set(FORTRAN_C_MODULE_PREFIX "${prefix}" CACHE INTERNAL
-        "PREFIX for Fortran to c name mangling")
-      set(FORTRAN_C_MODULE_SUFFIX "${suffix}" CACHE INTERNAL
-        "SUFFIX for Fortran to c name mangling")
-      set(FORTRAN_C_MODULE_MANGLING_FOUND TRUE CACHE INTERNAL
-        "SUFFIX for Fortran to c name mangling")
     else(found)
-      set(FORTRAN_C_MODULE_MANGLING_FOUND FALSE CACHE INTERNAL
-        "Fortran to C Module calling not availible.")
+      message(STATUS "Failed to find Fortran module linkage")
     endif(found)
+    set(FORTRAN_C_MODULE_PREFIX "${prefix}" CACHE INTERNAL
+      "PREFIX for Fortran to c name mangling")
+    set(FORTRAN_C_MODULE_SUFFIX "${suffix}" CACHE INTERNAL
+      "SUFFIX for Fortran to c name mangling")
+    set(FORTRAN_C_MODULE_MANGLING_FOUND ${found} CACHE INTERNAL
+      "Was for Fortran to c name mangling found for modules")
   endif(NOT FORTRAN_C_MANGLING_FOUND)
   foreach(f ${${FUNCTIONS}})
     if(FORTRAN_C_MANGLING_UPPERCASE)
