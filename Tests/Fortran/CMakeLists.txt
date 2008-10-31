@@ -16,7 +16,7 @@ if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     set(FORTRAN_FUNCTIONS test_mod:sub)
   else(FORTRAN_C_MODULE_MANGLING_FOUND)
     if(CMAKE_Fortran_COMPILER_ID MATCHES "SunPro|MIPSpro")
-      message("SunPro and MPISpro compilers do not support"
+      message("${CMAKE_Fortran_COMPILER_ID} compilers do not support"
         " linking Fortran module procedures from C")
     else()
       message("This will fail, but let the user see the error")
