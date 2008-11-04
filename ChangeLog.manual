@@ -1,3 +1,5 @@
+Changes in CMake 2.6.3 RC 2
+- Merge in more Haiku changes
 Changes in CMake 2.6.3 RC 1
 - Better reporting when nmake compiler environment is not correct
 - Fix bug #5936 set locale when running cvs and svn
@@ -31,6 +33,8 @@ Changes in CMake 2.6.3 RC 1
 - Fix Rc command with -D options and nmake
 - Fix NSIS detection on windows 2000
 - Display an error message in ccmake when there are errors
+
+CMake 2.6.2 released
 
 Changes in CMake 2.6.2 RC 6
 - Fix bug#7669 cpack did not work when sym-linked after install
