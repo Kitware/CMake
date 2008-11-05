@@ -9,65 +9,81 @@ MESSAGE("CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
 MESSAGE("CMAKE_Fortran_FLAGS = ${CMAKE_Fortran_FLAGS}")
 ADD_EXECUTABLE(testf hello.f)
 
-# test the C to Fortran interface module
-include(FortranCInterface)
-if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
-  if(FORTRAN_C_MODULE_MANGLING_FOUND)
-    set(srcs foo.f)
-    set(FORTRAN_FUNCTIONS test_mod:sub)
-  else(FORTRAN_C_MODULE_MANGLING_FOUND)
-    if(CMAKE_Fortran_COMPILER_ID MATCHES "SunPro|MIPSpro")
-      message("${CMAKE_Fortran_COMPILER_ID} compilers do not support"
-        " linking Fortran module procedures from C")
-    else()
-      message("This will fail, but let the user see the error")
+
+function(test_fortran_c_interface_module)
+  message(STATUS "Testing FortranCInterface module")
+  # test the C to Fortran interface module
+  include(FortranCInterface)
+  if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+    if(FORTRAN_C_MODULE_MANGLING_FOUND)
       set(srcs foo.f)
       set(FORTRAN_FUNCTIONS test_mod:sub)
+    else(FORTRAN_C_MODULE_MANGLING_FOUND)
+      if(CMAKE_Fortran_COMPILER_ID MATCHES "SunPro|MIPSpro")
+        message("${CMAKE_Fortran_COMPILER_ID} compilers do not support"
+          " linking Fortran module procedures from C")
+      else()
+        message("This will fail, but let the user see the error")
+        set(srcs foo.f)
+        set(FORTRAN_FUNCTIONS test_mod:sub)
+      endif()
+    endif(FORTRAN_C_MODULE_MANGLING_FOUND)
+  endif()
+  set(FORTRAN_FUNCTIONS ${FORTRAN_FUNCTIONS} my_sub mysub )
+  set(srcs ${srcs} mysub.f foo.c)
+  create_fortran_c_interface("F_" FORTRAN_FUNCTIONS 
+    "${testf_BINARY_DIR}/foo.h")
+  include_directories("${testf_BINARY_DIR}")
+  
+  # if the name mangling is not found for a F90 compiler
+  # print out some diagnostic stuff for the dashboard
+  if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+    if(NOT FORTRAN_C_MODULE_MANGLING_FOUND)
+      file(GLOB_RECURSE O_OBJFILES
+        "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckFortranLink/*.o"
+        "*.o" )
+      file(GLOB_RECURSE OBJ_OBJFILES 
+        "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckFortranLink/*.obj")
+      find_program(DUMPBIN dumpbin)
+      find_program(NM nm)
+      foreach(ofile ${O_OBJFILES} ${OBJ_OBJFILES})
+        if(DEPENDS)
+          execute_process(COMMAND ${DUMPBIN} /symbols "${ofile}" 
+            OUTPUT_VARIABLE out)
+          message("symbols in ${ofile}:\n${out}")
+        endif()
+        if(NM)
+          execute_process(COMMAND ${NM} "${ofile}" OUTPUT_VARIABLE out)
+          message("symbols in ${ofile}:\n${out}")
+        endif()
+      endforeach()
     endif()
-  endif(FORTRAN_C_MODULE_MANGLING_FOUND)
-endif()
-set(FORTRAN_FUNCTIONS ${FORTRAN_FUNCTIONS} my_sub mysub )
-set(srcs ${srcs} mysub.f foo.c)
-create_fortran_c_interface("F_" FORTRAN_FUNCTIONS "${testf_BINARY_DIR}/foo.h")
-include_directories("${testf_BINARY_DIR}")
-
-if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "${CMAKE_C_COMPILER_ID}" )
+  endif()
   message("Fortran = ${CMAKE_Fortran_COMPILER_ID}")
   message("C = ${CMAKE_C_COMPILER_ID}")
   add_executable(foo ${srcs})
+  # print out some stuff to help debug on machines via cdash
+  file(READ "${testf_BINARY_DIR}/foo.h" fooh)
+  message("foo.h contents:\n${fooh}")
+endfunction()
+
+# if the id's match or the compilers are compatible, then
+# call the test_fortran_c_interface_module function
+if(("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel")
+    AND 
+    ("${CMAKE_C_COMPILER_ID}" MATCHES "MSVC")
+    )
+  set(COMPATABLE_COMPILERS TRUE)
+endif()
+if(COMPATABLE_COMPILERS
+    OR ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "${CMAKE_C_COMPILER_ID}" ))
+  test_fortran_c_interface_module()
 else()
   message("Fortran does not match c compiler")
   message("Fortran = ${CMAKE_Fortran_COMPILER_ID}")
   message("C = ${CMAKE_C_COMPILER_ID}")
 endif()
-# print out some stuff to help debug on machines via cdash
-file(READ "${testf_BINARY_DIR}/foo.h" fooh)
-message("foo.h contents:\n${fooh}")
 
-# if the name mangling is not found for an F90 compiler
-# print out some diagnostic stuff for the dashboard
-if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
-  if(NOT FORTRAN_C_MODULE_MANGLING_FOUND)
-    file(GLOB_RECURSE O_OBJFILES
-      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckFortranLink/*.o"
-      "*.o" )
-    file(GLOB_RECURSE OBJ_OBJFILES 
-      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckFortranLink/*.obj")
-    find_program(DUMPBIN dumpbin)
-    find_program(NM nm)
-    foreach(ofile ${O_OBJFILES} ${OBJ_OBJFILES})
-      if(DEPENDS)
-        execute_process(COMMAND ${DUMPBIN} /symbols "${ofile}" 
-          OUTPUT_VARIABLE out)
-        message("symbols in ${ofile}:\n${out}")
-      endif()
-      if(NM)
-        execute_process(COMMAND ${NM} "${ofile}" OUTPUT_VARIABLE out)
-        message("symbols in ${ofile}:\n${out}")
-      endif()
-    endforeach()
-  endif()
-endif()
 
 
 
