@@ -1,3 +1,5 @@
+Changes in CMake 2.6.3 RC 3
+- Merge in CMakeLists.txt curl Haiku change
 Changes in CMake 2.6.3 RC 2
 - Merge in more Haiku changes
 Changes in CMake 2.6.3 RC 1
