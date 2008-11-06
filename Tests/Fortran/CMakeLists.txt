@@ -62,6 +62,11 @@ function(test_fortran_c_interface_module)
   message("Fortran = ${CMAKE_Fortran_COMPILER_ID}")
   message("C = ${CMAKE_C_COMPILER_ID}")
   add_executable(foo ${srcs})
+  if(NOT ("$ENV{EXTRA_FORTRAN_C_LIBS}" STREQUAL ""))
+    message(STATUS 
+      "linking in extra C to Fortran libs $ENV{EXTRA_FORTRAN_C_LIBS}")
+    target_link_libraries(foo $ENV{EXTRA_FORTRAN_C_LIBS})
+  endif()
   # print out some stuff to help debug on machines via cdash
   file(READ "${testf_BINARY_DIR}/foo.h" fooh)
   message("foo.h contents:\n${fooh}")
