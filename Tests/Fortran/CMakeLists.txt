@@ -96,6 +96,11 @@ else()
     set(CMAKE_LINK_LIBRARY_FLAG "-l")
     set(CMAKE_LINK_LIBRARY_SUFFIX )
   endif()
+  # gnu and sunpro do not use the same flag here...
+  if( ("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
+      AND ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "SunPro"))
+    set(CMAKE_SHARED_LIBRARY_C_FLAGS "-KPIC" )
+  endif()
 
 endif()
 
