@@ -69,6 +69,8 @@ public:
   #else
     typedef void* LibraryHandle;
   #endif
+#elif defined(__HAIKU__)
+  typedef image_id LibraryHandle;
 #elif defined(__BEOS__)
   typedef image_id LibraryHandle;
 #else  // POSIX

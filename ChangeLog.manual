@@ -1,3 +1,9 @@
+Changes in CMake 2.6.3 RC 4
+- Fix for SccProvider in visual studio 
+- fix for missing package_source target
+- FindQt4 QT_PHONON_MODULE_DEPENDS fixes
+- Fixes for GetPrerequisites.cmake system libraries on Mac and UNIX
+- Merge in kwsys Haiku DynaimcLoader change
 Changes in CMake 2.6.3 RC 3
 - Merge in CMakeLists.txt curl Haiku change
 Changes in CMake 2.6.3 RC 2

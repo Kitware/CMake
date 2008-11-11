@@ -1607,7 +1607,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
     singleLine.push_back("--config");
     configFile = mf->GetStartOutputDirectory();;
-    configFile += "/CPackSourceCConfig.cmake";
+    configFile += "/CPackSourceConfig.cmake";
     relConfigFile = "./CPackSourceConfig.cmake";
     singleLine.push_back(relConfigFile);
     if(cmSystemTools::FileExists(configFile.c_str()))
