@@ -96,10 +96,13 @@ else()
     set(CMAKE_LINK_LIBRARY_FLAG "-l")
     set(CMAKE_LINK_LIBRARY_SUFFIX )
   endif()
-  # gnu and sunpro do not use the same flag here...
+  # gnu and sunpro do not use the same flags here...
+  # however if LDFLAGS is used to set -m64 it causes odd stuf
+  # with the fortran build
   if( ("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
       AND ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "SunPro"))
-    set(CMAKE_SHARED_LIBRARY_C_FLAGS "-KPIC" )
+    set(CMAKE_EXE_LINKER_FLAGS "")
+    set(CMAKE_Fortran_FLAGS "")
   endif()
 
 endif()
