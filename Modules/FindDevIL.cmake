@@ -12,8 +12,7 @@
 # TODO: Add version support.
 # Tested under Linux and Windows (MSVC)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
-INCLUDE(${CMAKE_ROOT}/Modules/FindPackageHandleStandardArgs.cmake)
+INCLUDE(FindPackageHandleStandardArgs)
 
 FIND_PATH(IL_INCLUDE_DIR il.h 
   PATH_SUFFIXES include IL
