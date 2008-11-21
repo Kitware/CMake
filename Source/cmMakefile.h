@@ -264,7 +264,8 @@ public:
   ///! Add a definition to this makefile and the global cmake cache.
   void AddCacheDefinition(const char* name, const char* value, 
                           const char* doc,
-                          cmCacheManager::CacheEntryType type);
+                          cmCacheManager::CacheEntryType type,
+                          bool force = false);
 
   /**
    * Add bool variable definition to the build. 
