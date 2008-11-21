@@ -14,7 +14,7 @@ IF(COMPLEX_TEST_CMAKELIB)
   LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmzlib)
   # prefer the new curl if it is around
   IF(EXISTS ${Complex_BINARY_DIR}/../../Utilities/cmcurl-7.19.0)
-    LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmcurl-7.19.0)
+    LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmcurl-7.19.0/lib)
   ENDIF(EXISTS ${Complex_BINARY_DIR}/../../Utilities/cmcurl-7.19.0)
   IF(EXISTS ${Complex_BINARY_DIR}/../../Utilities/cmcurl)
     LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmcurl)
