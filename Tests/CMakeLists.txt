@@ -889,7 +889,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest2/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
     ADD_TEST(CTestTest2 ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
+      -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -VV
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
       )
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest3/test.cmake.in"
