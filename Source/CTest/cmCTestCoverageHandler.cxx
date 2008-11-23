@@ -1641,6 +1641,8 @@ int cmCTestCoverageHandler::HandleBullseyeCoverage(
                "Error running bullseye summary.\n");
     return 0;
     }
+  cmCTestLog(this->CTest, DEBUG, "HandleBullseyeCoverage return 1 "  
+             << std::endl);
   return 1;
 }
 

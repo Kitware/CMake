@@ -1981,6 +1981,11 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
 #ifdef CMAKE_BUILD_WITH_CMAKE
     cmDynamicLoader::FlushCache();
 #endif
+    if(retv != 0)
+      {
+      cmCTestLog(this, DEBUG, "build and test failing returing: " << retv 
+                 << std::endl);
+      }
     return retv;
     }
 
@@ -2005,6 +2010,12 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
         }
       this->GetHandler("script")->SetVerbose(this->Verbose);
       res = this->GetHandler("script")->ProcessHandler();
+      if(res != 0)
+        {
+        cmCTestLog(this, DEBUG, "running script failing returing: " << res 
+                   << std::endl);
+        }
+
       }
     else
       {
@@ -2032,6 +2043,11 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
         res = this->ProcessTests();
         }
       this->Finalize();
+      }
+    if(res != 0)
+      {
+      cmCTestLog(this, DEBUG, "Running a test(s) failed returning : " << res 
+                 << std::endl);
       }
     return res;
     }

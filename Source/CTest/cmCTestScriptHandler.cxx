@@ -397,6 +397,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   if (!this->Makefile->ReadListFile(0, systemFile.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag())
     {
+    cmCTestLog(this->CTest, DEBUG, "Error in read: "  << systemFile.c_str()
+               << std::endl);
     return 2;
     }
 
@@ -404,6 +406,9 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   if (!this->Makefile->ReadListFile(0, script.c_str()) ||
     cmSystemTools::GetErrorOccuredFlag())
     {
+    cmCTestLog(this->CTest, DEBUG, "Error in read script: "
+               << script.c_str()
+               << std::endl);
     return 2;
     }
 
