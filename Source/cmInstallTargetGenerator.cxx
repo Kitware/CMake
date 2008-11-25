@@ -489,10 +489,17 @@ cmInstallTargetGenerator
     for(std::set<cmTarget*>::const_iterator j = sharedLibs.begin();
         j != sharedLibs.end(); ++j)
       {
+      cmTarget* tgt = *j;
+
+      // The install_name of an imported target does not change.
+      if(tgt->IsImported())
+        {
+        continue;
+        }
+
       // If the build tree and install tree use different path
       // components of the install_name field then we need to create a
       // mapping to be applied after installation.
-      cmTarget* tgt = *j;
       std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
       std::string for_install = tgt->GetInstallNameDirForInstallTree(config);
       if(for_build != for_install)
