@@ -90,6 +90,7 @@ public:
     bool WillFail;
     double Timeout;
     int Index;
+    std::vector<std::string> Environment;
   };
 
   struct cmCTestTestResult

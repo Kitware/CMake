@@ -335,6 +335,17 @@ public:
 
   /** Get the list of all environment variables */
   static std::vector<std::string> GetEnvironmentVariables();
+
+  /** Append multiple variables to the current environment.
+      Return the original environment, as it was before the
+      append. */
+  static std::vector<std::string> AppendEnv(
+    std::vector<std::string>* env);
+
+  /** Restore the full environment to "env" - use after
+      AppendEnv to put the environment back to the way it
+      was. */
+  static void RestoreEnv(const std::vector<std::string>& env);
 #endif
 
   /** Setup the environment to enable VS 8 IDE output.  */

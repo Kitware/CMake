@@ -1556,6 +1556,7 @@ bool cmSystemTools::PutEnv(const char* value)
 }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
+//----------------------------------------------------------------------
 bool cmSystemTools::UnsetEnv(const char* value)
 {
 #if !defined(HAVE_UNSETENV)
@@ -1568,6 +1569,7 @@ bool cmSystemTools::UnsetEnv(const char* value)
 #endif
 }
 
+//----------------------------------------------------------------------
 std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
 {
   std::vector<std::string> env;
@@ -1577,6 +1579,54 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
     env.push_back(environ[cc]);
     }
   return env;
+}
+
+//----------------------------------------------------------------------
+std::vector<std::string> cmSystemTools::AppendEnv(
+  std::vector<std::string>* env)
+{
+  std::vector<std::string> origEnv = GetEnvironmentVariables();
+
+  if (env && env->size()>0)
+    {
+    std::vector<std::string>::const_iterator eit;
+
+    for (eit = env->begin(); eit!= env->end(); ++eit)
+      {
+      PutEnv(eit->c_str());
+      }
+    }
+
+  return origEnv;
+}
+
+//----------------------------------------------------------------------
+void cmSystemTools::RestoreEnv(const std::vector<std::string>& env)
+{
+  std::vector<std::string>::const_iterator eit;
+
+  // First clear everything in the current environment:
+  //
+  std::vector<std::string> currentEnv = GetEnvironmentVariables();
+  for (eit = currentEnv.begin(); eit!= currentEnv.end(); ++eit)
+    {
+    std::string var(*eit);
+
+    int pos = var.find("=");
+    if (pos != std::string::npos)
+      {
+      var = var.substr(0, pos);
+      }
+
+    UnsetEnv(var.c_str());
+    }
+
+  // Then put back each entry from the original environment:
+  //
+  for (eit = env.begin(); eit!= env.end(); ++eit)
+    {
+    PutEnv(eit->c_str());
+    }
 }
 #endif
 

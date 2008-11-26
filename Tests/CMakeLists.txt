@@ -497,6 +497,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Example")
 
+  ADD_TEST(Environment ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/Environment"
+    "${CMake_BINARY_DIR}/Tests/Environment"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project EnvironmentProj
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Environment"
+    --force-new-ctest-process
+    --test-command ${CMAKE_CTEST_COMMAND} -VV
+    )
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
+
   # do each of the tutorial steps
   FOREACH(STP RANGE 1 7)
     ADD_TEST(TutorialStep${STP} ${CMAKE_CTEST_COMMAND}

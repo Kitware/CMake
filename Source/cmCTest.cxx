@@ -1105,8 +1105,12 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
 //----------------------------------------------------------------------
 int cmCTest::RunTest(std::vector<const char*> argv,
                      std::string* output, int *retVal,
-                     std::ostream* log, double testTimeOut)
+                     std::ostream* log, double testTimeOut,
+                     std::vector<std::string>* environment)
 {
+  std::vector<std::string> origEnv;
+  bool modifyEnv = (environment && environment->size()>0);
+
   // determine how much time we have
   double timeout = this->GetRemainingTimeAllowed() - 120;
   if (this->TimeOut && this->TimeOut < timeout)
@@ -1156,6 +1160,11 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       }
     std::string oldpath = cmSystemTools::GetCurrentWorkingDirectory();
 
+    if (modifyEnv)
+      {
+      origEnv = cmSystemTools::AppendEnv(environment);
+      }
+
     *retVal = inst.Run(args, output);
     if ( *log )
       {
@@ -1166,12 +1175,23 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
       "Internal cmCTest object used to run test." << std::endl
       <<  *output << std::endl);
+
+    if (modifyEnv)
+      {
+      cmSystemTools::RestoreEnv(origEnv);
+      }
+
     return cmsysProcess_State_Exited;
     }
   std::vector<char> tempOutput;
   if ( output )
     {
     *output = "";
+    }
+
+  if (modifyEnv)
+    {
+    origEnv = cmSystemTools::AppendEnv(environment);
     }
 
   cmsysProcess* cp = cmsysProcess_New();
@@ -1232,6 +1252,11 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       << std::flush);
     }
   cmsysProcess_Delete(cp);
+
+  if (modifyEnv)
+    {
+    cmSystemTools::RestoreEnv(origEnv);
+    }
 
   return result;
 }

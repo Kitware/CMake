@@ -246,9 +246,11 @@ public:
   void SetProduceXML(bool v);
 
   //! Run command specialized for tests. Returns process status and retVal is
-  // return value or exception.
+  // return value or exception. If environment is non-null, it is used to set
+  // environment variables prior to running the test. After running the test,
+  // environment variables are restored to their previous values.
   int RunTest(std::vector<const char*> args, std::string* output, int *retVal,
-    std::ostream* logfile, double testTimeOut);
+    std::ostream* logfile, double testTimeOut, std::vector<std::string>* environment);
 
   /**
    * Execute handler and return its result. If the handler fails, it returns

@@ -733,11 +733,11 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
   if ( !this->CTest->GetShowOnly() )
     {
     res = this->CTest->RunTest(arguments, &output, &retVal, this->LogFile,
-                               it->Timeout);
+                               it->Timeout, &it->Environment);
     }
-  
-  clock_finish = cmSystemTools::GetTime();
-  
+
+  clock_finish = cmSystemTools::GetTime();  
+
   if ( this->LogFile )
     {
     double ttime = clock_finish - clock_start;
@@ -2209,13 +2209,23 @@ bool cmCTestTestHandler::SetTestsProperties(
               }
             }
           if ( key == "DEPENDS" )
-            { 
+            {
             std::vector<std::string> lval;
             cmSystemTools::ExpandListArgument(val.c_str(), lval);
             std::vector<std::string>::iterator crit;
             for ( crit = lval.begin(); crit != lval.end(); ++ crit )
               {
               rtit->Depends.push_back(*crit);
+              }
+            }
+          if ( key == "ENVIRONMENT" )
+            { 
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            std::vector<std::string>::iterator crit;
+            for ( crit = lval.begin(); crit != lval.end(); ++ crit )
+              {
+              rtit->Environment.push_back(*crit);
               }
             }
           if ( key == "MEASUREMENT" )

@@ -382,7 +382,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     }
   
   int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, 0, 
-                                        remainingTime);
+                                        remainingTime, 0);
 
   if(runTestRes != cmsysProcess_State_Exited || retval != 0)
     {
