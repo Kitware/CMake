@@ -1612,7 +1612,7 @@ void cmSystemTools::RestoreEnv(const std::vector<std::string>& env)
     {
     std::string var(*eit);
 
-    int pos = var.find("=");
+    std::string::size_type pos = var.find("=");
     if (pos != std::string::npos)
       {
       var = var.substr(0, pos);
