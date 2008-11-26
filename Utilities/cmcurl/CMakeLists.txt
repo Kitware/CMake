@@ -153,7 +153,10 @@ MACRO(CHECK_LIBRARY_EXISTS_CONCAT LIBRARY SYMBOL VARIABLE)
 ENDMACRO(CHECK_LIBRARY_EXISTS_CONCAT)
 
 # Check for all needed libraries
-CHECK_LIBRARY_EXISTS_CONCAT("dl"     dlopen       HAVE_LIBDL)
+# use the cmake defined dl libs as dl is should not be used
+# on HPUX, but rather dld this avoids a warning
+SET(CURL_LIBS ${CURL_LIBS} ${CMAKE_DL_LIBS})
+#CHECK_LIBRARY_EXISTS_CONCAT("dl"     dlopen       HAVE_LIBDL)
 #CHECK_LIBRARY_EXISTS_CONCAT("ucb"    gethostname  HAVE_LIBUCB)
 CHECK_LIBRARY_EXISTS_CONCAT("socket" connect      HAVE_LIBSOCKET)
 CHECK_LIBRARY_EXISTS("c" gethostbyname "" NOT_NEED_LIBNSL)
