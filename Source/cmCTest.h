@@ -250,7 +250,8 @@ public:
   // environment variables prior to running the test. After running the test,
   // environment variables are restored to their previous values.
   int RunTest(std::vector<const char*> args, std::string* output, int *retVal,
-    std::ostream* logfile, double testTimeOut, std::vector<std::string>* environment);
+    std::ostream* logfile, double testTimeOut,
+    std::vector<std::string>* environment);
 
   /**
    * Execute handler and return its result. If the handler fails, it returns
