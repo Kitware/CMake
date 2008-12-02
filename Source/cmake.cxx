@@ -3937,7 +3937,8 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
       std::cout << "Visual Studio Incremental Link without manifests\n";
       }
     }
-  return cmake::VisualStudioLinkNonIncremental(expandedArgs, type, hasManifest, verbose);
+  return cmake::VisualStudioLinkNonIncremental(expandedArgs,
+                                               type, hasManifest, verbose);
 }
 
 int cmake::ParseVisualStudioLinkCommand(std::vector<std::string>& args, 

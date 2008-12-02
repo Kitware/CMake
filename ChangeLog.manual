@@ -1,3 +1,17 @@
+Changes in CMake 2.6.3 RC 5
+- add EXCLUDE, INCLUDE to ctest_test command in ctest -S scripts
+- Set CMAKE_SYSTEM in ctest -S scripts by reading CMakeDetermineSystem
+- Fix for GetLibraryNamesInternal called on imported target issue on osx
+- Add FortranCInterface.cmake module to discover Fortran/C interfaces
+- Fix Fortran compiler specified with -D issue
+- Add support for the MS masm and masm64 assemblers, works with nmake/make
+- Improvments to FindQt4.cmake
+- InstallRequiredSystemLibraries fix for win64
+- Fix flags for Sun Fortran, and g77 
+- Fix imported library issue with OSX
+- Fix -D and CACHE FORCE issue
+- Have kwsys submit dashboards to cdash.org
+
 Changes in CMake 2.6.3 RC 4
 - Fix for SccProvider in visual studio 
 - fix for missing package_source target

@@ -53,7 +53,7 @@ IF(NOT CMAKE_Fortran_COMPILER)
     # CMake/Source/CMakeLists.txt, IF YOU CHANGE THIS LIST,
     # PLEASE UPDATE THAT FILE AS WELL!
     SET(CMAKE_Fortran_COMPILER_LIST
-      ifort ifc efc f95 pgf95 lf95 xlf95 fort gfortran g95 f90
+      ifort ifc efc f95 pgf95 lf95 xlf95 fort gfortran gfortran-4 g95 f90
       pgf90 xlf90 epcf90 fort77 frt pgf77 xlf fl32 af77 g77 f77
       )
   ENDIF(CMAKE_Fortran_COMPILER_INIT)
@@ -63,6 +63,32 @@ IF(NOT CMAKE_Fortran_COMPILER)
   IF(CMAKE_Fortran_COMPILER_INIT AND NOT CMAKE_Fortran_COMPILER)
     SET(CMAKE_Fortran_COMPILER "${CMAKE_Fortran_COMPILER_INIT}" CACHE FILEPATH "Fortran compiler" FORCE)
   ENDIF(CMAKE_Fortran_COMPILER_INIT AND NOT CMAKE_Fortran_COMPILER)
+ELSE(NOT CMAKE_Fortran_COMPILER)
+   # we only get here if CMAKE_Fortran_COMPILER was specified using -D or a pre-made CMakeCache.txt
+  # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
+  # if CMAKE_Fortran_COMPILER is a list of length 2, use the first item as 
+  # CMAKE_Fortran_COMPILER and the 2nd one as CMAKE_Fortran_COMPILER_ARG1
+
+  LIST(LENGTH CMAKE_Fortran_COMPILER _CMAKE_Fortran_COMPILER_LIST_LENGTH)
+  IF("${_CMAKE_Fortran_COMPILER_LIST_LENGTH}" EQUAL 2)
+    LIST(GET CMAKE_Fortran_COMPILER 1 CMAKE_Fortran_COMPILER_ARG1)
+    LIST(GET CMAKE_Fortran_COMPILER 0 CMAKE_Fortran_COMPILER)
+  ENDIF("${_CMAKE_Fortran_COMPILER_LIST_LENGTH}" EQUAL 2)
+
+  # if a compiler was specified by the user but without path, 
+  # now try to find it with the full path
+  # if it is found, force it into the cache, 
+  # if not, don't overwrite the setting (which was given by the user) with "NOTFOUND"
+  # if the C compiler already had a path, reuse it for searching the CXX compiler
+  GET_FILENAME_COMPONENT(_CMAKE_USER_Fortran_COMPILER_PATH "${CMAKE_Fortran_COMPILER}" PATH)
+  IF(NOT _CMAKE_USER_Fortran_COMPILER_PATH)
+    FIND_PROGRAM(CMAKE_Fortran_COMPILER_WITH_PATH NAMES ${CMAKE_Fortran_COMPILER})
+    MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER_WITH_PATH)
+    IF(CMAKE_Fortran_COMPILER_WITH_PATH)
+      SET(CMAKE_Fortran_COMPILER ${CMAKE_Fortran_COMPILER_WITH_PATH}
+        CACHE STRING "Fortran compiler" FORCE)
+    ENDIF(CMAKE_Fortran_COMPILER_WITH_PATH)
+  ENDIF(NOT _CMAKE_USER_Fortran_COMPILER_PATH)
 ENDIF(NOT CMAKE_Fortran_COMPILER)
 
 MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER)  

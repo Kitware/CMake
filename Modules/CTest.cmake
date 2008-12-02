@@ -1,5 +1,5 @@
-# - Configure a project for testing with CTest/Dart
-# This file configures a project to use the CTest/Dart
+# - Configure a project for testing with CTest/CDash
+# This file configures a project to use the CTest/CDash/Dart
 # testing/dashboard process.  This module should be included
 # in the CMakeLists.txt file at the top of a project.  Typical usage:
 #  INCLUDE(CTest)

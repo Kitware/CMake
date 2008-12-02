@@ -70,7 +70,11 @@ int main(int ac, char *av[])
     printf("To run a test, enter the test number: ");
     fflush(stdout);
     testNum = 0;
-    scanf("%d", &testNum);
+    if( scanf("%d", &testNum) != 1 )
+      {
+      printf("Couldn't parse that input as a number\n");
+      return -1;
+      }
     if (testNum >= NumTests)
       {
       printf("%3d is an invalid test number.\n", testNum);

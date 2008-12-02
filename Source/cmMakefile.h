@@ -264,7 +264,8 @@ public:
   ///! Add a definition to this makefile and the global cmake cache.
   void AddCacheDefinition(const char* name, const char* value, 
                           const char* doc,
-                          cmCacheManager::CacheEntryType type);
+                          cmCacheManager::CacheEntryType type,
+                          bool force = false);
 
   /**
    * Add bool variable definition to the build. 
@@ -278,6 +279,8 @@ public:
    * for cache entries, and will only affect the current makefile.
    */
   void RemoveDefinition(const char* name);
+  ///! Remove a definition from the cache.
+  void RemoveCacheDefinition(const char* name);
   
   /**
    * Specify the name of the project for this build.

@@ -14,12 +14,14 @@
 
 IF(MSVC)
   FILE(TO_CMAKE_PATH "$ENV{SYSTEMROOT}" SYSTEMROOT)
+
   IF(MSVC70)
     SET(__install__libs
       "${SYSTEMROOT}/system32/msvcp70.dll"
       "${SYSTEMROOT}/system32/msvcr70.dll"
       )
   ENDIF(MSVC70)
+
   IF(MSVC71)
     SET(__install__libs
       "${SYSTEMROOT}/system32/msvcp71.dll"
@@ -33,10 +35,15 @@ IF(MSVC)
     SET(CMAKE_MSVC_ARCH x86)
   ENDIF(CMAKE_CL_64)
 
+  GET_FILENAME_COMPONENT(devenv_dir "${CMAKE_MAKE_PROGRAM}" PATH)
+  GET_FILENAME_COMPONENT(base_dir "${devenv_dir}/../.." ABSOLUTE)
+
   IF(MSVC80)
     # Find the runtime library redistribution directory.
     FIND_PATH(MSVC80_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest
-      PATHS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0;InstallDir]/../../VC/redist"
+      PATHS
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0;InstallDir]/../../VC/redist"
+        "${base_dir}/VC/redist"
       )
     MARK_AS_ADVANCED(MSVC80_REDIST_DIR)
     SET(MSVC80_CRT_DIR "${MSVC80_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC80.CRT")
@@ -62,16 +69,18 @@ IF(MSVC)
     ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
 
   ENDIF(MSVC80)
+
   IF(MSVC90)
     # Find the runtime library redistribution directory.
     FIND_PATH(MSVC90_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest
-      PATHS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]/../../VC/redist"
-      
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0;InstallDir]/../../VC/redist"
+      PATHS
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]/../../VC/redist"
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0;InstallDir]/../../VC/redist"
+        "${base_dir}/VC/redist"
       )
     MARK_AS_ADVANCED(MSVC90_REDIST_DIR)
     SET(MSVC90_CRT_DIR "${MSVC90_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC90.CRT")
-    
+
     # Install the manifest that allows DLLs to be loaded from the
     # directory containing the executable.
     SET(__install__libs
@@ -91,6 +100,7 @@ IF(MSVC)
         )
     ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES) 
   ENDIF(MSVC90) 
+
   IF(CMAKE_INSTALL_MFC_LIBRARIES)
     IF(MSVC70)
       SET(__install__libs ${__install__libs}
@@ -142,6 +152,7 @@ IF(MSVC)
         "${MSVC80_MFCLOC_DIR}/mfc80kor.dll"
         )
     ENDIF(MSVC80)
+
     IF(MSVC90)
       IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
         SET(MSVC90_MFC_DIR
@@ -184,6 +195,7 @@ IF(MSVC)
     ENDIF(MSVC90)
 
   ENDIF(CMAKE_INSTALL_MFC_LIBRARIES)
+
   FOREACH(lib
       ${__install__libs}
       )
@@ -205,5 +217,3 @@ IF(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
     ENDIF(WIN32)
   ENDIF(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP)
 ENDIF(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
-
-

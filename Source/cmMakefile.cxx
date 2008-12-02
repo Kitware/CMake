@@ -1561,7 +1561,8 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 
 void cmMakefile::AddCacheDefinition(const char* name, const char* value,
                                     const char* doc,
-                                    cmCacheManager::CacheEntryType type)
+                                    cmCacheManager::CacheEntryType type,
+                                    bool force)
 {
   const char* val = value;
   cmCacheManager::CacheIterator it =
@@ -1569,7 +1570,12 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
   if(!it.IsAtEnd() && (it.GetType() == cmCacheManager::UNINITIALIZED) &&
      it.Initialized())
     {
-    val = it.GetValue();
+    // if this is not a force, then use the value from the cache
+    // if it is a force, then use the value being passed in
+    if(!force)
+      {
+      val = it.GetValue();
+      }
     if ( type == cmCacheManager::PATH || type == cmCacheManager::FILEPATH )
       {
       std::vector<std::string>::size_type cc;
@@ -1651,6 +1657,11 @@ void cmMakefile::RemoveDefinition(const char* name)
       0, this);
     }
 #endif
+}
+
+void cmMakefile::RemoveCacheDefinition(const char* name)
+{
+  this->GetCacheManager()->RemoveCacheEntry(name);
 }
 
 void cmMakefile::SetProjectName(const char* p)
