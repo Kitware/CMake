@@ -1511,31 +1511,29 @@ void cmLocalVisualStudio6Generator
       }
 
     // Add per-target and per-configuration preprocessor definitions.
-    this->AppendDefines
-      (flags, this->Makefile->GetProperty("COMPILE_DEFINITIONS"), 0);
-    this->AppendDefines(flags, target.GetProperty("COMPILE_DEFINITIONS"), 0);
-    this->AppendDefines
-      (flagsDebug,
-       this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
-    this->AppendDefines(flagsDebug,
-                        target.GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
-    this->AppendDefines
-      (flagsRelease,
-       this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
-    this->AppendDefines(flagsRelease,
-                        target.GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
-    this->AppendDefines
-      (flagsMinSize,
-       this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
-    this->AppendDefines
-      (flagsMinSize,
-       target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
-    this->AppendDefines
-      (flagsDebugRel,
-       this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
-    this->AppendDefines
-      (flagsDebugRel,
-       target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
+    std::string defines = " ";
+    std::string debugDefines = " ";
+    std::string releaseDefines = " ";
+    std::string minsizeDefines = " ";
+    std::string debugrelDefines = " ";
+
+    this->AppendDefines(defines,this->Makefile->GetProperty("COMPILE_DEFINITIONS"), 0);
+    this->AppendDefines(debugDefines,this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
+    this->AppendDefines(releaseDefines,this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
+    this->AppendDefines(minsizeDefines,this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
+    this->AppendDefines(debugrelDefines,this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
+
+    this->AppendDefines(defines,target.GetProperty("COMPILE_DEFINITIONS"), 0);
+    this->AppendDefines(debugDefines,target.GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
+    this->AppendDefines(releaseDefines,target.GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
+    this->AppendDefines(minsizeDefines,target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
+    this->AppendDefines(debugrelDefines,target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
+
+    this->AppendDefines(flags, defines.c_str(), 0);
+    this->AppendDefines(flagsDebug, debugDefines.c_str(), 0);
+    this->AppendDefines(flagsRelease, releaseDefines.c_str(), 0);
+    this->AppendDefines(flagsMinSize, minsizeDefines.c_str(), 0);
+    this->AppendDefines(flagsDebugRel, debugrelDefines.c_str(), 0);
 
     // The template files have CXX FLAGS in them, that need to be replaced.
     // There are not separate CXX and C template files, so we use the same
@@ -1550,6 +1548,17 @@ void cmLocalVisualStudio6Generator
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE", 
                                  flagsRelease.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());
+
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_MINSIZE", 
+                                 minsizeDefines.c_str());
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_DEBUG", 
+                                 debugDefines.c_str());
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELWITHDEBINFO", 
+                                 debugrelDefines.c_str());
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELEASE", 
+                                 releaseDefines.c_str());
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS", defines.c_str());
+
     fout << line.c_str() << std::endl;
     }
 }
