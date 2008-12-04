@@ -113,21 +113,13 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
     return 0;
     }
 
-  const std::string cpack_bundle_startup_command = 
-    this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") ? 
-    this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") : "";
-  if(cpack_bundle_startup_command.empty())
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "CPACK_BUNDLE_STARTUP_COMMAND must be set."
-      << std::endl);
-
-    return 0;
-    }
-
   // Get optional arguments ...
   const std::string cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON") 
     ? this->GetOption("CPACK_PACKAGE_ICON") : "";
+
+  const std::string cpack_bundle_startup_command = 
+    this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") 
+    ? this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") : "";
 
   // The staging directory contains everything that will end-up inside the
   // final disk image ...
@@ -176,25 +168,28 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
     return 0;
     }
 
-  // Install a user-provided startup command (could be an executable or a
-  // script) ...
-  cmOStringStream command_source;
-  command_source << cpack_bundle_startup_command;
-
-  cmOStringStream command_target;
-  command_target << application.str() << "/" << cpack_bundle_name;
-
-  if(!this->CopyFile(command_source, command_target))
+  // Optionally a user-provided startup command (could be an
+  // executable or a script) ...
+  if(!cpack_bundle_startup_command.empty())
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Error copying startup command. "
-                  " Check the value of CPACK_BUNDLE_STARTUP_COMMAND."
-      << std::endl);
+    cmOStringStream command_source;
+    command_source << cpack_bundle_startup_command;
 
-    return 0;
+    cmOStringStream command_target;
+    command_target << application.str() << "/" << cpack_bundle_name;
+
+    if(!this->CopyFile(command_source, command_target))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error copying startup command. "
+                    " Check the value of CPACK_BUNDLE_STARTUP_COMMAND."
+        << std::endl);
+
+      return 0;
+      }
+
+    cmSystemTools::SetPermissions(command_target.str().c_str(), 0777);
     }
-
-  cmSystemTools::SetPermissions(command_target.str().c_str(), 0777);
 
   // Add a symlink to /Applications so users can drag-and-drop the bundle
   // into it
