@@ -568,8 +568,10 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   endif("${candidate}" MATCHES "${gp_regex}")
   endforeach(candidate)
 
-  list(SORT ${prerequisites_var})
-
+  list(LENGTH ${prerequisites_var} prerequisites_var_length)
+  if(prerequisites_var_length GREATER 0)
+    list(SORT ${prerequisites_var})
+  endif(prerequisites_var_length GREATER 0)
   if(${recurse})
     set(more_inputs ${unseen_prereqs})
     foreach(input ${more_inputs})
