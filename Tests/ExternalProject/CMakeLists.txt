@@ -9,6 +9,30 @@ get_external_project_directories(base_dir build_dir downloads_dir install_dir
 set(prefix "${install_dir}")
 
 
+# Use a "TryCheckout" technique on small subtrees of certain projects
+# to see if cvs checkout and svn checkout may be used on this machine
+# without problems. If so, we can test the projects that use those
+# download techniques. If not, we skip them on this machine...
+#
+include("${CMAKE_CURRENT_SOURCE_DIR}/TryCheckout.cmake")
+
+try_cvs_checkout(
+  ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
+  "CMake/Tests/Tutorial/Step1"
+  "${CMAKE_CURRENT_BINARY_DIR}/TryCheckout/TutorialStep1"
+  can_use_cvs
+  )
+
+try_svn_checkout(
+  "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
+  "${CMAKE_CURRENT_BINARY_DIR}/TryCheckout/gdcmmd5"
+  can_use_svn
+  )
+
+message(STATUS "can_use_cvs='${can_use_cvs}'")
+message(STATUS "can_use_svn='${can_use_svn}'")
+
+
 # Local DIR:
 #
 set(proj TutorialStep5-Local)
@@ -64,7 +88,7 @@ add_external_project(${proj}
 
 # Download CVS:
 #
-if(CVS_EXECUTABLE)
+if(can_use_cvs)
   # CVS by date stamp:
   #
   set(proj KWStyle-20081201)
@@ -100,7 +124,7 @@ endif()
 
 # Download SVN:
 #
-if(Subversion_SVN_EXECUTABLE)
+if(can_use_svn)
   # SVN by date stamp:
   #
   set(proj gdcm-md5-20081204)
@@ -162,7 +186,7 @@ add_test(TutorialStep1-LocalTGZ-BuildTreeTest
 add_test(TutorialStep1-LocalNoDirTGZ-BuildTreeTest
   "${build_dir}/TutorialStep1-LocalNoDirTGZ/Tutorial" 9)
 
-if(CVS_EXECUTABLE)
+if(can_use_cvs)
   add_test(KWStyle-20081201-BuildTreeTest
     "${build_dir}/KWStyle-20081201/KWStyle" -xml "${kwstyleXmlFile}" "${header}")
 
@@ -173,7 +197,7 @@ if(CVS_EXECUTABLE)
     "${build_dir}/TutorialStep1-LocalNoDirTGZ/Tutorial" 4)
 endif()
 
-if(Subversion_SVN_EXECUTABLE)
+if(can_use_svn)
   add_test(gdcm-md5-20081204-BuildTreeTest
     "${build_dir}/gdcm-md5-20081204/md5main" --version)
 
@@ -190,12 +214,12 @@ endif()
 add_test(TutorialStep5-InstallTreeTest
   "${install_dir}/bin/Tutorial" 49)
 
-if(CVS_EXECUTABLE)
+if(can_use_cvs)
   add_test(KWStyle-InstallTreeTest
     "${install_dir}/bin/KWStyle" -xml "${kwstyleXmlFile}" "${header}")
 endif()
 
-if(Subversion_SVN_EXECUTABLE)
+if(can_use_svn)
   add_test(gdcm-md5-InstallTreeTest
     "${install_dir}/bin/md5main" --version)
 endif()
