@@ -2897,7 +2897,7 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
 bool SystemInformationImplementation::QuerySolarisInfo()
 {
   // Parse values
-  this->NumberOfPhysicalCPU = atoi(this->ParseValueFromKStat("-n systethis->misc -s ncpus").c_str());
+  this->NumberOfPhysicalCPU = atoi(this->ParseValueFromKStat("-n syste_misc -s ncpus").c_str());
   this->NumberOfLogicalCPU = this->NumberOfPhysicalCPU;
   
   if(this->NumberOfPhysicalCPU!=0)
