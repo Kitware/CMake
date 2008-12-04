@@ -1528,13 +1528,12 @@ void cmLocalVisualStudio6Generator
     this->AppendDefines(releaseDefines,target.GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
     this->AppendDefines(minsizeDefines,target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
     this->AppendDefines(debugrelDefines,target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
-
-    this->AppendDefines(flags, defines.c_str(), 0);
-    this->AppendDefines(flagsDebug, debugDefines.c_str(), 0);
-    this->AppendDefines(flagsRelease, releaseDefines.c_str(), 0);
-    this->AppendDefines(flagsMinSize, minsizeDefines.c_str(), 0);
-    this->AppendDefines(flagsDebugRel, debugrelDefines.c_str(), 0);
-
+    flags += defines;
+    flagsDebug += debugDefines;
+    flagsRelease += releaseDefines;
+    flagsMinSize += minsizeDefines;
+    flagsDebugRel += debugrelDefines;
+ 
     // The template files have CXX FLAGS in them, that need to be replaced.
     // There are not separate CXX and C template files, so we use the same
     // variable names.   The previous code sets up flags* variables to contain
