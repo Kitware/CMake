@@ -16,21 +16,62 @@ set(prefix "${install_dir}")
 #
 include("${CMAKE_CURRENT_SOURCE_DIR}/TryCheckout.cmake")
 
-try_cvs_checkout(
-  ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
-  "CMake/Tests/Tutorial/Step1"
-  "${CMAKE_CURRENT_BINARY_DIR}/TryCheckout/TutorialStep1"
-  can_use_cvs
-  )
+if(NOT DEFINED can_use_cvs)
+  try_cvs_checkout(
+    ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
+    "CMake/Tests/Tutorial/Step1"
+    "${CMAKE_CURRENT_BINARY_DIR}/TryCheckout/TutorialStep1"
+    can_use_cvs
+    )
+  set(can_use_cvs ${can_use_cvs} CACHE STRING "Was try_cvs_checkout successful?")
+endif()
 
-try_svn_checkout(
-  "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
-  "${CMAKE_CURRENT_BINARY_DIR}/TryCheckout/gdcmmd5"
-  can_use_svn
-  )
+if(NOT DEFINED can_use_svn)
+  try_svn_checkout(
+    "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
+    "${CMAKE_CURRENT_BINARY_DIR}/TryCheckout/gdcmmd5"
+    can_use_svn
+    )
+  set(can_use_svn ${can_use_svn} CACHE STRING "Was try_svn_checkout successful?")
+endif()
 
 message(STATUS "can_use_cvs='${can_use_cvs}'")
 message(STATUS "can_use_svn='${can_use_svn}'")
+
+
+# Empty projects that test all the known add_external_project argument key words:
+#
+set(proj MinimalNoOpProject)
+add_external_project(${proj}
+  BUILD_COMMAND ""
+  CONFIGURE_COMMAND ""
+  DOWNLOAD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+set(proj EmptyNoOpProject)
+add_external_project(${proj}
+  BUILD_ARGS ""
+  BUILD_COMMAND ""
+  CONFIGURE_ARGS ""
+  CONFIGURE_COMMAND ""
+  CONFIGURE_DIR ""
+  CVS_REPOSITORY ""
+  CVS_MODULE ""
+  CVS_TAG ""
+  DEPENDS "MinimalNoOpProject"
+  DIR ""
+  DOWNLOAD_ARGS ""
+  DOWNLOAD_COMMAND ""
+  INSTALL_ARGS ""
+  INSTALL_COMMAND ""
+  SVN_REPOSITORY ""
+  SVN_TAG ""
+  TAR ""
+  TAR_URL ""
+  TGZ ""
+  TGZ_URL ""
+)
 
 
 # Local DIR:
@@ -70,7 +111,7 @@ add_external_project(${proj}
 
 set(proj TutorialStep1-LocalNoDirTGZ)
 add_external_project(${proj}
-  TGZ "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tgz"
+  TGZ "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tgz"
   CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
   INSTALL_COMMAND ""
 )
@@ -91,12 +132,13 @@ add_external_project(${proj}
 if(can_use_cvs)
   # CVS by date stamp:
   #
-  set(proj KWStyle-20081201)
+  set(proj TutorialStep1-20081201)
   add_external_project(${proj}
-    CVS_REPOSITORY ":pserver:anoncvs@public.kitware.com:/cvsroot/KWStyle"
-    CVS_MODULE "KWStyle"
+    CVS_REPOSITORY ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
+    CVS_MODULE "CMake/Tests/Tutorial/Step1"
     CVS_TAG "-D\;2008-12-01 01:00:00 UTC"
     CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+    INSTALL_COMMAND ""
   )
 
   # CVS by tag:
@@ -112,12 +154,19 @@ if(can_use_cvs)
 
   # Live CVS / HEAD (no CVS_TAG):
   #
-  set(proj TutorialStep1-CVSHEAD)
+  set(proj KWStyle-CVSHEAD)
   add_external_project(${proj}
-    CVS_REPOSITORY ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
-    CVS_MODULE "CMake/Tests/Tutorial/Step1"
+    CVS_REPOSITORY ":pserver:anoncvs@public.kitware.com:/cvsroot/KWStyle"
+    CVS_MODULE "KWStyle"
     CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
-    INSTALL_COMMAND ""
+    DEPENDS "EmptyNoOpProject"
+    DEPENDS "TutorialStep5-Local"
+    DEPENDS "TutorialStep1-LocalTAR"
+    DEPENDS "TutorialStep1-LocalNoDirTAR"
+    DEPENDS "TutorialStep1-LocalTGZ"
+    DEPENDS "TutorialStep1-LocalNoDirTGZ"
+    DEPENDS "TutorialStep1-20081201"
+    DEPENDS "kwsys-from-CMake-2-6-2"
   )
 endif()
 
@@ -162,7 +211,7 @@ enable_testing()
 
 # Use these as input to the KWStyle tests:
 #
-set(kwstyleXmlFile "${source_dir}/KWStyle-20081201/Testing/Data/0001-KWStyleConfiguration.kws.xml")
+set(kwstyleXmlFile "${source_dir}/KWStyle-CVSHEAD/Testing/Data/0001-KWStyleConfiguration.kws.xml")
 set(header "${install_dir}/include/TutorialConfig.h")
 
 
@@ -187,14 +236,14 @@ add_test(TutorialStep1-LocalNoDirTGZ-BuildTreeTest
   "${build_dir}/TutorialStep1-LocalNoDirTGZ/Tutorial" 9)
 
 if(can_use_cvs)
-  add_test(KWStyle-20081201-BuildTreeTest
-    "${build_dir}/KWStyle-20081201/KWStyle" -xml "${kwstyleXmlFile}" "${header}")
+  add_test(TutorialStep1-20081201-BuildTreeTest
+    "${build_dir}/TutorialStep1-20081201/Tutorial" 4)
 
   add_test(kwsys-from-CMake-2-6-2-BuildTreeTest
     "${build_dir}/kwsys-from-CMake-2-6-2/kwsysTestProcess" 1)
 
-  add_test(TutorialStep1-CVSHEAD-BuildTreeTest
-    "${build_dir}/TutorialStep1-LocalNoDirTGZ/Tutorial" 4)
+  add_test(KWStyle-CVSHEAD-BuildTreeTest
+    "${build_dir}/KWStyle-CVSHEAD/KWStyle" -xml "${kwstyleXmlFile}" "${header}")
 endif()
 
 if(can_use_svn)

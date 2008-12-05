@@ -36,10 +36,76 @@ function(get_configure_build_working_dir name working_dir_var)
 endfunction(get_configure_build_working_dir)
 
 
+function(get_configure_command_id name cfg_cmd_id_var)
+  get_target_property(cmd ${name} AEP_CONFIGURE_COMMAND)
+
+  if(cmd STREQUAL "")
+    # Explicit empty string means no configure step for this project
+    set(${cfg_cmd_id_var} "none" PARENT_SCOPE)
+  else()
+    if(NOT cmd)
+      # Default is "use cmake":
+      set(${cfg_cmd_id_var} "cmake" PARENT_SCOPE)
+    else()
+      # Otherwise we have to analyze the value:
+      if(cmd MATCHES "/configure$")
+        set(${cfg_cmd_id_var} "configure" PARENT_SCOPE)
+      else()
+        if(cmd MATCHES "cmake")
+          set(${cfg_cmd_id_var} "cmake" PARENT_SCOPE)
+        else()
+          if(cmd MATCHES "config")
+            set(${cfg_cmd_id_var} "configure" PARENT_SCOPE)
+          else()
+            set(${cfg_cmd_id_var} "unknown:${cmd}" PARENT_SCOPE)
+          endif()
+        endif()
+      endif()
+    endif()
+  endif()
+endfunction(get_configure_command_id)
+
+
 function(add_external_project_download_command name)
   set(added 0)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
     sentinels_dir source_dir tmp_dir)
+
+
+  if(NOT added)
+  get_target_property(cmd ${name} AEP_DOWNLOAD_COMMAND)
+  if(cmd STREQUAL "")
+    # Explicit empty string means no download step for this project
+    add_custom_command(
+      OUTPUT ${sentinels_dir}/${name}-download
+      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
+      WORKING_DIRECTORY ${sentinels_dir}
+      COMMENT "No download step for '${name}'"
+      )
+    set(added 1)
+  else()
+    if(cmd)
+      set(args "")
+      get_target_property(download_args ${name} AEP_DOWNLOAD_ARGS)
+      if(download_args)
+        set(args "${download_args}")
+        separate_arguments(args)
+      endif()
+
+      add_custom_command(
+        OUTPUT ${sentinels_dir}/${name}-download
+        COMMAND ${cmd} ${args}
+        COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
+        WORKING_DIRECTORY ${downloads_dir}
+        COMMENT "Performing download step for '${name}'"
+        )
+      set(added 1)
+    else()
+      # No explicit DOWNLOAD_COMMAND property. Look for other properties
+      # indicating which download method to use in the logic below...
+    endif()
+  endif()
+  endif()
 
 
   if(NOT added)
@@ -275,13 +341,21 @@ function(add_external_project_build_command name)
       DEPENDS ${sentinels_dir}/${name}-configure
       )
   else()
+    get_configure_command_id(${name} cfg_cmd_id)
+
     if(NOT cmd)
-      set(cmd ${CMAKE_COMMAND})
+      set(cmd make)
+      if(cfg_cmd_id STREQUAL "cmake")
+        set(cmd ${CMAKE_COMMAND})
+      endif()
     endif()
 
     get_target_property(args ${name} AEP_BUILD_ARGS)
     if(NOT args)
-      set(args --build ${working_dir} --config ${CMAKE_CFG_INTDIR})
+      set(args)
+      if(cfg_cmd_id STREQUAL "cmake")
+        set(args --build ${working_dir} --config ${CMAKE_CFG_INTDIR})
+      endif()
     endif()
 
     add_custom_command(
@@ -312,13 +386,24 @@ function(add_external_project_install_command name)
       DEPENDS ${sentinels_dir}/${name}-build
       )
   else()
+    get_configure_command_id(${name} cfg_cmd_id)
+
     if(NOT cmd)
-      set(cmd ${CMAKE_COMMAND})
+      set(cmd make)
+      if(cfg_cmd_id STREQUAL "cmake")
+        set(cmd ${CMAKE_COMMAND})
+      endif()
     endif()
 
     get_target_property(args ${name} AEP_INSTALL_ARGS)
     if(NOT args)
-      set(args --build ${working_dir} --config ${CMAKE_CFG_INTDIR} --target install)
+      set(args)
+      if(cfg_cmd_id STREQUAL "cmake")
+        set(args --build ${working_dir} --config ${CMAKE_CFG_INTDIR} --target install)
+      endif()
+      if(cfg_cmd_id STREQUAL "configure")
+        set(args "install")
+      endif()
     endif()
 
     add_custom_command(
@@ -339,123 +424,101 @@ function(add_CMakeExternals_target)
       sentinels_dir source_dir tmp_dir)
 
     add_custom_command(
-      OUTPUT ${tmp_dir}
+      OUTPUT ${sentinels_dir}/CMakeExternals-directories
       COMMAND ${CMAKE_COMMAND} -E make_directory ${build_dir}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${downloads_dir}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${install_dir}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${sentinels_dir}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${source_dir}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${tmp_dir}
+      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/CMakeExternals-directories
+      COMMENT "Creating CMakeExternals directories"
     )
 
     add_custom_target(CMakeExternals ALL
-      DEPENDS ${tmp_dir}
+      DEPENDS ${sentinels_dir}/CMakeExternals-directories
     )
   endif()
 endfunction(add_CMakeExternals_target)
+
+
+function(is_known_aep_property_key key result_var)
+  set(${result_var} 0 PARENT_SCOPE)
+
+  if(key MATCHES "^BUILD_ARGS|BUILD_COMMAND|CONFIGURE_ARGS|CONFIGURE_COMMAND|CONFIGURE_DIR|CVS_REPOSITORY|CVS_MODULE|CVS_TAG|DEPENDS|DOWNLOAD_ARGS|DOWNLOAD_COMMAND|DIR|INSTALL_ARGS|INSTALL_COMMAND|SVN_REPOSITORY|SVN_TAG|TAR|TAR_URL|TGZ|TGZ_URL$"
+  )
+    #message(STATUS "info: recognized via MATCHES - key='${key}'")
+    set(${result_var} 1 PARENT_SCOPE)
+  else()
+    message(STATUS "warning: is_known_aep_property_key unknown key='${key}'")
+  endif()
+endfunction(is_known_aep_property_key)
 
 
 function(add_external_project name)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
     sentinels_dir source_dir tmp_dir)
 
+
+  # Ensure root CMakeExternals target and directories are created.
+  # All external projects will depend on this root CMakeExternals target.
+  #
   add_CMakeExternals_target()
 
+
+  # Add a custom target for the external project and make its DEPENDS
+  # the output of the final build step:
+  #
   add_custom_target(${name} ALL
     DEPENDS ${sentinels_dir}/${name}-install
   )
   set_target_properties(${name} PROPERTIES AEP_IS_EXTERNAL_PROJECT 1)
+  add_dependencies(${name} CMakeExternals)
 
-  # Loop over ARGN by 2's extracting key/value pairs from
-  # the non-explicit arguments to the function:
+
+  # Transfer the arguments to this function into target properties for the
+  # new custom target we just added so that we can set up all the build steps
+  # correctly based on target properties.
+  #
+  # Loop over ARGN by 2's extracting key/value pairs from the non-explicit
+  # arguments to this function:
   #
   list(LENGTH ARGN n)
   set(i 0)
   while(i LESS n)
     math(EXPR j ${i}+1)
+
     list(GET ARGN ${i} key)
     list(GET ARGN ${j} value)
-    #message(STATUS "  ${key}='${value}'")
 
-    if(key STREQUAL "BUILD_ARGS")
-      set_target_properties(${name} PROPERTIES AEP_BUILD_ARGS "${value}")
-    endif()
+    is_known_aep_property_key("${key}" is_known_key)
 
-    if(key STREQUAL "BUILD_COMMAND")
-      set_target_properties(${name} PROPERTIES AEP_BUILD_COMMAND "${value}")
-    endif()
-
-    if(key STREQUAL "CONFIGURE_ARGS")
-      set_target_properties(${name} PROPERTIES AEP_CONFIGURE_ARGS "${value}")
-    endif()
-
-    if(key STREQUAL "CONFIGURE_COMMAND")
-      set_target_properties(${name} PROPERTIES AEP_CONFIGURE_COMMAND "${value}")
-    endif()
-
-    if(key STREQUAL "CONFIGURE_DIR")
-      set_target_properties(${name} PROPERTIES AEP_CONFIGURE_DIR "${value}")
-    endif()
-
-    if(key STREQUAL "CVS_REPOSITORY")
-      set_target_properties(${name} PROPERTIES AEP_CVS_REPOSITORY "${value}")
-    endif()
-
-    if(key STREQUAL "CVS_MODULE")
-      set_target_properties(${name} PROPERTIES AEP_CVS_MODULE "${value}")
-    endif()
-
-    if(key STREQUAL "CVS_TAG")
-      set_target_properties(${name} PROPERTIES AEP_CVS_TAG "${value}")
-    endif()
-
-    if(key STREQUAL "DEPENDS")
-      add_dependencies(${name} ${value})
-    endif()
-
-    if(key STREQUAL "DIR")
-      set_target_properties(${name} PROPERTIES AEP_DIR "${value}")
-    endif()
-
-    if(key STREQUAL "INSTALL_ARGS")
-      set_target_properties(${name} PROPERTIES AEP_INSTALL_ARGS "${value}")
-    endif()
-
-    if(key STREQUAL "INSTALL_COMMAND")
-      set_target_properties(${name} PROPERTIES AEP_INSTALL_COMMAND "${value}")
-    endif()
-
-    if(key STREQUAL "SVN_REPOSITORY")
-      set_target_properties(${name} PROPERTIES AEP_SVN_REPOSITORY "${value}")
-    endif()
-
-    if(key STREQUAL "SVN_TAG")
-      set_target_properties(${name} PROPERTIES AEP_SVN_TAG "${value}")
-    endif()
-
-    if(key STREQUAL "TAR")
-      set_target_properties(${name} PROPERTIES AEP_TAR "${value}")
-    endif()
-
-    if(key STREQUAL "TAR_URL")
-      set_target_properties(${name} PROPERTIES AEP_TAR_URL "${value}")
-    endif()
-
-    if(key STREQUAL "TGZ")
-      set_target_properties(${name} PROPERTIES AEP_TGZ "${value}")
-    endif()
-
-    if(key STREQUAL "TGZ_URL")
-      set_target_properties(${name} PROPERTIES AEP_TGZ_URL "${value}")
+    if(is_known_key)
+      if(key STREQUAL "DEPENDS")
+        if(NOT value STREQUAL "")
+          add_dependencies(${name} ${value})
+        else()
+          message(STATUS "warning: empty DEPENDS value in add_external_project")
+        endif()
+      else()
+        set_target_properties(${name} PROPERTIES AEP_${key} "${value}")
+      endif()
+    else()
+      message(SEND_ERROR "error: unknown add_external_project key with name='${name}' key='${key}' value='${value}'")
     endif()
 
     math(EXPR i ${i}+2)
   endwhile()
 
+
+  # Set up custom build steps based on the target properties.
+  # Each step depends on the previous one.
+  #
+  # The target depends on the output of the final step.
+  # (Already set up above in the DEPENDS of the add_custom_target command.)
+  #
   add_external_project_download_command(${name})
   add_external_project_configure_command(${name})
   add_external_project_build_command(${name})
   add_external_project_install_command(${name})
-
-  add_dependencies(${name} CMakeExternals)
 endfunction(add_external_project)
