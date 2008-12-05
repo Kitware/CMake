@@ -9,6 +9,7 @@ get_external_project_directories(base_dir build_dir downloads_dir install_dir
 set(prefix "${install_dir}")
 
 
+
 # Use a "TryCheckout" technique on small subtrees of certain projects
 # to see if cvs checkout and svn checkout may be used on this machine
 # without problems. If so, we can test the projects that use those
