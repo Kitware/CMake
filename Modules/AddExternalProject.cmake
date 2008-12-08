@@ -66,6 +66,15 @@ function(get_configure_command_id name cfg_cmd_id_var)
 endfunction(get_configure_command_id)
 
 
+function(mkdir d)
+  file(MAKE_DIRECTORY "${d}")
+  #message(STATUS "mkdir d='${d}'")
+  if(NOT EXISTS "${d}")
+    message(FATAL_ERROR "error: dir '${d}' does not exist after file(MAKE_DIRECTORY call...")
+  endif()
+endfunction(mkdir)
+
+
 function(add_external_project_download_command name)
   set(added 0)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
@@ -81,6 +90,7 @@ function(add_external_project_download_command name)
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
       WORKING_DIRECTORY ${sentinels_dir}
       COMMENT "No download step for '${name}'"
+      DEPENDS ${sentinels_dir}/CMakeExternals-directories
       )
     set(added 1)
   else()
@@ -98,6 +108,7 @@ function(add_external_project_download_command name)
         COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
         WORKING_DIRECTORY ${downloads_dir}
         COMMENT "Performing download step for '${name}'"
+        DEPENDS ${sentinels_dir}/CMakeExternals-directories
         )
       set(added 1)
     else()
@@ -127,7 +138,6 @@ function(add_external_project_download_command name)
     endif()
 
     set(args -d ${cvs_repository} co ${cvs_tag} -d ${name} ${cvs_module})
-    set(wd "${source_dir}")
 
     set(repository ${cvs_repository})
     set(module ${cvs_module})
@@ -139,13 +149,14 @@ function(add_external_project_download_command name)
       @ONLY
     )
 
+    mkdir("${source_dir}/${name}")
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-download
       COMMAND ${CVS_EXECUTABLE} ${args}
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-      WORKING_DIRECTORY ${wd}
+      WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (CVS checkout) for '${name}'"
-      DEPENDS "${sentinels_dir}/${name}-cvsinfo.txt"
+      DEPENDS ${sentinels_dir}/${name}-cvsinfo.txt
     )
     set(added 1)
   endif()
@@ -166,7 +177,6 @@ function(add_external_project_download_command name)
     endif()
 
     set(args co ${svn_repository} ${svn_tag} ${name})
-    set(wd "${source_dir}")
 
     set(repository ${svn_repository})
     set(module)
@@ -178,13 +188,14 @@ function(add_external_project_download_command name)
       @ONLY
     )
 
+    mkdir("${source_dir}/${name}")
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-download
       COMMAND ${Subversion_SVN_EXECUTABLE} ${args}
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-      WORKING_DIRECTORY ${wd}
+      WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (SVN checkout) for '${name}'"
-      DEPENDS "${sentinels_dir}/${name}-svninfo.txt"
+      DEPENDS ${sentinels_dir}/${name}-svninfo.txt
     )
     set(added 1)
   endif()
@@ -194,13 +205,27 @@ function(add_external_project_download_command name)
   if(NOT added)
   get_target_property(dir ${name} AEP_DIR)
   if(dir)
+    get_filename_component(abs_dir "${dir}" ABSOLUTE)
+
+    set(repository "add_external_project DIR")
+    set(module "${abs_dir}")
+    set(tag "")
+
+    configure_file(
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${sentinels_dir}/${name}-dirinfo.txt"
+      @ONLY
+    )
+
+    mkdir("${source_dir}/${name}")
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-download
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${dir} ${source_dir}/${name}
+      COMMAND ${CMAKE_COMMAND} -E remove_directory ${source_dir}/${name}
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir}/${name}
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
       WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (DIR copy) for '${name}'"
-      DEPENDS ${dir}
+      DEPENDS ${sentinels_dir}/${name}-dirinfo.txt
     )
     set(added 1)
   endif()
@@ -210,6 +235,7 @@ function(add_external_project_download_command name)
   if(NOT added)
   get_target_property(tar ${name} AEP_TAR)
   if(tar)
+    mkdir("${source_dir}/${name}")
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-download
       COMMAND ${CMAKE_COMMAND} -Dfilename=${tar} -Dtmp=${tmp_dir}/${name} -Ddirectory=${source_dir}/${name} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake
@@ -226,6 +252,7 @@ function(add_external_project_download_command name)
   if(NOT added)
   get_target_property(tgz ${name} AEP_TGZ)
   if(tgz)
+    mkdir("${source_dir}/${name}")
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-download
       COMMAND ${CMAKE_COMMAND} -Dfilename=${tgz} -Dtmp=${tmp_dir}/${name} -Ddirectory=${source_dir}/${name} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake
@@ -242,6 +269,17 @@ function(add_external_project_download_command name)
   if(NOT added)
   get_target_property(tgz_url ${name} AEP_TGZ_URL)
   if(tgz_url)
+    set(repository "add_external_project TGZ_URL")
+    set(module "${tgz_url}")
+    set(tag "")
+
+    configure_file(
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${sentinels_dir}/${name}-urlinfo.txt"
+      @ONLY
+    )
+
+    mkdir("${source_dir}/${name}")
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-download
       COMMAND ${CMAKE_COMMAND} -Dremote=${tgz_url} -Dlocal=${downloads_dir}/${name}.tgz -P ${CMAKE_ROOT}/Modules/DownloadFile.cmake
@@ -249,15 +287,27 @@ function(add_external_project_download_command name)
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
       WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (TGZ_URL download and untar) for '${name}'"
-      DEPENDS ${downloads_dir}/${name}.tgz
+      DEPENDS ${sentinels_dir}/${name}-urlinfo.txt
     )
     set(added 1)
   endif()
   endif(NOT added)
 
+
   if(NOT added)
   get_target_property(tar_url ${name} AEP_TAR_URL)
   if(tar_url)
+    set(repository "add_external_project TAR_URL")
+    set(module "${tar_url}")
+    set(tag "")
+
+    configure_file(
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${sentinels_dir}/${name}-urlinfo.txt"
+      @ONLY
+    )
+
+    mkdir("${source_dir}/${name}")
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-download
       COMMAND ${CMAKE_COMMAND} -Dremote=${tar_url} -Dlocal=${downloads_dir}/${name}.tar -P ${CMAKE_ROOT}/Modules/DownloadFile.cmake
@@ -265,7 +315,7 @@ function(add_external_project_download_command name)
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
       WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (TAR_URL download and untar) for '${name}'"
-      DEPENDS ${downloads_dir}/${name}.tar
+      DEPENDS ${sentinels_dir}/${name}-urlinfo.txt
     )
     set(added 1)
   endif()
@@ -285,9 +335,11 @@ function(add_external_project_configure_command name)
 
   # Create the working_dir for configure, build and install steps:
   #
+  mkdir("${working_dir}")
   add_custom_command(
-    OUTPUT ${working_dir}
+    OUTPUT ${sentinels_dir}/${name}-working_dir
     COMMAND ${CMAKE_COMMAND} -E make_directory ${working_dir}
+    COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-working_dir
     DEPENDS ${sentinels_dir}/${name}-download
     )
 
@@ -299,7 +351,7 @@ function(add_external_project_configure_command name)
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-configure
       WORKING_DIRECTORY ${working_dir}
       COMMENT "No configure step for '${name}'"
-      DEPENDS ${working_dir} ${sentinels_dir}/${name}-download
+      DEPENDS ${sentinels_dir}/${name}-working_dir
       )
   else()
     if(NOT cmd)
@@ -319,7 +371,7 @@ function(add_external_project_configure_command name)
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-configure
       WORKING_DIRECTORY ${working_dir}
       COMMENT "Performing configure step for '${name}'"
-      DEPENDS ${working_dir} ${sentinels_dir}/${name}-download
+      DEPENDS ${sentinels_dir}/${name}-working_dir
       )
   endif()
 endfunction(add_external_project_configure_command)
@@ -422,6 +474,22 @@ function(add_CMakeExternals_target)
   if(NOT TARGET CMakeExternals)
     get_external_project_directories(base_dir build_dir downloads_dir install_dir
       sentinels_dir source_dir tmp_dir)
+
+    # Make the directories at CMake configure time *and* add a custom command
+    # to make them at build time. They need to exist at makefile generation
+    # time for Borland make and wmake so that CMake may generate makefiles
+    # with "cd C:\short\paths\with\no\spaces" commands in them.
+    #
+    # Additionally, the add_custom_command is still used in case somebody
+    # removes one of the necessary directories and tries to rebuild without
+    # re-running cmake.
+    #
+    mkdir("${build_dir}")
+    mkdir("${downloads_dir}")
+    mkdir("${install_dir}")
+    mkdir("${sentinels_dir}")
+    mkdir("${source_dir}")
+    mkdir("${tmp_dir}")
 
     add_custom_command(
       OUTPUT ${sentinels_dir}/CMakeExternals-directories
