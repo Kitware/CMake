@@ -1517,17 +1517,37 @@ void cmLocalVisualStudio6Generator
     std::string minsizeDefines = " ";
     std::string debugrelDefines = " ";
 
-    this->AppendDefines(defines,this->Makefile->GetProperty("COMPILE_DEFINITIONS"), 0);
-    this->AppendDefines(debugDefines,this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
-    this->AppendDefines(releaseDefines,this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
-    this->AppendDefines(minsizeDefines,this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
-    this->AppendDefines(debugrelDefines,this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
+    this->AppendDefines(
+      defines,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS"), 0);
+    this->AppendDefines(
+      debugDefines,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"),0);
+    this->AppendDefines(
+      releaseDefines,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
+    this->AppendDefines(
+      minsizeDefines,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
+    this->AppendDefines(
+      debugrelDefines,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
 
-    this->AppendDefines(defines,target.GetProperty("COMPILE_DEFINITIONS"), 0);
-    this->AppendDefines(debugDefines,target.GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
-    this->AppendDefines(releaseDefines,target.GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
-    this->AppendDefines(minsizeDefines,target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
-    this->AppendDefines(debugrelDefines,target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
+    this->AppendDefines(
+      defines,
+      target.GetProperty("COMPILE_DEFINITIONS"), 0);
+    this->AppendDefines(
+      debugDefines,
+      target.GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
+    this->AppendDefines(
+      releaseDefines,
+      target.GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
+    this->AppendDefines(
+      minsizeDefines,
+      target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
+    this->AppendDefines(
+      debugrelDefines,
+      target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
     flags += defines;
     flagsDebug += debugDefines;
     flagsRelease += releaseDefines;
