@@ -75,6 +75,8 @@ private:
   void AppendToProperty(const char* propertyName);
   void SetModuleVariables(const std::string& components);
   bool FindModule(bool& found);
+  void AddFindDefinition(const char* var, const char* val);
+  void RestoreFindDefinitions();
   bool HandlePackageMode();
   void FindConfig();
   bool FindPrefixedConfig();
@@ -103,6 +105,9 @@ private:
   bool SearchAppBundlePrefix(std::string const& prefix_in);
 
   friend class cmFindPackageFileList;
+
+  struct OriginalDef { bool exists; std::string value; };
+  std::map<cmStdString, OriginalDef> OriginalDefs;
 
   std::string CommandDocumentation;
   cmStdString Name;
