@@ -1933,14 +1933,6 @@ bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
   return false;
 }
 
-// TODO: Version numbers?  Perhaps have a listing component class that
-// sorts by lexicographic and numerical ordering.  Also try to match
-// some command argument for the version.  Alternatively provide an
-// API that just returns a list of valid directories?  Perhaps push a
-// scope and try loading the target file just to get its version
-// number?  Could add a foo-version.cmake or FooVersion.cmake file
-// in the projects that contains just version information.
-
 // TODO: Debug cmsys::Glob double slash problem.
 
 // TODO: Add registry entries after cmake system search path?
