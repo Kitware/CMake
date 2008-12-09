@@ -222,6 +222,7 @@ cmFindPackageCommand::cmFindPackageCommand()
     "UNIX (U), or Apple (A) conventions.\n"
     "  <prefix>/                                               (W)\n"
     "  <prefix>/(cmake|CMake)/                                 (W)\n"
+    "  <prefix>/(share|lib)/cmake/<name>*/                     (U)\n"
     "  <prefix>/(share|lib)/<name>*/                           (U)\n"
     "  <prefix>/(share|lib)/<name>*/(cmake|CMake)/             (U)\n"
     "On systems supporting OS X Frameworks and Application Bundles "
@@ -1788,6 +1789,20 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
   common.push_back("lib");
   common.push_back("share");
+
+  //  PREFIX/(share|lib)/cmake/(Foo|foo|FOO).*/
+  {
+  cmFindPackageFileList lister(this);
+  lister
+    / cmFileListGeneratorFixed(prefix)
+    / cmFileListGeneratorEnumerate(common)
+    / cmFileListGeneratorFixed("cmake")
+    / cmFileListGeneratorProject(this->Names);
+  if(lister.Search())
+    {
+    return true;
+    }
+  }
 
   //  PREFIX/(share|lib)/(Foo|foo|FOO).*/
   {

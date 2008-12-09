@@ -85,12 +85,12 @@ SET(TApp_EXPECTED
 SET(Tapp_EXPECTED
   "TApp.app/Contents/Resources/cmake/tapp-config.cmake")
 SET(VersionedA_EXPECTED "lib/zot-2.0/zot-config.cmake")
-SET(VersionedB_EXPECTED "lib/zot-3.1/zot-config.cmake")
+SET(VersionedB_EXPECTED "lib/cmake/zot-3.1/zot-config.cmake")
 SET(wibbleA_EXPECTED "A/wibble-config.cmake")
 SET(wibbleB_EXPECTED "B/wibble-config.cmake")
 SET(RecursiveA_EXPECTED "lib/RecursiveA/recursivea-config.cmake")
 SET(RecursiveB_EXPECTED "lib/zot-2.0/zot-config.cmake")
-SET(RecursiveC_EXPECTED "lib/zot-3.1/zot-config.cmake")
+SET(RecursiveC_EXPECTED "lib/cmake/zot-3.1/zot-config.cmake")
 
 # Check the results.
 FOREACH(p ${PACKAGES})
