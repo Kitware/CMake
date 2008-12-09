@@ -372,6 +372,23 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile()
     }
 }
 
+
+// Utility function to make a valid VS6 *.dsp filename out
+// of a CMake target name:
+//
+std::string GetVS6TargetName(const std::string& targetName)
+{
+  std::string name(targetName);
+
+  // Eliminate hyphens. VS6 cannot handle hyphens in *.dsp filenames...
+  // Replace them with underscores.
+  //
+  cmSystemTools::ReplaceString(name, "-", "_");
+
+  return name;
+}
+
+
 // Write a dsp file into the DSW file,
 // Note, that dependencies from executables to 
 // the libraries it uses are also done here
@@ -402,7 +419,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
         if(this->FindTarget(0, j->first.c_str()))
           {
           fout << "Begin Project Dependency\n";
-          fout << "Project_Dep_Name " << j->first.c_str() << "\n";
+          fout << "Project_Dep_Name " << GetVS6TargetName(j->first.c_str()) << "\n";
           fout << "End Project Dependency\n";
           }
         }
@@ -419,7 +436,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
       {
       std::string depName = this->GetUtilityForTarget(target, i->c_str());
       fout << "Begin Project Dependency\n";
-      fout << "Project_Dep_Name " << depName << "\n";
+      fout << "Project_Dep_Name " << GetVS6TargetName(depName) << "\n";
       fout << "End Project Dependency\n";
       }
     }
@@ -451,7 +468,7 @@ void cmGlobalVisualStudio6Generator::WriteExternalProject(std::ostream& fout,
   for(;i!= end; ++i)
   {
     fout << "Begin Project Dependency\n";
-    fout << "Project_Dep_Name " << *i << "\n";
+    fout << "Project_Dep_Name " << GetVS6TargetName(*i) << "\n";
     fout << "End Project Dependency\n";
   }
   fout << "}}}\n\n";

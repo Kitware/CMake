@@ -63,7 +63,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
 
   // Setup /I and /LIBPATH options for the resulting DSP file.  VS 6
   // truncates long include paths so make it as short as possible if
-  // the length threatents this problem.
+  // the length threatens this problem.
   unsigned int maxIncludeLength = 3000;
   bool useShortPath = false;
   for(int j=0; j < 2; ++j)
@@ -167,17 +167,23 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
     }
 }
 
+// Utility function to make a valid VS6 *.dsp filename out
+// of a CMake target name:
+//
+extern std::string GetVS6TargetName(const std::string& targetName);
+
 void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname, 
                                                     cmTarget &target)
 {
   // add to the list of projects
-  std::string pname = lname;
+  std::string pname = GetVS6TargetName(lname);
+
   this->CreatedProjectNames.push_back(pname);
   // create the dsp.cmake file
   std::string fname;
   fname = this->Makefile->GetStartOutputDirectory();
   fname += "/";
-  fname += lname;
+  fname += pname;
   fname += ".dsp";
   // save the name of the real dsp file
   std::string realDSP = fname;
@@ -188,7 +194,7 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname,
     cmSystemTools::Error("Error Writing ", fname.c_str());
     cmSystemTools::ReportLastSystemError("");
     }
-  this->WriteDSPFile(fout,lname,target);
+  this->WriteDSPFile(fout,pname.c_str(),target);
   fout.close();
   // if the dsp file has changed, then write it.
   cmSystemTools::CopyFileIfDifferent(fname.c_str(), realDSP.c_str());
@@ -197,7 +203,7 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname,
 
 void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
 {
-  std::string dspname = tgt.GetName();
+  std::string dspname = GetVS6TargetName(tgt.GetName());
   dspname += ".dsp.cmake";
   const char* dsprule = 
     this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
@@ -287,10 +293,6 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
       }
     }
   
-  // trace the visual studio dependencies
-  std::string name = libName;
-  name += ".dsp.cmake";
-
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
   
@@ -462,7 +464,8 @@ void cmLocalVisualStudio6Generator
       {
       cmSystemTools::ExpandListArgument(dependsValue, depends);
       }
-    if (source != libName || target.GetType() == cmTarget::UTILITY ||
+    if (GetVS6TargetName(source) != libName ||
+      target.GetType() == cmTarget::UTILITY ||
       target.GetType() == cmTarget::GLOBAL_TARGET)
       {
       fout << "# Begin Source File\n\n";
@@ -758,11 +761,13 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
   // reset this->Configurations
   this->Configurations.erase(this->Configurations.begin(), 
                              this->Configurations.end());
+
   // now add all the configurations possible
+  std::string vs6name = GetVS6TargetName(libName);
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
-    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
+    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", vs6name.c_str());
     if (reg.find(line))
       {
       this->Configurations.push_back(line.substr(reg.end()));
@@ -1055,8 +1060,8 @@ void cmLocalVisualStudio6Generator
     if ((target.GetType() != cmTarget::SHARED_LIBRARY
          && target.GetType() != cmTarget::STATIC_LIBRARY 
          && target.GetType() != cmTarget::MODULE_LIBRARY) || 
-        (target.GetType()==cmTarget::SHARED_LIBRARY && libName != j->first) ||
-        (target.GetType()==cmTarget::MODULE_LIBRARY && libName != j->first))
+        (target.GetType()==cmTarget::SHARED_LIBRARY && libName != GetVS6TargetName(j->first)) ||
+        (target.GetType()==cmTarget::MODULE_LIBRARY && libName != GetVS6TargetName(j->first)))
       {
       // Compute the proper name to use to link this library.
       std::string lib;
@@ -1404,12 +1409,15 @@ void cmLocalVisualStudio6Generator
                                  targetImplibFlagMinSizeRel.c_str());
     cmSystemTools::ReplaceString(line, "TARGET_IMPLIB_FLAG_RELWITHDEBINFO",
                                  targetImplibFlagRelWithDebInfo.c_str());
-    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
+
+    std::string vs6name = GetVS6TargetName(libName);
+    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", vs6name.c_str());
+
 #ifdef CM_USE_OLD_VS6
-    // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH 
+    // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH
     // are already quoted in the template file,
     // we need to remove the quotes here, we still need
-    // to convert to output path for unix to win32 conversion 
+    // to convert to output path for unix to win32 conversion
     cmSystemTools::ReplaceString
       (line, "LIBRARY_OUTPUT_PATH",
        removeQuotes(this->ConvertToOptionallyRelativeOutputPath
