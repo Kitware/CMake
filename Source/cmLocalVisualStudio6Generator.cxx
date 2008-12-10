@@ -1060,8 +1060,10 @@ void cmLocalVisualStudio6Generator
     if ((target.GetType() != cmTarget::SHARED_LIBRARY
          && target.GetType() != cmTarget::STATIC_LIBRARY 
          && target.GetType() != cmTarget::MODULE_LIBRARY) || 
-        (target.GetType()==cmTarget::SHARED_LIBRARY && libName != GetVS6TargetName(j->first)) ||
-        (target.GetType()==cmTarget::MODULE_LIBRARY && libName != GetVS6TargetName(j->first)))
+        (target.GetType()==cmTarget::SHARED_LIBRARY
+         && libName != GetVS6TargetName(j->first)) ||
+        (target.GetType()==cmTarget::MODULE_LIBRARY
+         && libName != GetVS6TargetName(j->first)))
       {
       // Compute the proper name to use to link this library.
       std::string lib;

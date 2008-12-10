@@ -419,7 +419,8 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
         if(this->FindTarget(0, j->first.c_str()))
           {
           fout << "Begin Project Dependency\n";
-          fout << "Project_Dep_Name " << GetVS6TargetName(j->first.c_str()) << "\n";
+          fout << "Project_Dep_Name "
+               << GetVS6TargetName(j->first.c_str()) << "\n";
           fout << "End Project Dependency\n";
           }
         }
