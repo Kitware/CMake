@@ -16,6 +16,14 @@ set(prefix "${install_dir}")
 #
 include("${CMAKE_CURRENT_SOURCE_DIR}/TryCheckout.cmake")
 
+if(NOT DEFINED can_build_kwstyle)
+  if(WATCOM)
+    set(can_build_kwstyle 0)
+  else()
+    set(can_build_kwstyle 1)
+  endif()
+endif()
+
 if(NOT DEFINED can_use_cvs)
   try_cvs_checkout(
     ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
@@ -35,6 +43,7 @@ if(NOT DEFINED can_use_svn)
   set(can_use_svn ${can_use_svn} CACHE STRING "Was try_svn_checkout successful?")
 endif()
 
+message(STATUS "can_build_kwstyle='${can_build_kwstyle}'")
 message(STATUS "can_use_cvs='${can_use_cvs}'")
 message(STATUS "can_use_svn='${can_use_svn}'")
 
@@ -152,22 +161,24 @@ if(can_use_cvs)
     INSTALL_COMMAND ""
   )
 
-  # Live CVS / HEAD (no CVS_TAG):
-  #
-  set(proj KWStyle-CVSHEAD)
-  add_external_project(${proj}
-    CVS_REPOSITORY ":pserver:anoncvs@public.kitware.com:/cvsroot/KWStyle"
-    CVS_MODULE "KWStyle"
-    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
-    DEPENDS "EmptyNoOpProject"
-    DEPENDS "TutorialStep5-Local"
-    DEPENDS "TutorialStep1-LocalTAR"
-    DEPENDS "TutorialStep1-LocalNoDirTAR"
-    DEPENDS "TutorialStep1-LocalTGZ"
-    DEPENDS "TutorialStep1-LocalNoDirTGZ"
-    DEPENDS "TutorialStep1-20081201"
-    DEPENDS "kwsys-from-CMake-2-6-2"
-  )
+  if(can_build_kwstyle)
+    # Live CVS / HEAD (no CVS_TAG):
+    #
+    set(proj KWStyle-CVSHEAD)
+    add_external_project(${proj}
+      CVS_REPOSITORY ":pserver:anoncvs@public.kitware.com:/cvsroot/KWStyle"
+      CVS_MODULE "KWStyle"
+      CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+      DEPENDS "EmptyNoOpProject"
+      DEPENDS "TutorialStep5-Local"
+      DEPENDS "TutorialStep1-LocalTAR"
+      DEPENDS "TutorialStep1-LocalNoDirTAR"
+      DEPENDS "TutorialStep1-LocalTGZ"
+      DEPENDS "TutorialStep1-LocalNoDirTGZ"
+      DEPENDS "TutorialStep1-20081201"
+      DEPENDS "kwsys-from-CMake-2-6-2"
+    )
+  endif()
 endif()
 
 
@@ -242,8 +253,10 @@ if(can_use_cvs)
   add_test(kwsys-from-CMake-2-6-2-BuildTreeTest
     "${build_dir}/kwsys-from-CMake-2-6-2/kwsysTestProcess" 1)
 
-  add_test(KWStyle-CVSHEAD-BuildTreeTest
-    "${build_dir}/KWStyle-CVSHEAD/KWStyle" -xml "${kwstyleXmlFile}" "${header}")
+  if(can_build_kwstyle)
+    add_test(KWStyle-CVSHEAD-BuildTreeTest
+      "${build_dir}/KWStyle-CVSHEAD/KWStyle" -xml "${kwstyleXmlFile}" "${header}")
+  endif()
 endif()
 
 if(can_use_svn)
@@ -264,8 +277,10 @@ add_test(TutorialStep5-InstallTreeTest
   "${install_dir}/bin/Tutorial" 49)
 
 if(can_use_cvs)
-  add_test(KWStyle-InstallTreeTest
-    "${install_dir}/bin/KWStyle" -xml "${kwstyleXmlFile}" "${header}")
+  if(can_build_kwstyle)
+    add_test(KWStyle-InstallTreeTest
+      "${install_dir}/bin/KWStyle" -xml "${kwstyleXmlFile}" "${header}")
+  endif()
 endif()
 
 if(can_use_svn)
