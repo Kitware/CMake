@@ -506,7 +506,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Environment"
     --force-new-ctest-process
-    --test-command ${CMAKE_CTEST_COMMAND} -VV
+    --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
 
@@ -519,7 +519,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProject"
     --force-new-ctest-process
-    --test-command ${CMAKE_CTEST_COMMAND} -VV
+    --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProject")
 
@@ -915,7 +915,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest2/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
     ADD_TEST(CTestTest2 ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -VV --debug
+      -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
       )
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest3/test.cmake.in"
