@@ -24,6 +24,22 @@ if(NOT DEFINED can_build_kwstyle)
   endif()
 endif()
 
+if(NOT DEFINED can_build_tutorial_step5)
+  set(can_build_tutorial_step5 1)
+
+  # Tutorial Step5 cannot build correctly using Visual Studio 6
+  # on Windows 98 if the path of its build tree exceeds 72
+  # characters in length... So don't attempt to build it
+  # in a long path on Win98:
+  #
+  if(CMAKE_SYSTEM STREQUAL "Windows-4.10")
+    string(LENGTH "${build_dir}/TutorialStep5-Local" n)
+    if(n GREATER 72)
+      set(can_build_tutorial_step5 0)
+    endif()
+  endif()
+endif()
+
 if(NOT DEFINED can_use_cvs)
   try_cvs_checkout(
     ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
@@ -44,6 +60,7 @@ if(NOT DEFINED can_use_svn)
 endif()
 
 message(STATUS "can_build_kwstyle='${can_build_kwstyle}'")
+message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
 message(STATUS "can_use_cvs='${can_use_cvs}'")
 message(STATUS "can_use_svn='${can_use_svn}'")
 
@@ -85,11 +102,13 @@ add_external_project(${proj}
 
 # Local DIR:
 #
-set(proj TutorialStep5-Local)
-add_external_project(${proj}
-  DIR "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
-  CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
-)
+if(can_build_tutorial_step5)
+  set(proj TutorialStep5-Local)
+  add_external_project(${proj}
+    DIR "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
+    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+  )
+endif()
 
 
 # Local TAR:
@@ -170,7 +189,6 @@ if(can_use_cvs)
       CVS_MODULE "KWStyle"
       CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
       DEPENDS "EmptyNoOpProject"
-      DEPENDS "TutorialStep5-Local"
       DEPENDS "TutorialStep1-LocalTAR"
       DEPENDS "TutorialStep1-LocalNoDirTAR"
       DEPENDS "TutorialStep1-LocalTGZ"
@@ -231,8 +249,10 @@ set(header "${install_dir}/include/TutorialConfig.h")
 #
 # BuildTree tests:
 #
-add_test(TutorialStep5-Local-BuildTreeTest
-  "${build_dir}/TutorialStep5-Local/Tutorial" 42)
+if(can_build_tutorial_step5)
+  add_test(TutorialStep5-Local-BuildTreeTest
+    "${build_dir}/TutorialStep5-Local/Tutorial" 42)
+endif()
 
 add_test(TutorialStep1-LocalTAR-BuildTreeTest
   "${build_dir}/TutorialStep1-LocalTAR/Tutorial" 36)
@@ -273,8 +293,10 @@ endif()
 
 # InstallTree tests:
 #
-add_test(TutorialStep5-InstallTreeTest
-  "${install_dir}/bin/Tutorial" 49)
+if(can_build_tutorial_step5)
+  add_test(TutorialStep5-InstallTreeTest
+    "${install_dir}/bin/Tutorial" 49)
+endif()
 
 if(can_use_cvs)
   if(can_build_kwstyle)
