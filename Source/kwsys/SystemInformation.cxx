@@ -2158,7 +2158,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   size_t fileSize = 0;
   while(!feof(fd))
     {
-    buffer += fgetc(fd);
+    buffer += static_cast<unsigned char>(fgetc(fd));
     fileSize++;
     }
   fclose( fd );
@@ -2500,7 +2500,7 @@ unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
 #if USE_ASM_INSTRUCTIONS
   if (!this->IsHyperThreadingSupported()) 
     {
-    return (unsigned char) 1;  // HT not supported
+    return static_cast<unsigned char>(1);  // HT not supported
     }
   __asm
     {
@@ -2509,7 +2509,7 @@ unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
     mov Regebx, ebx
     }
 #endif
-  return (unsigned char) ((Regebx & NUM_LOGICAL_BITS) >> 16);
+  return static_cast<unsigned char> ((Regebx & NUM_LOGICAL_BITS) >> 16);
 }
 
 /** Works only for windows */
@@ -2565,7 +2565,7 @@ unsigned char SystemInformationImplementation::GetAPICId()
 #if USE_ASM_INSTRUCTIONS
   if (!this->IsHyperThreadingSupported()) 
     {
-    return (unsigned char) -1;  // HT not supported
+    return static_cast<unsigned char>(-1);  // HT not supported
     } // Logical processor = 1
   __asm
     {
@@ -2574,7 +2574,7 @@ unsigned char SystemInformationImplementation::GetAPICId()
     mov Regebx, ebx
     }
 #endif
-  return (unsigned char) ((Regebx & INITIAL_APIC_ID_BITS) >> 24);
+  return static_cast<unsigned char>((Regebx & INITIAL_APIC_ID_BITS) >> 24);
 }
 
 /** Count the number of CPUs. Works only on windows. */
@@ -2727,7 +2727,7 @@ bool SystemInformationImplementation::ParseSysCtl()
     this->NumberOfLogicalCPU /= this->NumberOfPhysicalCPU;
     }
 
-  this->CPUSpeedInMHz = atoi(this->ExtractValueFromSysCtl("hw.cpufrequency:").c_str()); 
+  this->CPUSpeedInMHz = static_cast<float>(atoi(this->ExtractValueFromSysCtl("hw.cpufrequency:").c_str())); 
   this->CPUSpeedInMHz /= 1000000;
 
   // Chip family
@@ -2905,7 +2905,7 @@ bool SystemInformationImplementation::QuerySolarisInfo()
     this->NumberOfLogicalCPU /= this->NumberOfPhysicalCPU;
     }
 
-  this->CPUSpeedInMHz = atoi(this->ParseValueFromKStat("-s clock_MHz").c_str());
+  this->CPUSpeedInMHz = static_cast<float>(atoi(this->ParseValueFromKStat("-s clock_MHz").c_str()));
 
   // Chip family
   this->ChipID.Family = 0; 

@@ -723,7 +723,8 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   if(cp->WorkingDirectory)
     {
     int r;
-    if(!getcwd(cp->RealWorkingDirectory, cp->RealWorkingDirectoryLength))
+    if(!getcwd(cp->RealWorkingDirectory,
+               (size_t)(cp->RealWorkingDirectoryLength)))
       {
       kwsysProcessCleanup(cp, 1);
       return;
@@ -1426,7 +1427,8 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
 #else
     cp->RealWorkingDirectoryLength = 4096;
 #endif
-    cp->RealWorkingDirectory = malloc(cp->RealWorkingDirectoryLength);
+    cp->RealWorkingDirectory =
+      malloc((size_t)(cp->RealWorkingDirectoryLength));
     if(!cp->RealWorkingDirectory)
       {
       return 0;
@@ -1736,7 +1738,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
     {
     /* Keep trying to read until the operation is not interrupted.  */
     while(((n = read(si->ErrorPipe[0], cp->ErrorMessage+total,
-                     KWSYSPE_PIPE_BUFFER_SIZE-total)) < 0) &&
+                     (size_t)(KWSYSPE_PIPE_BUFFER_SIZE-total))) < 0) &&
           (errno == EINTR));
     if(n > 0)
       {
@@ -2665,7 +2667,7 @@ static int kwsysProcessAppendByte(char* local,
   if((*end - *begin) >= *size)
     {
     kwsysProcess_ptrdiff_t length = *end - *begin;
-    char* newBuffer = (char*)malloc(*size*2);
+    char* newBuffer = (char*)malloc((size_t)(*size*2));
     if(!newBuffer)
       {
       return 0;
@@ -2719,14 +2721,14 @@ static int kwsysProcessAppendArgument(char** local,
     }
 
   /* Allocate space for the argument string.  */
-  **end = (char*)malloc(*arg_end - *arg_begin);
+  **end = (char*)malloc((size_t)(*arg_end - *arg_begin));
   if(!**end)
     {
     return 0;
     }
 
   /* Store the argument in the command array.  */
-  memcpy(**end, *arg_begin, *arg_end - *arg_begin);
+  memcpy(**end, *arg_begin,(size_t)(*arg_end - *arg_begin));
   ++(*end);
 
   /* Reset the argument to be empty.  */
