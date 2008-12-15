@@ -822,18 +822,23 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
-  
 
   cm->DefineProperty
     ("CMAKE_DEBUG_POSTFIX", cmProperty::VARIABLE,
-     "A postfix to add to targets when build as debug.",
-     "This variable is used to initialize the DEBUG_POSTFIX "
-     "property on all the targets. If set the postfix will be "
-     "appended to any targets built when the configuration is "
-     "Debug.",
+     "See variable CMAKE_<CONFIG>_POSTFIX.",
+     "This variable is a special case of the more-general "
+     "CMAKE_<CONFIG>_POSTFIX variable for the DEBUG configuration.",
      false,
      "Variables that Control the Build");
-  
+  cm->DefineProperty
+    ("CMAKE_<CONFIG>_POSTFIX", cmProperty::VARIABLE,
+     "Default filename postfix for libraries under configuration <CONFIG>.",
+     "When a non-executable target is created its <CONFIG>_POSTFIX "
+     "target property is initialized with the value of this variable "
+     "if it is set.",
+     false,
+     "Variables that Control the Build");
+
   cm->DefineProperty
     ("CMAKE_BUILD_WITH_INSTALL_RPATH", cmProperty::VARIABLE,
      "Use the install path for the RPATH",

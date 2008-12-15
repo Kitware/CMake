@@ -135,10 +135,19 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("DEBUG_POSTFIX", cmProperty::TARGET,
-     "A postfix that will be applied to this target when build debug.",
-     "A property on a target that specifies a postfix to add to the "
-     "target name when built in debug mode. For example \"foo.dll\" "
-     "versus \"fooD.dll\".  Ignored for Mac Frameworks and App Bundles.");
+     "See target property <CONFIG>_POSTFIX.",
+     "This property is a special case of the more-general <CONFIG>_POSTFIX "
+     "property for the DEBUG configuration.");
+
+  cm->DefineProperty
+    ("<CONFIG>_POSTFIX", cmProperty::TARGET,
+     "Postfix to append to the target file name for configuration <CONFIG>.",
+     "When building with configuration <CONFIG> the value of this property "
+     "is appended to the target file name built on disk.  "
+     "For non-executable targets, this property is initialized by the value "
+     "of the variable CMAKE_<CONFIG>_POSTFIX if it is set when a target is "
+     "created.  "
+     "This property is ignored on the Mac for Frameworks and App Bundles.");
 
   cm->DefineProperty
     ("EchoString", cmProperty::TARGET,
