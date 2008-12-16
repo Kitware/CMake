@@ -1928,12 +1928,12 @@ cmLocalUnixMakefileGenerator3
   obj += "/";
 
   // Get the object file name without the target directory.
-  std::string::size_type dir_len = 0;
-  dir_len += strlen(this->Makefile->GetCurrentOutputDirectory());
-  dir_len += 1;
-  dir_len += obj.size();
+  std::string dir_max;
+  dir_max += this->Makefile->GetCurrentOutputDirectory();
+  dir_max += "/";
+  dir_max += obj;
   std::string objectName =
-    this->GetObjectFileNameWithoutTarget(source, dir_len,
+    this->GetObjectFileNameWithoutTarget(source, dir_max,
                                          hasSourceExtension);
   if(nameWithoutTargetDir)
     {

@@ -340,10 +340,10 @@ protected:
 
   // Compute object file names.
   std::string GetObjectFileNameWithoutTarget(const cmSourceFile& source,
-                                             std::string::size_type dir_len,
+                                             std::string const& dir_max,
                                              bool* hasSourceExtension = 0);
   std::string& CreateSafeUniqueObjectFileName(const char* sin,
-                                              std::string::size_type dir_len);
+                                              std::string const& dir_max);
 
   void ConfigureRelativePaths();
   std::string FindRelativePathTopSource();

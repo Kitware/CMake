@@ -1226,7 +1226,7 @@ public:
                                       cmTarget& target,
                                       cmSourceFile const& sf,
                                       std::vector<std::string>* configs,
-                                      std::string::size_type dir_len);
+                                      std::string const& dir_max);
   std::map<cmStdString, cmLVS7GFileConfig> FileConfigMap;
 };
 
@@ -1235,12 +1235,12 @@ cmLocalVisualStudio7GeneratorFCInfo
                                       cmTarget& target,
                                       cmSourceFile const& sf,
                                       std::vector<std::string>* configs,
-                                      std::string::size_type dir_len)
+                                      std::string const& dir_max)
 {
   std::string objectName;
   if(lg->NeedObjectName.find(&sf) != lg->NeedObjectName.end())
     {
-    objectName = lg->GetObjectFileNameWithoutTarget(sf, dir_len);
+    objectName = lg->GetObjectFileNameWithoutTarget(sf, dir_max);
     }
 
   // Compute per-source, per-config information.
@@ -1358,27 +1358,27 @@ void cmLocalVisualStudio7Generator
     this->WriteVCProjBeginGroup(fout, name.c_str(), "");
     }
 
-  // Compute the maximum length of a configuration name.
-  std::string::size_type config_len_max = 0;
+  // Compute the maximum length configuration name.
+  std::string config_max;
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {
-    if(i->size() > config_len_max)
+    if(i->size() > config_max.size())
       {
-      config_len_max = i->size();
+      config_max = *i;
       }
     }
 
-  // Compute the maximum length of the full path to the intermediate
+  // Compute the maximum length full path to the intermediate
   // files directory for any configuration.  This is used to construct
   // object file names that do not produce paths that are too long.
-  std::string::size_type dir_len = 0;
-  dir_len += strlen(this->Makefile->GetCurrentOutputDirectory());
-  dir_len += 1;
-  dir_len += this->GetTargetDirectory(target).size();
-  dir_len += 1;
-  dir_len += config_len_max;
-  dir_len += 1;
+  std::string dir_max;
+  dir_max += this->Makefile->GetCurrentOutputDirectory();
+  dir_max += "/";
+  dir_max += this->GetTargetDirectory(target);
+  dir_max += "/";
+  dir_max += config_max;
+  dir_max += "/";
 
   // Loop through each source in the source group.
   std::string objectName;
@@ -1386,7 +1386,7 @@ void cmLocalVisualStudio7Generator
         sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
     {
     std::string source = (*sf)->GetFullPath();
-    FCInfo fcinfo(this, target, *(*sf), configs, dir_len);
+    FCInfo fcinfo(this, target, *(*sf), configs, dir_max);
 
     if (source != libName || target.GetType() == cmTarget::UTILITY ||
       target.GetType() == cmTarget::GLOBAL_TARGET )

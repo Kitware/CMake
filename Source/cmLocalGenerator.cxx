@@ -645,10 +645,10 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
        !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
        !sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
       {
-      std::string::size_type dir_len = 0;
-      dir_len += strlen(this->Makefile->GetCurrentOutputDirectory());
-      dir_len += 1;
-      std::string obj = this->GetObjectFileNameWithoutTarget(*sf, dir_len);
+      std::string dir_max;
+      dir_max += this->Makefile->GetCurrentOutputDirectory();
+      dir_max += "/";
+      std::string obj = this->GetObjectFileNameWithoutTarget(*sf, dir_max);
       if(!obj.empty())
         {
         std::string ofname = this->Makefile->GetCurrentOutputDirectory();
@@ -2475,7 +2475,7 @@ bool cmLocalGeneratorCheckObjectName(std::string& objName,
 std::string&
 cmLocalGenerator
 ::CreateSafeUniqueObjectFileName(const char* sin,
-                                 std::string::size_type dir_len)
+                                 std::string const& dir_max)
 {
   // Look for an existing mapped name for this object file.
   std::map<cmStdString,cmStdString>::iterator it =
@@ -2536,9 +2536,10 @@ cmLocalGenerator
       }
 
 #if defined(CM_LG_ENCODE_OBJECT_NAMES)
-    cmLocalGeneratorCheckObjectName(ssin, dir_len, this->ObjectPathMax);
+    cmLocalGeneratorCheckObjectName(ssin, dir_max.size(),
+                                    this->ObjectPathMax);
 #else
-    (void)dir_len;
+    (void)dir_max;
 #endif
 
     // Insert the newly mapped object file name.
@@ -2554,7 +2555,7 @@ cmLocalGenerator
 std::string
 cmLocalGenerator
 ::GetObjectFileNameWithoutTarget(const cmSourceFile& source,
-                                 std::string::size_type dir_len,
+                                 std::string const& dir_max,
                                  bool* hasSourceExtension)
 {
   // Construct the object file name using the full path to the source
@@ -2642,7 +2643,7 @@ cmLocalGenerator
     }
 
   // Convert to a safe name.
-  return this->CreateSafeUniqueObjectFileName(objectName.c_str(), dir_len);
+  return this->CreateSafeUniqueObjectFileName(objectName.c_str(), dir_max);
 }
 
 //----------------------------------------------------------------------------
