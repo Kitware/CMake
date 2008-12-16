@@ -136,6 +136,7 @@ void cmLocalGenerator::Configure()
       this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
       }
     }
+  this->ObjectMaxPathViolations.clear();
   }
 
   this->Configured = true;
@@ -2536,8 +2537,26 @@ cmLocalGenerator
       }
 
 #if defined(CM_LG_ENCODE_OBJECT_NAMES)
-    cmLocalGeneratorCheckObjectName(ssin, dir_max.size(),
-                                    this->ObjectPathMax);
+    if(!cmLocalGeneratorCheckObjectName(ssin, dir_max.size(),
+                                        this->ObjectPathMax))
+      {
+      // Warn if this is the first time the path has been seen.
+      if(this->ObjectMaxPathViolations.insert(dir_max).second)
+        {
+        cmOStringStream m;
+        m << "The object file directory\n"
+          << "  " << dir_max << "\n"
+          << "has " << dir_max.size() << " characters.  "
+          << "The maximum full path to an object file is "
+          << this->ObjectPathMax << " characters "
+          << "(see CMAKE_OBJECT_PATH_MAX).  "
+          << "Object file\n"
+          << "  " << ssin << "\n"
+          << "cannot be safely placed under this directory.  "
+          << "The build may not work correctly.";
+        this->Makefile->IssueMessage(cmake::WARNING, m.str());
+        }
+      }
 #else
     (void)dir_max;
 #endif

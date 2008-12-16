@@ -370,6 +370,7 @@ protected:
   std::map<cmStdString, cmStdString> LanguageToIncludeFlags;
   std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;
+  std::set<cmStdString> ObjectMaxPathViolations;
   bool WindowsShell;
   bool WindowsVSIDE;
   bool WatcomWMake;
