@@ -1298,6 +1298,7 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
 {
   // The version file will be loaded in an isolated scope.
   this->Makefile->PushScope();
+  this->Makefile->PushPolicy();
 
   // Clear the output variables.
   this->Makefile->RemoveDefinition("PACKAGE_VERSION");
@@ -1364,6 +1365,7 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
     }
 
   // Restore the original scope.
+  this->Makefile->PopPolicy();
   this->Makefile->PopScope();
 
   // Succeed if the version is suitable.
