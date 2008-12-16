@@ -36,7 +36,7 @@ FIND_PACKAGE(VersionTestD 1.2.3.4)
 # For purposes of the test wipe out previous find results.
 SET(PACKAGES
   foo Foo Bar TFramework Tframework TApp Tapp Special
-  VersionedA VersionedB
+  VersionedA VersionedB VersionedC
   wibbleA wibbleB
   RecursiveA RecursiveB RecursiveC
   )
@@ -60,6 +60,7 @@ FIND_PACKAGE(Tapp CONFIGS tapp-config.cmake)
 FIND_PACKAGE(Special NAMES Suffix SuffixTest PATH_SUFFIXES test)
 FIND_PACKAGE(VersionedA 2 NAMES zot)
 FIND_PACKAGE(VersionedB 3.1 EXACT NAMES zot)
+FIND_PACKAGE(VersionedC 4.0 EXACT NAMES zot)
 
 # HINTS should override the system but PATHS should not
 LIST(INSERT CMAKE_SYSTEM_PREFIX_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/A")
@@ -85,12 +86,13 @@ SET(TApp_EXPECTED
 SET(Tapp_EXPECTED
   "TApp.app/Contents/Resources/cmake/tapp-config.cmake")
 SET(VersionedA_EXPECTED "lib/zot-2.0/zot-config.cmake")
-SET(VersionedB_EXPECTED "lib/cmake/zot-3.1/zot-config.cmake")
+SET(VersionedB_EXPECTED "lib/zot-3.1/zot-config.cmake")
+SET(VersionedC_EXPECTED "lib/cmake/zot-4.0/zot-config.cmake")
 SET(wibbleA_EXPECTED "A/wibble-config.cmake")
 SET(wibbleB_EXPECTED "B/wibble-config.cmake")
 SET(RecursiveA_EXPECTED "lib/RecursiveA/recursivea-config.cmake")
 SET(RecursiveB_EXPECTED "lib/zot-2.0/zot-config.cmake")
-SET(RecursiveC_EXPECTED "lib/cmake/zot-3.1/zot-config.cmake")
+SET(RecursiveC_EXPECTED "lib/zot-3.1/zot-config.cmake")
 
 # Check the results.
 FOREACH(p ${PACKAGES})
