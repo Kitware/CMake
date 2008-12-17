@@ -222,6 +222,8 @@ cmFindPackageCommand::cmFindPackageCommand()
     "UNIX (U), or Apple (A) conventions.\n"
     "  <prefix>/                                               (W)\n"
     "  <prefix>/(cmake|CMake)/                                 (W)\n"
+    "  <prefix>/<name>*/                                       (W)\n"
+    "  <prefix>/<name>*/(cmake|CMake)/                         (W)\n"
     "  <prefix>/(share|lib)/cmake/<name>*/                     (U)\n"
     "  <prefix>/(share|lib)/<name>*/                           (U)\n"
     "  <prefix>/(share|lib)/<name>*/(cmake|CMake)/             (U)\n"
@@ -1776,6 +1778,31 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   cmFindPackageFileList lister(this);
   lister
     / cmFileListGeneratorFixed(prefix)
+    / cmFileListGeneratorCaseInsensitive("cmake");
+  if(lister.Search())
+    {
+    return true;
+    }
+  }
+
+  //  PREFIX/(Foo|foo|FOO).*/
+  {
+  cmFindPackageFileList lister(this);
+  lister
+    / cmFileListGeneratorFixed(prefix)
+    / cmFileListGeneratorProject(this->Names);
+  if(lister.Search())
+    {
+    return true;
+    }
+  }
+
+  //  PREFIX/(Foo|foo|FOO).*/(cmake|CMake)/
+  {
+  cmFindPackageFileList lister(this);
+  lister
+    / cmFileListGeneratorFixed(prefix)
+    / cmFileListGeneratorProject(this->Names)
     / cmFileListGeneratorCaseInsensitive("cmake");
   if(lister.Search())
     {
