@@ -91,6 +91,7 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 
 /*-------------------------------------------------------------------------*/
 /* Tokens */
+%token cal_ENVCURLY
 %token cal_NCURLY
 %token cal_DCURLY
 %token cal_DOLLAR "$"
@@ -179,6 +180,12 @@ cal_SYMBOL
 }
 
 Variable:
+cal_ENVCURLY EnvVarName cal_RCURLY
+{
+  $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1,$<str>2);
+  //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
+}
+|
 cal_NCURLY MultipleIds cal_RCURLY
 {
   $<str>$ = yyGetParser->ExpandSpecialVariable($<str>1,$<str>2);
@@ -194,6 +201,17 @@ cal_DCURLY MultipleIds cal_RCURLY
 cal_ATNAME
 {
   $<str>$ = yyGetParser->ExpandVariableForAt($<str>1);
+}
+
+EnvVarName:
+MultipleIds
+{
+  $<str>$ = $<str>1;
+}
+|
+cal_SYMBOL EnvVarName
+{
+  $<str>$ = $<str>1;
 }
 
 MultipleIds:

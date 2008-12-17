@@ -62,6 +62,12 @@ Modify cmCommandArgumentLexer.h:
 
 %%
 
+\$ENV\{ {
+  //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
+  yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2);
+  return cal_ENVCURLY;
+}
+
 \$[A-Za-z0-9/_.+-]+\{ { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 

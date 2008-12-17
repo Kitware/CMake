@@ -132,6 +132,13 @@ IF(NOT result)
   MESSAGE(SEND_ERROR "Unquoted $(VAR) syntax is broken.")
 ENDIF(NOT result)
 
+# Obscure environment variable name
+SET("ENV{x+(y)}" "Obscure environment variable value")
+MESSAGE("Output: [$ENV{x+(y)}]")
+IF(NOT "$ENV{x+(y)}" STREQUAL "Obscure environment variable value")
+  MESSAGE(SEND_ERROR "Environment variable \"ENV{x+(y)}\" does not work.")
+ENDIF()
+
 # Make directories test
 FILE(MAKE_DIRECTORY 
   "${CMAKE_CURRENT_BINARY_DIR}/Includes" 

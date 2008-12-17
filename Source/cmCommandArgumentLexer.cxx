@@ -11,7 +11,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 33
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -33,7 +33,7 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if __STDC_VERSION__ >= 199901L
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -56,7 +56,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -87,6 +86,8 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#endif /* ! C99 */
+
 #endif /* ! FLEXINT_H */
 
 #ifdef __cplusplus
@@ -96,11 +97,12 @@ typedef unsigned int flex_uint32_t;
 
 #else   /* ! __cplusplus */
 
-#if __STDC__
+/* C99 requires __STDC__ to be defined as 1. */
+#if defined (__STDC__)
 
 #define YY_USE_CONST
 
-#endif  /* __STDC__ */
+#endif  /* defined (__STDC__) */
 #endif  /* ! __cplusplus */
 
 #ifdef YY_USE_CONST
@@ -135,8 +137,6 @@ typedef void* yyscan_t;
 #define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
 #define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
 #define yy_flex_debug yyg->yy_flex_debug_r
-
-int cmCommandArgument_yylex_init (yyscan_t* scanner);
 
 /* Enter a start condition.  This macro really ought to take a parameter,
  * but we do it the disgusting crufty way forced on us by the ()-less
@@ -195,14 +195,9 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 #define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
 
-/* The following is because we cannot portably get our hands on size_t
- * (without autoconf's help, which isn't available because we want
- * flex-generated scanners to compile on their own).
- */
-
 #ifndef YY_TYPEDEF_YY_SIZE_T
 #define YY_TYPEDEF_YY_SIZE_T
-typedef unsigned int yy_size_t;
+typedef size_t yy_size_t;
 #endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -357,8 +352,8 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
         *yy_cp = '\0'; \
         yyg->yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 13
-#define YY_END_OF_BUFFER 14
+#define YY_NUM_RULES 14
+#define YY_END_OF_BUFFER 15
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -366,11 +361,11 @@ struct yy_trans_info
         flex_int32_t yy_verify;
         flex_int32_t yy_nxt;
         };
-static yyconst flex_int16_t yy_accept[26] =
+static yyconst flex_int16_t yy_accept[30] =
     {   0,
-        0,    0,    0,    0,    0,    0,   14,    8,    9,    6,
-        5,   13,   10,    4,   11,   12,    8,    0,    3,    6,
-        0,    7,    1,    2,    0
+        0,    0,    0,    0,    0,    0,   15,    9,   10,    7,
+        6,   14,   11,    5,   12,   13,    9,    0,    0,    4,
+        7,    0,    8,    2,    0,    3,    0,    1,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -381,14 +376,14 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1,    3,    1,    1,    1,    1,
         1,    1,    4,    1,    4,    4,    4,    4,    4,    4,
         4,    4,    4,    4,    4,    4,    4,    1,    1,    1,
-        1,    1,    1,    5,    4,    4,    4,    4,    4,    4,
-        4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-        4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-        1,    6,    1,    1,    4,    1,    4,    4,    4,    4,
+        1,    1,    1,    5,    4,    4,    4,    4,    6,    4,
+        4,    4,    4,    4,    4,    4,    4,    7,    4,    4,
+        4,    4,    4,    4,    4,    8,    4,    4,    4,    4,
+        1,    9,    1,    1,    4,    1,    4,    4,    4,    4,
 
         4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
         4,    4,    4,    4,    4,    4,    4,    4,    4,    4,
-        4,    4,    7,    1,    8,    1,    1,    1,    1,    1,
+        4,    4,   10,    1,   11,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -405,39 +400,46 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[9] =
+static yyconst flex_int32_t yy_meta[12] =
     {   0,
-        1,    2,    3,    1,    3,    3,    3,    3
+        1,    2,    3,    4,    3,    4,    4,    4,    3,    5,
+        3
     } ;
 
-static yyconst flex_int16_t yy_base[28] =
+static yyconst flex_int16_t yy_base[35] =
     {   0,
-        0,    0,   18,   17,   16,   15,   20,    0,    5,   14,
-        7,   25,   25,   25,    0,   25,    0,    3,   25,    0,
-        9,   25,   25,   25,   25,   14,   16
+        0,    0,   31,   30,   29,   28,   36,    0,    6,   16,
+        0,   41,   41,   41,    0,   41,    0,   22,   22,   41,
+       18,   18,   41,   41,    7,   41,    4,   41,   41,   20,
+       21,   26,    9,   30
     } ;
 
-static yyconst flex_int16_t yy_def[28] =
+static yyconst flex_int16_t yy_def[35] =
     {   0,
-       25,    1,    1,    1,    1,    1,   25,   26,   25,   26,
-       25,   25,   25,   25,   27,   25,   26,    9,   25,   10,
-       25,   25,   25,   25,    0,   25,   25
+       29,    1,    1,    1,    1,    1,   29,   30,   31,   32,
+       33,   29,   29,   29,   34,   29,   30,   31,   18,   29,
+       32,   33,   29,   29,   18,   29,   18,   29,    0,   29,
+       29,   29,   29,   29
     } ;
 
-static yyconst flex_int16_t yy_nxt[34] =
+static yyconst flex_int16_t yy_nxt[53] =
     {   0,
-        8,    8,    9,   10,   11,   12,   13,   14,   18,   23,
-       21,   19,   21,   24,   17,   17,   22,   20,   22,   25,
-       16,   16,   15,   15,    7,   25,   25,   25,   25,   25,
-       25,   25,   25
+        8,    8,    9,   10,   11,   10,   10,   10,   12,   13,
+       14,   19,   22,   28,   27,   20,   17,   17,   17,   17,
+       17,   17,   26,   17,   18,   18,   21,   21,   25,   21,
+       23,   24,   23,   23,   23,   29,   16,   16,   15,   15,
+        7,   29,   29,   29,   29,   29,   29,   29,   29,   29,
+       29,   29
     } ;
 
-static yyconst flex_int16_t yy_chk[34] =
+static yyconst flex_int16_t yy_chk[53] =
     {   0,
-        1,    1,    1,    1,    1,    1,    1,    1,    9,   18,
-       11,    9,   21,   21,   26,   26,   27,   10,   27,    7,
-        6,    5,    4,    3,   25,   25,   25,   25,   25,   25,
-       25,   25,   25
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    9,   33,   27,   25,    9,   10,   10,   21,   21,
+       30,   30,   22,   30,   31,   31,   32,   32,   19,   32,
+       34,   18,   34,   34,   34,    7,    6,    5,    4,    3,
+       29,   29,   29,   29,   29,   29,   29,   29,   29,   29,
+       29,   29
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -474,6 +476,7 @@ Run flex like this:
   flex --prefix=cmCommandArgument_yy --header-file=cmCommandArgumentLexer.h -ocmCommandArgumentLexer.cxx cmCommandArgumentLexer.in.l
 
 Modify cmCommandArgumentLexer.cxx:
+  - add #include "cmStandardIncludes.h" to top of file
   - remove TABs
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, cmCommandArgument_yyalloc, cmCommandArgument_yyrealloc, cmCommandArgument_yyfree
@@ -503,7 +506,7 @@ Modify cmCommandArgumentLexer.h:
 /*--------------------------------------------------------------------------*/
 
 
-#line 505 "cmCommandArgumentLexer.cxx"
+#line 508 "cmCommandArgumentLexer.cxx"
 
 #define INITIAL 0
 #define ESCAPES 1
@@ -557,6 +560,10 @@ struct yyguts_t
 
 static int yy_init_globals (yyscan_t yyscanner );
 
+int cmCommandArgument_yylex_init (yyscan_t* scanner);
+
+int cmCommandArgument_yylex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
@@ -598,6 +605,8 @@ extern int cmCommandArgument_yywrap (yyscan_t yyscanner );
 #endif
 #endif
 
+    static void yyunput (int c,char *buf_ptr  ,yyscan_t yyscanner);
+    
 #ifndef yytext_ptr
 static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
 #endif
@@ -626,7 +635,7 @@ static int input (yyscan_t yyscanner );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO (void) fwrite( yytext, yyleng, 1, yyout )
+#define ECHO fwrite( yytext, yyleng, 1, yyout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -720,10 +729,10 @@ YY_DECL
         register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 62 "cmCommandArgumentLexer.in.l"
+#line 63 "cmCommandArgumentLexer.in.l"
 
 
-#line 727 "cmCommandArgumentLexer.cxx"
+#line 734 "cmCommandArgumentLexer.cxx"
 
         if ( !yyg->yy_init )
                 {
@@ -776,13 +785,13 @@ yy_match:
                         while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                                 {
                                 yy_current_state = (int) yy_def[yy_current_state];
-                                if ( yy_current_state >= 26 )
+                                if ( yy_current_state >= 30 )
                                         yy_c = yy_meta[(unsigned int) yy_c];
                                 }
                         yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
                         ++yy_cp;
                         }
-                while ( yy_base[yy_current_state] != 25 );
+                while ( yy_base[yy_current_state] != 41 );
 
 yy_find_action:
                 yy_act = yy_accept[yy_current_state];
@@ -808,37 +817,36 @@ do_action:      /* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 64 "cmCommandArgumentLexer.in.l"
+#line 65 "cmCommandArgumentLexer.in.l"
+{ 
+  //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
+  yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
+  return cal_ENVCURLY; 
+} 
+case 2:
+YY_RULE_SETUP
+#line 71 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
   return cal_NCURLY; 
 } 
-case 2:
+case 3:
 YY_RULE_SETUP
-#line 70 "cmCommandArgumentLexer.in.l"
+#line 77 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2); 
   return cal_ATNAME; 
 } 
-case 3:
-YY_RULE_SETUP
-#line 76 "cmCommandArgumentLexer.in.l"
-{
-  //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
-  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->DCURLYVariable;
-  return cal_DCURLY;
-}
 case 4:
 YY_RULE_SETUP
 #line 83 "cmCommandArgumentLexer.in.l"
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->RCURLYVariable;
-  return cal_RCURLY;
+  yylvalp->str = yyextra->DCURLYVariable;
+  return cal_DCURLY;
 }
 case 5:
 YY_RULE_SETUP
@@ -846,20 +854,29 @@ YY_RULE_SETUP
 {
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
-  yylvalp->str = yyextra->ATVariable;
-  return cal_AT;
+  yylvalp->str = yyextra->RCURLYVariable;
+  return cal_RCURLY;
 }
 case 6:
 YY_RULE_SETUP
 #line 97 "cmCommandArgumentLexer.in.l"
+{
+  //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
+  //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
+  yylvalp->str = yyextra->ATVariable;
+  return cal_AT;
+}
+case 7:
+YY_RULE_SETUP
+#line 104 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   return cal_NAME; 
 }
-case 7:
+case 8:
 YY_RULE_SETUP
-#line 103 "cmCommandArgumentLexer.in.l"
+#line 110 "cmCommandArgumentLexer.in.l"
 {
   if ( !yyextra->HandleEscapeSymbol(yylvalp, *(yytext+1)) )
     {
@@ -867,53 +884,53 @@ YY_RULE_SETUP
     }
   return cal_SYMBOL; 
 }
-case 8:
-/* rule 8 can match eol */
+case 9:
+/* rule 9 can match eol */
 YY_RULE_SETUP
-#line 111 "cmCommandArgumentLexer.in.l"
+#line 118 "cmCommandArgumentLexer.in.l"
 { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
   yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   return cal_SYMBOL; 
 }
-case 9:
+case 10:
 YY_RULE_SETUP
-#line 117 "cmCommandArgumentLexer.in.l"
+#line 124 "cmCommandArgumentLexer.in.l"
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->DOLLARVariable;
   return cal_DOLLAR; 
 }
-case 10:
+case 11:
 YY_RULE_SETUP
-#line 123 "cmCommandArgumentLexer.in.l"
+#line 130 "cmCommandArgumentLexer.in.l"
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->LCURLYVariable;
   return cal_LCURLY; 
 }
-case 11:
+case 12:
 YY_RULE_SETUP
-#line 129 "cmCommandArgumentLexer.in.l"
+#line 136 "cmCommandArgumentLexer.in.l"
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext)); 
   yylvalp->str = yyextra->BSLASHVariable;
   return cal_BSLASH; 
 }
-case 12:
+case 13:
 YY_RULE_SETUP
-#line 135 "cmCommandArgumentLexer.in.l"
+#line 142 "cmCommandArgumentLexer.in.l"
 {
   //yyextra->AllocateParserType(yylvalp, yytext, strlen(yytext));
   yylvalp->str = yyextra->BSLASHVariable;
   return cal_SYMBOL;
 }
-case 13:
+case 14:
 YY_RULE_SETUP
-#line 141 "cmCommandArgumentLexer.in.l"
+#line 148 "cmCommandArgumentLexer.in.l"
 ECHO;
         YY_BREAK
-#line 929 "cmCommandArgumentLexer.cxx"
+#line 945 "cmCommandArgumentLexer.cxx"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(ESCAPES):
 case YY_STATE_EOF(NOESCAPES):
@@ -1046,7 +1063,6 @@ case YY_STATE_EOF(NOESCAPES):
                         "fatal flex scanner internal error--no action found" );
         } /* end of action switch */
                 } /* end of scanning one token */
-return 0; /* this should not happend but it should silence a warning */
 } /* end of cmCommandArgument_yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -1172,6 +1188,14 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
         else
                 ret_val = EOB_ACT_CONTINUE_SCAN;
 
+        if ((yy_size_t) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+                /* Extend the array by 50%, plus the number we really need. */
+                yy_size_t new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
+                YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) cmCommandArgument_yyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
+                if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
+                        YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+        }
+
         yyg->yy_n_chars += number_to_move;
         YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] = YY_END_OF_BUFFER_CHAR;
         YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] = YY_END_OF_BUFFER_CHAR;
@@ -1202,7 +1226,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
                 while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                         {
                         yy_current_state = (int) yy_def[yy_current_state];
-                        if ( yy_current_state >= 26 )
+                        if ( yy_current_state >= 30 )
                                 yy_c = yy_meta[(unsigned int) yy_c];
                         }
                 yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1231,13 +1255,51 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
         while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                 {
                 yy_current_state = (int) yy_def[yy_current_state];
-                if ( yy_current_state >= 26 )
+                if ( yy_current_state >= 30 )
                         yy_c = yy_meta[(unsigned int) yy_c];
                 }
         yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-        yy_is_jam = (yy_current_state == 25);
+        yy_is_jam = (yy_current_state == 29);
 
         return yy_is_jam ? 0 : yy_current_state;
+}
+
+    static void yyunput (int c, register char * yy_bp , yyscan_t yyscanner)
+{
+        register char *yy_cp;
+    struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+
+    yy_cp = yyg->yy_c_buf_p;
+
+        /* undo effects of setting up yytext */
+        *yy_cp = yyg->yy_hold_char;
+
+        if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
+                { /* need to shift things up to make room */
+                /* +2 for EOB chars. */
+                register int number_to_move = yyg->yy_n_chars + 2;
+                register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
+                                        YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
+                register char *source =
+                                &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move];
+
+                while ( source > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
+                        *--dest = *--source;
+
+                yy_cp += (int) (dest - source);
+                yy_bp += (int) (dest - source);
+                YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
+                        yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
+
+                if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
+                        YY_FATAL_ERROR( "flex scanner push-back overflow" );
+                }
+
+        *--yy_cp = (char) c;
+
+        yyg->yytext_ptr = yy_bp;
+        yyg->yy_hold_char = *yy_cp;
+        yyg->yy_c_buf_p = yy_cp;
 }
 
 #ifndef YY_NO_INPUT
@@ -1562,7 +1624,9 @@ static void cmCommandArgument_yyensure_buffer_stack (yyscan_t yyscanner)
                 yyg->yy_buffer_stack = (struct yy_buffer_state**)cmCommandArgument_yyalloc
                                                                 (num_to_alloc * sizeof(struct yy_buffer_state*)
                                                                 , yyscanner);
-                
+                if ( ! yyg->yy_buffer_stack )
+                        YY_FATAL_ERROR( "out of dynamic memory in cmCommandArgument_yyensure_buffer_stack()" );
+                                                                  
                 memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
                                 
                 yyg->yy_buffer_stack_max = num_to_alloc;
@@ -1580,6 +1644,8 @@ static void cmCommandArgument_yyensure_buffer_stack (yyscan_t yyscanner)
                                                                 (yyg->yy_buffer_stack,
                                                                 num_to_alloc * sizeof(struct yy_buffer_state*)
                                                                 , yyscanner);
+                if ( ! yyg->yy_buffer_stack )
+                        YY_FATAL_ERROR( "out of dynamic memory in cmCommandArgument_yyensure_buffer_stack()" );
 
                 /* zero only the new slots.*/
                 memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -1874,6 +1940,42 @@ int cmCommandArgument_yylex_init(yyscan_t* ptr_yy_globals)
     return yy_init_globals ( *ptr_yy_globals );
 }
 
+/* cmCommandArgument_yylex_init_extra has the same functionality as cmCommandArgument_yylex_init, but follows the
+ * convention of taking the scanner as the last argument. Note however, that
+ * this is a *pointer* to a scanner, as it will be allocated by this call (and
+ * is the reason, too, why this function also must handle its own declaration).
+ * The user defined value in the first argument will be available to cmCommandArgument_yyalloc in
+ * the yyextra field.
+ */
+
+int cmCommandArgument_yylex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
+
+{
+    struct yyguts_t dummy_yyguts;
+
+    cmCommandArgument_yyset_extra (yy_user_defined, &dummy_yyguts);
+
+    if (ptr_yy_globals == NULL){
+        errno = EINVAL;
+        return 1;
+    }
+        
+    *ptr_yy_globals = (yyscan_t) cmCommandArgument_yyalloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
+        
+    if (*ptr_yy_globals == NULL){
+        errno = ENOMEM;
+        return 1;
+    }
+    
+    /* By setting to 0xAA, we expose bugs in
+    yy_init_globals. Leave at 0x00 for releases. */
+    memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
+    
+    cmCommandArgument_yyset_extra (yy_user_defined, *ptr_yy_globals);
+    
+    return yy_init_globals ( *ptr_yy_globals );
+}
+
 static int yy_init_globals (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
@@ -1985,7 +2087,7 @@ void cmCommandArgument_yyfree (void * ptr , yyscan_t)
 
 #define YYTABLES_NAME "yytables"
 
-#line 141 "cmCommandArgumentLexer.in.l"
+#line 148 "cmCommandArgumentLexer.in.l"
 
 
 
