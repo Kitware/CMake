@@ -56,6 +56,7 @@ Modify cmCommandArgumentLexer.h:
 
 %option reentrant
 %option noyywrap
+%option nounput
 %pointer
 %s ESCAPES
 %s NOESCAPES
