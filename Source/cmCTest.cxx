@@ -1154,7 +1154,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
         args.push_back(argv[i]);
         }
       }
-    if ( *log )
+    if ( log )
       {
       *log << "* Run internal CTest" << std::endl;
       }
@@ -1166,7 +1166,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       }
 
     *retVal = inst.Run(args, output);
-    if ( *log )
+    if ( log )
       {
       *log << output->c_str();
       }
