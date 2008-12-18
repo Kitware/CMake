@@ -346,7 +346,7 @@ ENDIF(NOT MINGW)
 #   | < > << >> &> 2>&1 1>&2
 # to allow custom commands to perform redirection.
 
-FOREACH(arg ${CHECK_ARGS})
+FOREACH(arg ${CHECK_ARGS} "")
   SET(ARG "${arg}")
   STRING(REGEX REPLACE "\\\\" "\\\\\\\\" ARG "${ARG}")
   STRING(REGEX REPLACE "\"" "\\\\\"" ARG "${ARG}")
@@ -367,7 +367,7 @@ ADD_CUSTOM_COMMAND(
   COMMAND ${CMAKE_COMMAND} -DMARK_FILE=${CMAKE_CURRENT_BINARY_DIR}/check_mark.txt
   -P ${CMAKE_CURRENT_SOURCE_DIR}/check_mark.cmake
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
-  ${CHECK_ARGS}
+  ${CHECK_ARGS} ""
   VERBATIM
   COMMENT "Checking custom command line escapes (single'quote)"
   )
@@ -377,7 +377,7 @@ ADD_CUSTOM_TARGET(do_check_command_line ALL
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/command_line_check
   COMMAND ${CMAKE_COMMAND} -E echo "Checking custom target command escapes"
   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
-  ${CHECK_ARGS}
+  ${CHECK_ARGS} ""
   VERBATIM
   COMMENT "Checking custom target command line escapes ($dollar-signs$)"
   )

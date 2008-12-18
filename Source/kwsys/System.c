@@ -170,6 +170,12 @@ flag later when we understand applications of this better.
 static int kwsysSystem_Shell__ArgumentNeedsQuotes(const char* in, int isUnix,
                                                   int flags)
 {
+  /* The empty string needs quotes.  */
+  if(!*in)
+    {
+    return 1;
+    }
+
   /* Scan the string for characters that require quoting.  */
   {
   const char* c;
