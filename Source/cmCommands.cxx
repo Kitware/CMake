@@ -33,7 +33,6 @@
 #include "cmQTWrapUICommand.cxx"
 #include "cmRemoveCommand.cxx"
 #include "cmRemoveDefinitionsCommand.cxx"
-#include "cmSetDirectoryPropertiesCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
 #include "cmSubdirDependsCommand.cxx"
 #include "cmUseMangledMesaCommand.cxx"
@@ -75,7 +74,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmQTWrapUICommand);
   commands.push_back(new cmRemoveCommand);
   commands.push_back(new cmRemoveDefinitionsCommand);
-  commands.push_back(new cmSetDirectoryPropertiesCommand);
   commands.push_back(new cmSourceGroupCommand);
   commands.push_back(new cmSubdirDependsCommand);
   commands.push_back(new cmUseMangledMesaCommand);
