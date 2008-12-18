@@ -359,10 +359,10 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     out << "Run test in directory: " << this->BuildRunDir << "\n";
     cmSystemTools::ChangeDirectory(this->BuildRunDir.c_str());
     }
-  out << "Running test executable: " << fullPath << " ";
+  out << "Running test command: \"" << fullPath << "\"";
   for(k=0; k < this->TestCommandArgs.size(); ++k)
     {
-    out << this->TestCommandArgs[k] << " ";
+    out << " \"" << this->TestCommandArgs[k] << "\"";
     }
   out << "\n";
 
@@ -386,7 +386,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   if(runTestRes != cmsysProcess_State_Exited || retval != 0)
     {
-    out << "Failed to run test command: " << testCommand[0] << "\n";
+    out << "Test command failed: " << testCommand[0] << "\n";
     retval = 1;
     }
 
