@@ -13,6 +13,11 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${NAME}")
 ENDMACRO(ADD_TEST_MACRO)
 
+# Make sure the 'testing' test gets a proper configuration.
+SET_DIRECTORY_PROPERTIES(PROPERTIES
+  TEST_INCLUDE_FILE "${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake"
+  )
+
 # Testing
 IF(BUILD_TESTING)
   # Collect a list of all test build directories.
