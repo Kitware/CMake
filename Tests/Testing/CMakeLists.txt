@@ -46,7 +46,7 @@ ENABLE_TESTING()
 # Add test
 #
 ADD_EXECUTABLE(testing testing.cxx)
-ADD_TEST(testing ${Testing_BINARY_DIR}/bin/testing)
+ADD_TEST(testing.1 ${Testing_BINARY_DIR}/bin/testing)
 
 #
 # skip level test

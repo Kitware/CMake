@@ -537,15 +537,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   ENDFOREACH(STP)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Tutorial")
 
-  ADD_TEST(testing ${CMAKE_CTEST_COMMAND}
+  ADD_TEST(testing ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Testing"
     "${CMake_BINARY_DIR}/Tests/Testing"
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project Testing
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Testing/bin"
-    --test-command testing
+    --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Testing")
 
