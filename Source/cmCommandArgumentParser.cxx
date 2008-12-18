@@ -9,8 +9,8 @@
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -150,6 +150,7 @@ Run bison like this:
 
 Modify cmCommandArgumentParser.cxx:
   - remove TABs
+  - put header block at top of file
 
 */
 
@@ -187,9 +188,9 @@ YY_DECL;
 static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 
 #define YYDEBUG 1
-//#define YYMAXDEPTH 100000
-//#define YYINITDEPTH 10000
-
+/* Configure the parser to support large input.  */
+#define YYMAXDEPTH 100000
+#define YYINITDEPTH 10000
 
 /* Disable some warnings in the generated code.  */
 #ifdef __BORLANDC__
@@ -202,6 +203,8 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 # pragma warning (disable: 4102) /* Unused goto label.  */
 # pragma warning (disable: 4065) /* Switch statement contains default but no
                                     case. */
+# pragma warning (disable: 4244) /* loss of precision */
+# pragma warning (disable: 4702) /* unreachable code */
 #endif
 
 
@@ -236,7 +239,7 @@ typedef int YYSTYPE;
 
 
 /* Line 216 of yacc.c.  */
-#line 224 "cmCommandArgumentParser.cxx"
+#line 227 "cmCommandArgumentParser.cxx"
 
 #ifdef short
 # undef short
@@ -525,9 +528,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   113,   113,   120,   125,   131,   135,   141,   146,   152,
-     157,   162,   167,   172,   177,   183,   189,   195,   201,   207,
-     212,   218,   222,   228,   233
+       0,   116,   116,   123,   128,   134,   138,   144,   149,   155,
+     160,   165,   170,   175,   180,   186,   192,   198,   204,   210,
+     215,   221,   225,   231,   236
 };
 #endif
 
@@ -1449,7 +1452,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 114 "cmCommandArgumentParser.y"
+#line 117 "cmCommandArgumentParser.y"
     {
   (yyval.str) = 0;
   yyGetParser->SetResult((yyvsp[(1) - (1)].str));
@@ -1457,91 +1460,91 @@ yyreduce:
     break;
 
   case 3:
-#line 121 "cmCommandArgumentParser.y"
+#line 124 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 4:
-#line 126 "cmCommandArgumentParser.y"
+#line 129 "cmCommandArgumentParser.y"
     {
   (yyval.str) = yyGetParser->CombineUnions((yyvsp[(1) - (2)].str), (yyvsp[(2) - (2)].str));
 }
     break;
 
   case 5:
-#line 131 "cmCommandArgumentParser.y"
+#line 134 "cmCommandArgumentParser.y"
     {
   (yyval.str) = 0;
 }
     break;
 
   case 6:
-#line 136 "cmCommandArgumentParser.y"
+#line 139 "cmCommandArgumentParser.y"
     {
   (yyval.str) = yyGetParser->CombineUnions((yyvsp[(1) - (2)].str), (yyvsp[(2) - (2)].str));
 }
     break;
 
   case 7:
-#line 142 "cmCommandArgumentParser.y"
+#line 145 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 8:
-#line 147 "cmCommandArgumentParser.y"
+#line 150 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 9:
-#line 153 "cmCommandArgumentParser.y"
+#line 156 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 10:
-#line 158 "cmCommandArgumentParser.y"
+#line 161 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 11:
-#line 163 "cmCommandArgumentParser.y"
+#line 166 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 12:
-#line 168 "cmCommandArgumentParser.y"
+#line 171 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 13:
-#line 173 "cmCommandArgumentParser.y"
+#line 176 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 14:
-#line 178 "cmCommandArgumentParser.y"
+#line 181 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 15:
-#line 184 "cmCommandArgumentParser.y"
+#line 187 "cmCommandArgumentParser.y"
     {
   (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[(1) - (3)].str),(yyvsp[(2) - (3)].str));
   //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
@@ -1549,7 +1552,7 @@ yyreduce:
     break;
 
   case 16:
-#line 190 "cmCommandArgumentParser.y"
+#line 193 "cmCommandArgumentParser.y"
     {
   (yyval.str) = yyGetParser->ExpandSpecialVariable((yyvsp[(1) - (3)].str),(yyvsp[(2) - (3)].str));
   //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
@@ -1557,7 +1560,7 @@ yyreduce:
     break;
 
   case 17:
-#line 196 "cmCommandArgumentParser.y"
+#line 199 "cmCommandArgumentParser.y"
     {
   (yyval.str) = yyGetParser->ExpandVariable((yyvsp[(2) - (3)].str));
   //std::cerr << __LINE__ << " here: [" << $<str>1 << "] [" << $<str>2 << "] [" << $<str>3 << "]" << std::endl;
@@ -1565,49 +1568,49 @@ yyreduce:
     break;
 
   case 18:
-#line 202 "cmCommandArgumentParser.y"
+#line 205 "cmCommandArgumentParser.y"
     {
   (yyval.str) = yyGetParser->ExpandVariableForAt((yyvsp[(1) - (1)].str));
 }
     break;
 
   case 19:
-#line 208 "cmCommandArgumentParser.y"
+#line 211 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 20:
-#line 213 "cmCommandArgumentParser.y"
+#line 216 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (2)].str);
 }
     break;
 
   case 21:
-#line 218 "cmCommandArgumentParser.y"
+#line 221 "cmCommandArgumentParser.y"
     {
   (yyval.str) = 0;
 }
     break;
 
   case 22:
-#line 223 "cmCommandArgumentParser.y"
+#line 226 "cmCommandArgumentParser.y"
     {
   (yyval.str) = yyGetParser->CombineUnions((yyvsp[(1) - (2)].str), (yyvsp[(2) - (2)].str));
 }
     break;
 
   case 23:
-#line 229 "cmCommandArgumentParser.y"
+#line 232 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
     break;
 
   case 24:
-#line 234 "cmCommandArgumentParser.y"
+#line 237 "cmCommandArgumentParser.y"
     {
   (yyval.str) = (yyvsp[(1) - (1)].str);
 }
@@ -1615,7 +1618,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1603 "cmCommandArgumentParser.cxx"
+#line 1606 "cmCommandArgumentParser.cxx"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1829,7 +1832,7 @@ yyreturn:
 }
 
 
-#line 239 "cmCommandArgumentParser.y"
+#line 242 "cmCommandArgumentParser.y"
 
 /* End of grammar */
 
