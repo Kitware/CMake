@@ -64,7 +64,6 @@ public:
   bool IsImportLibrary() const { return this->ImportLibrary; }
 
 protected:
-  typedef cmInstallGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);
   virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
