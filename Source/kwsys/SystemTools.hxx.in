@@ -490,33 +490,42 @@ public:
 
   /**
    * Copy the source file to the destination file only
-   * if the two files differ.  
+   * if the two files differ. If the "copyPermissions"
+   * argument is true, the permissions of the copy are
+   * set to be the same as the permissions of the
+   * original.
    */
   static bool CopyFileIfDifferent(const char* source,
-                                  const char* destination);
-  
+                                  const char* destination,
+                                  bool copyPermissions = true);
+
   /**
    * Compare the contents of two files.  Return true if different
    */
   static bool FilesDiffer(const char* source, const char* destination);
-  
+
   /**
    * Return true if the two files are the same file
    */
   static bool SameFile(const char* file1, const char* file2);
 
   /**
-   * Copy a file
+   * Copy a file. If the "copyPermissions" argument is true, the
+   * permissions of the copy are set to be the same as the permissions
+   * of the original.
    */
-  static bool CopyFileAlways(const char* source, const char* destination);
+  static bool CopyFileAlways(const char* source, const char* destination,
+                             bool copyPermissions = true);
 
   /**
    * Copy a file.  If the "always" argument is true the file is always
    * copied.  If it is false, the file is copied only if it is new or
-   * has changed.
+   * has changed. If the "copyPermissions" argument is true, the
+   * permissions of the copy are set to be the same as the permissions
+   * of the original.
    */
   static bool CopyAFile(const char* source, const char* destination,
-                        bool always = true);
+                        bool always = true, bool copyPermissions = true);
 
   /**
    * Copy content directory to another directory with all files and
@@ -525,7 +534,7 @@ public:
    * are new are copied.
    */
   static bool CopyADirectory(const char* source, const char* destination,
-                             bool always = true);
+                             bool always = true, bool copyPermissions = true);
   
   /**
    * Remove a file

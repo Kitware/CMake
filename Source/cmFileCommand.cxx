@@ -1049,7 +1049,7 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
   this->Makefile->DisplayStatus(message.c_str(), -1);
 
   // Copy the file.
-  if(copy && !cmSystemTools::CopyAFile(fromFile, toFile, true))
+  if(copy && !cmSystemTools::CopyAFile(fromFile, toFile, true, false))
     {
     cmOStringStream e;
     e << "INSTALL cannot copy file \"" << fromFile
@@ -1064,7 +1064,13 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
   // Set the file modification time of the destination file.
   if(copy && !always)
     {
-    cmSystemTools::CopyFileTime(fromFile, toFile);
+    if (!cmSystemTools::CopyFileTime(fromFile, toFile))
+      {
+      cmOStringStream e;
+      e << "Problem setting modification time on file \"" << toFile << "\"";
+      this->FileCommand->SetError(e.str().c_str());
+      return false;
+      }
     }
 
   // Set permissions of the destination file.
