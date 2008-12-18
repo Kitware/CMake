@@ -1,3 +1,19 @@
+/*=========================================================================
+
+  Program:   CMake - Cross-Platform Makefile Generator
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
 #include "cmStandardIncludes.h"
 
 #line 2 "cmCommandArgumentLexer.cxx"
@@ -477,11 +493,13 @@ Run flex like this:
 
 Modify cmCommandArgumentLexer.cxx:
   - add #include "cmStandardIncludes.h" to top of file
+  - put header block at top of file
   - remove TABs
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, cmCommandArgument_yyalloc, cmCommandArgument_yyrealloc, cmCommandArgument_yyfree
   - remove all YY_BREAK lines occurring right after return statements
   - change while ( 1 ) to for(;;)
+  - add "return 0;" to end of cmCommandArgument_yylex
 
 Modify cmCommandArgumentLexer.h:
   - remove TABs
@@ -1061,6 +1079,7 @@ case YY_STATE_EOF(NOESCAPES):
                         "fatal flex scanner internal error--no action found" );
         } /* end of action switch */
                 } /* end of scanning one token */
+return 0; /* this should not happend but it should silence a warning */
 } /* end of cmCommandArgument_yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer

@@ -25,11 +25,13 @@ Run flex like this:
 
 Modify cmCommandArgumentLexer.cxx:
   - add #include "cmStandardIncludes.h" to top of file
+  - put header block at top of file
   - remove TABs
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, cmCommandArgument_yyalloc, cmCommandArgument_yyrealloc, cmCommandArgument_yyfree
   - remove all YY_BREAK lines occurring right after return statements
   - change while ( 1 ) to for(;;)
+  - add "return 0;" to end of cmCommandArgument_yylex
 
 Modify cmCommandArgumentLexer.h:
   - remove TABs
