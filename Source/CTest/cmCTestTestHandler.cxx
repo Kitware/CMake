@@ -1179,7 +1179,7 @@ void cmCTestTestHandler::LoadTestList()
     int numErrRegex = 0;
     ok = ok && this->GetValue("ErrorRegularExpressions:", 
                               numErrRegex, fin);
-    for(int i =0; i < numErrRegex; i++)
+    for(int j =0; j < numErrRegex; j++)
       {
       cmSystemTools::GetLineFromStream(fin, line);
       std::pair<cmsys::RegularExpression, std::string> rpair;
@@ -1190,7 +1190,7 @@ void cmCTestTestHandler::LoadTestList()
     int numReqRegex = 0;
     ok = ok && this->GetValue("RequiredRegularExpressions:", 
                               numReqRegex, fin);
-    for(int i =0; i < numReqRegex; i++)
+    for(int j =0; j < numReqRegex; j++)
       {
       cmSystemTools::GetLineFromStream(fin, line);
       std::pair<cmsys::RegularExpression, std::string> rpair;
@@ -1201,7 +1201,7 @@ void cmCTestTestHandler::LoadTestList()
     int numMeasure = 0;
     ok = ok && this->GetValue("Measurements:", 
                               numMeasure, fin);
-    for(int i =0; i < numMeasure; i++)
+    for(int j =0; j < numMeasure; j++)
       {
       cmStdString m;
       cmStdString v;
@@ -1219,7 +1219,7 @@ void cmCTestTestHandler::LoadTestList()
     int numEnv = 0;
     ok = ok && this->GetValue("Environment:", 
                               numEnv, fin);
-    for(int i =0; i < numEnv; i++)
+    for(int j =0; j < numEnv; j++)
       {
       cmSystemTools::GetLineFromStream(fin, line);
       p.Environment.push_back(line);
