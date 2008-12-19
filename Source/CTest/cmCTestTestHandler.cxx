@@ -1176,13 +1176,59 @@ void cmCTestTestHandler::LoadTestList()
       cmSystemTools::GetLineFromStream(fin, line);
       p.Depends.push_back(line);
       }
+    int numErrRegex = 0;
+    ok = ok && this->GetValue("ErrorRegularExpressions:", 
+                              numErrRegex, fin);
+    for(int i =0; i < numErrRegex; i++)
+      {
+      cmSystemTools::GetLineFromStream(fin, line);
+      std::pair<cmsys::RegularExpression, std::string> rpair;
+      rpair.first.compile(line.c_str());
+      rpair.second = line;
+      p.ErrorRegularExpressions.push_back(rpair);
+      }
+    int numReqRegex = 0;
+    ok = ok && this->GetValue("RequiredRegularExpressions:", 
+                              numReqRegex, fin);
+    for(int i =0; i < numReqRegex; i++)
+      {
+      cmSystemTools::GetLineFromStream(fin, line);
+      std::pair<cmsys::RegularExpression, std::string> rpair;
+      rpair.first.compile(line.c_str());
+      rpair.second = line;
+      p.RequiredRegularExpressions.push_back(rpair);
+      }
+    int numMeasure = 0;
+    ok = ok && this->GetValue("Measurements:", 
+                              numMeasure, fin);
+    for(int i =0; i < numMeasure; i++)
+      {
+      cmStdString m;
+      cmStdString v;
+      cmSystemTools::GetLineFromStream(fin, line);
+      m = line;
+      cmSystemTools::GetLineFromStream(fin, line);
+      v = line;
+      p.Measurements[m] = v;
+      }
     int isinre;
     ok = ok && this->GetValue("IsInBasedOnREOptions:", isinre, fin);
     ok = ok && this->GetValue("WillFail:", p.WillFail, fin);
     ok = ok && this->GetValue("TimeOut:", p.Timeout, fin);
     ok = ok && this->GetValue("Index:", p.Index, fin);
+    int numEnv = 0;
+    ok = ok && this->GetValue("Environment:", 
+                              numEnv, fin);
+    for(int i =0; i < numEnv; i++)
+      {
+      cmSystemTools::GetLineFromStream(fin, line);
+      p.Environment.push_back(line);
+      }
     if(!ok)
       {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "Internal Error reading cached test information."
+                 << std::endl);
       return;
       }
     if(p.Index == testIndexToRun)
@@ -1230,6 +1276,31 @@ std::string cmCTestTestHandler::SaveTestList()
       {
       fout << i->c_str() << "\n";
       }
+    std::vector<std::pair<cmsys::RegularExpression,
+      std::string> >::iterator regxi;
+    fout << "ErrorRegularExpressions:\n" << 
+      p.ErrorRegularExpressions.size() << "\n";
+    for(regxi  = p.ErrorRegularExpressions.begin(); 
+        regxi != p.ErrorRegularExpressions.end(); regxi++)
+      {
+      fout << regxi->second << "\n";
+      }
+    fout << "RequiredRegularExpressions:\n" << 
+      p.RequiredRegularExpressions.size() << "\n";
+    for(regxi  = p.RequiredRegularExpressions.begin(); 
+        regxi != p.RequiredRegularExpressions.end(); regxi++)
+      {
+      fout << regxi->second << "\n";
+      }
+    fout << "Measurements:\n" << 
+      p.Measurements.size() << "\n";
+    for(std::map<cmStdString, cmStdString>::const_iterator m =
+          p.Measurements.begin(); m != p.Measurements.end(); ++m)
+      {
+      fout << m->first << "\n";
+      fout << m->second << "\n";
+      }
+
     fout << "IsInBasedOnREOptions:\n"
          << p.IsInBasedOnREOptions
          << "\nWillFail:\n"
@@ -1238,6 +1309,13 @@ std::string cmCTestTestHandler::SaveTestList()
          << p.Timeout
          << "\nIndex:\n"
          << p.Index << "\n";
+    fout << "Environment:\n" << 
+      p.Environment.size() << "\n";
+    for(std::vector<std::string>::const_iterator e =
+          p.Environment.begin(); e != p.Environment.end(); ++e)
+      {
+      fout << *e << "\n";
+      }
     }
   fout.close();
   return fname;
