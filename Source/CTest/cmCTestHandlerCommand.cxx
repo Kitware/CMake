@@ -54,9 +54,7 @@ bool cmCTestHandlerCommand
     return false;
     }
 
-  cmCTestLog(this->CTest, DEBUG, "Populate Custom Vectors" << std::endl;);
   handler->PopulateCustomVectors(this->Makefile);
-
   if ( this->Values[ct_BUILD] )
     {
     this->CTest->SetCTestConfiguration("BuildDirectory",
@@ -65,9 +63,20 @@ bool cmCTestHandlerCommand
     }
   else
     {
-    this->CTest->SetCTestConfiguration("BuildDirectory",
-      cmSystemTools::CollapseFullPath(
-        this->Makefile->GetDefinition("CTEST_BINARY_DIRECTORY")).c_str());
+    const char* bdir = 
+      this->Makefile->GetSafeDefinition("CTEST_BINARY_DIRECTORY");
+    if(bdir)
+      {
+      this->
+        CTest->SetCTestConfiguration("BuildDirectory",
+                                     cmSystemTools::CollapseFullPath(bdir).c_str());
+      }
+    else
+      {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+                 "CTEST_BINARY_DIRECTORY not set" << std::endl;);
+      }
+
     }
   if ( this->Values[ct_SOURCE] )
     {
@@ -98,7 +107,6 @@ bool cmCTestHandlerCommand
       handler->SetSubmitIndex(atoi(this->Values[ct_SUBMIT_INDEX]));
       }
     }
-
   std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(
     this->CTest->GetCTestConfiguration("BuildDirectory").c_str());

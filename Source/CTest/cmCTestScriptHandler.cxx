@@ -274,13 +274,47 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   int result = cmsysProcess_GetState(cp);
 
   int retVal = 0;
+  bool failed = false;
   if(result == cmsysProcess_State_Exited)
     {
     retVal = cmsysProcess_GetExitValue(cp);
     }
-  else
+  else if(result == cmsysProcess_State_Exception)
     {
-    abort();
+    retVal = cmsysProcess_GetExitException(cp);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "\tThere was an exception: "
+               << cmsysProcess_GetExceptionString(cp) << " " << 
+               retVal << std::endl);
+    failed = true;
+    }
+  else if(result == cmsysProcess_State_Expired)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "\tThere was a timeout"
+               << std::endl);
+    failed = true;
+    }
+  else if(result == cmsysProcess_State_Error)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "\tError executing ctest: "
+               << cmsysProcess_GetErrorString(cp) << std::endl);
+    failed = true;
+    }
+  if(failed)
+    {
+    cmOStringStream message;
+    message << "Error running command: [";
+    message << result << "] ";
+    for(std::vector<const char*>::iterator i = argv.begin();
+        i != argv.end(); ++i)
+      {
+      if(*i)
+        {
+        message  << *i << " ";
+        }
+      }
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               message.str() << argv[0] << std::endl);
+    return -1;
     }
   return retVal;
 }
