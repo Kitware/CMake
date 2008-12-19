@@ -145,7 +145,7 @@ public:
       "TO_NATIVE_PATH works just like TO_CMAKE_PATH, but will convert from "
       " a cmake style path into the native path style \\ for windows and / "
       "for UNIX.\n"
-      "DOWNLOAD will download the givin URL to the given file. "
+      "DOWNLOAD will download the given URL to the given file. "
       "If LOG var is specified a log of the download will be put in var. "
       "If STATUS var is specified the status of the operation will"
       " be put in var. The status is returned in a list of length 2. "
