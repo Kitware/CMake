@@ -76,12 +76,10 @@ endfunction(mkdir)
 
 
 function(add_external_project_download_command name)
-  set(added 0)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
     sentinels_dir source_dir tmp_dir)
 
 
-  if(NOT added)
   get_target_property(cmd ${name} AEP_DOWNLOAD_COMMAND)
   if(cmd STREQUAL "")
     # Explicit empty string means no download step for this project
@@ -92,7 +90,7 @@ function(add_external_project_download_command name)
       COMMENT "No download step for '${name}'"
       DEPENDS ${sentinels_dir}/CMakeExternals-directories
       )
-    set(added 1)
+    return()
   else()
     if(cmd)
       set(args "")
@@ -110,16 +108,14 @@ function(add_external_project_download_command name)
         COMMENT "Performing download step for '${name}'"
         DEPENDS ${sentinels_dir}/CMakeExternals-directories
         )
-      set(added 1)
+      return()
     else()
       # No explicit DOWNLOAD_COMMAND property. Look for other properties
       # indicating which download method to use in the logic below...
     endif()
   endif()
-  endif()
 
 
-  if(NOT added)
   get_target_property(cvs_repository ${name} AEP_CVS_REPOSITORY)
   if(cvs_repository)
     if(NOT CVS_EXECUTABLE)
@@ -137,7 +133,7 @@ function(add_external_project_download_command name)
       set(cvs_tag ${tag})
     endif()
 
-    set(args -d ${cvs_repository} co ${cvs_tag} -d ${name} ${cvs_module})
+    set(args -d ${cvs_repository} -q co ${cvs_tag} -d ${name} ${cvs_module})
 
     set(repository ${cvs_repository})
     set(module ${cvs_module})
@@ -158,12 +154,10 @@ function(add_external_project_download_command name)
       COMMENT "Performing download step (CVS checkout) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-cvsinfo.txt
     )
-    set(added 1)
+    return()
   endif()
-  endif(NOT added)
 
 
-  if(NOT added)
   get_target_property(svn_repository ${name} AEP_SVN_REPOSITORY)
   if(svn_repository)
     if(NOT Subversion_SVN_EXECUTABLE)
@@ -197,12 +191,10 @@ function(add_external_project_download_command name)
       COMMENT "Performing download step (SVN checkout) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-svninfo.txt
     )
-    set(added 1)
+    return()
   endif()
-  endif(NOT added)
 
 
-  if(NOT added)
   get_target_property(dir ${name} AEP_DIR)
   if(dir)
     get_filename_component(abs_dir "${dir}" ABSOLUTE)
@@ -227,12 +219,10 @@ function(add_external_project_download_command name)
       COMMENT "Performing download step (DIR copy) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-dirinfo.txt
     )
-    set(added 1)
+    return()
   endif()
-  endif(NOT added)
 
 
-  if(NOT added)
   get_target_property(tar ${name} AEP_TAR)
   if(tar)
     mkdir("${source_dir}/${name}")
@@ -244,12 +234,10 @@ function(add_external_project_download_command name)
       COMMENT "Performing download step (TAR untar) for '${name}'"
       DEPENDS ${tar}
     )
-    set(added 1)
+    return()
   endif()
-  endif(NOT added)
 
 
-  if(NOT added)
   get_target_property(tgz ${name} AEP_TGZ)
   if(tgz)
     mkdir("${source_dir}/${name}")
@@ -261,12 +249,10 @@ function(add_external_project_download_command name)
       COMMENT "Performing download step (TGZ untar) for '${name}'"
       DEPENDS ${tgz}
     )
-    set(added 1)
+    return()
   endif()
-  endif(NOT added)
 
 
-  if(NOT added)
   get_target_property(tgz_url ${name} AEP_TGZ_URL)
   if(tgz_url)
     set(repository "add_external_project TGZ_URL")
@@ -289,12 +275,10 @@ function(add_external_project_download_command name)
       COMMENT "Performing download step (TGZ_URL download and untar) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-urlinfo.txt
     )
-    set(added 1)
+    return()
   endif()
-  endif(NOT added)
 
 
-  if(NOT added)
   get_target_property(tar_url ${name} AEP_TAR_URL)
   if(tar_url)
     set(repository "add_external_project TAR_URL")
@@ -317,21 +301,128 @@ function(add_external_project_download_command name)
       COMMENT "Performing download step (TAR_URL download and untar) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-urlinfo.txt
     )
-    set(added 1)
+    return()
   endif()
-  endif(NOT added)
 
 
-  if(NOT added)
-    message(SEND_ERROR "error: no download info for '${name}'")
-  endif(NOT added)
+  message(SEND_ERROR "error: no download info for '${name}'")
 endfunction(add_external_project_download_command)
+
+
+function(add_external_project_update_command name)
+  set(added 0)
+  get_external_project_directories(base_dir build_dir downloads_dir install_dir
+    sentinels_dir source_dir tmp_dir)
+
+
+  get_target_property(cmd ${name} AEP_UPDATE_COMMAND)
+  if(cmd STREQUAL "")
+    # Explicit empty string means no update step for this project
+    add_custom_command(
+      OUTPUT ${sentinels_dir}/${name}-update
+      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-update
+      WORKING_DIRECTORY ${sentinels_dir}
+      COMMENT "No update step for '${name}'"
+      DEPENDS ${sentinels_dir}/${name}-download
+      )
+    return()
+  else()
+    if(cmd)
+      set(args "")
+      get_target_property(update_args ${name} AEP_UPDATE_ARGS)
+      if(update_args)
+        set(args "${update_args}")
+        separate_arguments(args)
+      endif()
+
+      add_custom_command(
+        OUTPUT ${sentinels_dir}/${name}-update
+        COMMAND ${cmd} ${args}
+        COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-update
+        WORKING_DIRECTORY ${source_dir}/${name}
+        COMMENT "Performing update step for '${name}'"
+        DEPENDS ${sentinels_dir}/${name}-download
+        )
+      return()
+    else()
+      # No explicit UPDATE_COMMAND property. Look for other properties
+      # indicating which update method to use in the logic below...
+    endif()
+  endif()
+
+
+  get_target_property(cvs_repository ${name} AEP_CVS_REPOSITORY)
+  if(cvs_repository)
+    if(NOT CVS_EXECUTABLE)
+      message(FATAL_ERROR "error: could not find cvs for update of ${name}")
+    endif()
+
+    get_target_property(tag ${name} AEP_CVS_TAG)
+    set(cvs_tag)
+    if(tag)
+      set(cvs_tag ${tag})
+    endif()
+
+    set(args -d ${cvs_repository} -q up -dP ${cvs_tag})
+
+    mkdir("${source_dir}/${name}")
+    add_custom_command(
+      OUTPUT ${sentinels_dir}/${name}-update
+      COMMAND ${CVS_EXECUTABLE} ${args}
+      WORKING_DIRECTORY ${source_dir}/${name}
+      COMMENT "Performing update step (CVS update) for '${name}'"
+      DEPENDS ${sentinels_dir}/${name}-download
+    )
+    return()
+  endif()
+
+
+  get_target_property(svn_repository ${name} AEP_SVN_REPOSITORY)
+  if(svn_repository)
+    if(NOT Subversion_SVN_EXECUTABLE)
+      message(FATAL_ERROR "error: could not find svn for update of ${name}")
+    endif()
+
+    get_target_property(tag ${name} AEP_SVN_TAG)
+    set(svn_tag)
+    if(tag)
+      set(svn_tag ${tag})
+    endif()
+
+    set(args up ${svn_tag})
+
+    mkdir("${source_dir}/${name}")
+    add_custom_command(
+      OUTPUT ${sentinels_dir}/${name}-update
+      COMMAND ${Subversion_SVN_EXECUTABLE} ${args}
+      WORKING_DIRECTORY ${source_dir}/${name}
+      COMMENT "Performing update step (SVN update) for '${name}'"
+      DEPENDS ${sentinels_dir}/${name}-download
+    )
+    return()
+  endif()
+
+
+  add_custom_command(
+    OUTPUT ${sentinels_dir}/${name}-update
+    COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-update
+    WORKING_DIRECTORY ${sentinels_dir}
+    COMMENT "No update step for '${name}'"
+    DEPENDS ${sentinels_dir}/${name}-download
+    )
+endfunction(add_external_project_update_command)
 
 
 function(add_external_project_configure_command name)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
     sentinels_dir source_dir tmp_dir)
   get_configure_build_working_dir(${name} working_dir)
+
+  get_target_property(file_deps ${name} AEP_FILE_DEPENDS)
+  if(NOT file_deps)
+    set(file_deps)
+  endif()
+  #message(STATUS "info: name='${name}' file_deps='${file_deps}'")
 
   # Create the working_dir for configure, build and install steps:
   #
@@ -340,7 +431,8 @@ function(add_external_project_configure_command name)
     OUTPUT ${sentinels_dir}/${name}-working_dir
     COMMAND ${CMAKE_COMMAND} -E make_directory ${working_dir}
     COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-working_dir
-    DEPENDS ${sentinels_dir}/${name}-download
+    DEPENDS ${sentinels_dir}/${name}-update
+      ${file_deps}
     )
 
   get_target_property(cmd ${name} AEP_CONFIGURE_COMMAND)
@@ -438,6 +530,7 @@ function(add_external_project_install_command name)
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-install
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-install
+      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-complete
       WORKING_DIRECTORY ${working_dir}
       COMMENT "No install step for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-build
@@ -472,6 +565,7 @@ function(add_external_project_install_command name)
       OUTPUT ${sentinels_dir}/${name}-install
       COMMAND ${cmd} ${args}
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-install
+      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-complete
       WORKING_DIRECTORY ${working_dir}
       COMMENT "Performing install step for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-build
@@ -523,7 +617,7 @@ endfunction(add_CMakeExternals_target)
 function(is_known_aep_property_key key result_var)
   set(${result_var} 0 PARENT_SCOPE)
 
-  if(key MATCHES "^BUILD_ARGS|BUILD_COMMAND|CONFIGURE_ARGS|CONFIGURE_COMMAND|CONFIGURE_DIR|CVS_REPOSITORY|CVS_MODULE|CVS_TAG|DEPENDS|DOWNLOAD_ARGS|DOWNLOAD_COMMAND|DIR|INSTALL_ARGS|INSTALL_COMMAND|SVN_REPOSITORY|SVN_TAG|TAR|TAR_URL|TGZ|TGZ_URL$"
+  if(key MATCHES "^BUILD_ARGS|BUILD_COMMAND|CONFIGURE_ARGS|CONFIGURE_COMMAND|CONFIGURE_DIR|CVS_REPOSITORY|CVS_MODULE|CVS_TAG|DEPENDS|DOWNLOAD_ARGS|DOWNLOAD_COMMAND|DIR|INSTALL_ARGS|INSTALL_COMMAND|SVN_REPOSITORY|SVN_TAG|TAR|TAR_URL|TGZ|TGZ_URL|UPDATE_ARGS|UPDATE_COMMAND$"
   )
     #message(STATUS "info: recognized via MATCHES - key='${key}'")
     set(${result_var} 1 PARENT_SCOPE)
@@ -575,11 +669,12 @@ function(add_external_project name)
       if(key STREQUAL "DEPENDS")
         if(NOT value STREQUAL "")
           add_dependencies(${name} ${value})
+          set_property(TARGET ${name} APPEND PROPERTY AEP_FILE_DEPENDS "${sentinels_dir}/${value}-complete")
         else()
           message(STATUS "warning: empty DEPENDS value in add_external_project")
         endif()
       else()
-        set_target_properties(${name} PROPERTIES AEP_${key} "${value}")
+        set_property(TARGET ${name} PROPERTY AEP_${key} "${value}")
       endif()
     else()
       message(SEND_ERROR "error: unknown add_external_project key with name='${name}' key='${key}' value='${value}'")
@@ -596,6 +691,7 @@ function(add_external_project name)
   # (Already set up above in the DEPENDS of the add_custom_target command.)
   #
   add_external_project_download_command(${name})
+  add_external_project_update_command(${name})
   add_external_project_configure_command(${name})
   add_external_project_build_command(${name})
   add_external_project_install_command(${name})
