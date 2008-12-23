@@ -59,10 +59,23 @@ if(NOT DEFINED can_use_svn)
   set(can_use_svn ${can_use_svn} CACHE STRING "Was try_svn_checkout successful?")
 endif()
 
+# WATCOM WMake cannot handle "always out of date" custom commands,
+# so force the update_step to be an up-to-date no-op instead of a
+# cvs/svn update...
+#
+set(update_step)
+if(WATCOM)
+  set(update_step
+    UPDATE_COMMAND ${CMAKE_COMMAND}
+    UPDATE_ARGS "-E echo no-op update step"
+  )
+endif()
+
 message(STATUS "can_build_kwstyle='${can_build_kwstyle}'")
 message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
 message(STATUS "can_use_cvs='${can_use_cvs}'")
 message(STATUS "can_use_svn='${can_use_svn}'")
+message(STATUS "update_step='${update_step}'")
 
 
 # Empty projects that test all the known add_external_project argument key words:
@@ -167,6 +180,7 @@ if(can_use_cvs)
     CVS_TAG "-D\;2008-12-01 01:00:00 UTC"
     CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
     INSTALL_COMMAND ""
+    ${update_step}
   )
 
   # CVS by tag:
@@ -178,6 +192,7 @@ if(can_use_cvs)
     CVS_TAG "-r\;CMake-2-6-2"
     CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
     INSTALL_COMMAND ""
+    ${update_step}
   )
 
   if(can_build_kwstyle)
@@ -195,6 +210,7 @@ if(can_use_cvs)
       DEPENDS "TutorialStep1-LocalNoDirTGZ"
       DEPENDS "TutorialStep1-20081201"
       DEPENDS "kwsys-from-CMake-2-6-2"
+      ${update_step}
     )
   endif()
 endif()
@@ -210,6 +226,7 @@ if(can_use_svn)
     SVN_REPOSITORY "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
     SVN_TAG "-r\;{2008-12-04 01:00:00 +0000}"
     CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+    ${update_step}
   )
 
   # SVN by revision number:
@@ -220,6 +237,7 @@ if(can_use_svn)
     SVN_TAG "-r\;4824"
     CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
     INSTALL_COMMAND ""
+    ${update_step}
   )
 
   # Live SVN / trunk (no SVN_TAG):
@@ -229,6 +247,7 @@ if(can_use_svn)
     SVN_REPOSITORY "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
     CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
     INSTALL_COMMAND ""
+    ${update_step}
   )
 endif()
 
