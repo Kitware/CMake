@@ -310,7 +310,6 @@ endfunction(add_external_project_download_command)
 
 
 function(add_external_project_update_command name)
-  set(added 0)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
     sentinels_dir source_dir tmp_dir)
 
@@ -373,6 +372,9 @@ function(add_external_project_update_command name)
       COMMENT "Performing update step (CVS update) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-download
     )
+    # Since the update sentinel is not actually written:
+    set_property(SOURCE ${sentinels_dir}/${name}-update
+      PROPERTY SYMBOLIC 1)
     return()
   endif()
 
@@ -399,6 +401,9 @@ function(add_external_project_update_command name)
       COMMENT "Performing update step (SVN update) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-download
     )
+    # Since the update sentinel is not actually written:
+    set_property(SOURCE ${sentinels_dir}/${name}-update
+      PROPERTY SYMBOLIC 1)
     return()
   endif()
 
