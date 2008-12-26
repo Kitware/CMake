@@ -66,7 +66,9 @@ ENDIF (NOT DOXYGEN_FIND_QUIETLY)
 
 FIND_PROGRAM(DOXYGEN_DOT_EXECUTABLE
   NAMES dot
-  PATHS "$ENV{ProgramFiles}/ATT/Graphviz/bin"
+  PATHS "$ENV{ProgramFiles}/Graphviz 2.21/bin"
+  "C:/Program Files/Graphviz 2.21/bin"
+  "$ENV{ProgramFiles}/ATT/Graphviz/bin"
   "C:/Program Files/ATT/Graphviz/bin"
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\ATT\\Graphviz;InstallPath]/bin
   /Applications/Graphviz.app/Contents/MacOS
