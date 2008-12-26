@@ -69,14 +69,13 @@ bool cmCTestHandlerCommand
       {
       this->
         CTest->SetCTestConfiguration("BuildDirectory",
-                                     cmSystemTools::CollapseFullPath(bdir).c_str());
+          cmSystemTools::CollapseFullPath(bdir).c_str());
       }
     else
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "CTEST_BINARY_DIRECTORY not set" << std::endl;);
       }
-
     }
   if ( this->Values[ct_SOURCE] )
     {
