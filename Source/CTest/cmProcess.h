@@ -56,6 +56,8 @@ public:
 private:
   int LastOutputPipe;
   double Timeout;
+  double StartTime;
+  double TotalTime;
   cmsysProcess* Process;
   std::vector<char> StdErrorBuffer;
   std::vector<char> StdOutBuffer;

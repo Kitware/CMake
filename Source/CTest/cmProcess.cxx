@@ -16,6 +16,7 @@
 =========================================================================*/
 
 #include <cmProcess.h>
+#include <cmSystemTools.h>
 
 cmProcess::cmProcess()
 {
@@ -43,6 +44,7 @@ bool cmProcess::StartProcess()
     {
     return false;
     }
+  this->StartTime = cmSystemTools::GetTime();
   this->ProcessArgs.clear();
   // put the command as arg0
   this->ProcessArgs.push_back(this->Command.c_str());
@@ -210,6 +212,8 @@ bool cmProcess::IsRunning()
   // if the process is done, then wait for it to exit
   cmsysProcess_WaitForExit(this->Process, 0);
   this->ExitValue = cmsysProcess_GetExitValue(this->Process);
+  this->TotalTime = cmSystemTools::GetTime() - this->StartTime;
+//  std::cerr << "Time to run: " << this->TotalTime << "\n";
   return false;
 }
 
