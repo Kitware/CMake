@@ -98,7 +98,7 @@ int cmCTestConfigureHandler::ProcessHandler()
          << std::endl
          << "\t<StartConfigureTime>" << start_time_time
          << "</StartConfigureTime>\n";
-           
+
       if ( res == cmsysProcess_State_Exited && retVal )
         {
         os << retVal;
@@ -129,7 +129,7 @@ int cmCTestConfigureHandler::ProcessHandler()
   if (! res || retVal )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-      "Error(s) when updating the project" << std::endl);
+      "Error(s) when configuring the project" << std::endl);
     return -1;
     }
   return 0;

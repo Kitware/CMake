@@ -19,8 +19,22 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 
+cmCTestConfigureCommand::cmCTestConfigureCommand()
+{
+  this->Arguments[ctc_OPTIONS] = "OPTIONS";
+  this->Arguments[ctc_LAST] = 0;
+  this->Last = ctc_LAST;
+}
+
 cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
 {
+  std::vector<std::string> options;
+
+  if (this->Values[ctc_OPTIONS])
+    {
+    cmSystemTools::ExpandListArgument(this->Values[ctc_OPTIONS], options);
+    }
+
   if ( this->Values[ct_BUILD] )
     {
     this->CTest->SetCTestConfiguration("BuildDirectory",
@@ -33,6 +47,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       cmSystemTools::CollapseFullPath(
        this->Makefile->GetDefinition("CTEST_BINARY_DIRECTORY")).c_str());
     }
+
   if ( this->Values[ct_SOURCE] )
     {
     this->CTest->SetCTestConfiguration("SourceDirectory",
@@ -45,6 +60,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       cmSystemTools::CollapseFullPath(
         this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY")).c_str());
     }
+
   if ( this->CTest->GetCTestConfiguration("BuildDirectory").empty() )
     {
     this->SetError("Build directory not specified. Either use BUILD "
@@ -77,11 +93,26 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         }
       std::string cmakeConfigureCommand = "\"";
       cmakeConfigureCommand += this->CTest->GetCMakeExecutable();
-      cmakeConfigureCommand += "\" \"-G";
+      cmakeConfigureCommand += "\"";
+
+      std::vector<std::string>::const_iterator it;
+      std::string option;
+      for (it= options.begin(); it!=options.end(); ++it)
+        {
+        option = *it;
+        cmakeConfigureCommand += " \"";
+        cmakeConfigureCommand += option;
+        cmakeConfigureCommand += "\"";
+        }
+
+      cmakeConfigureCommand += " \"-G";
       cmakeConfigureCommand += cmakeGeneratorName;
-      cmakeConfigureCommand += "\" \"";
+      cmakeConfigureCommand += "\"";
+
+      cmakeConfigureCommand += " \"";
       cmakeConfigureCommand += source_dir;
       cmakeConfigureCommand += "\"";
+
       this->CTest->SetCTestConfiguration("ConfigureCommand",
         cmakeConfigureCommand.c_str());
       }
@@ -104,5 +135,3 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
     }
   return handler;
 }
-
-

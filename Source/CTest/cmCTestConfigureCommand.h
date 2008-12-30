@@ -27,8 +27,7 @@
 class cmCTestConfigureCommand : public cmCTestHandlerCommand
 {
 public:
-
-  cmCTestConfigureCommand() {}
+  cmCTestConfigureCommand();
 
   /**
    * This is a virtual constructor for the command.
@@ -60,10 +59,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_configure(BUILD build_dir RETURN_VALUE res)\n"
+      "  ctest_configure(BUILD build_dir OPTIONS options RETURN_VALUE res)\n"
       "Configures the given build directory and stores results in "
-      "Configure.xml. The second argument is a variable that will hold "
-      "return value.";
+      "Configure.xml. The OPTIONS arguments are passed as command line "
+      "arguments to the configure command. "
+      "The RETURN_VALUE argument is a variable that will hold "
+      "the return value.";
     }
 
   cmTypeMacro(cmCTestConfigureCommand, cmCTestHandlerCommand);
@@ -71,6 +72,11 @@ public:
 protected:
   cmCTestGenericHandler* InitializeHandler();
 
+  enum {
+    ctc_FIRST = ct_LAST,
+    ctc_OPTIONS,
+    ctc_LAST
+  };
 };
 
 
