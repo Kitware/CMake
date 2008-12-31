@@ -199,9 +199,12 @@
 #  QT_QTXMLPATTERNS_INCLUDE_DIR  Path to "include/QtXmlPatterns"
 #  QT_PHONON_INCLUDE_DIR       Path to "include/phonon"
 #                            
+#  QT_BINARY_DIR               Path to "bin" of Qt4
 #  QT_LIBRARY_DIR              Path to "lib" of Qt4
-# 
 #  QT_PLUGINS_DIR              Path to "plugins" for Qt4
+#  QT_TRANSLATIONS_DIR         Path to "translations" of Qt4
+#  QT_DOC_DIR                  Path to "doc" of Qt4
+#  QT_MKSPECS_DIR              Path to "mkspecs" of Qt4
 #                            
 #
 # The Qt toolkit may contain both debug and release libraries.
@@ -243,9 +246,6 @@
 #  QT_LUPDATE_EXECUTABLE      Where to find the lupdate tool.
 #  QT_LRELEASE_EXECUTABLE     Where to find the lrelease tool.
 #  
-#  QT_DOC_DIR                 Path to "doc" of Qt4
-#  QT_MKSPECS_DIR             Path to "mkspecs" of Qt4
-#
 #
 # These are around for backwards compatibility 
 # they will be set
@@ -473,6 +473,17 @@ IF (QT4_QMAKE_FOUND)
     FILE(TO_CMAKE_PATH "${qt_plugins_dir}" qt_plugins_dir)
     SET(QT_PLUGINS_DIR ${qt_plugins_dir} CACHE PATH "The location of the Qt plugins" FORCE)
   ENDIF ((QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR) OR QT_QMAKE_CHANGED)
+
+  # ask qmake for the translations directory
+  IF ((QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR) OR QT_QMAKE_CHANGED)
+    EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
+      ARGS "-query QT_INSTALL_TRANSLATIONS"
+      OUTPUT_VARIABLE qt_translations_dir )
+    # make sure we have / and not \ as qmake gives on windows
+    FILE(TO_CMAKE_PATH "${qt_translations_dir}" qt_translations_dir)
+    SET(QT_TRANSLATIONS_DIR ${qt_translations_dir} CACHE PATH "The location of the Qt translations" FORCE)
+  ENDIF ((QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR) OR QT_QMAKE_CHANGED)
+
   ########################################
   #
   #       Setting the INCLUDE-Variables
@@ -554,7 +565,8 @@ IF (QT4_QMAKE_FOUND)
   ENDIF( NOT QT_INCLUDE_DIR)
   
   # Make variables changeble to the advanced user
-  MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_INCLUDE_DIR QT_DOC_DIR QT_MKSPECS_DIR QT_PLUGINS_DIR)
+  MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_INCLUDE_DIR QT_DOC_DIR QT_MKSPECS_DIR
+                    QT_PLUGINS_DIR QT_TRANSLATIONS_DIR)
 
   # Set QT_INCLUDES
   SET( QT_INCLUDES ${QT_MKSPECS_DIR}/default ${QT_INCLUDE_DIR} )

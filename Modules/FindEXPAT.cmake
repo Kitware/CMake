@@ -9,7 +9,7 @@
 FIND_PATH(EXPAT_INCLUDE_DIR NAMES expat.h)
 
 # Look for the library.
-FIND_LIBRARY(EXPAT_LIBRARY NAMES expat)
+FIND_LIBRARY(EXPAT_LIBRARY NAMES expat libexpat)
 
 # handle the QUIETLY and REQUIRED arguments and set EXPAT_FOUND to TRUE if 
 # all listed variables are TRUE

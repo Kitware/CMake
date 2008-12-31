@@ -29,7 +29,14 @@ functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
 char* lowercase(const char *string)
 {
   char *new_string, *p;
-  new_string = (char *)malloc(sizeof(char) * (size_t)(strlen(string) + 1));
+
+#ifdef __cplusplus
+  new_string = static_cast<char *>(malloc(sizeof(char) *
+    static_cast<size_t>(strlen(string) + 1)));
+#else
+  new_string = (char *)(malloc(sizeof(char) * (size_t)(strlen(string) + 1)));
+#endif
+
   if (!new_string)
     {
     return 0;
@@ -38,7 +45,12 @@ char* lowercase(const char *string)
   p = new_string;
   while (*p != 0)
     {
-    *p = (char)tolower(*p);
+#ifdef __cplusplus
+    *p = static_cast<char>(tolower(*p));
+#else
+    *p = (char)(tolower(*p));
+#endif
+
     ++p;
     }
   return new_string;

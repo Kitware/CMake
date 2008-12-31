@@ -104,15 +104,32 @@ void QCMakePathEditor::chooseFile()
     }
 }
 
+// use same QDirModel for all completers
+static QDirModel* fileDirModel()
+{
+  static QDirModel* m = NULL;
+  if(!m)
+    {
+    m = new QDirModel();
+    }
+  return m;
+}
+static QDirModel* pathDirModel()
+{
+  static QDirModel* m = NULL;
+  if(!m)
+    {
+    m = new QDirModel();
+    m->setFilter(QDir::AllDirs | QDir::Drives | QDir::NoDotAndDotDot);
+    }
+  return m;
+}
+
 QCMakeFileCompleter::QCMakeFileCompleter(QObject* o, bool dirs)
   : QCompleter(o)
 {
-  QDirModel* model = new QDirModel(this);
-  if(dirs)
-    {
-    model->setFilter(QDir::AllDirs | QDir::Drives | QDir::NoDotAndDotDot);
-    }
-  this->setModel(model);
+  QDirModel* m = dirs ? pathDirModel() : fileDirModel();
+  this->setModel(m);
 }
 
 QString QCMakeFileCompleter::pathFromIndex(const QModelIndex& idx) const

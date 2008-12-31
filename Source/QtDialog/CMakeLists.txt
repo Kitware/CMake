@@ -16,11 +16,11 @@ ELSE(NOT QT4_FOUND)
   SET(SRCS
     AddCacheEntry.cxx
     AddCacheEntry.h
-    CMakeFirstConfigure.cxx
-    CMakeFirstConfigure.h
     CMakeSetup.cxx
     CMakeSetupDialog.cxx
     CMakeSetupDialog.h
+    FirstConfigure.cxx
+    FirstConfigure.h
     QCMake.cxx
     QCMake.h
     QCMakeCacheView.cxx
@@ -31,15 +31,17 @@ ELSE(NOT QT4_FOUND)
     QMacInstallDialog.h
     )
   QT4_WRAP_UI(UI_SRCS 
-    CMakeFirstConfigure.ui
     CMakeSetupDialog.ui
+    Compilers.ui
+    CrossCompiler.ui
     AddCacheEntry.ui
     MacInstallDialog.ui
     )
   QT4_WRAP_CPP(MOC_SRCS 
     AddCacheEntry.h
-    CMakeFirstConfigure.h
+    Compilers.h
     CMakeSetupDialog.h
+    FirstConfigure.h
     QCMake.h
     QCMakeCacheView.h
     QCMakeWidgets.h

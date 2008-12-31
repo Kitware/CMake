@@ -723,7 +723,8 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   if(cp->WorkingDirectory)
     {
     int r;
-    if(!getcwd(cp->RealWorkingDirectory, cp->RealWorkingDirectoryLength))
+    if(!getcwd(cp->RealWorkingDirectory,
+               (size_t)(cp->RealWorkingDirectoryLength)))
       {
       kwsysProcessCleanup(cp, 1);
       return;

@@ -78,7 +78,10 @@ void cmGlobalMSYSMakefileGenerator
   mf->AddDefinition("CMAKE_GENERATOR_CC", gcc.c_str());
   mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx.c_str());
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
-  if(!mf->IsSet("CMAKE_AR") && !this->CMakeInstance->GetIsInTryCompile())
+
+  if(!mf->IsSet("CMAKE_AR") &&
+      !this->CMakeInstance->GetIsInTryCompile() &&
+      !(1==l.size() && l[0]=="NONE"))
     {
     cmSystemTools::Error
       ("CMAKE_AR was not found, please set to archive program. ",

@@ -489,8 +489,6 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     ENDIF(NOT WX_LIB_DIR STREQUAL wxWidgets_LIB_DIR)
 
     IF(WX_LIB_DIR)
-      SET(wxWidgets_FOUND TRUE)
-
       # If building shared libs, define WXUSINGDLL to use dllimport.
       IF(WX_LIB_DIR MATCHES ".*[dD][lL][lL].*")
         SET(wxWidgets_DEFINITIONS "-DWXUSINGDLL")
@@ -509,6 +507,8 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
       DBG_MSG_V("WX_CONFIGURATION_LIST=${WX_CONFIGURATION_LIST}")
 
       IF(WX_CONFIGURATION)
+        SET(wxWidgets_FOUND TRUE)
+
         # If the selected configuration wasn't found force the default
         # one. Otherwise, use it but still force a refresh for
         # updating the doc string with the current list of available

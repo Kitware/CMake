@@ -52,7 +52,7 @@ SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib" ".so" ".a")
 # and still cmake didn't fail in CMakeFindBinUtils.cmake (because it isn't rerun)
 # hardcode CMAKE_INSTALL_NAME_TOOL here to install_name_tool, so it behaves as it did before, Alex
 IF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
-  SET(CMAKE_INSTALL_NAME_TOOL install_name_tool)
+  FIND_PROGRAM(CMAKE_INSTALL_NAME_TOOL install_name_tool)
 ENDIF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
 # find installed SDKs
 FILE(GLOB _CMAKE_OSX_SDKS "/Developer/SDKs/*")

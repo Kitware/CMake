@@ -1,3 +1,21 @@
+
+Changes in CMake 2.6.3 RC 6
+- Fix project(foo NONE) enable c later bug on OSX
+- Fix Haiku default paths
+- Fix windows paths to look in cmake install dirs
+- RPM Update generator to handle optional dependencies using Requires
+- Fix FindCurses for Haiku
+- Look for doxygen in more places
+- Look for different expat names on windows
+- FindLibxml2 use FindPkgConfig.cmake instead of UsePkgConfig.cmake,
+- Add translations support to FindQt4.cmake
+- FindWxWidgets Fixed placement of initial wxWidgets_FOUND=TRUE 
+- Fix GetPrerequisites.cmake to work with 0 libs
+- Add support for Squish
+- Make bundle startup optional in bundle generator
+- Fix runtime search path ordering with symlinks
+- Fix potential crash with ctest and log being null
+
 Changes in CMake 2.6.3 RC 5
 - add EXCLUDE, INCLUDE to ctest_test command in ctest -S scripts
 - Set CMAKE_SYSTEM in ctest -S scripts by reading CMakeDetermineSystem

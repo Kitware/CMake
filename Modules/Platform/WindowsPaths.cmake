@@ -1,15 +1,56 @@
+# Add the program-files folder(s) to the list of installation
+# prefixes.
+#
+# Windows 64-bit Binary:
+#   ENV{ProgramFiles(x86)} = [C:\Program Files (x86)]
+#   ENV{ProgramFiles} = [C:\Program Files]
+#   ENV{ProgramW6432} = <not set>
+# (executed from cygwin):
+#   ENV{ProgramFiles(x86)} = <not set>
+#   ENV{ProgramFiles} = [C:\Program Files]
+#   ENV{ProgramW6432} = <not set>
+#
+# Windows 32-bit Binary:
+#   ENV{ProgramFiles(x86)} = [C:\Program Files (x86)]
+#   ENV{ProgramFiles} = [C:\Program Files (x86)]
+#   ENV{ProgramW6432} = [C:\Program Files]
+# (executed from cygwin):
+#   ENV{ProgramFiles(x86)} = <not set>
+#   ENV{ProgramFiles} = [C:\Program Files (x86)]
+#   ENV{ProgramW6432} = [C:\Program Files]
+IF(DEFINED "ENV{ProgramW6432}")
+  # 32-bit binary on 64-bit windows.
+  # The 64-bit program files are in ProgramW6432.
+  LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramW6432}")
+
+  # The 32-bit program files are in ProgramFiles.
+  IF(DEFINED "ENV{ProgramFiles}")
+    LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles}")
+  ENDIF()
+ELSE()
+  # 64-bit binary, or 32-bit binary on 32-bit windows.
+  IF(DEFINED "ENV{ProgramFiles}")
+    LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles}")
+  ENDIF()
+  IF(DEFINED "ENV{ProgramFiles(x86)}")
+    # 64-bit binary.  32-bit program files are in ProgramFiles(x86).
+    LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles(x86)}")
+  ELSEIF(DEFINED "ENV{SystemDrive}")
+    # Guess the 32-bit program files location.
+    IF(EXISTS "$ENV{SystemDrive}/Program Files (x86)")
+      LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
+        "$ENV{SystemDrive}/Program Files (x86)")
+    ENDIF()
+  ENDIF()
+ENDIF()
+
+# Add the CMake install location.
 GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${CMAKE_ROOT}" PATH)
 GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
+LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH "${_CMAKE_INSTALL_DIR}")
 
-# List common installation prefixes.  These will be used for all
-# search types.
+# Add other locations.
 LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
-  # Standard
-  "$ENV{ProgramFiles}"
-
-  # CMake install location
-  "${_CMAKE_INSTALL_DIR}"
-
   # Project install destination.
   "${CMAKE_INSTALL_PREFIX}"
 

@@ -8,6 +8,6 @@ Icon=CMakeSetup.png
 Terminal=false
 X-MultipleArgs=false
 Type=Application
-Categories=Application;Development;
+Categories=Development;
 StartupNotify=true
 MimeType=application/x-cmakecache;
