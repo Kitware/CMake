@@ -25,11 +25,13 @@ Run flex like this:
 
 Modify cmCommandArgumentLexer.cxx:
   - add #include "cmStandardIncludes.h" to top of file
+  - put header block at top of file
   - remove TABs
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, cmCommandArgument_yyalloc, cmCommandArgument_yyrealloc, cmCommandArgument_yyfree
   - remove all YY_BREAK lines occurring right after return statements
   - change while ( 1 ) to for(;;)
+  - add "return 0;" to end of cmCommandArgument_yylex
 
 Modify cmCommandArgumentLexer.h:
   - remove TABs
@@ -56,11 +58,18 @@ Modify cmCommandArgumentLexer.h:
 
 %option reentrant
 %option noyywrap
+%option nounput
 %pointer
 %s ESCAPES
 %s NOESCAPES
 
 %%
+
+\$ENV\{ {
+  //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;
+  yyextra->AllocateParserType(yylvalp, yytext+1, strlen(yytext)-2);
+  return cal_ENVCURLY;
+}
 
 \$[A-Za-z0-9/_.+-]+\{ { 
   //std::cerr << __LINE__ << " here: [" << yytext << "]" << std::endl;

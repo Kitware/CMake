@@ -1139,14 +1139,14 @@ int cmCTest::RunTest(std::vector<const char*> argv,
         args.push_back(argv[i]);
         }
       }
-    if ( *log )
+    if ( log )
       {
       *log << "* Run internal CTest" << std::endl;
       }
     std::string oldpath = cmSystemTools::GetCurrentWorkingDirectory();
 
     *retVal = inst.Run(args, output);
-    if ( *log )
+    if ( log )
       {
       *log << output->c_str();
       }

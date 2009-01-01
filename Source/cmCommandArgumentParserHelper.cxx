@@ -87,8 +87,25 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
       }
     return this->EmptyVariable;
     }
-  cmSystemTools::Error("Key ", key, 
-                       " is not used yet. For now only $ENV{..} is allowed");
+  if ( strcmp(key, "CACHE") == 0 )
+    {
+    if(const char* c = this->Makefile->GetCacheManager()->GetCacheValue(var))
+      {
+      if(this->EscapeQuotes)
+        {
+        return this->AddString(cmSystemTools::EscapeQuotes(c).c_str());
+        }
+      else
+        {
+        return this->AddString(c);
+        }
+      }
+    return this->EmptyVariable;
+    }
+  cmOStringStream e;
+  e << "Syntax $" << key << "{} is not supported.  "
+    << "Only ${}, $ENV{}, and $CACHE{} are allowed.";
+  this->SetError(e.str());
   return 0;
 }
 
@@ -216,10 +233,11 @@ bool cmCommandArgumentParserHelper::HandleEscapeSymbol
     this->AllocateParserType(pt, "\0", 1);
     break;
   default:
-    char buffer[2];
-    buffer[0] = symbol;
-    buffer[1] = 0;
-    cmSystemTools::Error("Invalid escape sequence \\", buffer);
+    {
+    cmOStringStream e;
+    e << "Invalid escape sequence \\" << symbol;
+    this->SetError(e.str());
+    }
     return false;
     }
   return true;
@@ -300,7 +318,7 @@ void cmCommandArgumentParserHelper::Error(const char* str)
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
   cmOStringStream ostr;
   ostr << str << " (" << pos << ")";
-  this->ErrorString = ostr.str();
+  this->SetError(ostr.str());
 }
 
 void cmCommandArgumentParserHelper::SetMakefile(const cmMakefile* mf)
@@ -318,3 +336,11 @@ void cmCommandArgumentParserHelper::SetResult(const char* value)
   this->Result = value;
 }
 
+void cmCommandArgumentParserHelper::SetError(std::string const& msg)
+{
+  // Keep only the first error.
+  if(this->ErrorString.empty())
+    {
+    this->ErrorString = msg;
+    }
+}

@@ -1,8 +1,11 @@
 
+Changes in CMake 2.6.3 RC 7
+- Add both 32/64-bit Program Files as windows paths
+- Fix potential crash with ctest and log being null
+
 Changes in CMake 2.6.3 RC 6
 - Fix project(foo NONE) enable c later bug on OSX
 - Fix Haiku default paths
-- Fix windows paths to look in cmake install dirs
 - RPM Update generator to handle optional dependencies using Requires
 - Fix FindCurses for Haiku
 - Look for doxygen in more places
@@ -13,8 +16,11 @@ Changes in CMake 2.6.3 RC 6
 - Fix GetPrerequisites.cmake to work with 0 libs
 - Add support for Squish
 - Make bundle startup optional in bundle generator
-- Fix runtime search path ordering with symlinks
-- Fix potential crash with ctest and log being null
+- Fix runtime search path ordering with symlinks (fix from RC4)
+- Fix escaping of empty custom command argument on Windows
+- Teach find_package more config file locations
+- Fix scope of find_package definitions in find-modules
+- Teach find_package to push/pop policies for version files 
 
 Changes in CMake 2.6.3 RC 5
 - add EXCLUDE, INCLUDE to ctest_test command in ctest -S scripts
