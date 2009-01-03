@@ -83,6 +83,10 @@ public:
     }
   
   cmTypeMacro(cmCMakeMinimumRequired, cmCommand);
+
+private:
+  std::vector<std::string> UnknownArguments;
+  bool EnforceUnknownArguments();
 };
 
 
