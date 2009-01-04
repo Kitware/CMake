@@ -79,7 +79,7 @@ public:
       "which enables compatibility features for CMake 2.4 and lower.\n"
       "The FATAL_ERROR option is accepted but ignored by CMake 2.6 "
       "and higher.  "
-      "One may specify it so CMake versions 2.4 and lower fail with an "
+      "It should be specified so CMake versions 2.4 and lower fail with an "
       "error instead of just a warning.";
     }
   
