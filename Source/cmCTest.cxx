@@ -258,6 +258,7 @@ cmCTest::cmCTest()
   this->OutputLogFileLastTag   = -1;
   this->SuppressUpdatingCTestConfiguration = false;
   this->DartVersion            = 1;
+  this->InitStreams();
 
   int cc;
   for ( cc=0; cc < cmCTest::LAST_TEST; cc ++ )
@@ -1136,6 +1137,11 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     cmCTest inst;
     inst.ConfigType = this->ConfigType;
     inst.TimeOut = timeout;
+
+    // Capture output of the child ctest.
+    cmOStringStream oss;
+    inst.SetStreams(&oss, &oss);
+
     std::vector<std::string> args;
     for(unsigned int i =0; i < argv.size(); ++i)
       {
@@ -1166,6 +1172,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       }
 
     *retVal = inst.Run(args, output);
+    *output += oss.str();
     if ( log )
       {
       *log << output->c_str();
@@ -2602,6 +2609,13 @@ static const char* cmCTestStringLogType[] =
     (stream) << std::endl << file << ":" << line << " "; \
     }
 
+void cmCTest::InitStreams()
+{
+  // By default we write output to the process output streams.
+  this->StreamOut = &std::cout;
+  this->StreamErr = &std::cerr;
+}
+
 void cmCTest::Log(int logType, const char* file, int line, const char* msg)
 {
   if ( !msg || !*msg )
@@ -2640,47 +2654,49 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg)
     }
   if ( !this->Quiet )
     {
+    std::ostream& out = *this->StreamOut;
+    std::ostream& err = *this->StreamErr;
     switch ( logType )
       {
     case DEBUG:
       if ( this->Debug )
         {
-        cmCTestLogOutputFileLine(std::cout);
-        std::cout << msg;
-        std::cout.flush();
+        cmCTestLogOutputFileLine(out);
+        out << msg;
+        out.flush();
         }
       break;
     case OUTPUT: case HANDLER_OUTPUT:
       if ( this->Debug || this->Verbose )
         {
-        cmCTestLogOutputFileLine(std::cout);
-        std::cout << msg;
-        std::cout.flush();
+        cmCTestLogOutputFileLine(out);
+        out << msg;
+        out.flush();
         }
       break;
     case HANDLER_VERBOSE_OUTPUT:
       if ( this->Debug || this->ExtraVerbose )
         {
-        cmCTestLogOutputFileLine(std::cout);
-        std::cout << msg;
-        std::cout.flush();
+        cmCTestLogOutputFileLine(out);
+        out << msg;
+        out.flush();
         }
       break;
     case WARNING:
-      cmCTestLogOutputFileLine(std::cerr);
-      std::cerr << msg;
-      std::cerr.flush();
+      cmCTestLogOutputFileLine(err);
+      err << msg;
+      err.flush();
       break;
     case ERROR_MESSAGE:
-      cmCTestLogOutputFileLine(std::cerr);
-      std::cerr << msg;
-      std::cerr.flush();
+      cmCTestLogOutputFileLine(err);
+      err << msg;
+      err.flush();
       cmSystemTools::SetErrorOccured();
       break;
     default:
-      cmCTestLogOutputFileLine(std::cout);
-      std::cout << msg;
-      std::cout.flush();
+      cmCTestLogOutputFileLine(out);
+      out << msg;
+      out.flush();
       }
     }
 }

@@ -331,6 +331,10 @@ public:
 
   bool GetVerbose() { return this->Verbose;}
   bool GetExtraVerbose() { return this->ExtraVerbose;}
+
+  /** Direct process output to given streams.  */
+  void SetStreams(std::ostream* out, std::ostream* err)
+    { this->StreamOut = out; this->StreamErr = err; }
 private:
   std::string ConfigType;
   bool Verbose;
@@ -401,6 +405,10 @@ private:
   bool                     ShortDateFormat;
 
   bool                     CompressXMLFiles;
+
+  void InitStreams();
+  std::ostream* StreamOut;
+  std::ostream* StreamErr;
 
   void BlockTestErrorDiagnostics();
 
