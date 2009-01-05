@@ -1690,7 +1690,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
     std::string stype = "FILES";
     enum Doing { DoingNone, DoingFiles, DoingProperties,
                  DoingPermissionsFile, DoingPermissionsDir,
-                 DoingPermissionsMatch };
+                 DoingPermissionsMatch, DoingSelf24 };
     Doing doing = DoingNone;
     bool use_given_permissions_file = false;
     bool use_given_permissions_dir = false;
@@ -1844,6 +1844,14 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         }
       else if ( *cstr == "COMPONENTS"  )
         {
+        if(this->Makefile->IsOn("CMAKE_INSTALL_SELF_2_4"))
+          {
+          // When CMake 2.4 builds this CMake version we need to support
+          // the install scripts it generates since it asks this CMake
+          // to install itself using the rules it generated.
+          doing = DoingSelf24;
+          continue;
+          }
         cmOStringStream e;
         e << "INSTALL called with old-style COMPONENTS argument.  "
           << "This script was generated with an older version of CMake.  "
@@ -1902,6 +1910,13 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           {
           return false;
           }
+        }
+      else if(doing == DoingSelf24)
+        {
+        // Ignore these arguments for compatibility.  This should be
+        // reached only when CMake 2.4 is installing the current
+        // CMake.  It can be removed when CMake 2.6 or higher is
+        // required to build CMake.
         }
       else
         {

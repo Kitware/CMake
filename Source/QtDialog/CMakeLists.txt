@@ -72,6 +72,11 @@ ELSE(NOT QT4_FOUND)
     ENDIF(APPLE)
     SET(CMAKE_INSTALL_DESTINATION_ARGS 
       BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}")
+  ELSE(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
+    # Since the built CMake will install itself instead of the
+    # generating CMake, tell it that the install rules were generated
+    # by CMake 2.4.
+    INSTALL(CODE "SET(CMAKE_INSTALL_SELF_2_4 1)")
   ENDIF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
   # if qt is not static and we are on windows then skip the install
   # I don't want to distribute qt dlls
