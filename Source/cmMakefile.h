@@ -737,7 +737,6 @@ public:
    */
   cmTest* GetTest(const char* testName) const;
   const std::vector<cmTest*> *GetTests() const;
-  std::vector<cmTest*> *GetTests();
 
   /**
    * Get a list of macros as a ; separated string
@@ -807,7 +806,8 @@ protected:
   std::vector<cmSourceFile*> SourceFiles;
 
   // Tests
-  std::vector<cmTest*> Tests;
+  std::map<cmStdString, cmTest*> Tests;
+  std::vector<cmTest*> OrderedTests;
   
   // The include and link-library paths.  These may have order
   // dependency, so they must be vectors (not set).

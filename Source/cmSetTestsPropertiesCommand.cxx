@@ -100,30 +100,17 @@ bool cmSetTestsPropertiesCommand
              std::vector<std::string> &propertyPairs,
              cmMakefile *mf, std::string &errors)
 {
-  std::vector<cmTest*> &tests = *mf->GetTests();
-  // now loop over all the targets
-  unsigned int k;
-  bool found = false;
-  // if the file is already in the makefile just set properites on it
-  std::vector<cmTest*>::iterator it;
-  for ( it = tests.begin(); it != tests.end(); ++ it )
+  if(cmTest* test = mf->GetTest(tname))
     {
-    cmTest* test = *it;
-    if ( !strcmp(test->GetName(),tname ))
+    // now loop through all the props and set them
+    unsigned int k;
+    for (k = 0; k < propertyPairs.size(); k = k + 2)
       {
-      // now loop through all the props and set them
-      for (k = 0; k < propertyPairs.size(); k = k + 2)
-        {
-        test->SetProperty(propertyPairs[k].c_str(),
-                          propertyPairs[k+1].c_str());
-        }
-      found = true;
-      break;
+      test->SetProperty(propertyPairs[k].c_str(),
+                        propertyPairs[k+1].c_str());
       }
     }
-  
-  // if file is not already in the makefile, then add it
-  if ( ! found )
+  else
     { 
     errors = "Can not find test to add properties to: ";
     errors += tname;

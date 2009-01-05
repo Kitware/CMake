@@ -108,6 +108,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->Targets = mf.Targets;
   this->SourceFiles = mf.SourceFiles;
   this->Tests = mf.Tests;
+  this->OrderedTests = mf.OrderedTests;
   this->IncludeDirectories = mf.IncludeDirectories;
   this->LinkDirectories = mf.LinkDirectories;
   this->SystemIncludeDirectories = mf.SystemIncludeDirectories;
@@ -182,10 +183,10 @@ cmMakefile::~cmMakefile()
     {
     delete *i;
     }
-  for(std::vector<cmTest*>::iterator i = this->Tests.begin();
+  for(std::map<cmStdString, cmTest*>::iterator i = this->Tests.begin();
       i != this->Tests.end(); ++i)
     {
-    delete *i;
+    delete i->second;
     }
   for(std::vector<cmTarget*>::iterator
         i = this->ImportedTargetsOwned.begin();
@@ -3117,6 +3118,7 @@ cmTarget* cmMakefile::FindTarget(const char* name)
   return 0;
 }
 
+//----------------------------------------------------------------------------
 cmTest* cmMakefile::CreateTest(const char* testName)
 {
   if ( !testName )
@@ -3131,35 +3133,30 @@ cmTest* cmMakefile::CreateTest(const char* testName)
   test = new cmTest;
   test->SetName(testName);
   test->SetMakefile(this);
-  this->Tests.push_back(test);
+  this->Tests[testName] = test;
+  this->OrderedTests.push_back(test);
   return test;
 }
 
+//----------------------------------------------------------------------------
 cmTest* cmMakefile::GetTest(const char* testName) const
 {
-  if ( !testName )
+  if(testName)
     {
-    return 0;
-    }
-  std::vector<cmTest*>::const_iterator it;
-  for ( it = this->Tests.begin(); it != this->Tests.end(); ++ it )
-    {
-    if ( strcmp((*it)->GetName(), testName) == 0 )
+    std::map<cmStdString, cmTest*>::const_iterator
+      mi = this->Tests.find(testName);
+    if(mi != this->Tests.end())
       {
-      return *it;
+      return mi->second;
       }
     }
   return 0;
 }
 
+//----------------------------------------------------------------------------
 const std::vector<cmTest*> *cmMakefile::GetTests() const
 {
-  return &this->Tests;
-}
-
-std::vector<cmTest*> *cmMakefile::GetTests()
-{
-  return &this->Tests;
+  return &this->OrderedTests;
 }
 
 std::string cmMakefile::GetListFileStack()

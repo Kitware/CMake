@@ -327,15 +327,14 @@ bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
 //----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleTestMode()
 {
-  // Loop over all tests looking for matching names.
-  std::vector<cmTest*> const& tests = *this->Makefile->GetTests();
-  for(std::vector<cmTest*>::const_iterator ti = tests.begin();
-      ti != tests.end(); ++ti)
+  // Look for tests with all names given.
+  std::set<cmStdString>::iterator next;
+  for(std::set<cmStdString>::iterator ni = this->Names.begin();
+      ni != this->Names.end(); ni = next)
     {
-    cmTest* test = *ti;
-    std::set<cmStdString>::iterator ni =
-      this->Names.find(test->GetName());
-    if(ni != this->Names.end())
+    next = ni;
+    ++next;
+    if(cmTest* test = this->Makefile->GetTest(ni->c_str()))
       {
       if(this->HandleTest(test))
         {

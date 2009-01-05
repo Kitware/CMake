@@ -328,15 +328,9 @@ bool cmGetPropertyCommand::HandleTestMode()
     }
 
   // Loop over all tests looking for matching names.
-  std::vector<cmTest*> const& tests = *this->Makefile->GetTests();
-  for(std::vector<cmTest*>::const_iterator ti = tests.begin();
-      ti != tests.end(); ++ti)
+  if(cmTest* test = this->Makefile->GetTest(this->Name.c_str()))
     {
-    cmTest* test = *ti;
-    if(test->GetName() == this->Name)
-      {
-      return this->StoreResult(test->GetProperty(this->PropertyName.c_str()));
-      }
+    return this->StoreResult(test->GetProperty(this->PropertyName.c_str()));
     }
 
   // If not found it is an error.
