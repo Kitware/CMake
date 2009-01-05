@@ -385,22 +385,34 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("LOCATION", cmProperty::TARGET,
-     "Deprecated.  Use LOCATION_<CONFIG> or avoid altogether.",
-     "This property is provided for compatibility with CMake 2.4 and below. "
+     "Read-only location of a target on disk.",
+     "For an imported target, this read-only property returns the value of "
+     "the LOCATION_<CONFIG> property for an unspecified configuration "
+     "<CONFIG> provided by the target.\n"
+     "For a non-imported target, this property is provided for compatibility "
+     "with CMake 2.4 and below.  "
      "It was meant to get the location of an executable target's output file "
      "for use in add_custom_command.  "
+     "The path may contain a build-system-specific portion that "
+     "is replaced at build time with the configuration getting built "
+     "(such as \"$(ConfigurationName)\" in VS). "
      "In CMake 2.6 and above add_custom_command automatically recognizes a "
      "target name in its COMMAND and DEPENDS options and computes the "
-     "target location.  Therefore this property need not be used.  "
-     "This property is not defined for IMPORTED targets because they "
-     "were not available in CMake 2.4 or below anyway.");
+     "target location.  "
+     "Therefore this property is not needed for creating custom commands.");
 
   cm->DefineProperty
     ("LOCATION_<CONFIG>", cmProperty::TARGET,
      "Read-only property providing a target location on disk.",
      "A read-only property that indicates where a target's main file is "
      "located on disk for the configuration <CONFIG>.  "
-     "The property is defined only for library and executable targets.");
+     "The property is defined only for library and executable targets.  "
+     "An imported target may provide a set of configurations different "
+     "from that of the importing project.  "
+     "By default CMake looks for an exact-match but otherwise uses an "
+     "arbitrary available configuration.  "
+     "Use the MAP_IMPORTED_CONFIG_<CONFIG> property to map imported "
+     "configurations explicitly.");
 
   cm->DefineProperty
     ("LINK_INTERFACE_LIBRARIES", cmProperty::TARGET,
@@ -2038,13 +2050,17 @@ const char *cmTarget::GetProperty(const char* prop,
      this->GetType() == cmTarget::MODULE_LIBRARY ||
      this->GetType() == cmTarget::UNKNOWN_LIBRARY)
     {
-    if(!this->IsImported() && strcmp(prop,"LOCATION") == 0)
+    if(strcmp(prop,"LOCATION") == 0)
       {
-      // Set the LOCATION property of the target.  Note that this
+      // Set the LOCATION property of the target.
+      //
+      // For an imported target this is the location of an arbitrary
+      // available configuration.
+      //
+      // For a non-imported target this is deprecated because it
       // cannot take into account the per-configuration name of the
       // target because the configuration type may not be known at
-      // CMake time.  It is now deprecated as described in the
-      // documentation.
+      // CMake time.
       this->SetProperty("LOCATION", this->GetLocation(0));
       }
 
