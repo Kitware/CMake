@@ -14,9 +14,11 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
 ENDMACRO(ADD_TEST_MACRO)
 
 # Make sure the 'testing' test gets a proper configuration.
-#SET_DIRECTORY_PROPERTIES(PROPERTIES
-#  TEST_INCLUDE_FILE "${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake"
-#  )
+CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
+               ${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake @ONLY)
+SET_DIRECTORY_PROPERTIES(PROPERTIES
+  TEST_INCLUDE_FILE "${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake"
+  )
 
 # Testing
 IF(BUILD_TESTING)
@@ -542,16 +544,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   ENDFOREACH(STP)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Tutorial")
 
-  ADD_TEST(testing ${CMAKE_CTEST_COMMAND} # -C \${CTEST_CONFIGURATION_TYPE}
+  ADD_TEST(testing ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Testing"
     "${CMake_BINARY_DIR}/Tests/Testing"
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project Testing
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    #--test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Testing/bin"
-    --test-command testing
+    --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Testing")
 
