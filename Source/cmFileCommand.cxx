@@ -1688,11 +1688,10 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
                                 bool& optional)
 {
     std::string stype = "FILES";
-    bool doing_files = false;
-    bool doing_properties = false;
-    bool doing_permissions_file = false;
-    bool doing_permissions_dir = false;
-    bool doing_permissions_match = false;
+    enum Doing { DoingNone, DoingFiles, DoingProperties,
+                 DoingPermissionsFile, DoingPermissionsDir,
+                 DoingPermissionsMatch };
+    Doing doing = DoingNone;
     bool use_given_permissions_file = false;
     bool use_given_permissions_dir = false;
     bool use_source_permissions = false;
@@ -1717,10 +1716,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
 
         i++;
         destination = args[i];
-        doing_files = false;
-        doing_properties = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         }
       else if ( *cstr == "TYPE" && i < args.size()-1 )
         {
@@ -1739,10 +1735,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           i++;
           optional = true;
           }
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         }
       else if ( *cstr == "RENAME" && i < args.size()-1 )
         {
@@ -1756,10 +1749,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
 
         i++;
         rename = args[i];
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         }
       else if ( *cstr == "REGEX" && i < args.size()-1 )
         {
@@ -1773,10 +1763,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           this->SetError(e.str().c_str());
           return false;
           }
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         }
       else if ( *cstr == "EXCLUDE"  )
         {
@@ -1790,7 +1777,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           return false;
           }
         current_match_rule->Properties.Exclude = true;
-        doing_permissions_match = true;
+        doing = DoingPermissionsMatch;
         }
       else if ( *cstr == "PROPERTIES"  )
         {
@@ -1802,27 +1789,19 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           return false;
           }
 
-        doing_properties = true;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingProperties;
         }
       else if ( *cstr == "PERMISSIONS" )
         {
         if(current_match_rule)
           {
-          doing_permissions_match = true;
-          doing_permissions_file = false;
+          doing = DoingPermissionsMatch;
           }
         else
           {
-          doing_permissions_match = false;
-          doing_permissions_file = true;
+          doing = DoingPermissionsFile;
           use_given_permissions_file = true;
           }
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_dir = false;
         }
       else if ( *cstr == "DIR_PERMISSIONS" )
         {
@@ -1835,10 +1814,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           }
 
         use_given_permissions_dir = true;
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = true;
+        doing = DoingPermissionsDir;
         }
       else if ( *cstr == "USE_SOURCE_PERMISSIONS" )
         {
@@ -1850,10 +1826,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           return false;
           }
 
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         use_source_permissions = true;
         }
       else if ( *cstr == "FILES_MATCHING" )
@@ -1866,10 +1839,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           return false;
           }
 
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         installer.MatchlessFiles = false;
         }
       else if ( *cstr == "COMPONENTS"  )
@@ -1890,7 +1860,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         this->SetError(e.str().c_str());
         return false;
         }
-      else if ( *cstr == "FILES" && !doing_files)
+      else if(*cstr == "FILES" && doing != DoingFiles)
         {
         if(current_match_rule)
           {
@@ -1900,35 +1870,32 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           return false;
           }
 
-        doing_files = true;
-        doing_properties = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingFiles;
         }
-      else if ( doing_properties && i < args.size()-1 )
+      else if(doing == DoingProperties && i < args.size()-1)
         {
         properties[args[i]] = args[i+1].c_str();
         i++;
         }
-      else if ( doing_files )
+      else if(doing == DoingFiles)
         {
         files.push_back(*cstr);
         }
-      else if(doing_permissions_file)
+      else if(doing == DoingPermissionsFile)
         {
         if(!installer.CheckPermissions(args[i], permissions_file))
           {
           return false;
           }
         }
-      else if(doing_permissions_dir)
+      else if(doing == DoingPermissionsDir)
         {
         if(!installer.CheckPermissions(args[i], permissions_dir))
           {
           return false;
           }
         }
-      else if(doing_permissions_match)
+      else if(doing == DoingPermissionsMatch)
         {
         if(!installer.CheckPermissions(
             args[i], current_match_rule->Properties.Permissions))
