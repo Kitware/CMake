@@ -252,14 +252,14 @@ int cmCTestUpdateHandler::ProcessHandler()
   std::string goutput;
   std::string errors;
 
-  // make sure 
+  // make sure
   std::string saveLCMessages;
   const char* lcmess = cmSystemTools::GetEnv("LC_MESSAGES");
   if(lcmess)
     {
     saveLCMessages = lcmess;
     }
-  // if LC_MESSAGES is not set to C, then 
+  // if LC_MESSAGES is not set to C, then
   // set it, so that svn/cvs info will be in english ascii
   if(! (lcmess && strcmp(lcmess, "C") == 0))
     {
@@ -332,7 +332,7 @@ int cmCTestUpdateHandler::ProcessHandler()
       }
     if(!this->CTest->InitializeFromCommand(this->Command))
       {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, 
+      cmCTestLog(this->CTest, HANDLER_OUTPUT,
                  " Fatal Error in initialize: "
                  << std::endl);
       cmSystemTools::SetFatalErrorOccured();
