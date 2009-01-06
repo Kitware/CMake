@@ -2,6 +2,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   ${CTEST_CUSTOM_WARNING_EXCEPTION}
   "xtree.[0-9]+. : warning C4702: unreachable code"
   "warning LNK4221"
+  "warning LNK4204" # Occurs by race condition with objects in small libs
   "variable .var_args[2]*. is used before its value is set"
   "jobserver unavailable"
   "warning: \\(Long double usage is reported only once for each file"
