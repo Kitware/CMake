@@ -180,6 +180,46 @@ private:
 //**********************************************************************
 //----------------------------------------------------------------------
 
+class cmCTestUpdateHandlerLocale
+{
+public:
+  cmCTestUpdateHandlerLocale();
+  ~cmCTestUpdateHandlerLocale();
+private:
+  std::string saveLCMessages;
+};
+
+cmCTestUpdateHandlerLocale::cmCTestUpdateHandlerLocale()
+{
+  const char* lcmess = cmSystemTools::GetEnv("LC_MESSAGES");
+  if(lcmess)
+    {
+    saveLCMessages = lcmess;
+    }
+  // if LC_MESSAGES is not set to C, then
+  // set it, so that svn/cvs info will be in english ascii
+  if(! (lcmess && strcmp(lcmess, "C") == 0))
+    {
+    cmSystemTools::PutEnv("LC_MESSAGES=C");
+    }
+}
+
+cmCTestUpdateHandlerLocale::~cmCTestUpdateHandlerLocale()
+{
+  // restore the value of LC_MESSAGES after running the version control
+  // commands
+  if(saveLCMessages.size())
+    {
+    std::string put = "LC_MESSAGES=";
+    put += saveLCMessages;
+    cmSystemTools::PutEnv(put.c_str());
+    }
+  else
+    {
+    cmSystemTools::UnsetEnv("LC_MESSAGES");
+    }
+}
+
 //----------------------------------------------------------------------
 cmCTestUpdateHandler::cmCTestUpdateHandler()
 {
@@ -252,19 +292,10 @@ int cmCTestUpdateHandler::ProcessHandler()
   std::string goutput;
   std::string errors;
 
-  // make sure
-  std::string saveLCMessages;
-  const char* lcmess = cmSystemTools::GetEnv("LC_MESSAGES");
-  if(lcmess)
-    {
-    saveLCMessages = lcmess;
-    }
-  // if LC_MESSAGES is not set to C, then
-  // set it, so that svn/cvs info will be in english ascii
-  if(! (lcmess && strcmp(lcmess, "C") == 0))
-    {
-    cmSystemTools::PutEnv("LC_MESSAGES=C");
-    }
+  // Make sure VCS tool messages are in English so we can parse them.
+  cmCTestUpdateHandlerLocale fixLocale;
+  static_cast<void>(fixLocale);
+
   std::string checkoutErrorMessages;
   int retVal = 0;
 
@@ -1122,18 +1153,6 @@ int cmCTestUpdateHandler::ProcessHandler()
     }
   os << "</UpdateReturnStatus>" << std::endl;
   os << "</Update>" << std::endl;
-  // restore the value of LC_MESSAGES after running the version control
-  // commands
-  if(saveLCMessages.size())
-    {
-    std::string put = "LC_MESSAGES=";
-    put += saveLCMessages;
-    cmSystemTools::PutEnv(put.c_str());
-    }
-  else
-    {
-    cmSystemTools::UnsetEnv("LC_MESSAGES");
-    }
   if (! res  )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
