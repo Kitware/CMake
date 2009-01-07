@@ -1224,6 +1224,14 @@ void cmCTestTestHandler::LoadTestList()
       cmSystemTools::GetLineFromStream(fin, line);
       p.Environment.push_back(line);
       }
+    int numLabels = 0;
+    ok = ok && this->GetValue("Labels:",
+                              numLabels, fin);
+    for(int j =0; j < numLabels; j++)
+      {
+      cmSystemTools::GetLineFromStream(fin, line);
+      p.Labels.push_back(line);
+      }
     if(!ok)
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -1313,6 +1321,13 @@ std::string cmCTestTestHandler::SaveTestList()
       p.Environment.size() << "\n";
     for(std::vector<std::string>::const_iterator e =
           p.Environment.begin(); e != p.Environment.end(); ++e)
+      {
+      fout << *e << "\n";
+      }
+    fout << "Labels:\n" <<
+      p.Labels.size() << "\n";
+    for(std::vector<std::string>::const_iterator e =
+          p.Labels.begin(); e != p.Labels.end(); ++e)
       {
       fout << *e << "\n";
       }
@@ -1513,7 +1528,21 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
     os
       << "</Value>\n"
       << "\t\t\t</Measurement>\n"
-      << "\t\t</Results>\n"
+      << "\t\t</Results>\n";
+
+    if(!result->Properties->Labels.empty())
+      {
+      os << "\t\t<Labels>\n";
+      std::vector<std::string> const& labels = result->Properties->Labels;
+      for(std::vector<std::string>::const_iterator li = labels.begin();
+          li != labels.end(); ++li)
+        {
+        os << "\t\t\t<Label>" << cmCTest::MakeXMLSafe(*li) << "</Label>\n";
+        }
+      os << "\t\t</Labels>\n";
+      }
+
+    os
       << "\t</Test>" << std::endl;
     }
 
@@ -2304,6 +2333,16 @@ bool cmCTestTestHandler::SetTestsProperties(
             for ( crit = lval.begin(); crit != lval.end(); ++ crit )
               {
               rtit->Environment.push_back(*crit);
+              }
+            }
+          if ( key == "LABELS" )
+            {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            std::vector<std::string>::iterator crit;
+            for ( crit = lval.begin(); crit != lval.end(); ++ crit )
+              {
+              rtit->Labels.push_back(*crit);
               }
             }
           if ( key == "MEASUREMENT" )

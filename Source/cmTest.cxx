@@ -110,6 +110,11 @@ void cmTest::DefineProperties(cmake *cm)
      "For example: PASS_REGULAR_EXPRESSION \"[^a-z]Error;ERROR;Failed\"");
 
   cm->DefineProperty
+    ("LABELS", cmProperty::TEST,
+     "Specify a list of text labels associated with a test.",
+     "The list is reported in dashboard submissions.");
+
+  cm->DefineProperty
     ("MEASUREMENT", cmProperty::TEST, 
      "Specify a DART measurement and value to be reported for a test.",
      "If set to a name then that name will be reported to DART as a "

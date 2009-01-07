@@ -95,6 +95,7 @@ public:
     double Timeout;
     int Index;
     std::vector<std::string> Environment;
+    std::vector<std::string> Labels;
   };
 
   struct cmCTestTestResult
