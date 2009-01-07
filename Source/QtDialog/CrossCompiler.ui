@@ -39,7 +39,7 @@
        </widget>
       </item>
       <item row="0" column="1" >
-       <widget class="QCMakeFilePathEditor" name="systemName" />
+       <widget class="QLineEdit" name="systemName" />
       </item>
       <item row="0" column="2" colspan="2" >
        <spacer>
@@ -197,11 +197,6 @@
    <extends>QWidget</extends>
    <header>Compilers.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QCMakeFilePathEditor</class>
-   <extends>QLineEdit</extends>
-   <header>QCMakeWidgets.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
