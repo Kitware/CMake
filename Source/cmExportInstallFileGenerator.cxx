@@ -28,6 +28,15 @@ cmExportInstallFileGenerator
 }
 
 //----------------------------------------------------------------------------
+std::string cmExportInstallFileGenerator::GetConfigImportFileGlob()
+{
+  std::string glob = this->FileBase;
+  glob += "-*";
+  glob += this->FileExt;
+  return glob;
+}
+
+//----------------------------------------------------------------------------
 bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 {
   // Create all the imported targets.
@@ -55,7 +64,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   os << "# Load information for each installed configuration.\n"
      << "GET_FILENAME_COMPONENT(_DIR \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n"
      << "FILE(GLOB CONFIG_FILES \"${_DIR}/"
-     << this->FileBase << "-*" << this->FileExt << "\")\n"
+     << this->GetConfigImportFileGlob() << "\")\n"
      << "FOREACH(f ${CONFIG_FILES})\n"
      << "  INCLUDE(${f})\n"
      << "ENDFOREACH(f)\n"
