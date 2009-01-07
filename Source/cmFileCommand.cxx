@@ -112,6 +112,10 @@ bool cmFileCommand
     {
     return this->HandleInstallCommand(args);
     }
+  else if ( subCommand == "DIFFERENT" )
+    {
+    return this->HandleDifferentCommand(args);
+    }
   else if ( subCommand == "RPATH_CHANGE" || subCommand == "CHRPATH" )
     {
     return this->HandleRPathChangeCommand(args);
@@ -827,6 +831,67 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
       return false;
       }
     }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmFileCommand::HandleDifferentCommand(std::vector<std::string> const& args)
+{
+  /*
+    FILE(DIFFERENT <variable> FILES <lhs> <rhs>)
+   */
+
+  // Evaluate arguments.
+  const char* file_lhs = 0;
+  const char* file_rhs = 0;
+  const char* var = 0;
+  enum Doing { DoingNone, DoingVar, DoingFileLHS, DoingFileRHS };
+  Doing doing = DoingVar;
+  for(unsigned int i=1; i < args.size(); ++i)
+    {
+    if(args[i] == "FILES")
+      {
+      doing = DoingFileLHS;
+      }
+    else if(doing == DoingVar)
+      {
+      var = args[i].c_str();
+      doing = DoingNone;
+      }
+    else if(doing == DoingFileLHS)
+      {
+      file_lhs = args[i].c_str();
+      doing = DoingFileRHS;
+      }
+    else if(doing == DoingFileRHS)
+      {
+      file_rhs = args[i].c_str();
+      doing = DoingNone;
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "DIFFERENT given unknown argument " << args[i];
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+  if(!var)
+    {
+    this->SetError("DIFFERENT not given result variable name.");
+    return false;
+    }
+  if(!file_lhs || !file_rhs)
+    {
+    this->SetError("DIFFERENT not given FILES option with two file names.");
+    return false;
+    }
+
+  // Compare the files.
+  const char* result =
+    cmSystemTools::FilesDiffer(file_lhs, file_rhs)? "1" : "0";
+  this->Makefile->AddDefinition(var, result);
   return true;
 }
 
