@@ -203,6 +203,30 @@ cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
 void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
                                                      Indent const& indent)
 {
+  // Remove old per-configuration export files if the main changes.
+  std::string installedDir = "$ENV{DESTDIR}";
+  installedDir += this->GetInstallDestination();
+  installedDir += "/";
+  std::string installedFile = installedDir;
+  installedFile += this->FileName;
+  os << indent << "IF(EXISTS \"" << installedFile << "\")\n";
+  Indent indentN = indent.Next();
+  Indent indentNN = indentN.Next();
+  Indent indentNNN = indentNN.Next();
+  os << indentN << "FILE(DIFFERENT EXPORT_FILE_CHANGED FILES\n"
+     << indentN << "     \"" << installedFile << "\"\n"
+     << indentN << "     \"" << this->MainImportFile << "\")\n";
+  os << indentN << "IF(EXPORT_FILE_CHANGED)\n";
+  os << indentNN << "FILE(GLOB OLD_CONFIG_FILES \"" << installedDir
+     << this->EFGen->GetConfigImportFileGlob() << "\")\n";
+  os << indentNN << "IF(OLD_CONFIG_FILES)\n";
+  os << indentNNN << "MESSAGE(STATUS \"Old export file \\\"" << installedFile
+     << "\\\" will be replaced.  Removing files [${OLD_CONFIG_FILES}].\")\n";
+  os << indentNNN << "FILE(REMOVE ${OLD_CONFIG_FILES})\n";
+  os << indentNN << "ENDIF(OLD_CONFIG_FILES)\n";
+  os << indentN << "ENDIF(EXPORT_FILE_CHANGED)\n";
+  os << indent << "ENDIF()\n";
+
   // Install the main export file.
   std::vector<std::string> files;
   files.push_back(this->MainImportFile);
