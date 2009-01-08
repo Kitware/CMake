@@ -97,7 +97,6 @@ private:
   bool SearchDirectory(std::string const& dir);
   bool CheckDirectory(std::string const& dir);
   bool FindConfigFile(std::string const& dir, std::string& file);
-  bool FindConfigFileToLoad(std::string const& dir, std::string& file);
   bool CheckVersion(std::string const& config_file);
   bool CheckVersionFile(std::string const& version_file);
   bool SearchPrefix(std::string const& prefix);
