@@ -84,6 +84,8 @@ private:
                                          const std::string& type,
                                          const std::string& path);
 
+  static std::string EscapeForXML(const std::string& value);
+
   // Helper functions
   static void AppendStorageScanners(cmGeneratedFileStream& fout);
   static void AppendTarget         (cmGeneratedFileStream& fout,

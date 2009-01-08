@@ -573,7 +573,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           {
           emmited.insert(def);
           fout << "<pathentry kind=\"mac\" name=\"" << def
-               << "\" path=\"\" value=\"" << val << "\"/>\n";
+               << "\" path=\"\" value=\"" << this->EscapeForXML(val) 
+               << "\"/>\n";
           }
         }
       }
@@ -790,6 +791,19 @@ cmExtraEclipseCDT4Generator::GenerateProjectName(const std::string& name,
                                                  const std::string& path)
 {
   return name + (type.empty() ? "" : "-") + type + "@" + path;
+}
+
+std::string cmExtraEclipseCDT4Generator::EscapeForXML(const std::string& value)
+{
+  std::string str = value;
+  cmSystemTools::ReplaceString(str, "&", "&amp;");
+  cmSystemTools::ReplaceString(str, "<", "&lt;");
+  cmSystemTools::ReplaceString(str, ">", "&gt;");
+  cmSystemTools::ReplaceString(str, "\"", "&quot;");
+  // NOTE: This one is not necessary, since as of Eclipse CDT4 it will
+  //       automatically change this to the original value (').
+  //cmSystemTools::ReplaceString(str, "'", "&apos;");
+  return str;
 }
 
 //----------------------------------------------------------------------------
