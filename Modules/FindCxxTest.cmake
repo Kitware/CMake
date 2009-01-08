@@ -1,21 +1,20 @@
 # - Find CxxTest
 # Find the CxxTest suite and declare a helper macro for creating unit tests
-# and integrating them with CTest.  To assist in finding CxxTest the
-# CMAKE_PREFIX_PATH variable can be used.
+# and integrating them with CTest.
 # For more details on CxxTest see http://cxxtest.tigris.org
 #
 # INPUT Variables
 #
 #   CXXTEST_USE_PYTHON
-#       If true, have the CXXTEST_ADD_TEST macro use
-#       the python test generator instead of perl.
+#       If true, the CXXTEST_ADD_TEST macro will use
+#       the Python test generator instead of Perl.
 #
 # OUTPUT Variables
 #
-#   CXXTEST_INCLUDE_DIR
-#       Where to find the CxxTest include directory
 #   CXXTEST_FOUND
 #       True if the CxxTest framework was found
+#   CXXTEST_INCLUDE_DIR
+#       Where to find the CxxTest include directory
 #   CXXTEST_PERL_TESTGEN_EXECUTABLE
 #       The perl-based test generator.
 #   CXXTEST_PYTHON_TESTGEN_EXECUTABLE
@@ -31,7 +30,12 @@
 #           input_files_to_testgen  The list of header files containing the
 #                                   CxxTest::TestSuite's to be included in this runner
 #           
-#       Example:
+#       #==============
+#       Example Usage:
+#
+#           FIND_PACKAGE(CxxTest)
+#           INCLUDE_DIRECTORIES(${CXXTEST_INCLUDE_DIR})
+#
 #           ENABLE_TESTING()
 #           CXXTEST_ADD_TEST(unittest_foo foo_test.cc ${CMAKE_CURRENT_SOURCE_DIR}/foo_test.h)
 #
@@ -40,14 +44,41 @@
 #                 binary tree from "foo_test.h" in the current source directory.
 #              2. Create an executable and test called unittest_foo.
 #               
+#      #=============
+#      Example foo_test.h:
+#
+#          #include <cxxtest/TestSuite.h>
+#          
+#          class MyTestSuite : public CxxTest::TestSuite 
+#          {
+#          public:
+#             void testAddition( void )
+#             {
+#                TS_ASSERT( 1 + 1 > 1 );
+#                TS_ASSERT_EQUALS( 1 + 1, 2 );
+#             }
+#          };
+#
+#
+# FindCxxTest.cmake
+# Copyright (c) 2008
+#     Philip Lowman <philip@yhbt.com>
+#
+# Version 1.0 (1/8/08)
+#     Fixed CXXTEST_INCLUDE_DIRS so it will work properly
+#     Eliminated superfluous CXXTEST_FOUND assignment
+#     Cleaned up and added more documentation
 
+#=============================================================
+# CXXTEST_ADD_TEST (public macro)
+#=============================================================
 MACRO(CXXTEST_ADD_TEST _cxxtest_testname _cxxtest_outfname)
     SET(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_outfname})
     IF(CXXTEST_USE_PYTHON)
         SET(_cxxtest_executable ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE})
-    ELSE(CXXTEST_USE_PYTHON)
+    ELSE()
         SET(_cxxtest_executable ${CXXTEST_PERL_TESTGEN_EXECUTABLE})
-    ENDIF(CXXTEST_USE_PYTHON)
+    ENDIF()
 
     ADD_CUSTOM_COMMAND(
         OUTPUT  ${_cxxtest_real_outfname}
@@ -60,31 +91,23 @@ MACRO(CXXTEST_ADD_TEST _cxxtest_testname _cxxtest_outfname)
     ADD_EXECUTABLE(${_cxxtest_testname} ${_cxxtest_real_outfname})
 
     IF(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-        # The test binary is in CMAKE_RUNTIME_OUTPUT_DIRECTORY
         ADD_TEST(${_cxxtest_testname} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_cxxtest_testname})
-
     ELSEIF(EXECUTABLE_OUTPUT_PATH)
         ADD_TEST(${_cxxtest_testname} ${EXECUTABLE_OUTPUT_PATH}/${_cxxtest_testname})
-
-    ELSE(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+    ELSE()
         ADD_TEST(${_cxxtest_testname} ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname})
-
-    ENDIF(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+    ENDIF()
 
 ENDMACRO(CXXTEST_ADD_TEST)
 
-#=========
-# main
-#=========
+#=============================================================
+# main()
+#=============================================================
 
-FIND_PATH(CXXTEST_INCLUDE_DIR cxxtest/SelfTest.h)
+FIND_PATH(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h)
 FIND_PROGRAM(CXXTEST_PERL_TESTGEN_EXECUTABLE cxxtestgen.pl)
 FIND_PROGRAM(CXXTEST_PYTHON_TESTGEN_EXECUTABLE cxxtestgen.py)
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG CXXTEST_INCLUDE_DIR)
-IF(CXXTEST_INCLUDE_DIR)
-    SET(CXXTEST_INCLUDE_DIRS ${CXXTEST_INCLUDE_DIR})
-    SET(CXXTEST_FOUND true)
-ENDIF(CXXTEST_INCLUDE_DIR)
-
+SET(CXXTEST_INCLUDE_DIRS ${CXXTEST_INCLUDE_DIR})
