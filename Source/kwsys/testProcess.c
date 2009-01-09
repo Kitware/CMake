@@ -457,7 +457,7 @@ int main(int argc, const char* argv[])
     int values[8] = {0, 123, 1, 1, 0, 0, 0, 0};
     int outputs[8] = {1, 1, 1, 1, 1, 0, 1, 1};
     int delays[8] = {0, 0, 0, 0, 0, 1, 0, 0};
-    double timeouts[8] = {10, 10, 10, 10, 30, 10, -1, 10};
+    double timeouts[8] = {10, 10, 10, 30, 30, 10, -1, 10};
     int polls[8] = {0, 0, 0, 0, 0, 0, 1, 0};
     int repeat[8] = {2, 1, 1, 1, 1, 1, 1, 1};
     int r;
