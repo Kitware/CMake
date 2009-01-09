@@ -699,7 +699,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           "</storageModule>\n"
           ;
 
-  this->AppendStorageScanners(fout);
+  this->AppendStorageScanners(fout, *mf);
 
   fout << "</cconfiguration>\n"
           "</storageModule>\n"
@@ -810,8 +810,23 @@ std::string cmExtraEclipseCDT4Generator::EscapeForXML(const std::string& value)
 // Helper functions
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
-::AppendStorageScanners(cmGeneratedFileStream& fout)
+::AppendStorageScanners(cmGeneratedFileStream& fout, 
+                        const cmMakefile& makefile)
 {
+  // we need the "make" and the C (or C++) compiler which are used, Alex
+  std::string make = makefile.GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  std::string compiler = makefile.GetSafeDefinition("CMAKE_C_COMPILER");
+  if (compiler.empty())
+    {
+    compiler = makefile.GetSafeDefinition("CMAKE_CXX_COMPILER");
+    }
+  if (compiler.empty())  //Hmm, what to do now ?
+    {
+    compiler = "gcc";
+    }
+
+
+  // the following right now hardcodes gcc behaviour :-/
   fout << 
     "<storageModule moduleId=\"scannerConfiguration\">\n"
     "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
@@ -822,12 +837,12 @@ void cmExtraEclipseCDT4Generator
     "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile",
     true, "", true, "specsFile",
     "-E -P -v -dD ${plugin_state_location}/${specs_file}",
-    "gcc", true, true);
+    compiler, true, true);
   cmExtraEclipseCDT4Generator::AppendScannerProfile(fout,
     "org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile",
     true, "", true, "makefileGenerator",
     "-f ${project_name}_scd.mk",
-    "make", true, true);
+    make, true, true);
 
   fout << "</storageModule>\n";
 }

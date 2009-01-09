@@ -87,7 +87,8 @@ private:
   static std::string EscapeForXML(const std::string& value);
 
   // Helper functions
-  static void AppendStorageScanners(cmGeneratedFileStream& fout);
+  static void AppendStorageScanners(cmGeneratedFileStream& fout, 
+                                    const cmMakefile& makefile);
   static void AppendTarget         (cmGeneratedFileStream& fout,
                                     const std::string&     target,
                                     const std::string&     make);
