@@ -27,6 +27,7 @@ class cmMakefile;
 class cmCTestGenericHandler;
 class cmGeneratedFileStream;
 class cmCTestCommand;
+class cmCTestScriptHandler;
 
 #define cmCTestLog(ctSelf, logType, msg) \
   do { \
@@ -171,6 +172,7 @@ public:
 
   ///! The max output width
   int GetMaxTestNameWidth() const;
+  int SetMaxTestNameWidth(int w) { this->MaxTestNameWidth = w;}
 
   /**
    * Run a single executable command and put the stdout and stderr
@@ -335,6 +337,7 @@ public:
   /** Direct process output to given streams.  */
   void SetStreams(std::ostream* out, std::ostream* err)
     { this->StreamOut = out; this->StreamErr = err; }
+  void AddSiteProperties(std::ostream& );
 private:
   std::string ConfigType;
   bool Verbose;

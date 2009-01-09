@@ -110,7 +110,7 @@ public:
 
   void CreateCMake();
   void GetCommandDocumentation(std::vector<cmDocumentationEntry>& v) const;
-
+  cmake* GetCMake() { return this->CMake;}
 private:
   // reads in a script
   int ReadInScript(const std::string& total_script_arg);

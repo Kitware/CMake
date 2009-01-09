@@ -1309,7 +1309,38 @@ void cmCTest::StartXML(std::ostream& ostr)
        << "\tProcessorClockFrequency=\"" 
        << info.GetProcessorClockFrequency() << "\"\n" 
        << ">" << std::endl;
+  this->AddSiteProperties(ostr); 
 }
+
+//----------------------------------------------------------------------
+void cmCTest::AddSiteProperties(std::ostream& ostr)
+{
+  cmCTestScriptHandler* ch = 
+    static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+  const char* subproject = 
+    ch->GetCMake()->GetProperty("SubProject", cmProperty::GLOBAL);
+  if(subproject)
+    { 
+    ostr << "<Subproject name=\"" << subproject << "\">\n";
+    const char* labels = 
+      ch->GetCMake()->GetProperty("SubProjectLabels", cmProperty::GLOBAL);
+    if(labels)
+      {
+      ostr << "  <Labels>\n";
+      std::string l = labels;
+      std::vector<std::string> args;
+      cmSystemTools::ExpandListArgument(l, args);
+      for(std::vector<std::string>::iterator i = args.begin();
+          i != args.end(); ++i)
+        {
+        ostr << "    <Label>" << i->c_str() << "</Label>\n";
+        }
+      ostr << "  </Labels>\n";
+      }
+    ostr << "</Subproject>\n";
+    }
+}
+
 
 //----------------------------------------------------------------------
 void cmCTest::EndXML(std::ostream& ostr)
@@ -1323,16 +1354,17 @@ int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
 {
   cmCTest::VectorOfStrings::const_iterator it;
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    << "<?xml-stylesheet type=\"text/xsl\" "
+     << "<?xml-stylesheet type=\"text/xsl\" "
     "href=\"Dart/Source/Server/XSL/Build.xsl "
     "<file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
-    << "<Site BuildName=\"" << this->GetCTestConfiguration("BuildName")
-    << "\" BuildStamp=\""
-    << this->CurrentTag << "-" << this->GetTestModelString() << "\" Name=\""
-    << this->GetCTestConfiguration("Site") << "\" Generator=\"ctest"
-    << cmVersion::GetCMakeVersion()
-    << "\">\n"
-    << "<Notes>" << std::endl;
+     << "<Site BuildName=\"" << this->GetCTestConfiguration("BuildName")
+     << "\" BuildStamp=\""
+     << this->CurrentTag << "-" << this->GetTestModelString() << "\" Name=\""
+     << this->GetCTestConfiguration("Site") << "\" Generator=\"ctest"
+     << cmVersion::GetCMakeVersion()
+     << "\">\n";
+  this->AddSiteProperties(os);
+  os << "<Notes>" << std::endl;
 
   for ( it = files.begin(); it != files.end(); it ++ )
     {
