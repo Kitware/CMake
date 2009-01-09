@@ -172,7 +172,7 @@ public:
 
   ///! The max output width
   int GetMaxTestNameWidth() const;
-  int SetMaxTestNameWidth(int w) { this->MaxTestNameWidth = w;}
+  void SetMaxTestNameWidth(int w) { this->MaxTestNameWidth = w;}
 
   /**
    * Run a single executable command and put the stdout and stderr
