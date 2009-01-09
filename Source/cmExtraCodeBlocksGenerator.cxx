@@ -418,6 +418,13 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += "&quot; ";
     command += target;
     }
+  else if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
+    {
+    command += " -f ";
+    command += makefile;
+    command += " ";
+    command += target;
+    }
   else
     {
     command += " -f &quot;";
