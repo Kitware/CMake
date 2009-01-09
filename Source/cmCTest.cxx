@@ -1317,8 +1317,14 @@ void cmCTest::AddSiteProperties(std::ostream& ostr)
 {
   cmCTestScriptHandler* ch = 
     static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
-  const char* subproject = 
-    ch->GetCMake()->GetProperty("SubProject", cmProperty::GLOBAL);
+  cmake* cm =  ch->GetCMake();
+  // if no CMake then this is the old style script and props like
+  // this will not work anyway.
+  if(!cm)
+    {
+    return;
+    }
+  const char* subproject = cm->GetProperty("SubProject", cmProperty::GLOBAL);
   if(subproject)
     { 
     ostr << "<Subproject name=\"" << subproject << "\">\n";
