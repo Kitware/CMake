@@ -1288,7 +1288,7 @@ void cmCTest::StartXML(std::ostream& ostr)
        << "\"\n\tBuildStamp=\"" << this->CurrentTag << "-"
        << this->GetTestModelString() << "\"\n\tName=\""
        << this->GetCTestConfiguration("Site") << "\"\n\tGenerator=\"ctest"
-       << cmVersion::GetCMakeVersion()  << "\""
+       << cmVersion::GetCMakeVersion()  << "\"\n"
        << "\tOSName=\"" << info.GetOSName() << "\"\n"
        << "\tHostname=\"" << info.GetHostname() << "\"\n"
        << "\tOSRelease=\"" << info.GetOSRelease() << "\"\n"
