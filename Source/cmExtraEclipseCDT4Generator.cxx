@@ -40,6 +40,36 @@ cmExtraEclipseCDT4Generator
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 #endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+
+  // don't create these targets in Eclipse, they are too many and 
+  // should be only rarely used directly
+  this->TargetsToIgnore.insert("preinstall");
+  this->TargetsToIgnore.insert("install/local");
+  this->TargetsToIgnore.insert("ContinuousBuild");
+  this->TargetsToIgnore.insert("ContinuousConfigure");
+  this->TargetsToIgnore.insert("ContinuousCoverage");
+  this->TargetsToIgnore.insert("ContinuousMemCheck");
+  this->TargetsToIgnore.insert("ContinuousStart");
+  this->TargetsToIgnore.insert("ContinuousSubmit");
+  this->TargetsToIgnore.insert("ContinuousTest");
+  this->TargetsToIgnore.insert("ContinuousUpdate");
+  this->TargetsToIgnore.insert("ExperimentalBuild");
+  this->TargetsToIgnore.insert("ExperimentalConfigure");
+  this->TargetsToIgnore.insert("ExperimentalCoverage");
+  this->TargetsToIgnore.insert("ExperimentalMemCheck");
+  this->TargetsToIgnore.insert("ExperimentalStart");
+  this->TargetsToIgnore.insert("ExperimentalSubmit");
+  this->TargetsToIgnore.insert("ExperimentalTest");
+  this->TargetsToIgnore.insert("ExperimentalUpdate");
+  this->TargetsToIgnore.insert("NightlyBuild");
+  this->TargetsToIgnore.insert("NightlyConfigure");
+  this->TargetsToIgnore.insert("NightlyCoverage");
+  this->TargetsToIgnore.insert("NightlyMemCheck");
+  this->TargetsToIgnore.insert("NightlyMemoryCheck");
+  this->TargetsToIgnore.insert("NightlyStart");
+  this->TargetsToIgnore.insert("NightlySubmit");
+  this->TargetsToIgnore.insert("NightlyTest");
+  this->TargetsToIgnore.insert("NightlyUpdate");
 }
 
 //----------------------------------------------------------------------------
@@ -615,22 +645,12 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   if (generator->GetAllTargetName())
     {
     emmited.insert(generator->GetAllTargetName());
-    cmExtraEclipseCDT4Generator::AppendTarget(fout,
-                                              generator->GetAllTargetName(),
-                                              make);
+    this->AppendTarget(fout, generator->GetAllTargetName(), make);
     }
-  if (generator->GetPreinstallTargetName())
-    {
-    emmited.insert(generator->GetPreinstallTargetName());
-    cmExtraEclipseCDT4Generator
-    ::AppendTarget(fout, generator->GetPreinstallTargetName(), make);
-    }
-
   if (generator->GetCleanTargetName())
     {
     emmited.insert(generator->GetCleanTargetName());
-    cmExtraEclipseCDT4Generator
-    ::AppendTarget(fout, generator->GetCleanTargetName(), make);
+    this->AppendTarget(fout, generator->GetCleanTargetName(), make);
     }
 
   // add all executable and library targets and some of the GLOBAL 
@@ -643,47 +663,55 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
     for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
       {
+      bool addFastTarget = false;
       switch(t->second.GetType())
         {
-        case cmTarget::UTILITY:
-        case cmTarget::GLOBAL_TARGET:
-          {
-          // only add these global targets
-          if (!( (t->first=="install")
-              || (t->first=="install/strip")
-              || (t->first=="test")
-              || (t->first=="Experimental")
-              || (t->first=="Nightly")
-              || (t->first=="edit_cache")
-              || (t->first=="package")
-              || (t->first=="package_source")
-              || (t->first=="rebuild_cache") ))
-            {
-            break;
-            }
-          // add the edit_cache target only if it's not ccmake
-          // otherwise ccmake will be executed in the log view of Eclipse,
-          // which is no terminal, so curses don't work there, Alex
-          if (t->first=="edit_cache") 
-            {
-            if (strstr(mf->GetRequiredDefinition("CMAKE_EDIT_COMMAND"), 
-                                                 "ccmake")!=NULL)
-              {
-              break;
-              }
-            }
-          }
         case cmTarget::EXECUTABLE:
         case cmTarget::STATIC_LIBRARY:
         case cmTarget::SHARED_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
+           addFastTarget = true;
+           // no break here
+        case cmTarget::UTILITY:
+        case cmTarget::GLOBAL_TARGET:
           {
-          if(emmited.find(t->first) == emmited.end())
+          bool insertTarget = true;
+          if(insertTarget && (this->TargetsToIgnore.find(t->first) != 
+                                                  this->TargetsToIgnore.end()))
+            {
+            insertTarget = false;
+            }
+
+          if(insertTarget && (emmited.find(t->first) != emmited.end()))
+            {
+            insertTarget = false;
+            }
+
+          // add the edit_cache target only if it's not ccmake
+          // otherwise ccmake will be executed in the log view of Eclipse,
+          // which is no terminal, so curses don't work there, Alex
+          if (insertTarget && (t->first=="edit_cache"))
+            {
+            if (strstr(mf->GetRequiredDefinition("CMAKE_EDIT_COMMAND"), 
+                                                 "ccmake")!=NULL)
+              {
+              insertTarget = false;
+              }
+            }
+
+          if (insertTarget)
             {
             emmited.insert(t->first);
-            cmExtraEclipseCDT4Generator::AppendTarget(fout, t->first, make);
+            fprintf(stderr, "adding %s\n", t->first.c_str());
+            this->AppendTarget(fout, t->first, make);
+            if (addFastTarget || t->first=="install")
+              {
+              std::string fastTarget = t->first;
+              fastTarget = fastTarget + "/fast";
+              this->AppendTarget(fout, fastTarget, make);
+              }
             }
-           break;
+          break;
           }
         // ignore these:
         case cmTarget::INSTALL_FILES:
