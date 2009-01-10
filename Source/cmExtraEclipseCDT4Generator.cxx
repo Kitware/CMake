@@ -702,7 +702,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           if (insertTarget)
             {
             emmited.insert(t->first);
-            fprintf(stderr, "adding %s\n", t->first.c_str());
             this->AppendTarget(fout, t->first, make);
             if (addFastTarget || t->first=="install")
               {
