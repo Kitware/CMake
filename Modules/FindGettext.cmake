@@ -18,7 +18,9 @@ FIND_PROGRAM(GETTEXT_MSGMERGE_EXECUTABLE msgmerge)
 
 FIND_PROGRAM(GETTEXT_MSGFMT_EXECUTABLE msgfmt)
 
-MACRO(GETTEXT_CREATE_TRANSLATIONS _potFile _firstPoFile)
+MACRO(GETTEXT_CREATE_TRANSLATIONS _potFile _firstPoFileArg)
+   # make it a real variable, so we can modify it here
+   SET(_firstPoFile "${_firstPoFileArg}")
 
    SET(_gmoFiles)
    GET_FILENAME_COMPONENT(_potBasename ${_potFile} NAME_WE)
