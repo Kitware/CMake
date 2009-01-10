@@ -576,9 +576,16 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "add_executable(CMakeSetup WIN32 ${SRCS})\n",false,
      "Variables That Change Behavior");
 
-  
+  cm->DefineProperty
+    ("CMAKE_COLOR_MAKEFILE", cmProperty::VARIABLE,
+     "Enables color output when using the Makefile generator.",
+     "When enabled, the generated Makefiles will produce colored output. "
+     "Default is ON.",false,
+     "Variables That Change Behavior");
+
+
   // Variables defined by CMake that describe the system
-  
+
   cm->DefineProperty
     ("CMAKE_SYSTEM", cmProperty::VARIABLE,
      "Name of system cmake is compiling for.",
