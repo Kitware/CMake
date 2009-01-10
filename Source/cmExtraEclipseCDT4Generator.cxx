@@ -66,7 +66,6 @@ void cmExtraEclipseCDT4Generator
     = static_cast<cmGlobalUnixMakefileGenerator3*>(generator);
   mf->SetToolSupportsColor(true);
   mf->SetForceVerboseMakefiles(true);
-  mf->EnableInstallTarget();
 }
 
 //----------------------------------------------------------------------------
