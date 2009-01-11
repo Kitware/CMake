@@ -380,42 +380,14 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
         }
       }
     // for EXECUTABLE_OUTPUT_PATH when not in binary dir
-    std::string outputPath = mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-    if (!outputPath.empty() && !cmSystemTools::IsSubDirectory(
-                        outputPath.c_str(), this->HomeOutputDirectory.c_str()))
-      {
-      std::string name = this->GetPathBasename(outputPath);
-
-      // make sure linked resource name is unique
-      while (this->GlobalGenerator->GetProjectMap().find(name)
-             != this->GlobalGenerator->GetProjectMap().end())
-        {
-        name += "_";
-        }
-        this->AppendLinkedResource(fout, name,
-                                   this->GetEclipsePath(outputPath));
-        this->OutLinkedResources.push_back(name);
-      }
+    this->AppendOutLinkedResource(fout,
+      mf->GetSafeDefinition("CMAKE_RUNTIME_OUTPUT_DIRECTORY"),
+      mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH"));
     // for LIBRARY_OUTPUT_PATH when not in binary dir
-    if (outputPath != mf->GetSafeDefinition("LIBRARY_OUTPUT_PATH"))
-      {
-      outputPath = mf->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
-      if (!outputPath.empty() && !cmSystemTools::IsSubDirectory(
-                        outputPath.c_str(), this->HomeOutputDirectory.c_str()))
-        {
-        std::string name = this->GetPathBasename(outputPath);
+    this->AppendOutLinkedResource(fout,
+      mf->GetSafeDefinition("CMAKE_LIBRARY_OUTPUT_DIRECTORY"),
+      mf->GetSafeDefinition("LIBRARY_OUTPUT_PATH"));
 
-        // make sure linked resource name is unique
-        while (this->GlobalGenerator->GetProjectMap().find(name)
-               != this->GlobalGenerator->GetProjectMap().end())
-          {
-          name += "_";
-          }
-        this->AppendLinkedResource(fout, name,
-                                   this->GetEclipsePath(outputPath));
-        this->OutLinkedResources.push_back(name);
-        }
-      }
     fout << "\t</linkedResources>\n";
     }
 
@@ -936,3 +908,51 @@ void cmExtraEclipseCDT4Generator
     "\t\t</link>\n"
     ;
 }
+
+bool cmExtraEclipseCDT4Generator
+::AppendOutLinkedResource(cmGeneratedFileStream& fout,
+                          const std::string&     defname,
+                          const std::string&     altdefname)
+{
+  if (defname.empty() && altdefname.empty())
+    {
+    return false;
+    }
+
+  std::string outputPath = (defname.empty() ? altdefname : defname);
+
+  if (!cmSystemTools::FileIsFullPath(outputPath.c_str()))
+    {
+    outputPath = this->HomeOutputDirectory + "/" + outputPath;
+    }
+  if (cmSystemTools::IsSubDirectory(outputPath.c_str(),
+                                    this->HomeOutputDirectory.c_str()))
+    {
+    return false;
+    }
+
+  std::string name = this->GetPathBasename(outputPath);
+
+  // make sure linked resource name is unique
+  while (this->GlobalGenerator->GetProjectMap().find(name)
+      != this->GlobalGenerator->GetProjectMap().end())
+    {
+    name += "_";
+    }
+
+  if (std::find(this->OutLinkedResources.begin(),
+                this->OutLinkedResources.end(),
+                name)
+      != this->OutLinkedResources.end())
+    {
+    return false;
+    }
+  else
+    {
+    this->AppendLinkedResource(fout, name,
+                               this->GetEclipsePath(outputPath));
+    this->OutLinkedResources.push_back(name);
+    return true;
+    }
+}
+

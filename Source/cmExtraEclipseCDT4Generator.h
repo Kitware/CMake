@@ -107,6 +107,10 @@ private:
                                     const std::string&     name,
                                     const std::string&     path);
 
+  bool AppendOutLinkedResource(cmGeneratedFileStream& fout,
+                               const std::string&     defname,
+                               const std::string&     altdefname);
+
   std::vector<std::string> SrcLinkedResources;
   std::vector<std::string> OutLinkedResources;
   std::string HomeDirectory;
