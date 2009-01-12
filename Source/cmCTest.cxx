@@ -807,7 +807,6 @@ int cmCTest::ProcessTests()
 {
   int res = 0;
   bool notest = true;
-  int cc;
   int update_count = 0;
 
   // do not output startup if this is a sub-process for parallel tests
