@@ -52,8 +52,19 @@ public:
 
 protected:
   virtual cmCTestGenericHandler* InitializeHandler() = 0;
-  bool ProcessArguments(std::vector<std::string> const& args,
-    int last, const char** strings, std::vector<const char*>& values);
+
+  // Command argument handling.
+  virtual bool CheckArgumentKeyword(std::string const& arg);
+  virtual bool CheckArgumentValue(std::string const& arg);
+  enum
+  {
+    ArgumentDoingNone,
+    ArgumentDoingError,
+    ArgumentDoingKeyword,
+    ArgumentDoingLast1
+  };
+  int ArgumentDoing;
+  unsigned int ArgumentIndex;
 
   std::string ReturnVariable;
   std::vector<const char*> Arguments;

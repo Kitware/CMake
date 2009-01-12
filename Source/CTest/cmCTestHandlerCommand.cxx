@@ -38,10 +38,29 @@ cmCTestHandlerCommand::cmCTestHandlerCommand()
 bool cmCTestHandlerCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
-  if ( !this->ProcessArguments(args, (unsigned int)this->Last, 
-                               &*this->Arguments.begin(),this->Values) )
+  // Allocate space for argument values.
+  this->Values.clear();
+  this->Values.resize(this->Last, 0);
+
+  // Process input arguments.
+  this->ArgumentDoing = ArgumentDoingNone;
+  for(unsigned int i=0; i < args.size(); ++i)
     {
-    return false;
+    // Check this argument.
+    if(!this->CheckArgumentKeyword(args[i]) &&
+       !this->CheckArgumentValue(args[i]))
+      {
+      cmOStringStream e;
+      e << "called with unknown argument \"" << args[i] << "\".";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
+    // Quit if an argument is invalid.
+    if(this->ArgumentDoing == ArgumentDoingError)
+      {
+      return false;
+      }
     }
 
   cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl;);
@@ -121,57 +140,41 @@ bool cmCTestHandlerCommand
   return true;
 }
 
-bool cmCTestHandlerCommand::ProcessArguments(
-  std::vector<std::string> const& args, int last, const char** strings,
-  std::vector<const char*>& values)
+//----------------------------------------------------------------------------
+bool cmCTestHandlerCommand::CheckArgumentKeyword(std::string const& arg)
 {
-  int state = 0;
-  int cc;
-  values.resize(last);
-  for ( cc = 0; cc < last; ++ cc )
+  // Check for a keyword in our argument/value table.
+  for(unsigned int k=0; k < this->Arguments.size(); ++k)
     {
-    values[cc] = 0;
+    if(this->Arguments[k] && arg == this->Arguments[k])
+      {
+      this->ArgumentDoing = ArgumentDoingKeyword;
+      this->ArgumentIndex = k;
+      return true;
+      }
     }
+  return false;
+}
 
-  for(size_t i=0; i < args.size(); ++i)
+//----------------------------------------------------------------------------
+bool cmCTestHandlerCommand::CheckArgumentValue(std::string const& arg)
+{
+  if(this->ArgumentDoing == ArgumentDoingKeyword)
     {
-    if ( state > 0 && state < last )
+    this->ArgumentDoing = ArgumentDoingNone;
+    unsigned int k = this->ArgumentIndex;
+    if(this->Values[k])
       {
-      values[state] = args[i].c_str();
-      cmCTestLog(this->CTest, DEBUG, "Set " << strings[state] << " to "
-        << args[i].c_str() << std::endl);
-      state = 0;
+      cmOStringStream e;
+      e << "Called with more than one value for " << this->Arguments[k];
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->ArgumentDoing = ArgumentDoingError;
+      return true;
       }
-    else
-      {
-      bool found = false;
-      for ( cc = 0; cc < last; ++ cc )
-        {
-        if ( strings[cc] && args[i] == strings[cc] )
-          {
-          state = cc;
-          if ( values[state] )
-            {
-            cmOStringStream ostr;
-            ostr << "called with incorrect number of arguments. "
-              << strings[state] << " specified twice.";
-            this->SetError(ostr.str().c_str());
-            return false;
-            }
-          found = true;
-          break;
-          }
-        }
-      if ( !found )
-        {
-        cmOStringStream str;
-        str
-          << "called with incorrect number of arguments. Extra argument is: "
-          << args[i].c_str() << ".";
-        this->SetError(str.str().c_str());
-        return false;
-        }
-      }
+    this->Values[k] = arg.c_str();
+    cmCTestLog(this->CTest, DEBUG, "Set " << this->Arguments[k]
+               << " to " << arg << "\n");
+    return true;
     }
-  return true;
+  return false;
 }
