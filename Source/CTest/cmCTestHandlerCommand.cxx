@@ -33,6 +33,7 @@ cmCTestHandlerCommand::cmCTestHandlerCommand()
   this->Arguments[ct_BUILD] = "BUILD";
   this->Arguments[ct_SUBMIT_INDEX] = "SUBMIT_INDEX";
   this->Last = ct_LAST;
+  this->AppendXML = false;
 }
 
 bool cmCTestHandlerCommand
@@ -72,6 +73,8 @@ bool cmCTestHandlerCommand
                << std::endl);
     return false;
     }
+
+  handler->SetAppendXML(this->AppendXML);
 
   handler->PopulateCustomVectors(this->Makefile);
   if ( this->Values[ct_BUILD] )
@@ -143,6 +146,14 @@ bool cmCTestHandlerCommand
 //----------------------------------------------------------------------------
 bool cmCTestHandlerCommand::CheckArgumentKeyword(std::string const& arg)
 {
+  // Look for non-value arguments common to all commands.
+  if(arg == "APPEND")
+    {
+    this->ArgumentDoing = ArgumentDoingNone;
+    this->AppendXML = true;
+    return true;
+    }
+
   // Check for a keyword in our argument/value table.
   for(unsigned int k=0; k < this->Arguments.size(); ++k)
     {

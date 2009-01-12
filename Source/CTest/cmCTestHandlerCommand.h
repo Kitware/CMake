@@ -66,6 +66,8 @@ protected:
   int ArgumentDoing;
   unsigned int ArgumentIndex;
 
+  bool AppendXML;
+
   std::string ReturnVariable;
   std::vector<const char*> Arguments;
   std::vector<const char*> Values;

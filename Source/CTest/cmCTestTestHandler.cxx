@@ -1442,7 +1442,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
     return;
     }
 
-  this->CTest->StartXML(os);
+  this->CTest->StartXML(os, this->AppendXML);
   os << "<Testing>\n"
     << "\t<StartDateTime>" << this->StartTest << "</StartDateTime>\n"
     << "\t<StartTestTime>" << this->StartTestTime << "</StartTestTime>\n"

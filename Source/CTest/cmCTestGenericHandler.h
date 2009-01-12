@@ -88,10 +88,13 @@ public:
   void SetSubmitIndex(int idx) { this->SubmitIndex = idx; }
   int GetSubmitIndex() { return this->SubmitIndex; }
 
+  void SetAppendXML(bool b) { this->AppendXML = b; }
+
 protected:
   bool StartResultingXML(const char* name, cmGeneratedFileStream& xofs);
   bool StartLogFile(const char* name, cmGeneratedFileStream& xofs);
 
+  bool AppendXML;
   bool HandlerVerbose;
   cmCTest *CTest;
   t_StringToString Options;

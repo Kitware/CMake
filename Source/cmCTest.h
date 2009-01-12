@@ -199,7 +199,7 @@ public:
     int* retVal = 0, const char* dir = 0, double timeout = 0.0);
 
   //! Start CTest XML output file
-  void StartXML(std::ostream& ostr);
+  void StartXML(std::ostream& ostr, bool append);
 
   //! End CTest XML output file
   void EndXML(std::ostream& ostr);

@@ -92,7 +92,7 @@ int cmCTestConfigureHandler::ProcessHandler()
 
     if ( os )
       {
-      this->CTest->StartXML(os);
+      this->CTest->StartXML(os, this->AppendXML);
       os << "<Configure>\n"
          << "\t<StartDateTime>" << start_time << "</StartDateTime>"
          << std::endl

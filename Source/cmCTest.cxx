@@ -1269,7 +1269,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
 }
 
 //----------------------------------------------------------------------
-void cmCTest::StartXML(std::ostream& ostr)
+void cmCTest::StartXML(std::ostream& ostr, bool append)
 {
   if(this->CurrentTag.empty())
     {
@@ -1289,6 +1289,7 @@ void cmCTest::StartXML(std::ostream& ostr)
        << this->GetTestModelString() << "\"\n\tName=\""
        << this->GetCTestConfiguration("Site") << "\"\n\tGenerator=\"ctest"
        << cmVersion::GetCMakeVersion()  << "\"\n"
+       << (append? "\tAppend=\"true\"\n":"")
        << "\tOSName=\"" << info.GetOSName() << "\"\n"
        << "\tHostname=\"" << info.GetHostname() << "\"\n"
        << "\tOSRelease=\"" << info.GetOSRelease() << "\"\n"

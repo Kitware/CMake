@@ -287,7 +287,7 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
     return;
     }
 
-  this->CTest->StartXML(os);
+  this->CTest->StartXML(os, this->AppendXML);
   os << "<DynamicAnalysis Checker=\"";
   switch ( this->MemoryTesterStyle )
     {

@@ -26,6 +26,7 @@ cmCTestGenericHandler::cmCTestGenericHandler()
   this->HandlerVerbose = false;
   this->CTest = 0;
   this->SubmitIndex = 0;
+  this->AppendXML = false;
 }
 
 //----------------------------------------------------------------------

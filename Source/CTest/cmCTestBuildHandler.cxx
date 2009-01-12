@@ -484,7 +484,7 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
   std::vector<cmCTestBuildErrorWarning> ew,
   double elapsed_build_time)
 {
-  this->CTest->StartXML(os);
+  this->CTest->StartXML(os, this->AppendXML);
   os << "<Build>\n"
      << "\t<StartDateTime>" << this->StartBuild << "</StartDateTime>\n"
      << "\t<StartBuildTime>" << 

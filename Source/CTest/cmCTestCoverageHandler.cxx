@@ -169,7 +169,7 @@ bool cmCTestCoverageHandler::StartCoverageLogFile(
     return false;
     }
   std::string local_start_time = this->CTest->CurrentTime();
-  this->CTest->StartXML(covLogFile);
+  this->CTest->StartXML(covLogFile, this->AppendXML);
   covLogFile << "<CoverageLog>" << std::endl
              << "\t<StartDateTime>" << local_start_time << "</StartDateTime>"
              << "\t<StartTime>" 
@@ -388,7 +388,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     return -1;
     }
 
-  this->CTest->StartXML(covSumFile);
+  this->CTest->StartXML(covSumFile, this->AppendXML);
   // Produce output xml files
 
   covSumFile << "<Coverage>" << std::endl
@@ -1440,7 +1440,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
       "Cannot open coverage summary file." << std::endl);
     return 0;
     }
-  this->CTest->StartXML(covSumFile); 
+  this->CTest->StartXML(covSumFile, this->AppendXML);
   double elapsed_time_start = cmSystemTools::GetTime();
   std::string coverage_start_time = this->CTest->CurrentTime();
   covSumFile << "<Coverage>" << std::endl
