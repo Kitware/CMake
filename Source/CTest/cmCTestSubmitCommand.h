@@ -18,6 +18,7 @@
 #define cmCTestSubmitCommand_h
 
 #include "cmCTestHandlerCommand.h"
+#include "cmCTest.h"
 
 /** \class cmCTestSubmit
  * \brief Run a ctest script
@@ -61,14 +62,25 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_submit([RETURN_VALUE res])\n"
-      "Submits the test results for the project.";
+      "  ctest_submit([RETURN_VALUE res] [PARTS ...])\n"
+      "Submits the test results for the project.  "
+      "By default all available parts are submitted.  "
+      "The PARTS option lists a subset of parts to be submitted.";
     }
 
   cmTypeMacro(cmCTestSubmitCommand, cmCTestHandlerCommand);
 
 protected:
   cmCTestGenericHandler* InitializeHandler();
+
+  virtual bool CheckArgumentKeyword(std::string const& arg);
+  virtual bool CheckArgumentValue(std::string const& arg);
+  enum
+  {
+    ArgumentDoingParts = Superclass::ArgumentDoingLast1,
+    ArgumentDoingLast2
+  };
+  std::set<cmCTest::Part> Parts;
 };
 
 

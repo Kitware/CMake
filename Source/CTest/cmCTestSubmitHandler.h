@@ -39,7 +39,9 @@ public:
   int ProcessHandler();
 
   void Initialize();
-  
+
+  /** Specify a set of parts (by name) to submit.  */
+  void SelectParts(std::set<cmCTest::Part> const& parts);
 private:
   void SetLogFile(std::ostream* ost) { this->LogFile = ost; }
 
@@ -77,6 +79,7 @@ private:
   cmStdString   FTPProxy;
   int           FTPProxyType;
   std::ostream* LogFile;
+  bool SubmitPart[cmCTest::PartCount];
   bool CDash;
 };
 

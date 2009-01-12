@@ -18,6 +18,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmCTestSubmitHandler.h"
 
 cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 {
@@ -106,7 +107,52 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     this->SetError("internal CTest error. Cannot instantiate submit handler");
     return 0;
     }
+
+  // If a PARTS option was given, select only the named parts for submission.
+  if(!this->Parts.empty())
+    {
+    static_cast<cmCTestSubmitHandler*>(handler)->SelectParts(this->Parts);
+    }
   return handler;
 }
 
 
+
+//----------------------------------------------------------------------------
+bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
+{
+  // Look for arguments specific to this command.
+  if(arg == "PARTS")
+    {
+    this->ArgumentDoing = ArgumentDoingParts;
+    return true;
+    }
+
+  // Look for other arguments.
+  return this->Superclass::CheckArgumentKeyword(arg);
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
+{
+  // Handle states specific to this command.
+  if(this->ArgumentDoing == ArgumentDoingParts)
+    {
+    cmCTest::Part p = this->CTest->GetPartFromName(arg.c_str());
+    if(p != cmCTest::PartCount)
+      {
+      this->Parts.insert(p);
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "Part name \"" << arg << "\" is invalid.";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->ArgumentDoing = ArgumentDoingError;
+      }
+    return true;
+    }
+
+  // Look for other arguments.
+  return this->Superclass::CheckArgumentValue(arg);
+}

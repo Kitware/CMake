@@ -69,6 +69,13 @@ cmCTestSubmitHandler::cmCTestSubmitHandler() : HTTPProxy(), FTPProxy()
   this->FTPProxy = "";
   this->FTPProxyType = 0;
   this->CDash = false;
+
+  // We submit all available parts by default.
+  for(cmCTest::Part p = cmCTest::PartStart;
+      p != cmCTest::PartCount; p = cmCTest::Part(p+1))
+    {
+    this->SubmitPart[p] = true;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -893,6 +900,13 @@ int cmCTestSubmitHandler::ProcessHandler()
   for(cmCTest::Part p = cmCTest::PartStart;
       p != cmCTest::PartCount; p = cmCTest::Part(p+1))
     {
+    // Skip parts we are not submitting.
+    if(!this->SubmitPart[p])
+      {
+      continue;
+      }
+
+    // Submit files from this part.
     std::vector<std::string> const& pfiles = this->CTest->GetSubmitFiles(p);
     for(std::vector<std::string>::const_iterator pi = pfiles.begin();
         pi != pfiles.end(); ++pi)
@@ -1107,4 +1121,13 @@ std::string cmCTestSubmitHandler::GetSubmitResultsPrefix()
   return name;
 }
 
-
+//----------------------------------------------------------------------------
+void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)
+{
+  // Check whether each part is selected.
+  for(cmCTest::Part p = cmCTest::PartStart;
+      p != cmCTest::PartCount; p = cmCTest::Part(p+1))
+    {
+    this->SubmitPart[p] = (parts.find(p) != parts.end());
+    }
+}
