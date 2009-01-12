@@ -269,6 +269,7 @@ cmCTest::cmCTest()
   this->Parts[PartMemCheck].SetName("MemCheck");
   this->Parts[PartSubmit].SetName("Submit");
   this->Parts[PartNotes].SetName("Notes");
+  this->Parts[PartExtraFiles].SetName("ExtraFiles");
 
   // Fill the part name-to-id map.
   for(Part p = PartStart; p != PartCount; p = Part(p+1))
@@ -734,11 +735,11 @@ bool cmCTest::OpenOutputFile(const std::string& path,
 }
 
 //----------------------------------------------------------------------
-bool cmCTest::AddIfExists(SetOfStrings& files, const char* file)
+bool cmCTest::AddIfExists(Part part, const char* file)
 {
   if ( this->CTestFileExists(file) )
     {
-    files.insert(file);
+    this->AddSubmitFile(part, file);
     }
   else
     {
@@ -746,7 +747,7 @@ bool cmCTest::AddIfExists(SetOfStrings& files, const char* file)
     name += ".gz";
     if ( this->CTestFileExists(name.c_str()) )
       {
-      files.insert(name.c_str());
+      this->AddSubmitFile(part, file);
       }
     else
       {
@@ -1448,7 +1449,7 @@ bool cmCTest::SubmitExtraFiles(const std::vector<cmStdString> &files)
         << std::endl;);
       return false;
       }
-    this->AddSubmitFile(it->c_str());
+    this->AddSubmitFile(PartExtraFiles, it->c_str());
     }
   return true;
 }
@@ -2436,9 +2437,9 @@ void cmCTest::SetSpecificTrack(const char* track)
 }
 
 //----------------------------------------------------------------------
-void cmCTest::AddSubmitFile(const char* name)
+void cmCTest::AddSubmitFile(Part part, const char* name)
 {
-  this->SubmitFiles.insert(name);
+  this->Parts[part].SubmitFiles.push_back(name);
 }
 
 //----------------------------------------------------------------------

@@ -20,8 +20,8 @@
 
 
 #include "cmObject.h"
+#include "cmCTest.h"
 
-class cmCTest;
 class cmMakefile;
 class cmCTestCommand;
 class cmGeneratedFileStream;
@@ -91,7 +91,8 @@ public:
   void SetAppendXML(bool b) { this->AppendXML = b; }
 
 protected:
-  bool StartResultingXML(const char* name, cmGeneratedFileStream& xofs);
+  bool StartResultingXML(cmCTest::Part part,
+                         const char* name, cmGeneratedFileStream& xofs);
   bool StartLogFile(const char* name, cmGeneratedFileStream& xofs);
 
   bool AppendXML;

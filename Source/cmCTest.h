@@ -62,6 +62,7 @@ public:
     PartMemCheck,
     PartSubmit,
     PartNotes,
+    PartExtraFiles,
     PartCount // Update names in constructor when adding a part
   };
 
@@ -75,6 +76,8 @@ public:
 
     void Enable() { this->Enabled = true; }
     operator bool() const { return this->Enabled; }
+
+    std::vector<std::string> SubmitFiles;
   private:
     bool Enabled;
     std::string Name;
@@ -147,7 +150,7 @@ public:
    * Check if CTest file exists
    */
   bool CTestFileExists(const std::string& filename);
-  bool AddIfExists(SetOfStrings& files, const char* file);
+  bool AddIfExists(Part part, const char* file);
 
   /**
    * Set the cmake test
@@ -352,8 +355,9 @@ public:
   int GetDartVersion() { return this->DartVersion; }
 
   //! Add file to be submitted
-  void AddSubmitFile(const char* name);
-  SetOfStrings* GetSubmitFiles() { return &this->SubmitFiles; }
+  void AddSubmitFile(Part part, const char* name);
+  std::vector<std::string> const& GetSubmitFiles(Part part)
+    { return this->Parts[part].SubmitFiles; }
 
   //! Read the custom configuration files and apply them to the current ctest
   int ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf);

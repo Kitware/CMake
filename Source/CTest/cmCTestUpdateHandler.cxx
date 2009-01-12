@@ -578,7 +578,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   // Now update repository and remember what files were updated
   //
   cmGeneratedFileStream os;
-  if ( !this->StartResultingXML("Update", os) )
+  if(!this->StartResultingXML(cmCTest::PartUpdate, "Update", os))
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open log file"
       << std::endl);

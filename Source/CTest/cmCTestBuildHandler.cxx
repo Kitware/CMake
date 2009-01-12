@@ -467,7 +467,7 @@ int cmCTestBuildHandler::ProcessHandler()
 
   // Generate XML output
   cmGeneratedFileStream xofs;
-  if( !this->StartResultingXML("Build", xofs))
+  if(!this->StartResultingXML(cmCTest::PartBuild, "Build", xofs))
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create build XML file"
       << std::endl);

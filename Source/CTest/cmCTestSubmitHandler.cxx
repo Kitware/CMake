@@ -852,15 +852,14 @@ int cmCTestSubmitHandler::ProcessHandler()
   cmGeneratedFileStream ofs;
   this->StartLogFile("Submit", ofs);
 
-  cmCTest::SetOfStrings files;
   std::string prefix = this->GetSubmitResultsPrefix();
   // TODO:
   // Check if test is enabled
-  this->CTest->AddIfExists(files, "Update.xml");
-  this->CTest->AddIfExists(files, "Configure.xml");
-  this->CTest->AddIfExists(files, "Build.xml");
-  this->CTest->AddIfExists(files, "Test.xml");
-  if ( this->CTest->AddIfExists(files, "Coverage.xml") )
+  this->CTest->AddIfExists(cmCTest::PartUpdate, "Update.xml");
+  this->CTest->AddIfExists(cmCTest::PartConfigure, "Configure.xml");
+  this->CTest->AddIfExists(cmCTest::PartBuild, "Build.xml");
+  this->CTest->AddIfExists(cmCTest::PartTest, "Test.xml");
+  if(this->CTest->AddIfExists(cmCTest::PartCoverage, "Coverage.xml"))
     {
     cmCTest::VectorOfStrings gfiles;
     std::string gpath
@@ -877,7 +876,7 @@ int cmCTestSubmitHandler::ProcessHandler()
         gfiles[cc] = gfiles[cc].substr(glen);
         cmCTestLog(this->CTest, DEBUG, "Glob file: " << gfiles[cc].c_str()
           << std::endl);
-        files.insert(gfiles[cc]);
+        this->CTest->AddSubmitFile(cmCTest::PartCoverage, gfiles[cc].c_str());
         }
       }
     else
@@ -885,22 +884,28 @@ int cmCTestSubmitHandler::ProcessHandler()
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Problem globbing" << std::endl);
       }
     }
-  this->CTest->AddIfExists(files, "DynamicAnalysis.xml");
-  this->CTest->AddIfExists(files, "Purify.xml");
-  this->CTest->AddIfExists(files, "Notes.xml");
+  this->CTest->AddIfExists(cmCTest::PartMemCheck, "DynamicAnalysis.xml");
+  this->CTest->AddIfExists(cmCTest::PartMemCheck, "Purify.xml");
+  this->CTest->AddIfExists(cmCTest::PartNotes, "Notes.xml");
 
-  cmCTest::SetOfStrings::iterator it;
-  for ( it = this->CTest->GetSubmitFiles()->begin();
-   it != this->CTest->GetSubmitFiles()->end();
-   ++ it )
+  // Query parts for files to submit.
+  cmCTest::SetOfStrings files;
+  for(cmCTest::Part p = cmCTest::PartStart;
+      p != cmCTest::PartCount; p = cmCTest::Part(p+1))
     {
-    files.insert(files.end(), *it);
+    std::vector<std::string> const& pfiles = this->CTest->GetSubmitFiles(p);
+    for(std::vector<std::string>::const_iterator pi = pfiles.begin();
+        pi != pfiles.end(); ++pi)
+      {
+      files.insert(*pi);
+      }
     }
 
   if ( ofs )
     {
     ofs << "Upload files:" << std::endl;
     int cnt = 0;
+    cmCTest::SetOfStrings::iterator it;
     for ( it = files.begin(); it != files.end(); ++ it )
       {
       ofs << cnt << "\t" << it->c_str() << std::endl;

@@ -104,8 +104,9 @@ const char* cmCTestGenericHandler::GetOption(const char* op)
 }
 
 //----------------------------------------------------------------------
-bool cmCTestGenericHandler::StartResultingXML(const char* name,
-  cmGeneratedFileStream& xofs)
+bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
+                                              const char* name,
+                                              cmGeneratedFileStream& xofs)
 {
   if ( !name )
     {
@@ -139,7 +140,7 @@ bool cmCTestGenericHandler::StartResultingXML(const char* name,
       << std::endl);
     return false;
     }
-  this->CTest->AddSubmitFile(ostr.str().c_str());
+  this->CTest->AddSubmitFile(part, ostr.str().c_str());
   return true;
 }
 

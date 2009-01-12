@@ -592,6 +592,7 @@ int cmCTestTestHandler::ProcessHandler()
     {
     cmGeneratedFileStream xmlfile;
     if( !this->StartResultingXML(
+          (this->MemCheck ? cmCTest::PartMemCheck : cmCTest::PartTest),
         (this->MemCheck ? "DynamicAnalysis" : "Test"), xmlfile) )
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create "

@@ -67,7 +67,7 @@ int cmCTestConfigureHandler::ProcessHandler()
   if ( !this->CTest->GetShowOnly() )
     {
     cmGeneratedFileStream os;
-    if ( !this->StartResultingXML("Configure", os) )
+    if(!this->StartResultingXML(cmCTest::PartConfigure, "Configure", os))
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open configure file"
         << std::endl);
