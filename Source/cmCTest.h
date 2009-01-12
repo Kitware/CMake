@@ -50,6 +50,40 @@ class cmCTestScriptHandler;
 class cmCTest
 {
 public:
+  /** Enumerate parts of the testing and submission process.  */
+  enum Part
+  {
+    PartStart,
+    PartUpdate,
+    PartConfigure,
+    PartBuild,
+    PartTest,
+    PartCoverage,
+    PartMemCheck,
+    PartSubmit,
+    PartNotes,
+    PartCount // Update names in constructor when adding a part
+  };
+
+  /** Representation of one part.  */
+  struct PartInfo
+  {
+    PartInfo(): Enabled(false) {}
+
+    void SetName(const char* name) { this->Name = name; }
+    const char* GetName() const { return this->Name.c_str(); }
+
+    void Enable() { this->Enabled = true; }
+    operator bool() const { return this->Enabled; }
+  private:
+    bool Enabled;
+    std::string Name;
+  };
+
+  /** Get a testing part id from its string name.  Returns PartCount
+      if the string does not name a valid part.  */
+  Part GetPartFromName(const char* name);
+
   typedef std::vector<cmStdString> VectorOfStrings;
   typedef std::set<cmStdString> SetOfStrings;
 
@@ -356,28 +390,15 @@ private:
 
   bool ShowOnly;
 
-  enum {
-    FIRST_TEST     = 0,
-    UPDATE_TEST    = 1,
-    START_TEST     = 2,
-    CONFIGURE_TEST = 3,
-    BUILD_TEST     = 4,
-    TEST_TEST      = 5,
-    COVERAGE_TEST  = 6,
-    MEMCHECK_TEST  = 7,
-    SUBMIT_TEST    = 8,
-    NOTES_TEST     = 9,
-    ALL_TEST       = 10,
-    LAST_TEST      = 11
-  };
-
   //! Map of configuration properties
   typedef std::map<cmStdString, cmStdString> CTestConfigurationMap;
 
   std::string             CTestConfigFile;
   CTestConfigurationMap CTestConfiguration;
   CTestConfigurationMap CTestConfigurationOverwrites;
-  int                     Tests[LAST_TEST];
+  PartInfo                Parts[PartCount];
+  typedef std::map<cmStdString, Part> PartMapType;
+  PartMapType             PartMap;
 
   std::string             CurrentTag;
   bool                    TomorrowTag;

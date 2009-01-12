@@ -260,11 +260,22 @@ cmCTest::cmCTest()
   this->DartVersion            = 1;
   this->InitStreams();
 
-  int cc;
-  for ( cc=0; cc < cmCTest::LAST_TEST; cc ++ )
+  this->Parts[PartStart].SetName("Start");
+  this->Parts[PartUpdate].SetName("Update");
+  this->Parts[PartConfigure].SetName("Configure");
+  this->Parts[PartBuild].SetName("Build");
+  this->Parts[PartTest].SetName("Test");
+  this->Parts[PartCoverage].SetName("Coverage");
+  this->Parts[PartMemCheck].SetName("MemCheck");
+  this->Parts[PartSubmit].SetName("Submit");
+  this->Parts[PartNotes].SetName("Notes");
+
+  // Fill the part name-to-id map.
+  for(Part p = PartStart; p != PartCount; p = Part(p+1))
     {
-    this->Tests[cc] = 0;
+    this->PartMap[cmSystemTools::LowerCase(this->Parts[p].GetName())] = p;
     }
+
   this->ShortDateFormat        = true;
 
   this->TestingHandlers["build"]     = new cmCTestBuildHandler;
@@ -299,6 +310,21 @@ cmCTest::~cmCTest()
     it->second = 0;
     }
   this->SetOutputLogFileName(0);
+}
+
+//----------------------------------------------------------------------------
+cmCTest::Part cmCTest::GetPartFromName(const char* name)
+{
+  // Look up by lower-case to make names case-insensitive.
+  std::string lower_name = cmSystemTools::LowerCase(name);
+  PartMapType::const_iterator i = this->PartMap.find(lower_name);
+  if(i != this->PartMap.end())
+    {
+    return i->second;
+    }
+
+  // The string does not name a valid part.
+  return PartCount;
 }
 
 //----------------------------------------------------------------------
@@ -401,16 +427,14 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
       std::string tagmode;
       if ( cmSystemTools::GetLineFromStream(tfin, tagmode) )
         {
-        if ( tagmode.size() > 4 && !( this->Tests[cmCTest::START_TEST] ||
-            this->Tests[ALL_TEST] ))
+        if (tagmode.size() > 4 && !this->Parts[PartStart])
           {
           this->TestModel = cmCTest::GetTestModelFromString(tagmode.c_str());
           }
         }
       tfin.close();
       }
-    if ( tag.size() == 0 || new_tag || this->Tests[cmCTest::START_TEST] ||
-      this->Tests[ALL_TEST])
+    if (tag.size() == 0 || new_tag || this->Parts[PartStart])
       {
       cmCTestLog(this, DEBUG, "TestModel: " << this->GetTestModelString()
         << std::endl);
@@ -634,43 +658,17 @@ bool cmCTest::SetTest(const char* ttype, bool report)
 {
   if ( cmSystemTools::LowerCase(ttype) == "all" )
     {
-    this->Tests[cmCTest::ALL_TEST] = 1;
+    for(Part p = PartStart; p != PartCount; p = Part(p+1))
+      {
+      this->Parts[p].Enable();
+      }
+    return true;
     }
-  else if ( cmSystemTools::LowerCase(ttype) == "start" )
+  Part p = this->GetPartFromName(ttype);
+  if(p != PartCount)
     {
-    this->Tests[cmCTest::START_TEST] = 1;
-    }
-  else if ( cmSystemTools::LowerCase(ttype) == "update" )
-    {
-    this->Tests[cmCTest::UPDATE_TEST] = 1;
-    }
-  else if ( cmSystemTools::LowerCase(ttype) == "configure" )
-    {
-    this->Tests[cmCTest::CONFIGURE_TEST] = 1;
-    }
-  else if ( cmSystemTools::LowerCase(ttype) == "build" )
-    {
-    this->Tests[cmCTest::BUILD_TEST] = 1;
-    }
-  else if ( cmSystemTools::LowerCase(ttype) == "test" )
-    {
-    this->Tests[cmCTest::TEST_TEST] = 1;
-    }
-  else if ( cmSystemTools::LowerCase(ttype) == "coverage" )
-    {
-    this->Tests[cmCTest::COVERAGE_TEST] = 1;
-    }
-  else if ( cmSystemTools::LowerCase(ttype) == "memcheck" )
-    {
-    this->Tests[cmCTest::MEMCHECK_TEST] = 1;
-    }
-  else if ( cmSystemTools::LowerCase(ttype) == "notes" )
-    {
-    this->Tests[cmCTest::NOTES_TEST] = 1;
-    }
-  else if ( cmSystemTools::LowerCase(ttype) == "submit" )
-    {
-    this->Tests[cmCTest::SUBMIT_TEST] = 1;
+    this->Parts[p].Enable();
+    return true;
     }
   else
     {
@@ -681,7 +679,6 @@ bool cmCTest::SetTest(const char* ttype, bool report)
       }
     return false;
     }
-  return true;
 }
 
 //----------------------------------------------------------------------
@@ -818,15 +815,11 @@ int cmCTest::ProcessTests()
     cmCTestLog(this, OUTPUT, "Start processing tests" << std::endl);
     }
 
-  for ( cc = 0; cc < LAST_TEST; cc ++ )
+  for(Part p = PartStart; notest && p != PartCount; p = Part(p+1))
     {
-    if ( this->Tests[cc] )
-      {
-      notest = false;
-      break;
-      }
+    notest = !this->Parts[p];
     }
-  if (( this->Tests[UPDATE_TEST] || this->Tests[ALL_TEST] ) &&
+  if (this->Parts[PartUpdate] &&
       (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     cmCTestGenericHandler* uphandler = this->GetHandler("update");
@@ -842,7 +835,7 @@ int cmCTest::ProcessTests()
     {
     return 0;
     }
-  if (( this->Tests[CONFIGURE_TEST] || this->Tests[ALL_TEST] )&&
+  if (this->Parts[PartConfigure] &&
       (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     if (this->GetHandler("configure")->ProcessHandler() < 0)
@@ -850,7 +843,7 @@ int cmCTest::ProcessTests()
       res |= cmCTest::CONFIGURE_ERRORS;
       }
     }
-  if (( this->Tests[BUILD_TEST] || this->Tests[ALL_TEST] )&&
+  if (this->Parts[PartBuild] &&
       (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
@@ -859,7 +852,7 @@ int cmCTest::ProcessTests()
       res |= cmCTest::BUILD_ERRORS;
       }
     }
-  if (( this->Tests[TEST_TEST] || this->Tests[ALL_TEST] || notest ) &&
+  if ((this->Parts[PartTest] || notest) &&
       (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
@@ -868,7 +861,7 @@ int cmCTest::ProcessTests()
       res |= cmCTest::TEST_ERRORS;
       }
     }
-  if (( this->Tests[COVERAGE_TEST] || this->Tests[ALL_TEST] ) &&
+  if (this->Parts[PartCoverage] &&
       (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
@@ -877,7 +870,7 @@ int cmCTest::ProcessTests()
       res |= cmCTest::COVERAGE_ERRORS;
       }
     }
-  if (( this->Tests[MEMCHECK_TEST] || this->Tests[ALL_TEST] )&&
+  if (this->Parts[PartMemCheck] &&
       (this->GetRemainingTimeAllowed() - 120 > 0))
     {
     this->UpdateCTestConfiguration();
@@ -906,12 +899,12 @@ int cmCTest::ProcessTests()
             this->NotesFiles += ";";
             }
           this->NotesFiles += fullname;
-          this->Tests[NOTES_TEST] = 1;
+          this->Parts[PartNotes].Enable();
           }
         }
       }
     }
-  if ( this->Tests[NOTES_TEST] || this->Tests[ALL_TEST] )
+  if (this->Parts[PartNotes])
     {
     this->UpdateCTestConfiguration();
     if ( this->NotesFiles.size() )
@@ -919,7 +912,7 @@ int cmCTest::ProcessTests()
       this->GenerateNotesFile(this->NotesFiles.c_str());
       }
     }
-  if ( this->Tests[SUBMIT_TEST] || this->Tests[ALL_TEST] )
+  if (this->Parts[PartSubmit])
     {
     this->UpdateCTestConfiguration();
     if (this->GetHandler("submit")->ProcessHandler() < 0)
