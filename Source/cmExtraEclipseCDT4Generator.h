@@ -84,8 +84,11 @@ private:
                                          const std::string& type,
                                          const std::string& path);
 
+  static std::string EscapeForXML(const std::string& value);
+
   // Helper functions
-  static void AppendStorageScanners(cmGeneratedFileStream& fout);
+  static void AppendStorageScanners(cmGeneratedFileStream& fout, 
+                                    const cmMakefile& makefile);
   static void AppendTarget         (cmGeneratedFileStream& fout,
                                     const std::string&     target,
                                     const std::string&     make);
@@ -104,10 +107,15 @@ private:
                                     const std::string&     name,
                                     const std::string&     path);
 
+  bool AppendOutLinkedResource(cmGeneratedFileStream& fout,
+                               const std::string&     defname,
+                               const std::string&     altdefname);
+
   std::vector<std::string> SrcLinkedResources;
   std::vector<std::string> OutLinkedResources;
   std::string HomeDirectory;
   std::string HomeOutputDirectory;
+  std::set<std::string> TargetsToIgnore;
   bool IsOutOfSourceBuild;
   bool GenerateSourceProject;
 

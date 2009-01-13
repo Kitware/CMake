@@ -172,6 +172,7 @@ protected:
   bool HandleRPathChangeCommand(std::vector<std::string> const& args);
   bool HandleRPathCheckCommand(std::vector<std::string> const& args);
   bool HandleRPathRemoveCommand(std::vector<std::string> const& args);
+  bool HandleDifferentCommand(std::vector<std::string> const& args);
 
   // file(INSTALL ...) related functions
   bool HandleInstallCommand(std::vector<std::string> const& args);

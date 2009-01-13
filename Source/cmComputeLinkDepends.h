@@ -72,6 +72,7 @@ private:
 
   // Configuration information.
   const char* Config;
+  cmTarget::LinkLibraryType LinkType;
 
   // Output information.
   EntryVector FinalLinkEntries;

@@ -29,7 +29,7 @@ IF(NOT _INCLUDED_SYSTEM_INFO_FILE)
   IF(EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
     CONFIGURE_FILE(${CMAKE_BINARY_DIR}/CMakeCache.txt
                    ${CMAKE_BINARY_DIR}/CopyOfCMakeCache.txt COPYONLY)
-    MESSAGE("You CMakeCache.txt file was copied to CopyOfCMakeCache.txt. " 
+    MESSAGE("Your CMakeCache.txt file was copied to CopyOfCMakeCache.txt. " 
             "Please send that file to cmake@www.cmake.org.")
    ENDIF(EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
 ENDIF(NOT _INCLUDED_SYSTEM_INFO_FILE)

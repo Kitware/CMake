@@ -112,6 +112,10 @@ bool cmFileCommand
     {
     return this->HandleInstallCommand(args);
     }
+  else if ( subCommand == "DIFFERENT" )
+    {
+    return this->HandleDifferentCommand(args);
+    }
   else if ( subCommand == "RPATH_CHANGE" || subCommand == "CHRPATH" )
     {
     return this->HandleRPathChangeCommand(args);
@@ -831,6 +835,67 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
 }
 
 //----------------------------------------------------------------------------
+bool
+cmFileCommand::HandleDifferentCommand(std::vector<std::string> const& args)
+{
+  /*
+    FILE(DIFFERENT <variable> FILES <lhs> <rhs>)
+   */
+
+  // Evaluate arguments.
+  const char* file_lhs = 0;
+  const char* file_rhs = 0;
+  const char* var = 0;
+  enum Doing { DoingNone, DoingVar, DoingFileLHS, DoingFileRHS };
+  Doing doing = DoingVar;
+  for(unsigned int i=1; i < args.size(); ++i)
+    {
+    if(args[i] == "FILES")
+      {
+      doing = DoingFileLHS;
+      }
+    else if(doing == DoingVar)
+      {
+      var = args[i].c_str();
+      doing = DoingNone;
+      }
+    else if(doing == DoingFileLHS)
+      {
+      file_lhs = args[i].c_str();
+      doing = DoingFileRHS;
+      }
+    else if(doing == DoingFileRHS)
+      {
+      file_rhs = args[i].c_str();
+      doing = DoingNone;
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "DIFFERENT given unknown argument " << args[i];
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+  if(!var)
+    {
+    this->SetError("DIFFERENT not given result variable name.");
+    return false;
+    }
+  if(!file_lhs || !file_rhs)
+    {
+    this->SetError("DIFFERENT not given FILES option with two file names.");
+    return false;
+    }
+
+  // Compare the files.
+  const char* result =
+    cmSystemTools::FilesDiffer(file_lhs, file_rhs)? "1" : "0";
+  this->Makefile->AddDefinition(var, result);
+  return true;
+}
+
+//----------------------------------------------------------------------------
 // File installation helper class.
 struct cmFileInstaller
 {
@@ -1049,7 +1114,7 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
   this->Makefile->DisplayStatus(message.c_str(), -1);
 
   // Copy the file.
-  if(copy && !cmSystemTools::CopyAFile(fromFile, toFile, true))
+  if(copy && !cmSystemTools::CopyAFile(fromFile, toFile, true, false))
     {
     cmOStringStream e;
     e << "INSTALL cannot copy file \"" << fromFile
@@ -1064,7 +1129,13 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
   // Set the file modification time of the destination file.
   if(copy && !always)
     {
-    cmSystemTools::CopyFileTime(fromFile, toFile);
+    if (!cmSystemTools::CopyFileTime(fromFile, toFile))
+      {
+      cmOStringStream e;
+      e << "Problem setting modification time on file \"" << toFile << "\"";
+      this->FileCommand->SetError(e.str().c_str());
+      return false;
+      }
     }
 
   // Set permissions of the destination file.
@@ -1682,11 +1753,10 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
                                 bool& optional)
 {
     std::string stype = "FILES";
-    bool doing_files = false;
-    bool doing_properties = false;
-    bool doing_permissions_file = false;
-    bool doing_permissions_dir = false;
-    bool doing_permissions_match = false;
+    enum Doing { DoingNone, DoingFiles, DoingProperties,
+                 DoingPermissionsFile, DoingPermissionsDir,
+                 DoingPermissionsMatch, DoingSelf24 };
+    Doing doing = DoingNone;
     bool use_given_permissions_file = false;
     bool use_given_permissions_dir = false;
     bool use_source_permissions = false;
@@ -1711,10 +1781,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
 
         i++;
         destination = args[i];
-        doing_files = false;
-        doing_properties = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         }
       else if ( *cstr == "TYPE" && i < args.size()-1 )
         {
@@ -1733,10 +1800,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           i++;
           optional = true;
           }
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         }
       else if ( *cstr == "RENAME" && i < args.size()-1 )
         {
@@ -1750,10 +1814,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
 
         i++;
         rename = args[i];
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         }
       else if ( *cstr == "REGEX" && i < args.size()-1 )
         {
@@ -1767,10 +1828,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           this->SetError(e.str().c_str());
           return false;
           }
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         }
       else if ( *cstr == "EXCLUDE"  )
         {
@@ -1784,7 +1842,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           return false;
           }
         current_match_rule->Properties.Exclude = true;
-        doing_permissions_match = true;
+        doing = DoingPermissionsMatch;
         }
       else if ( *cstr == "PROPERTIES"  )
         {
@@ -1796,27 +1854,19 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           return false;
           }
 
-        doing_properties = true;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingProperties;
         }
       else if ( *cstr == "PERMISSIONS" )
         {
         if(current_match_rule)
           {
-          doing_permissions_match = true;
-          doing_permissions_file = false;
+          doing = DoingPermissionsMatch;
           }
         else
           {
-          doing_permissions_match = false;
-          doing_permissions_file = true;
+          doing = DoingPermissionsFile;
           use_given_permissions_file = true;
           }
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_dir = false;
         }
       else if ( *cstr == "DIR_PERMISSIONS" )
         {
@@ -1829,10 +1879,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           }
 
         use_given_permissions_dir = true;
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = true;
+        doing = DoingPermissionsDir;
         }
       else if ( *cstr == "USE_SOURCE_PERMISSIONS" )
         {
@@ -1844,10 +1891,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           return false;
           }
 
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         use_source_permissions = true;
         }
       else if ( *cstr == "FILES_MATCHING" )
@@ -1860,14 +1904,19 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           return false;
           }
 
-        doing_properties = false;
-        doing_files = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingNone;
         installer.MatchlessFiles = false;
         }
       else if ( *cstr == "COMPONENTS"  )
         {
+        if(this->Makefile->IsOn("CMAKE_INSTALL_SELF_2_4"))
+          {
+          // When CMake 2.4 builds this CMake version we need to support
+          // the install scripts it generates since it asks this CMake
+          // to install itself using the rules it generated.
+          doing = DoingSelf24;
+          continue;
+          }
         cmOStringStream e;
         e << "INSTALL called with old-style COMPONENTS argument.  "
           << "This script was generated with an older version of CMake.  "
@@ -1884,7 +1933,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         this->SetError(e.str().c_str());
         return false;
         }
-      else if ( *cstr == "FILES" && !doing_files)
+      else if(*cstr == "FILES" && doing != DoingFiles)
         {
         if(current_match_rule)
           {
@@ -1894,41 +1943,45 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
           return false;
           }
 
-        doing_files = true;
-        doing_properties = false;
-        doing_permissions_file = false;
-        doing_permissions_dir = false;
+        doing = DoingFiles;
         }
-      else if ( doing_properties && i < args.size()-1 )
+      else if(doing == DoingProperties && i < args.size()-1)
         {
         properties[args[i]] = args[i+1].c_str();
         i++;
         }
-      else if ( doing_files )
+      else if(doing == DoingFiles)
         {
         files.push_back(*cstr);
         }
-      else if(doing_permissions_file)
+      else if(doing == DoingPermissionsFile)
         {
         if(!installer.CheckPermissions(args[i], permissions_file))
           {
           return false;
           }
         }
-      else if(doing_permissions_dir)
+      else if(doing == DoingPermissionsDir)
         {
         if(!installer.CheckPermissions(args[i], permissions_dir))
           {
           return false;
           }
         }
-      else if(doing_permissions_match)
+      else if(doing == DoingPermissionsMatch)
         {
         if(!installer.CheckPermissions(
             args[i], current_match_rule->Properties.Permissions))
           {
           return false;
           }
+        }
+      else if(doing == DoingSelf24)
+        {
+        // Ignore these arguments for compatibility.  This should be
+        // reached only when CMake 2.4 is installing the current
+        // CMake.  It can be removed when CMake 2.6 or higher is
+        // required to build CMake.
         }
       else
         {

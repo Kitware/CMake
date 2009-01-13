@@ -6,6 +6,10 @@ if(CMAKE_ANSI_CFLAGS)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
 endif(CMAKE_ANSI_CFLAGS)
 
+# Pretend that RelWithDebInfo should link to debug libraries to test
+# the DEBUG_CONFIGURATIONS property.
+set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug RelWithDebInfo)
+
 add_library(testExe1lib STATIC testExe1lib.c) # not exported
 add_executable(testExe1 testExe1.c)
 target_link_libraries(testExe1 testExe1lib)

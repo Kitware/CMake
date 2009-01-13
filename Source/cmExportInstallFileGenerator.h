@@ -59,6 +59,10 @@ public:
       for installation.  */
   std::map<cmStdString, cmStdString> const& GetConfigImportFiles()
     { return this->ConfigImportFiles; }
+
+  /** Compute the globbing expression used to load per-config import
+      files from the main file.  */
+  std::string GetConfigImportFileGlob();
 protected:
 
   // Implement virtual methods from the superclass.

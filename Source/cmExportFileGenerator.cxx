@@ -177,11 +177,7 @@ cmExportFileGenerator
                           cmTarget* target, ImportPropertyMap& properties)
 {
   // Compute which library configuration to link.
-  cmTarget::LinkLibraryType linkType = cmTarget::OPTIMIZED;
-  if(config && cmSystemTools::UpperCase(config) == "DEBUG")
-    {
-    linkType = cmTarget::DEBUG;
-    }
+  cmTarget::LinkLibraryType linkType = target->ComputeLinkType(config);
 
   // Construct the list of libs linked for this configuration.
   std::vector<std::string> actual_libs;

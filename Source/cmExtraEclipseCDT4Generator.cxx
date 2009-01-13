@@ -40,6 +40,36 @@ cmExtraEclipseCDT4Generator
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 #endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+
+  // don't create these targets in Eclipse, they are too many and 
+  // should be only rarely used directly
+  this->TargetsToIgnore.insert("preinstall");
+  this->TargetsToIgnore.insert("install/local");
+  this->TargetsToIgnore.insert("ContinuousBuild");
+  this->TargetsToIgnore.insert("ContinuousConfigure");
+  this->TargetsToIgnore.insert("ContinuousCoverage");
+  this->TargetsToIgnore.insert("ContinuousMemCheck");
+  this->TargetsToIgnore.insert("ContinuousStart");
+  this->TargetsToIgnore.insert("ContinuousSubmit");
+  this->TargetsToIgnore.insert("ContinuousTest");
+  this->TargetsToIgnore.insert("ContinuousUpdate");
+  this->TargetsToIgnore.insert("ExperimentalBuild");
+  this->TargetsToIgnore.insert("ExperimentalConfigure");
+  this->TargetsToIgnore.insert("ExperimentalCoverage");
+  this->TargetsToIgnore.insert("ExperimentalMemCheck");
+  this->TargetsToIgnore.insert("ExperimentalStart");
+  this->TargetsToIgnore.insert("ExperimentalSubmit");
+  this->TargetsToIgnore.insert("ExperimentalTest");
+  this->TargetsToIgnore.insert("ExperimentalUpdate");
+  this->TargetsToIgnore.insert("NightlyBuild");
+  this->TargetsToIgnore.insert("NightlyConfigure");
+  this->TargetsToIgnore.insert("NightlyCoverage");
+  this->TargetsToIgnore.insert("NightlyMemCheck");
+  this->TargetsToIgnore.insert("NightlyMemoryCheck");
+  this->TargetsToIgnore.insert("NightlyStart");
+  this->TargetsToIgnore.insert("NightlySubmit");
+  this->TargetsToIgnore.insert("NightlyTest");
+  this->TargetsToIgnore.insert("NightlyUpdate");
 }
 
 //----------------------------------------------------------------------------
@@ -66,7 +96,6 @@ void cmExtraEclipseCDT4Generator
     = static_cast<cmGlobalUnixMakefileGenerator3*>(generator);
   mf->SetToolSupportsColor(true);
   mf->SetForceVerboseMakefiles(true);
-  mf->EnableInstallTarget();
 }
 
 //----------------------------------------------------------------------------
@@ -351,42 +380,14 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
         }
       }
     // for EXECUTABLE_OUTPUT_PATH when not in binary dir
-    std::string outputPath = mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-    if (!outputPath.empty() && !cmSystemTools::IsSubDirectory(
-                        outputPath.c_str(), this->HomeOutputDirectory.c_str()))
-      {
-      std::string name = this->GetPathBasename(outputPath);
-
-      // make sure linked resource name is unique
-      while (this->GlobalGenerator->GetProjectMap().find(name)
-             != this->GlobalGenerator->GetProjectMap().end())
-        {
-        name += "_";
-        }
-        this->AppendLinkedResource(fout, name,
-                                   this->GetEclipsePath(outputPath));
-        this->OutLinkedResources.push_back(name);
-      }
+    this->AppendOutLinkedResource(fout,
+      mf->GetSafeDefinition("CMAKE_RUNTIME_OUTPUT_DIRECTORY"),
+      mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH"));
     // for LIBRARY_OUTPUT_PATH when not in binary dir
-    if (outputPath != mf->GetSafeDefinition("LIBRARY_OUTPUT_PATH"))
-      {
-      outputPath = mf->GetSafeDefinition("LIBRARY_OUTPUT_PATH");
-      if (!outputPath.empty() && !cmSystemTools::IsSubDirectory(
-                        outputPath.c_str(), this->HomeOutputDirectory.c_str()))
-        {
-        std::string name = this->GetPathBasename(outputPath);
+    this->AppendOutLinkedResource(fout,
+      mf->GetSafeDefinition("CMAKE_LIBRARY_OUTPUT_DIRECTORY"),
+      mf->GetSafeDefinition("LIBRARY_OUTPUT_PATH"));
 
-        // make sure linked resource name is unique
-        while (this->GlobalGenerator->GetProjectMap().find(name)
-               != this->GlobalGenerator->GetProjectMap().end())
-          {
-          name += "_";
-          }
-        this->AppendLinkedResource(fout, name,
-                                   this->GetEclipsePath(outputPath));
-        this->OutLinkedResources.push_back(name);
-        }
-      }
     fout << "\t</linkedResources>\n";
     }
 
@@ -573,7 +574,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           {
           emmited.insert(def);
           fout << "<pathentry kind=\"mac\" name=\"" << def
-               << "\" path=\"\" value=\"" << val << "\"/>\n";
+               << "\" path=\"\" value=\"" << this->EscapeForXML(val) 
+               << "\"/>\n";
           }
         }
       }
@@ -615,22 +617,12 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   if (generator->GetAllTargetName())
     {
     emmited.insert(generator->GetAllTargetName());
-    cmExtraEclipseCDT4Generator::AppendTarget(fout,
-                                              generator->GetAllTargetName(),
-                                              make);
+    this->AppendTarget(fout, generator->GetAllTargetName(), make);
     }
-  if (generator->GetPreinstallTargetName())
-    {
-    emmited.insert(generator->GetPreinstallTargetName());
-    cmExtraEclipseCDT4Generator
-    ::AppendTarget(fout, generator->GetPreinstallTargetName(), make);
-    }
-
   if (generator->GetCleanTargetName())
     {
     emmited.insert(generator->GetCleanTargetName());
-    cmExtraEclipseCDT4Generator
-    ::AppendTarget(fout, generator->GetCleanTargetName(), make);
+    this->AppendTarget(fout, generator->GetCleanTargetName(), make);
     }
 
   // add all executable and library targets and some of the GLOBAL 
@@ -643,47 +635,54 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
     for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
       {
+      bool addFastTarget = false;
       switch(t->second.GetType())
         {
-        case cmTarget::UTILITY:
-        case cmTarget::GLOBAL_TARGET:
-          {
-          // only add these global targets
-          if (!( (t->first=="install")
-              || (t->first=="install/strip")
-              || (t->first=="test")
-              || (t->first=="Experimental")
-              || (t->first=="Nightly")
-              || (t->first=="edit_cache")
-              || (t->first=="package")
-              || (t->first=="package_source")
-              || (t->first=="rebuild_cache") ))
-            {
-            break;
-            }
-          // add the edit_cache target only if it's not ccmake
-          // otherwise ccmake will be executed in the log view of Eclipse,
-          // which is no terminal, so curses don't work there, Alex
-          if (t->first=="edit_cache") 
-            {
-            if (strstr(mf->GetRequiredDefinition("CMAKE_EDIT_COMMAND"), 
-                                                 "ccmake")!=NULL)
-              {
-              break;
-              }
-            }
-          }
         case cmTarget::EXECUTABLE:
         case cmTarget::STATIC_LIBRARY:
         case cmTarget::SHARED_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
+           addFastTarget = true;
+           // no break here
+        case cmTarget::UTILITY:
+        case cmTarget::GLOBAL_TARGET:
           {
-          if(emmited.find(t->first) == emmited.end())
+          bool insertTarget = true;
+          if(insertTarget && (this->TargetsToIgnore.find(t->first) != 
+                                                  this->TargetsToIgnore.end()))
+            {
+            insertTarget = false;
+            }
+
+          if(insertTarget && (emmited.find(t->first) != emmited.end()))
+            {
+            insertTarget = false;
+            }
+
+          // add the edit_cache target only if it's not ccmake
+          // otherwise ccmake will be executed in the log view of Eclipse,
+          // which is no terminal, so curses don't work there, Alex
+          if (insertTarget && (t->first=="edit_cache"))
+            {
+            if (strstr(mf->GetRequiredDefinition("CMAKE_EDIT_COMMAND"), 
+                                                 "ccmake")!=NULL)
+              {
+              insertTarget = false;
+              }
+            }
+
+          if (insertTarget)
             {
             emmited.insert(t->first);
-            cmExtraEclipseCDT4Generator::AppendTarget(fout, t->first, make);
+            this->AppendTarget(fout, t->first, make);
+            if (addFastTarget || t->first=="install")
+              {
+              std::string fastTarget = t->first;
+              fastTarget = fastTarget + "/fast";
+              this->AppendTarget(fout, fastTarget, make);
+              }
             }
-           break;
+          break;
           }
         // ignore these:
         case cmTarget::INSTALL_FILES:
@@ -698,7 +697,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           "</storageModule>\n"
           ;
 
-  this->AppendStorageScanners(fout);
+  this->AppendStorageScanners(fout, *mf);
 
   fout << "</cconfiguration>\n"
           "</storageModule>\n"
@@ -792,12 +791,40 @@ cmExtraEclipseCDT4Generator::GenerateProjectName(const std::string& name,
   return name + (type.empty() ? "" : "-") + type + "@" + path;
 }
 
+std::string cmExtraEclipseCDT4Generator::EscapeForXML(const std::string& value)
+{
+  std::string str = value;
+  cmSystemTools::ReplaceString(str, "&", "&amp;");
+  cmSystemTools::ReplaceString(str, "<", "&lt;");
+  cmSystemTools::ReplaceString(str, ">", "&gt;");
+  cmSystemTools::ReplaceString(str, "\"", "&quot;");
+  // NOTE: This one is not necessary, since as of Eclipse CDT4 it will
+  //       automatically change this to the original value (').
+  //cmSystemTools::ReplaceString(str, "'", "&apos;");
+  return str;
+}
+
 //----------------------------------------------------------------------------
 // Helper functions
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
-::AppendStorageScanners(cmGeneratedFileStream& fout)
+::AppendStorageScanners(cmGeneratedFileStream& fout, 
+                        const cmMakefile& makefile)
 {
+  // we need the "make" and the C (or C++) compiler which are used, Alex
+  std::string make = makefile.GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  std::string compiler = makefile.GetSafeDefinition("CMAKE_C_COMPILER");
+  if (compiler.empty())
+    {
+    compiler = makefile.GetSafeDefinition("CMAKE_CXX_COMPILER");
+    }
+  if (compiler.empty())  //Hmm, what to do now ?
+    {
+    compiler = "gcc";
+    }
+
+
+  // the following right now hardcodes gcc behaviour :-/
   fout << 
     "<storageModule moduleId=\"scannerConfiguration\">\n"
     "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
@@ -808,12 +835,12 @@ void cmExtraEclipseCDT4Generator
     "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile",
     true, "", true, "specsFile",
     "-E -P -v -dD ${plugin_state_location}/${specs_file}",
-    "gcc", true, true);
+    compiler, true, true);
   cmExtraEclipseCDT4Generator::AppendScannerProfile(fout,
     "org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile",
     true, "", true, "makefileGenerator",
     "-f ${project_name}_scd.mk",
-    "make", true, true);
+    make, true, true);
 
   fout << "</storageModule>\n";
 }
@@ -881,3 +908,51 @@ void cmExtraEclipseCDT4Generator
     "\t\t</link>\n"
     ;
 }
+
+bool cmExtraEclipseCDT4Generator
+::AppendOutLinkedResource(cmGeneratedFileStream& fout,
+                          const std::string&     defname,
+                          const std::string&     altdefname)
+{
+  if (defname.empty() && altdefname.empty())
+    {
+    return false;
+    }
+
+  std::string outputPath = (defname.empty() ? altdefname : defname);
+
+  if (!cmSystemTools::FileIsFullPath(outputPath.c_str()))
+    {
+    outputPath = this->HomeOutputDirectory + "/" + outputPath;
+    }
+  if (cmSystemTools::IsSubDirectory(outputPath.c_str(),
+                                    this->HomeOutputDirectory.c_str()))
+    {
+    return false;
+    }
+
+  std::string name = this->GetPathBasename(outputPath);
+
+  // make sure linked resource name is unique
+  while (this->GlobalGenerator->GetProjectMap().find(name)
+      != this->GlobalGenerator->GetProjectMap().end())
+    {
+    name += "_";
+    }
+
+  if (std::find(this->OutLinkedResources.begin(),
+                this->OutLinkedResources.end(),
+                name)
+      != this->OutLinkedResources.end())
+    {
+    return false;
+    }
+  else
+    {
+    this->AppendLinkedResource(fout, name,
+                               this->GetEclipsePath(outputPath));
+    this->OutLinkedResources.push_back(name);
+    return true;
+    }
+}
+

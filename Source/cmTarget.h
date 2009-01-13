@@ -186,6 +186,9 @@ public:
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
 
+  /** Compute the link type to use for the given configuration.  */
+  LinkLibraryType ComputeLinkType(const char* config);
+
   /**
    * Clear the dependency information recorded for this target, if any.
    */

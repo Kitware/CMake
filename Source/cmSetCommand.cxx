@@ -171,7 +171,7 @@ bool cmSetCommand
     this->Makefile->AddCacheDefinition(variable,
                                    value.c_str(),
                                    docstring,
-                                   type);
+                                   type, force);
     }
   else
     {

@@ -42,7 +42,6 @@ public:
 protected:
   typedef std::vector<cmTargetExport*> ExportSet;
 
-  typedef cmInstallGeneratorIndent Indent;
   virtual void GenerateScript(std::ostream& os);
   virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);

@@ -189,9 +189,9 @@ std::string
 cmInstallGenerator::CreateComponentTest(const char* component)
 {
   std::string result = "NOT CMAKE_INSTALL_COMPONENT OR "
-    "\"${CMAKE_INSTALL_COMPONENT}\" MATCHES \"^(";
+    "\"${CMAKE_INSTALL_COMPONENT}\" STREQUAL \"";
   result += component;
-  result += ")$\"";
+  result += "\"";
   return result;
 }
 

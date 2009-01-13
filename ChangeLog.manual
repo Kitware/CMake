@@ -1,3 +1,22 @@
+Changes in CMake 2.6.3 RC 8
+- CMAKE_VERBOSE_MAKEFILE fix for KDevelop3
+- FindGettext.cmake fix #8122
+- FindPythonInterp.cmake find python 2.6 on windows
+- cmake_minimum_required forward compatibility
+- Fix (#7289) in cmDocumentationFormatterDocbook.cxx
+- Fix #8203: codeblocks + mingw quoting issue
+- Clean per-config export files during install
+- Bug fixes for Eclipse CDT4 generator
+- find_package refind when previously found file is removed
+- Support '-' in target names for VS6
+- Fix component-name test on installation
+- Warn when build directory is too long
+- Fix set cache FORCE and -D command line to work together
+- Enable LOCATION property for imported targets
+- Allow cmake-gui to be built by cmake 2.4
+- Fix installation from read-only source file
+- Fix for rc and vs6 -D flags
+- Create DEBUG_CONFIGURATIONS global property
 
 Changes in CMake 2.6.3 RC 7
 - Add both 32/64-bit Program Files as windows paths

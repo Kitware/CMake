@@ -710,17 +710,8 @@ bool cmFindPackageCommand::HandlePackageMode()
       }
     }
 
-  // Search for the config file if it is not already found.
-  if(cmSystemTools::IsOff(def))
-    {
-    this->FindConfig();
-    def = this->Makefile->GetDefinition(this->Variable.c_str());
-    }
-
-  // If the config file was found, load it.
-  std::string file;
-  bool result = true;
-  bool found = false;
+  // Try to load the config file if the directory is known
+  bool cachedDirectoryOk = false;
   if(!cmSystemTools::IsOff(def))
     {
     // Get the directory from the variable value.
@@ -733,38 +724,44 @@ bool cmFindPackageCommand::HandlePackageMode()
       dir = "/" + dir;
       dir = this->Makefile->GetCurrentDirectory() + dir;
       }
-
-    // Find the configuration file.
-    if(this->FindConfigFileToLoad(dir, file))
+    // The file location was cached.  Look for the correct file.
+    std::string file;
+    if (this->FindConfigFile(dir, file))
       {
-      // Set the version variables before loading the config file.
-      // It may override them.
-      this->StoreVersionFound();
+      this->FileFound = file;
+      cachedDirectoryOk = true;
+      }
+    def = this->Makefile->GetDefinition(this->Variable.c_str());
+    }
 
-      // Parse the configuration file.
-      if(this->ReadListFile(file.c_str()))
-        {
-        // The package has been found.
-        found = true;
-        }
-      else
-        {
-        // The configuration file is invalid.
-        result = false;
-        }
+  // Search for the config file if it is not already found.
+  if(cmSystemTools::IsOff(def) || !cachedDirectoryOk)
+    {
+    this->FindConfig();
+    def = this->Makefile->GetDefinition(this->Variable.c_str());
+    }
+
+  // If the directory for the config file was found, try to read the file.
+  bool result = true;
+  bool found = false;
+  // in the following test FileFound should never be empty if def is valid
+  // but I don't want to put an assert() in there now, in case this still
+  // makes it into 2.6.3
+  if(!cmSystemTools::IsOff(def) && (!this->FileFound.empty()))
+    {
+    // Set the version variables before loading the config file.
+    // It may override them.
+    this->StoreVersionFound();
+
+    // Parse the configuration file.
+    if(this->ReadListFile(this->FileFound.c_str()))
+      {
+      // The package has been found.
+      found = true;
       }
     else
       {
-      // The variable setting is wrong.
-      cmOStringStream e;
-      e << "cannot find package " << this->Name << " because "
-        << this->Variable << " is set to \"" << def << "\" "
-        << "which is not a directory containing a package configuration "
-        << "file (or it is not for the requested version).  "
-        << "Please set the cache entry " << this->Variable << " "
-        << "to the correct directory, or delete it to ask CMake "
-        << "to search.";
-      this->SetError(e.str().c_str());
+      // The configuration file is invalid.
       result = false;
       }
     }
@@ -816,7 +813,7 @@ bool cmFindPackageCommand::HandlePackageMode()
   fileVar += "_CONFIG";
   if(found)
     {
-    this->Makefile->AddDefinition(fileVar.c_str(), file.c_str());
+    this->Makefile->AddDefinition(fileVar.c_str(), this->FileFound.c_str());
     }
   else
     {
@@ -1242,24 +1239,6 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
       }
     }
   return false;
-}
-
-//----------------------------------------------------------------------------
-bool cmFindPackageCommand::FindConfigFileToLoad(std::string const& dir,
-                                                std::string& file)
-{
-  if(this->FileFound.empty())
-    {
-    // The file location was cached.  Look for the correct file.
-    return this->FindConfigFile(dir, file);
-    }
-  else
-    {
-    // The file location was just found during this call.
-    // Use the file found without searching again.
-    file = this->FileFound;
-    return true;
-    }
 }
 
 //----------------------------------------------------------------------------

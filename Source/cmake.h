@@ -332,6 +332,10 @@ class cmake
   bool IsPropertyDefined(const char *name, cmProperty::ScopeType scope);
   bool IsPropertyChained(const char *name, cmProperty::ScopeType scope);
 
+  /** Get the list of configurations (in upper case) considered to be
+      debugging configurations.*/
+  std::vector<std::string> const& GetDebugConfigs();
+
   // record accesses of properties and variables
   void RecordPropertyAccess(const char *name, cmProperty::ScopeType scope);
   void ReportUndefinedPropertyAccesses(const char *filename);
@@ -456,6 +460,7 @@ private:
   bool DebugTryCompile;
   cmFileTimeComparison* FileComparison;
   std::string GraphVizFile;
+  std::vector<std::string> DebugConfigs;
   
   void UpdateConversionPathTable();
 };

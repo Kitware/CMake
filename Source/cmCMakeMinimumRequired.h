@@ -77,12 +77,17 @@ public:
       "When version 2.4 or lower is given the command implicitly invokes\n"
       "  cmake_policy(VERSION 2.4)\n"
       "which enables compatibility features for CMake 2.4 and lower.\n"
-      "The FATAL_ERROR option is accepted but ignored.  It is left from "
-      "CMake versions 2.4 and lower in which failure to meet the minimum "
-      "version was a warning by default.";
+      "The FATAL_ERROR option is accepted but ignored by CMake 2.6 "
+      "and higher.  "
+      "It should be specified so CMake versions 2.4 and lower fail with an "
+      "error instead of just a warning.";
     }
   
   cmTypeMacro(cmCMakeMinimumRequired, cmCommand);
+
+private:
+  std::vector<std::string> UnknownArguments;
+  bool EnforceUnknownArguments();
 };
 
 

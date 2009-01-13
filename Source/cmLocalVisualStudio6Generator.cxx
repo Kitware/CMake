@@ -63,7 +63,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
 
   // Setup /I and /LIBPATH options for the resulting DSP file.  VS 6
   // truncates long include paths so make it as short as possible if
-  // the length threatents this problem.
+  // the length threatens this problem.
   unsigned int maxIncludeLength = 3000;
   bool useShortPath = false;
   for(int j=0; j < 2; ++j)
@@ -167,17 +167,23 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
     }
 }
 
+// Utility function to make a valid VS6 *.dsp filename out
+// of a CMake target name:
+//
+extern std::string GetVS6TargetName(const std::string& targetName);
+
 void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname, 
                                                     cmTarget &target)
 {
   // add to the list of projects
-  std::string pname = lname;
+  std::string pname = GetVS6TargetName(lname);
+
   this->CreatedProjectNames.push_back(pname);
   // create the dsp.cmake file
   std::string fname;
   fname = this->Makefile->GetStartOutputDirectory();
   fname += "/";
-  fname += lname;
+  fname += pname;
   fname += ".dsp";
   // save the name of the real dsp file
   std::string realDSP = fname;
@@ -188,7 +194,7 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname,
     cmSystemTools::Error("Error Writing ", fname.c_str());
     cmSystemTools::ReportLastSystemError("");
     }
-  this->WriteDSPFile(fout,lname,target);
+  this->WriteDSPFile(fout,pname.c_str(),target);
   fout.close();
   // if the dsp file has changed, then write it.
   cmSystemTools::CopyFileIfDifferent(fname.c_str(), realDSP.c_str());
@@ -197,7 +203,7 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname,
 
 void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
 {
-  std::string dspname = tgt.GetName();
+  std::string dspname = GetVS6TargetName(tgt.GetName());
   dspname += ".dsp.cmake";
   const char* dsprule = 
     this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
@@ -287,10 +293,6 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
       }
     }
   
-  // trace the visual studio dependencies
-  std::string name = libName;
-  name += ".dsp.cmake";
-
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
   
@@ -370,27 +372,27 @@ void cmLocalVisualStudio6Generator
     this->WriteDSPBeginGroup(fout, name.c_str(), "");
     }
 
-  // Compute the maximum length of a configuration name.
-  std::string::size_type config_len_max = 0;
+  // Compute the maximum length configuration name.
+  std::string config_max;
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
     // Strip the subdirectory name out of the configuration name.
     std::string config = this->GetConfigName(*i);
-    if(config.size() > config_len_max)
+    if(config.size() > config_max.size())
       {
-      config_len_max = config.size();
+      config_max = config;
       }
     }
 
-  // Compute the maximum length of the full path to the intermediate
+  // Compute the maximum length full path to the intermediate
   // files directory for any configuration.  This is used to construct
   // object file names that do not produce paths that are too long.
-  std::string::size_type dir_len = 0;
-  dir_len += strlen(this->Makefile->GetCurrentOutputDirectory());
-  dir_len += 1;
-  dir_len += config_len_max;
-  dir_len += 1;
+  std::string dir_max;
+  dir_max += this->Makefile->GetCurrentOutputDirectory();
+  dir_max += "/";
+  dir_max += config_max;
+  dir_max += "/";
 
   // Loop through each source in the source group.
   for(std::vector<const cmSourceFile *>::const_iterator sf =
@@ -406,7 +408,7 @@ void cmLocalVisualStudio6Generator
       {
       objectNameDir =
         cmSystemTools::GetFilenamePath(
-          this->GetObjectFileNameWithoutTarget(*(*sf), dir_len));
+          this->GetObjectFileNameWithoutTarget(*(*sf), dir_max));
       }
 
     // Add per-source file flags.
@@ -462,7 +464,8 @@ void cmLocalVisualStudio6Generator
       {
       cmSystemTools::ExpandListArgument(dependsValue, depends);
       }
-    if (source != libName || target.GetType() == cmTarget::UTILITY ||
+    if (GetVS6TargetName(source) != libName ||
+      target.GetType() == cmTarget::UTILITY ||
       target.GetType() == cmTarget::GLOBAL_TARGET)
       {
       fout << "# Begin Source File\n\n";
@@ -758,11 +761,13 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
   // reset this->Configurations
   this->Configurations.erase(this->Configurations.begin(), 
                              this->Configurations.end());
+
   // now add all the configurations possible
+  std::string vs6name = GetVS6TargetName(libName);
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
-    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
+    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", vs6name.c_str());
     if (reg.find(line))
       {
       this->Configurations.push_back(line.substr(reg.end()));
@@ -1055,8 +1060,10 @@ void cmLocalVisualStudio6Generator
     if ((target.GetType() != cmTarget::SHARED_LIBRARY
          && target.GetType() != cmTarget::STATIC_LIBRARY 
          && target.GetType() != cmTarget::MODULE_LIBRARY) || 
-        (target.GetType()==cmTarget::SHARED_LIBRARY && libName != j->first) ||
-        (target.GetType()==cmTarget::MODULE_LIBRARY && libName != j->first))
+        (target.GetType()==cmTarget::SHARED_LIBRARY
+         && libName != GetVS6TargetName(j->first)) ||
+        (target.GetType()==cmTarget::MODULE_LIBRARY
+         && libName != GetVS6TargetName(j->first)))
       {
       // Compute the proper name to use to link this library.
       std::string lib;
@@ -1404,12 +1411,15 @@ void cmLocalVisualStudio6Generator
                                  targetImplibFlagMinSizeRel.c_str());
     cmSystemTools::ReplaceString(line, "TARGET_IMPLIB_FLAG_RELWITHDEBINFO",
                                  targetImplibFlagRelWithDebInfo.c_str());
-    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME",libName);
+
+    std::string vs6name = GetVS6TargetName(libName);
+    cmSystemTools::ReplaceString(line, "OUTPUT_LIBNAME", vs6name.c_str());
+
 #ifdef CM_USE_OLD_VS6
-    // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH 
+    // because LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH
     // are already quoted in the template file,
     // we need to remove the quotes here, we still need
-    // to convert to output path for unix to win32 conversion 
+    // to convert to output path for unix to win32 conversion
     cmSystemTools::ReplaceString
       (line, "LIBRARY_OUTPUT_PATH",
        removeQuotes(this->ConvertToOptionallyRelativeOutputPath
@@ -1511,32 +1521,49 @@ void cmLocalVisualStudio6Generator
       }
 
     // Add per-target and per-configuration preprocessor definitions.
-    this->AppendDefines
-      (flags, this->Makefile->GetProperty("COMPILE_DEFINITIONS"), 0);
-    this->AppendDefines(flags, target.GetProperty("COMPILE_DEFINITIONS"), 0);
-    this->AppendDefines
-      (flagsDebug,
-       this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
-    this->AppendDefines(flagsDebug,
-                        target.GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
-    this->AppendDefines
-      (flagsRelease,
-       this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
-    this->AppendDefines(flagsRelease,
-                        target.GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
-    this->AppendDefines
-      (flagsMinSize,
-       this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
-    this->AppendDefines
-      (flagsMinSize,
-       target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
-    this->AppendDefines
-      (flagsDebugRel,
-       this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
-    this->AppendDefines
-      (flagsDebugRel,
-       target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
+    std::string defines = " ";
+    std::string debugDefines = " ";
+    std::string releaseDefines = " ";
+    std::string minsizeDefines = " ";
+    std::string debugrelDefines = " ";
 
+    this->AppendDefines(
+      defines,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS"), 0);
+    this->AppendDefines(
+      debugDefines,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"),0);
+    this->AppendDefines(
+      releaseDefines,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
+    this->AppendDefines(
+      minsizeDefines,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
+    this->AppendDefines(
+      debugrelDefines,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
+
+    this->AppendDefines(
+      defines,
+      target.GetProperty("COMPILE_DEFINITIONS"), 0);
+    this->AppendDefines(
+      debugDefines,
+      target.GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
+    this->AppendDefines(
+      releaseDefines,
+      target.GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
+    this->AppendDefines(
+      minsizeDefines,
+      target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
+    this->AppendDefines(
+      debugrelDefines,
+      target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
+    flags += defines;
+    flagsDebug += debugDefines;
+    flagsRelease += releaseDefines;
+    flagsMinSize += minsizeDefines;
+    flagsDebugRel += debugrelDefines;
+ 
     // The template files have CXX FLAGS in them, that need to be replaced.
     // There are not separate CXX and C template files, so we use the same
     // variable names.   The previous code sets up flags* variables to contain
@@ -1550,6 +1577,17 @@ void cmLocalVisualStudio6Generator
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE", 
                                  flagsRelease.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());
+
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_MINSIZE", 
+                                 minsizeDefines.c_str());
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_DEBUG", 
+                                 debugDefines.c_str());
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELWITHDEBINFO", 
+                                 debugrelDefines.c_str());
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELEASE", 
+                                 releaseDefines.c_str());
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS", defines.c_str());
+
     fout << line.c_str() << std::endl;
     }
 }
