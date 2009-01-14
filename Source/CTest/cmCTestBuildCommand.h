@@ -20,6 +20,7 @@
 #include "cmCTestHandlerCommand.h"
 
 class cmGlobalGenerator;
+class cmCTestBuildHandler;
 
 /** \class cmCTestBuild
  * \brief Run a ctest script
@@ -56,14 +57,16 @@ public:
     {
     return "Builds the repository.";
     }
-
+  virtual bool InitialPass(std::vector<std::string> const& args,
+                           cmExecutionStatus &status);
   /**
    * More documentation.
    */
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_build([BUILD build_dir] [RETURN_VALUE res])\n"
+      "  ctest_build([BUILD build_dir] [RETURN_VALUE res] "
+      " [NUMBER_ERRORS val] [NUMBER_WARNINGS val])\n"
       "Builds the given build directory and stores results in Build.xml.";
     }
 
@@ -72,6 +75,14 @@ public:
   cmGlobalGenerator* GlobalGenerator;
 
 protected:
+  cmCTestBuildHandler* Handler;
+  enum {
+    ctb_BUILD = ct_LAST,
+    ctb_NUMBER_ERRORS,
+    ctb_NUMBER_WARNINGS,
+    ctb_LAST
+  };
+
   cmCTestGenericHandler* InitializeHandler();
 };
 

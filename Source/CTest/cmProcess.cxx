@@ -213,7 +213,7 @@ bool cmProcess::IsRunning()
   cmsysProcess_WaitForExit(this->Process, 0);
   this->ExitValue = cmsysProcess_GetExitValue(this->Process);
   this->TotalTime = cmSystemTools::GetTime() - this->StartTime;
-//  std::cerr << "Time to run: " << this->TotalTime << "\n";
+  std::cerr << "Time to run: " << this->TotalTime << "\n";
   return false;
 }
 

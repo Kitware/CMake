@@ -18,6 +18,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
+#include "cmCTestBuildHandler.h"
 #include "cmake.h"
 #include "cmGlobalGenerator.h"
 
@@ -26,6 +27,10 @@
 cmCTestBuildCommand::cmCTestBuildCommand()
 {
   this->GlobalGenerator = 0;
+  this->Arguments[ctb_NUMBER_ERRORS] = "NUMBER_ERRORS";
+  this->Arguments[ctb_NUMBER_WARNINGS] = "NUMBER_WARNINGS"; 
+  this->Arguments[ctb_LAST] = 0;
+  this->Last = ctb_LAST;
 }
 
 //----------------------------------------------------------------------------
@@ -48,7 +53,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
     this->SetError("internal CTest error. Cannot instantiate build handler");
     return 0;
     }
-
+  this->Handler =  (cmCTestBuildHandler*)handler;
   const char* ctestBuildCommand
     = this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");
   if ( ctestBuildCommand && *ctestBuildCommand )
@@ -132,3 +137,24 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
 }
 
 
+bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
+                                      cmExecutionStatus &status)
+{
+  bool ret =  cmCTestHandlerCommand::InitialPass(args, status);
+  if ( this->Values[ctb_NUMBER_ERRORS] && *this->Values[ctb_NUMBER_ERRORS])
+    {  
+    cmOStringStream str;
+    str << this->Handler->GetTotalErrors();
+    this->Makefile->AddDefinition(
+      this->Values[ctb_NUMBER_ERRORS], str.str().c_str());
+    }
+  if ( this->Values[ctb_NUMBER_WARNINGS]
+       && *this->Values[ctb_NUMBER_WARNINGS])
+    {
+    cmOStringStream str;
+    str << this->Handler->GetTotalWarnings();
+    this->Makefile->AddDefinition(
+      this->Values[ctb_NUMBER_WARNINGS], str.str().c_str());
+    }
+  return ret;
+}

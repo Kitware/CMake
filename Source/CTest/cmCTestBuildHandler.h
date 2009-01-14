@@ -49,6 +49,8 @@ public:
    */
   virtual void Initialize();
 
+  int GetTotalErrors() { return this->TotalErrors;}
+  int GetTotalWarnings() { return this->TotalWarnings;}
 private:
   //! Run command specialized for make and configure. Returns process status
   // and retVal is return value or exception.

@@ -475,7 +475,7 @@ int cmCTestBuildHandler::ProcessHandler()
     }
   this->GenerateDartBuildOutput(
     xofs, this->ErrorsAndWarnings, elapsed_build_time);
-  return 0;
+  return res;
 }
 
 //----------------------------------------------------------------------
@@ -724,6 +724,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
         errorwarning.Error       = false;
         this->ErrorsAndWarnings.push_back(errorwarning);
         this->TotalWarnings ++;
+        return *retVal;  // return the program return value
         }
       }
     }
@@ -734,11 +735,13 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
       *retVal = cmsysProcess_GetExitException(cp);
       cmCTestLog(this->CTest, WARNING, "There was an exception: " << *retVal
                  << std::endl);
+      return *retVal;
       }
     }
   else if(result == cmsysProcess_State_Expired)
     {
     cmCTestLog(this->CTest, WARNING, "There was a timeout" << std::endl);
+    return -1;
     }
   else if(result == cmsysProcess_State_Error)
     {
@@ -754,11 +757,12 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     this->TotalErrors ++;
     cmCTestLog(this->CTest, ERROR_MESSAGE, "There was an error: "
       << cmsysProcess_GetErrorString(cp) << std::endl);
+    return -1;
     }
 
   cmsysProcess_Delete(cp);
 
-  return result;
+  return 0;
 }
 
 //######################################################################
