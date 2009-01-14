@@ -49,6 +49,9 @@ ENDFOREACH(p)
 SET(CMAKE_FIND_FRAMEWORK LAST)
 SET(CMAKE_FIND_APPBUNDLE FIRST)
 
+# Set the wrong answer for a find to make sure it re-finds.
+set(VersionedA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/cmake/zot-4.0)
+
 # Look for packages with new-style signatures.
 FIND_PACKAGE(foo NO_MODULE)
 FIND_PACKAGE(Foo CONFIGS FooConfig.cmake)
