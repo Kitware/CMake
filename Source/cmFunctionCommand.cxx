@@ -104,7 +104,8 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     }
 
   // we push a scope on the makefile
-  this->Makefile->PushScope();
+  cmMakefile::ScopePushPop varScope(this->Makefile);
+  static_cast<void>(varScope);
 
   // set the value of argc
   cmOStringStream strStream;
@@ -167,13 +168,11 @@ bool cmFunctionHelperCommand::InvokeInitialPass
       }
     if (status.GetReturnInvoked())
       {
-      this->Makefile->PopScope();
       return true;
       }
     }
 
   // pop scope on the makefile
-  this->Makefile->PopScope();
   return true;
 }
 
