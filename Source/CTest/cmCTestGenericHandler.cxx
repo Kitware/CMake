@@ -81,6 +81,7 @@ void cmCTestGenericHandler::SetPersistentOption(const char* op,
 //----------------------------------------------------------------------
 void cmCTestGenericHandler::Initialize()
 {
+  this->AppendXML = false;
   this->Options.clear();
   t_StringToString::iterator it;
   for ( it = this->PersistentOptions.begin(); 

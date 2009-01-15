@@ -70,17 +70,17 @@ cmCTestSubmitHandler::cmCTestSubmitHandler() : HTTPProxy(), FTPProxy()
   this->FTPProxyType = 0;
   this->CDash = false;
 
+}
+
+//----------------------------------------------------------------------------
+void cmCTestSubmitHandler::Initialize()
+{
   // We submit all available parts by default.
   for(cmCTest::Part p = cmCTest::PartStart;
       p != cmCTest::PartCount; p = cmCTest::Part(p+1))
     {
     this->SubmitPart[p] = true;
     }
-}
-
-//----------------------------------------------------------------------------
-void cmCTestSubmitHandler::Initialize()
-{
   this->CDash = false;
   this->Superclass::Initialize();
   this->HTTPProxy = "";
