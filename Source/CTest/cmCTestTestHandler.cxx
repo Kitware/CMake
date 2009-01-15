@@ -401,7 +401,12 @@ cmCTestTestHandler::cmCTestTestHandler()
 
   this->LogFile = 0;
 
-  this->DartStuff.compile("(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
+  // regex to detect <DartMeasurement>...</DartMeasurement>
+  this->DartStuff.compile(
+    "(<DartMeasurement.*/DartMeasurement[a-zA-Z]*>)");
+  // regex to detect each individual <DartMeasurement>...</DartMeasurement>
+  this->DartStuff1.compile(
+    "(<DartMeasurement[^<]*</DartMeasurement[a-zA-Z]*>)");
 }
 
 //----------------------------------------------------------------------
@@ -897,7 +902,13 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
       if (this->DartStuff.find(output.c_str()))
         {
         std::string dartString = this->DartStuff.match(1);
-        cmSystemTools::ReplaceString(output, dartString.c_str(),"");
+        // keep searching and replacing until none are left
+        while (this->DartStuff1.find(output.c_str()))
+          {
+          // replace the exact match for the string
+          cmSystemTools::ReplaceString(output,
+                                       this->DartStuff1.match(1).c_str(), "");
+          }
         cres.RegressionImages
           = this->GenerateRegressionImages(dartString);
         }

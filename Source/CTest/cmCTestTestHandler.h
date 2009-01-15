@@ -240,6 +240,7 @@ private:
   cmsys::RegularExpression ExcludeTestsRegularExpression;
 
   std::string GenerateRegressionImages(const std::string& xml);
+  cmsys::RegularExpression DartStuff1;
 
   std::string TestsToRunString;
   bool UseUnion;
