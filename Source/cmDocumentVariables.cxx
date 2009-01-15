@@ -208,6 +208,20 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This specifies the minor version of the CMake"
      " executable being run.",false,
      "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_PATCH_VERSION", cmProperty::VARIABLE,
+     "The patch version of cmake (i.e. the 3 in X.X.3).",
+     "This specifies the patch version of the CMake"
+     " executable being run.",false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_VERSION", cmProperty::VARIABLE,
+     "The full version of cmake in major.minor.patch format.",
+     "This specifies the full version of the CMake executable being run.  "
+     "This variable is defined by versions 2.6.3 and higher.  "
+     "See variables CMAKE_MAJOR_VERSION, CMAKE_MINOR_VERSION, and "
+     "CMAKE_PATCH_VERSION for individual version components.", false,
+     "Variables that Provide Information");
 
   cm->DefineProperty
     ("CMAKE_PARENT_LIST_FILE", cmProperty::VARIABLE,

@@ -1,3 +1,8 @@
+Changes in CMake 2.6.3 RC 9
+- Fix borland 55 build
+- Pop a function scope even on error
+- Provide variable CMAKE_VERSION
+
 Changes in CMake 2.6.3 RC 8
 - CMAKE_VERBOSE_MAKEFILE fix for KDevelop3
 - FindGettext.cmake fix #8122

@@ -781,6 +781,16 @@ public:
   void PopScope();
   void RaiseScope(const char *var, const char *value);
 
+  /** Helper class to push and pop scopes automatically.  */
+  class ScopePushPop
+  {
+  public:
+    ScopePushPop(cmMakefile* m): Makefile(m) { this->Makefile->PushScope(); }
+    ~ScopePushPop() { this->Makefile->PopScope(); }
+  private:
+    cmMakefile* Makefile;
+  };
+
   void IssueMessage(cmake::MessageType t,
                     std::string const& text) const;
 

@@ -648,8 +648,10 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         case cmTarget::GLOBAL_TARGET:
           {
           bool insertTarget = true;
-          if(insertTarget && (this->TargetsToIgnore.find(t->first) != 
-                                                  this->TargetsToIgnore.end()))
+          if(insertTarget &&
+             (std::set<std::string>::const_iterator(
+               this->TargetsToIgnore.find(t->first)) !=
+              this->TargetsToIgnore.end()))
             {
             insertTarget = false;
             }
