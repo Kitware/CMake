@@ -918,7 +918,7 @@ private:
   bool CheckCMP0000;
 
   // Enforce rules about CMakeLists.txt files.
-  void EnforceDirectoryLevelRules(bool endScopeNicely);
+  void EnforceDirectoryLevelRules();
 };
 
 

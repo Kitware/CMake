@@ -562,6 +562,11 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   // add this list file to the list of dependencies
   this->ListFiles.push_back( filenametoread);
   bool endScopeNicely = true;
+
+  // Save the current policy stack depth.
+  size_t const policy_depth = this->PolicyStack.size();
+
+  // Run the parsed commands.
   const size_t numberFunctions = cacheFile.Functions.size();
   for(size_t i =0; i < numberFunctions; ++i)
     {
@@ -574,6 +579,17 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       endScopeNicely = false;
       break;
       }
+    }
+
+  // Restore policy stack depth.
+  while(this->PolicyStack.size() > policy_depth)
+    {
+    if(endScopeNicely)
+      {
+      this->IssueMessage(cmake::FATAL_ERROR,
+                         "cmake_policy PUSH without matching POP");
+      }
+    this->PopPolicy(false);
     }
 
   // send scope ended to and function blockers
@@ -597,7 +613,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   // some extra checks.
   if(this->ListFileStack.size() == 1)
     {
-    this->EnforceDirectoryLevelRules(endScopeNicely);
+    this->EnforceDirectoryLevelRules();
     }
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
@@ -610,19 +626,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::EnforceDirectoryLevelRules(bool endScopeNicely)
+void cmMakefile::EnforceDirectoryLevelRules()
 {
-  // Enforce policy stack depth.
-  while(this->PolicyStack.size() > 1)
-    {
-    if(endScopeNicely)
-      {
-      this->IssueMessage(cmake::FATAL_ERROR,
-                         "cmake_policy PUSH without matching POP");
-      }
-    this->PopPolicy(false);
-    }
-
   // Diagnose a violation of CMP0000 if necessary.
   if(this->CheckCMP0000)
     {
