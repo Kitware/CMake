@@ -9,28 +9,40 @@
 #     ADD_EXECUTABLE(foo foo.cc)
 #     TARGET_LINK_LIBRARIES(foo ${Boost_LIBRARIES})
 #
-# The Boost_ADDITIONAL_VERSIONS variable can be used to specify a list of
-# boost version numbers that should be taken into account when searching
-# for the libraries. Unfortunately boost puts the version number into the
-# actual filename for the libraries, so this might be needed in the future
-# when new Boost versions are released.  CMake will one day have glob
-# or regex support for FIND_LIBRARY() after which this variable will
-# likely be removed.
-#
-# Currently this module searches for the following version numbers:
-# 1.33, 1.33.0, 1.33.1, 1.34, 1.34.0, 1.34.1, 1.35, 1.35.0, 1.35.1, 1.36, 
-# 1.36.0, 1.36.1, 1.37
-#
 # The components list needs to be the actual names of boost libraries, that is
 # the part of the actual library files that differ on different libraries. So
 # its "date_time" for "libboost_date_time...". Anything else will result in
-# errors
+# errors.
 #
 # You can provide a minimum version number that should be used. If you provide this 
 # version number and specify the REQUIRED attribute, this module will fail if it
 # can't find the specified or a later version. If you specify a version number this is
 # automatically put into the considered list of version numbers and thus doesn't need
 # to be specified in the Boost_ADDITIONAL_VERSIONS variable
+#
+# =========== The mess that is Boost_ADDITIONAL_VERSIONS (sorry?) ============
+#
+# OK, so the Boost_ADDITIONAL_VERSIONS variable can be used to specify a list of
+# boost version numbers that should be taken into account when searching
+# for Boost. Unfortunately boost puts the version number into the
+# actual filename for the libraries, so this variable will certainly be needed
+# in the future when new Boost versions are released.  CMake will one day have glob
+# or regex support for FIND_LIBRARY() after which this variable will
+# likely be ignored.
+#
+# Currently this module searches for the following version numbers:
+# 1.33, 1.33.0, 1.33.1, 1.34, 1.34.0, 1.34.1, 1.35, 1.35.0, 1.35.1,
+# 1.36, 1.36.0, 1.36.1, 1.37, 1.37.0
+#
+# NOTE: If you add a new major 1.x version in Boost_ADDITIONAL_VERSIONS you should
+# add both 1.x and 1.x.0 as shown above.
+#
+# SET(Boost_ADDITIONAL_VERSIONS "0.99" "0.99.0" "1.78" "1.78.0")
+#
+# One day in the near future this will no longer be necessary and which
+# version gets selected will depend completely on how you call FIND_PACKAGE().
+#
+# ============================================================================
 #
 # Variables used by this module, they can change the default behaviour and need to be set
 # before calling find_package:
@@ -44,15 +56,9 @@
 # Other Variables used by this module which you may want to set.
 #
 #  Boost_ADDITIONAL_VERSIONS     A list of version numbers to use for searching
-#                                the boost include directory. The default list
-#                                of version numbers is:
-#                                1.33, 1.33.0, 1.33.1, 1.34, 1.34.0, 1.34.1, 
-#                                1.35, 1.35.0, 1.35.1, 1.36, 1.36.0, 1.36.1,
-#                                1.37
-#                                If you want to look for an older or newer
-#                                version set this variable to a list of
-#                                strings, where each string contains a number, i.e.
-#                                SET(Boost_ADDITIONAL_VERSIONS "0.99.0" "1.35.0")
+#                                the boost include directory.  Please see
+#                                the documentation above regarding this
+#                                annoying variable :(
 #
 #  Boost_DEBUG                   Set this to TRUE to enable debugging output
 #                                of FindBoost.cmake if you are having problems.
@@ -136,7 +142,8 @@ else(Boost_FIND_VERSION_EXACT)
   # The user has not requested an exact version.  Among known
   # versions, find those that are acceptable to the user request.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
-    "1.37" "1.36.1" "1.36.0" "1.36" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0"
+    "1.37.0" "1.37"
+    "1.36.1" "1.36.0" "1.36" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0"
     "1.34" "1.33.1" "1.33.0" "1.33")
   set(_boost_TEST_VERSIONS)
   if(Boost_FIND_VERSION)
@@ -286,18 +293,9 @@ ELSE (_boost_IN_CACHE)
 
   SET(_boost_INCLUDE_SEARCH_DIRS
     C:/boost/include
-    "C:/boost"
-    "$ENV{ProgramFiles}/boost/boost_${Boost_FIND_VERSION_MAJOR}_${Boost_FIND_VERSION_MINOR}_${Boost_FIND_VERSION_PATCH}"
-    "$ENV{ProgramFiles}/Boost"
+    C:/boost
+    "$ENV{ProgramFiles}/boost"
     /sw/local/include
-  )
-
-  SET(_boost_LIBRARIES_SEARCH_DIRS
-    C:/boost/lib
-    "C:/boost"
-    "$ENV{ProgramFiles}/boost/boost_${Boost_FIND_VERSION_MAJOR}_${Boost_FIND_VERSION_MINOR}_${Boost_FIND_VERSION_PATCH}/lib"
-    "$ENV{ProgramFiles}/Boost"
-    /sw/local/lib
   )
 
   # If BOOST_ROOT was defined in the environment, use it.
@@ -314,11 +312,15 @@ ELSE (_boost_IN_CACHE)
   IF( NOT $ENV{BOOST_INCLUDEDIR} STREQUAL "" )
     set(BOOST_INCLUDEDIR $ENV{BOOST_INCLUDEDIR})
   ENDIF( NOT $ENV{BOOST_INCLUDEDIR} STREQUAL "" )
-
+  
   # If BOOST_LIBRARYDIR was defined in the environment, use it.
   IF( NOT $ENV{BOOST_LIBRARYDIR} STREQUAL "" )
     set(BOOST_LIBRARYDIR $ENV{BOOST_LIBRARYDIR})
   ENDIF( NOT $ENV{BOOST_LIBRARYDIR} STREQUAL "" )
+  
+  IF( BOOST_ROOT )
+    file(TO_CMAKE_PATH ${BOOST_ROOT} BOOST_ROOT)
+  ENDIF( BOOST_ROOT )
 
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
@@ -334,15 +336,10 @@ ELSE (_boost_IN_CACHE)
   endif()
 
   IF( BOOST_ROOT )
-    file(TO_CMAKE_PATH ${BOOST_ROOT} BOOST_ROOT)
     SET(_boost_INCLUDE_SEARCH_DIRS 
       ${BOOST_ROOT}/include 
       ${BOOST_ROOT}
       ${_boost_INCLUDE_SEARCH_DIRS})
-    SET(_boost_LIBRARIES_SEARCH_DIRS 
-      ${BOOST_ROOT}/lib 
-      ${BOOST_ROOT}/stage/lib 
-      ${_boost_LIBRARIES_SEARCH_DIRS})
   ENDIF( BOOST_ROOT )
 
   IF( BOOST_INCLUDEDIR )
@@ -351,12 +348,9 @@ ELSE (_boost_IN_CACHE)
       ${BOOST_INCLUDEDIR} ${_boost_INCLUDE_SEARCH_DIRS})
   ENDIF( BOOST_INCLUDEDIR )
 
-  IF( BOOST_LIBRARYDIR )
-    file(TO_CMAKE_PATH ${BOOST_LIBRARYDIR} BOOST_LIBRARYDIR)
-    SET(_boost_LIBRARIES_SEARCH_DIRS 
-      ${BOOST_LIBRARYDIR} ${_boost_LIBRARIES_SEARCH_DIRS})
-  ENDIF( BOOST_LIBRARYDIR )
-
+  # ------------------------------------------------------------------------
+  #  Search for Boost include DIR 
+  # ------------------------------------------------------------------------
   # Try to find Boost by stepping backwards through the Boost versions
   # we know about.
   IF( NOT Boost_INCLUDE_DIR )
@@ -366,21 +360,23 @@ ELSE (_boost_IN_CACHE)
       # Add in a path suffix, based on the required version, ideally
       # we could read this from version.hpp, but for that to work we'd
       # need to know the include dir already
-      if (WIN32 AND NOT CYGWIN)
-        set(_boost_PATH_SUFFIX boost_${_boost_VER})
-      else (WIN32 AND NOT CYGWIN)
-        set(_boost_PATH_SUFFIX boost-${_boost_VER})
-      endif (WIN32 AND NOT CYGWIN)
+      set(_boost_BOOSTIFIED_VERSION)
 
-      IF(_boost_PATH_SUFFIX MATCHES "[0-9]+\\.[0-9]+\\.[0-9]+")
+      # Transform 1.35 => 1_35 and 1.36.0 => 1_36_0
+      IF(_boost_VER MATCHES "[0-9]+\\.[0-9]+\\.[0-9]+")
           STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1_\\2_\\3" 
-            _boost_PATH_SUFFIX ${_boost_PATH_SUFFIX})
-      ELSEIF(_boost_PATH_SUFFIX MATCHES "[0-9]+\\.[0-9]+")
+            _boost_BOOSTIFIED_VERSION ${_boost_VER})
+      ELSEIF(_boost_VER MATCHES "[0-9]+\\.[0-9]+")
           STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)" "\\1_\\2" 
-            _boost_PATH_SUFFIX ${_boost_PATH_SUFFIX})
-      ENDIF(_boost_PATH_SUFFIX MATCHES "[0-9]+\\.[0-9]+\\.[0-9]+")
+            _boost_BOOSTIFIED_VERSION ${_boost_VER})
+      ENDIF()
       
-      LIST(APPEND _boost_PATH_SUFFIXES "${_boost_PATH_SUFFIX}")
+      LIST(APPEND _boost_PATH_SUFFIXES "boost-${_boost_BOOSTIFIED_VERSION}")
+      IF(WIN32)
+        # Yay Boost Pro!  We dig your underscores.
+        LIST(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
+      ENDIF()
+
     ENDFOREACH(_boost_VER)
       
     if(Boost_DEBUG)
@@ -399,6 +395,10 @@ ELSE (_boost_IN_CACHE)
       PATH_SUFFIXES ${_boost_PATH_SUFFIXES}
       )
   ENDIF( NOT Boost_INCLUDE_DIR )
+  
+  # ------------------------------------------------------------------------
+  #  Extract version information from version.hpp
+  # ------------------------------------------------------------------------
 
   IF(Boost_INCLUDE_DIR)
     # Extract Boost_VERSION and Boost_LIB_VERSION from version.hpp
@@ -407,6 +407,10 @@ ELSE (_boost_IN_CACHE)
     SET(BOOST_VERSION 0)
     SET(BOOST_LIB_VERSION "")
     FILE(READ "${Boost_INCLUDE_DIR}/boost/version.hpp" _boost_VERSION_HPP_CONTENTS)
+    if(Boost_DEBUG)
+      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                     "location of version.hpp: ${Boost_INCLUDE_DIR}/boost/version.hpp")
+    endif()
   
     STRING(REGEX REPLACE ".*#define BOOST_VERSION ([0-9]+).*" "\\1" Boost_VERSION "${_boost_VERSION_HPP_CONTENTS}")
     STRING(REGEX REPLACE ".*#define BOOST_LIB_VERSION \"([0-9_]+)\".*" "\\1" Boost_LIB_VERSION "${_boost_VERSION_HPP_CONTENTS}")
@@ -431,6 +435,10 @@ ELSE (_boost_IN_CACHE)
     set(Boost_ERROR_REASON
       "${Boost_ERROR_REASON}Unable to find the Boost header files. Please set BOOST_ROOT to the root directory containing Boost or BOOST_INCLUDEDIR to the directory containing Boost's headers.")
   ENDIF(Boost_INCLUDE_DIR)
+  
+  # ------------------------------------------------------------------------
+  #  Suffix initialization and compiler suffix detection.
+  # ------------------------------------------------------------------------
 
   # Setting some more suffixes for the library
   SET (Boost_LIB_PREFIX "")
@@ -533,6 +541,27 @@ ELSE (_boost_IN_CACHE)
   # ------------------------------------------------------------------------
   #  Begin finding boost libraries
   # ------------------------------------------------------------------------
+  
+  SET(_boost_LIBRARIES_SEARCH_DIRS
+    C:/boost/lib
+    C:/boost
+    "$ENV{ProgramFiles}/boost/boost_${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}_${Boost_SUBMINOR_VERSION}/lib"
+    "$ENV{ProgramFiles}/boost"
+    /sw/local/lib
+  )
+  IF( BOOST_ROOT )
+    SET(_boost_LIBRARIES_SEARCH_DIRS 
+      ${BOOST_ROOT}/lib 
+      ${BOOST_ROOT}/stage/lib 
+      ${_boost_LIBRARIES_SEARCH_DIRS})
+  ENDIF( BOOST_ROOT )
+
+  IF( BOOST_LIBRARYDIR )
+    file(TO_CMAKE_PATH ${BOOST_LIBRARYDIR} BOOST_LIBRARYDIR)
+    SET(_boost_LIBRARIES_SEARCH_DIRS 
+      ${BOOST_LIBRARYDIR} ${_boost_LIBRARIES_SEARCH_DIRS})
+  ENDIF( BOOST_LIBRARYDIR )
+
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
       "_boost_LIBRARIES_SEARCH_DIRS = ${_boost_LIBRARIES_SEARCH_DIRS}")
