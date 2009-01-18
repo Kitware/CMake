@@ -2915,7 +2915,10 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   if ( propname == "INCLUDE_DIRECTORIES" )
     {
     std::vector<std::string> varArgsExpanded;
-    cmSystemTools::ExpandListArgument(value, varArgsExpanded);
+    if(value)
+      {
+      cmSystemTools::ExpandListArgument(value, varArgsExpanded);
+      }
     this->SetIncludeDirectories(varArgsExpanded);
     return;
     }
@@ -2923,7 +2926,10 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   if ( propname == "LINK_DIRECTORIES" )
     {
     std::vector<std::string> varArgsExpanded;
-    cmSystemTools::ExpandListArgument(value, varArgsExpanded);
+    if(value)
+      {
+      cmSystemTools::ExpandListArgument(value, varArgsExpanded);
+      }
     this->SetLinkDirectories(varArgsExpanded);
     return;
     }
