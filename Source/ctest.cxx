@@ -65,6 +65,9 @@ static const char * cmDocumentationOptions[][3] =
   {"--debug", "Displaying more verbose internals of CTest.",
     "This feature will result in large number of output that is mostly "
     "useful for debugging dashboard problems."},
+  {"--output-on-failure", "Output anything outputted by the test program "
+   "if the test should fail.  This option can also be enabled by setting "
+   "the environment variable CTEST_OUTPUT_ON_FAILURE"},
   {"-Q,--quiet", "Make ctest quiet.",
     "This option will suppress all the output. The output log file will "
     "still be generated if the --output-log is specified. Options such "

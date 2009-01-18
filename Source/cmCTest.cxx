@@ -258,6 +258,11 @@ cmCTest::cmCTest()
   this->OutputLogFileLastTag   = -1;
   this->SuppressUpdatingCTestConfiguration = false;
   this->DartVersion            = 1;
+  this->OutputTestOutputOnTestFailure = false;
+  if(cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE"))
+    {
+    this->OutputTestOutputOnTestFailure = true;
+    }
   this->InitStreams();
 
   this->Parts[PartStart].SetName("Start");
@@ -1233,9 +1238,17 @@ int cmCTest::RunTest(std::vector<const char*> argv,
   if(result == cmsysProcess_State_Exited)
     {
     *retVal = cmsysProcess_GetExitValue(cp);
+    if(*retVal != 0 && this->OutputTestOutputOnTestFailure)
+      {
+        OutputTestErrors(tempOutput);
+      }
     }
   else if(result == cmsysProcess_State_Exception)
     {
+    if(this->OutputTestOutputOnTestFailure)
+      {
+        OutputTestErrors(tempOutput);
+      }
     *retVal = cmsysProcess_GetExitException(cp);
     std::string outerr = "\n*** Exception executing: ";
     outerr += cmsysProcess_GetExceptionString(cp);
@@ -1766,6 +1779,10 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     {
     this->ExtraVerbose = true;
     this->Verbose = true;
+    }
+  if(this->CheckArgument(arg, "--output-on-failure"))
+    {
+    this->OutputTestOutputOnTestFailure = true;
     }
   
   if(this->CheckArgument(arg, "-N", "--show-only"))
@@ -2746,3 +2763,12 @@ double cmCTest::GetRemainingTimeAllowed()
 
   return ch->GetRemainingTimeAllowed();
 }
+
+//----------------------------------------------------------------------
+void cmCTest::OutputTestErrors(std::vector<char> const &process_output)
+{
+  std::string test_outputs("\n*** Test Failed:\n");
+  test_outputs.append(&*process_output.begin(), process_output.size());
+  cmCTestLog(this, HANDLER_OUTPUT, test_outputs << std::endl << std::flush);
+}
+

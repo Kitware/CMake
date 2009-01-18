@@ -467,6 +467,9 @@ private:
   bool CheckArgument(const std::string& arg, const char* varg1,
     const char* varg2 = 0);
 
+  //! Output errors from a test
+  void OutputTestErrors(std::vector<char> const &process_output);
+
   bool                      SuppressUpdatingCTestConfiguration;
 
   bool Debug;
@@ -482,6 +485,8 @@ private:
 
   cmGeneratedFileStream* OutputLogFile;
   int OutputLogFileLastTag;
+
+  bool OutputTestOutputOnTestFailure;
 };
 
 class cmCTestLogWrite
