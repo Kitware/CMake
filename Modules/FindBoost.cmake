@@ -792,13 +792,6 @@ ELSE (_boost_IN_CACHE)
       ENDIF(Boost_FIND_REQUIRED)
   ENDIF(Boost_FOUND)
 
-  # Under Windows, automatic linking is performed, so no need to specify the libraries.
-  IF (WIN32)
-    IF (NOT MINGW)
-      SET(Boost_LIBRARIES "")
-    ENDIF (NOT MINGW)
-  ENDIF(WIN32)
-
   # show the Boost_INCLUDE_DIRS AND Boost_LIBRARIES variables only in the advanced view
   MARK_AS_ADVANCED(Boost_INCLUDE_DIR
       Boost_INCLUDE_DIRS
