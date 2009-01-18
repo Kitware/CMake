@@ -548,6 +548,7 @@ ELSE (_boost_IN_CACHE)
   endif()
 
   SET( _boost_STATIC_TAG "")
+  set( _boost_ABI_TAG "")
   IF (WIN32)
     IF(MSVC)
       SET (_boost_ABI_TAG "g")
