@@ -1,8 +1,8 @@
 # - Try to find Boost include dirs and libraries
 # Usage of this module as follows:
 #
-#     SET(Boost_USE_STATIC_LIBS ON)
-#     SET(Boost_USE_MULTITHREAD OFF)
+#     SET(Boost_USE_STATIC_LIBS   ON)
+#     SET(Boost_USE_MULTITHREADED ON)
 #     FIND_PACKAGE( Boost 1.34.1 COMPONENTS date_time filesystem iostreams ... )
 #
 #     INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
@@ -47,8 +47,9 @@
 # Variables used by this module, they can change the default behaviour and need to be set
 # before calling find_package:
 #
-#  Boost_USE_MULTITHREAD         Can be set to OFF to use the non-multithreaded
-#                                boost libraries. Defaults to ON.
+#  Boost_USE_MULTITHREADED       Can be set to OFF to use the non-multithreaded
+#                                boost libraries.  If not specified, defaults
+#                                to ON.
 #
 #  Boost_USE_STATIC_LIBS         Can be set to ON to force the use of the static
 #                                boost libraries. Defaults to OFF.
@@ -129,8 +130,9 @@
 #  BSD license.
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
-OPTION(Boost_USE_MULTITHREADED 
-  "Use the multithreaded versions of the Boost libraries" ON)
+IF(NOT DEFINED Boost_USE_MULTITHREADED)
+    SET(Boost_USE_MULTITHREADED TRUE)
+ENDIF()
 
 if(Boost_FIND_VERSION_EXACT)
   # The version may appear in a directory with or without the patch
