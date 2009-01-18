@@ -12,7 +12,8 @@
 # The components list needs to be the actual names of boost libraries, that is
 # the part of the actual library files that differ on different libraries. So
 # its "date_time" for "libboost_date_time...". Anything else will result in
-# errors.
+# errors.  If you're using parts of Boost that contains header files only (e.g.
+# foreach) you do not need to specify COMPONENTS.
 #
 # You can provide a minimum version number that should be used. If you provide this 
 # version number and specify the REQUIRED attribute, this module will fail if it
@@ -100,14 +101,14 @@
 #  Boost_LIB_VERSION                    The version number in filename form as its appended to the library filenames
 #
 #  Boost_MAJOR_VERSION                  major version number of boost
-#
 #  Boost_MINOR_VERSION                  minor version number of boost
-#
 #  Boost_SUBMINOR_VERSION               subminor version number of boost
 #
-#  Boost_LIB_DIAGNOSTIC_DEFINITIONS     Only set on windows. Can be used with add_definitions 
-#                                       to print diagnostic information about the automatic 
-#                                       linking done on windows.
+#  Boost_LIB_DIAGNOSTIC_DEFINITIONS     [WIN32 Only] You can call
+#                                       add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINTIIONS})
+#                                       to have diagnostic information about
+#                                       Boost's automatic linking outputted
+#                                       during compilation time.
 
 # For each component you list the following variables are set.
 # ATTENTION: The component names need to be in lower case, just as the boost
@@ -130,6 +131,7 @@
 #  BSD license.
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
+
 IF(NOT DEFINED Boost_USE_MULTITHREADED)
     SET(Boost_USE_MULTITHREADED TRUE)
 ENDIF()
@@ -283,10 +285,15 @@ IF (_boost_IN_CACHE)
 ELSE (_boost_IN_CACHE)
   # Need to search for boost
   if(Boost_DEBUG)
-      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                     "boost not in cache")
-      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                     "_boost_TEST_VERSIONS = ${_boost_TEST_VERSIONS}")
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                   "Boost not in cache")
+    # Output some of their choices
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                   "_boost_TEST_VERSIONS = ${_boost_TEST_VERSIONS}")
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                   "Boost_USE_MULTITHREADED = ${Boost_USE_MULTITHREADED}")
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                   "Boost_USE_STATIC_LIBS = ${Boost_USE_STATIC_LIBS}")
   endif()
 
   IF(WIN32)
@@ -475,14 +482,15 @@ ELSE (_boost_IN_CACHE)
   else(Boost_COMPILER)
     # Attempt to guess the compiler suffix
     SET (_boost_COMPILER "-gcc")
-    IF (MSVC90)
+    if (MSVC90)
       SET (_boost_COMPILER "-vc90")
-    ELSEIF (MSVC80)
+    elseif (MSVC80)
       SET (_boost_COMPILER "-vc80")
-    ELSEIF (MSVC71)
+    elseif (MSVC71)
       SET (_boost_COMPILER "-vc71")
-    ENDIF(MSVC90)
-    IF (MINGW)
+    elseif (MSVC70) # Good luck!
+      SET (_boost_COMPILER "-vc70")
+    elseif (MINGW)
       EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
         ARGS -dumpversion
         OUTPUT_VARIABLE _boost_COMPILER_VERSION
@@ -490,8 +498,7 @@ ELSE (_boost_IN_CACHE)
       STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
         _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
       SET (_boost_COMPILER "-mgw${_boost_COMPILER_VERSION}")
-    ENDIF(MINGW)
-    IF (UNIX)
+    elseif (UNIX)
       IF (NOT CMAKE_COMPILER_IS_GNUCC)
         # We assume that we have the Intel compiler.
         SET (_boost_COMPILER "-il")
@@ -523,7 +530,7 @@ ELSE (_boost_IN_CACHE)
           SET (_boost_COMPILER "-gcc${_boost_COMPILER_VERSION}")
         ENDIF()
       ENDIF (NOT CMAKE_COMPILER_IS_GNUCC)
-    ENDIF(UNIX)
+    endif()
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
         "guessed _boost_COMPILER = ${_boost_COMPILER}")
@@ -532,9 +539,9 @@ ELSE (_boost_IN_CACHE)
 
   SET (_boost_MULTITHREADED "-mt")
 
-  IF( NOT Boost_USE_MULTITHREADED )
-    SET (_boost_MULTITHREADED "")
-  ENDIF( NOT Boost_USE_MULTITHREADED )
+  if( NOT Boost_USE_MULTITHREADED )
+    set (_boost_MULTITHREADED "")
+  endif()
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
       "_boost_MULTITHREADED = ${_boost_MULTITHREADED}")
@@ -796,7 +803,6 @@ ELSE (_boost_IN_CACHE)
   MARK_AS_ADVANCED(Boost_INCLUDE_DIR
       Boost_INCLUDE_DIRS
       Boost_LIBRARY_DIRS
-      Boost_USE_MULTITHREADED
   )
 ENDIF(_boost_IN_CACHE)
 
