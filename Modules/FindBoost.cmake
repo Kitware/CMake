@@ -477,11 +477,10 @@ ELSE (_boost_IN_CACHE)
     set(_boost_COMPILER ${Boost_COMPILER})
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                     "using user-specified _boost_COMPILER = ${_boost_COMPILER}")
+                     "using user-specified Boost_COMPILER = ${_boost_COMPILER}")
     endif()
   else(Boost_COMPILER)
     # Attempt to guess the compiler suffix
-    SET (_boost_COMPILER "-gcc")
     if (MSVC90)
       SET (_boost_COMPILER "-vc90")
     elseif (MSVC80)
@@ -489,20 +488,27 @@ ELSE (_boost_IN_CACHE)
     elseif (MSVC71)
       SET (_boost_COMPILER "-vc71")
     elseif (MSVC70) # Good luck!
-      SET (_boost_COMPILER "-vc70")
+      SET (_boost_COMPILER "-vc7") # yes, this is correct
+    elseif (MSVC60) # Good luck!
+      SET (_boost_COMPILER "-vc6") # yes, this is correct
+    elseif (BORLAND)
+      SET (_boost_COMPILER "-bcb")
+    elseif("${CMAKE_CXX_COMPILER}" MATCHES "icl") 
+      if(WIN32)
+        set (_boost_COMPILER "-iw")
+      else()
+        set (_boost_COMPILER "-il")
+      endif()
     elseif (MINGW)
       EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
-        ARGS -dumpversion
+        ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
         OUTPUT_VARIABLE _boost_COMPILER_VERSION
         )
       STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
         _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
       SET (_boost_COMPILER "-mgw${_boost_COMPILER_VERSION}")
     elseif (UNIX)
-      IF (NOT CMAKE_COMPILER_IS_GNUCC)
-        # We assume that we have the Intel compiler.
-        SET (_boost_COMPILER "-il")
-      ELSE (NOT CMAKE_COMPILER_IS_GNUCC)
+      if (CMAKE_COMPILER_IS_GNUCC)
         # Determine which version of GCC we have.
         EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
           ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
@@ -529,7 +535,7 @@ ELSE (_boost_IN_CACHE)
         ELSE()
           SET (_boost_COMPILER "-gcc${_boost_COMPILER_VERSION}")
         ENDIF()
-      ENDIF (NOT CMAKE_COMPILER_IS_GNUCC)
+      endif (CMAKE_COMPILER_IS_GNUCC)
     endif()
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
