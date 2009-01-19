@@ -469,9 +469,9 @@ ELSE (_boost_IN_CACHE)
 
   # Setting some more suffixes for the library
   SET (Boost_LIB_PREFIX "")
-  IF ( WIN32 AND Boost_USE_STATIC_LIBS )
+  if ( MSVC AND Boost_USE_STATIC_LIBS )
     SET (Boost_LIB_PREFIX "lib")
-  ENDIF ( WIN32 AND Boost_USE_STATIC_LIBS )
+  endif()
 
   if (Boost_COMPILER)
     set(_boost_COMPILER ${Boost_COMPILER})
@@ -481,6 +481,9 @@ ELSE (_boost_IN_CACHE)
     endif()
   else(Boost_COMPILER)
     # Attempt to guess the compiler suffix
+    # NOTE: this is not perfect yet, if you experience any issues
+    # please report them and use the Boost_COMPILER variable
+    # to work around the problems.
     if (MSVC90)
       SET (_boost_COMPILER "-vc90")
     elseif (MSVC80)
@@ -500,41 +503,49 @@ ELSE (_boost_IN_CACHE)
         set (_boost_COMPILER "-il")
       endif()
     elseif (MINGW)
-      EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
-        ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-        OUTPUT_VARIABLE _boost_COMPILER_VERSION
-        )
-      STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
-        _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
-      SET (_boost_COMPILER "-mgw${_boost_COMPILER_VERSION}")
-    elseif (UNIX)
-      if (CMAKE_COMPILER_IS_GNUCC)
-        # Determine which version of GCC we have.
+      if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
+          SET(_boost_COMPILER "-mgw") # no GCC version encoding prior to 1.34
+      else()
         EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
           ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
           OUTPUT_VARIABLE _boost_COMPILER_VERSION
           )
         STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
           _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
-        IF(APPLE)
-          IF(Boost_MINOR_VERSION)
-            IF(${Boost_MINOR_VERSION} GREATER 35)
-              # In Boost 1.36.0 and newer, the mangled compiler name used
-              # on Mac OS X/Darwin is "xgcc".
-              SET(_boost_COMPILER "-xgcc${_boost_COMPILER_VERSION}")
-            ELSE(${Boost_MINOR_VERSION} GREATER 35)
-              # In Boost <= 1.35.0, there is no mangled compiler name for
-              # the Mac OS X/Darwin version of GCC.
+        SET (_boost_COMPILER "-mgw${_boost_COMPILER_VERSION}")
+      endif()
+    elseif (UNIX)
+      if (CMAKE_COMPILER_IS_GNUCC)
+        if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
+          SET(_boost_COMPILER "-gcc") # no GCC version encoding prior to 1.34
+        else()
+          # Determine which version of GCC we have.
+          EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
+            ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+            OUTPUT_VARIABLE _boost_COMPILER_VERSION
+            )
+          STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
+            _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
+          IF(APPLE)
+            IF(Boost_MINOR_VERSION)
+              IF(${Boost_MINOR_VERSION} GREATER 35)
+                # In Boost 1.36.0 and newer, the mangled compiler name used
+                # on Mac OS X/Darwin is "xgcc".
+                SET(_boost_COMPILER "-xgcc${_boost_COMPILER_VERSION}")
+              ELSE(${Boost_MINOR_VERSION} GREATER 35)
+                # In Boost <= 1.35.0, there is no mangled compiler name for
+                # the Mac OS X/Darwin version of GCC.
+                SET(_boost_COMPILER "")
+              ENDIF(${Boost_MINOR_VERSION} GREATER 35)
+            ELSE(Boost_MINOR_VERSION)
+              # We don't know the Boost version, so assume it's
+              # pre-1.36.0.
               SET(_boost_COMPILER "")
-            ENDIF(${Boost_MINOR_VERSION} GREATER 35)
-          ELSE(Boost_MINOR_VERSION)
-            # We don't know the Boost version, so assume it's
-            # pre-1.36.0.
-            SET(_boost_COMPILER "")
-          ENDIF(Boost_MINOR_VERSION)
-        ELSE()
-          SET (_boost_COMPILER "-gcc${_boost_COMPILER_VERSION}")
-        ENDIF()
+            ENDIF(Boost_MINOR_VERSION)
+          ELSE()
+            SET (_boost_COMPILER "-gcc${_boost_COMPILER_VERSION}")
+          ENDIF()
+        endif()
       endif (CMAKE_COMPILER_IS_GNUCC)
     endif()
     if(Boost_DEBUG)
@@ -544,7 +555,6 @@ ELSE (_boost_IN_CACHE)
   endif(Boost_COMPILER)
 
   SET (_boost_MULTITHREADED "-mt")
-
   if( NOT Boost_USE_MULTITHREADED )
     set (_boost_MULTITHREADED "")
   endif()
@@ -564,7 +574,6 @@ ELSE (_boost_IN_CACHE)
     ENDIF( Boost_USE_STATIC_LIBS )
   ENDIF(WIN32)
   SET (_boost_ABI_TAG "${_boost_ABI_TAG}d")
-
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
       "_boost_STATIC_TAG = ${_boost_STATIC_TAG}")
