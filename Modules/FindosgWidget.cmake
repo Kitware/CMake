@@ -9,30 +9,30 @@
 # If you want to use a more convenient module that includes everything,
 # use the FindOpenSceneGraph.cmake instead of the Findosg*.cmake modules.
 # 
-# Locate osgProducer
+# Locate osgWidget
 # This module defines
 #
-# OSGPRODUCER_FOUND - Was osgProducer found?
-# OSGPRODUCER_INCLUDE_DIR - Where to find the headers
-# OSGPRODUCER_LIBRARIES - The libraries to link for osgProducer (use this)
+# OSGWIDGET_FOUND - Was osgWidget found?
+# OSGWIDGET_INCLUDE_DIR - Where to find the headers
+# OSGWIDGET_LIBRARIES - The libraries to link for osgWidget (use this)
 #
-# OSGPRODUCER_LIBRARY - The osgProducer library
-# OSGPRODUCER_LIBRARY_DEBUG - The osgProducer debug library
+# OSGWIDGET_LIBRARY - The osgWidget library
+# OSGWIDGET_LIBRARY_DEBUG - The osgWidget debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
 # used in building osg.
 #
-# Created by Eric Wing.
+# FindosgWidget.cmake tweaked from Findosg* suite as created by Eric Wing.
 
 # Header files are presumed to be included like
 # #include <osg/PositionAttitudeTransform>
-# #include <osgProducer/OsgSceneHandler>
+# #include <osgWidget/Widget>
 
 include(Findosg_functions)
-OSG_FIND_PATH   (OSGPRODUCER osgProducer/OsgSceneHandler)
-OSG_FIND_LIBRARY(OSGPRODUCER osgProducer)
+OSG_FIND_PATH   (OSGWIDGET osgWidget/Widget)
+OSG_FIND_LIBRARY(OSGWIDGET osgWidget)
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGPRODUCER DEFAULT_MSG
-    OSGPRODUCER_LIBRARY OSGPRODUCER_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGWIDGET DEFAULT_MSG
+    OSGWIDGET_LIBRARY OSGWIDGET_INCLUDE_DIR)

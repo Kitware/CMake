@@ -11,9 +11,13 @@
 # 
 # Locate osgGA
 # This module defines
-# OSGGA_LIBRARY
-# OSGGA_FOUND, if false, do not try to link to osgGA
-# OSGGA_INCLUDE_DIR, where to find the headers
+#
+# OSGGA_FOUND - Was osgGA found?
+# OSGGA_INCLUDE_DIR - Where to find the headers
+# OSGGA_LIBRARIES - The libraries to link against for the osgGA (use this)
+#
+# OSGGA_LIBRARY - The osgGA library
+# OSGGA_LIBRARY_DEBUG - The osgGA debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,46 +29,10 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgGA/FlightManipulator>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSGGA_INCLUDE_DIR osgGA/FlightManipulator
-  HINTS
-  $ENV{OSGGA_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSGGA osgGA/FlightManipulator)
+OSG_FIND_LIBRARY(OSGGA osgGA)
 
-FIND_LIBRARY(OSGGA_LIBRARY 
-  NAMES osgGA
-  HINTS
-  $ENV{OSGGA_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSGGA_FOUND "NO")
-IF(OSGGA_LIBRARY AND OSGGA_INCLUDE_DIR)
-  SET(OSGGA_FOUND "YES")
-ENDIF(OSGGA_LIBRARY AND OSGGA_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGGA DEFAULT_MSG
+    OSGGA_LIBRARY OSGGA_INCLUDE_DIR)

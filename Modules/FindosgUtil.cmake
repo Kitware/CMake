@@ -11,9 +11,13 @@
 # 
 # Locate osgUtil
 # This module defines
-# OSGUTIL_LIBRARY
-# OSGUTIL_FOUND, if false, do not try to link to osgUtil
-# OSGUTIL_INCLUDE_DIR, where to find the headers
+#
+# OSGUTIL_FOUND - Was osgUtil found?
+# OSGUTIL_INCLUDE_DIR - Where to find the headers
+# OSGUTIL_LIBRARIES - The libraries to link for osgUtil (use this)
+#
+# OSGUTIL_LIBRARY - The osgUtil library
+# OSGUTIL_LIBRARY_DEBUG - The osgUtil debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,46 +29,10 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgUtil/SceneView>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSGUTIL_INCLUDE_DIR osgUtil/SceneView
-  HINTS
-  $ENV{OSGUTIL_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSGUTIL osgUtil/SceneView)
+OSG_FIND_LIBRARY(OSGUTIL osgUtil)
 
-FIND_LIBRARY(OSGUTIL_LIBRARY 
-  NAMES osgUtil
-  HINTS
-  $ENV{OSGUTIL_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSGUTIL_FOUND "NO")
-IF(OSGUTIL_LIBRARY AND OSGUTIL_INCLUDE_DIR)
-  SET(OSGUTIL_FOUND "YES")
-ENDIF(OSGUTIL_LIBRARY AND OSGUTIL_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGUTIL DEFAULT_MSG
+    OSGUTIL_LIBRARY OSGUTIL_INCLUDE_DIR)

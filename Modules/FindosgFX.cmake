@@ -11,9 +11,13 @@
 # 
 # Locate osgFX
 # This module defines
-# OSGFX_LIBRARY
-# OSGFX_FOUND, if false, do not try to link to osgFX
-# OSGFX_INCLUDE_DIR, where to find the headers
+#
+# OSGFX_FOUND - Was osgFX found?
+# OSGFX_INCLUDE_DIR - Where to find the headers
+# OSGFX_LIBRARIES - The libraries to link against for the osgFX (use this)
+#
+# OSGFX_LIBRARY - The osgFX library
+# OSGFX_LIBRARY_DEBUG - The osgFX debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,46 +29,10 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgFX/BumpMapping>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSGFX_INCLUDE_DIR osgFX/BumpMapping
-  HINTS
-  $ENV{OSGFX_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSGFX osgFX/BumpMapping)
+OSG_FIND_LIBRARY(OSGFX osgFX)
 
-FIND_LIBRARY(OSGFX_LIBRARY 
-  NAMES osgFX
-  HINTS
-  $ENV{OSGFX_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSGFX_FOUND "NO")
-IF(OSGFX_LIBRARY AND OSGFX_INCLUDE_DIR)
-  SET(OSGFX_FOUND "YES")
-ENDIF(OSGFX_LIBRARY AND OSGFX_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGFX DEFAULT_MSG
+    OSGFX_LIBRARY OSGFX_INCLUDE_DIR)

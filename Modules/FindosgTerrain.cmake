@@ -11,9 +11,13 @@
 # 
 # Locate osgTerrain
 # This module defines
-# OSGTERRAIN_LIBRARY
-# OSGTERRAIN_FOUND, if false, do not try to link to osgTerrain
-# OSGTERRAIN_INCLUDE_DIR, where to find the headers
+#
+# OSGTERRAIN_FOUND - Was osgTerrain found?
+# OSGTERRAIN_INCLUDE_DIR - Where to find the headers
+# OSGTERRAIN_LIBRARIES - The libraries to link for osgTerrain (use this)
+#
+# OSGTERRAIN_LIBRARY - The osgTerrain library
+# OSGTERRAIN_LIBRARY_DEBUG - The osgTerrain debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,46 +29,10 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgTerrain/Terrain>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSGTERRAIN_INCLUDE_DIR osgTerrain/Terrain
-  HINTS
-  $ENV{OSGTERRAIN_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSGTERRAIN osgTerrain/Terrain)
+OSG_FIND_LIBRARY(OSGTERRAIN osgTerrain)
 
-FIND_LIBRARY(OSGTERRAIN_LIBRARY 
-  NAMES osgTerrain
-  HINTS
-  $ENV{OSGTERRAIN_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSGTERRAIN_FOUND "NO")
-IF(OSGTERRAIN_LIBRARY AND OSGTERRAIN_INCLUDE_DIR)
-  SET(OSGTERRAIN_FOUND "YES")
-ENDIF(OSGTERRAIN_LIBRARY AND OSGTERRAIN_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGTERRAIN DEFAULT_MSG
+    OSGTERRAIN_LIBRARY OSGTERRAIN_INCLUDE_DIR)

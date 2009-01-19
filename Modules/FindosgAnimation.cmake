@@ -9,15 +9,15 @@
 # If you want to use a more convenient module that includes everything,
 # use the FindOpenSceneGraph.cmake instead of the Findosg*.cmake modules.
 # 
-# Locate osgProducer
+# Locate osgAnimation
 # This module defines
 #
-# OSGPRODUCER_FOUND - Was osgProducer found?
-# OSGPRODUCER_INCLUDE_DIR - Where to find the headers
-# OSGPRODUCER_LIBRARIES - The libraries to link for osgProducer (use this)
+# OSGANIMATION_FOUND - Was osgAnimation found?
+# OSGANIMATION_INCLUDE_DIR - Where to find the headers
+# OSGANIMATION_LIBRARIES - The libraries to link against for the OSG (use this)
 #
-# OSGPRODUCER_LIBRARY - The osgProducer library
-# OSGPRODUCER_LIBRARY_DEBUG - The osgProducer debug library
+# OSGANIMATION_LIBRARY - The OSG library
+# OSGANIMATION_LIBRARY_DEBUG - The OSG debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -27,12 +27,12 @@
 
 # Header files are presumed to be included like
 # #include <osg/PositionAttitudeTransform>
-# #include <osgProducer/OsgSceneHandler>
+# #include <osgAnimation/Animation>
 
 include(Findosg_functions)
-OSG_FIND_PATH   (OSGPRODUCER osgProducer/OsgSceneHandler)
-OSG_FIND_LIBRARY(OSGPRODUCER osgProducer)
+OSG_FIND_PATH   (OSGANIMATION osgAnimation/Animation)
+OSG_FIND_LIBRARY(OSGANIMATION osgAnimation)
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGPRODUCER DEFAULT_MSG
-    OSGPRODUCER_LIBRARY OSGPRODUCER_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGANIMATION DEFAULT_MSG
+    OSGANIMATION_LIBRARY OSGANIMATION_INCLUDE_DIR)

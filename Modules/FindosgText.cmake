@@ -11,9 +11,13 @@
 # 
 # Locate osgText
 # This module defines
-# OSGTEXT_LIBRARY
-# OSGTEXT_FOUND, if false, do not try to link to osgText
-# OSGTEXT_INCLUDE_DIR, where to find the headers
+#
+# OSGTEXT_FOUND - Was osgText found?
+# OSGTEXT_INCLUDE_DIR - Where to find the headers
+# OSGTEXT_LIBRARIES - The libraries to link for osgText (use this)
+#
+# OSGTEXT_LIBRARY - The osgText library
+# OSGTEXT_LIBRARY_DEBUG - The osgText debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,46 +29,10 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgText/Text>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSGTEXT_INCLUDE_DIR osgText/Text
-  HINTS
-  $ENV{OSGTEXT_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSGTEXT osgText/Text)
+OSG_FIND_LIBRARY(OSGTEXT osgText)
 
-FIND_LIBRARY(OSGTEXT_LIBRARY 
-  NAMES osgText
-  HINTS
-  $ENV{OSGTEXT_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSGTEXT_FOUND "NO")
-IF(OSGTEXT_LIBRARY AND OSGTEXT_INCLUDE_DIR)
-  SET(OSGTEXT_FOUND "YES")
-ENDIF(OSGTEXT_LIBRARY AND OSGTEXT_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGTEXT DEFAULT_MSG
+    OSGTEXT_LIBRARY OSGTEXT_INCLUDE_DIR)

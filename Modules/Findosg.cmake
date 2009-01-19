@@ -11,9 +11,13 @@
 # 
 # Locate osg
 # This module defines
-# OSG_LIBRARY
-# OSG_FOUND, if false, do not try to link to osg
-# OSG_INCLUDE_DIR, where to find the headers
+#
+# OSG_FOUND - Was the Osg found?
+# OSG_INCLUDE_DIR - Where to find the headers
+# OSG_LIBRARIES - The libraries to link against for the OSG (use this)
+#
+# OSG_LIBRARY - The OSG library
+# OSG_LIBRARY_DEBUG - The OSG debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,44 +29,9 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgUtil/SceneView>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSG_INCLUDE_DIR osg/PositionAttitudeTransform
-  HINTS
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSG osg/PositionAttitudeTransform)
+OSG_FIND_LIBRARY(OSG osg)
 
-FIND_LIBRARY(OSG_LIBRARY 
-  NAMES osg
-  HINTS
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSG_FOUND "NO")
-IF(OSG_LIBRARY AND OSG_INCLUDE_DIR)
-  SET(OSG_FOUND "YES")
-ENDIF(OSG_LIBRARY AND OSG_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSG DEFAULT_MSG OSG_LIBRARY OSG_INCLUDE_DIR)
