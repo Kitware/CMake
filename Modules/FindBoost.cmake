@@ -1,13 +1,21 @@
 # - Try to find Boost include dirs and libraries
 # Usage of this module as follows:
 #
-#     SET(Boost_USE_STATIC_LIBS   ON)
-#     SET(Boost_USE_MULTITHREADED ON)
-#     FIND_PACKAGE( Boost 1.34.1 COMPONENTS date_time filesystem iostreams ... )
+# == Using Header-Only libraries from within Boost: ==
 #
-#     INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-#     ADD_EXECUTABLE(foo foo.cc)
-#     TARGET_LINK_LIBRARIES(foo ${Boost_LIBRARIES})
+#   FIND_PACKAGE( Boost 1.36.0 )
+#   INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+#   ADD_EXECUTABLE(foo foo.cc)
+#
+# == Using actual libraries from within Boost: ==
+#
+#   SET(Boost_USE_STATIC_LIBS   ON)
+#   SET(Boost_USE_MULTITHREADED ON)
+#   FIND_PACKAGE( Boost 1.36.0 COMPONENTS date_time filesystem system ... )
+#   INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+#
+#   ADD_EXECUTABLE(foo foo.cc)
+#   TARGET_LINK_LIBRARIES(foo ${Boost_LIBRARIES})
 #
 # The components list needs to be the actual names of boost libraries, that is
 # the part of the actual library files that differ on different libraries. So
@@ -15,11 +23,22 @@
 # errors.  If you're using parts of Boost that contains header files only (e.g.
 # foreach) you do not need to specify COMPONENTS.
 #
-# You can provide a minimum version number that should be used. If you provide this 
+# You should provide a minimum version number that should be used. If you provide this 
 # version number and specify the REQUIRED attribute, this module will fail if it
 # can't find the specified or a later version. If you specify a version number this is
 # automatically put into the considered list of version numbers and thus doesn't need
-# to be specified in the Boost_ADDITIONAL_VERSIONS variable
+# to be specified in the Boost_ADDITIONAL_VERSIONS variable (see below).
+#
+# NOTE for Visual Studio Users:
+#     Automatic linking is used on MSVC & Borland compilers by default when
+#     #including things in Boost.  It's important to note that setting
+#     Boost_USE_STATIC_LIBS to OFF is NOT enough to get you dynamic linking,
+#     autolinking typically uses static libraries by default.
+#
+#     Please see the section below near Boost_LIB_DIAGNOSTIC_DEFINITIONS for
+#     more details.  Adding a TARGET_LINK_LIBRARIES() as shown in the example
+#     above appears to cause VS to link dynamically if Boost_USE_STATIC_LIBS
+#     gets set to OFF.
 #
 # =========== The mess that is Boost_ADDITIONAL_VERSIONS (sorry?) ============
 #
@@ -27,21 +46,18 @@
 # boost version numbers that should be taken into account when searching
 # for Boost. Unfortunately boost puts the version number into the
 # actual filename for the libraries, so this variable will certainly be needed
-# in the future when new Boost versions are released.  CMake will one day have glob
-# or regex support for FIND_LIBRARY() after which this variable will
-# likely be ignored.
+# in the future when new Boost versions are released.
 #
 # Currently this module searches for the following version numbers:
 # 1.33, 1.33.0, 1.33.1, 1.34, 1.34.0, 1.34.1, 1.35, 1.35.0, 1.35.1,
-# 1.36, 1.36.0, 1.36.1, 1.37, 1.37.0
+# 1.36, 1.36.0, 1.36.1, 1.37, 1.37.0, 1.38, 1.38.0
 #
 # NOTE: If you add a new major 1.x version in Boost_ADDITIONAL_VERSIONS you should
-# add both 1.x and 1.x.0 as shown above.
+# add both 1.x and 1.x.0 as shown above.  Official boost include directories
+# omit the 3rd version number from include paths if it is 0 although not all
+# binary boost releases do so.
 #
 # SET(Boost_ADDITIONAL_VERSIONS "0.99" "0.99.0" "1.78" "1.78.0")
-#
-# One day in the near future this will no longer be necessary and which
-# version gets selected will depend completely on how you call FIND_PACKAGE().
 #
 # ============================================================================
 #
@@ -60,11 +76,12 @@
 #  Boost_ADDITIONAL_VERSIONS     A list of version numbers to use for searching
 #                                the boost include directory.  Please see
 #                                the documentation above regarding this
-#                                annoying variable :(
+#                                annoying, but necessary variable :(
 #
 #  Boost_DEBUG                   Set this to TRUE to enable debugging output
 #                                of FindBoost.cmake if you are having problems.
-#                                Please enable this and include the output in any bug reports.
+#                                Please enable this before filing any bug
+#                                reports.
 # 
 #  Boost_COMPILER                Set this to the compiler suffix used by boost (e.g. -gcc43) if the
 #                                module has problems finding the proper Boost installation
@@ -109,7 +126,7 @@
 #                                       to have diagnostic information about
 #                                       Boost's automatic linking outputted
 #                                       during compilation time.
-
+#
 # For each component you list the following variables are set.
 # ATTENTION: The component names need to be in lower case, just as the boost
 # library names however the cmake variables use upper case for the component
@@ -146,7 +163,7 @@ else(Boost_FIND_VERSION_EXACT)
   # The user has not requested an exact version.  Among known
   # versions, find those that are acceptable to the user request.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
-    "1.37.0" "1.37"
+    "1.38.0" "1.38" "1.37.0" "1.37"
     "1.36.1" "1.36.0" "1.36" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0"
     "1.34" "1.33.1" "1.33.0" "1.33")
   set(_boost_TEST_VERSIONS)
