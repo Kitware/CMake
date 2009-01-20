@@ -265,6 +265,23 @@ MACRO (_Boost_ADJUST_LIB_VARS basename)
   )
 ENDMACRO (_Boost_ADJUST_LIB_VARS)
 
+#
+# Runs compiler with "-dumpversion" and parses major/minor
+# version with a regex.
+#
+FUNCTION(_Boost_COMPILER_DUMPVERSION _OUTPUT_VERSION)
+
+  EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
+    ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+    OUTPUT_VARIABLE _boost_COMPILER_VERSION
+  )
+  STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
+    _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
+
+  SET(${_OUTPUT_VERSION} ${_boost_COMPILER_VERSION} PARENT_SCOPE)
+ENDFUNCTION()
+
+
 #-------------------------------------------------------------------------------
 
 
@@ -513,7 +530,8 @@ ELSE (_boost_IN_CACHE)
       SET (_boost_COMPILER "-vc6") # yes, this is correct
     elseif (BORLAND)
       SET (_boost_COMPILER "-bcb")
-    elseif("${CMAKE_CXX_COMPILER}" MATCHES "icl") 
+    elseif("${CMAKE_CXX_COMPILER}" MATCHES "icl" 
+        OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc") 
       if(WIN32)
         set (_boost_COMPILER "-iw")
       else()
@@ -523,12 +541,7 @@ ELSE (_boost_IN_CACHE)
       if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
           SET(_boost_COMPILER "-mgw") # no GCC version encoding prior to 1.34
       else()
-        EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
-          ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-          OUTPUT_VARIABLE _boost_COMPILER_VERSION
-          )
-        STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
-          _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
+        _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION)
         SET (_boost_COMPILER "-mgw${_boost_COMPILER_VERSION}")
       endif()
     elseif (UNIX)
@@ -536,13 +549,8 @@ ELSE (_boost_IN_CACHE)
         if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
           SET(_boost_COMPILER "-gcc") # no GCC version encoding prior to 1.34
         else()
+          _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION)
           # Determine which version of GCC we have.
-          EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
-            ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-            OUTPUT_VARIABLE _boost_COMPILER_VERSION
-            )
-          STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
-            _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
           IF(APPLE)
             IF(Boost_MINOR_VERSION)
               IF(${Boost_MINOR_VERSION} GREATER 35)
