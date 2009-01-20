@@ -27,13 +27,6 @@ IsFunctionBlocked(const cmListFileFunction& lff,
                   cmMakefile &mf,
                   cmExecutionStatus &inStatus)
 {
-  // Prevent recusion and don't let this blocker block its own
-  // commands.
-  if (this->Executing)
-    {
-    return false;
-    }
-
   // we start by recording all the functions
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"if"))
     {
@@ -45,8 +38,11 @@ IsFunctionBlocked(const cmListFileFunction& lff,
     // if this is the endif for this if statement, then start executing
     if (!this->ScopeDepth) 
       {
+      // Remove the function blocker for this scope or bail.
+      cmsys::auto_ptr<cmFunctionBlocker> fb(mf.RemoveFunctionBlocker(lff));
+      if(!fb.get()) { return false; }
+
       // execute the functions for the true parts of the if statement
-      this->Executing = true;
       cmExecutionStatus status;
       int scopeDepth = 0;
       for(unsigned int c = 0; c < this->Functions.size(); ++c)
@@ -104,7 +100,6 @@ IsFunctionBlocked(const cmListFileFunction& lff,
               err += ").";
               mf.IssueMessage(cmake::FATAL_ERROR, err);
               cmSystemTools::SetFatalErrorOccured();
-              mf.RemoveFunctionBlocker(lff);
               return true;
               }
         
@@ -124,18 +119,15 @@ IsFunctionBlocked(const cmListFileFunction& lff,
           if (status.GetReturnInvoked())
             {
             inStatus.SetReturnInvoked(true);
-            mf.RemoveFunctionBlocker(lff);
             return true;
             }
           if (status.GetBreakInvoked())
             {
             inStatus.SetBreakInvoked(true);
-            mf.RemoveFunctionBlocker(lff);
             return true;
             }
           }
         }
-      mf.RemoveFunctionBlocker(lff);
       return true;
       }
     }

@@ -2395,7 +2395,8 @@ bool cmMakefile::ExpandArguments(
   return !cmSystemTools::GetFatalErrorOccured();
 }
 
-void cmMakefile::RemoveFunctionBlocker(const cmListFileFunction& lff)
+cmsys::auto_ptr<cmFunctionBlocker>
+cmMakefile::RemoveFunctionBlocker(const cmListFileFunction& lff)
 {
   // loop over all function blockers to see if any block this command
   std::list<cmFunctionBlocker *>::reverse_iterator pos;
@@ -2406,12 +2407,11 @@ void cmMakefile::RemoveFunctionBlocker(const cmListFileFunction& lff)
       {
       cmFunctionBlocker* b = *pos;
       this->FunctionBlockers.remove(b);
-      delete b;
-      break;
+      return cmsys::auto_ptr<cmFunctionBlocker>(b);
       }
     }
 
-  return;
+  return cmsys::auto_ptr<cmFunctionBlocker>();
 }
 
 void cmMakefile::SetHomeDirectory(const char* dir)

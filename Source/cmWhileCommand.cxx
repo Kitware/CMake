@@ -21,13 +21,6 @@ bool cmWhileFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
                   cmExecutionStatus &inStatus)
 {
-  // Prevent recusion and don't let this blocker block its own
-  // commands.
-  if (this->Executing)
-    {
-    return false;
-    }
-  
   // at end of for each execute recorded commands
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"while"))
     {
@@ -39,6 +32,10 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endwhile for this while loop then execute
     if (!this->Depth) 
       {
+      // Remove the function blocker for this scope or bail.
+      cmsys::auto_ptr<cmFunctionBlocker> fb(mf.RemoveFunctionBlocker(lff));
+      if(!fb.get()) { return false; }
+
       std::string errorString;
     
       std::vector<std::string> expandedArguments;
@@ -46,7 +43,6 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       bool isTrue = 
         cmIfCommand::IsTrue(expandedArguments,errorString,&mf);
 
-      this->Executing = true;
       while (isTrue)
         {      
         // Invoke all the functions that were collected in the block.
@@ -57,12 +53,10 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
           if (status.GetReturnInvoked())
             {
             inStatus.SetReturnInvoked(true);
-            mf.RemoveFunctionBlocker(lff);
             return true;
             }
           if (status.GetBreakInvoked())
             {
-            mf.RemoveFunctionBlocker(lff);
             return true;
             }
           }
@@ -71,7 +65,6 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
         isTrue = 
           cmIfCommand::IsTrue(expandedArguments,errorString,&mf);
         }
-      mf.RemoveFunctionBlocker(lff);
       return true;
       }
     else

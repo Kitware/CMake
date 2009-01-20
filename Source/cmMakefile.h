@@ -31,6 +31,7 @@
 #include "cmSourceGroup.h"
 #endif
 
+#include <cmsys/auto_ptr.hxx>
 #include <cmsys/RegularExpression.hxx>
 
 class cmFunctionBlocker;
@@ -89,9 +90,13 @@ public:
    */
   void AddFunctionBlocker(cmFunctionBlocker *fb)
     { this->FunctionBlockers.push_back(fb);}
-  void RemoveFunctionBlocker(cmFunctionBlocker *fb)
-    { this->FunctionBlockers.remove(fb);}
-  void RemoveFunctionBlocker(const cmListFileFunction& lff);
+
+  /**
+   * Remove the function blocker whose scope ends with the given command.
+   * This returns ownership of the function blocker object.
+   */
+  cmsys::auto_ptr<cmFunctionBlocker>
+  RemoveFunctionBlocker(const cmListFileFunction& lff);
 
   /**
    * Try running cmake and building a file. This is used for dynalically

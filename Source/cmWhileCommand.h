@@ -29,7 +29,7 @@
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmWhileFunctionBlocker() {Executing = false; Depth=0;}
+  cmWhileFunctionBlocker() {this->Depth=0;}
   virtual ~cmWhileFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf,
@@ -39,7 +39,6 @@ public:
   
   std::vector<cmListFileArgument> Args;
   std::vector<cmListFileFunction> Functions;
-  bool Executing;
 private:
   int Depth;
 };

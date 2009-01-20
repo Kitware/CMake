@@ -29,7 +29,7 @@ class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
   cmIfFunctionBlocker() {
-    this->HasRun = false; this->ScopeDepth = 0; this->Executing = false;}
+    this->HasRun = false; this->ScopeDepth = 0; }
   virtual ~cmIfFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf,
@@ -43,7 +43,6 @@ public:
   bool IsBlocking;
   bool HasRun;
   unsigned int ScopeDepth;
-  bool Executing;
 };
 
 /** \class cmIfCommand
