@@ -76,6 +76,10 @@ IsFunctionBlocked(const cmListFileFunction& lff,
             }
           else
             {
+            // Place this call on the call stack.
+            cmMakefileCall stack_manager(&mf, this->Functions[c], status);
+            static_cast<void>(stack_manager);
+
             std::string errorString;
             
             std::vector<std::string> expandedArguments;
@@ -98,8 +102,10 @@ IsFunctionBlocked(const cmListFileFunction& lff,
               err += "(";
               err += errorString;
               err += ").";
-              cmSystemTools::Error(err.c_str());
-              return false;
+              mf.IssueMessage(cmake::FATAL_ERROR, err);
+              cmSystemTools::SetFatalErrorOccured();
+              mf.RemoveFunctionBlocker(lff);
+              return true;
               }
         
             if (isTrue)
@@ -204,6 +210,7 @@ bool cmIfCommand
     err += errorString;
     err += ").";
     this->SetError(err.c_str());
+    cmSystemTools::SetFatalErrorOccured();
     return false;
     }
   
