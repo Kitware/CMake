@@ -39,6 +39,9 @@ install(TARGETS mylibapp
 install(FILES mylib.h
   DESTINATION include
   COMPONENT headers)
+install(FILES "Issue 7470.html"
+  DESTINATION docs
+  COMPONENT documentation)
 
 if(mylib_install_to_absolute_path)
  install(FILES mylib.cpp
@@ -75,6 +78,11 @@ cpack_add_component_group(Development
 cpack_add_component(applications
   DISPLAY_NAME "MyLib Application"
   DESCRIPTION "An extremely useful application that makes use of MyLib"
+  GROUP Runtime
+  INSTALL_TYPES Full)
+cpack_add_component(documentation
+  DISPLAY_NAME "MyLib Documentation"
+  DESCRIPTION "The extensive suite of MyLib Application documentation files"
   GROUP Runtime
   INSTALL_TYPES Full)
 cpack_add_component(libraries
