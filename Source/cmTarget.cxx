@@ -1932,6 +1932,11 @@ const char* cmTarget::NormalGetLocation(const char* config)
     this->Location += cfgid;
     this->Location += "/";
     }
+  if(this->IsAppBundleOnApple())
+    {
+    this->Location += this->GetFullName(config, false);
+    this->Location += ".app/Contents/MacOS/";
+    }
    if(this->IsFrameworkOnApple())
     {
     this->Location += this->GetFullName(config, false);
@@ -2446,6 +2451,11 @@ std::string cmTarget::NormalGetFullPath(const char* config, bool implib,
   std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
 
+  if(this->IsAppBundleOnApple())
+    {
+    fpath += this->GetFullName(config, false);
+    fpath += ".app/Contents/MacOS/";
+    }
   if(this->IsFrameworkOnApple())
     {
     fpath += this->GetFullName(config, false);
