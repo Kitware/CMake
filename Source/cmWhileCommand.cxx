@@ -97,15 +97,6 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile& )
   return false;
 }
 
-void cmWhileFunctionBlocker::
-ScopeEnded(cmMakefile &mf) 
-{
-  cmSystemTools::Error(
-    "The end of a CMakeLists file was reached with a WHILE statement that "
-    "was not closed properly. Within the directory: ", 
-    mf.GetCurrentDirectory());
-}
-
 bool cmWhileCommand
 ::InvokeInitialPass(const std::vector<cmListFileArgument>& args, 
                     cmExecutionStatus &)

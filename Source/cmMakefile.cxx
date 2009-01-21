@@ -2365,7 +2365,14 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
     this->FunctionBlockers.pop_back();
     if(reportError)
       {
-      fb->ScopeEnded(*this);
+      // Report the context in which the unclosed block was opened.
+      cmListFileContext const& lfc = fb->GetStartingContext();
+      cmOStringStream e;
+      e << "A logical block opening on the line\n"
+        << "  " << lfc << "\n"
+        << "is not closed.";
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      reportError = false;
       }
     }
 
@@ -2400,6 +2407,18 @@ bool cmMakefile::ExpandArguments(
       }
     }
   return !cmSystemTools::GetFatalErrorOccured();
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::AddFunctionBlocker(cmFunctionBlocker* fb)
+{
+  if(!this->CallStack.empty())
+    {
+    // Record the context in which the blocker is created.
+    fb->SetStartingContext(*(this->CallStack.back().Context));
+    }
+
+  this->FunctionBlockers.push_back(fb);
 }
 
 cmsys::auto_ptr<cmFunctionBlocker>

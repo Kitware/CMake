@@ -35,7 +35,6 @@ public:
                                  cmMakefile &mf,
                                  cmExecutionStatus &);
   virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
-  virtual void ScopeEnded(cmMakefile &mf);
   
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;

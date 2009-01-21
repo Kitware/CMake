@@ -88,8 +88,7 @@ public:
   /**
    * Add a function blocker to this makefile
    */
-  void AddFunctionBlocker(cmFunctionBlocker *fb)
-    { this->FunctionBlockers.push_back(fb);}
+  void AddFunctionBlocker(cmFunctionBlocker* fb);
 
   /**
    * Remove the function blocker whose scope ends with the given command.

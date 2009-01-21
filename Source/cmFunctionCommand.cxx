@@ -258,17 +258,6 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
   return false;
 }
 
-void cmFunctionFunctionBlocker::
-ScopeEnded(cmMakefile &mf)
-{
-  // functions should end with an EndFunction
-  cmSystemTools::Error(
-    "The end of a CMakeLists file was reached with a FUNCTION statement that "
-    "was not closed properly. Within the directory: ",
-    mf.GetCurrentDirectory(), " with function ",
-    this->Args[0].c_str());
-}
-
 bool cmFunctionCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
