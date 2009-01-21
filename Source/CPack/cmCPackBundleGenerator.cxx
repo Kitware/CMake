@@ -19,6 +19,8 @@
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
 
+#include <cmsys/RegularExpression.hxx>
+
 //----------------------------------------------------------------------
 cmCPackBundleGenerator::cmCPackBundleGenerator()
 {
@@ -245,16 +247,14 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
   if(!cpack_package_icon.empty())
     {
     cmOStringStream temp_mount;
-    temp_mount << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/mnt";
-    cmSystemTools::MakeDirectory(temp_mount.str().c_str());
 
     cmOStringStream attach_command;
     attach_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     attach_command << " attach";
-    attach_command << " -mountpoint \"" << temp_mount.str() << "\"";
     attach_command << " \"" << temp_image.str() << "\"";
 
-    if(!this->RunCommand(attach_command))
+    std::string attach_output;
+    if(!this->RunCommand(attach_command, &attach_output))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
         "Error attaching temporary disk image."
@@ -262,6 +262,10 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
 
       return 0;
       }
+
+    cmsys::RegularExpression mountpoint_regex(".*(/Volumes/[^\n]+)\n.*");
+    mountpoint_regex.find(attach_output.c_str());
+    temp_mount << mountpoint_regex.match(1);
 
     cmOStringStream setfile_command;
     setfile_command << this->GetOption("CPACK_COMMAND_SETFILE");
@@ -335,14 +339,14 @@ bool cmCPackBundleGenerator::CopyFile(cmOStringStream& source,
 }
 
 //----------------------------------------------------------------------
-bool cmCPackBundleGenerator::RunCommand(cmOStringStream& command)
+bool cmCPackBundleGenerator::RunCommand(cmOStringStream& command, 
+  std::string* output)
 {
-  std::string output;
   int exit_code = 1;
 
   bool result = cmSystemTools::RunSingleCommand(
     command.str().c_str(),
-    &output,
+    output,
     &exit_code,
     0,
     this->GeneratorVerbose,

@@ -41,7 +41,7 @@ protected:
     const std::vector<std::string>& files);
 
   bool CopyFile(cmOStringStream& source, cmOStringStream& target);
-  bool RunCommand(cmOStringStream& command);
+  bool RunCommand(cmOStringStream& command, std::string* output = 0);
 
   std::string InstallPrefix;
 };
