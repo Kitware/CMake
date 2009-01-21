@@ -119,7 +119,7 @@ protected:
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
-  class OrderedTargetDependSet: public std::set<cmTarget*, TargetCompare>
+  class OrderedTargetDependSet: public std::multiset<cmTarget*, TargetCompare>
   {
   public:
     OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const&);
