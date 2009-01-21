@@ -107,6 +107,9 @@ bool cmMacroHelperCommand::InvokeInitialPass
     return false;
     }
 
+  // Enforce matching logical blocks inside the macro.
+  cmMakefile::LexicalPushPop lexScope(this->Makefile);
+
   // set the value of argc
   cmOStringStream argcDefStream;
   argcDefStream << expandedArgs.size();
@@ -215,6 +218,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
       {
       // The error message should have already included the call stack
       // so we do not need to report an error here.
+      lexScope.Quiet();
       inStatus.SetNestedError(true);
       return false;
       }

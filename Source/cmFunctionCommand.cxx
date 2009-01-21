@@ -104,6 +104,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     }
 
   // we push a scope on the makefile
+  cmMakefile::LexicalPushPop lexScope(this->Makefile);
   cmMakefile::ScopePushPop varScope(this->Makefile);
   static_cast<void>(varScope);
 
@@ -163,6 +164,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass
       {
       // The error message should have already included the call stack
       // so we do not need to report an error here.
+      lexScope.Quiet();
       inStatus.SetNestedError(true);
       return false;
       }
