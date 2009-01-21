@@ -206,7 +206,7 @@ cmMakefile::~cmMakefile()
       delete d->second;
       }
     }
-  std::list<cmFunctionBlocker *>::iterator pos;
+  std::vector<cmFunctionBlocker*>::iterator pos;
   for (pos = this->FunctionBlockers.begin();
        pos != this->FunctionBlockers.end(); ++pos)
     {
@@ -453,10 +453,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
 
-  // used to watch for blockers going out of scope
-  // e.g. mismatched IF statement
-  std::set<cmFunctionBlocker *> originalBlockers;
-
   const char* external = 0;
   std::string external_abs;
 
@@ -485,14 +481,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       {
       this->cmCurrentListFile = filename;
       }
-    }
-
-  // loop over current function blockers and record them
-  for (std::list<cmFunctionBlocker *>::iterator pos 
-        = this->FunctionBlockers.begin();
-       pos != this->FunctionBlockers.end(); ++pos)
-    {
-    originalBlockers.insert(*pos);
     }
 
   // Now read the input file
@@ -541,6 +529,10 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
   // add this list file to the list of dependencies
   this->ListFiles.push_back( filenametoread);
+
+  // Enforce balanced blocks (if/endif, function/endfunction, etc.).
+  {
+  LexicalPushPop lexScope(this);
   bool endScopeNicely = true;
 
   // Save the current policy stack depth.
@@ -552,11 +544,16 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     {
     cmExecutionStatus status;
     this->ExecuteCommand(cacheFile.Functions[i],status);
-    if (status.GetReturnInvoked() ||
-        cmSystemTools::GetFatalErrorOccured() )
+    if(cmSystemTools::GetFatalErrorOccured())
       {
-      // Exit early from processing this file.
+      // Exit early due to error.
       endScopeNicely = false;
+      lexScope.Quiet();
+      break;
+      }
+    if(status.GetReturnInvoked())
+      {
+      // Exit early due to return command.
       break;
       }
     }
@@ -571,23 +568,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       }
     this->PopPolicy(false);
     }
-
-  // send scope ended to and function blockers
-  if (endScopeNicely)
-    {
-    // loop over all function blockers to see if any block this command
-    for (std::list<cmFunctionBlocker *>::iterator pos 
-         = this->FunctionBlockers.begin();
-         pos != this->FunctionBlockers.end(); ++pos)
-      {
-      // if this blocker was not in the original then send a
-      // scope ended message
-      if (originalBlockers.find(*pos) == originalBlockers.end())
-        {
-        (*pos)->ScopeEnded(*this);
-        }
-      }
-    }
+  }
 
   // If this is the directory-level CMakeLists.txt file then perform
   // some extra checks.
@@ -2353,7 +2334,7 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
 
   // loop over all function blockers to see if any block this command
   // evaluate in reverse, this is critical for balanced IF statements etc
-  std::list<cmFunctionBlocker *>::reverse_iterator pos;
+  std::vector<cmFunctionBlocker*>::reverse_iterator pos;
   for (pos = this->FunctionBlockers.rbegin();
        pos != this->FunctionBlockers.rend(); ++pos)
     {
@@ -2364,6 +2345,32 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
     }
 
   return false;
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::PushFunctionBlockerBarrier()
+{
+  this->FunctionBlockerBarriers.push_back(this->FunctionBlockers.size());
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
+{
+  // Remove any extra entries pushed on the barrier.
+  FunctionBlockersType::size_type barrier =
+    this->FunctionBlockerBarriers.back();
+  while(this->FunctionBlockers.size() > barrier)
+    {
+    cmsys::auto_ptr<cmFunctionBlocker> fb(this->FunctionBlockers.back());
+    this->FunctionBlockers.pop_back();
+    if(reportError)
+      {
+      fb->ScopeEnded(*this);
+      }
+    }
+
+  // Remove the barrier.
+  this->FunctionBlockerBarriers.pop_back();
 }
 
 bool cmMakefile::ExpandArguments(
@@ -2398,20 +2405,42 @@ bool cmMakefile::ExpandArguments(
 cmsys::auto_ptr<cmFunctionBlocker>
 cmMakefile::RemoveFunctionBlocker(const cmListFileFunction& lff)
 {
-  // loop over all function blockers to see if any block this command
-  std::list<cmFunctionBlocker *>::reverse_iterator pos;
-  for (pos = this->FunctionBlockers.rbegin();
-       pos != this->FunctionBlockers.rend(); ++pos)
+  // Find the function blocker stack barrier for the current scope.
+  // We only remove a blocker whose index is not less than the barrier.
+  FunctionBlockersType::size_type barrier = 0;
+  if(!this->FunctionBlockerBarriers.empty())
     {
+    barrier = this->FunctionBlockerBarriers.back();
+    }
+
+  // Search for the function blocker whose scope this command ends.
+  for(FunctionBlockersType::size_type
+        i = this->FunctionBlockers.size(); i > barrier; --i)
+    {
+    std::vector<cmFunctionBlocker*>::iterator pos =
+      this->FunctionBlockers.begin() + (i - 1);
     if ((*pos)->ShouldRemove(lff, *this))
       {
       cmFunctionBlocker* b = *pos;
-      this->FunctionBlockers.remove(b);
+      this->FunctionBlockers.erase(pos);
       return cmsys::auto_ptr<cmFunctionBlocker>(b);
       }
     }
 
   return cmsys::auto_ptr<cmFunctionBlocker>();
+}
+
+//----------------------------------------------------------------------------
+cmMakefile::LexicalPushPop::LexicalPushPop(cmMakefile* mf):
+  Makefile(mf), ReportError(true)
+{
+  this->Makefile->PushFunctionBlockerBarrier();
+}
+
+//----------------------------------------------------------------------------
+cmMakefile::LexicalPushPop::~LexicalPushPop()
+{
+  this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
 
 void cmMakefile::SetHomeDirectory(const char* dir)

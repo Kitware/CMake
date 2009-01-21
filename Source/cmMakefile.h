@@ -98,6 +98,19 @@ public:
   cmsys::auto_ptr<cmFunctionBlocker>
   RemoveFunctionBlocker(const cmListFileFunction& lff);
 
+  /** Push/pop a lexical (function blocker) barrier automatically.  */
+  class LexicalPushPop
+  {
+  public:
+    LexicalPushPop(cmMakefile* mf);
+    ~LexicalPushPop();
+    void Quiet() { this->ReportError = false; }
+  private:
+    cmMakefile* Makefile;
+    bool ReportError;
+  };
+  friend class LexicalPushPop;
+
   /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
@@ -876,7 +889,11 @@ private:
                          const std::vector<std::string>& v) const;
 
   void AddDefaultDefinitions();
-  std::list<cmFunctionBlocker *> FunctionBlockers;
+  typedef std::vector<cmFunctionBlocker*> FunctionBlockersType;
+  FunctionBlockersType FunctionBlockers;
+  std::vector<FunctionBlockersType::size_type> FunctionBlockerBarriers;
+  void PushFunctionBlockerBarrier();
+  void PopFunctionBlockerBarrier(bool reportError = true);
 
   typedef std::map<cmStdString, cmData*> DataMapType;
   DataMapType DataMap;
