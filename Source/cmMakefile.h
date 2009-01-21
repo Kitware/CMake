@@ -95,7 +95,7 @@ public:
    * This returns ownership of the function blocker object.
    */
   cmsys::auto_ptr<cmFunctionBlocker>
-  RemoveFunctionBlocker(const cmListFileFunction& lff);
+  RemoveFunctionBlocker(cmFunctionBlocker* fb, const cmListFileFunction& lff);
 
   /** Push/pop a lexical (function blocker) barrier automatically.  */
   class LexicalPushPop

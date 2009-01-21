@@ -2422,7 +2422,8 @@ void cmMakefile::AddFunctionBlocker(cmFunctionBlocker* fb)
 }
 
 cmsys::auto_ptr<cmFunctionBlocker>
-cmMakefile::RemoveFunctionBlocker(const cmListFileFunction& lff)
+cmMakefile::RemoveFunctionBlocker(cmFunctionBlocker* fb,
+                                  const cmListFileFunction& lff)
 {
   // Find the function blocker stack barrier for the current scope.
   // We only remove a blocker whose index is not less than the barrier.
@@ -2438,8 +2439,20 @@ cmMakefile::RemoveFunctionBlocker(const cmListFileFunction& lff)
     {
     std::vector<cmFunctionBlocker*>::iterator pos =
       this->FunctionBlockers.begin() + (i - 1);
-    if ((*pos)->ShouldRemove(lff, *this))
+    if (*pos == fb)
       {
+      // Warn if the arguments do not match, but always remove.
+      if(!(*pos)->ShouldRemove(lff, *this))
+        {
+        cmListFileContext const& lfc = fb->GetStartingContext();
+        cmOStringStream e;
+        e << "A logical block opening on the line\n"
+          << "  " << lfc << "\n"
+          << "closes on the line\n"
+          << "  " << lff << "\n"
+          << "with mis-matching arguments.";
+        this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        }
       cmFunctionBlocker* b = *pos;
       this->FunctionBlockers.erase(pos);
       return cmsys::auto_ptr<cmFunctionBlocker>(b);

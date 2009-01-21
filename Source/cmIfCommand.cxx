@@ -39,7 +39,8 @@ IsFunctionBlocked(const cmListFileFunction& lff,
     if (!this->ScopeDepth) 
       {
       // Remove the function blocker for this scope or bail.
-      cmsys::auto_ptr<cmFunctionBlocker> fb(mf.RemoveFunctionBlocker(lff));
+      cmsys::auto_ptr<cmFunctionBlocker>
+        fb(mf.RemoveFunctionBlocker(this, lff));
       if(!fb.get()) { return false; }
 
       // execute the functions for the true parts of the if statement

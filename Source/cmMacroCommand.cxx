@@ -266,7 +266,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       mf.AddCommand(f);
 
       // remove the function blocker now that the macro is defined
-      mf.RemoveFunctionBlocker(lff);
+      mf.RemoveFunctionBlocker(this, lff);
       return true;
       }
     else

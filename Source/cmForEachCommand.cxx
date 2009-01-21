@@ -31,7 +31,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     if (!this->Depth) 
       {
       // Remove the function blocker for this scope or bail.
-      cmsys::auto_ptr<cmFunctionBlocker> fb(mf.RemoveFunctionBlocker(lff));
+      cmsys::auto_ptr<cmFunctionBlocker>
+        fb(mf.RemoveFunctionBlocker(this, lff));
       if(!fb.get()) { return false; }
 
       // at end of for each execute recorded commands
