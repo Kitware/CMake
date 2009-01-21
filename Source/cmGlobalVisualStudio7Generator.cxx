@@ -729,6 +729,15 @@ bool
 cmGlobalVisualStudio7Generator::TargetCompare
 ::operator()(cmTarget const* l, cmTarget const* r)
 {
+  // Make sure ALL_BUILD is first so it is the default active project.
+  if(strcmp(l->GetName(), "ALL_BUILD") == 0)
+    {
+    return true;
+    }
+  if(strcmp(r->GetName(), "ALL_BUILD") == 0)
+    {
+    return false;
+    }
   return strcmp(l->GetName(), r->GetName()) < 0;
 }
 
