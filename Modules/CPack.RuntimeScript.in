@@ -6,6 +6,26 @@ CWD="`dirname \"$0\"`"
 TMP=/tmp/$UID/TemporaryItems
 
 version=`sw_vers -productVersion`
+if [ "$?" == "0" ]; then
+  major=${version%%\.*}
+  rest=${version#*\.}
+  minor=${rest%%\.*}
+  build=${rest#*\.}
+else
+  major=10
+  minor=4
+  build=0
+fi
+
+echo $version
+echo "Major = $major"
+echo "Minor = $minor"
+echo "Build = $build"
+
+
+# if 10.5 or greater, then all the open-x11 stuff need not occur
+if ((( $major < 10 )) || ((( $major == 10)) && (( $minor < 5 )))); then
+version=`sw_vers -productVersion`
 if [ "$?" = "0" ]; then
   major=${version%%\.*}
   rest=${version#*\.}
@@ -42,6 +62,7 @@ else
     echo \$DISPLAY > "$TMP/display"
 fi
 __END_OF_GETDISPLAY_SCRIPT__
+fi
 chmod +x "$TMP/getdisplay.sh"
 rm -f $TMP/display
 open-x11 $TMP/getdisplay.sh || \

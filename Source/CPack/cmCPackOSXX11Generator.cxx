@@ -89,10 +89,15 @@ int cmCPackOSXX11Generator::CompressFiles(const char* outFileName,
   std::string contentsDirectory = packageDirFileName + "/Contents";
   std::string resourcesDirectory = contentsDirectory + "/Resources";
   std::string appDirectory = contentsDirectory + "/MacOS";
+  std::string scriptDirectory = resourcesDirectory + "/Scripts";
+  std::string resourceFileName = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  resourceFileName += ".rsrc";
 
   const char* dir = resourcesDirectory.c_str();
   const char* appdir = appDirectory.c_str();
+  const char* scrDir = scriptDirectory.c_str();
   const char* contDir = contentsDirectory.c_str();
+  const char* rsrcFile = resourceFileName.c_str();
   const char* iconFile = this->GetOption("CPACK_PACKAGE_ICON");
   if ( iconFile )
     {
@@ -124,6 +129,10 @@ int cmCPackOSXX11Generator::CompressFiles(const char* outFileName,
     !this->CopyResourcePlistFile("RuntimeScript", dir) ||
     !this->CopyResourcePlistFile("OSXX11.Info.plist", contDir,
       "Info.plist" ) ||
+    !this->CopyResourcePlistFile("OSXX11.main.scpt", scrDir,
+      "main.scpt", true ) ||
+    !this->CopyResourcePlistFile("OSXScriptLauncher.rsrc", dir, 
+      rsrcFile, true) ||
     !this->CopyResourcePlistFile("OSXScriptLauncher", appdir, 
       this->GetOption("CPACK_PACKAGE_FILE_NAME"), true)
   )

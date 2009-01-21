@@ -407,7 +407,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponents")
   ENDIF(CTEST_RUN_CPackComponents)
 
-  ADD_TEST(X11  ${CMAKE_CTEST_COMMAND}
+  IF(CTEST_TEST_CPACK)
+    SET(X11_build_target_arg --build-target package)
+  ELSE(CTEST_TEST_CPACK)
+    SET(X11_build_target_arg)
+  ENDIF(CTEST_TEST_CPACK)
+
+  ADD_TEST(X11 ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/X11"
     "${CMake_BINARY_DIR}/Tests/X11"
@@ -415,6 +421,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --build-project UseX11
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-two-config
+    ${X11_build_target_arg}
     --test-command  UseX11)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/X11")
 
