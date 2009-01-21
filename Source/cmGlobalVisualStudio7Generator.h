@@ -97,6 +97,11 @@ public:
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGInitDirectory()  { return "$(OutDir)"; }
 
+  struct TargetCompare
+  {
+    bool operator()(cmTarget const* l, cmTarget const* r);
+  };
+
 protected:
   static cmVS7FlagTable const* GetExtraFlagTableVS7();
   virtual void OutputSLNFile(cmLocalGenerator* root, 
@@ -114,18 +119,24 @@ protected:
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
+  class OrderedTargetDependSet: public std::set<cmTarget*, TargetCompare>
+  {
+  public:
+    OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const&);
+  };
+
   virtual void WriteTargetsToSolution(
     std::ostream& fout,
     cmLocalGenerator* root,
-    cmGlobalGenerator::TargetDependSet& projectTargets,
+    OrderedTargetDependSet const& projectTargets,
     cmGlobalGenerator::TargetDependSet& originalTargets);
   virtual void WriteTargetDepends(
     std::ostream& fout,
-    cmGlobalGenerator::TargetDependSet& projectTargets);
+    OrderedTargetDependSet const& projectTargets);
   virtual void WriteTargetConfigurations(
     std::ostream& fout,
     cmLocalGenerator* root,
-    cmGlobalGenerator::TargetDependSet& projectTargets);
+    OrderedTargetDependSet const& projectTargets);
   
   void AddAllBuildDepends(cmLocalGenerator* root,
                           cmTarget* target,

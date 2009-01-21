@@ -115,7 +115,9 @@ void cmGlobalVisualStudio71Generator
   this->GetTargetSets(projectTargets,
                       originalTargets,
                       root, generators);
-  this->WriteTargetsToSolution(fout, root, projectTargets, originalTargets);
+  OrderedTargetDependSet orderedProjectTargets(projectTargets);
+  this->WriteTargetsToSolution(fout, root, orderedProjectTargets,
+                               originalTargets);
   // Write out the configurations information for the solution
   fout << "Global\n";
   // Write out the configurations for the solution
@@ -123,7 +125,7 @@ void cmGlobalVisualStudio71Generator
   fout << "\tGlobalSection(" << this->ProjectConfigurationSectionName
        << ") = postSolution\n";
   // Write out the configurations for all the targets in the project
-  this->WriteTargetConfigurations(fout, root, projectTargets);
+  this->WriteTargetConfigurations(fout, root, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
   // Write the footer for the SLN file
   this->WriteSLNFooter(fout);

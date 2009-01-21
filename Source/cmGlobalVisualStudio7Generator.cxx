@@ -253,15 +253,7 @@ void cmGlobalVisualStudio7Generator::AddAllBuildDepends(
     cmTarget* t = const_cast<cmTarget*>(*ot);
     if(!this->IsExcluded(root, *t))
       {
-      if (t->GetType() == cmTarget::UTILITY ||
-          t->GetType() == cmTarget::GLOBAL_TARGET)
-        {
-        target->AddUtility(t->GetName());
-        }
-      else
-        {
-        target->AddLinkLibrary(t->GetName(),cmTarget::GENERAL);
-        }
+      target->AddUtility(t->GetName());
       }
     }
 }
@@ -269,14 +261,14 @@ void cmGlobalVisualStudio7Generator::AddAllBuildDepends(
 void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   std::ostream& fout, 
   cmLocalGenerator* root,
-  cmGlobalGenerator::TargetDependSet& projectTargets)
+  OrderedTargetDependSet const& projectTargets)
 {
   // loop over again and write out configurations for each target
   // in the solution
-  for(cmGlobalGenerator::TargetDependSet::iterator tt =
+  for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget* target = const_cast<cmTarget*>(*tt);
+    cmTarget* target = *tt;
     if (strncmp(target->GetName(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
       {
       cmCustomCommand cc = target->GetPostBuildCommands()[0];
@@ -304,16 +296,16 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
 void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     std::ostream& fout,
     cmLocalGenerator* root,
-    cmGlobalGenerator::TargetDependSet& projectTargets,
+    OrderedTargetDependSet const& projectTargets,
     cmGlobalGenerator::TargetDependSet& originalTargets
     )
 {
   std::string rootdir = root->GetMakefile()->GetStartOutputDirectory();
   rootdir += "/";
-  for(cmGlobalGenerator::TargetDependSet::iterator tt =
+  for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget* target = const_cast<cmTarget*>(*tt);
+    cmTarget* target = *tt;
     cmMakefile* mf = target->GetMakefile();
     // look for the all_build rule and add depends to all
     // of the original targets (none that were "pulled" into this project)
@@ -370,13 +362,13 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 
 void cmGlobalVisualStudio7Generator::WriteTargetDepends(
     std::ostream& fout,
-    cmGlobalGenerator::TargetDependSet& projectTargets
+    OrderedTargetDependSet const& projectTargets
     )
 {
-  for(cmGlobalGenerator::TargetDependSet::iterator tt =
+  for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget* target = const_cast<cmTarget*>(*tt);
+    cmTarget* target = *tt;
     cmMakefile* mf = target->GetMakefile();
     if (strncmp(target->GetName(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
       {
@@ -434,7 +426,9 @@ void cmGlobalVisualStudio7Generator
   this->GetTargetSets(projectTargets,
                       originalTargets,
                       root, generators);
-  this->WriteTargetsToSolution(fout, root, projectTargets, originalTargets);
+  OrderedTargetDependSet orderedProjectTargets(projectTargets);
+  this->WriteTargetsToSolution(fout, root, orderedProjectTargets,
+                               originalTargets);
   // Write out the configurations information for the solution
   fout << "Global\n"
        << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
@@ -449,12 +443,12 @@ void cmGlobalVisualStudio7Generator
   fout << "\tEndGlobalSection\n";
   // Write out project(target) depends 
   fout << "\tGlobalSection(ProjectDependencies) = postSolution\n";
-  this->WriteTargetDepends(fout, projectTargets);
+  this->WriteTargetDepends(fout, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
   // Write out the configurations for all the targets in the project
   fout << "\tGlobalSection(ProjectConfiguration) = postSolution\n";
-  this->WriteTargetConfigurations(fout, root, projectTargets);
+  this->WriteTargetConfigurations(fout, root, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
   // Write the footer for the SLN file
@@ -728,6 +722,25 @@ bool cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,
     } 
   // default is to be part of the build
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio7Generator::TargetCompare
+::operator()(cmTarget const* l, cmTarget const* r)
+{
+  return strcmp(l->GetName(), r->GetName()) < 0;
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudio7Generator::OrderedTargetDependSet
+::OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const& targets)
+{
+  for(cmGlobalGenerator::TargetDependSet::const_iterator ti =
+        targets.begin(); ti != targets.end(); ++ti)
+    {
+    this->insert(*ti);
+    }
 }
 
 //----------------------------------------------------------------------------
