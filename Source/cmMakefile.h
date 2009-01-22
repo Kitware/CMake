@@ -349,7 +349,9 @@ public:
   class PolicyPushPop
   {
   public:
-    PolicyPushPop(cmMakefile* m);
+    PolicyPushPop(cmMakefile* m,
+                  bool weak = false,
+                  cmPolicies::PolicyMap const& pm = cmPolicies::PolicyMap());
     ~PolicyPushPop();
     void Quiet() { this->ReportError = false; }
   private:
@@ -943,7 +945,8 @@ private:
   std::map<cmStdString, cmTarget*> ImportedTargets;
 
   // Internal policy stack management.
-  void PushPolicy();
+  void PushPolicy(bool weak = false,
+                  cmPolicies::PolicyMap const& pm = cmPolicies::PolicyMap());
   void PopPolicy();
   void PushPolicyBarrier();
   void PopPolicyBarrier(bool reportError = true);
@@ -955,9 +958,10 @@ private:
   struct PolicyStackEntry: public cmPolicies::PolicyMap
   {
     typedef cmPolicies::PolicyMap derived;
-    PolicyStackEntry(): derived() {}
-    PolicyStackEntry(derived const& d): derived(d) {}
-    PolicyStackEntry(PolicyStackEntry const& r): derived(r) {}
+    PolicyStackEntry(bool w = false): derived(), Weak(w) {}
+    PolicyStackEntry(derived const& d, bool w = false): derived(d), Weak(w) {}
+    PolicyStackEntry(PolicyStackEntry const& r): derived(r), Weak(r.Weak) {}
+    bool Weak;
   };
   typedef std::vector<PolicyStackEntry> PolicyStackType;
   PolicyStackType PolicyStack;

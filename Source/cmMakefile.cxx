@@ -3666,8 +3666,14 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
     return false;
     }
 
-  // Store the setting.
-  this->PolicyStack.back()[id] = status;
+  // Update the policy stack from the top to the top-most strong entry.
+  bool previous_was_weak = true;
+  for(PolicyStackType::reverse_iterator psi = this->PolicyStack.rbegin();
+      previous_was_weak && psi != this->PolicyStack.rend(); ++psi)
+    {
+    (*psi)[id] = status;
+    previous_was_weak = psi->Weak;
+    }
 
   // Special hook for presenting compatibility variable as soon as
   // the user requests it.
@@ -3692,10 +3698,11 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 }
 
 //----------------------------------------------------------------------------
-cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m):
+cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m, bool weak,
+                                         cmPolicies::PolicyMap const& pm):
   Makefile(m), ReportError(true)
 {
-  this->Makefile->PushPolicy();
+  this->Makefile->PushPolicy(weak, pm);
   this->Makefile->PushPolicyBarrier();
 }
 
@@ -3707,10 +3714,10 @@ cmMakefile::PolicyPushPop::~PolicyPushPop()
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::PushPolicy()
+void cmMakefile::PushPolicy(bool weak, cmPolicies::PolicyMap const& pm)
 {
   // Allocate a new stack entry.
-  this->PolicyStack.push_back(PolicyStackEntry());
+  this->PolicyStack.push_back(PolicyStackEntry(pm, weak));
 }
 
 //----------------------------------------------------------------------------
