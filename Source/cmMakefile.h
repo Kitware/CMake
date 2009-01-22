@@ -44,6 +44,7 @@ class cmTest;
 class cmVariableWatch;
 class cmake;
 class cmMakefileCall;
+class cmCMakePolicyCommand;
 
 /** \class cmMakefile
  * \brief Process the input CMakeLists.txt file.
@@ -341,8 +342,6 @@ public:
   bool SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
   bool SetPolicy(const char *id, cmPolicies::PolicyStatus status);
   cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
-  bool PushPolicy();
-  bool PopPolicy(bool reportError = true);
   bool SetPolicyVersion(const char *version);
   //@}
 
@@ -941,7 +940,12 @@ private:
   cmTarget* FindBasicTarget(const char* name);
   std::vector<cmTarget*> ImportedTargetsOwned;
   std::map<cmStdString, cmTarget*> ImportedTargets;
-  
+
+  // Internal policy stack management.
+  bool PushPolicy();
+  bool PopPolicy(bool reportError = true);
+  friend class cmCMakePolicyCommand;
+
   // stack of policy settings
   struct PolicyStackEntry: public cmPolicies::PolicyMap
   {
