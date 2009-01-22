@@ -708,6 +708,7 @@ if(NOT CPACK_GENERATOR)
     else(CYGWIN)
       if(APPLE)
         option(CPACK_BINARY_BUNDLE       "Enable to build OSX bundles"      OFF)
+        option(CPACK_BINARY_DRAGNDROP    "Enable to build OSX Drag And Drop package" OFF)
         option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages" ON)
         option(CPACK_BINARY_OSXX11       "Enable to build OSX X11 packages"      OFF)
       else(APPLE)
@@ -726,6 +727,7 @@ if(NOT CPACK_GENERATOR)
   endif(UNIX)
   
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_BUNDLE       Bundle)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DRAGNDROP    DragNDrop)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PACKAGEMAKER PackageMaker)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_OSXX11       OSXX11)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_CYGWIN       CygwinBinary)
@@ -768,7 +770,7 @@ mark_as_advanced(CPACK_BINARY_CYGWIN CPACK_BINARY_PACKAGEMAKER CPACK_BINARY_OSXX
                  CPACK_BINARY_DEB    CPACK_BINARY_RPM          CPACK_BINARY_TZ     
                  CPACK_BINARY_NSIS CPACK_BINARY_ZIP CPACK_BINARY_BUNDLE
                  CPACK_SOURCE_CYGWIN CPACK_SOURCE_TBZ2 CPACK_SOURCE_TGZ 
-                 CPACK_SOURCE_TZ CPACK_SOURCE_ZIP)
+                 CPACK_SOURCE_TZ CPACK_SOURCE_ZIP CPACK_BINARY_DRAGNDROP)
 
 # Set some other variables
 cpack_set_if_not_set(CPACK_INSTALL_CMAKE_PROJECTS
