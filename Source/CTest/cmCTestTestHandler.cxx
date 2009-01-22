@@ -1503,26 +1503,31 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
         {
         os << "\t\t\t<NamedMeasurement type=\"text/string\" "
           "name=\"Exit Code\"><Value>"
-          << this->GetTestStatus(result->Status) << "</Value>"
+          << cmCTest::MakeXMLSafe(this->GetTestStatus(result->Status))
+          << "</Value>"
           "</NamedMeasurement>\n"
           << "\t\t\t<NamedMeasurement type=\"text/string\" "
           "name=\"Exit Value\"><Value>"
-          << result->ReturnValue << "</Value></NamedMeasurement>"
+          << result->ReturnValue
+          << "</Value></NamedMeasurement>"
           << std::endl;
         }
       os << result->RegressionImages;
       os << "\t\t\t<NamedMeasurement type=\"numeric/double\" "
         << "name=\"Execution Time\"><Value>"
-        << result->ExecutionTime << "</Value></NamedMeasurement>\n";
+        << result->ExecutionTime
+        << "</Value></NamedMeasurement>\n";
       os
         << "\t\t\t<NamedMeasurement type=\"text/string\" "
         << "name=\"Completion Status\"><Value>"
-        << result->CompletionStatus << "</Value></NamedMeasurement>\n";
+        << cmCTest::MakeXMLSafe(result->CompletionStatus)
+        << "</Value></NamedMeasurement>\n";
       }
     os
       << "\t\t\t<NamedMeasurement type=\"text/string\" "
       << "name=\"Command Line\"><Value>"
-      << result->FullCommandLine << "</Value></NamedMeasurement>\n";
+      << cmCTest::MakeXMLSafe(result->FullCommandLine)
+      << "</Value></NamedMeasurement>\n";
     std::map<cmStdString,cmStdString>::iterator measureIt;
     for ( measureIt = result->Properties->Measurements.begin();
       measureIt != result->Properties->Measurements.end();
@@ -1531,7 +1536,8 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
       os
         << "\t\t\t<NamedMeasurement type=\"text/string\" "
         << "name=\"" << measureIt->first.c_str() << "\"><Value>"
-        << measureIt->second.c_str() << "</Value></NamedMeasurement>\n";
+        << cmCTest::MakeXMLSafe(measureIt->second.c_str())
+        << "</Value></NamedMeasurement>\n";
       }
     os
       << "\t\t\t<Measurement>\n"
