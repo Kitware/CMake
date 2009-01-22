@@ -177,7 +177,9 @@ ENDIF(NOT FLTK_DIR)
       /usr/X11R6/include
       )
 
-    FIND_PATH(FLTK_INCLUDE_DIR FL/Fl.h ${FLTK_INCLUDE_SEARCH_PATH})
+    FIND_PATH(FLTK_INCLUDE_DIR 
+        NAMES FL/Fl.h FL/Fl.H    # fltk 1.1.9 has Fl.H (#8376)
+        PATHS ${FLTK_INCLUDE_SEARCH_PATH})
 
     SET(FLTK_LIBRARY_SEARCH_PATH ${FLTK_LIBRARY_SEARCH_PATH}
       /usr/local/fltk/lib
