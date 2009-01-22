@@ -372,6 +372,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   # option is ON:
   #
   set(CTEST_RUN_CPackComponents ${CTEST_TEST_CPACK})
+  set(CTEST_package_X11_TEST ${CTEST_TEST_CPACK})
 
   # But on Windows, only run the CPackComponents test if the NSIS
   # installer builder is available:
@@ -385,6 +386,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       set(CTEST_RUN_CPackComponents ON)
     else(NSIS_MAKENSIS_EXECUTABLE)
       set(CTEST_RUN_CPackComponents OFF)
+      set(CTEST_package_X11_TEST OFF)
     endif(NSIS_MAKENSIS_EXECUTABLE)
   endif(WIN32)
 
@@ -407,11 +409,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponents")
   ENDIF(CTEST_RUN_CPackComponents)
 
-  IF(CTEST_TEST_CPACK)
+  IF(CTEST_package_X11_TEST)
     SET(X11_build_target_arg --build-target package)
-  ELSE(CTEST_TEST_CPACK)
+  ELSE(CTEST_package_X11_TEST)
     SET(X11_build_target_arg)
-  ENDIF(CTEST_TEST_CPACK)
+  ENDIF(CTEST_package_X11_TEST)
 
   ADD_TEST(X11 ${CMAKE_CTEST_COMMAND}
     --build-and-test
