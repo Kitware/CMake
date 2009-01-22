@@ -351,9 +351,10 @@ public:
   public:
     PolicyPushPop(cmMakefile* m);
     ~PolicyPushPop();
+    void Quiet() { this->ReportError = false; }
   private:
     cmMakefile* Makefile;
-    size_t PolicyDepth;
+    bool ReportError;
   };
   friend class PolicyPushPop;
 
@@ -942,9 +943,13 @@ private:
   std::map<cmStdString, cmTarget*> ImportedTargets;
 
   // Internal policy stack management.
-  bool PushPolicy();
-  bool PopPolicy(bool reportError = true);
+  void PushPolicy();
+  void PopPolicy();
+  void PushPolicyBarrier();
+  void PopPolicyBarrier(bool reportError = true);
   friend class cmCMakePolicyCommand;
+  class IncludeScope;
+  friend class IncludeScope;
 
   // stack of policy settings
   struct PolicyStackEntry: public cmPolicies::PolicyMap
@@ -956,6 +961,7 @@ private:
   };
   typedef std::vector<PolicyStackEntry> PolicyStackType;
   PolicyStackType PolicyStack;
+  std::vector<PolicyStackType::size_type> PolicyBarriers;
   cmPolicies::PolicyStatus GetPolicyStatusInternal(cmPolicies::PolicyID id);
 
   bool CheckCMP0000;

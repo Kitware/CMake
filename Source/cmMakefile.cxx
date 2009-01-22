@@ -150,6 +150,9 @@ void cmMakefile::Initialize()
   // Enter a policy level for this directory.
   this->PushPolicy();
 
+  // Protect the directory-level policies.
+  this->PushPolicyBarrier();
+
   // By default the check is not done.  It is enabled by
   // cmListFileCache in the top level if necessary.
   this->CheckCMP0000 = false;
@@ -441,6 +444,34 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   return result;
 }
 
+//----------------------------------------------------------------------------
+class cmMakefile::IncludeScope
+{
+public:
+  IncludeScope(cmMakefile* mf);
+  ~IncludeScope();
+  void Quiet() { this->ReportError = false; }
+private:
+  cmMakefile* Makefile;
+  bool ReportError;
+};
+
+//----------------------------------------------------------------------------
+cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf):
+  Makefile(mf), ReportError(true)
+{
+  // The included file cannot pop our policy scope.
+  this->Makefile->PushPolicyBarrier();
+}
+
+//----------------------------------------------------------------------------
+cmMakefile::IncludeScope::~IncludeScope()
+{
+  // Enforce matching policy scopes inside the included file.
+  this->Makefile->PopPolicyBarrier(this->ReportError);
+}
+
+//----------------------------------------------------------------------------
 // Parse the given CMakeLists.txt file executing all commands
 //
 bool cmMakefile::ReadListFile(const char* filename_in,
@@ -533,10 +564,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   // Enforce balanced blocks (if/endif, function/endfunction, etc.).
   {
   LexicalPushPop lexScope(this);
-  bool endScopeNicely = true;
-
-  // Save the current policy stack depth.
-  size_t const policy_depth = this->PolicyStack.size();
+  IncludeScope incScope(this);
 
   // Run the parsed commands.
   const size_t numberFunctions = cacheFile.Functions.size();
@@ -547,8 +575,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     if(cmSystemTools::GetFatalErrorOccured())
       {
       // Exit early due to error.
-      endScopeNicely = false;
       lexScope.Quiet();
+      incScope.Quiet();
       break;
       }
     if(status.GetReturnInvoked())
@@ -556,17 +584,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       // Exit early due to return command.
       break;
       }
-    }
-
-  // Restore policy stack depth.
-  while(this->PolicyStack.size() > policy_depth)
-    {
-    if(endScopeNicely)
-      {
-      this->IssueMessage(cmake::FATAL_ERROR,
-                         "cmake_policy PUSH without matching POP");
-      }
-    this->PopPolicy(false);
     }
   }
 
@@ -3675,54 +3692,65 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 }
 
 //----------------------------------------------------------------------------
-cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m): Makefile(m)
+cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m):
+  Makefile(m), ReportError(true)
 {
   this->Makefile->PushPolicy();
-  this->PolicyDepth = this->Makefile->PolicyStack.size();
+  this->Makefile->PushPolicyBarrier();
 }
 
 //----------------------------------------------------------------------------
 cmMakefile::PolicyPushPop::~PolicyPushPop()
 {
-  // Enforce matching PUSH/POP pairs.
-  if(this->Makefile->PolicyStack.size() < this->PolicyDepth)
-    {
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
-                                 "cmake_policy POP without matching PUSH");
-    return;
-    }
-  while(this->Makefile->PolicyStack.size() > this->PolicyDepth)
-    {
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
-                                 "cmake_policy PUSH without matching POP");
-    this->Makefile->PopPolicy(false);
-    }
-
-  // Pop our scope.
+  this->Makefile->PopPolicyBarrier(this->ReportError);
   this->Makefile->PopPolicy();
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::PushPolicy()
+void cmMakefile::PushPolicy()
 {
   // Allocate a new stack entry.
   this->PolicyStack.push_back(PolicyStackEntry());
-  return true;
 }
 
-bool cmMakefile::PopPolicy(bool reportError)
+//----------------------------------------------------------------------------
+void cmMakefile::PopPolicy()
 {
-  if(this->PolicyStack.size() == 1)
+  if(this->PolicyStack.size() > this->PolicyBarriers.back())
+    {
+    this->PolicyStack.pop_back();
+    }
+  else
+    {
+    this->IssueMessage(cmake::FATAL_ERROR,
+                       "cmake_policy POP without matching PUSH");
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::PushPolicyBarrier()
+{
+  this->PolicyBarriers.push_back(this->PolicyStack.size());
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::PopPolicyBarrier(bool reportError)
+{
+  // Remove any extra entries pushed on the barrier.
+  PolicyStackType::size_type barrier = this->PolicyBarriers.back();
+  while(this->PolicyStack.size() > barrier)
     {
     if(reportError)
       {
-      cmSystemTools::Error("Attempt to pop the policy stack past "
-                           "it's beginning.");
+      this->IssueMessage(cmake::FATAL_ERROR,
+                         "cmake_policy PUSH without matching POP");
+      reportError = false;
       }
-    return false;
+    this->PopPolicy();
     }
-  this->PolicyStack.pop_back();
-  return true;
+
+  // Remove the barrier.
+  this->PolicyBarriers.pop_back();
 }
 
 bool cmMakefile::SetPolicyVersion(const char *version)

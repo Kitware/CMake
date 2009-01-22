@@ -43,7 +43,8 @@ bool cmCMakePolicyCommand
       this->SetError("PUSH may not be given additional arguments.");
       return false;
       }
-    return this->Makefile->PushPolicy();
+    this->Makefile->PushPolicy();
+    return true;
     }
   else if(args[0] == "POP")
     {
@@ -52,15 +53,8 @@ bool cmCMakePolicyCommand
       this->SetError("POP may not be given additional arguments.");
       return false;
       }
-    if(this->Makefile->PopPolicy(false))
-      {
-      return true;
-      }
-    else
-      {
-      this->SetError("POP without matching PUSH");
-      return false;
-      }
+    this->Makefile->PopPolicy();
+    return true;
     }
   else if(args[0] == "VERSION")
     {
