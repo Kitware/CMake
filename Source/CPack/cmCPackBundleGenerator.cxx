@@ -32,6 +32,22 @@ cmCPackBundleGenerator::~cmCPackBundleGenerator()
 }
 
 //----------------------------------------------------------------------
+int cmCPackBundleGenerator::InitializeInternal()
+{
+  const char* name = this->GetOption("CPACK_BUNDLE_NAME");
+  if(0 == name)
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "CPACK_BUNDLE_NAME must be set to use the Bundle generator."
+      << std::endl);
+
+    return 0;
+    }
+
+  return this->Superclass::InitializeInternal();
+}
+
+//----------------------------------------------------------------------
 const char* cmCPackBundleGenerator::GetPackagingInstallPrefix()
 {
   this->InstallPrefix = "/";

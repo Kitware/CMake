@@ -34,6 +34,7 @@ public:
   virtual ~cmCPackBundleGenerator();
 
 protected:
+  virtual int InitializeInternal();
   virtual const char* GetPackagingInstallPrefix();
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
