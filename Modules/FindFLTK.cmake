@@ -16,6 +16,8 @@ IF (FLTK_INCLUDE_DIR)
   SET(FLTK_FIND_QUIETLY TRUE)
 ENDIF (FLTK_INCLUDE_DIR)
 
+FIND_PACKAGE(OpenGL)
+
 #  Platform dependent libraries required by FLTK
 IF(WIN32)
   IF(NOT CYGWIN)
@@ -87,6 +89,8 @@ IF(NOT FLTK_DIR)
 
     # Read from the CMakeSetup registry entries.  It is likely that
     # FLTK will have been recently built.
+    # TODO: Is this really a good idea?  I can already hear the user screaming, "But
+    # it worked when I configured the build LAST week!"
     [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild1]
     [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild2]
     [HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild3]
@@ -172,19 +176,48 @@ ENDIF(NOT FLTK_DIR)
       SET(FLTK_WRAP_UI 1)
     ENDIF(FLTK_FLUID_EXECUTABLE)
 
+    #
+    # Try to find FLTK include dir
+    IF(UNIX)
+      # Use fltk-config to generate a list of possible include directories
+      FIND_PROGRAM(FLTK_CONFIG_SCRIPT fltk-config PATHS ${FLTK_BIN_DIR})
+      IF(FLTK_CONFIG_SCRIPT)
+        IF(NOT FLTK_INCLUDE_DIR)
+          EXEC_PROGRAM(${FLTK_CONFIG_SCRIPT} ARGS --cxxflags OUTPUT_VARIABLE FLTK_CXXFLAGS)
+          IF(FLTK_CXXFLAGS)
+            STRING(REGEX REPLACE "-I" "" _FLTK_POSSIBLE_INCLUDE_DIRS ${FLTK_CXXFLAGS})
+            STRING(REGEX REPLACE "-D[A-Za-z0-9_=]+" "" _FLTK_POSSIBLE_INCLUDE_DIRS ${_FLTK_POSSIBLE_INCLUDE_DIRS})
+          ENDIF(FLTK_CXXFLAGS)
+        ENDIF()
+      ENDIF()
+    ENDIF()
+
     SET(FLTK_INCLUDE_SEARCH_PATH ${FLTK_INCLUDE_SEARCH_PATH}
       /usr/local/fltk
       /usr/X11R6/include
+      ${_FLTK_POSSIBLE_INCLUDE_DIRS}
       )
 
     FIND_PATH(FLTK_INCLUDE_DIR 
         NAMES FL/Fl.h FL/Fl.H    # fltk 1.1.9 has Fl.H (#8376)
         PATHS ${FLTK_INCLUDE_SEARCH_PATH})
+    
+    #
+    # Try to find FLTK library
+    IF(UNIX)
+      IF(FLTK_CONFIG_SCRIPT)
+        EXEC_PROGRAM(${FLTK_CONFIG_SCRIPT} ARGS --libs OUTPUT_VARIABLE _FLTK_POSSIBLE_LIBS)
+        IF(_FLTK_POSSIBLE_LIBS)
+          GET_FILENAME_COMPONENT(_FLTK_POSSIBLE_LIBRARY_DIR ${_FLTK_POSSIBLE_LIBS} PATH)
+        ENDIF()
+      ENDIF()
+    ENDIF()
 
     SET(FLTK_LIBRARY_SEARCH_PATH ${FLTK_LIBRARY_SEARCH_PATH}
       /usr/local/fltk/lib
       /usr/X11R6/lib
       ${FLTK_INCLUDE_DIR}/lib
+      ${_FLTK_POSSIBLE_LIBRARY_DIR}
       )
 
     FIND_LIBRARY(FLTK_BASE_LIBRARY NAMES fltk fltkd
@@ -198,7 +231,6 @@ ENDIF(NOT FLTK_DIR)
 
     # Find the extra libraries needed for the fltk_images library.
     IF(UNIX)
-      FIND_PROGRAM(FLTK_CONFIG_SCRIPT fltk-config PATHS ${FLTK_BIN_DIR})
       IF(FLTK_CONFIG_SCRIPT)
         EXEC_PROGRAM(${FLTK_CONFIG_SCRIPT} ARGS --use-images --ldflags
           OUTPUT_VARIABLE FLTK_IMAGES_LDFLAGS)
@@ -228,8 +260,13 @@ FOREACH(var FLTK_FLUID_EXECUTABLE FLTK_INCLUDE_DIR
 ENDFOREACH(var)
 
 IF(FLTK_FOUND)
-  SET(FLTK_LIBRARIES ${FLTK_IMAGES_LIBRARY} ${FLTK_IMAGES_LIBS} ${FLTK_BASE_LIBRARY} ${FLTK_GL_LIBRARY}
-    ${FLTK_FORMS_LIBRARY} )
+  SET(FLTK_LIBRARIES ${FLTK_IMAGES_LIBRARY} ${FLTK_IMAGES_LIBS} ${FLTK_BASE_LIBRARY})
+  IF(FLTK_GL_LIBRARY AND OPENGL_FOUND)
+    LIST(APPEND FLTK_LIBRARIES ${FLTK_GL_LIBRARY} ${OPENGL_gl_LIBRARY})
+    LIST(APPEND FLTK_INCLUDE_DIR ${OPENGL_INCLUDE_DIR})
+  ENDIF()
+  LIST(APPEND FLTK_LIBRARIES ${FLTK_FORMS_LIBRARY})
+
   IF(APPLE)
     SET(FLTK_LIBRARIES ${FLTK_PLATFORM_DEPENDENT_LIBS} ${FLTK_LIBRARIES})
   ELSE(APPLE)
