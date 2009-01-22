@@ -448,18 +448,53 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
 class cmMakefile::IncludeScope
 {
 public:
-  IncludeScope(cmMakefile* mf);
+  IncludeScope(cmMakefile* mf, const char* fname, bool noPolicyScope);
   ~IncludeScope();
   void Quiet() { this->ReportError = false; }
 private:
   cmMakefile* Makefile;
+  const char* File;
+  bool NoPolicyScope;
+  bool CheckCMP0011;
   bool ReportError;
+  void EnforceCMP0011();
 };
 
 //----------------------------------------------------------------------------
-cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf):
-  Makefile(mf), ReportError(true)
+cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf, const char* fname,
+                                       bool noPolicyScope):
+  Makefile(mf), File(fname), NoPolicyScope(noPolicyScope),
+  CheckCMP0011(false), ReportError(true)
 {
+  if(!this->NoPolicyScope)
+    {
+    // Check CMP0011 to determine the policy scope type.
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011))
+      {
+      case cmPolicies::WARN:
+        // We need to push a scope to detect whether the script sets
+        // any policies that would affect the includer and therefore
+        // requires a warning.  We use a weak scope to simulate OLD
+        // behavior by allowing policy changes to affect the includer.
+        this->Makefile->PushPolicy(true);
+        this->CheckCMP0011 = true;
+        break;
+      case cmPolicies::OLD:
+        // OLD behavior is to not push a scope at all.
+        this->NoPolicyScope = true;
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        // We should never make this policy required, but we handle it
+        // here just in case.
+        this->CheckCMP0011 = true;
+      case cmPolicies::NEW:
+        // NEW behavior is to push a (strong) scope.
+        this->Makefile->PushPolicy();
+        break;
+      }
+    }
+
   // The included file cannot pop our policy scope.
   this->Makefile->PushPolicyBarrier();
 }
@@ -469,6 +504,67 @@ cmMakefile::IncludeScope::~IncludeScope()
 {
   // Enforce matching policy scopes inside the included file.
   this->Makefile->PopPolicyBarrier(this->ReportError);
+
+  if(!this->NoPolicyScope)
+    {
+    // If we need to enforce policy CMP0011 then the top entry is the
+    // one we pushed above.  If the entry is empty, then the included
+    // script did not set any policies that might affect the includer so
+    // we do not need to enforce the policy.
+    if(this->CheckCMP0011 && this->Makefile->PolicyStack.back().empty())
+      {
+      this->CheckCMP0011 = false;
+      }
+
+    // Pop the scope we pushed for the script.
+    this->Makefile->PopPolicy();
+
+    // We enforce the policy after the script's policy stack entry has
+    // been removed.
+    if(this->CheckCMP0011)
+      {
+      this->EnforceCMP0011();
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::IncludeScope::EnforceCMP0011()
+{
+  // We check the setting of this policy again because the included
+  // script might actually set this policy for its includer.
+  cmPolicies* policies = this->Makefile->GetPolicies();
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011))
+    {
+    case cmPolicies::WARN:
+      // Warn because the user did not set this policy.
+      {
+      cmOStringStream w;
+      w << policies->GetPolicyWarning(cmPolicies::CMP0011) << "\n"
+        << "The included script\n  " << this->File << "\n"
+        << "affects policy settings.  "
+        << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
+        << "so the effects are applied to the including context.";
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      }
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      {
+      cmOStringStream e;
+      e << policies->GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
+        << "The included script\n  " << this->File << "\n"
+        << "affects policy settings, so it requires this policy to be set.";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
+      break;
+    case cmPolicies::OLD:
+    case cmPolicies::NEW:
+      // The script set this policy.  We assume the purpose of the
+      // script is to initialize policies for its includer, and since
+      // the policy is now set for later scripts, we do not warn.
+      break;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -476,7 +572,8 @@ cmMakefile::IncludeScope::~IncludeScope()
 //
 bool cmMakefile::ReadListFile(const char* filename_in,
                               const char *external_in,
-                              std::string* fullPath)
+                              std::string* fullPath,
+                              bool noPolicyScope)
 {
   std::string currentParentFile
     = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
@@ -564,7 +661,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   // Enforce balanced blocks (if/endif, function/endfunction, etc.).
   {
   LexicalPushPop lexScope(this);
-  IncludeScope incScope(this);
+  IncludeScope incScope(this, filenametoread, noPolicyScope);
 
   // Run the parsed commands.
   const size_t numberFunctions = cacheFile.Functions.size();

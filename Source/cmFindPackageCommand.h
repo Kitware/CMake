@@ -82,7 +82,8 @@ private:
   bool FindPrefixedConfig();
   bool FindFrameworkConfig();
   bool FindAppBundleConfig();
-  bool ReadListFile(const char* f);
+  enum PolicyScopeRule { NoPolicyScope, DoPolicyScope };
+  bool ReadListFile(const char* f, PolicyScopeRule psr);
   void StoreVersionFound();
 
   void ComputePrefixes();
@@ -132,6 +133,7 @@ private:
   bool NoBuilds;
   bool DebugMode;
   bool UseLib64Paths;
+  bool PolicyScope;
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
 };

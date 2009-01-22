@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.6.3)
 project(PolicyScope C)
+# No cmake_minimum_required(VERSION), it's in FindFoo.
 
 #-----------------------------------------------------------------------------
 # Helper function to report results.
@@ -8,6 +8,37 @@ function(check msg lhs rhs)
     message(FATAL_ERROR "${msg}: expected [${lhs}], got [${rhs}]")
   endif()
 endfunction(check)
+
+#-----------------------------------------------------------------------------
+# Test using a development framework that sets policies for us.
+
+# Policy CMP0011 should not be set at this point.
+cmake_policy(GET CMP0011 cmp)
+check(CMP0011 "" "${cmp}")
+
+# Put the test modules in the search path.
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+# The included file should set policies for us.
+find_package(Foo)
+
+# Check policies set by the package.
+cmake_policy(GET CMP0003 cmp)
+check(CMP0003 "OLD" "${cmp}")
+cmake_policy(GET CMP0002 cmp)
+check(CMP0002 "NEW" "${cmp}")
+cmake_policy(GET CMP0011 cmp)
+check(CMP0011 "NEW" "${cmp}")
+
+# Make sure an included file cannot change policies.
+include(Bar)
+cmake_policy(GET CMP0003 cmp)
+check(CMP0003 "OLD" "${cmp}")
+
+# Allow the included file to change policies.
+include(Bar NO_POLICY_SCOPE)
+cmake_policy(GET CMP0003 cmp)
+check(CMP0003 "NEW" "${cmp}")
 
 #-----------------------------------------------------------------------------
 # Test function and macro policy recording.
