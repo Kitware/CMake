@@ -89,6 +89,10 @@ public:
   ///! Get docs for policies
   void GetDocumentation(std::vector<cmDocumentationEntry>& v);
 
+  /** Represent a set of policy values.  */
+  typedef std::map<cmPolicies::PolicyID,
+                   cmPolicies::PolicyStatus> PolicyMap;
+
   private:
   // might have to make these internal for VS6 not sure yet
   std::map<PolicyID,cmPolicy *> Policies;

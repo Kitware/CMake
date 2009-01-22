@@ -3599,11 +3599,10 @@ cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id)
 {
   // Is the policy set in our stack?
-  for(std::vector<PolicyMap>::reverse_iterator
-        psi = this->PolicyStack.rbegin();
+  for(PolicyStackType::reverse_iterator psi = this->PolicyStack.rbegin();
       psi != this->PolicyStack.rend(); ++psi)
     {
-    PolicyMap::const_iterator pse = psi->find(id);
+    PolicyStackEntry::const_iterator pse = psi->find(id);
     if(pse != psi->end())
       {
       return pse->second;
@@ -3678,7 +3677,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 bool cmMakefile::PushPolicy()
 {
   // Allocate a new stack entry.
-  this->PolicyStack.push_back(PolicyMap());
+  this->PolicyStack.push_back(PolicyStackEntry());
   return true;
 }
 

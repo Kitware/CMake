@@ -931,9 +931,15 @@ private:
   std::map<cmStdString, cmTarget*> ImportedTargets;
   
   // stack of policy settings
-  typedef std::map<cmPolicies::PolicyID,
-                   cmPolicies::PolicyStatus> PolicyMap;
-  std::vector<PolicyMap> PolicyStack;
+  struct PolicyStackEntry: public cmPolicies::PolicyMap
+  {
+    typedef cmPolicies::PolicyMap derived;
+    PolicyStackEntry(): derived() {}
+    PolicyStackEntry(derived const& d): derived(d) {}
+    PolicyStackEntry(PolicyStackEntry const& r): derived(r) {}
+  };
+  typedef std::vector<PolicyStackEntry> PolicyStackType;
+  PolicyStackType PolicyStack;
   cmPolicies::PolicyStatus GetPolicyStatusInternal(cmPolicies::PolicyID id);
 
   bool CheckCMP0000;
