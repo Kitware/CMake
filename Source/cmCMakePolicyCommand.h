@@ -113,16 +113,17 @@ public:
       "The output variable value will be \"OLD\" or \"NEW\" if the "
       "policy is set, and empty otherwise."
       "\n"
+      "CMake keeps policy settings on a stack, so changes made by the "
+      "cmake_policy command affect only the top of the stack.  "
+      "A new entry on the policy stack is managed automatically for each "
+      "subdirectory to protect its parents and siblings.  "
+      "The cmake_policy command provides an interface to manage custom "
+      "entries on the policy stack:\n"
       "  cmake_policy(PUSH)\n"
       "  cmake_policy(POP)\n"
-      "Push and pop the current policy setting state on a stack.  "
-      "Each PUSH must have a matching POP.  "
-      "This is useful when mixing multiple projects, subprojects, and "
-      "files included from external projects that may each have been "
-      "written for a different version of CMake.  "
-      "Each subdirectory entered by the project automatically pushes "
-      "a new level on the stack to isolate the subdirectories from "
-      "their parents.";
+      "Each PUSH must have a matching POP to erase any changes.  "
+      "This is useful to make temporary changes to policy settings."
+      ;
     }
   
   cmTypeMacro(cmCMakePolicyCommand, cmCommand);
