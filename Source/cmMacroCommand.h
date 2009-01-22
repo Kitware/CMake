@@ -111,7 +111,11 @@ public:
       "are not variables in the usual CMake sense. They are string "
       "replacements much like the c preprocessor would do with a "
       "macro. If you want true CMake variables you should look at "
-      "the function command.";
+      "the function command."
+      "\n"
+      "See the cmake_policy() command documentation for the behavior of "
+      "policies inside macros."
+      ;
     }
 
   cmTypeMacro(cmMacroCommand, cmCommand);

@@ -102,6 +102,7 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(Preprocess Preprocess)
   ADD_TEST_MACRO(ExportImport ExportImport)
   ADD_TEST_MACRO(Unset Unset)
+  ADD_TEST_MACRO(PolicyScope PolicyScope)
 
   SET(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
   SET(CMAKE_BUILD_TEST_BINARY_DIR "${CMake_BINARY_DIR}/Tests/CMakeBuildCOnly")

@@ -343,6 +343,7 @@ public:
   bool SetPolicy(const char *id, cmPolicies::PolicyStatus status);
   cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
   bool SetPolicyVersion(const char *version);
+  void RecordPolicies(cmPolicies::PolicyMap& pm);
   //@}
 
   /** Helper class to push and pop policies automatically.  */

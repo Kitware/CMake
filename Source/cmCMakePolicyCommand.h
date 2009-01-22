@@ -123,6 +123,12 @@ public:
       "  cmake_policy(POP)\n"
       "Each PUSH must have a matching POP to erase any changes.  "
       "This is useful to make temporary changes to policy settings."
+      "\n"
+      "Functions and macros record policy settings when they are created "
+      "and use the pre-record policies when they are invoked.  "
+      "If the function or macro implementation sets policies, the changes "
+      "automatically propagate up through callers until they reach the "
+      "closest nested policy stack entry."
       ;
     }
   

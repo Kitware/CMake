@@ -36,6 +36,7 @@ public:
     // we must copy when we clone
     newC->Args = this->Args;
     newC->Functions = this->Functions;
+    newC->Policies = this->Policies;
     return newC;
   }
 
@@ -81,6 +82,7 @@ public:
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
+  cmPolicies::PolicyMap Policies;
 };
 
 
@@ -107,6 +109,10 @@ bool cmFunctionHelperCommand::InvokeInitialPass
   cmMakefile::LexicalPushPop lexScope(this->Makefile);
   cmMakefile::ScopePushPop varScope(this->Makefile);
   static_cast<void>(varScope);
+
+  // Push a weak policy scope which restores the policies recorded at
+  // function creation.
+  cmMakefile::PolicyPushPop polScope(this->Makefile, true, this->Policies);
 
   // set the value of argc
   cmOStringStream strStream;
@@ -165,6 +171,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass
       // The error message should have already included the call stack
       // so we do not need to report an error here.
       lexScope.Quiet();
+      polScope.Quiet();
       inStatus.SetNestedError(true);
       return false;
       }
@@ -206,6 +213,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       cmFunctionHelperCommand *f = new cmFunctionHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
+      mf.RecordPolicies(f->Policies);
       
       // Set the FilePath on the arguments to match the function since it is
       // not stored and the original values may be freed

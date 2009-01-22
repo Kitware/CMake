@@ -3774,3 +3774,15 @@ cmPolicies *cmMakefile::GetPolicies()
   }
   return this->GetCMakeInstance()->GetPolicies();
 }
+
+//----------------------------------------------------------------------------
+void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
+{
+  /* Record the setting of every policy.  */
+  typedef cmPolicies::PolicyID PolicyID;
+  for(PolicyID pid = cmPolicies::CMP0000;
+      pid != cmPolicies::CMPCOUNT; pid = PolicyID(pid+1))
+    {
+    pm[pid] = this->GetPolicyStatus(pid);
+    }
+}
