@@ -3674,6 +3674,35 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   return true;
 }
 
+//----------------------------------------------------------------------------
+cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m): Makefile(m)
+{
+  this->Makefile->PushPolicy();
+  this->PolicyDepth = this->Makefile->PolicyStack.size();
+}
+
+//----------------------------------------------------------------------------
+cmMakefile::PolicyPushPop::~PolicyPushPop()
+{
+  // Enforce matching PUSH/POP pairs.
+  if(this->Makefile->PolicyStack.size() < this->PolicyDepth)
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+                                 "cmake_policy POP without matching PUSH");
+    return;
+    }
+  while(this->Makefile->PolicyStack.size() > this->PolicyDepth)
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+                                 "cmake_policy PUSH without matching POP");
+    this->Makefile->PopPolicy(false);
+    }
+
+  // Pop our scope.
+  this->Makefile->PopPolicy();
+}
+
+//----------------------------------------------------------------------------
 bool cmMakefile::PushPolicy()
 {
   // Allocate a new stack entry.

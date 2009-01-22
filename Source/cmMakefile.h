@@ -346,6 +346,18 @@ public:
   bool SetPolicyVersion(const char *version);
   //@}
 
+  /** Helper class to push and pop policies automatically.  */
+  class PolicyPushPop
+  {
+  public:
+    PolicyPushPop(cmMakefile* m);
+    ~PolicyPushPop();
+  private:
+    cmMakefile* Makefile;
+    size_t PolicyDepth;
+  };
+  friend class PolicyPushPop;
+
   /**
     * Get the Policies Instance
     */
