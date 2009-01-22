@@ -28,7 +28,7 @@
 class cmCPackBundleGenerator : public cmCPackDragNDropGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackBundleGenerator, cmCPackGenerator);
+  cmCPackTypeMacro(cmCPackBundleGenerator, cmCPackDragNDropGenerator);
 
   cmCPackBundleGenerator();
   virtual ~cmCPackBundleGenerator();
