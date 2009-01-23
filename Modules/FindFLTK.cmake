@@ -1,22 +1,37 @@
 # - Find the native FLTK includes and library
-# The following settings are defined
-#  FLTK_FLUID_EXECUTABLE, where to find the Fluid tool
-#  FLTK_WRAP_UI, This enables the FLTK_WRAP_UI command
-#  FLTK_INCLUDE_DIR, where to find include files
-#  FLTK_LIBRARIES, list of fltk libraries
-#  FLTK_FOUND, Don't use FLTK if false.
-# The following settings should not be used in general.
-#  FLTK_BASE_LIBRARY   = the full path to fltk.lib
-#  FLTK_GL_LIBRARY     = the full path to fltk_gl.lib
-#  FLTK_FORMS_LIBRARY  = the full path to fltk_forms.lib
-#  FLTK_IMAGES_LIBRARY = the full path to fltk_images.lib
+#
+# By default FindFLTK.cmake will search for all of the FLTK components and
+# add them to the FLTK_LIBRARIES variable.
+#
+#   You can limit the components which get placed in FLTK_LIBRARIES by
+#   defining one or more of the following three options:
+#
+#     FLTK_SKIP_OPENGL, set to true to disable searching for opengl and
+#                       the FLTK GL library
+#     FLTK_SKIP_FORMS, set to true to disable searching for fltk_forms
+#     FLTK_SKIP_IMAGES, set to true to disable searching for fltk_images
+#
+#     FLTK_SKIP_FLUID, set to true if the fluid binary need not be present
+#                      at build time
+#
+# The following variables will be defined:
+#     FLTK_FOUND, True if all components not skipped were found
+#     FLTK_INCLUDE_DIR, where to find include files
+#     FLTK_LIBRARIES, list of fltk libraries you should link against
+#     FLTK_FLUID_EXECUTABLE, where to find the Fluid tool
+#     FLTK_WRAP_UI, This enables the FLTK_WRAP_UI command
+#
+# The following cache variables are assigned but should not be used.
+# See the FLTK_LIBRARIES variable instead.
+#
+#     FLTK_BASE_LIBRARY   = the full path to fltk.lib
+#     FLTK_GL_LIBRARY     = the full path to fltk_gl.lib
+#     FLTK_FORMS_LIBRARY  = the full path to fltk_forms.lib
+#     FLTK_IMAGES_LIBRARY = the full path to fltk_images.lib
 
-IF (FLTK_INCLUDE_DIR)
-  # Already in cache, be silent
-  SET(FLTK_FIND_QUIETLY TRUE)
-ENDIF (FLTK_INCLUDE_DIR)
-
-FIND_PACKAGE(OpenGL)
+IF(NOT FLTK_SKIP_OPENGL)
+  FIND_PACKAGE(OpenGL)
+ENDIF()
 
 #  Platform dependent libraries required by FLTK
 IF(WIN32)
@@ -117,7 +132,7 @@ ENDIF(NOT FLTK_DIR)
     INCLUDE(${FLTK_DIR}/FLTKConfig.cmake)
 
     # Fluid
-    IF(FLUID_COMMAND) 
+    IF(FLUID_COMMAND)
       SET(FLTK_FLUID_EXECUTABLE ${FLUID_COMMAND} CACHE FILEPATH "Fluid executable")
     ELSE(FLUID_COMMAND) 
       FIND_PROGRAM(FLTK_FLUID_EXECUTABLE fluid PATHS 
@@ -177,7 +192,8 @@ ENDIF(NOT FLTK_DIR)
     ENDIF(FLTK_FLUID_EXECUTABLE)
 
     #
-    # Try to find FLTK include dir
+    # Try to find FLTK include dir using fltk-config
+    #
     IF(UNIX)
       # Use fltk-config to generate a list of possible include directories
       FIND_PROGRAM(FLTK_CONFIG_SCRIPT fltk-config PATHS ${FLTK_BIN_DIR})
@@ -185,8 +201,12 @@ ENDIF(NOT FLTK_DIR)
         IF(NOT FLTK_INCLUDE_DIR)
           EXEC_PROGRAM(${FLTK_CONFIG_SCRIPT} ARGS --cxxflags OUTPUT_VARIABLE FLTK_CXXFLAGS)
           IF(FLTK_CXXFLAGS)
-            STRING(REGEX REPLACE "-I" "" _FLTK_POSSIBLE_INCLUDE_DIRS ${FLTK_CXXFLAGS})
-            STRING(REGEX REPLACE "-D[A-Za-z0-9_=]+" "" _FLTK_POSSIBLE_INCLUDE_DIRS ${_FLTK_POSSIBLE_INCLUDE_DIRS})
+            STRING(REGEX MATCHALL "-I[^ ]*" _fltk_temp_dirs ${FLTK_CXXFLAGS})
+            STRING(REPLACE "-I" "" _fltk_temp_dirs "${_fltk_temp_dirs}")
+            FOREACH(_dir ${_fltk_temp_dirs})
+              STRING(STRIP ${_dir} _output)
+              LIST(APPEND _FLTK_POSSIBLE_INCLUDE_DIRS ${_output})
+            ENDFOREACH()
           ENDIF(FLTK_CXXFLAGS)
         ENDIF()
       ENDIF()
@@ -249,24 +269,29 @@ ENDIF(NOT FLTK_DIR)
 
   ENDIF(FLTK_BUILT_WITH_CMAKE)
 
-
-SET(FLTK_FOUND 1)
-FOREACH(var FLTK_FLUID_EXECUTABLE FLTK_INCLUDE_DIR
-    FLTK_BASE_LIBRARY FLTK_GL_LIBRARY
-    FLTK_FORMS_LIBRARY FLTK_IMAGES_LIBRARY)
-  IF(NOT ${var})
-    SET(FLTK_FOUND 0)
-  ENDIF(NOT ${var})
-ENDFOREACH(var)
-
-IF(FLTK_FOUND)
-  SET(FLTK_LIBRARIES ${FLTK_IMAGES_LIBRARY} ${FLTK_IMAGES_LIBS} ${FLTK_BASE_LIBRARY})
-  IF(FLTK_GL_LIBRARY AND OPENGL_FOUND)
+  # Append all of the required libraries together (by default, everything)
+  SET(FLTK_LIBRARIES)
+  IF(NOT FLTK_SKIP_IMAGES)
+    LIST(APPEND FLTK_LIBRARIES ${FLTK_IMAGES_LIBRARY})
+  ENDIF()
+  IF(NOT FLTK_SKIP_FORMS)
+    LIST(APPEND FLTK_LIBRARIES ${FLTK_FORMS_LIBRARY})
+  ENDIF()
+  IF(NOT FLTK_SKIP_OPENGL)
     LIST(APPEND FLTK_LIBRARIES ${FLTK_GL_LIBRARY} ${OPENGL_gl_LIBRARY})
     LIST(APPEND FLTK_INCLUDE_DIR ${OPENGL_INCLUDE_DIR})
+    LIST(REMOVE_DUPLICATES FLTK_INCLUDE_DIR)
   ENDIF()
-  LIST(APPEND FLTK_LIBRARIES ${FLTK_FORMS_LIBRARY})
+  LIST(APPEND FLTK_LIBRARIES ${FLTK_BASE_LIBRARY})
 
+INCLUDE(FindPackageHandleStandardArgs)
+IF(FLTK_SKIP_FLUID)
+  FIND_PACKAGE_HANDLE_STANDARD_ARGS(FLTK DEFAULT_MSG FLTK_LIBRARIES FLTK_INCLUDE_DIR)
+ELSE()
+  FIND_PACKAGE_HANDLE_STANDARD_ARGS(FLTK DEFAULT_MSG FLTK_LIBRARIES FLTK_INCLUDE_DIR FLTK_FLUID_EXECUTABLE)
+ENDIF()
+
+IF(FLTK_FOUND)
   IF(APPLE)
     SET(FLTK_LIBRARIES ${FLTK_PLATFORM_DEPENDENT_LIBS} ${FLTK_LIBRARIES})
   ELSE(APPLE)
@@ -280,5 +305,3 @@ IF(FLTK_FOUND)
   SET (FLTK_LIBRARY ${FLTK_LIBRARIES})
 ENDIF(FLTK_FOUND)
 
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(FLTK DEFAULT_MSG FLTK_LIBRARIES FLTK_INCLUDE_DIR)
