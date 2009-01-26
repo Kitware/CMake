@@ -527,7 +527,7 @@ IF (QT4_QMAKE_FOUND)
   # Set QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR
   FIND_PATH(QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR QDesignerComponents
     PATHS
-    ${QT_INCLUDE_DIR}/QtDesigner
+    ${QT_HEADERS_DIR}/QtDesigner
     ${QT_LIBRARY_DIR}/QtDesigner.framework/Headers
     NO_DEFAULT_PATH
     )
@@ -535,7 +535,7 @@ IF (QT4_QMAKE_FOUND)
   # Set QT_QTASSISTANT_INCLUDE_DIR
   FIND_PATH(QT_QTASSISTANT_INCLUDE_DIR QAssistantClient
     PATHS
-    ${QT_INCLUDE_DIR}/QtAssistant
+    ${QT_HEADERS_DIR}/QtAssistant
     ${QT_LIBRARY_DIR}/QtAssistant.framework/Headers
     NO_DEFAULT_PATH
     )
@@ -543,7 +543,7 @@ IF (QT4_QMAKE_FOUND)
   # Set QT_QTASSISTANTCLIENT_INCLUDE_DIR
   FIND_PATH(QT_QTASSISTANTCLIENT_INCLUDE_DIR QAssistantClient
     PATHS
-    ${QT_INCLUDE_DIR}/QtAssistant
+    ${QT_HEADERS_DIR}/QtAssistant
     ${QT_LIBRARY_DIR}/QtAssistant.framework/Headers
     NO_DEFAULT_PATH
     )
