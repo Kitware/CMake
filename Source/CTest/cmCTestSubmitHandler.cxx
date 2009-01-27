@@ -62,14 +62,7 @@ cmCTestSubmitHandlerCurlDebugCallback(CURL *, curl_infotype, char *chPtr,
 //----------------------------------------------------------------------------
 cmCTestSubmitHandler::cmCTestSubmitHandler() : HTTPProxy(), FTPProxy()
 {
-  this->HTTPProxy = "";
-  this->HTTPProxyType = 0;
-  this->HTTPProxyAuth = "";
-
-  this->FTPProxy = "";
-  this->FTPProxyType = 0;
-  this->CDash = false;
-
+  this->Initialize();
 }
 
 //----------------------------------------------------------------------------
