@@ -478,7 +478,6 @@ private:
 
   int  DartVersion;
 
-  std::set<cmStdString> SubmitFiles;
   std::vector<cmStdString> InitialCommandLineArguments;
 
   int SubmitIndex;

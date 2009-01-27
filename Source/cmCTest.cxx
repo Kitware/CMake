@@ -488,7 +488,10 @@ bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
     = this->GetCTestConfiguration("SourceDirectory").c_str();
   std::string bld_dir = this->GetCTestConfiguration("BuildDirectory").c_str();
   this->DartVersion = 1;
-  this->SubmitFiles.clear();
+  for(Part p = PartStart; p != PartCount; p = Part(p+1))
+    {
+    this->Parts[p].SubmitFiles.clear();
+    }
 
   cmMakefile* mf = command->GetMakefile();
   std::string fname = src_dir;
