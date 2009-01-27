@@ -50,42 +50,42 @@ if [ ! -z "@USER_MAKE_RULE_FILE_CONTENTS@" ]; then
     check_exit_value $? "Create User Rule file" || exit 1
 fi
 echo "Create a directory to build in"
-rm -rf @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build
+rm -rf @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build
 check_exit_value $? "Remove build tree" || exit 1
-mkdir @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build
+mkdir @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build
 check_exit_value $? "Create build directory" || exit 1
 # make sure directory was created
-if [ ! -d @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build ]; then
-        echo "Could not create @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build"
+if [ ! -d @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build ]; then
+        echo "Could not create @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build"
         exit -1
 fi
 
 echo "Create initial cache"
-echo "@INITIAL_CACHE@" > @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build/CMakeCache.txt
+echo "@INITIAL_CACHE@" > @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build/CMakeCache.txt
 check_exit_value $? "Create initial cache" || exit 1
 
 #echo "Login into cvs."
 #echo "cmake" | @CVS_COMMAND@ -d @CVSROOT@ login
 
-echo "Checkout the source for @CMAKE_VERSION@"
+echo "Checkout the source for @CMAKE_CREATE_VERSION@"
 cd @CMAKE_RELEASE_DIRECTORY@ 
-@CMAKE_CHECKOUT@ -d @CMAKE_VERSION@ CMake
+@CMAKE_CHECKOUT@ -d @CMAKE_CREATE_VERSION@ CMake
 check_exit_value $? "Checkout cmake source" || exit 1
 
-cd @CMAKE_RELEASE_DIRECTORY@/@CMAKE_VERSION@-build 
+cd @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build 
 
 if [ ! -z "@CONFIGURE_WITH_CMAKE@" ]; then 
     echo  "Run cmake to configure cmake"
-    @CMAKE_CONFIGURE_PATH@ ../@CMAKE_VERSION@
+    @CMAKE_CONFIGURE_PATH@ ../@CMAKE_CREATE_VERSION@
     check_exit_value $? "Configure cmake" || exit 1
 else
     if [ -z "@INSTALL_PREFIX@" ]; then
 	echo  "Run cmake bootstrap --parallel=@PROCESSORS@"
-	../@CMAKE_VERSION@/bootstrap --parallel=@PROCESSORS@
+	../@CMAKE_CREATE_VERSION@/bootstrap --parallel=@PROCESSORS@
 	check_exit_value $? "Bootstrap cmake" || exit 1
     else
 	echo  "Run cmake bootstrap --prefix=@INSTALL_PREFIX@ --parallel=@PROCESSORS@"
-	../@CMAKE_VERSION@/bootstrap --prefix=@INSTALL_PREFIX@ --parallel=@PROCESSORS@
+	../@CMAKE_CREATE_VERSION@/bootstrap --prefix=@INSTALL_PREFIX@ --parallel=@PROCESSORS@
 	check_exit_value $? "Bootstrap cmake" || exit 1
     fi
 fi

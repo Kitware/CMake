@@ -2,7 +2,7 @@ To create a cmake release, first test the branch:
 
 mkdir 2-4
 cd 2-4
-cmake -DCMAKE_VERSION=CMake-2-4 -P ../create-cmake-release.cmake
+cmake -DCMAKE_CREATE_VERSION=CMake-2-4 -P ../create-cmake-release.cmake
 ./create-CMake-2-4.sh
 
 If that works:
@@ -15,7 +15,7 @@ cvs tag 2-4-7
 Then create a release from the tag:
 mkdir 2-4-7
 cd 2-4-7
-cmake -DCMAKE_VERSION=CMake-2-4-7 -P ../create-cmake-release.cmake
+cmake -DCMAKE_CREATE_VERSION=CMake-2-4-7 -P ../create-cmake-release.cmake
 ./create-CMake-2-4.sh
 
 
