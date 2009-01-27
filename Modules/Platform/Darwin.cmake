@@ -111,8 +111,10 @@ IF(NOT ENV_SDKROOT STREQUAL "")
 ENDIF(NOT ENV_SDKROOT STREQUAL "")
 
 # Set cache variables - end user may change these during ccmake or cmake-gui configure.
-SET(CMAKE_OSX_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT}" CACHE STRING
-  "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
+IF(CURRENT_OSX_VERSION GREATER 10.3)
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT}" CACHE STRING
+    "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
+ENDIF(CURRENT_OSX_VERSION GREATER 10.3)
 
 SET(CMAKE_OSX_SYSROOT "${CMAKE_OSX_SYSROOT_DEFAULT}"  CACHE PATH 
   "The product will be built against the headers and libraries located inside the indicated SDK.")
