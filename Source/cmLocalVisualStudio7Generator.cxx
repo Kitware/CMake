@@ -1302,11 +1302,10 @@ cmLocalVisualStudio7GeneratorFCInfo
       needForceLang = true;
       lang = sourceLang;
       }
-    // If lang is set, the compiler will generate code automatically.
     // If HEADER_FILE_ONLY is set, we must suppress this generation in
     // the project file
     fc.ExcludedFromBuild =
-      (lang && sf.GetPropertyAsBool("HEADER_FILE_ONLY"));
+      (sf.GetPropertyAsBool("HEADER_FILE_ONLY"));
     if(fc.ExcludedFromBuild)
       {
       needfc = true;
