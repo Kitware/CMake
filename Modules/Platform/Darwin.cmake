@@ -54,39 +54,108 @@ SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib" ".so" ".a")
 IF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
   FIND_PROGRAM(CMAKE_INSTALL_NAME_TOOL install_name_tool)
 ENDIF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
-# find installed SDKs
-FILE(GLOB _CMAKE_OSX_SDKS "/Developer/SDKs/*")
-# setup for universal binaries if sysroot exists
-IF(_CMAKE_OSX_SDKS) 
-  # find the most recent sdk for the default
-  LIST(SORT _CMAKE_OSX_SDKS)
-  LIST(REVERSE _CMAKE_OSX_SDKS)
-  LIST(GET _CMAKE_OSX_SDKS 0 _CMAKE_OSX_SDKS)
-  SET(CMAKE_OSX_SYSROOT_DEFAULT "${_CMAKE_OSX_SDKS}")
-  # use the environment variable CMAKE_OSX_SYSROOT if it is set
-  IF(NOT "$ENV{CMAKE_OSX_SYSROOT}" STREQUAL "") 
-    SET(_CMAKE_OSX_SDKS "$ENV{CMAKE_OSX_SYSROOT}")
-  ENDIF(NOT "$ENV{CMAKE_OSX_SYSROOT}" STREQUAL "") 
-  SET(CMAKE_OSX_SYSROOT ${_CMAKE_OSX_SDKS} CACHE PATH
-    "isysroot used for universal binary support")
-  # set _CMAKE_OSX_MACHINE to umame -m
-  EXEC_PROGRAM(uname ARGS -m OUTPUT_VARIABLE _CMAKE_OSX_MACHINE)
-  # check for Power PC and change to ppc
-  IF("${_CMAKE_OSX_MACHINE}" MATCHES "Power")
-    SET(_CMAKE_OSX_MACHINE ppc)
-  ENDIF("${_CMAKE_OSX_MACHINE}" MATCHES "Power")
-  # set the default based on uname and not the environment variable
-  # as that is what is used to change it!
-  SET(CMAKE_OSX_ARCHITECTURES_DEFAULT ${_CMAKE_OSX_MACHINE})
-  # check for environment variable CMAKE_OSX_ARCHITECTURES
-  # if it is set.
-  IF(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
-    SET(_CMAKE_OSX_MACHINE "$ENV{CMAKE_OSX_ARCHITECTURES}")
-  ENDIF(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
-  # now put _CMAKE_OSX_MACHINE into the cache
-  SET(CMAKE_OSX_ARCHITECTURES ${_CMAKE_OSX_MACHINE}
-    CACHE STRING "Build architectures for OSX")
-ENDIF(_CMAKE_OSX_SDKS)
+
+# Set the assumed (Pre 10.5 or Default) location of the developer tools
+SET(OSX_DEVELOPER_ROOT "/Developer")
+
+# Find installed SDKs
+FILE(GLOB _CMAKE_OSX_SDKS "${OSX_DEVELOPER_ROOT}/SDKs/*")
+
+# If nothing is found there, then try locating the dev tools based on the xcode-select tool
+# (available in Xcode >= 3.0 installations)
+IF(NOT _CMAKE_OSX_SDKS)
+  FIND_PROGRAM(CMAKE_XCODE_SELECT xcode-select)
+  IF(CMAKE_XCODE_SELECT)
+    EXECUTE_PROCESS(COMMAND ${CMAKE_XCODE_SELECT} "-print-path"
+      OUTPUT_VARIABLE OSX_DEVELOPER_ROOT)
+    FILE(GLOB _CMAKE_OSX_SDKS "${OSX_DEVELOPER_ROOT}/SDKs/*")
+  ENDIF(CMAKE_XCODE_SELECT)
+ENDIF(NOT _CMAKE_OSX_SDKS)
+
+# Set CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT to the current version of OS X
+EXECUTE_PROCESS(COMMAND sw_vers -productVersion OUTPUT_VARIABLE CURRENT_OSX_VERSION)
+STRING(REGEX REPLACE "^.*(10)\\.([0-9]+)\\.([0-9]+).*$" "\\1.\\2"
+  CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT ${CURRENT_OSX_VERSION})
+
+# Set CMAKE_OSX_SYSROOT_DEFAULT based on CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT.
+# This next block assumes that Apple will start being consistent with
+# its SDK names from here on out...
+IF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT GREATER "10.4")
+  SET(CMAKE_OSX_SYSROOT_DEFAULT
+    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX${CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT}.sdk")
+ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT GREATER "10.4")
+
+IF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.4")
+  SET(CMAKE_OSX_SYSROOT_DEFAULT
+    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX10.4u.sdk")
+ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.4")
+
+IF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.3")
+  SET(CMAKE_OSX_SYSROOT_DEFAULT
+    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX10.3.9.sdk")
+ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.3")
+
+# Allow environment variables set by the user to override our defaults.
+# Use the same environment variables that Xcode uses.
+SET(ENV_MACOSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}")
+SET(ENV_SDKROOT "$ENV{SDKROOT}")
+
+# See if we need to override the default SDK or Deployment target with the
+# environment variables
+IF(NOT ENV_MACOSX_DEPLOYMENT_TARGET STREQUAL "")
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT "${ENV_MACOSX_DEPLOYMENT_TARGET}")
+ENDIF(NOT ENV_MACOSX_DEPLOYMENT_TARGET STREQUAL "")
+
+IF(NOT ENV_SDKROOT STREQUAL "")
+  SET(CMAKE_OSX_SYSROOT_DEFAULT "${ENV_SDKROOT}")
+ENDIF(NOT ENV_SDKROOT STREQUAL "")
+
+# Set cache variables - end user may change these during ccmake or cmake-gui configure.
+SET(CMAKE_OSX_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT}" CACHE STRING
+  "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
+
+SET(CMAKE_OSX_SYSROOT "${CMAKE_OSX_SYSROOT_DEFAULT}"  CACHE PATH 
+  "The product will be built against the headers and libraries located inside the indicated SDK.")
+
+#----------------------------------------------------------------------------
+function(SanityCheckSDKAndDeployTarget _sdk_path _deploy)
+  if (_deploy STREQUAL "")
+    return()
+  endif()
+
+  string (REGEX REPLACE "(.*MacOSX*)(....)(.*\\.sdk)" "\\2" SDK ${_sdk_path})
+  if (_deploy GREATER SDK)
+    message (FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET (${_deploy}) is greater than CMAKE_OSX_SYSROOT SDK (${_sdk_path}). Please set CMAKE_OSX_DEPLOYMENT_TARGET to ${SDK}")
+  endif (_deploy GREATER SDK)
+endfunction(SanityCheckSDKAndDeployTarget _sdk_path _deploy)
+#----------------------------------------------------------------------------
+
+# Make sure the combination of SDK and Deployment Target are allowed
+SanityCheckSDKAndDeployTarget("${CMAKE_OSX_SYSROOT}" "${CMAKE_OSX_DEPLOYMENT_TARGET}")
+
+# set _CMAKE_OSX_MACHINE to uname -m
+EXECUTE_PROCESS(COMMAND uname -m
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  OUTPUT_VARIABLE _CMAKE_OSX_MACHINE)
+
+# check for Power PC and change to ppc
+IF(_CMAKE_OSX_MACHINE MATCHES "Power")
+  SET(_CMAKE_OSX_MACHINE ppc)
+ENDIF(_CMAKE_OSX_MACHINE MATCHES "Power")
+
+# set the default based on uname and not the environment variable
+# as that is what is used to change it!
+SET(CMAKE_OSX_ARCHITECTURES_DEFAULT ${_CMAKE_OSX_MACHINE})
+
+# check for environment variable CMAKE_OSX_ARCHITECTURES
+# if it is set.
+IF(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
+  SET(CMAKE_OSX_ARCHITECTURES_DEFAULT "$ENV{CMAKE_OSX_ARCHITECTURES}")
+ENDIF(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
+
+# now put _CMAKE_OSX_MACHINE into the cache
+SET(CMAKE_OSX_ARCHITECTURES "${CMAKE_OSX_ARCHITECTURES_DEFAULT}" CACHE STRING
+  "Build architectures for OSX")
 
 
 IF("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")

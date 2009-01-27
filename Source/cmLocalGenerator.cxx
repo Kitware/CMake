@@ -1685,6 +1685,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   std::string flagsVar = "CMAKE_";
   flagsVar += lang;
   flagsVar += "_FLAGS";
+
   if(this->EmitUniversalBinaryFlags)
     {
     const char* osxArch = 
@@ -1693,9 +1694,13 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
     const char* sysrootDefault = 
       this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT_DEFAULT");
+    const char* deploymentTarget = 
+      this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
+
     bool flagsUsed = false;
-    if(osxArch && sysroot  && lang && (lang[0] =='C' || lang[0] == 'F'))
-      { 
+
+    if(osxArch && sysroot && lang && (lang[0] =='C' || lang[0] == 'F'))
+      {
       std::vector<std::string> archs;
       cmSystemTools::ExpandListArgument(std::string(osxArch),
                                         archs);
@@ -1704,6 +1709,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
         {
         const char* archOrig = 
           this->Makefile->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES_DEFAULT");
+
         if(archs[0] == archOrig)
           {
           addArchFlag = false;
@@ -1721,18 +1727,29 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
           flags += " -arch ";
           flags += *i;
           }
+
         flags += " -isysroot ";
         flags += sysroot;
+
         flagsUsed = true;
         }
       }
+
     if(!flagsUsed && sysroot && sysrootDefault &&
        strcmp(sysroot, sysrootDefault) != 0)
       {
       flags += " -isysroot ";
       flags += sysroot;
       }
+
+    if (deploymentTarget && *deploymentTarget &&
+        lang && (lang[0] =='C' || lang[0] == 'F'))
+      {
+      flags += " -mmacosx-version-min=";
+      flags += deploymentTarget;
+      }
     }
+
   this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
 }
 

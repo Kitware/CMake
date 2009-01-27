@@ -2477,6 +2477,8 @@ void cmGlobalXCodeGenerator
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
   const char* sysrootDefault = 
     this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT_DEFAULT");
+  const char* deploymentTarget = 
+    this->CurrentMakefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
   if(osxArch && sysroot)
     {
     bool flagsUsed = false;
@@ -2517,6 +2519,11 @@ void cmGlobalXCodeGenerator
       buildSettings->AddAttribute("SDKROOT", 
                                   this->CreateString(sysroot));
       }
+    }
+  if(deploymentTarget && *deploymentTarget)
+    {
+    buildSettings->AddAttribute("MACOSX_DEPLOYMENT_TARGET",
+                                this->CreateString(deploymentTarget));
     }
   for( std::vector<cmXCodeObject*>::iterator i = configs.begin();
        i != configs.end(); ++i)
