@@ -205,7 +205,7 @@ IF(BUILD_TESTING)
     FILE(MAKE_DIRECTORY "${CMake_BINARY_DIR}/Tests/CMake-CVS")
     FILE(WRITE "${CMake_BINARY_DIR}/Tests/CMake-CVS/nightly-cmake.sh"
 "cd ${CMake_BINARY_DIR}/Tests/CMake-CVS
-${CMake_BINARY_DIR}/bin/cmake -DCMAKE_VERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Release/vogon_release.cmake
+${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Release/vogon_release.cmake
 ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Release/upload_release.cmake
 ")
     ADD_TEST(NightlyCMakeBuild 
