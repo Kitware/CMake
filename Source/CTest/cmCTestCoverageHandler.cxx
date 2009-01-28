@@ -570,7 +570,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       }
     }
 
-  int total_lines = total_tested + total_untested;
+  long total_lines = total_tested + total_untested;
   float percent_coverage = 100 * SAFEDIV(static_cast<float>(total_tested),
     static_cast<float>(total_lines));
   if ( total_lines == 0 )
