@@ -23,12 +23,16 @@ include(CheckCXXSourceCompiles)
 include(FindPackageHandleStandardArgs)
 
 set(OpenMP_C_FLAG_CANDIDATES
-  #Empty, if compiler automatically accepts openmp
-  " "
+  #Gnu
+  "-fopenmp"
+  #Microsoft Visual Studio
+  "/openmp"
   #Intel windows
   "-Qopenmp" 
   #Intel
   "-openmp" 
+  #Empty, if compiler automatically accepts openmp
+  " "
   #Sun
   "-xopenmp"
   #HP
@@ -37,10 +41,6 @@ set(OpenMP_C_FLAG_CANDIDATES
   "-qsmp"
   #Portland Group
   "-mp"
-  #Gnu
-  "-fopenmp"
-  #Microsoft Visual Studio
-  "/openmp"
 )
 set(OpenMP_CXX_FLAG_CANDIDATES ${OpenMP_C_FLAG_CANDIDATES})
 
@@ -49,7 +49,7 @@ set(OpenMP_C_TEST_SOURCE
 "
 #include <omp.h>
 int main() { 
-#ifdef _OpenMP
+#ifdef _OPENMP
   return 0; 
 #else
   breaks_on_purpose
@@ -70,7 +70,7 @@ foreach(FLAG ${OpenMP_C_FLAG_CANDIDATES})
   set(SAFE_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
   set(CMAKE_REQUIRED_FLAGS "${FLAG}")
   unset(OpenMP_FLAG_DETECTED CACHE)
-  message(STATUS "Try OpenMP flag = [${FLAG}]")
+  message(STATUS "Try OpenMP C flag = [${FLAG}]")
   check_c_source_compiles("${OpenMP_CXX_TEST_SOURCE}" OpenMP_FLAG_DETECTED)
   set(CMAKE_REQUIRED_FLAGS "${SAFE_CMAKE_REQUIRED_FLAGS}")
   if(OpenMP_FLAG_DETECTED)
@@ -84,7 +84,7 @@ foreach(FLAG ${OpenMP_CXX_FLAG_CANDIDATES})
   set(SAFE_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
   set(CMAKE_REQUIRED_FLAGS "${FLAG}")
   unset(OpenMP_FLAG_DETECTED CACHE)
-  message(STATUS "Try OpenMP flag = [${FLAG}]")
+  message(STATUS "Try OpenMP CXX flag = [${FLAG}]")
   check_cxx_source_compiles("${OpenMP_C_TEST_SOURCE}" OpenMP_FLAG_DETECTED)
   set(CMAKE_REQUIRED_FLAGS "${SAFE_CMAKE_REQUIRED_FLAGS}")
   if(OpenMP_FLAG_DETECTED)
