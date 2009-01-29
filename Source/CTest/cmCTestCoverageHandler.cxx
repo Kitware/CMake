@@ -1157,7 +1157,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
           << std::endl);
         // Read the line number starting at the 10th character of the gcov
         // output line
-        int lineIdx = cnt;
+        long lineIdx = cnt;
         if ( lineIdx >= 0 )
           {
           while ( vec->size() <=
