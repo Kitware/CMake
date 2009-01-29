@@ -91,7 +91,8 @@ bool cmGetFilenameComponentCommand
       }
 
     // Collapse the path to its simplest form.
-    result = cmSystemTools::CollapseFullPath(filename.c_str());
+    filename = cmSystemTools::CollapseFullPath(filename.c_str());
+    result   = cmSystemTools::GetRealPath(filename.c_str());
     }
   else 
     {
