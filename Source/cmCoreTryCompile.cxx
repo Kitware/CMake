@@ -22,7 +22,6 @@
 
 int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
 {
-  
   this->BinaryDirectory = argv[1].c_str();
   this->OutputFile = "";
   // which signature were we called with ?
@@ -305,6 +304,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   if (this->SrcFileSignature)
     {
     this->FindOutputFile(targetName);
+
     if ((res==0) && (copyFile.size()))
       {
       if(!cmSystemTools::CopyFileAlways(this->OutputFile.c_str(), 
@@ -314,6 +314,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         emsg << "Could not COPY_FILE.\n"
           << "  OutputFile: '" << this->OutputFile.c_str() << "'\n"
           << "    copyFile: '" << copyFile.c_str() << "'\n";
+
+        if (this->FindErrorMessage.size())
+          {
+          emsg << "\n";
+          emsg << this->FindErrorMessage.c_str() << "\n";
+          }
+
         cmSystemTools::Error(emsg.str().c_str());
         return -1;
         }
