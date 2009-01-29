@@ -1,9 +1,11 @@
 # - This module looks for Doxygen and the path to Graphviz's dot
-# Doxygen is a documentation generation tool see http://www.doxygen.org
+# Doxygen is a documentation generation tool.  Please see
+# http://www.doxygen.org
 #
 # This module accepts the following optional variables:
 #
 #   DOXYGEN_SKIP_DOT       = If true this module will skip trying to find Dot
+#                            (an optional component often used by Doxygen)
 #
 # This modules defines the following variables:
 #
@@ -14,21 +16,28 @@
 #   DOXYGEN_DOT_FOUND      = Was Dot found or not?
 #   DOXYGEN_DOT_PATH       = The path to dot not including the executable
 #
-# Details for OSX Users:
-#     With the OS X GUI version, it likes to be installed to /Applications and
+#
+
+# For backwards compatibility support
+IF(Doxygen_FIND_QUIETLY)
+  SET(DOXYGEN_FIND_QUIETLY TRUE)
+ENDIF(Doxygen_FIND_QUIETLY)
+
+# ===== Rationale for OS X AppBundle mods below =====
+#     With the OS X GUI version, Doxygen likes to be installed to /Applications and
 #     it contains the doxygen executable in the bundle. In the versions I've 
 #     seen, it is located in Resources, but in general, more often binaries are 
 #     located in MacOS.
 #
-#     The official Doxygen.app that is distributed for OS X uses non-standard 
-#     conventions. Instead of the command-line "doxygen" tool being placed in
+#     NOTE: The official Doxygen.app that is distributed for OS X uses non-standard 
+#     conventions.  Instead of the command-line "doxygen" tool being placed in
 #     Doxygen.app/Contents/MacOS, "Doxywizard" is placed there instead and 
-#     "doxygen" is actually placed in Contents/Resources. This is most likely
-#     to accomodate people who double-click on the Doxygen.app package and expect
-#     to see something happen. However, the CMake backend gets horribly confused
-#     by this. Once CMake sees the bundle, it indiscrimately uses Doxywizard
-#     as the executable to use. The only work-around I have found is to disable
-#     the app-bundle feature for only this command.
+#     "doxygen" is placed in Contents/Resources.  This is most likely done
+#     so that something happens when people double-click on the Doxygen.app
+#     package.  Unfortunately, CMake gets confused by this as when it sees the
+#     bundle it uses "Doxywizard" as the executable to use instead of
+#     "doxygen".  Therefore to work-around this issue we temporarily disable
+#     the app-bundle feature, just for this CMake module:
 if(APPLE)
     #  Save the old setting
     SET(TEMP_DOXYGEN_SAVE_CMAKE_FIND_APPBUNDLE ${CMAKE_FIND_APPBUNDLE})
@@ -37,17 +46,9 @@ if(APPLE)
 endif()
 #     FYI:
 #     In the older versions of OS X Doxygen, dot was included with the 
-#     Doxygen bundle. But the new versions place make you download Graphviz.app
-#     which contains dot in its bundle.
+#     Doxygen bundle. But the new versions require you to download
+#     Graphviz.app which contains "dot" in it's bundle.
 # ============== End OSX stuff ================
-
-
-# For backwards compatibility support
-# DOXYGEN_FIND_QUIETLY, but it should have been
-# Doxygen_FIND_QUIETLY.  
-IF(Doxygen_FIND_QUIETLY)
-  SET(DOXYGEN_FIND_QUIETLY TRUE)
-ENDIF(Doxygen_FIND_QUIETLY)
 
 #
 # Find Doxygen...
@@ -116,7 +117,7 @@ else()
   set(DOXYGEN_DOT_FOUND "NO")
 endif()
 
-# Backwards compatibility for CMake4.3 and less
+# For backwards compatibility support
 SET (DOXYGEN ${DOXYGEN_EXECUTABLE} )
 SET (DOT ${DOXYGEN_DOT_EXECUTABLE} )
 
