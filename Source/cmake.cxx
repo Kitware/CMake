@@ -1228,7 +1228,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         {
         cmSystemTools::Error("Directory does not exist for chdir command: ",
                              args[2].c_str());
-        return 0;
+        return 1;
         }
 
       std::string command = "\"";
