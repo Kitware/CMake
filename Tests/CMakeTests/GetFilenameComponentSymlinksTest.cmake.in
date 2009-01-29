@@ -1,0 +1,43 @@
+if(UNIX)
+    # file1 => file2 => file3 (real)
+
+    set(bindir ${CMAKE_CURRENT_BINARY_DIR})
+
+    file(WRITE ${bindir}/file3 "test file")
+    find_program(LN NAMES "ln")
+
+    if(LN)
+        # Create symlinks using "ln -s"
+        if(NOT EXISTS ${bindir}/file2)
+            execute_process(COMMAND ${LN} "-s" "${bindir}/file3" "${bindir}/file2")
+        endif()
+        if(NOT EXISTS ${bindir}/file1)
+            execute_process(COMMAND ${LN} "-s" "${bindir}/file2" "${bindir}/file1")
+        endif()
+
+        get_filename_component(file1 ${bindir}/file1 ABSOLUTE)
+        get_filename_component(file2 ${bindir}/file2 ABSOLUTE)
+        get_filename_component(file3 ${bindir}/file3 ABSOLUTE)
+
+        if(NOT file3 STREQUAL "${bindir}/file3")
+            message(FATAL_ERROR "CMake fails resolving absolute file file3")
+        endif()
+
+        if(NOT file2 STREQUAL "${bindir}/file3")
+            message(FATAL_ERROR "CMake fails resolving simple symlink")
+        endif()
+
+        if(NOT file1 STREQUAL "${bindir}/file3")
+            message(FATAL_ERROR "CMake fails resolving double symlink")
+        endif()
+
+        # cleanup
+        file(REMOVE ${bindir}/file1)
+        file(REMOVE ${bindir}/file2)
+        file(REMOVE ${bindir}/file3)
+        if(EXISTS file1 OR EXISTS file2 OR EXISTS file3)
+           message(FATAL_ERROR "removal of file1, file2, or file3 failed")
+        endif()
+
+    endif(LN)
+endif()
