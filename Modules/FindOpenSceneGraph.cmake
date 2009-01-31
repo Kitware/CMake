@@ -126,15 +126,17 @@ endif()
 #
 # Version checking
 #
-if(OpenSceneGraph_FIND_VERSION_EXACT)
-   if(NOT OPENSCENEGRAPH_VERSION VERSION_EQUAL ${OpenSceneGraph_FIND_VERSION})
-       set(_osg_version_not_exact TRUE)
-   endif()
-else()
-    # version is too low
-    if(NOT OPENSCENEGRAPH_VERSION VERSION_EQUAL ${OpenSceneGraph_FIND_VERSION} AND 
-            NOT OPENSCENEGRAPH_VERSION VERSION_GREATER ${OpenSceneGraph_FIND_VERSION})
-        set(_osg_version_not_high_enough TRUE)
+if(OpenSceneGraph_FIND_VERSION)
+    if(OpenSceneGraph_FIND_VERSION_EXACT)
+        if(NOT OPENSCENEGRAPH_VERSION VERSION_EQUAL ${OpenSceneGraph_FIND_VERSION})
+            set(_osg_version_not_exact TRUE)
+        endif()
+    else()
+        # version is too low
+        if(NOT OPENSCENEGRAPH_VERSION VERSION_EQUAL ${OpenSceneGraph_FIND_VERSION} AND 
+                NOT OPENSCENEGRAPH_VERSION VERSION_GREATER ${OpenSceneGraph_FIND_VERSION})
+            set(_osg_version_not_high_enough TRUE)
+        endif()
     endif()
 endif()
 
