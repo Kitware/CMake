@@ -1,3 +1,7 @@
+#
+# NOTE: It is highly recommended that you use the new FindOpenSceneGraph.cmake
+# introduced in CMake 2.6.3 and not use this Find module directly.
+#
 # This is part of the Findosg* suite used to find OpenSceneGraph components.
 # Each component is separate and you must opt in to each module. You must 
 # also opt into OpenGL and OpenThreads (and Producer if needed) as these 

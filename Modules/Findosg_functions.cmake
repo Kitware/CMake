@@ -83,8 +83,9 @@ endfunction(OSG_FIND_LIBRARY module library)
 # OSG_MARK_AS_ADVANCED
 # Just a convenience function for calling MARK_AS_ADVANCED
 #
-function(OSG_MARK_AS_ADVANCED module)
-   mark_as_advanced(${module}_INCLUDE_DIR)
-   mark_as_advanced(${module}_LIBRARY)
-   mark_as_advanced(${module}_LIBRARY_DEBUG)
+function(OSG_MARK_AS_ADVANCED _module)
+   string(TOUPPER ${_module} _module_UC)
+   mark_as_advanced(${_module_UC}_INCLUDE_DIR)
+   mark_as_advanced(${_module_UC}_LIBRARY)
+   mark_as_advanced(${_module_UC}_LIBRARY_DEBUG)
 endfunction()
