@@ -337,30 +337,8 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
       }
     this->CleanTestOutput(memcheckstr,
       static_cast<size_t>(this->CustomMaximumFailedTestOutputSize));
-    os << "\t<Test Status=\"";
-    if ( result->Status == cmCTestMemCheckHandler::COMPLETED )
-      {
-      os << "passed";
-      }
-    else if ( result->Status == cmCTestMemCheckHandler::NOT_RUN )
-      {
-      os << "notrun";
-      }
-    else
-      {
-      os << "failed";
-      }
-    std::string testPath = result->Path + "/" + result->Name;
-    os << "\">\n"
-      << "\t\t<Name>" << cmCTest::MakeXMLSafe(result->Name) << "</Name>\n"
-      << "\t\t<Path>" << cmCTest::MakeXMLSafe(
-        this->CTest->GetShortPathToFile(result->Path.c_str())) << "</Path>\n"
-      << "\t\t<FullName>" << cmCTest::MakeXMLSafe(
-        this->CTest->GetShortPathToFile(testPath.c_str())) << "</FullName>\n"
-      << "\t\t<FullCommandLine>"
-      << cmCTest::MakeXMLSafe(result->FullCommandLine)
-      << "</FullCommandLine>\n"
-      << "\t\t<Results>" << std::endl;
+    this->WriteTestResultHeader(os, result);
+    os << "\t\t<Results>" << std::endl;
     for ( kk = 0; cmCTestMemCheckResultLongStrings[kk]; kk ++ )
       {
       if ( memcheckresults[kk] )
@@ -375,8 +353,8 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
     os
       << "\t\t</Results>\n"
       << "\t<Log>\n" << memcheckstr << std::endl
-      << "\t</Log>\n"
-      << "\t</Test>" << std::endl;
+      << "\t</Log>\n";
+    this->WriteTestResultFooter(os, result);
     if ( current < cc )
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "#" << std::flush);

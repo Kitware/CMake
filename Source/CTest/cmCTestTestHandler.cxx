@@ -1472,30 +1472,8 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
   for ( cc = 0; cc < this->TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &this->TestResults[cc];
-    os << "\t<Test Status=\"";
-    if ( result->Status == cmCTestTestHandler::COMPLETED )
-      {
-      os << "passed";
-      }
-    else if ( result->Status == cmCTestTestHandler::NOT_RUN )
-      {
-      os << "notrun";
-      }
-    else
-      {
-      os << "failed";
-      }
-    std::string testPath = result->Path + "/" + result->Name;
-    os << "\">\n"
-      << "\t\t<Name>" << cmCTest::MakeXMLSafe(result->Name) << "</Name>\n"
-      << "\t\t<Path>" << cmCTest::MakeXMLSafe(
-        this->CTest->GetShortPathToFile(result->Path.c_str())) << "</Path>\n"
-      << "\t\t<FullName>" << cmCTest::MakeXMLSafe(
-        this->CTest->GetShortPathToFile(testPath.c_str())) << "</FullName>\n"
-      << "\t\t<FullCommandLine>"
-      << cmCTest::MakeXMLSafe(result->FullCommandLine)
-      << "</FullCommandLine>\n"
-      << "\t\t<Results>" << std::endl;
+    this->WriteTestResultHeader(os, result);
+    os << "\t\t<Results>" << std::endl;
     if ( result->Status != cmCTestTestHandler::NOT_RUN )
       {
       if ( result->Status != cmCTestTestHandler::COMPLETED ||
@@ -1547,21 +1525,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
       << "</Value>\n"
       << "\t\t\t</Measurement>\n"
       << "\t\t</Results>\n";
-
-    if(!result->Properties->Labels.empty())
-      {
-      os << "\t\t<Labels>\n";
-      std::vector<std::string> const& labels = result->Properties->Labels;
-      for(std::vector<std::string>::const_iterator li = labels.begin();
-          li != labels.end(); ++li)
-        {
-        os << "\t\t\t<Label>" << cmCTest::MakeXMLSafe(*li) << "</Label>\n";
-        }
-      os << "\t\t</Labels>\n";
-      }
-
-    os
-      << "\t</Test>" << std::endl;
+    this->WriteTestResultFooter(os, result);
     }
 
   os << "\t<EndDateTime>" << this->EndTest << "</EndDateTime>\n"
@@ -1571,6 +1535,55 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
      << "</ElapsedMinutes>"
     << "</Testing>" << std::endl;
   this->CTest->EndXML(os);
+}
+
+//----------------------------------------------------------------------------
+void cmCTestTestHandler::WriteTestResultHeader(std::ostream& os,
+                                               cmCTestTestResult* result)
+{
+  os << "\t<Test Status=\"";
+  if ( result->Status == cmCTestTestHandler::COMPLETED )
+    {
+    os << "passed";
+    }
+  else if ( result->Status == cmCTestTestHandler::NOT_RUN )
+    {
+    os << "notrun";
+    }
+  else
+    {
+    os << "failed";
+    }
+  std::string testPath = result->Path + "/" + result->Name;
+  os << "\">\n"
+     << "\t\t<Name>" << cmCTest::MakeXMLSafe(result->Name) << "</Name>\n"
+     << "\t\t<Path>" << cmCTest::MakeXMLSafe(
+       this->CTest->GetShortPathToFile(result->Path.c_str())) << "</Path>\n"
+     << "\t\t<FullName>" << cmCTest::MakeXMLSafe(
+       this->CTest->GetShortPathToFile(testPath.c_str())) << "</FullName>\n"
+     << "\t\t<FullCommandLine>"
+     << cmCTest::MakeXMLSafe(result->FullCommandLine)
+     << "</FullCommandLine>\n";
+}
+
+//----------------------------------------------------------------------------
+void cmCTestTestHandler::WriteTestResultFooter(std::ostream& os,
+                                               cmCTestTestResult* result)
+{
+  if(!result->Properties->Labels.empty())
+    {
+    os << "\t\t<Labels>\n";
+    std::vector<std::string> const& labels = result->Properties->Labels;
+    for(std::vector<std::string>::const_iterator li = labels.begin();
+        li != labels.end(); ++li)
+      {
+      os << "\t\t\t<Label>" << cmCTest::MakeXMLSafe(*li) << "</Label>\n";
+      }
+    os << "\t\t</Labels>\n";
+    }
+
+  os
+    << "\t</Test>" << std::endl;
 }
 
 //----------------------------------------------------------------------

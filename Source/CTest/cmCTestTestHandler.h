@@ -134,6 +134,9 @@ protected:
   virtual void GenerateTestCommand(std::vector<const char*>& args);
   int ExecuteCommands(std::vector<cmStdString>& vec);
 
+  void WriteTestResultHeader(std::ostream& os, cmCTestTestResult* result);
+  void WriteTestResultFooter(std::ostream& os, cmCTestTestResult* result);
+
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);
 
