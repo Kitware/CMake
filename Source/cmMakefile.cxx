@@ -3162,6 +3162,10 @@ const char *cmMakefile::GetProperty(const char* prop)
 const char *cmMakefile::GetProperty(const char* prop,
                                     cmProperty::ScopeType scope)
 {
+  if(!prop)
+    {
+    return 0;
+    }
   // watch for specific properties
   static std::string output;
   output = "";

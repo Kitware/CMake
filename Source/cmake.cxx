@@ -3606,6 +3606,10 @@ const char *cmake::GetProperty(const char* prop)
 
 const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
 {
+  if(!prop)
+    {
+    return 0;
+    }
   bool chain = false;
 
   // watch for special properties
