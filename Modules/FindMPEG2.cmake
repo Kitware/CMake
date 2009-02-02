@@ -31,7 +31,7 @@ IF(MPEG2_FOUND)
 
   #some native mpeg2 installations will depend
   #on libSDL, if found, add it in.
-  INCLUDE( FindSDL.cmake )
+  INCLUDE( FindSDL )
   IF(SDL_FOUND)
     SET( MPEG2_LIBRARIES ${MPEG2_LIBRARIES} ${SDL_LIBRARY})
   ENDIF(SDL_FOUND)
