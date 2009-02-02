@@ -601,23 +601,6 @@ cmMakefileTargetGenerator
   this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
                                    cmLocalUnixMakefileGenerator3::EchoBuild);
 
-  // Construct the compile rules.
-  std::string compileRuleVar = "CMAKE_";
-  compileRuleVar += lang;
-  compileRuleVar += "_COMPILE_OBJECT";
-  std::string compileRule =
-    this->Makefile->GetRequiredDefinition(compileRuleVar.c_str());
-  std::vector<std::string> compileCommands;
-  cmSystemTools::ExpandListArgument(compileRule, compileCommands);
-
-  // Change the command working directory to the local build tree.
-  this->LocalGenerator->CreateCDCommand
-    (compileCommands,
-     this->Makefile->GetStartOutputDirectory(),
-     cmLocalGenerator::HOME_OUTPUT);
-  commands.insert(commands.end(),
-                  compileCommands.begin(), compileCommands.end());
-
   std::string targetOutPathPDB;
   {
   std::string targetFullPathPDB;
@@ -652,13 +635,31 @@ cmMakefileTargetGenerator
   vars.Flags = flags.c_str();
   vars.Defines = defines.c_str();
 
+  // Construct the compile rules.
+  {
+  std::string compileRuleVar = "CMAKE_";
+  compileRuleVar += lang;
+  compileRuleVar += "_COMPILE_OBJECT";
+  std::string compileRule =
+    this->Makefile->GetRequiredDefinition(compileRuleVar.c_str());
+  std::vector<std::string> compileCommands;
+  cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+
   // Expand placeholders in the commands.
-  for(std::vector<std::string>::iterator i = commands.begin();
-      i != commands.end(); ++i)
+  for(std::vector<std::string>::iterator i = compileCommands.begin();
+      i != compileCommands.end(); ++i)
     {
     this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
 
+  // Change the command working directory to the local build tree.
+  this->LocalGenerator->CreateCDCommand
+    (compileCommands,
+     this->Makefile->GetStartOutputDirectory(),
+     cmLocalGenerator::HOME_OUTPUT);
+  commands.insert(commands.end(),
+                  compileCommands.begin(), compileCommands.end());
+  }
 
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
@@ -722,6 +723,14 @@ cmMakefileTargetGenerator
         {
         std::vector<std::string> preprocessCommands;
         cmSystemTools::ExpandListArgument(preprocessRule, preprocessCommands);
+
+        // Expand placeholders in the commands.
+        for(std::vector<std::string>::iterator i = preprocessCommands.begin();
+            i != preprocessCommands.end(); ++i)
+          {
+          this->LocalGenerator->ExpandRuleVariables(*i, vars);
+          }
+
         this->LocalGenerator->CreateCDCommand
           (preprocessCommands,
            this->Makefile->GetStartOutputDirectory(),
@@ -735,13 +744,6 @@ cmMakefileTargetGenerator
                         cmLocalGenerator::NONE,
                         cmLocalGenerator::SHELL).c_str();
         vars.PreprocessedSource = shellObjI.c_str();
-
-        // Expand placeholders in the commands.
-        for(std::vector<std::string>::iterator i = commands.begin();
-            i != commands.end(); ++i)
-          {
-          this->LocalGenerator->ExpandRuleVariables(*i, vars);
-          }
         }
       else
         {
@@ -778,6 +780,14 @@ cmMakefileTargetGenerator
         {
         std::vector<std::string> assemblyCommands;
         cmSystemTools::ExpandListArgument(assemblyRule, assemblyCommands);
+
+        // Expand placeholders in the commands.
+        for(std::vector<std::string>::iterator i = assemblyCommands.begin();
+            i != assemblyCommands.end(); ++i)
+          {
+          this->LocalGenerator->ExpandRuleVariables(*i, vars);
+          }
+
         this->LocalGenerator->CreateCDCommand
           (assemblyCommands,
            this->Makefile->GetStartOutputDirectory(),
@@ -791,13 +801,6 @@ cmMakefileTargetGenerator
                         cmLocalGenerator::NONE,
                         cmLocalGenerator::SHELL).c_str();
         vars.AssemblySource = shellObjS.c_str();
-
-        // Expand placeholders in the commands.
-        for(std::vector<std::string>::iterator i = commands.begin();
-            i != commands.end(); ++i)
-          {
-          this->LocalGenerator->ExpandRuleVariables(*i, vars);
-          }
         }
       else
         {
