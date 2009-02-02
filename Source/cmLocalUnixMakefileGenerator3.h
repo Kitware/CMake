@@ -332,7 +332,8 @@ protected:
                            const cmCustomCommand& cc,
                            bool echo_comment=false,
                            cmLocalGenerator::RelativeRoot relative =
-                           cmLocalGenerator::HOME_OUTPUT);
+                           cmLocalGenerator::HOME_OUTPUT,
+                           std::ostream* content = 0);
   void AppendCleanCommand(std::vector<std::string>& commands,
                           const std::vector<std::string>& files,
                           cmTarget& target, const char* filename =0);

@@ -968,7 +968,8 @@ void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomCommand(std::vector<std::string>& commands,
                       const cmCustomCommand& cc, bool echo_comment,
-                      cmLocalGenerator::RelativeRoot relative)
+                      cmLocalGenerator::RelativeRoot relative,
+                      std::ostream* content)
 {
   // Optionally create a command to display the custom command's
   // comment text.  This is used for pre-build, pre-link, and
@@ -990,6 +991,10 @@ cmLocalUnixMakefileGenerator3
   if(workingDir)
     {
     dir = workingDir;
+    }
+  if(content)
+    {
+    *content << dir;
     }
   bool escapeOldStyle = cc.GetEscapeOldStyle();
   bool escapeAllowMakeVars = cc.GetEscapeAllowMakeVars();
@@ -1047,6 +1052,10 @@ cmLocalUnixMakefileGenerator3
           cmd += this->EscapeForShell(commandLine[j].c_str(),
                                       escapeAllowMakeVars);
           }
+        }
+      if(content)
+        {
+        *content << cmd;
         }
       if(this->BorlandMakeCurlyHack)
         {
