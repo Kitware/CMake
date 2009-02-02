@@ -64,12 +64,14 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  target_link_libraries(<target> [lib1 [lib2 [...]]]\n"
-      "                        [[debug|optimized|general] <lib>] ...)\n"
-      "Specify a list of libraries to be linked into the specified target.  "
-      "If any library name matches that of a target in the current project "
+      "  target_link_libraries(<target> [item1 [item2 [...]]]\n"
+      "                        [[debug|optimized|general] <item>] ...)\n"
+      "Specify libraries or flags to use when linking a given target.  "
+      "If a library name matches that of another target in the project "
       "a dependency will automatically be added in the build system to make "
-      "sure the library being linked is up-to-date before the target links."
+      "sure the library being linked is up-to-date before the target links.  "
+      "Item names starting with '-', but not '-l' or '-framework', are "
+      "treated as linker flags."
       "\n"
       "A \"debug\", \"optimized\", or \"general\" keyword indicates that "
       "the library immediately following it is to be used only for the "
