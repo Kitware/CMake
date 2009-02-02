@@ -724,6 +724,12 @@ cmMakefileTargetGenerator
         std::vector<std::string> preprocessCommands;
         cmSystemTools::ExpandListArgument(preprocessRule, preprocessCommands);
 
+        std::string shellObjI =
+          this->Convert(objI.c_str(),
+                        cmLocalGenerator::NONE,
+                        cmLocalGenerator::SHELL).c_str();
+        vars.PreprocessedSource = shellObjI.c_str();
+
         // Expand placeholders in the commands.
         for(std::vector<std::string>::iterator i = preprocessCommands.begin();
             i != preprocessCommands.end(); ++i)
@@ -738,12 +744,6 @@ cmMakefileTargetGenerator
         commands.insert(commands.end(),
                         preprocessCommands.begin(),
                         preprocessCommands.end());
-
-        std::string shellObjI =
-          this->Convert(objI.c_str(),
-                        cmLocalGenerator::NONE,
-                        cmLocalGenerator::SHELL).c_str();
-        vars.PreprocessedSource = shellObjI.c_str();
         }
       else
         {
@@ -781,6 +781,12 @@ cmMakefileTargetGenerator
         std::vector<std::string> assemblyCommands;
         cmSystemTools::ExpandListArgument(assemblyRule, assemblyCommands);
 
+        std::string shellObjS =
+          this->Convert(objS.c_str(),
+                        cmLocalGenerator::NONE,
+                        cmLocalGenerator::SHELL).c_str();
+        vars.AssemblySource = shellObjS.c_str();
+
         // Expand placeholders in the commands.
         for(std::vector<std::string>::iterator i = assemblyCommands.begin();
             i != assemblyCommands.end(); ++i)
@@ -795,12 +801,6 @@ cmMakefileTargetGenerator
         commands.insert(commands.end(),
                         assemblyCommands.begin(),
                         assemblyCommands.end());
-
-        std::string shellObjS =
-          this->Convert(objS.c_str(),
-                        cmLocalGenerator::NONE,
-                        cmLocalGenerator::SHELL).c_str();
-        vars.AssemblySource = shellObjS.c_str();
         }
       else
         {
