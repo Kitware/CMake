@@ -2035,8 +2035,7 @@ cmGlobalGenerator::AddRuleHash(const std::vector<std::string>& outputs,
   this->RuleHashes[fname] = hash;
 #else
   (void)outputs;
-  (void)first;
-  (void)last;
+  (void)content;
 #endif
 }
 
