@@ -82,6 +82,7 @@ void cmCTestSubmitHandler::Initialize()
   this->FTPProxy = "";
   this->FTPProxyType = 0;
   this->LogFile = 0;
+  this->Files.clear();
 }
 
 //----------------------------------------------------------------------------
@@ -852,9 +853,22 @@ int cmCTestSubmitHandler::ProcessHandler()
   cmGeneratedFileStream ofs;
   this->StartLogFile("Submit", ofs);
 
+  cmCTest::SetOfStrings files;
   std::string prefix = this->GetSubmitResultsPrefix();
+
+  if (!this->Files.empty())
+    {
+    // Submit only the explicitly selected files:
+    //
+    files.insert(this->Files.begin(), this->Files.end());
+    }
+
+  // Add to the list of files to submit from any selected, existing parts:
+  //
+
   // TODO:
   // Check if test is enabled
+
   this->CTest->AddIfExists(cmCTest::PartUpdate, "Update.xml");
   this->CTest->AddIfExists(cmCTest::PartConfigure, "Configure.xml");
   this->CTest->AddIfExists(cmCTest::PartBuild, "Build.xml");
@@ -889,7 +903,6 @@ int cmCTestSubmitHandler::ProcessHandler()
   this->CTest->AddIfExists(cmCTest::PartNotes, "Notes.xml");
 
   // Query parts for files to submit.
-  cmCTest::SetOfStrings files;
   for(cmCTest::Part p = cmCTest::PartStart;
       p != cmCTest::PartCount; p = cmCTest::Part(p+1))
     {
@@ -919,6 +932,7 @@ int cmCTestSubmitHandler::ProcessHandler()
       cnt ++;
       }
     }
+
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "Submit files (using "
     << this->CTest->GetCTestConfiguration("DropMethod") << ")"
     << std::endl);
@@ -929,8 +943,10 @@ int cmCTestSubmitHandler::ProcessHandler()
       << specificTrack << std::endl);
     }
   this->SetLogFile(&ofs);
-  if ( this->CTest->GetCTestConfiguration("DropMethod") == "" ||
-    this->CTest->GetCTestConfiguration("DropMethod") ==  "ftp" )
+
+  cmStdString dropMethod(this->CTest->GetCTestConfiguration("DropMethod"));
+
+  if ( dropMethod == "" || dropMethod == "ftp" )
     {
     ofs << "Using drop method: FTP" << std::endl;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using FTP submit method"
@@ -990,7 +1006,7 @@ int cmCTestSubmitHandler::ProcessHandler()
       return 0;
       }
     }
-  else if ( this->CTest->GetCTestConfiguration("DropMethod") == "http" )
+  else if ( dropMethod == "http" )
     {
     ofs << "Using drop method: HTTP" << std::endl;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using HTTP submit method"
@@ -1045,7 +1061,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     ofs << "   Submission successful" << std::endl;
     return 0;
     }
-  else if ( this->CTest->GetCTestConfiguration("DropMethod") == "xmlrpc" )
+  else if ( dropMethod == "xmlrpc" )
     {
     ofs << "Using drop method: XML-RPC" << std::endl;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using XML-RPC submit method"
@@ -1065,7 +1081,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     ofs << "   Submission successful" << std::endl;
     return 0;
     }
-  else if ( this->CTest->GetCTestConfiguration("DropMethod") == "scp" )
+  else if ( dropMethod == "scp" )
     {
     std::string url;
     std::string oldWorkingDirectory;
@@ -1100,7 +1116,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     }
 
   cmCTestLog(this->CTest, ERROR_MESSAGE, "   Unknown submission method: \""
-    << this->CTest->GetCTestConfiguration("DropMethod") << "\"" << std::endl);
+    << dropMethod << "\"" << std::endl);
   return -1;
 }
 
@@ -1124,4 +1140,10 @@ void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)
     this->SubmitPart[p] =
       (std::set<cmCTest::Part>::const_iterator(parts.find(p)) != parts.end());
     }
+}
+
+//----------------------------------------------------------------------------
+void cmCTestSubmitHandler::SelectFiles(cmCTest::SetOfStrings const& files)
+{
+  this->Files.insert(files.begin(), files.end());
 }

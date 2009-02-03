@@ -42,6 +42,10 @@ public:
 
   /** Specify a set of parts (by name) to submit.  */
   void SelectParts(std::set<cmCTest::Part> const& parts);
+
+  /** Specify a set of files to submit.  */
+  void SelectFiles(cmCTest::SetOfStrings const& files);
+
 private:
   void SetLogFile(std::ostream* ost) { this->LogFile = ost; }
 
@@ -81,6 +85,7 @@ private:
   std::ostream* LogFile;
   bool SubmitPart[cmCTest::PartCount];
   bool CDash;
+  cmCTest::SetOfStrings Files;
 };
 
 #endif

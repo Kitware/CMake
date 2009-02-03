@@ -30,31 +30,66 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     = this->Makefile->GetDefinition("CTEST_DROP_LOCATION");
   const char* ctestTriggerSite
     = this->Makefile->GetDefinition("CTEST_TRIGGER_SITE");
+  bool ctestDropSiteCDash
+    = this->Makefile->IsOn("CTEST_DROP_SITE_CDASH");
 
   if ( !ctestDropMethod )
     {
     ctestDropMethod = "http";
     }
-  if ( !ctestDropSite )
+
+  if ( ctestDropSiteCDash )
     {
-    ctestDropSite = "public.kitware.com";
+    // drop site is a CDash server...
+    //
+    if ( !ctestDropSite )
+      {
+      // error: CDash requires CTEST_DROP_SITE definition
+      // in CTestConfig.cmake
+      }
+    if ( !ctestDropLocation )
+      {
+      // error: CDash requires CTEST_DROP_LOCATION definition
+      // in CTestConfig.cmake
+      }
     }
-  if ( !ctestDropLocation )
+  else
     {
-    ctestDropLocation = "/cgi-bin/HTTPUploadDartFile.cgi";
-    }
-  if ( !ctestTriggerSite )
-    {
-    ctestTriggerSite
-      = "http://public.kitware.com/cgi-bin/Submit-Random-TestingResults.cgi";
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "* Use default trigger site: "
-      << ctestTriggerSite << std::endl;);
+    // drop site is a *NOT* a CDash server...
+    //
+    // Keep all this code in case anybody out there is still
+    // using newer CMake with non-CDash servers
+    //
+    if ( !ctestDropSite )
+      {
+      ctestDropSite = "public.kitware.com";
+      }
+    if ( !ctestDropLocation )
+      {
+      ctestDropLocation = "/cgi-bin/HTTPUploadDartFile.cgi";
+      }
+    if ( !ctestTriggerSite )
+      {
+      ctestTriggerSite
+        = "http://public.kitware.com/cgi-bin/Submit-Random-TestingResults.cgi";
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "* Use default trigger site: "
+        << ctestTriggerSite << std::endl;);
+      }
     }
 
-  this->CTest->SetCTestConfiguration("DropMethod",   ctestDropMethod);
-  this->CTest->SetCTestConfiguration("DropSite",     ctestDropSite);
+  this->CTest->SetCTestConfiguration("DropMethod", ctestDropMethod);
+  this->CTest->SetCTestConfiguration("DropSite", ctestDropSite);
   this->CTest->SetCTestConfiguration("DropLocation", ctestDropLocation);
-  this->CTest->SetCTestConfiguration("TriggerSite",  ctestTriggerSite);
+
+  this->CTest->SetCTestConfiguration("IsCDash",
+    ctestDropSiteCDash ? "TRUE" : "FALSE");
+
+  // Only propagate TriggerSite for non-CDash projects:
+  //
+  if ( !ctestDropSiteCDash )
+    {
+    this->CTest->SetCTestConfiguration("TriggerSite",  ctestTriggerSite);
+    }
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "DropSiteUser", "CTEST_DROP_SITE_USER");
@@ -79,6 +114,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
       }
     this->CTest->GenerateNotesFile(newNotesFiles);
     }
+
   const char* extraFilesVariable
     = this->Makefile->GetDefinition("CTEST_EXTRA_SUBMIT_FILES");
   if (extraFilesVariable)
@@ -108,14 +144,42 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     return 0;
     }
 
+  // If no FILES or PARTS given, *all* PARTS are submitted by default.
+  //
+  // If FILES are given, but not PARTS, only the FILES are submitted
+  // and *no* PARTS are submitted.
+  //  (This is why we select the empty "noParts" set in the
+  //   FilesMentioned block below...)
+  //
+  // If PARTS are given, only the selected PARTS are submitted.
+  //
+  // If both PARTS and FILES are given, only the selected PARTS *and*
+  // all the given FILES are submitted.
+
+  // If given explicit FILES to submit, pass them to the handler.
+  //
+  if(this->FilesMentioned)
+    {
+    // Intentionally select *no* PARTS. (Pass an empty set.) If PARTS
+    // were also explicitly mentioned, they will be selected below...
+    // But FILES with no PARTS mentioned should just submit the FILES
+    // without any of the default parts.
+    //
+    std::set<cmCTest::Part> noParts;
+    static_cast<cmCTestSubmitHandler*>(handler)->SelectParts(noParts);
+
+    static_cast<cmCTestSubmitHandler*>(handler)->SelectFiles(this->Files);
+    }
+
   // If a PARTS option was given, select only the named parts for submission.
-  if(!this->Parts.empty())
+  //
+  if(this->PartsMentioned)
     {
     static_cast<cmCTestSubmitHandler*>(handler)->SelectParts(this->Parts);
     }
+
   return handler;
 }
-
 
 
 //----------------------------------------------------------------------------
@@ -125,12 +189,21 @@ bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
   if(arg == "PARTS")
     {
     this->ArgumentDoing = ArgumentDoingParts;
+    this->PartsMentioned = true;
+    return true;
+    }
+
+  if(arg == "FILES")
+    {
+    this->ArgumentDoing = ArgumentDoingFiles;
+    this->FilesMentioned = true;
     return true;
     }
 
   // Look for other arguments.
   return this->Superclass::CheckArgumentKeyword(arg);
 }
+
 
 //----------------------------------------------------------------------------
 bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
@@ -147,6 +220,24 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
       {
       cmOStringStream e;
       e << "Part name \"" << arg << "\" is invalid.";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->ArgumentDoing = ArgumentDoingError;
+      }
+    return true;
+    }
+
+  if(this->ArgumentDoing == ArgumentDoingFiles)
+    {
+    cmStdString filename(arg);
+    if(cmSystemTools::FileExists(filename.c_str()))
+      {
+      this->Files.insert(filename);
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "File \"" << filename << "\" does not exist. Cannot submit "
+          << "a non-existent file.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       this->ArgumentDoing = ArgumentDoingError;
       }
