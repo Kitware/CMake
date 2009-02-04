@@ -93,6 +93,7 @@
 #include "cmTargetLinkLibrariesCommand.cxx"
 #include "cmTryCompileCommand.cxx"
 #include "cmTryRunCommand.cxx"
+#include "cmUnsetCommand.cxx"
 
 void GetBootstrapCommands(std::list<cmCommand*>& commands)
 {
@@ -163,4 +164,5 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmTargetLinkLibrariesCommand);
   commands.push_back(new cmTryCompileCommand);
   commands.push_back(new cmTryRunCommand);
+  commands.push_back(new cmUnsetCommand);
 }

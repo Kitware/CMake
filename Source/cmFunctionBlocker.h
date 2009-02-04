@@ -19,6 +19,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmExecutionStatus.h"
+#include "cmListFileCache.h"
 class cmMakefile;
 
 /** \class cmFunctionBlocker
@@ -43,14 +44,15 @@ public:
   virtual bool ShouldRemove(const cmListFileFunction&,
                             cmMakefile&) {return false;}
 
-  /**
-   * When the end of a CMakeList file is reached this method is called.  It
-   * is not called on the end of an INCLUDE cmake file, just at the end of a
-   * regular CMakeList file 
-   */
-  virtual void ScopeEnded(cmMakefile&) {}
-
   virtual ~cmFunctionBlocker() {}
+
+  /** Set/Get the context in which this blocker is created.  */
+  void SetStartingContext(cmListFileContext const& lfc)
+    { this->StartingContext = lfc; }
+  cmListFileContext const& GetStartingContext()
+    { return this->StartingContext; }
+private:
+  cmListFileContext StartingContext;
 };
 
 #endif

@@ -310,7 +310,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       if(!cmSystemTools::CopyFileAlways(this->OutputFile.c_str(), 
                                         copyFile.c_str()))
         {
-        cmSystemTools::Error("Could not COPY_FILE");
+        cmOStringStream emsg;
+        emsg << "Could not COPY_FILE.\n"
+          << "  OutputFile: '" << this->OutputFile.c_str() << "'\n"
+          << "    copyFile: '" << copyFile.c_str() << "'\n";
+        cmSystemTools::Error(emsg.str().c_str());
         return -1;
         }
       }

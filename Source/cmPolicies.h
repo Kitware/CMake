@@ -51,6 +51,7 @@ public:
     CMP0008, // Full-path libraries must be a valid library file name
     CMP0009, // GLOB_RECURSE should not follow symlinks by default
     CMP0010, // Bad variable reference syntax is an error
+    CMP0011, // Strong policy scope for include and find_package
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.
@@ -88,6 +89,9 @@ public:
 
   ///! Get docs for policies
   void GetDocumentation(std::vector<cmDocumentationEntry>& v);
+
+  /** Represent a set of policy values.  */
+  typedef std::map<PolicyID, PolicyStatus> PolicyMap;
 
   private:
   // might have to make these internal for VS6 not sure yet

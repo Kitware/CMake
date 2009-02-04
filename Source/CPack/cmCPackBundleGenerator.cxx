@@ -19,6 +19,8 @@
 #include "cmCPackLog.h"
 #include "cmSystemTools.h"
 
+#include <cmsys/RegularExpression.hxx>
+
 //----------------------------------------------------------------------
 cmCPackBundleGenerator::cmCPackBundleGenerator()
 {
@@ -32,35 +34,17 @@ cmCPackBundleGenerator::~cmCPackBundleGenerator()
 //----------------------------------------------------------------------
 int cmCPackBundleGenerator::InitializeInternal()
 {
-  const std::string hdiutil_path = cmSystemTools::FindProgram("hdiutil",
-    std::vector<std::string>(), false);
-  if(hdiutil_path.empty())
+  const char* name = this->GetOption("CPACK_BUNDLE_NAME");
+  if(0 == name)
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Cannot locate hdiutil command"
+      "CPACK_BUNDLE_NAME must be set to use the Bundle generator."
       << std::endl);
-    return 0;
-    }
-  this->SetOptionIfNotSet("CPACK_COMMAND_HDIUTIL", hdiutil_path.c_str());
 
-  const std::string setfile_path = cmSystemTools::FindProgram("SetFile",
-    std::vector<std::string>(1, "/Developer/Tools"), false);
-  if(setfile_path.empty())
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Cannot locate SetFile command"
-      << std::endl);
     return 0;
     }
-  this->SetOptionIfNotSet("CPACK_COMMAND_SETFILE", setfile_path.c_str());
 
   return this->Superclass::InitializeInternal();
-}
-
-//----------------------------------------------------------------------
-const char* cmCPackBundleGenerator::GetOutputExtension()
-{
-  return ".dmg";
 }
 
 //----------------------------------------------------------------------
@@ -245,16 +229,14 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
   if(!cpack_package_icon.empty())
     {
     cmOStringStream temp_mount;
-    temp_mount << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "/mnt";
-    cmSystemTools::MakeDirectory(temp_mount.str().c_str());
 
     cmOStringStream attach_command;
     attach_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     attach_command << " attach";
-    attach_command << " -mountpoint \"" << temp_mount.str() << "\"";
     attach_command << " \"" << temp_image.str() << "\"";
 
-    if(!this->RunCommand(attach_command))
+    std::string attach_output;
+    if(!this->RunCommand(attach_command, &attach_output))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
         "Error attaching temporary disk image."
@@ -262,6 +244,10 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
 
       return 0;
       }
+
+    cmsys::RegularExpression mountpoint_regex(".*(/Volumes/[^\n]+)\n.*");
+    mountpoint_regex.find(attach_output.c_str());
+    temp_mount << mountpoint_regex.match(1);
 
     cmOStringStream setfile_command;
     setfile_command << this->GetOption("CPACK_COMMAND_SETFILE");
@@ -311,52 +297,4 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
     }
 
   return 1;
-}
-
-//----------------------------------------------------------------------
-bool cmCPackBundleGenerator::CopyFile(cmOStringStream& source,
-  cmOStringStream& target)
-{
-  if(!cmSystemTools::CopyFileIfDifferent(
-    source.str().c_str(),
-    target.str().c_str()))
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Error copying "
-      << source.str()
-      << " to "
-      << target.str()
-      << std::endl);
-
-    return false;
-    }
-
-  return true;
-}
-
-//----------------------------------------------------------------------
-bool cmCPackBundleGenerator::RunCommand(cmOStringStream& command)
-{
-  std::string output;
-  int exit_code = 1;
-
-  bool result = cmSystemTools::RunSingleCommand(
-    command.str().c_str(),
-    &output,
-    &exit_code,
-    0,
-    this->GeneratorVerbose,
-    0);
-
-  if(!result || exit_code)
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Error executing: "
-      << command.str()
-      << std::endl);
-
-    return false;
-    }
-
-  return true;
 }

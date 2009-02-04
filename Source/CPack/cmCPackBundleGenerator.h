@@ -18,30 +18,26 @@
 #ifndef cmCPackBundleGenerator_h
 #define cmCPackBundleGenerator_h
 
-#include "cmCPackGenerator.h"
+#include "cmCPackDragNDropGenerator.h"
 
 /** \class cmCPackBundleGenerator
  * \brief A generator for OSX bundles
  *
  * Based on Gimp.app
  */
-class cmCPackBundleGenerator : public cmCPackGenerator
+class cmCPackBundleGenerator : public cmCPackDragNDropGenerator
 {
 public:
-  cmCPackTypeMacro(cmCPackBundleGenerator, cmCPackGenerator);
+  cmCPackTypeMacro(cmCPackBundleGenerator, cmCPackDragNDropGenerator);
 
   cmCPackBundleGenerator();
   virtual ~cmCPackBundleGenerator();
 
 protected:
   virtual int InitializeInternal();
-  virtual const char* GetOutputExtension();
   virtual const char* GetPackagingInstallPrefix();
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
-
-  bool CopyFile(cmOStringStream& source, cmOStringStream& target);
-  bool RunCommand(cmOStringStream& command);
 
   std::string InstallPrefix;
 };

@@ -2607,11 +2607,6 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
          t->GetType() == cmTarget::MODULE_LIBRARY)
         {
         std::string tfull = t->GetFullPath(configName);
-        if(t->IsAppBundleOnApple())
-          {
-          tfull += ".app/Contents/MacOS/";
-          tfull += t->GetFullName(configName);
-          }
         makefileStream << "\\\n\t" <<
           this->ConvertToRelativeForMake(tfull.c_str());
         }
@@ -2669,11 +2664,6 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         {
         // Create a rule for this target.
         std::string tfull = t->GetFullPath(configName);
-        if(t->IsAppBundleOnApple())
-          {
-          tfull += ".app/Contents/MacOS/";
-          tfull += t->GetFullName(configName);
-          }
         makefileStream << this->ConvertToRelativeForMake(tfull.c_str()) 
                        << ":";
 

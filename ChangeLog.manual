@@ -1,3 +1,21 @@
+Changes in CMake 2.6.3 RC 10
+- Fix issue #7470. Allow spaces in the path names for CPack NSIS.
+- Fix crash with set properties and empty values
+- Enforce matching cmake_policy push/pop scope in scripts
+- Document find_package refind
+- add unset command
+- add/fix many osg modules
+- Fixes for FindBoost.cmake
+- Fixes for FindDoxygen.cmake
+- Fixes for FindFLTK.cmake
+- Fix endif in FindKDE4.cmake
+- Fix HEADER_FILE_ONLY with VS and midl files  #7845 
+- Add #7833 changes to support OSXX11 file associations
+- Fix target ordering in VS IDE solution files
+- Fix LOCATION property for Mac App Bundle targets
+- Better diagnosis of mismatching logical blocks
+- Improve scoping of policies (see cmake_policy and CMP0011) 
+
 Changes in CMake 2.6.3 RC 9
 - Fix borland 55 build
 - Pop a function scope even on error

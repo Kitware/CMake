@@ -18,6 +18,7 @@
 #include "cmCPackLog.h"
 
 #include "cmGeneratedFileStream.h"
+#include "cmSystemTools.h"
 
 //----------------------------------------------------------------------
 cmCPackLog::cmCPackLog()
@@ -220,5 +221,10 @@ void cmCPackLog::Log(int tag, const char* file, int line,
   if ( msg[length-1] == '\n' || length > 2 )
     {
     this->NewLine = true;
+    }
+
+  if ( error )
+    {
+    cmSystemTools::SetErrorOccured();
     }
 }

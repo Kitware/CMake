@@ -11,9 +11,13 @@
 # 
 # Locate osgViewer
 # This module defines
-# OSGVIEWER_LIBRARY
-# OSGVIEWER_FOUND, if false, do not try to link to osgViewer
-# OSGVIEWER_INCLUDE_DIR, where to find the headers
+#
+# OSGVIEWER_FOUND - Was osgViewer found?
+# OSGVIEWER_INCLUDE_DIR - Where to find the headers
+# OSGVIEWER_LIBRARIES - The libraries to link for osgViewer (use this)
+#
+# OSGVIEWER_LIBRARY - The osgViewer library
+# OSGVIEWER_LIBRARY_DEBUG - The osgViewer debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,46 +29,10 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgViewer/Viewer>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSGVIEWER_INCLUDE_DIR osgViewer/Viewer
-  HINTS
-  $ENV{OSGVIEWER_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSGVIEWER osgViewer/Viewer)
+OSG_FIND_LIBRARY(OSGVIEWER osgViewer)
 
-FIND_LIBRARY(OSGVIEWER_LIBRARY 
-  NAMES osgViewer
-  HINTS
-  $ENV{OSGVIEWER_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSGVIEWER_FOUND "NO")
-IF(OSGVIEWER_LIBRARY AND OSGVIEWER_INCLUDE_DIR)
-  SET(OSGVIEWER_FOUND "YES")
-ENDIF(OSGVIEWER_LIBRARY AND OSGVIEWER_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGVIEWER DEFAULT_MSG
+    OSGVIEWER_LIBRARY OSGVIEWER_INCLUDE_DIR)

@@ -20,13 +20,6 @@ bool cmForEachFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
                   cmExecutionStatus &inStatus)
 {
-  // Prevent recusion and don't let this blocker block its own
-  // commands.
-  if (this->Executing)
-    {
-    return false;
-    }
-
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"foreach"))
     {
     // record the number of nested foreach commands
@@ -37,6 +30,11 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endofreach for this statement
     if (!this->Depth) 
       {
+      // Remove the function blocker for this scope or bail.
+      cmsys::auto_ptr<cmFunctionBlocker>
+        fb(mf.RemoveFunctionBlocker(this, lff));
+      if(!fb.get()) { return false; }
+
       // at end of for each execute recorded commands
       // store the old value
       std::string oldDef;
@@ -44,7 +42,6 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
         {
         oldDef = mf.GetDefinition(this->Args[0].c_str());
         }
-      this->Executing = true;
       std::vector<std::string>::const_iterator j = this->Args.begin();
       ++j;
 
@@ -65,21 +62,18 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
             inStatus.SetReturnInvoked(true);
             // restore the variable to its prior value
             mf.AddDefinition(this->Args[0].c_str(),oldDef.c_str());
-            mf.RemoveFunctionBlocker(lff);
             return true;
             }
           if (status.GetBreakInvoked())
             {
             // restore the variable to its prior value
             mf.AddDefinition(this->Args[0].c_str(),oldDef.c_str());
-            mf.RemoveFunctionBlocker(lff);
             return true;
             }
           }
         }
       // restore the variable to its prior value
       mf.AddDefinition(this->Args[0].c_str(),oldDef.c_str());
-      mf.RemoveFunctionBlocker(lff);
       return true;
       }
     else
@@ -112,15 +106,6 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile& mf)
       }
     }
   return false;
-}
-
-void cmForEachFunctionBlocker::
-ScopeEnded(cmMakefile &mf) 
-{
-  cmSystemTools::Error("The end of a CMakeLists file was reached with a "
-                       "FOREACH statement that was not closed properly. "
-                       "Within the directory: ", 
-                       mf.GetCurrentDirectory());
 }
 
 bool cmForEachCommand

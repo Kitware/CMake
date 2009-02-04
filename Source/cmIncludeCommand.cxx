@@ -28,6 +28,7 @@ bool cmIncludeCommand
       return false;
     }
   bool optional = false;
+  bool noPolicyScope = false;
   std::string fname = args[0];
   std::string resultVarName;
   
@@ -60,6 +61,10 @@ bool cmIncludeCommand
         return false;
         }
       }
+    else if(args[i] == "NO_POLICY_SCOPE")
+      {
+      noPolicyScope = true;
+      }
       else if(i > 1)  // compat.: in previous cmake versions the second 
                       // parameter was ignore if it wasn't "OPTIONAL"
         {
@@ -84,7 +89,8 @@ bool cmIncludeCommand
   std::string fullFilePath;
   bool readit = 
     this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(), 
-                                  fname.c_str(), &fullFilePath );
+                                  fname.c_str(), &fullFilePath,
+                                  noPolicyScope);
   
   // add the location of the included file if a result variable was given
   if (resultVarName.size())

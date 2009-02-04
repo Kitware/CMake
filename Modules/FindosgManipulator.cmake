@@ -11,9 +11,13 @@
 # 
 # Locate osgManipulator
 # This module defines
-# OSG_LIBRARY
-# OSGMANIPULATOR_FOUND, if false, do not try to link to osgManipulator
-# OSGMANIPULATOR_INCLUDE_DIR, where to find the headers
+#
+# OSGMANIPULATOR_FOUND - Was osgManipulator found?
+# OSGMANIPULATOR_INCLUDE_DIR - Where to find the headers
+# OSGMANIPULATOR_LIBRARIES - The libraries to link for osgManipulator (use this)
+#
+# OSGMANIPULATOR_LIBRARY - The osgManipulator library
+# OSGMANIPULATOR_LIBRARY_DEBUG - The osgManipulator debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,46 +29,10 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgManipulator/TrackballDragger>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSGMANIPULATOR_INCLUDE_DIR osgManipulator/TrackballDragger
-  HINTS
-  $ENV{OSGMANIPULATOR_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSGMANIPULATOR osgManipulator/TrackballDragger)
+OSG_FIND_LIBRARY(OSGMANIPULATOR osgManipulator)
 
-FIND_LIBRARY(OSGMANIPULATOR_LIBRARY 
-  NAMES osgManipulator
-  HINTS
-  $ENV{OSGMANIPULATOR_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSGMANIPULATOR_FOUND "NO")
-IF(OSGMANIPULATOR_LIBRARY AND OSGMANIPULATOR_INCLUDE_DIR)
-  SET(OSGMANIPULATOR_FOUND "YES")
-ENDIF(OSGMANIPULATOR_LIBRARY AND OSGMANIPULATOR_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGMANIPULATOR DEFAULT_MSG
+    OSGMANIPULATOR_LIBRARY OSGMANIPULATOR_INCLUDE_DIR)

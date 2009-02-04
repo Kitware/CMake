@@ -29,17 +29,15 @@
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmWhileFunctionBlocker() {Executing = false; Depth=0;}
+  cmWhileFunctionBlocker() {this->Depth=0;}
   virtual ~cmWhileFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf,
                                  cmExecutionStatus &);
   virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
-  virtual void ScopeEnded(cmMakefile &mf);
   
   std::vector<cmListFileArgument> Args;
   std::vector<cmListFileFunction> Functions;
-  bool Executing;
 private:
   int Depth;
 };

@@ -793,20 +793,25 @@ CreateComponentDescription(cmCPackComponent *component,
   macrosOut << "  IntCmp $" << component->Name << "_was_installed 0 noremove_"
             << component->Name << "\n";
   std::vector<std::string>::iterator pathIt;
-  for (pathIt = component->Files.begin(); 
-       pathIt != component->Files.end(); 
-       ++pathIt) 
+  std::string path;
+  for (pathIt = component->Files.begin();
+       pathIt != component->Files.end();
+       ++pathIt)
     {
-    macrosOut << "  Delete \"$INSTDIR\\" 
-              << cmSystemTools::ConvertToWindowsOutputPath(pathIt->c_str())
+    path = *pathIt;
+    cmSystemTools::ReplaceString(path, "/", "\\");
+    macrosOut << "  Delete \"$INSTDIR\\"
+              << path.c_str()
               << "\"\n";
     }
-  for (pathIt = component->Directories.begin(); 
-       pathIt != component->Directories.end(); 
-       ++pathIt) 
+  for (pathIt = component->Directories.begin();
+       pathIt != component->Directories.end();
+       ++pathIt)
     {
-    macrosOut << "  RMDir \"$INSTDIR\\" 
-              << cmSystemTools::ConvertToWindowsOutputPath(pathIt->c_str())
+    path = *pathIt;
+    cmSystemTools::ReplaceString(path, "/", "\\");
+    macrosOut << "  RMDir \"$INSTDIR\\"
+              << path.c_str()
               << "\"\n";
     }
   macrosOut << "  noremove_" << component->Name << ":\n";

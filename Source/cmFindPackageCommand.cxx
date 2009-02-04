@@ -64,6 +64,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->NoModule = false;
   this->DebugMode = false;
   this->UseLib64Paths = false;
+  this->PolicyScope = true;
   this->VersionMajor = 0;
   this->VersionMinor = 0;
   this->VersionPatch = 0;
@@ -77,7 +78,8 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->VersionFoundCount = 0;
   this->CommandDocumentation =
     "  find_package(<package> [version] [EXACT] [QUIET]\n"
-    "               [[REQUIRED|COMPONENTS] [components...]])\n"
+    "               [[REQUIRED|COMPONENTS] [components...]]\n"
+    "               [NO_POLICY_SCOPE])\n"
     "Finds and loads settings from an external project.  "
     "<package>_FOUND will be set to indicate whether the package was found.  "
     "When the package is found package-specific information is provided "
@@ -116,6 +118,7 @@ cmFindPackageCommand::cmFindPackageCommand()
     "The complete Config mode command signature is:\n"
     "  find_package(<package> [version] [EXACT] [QUIET]\n"
     "               [[REQUIRED|COMPONENTS] [components...]] [NO_MODULE]\n"
+    "               [NO_POLICY_SCOPE]\n"
     "               [NAMES name1 [name2 ...]]\n"
     "               [CONFIGS config1 [config2 ...]]\n"
     "               [HINTS path1 [path2 ... ]]\n"
@@ -155,8 +158,7 @@ cmFindPackageCommand::cmFindPackageCommand()
     "argument is specified.  If REQUIRED is specified and the package "
     "is not found a fatal error is generated and the configure step stops "
     "executing.  If <package>_DIR has been set to a directory not containing "
-    "a configuration file a fatal error is always generated because user "
-    "intervention is required."
+    "a configuration file CMake will ignore it and search from scratch."
     "\n"
     "When the [version] argument is given Config mode will only find a "
     "version of the package that claims compatibility with the requested "
@@ -291,6 +293,11 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->CommandDocumentation += this->GenericDocumentationMacPolicy;
   this->CommandDocumentation += this->GenericDocumentationRootPath;
   this->CommandDocumentation += this->GenericDocumentationPathsOrder;
+  this->CommandDocumentation +=
+    "\n"
+    "See the cmake_policy() command documentation for discussion of the "
+    "NO_POLICY_SCOPE option."
+    ;
 }
 
 //----------------------------------------------------------------------------
@@ -406,6 +413,12 @@ bool cmFindPackageCommand
       this->NoModule = true;
       this->Compatibility_1_6 = false;
       doing = DoingConfigs;
+      }
+    else if(args[i] == "NO_POLICY_SCOPE")
+      {
+      this->PolicyScope = false;
+      this->Compatibility_1_6 = false;
+      doing = DoingNone;
       }
     else if(args[i] == "NO_CMAKE_BUILDS_PATH")
       {
@@ -676,7 +689,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
     std::string var = this->Name;
     var += "_FIND_MODULE";
     this->Makefile->AddDefinition(var.c_str(), "1");
-    bool result = this->ReadListFile(mfile.c_str());
+    bool result = this->ReadListFile(mfile.c_str(), DoPolicyScope);
     this->Makefile->RemoveDefinition(var.c_str());
     return result;
     }
@@ -754,7 +767,7 @@ bool cmFindPackageCommand::HandlePackageMode()
     this->StoreVersionFound();
 
     // Parse the configuration file.
-    if(this->ReadListFile(this->FileFound.c_str()))
+    if(this->ReadListFile(this->FileFound.c_str(), DoPolicyScope))
       {
       // The package has been found.
       found = true;
@@ -964,9 +977,10 @@ bool cmFindPackageCommand::FindAppBundleConfig()
 }
 
 //----------------------------------------------------------------------------
-bool cmFindPackageCommand::ReadListFile(const char* f)
+bool cmFindPackageCommand::ReadListFile(const char* f, PolicyScopeRule psr)
 {
-  if(this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(),f))
+  if(this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(), f, 0,
+                                  !this->PolicyScope || psr == NoPolicyScope))
     {
     return true;
     }
@@ -1278,8 +1292,10 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
 bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
 {
   // The version file will be loaded in an isolated scope.
-  this->Makefile->PushScope();
-  this->Makefile->PushPolicy();
+  cmMakefile::ScopePushPop varScope(this->Makefile);
+  cmMakefile::PolicyPushPop polScope(this->Makefile);
+  static_cast<void>(varScope);
+  static_cast<void>(polScope);
 
   // Clear the output variables.
   this->Makefile->RemoveDefinition("PACKAGE_VERSION");
@@ -1303,9 +1319,10 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
   sprintf(buf, "%u", this->VersionCount);
   this->Makefile->AddDefinition("PACKAGE_FIND_VERSION_COUNT", buf);
 
-  // Load the version check file.
+  // Load the version check file.  Pass NoPolicyScope because we do
+  // our own policy push/pop independent of CMP0011.
   bool suitable = false;
-  if(this->ReadListFile(version_file.c_str()))
+  if(this->ReadListFile(version_file.c_str(), NoPolicyScope))
     {
     // Check the output variables.
     bool okay = this->Makefile->IsOn("PACKAGE_VERSION_EXACT");
@@ -1344,10 +1361,6 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
         }
       }
     }
-
-  // Restore the original scope.
-  this->Makefile->PopPolicy();
-  this->Makefile->PopScope();
 
   // Succeed if the version is suitable.
   return suitable;

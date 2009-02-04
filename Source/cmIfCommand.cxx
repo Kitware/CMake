@@ -27,13 +27,6 @@ IsFunctionBlocked(const cmListFileFunction& lff,
                   cmMakefile &mf,
                   cmExecutionStatus &inStatus)
 {
-  // Prevent recusion and don't let this blocker block its own
-  // commands.
-  if (this->Executing)
-    {
-    return false;
-    }
-
   // we start by recording all the functions
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"if"))
     {
@@ -45,8 +38,12 @@ IsFunctionBlocked(const cmListFileFunction& lff,
     // if this is the endif for this if statement, then start executing
     if (!this->ScopeDepth) 
       {
+      // Remove the function blocker for this scope or bail.
+      cmsys::auto_ptr<cmFunctionBlocker>
+        fb(mf.RemoveFunctionBlocker(this, lff));
+      if(!fb.get()) { return false; }
+
       // execute the functions for the true parts of the if statement
-      this->Executing = true;
       cmExecutionStatus status;
       int scopeDepth = 0;
       for(unsigned int c = 0; c < this->Functions.size(); ++c)
@@ -76,6 +73,10 @@ IsFunctionBlocked(const cmListFileFunction& lff,
             }
           else
             {
+            // Place this call on the call stack.
+            cmMakefileCall stack_manager(&mf, this->Functions[c], status);
+            static_cast<void>(stack_manager);
+
             std::string errorString;
             
             std::vector<std::string> expandedArguments;
@@ -98,8 +99,9 @@ IsFunctionBlocked(const cmListFileFunction& lff,
               err += "(";
               err += errorString;
               err += ").";
-              cmSystemTools::Error(err.c_str());
-              return false;
+              mf.IssueMessage(cmake::FATAL_ERROR, err);
+              cmSystemTools::SetFatalErrorOccured();
+              return true;
               }
         
             if (isTrue)
@@ -118,18 +120,15 @@ IsFunctionBlocked(const cmListFileFunction& lff,
           if (status.GetReturnInvoked())
             {
             inStatus.SetReturnInvoked(true);
-            mf.RemoveFunctionBlocker(lff);
             return true;
             }
           if (status.GetBreakInvoked())
             {
             inStatus.SetBreakInvoked(true);
-            mf.RemoveFunctionBlocker(lff);
             return true;
             }
           }
         }
-      mf.RemoveFunctionBlocker(lff);
       return true;
       }
     }
@@ -160,24 +159,6 @@ bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
 }
 
 //=========================================================================
-void cmIfFunctionBlocker::ScopeEnded(cmMakefile &mf)
-{
-  std::string errmsg = "The end of a CMakeLists file was reached with an "
-    "IF statement that was not closed properly.\nWithin the directory: ";
-  errmsg += mf.GetCurrentDirectory();
-  errmsg += "\nThe arguments are: ";
-  for(std::vector<cmListFileArgument>::const_iterator j = this->Args.begin();
-      j != this->Args.end(); ++j)
-    {   
-    errmsg += (j->Quoted?"\"":"");
-    errmsg += j->Value;
-    errmsg += (j->Quoted?"\"":"");
-    errmsg += " ";
-    }
-  cmSystemTools::Message(errmsg.c_str(), "Warning");
-}
-
-//=========================================================================
 bool cmIfCommand
 ::InvokeInitialPass(const std::vector<cmListFileArgument>& args, 
                     cmExecutionStatus &)
@@ -204,6 +185,7 @@ bool cmIfCommand
     err += errorString;
     err += ").";
     this->SetError(err.c_str());
+    cmSystemTools::SetFatalErrorOccured();
     return false;
     }
   

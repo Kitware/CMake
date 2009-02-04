@@ -9,11 +9,15 @@
 # If you want to use a more convenient module that includes everything,
 # use the FindOpenSceneGraph.cmake instead of the Findosg*.cmake modules.
 # 
-# Locate osgIntrospection
+# Locate osgINTROSPECTION
 # This module defines
-# OSGINTROSPECTION_LIBRARY
-# OSGINTROSPECTION_FOUND, if false, do not try to link to osgIntrospection
-# OSGINTROSPECTION_INCLUDE_DIR, where to find the headers
+#
+# OSGINTROSPECTION_FOUND - Was osgIntrospection found?
+# OSGINTROSPECTION_INCLUDE_DIR - Where to find the headers
+# OSGINTROSPECTION_LIBRARIES - The libraries to link for osgIntrospection (use this)
+#
+# OSGINTROSPECTION_LIBRARY - The osgIntrospection library
+# OSGINTROSPECTION_LIBRARY_DEBUG - The osgIntrospection debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,46 +29,10 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgIntrospection/Reflection>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSGINTROSPECTION_INCLUDE_DIR osgIntrospection/Reflection
-  HINTS
-  $ENV{OSGINTROSPECTION_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSGINTROSPECTION osgIntrospection/Reflection)
+OSG_FIND_LIBRARY(OSGINTROSPECTION osgIntrospection)
 
-FIND_LIBRARY(OSGINTROSPECTION_LIBRARY 
-  NAMES osgIntrospection
-  HINTS
-  $ENV{OSGINTROSPECTION_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSGINTROSPECTION_FOUND "NO")
-IF(OSGINTROSPECTION_LIBRARY AND OSGINTROSPECTION_INCLUDE_DIR)
-  SET(OSGINTROSPECTION_FOUND "YES")
-ENDIF(OSGINTROSPECTION_LIBRARY AND OSGINTROSPECTION_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGINTROSPECTION DEFAULT_MSG
+    OSGINTROSPECTION_LIBRARY OSGINTROSPECTION_INCLUDE_DIR)

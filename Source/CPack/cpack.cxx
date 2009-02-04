@@ -474,5 +474,10 @@ int main (int argc, char *argv[])
 #define cout no_cout_use_cmCPack_Log
     }
 
+  if (cmSystemTools::GetErrorOccuredFlag())
+    {
+    return 1;
+    }
+
   return 0;
 }

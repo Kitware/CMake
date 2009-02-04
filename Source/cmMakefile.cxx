@@ -149,6 +149,9 @@ void cmMakefile::Initialize()
   // Enter a policy level for this directory.
   this->PushPolicy();
 
+  // Protect the directory-level policies.
+  this->PushPolicyBarrier();
+
   // By default the check is not done.  It is enabled by
   // cmListFileCache in the top level if necessary.
   this->CheckCMP0000 = false;
@@ -205,7 +208,7 @@ cmMakefile::~cmMakefile()
       delete d->second;
       }
     }
-  std::list<cmFunctionBlocker *>::iterator pos;
+  std::vector<cmFunctionBlocker*>::iterator pos;
   for (pos = this->FunctionBlockers.begin();
        pos != this->FunctionBlockers.end(); ++pos)
     {
@@ -348,26 +351,6 @@ bool cmMakefile::GetBacktrace(cmListFileBacktrace& backtrace) const
 }
 
 //----------------------------------------------------------------------------
-// Helper class to make sure the call stack is valid.
-class cmMakefileCall
-{
-public:
-  cmMakefileCall(cmMakefile* mf,
-                 cmListFileContext const& lfc,
-                 cmExecutionStatus& status): Makefile(mf)
-    {
-    cmMakefile::CallStackEntry entry = {&lfc, &status};
-    this->Makefile->CallStack.push_back(entry);
-    }
-  ~cmMakefileCall()
-    {
-    this->Makefile->CallStack.pop_back();
-    }
-private:
-  cmMakefile* Makefile;
-};
-
-//----------------------------------------------------------------------------
 bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
                                 cmExecutionStatus &status)
 {
@@ -460,21 +443,142 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   return result;
 }
 
+//----------------------------------------------------------------------------
+class cmMakefile::IncludeScope
+{
+public:
+  IncludeScope(cmMakefile* mf, const char* fname, bool noPolicyScope);
+  ~IncludeScope();
+  void Quiet() { this->ReportError = false; }
+private:
+  cmMakefile* Makefile;
+  const char* File;
+  bool NoPolicyScope;
+  bool CheckCMP0011;
+  bool ReportError;
+  void EnforceCMP0011();
+};
+
+//----------------------------------------------------------------------------
+cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf, const char* fname,
+                                       bool noPolicyScope):
+  Makefile(mf), File(fname), NoPolicyScope(noPolicyScope),
+  CheckCMP0011(false), ReportError(true)
+{
+  if(!this->NoPolicyScope)
+    {
+    // Check CMP0011 to determine the policy scope type.
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011))
+      {
+      case cmPolicies::WARN:
+        // We need to push a scope to detect whether the script sets
+        // any policies that would affect the includer and therefore
+        // requires a warning.  We use a weak scope to simulate OLD
+        // behavior by allowing policy changes to affect the includer.
+        this->Makefile->PushPolicy(true);
+        this->CheckCMP0011 = true;
+        break;
+      case cmPolicies::OLD:
+        // OLD behavior is to not push a scope at all.
+        this->NoPolicyScope = true;
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        // We should never make this policy required, but we handle it
+        // here just in case.
+        this->CheckCMP0011 = true;
+      case cmPolicies::NEW:
+        // NEW behavior is to push a (strong) scope.
+        this->Makefile->PushPolicy();
+        break;
+      }
+    }
+
+  // The included file cannot pop our policy scope.
+  this->Makefile->PushPolicyBarrier();
+}
+
+//----------------------------------------------------------------------------
+cmMakefile::IncludeScope::~IncludeScope()
+{
+  // Enforce matching policy scopes inside the included file.
+  this->Makefile->PopPolicyBarrier(this->ReportError);
+
+  if(!this->NoPolicyScope)
+    {
+    // If we need to enforce policy CMP0011 then the top entry is the
+    // one we pushed above.  If the entry is empty, then the included
+    // script did not set any policies that might affect the includer so
+    // we do not need to enforce the policy.
+    if(this->CheckCMP0011 && this->Makefile->PolicyStack.back().empty())
+      {
+      this->CheckCMP0011 = false;
+      }
+
+    // Pop the scope we pushed for the script.
+    this->Makefile->PopPolicy();
+
+    // We enforce the policy after the script's policy stack entry has
+    // been removed.
+    if(this->CheckCMP0011)
+      {
+      this->EnforceCMP0011();
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::IncludeScope::EnforceCMP0011()
+{
+  // We check the setting of this policy again because the included
+  // script might actually set this policy for its includer.
+  cmPolicies* policies = this->Makefile->GetPolicies();
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011))
+    {
+    case cmPolicies::WARN:
+      // Warn because the user did not set this policy.
+      {
+      cmOStringStream w;
+      w << policies->GetPolicyWarning(cmPolicies::CMP0011) << "\n"
+        << "The included script\n  " << this->File << "\n"
+        << "affects policy settings.  "
+        << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
+        << "so the effects are applied to the including context.";
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      }
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      {
+      cmOStringStream e;
+      e << policies->GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
+        << "The included script\n  " << this->File << "\n"
+        << "affects policy settings, so it requires this policy to be set.";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
+      break;
+    case cmPolicies::OLD:
+    case cmPolicies::NEW:
+      // The script set this policy.  We assume the purpose of the
+      // script is to initialize policies for its includer, and since
+      // the policy is now set for later scripts, we do not warn.
+      break;
+    }
+}
+
+//----------------------------------------------------------------------------
 // Parse the given CMakeLists.txt file executing all commands
 //
 bool cmMakefile::ReadListFile(const char* filename_in,
                               const char *external_in,
-                              std::string* fullPath)
+                              std::string* fullPath,
+                              bool noPolicyScope)
 {
   std::string currentParentFile
     = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
   std::string currentFile
     = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
-
-  // used to watch for blockers going out of scope
-  // e.g. mismatched IF statement
-  std::set<cmFunctionBlocker *> originalBlockers;
 
   const char* external = 0;
   std::string external_abs;
@@ -504,14 +608,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       {
       this->cmCurrentListFile = filename;
       }
-    }
-
-  // loop over current function blockers and record them
-  for (std::list<cmFunctionBlocker *>::iterator pos 
-        = this->FunctionBlockers.begin();
-       pos != this->FunctionBlockers.end(); ++pos)
-    {
-    originalBlockers.insert(*pos);
     }
 
   // Now read the input file
@@ -560,43 +656,38 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
   // add this list file to the list of dependencies
   this->ListFiles.push_back( filenametoread);
-  bool endScopeNicely = true;
+
+  // Enforce balanced blocks (if/endif, function/endfunction, etc.).
+  {
+  LexicalPushPop lexScope(this);
+  IncludeScope incScope(this, filenametoread, noPolicyScope);
+
+  // Run the parsed commands.
   const size_t numberFunctions = cacheFile.Functions.size();
   for(size_t i =0; i < numberFunctions; ++i)
     {
     cmExecutionStatus status;
     this->ExecuteCommand(cacheFile.Functions[i],status);
-    if (status.GetReturnInvoked() ||
-        cmSystemTools::GetFatalErrorOccured() )
+    if(cmSystemTools::GetFatalErrorOccured())
       {
-      // Exit early from processing this file.
-      endScopeNicely = false;
+      // Exit early due to error.
+      lexScope.Quiet();
+      incScope.Quiet();
+      break;
+      }
+    if(status.GetReturnInvoked())
+      {
+      // Exit early due to return command.
       break;
       }
     }
-
-  // send scope ended to and function blockers
-  if (endScopeNicely)
-    {
-    // loop over all function blockers to see if any block this command
-    for (std::list<cmFunctionBlocker *>::iterator pos 
-         = this->FunctionBlockers.begin();
-         pos != this->FunctionBlockers.end(); ++pos)
-      {
-      // if this blocker was not in the original then send a
-      // scope ended message
-      if (originalBlockers.find(*pos) == originalBlockers.end())
-        {
-        (*pos)->ScopeEnded(*this);
-        }
-      }
-    }
+  }
 
   // If this is the directory-level CMakeLists.txt file then perform
   // some extra checks.
   if(this->ListFileStack.size() == 1)
     {
-    this->EnforceDirectoryLevelRules(endScopeNicely);
+    this->EnforceDirectoryLevelRules();
     }
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
@@ -609,19 +700,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::EnforceDirectoryLevelRules(bool endScopeNicely)
+void cmMakefile::EnforceDirectoryLevelRules()
 {
-  // Enforce policy stack depth.
-  while(this->PolicyStack.size() > 1)
-    {
-    if(endScopeNicely)
-      {
-      this->IssueMessage(cmake::FATAL_ERROR,
-                         "cmake_policy PUSH without matching POP");
-      }
-    this->PopPolicy(false);
-    }
-
   // Diagnose a violation of CMP0000 if necessary.
   if(this->CheckCMP0000)
     {
@@ -2367,7 +2447,7 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
 
   // loop over all function blockers to see if any block this command
   // evaluate in reverse, this is critical for balanced IF statements etc
-  std::list<cmFunctionBlocker *>::reverse_iterator pos;
+  std::vector<cmFunctionBlocker*>::reverse_iterator pos;
   for (pos = this->FunctionBlockers.rbegin();
        pos != this->FunctionBlockers.rend(); ++pos)
     {
@@ -2378,6 +2458,39 @@ bool cmMakefile::IsFunctionBlocked(const cmListFileFunction& lff,
     }
 
   return false;
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::PushFunctionBlockerBarrier()
+{
+  this->FunctionBlockerBarriers.push_back(this->FunctionBlockers.size());
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
+{
+  // Remove any extra entries pushed on the barrier.
+  FunctionBlockersType::size_type barrier =
+    this->FunctionBlockerBarriers.back();
+  while(this->FunctionBlockers.size() > barrier)
+    {
+    cmsys::auto_ptr<cmFunctionBlocker> fb(this->FunctionBlockers.back());
+    this->FunctionBlockers.pop_back();
+    if(reportError)
+      {
+      // Report the context in which the unclosed block was opened.
+      cmListFileContext const& lfc = fb->GetStartingContext();
+      cmOStringStream e;
+      e << "A logical block opening on the line\n"
+        << "  " << lfc << "\n"
+        << "is not closed.";
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      reportError = false;
+      }
+    }
+
+  // Remove the barrier.
+  this->FunctionBlockerBarriers.pop_back();
 }
 
 bool cmMakefile::ExpandArguments(
@@ -2409,23 +2522,70 @@ bool cmMakefile::ExpandArguments(
   return !cmSystemTools::GetFatalErrorOccured();
 }
 
-void cmMakefile::RemoveFunctionBlocker(const cmListFileFunction& lff)
+//----------------------------------------------------------------------------
+void cmMakefile::AddFunctionBlocker(cmFunctionBlocker* fb)
 {
-  // loop over all function blockers to see if any block this command
-  std::list<cmFunctionBlocker *>::reverse_iterator pos;
-  for (pos = this->FunctionBlockers.rbegin();
-       pos != this->FunctionBlockers.rend(); ++pos)
+  if(!this->CallStack.empty())
     {
-    if ((*pos)->ShouldRemove(lff, *this))
+    // Record the context in which the blocker is created.
+    fb->SetStartingContext(*(this->CallStack.back().Context));
+    }
+
+  this->FunctionBlockers.push_back(fb);
+}
+
+cmsys::auto_ptr<cmFunctionBlocker>
+cmMakefile::RemoveFunctionBlocker(cmFunctionBlocker* fb,
+                                  const cmListFileFunction& lff)
+{
+  // Find the function blocker stack barrier for the current scope.
+  // We only remove a blocker whose index is not less than the barrier.
+  FunctionBlockersType::size_type barrier = 0;
+  if(!this->FunctionBlockerBarriers.empty())
+    {
+    barrier = this->FunctionBlockerBarriers.back();
+    }
+
+  // Search for the function blocker whose scope this command ends.
+  for(FunctionBlockersType::size_type
+        i = this->FunctionBlockers.size(); i > barrier; --i)
+    {
+    std::vector<cmFunctionBlocker*>::iterator pos =
+      this->FunctionBlockers.begin() + (i - 1);
+    if (*pos == fb)
       {
+      // Warn if the arguments do not match, but always remove.
+      if(!(*pos)->ShouldRemove(lff, *this))
+        {
+        cmListFileContext const& lfc = fb->GetStartingContext();
+        cmOStringStream e;
+        e << "A logical block opening on the line\n"
+          << "  " << lfc << "\n"
+          << "closes on the line\n"
+          << "  " << lff << "\n"
+          << "with mis-matching arguments.";
+        this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        }
       cmFunctionBlocker* b = *pos;
-      this->FunctionBlockers.remove(b);
-      delete b;
-      break;
+      this->FunctionBlockers.erase(pos);
+      return cmsys::auto_ptr<cmFunctionBlocker>(b);
       }
     }
 
-  return;
+  return cmsys::auto_ptr<cmFunctionBlocker>();
+}
+
+//----------------------------------------------------------------------------
+cmMakefile::LexicalPushPop::LexicalPushPop(cmMakefile* mf):
+  Makefile(mf), ReportError(true)
+{
+  this->Makefile->PushFunctionBlockerBarrier();
+}
+
+//----------------------------------------------------------------------------
+cmMakefile::LexicalPushPop::~LexicalPushPop()
+{
+  this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
 
 void cmMakefile::SetHomeDirectory(const char* dir)
@@ -2909,7 +3069,10 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   if ( propname == "INCLUDE_DIRECTORIES" )
     {
     std::vector<std::string> varArgsExpanded;
-    cmSystemTools::ExpandListArgument(value, varArgsExpanded);
+    if(value)
+      {
+      cmSystemTools::ExpandListArgument(value, varArgsExpanded);
+      }
     this->SetIncludeDirectories(varArgsExpanded);
     return;
     }
@@ -2917,7 +3080,10 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   if ( propname == "LINK_DIRECTORIES" )
     {
     std::vector<std::string> varArgsExpanded;
-    cmSystemTools::ExpandListArgument(value, varArgsExpanded);
+    if(value)
+      {
+      cmSystemTools::ExpandListArgument(value, varArgsExpanded);
+      }
     this->SetLinkDirectories(varArgsExpanded);
     return;
     }
@@ -3122,6 +3288,7 @@ cmTarget* cmMakefile::FindTarget(const char* name)
   return 0;
 }
 
+//----------------------------------------------------------------------------
 cmTest* cmMakefile::CreateTest(const char* testName)
 {
   if ( !testName )
@@ -3550,11 +3717,10 @@ cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id)
 {
   // Is the policy set in our stack?
-  for(std::vector<PolicyMap>::reverse_iterator
-        psi = this->PolicyStack.rbegin();
+  for(PolicyStackType::reverse_iterator psi = this->PolicyStack.rbegin();
       psi != this->PolicyStack.rend(); ++psi)
     {
-    PolicyMap::const_iterator pse = psi->find(id);
+    PolicyStackEntry::const_iterator pse = psi->find(id);
     if(pse != psi->end())
       {
       return pse->second;
@@ -3601,8 +3767,14 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
     return false;
     }
 
-  // Store the setting.
-  this->PolicyStack.back()[id] = status;
+  // Update the policy stack from the top to the top-most strong entry.
+  bool previous_was_weak = true;
+  for(PolicyStackType::reverse_iterator psi = this->PolicyStack.rbegin();
+      previous_was_weak && psi != this->PolicyStack.rend(); ++psi)
+    {
+    (*psi)[id] = status;
+    previous_was_weak = psi->Weak;
+    }
 
   // Special hook for presenting compatibility variable as soon as
   // the user requests it.
@@ -3626,26 +3798,67 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   return true;
 }
 
-bool cmMakefile::PushPolicy()
+//----------------------------------------------------------------------------
+cmMakefile::PolicyPushPop::PolicyPushPop(cmMakefile* m, bool weak,
+                                         cmPolicies::PolicyMap const& pm):
+  Makefile(m), ReportError(true)
 {
-  // Allocate a new stack entry.
-  this->PolicyStack.push_back(PolicyMap());
-  return true;
+  this->Makefile->PushPolicy(weak, pm);
+  this->Makefile->PushPolicyBarrier();
 }
 
-bool cmMakefile::PopPolicy(bool reportError)
+//----------------------------------------------------------------------------
+cmMakefile::PolicyPushPop::~PolicyPushPop()
 {
-  if(this->PolicyStack.size() == 1)
+  this->Makefile->PopPolicyBarrier(this->ReportError);
+  this->Makefile->PopPolicy();
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::PushPolicy(bool weak, cmPolicies::PolicyMap const& pm)
+{
+  // Allocate a new stack entry.
+  this->PolicyStack.push_back(PolicyStackEntry(pm, weak));
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::PopPolicy()
+{
+  if(this->PolicyStack.size() > this->PolicyBarriers.back())
+    {
+    this->PolicyStack.pop_back();
+    }
+  else
+    {
+    this->IssueMessage(cmake::FATAL_ERROR,
+                       "cmake_policy POP without matching PUSH");
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::PushPolicyBarrier()
+{
+  this->PolicyBarriers.push_back(this->PolicyStack.size());
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::PopPolicyBarrier(bool reportError)
+{
+  // Remove any extra entries pushed on the barrier.
+  PolicyStackType::size_type barrier = this->PolicyBarriers.back();
+  while(this->PolicyStack.size() > barrier)
     {
     if(reportError)
       {
-      cmSystemTools::Error("Attempt to pop the policy stack past "
-                           "it's beginning.");
+      this->IssueMessage(cmake::FATAL_ERROR,
+                         "cmake_policy PUSH without matching POP");
+      reportError = false;
       }
-    return false;
+    this->PopPolicy();
     }
-  this->PolicyStack.pop_back();
-  return true;
+
+  // Remove the barrier.
+  this->PolicyBarriers.pop_back();
 }
 
 bool cmMakefile::SetPolicyVersion(const char *version)
@@ -3661,4 +3874,16 @@ cmPolicies *cmMakefile::GetPolicies()
     return 0;
   }
   return this->GetCMakeInstance()->GetPolicies();
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
+{
+  /* Record the setting of every policy.  */
+  typedef cmPolicies::PolicyID PolicyID;
+  for(PolicyID pid = cmPolicies::CMP0000;
+      pid != cmPolicies::CMPCOUNT; pid = PolicyID(pid+1))
+    {
+    pm[pid] = this->GetPolicyStatus(pid);
+    }
 }

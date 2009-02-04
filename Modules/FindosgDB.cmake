@@ -11,9 +11,13 @@
 # 
 # Locate osgDB
 # This module defines
-# OSGDB_LIBRARY
-# OSGDB_FOUND, if false, do not try to link to osgDB
-# OSGDB_INCLUDE_DIR, where to find the headers
+#
+# OSGDB_FOUND - Was osgDB found?
+# OSGDB_INCLUDE_DIR - Where to find the headers
+# OSGDB_LIBRARIES - The libraries to link against for the osgDB (use this)
+#
+# OSGDB_LIBRARY - The osgDB library
+# OSGDB_LIBRARY_DEBUG - The osgDB debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,46 +29,10 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgDB/DatabasePager>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSGDB_INCLUDE_DIR osgDB/DatabasePager
-  HINTS
-  $ENV{OSGDB_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSGDB osgDB/DatabasePager)
+OSG_FIND_LIBRARY(OSGDB osgDB)
 
-FIND_LIBRARY(OSGDB_LIBRARY 
-  NAMES osgDB
-  HINTS
-  $ENV{OSGDB_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSGDB_FOUND "NO")
-IF(OSGDB_LIBRARY AND OSGDB_INCLUDE_DIR)
-  SET(OSGDB_FOUND "YES")
-ENDIF(OSGDB_LIBRARY AND OSGDB_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGDB DEFAULT_MSG
+    OSGDB_LIBRARY OSGDB_INCLUDE_DIR)

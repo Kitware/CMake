@@ -11,9 +11,13 @@
 # 
 # Locate osgProducer
 # This module defines
-# OSGPRODUCER_LIBRARY
-# OSGPRODUCER_FOUND, if false, do not try to link to osgProducer
-# OSGPRODUCER_INCLUDE_DIR, where to find the headers
+#
+# OSGPRODUCER_FOUND - Was osgProducer found?
+# OSGPRODUCER_INCLUDE_DIR - Where to find the headers
+# OSGPRODUCER_LIBRARIES - The libraries to link for osgProducer (use this)
+#
+# OSGPRODUCER_LIBRARY - The osgProducer library
+# OSGPRODUCER_LIBRARY_DEBUG - The osgProducer debug library
 #
 # $OSGDIR is an environment variable that would
 # correspond to the ./configure --prefix=$OSGDIR
@@ -25,46 +29,10 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgProducer/OsgSceneHandler>
 
-# Try the user's environment request before anything else.
-FIND_PATH(OSGPRODUCER_INCLUDE_DIR osgProducer/OsgSceneHandler
-  HINTS
-  $ENV{OSGPRODUCER_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES include
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw # Fink
-    /opt/local # DarwinPorts
-    /opt/csw # Blastwave
-    /opt
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
-)
+include(Findosg_functions)
+OSG_FIND_PATH   (OSGPRODUCER osgProducer/OsgSceneHandler)
+OSG_FIND_LIBRARY(OSGPRODUCER osgProducer)
 
-FIND_LIBRARY(OSGPRODUCER_LIBRARY 
-  NAMES osgProducer
-  HINTS
-  $ENV{OSGPRODUCER_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
-
-SET(OSGPRODUCER_FOUND "NO")
-IF(OSGPRODUCER_LIBRARY AND OSGPRODUCER_INCLUDE_DIR)
-  SET(OSGPRODUCER_FOUND "YES")
-ENDIF(OSGPRODUCER_LIBRARY AND OSGPRODUCER_INCLUDE_DIR)
-
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSGPRODUCER DEFAULT_MSG
+    OSGPRODUCER_LIBRARY OSGPRODUCER_INCLUDE_DIR)

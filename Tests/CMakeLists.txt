@@ -91,6 +91,8 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
   ADD_TEST_MACRO(Preprocess Preprocess)
   ADD_TEST_MACRO(ExportImport ExportImport)
+  ADD_TEST_MACRO(PolicyScope PolicyScope)
+  ADD_TEST_MACRO(Unset Unset)
 
   # test for correct sub-project generation
   # not implemented in VS6 or Xcode

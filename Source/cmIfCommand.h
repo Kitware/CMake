@@ -29,21 +29,19 @@ class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
   cmIfFunctionBlocker() {
-    this->HasRun = false; this->ScopeDepth = 0; this->Executing = false;}
+    this->HasRun = false; this->ScopeDepth = 0; }
   virtual ~cmIfFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf,
                                  cmExecutionStatus &);
   virtual bool ShouldRemove(const cmListFileFunction& lff,
                             cmMakefile &mf);
-  virtual void ScopeEnded(cmMakefile &mf);
   
   std::vector<cmListFileArgument> Args;
   std::vector<cmListFileFunction> Functions;
   bool IsBlocking;
   bool HasRun;
   unsigned int ScopeDepth;
-  bool Executing;
 };
 
 /** \class cmIfCommand

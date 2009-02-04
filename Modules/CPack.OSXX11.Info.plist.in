@@ -4,6 +4,19 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeExtensions</key>
+      <array>
+        <string>@CPACK_FILE_ASSOCIATION_EXTENSION@</string>
+      </array>
+      <key>CFBundleTypeName</key>
+      <string>@CPACK_FILE_ASSOCIATION_TYPE@</string>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+    </dict>
+  </array>
 	<key>CFBundleExecutable</key>
 	<string>@CPACK_PACKAGE_FILE_NAME@</string>
 	<key>CFBundleGetInfoString</key>
