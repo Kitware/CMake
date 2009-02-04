@@ -858,9 +858,13 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   if (!this->Files.empty())
     {
-    // Submit only the explicitly selected files:
+    // Submit the explicitly selected files:
     //
-    files.insert(this->Files.begin(), this->Files.end());
+    cmCTest::SetOfStrings::const_iterator it;
+    for (it = this->Files.begin(); it != this->Files.end(); ++it)
+      {
+      files.insert(*it);
+      }
     }
 
   // Add to the list of files to submit from any selected, existing parts:
@@ -1145,5 +1149,9 @@ void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)
 //----------------------------------------------------------------------------
 void cmCTestSubmitHandler::SelectFiles(cmCTest::SetOfStrings const& files)
 {
-  this->Files.insert(files.begin(), files.end());
+  cmCTest::SetOfStrings::const_iterator it;
+  for (it = files.begin(); it != files.end(); ++it)
+    {
+    this->Files.insert(*it);
+    }
 }
