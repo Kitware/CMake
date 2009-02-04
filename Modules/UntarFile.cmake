@@ -34,6 +34,9 @@ endif()
 get_filename_component(filename "${filename}" ABSOLUTE)
 get_filename_component(tmp "${tmp}" ABSOLUTE)
 get_filename_component(directory "${directory}" ABSOLUTE)
+message(STATUS "filename='${filename}'")
+message(STATUS "tmp='${tmp}'")
+message(STATUS "directory='${directory}'")
 
 
 # Prepare a space for untarring:
@@ -44,6 +47,7 @@ while(EXISTS "${tmp}/untar${i}")
   math(EXPR i "${i} + 1")
 endwhile()
 set(ut_dir "${tmp}/untar${i}")
+message(STATUS "ut_dir='${ut_dir}'")
 file(MAKE_DIRECTORY "${ut_dir}")
 
 
