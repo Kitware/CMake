@@ -2377,6 +2377,10 @@ cmLocalGenerator
       // We also skip over the leading slash given by the user.
       std::string destination = l->second.GetInstallPath().substr(1);
       cmSystemTools::ConvertToUnixSlashes(destination);
+      if(destination.empty())
+        {
+        destination = ".";
+        }
 
       // Generate the proper install generator for this target type.
       switch(l->second.GetType())
