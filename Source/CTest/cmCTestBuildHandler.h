@@ -86,10 +86,9 @@ private:
   };
 
   // generate the XML output
-  void GenerateDartBuildOutput(std::ostream& os,
-                               std::vector<cmCTestBuildErrorWarning>,
-                               double elapsed_time);
-
+  void GenerateXMLHeader(std::ostream& os);
+  void GenerateXMLLogScraped(std::ostream& os);
+  void GenerateXMLFooter(std::ostream& os, double elapsed_build_time);
 
   std::string             StartBuild;
   std::string             EndBuild;

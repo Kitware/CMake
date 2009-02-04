@@ -473,16 +473,14 @@ int cmCTestBuildHandler::ProcessHandler()
       << std::endl);
     return -1;
     }
-  this->GenerateDartBuildOutput(
-    xofs, this->ErrorsAndWarnings, elapsed_build_time);
+  this->GenerateXMLHeader(xofs);
+  this->GenerateXMLLogScraped(xofs);
+  this->GenerateXMLFooter(xofs, elapsed_build_time);
   return retVal;
 }
 
-//----------------------------------------------------------------------
-void cmCTestBuildHandler::GenerateDartBuildOutput(
-  std::ostream& os,
-  std::vector<cmCTestBuildErrorWarning> ew,
-  double elapsed_build_time)
+//----------------------------------------------------------------------------
+void cmCTestBuildHandler::GenerateXMLHeader(std::ostream& os)
 {
   this->CTest->StartXML(os, this->AppendXML);
   os << "<Build>\n"
@@ -494,7 +492,12 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
      << this->CTest->MakeXMLSafe(
        this->CTest->GetCTestConfiguration("MakeCommand"))
      << "</BuildCommand>" << std::endl;
+}
 
+//----------------------------------------------------------------------------
+void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
+{
+  std::vector<cmCTestBuildErrorWarning>& ew = this->ErrorsAndWarnings;
   std::vector<cmCTestBuildErrorWarning>::iterator it;
 
   // only report the first 50 warnings and first 50 errors
@@ -591,6 +594,12 @@ void cmCTestBuildHandler::GenerateDartBuildOutput(
          << std::endl;
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmCTestBuildHandler::GenerateXMLFooter(std::ostream& os,
+                                            double elapsed_build_time)
+{
   os << "\t<Log Encoding=\"base64\" Compression=\"/bin/gzip\">\n\t</Log>\n"
      << "\t<EndDateTime>" << this->EndBuild << "</EndDateTime>\n"
      << "\t<EndBuildTime>" << static_cast<unsigned int>(this->EndBuildTime)
