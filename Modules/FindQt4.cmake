@@ -1131,7 +1131,7 @@ IF (QT4_QMAKE_FOUND)
 
             GET_FILENAME_COMPONENT(_abs_PATH ${_abs_FILE} PATH)
 
-            STRING(REGEX MATCHALL "#include +[^ ]+\\.moc[\">]" _match "${_contents}")
+            STRING(REGEX MATCHALL "# *include +[^ ]+\\.moc[\">]" _match "${_contents}")
             IF(_match)
                FOREACH (_current_MOC_INC ${_match})
                   STRING(REGEX MATCH "[^ <\"]+\\.moc" _current_MOC "${_current_MOC_INC}")

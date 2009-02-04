@@ -64,7 +64,7 @@ FIND_PROGRAM(DOXYGEN_EXECUTABLE
 )
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(DOXYGEN DEFAULT_MSG DOXYGEN_EXECUTABLE)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Doxygen DEFAULT_MSG DOXYGEN_EXECUTABLE)
 
 #
 # Find Dot...
@@ -85,10 +85,8 @@ IF(NOT DOXYGEN_SKIP_DOT)
     DOC "Graphviz Dot tool for using Doxygen"
   )
   
-  include(FindPackageHandleStandardArgs)
-  FIND_PACKAGE_HANDLE_STANDARD_ARGS(DOXYGEN_DOT DEFAULT_MSG DOXYGEN_DOT_EXECUTABLE)
-  
   if(DOXYGEN_DOT_EXECUTABLE)
+    set(DOXYGEN_DOT_FOUND TRUE)
     # The Doxyfile wants the path to Dot, not the entire path and executable
     get_filename_component(DOXYGEN_DOT_PATH "${DOXYGEN_DOT_EXECUTABLE}" PATH CACHE)
   endif()

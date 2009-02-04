@@ -1,3 +1,15 @@
+Changes in CMake 2.6.3 RC 11
+- Fix old-style install to prefix top
+- Fix Docs for relative paths in link_directories
+- Fix OS X dylib version flags for more linkers 
+- Add some extra search paths for Haiku
+- Fix FindDoxygen not respecting QUIET and REQUIRED
+- Fix FindGDAL, FindLua50 FindLua51 FindMPEG2
+- add FindOpenSceneGraph.cmake
+- Fixes for FindOSG
+- Fix FindQt4 find .moc files if there are spaces between # and include#8433.
+- Change haiku to use dlopen functions and not BEOS stuff
+
 Changes in CMake 2.6.3 RC 10
 - Fix issue #7470. Allow spaces in the path names for CPack NSIS.
 - Fix crash with set properties and empty values

@@ -15,16 +15,14 @@ function(OSG_FIND_PATH module header)
             $ENV{${module_uc}_DIR}
             $ENV{OSG_DIR}
             $ENV{OSGDIR}
+            $ENV{OSG_ROOT}
        PATH_SUFFIXES include
        PATHS
-            ~/Library/Frameworks
-            /Library/Frameworks
             /sw # Fink
             /opt/local # DarwinPorts
             /opt/csw # Blastwave
             /opt
-            [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]
-            [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
+            /usr/freeware
    )
 endfunction(OSG_FIND_PATH module header)
 
@@ -41,17 +39,14 @@ function(OSG_FIND_LIBRARY module library)
             $ENV{${module_uc}_DIR}
             $ENV{OSG_DIR}
             $ENV{OSGDIR}
+            $ENV{OSG_ROOT}
        PATH_SUFFIXES lib64 lib
        PATHS
-            ~/Library/Frameworks
-            /Library/Frameworks
-            /usr/local
-            /usr
             /sw # Fink
             /opt/local # DarwinPorts
             /opt/csw # Blastwave
             /opt
-            [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
+            /usr/freeware
    )
 
    find_library(${module_uc}_LIBRARY_DEBUG
@@ -60,17 +55,14 @@ function(OSG_FIND_LIBRARY module library)
             $ENV{${module_uc}_DIR}
             $ENV{OSG_DIR}
             $ENV{OSGDIR}
+            $ENV{OSG_ROOT}
        PATH_SUFFIXES lib64 lib
        PATHS
-            ~/Library/Frameworks
-            /Library/Frameworks
-            /usr/local
-            /usr
             /sw # Fink
             /opt/local # DarwinPorts
             /opt/csw # Blastwave
             /opt
-            [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
+            /usr/freeware
     )
 
    if(NOT ${module_uc}_LIBRARY_DEBUG)
@@ -85,6 +77,15 @@ function(OSG_FIND_LIBRARY module library)
           PARENT_SCOPE
       )
    endif()
-
-
 endfunction(OSG_FIND_LIBRARY module library)
+
+#
+# OSG_MARK_AS_ADVANCED
+# Just a convenience function for calling MARK_AS_ADVANCED
+#
+function(OSG_MARK_AS_ADVANCED _module)
+   string(TOUPPER ${_module} _module_UC)
+   mark_as_advanced(${_module_UC}_INCLUDE_DIR)
+   mark_as_advanced(${_module_UC}_LIBRARY)
+   mark_as_advanced(${_module_UC}_LIBRARY_DEBUG)
+endfunction()

@@ -1,3 +1,7 @@
+#
+# NOTE: It is highly recommended that you use the new FindOpenSceneGraph.cmake
+# introduced in CMake 2.6.3 and not use this Find module directly.
+#
 # This is part of the Findosg* suite used to find OpenSceneGraph components.
 # Each component is separate and you must opt in to each module. You must 
 # also opt into OpenGL and OpenThreads (and Producer if needed) as these 
@@ -34,4 +38,4 @@ OSG_FIND_PATH   (OSG osg/PositionAttitudeTransform)
 OSG_FIND_LIBRARY(OSG osg)
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSG DEFAULT_MSG OSG_LIBRARY OSG_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(osg DEFAULT_MSG OSG_LIBRARY OSG_INCLUDE_DIR)

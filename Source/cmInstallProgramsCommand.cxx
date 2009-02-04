@@ -86,6 +86,10 @@ void cmInstallProgramsCommand::FinalPass()
   // the prefix.  We skip the leading slash given by the user.
   std::string destination = this->Destination.substr(1);
   cmSystemTools::ConvertToUnixSlashes(destination);
+  if(destination.empty())
+    {
+    destination = ".";
+    }
 
   // Use a file install generator.
   const char* no_permissions = "";

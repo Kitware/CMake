@@ -66,7 +66,12 @@ public:
     return
       "  link_directories(directory1 directory2 ...)\n"
       "Specify the paths in which the linker should search for libraries. "
-      "The command will apply only to targets created after it is called.";
+      "The command will apply only to targets created after it is called. "
+      "For historical reasons, relative paths given to this command are "
+      "passed to the linker unchanged "
+      "(unlike many CMake commands which interpret them relative to the "
+      "current source directory)."
+      ;
     }
   
   cmTypeMacro(cmLinkDirectoriesCommand, cmCommand);

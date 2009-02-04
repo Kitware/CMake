@@ -40,91 +40,61 @@
 
 find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
     HINTS
-    $ENV{OPENTHREADS_INCLUDE_DIR}
-    $ENV{OPENTHREADS_DIR}/include
-    $ENV{OPENTHREADS_DIR}
-    $ENV{OSG_INCLUDE_DIR}
-    $ENV{OSG_DIR}/include
-    $ENV{OSG_DIR}
-    $ENV{OSGDIR}/include
-    $ENV{OSGDIR}
+        # enough environment variables?
+        $ENV{OPENTHREADS_INCLUDE_DIR}
+        $ENV{OPENTHREADS_DIR}
+        $ENV{OSG_INCLUDE_DIR}
+        $ENV{OSG_DIR}
+        $ENV{OSGDIR}
+        $ENV{OpenThreads_ROOT}
+        $ENV{OSG_ROOT}
     PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local/include
-    /usr/include
-    /sw/include # Fink
-    /opt/local/include # DarwinPorts
-    /opt/csw/include # Blastwave
-    /opt/include
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]/include
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]/include
+        /sw # Fink
+        /opt/local # DarwinPorts
+        /opt/csw # Blastwave
+        /opt
+        /usr/freeware
+    PATH_SUFFIXES include
 )
 
 
 find_library(OPENTHREADS_LIBRARY 
     NAMES OpenThreads OpenThreadsWin32 
     HINTS
-    $ENV{OPENTHREADS_LIBRARY_DIR}
-    $ENV{OPENTHREADS_DIR}/lib64
-    $ENV{OPENTHREADS_DIR}/lib
-    $ENV{OPENTHREADS_DIR}
-    $ENV{OSG_LIBRARY_DIR}
-    $ENV{OSG_DIR}/lib64
-    $ENV{OSG_DIR}/lib
-    $ENV{OSG_DIR}
-    $ENV{OSGDIR}/lib64
-    $ENV{OSGDIR}/lib
-    $ENV{OSGDIR}
+        $ENV{OPENTHREADS_LIBRARY_DIR}
+        $ENV{OPENTHREADS_DIR}
+        $ENV{OSG_LIBRARY_DIR}
+        $ENV{OSG_DIR}
+        $ENV{OSGDIR}
+        $ENV{OpenThreads_ROOT}
+        $ENV{OSG_ROOT}
     PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local/lib64
-    /usr/local/lib
-    /usr/lib64
-    /usr/lib
-    /sw/lib64
-    /sw/lib
-    /opt/local/lib64
-    /opt/local/lib
-    /opt/csw/lib64
-    /opt/csw/lib
-    /opt/lib64
-    /opt/lib
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]/lib
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]/lib
+        /sw
+        /opt/local
+        /opt/csw
+        /opt
+        /usr/freeware
+    PATH_SUFFIXES lib64 lib
 )
 
 find_library(OPENTHREADS_LIBRARY_DEBUG 
     NAMES OpenThreadsd OpenThreadsWin32d
     HINTS
-    $ENV{OPENTHREADS_DEBUG_LIBRARY_DIR}
-    $ENV{OPENTHREADS_LIBRARY_DIR}
-    $ENV{OPENTHREADS_DIR}/lib64
-    $ENV{OPENTHREADS_DIR}/lib
-    $ENV{OPENTHREADS_DIR}
-    $ENV{OSG_LIBRARY_DIR}
-    $ENV{OSG_DIR}/lib64
-    $ENV{OSG_DIR}/lib
-    $ENV{OSG_DIR}
-    $ENV{OSGDIR}/lib64
-    $ENV{OSGDIR}/lib
-    $ENV{OSGDIR}
+        $ENV{OPENTHREADS_DEBUG_LIBRARY_DIR}
+        $ENV{OPENTHREADS_LIBRARY_DIR}
+        $ENV{OPENTHREADS_DIR}
+        $ENV{OSG_LIBRARY_DIR}
+        $ENV{OSG_DIR}
+        $ENV{OSGDIR}
+        $ENV{OpenThreads_ROOT}
+        $ENV{OSG_ROOT}
     PATHS
-    /usr/local/lib64
-    /usr/local/lib
-    /usr/lib64
-    /usr/lib
-    /sw/lib64
-    /sw/lib
-    /opt/local/lib64
-    /opt/local/lib
-    /opt/csw/lib64
-    /opt/csw/lib
-    /opt/lib64
-    /opt/lib
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OpenThreads_ROOT]/lib
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]/lib
+        /sw
+        /opt/local
+        /opt/csw
+        /opt
+        /usr/freeware
+    PATH_SUFFIXES lib64 lib
 )
 
 if(OPENTHREADS_LIBRARY_DEBUG)
@@ -132,10 +102,9 @@ if(OPENTHREADS_LIBRARY_DEBUG)
         optimized ${OPENTHREADS_LIBRARY}
         debug ${OPENTHREADS_LIBRARY_DEBUG})
 else()
-    set(OPENTHREADS_LIBRARY_DEBUG ${OPENTHREADS_LIBRARY})
     set(OPENTHREADS_LIBRARIES ${OPENTHREADS_LIBRARY})
 endif()
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OPENTHREADS DEFAULT_MSG
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenThreads DEFAULT_MSG
     OPENTHREADS_LIBRARY OPENTHREADS_INCLUDE_DIR)

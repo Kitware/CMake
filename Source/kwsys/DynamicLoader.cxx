@@ -335,20 +335,13 @@ const char* DynamicLoader::LastError()
 #endif //_WIN32
 
 // ---------------------------------------------------------------
-// 4. Implementation for BeOS / Haiku
-#if defined __BEOS__ || defined(__HAIKU__)
+// 4. Implementation for BeOS
+#if defined __BEOS__
 
 #include <string.h> // for strerror()
 
-#ifdef __BEOS__
 #include <be/kernel/image.h>
 #include <be/support/Errors.h>
-#endif
-
-#ifdef __HAIKU__
-#include <os/kernel/image.h>
-#include <os/support/Errors.h>
-#endif
 
 #define DYNAMICLOADER_DEFINED 1
 

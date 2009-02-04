@@ -1,8 +1,14 @@
 # Locate gdal
-# This module defines
-# GDAL_LIBRARY
-# GDAL_FOUND, if false, do not try to link to gdal 
-# GDAL_INCLUDE_DIR, where to find the headers
+#
+# This module accepts the following environment variables:
+#
+#    GDAL_DIR or GDAL_ROOT - Specify the location of GDAL
+#
+# This module defines the following CMake variables:
+#
+#    GDAL_FOUND - True if libgdal is found
+#    GDAL_LIBRARY - A variable pointing to the GDAL library
+#    GDAL_INCLUDE_DIR - Where to find the headers
 #
 # $GDALDIR is an environment variable that would
 # correspond to the ./configure --prefix=$GDAL_DIR
@@ -17,57 +23,71 @@
 # to happen).
 
 # This makes the presumption that you are include gdal.h like
-# #include "gdal.h"
+#
+#include "gdal.h"
 
 FIND_PATH(GDAL_INCLUDE_DIR gdal.h
   HINTS
-  $ENV{GDAL_DIR}
-  PATH_SUFFIXES include
+    $ENV{GDAL_DIR}
+    $ENV{GDAL_ROOT}
+  PATH_SUFFIXES
+     include/gdal
+     include/GDAL
+     include
   PATHS
-  ~/Library/Frameworks/gdal.framework/Headers
-  /Library/Frameworks/gdal.framework/Headers
-  /usr/local/include/gdal
-  /usr/local/include/GDAL
-  /usr/local/include
-  /usr/include/gdal
-  /usr/include/GDAL
-  /usr/include
-  /sw/include/gdal 
-  /sw/include/GDAL 
-  /sw/include # Fink
-  /opt/local/include/gdal
-  /opt/local/include/GDAL
-  /opt/local/include # DarwinPorts
-  /opt/csw/include/gdal
-  /opt/csw/include/GDAL
-  /opt/csw/include # Blastwave
-  /opt/include/gdal
-  /opt/include/GDAL
-  /opt/include
+      ~/Library/Frameworks/gdal.framework/Headers
+      /Library/Frameworks/gdal.framework/Headers
+      /sw # Fink
+      /opt/local # DarwinPorts
+      /opt/csw # Blastwave
+      /opt
 )
 
+IF(UNIX)
+    # Use gdal-config to obtain the library version (this should hopefully
+    # allow us to -lgdal1.x.y where x.y are correct version)
+    # For some reason, libgdal development packages do not contain
+    # libgdal.so...
+    FIND_PROGRAM(GDAL_CONFIG gdal-config
+        HINTS
+          $ENV{GDAL_DIR}
+          $ENV{GDAL_ROOT}
+        PATH_SUFFIXES bin
+        PATHS
+            /sw # Fink
+            /opt/local # DarwinPorts
+            /opt/csw # Blastwave
+            /opt
+    )
+
+    if(GDAL_CONFIG)
+        exec_program(${GDAL_CONFIG} ARGS --libs OUTPUT_VARIABLE GDAL_CONFIG_LIBS)
+        if(GDAL_CONFIG_LIBS)
+            string(REGEX MATCHALL "-l[^ ]+" _gdal_dashl ${GDAL_CONFIG_LIBS})
+            string(REGEX REPLACE "-l" "" _gdal_lib "${_gdal_dashl}")
+            string(REGEX MATCHALL "-L[^ ]+" _gdal_dashL ${GDAL_CONFIG_LIBS})
+            string(REGEX REPLACE "-L" "" _gdal_libpath "${_gdal_dashL}")
+        endif()
+    endif()
+endif()
+
 FIND_LIBRARY(GDAL_LIBRARY 
-  NAMES gdal GDAL
+  NAMES ${_gdal_lib} gdal gdal_i gdal1.5.0 gdal1.4.0 gdal1.3.2 GDAL
   HINTS
-  $ENV{GDAL_DIR}
+     $ENV{GDAL_DIR}
+     $ENV{GDAL_ROOT}
+     ${_gdal_libpath}
   PATH_SUFFIXES lib64 lib
   PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
     /sw
     /opt/local
     /opt/csw
     /opt
     /usr/freeware
-    [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;GDAL_ROOT]/lib
 )
 
-SET(GDAL_FOUND "NO")
-IF(GDAL_LIBRARY AND GDAL_INCLUDE_DIR)
-  SET(GDAL_FOUND "YES")
-ENDIF(GDAL_LIBRARY AND GDAL_INCLUDE_DIR)
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(GDAL DEFAULT_MSG GDAL_LIBRARY GDAL_INCLUDE_DIR)
 
-
-
+set(GDAL_LIBRARIES ${GDAL_LIBRARY})
+set(GDAL_INCLUDE_DIRS ${GDAL_INCLUDE_DIR})
