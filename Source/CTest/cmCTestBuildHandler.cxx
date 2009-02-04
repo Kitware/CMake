@@ -457,14 +457,6 @@ int cmCTestBuildHandler::ProcessHandler()
       }
     }
 
-  // Display message about number of errors and warnings
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   " << this->TotalErrors
-    << (this->TotalErrors >= this->MaxErrors ? " or more" : "")
-    << " Compiler errors" << std::endl);
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   " << this->TotalWarnings
-    << (this->TotalWarnings >= this->MaxWarnings ? " or more" : "")
-    << " Compiler warnings" << std::endl);
-
   // Generate XML output
   cmGeneratedFileStream xofs;
   if(!this->StartResultingXML(cmCTest::PartBuild, "Build", xofs))
@@ -476,6 +468,15 @@ int cmCTestBuildHandler::ProcessHandler()
   this->GenerateXMLHeader(xofs);
   this->GenerateXMLLogScraped(xofs);
   this->GenerateXMLFooter(xofs, elapsed_build_time);
+
+  // Display message about number of errors and warnings
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   " << this->TotalErrors
+    << (this->TotalErrors >= this->MaxErrors ? " or more" : "")
+    << " Compiler errors" << std::endl);
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   " << this->TotalWarnings
+    << (this->TotalWarnings >= this->MaxWarnings ? " or more" : "")
+    << " Compiler warnings" << std::endl);
+
   return retVal;
 }
 
