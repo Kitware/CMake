@@ -28,6 +28,7 @@
 #include "cmLocalGenerator.h"
 #include "cmCommand.h"
 #include "cmSystemTools.h"
+#include "cmXMLSafe.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -1464,7 +1465,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
     {
     cmCTestTestResult *result = &this->TestResults[cc];
     std::string testPath = result->Path + "/" + result->Name;
-    os << "\t\t<Test>" << cmCTest::MakeXMLSafe(
+    os << "\t\t<Test>" << cmXMLSafe(
       this->CTest->GetShortPathToFile(testPath.c_str()))
       << "</Test>" << std::endl;
     }
@@ -1481,7 +1482,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
         {
         os << "\t\t\t<NamedMeasurement type=\"text/string\" "
           "name=\"Exit Code\"><Value>"
-          << cmCTest::MakeXMLSafe(this->GetTestStatus(result->Status))
+          << cmXMLSafe(this->GetTestStatus(result->Status))
           << "</Value>"
           "</NamedMeasurement>\n"
           << "\t\t\t<NamedMeasurement type=\"text/string\" "
@@ -1498,13 +1499,13 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
       os
         << "\t\t\t<NamedMeasurement type=\"text/string\" "
         << "name=\"Completion Status\"><Value>"
-        << cmCTest::MakeXMLSafe(result->CompletionStatus)
+        << cmXMLSafe(result->CompletionStatus)
         << "</Value></NamedMeasurement>\n";
       }
     os
       << "\t\t\t<NamedMeasurement type=\"text/string\" "
       << "name=\"Command Line\"><Value>"
-      << cmCTest::MakeXMLSafe(result->FullCommandLine)
+      << cmXMLSafe(result->FullCommandLine)
       << "</Value></NamedMeasurement>\n";
     std::map<cmStdString,cmStdString>::iterator measureIt;
     for ( measureIt = result->Properties->Measurements.begin();
@@ -1514,13 +1515,13 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
       os
         << "\t\t\t<NamedMeasurement type=\"text/string\" "
         << "name=\"" << measureIt->first.c_str() << "\"><Value>"
-        << cmCTest::MakeXMLSafe(measureIt->second.c_str())
+        << cmXMLSafe(measureIt->second)
         << "</Value></NamedMeasurement>\n";
       }
     os
       << "\t\t\t<Measurement>\n"
       << "\t\t\t\t<Value>";
-    os << cmCTest::MakeXMLSafe(result->Output);
+    os << cmXMLSafe(result->Output);
     os
       << "</Value>\n"
       << "\t\t\t</Measurement>\n"
@@ -1556,13 +1557,13 @@ void cmCTestTestHandler::WriteTestResultHeader(std::ostream& os,
     }
   std::string testPath = result->Path + "/" + result->Name;
   os << "\">\n"
-     << "\t\t<Name>" << cmCTest::MakeXMLSafe(result->Name) << "</Name>\n"
-     << "\t\t<Path>" << cmCTest::MakeXMLSafe(
+     << "\t\t<Name>" << cmXMLSafe(result->Name) << "</Name>\n"
+     << "\t\t<Path>" << cmXMLSafe(
        this->CTest->GetShortPathToFile(result->Path.c_str())) << "</Path>\n"
-     << "\t\t<FullName>" << cmCTest::MakeXMLSafe(
+     << "\t\t<FullName>" << cmXMLSafe(
        this->CTest->GetShortPathToFile(testPath.c_str())) << "</FullName>\n"
      << "\t\t<FullCommandLine>"
-     << cmCTest::MakeXMLSafe(result->FullCommandLine)
+     << cmXMLSafe(result->FullCommandLine)
      << "</FullCommandLine>\n";
 }
 
@@ -1577,7 +1578,7 @@ void cmCTestTestHandler::WriteTestResultFooter(std::ostream& os,
     for(std::vector<std::string>::const_iterator li = labels.begin();
         li != labels.end(); ++li)
       {
-      os << "\t\t\t<Label>" << cmCTest::MakeXMLSafe(*li) << "</Label>\n";
+      os << "\t\t\t<Label>" << cmXMLSafe(*li) << "</Label>\n";
       }
     os << "\t\t</Labels>\n";
     }

@@ -213,6 +213,8 @@ SET(SRCS
   cmVersion.h
   cmXMLParser.cxx
   cmXMLParser.h
+  cmXMLSafe.cxx
+  cmXMLSafe.h
   cmake.cxx
   cmake.h
   cmakewizard.cxx

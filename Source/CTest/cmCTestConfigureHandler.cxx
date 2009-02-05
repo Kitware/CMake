@@ -20,6 +20,7 @@
 #include "cmCTest.h"
 #include "cmGeneratedFileStream.h"
 #include "cmake.h"
+#include "cmXMLSafe.h"
 #include <cmsys/Process.h>
 
 
@@ -106,7 +107,7 @@ int cmCTestConfigureHandler::ProcessHandler()
       os << "<ConfigureCommand>" << cCommand.c_str() << "</ConfigureCommand>"
         << std::endl;
       cmCTestLog(this->CTest, DEBUG, "End" << std::endl);
-      os << "<Log>" << cmCTest::MakeXMLSafe(output) << "</Log>" << std::endl;
+      os << "<Log>" << cmXMLSafe(output) << "</Log>" << std::endl;
       std::string end_time = this->CTest->CurrentTime();
       os << "\t<ConfigureStatus>" << retVal << "</ConfigureStatus>\n"
          << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"

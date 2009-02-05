@@ -200,9 +200,6 @@ public:
                       cmGeneratedFileStream& stream,
                       bool compress = false);
 
-  ///! Convert string to something that is XML safe
-  static std::string MakeXMLSafe(const std::string&);
-
   ///! Should we only show what we would do?
   bool GetShowOnly();
 

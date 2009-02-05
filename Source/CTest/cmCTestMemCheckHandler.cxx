@@ -24,6 +24,7 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Base64.h>
 #include "cmMakefile.h"
+#include "cmXMLSafe.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -77,8 +78,8 @@ public:
       int i = 0;
       for(; atts[i] != 0; i+=2)
         {
-        ostr << "   " << this->CTest->MakeXMLSafe(atts[i]).c_str() 
-             << " - " << this->CTest->MakeXMLSafe(atts[i+1]).c_str() << "\n";
+        ostr << "   " << cmXMLSafe(atts[i])
+             << " - " << cmXMLSafe(atts[i+1]) << "\n";
         }
       ostr << "\n";
       this->Log += ostr.str();
@@ -313,7 +314,7 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
     {
     cmCTestTestResult *result = &this->TestResults[cc];
     std::string testPath = result->Path + "/" + result->Name;
-    os << "\t\t<Test>" << cmCTest::MakeXMLSafe(
+    os << "\t\t<Test>" << cmXMLSafe(
       this->CTest->GetShortPathToFile(testPath.c_str()))
       << "</Test>" << std::endl;
     }
@@ -610,7 +611,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
       results[failure] ++;
       defects ++;
       }
-    ostr << cmCTest::MakeXMLSafe(*i) << std::endl;
+    ostr << cmXMLSafe(*i) << std::endl;
     }
 
   log = ostr.str();
@@ -750,7 +751,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
         defects ++;
         }
       totalOutputSize += lines[cc].size();
-      ostr << cmCTest::MakeXMLSafe(lines[cc]) << std::endl;
+      ostr << cmXMLSafe(lines[cc]) << std::endl;
       } 
     else
       {
@@ -767,9 +768,9 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
       cmCTestLog(this->CTest, DEBUG, "before xml safe "
                  << lines[*i] << std::endl);
       cmCTestLog(this->CTest, DEBUG, "after  xml safe "
-                 <<  cmCTest::MakeXMLSafe(lines[*i]) << std::endl);
+                 <<  cmXMLSafe(lines[*i]) << std::endl);
 
-      ostr << cmCTest::MakeXMLSafe(lines[*i]) << std::endl;
+      ostr << cmXMLSafe(lines[*i]) << std::endl;
       if(!unlimitedOutput && totalOutputSize > 
          static_cast<size_t>(this->CustomMaximumFailedTestOutputSize))
         {

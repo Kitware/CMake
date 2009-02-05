@@ -23,6 +23,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmXMLSafe.h"
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
@@ -490,7 +491,7 @@ void cmCTestBuildHandler::GenerateXMLHeader(std::ostream& os)
     static_cast<unsigned int>(this->StartBuildTime)
      << "</StartBuildTime>\n"
      << "<BuildCommand>"
-     << this->CTest->MakeXMLSafe(
+     << cmXMLSafe(
        this->CTest->GetCTestConfiguration("MakeCommand"))
      << "</BuildCommand>" << std::endl;
 }
@@ -526,7 +527,7 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
         }
       os << "\t<" << (cm->Error ? "Error" : "Warning") << ">\n"
          << "\t\t<BuildLogLine>" << cm->LogLine << "</BuildLogLine>\n"
-         << "\t\t<Text>" << this->CTest->MakeXMLSafe(cm->Text)
+         << "\t\t<Text>" << cmXMLSafe(cm->Text).Quotes(false)
          << "\n</Text>" << std::endl;
       std::vector<cmCTestCompileErrorWarningRex>::iterator rit;
       for ( rit = this->ErrorWarningFileLineRegex.begin();
@@ -579,9 +580,9 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
             << "</SourceLineNumber>" << std::endl;
           }
         }
-      os << "\t\t<PreContext>" << this->CTest->MakeXMLSafe(cm->PreContext)
+      os << "\t\t<PreContext>" << cmXMLSafe(cm->PreContext).Quotes(false)
          << "</PreContext>\n"
-         << "\t\t<PostContext>" << this->CTest->MakeXMLSafe(cm->PostContext);
+         << "\t\t<PostContext>" << cmXMLSafe(cm->PostContext).Quotes(false);
       // is this the last warning or error, if so notify
       if (cm->Error && !numErrorsAllowed ||
           !cm->Error && !numWarningsAllowed)

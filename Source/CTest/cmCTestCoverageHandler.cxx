@@ -19,6 +19,7 @@
 #include "cmake.h"
 #include "cmSystemTools.h"
 #include "cmGeneratedFileStream.h"
+#include "cmXMLSafe.h"
 
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
@@ -470,8 +471,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     const cmCTestCoverageHandlerContainer::SingleFileCoverageVector& fcov
       = fileIterator->second;
     covLogFile << "\t<File Name=\""
-      << this->CTest->MakeXMLSafe(fileName.c_str())
-      << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
+      << cmXMLSafe(fileName)
+      << "\" FullPath=\"" << cmXMLSafe(
         this->CTest->GetShortPathToFile(
           fileIterator->first.c_str())) << "\">" << std::endl
       << "\t\t<Report>" << std::endl;
@@ -507,7 +508,7 @@ int cmCTestCoverageHandler::ProcessHandler()
         }
       covLogFile << "\t\t<Line Number=\"" << cc << "\" Count=\"" << fcov[cc]
         << "\">"
-        << this->CTest->MakeXMLSafe(line.c_str()) << "</Line>" << std::endl;
+        << cmXMLSafe(line) << "</Line>" << std::endl;
       if ( fcov[cc] == 0 )
         {
         untested ++;
@@ -536,8 +537,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     total_untested += untested;
     covLogFile << "\t\t</Report>" << std::endl
       << "\t</File>" << std::endl;
-    covSumFile << "\t<File Name=\"" << this->CTest->MakeXMLSafe(fileName)
-      << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
+    covSumFile << "\t<File Name=\"" << cmXMLSafe(fileName)
+      << "\" FullPath=\"" << cmXMLSafe(
         this->CTest->GetShortPathToFile(fullFileName.c_str()))
       << "\" Covered=\"" << (tested > 0 ? "true":"false") << "\">\n"
       << "\t\t<LOCTested>" << tested << "</LOCTested>\n"
@@ -1329,8 +1330,8 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
                    << std::endl);
         // start the file output
         covLogFile << "\t<File Name=\""
-                   << this->CTest->MakeXMLSafe(i->first.c_str())
-                   << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
+                   << cmXMLSafe(i->first)
+                   << "\" FullPath=\"" << cmXMLSafe(
                      this->CTest->GetShortPathToFile(
                        i->second.c_str())) << "\">" << std::endl
                    << "\t\t<Report>" << std::endl;
@@ -1339,7 +1340,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
         for(int k =0; bullseyeHelp[k] != 0; ++k)
           {
           covLogFile << "\t\t<Line Number=\"" << line << "\" Count=\"-1\">"
-                     << this->CTest->MakeXMLSafe(bullseyeHelp[k]) 
+                     << cmXMLSafe(bullseyeHelp[k])
                      << "</Line>" << std::endl;
           line++;
           }
@@ -1355,7 +1356,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
     else if(valid)
       {
       covLogFile << "\t\t<Line Number=\"" << line << "\" Count=\"-1\">"
-                 << this->CTest->MakeXMLSafe(lineIn.c_str()) 
+                 << cmXMLSafe(lineIn)
                  << "</Line>" << std::endl;
       line++;
       }
@@ -1561,8 +1562,8 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
       tmpLog << "percentBranch: " << percentBranch << "\n";
       tmpLog << "percentCoverage: " << percent_coverage << "\n";
       tmpLog << "coverage metric: " << cmet << "\n";
-      covSumFile << "\t<File Name=\"" << this->CTest->MakeXMLSafe(sourceFile)
-                 << "\" FullPath=\"" << this->CTest->MakeXMLSafe(
+      covSumFile << "\t<File Name=\"" << cmXMLSafe(sourceFile)
+                 << "\" FullPath=\"" << cmXMLSafe(
                    this->CTest->GetShortPathToFile(file.c_str()))
                  << "\" Covered=\"" << (cmet>0?"true":"false") << "\">\n"
                  << "\t\t<BranchesTested>"

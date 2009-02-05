@@ -24,6 +24,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmCPackComponentGroup.h"
+#include "cmXMLSafe.h"
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
@@ -143,7 +144,7 @@ int cmCPackGenerator::PrepareNames()
       "Read description file: " << descFileName << std::endl);
     while ( ifs && cmSystemTools::GetLineFromStream(ifs, line) )
       {
-      ostr << cmSystemTools::MakeXMLSafe(line.c_str()) << std::endl;
+      ostr << cmXMLSafe(line) << std::endl;
       }
     this->SetOptionIfNotSet("CPACK_PACKAGE_DESCRIPTION", ostr.str().c_str());
     }

@@ -25,6 +25,7 @@
 #include "cmVersion.h"
 #include "cmGeneratedFileStream.h"
 #include "cmXMLParser.h"
+#include "cmXMLSafe.h"
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
@@ -653,9 +654,9 @@ int cmCTestUpdateHandler::ProcessHandler()
     << this->CTest->GetTestModelString() << "</BuildStamp>" << std::endl;
   os << "\t<StartDateTime>" << start_time << "</StartDateTime>\n"
     << "\t<StartTime>" << start_time_time << "</StartTime>\n"
-    << "\t<UpdateCommand>" << this->CTest->MakeXMLSafe(command)
+    << "\t<UpdateCommand>" << cmXMLSafe(command)
     << "</UpdateCommand>\n"
-    << "\t<UpdateType>" << this->CTest->MakeXMLSafe(
+    << "\t<UpdateType>" << cmXMLSafe(
       cmCTestUpdateHandlerUpdateToString(updateType))
     << "</UpdateType>\n";
 
@@ -1009,17 +1010,17 @@ int cmCTestUpdateHandler::ProcessHandler()
           << path.c_str() << " / " << fname.c_str() << " was updated by "
           << sauthor1.c_str() << " to revision: " << srevision1.c_str()
           << " from revision: " << srevision2.c_str() << std::endl);
-        os << "\t\t<File Directory=\"" << cmCTest::MakeXMLSafe(path) << "\">"
-          << cmCTest::MakeXMLSafe(fname)
+        os << "\t\t<File Directory=\"" << cmXMLSafe(path) << "\">"
+          << cmXMLSafe(fname)
           << "</File>\n"
-          << "\t\t<Directory>" << cmCTest::MakeXMLSafe(path)
+          << "\t\t<Directory>" << cmXMLSafe(path)
           << "</Directory>\n"
-          << "\t\t<FullName>" << cmCTest::MakeXMLSafe(file) << "</FullName>\n"
-          << "\t\t<CheckinDate>" << cmCTest::MakeXMLSafe(sdate1)
+          << "\t\t<FullName>" << cmXMLSafe(file) << "</FullName>\n"
+          << "\t\t<CheckinDate>" << cmXMLSafe(sdate1)
           << "</CheckinDate>\n"
-          << "\t\t<Author>" << cmCTest::MakeXMLSafe(sauthor1) << "</Author>\n"
-          << "\t\t<Email>" << cmCTest::MakeXMLSafe(semail1) << "</Email>\n"
-          << "\t\t<Log>" << cmCTest::MakeXMLSafe(comment1) << "</Log>\n"
+          << "\t\t<Author>" << cmXMLSafe(sauthor1) << "</Author>\n"
+          << "\t\t<Email>" << cmXMLSafe(semail1) << "</Email>\n"
+          << "\t\t<Log>" << cmXMLSafe(comment1) << "</Log>\n"
           << "\t\t<Revision>" << srevision1 << "</Revision>\n"
           << "\t\t<PriorRevision>" << srevision2 << "</PriorRevision>"
           << std::endl;
@@ -1030,26 +1031,26 @@ int cmCTestUpdateHandler::ProcessHandler()
             << "\t\t\t<Revision>" << srevision1 << "</Revision>\n"
             << "\t\t\t<PreviousRevision>" << srevision2
             << "</PreviousRevision>\n"
-            << "\t\t\t<Author>" << cmCTest::MakeXMLSafe(sauthor1)
+            << "\t\t\t<Author>" << cmXMLSafe(sauthor1)
             << "</Author>\n"
-            << "\t\t\t<Date>" << cmCTest::MakeXMLSafe(sdate1)
+            << "\t\t\t<Date>" << cmXMLSafe(sdate1)
             << "</Date>\n"
-            << "\t\t\t<Comment>" << cmCTest::MakeXMLSafe(comment1)
+            << "\t\t\t<Comment>" << cmXMLSafe(comment1)
             << "</Comment>\n"
-            << "\t\t\t<Email>" << cmCTest::MakeXMLSafe(semail1)
+            << "\t\t\t<Email>" << cmXMLSafe(semail1)
             << "</Email>\n"
             << "\t\t</Revisions>\n"
             << "\t\t<Revisions>\n"
             << "\t\t\t<Revision>" << srevision2 << "</Revision>\n"
             << "\t\t\t<PreviousRevision>" << srevision2
             << "</PreviousRevision>\n"
-            << "\t\t\t<Author>" << cmCTest::MakeXMLSafe(sauthor2)
+            << "\t\t\t<Author>" << cmXMLSafe(sauthor2)
             << "</Author>\n"
-            << "\t\t\t<Date>" << cmCTest::MakeXMLSafe(sdate2)
+            << "\t\t\t<Date>" << cmXMLSafe(sdate2)
             << "</Date>\n"
-            << "\t\t\t<Comment>" << cmCTest::MakeXMLSafe(comment2)
+            << "\t\t\t<Comment>" << cmXMLSafe(comment2)
             << "</Comment>\n"
-            << "\t\t\t<Email>" << cmCTest::MakeXMLSafe(semail2)
+            << "\t\t\t<Email>" << cmXMLSafe(semail2)
             << "</Email>\n"
             << "\t\t</Revisions>" << std::endl;
           }
@@ -1147,7 +1148,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   if ( updateProducedError )
     {
     os << "Update error: ";
-    os << this->CTest->MakeXMLSafe(checkoutErrorMessages);
+    os << cmXMLSafe(checkoutErrorMessages);
     cmCTestLog(this->CTest, ERROR_MESSAGE, "   Update with command: "
       << command << " failed" << std::endl);
     }

@@ -351,9 +351,6 @@ public:
   /** Setup the environment to enable VS 8 IDE output.  */
   static void EnableVSConsoleOutput();
 
-  /** Make string XML safe */
-  static std::string MakeXMLSafe(const char* str);
-
   /** Create tar */
   static bool ListTar(const char* outFileName,
                       std::vector<cmStdString>& files, 
