@@ -60,7 +60,7 @@ cmsys_ios::ostream& operator<<(cmsys_ios::ostream& os, cmXMLSafe const& self)
   char const* last = self.Data + self.Size;
   for(char const* ci = first; ci != last; ++ci)
     {
-    char c = *ci;
+    unsigned char c = static_cast<unsigned char>(*ci);
     switch(c)
       {
       case '&': os << "&amp;"; break;
@@ -74,16 +74,15 @@ cmsys_ios::ostream& operator<<(cmsys_ios::ostream& os, cmXMLSafe const& self)
       default:
         if(c >= 0x20 && c <= 0x7f)
           {
-          os.put(c);
+          os.put(static_cast<char>(c));
           }
         else
           {
           // TODO: More complete treatment of program output character
           // encoding.  Instead of escaping these bytes, we should
           // handle the current locale and its encoding.
-          unsigned char uc = static_cast<unsigned char>(c);
           char buf[16];
-          sprintf(buf, "&#x%hx;", static_cast<unsigned short>(uc));
+          sprintf(buf, "&#x%hx;", static_cast<unsigned short>(c));
           os << buf;
           }
         break;
