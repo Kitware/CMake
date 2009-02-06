@@ -14,7 +14,6 @@ AddCMakeTest(VariableWatch "")
 AddCMakeTest(Include "")
 AddCMakeTest(FindBase "")
 AddCMakeTest(Toolchain "")
-AddCMakeTest(GetFilenameComponentSymlinks "")
 
 SET(GetPrerequisites_PreArgs
   "-DCTEST_CONFIGURATION_TYPE:STRING=\\\${CTEST_CONFIGURATION_TYPE}"
