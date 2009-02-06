@@ -2666,7 +2666,8 @@ int cmake::CheckBuildSystem()
   for(std::vector<std::string>::const_iterator pi = products.begin();
       pi != products.end(); ++pi)
     {
-    if(!cmSystemTools::FileExists(pi->c_str()))
+    if(!(cmSystemTools::FileExists(pi->c_str()) ||
+         cmSystemTools::FileIsSymlink(pi->c_str())))
       {
       if(verbose)
         {
