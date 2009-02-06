@@ -1,5 +1,6 @@
 Changes in CMake 2.6.3 RC 12
 - Fix bug #8465 MACOSX_BUNDLE triggers re-configuration after build
+- Add support for building with Qts ActiveX
 
 Changes in CMake 2.6.3 RC 11
 - Fix old-style install to prefix top
