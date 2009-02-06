@@ -11,6 +11,8 @@
 #                    QT_DONT_USE_QTGUI
 #                    QT_USE_QT3SUPPORT
 #                    QT_USE_QTASSISTANT
+#                    QT_USE_QAXCONTAINER
+#                    QT_USE_QAXSERVER
 #                    QT_USE_QTDESIGNER
 #                    QT_USE_QTMOTIF
 #                    QT_USE_QTMAIN
@@ -139,6 +141,8 @@
 #  QT_QTGUI_FOUND           True if QtGui was found.
 #  QT_QT3SUPPORT_FOUND      True if Qt3Support was found.
 #  QT_QTASSISTANT_FOUND     True if QtAssistant was found.
+#  QT_QAXCONTAINER_FOUND     True if QAxContainer was found (Windows only).
+#  QT_QAXSERVER_FOUND          True if QAxServer was found (Windows only).
 #  QT_QTDBUS_FOUND          True if QtDBus was found.
 #  QT_QTDESIGNER_FOUND      True if QtDesigner was found.
 #  QT_QTDESIGNERCOMPONENTS  True if QtDesignerComponents was found.
@@ -179,6 +183,8 @@
 #  QT_INCLUDE_DIR              Path to "include" of Qt4
 #  QT_QT3SUPPORT_INCLUDE_DIR   Path to "include/Qt3Support" 
 #  QT_QTASSISTANT_INCLUDE_DIR  Path to "include/QtAssistant" 
+#  QT_QAXCONTAINER_INCLUDE_DIR  Path to "include/ActiveQt" (Windows only)
+#  QT_QAXSERVER_INCLUDE_DIR  Path to "include/ActiveQt" (Windows only)
 #  QT_QTCORE_INCLUDE_DIR       Path to "include/QtCore"         
 #  QT_QTDESIGNER_INCLUDE_DIR   Path to "include/QtDesigner" 
 #  QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR   Path to "include/QtDesigner"
@@ -214,6 +220,8 @@
 #
 #  QT_QT3SUPPORT_LIBRARY            The Qt3Support library
 #  QT_QTASSISTANT_LIBRARY           The QtAssistant library
+#  QT_QAXCONTAINER_LIBRARY           The QAxContainer library (Windows only)
+#  QT_QAXSERVER_LIBRARY                The QAxServer library (Windows only)
 #  QT_QTCORE_LIBRARY                The QtCore library
 #  QT_QTDBUS_LIBRARY                The QtDBus library
 #  QT_QTDESIGNER_LIBRARY            The QtDesigner library
@@ -512,6 +520,12 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_QTASSISTANT_LIBRARY_DEBUG NOTFOUND)
     SET(QT_QTCLUCENE_LIBRARY_RELEASE NOTFOUND)
     SET(QT_QTCLUCENE_LIBRARY_DEBUG NOTFOUND)
+    SET(QT_QAXCONTAINER_INCLUDE_DIR NOTFOUND)
+    SET(QT_QAXCONTAINER_LIBRARY_RELEASE NOTFOUND)
+    SET(QT_QAXCONTAINER_LIBRARY_DEBUG NOTFOUND)
+    SET(QT_QAXSERVER_INCLUDE_DIR NOTFOUND)
+    SET(QT_QAXSERVER_LIBRARY_RELEASE NOTFOUND)
+    SET(QT_QAXSERVER_LIBRARY_DEBUG NOTFOUND)
   ENDIF(QT_QMAKE_CHANGED)
 
   FOREACH(QT_MODULE ${QT_MODULES})
@@ -523,6 +537,21 @@ IF (QT4_QMAKE_FOUND)
               NO_DEFAULT_PATH
       )
   ENDFOREACH(QT_MODULE)
+  
+  IF(WIN32)
+    SET(QT_MODULES ${QT_MODULES} QAxContainer QAxServer)
+    # Set QT_AXCONTAINER_INCLUDE_DIR and QT_AXSERVER_INCLUDE_DIR
+    FIND_PATH(QT_QAXCONTAINER_INCLUDE_DIR ActiveQt
+      PATHS
+      ${QT_HEADERS_DIR}/ActiveQt
+      NO_DEFAULT_PATH
+      )
+    FIND_PATH(QT_QAXSERVER_INCLUDE_DIR ActiveQt
+      PATHS
+      ${QT_HEADERS_DIR}/ActiveQt
+      NO_DEFAULT_PATH
+      )
+  ENDIF(WIN32)
   
   # Set QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR
   FIND_PATH(QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR QDesignerComponents
@@ -756,6 +785,8 @@ IF (QT4_QMAKE_FOUND)
   # platform dependent libraries
   IF(WIN32)
     _QT4_ADJUST_LIB_VARS(QTMAIN)
+    _QT4_ADJUST_LIB_VARS(QAXSERVER)
+    _QT4_ADJUST_LIB_VARS(QAXCONTAINER)
   ENDIF(WIN32)
   
 

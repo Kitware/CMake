@@ -352,17 +352,25 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     cmakefileStream << "  \"" << 
       lg->Convert(tmpStr.c_str(),cmLocalGenerator::HOME_OUTPUT).c_str() 
                     << "\"\n";
-    const std::vector<std::string>& outfiles = 
-      lg->GetMakefile()->GetOutputFiles();
-    for(std::vector<std::string>::const_iterator k= outfiles.begin();
-        k != outfiles.end(); ++k)
-      {
-      cmakefileStream << "  \"" << 
-        lg->Convert(k->c_str(),cmLocalGenerator::HOME_OUTPUT).c_str() 
-                      << "\"\n";
-      }
     }
   cmakefileStream << "  )\n\n";
+
+  // CMake must rerun if a byproduct is missing.
+  {
+  cmakefileStream
+    << "# Byproducts of CMake generate step:\n"
+    << "SET(CMAKE_MAKEFILE_PRODUCTS\n";
+  const std::vector<std::string>& outfiles =
+    lg->GetMakefile()->GetOutputFiles();
+  for(std::vector<std::string>::const_iterator k = outfiles.begin();
+      k != outfiles.end(); ++k)
+    {
+    cmakefileStream << "  \"" <<
+      lg->Convert(k->c_str(),cmLocalGenerator::HOME_OUTPUT).c_str()
+                    << "\"\n";
+    }
+  cmakefileStream << "  )\n\n";
+  }
 
   this->WriteMainCMakefileLanguageRules(cmakefileStream, 
                                         this->LocalGenerators);

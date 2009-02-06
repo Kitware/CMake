@@ -2654,6 +2654,28 @@ int cmake::CheckBuildSystem()
       }
     }
 
+  // If any byproduct of makefile generation is missing we must re-run.
+  std::vector<std::string> products;
+  if(const char* productStr = mf->GetDefinition("CMAKE_MAKEFILE_PRODUCTS"))
+    {
+    cmSystemTools::ExpandListArgument(productStr, products);
+    }
+  for(std::vector<std::string>::const_iterator pi = products.begin();
+      pi != products.end(); ++pi)
+    {
+    if(!(cmSystemTools::FileExists(pi->c_str()) ||
+         cmSystemTools::FileIsSymlink(pi->c_str())))
+      {
+      if(verbose)
+        {
+        cmOStringStream msg;
+        msg << "Re-run cmake, missing byproduct: " << *pi << "\n";
+        cmSystemTools::Stdout(msg.str().c_str());
+        }
+      return 1;
+      }
+    }
+
   // Get the set of dependencies and outputs.
   std::vector<std::string> depends;
   std::vector<std::string> outputs;
