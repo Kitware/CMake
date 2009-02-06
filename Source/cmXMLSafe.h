@@ -29,7 +29,7 @@ public:
   /** Construct with the data to be written.  This assumes the data
       will exist for the duration of this object's life.  */
   cmXMLSafe(const char* s);
-  cmXMLSafe(cmsys_stl::string const& str);
+  cmXMLSafe(cmsys_stl::string const& s);
 
   /** Specify whether to escape quotes too.  This is needed when
       writing the content of an attribute value.  By default quotes

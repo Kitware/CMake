@@ -31,9 +31,9 @@ cmXMLSafe::cmXMLSafe(const char* s):
 }
 
 //----------------------------------------------------------------------------
-cmXMLSafe::cmXMLSafe(cmsys_stl::string const& str):
-    Data(str.c_str()),
-    Size(static_cast<unsigned long>(str.length())),
+cmXMLSafe::cmXMLSafe(cmsys_stl::string const& s):
+    Data(s.c_str()),
+    Size(static_cast<unsigned long>(s.length())),
     DoQuotes(true)
 {
 }
