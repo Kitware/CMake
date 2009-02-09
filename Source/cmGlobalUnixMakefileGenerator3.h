@@ -176,7 +176,6 @@ protected:
   // in the rule to satisfy the make program.
   std::string EmptyRuleHackCommand;
 
-  std::map<cmStdString, int > TargetSourceFileCount;
   bool ForceVerboseMakefiles;
 };
 
