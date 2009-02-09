@@ -3058,6 +3058,11 @@ kwsys_stl::string SystemTools::GetActualCaseForPath(const char* p)
     {
     return p;
     }
+  // Use original path if conversion back to a long path failed.
+  if(longPath == shortPath)
+    {
+    longPath = p;
+    }
   // make sure drive letter is always upper case
   if(longPath.size() > 1 && longPath[1] == ':')
     {
