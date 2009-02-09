@@ -282,7 +282,7 @@ protected:
   void WriteLocalMakefileTargets(std::ostream& ruleFileStream,
                                  std::set<cmStdString> &emitted);
 
-  // this method Writes the Directory informaiton files
+  // this method Writes the Directory information files
   void WriteDirectoryInformationFile();
 
 

@@ -1976,7 +1976,7 @@ cmLocalUnixMakefileGenerator3
   cmd += this->Convert(makefile,NONE,SHELL);
   cmd += " ";
   
-  // Passg down verbosity level.
+  // Pass down verbosity level.
   if(this->GetMakeSilentFlag().size())
     {
     cmd += this->GetMakeSilentFlag();
