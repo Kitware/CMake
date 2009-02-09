@@ -205,6 +205,10 @@ inline void Realpath(const char *path, kwsys_stl::string & resolved_path)
     resolved_path = fullpath;
     KWSYS_NAMESPACE::SystemTools::ConvertToUnixSlashes(resolved_path);
     }
+  else
+    {
+    resolved_path = path;
+    }
 }
 #else
 #include <sys/types.h>
@@ -237,8 +241,16 @@ inline void Realpath(const char *path, kwsys_stl::string & resolved_path)
 {
   char resolved_name[KWSYS_SYSTEMTOOLS_MAXPATH];
 
-  realpath(path, resolved_name);
-  resolved_path = resolved_name;
+  char *ret = realpath(path, resolved_name);
+  if(ret)
+    {
+    resolved_path = ret;
+    }
+  else
+    {
+    // if path resolution fails, return what was passed in
+    resolved_path = path;
+    }
 }
 #endif
 

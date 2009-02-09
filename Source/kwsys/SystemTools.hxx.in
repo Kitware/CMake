@@ -351,7 +351,9 @@ public:
                                             const char* in_base);
 
   /** 
-   * Get the real path for a given path, removing all symlinks.
+   * Get the real path for a given path, removing all symlinks.  In
+   * the event of an error (non-existent path, permissions issue,
+   * etc.) the original path is returned.
    */
   static kwsys_stl::string GetRealPath(const char* path);
 
