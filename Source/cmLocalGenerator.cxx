@@ -1034,6 +1034,8 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
 {
   std::vector<std::string> enabledLanguages;
   this->GlobalGenerator->GetEnabledLanguages(enabledLanguages);
+  this->InsertRuleLauncher(s, replaceValues.CMTarget,
+                           replaceValues.RuleLauncher);
   std::string::size_type start = s.find('<');
   // no variables to expand
   if(start == s.npos)
@@ -1073,6 +1075,32 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
   // add the rest of the input
   expandedInput += s.substr(pos, s.size()-pos);
   s = expandedInput;
+}
+
+//----------------------------------------------------------------------------
+const char* cmLocalGenerator::GetRuleLauncher(cmTarget* target,
+                                              const char* prop)
+{
+  if(target)
+    {
+    return target->GetProperty(prop);
+    }
+  else
+    {
+    return this->Makefile->GetProperty(prop);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::InsertRuleLauncher(std::string& s, cmTarget* target,
+                                          const char* prop)
+{
+  if(const char* val = this->GetRuleLauncher(target, prop))
+    {
+    cmOStringStream wrapped;
+    wrapped << val << " " << s;
+    s = wrapped.str();
+    }
 }
 
 //----------------------------------------------------------------------------

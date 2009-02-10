@@ -203,6 +203,7 @@ public:
       {
         memset(this, 0,  sizeof(*this));
       }
+    cmTarget* CMTarget;
     const char* TargetPDB;
     const char* TargetVersionMajor;
     const char* TargetVersionMinor;
@@ -222,6 +223,7 @@ public:
     const char* LinkFlags;
     const char* LanguageCompileFlags;
     const char* Defines;
+    const char* RuleLauncher;
   };
 
   /** Set whether to treat conversions to SHELL as a link script shell.  */
@@ -317,6 +319,11 @@ protected:
   // Expand rule variables in a single string
   std::string ExpandRuleVariable(std::string const& variable,
                                  const RuleVariables& replaceValues);
+
+  const char* GetRuleLauncher(cmTarget* target, const char* prop);
+  void InsertRuleLauncher(std::string& s, cmTarget* target,
+                          const char* prop);
+
   
   /** Convert a target to a utility target for unsupported 
    *  languages of a generator */

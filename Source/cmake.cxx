@@ -3444,6 +3444,31 @@ void cmake::DefineProperties(cmake *cm)
      "enabled languages",
      "Set to list of currently enabled lanauges.");
 
+  cm->DefineProperty
+    ("RULE_LAUNCH_COMPILE", cmProperty::GLOBAL,
+     "Specify a launcher for compile rules.",
+     "Makefile generators prefix compiler commands with the given "
+     "launcher command line.  "
+     "This is intended to allow launchers to intercept build problems "
+     "with high granularity.  "
+     "Non-Makefile generators currently ignore this property.");
+  cm->DefineProperty
+    ("RULE_LAUNCH_LINK", cmProperty::GLOBAL,
+     "Specify a launcher for link rules.",
+     "Makefile generators prefix link and archive commands with the given "
+     "launcher command line.  "
+     "This is intended to allow launchers to intercept build problems "
+     "with high granularity.  "
+     "Non-Makefile generators currently ignore this property.");
+  cm->DefineProperty
+    ("RULE_LAUNCH_CUSTOM", cmProperty::GLOBAL,
+     "Specify a launcher for custom rules.",
+     "Makefile generators prefix custom commands with the given "
+     "launcher command line.  "
+     "This is intended to allow launchers to intercept build problems "
+     "with high granularity.  "
+     "Non-Makefile generators currently ignore this property.");
+
   // ================================================================
   // define variables as well
   // ================================================================

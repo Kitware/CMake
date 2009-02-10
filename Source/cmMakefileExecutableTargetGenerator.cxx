@@ -360,6 +360,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                           buildObjs, depends);
 
   cmLocalGenerator::RuleVariables vars;
+  vars.RuleLauncher = "RULE_LAUNCH_LINK";
+  vars.CMTarget = this->Target;
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
   vars.Target = targetOutPathReal.c_str();

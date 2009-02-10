@@ -3564,6 +3564,25 @@ void cmMakefile::DefineProperties(cmake *cm)
      "This read-only property specifies the list of directories given "
      "so far to the link_directories command.  "
      "It is intended for debugging purposes.", false);
+
+  cm->DefineProperty
+    ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
+     "Specify a launcher for compile rules.",
+     "See the global property of the same name for details.  "
+     "This overrides the global property for a directory.",
+     true);
+  cm->DefineProperty
+    ("RULE_LAUNCH_LINK", cmProperty::DIRECTORY,
+     "Specify a launcher for link rules.",
+     "See the global property of the same name for details.  "
+     "This overrides the global property for a directory.",
+     true);
+  cm->DefineProperty
+    ("RULE_LAUNCH_CUSTOM", cmProperty::DIRECTORY,
+     "Specify a launcher for custom rules.",
+     "See the global property of the same name for details.  "
+     "This overrides the global property for a directory.",
+     true);
 }
 
 //----------------------------------------------------------------------------

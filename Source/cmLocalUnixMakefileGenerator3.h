@@ -347,6 +347,9 @@ protected:
   void CheckMultipleOutputs(bool verbose);
 
 private:
+  std::string MakeLauncher(const cmCustomCommand& cc, cmTarget* target,
+                           RelativeRoot relative);
+
   friend class cmMakefileTargetGenerator;
   friend class cmMakefileExecutableTargetGenerator;
   friend class cmMakefileLibraryTargetGenerator;

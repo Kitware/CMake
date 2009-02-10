@@ -523,6 +523,25 @@ void cmTarget::DefineProperties(cmake *cm)
      "RESOURCE option to the install(TARGETS) command.");
 
   cm->DefineProperty
+    ("RULE_LAUNCH_COMPILE", cmProperty::TARGET,
+     "Specify a launcher for compile rules.",
+     "See the global property of the same name for details.  "
+     "This overrides the global and directory property for a target.",
+     true);
+  cm->DefineProperty
+    ("RULE_LAUNCH_LINK", cmProperty::TARGET,
+     "Specify a launcher for link rules.",
+     "See the global property of the same name for details.  "
+     "This overrides the global and directory property for a target.",
+     true);
+  cm->DefineProperty
+    ("RULE_LAUNCH_CUSTOM", cmProperty::TARGET,
+     "Specify a launcher for custom rules.",
+     "See the global property of the same name for details.  "
+     "This overrides the global and directory property for a target.",
+     true);
+
+  cm->DefineProperty
     ("SKIP_BUILD_RPATH", cmProperty::TARGET,
      "Should rpaths be used for the build tree.",
      "SKIP_BUILD_RPATH is a boolean specifying whether to skip automatic "

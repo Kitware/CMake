@@ -619,6 +619,8 @@ cmMakefileTargetGenerator
                   cmLocalGenerator::SHELL);
   }
   cmLocalGenerator::RuleVariables vars;
+  vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
+  vars.CMTarget = this->Target;
   vars.Language = lang;
   vars.TargetPDB = targetOutPathPDB.c_str();
   vars.Source = sourceFile.c_str();

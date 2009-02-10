@@ -713,6 +713,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.TargetVersionMajor = targetVersionMajor.c_str();
   vars.TargetVersionMinor = targetVersionMinor.c_str();
 
+  vars.RuleLauncher = "RULE_LAUNCH_LINK";
+  vars.CMTarget = this->Target;
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
   std::string objdir = cmake::GetCMakeFilesDirectoryPostSlash();

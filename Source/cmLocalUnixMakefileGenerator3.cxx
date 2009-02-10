@@ -974,7 +974,6 @@ cmLocalUnixMakefileGenerator3
                       cmLocalGenerator::RelativeRoot relative,
                       std::ostream* content)
 {
-  static_cast<void>(target); // Future use
   // Optionally create a command to display the custom command's
   // comment text.  This is used for pre-build, pre-link, and
   // post-build command comments.  Custom build step commands have
@@ -1043,7 +1042,9 @@ cmLocalUnixMakefileGenerator3
           cmd = scmd;
           }
         }
-      cmd = this->Convert(cmd.c_str(),NONE,SHELL);
+      std::string launcher =
+        this->MakeLauncher(cc, target, workingDir? NONE : START_OUTPUT);
+      cmd = launcher + this->Convert(cmd.c_str(),NONE,SHELL);
       for(unsigned int j=1; j < commandLine.size(); ++j)
         {
         cmd += " ";
@@ -1059,7 +1060,8 @@ cmLocalUnixMakefileGenerator3
         }
       if(content)
         {
-        *content << cmd;
+        // Rule content does not include the launcher.
+        *content << (cmd.c_str()+launcher.size());
         }
       if(this->BorlandMakeCurlyHack)
         {
@@ -1091,6 +1093,35 @@ cmLocalUnixMakefileGenerator3
 
   // push back the custom commands
   commands.insert(commands.end(), commands1.begin(), commands1.end());
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalUnixMakefileGenerator3::MakeLauncher(const cmCustomCommand& cc,
+                                            cmTarget* target,
+                                            RelativeRoot relative)
+{
+  // Short-circuit if there is no launcher.
+  const char* prop = "RULE_LAUNCH_CUSTOM";
+  const char* val = this->GetRuleLauncher(target, prop);
+  if(!(val && *val))
+    {
+    return "";
+    }
+
+  // Expand rules in the empty string.  It may insert the launcher and
+  // perform replacements.
+  RuleVariables vars;
+  vars.RuleLauncher = prop;
+  vars.CMTarget = target;
+
+  std::string launcher;
+  this->ExpandRuleVariables(launcher, vars);
+  if(!launcher.empty())
+    {
+    launcher += " ";
+    }
+  return launcher;
 }
 
 //----------------------------------------------------------------------------

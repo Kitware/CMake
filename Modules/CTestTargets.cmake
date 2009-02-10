@@ -50,6 +50,7 @@ IF(NOT _CTEST_TARGETS_ADDED)
     ADD_CUSTOM_TARGET(${mode}
       ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode}
       )
+    SET_PROPERTY(TARGET ${mode} PROPERTY RULE_LAUNCH_CUSTOM "")
   ENDFOREACH(mode)
 
   # For Makefile generators add more granular targets.
@@ -63,6 +64,7 @@ IF(NOT _CTEST_TARGETS_ADDED)
         ADD_CUSTOM_TARGET(${mode}${testtype}
           ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode}${testtype}
           )
+        SET_PROPERTY(TARGET ${mode}${testtype} PROPERTY RULE_LAUNCH_CUSTOM "")
       ENDFOREACH(testtype)
     ENDFOREACH(mode)
   ENDIF("${CMAKE_GENERATOR}" MATCHES Make)
