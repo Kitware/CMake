@@ -735,9 +735,9 @@ IF (QT4_QMAKE_FOUND)
       ENDIF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
 
       IF(QT_QMAKE_CHANGED)
-        SET(QT_${basename}_LIBRARY ${QT_${basename}_LIBRARY} CACHE FILEPATH "The Qt ${basename} library" FORCE)
+        SET(QT_${basename}_LIBRARY ${QT_${basename}_LIBRARY} CACHE STRING "The Qt ${basename} library" FORCE)
       ELSE(QT_QMAKE_CHANGED)
-        SET(QT_${basename}_LIBRARY ${QT_${basename}_LIBRARY} CACHE FILEPATH "The Qt ${basename} library")
+        SET(QT_${basename}_LIBRARY ${QT_${basename}_LIBRARY} CACHE STRING "The Qt ${basename} library")
       ENDIF(QT_QMAKE_CHANGED)
 
       IF (QT_${basename}_LIBRARY)
