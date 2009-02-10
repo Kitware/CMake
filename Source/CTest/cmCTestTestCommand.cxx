@@ -26,6 +26,8 @@ cmCTestTestCommand::cmCTestTestCommand()
   this->Arguments[ctt_STRIDE] = "STRIDE";
   this->Arguments[ctt_EXCLUDE] = "EXCLUDE";
   this->Arguments[ctt_INCLUDE] = "INCLUDE";
+  this->Arguments[ctt_EXCLUDE_LABEL] = "EXCLUDE_LABEL";
+  this->Arguments[ctt_INCLUDE_LABEL] = "INCLUDE_LABEL";
   this->Arguments[ctt_LAST] = 0;
   this->Last = ctt_LAST;
 }
@@ -77,6 +79,16 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   if(this->Values[ctt_INCLUDE])
     {
     handler->SetOption("IncludeRegularExpression", this->Values[ctt_INCLUDE]);
+    }
+  if(this->Values[ctt_EXCLUDE_LABEL])
+    {
+    handler->SetOption("ExcludeLabelRegularExpression",
+                       this->Values[ctt_EXCLUDE_LABEL]);
+    }
+  if(this->Values[ctt_INCLUDE_LABEL])
+    {
+    handler->SetOption("LabelRegularExpression", 
+                       this->Values[ctt_INCLUDE_LABEL]);
     }
   return handler;
 }

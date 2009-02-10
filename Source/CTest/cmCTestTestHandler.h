@@ -234,16 +234,25 @@ private:
 
   std::vector<int>        TestsToRun;
 
+  bool UseIncludeLabelRegExpFlag;
+  bool UseExcludeLabelRegExpFlag;
   bool UseIncludeRegExpFlag;
   bool UseExcludeRegExpFlag;
   bool UseExcludeRegExpFirst;
+  std::string IncludeLabelRegExp;
+  std::string ExcludeLabelRegExp;
   std::string IncludeRegExp;
   std::string ExcludeRegExp;
+  cmsys::RegularExpression IncludeLabelRegularExpression;
+  cmsys::RegularExpression ExcludeLabelRegularExpression;
   cmsys::RegularExpression IncludeTestsRegularExpression;
   cmsys::RegularExpression ExcludeTestsRegularExpression;
 
   std::string GenerateRegressionImages(const std::string& xml);
   cmsys::RegularExpression DartStuff1;
+  void CheckLabelFilter(cmCTestTestProperties& it);
+  void CheckLabelFilterExclude(cmCTestTestProperties& it);
+  void CheckLabelFilterInclude(cmCTestTestProperties& it);
 
   std::string TestsToRunString;
   bool UseUnion;

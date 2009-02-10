@@ -1813,6 +1813,22 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     this->GetHandler("memcheck")->
       SetPersistentOption("IncludeRegularExpression", args[i].c_str());
     }
+  if(this->CheckArgument(arg, "-L", "--label-regex") && i < args.size() - 1)
+    {
+    i++;
+    this->GetHandler("test")->
+      SetPersistentOption("LabelRegularExpression", args[i].c_str());
+    this->GetHandler("memcheck")->
+      SetPersistentOption("LabelRegularExpression", args[i].c_str());
+    }
+  if(this->CheckArgument(arg, "-LE", "--label-exclude") && i < args.size() - 1)
+    {
+    i++;
+    this->GetHandler("test")->
+      SetPersistentOption("ExcludeLabelRegularExpression", args[i].c_str());
+    this->GetHandler("memcheck")->
+      SetPersistentOption("ExcludeLabelRegularExpression", args[i].c_str());
+    }
   
   if(this->CheckArgument(arg, "-E", "--exclude-regex") &&
      i < args.size() - 1)

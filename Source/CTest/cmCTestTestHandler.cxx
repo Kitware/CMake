@@ -391,6 +391,8 @@ cmCTestTestHandler::cmCTestTestHandler()
 {
   this->UseUnion = false;
 
+  this->UseIncludeLabelRegExpFlag   = false;
+  this->UseExcludeLabelRegExpFlag   = false;
   this->UseIncludeRegExpFlag   = false;
   this->UseExcludeRegExpFlag   = false;
   this->UseExcludeRegExpFirst  = false;
@@ -433,6 +435,8 @@ void cmCTestTestHandler::Initialize()
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
+  this->IncludeLabelRegularExpression = "";
+  this->ExcludeLabelRegularExpression = "";
   this->IncludeRegExp = "";
   this->ExcludeRegExp = "";
 
@@ -492,6 +496,18 @@ int cmCTestTestHandler::ProcessHandler()
   this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
   this->SetUseUnion(cmSystemTools::IsOn(this->GetOption("UseUnion")));
   const char* val;
+  val = this->GetOption("LabelRegularExpression");
+  if ( val )
+    {
+    this->UseIncludeLabelRegExpFlag = true;
+    this->IncludeLabelRegExp = val;
+    }
+  val = this->GetOption("ExcludeLabelRegularExpression");
+  if ( val )
+    {
+    this->UseExcludeLabelRegExpFlag = true;
+    this->ExcludeLabelRegularExpression = val;
+    }
   val = this->GetOption("IncludeRegularExpression");
   if ( val )
     {
@@ -939,6 +955,79 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
 }
 
 //----------------------------------------------------------------------
+void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
+{
+  // if not using Labels to filter then return
+  if (!this->UseIncludeLabelRegExpFlag )
+    {
+    return;
+    }
+  // if there are no labels and we are filtering by labels
+  // then exclude the test as it does not have the label
+  if(it.Labels.size() == 0 )
+    {
+    it.IsInBasedOnREOptions = false;
+    return;
+    }
+  // check to see if the label regular expression matches
+  bool found = false;  // assume it does not match
+  // loop over all labels and look for match
+  for(std::vector<std::string>::iterator l = it.Labels.begin();
+      l !=  it.Labels.end(); ++l)
+    {
+    if(this->IncludeLabelRegularExpression.find(*l))
+      {
+      found = true;
+      }
+    }
+  // if no match was found, exclude the test
+  if(!found)
+    {
+    it.IsInBasedOnREOptions = false;
+    }
+}
+
+
+//----------------------------------------------------------------------
+void cmCTestTestHandler::CheckLabelFilterExclude(cmCTestTestProperties& it)
+{
+  // if not using Labels to filter then return
+  if (!this->UseExcludeLabelRegExpFlag )
+    {
+    return;
+    }
+  // if there are no labels and we are excluding by labels
+  // then do nothing as a no label can not be a match
+  if(it.Labels.size() == 0 )
+    {
+    return;
+    }
+  // check to see if the label regular expression matches
+  bool found = false;  // assume it does not match
+  // loop over all labels and look for match
+  for(std::vector<std::string>::iterator l = it.Labels.begin();
+      l !=  it.Labels.end(); ++l)
+    {
+    if(this->ExcludeLabelRegularExpression.find(*l))
+      {
+      found = true;
+      }
+    }
+  // if match was found, exclude the test
+  if(found)
+    {
+    it.IsInBasedOnREOptions = false;
+    }
+}
+
+//----------------------------------------------------------------------
+void cmCTestTestHandler::CheckLabelFilter(cmCTestTestProperties& it)
+{
+  this->CheckLabelFilterInclude(it);
+  this->CheckLabelFilterExclude(it);
+}
+
+//----------------------------------------------------------------------
 void cmCTestTestHandler::ComputeTestList()
 {
   this->TestList.clear(); // clear list of test
@@ -952,12 +1041,12 @@ void cmCTestTestHandler::ComputeTestList()
     this->GetListOfTests();
     }
   cmCTestTestHandler::ListOfTests::size_type tmsize = this->TestList.size();
-
   // how many tests are in based on RegExp?
   int inREcnt = 0;
   cmCTestTestHandler::ListOfTests::iterator it;
   for ( it = this->TestList.begin(); it != this->TestList.end(); it ++ )
     {
+    this->CheckLabelFilter(*it);
     if (it->IsInBasedOnREOptions)
       {
       inREcnt ++;
@@ -1808,6 +1897,16 @@ std::string cmCTestTestHandler
 //----------------------------------------------------------------------
 void cmCTestTestHandler::GetListOfTests()
 {
+  if ( !this->IncludeLabelRegExp.empty() )
+    {
+    this->IncludeLabelRegularExpression.
+      compile(this->IncludeLabelRegExp.c_str());
+    }
+  if ( !this->IncludeLabelRegExp.empty() )
+    {
+    this->ExcludeLabelRegularExpression.
+      compile(this->ExcludeLabelRegExp.c_str());
+    }
   if ( !this->IncludeRegExp.empty() )
     {
     this->IncludeTestsRegularExpression.compile(this->IncludeRegExp.c_str());
@@ -2376,6 +2475,7 @@ bool cmCTestTestHandler::SetTestsProperties(
               {
               rtit->Labels.push_back(*crit);
               }
+            
             }
           if ( key == "MEASUREMENT" )
             {
