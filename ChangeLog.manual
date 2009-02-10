@@ -1,3 +1,9 @@
+Changes in CMake 2.6.3 RC 13
+- Fix cmake can not find cmake when run on windows from PATH
+- Fix #8378 FILEPATH cache UNC paths in list removed extra /
+- Update FindBoost to reflect #8378 fix
+- More FindQt4 fixes
+
 Changes in CMake 2.6.3 RC 12
 - Fix bug #8465 MACOSX_BUNDLE triggers re-configuration after build
 - Add support for building with Qts ActiveX

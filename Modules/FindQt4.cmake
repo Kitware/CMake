@@ -328,9 +328,9 @@ FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake qmake4 qmake-qt4 PATHS
 
 IF (QT_QMAKE_EXECUTABLE)
 
-  IF(QT_QMAKE_EXECUTABLE_LAST AND NOT QT_QMAKE_EXECUTABLE_LAST MATCHES "^${QT_QMAKE_EXECUTABLE}$")
-    SET(QT_QMAKE_CHANGED 1)
-  ENDIF(QT_QMAKE_EXECUTABLE_LAST AND NOT QT_QMAKE_EXECUTABLE_LAST MATCHES "^${QT_QMAKE_EXECUTABLE}$")
+  IF(QT_QMAKE_EXECUTABLE_LAST)
+    STRING(COMPARE NOTEQUAL "${QT_QMAKE_EXECUTABLE_LAST}" "${QT_QMAKE_EXECUTABLE}" QT_QMAKE_CHANGED)
+  ENDIF(QT_QMAKE_EXECUTABLE_LAST)
 
   SET(QT_QMAKE_EXECUTABLE_LAST "${QT_QMAKE_EXECUTABLE}" CACHE INTERNAL "" FORCE)
 
@@ -1167,7 +1167,11 @@ IF (QT4_QMAKE_FOUND)
                FOREACH (_current_MOC_INC ${_match})
                   STRING(REGEX MATCH "[^ <\"]+\\.moc" _current_MOC "${_current_MOC_INC}")
                   GET_FILENAME_COMPONENT(_basename ${_current_MOC} NAME_WE)
-                  SET(_header ${_abs_PATH}/${_basename}.h)
+                  IF(EXISTS ${_abs_PATH}/${_basename}.hpp)
+                    SET(_header ${_abs_PATH}/${_basename}.hpp)
+                  ELSE(EXISTS ${_abs_PATH}/${_basename}.hpp)
+                    SET(_header ${_abs_PATH}/${_basename}.h)
+                  ENDIF(EXISTS ${_abs_PATH}/${_basename}.hpp)
                   SET(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_current_MOC})
                   QT4_CREATE_MOC_COMMAND(${_header} ${_moc} "${_moc_INCS}" "")
                   MACRO_ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})

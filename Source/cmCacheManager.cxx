@@ -784,7 +784,25 @@ void cmCacheManager::AddCacheEntry(const char* key,
   // make sure we only use unix style paths
   if(type == FILEPATH || type == PATH)
     {
-    cmSystemTools::ConvertToUnixSlashes(e.Value);
+    if(e.Value.find(';') != e.Value.npos)
+      {
+      std::vector<std::string> paths;
+      cmSystemTools::ExpandListArgument(e.Value, paths);
+      const char* sep = "";
+      e.Value = "";
+      for(std::vector<std::string>::iterator i = paths.begin();
+          i != paths.end(); ++i)
+        {
+        cmSystemTools::ConvertToUnixSlashes(*i);
+        e.Value += sep;
+        e.Value += *i;
+        sep = ";";
+        }
+      }
+    else
+      {
+      cmSystemTools::ConvertToUnixSlashes(e.Value);
+      }
     }
   if ( helpString )
     {

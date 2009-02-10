@@ -2192,6 +2192,14 @@ bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
 static std::string cmSystemToolsExecutableDirectory;
 void cmSystemTools::FindExecutableDirectory(const char* argv0)
 {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  (void)argv0; // ignore this on windows
+  char modulepath[_MAX_PATH];
+  ::GetModuleFileName(NULL, modulepath, sizeof(modulepath));
+  cmSystemToolsExecutableDirectory =
+    cmSystemTools::GetFilenamePath(modulepath);
+  return;
+#else
   std::string errorMsg;
   std::string exe;
   if(cmSystemTools::FindProgramPath(argv0, exe, errorMsg))
@@ -2205,6 +2213,7 @@ void cmSystemTools::FindExecutableDirectory(const char* argv0)
     {
     // ???
     }
+#endif
 }
 
 //----------------------------------------------------------------------------

@@ -3,25 +3,30 @@
 #
 # == Using Header-Only libraries from within Boost: ==
 #
-#   FIND_PACKAGE( Boost 1.36.0 )
-#   INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-#   ADD_EXECUTABLE(foo foo.cc)
+#   find_package( Boost 1.36.0 )
+#   if(Boost_FOUND)
+#      include_directories(${Boost_INCLUDE_DIRS})
+#      add_executable(foo foo.cc)
+#   endif()
+#
 #
 # == Using actual libraries from within Boost: ==
 #
-#   SET(Boost_USE_STATIC_LIBS   ON)
-#   SET(Boost_USE_MULTITHREADED ON)
-#   FIND_PACKAGE( Boost 1.36.0 COMPONENTS date_time filesystem system ... )
-#   INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+#   set(Boost_USE_STATIC_LIBS   ON)
+#   set(Boost_USE_MULTITHREADED ON)
+#   find_package( Boost 1.36.0 COMPONENTS date_time filesystem system ... )
 #
-#   ADD_EXECUTABLE(foo foo.cc)
-#   TARGET_LINK_LIBRARIES(foo ${Boost_LIBRARIES})
+#   if(Boost_FOUND)
+#      include_directories(${Boost_INCLUDE_DIRS})
+#      add_executable(foo foo.cc)
+#      target_link_libraries(foo ${Boost_LIBRARIES})
+#   endif()
 #
-# The components list needs to be the actual names of boost libraries, that is
-# the part of the actual library files that differ on different libraries. So
-# its "date_time" for "libboost_date_time...". Anything else will result in
-# errors.  If you're using parts of Boost that contains header files only (e.g.
-# foreach) you do not need to specify COMPONENTS.
+#
+# The components list needs to contain actual names of boost libraries only,
+# such as "date_time" for "libboost_date_time".  If you're using parts of
+# Boost that contain header files only (e.g. foreach) you do not need to
+# specify COMPONENTS.
 #
 # You should provide a minimum version number that should be used. If you provide this 
 # version number and specify the REQUIRED attribute, this module will fail if it
@@ -33,12 +38,14 @@
 #     Automatic linking is used on MSVC & Borland compilers by default when
 #     #including things in Boost.  It's important to note that setting
 #     Boost_USE_STATIC_LIBS to OFF is NOT enough to get you dynamic linking,
-#     autolinking typically uses static libraries by default.
+#     should you need this feature.  Automatic linking typically uses static
+#     libraries with a few exceptions (Boost.Python is one).
 #
 #     Please see the section below near Boost_LIB_DIAGNOSTIC_DEFINITIONS for
 #     more details.  Adding a TARGET_LINK_LIBRARIES() as shown in the example
 #     above appears to cause VS to link dynamically if Boost_USE_STATIC_LIBS
-#     gets set to OFF.
+#     gets set to OFF.  It is suggested you avoid automatic linking since it
+#     will make your application less portable.
 #
 # =========== The mess that is Boost_ADDITIONAL_VERSIONS (sorry?) ============
 #
@@ -53,9 +60,9 @@
 # 1.36, 1.36.0, 1.36.1, 1.37, 1.37.0, 1.38, 1.38.0
 #
 # NOTE: If you add a new major 1.x version in Boost_ADDITIONAL_VERSIONS you should
-# add both 1.x and 1.x.0 as shown above.  Official boost include directories
+# add both 1.x and 1.x.0 as shown above.  Official Boost include directories
 # omit the 3rd version number from include paths if it is 0 although not all
-# binary boost releases do so.
+# binary Boost releases do so.
 #
 # SET(Boost_ADDITIONAL_VERSIONS "0.99" "0.99.0" "1.78" "1.78.0")
 #
@@ -83,11 +90,15 @@
 #                                Please enable this before filing any bug
 #                                reports.
 # 
-#  Boost_COMPILER                Set this to the compiler suffix used by boost (e.g. -gcc43) if the
-#                                module has problems finding the proper Boost installation
+#  Boost_COMPILER                Set this to the compiler suffix used by Boost
+#                                (e.g. "-gcc43") if FindBoods has problems finding
+#                                the proper Boost installation
 #
-#  BOOST_ROOT or BOOSTROOT       Preferred installation prefix for searching for Boost,
-#                                set this if the module has problems finding the proper Boost installation
+#  These last three variables are available also as environment variables:
+#
+#  BOOST_ROOT or BOOSTROOT       The preferred installation prefix for searching for
+#                                Boost.  Set this if the module has problems finding
+#                                the proper Boost installation.
 #
 #  BOOST_INCLUDEDIR              Set this to the include directory of Boost, if the
 #                                module has problems finding the proper Boost installation
@@ -95,27 +106,27 @@
 #  BOOST_LIBRARYDIR              Set this to the lib directory of Boost, if the
 #                                module has problems finding the proper Boost installation
 #
-#  The last three variables are available also as environment variables
-#
-#
 # Variables defined by this module:
 #
-#  Boost_FOUND                          System has Boost, this means the include dir was found,
-#                                       as well as all the libraries specified in the COMPONENTS list
+#  Boost_FOUND                          System has Boost, this means the include dir was
+#                                       found, as well as all the libraries specified in
+#                                       the COMPONENTS list.
 #
-#  Boost_INCLUDE_DIRS                   Boost include directories, not cached
+#  Boost_INCLUDE_DIRS                   Boost include directories: not cached
 #
-#  Boost_INCLUDE_DIR                    This is almost the same as above, but this one is cached and may be
-#                                       modified by advanced users
+#  Boost_INCLUDE_DIR                    This is almost the same as above, but this one is
+#                                       cached and may be modified by advanced users
 #
-#  Boost_LIBRARIES                      Link these to use the Boost libraries that you specified, not cached
+#  Boost_LIBRARIES                      Link these to use the Boost libraries that you
+#                                       specified: not cached
 #
 #  Boost_LIBRARY_DIRS                   The path to where the Boost library files are.
 #
-#  Boost_VERSION                        The version number of the boost libraries that have been found,
-#                                       same as in version.hpp from Boost
+#  Boost_VERSION                        The version number of the boost libraries that
+#                                       have been found, same as in version.hpp from Boost
 #
-#  Boost_LIB_VERSION                    The version number in filename form as its appended to the library filenames
+#  Boost_LIB_VERSION                    The version number in filename form as
+#                                       it's appended to the library filenames
 #
 #  Boost_MAJOR_VERSION                  major version number of boost
 #  Boost_MINOR_VERSION                  minor version number of boost
@@ -123,13 +134,12 @@
 #
 #  Boost_LIB_DIAGNOSTIC_DEFINITIONS     [WIN32 Only] You can call
 #                                       add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINTIIONS})
-#                                       to have diagnostic information about
-#                                       Boost's automatic linking outputted
-#                                       during compilation time.
+#                                       to have diagnostic information about Boost's
+#                                       automatic linking outputted during compilation time.
 #
 # For each component you list the following variables are set.
 # ATTENTION: The component names need to be in lower case, just as the boost
-# library names however the cmake variables use upper case for the component
+# library names however the CMake variables use upper case for the component
 # part. So you'd get Boost_SERIALIZATION_FOUND for example.
 #
 #  Boost_${COMPONENT}_FOUND             True IF the Boost library "component" was found.
@@ -232,12 +242,7 @@ MACRO (_Boost_ADJUST_LIB_VARS basename)
     ENDIF (Boost_${basename}_LIBRARY_DEBUG AND NOT Boost_${basename}_LIBRARY_RELEASE)
     
     IF (Boost_${basename}_LIBRARY)
-      IF(WIN32)
-        # Workaround issue #8378.
-        SET(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE STRING "The Boost ${basename} library")
-      ELSE()
-        SET(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE FILEPATH "The Boost ${basename} library")
-      ENDIF()
+      set(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE FILEPATH "The Boost ${basename} library")
 
       # Remove superfluous "debug" / "optimized" keywords from
       # Boost_LIBRARY_DIRS
@@ -247,12 +252,7 @@ MACRO (_Boost_ADJUST_LIB_VARS basename)
       ENDFOREACH()
       LIST(REMOVE_DUPLICATES Boost_LIBRARY_DIRS)
 
-      IF(WIN32)
-        # Workaround issue #8378.
-        SET(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} CACHE STRING "Boost library directory")
-      ELSE()
-        SET(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} CACHE FILEPATH "Boost library directory")
-      ENDIF()
+      set(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} CACHE FILEPATH "Boost library directory")
       SET(Boost_${basename}_FOUND ON CACHE INTERNAL "Whether the Boost ${basename} library found")
     ENDIF (Boost_${basename}_LIBRARY)
 
@@ -432,11 +432,11 @@ ELSE (_boost_IN_CACHE)
             _boost_BOOSTIFIED_VERSION ${_boost_VER})
       ENDIF()
       
-      LIST(APPEND _boost_PATH_SUFFIXES "boost-${_boost_BOOSTIFIED_VERSION}")
-      IF(WIN32)
-        # Yay Boost Pro!  We dig your underscores.
-        LIST(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
-      ENDIF()
+      list(APPEND _boost_PATH_SUFFIXES "boost-${_boost_BOOSTIFIED_VERSION}")
+      if(WIN32)
+        # For BoostPro's underscores (and others?)
+        list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
+      endif()
 
     ENDFOREACH(_boost_VER)
       
