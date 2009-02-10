@@ -477,6 +477,13 @@ void cmSourceFile::DefineProperties(cmake *cm)
      "of the source file, for example .cxx will go to a .o extension.");
 
   cm->DefineProperty
+    ("LABELS", cmProperty::SOURCE_FILE,
+     "Specify a list of text labels associated with a source file.",
+     "This property has meaning only when the source file is listed in "
+     "a target whose LABELS property is also set.  "
+     "No other semantics are currently specified.");
+
+  cm->DefineProperty
     ("LANGUAGE", cmProperty::SOURCE_FILE, 
      "What programming language is the file.",
      "A property that can be set to indicate what programming language "

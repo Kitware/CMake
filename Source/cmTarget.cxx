@@ -351,6 +351,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "project to the INSTALL_RPATH. ");
 
   cm->DefineProperty
+    ("LABELS", cmProperty::TARGET,
+     "Specify a list of text labels associated with a target.",
+     "Target label semantics are currently unspecified.");
+
+  cm->DefineProperty
     ("LINK_FLAGS", cmProperty::TARGET,
      "Additional flags to use when linking this target.",
      "The LINK_FLAGS property can be used to add extra flags to the "

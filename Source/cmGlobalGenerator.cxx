@@ -897,6 +897,8 @@ void cmGlobalGenerator::Generate()
   // Update rule hashes.
   this->CheckRuleHashes();
 
+  this->WriteTargetLabels();
+
   if (this->ExtraGenerator != 0)
     {
     this->ExtraGenerator->Generate();
@@ -2119,4 +2121,92 @@ void cmGlobalGenerator::CheckRuleHashes()
       }
     }
 #endif
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::WriteTargetLabels()
+{
+  cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
+
+  // Record generated per-target label files in a central location.
+  std::string fname = mf->GetHomeOutputDirectory();
+  fname += cmake::GetCMakeFilesDirectory();
+  fname += "/LabelFiles.txt";
+  bool opened = false;
+  cmGeneratedFileStream fout;
+
+  // Generate a label file for each target.
+  std::string file;
+  for(std::map<cmStdString,cmTarget *>::const_iterator ti =
+        this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
+    {
+    if(this->WriteTargetLabels(ti->second, file))
+      {
+      if(!opened)
+        {
+        fout.Open(fname.c_str());
+        }
+      fout << file << "\n";
+      }
+    }
+  if(!opened)
+    {
+    cmSystemTools::RemoveFile(fname.c_str());
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalGenerator::WriteTargetLabels(cmTarget* target, std::string& file)
+{
+  // Place the labels file in a per-target support directory.
+  std::string dir = target->GetSupportDirectory();
+  file = dir;
+  file += "/Labels.txt";
+
+  // Check whether labels are enabled for this target.
+  if(const char* value = target->GetProperty("LABELS"))
+    {
+    cmSystemTools::MakeDirectory(dir.c_str());
+    cmGeneratedFileStream fout(file.c_str());
+
+    // List the target-wide labels.  All sources in the target get
+    // these labels.
+    std::vector<std::string> labels;
+    cmSystemTools::ExpandListArgument(value, labels);
+    if(!labels.empty())
+      {
+      fout << "# Target labels\n";
+      for(std::vector<std::string>::const_iterator li = labels.begin();
+          li != labels.end(); ++li)
+        {
+        fout << " " << *li << "\n";
+        }
+      }
+
+    // List the source files with any per-source labels.
+    fout << "# Source files and their labels\n";
+    std::vector<cmSourceFile*> const& sources = target->GetSourceFiles();
+    for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
+        si != sources.end(); ++si)
+      {
+      cmSourceFile* sf = *si;
+      fout << sf->GetFullPath() << "\n";
+      if(const char* svalue = sf->GetProperty("LABELS"))
+        {
+        labels.clear();
+        cmSystemTools::ExpandListArgument(svalue, labels);
+        for(std::vector<std::string>::const_iterator li = labels.begin();
+            li != labels.end(); ++li)
+          {
+          fout << " " << *li << "\n";
+          }
+        }
+      }
+    return true;
+    }
+  else
+    {
+    cmSystemTools::RemoveFile(file.c_str());
+    return false;
+    }
 }

@@ -328,6 +328,9 @@ private:
   std::map<cmStdString, RuleHash> RuleHashes;
   void CheckRuleHashes();
 
+  void WriteTargetLabels();
+  bool WriteTargetLabels(cmTarget* target, std::string& file);
+
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 
   // track files replaced during a Generate
