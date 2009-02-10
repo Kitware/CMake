@@ -83,6 +83,13 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   newp->SetId(test);
   newp->SetCommand(this->CTestCommand.c_str());
   std::vector<std::string> args;
+  cmOStringStream width;
+  if(this->CTest->GetMaxTestNameWidth())
+    {
+    args.push_back("-W");
+    width << this->CTest->GetMaxTestNameWidth();
+    args.push_back(width.str().c_str());
+    }
   args.push_back("-I");
   cmOStringStream strm;
   strm << test << "," << test;
