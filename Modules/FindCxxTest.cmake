@@ -20,7 +20,7 @@
 #   CXXTEST_PYTHON_TESTGEN_EXECUTABLE
 #       The python-based test generator.
 #
-# MACROS for use by CMake users:
+# MACROS for optional use by CMake users:
 #
 #    CXXTEST_ADD_TEST(<test_name> <gen_source_file> <input_files_to_testgen...>)
 #       Creates a CxxTest runner and adds it to the CTest testing suite
@@ -33,13 +33,17 @@
 #       #==============
 #       Example Usage:
 #
-#           FIND_PACKAGE(CxxTest)
-#           INCLUDE_DIRECTORIES(${CXXTEST_INCLUDE_DIR})
+#           find_package(CxxTest)
+#           if(CXXTEST_FOUND)
+#               include_directories(${CXXTEST_INCLUDE_DIR})
+#               enable_testing()
 #
-#           ENABLE_TESTING()
-#           CXXTEST_ADD_TEST(unittest_foo foo_test.cc ${CMAKE_CURRENT_SOURCE_DIR}/foo_test.h)
+#               CXXTEST_ADD_TEST(unittest_foo foo_test.cc
+#                                 ${CMAKE_CURRENT_SOURCE_DIR}/foo_test.h)
+#               target_link_libraries(unittest_foo foo) # as needed
+#           endif()
 #
-#              This will:
+#              This will (if CxxTest is found):
 #              1. Invoke the testgen executable to autogenerate foo_test.cc in the
 #                 binary tree from "foo_test.h" in the current source directory.
 #              2. Create an executable and test called unittest_foo.
@@ -60,54 +64,63 @@
 #          };
 #
 #
-# FindCxxTest.cmake
-# Copyright (c) 2008
-#     Philip Lowman <philip@yhbt.com>
-#
+# Version 1.1 (2/9/08)
+#     Clarified example to illustrate need to call target_link_libraries()
+#     Changed commands to lowercase
+#     Added licensing info
 # Version 1.0 (1/8/08)
 #     Fixed CXXTEST_INCLUDE_DIRS so it will work properly
 #     Eliminated superfluous CXXTEST_FOUND assignment
 #     Cleaned up and added more documentation
+#
+# FindCxxTest.cmake
+# Copyright (c) 2008-2009
+#     Philip Lowman <philip@yhbt.com>
+#
+#  Redistribution AND use is allowed according to the terms of the New
+#  BSD license.
+#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 #=============================================================
 # CXXTEST_ADD_TEST (public macro)
 #=============================================================
-MACRO(CXXTEST_ADD_TEST _cxxtest_testname _cxxtest_outfname)
-    SET(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_outfname})
-    IF(CXXTEST_USE_PYTHON)
-        SET(_cxxtest_executable ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE})
-    ELSE()
-        SET(_cxxtest_executable ${CXXTEST_PERL_TESTGEN_EXECUTABLE})
-    ENDIF()
+macro(CXXTEST_ADD_TEST _cxxtest_testname _cxxtest_outfname)
+    set(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_outfname})
+    if(CXXTEST_USE_PYTHON)
+        set(_cxxtest_executable ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE})
+    else()
+        set(_cxxtest_executable ${CXXTEST_PERL_TESTGEN_EXECUTABLE})
+    endif()
 
-    ADD_CUSTOM_COMMAND(
+    add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
         DEPENDS ${ARGN}
         COMMAND ${_cxxtest_executable}
         --error-printer -o ${_cxxtest_real_outfname} ${ARGN}
     )
 
-    SET_SOURCE_FILES_PROPERTIES(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
-    ADD_EXECUTABLE(${_cxxtest_testname} ${_cxxtest_real_outfname})
+    set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
+    add_executable(${_cxxtest_testname} ${_cxxtest_real_outfname})
 
-    IF(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-        ADD_TEST(${_cxxtest_testname} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_cxxtest_testname})
-    ELSEIF(EXECUTABLE_OUTPUT_PATH)
-        ADD_TEST(${_cxxtest_testname} ${EXECUTABLE_OUTPUT_PATH}/${_cxxtest_testname})
-    ELSE()
-        ADD_TEST(${_cxxtest_testname} ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname})
-    ENDIF()
+    if(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+        add_test(${_cxxtest_testname} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_cxxtest_testname})
+    elseif(EXECUTABLE_OUTPUT_PATH)
+        add_test(${_cxxtest_testname} ${EXECUTABLE_OUTPUT_PATH}/${_cxxtest_testname})
+    else()
+        add_test(${_cxxtest_testname} ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname})
+    endif()
 
-ENDMACRO(CXXTEST_ADD_TEST)
+endmacro(CXXTEST_ADD_TEST)
 
 #=============================================================
 # main()
 #=============================================================
 
-FIND_PATH(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h)
-FIND_PROGRAM(CXXTEST_PERL_TESTGEN_EXECUTABLE cxxtestgen.pl)
-FIND_PROGRAM(CXXTEST_PYTHON_TESTGEN_EXECUTABLE cxxtestgen.py)
+find_path(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h)
+find_program(CXXTEST_PERL_TESTGEN_EXECUTABLE cxxtestgen.pl)
+find_program(CXXTEST_PYTHON_TESTGEN_EXECUTABLE cxxtestgen.py)
 
-INCLUDE(FindPackageHandleStandardArgs)
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG CXXTEST_INCLUDE_DIR)
-SET(CXXTEST_INCLUDE_DIRS ${CXXTEST_INCLUDE_DIR})
+
+set(CXXTEST_INCLUDE_DIRS ${CXXTEST_INCLUDE_DIR})
