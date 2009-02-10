@@ -242,12 +242,7 @@ MACRO (_Boost_ADJUST_LIB_VARS basename)
     ENDIF (Boost_${basename}_LIBRARY_DEBUG AND NOT Boost_${basename}_LIBRARY_RELEASE)
     
     IF (Boost_${basename}_LIBRARY)
-      IF(WIN32)
-        # Workaround issue #8378.
-        SET(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE STRING "The Boost ${basename} library")
-      ELSE()
-        SET(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE FILEPATH "The Boost ${basename} library")
-      ENDIF()
+      set(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE FILEPATH "The Boost ${basename} library")
 
       # Remove superfluous "debug" / "optimized" keywords from
       # Boost_LIBRARY_DIRS
@@ -257,12 +252,7 @@ MACRO (_Boost_ADJUST_LIB_VARS basename)
       ENDFOREACH()
       LIST(REMOVE_DUPLICATES Boost_LIBRARY_DIRS)
 
-      IF(WIN32)
-        # Workaround issue #8378.
-        SET(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} CACHE STRING "Boost library directory")
-      ELSE()
-        SET(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} CACHE FILEPATH "Boost library directory")
-      ENDIF()
+      set(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} CACHE FILEPATH "Boost library directory")
       SET(Boost_${basename}_FOUND ON CACHE INTERNAL "Whether the Boost ${basename} library found")
     ENDIF (Boost_${basename}_LIBRARY)
 
