@@ -972,6 +972,31 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       return replaceValues.LinkLibraries;
       }
     }
+  if(replaceValues.Language)
+    {
+    if(variable == "LANGUAGE")
+      {
+      return replaceValues.Language;
+      }
+    }
+  if(replaceValues.CMTarget)
+    {
+    if(variable == "TARGET_NAME")
+      {
+      return replaceValues.CMTarget->GetName();
+      }
+    if(variable == "TARGET_TYPE")
+      {
+      return cmTarget::TargetTypeNames[replaceValues.CMTarget->GetType()];
+      }
+    }
+  if(replaceValues.Output)
+    {
+    if(variable == "OUTPUT")
+      {
+      return replaceValues.Output;
+      }
+    }
   if(variable == "CMAKE_COMMAND")
     {
     const char* cmcommand =

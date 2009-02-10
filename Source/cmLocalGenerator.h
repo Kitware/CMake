@@ -214,6 +214,7 @@ public:
     const char* Source;
     const char* AssemblySource;
     const char* PreprocessedSource;
+    const char* Output;
     const char* Object;
     const char* ObjectDir;
     const char* Flags;
