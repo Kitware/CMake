@@ -789,6 +789,7 @@ void cmCacheManager::AddCacheEntry(const char* key,
       std::vector<std::string> paths;
       cmSystemTools::ExpandListArgument(e.Value, paths);
       const char* sep = "";
+      e.Value = "";
       for(std::vector<std::string>::iterator i = paths.begin();
           i != paths.end(); ++i)
         {
