@@ -866,6 +866,17 @@ cmListFileBacktrace const& cmTarget::GetBacktrace() const
 }
 
 //----------------------------------------------------------------------------
+std::string cmTarget::GetSupportDirectory() const
+{
+  std::string dir = this->Makefile->GetCurrentOutputDirectory();
+  dir += cmake::GetCMakeFilesDirectory();
+  dir += "/";
+  dir += this->Name;
+  dir += ".dir";
+  return dir;
+}
+
+//----------------------------------------------------------------------------
 bool cmTarget::IsExecutableWithExports()
 {
   return (this->GetType() == cmTarget::EXECUTABLE &&

@@ -415,6 +415,9 @@ public:
   /** Get a backtrace from the creation of the target.  */
   cmListFileBacktrace const& GetBacktrace() const;
 
+  /** Get a build-tree directory in which to place target support files.  */
+  std::string GetSupportDirectory() const;
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
