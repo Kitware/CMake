@@ -326,10 +326,12 @@ protected:
                           const cmCustomCommand& cc);
   void AppendCustomCommands(std::vector<std::string>& commands,
                             const std::vector<cmCustomCommand>& ccs,
+                            cmTarget* target,
                             cmLocalGenerator::RelativeRoot relative =
                             cmLocalGenerator::HOME_OUTPUT);
   void AppendCustomCommand(std::vector<std::string>& commands,
                            const cmCustomCommand& cc,
+                           cmTarget* target,
                            bool echo_comment=false,
                            cmLocalGenerator::RelativeRoot relative =
                            cmLocalGenerator::HOME_OUTPUT,

@@ -954,12 +954,13 @@ void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomCommands(std::vector<std::string>& commands,
                        const std::vector<cmCustomCommand>& ccs,
+                       cmTarget* target,
                        cmLocalGenerator::RelativeRoot relative)
 {
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
       i != ccs.end(); ++i)
     {
-    this->AppendCustomCommand(commands, *i, true, relative);
+    this->AppendCustomCommand(commands, *i, target, true, relative);
     }
 }
 
@@ -967,10 +968,13 @@ cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomCommand(std::vector<std::string>& commands,
-                      const cmCustomCommand& cc, bool echo_comment,
+                      const cmCustomCommand& cc,
+                      cmTarget* target,
+                      bool echo_comment,
                       cmLocalGenerator::RelativeRoot relative,
                       std::ostream* content)
 {
+  static_cast<void>(target); // Future use
   // Optionally create a command to display the custom command's
   // comment text.  This is used for pre-build, pre-link, and
   // post-build command comments.  Custom build step commands have
@@ -1621,9 +1625,11 @@ void cmLocalUnixMakefileGenerator3
                                 glIt->second.GetPostBuildCommands());
       this->AppendCustomCommands(commands, 
                                  glIt->second.GetPreBuildCommands(),
+                                 &glIt->second,
                                  cmLocalGenerator::START_OUTPUT);
       this->AppendCustomCommands(commands, 
                                  glIt->second.GetPostBuildCommands(),
+                                 &glIt->second,
                                  cmLocalGenerator::START_OUTPUT);
       std::string targetName = glIt->second.GetName();
       this->WriteMakeRule(ruleFileStream, targetString.c_str(), 

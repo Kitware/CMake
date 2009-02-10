@@ -1125,7 +1125,7 @@ void cmMakefileTargetGenerator
 
   // Now append the actual user-specified commands.
   cmOStringStream content;
-  this->LocalGenerator->AppendCustomCommand(commands, cc, false,
+  this->LocalGenerator->AppendCustomCommand(commands, cc, this->Target, false,
                                             cmLocalGenerator::HOME_OUTPUT,
                                             &content);
 

@@ -299,9 +299,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if(!relink)
     {
     this->LocalGenerator
-      ->AppendCustomCommands(commands, this->Target->GetPreBuildCommands());
+      ->AppendCustomCommands(commands, this->Target->GetPreBuildCommands(),
+                             this->Target);
     this->LocalGenerator
-      ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands());
+      ->AppendCustomCommands(commands, this->Target->GetPreLinkCommands(),
+                             this->Target);
     }
 
   // Determine whether a link script will be used.
@@ -436,7 +438,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   if(!relink)
     {
     this->LocalGenerator->
-      AppendCustomCommands(commands, this->Target->GetPostBuildCommands());
+      AppendCustomCommands(commands, this->Target->GetPostBuildCommands(),
+                           this->Target);
     }
 
   // Write the build rule.
