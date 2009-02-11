@@ -198,7 +198,7 @@ void cmCTestLaunch::ComputeFileNames()
 
   // We hash the input command working dir and command line to obtain
   // a repeatable and (probably) unique name for log files.
-  char hash[33] = {};
+  char hash[32];
   cmsysMD5* md5 = cmsysMD5_New();
   cmsysMD5_Initialize(md5);
   cmsysMD5_Append(md5, (unsigned char const*)(this->CWD.c_str()), -1);
@@ -209,7 +209,7 @@ void cmCTestLaunch::ComputeFileNames()
     }
   cmsysMD5_FinalizeHex(md5, hash);
   cmsysMD5_Delete(md5);
-  this->LogHash = hash;
+  this->LogHash.assign(hash, 32);
 
   // We store stdout and stderr in temporary log files.
   this->LogOut = this->LogDir;
