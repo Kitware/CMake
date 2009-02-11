@@ -60,3 +60,5 @@ CoverageCommand: @COVERAGE_COMMAND@
 # process will be summaily terminated.
 # Currently set to 25 minutes
 TimeOut: @DART_TESTING_TIMEOUT@
+
+UseLaunchers: @CTEST_USE_LAUNCHERS@
