@@ -87,8 +87,12 @@ private:
 
   // generate the XML output
   void GenerateXMLHeader(std::ostream& os);
+  void GenerateXMLLaunched(std::ostream& os);
   void GenerateXMLLogScraped(std::ostream& os);
   void GenerateXMLFooter(std::ostream& os, double elapsed_build_time);
+  void GenerateXMLLaunchedFragment(std::ostream& os, const char* fname);
+  bool IsLaunchedErrorFile(const char* fname);
+  bool IsLaunchedWarningFile(const char* fname);
 
   std::string             StartBuild;
   std::string             EndBuild;
@@ -99,6 +103,8 @@ private:
   std::vector<cmStdString> CustomErrorExceptions;
   std::vector<cmStdString> CustomWarningMatches;
   std::vector<cmStdString> CustomWarningExceptions;
+  std::vector<std::string> ReallyCustomWarningMatches;
+  std::vector<std::string> ReallyCustomWarningExceptions;
   std::vector<cmCTestCompileErrorWarningRex> ErrorWarningFileLineRegex;
 
   std::vector<cmsys::RegularExpression> ErrorMatchRegex;
@@ -137,6 +143,12 @@ private:
 
   int                                   MaxErrors;
   int                                   MaxWarnings;
+
+  bool UseCTestLaunch;
+  std::string CTestLaunchDir;
+  class LaunchHelper;
+  friend class LaunchHelper;
+  class FragmentCompare;
 };
 
 #endif

@@ -24,9 +24,11 @@
 #include "cmGlobalGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmXMLSafe.h"
+#include "cmFileTimeComparison.h"
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
+#include <cmsys/Directory.hxx>
 
 // used for sleep
 #ifdef _WIN32
@@ -185,6 +187,7 @@ cmCTestBuildHandler::cmCTestBuildHandler()
 
   this->LastErrorOrWarning = this->ErrorsAndWarnings.end();
 
+  this->UseCTestLaunch = false;
 }
 
 //----------------------------------------------------------------------
@@ -197,6 +200,8 @@ void cmCTestBuildHandler::Initialize()
   this->CustomErrorExceptions.clear();
   this->CustomWarningMatches.clear();
   this->CustomWarningExceptions.clear();
+  this->ReallyCustomWarningMatches.clear();
+  this->ReallyCustomWarningExceptions.clear();
   this->ErrorWarningFileLineRegex.clear();
 
   this->ErrorMatchRegex.clear();
@@ -227,6 +232,8 @@ void cmCTestBuildHandler::Initialize()
 
   this->MaxErrors = 50;
   this->MaxWarnings = 50;
+
+  this->UseCTestLaunch = false;
 }
 
 //----------------------------------------------------------------------
@@ -246,6 +253,20 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
   this->CTest->PopulateCustomInteger(mf,
                              "CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS",
                              this->MaxWarnings);
+
+  // Record the user-specified custom warning rules.
+  if(const char* customWarningMatchers =
+     mf->GetDefinition("CTEST_CUSTOM_WARNING_MATCH"))
+    {
+    cmSystemTools::ExpandListArgument(customWarningMatchers,
+                                      this->ReallyCustomWarningMatches);
+    }
+  if(const char* customWarningExceptions =
+     mf->GetDefinition("CTEST_CUSTOM_WARNING_EXCEPTION"))
+    {
+    cmSystemTools::ExpandListArgument(customWarningExceptions,
+                                      this->ReallyCustomWarningExceptions);
+    }
 }
 
 //----------------------------------------------------------------------
@@ -305,6 +326,10 @@ int cmCTestBuildHandler::ProcessHandler()
       << std::endl);
     return -1;
     }
+
+  std::string const& useLaunchers =
+    this->CTest->GetCTestConfiguration("UseLaunchers");
+  this->UseCTestLaunch = cmSystemTools::IsOn(useLaunchers.c_str());
 
   // Create a last build log
   cmGeneratedFileStream ofs;
@@ -467,7 +492,14 @@ int cmCTestBuildHandler::ProcessHandler()
     return -1;
     }
   this->GenerateXMLHeader(xofs);
-  this->GenerateXMLLogScraped(xofs);
+  if(this->UseCTestLaunch)
+    {
+    this->GenerateXMLLaunched(xofs);
+    }
+  else
+    {
+    this->GenerateXMLLogScraped(xofs);
+    }
   this->GenerateXMLFooter(xofs, elapsed_build_time);
 
   // Display message about number of errors and warnings
@@ -494,6 +526,70 @@ void cmCTestBuildHandler::GenerateXMLHeader(std::ostream& os)
      << cmXMLSafe(
        this->CTest->GetCTestConfiguration("MakeCommand"))
      << "</BuildCommand>" << std::endl;
+}
+
+//----------------------------------------------------------------------------
+class cmCTestBuildHandler::FragmentCompare
+{
+public:
+  FragmentCompare(cmFileTimeComparison* ftc): FTC(ftc) {}
+  bool operator()(std::string const& l, std::string const& r)
+    {
+    // Order files by modification time.  If comparison fails, just
+    // use lexicographic order (should not happen in our use case).
+    int result;
+    if(this->FTC->FileTimeCompare(l.c_str(), r.c_str(), &result))
+      {
+      return result < 0;
+      }
+    else
+      {
+      return l < r;
+      }
+    }
+private:
+  cmFileTimeComparison* FTC;
+};
+
+//----------------------------------------------------------------------------
+void cmCTestBuildHandler::GenerateXMLLaunched(std::ostream& os)
+{
+  if(this->CTestLaunchDir.empty())
+    {
+    return;
+    }
+
+  // Sort XML fragments in chronological order.
+  cmFileTimeComparison ftc;
+  FragmentCompare fragmentCompare(&ftc);
+  typedef std::set<cmStdString, FragmentCompare> Fragments;
+  Fragments fragments(fragmentCompare);
+
+  // Identify fragments on disk.
+  cmsys::Directory launchDir;
+  launchDir.Load(this->CTestLaunchDir.c_str());
+  unsigned long n = launchDir.GetNumberOfFiles();
+  for(unsigned long i=0; i < n; ++i)
+    {
+    const char* fname = launchDir.GetFile(i);
+    if(this->IsLaunchedErrorFile(fname))
+      {
+      fragments.insert(this->CTestLaunchDir + "/" + fname);
+      ++this->TotalErrors;
+      }
+    else if(this->IsLaunchedWarningFile(fname))
+      {
+      fragments.insert(this->CTestLaunchDir + "/" + fname);
+      ++this->TotalWarnings;
+      }
+    }
+
+  // Copy the fragments into the final XML file.
+  for(Fragments::const_iterator fi = fragments.begin();
+      fi != fragments.end(); ++fi)
+    {
+    this->GenerateXMLLaunchedFragment(os, fi->c_str());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -612,10 +708,134 @@ void cmCTestBuildHandler::GenerateXMLFooter(std::ostream& os,
   this->CTest->EndXML(os);
 }
 
+//----------------------------------------------------------------------------
+void cmCTestBuildHandler::GenerateXMLLaunchedFragment(std::ostream& os,
+                                                      const char* fname)
+{
+  std::ifstream fin(fname, std::ios::in | std::ios::binary);
+  std::string line;
+  while(cmSystemTools::GetLineFromStream(fin, line))
+    {
+    os << line << "\n";
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestBuildHandler::IsLaunchedErrorFile(const char* fname)
+{
+  // error-{hash}.xml
+  return (strncmp(fname, "error-", 6) == 0 &&
+          strcmp(fname+strlen(fname)-4, ".xml") == 0);
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestBuildHandler::IsLaunchedWarningFile(const char* fname)
+{
+  // warning-{hash}.xml
+  return (strncmp(fname, "warning-", 8) == 0 &&
+          strcmp(fname+strlen(fname)-4, ".xml") == 0);
+}
+
 //######################################################################
 //######################################################################
 //######################################################################
 //######################################################################
+
+//----------------------------------------------------------------------------
+class cmCTestBuildHandler::LaunchHelper
+{
+public:
+  LaunchHelper(cmCTestBuildHandler* handler);
+  ~LaunchHelper();
+private:
+  cmCTestBuildHandler* Handler;
+  cmCTest* CTest;
+
+  void WriteScrapeMatchers();
+  void WriteScrapeMatchers(const char* purpose,
+                           std::vector<std::string> const& matchers);
+};
+
+//----------------------------------------------------------------------------
+cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler):
+  Handler(handler), CTest(handler->CTest)
+{
+  std::string tag = this->CTest->GetCurrentTag();
+  if(tag.empty())
+    {
+    // This is not for a dashboard submission, so there is no XML.
+    // Skip enabling the launchers.
+    this->Handler->UseCTestLaunch = false;
+    }
+  else
+    {
+    // Compute a directory in which to store launcher fragments.
+    std::string& launchDir = this->Handler->CTestLaunchDir;
+    launchDir = this->CTest->GetBinaryDir();
+    launchDir += "/Testing/";
+    launchDir += tag;
+    launchDir += "/Build";
+
+    // Clean out any existing launcher fragments.
+    cmSystemTools::RemoveADirectory(launchDir.c_str());
+
+    if(this->Handler->UseCTestLaunch)
+      {
+      // Enable launcher fragments.
+      cmSystemTools::MakeDirectory(launchDir.c_str());
+      this->WriteScrapeMatchers();
+      std::string launchEnv = "CTEST_LAUNCH_LOGS=";
+      launchEnv += launchDir;
+      cmSystemTools::PutEnv(launchEnv.c_str());
+      }
+    }
+
+  // If not using launchers, make sure they passthru.
+  if(!this->Handler->UseCTestLaunch)
+    {
+    cmSystemTools::UnsetEnv("CTEST_LAUNCH_LOGS");
+    }
+}
+
+//----------------------------------------------------------------------------
+cmCTestBuildHandler::LaunchHelper::~LaunchHelper()
+{
+  if(this->Handler->UseCTestLaunch)
+    {
+    cmSystemTools::UnsetEnv("CTEST_LAUNCH_LOGS");
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers()
+{
+  this->WriteScrapeMatchers("Warning",
+                            this->Handler->ReallyCustomWarningMatches);
+  this->WriteScrapeMatchers("WarningSuppress",
+                            this->Handler->ReallyCustomWarningExceptions);
+}
+
+//----------------------------------------------------------------------------
+void
+cmCTestBuildHandler::LaunchHelper
+::WriteScrapeMatchers(const char* purpose,
+                      std::vector<std::string> const& matchers)
+{
+  if(matchers.empty())
+    {
+    return;
+    }
+  std::string fname = this->Handler->CTestLaunchDir;
+  fname += "/Custom";
+  fname += purpose;
+  fname += ".txt";
+  cmGeneratedFileStream fout(fname.c_str());
+  for(std::vector<std::string>::const_iterator mi = matchers.begin();
+      mi != matchers.end(); ++mi)
+    {
+    fout << *mi << "\n";
+    }
+}
 
 //----------------------------------------------------------------------
 int cmCTestBuildHandler::RunMakeCommand(const char* command,
@@ -645,6 +865,10 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     }
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl);
 
+  // Optionally use make rule launchers to record errors and warnings.
+  LaunchHelper launchHelper(this);
+  static_cast<void>(launchHelper);
+
   // Now create process object
   cmsysProcess* cp = cmsysProcess_New();
   cmsysProcess_SetCommand(cp, &*argv.begin());
@@ -662,7 +886,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
     "   Each symbol represents " << tick_len << " bytes of output."
     << std::endl
-    << "   '!' represents an error and '*' a warning." << std::endl
+    << (this->UseCTestLaunch? "" :
+        "   '!' represents an error and '*' a warning.\n")
     << "    " << std::flush);
 
   // Initialize building structures
@@ -939,6 +1164,12 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
 //----------------------------------------------------------------------
 int cmCTestBuildHandler::ProcessSingleLine(const char* data)
 {
+  if(this->UseCTestLaunch)
+    {
+    // No log scraping when using launchers.
+    return b_REGULAR_LINE;
+    }
+
   cmCTestLog(this->CTest, DEBUG, "Line: [" << data << "]" << std::endl);
 
   std::vector<cmsys::RegularExpression>::iterator it;
