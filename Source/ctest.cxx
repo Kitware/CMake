@@ -22,6 +22,8 @@
 #include "cmDocumentation.h"
 
 #include "CTest/cmCTestScriptHandler.h"
+#include "CTest/cmCTestLaunch.h"
+
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][3] =
 {
@@ -217,6 +219,13 @@ int main (int argc, char *argv[])
   cmSystemTools::DoNotInheritStdPipes();
   cmSystemTools::EnableMSVCDebugHook();
   cmSystemTools::FindExecutableDirectory(argv[0]);
+
+  // Dispatch 'ctest --launch' mode directly.
+  if(argc >= 2 && strcmp(argv[1], "--launch") == 0)
+    {
+    return cmCTestLaunch::Main(argc, argv);
+    }
+
   int nocwd = 0;
   cmCTest inst;
 
