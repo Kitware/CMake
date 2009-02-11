@@ -35,6 +35,11 @@ if [ ! -z "@LDFLAGS@" ]; then
     check_exit_value $? "set LDFLAGS env var" || exit 1
 fi
 
+if [ ! -z "@FFLAGS@" ]; then
+    export FFLAGS="@FFLAGS@"
+    check_exit_value $? "set FFLAGS env var" || exit 1
+fi
+
 if [ ! -z "@CFLAGS@" ]; then
     export CFLAGS="@CFLAGS@"
     check_exit_value $? "set CFLAGS  env var" || exit 1
