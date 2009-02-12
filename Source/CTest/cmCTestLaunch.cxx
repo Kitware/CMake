@@ -292,6 +292,7 @@ int cmCTestLaunch::Run()
     return this->ExitCode;
     }
 
+  this->LoadConfig();
   this->WriteXML();
 
   return this->ExitCode;
@@ -414,8 +415,21 @@ void cmCTestLaunch::WriteXMLAction(std::ostream& fxml)
   // SourceFile
   if(!this->OptionSource.empty())
     {
+    std::string source = this->OptionSource;
+    cmSystemTools::ConvertToUnixSlashes(source);
+
+    // If file is in source tree use its relative location.
+    if(cmSystemTools::FileIsFullPath(this->SourceDir.c_str()) &&
+       cmSystemTools::FileIsFullPath(source.c_str()) &&
+       cmSystemTools::IsSubDirectory(source.c_str(),
+                                     this->SourceDir.c_str()))
+      {
+      source = cmSystemTools::RelativePath(this->SourceDir.c_str(),
+                                           source.c_str());
+      }
+
     fxml << "\t\t\t<SourceFile>"
-         << cmXMLSafe(this->OptionSource)
+         << cmXMLSafe(source)
          << "</SourceFile>\n";
     }
 
@@ -677,4 +691,27 @@ int cmCTestLaunch::Main(int argc, const char* const argv[])
     }
   cmCTestLaunch self(argc, argv);
   return self.Run();
+}
+
+//----------------------------------------------------------------------------
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmake.h"
+#include <cmsys/auto_ptr.hxx>
+void cmCTestLaunch::LoadConfig()
+{
+  cmake cm;
+  cmGlobalGenerator gg;
+  gg.SetCMakeInstance(&cm);
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  cmMakefile* mf = lg->GetMakefile();
+  std::string fname = this->LogDir;
+  fname += "CTestLaunchConfig.cmake";
+  if(cmSystemTools::FileExists(fname.c_str()) &&
+     mf->ReadListFile(0, fname.c_str()))
+    {
+    this->SourceDir = mf->GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
+    cmSystemTools::ConvertToUnixSlashes(this->SourceDir);
+    }
 }

@@ -100,6 +100,10 @@ private:
   void WriteXMLResult(std::ostream& fxml);
   void WriteXMLLabels(std::ostream& fxml);
   void DumpFileToXML(std::ostream& fxml, std::string const& fname);
+
+  // Configuration
+  void LoadConfig();
+  std::string SourceDir;
 };
 
 #endif

@@ -752,7 +752,7 @@ private:
   cmCTestBuildHandler* Handler;
   cmCTest* CTest;
 
-  void WriteScrapeMatchers();
+  void WriteLauncherConfig();
   void WriteScrapeMatchers(const char* purpose,
                            std::vector<std::string> const& matchers);
 };
@@ -784,7 +784,7 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler):
       {
       // Enable launcher fragments.
       cmSystemTools::MakeDirectory(launchDir.c_str());
-      this->WriteScrapeMatchers();
+      this->WriteLauncherConfig();
       std::string launchEnv = "CTEST_LAUNCH_LOGS=";
       launchEnv += launchDir;
       cmSystemTools::PutEnv(launchEnv.c_str());
@@ -808,12 +808,19 @@ cmCTestBuildHandler::LaunchHelper::~LaunchHelper()
 }
 
 //----------------------------------------------------------------------------
-void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers()
+void cmCTestBuildHandler::LaunchHelper::WriteLauncherConfig()
 {
   this->WriteScrapeMatchers("Warning",
                             this->Handler->ReallyCustomWarningMatches);
   this->WriteScrapeMatchers("WarningSuppress",
                             this->Handler->ReallyCustomWarningExceptions);
+
+  // Give some testing configuration information to the launcher.
+  std::string fname = this->Handler->CTestLaunchDir;
+  fname += "/CTestLaunchConfig.cmake";
+  cmGeneratedFileStream fout(fname.c_str());
+  std::string srcdir = this->CTest->GetCTestConfiguration("SourceDirectory");
+  fout << "set(CTEST_SOURCE_DIRECTORY \"" << srcdir << "\")\n";
 }
 
 //----------------------------------------------------------------------------
