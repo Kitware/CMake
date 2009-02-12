@@ -535,10 +535,11 @@ public:
   FragmentCompare(cmFileTimeComparison* ftc): FTC(ftc) {}
   bool operator()(std::string const& l, std::string const& r)
     {
-    // Order files by modification time.  If comparison fails, just
-    // use lexicographic order (should not happen in our use case).
+    // Order files by modification time.  Use lexicographic order
+    // among files with the same time.
     int result;
-    if(this->FTC->FileTimeCompare(l.c_str(), r.c_str(), &result))
+    if(this->FTC->FileTimeCompare(l.c_str(), r.c_str(), &result) &&
+       result != 0)
       {
       return result < 0;
       }
