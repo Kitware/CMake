@@ -62,6 +62,10 @@
 # include <sys/pstat.h>
 #endif
 
+#ifdef __HAIKU__
+#include <OS.h>
+#endif
+
 #include <memory.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -241,6 +245,9 @@ protected:
   bool QuerySolarisInfo();
   kwsys_stl::string ParseValueFromKStat(const char* arguments);
   kwsys_stl::string RunProcess(kwsys_stl::vector<const char*> args);
+
+  //For Haiku OS
+  bool QueryHaikuInfo();
 
   // Evaluate the memory information.
   int QueryMemory();
@@ -535,6 +542,8 @@ void SystemInformationImplementation::RunCPUCheck()
   this->ParseSysCtl();
 #elif defined (__SVR4) && defined (__sun)
   this->QuerySolarisInfo();
+#elif defined(__HAIKU__)
+  this->QueryHaikuInfo();
 #else
   this->RetreiveInformationFromCpuInfoFile();
 #endif
@@ -551,6 +560,8 @@ void SystemInformationImplementation::RunMemoryCheck()
   this->ParseSysCtl();
 #elif defined (__SVR4) && defined (__sun)
   this->QuerySolarisInfo();
+#elif defined(__HAIKU__)
+  this->QueryHaikuInfo();
 #else
   this->QueryMemory();
 #endif
@@ -2934,6 +2945,75 @@ bool SystemInformationImplementation::QuerySolarisInfo()
   this->AvailablePhysicalMemory = 0;
   this->AvailableVirtualMemory = 0;
 
+  return true;
+}
+
+/** Querying for system information from Haiku OS */
+bool SystemInformationImplementation::QueryHaikuInfo()
+{
+#if defined(__HAIKU__)
+
+  system_info info;
+  get_system_info(&info);
+  
+  this->NumberOfPhysicalCPU = info.cpu_count;
+  this->CPUSpeedInMHz = info.cpu_clock_speed / 1000000.0F;
+
+  // Physical Memory
+  this->TotalPhysicalMemory = (info.max_pages * B_PAGE_SIZE) / (1024 * 1024) ;
+  this->AvailablePhysicalMemory = this->TotalPhysicalMemory - 
+    ((info.used_pages * B_PAGE_SIZE) / (1024 * 1024));
+
+  
+  // NOTE: get_system_info_etc is currently a private call so just set to 0
+  // until it becomes public
+  this->TotalVirtualMemory = 0;
+  this->AvailableVirtualMemory = 0;
+
+  // Retrieve cpuid_info union for cpu 0
+  cpuid_info cpu_info;
+  get_cpuid(&cpu_info, 0, 0);
+
+  // Chip Vendor
+  // Use a temporary buffer so that we can add NULL termination to the string
+  char vbuf[13];
+  strncpy(vbuf, cpu_info.eax_0.vendor_id, 12);
+  vbuf[12] = '\0';
+  strcpy(this->ChipID.Vendor,vbuf);
+
+  this->FindManufacturer();
+
+  // Retrieve cpuid_info union for cpu 0 this time using a register value of 1
+  get_cpuid(&cpu_info, 1, 0);
+
+  this->NumberOfLogicalCPU = cpu_info.eax_1.logical_cpus;
+
+  // Chip type
+  this->ChipID.Type = cpu_info.eax_1.type;
+
+  // Chip family
+  this->ChipID.Family = cpu_info.eax_1.family; 
+  
+  // Chip Model
+  this->ChipID.Model = cpu_info.eax_1.model;
+
+  // Chip Revision
+  this->ChipID.Revision = cpu_info.eax_1.stepping;
+
+  // Chip Extended Family
+  this->ChipID.ExtendedFamily = cpu_info.eax_1.extended_family;
+
+  // Chip Extended Model
+  this->ChipID.ExtendedModel = cpu_info.eax_1.extended_model;
+
+  // Get ChipID.ProcessorName from other information already gathered
+  this->RetrieveClassicalCPUIdentity();
+
+  // Cache size
+  this->Features.L1CacheSize = 0;
+  this->Features.L2CacheSize = 0;
+
+#endif
   return true;
 }
 
