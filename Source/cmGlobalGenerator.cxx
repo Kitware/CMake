@@ -2145,6 +2145,7 @@ void cmGlobalGenerator::WriteTargetLabels()
       if(!opened)
         {
         fout.Open(fname.c_str());
+        opened = true;
         }
       fout << file << "\n";
       }
