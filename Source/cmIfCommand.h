@@ -118,9 +118,10 @@ public:
       "in the THEN section are invoked.  Otherwise, the commands in the "
       "else section are invoked.  The elseif and else sections are "
       "optional. You may have multiple elseif clauses. Note that "
-      "the same expression must be given to if, and endif.  Long "
-      "expressions can be used and the order or precedence is that the "
-      "EXISTS, COMMAND, and DEFINED operators will be evaluated first. "
+      "the expression in the else and endif clause is optional. Long "
+      "expressions can be used and there is a traditional order of precedence. "
+      "Parenthetical expressions are evaluated first followed by unary operators "
+      "such as EXISTS, COMMAND, and DEFINED. "
       "Then any EQUAL, LESS, GREATER, STRLESS, STRGREATER, STREQUAL, MATCHES "
       "will be evaluated. Then NOT operators and finally AND, OR operators "
       "will be evaluated. Possible expressions are:\n"
@@ -154,7 +155,7 @@ public:
       "True if the given name is a directory.  "
       "Behavior is well-defined only for full paths.\n"
       "  if(IS_ABSOLUTE path)\n"
-      "True if the given path is an absolute path.\n "
+      "True if the given path is an absolute path.\n"
       "  if(variable MATCHES regex)\n"
       "  if(string MATCHES regex)\n"
       "True if the given string or variable's value matches the given "
@@ -182,7 +183,13 @@ public:
       "major[.minor[.patch[.tweak]]]).\n"
       "  if(DEFINED variable)\n"
       "True if the given variable is defined. It does not matter if the "
-      "variable is true or false just if it has been set.";
+      "variable is true or false just if it has been set.\n"
+      "  if((expression) AND (expression OR (expression)))\n"
+      "The expressions inside the parenthesis are evaluated first and then the remaining "
+      "expression is evaluated as in the previous examples. Where there are nested "
+      "parenthesis the innermost are evaluated as part of evaluating the expression "
+      "that contains them."
+      ;
     }
 
   // this is a shared function for both If and Else to determine if the
