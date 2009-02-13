@@ -12,6 +12,8 @@ ELSE(NOT QT4_FOUND)
   # unless qt is static
   IF(WIN32 AND NOT QT_CONFIG MATCHES "static")
     SET(CMAKE_PACKAGE_QTGUI FALSE)
+    MESSAGE(STATUS 
+      "WARNING: QtDialog requires a static built qt for installation.")
   ENDIF(WIN32 AND NOT QT_CONFIG MATCHES "static")
   SET(SRCS
     AddCacheEntry.cxx
