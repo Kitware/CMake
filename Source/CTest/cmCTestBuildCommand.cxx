@@ -133,6 +133,12 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       }
     }
 
+  if(const char* useLaunchers =
+     this->Makefile->GetDefinition("CTEST_USE_LAUNCHERS"))
+    {
+    this->CTest->SetCTestConfiguration("UseLaunchers", useLaunchers);
+    }
+
   return handler;
 }
 
