@@ -442,12 +442,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     const std::string fullFileName = fileIterator->first;
     const std::string fileName
       = cmSystemTools::GetFilenameName(fullFileName.c_str());
-    std::string fullFilePath
-      = cmSystemTools::GetFilenamePath(fullFileName.c_str());
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "Process file: " << fullFileName << std::endl);
-
-    cmSystemTools::ConvertToUnixSlashes(fullFilePath);
 
     if ( !cmSystemTools::FileExists(fullFileName.c_str()) )
       {
