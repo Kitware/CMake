@@ -22,7 +22,7 @@ if(CPACK_GENERATOR MATCHES "NSIS")
     "http://www.cmake.org" "CMake Web Site"
     )
   # tell cpack the executables you want in the start menu as links
-  SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMake" )
+  SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMakeSetup(deprecated)" )
   # tell cpack to create a desktop link to CMakeSetup
   SET(CPACK_CREATE_DESKTOP_LINKS "CMakeSetup")
   SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\CMakeSetup.exe")
