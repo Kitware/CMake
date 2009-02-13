@@ -319,6 +319,8 @@ int cmCTestCoverageHandler::ProcessHandler()
   std::string binaryDir
     = this->CTest->GetCTestConfiguration("BuildDirectory");
 
+  this->LoadLabels();
+
   cmGeneratedFileStream ofs;
   double elapsed_time_start = cmSystemTools::GetTime();
   if ( !this->StartLogFile("Coverage", ofs) )
@@ -464,13 +466,12 @@ int cmCTestCoverageHandler::ProcessHandler()
       continue;
       }
 
+    std::string shortFileName =
+      this->CTest->GetShortPathToFile(fullFileName.c_str());
     const cmCTestCoverageHandlerContainer::SingleFileCoverageVector& fcov
       = fileIterator->second;
-    covLogFile << "\t<File Name=\""
-      << cmXMLSafe(fileName)
-      << "\" FullPath=\"" << cmXMLSafe(
-        this->CTest->GetShortPathToFile(
-          fileIterator->first.c_str())) << "\">" << std::endl
+    covLogFile << "\t<File Name=\"" << cmXMLSafe(fileName)
+      << "\" FullPath=\"" << cmXMLSafe(shortFileName) << "\">\n"
       << "\t\t<Report>" << std::endl;
 
     std::ifstream ifs(fullFileName.c_str());
@@ -546,8 +547,9 @@ int cmCTestCoverageHandler::ProcessHandler()
       << "\t\t<CoverageMetric>";
     covSumFile.setf(std::ios::fixed, std::ios::floatfield);
     covSumFile.precision(2);
-    covSumFile << (cmet) << "</CoverageMetric>\n"
-      << "\t</File>" << std::endl;
+    covSumFile << (cmet) << "</CoverageMetric>\n";
+    this->WriteXMLLabels(covSumFile, shortFileName);
+    covSumFile << "\t</File>" << std::endl;
     cnt ++;
     }
   this->EndCoverageLogFile(covLogFile, logFileCount);
@@ -1712,4 +1714,101 @@ bool cmCTestCoverageHandler::ParseBullsEyeCovsrcLine(
                "\n");
     }
   return true;
+}
+
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::GetLabelId(std::string const& label)
+{
+  LabelIdMapType::iterator i = this->LabelIdMap.find(label);
+  if(i == this->LabelIdMap.end())
+    {
+    int n = int(this->Labels.size());
+    this->Labels.push_back(label);
+    LabelIdMapType::value_type entry(label, n);
+    i = this->LabelIdMap.insert(entry).first;
+    }
+  return i->second;
+}
+
+//----------------------------------------------------------------------
+void cmCTestCoverageHandler::LoadLabels()
+{
+  std::string fileList = this->CTest->GetBinaryDir();
+  fileList += cmake::GetCMakeFilesDirectory();
+  fileList += "/LabelFiles.txt";
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             " label file list [" << fileList << "]\n");
+  std::ifstream finList(fileList.c_str());
+  std::string line;
+  while(cmSystemTools::GetLineFromStream(finList, line))
+    {
+    this->LoadLabels(line.c_str());
+    }
+}
+
+//----------------------------------------------------------------------
+void cmCTestCoverageHandler::LoadLabels(const char* fname)
+{
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             " loading labels from [" << fname << "]\n");
+  std::ifstream fin(fname);
+  bool inTarget = true;
+  std::string source;
+  std::string line;
+  std::vector<int> targetLabels;
+  while(cmSystemTools::GetLineFromStream(fin, line))
+    {
+    if(line.empty() || line[0] == '#')
+      {
+      // Ignore blank and comment lines.
+      continue;
+      }
+    else if(line[0] == ' ')
+      {
+      // Label lines appear indented by one space.
+      std::string label = line.substr(1);
+      int id = this->GetLabelId(label);
+      if(inTarget)
+        {
+        targetLabels.push_back(id);
+        }
+      else
+        {
+        this->SourceLabels[source].insert(id);
+        }
+      }
+    else
+      {
+      // Non-indented lines specify a source file name.  The first one
+      // is the end of the target-wide labels.
+      inTarget = false;
+
+      source = this->CTest->GetShortPathToFile(line.c_str());
+
+      // Label the source with the target labels.
+      LabelSet& labelSet = this->SourceLabels[source];
+      for(std::vector<int>::const_iterator li = targetLabels.begin();
+          li != targetLabels.end(); ++li)
+        {
+        labelSet.insert(*li);
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------
+void cmCTestCoverageHandler::WriteXMLLabels(std::ofstream& os,
+                                            std::string const& source)
+{
+  LabelMapType::const_iterator li = this->SourceLabels.find(source);
+  if(li != this->SourceLabels.end() && !li->second.empty())
+    {
+    os << "\t\t<Labels>\n";
+    for(LabelSet::const_iterator lsi = li->second.begin();
+        lsi != li->second.end(); ++lsi)
+      {
+      os << "\t\t\t<Label>" << cmXMLSafe(this->Labels[*lsi]) << "</Label>\n";
+      }
+    os << "\t\t</Labels>\n";
+    }
 }

@@ -137,6 +137,22 @@ private:
   std::vector<cmsys::RegularExpression> CustomCoverageExcludeRegex;
 
   typedef std::map<std::string, cmCTestCoverage> CoverageMap;
+
+  // Map from source file to label ids.
+  class LabelSet: public std::set<int> {};
+  typedef std::map<cmStdString, LabelSet> LabelMapType;
+  LabelMapType SourceLabels;
+
+  // Map from label name to label id.
+  typedef std::map<cmStdString, int> LabelIdMapType;
+  LabelIdMapType LabelIdMap;
+  std::vector<std::string> Labels;
+  int GetLabelId(std::string const& label);
+
+  // Load reading and writing methods.
+  void LoadLabels();
+  void LoadLabels(const char* fname);
+  void WriteXMLLabels(std::ofstream& os, std::string const& source);
 };
 
 #endif
