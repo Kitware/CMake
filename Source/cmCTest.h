@@ -395,6 +395,10 @@ private:
   typedef std::map<cmStdString, cmStdString> CTestConfigurationMap;
 
   std::string             CTestConfigFile;
+  // TODO: The ctest configuration should be a hierarchy of
+  // configuration option sources: command-line, script, ini file.
+  // Then the ini file can get re-loaded whenever it changes without
+  // affecting any higher-precedence settings.
   CTestConfigurationMap CTestConfiguration;
   CTestConfigurationMap CTestConfigurationOverwrites;
   PartInfo                Parts[PartCount];
