@@ -68,7 +68,7 @@ line.
 A FindXXX.cmake module will typically be loaded by the command
 
   FIND_PACKAGE(XXX [major[.minor[.patch[.tweak]]]] [EXACT]
-               [QUIET] [REQUIRED [components...]])
+               [QUIET] [[REQUIRED|COMPONENTS] [components...]])
 
 If any version numbers are given to the command it will set the
 following variables before loading the module:
@@ -96,7 +96,8 @@ XXX_FIND_REQUIRED to true before loading the FindXXX.cmake module.  If
 this variable is set the module should issue a FATAL_ERROR if the
 package cannot be found.  For each package-specific component, say
 YYY, listed after the REQUIRED option a variable XXX_FIND_REQUIRED_YYY
-to true.  The set of components listed will also be specified in a
+to true.  The set of components listed after either the REQUIRED
+option or the COMPONENTS option will be specified in a
 XXX_FIND_COMPONENTS variable.  This can be used by the FindXXX.cmake
 module to determine which sub-components of the package must be found.
 If neither the QUIET nor REQUIRED options are given then the
