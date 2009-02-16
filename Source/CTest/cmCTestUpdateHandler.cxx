@@ -807,6 +807,10 @@ int cmCTestUpdateHandler::ProcessHandler()
           ofs << output << std::endl;
           }
         }
+      else
+        {
+        res = false;
+        }
       if ( res )
         {
         cmCTestLog(this->CTest, DEBUG, output << std::endl);
