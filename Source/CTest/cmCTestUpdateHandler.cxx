@@ -694,7 +694,7 @@ int cmCTestUpdateHandler::ProcessHandler()
 
   cmCTestUpdateHandler::AuthorsToUpdatesMap authors_files_map;
   int numUpdated = 0;
-  int numModiefied = 0;
+  int numModified = 0;
   int numConflicting = 0;
   // In subversion, get the latest revision
   if ( updateType == cmCTestUpdateHandler::e_SVN )
@@ -751,7 +751,7 @@ int cmCTestUpdateHandler::ProcessHandler()
       std::string upChar = file_update_line.match(1);
       std::string upFile = file_update_line.match(2);
       char mod = upChar[0];
-      bool modifiedOrConflict = false;
+      bool notLocallyModified = false;
       if ( mod == 'X' || mod == 'L')
         {
         continue;
@@ -759,14 +759,14 @@ int cmCTestUpdateHandler::ProcessHandler()
       if ( mod != 'M' && mod != 'C' && mod != 'G' )
         {
         count ++;
-        modifiedOrConflict = true;
+        notLocallyModified = true;
         }
       const char* file = upFile.c_str();
       cmCTestLog(this->CTest, DEBUG, "Line" << cc << ": " << mod << " - "
         << file << std::endl);
 
       std::string output;
-      if ( modifiedOrConflict )
+      if ( notLocallyModified )
         {
         std::string logcommand;
         switch ( updateType )
@@ -994,7 +994,7 @@ int cmCTestUpdateHandler::ProcessHandler()
           }
         else if ( mod == 'M' )
           {
-          numModiefied ++;
+          numModified ++;
           os << "\t<Modified>" << std::endl;
           }
         else
@@ -1090,9 +1090,9 @@ int cmCTestUpdateHandler::ProcessHandler()
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Found " << numUpdated
       << " updated files" << std::endl);
     }
-  if ( numModiefied )
+  if ( numModified )
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Found " << numModiefied
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Found " << numModified
       << " locally modified files"
       << std::endl);
     }
@@ -1102,7 +1102,7 @@ int cmCTestUpdateHandler::ProcessHandler()
       << " conflicting files"
       << std::endl);
     }
-  if ( numModiefied == 0 && numConflicting == 0 && numUpdated == 0 )
+  if ( numModified == 0 && numConflicting == 0 && numUpdated == 0 )
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Project is up-to-date"
       << std::endl);
@@ -1137,7 +1137,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0
     << "</ElapsedMinutes>\n"
     << "\t<UpdateReturnStatus>";
-  if ( numModiefied > 0 || numConflicting > 0 )
+  if ( numModified > 0 || numConflicting > 0 )
     {
     os << "Update error: There are modified or conflicting files in the "
       "repository";
