@@ -1,3 +1,6 @@
+Changes in CMake 2.6.3 RC 14
+- Take cmake-gui out of beta for windows installer
+
 Changes in CMake 2.6.3 RC 13
 - Fix cmake can not find cmake when run on windows from PATH
 - Fix #8378 FILEPATH cache UNC paths in list removed extra /

@@ -2,7 +2,7 @@ SET(IS_APPLE @APPLE@)
 SET(CMAKE_PACKAGE_QTGUI @CMAKE_PACKAGE_QTGUI@)
 
 IF(CMAKE_PACKAGE_QTGUI)
-  SET(CPACK_PACKAGE_EXECUTABLES ${CPACK_PACKAGE_EXECUTABLES} "cmake-gui" "cmake-gui(beta)") 
+  SET(CPACK_PACKAGE_EXECUTABLES "cmake-gui" "CMake (cmake-gui)" ${CPACK_PACKAGE_EXECUTABLES}) 
   IF(IS_APPLE)
     # for apple install we set the install prefix to
     # / and then install

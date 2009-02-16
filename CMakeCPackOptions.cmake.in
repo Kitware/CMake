@@ -11,18 +11,19 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   SET(CPACK_PACKAGE_ICON "@CMake_SOURCE_DIR@/Utilities/Release\\CMakeInstall.bmp")
   # tell cpack to create links to the doc files
   SET(CPACK_NSIS_MENU_LINKS
-    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/CMakeSetup.html" "CMakeSetup Help"
+    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake-gui.html" "cmake-gui Help"
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake.html" "CMake Help"
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake-properties.html"
     "CMake Properties and Variables Help"
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/ctest.html" "CTest Help"
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake-modules.html" "CMake Modules Help"
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake-commands.html" "CMake Commands Help"
+    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/CMakeSetup.html" "CMakeSetup Help"
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cpack.html" "CPack Help"
     "http://www.cmake.org" "CMake Web Site"
     )
   # tell cpack the executables you want in the start menu as links
-  SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMake" )
+  SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMakeSetup(deprecated)" )
   # tell cpack to create a desktop link to CMakeSetup
   SET(CPACK_CREATE_DESKTOP_LINKS "CMakeSetup")
   SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\CMakeSetup.exe")
