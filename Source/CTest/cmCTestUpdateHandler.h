@@ -59,8 +59,6 @@ private:
   struct StringPair :
     public std::pair<std::string, std::string>{};
   struct UpdateFiles : public std::vector<StringPair>{};
-  struct AuthorsToUpdatesMap :
-    public std::map<std::string, UpdateFiles>{};
 
   // Determine the type of version control
   int DetermineType(const char* cmd, const char* type);

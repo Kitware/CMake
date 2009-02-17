@@ -692,7 +692,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   std::string current_path = "<no-path>";
   bool first_file = true;
 
-  cmCTestUpdateHandler::AuthorsToUpdatesMap authors_files_map;
+  std::set<cmStdString> author_set;
   int numUpdated = 0;
   int numModified = 0;
   int numConflicting = 0;
@@ -821,10 +821,6 @@ int cmCTestUpdateHandler::ProcessHandler()
         std::string semail1    = "Unknown";
         std::string comment1   = "";
         std::string srevision2 = "Unknown";
-        std::string sdate2     = "Unknown";
-        std::string sauthor2   = "Unknown";
-        std::string comment2   = "";
-        std::string semail2    = "Unknown";
         if ( updateType == cmCTestUpdateHandler::e_CVS )
           {
           bool have_first = false;
@@ -854,11 +850,6 @@ int cmCTestUpdateHandler::ProcessHandler()
                 sdate1 = cvs_date_author_regex.match(1);
                 sauthor1 = cvs_date_author_regex.match(2);
                 }
-              else
-                {
-                sdate2 = cvs_date_author_regex.match(1);
-                sauthor2 = cvs_date_author_regex.match(2);
-                }
               }
             else if ( sline && cvs_end_of_comment_regex.find(clp) ||
               cvs_end_of_file_regex.find(clp))
@@ -879,11 +870,6 @@ int cmCTestUpdateHandler::ProcessHandler()
                 {
                 comment1 += clp;
                 comment1 += "\n";
-                }
-              else
-                {
-                comment2 += clp;
-                comment2 += "\n";
                 }
               }
             }
@@ -949,9 +935,6 @@ int cmCTestUpdateHandler::ProcessHandler()
                   cmOStringStream mRevStream;
                   mRevStream << minrev;
                   srevision2 = mRevStream.str();
-                  sauthor2 = it->Author;
-                  comment2 = it->Message;
-                  sdate2 = it->Date;
                   }
                 }
               }
@@ -1014,7 +997,7 @@ int cmCTestUpdateHandler::ProcessHandler()
           << path.c_str() << " / " << fname.c_str() << " was updated by "
           << sauthor1.c_str() << " to revision: " << srevision1.c_str()
           << " from revision: " << srevision2.c_str() << std::endl);
-        os << "\t\t<File Directory=\"" << cmXMLSafe(path) << "\">"
+        os << "\t\t<File>"
           << cmXMLSafe(fname)
           << "</File>\n"
           << "\t\t<Directory>" << cmXMLSafe(path)
@@ -1028,36 +1011,6 @@ int cmCTestUpdateHandler::ProcessHandler()
           << "\t\t<Revision>" << srevision1 << "</Revision>\n"
           << "\t\t<PriorRevision>" << srevision2 << "</PriorRevision>"
           << std::endl;
-        if ( srevision2 != srevision1 )
-          {
-          os
-            << "\t\t<Revisions>\n"
-            << "\t\t\t<Revision>" << srevision1 << "</Revision>\n"
-            << "\t\t\t<PreviousRevision>" << srevision2
-            << "</PreviousRevision>\n"
-            << "\t\t\t<Author>" << cmXMLSafe(sauthor1)
-            << "</Author>\n"
-            << "\t\t\t<Date>" << cmXMLSafe(sdate1)
-            << "</Date>\n"
-            << "\t\t\t<Comment>" << cmXMLSafe(comment1)
-            << "</Comment>\n"
-            << "\t\t\t<Email>" << cmXMLSafe(semail1)
-            << "</Email>\n"
-            << "\t\t</Revisions>\n"
-            << "\t\t<Revisions>\n"
-            << "\t\t\t<Revision>" << srevision2 << "</Revision>\n"
-            << "\t\t\t<PreviousRevision>" << srevision2
-            << "</PreviousRevision>\n"
-            << "\t\t\t<Author>" << cmXMLSafe(sauthor2)
-            << "</Author>\n"
-            << "\t\t\t<Date>" << cmXMLSafe(sdate2)
-            << "</Date>\n"
-            << "\t\t\t<Comment>" << cmXMLSafe(comment2)
-            << "</Comment>\n"
-            << "\t\t\t<Email>" << cmXMLSafe(semail2)
-            << "</Email>\n"
-            << "\t\t</Revisions>" << std::endl;
-          }
         if ( mod == 'C' )
           {
           os << "\t</Conflicting>" << std::endl;
@@ -1074,12 +1027,7 @@ int cmCTestUpdateHandler::ProcessHandler()
           {
           os << "\t</Updated>" << std::endl;
           }
-        cmCTestUpdateHandler::UpdateFiles *u = &authors_files_map[sauthor1];
-        cmCTestUpdateHandler::StringPair p;
-        p.first = path;
-        p.second = fname;
-        u->push_back(p);
-
+        author_set.insert(sauthor1);
         current_path = path;
         }
       file_count ++;
@@ -1116,20 +1064,11 @@ int cmCTestUpdateHandler::ProcessHandler()
     os << "\t</Directory>" << std::endl;
     }
 
-  cmCTestUpdateHandler::AuthorsToUpdatesMap::iterator it;
-  for ( it = authors_files_map.begin();
-    it != authors_files_map.end();
-    it ++ )
+  // TODO: Skip the author list when submitting to CDash.
+  for(std::set<cmStdString>::const_iterator ai = author_set.begin();
+      ai != author_set.end(); ++ai)
     {
-    os << "\t<Author>\n"
-      << "\t\t<Name>" << it->first << "</Name>" << std::endl;
-    cmCTestUpdateHandler::UpdateFiles *u = &(it->second);
-    for ( cc = 0; cc < u->size(); cc ++ )
-      {
-      os << "\t\t<File Directory=\"" << (*u)[cc].first << "\">"
-        << (*u)[cc].second << "</File>" << std::endl;
-      }
-    os << "\t</Author>" << std::endl;
+    os << "\t<Author><Name>" << cmXMLSafe(*ai) << "</Name></Author>\n";
     }
 
   cmCTestLog(this->CTest, DEBUG, "End" << std::endl);
