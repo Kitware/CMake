@@ -1,3 +1,6 @@
+Changes in CMake 2.6.3 RC 15
+- Fix Xcode rebuild issue with static libraries
+
 Changes in CMake 2.6.3 RC 14
 - Take cmake-gui out of beta for windows installer
 
