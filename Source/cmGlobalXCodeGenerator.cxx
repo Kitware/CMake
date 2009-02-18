@@ -2698,7 +2698,8 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           {
           std::string universal = t->GetDirectory();
           universal += "/";
-          universal += this->CurrentMakefile->GetProjectName();
+          universal +=
+            this->LocalGenerators[0]->GetMakefile()->GetProjectName(); 
           universal += ".build/";
           universal += configName;
           universal += "/";
