@@ -71,6 +71,59 @@ int cmCPackDragNDropGenerator::CompressFiles(const char* outFileName,
 {
   (void) files;
 
+  return this->CreateDMG(toplevel, outFileName);
+}
+
+//----------------------------------------------------------------------
+bool cmCPackDragNDropGenerator::CopyFile(cmOStringStream& source,
+  cmOStringStream& target)
+{
+  if(!cmSystemTools::CopyFileIfDifferent(
+    source.str().c_str(),
+    target.str().c_str()))
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Error copying "
+      << source.str()
+      << " to "
+      << target.str()
+      << std::endl);
+
+    return false;
+    }
+
+  return true;
+}
+
+//----------------------------------------------------------------------
+bool cmCPackDragNDropGenerator::RunCommand(cmOStringStream& command,
+  std::string* output)
+{
+  int exit_code = 1;
+
+  bool result = cmSystemTools::RunSingleCommand(
+    command.str().c_str(),
+    output,
+    &exit_code,
+    0,
+    this->GeneratorVerbose,
+    0);
+
+  if(!result || exit_code)
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Error executing: "
+      << command.str()
+      << std::endl);
+
+    return false;
+    }
+
+  return true;
+}
+  
+int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel, const std::string& outFileName)
+{
   // Get optional arguments ...
   const std::string cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON") 
     ? this->GetOption("CPACK_PACKAGE_ICON") : "";
@@ -204,50 +257,3 @@ int cmCPackDragNDropGenerator::CompressFiles(const char* outFileName,
   return 1;
 }
 
-//----------------------------------------------------------------------
-bool cmCPackDragNDropGenerator::CopyFile(cmOStringStream& source,
-  cmOStringStream& target)
-{
-  if(!cmSystemTools::CopyFileIfDifferent(
-    source.str().c_str(),
-    target.str().c_str()))
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Error copying "
-      << source.str()
-      << " to "
-      << target.str()
-      << std::endl);
-
-    return false;
-    }
-
-  return true;
-}
-
-//----------------------------------------------------------------------
-bool cmCPackDragNDropGenerator::RunCommand(cmOStringStream& command,
-  std::string* output)
-{
-  int exit_code = 1;
-
-  bool result = cmSystemTools::RunSingleCommand(
-    command.str().c_str(),
-    output,
-    &exit_code,
-    0,
-    this->GeneratorVerbose,
-    0);
-
-  if(!result || exit_code)
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Error executing: "
-      << command.str()
-      << std::endl);
-
-    return false;
-    }
-
-  return true;
-}

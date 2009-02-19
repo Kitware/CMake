@@ -39,6 +39,8 @@ protected:
 
   bool CopyFile(cmOStringStream& source, cmOStringStream& target);
   bool RunCommand(cmOStringStream& command, std::string* output = 0);
+  
+  virtual int CreateDMG(const std::string& installdir, const std::string& outdmg);
 
   std::string InstallPrefix;
 };
