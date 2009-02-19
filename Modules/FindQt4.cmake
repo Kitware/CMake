@@ -3,10 +3,20 @@
 # The most important issue is that the Qt4 qmake is available via the system path.
 # This qmake is then used to detect basically everything else.
 # This module defines a number of key variables and macros. 
-# First is QT_USE_FILE which is the path to a CMake file that can be included 
-# to compile Qt 4 applications and libraries.  By default, the QtCore and QtGui 
-# libraries are loaded. This behavior can be changed by setting one or more 
-# of the following variables to true before doing INCLUDE(${QT_USE_FILE}):
+# The variable QT_USE_FILE is set which is the path to a CMake file that can be included 
+# to compile Qt 4 applications and libraries.  It sets up the compilation
+# environment for include directories, preprocessor defines and populates a
+# QT_LIBRARIES variable.
+#
+# Typical usage could be something like:
+#   find_package(Qt4 4.4.3 COMPONENTS QtCore QtGui QtXml REQUIRED )
+#   include(${QT_USE_FILE})
+#   add_executable(myexe main.cpp)
+#   target_link_libraries(myexe ${QT_LIBRARIES})
+#
+# When using the components argument, QT_USE_QT* variables are automatically set
+# for the QT_USE_FILE to pick up.  If one wishes to manually set them, the
+# available ones to set include:
 #                    QT_DONT_USE_QTCORE
 #                    QT_DONT_USE_QTGUI
 #                    QT_USE_QT3SUPPORT
@@ -31,19 +41,6 @@
 #                    QT_USE_QTWEBKIT
 #                    QT_USE_QTXMLPATTERNS
 #                    QT_USE_PHONON
-#
-# The file pointed to by QT_USE_FILE will set up your compile environment
-# by adding include directories, preprocessor defines, and populate a
-# QT_LIBRARIES variable containing all the Qt libraries and their dependencies.
-# Add the QT_LIBRARIES variable to your TARGET_LINK_LIBRARIES.
-#
-# Typical usage could be something like:
-#   FIND_PACKAGE(Qt4)
-#   SET(QT_USE_QTXML 1)
-#   INCLUDE(${QT_USE_FILE})
-#   ADD_EXECUTABLE(myexe main.cpp)
-#   TARGET_LINK_LIBRARIES(myexe ${QT_LIBRARIES})
-#
 #
 # There are also some files that need processing by some Qt tools such as moc
 # and uic.  Listed below are macros that may be used to process those files.
@@ -128,6 +125,7 @@
 #        must exists and are not updated in any way.
 #
 #
+#  Below is a detailed list of variables that FindQt4.cmake sets.
 #  QT_FOUND         If false, don't try to use Qt.
 #  QT4_FOUND        If false, don't try to use Qt 4.
 #
@@ -266,6 +264,25 @@
 # These variables are set to "" Because Qt structure changed 
 # (They make no sense in Qt4)
 #  QT_QT_LIBRARY        Qt-Library is now split
+
+
+# Use FIND_PACKAGE( Qt4 COMPONENTS ... ) to enable modules
+IF( Qt4_FIND_COMPONENTS )
+  FOREACH( component ${Qt4_FIND_COMPONENTS} )
+    STRING( TOUPPER ${component} _COMPONENT )
+    SET( QT_USE_${_COMPONENT} 1 )
+  ENDFOREACH( component )
+  
+  # To make sure we don't use QtCore or QtGui when not in COMPONENTS
+  IF(NOT QT_USE_QTCORE)
+    SET( QT_DONT_USE_QTCORE 1 )
+  ENDIF(NOT QT_USE_QTCORE)
+  
+  IF(NOT QT_USE_QTGUI)
+    SET( QT_DONT_USE_QTGUI 1 )
+  ENDIF(NOT QT_USE_QTGUI)
+
+ENDIF( Qt4_FIND_COMPONENTS )
 
 # If Qt3 has already been found, fail.
 IF(QT_QT_LIBRARY)
