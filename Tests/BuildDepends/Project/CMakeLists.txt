@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
 project(testRebuild)
-set(CMAKE_OSX_ARCHITECTURES "ppc;i386")
+if(APPLE)
+  # only use multi-arch if the sysroot exists on this machine
+  if(EXISTS "${CMAKE_OSX_SYSROOT}")
+    set(CMAKE_OSX_ARCHITECTURES "ppc;i386")
+  endif(EXISTS "${CMAKE_OSX_SYSROOT}")
+endif(APPLE)
+
 add_library(foo STATIC ${testRebuild_BINARY_DIR}/foo.cxx)
 set_target_properties(foo PROPERTIES OUTPUT_NAME "foolib")
 # Add a generated header that regenerates when the generator is
