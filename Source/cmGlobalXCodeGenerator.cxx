@@ -556,6 +556,10 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     {
     sourcecode = "compiled.mach-o.objfile";
     }
+  else if(ext == "xib")
+    {
+    sourcecode = "file.xib";
+    }
   else if(ext == "mm")
     {
     sourcecode += ".cpp.objcpp";
