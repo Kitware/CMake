@@ -2698,8 +2698,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           {
           std::string universal = t->GetDirectory();
           universal += "/";
-          universal +=
-            this->LocalGenerators[0]->GetMakefile()->GetProjectName(); 
+          universal += this->CurrentProject;
           universal += ".build/";
           universal += configName;
           universal += "/";
@@ -2712,7 +2711,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
             std::string universalFile = universal;
             universalFile += *arch;
             universalFile += "/";
-            universalFile += t->GetName();
+            universalFile += t->GetFullName(configName);
             makefileStream << "\t/bin/rm -f "
                            << 
               this->ConvertToRelativeForMake(universalFile.c_str())
