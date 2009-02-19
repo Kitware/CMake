@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(testRebuild)
+set(CMAKE_OSX_ARCHITECTURES "ppc;i386")
 add_library(foo STATIC ${testRebuild_BINARY_DIR}/foo.cxx)
-
+set_target_properties(foo PROPERTIES OUTPUT_NAME "foolib")
 # Add a generated header that regenerates when the generator is
 # rebuilt.
 add_custom_command(
@@ -21,6 +22,7 @@ add_custom_command(
 # changes.  This should cause regen.h to be recreated also.
 add_executable(generator generator.cxx)
 target_link_libraries(generator foo)
+set_target_properties(generator PROPERTIES OUTPUT_NAME "gen")
 
 # Build an executable to drive the build and rebuild.
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
