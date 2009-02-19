@@ -2695,7 +2695,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           universal += ".build/";
           universal += configName;
           universal += "/";
-          universal += t->GetName();
+          universal += t->GetFullName(configName);
           universal += ".build/Objects-normal/";
           for( std::vector<std::string>::iterator arch = 
                  this->Architectures.begin();

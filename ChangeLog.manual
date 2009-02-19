@@ -1,3 +1,6 @@
+Changes in CMake 2.6.3 RC 17
+- Fix Xcode rebuild issue again, with a test!
+
 Changes in CMake 2.6.3 RC 16
 - Fix Xcode rebuild issue again...
 
