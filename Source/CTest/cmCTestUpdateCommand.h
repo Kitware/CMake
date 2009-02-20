@@ -51,7 +51,7 @@ public:
    */
   virtual const char* GetTerseDocumentation()
     {
-    return "Updates the repository.";
+    return "Update the work tree from version control.";
     }
 
   /**
@@ -62,8 +62,11 @@ public:
     return
       "  ctest_update([SOURCE source] [RETURN_VALUE res])\n"
       "Updates the given source directory and stores results in Update.xml. "
-      "The second argument is a variable that will hold the number of files "
-      "modified. If there is a problem, the variable will be -1.";
+      "If no SOURCE is given, the CTEST_SOURCE_DIRECTORY variable is used. "
+      "The RETURN_VALUE option specifies a variable in which to store the "
+      "result, which is -1 on error, non-negative for success, and positive "
+      "if there are local modifications in the work tree."
+      ;
     }
 
   cmTypeMacro(cmCTestUpdateCommand, cmCTestHandlerCommand);

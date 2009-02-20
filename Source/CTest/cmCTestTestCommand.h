@@ -51,7 +51,7 @@ public:
    */
   virtual const char* GetTerseDocumentation()
     {
-    return "Tests the repository.";
+    return "Run tests in the project build tree.";
     }
 
   /**
@@ -73,7 +73,8 @@ public:
       "expression for tests to run INCLUDE, or a regular expression for tests "
       "to not run EXCLUDE. EXCLUDE_LABEL and INCLUDE_LABEL are regular "
       "expression for test to be included or excluded by the test "
-      "property LABEL.";
+      "property LABEL."
+      ;
     }
 
   cmTypeMacro(cmCTestTestCommand, cmCTestHandlerCommand);

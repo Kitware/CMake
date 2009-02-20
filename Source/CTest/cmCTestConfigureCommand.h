@@ -50,7 +50,7 @@ public:
    */
   virtual const char* GetTerseDocumentation()
     {
-    return "Configures the repository.";
+    return "Configure the project build tree.";
     }
 
   /**
@@ -59,12 +59,17 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_configure(BUILD build_dir OPTIONS options RETURN_VALUE res)\n"
+      "  ctest_configure([BUILD build_dir] [SOURCE source_dir]\n"
+      "                  [OPTIONS options] [RETURN_VALUE res])\n"
       "Configures the given build directory and stores results in "
-      "Configure.xml. The OPTIONS arguments are passed as command line "
-      "arguments to the configure command. "
-      "The RETURN_VALUE argument is a variable that will hold "
-      "the return value.";
+      "Configure.xml. "
+      "If no BUILD is given, the CTEST_BINARY_DIRECTORY variable is used. "
+      "If no SOURCE is given, the CTEST_SOURCE_DIRECTORY variable is used. "
+      "The OPTIONS argument specifies command line arguments to pass to "
+      "the configuration tool. "
+      "The RETURN_VALUE option specifies a variable in which to store the "
+      "return value of the native build tool."
+      ;
     }
 
   cmTypeMacro(cmCTestConfigureCommand, cmCTestHandlerCommand);

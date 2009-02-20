@@ -55,7 +55,7 @@ public:
    */
   virtual const char* GetTerseDocumentation()
     {
-    return "Builds the repository.";
+    return "Build the project.";
     }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
@@ -65,9 +65,15 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_build([BUILD build_dir] [RETURN_VALUE res] "
-      " [NUMBER_ERRORS val] [NUMBER_WARNINGS val])\n"
-      "Builds the given build directory and stores results in Build.xml.";
+      "  ctest_build([BUILD build_dir] [RETURN_VALUE res]\n"
+      "              [NUMBER_ERRORS val] [NUMBER_WARNINGS val])\n"
+      "Builds the given build directory and stores results in Build.xml. "
+      "If no BUILD is given, the CTEST_BINARY_DIRECTORY variable is used. "
+      "The RETURN_VALUE option specifies a variable in which to store the "
+      "return value of the native build tool. "
+      "The NUMBER_ERRORS and NUMBER_WARNINGS options specify variables in "
+      "which to store the number of build errors and warnings detected."
+      ;
     }
 
   cmTypeMacro(cmCTestBuildCommand, cmCTestHandlerCommand);
