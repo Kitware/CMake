@@ -57,7 +57,7 @@ public:
    */
   virtual const char* GetTerseDocumentation()
     {
-    return "Submits the repository.";
+    return "Submit results to a dashboard server.";
     }
 
   /**
@@ -66,12 +66,23 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_submit([RETURN_VALUE res] [PARTS ...] [FILES ...])\n"
-      "Submits the test results for the project.  "
-      "By default all available parts are submitted.  "
+      "  ctest_submit([PARTS ...] [FILES ...] [RETURN_VALUE res])\n"
+      "By default all available parts are submitted if no PARTS or FILES "
+      "are specified.  "
       "The PARTS option lists a subset of parts to be submitted.  "
+      "Valid part names are:\n"
+      "  Start      = nothing\n"
+      "  Update     = ctest_update results, in Update.xml\n"
+      "  Configure  = ctest_configure results, in Configure.xml\n"
+      "  Build      = ctest_build results, in Build.xml\n"
+      "  Test       = ctest_test results, in Test.xml\n"
+      "  Coverage   = ctest_coverage results, in Coverage.xml\n"
+      "  MemCheck   = ctest_memcheck results, in DynamicAnalysis.xml\n"
+      "  Notes      = Files listed by CTEST_NOTES_FILES, in Notes.xml\n"
+      "  ExtraFiles = Files listed by CTEST_EXTRA_SUBMIT_FILES\n"
+      "  Submit     = nothing\n"
       "The FILES option explicitly lists specific files to be submitted.  "
-      "Each individual file must exist at the time of the call.";
+      "Each individual file must exist at the time of the call.\n";
     }
 
   cmTypeMacro(cmCTestSubmitCommand, cmCTestHandlerCommand);
