@@ -60,11 +60,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_coverage([BUILD build_dir] [RETURN_VALUE res])\n"
+      "  ctest_coverage([BUILD build_dir] [RETURN_VALUE res] [APPEND])\n"
       "Perform the coverage of the given build directory and stores results "
       "in Coverage.xml. The second argument is a variable that will hold "
       "value."
-      ;
+      "\n"
+      CTEST_COMMAND_APPEND_OPTION_DOCS;
     }
 
   cmTypeMacro(cmCTestCoverageCommand, cmCTestHandlerCommand);

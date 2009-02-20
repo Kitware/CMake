@@ -60,7 +60,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_test([BUILD build_dir]\n"
+      "  ctest_test([BUILD build_dir] [APPEND]\n"
       "             [START start number] [END end number]\n"
       "             [STRIDE stride number] [EXCLUDE exclude regex ]\n"
       "             [INCLUDE include regex] [RETURN_VALUE res] \n" 
@@ -74,7 +74,8 @@ public:
       "to not run EXCLUDE. EXCLUDE_LABEL and INCLUDE_LABEL are regular "
       "expression for test to be included or excluded by the test "
       "property LABEL."
-      ;
+      "\n"
+      CTEST_COMMAND_APPEND_OPTION_DOCS;
     }
 
   cmTypeMacro(cmCTestTestCommand, cmCTestHandlerCommand);

@@ -59,7 +59,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_configure([BUILD build_dir] [SOURCE source_dir]\n"
+      "  ctest_configure([BUILD build_dir] [SOURCE source_dir] [APPEND]\n"
       "                  [OPTIONS options] [RETURN_VALUE res])\n"
       "Configures the given build directory and stores results in "
       "Configure.xml. "
@@ -69,7 +69,8 @@ public:
       "the configuration tool. "
       "The RETURN_VALUE option specifies a variable in which to store the "
       "return value of the native build tool."
-      ;
+      "\n"
+      CTEST_COMMAND_APPEND_OPTION_DOCS;
     }
 
   cmTypeMacro(cmCTestConfigureCommand, cmCTestHandlerCommand);

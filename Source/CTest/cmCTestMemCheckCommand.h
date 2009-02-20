@@ -62,11 +62,12 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_memcheck([BUILD build_dir] [RETURN_VALUE res])\n"
+      "  ctest_memcheck([BUILD build_dir] [RETURN_VALUE res] [APPEND])\n"
       "Performs a memory checking of tests in the given build directory and "
       "stores results in MemCheck.xml. The second argument is a variable "
       "that will hold value."
-      ;
+      "\n"
+      CTEST_COMMAND_APPEND_OPTION_DOCS;
     }
 
   cmTypeMacro(cmCTestMemCheckCommand, cmCTestTestCommand);

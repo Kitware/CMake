@@ -65,7 +65,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_build([BUILD build_dir] [RETURN_VALUE res]\n"
+      "  ctest_build([BUILD build_dir] [RETURN_VALUE res] [APPEND]\n"
       "              [NUMBER_ERRORS val] [NUMBER_WARNINGS val])\n"
       "Builds the given build directory and stores results in Build.xml. "
       "If no BUILD is given, the CTEST_BINARY_DIRECTORY variable is used. "
@@ -73,7 +73,8 @@ public:
       "return value of the native build tool. "
       "The NUMBER_ERRORS and NUMBER_WARNINGS options specify variables in "
       "which to store the number of build errors and warnings detected."
-      ;
+      "\n"
+      CTEST_COMMAND_APPEND_OPTION_DOCS;
     }
 
   cmTypeMacro(cmCTestBuildCommand, cmCTestHandlerCommand);
