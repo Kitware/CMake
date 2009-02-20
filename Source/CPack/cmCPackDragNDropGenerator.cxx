@@ -121,8 +121,10 @@ bool cmCPackDragNDropGenerator::RunCommand(cmOStringStream& command,
 
   return true;
 }
-  
-int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel, const std::string& outFileName)
+
+//----------------------------------------------------------------------
+int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel,
+  const std::string& outFileName)
 {
   // Get optional arguments ...
   const std::string cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON") 
@@ -256,4 +258,3 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel, const std:
 
   return 1;
 }
-
