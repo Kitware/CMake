@@ -1,8 +1,5 @@
-Changes in CMake 2.6.3 RC 17
-- Fix Xcode rebuild issue again, with a test!
-
-Changes in CMake 2.6.3 RC 16
-- Fix Xcode rebuild issue again...
+Changes in CMake 2.6.3 RC 17 - 15
+- Fix Xcode rebuild issue with static libraries and add a test.
 
 Changes in CMake 2.6.3 RC 15
 - Fix Xcode rebuild issue with static libraries
