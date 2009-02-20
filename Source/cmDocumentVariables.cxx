@@ -931,21 +931,17 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("EXECUTABLE_OUTPUT_PATH", cmProperty::VARIABLE,
      "Old executable location variable.",
-     "This variable should no longer be used as of CMake 2.6.  "
-     "Use the RUNTIME_OUTPUT_DIRECTORY target property instead.  "
-     "It will override this variable if it is set.\n"
-     "If set, this is the directory where all executables "
-     "built during the build process will be placed.",false,
+     "The target property RUNTIME_OUTPUT_DIRECTORY supercedes "
+     "this variable for a target if it is set.  "
+     "Executable targets are otherwise placed in this directory.",false,
      "Variables that Control the Build");
   cm->DefineProperty
     ("LIBRARY_OUTPUT_PATH", cmProperty::VARIABLE,
      "Old library location variable.",
-     "This variable should no longer be used as of CMake 2.6.  "
-     "Use the ARCHIVE_OUTPUT_DIRECTORY, LIBRARY_OUTPUT_DIRECTORY, and "
-     "RUNTIME_OUTPUT_DIRECTORY target properties instead.  "
-     "They will override this variable if they are set.\n"
-     "If set, this is the directory where all the libraries "
-     "built during the build process will be placed.",false,
+     "The target properties ARCHIVE_OUTPUT_DIRECTORY, "
+     "LIBRARY_OUTPUT_DIRECTORY, and RUNTIME_OUTPUT_DIRECTORY supercede "
+     "this variable for a target if they are set.  "
+     "Library targets are otherwise placed in this directory.",false,
      "Variables that Control the Build");
 
 
