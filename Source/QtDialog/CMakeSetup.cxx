@@ -67,6 +67,42 @@ static const char * cmDocumentationOptions[][3] =
 int main(int argc, char** argv)
 {
   cmSystemTools::FindExecutableDirectory(argv[0]);
+  // check docs first so that X is not need to get docs
+  // do docs, if args were given
+  cmDocumentation doc;
+  if(argc >1 && doc.CheckOptions(argc, argv))
+    {
+    // Construct and print requested documentation.
+    cmake hcm;
+    hcm.AddCMakePaths();
+    // just incase the install is bad avoid a seg fault
+    const char* root = hcm.GetCacheDefinition("CMAKE_ROOT");
+    if(root)
+      {
+      doc.SetCMakeRoot(root);
+      }
+    std::vector<cmDocumentationEntry> commands;
+    std::vector<cmDocumentationEntry> compatCommands;
+    std::map<std::string,cmDocumentationSection *> propDocs;
+
+    std::vector<cmDocumentationEntry> generators;
+    hcm.GetCommandDocumentation(commands, true, false);
+    hcm.GetCommandDocumentation(compatCommands, false, true);
+    hcm.GetGeneratorDocumentation(generators);
+    hcm.GetPropertiesDocumentation(propDocs);
+    doc.SetName("cmake");
+    doc.SetSection("Name",cmDocumentationName);
+    doc.SetSection("Usage",cmDocumentationUsage);
+    doc.SetSection("Description",cmDocumentationDescription);
+    doc.AppendSection("Generators",generators);
+    doc.PrependSection("Options",cmDocumentationOptions);
+    doc.SetSection("Commands",commands);
+    doc.SetSection("Compatilbility Commands", compatCommands);
+    doc.SetSections(propDocs);
+
+    return (doc.PrintRequestedDocumentation(std::cout)? 0:1);
+    }
+
   QApplication app(argc, argv);
   
   // clean out standard Qt paths for plugins, which we don't use anyway
@@ -106,42 +142,6 @@ int main(int argc, char** argv)
   app.setOrganizationName("Kitware");
   app.setWindowIcon(QIcon(":/Icons/CMakeSetup.png"));
   
-  // do docs, if args were given
-  cmDocumentation doc;
-  if(app.arguments().size() > 1 &&
-     doc.CheckOptions(app.argc(), app.argv()))
-    {
-    // Construct and print requested documentation.
-    cmake hcm;
-    hcm.AddCMakePaths();
-    // just incase the install is bad avoid a seg fault
-    const char* root = hcm.GetCacheDefinition("CMAKE_ROOT");
-    if(root)
-      {
-      doc.SetCMakeRoot(root);
-      }
-    std::vector<cmDocumentationEntry> commands;
-    std::vector<cmDocumentationEntry> compatCommands;
-    std::map<std::string,cmDocumentationSection *> propDocs;
-
-    std::vector<cmDocumentationEntry> generators;
-    hcm.GetCommandDocumentation(commands, true, false);
-    hcm.GetCommandDocumentation(compatCommands, false, true);
-    hcm.GetGeneratorDocumentation(generators);
-    hcm.GetPropertiesDocumentation(propDocs);
-    doc.SetName("cmake");
-    doc.SetSection("Name",cmDocumentationName);
-    doc.SetSection("Usage",cmDocumentationUsage);
-    doc.SetSection("Description",cmDocumentationDescription);
-    doc.AppendSection("Generators",generators);
-    doc.PrependSection("Options",cmDocumentationOptions);
-    doc.SetSection("Commands",commands);
-    doc.SetSection("Compatilbility Commands", compatCommands);
-    doc.SetSections(propDocs);
-
-    return (doc.PrintRequestedDocumentation(std::cout)? 0:1);
-    }
-
   CMakeSetupDialog dialog;
   QString title = QString("CMake %1");
   title = title.arg(cmVersion::GetCMakeVersion().c_str());
