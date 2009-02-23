@@ -20,7 +20,7 @@ message(" svnadmin = ${SVNADMIN}")
 # Isolate svn test operations from the user configuration.
 file(MAKE_DIRECTORY ${TOP}/config)
 set(SVNCMD ${SVN} --config-dir ${TOP}/config)
-set(SVNUSER --username testauthor --non-interactive)
+set(SVNUSER --username "test author" --non-interactive)
 
 #-----------------------------------------------------------------------------
 # Initialize the testing directory.
