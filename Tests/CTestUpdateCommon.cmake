@@ -88,13 +88,24 @@ endfunction(create_content)
 
 #-----------------------------------------------------------------------------
 # Function to update content.
-function(update_content dir added_var removed_var)
+function(update_content dir added_var removed_var dirs_var)
   file(APPEND ${TOP}/${dir}/foo.txt "foo line 2\n")
   file(WRITE ${TOP}/${dir}/zot.txt "zot\n")
   file(REMOVE ${TOP}/${dir}/bar.txt)
-  set(${added_var} zot.txt PARENT_SCOPE)
+  file(MAKE_DIRECTORY ${TOP}/${dir}/subdir)
+  file(WRITE ${TOP}/${dir}/subdir/foo.txt "foo\n")
+  file(WRITE ${TOP}/${dir}/subdir/bar.txt "bar\n")
+  set(${dirs_var} subdir PARENT_SCOPE)
+  set(${added_var} zot.txt subdir/foo.txt subdir/bar.txt PARENT_SCOPE)
   set(${removed_var} bar.txt PARENT_SCOPE)
 endfunction(update_content)
+
+#-----------------------------------------------------------------------------
+# Function to change existing files
+function(change_content dir)
+  file(APPEND ${TOP}/${dir}/foo.txt "foo line 3\n")
+  file(APPEND ${TOP}/${dir}/subdir/foo.txt "foo line 2\n")
+endfunction(change_content)
 
 #-----------------------------------------------------------------------------
 # Function to write CTestConfiguration.ini content.
@@ -136,7 +147,8 @@ function(run_dashboard_command_line bin_dir)
     )
 
   # Verify the updates reported by CTest.
-  check_updates(${bin_dir} foo.txt bar.txt zot.txt)
+  check_updates(${bin_dir} foo.txt bar.txt zot.txt
+                           subdir/foo.txt subdir/bar.txt)
 endfunction(run_dashboard_command_line)
 
 #-----------------------------------------------------------------------------
@@ -148,7 +160,8 @@ function(run_dashboard_script name)
     )
 
   # Verify the updates reported by CTest.
-  check_updates(dash-binary foo.txt bar.txt zot.txt)
+  check_updates(dash-binary foo.txt bar.txt zot.txt
+                            subdir/foo.txt subdir/bar.txt)
 endfunction(run_dashboard_script)
 
 #-----------------------------------------------------------------------------
