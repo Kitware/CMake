@@ -10,7 +10,7 @@ function(run_child)
     )
   if(FAILED)
     string(REGEX REPLACE "\n" "\n  " OUTPUT "${OUTPUT}")
-    message(FATAL_ERROR "Child failed.  Output is\n  ${OUTPUT}\n")
+    message(FATAL_ERROR "Child failed (${FAILED}), output is\n  ${OUTPUT}\n")
   endif(FAILED)
 endfunction(run_child)
 
