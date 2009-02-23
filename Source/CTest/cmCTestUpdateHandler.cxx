@@ -461,8 +461,6 @@ int cmCTestUpdateHandler::ProcessHandler()
 
   bool res = true;
 
-  updateCommand = "\"" + updateCommand + "\"";
-
   // First, check what the current state of repository is
   std::string command = "";
   switch( updateType )
@@ -471,7 +469,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     // TODO: CVS - for now just leave empty
     break;
   case cmCTestUpdateHandler::e_SVN:
-    command = updateCommand + " cleanup";
+    command = "\"" + updateCommand + "\" cleanup";
     break;
     }
 
@@ -513,7 +511,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     // TODO: CVS - for now just leave empty
     break;
   case cmCTestUpdateHandler::e_SVN:
-    command = updateCommand + " info";
+    command = "\"" + updateCommand + "\" info";
     break;
     }
 
@@ -598,7 +596,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     switch( updateType )
       {
     case cmCTestUpdateHandler::e_CVS:
-      command = updateCommand + " -z3 update " + updateOptions +
+      command = "\"" + updateCommand + "\" -z3 update " + updateOptions +
         " " + extra_update_opts;
       ofs << "* Update repository: " << std::endl;
       ofs << "  Command: " << command.c_str() << std::endl;
@@ -610,7 +608,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     case cmCTestUpdateHandler::e_SVN:
         {
         std::string partialOutput;
-        command = updateCommand + " update " + updateOptions +
+        command = "\"" + updateCommand + "\" update " + updateOptions +
           " " + extra_update_opts;
         ofs << "* Update repository: " << std::endl;
         ofs << "  Command: " << command.c_str() << std::endl;
@@ -620,7 +618,7 @@ int cmCTestUpdateHandler::ProcessHandler()
         ofs << "  Output: " << partialOutput.c_str() << std::endl;
         ofs << "  Errors: " << errors.c_str() << std::endl;
         goutput = partialOutput;
-        command = updateCommand + " status";
+        command = "\"" + updateCommand + "\" status";
         ofs << "* Status repository: " << std::endl;
         ofs << "  Command: " << command.c_str() << std::endl;
         res = this->CTest->RunCommand(command.c_str(), &partialOutput,
@@ -772,22 +770,22 @@ int cmCTestUpdateHandler::ProcessHandler()
         switch ( updateType )
           {
         case cmCTestUpdateHandler::e_CVS:
-          logcommand = updateCommand + " -z3 log -N \"" + file + "\"";
+          logcommand = "\""+updateCommand+"\" -z3 log -N \"" + file + "\"";
           break;
         case cmCTestUpdateHandler::e_SVN:
           if ( svn_latest_revision > 0 &&
             svn_latest_revision > svn_current_revision )
             {
             cmOStringStream logCommandStream;
-            logCommandStream << updateCommand << " log -r "
+            logCommandStream << "\"" << updateCommand << "\" log -r "
               << svn_current_revision << ":" << svn_latest_revision
               << " --xml \"" << file << "\"";
             logcommand = logCommandStream.str();
             }
           else
             {
-            logcommand = updateCommand +
-              " status  --verbose \"" + file + "\"";
+            logcommand = "\"" + updateCommand +
+              "\" status  --verbose \"" + file + "\"";
             svn_use_status = 1;
             }
           break;
