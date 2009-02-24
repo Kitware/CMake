@@ -310,6 +310,9 @@ public:
   //! Make string safe to be send as an URL
   static std::string MakeURLSafe(const std::string&);
 
+  /** Decode a URL to the original string.  */
+  static std::string DecodeURL(const std::string&);
+
   //! Should ctect configuration be updated. When using new style ctest
   // script, this should be true.
   void SetSuppressUpdatingCTestConfiguration(bool val)

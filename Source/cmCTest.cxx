@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
+#include <ctype.h>
 
 #include <memory> // auto_ptr
 
@@ -178,6 +179,26 @@ std::string cmCTest::MakeURLSafe(const std::string& str)
       }
     }
   return ost.str();
+}
+
+//----------------------------------------------------------------------------
+std::string cmCTest::DecodeURL(const std::string& in)
+{
+  std::string out;
+  for(const char* c = in.c_str(); *c; ++c)
+    {
+    if(*c == '%' && isxdigit(*(c+1)) && isxdigit(*(c+2)))
+      {
+      char buf[3] = {*(c+1), *(c+2), 0};
+      out.append(1, char(strtoul(buf, 0, 16)));
+      c += 2;
+      }
+    else
+      {
+      out.append(1, *c);
+      }
+    }
+  return out;
 }
 
 //----------------------------------------------------------------------
