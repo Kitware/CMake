@@ -17,7 +17,7 @@
 #ifndef cmCTestVC_h
 #define cmCTestVC_h
 
-#include "cmStandardIncludes.h"
+#include "cmProcessTools.h"
 
 class cmCTest;
 
@@ -25,7 +25,7 @@ class cmCTest;
  * \brief Base class for version control system handlers
  *
  */
-class cmCTestVC
+class cmCTestVC: public cmProcessTools
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
@@ -40,6 +40,13 @@ public:
   void SetSourceDirectory(std::string const& dir);
 
 protected:
+
+  /** Convert a list of arguments to a human-readable command line.  */
+  static std::string ComputeCommandLine(char const* const* cmd);
+
+  /** Run a command line and send output to given parsers.  */
+  bool RunChild(char const* const* cmd, OutputParser* out,
+                OutputParser* err, const char* workDir = 0);
 
   // Instance of cmCTest running the script.
   cmCTest* CTest;

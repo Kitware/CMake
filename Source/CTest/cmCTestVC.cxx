@@ -18,6 +18,8 @@
 
 #include "cmCTest.h"
 
+#include <cmsys/Process.h>
+
 //----------------------------------------------------------------------------
 cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log): CTest(ct), Log(log)
 {
@@ -38,4 +40,33 @@ void cmCTestVC::SetCommandLineTool(std::string const& tool)
 void cmCTestVC::SetSourceDirectory(std::string const& dir)
 {
   this->SourceDirectory = dir;
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestVC::RunChild(char const* const* cmd, OutputParser* out,
+                         OutputParser* err, const char* workDir)
+{
+  this->Log << this->ComputeCommandLine(cmd) << "\n";
+
+  cmsysProcess* cp = cmsysProcess_New();
+  cmsysProcess_SetCommand(cp, cmd);
+  workDir = workDir? workDir : this->SourceDirectory.c_str();
+  cmsysProcess_SetWorkingDirectory(cp, workDir);
+  this->RunProcess(cp, out, err);
+  int result = cmsysProcess_GetExitValue(cp);
+  cmsysProcess_Delete(cp);
+  return result == 0;
+}
+
+//----------------------------------------------------------------------------
+std::string cmCTestVC::ComputeCommandLine(char const* const* cmd)
+{
+  cmOStringStream line;
+  const char* sep = "";
+  for(const char* const* arg = cmd; *arg; ++arg)
+    {
+    line << sep << "\"" << *arg << "\"";
+    sep = " ";
+    }
+  return line.str();
 }
