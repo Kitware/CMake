@@ -32,14 +32,17 @@ MACRO(ADD_DOCS target dependency)
 ENDMACRO(ADD_DOCS target dependency)
 
 # Help cmake-gui find the Qt DLLs on Windows.
-IF(BUILD_QtDialog AND WIN32 AND EXISTS "${QT_QMAKE_EXECUTABLE}")
+SET(WIN_SHELL_GENS "Visual Studio|NMake|MinGW|Watcom|Borland")
+IF(BUILD_QtDialog AND "${CMAKE_GENERATOR}" MATCHES "${WIN_SHELL_GENS}"
+    AND EXISTS "${QT_QMAKE_EXECUTABLE}" AND NOT CMAKE_NO_AUTO_QT_ENV)
   GET_FILENAME_COMPONENT(Qt_BIN_DIR "${QT_QMAKE_EXECUTABLE}" PATH)
   IF(EXISTS "${Qt_BIN_DIR}/QtCore4.dll")
     # Tell the macro to set the path before running cmake-gui.
     STRING(REPLACE ";" "\\;" _PATH "PATH=${Qt_BIN_DIR};%PATH%")
     SET(cmake-gui-PATH COMMAND set "${_PATH}")
   ENDIF(EXISTS "${Qt_BIN_DIR}/QtCore4.dll")
-ENDIF(BUILD_QtDialog AND WIN32 AND EXISTS "${QT_QMAKE_EXECUTABLE}")
+ENDIF(BUILD_QtDialog AND "${CMAKE_GENERATOR}" MATCHES "${WIN_SHELL_GENS}"
+  AND EXISTS "${QT_QMAKE_EXECUTABLE}" AND NOT CMAKE_NO_AUTO_QT_ENV)
 
 # add the docs for the executables
 ADD_DOCS(ctest      ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt)
