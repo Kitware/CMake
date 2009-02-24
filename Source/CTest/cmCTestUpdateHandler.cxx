@@ -230,6 +230,8 @@ cmCTestUpdateHandler::cmCTestUpdateHandler()
 void cmCTestUpdateHandler::Initialize()
 {
   this->Superclass::Initialize();
+  this->UpdateCommand = "";
+  this->UpdateType = e_CVS;
 }
 
 //----------------------------------------------------------------------
@@ -264,20 +266,6 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
       return cmCTestUpdateHandler::e_SVN;
       }
     }
-  std::string sourceDirectory = this->GetOption("SourceDirectory");
-  cmCTestLog(this->CTest, DEBUG, "Check directory: "
-    << sourceDirectory.c_str() << std::endl);
-  sourceDirectory += "/.svn";
-  if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
-    {
-    return cmCTestUpdateHandler::e_SVN;
-    }
-  sourceDirectory = this->GetOption("SourceDirectory");
-  sourceDirectory += "/CVS";
-  if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
-    {
-    return cmCTestUpdateHandler::e_CVS;
-    }
   return cmCTestUpdateHandler::e_UNKNOWN;
 }
 
@@ -287,7 +275,6 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
 int cmCTestUpdateHandler::ProcessHandler()
 {
   int count = 0;
-  int updateType = e_CVS;
   std::string::size_type cc, kk;
   std::string goutput;
   std::string errors;
@@ -326,40 +313,14 @@ int cmCTestUpdateHandler::ProcessHandler()
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Updating the repository: "
     << sourceDirectory << std::endl);
 
-  // Get update command
-  std::string updateCommand
-    = this->CTest->GetCTestConfiguration("UpdateCommand");
-  if ( updateCommand.empty() )
+  if(!this->SelectVCS())
     {
-    updateCommand = this->CTest->GetCTestConfiguration("CVSCommand");
-    if ( updateCommand.empty() )
-      {
-      updateCommand = this->CTest->GetCTestConfiguration("SVNCommand");
-      if ( updateCommand.empty() )
-        {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-          "Cannot find CVSCommand, SVNCommand, or UpdateCommand key in the "
-          "DartConfiguration.tcl" << std::endl);
-        return -1;
-        }
-      else
-        {
-        updateType = e_SVN;
-        }
-      }
-    else
-      {
-      updateType = e_CVS;
-      }
-    }
-  else
-    {
-    updateType = this->DetermineType(updateCommand.c_str(),
-      this->CTest->GetCTestConfiguration("UpdateType").c_str());
+    return -1;
     }
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Use "
-    << cmCTestUpdateHandlerUpdateToString(updateType) << " repository type"
+    << cmCTestUpdateHandlerUpdateToString(this->UpdateType)
+    << " repository type"
     << std::endl;);
 
   // And update options
@@ -367,7 +328,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     = this->CTest->GetCTestConfiguration("UpdateOptions");
   if ( updateOptions.empty() )
     {
-    switch (updateType)
+    switch (this->UpdateType)
       {
     case cmCTestUpdateHandler::e_CVS:
       updateOptions = this->CTest->GetCTestConfiguration("CVSUpdateOptions");
@@ -400,7 +361,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     std::string today_update_date = current_time;
 
     // TODO: SVN
-    switch ( updateType )
+    switch ( this->UpdateType )
       {
     case cmCTestUpdateHandler::e_CVS:
       extra_update_opts += "-D \"" + today_update_date +" UTC\"";
@@ -415,13 +376,13 @@ int cmCTestUpdateHandler::ProcessHandler()
 
   // First, check what the current state of repository is
   std::string command = "";
-  switch( updateType )
+  switch( this->UpdateType )
     {
   case cmCTestUpdateHandler::e_CVS:
     // TODO: CVS - for now just leave empty
     break;
   case cmCTestUpdateHandler::e_SVN:
-    command = "\"" + updateCommand + "\" cleanup";
+    command = "\"" + this->UpdateCommand + "\" cleanup";
     break;
     }
 
@@ -457,13 +418,13 @@ int cmCTestUpdateHandler::ProcessHandler()
 
   // First, check what the current state of repository is
   command = "";
-  switch( updateType )
+  switch( this->UpdateType )
     {
   case cmCTestUpdateHandler::e_CVS:
     // TODO: CVS - for now just leave empty
     break;
   case cmCTestUpdateHandler::e_SVN:
-    command = "\"" + updateCommand + "\" info";
+    command = "\"" + this->UpdateCommand + "\" info";
     break;
     }
 
@@ -495,7 +456,7 @@ int cmCTestUpdateHandler::ProcessHandler()
         ofs << "--- Update information ---" << std::endl;
         ofs << goutput << std::endl;
         }
-      switch ( updateType )
+      switch ( this->UpdateType )
         {
       case cmCTestUpdateHandler::e_CVS:
         // TODO: CVS - for now just leave empty
@@ -545,10 +506,10 @@ int cmCTestUpdateHandler::ProcessHandler()
   if ( !this->CTest->GetShowOnly() )
     {
     command = "";
-    switch( updateType )
+    switch( this->UpdateType )
       {
     case cmCTestUpdateHandler::e_CVS:
-      command = "\"" + updateCommand + "\" -z3 update " + updateOptions +
+      command = "\""+this->UpdateCommand+"\" -z3 update " + updateOptions +
         " " + extra_update_opts;
       ofs << "* Update repository: " << std::endl;
       ofs << "  Command: " << command.c_str() << std::endl;
@@ -560,7 +521,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     case cmCTestUpdateHandler::e_SVN:
         {
         std::string partialOutput;
-        command = "\"" + updateCommand + "\" update " + updateOptions +
+        command = "\"" + this->UpdateCommand + "\" update " + updateOptions +
           " " + extra_update_opts;
         ofs << "* Update repository: " << std::endl;
         ofs << "  Command: " << command.c_str() << std::endl;
@@ -570,7 +531,7 @@ int cmCTestUpdateHandler::ProcessHandler()
         ofs << "  Output: " << partialOutput.c_str() << std::endl;
         ofs << "  Errors: " << errors.c_str() << std::endl;
         goutput = partialOutput;
-        command = "\"" + updateCommand + "\" status";
+        command = "\"" + this->UpdateCommand + "\" status";
         ofs << "* Status repository: " << std::endl;
         ofs << "  Command: " << command.c_str() << std::endl;
         res = this->CTest->RunCommand(command.c_str(), &partialOutput,
@@ -603,7 +564,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     << "\t<UpdateCommand>" << cmXMLSafe(command)
     << "</UpdateCommand>\n"
     << "\t<UpdateType>" << cmXMLSafe(
-      cmCTestUpdateHandlerUpdateToString(updateType))
+      cmCTestUpdateHandlerUpdateToString(this->UpdateType))
     << "</UpdateType>\n";
 
   // Even though it failed, we may have some useful information. Try to
@@ -643,7 +604,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   int numModified = 0;
   int numConflicting = 0;
   // In subversion, get the latest revision
-  if ( updateType == cmCTestUpdateHandler::e_SVN )
+  if ( this->UpdateType == cmCTestUpdateHandler::e_SVN )
     {
     for ( cc= 0; cc < lines.size(); cc ++ )
       {
@@ -715,24 +676,25 @@ int cmCTestUpdateHandler::ProcessHandler()
       if ( notLocallyModified )
         {
         std::string logcommand;
-        switch ( updateType )
+        switch ( this->UpdateType )
           {
         case cmCTestUpdateHandler::e_CVS:
-          logcommand = "\""+updateCommand+"\" -z3 log -N \"" + file + "\"";
+          logcommand = "\"" + this->UpdateCommand + "\" -z3 log -N \""
+            + file + "\"";
           break;
         case cmCTestUpdateHandler::e_SVN:
           if ( svn_latest_revision > 0 &&
             svn_latest_revision > svn_current_revision )
             {
             cmOStringStream logCommandStream;
-            logCommandStream << "\"" << updateCommand << "\" log -r "
+            logCommandStream << "\"" << this->UpdateCommand << "\" log -r "
               << svn_current_revision << ":" << svn_latest_revision
               << " --xml \"" << file << "\"";
             logcommand = logCommandStream.str();
             }
           else
             {
-            logcommand = "\"" + updateCommand +
+            logcommand = "\"" + this->UpdateCommand +
               "\" status  --verbose \"" + file + "\"";
             svn_use_status = 1;
             }
@@ -767,7 +729,7 @@ int cmCTestUpdateHandler::ProcessHandler()
         std::string semail1    = "Unknown";
         std::string comment1   = "";
         std::string srevision2 = "Unknown";
-        if ( updateType == cmCTestUpdateHandler::e_CVS )
+        if ( this->UpdateType == cmCTestUpdateHandler::e_CVS )
           {
           bool have_first = false;
           bool have_second = false;
@@ -820,7 +782,7 @@ int cmCTestUpdateHandler::ProcessHandler()
               }
             }
           }
-        else if ( updateType == cmCTestUpdateHandler::e_SVN )
+        else if ( this->UpdateType == cmCTestUpdateHandler::e_SVN )
           {
           if ( svn_use_status )
             {
@@ -1110,5 +1072,72 @@ bool cmCTestUpdateHandler::InitialCheckout(std::ostream& ofs)
       return false;
       }
     }
+  return true;
+}
+
+//----------------------------------------------------------------------
+int cmCTestUpdateHandler::DetectVCS(const char* dir)
+{
+  std::string sourceDirectory = dir;
+  cmCTestLog(this->CTest, DEBUG, "Check directory: "
+    << sourceDirectory.c_str() << std::endl);
+  sourceDirectory += "/.svn";
+  if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
+    {
+    return cmCTestUpdateHandler::e_SVN;
+    }
+  sourceDirectory = dir;
+  sourceDirectory += "/CVS";
+  if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
+    {
+    return cmCTestUpdateHandler::e_CVS;
+    }
+  return cmCTestUpdateHandler::e_UNKNOWN;
+}
+
+//----------------------------------------------------------------------
+bool cmCTestUpdateHandler::SelectVCS()
+{
+  // Get update command
+  this->UpdateCommand = this->CTest->GetCTestConfiguration("UpdateCommand");
+
+  // Detect the VCS managing the source tree.
+  this->UpdateType = this->DetectVCS(this->GetOption("SourceDirectory"));
+  if (this->UpdateType == e_UNKNOWN)
+    {
+    // The source tree does not have a recognized VCS.  Check the
+    // configuration value or command name.
+    this->UpdateType = this->DetermineType(this->UpdateCommand.c_str(),
+      this->CTest->GetCTestConfiguration("UpdateType").c_str());
+    }
+
+  // If no update command was specified, lookup one for this VCS tool.
+  if (this->UpdateCommand.empty())
+    {
+    const char* key = 0;
+    switch (this->UpdateType)
+      {
+      case e_CVS: key = "CVSCommand"; break;
+      case e_SVN: key = "SVNCommand"; break;
+      default: break;
+      }
+    if (key)
+      {
+      this->UpdateCommand = this->CTest->GetCTestConfiguration(key);
+      }
+    if (this->UpdateCommand.empty())
+      {
+      cmOStringStream e;
+      e << "Cannot find UpdateCommand ";
+      if (key)
+        {
+        e << "or " << key;
+        }
+      e << " configuration key.";
+      cmCTestLog(this->CTest, ERROR_MESSAGE, e.str() << std::endl);
+      return false;
+      }
+    }
+
   return true;
 }

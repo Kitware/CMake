@@ -63,7 +63,13 @@ private:
   // Determine the type of version control
   int DetermineType(const char* cmd, const char* type);
 
+  // The VCS command to update the working tree.
+  std::string UpdateCommand;
+  int UpdateType;
+
   bool InitialCheckout(std::ostream& ofs);
+  int DetectVCS(const char* dir);
+  bool SelectVCS();
 };
 
 #if defined(__sgi) && !defined(__GNUC__)
