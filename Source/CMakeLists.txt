@@ -342,6 +342,9 @@ SET(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestTestHandler.cxx
   CTest/cmCTestUpdateCommand.cxx
   CTest/cmCTestUpdateHandler.cxx
+
+  CTest/cmCTestVC.cxx
+  CTest/cmCTestVC.h
   )
 
 # Build CTestLib
