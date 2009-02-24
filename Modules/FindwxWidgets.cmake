@@ -41,7 +41,9 @@
 #                               rpath on UNIX. Typically an empty string
 #                               in WIN32 environment.
 #  wxWidgets_DEFINITIONS      - Contains defines required to compile/link
-#                               against WX, e.g. -DWXUSINGDLL
+#                               against WX, e.g. WXUSINGDLL
+#  wxWidgets_DEFINITIONS_DEBUG- Contains defines required to compile/link
+#                               against WX debug builds, e.g. __WXDEBUG__
 #  wxWidgets_CXX_FLAGS        - Include dirs and ompiler flags for
 #                               unices, empty on WIN32. Esentially
 #                               "`wx-config --cxxflags`".
@@ -413,7 +415,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
       wxWidgets-2.7.4
       wxWidgets-2.7.3
       wxWidgets-2.7.2
-      wxWidgest-2.7.1
+      wxWidgets-2.7.1
       wxWidgets-2.7.0
       wxWidgets-2.7.0-1
       wxWidgets-2.6.4
@@ -491,7 +493,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     IF(WX_LIB_DIR)
       # If building shared libs, define WXUSINGDLL to use dllimport.
       IF(WX_LIB_DIR MATCHES ".*[dD][lL][lL].*")
-        SET(wxWidgets_DEFINITIONS "-DWXUSINGDLL")
+        SET(wxWidgets_DEFINITIONS WXUSINGDLL)
         DBG_MSG_V("detected SHARED/DLL tree WX_LIB_DIR=${WX_LIB_DIR}")
       ENDIF(WX_LIB_DIR MATCHES ".*[dD][lL][lL].*")
 
@@ -563,6 +565,14 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
 
         # Settings for requested libs (i.e., include dir, libraries, etc.).
         WX_SET_LIBRARIES(wxWidgets_FIND_COMPONENTS "${DBG}")
+
+        # Add necessary definitions for unicode builds
+        IF("${UCD}" STREQUAL "u")
+          LIST(APPEND wxWidgets_DEFINITIONS UNICODE _UNICODE)
+        ENDIF("${UCD}" STREQUAL "u")
+
+        # Add necessary definitions for debug builds
+        SET(wxWidgets_DEFINITIONS_DEBUG _DEBUG __WXDEBUG__)
 
       ENDIF(WX_CONFIGURATION)
     ENDIF(WX_LIB_DIR)
@@ -692,11 +702,13 @@ ELSE(wxWidgets_FIND_STYLE STREQUAL "win32")
 
         DBG_MSG_V("wxWidgets_CXX_FLAGS=${wxWidgets_CXX_FLAGS}")
 
-        # parse definitions from cxxflags; drop -D* from CXXFLAGS
+        # parse definitions from cxxflags; drop -D* from CXXFLAGS and the -D prefix
         STRING(REGEX MATCHALL "-D[^;]+"
           wxWidgets_DEFINITIONS  "${wxWidgets_CXX_FLAGS}")
         STRING(REGEX REPLACE "-D[^;]+;" ""
           wxWidgets_CXX_FLAGS "${wxWidgets_CXX_FLAGS}")
+        STRING(REPLACE "-D" ""
+          wxWidgets_INCLUDE_DIRS "${wxWidgets_DEFINITIONS}")
 
         # parse include dirs from cxxflags; drop -I prefix
         STRING(REGEX MATCHALL "-I[^;]+"
