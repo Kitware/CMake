@@ -39,6 +39,9 @@ public:
   /** Top-level source directory.  */
   void SetSourceDirectory(std::string const& dir);
 
+  /** Get the date/time specification for the current nightly start time.  */
+  std::string GetNightlyTime();
+
   /** Perform cleanup operations on the work tree.  */
   void Cleanup();
 

@@ -364,18 +364,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   std::string extra_update_opts;
   if ( this->CTest->GetTestModel() == cmCTest::NIGHTLY )
     {
-    struct tm* t = this->CTest->GetNightlyTime(
-      this->CTest->GetCTestConfiguration("NightlyStartTime"),
-      this->CTest->GetTomorrowTag());
-    char current_time[1024];
-    sprintf(current_time, "%04d-%02d-%02d %02d:%02d:%02d",
-      t->tm_year + 1900,
-      t->tm_mon + 1,
-      t->tm_mday,
-      t->tm_hour,
-      t->tm_min,
-      t->tm_sec);
-    std::string today_update_date = current_time;
+    std::string today_update_date = vc->GetNightlyTime();
 
     // TODO: SVN
     switch ( this->UpdateType )
