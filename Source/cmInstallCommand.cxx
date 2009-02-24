@@ -855,6 +855,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
                DoingConfigurations, DoingComponent };
   Doing doing = DoingDirs;
   bool in_match_mode = false;
+  bool optional = false;
   std::vector<std::string> dirs;
   const char* destination = 0;
   std::string permissions_file;
@@ -877,6 +878,21 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 
       // Switch to setting the destination property.
       doing = DoingDestination;
+      }
+    else if(args[i] == "OPTIONAL")
+      {
+      if(in_match_mode)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      // Mark the rule as optional.
+      optional = true;
+      doing = DoingNone;
       }
     else if(args[i] == "PATTERN")
       {
@@ -1144,7 +1160,8 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
                                     permissions_dir.c_str(),
                                     configurations,
                                     component.c_str(),
-                                    literal_args.c_str()));
+                                    literal_args.c_str(),
+                                    optional));
 
   // Tell the global generator about any installation component names
   // specified.

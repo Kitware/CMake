@@ -215,7 +215,7 @@ public:
       "  install(DIRECTORY dirs... DESTINATION <dir>\n"
       "          [FILE_PERMISSIONS permissions...]\n"
       "          [DIRECTORY_PERMISSIONS permissions...]\n"
-      "          [USE_SOURCE_PERMISSIONS]\n"
+      "          [USE_SOURCE_PERMISSIONS] [OPTIONAL]\n"
       "          [CONFIGURATIONS [Debug|Release|...]]\n"
       "          [COMPONENT <component>] [FILES_MATCHING]\n"
       "          [[PATTERN <pattern> | REGEX <regex>]\n"

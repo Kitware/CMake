@@ -31,7 +31,8 @@ public:
                               const char* dir_permissions,
                               std::vector<std::string> const& configurations,
                               const char* component,
-                              const char* literal_args);
+                              const char* literal_args,
+                              bool optional = false);
   virtual ~cmInstallDirectoryGenerator();
 
 protected:
@@ -40,6 +41,7 @@ protected:
   std::string FilePermissions;
   std::string DirPermissions;
   std::string LiteralArguments;
+  bool Optional;
 };
 
 #endif

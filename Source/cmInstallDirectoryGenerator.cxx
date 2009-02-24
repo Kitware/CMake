@@ -26,10 +26,11 @@ cmInstallDirectoryGenerator
                               const char* dir_permissions,
                               std::vector<std::string> const& configurations,
                               const char* component,
-                              const char* literal_args):
+                              const char* literal_args,
+                              bool optional):
   cmInstallGenerator(dest, configurations, component), Directories(dirs),
   FilePermissions(file_permissions), DirPermissions(dir_permissions),
-  LiteralArguments(literal_args)
+  LiteralArguments(literal_args), Optional(optional)
 {
 }
 
@@ -45,12 +46,11 @@ cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
                                                    Indent const& indent)
 {
   // Write code to install the directories.
-  bool not_optional = false;
   const char* no_properties = 0;
   const char* no_rename = 0;
   this->AddInstallRule(os, cmTarget::INSTALL_DIRECTORY,
                        this->Directories,
-                       not_optional, no_properties,
+                       this->Optional, no_properties,
                        this->FilePermissions.c_str(),
                        this->DirPermissions.c_str(),
                        no_rename, this->LiteralArguments.c_str(),

@@ -270,6 +270,9 @@ ELSE(STAGE2)
   # Test empty directory installation.
   INSTALL(DIRECTORY DESTINATION MyTest/share/empty)
 
+  # Test optional directory installation.
+  INSTALL(DIRECTORY does-not-exist DESTINATION MyTest/share OPTIONAL)
+
   # Test user-specified install scripts, with and without COMPONENT.
   INSTALL(
     SCRIPT InstallScript1.cmake
