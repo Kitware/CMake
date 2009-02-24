@@ -850,15 +850,10 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
 bool
 cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 {
-  bool doing_dirs = true;
-  bool doing_destination = false;
-  bool doing_pattern = false;
-  bool doing_regex = false;
-  bool doing_permissions_file = false;
-  bool doing_permissions_dir = false;
-  bool doing_permissions_match = false;
-  bool doing_configurations = false;
-  bool doing_component = false;
+  enum Doing { DoingNone, DoingDirs, DoingDestination, DoingPattern,
+               DoingRegex, DoingPermsFile, DoingPermsDir, DoingPermsMatch,
+               DoingConfigurations, DoingComponent };
+  Doing doing = DoingDirs;
   bool in_match_mode = false;
   std::vector<std::string> dirs;
   const char* destination = 0;
@@ -881,47 +876,24 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         }
 
       // Switch to setting the destination property.
-      doing_dirs = false;
-      doing_destination = true;
-      doing_pattern = false;
-      doing_regex = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_configurations = false;
-      doing_component = false;
+      doing = DoingDestination;
       }
     else if(args[i] == "PATTERN")
       {
       // Switch to a new pattern match rule.
-      doing_dirs = false;
-      doing_destination = false;
-      doing_pattern = true;
-      doing_regex = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_permissions_match = false;
-      doing_configurations = false;
-      doing_component = false;
+      doing = DoingPattern;
       in_match_mode = true;
       }
     else if(args[i] == "REGEX")
       {
       // Switch to a new regex match rule.
-      doing_dirs = false;
-      doing_destination = false;
-      doing_pattern = false;
-      doing_regex = true;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_permissions_match = false;
-      doing_configurations = false;
-      doing_component = false;
+      doing = DoingRegex;
       in_match_mode = true;
       }
     else if(args[i] == "EXCLUDE")
       {
       // Add this property to the current match rule.
-      if(!in_match_mode || doing_pattern || doing_regex)
+      if(!in_match_mode || doing == DoingPattern || doing == DoingRegex)
         {
         cmOStringStream e;
         e << args[0] << " does not allow \""
@@ -930,7 +902,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         return false;
         }
       literal_args += " EXCLUDE";
-      doing_permissions_match = false;
+      doing = DoingNone;
       }
     else if(args[i] == "PERMISSIONS")
       {
@@ -945,7 +917,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 
       // Switch to setting the current match permissions property.
       literal_args += " PERMISSIONS";
-      doing_permissions_match = true;
+      doing = DoingPermsMatch;
       }
     else if(args[i] == "FILE_PERMISSIONS")
       {
@@ -959,14 +931,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         }
 
       // Switch to setting the file permissions property.
-      doing_dirs = false;
-      doing_destination = false;
-      doing_pattern = false;
-      doing_regex = false;
-      doing_permissions_file = true;
-      doing_permissions_dir = false;
-      doing_configurations = false;
-      doing_component = false;
+      doing = DoingPermsFile;
       }
     else if(args[i] == "DIRECTORY_PERMISSIONS")
       {
@@ -980,14 +945,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         }
 
       // Switch to setting the directory permissions property.
-      doing_dirs = false;
-      doing_destination = false;
-      doing_pattern = false;
-      doing_regex = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = true;
-      doing_configurations = false;
-      doing_component = false;
+      doing = DoingPermsDir;
       }
     else if(args[i] == "USE_SOURCE_PERMISSIONS")
       {
@@ -1001,15 +959,8 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         }
 
       // Add this option literally.
-      doing_dirs = false;
-      doing_destination = false;
-      doing_pattern = false;
-      doing_regex = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_configurations = false;
-      doing_component = false;
       literal_args += " USE_SOURCE_PERMISSIONS";
+      doing = DoingNone;
       }
     else if(args[i] == "FILES_MATCHING")
       {
@@ -1023,16 +974,8 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         }
 
       // Add this option literally.
-      doing_dirs = false;
-      doing_destination = false;
-      doing_pattern = false;
-      doing_regex = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_permissions_match = false;
-      doing_configurations = false;
-      doing_component = false;
       literal_args += " FILES_MATCHING";
+      doing = DoingNone;
       }
     else if(args[i] == "CONFIGURATIONS")
       {
@@ -1046,14 +989,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         }
 
       // Switch to setting the configurations property.
-      doing_dirs = false;
-      doing_destination = false;
-      doing_pattern = false;
-      doing_regex = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_configurations = true;
-      doing_component = false;
+      doing = DoingConfigurations;
       }
     else if(args[i] == "COMPONENT")
       {
@@ -1067,16 +1003,9 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         }
 
       // Switch to setting the component property.
-      doing_dirs = false;
-      doing_destination = false;
-      doing_pattern = false;
-      doing_regex = false;
-      doing_permissions_file = false;
-      doing_permissions_dir = false;
-      doing_configurations = false;
-      doing_component = true;
+      doing = DoingComponent;
       }
-    else if(doing_dirs)
+    else if(doing == DoingDirs)
       {
       // Convert this directory to a full path.
       std::string dir = args[i];
@@ -1101,16 +1030,16 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       // Store the directory for installation.
       dirs.push_back(dir);
       }
-    else if(doing_configurations)
+    else if(doing == DoingConfigurations)
       {
       configurations.push_back(args[i]);
       }
-    else if(doing_destination)
+    else if(doing == DoingDestination)
       {
       destination = args[i].c_str();
-      doing_destination = false;
+      doing = DoingNone;
       }
-    else if(doing_pattern)
+    else if(doing == DoingPattern)
       {
       // Convert the pattern to a regular expression.  Require a
       // leading slash and trailing end-of-string in the matched
@@ -1121,9 +1050,9 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       cmSystemTools::ReplaceString(regex, "\\", "\\\\");
       literal_args += regex;
       literal_args += "$\"";
-      doing_pattern = false;
+      doing = DoingNone;
       }
-    else if(doing_regex)
+    else if(doing == DoingRegex)
       {
       literal_args += " REGEX \"";
     // Match rules are case-insensitive on some platforms.
@@ -1135,14 +1064,14 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       cmSystemTools::ReplaceString(regex, "\\", "\\\\");
       literal_args += regex;
       literal_args += "\"";
-      doing_regex = false;
+      doing = DoingNone;
       }
-    else if(doing_component)
+    else if(doing == DoingComponent)
       {
       component = args[i];
-      doing_component = false;
+      doing = DoingNone;
       }
-    else if(doing_permissions_file)
+    else if(doing == DoingPermsFile)
      {
      // Check the requested permission.
      if(!cmInstallCommandArguments::CheckPermissions(args[i],permissions_file))
@@ -1154,7 +1083,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         return false;
         }
       }
-    else if(doing_permissions_dir)
+    else if(doing == DoingPermsDir)
       {
       // Check the requested permission.
       if(!cmInstallCommandArguments::CheckPermissions(args[i],permissions_dir))
@@ -1166,7 +1095,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
         return false;
         }
       }
-    else if(doing_permissions_match)
+    else if(doing == DoingPermsMatch)
       {
       // Check the requested permission.
       if(!cmInstallCommandArguments::CheckPermissions(args[i], literal_args))
