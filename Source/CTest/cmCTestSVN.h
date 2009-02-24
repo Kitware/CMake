@@ -31,9 +31,23 @@ public:
 
   virtual ~cmCTestSVN();
 
+  int GetOldRevision() { return atoi(this->OldRevision.c_str()); }
+  int GetNewRevision() { return atoi(this->NewRevision.c_str()); }
 private:
   // Implement cmCTestVC internal API.
   virtual void CleanupImpl();
+  virtual void NoteOldRevision();
+  virtual void NoteNewRevision();
+
+  // Old and new repository revisions.
+  std::string OldRevision;
+  std::string NewRevision;
+
+  std::string LoadInfo();
+
+  // Parsing helper classes.
+  class InfoParser;
+  friend class InfoParser;
 };
 
 #endif

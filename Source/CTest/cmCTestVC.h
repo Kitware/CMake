@@ -45,9 +45,13 @@ public:
   /** Perform cleanup operations on the work tree.  */
   void Cleanup();
 
+  void MarkOldRevision() { this->NoteOldRevision(); }
+  void MarkNewRevision() { this->NoteNewRevision(); }
 protected:
   // Internal API to be implemented by subclasses.
   virtual void CleanupImpl();
+  virtual void NoteOldRevision();
+  virtual void NoteNewRevision();
 
   /** Convert a list of arguments to a human-readable command line.  */
   static std::string ComputeCommandLine(char const* const* cmd);

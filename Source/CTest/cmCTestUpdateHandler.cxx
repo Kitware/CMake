@@ -383,73 +383,18 @@ int cmCTestUpdateHandler::ProcessHandler()
 
   bool res = true;
 
-  // First, check what the current state of repository is
-  std::string command = "";
-  switch( this->UpdateType )
-    {
-  case cmCTestUpdateHandler::e_CVS:
-    // TODO: CVS - for now just leave empty
-    break;
-  case cmCTestUpdateHandler::e_SVN:
-    command = "\"" + this->UpdateCommand + "\" info";
-    break;
-    }
-
   // CVS variables
   // SVN variables
   int svn_current_revision = 0;
   int svn_latest_revision = 0;
   int svn_use_status = 0;
 
-  //
-  // Get initial repository information if that is possible. With subversion,
-  // this will check the current revision.
-  //
-  if ( !command.empty() )
+  // Get initial repository information if that is possible.
+  vc->MarkOldRevision();
+  if(this->UpdateType == e_SVN)
     {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-      "* Get repository information: " << command.c_str() << std::endl);
-    if ( !this->CTest->GetShowOnly() )
-      {
-      ofs << "* Get repository information" << std::endl;
-      ofs << "  Command: " << command.c_str() << std::endl;
-      res = this->CTest->RunCommand(command.c_str(), &goutput, &errors,
-        &retVal, sourceDirectory, 0 /*this->TimeOut*/);
-
-      ofs << "  Output: " << goutput.c_str() << std::endl;
-      ofs << "  Errors: " << errors.c_str() << std::endl;
-      if ( ofs )
-        {
-        ofs << "--- Update information ---" << std::endl;
-        ofs << goutput << std::endl;
-        }
-      switch ( this->UpdateType )
-        {
-      case cmCTestUpdateHandler::e_CVS:
-        // TODO: CVS - for now just leave empty
-        break;
-      case cmCTestUpdateHandler::e_SVN:
-          {
-          cmsys::RegularExpression current_revision_regex(
-            "Revision: ([0-9]+)");
-          if ( current_revision_regex.find(goutput.c_str()) )
-            {
-            std::string currentRevisionString
-              = current_revision_regex.match(1);
-            svn_current_revision = atoi(currentRevisionString.c_str());
-            cmCTestLog(this->CTest, HANDLER_OUTPUT,
-              "   Old revision of repository is: " << svn_current_revision
-              << std::endl);
-            }
-          }
-        break;
-        }
-      }
-    else
-      {
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-        "Get information with command: " << command << std::endl);
-      }
+    svn_current_revision =
+      static_cast<cmCTestSVN*>(vc.get())->GetOldRevision();
     }
 
 
@@ -468,6 +413,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     static_cast<unsigned int>(cmSystemTools::GetTime());
   double elapsed_time_start = cmSystemTools::GetTime();
 
+  std::string command;
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "* Update repository: "
     << command.c_str() << std::endl);
   if ( !this->CTest->GetShowOnly() )
@@ -570,31 +516,13 @@ int cmCTestUpdateHandler::ProcessHandler()
   int numUpdated = 0;
   int numModified = 0;
   int numConflicting = 0;
-  // In subversion, get the latest revision
+
+  // Get final repository information if that is possible.
+  vc->MarkNewRevision();
   if ( this->UpdateType == cmCTestUpdateHandler::e_SVN )
     {
-    for ( cc= 0; cc < lines.size(); cc ++ )
-      {
-      const char* line = lines[cc].c_str();
-      if ( svn_latest_revision_regex.find(line) )
-        {
-        svn_latest_revision = atoi(
-          svn_latest_revision_regex.match(2).c_str());
-        }
-      }
-    if ( svn_latest_revision <= 0 )
-      {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-        "Problem determining the current "
-        "revision of the repository from output:" << std::endl
-        << goutput.c_str() << std::endl);
-      }
-    else
-      {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
-        "   Current revision of repository is: " << svn_latest_revision
-        << std::endl);
-      }
+    svn_latest_revision =
+      static_cast<cmCTestSVN*>(vc.get())->GetNewRevision();
     }
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT,

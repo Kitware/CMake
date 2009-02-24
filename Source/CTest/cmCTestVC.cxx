@@ -102,3 +102,15 @@ void cmCTestVC::CleanupImpl()
 {
   // We do no cleanup by default.
 }
+
+//----------------------------------------------------------------------------
+void cmCTestVC::NoteOldRevision()
+{
+  // We do nothing by default.
+}
+
+//----------------------------------------------------------------------------
+void cmCTestVC::NoteNewRevision()
+{
+  // We do nothing by default.
+}
