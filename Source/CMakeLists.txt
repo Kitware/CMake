@@ -187,6 +187,8 @@ SET(SRCS
   cmOrderDirectories.h
   cmPolicies.h
   cmPolicies.cxx
+  cmProcessTools.cxx
+  cmProcessTools.h
   cmProperty.cxx
   cmProperty.h
   cmPropertyDefinition.cxx
