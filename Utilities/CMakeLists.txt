@@ -12,6 +12,7 @@ MACRO(ADD_DOCS target dependency)
   IF(CMD)
     ADD_CUSTOM_COMMAND(
       OUTPUT ${CMake_BINARY_DIR}/Docs/${target}.txt
+      ${${target}-PATH} # Possibly set PATH, see below.
       COMMAND ${CMD}
       ARGS --help-full ${CMake_BINARY_DIR}/Docs/${target}.txt
            --help-full ${CMake_BINARY_DIR}/Docs/${target}.html
@@ -29,6 +30,16 @@ MACRO(ADD_DOCS target dependency)
     SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/${target}.txt)
   ENDIF(CMD)
 ENDMACRO(ADD_DOCS target dependency)
+
+# Help cmake-gui find the Qt DLLs on Windows.
+IF(BUILD_QtDialog AND WIN32 AND EXISTS "${QT_QMAKE_EXECUTABLE}")
+  GET_FILENAME_COMPONENT(Qt_BIN_DIR "${QT_QMAKE_EXECUTABLE}" PATH)
+  IF(EXISTS "${Qt_BIN_DIR}/QtCore4.dll")
+    # Tell the macro to set the path before running cmake-gui.
+    STRING(REPLACE ";" "\\;" _PATH "PATH=${Qt_BIN_DIR};%PATH%")
+    SET(cmake-gui-PATH COMMAND set "${_PATH}")
+  ENDIF(EXISTS "${Qt_BIN_DIR}/QtCore4.dll")
+ENDIF(BUILD_QtDialog AND WIN32 AND EXISTS "${QT_QMAKE_EXECUTABLE}")
 
 # add the docs for the executables
 ADD_DOCS(ctest      ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt)
