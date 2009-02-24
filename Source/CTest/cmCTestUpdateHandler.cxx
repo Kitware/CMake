@@ -27,6 +27,12 @@
 #include "cmXMLParser.h"
 #include "cmXMLSafe.h"
 
+#include "cmCTestVC.h"
+#include "cmCTestCVS.h"
+#include "cmCTestSVN.h"
+
+#include <cmsys/auto_ptr.hxx>
+
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
 
@@ -322,6 +328,17 @@ int cmCTestUpdateHandler::ProcessHandler()
     << cmCTestUpdateHandlerUpdateToString(this->UpdateType)
     << " repository type"
     << std::endl;);
+
+  // Create an object to interact with the VCS tool.
+  cmsys::auto_ptr<cmCTestVC> vc;
+  switch (this->UpdateType)
+    {
+    case e_CVS: vc.reset(new cmCTestCVS(this->CTest, ofs)); break;
+    case e_SVN: vc.reset(new cmCTestSVN(this->CTest, ofs)); break;
+    default:    vc.reset(new cmCTestVC(this->CTest, ofs));  break;
+    }
+  vc->SetCommandLineTool(this->UpdateCommand);
+  vc->SetSourceDirectory(sourceDirectory);
 
   // And update options
   std::string updateOptions

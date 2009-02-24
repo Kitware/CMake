@@ -345,6 +345,10 @@ SET(CTEST_SRCS cmCTest.cxx
 
   CTest/cmCTestVC.cxx
   CTest/cmCTestVC.h
+  CTest/cmCTestCVS.cxx
+  CTest/cmCTestCVS.h
+  CTest/cmCTestSVN.cxx
+  CTest/cmCTestSVN.h
   )
 
 # Build CTestLib
