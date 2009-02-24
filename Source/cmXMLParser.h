@@ -91,6 +91,9 @@ protected:
   //! Called by Parse to report an XML syntax error.
   virtual void ReportXmlParseError();  
 
+  /** Called by ReportXmlParseError with basic error info.  */
+  virtual void ReportError(int line, int column, const char* msg);
+
   //! Utility for convenience of subclasses.  Wraps isspace C library
   // routine.
   static int IsSpace(char c);  

@@ -211,10 +211,15 @@ void cmXMLParserCharacterDataHandler(void* parser, const char* data,
 //----------------------------------------------------------------------------
 void cmXMLParser::ReportXmlParseError()
 {
-  std::cerr << "Error parsing XML in stream at line "
-    << XML_GetCurrentLineNumber(static_cast<XML_Parser>(this->Parser))
-    << ": " 
-    << XML_ErrorString(XML_GetErrorCode(
-        static_cast<XML_Parser>(this->Parser))) << std::endl;
+  XML_Parser* parser = static_cast<XML_Parser*>(this->Parser);
+  this->ReportError(XML_GetCurrentLineNumber(parser),
+                    XML_GetCurrentColumnNumber(parser),
+                    XML_ErrorString(XML_GetErrorCode(parser)));
 }
 
+//----------------------------------------------------------------------------
+void cmXMLParser::ReportError(int line, int, const char* msg)
+{
+  std::cerr << "Error parsing XML in stream at line "
+            << line << ": " << msg << std::endl;
+}
