@@ -127,6 +127,7 @@ if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
     in_interface/module.f90)
 
   add_definitions(-DFOO -DBAR=1)
+  include_directories(${testf_SOURCE_DIR}/include)
   add_executable(test_preprocess test_preprocess.F90)
 
   set(TEST_MODULE_DEPENDS 1)
