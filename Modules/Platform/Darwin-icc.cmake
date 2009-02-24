@@ -103,7 +103,6 @@ SET(CMAKE_Fortran_CREATE_SHARED_MODULE
 #  We can use $ENV{INTEL_LICENSE_FILE} to try and get at the installation location for ICC. 
 # We also need to consider to use cce (which is the 64bit compiler) and not JUST the 32bit compiler.
 # I have no idea what the best way to do that would be.
-SET(CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES /usr/local/include )
 
 
 # default to searching for frameworks first

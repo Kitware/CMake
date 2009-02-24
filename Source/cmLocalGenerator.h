@@ -189,8 +189,7 @@ public:
     { return true; }
 
   /** Get the include flags for the current makefile and language.  */
-  void GetIncludeDirectories(std::vector<std::string>& dirs,
-                             bool filter_system_dirs = true);
+  void GetIncludeDirectories(std::vector<std::string>& dirs);
 
   /** Compute the language used to compile the given source file.  */
   const char* GetSourceFileLanguage(const cmSourceFile& source);

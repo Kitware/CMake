@@ -1293,8 +1293,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
-                                             bool filter_system_dirs)
+void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
 {
   // Need to decide whether to automatically include the source and
   // binary directories at the beginning of the include path.
@@ -1357,24 +1356,6 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       {
       dirs.push_back(this->Makefile->GetStartDirectory());
       emitted.insert(this->Makefile->GetStartDirectory());
-      }
-    }
-
-  if(filter_system_dirs)
-    {
-    // Do not explicitly add the standard include path "/usr/include".
-    // This can cause problems with certain standard library
-    // implementations because the wrong headers may be found first.
-    emitted.insert("/usr/include");
-    if(const char* implicitIncludes = this->Makefile->GetDefinition
-       ("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))
-      {
-      std::vector<std::string> implicitIncludeVec;
-      cmSystemTools::ExpandListArgument(implicitIncludes, implicitIncludeVec);
-      for(unsigned int k = 0; k < implicitIncludeVec.size(); ++k)
-        {
-        emitted.insert(implicitIncludeVec[k]);
-        }
       }
     }
 
