@@ -105,6 +105,9 @@ protected:
   //! Send the given c-style string to the XML parser.
   int ParseBuffer(const char* buffer);
 
+  /** Helps subclasses search for attributes on elements.  */
+  static const char* FindAttribute(const char** atts, const char* attribute);
+
   //! Callbacks for the expat
   friend void cmXMLParserStartElement(void*, const char*, const char**);
   friend void cmXMLParserEndElement(void*, const char*);

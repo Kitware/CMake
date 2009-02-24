@@ -181,6 +181,23 @@ int cmXMLParser::IsSpace(char c)
 }
 
 //----------------------------------------------------------------------------
+const char* cmXMLParser::FindAttribute(const char** atts,
+                                       const char* attribute)
+{
+  if(atts && attribute)
+    {
+    for(const char** a = atts; *a && *(a+1); a += 2)
+      {
+      if(strcmp(*a, attribute) == 0)
+        {
+        return *(a+1);
+        }
+      }
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
 void cmXMLParserStartElement(void* parser, const char *name,
                               const char **atts)
 {
