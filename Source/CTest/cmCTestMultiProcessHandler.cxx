@@ -240,6 +240,10 @@ bool cmCTestMultiProcessHandler::CheckOutput()
 
 void cmCTestMultiProcessHandler::EndTest(cmProcess* p)
 {
+  // Should have a way of getting this stuff from the 
+  // launched ctest, maybe a temp file or some extra xml
+  // stuff in the stdout
+  // Need things like Reason and ExecutionTime, Path, etc.
   int test = p->GetId();
   int exitVal = p->GetExitValue();
   cmCTestTestHandler::cmCTestTestResult cres;

@@ -102,6 +102,7 @@ public:
   {
     std::string Name;
     std::string Path;
+    std::string Reason;
     std::string FullCommandLine;
     double      ExecutionTime;
     int         ReturnValue;

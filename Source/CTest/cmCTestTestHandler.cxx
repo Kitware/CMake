@@ -799,22 +799,23 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
         if ( passIt->first.find(output.c_str()) )
           {
           found = true;
+          reason = "Required regular expression found.";
           }
         }
       if ( !found )
         { 
         reason = "Required regular expression not found.";
-        reason +=  "Regex=["; 
-        for ( passIt = it->RequiredRegularExpressions.begin();
-            passIt != it->RequiredRegularExpressions.end();
-            ++ passIt )
-          {
-          reason += passIt->second;
-          reason += "\n";
-          }
-        reason += "]";
         forceFail = true;
         }
+      reason +=  "Regex=["; 
+      for ( passIt = it->RequiredRegularExpressions.begin();
+            passIt != it->RequiredRegularExpressions.end();
+            ++ passIt )
+        {
+        reason += passIt->second;
+        reason += "\n";
+        }
+      reason += "]";
       }
     if ( it->ErrorRegularExpressions.size() > 0 )
       {
@@ -947,7 +948,7 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
                             (this->CustomMaximumFailedTestOutputSize));
       }
     }
-
+  cres.Reason = reason;
   cres.Output = output;
   cres.ReturnValue = retVal;
   cres.CompletionStatus = "Completed";
@@ -1585,6 +1586,19 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
         << "name=\"Execution Time\"><Value>"
         << result->ExecutionTime
         << "</Value></NamedMeasurement>\n";
+      if(result->Reason.size())
+        { 
+        const char* reasonType = "Pass Reason";
+        if(result->Status != cmCTestTestHandler::COMPLETED &&
+           result->Status != cmCTestTestHandler::NOT_RUN)
+          {
+          reasonType = "Fail Reason";
+          }
+        os << "\t\t\t<NamedMeasurement type=\"text/string\" "
+           << "name=\"" << reasonType << "\"><Value>"
+           << cmXMLSafe(result->Reason)
+           << "</Value></NamedMeasurement>\n";
+        }
       os
         << "\t\t\t<NamedMeasurement type=\"text/string\" "
         << "name=\"Completion Status\"><Value>"
