@@ -62,6 +62,8 @@ private:
 
   // Determine the type of version control
   int DetermineType(const char* cmd, const char* type);
+
+  bool InitialCheckout(std::ostream& ofs);
 };
 
 #if defined(__sgi) && !defined(__GNUC__)

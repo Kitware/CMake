@@ -289,7 +289,6 @@ int cmCTestUpdateHandler::ProcessHandler()
   int count = 0;
   int updateType = e_CVS;
   std::string::size_type cc, kk;
-  bool updateProducedError = false;
   std::string goutput;
   std::string errors;
 
@@ -297,7 +296,6 @@ int cmCTestUpdateHandler::ProcessHandler()
   cmCTestUpdateHandlerLocale fixLocale;
   static_cast<void>(fixLocale);
 
-  std::string checkoutErrorMessages;
   int retVal = 0;
 
   // Get source dir
@@ -319,58 +317,12 @@ int cmCTestUpdateHandler::ProcessHandler()
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
     "Updating the repository" << std::endl);
 
-  const char* initialCheckoutCommand = this->GetOption("InitialCheckout");
-  if ( initialCheckoutCommand )
+  // Make sure the source directory exists.
+  if(!this->InitialCheckout(ofs))
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-      "   First perform the initial checkout: " << initialCheckoutCommand
-      << std::endl);
-    cmStdString parent = cmSystemTools::GetParentDirectory(sourceDirectory);
-    if ( parent.empty() )
-      {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-        "Something went wrong when trying "
-        "to determine the parent directory of " << sourceDirectory
-        << std::endl);
-      return -1;
-      }
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-      "   Perform checkout in directory: " << parent.c_str() << std::endl);
-    if ( !cmSystemTools::MakeDirectory(parent.c_str()) )
-      {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-        "Cannot create parent directory: " << parent.c_str()
-        << " of the source directory: " << sourceDirectory << std::endl);
-      return -1;
-      }
-    ofs << "* Run initial checkout" << std::endl;
-    ofs << "  Command: " << initialCheckoutCommand << std::endl;
-    cmCTestLog(this->CTest, DEBUG, "   Before: "
-      << initialCheckoutCommand << std::endl);
-    bool retic = this->CTest->RunCommand(initialCheckoutCommand, &goutput,
-      &errors, &retVal, parent.c_str(), 0 /* Timeout */);
-    cmCTestLog(this->CTest, DEBUG, "   After: "
-      << initialCheckoutCommand << std::endl);
-    ofs << "  Output: " << goutput.c_str() << std::endl;
-    ofs << "  Errors: " << errors.c_str() << std::endl;
-    if ( !retic || retVal )
-      {
-      cmOStringStream ostr;
-      ostr << "Problem running initial checkout Output [" << goutput
-        << "] Errors [" << errors << "]";
-      cmCTestLog(this->CTest, ERROR_MESSAGE, ostr.str().c_str() << std::endl);
-      checkoutErrorMessages += ostr.str();
-      updateProducedError = true;
-      }
-    if(!this->CTest->InitializeFromCommand(this->Command))
-      {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                 " Fatal Error in initialize: "
-                 << std::endl);
-      cmSystemTools::SetFatalErrorOccured();
-      return -1;
-      }
+    return -1;
     }
+
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Updating the repository: "
     << sourceDirectory << std::endl);
 
@@ -636,11 +588,7 @@ int cmCTestUpdateHandler::ProcessHandler()
       ofs << goutput << std::endl;
       }
     }
-  if ( !res || retVal )
-    {
-    updateProducedError = true;
-    checkoutErrorMessages += " " + goutput;
-    }
+  bool updateProducedError = !res || retVal;
 
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     << "<Update mode=\"Client\" Generator=\"ctest-"
@@ -1089,7 +1037,6 @@ int cmCTestUpdateHandler::ProcessHandler()
   if ( updateProducedError )
     {
     os << "Update error: ";
-    os << cmXMLSafe(checkoutErrorMessages);
     cmCTestLog(this->CTest, ERROR_MESSAGE, "   Update with command: "
       << command << " failed" << std::endl);
     }
@@ -1104,4 +1051,64 @@ int cmCTestUpdateHandler::ProcessHandler()
     return -1;
     }
   return count;
+}
+
+//----------------------------------------------------------------------
+bool cmCTestUpdateHandler::InitialCheckout(std::ostream& ofs)
+{
+  const char* sourceDirectory = this->GetOption("SourceDirectory");
+
+  // Use the user-provided command to create the source tree.
+  const char* initialCheckoutCommand = this->GetOption("InitialCheckout");
+  if ( initialCheckoutCommand )
+    {
+    std::string goutput;
+    std::string errors;
+    int retVal = 0;
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+      "   First perform the initial checkout: " << initialCheckoutCommand
+      << std::endl);
+    cmStdString parent = cmSystemTools::GetParentDirectory(sourceDirectory);
+    if ( parent.empty() )
+      {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+        "Something went wrong when trying "
+        "to determine the parent directory of " << sourceDirectory
+        << std::endl);
+      return false;
+      }
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+      "   Perform checkout in directory: " << parent.c_str() << std::endl);
+    if ( !cmSystemTools::MakeDirectory(parent.c_str()) )
+      {
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+        "Cannot create parent directory: " << parent.c_str()
+        << " of the source directory: " << sourceDirectory << std::endl);
+      return false;
+      }
+    ofs << "* Run initial checkout" << std::endl;
+    ofs << "  Command: " << initialCheckoutCommand << std::endl;
+    cmCTestLog(this->CTest, DEBUG, "   Before: "
+      << initialCheckoutCommand << std::endl);
+    bool retic = this->CTest->RunCommand(initialCheckoutCommand, &goutput,
+      &errors, &retVal, parent.c_str(), 0 /* Timeout */);
+    cmCTestLog(this->CTest, DEBUG, "   After: "
+      << initialCheckoutCommand << std::endl);
+    ofs << "  Output: " << goutput.c_str() << std::endl;
+    ofs << "  Errors: " << errors.c_str() << std::endl;
+    if ( !retic || retVal )
+      {
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "Initial checkout failed:\n"
+                 << goutput << "\n" << errors << "\n");
+      }
+    if(!this->CTest->InitializeFromCommand(this->Command))
+      {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+                 " Fatal Error in initialize: "
+                 << std::endl);
+      cmSystemTools::SetFatalErrorOccured();
+      return false;
+      }
+    }
+  return true;
 }
