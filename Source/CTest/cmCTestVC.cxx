@@ -70,3 +70,17 @@ std::string cmCTestVC::ComputeCommandLine(char const* const* cmd)
     }
   return line.str();
 }
+
+//----------------------------------------------------------------------------
+void cmCTestVC::Cleanup()
+{
+  this->Log << "--- Begin Cleanup ---\n";
+  this->CleanupImpl();
+  this->Log << "--- End Cleanup ---\n";
+}
+
+//----------------------------------------------------------------------------
+void cmCTestVC::CleanupImpl()
+{
+  // We do no cleanup by default.
+}

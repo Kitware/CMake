@@ -389,52 +389,13 @@ int cmCTestUpdateHandler::ProcessHandler()
       }
     }
 
+  // Cleanup the working tree.
+  vc->Cleanup();
+
   bool res = true;
 
   // First, check what the current state of repository is
   std::string command = "";
-  switch( this->UpdateType )
-    {
-  case cmCTestUpdateHandler::e_CVS:
-    // TODO: CVS - for now just leave empty
-    break;
-  case cmCTestUpdateHandler::e_SVN:
-    command = "\"" + this->UpdateCommand + "\" cleanup";
-    break;
-    }
-
-  //
-  // Get initial repository information if that is possible. With subversion,
-  // this will check the current revision.
-  //
-  if ( !command.empty() )
-    {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-      "* Cleanup repository: " << command.c_str() << std::endl);
-    if ( !this->CTest->GetShowOnly() )
-      {
-      ofs << "* Cleanup repository" << std::endl;
-      ofs << "  Command: " << command.c_str() << std::endl;
-      res = this->CTest->RunCommand(command.c_str(), &goutput, &errors,
-        &retVal, sourceDirectory, 0 /*this->TimeOut*/);
-
-      ofs << "  Output: " << goutput.c_str() << std::endl;
-      ofs << "  Errors: " << errors.c_str() << std::endl;
-      if ( ofs )
-        {
-        ofs << "--- Cleanup ---" << std::endl;
-        ofs << goutput << std::endl;
-        }
-      }
-    else
-      {
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-        "Cleanup with command: " << command << std::endl);
-      }
-    }
-
-  // First, check what the current state of repository is
-  command = "";
   switch( this->UpdateType )
     {
   case cmCTestUpdateHandler::e_CVS:

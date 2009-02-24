@@ -39,7 +39,12 @@ public:
   /** Top-level source directory.  */
   void SetSourceDirectory(std::string const& dir);
 
+  /** Perform cleanup operations on the work tree.  */
+  void Cleanup();
+
 protected:
+  // Internal API to be implemented by subclasses.
+  virtual void CleanupImpl();
 
   /** Convert a list of arguments to a human-readable command line.  */
   static std::string ComputeCommandLine(char const* const* cmd);

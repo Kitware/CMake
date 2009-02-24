@@ -25,3 +25,13 @@ cmCTestSVN::cmCTestSVN(cmCTest* ct, std::ostream& log): cmCTestVC(ct, log)
 cmCTestSVN::~cmCTestSVN()
 {
 }
+
+//----------------------------------------------------------------------------
+void cmCTestSVN::CleanupImpl()
+{
+  const char* svn = this->CommandLineTool.c_str();
+  const char* svn_cleanup[] = {svn, "cleanup", 0};
+  OutputLogger out(this->Log, "cleanup-out> ");
+  OutputLogger err(this->Log, "cleanup-err> ");
+  this->RunChild(svn_cleanup, &out, &err);
+}

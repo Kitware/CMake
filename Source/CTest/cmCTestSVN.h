@@ -30,6 +30,10 @@ public:
   cmCTestSVN(cmCTest* ctest, std::ostream& log);
 
   virtual ~cmCTestSVN();
+
+private:
+  // Implement cmCTestVC internal API.
+  virtual void CleanupImpl();
 };
 
 #endif
