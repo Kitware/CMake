@@ -35,6 +35,8 @@ public:
         in any more data and false if it is done.  */
     bool Process(const char* data, int length)
       { return this->ProcessChunk(data, length); }
+
+    virtual ~OutputParser() {}
   protected:
     /** Implement in a subclass to process a chunk of data.  It should
         return true only if it is interested in more data.  */
