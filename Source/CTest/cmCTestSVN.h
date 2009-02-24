@@ -43,6 +43,15 @@ private:
   std::string OldRevision;
   std::string NewRevision;
 
+  // URL of repository directory checked out in the working tree.
+  std::string URL;
+
+  // URL of repository root directory.
+  std::string Root;
+
+  // Directory under repository root checked out in working tree.
+  std::string Base;
+
   std::string LoadInfo();
 
   // Parsing helper classes.

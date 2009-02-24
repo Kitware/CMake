@@ -49,20 +49,50 @@ public:
     {
     this->SetLog(&svn->Log, prefix);
     this->RegexRev.compile("^Revision: ([0-9]+)");
+    this->RegexURL.compile("^URL: +([^ ]+) *$");
+    this->RegexRoot.compile("^Repository Root: +([^ ]+) *$");
     }
 private:
   cmCTestSVN* SVN;
   std::string& Rev;
   cmsys::RegularExpression RegexRev;
+  cmsys::RegularExpression RegexURL;
+  cmsys::RegularExpression RegexRoot;
   virtual bool ProcessLine()
     {
     if(this->RegexRev.find(this->Line))
       {
       this->Rev = this->RegexRev.match(1);
       }
+    else if(this->RegexURL.find(this->Line))
+      {
+      this->SVN->URL = this->RegexURL.match(1);
+      }
+    else if(this->RegexRoot.find(this->Line))
+      {
+      this->SVN->Root = this->RegexRoot.match(1);
+      }
     return true;
     }
 };
+
+//----------------------------------------------------------------------------
+static bool cmCTestSVNPathStarts(std::string const& p1, std::string const& p2)
+{
+  // Does path p1 start with path p2?
+  if(p1.size() == p2.size())
+    {
+    return p1 == p2;
+    }
+  else if(p1.size() > p2.size() && p1[p2.size()] == '/')
+    {
+    return strncmp(p1.c_str(), p2.c_str(), p2.size()) == 0;
+    }
+  else
+    {
+    return false;
+    }
+}
 
 //----------------------------------------------------------------------------
 std::string cmCTestSVN::LoadInfo()
@@ -93,4 +123,16 @@ void cmCTestSVN::NoteNewRevision()
   this->Log << "Revision after update: " << this->NewRevision << "\n";
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   New revision of repository is: "
              << this->NewRevision << "\n");
+
+  this->Log << "URL = " << this->URL << "\n";
+  this->Log << "Root = " << this->Root << "\n";
+
+  // Compute the base path the working tree has checked out under
+  // the repository root.
+  if(!this->Root.empty() && cmCTestSVNPathStarts(this->URL, this->Root))
+    {
+    this->Base = cmCTest::DecodeURL(this->URL.substr(this->Root.size()));
+    this->Base += "/";
+    }
+  this->Log << "Base = " << this->Base << "\n";
 }
