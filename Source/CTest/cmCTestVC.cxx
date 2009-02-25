@@ -17,12 +17,19 @@
 #include "cmCTestVC.h"
 
 #include "cmCTest.h"
+#include "cmXMLSafe.h"
 
 #include <cmsys/Process.h>
 
 //----------------------------------------------------------------------------
 cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log): CTest(ct), Log(log)
 {
+  this->PathCount[PathUpdated] = 0;
+  this->PathCount[PathModified] = 0;
+  this->PathCount[PathConflicting] = 0;
+  this->Unknown.Date = "Unknown";
+  this->Unknown.Author = "Unknown";
+  this->Unknown.Rev = "Unknown";
 }
 
 //----------------------------------------------------------------------------
@@ -72,6 +79,22 @@ std::string cmCTestVC::ComputeCommandLine(char const* const* cmd)
 }
 
 //----------------------------------------------------------------------------
+bool cmCTestVC::RunUpdateCommand(char const* const* cmd,
+                                 OutputParser* out, OutputParser* err)
+{
+  // Report the command line.
+  this->UpdateCommandLine = this->ComputeCommandLine(cmd);
+  if(this->CTest->GetShowOnly())
+    {
+    this->Log << this->UpdateCommandLine << "\n";
+    return true;
+    }
+
+  // Run the command.
+  return this->RunChild(cmd, out, err);
+}
+
+//----------------------------------------------------------------------------
 std::string cmCTestVC::GetNightlyTime()
 {
   // Get the nightly start time corresponding to the current dau.
@@ -104,6 +127,17 @@ void cmCTestVC::CleanupImpl()
 }
 
 //----------------------------------------------------------------------------
+bool cmCTestVC::Update()
+{
+  this->NoteOldRevision();
+  this->Log << "--- Begin Update ---\n";
+  bool result = this->UpdateImpl();
+  this->Log << "--- End Update ---\n";
+  this->NoteNewRevision();
+  return result;
+}
+
+//----------------------------------------------------------------------------
 void cmCTestVC::NoteOldRevision()
 {
   // We do nothing by default.
@@ -113,4 +147,52 @@ void cmCTestVC::NoteOldRevision()
 void cmCTestVC::NoteNewRevision()
 {
   // We do nothing by default.
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestVC::UpdateImpl()
+{
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "* Unknown VCS tool, not updating!" << std::endl);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestVC::WriteXML(std::ostream& xml)
+{
+  this->Log << "--- Begin Revisions ---\n";
+  bool result = this->WriteXMLUpdates(xml);
+  this->Log << "--- End Revisions ---\n";
+  return result;
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestVC::WriteXMLUpdates(std::ostream&)
+{
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "* CTest cannot extract updates for this VCS tool.\n");
+  return true;
+}
+
+//----------------------------------------------------------------------------
+void cmCTestVC::WriteXMLEntry(std::ostream& xml,
+                              std::string const& path,
+                              std::string const& name,
+                              std::string const& full,
+                              File const& f)
+{
+  static const char* desc[3] = { "Updated", "Modified", "Conflicting"};
+  Revision const& rev = f.Rev? *f.Rev : this->Unknown;
+  std::string prior = f.PriorRev? f.PriorRev->Rev : std::string("Unknown");
+  xml << "\t\t<" << desc[f.Status] << ">\n"
+      << "\t\t\t<File>" << cmXMLSafe(name) << "</File>\n"
+      << "\t\t\t<Directory>" << cmXMLSafe(path) << "</Directory>\n"
+      << "\t\t\t<FullName>" << cmXMLSafe(full) << "</FullName>\n"
+      << "\t\t\t<CheckinDate>" << cmXMLSafe(rev.Date) << "</CheckinDate>\n"
+      << "\t\t\t<Author>" << cmXMLSafe(rev.Author) << "</Author>\n"
+      << "\t\t\t<Log>" << cmXMLSafe(rev.Log) << "</Log>\n"
+      << "\t\t\t<Revision>" << cmXMLSafe(rev.Rev) << "</Revision>\n"
+      << "\t\t\t<PriorRevision>" << cmXMLSafe(prior) << "</PriorRevision>\n"
+      << "\t\t</" << desc[f.Status] << ">\n";
+  ++this->PathCount[f.Status];
 }

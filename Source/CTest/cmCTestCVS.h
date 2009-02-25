@@ -30,6 +30,27 @@ public:
   cmCTestCVS(cmCTest* ctest, std::ostream& log);
 
   virtual ~cmCTestCVS();
+
+private:
+  // Implement cmCTestVC internal API.
+  virtual bool UpdateImpl();
+  virtual bool WriteXMLUpdates(std::ostream& xml);
+
+  // Update status for files in each directory.
+  class Directory: public std::map<cmStdString, PathStatus> {};
+  std::map<cmStdString, Directory> Dirs;
+
+  std::string ComputeBranchFlag(std::string const& dir);
+  void LoadRevisions(std::string const& file, const char* branchFlag,
+                     std::vector<Revision>& revisions);
+  void WriteXMLDirectory(std::ostream& xml, std::string const& path,
+                         Directory const& dir);
+
+  // Parsing helper classes.
+  class UpdateParser;
+  class LogParser;
+  friend class UpdateParser;
+  friend class LogParser;
 };
 
 #endif

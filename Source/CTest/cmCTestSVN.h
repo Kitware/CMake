@@ -31,13 +31,25 @@ public:
 
   virtual ~cmCTestSVN();
 
-  int GetOldRevision() { return atoi(this->OldRevision.c_str()); }
-  int GetNewRevision() { return atoi(this->NewRevision.c_str()); }
 private:
   // Implement cmCTestVC internal API.
   virtual void CleanupImpl();
   virtual void NoteOldRevision();
   virtual void NoteNewRevision();
+  virtual bool UpdateImpl();
+  virtual bool WriteXMLUpdates(std::ostream& xml);
+
+  /** Represent a subversion-reported action for one path in a revision.  */
+  struct Change
+  {
+    char Action;
+    std::string Path;
+    Change(): Action('?') {}
+  };
+
+  // Update status for files in each directory.
+  class Directory: public std::map<cmStdString, File> {};
+  std::map<cmStdString, Directory> Dirs;
 
   // Old and new repository revisions.
   std::string OldRevision;
@@ -52,11 +64,33 @@ private:
   // Directory under repository root checked out in working tree.
   std::string Base;
 
+  // Information known about old revision.
+  Revision PriorRev;
+
+  // Information about revisions from a svn log.
+  std::list<Revision> Revisions;
+
   std::string LoadInfo();
+  void LoadModifications();
+  void LoadRevisions();
+
+  void GuessBase(std::vector<Change> const& changes);
+  const char* LocalPath(std::string const& path);
+
+  void DoRevision(Revision const& revision,
+                  std::vector<Change> const& changes);
+  void WriteXMLDirectory(std::ostream& xml, std::string const& path,
+                         Directory const& dir);
 
   // Parsing helper classes.
   class InfoParser;
+  class LogParser;
+  class StatusParser;
+  class UpdateParser;
   friend class InfoParser;
+  friend class LogParser;
+  friend class StatusParser;
+  friend class UpdateParser;
 };
 
 #endif
