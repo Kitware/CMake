@@ -78,6 +78,9 @@ protected:
     std::string Log;
   };
 
+  struct File;
+  friend struct File;
+
   /** Represent change to one file.  */
   struct File
   {

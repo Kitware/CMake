@@ -274,7 +274,8 @@ bool cmCTestSVN::UpdateImpl()
 }
 
 //----------------------------------------------------------------------------
-class cmCTestSVN::LogParser: public OutputLogger, private cmXMLParser
+class cmCTestSVN::LogParser: public cmCTestVC::OutputLogger,
+                             private cmXMLParser
 {
 public:
   LogParser(cmCTestSVN* svn, const char* prefix):
