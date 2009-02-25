@@ -890,13 +890,13 @@ IF (QT4_QMAKE_FOUND)
     )
 
   FIND_PROGRAM(QT_LUPDATE_EXECUTABLE
-    NAMES lupdate
+    NAMES lupdate-qt4 lupdate
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH
     )
 
   FIND_PROGRAM(QT_LRELEASE_EXECUTABLE
-    NAMES lrelease
+    NAMES lrelease-qt4 lrelease
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH
     )
