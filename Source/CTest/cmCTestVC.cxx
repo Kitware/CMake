@@ -86,7 +86,7 @@ std::string cmCTestVC::GetNightlyTime()
           t->tm_hour,
           t->tm_min,
           t->tm_sec);
-  return current_time;
+  return std::string(current_time);
 }
 
 //----------------------------------------------------------------------------
