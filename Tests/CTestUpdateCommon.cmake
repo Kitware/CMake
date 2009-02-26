@@ -110,6 +110,12 @@ function(change_content dir)
 endfunction(change_content)
 
 #-----------------------------------------------------------------------------
+# Function to create local modifications before update
+function(modify_content dir)
+  file(APPEND ${TOP}/${dir}/CTestConfig.cmake "# local modification\n")
+endfunction(modify_content)
+
+#-----------------------------------------------------------------------------
 # Function to write CTestConfiguration.ini content.
 function(create_build_tree src_dir bin_dir)
   file(MAKE_DIRECTORY ${TOP}/${bin_dir})
@@ -149,7 +155,7 @@ function(run_dashboard_command_line bin_dir)
     )
 
   # Verify the updates reported by CTest.
-  check_updates(${bin_dir} foo.txt bar.txt zot.txt
+  check_updates(${bin_dir} foo.txt bar.txt zot.txt CTestConfig.cmake
                            subdir/foo.txt subdir/bar.txt)
 endfunction(run_dashboard_command_line)
 

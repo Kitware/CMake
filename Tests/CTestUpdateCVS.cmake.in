@@ -102,6 +102,9 @@ run_child(
   COMMAND ${CVSCMD} up -rRevision1
   )
 
+# Create a modified file.
+modify_content(user-source)
+
 #-----------------------------------------------------------------------------
 # Test updating the user work directory with the command-line interface.
 message("Running CTest Dashboard Command Line...")
