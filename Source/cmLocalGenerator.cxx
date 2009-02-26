@@ -1187,25 +1187,9 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     return this->LanguageToIncludeFlags[lang].c_str();
     }
 
-  // Load implicit include directories for this language.
-  std::set<cmStdString> impDirs;
-  std::string impDirVar = "CMAKE_";
-  impDirVar += lang;
-  impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
-  if(const char* value = this->Makefile->GetDefinition(impDirVar.c_str()))
-    {
-    std::vector<std::string> impDirVec;
-    cmSystemTools::ExpandListArgument(value, impDirVec);
-    for(std::vector<std::string>::const_iterator i = impDirVec.begin();
-        i != impDirVec.end(); ++i)
-      {
-      impDirs.insert(*i);
-      }
-    }
-
   cmOStringStream includeFlags;
   std::vector<std::string> includes;
-  this->GetIncludeDirectories(includes);
+  this->GetIncludeDirectories(includes, lang);
   std::vector<std::string>::iterator i;
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
@@ -1250,11 +1234,6 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 #endif
   for(i = includes.begin(); i != includes.end(); ++i)
     {
-    // Skip implicit include directories.
-    if(impDirs.find(*i) != impDirs.end())
-      {
-      continue;
-      }
 #ifdef __APPLE__
     if(cmSystemTools::IsPathToFramework(i->c_str()))
       {
@@ -1315,7 +1294,8 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
+void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
+                                             const char* lang)
 {
   // Need to decide whether to automatically include the source and
   // binary directories at the beginning of the include path.
@@ -1378,6 +1358,21 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs)
       {
       dirs.push_back(this->Makefile->GetStartDirectory());
       emitted.insert(this->Makefile->GetStartDirectory());
+      }
+    }
+
+  // Load implicit include directories for this language.
+  std::string impDirVar = "CMAKE_";
+  impDirVar += lang;
+  impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
+  if(const char* value = this->Makefile->GetDefinition(impDirVar.c_str()))
+    {
+    std::vector<std::string> impDirVec;
+    cmSystemTools::ExpandListArgument(value, impDirVec);
+    for(std::vector<std::string>::const_iterator i = impDirVec.begin();
+        i != impDirVec.end(); ++i)
+      {
+      emitted.insert(*i);
       }
     }
 
