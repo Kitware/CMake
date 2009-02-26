@@ -2200,25 +2200,15 @@ std::string cmLocalGenerator::Convert(RelativeRoot remote,
                                       bool optional)
 {
   const char* remotePath = this->GetRelativeRootPath(remote);
+
+  // The relative root must have a path (i.e. not FULL or NONE)
+  assert(remotePath != 0);
+
   if(local && (!optional || this->UseRelativePaths))
     {
     std::vector<std::string> components;
-    std::string result;
-    switch(remote)
-      {
-      case HOME:
-      case HOME_OUTPUT:
-      case START:
-      case START_OUTPUT:
-        cmSystemTools::SplitPath(local, components);
-        result = this->ConvertToRelativePath(components, remotePath);
-        break;
-      case FULL:
-        result = remotePath;
-        break;
-      case NONE:
-        break;
-      }
+    cmSystemTools::SplitPath(local, components);
+    std::string result = this->ConvertToRelativePath(components, remotePath);
     return this->ConvertToOutputFormat(result.c_str(), output);
     }
   else
