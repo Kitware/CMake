@@ -42,6 +42,9 @@ public:
   /** Get the date/time specification for the current nightly start time.  */
   std::string GetNightlyTime();
 
+  /** Prepare the work tree.  */
+  bool InitialCheckout(const char* command);
+
   /** Perform cleanup operations on the work tree.  */
   void Cleanup();
 

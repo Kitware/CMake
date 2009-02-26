@@ -17,6 +17,7 @@
 #include "cmCTestVC.h"
 
 #include "cmCTest.h"
+#include "cmSystemTools.h"
 #include "cmXMLSafe.h"
 
 #include <cmsys/Process.h>
@@ -47,6 +48,47 @@ void cmCTestVC::SetCommandLineTool(std::string const& tool)
 void cmCTestVC::SetSourceDirectory(std::string const& dir)
 {
   this->SourceDirectory = dir;
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestVC::InitialCheckout(const char* command)
+{
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+             "   First perform the initial checkout: " << command << "\n");
+
+  // Make the parent directory in which to perform the checkout.
+  std::string parent = cmSystemTools::GetFilenamePath(this->SourceDirectory);
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+             "   Perform checkout in directory: " << parent << "\n");
+  if(!cmSystemTools::MakeDirectory(parent.c_str()))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot create directory: " << parent << std::endl);
+    return false;
+    }
+
+  // Construct the initial checkout command line.
+  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
+  std::vector<char const*> vc_co;
+  for(std::vector<cmStdString>::const_iterator ai = args.begin();
+      ai != args.end(); ++ai)
+    {
+    vc_co.push_back(ai->c_str());
+    }
+  vc_co.push_back(0);
+
+  // Run the initial checkout command and log its output.
+  this->Log << "--- Begin Initial Checkout ---\n";
+  OutputLogger out(this->Log, "co-out> ");
+  OutputLogger err(this->Log, "co-err> ");
+  bool result = this->RunChild(&vc_co[0], &out, &err, parent.c_str());
+  this->Log << "--- End Initial Checkout ---\n";
+  if(!result)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Initial checkout failed!" << std::endl);
+    }
+  return result;
 }
 
 //----------------------------------------------------------------------------
