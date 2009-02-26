@@ -102,53 +102,69 @@
 (defun cmake-indent ()
   "Indent current line as CMAKE code."
   (interactive)
-  (beginning-of-line)
   (if (cmake-line-starts-inside-string)
       ()
     (if (bobp)
-        (indent-line-to 0)
-      (let ((point-start (point))
-            token cur-indent)
+        (cmake-indent-line-to 0)
+      (let (cur-indent)
 
         (save-excursion
-          ; Search back for the last indented line.
-          (cmake-find-last-indented-line)
+          (beginning-of-line)
 
-          ; Start with the indentation on this line.
-          (setq cur-indent (current-indentation))
+          (let ((point-start (point))
+                token)
 
-          ; Search forward counting tokens that adjust indentation.
-          (while (re-search-forward cmake-regex-token point-start t)
-            (setq token (match-string 0))
-            (if (string-match (concat "^" cmake-regex-paren-left "$") token)
-                (setq cur-indent (+ cur-indent cmake-tab-width))
+            ; Search back for the last indented line.
+            (cmake-find-last-indented-line)
+
+            ; Start with the indentation on this line.
+            (setq cur-indent (current-indentation))
+
+            ; Search forward counting tokens that adjust indentation.
+            (while (re-search-forward cmake-regex-token point-start t)
+              (setq token (match-string 0))
+              (if (string-match (concat "^" cmake-regex-paren-left "$") token)
+                  (setq cur-indent (+ cur-indent cmake-tab-width))
+                )
+              (if (string-match (concat "^" cmake-regex-paren-right "$") token)
+                  (setq cur-indent (- cur-indent cmake-tab-width))
+                )
+              (if (and
+                   (string-match cmake-regex-block-open token)
+                   (looking-at (concat "[ \t]*" cmake-regex-paren-left))
+                   )
+                  (setq cur-indent (+ cur-indent cmake-tab-width))
+                )
               )
-            (if (string-match (concat "^" cmake-regex-paren-right "$") token)
+            (goto-char point-start)
+
+            ; If this is the end of a block, decrease indentation.
+            (if (looking-at cmake-regex-block-close)
                 (setq cur-indent (- cur-indent cmake-tab-width))
-              )
-            (if (and
-                 (string-match cmake-regex-block-open token)
-                 (looking-at (concat "[ \t]*" cmake-regex-paren-left))
-                 )
-                (setq cur-indent (+ cur-indent cmake-tab-width))
               )
             )
           )
 
-        ; If this is the end of a block, decrease indentation.
-        (if (looking-at cmake-regex-block-close)
-            (setq cur-indent (- cur-indent cmake-tab-width))
-          )
-
         ; Indent this line by the amount selected.
         (if (< cur-indent 0)
-            (indent-line-to 0)
-          (indent-line-to cur-indent)
+            (cmake-indent-line-to 0)
+          (cmake-indent-line-to cur-indent)
           )
         )
       )
     )
   )
+
+(defun cmake-point-in-indendation ()
+  (string-match "^[ \\t]*$" (buffer-substring (point-at-bol) (point))))
+
+(defun cmake-indent-line-to (column)
+  "Indent the current line to COLUMN.
+If point is within the existing indentation it is moved to the end of
+the indentation.  Otherwise it retains the same position on the line"
+  (if (cmake-point-in-indendation)
+      (indent-line-to column)
+    (save-excursion (indent-line-to column))))
 
 ;------------------------------------------------------------------------------
 
