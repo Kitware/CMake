@@ -268,8 +268,7 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     // Add the export symbol definition for shared library objects.
     if(const char* exportMacro = this->Target->GetExportMacro())
       {
-      flags += "-D";
-      flags += exportMacro;
+      this->LocalGenerator->AppendDefines(defines, exportMacro, lang);
       }
 
     // Add preprocessor definitions for this target and configuration.
