@@ -732,17 +732,21 @@ void cmGlobalGenerator::Configure()
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
+  this->BinaryDirectories.clear();
 
   // start with this directory
   cmLocalGenerator *lg = this->CreateLocalGenerator();
   this->LocalGenerators.push_back(lg);
 
   // set the Start directories
+  cmMakefile* mf = lg->GetMakefile();
   lg->GetMakefile()->SetStartDirectory
     (this->CMakeInstance->GetStartDirectory());
   lg->GetMakefile()->SetStartOutputDirectory
     (this->CMakeInstance->GetStartOutputDirectory());
   lg->GetMakefile()->MakeStartDirectoriesCurrent();
+
+  this->BinaryDirectories.insert(mf->GetStartOutputDirectory());
 
   // now do it
   lg->Configure();
