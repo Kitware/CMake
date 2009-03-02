@@ -1540,6 +1540,8 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
       total_untested += (totalFunctions - functionsCalled);
 
       std::string fileName = cmSystemTools::GetFilenameName(file.c_str());
+      std::string shortFileName =
+        this->CTest->GetShortPathToFile(file.c_str());
 
       float cper = percentBranch + percentFunction;
       if(totalBranches > 0)
@@ -1564,8 +1566,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
       tmpLog << "percentCoverage: " << percent_coverage << "\n";
       tmpLog << "coverage metric: " << cmet << "\n";
       covSumFile << "\t<File Name=\"" << cmXMLSafe(sourceFile)
-                 << "\" FullPath=\"" << cmXMLSafe(
-                   this->CTest->GetShortPathToFile(file.c_str()))
+                 << "\" FullPath=\"" << cmXMLSafe(shortFileName)
                  << "\" Covered=\"" << (cmet>0?"true":"false") << "\">\n"
                  << "\t\t<BranchesTested>"
                  << branchCovered
@@ -1593,8 +1594,9 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
                  << "\t\t<CoverageMetric>";
       covSumFile.setf(std::ios::fixed, std::ios::floatfield);
       covSumFile.precision(2);
-      covSumFile << (cmet) << "</CoverageMetric>\n"
-                 << "\t</File>" << std::endl;
+      covSumFile << (cmet) << "</CoverageMetric>\n";
+      this->WriteXMLLabels(covSumFile, shortFileName);
+      covSumFile << "\t</File>" << std::endl;
       }
     }
   std::string end_time = this->CTest->CurrentTime();
