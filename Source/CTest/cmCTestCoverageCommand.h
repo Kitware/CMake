@@ -60,10 +60,14 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_coverage([BUILD build_dir] [RETURN_VALUE res] [APPEND])\n"
+      "  ctest_coverage([BUILD build_dir] [RETURN_VALUE res] [APPEND]\n"
+      "                 [LABELS label1 [label2 [...]]])\n"
       "Perform the coverage of the given build directory and stores results "
       "in Coverage.xml. The second argument is a variable that will hold "
       "value."
+      "\n"
+      "The LABELS option filters the coverage report to include only "
+      "source files labeled with at least one of the labels specified."
       "\n"
       CTEST_COMMAND_APPEND_OPTION_DOCS;
     }
@@ -72,6 +76,18 @@ public:
 
 protected:
   cmCTestGenericHandler* InitializeHandler();
+
+  virtual bool CheckArgumentKeyword(std::string const& arg);
+  virtual bool CheckArgumentValue(std::string const& arg);
+
+  enum
+  {
+    ArgumentDoingLabels = Superclass::ArgumentDoingLast1,
+    ArgumentDoingLast2
+  };
+
+  bool LabelsMentioned;
+  std::set<cmStdString> Labels;
 };
 
 

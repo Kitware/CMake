@@ -17,6 +17,7 @@
 #include "cmCTestCoverageHandler.h"
 #include "cmCTest.h"
 #include "cmake.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmGeneratedFileStream.h"
 #include "cmXMLSafe.h"
@@ -24,6 +25,8 @@
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/stl/iterator>
+#include <cmsys/stl/algorithm>
 
 #include <stdlib.h>
 #include <math.h>
@@ -156,6 +159,7 @@ void cmCTestCoverageHandler::Initialize()
   this->SourceLabels.clear();
   this->LabelIdMap.clear();
   this->Labels.clear();
+  this->LabelFilter.clear();
 }
 
 //----------------------------------------------------------------------
@@ -207,6 +211,11 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
   const char* srcDir,
   const char* binDir)
 {
+  if(this->IsFilteredOut(file))
+    {
+    return false;
+    }
+
   std::vector<cmsys::RegularExpression>::iterator sit;
   for ( sit = this->CustomCoverageExcludeRegex.begin();
     sit != this->CustomCoverageExcludeRegex.end(); ++ sit )
@@ -1816,4 +1825,40 @@ void cmCTestCoverageHandler::WriteXMLLabels(std::ofstream& os,
       }
     os << "\t\t</Labels>\n";
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmCTestCoverageHandler::SetLabelFilter(std::set<cmStdString> const& labels)
+{
+  this->LabelFilter.clear();
+  for(std::set<cmStdString>::const_iterator li = labels.begin();
+      li != labels.end(); ++li)
+    {
+    this->LabelFilter.insert(this->GetLabelId(*li));
+    }
+}
+
+//----------------------------------------------------------------------
+bool cmCTestCoverageHandler::IsFilteredOut(std::string const& source)
+{
+  // If there is no label filter then nothing is filtered out.
+  if(this->LabelFilter.empty())
+    {
+    return false;
+    }
+
+  // The source is filtered out if it does not have any labels in
+  // common with the filter set.
+  std::vector<int> ids;
+  std::string shortSrc = this->CTest->GetShortPathToFile(source.c_str());
+  LabelMapType::const_iterator li = this->SourceLabels.find(shortSrc);
+  if(li != this->SourceLabels.end() && !li->second.empty())
+    {
+    cmsys_stl::set_intersection
+      (li->second.begin(), li->second.end(),
+       this->LabelFilter.begin(), this->LabelFilter.end(),
+       cmsys_stl::back_inserter(ids));
+    }
+  return ids.empty();
 }

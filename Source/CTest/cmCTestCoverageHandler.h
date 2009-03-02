@@ -50,6 +50,9 @@ public:
    */
   void PopulateCustomVectors(cmMakefile *mf);
 
+  /** Report coverage only for sources with these labels.  */
+  void SetLabelFilter(std::set<cmStdString> const& labels);
+
 private:
   bool ShouldIDoCoverage(const char* file, const char* srcDir,
     const char* binDir);
@@ -153,6 +156,10 @@ private:
   void LoadLabels();
   void LoadLabels(const char* fname);
   void WriteXMLLabels(std::ofstream& os, std::string const& source);
+
+  // Label-based filtering.
+  std::set<int> LabelFilter;
+  bool IsFilteredOut(std::string const& source);
 };
 
 #endif
