@@ -82,7 +82,7 @@ cmsys_ios::ostream& operator<<(cmsys_ios::ostream& os, cmXMLSafe const& self)
           // encoding.  Instead of escaping these bytes, we should
           // handle the current locale and its encoding.
           char buf[16];
-          sprintf(buf, "&#x%hx;", static_cast<unsigned short>(c));
+          sprintf(buf, "[bad-char-%hx]", static_cast<unsigned short>(c));
           os << buf;
           }
         break;
