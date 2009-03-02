@@ -152,7 +152,10 @@ cmCTestCoverageHandler::cmCTestCoverageHandler()
 void cmCTestCoverageHandler::Initialize()
 {
   this->Superclass::Initialize();
-  this->CustomCoverageExclude.empty();
+  this->CustomCoverageExclude.clear();
+  this->SourceLabels.clear();
+  this->LabelIdMap.clear();
+  this->Labels.clear();
 }
 
 //----------------------------------------------------------------------
@@ -346,7 +349,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   cont.OFS = &ofs;
 
   // setup the regex exclude stuff
-  this->CustomCoverageExcludeRegex.empty();
+  this->CustomCoverageExcludeRegex.clear();
   std::vector<cmStdString>::iterator rexIt;
   for ( rexIt = this->CustomCoverageExclude.begin();
     rexIt != this->CustomCoverageExclude.end();
