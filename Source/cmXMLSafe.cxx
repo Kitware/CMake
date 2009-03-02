@@ -82,7 +82,17 @@ cmsys_ios::ostream& operator<<(cmsys_ios::ostream& os, cmXMLSafe const& self)
           // encoding.  Instead of escaping these bytes, we should
           // handle the current locale and its encoding.
           char buf[16];
-          sprintf(buf, "[bad-char-%hx]", static_cast<unsigned short>(c));
+          // http://www.w3.org/TR/REC-xml/#NT-Char
+          if(c >= 0x80)
+            {
+            sprintf(buf, "&#x%hx;", static_cast<unsigned short>(c));
+            }
+          else
+            {
+            // We cannot use "&#x%hx;" here because this value is not
+            // valid in XML.  Instead use a human-readable hex value.
+            sprintf(buf, "&lt;0x%hx&gt;", static_cast<unsigned short>(c));
+            }
           os << buf;
           }
         break;
