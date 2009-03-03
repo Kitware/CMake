@@ -68,86 +68,87 @@
 #
 # ============================================================================
 #
-# Variables used by this module, they can change the default behaviour and need to be set
-# before calling find_package:
+# Variables used by this module, they can change the default behaviour and
+# need to be set before calling find_package:
 #
-#  Boost_USE_MULTITHREADED       Can be set to OFF to use the non-multithreaded
+#   Boost_USE_MULTITHREADED      Can be set to OFF to use the non-multithreaded
 #                                boost libraries.  If not specified, defaults
 #                                to ON.
 #
-#  Boost_USE_STATIC_LIBS         Can be set to ON to force the use of the static
+#   Boost_USE_STATIC_LIBS        Can be set to ON to force the use of the static
 #                                boost libraries. Defaults to OFF.
 #
 # Other Variables used by this module which you may want to set.
 #
-#  Boost_ADDITIONAL_VERSIONS     A list of version numbers to use for searching
+#   Boost_ADDITIONAL_VERSIONS    A list of version numbers to use for searching
 #                                the boost include directory.  Please see
 #                                the documentation above regarding this
 #                                annoying, but necessary variable :(
 #
-#  Boost_DEBUG                   Set this to TRUE to enable debugging output
+#   Boost_DEBUG                  Set this to TRUE to enable debugging output
 #                                of FindBoost.cmake if you are having problems.
 #                                Please enable this before filing any bug
 #                                reports.
 # 
-#  Boost_COMPILER                Set this to the compiler suffix used by Boost
-#                                (e.g. "-gcc43") if FindBoods has problems finding
+#   Boost_COMPILER               Set this to the compiler suffix used by Boost
+#                                (e.g. "-gcc43") if FindBoost has problems finding
 #                                the proper Boost installation
 #
-#  These last three variables are available also as environment variables:
+# These last three variables are available also as environment variables:
 #
-#  BOOST_ROOT or BOOSTROOT       The preferred installation prefix for searching for
+#   BOOST_ROOT or BOOSTROOT      The preferred installation prefix for searching for
 #                                Boost.  Set this if the module has problems finding
 #                                the proper Boost installation.
 #
-#  BOOST_INCLUDEDIR              Set this to the include directory of Boost, if the
+#   BOOST_INCLUDEDIR             Set this to the include directory of Boost, if the
 #                                module has problems finding the proper Boost installation
 #
-#  BOOST_LIBRARYDIR              Set this to the lib directory of Boost, if the
+#   BOOST_LIBRARYDIR             Set this to the lib directory of Boost, if the
 #                                module has problems finding the proper Boost installation
 #
 # Variables defined by this module:
 #
-#  Boost_FOUND                          System has Boost, this means the include dir was
+#   Boost_FOUND                         System has Boost, this means the include dir was
 #                                       found, as well as all the libraries specified in
 #                                       the COMPONENTS list.
 #
-#  Boost_INCLUDE_DIRS                   Boost include directories: not cached
+#   Boost_INCLUDE_DIRS                  Boost include directories: not cached
 #
-#  Boost_INCLUDE_DIR                    This is almost the same as above, but this one is
+#   Boost_INCLUDE_DIR                   This is almost the same as above, but this one is
 #                                       cached and may be modified by advanced users
 #
-#  Boost_LIBRARIES                      Link these to use the Boost libraries that you
+#   Boost_LIBRARIES                     Link to these to use the Boost libraries that you
 #                                       specified: not cached
 #
-#  Boost_LIBRARY_DIRS                   The path to where the Boost library files are.
+#   Boost_LIBRARY_DIRS                  The path to where the Boost library files are.
 #
-#  Boost_VERSION                        The version number of the boost libraries that
+#   Boost_VERSION                       The version number of the boost libraries that
 #                                       have been found, same as in version.hpp from Boost
 #
-#  Boost_LIB_VERSION                    The version number in filename form as
+#   Boost_LIB_VERSION                   The version number in filename form as
 #                                       it's appended to the library filenames
 #
-#  Boost_MAJOR_VERSION                  major version number of boost
-#  Boost_MINOR_VERSION                  minor version number of boost
-#  Boost_SUBMINOR_VERSION               subminor version number of boost
+#   Boost_MAJOR_VERSION                 major version number of boost
+#   Boost_MINOR_VERSION                 minor version number of boost
+#   Boost_SUBMINOR_VERSION              subminor version number of boost
 #
-#  Boost_LIB_DIAGNOSTIC_DEFINITIONS     [WIN32 Only] You can call
+#   Boost_LIB_DIAGNOSTIC_DEFINITIONS    [WIN32 Only] You can call
 #                                       add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINTIIONS})
 #                                       to have diagnostic information about Boost's
 #                                       automatic linking outputted during compilation time.
 #
-# For each component you list the following variables are set.
-# ATTENTION: The component names need to be in lower case, just as the boost
-# library names however the CMake variables use upper case for the component
-# part. So you'd get Boost_SERIALIZATION_FOUND for example.
+# For each component you specify in find_package(), the following (UPPER-CASE)
+# variables are set.  You can use these variables if you would like to pick and
+# choose components for your targets instead of just using Boost_LIBRARIES.
 #
-#  Boost_${COMPONENT}_FOUND             True IF the Boost library "component" was found.
-#  Boost_${COMPONENT}_LIBRARY           The absolute path of the Boost library "component".
-#  Boost_${COMPONENT}_LIBRARY_DEBUG     The absolute path of the debug version of the
-#                                       Boost library "component".
-#  Boost_${COMPONENT}_LIBRARY_RELEASE   The absolute path of the release version of the
-#                                       Boost library "component"
+#   Boost_${COMPONENT}_FOUND            True IF the Boost library "component" was found.
+#
+#   Boost_${COMPONENT}_LIBRARY          Contains the libraries for the specified Boost
+#                                       "component" (includes debug and optimized keywords
+#                                       when needed).
+#
+# =====================================================================
+#
 #
 #  Copyright (c) 2006-2008 Andreas Schneider <mail@cynapses.org>
 #  Copyright (c) 2007      Wengo
