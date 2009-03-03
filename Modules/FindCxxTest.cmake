@@ -64,6 +64,9 @@
 #          };
 #
 #
+# Version 1.2 (3/2/08)
+#     Included patch from Tyler Roscoe to have the perl & python binaries
+#     detected based on CXXTEST_INCLUDE_DIR
 # Version 1.1 (2/9/08)
 #     Clarified example to illustrate need to call target_link_libraries()
 #     Changed commands to lowercase
@@ -117,8 +120,10 @@ endmacro(CXXTEST_ADD_TEST)
 #=============================================================
 
 find_path(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h)
-find_program(CXXTEST_PERL_TESTGEN_EXECUTABLE cxxtestgen.pl)
-find_program(CXXTEST_PYTHON_TESTGEN_EXECUTABLE cxxtestgen.py)
+find_program(CXXTEST_PERL_TESTGEN_EXECUTABLE cxxtestgen.pl
+    PATHS ${CXXTEST_INCLUDE_DIR})
+find_program(CXXTEST_PYTHON_TESTGEN_EXECUTABLE cxxtestgen.py
+    PATHS ${CXXTEST_INCLUDE_DIR})
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CxxTest DEFAULT_MSG CXXTEST_INCLUDE_DIR)
