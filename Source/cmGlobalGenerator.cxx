@@ -1125,7 +1125,8 @@ int cmGlobalGenerator::Build(
   bool clean, bool fast,
   double timeout,
   bool verbose,
-  const char* extraOptions)
+  const char* extraOptions,
+  std::vector<std::string> const& nativeOptions)
 {
   /**
    * Run an executable command and put the stdout in output.
@@ -1194,8 +1195,16 @@ int cmGlobalGenerator::Build(
     *output += makeCommand;
     *output += "\n";
     }
-  
-  if (!cmSystemTools::RunSingleCommand(makeCommand.c_str(), outputPtr,
+
+  std::vector<cmStdString> command =
+    cmSystemTools::ParseArguments(makeCommand.c_str());
+  for(std::vector<std::string>::const_iterator ni = nativeOptions.begin();
+      ni != nativeOptions.end(); ++ni)
+    {
+    command.push_back(*ni);
+    }
+
+  if (!cmSystemTools::RunSingleCommand(command, outputPtr,
                                        &retVal, 0, verbose, timeout))
     {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
