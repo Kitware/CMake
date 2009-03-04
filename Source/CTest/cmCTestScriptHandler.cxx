@@ -369,6 +369,9 @@ void cmCTestScriptHandler::GetCommandDocumentation(
 // cmake instance and generators, and then reads in the script
 int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 {
+  // Reset the error flag so that the script is read in no matter what
+  cmSystemTools::ResetErrorOccuredFlag();
+
   // if the argument has a , in it then it needs to be broken into the fist
   // argument (which is the script) and the second argument which will be
   // passed into the scripts as S_ARG
@@ -379,7 +382,6 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     script = total_script_arg.substr(0,total_script_arg.find(","));
     script_arg = total_script_arg.substr(total_script_arg.find(",")+1);
     }
-
   // make sure the file exists
   if (!cmSystemTools::FileExists(script.c_str()))
     {
@@ -414,6 +416,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   f->CTestScriptHandler = this;
   this->Makefile->AddFunctionBlocker(f);
 
+
   /* Execute CMakeDetermineSystem and CMakeSystemSpecificInformation, so 
   that variables like CMAKE_SYSTEM and also the search paths for libraries,
   header and executables are set correctly and can be used. Makes new-style
@@ -422,7 +425,9 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
       this->Makefile->GetModulesFile("CMakeDetermineSystem.cmake");
   if (!this->Makefile->ReadListFile(0, systemFile.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag())
-    {
+    {  
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:" 
+               << systemFile.c_str() << "\n");
     return 2;
     }
 
@@ -431,8 +436,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   if (!this->Makefile->ReadListFile(0, systemFile.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag())
     {
-    cmCTestLog(this->CTest, DEBUG, "Error in read: "  << systemFile.c_str()
-               << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:" 
+               << systemFile.c_str() << "\n");
     return 2;
     }
 
@@ -440,7 +445,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   if (!this->Makefile->ReadListFile(0, script.c_str()) ||
     cmSystemTools::GetErrorOccuredFlag())
     {
-    cmCTestLog(this->CTest, DEBUG, "Error in read script: "
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read script: "
                << script.c_str()
                << std::endl);
     return 2;
