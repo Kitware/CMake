@@ -46,7 +46,7 @@ endif(RESULT)
 # build it again with clean and only COnly target
 execute_process(COMMAND "${CMAKE_COMMAND}" 
   --build "@CMAKE_BUILD_TEST_BINARY_DIR@" --config Debug 
-  --clean --target COnly
+  --clean-first --target COnly
   RESULT_VARIABLE RESULT)
 if(RESULT)
   message(FATAL_ERROR "Error running cmake --build")

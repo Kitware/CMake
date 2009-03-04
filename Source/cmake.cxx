@@ -4394,7 +4394,7 @@ std::vector<std::string> const& cmake::GetDebugConfigs()
 int cmake::Build(const std::string& dir,
                  const std::string& target,
                  const std::string& config,
-                 const std::string& extraBuildOptions,
+                 const std::vector<std::string>& nativeOptions,
                  bool clean)
 { 
   if(!cmSystemTools::FileIsDirectory(dir.c_str()))
@@ -4438,51 +4438,5 @@ int cmake::Build(const std::string& dir,
                     &output, 
                     makeProgram.c_str(),
                     config.c_str(), clean, false, 0, true,
-                    extraBuildOptions.c_str());
-}
-
-int cmake::DoBuild(int ac, char* av[])
-{
-#ifndef CMAKE_BUILD_WITH_CMAKE
-  std::cerr << "This cmake does not support --build\n";
-  return -1;
-#else
-  std::string target;
-  std::string config = "Debug";
-  std::string extraBuildOptions;
-  std::string dir;
-  bool clean = false;
-  cmsys::CommandLineArguments arg;
-  arg.Initialize(ac, av);
-  typedef cmsys::CommandLineArguments argT;
-  arg.AddArgument("--build", argT::SPACE_ARGUMENT, &dir, 
-                  "Build a configured cmake project --build dir.");
-  arg.AddArgument("--target", argT::SPACE_ARGUMENT, &target, 
-                  "Specifiy the target to build,"
-                  " if missing, all targets are built.");
-  arg.AddArgument("--config", argT::SPACE_ARGUMENT, &config, 
-                  "Specify configuration to build"
-                  " if missing Debug is built.");
-  arg.AddArgument("--extra-options", argT::SPACE_ARGUMENT, &extraBuildOptions, 
-                  "Specify extra options to pass to build program,"
-                  " for example with gmake -jN.");
-  arg.AddArgument("--clean", argT::NO_ARGUMENT, &clean, 
-                  "Clean before building.");
-  if ( !arg.Parse() )
-    {
-    std::cerr << "Problem parsing --build arguments:\n";
-    std::cerr << arg.GetHelp() << "\n";
-    return 1;
-    }
-
-  // Hack for vs6 that passes ".\Debug" as "$(IntDir)" value:
-  //
-  if (cmSystemTools::StringStartsWith(config.c_str(), ".\\"))
-    {
-    config = config.substr(2);
-    }
-
-  cmake cm;
-  return cm.Build(dir, target, config, extraBuildOptions, clean);
-#endif
+                    0, nativeOptions);
 }

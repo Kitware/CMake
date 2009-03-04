@@ -61,6 +61,14 @@ static const char * cmDocumentationDescription[][3] =
   {0,0,0}
 };
 
+#define CMAKE_BUILD_OPTIONS                                             \
+  "  <dir>          = Project binary directory to be built.\n"          \
+  "  --target <tgt> = Build <tgt> instead of default targets.\n"        \
+  "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"   \
+  "  --clean-first  = Build target 'clean' first, then build.\n"        \
+  "                   (To clean only, use --target 'clean'.)\n"         \
+  "  --             = Pass remaining options to the native tool.\n"
+
 //----------------------------------------------------------------------------
 static const char * cmDocumentationOptions[][3] =
 {
@@ -85,11 +93,11 @@ static const char * cmDocumentationOptions[][3] =
    "variables being created. If A is specified, then it will display also "
    "advanced variables. If H is specified, it will also display help for "
    "each variable."},
-  {"--build dir", "Build a configured cmake tree found in dir.",
-   "This option will use the native build tool from the command line to"
-   " build the project. Other options that can be specified with this one" 
-   " are --target, --config, --extra-options, and --clean.  For complete "
-   "help run --build with no options."},
+  {"--build <dir>", "Build a CMake-generated project binary tree.",
+   "This abstracts a native build tool's command-line interface with the "
+   "following options:\n"
+   CMAKE_BUILD_OPTIONS
+   "Run cmake --build with no options for quick help."},
   {"-N", "View mode only.",
    "Only load the cache. Do not actually run configure and generate steps."},
   {"-P <file>", "Process script mode.",
@@ -236,6 +244,7 @@ static const char * cmDocumentationNOTE[][3] =
 #endif
 
 int do_cmake(int ac, char** av);
+static int do_build(int ac, char** av);
 
 static cmMakefile* cmakemainGetMakefile(void *clientdata)
 {
@@ -307,6 +316,10 @@ int main(int ac, char** av)
 {
   cmSystemTools::EnableMSVCDebugHook();
   cmSystemTools::FindExecutableDirectory(av[0]);
+  if(ac > 1 && strcmp(av[1], "--build") == 0)
+    {
+    return do_build(ac, av);
+    }
   int ret = do_cmake(ac, av);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDynamicLoader::FlushCache();
@@ -412,17 +425,12 @@ int do_cmake(int ac, char** av)
   bool list_help = false;
   bool view_only = false;
   bool script_mode = false;
-  bool build = false;
   std::vector<std::string> args;
   for(int i =0; i < ac; ++i)
     {
     if(strcmp(av[i], "-i") == 0)
       {
       wiz = true;
-      }
-    else if(!command && strcmp(av[i], "--build") == 0)
-      {
-      return cmake::DoBuild(ac, av);
       }
     else if(!command && strcmp(av[i], "--system-information") == 0)
       {
@@ -474,11 +482,6 @@ int do_cmake(int ac, char** av)
       {
       args.push_back(av[i]);
       }
-    }
-  if(build)
-    {
-    int ret = cmake::DoBuild(ac, av);
-    return ret;
     }
   if(command)
     {
@@ -544,3 +547,85 @@ int do_cmake(int ac, char** av)
     }
 }
 
+//----------------------------------------------------------------------------
+static int do_build(int ac, char** av)
+{
+#ifndef CMAKE_BUILD_WITH_CMAKE
+  std::cerr << "This cmake does not support --build\n";
+  return -1;
+#else
+  std::string target;
+  std::string config = "Debug";
+  std::string dir;
+  std::vector<std::string> nativeOptions;
+  bool clean = false;
+
+  enum Doing { DoingNone, DoingDir, DoingTarget, DoingConfig, DoingNative};
+  Doing doing = DoingDir;
+  for(int i=2; i < ac; ++i)
+    {
+    if(doing == DoingNative)
+      {
+      nativeOptions.push_back(av[i]);
+      }
+    else if(strcmp(av[i], "--target") == 0)
+      {
+      doing = DoingTarget;
+      }
+    else if(strcmp(av[i], "--config") == 0)
+      {
+      doing = DoingConfig;
+      }
+    else if(strcmp(av[i], "--clean-first") == 0)
+      {
+      clean = true;
+      doing = DoingNone;
+      }
+    else if(strcmp(av[i], "--") == 0)
+      {
+      doing = DoingNative;
+      }
+    else
+      {
+      switch (doing)
+        {
+        case DoingDir:
+          dir = av[i];
+          doing = DoingNone;
+          break;
+        case DoingTarget:
+          target = av[i];
+          doing = DoingNone;
+          break;
+        case DoingConfig:
+          config = av[i];
+          doing = DoingNone;
+          break;
+        default:
+          std::cerr << "Unknown argument " << av[i] << std::endl;
+          dir = "";
+          break;
+        }
+      }
+    }
+  if(dir.empty())
+    {
+    std::cerr <<
+      "Usage: cmake --build <dir> [options] [-- [native-options]]\n"
+      "Options:\n"
+      CMAKE_BUILD_OPTIONS
+      ;
+    return 1;
+    }
+
+  // Hack for vs6 that passes ".\Debug" as "$(IntDir)" value:
+  //
+  if (cmSystemTools::StringStartsWith(config.c_str(), ".\\"))
+    {
+    config = config.substr(2);
+    }
+
+  cmake cm;
+  return cm.Build(dir, target, config, nativeOptions, clean);
+#endif
+}
