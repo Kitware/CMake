@@ -65,6 +65,55 @@ function(get_configure_command_id name cfg_cmd_id_var)
   endif()
 endfunction(get_configure_command_id)
 
+function(_aep_get_build_command name step cmd_var args_var)
+  # No default arguments if command is user-specified.
+  set(args)
+
+  set(cmd "${${cmd_var}}")
+  if(NOT cmd)
+    get_configure_command_id(${name} cfg_cmd_id)
+    if(cfg_cmd_id STREQUAL "cmake")
+      # CMake project.  Select build command based on generator.
+      get_target_property(cmake_generator ${name} AEP_CMAKE_GENERATOR)
+      if("${cmake_generator}" MATCHES "Make" AND
+          "${cmake_generator}" STREQUAL "${CMAKE_GENERATOR}")
+        # The project uses the same Makefile generator.  Use recursive make.
+        set(cmd "$(MAKE)")
+        if(step STREQUAL "INSTALL")
+          set(args install)
+        endif()
+      else()
+        # Drive the project with "cmake --build".
+        get_target_property(cfg_cmd ${name} AEP_CONFIGURE_COMMAND)
+        if(cfg_cmd)
+          set(cmd "${cfg_cmd}")
+        else()
+          set(cmd "${CMAKE_COMMAND}")
+        endif()
+        set(args --build ${working_dir} --config ${CMAKE_CFG_INTDIR})
+        if(step STREQUAL "INSTALL")
+          list(APPEND args --target install)
+        endif()
+      endif()
+    else() # if(cfg_cmd_id STREQUAL "configure")
+      # Non-CMake project.  Guess "make" and "make install".
+      set(cmd "make")
+      if(step STREQUAL "INSTALL")
+        set(args install)
+      endif()
+    endif()
+  endif()
+
+  # Use user-specified build arguments, if any.
+  get_property(have_args TARGET ${name} PROPERTY AEP_${step}_ARGS SET)
+  if(have_args)
+    get_target_property(args ${name} AEP_${step}_ARGS)
+  endif()
+
+  # Return answers to caller.
+  set(${cmd_var} "${cmd}" PARENT_SCOPE)
+  set(${args_var} "${args}" PARENT_SCOPE)
+endfunction(_aep_get_build_command)
 
 function(mkdir d)
   file(MAKE_DIRECTORY "${d}")
@@ -443,6 +492,14 @@ function(add_external_project_configure_command name)
       separate_arguments(args)
     endif()
 
+    get_target_property(cmake_generator ${name} AEP_CMAKE_GENERATOR)
+    if(cmake_generator)
+      get_configure_command_id(${name} cfg_cmd_id)
+      if(cfg_cmd_id STREQUAL "cmake")
+        list(APPEND args "-G${cmake_generator}" "${source_dir}/${name}")
+      endif()
+    endif()
+
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-configure
       COMMAND ${cmd} ${args}
@@ -471,29 +528,7 @@ function(add_external_project_build_command name)
       DEPENDS ${sentinels_dir}/${name}-configure
       )
   else()
-    get_configure_command_id(${name} cfg_cmd_id)
-
-    if(NOT cmd)
-      set(cmd make)
-      if(cfg_cmd_id STREQUAL "cmake")
-        get_target_property(cfg_cmd ${name} AEP_CONFIGURE_COMMAND)
-        if(cfg_cmd)
-          set(cmd ${cfg_cmd})
-        else()
-          set(cmd ${CMAKE_COMMAND})
-        endif()
-      endif()
-    endif()
-
-    get_property(have_args TARGET ${name} PROPERTY AEP_BUILD_ARGS SET)
-    if(have_args)
-      get_target_property(args ${name} AEP_BUILD_ARGS)
-    else()
-      set(args)
-      if(cfg_cmd_id STREQUAL "cmake")
-        set(args --build ${working_dir} --config ${CMAKE_CFG_INTDIR})
-      endif()
-    endif()
+    _aep_get_build_command(${name} BUILD cmd args)
 
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-build
@@ -524,32 +559,7 @@ function(add_external_project_install_command name)
       DEPENDS ${sentinels_dir}/${name}-build
       )
   else()
-    get_configure_command_id(${name} cfg_cmd_id)
-
-    if(NOT cmd)
-      set(cmd make)
-      if(cfg_cmd_id STREQUAL "cmake")
-        get_target_property(cfg_cmd ${name} AEP_CONFIGURE_COMMAND)
-        if(cfg_cmd)
-          set(cmd ${cfg_cmd})
-        else()
-          set(cmd ${CMAKE_COMMAND})
-        endif()
-      endif()
-    endif()
-
-    get_property(have_args TARGET ${name} PROPERTY AEP_INSTALL_ARGS SET)
-    if(have_args)
-      get_target_property(args ${name} AEP_INSTALL_ARGS)
-    else()
-      set(args)
-      if(cfg_cmd_id STREQUAL "cmake")
-        set(args --build ${working_dir} --config ${CMAKE_CFG_INTDIR} --target install)
-      endif()
-      if(cfg_cmd_id STREQUAL "configure")
-        set(args "install")
-      endif()
-    endif()
+    _aep_get_build_command(${name} INSTALL cmd args)
 
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-install
@@ -607,7 +617,7 @@ endfunction(add_CMakeExternals_target)
 function(is_known_aep_property_key key result_var)
   set(${result_var} 0 PARENT_SCOPE)
 
-  if(key MATCHES "^BUILD_ARGS|BUILD_COMMAND|CONFIGURE_ARGS|CONFIGURE_COMMAND|CONFIGURE_DIR|CVS_REPOSITORY|CVS_MODULE|CVS_TAG|DEPENDS|DOWNLOAD_ARGS|DOWNLOAD_COMMAND|DIR|INSTALL_ARGS|INSTALL_COMMAND|SVN_REPOSITORY|SVN_TAG|TAR|TAR_URL|TGZ|TGZ_URL|UPDATE_ARGS|UPDATE_COMMAND$"
+  if(key MATCHES "^BUILD_ARGS|BUILD_COMMAND|CMAKE_GENERATOR|CONFIGURE_ARGS|CONFIGURE_COMMAND|CONFIGURE_DIR|CVS_REPOSITORY|CVS_MODULE|CVS_TAG|DEPENDS|DOWNLOAD_ARGS|DOWNLOAD_COMMAND|DIR|INSTALL_ARGS|INSTALL_COMMAND|SVN_REPOSITORY|SVN_TAG|TAR|TAR_URL|TGZ|TGZ_URL|UPDATE_ARGS|UPDATE_COMMAND$"
   )
     #message(STATUS "info: recognized via MATCHES - key='${key}'")
     set(${result_var} 1 PARENT_SCOPE)

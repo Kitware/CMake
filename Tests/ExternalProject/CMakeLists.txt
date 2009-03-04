@@ -118,7 +118,8 @@ endif()
 set(proj TutorialStep1-LocalTAR)
 add_external_project(${proj}
   TAR "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tar"
-  CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+  CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+  CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\""
   INSTALL_COMMAND ""
 )
 
@@ -142,7 +143,8 @@ add_external_project(${proj}
 set(proj TutorialStep1-LocalNoDirTGZ)
 add_external_project(${proj}
   TGZ "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tgz"
-  CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+  CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+  CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\""
   INSTALL_COMMAND ""
 )
 
@@ -167,7 +169,8 @@ if(can_use_cvs)
     CVS_REPOSITORY ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
     CVS_MODULE "CMake/Tests/Tutorial/Step1"
     CVS_TAG "-D\;2008-12-01 01:00:00 UTC"
-    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\""
     INSTALL_COMMAND ""
   )
 
@@ -178,7 +181,8 @@ if(can_use_cvs)
     CVS_REPOSITORY ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
     CVS_MODULE "CMake/Source/kwsys"
     CVS_TAG "-r\;CMake-2-6-2"
-    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\""
     INSTALL_COMMAND ""
   )
 
@@ -189,7 +193,8 @@ if(can_use_cvs)
     add_external_project(${proj}
       CVS_REPOSITORY ":pserver:anoncvs@public.kitware.com:/cvsroot/KWStyle"
       CVS_MODULE "KWStyle"
-      CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+      CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+      CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\""
       DEPENDS "EmptyNoOpProject"
       DEPENDS "TutorialStep1-LocalTAR"
       DEPENDS "TutorialStep1-LocalNoDirTAR"
@@ -211,7 +216,8 @@ if(can_use_svn)
   add_external_project(${proj}
     SVN_REPOSITORY "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
     SVN_TAG "-r\;{2008-12-04 01:00:00 +0000}"
-    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\""
   )
 
   # SVN by revision number:
@@ -220,7 +226,8 @@ if(can_use_svn)
   add_external_project(${proj}
     SVN_REPOSITORY "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
     SVN_TAG "-r\;4824"
-    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\""
     INSTALL_COMMAND ""
   )
 
@@ -229,7 +236,8 @@ if(can_use_svn)
   set(proj gdcm-md5-SVNtrunk)
   add_external_project(${proj}
     SVN_REPOSITORY "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
-    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\" -G \"${CMAKE_GENERATOR}\" \"${source_dir}/${proj}\""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CONFIGURE_ARGS "\"-DCMAKE_INSTALL_PREFIX:PATH=${prefix}\""
     INSTALL_COMMAND ""
   )
 endif()
