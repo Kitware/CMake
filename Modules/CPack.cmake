@@ -778,7 +778,7 @@ cpack_set_if_not_set(CPACK_INSTALL_CMAKE_PROJECTS
 cpack_set_if_not_set(CPACK_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 cpack_set_if_not_set(CPACK_TOPLEVEL_TAG "${CPACK_SYSTEM_NAME}")
 
-cpack_set_if_not_set(CPACK_NSIS_DISPLAY_NAME "@CPACK_PACKAGE_INSTALL_DIRECTORY@")
+cpack_set_if_not_set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
 
 cpack_set_if_not_set(CPACK_OUTPUT_CONFIG_FILE
   "${CMAKE_BINARY_DIR}/CPackConfig.cmake")
