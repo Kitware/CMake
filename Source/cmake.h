@@ -398,8 +398,6 @@ protected:
   bool SuppressDevWarnings;
   bool DoSuppressDevWarnings;
 
-  ///! return true if the same cmake was used to make the cache.
-  bool CacheVersionMatches();
   ///! read in a cmake list file to initialize the cache
   void ReadListFile(const char *path);
 

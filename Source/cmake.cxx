@@ -2174,26 +2174,6 @@ int cmake::ActualConfigure()
   return 0;
 }
 
-bool cmake::CacheVersionMatches()
-{
-  const char* majv = 
-    this->CacheManager->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION");
-  const char* minv = 
-    this->CacheManager->GetCacheValue("CMAKE_CACHE_MINOR_VERSION");
-  const char* relv = 
-    this->CacheManager->GetCacheValue("CMAKE_CACHE_RELEASE_VERSION");
-  bool cacheSameCMake = false;
-  if(majv &&
-     atoi(majv) == static_cast<int>(cmVersion::GetMajorVersion())
-     && minv &&
-     atoi(minv) == static_cast<int>(cmVersion::GetMinorVersion())
-     && relv && (strcmp(relv, cmVersion::GetReleaseVersion().c_str()) == 0))
-    {
-    cacheSameCMake = true;
-    }
-  return cacheSameCMake;
-}
-
 void cmake::PreLoadCMakeFiles()
 {
   std::string pre_load = this->GetHomeDirectory();
