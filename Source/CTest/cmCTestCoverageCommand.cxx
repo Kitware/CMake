@@ -19,6 +19,13 @@
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 
+//----------------------------------------------------------------------------
+cmCTestCoverageCommand::cmCTestCoverageCommand()
+{
+  this->LabelsMentioned = false;
+}
+
+//----------------------------------------------------------------------------
 cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
 {
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,

@@ -28,7 +28,7 @@ class cmCTestCoverageCommand : public cmCTestHandlerCommand
 {
 public:
 
-  cmCTestCoverageCommand() {}
+  cmCTestCoverageCommand();
 
   /**
    * This is a virtual constructor for the command.
