@@ -361,11 +361,11 @@ SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 7)
 SET(CMake_VERSION_PATCH 0)
 
-# CVS versions are odd, if this is an odd minor version
-# then set the CMake_VERSION_DATE variable
+# We use odd minor numbers for development versions.
+# Use a date for the development patch level.
 IF("${CMake_VERSION_MINOR}" MATCHES "[13579]$")
   INCLUDE(${CMake_SOURCE_DIR}/Source/kwsys/kwsysDateStamp.cmake)
-  SET(CMake_VERSION_DATE
+  SET(CMake_VERSION_PATCH
     "${KWSYS_DATE_STAMP_YEAR}${KWSYS_DATE_STAMP_MONTH}${KWSYS_DATE_STAMP_DAY}"
     )
 ENDIF("${CMake_VERSION_MINOR}" MATCHES "[13579]$")
@@ -425,10 +425,6 @@ IF(BUILD_QtDialog)
   IF(APPLE)
     SET(CMAKE_BUNDLE_NAME
       "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}-${CMake_VERSION_PATCH}")
-    IF(CMake_VERSION_DATE)
-      SET(CMAKE_BUNDLE_NAME
-        "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}-${CMake_VERSION_DATE}")
-    ENDIF(CMake_VERSION_DATE)
     SET(CMAKE_BUNDLE_LOCATION "${CMAKE_INSTALL_PREFIX}")
     # make sure CMAKE_INSTALL_PREFIX ends in /
     STRING(LENGTH "${CMAKE_INSTALL_PREFIX}" LEN)

@@ -330,9 +330,7 @@ BOOL CMakeSetupDialog::OnInitDialog()
     
   // Set the version number
   char tmp[1024];
-  sprintf(tmp,"CMake %d.%d - %s", cmVersion::GetMajorVersion(),
-          cmVersion::GetMinorVersion(), 
-          cmVersion::GetReleaseVersion().c_str());
+  sprintf(tmp,"CMake %s", cmVersion::GetCMakeVersion());
   SetDlgItemText(IDC_PROGRESS, "");
   this->SetWindowText(tmp);
   this->UpdateData(FALSE);

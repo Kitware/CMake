@@ -144,7 +144,7 @@ int main(int argc, char** argv)
   
   CMakeSetupDialog dialog;
   QString title = QString("CMake %1");
-  title = title.arg(cmVersion::GetCMakeVersion().c_str());
+  title = title.arg(cmVersion::GetCMakeVersion());
   dialog.setWindowTitle(title);
   dialog.show();
  

@@ -40,10 +40,13 @@ cmake_binary_dir=`pwd`
 cmake_bootstrap_dir="${cmake_binary_dir}/Bootstrap.cmk"
 cmake_version_major="`cmake_version_component MAJOR`"
 cmake_version_minor="`cmake_version_component MINOR`"
-cmake_version_patch="`cmake_version_component PATCH`"
+if echo "${cmake_version_minor}" | grep "[0-9]*[13579]" > /dev/null 2>&1; then
+  cmake_version_patch="`cmake_date_stamp_component YEAR``cmake_date_stamp_component MONTH``cmake_date_stamp_component DAY`"
+else
+  cmake_version_patch="`cmake_version_component PATCH`"
+fi
 cmake_version="${cmake_version_major}.${cmake_version_minor}"
 cmake_version_full="${cmake_version_major}.${cmake_version_minor}.${cmake_version_patch}"
-cmake_date_stamp="`cmake_date_stamp_component YEAR``cmake_date_stamp_component MONTH``cmake_date_stamp_component DAY`"
 cmake_data_dir="/share/cmake-${cmake_version}"
 cmake_doc_dir="/doc/cmake-${cmake_version}"
 cmake_man_dir="/man"
@@ -283,15 +286,7 @@ EOF
 # Display CMake bootstrap usage
 cmake_version_display()
 {
-  (
-  # Get CMake version
-  if echo "${cmake_version_full}" | grep "[0-9]\.[0-9]*[13579]\.[0-9]" > /dev/null 2>&1; then
-    version="${cmake_version}-${cmake_date_stamp}"
-  else
-    version="${cmake_version}-${cmake_version_patch}"
-  fi
-  echo "CMake ${version}, Copyright (c) 2007 Kitware, Inc., Insight Consortium"
-  )
+  echo "CMake ${cmake_version_full}, Copyright (c) 2000-2009 Kitware, Inc., Insight Consortium"
 }
 
 # Display CMake bootstrap error, display the log file and exit
@@ -594,6 +589,7 @@ done
 # Delete all the bootstrap files
 rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
 rm -f "${cmake_bootstrap_dir}/cmConfigure.h.tmp"
+rm -f "${cmake_bootstrap_dir}/cmVersionConfig.h.tmp"
 
 # If exist compiler flags, set them
 cmake_c_flags=${CFLAGS}
@@ -1204,19 +1200,21 @@ else
 fi
 
 # Write CMake version
-cmake_report cmConfigure.h.tmp "#define CMake_VERSION_MAJOR ${cmake_version_major}"
-cmake_report cmConfigure.h.tmp "#define CMake_VERSION_MINOR ${cmake_version_minor}"
-cmake_report cmConfigure.h.tmp "#define CMake_VERSION_PATCH ${cmake_version_patch}"
+cmake_report cmVersionConfig.h.tmp "#define CMake_VERSION_MAJOR ${cmake_version_major}"
+cmake_report cmVersionConfig.h.tmp "#define CMake_VERSION_MINOR ${cmake_version_minor}"
+cmake_report cmVersionConfig.h.tmp "#define CMake_VERSION_PATCH ${cmake_version_patch}"
 cmake_report cmConfigure.h.tmp "#define CMAKE_ROOT_DIR \"${cmake_root_dir}\""
 cmake_report cmConfigure.h.tmp "#define CMAKE_DATA_DIR \"${cmake_data_dir}\""
 cmake_report cmConfigure.h.tmp "#define CMAKE_BOOTSTRAP"
 
-# Regenerate real cmConfigure.h
-if diff cmConfigure.h cmConfigure.h.tmp > /dev/null 2> /dev/null; then
-  rm -f cmConfigure.h.tmp
-else
-  mv -f cmConfigure.h.tmp cmConfigure.h
-fi
+# Regenerate configured headers
+for h in Configure VersionConfig; do
+  if diff cm${h}.h cm${h}.h.tmp > /dev/null 2> /dev/null; then
+    rm -f cm${h}.h.tmp
+  else
+    mv -f cm${h}.h.tmp cm${h}.h
+  fi
+done
 
 # Prepare KWSYS
 cmake_kwsys_config_replace_string \
@@ -1227,14 +1225,6 @@ cmake_kwsys_config_replace_string \
   "${cmake_source_dir}/Source/kwsys/Configure.h.in" \
   "${cmake_bootstrap_dir}/cmsys/Configure.h" \
   "${cmake_compiler_settings_comment}"
-
-cat>"${cmake_bootstrap_dir}/cmsys/DateStamp.h"<<EOF
-/* Minimal DateStamp header for CMake bootstrap build.  */
-#ifndef cmsys_DateStamp_h
-#define cmsys_DateStamp_h
-#define cmsys_DATE_STAMP_STRING_FULL "${cmake_date_stamp}"
-#endif
-EOF
 
 for a in ${KWSYS_FILES}; do 
   cmake_replace_string "${cmake_source_dir}/Source/kwsys/${a}.in" \

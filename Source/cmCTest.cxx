@@ -26,6 +26,7 @@
 #include "cmDynamicLoader.h"
 #include "cmGeneratedFileStream.h"
 #include "cmXMLSafe.h"
+#include "cmVersionMacros.h"
 #include "cmCTestCommand.h"
 
 #include "cmCTestBuildHandler.h"
@@ -1266,7 +1267,7 @@ void cmCTest::StartXML(std::ostream& ostr, bool append)
        << "<Site BuildName=\"" << this->GetCTestConfiguration("BuildName")
        << "\"\n\tBuildStamp=\"" << this->CurrentTag << "-"
        << this->GetTestModelString() << "\"\n\tName=\""
-       << this->GetCTestConfiguration("Site") << "\"\n\tGenerator=\"ctest"
+       << this->GetCTestConfiguration("Site") << "\"\n\tGenerator=\"ctest-"
        << cmVersion::GetCMakeVersion()  << "\"\n"
        << (append? "\tAppend=\"true\"\n":"")
        << "\tOSName=\"" << info.GetOSName() << "\"\n"

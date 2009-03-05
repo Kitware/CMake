@@ -592,8 +592,7 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   // We want to display this on the right
   char version[cmCursesMainForm::MAX_WIDTH];
   char vertmp[128];
-  sprintf(vertmp,"CMake Version %d.%d - %s", cmVersion::GetMajorVersion(),
-          cmVersion::GetMinorVersion(),cmVersion::GetReleaseVersion().c_str());
+  sprintf(vertmp,"CMake Version %s", cmVersion::GetCMakeVersion());
   int sideSpace = (width-strlen(vertmp));
   for(i=0; i<sideSpace; i++) { version[i] = ' '; }
   sprintf(version+sideSpace, "%s", vertmp);

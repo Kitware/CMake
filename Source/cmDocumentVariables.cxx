@@ -110,9 +110,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Provide Information");
   
   cm->DefineProperty
-    ("CMAKE_CACHE_RELEASE_VERSION", cmProperty::VARIABLE,
-     "Release version of CMake used to create the CMakeCache.txt file",
-     "This is stores the release version of CMake used to "
+    ("CMAKE_CACHE_PATCH_VERSION", cmProperty::VARIABLE,
+     "Patch version of CMake used to create the CMakeCache.txt file",
+     "This is stores the patch version of CMake used to "
      "write a CMake cache file. It is only different when "
      "a different version of CMake is run on a previously "
      "created cache file.", false, 

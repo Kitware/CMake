@@ -21,25 +21,10 @@
 #ifndef cmStandardIncludes_h
 #define cmStandardIncludes_h
 
-#define CMAKE_TO_STRING(x) CMAKE_TO_STRING0(x)
-#define CMAKE_TO_STRING0(x) #x
-
 // include configure generated  header to define CMAKE_NO_ANSI_STREAM_HEADERS,
 // CMAKE_NO_STD_NAMESPACE, and other macros.
 #include "cmConfigure.h"
 #include <cmsys/Configure.hxx>
-
-#define CMake_VERSION \
-  CMAKE_TO_STRING(CMake_VERSION_MAJOR) "." \
-  CMAKE_TO_STRING(CMake_VERSION_MINOR)
-
-#define CMake_VERSION_FULL \
-  CMAKE_TO_STRING(CMake_VERSION_MAJOR) "." \
-  CMAKE_TO_STRING(CMake_VERSION_MINOR) "." \
-  CMAKE_TO_STRING(CMake_VERSION_PATCH)
-
-#define CMake_VERSION_ENCODE(major, minor, patch) \
-  ((major)*0x10000u + (minor)*0x100u + (patch))
 
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )

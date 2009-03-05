@@ -13,6 +13,10 @@ CONFIGURE_FILE(
   "${CMake_BINARY_DIR}/Source/cmConfigure.h"
   )
 CONFIGURE_FILE(
+  "${CMake_SOURCE_DIR}/Source/cmVersionConfig.h.in"
+  "${CMake_BINARY_DIR}/Source/cmVersionConfig.h"
+  )
+CONFIGURE_FILE(
   "${CMake_SOURCE_DIR}/Source/CPack/cmCPackConfigure.h.in"
   "${CMake_BINARY_DIR}/Source/CPack/cmCPackConfigure.h"
   )

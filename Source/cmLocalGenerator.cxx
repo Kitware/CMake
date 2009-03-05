@@ -26,6 +26,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmTest.h"
+#include "cmVersion.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

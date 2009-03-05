@@ -30,12 +30,14 @@ public:
   /**
    * Return major and minor version numbers for cmake.
    */
-  static unsigned int GetMajorVersion() { return CMake_VERSION_MAJOR; }
-  static unsigned int GetMinorVersion() { return CMake_VERSION_MINOR; }
-  static unsigned int GetPatchVersion() { return CMake_VERSION_PATCH; }
-  static std::string GetReleaseVersion();
-  static std::string GetCMakeVersion();
+  static unsigned int GetMajorVersion();
+  static unsigned int GetMinorVersion();
+  static unsigned int GetPatchVersion();
+  static const char* GetCMakeVersion();
 };
+
+#define CMake_VERSION_ENCODE(major, minor, patch) \
+  ((major)*0x10000u + (minor)*0x100u + (patch))
 
 #endif
 
