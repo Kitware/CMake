@@ -30,8 +30,15 @@ bool cmMessageCommand
 
   cmake::MessageType type = cmake::MESSAGE;
   bool status = false;
-  if (*i == "SEND_ERROR" || *i == "FATAL_ERROR")
+  bool fatal = false;
+  if (*i == "SEND_ERROR")
     {
+    type = cmake::FATAL_ERROR;
+    ++i;
+    }
+  else if (*i == "FATAL_ERROR")
+    {
+    fatal = true;
     type = cmake::FATAL_ERROR;
     ++i;
     }
@@ -70,6 +77,10 @@ bool cmMessageCommand
       {
       cmSystemTools::Message(message.c_str());
       }
+    }
+  if(fatal)
+    {
+    cmSystemTools::SetFatalErrorOccured();
     }
   return true;
 }
