@@ -65,16 +65,28 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  message([SEND_ERROR | STATUS | FATAL_ERROR]\n"
+      "  message([STATUS|WARNING|AUTHOR_WARNING|FATAL_ERROR|SEND_ERROR]\n"
       "          \"message to display\" ...)\n"
-      "By default the message is displayed in a pop up window (CMakeSetup), "
-      "or in the stdout of cmake, or the error section of ccmake. "
-      "If the first argument is "
-      "SEND_ERROR then an error is raised, and the generate phase will "
-      "be skipped.  If the first argument is FATAL_ERROR, all processing "
-      "is halted. If the first argument is STATUS then the message is "
-      "displayed in the progress line for the GUI, or with a -- in the "
-      "command line cmake.";
+      "The optional keyword determines the type of message:\n"
+      "  (none)         = Important information\n"
+      "  STATUS         = Incidental information\n"
+      "  WARNING        = CMake Warning, continue processing\n"
+      "  AUTHOR_WARNING = CMake Warning (dev), continue processing\n"
+      "  FATAL_ERROR    = CMake Error, stop all processing\n"
+      "  SEND_ERROR     = CMake Error, stop all processing (legacy)\n"
+      "The CMake command-line tool displays STATUS messages on stdout "
+      "and all other message types on stderr.  "
+      "The CMake GUI displays all messages in its log area.  "
+      "The interactive dialogs (ccmake and CMakeSetup) show STATUS messages "
+      "one at a time on a status line and other messages in interactive "
+      "pop-up boxes."
+      "\n"
+      "CMake Warning and Error message text displays using a simple "
+      "markup language.  "
+      "Non-indented text is formatted in line-wrapped paragraphs delimited "
+      "by newlines.  "
+      "Indented text is considered pre-formatted."
+      ;
     }
   
   cmTypeMacro(cmMessageCommand, cmCommand);
