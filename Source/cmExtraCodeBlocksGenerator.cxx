@@ -259,15 +259,47 @@ void cmExtraCodeBlocksGenerator
       }
     }
 
+  // The following loop tries to add header files matching to implementation
+  // files to the project. It does that by iterating over all source files,
+  // replacing the file name extension with ".h" and checks whether such a 
+  // file exists. If it does, it is inserted into the map of files.
+  // A very similar version of that code exists also in the kdevelop
+  // project generator.
+  for (std::map<std::string, std::string>::const_iterator 
+       sit=sourceFiles.begin();
+       sit!=sourceFiles.end();
+       ++sit)
+    {
+    std::string headerBasename=cmSystemTools::GetFilenamePath(sit->first);
+    headerBasename+="/";
+    headerBasename+=cmSystemTools::GetFilenameWithoutExtension(sit->first);
+
+    // check if there's a matching header around
+    for(std::vector<std::string>::const_iterator
+        ext = mf->GetHeaderExtensions().begin();
+        ext !=  mf->GetHeaderExtensions().end(); 
+        ++ext)
+      {
+      std::string hname=headerBasename;
+      hname += ".";
+      hname += *ext;
+      if(cmSystemTools::FileExists(hname.c_str()))
+        {
+        sourceFiles[hname] = hname;
+        break;
+        }
+      }
+    }
+
   // insert all used source files in the CodeBlocks project
   for (std::map<std::string, std::string>::const_iterator 
        sit=sourceFiles.begin();
        sit!=sourceFiles.end();
        ++sit)
-  {
-  fout<<"      <Unit filename=\""<<sit->first <<"\">\n"
-        "      </Unit>\n";
-  }
+    {
+    fout<<"      <Unit filename=\""<<sit->first <<"\">\n"
+          "      </Unit>\n";
+    }
 
   fout<<"   </Project>\n"
         "</CodeBlocks_project_file>\n";
