@@ -205,7 +205,14 @@ bool cmGetPropertyCommand::StoreResult(const char* value)
     }
   else // if(this->InfoType == OutValue)
     {
-    this->Makefile->AddDefinition(this->Variable.c_str(), value);
+    if(value)
+      {
+      this->Makefile->AddDefinition(this->Variable.c_str(), value);
+      }
+    else
+      {
+      this->Makefile->RemoveDefinition(this->Variable.c_str());
+      }
     }
   return true;
 }
