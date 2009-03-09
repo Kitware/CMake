@@ -901,7 +901,7 @@ void cmGlobalGenerator::Generate()
   // Update rule hashes.
   this->CheckRuleHashes();
 
-  this->WriteTargetLabels();
+  this->WriteSummary();
 
   if (this->ExtraGenerator != 0)
     {
@@ -2137,44 +2137,32 @@ void cmGlobalGenerator::CheckRuleHashes()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::WriteTargetLabels()
+void cmGlobalGenerator::WriteSummary()
 {
   cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
 
-  // Record generated per-target label files in a central location.
+  // Record all target directories in a central location.
   std::string fname = mf->GetHomeOutputDirectory();
   fname += cmake::GetCMakeFilesDirectory();
-  fname += "/LabelFiles.txt";
-  bool opened = false;
-  cmGeneratedFileStream fout;
+  fname += "/TargetDirectories.txt";
+  cmGeneratedFileStream fout(fname.c_str());
 
-  // Generate a label file for each target.
-  std::string file;
+  // Generate summary information files for each target.
+  std::string dir;
   for(std::map<cmStdString,cmTarget *>::const_iterator ti =
         this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
     {
-    if(this->WriteTargetLabels(ti->second, file))
-      {
-      if(!opened)
-        {
-        fout.Open(fname.c_str());
-        opened = true;
-        }
-      fout << file << "\n";
-      }
-    }
-  if(!opened)
-    {
-    cmSystemTools::RemoveFile(fname.c_str());
+    this->WriteSummary(ti->second);
+    fout << ti->second->GetSupportDirectory() << "\n";
     }
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalGenerator::WriteTargetLabels(cmTarget* target, std::string& file)
+void cmGlobalGenerator::WriteSummary(cmTarget* target)
 {
   // Place the labels file in a per-target support directory.
   std::string dir = target->GetSupportDirectory();
-  file = dir;
+  std::string file = dir;
   file += "/Labels.txt";
 
   // Check whether labels are enabled for this target.
@@ -2216,11 +2204,9 @@ bool cmGlobalGenerator::WriteTargetLabels(cmTarget* target, std::string& file)
           }
         }
       }
-    return true;
     }
   else
     {
     cmSystemTools::RemoveFile(file.c_str());
-    return false;
     }
 }

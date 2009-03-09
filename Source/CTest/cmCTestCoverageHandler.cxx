@@ -1749,9 +1749,9 @@ void cmCTestCoverageHandler::LoadLabels()
 {
   std::string fileList = this->CTest->GetBinaryDir();
   fileList += cmake::GetCMakeFilesDirectory();
-  fileList += "/LabelFiles.txt";
+  fileList += "/TargetDirectories.txt";
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-             " label file list [" << fileList << "]\n");
+             " target directory list [" << fileList << "]\n");
   std::ifstream finList(fileList.c_str());
   std::string line;
   while(cmSystemTools::GetLineFromStream(finList, line))
@@ -1761,11 +1761,18 @@ void cmCTestCoverageHandler::LoadLabels()
 }
 
 //----------------------------------------------------------------------
-void cmCTestCoverageHandler::LoadLabels(const char* fname)
+void cmCTestCoverageHandler::LoadLabels(const char* dir)
 {
+  std::string fname = dir;
+  fname += "/Labels.txt";
+  std::ifstream fin(fname.c_str());
+  if(!fin)
+    {
+    return;
+    }
+
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              " loading labels from [" << fname << "]\n");
-  std::ifstream fin(fname);
   bool inTarget = true;
   std::string source;
   std::string line;

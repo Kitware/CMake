@@ -152,9 +152,9 @@ private:
   std::vector<std::string> Labels;
   int GetLabelId(std::string const& label);
 
-  // Load reading and writing methods.
+  // Label reading and writing methods.
   void LoadLabels();
-  void LoadLabels(const char* fname);
+  void LoadLabels(const char* dir);
   void WriteXMLLabels(std::ofstream& os, std::string const& source);
 
   // Label-based filtering.

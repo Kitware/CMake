@@ -336,8 +336,8 @@ private:
   std::map<cmStdString, RuleHash> RuleHashes;
   void CheckRuleHashes();
 
-  void WriteTargetLabels();
-  bool WriteTargetLabels(cmTarget* target, std::string& file);
+  void WriteSummary();
+  void WriteSummary(cmTarget* target);
 
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 
