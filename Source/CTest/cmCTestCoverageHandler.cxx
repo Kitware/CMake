@@ -694,17 +694,8 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   cmsys::RegularExpression st2re5(st2gcovOutputRex5.c_str());
   cmsys::RegularExpression st2re6(st2gcovOutputRex6.c_str());
 
-
-  cmsys::Glob gl;
-  gl.RecurseOn();
-  gl.RecurseThroughSymlinksOff();
-  std::string daGlob = cont->BinaryDir + "/*.da";
-  gl.FindFiles(daGlob);
-  std::vector<std::string> files = gl.GetFiles();
-  daGlob = cont->BinaryDir + "/*.gcda";
-  gl.FindFiles(daGlob);
-  std::vector<std::string>& moreFiles = gl.GetFiles();
-  files.insert(files.end(), moreFiles.begin(), moreFiles.end());
+  std::vector<std::string> files;
+  this->FindGCovFiles(files);
   std::vector<std::string>::iterator it;
 
   if ( files.size() == 0 )
@@ -1059,6 +1050,37 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     }
   cmSystemTools::ChangeDirectory(currentDirectory.c_str());
   return file_count;
+}
+
+//----------------------------------------------------------------------------
+void cmCTestCoverageHandler::FindGCovFiles(std::vector<std::string>& files)
+{
+  cmsys::Glob gl;
+  gl.RecurseOn();
+  gl.RecurseThroughSymlinksOff();
+
+  for(LabelMapType::const_iterator lmi = this->TargetDirs.begin();
+      lmi != this->TargetDirs.end(); ++lmi)
+    {
+    // Skip targets containing no interesting labels.
+    if(!this->IntersectsFilter(lmi->second))
+      {
+      continue;
+      }
+
+    // Coverage files appear next to their object files in the target
+    // support directory.
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "   globbing for coverage in: " << lmi->first << std::endl);
+    std::string daGlob = lmi->first;
+    daGlob += "/*.da";
+    gl.FindFiles(daGlob);
+    files.insert(files.end(), gl.GetFiles().begin(), gl.GetFiles().end());
+    daGlob = lmi->first;
+    daGlob += "/*.gcda";
+    gl.FindFiles(daGlob);
+    files.insert(files.end(), gl.GetFiles().begin(), gl.GetFiles().end());
+    }
 }
 
 //----------------------------------------------------------------------
@@ -1763,6 +1785,7 @@ void cmCTestCoverageHandler::LoadLabels()
 //----------------------------------------------------------------------
 void cmCTestCoverageHandler::LoadLabels(const char* dir)
 {
+  LabelSet& dirLabels = this->TargetDirs[dir];
   std::string fname = dir;
   fname += "/Labels.txt";
   std::ifstream fin(fname.c_str());
@@ -1789,6 +1812,7 @@ void cmCTestCoverageHandler::LoadLabels(const char* dir)
       // Label lines appear indented by one space.
       std::string label = line.substr(1);
       int id = this->GetLabelId(label);
+      dirLabels.insert(id);
       if(inTarget)
         {
         targetLabels.push_back(id);
@@ -1847,6 +1871,23 @@ cmCTestCoverageHandler::SetLabelFilter(std::set<cmStdString> const& labels)
 }
 
 //----------------------------------------------------------------------
+bool cmCTestCoverageHandler::IntersectsFilter(LabelSet const& labels)
+{
+  // If there is no label filter then nothing is filtered out.
+  if(this->LabelFilter.empty())
+    {
+    return true;
+    }
+
+  std::vector<int> ids;
+  cmsys_stl::set_intersection
+    (labels.begin(), labels.end(),
+     this->LabelFilter.begin(), this->LabelFilter.end(),
+     cmsys_stl::back_inserter(ids));
+  return !ids.empty();
+}
+
+//----------------------------------------------------------------------
 bool cmCTestCoverageHandler::IsFilteredOut(std::string const& source)
 {
   // If there is no label filter then nothing is filtered out.
@@ -1857,15 +1898,11 @@ bool cmCTestCoverageHandler::IsFilteredOut(std::string const& source)
 
   // The source is filtered out if it does not have any labels in
   // common with the filter set.
-  std::vector<int> ids;
   std::string shortSrc = this->CTest->GetShortPathToFile(source.c_str());
   LabelMapType::const_iterator li = this->SourceLabels.find(shortSrc);
-  if(li != this->SourceLabels.end() && !li->second.empty())
+  if(li != this->SourceLabels.end())
     {
-    cmsys_stl::set_intersection
-      (li->second.begin(), li->second.end(),
-       this->LabelFilter.begin(), this->LabelFilter.end(),
-       cmsys_stl::back_inserter(ids));
+    return !this->IntersectsFilter(li->second);
     }
-  return ids.empty();
+  return true;
 }

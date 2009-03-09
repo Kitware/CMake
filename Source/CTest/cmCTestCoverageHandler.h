@@ -61,6 +61,7 @@ private:
 
   //! Handle coverage using GCC's GCov
   int HandleGCovCoverage(cmCTestCoverageHandlerContainer* cont);
+  void FindGCovFiles(std::vector<std::string>& files);
 
   //! Handle coverage using Bullseye
   int HandleBullseyeCoverage(cmCTestCoverageHandlerContainer* cont);
@@ -145,6 +146,7 @@ private:
   class LabelSet: public std::set<int> {};
   typedef std::map<cmStdString, LabelSet> LabelMapType;
   LabelMapType SourceLabels;
+  LabelMapType TargetDirs;
 
   // Map from label name to label id.
   typedef std::map<cmStdString, int> LabelIdMapType;
@@ -159,6 +161,7 @@ private:
 
   // Label-based filtering.
   std::set<int> LabelFilter;
+  bool IntersectsFilter(LabelSet const& labels);
   bool IsFilteredOut(std::string const& source);
 };
 
