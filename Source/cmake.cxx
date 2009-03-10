@@ -228,6 +228,7 @@ void cmake::InitializeProperties()
   this->PropertyDefinitions.clear();
 
   // initialize properties
+  cmCacheManager::DefineProperties(this);
   cmSourceFile::DefineProperties(this);
   cmTarget::DefineProperties(this);
   cmMakefile::DefineProperties(this);

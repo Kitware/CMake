@@ -155,6 +155,9 @@ public:
   unsigned int GetCacheMinorVersion() { return this->CacheMinorVersion; }
   bool NeedCacheCompatibility(int major, int minor);
 
+  /** Define and document CACHE entry properties.  */
+  static void DefineProperties(cmake *cm);
+
 protected:
   ///! Add an entry into the cache
   void AddCacheEntry(const char* key, const char* value, 

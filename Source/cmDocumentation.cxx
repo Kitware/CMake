@@ -267,6 +267,7 @@ cmDocumentation::cmDocumentation()
   this->PropertySections.push_back("Properties on Targets");
   this->PropertySections.push_back("Properties on Tests");
   this->PropertySections.push_back("Properties on Source Files");
+  this->PropertySections.push_back("Properties on Cache Entries");
 
   this->VariableSections.push_back("Variables that Provide Information");
   this->VariableSections.push_back("Variables That Change Behavior");
