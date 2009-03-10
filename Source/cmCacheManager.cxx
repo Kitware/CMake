@@ -71,6 +71,18 @@ cmCacheManager::CacheEntryType cmCacheManager::StringToType(const char* s)
   return STRING;
 }
 
+bool cmCacheManager::IsType(const char* s)
+{
+  for(int i=0; cmCacheManagerTypes[i]; ++i)
+    {
+    if(strcmp(s, cmCacheManagerTypes[i]) == 0)
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
 bool cmCacheManager::LoadCache(cmMakefile* mf)
 {
   return this->LoadCache(mf->GetHomeOutputDirectory());

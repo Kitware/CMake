@@ -59,7 +59,8 @@ public:
         "                DIRECTORY [dir]                   |\n"
         "                TARGET    [target1 [target2 ...]] |\n"
         "                SOURCE    [src1 [src2 ...]]       |\n"
-        "                TEST      [test1 [test2 ...]]>\n"
+        "                TEST      [test1 [test2 ...]]     |\n"
+        "                CACHE     [entry1 [entry2 ...]]>\n"
         "               [APPEND]\n"
         "               PROPERTY <name> [value1 [value2 ...]])\n"
         "Set one property on zero or more objects of a scope.  "
@@ -72,6 +73,7 @@ public:
         "TARGET scope may name zero or more existing targets.\n"
         "SOURCE scope may name zero or more source files.\n"
         "TEST scope may name zero or more existing tests.\n"
+        "CACHE scope must name zero or more cache existing entries.\n"
         "The required PROPERTY option is immediately followed by the name "
         "of the property to set.  Remaining arguments are used to "
         "compose the property value in the form of a semicolon-separated "
@@ -104,6 +106,8 @@ private:
   bool HandleSource(cmSourceFile* sf);
   bool HandleTestMode();
   bool HandleTest(cmTest* test);
+  bool HandleCacheMode();
+  bool HandleCacheEntry(cmCacheManager::CacheIterator&);
 };
 
 

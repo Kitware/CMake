@@ -19,6 +19,8 @@
 #include "cmSetTestsPropertiesCommand.h"
 #include "cmSetSourceFilesPropertiesCommand.h"
 
+#include "cmCacheManager.h"
+
 //----------------------------------------------------------------------------
 cmSetPropertyCommand::cmSetPropertyCommand()
 {
@@ -59,11 +61,15 @@ bool cmSetPropertyCommand
     {
     scope = cmProperty::TEST;
     }
+  else if(*arg == "CACHE")
+    {
+    scope = cmProperty::CACHE;
+    }
   else
     {
     cmOStringStream e;
     e << "given invalid scope " << *arg << ".  "
-      << "Valid scopes are GLOBAL, DIRECTORY, TARGET, SOURCE, TEST.";
+      << "Valid scopes are GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, CACHE.";
     this->SetError(e.str().c_str());
     return false;
     }
@@ -123,6 +129,7 @@ bool cmSetPropertyCommand
     case cmProperty::TARGET:      return this->HandleTargetMode();
     case cmProperty::SOURCE_FILE: return this->HandleSourceMode();
     case cmProperty::TEST:        return this->HandleTestMode();
+    case cmProperty::CACHE:       return this->HandleCacheMode();
 
     case cmProperty::VARIABLE:
     case cmProperty::CACHED_VARIABLE:
@@ -380,6 +387,92 @@ bool cmSetPropertyCommand::HandleTest(cmTest* test)
   else
     {
     test->SetProperty(name, value);
+    }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmSetPropertyCommand::HandleCacheMode()
+{
+  if(this->PropertyName == "ADVANCED")
+    {
+    if(!this->Remove &&
+       !cmSystemTools::IsOn(this->PropertyValue.c_str()) &&
+       !cmSystemTools::IsOff(this->PropertyValue.c_str()))
+      {
+      cmOStringStream e;
+      e << "given non-boolean value \"" << this->PropertyValue
+        << "\" for CACHE property \"ADVANCED\".  ";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+  else if(this->PropertyName == "TYPE")
+    {
+    if(!cmCacheManager::IsType(this->PropertyValue.c_str()))
+      {
+      cmOStringStream e;
+      e << "given invalid CACHE entry TYPE \"" << this->PropertyValue << "\"";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+  else if(this->PropertyName != "HELPSTRING" &&
+          this->PropertyName != "VALUE")
+    {
+    cmOStringStream e;
+    e << "given invalid CACHE property " << this->PropertyName << ".  "
+      << "Settable CACHE properties are: "
+      << "ADVANCED, HELPSTRING, TYPE, and VALUE.";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  for(std::set<cmStdString>::const_iterator ni = this->Names.begin();
+      ni != this->Names.end(); ++ni)
+    {
+    // Get the source file.
+    cmMakefile* mf = this->GetMakefile();
+    cmake* cm = mf->GetCMakeInstance();
+    cmCacheManager::CacheIterator it =
+      cm->GetCacheManager()->GetCacheIterator(ni->c_str());
+    if(!it.IsAtEnd())
+      {
+      if(!this->HandleCacheEntry(it))
+        {
+        return false;
+        }
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "could not find CACHE variable " << *ni
+        << ".  Perhaps it has not yet been created.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmSetPropertyCommand::HandleCacheEntry(cmCacheManager::CacheIterator& it)
+{
+  // Set or append the property.
+  const char* name = this->PropertyName.c_str();
+  const char* value = this->PropertyValue.c_str();
+  if (this->Remove)
+    {
+    value = 0;
+    }
+  if(this->AppendMode)
+    {
+    it.AppendProperty(name, value);
+    }
+  else
+    {
+    it.SetProperty(name, value);
     }
 
   return true;

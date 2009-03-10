@@ -65,12 +65,16 @@ bool cmGetPropertyCommand
     {
     scope = cmProperty::VARIABLE;
     }
+  else if(args[1] == "CACHE")
+    {
+    scope = cmProperty::CACHE;
+    }
   else
     {
     cmOStringStream e;
     e << "given invalid scope " << args[1] << ".  "
       << "Valid scopes are "
-      << "GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, VARIABLE.";
+      << "GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, VARIABLE, CACHE.";
     this->SetError(e.str().c_str());
     return false;
     }
@@ -187,6 +191,7 @@ bool cmGetPropertyCommand
       case cmProperty::SOURCE_FILE: return this->HandleSourceMode();
       case cmProperty::TEST:        return this->HandleTestMode();
       case cmProperty::VARIABLE:    return this->HandleVariableMode();
+      case cmProperty::CACHE:       return this->HandleCacheMode();
 
       case cmProperty::CACHED_VARIABLE:
         break; // should never happen
@@ -358,4 +363,24 @@ bool cmGetPropertyCommand::HandleVariableMode()
 
   return this->StoreResult
     (this->Makefile->GetDefinition(this->PropertyName.c_str()));
+}
+
+//----------------------------------------------------------------------------
+bool cmGetPropertyCommand::HandleCacheMode()
+{
+  if(this->Name.empty())
+    {
+    this->SetError("not given name for CACHE scope.");
+    return false;
+    }
+
+  const char* value = 0;
+  cmCacheManager::CacheIterator it =
+    this->Makefile->GetCacheManager()->GetCacheIterator(this->Name.c_str());
+  if(!it.IsAtEnd())
+    {
+    value = it.GetProperty(this->PropertyName.c_str());
+    }
+  this->StoreResult(value);
+  return true;
 }

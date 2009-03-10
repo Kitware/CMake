@@ -66,6 +66,7 @@ public:
         "                TARGET    <target> |\n"
         "                SOURCE    <source> |\n"
         "                TEST      <test>   |\n"
+        "                CACHE     <entry>  |\n"
         "                VARIABLE>\n"
         "               PROPERTY <name>\n"
         "               [SET | DEFINED | BRIEF_DOCS | FULL_DOCS])\n"
@@ -81,6 +82,7 @@ public:
         "TARGET scope must name one existing target.\n"
         "SOURCE scope must name one source file.\n"
         "TEST scope must name one existing test.\n"
+        "CACHE scope must name one cache entry.\n"
         "VARIABLE scope is unique and does not accept a name.\n"
         "The required PROPERTY option is immediately followed by the name "
         "of the property to get.  "
@@ -114,6 +116,7 @@ private:
   bool HandleSourceMode();
   bool HandleTestMode();
   bool HandleVariableMode();
+  bool HandleCacheMode();
 };
 
 #endif
