@@ -22,7 +22,7 @@
 class cmProperty 
 {
 public:
-  enum ScopeType { TARGET, SOURCE_FILE, DIRECTORY, GLOBAL, 
+  enum ScopeType { TARGET, SOURCE_FILE, DIRECTORY, GLOBAL, CACHE,
                    TEST, VARIABLE, CACHED_VARIABLE };
 
   // set this property

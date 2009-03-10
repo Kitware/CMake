@@ -18,6 +18,7 @@
 #define cmCacheManager_h
 
 #include "cmStandardIncludes.h"
+#include "cmPropertyMap.h"
 class cmMakefile;
 class cmMarkAsAdvancedCommand;
 
@@ -41,7 +42,10 @@ private:
   {
     std::string Value;
     CacheEntryType Type;
-    std::map<cmStdString,cmStdString> Properties;
+    cmPropertyMap Properties;
+    const char* GetProperty(const char*) const;
+    void SetProperty(const char* property, const char* value);
+    void AppendProperty(const char* property, const char* value);
     bool Initialized;
     CacheEntry() : Value(""), Type(UNINITIALIZED), Initialized(false)
       {}
@@ -61,6 +65,7 @@ public:
     bool GetPropertyAsBool(const char*) const ;
     bool PropertyExists(const char*) const;
     void SetProperty(const char* property, const char* value);
+    void AppendProperty(const char* property, const char* value);
     void SetProperty(const char* property, bool value);
     const char* GetValue() const { return this->GetEntry().Value.c_str(); }
     bool GetValueAsBool() const;

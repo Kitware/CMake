@@ -212,6 +212,7 @@ bool cmCacheManager::LoadCache(const char* path,
   while(fin)
     {
     // Format is key:type=value
+    std::string helpString;
     CacheEntry e;
     cmSystemTools::GetLineFromStream(fin, buffer);
     realbuffer = buffer.c_str();
@@ -232,12 +233,12 @@ bool cmCacheManager::LoadCache(const char* path,
       {
       if ((realbuffer[2] == '\\') && (realbuffer[3]=='n'))
         {
-        e.Properties["HELPSTRING"] += "\n";
-        e.Properties["HELPSTRING"] += &realbuffer[4];
+        helpString += "\n";
+        helpString += &realbuffer[4];
         }
       else
         {
-        e.Properties["HELPSTRING"] += &realbuffer[2];
+        helpString += &realbuffer[2];
         }
       cmSystemTools::GetLineFromStream(fin, buffer);
       realbuffer = buffer.c_str();
@@ -246,6 +247,7 @@ bool cmCacheManager::LoadCache(const char* path,
         continue;
         }
       }
+    e.SetProperty("HELPSTRING", helpString.c_str());
     if(cmCacheManager::ParseEntry(realbuffer, entryKey, e.Value, e.Type))
       {
       if ( excludes.find(entryKey) == excludes.end() )
@@ -263,12 +265,13 @@ bool cmCacheManager::LoadCache(const char* path,
           if (!internal)
             {
             e.Type = INTERNAL;
-            e.Properties["HELPSTRING"] = "DO NOT EDIT, ";
-            e.Properties["HELPSTRING"] += entryKey;
-            e.Properties["HELPSTRING"] += " loaded from external file.  "
+            helpString = "DO NOT EDIT, ";
+            helpString += entryKey;
+            helpString += " loaded from external file.  "
               "To change this value edit this file: ";
-            e.Properties["HELPSTRING"] += path;
-            e.Properties["HELPSTRING"] += "/CMakeCache.txt"   ;
+            helpString += path;
+            helpString += "/CMakeCache.txt"   ;
+            e.SetProperty("HELPSTRING", helpString.c_str());
             }
           if ( e.Type == cmCacheManager::INTERNAL &&
                (entryKey.size() > strlen("-ADVANCED")) &&
@@ -472,15 +475,13 @@ bool cmCacheManager::SaveCache(const char* path)
     else if(t != INTERNAL)
       {
       // Format is key:type=value
-      std::map<cmStdString,cmStdString>::const_iterator it = 
-        ce.Properties.find("HELPSTRING");
-      if ( it == ce.Properties.end() )
+      if(const char* help = ce.GetProperty("HELPSTRING"))
         {
-        cmCacheManager::OutputHelpString(fout, "Missing description");
+        cmCacheManager::OutputHelpString(fout, help);
         }
       else
         {
-        cmCacheManager::OutputHelpString(fout, it->second);
+        cmCacheManager::OutputHelpString(fout, "Missing description");
         }
       std::string key;
       // support : in key name by double quoting
@@ -803,15 +804,8 @@ void cmCacheManager::AddCacheEntry(const char* key,
       cmSystemTools::ConvertToUnixSlashes(e.Value);
       }
     }
-  if ( helpString )
-    {
-    e.Properties["HELPSTRING"] = helpString;
-    }
-  else
-    {
-    e.Properties["HELPSTRING"] = 
-      "(This variable does not exist and should not be used)";
-    }
+  e.SetProperty("HELPSTRING", helpString? helpString :
+                "(This variable does not exist and should not be used)");
   this->Cache[key] = e;
 }
 
@@ -870,121 +864,121 @@ void cmCacheManager::CacheIterator::SetValue(const char* value)
     }
 }
 
-const char* cmCacheManager::CacheIterator::GetProperty(
-  const char* property) const
+//----------------------------------------------------------------------------
+bool cmCacheManager::CacheIterator::GetValueAsBool() const
 {
-  // make sure it is not at the end
-  if (this->IsAtEnd())
-    {
-    return 0;
-    }
-
-  if ( !strcmp(property, "TYPE") || !strcmp(property, "VALUE") )
-    {
-    cmSystemTools::Error("Property \"", property,
-                         "\" cannot be accessed through the GetProperty()");
-    return 0;
-    }
-  const CacheEntry* ent = &this->GetEntry();
-  std::map<cmStdString,cmStdString>::const_iterator it = 
-    ent->Properties.find(property);
-  if ( it == ent->Properties.end() )
-    {
-    return 0;
-    }
-  return it->second.c_str();
+  return cmSystemTools::IsOn(this->GetEntry().Value.c_str());
 }
 
+//----------------------------------------------------------------------------
+const char*
+cmCacheManager::CacheEntry::GetProperty(const char* prop) const
+{
+  if(strcmp(prop, "TYPE") == 0)
+    {
+    return cmCacheManagerTypes[this->Type];
+    }
+  else if(strcmp(prop, "VALUE") == 0)
+    {
+    return this->Value.c_str();
+    }
+  bool c = false;
+  return
+    this->Properties.GetPropertyValue(prop, cmProperty::CACHE, c);
+}
+
+//----------------------------------------------------------------------------
+void cmCacheManager::CacheEntry::SetProperty(const char* prop,
+                                             const char* value)
+{
+  if(strcmp(prop, "TYPE") == 0)
+    {
+    this->Type = cmCacheManager::StringToType(value? value : "STRING");
+    }
+  else if(strcmp(prop, "VALUE") == 0)
+    {
+    this->Value = value? value : "";
+    }
+  else
+    {
+    this->Properties.SetProperty(prop, value, cmProperty::CACHE);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmCacheManager::CacheEntry::AppendProperty(const char* prop,
+                                                const char* value)
+{
+  if(strcmp(prop, "TYPE") == 0)
+    {
+    this->Type = cmCacheManager::StringToType(value? value : "STRING");
+    }
+  else if(strcmp(prop, "VALUE") == 0)
+    {
+    if(value)
+      {
+      if(!this->Value.empty() && *value)
+        {
+        this->Value += ";";
+        }
+      this->Value += value;
+      }
+    }
+  else
+    {
+    this->Properties.AppendProperty(prop, value, cmProperty::CACHE);
+    }
+}
+
+//----------------------------------------------------------------------------
+const char* cmCacheManager::CacheIterator::GetProperty(const char* prop) const
+{
+  if(!this->IsAtEnd())
+    {
+    return this->GetEntry().GetProperty(prop);
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
 void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v)
 {
-  // make sure it is not at the end
-  if (this->IsAtEnd())
+  if(!this->IsAtEnd())
     {
-    return;
+    return this->GetEntry().SetProperty(p, v);
     }
-
-  if ( !strcmp(p, "TYPE") || !strcmp(p, "VALUE") )
-    {
-    cmSystemTools::Error("Property \"", p,
-                         "\" cannot be accessed through the SetProperty()");
-    return;
-    }
-  CacheEntry* ent = &this->GetEntry();
-  ent->Properties[p] = v;
 }
 
-
-bool cmCacheManager::CacheIterator::GetValueAsBool() const 
-{ 
-  return cmSystemTools::IsOn(this->GetEntry().Value.c_str()); 
-}
-
-bool cmCacheManager::CacheIterator::GetPropertyAsBool(
-  const char* property) const
+//----------------------------------------------------------------------------
+void cmCacheManager::CacheIterator::AppendProperty(const char* p,
+                                                   const char* v)
 {
-  // make sure it is not at the end
-  if (this->IsAtEnd())
+  if(!this->IsAtEnd())
     {
-    return false;
+    this->GetEntry().AppendProperty(p, v);
     }
-
-  if ( !strcmp(property, "TYPE") || !strcmp(property, "VALUE") )
-    {
-    cmSystemTools::Error("Property \"", property,
-      "\" cannot be accessed through the GetPropertyAsBool()");
-    return false;
-    }
-  const CacheEntry* ent = &this->GetEntry();
-  std::map<cmStdString,cmStdString>::const_iterator it = 
-    ent->Properties.find(property);
-  if ( it == ent->Properties.end() )
-    {
-    return false;
-    }
-  return cmSystemTools::IsOn(it->second.c_str());
 }
 
+//----------------------------------------------------------------------------
+bool cmCacheManager::CacheIterator::GetPropertyAsBool(const char* prop) const
+{
+  if(const char* value = this->GetProperty(prop))
+    {
+    return cmSystemTools::IsOn(value);
+    }
+  return false;
+}
 
+//----------------------------------------------------------------------------
 void cmCacheManager::CacheIterator::SetProperty(const char* p, bool v)
 {
-  // make sure it is not at the end
-  if (this->IsAtEnd())
-    {
-    return;
-    }
-
-  if ( !strcmp(p, "TYPE") || !strcmp(p, "VALUE") )
-    {
-    cmSystemTools::Error("Property \"", p,
-                         "\" cannot be accessed through the SetProperty()");
-    return;
-    }
-  CacheEntry* ent = &this->GetEntry();
-  ent->Properties[p] = v ? "ON" : "OFF";
+  this->SetProperty(p, v ? "ON" : "OFF");
 }
 
-bool cmCacheManager::CacheIterator::PropertyExists(const char* property) const
+//----------------------------------------------------------------------------
+bool cmCacheManager::CacheIterator::PropertyExists(const char* prop) const
 {
-  // make sure it is not at the end
-  if (this->IsAtEnd())
-    {
-    return false;
-    }
-
-  if ( !strcmp(property, "TYPE") || !strcmp(property, "VALUE") )
-    {
-    cmSystemTools::Error("Property \"", property,
-      "\" cannot be accessed through the PropertyExists()");
-    return false;
-    }
-  const CacheEntry* ent = &this->GetEntry();
-  std::map<cmStdString,cmStdString>::const_iterator it = 
-    ent->Properties.find(property);
-  if ( it == ent->Properties.end() )
-    {
-    return false;
-    }
-  return true;
+  return this->GetProperty(prop)? true:false;
 }
 
 //----------------------------------------------------------------------------

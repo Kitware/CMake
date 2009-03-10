@@ -69,6 +69,9 @@ void cmPropertyDefinitionMap
         case cmProperty::TEST:
           secName = "Properties on Tests";
           break;
+        case cmProperty::CACHE:
+          secName = "Properties on Cache Entries";
+          break;
         case cmProperty::VARIABLE:
           secName = "Variables";
           break;
