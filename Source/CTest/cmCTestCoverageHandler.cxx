@@ -464,28 +464,8 @@ int cmCTestCoverageHandler::ProcessHandler()
         << cont.TotalCoverage.size() << std::endl);
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "    ");
       }
-    if ( cnt % 100 == 0 )
-      {
-      this->EndCoverageLogFile(covLogFile, logFileCount);
-      logFileCount ++;
-      if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
-        {
-        return -1;
-        }
-      }
+
     const std::string fullFileName = fileIterator->first;
-    const std::string fileName
-      = cmSystemTools::GetFilenameName(fullFileName.c_str());
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-      "Process file: " << fullFileName << std::endl);
-
-    if ( !cmSystemTools::FileExists(fullFileName.c_str()) )
-      {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot find file: "
-        << fullFileName.c_str() << std::endl);
-      continue;
-      }
-
     bool shouldIDoCoverage
       = this->ShouldIDoCoverage(fullFileName.c_str(),
         sourceDir.c_str(), binaryDir.c_str());
@@ -498,6 +478,28 @@ int cmCTestCoverageHandler::ProcessHandler()
       continue;
       }
 
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "Process file: " << fullFileName << std::endl);
+
+    if ( !cmSystemTools::FileExists(fullFileName.c_str()) )
+      {
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot find file: "
+        << fullFileName.c_str() << std::endl);
+      continue;
+      }
+
+    if ( ++cnt % 100 == 0 )
+      {
+      this->EndCoverageLogFile(covLogFile, logFileCount);
+      logFileCount ++;
+      if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
+        {
+        return -1;
+        }
+      }
+
+    const std::string fileName
+      = cmSystemTools::GetFilenameName(fullFileName.c_str());
     std::string shortFileName =
       this->CTest->GetShortPathToFile(fullFileName.c_str());
     const cmCTestCoverageHandlerContainer::SingleFileCoverageVector& fcov
@@ -582,7 +584,6 @@ int cmCTestCoverageHandler::ProcessHandler()
     covSumFile << (cmet) << "</CoverageMetric>\n";
     this->WriteXMLLabels(covSumFile, shortFileName);
     covSumFile << "\t</File>" << std::endl;
-    cnt ++;
     }
   this->EndCoverageLogFile(covLogFile, logFileCount);
 
