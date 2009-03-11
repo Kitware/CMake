@@ -358,6 +358,7 @@ public:
   void AddSubmitFile(Part part, const char* name);
   std::vector<std::string> const& GetSubmitFiles(Part part)
     { return this->Parts[part].SubmitFiles; }
+  void ClearSubmitFiles(Part part) { this->Parts[part].SubmitFiles.clear(); }
 
   //! Read the custom configuration files and apply them to the current ctest
   int ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf);

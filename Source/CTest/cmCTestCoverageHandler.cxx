@@ -334,6 +334,7 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
 //functions and commented...
 int cmCTestCoverageHandler::ProcessHandler()
 {
+  this->CTest->ClearSubmitFiles(cmCTest::PartCoverage);
   int error = 0;
   // do we have time for this
   if (this->CTest->GetRemainingTimeAllowed() < 120)
