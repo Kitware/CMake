@@ -1,6 +1,6 @@
-# - Check if the source code provided in the SOURCE argument compiles and runs.
+# - Check if the C++ source code provided in the SOURCE argument compiles and runs.
 # CHECK_CXX_SOURCE_RUNS(SOURCE VAR)
-# - macro which checks if the source code compiles
+#
 #  SOURCE - source code to try to compile
 #  VAR    - variable to store the result, 1 for success, empty for failure
 #
