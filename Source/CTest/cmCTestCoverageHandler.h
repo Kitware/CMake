@@ -56,6 +56,7 @@ public:
 private:
   bool ShouldIDoCoverage(const char* file, const char* srcDir,
     const char* binDir);
+  void CleanCoverageLogFiles(std::ostream& log);
   bool StartCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
   void EndCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
 

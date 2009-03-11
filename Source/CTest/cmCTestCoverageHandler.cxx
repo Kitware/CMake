@@ -162,6 +162,24 @@ void cmCTestCoverageHandler::Initialize()
   this->LabelFilter.clear();
 }
 
+//----------------------------------------------------------------------------
+void cmCTestCoverageHandler::CleanCoverageLogFiles(std::ostream& log)
+{
+  std::string logGlob = this->CTest->GetCTestConfiguration("BuildDirectory");
+  logGlob += "/Testing/";
+  logGlob += this->CTest->GetCurrentTag();
+  logGlob += "/CoverageLog*";
+  cmsys::Glob gl;
+  gl.FindFiles(logGlob.c_str());
+  std::vector<std::string> const& files = gl.GetFiles();
+  for(std::vector<std::string>::const_iterator fi = files.begin();
+      fi != files.end(); ++fi)
+    {
+    log << "Removing old coverage log: " << *fi << "\n";
+    cmSystemTools::RemoveFile(fi->c_str());
+    }
+}
+
 //----------------------------------------------------------------------
 bool cmCTestCoverageHandler::StartCoverageLogFile(
   cmGeneratedFileStream& covLogFile, int logFileCount)
@@ -342,6 +360,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     }
 
   ofs << "Performing coverage: " << elapsed_time_start << std::endl;
+  this->CleanCoverageLogFiles(ofs);
 
   cmSystemTools::ConvertToUnixSlashes(sourceDir);
   cmSystemTools::ConvertToUnixSlashes(binaryDir);
