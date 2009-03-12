@@ -419,12 +419,13 @@ bool cmSetPropertyCommand::HandleCacheMode()
       }
     }
   else if(this->PropertyName != "HELPSTRING" &&
+          this->PropertyName != "STRINGS" &&
           this->PropertyName != "VALUE")
     {
     cmOStringStream e;
     e << "given invalid CACHE property " << this->PropertyName << ".  "
       << "Settable CACHE properties are: "
-      << "ADVANCED, HELPSTRING, TYPE, and VALUE.";
+      << "ADVANCED, HELPSTRING, STRINGS, TYPE, and VALUE.";
     this->SetError(e.str().c_str());
     return false;
     }
