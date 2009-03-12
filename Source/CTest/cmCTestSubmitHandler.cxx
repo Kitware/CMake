@@ -1010,14 +1010,15 @@ int cmCTestSubmitHandler::ProcessHandler()
       return 0;
       }
     }
-  else if ( dropMethod == "http" )
+  else if ( dropMethod == "http" || dropMethod == "https" )
     {
+    std::string url = dropMethod;
+    url += "://";
     ofs << "Using drop method: HTTP" << std::endl;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using HTTP submit method"
       << std::endl
-      << "   Drop site: http://");
-    std::string url = "http://";
-    if ( this->CTest->GetCTestConfiguration("DropSiteUser").size() > 0 )
+      << "   Drop site:" << url);
+     if ( this->CTest->GetCTestConfiguration("DropSiteUser").size() > 0 )
       {
       url += this->CTest->GetCTestConfiguration("DropSiteUser");
       cmCTestLog(this->CTest, HANDLER_OUTPUT,
