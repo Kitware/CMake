@@ -176,8 +176,15 @@ protected:
   unsigned int CacheMinorVersion;
 private:
   typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
-  static void OutputHelpString(std::ofstream& fout, 
+  static void OutputHelpString(std::ostream& fout,
                                const std::string& helpString);
+  static void OutputKey(std::ostream& fout, std::string const& key);
+  static void OutputValue(std::ostream& fout, std::string const& value);
+
+  static const char* PersistentProperties[];
+  bool ReadPropertyEntry(std::string const& key, CacheEntry& e);
+  void WritePropertyEntries(std::ostream& os, CacheIterator const& i);
+
   CacheEntryMap Cache;
   // Only cmake and cmMakefile should be able to add cache values
   // the commands should never use the cmCacheManager directly
