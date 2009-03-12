@@ -19,6 +19,7 @@
 #define QCMakeWidgets_h
 
 #include <QLineEdit>
+#include <QComboBox>
 #include <QCompleter>
 class QToolButton;
 
@@ -65,6 +66,26 @@ class QCMakeFileCompleter : public QCompleter
 public:
   QCMakeFileCompleter(QObject* o, bool dirs);
   virtual QString pathFromIndex(const QModelIndex& idx) const;
+};
+
+// editor for strings
+class QCMakeComboBox : public QComboBox
+{
+  Q_OBJECT
+  Q_PROPERTY(QString value READ currentText WRITE setValue USER true);
+public:
+  QCMakeComboBox(QWidget* p, QStringList strings) : QComboBox(p)
+  {
+    this->addItems(strings);
+  }
+  void setValue(const QString& v)
+  {
+    int i = this->findText(v);
+    if(i != -1)
+    {
+      this->setCurrentIndex(i);
+    }
+  }
 };
 
 #endif

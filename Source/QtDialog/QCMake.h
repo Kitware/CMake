@@ -38,6 +38,7 @@ struct QCMakeProperty
   enum PropertyType { BOOL, PATH, FILEPATH, STRING };
   QString Key;
   QVariant Value;
+  QStringList Strings;
   QString Help;
   PropertyType Type;
   bool Advanced;

@@ -70,7 +70,8 @@ public:
   // properties, and the advanced flag
   enum { HelpRole = Qt::ToolTipRole,
          TypeRole = Qt::UserRole, 
-         AdvancedRole };
+         AdvancedRole,
+         StringsRole};
 
   enum ViewType { FlatView, GroupView };
 

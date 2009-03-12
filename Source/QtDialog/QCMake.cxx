@@ -286,6 +286,10 @@ QCMakePropertyList QCMake::properties() const
     else if(i.GetType() == cmCacheManager::STRING)
       {
       prop.Type = QCMakeProperty::STRING;
+      if (i.PropertyExists("STRINGS"))
+        {
+        prop.Strings = QString(i.GetProperty("STRINGS")).split(";");
+        }
       }
 
     ret.append(prop);

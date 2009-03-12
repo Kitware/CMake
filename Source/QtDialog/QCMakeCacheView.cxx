@@ -365,6 +365,11 @@ void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1,
   }
   this->setData(idx2, prop.Help, QCMakeCacheModel::HelpRole);
 
+  if (!prop.Strings.isEmpty())
+  {
+    this->setData(idx1, prop.Strings, QCMakeCacheModel::StringsRole);
+  }
+
   if(isNew)
   {
     this->setData(idx1, QBrush(QColor(255,100,100)), Qt::BackgroundColorRole);
@@ -381,6 +386,7 @@ void QCMakeCacheModel::getPropertyData(const QModelIndex& idx1,
   prop.Help = this->data(idx1, HelpRole).toString();
   prop.Type = static_cast<QCMakeProperty::PropertyType>(this->data(idx1, TypeRole).toInt());
   prop.Advanced = this->data(idx1, AdvancedRole).toBool();
+  prop.Strings = this->data(idx1, QCMakeCacheModel::StringsRole).toStringList();
   if(prop.Type == QCMakeProperty::BOOL)
   {
     int check = this->data(idx2, Qt::CheckStateRole).toInt();
@@ -572,10 +578,20 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
         SLOT(setFileDialogFlag(bool)));
     return editor;
     }
+  else if(type == QCMakeProperty::STRING &&
+          var.data(QCMakeCacheModel::StringsRole).isValid())
+    {
+    QCMakeComboBox* editor = 
+      new QCMakeComboBox(p, var.data(QCMakeCacheModel::StringsRole).toStringList());
+    editor->setFrame(false);
+    return editor;
+    }
 
-  return new QLineEdit(p);
+  QLineEdit* editor = new QLineEdit(p);
+  editor->setFrame(false);
+  return editor;
 }
-  
+
 bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model, 
        const QStyleOptionViewItem& option, const QModelIndex& index)
 {
