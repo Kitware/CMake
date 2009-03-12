@@ -898,7 +898,7 @@ void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v)
 {
   if(!this->IsAtEnd())
     {
-    return this->GetEntry().SetProperty(p, v);
+    this->GetEntry().SetProperty(p, v);
     }
 }
 
