@@ -993,6 +993,13 @@ void cmCacheManager::DefineProperties(cmake *cm)
       );
 
   cm->DefineProperty
+    ("MODIFIED", cmProperty::CACHE,
+     "Internal management property.  Do not set or get.",
+     "This is an internal cache entry property managed by CMake to "
+     "track interactive user modification of entries.  Ignore it."
+      );
+
+  cm->DefineProperty
     ("STRINGS", cmProperty::CACHE,
      "Enumerate possible STRING entry values for GUI selection.",
      "For cache entries with type STRING, this enumerates a set of values.  "
