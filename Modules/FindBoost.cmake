@@ -160,6 +160,103 @@
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
+
+
+#-------------------------------------------------------------------------------
+#  FindBoost functions & macros
+#
+############################################
+#
+# Check the existence of the libraries.
+#
+############################################
+# This macro was taken directly from the FindQt4.cmake file that is included
+# with the CMake distribution. This is NOT my work. All work was done by the
+# original authors of the FindQt4.cmake file. Only minor modifications were
+# made to remove references to Qt and make this file more generally applicable
+# And ELSE/ENDIF pairs were removed for readability.
+#########################################################################
+
+MACRO (_Boost_ADJUST_LIB_VARS basename)
+  IF (Boost_INCLUDE_DIR )
+    IF (Boost_${basename}_LIBRARY_DEBUG AND Boost_${basename}_LIBRARY_RELEASE)
+      # if the generator supports configuration types then set
+      # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
+      IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+        SET(Boost_${basename}_LIBRARY optimized ${Boost_${basename}_LIBRARY_RELEASE} debug ${Boost_${basename}_LIBRARY_DEBUG})
+      ELSE()
+        # if there are no configuration types and CMAKE_BUILD_TYPE has no value
+        # then just use the release libraries
+        SET(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY_RELEASE} )
+      ENDIF()
+      # FIXME: This probably should be set for both cases
+      SET(Boost_${basename}_LIBRARIES optimized ${Boost_${basename}_LIBRARY_RELEASE} debug ${Boost_${basename}_LIBRARY_DEBUG})
+    ENDIF()
+
+    # if only the release version was found, set the debug variable also to the release version
+    IF (Boost_${basename}_LIBRARY_RELEASE AND NOT Boost_${basename}_LIBRARY_DEBUG)
+      SET(Boost_${basename}_LIBRARY_DEBUG ${Boost_${basename}_LIBRARY_RELEASE})
+      SET(Boost_${basename}_LIBRARY       ${Boost_${basename}_LIBRARY_RELEASE})
+      SET(Boost_${basename}_LIBRARIES     ${Boost_${basename}_LIBRARY_RELEASE})
+    ENDIF()
+
+    # if only the debug version was found, set the release variable also to the debug version
+    IF (Boost_${basename}_LIBRARY_DEBUG AND NOT Boost_${basename}_LIBRARY_RELEASE)
+      SET(Boost_${basename}_LIBRARY_RELEASE ${Boost_${basename}_LIBRARY_DEBUG})
+      SET(Boost_${basename}_LIBRARY         ${Boost_${basename}_LIBRARY_DEBUG})
+      SET(Boost_${basename}_LIBRARIES       ${Boost_${basename}_LIBRARY_DEBUG})
+    ENDIF()
+    
+    IF (Boost_${basename}_LIBRARY)
+      set(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE FILEPATH "The Boost ${basename} library")
+
+      # Remove superfluous "debug" / "optimized" keywords from
+      # Boost_LIBRARY_DIRS
+      FOREACH(_boost_my_lib ${Boost_${basename}_LIBRARY})
+        GET_FILENAME_COMPONENT(_boost_my_lib_path "${_boost_my_lib}" PATH)
+        LIST(APPEND Boost_LIBRARY_DIRS ${_boost_my_lib_path})
+      ENDFOREACH()
+      LIST(REMOVE_DUPLICATES Boost_LIBRARY_DIRS)
+
+      set(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} CACHE FILEPATH "Boost library directory")
+      SET(Boost_${basename}_FOUND ON CACHE INTERNAL "Whether the Boost ${basename} library found")
+    ENDIF(Boost_${basename}_LIBRARY)
+
+  ENDIF (Boost_INCLUDE_DIR )
+  # Make variables changeble to the advanced user
+  MARK_AS_ADVANCED(
+      Boost_${basename}_LIBRARY
+      Boost_${basename}_LIBRARY_RELEASE
+      Boost_${basename}_LIBRARY_DEBUG
+  )
+ENDMACRO (_Boost_ADJUST_LIB_VARS)
+
+#-------------------------------------------------------------------------------
+
+#
+# Runs compiler with "-dumpversion" and parses major/minor
+# version with a regex.
+#
+FUNCTION(_Boost_COMPILER_DUMPVERSION _OUTPUT_VERSION)
+
+  EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
+    ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+    OUTPUT_VARIABLE _boost_COMPILER_VERSION
+  )
+  STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
+    _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
+
+  SET(${_OUTPUT_VERSION} ${_boost_COMPILER_VERSION} PARENT_SCOPE)
+ENDFUNCTION()
+
+#
+# End functions/macros
+#  
+#-------------------------------------------------------------------------------
+
+
+
+
 IF(NOT DEFINED Boost_USE_MULTITHREADED)
     SET(Boost_USE_MULTITHREADED TRUE)
 ENDIF()
@@ -201,89 +298,6 @@ endif(Boost_FIND_VERSION_EXACT)
 # user-friendly message when we fail to find some necessary piece of
 # Boost.
 set(Boost_ERROR_REASON)
-
-############################################
-#
-# Check the existence of the libraries.
-#
-############################################
-# This macro was taken directly from the FindQt4.cmake file that is included
-# with the CMake distribution. This is NOT my work. All work was done by the
-# original authors of the FindQt4.cmake file. Only minor modifications were
-# made to remove references to Qt and make this file more generally applicable
-#########################################################################
-
-MACRO (_Boost_ADJUST_LIB_VARS basename)
-  IF (Boost_INCLUDE_DIR )
-    IF (Boost_${basename}_LIBRARY_DEBUG AND Boost_${basename}_LIBRARY_RELEASE)
-      # if the generator supports configuration types then set
-      # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
-      IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-        SET(Boost_${basename}_LIBRARY optimized ${Boost_${basename}_LIBRARY_RELEASE} debug ${Boost_${basename}_LIBRARY_DEBUG})
-      ELSE(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-        # if there are no configuration types and CMAKE_BUILD_TYPE has no value
-        # then just use the release libraries
-        SET(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY_RELEASE} )
-      ENDIF(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-      SET(Boost_${basename}_LIBRARIES optimized ${Boost_${basename}_LIBRARY_RELEASE} debug ${Boost_${basename}_LIBRARY_DEBUG})
-    ENDIF (Boost_${basename}_LIBRARY_DEBUG AND Boost_${basename}_LIBRARY_RELEASE)
-
-    # if only the release version was found, set the debug variable also to the release version
-    IF (Boost_${basename}_LIBRARY_RELEASE AND NOT Boost_${basename}_LIBRARY_DEBUG)
-      SET(Boost_${basename}_LIBRARY_DEBUG ${Boost_${basename}_LIBRARY_RELEASE})
-      SET(Boost_${basename}_LIBRARY       ${Boost_${basename}_LIBRARY_RELEASE})
-      SET(Boost_${basename}_LIBRARIES     ${Boost_${basename}_LIBRARY_RELEASE})
-    ENDIF (Boost_${basename}_LIBRARY_RELEASE AND NOT Boost_${basename}_LIBRARY_DEBUG)
-
-    # if only the debug version was found, set the release variable also to the debug version
-    IF (Boost_${basename}_LIBRARY_DEBUG AND NOT Boost_${basename}_LIBRARY_RELEASE)
-      SET(Boost_${basename}_LIBRARY_RELEASE ${Boost_${basename}_LIBRARY_DEBUG})
-      SET(Boost_${basename}_LIBRARY         ${Boost_${basename}_LIBRARY_DEBUG})
-      SET(Boost_${basename}_LIBRARIES       ${Boost_${basename}_LIBRARY_DEBUG})
-    ENDIF (Boost_${basename}_LIBRARY_DEBUG AND NOT Boost_${basename}_LIBRARY_RELEASE)
-    
-    IF (Boost_${basename}_LIBRARY)
-      set(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE FILEPATH "The Boost ${basename} library")
-
-      # Remove superfluous "debug" / "optimized" keywords from
-      # Boost_LIBRARY_DIRS
-      FOREACH(_boost_my_lib ${Boost_${basename}_LIBRARY})
-        GET_FILENAME_COMPONENT(_boost_my_lib_path "${_boost_my_lib}" PATH)
-        LIST(APPEND Boost_LIBRARY_DIRS ${_boost_my_lib_path})
-      ENDFOREACH()
-      LIST(REMOVE_DUPLICATES Boost_LIBRARY_DIRS)
-
-      set(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} CACHE FILEPATH "Boost library directory")
-      SET(Boost_${basename}_FOUND ON CACHE INTERNAL "Whether the Boost ${basename} library found")
-    ENDIF (Boost_${basename}_LIBRARY)
-
-  ENDIF (Boost_INCLUDE_DIR )
-  # Make variables changeble to the advanced user
-  MARK_AS_ADVANCED(
-      Boost_${basename}_LIBRARY
-      Boost_${basename}_LIBRARY_RELEASE
-      Boost_${basename}_LIBRARY_DEBUG
-  )
-ENDMACRO (_Boost_ADJUST_LIB_VARS)
-
-#
-# Runs compiler with "-dumpversion" and parses major/minor
-# version with a regex.
-#
-FUNCTION(_Boost_COMPILER_DUMPVERSION _OUTPUT_VERSION)
-
-  EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
-    ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
-    OUTPUT_VARIABLE _boost_COMPILER_VERSION
-  )
-  STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
-    _boost_COMPILER_VERSION ${_boost_COMPILER_VERSION})
-
-  SET(${_OUTPUT_VERSION} ${_boost_COMPILER_VERSION} PARENT_SCOPE)
-ENDFUNCTION()
-
-
-#-------------------------------------------------------------------------------
 
 
 SET( _boost_IN_CACHE TRUE)
