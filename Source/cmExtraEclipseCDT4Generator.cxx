@@ -95,7 +95,6 @@ void cmExtraEclipseCDT4Generator
   cmGlobalUnixMakefileGenerator3* mf
     = static_cast<cmGlobalUnixMakefileGenerator3*>(generator);
   mf->SetToolSupportsColor(true);
-  mf->SetForceVerboseMakefiles(true);
 }
 
 //----------------------------------------------------------------------------
@@ -251,6 +250,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.environment</key>\n"
+    "\t\t\t\t\t<value>VERBOSE=1|</value>\n"  // enforce VERBOSE Makefile output
     "\t\t\t\t\t<value>"
     ;
   // set vsvars32.bat environment available at CMake time,
