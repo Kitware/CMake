@@ -176,7 +176,7 @@ cmake::cmake()
 
   this->Verbose = false;
   this->InTryCompile = false;
-  this->CacheManager = new cmCacheManager;
+  this->CacheManager = new cmCacheManager(this);
   this->GlobalGenerator = 0;
   this->ProgressCallback = 0;
   this->ProgressCallbackClientData = 0;

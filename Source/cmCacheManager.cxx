@@ -42,10 +42,11 @@ const char* cmCacheManagerTypes[] =
   0
 };
 
-cmCacheManager::cmCacheManager()
+cmCacheManager::cmCacheManager(cmake* cm)
 {
   this->CacheMajorVersion = 0;
   this->CacheMinorVersion = 0;
+  this->CMakeInstance = cm;
 }
 
 const char* cmCacheManager::TypeToString(cmCacheManager::CacheEntryType type)
@@ -226,6 +227,7 @@ bool cmCacheManager::LoadCache(const char* path,
     // Format is key:type=value
     std::string helpString;
     CacheEntry e;
+    e.Properties.SetCMakeInstance(this->CMakeInstance);
     cmSystemTools::GetLineFromStream(fin, buffer);
     realbuffer = buffer.c_str();
     while(*realbuffer != '0' &&
@@ -384,6 +386,7 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
         {
         // Create an entry and store the property.
         CacheEntry& ne = this->Cache[key];
+        ne.Properties.SetCMakeInstance(this->CMakeInstance);
         ne.Type = cmCacheManager::UNINITIALIZED;
         ne.SetProperty(*p, e.Value.c_str());
         }
@@ -724,6 +727,7 @@ void cmCacheManager::AddCacheEntry(const char* key,
                                    CacheEntryType type)
 {
   CacheEntry& e = this->Cache[key];
+  e.Properties.SetCMakeInstance(this->CMakeInstance);
   if ( value )
     {
     e.Value = value;

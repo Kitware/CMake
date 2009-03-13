@@ -21,6 +21,7 @@
 #include "cmPropertyMap.h"
 class cmMakefile;
 class cmMarkAsAdvancedCommand;
+class cmake;
 
 /** \class cmCacheManager
  * \brief Control class for cmake's cache
@@ -31,7 +32,7 @@ class cmMarkAsAdvancedCommand;
 class cmCacheManager
 {
 public:
-  cmCacheManager();
+  cmCacheManager(cmake* cm);
   class CacheIterator;
   friend class cmCacheManager::CacheIterator;
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC, 
@@ -175,6 +176,7 @@ protected:
   unsigned int CacheMajorVersion;
   unsigned int CacheMinorVersion;
 private:
+  cmake* CMakeInstance;
   typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
   static void OutputHelpString(std::ostream& fout,
                                const std::string& helpString);
