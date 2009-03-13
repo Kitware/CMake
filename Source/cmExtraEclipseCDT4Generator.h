@@ -111,6 +111,10 @@ private:
                                const std::string&     defname,
                                const std::string&     altdefname);
 
+  static void AppendIncludeDirectories(cmGeneratedFileStream& fout,
+                                   const std::vector<std::string>& includeDirs,
+                                   std::set<std::string>& emittedDirs);
+
   std::vector<std::string> SrcLinkedResources;
   std::vector<std::string> OutLinkedResources;
   std::string HomeDirectory;
