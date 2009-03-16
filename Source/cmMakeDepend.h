@@ -96,22 +96,10 @@ public:
    */
   virtual void SetMakefile(cmMakefile* makefile); 
 
-  /** 
-   * Get the depend info struct for a source file
-   */
-  const cmDependInformation 
-  *GetDependInformationForSourceFile(const cmSourceFile &sf) const;
-
   /**
    * Add a directory to the search path for include files.
    */
   virtual void AddSearchPath(const char*);
-
-  /**
-   * Generate dependencies for all the sources of all the targets
-   * in the makefile.
-   */
-  void GenerateMakefileDependencies();
 
   /**
    * Generate dependencies for the file given.  Returns a pointer to
@@ -119,12 +107,7 @@ public:
    */
   const cmDependInformation* FindDependencies(const char* file);
 
-protected: 
-  /**
-   * Add a source file to the search path.
-   */
-  void AddFileToSearchPath(const char* filepath);
-
+protected:
   /**
    * Compute the depend information for this class.
    */
