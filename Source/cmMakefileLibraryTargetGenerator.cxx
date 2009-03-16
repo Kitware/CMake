@@ -451,18 +451,15 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Add the link message.
   std::string buildEcho = "Linking ";
   buildEcho += linkLanguage;
-  const char* forbiddenFlagVar = 0;
   switch(this->Target->GetType())
     {
     case cmTarget::STATIC_LIBRARY:
       buildEcho += " static library "; 
       break;
     case cmTarget::SHARED_LIBRARY:
-      forbiddenFlagVar = "_CREATE_SHARED_LIBRARY_FORBIDDEN_FLAGS";
       buildEcho += " shared library ";
       break;
     case cmTarget::MODULE_LIBRARY:
-      forbiddenFlagVar = "_CREATE_SHARED_MODULE_FORBIDDEN_FLAGS";
       buildEcho += " shared module ";
       break;
     default:
@@ -472,6 +469,18 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   buildEcho += targetOutPath.c_str();
   this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
                                    cmLocalUnixMakefileGenerator3::EchoLink);
+
+  const char* forbiddenFlagVar = 0;
+  switch(this->Target->GetType())
+    {
+    case cmTarget::SHARED_LIBRARY:
+      forbiddenFlagVar = "_CREATE_SHARED_LIBRARY_FORBIDDEN_FLAGS";
+      break;
+    case cmTarget::MODULE_LIBRARY:
+      forbiddenFlagVar = "_CREATE_SHARED_MODULE_FORBIDDEN_FLAGS";
+      break;
+    default: break;
+    }
 
   // Construct a list of files associated with this library that may
   // need to be cleaned.
