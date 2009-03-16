@@ -3454,6 +3454,20 @@ void cmake::DefineProperties(cmake *cm)
      "with high granularity.  "
      "Non-Makefile generators currently ignore this property.");
 
+  cm->DefineProperty
+    ("RULE_PROGRESS", cmProperty::GLOBAL,
+     "Specify whether to report progress for each make rule.",
+     "Makefile generators add commands to report progress.  "
+     "This property specifies whether to report progress on every rule.  "
+     "If the property is not set the default is ON.  "
+     "Set the property to OFF to disable granular progress and report only "
+     "as each target completes.  "
+     "This is intended to allow scripted builds to avoid the build time "
+     "cost of detailed progress reports.  "
+     "If a CMAKE_RULE_PROGRESS cache entry exists its value initializes "
+     "the value of this property.  "
+     "Non-Makefile generators currently ignore this property.");
+
   // ================================================================
   // define variables as well
   // ================================================================

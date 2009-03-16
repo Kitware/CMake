@@ -170,6 +170,7 @@ protected:
   std::string ProgressFileName;
   std::string ProgressFileNameFull;
   unsigned long NumberOfProgressActions;
+  bool NoRuleProgress;
 
   // the path to the directory the build file is in
   std::string TargetBuildDirectory;

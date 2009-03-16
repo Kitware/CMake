@@ -46,6 +46,12 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
   this->GlobalGenerator =
     static_cast<cmGlobalUnixMakefileGenerator3*>(
       this->LocalGenerator->GetGlobalGenerator());
+  cmake* cm = this->GlobalGenerator->GetCMakeInstance();
+  this->NoRuleProgress = false;
+  if(const char* ruleProgress = cm->GetProperty("RULE_PROGRESS"))
+    {
+    this->NoRuleProgress = cmSystemTools::IsOff(ruleProgress);
+    }
 }
 
 cmMakefileTargetGenerator *
@@ -195,15 +201,18 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
                      cmLocalGenerator::HOME_OUTPUT,
                      cmLocalGenerator::MAKEFILE)
     << "\n\n";
-  
-  // Include the progress variables for the target.
-  *this->BuildFileStream
-    << "# Include the progress variables for this target.\n"
-    << this->LocalGenerator->IncludeDirective << " "
-    << this->Convert(this->ProgressFileNameFull.c_str(),
-                     cmLocalGenerator::HOME_OUTPUT,
-                     cmLocalGenerator::MAKEFILE)
-    << "\n\n";
+
+  if(!this->NoRuleProgress)
+    {
+    // Include the progress variables for the target.
+    *this->BuildFileStream
+      << "# Include the progress variables for this target.\n"
+      << this->LocalGenerator->IncludeDirective << " "
+      << this->Convert(this->ProgressFileNameFull.c_str(),
+                       cmLocalGenerator::HOME_OUTPUT,
+                       cmLocalGenerator::MAKEFILE)
+      << "\n\n";
+    }
 
   // make sure the depend file exists
   if (!cmSystemTools::FileExists(dependFileNameFull.c_str()))
@@ -1200,6 +1209,10 @@ void
 cmMakefileTargetGenerator::AppendProgress(std::vector<std::string>& commands)
 {
   this->NumberOfProgressActions++;
+  if(this->NoRuleProgress)
+    {
+    return;
+    }
   std::string progressDir = this->Makefile->GetHomeOutputDirectory();
   progressDir += cmake::GetCMakeFilesDirectory();
   cmOStringStream progCmd;
