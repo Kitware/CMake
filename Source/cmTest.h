@@ -63,10 +63,16 @@ public:
   void SetMakefile(cmMakefile *mf);
   cmMakefile *GetMakefile() { return this->Makefile;};
 
+  /** Get/Set whether this is an old-style test.  */
+  bool GetOldStyle() const { return this->OldStyle; }
+  void SetOldStyle(bool b) { this->OldStyle = b; }
+
 private:
   cmPropertyMap Properties;
   cmStdString Name;
   std::vector<std::string> Command;
+
+  bool OldStyle;
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.

@@ -36,6 +36,10 @@ public:
 protected:
   virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
+  virtual void GenerateScriptForConfig(std::ostream& os,
+                                       const char* config,
+                                       Indent const& indent);
+  void GenerateOldStyle(std::ostream& os, Indent const& indent);
 
   cmTest* Test;
   bool TestGenerated;

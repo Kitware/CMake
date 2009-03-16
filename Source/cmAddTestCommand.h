@@ -70,11 +70,21 @@ public:
       "built by this project or an arbitrary executable on the "
       "system (like tclsh).  The test will be run with the current working "
       "directory set to the CMakeList.txt files corresponding directory "
-      "in the binary tree.";
+      "in the binary tree."
+      "\n"
+      "  add_test(NAME <name> [CONFIGURATIONS [Debug|Release|...]]\n"
+      "           COMMAND <command> [arg1 [arg2 ...]])\n"
+      "If COMMAND specifies an executable target (created by "
+      "add_executable) it will automatically be replaced by the location "
+      "of the executable created at build time.  "
+      "If a CONFIGURATIONS option is given then the test will be executed "
+      "only when testing under one of the named configurations."
+      ;
     }
   
   cmTypeMacro(cmAddTestCommand, cmCommand);
-
+private:
+  bool HandleNameMode(std::vector<std::string> const& args);
 };
 
 

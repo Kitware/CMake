@@ -16,7 +16,10 @@
 =========================================================================*/
 #include "cmTestGenerator.h"
 
+#include "cmLocalGenerator.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTest.h"
 
 //----------------------------------------------------------------------------
@@ -26,7 +29,7 @@ cmTestGenerator
   cmScriptGenerator("CTEST_CONFIGURATION_TYPE", configurations),
   Test(test)
 {
-  this->ActionsPerConfig = false;
+  this->ActionsPerConfig = !test->GetOldStyle();
   this->TestGenerated = false;
 }
 
@@ -92,8 +95,69 @@ void cmTestGenerator::GenerateScriptConfigs(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
-void cmTestGenerator::GenerateScriptActions(std::ostream& fout,
+void cmTestGenerator::GenerateScriptActions(std::ostream& os,
                                             Indent const& indent)
+{
+  if(this->ActionsPerConfig)
+    {
+    // This is the per-config generation in a single-configuration
+    // build generator case.  The superclass will call our per-config
+    // method.
+    this->cmScriptGenerator::GenerateScriptActions(os, indent);
+    }
+  else
+    {
+    // This is an old-style test, so there is only one config.
+    //assert(this->Test->GetOldStyle());
+    this->GenerateOldStyle(os, indent);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
+                                              const char* config,
+                                              Indent const& indent)
+{
+  this->TestGenerated = true;
+
+  // Start the test command.
+  os << indent << "ADD_TEST(" << this->Test->GetName() << " ";
+
+  // Get the test command line to be executed.
+  std::vector<std::string> const& command = this->Test->GetCommand();
+
+  // Check whether the command executable is a target whose name is to
+  // be translated.
+  std::string exe = command[0];
+  cmMakefile* mf = this->Test->GetMakefile();
+  cmTarget* target = mf->FindTargetToUse(exe.c_str());
+  if(target && target->GetType() == cmTarget::EXECUTABLE)
+    {
+    // Use the target file on disk.
+    exe = target->GetFullPath(config);
+    }
+  else
+    {
+    // Use the command name given.
+    cmSystemTools::ConvertToUnixSlashes(exe);
+    }
+
+  // Generate the command line with full escapes.
+  cmLocalGenerator* lg = mf->GetLocalGenerator();
+  os << lg->EscapeForCMake(exe.c_str());
+  for(std::vector<std::string>::const_iterator ci = command.begin()+1;
+      ci != command.end(); ++ci)
+    {
+    os << " " << lg->EscapeForCMake(ci->c_str());
+    }
+
+  // Finish the test command.
+  os << ")\n";
+}
+
+//----------------------------------------------------------------------------
+void cmTestGenerator::GenerateOldStyle(std::ostream& fout,
+                                       Indent const& indent)
 {
   this->TestGenerated = true;
 

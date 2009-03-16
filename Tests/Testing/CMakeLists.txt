@@ -1,7 +1,7 @@
 #
 # Testing
 #
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.7)
 PROJECT (Testing)
 
 #
@@ -52,3 +52,9 @@ ADD_TEST(testing.1 ${Testing_BINARY_DIR}/bin/testing)
 # skip level test
 #
 ADD_SUBDIRECTORY(Sub/Sub2)
+
+# Per-config target name test.
+ADD_EXECUTABLE(perconfig perconfig.c)
+SET_PROPERTY(TARGET perconfig PROPERTY RELEASE_POSTFIX -opt)
+SET_PROPERTY(TARGET perconfig PROPERTY DEBUG_POSTFIX -dbg)
+ADD_TEST(NAME testing.perconfig COMMAND perconfig)

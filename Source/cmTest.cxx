@@ -23,6 +23,7 @@
 cmTest::cmTest() 
 {
   this->Makefile = 0;
+  this->OldStyle = true;
 }
 
 cmTest::~cmTest()
