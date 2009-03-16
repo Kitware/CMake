@@ -65,11 +65,9 @@ public:
 
 protected:
   virtual void GenerateScript(std::ostream& os);
-  virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
-  virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
-  void GenerateScriptForConfig(std::ostream& os,
-                               const char* config,
-                               Indent const& indent);
+  virtual void GenerateScriptForConfig(std::ostream& os,
+                                       const char* config,
+                                       Indent const& indent);
   void AddInstallNamePatchRule(std::ostream& os, Indent const& indent,
                                const char* config,
                                const std::string& toDestDirPath);

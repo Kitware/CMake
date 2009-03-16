@@ -201,6 +201,8 @@ SET(SRCS
   cmPropertyDefinitionMap.h
   cmPropertyMap.cxx
   cmPropertyMap.h
+  cmScriptGenerator.h
+  cmScriptGenerator.cxx
   cmSourceFile.cxx
   cmSourceFile.h
   cmSourceFileLocation.cxx

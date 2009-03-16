@@ -24,11 +24,9 @@ cmInstallGenerator
 ::cmInstallGenerator(const char* destination,
                      std::vector<std::string> const& configurations,
                      const char* component):
+  cmScriptGenerator("CMAKE_INSTALL_CONFIG_NAME", configurations),
   Destination(destination? destination:""),
-  Configurations(configurations),
-  Component(component? component:""),
-  ConfigurationName(0),
-  ConfigurationTypes(0)
+  Component(component? component:"")
 {
 }
 
@@ -36,19 +34,6 @@ cmInstallGenerator
 cmInstallGenerator
 ::~cmInstallGenerator()
 {
-}
-
-//----------------------------------------------------------------------------
-void
-cmInstallGenerator
-::Generate(std::ostream& os, const char* config,
-           std::vector<std::string> const& configurationTypes)
-{
-  this->ConfigurationName = config;
-  this->ConfigurationTypes = &configurationTypes;
-  this->GenerateScript(os);
-  this->ConfigurationName = 0;
-  this->ConfigurationTypes = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -63,7 +48,7 @@ void cmInstallGenerator
                  const char* permissions_dir /* = 0 */,
                  const char* rename /* = 0 */,
                  const char* literal_args /* = 0 */,
-                 cmInstallGeneratorIndent const& indent
+                 Indent const& indent
                  )
 {
   // Use the FILE command to install the file.
@@ -128,63 +113,6 @@ void cmInstallGenerator
 }
 
 //----------------------------------------------------------------------------
-static void cmInstallGeneratorEncodeConfig(const char* config,
-                                           std::string& result)
-{
-  for(const char* c = config; *c; ++c)
-    {
-    if(*c >= 'a' && *c <= 'z')
-      {
-      result += "[";
-      result += *c + ('A' - 'a');
-      result += *c;
-      result += "]";
-      }
-    else if(*c >= 'A' && *c <= 'Z')
-      {
-      result += "[";
-      result += *c;
-      result += *c + ('a' - 'A');
-      result += "]";
-      }
-    else
-      {
-      result += *c;
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmInstallGenerator::CreateConfigTest(const char* config)
-{
-  std::string result = "\"${CMAKE_INSTALL_CONFIG_NAME}\" MATCHES \"^(";
-  if(config && *config)
-    {
-    cmInstallGeneratorEncodeConfig(config, result);
-    }
-  result += ")$\"";
-  return result;
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmInstallGenerator::CreateConfigTest(std::vector<std::string> const& configs)
-{
-  std::string result = "\"${CMAKE_INSTALL_CONFIG_NAME}\" MATCHES \"^(";
-  const char* sep = "";
-  for(std::vector<std::string>::const_iterator ci = configs.begin();
-      ci != configs.end(); ++ci)
-    {
-    result += sep;
-    sep = "|";
-    cmInstallGeneratorEncodeConfig(ci->c_str(), result);
-    }
-  result += ")$\"";
-  return result;
-}
-
-//----------------------------------------------------------------------------
 std::string
 cmInstallGenerator::CreateComponentTest(const char* component)
 {
@@ -214,53 +142,9 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-void
-cmInstallGenerator::GenerateScriptConfigs(std::ostream& os,
-                                          Indent const& indent)
-{
-  if(this->Configurations.empty())
-    {
-    // This rule is for all configurations.
-    this->GenerateScriptActions(os, indent);
-    }
-  else
-    {
-    // Generate a per-configuration block.
-    std::string config_test = this->CreateConfigTest(this->Configurations);
-    os << indent << "IF(" << config_test << ")\n";
-    this->GenerateScriptActions(os, indent.Next());
-    os << indent << "ENDIF(" << config_test << ")\n";
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmInstallGenerator::GenerateScriptActions(std::ostream&, Indent const&)
-{
-  // No actions for this generator.
-}
-
-//----------------------------------------------------------------------------
 bool cmInstallGenerator::InstallsForConfig(const char* config)
 {
-  // If this is not a configuration-specific rule then we install.
-  if(this->Configurations.empty())
-    {
-    return true;
-    }
-
-  // This is a configuration-specific rule.  Check if the config
-  // matches this rule.
-  std::string config_upper = cmSystemTools::UpperCase(config?config:"");
-  for(std::vector<std::string>::const_iterator i =
-        this->Configurations.begin();
-      i != this->Configurations.end(); ++i)
-    {
-    if(cmSystemTools::UpperCase(*i) == config_upper)
-      {
-      return true;
-      }
-    }
-  return false;
+  return this->GeneratesForConfig(config);
 }
 
 //----------------------------------------------------------------------------

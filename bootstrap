@@ -167,6 +167,7 @@ CMAKE_CXX_SOURCES="\
   cmInstallFilesGenerator \
   cmInstallScriptGenerator \
   cmInstallTargetGenerator \
+  cmScriptGenerator \
   cmSourceFile \
   cmSourceFileLocation \
   cmSystemTools \

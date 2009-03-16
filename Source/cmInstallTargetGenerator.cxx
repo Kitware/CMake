@@ -33,6 +33,7 @@ cmInstallTargetGenerator
   cmInstallGenerator(dest, configurations, component), Target(&t),
   ImportLibrary(implib), FilePermissions(file_permissions), Optional(optional)
 {
+  this->ActionsPerConfig = true;
   this->NamelinkMode = NamelinkModeNone;
   this->Target->SetHaveInstallRule(true);
 }
@@ -73,48 +74,6 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
 
   // Perform the main install script generation.
   this->cmInstallGenerator::GenerateScript(os);
-}
-
-//----------------------------------------------------------------------------
-void cmInstallTargetGenerator::GenerateScriptConfigs(std::ostream& os,
-                                                     Indent const& indent)
-{
-  if(this->ConfigurationTypes->empty())
-    {
-    // In a single-configuration generator, only the install rule's
-    // configuration test is important.  If that passes, the target is
-    // installed regardless of for what configuration it was built.
-    this->cmInstallGenerator::GenerateScriptConfigs(os, indent);
-    }
-  else
-    {
-    // In a multi-configuration generator, a separate rule is produced
-    // in a block for each configuration that is built.  However, the
-    // list of configurations is restricted to those for which this
-    // install rule applies.
-    for(std::vector<std::string>::const_iterator i =
-          this->ConfigurationTypes->begin();
-        i != this->ConfigurationTypes->end(); ++i)
-      {
-      const char* config = i->c_str();
-      if(this->InstallsForConfig(config))
-        {
-        // Generate a per-configuration block.
-        std::string config_test = this->CreateConfigTest(config);
-        os << indent << "IF(" << config_test << ")\n";
-        this->GenerateScriptForConfig(os, config, indent.Next());
-        os << indent << "ENDIF(" << config_test << ")\n";
-        }
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmInstallTargetGenerator::GenerateScriptActions(std::ostream& os,
-                                                     Indent const& indent)
-{
-  // This is reached for single-configuration generators only.
-  this->GenerateScriptForConfig(os, this->ConfigurationName, indent);
 }
 
 //----------------------------------------------------------------------------
