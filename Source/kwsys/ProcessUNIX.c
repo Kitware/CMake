@@ -390,7 +390,8 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
 
   /* Allocate a new array for command pointers.  */
   newNumberOfCommands = cp->NumberOfCommands + 1;
-  if(!(newCommands = (char***)malloc(sizeof(char**) * newNumberOfCommands)))
+  if(!(newCommands =
+       (char***)malloc(sizeof(char**) *(size_t)(newNumberOfCommands))))
     {
     /* Out of memory.  */
     return 0;
@@ -427,7 +428,8 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
     kwsysProcess_ptrdiff_t i = 0;
     while(*c++);
     n = c - command - 1;
-    newCommands[cp->NumberOfCommands] = (char**)malloc((n+1)*sizeof(char*));
+    newCommands[cp->NumberOfCommands] =
+      (char**)malloc((size_t)(n+1)*sizeof(char*));
     if(!newCommands[cp->NumberOfCommands])
       {
       /* Out of memory.  */
@@ -1049,7 +1051,7 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
           {
           /* Report this data.  */
           *data = cp->PipeBuffer;
-          *length = n;
+          *length = (int)(n);
           switch(i)
             {
             case KWSYSPE_PIPE_STDOUT:
@@ -1399,23 +1401,24 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
     {
     free(cp->ForkPIDs);
     }
-  cp->ForkPIDs = (pid_t*)malloc(sizeof(pid_t)*cp->NumberOfCommands);
+  cp->ForkPIDs = (pid_t*)malloc(sizeof(pid_t)*(size_t)(cp->NumberOfCommands));
   if(!cp->ForkPIDs)
     {
     return 0;
     }
-  memset(cp->ForkPIDs, 0, sizeof(pid_t)*cp->NumberOfCommands);
+  memset(cp->ForkPIDs, 0, sizeof(pid_t)*(size_t)(cp->NumberOfCommands));
 
   if(cp->CommandExitCodes)
     {
     free(cp->CommandExitCodes);
     }
-  cp->CommandExitCodes = (int*)malloc(sizeof(int)*cp->NumberOfCommands);
+  cp->CommandExitCodes = (int*)malloc(sizeof(int)*
+                                      (size_t)(cp->NumberOfCommands));
   if(!cp->CommandExitCodes)
     {
     return 0;
     }
-  memset(cp->CommandExitCodes, 0, sizeof(int)*cp->NumberOfCommands);
+  memset(cp->CommandExitCodes, 0, sizeof(int)*(size_t)(cp->NumberOfCommands));
 
   /* Allocate memory to save the real working directory.  */
   if ( cp->WorkingDirectory )
@@ -1951,7 +1954,7 @@ static kwsysProcessTime kwsysProcessTimeGetCurrent(void)
 /*--------------------------------------------------------------------------*/
 static double kwsysProcessTimeToDouble(kwsysProcessTime t)
 {
-  return (double)t.tv_sec + t.tv_usec*0.000001;
+  return (double)t.tv_sec + (double)(t.tv_usec)*0.000001;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1959,7 +1962,7 @@ static kwsysProcessTime kwsysProcessTimeFromDouble(double d)
 {
   kwsysProcessTime t;
   t.tv_sec = (long)d;
-  t.tv_usec = (long)((d-t.tv_sec)*1000000);
+  t.tv_usec = (long)((d-(double)(t.tv_sec))*1000000);
   return t;
 }
 
@@ -2379,7 +2382,7 @@ static void kwsysProcessKill(pid_t process_id)
           FILE* f = fopen(fname, "r");
           if(f)
             {
-            int nread = fread(buffer, 1, KWSYSPE_PIPE_BUFFER_SIZE, f);
+            size_t nread = fread(buffer, 1, KWSYSPE_PIPE_BUFFER_SIZE, f);
             buffer[nread] = '\0';
             if(nread > 0)
               {
@@ -2513,14 +2516,14 @@ static int kwsysProcessesAdd(kwsysProcess* cp)
 
     /* Try allocating the new block of memory.  */
     if((newProcesses.Processes = ((kwsysProcess**)
-                                  malloc(newProcesses.Size*
+                                  malloc((size_t)(newProcesses.Size)*
                                          sizeof(kwsysProcess*)))))
       {
       /* Copy the old pipe set to the new memory.  */
       if(oldProcesses.Count > 0)
         {
         memcpy(newProcesses.Processes, oldProcesses.Processes,
-               (oldProcesses.Count * sizeof(kwsysProcess*)));
+               ((size_t)(oldProcesses.Count) * sizeof(kwsysProcess*)));
         }
       }
     else
@@ -2672,7 +2675,7 @@ static int kwsysProcessAppendByte(char* local,
       {
       return 0;
       }
-    memcpy(newBuffer, *begin, length*sizeof(char));
+    memcpy(newBuffer, *begin, (size_t)(length)*sizeof(char));
     if(*begin != local)
       {
       free(*begin);
@@ -2705,12 +2708,12 @@ static int kwsysProcessAppendArgument(char** local,
   if((*end - *begin) >= *size)
     {
     kwsysProcess_ptrdiff_t length = *end - *begin;
-    char** newPointers = (char**)malloc(*size*2*sizeof(char*));
+    char** newPointers = (char**)malloc((size_t)(*size)*2*sizeof(char*));
     if(!newPointers)
       {
       return 0;
       }
-    memcpy(newPointers, *begin, length*sizeof(char*));
+    memcpy(newPointers, *begin, (size_t)(length)*sizeof(char*));
     if(*begin != local)
       {
       free(*begin);
@@ -2878,14 +2881,14 @@ static char** kwsysProcessParseVerbatimCommand(const char* command)
   if(!failed)
     {
     kwsysProcess_ptrdiff_t n = pointer_end - pointer_begin;
-    newCommand = (char**)malloc((n+1)*sizeof(char*));
+    newCommand = (char**)malloc((size_t)(n+1)*sizeof(char*));
     }
 
   if(newCommand)
     {
     /* Copy the arguments into the new command buffer.  */
     kwsysProcess_ptrdiff_t n = pointer_end - pointer_begin;
-    memcpy(newCommand, pointer_begin, sizeof(char*)*n);
+    memcpy(newCommand, pointer_begin, sizeof(char*)*(size_t)(n));
     newCommand[n] = 0;
     }
   else
