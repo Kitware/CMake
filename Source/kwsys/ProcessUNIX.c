@@ -2137,10 +2137,11 @@ static void kwsysProcessChildErrorExit(int errorPipe)
 {
   /* Construct the error message.  */
   char buffer[KWSYSPE_PIPE_BUFFER_SIZE];
+  kwsysProcess_ssize_t result;
   strncpy(buffer, strerror(errno), KWSYSPE_PIPE_BUFFER_SIZE);
 
   /* Report the error to the parent through the special pipe.  */
-  kwsysProcess_ssize_t result=write(errorPipe, buffer, strlen(buffer));
+  result=write(errorPipe, buffer, strlen(buffer));
   (void)result;
 
   /* Terminate without cleanup.  */
