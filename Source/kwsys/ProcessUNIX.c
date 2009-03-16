@@ -2140,7 +2140,8 @@ static void kwsysProcessChildErrorExit(int errorPipe)
   strncpy(buffer, strerror(errno), KWSYSPE_PIPE_BUFFER_SIZE);
 
   /* Report the error to the parent through the special pipe.  */
-  write(errorPipe, buffer, strlen(buffer));
+  kwsysProcess_ssize_t result=write(errorPipe, buffer, strlen(buffer));
+  (void)result;
 
   /* Terminate without cleanup.  */
   _exit(1);
@@ -2641,8 +2642,10 @@ static void kwsysProcessesSignalHandler(int signum
     /* Set the pipe in a signalled state.  */
     char buf = 1;
     kwsysProcess* cp = kwsysProcesses.Processes[i];
-    read(cp->PipeReadEnds[KWSYSPE_PIPE_SIGNAL], &buf, 1);
-    write(cp->SignalPipe, &buf, 1);
+    kwsysProcess_ssize_t status=
+      read(cp->PipeReadEnds[KWSYSPE_PIPE_SIGNAL], &buf, 1);
+    status=write(cp->SignalPipe, &buf, 1);
+    
     }
   }
 
