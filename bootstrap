@@ -171,6 +171,7 @@ CMAKE_CXX_SOURCES="\
   cmSourceFile \
   cmSourceFileLocation \
   cmSystemTools \
+  cmTestGenerator \
   cmVersion \
   cmFileTimeComparison \
   cmGlobalUnixMakefileGenerator3 \

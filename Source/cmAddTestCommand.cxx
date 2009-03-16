@@ -16,6 +16,8 @@
 =========================================================================*/
 #include "cmAddTestCommand.h"
 
+#include "cmTestGenerator.h"
+
 #include "cmTest.h"
 
 
@@ -42,7 +44,14 @@ bool cmAddTestCommand
     arguments.push_back(*it);
     }
 
-  cmTest* test = this->Makefile->CreateTest(args[0].c_str());
+  // Create the test but add a generator only the first time it is
+  // seen.  This preserves behavior from before test generators.
+  cmTest* test = this->Makefile->GetTest(args[0].c_str());
+  if(!test)
+    {
+    test = this->Makefile->CreateTest(args[0].c_str());
+    this->Makefile->AddTestGenerator(new cmTestGenerator(test));
+    }
   test->SetCommand(args[1].c_str());
   test->SetArguments(arguments);
 

@@ -32,6 +32,7 @@
 #  include "cmVariableWatch.h"
 #endif
 #include "cmInstallGenerator.h"
+#include "cmTestGenerator.h"
 #include "cmake.h"
 #include <stdlib.h> // required for atoi
 
@@ -108,7 +109,6 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->Targets = mf.Targets;
   this->SourceFiles = mf.SourceFiles;
   this->Tests = mf.Tests;
-  this->OrderedTests = mf.OrderedTests;
   this->IncludeDirectories = mf.IncludeDirectories;
   this->LinkDirectories = mf.LinkDirectories;
   this->SystemIncludeDirectories = mf.SystemIncludeDirectories;
@@ -116,6 +116,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->OutputFiles = mf.OutputFiles;
   this->LinkLibraries = mf.LinkLibraries;
   this->InstallGenerators = mf.InstallGenerators;
+  this->TestGenerators = mf.TestGenerators;
   this->IncludeFileRegularExpression = mf.IncludeFileRegularExpression;
   this->ComplainFileRegularExpression = mf.ComplainFileRegularExpression;
   this->SourceFileExtensions = mf.SourceFileExtensions;
@@ -178,6 +179,12 @@ cmMakefile::~cmMakefile()
   for(std::vector<cmInstallGenerator*>::iterator
         i = this->InstallGenerators.begin();
       i != this->InstallGenerators.end(); ++i)
+    {
+    delete *i;
+    }
+  for(std::vector<cmTestGenerator*>::iterator
+        i = this->TestGenerators.begin();
+      i != this->TestGenerators.end(); ++i)
     {
     delete *i;
     }
@@ -3324,7 +3331,6 @@ cmTest* cmMakefile::CreateTest(const char* testName)
   test->SetName(testName);
   test->SetMakefile(this);
   this->Tests[testName] = test;
-  this->OrderedTests.push_back(test);
   return test;
 }
 
@@ -3341,12 +3347,6 @@ cmTest* cmMakefile::GetTest(const char* testName) const
       }
     }
   return 0;
-}
-
-//----------------------------------------------------------------------------
-const std::vector<cmTest*> *cmMakefile::GetTests() const
-{
-  return &this->OrderedTests;
 }
 
 std::string cmMakefile::GetListFileStack()

@@ -26,6 +26,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmTest.h"
+#include "cmTestGenerator.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
@@ -212,6 +213,20 @@ void cmLocalGenerator::GenerateTestFiles()
     {
     return;
     }
+
+  // Compute the set of configurations.
+  std::vector<std::string> configurationTypes;
+  if(const char* types =
+     this->Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+    {
+    cmSystemTools::ExpandListArgument(types, configurationTypes);
+    }
+  const char* config = 0;
+  if(configurationTypes.empty())
+    {
+    config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    }
+
   std::string file = this->Makefile->GetStartOutputDirectory();
   file += "/";
   file += "CTestTestfile.cmake";
@@ -238,77 +253,14 @@ void cmLocalGenerator::GenerateTestFiles()
     {
     fout << "INCLUDE(\"" << testIncludeFile << "\")" << std::endl;
     }
-  
-  const std::vector<cmTest*> *tests = this->Makefile->GetTests();
-  std::vector<cmTest*>::const_iterator it;
-  for ( it = tests->begin(); it != tests->end(); ++ it )
+
+  // Ask each test generator to write its code.
+  std::vector<cmTestGenerator*> const&
+    testers = this->Makefile->GetTestGenerators();
+  for(std::vector<cmTestGenerator*>::const_iterator gi = testers.begin();
+      gi != testers.end(); ++gi)
     {
-    cmTest* test = *it;
-    fout << "ADD_TEST(";
-    fout << test->GetName() << " \"" << test->GetCommand() << "\"";
-    
-    std::vector<cmStdString>::const_iterator argit;
-    for (argit = test->GetArguments().begin();
-         argit != test->GetArguments().end(); ++argit)
-      {
-      // Just double-quote all arguments so they are re-parsed
-      // correctly by the test system.
-      fout << " \"";
-      for(std::string::const_iterator c = argit->begin(); 
-          c != argit->end(); ++c)
-        {
-        // Escape quotes within arguments.  We should escape
-        // backslashes too but we cannot because it makes the result
-        // inconsistent with previous behavior of this command.
-        if((*c == '"'))
-          {
-          fout << '\\';
-          }
-        fout << *c;
-        }
-      fout << "\"";
-      }
-    fout << ")" << std::endl;
-    cmPropertyMap::const_iterator pit;
-    cmPropertyMap* mpit = &test->GetProperties();
-    if ( mpit->size() )
-      {
-      fout << "SET_TESTS_PROPERTIES(" << test->GetName() << " PROPERTIES ";
-      for ( pit = mpit->begin(); pit != mpit->end(); ++ pit )
-        {
-        fout << " " << pit->first.c_str() << " \"";
-        const char* value = pit->second.GetValue();
-        for ( ; *value; ++ value )
-          {
-          switch ( *value )
-            {
-          case '\\':
-          case '"':
-          case ' ':
-          case '#':
-          case '(':
-          case ')':
-          case '$':
-          case '^':
-            fout << "\\" << *value;
-            break;
-          case '\t':
-            fout << "\\t";
-            break;
-          case '\n':
-            fout << "\\n";
-            break;
-          case '\r':
-            fout << "\\r";
-            break;
-          default:
-            fout << *value;
-            }
-          }
-        fout << "\"";
-        }
-      fout << ")" << std::endl;
-      }
+    (*gi)->Generate(fout, config, configurationTypes);
     }
   if ( this->Children.size())
     {

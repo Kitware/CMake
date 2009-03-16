@@ -41,6 +41,7 @@ class cmLocalGenerator;
 class cmMakeDepend;
 class cmSourceFile;
 class cmTest;
+class cmTestGenerator;
 class cmVariableWatch;
 class cmake;
 class cmMakefileCall;
@@ -769,7 +770,6 @@ public:
    *  not found, then a null pointer is returned.
    */
   cmTest* GetTest(const char* testName) const;
-  const std::vector<cmTest*> *GetTests() const;
 
   /**
    * Get a list of macros as a ; separated string
@@ -804,6 +804,11 @@ public:
     { if(g) this->InstallGenerators.push_back(g); }
   std::vector<cmInstallGenerator*>& GetInstallGenerators()
     { return this->InstallGenerators; }
+
+  void AddTestGenerator(cmTestGenerator* g)
+    { if(g) this->TestGenerators.push_back(g); }
+  std::vector<cmTestGenerator*>& GetTestGenerators()
+    { return this->TestGenerators; }
 
   // Define the properties
   static void DefineProperties(cmake *cm);
@@ -850,7 +855,6 @@ protected:
 
   // Tests
   std::map<cmStdString, cmTest*> Tests;
-  std::vector<cmTest*> OrderedTests;
   
   // The include and link-library paths.  These may have order
   // dependency, so they must be vectors (not set).
@@ -868,6 +872,7 @@ protected:
   cmTarget::LinkLibraryVectorType LinkLibraries;
 
   std::vector<cmInstallGenerator*> InstallGenerators;
+  std::vector<cmTestGenerator*> TestGenerators;
 
   std::string IncludeFileRegularExpression;
   std::string ComplainFileRegularExpression;

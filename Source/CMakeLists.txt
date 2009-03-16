@@ -215,6 +215,8 @@ SET(SRCS
   cmTarget.h
   cmTest.cxx
   cmTest.h
+  cmTestGenerator.cxx
+  cmTestGenerator.h
   cmVariableWatch.cxx
   cmVariableWatch.h
   cmVersion.cxx
