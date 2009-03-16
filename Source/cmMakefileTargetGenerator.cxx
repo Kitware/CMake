@@ -580,18 +580,7 @@ cmMakefileTargetGenerator
   std::vector<std::string> commands;
 
   // add in a progress call if needed
-  std::string progressDir = this->Makefile->GetHomeOutputDirectory();
-  progressDir += cmake::GetCMakeFilesDirectory();
-  cmOStringStream progCmd;
-  progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-  progCmd << this->LocalGenerator->Convert(progressDir.c_str(),
-                                           cmLocalGenerator::FULL,
-                                           cmLocalGenerator::SHELL);
-  this->NumberOfProgressActions++;
-  progCmd << " $(CMAKE_PROGRESS_" 
-          << this->NumberOfProgressActions 
-          << ")";
-  commands.push_back(progCmd.str());
+  this->AppendProgress(commands);
 
   std::string buildEcho = "Building ";
   buildEcho += lang;
@@ -1107,18 +1096,7 @@ void cmMakefileTargetGenerator
   if(!comment.empty())
     {
     // add in a progress call if needed
-    std::string progressDir = this->Makefile->GetHomeOutputDirectory();
-    progressDir += cmake::GetCMakeFilesDirectory();
-    cmOStringStream progCmd;
-    progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-    progCmd << this->LocalGenerator->Convert(progressDir.c_str(),
-                                             cmLocalGenerator::FULL,
-                                             cmLocalGenerator::SHELL);
-    this->NumberOfProgressActions++;
-    progCmd << " $(CMAKE_PROGRESS_" 
-            << this->NumberOfProgressActions 
-            << ")";
-    commands.push_back(progCmd.str());
+    this->AppendProgress(commands);
     this->LocalGenerator
       ->AppendEcho(commands, comment.c_str(),
                    cmLocalUnixMakefileGenerator3::EchoGenerate);
@@ -1215,6 +1193,22 @@ cmMakefileTargetGenerator
   // extra outputs are missing.  This forces the rule to regenerate
   // all outputs.
   this->AddMultipleOutputPair(out, in);
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefileTargetGenerator::AppendProgress(std::vector<std::string>& commands)
+{
+  this->NumberOfProgressActions++;
+  std::string progressDir = this->Makefile->GetHomeOutputDirectory();
+  progressDir += cmake::GetCMakeFilesDirectory();
+  cmOStringStream progCmd;
+  progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
+  progCmd << this->LocalGenerator->Convert(progressDir.c_str(),
+                                           cmLocalGenerator::FULL,
+                                           cmLocalGenerator::SHELL);
+  progCmd << " $(CMAKE_PROGRESS_" << this->NumberOfProgressActions << ")";
+  commands.push_back(progCmd.str());
 }
 
 //----------------------------------------------------------------------------
