@@ -47,10 +47,10 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
     static_cast<cmGlobalUnixMakefileGenerator3*>(
       this->LocalGenerator->GetGlobalGenerator());
   cmake* cm = this->GlobalGenerator->GetCMakeInstance();
-  this->NoRuleProgress = false;
-  if(const char* ruleProgress = cm->GetProperty("RULE_PROGRESS"))
+  this->NoRuleMessages = false;
+  if(const char* ruleStatus = cm->GetProperty("RULE_MESSAGES"))
     {
-    this->NoRuleProgress = cmSystemTools::IsOff(ruleProgress);
+    this->NoRuleMessages = cmSystemTools::IsOff(ruleStatus);
     }
 }
 
@@ -202,7 +202,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
                      cmLocalGenerator::MAKEFILE)
     << "\n\n";
 
-  if(!this->NoRuleProgress)
+  if(!this->NoRuleMessages)
     {
     // Include the progress variables for the target.
     *this->BuildFileStream
@@ -591,12 +591,15 @@ cmMakefileTargetGenerator
   // add in a progress call if needed
   this->AppendProgress(commands);
 
-  std::string buildEcho = "Building ";
-  buildEcho += lang;
-  buildEcho += " object ";
-  buildEcho += relativeObj;
-  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
-                                   cmLocalUnixMakefileGenerator3::EchoBuild);
+  if(!this->NoRuleMessages)
+    {
+    std::string buildEcho = "Building ";
+    buildEcho += lang;
+    buildEcho += " object ";
+    buildEcho += relativeObj;
+    this->LocalGenerator->AppendEcho
+      (commands, buildEcho.c_str(), cmLocalUnixMakefileGenerator3::EchoBuild);
+    }
 
   std::string targetOutPathPDB;
   {
@@ -1106,9 +1109,12 @@ void cmMakefileTargetGenerator
     {
     // add in a progress call if needed
     this->AppendProgress(commands);
-    this->LocalGenerator
-      ->AppendEcho(commands, comment.c_str(),
-                   cmLocalUnixMakefileGenerator3::EchoGenerate);
+    if(!this->NoRuleMessages)
+      {
+      this->LocalGenerator
+        ->AppendEcho(commands, comment.c_str(),
+                     cmLocalUnixMakefileGenerator3::EchoGenerate);
+      }
     }
 
   // Now append the actual user-specified commands.
@@ -1209,7 +1215,7 @@ void
 cmMakefileTargetGenerator::AppendProgress(std::vector<std::string>& commands)
 {
   this->NumberOfProgressActions++;
-  if(this->NoRuleProgress)
+  if(this->NoRuleMessages)
     {
     return;
     }

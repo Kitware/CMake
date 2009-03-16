@@ -3455,16 +3455,16 @@ void cmake::DefineProperties(cmake *cm)
      "Non-Makefile generators currently ignore this property.");
 
   cm->DefineProperty
-    ("RULE_PROGRESS", cmProperty::GLOBAL,
-     "Specify whether to report progress for each make rule.",
-     "Makefile generators add commands to report progress.  "
-     "This property specifies whether to report progress on every rule.  "
+    ("RULE_MESSAGES", cmProperty::GLOBAL,
+     "Specify whether to report a message for each make rule.",
+     "This property specifies whether Makefile generators should add a "
+     "progress message describing what each build rule does.  "
      "If the property is not set the default is ON.  "
-     "Set the property to OFF to disable granular progress and report only "
+     "Set the property to OFF to disable granular messages and report only "
      "as each target completes.  "
      "This is intended to allow scripted builds to avoid the build time "
-     "cost of detailed progress reports.  "
-     "If a CMAKE_RULE_PROGRESS cache entry exists its value initializes "
+     "cost of detailed reports.  "
+     "If a CMAKE_RULE_MESSAGES cache entry exists its value initializes "
      "the value of this property.  "
      "Non-Makefile generators currently ignore this property.");
 

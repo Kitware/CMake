@@ -189,13 +189,16 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     return;
     }
 
-  // Add the link message.
-  std::string buildEcho = "Linking ";
-  buildEcho += linkLanguage;
-  buildEcho += " executable ";
-  buildEcho += targetOutPath;
-  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
-                                   cmLocalUnixMakefileGenerator3::EchoLink);
+  if(!this->NoRuleMessages)
+    {
+    // Add the link message.
+    std::string buildEcho = "Linking ";
+    buildEcho += linkLanguage;
+    buildEcho += " executable ";
+    buildEcho += targetOutPath;
+    this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
+                                     cmLocalUnixMakefileGenerator3::EchoLink);
+    }
 
   // Build a list of compiler flags and linker flags.
   std::string flags;

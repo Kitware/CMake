@@ -14,8 +14,8 @@ IF(POLICY CMP0003)
   ENDIF(NOT "${P3}" STREQUAL "NEW")
 ENDIF(POLICY CMP0003)
 
-# Test building without per-rule progress in Makefiles.
-SET_PROPERTY(GLOBAL PROPERTY RULE_PROGRESS OFF)
+# Test building without per-rule echo lines in Makefiles.
+SET_PROPERTY(GLOBAL PROPERTY RULE_MESSAGES OFF)
 
 # Choose whether to test CMakeLib.
 SET(COMPLEX_TEST_CMAKELIB 1)

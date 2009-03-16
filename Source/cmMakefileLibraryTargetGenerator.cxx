@@ -448,27 +448,30 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     this->Convert(targetFullPathImport.c_str(),cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
 
-  // Add the link message.
-  std::string buildEcho = "Linking ";
-  buildEcho += linkLanguage;
-  switch(this->Target->GetType())
+  if(!this->NoRuleMessages)
     {
-    case cmTarget::STATIC_LIBRARY:
-      buildEcho += " static library "; 
-      break;
-    case cmTarget::SHARED_LIBRARY:
-      buildEcho += " shared library ";
-      break;
-    case cmTarget::MODULE_LIBRARY:
-      buildEcho += " shared module ";
-      break;
-    default:
-      buildEcho += " library "; 
-      break;
+    // Add the link message.
+    std::string buildEcho = "Linking ";
+    buildEcho += linkLanguage;
+    switch(this->Target->GetType())
+      {
+      case cmTarget::STATIC_LIBRARY:
+        buildEcho += " static library ";
+        break;
+      case cmTarget::SHARED_LIBRARY:
+        buildEcho += " shared library ";
+        break;
+      case cmTarget::MODULE_LIBRARY:
+        buildEcho += " shared module ";
+        break;
+      default:
+        buildEcho += " library ";
+        break;
+      }
+    buildEcho += targetOutPath.c_str();
+    this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
+                                     cmLocalUnixMakefileGenerator3::EchoLink);
     }
-  buildEcho += targetOutPath.c_str();
-  this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
-                                   cmLocalUnixMakefileGenerator3::EchoLink);
 
   const char* forbiddenFlagVar = 0;
   switch(this->Target->GetType())
