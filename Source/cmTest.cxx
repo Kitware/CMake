@@ -38,19 +38,9 @@ void cmTest::SetName(const char* name)
   this->Name = name;
 }
 
-void cmTest::SetCommand(const char* command)
+void cmTest::SetCommand(std::vector<std::string> const& command)
 {
-  if ( !command )
-    {
-    command = "";
-    }
   this->Command = command;
-  cmSystemTools::ConvertToUnixSlashes(this->Command);
-}
-
-void cmTest::SetArguments(const std::vector<cmStdString>& args)
-{
-  this->Args = args;
 }
 
 const char *cmTest::GetProperty(const char* prop) const

@@ -33,15 +33,13 @@ bool cmAddTestCommand
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
-  // store the arguments for the final pass
-  // also expand any CMake variables
 
-  std::vector<cmStdString> arguments;
-  std::vector<std::string>::const_iterator it;
-  for ( it = args.begin() + 2; it != args.end(); ++ it )
+  // Collect the command with arguments.
+  std::vector<std::string> command;
+  for(std::vector<std::string>::const_iterator it = args.begin() + 1;
+      it != args.end(); ++it)
     {
-    arguments.push_back(*it);
+    command.push_back(*it);
     }
 
   // Create the test but add a generator only the first time it is
@@ -52,8 +50,7 @@ bool cmAddTestCommand
     test = this->Makefile->CreateTest(args[0].c_str());
     this->Makefile->AddTestGenerator(new cmTestGenerator(test));
     }
-  test->SetCommand(args[1].c_str());
-  test->SetArguments(arguments);
+  test->SetCommand(command);
 
   return true;
 }

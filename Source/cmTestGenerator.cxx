@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmTestGenerator.h"
 
+#include "cmSystemTools.h"
 #include "cmTest.h"
 
 //----------------------------------------------------------------------------
@@ -96,14 +97,17 @@ void cmTestGenerator::GenerateScriptActions(std::ostream& fout,
 {
   this->TestGenerated = true;
 
-  cmTest* test = this->Test;
+  // Get the test command line to be executed.
+  std::vector<std::string> const& command = this->Test->GetCommand();
+
+  std::string exe = command[0];
+  cmSystemTools::ConvertToUnixSlashes(exe);
   fout << indent;
   fout << "ADD_TEST(";
-  fout << test->GetName() << " \"" << test->GetCommand() << "\"";
+  fout << this->Test->GetName() << " \"" << exe << "\"";
 
-  std::vector<cmStdString>::const_iterator argit;
-  for (argit = test->GetArguments().begin();
-       argit != test->GetArguments().end(); ++argit)
+  for(std::vector<std::string>::const_iterator argit = command.begin()+1;
+      argit != command.end(); ++argit)
     {
     // Just double-quote all arguments so they are re-parsed
     // correctly by the test system.

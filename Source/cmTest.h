@@ -37,12 +37,11 @@ public:
   ///! Set the test name
   void SetName(const char* name);
   const char* GetName() const { return this->Name.c_str(); }
-  void SetCommand(const char* command);
-  const char* GetCommand() const { return this->Command.c_str(); }
-  void SetArguments(const std::vector<cmStdString>& args);
-  const std::vector<cmStdString>& GetArguments() const
+
+  void SetCommand(std::vector<std::string> const& command);
+  std::vector<std::string> const& GetCommand() const
     {
-    return this->Args;
+    return this->Command;
     }
 
   /**
@@ -67,8 +66,7 @@ public:
 private:
   cmPropertyMap Properties;
   cmStdString Name;
-  cmStdString Command;
-  std::vector<cmStdString> Args;
+  std::vector<std::string> Command;
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.
