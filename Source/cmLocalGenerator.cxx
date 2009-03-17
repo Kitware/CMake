@@ -2713,7 +2713,11 @@ static bool cmLocalGeneratorIsShellOperator(const char* str)
      strcmp(str, "<<") == 0 ||
      strcmp(str, ">>") == 0 ||
      strcmp(str, "|") == 0 ||
+     strcmp(str, "||") == 0 ||
+     strcmp(str, "&&") == 0 ||
      strcmp(str, "&>") == 0 ||
+     strcmp(str, "1>") == 0 ||
+     strcmp(str, "2>") == 0 ||
      strcmp(str, "2>&1") == 0 ||
      strcmp(str, "1>&2") == 0)
     {
