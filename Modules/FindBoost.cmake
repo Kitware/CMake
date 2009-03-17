@@ -299,9 +299,19 @@ endif(Boost_FIND_VERSION_EXACT)
 # Boost.
 set(Boost_ERROR_REASON)
 
-
 SET( _boost_IN_CACHE TRUE)
 IF(Boost_INCLUDE_DIR)
+
+  # On versions < 1.35, remove the System library from the considered list
+  # since it wasn't added until 1.35.
+  if(Boost_VERSION)
+     math(EXPR _boost_maj "${Boost_VERSION} / 100000")
+     math(EXPR _boost_min "${Boost_VERSION} / 100 % 1000")
+     if(${_boost_maj}.${_boost_min} VERSION_LESS 1.35)
+       list(REMOVE_ITEM Boost_FIND_COMPONENTS system)
+     endif()
+  endif()
+
   FOREACH(COMPONENT ${Boost_FIND_COMPONENTS})
     STRING(TOUPPER ${COMPONENT} COMPONENT)
     IF(NOT Boost_${COMPONENT}_FOUND)
