@@ -380,13 +380,13 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr)
     }
   kwsys_stl::string fexpr = expr;
 
-  int skip = 0;
-  int last_slash = 0;
+  kwsys_stl::string::size_type skip = 0;
+  kwsys_stl::string::size_type last_slash = 0;
   for ( cc = 0; cc < expr.size(); cc ++ )
     {
     if ( cc > 0 && expr[cc] == '/' && expr[cc-1] != '\\' )
       {
-      last_slash = static_cast<int>(cc);
+      last_slash = cc;
       }
     if ( cc > 0 &&
       (expr[cc] == '[' || expr[cc] == '?' || expr[cc] == '*') &&

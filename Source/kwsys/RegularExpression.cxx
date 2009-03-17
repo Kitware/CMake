@@ -269,7 +269,7 @@ const unsigned char MAGIC = 0234;
  * Utility definitions.
  */
 
-#define UCHARAT(p)      ((const unsigned char*)(p))[0]
+#define UCHARAT(p)      (reinterpret_cast<const unsigned char*>(p))[0]
 
 
 #define FAIL(m) { regerror(m); return(0); }
@@ -316,7 +316,7 @@ static       char* regatom (int*);
 static       char* regnode (char);
 static const char* regnext (register const char*);
 static       char* regnext (register char*);
-static void        regc (unsigned char);
+static void        regc (char);
 static void        reginsert (char, char*);
 static void        regtail (char*, const char*);
 static void        regoptail (char*, const char*);
@@ -362,7 +362,7 @@ bool RegularExpression::compile (const char* exp) {
     regnpar = 1;
     regsize = 0L;
     regcode = &regdummy;
-    regc(MAGIC);
+    regc(static_cast<char>(MAGIC));
     if(!reg(0, &flags))
       {
         printf ("RegularExpression::compile(): Error in compile.\n");
@@ -394,7 +394,7 @@ bool RegularExpression::compile (const char* exp) {
     regparse = exp;
     regnpar = 1;
     regcode = this->program;
-    regc(MAGIC);
+    regc(static_cast<char>(MAGIC));
     reg(0, &flags);
 
     // Dig out information for optimizations.
@@ -426,7 +426,7 @@ bool RegularExpression::compile (const char* exp) {
             for (; scan != 0; scan = regnext(scan))
                 if (OP(scan) == EXACTLY && strlen(OPERAND(scan)) >= len) {
                     longest = OPERAND(scan);
-                    len = int(strlen(OPERAND(scan)));
+                    len = strlen(OPERAND(scan));
                 }
             this->regmust = longest;
             this->regmlen = len;
@@ -675,7 +675,7 @@ static char* regatom (int *flagp) {
                                return 0;
                             }
                             for (; rxpclass <= rxpclassend; rxpclass++)
-                                regc(static_cast<unsigned char>(rxpclass));
+                              regc(static_cast<char>(rxpclass));
                             regparse++;
                         }
                     }
@@ -778,7 +778,7 @@ static char* regnode (char op) {
 /*
  - regc - emit (if appropriate) a byte of code
  */
-static void regc (unsigned char b) {
+static void regc (char b) {
     if (regcode != &regdummy)
         *regcode++ = b;
     else
@@ -1018,14 +1018,14 @@ static int regmatch (const char* prog) {
                 reginput++;
                 break;
             case EXACTLY:{
-                    register int         len;
+                    register size_t len;
                     register const char* opnd;
 
                     opnd = OPERAND(scan);
                     // Inline the first character, for speed.
                     if (*opnd != *reginput)
                         return (0);
-                    len = int(strlen(opnd));
+                    len = strlen(opnd);
                     if (len > 1 && strncmp(opnd, reginput, len) != 0)
                         return (0);
                     reginput += len;

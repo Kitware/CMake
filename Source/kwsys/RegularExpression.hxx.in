@@ -323,7 +323,8 @@ inline RegularExpression::~RegularExpression ()
  */
 inline kwsys_stl::string::size_type RegularExpression::start () const 
 {
-  return(this->startp[0] - searchstring);
+  return static_cast<kwsys_stl::string::size_type>(
+    this->startp[0] - searchstring);
 }
 
 
@@ -332,7 +333,8 @@ inline kwsys_stl::string::size_type RegularExpression::start () const
  */
 inline kwsys_stl::string::size_type RegularExpression::end () const 
 {
-  return(this->endp[0] - searchstring);
+  return static_cast<kwsys_stl::string::size_type>(
+    this->endp[0] - searchstring);
 }
 
 /**
@@ -367,7 +369,8 @@ inline void RegularExpression::set_invalid ()
  */
 inline kwsys_stl::string::size_type RegularExpression::start(int n) const
 {
-  return this->startp[n] - searchstring;
+  return static_cast<kwsys_stl::string::size_type>(
+    this->startp[n] - searchstring);
 }
 
 
@@ -376,7 +379,8 @@ inline kwsys_stl::string::size_type RegularExpression::start(int n) const
  */
 inline kwsys_stl::string::size_type RegularExpression::end(int n) const
 {
-  return this->endp[n] - searchstring;
+  return static_cast<kwsys_stl::string::size_type>(
+    this->endp[n] - searchstring);
 }
 
 /**
@@ -390,7 +394,9 @@ inline kwsys_stl::string RegularExpression::match(int n) const
     }
   else
     {
-    return kwsys_stl::string(this->startp[n], this->endp[n] - this->startp[n]);
+    return kwsys_stl::string(this->startp[n],
+                             static_cast<kwsys_stl::string::size_type>(
+                               this->endp[n] - this->startp[n]));
     }
 }
 
