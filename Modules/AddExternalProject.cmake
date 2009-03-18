@@ -477,6 +477,7 @@ function(add_external_project_patch_command name)
 endfunction(add_external_project_patch_command)
 
 
+# TODO: Make sure external projects use the proper compiler
 function(add_external_project_configure_command name)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
     sentinels_dir source_dir tmp_dir)
