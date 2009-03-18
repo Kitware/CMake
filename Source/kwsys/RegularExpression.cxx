@@ -348,7 +348,7 @@ static int strcspn ();
 bool RegularExpression::compile (const char* exp) {
     register const char* scan;
     register const char* longest;
-    register unsigned long len;
+    register size_t len;
              int         flags;
 
     if (exp == 0) {
