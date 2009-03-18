@@ -1234,7 +1234,6 @@ static const char* regnext (register const char* p) {
         return (p + offset);
 }
 
-
 static char* regnext (register char* p) {
     register int offset;
 
