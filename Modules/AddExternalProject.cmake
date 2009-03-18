@@ -65,12 +65,10 @@ function(get_configure_command_id name cfg_cmd_id_var)
   endif()
 endfunction(get_configure_command_id)
 
-function(_aep_get_build_command name step cmd_var args_var)
-  # No default arguments if command is user-specified.
-  set(args)
-
+function(_aep_get_build_command name step cmd_var)
   set(cmd "${${cmd_var}}")
   if(NOT cmd)
+    set(args)
     get_configure_command_id(${name} cfg_cmd_id)
     if(cfg_cmd_id STREQUAL "cmake")
       # CMake project.  Select build command based on generator.
@@ -84,9 +82,9 @@ function(_aep_get_build_command name step cmd_var args_var)
         endif()
       else()
         # Drive the project with "cmake --build".
-        get_target_property(cfg_cmd ${name} AEP_CONFIGURE_COMMAND)
-        if(cfg_cmd)
-          set(cmd "${cfg_cmd}")
+        get_target_property(cmake_command ${name} AEP_CMAKE_COMMAND)
+        if(cmake_command)
+          set(cmd "${cmake_command}")
         else()
           set(cmd "${CMAKE_COMMAND}")
         endif()
@@ -102,17 +100,17 @@ function(_aep_get_build_command name step cmd_var args_var)
         set(args install)
       endif()
     endif()
+
+    # Use user-specified arguments instead of default arguments, if any.
+    get_property(have_args TARGET ${name} PROPERTY AEP_${step}_ARGS SET)
+    if(have_args)
+      get_target_property(args ${name} AEP_${step}_ARGS)
+    endif()
+
+    list(APPEND cmd ${args})
   endif()
 
-  # Use user-specified build arguments, if any.
-  get_property(have_args TARGET ${name} PROPERTY AEP_${step}_ARGS SET)
-  if(have_args)
-    get_target_property(args ${name} AEP_${step}_ARGS)
-  endif()
-
-  # Return answers to caller.
   set(${cmd_var} "${cmd}" PARENT_SCOPE)
-  set(${args_var} "${args}" PARENT_SCOPE)
 endfunction(_aep_get_build_command)
 
 function(mkdir d)
@@ -138,24 +136,19 @@ function(add_external_project_download_command name)
       WORKING_DIRECTORY ${sentinels_dir}
       COMMENT "No download step for '${name}'"
       DEPENDS ${sentinels_dir}/CMakeExternals-directories
+      VERBATIM
       )
     return()
   else()
     if(cmd)
-      set(args "")
-      get_target_property(download_args ${name} AEP_DOWNLOAD_ARGS)
-      if(download_args)
-        set(args "${download_args}")
-        separate_arguments(args)
-      endif()
-
       add_custom_command(
         OUTPUT ${sentinels_dir}/${name}-download
-        COMMAND ${cmd} ${args}
+        COMMAND ${cmd}
         COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
         WORKING_DIRECTORY ${downloads_dir}
         COMMENT "Performing download step for '${name}'"
         DEPENDS ${sentinels_dir}/CMakeExternals-directories
+        VERBATIM
         )
       return()
     else()
@@ -198,6 +191,7 @@ function(add_external_project_download_command name)
       WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (CVS checkout) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-cvsinfo.txt
+      VERBATIM
     )
     return()
   endif()
@@ -231,6 +225,7 @@ function(add_external_project_download_command name)
       WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (SVN checkout) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-svninfo.txt
+      VERBATIM
     )
     return()
   endif()
@@ -259,6 +254,7 @@ function(add_external_project_download_command name)
       WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (DIR copy) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-dirinfo.txt
+      VERBATIM
     )
     return()
   endif()
@@ -274,6 +270,7 @@ function(add_external_project_download_command name)
       WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (TAR untar) for '${name}'"
       DEPENDS ${tar}
+      VERBATIM
     )
     return()
   endif()
@@ -289,6 +286,7 @@ function(add_external_project_download_command name)
       WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (TGZ untar) for '${name}'"
       DEPENDS ${tgz}
+      VERBATIM
     )
     return()
   endif()
@@ -315,6 +313,7 @@ function(add_external_project_download_command name)
       WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (TGZ_URL download and untar) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-urlinfo.txt
+      VERBATIM
     )
     return()
   endif()
@@ -341,6 +340,7 @@ function(add_external_project_download_command name)
       WORKING_DIRECTORY ${source_dir}
       COMMENT "Performing download step (TAR_URL download and untar) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-urlinfo.txt
+      VERBATIM
     )
     return()
   endif()
@@ -368,20 +368,14 @@ function(add_external_project_update_command name)
     return()
   else()
     if(cmd)
-      set(args "")
-      get_target_property(update_args ${name} AEP_UPDATE_ARGS)
-      if(update_args)
-        set(args "${update_args}")
-        separate_arguments(args)
-      endif()
-
       add_custom_command(
         OUTPUT ${sentinels_dir}/${name}-update
-        COMMAND ${cmd} ${args}
+        COMMAND ${cmd}
         COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-update
         WORKING_DIRECTORY ${source_dir}/${name}
         COMMENT "Performing update step for '${name}'"
         DEPENDS ${sentinels_dir}/${name}-download
+        VERBATIM
         )
       return()
     else()
@@ -408,6 +402,7 @@ function(add_external_project_update_command name)
       WORKING_DIRECTORY ${source_dir}/${name}
       COMMENT "Performing update step (CVS update) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-download
+      VERBATIM
     )
     # Since the update sentinel is not actually written:
     set_property(SOURCE ${sentinels_dir}/${name}-update
@@ -433,6 +428,7 @@ function(add_external_project_update_command name)
       WORKING_DIRECTORY ${source_dir}/${name}
       COMMENT "Performing update step (SVN update) for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-download
+      VERBATIM
     )
     # Since the update sentinel is not actually written:
     set_property(SOURCE ${sentinels_dir}/${name}-update
@@ -447,6 +443,7 @@ function(add_external_project_update_command name)
     WORKING_DIRECTORY ${sentinels_dir}
     COMMENT "No update step for '${name}'"
     DEPENDS ${sentinels_dir}/${name}-download
+    VERBATIM
     )
 endfunction(add_external_project_update_command)
 
@@ -468,6 +465,7 @@ function(add_external_project_configure_command name)
     COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-working_dir
     DEPENDS ${sentinels_dir}/${name}-update
       ${file_deps}
+    VERBATIM
     )
 
   get_target_property(cmd ${name} AEP_CONFIGURE_COMMAND)
@@ -479,34 +477,34 @@ function(add_external_project_configure_command name)
       WORKING_DIRECTORY ${working_dir}
       COMMENT "No configure step for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-working_dir
+      VERBATIM
       )
   else()
     if(NOT cmd)
-      set(cmd ${CMAKE_COMMAND})
-    endif()
+      get_target_property(cmake_command ${name} AEP_CMAKE_COMMAND)
+      if(cmake_command)
+        set(cmd "${cmake_command}")
+      else()
+        set(cmd "${CMAKE_COMMAND}")
+      endif()
 
-    set(args "")
-    get_target_property(configure_args ${name} AEP_CONFIGURE_ARGS)
-    if(configure_args)
-      set(args "${configure_args}")
-      separate_arguments(args)
-    endif()
+      get_property(cmake_args TARGET ${name} PROPERTY AEP_CMAKE_ARGS)
+      list(APPEND cmd ${cmake_args})
 
-    get_target_property(cmake_generator ${name} AEP_CMAKE_GENERATOR)
-    if(cmake_generator)
-      get_configure_command_id(${name} cfg_cmd_id)
-      if(cfg_cmd_id STREQUAL "cmake")
-        list(APPEND args "-G${cmake_generator}" "${source_dir}/${name}")
+      get_target_property(cmake_generator ${name} AEP_CMAKE_GENERATOR)
+      if(cmake_generator)
+        list(APPEND cmd "-G${cmake_generator}" "${source_dir}/${name}")
       endif()
     endif()
 
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-configure
-      COMMAND ${cmd} ${args}
+      COMMAND ${cmd}
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-configure
       WORKING_DIRECTORY ${working_dir}
       COMMENT "Performing configure step for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-working_dir
+      VERBATIM
       )
   endif()
 endfunction(add_external_project_configure_command)
@@ -526,17 +524,19 @@ function(add_external_project_build_command name)
       WORKING_DIRECTORY ${working_dir}
       COMMENT "No build step for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-configure
+      VERBATIM
       )
   else()
-    _aep_get_build_command(${name} BUILD cmd args)
+    _aep_get_build_command(${name} BUILD cmd)
 
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-build
-      COMMAND ${cmd} ${args}
+      COMMAND ${cmd}
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-build
       WORKING_DIRECTORY ${working_dir}
       COMMENT "Performing build step for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-configure
+      VERBATIM
       )
   endif()
 endfunction(add_external_project_build_command)
@@ -557,18 +557,20 @@ function(add_external_project_install_command name)
       WORKING_DIRECTORY ${working_dir}
       COMMENT "No install step for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-build
+      VERBATIM
       )
   else()
-    _aep_get_build_command(${name} INSTALL cmd args)
+    _aep_get_build_command(${name} INSTALL cmd)
 
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-install
-      COMMAND ${cmd} ${args}
+      COMMAND ${cmd}
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-install
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-complete
       WORKING_DIRECTORY ${working_dir}
       COMMENT "Performing install step for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-build
+      VERBATIM
       )
   endif()
 endfunction(add_external_project_install_command)
@@ -605,6 +607,7 @@ function(add_CMakeExternals_target)
       COMMAND ${CMAKE_COMMAND} -E make_directory ${tmp_dir}
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/CMakeExternals-directories
       COMMENT "Creating CMakeExternals directories"
+      VERBATIM
     )
 
     add_custom_target(CMakeExternals ALL
@@ -613,19 +616,38 @@ function(add_CMakeExternals_target)
   endif()
 endfunction(add_CMakeExternals_target)
 
-
-function(is_known_aep_property_key key result_var)
-  set(${result_var} 0 PARENT_SCOPE)
-
-  if(key MATCHES "^BUILD_ARGS|BUILD_COMMAND|CMAKE_GENERATOR|CONFIGURE_ARGS|CONFIGURE_COMMAND|CONFIGURE_DIR|CVS_REPOSITORY|CVS_MODULE|CVS_TAG|DEPENDS|DOWNLOAD_ARGS|DOWNLOAD_COMMAND|DIR|INSTALL_ARGS|INSTALL_COMMAND|SVN_REPOSITORY|SVN_TAG|TAR|TAR_URL|TGZ|TGZ_URL|UPDATE_ARGS|UPDATE_COMMAND$"
-  )
-    #message(STATUS "info: recognized via MATCHES - key='${key}'")
-    set(${result_var} 1 PARENT_SCOPE)
-  else()
-    message(STATUS "warning: is_known_aep_property_key unknown key='${key}'")
-  endif()
-endfunction(is_known_aep_property_key)
-
+# Pre-compute a regex to match known keywords.
+set(_aep_keyword_regex "^(")
+set(_aep_keyword_sep)
+foreach(key IN ITEMS
+    BUILD_ARGS
+    BUILD_COMMAND
+    CMAKE_ARGS
+    CMAKE_COMMAND
+    CMAKE_GENERATOR
+    CONFIGURE_COMMAND
+    CONFIGURE_DIR
+    CVS_MODULE
+    CVS_REPOSITORY
+    CVS_TAG
+    DEPENDS
+    DIR
+    DOWNLOAD_COMMAND
+    INSTALL_ARGS
+    INSTALL_COMMAND
+    SVN_REPOSITORY
+    SVN_TAG
+    TAR
+    TAR_URL
+    TGZ
+    TGZ_URL
+    UPDATE_COMMAND
+    )
+  set(_aep_keyword_regex "${_aep_keyword_regex}${_aep_keyword_sep}${key}")
+  set(_aep_keyword_sep "|")
+endforeach(key)
+set(_aep_keyword_regex "${_aep_keyword_regex})$")
+set(_aep_keyword_sep)
 
 function(add_external_project name)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
@@ -652,37 +674,44 @@ function(add_external_project name)
   # new custom target we just added so that we can set up all the build steps
   # correctly based on target properties.
   #
-  # Loop over ARGN by 2's extracting key/value pairs from the non-explicit
-  # arguments to this function:
-  #
-  list(LENGTH ARGN n)
-  set(i 0)
-  while(i LESS n)
-    math(EXPR j ${i}+1)
-
-    list(GET ARGN ${i} key)
-    list(GET ARGN ${j} value)
-
-    is_known_aep_property_key("${key}" is_known_key)
-
-    if(is_known_key)
-      if(key STREQUAL "DEPENDS")
-        if(NOT value STREQUAL "")
-          add_dependencies(${name} ${value})
-          set_property(TARGET ${name} APPEND PROPERTY AEP_FILE_DEPENDS "${sentinels_dir}/${value}-complete")
-        else()
-          message(STATUS "warning: empty DEPENDS value in add_external_project")
-        endif()
+  # We loop through ARGN and consider the namespace starting with an
+  # upper-case letter followed by at least two more upper-case letters
+  # or underscores to be keywords.
+  set(key)
+  foreach(arg IN LISTS ARGN)
+    if(arg MATCHES "^[A-Z][A-Z_][A-Z_]+$" AND
+        NOT arg MATCHES "^(TRUE|FALSE)$")
+      # Keyword
+      set(key "${arg}")
+      if(NOT key MATCHES "${_aep_keyword_regex}")
+        message(AUTHOR_WARNING "unknown add_external_project keyword: ${key}")
+      endif()
+    elseif(key STREQUAL "DEPENDS")
+      # Value for DEPENDS
+      if(NOT arg STREQUAL "")
+        add_dependencies(${name} ${arg})
+        set_property(TARGET ${name} APPEND PROPERTY AEP_FILE_DEPENDS "${sentinels_dir}/${arg}-complete")
       else()
-        set_property(TARGET ${name} PROPERTY AEP_${key} "${value}")
+        message(AUTHOR_WARNING "empty DEPENDS value in add_external_project")
+      endif()
+    elseif(key)
+      # Value
+      if(NOT arg STREQUAL "")
+        set_property(TARGET ${name} APPEND PROPERTY AEP_${key} "${arg}")
+      else()
+        get_property(have_key TARGET ${name} PROPERTY AEP_${key} SET)
+        if(have_key)
+          get_property(value TARGET ${name} PROPERTY AEP_${key})
+          set_property(TARGET ${name} PROPERTY AEP_${key} "${value};${arg}")
+        else()
+          set_property(TARGET ${name} PROPERTY AEP_${key} "${arg}")
+        endif()
       endif()
     else()
-      message(SEND_ERROR "error: unknown add_external_project key with name='${name}' key='${key}' value='${value}'")
+      # Missing Keyword
+      message(AUTHOR_WARNING "value with no keyword in add_external_project")
     endif()
-
-    math(EXPR i ${i}+2)
-  endwhile()
-
+  endforeach()
 
   # Set up custom build steps based on the target properties.
   # Each step depends on the previous one.
