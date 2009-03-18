@@ -448,6 +448,35 @@ function(add_external_project_update_command name)
 endfunction(add_external_project_update_command)
 
 
+function(add_external_project_patch_command name)
+  get_external_project_directories(base_dir build_dir downloads_dir install_dir
+    sentinels_dir source_dir tmp_dir)
+
+  get_target_property(cmd ${name} AEP_PATCH_COMMAND)
+  if(cmd)
+    add_custom_command(
+      OUTPUT ${sentinels_dir}/${name}-patch
+      COMMAND ${cmd}
+      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-patch
+      WORKING_DIRECTORY ${source_dir}/${name}
+      COMMENT "Performing patch step for '${name}'"
+      DEPENDS ${sentinels_dir}/${name}-download
+      VERBATIM
+      )
+    return()
+  endif()
+
+  add_custom_command(
+    OUTPUT ${sentinels_dir}/${name}-patch
+    COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-patch
+    WORKING_DIRECTORY ${sentinels_dir}
+    COMMENT "No patch step for '${name}'"
+    DEPENDS ${sentinels_dir}/${name}-download
+    VERBATIM
+    )
+endfunction(add_external_project_patch_command)
+
+
 function(add_external_project_configure_command name)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
     sentinels_dir source_dir tmp_dir)
@@ -464,6 +493,7 @@ function(add_external_project_configure_command name)
     COMMAND ${CMAKE_COMMAND} -E make_directory ${working_dir}
     COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-working_dir
     DEPENDS ${sentinels_dir}/${name}-update
+            ${sentinels_dir}/${name}-patch
       ${file_deps}
     VERBATIM
     )
@@ -635,6 +665,7 @@ foreach(key IN ITEMS
     DOWNLOAD_COMMAND
     INSTALL_ARGS
     INSTALL_COMMAND
+    PATCH_COMMAND
     SVN_REPOSITORY
     SVN_TAG
     TAR
@@ -721,6 +752,7 @@ function(add_external_project name)
   #
   add_external_project_download_command(${name})
   add_external_project_update_command(${name})
+  add_external_project_patch_command(${name})
   add_external_project_configure_command(${name})
   add_external_project_build_command(${name})
   add_external_project_install_command(${name})

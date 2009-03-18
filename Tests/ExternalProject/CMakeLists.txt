@@ -90,6 +90,7 @@ add_external_project(${proj}
   DOWNLOAD_COMMAND ""
   INSTALL_ARGS ""
   INSTALL_COMMAND ""
+  PATCH_COMMAND ""
   SVN_REPOSITORY ""
   SVN_TAG ""
   TAR ""
@@ -116,6 +117,7 @@ endif()
 set(proj TutorialStep1-LocalTAR)
 add_external_project(${proj}
   TAR "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tar"
+  PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Step1Patch.cmake
   CMAKE_GENERATOR "${CMAKE_GENERATOR}"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${prefix}
   INSTALL_COMMAND ""
@@ -263,7 +265,7 @@ if(can_build_tutorial_step5)
 endif()
 
 add_test(TutorialStep1-LocalTAR-BuildTreeTest
-  "${build_dir}/TutorialStep1-LocalTAR/Tutorial" 36)
+  "${build_dir}/TutorialStep1-LocalTAR/EP-Tutorial" 36)
 
 add_test(TutorialStep1-LocalNoDirTAR-BuildTreeTest
   "${build_dir}/TutorialStep1-LocalNoDirTAR/Tutorial" 25)
