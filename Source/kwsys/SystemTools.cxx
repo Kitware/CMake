@@ -311,11 +311,11 @@ SystemTools::GetTime(void)
   struct timeval t;
 #ifdef GETTIMEOFDAY_NO_TZ
   if (gettimeofday(&t) == 0)
-    return static_cast<double>(t.tv_sec) + t.tv_usec*0.000001;
 #else /* !GETTIMEOFDAY_NO_TZ */
   if (gettimeofday(&t, static_cast<struct timezone *>(NULL)) == 0)
-    return static_cast<double>(t.tv_sec) + t.tv_usec*0.000001;
 #endif /* !GETTIMEOFDAY_NO_TZ */
+    return static_cast<double>(t.tv_sec) +
+      static_cast<double>(t.tv_usec)*0.000001;
   }
 #endif /* !HAVE_GETTIMEOFDAY */
   {
@@ -1660,7 +1660,7 @@ bool SystemTools::CopyFileIfDifferent(const char* source,
 #define KWSYS_ST_BUFFER 4096
 
 bool SystemTools::FilesDiffer(const char* source,
-                                const char* destination)
+                              const char* destination)
 {
   struct stat statSource;
   if (stat(source, &statSource) != 0) 
@@ -1715,10 +1715,11 @@ bool SystemTools::FilesDiffer(const char* source,
       {
       return true;
       }
-
+    
     // If this block differs the file differs.
     if(memcmp(static_cast<const void*>(source_buf),
-        static_cast<const void*>(dest_buf), nnext) != 0)
+              static_cast<const void*>(dest_buf),
+              static_cast<size_t>(nnext)) != 0)
       {
       return true;
       }
@@ -1999,7 +2000,7 @@ bool SystemTools::ConvertDateMacroString(const char *str, time_t *tmt)
     return false;
     }
 
-  int month = (ptr - month_names) / 3;
+  int month = static_cast<int>((ptr - month_names) / 3);
   int day = atoi(buffer + 4);
   int year = atoi(buffer + 7);
 
@@ -2050,7 +2051,7 @@ bool SystemTools::ConvertTimeStampMacroString(const char *str, time_t *tmt)
     return false;
     }
 
-  int month = (ptr - month_names) / 3;
+  int month = static_cast<int>((ptr - month_names) / 3);
   int day = atoi(buffer + 8);
   int hour = atoi(buffer + 11);
   int min = atoi(buffer + 14);
@@ -2495,7 +2496,7 @@ bool SystemTools::FileIsDirectory(const char* name)
 {
   // Remove any trailing slash from the name.
   char buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
-  int last = static_cast<int>(strlen(name))-1;
+  size_t last = strlen(name)-1;
   if(last > 0 && (name[last] == '/' || name[last] == '\\')
     && strcmp(name, "/") !=0)
     {
@@ -3130,7 +3131,7 @@ const char* SystemTools::SplitPathRootComponent(const char* p,
     //   "~u"   : root = "~u/", return ""
     //   "~u/"  : root = "~u/", return ""
     //   "~u/x" : root = "~u/", return "x"
-    int n = 1;
+    size_t n = 1;
     while(c[n] && c[n] != '/')
       {
       ++n;
@@ -3221,7 +3222,9 @@ void SystemTools::SplitPath(const char* p,
     if(*last == '/' || *last == '\\')
       {
       // End of a component.  Save it.
-      components.push_back(kwsys_stl::string(first, last-first));
+      components.push_back(
+        kwsys_stl::string(first,static_cast<kwsys_stl::string::size_type>(
+                            last-first)));
       first = last+1;
       }
     }
@@ -3229,7 +3232,9 @@ void SystemTools::SplitPath(const char* p,
   // Save the last component unless there were no components.
   if(last != c)
     {
-    components.push_back(kwsys_stl::string(first, last-first));
+    components.push_back(
+      kwsys_stl::string(first,static_cast<kwsys_stl::string::size_type>(
+                          last-first)));
     }
 }
 
