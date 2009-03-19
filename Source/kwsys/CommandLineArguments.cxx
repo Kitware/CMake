@@ -521,7 +521,7 @@ unsigned int CommandLineArguments::GetLastArgument()
 void CommandLineArguments::GenerateHelp()
 {
   kwsys_ios::ostringstream str;
-
+  
   // Collapse all arguments into the map of vectors of all arguments that do
   // the same thing.
   CommandLineArguments::Internal::CallbacksMap::iterator it;
@@ -660,7 +660,7 @@ void CommandLineArguments::GenerateHelp()
           skip = cc;
           }
         }
-      str.write(ptr, skip);
+      str.write(ptr, static_cast<kwsys_stl::streamsize>(skip));
       str << kwsys_ios::endl;
       ptr += skip;
       len -= skip;
@@ -701,7 +701,7 @@ void CommandLineArguments::PopulateVariable(
   int* variable, const kwsys_stl::string& value)
 {
   char* res = 0;
-  *variable = strtol(value.c_str(), &res, 10);
+  *variable = static_cast<int>(strtol(value.c_str(), &res, 10));
   //if ( res && *res )
   //  {
   //  Can handle non-int
@@ -759,7 +759,7 @@ void CommandLineArguments::PopulateVariable(
   kwsys_stl::vector<int>* variable, const kwsys_stl::string& value)
 {
   char* res = 0;
-  variable->push_back(strtol(value.c_str(), &res, 10));
+  variable->push_back(static_cast<int>(strtol(value.c_str(), &res, 10)));
   //if ( res && *res )
   //  {
   //  Can handle non-int
