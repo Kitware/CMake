@@ -660,7 +660,7 @@ void CommandLineArguments::GenerateHelp()
           skip = cc;
           }
         }
-      str.write(ptr, static_cast<kwsys_stl::streamsize>(skip));
+      str.write(ptr, static_cast<kwsys_ios::streamsize>(skip));
       str << kwsys_ios::endl;
       ptr += skip;
       len -= skip;
