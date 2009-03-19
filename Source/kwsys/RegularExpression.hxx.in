@@ -281,7 +281,7 @@ private:
   char  regstart;                       // Internal use only
   char  reganch;                        // Internal use only
   const char* regmust;                  // Internal use only
-  size_t regmlen;                // Internal use only
+  kwsys_stl::string::size_type regmlen;                // Internal use only
   char* program;   
   int   progsize;
   const char* searchstring;
