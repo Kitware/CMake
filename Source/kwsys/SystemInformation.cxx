@@ -104,7 +104,7 @@ public:
   const char * GetExtendedProcessorName();
   const char * GetProcessorSerialNumber();
   int GetProcessorCacheSize();
-  int GetLogicalProcessorsPerPhysical();
+  unsigned int GetLogicalProcessorsPerPhysical();
   float GetProcessorClockFrequency();
   int GetProcessorAPICID();
   int GetProcessorCacheXSize(long int);
@@ -166,7 +166,7 @@ public:
     bool HasMMXPlus;
     bool HasSSEMMX;
     bool SupportsHyperthreading;
-    int LogicalProcessorsPerPhysical;
+    unsigned int LogicalProcessorsPerPhysical;
     int APIC_ID;
     CPUPowerManagement PowerManagement;
     } CPUExtendedFeatures;  
@@ -317,7 +317,7 @@ int SystemInformation::GetProcessorCacheSize()
 {
   return this->Implementation->GetProcessorCacheSize();
 }
-int SystemInformation::GetLogicalProcessorsPerPhysical()
+unsigned int SystemInformation::GetLogicalProcessorsPerPhysical()
 {
   return this->Implementation->GetLogicalProcessorsPerPhysical();
 }
@@ -680,7 +680,7 @@ const char * SystemInformationImplementation::GetProcessorSerialNumber()
 }
 
 /** Return the logical processors per physical */
-int SystemInformationImplementation::GetLogicalProcessorsPerPhysical()
+unsigned int SystemInformationImplementation::GetLogicalProcessorsPerPhysical()
 {
   return this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical;
 }
@@ -1563,7 +1563,7 @@ bool SystemInformationImplementation::RetrieveExtendedCPUFeatures()
     }
 
   // Check to see if what we are about to do is supported...
-  if (!RetrieveCPUExtendedLevelSupport (0x80000001)) 
+  if (!RetrieveCPUExtendedLevelSupport(static_cast<int>(0x80000001)))
     {
     return false;
     }
@@ -1698,7 +1698,7 @@ bool SystemInformationImplementation::RetrieveProcessorSerialNumber()
 bool SystemInformationImplementation::RetrieveCPUPowerManagement()
 {  
   // Check to see if what we are about to do is supported...
-  if (!RetrieveCPUExtendedLevelSupport (0x80000007)) 
+  if (!RetrieveCPUExtendedLevelSupport(static_cast<int>(0x80000007)))
     {
     this->Features.ExtendedFeatures.PowerManagement.HasFrequencyID = false;
     this->Features.ExtendedFeatures.PowerManagement.HasVoltageID = false;
@@ -1755,9 +1755,12 @@ bool SystemInformationImplementation::RetrieveCPUPowerManagement()
 bool SystemInformationImplementation::RetrieveExtendedCPUIdentity()
 {
   // Check to see if what we are about to do is supported...
-  if (!RetrieveCPUExtendedLevelSupport(0x80000002)) return false;
-  if (!RetrieveCPUExtendedLevelSupport(0x80000003)) return false;
-  if (!RetrieveCPUExtendedLevelSupport(0x80000004)) return false;
+  if (!RetrieveCPUExtendedLevelSupport(static_cast<int>(0x80000002)))
+    return false;
+  if (!RetrieveCPUExtendedLevelSupport(static_cast<int>(0x80000003)))
+    return false;
+  if (!RetrieveCPUExtendedLevelSupport(static_cast<int>(0x80000004)))
+    return false;
    
 #if USE_ASM_INSTRUCTIONS
   int ProcessorNameStartPos = 0;
@@ -2169,7 +2172,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   size_t fileSize = 0;
   while(!feof(fd))
     {
-    buffer += static_cast<unsigned char>(fgetc(fd));
+    buffer += static_cast<char>(fgetc(fd));
     fileSize++;
     }
   fclose( fd );
@@ -2204,7 +2207,8 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   kwsys_stl::string cores =
                         this->ExtractValueFromCpuInfoFile(buffer,"cpu cores");
   int numberOfCoresPerCPU=atoi(cores.c_str());
-  this->NumberOfPhysicalCPU=numberOfCoresPerCPU*(maxId+1);
+  this->NumberOfPhysicalCPU=static_cast<unsigned int>(
+    numberOfCoresPerCPU*(maxId+1));
 
 #else // __CYGWIN__
   // does not have "physical id" entries, neither "cpu cores"
@@ -2222,7 +2226,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     }
   // LogicalProcessorsPerPhysical>1 => hyperthreading.
   this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical=
-                            this->NumberOfLogicalCPU/this->NumberOfPhysicalCPU;
+      this->NumberOfLogicalCPU/this->NumberOfPhysicalCPU;
 
   // CPU speed (checking only the first proc
   kwsys_stl::string CPUSpeed = this->ExtractValueFromCpuInfoFile(buffer,"cpu MHz");
@@ -2328,33 +2332,62 @@ int SystemInformationImplementation::QueryMemory()
     // Rigorously, this test should check from the developping version 2.5.x
     // that introduced the new format...
     
-    long freeMem;
-    long buffersMem;
-    long cachedMem;
+    unsigned long freeMem;
+    unsigned long buffersMem;
+    unsigned long cachedMem;
+
+    int status;
     
-    fscanf(fd,"MemTotal:%ld kB\n", &this->TotalPhysicalMemory);
-    fscanf(fd,"MemFree:%ld kB\n", &freeMem);
-    fscanf(fd,"Buffers:%ld kB\n", &buffersMem);
-    fscanf(fd,"Cached:%ld kB\n", &cachedMem);
-    
-    this->TotalPhysicalMemory /= 1024;
-    this->AvailablePhysicalMemory = freeMem+cachedMem+buffersMem;
-    this->AvailablePhysicalMemory /= 1024;
+    status=fscanf(fd,"MemTotal:%lu kB\n", &this->TotalPhysicalMemory);
+    if(status==1)
+      {
+      status+=fscanf(fd,"MemFree:%lu kB\n", &freeMem);
+      }
+    if(status==2)
+      {
+      status+=fscanf(fd,"Buffers:%lu kB\n", &buffersMem);
+      }
+    if(status==3)
+      {
+      status+=fscanf(fd,"Cached:%lu kB\n", &cachedMem);
+      }
+    if(status==4)
+      {
+      this->TotalPhysicalMemory /= 1024;
+      this->AvailablePhysicalMemory = freeMem+cachedMem+buffersMem;
+      this->AvailablePhysicalMemory /= 1024;
+      }
     
     // Skip SwapCached, Active, Inactive, HighTotal, HighFree, LowTotal
     // and LowFree.
     int i=0;
-    while(i<7)
+    bool success=status==4;
+    while(i<7 && success)
       {
-      fgets(buffer, sizeof(buffer), fd); // skip a line
+      char *r=fgets(buffer, sizeof(buffer), fd); // skip a line
+      success=r==buffer;
       ++i;
       }
     
-    fscanf(fd,"SwapTotal:%ld kB\n", &this->TotalVirtualMemory);
-    fscanf(fd,"SwapFree:%ld kB\n", &this->AvailableVirtualMemory);
-
-    this->TotalVirtualMemory /= 1024;
-    this->AvailableVirtualMemory /= 1024;
+    if(success)
+      {
+      status+=fscanf(fd,"SwapTotal:%lu kB\n", &this->TotalVirtualMemory);
+      }
+    if(status==5)
+      {
+      status+=fscanf(fd,"SwapFree:%lu kB\n", &this->AvailableVirtualMemory);
+      }
+    if(status==6)
+      {
+      this->TotalVirtualMemory /= 1024;
+      this->AvailableVirtualMemory /= 1024;
+      }
+    else
+      {
+      kwsys_ios::cout << "Problem parsing /proc/meminfo" << kwsys_ios::endl;
+      fclose(fd);
+      return 0;
+      }
     }
   else
     {
@@ -2363,16 +2396,30 @@ int SystemInformationImplementation::QueryMemory()
     unsigned long temp;
     unsigned long cachedMem;
     unsigned long buffersMem;
-    fgets(buffer, sizeof(buffer), fd); // Skip "total: used:..."
-    
-    fscanf(fd, "Mem: %lu %lu %lu %lu %lu %lu\n",
-         &tp, &temp, &ap, &temp, &buffersMem, &cachedMem);
-    fscanf(fd, "Swap: %lu %lu %lu\n", &tv, &temp, &av);
-    
-    this->TotalVirtualMemory = tv>>10>>10;
-    this->TotalPhysicalMemory = tp>>10>>10;
-    this->AvailableVirtualMemory = av>>10>>10;
-    this->AvailablePhysicalMemory = (ap+buffersMem+cachedMem)>>10>>10;
+    char *r=fgets(buffer, sizeof(buffer), fd); // Skip "total: used:..."
+    int status=0;
+    if(r==buffer)
+      {
+      status+=fscanf(fd, "Mem: %lu %lu %lu %lu %lu %lu\n",
+                     &tp, &temp, &ap, &temp, &buffersMem, &cachedMem);
+      }
+    if(status==6)
+      {
+      status+=fscanf(fd, "Swap: %lu %lu %lu\n", &tv, &temp, &av);
+      }
+    if(status==9)
+      {
+      this->TotalVirtualMemory = tv>>10>>10;
+      this->TotalPhysicalMemory = tp>>10>>10;
+      this->AvailableVirtualMemory = av>>10>>10;
+      this->AvailablePhysicalMemory = (ap+buffersMem+cachedMem)>>10>>10;
+      }
+    else
+      {
+      kwsys_ios::cout << "Problem parsing /proc/meminfo" << kwsys_ios::endl;
+      fclose(fd);
+      return 0;
+      }
     }
   fclose( fd );
   return 1;
@@ -2725,13 +2772,14 @@ bool SystemInformationImplementation::ParseSysCtl()
   this->SysCtlBuffer = this->RunProcess(args);
    
   // Parse values for Mac
-  this->TotalPhysicalMemory = atoi(this->ExtractValueFromSysCtl("hw.memsize:").c_str())/(1024*1024);
+  this->TotalPhysicalMemory = static_cast<unsigned long>(
+    atoi(this->ExtractValueFromSysCtl("hw.memsize:").c_str())/(1024*1024));
   this->TotalVirtualMemory = 0;
   this->AvailablePhysicalMemory = 0;
   this->AvailableVirtualMemory = 0;
 
-  this->NumberOfPhysicalCPU = atoi(this->ExtractValueFromSysCtl("hw.physicalcpu:").c_str());
-  this->NumberOfLogicalCPU = atoi(this->ExtractValueFromSysCtl("hw.logicalcpu:").c_str());
+  this->NumberOfPhysicalCPU = static_cast<unsigned int>(atoi(this->ExtractValueFromSysCtl("hw.physicalcpu:").c_str()));
+  this->NumberOfLogicalCPU = static_cast<unsigned int>(atoi(this->ExtractValueFromSysCtl("hw.logicalcpu:").c_str()));
   
   if(this->NumberOfPhysicalCPU!=0)
     {
@@ -2908,7 +2956,8 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
 bool SystemInformationImplementation::QuerySolarisInfo()
 {
   // Parse values
-  this->NumberOfPhysicalCPU = atoi(this->ParseValueFromKStat("-n syste_misc -s ncpus").c_str());
+  this->NumberOfPhysicalCPU = static_cast<unsigned int>(
+    atoi(this->ParseValueFromKStat("-n syste_misc -s ncpus").c_str()));
   this->NumberOfLogicalCPU = this->NumberOfPhysicalCPU;
   
   if(this->NumberOfPhysicalCPU!=0)

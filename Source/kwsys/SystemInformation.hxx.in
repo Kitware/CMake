@@ -47,7 +47,7 @@ public:
   const char * GetExtendedProcessorName();
   const char * GetProcessorSerialNumber();
   int GetProcessorCacheSize();
-  int GetLogicalProcessorsPerPhysical();
+  unsigned int GetLogicalProcessorsPerPhysical();
   float GetProcessorClockFrequency();
   int GetProcessorAPICID();
   int GetProcessorCacheXSize(long int);
