@@ -248,7 +248,8 @@ int cmCTestUpdateHandler::ProcessHandler()
   vc->WriteXML(os);
 
   int localModifications = 0;
-  if(int numUpdated = vc->GetPathCount(cmCTestVC::PathUpdated))
+  int numUpdated = vc->GetPathCount(cmCTestVC::PathUpdated);
+  if(numUpdated)
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
                "   Found " << numUpdated << " updated files\n");
@@ -290,7 +291,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     }
   os << "</UpdateReturnStatus>" << std::endl;
   os << "</Update>" << std::endl;
-  return localModifications;
+  return numUpdated;
 }
 
 //----------------------------------------------------------------------

@@ -64,8 +64,7 @@ public:
       "Updates the given source directory and stores results in Update.xml. "
       "If no SOURCE is given, the CTEST_SOURCE_DIRECTORY variable is used. "
       "The RETURN_VALUE option specifies a variable in which to store the "
-      "result, which is -1 on error, non-negative for success, and positive "
-      "if there are local modifications in the work tree."
+      "result, which is the number of files updated or -1 on error."
       ;
     }
 
