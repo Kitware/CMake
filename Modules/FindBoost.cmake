@@ -304,7 +304,7 @@ IF(Boost_INCLUDE_DIR)
 
   # On versions < 1.35, remove the System library from the considered list
   # since it wasn't added until 1.35.
-  if(Boost_VERSION)
+  if(Boost_VERSION AND Boost_FIND_COMPONENTS)
      math(EXPR _boost_maj "${Boost_VERSION} / 100000")
      math(EXPR _boost_min "${Boost_VERSION} / 100 % 1000")
      if(${_boost_maj}.${_boost_min} VERSION_LESS 1.35)
