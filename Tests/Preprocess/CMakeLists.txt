@@ -65,14 +65,20 @@ if(NOT BORLAND AND NOT PP_VS70)
   set(SEMICOLON "\;")
 endif(NOT BORLAND AND NOT PP_VS70)
 
-if(NOT PP_BORLAND AND NOT PP_WATCOM)
-  # Borland, WMake: multiple spaces
-  # The make tool seems to remove extra whitespace from inside
-  # quoted strings when passing to the compiler.  It does not have
-  # trouble passing to other tools, and the compiler may be directly
-  # invoked from the command line.
-  set(STRING_EXTRA "${STRING_EXTRA}  ")
-endif(NOT PP_BORLAND AND NOT PP_WATCOM)
+if(NOT PP_VS6)
+  # VS 6 IDE: spaces
+  # The project parser unconditionally separates arguments at spaces.
+  set(STRING_EXTRA "${STRING_EXTRA} ")
+
+  if(NOT PP_BORLAND AND NOT PP_WATCOM)
+    # Borland, WMake: multiple spaces
+    # The make tool seems to remove extra whitespace from inside
+    # quoted strings when passing to the compiler.  It does not have
+    # trouble passing to other tools, and the compiler may be directly
+    # invoked from the command line.
+    set(STRING_EXTRA "${STRING_EXTRA} ")
+  endif(NOT PP_BORLAND AND NOT PP_WATCOM)
+endif(NOT PP_VS6)
 
 if(NOT PP_VS)
   # VS: ,
@@ -152,7 +158,7 @@ endif(PP_NMAKE OR PP_UMAKE)
 # support it and it is not an operator it is not worthwhile.
 
 # Compose the final test string.
-set(STRING_VALUE "hello `~!@$*)(_+-=}{][:'.?/ ${STRING_EXTRA}world")
+set(STRING_VALUE "hello`~!@$*)(_+-=}{][:'.?/${STRING_EXTRA}world")
 
 #-----------------------------------------------------------------------------
 # Function-style macro command-line support:
@@ -194,11 +200,7 @@ endif(PP_VS6)
 add_definitions(-DOLD_DEF -DOLD_EXPR=2)
 
 # Make sure old-style definitions are converted to directory property.
-if(PREPROCESS_VS6)
-  set(OLD_DEFS_EXPECTED "OLD_DEF")
-else(PREPROCESS_VS6)
-  set(OLD_DEFS_EXPECTED "OLD_DEF;OLD_EXPR=2")
-endif(PREPROCESS_VS6)
+set(OLD_DEFS_EXPECTED "OLD_DEF;OLD_EXPR=2")
 get_property(OLD_DEFS DIRECTORY PROPERTY COMPILE_DEFINITIONS)
 if(NOT "${OLD_DEFS}" STREQUAL "${OLD_DEFS_EXPECTED}")
   message(SEND_ERROR "add_definitions not converted to directory property!")
@@ -225,23 +227,26 @@ foreach(c "" "_DEBUG" "_RELEASE")
     )
 endforeach(c)
 
-# Add definitions with values.  VS6 does not support this.
+# Add definitions with values.
 if(NOT PREPROCESS_VS6)
-  set_property(
-    TARGET Preprocess
-    APPEND PROPERTY COMPILE_DEFINITIONS
-    "TARGET_STRING=\"${STRING_VALUE}${SEMICOLON}\""
-    "TARGET_EXPR=${EXPR}"
-    "TARGET_PATH=\"${TARGET_PATH}\""
-    )
-  set_property(
-    SOURCE preprocess.c preprocess${VS6}.cxx
-    APPEND PROPERTY COMPILE_DEFINITIONS
-    "FILE_STRING=\"${STRING_VALUE}${SEMICOLON}\""
-    "FILE_EXPR=${EXPR}"
-    "FILE_PATH=\"${FILE_PATH}\""
-    )
+  # The path might have spaces, which VS6 does not support.
+  set(DEF_TARGET_PATH "TARGET_PATH=\"${TARGET_PATH}\"")
+  set(DEF_FILE_PATH "FILE_PATH=\"${FILE_PATH}\"")
 endif(NOT PREPROCESS_VS6)
+set_property(
+  TARGET Preprocess
+  APPEND PROPERTY COMPILE_DEFINITIONS
+  "TARGET_STRING=\"${STRING_VALUE}${SEMICOLON}\""
+  "TARGET_EXPR=${EXPR}"
+  ${DEF_TARGET_PATH}
+  )
+set_property(
+  SOURCE preprocess.c preprocess${VS6}.cxx
+  APPEND PROPERTY COMPILE_DEFINITIONS
+  "FILE_STRING=\"${STRING_VALUE}${SEMICOLON}\""
+  "FILE_EXPR=${EXPR}"
+  ${DEF_FILE_PATH}
+  )
 
 # Helper target for running test manually in build tree.
 add_custom_target(drive COMMAND Preprocess)

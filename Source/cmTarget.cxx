@@ -108,7 +108,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "(ex. \"COMPILE_DEFINITIONS_DEBUG\").\n"
      "CMake will automatically drop some definitions that "
      "are not supported by the native build tool.  "
-     "The VS6 IDE does not support definitions with values "
+     "The VS6 IDE does not support definition values with spaces "
      "(but NMake does).\n"
      "Dislaimer: Most native build tools have poor support for escaping "
      "certain values.  CMake has work-arounds for many cases but some "
