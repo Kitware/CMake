@@ -14,6 +14,7 @@ AddCMakeTest(VariableWatch "")
 AddCMakeTest(Include "")
 AddCMakeTest(FindBase "")
 AddCMakeTest(Toolchain "")
+AddCMakeTest(GetFilenameComponentRealpath "")
 
 # Not ready for Unix testing yet. Coming "soon"...
 #

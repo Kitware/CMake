@@ -68,11 +68,12 @@ public:
     {
     return
       "  get_filename_component(VarName FileName\n"
-      "                         PATH|ABSOLUTE|NAME|EXT|NAME_WE\n"
+      "                         PATH|ABSOLUTE|NAME|EXT|NAME_WE|REALPATH\n"
       "                         [CACHE])\n"
       "Set VarName to be the path (PATH), file name (NAME), file "
       "extension (EXT), file name without extension (NAME_WE) of FileName, "
-      "or the full absolute (ABSOLUTE) file name without symlinks.  "
+      "the full path (ABSOLUTE), or the full path with all symlinks "
+      "resolved (REALPATH).  "
       "Note that the path is converted to Unix slashes format and has no "
       "trailing slashes. The longest file extension is always considered. "
       "If the optional CACHE argument is specified, the result variable is "

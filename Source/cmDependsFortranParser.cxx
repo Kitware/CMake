@@ -242,8 +242,8 @@ static char charmap[] = {
 inline int strcasecmpCM(const char *s1, const char *s2) 
 {
   const char *cm = charmap;
-  const char* us1 = s1;
-  const char* us2 = s2;
+  unsigned char const* us1 = reinterpret_cast<unsigned char const*>(s1);
+  unsigned char const* us2 = reinterpret_cast<unsigned char const*>(s2);
   
   while(cm[*us1] == cm[*us2++])
     if(*us1++ == '\0') 

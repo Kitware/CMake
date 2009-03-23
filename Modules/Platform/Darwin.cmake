@@ -140,7 +140,6 @@ SET(CMAKE_CXX_CREATE_MACOSX_FRAMEWORK
 
 
  
-SET(CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES /usr/local/include)
 # default to searching for frameworks first
 SET(CMAKE_FIND_FRAMEWORK FIRST)
 # set up the default search directories for frameworks

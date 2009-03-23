@@ -500,7 +500,7 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
   infoFileStream
     << "SET(CMAKE_C_INCLUDE_PATH\n";
   std::vector<std::string> includeDirs;
-  this->GetIncludeDirectories(includeDirs, false);
+  this->GetIncludeDirectories(includeDirs);
   for(std::vector<std::string>::iterator i = includeDirs.begin();
       i != includeDirs.end(); ++i)
     {

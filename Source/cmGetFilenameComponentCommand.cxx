@@ -75,7 +75,8 @@ bool cmGetFilenameComponentCommand
     {
     result = cmSystemTools::GetFilenameWithoutExtension(filename);
     }
-  else if (args[2] == "ABSOLUTE")
+  else if (args[2] == "ABSOLUTE" ||
+           args[2] == "REALPATH")
     {
     // If the path given is relative evaluate it relative to the
     // current source directory.
@@ -92,6 +93,11 @@ bool cmGetFilenameComponentCommand
 
     // Collapse the path to its simplest form.
     result = cmSystemTools::CollapseFullPath(filename.c_str());
+    if(args[2] == "REALPATH")
+      {
+      // Resolve symlinks if possible
+      result = cmSystemTools::GetRealPath(filename.c_str());
+      }
     }
   else 
     {

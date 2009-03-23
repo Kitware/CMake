@@ -71,7 +71,7 @@ void cmDocumentationFormatterMan::PrintPreformatted(std::ostream& os,
   os << ".nf\n" << man_text;
   if (*text && man_text.at(man_text.length()-1) != '\n')
       os << "\n";
-  os << ".fi\n";
+  os << ".fi\n\n";
 }
 
 void cmDocumentationFormatterMan::PrintParagraph(std::ostream& os, 

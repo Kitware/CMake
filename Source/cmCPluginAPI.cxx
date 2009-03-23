@@ -706,10 +706,6 @@ void CCONV cmSourceFileSetName(void *arg, const char* name, const char* dir,
     headerExts.push_back(headerExtensions[i]);
     }
 
-  // Implement the old SetName method code here.
-  sf->Properties.SetProperty("HEADER_FILE_ONLY", "1",
-                             cmProperty::SOURCE_FILE);
-
   // Save the original name given.
   sf->SourceName = name;
 
@@ -742,13 +738,6 @@ void CCONV cmSourceFileSetName(void *arg, const char* name, const char* dir,
         }
       }
 
-    // See if the file is a header file
-    if(std::find( headerExts.begin(), headerExts.end(),
-                  sf->SourceExtension ) == headerExts.end())
-      {
-      sf->Properties.SetProperty("HEADER_FILE_ONLY", "0",
-                                 cmProperty::SOURCE_FILE);
-      }
     sf->FullPath = hname;
     return;
     }
@@ -763,8 +752,6 @@ void CCONV cmSourceFileSetName(void *arg, const char* name, const char* dir,
     if(cmSystemTools::FileExists(hname.c_str()))
       {
       sf->SourceExtension = *ext;
-      sf->Properties.SetProperty("HEADER_FILE_ONLY", "0",
-                                 cmProperty::SOURCE_FILE);
       sf->FullPath = hname;
       return;
       }
@@ -814,9 +801,11 @@ void CCONV cmSourceFileSetName2(void *arg, const char* name, const char* dir,
     }
 
   // Implement the old SetName method code here.
-  sf->Properties.SetProperty("HEADER_FILE_ONLY",
-                             headerFileOnly? "1" : "0",
-                             cmProperty::SOURCE_FILE);
+  if(headerFileOnly)
+    {
+    sf->Properties.SetProperty("HEADER_FILE_ONLY", "1",
+                               cmProperty::SOURCE_FILE);
+    }
   sf->SourceName = name;
   std::string fname = sf->SourceName;
   if(ext && strlen(ext))

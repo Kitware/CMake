@@ -141,6 +141,9 @@ cmDependsFortran
   cmDepends(lg),
   Internal(new cmDependsFortranInternals)
 {
+  // Configure the include file search path.
+  this->SetIncludePathFromLanguage("Fortran");
+
   // Get the list of definitions.
   std::vector<std::string> definitions;
   cmMakefile* mf = this->LocalGenerator->GetMakefile();

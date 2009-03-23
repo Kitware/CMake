@@ -2185,13 +2185,20 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
   i++; // Get rid of subcommand
   for(;i != args.end(); ++i)
     {
-    if(cmSystemTools::FileIsDirectory(i->c_str()) && recurse)
+    std::string fileName = *i;
+    if(!cmsys::SystemTools::FileIsFullPath(fileName.c_str()))
       {
-      cmSystemTools::RemoveADirectory(i->c_str());
+      fileName = this->Makefile->GetCurrentDirectory();
+      fileName += "/" + *i;
+      }
+
+    if(cmSystemTools::FileIsDirectory(fileName.c_str()) && recurse)
+      {
+      cmSystemTools::RemoveADirectory(fileName.c_str());
       }
     else
       {
-      cmSystemTools::RemoveFile(i->c_str());
+      cmSystemTools::RemoveFile(fileName.c_str());
       }
     }
   return true;

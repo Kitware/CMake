@@ -83,7 +83,7 @@ cmMakefile::cmMakefile()
   this->AddSourceGroup("", "^.*$");
   this->AddSourceGroup
     ("Source Files",
-     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp"
+     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|F|f90|for|fpp"
      "|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
   this->AddSourceGroup("Header Files",
                        "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
@@ -1533,6 +1533,21 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
          srcPath);
       return;
       }
+    }
+
+  // Make sure the binary directory is unique.
+  cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
+  if(!gg->BinaryDirectoryIsNew(binPath))
+    {
+    cmOStringStream e;
+    e << "The binary directory\n"
+      << "  " << binPath << "\n"
+      << "is already used to build another source directory, so it cannot "
+      << "be used to build source directory\n"
+      << "  " << srcPath << "\n"
+      << "Specify a unique binary directory name.";
+    this->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
     }
 
   // create a new local generator and set its parent

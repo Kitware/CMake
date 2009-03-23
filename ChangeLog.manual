@@ -1,3 +1,22 @@
+Changes in CMake 2.6.4 RC 0
+- Add some better documentation about RPATH variables
+- No longer mark header files as HEADER_FILE_ONLY automatically,
+  this gets rid of the ugly red marks in Visual Stuido
+- Fix man-page preformatted text paragraphing
+- Teach file(REMOVE) how to use relative paths
+- Gracefully handle broken version symlinks
+- Fix ASM source file extension default list
+- Pass shared library export symbol in DEFINES
+- Enforce unique binary directories
+- Fix cmake-mode.el indentation cursor motion
+- Simplify reverse cmLocalGenerator::Convert
+- More robust decision to suppress implicit include dirs
+- Fix Fortran implicit dependency include path (and test it)
+- Clarify docs of old *_OUTPUT_PATH vars
+- Fix svn update logic for modified files
+- Add get_filename_component(... REALPATH)
+- Work around broken GetLongPathName case 
+
 Changes in CMake 2.6.3 RC 17 - 15
 - Fix Xcode rebuild issue with static libraries and add a test.
 

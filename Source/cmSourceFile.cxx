@@ -246,25 +246,6 @@ void cmSourceFile::CheckExtension()
     this->SetProperty("EXTERNAL_OBJECT", "1");
     }
 
-  // Look for header files.
-  cmMakefile* mf = this->Location.GetMakefile();
-  const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
-  if(std::find(hdrExts.begin(), hdrExts.end(), this->Extension) ==
-     hdrExts.end())
-    {
-    // This is not a known header file extension.  Mark it as not a
-    // header unless the user has already explicitly set the property.
-    if(!this->GetProperty("HEADER_FILE_ONLY"))
-      {
-      this->SetProperty("HEADER_FILE_ONLY", "0");
-      }
-    }
-  else
-    {
-    // This is a known header file extension.  The source cannot be compiled.
-    this->SetProperty("HEADER_FILE_ONLY", "1");
-    }
-
   // Try to identify the source file language from the extension.
   if(this->Language.empty())
     {

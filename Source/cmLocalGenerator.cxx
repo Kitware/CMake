@@ -1133,9 +1133,10 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     {
     return this->LanguageToIncludeFlags[lang].c_str();
     }
+
   cmOStringStream includeFlags;
   std::vector<std::string> includes;
-  this->GetIncludeDirectories(includes);
+  this->GetIncludeDirectories(includes, lang);
   std::vector<std::string>::iterator i;
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
@@ -1241,7 +1242,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
-                                             bool filter_system_dirs)
+                                             const char* lang)
 {
   // Need to decide whether to automatically include the source and
   // binary directories at the beginning of the include path.
@@ -1307,21 +1308,18 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       }
     }
 
-  if(filter_system_dirs)
+  // Load implicit include directories for this language.
+  std::string impDirVar = "CMAKE_";
+  impDirVar += lang;
+  impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
+  if(const char* value = this->Makefile->GetDefinition(impDirVar.c_str()))
     {
-    // Do not explicitly add the standard include path "/usr/include".
-    // This can cause problems with certain standard library
-    // implementations because the wrong headers may be found first.
-    emitted.insert("/usr/include");
-    if(const char* implicitIncludes = this->Makefile->GetDefinition
-       ("CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES"))
+    std::vector<std::string> impDirVec;
+    cmSystemTools::ExpandListArgument(value, impDirVec);
+    for(std::vector<std::string>::const_iterator i = impDirVec.begin();
+        i != impDirVec.end(); ++i)
       {
-      std::vector<std::string> implicitIncludeVec;
-      cmSystemTools::ExpandListArgument(implicitIncludes, implicitIncludeVec);
-      for(unsigned int k = 0; k < implicitIncludeVec.size(); ++k)
-        {
-        emitted.insert(implicitIncludeVec[k]);
-        }
+      emitted.insert(*i);
       }
     }
 
@@ -2127,25 +2125,15 @@ std::string cmLocalGenerator::Convert(RelativeRoot remote,
                                       bool optional)
 {
   const char* remotePath = this->GetRelativeRootPath(remote);
+
+  // The relative root must have a path (i.e. not FULL or NONE)
+  assert(remotePath != 0);
+
   if(local && (!optional || this->UseRelativePaths))
     {
     std::vector<std::string> components;
-    std::string result;
-    switch(remote)
-      {
-      case HOME:
-      case HOME_OUTPUT:
-      case START:
-      case START_OUTPUT:
-        cmSystemTools::SplitPath(local, components);
-        result = this->ConvertToRelativePath(components, remotePath);
-        break;
-      case FULL:
-        result = remotePath;
-        break;
-      case NONE:
-        break;
-      }
+    cmSystemTools::SplitPath(local, components);
+    std::string result = this->ConvertToRelativePath(components, remotePath);
     return this->ConvertToOutputFormat(result.c_str(), output);
     }
   else
