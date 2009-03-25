@@ -1260,7 +1260,13 @@ IF (QT4_QMAKE_FOUND)
       FOREACH (_current_FILE ${ARGN})
          GET_FILENAME_COMPONENT(_abs_FILE ${_current_FILE} ABSOLUTE)
          GET_FILENAME_COMPONENT(qm ${_abs_FILE} NAME_WE)
-         SET(qm "${CMAKE_CURRENT_BINARY_DIR}/${qm}.qm")
+         GET_SOURCE_FILE_PROPERTY(output_location ${_abs_FILE} OUTPUT_LOCATION)
+         IF(output_location)
+           FILE(MAKE_DIRECTORY "${output_location}")
+           SET(qm "${output_location}/${qm}.qm")
+         ELSE(output_location)
+           SET(qm "${CMAKE_CURRENT_BINARY_DIR}/${qm}.qm")
+         ENDIF(output_location)
 
          ADD_CUSTOM_COMMAND(OUTPUT ${qm}
             COMMAND ${QT_LRELEASE_EXECUTABLE}
