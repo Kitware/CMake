@@ -115,11 +115,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     {
     return 0;
     }
-  if(this->FileName && strcmp(var, "CMAKE_CURRENT_LIST_FILE") == 0)
-    {
-    return this->AddString(this->FileName);
-    }
-  else if(this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0)
+  if(this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0)
     {
     cmOStringStream ostr;
     ostr << this->FileLine;
