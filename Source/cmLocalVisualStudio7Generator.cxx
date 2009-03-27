@@ -404,6 +404,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"WarningLevel", "W2", "Warning level", "2", 0},
   {"WarningLevel", "W3", "Warning level", "3", 0},
   {"WarningLevel", "W4", "Warning level", "4", 0},
+  {"DisableSpecificWarnings", "wd", "Disable specific warnings", "",
+   cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
 
   // Precompiled header and related options.  Note that the
   // UsePrecompiledHeader entries are marked as "Continue" so that the
@@ -459,6 +461,15 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
   cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
   {"IgnoreAllDefaultLibraries", "NODEFAULTLIB", "ignore all default libs",
    "TRUE", 0},
+  {"FixedBaseAddress", "FIXED:NO", "Generate a relocation section", "1", 0},
+  {"FixedBaseAddress", "FIXED", "Image must be loaded at a fixed address", "2", 0},
+  {"EnableCOMDATFolding", "OPT:NOICF", "Do not remove redundant COMDATs", "1", 0},
+  {"EnableCOMDATFolding", "OPT:ICF", "Remove redundant COMDATs", "2", 0},
+  {"OptimizeReferences", "OPT:NOREF", "Keep unreferenced data", "1", 0},
+  {"OptimizeReferences", "OPT:REF", "Eliminate unreferenced data", "2", 0},
+  {"TargetMachine", "MACHINE:I386", "Machine x86", "1", 0},
+  {"TargetMachine", "MACHINE:X86", "Machine x86", "1", 0},
+  {"TargetMachine", "MACHINE:X64", "Machine x64", "17", 0},
   {"ModuleDefinitionFile", "DEF:", "add an export def file", "",
    cmVS7FlagTable::UserValue}, 
   {"GenerateMapFile", "MAP", "enable generation of map file", "TRUE", 0},
