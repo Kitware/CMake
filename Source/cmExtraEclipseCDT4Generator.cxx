@@ -95,7 +95,6 @@ void cmExtraEclipseCDT4Generator
   cmGlobalUnixMakefileGenerator3* mf
     = static_cast<cmGlobalUnixMakefileGenerator3*>(generator);
   mf->SetToolSupportsColor(true);
-  mf->SetForceVerboseMakefiles(true);
 }
 
 //----------------------------------------------------------------------------
@@ -251,6 +250,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.environment</key>\n"
+    "\t\t\t\t\t<value>VERBOSE=1|</value>\n"  // enforce VERBOSE Makefile output
     "\t\t\t\t\t<value>"
     ;
   // set vsvars32.bat environment available at CMake time,
@@ -392,6 +392,30 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     }
 
   fout << "</projectDescription>\n";
+}
+
+//----------------------------------------------------------------------------
+void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
+                            cmGeneratedFileStream& fout,
+                            const std::vector<std::string>& includeDirs,
+                            std::set<std::string>& emittedDirs)
+{
+  for(std::vector<std::string>::const_iterator inc = includeDirs.begin();
+      inc != includeDirs.end();
+      ++inc)
+    {
+    if (!inc->empty())
+      {
+      std::string dir = cmSystemTools::CollapseFullPath(inc->c_str());
+      if(emittedDirs.find(dir) == emittedDirs.end())
+        {
+        emittedDirs.insert(dir);
+        fout << "<pathentry include=\"" 
+             << cmExtraEclipseCDT4Generator::GetEclipsePath(dir)
+             << "\" kind=\"inc\" path=\"\" system=\"true\"/>\n";
+        }
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -590,18 +614,29 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     {
     const std::vector<std::string>& includeDirs
       = (*it)->GetMakefile()->GetIncludeDirectories();
-    for(std::vector<std::string>::const_iterator inc = includeDirs.begin();
-        inc != includeDirs.end();
-        ++inc)
-      {
-      std::string dir = cmSystemTools::CollapseFullPath(inc->c_str());
-      if(emmited.find(dir) == emmited.end())
-        {
-        emmited.insert(dir);
-        fout << "<pathentry include=\"" << this->GetEclipsePath(dir)
-             << "\" kind=\"inc\" path=\"\" system=\"true\"/>\n";
-        }
+    this->AppendIncludeDirectories(fout, includeDirs, emmited);
       }
+  // now also the system include directories, in case we found them in 
+  // CMakeSystemSpecificInformation.cmake. This makes Eclipse find the 
+  // standard headers.
+  mf->GetDefinition("CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS");
+  std::string compiler = mf->GetSafeDefinition("CMAKE_C_COMPILER");
+  if (!compiler.empty())
+    {
+    std::string systemIncludeDirs = mf->GetSafeDefinition(
+                                      "CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS");
+    std::vector<std::string> dirs;
+    cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+    this->AppendIncludeDirectories(fout, dirs, emmited);
+    }
+  compiler = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
+  if (!compiler.empty())
+    {
+    std::string systemIncludeDirs = mf->GetSafeDefinition(
+                                      "CMAKE_ECLIPSE_CXX_SYSTEM_INCLUDE_DIRS");
+    std::vector<std::string> dirs;
+    cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+    this->AppendIncludeDirectories(fout, dirs, emmited);
     }
   fout << "</storageModule>\n";
 

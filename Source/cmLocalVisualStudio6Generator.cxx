@@ -1712,11 +1712,11 @@ cmLocalVisualStudio6Generator
     }
 
   // Now do the VS6-specific check.
-  if(define.find_first_of("=") != define.npos)
+  if(define.find_first_of(" ") != define.npos)
     {
     cmOStringStream e;
-    e << "WARNING: The VS6 IDE does not support preprocessor definitions "
-      << "with values.\n"
+    e << "WARNING: The VS6 IDE does not support preprocessor definition "
+      << "values with spaces.\n"
       << "CMake is dropping a preprocessor definition: " << define << "\n"
       << "Consider defining the macro in a (configured) header file.\n";
     cmSystemTools::Message(e.str().c_str());

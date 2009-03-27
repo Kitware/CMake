@@ -64,14 +64,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  project(projectname [CXX] [C] [Java])\n"
+      "  project(<projectname> [languageName1 languageName2 ... ] )\n"
       "Sets the name of the project.  "
-      "This creates the variables projectname_BINARY_DIR and "
-      "projectname_SOURCE_DIR.  "
+      "Additionally this sets the variables <projectName>_BINARY_DIR and "
+      "<projectName>_SOURCE_DIR to the respective values.\n"
       "Optionally you can specify which languages your project supports.  "
-      "By default all languages are supported.  If you do not have a "
-      "C++ compiler, but want" 
-      " to build a c program with cmake, then use this option.";
+      "Example languages are CXX (i.e. C++), C, Fortran, etc. "
+      "By default C and CXX are enabled.  E.g. if you do not have a "
+      "C++ compiler, you can disable the check for it by explicitely listing "
+      "the languages you want to support, e.g. C.  By using the special "
+      "language \"NONE\" all checks for any language can be disabled.";
     }
   
   cmTypeMacro(cmProjectCommand, cmCommand);

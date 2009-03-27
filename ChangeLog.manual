@@ -1,4 +1,14 @@
-Changes in CMake 2.6.4 RC 0
+Changes in CMake 2.6.4 RC 2
+- Fix issues in FindBoost #8576 #8734
+- Fix -D issues with VS 6
+- Fix scope issue with CMAKE_CURRENT_LIST_FILE  and macros
+- Eclipse make VERBOSE off in makfiles #7585, and use built-in includes
+- Codeblocks auto header finding
+- Fix crash in include_directories #8704
+- Some documentation fixes to commands and classes.
+- Do not warn if LIBPATH is not set for nmake
+
+Changes in CMake 2.6.4 RC 1
 - Add some better documentation about RPATH variables
 - No longer mark header files as HEADER_FILE_ONLY automatically,
   this gets rid of the ugly red marks in Visual Stuido

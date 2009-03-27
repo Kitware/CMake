@@ -132,9 +132,10 @@ public:
       "   +         Matches preceding pattern one or more times\n"
       "   ?         Matches preceding pattern zero or once only\n"
       "   |         Matches a pattern on either side of the |\n"
-      "   ()        Saves a matched subexpression, which can be referenced in "
-      "the REGEX REPLACE operation. Additionally it is saved in the special "
-      "CMake variables CMAKE_MATCH_(0..9).";
+      "   ()        Saves a matched subexpression, which can be referenced \n"
+      "             in the REGEX REPLACE operation. Additionally it is saved\n"
+      "             by all regular expression-related commands, including \n"
+      "             e.g. if( MATCHES ), in the variables CMAKE_MATCH_(0..9).";
     }
   
   cmTypeMacro(cmStringCommand, cmCommand);

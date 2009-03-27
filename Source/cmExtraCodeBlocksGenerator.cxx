@@ -230,7 +230,10 @@ void cmExtraCodeBlocksGenerator
 
 
   // Collect all used source files in the project
-  std::map<std::string, std::string> sourceFiles;
+  // Sort them into two containers, one for C/C++ implementation files
+  // which may have an acompanying header, one for all other files
+  std::map<std::string, cmSourceFile*> cFiles;
+  std::set<std::string> otherFiles;
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
        lg!=lgs.end(); lg++)
     {
@@ -250,7 +253,32 @@ void cmExtraCodeBlocksGenerator
           for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
                si!=sources.end(); si++)
             {
-            sourceFiles[(*si)->GetFullPath()] = ti->first;
+            // check whether it is a C/C++ implementation file
+            bool isCFile = false;
+            if ((*si)->GetLanguage() && (*(*si)->GetLanguage() == 'C'))
+              {
+              for(std::vector<std::string>::const_iterator
+                  ext = mf->GetSourceExtensions().begin();
+                  ext !=  mf->GetSourceExtensions().end(); 
+                  ++ext)
+                {
+                if ((*si)->GetExtension() == *ext)
+                  {
+                  isCFile = true;
+                  break;
+                  }
+                }
+              }
+
+            // then put it accordingly into one of the two containers
+            if (isCFile)
+              {
+              cFiles[(*si)->GetFullPath()] = *si ;
+              }
+            else
+              {
+              otherFiles.insert((*si)->GetFullPath());
+              }
             }
           }
         default:  // intended fallthrough
@@ -259,13 +287,61 @@ void cmExtraCodeBlocksGenerator
       }
     }
 
-  // insert all used source files in the CodeBlocks project
-  for (std::map<std::string, std::string>::const_iterator 
-       sit=sourceFiles.begin();
-       sit!=sourceFiles.end();
+  // The following loop tries to add header files matching to implementation
+  // files to the project. It does that by iterating over all source files,
+  // replacing the file name extension with ".h" and checks whether such a 
+  // file exists. If it does, it is inserted into the map of files.
+  // A very similar version of that code exists also in the kdevelop
+  // project generator.
+  for (std::map<std::string, cmSourceFile*>::const_iterator 
+       sit=cFiles.begin();
+       sit!=cFiles.end();
+       ++sit)
+    {
+    std::string headerBasename=cmSystemTools::GetFilenamePath(sit->first);
+    headerBasename+="/";
+    headerBasename+=cmSystemTools::GetFilenameWithoutExtension(sit->first);
+
+    // check if there's a matching header around
+    for(std::vector<std::string>::const_iterator
+        ext = mf->GetHeaderExtensions().begin();
+        ext !=  mf->GetHeaderExtensions().end(); 
+        ++ext)
+      {
+      std::string hname=headerBasename;
+      hname += ".";
+      hname += *ext;
+      // if it's already in the set, don't check if it exists on disk
+      std::set<std::string>::const_iterator headerIt=otherFiles.find(hname);
+      if (headerIt != otherFiles.end())
+        {
+        break;
+        }
+
+      if(cmSystemTools::FileExists(hname.c_str()))
+        {
+        otherFiles.insert(hname);
+        break;
+        }
+      }
+    }
+
+  // insert all source files in the CodeBlocks project
+  // first the C/C++ implementation files, then all others
+  for (std::map<std::string, cmSourceFile*>::const_iterator 
+       sit=cFiles.begin();
+       sit!=cFiles.end();
+       ++sit)
+    {
+    fout<<"      <Unit filename=\""<< sit->first <<"\">\n"
+          "      </Unit>\n";
+    }
+  for (std::set<std::string>::const_iterator 
+       sit=otherFiles.begin();
+       sit!=otherFiles.end();
        ++sit)
   {
-  fout<<"      <Unit filename=\""<<sit->first <<"\">\n"
+    fout<<"      <Unit filename=\""<< sit->c_str() <<"\">\n"
         "      </Unit>\n";
   }
 

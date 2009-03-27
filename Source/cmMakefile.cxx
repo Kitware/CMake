@@ -1208,10 +1208,10 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
     return false;
     }
 
-  // VS6 IDE does not support definitions with values.
+  // VS6 IDE does not support definition values with spaces.
   if((strcmp(this->LocalGenerator->GetGlobalGenerator()->GetName(),
              "Visual Studio 6") == 0) &&
-     (def.find("=") != def.npos))
+     (def.find(" ") != def.npos))
     {
     return false;
     }
@@ -3475,7 +3475,7 @@ void cmMakefile::DefineProperties(cmake *cm)
      "in the directory's parent.\n"
      "CMake will automatically drop some definitions that "
      "are not supported by the native build tool.  "
-     "The VS6 IDE does not support definitions with values "
+     "The VS6 IDE does not support definition values with spaces "
      "(but NMake does).\n"
      "Dislaimer: Most native build tools have poor support for escaping "
      "certain values.  CMake has work-arounds for many cases but some "
