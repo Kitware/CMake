@@ -1,6 +1,6 @@
 set(CMAKE_RELEASE_DIRECTORY "c:/hoffman/CMakeReleaseDirectory")
 set(CONFIGURE_WITH_CMAKE TRUE)
-set(CMAKE_CONFIGURE_PATH "c:/Hoffman/My\\ Builds/CMakeVSNMake71Dev/bin/cmake.exe")
+set(CMAKE_CONFIGURE_PATH "c:/Program Files/CMake 2.6/bin/cmake.exe")
 set(PROCESSORS 1)
 set(HOST vogon)
 set(CPACK_BINARY_GENERATORS "NSIS ZIP")
