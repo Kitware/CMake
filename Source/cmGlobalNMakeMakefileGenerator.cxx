@@ -35,8 +35,7 @@ void cmGlobalNMakeMakefileGenerator
   mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
   if(!(cmSystemTools::GetEnv("INCLUDE") && 
-       cmSystemTools::GetEnv("LIB") &&
-       cmSystemTools::GetEnv("LIBPATH"))
+       cmSystemTools::GetEnv("LIB"))
     )
     {
     std::string message = "To use the NMake generator, cmake must be run "
