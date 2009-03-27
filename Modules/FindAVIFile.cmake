@@ -14,13 +14,10 @@ IF (UNIX)
   FIND_PATH(AVIFILE_INCLUDE_DIR avifile.h
     /usr/local/avifile/include
     /usr/local/include/avifile
-    /usr/include
   )
 
   FIND_LIBRARY(AVIFILE_AVIPLAY_LIBRARY aviplay
     /usr/local/avifile/lib
-    /usr/local/lib
-    /usr/lib
   )
 
 ENDIF (UNIX)
@@ -37,3 +34,4 @@ IF(AVIFILE_INCLUDE_DIR)
 ENDIF(AVIFILE_INCLUDE_DIR)
 
 
+MARK_AS_ADVANCED(AVIFILE_INCLUDE_DIR AVIFILE_AVIPLAY_LIBRARY)
