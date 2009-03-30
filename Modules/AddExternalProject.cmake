@@ -466,55 +466,38 @@ function(add_external_project_configure_command name)
   # Create the working_dir for configure, build and install steps:
   #
   mkdir("${working_dir}")
-  add_custom_command(
-    OUTPUT ${sentinels_dir}/${name}-working_dir
+  add_external_project_step(${name} working_dir
+    COMMENT "Making directory \"${working_dir}\""
     COMMAND ${CMAKE_COMMAND} -E make_directory ${working_dir}
-    COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-working_dir
-    DEPENDS ${sentinels_dir}/${name}-update
-            ${sentinels_dir}/${name}-patch
-      ${file_deps}
-    VERBATIM
+    DEPENDEES update patch
+    DEPENDS ${file_deps}
     )
 
-  get_target_property(cmd ${name} AEP_CONFIGURE_COMMAND)
-  if(cmd STREQUAL "")
-    # Explicit empty string means no configure step for this project
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-configure
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-configure
-      WORKING_DIRECTORY ${working_dir}
-      COMMENT "No configure step for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-working_dir
-      VERBATIM
-      )
+  get_property(cmd_set TARGET ${name} PROPERTY AEP_CONFIGURE_COMMAND SET)
+  if(cmd_set)
+    get_property(cmd TARGET ${name} PROPERTY AEP_CONFIGURE_COMMAND)
   else()
-    if(NOT cmd)
-      get_target_property(cmake_command ${name} AEP_CMAKE_COMMAND)
-      if(cmake_command)
-        set(cmd "${cmake_command}")
-      else()
-        set(cmd "${CMAKE_COMMAND}")
-      endif()
-
-      get_property(cmake_args TARGET ${name} PROPERTY AEP_CMAKE_ARGS)
-      list(APPEND cmd ${cmake_args})
-
-      get_target_property(cmake_generator ${name} AEP_CMAKE_GENERATOR)
-      if(cmake_generator)
-        list(APPEND cmd "-G${cmake_generator}" "${source_dir}/${name}")
-      endif()
+    get_target_property(cmake_command ${name} AEP_CMAKE_COMMAND)
+    if(cmake_command)
+      set(cmd "${cmake_command}")
+    else()
+      set(cmd "${CMAKE_COMMAND}")
     endif()
 
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-configure
-      COMMAND ${cmd}
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-configure
-      WORKING_DIRECTORY ${working_dir}
-      COMMENT "Performing configure step for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-working_dir
-      VERBATIM
-      )
+    get_property(cmake_args TARGET ${name} PROPERTY AEP_CMAKE_ARGS)
+    list(APPEND cmd ${cmake_args})
+
+    get_target_property(cmake_generator ${name} AEP_CMAKE_GENERATOR)
+    if(cmake_generator)
+      list(APPEND cmd "-G${cmake_generator}" "${source_dir}/${name}")
+    endif()
   endif()
+
+  add_external_project_step(${name} configure
+    COMMAND ${cmd}
+    WORKING_DIRECTORY ${working_dir}
+    DEPENDEES working_dir
+    )
 endfunction(add_external_project_configure_command)
 
 
