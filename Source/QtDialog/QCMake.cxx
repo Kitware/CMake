@@ -82,8 +82,10 @@ void QCMake::loadCache(const QString& dir)
   this->setBinaryDirectory(dir);
 }
 
-void QCMake::setSourceDirectory(const QString& dir)
+void QCMake::setSourceDirectory(const QString& _dir)
 {
+  QString dir = 
+    cmSystemTools::GetActualCaseForPath(_dir.toAscii().data()).c_str();
   if(this->SourceDirectory != dir)
     {
     this->SourceDirectory = QDir::fromNativeSeparators(dir);
@@ -91,8 +93,10 @@ void QCMake::setSourceDirectory(const QString& dir)
     }
 }
 
-void QCMake::setBinaryDirectory(const QString& dir)
+void QCMake::setBinaryDirectory(const QString& _dir)
 {
+  QString dir = 
+    cmSystemTools::GetActualCaseForPath(_dir.toAscii().data()).c_str();
   if(this->BinaryDirectory != dir)
     {
     this->BinaryDirectory = QDir::fromNativeSeparators(dir);
