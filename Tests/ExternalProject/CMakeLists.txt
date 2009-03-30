@@ -129,6 +129,13 @@ add_external_project(${proj}
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${prefix} -G ${CMAKE_GENERATOR} ${source_dir}/${proj}
   INSTALL_COMMAND ""
 )
+add_external_project_step(${proj} mypatch
+  COMMAND ${CMAKE_COMMAND} -E echo "This is a custom external project step."
+  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Step1Patch.cmake
+  WORKING_DIRECTORY ${source_dir}/TutorialStep1-LocalNoDirTAR
+  DEPENDEES download
+  DEPENDERS configure
+  )
 
 
 # Local TGZ:
@@ -268,7 +275,7 @@ add_test(TutorialStep1-LocalTAR-BuildTreeTest
   "${build_dir}/TutorialStep1-LocalTAR/EP-Tutorial" 36)
 
 add_test(TutorialStep1-LocalNoDirTAR-BuildTreeTest
-  "${build_dir}/TutorialStep1-LocalNoDirTAR/Tutorial" 25)
+  "${build_dir}/TutorialStep1-LocalNoDirTAR/EP-Tutorial" 25)
 
 add_test(TutorialStep1-LocalTGZ-BuildTreeTest
   "${build_dir}/TutorialStep1-LocalTGZ/Tutorial" 16)

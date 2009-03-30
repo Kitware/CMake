@@ -15,6 +15,7 @@ function(_aep_parse_arguments f name ns args)
   set(key)
   foreach(arg IN LISTS args)
     if(arg MATCHES "^[A-Z][A-Z_][A-Z_]+$" AND
+        NOT ((arg STREQUAL "${key}") AND (key STREQUAL "COMMAND")) AND
         NOT arg MATCHES "^(TRUE|FALSE)$")
       # Keyword
       set(key "${arg}")
@@ -158,6 +159,87 @@ function(mkdir d)
   endif()
 endfunction(mkdir)
 
+# Pre-compute a regex to match known keywords.
+set(_aep_keyword_regex "^(")
+set(_aep_keyword_sep)
+foreach(key IN ITEMS
+    COMMAND
+    COMMENT
+    DEPENDEES
+    DEPENDERS
+    DEPENDS
+    SYMBOLIC
+    WORKING_DIRECTORY
+    )
+  set(_aep_keyword_regex "${_aep_keyword_regex}${_aep_keyword_sep}${key}")
+  set(_aep_keyword_sep "|")
+endforeach(key)
+set(_aep_keyword_regex "${_aep_keyword_regex})$")
+set(_aep_keyword_sep)
+set(_aep_keywords_add_external_project_step "${_aep_keyword_regex}")
+
+function(add_external_project_step name step)
+  get_external_project_directories(base_dir build_dir downloads_dir install_dir
+    sentinels_dir source_dir tmp_dir)
+  add_custom_command(APPEND
+    OUTPUT ${sentinels_dir}/${name}-complete
+    DEPENDS ${sentinels_dir}/${name}-${step}
+    )
+  _aep_parse_arguments(add_external_project_step
+                       ${name} AEP_${step}_ "${ARGN}")
+
+  # Steps depending on this step.
+  get_property(dependers TARGET ${name} PROPERTY AEP_${step}_DEPENDERS)
+  foreach(depender IN LISTS dependers)
+    add_custom_command(APPEND
+      OUTPUT ${sentinels_dir}/${name}-${depender}
+      DEPENDS ${sentinels_dir}/${name}-${step}
+      )
+  endforeach()
+
+  # Dependencies on files.
+  get_property(depends TARGET ${name} PROPERTY AEP_${step}_DEPENDS)
+
+  # Dependencies on steps.
+  get_property(dependees TARGET ${name} PROPERTY AEP_${step}_DEPENDEES)
+  foreach(dependee IN LISTS dependees)
+    list(APPEND depends ${sentinels_dir}/${name}-${dependee})
+  endforeach()
+
+  # The command to run.
+  get_property(command TARGET ${name} PROPERTY AEP_${step}_COMMAND)
+  if(command)
+    set(comment "Performing ${step} step for '${name}'")
+  else()
+    set(comment "No ${step} step for '${name}'")
+  endif()
+  get_property(work_dir TARGET ${name} PROPERTY AEP_${step}_WORKING_DIRECTORY)
+
+  # Custom comment?
+  get_property(comment_set TARGET ${name} PROPERTY AEP_${step}_COMMENT SET)
+  if(comment_set)
+    get_property(comment TARGET ${name} PROPERTY AEP_${step}_COMMENT)
+  endif()
+
+  # Run every time?
+  get_property(symbolic TARGET ${name} PROPERTY AEP_${step}_SYMBOLIC)
+  if(symbolic)
+    set_property(SOURCE ${sentinels_dir}/${name}-${step} PROPERTY SYMBOLIC 1)
+    set(touch)
+  else()
+    set(touch ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-${step})
+  endif()
+
+  add_custom_command(
+    OUTPUT ${sentinels_dir}/${name}-${step}
+    COMMENT ${comment}
+    COMMAND ${command}
+    COMMAND ${touch}
+    DEPENDS ${depends}
+    WORKING_DIRECTORY ${work_dir}
+    VERBATIM
+    )
+endfunction(add_external_project_step)
 
 function(add_external_project_download_command name)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
