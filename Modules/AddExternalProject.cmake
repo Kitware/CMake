@@ -390,96 +390,43 @@ function(add_external_project_update_command name)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
     sentinels_dir source_dir tmp_dir)
 
+  get_property(cmd TARGET ${name} PROPERTY AEP_UPDATE_COMMAND)
+  get_property(cvs_repository TARGET ${name} PROPERTY AEP_CVS_REPOSITORY)
+  get_property(svn_repository TARGET ${name} PROPERTY AEP_SVN_REPOSITORY)
 
-  get_target_property(cmd ${name} AEP_UPDATE_COMMAND)
-  if(cmd STREQUAL "")
-    # Explicit empty string means no update step for this project
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-update
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-update
-      WORKING_DIRECTORY ${sentinels_dir}
-      COMMENT "No update step for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-download
-      )
-    return()
-  else()
-    if(cmd)
-      add_custom_command(
-        OUTPUT ${sentinels_dir}/${name}-update
-        COMMAND ${cmd}
-        COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-update
-        WORKING_DIRECTORY ${source_dir}/${name}
-        COMMENT "Performing update step for '${name}'"
-        DEPENDS ${sentinels_dir}/${name}-download
-        VERBATIM
-        )
-      return()
-    else()
-      # No explicit UPDATE_COMMAND property. Look for other properties
-      # indicating which update method to use in the logic below...
-    endif()
-  endif()
-
-
-  get_target_property(cvs_repository ${name} AEP_CVS_REPOSITORY)
-  if(cvs_repository)
+  set(work_dir)
+  set(comment)
+  set(symbolic)
+  if(cmd)
+    set(work_dir ${source_dir}/${name})
+  elseif(cvs_repository)
     if(NOT CVS_EXECUTABLE)
       message(FATAL_ERROR "error: could not find cvs for update of ${name}")
     endif()
-
-    get_property(cvs_tag TARGET ${name} PROPERTY AEP_CVS_TAG)
-
-    set(args -d ${cvs_repository} -q up -dP ${cvs_tag})
-
     mkdir("${source_dir}/${name}")
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-update
-      COMMAND ${CVS_EXECUTABLE} ${args}
-      WORKING_DIRECTORY ${source_dir}/${name}
-      COMMENT "Performing update step (CVS update) for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-download
-      VERBATIM
-    )
-    # Since the update sentinel is not actually written:
-    set_property(SOURCE ${sentinels_dir}/${name}-update
-      PROPERTY SYMBOLIC 1)
-    return()
-  endif()
-
-
-  get_target_property(svn_repository ${name} AEP_SVN_REPOSITORY)
-  if(svn_repository)
+    set(work_dir ${source_dir}/${name})
+    set(comment "Performing update step (CVS update) for '${name}'")
+    get_property(cvs_tag TARGET ${name} PROPERTY AEP_CVS_TAG)
+    set(cmd ${CVS_EXECUTABLE} -d ${cvs_repository} -q up -dP ${cvs_tag})
+    set(symbolic 1)
+  elseif(svn_repository)
     if(NOT Subversion_SVN_EXECUTABLE)
       message(FATAL_ERROR "error: could not find svn for update of ${name}")
     endif()
-
-    get_property(svn_tag TARGET ${name} PROPERTY AEP_SVN_TAG)
-
-    set(args up ${svn_tag})
-
     mkdir("${source_dir}/${name}")
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-update
-      COMMAND ${Subversion_SVN_EXECUTABLE} ${args}
-      WORKING_DIRECTORY ${source_dir}/${name}
-      COMMENT "Performing update step (SVN update) for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-download
-      VERBATIM
-    )
-    # Since the update sentinel is not actually written:
-    set_property(SOURCE ${sentinels_dir}/${name}-update
-      PROPERTY SYMBOLIC 1)
-    return()
+    set(work_dir ${source_dir}/${name})
+    set(comment "Performing update step (SVN update) for '${name}'")
+    get_property(svn_tag TARGET ${name} PROPERTY AEP_SVN_TAG)
+    set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_tag})
+    set(symbolic 1)
   endif()
 
-
-  add_custom_command(
-    OUTPUT ${sentinels_dir}/${name}-update
-    COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-update
-    WORKING_DIRECTORY ${sentinels_dir}
-    COMMENT "No update step for '${name}'"
-    DEPENDS ${sentinels_dir}/${name}-download
-    VERBATIM
+  add_external_project_step(${name} update
+    COMMENT ${comment}
+    COMMAND ${cmd}
+    SYMBOLIC ${symbolic}
+    WORKING_DIRECTORY ${work_dir}
+    DEPENDEES download
     )
 endfunction(add_external_project_update_command)
 
