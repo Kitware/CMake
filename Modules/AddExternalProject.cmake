@@ -4,6 +4,43 @@
 find_package(CVS)
 find_package(Subversion)
 
+function(_aep_parse_arguments f name ns args)
+  # Transfer the arguments to this function into target properties for the
+  # new custom target we just added so that we can set up all the build steps
+  # correctly based on target properties.
+  #
+  # We loop through ARGN and consider the namespace starting with an
+  # upper-case letter followed by at least two more upper-case letters
+  # or underscores to be keywords.
+  set(key)
+  foreach(arg IN LISTS args)
+    if(arg MATCHES "^[A-Z][A-Z_][A-Z_]+$" AND
+        NOT arg MATCHES "^(TRUE|FALSE)$")
+      # Keyword
+      set(key "${arg}")
+      if(_aep_keywords_${f} AND NOT key MATCHES "${_aep_keywords_${f}}")
+        message(AUTHOR_WARNING "unknown ${f} keyword: ${key}")
+      endif()
+    elseif(key)
+      # Value
+      if(NOT arg STREQUAL "")
+        set_property(TARGET ${name} APPEND PROPERTY ${ns}${key} "${arg}")
+      else()
+        get_property(have_key TARGET ${name} PROPERTY ${ns}${key} SET)
+        if(have_key)
+          get_property(value TARGET ${name} PROPERTY ${ns}${key})
+          set_property(TARGET ${name} PROPERTY ${ns}${key} "${value};${arg}")
+        else()
+          set_property(TARGET ${name} PROPERTY ${ns}${key} "${arg}")
+        endif()
+      endif()
+    else()
+      # Missing Keyword
+      message(AUTHOR_WARNING "value with no keyword in ${f}")
+    endif()
+  endforeach()
+endfunction(_aep_parse_arguments)
+
 
 function(get_external_project_directories base_dir_var build_dir_var downloads_dir_var install_dir_var sentinels_dir_var source_dir_var tmp_dir_var)
   set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
@@ -483,7 +520,12 @@ function(add_external_project_configure_command name)
     sentinels_dir source_dir tmp_dir)
   get_configure_build_working_dir(${name} working_dir)
 
-  get_property(file_deps TARGET ${name} PROPERTY AEP_FILE_DEPENDS)
+  # Depend on other external projects (file-level).
+  set(file_deps)
+  get_property(deps TARGET ${name} PROPERTY AEP_DEPENDS)
+  foreach(arg IN LISTS deps)
+    list(APPEND file_deps ${sentinels_dir}/${arg}-done)
+  endforeach()
   #message(STATUS "info: name='${name}' file_deps='${file_deps}'")
 
   # Create the working_dir for configure, build and install steps:
@@ -678,6 +720,7 @@ foreach(key IN ITEMS
 endforeach(key)
 set(_aep_keyword_regex "${_aep_keyword_regex})$")
 set(_aep_keyword_sep)
+set(_aep_keywords_add_external_project "${_aep_keyword_regex}")
 
 function(add_external_project name)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
@@ -708,48 +751,12 @@ function(add_external_project name)
   set_target_properties(${name} PROPERTIES AEP_IS_EXTERNAL_PROJECT 1)
   add_dependencies(${name} CMakeExternals)
 
+  _aep_parse_arguments(add_external_project ${name} AEP_ "${ARGN}")
 
-  # Transfer the arguments to this function into target properties for the
-  # new custom target we just added so that we can set up all the build steps
-  # correctly based on target properties.
-  #
-  # We loop through ARGN and consider the namespace starting with an
-  # upper-case letter followed by at least two more upper-case letters
-  # or underscores to be keywords.
-  set(key)
-  foreach(arg IN LISTS ARGN)
-    if(arg MATCHES "^[A-Z][A-Z_][A-Z_]+$" AND
-        NOT arg MATCHES "^(TRUE|FALSE)$")
-      # Keyword
-      set(key "${arg}")
-      if(NOT key MATCHES "${_aep_keyword_regex}")
-        message(AUTHOR_WARNING "unknown add_external_project keyword: ${key}")
-      endif()
-    elseif(key STREQUAL "DEPENDS")
-      # Value for DEPENDS
-      if(NOT arg STREQUAL "")
-        add_dependencies(${name} ${arg})
-        set_property(TARGET ${name} APPEND PROPERTY AEP_FILE_DEPENDS "${sentinels_dir}/${arg}-done")
-      else()
-        message(AUTHOR_WARNING "empty DEPENDS value in add_external_project")
-      endif()
-    elseif(key)
-      # Value
-      if(NOT arg STREQUAL "")
-        set_property(TARGET ${name} APPEND PROPERTY AEP_${key} "${arg}")
-      else()
-        get_property(have_key TARGET ${name} PROPERTY AEP_${key} SET)
-        if(have_key)
-          get_property(value TARGET ${name} PROPERTY AEP_${key})
-          set_property(TARGET ${name} PROPERTY AEP_${key} "${value};${arg}")
-        else()
-          set_property(TARGET ${name} PROPERTY AEP_${key} "${arg}")
-        endif()
-      endif()
-    else()
-      # Missing Keyword
-      message(AUTHOR_WARNING "value with no keyword in add_external_project")
-    endif()
+  # Depend on other external projects (target-level).
+  get_property(deps TARGET ${name} PROPERTY AEP_DEPENDS)
+  foreach(arg IN LISTS deps)
+    add_dependencies(${name} ${arg})
   endforeach()
 
   # Set up custom build steps based on the target properties.
