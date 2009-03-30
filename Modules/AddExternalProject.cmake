@@ -506,30 +506,17 @@ function(add_external_project_build_command name)
     sentinels_dir source_dir tmp_dir)
   get_configure_build_working_dir(${name} working_dir)
 
-  get_target_property(cmd ${name} AEP_BUILD_COMMAND)
-  if(cmd STREQUAL "")
-    # Explicit empty string means no build step for this project
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-build
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-build
-      WORKING_DIRECTORY ${working_dir}
-      COMMENT "No build step for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-configure
-      VERBATIM
-      )
+  get_property(cmd_set TARGET ${name} PROPERTY AEP_BUILD_COMMAND SET)
+  if(cmd_set)
+    get_property(cmd TARGET ${name} PROPERTY AEP_BUILD_COMMAND)
   else()
     _aep_get_build_command(${name} BUILD cmd)
-
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-build
-      COMMAND ${cmd}
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-build
-      WORKING_DIRECTORY ${working_dir}
-      COMMENT "Performing build step for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-configure
-      VERBATIM
-      )
   endif()
+  add_external_project_step(${name} build
+    COMMAND ${cmd}
+    WORKING_DIRECTORY ${working_dir}
+    DEPENDEES configure
+    )
 endfunction(add_external_project_build_command)
 
 
