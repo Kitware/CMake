@@ -245,40 +245,23 @@ function(add_external_project_download_command name)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
     sentinels_dir source_dir tmp_dir)
 
+  get_property(cmd_set TARGET ${name} PROPERTY AEP_DOWNLOAD_COMMAND SET)
+  get_property(cmd TARGET ${name} PROPERTY AEP_DOWNLOAD_COMMAND)
+  get_property(cvs_repository TARGET ${name} PROPERTY AEP_CVS_REPOSITORY)
+  get_property(svn_repository TARGET ${name} PROPERTY AEP_SVN_REPOSITORY)
+  get_property(dir TARGET ${name} PROPERTY AEP_DIR)
+  get_property(tar TARGET ${name} PROPERTY AEP_TAR)
+  get_property(tgz TARGET ${name} PROPERTY AEP_TGZ)
+  get_property(tgz_url TARGET ${name} PROPERTY AEP_TGZ_URL)
+  get_property(tar_url TARGET ${name} PROPERTY AEP_TAR_URL)
 
-  get_target_property(cmd ${name} AEP_DOWNLOAD_COMMAND)
-  if(cmd STREQUAL "")
-    # Explicit empty string means no download step for this project
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-download
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-      WORKING_DIRECTORY ${sentinels_dir}
-      COMMENT "No download step for '${name}'"
-      DEPENDS ${sentinels_dir}/CMakeExternals-directories
-      VERBATIM
-      )
-    return()
-  else()
-    if(cmd)
-      add_custom_command(
-        OUTPUT ${sentinels_dir}/${name}-download
-        COMMAND ${cmd}
-        COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-        WORKING_DIRECTORY ${downloads_dir}
-        COMMENT "Performing download step for '${name}'"
-        DEPENDS ${sentinels_dir}/CMakeExternals-directories
-        VERBATIM
-        )
-      return()
-    else()
-      # No explicit DOWNLOAD_COMMAND property. Look for other properties
-      # indicating which download method to use in the logic below...
-    endif()
-  endif()
+  set(depends ${sentinels_dir}/CMakeExternals-directories)
+  set(comment)
+  set(work_dir)
 
-
-  get_target_property(cvs_repository ${name} AEP_CVS_REPOSITORY)
-  if(cvs_repository)
+  if(cmd_set)
+    set(work_dir ${downloads_dir})
+  elseif(cvs_repository)
     if(NOT CVS_EXECUTABLE)
       message(FATAL_ERROR "error: could not find cvs for checkout of ${name}")
     endif()
@@ -290,68 +273,42 @@ function(add_external_project_download_command name)
 
     get_property(cvs_tag TARGET ${name} PROPERTY AEP_CVS_TAG)
 
-    set(args -d ${cvs_repository} -q co ${cvs_tag} -d ${name} ${cvs_module})
-
     set(repository ${cvs_repository})
     set(module ${cvs_module})
     set(tag ${cvs_tag})
-
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${sentinels_dir}/${name}-cvsinfo.txt"
       @ONLY
-    )
+      )
 
     mkdir("${source_dir}/${name}")
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-download
-      COMMAND ${CVS_EXECUTABLE} ${args}
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-      WORKING_DIRECTORY ${source_dir}
-      COMMENT "Performing download step (CVS checkout) for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-cvsinfo.txt
-      VERBATIM
-    )
-    return()
-  endif()
-
-
-  get_target_property(svn_repository ${name} AEP_SVN_REPOSITORY)
-  if(svn_repository)
+    set(work_dir ${source_dir})
+    set(comment "Performing download step (CVS checkout) for '${name}'")
+    set(cmd ${CVS_EXECUTABLE} -d ${cvs_repository} -q co ${cvs_tag} -d ${name} ${cvs_module})
+    list(APPEND depends ${sentinels_dir}/${name}-cvsinfo.txt)
+  elseif(svn_repository)
     if(NOT Subversion_SVN_EXECUTABLE)
       message(FATAL_ERROR "error: could not find svn for checkout of ${name}")
     endif()
 
     get_property(svn_tag TARGET ${name} PROPERTY AEP_SVN_TAG)
 
-    set(args co ${svn_repository} ${svn_tag} ${name})
-
     set(repository ${svn_repository})
     set(module)
     set(tag ${svn_tag})
-
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${sentinels_dir}/${name}-svninfo.txt"
       @ONLY
-    )
+      )
 
     mkdir("${source_dir}/${name}")
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-download
-      COMMAND ${Subversion_SVN_EXECUTABLE} ${args}
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-      WORKING_DIRECTORY ${source_dir}
-      COMMENT "Performing download step (SVN checkout) for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-svninfo.txt
-      VERBATIM
-    )
-    return()
-  endif()
-
-
-  get_target_property(dir ${name} AEP_DIR)
-  if(dir)
+    set(work_dir ${source_dir})
+    set(comment "Performing download step (SVN checkout) for '${name}'")
+    set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_tag} ${name})
+    list(APPEND depends ${sentinels_dir}/${name}-svninfo.txt)
+  elseif(dir)
     get_filename_component(abs_dir "${dir}" ABSOLUTE)
 
     set(repository "add_external_project DIR")
@@ -362,57 +319,27 @@ function(add_external_project_download_command name)
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${sentinels_dir}/${name}-dirinfo.txt"
       @ONLY
-    )
+      )
 
     mkdir("${source_dir}/${name}")
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-download
-      COMMAND ${CMAKE_COMMAND} -E remove_directory ${source_dir}/${name}
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir}/${name}
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-      WORKING_DIRECTORY ${source_dir}
-      COMMENT "Performing download step (DIR copy) for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-dirinfo.txt
-      VERBATIM
-    )
-    return()
-  endif()
-
-
-  get_target_property(tar ${name} AEP_TAR)
-  if(tar)
+    set(work_dir ${source_dir})
+    set(comment "Performing download step (DIR copy) for '${name}'")
+    set(cmd   ${CMAKE_COMMAND} -E remove_directory ${source_dir}/${name}
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir}/${name})
+    list(APPEND depends ${sentinels_dir}/${name}-dirinfo.txt)
+  elseif(tar)
     mkdir("${source_dir}/${name}")
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-download
-      COMMAND ${CMAKE_COMMAND} -Dfilename=${tar} -Dtmp=${tmp_dir}/${name} -Ddirectory=${source_dir}/${name} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-      WORKING_DIRECTORY ${source_dir}
-      COMMENT "Performing download step (TAR untar) for '${name}'"
-      DEPENDS ${tar}
-      VERBATIM
-    )
-    return()
-  endif()
-
-
-  get_target_property(tgz ${name} AEP_TGZ)
-  if(tgz)
+    set(work_dir ${source_dir})
+    set(comment "Performing download step (TAR untar) for '${name}'")
+    set(cmd ${CMAKE_COMMAND} -Dfilename=${tar} -Dtmp=${tmp_dir}/${name} -Ddirectory=${source_dir}/${name} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake)
+    list(APPEND depends ${tar})
+  elseif(tgz)
     mkdir("${source_dir}/${name}")
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-download
-      COMMAND ${CMAKE_COMMAND} -Dfilename=${tgz} -Dtmp=${tmp_dir}/${name} -Ddirectory=${source_dir}/${name} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-      WORKING_DIRECTORY ${source_dir}
-      COMMENT "Performing download step (TGZ untar) for '${name}'"
-      DEPENDS ${tgz}
-      VERBATIM
-    )
-    return()
-  endif()
-
-
-  get_target_property(tgz_url ${name} AEP_TGZ_URL)
-  if(tgz_url)
+    set(work_dir ${source_dir})
+    set(comment "Performing download step (TGZ untar) for '${name}'")
+    set(cmd ${CMAKE_COMMAND} -Dfilename=${tgz} -Dtmp=${tmp_dir}/${name} -Ddirectory=${source_dir}/${name} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake)
+    list(APPEND depends ${tgz})
+  elseif(tgz_url)
     set(repository "add_external_project TGZ_URL")
     set(module "${tgz_url}")
     set(tag "")
@@ -424,22 +351,12 @@ function(add_external_project_download_command name)
     )
 
     mkdir("${source_dir}/${name}")
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-download
-      COMMAND ${CMAKE_COMMAND} -Dremote=${tgz_url} -Dlocal=${downloads_dir}/${name}.tgz -P ${CMAKE_ROOT}/Modules/DownloadFile.cmake
-      COMMAND ${CMAKE_COMMAND} -Dfilename=${downloads_dir}/${name} -Dtmp=${tmp_dir}/${name} -Ddirectory=${source_dir}/${name} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-      WORKING_DIRECTORY ${source_dir}
-      COMMENT "Performing download step (TGZ_URL download and untar) for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-urlinfo.txt
-      VERBATIM
-    )
-    return()
-  endif()
-
-
-  get_target_property(tar_url ${name} AEP_TAR_URL)
-  if(tar_url)
+    set(work_dir ${source_dir})
+    set(comment "Performing download step (TGZ_URL download and untar) for '${name}'")
+    set(cmd   ${CMAKE_COMMAND} -Dremote=${tgz_url} -Dlocal=${downloads_dir}/${name}.tgz -P ${CMAKE_ROOT}/Modules/DownloadFile.cmake
+      COMMAND ${CMAKE_COMMAND} -Dfilename=${downloads_dir}/${name} -Dtmp=${tmp_dir}/${name} -Ddirectory=${source_dir}/${name} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake)
+    list(APPEND depends ${sentinels_dir}/${name}-urlinfo.txt)
+  elseif(tar_url)
     set(repository "add_external_project TAR_URL")
     set(module "${tar_url}")
     set(tag "")
@@ -451,21 +368,21 @@ function(add_external_project_download_command name)
     )
 
     mkdir("${source_dir}/${name}")
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-download
-      COMMAND ${CMAKE_COMMAND} -Dremote=${tar_url} -Dlocal=${downloads_dir}/${name}.tar -P ${CMAKE_ROOT}/Modules/DownloadFile.cmake
-      COMMAND ${CMAKE_COMMAND} -Dfilename=${downloads_dir}/${name} -Dtmp=${tmp_dir}/${name} -Ddirectory=${source_dir}/${name} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-download
-      WORKING_DIRECTORY ${source_dir}
-      COMMENT "Performing download step (TAR_URL download and untar) for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-urlinfo.txt
-      VERBATIM
-    )
-    return()
+    set(work_dir ${source_dir})
+    set(comment "Performing download step (TAR_URL download and untar) for '${name}'")
+    set(cmd   ${CMAKE_COMMAND} -Dremote=${tar_url} -Dlocal=${downloads_dir}/${name}.tar -P ${CMAKE_ROOT}/Modules/DownloadFile.cmake
+      COMMAND ${CMAKE_COMMAND} -Dfilename=${downloads_dir}/${name} -Dtmp=${tmp_dir}/${name} -Ddirectory=${source_dir}/${name} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake)
+    list(APPEND depends ${sentinels_dir}/${name}-urlinfo.txt)
+  else()
+    message(SEND_ERROR "error: no download info for '${name}'")
   endif()
 
-
-  message(SEND_ERROR "error: no download info for '${name}'")
+  add_external_project_step(${name} download
+    COMMENT ${comment}
+    COMMAND ${cmd}
+    WORKING_DIRECTORY ${source_dir}
+    DEPENDS ${depends}
+    )
 endfunction(add_external_project_download_command)
 
 
