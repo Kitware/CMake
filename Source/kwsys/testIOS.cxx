@@ -12,6 +12,8 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
+#include <string.h> /* strlen */
+
 int testIOS(int, char*[])
 {
   kwsys_ios::ostringstream ostr;
@@ -24,7 +26,7 @@ int testIOS(int, char*[])
     }
   const char world[] = "world";
   kwsys_ios::ostringstream ostr2;
-  ostr2.write( hello, strlen(hello) );
+  ostr2.write( hello, strlen(hello) ); /* I could do sizeof */
   ostr2.put( '\0' );
   ostr2.write( world, strlen(world) );
   if(ostr2.str().size() !=  strlen(hello) + 1 + strlen(world) )
