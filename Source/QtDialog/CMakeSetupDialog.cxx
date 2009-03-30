@@ -37,6 +37,7 @@
 #include "QCMakeCacheView.h"
 #include "AddCacheEntry.h"
 #include "FirstConfigure.h"
+#include "cmVersion.h"
 
 QCMakeThread::QCMakeThread(QObject* p) 
   : QThread(p), CMakeInstance(NULL)
@@ -673,7 +674,12 @@ void CMakeSetupDialog::doDeleteCache()
 
 void CMakeSetupDialog::doAbout()
 {
-  QString msg = "CMake\nwww.cmake.org";
+  QString msg = "CMake %1\n"
+                "Using Qt %2\n"
+                "www.cmake.org";
+
+  msg = msg.arg(cmVersion::GetCMakeVersion());
+  msg = msg.arg(qVersion());
 
   QDialog dialog;
   dialog.setWindowTitle(tr("About"));
