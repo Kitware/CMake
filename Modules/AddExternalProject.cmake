@@ -435,27 +435,16 @@ function(add_external_project_patch_command name)
   get_external_project_directories(base_dir build_dir downloads_dir install_dir
     sentinels_dir source_dir tmp_dir)
 
-  get_target_property(cmd ${name} AEP_PATCH_COMMAND)
+  set(work_dir)
+  get_property(cmd TARGET ${name} PROPERTY AEP_PATCH_COMMAND)
   if(cmd)
-    add_custom_command(
-      OUTPUT ${sentinels_dir}/${name}-patch
-      COMMAND ${cmd}
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-patch
-      WORKING_DIRECTORY ${source_dir}/${name}
-      COMMENT "Performing patch step for '${name}'"
-      DEPENDS ${sentinels_dir}/${name}-download
-      VERBATIM
-      )
-    return()
+    set(work_dir ${source_dir}/${name})
   endif()
 
-  add_custom_command(
-    OUTPUT ${sentinels_dir}/${name}-patch
-    COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-patch
-    WORKING_DIRECTORY ${sentinels_dir}
-    COMMENT "No patch step for '${name}'"
-    DEPENDS ${sentinels_dir}/${name}-download
-    VERBATIM
+  add_external_project_step(${name} patch
+    COMMAND ${cmd}
+    WORKING_DIRECTORY ${work_dir}
+    DEPENDEES download
     )
 endfunction(add_external_project_patch_command)
 
