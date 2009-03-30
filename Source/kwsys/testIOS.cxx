@@ -15,10 +15,21 @@
 int testIOS(int, char*[])
 {
   kwsys_ios::ostringstream ostr;
-  ostr << "hello";
-  if(ostr.str() != "hello")
+  const char hello[] = "hello";
+  ostr << hello;
+  if(ostr.str() != hello)
     {
     kwsys_ios::cerr << "failed to write hello to ostr" << kwsys_ios::endl;
+    return 1;
+    }
+  const char world[] = "world";
+  kwsys_ios::ostringstream ostr2;
+  ostr2.write( hello, strlen(hello) );
+  ostr2.put( '\0' );
+  ostr2.write( world, strlen(world) );
+  if(ostr2.str().size() !=  strlen(hello) + 1 + strlen(world) )
+    {
+    kwsys_ios::cerr << "failed to write hello to ostr2" << kwsys_ios::endl;
     return 1;
     }
   kwsys_ios::istringstream istr(" 10 20 str ");
