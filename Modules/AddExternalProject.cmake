@@ -584,7 +584,6 @@ function(add_external_project_install_command name)
     add_custom_command(
       OUTPUT ${sentinels_dir}/${name}-install
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-install
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-complete
       WORKING_DIRECTORY ${working_dir}
       COMMENT "No install step for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-build
@@ -597,7 +596,6 @@ function(add_external_project_install_command name)
       OUTPUT ${sentinels_dir}/${name}-install
       COMMAND ${cmd}
       COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-install
-      COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-complete
       WORKING_DIRECTORY ${working_dir}
       COMMENT "Performing install step for '${name}'"
       DEPENDS ${sentinels_dir}/${name}-build
@@ -692,12 +690,21 @@ function(add_external_project name)
   add_CMakeExternals_target()
 
 
-  # Add a custom target for the external project and make its DEPENDS
-  # the output of the final build step:
-  #
-  add_custom_target(${name} ALL
+  # Add a custom target for the external project.  The 'complete' step
+  # depends on all other steps and creates a 'done' mark.  A dependent
+  # external project's 'configure' step depends on the 'done' mark so
+  # that it rebuilds when this project rebuilds.  It is important that
+  # 'done' is not the output of any custom command so that CMake does
+  # not propagate build rules to other external project targets.
+  add_custom_target(${name} ALL DEPENDS ${sentinels_dir}/${name}-complete)
+  add_custom_command(
+    OUTPUT ${sentinels_dir}/${name}-complete
+    COMMENT "Completed '${name}'"
+    COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-complete
+    COMMAND ${CMAKE_COMMAND} -E touch ${sentinels_dir}/${name}-done
     DEPENDS ${sentinels_dir}/${name}-install
-  )
+    VERBATIM
+    )
   set_target_properties(${name} PROPERTIES AEP_IS_EXTERNAL_PROJECT 1)
   add_dependencies(${name} CMakeExternals)
 
@@ -722,7 +729,7 @@ function(add_external_project name)
       # Value for DEPENDS
       if(NOT arg STREQUAL "")
         add_dependencies(${name} ${arg})
-        set_property(TARGET ${name} APPEND PROPERTY AEP_FILE_DEPENDS "${sentinels_dir}/${arg}-complete")
+        set_property(TARGET ${name} APPEND PROPERTY AEP_FILE_DEPENDS "${sentinels_dir}/${arg}-done")
       else()
         message(AUTHOR_WARNING "empty DEPENDS value in add_external_project")
       endif()
