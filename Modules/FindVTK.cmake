@@ -45,6 +45,7 @@ IF(NOT VTK_DIR)
   SET(VTK_DIR_SEARCH "")
   FOREACH(dir ${VTK_DIR_SEARCH2})
     SET(VTK_DIR_SEARCH ${VTK_DIR_SEARCH}
+      ${dir}/../lib/vtk-5.4
       ${dir}/../lib/vtk-5.2
       ${dir}/../lib/vtk-5.1
       ${dir}/../lib/vtk-5.0
