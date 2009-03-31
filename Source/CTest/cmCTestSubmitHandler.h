@@ -66,6 +66,11 @@ private:
                       const cmStdString& remoteprefix, 
                       const cmStdString& url);
 
+  bool SubmitUsingCP( const cmStdString& localprefix, 
+                      const std::set<cmStdString>& files,
+                      const cmStdString& remoteprefix, 
+                      const cmStdString& url);
+
   bool TriggerUsingHTTP(const std::set<cmStdString>& files,
                         const cmStdString& remoteprefix, 
                         const cmStdString& url);

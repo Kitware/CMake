@@ -254,6 +254,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
     curl = curl_easy_init();
     if(curl)
       {
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 
       // Using proxy
       if ( this->HTTPProxyType > 0 )
@@ -424,7 +425,6 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
 {
   CURL *curl;
   char error_buffer[1024];
-
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
 
@@ -506,6 +506,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
       *this->LogFile << "Trigger url: " << turl.c_str() << std::endl;
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   Trigger url: "
         << turl.c_str() << std::endl);
+      curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
       curl_easy_setopt(curl, CURLOPT_URL, turl.c_str());
       if ( curl_easy_perform(curl) )
         {
@@ -655,6 +656,47 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(
     }
   return true;
 }
+
+//----------------------------------------------------------------------------
+bool cmCTestSubmitHandler::SubmitUsingCP(
+  const cmStdString& localprefix,
+  const std::set<cmStdString>& files,
+  const cmStdString& remoteprefix,
+  const cmStdString& destination)
+{
+  if ( !localprefix.size() ||
+    !files.size() || !remoteprefix.size() || !destination.size() )
+    { 
+    cmCTestLog(this->CTest, ERROR_MESSAGE, 
+               "Missing arguments for submit via cp:\n"
+               << "\tlocalprefix: " << localprefix << "\n"
+               << "\tNumber of files: " << files.size() << "\n"
+               << "\tremoteprefix: " << remoteprefix << "\n"
+               << "\tdestination: " << destination << std::endl);
+    return 0;
+    }
+  cmCTest::SetOfStrings::const_iterator file;
+  bool problems = false;
+  for ( file = files.begin(); file != files.end(); ++file )
+    {
+    std::string lfname = localprefix;
+    cmSystemTools::ConvertToUnixSlashes(lfname);
+    lfname += "/" + *file;
+    std::string rfname = destination + "/" + remoteprefix + *file;
+    cmSystemTools::CopyFileAlways(lfname.c_str(), rfname.c_str());
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   Copy file: "
+        << lfname.c_str() << " to "
+        << rfname.c_str() << std::endl);
+    }
+  std::string tagDoneFile = destination + "/" + remoteprefix + "DONE";
+  cmSystemTools::Touch(tagDoneFile.c_str(), true);
+  if ( problems )
+    {
+    return false;
+    }
+  return true;
+}
+
 
 //----------------------------------------------------------------------------
 bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
@@ -936,7 +978,6 @@ int cmCTestSubmitHandler::ProcessHandler()
       cnt ++;
       }
     }
-
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "Submit files (using "
     << this->CTest->GetCTestConfiguration("DropMethod") << ")"
     << std::endl);
@@ -987,7 +1028,7 @@ int cmCTestSubmitHandler::ProcessHandler()
         << std::endl);
       ofs << "   Problems when submitting via FTP" << std::endl;
       return -1;
-      }
+      } 
     if(!this->CDash)
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using HTTP trigger method"
@@ -1111,6 +1152,39 @@ int cmCTestSubmitHandler::ProcessHandler()
         "   Problems when submitting via SCP"
         << std::endl);
       ofs << "   Problems when submitting via SCP" << std::endl;
+      return -1;
+      }
+    cmSystemTools::ChangeDirectory(oldWorkingDirectory.c_str());
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Submission successful"
+      << std::endl);
+    ofs << "   Submission successful" << std::endl;
+    return 0;
+    }
+  else if ( dropMethod == "cp" )
+    {
+    std::string location
+      = this->CTest->GetCTestConfiguration("DropLocation");
+    
+
+    // change to the build directory so that we can uses a relative path
+    // on windows since scp dosn't support "c:" a drive in the path
+    std::string 
+      oldWorkingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
+    cmSystemTools::ChangeDirectory(buildDirectory.c_str());
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   Change directory: "
+               << buildDirectory.c_str() << std::endl);
+
+    if ( !this->SubmitUsingCP(
+           "Testing/"+this->CTest->GetCurrentTag(), 
+           files, 
+           prefix, 
+           location) )
+      {
+      cmSystemTools::ChangeDirectory(oldWorkingDirectory.c_str());
+      cmCTestLog(this->CTest, ERROR_MESSAGE,
+        "   Problems when submitting via CP"
+        << std::endl);
+      ofs << "   Problems when submitting via cp" << std::endl;
       return -1;
       }
     cmSystemTools::ChangeDirectory(oldWorkingDirectory.c_str());
