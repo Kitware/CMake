@@ -254,7 +254,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
     curl = curl_easy_init();
     if(curl)
       {
-      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 
       // Using proxy
       if ( this->HTTPProxyType > 0 )
