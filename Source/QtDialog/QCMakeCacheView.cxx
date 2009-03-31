@@ -517,6 +517,7 @@ Qt::ItemFlags QCMakeCacheModel::flags (const QModelIndex& idx) const
   if(!this->EditEnabled)
     {
     f &= ~Qt::ItemIsEditable;
+    return f;
     }
   if(QCMakeProperty::BOOL == this->data(idx, TypeRole).toInt())
     {

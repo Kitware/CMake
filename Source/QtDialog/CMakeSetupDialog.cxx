@@ -32,7 +32,7 @@
 #include <QUrl>
 #include <QShortcut>
 #include <QMacInstallDialog.h>
-
+#include "cmVersion.h"
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
 #include "AddCacheEntry.h"
@@ -673,7 +673,12 @@ void CMakeSetupDialog::doDeleteCache()
 
 void CMakeSetupDialog::doAbout()
 {
-  QString msg = "CMake\nwww.cmake.org";
+  QString msg = "CMake %1\n"
+                "Using Qt %2\n"
+                "www.cmake.org";
+
+  msg = msg.arg(cmVersion::GetCMakeVersion().c_str());
+  msg = msg.arg(qVersion());
 
   QDialog dialog;
   dialog.setWindowTitle(tr("About"));
