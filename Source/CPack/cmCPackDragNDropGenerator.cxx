@@ -173,10 +173,28 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel,
   const std::string cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON") 
     ? this->GetOption("CPACK_PACKAGE_ICON") : "";
   
+  const std::string cpack_dmg_volume_name =
+    this->GetOption("CPACK_DMG_VOLUME_NAME")
+    ? this->GetOption("CPACK_DMG_VOLUME_NAME")
+        : this->GetOption("CPACK_PACKAGE_FILE_NAME");
+
+  const std::string cpack_dmg_format =
+    this->GetOption("CPACK_DMG_FORMAT")
+    ? this->GetOption("CPACK_DMG_FORMAT") : "UDZO";
+
   // Get optional arguments ...
   std::string cpack_license_file = 
     this->GetOption("CPACK_RESOURCE_FILE_LICENSE") ? 
     this->GetOption("CPACK_RESOURCE_FILE_LICENSE") : "";
+
+  const std::string cpack_dmg_background_image =
+    this->GetOption("CPACK_DMG_BACKGROUND_IMAGE")
+    ? this->GetOption("CPACK_DMG_BACKGROUND_IMAGE") : "";
+
+  const std::string cpack_dmg_ds_store =
+    this->GetOption("CPACK_DMG_DS_STORE")
+    ? this->GetOption("CPACK_DMG_DS_STORE") : "";
+
   // only put license on dmg if is user provided
   if(!cpack_license_file.empty() &&
       cpack_license_file.find("CPack.GenericLicense.txt") != std::string::npos)
@@ -216,6 +234,63 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel,
       }
     }
 
+  // Optionally add a custom .DS_Store file
+  // (e.g. for setting background/layout) ...
+  if(!cpack_dmg_ds_store.empty())
+    {
+    cmOStringStream package_settings_source;
+    package_settings_source << cpack_dmg_ds_store;
+
+    cmOStringStream package_settings_destination;
+    package_settings_destination << staging.str() << "/.DS_Store";
+
+    if(!this->CopyFile(package_settings_source, package_settings_destination))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error copying disk volume settings file.  "
+                    "Check the value of CPACK_DMG_DS_STORE."
+        << std::endl);
+
+      return 0;
+      }
+    }
+
+  // Optionally add a custom background image ...
+  if(!cpack_dmg_background_image.empty())
+    {
+    cmOStringStream package_background_source;
+    package_background_source << cpack_dmg_background_image;
+
+    cmOStringStream package_background_destination;
+    package_background_destination << staging.str() << "/background.png";
+
+    if(!this->CopyFile(package_background_source,
+        package_background_destination))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error copying disk volume background image.  "
+                    "Check the value of CPACK_DMG_BACKGROUND_IMAGE."
+        << std::endl);
+
+      return 0;
+      }
+
+    cmOStringStream temp_background_hiding_command;
+    temp_background_hiding_command << this->GetOption("CPACK_COMMAND_SETFILE");
+    temp_background_hiding_command << " -a V \"";
+    temp_background_hiding_command << package_background_destination.str();
+    temp_background_hiding_command << "\"";
+
+    if(!this->RunCommand(temp_background_hiding_command))
+      {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Error setting attributes on disk volume background image."
+          << std::endl);
+
+      return 0;
+      }
+    }
+
   // Create a temporary read-write disk image ...
   std::string temp_image = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   temp_image += "/temp.dmg";
@@ -226,7 +301,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel,
   temp_image_command << " -ov";
   temp_image_command << " -srcfolder \"" << staging.str() << "\"";
   temp_image_command << " -volname \""
-    << this->GetOption("CPACK_PACKAGE_FILE_NAME") << "\"";
+    << cpack_dmg_volume_name << "\"";
   temp_image_command << " -format UDRW";
   temp_image_command << " \"" << temp_image << "\"";
 
@@ -394,7 +469,8 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel,
   cmOStringStream final_image_command;
   final_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
   final_image_command << " convert \"" << temp_image << "\"";
-  final_image_command << " -format UDZO";
+  final_image_command << " -format ";
+  final_image_command << cpack_dmg_format;
   final_image_command << " -imagekey";
   final_image_command << " zlib-level=9";
   final_image_command << " -o \"" << outFileName << "\"";
