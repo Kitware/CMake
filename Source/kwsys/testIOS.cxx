@@ -38,6 +38,9 @@ int testIOS(int, char*[])
   const unsigned int narray = sizeof(array); // 180
   kwsys_ios::stringstream strstr;
   strstr.write( (char*)array, narray );
+  strstr.seekp( narray / 2 ); // set position of put pointer in mid string
+  //const char zero[] = {0, 0};
+  //strstr.write( zero, 2 );
   if(strstr.str().size() != narray )
     {
     kwsys_ios::cerr << "failed to write array to strstr" << kwsys_ios::endl;
