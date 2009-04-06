@@ -2288,7 +2288,7 @@ int SystemInformationImplementation::QueryMemory()
   unsigned long av=0;
   unsigned long ap=0;
   
-  char buffer[1024]; // for skipping unused lines
+  char buffer[1024]; // for reading lines
   
   int linuxMajor = 0;
   int linuxMinor = 0;
@@ -2331,56 +2331,32 @@ int SystemInformationImplementation::QueryMemory()
     // new /proc/meminfo format since kernel 2.6.x
     // Rigorously, this test should check from the developping version 2.5.x
     // that introduced the new format...
-    
-    unsigned long freeMem;
-    unsigned long buffersMem;
-    unsigned long cachedMem;
 
-    int status;
-    
-    status=fscanf(fd,"MemTotal:%lu kB\n", &this->TotalPhysicalMemory);
-    if(status==1)
+    enum { mMemTotal, mMemFree, mBuffers, mCached, mSwapTotal, mSwapFree };
+    const char* format[6] =
+      { "MemTotal:%lu kB", "MemFree:%lu kB", "Buffers:%lu kB",
+        "Cached:%lu kB", "SwapTotal:%lu kB", "SwapFree:%lu kB" };
+    bool have[6] = { false, false, false, false, false, false };
+    unsigned long value[6];
+    int count = 0;
+    while(fgets(buffer, sizeof(buffer), fd))
       {
-      status+=fscanf(fd,"MemFree:%lu kB\n", &freeMem);
+      for(int i=0; i < 6; ++i)
+        {
+        if(!have[i] && sscanf(buffer, format[i], &value[i]) == 1)
+          {
+          have[i] = true;
+          ++count;
+          }
+        }
       }
-    if(status==2)
+    if(count == 6)
       {
-      status+=fscanf(fd,"Buffers:%lu kB\n", &buffersMem);
-      }
-    if(status==3)
-      {
-      status+=fscanf(fd,"Cached:%lu kB\n", &cachedMem);
-      }
-    if(status==4)
-      {
-      this->TotalPhysicalMemory /= 1024;
-      this->AvailablePhysicalMemory = freeMem+cachedMem+buffersMem;
-      this->AvailablePhysicalMemory /= 1024;
-      }
-    
-    // Skip SwapCached, Active, Inactive, HighTotal, HighFree, LowTotal
-    // and LowFree.
-    int i=0;
-    bool success=status==4;
-    while(i<7 && success)
-      {
-      char *r=fgets(buffer, sizeof(buffer), fd); // skip a line
-      success=r==buffer;
-      ++i;
-      }
-    
-    if(success)
-      {
-      status+=fscanf(fd,"SwapTotal:%lu kB\n", &this->TotalVirtualMemory);
-      }
-    if(status==5)
-      {
-      status+=fscanf(fd,"SwapFree:%lu kB\n", &this->AvailableVirtualMemory);
-      }
-    if(status==6)
-      {
-      this->TotalVirtualMemory /= 1024;
-      this->AvailableVirtualMemory /= 1024;
+      this->TotalPhysicalMemory = value[mMemTotal] / 1024;
+      this->AvailablePhysicalMemory =
+        (value[mMemFree] + value[mBuffers] + value[mCached]) / 1024;
+      this->TotalVirtualMemory = value[mSwapTotal] / 1024;
+      this->AvailableVirtualMemory = value[mSwapFree] / 1024;
       }
     else
       {
