@@ -295,7 +295,8 @@ cmComputeLinkDepends::AllocateLinkEntry(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
-int cmComputeLinkDepends::AddLinkEntry(std::string const& item)
+int cmComputeLinkDepends::AddLinkEntry(int depender_index,
+                                       std::string const& item)
 {
   // Check if the item entry has already been added.
   std::map<cmStdString, int>::iterator lei = this->LinkEntryIndex.find(item);
@@ -312,7 +313,7 @@ int cmComputeLinkDepends::AddLinkEntry(std::string const& item)
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = item;
-  entry.Target = this->FindTargetToLink(entry.Item.c_str());
+  entry.Target = this->FindTargetToLink(depender_index, entry.Item.c_str());
   entry.IsFlag = (!entry.Target && item[0] == '-' && item[1] != 'l' &&
                   item.substr(0, 10) != "-framework");
 
@@ -409,7 +410,8 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
     // Initialize the item entry.
     LinkEntry& entry = this->EntryList[lei->second];
     entry.Item = dep.Item;
-    entry.Target = this->FindTargetToLink(dep.Item.c_str());
+    entry.Target = this->FindTargetToLink(dep.DependerIndex,
+                                          dep.Item.c_str());
 
     // This item was added specifically because it is a dependent
     // shared library.  It may get special treatment
@@ -500,7 +502,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
         }
       else if(this->OldLinkDirMode)
         {
-        this->CheckWrongConfigItem(*di);
+        this->CheckWrongConfigItem(depender_index, *di);
         }
 
       // Reset the link type until another explicit type is given.
@@ -529,7 +531,7 @@ cmComputeLinkDepends::AddTargetLinkEntries(int depender_index,
       }
     else if(this->OldLinkDirMode)
       {
-      this->CheckWrongConfigItem(li->first);
+      this->CheckWrongConfigItem(depender_index, li->first);
       }
     }
 
@@ -558,7 +560,7 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
       }
 
     // Add a link entry for this item.
-    int dependee_index = this->AddLinkEntry(item);
+    int dependee_index = this->AddLinkEntry(depender_index, item);
 
     // The dependee must come after the depender.
     if(depender_index >= 0)
@@ -664,10 +666,19 @@ std::string cmComputeLinkDepends::CleanItemName(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
-cmTarget* cmComputeLinkDepends::FindTargetToLink(const char* name)
+cmTarget* cmComputeLinkDepends::FindTargetToLink(int depender_index,
+                                                 const char* name)
 {
-  // Look for a target.
-  cmTarget* tgt = this->Makefile->FindTargetToUse(name);
+  // Look for a target in the scope of the depender.
+  cmMakefile* mf = this->Makefile;
+  if(depender_index >= 0)
+    {
+    if(cmTarget* depender = this->EntryList[depender_index].Target)
+      {
+      mf = depender->GetMakefile();
+      }
+    }
+  cmTarget* tgt = mf->FindTargetToUse(name);
 
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
@@ -987,7 +998,8 @@ void cmComputeLinkDepends::DisplayFinalEntries()
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkDepends::CheckWrongConfigItem(std::string const& item)
+void cmComputeLinkDepends::CheckWrongConfigItem(int depender_index,
+                                                std::string const& item)
 {
   if(!this->OldLinkDirMode)
     {
@@ -997,7 +1009,7 @@ void cmComputeLinkDepends::CheckWrongConfigItem(std::string const& item)
   // For CMake 2.4 bug-compatibility we need to consider the output
   // directories of targets linked in another configuration as link
   // directories.
-  if(cmTarget* tgt = this->FindTargetToLink(item.c_str()))
+  if(cmTarget* tgt = this->FindTargetToLink(depender_index, item.c_str()))
     {
     if(!tgt->IsImported())
       {
