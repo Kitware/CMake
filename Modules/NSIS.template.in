@@ -25,22 +25,22 @@
   !include "MUI.nsh"
 
   ;Default installation folder
-  InstallDir "$PROGRAMFILES\@CPACK_PACKAGE_INSTALL_DIRECTORY@"  
+  InstallDir "$PROGRAMFILES\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
 
 ;--------------------------------
 ;General
 
   ;Name and file
-  Name "@CPACK_PACKAGE_INSTALL_DIRECTORY@"
+  Name "@CPACK_NSIS_DISPLAY_NAME@"
   OutFile "@CPACK_TOPLEVEL_DIRECTORY@/@CPACK_OUTPUT_FILE_NAME@"
 
   ;Set compression
   SetCompressor @CPACK_NSIS_COMPRESSOR@
-   
+
 @CPACK_NSIS_DEFINES@   
-   
+
   !include Sections.nsh
-  
+
 ;--- Component support macros: ---
 ; The code for the add/remove functionality is from:
 ;   http://nsis.sourceforge.net/Add/Remove_Functionality
@@ -701,7 +701,7 @@ SectionEnd
 ;--------------------------------
 ; Create custom pages
 Function InstallOptionsPage
-  !insertmacro MUI_HEADER_TEXT "Install Options" "Chose options for installing @CPACK_PACKAGE_INSTALL_DIRECTORY@"
+  !insertmacro MUI_HEADER_TEXT "Install Options" "Choose options for installing @CPACK_NSIS_DISPLAY_NAME@"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "NSIS.InstallOptions.ini"
 
 FunctionEnd
