@@ -1232,7 +1232,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     }
   std::string flags = includeFlags.str();
   // remove trailing separators
-  if((sep[0] != ' ') && flags[flags.size()-1] == sep[0])
+  if((sep[0] != ' ') && flags.size()>0 && flags[flags.size()-1] == sep[0])
     {
     flags[flags.size()-1] = ' ';
     }
