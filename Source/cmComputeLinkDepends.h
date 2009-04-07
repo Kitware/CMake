@@ -81,14 +81,14 @@ private:
 
   std::map<cmStdString, int>::iterator
   AllocateLinkEntry(std::string const& item);
-  int AddLinkEntry(std::string const& item);
+  int AddLinkEntry(int depender_index, std::string const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddTargetLinkEntries(int depender_index,
                             LinkLibraryVectorType const& libs);
   void AddLinkEntries(int depender_index,
                       std::vector<std::string> const& libs);
   std::string CleanItemName(std::string const& item);
-  cmTarget* FindTargetToLink(const char* name);
+  cmTarget* FindTargetToLink(int depender_index, const char* name);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;
@@ -162,7 +162,7 @@ private:
 
   // Compatibility help.
   bool OldLinkDirMode;
-  void CheckWrongConfigItem(std::string const& item);
+  void CheckWrongConfigItem(int depender_index, std::string const& item);
   std::set<cmTarget*> OldWrongConfigItems;
 };
 

@@ -2273,7 +2273,7 @@ int SystemInformationImplementation::QueryMemory()
   unsigned long av=0;
   unsigned long ap=0;
   
-  char buffer[1024]; // for skipping unused lines
+  char buffer[1024]; // for reading lines
   
   int linuxMajor = 0;
   int linuxMinor = 0;
@@ -2316,34 +2316,39 @@ int SystemInformationImplementation::QueryMemory()
     // new /proc/meminfo format since kernel 2.6.x
     // Rigorously, this test should check from the developping version 2.5.x
     // that introduced the new format...
-    
-    long freeMem;
-    long buffersMem;
-    long cachedMem;
-    
-    fscanf(fd,"MemTotal:%ld kB\n", &this->TotalPhysicalMemory);
-    fscanf(fd,"MemFree:%ld kB\n", &freeMem);
-    fscanf(fd,"Buffers:%ld kB\n", &buffersMem);
-    fscanf(fd,"Cached:%ld kB\n", &cachedMem);
-    
-    this->TotalPhysicalMemory /= 1024;
-    this->AvailablePhysicalMemory = freeMem+cachedMem+buffersMem;
-    this->AvailablePhysicalMemory /= 1024;
-    
-    // Skip SwapCached, Active, Inactive, HighTotal, HighFree, LowTotal
-    // and LowFree.
-    int i=0;
-    while(i<7)
-      {
-      fgets(buffer, sizeof(buffer), fd); // skip a line
-      ++i;
-      }
-    
-    fscanf(fd,"SwapTotal:%ld kB\n", &this->TotalVirtualMemory);
-    fscanf(fd,"SwapFree:%ld kB\n", &this->AvailableVirtualMemory);
 
-    this->TotalVirtualMemory /= 1024;
-    this->AvailableVirtualMemory /= 1024;
+    enum { mMemTotal, mMemFree, mBuffers, mCached, mSwapTotal, mSwapFree };
+    const char* format[6] =
+      { "MemTotal:%lu kB", "MemFree:%lu kB", "Buffers:%lu kB",
+        "Cached:%lu kB", "SwapTotal:%lu kB", "SwapFree:%lu kB" };
+    bool have[6] = { false, false, false, false, false, false };
+    unsigned long value[6];
+    int count = 0;
+    while(fgets(buffer, sizeof(buffer), fd))
+      {
+      for(int i=0; i < 6; ++i)
+        {
+        if(!have[i] && sscanf(buffer, format[i], &value[i]) == 1)
+          {
+          have[i] = true;
+          ++count;
+          }
+        }
+      }
+    if(count == 6)
+      {
+      this->TotalPhysicalMemory = value[mMemTotal] / 1024;
+      this->AvailablePhysicalMemory =
+        (value[mMemFree] + value[mBuffers] + value[mCached]) / 1024;
+      this->TotalVirtualMemory = value[mSwapTotal] / 1024;
+      this->AvailableVirtualMemory = value[mSwapFree] / 1024;
+      }
+    else
+      {
+      kwsys_ios::cout << "Problem parsing /proc/meminfo" << kwsys_ios::endl;
+      fclose(fd);
+      return 0;
+      }
     }
   else
     {
