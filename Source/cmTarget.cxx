@@ -3565,7 +3565,7 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
         !loc && aci != availableConfigs.end(); ++aci)
       {
       suffix = "_";
-      suffix += cmSystemTools::UpperCase(availableConfigs[0]);
+      suffix += cmSystemTools::UpperCase(*aci);
       std::string locProp = "IMPORTED_LOCATION";
       locProp += suffix;
       loc = this->GetProperty(locProp.c_str());
