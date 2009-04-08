@@ -104,6 +104,7 @@ run_child(
   )
 
 # Create a modified file.
+message("Modifying locally...")
 modify_content(user-source)
 
 #-----------------------------------------------------------------------------
