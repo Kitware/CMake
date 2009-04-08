@@ -23,7 +23,12 @@ add_executable(imp_testExe1
   )
 
 # Try linking to a library imported from the install tree.
-target_link_libraries(imp_testExe1 exp_testLib2 exp_testLib3 exp_testLib4)
+target_link_libraries(imp_testExe1
+  exp_testLib2
+  exp_testLib3
+  exp_testLib4
+  exp_testLib5
+  )
 
 # Try building a plugin to an executable imported from the install tree.
 add_library(imp_mod1 MODULE imp_mod1.c)
@@ -48,7 +53,12 @@ add_executable(imp_testExe1b
   )
 
 # Try linking to a library imported from the build tree.
-target_link_libraries(imp_testExe1b bld_testLib2 bld_testLib3 bld_testLib4)
+target_link_libraries(imp_testExe1b
+  bld_testLib2
+  bld_testLib3
+  bld_testLib4
+  bld_testLib5
+  )
 
 # Try building a plugin to an executable imported from the build tree.
 add_library(imp_mod1b MODULE imp_mod1.c)

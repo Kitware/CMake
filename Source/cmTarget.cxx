@@ -2527,23 +2527,17 @@ std::string cmTarget::NormalGetFullPath(const char* config, bool implib,
 //----------------------------------------------------------------------------
 std::string cmTarget::ImportedGetFullPath(const char* config, bool implib)
 {
+  std::string result;
   if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
     {
-    if(implib)
-      {
-      return info->ImportLibrary;
-      }
-    else
-      {
-      return info->Location;
-      }
+    result = implib? info->ImportLibrary : info->Location;
     }
-  else
+  if(result.empty())
     {
-    std::string result = this->GetName();
+    result = this->GetName();
     result += "-NOTFOUND";
-    return result;
     }
+  return result;
 }
 
 //----------------------------------------------------------------------------
@@ -3467,7 +3461,7 @@ cmTarget::GetImportInfo(const char* config)
 
   // If the location is empty then the target is not available for
   // this configuration.
-  if(i->second.Location.empty())
+  if(i->second.Location.empty() && i->second.ImportLibrary.empty())
     {
     return 0;
     }
@@ -3491,6 +3485,12 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   std::string suffix = "_";
   suffix += desired_config;
 
+  // On a DLL platform there may be only IMPORTED_IMPLIB for a shared
+  // library or an executable with exports.
+  bool allowImp =
+    this->DLLPlatform && (this->GetType() == cmTarget::SHARED_LIBRARY ||
+                          this->IsExecutableWithExports());
+
   // Look for a mapping from the current project's configuration to
   // the imported project's configuration.
   std::vector<std::string> mappedConfigs;
@@ -3505,17 +3505,24 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
 
   // If a mapping was found, check its configurations.
   const char* loc = 0;
+  const char* imp = 0;
   for(std::vector<std::string>::const_iterator mci = mappedConfigs.begin();
-      !loc && mci != mappedConfigs.end(); ++mci)
+      !loc && !imp && mci != mappedConfigs.end(); ++mci)
     {
     // Look for this configuration.
     std::string mcUpper = cmSystemTools::UpperCase(mci->c_str());
     std::string locProp = "IMPORTED_LOCATION_";
     locProp += mcUpper;
     loc = this->GetProperty(locProp.c_str());
+    if(allowImp)
+      {
+      std::string impProp = "IMPORTED_IMPLIB_";
+      impProp += mcUpper;
+      imp = this->GetProperty(impProp.c_str());
+      }
 
     // If it was found, use it for all properties below.
-    if(loc)
+    if(loc || imp)
       {
       suffix = "_";
       suffix += mcUpper;
@@ -3525,23 +3532,29 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   // If we needed to find one of the mapped configurations but did not
   // then the target is not found.  The project does not want any
   // other configuration.
-  if(!mappedConfigs.empty() && !loc)
+  if(!mappedConfigs.empty() && !loc && !imp)
     {
     return;
     }
 
   // If we have not yet found it then there are no mapped
   // configurations.  Look for an exact-match.
-  if(!loc)
+  if(!loc && !imp)
     {
     std::string locProp = "IMPORTED_LOCATION";
     locProp += suffix;
     loc = this->GetProperty(locProp.c_str());
+    if(allowImp)
+      {
+      std::string impProp = "IMPORTED_IMPLIB";
+      impProp += suffix;
+      imp = this->GetProperty(impProp.c_str());
+      }
     }
 
   // If we have not yet found it then there are no mapped
   // configurations and no exact match.
-  if(!loc)
+  if(!loc && !imp)
     {
     // The suffix computed above is not useful.
     suffix = "";
@@ -3549,11 +3562,15 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
     // Look for a configuration-less location.  This may be set by
     // manually-written code.
     loc = this->GetProperty("IMPORTED_LOCATION");
+    if(allowImp)
+      {
+      imp = this->GetProperty("IMPORTED_IMPLIB");
+      }
     }
 
   // If we have not yet found it then the project is willing to try
   // any available configuration.
-  if(!loc)
+  if(!loc && !imp)
     {
     std::vector<std::string> availableConfigs;
     if(const char* iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS"))
@@ -3562,25 +3579,49 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
       }
     for(std::vector<std::string>::const_iterator
           aci = availableConfigs.begin();
-        !loc && aci != availableConfigs.end(); ++aci)
+        !loc && !imp && aci != availableConfigs.end(); ++aci)
       {
       suffix = "_";
       suffix += cmSystemTools::UpperCase(*aci);
       std::string locProp = "IMPORTED_LOCATION";
       locProp += suffix;
       loc = this->GetProperty(locProp.c_str());
+      if(allowImp)
+        {
+        std::string impProp = "IMPORTED_IMPLIB";
+        impProp += suffix;
+        imp = this->GetProperty(impProp.c_str());
+        }
       }
     }
 
   // If we have not yet found it then the target is not available.
-  if(!loc)
+  if(!loc && !imp)
     {
     return;
     }
 
   // A provided configuration has been chosen.  Load the
   // configuration's properties.
-  info.Location = loc;
+
+  // Get the location.
+  if(loc)
+    {
+    info.Location = loc;
+    }
+  else
+    {
+    std::string impProp = "IMPORTED_LOCATION";
+    impProp += suffix;
+    if(const char* config_location = this->GetProperty(impProp.c_str()))
+      {
+      info.Location = config_location;
+      }
+    else if(const char* location = this->GetProperty("IMPORTED_LOCATION"))
+      {
+      info.Location = location;
+      }
+    }
 
   // Get the soname.
   if(this->GetType() == cmTarget::SHARED_LIBRARY)
@@ -3613,8 +3654,12 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
     }
 
   // Get the import library.
-  if(this->GetType() == cmTarget::SHARED_LIBRARY ||
-     this->IsExecutableWithExports())
+  if(imp)
+    {
+    info.ImportLibrary = imp;
+    }
+  else if(this->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->IsExecutableWithExports())
     {
     std::string impProp = "IMPORTED_IMPLIB";
     impProp += suffix;

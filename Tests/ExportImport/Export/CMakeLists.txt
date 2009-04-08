@@ -39,6 +39,8 @@ set_property(TARGET testLib3 PROPERTY SOVERSION 3)
 add_library(testLib4 SHARED testLib4.c)
 set_property(TARGET testLib4 PROPERTY FRAMEWORK 1)
 
+add_library(testLib5 SHARED testLib5.c)
+
 # Work-around: Visual Studio 6 does not support per-target object files.
 set(VS6)
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
@@ -85,7 +87,19 @@ install(
   LIBRARY DESTINATION lib/impl
   ARCHIVE DESTINATION lib/impl
   )
+install(
+  TARGETS testLib5
+  EXPORT exp
+  # Leave out RUNTIME DESTINATION to test implib-only export.
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
 install(EXPORT exp NAMESPACE exp_ DESTINATION lib/exp)
+
+# Install testLib5.dll outside the export.
+if(WIN32)
+  install(TARGETS testLib5 RUNTIME DESTINATION bin)
+endif(WIN32)
 
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
@@ -93,7 +107,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
-export(TARGETS testExe2 testLib4 testExe3 testExe2lib
+export(TARGETS testExe2 testLib4 testLib5 testExe3 testExe2lib
   testLib4lib testLib4libdbg testLib4libopt
   NAMESPACE bld_
   APPEND FILE ExportBuildTree.cmake
