@@ -102,6 +102,13 @@ run_child(
   COMMAND ${CVSCMD} up -rRevision1
   )
 
+# Delay 1 second so the modification produces a newer time stamp.
+find_program(SLEEP sleep)
+if(SLEEP)
+  message("Delaying...")
+  execute_process(COMMAND ${SLEEP} 1)
+endif()
+
 # Create a modified file.
 modify_content(user-source)
 
