@@ -211,6 +211,12 @@ function(add_external_project_step name step)
   endif()
   get_property(work_dir TARGET ${name} PROPERTY AEP_${step}_WORKING_DIRECTORY)
 
+  # Replace list separators.
+  get_property(sep TARGET ${name} PROPERTY AEP_LIST_SEPARATOR)
+  if(sep AND command)
+    string(REPLACE "${sep}" "\\;" command "${command}")
+  endif()
+
   # Custom comment?
   get_property(comment_set TARGET ${name} PROPERTY AEP_${step}_COMMENT SET)
   if(comment_set)
@@ -594,6 +600,7 @@ foreach(key IN ITEMS
     DOWNLOAD_COMMAND
     INSTALL_ARGS
     INSTALL_COMMAND
+    LIST_SEPARATOR
     PATCH_COMMAND
     SVN_REPOSITORY
     SVN_TAG

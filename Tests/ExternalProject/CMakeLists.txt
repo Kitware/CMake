@@ -117,16 +117,20 @@ endif()
 set(proj TutorialStep1-LocalTAR)
 add_external_project(${proj}
   TAR "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tar"
+  LIST_SEPARATOR ::
   PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Step1Patch.cmake
   CMAKE_GENERATOR "${CMAKE_GENERATOR}"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${prefix}
+             -DTEST_LIST:STRING=A::B::C
   INSTALL_COMMAND ""
 )
 
 set(proj TutorialStep1-LocalNoDirTAR)
 add_external_project(${proj}
   TAR "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tar"
+  LIST_SEPARATOR @@
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${prefix} -G ${CMAKE_GENERATOR} ${source_dir}/${proj}
+             -DTEST_LIST:STRING=1@@2@@3
   INSTALL_COMMAND ""
 )
 add_external_project_step(${proj} mypatch

@@ -17,5 +17,9 @@ endif()
 file(APPEND CMakeLists.txt "
 # Patch by ExternalProject test:
 set_property(TARGET Tutorial PROPERTY OUTPUT_NAME EP-Tutorial)
+list(LENGTH TEST_LIST len)
+if(NOT len EQUAL 3)
+  message(FATAL_ERROR \"TEST_LIST length is \${len}, not 3\")
+endif()
 ")
 message(STATUS "Patched ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt")
