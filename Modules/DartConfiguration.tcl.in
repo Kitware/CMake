@@ -62,3 +62,4 @@ CoverageCommand: @COVERAGE_COMMAND@
 TimeOut: @DART_TESTING_TIMEOUT@
 
 UseLaunchers: @CTEST_USE_LAUNCHERS@
+CurlOptions: @CTEST_CURL_OPTIONS@

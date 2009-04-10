@@ -245,7 +245,30 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
-
+  cmStdString dropMethod(this->CTest->GetCTestConfiguration("DropMethod"));
+  cmStdString curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArgument(curlopt.c_str(), args);
+  bool verifyPeerOff = false;
+  bool verifyHostOff = false;
+  for( std::vector<std::string>::iterator i = args.begin();
+       i != args.end(); ++i)
+    {
+    std::cerr << *i << "\n";
+    if(*i == "CURLOPT_SSL_VERIFYPEER_OFF")
+      {
+      verifyPeerOff = true;
+      }
+    if(*i == "CURLOPT_SSL_VERIFYHOST_OFF")
+      {
+      verifyHostOff = true;
+      }
+    }
+  bool https = false;
+  if(dropMethod == "https")
+    {
+    https = true;
+    }
   cmStdString::size_type kk;
   cmCTest::SetOfStrings::const_iterator file;
   for ( file = files.begin(); file != files.end(); ++file )
@@ -254,7 +277,18 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
     curl = curl_easy_init();
     if(curl)
       {
-      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+      if(verifyPeerOff)
+        {
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+                   "  Set CURLOPT_SSL_VERIFYPEER to off\n");
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+        }
+      if(verifyHostOff)
+        {
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+                   "  Set CURLOPT_SSL_VERIFYHOST to off\n");
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+        }
 
       // Using proxy
       if ( this->HTTPProxyType > 0 )
