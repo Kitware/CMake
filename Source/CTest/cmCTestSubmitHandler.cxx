@@ -254,7 +254,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
   for( std::vector<std::string>::iterator i = args.begin();
        i != args.end(); ++i)
     {
-    std::cerr << *i << "\n";
     if(*i == "CURLOPT_SSL_VERIFYPEER_OFF")
       {
       verifyPeerOff = true;
