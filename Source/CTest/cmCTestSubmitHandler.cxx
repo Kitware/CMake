@@ -263,11 +263,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       verifyHostOff = true;
       }
     }
-  bool https = false;
-  if(dropMethod == "https")
-    {
-    https = true;
-    }
   cmStdString::size_type kk;
   cmCTest::SetOfStrings::const_iterator file;
   for ( file = files.begin(); file != files.end(); ++file )
@@ -1088,7 +1083,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     {
     std::string url = dropMethod;
     url += "://";
-    ofs << "Using drop method: HTTP" << std::endl;
+    ofs << "Using drop method: " << dropMethod << std::endl;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using HTTP submit method"
       << std::endl
       << "   Drop site:" << url);
