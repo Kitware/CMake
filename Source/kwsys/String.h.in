@@ -26,8 +26,10 @@
 # define kwsys_ns(x) @KWSYS_NAMESPACE@##x
 # define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
-#define kwsysString_strcasecmp                kwsys_ns(String_strcasecmp)
-#define kwsysString_strncasecmp               kwsys_ns(String_strncasecmp)
+#if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# define kwsysString_strcasecmp                kwsys_ns(String_strcasecmp)
+# define kwsysString_strncasecmp               kwsys_ns(String_strncasecmp)
+#endif
 
 #if defined(__cplusplus)
 extern "C"
@@ -58,8 +60,10 @@ kwsysEXPORT int kwsysString_strncasecmp(const char* lhs, const char* rhs,
 #if !defined(KWSYS_NAMESPACE)
 # undef kwsys_ns
 # undef kwsysEXPORT
-# undef kwsysString_strcasecmp
-# undef kwsysString_strncasecmp
+# if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+#  undef kwsysString_strcasecmp
+#  undef kwsysString_strncasecmp
+# endif
 #endif
 
 #endif

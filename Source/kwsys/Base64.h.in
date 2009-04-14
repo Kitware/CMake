@@ -24,13 +24,15 @@
 # define kwsys_ns(x) @KWSYS_NAMESPACE@##x
 # define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
-#define kwsysBase64          kwsys_ns(Base64)
-#define kwsysBase64_Decode   kwsys_ns(Base64_Decode)
-#define kwsysBase64_Decode3  kwsys_ns(Base64_Decode3)
-#define kwsysBase64_Encode   kwsys_ns(Base64_Encode)
-#define kwsysBase64_Encode1  kwsys_ns(Base64_Encode1)
-#define kwsysBase64_Encode2  kwsys_ns(Base64_Encode2)
-#define kwsysBase64_Encode3  kwsys_ns(Base64_Encode3)
+#if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# define kwsysBase64          kwsys_ns(Base64)
+# define kwsysBase64_Decode   kwsys_ns(Base64_Decode)
+# define kwsysBase64_Decode3  kwsys_ns(Base64_Decode3)
+# define kwsysBase64_Encode   kwsys_ns(Base64_Encode)
+# define kwsysBase64_Encode1  kwsys_ns(Base64_Encode1)
+# define kwsysBase64_Encode2  kwsys_ns(Base64_Encode2)
+# define kwsysBase64_Encode3  kwsys_ns(Base64_Encode3)
+#endif
 
 #if defined(__cplusplus)
 extern "C"
@@ -106,13 +108,15 @@ kwsysEXPORT unsigned long kwsysBase64_Decode(const unsigned char *input,
 #if !defined(KWSYS_NAMESPACE)
 # undef kwsys_ns
 # undef kwsysEXPORT
-# undef kwsysBase64
-# undef kwsysBase64_Decode
-# undef kwsysBase64_Decode3
-# undef kwsysBase64_Encode
-# undef kwsysBase64_Encode1
-# undef kwsysBase64_Encode2
-# undef kwsysBase64_Encode3
+# if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+#  undef kwsysBase64
+#  undef kwsysBase64_Decode
+#  undef kwsysBase64_Decode3
+#  undef kwsysBase64_Encode
+#  undef kwsysBase64_Encode1
+#  undef kwsysBase64_Encode2
+#  undef kwsysBase64_Encode3
+# endif
 #endif
 
 #endif

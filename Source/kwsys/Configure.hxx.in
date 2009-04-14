@@ -17,9 +17,6 @@
 /* Include C configuration.  */
 #include <@KWSYS_NAMESPACE@/Configure.h>
 
-/* Whether kwsys namespace is "kwsys".  */
-#define @KWSYS_NAMESPACE@_NAME_IS_KWSYS @KWSYS_NAME_IS_KWSYS@
-
 /* Whether ANSI C++ stream headers are to be used.  */
 #define @KWSYS_NAMESPACE@_IOS_USE_ANSI @KWSYS_IOS_USE_ANSI@
 

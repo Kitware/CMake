@@ -24,57 +24,59 @@
 # define kwsys_ns(x) @KWSYS_NAMESPACE@##x
 # define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
-#define kwsysProcess                     kwsys_ns(Process)
-#define kwsysProcess_s                   kwsys_ns(Process_s)
-#define kwsysProcess_New                 kwsys_ns(Process_New)
-#define kwsysProcess_Delete              kwsys_ns(Process_Delete)
-#define kwsysProcess_SetCommand          kwsys_ns(Process_SetCommand)
-#define kwsysProcess_AddCommand          kwsys_ns(Process_AddCommand)
-#define kwsysProcess_SetTimeout          kwsys_ns(Process_SetTimeout)
-#define kwsysProcess_SetWorkingDirectory kwsys_ns(Process_SetWorkingDirectory)
-#define kwsysProcess_SetPipeFile         kwsys_ns(Process_SetPipeFile)
-#define kwsysProcess_SetPipeNative       kwsys_ns(Process_SetPipeNative)
-#define kwsysProcess_SetPipeShared       kwsys_ns(Process_SetPipeShared)
-#define kwsysProcess_Option_Detach       kwsys_ns(Process_Option_Detach)
-#define kwsysProcess_Option_HideWindow   kwsys_ns(Process_Option_HideWindow)
-#define kwsysProcess_Option_Verbatim     kwsys_ns(Process_Option_Verbatim)
-#define kwsysProcess_GetOption           kwsys_ns(Process_GetOption)
-#define kwsysProcess_SetOption           kwsys_ns(Process_SetOption)
-#define kwsysProcess_Option_e            kwsys_ns(Process_Option_e)
-#define kwsysProcess_State_Starting      kwsys_ns(Process_State_Starting)
-#define kwsysProcess_State_Error         kwsys_ns(Process_State_Error)
-#define kwsysProcess_State_Exception     kwsys_ns(Process_State_Exception)
-#define kwsysProcess_State_Executing     kwsys_ns(Process_State_Executing)
-#define kwsysProcess_State_Exited        kwsys_ns(Process_State_Exited)
-#define kwsysProcess_State_Expired       kwsys_ns(Process_State_Expired)
-#define kwsysProcess_State_Killed        kwsys_ns(Process_State_Killed)
-#define kwsysProcess_State_Disowned      kwsys_ns(Process_State_Disowned)
-#define kwsysProcess_GetState            kwsys_ns(Process_GetState)
-#define kwsysProcess_State_e             kwsys_ns(Process_State_e)
-#define kwsysProcess_Exception_None      kwsys_ns(Process_Exception_None)
-#define kwsysProcess_Exception_Fault     kwsys_ns(Process_Exception_Fault)
-#define kwsysProcess_Exception_Illegal   kwsys_ns(Process_Exception_Illegal)
-#define kwsysProcess_Exception_Interrupt kwsys_ns(Process_Exception_Interrupt)
-#define kwsysProcess_Exception_Numerical kwsys_ns(Process_Exception_Numerical)
-#define kwsysProcess_Exception_Other     kwsys_ns(Process_Exception_Other)
-#define kwsysProcess_GetExitException    kwsys_ns(Process_GetExitException)
-#define kwsysProcess_Exception_e         kwsys_ns(Process_Exception_e)
-#define kwsysProcess_GetExitCode         kwsys_ns(Process_GetExitCode)
-#define kwsysProcess_GetExitValue        kwsys_ns(Process_GetExitValue)
-#define kwsysProcess_GetErrorString      kwsys_ns(Process_GetErrorString)
-#define kwsysProcess_GetExceptionString  kwsys_ns(Process_GetExceptionString)
-#define kwsysProcess_Execute             kwsys_ns(Process_Execute)
-#define kwsysProcess_Disown              kwsys_ns(Process_Disown)
-#define kwsysProcess_WaitForData         kwsys_ns(Process_WaitForData)
-#define kwsysProcess_Pipes_e             kwsys_ns(Process_Pipes_e)
-#define kwsysProcess_Pipe_None           kwsys_ns(Process_Pipe_None)
-#define kwsysProcess_Pipe_STDIN          kwsys_ns(Process_Pipe_STDIN)
-#define kwsysProcess_Pipe_STDOUT         kwsys_ns(Process_Pipe_STDOUT)
-#define kwsysProcess_Pipe_STDERR         kwsys_ns(Process_Pipe_STDERR)
-#define kwsysProcess_Pipe_Timeout        kwsys_ns(Process_Pipe_Timeout)
-#define kwsysProcess_Pipe_Handle         kwsys_ns(Process_Pipe_Handle)
-#define kwsysProcess_WaitForExit         kwsys_ns(Process_WaitForExit)
-#define kwsysProcess_Kill                kwsys_ns(Process_Kill)
+#if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# define kwsysProcess                     kwsys_ns(Process)
+# define kwsysProcess_s                   kwsys_ns(Process_s)
+# define kwsysProcess_New                 kwsys_ns(Process_New)
+# define kwsysProcess_Delete              kwsys_ns(Process_Delete)
+# define kwsysProcess_SetCommand          kwsys_ns(Process_SetCommand)
+# define kwsysProcess_AddCommand          kwsys_ns(Process_AddCommand)
+# define kwsysProcess_SetTimeout          kwsys_ns(Process_SetTimeout)
+# define kwsysProcess_SetWorkingDirectory kwsys_ns(Process_SetWorkingDirectory)
+# define kwsysProcess_SetPipeFile         kwsys_ns(Process_SetPipeFile)
+# define kwsysProcess_SetPipeNative       kwsys_ns(Process_SetPipeNative)
+# define kwsysProcess_SetPipeShared       kwsys_ns(Process_SetPipeShared)
+# define kwsysProcess_Option_Detach       kwsys_ns(Process_Option_Detach)
+# define kwsysProcess_Option_HideWindow   kwsys_ns(Process_Option_HideWindow)
+# define kwsysProcess_Option_Verbatim     kwsys_ns(Process_Option_Verbatim)
+# define kwsysProcess_GetOption           kwsys_ns(Process_GetOption)
+# define kwsysProcess_SetOption           kwsys_ns(Process_SetOption)
+# define kwsysProcess_Option_e            kwsys_ns(Process_Option_e)
+# define kwsysProcess_State_Starting      kwsys_ns(Process_State_Starting)
+# define kwsysProcess_State_Error         kwsys_ns(Process_State_Error)
+# define kwsysProcess_State_Exception     kwsys_ns(Process_State_Exception)
+# define kwsysProcess_State_Executing     kwsys_ns(Process_State_Executing)
+# define kwsysProcess_State_Exited        kwsys_ns(Process_State_Exited)
+# define kwsysProcess_State_Expired       kwsys_ns(Process_State_Expired)
+# define kwsysProcess_State_Killed        kwsys_ns(Process_State_Killed)
+# define kwsysProcess_State_Disowned      kwsys_ns(Process_State_Disowned)
+# define kwsysProcess_GetState            kwsys_ns(Process_GetState)
+# define kwsysProcess_State_e             kwsys_ns(Process_State_e)
+# define kwsysProcess_Exception_None      kwsys_ns(Process_Exception_None)
+# define kwsysProcess_Exception_Fault     kwsys_ns(Process_Exception_Fault)
+# define kwsysProcess_Exception_Illegal   kwsys_ns(Process_Exception_Illegal)
+# define kwsysProcess_Exception_Interrupt kwsys_ns(Process_Exception_Interrupt)
+# define kwsysProcess_Exception_Numerical kwsys_ns(Process_Exception_Numerical)
+# define kwsysProcess_Exception_Other     kwsys_ns(Process_Exception_Other)
+# define kwsysProcess_GetExitException    kwsys_ns(Process_GetExitException)
+# define kwsysProcess_Exception_e         kwsys_ns(Process_Exception_e)
+# define kwsysProcess_GetExitCode         kwsys_ns(Process_GetExitCode)
+# define kwsysProcess_GetExitValue        kwsys_ns(Process_GetExitValue)
+# define kwsysProcess_GetErrorString      kwsys_ns(Process_GetErrorString)
+# define kwsysProcess_GetExceptionString  kwsys_ns(Process_GetExceptionString)
+# define kwsysProcess_Execute             kwsys_ns(Process_Execute)
+# define kwsysProcess_Disown              kwsys_ns(Process_Disown)
+# define kwsysProcess_WaitForData         kwsys_ns(Process_WaitForData)
+# define kwsysProcess_Pipes_e             kwsys_ns(Process_Pipes_e)
+# define kwsysProcess_Pipe_None           kwsys_ns(Process_Pipe_None)
+# define kwsysProcess_Pipe_STDIN          kwsys_ns(Process_Pipe_STDIN)
+# define kwsysProcess_Pipe_STDOUT         kwsys_ns(Process_Pipe_STDOUT)
+# define kwsysProcess_Pipe_STDERR         kwsys_ns(Process_Pipe_STDERR)
+# define kwsysProcess_Pipe_Timeout        kwsys_ns(Process_Pipe_Timeout)
+# define kwsysProcess_Pipe_Handle         kwsys_ns(Process_Pipe_Handle)
+# define kwsysProcess_WaitForExit         kwsys_ns(Process_WaitForExit)
+# define kwsysProcess_Kill                kwsys_ns(Process_Kill)
+#endif
 
 #if defined(__cplusplus)
 extern "C"
@@ -370,57 +372,59 @@ kwsysEXPORT void kwsysProcess_Kill(kwsysProcess* cp);
 #if !defined(KWSYS_NAMESPACE)
 # undef kwsys_ns
 # undef kwsysEXPORT
-# undef kwsysProcess
-# undef kwsysProcess_s
-# undef kwsysProcess_New
-# undef kwsysProcess_Delete
-# undef kwsysProcess_SetCommand
-# undef kwsysProcess_AddCommand
-# undef kwsysProcess_SetTimeout
-# undef kwsysProcess_SetWorkingDirectory
-# undef kwsysProcess_SetPipeFile
-# undef kwsysProcess_SetPipeNative
-# undef kwsysProcess_SetPipeShared
-# undef kwsysProcess_Option_Detach
-# undef kwsysProcess_Option_HideWindow
-# undef kwsysProcess_Option_Verbatim
-# undef kwsysProcess_GetOption
-# undef kwsysProcess_SetOption
-# undef kwsysProcess_Option_e
-# undef kwsysProcess_State_Starting
-# undef kwsysProcess_State_Error
-# undef kwsysProcess_State_Exception
-# undef kwsysProcess_State_Executing
-# undef kwsysProcess_State_Exited
-# undef kwsysProcess_State_Expired
-# undef kwsysProcess_State_Killed
-# undef kwsysProcess_State_Disowned
-# undef kwsysProcess_GetState
-# undef kwsysProcess_State_e
-# undef kwsysProcess_Exception_None
-# undef kwsysProcess_Exception_Fault
-# undef kwsysProcess_Exception_Illegal
-# undef kwsysProcess_Exception_Interrupt
-# undef kwsysProcess_Exception_Numerical
-# undef kwsysProcess_Exception_Other
-# undef kwsysProcess_GetExitException
-# undef kwsysProcess_Exception_e
-# undef kwsysProcess_GetExitCode
-# undef kwsysProcess_GetExitValue
-# undef kwsysProcess_GetErrorString
-# undef kwsysProcess_GetExceptionString
-# undef kwsysProcess_Execute
-# undef kwsysProcess_Disown
-# undef kwsysProcess_WaitForData
-# undef kwsysProcess_Pipes_e
-# undef kwsysProcess_Pipe_None
-# undef kwsysProcess_Pipe_STDIN
-# undef kwsysProcess_Pipe_STDOUT
-# undef kwsysProcess_Pipe_STDERR
-# undef kwsysProcess_Pipe_Timeout
-# undef kwsysProcess_Pipe_Handle
-# undef kwsysProcess_WaitForExit
-# undef kwsysProcess_Kill
+# if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+#  undef kwsysProcess
+#  undef kwsysProcess_s
+#  undef kwsysProcess_New
+#  undef kwsysProcess_Delete
+#  undef kwsysProcess_SetCommand
+#  undef kwsysProcess_AddCommand
+#  undef kwsysProcess_SetTimeout
+#  undef kwsysProcess_SetWorkingDirectory
+#  undef kwsysProcess_SetPipeFile
+#  undef kwsysProcess_SetPipeNative
+#  undef kwsysProcess_SetPipeShared
+#  undef kwsysProcess_Option_Detach
+#  undef kwsysProcess_Option_HideWindow
+#  undef kwsysProcess_Option_Verbatim
+#  undef kwsysProcess_GetOption
+#  undef kwsysProcess_SetOption
+#  undef kwsysProcess_Option_e
+#  undef kwsysProcess_State_Starting
+#  undef kwsysProcess_State_Error
+#  undef kwsysProcess_State_Exception
+#  undef kwsysProcess_State_Executing
+#  undef kwsysProcess_State_Exited
+#  undef kwsysProcess_State_Expired
+#  undef kwsysProcess_State_Killed
+#  undef kwsysProcess_State_Disowned
+#  undef kwsysProcess_GetState
+#  undef kwsysProcess_State_e
+#  undef kwsysProcess_Exception_None
+#  undef kwsysProcess_Exception_Fault
+#  undef kwsysProcess_Exception_Illegal
+#  undef kwsysProcess_Exception_Interrupt
+#  undef kwsysProcess_Exception_Numerical
+#  undef kwsysProcess_Exception_Other
+#  undef kwsysProcess_GetExitException
+#  undef kwsysProcess_Exception_e
+#  undef kwsysProcess_GetExitCode
+#  undef kwsysProcess_GetExitValue
+#  undef kwsysProcess_GetErrorString
+#  undef kwsysProcess_GetExceptionString
+#  undef kwsysProcess_Execute
+#  undef kwsysProcess_Disown
+#  undef kwsysProcess_WaitForData
+#  undef kwsysProcess_Pipes_e
+#  undef kwsysProcess_Pipe_None
+#  undef kwsysProcess_Pipe_STDIN
+#  undef kwsysProcess_Pipe_STDOUT
+#  undef kwsysProcess_Pipe_STDERR
+#  undef kwsysProcess_Pipe_Timeout
+#  undef kwsysProcess_Pipe_Handle
+#  undef kwsysProcess_WaitForExit
+#  undef kwsysProcess_Kill
+# endif
 #endif
 
 #endif

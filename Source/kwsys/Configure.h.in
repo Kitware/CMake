@@ -22,6 +22,9 @@
 # define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
 
+/* Whether kwsys namespace is "kwsys".  */
+#define @KWSYS_NAMESPACE@_NAME_IS_KWSYS @KWSYS_NAME_IS_KWSYS@
+
 /* If we are building a kwsys .c or .cxx file, suppress the Microsoft
    deprecation warnings.  */
 #if defined(KWSYS_NAMESPACE)
