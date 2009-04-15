@@ -955,6 +955,8 @@ void CMakeCommandUsage(const char* program)
     << "Usage: " << program << " -E [command] [arguments ...]\n"
     << "Available commands: \n"
     << "  chdir dir cmd [args]...   - run command in a given directory\n"
+    << "  rename oldname newname    - rename a file or directory "
+       "(on one volume)\n"
     << "  copy file destination     - copy file to destination (either file "
        "or directory)\n"
     << "  copy_if_different in-file out-file  - copy file if input has "
@@ -1028,6 +1030,20 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         std::cerr << "Error copying directory from \""
                   << args[2].c_str() << "\" to \"" << args[3].c_str()
                   << "\".\n";
+        return 1;
+        }
+      return 0;
+      }
+
+    // Rename a file or directory
+    if (args[1] == "rename" && args.size() == 4)
+      {
+      if(!cmSystemTools::RenameFile(args[2].c_str(), args[3].c_str()))
+        {
+        std::string e = cmSystemTools::GetLastSystemError();
+        std::cerr << "Error renaming from \""
+                  << args[2].c_str() << "\" to \"" << args[3].c_str()
+                  << "\": " << e << "\n";
         return 1;
         }
       return 0;
