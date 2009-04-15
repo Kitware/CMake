@@ -78,6 +78,7 @@ public:
       "  file(GLOB variable [RELATIVE path] [globbing expressions]...)\n"
       "  file(GLOB_RECURSE variable [RELATIVE path] \n"
       "       [FOLLOW_SYMLINKS] [globbing expressions]...)\n"
+      "  file(RENAME <oldname> <newname>)\n"
       "  file(REMOVE [file1 ...])\n"
       "  file(REMOVE_RECURSE [file1 ...])\n"
       "  file(MAKE_DIRECTORY [directory1 directory2 ...])\n"
@@ -133,6 +134,9 @@ public:
       "   /dir/*.py  - match all python files in /dir and subdirectories\n"
       "MAKE_DIRECTORY will create the given directories, also if their parent "
       "directories don't exist yet\n"
+      "RENAME moves a file or directory within a filesystem, "
+      "replacing the destination atomically."
+      "\n"
       "REMOVE will remove the given files, also in subdirectories\n"
       "REMOVE_RECURSE will remove the given files and directories, also "
       "non-empty directories\n"
@@ -159,6 +163,7 @@ public:
   cmTypeMacro(cmFileCommand, cmCommand);
 
 protected:
+  bool HandleRename(std::vector<std::string> const& args);
   bool HandleRemove(std::vector<std::string> const& args, bool recurse);
   bool HandleWriteCommand(std::vector<std::string> const& args, bool append);
   bool HandleReadCommand(std::vector<std::string> const& args);

@@ -184,7 +184,9 @@ SET(infile "${infile+-/out}")
 
 # Write include file to a file
 STRING(REGEX REPLACE "includefile" "${file}" outfile "${infile}")
-FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h" "${outfile}")
+FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h-tmp" "${outfile}")
+FILE(RENAME "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h-tmp"
+            "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h")
 
 # Test file glob
 FILE(GLOB_RECURSE src_files "${CMAKE_CURRENT_SOURCE_DIR}/*")

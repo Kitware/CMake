@@ -100,6 +100,10 @@ bool cmFileCommand
     {
     return this->HandleMakeDirectoryCommand(args);
     }
+  else if ( subCommand == "RENAME" )
+    {
+    return this->HandleRename(args);
+    }
   else if ( subCommand == "REMOVE" )
     {
     return this->HandleRemove(args, false);
@@ -2170,6 +2174,45 @@ bool cmFileCommand::HandleRelativePathCommand(
                                                 fileName.c_str());
   this->Makefile->AddDefinition(outVar.c_str(),
     res.c_str());
+  return true;
+}
+
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleRename(std::vector<std::string> const& args)
+{
+  if(args.size() != 3)
+    {
+    this->SetError("given incorrect number of arguments.");
+    return false;
+    }
+
+  // Compute full path for old and new names.
+  std::string oldname = args[1];
+  if(!cmsys::SystemTools::FileIsFullPath(oldname.c_str()))
+    {
+    oldname = this->Makefile->GetCurrentDirectory();
+    oldname += "/" + args[1];
+    }
+  std::string newname = args[2];
+  if(!cmsys::SystemTools::FileIsFullPath(newname.c_str()))
+    {
+    newname = this->Makefile->GetCurrentDirectory();
+    newname += "/" + args[2];
+    }
+
+  if(!cmSystemTools::RenameFile(oldname.c_str(), newname.c_str()))
+    {
+    std::string err = cmSystemTools::GetLastSystemError();
+    cmOStringStream e;
+    e << "RENAME failed to rename\n"
+      << "  " << oldname << "\n"
+      << "to\n"
+      << "  " << newname << "\n"
+      << "because: " << err << "\n";
+    this->SetError(e.str().c_str());
+    return false;
+    }
   return true;
 }
 
