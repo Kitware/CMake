@@ -1139,18 +1139,18 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
          cannot quite rename the file atomically.  Just delete the
          destination and then move the file.  */
       DeleteFile(newname);
-      return MoveFile(oldname, newname);
+      return MoveFile(oldname, newname) != 0;
       }
     else
       {
       /* This is not Win9x.  Use the MoveFileEx implementation.  */
-      return MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING);
+      return MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING) != 0;
       }
     }
   else
     {
     /* The destination does not exist.  Just move the file.  */
-    return MoveFile(oldname, newname);
+    return MoveFile(oldname, newname) != 0;
     }
 #else
   /* On UNIX we have an OS-provided call to do this atomically.  */
