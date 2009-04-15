@@ -3975,31 +3975,7 @@ bool SystemTools::SetPermissions(const char* file, mode_t mode)
 
 kwsys_stl::string SystemTools::GetParentDirectory(const char* fileOrDir)
 {
-  if ( !fileOrDir || !*fileOrDir || !SystemTools::FileExists(fileOrDir))
-    {
-    return "";
-    }
-  kwsys_stl::string res = fileOrDir;
-  SystemTools::ConvertToUnixSlashes(res);
-  
-  // If the root "/" directory is passed in, return empty string
-  if(strcmp(res.c_str(), "/") ==0 )
-    {
-    return "";
-    }
-  kwsys_stl::string::size_type cc = res.size()-1;
-  if ( res[cc] == '/' )
-    {
-    cc --;
-    }
-  for ( ; cc > 0; cc -- )
-    {
-    if ( res[cc] == '/' )
-      {
-      break;
-      }
-    }
-  return res.substr(0, cc);
+  return SystemTools::GetFilenamePath(fileOrDir);
 }
 
 bool SystemTools::IsSubDirectory(const char* cSubdir, const char* cDir)
