@@ -166,6 +166,10 @@ public:
   static bool CopyFileIfDifferent(const char* source, 
     const char* destination);
 
+  /** Rename a file or directory within a single disk volume (atomic
+      if possible).  */
+  static bool RenameFile(const char* oldname, const char* newname);
+
   ///! Compute the md5sum of a file
   static bool ComputeFileMD5(const char* source, char* md5out);
 

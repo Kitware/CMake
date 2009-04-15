@@ -18,14 +18,6 @@
 
 #include "cmSystemTools.h"
 
-// Includes needed for implementation of RenameFile.  This is not in
-// system tools because it is not implemented robustly enough to move
-// files across directories.
-#ifdef _WIN32
-# include <windows.h>
-# include <sys/stat.h>
-#endif
-
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include <cm_zlib.h>
 #endif
@@ -254,51 +246,7 @@ int cmGeneratedFileStreamBase::CompressFile(const char*, const char*)
 int cmGeneratedFileStreamBase::RenameFile(const char* oldname,
                                           const char* newname)
 {
-#ifdef _WIN32
-  /* On Windows the move functions will not replace existing files.
-     Check if the destination exists.  */
-  struct stat newFile;
-  if(stat(newname, &newFile) == 0)
-    {
-    /* The destination exists.  We have to replace it carefully.  The
-       MoveFileEx function does what we need but is not available on
-       Win9x.  */
-    OSVERSIONINFO osv;
-    DWORD attrs;
-
-    /* Make sure the destination is not read only.  */
-    attrs = GetFileAttributes(newname);
-    if(attrs & FILE_ATTRIBUTE_READONLY)
-      {
-      SetFileAttributes(newname, attrs & ~FILE_ATTRIBUTE_READONLY);
-      }
-
-    /* Check the windows version number.  */
-    osv.dwOSVersionInfoSize = sizeof(osv);
-    GetVersionEx(&osv);
-    if(osv.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-      {
-      /* This is Win9x.  There is no MoveFileEx implementation.  We
-         cannot quite rename the file atomically.  Just delete the
-         destination and then move the file.  */
-      DeleteFile(newname);
-      return MoveFile(oldname, newname);
-      }
-    else
-      {
-      /* This is not Win9x.  Use the MoveFileEx implementation.  */
-      return MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING);
-      }
-    }
-  else
-    {
-    /* The destination does not exist.  Just move the file.  */
-    return MoveFile(oldname, newname);
-    }
-#else
-  /* On UNIX we have an OS-provided call to do this atomically.  */
-  return rename(oldname, newname) == 0;
-#endif
+  return cmSystemTools::RenameFile(oldname, newname);
 }
 
 //----------------------------------------------------------------------------
