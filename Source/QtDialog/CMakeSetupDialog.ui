@@ -51,9 +51,7 @@
      <item row="1" column="1" >
       <widget class="QComboBox" name="BinaryDirectory" >
        <property name="sizePolicy" >
-        <sizepolicy>
-         <hsizetype>7</hsizetype>
-         <vsizetype>0</vsizetype>
+        <sizepolicy vsizetype="Fixed" hsizetype="Ignored" >
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
