@@ -63,3 +63,6 @@ TimeOut: @DART_TESTING_TIMEOUT@
 
 UseLaunchers: @CTEST_USE_LAUNCHERS@
 CurlOptions: @CTEST_CURL_OPTIONS@
+# warning, if you add new options here that have to do with submit,
+# you have to update cmCTestSubmitCommand.cxx
+

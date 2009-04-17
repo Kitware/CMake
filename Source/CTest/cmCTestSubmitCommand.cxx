@@ -92,6 +92,8 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     }
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "CurlOptions", "CTEST_CURL_OPTIONS");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "DropSiteUser", "CTEST_DROP_SITE_USER");
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "DropSitePassword", "CTEST_DROP_SITE_PASSWORD");
