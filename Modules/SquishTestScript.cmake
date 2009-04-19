@@ -1,6 +1,6 @@
 #
 # This script launches a GUI test using Squish.  You should not call
-# the script directly; instead, you should acces it via the
+# the script directly; instead, you should access it via the
 # SQUISH_ADD_TEST macro that is defined in FindSquish.cmake.
 #
 # This script starts the Squish server, launches the test on the

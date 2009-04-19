@@ -18,7 +18,7 @@
 #    is found
 #  BLA_STATIC  if set on this determines what kind of linkage we do (static)
 #  BLA_VENDOR  if set checks only the specified vendor, if not set checks
-#     all the posibilities
+#     all the possibilities
 #  BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
 ##########
 ### List of vendors (BLA_VENDOR) valid in this module

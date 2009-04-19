@@ -2,10 +2,10 @@
 # This module finds if any HLA RTI is installed and locates the standard RTI
 # include files and libraries.
 #
-# RTI is a simulation infrastructure standartized by IEEE and SISO. It has a
+# RTI is a simulation infrastructure standardized by IEEE and SISO. It has a
 # well defined C++ API that assures that simulation applications are
 # independent on a particular RTI implementation.
-# http://en.wikipedia.org/wiki/Run-Time_Infrastructure_(simulation)
+#  http://en.wikipedia.org/wiki/Run-Time_Infrastructure_(simulation)
 #
 # This code sets the following variables:
 #  RTI_INCLUDE_DIR = the directory where RTI includes file are found

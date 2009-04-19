@@ -44,8 +44,8 @@
 #                               against WX, e.g. WXUSINGDLL
 #  wxWidgets_DEFINITIONS_DEBUG- Contains defines required to compile/link
 #                               against WX debug builds, e.g. __WXDEBUG__
-#  wxWidgets_CXX_FLAGS        - Include dirs and ompiler flags for
-#                               unices, empty on WIN32. Esentially
+#  wxWidgets_CXX_FLAGS        - Include dirs and compiler flags for
+#                               unices, empty on WIN32. Essentially
 #                               "`wx-config --cxxflags`".
 #  wxWidgets_USE_FILE         - Convenience include file.
 #

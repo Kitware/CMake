@@ -66,7 +66,7 @@
 #
 # SET(Boost_ADDITIONAL_VERSIONS "0.99" "0.99.0" "1.78" "1.78.0")
 #
-# ============================================================================
+# ===================================== ============= ========================
 #
 # Variables used by this module, they can change the default behaviour and
 # need to be set before calling find_package:
@@ -133,7 +133,7 @@
 #   Boost_SUBMINOR_VERSION              subminor version number of boost
 #
 #   Boost_LIB_DIAGNOSTIC_DEFINITIONS    [WIN32 Only] You can call
-#                                       add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINTIIONS})
+#                                       add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 #                                       to have diagnostic information about Boost's
 #                                       automatic linking outputted during compilation time.
 #

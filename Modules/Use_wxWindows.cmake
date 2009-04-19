@@ -15,7 +15,7 @@
 #
 # -----------------------------------------------------
 # 16.Feb.2004: changed INCLUDE to FIND_PACKAGE to read from users own non-system CMAKE_MODULE_PATH (Jan Woetzel JW)
-# 07/2006: rewrite as FindwxWidgets.cmake, kept for backward compatibilty JW
+# 07/2006: rewrite as FindwxWidgets.cmake, kept for backward compatibility JW
 
 MESSAGE(STATUS "Use_wxWindows.cmake is DEPRECATED. \n"
 "Please use FIND_PACKAGE(wxWidgets) and INCLUDE(${wxWidgets_USE_FILE}) instead. (JW)")
