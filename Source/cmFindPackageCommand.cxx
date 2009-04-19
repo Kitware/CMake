@@ -169,7 +169,7 @@ cmFindPackageCommand::cmFindPackageCommand()
     "numbers.  "
     "Package version numbers are checked by \"version\" files provided by "
     "the packages themselves.  "
-    "For a candidate package confguration file \"<config-file>.cmake\" the "
+    "For a candidate package configuration file \"<config-file>.cmake\" the "
     "corresponding version file is located next to it and named either "
     "\"<config-file>-version.cmake\" or \"<config-file>Version.cmake\".  "
     "If no such version file is available then the configuration file "

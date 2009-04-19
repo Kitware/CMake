@@ -3443,7 +3443,7 @@ void cmake::DefineProperties(cmake *cm)
     ("ENABLED_LANGUAGES", cmProperty::GLOBAL,
      "Read-only property that contains the list of currently "
      "enabled languages",
-     "Set to list of currently enabled lanauges.");
+     "Set to list of currently enabled languages.");
 
   cm->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::GLOBAL,

@@ -67,7 +67,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_BUILD_TOOL", cmProperty::VARIABLE,
-     "Tool used for the acutal build process.",
+     "Tool used for the actual build process.",
      "This variable is set to the program that will be"
      " needed to build the output of CMake.   If the "
      "generator selected was Visual Studio 6, the "
@@ -263,7 +263,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_SKIP_RPATH", cmProperty::VARIABLE,
      "If true, do not add run time path information.",
      "If this is set to TRUE, then the rpath information "
-     "is not added to compiled executables.  The default"
+     "is not added to compiled executables.  The default "
      "is to add rpath information if the platform supports it."
      "This allows for easy running from the build tree.",false,
      "Variables that Provide Information");
@@ -338,7 +338,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_IMPORT_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for import  libraries that you link to.",
      "The suffix to use for the end of an import library if used "
-     "onthis platform.",
+     "on this platform.",
      false,
      "Variables that Provide Information");
   cm->DefineProperty
@@ -450,7 +450,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_MODULE_PATH", cmProperty::VARIABLE,
      "Path to look for cmake modules to load.",
-     "Specifies a path to override the default seach path for "
+     "Specifies a path to override the default search path for "
      "CMake modules. For example include commands will look "
      "in this path first for modules to include.",
      false,
@@ -603,7 +603,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_SYSTEM", cmProperty::VARIABLE,
      "Name of system cmake is compiling for.",
-     "This variable is the composite of CMAKE_SYSTEM_NAME"
+     "This variable is the composite of CMAKE_SYSTEM_NAME "
      "and CMAKE_SYSTEM_VERSION, like this "
      "${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}. "
      "If CMAKE_SYSTEM_VERSION is not set, then "
