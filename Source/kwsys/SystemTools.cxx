@@ -3980,6 +3980,10 @@ kwsys_stl::string SystemTools::GetParentDirectory(const char* fileOrDir)
 
 bool SystemTools::IsSubDirectory(const char* cSubdir, const char* cDir)
 {
+  if(!*cDir)
+    {
+    return false;
+    }
   kwsys_stl::string subdir = cSubdir;
   kwsys_stl::string dir = cDir;
   SystemTools::ConvertToUnixSlashes(dir);
