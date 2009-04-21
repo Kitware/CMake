@@ -32,7 +32,11 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/j2sdk1.4-sun/jre/lib/i386
   /usr/lib/j2sdk1.5-sun/jre/lib/i386
   /opt/sun-jdk-1.5.0.04/jre/lib/amd64
-  /usr/lib/jvm/java-6-sun-1.6.0.00/jre/lib/amd64
+  /usr/lib/jvm/java-6-sun/jre/lib/i386
+  /usr/lib/jvm/java-6-sun/jre/lib/amd64
+  /usr/lib/jvm/java-1.5.0-sun/jre/lib/i386
+  /usr/lib/jvm/java-1.5.0-sun/jre/lib/amd64
+  /usr/lib/jvm/java-6-sun-1.6.0.00/jre/lib/amd64       # can this one be removed according to #8821 ? Alex
   /usr/lib/java/jre/lib/amd64
   /usr/local/lib/java/jre/lib/amd64
   /usr/local/share/java/jre/lib/amd64
@@ -66,7 +70,9 @@ SET(JAVA_AWT_INCLUDE_DIRECTORIES
   /usr/lib/java/include
   /usr/local/lib/java/include
   /usr/lib/jvm/java/include
-  /usr/lib/jvm/java-6-sun-1.6.0.00/include
+  /usr/lib/jvm/java-6-sun/include
+  /usr/lib/jvm/java-1.5.0-sun/include
+  /usr/lib/jvm/java-6-sun-1.6.0.00/include       # can this one be removed according to #8821 ? Alex
   /usr/local/share/java/include
   /usr/lib/j2sdk1.4-sun/include
   /usr/lib/j2sdk1.5-sun/include
