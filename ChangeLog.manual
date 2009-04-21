@@ -1,3 +1,7 @@
+Changes in CMake 2.6.4 RC 5
+- Add missing file for OSXX11 CPack generator
+- cmake-gui fix path length in the binary directory's combo box
+
 Changes in CMake 2.6.4 RC 4
 - Better document Verbatim in custom commands
 - Fix #8843 ctest system information was not always correct on linux
