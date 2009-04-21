@@ -7,8 +7,9 @@
 #  MPEG2_mpeg2_LIBRARY, where to find the MPEG2 library.
 #  MPEG2_vo_LIBRARY, where to find the vo library.
 
-FIND_PATH(MPEG2_INCLUDE_DIR mpeg2.h
-  /usr/local/livid
+FIND_PATH(MPEG2_INCLUDE_DIR 
+  NAMES mpeg2.h mpeg2dec/mpeg2.h
+  PATHS /usr/local/livid
 )
 
 FIND_LIBRARY(MPEG2_mpeg2_LIBRARY mpeg2
@@ -37,3 +38,4 @@ IF(MPEG2_FOUND)
   ENDIF(SDL_FOUND)
 ENDIF(MPEG2_FOUND)
 
+MARK_AS_ADVANCED(MPEG2_INCLUDE_DIR MPEG2_mpeg2_LIBRARY MPEG2_vo_LIBRARY)
