@@ -22,6 +22,7 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   $ENV{JAVA_HOME}/jre/lib/i386
   $ENV{JAVA_HOME}/jre/lib/amd64
   $ENV{JAVA_HOME}/jre/lib/ppc
+  $ENV{JAVA_HOME}/lib
   /usr/lib
   /usr/local/lib
   /usr/lib/jvm/java/lib
