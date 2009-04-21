@@ -659,14 +659,6 @@ public:
                               const char *dir, 
                               kwsys_stl::string& filename_found,
                               int try_filename_dirs = 0);
-  
-  /** 
-   * Check if the given file exists in one of the parent directory of the
-   * given file or directory and if it does, return the name of the file.
-   * Toplevel specifies the top-most directory to where it will look.
-   */
-  static kwsys_stl::string FileExistsInParentDirectories(const char* fname,
-    const char* directory, const char* toplevel);
 
   /** compute the relative path from local to remote.  local must 
       be a directory.  remote can be a file or a directory.  

@@ -144,6 +144,14 @@ public:
     const char *name,
     const std::vector<std::string>& sourceExts);
 
+  /**
+   * Check if the given file exists in one of the parent directory of the
+   * given file or directory and if it does, return the name of the file.
+   * Toplevel specifies the top-most directory to where it will look.
+   */
+  static std::string FileExistsInParentDirectories(const char* fname,
+    const char* directory, const char* toplevel);
+
   static void Glob(const char *directory, const char *regexp,
                    std::vector<std::string>& files);
   static void GlobDirs(const char *fullPath, std::vector<std::string>& files);

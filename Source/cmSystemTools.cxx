@@ -1097,6 +1097,29 @@ bool cmSystemTools::DoesFileExistWithExtensions(
   return false;
 }
 
+std::string cmSystemTools::FileExistsInParentDirectories(const char* fname,
+  const char* directory, const char* toplevel)
+{
+  std::string file = fname;
+  SystemTools::ConvertToUnixSlashes(file);
+  std::string dir = directory;
+  SystemTools::ConvertToUnixSlashes(dir);
+  while ( !dir.empty() )
+    {
+    std::string path = dir + "/" + file;
+    if ( SystemTools::FileExists(path.c_str()) )
+      {
+      return path;
+      }
+    if ( dir.size() < strlen(toplevel) )
+      {
+      break;
+      }
+    dir = SystemTools::GetParentDirectory(dir.c_str());
+    }
+  return "";
+}
+
 bool cmSystemTools::cmCopyFile(const char* source, const char* destination)
 {
   return Superclass::CopyFileAlways(source, destination);
