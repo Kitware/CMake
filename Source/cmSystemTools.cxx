@@ -1104,7 +1104,8 @@ std::string cmSystemTools::FileExistsInParentDirectories(const char* fname,
   SystemTools::ConvertToUnixSlashes(file);
   std::string dir = directory;
   SystemTools::ConvertToUnixSlashes(dir);
-  while ( !dir.empty() )
+  std::string prevDir;
+  while(dir != prevDir)
     {
     std::string path = dir + "/" + file;
     if ( SystemTools::FileExists(path.c_str()) )
@@ -1115,6 +1116,7 @@ std::string cmSystemTools::FileExistsInParentDirectories(const char* fname,
       {
       break;
       }
+    prevDir = dir;
     dir = SystemTools::GetParentDirectory(dir.c_str());
     }
   return "";
