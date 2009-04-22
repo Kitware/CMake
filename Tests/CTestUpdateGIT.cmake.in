@@ -1,0 +1,174 @@
+# This script drives creation of a git repository and checks
+# that CTest can update from it.
+
+#-----------------------------------------------------------------------------
+# Test in a directory next to this script.
+get_filename_component(TOP "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(TOP "${TOP}/@CTestUpdateGIT_DIR@")
+
+# Include code common to all update tests.
+include("@CMAKE_CURRENT_SOURCE_DIR@/CTestUpdateCommon.cmake")
+
+#-----------------------------------------------------------------------------
+# Report git tools in use.
+message("Using GIT tools:")
+set(GIT "@GIT_EXECUTABLE@")
+message(" git = ${GIT}")
+
+set(AUTHOR_CONFIG "[user]
+\tname = Test Author
+\temail = testauthor@cmake.org
+")
+
+#-----------------------------------------------------------------------------
+# Initialize the testing directory.
+message("Creating test directory...")
+init_testing()
+
+#-----------------------------------------------------------------------------
+# Create the repository.
+message("Creating repository...")
+file(MAKE_DIRECTORY ${TOP}/repo.git)
+run_child(
+  WORKING_DIRECTORY ${TOP}/repo.git
+  COMMAND ${GIT} init --bare
+  )
+file(REMOVE_RECURSE ${TOP}/repo.git/hooks)
+set(REPO file://${TOP}/repo.git)
+
+#-----------------------------------------------------------------------------
+# Import initial content into the repository.
+message("Importing content...")
+create_content(import)
+
+# Import the content into the repository.
+run_child(WORKING_DIRECTORY ${TOP}/import
+  COMMAND ${GIT} init
+  )
+file(REMOVE_RECURSE ${TOP}/import/.git/hooks)
+file(APPEND ${TOP}/import/.git/config "
+[remote \"origin\"]
+\turl = ${REPO}
+\tfetch = +refs/heads/*:refs/remotes/origin/*
+${AUTHOR_CONFIG}")
+run_child(WORKING_DIRECTORY ${TOP}/import
+  COMMAND ${GIT} add .
+  )
+run_child(WORKING_DIRECTORY ${TOP}/import
+  COMMAND ${GIT} commit -m "Initial content"
+  )
+run_child(WORKING_DIRECTORY ${TOP}/import
+  COMMAND ${GIT} push origin master:refs/heads/master
+  )
+
+#-----------------------------------------------------------------------------
+# Create a working tree.
+message("Checking out revision 1...")
+run_child(
+  WORKING_DIRECTORY ${TOP}
+  COMMAND ${GIT} clone ${REPO} user-source
+  )
+file(REMOVE_RECURSE ${TOP}/user-source/.git/hooks)
+file(APPEND ${TOP}/user-source/.git/config "${AUTHOR_CONFIG}")
+
+#-----------------------------------------------------------------------------
+# Make changes in the working tree.
+message("Changing content...")
+update_content(user-source files_added files_removed dirs_added)
+if(dirs_added)
+  run_child(
+    WORKING_DIRECTORY ${TOP}/user-source
+    COMMAND ${GIT} add ${dirs_added}
+    )
+endif(dirs_added)
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${GIT} add ${files_added}
+  )
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${GIT} rm ${files_removed}
+  )
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${GIT} add -u
+  )
+
+#-----------------------------------------------------------------------------
+# Commit the changes to the repository.
+message("Committing revision 2...")
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${GIT} commit -m "Changed content"
+  )
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${GIT} push origin
+  )
+
+#-----------------------------------------------------------------------------
+# Make changes in the working tree.
+message("Changing content again...")
+change_content(user-source)
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${GIT} add -u
+  )
+
+#-----------------------------------------------------------------------------
+# Commit the changes to the repository.
+message("Committing revision 3...")
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${GIT} commit -m "Changed content again"
+  )
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${GIT} push origin
+  )
+
+#-----------------------------------------------------------------------------
+# Go back to before the changes so we can test updating.
+message("Backing up to revision 1...")
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${GIT} reset --hard master~2
+  )
+
+# Create a modified file.
+modify_content(user-source)
+
+#-----------------------------------------------------------------------------
+# Test updating the user work directory with the command-line interface.
+message("Running CTest Dashboard Command Line...")
+
+# Create the user build tree.
+create_build_tree(user-source user-binary)
+file(APPEND ${TOP}/user-binary/CTestConfiguration.ini
+  "# GIT command configuration
+UpdateCommand: ${GIT}
+")
+
+# Run the dashboard command line interface.
+run_dashboard_command_line(user-binary)
+
+#-----------------------------------------------------------------------------
+# Test initial checkout and update with a dashboard script.
+message("Running CTest Dashboard Script...")
+
+create_dashboard_script(dashboard.cmake
+  "# git command configuration
+set(CTEST_GIT_COMMAND \"${GIT}\")
+set(CTEST_GIT_UPDATE_OPTIONS)
+execute_process(
+  WORKING_DIRECTORY \"${TOP}\"
+  COMMAND \"${GIT}\" clone \"${REPO}\" dash-source
+  )
+execute_process(
+  WORKING_DIRECTORY \"${TOP}/dash-source\"
+  COMMAND \"${GIT}\" reset --hard master~2
+  )
+")
+
+# Run the dashboard script with CTest.
+run_dashboard_script(dashboard.cmake)

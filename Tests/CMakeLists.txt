@@ -925,6 +925,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateCVS_DIR}")
     ENDIF(CTEST_TEST_UPDATE_CVS AND CVS_FOUND)
 
+    # Test CTest Update with GIT
+    FIND_PROGRAM(GIT_EXECUTABLE NAMES git)
+    MARK_AS_ADVANCED(GIT_EXECUTABLE)
+    IF(GIT_EXECUTABLE)
+      SET(CTestUpdateGIT_DIR "CTest UpdateGIT")
+      CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestUpdateGIT.cmake.in"
+        "${CMake_BINARY_DIR}/Tests/CTestUpdateGIT.cmake" @ONLY)
+      ADD_TEST(CTest.UpdateGIT ${CMAKE_CMAKE_COMMAND}
+        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateGIT.cmake"
+        )
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateGIT_DIR}")
+    ENDIF(GIT_EXECUTABLE)
+
   ENDIF(CTEST_TEST_UPDATE)
 
   IF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)

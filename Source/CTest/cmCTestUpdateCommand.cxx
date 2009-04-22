@@ -48,6 +48,10 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
     "SVNCommand", "CTEST_SVN_COMMAND");
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "SVNUpdateOptions", "CTEST_SVN_UPDATE_OPTIONS");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "GITCommand", "CTEST_GIT_COMMAND");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "GITUpdateOptions", "CTEST_GIT_UPDATE_OPTIONS");
 
   const char* initialCheckoutCommand
     = this->Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
