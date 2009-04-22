@@ -17,13 +17,13 @@
 #ifndef cmCTestSVN_h
 #define cmCTestSVN_h
 
-#include "cmCTestVC.h"
+#include "cmCTestGlobalVC.h"
 
 /** \class cmCTestSVN
  * \brief Interaction with subversion command-line tool
  *
  */
-class cmCTestSVN: public cmCTestVC
+class cmCTestSVN: public cmCTestGlobalVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
@@ -37,23 +37,6 @@ private:
   virtual void NoteOldRevision();
   virtual void NoteNewRevision();
   virtual bool UpdateImpl();
-  virtual bool WriteXMLUpdates(std::ostream& xml);
-
-  /** Represent a subversion-reported action for one path in a revision.  */
-  struct Change
-  {
-    char Action;
-    std::string Path;
-    Change(): Action('?') {}
-  };
-
-  // Update status for files in each directory.
-  class Directory: public std::map<cmStdString, File> {};
-  std::map<cmStdString, Directory> Dirs;
-
-  // Old and new repository revisions.
-  std::string OldRevision;
-  std::string NewRevision;
 
   // URL of repository directory checked out in the working tree.
   std::string URL;
@@ -64,12 +47,6 @@ private:
   // Directory under repository root checked out in working tree.
   std::string Base;
 
-  // Information known about old revision.
-  Revision PriorRev;
-
-  // Information about revisions from a svn log.
-  std::list<Revision> Revisions;
-
   std::string LoadInfo();
   void LoadModifications();
   void LoadRevisions();
@@ -79,8 +56,6 @@ private:
 
   void DoRevision(Revision const& revision,
                   std::vector<Change> const& changes);
-  void WriteXMLDirectory(std::ostream& xml, std::string const& path,
-                         Directory const& dir);
 
   // Parsing helper classes.
   class InfoParser;

@@ -24,7 +24,8 @@
 #include <cmsys/RegularExpression.hxx>
 
 //----------------------------------------------------------------------------
-cmCTestSVN::cmCTestSVN(cmCTest* ct, std::ostream& log): cmCTestVC(ct, log)
+cmCTestSVN::cmCTestSVN(cmCTest* ct, std::ostream& log):
+  cmCTestGlobalVC(ct, log)
 {
   this->PriorRev = this->Unknown;
 }
@@ -360,10 +361,6 @@ private:
 //----------------------------------------------------------------------------
 void cmCTestSVN::LoadRevisions()
 {
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
-             "   Gathering version information (one . per revision):\n"
-             "    " << std::flush);
-
   // We are interested in every revision included in the update.
   std::string revs;
   if(atoi(this->OldRevision.c_str()) < atoi(this->NewRevision.c_str()))
@@ -383,7 +380,6 @@ void cmCTestSVN::LoadRevisions()
   OutputLogger err(this->Log, "log-err> ");
   this->RunChild(svn_log, &out, &err);
   }
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
 }
 
 //----------------------------------------------------------------------------
@@ -395,40 +391,7 @@ void cmCTestSVN::DoRevision(Revision const& revision,
     {
     this->GuessBase(changes);
     }
-
-  // Indicate we found a revision.
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
-
-  // Ignore changes in the old revision.
-  if(revision.Rev == this->OldRevision)
-    {
-    this->PriorRev = revision;
-    return;
-    }
-
-  // Store the revision.
-  this->Revisions.push_back(revision);
-
-  // Report this revision.
-  Revision const& rev = this->Revisions.back();
-  this->Log << "Found revision " << rev.Rev << "\n"
-            << "  author = " << rev.Author << "\n"
-            << "  date = " << rev.Date << "\n";
-
-  // Update information about revisions of the changed files.
-  for(std::vector<Change>::const_iterator ci = changes.begin();
-      ci != changes.end(); ++ci)
-    {
-    if(const char* local = this->LocalPath(ci->Path))
-      {
-      std::string dir = cmSystemTools::GetFilenamePath(local);
-      std::string name = cmSystemTools::GetFilenameName(local);
-      File& file = this->Dirs[dir][name];
-      file.PriorRev = file.Rev? file.Rev : &this->PriorRev;
-      file.Rev = &rev;
-      this->Log << "  " << ci->Action << " " << local << " " << "\n";
-      }
-    }
+  this->cmCTestGlobalVC::DoRevision(revision, changes);
 }
 
 //----------------------------------------------------------------------------
@@ -461,27 +424,13 @@ private:
     switch(status)
       {
       case 'M': case '!': case 'A': case 'D': case 'R': case 'X':
-        this->DoPath(PathModified, path);
+        this->SVN->DoModification(PathModified, path);
         break;
       case 'C': case '~':
-        this->DoPath(PathConflicting, path);
+        this->SVN->DoModification(PathConflicting, path);
         break;
       case 'I': case '?': case ' ': default:
         break;
-      }
-    }
-
-  void DoPath(PathStatus status, std::string const& path)
-    {
-    std::string dir = cmSystemTools::GetFilenamePath(path);
-    std::string name = cmSystemTools::GetFilenameName(path);
-    File& file = this->SVN->Dirs[dir][name];
-    file.Status = status;
-    // For local modifications the current rev is unknown and the
-    // prior rev is the latest from svn.
-    if(!file.Rev && !file.PriorRev)
-      {
-      file.PriorRev = &this->SVN->PriorRev;
       }
     }
 };
@@ -495,35 +444,4 @@ void cmCTestSVN::LoadModifications()
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunChild(svn_status, &out, &err);
-}
-
-//----------------------------------------------------------------------------
-void cmCTestSVN::WriteXMLDirectory(std::ostream& xml,
-                                   std::string const& path,
-                                   Directory const& dir)
-{
-  const char* slash = path.empty()? "":"/";
-  xml << "\t<Directory>\n"
-      << "\t\t<Name>" << cmXMLSafe(path) << "</Name>\n";
-  for(Directory::const_iterator fi = dir.begin(); fi != dir.end(); ++fi)
-    {
-    std::string full = path + slash + fi->first;
-    this->WriteXMLEntry(xml, path, fi->first, full, fi->second);
-    }
-  xml << "\t</Directory>\n";
-}
-
-//----------------------------------------------------------------------------
-bool cmCTestSVN::WriteXMLUpdates(std::ostream& xml)
-{
-  this->LoadRevisions();
-  this->LoadModifications();
-
-  for(std::map<cmStdString, Directory>::const_iterator
-        di = this->Dirs.begin(); di != this->Dirs.end(); ++di)
-    {
-    this->WriteXMLDirectory(xml, di->first, di->second);
-    }
-
-  return true;
 }
