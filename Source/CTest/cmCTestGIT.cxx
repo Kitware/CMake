@@ -252,7 +252,7 @@ protected:
 
    The header may have more fields.  See 'git help diff-tree'.
 */
-class cmCTestGIT::CommitParser: public DiffParser
+class cmCTestGIT::CommitParser: public cmCTestGIT::DiffParser
 {
 public:
   CommitParser(cmCTestGIT* git, const char* prefix):
