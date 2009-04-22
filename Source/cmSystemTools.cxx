@@ -1101,14 +1101,14 @@ std::string cmSystemTools::FileExistsInParentDirectories(const char* fname,
   const char* directory, const char* toplevel)
 {
   std::string file = fname;
-  SystemTools::ConvertToUnixSlashes(file);
+  cmSystemTools::ConvertToUnixSlashes(file);
   std::string dir = directory;
-  SystemTools::ConvertToUnixSlashes(dir);
+  cmSystemTools::ConvertToUnixSlashes(dir);
   std::string prevDir;
   while(dir != prevDir)
     {
     std::string path = dir + "/" + file;
-    if ( SystemTools::FileExists(path.c_str()) )
+    if ( cmSystemTools::FileExists(path.c_str()) )
       {
       return path;
       }
@@ -1117,7 +1117,7 @@ std::string cmSystemTools::FileExistsInParentDirectories(const char* fname,
       break;
       }
     prevDir = dir;
-    dir = SystemTools::GetParentDirectory(dir.c_str());
+    dir = cmSystemTools::GetParentDirectory(dir.c_str());
     }
   return "";
 }
