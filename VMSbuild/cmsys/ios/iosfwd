@@ -1,0 +1,51 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef cmsys_ios_iosfwd
+#define cmsys_ios_iosfwd
+
+#include <cmsys/Configure.hxx>
+
+#ifdef _MSC_VER
+#pragma warning (push, 1)
+#pragma warning (disable: 4702)
+#endif
+
+#if cmsys_IOS_USE_ANSI
+# include <iosfwd>
+#else
+class fstream;
+class ifstream;
+class ios;
+class istream;
+class ofstream;
+class ostream;
+#endif
+
+#if !cmsys_IOS_USE_SSTREAM
+namespace cmsys_ios
+{
+  using cmsys_ios_namespace::fstream;
+  using cmsys_ios_namespace::ifstream;
+  using cmsys_ios_namespace::ios;
+  using cmsys_ios_namespace::istream;
+  using cmsys_ios_namespace::ofstream;
+  using cmsys_ios_namespace::ostream;
+}
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+#endif

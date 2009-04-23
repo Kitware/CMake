@@ -53,12 +53,14 @@
 #ifndef _WIN32
 #include <utime.h>
 #include <limits.h>
-#include <sys/param.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <pwd.h>
+#ifndef __VMS
+#include <sys/param.h>
 #include <termios.h>
+#endif
 #include <signal.h>    /* sigprocmask */
 #endif
 

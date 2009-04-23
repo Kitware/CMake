@@ -11,20 +11,20 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-#ifndef @KWSYS_NAMESPACE@_System_h
-#define @KWSYS_NAMESPACE@_System_h
+#ifndef cmsys_System_h
+#define cmsys_System_h
 
-#include <@KWSYS_NAMESPACE@/Configure.h>
+#include <cmsys/Configure.h>
 
 /* Redefine all public interface symbol names to be in the proper
    namespace.  These macros are used internally to kwsys only, and are
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
 #if !defined(KWSYS_NAMESPACE)
-# define kwsys_ns(x) @KWSYS_NAMESPACE@##x
-# define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
+# define kwsys_ns(x) cmsys##x
+# define kwsysEXPORT cmsys_EXPORT
 #endif
-#if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+#if !cmsys_NAME_IS_KWSYS
 # define kwsysSystem_Shell_GetArgumentForWindows      kwsys_ns(System_Shell_GetArgumentForWindows)
 # define kwsysSystem_Shell_GetArgumentForUnix         kwsys_ns(System_Shell_GetArgumentForUnix)
 # define kwsysSystem_Shell_GetArgumentSizeForWindows  kwsys_ns(System_Shell_GetArgumentSizeForWindows)
@@ -40,12 +40,12 @@
 #endif
 
 #ifdef __VMS
-#define @KWSYS_NAMESPACE@System_Shell_GetArgumentForUnix \
-   @KWSYS_NAMESPACE@System_Shell_UnixGA
-#define @KWSYS_NAMESPACE@System_Shell_GetArgumentSizeForUnix \
-   @KWSYS_NAMESPACE@System_Shell_UnixGAS
-#define @KWSYS_NAMESPACE@System_Shell_GetArgumentForWindows \
-   @KWSYS_NAMESPACE@System_Shell_WindowsGA
+#define cmsysSystem_Shell_GetArgumentForUnix \
+   cmsysSystem_Shell_UnixGA
+#define cmsysSystem_Shell_GetArgumentSizeForUnix \
+   cmsysSystem_Shell_UnixGAS
+#define cmsysSystem_Shell_GetArgumentForWindows \
+   cmsysSystem_Shell_WindowsGA
 #endif
 
 #if defined(__cplusplus)
@@ -122,7 +122,7 @@ enum kwsysSystem_Shell_Flag_e
 #if !defined(KWSYS_NAMESPACE)
 # undef kwsys_ns
 # undef kwsysEXPORT
-# if !defined(KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# if !defined(KWSYS_NAMESPACE) && !cmsys_NAME_IS_KWSYS
 #  undef kwsysSystem_Shell_GetArgumentForWindows
 #  undef kwsysSystem_Shell_GetArgumentForUnix
 #  undef kwsysSystem_Shell_GetArgumentSizeForWindows

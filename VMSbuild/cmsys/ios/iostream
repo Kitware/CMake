@@ -1,0 +1,101 @@
+/*=========================================================================
+
+  Program:   KWSys - Kitware System Library
+  Module:    $RCSfile$
+
+  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+#ifndef cmsys_ios_iostream
+#define cmsys_ios_iostream
+
+#include <cmsys/Configure.hxx>
+
+#ifdef _MSC_VER
+# pragma warning (push, 1)
+# pragma warning (disable: 4702)
+# pragma warning (disable: 4995) /* Old streams are deprecated.  */
+#endif
+
+#if cmsys_IOS_USE_ANSI
+# include <iostream>
+#else
+# include <iostream.h>
+#endif
+
+// The HP implementation of iostream defines cin, cout, cerr, and clog
+// as macros in order to do thread-private streams.
+// See /opt/aCC/include/iostream/iostream.h for details.
+// This block redefines the macros in a safe way that is also compatible
+// with the HP definitions and the using declarations below.
+
+#if !cmsys_IOS_USE_SSTREAM
+# if defined(__HP_aCC) && (defined(HP_THREAD_SAFE) || defined(_THREAD_SAFE))
+#  if defined(cin) && !defined(cmsys_IOS_HP_HACK_CIN)
+#   define cmsys_IOS_HP_HACK_CIN
+#   undef cin
+#   define cin __tcin.ref()
+#  endif
+#  if defined(cout) && !defined(cmsys_IOS_HP_HACK_COUT)
+#   define cmsys_IOS_HP_HACK_COUT
+#   undef cout
+#   define cout __tcout.ref()
+#  endif
+#  if defined(cerr) && !defined(cmsys_IOS_HP_HACK_CERR)
+#   define cmsys_IOS_HP_HACK_CERR
+#   undef cerr
+#   define cerr __tcerr.ref()
+#  endif
+#  if defined(clog) && !defined(cmsys_IOS_HP_HACK_CLOG)
+#   define cmsys_IOS_HP_HACK_CLOG
+#   undef clog
+#   define clog __tclog.ref()
+#  endif
+# endif
+#endif
+
+// If using our own sstream emulation code, put the standard
+// streams in the same namespace.
+#if !cmsys_IOS_USE_SSTREAM
+namespace cmsys_ios
+{
+  typedef int streamsize;
+  typedef int streamoff;
+  using cmsys_ios_namespace::ostream;
+  using cmsys_ios_namespace::istream;
+  using cmsys_ios_namespace::ios;
+  using cmsys_ios_namespace::endl;
+  using cmsys_ios_namespace::flush;
+# if defined(cmsys_IOS_HP_HACK_CIN)
+  using cmsys_ios_namespace::__tcin;
+# else
+  using cmsys_ios_namespace::cin;
+# endif
+# if defined(cmsys_IOS_HP_HACK_COUT)
+  using cmsys_ios_namespace::__tcout;
+# else
+  using cmsys_ios_namespace::cout;
+# endif
+# if defined(cmsys_IOS_HP_HACK_CERR)
+  using cmsys_ios_namespace::__tcerr;
+# else
+  using cmsys_ios_namespace::cerr;
+# endif
+# if defined(cmsys_IOS_HP_HACK_CLOG)
+  using cmsys_ios_namespace::__tclog;
+# else
+  using cmsys_ios_namespace::clog;
+# endif
+}
+#endif
+
+#ifdef _MSC_VER
+# pragma warning(pop)
+#endif
+
+#endif

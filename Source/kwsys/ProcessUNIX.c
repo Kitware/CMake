@@ -2270,6 +2270,9 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
   if(cp->OptionDetach)
     {
     /* Create an intermediate process.  */
+#ifdef __VMS
+#define fork vfork
+#endif
     pid_t middle_pid = fork();
     if(middle_pid < 0)
       {
