@@ -31,7 +31,7 @@ message("Creating repository...")
 file(MAKE_DIRECTORY ${TOP}/repo.git)
 run_child(
   WORKING_DIRECTORY ${TOP}/repo.git
-  COMMAND ${GIT} init --bare
+  COMMAND ${GIT} --bare init
   )
 file(REMOVE_RECURSE ${TOP}/repo.git/hooks)
 set(REPO file://${TOP}/repo.git)
