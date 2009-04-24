@@ -178,7 +178,7 @@ set(EXPR "x*y+!(x==(y+1*2))*f(x${EXPR_OP1}2)")
 
 if(NOT WATCOM)
   # Watcom does not support - or / because it parses them as options.
-  set(EXPR "${EXPR}+y/x-x")
+  set(EXPR "${EXPR} + y/x-x")
 endif(NOT WATCOM)
 
 #-----------------------------------------------------------------------------
