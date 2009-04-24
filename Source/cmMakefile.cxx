@@ -1216,10 +1216,11 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
     return false;
     }
 
-  // VS6 IDE does not support definition values with spaces.
+  // VS6 IDE does not support definition values with spaces in
+  // combination with '"', '$', or ';'.
   if((strcmp(this->LocalGenerator->GetGlobalGenerator()->GetName(),
              "Visual Studio 6") == 0) &&
-     (def.find(" ") != def.npos))
+     (def.find(" ") != def.npos && def.find_first_of("\"$;") != def.npos))
     {
     return false;
     }

@@ -66,8 +66,9 @@ if(NOT BORLAND AND NOT PP_VS70)
 endif(NOT BORLAND AND NOT PP_VS70)
 
 if(NOT PP_VS6)
-  # VS 6 IDE: spaces
-  # The project parser unconditionally separates arguments at spaces.
+  # VS 6 IDE: spaces and '"', '$', or ';'
+  # The project parser cannot handle spaces if there are quotes.
+  # Since we test passing in a quoted string, we cannot have spaces.
   set(STRING_EXTRA "${STRING_EXTRA} ")
 
   if(NOT PP_BORLAND AND NOT PP_WATCOM)

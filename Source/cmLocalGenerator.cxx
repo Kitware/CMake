@@ -1994,8 +1994,15 @@ void cmLocalGenerator::AppendDefines(std::string& defines,
       }
     else
       {
-      // Make the definition appear properly on the command line.
-      defines += this->EscapeForShell(di->c_str(), true);
+      // Make the definition appear properly on the command line.  Use
+      // -DNAME="value" instead of -D"NAME=value" to help VS6 parser.
+      std::string::size_type eq = di->find("=");
+      defines += di->substr(0, eq);
+      if(eq != di->npos)
+        {
+        defines += "=";
+        defines += this->EscapeForShell(di->c_str() + eq + 1, true);
+        }
       }
     }
 }
