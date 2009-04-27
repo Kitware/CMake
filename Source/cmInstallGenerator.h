@@ -37,7 +37,6 @@ public:
     std::ostream& os, int type,
     std::vector<std::string> const& files,
     bool optional = false,
-    const char* properties = 0,
     const char* permissions_file = 0,
     const char* permissions_dir = 0,
     const char* rename = 0,

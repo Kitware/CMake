@@ -45,14 +45,13 @@ void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
                                                     Indent const& indent)
 {
   // Write code to install the files.
-  const char* no_properties = 0;
   const char* no_dir_permissions = 0;
   this->AddInstallRule(os,
                        (this->Programs
                         ? cmTarget::INSTALL_PROGRAMS
                         : cmTarget::INSTALL_FILES),
                        this->Files,
-                       this->Optional, no_properties,
+                       this->Optional,
                        this->FilePermissions.c_str(), no_dir_permissions,
                        this->Rename.c_str(), 0, indent);
 }

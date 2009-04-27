@@ -1733,9 +1733,8 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
   std::vector<std::string> files;
   int itype = cmTarget::INSTALL_FILES;
 
-  std::map<cmStdString, const char*> properties;
   bool optional = false;
-  bool result = this->ParseInstallArgs(args, installer, properties,
+  bool result = this->ParseInstallArgs(args, installer,
                                        itype, rename, destination, files,
                                        optional);
   if (result == true)
@@ -1749,7 +1748,6 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
                                 cmFileInstaller& installer,
-                                std::map<cmStdString, const char*>& properties,
                                 int& itype,
                                 std::string& rename,
                                 std::string& destination,
@@ -1757,7 +1755,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
                                 bool& optional)
 {
     std::string stype = "FILES";
-    enum Doing { DoingNone, DoingFiles, DoingProperties,
+    enum Doing { DoingNone, DoingFiles,
                  DoingPermissionsFile, DoingPermissionsDir,
                  DoingPermissionsMatch, DoingSelf24 };
     Doing doing = DoingNone;
@@ -1850,15 +1848,12 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         }
       else if ( *cstr == "PROPERTIES"  )
         {
-        if(current_match_rule)
-          {
-          cmOStringStream e;
-          e << "INSTALL does not allow \"" << *cstr << "\" after REGEX.";
-          this->SetError(e.str().c_str());
-          return false;
-          }
-
-        doing = DoingProperties;
+        cmOStringStream e;
+        e << "INSTALL called with old-style PROPERTIES argument.  "
+          << "This script was generated with an older version of CMake.  "
+          << "Re-run this cmake version on your build tree.";
+        this->SetError(e.str().c_str());
+        return false;
         }
       else if ( *cstr == "PERMISSIONS" )
         {
@@ -1949,11 +1944,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
 
         doing = DoingFiles;
         }
-      else if(doing == DoingProperties && i < args.size()-1)
-        {
-        properties[args[i]] = args[i+1].c_str();
-        i++;
-        }
       else if(doing == DoingFiles)
         {
         files.push_back(*cstr);
@@ -2024,25 +2014,6 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
 
       if (this->HandleInstallDestination(installer, destination) == false)
       {
-      return false;
-      }
-
-    if(properties.find("VERSION") != properties.end())
-      {
-      cmOStringStream e;
-      e << "INSTALL called with old-style VERSION property.  "
-        << "This script was generated with an older version of CMake.  "
-        << "Re-run this cmake version on your build tree.";
-      this->SetError(e.str().c_str());
-      return false;
-      }
-    if(properties.find("SOVERSION") != properties.end())
-      {
-      cmOStringStream e;
-      e << "INSTALL called with old-style SOVERSION property.  "
-        << "This script was generated with an older version of CMake.  "
-        << "Re-run this cmake version on your build tree.";
-      this->SetError(e.str().c_str());
       return false;
       }
 

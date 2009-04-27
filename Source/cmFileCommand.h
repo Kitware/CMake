@@ -183,7 +183,6 @@ protected:
   bool HandleInstallCommand(std::vector<std::string> const& args);
   bool ParseInstallArgs(std::vector<std::string> const& args,
                         cmFileInstaller& installer,
-                        std::map<cmStdString, const char*>& properties,
                         int& itype,
                         std::string& destination,
                         std::string& rename,
