@@ -1214,7 +1214,7 @@ bool cmFileInstaller::InstallDirectory(const char* source,
   // permissions temporarily during file installation.
   mode_t permissions_before = 0;
   mode_t permissions_after = 0;
-  if(permissions & required_permissions)
+  if(permissions & required_permissions == required_permissions)
     {
     permissions_before = permissions;
     }
