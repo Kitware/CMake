@@ -1216,10 +1216,27 @@ bool cmFileCopier::CheckValue(std::string const& arg)
   switch(this->Doing)
     {
     case DoingFiles:
-      this->Files.push_back(arg);
+      if(arg.empty() || cmSystemTools::FileIsFullPath(arg.c_str()))
+        {
+        this->Files.push_back(arg);
+        }
+      else
+        {
+        std::string file = this->Makefile->GetCurrentDirectory();
+        file += "/" + arg;
+        this->Files.push_back(file);
+        }
       break;
     case DoingDestination:
-      this->Destination = arg;
+      if(arg.empty() || cmSystemTools::FileIsFullPath(arg.c_str()))
+        {
+        this->Destination = arg;
+        }
+      else
+        {
+        this->Destination = this->Makefile->GetCurrentOutputDirectory();
+        this->Destination += "/" + arg;
+        }
       this->Doing = DoingNone;
       break;
     case DoingRegex:
