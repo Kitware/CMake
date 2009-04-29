@@ -186,15 +186,13 @@ protected:
                         int& itype,
                         std::string& destination,
                         std::string& rename,
-                        std::vector<std::string>& files,
-                        bool& optional
+                        std::vector<std::string>& files
                        );
   bool DoInstall(cmFileInstaller& installer,
                  const int itype,
                  const std::string& rename,
                  const std::string& destination,
-                 const std::vector<std::string>& files,
-                 const bool optional
+                 const std::vector<std::string>& files
                 );
   bool HandleDownloadCommand(std::vector<std::string> const& args);
   void GetTargetTypeFromString(const std::string& stype, int& itype) const;

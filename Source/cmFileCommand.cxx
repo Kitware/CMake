@@ -903,14 +903,10 @@ cmFileCommand::HandleDifferentCommand(std::vector<std::string> const& args)
 // File installation helper class.
 struct cmFileInstaller
 {
-  // Methods to actually install files.
-  bool InstallFile(const char* fromFile, const char* toFile);
-  bool InstallDirectory(const char* source, const char* destination);
-
   // All instances need the file command and makefile using them.
   cmFileInstaller(cmFileCommand* command):
     FileCommand(command), Makefile(command->GetMakefile()),
-    Always(false), DestDirLength(0), MatchlessFiles(true)
+    Always(false), Optional(false), DestDirLength(0), MatchlessFiles(true)
     {
     // Check whether to copy files always or only if they have changed.
     this->Always =
@@ -932,6 +928,7 @@ private:
   bool Always;
   cmFileTimeComparison FileTimes;
 public:
+  bool Optional;
 
   // The length of the destdir setting.
   int DestDirLength;
@@ -964,8 +961,7 @@ public:
   std::vector<MatchRule> MatchRules;
 
   // Get the properties from rules matching this input file.
-  MatchProperties CollectMatchProperties(const char* file,
-                                         bool isDirectory)
+  MatchProperties CollectMatchProperties(const char* file)
     {
     // Match rules are case-insensitive on some platforms.
 #if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
@@ -986,9 +982,9 @@ public:
         result.Permissions |= mr->Properties.Permissions;
         }
       }
-    if(!matched && !this->MatchlessFiles && !isDirectory)
+    if(!matched && !this->MatchlessFiles)
       {
-      result.Exclude = true;
+      result.Exclude = !cmSystemTools::FileIsDirectory(file);
       }
     return result;
     }
@@ -1038,7 +1034,60 @@ public:
 
 private:
   bool InstallSymlink(const char* fromFile, const char* toFile);
+public:
+  bool InstallFile(const char* fromFile, const char* toFile,
+                   MatchProperties const& match_properties);
+  bool InstallDirectory(const char* source, const char* destination,
+                        MatchProperties const& match_properties);
+  bool Install(const char* fromFile, const char* toFile);
 };
+
+//----------------------------------------------------------------------------
+bool cmFileInstaller::Install(const char* fromFile, const char* toFile)
+{
+  if(!*fromFile)
+    {
+    cmOStringStream e;
+    e << "INSTALL encountered an empty string input file name.";
+    this->FileCommand->SetError(e.str().c_str());
+    return false;
+    }
+
+  // Collect any properties matching this file name.
+  MatchProperties match_properties = this->CollectMatchProperties(fromFile);
+
+  // Skip the file if it is excluded.
+  if(match_properties.Exclude)
+    {
+    return true;
+    }
+
+  if(cmSystemTools::SameFile(fromFile, toFile))
+    {
+    return true;
+    }
+  else if(cmSystemTools::FileIsSymlink(fromFile))
+    {
+    return this->InstallSymlink(fromFile, toFile);
+    }
+  else if(cmSystemTools::FileIsDirectory(fromFile))
+    {
+    return this->InstallDirectory(fromFile, toFile, match_properties);
+    }
+  else if(cmSystemTools::FileExists(fromFile))
+    {
+    return this->InstallFile(fromFile, toFile, match_properties);
+    }
+  else if(!this->Optional)
+    {
+    // The input file does not exist and installation is not optional.
+    cmOStringStream e;
+    e << "INSTALL cannot find file \"" << fromFile << "\" to install.";
+    this->FileCommand->SetError(e.str().c_str());
+    return false;
+    }
+  return true;
+}
 
 //----------------------------------------------------------------------------
 bool cmFileInstaller::InstallSymlink(const char* fromFile, const char* toFile)
@@ -1097,24 +1146,9 @@ bool cmFileInstaller::InstallSymlink(const char* fromFile, const char* toFile)
 }
 
 //----------------------------------------------------------------------------
-bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile)
+bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
+                                  MatchProperties const& match_properties)
 {
-  // Collect any properties matching this file name.
-  MatchProperties match_properties =
-    this->CollectMatchProperties(fromFile, false);
-
-  // Skip the file if it is excluded.
-  if(match_properties.Exclude)
-    {
-    return true;
-    }
-
-  // Short-circuit for symbolic links.
-  if(cmSystemTools::FileIsSymlink(fromFile))
-    {
-    return this->InstallSymlink(fromFile, toFile);
-    }
-
   // Determine whether we will copy the file.
   bool copy = true;
   if(!this->Always)
@@ -1170,24 +1204,9 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile)
 
 //----------------------------------------------------------------------------
 bool cmFileInstaller::InstallDirectory(const char* source,
-                                       const char* destination)
+                                       const char* destination,
+                                      MatchProperties const& match_properties)
 {
-  // Collect any properties matching this directory name.
-  MatchProperties match_properties =
-    this->CollectMatchProperties(source, true);
-
-  // Skip the directory if it is excluded.
-  if(match_properties.Exclude)
-    {
-    return true;
-    }
-
-  // Short-circuit for symbolic links.
-  if(cmSystemTools::FileIsSymlink(source))
-    {
-    return this->InstallSymlink(source, destination);
-    }
-
   // Inform the user about this directory installation.
   std::string message = "Installing: ";
   message += destination;
@@ -1254,26 +1273,12 @@ bool cmFileInstaller::InstallDirectory(const char* source,
       cmsys_stl::string fromPath = source;
       fromPath += "/";
       fromPath += dir.GetFile(fileNum);
-      if(cmSystemTools::FileIsDirectory(fromPath.c_str()))
+      std::string toPath = destination;
+      toPath += "/";
+      toPath += dir.GetFile(fileNum);
+      if(!this->Install(fromPath.c_str(), toPath.c_str()))
         {
-        cmsys_stl::string toDir = destination;
-        toDir += "/";
-        toDir += dir.GetFile(fileNum);
-        if(!this->InstallDirectory(fromPath.c_str(), toDir.c_str()))
-          {
-          return false;
-          }
-        }
-      else
-        {
-        // Install this file.
-        std::string toFile = destination;
-        toFile += "/";
-        toFile += dir.GetFile(fileNum);
-        if(!this->InstallFile(fromPath.c_str(), toFile.c_str()))
-          {
-          return false;
-          }
+        return false;
         }
       }
     }
@@ -1728,14 +1733,12 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
   std::vector<std::string> files;
   int itype = cmTarget::INSTALL_FILES;
 
-  bool optional = false;
   bool result = this->ParseInstallArgs(args, installer,
-                                       itype, rename, destination, files,
-                                       optional);
+                                       itype, rename, destination, files);
   if (result == true)
     {
     result = this->DoInstall(installer,
-                             itype, rename, destination, files, optional);
+                             itype, rename, destination, files);
     }
   return result;
 }
@@ -1746,8 +1749,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
                                 int& itype,
                                 std::string& rename,
                                 std::string& destination,
-                                std::vector<std::string>& files,
-                                bool& optional)
+                                std::vector<std::string>& files)
 {
     std::string stype = "FILES";
     enum Doing { DoingNone, DoingFiles,
@@ -1795,7 +1797,7 @@ bool cmFileCommand::ParseInstallArgs(std::vector<std::string> const& args,
         if ( args[i+1] == "OPTIONAL" )
           {
           i++;
-          optional = true;
+          installer.Optional = true;
           }
         doing = DoingNone;
         }
@@ -2030,8 +2032,7 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
                               const int itype,
                               const std::string& rename,
                               const std::string& destination,
-                              const std::vector<std::string>& files,
-                              const bool optional)
+                              const std::vector<std::string>& files)
 {
   typedef std::set<cmStdString>::const_iterator iter_type;
 
@@ -2063,35 +2064,17 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
       fromFile += fromName;
       }
 
-    std::string message;
-    if(!cmSystemTools::SameFile(fromFile.c_str(), toFile.c_str()))
+    if(itype == cmTarget::INSTALL_DIRECTORY && fromFile.empty())
       {
-      if(itype == cmTarget::INSTALL_DIRECTORY &&
-         (fromFile.empty() ||
-          cmSystemTools::FileIsDirectory(fromFile.c_str())))
+      if(!installer.InstallDirectory(fromFile.c_str(), toFile.c_str(),
+                                     cmFileInstaller::MatchProperties()))
         {
-        // Try installing this directory.
-        if(!installer.InstallDirectory(fromFile.c_str(), toFile.c_str()))
-          {
-          return false;
-          }
-        }
-      else if(cmSystemTools::FileExists(fromFile.c_str()))
-        {
-        // Install this file.
-        if(!installer.InstallFile(fromFile.c_str(), toFile.c_str()))
-          {
-          return false;
-          }
-        }
-      else if(!optional)
-        {
-        // The input file does not exist and installation is not optional.
-        cmOStringStream e;
-        e << "INSTALL cannot find file \"" << fromFile << "\" to install.";
-        this->SetError(e.str().c_str());
         return false;
         }
+      }
+    else if(!installer.Install(fromFile.c_str(), toFile.c_str()))
+      {
+      return false;
       }
     }
 
