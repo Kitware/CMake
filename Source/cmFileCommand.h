@@ -179,32 +179,8 @@ protected:
   bool HandleRPathRemoveCommand(std::vector<std::string> const& args);
   bool HandleDifferentCommand(std::vector<std::string> const& args);
 
-  // file(INSTALL ...) related functions
   bool HandleInstallCommand(std::vector<std::string> const& args);
-  bool ParseInstallArgs(std::vector<std::string> const& args,
-                        cmFileInstaller& installer,
-                        int& itype,
-                        std::string& destination,
-                        std::string& rename,
-                        std::vector<std::string>& files
-                       );
-  bool DoInstall(cmFileInstaller& installer,
-                 const int itype,
-                 const std::string& rename,
-                 const std::string& destination,
-                 const std::vector<std::string>& files
-                );
   bool HandleDownloadCommand(std::vector<std::string> const& args);
-  void GetTargetTypeFromString(const std::string& stype, int& itype) const;
-  bool HandleInstallDestination(cmFileInstaller& installer,
-                                std::string& destination);
-  void HandleInstallPermissions(cmFileInstaller& installer,
-                                mode_t& permissions_file,
-                                mode_t& permissions_dir,
-                                int itype,
-                                bool use_given_permissions_file,
-                                bool use_given_permissions_dir,
-                                bool use_source_permissions) const;
 };
 
 
