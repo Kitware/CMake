@@ -909,8 +909,9 @@ struct cmFileInstaller
                         bool always);
 
   // All instances need the file command and makefile using them.
-  cmFileInstaller(cmFileCommand* fc, cmMakefile* mf):
-    FileCommand(fc), Makefile(mf), DestDirLength(0), MatchlessFiles(true)
+  cmFileInstaller(cmFileCommand* command):
+    FileCommand(command), Makefile(command->GetMakefile()),
+    DestDirLength(0), MatchlessFiles(true)
     {
     // Get the current manifest.
     this->Manifest =
@@ -1725,7 +1726,7 @@ bool cmFileCommand::HandleInstallCommand(std::vector<std::string> const& args)
     }
 
   // Construct a file installer object.
-  cmFileInstaller installer(this, this->Makefile);
+  cmFileInstaller installer(this);
 
   std::string rename = "";
   std::string destination = "";
