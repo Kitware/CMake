@@ -261,7 +261,7 @@ void cmCTestCVS::LoadRevisions(std::string const& file,
   // Run "cvs log" to get revisions of this file on this branch.
   const char* cvs = this->CommandLineTool.c_str();
   const char* cvs_log[] =
-    {cvs, "log", "-N", "-d<now", branchFlag, file.c_str(), 0};
+    {cvs, "log", "-N", branchFlag, file.c_str(), 0};
 
   LogParser out(this, "log-out> ", revisions);
   OutputLogger err(this->Log, "log-err> ");
