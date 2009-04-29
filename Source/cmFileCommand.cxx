@@ -1000,6 +1000,18 @@ public:
     this->Manifest += file.substr(this->DestDirLength);
     }
 
+  bool SetPermissions(const char* toFile, mode_t permissions)
+    {
+    if(permissions && !cmSystemTools::SetPermissions(toFile, permissions))
+      {
+      cmOStringStream e;
+      e << "INSTALL cannot set permissions on \"" << toFile << "\"";
+      this->FileCommand->SetError(e.str().c_str());
+      return false;
+      }
+    return true;
+    }
+
   // Translate an argument to a permissions bit.
   bool CheckPermissions(std::string const& arg, mode_t& permissions)
     {
@@ -1138,7 +1150,7 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile)
     if (!cmSystemTools::CopyFileTime(fromFile, toFile))
       {
       cmOStringStream e;
-      e << "Problem setting modification time on file \"" << toFile << "\"";
+      e << "INSTALL cannot set modification time on \"" << toFile << "\"";
       this->FileCommand->SetError(e.str().c_str());
       return false;
       }
@@ -1153,15 +1165,7 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile)
     // that the source file permissions be used.
     cmSystemTools::GetPermissions(fromFile, permissions);
     }
-  if(permissions && !cmSystemTools::SetPermissions(toFile, permissions))
-    {
-    cmOStringStream e;
-    e << "Problem setting permissions on file \"" << toFile << "\"";
-    this->FileCommand->SetError(e.str().c_str());
-    return false;
-    }
-
-  return true;
+  return this->SetPermissions(toFile, permissions);
 }
 
 //----------------------------------------------------------------------------
@@ -1230,13 +1234,8 @@ bool cmFileInstaller::InstallDirectory(const char* source,
     }
 
   // Set the required permissions of the destination directory.
-  if(permissions_before &&
-     !cmSystemTools::SetPermissions(destination, permissions_before))
+  if(!this->SetPermissions(destination, permissions_before))
     {
-    cmOStringStream e;
-    e << "Problem setting permissions on directory \""
-      << destination << "\"";
-    this->FileCommand->SetError(e.str().c_str());
     return false;
     }
 
@@ -1280,16 +1279,7 @@ bool cmFileInstaller::InstallDirectory(const char* source,
     }
 
   // Set the requested permissions of the destination directory.
-  if(permissions_after &&
-     !cmSystemTools::SetPermissions(destination, permissions_after))
-    {
-    cmOStringStream e;
-    e << "Problem setting permissions on directory \"" << destination << "\"";
-    this->FileCommand->SetError(e.str().c_str());
-    return false;
-    }
-
-  return true;
+  return this->SetPermissions(destination, permissions_after);
 }
 
 //----------------------------------------------------------------------------
