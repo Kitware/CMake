@@ -66,31 +66,15 @@ endif()
 # Analyze what came out of the tar file:
 #
 file(GLOB contents "${ut_dir}/*")
-
-set(is_one_directory 0)
 list(LENGTH contents n)
-if(n EQUAL 1)
-  if(IS_DIRECTORY "${contents}")
-    set(is_one_directory 1)
-  endif()
+if(NOT n EQUAL 1 OR NOT IS_DIRECTORY "${contents}")
+  set(contents "${ut_dir}")
 endif()
 
 
 # Copy "the one" directory to the final directory:
 #
-if(is_one_directory EQUAL 1)
-  #message(STATUS "info: (1) copying '${contents}' to '${directory}'...")
-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${contents}" "${directory}"
-    RESULT_VARIABLE rv)
-else()
-  #message(STATUS "info: (more) copying '${ut_dir}' to '${directory}'...")
-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${ut_dir}" "${directory}"
-    RESULT_VARIABLE rv)
-endif()
-
-if(NOT rv EQUAL 0)
-  message(FATAL_ERROR "error: copy_directory failed after untar in '${ut_dir}'")
-endif()
+file(COPY "${contents}/" DESTINATION ${directory})
 
 
 # Clean up:
