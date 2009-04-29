@@ -11,7 +11,7 @@ set(Copy-LateArg-STDERR "option FILE_PERMISSIONS may not appear after")
 set(Copy-NoDest-RESULT 1)
 set(Copy-NoDest-STDERR "given no DESTINATION")
 set(Copy-NoFile-RESULT 1)
-set(Copy-NoFile-STDERR "COPY cannot find .*/does_not_exist\\.txt")
+set(Copy-NoFile-STDERR "COPY cannot find.*/does_not_exist\\.txt")
 
 foreach(test
     Copy-BadArg
