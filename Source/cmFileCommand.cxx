@@ -922,6 +922,7 @@ struct cmFileCopier
     Doing(DoingNone)
     {
     }
+  virtual ~cmFileCopier() {}
 
   bool Run(std::vector<std::string> const& args);
 protected:
