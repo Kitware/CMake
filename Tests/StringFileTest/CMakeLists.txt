@@ -188,10 +188,19 @@ FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h-tmp" "${outfile}")
 FILE(RENAME "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h-tmp"
             "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h")
 
+# Test file copy with relative paths
+FILE(COPY .
+  DESTINATION src
+  FILE_PERMISSIONS OWNER_READ OWNER_WRITE
+  DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE # test no OWNER_WRITE
+  FILES_MATCHING PATTERN *.cxx # Only copy the main source file
+  REGEX /src$ EXCLUDE # Block recursion for in-source build
+  )
+
 # Test file glob
 FILE(GLOB_RECURSE src_files "${CMAKE_CURRENT_SOURCE_DIR}/*")
 MESSAGE("Files in ${CMAKE_CURRENT_SOURCE_DIR} are ${src_files}")
-SET(expr "${CMAKE_CURRENT_SOURCE_DIR}/[sS][!a-su-zA-Z0-9][^a-qs-zA-Z0-9]ing?ile*.cxx")
+SET(expr "${CMAKE_CURRENT_BINARY_DIR}/src/[sS][!a-su-zA-Z0-9][^a-qs-zA-Z0-9]ing?ile*.cxx")
 MESSAGE("Glob expression is [${expr}].")
 FILE(GLOB src_files "${expr}")
 MESSAGE("Globbed files [${src_files}].")
