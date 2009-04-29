@@ -904,15 +904,17 @@ cmFileCommand::HandleDifferentCommand(std::vector<std::string> const& args)
 struct cmFileInstaller
 {
   // Methods to actually install files.
-  bool InstallFile(const char* fromFile, const char* toFile, bool always);
-  bool InstallDirectory(const char* source, const char* destination,
-                        bool always);
+  bool InstallFile(const char* fromFile, const char* toFile);
+  bool InstallDirectory(const char* source, const char* destination);
 
   // All instances need the file command and makefile using them.
   cmFileInstaller(cmFileCommand* command):
     FileCommand(command), Makefile(command->GetMakefile()),
-    DestDirLength(0), MatchlessFiles(true)
+    Always(false), DestDirLength(0), MatchlessFiles(true)
     {
+    // Check whether to copy files always or only if they have changed.
+    this->Always =
+      cmSystemTools::IsOn(cmSystemTools::GetEnv("CMAKE_INSTALL_ALWAYS"));
     // Get the current manifest.
     this->Manifest =
       this->Makefile->GetSafeDefinition("CMAKE_INSTALL_MANIFEST_FILES");
@@ -927,6 +929,7 @@ struct cmFileInstaller
 private:
   cmFileCommand* FileCommand;
   cmMakefile* Makefile;
+  bool Always;
   cmFileTimeComparison FileTimes;
 public:
 
@@ -1022,12 +1025,11 @@ public:
     }
 
 private:
-  bool InstallSymlink(const char* fromFile, const char* toFile, bool always);
+  bool InstallSymlink(const char* fromFile, const char* toFile);
 };
 
 //----------------------------------------------------------------------------
-bool cmFileInstaller::InstallSymlink(const char* fromFile, const char* toFile,
-                                     bool always)
+bool cmFileInstaller::InstallSymlink(const char* fromFile, const char* toFile)
 {
   // Read the original symlink.
   std::string symlinkTarget;
@@ -1043,7 +1045,7 @@ bool cmFileInstaller::InstallSymlink(const char* fromFile, const char* toFile,
   // Compare the symlink value to that at the destination if not
   // always installing.
   bool copy = true;
-  if(!always)
+  if(!this->Always)
     {
     std::string oldSymlinkTarget;
     if(cmSystemTools::ReadSymlink(toFile, oldSymlinkTarget))
@@ -1083,8 +1085,7 @@ bool cmFileInstaller::InstallSymlink(const char* fromFile, const char* toFile,
 }
 
 //----------------------------------------------------------------------------
-bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
-                                  bool always)
+bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile)
 {
   // Collect any properties matching this file name.
   MatchProperties match_properties =
@@ -1099,12 +1100,12 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
   // Short-circuit for symbolic links.
   if(cmSystemTools::FileIsSymlink(fromFile))
     {
-    return this->InstallSymlink(fromFile, toFile, always);
+    return this->InstallSymlink(fromFile, toFile);
     }
 
   // Determine whether we will copy the file.
   bool copy = true;
-  if(!always)
+  if(!this->Always)
     {
     // If both files exist with the same time do not copy.
     if(!this->FileTimes.FileTimesDiffer(fromFile, toFile))
@@ -1132,7 +1133,7 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
   this->ManifestAppend(toFile);
 
   // Set the file modification time of the destination file.
-  if(copy && !always)
+  if(copy && !this->Always)
     {
     if (!cmSystemTools::CopyFileTime(fromFile, toFile))
       {
@@ -1165,8 +1166,7 @@ bool cmFileInstaller::InstallFile(const char* fromFile, const char* toFile,
 
 //----------------------------------------------------------------------------
 bool cmFileInstaller::InstallDirectory(const char* source,
-                                       const char* destination,
-                                       bool always)
+                                       const char* destination)
 {
   // Collect any properties matching this directory name.
   MatchProperties match_properties =
@@ -1181,7 +1181,7 @@ bool cmFileInstaller::InstallDirectory(const char* source,
   // Short-circuit for symbolic links.
   if(cmSystemTools::FileIsSymlink(source))
     {
-    return this->InstallSymlink(source, destination, always);
+    return this->InstallSymlink(source, destination);
     }
 
   // Inform the user about this directory installation.
@@ -1256,7 +1256,7 @@ bool cmFileInstaller::InstallDirectory(const char* source,
         cmsys_stl::string toDir = destination;
         toDir += "/";
         toDir += dir.GetFile(fileNum);
-        if(!this->InstallDirectory(fromPath.c_str(), toDir.c_str(), always))
+        if(!this->InstallDirectory(fromPath.c_str(), toDir.c_str()))
           {
           return false;
           }
@@ -1267,7 +1267,7 @@ bool cmFileInstaller::InstallDirectory(const char* source,
         std::string toFile = destination;
         toFile += "/";
         toFile += dir.GetFile(fileNum);
-        if(!this->InstallFile(fromPath.c_str(), toFile.c_str(), always))
+        if(!this->InstallFile(fromPath.c_str(), toFile.c_str()))
           {
           return false;
           }
@@ -2041,11 +2041,6 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
 {
   typedef std::set<cmStdString>::const_iterator iter_type;
 
-  // Check whether files should be copied always or only if they have
-  // changed.
-  bool copy_always =
-    cmSystemTools::IsOn(cmSystemTools::GetEnv("CMAKE_INSTALL_ALWAYS"));
-
   // Handle each file listed.
   for (std::vector<std::string>::size_type i = 0; i < files.size(); i ++ )
     {
@@ -2082,8 +2077,7 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
           cmSystemTools::FileIsDirectory(fromFile.c_str())))
         {
         // Try installing this directory.
-        if(!installer.InstallDirectory(fromFile.c_str(), toFile.c_str(),
-                                       copy_always))
+        if(!installer.InstallDirectory(fromFile.c_str(), toFile.c_str()))
           {
           return false;
           }
@@ -2091,8 +2085,7 @@ bool cmFileCommand::DoInstall( cmFileInstaller& installer,
       else if(cmSystemTools::FileExists(fromFile.c_str()))
         {
         // Install this file.
-        if(!installer.InstallFile(fromFile.c_str(), toFile.c_str(),
-                                  copy_always))
+        if(!installer.InstallFile(fromFile.c_str(), toFile.c_str()))
           {
           return false;
           }
