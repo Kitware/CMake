@@ -1039,7 +1039,7 @@ protected:
     TypeDir,
     TypeLink
   };
-  virtual void ReportCopy(const char* toFile, Type type, bool copy) {}
+  virtual void ReportCopy(const char*, Type, bool) {}
   virtual bool ReportMissing(const char* fromFile)
     {
     // The input file does not exist and installation is not optional.
