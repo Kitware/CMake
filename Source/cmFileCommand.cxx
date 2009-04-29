@@ -947,6 +947,8 @@ protected:
     mode_t Permissions;
     MatchProperties(): Exclude(false), Permissions(0) {}
   };
+  struct MatchRule;
+  friend struct MatchRule;
   struct MatchRule
   {
     cmsys::RegularExpression Regex;
