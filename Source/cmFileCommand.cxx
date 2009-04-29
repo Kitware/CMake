@@ -1192,6 +1192,10 @@ bool cmFileInstaller::InstallDirectory(const char* source,
   // Make sure the destination directory exists.
   if(!cmSystemTools::MakeDirectory(destination))
     {
+    cmOStringStream e;
+    e << "INSTALL cannot make directory \"" << destination << "\": "
+      << cmSystemTools::GetLastSystemError();
+    this->FileCommand->SetError(e.str().c_str());
     return false;
     }
 
