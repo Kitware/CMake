@@ -1,0 +1,50 @@
+set(Copy-BadArg-RESULT 1)
+set(Copy-BadArg-STDERR "unknown argument \"BADARG\"")
+set(Copy-BadPerm-RESULT 1)
+set(Copy-BadPerm-STDERR "COPY given invalid permission \"BADPERM\"")
+set(Copy-BadRegex-RESULT 1)
+set(Copy-BadRegex-STDERR "could not compile REGEX")
+set(Copy-EarlyArg-RESULT 1)
+set(Copy-EarlyArg-STDERR "option PERMISSIONS may not appear before")
+set(Copy-LateArg-RESULT 1)
+set(Copy-LateArg-STDERR "option FILE_PERMISSIONS may not appear after")
+set(Copy-NoDest-RESULT 1)
+set(Copy-NoDest-STDERR "given no DESTINATION")
+set(Copy-NoFile-RESULT 1)
+set(Copy-NoFile-STDERR "COPY cannot find .*/does_not_exist\\.txt")
+
+foreach(test
+    Copy-BadArg
+    Copy-BadPerm
+    Copy-BadRegex
+    Copy-EarlyArg
+    Copy-LateArg
+    Copy-NoDest
+    Copy-NoFile
+    )
+  message(STATUS "Test ${test}...")
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -P
+    "@CMAKE_CURRENT_SOURCE_DIR@/File-${test}.cmake"
+    WORKING_DIRECTORY "@CMAKE_CURRENT_BINARY_DIR@"
+    OUTPUT_VARIABLE stdout
+    ERROR_VARIABLE stderr
+    RESULT_VARIABLE result
+    )
+  string(REGEX REPLACE "\n" "\n out> " out " out> ${stdout}")
+  string(REGEX REPLACE "\n" "\n err> " err " err> ${stderr}")
+  if(NOT "${result}" STREQUAL ${${test}-RESULT})
+    message(FATAL_ERROR
+      "Test ${test} result is [${result}], not [${${test}-RESULT}].\n"
+      "Test ${test} output:\n"
+      "${out}\n"
+      "${err}")
+  endif()
+  if(${test}-STDERR AND NOT "${err}" MATCHES "${${test}-STDERR}")
+    message(FATAL_ERROR
+      "Test ${test} stderr does not match\n  ${${test}-STDERR}\n"
+      "Test ${test} output:\n"
+      "${out}\n"
+      "${err}")
+  endif()
+endforeach()
