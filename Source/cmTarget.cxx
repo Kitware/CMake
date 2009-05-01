@@ -2836,18 +2836,6 @@ void cmTarget::GetExecutableNames(std::string& name,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetExecutableCleanNames(std::string& name,
-                                       std::string& realName,
-                                       std::string& impName,
-                                       std::string& pdbName,
-                                       const char* config)
-{
-  // Get the name and versioned name of this executable.
-  this->GetExecutableNamesInternal(name, realName, impName, pdbName,
-                                   cmTarget::EXECUTABLE, config);
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::GetExecutableNamesInternal(std::string& name,
                                           std::string& realName,
                                           std::string& impName,

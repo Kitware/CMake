@@ -333,14 +333,6 @@ public:
                           std::string& impName,
                           std::string& pdbName, const char* config);
 
-  /** Get the names of the executable used to remove existing copies
-      of the executable from the build tree either before linking or
-      during a clean step.  This should be called only on an
-      executable target.  */
-  void GetExecutableCleanNames(std::string& name, std::string& realName,
-                               std::string& impName,
-                               std::string& pdbName, const char* config);
-
   /** Add the target output files to the global generator manifest.  */
   void GenerateTargetManifest(const char* config);
 

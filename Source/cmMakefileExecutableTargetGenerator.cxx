@@ -253,38 +253,25 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;
-  {
-  std::string cleanName;
-  std::string cleanRealName;
-  std::string cleanImportName;
-  std::string cleanPDBName;
-  this->Target->GetExecutableCleanNames
-    (cleanName, cleanRealName, cleanImportName, cleanPDBName,
-     this->LocalGenerator->ConfigurationName.c_str());
-
-  std::string cleanFullName = outpath + cleanName;
-  std::string cleanFullRealName = outpath + cleanRealName;
-  std::string cleanFullPDBName = outpath + cleanPDBName;
-  std::string cleanFullImportName = outpathImp + cleanImportName;
-  exeCleanFiles.push_back(this->Convert(cleanFullName.c_str(),
+  exeCleanFiles.push_back(this->Convert(targetFullPath.c_str(),
                                         cmLocalGenerator::START_OUTPUT,
                                         cmLocalGenerator::UNCHANGED));
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the
   // clean set just in case.
-  exeCleanFiles.push_back(this->Convert((cleanFullName+".manifest").c_str(),
+  exeCleanFiles.push_back(this->Convert((targetFullPath+".manifest").c_str(),
                                         cmLocalGenerator::START_OUTPUT,
                                         cmLocalGenerator::UNCHANGED));
 #endif
-  if(cleanRealName != cleanName)
+  if(targetNameReal != targetName)
     {
-    exeCleanFiles.push_back(this->Convert(cleanFullRealName.c_str(),
+    exeCleanFiles.push_back(this->Convert(targetFullPathReal.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
     }
-  if(!cleanImportName.empty())
+  if(!targetNameImport.empty())
     {
-    exeCleanFiles.push_back(this->Convert(cleanFullImportName.c_str(),
+    exeCleanFiles.push_back(this->Convert(targetFullPathImport.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
     }
@@ -293,10 +280,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
   this->CleanFiles.push_back
-    (this->Convert(cleanFullPDBName.c_str(),
+    (this->Convert(targetFullPathPDB.c_str(),
                    cmLocalGenerator::START_OUTPUT,
                    cmLocalGenerator::UNCHANGED));
-  }
 
   // Add the pre-build and pre-link rules building but not when relinking.
   if(!relink)
