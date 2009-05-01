@@ -485,101 +485,38 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     default: break;
     }
 
-  // Construct a list of files associated with this library that may
-  // need to be cleaned.
+  // Clean files associated with this library.
   std::vector<std::string> libCleanFiles;
-  if(this->Target->GetPropertyAsBool("CLEAN_DIRECT_OUTPUT"))
+  libCleanFiles.push_back(this->Convert(targetFullPath.c_str(),
+        cmLocalGenerator::START_OUTPUT,
+        cmLocalGenerator::UNCHANGED));
+  if(targetNameReal != targetName)
     {
-    // The user has requested that only the files directly built
-    // by this target be cleaned instead of all possible names.
-    libCleanFiles.push_back(this->Convert(targetFullPath.c_str(),
-          cmLocalGenerator::START_OUTPUT,
-          cmLocalGenerator::UNCHANGED));
-    if(targetNameReal != targetName)
-      {
-      libCleanFiles.push_back(this->Convert(targetFullPathReal.c_str(),
-          cmLocalGenerator::START_OUTPUT,
-          cmLocalGenerator::UNCHANGED));
-      }
-    if(targetNameSO != targetName &&
-       targetNameSO != targetNameReal)
-      {
-      libCleanFiles.push_back(this->Convert(targetFullPathSO.c_str(),
-          cmLocalGenerator::START_OUTPUT,
-          cmLocalGenerator::UNCHANGED));
-      }
-    if(!targetNameImport.empty())
-      {
-      libCleanFiles.push_back(this->Convert(targetFullPathImport.c_str(),
-          cmLocalGenerator::START_OUTPUT,
-          cmLocalGenerator::UNCHANGED));
-      }
+    libCleanFiles.push_back(this->Convert(targetFullPathReal.c_str(),
+        cmLocalGenerator::START_OUTPUT,
+        cmLocalGenerator::UNCHANGED));
     }
-  else
+  if(targetNameSO != targetName &&
+     targetNameSO != targetNameReal)
     {
-    // This target may switch between static and shared based
-    // on a user option or the BUILD_SHARED_LIBS switch.  Clean
-    // all possible names.
-    std::string cleanStaticName;
-    std::string cleanSharedName;
-    std::string cleanSharedSOName;
-    std::string cleanSharedRealName;
-    std::string cleanImportName;
-    std::string cleanPDBName;
-    this->Target->GetLibraryCleanNames(
-      cleanStaticName,
-      cleanSharedName,
-      cleanSharedSOName,
-      cleanSharedRealName,
-      cleanImportName,
-      cleanPDBName,
-      this->LocalGenerator->ConfigurationName.c_str());
-    std::string cleanFullStaticName = outpath + cleanStaticName;
-    std::string cleanFullSharedName = outpath + cleanSharedName;
-    std::string cleanFullSharedSOName = outpath + cleanSharedSOName;
-    std::string cleanFullSharedRealName = outpath + cleanSharedRealName;
-    std::string cleanFullImportName = outpathImp + cleanImportName;
-    std::string cleanFullPDBName = outpath + cleanPDBName;
-    libCleanFiles.push_back
-      (this->Convert(cleanFullStaticName.c_str(),
-                     cmLocalGenerator::START_OUTPUT,
-                     cmLocalGenerator::UNCHANGED));
-    if(cleanSharedRealName != cleanStaticName)
-      {
-      libCleanFiles.push_back(this->Convert(cleanFullSharedRealName.c_str(),
-          cmLocalGenerator::START_OUTPUT,
-          cmLocalGenerator::UNCHANGED));
-      }
-    if(cleanSharedSOName != cleanStaticName &&
-      cleanSharedSOName != cleanSharedRealName)
-      {
-      libCleanFiles.push_back(this->Convert(cleanFullSharedSOName.c_str(),
-          cmLocalGenerator::START_OUTPUT,
-          cmLocalGenerator::UNCHANGED));
-      }
-    if(cleanSharedName != cleanStaticName &&
-      cleanSharedName != cleanSharedSOName &&
-      cleanSharedName != cleanSharedRealName)
-      {
-      libCleanFiles.push_back(this->Convert(cleanFullSharedName.c_str(),
-          cmLocalGenerator::START_OUTPUT,
-          cmLocalGenerator::UNCHANGED));
-      }
-    if(!cleanImportName.empty())
-      {
-      libCleanFiles.push_back(this->Convert(cleanFullImportName.c_str(),
-          cmLocalGenerator::START_OUTPUT,
-          cmLocalGenerator::UNCHANGED));
-      }
+    libCleanFiles.push_back(this->Convert(targetFullPathSO.c_str(),
+        cmLocalGenerator::START_OUTPUT,
+        cmLocalGenerator::UNCHANGED));
+    }
+  if(!targetNameImport.empty())
+    {
+    libCleanFiles.push_back(this->Convert(targetFullPathImport.c_str(),
+        cmLocalGenerator::START_OUTPUT,
+        cmLocalGenerator::UNCHANGED));
+    }
 
-    // List the PDB for cleaning only when the whole target is
-    // cleaned.  We do not want to delete the .pdb file just before
-    // linking the target.
-    this->CleanFiles.push_back
-      (this->Convert(cleanFullPDBName.c_str(),
-                     cmLocalGenerator::START_OUTPUT,
-                     cmLocalGenerator::UNCHANGED));
-    }
+  // List the PDB for cleaning only when the whole target is
+  // cleaned.  We do not want to delete the .pdb file just before
+  // linking the target.
+  this->CleanFiles.push_back
+    (this->Convert(targetFullPathPDB.c_str(),
+                   cmLocalGenerator::START_OUTPUT,
+                   cmLocalGenerator::UNCHANGED));
 
 #ifdef _WIN32
   // There may be a manifest file for this target.  Add it to the

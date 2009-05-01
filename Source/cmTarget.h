@@ -326,18 +326,6 @@ public:
                        std::string& realName, std::string& impName,
                        std::string& pdbName, const char* config);
 
-  /** Get the names of the library used to remove existing copies of
-      the library from the build tree either before linking or during
-      a clean step.  This should be called only on a library
-      target.  */
-  void GetLibraryCleanNames(std::string& staticName,
-                            std::string& sharedName,
-                            std::string& sharedSOName,
-                            std::string& sharedRealName,
-                            std::string& importName,
-                            std::string& pdbName,
-                            const char* config);
-
   /** Get the names of the executable needed to generate a build rule
       that takes into account executable version numbers.  This should
       be called only on an executable target.  */

@@ -78,17 +78,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "CMAKE_BUILD_WITH_INSTALL_RPATH if it is set when a target is created.");
 
   cm->DefineProperty
-    ("CLEAN_DIRECT_OUTPUT", cmProperty::TARGET,
-     "Do not delete other variants of this target.",
-     "When a library is built CMake by default generates code to remove "
-     "any existing library using all possible names.  This is needed "
-     "to support libraries that switch between STATIC and SHARED by "
-     "a user option.  However when using OUTPUT_NAME to build a static "
-     "and shared library of the same name using different logical target "
-     "names the two targets will remove each other's files.  This can be "
-     "prevented by setting the CLEAN_DIRECT_OUTPUT property to 1.");
-
-  cm->DefineProperty
     ("COMPILE_FLAGS", cmProperty::TARGET,
      "Additional flags to use when compiling this target's sources.",
      "The COMPILE_FLAGS property sets additional compiler flags used "
@@ -2721,43 +2710,6 @@ void cmTarget::GetLibraryNames(std::string& name,
   // Get the names based on the real type of the library.
   this->GetLibraryNamesInternal(name, soName, realName, impName, pdbName,
                                 this->GetType(), config);
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::GetLibraryCleanNames(std::string& staticName,
-                                    std::string& sharedName,
-                                    std::string& sharedSOName,
-                                    std::string& sharedRealName,
-                                    std::string& importName,
-                                    std::string& pdbName,
-                                    const char* config)
-{
-  // Get the name as if this were a static library.
-  std::string soName;
-  std::string realName;
-  std::string impName;
-  this->GetLibraryNamesInternal(staticName, soName, realName, impName,
-                                pdbName, cmTarget::STATIC_LIBRARY, config);
-
-  // Get the names as if this were a shared library.
-  if(this->GetType() == cmTarget::STATIC_LIBRARY)
-    {
-    // Since the real type is static then the user either specified
-    // STATIC or did not specify a type.  In the former case the
-    // shared library will never be present.  In the latter case the
-    // type will never be MODULE.  Either way the only names that
-    // might have to be cleaned are the shared library names.
-    this->GetLibraryNamesInternal(sharedName, sharedSOName, sharedRealName,
-                                  importName, pdbName,
-                                  cmTarget::SHARED_LIBRARY, config);
-    }
-  else
-    {
-    // Use the name of the real type of the library (shared or module).
-    this->GetLibraryNamesInternal(sharedName, sharedSOName, sharedRealName,
-                                  importName, pdbName, this->GetType(),
-                                  config);
-    }
 }
 
 //----------------------------------------------------------------------------
