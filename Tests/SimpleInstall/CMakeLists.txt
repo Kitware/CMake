@@ -33,7 +33,7 @@ IF(STAGE2)
     )
   SET(t1NAMES test1 test1${CMAKE_DEBUG_POSTFIX} test1rel)
   SET(t2NAMES test2 test2${CMAKE_DEBUG_POSTFIX})
-  SET(t4NAMES test4 test4${CMAKE_DEBUG_POSTFIX})
+  SET(t4NAMES test4out test4out${CMAKE_DEBUG_POSTFIX})
 
   # Make sure the install script ran.
   SET(CMAKE_INSTALL_SCRIPT_DID_RUN 0)
@@ -164,6 +164,10 @@ ELSE(STAGE2)
   ADD_LIBRARY(test2 SHARED lib2.cxx)
   ADD_LIBRARY(test3 MODULE lib3.cxx)
   ADD_LIBRARY(test4 SHARED lib4.cxx)
+
+  # Test <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME properties.
+  SET_PROPERTY(TARGET test4 PROPERTY ARCHIVE_OUTPUT_NAME test4out)
+  SET_PROPERTY(TARGET test4 PROPERTY LIBRARY_OUTPUT_NAME test4out)
 
   ADD_EXECUTABLE (SimpleInstall inst.cxx foo.c foo.h)
   TARGET_LINK_LIBRARIES(SimpleInstall test1 test2 test4)

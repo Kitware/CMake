@@ -501,6 +501,9 @@ private:
   std::string GetOutputDir(bool implib);
   std::string const& ComputeBaseOutputDir(bool implib);
 
+  // Get the target base name.
+  std::string GetOutputName(const char* config, bool implib);
+
   const char* ImportedGetLocation(const char* config);
   const char* NormalGetLocation(const char* config);
 

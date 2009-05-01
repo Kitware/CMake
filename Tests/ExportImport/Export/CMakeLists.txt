@@ -36,6 +36,15 @@ set_property(TARGET testLib3 PROPERTY LINK_INTERFACE_LIBRARIES "")
 set_property(TARGET testLib3 PROPERTY VERSION 1.2)
 set_property(TARGET testLib3 PROPERTY SOVERSION 3)
 
+# Test <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME[_<CONFIG>] properties.
+set_property(TARGET testLib3 PROPERTY RUNTIME_OUTPUT_NAME_DEBUG testLib3dll-d)
+set_property(TARGET testLib3 PROPERTY RUNTIME_OUTPUT_NAME_RELEASE testLib3dll-r)
+set_property(TARGET testLib3 PROPERTY RUNTIME_OUTPUT_NAME testLib3dll)
+set_property(TARGET testLib3 PROPERTY LIBRARY_OUTPUT_NAME_DEBUG testLib3lib-d)
+set_property(TARGET testLib3 PROPERTY LIBRARY_OUTPUT_NAME_RELEASE testLib3lib-r)
+set_property(TARGET testLib3 PROPERTY LIBRARY_OUTPUT_NAME testLib3lib)
+set_property(TARGET testLib3 PROPERTY ARCHIVE_OUTPUT_NAME testLib3import)
+
 add_library(testLib4 SHARED testLib4.c)
 set_property(TARGET testLib4 PROPERTY FRAMEWORK 1)
 

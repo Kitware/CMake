@@ -468,12 +468,21 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("OUTPUT_NAME", cmProperty::TARGET,
-     "Sets the real name of a target when it is built.",
-     "Sets the real name of a target when it is built and "
-     "can be used to help create two targets of the same name even though "
-     "CMake requires unique logical target names.  There is also a "
-     "<CONFIG>_OUTPUT_NAME that can set the output name on a "
-     "per-configuration basis.");
+     "Output name for target files.",
+     "This sets the base name for output files created for an executable or "
+     "library target.  "
+     "If not set, the logical target name is used by default.");
+
+  cm->DefineProperty
+    ("OUTPUT_NAME_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration target file base name.",
+     "This is the configuration-specific version of OUTPUT_NAME.");
+
+  cm->DefineProperty
+    ("<CONFIG>_OUTPUT_NAME", cmProperty::TARGET,
+     "Old per-configuration target file base name.",
+     "This is a configuration-specific version of OUTPUT_NAME.  "
+     "Use OUTPUT_NAME_<CONFIG> instead.");
 
   cm->DefineProperty
     ("PRE_INSTALL_SCRIPT", cmProperty::TARGET,
@@ -791,9 +800,36 @@ void cmTarget::DefineProperties(cmake *cm)
      "This property is initialized by the value of the variable "
      "CMAKE_RUNTIME_OUTPUT_DIRECTORY if it is set when a target is created.");
 
-  // define some properties without documentation
-  cm->DefineProperty("DEBUG_OUTPUT_NAME", cmProperty::TARGET,0,0);
-  cm->DefineProperty("RELEASE_OUTPUT_NAME", cmProperty::TARGET,0,0);
+  cm->DefineProperty
+    ("ARCHIVE_OUTPUT_NAME", cmProperty::TARGET,
+     "Output name for ARCHIVE target files.",
+     "This property specifies the base name for archive target files. "
+     "It overrides OUTPUT_NAME and OUTPUT_NAME_<CONFIG> properties.  "
+     CM_TARGET_FILE_TYPES_DOC);
+  cm->DefineProperty
+    ("ARCHIVE_OUTPUT_NAME_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration output name for ARCHIVE target files.",
+     "This is the configuration-specific version of ARCHIVE_OUTPUT_NAME.");
+  cm->DefineProperty
+    ("LIBRARY_OUTPUT_NAME", cmProperty::TARGET,
+     "Output name for LIBRARY target files.",
+     "This property specifies the base name for library target files. "
+     "It overrides OUTPUT_NAME and OUTPUT_NAME_<CONFIG> properties.  "
+     CM_TARGET_FILE_TYPES_DOC);
+  cm->DefineProperty
+    ("LIBRARY_OUTPUT_NAME_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration output name for LIBRARY target files.",
+     "This is the configuration-specific version of LIBRARY_OUTPUT_NAME.");
+  cm->DefineProperty
+    ("RUNTIME_OUTPUT_NAME", cmProperty::TARGET,
+     "Output name for RUNTIME target files.",
+     "This property specifies the base name for runtime target files.  "
+     "It overrides OUTPUT_NAME and OUTPUT_NAME_<CONFIG> properties.  "
+     CM_TARGET_FILE_TYPES_DOC);
+  cm->DefineProperty
+    ("RUNTIME_OUTPUT_NAME_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration output name for RUNTIME target files.",
+     "This is the configuration-specific version of RUNTIME_OUTPUT_NAME.");
 }
 
 void cmTarget::SetType(TargetType type, const char* name)
@@ -2654,25 +2690,7 @@ void cmTarget::GetFullNameInternal(TargetType type,
   outPrefix = targetPrefix?targetPrefix:"";
 
   // Append the target name or property-specified name.
-  const char* outName = 0;
-  if(config && *config)
-    {
-    std::string configProp = cmSystemTools::UpperCase(config);
-    configProp += "_OUTPUT_NAME";
-    outName = this->GetProperty(configProp.c_str());
-    }
-  if(!outName)
-    {
-    outName = this->GetProperty("OUTPUT_NAME");
-    }
-  if(outName)
-    {
-    outBase = outName;
-    }
-  else
-    {
-    outBase = this->GetName();
-    }
+  outBase += this->GetOutputName(config, implib);
 
   // Append the per-configuration postfix.
   outBase += configPostfix?configPostfix:"";
@@ -3313,6 +3331,43 @@ std::string const& cmTarget::ComputeBaseOutputDir(bool implib)
   out = (cmSystemTools::CollapseFullPath
          (out.c_str(), this->Makefile->GetStartOutputDirectory()));
   return out;
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetOutputName(const char* config, bool implib)
+{
+  std::vector<std::string> props;
+  std::string type = this->GetOutputTargetType(implib);
+  std::string configUpper = cmSystemTools::UpperCase(config? config : "");
+  if(!type.empty() && !configUpper.empty())
+    {
+    // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME_<CONFIG>
+    props.push_back(type + "_OUTPUT_NAME_" + configUpper);
+    }
+  if(!type.empty())
+    {
+    // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME
+    props.push_back(type + "_OUTPUT_NAME");
+    }
+  if(!configUpper.empty())
+    {
+    // OUTPUT_NAME_<CONFIG>
+    props.push_back("OUTPUT_NAME_" + configUpper);
+    // <CONFIG>_OUTPUT_NAME
+    props.push_back(configUpper + "_OUTPUT_NAME");
+    }
+  // OUTPUT_NAME
+  props.push_back("OUTPUT_NAME");
+
+  for(std::vector<std::string>::const_iterator i = props.begin();
+      i != props.end(); ++i)
+    {
+    if(const char* outName = this->GetProperty(i->c_str()))
+      {
+      return outName;
+      }
+    }
+  return this->GetName();
 }
 
 //----------------------------------------------------------------------------
