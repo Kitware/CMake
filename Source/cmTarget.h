@@ -494,6 +494,9 @@ private:
   // If the variable is not defined use the given default instead.
   void SetPropertyDefault(const char* property, const char* default_value);
 
+  // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
+  const char* GetOutputTargetType(bool implib);
+
   // Get the full path to the target output directory.
   std::string GetOutputDir(bool implib);
   std::string const& ComputeBaseOutputDir(bool implib);

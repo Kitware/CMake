@@ -3167,6 +3167,62 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
 }
 
 //----------------------------------------------------------------------------
+const char* cmTarget::GetOutputTargetType(bool implib)
+{
+  switch(this->GetType())
+    {
+    case cmTarget::SHARED_LIBRARY:
+      if(this->DLLPlatform)
+        {
+        if(implib)
+          {
+          // A DLL import library is treated as an archive target.
+          return "ARCHIVE";
+          }
+        else
+          {
+          // A DLL shared library is treated as a runtime target.
+          return "RUNTIME";
+          }
+        }
+      else
+        {
+        // For non-DLL platforms shared libraries are treated as
+        // library targets.
+        return "LIBRARY";
+        }
+    case cmTarget::STATIC_LIBRARY:
+      // Static libraries are always treated as archive targets.
+      return "ARCHIVE";
+    case cmTarget::MODULE_LIBRARY:
+      if(implib)
+        {
+        // Module libraries are always treated as library targets.
+        return "ARCHIVE";
+        }
+      else
+        {
+        // Module import libraries are treated as archive targets.
+        return "LIBRARY";
+        }
+    case cmTarget::EXECUTABLE:
+      if(implib)
+        {
+        // Executable import libraries are treated as archive targets.
+        return "ARCHIVE";
+        }
+      else
+        {
+        // Executables are always treated as runtime targets.
+        return "RUNTIME";
+        }
+    default:
+      break;
+    }
+  return "";
+}
+
+//----------------------------------------------------------------------------
 std::string cmTarget::GetOutputDir(bool implib)
 {
   // The implib option is only allowed for shared libraries, module
@@ -3220,63 +3276,11 @@ std::string const& cmTarget::ComputeBaseOutputDir(bool implib)
   // Look for a target property defining the target output directory
   // based on the target type.
   const char* propertyName = 0;
-  switch(this->GetType())
+  std::string propertyNameStr = this->GetOutputTargetType(implib);
+  if(!propertyNameStr.empty())
     {
-    case cmTarget::SHARED_LIBRARY:
-      {
-      // For non-DLL platforms shared libraries are treated as
-      // library targets.  For DLL platforms the DLL part of a
-      // shared library is treated as a runtime target and the
-      // corresponding import library is treated as an archive
-      // target.
-      if(this->DLLPlatform)
-        {
-        if(implib)
-          {
-          propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
-          }
-        else
-          {
-          propertyName = "RUNTIME_OUTPUT_DIRECTORY";
-          }
-        }
-      else
-        {
-        propertyName = "LIBRARY_OUTPUT_DIRECTORY";
-        }
-      } break;
-    case cmTarget::STATIC_LIBRARY:
-      {
-      // Static libraries are always treated as archive targets.
-      propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
-      } break;
-    case cmTarget::MODULE_LIBRARY:
-      {
-      // Module libraries are always treated as library targets.
-      // Module import libraries are treated as archive targets.
-      if(implib)
-        {
-        propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
-        }
-      else
-        {
-        propertyName = "LIBRARY_OUTPUT_DIRECTORY";
-        }
-      } break;
-    case cmTarget::EXECUTABLE:
-      {
-      // Executables are always treated as runtime targets.
-      // Executable import libraries are treated as archive targets.
-      if(implib)
-        {
-        propertyName = "ARCHIVE_OUTPUT_DIRECTORY";
-        }
-      else
-        {
-        propertyName = "RUNTIME_OUTPUT_DIRECTORY";
-        }
-      } break;
-    default: break;
+    propertyNameStr += "_OUTPUT_DIRECTORY";
+    propertyName = propertyNameStr.c_str();
     }
 
   // Select an output directory.
