@@ -2319,10 +2319,9 @@ const char* cmTarget::GetCreateRuleVariable()
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetSuffixVariableInternal(TargetType type,
-                                                bool implib)
+const char* cmTarget::GetSuffixVariableInternal(bool implib)
 {
-  switch(type)
+  switch(this->GetType())
     {
     case cmTarget::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_SUFFIX";
@@ -2346,10 +2345,9 @@ const char* cmTarget::GetSuffixVariableInternal(TargetType type,
 
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetPrefixVariableInternal(TargetType type,
-                                                bool implib)
+const char* cmTarget::GetPrefixVariableInternal(bool implib)
 {
-  switch(type)
+  switch(this->GetType())
     {
     case cmTarget::STATIC_LIBRARY:
       return "CMAKE_STATIC_LIBRARY_PREFIX";
@@ -2375,8 +2373,7 @@ std::string cmTarget::GetPDBName(const char* config)
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->GetFullNameInternal(this->GetType(), config, false,
-                            prefix, base, suffix);
+  this->GetFullNameInternal(config, false, prefix, base, suffix);
   return prefix+base+".pdb";
 }
 
@@ -2478,7 +2475,7 @@ std::string cmTarget::GetFullName(const char* config, bool implib)
     }
   else
     {
-    return this->GetFullNameInternal(this->GetType(), config, implib);
+    return this->GetFullNameInternal(config, implib);
     }
 }
 
@@ -2494,8 +2491,7 @@ void cmTarget::GetFullNameComponents(std::string& prefix, std::string& base,
                                      std::string& suffix, const char* config,
                                      bool implib)
 {
-  this->GetFullNameInternal(this->GetType(), config, implib,
-                            prefix, base, suffix);
+  this->GetFullNameInternal(config, implib, prefix, base, suffix);
 }
 
 //----------------------------------------------------------------------------
@@ -2566,30 +2562,27 @@ std::string cmTarget::ImportedGetFullPath(const char* config, bool implib)
 }
 
 //----------------------------------------------------------------------------
-std::string
-cmTarget::GetFullNameInternal(TargetType type, const char* config,
-                              bool implib)
+std::string cmTarget::GetFullNameInternal(const char* config, bool implib)
 {
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->GetFullNameInternal(type, config, implib, prefix, base, suffix);
+  this->GetFullNameInternal(config, implib, prefix, base, suffix);
   return prefix+base+suffix;
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetFullNameInternal(TargetType type,
-                                   const char* config,
+void cmTarget::GetFullNameInternal(const char* config,
                                    bool implib,
                                    std::string& outPrefix,
                                    std::string& outBase,
                                    std::string& outSuffix)
 {
   // Use just the target name for non-main target types.
-  if(type != cmTarget::STATIC_LIBRARY &&
-     type != cmTarget::SHARED_LIBRARY &&
-     type != cmTarget::MODULE_LIBRARY &&
-     type != cmTarget::EXECUTABLE)
+  if(this->GetType() != cmTarget::STATIC_LIBRARY &&
+     this->GetType() != cmTarget::SHARED_LIBRARY &&
+     this->GetType() != cmTarget::MODULE_LIBRARY &&
+     this->GetType() != cmTarget::EXECUTABLE)
     {
     outPrefix = "";
     outBase = this->GetName();
@@ -2610,9 +2603,9 @@ void cmTarget::GetFullNameInternal(TargetType type,
 
   // The implib option is only allowed for shared libraries, module
   // libraries, and executables.
-  if(type != cmTarget::SHARED_LIBRARY &&
-     type != cmTarget::MODULE_LIBRARY &&
-     type != cmTarget::EXECUTABLE)
+  if(this->GetType() != cmTarget::SHARED_LIBRARY &&
+     this->GetType() != cmTarget::MODULE_LIBRARY &&
+     this->GetType() != cmTarget::EXECUTABLE)
     {
     implib = false;
     }
@@ -2637,8 +2630,8 @@ void cmTarget::GetFullNameInternal(TargetType type,
       configPostfix = 0;
       }
     }
-  const char* prefixVar = this->GetPrefixVariableInternal(type, implib);
-  const char* suffixVar = this->GetSuffixVariableInternal(type, implib);
+  const char* prefixVar = this->GetPrefixVariableInternal(implib);
+  const char* suffixVar = this->GetSuffixVariableInternal(implib);
   const char* ll =
     this->GetLinkerLanguage(
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator());
@@ -2687,7 +2680,7 @@ void cmTarget::GetFullNameInternal(TargetType type,
   // Name shared libraries with their version number on some platforms.
   if(const char* version = this->GetProperty("VERSION"))
     {
-    if(type == cmTarget::SHARED_LIBRARY && !implib &&
+    if(this->GetType() == cmTarget::SHARED_LIBRARY && !implib &&
        this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION"))
       {
       outBase += "-";
@@ -2707,26 +2700,12 @@ void cmTarget::GetLibraryNames(std::string& name,
                                std::string& pdbName,
                                const char* config)
 {
-  // Get the names based on the real type of the library.
-  this->GetLibraryNamesInternal(name, soName, realName, impName, pdbName,
-                                this->GetType(), config);
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::GetLibraryNamesInternal(std::string& name,
-                                       std::string& soName,
-                                       std::string& realName,
-                                       std::string& impName,
-                                       std::string& pdbName,
-                                       TargetType type,
-                                       const char* config)
-{
   // This should not be called for imported targets.
   // TODO: Split cmTarget into a class hierarchy to get compile-time
   // enforcement of the limited imported target API.
   if(this->IsImported())
     {
-    std::string msg =  "GetLibraryNamesInternal called on imported target: ";
+    std::string msg =  "GetLibraryNames called on imported target: ";
     msg += this->GetName();
     this->Makefile->IssueMessage(cmake::INTERNAL_ERROR,
                                  msg.c_str());
@@ -2748,7 +2727,8 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
   // Check for library version properties.
   const char* version = this->GetProperty("VERSION");
   const char* soversion = this->GetProperty("SOVERSION");
-  if((type != cmTarget::SHARED_LIBRARY && type != cmTarget::MODULE_LIBRARY) ||
+  if((this->GetType() != cmTarget::SHARED_LIBRARY &&
+      this->GetType() != cmTarget::MODULE_LIBRARY) ||
      !this->Makefile->GetDefinition(sonameFlag.c_str()) ||
      this->IsFrameworkOnApple())
     {
@@ -2768,7 +2748,7 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->GetFullNameInternal(type, config, false, prefix, base, suffix);
+  this->GetFullNameInternal(config, false, prefix, base, suffix);
 
   // The library name.
   name = prefix+base+suffix;
@@ -2809,10 +2789,10 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
 #endif
 
   // The import library name.
-  if(type == cmTarget::SHARED_LIBRARY ||
-     type == cmTarget::MODULE_LIBRARY)
+  if(this->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->GetType() == cmTarget::MODULE_LIBRARY)
     {
-    impName = this->GetFullNameInternal(type, config, true);
+    impName = this->GetFullNameInternal(config, true);
     }
   else
     {
@@ -2830,26 +2810,13 @@ void cmTarget::GetExecutableNames(std::string& name,
                                   std::string& pdbName,
                                   const char* config)
 {
-  // Get the names based on the real type of the executable.
-  this->GetExecutableNamesInternal(name, realName, impName, pdbName,
-                                   this->GetType(), config);
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::GetExecutableNamesInternal(std::string& name,
-                                          std::string& realName,
-                                          std::string& impName,
-                                          std::string& pdbName,
-                                          TargetType type,
-                                          const char* config)
-{
   // This should not be called for imported targets.
   // TODO: Split cmTarget into a class hierarchy to get compile-time
   // enforcement of the limited imported target API.
   if(this->IsImported())
     {
     std::string msg =
-      "GetExecutableNamesInternal called on imported target: ";
+      "GetExecutableNames called on imported target: ";
     msg += this->GetName();
     this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg.c_str());
     }
@@ -2861,7 +2828,7 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
 #else
   // Check for executable version properties.
   const char* version = this->GetProperty("VERSION");
-  if(type != cmTarget::EXECUTABLE || this->Makefile->IsOn("XCODE"))
+  if(this->GetType() != cmTarget::EXECUTABLE || this->Makefile->IsOn("XCODE"))
     {
     version = 0;
     }
@@ -2871,7 +2838,7 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->GetFullNameInternal(type, config, false, prefix, base, suffix);
+  this->GetFullNameInternal(config, false, prefix, base, suffix);
 
   // The executable name.
   name = prefix+base+suffix;
@@ -2892,7 +2859,7 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
 #endif
 
   // The import library name.
-  impName = this->GetFullNameInternal(type, config, true);
+  impName = this->GetFullNameInternal(config, true);
 
   // The program database file name.
   pdbName = prefix+base+".pdb";

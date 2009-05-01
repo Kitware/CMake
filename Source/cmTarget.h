@@ -448,27 +448,12 @@ private:
                            const LibraryID& lib,
                            DependencyMap& dep_map);
 
-  const char* GetSuffixVariableInternal(TargetType type, bool implib);
-  const char* GetPrefixVariableInternal(TargetType type, bool implib);
-  std::string GetFullNameInternal(TargetType type, const char* config,
-                                  bool implib);
-  void GetFullNameInternal(TargetType type, const char* config, bool implib,
+  const char* GetSuffixVariableInternal(bool implib);
+  const char* GetPrefixVariableInternal(bool implib);
+  std::string GetFullNameInternal(const char* config, bool implib);
+  void GetFullNameInternal(const char* config, bool implib,
                            std::string& outPrefix, std::string& outBase,
                            std::string& outSuffix);
-
-  void GetLibraryNamesInternal(std::string& name,
-                               std::string& soName,
-                               std::string& realName,
-                               std::string& impName,
-                               std::string& pdbName,
-                               TargetType type,
-                               const char* config);
-  void GetExecutableNamesInternal(std::string& name,
-                                  std::string& realName,
-                                  std::string& impName,
-                                  std::string& pdbName,
-                                  TargetType type,
-                                  const char* config);
 
   // Use a makefile variable to set a default for the given property.
   // If the variable is not defined use the given default instead.
