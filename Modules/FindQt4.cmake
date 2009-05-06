@@ -1253,7 +1253,10 @@ IF (QT4_QMAKE_FOUND)
           # long for some systems
           GET_FILENAME_COMPONENT(_ts_name ${_ts_file} NAME_WE)
           SET(_ts_pro ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${_ts_name}_lupdate.pro)
-          STRING(REPLACE ";" " " _pro_srcs "${_my_sources}")
+          SET(_pro_srcs)
+          FOREACH(_pro_src ${_my_sources})
+            SET(_pro_srcs "${_pro_srcs} \"${_pro_src}\"")
+          ENDFOREACH(_pro_src ${_my_sources})
           FILE(WRITE ${_ts_pro} "SOURCES = ${_pro_srcs}")
         ENDIF(_my_sources)
         ADD_CUSTOM_COMMAND(OUTPUT ${_ts_file}
