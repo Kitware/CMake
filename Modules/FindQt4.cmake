@@ -159,6 +159,7 @@
 #  QT_QTWEBKIT_FOUND        True if QtWebKit was found.
 #  QT_QTXMLPATTERNS_FOUND   True if QtXmlPatterns was found.
 #  QT_PHONON_FOUND          True if phonon was found.
+#  QT_QTSCRIPTTOOLS_FOUND   True if QtScriptTools was found.
 #
 #
 #  QT_DEFINITIONS   Definitions to use when compiling code that uses Qt.
@@ -202,6 +203,7 @@
 #  QT_QTWEBKIT_INCLUDE_DIR     Path to "include/QtWebKit"
 #  QT_QTXMLPATTERNS_INCLUDE_DIR  Path to "include/QtXmlPatterns"
 #  QT_PHONON_INCLUDE_DIR       Path to "include/phonon"
+#  QT_QTSCRIPTTOOLS_INCLUDE_DIR       Path to "include/QtScriptTools"
 #                            
 #  QT_BINARY_DIR               Path to "bin" of Qt4
 #  QT_LIBRARY_DIR              Path to "lib" of Qt4
@@ -241,6 +243,7 @@
 #  QT_QTWEBKIT_LIBRARY              The QtWebKit library
 #  QT_QTXMLPATTERNS_LIBRARY         The QtXmlPatterns library
 #  QT_PHONON_LIBRARY                The phonon library
+#  QT_QTSCRIPTTOOLS_LIBRARY         The QtScriptTools library
 #  
 # also defined, but NOT for general use are
 #  QT_MOC_EXECUTABLE          Where to find the moc tool.
@@ -544,7 +547,7 @@ IF (QT4_QMAKE_FOUND)
 
   SET(QT_MODULES QtCore QtGui Qt3Support QtSvg QtScript QtTest QtUiTools 
                  QtHelp QtWebKit QtXmlPatterns phonon QtMotif QtNetwork 
-                 QtNsPlugin QtOpenGL QtSql QtXml QtDesigner QtDBus)
+                 QtNsPlugin QtOpenGL QtSql QtXml QtDesigner QtDBus QtScriptTools)
 
   IF(QT_QMAKE_CHANGED)
     FOREACH(QT_MODULE ${QT_MODULES})
@@ -832,6 +835,7 @@ IF (QT4_QMAKE_FOUND)
   _QT4_ADJUST_LIB_VARS(PHONON)
   _QT4_ADJUST_LIB_VARS(QTCLUCENE)
   _QT4_ADJUST_LIB_VARS(QTMOTIF)
+  _QT4_ADJUST_LIB_VARS(QTSCRIPTTOOLS)
 
   # platform dependent libraries
   IF(WIN32)
