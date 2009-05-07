@@ -80,6 +80,10 @@ static const char * cmDocumentationOptions[][3] =
   {"-N,--show-only", "Disable actual execution of tests.",
    "This option tells ctest to list the tests that would be run but not "
    "actually run them.  Useful in conjunction with the -R and -E options."},
+  {"-L <regex>, --label-regex <regex>", "Run tests with labels matching "
+   "regular expression.",
+   "This option tells ctest to run only the tests whose labels match the "
+   "given regular expression."},
   {"-R <regex>, --tests-regex <regex>", "Run tests matching regular "
    "expression.",
    "This option tells ctest to run only the tests whose names match the "
@@ -87,6 +91,10 @@ static const char * cmDocumentationOptions[][3] =
   {"-E <regex>, --exclude-regex <regex>", "Exclude tests matching regular "
    "expression.",
    "This option tells ctest to NOT run the tests whose names match the "
+   "given regular expression."},
+  {"-LE <regex>, --label-exclude <regex>", "Exclude tests with labels "
+   "matching regular expression.",
+   "This option tells ctest to NOT run the tests whose labels match the "
    "given regular expression."},
   {"-D <dashboard>, --dashboard <dashboard>", "Execute dashboard test",
    "This option tells ctest to perform act as a Dart client and perform "
