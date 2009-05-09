@@ -1,5 +1,12 @@
+
+# VCExpress does not support cross compiling, which is necessary for Win CE
+SET( _CMAKE_MAKE_PROGRAM_NAMES devenv)
+IF(NOT CMAKE_CROSSCOMPILING)
+  SET( _CMAKE_MAKE_PROGRAM_NAMES ${_CMAKE_MAKE_PROGRAM_NAMES} VCExpress)
+ENDIF(NOT CMAKE_CROSSCOMPILING)
+
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM
-  NAMES VCExpress devenv 
+  NAMES ${_CMAKE_MAKE_PROGRAM_NAMES}
   PATHS
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup\\VS;EnvironmentDirectory]
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup;Dbghelp_path]
