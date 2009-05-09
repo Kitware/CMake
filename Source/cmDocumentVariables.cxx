@@ -779,6 +779,20 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   // targets.
   //
   cm->DefineProperty
+    ("CMAKE_INCLUDE_CURRENT_DIR", cmProperty::VARIABLE,
+     "Automatically add the current source- and build directories "
+     "to the include path.",
+     "If this variable is enabled, CMake automatically adds in each "
+     "directory ${CMAKE_CURRENT_SOURCE_DIR} and ${CMAKE_CURRENT_BINARY_DIR} "
+     "to the include path for this directory. These additional include "
+     "directories do not propagate down to subdirectories. This is useful "
+     "mainly for out-of-source builds, where files generated into the "
+     "build tree are included by files located in the source tree.\n"
+     "By default CMAKE_INCLUDE_CURRENT_DIR is OFF.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_INSTALL_RPATH", cmProperty::VARIABLE,
      "The rpath to use for installed targets.",
      "A semicolon-separated list specifying the rpath "
