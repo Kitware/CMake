@@ -79,7 +79,6 @@ bool cmSetCommand
   cmCacheManager::CacheEntryType type 
     = cmCacheManager::STRING; // required if cache
   const char* docstring = 0; // required if cache
-  std::string::size_type cacheStart = 0;
   
   unsigned int ignoreLastArgs = 0;
   // look for PARENT_SCOPE argument
@@ -145,7 +144,7 @@ bool cmSetCommand
   
   if(cache)
     {
-    cacheStart = args.size() - 3 - (force ? 1 : 0);
+    std::string::size_type cacheStart = args.size() - 3 - (force ? 1 : 0);
     type = cmCacheManager::StringToType(args[cacheStart+1].c_str());
     docstring = args[cacheStart+2].c_str();
     }
