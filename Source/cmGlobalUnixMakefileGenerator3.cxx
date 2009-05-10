@@ -95,20 +95,28 @@ void cmGlobalUnixMakefileGenerator3
     std::string changeVars;
     if(cname && (path != cname) && (optional==false))
       {
-      const char* cvars = 
-        this->GetCMakeInstance()->GetProperty(
-          "__CMAKE_DELETE_CACHE_CHANGE_VARS_");
-      if(cvars)
-        {
-        changeVars += cvars;
+      std::string cnameString = cname;
+      std::string pathString = path;
+      // get rid of potentially multiple slashes:
+      cmSystemTools::ConvertToUnixSlashes(cnameString);
+      cmSystemTools::ConvertToUnixSlashes(pathString);
+      if (cnameString != pathString)
+        { 
+        const char* cvars = 
+          this->GetCMakeInstance()->GetProperty(
+            "__CMAKE_DELETE_CACHE_CHANGE_VARS_");
+        if(cvars)
+          {
+          changeVars += cvars;
+          changeVars += ";";
+          }
+        changeVars += langComp;
         changeVars += ";";
+        changeVars += cname;
+        this->GetCMakeInstance()->SetProperty(
+          "__CMAKE_DELETE_CACHE_CHANGE_VARS_",
+          changeVars.c_str());
         }
-      changeVars += langComp;
-      changeVars += ";";
-      changeVars += cname;
-      this->GetCMakeInstance()->SetProperty(
-        "__CMAKE_DELETE_CACHE_CHANGE_VARS_",
-        changeVars.c_str());
       }
     mf->AddCacheDefinition(langComp.c_str(), path.c_str(),
                            doc.c_str(), cmCacheManager::FILEPATH);
