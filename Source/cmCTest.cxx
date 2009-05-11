@@ -1691,11 +1691,7 @@ bool cmCTest::AddTestsForDashboardType(std::string &targ)
 bool cmCTest::CheckArgument(const std::string& arg, const char* varg1,
   const char* varg2)
 {
-  if ( varg1 && arg == varg1 || varg2 && arg == varg2 )
-    {
-    return true;
-    }
-  return false;
+  return (varg1 && arg == varg1) || (varg2 && arg == varg2);
 }
 
 
