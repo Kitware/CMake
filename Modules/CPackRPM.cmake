@@ -17,10 +17,30 @@ ENDIF(NOT UNIX)
 # it may be a simple (symbolic) link to rpmb command.
 FIND_PROGRAM(RPMBUILD_EXECUTABLE rpmbuild)
 
+# Check version of the rpmbuild tool this would be easier to 
+# track bugs with users and CPackRPM debug mode.
+# We may use RPM version in order to check for available version dependent features 
+IF(RPMBUILD_EXECUTABLE)
+  execute_process(COMMAND ${RPMBUILD_EXECUTABLE} --version
+                  OUTPUT_VARIABLE _TMP_VERSION
+                  ERROR_QUIET
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  string(REGEX REPLACE "^.*\ " ""   
+         RPMBUILD_EXECUTABLE_VERSION
+         ${_TMP_VERSION})     
+  IF(CPACK_RPM_PACKAGE_DEBUG)
+    MESSAGE("CPackRPM:Debug: rpmbuild version is <${RPMBUILD_EXECUTABLE_VERSION}>")
+  ENDIF(CPACK_RPM_PACKAGE_DEBUG)  
+ENDIF(RPMBUILD_EXECUTABLE)
+
 IF(NOT RPMBUILD_EXECUTABLE)
   MESSAGE(FATAL_ERROR "RPM package requires rpmbuild executable")
 ENDIF(NOT RPMBUILD_EXECUTABLE)
 
+# We may use RPM version in the future in order
+# to shut down warning about space in buildtree 
+# some recent RPM version should support space in different places.
+# not checked [yet].
 IF(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
   MESSAGE(FATAL_ERROR "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory without spaces for building RPMs.")
 ENDIF(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
@@ -255,10 +275,12 @@ ENDIF(CPACK_RPM_USER_BINARY_SPECFILE)
 IF(RPMBUILD_EXECUTABLE)
   # Now call rpmbuild using the SPECFILE
   EXECUTE_PROCESS(
-    COMMAND "${RPMBUILD_EXECUTABLE}" -bb "${CPACK_RPM_BINARY_SPECFILE}"
+    COMMAND "${RPMBUILD_EXECUTABLE}" -bb 
+            --buildroot "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}" 
+            "${CPACK_RPM_BINARY_SPECFILE}"
     WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}"
     ERROR_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild.err"
-    OUTPUT_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild.out")
+    OUTPUT_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild.out")  
   IF(CPACK_RPM_PACKAGE_DEBUG)
     MESSAGE("CPackRPM:Debug: You may consult rpmbuild logs in: ")
     MESSAGE("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild.err")
