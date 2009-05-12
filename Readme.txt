@@ -1,6 +1,6 @@
 This is CMake, the cross-platform, open-source make system.
 CMake is free software under a BSD-like license, see Copyright.txt.
-For documentation see the Docs/ directory once you have built CMake 
+For documentation see the Docs/ directory once you have built CMake
 or visit http://www.cmake.org.
 
 
@@ -36,10 +36,10 @@ projects:
 $ ./bootstrap; make; make install
 
 
-* Other Windows: 
+* Other Windows:
 
 You need to download and install a binary release of CMake in order to build
-CMake.  You can get these releases from 
+CMake.  You can get these releases from
 http://www.cmake.org/HTML/Download.html .  Then proceed with the instructions
 below.
 
@@ -50,6 +50,4 @@ You already have a version of CMake installed
 You can build CMake as any other project with a CMake-based build system:
 run the installed CMake on the sources of this CMake with your preferred
 options and generators. Then build it and install it.
-For instructions how to do this, see http://www.cmake.org/HTML/RunningCMake.html 
-
-
+For instructions how to do this, see http://www.cmake.org/HTML/RunningCMake.html
