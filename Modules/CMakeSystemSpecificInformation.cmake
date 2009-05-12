@@ -36,10 +36,10 @@ ENDIF(NOT _INCLUDED_SYSTEM_INFO_FILE)
 
 
 # optionally include a file which can do extra-generator specific things, e.g.
-# CMakeEclipseCDT4.cmake asks gcc for the system include dirs for the Eclipse CDT4 generator
+# CMakeFindEclipseCDT4.cmake asks gcc for the system include dirs for the Eclipse CDT4 generator
 IF(CMAKE_EXTRA_GENERATOR)
   STRING(REPLACE " " "" _CMAKE_EXTRA_GENERATOR_NO_SPACES ${CMAKE_EXTRA_GENERATOR} )
-  INCLUDE("CMake${_CMAKE_EXTRA_GENERATOR_NO_SPACES}" OPTIONAL)
+  INCLUDE("CMakeFind${_CMAKE_EXTRA_GENERATOR_NO_SPACES}" OPTIONAL)
 ENDIF(CMAKE_EXTRA_GENERATOR)
 
 
