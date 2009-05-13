@@ -72,6 +72,10 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
             mf.AddDefinition(this->Args[0].c_str(),oldDef.c_str());
             return true;
             }
+          if(cmSystemTools::GetFatalErrorOccured() )
+            {
+            return true;
+            }
           }
         }
       // restore the variable to its prior value

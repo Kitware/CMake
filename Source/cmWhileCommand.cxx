@@ -60,6 +60,10 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
             {
             return true;
             }
+          if(cmSystemTools::GetFatalErrorOccured() )
+            {
+            return true;
+            }
           }
         expandedArguments.clear();
         mf.ExpandArguments(this->Args, expandedArguments);
