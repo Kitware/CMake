@@ -2103,6 +2103,19 @@ bool SystemTools::RemoveFile(const char* source)
 
 bool SystemTools::RemoveADirectory(const char* source)
 {
+  // Add write permission to the directory so we can modify its
+  // content to remove files and directories from it.
+  mode_t mode;
+  if(SystemTools::GetPermissions(source, mode))
+    {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    mode |= S_IWRITE;
+#else
+    mode |= S_IWUSR;
+#endif
+    SystemTools::SetPermissions(source, mode);
+    }
+
   Directory dir;
   dir.Load(source);
   size_t fileNum;
