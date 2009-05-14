@@ -46,6 +46,7 @@ public:
     e_UNKNOWN = 0,
     e_CVS,
     e_SVN,
+    e_BZR,
     e_GIT,
     e_LAST
   };

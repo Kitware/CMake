@@ -925,6 +925,24 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateCVS_DIR}")
     ENDIF(CTEST_TEST_UPDATE_CVS AND CVS_FOUND)
 
+    # Test CTest Update with BZR
+    FIND_PROGRAM(BZR_EXECUTABLE NAMES bzr)
+    MARK_AS_ADVANCED(BZR_EXECUTABLE)
+    IF(BZR_EXECUTABLE)
+      # Check if xmloutput plugin is there
+      EXECUTE_PROCESS(COMMAND ${BZR_EXECUTABLE} xmlplugins RESULT_VARIABLE xmlplugres
+        OUTPUT_QUIET ERROR_QUIET)
+      IF( NOT ${xmlplugres} )
+        SET(CTestUpdateBZR_DIR "CTest UpdateBZR")
+        CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestUpdateBZR.cmake.in"
+          "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake" @ONLY)
+        ADD_TEST(CTest.UpdateBZR ${CMAKE_CMAKE_COMMAND}
+          -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake"
+          )
+        LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
+      ENDIF( NOT ${xmlplugres} )
+    ENDIF(BZR_EXECUTABLE)
+
     # Test CTest Update with GIT
     FIND_PROGRAM(GIT_EXECUTABLE NAMES git)
     MARK_AS_ADVANCED(GIT_EXECUTABLE)

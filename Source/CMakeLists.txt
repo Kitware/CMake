@@ -361,6 +361,8 @@ SET(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestCVS.h
   CTest/cmCTestSVN.cxx
   CTest/cmCTestSVN.h
+  CTest/cmCTestBZR.cxx
+  CTest/cmCTestBZR.h
   CTest/cmCTestGIT.cxx
   CTest/cmCTestGIT.h
   )

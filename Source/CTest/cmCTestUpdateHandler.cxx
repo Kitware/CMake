@@ -30,6 +30,7 @@
 #include "cmCTestVC.h"
 #include "cmCTestCVS.h"
 #include "cmCTestSVN.h"
+#include "cmCTestBZR.h"
 #include "cmCTestGIT.h"
 
 #include <cmsys/auto_ptr.hxx>
@@ -52,6 +53,7 @@ static const char* cmCTestUpdateHandlerUpdateStrings[] =
   "Unknown",
   "CVS",
   "SVN",
+  "BZR",
   "GIT"
 };
 
@@ -135,6 +137,10 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
       {
       return cmCTestUpdateHandler::e_SVN;
       }
+    if ( stype.find("bzr") != std::string::npos )
+      {
+      return cmCTestUpdateHandler::e_BZR;
+      }
     if ( stype.find("git") != std::string::npos )
       {
       return cmCTestUpdateHandler::e_GIT;
@@ -152,6 +158,10 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
     if ( stype.find("svn") != std::string::npos )
       {
       return cmCTestUpdateHandler::e_SVN;
+      }
+    if ( stype.find("bzr") != std::string::npos )
+      {
+      return cmCTestUpdateHandler::e_BZR;
       }
     if ( stype.find("git") != std::string::npos )
       {
@@ -214,6 +224,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     {
     case e_CVS: vc.reset(new cmCTestCVS(this->CTest, ofs)); break;
     case e_SVN: vc.reset(new cmCTestSVN(this->CTest, ofs)); break;
+    case e_BZR: vc.reset(new cmCTestBZR(this->CTest, ofs)); break;
     case e_GIT: vc.reset(new cmCTestGIT(this->CTest, ofs)); break;
     default:    vc.reset(new cmCTestVC(this->CTest, ofs));  break;
     }
@@ -349,6 +360,12 @@ int cmCTestUpdateHandler::DetectVCS(const char* dir)
     return cmCTestUpdateHandler::e_CVS;
     }
   sourceDirectory = dir;
+  sourceDirectory += "/.bzr";
+  if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
+    {
+    return cmCTestUpdateHandler::e_BZR;
+    }
+  sourceDirectory = dir;
   sourceDirectory += "/.git";
   if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
     {
@@ -381,6 +398,7 @@ bool cmCTestUpdateHandler::SelectVCS()
       {
       case e_CVS: key = "CVSCommand"; break;
       case e_SVN: key = "SVNCommand"; break;
+      case e_BZR: key = "BZRCommand"; break;
       case e_GIT: key = "GITCommand"; break;
       default: break;
       }
