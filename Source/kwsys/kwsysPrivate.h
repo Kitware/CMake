@@ -12,9 +12,7 @@
 
 =========================================================================*/
 #ifndef KWSYS_NAMESPACE
-# ifndef __VMS
-#  error "Do not include kwsysPrivate.h outside of kwsys c and cxx files."
-# endif
+# error "Do not include kwsysPrivate.h outside of kwsys c and cxx files."
 #endif
 
 #ifndef _kwsysPrivate_h
@@ -41,7 +39,7 @@
 #define KWSYS_NAMESPACE_STRING1(x) #x
 
 #else
-# ifndef __VMS
+# ifndef __VMS /* Avoid strange false positive on VMS compiler.  */
 #  error "kwsysPrivate.h included multiple times."
 # endif
 #endif
