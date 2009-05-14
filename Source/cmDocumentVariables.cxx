@@ -1012,8 +1012,10 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_<LANG>_SIZEOF_DATA_PTR", cmProperty::VARIABLE,
-     "An internal variable subject to change.",
-     "This is used in determining the architecture and is subject to change.",
+     "Size of pointer-to-data types for language <LANG>.",
+     "This holds the size (in bytes) of pointer-to-data types in the target "
+     "platform ABI.  "
+     "It is defined for languages C and CXX (C++).",
      false,
      "Variables for Languages");
 
