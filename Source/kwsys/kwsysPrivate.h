@@ -24,7 +24,7 @@
   Define KWSYS_HEADER macro to help the c and cxx files include kwsys
   headers from the configured namespace directory.  The macro can be
   used like this:
-  
+
   #include KWSYS_HEADER(Directory.hxx)
   #include KWSYS_HEADER(std/vector)
 */
