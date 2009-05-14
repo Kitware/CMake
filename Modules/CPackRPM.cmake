@@ -1,9 +1,76 @@
-# CPack script for creating RPM package
+# - The builtin (binary) CPack RPM generator (Unix only)
+# CPackRPM may be used to create RPM package using CPack.
+# CPackRPM is a CPack generator thus it uses the CPACK_XXX variables
+# used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration
+#
+# However CPackRPM has specific features which are controlled by
+# the specifics CPACK_RPM_XXX variables.You'll find a detailed usage on 
+# the wiki: 
+#  http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
+# However as a handy reminder here comes the list of specific variables:
+#
+#  CPACK_RPM_PACKAGE_SUMMARY 
+#     Mandatory : YES
+#     Default   : CPACK_PACKAGE_DESCRIPTION
+#     The RPM package summary
+#  CPACK_RPM_PACKAGE_NAME
+#     Mandatory : YES
+#     Default   : CPACK_PACKAGE_NAME
+#     The RPM package name
+#  CPACK_RPM_PACKAGE_VERSION
+#     Mandatory : YES
+#     Default   : CPACK_PACKAGE_VERSION
+#     The RPM package version
+#  CPACK_RPM_PACKAGE_ARCHITECTURE
+#     Mandatory : NO
+#     Default   : -
+#     The RPM package architecture. This may be set to "noarch" if you 
+#     know you are building a noarch package.
+#  CPACK_RPM_PACKAGE_RELEASE
+#     Mandatory : YES
+#     Default   : 1
+#     The RPM package release. This is the numbering of the RPM package 
+#     itself, i.e. the version of the packaging and not the version of the 
+#     content (see CPACK_RPM_PACKAGE_VERSION). One may change the default 
+#     value if the previous packaging was buggy and/or you want to put here
+#     a fancy Linux distro specific numbering.
+#  CPACK_RPM_PACKAGE_LICENSE
+#     Mandatory : YES
+#     Default   : "unknown"
+#     The RPM package license policy.
+#  CPACK_RPM_PACKAGE_GROUP
+#     Mandatory : YES
+#     Default   : "unknown"
+#     The RPM package group.
+#  CPACK_RPM_PACKAGE_VENDOR 
+#     Mandatory : YES
+#     Default   : CPACK_PACKAGE_VENDOR if set or"unknown"
+#     The RPM package group.
+#  CPACK_RPM_PACKAGE_DESCRIPTION
+#     Mandatory : YES
+#     Default   : CPACK_PACKAGE_DESCRIPTION_FILE if set or "no package description available"
+#  CPACK_RPM_PACKAGE_REQUIRES
+#     Mandatory : NO
+#     Default   : -
+#     May be used to set RPM dependencies. 
+#  CPACK_RPM_SPEC_INSTALL_POST
+#     Mandatory : NO
+#     Default   : -
+#     May be used to set an RPM post-install command inside the spec file. 
+#     For example setting it to "/bin/true" may be used to prevent 
+#     rpmbuild to strip binaries.
+#  CPACK_RPM_SPEC_MORE_DEFINE
+#     Mandatory : NO
+#     Default   : -
+#     May be used to add any %define lines to the generated spec file.
+#  CPACK_RPM_PACKAGE_DEBUG
+#     Mandatory : NO
+#     Default   : -
+#     May be set when invoking cpack in order to trace debug informations 
+#     during CPack RPM run. For example you may launch CPack like this 
+#     cpack -D CPACK_RPM_PACKAGE_DEBUG=1 -G RPM
+
 # Author: Eric Noulard with the help of Alexander Neundorf.
-# All variables used by CPackRPM begins with CPACK_RPM_ prefix
-#
-# Here comes the list of used variables:
-#
 
 IF(CMAKE_BINARY_DIR)
   MESSAGE(FATAL_ERROR "CPackRPM.cmake may only be used by CPack internally.")
