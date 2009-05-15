@@ -63,36 +63,11 @@ IF(BUILD_TESTING)
   IF(EXISTS "${PROJECT_SOURCE_DIR}/DartConfig.cmake")
     INCLUDE("${PROJECT_SOURCE_DIR}/DartConfig.cmake")
   ELSE(EXISTS "${PROJECT_SOURCE_DIR}/DartConfig.cmake")
-
     # Dashboard is opened for submissions for a 24 hour period starting at
     # the specified NIGHTLY_START_TIME. Time is specified in 24 hour format.
     SET_IF_NOT_SET (NIGHTLY_START_TIME "00:00:00 EDT")
     SET_IF_NOT_SET(DROP_METHOD "http")
-
-    # Dart server to submit results (used by client)
-    # There should be an option to specify submit method, but I will leave it
-    # commented until we decide what to do with it.
-    # SET(DROP_METHOD "http" CACHE STRING "Set the CTest submit method. Valid options are http and ftp")
-    IF(DROP_METHOD MATCHES http)
-      SET_IF_NOT_SET (DROP_SITE "public.kitware.com")
-      SET_IF_NOT_SET (DROP_LOCATION "/cgi-bin/HTTPUploadDartFile.cgi")
-    ELSE(DROP_METHOD MATCHES http)
-      SET_IF_NOT_SET (DROP_SITE "public.kitware.com")
-      SET_IF_NOT_SET (DROP_LOCATION "/incoming")
-      SET_IF_NOT_SET (DROP_SITE_USER "anonymous")
-      SET_IF_NOT_SET (DROP_SITE_PASSWORD "random@someplace.com")
-      SET_IF_NOT_SET (DROP_SITE_MODE "active")
-    ENDIF(DROP_METHOD MATCHES http)
-    SET_IF_NOT_SET (TRIGGER_SITE "http://${DROP_SITE}/cgi-bin/Submit-Random-TestingResults.cgi")
     SET_IF_NOT_SET (COMPRESS_SUBMISSION ON)
-
-    # Dart server configuration 
-    SET (ROLLUP_URL "http://${DROP_SITE}/cgi-bin/random-rollup-dashboard.sh")
-    #SET (CVS_WEB_URL "")
-    #SET (CVS_WEB_CVSROOT "")
-
-    #SET (USE_DOXYGEN "Off")
-    #SET (DOXYGEN_URL "" )
   ENDIF(EXISTS "${PROJECT_SOURCE_DIR}/DartConfig.cmake")
   SET_IF_NOT_SET (NIGHTLY_START_TIME "00:00:00 EDT")
 

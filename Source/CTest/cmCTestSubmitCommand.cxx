@@ -38,43 +38,15 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     ctestDropMethod = "http";
     }
 
-  if ( ctestDropSiteCDash )
+  if ( !ctestDropSite )
     {
-    // drop site is a CDash server...
-    //
-    if ( !ctestDropSite )
-      {
-      // error: CDash requires CTEST_DROP_SITE definition
-      // in CTestConfig.cmake
-      }
-    if ( !ctestDropLocation )
-      {
-      // error: CDash requires CTEST_DROP_LOCATION definition
-      // in CTestConfig.cmake
-      }
+    // error: CDash requires CTEST_DROP_SITE definition
+    // in CTestConfig.cmake
     }
-  else
+  if ( !ctestDropLocation )
     {
-    // drop site is a *NOT* a CDash server...
-    //
-    // Keep all this code in case anybody out there is still
-    // using newer CMake with non-CDash servers
-    //
-    if ( !ctestDropSite )
-      {
-      ctestDropSite = "public.kitware.com";
-      }
-    if ( !ctestDropLocation )
-      {
-      ctestDropLocation = "/cgi-bin/HTTPUploadDartFile.cgi";
-      }
-    if ( !ctestTriggerSite )
-      {
-      ctestTriggerSite
-        = "http://public.kitware.com/cgi-bin/Submit-Random-TestingResults.cgi";
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "* Use default trigger site: "
-        << ctestTriggerSite << std::endl;);
-      }
+    // error: CDash requires CTEST_DROP_LOCATION definition
+    // in CTestConfig.cmake
     }
 
   this->CTest->SetCTestConfiguration("DropMethod", ctestDropMethod);
