@@ -67,7 +67,12 @@ int cmBZRXMLParserUnknownEncodingHandler(void*,
       0x00F8, 0x00F9, 0x00FA, 0x00FB, 0x00FC, 0x00FD, 0x00FE, 0x00FF
     };
 
-  if ( name==std::string("ascii") || name==std::string("cp1252") )
+  // The BZR xml output plugin can use some encodings that are not
+  // recognized by expat.  This will lead to an error, e.g. "Error
+  // parsing bzr log xml: unknown encoding", the following is a
+  // workaround for these unknown encodings.
+  if(name == std::string("ascii") || name == std::string("cp1252") ||
+     name == std::string("ANSI_X3.4-1968"))
     {
     for(unsigned int i=0;i<256;++i) info->map[i] = latin1[i];
     return 1;
