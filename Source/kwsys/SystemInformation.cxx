@@ -2768,6 +2768,7 @@ unsigned int SystemInformationImplementation::GetNumberOfPhysicalCPU()
 /** For Mac use sysctlbyname calls to find system info */
 bool SystemInformationImplementation::ParseSysCtl()
 {
+#if defined(__APPLE__)
   int err = 0;
   uint64_t value = 0;
   size_t len = sizeof(value);
@@ -2866,6 +2867,9 @@ bool SystemInformationImplementation::ParseSysCtl()
   this->Features.L2CacheSize = value;
   
   return true;
+#else
+  return false;
+#endif
 }
 
 /** Extract a value from sysctl command */
