@@ -2859,7 +2859,6 @@ bool SystemInformationImplementation::ParseSysCtl()
     this->ChipID.Model = value;
     }
   // Cache size
-  int iValue = 0;
   len = sizeof(value);
   err = sysctlbyname("hw.l1icachesize", &value, &len, NULL, 0);
   this->Features.L1CacheSize = value;
