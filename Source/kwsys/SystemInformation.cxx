@@ -49,14 +49,6 @@
 # include <windows.h>
 #endif
 
-#ifdef __APPLE__
-#include <sys/sysctl.h>
-#include <mach/vm_statistics.h>
-#include <mach/host_info.h>
-#include <mach/mach.h>
-#include <mach/mach_types.h>
-#endif
-
 #ifdef __linux
 # include <sys/procfs.h>
 # include <sys/types.h>
@@ -203,7 +195,7 @@ public:
     
   enum Manufacturer 
     {
-    AMD, Intel, NSC, UMC, Cyrix, NexGen, IDT, Rise, Transmeta, Sun, IBM, Motorola, UnknownManufacturer
+    AMD, Intel, NSC, UMC, Cyrix, NexGen, IDT, Rise, Transmeta, Sun, UnknownManufacturer
     };
 protected:
 
@@ -637,10 +629,6 @@ const char * SystemInformationImplementation::GetVendorID()
       return "Transmeta";
     case Sun:
       return "Sun Microelectronics";
-    case IBM:
-      return "IBM";
-    case Motorola:
-      return "Motorola";
     default:
       return "Unknown Manufacturer";
     }
@@ -980,9 +968,7 @@ void SystemInformationImplementation::FindManufacturer()
   else if (strcmp (this->ChipID.Vendor, "GenuineTMx86") == 0)  this->ChipManufacturer = Transmeta;      // Transmeta
   else if (strcmp (this->ChipID.Vendor, "TransmetaCPU") == 0)  this->ChipManufacturer = Transmeta;      // Transmeta
   else if (strcmp (this->ChipID.Vendor, "Geode By NSC") == 0)  this->ChipManufacturer = NSC;          // National Semiconductor
-  else if (strcmp (this->ChipID.Vendor, "Sun") == 0)           this->ChipManufacturer = Sun;          // Sun Microelectronics
-  else if (strcmp (this->ChipID.Vendor, "IBM") == 0)           this->ChipManufacturer = IBM;          // IBM Microelectronics
-  else if (strcmp (this->ChipID.Vendor, "Motorola") == 0)      this->ChipManufacturer = Motorola;          // Motorola Microelectronics
+  else if (strcmp (this->ChipID.Vendor, "Sun") == 0)  this->ChipManufacturer = Sun;          // Sun Microelectronics
   else                          this->ChipManufacturer = UnknownManufacturer;  // Unknown manufacturer
 }
 
@@ -1927,7 +1913,6 @@ bool SystemInformationImplementation::RetrieveClassicalCPUIdentity()
             case 8: sprintf (this->ChipID.ProcessorName,"Pentium III (0.18 micron) With 256 KB On-Die L2 Cache "); break;
             case 0xa: sprintf (this->ChipID.ProcessorName,"Pentium III (0.18 micron) With 1 Or 2 MB On-Die L2 Cache "); break;
             case 0xb: sprintf (this->ChipID.ProcessorName,"Pentium III (0.13 micron) With 256 Or 512 KB On-Die L2 Cache "); break;
-            case 23: sprintf (this->ChipID.ProcessorName, "Intel(R) Core(TM)2 Duo CPU     T9500  @ 2.60GHz"); break;
             default: sprintf (this->ChipID.ProcessorName,"Unknown P6 family"); return false;
             }
           break;
@@ -2558,20 +2543,6 @@ unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
     mov Regebx, ebx
     }
 #endif
-
-#ifdef __APPLE__
-    size_t len = 4;
-    int cores_per_package = 0;
-    int err = sysctlbyname("machdep.cpu.cores_per_package", &cores_per_package, &len, NULL, 0);
-    if (err != 0)
-    {
-      return 1; // That name was not found, default to 1
-    }
-    else
-    {
-      return static_cast<unsigned char>(cores_per_package);
-    }
-#endif
   return static_cast<unsigned char> ((Regebx & NUM_LOGICAL_BITS) >> 16);
 }
 
@@ -2765,110 +2736,51 @@ unsigned int SystemInformationImplementation::GetNumberOfPhysicalCPU()
   return this->NumberOfPhysicalCPU;
 }
 
-/** For Mac use sysctlbyname calls to find system info */
+/** For Mac we Parse the sysctl -a output */
 bool SystemInformationImplementation::ParseSysCtl()
 {
-#if defined(__APPLE__)
-  int err = 0;
-  uint64_t value = 0;
-  size_t len = sizeof(value);
-  sysctlbyname("hw.memsize", &value, &len, NULL, 0);
-  this->TotalPhysicalMemory = value/1048576;
+  // Extract the arguments from the command line
+  kwsys_stl::vector<const char*> args;
+  args.push_back("sysctl");
+  args.push_back("-a");
+  args.push_back(0);
 
+  this->SysCtlBuffer = this->RunProcess(args);
+   
   // Parse values for Mac
+  this->TotalPhysicalMemory = static_cast<unsigned long>(
+    atoi(this->ExtractValueFromSysCtl("hw.memsize:").c_str())/(1024*1024));
+  this->TotalVirtualMemory = 0;
   this->AvailablePhysicalMemory = 0;
-  vm_statistics_data_t  vmstat;
-  mach_msg_type_number_t count = HOST_VM_INFO_COUNT;
-  if ( host_statistics(mach_host_self(), HOST_VM_INFO, 
-                       (host_info_t) &vmstat, &count) == KERN_SUCCESS )
+  this->AvailableVirtualMemory = 0;
+
+  this->NumberOfPhysicalCPU = static_cast<unsigned int>(atoi(this->ExtractValueFromSysCtl("hw.physicalcpu:").c_str()));
+  this->NumberOfLogicalCPU = static_cast<unsigned int>(atoi(this->ExtractValueFromSysCtl("hw.logicalcpu:").c_str()));
+  
+  if(this->NumberOfPhysicalCPU!=0)
     {
-    err = sysctlbyname("hw.pagesize", &value, &len, NULL, 0);
-    int64_t available_memory = vmstat.free_count * value;
-    this->AvailablePhysicalMemory = available_memory / 1048576;
+    this->NumberOfLogicalCPU /= this->NumberOfPhysicalCPU;
     }
 
-  // Virtual memory.
-  int mib[2] = { CTL_VM, VM_SWAPUSAGE };
-  size_t miblen = sizeof(mib) / sizeof(mib[0]);
-  struct xsw_usage swap;
-  len = sizeof(struct xsw_usage);
-  err = sysctl(mib, miblen, &swap, &len, NULL, 0);
-  if (err == 0)
-    {
-    this->AvailableVirtualMemory = swap.xsu_avail/1048576;
-    this->TotalVirtualMemory = swap.xsu_total/1048576;
-    }
-
-// CPU Info
-  len = sizeof(this->NumberOfPhysicalCPU);
-  sysctlbyname("hw.physicalcpu", &this->NumberOfPhysicalCPU, &len, NULL, 0);
-  sysctlbyname("hw.logicalcpu", &this->NumberOfLogicalCPU, &len, NULL, 0);
-  this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical = 
-    this->LogicalCPUPerPhysicalCPU();
-
-  len = sizeof(value);
-  sysctlbyname("hw.cpufrequency", &value, &len, NULL, 0);
-  this->CPUSpeedInMHz = value / 1048576;
-
+  this->CPUSpeedInMHz = static_cast<float>(atoi(this->ExtractValueFromSysCtl("hw.cpufrequency:").c_str())); 
+  this->CPUSpeedInMHz /= 1000000;
 
   // Chip family
-  len = sizeof(this->ChipID.Family);
-  //Seems only the intel chips will have this name so if this fails it is
-  //probably a PPC machine
-  err = sysctlbyname("machdep.cpu.family",
-                     &this->ChipID.Family, &len, NULL, 0);
-  if (err != 0) // Go back to names we know but are less descriptive
-    {
-    this->ChipID.Family = 0;
-    char retBuf[32];
-    ::memset(retBuf, 0, 32);
-    len = 32;
-    err = sysctlbyname("hw.machine", &retBuf, &len, NULL, 0); 
-    kwsys_stl::string machineBuf(retBuf);
-    if (machineBuf.find_first_of("Power") != kwsys_stl::string::npos)
-      {
-      strcpy(this->ChipID.Vendor, "IBM");
-      len = 4;
-      err = sysctlbyname("hw.cputype", &this->ChipID.Family, &len, NULL, 0);
-      err = sysctlbyname("hw.cpusubtype", &this->ChipID.Model, &len, NULL, 0);
-      this->FindManufacturer();
-      }
-    }
-  else  // Should be an Intel Chip.
-    {
-    len = sizeof(this->ChipID.Family);
-    int err = 
-      sysctlbyname("machdep.cpu.family", &this->ChipID.Family, &len, NULL, 0);
-    
-    char retBuf[128];
-    ::memset(retBuf, 0, 128);
-    len = 128;
-    err = sysctlbyname("machdep.cpu.vendor", retBuf, &len, NULL, 0);
-    // Chip Vendor
-    strcpy(this->ChipID.Vendor,retBuf);
-    this->FindManufacturer();
-    
-    len=CHIPNAME_STRING_LENGTH;
-    err = 
-      sysctlbyname("machdep.cpu.brand_string", 
-                   this->ChipID.ProcessorName, &len, NULL, 0);
-
-    // Chip Model
-    len = sizeof(value);
-    err = sysctlbyname("machdep.cpu.model", &value, &len, NULL, 0);
-    this->ChipID.Model = value;
-    }
-  // Cache size
-  len = sizeof(value);
-  err = sysctlbyname("hw.l1icachesize", &value, &len, NULL, 0);
-  this->Features.L1CacheSize = value;
-  err = sysctlbyname("hw.l2cachesize", &value, &len, NULL, 0);
-  this->Features.L2CacheSize = value;
+  this->ChipID.Family = atoi(this->ExtractValueFromSysCtl("machdep.cpu.family:").c_str()); 
+ 
+  // Chip Vendor
+  strcpy(this->ChipID.Vendor,this->ExtractValueFromSysCtl("machdep.cpu.vendor:").c_str());
+  this->FindManufacturer();
   
+  // Chip Model
+  this->ChipID.Model = atoi(this->ExtractValueFromSysCtl("machdep.cpu.model:").c_str());
+  this->RetrieveClassicalCPUIdentity();
+
+  // Cache size
+  this->Features.L1CacheSize = atoi(this->ExtractValueFromSysCtl("hw.l1icachesize:").c_str());  
+  this->Features.L2CacheSize = atoi(this->ExtractValueFromSysCtl("hw.l2cachesize:").c_str());  
+
   return true;
-#else
-  return false;
-#endif
 }
 
 /** Extract a value from sysctl command */
