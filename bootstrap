@@ -55,6 +55,13 @@ cmake_bootstrap_system_libs=""
 cmake_bootstrap_qt_gui=""
 cmake_bootstrap_qt_qmake=""
 
+# Determine whether this is a Cygwin environment.
+if echo "${cmake_system}" | grep CYGWIN >/dev/null 2>&1; then
+  cmake_system_cygwin=true
+else
+  cmake_system_cygwin=false
+fi
+
 # Determine whether this is a MinGW environment.
 if echo "${cmake_system}" | grep MINGW >/dev/null 2>&1; then
   cmake_system_mingw=true
@@ -597,6 +604,11 @@ rm -f "${cmake_bootstrap_dir}/cmVersionConfig.h.tmp"
 cmake_c_flags=${CFLAGS}
 cmake_cxx_flags=${CXXFLAGS}
 cmake_ld_flags=${LDFLAGS}
+
+# Add Cygwin-specific flags
+if ${cmake_system_cygwin}; then
+  cmake_ld_flags="${LDFLAGS} -Wl,--enable-auto-import"
+fi
 
 # Add Carbon framework on Darwin
 if ${cmake_system_darwin}; then
