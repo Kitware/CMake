@@ -494,6 +494,22 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       cmSystemTools::EscapeSpaces(this->MemoryTesterOutputFile.c_str());
 
 #ifdef _WIN32
+    if( this->CTest->GetCTestConfiguration(
+          "MemoryCheckSuppressionFile").size() )
+      {
+      if( !cmSystemTools::FileExists(this->CTest->GetCTestConfiguration(
+                                       "MemoryCheckSuppressionFile").c_str()) )
+        {
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "Cannot find memory checker suppression file: "
+                   << this->CTest->GetCTestConfiguration(
+                     "MemoryCheckSuppressionFile").c_str() << std::endl);
+        return false;
+        }
+      this->MemoryTesterOptions += " /FilterFiles=" +
+        cmSystemTools::EscapeSpaces(this->CTest->GetCTestConfiguration(
+                                      "MemoryCheckSuppressionFile").c_str());
+      }
     this->MemoryTesterOptions += " /SAVETEXTDATA=" + outputFile;
 #else
     this->MemoryTesterOptions += " -log-file=" + outputFile;
@@ -941,5 +957,6 @@ cmCTestMemCheckHandler::PostProcessPurifyTest(cmCTestTestResult& res)
   while ( cmSystemTools::GetLineFromStream(ifs, line) )
     {
     res.Output += line;
+    res.Output += "\n";
     }
 }
