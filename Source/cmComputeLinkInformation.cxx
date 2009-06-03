@@ -814,6 +814,17 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
       this->AddLinkExtension(i->c_str(), LinkUnknown);
       }
     }
+  if(const char* sharedSuffixes =
+     mf->GetDefinition("CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES"))
+    {
+    std::vector<std::string> sharedSuffixVec;
+    cmSystemTools::ExpandListArgument(sharedSuffixes, sharedSuffixVec);
+    for(std::vector<std::string>::iterator i = sharedSuffixVec.begin();
+        i != sharedSuffixVec.end(); ++i)
+      {
+      this->AddLinkExtension(i->c_str(), LinkShared);
+      }
+    }
 
   // Compute a regex to match link extensions.
   std::string libext = this->CreateExtensionRegex(this->LinkExtensions);

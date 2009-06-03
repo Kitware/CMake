@@ -1,6 +1,7 @@
 SET(CMAKE_SHARED_LIBRARY_SUFFIX ".sl")          # .so
 SET(CMAKE_DL_LIBS "dld")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".sl" ".so" ".a")
+SET(CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES ".so")
 
 # The HP linker needs to find transitive shared library dependencies
 # in the -L path.  Therefore the runtime path must be added to the

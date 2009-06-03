@@ -377,6 +377,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "The suffix to use for the end of a static library, .lib on Windows.",
      false,
      "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES", cmProperty::VARIABLE,
+     "Additional suffixes for shared libraries.",
+     "Extensions for shared libraries other than that specified by "
+     "CMAKE_SHARED_LIBRARY_SUFFIX, if any.  "
+     "CMake uses this to recognize external shared library files during "
+     "analysis of libraries linked by a target.",
+     false,
+     "Variables that Provide Information");
 
 
   // Variables defined by cmake, that change the behavior 
