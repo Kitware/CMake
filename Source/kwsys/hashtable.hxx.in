@@ -212,9 +212,9 @@ inline PIn hash_allocate_type(PIn (*)(TSize),
 // Define the comparison operators in terms of a base type to avoid
 // needing templated versions.
 class hash_allocator_base {};
-bool operator==(const hash_allocator_base&,
+inline bool operator==(const hash_allocator_base&,
                 const hash_allocator_base&) throw() { return true; }
-bool operator!=(const hash_allocator_base&,
+inline bool operator!=(const hash_allocator_base&,
                 const hash_allocator_base&) throw() { return false; }
 
 // Define the allocator template.
