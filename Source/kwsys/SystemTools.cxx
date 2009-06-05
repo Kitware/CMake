@@ -405,17 +405,17 @@ bool SystemTools::GetEnv(const char* key, kwsys_stl::string& result)
 class kwsysDeletingCharVector : public kwsys_stl::vector<char*>
 {
 public:
-  ~kwsysDeletingCharVector()
-    {
-      for(kwsys_stl::vector<char*>::iterator i = this->begin();
-          i != this->end(); ++i)
-        {
-        delete []*i;
-        }
-    }
+  ~kwsysDeletingCharVector();
 };
 
-        
+kwsysDeletingCharVector::~kwsysDeletingCharVector()
+{
+  for(kwsys_stl::vector<char*>::iterator i = this->begin();
+      i != this->end(); ++i)
+    {
+    delete []*i;
+    }
+}
 bool SystemTools::PutEnv(const char* value)
 { 
   static kwsysDeletingCharVector localEnvironment;
