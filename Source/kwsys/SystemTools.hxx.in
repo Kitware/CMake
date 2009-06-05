@@ -754,6 +754,10 @@ public:
   static const char* GetEnv(const char* key);
   static bool GetEnv(const char* key, kwsys_stl::string& result);
 
+  /** Put a string into the environment
+      of the form var=value */
+  static bool PutEnv(const char* value);
+
   /**
    * Get current working directory CWD
    */

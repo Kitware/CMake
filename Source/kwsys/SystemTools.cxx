@@ -402,6 +402,33 @@ bool SystemTools::GetEnv(const char* key, kwsys_stl::string& result)
     }
 }
 
+class kwsysDeletingCharVector : public kwsys_stl::vector<char*>
+{
+public:
+  ~kwsysDeletingCharVector()
+    {
+      for(kwsys_stl::vector<char*>::iterator i = this->begin();
+          i != this->end(); ++i)
+        {
+        delete []*i;
+        }
+    }
+};
+
+        
+bool SystemTools::PutEnv(const char* value)
+{ 
+  static kwsysDeletingCharVector localEnvironment;
+  char* envVar = new char[strlen(value)+1];
+  strcpy(envVar, value);
+  int ret = putenv(envVar);
+  // save the pointer in the static vector so that it can
+  // be deleted on exit
+  localEnvironment.push_back(envVar);
+  return ret == 0;
+}
+
+
 const char* SystemTools::GetExecutableExtension()
 {
 #if defined(_WIN32) || defined(__CYGWIN__)

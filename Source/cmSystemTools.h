@@ -337,10 +337,6 @@ public:
   */
   static std::string RelativePath(const char* local, const char* remote);
 
-  /** Put a string into the environment
-      of the form var=value */
-  static bool PutEnv(const char* value);
-
 #ifdef CMAKE_BUILD_WITH_CMAKE
   /** Remove an environment variable */
   static bool UnsetEnv(const char* value);

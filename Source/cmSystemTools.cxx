@@ -1606,32 +1606,6 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
   return cmsys::SystemTools::RelativePath(local, remote);
 }
 
-class cmDeletingCharVector : public std::vector<char*>
-{
-public:
-  ~cmDeletingCharVector()
-    {
-      for(std::vector<char*>::iterator i = this->begin();
-          i != this->end(); ++i)
-        {
-        delete []*i;
-        }
-    }
-};
-
-        
-bool cmSystemTools::PutEnv(const char* value)
-{ 
-  static cmDeletingCharVector localEnvironment;
-  char* envVar = new char[strlen(value)+1];
-  strcpy(envVar, value);
-  int ret = putenv(envVar);
-  // save the pointer in the static vector so that it can
-  // be deleted on exit
-  localEnvironment.push_back(envVar);
-  return ret == 0;
-}
-
 #ifdef CMAKE_BUILD_WITH_CMAKE
 //----------------------------------------------------------------------
 bool cmSystemTools::UnsetEnv(const char* value)
