@@ -37,6 +37,7 @@
 # pragma warn -8030 /* Temporary used for parameter */
 # pragma warn -8027 /* 'for' not inlined.  */
 # pragma warn -8026 /* 'exception' not inlined.  */
+# pragma warn -8004 /* value never used */
 #endif
 
 #ifdef __ICL
