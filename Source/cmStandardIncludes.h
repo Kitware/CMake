@@ -34,7 +34,9 @@
 #endif
 
 #ifdef __BORLANDC__
-#pragma warn -8030 /* Temporary used for parameter */
+# pragma warn -8030 /* Temporary used for parameter */
+# pragma warn -8027 /* 'for' not inlined.  */
+# pragma warn -8026 /* 'exception' not inlined.  */
 #endif
 
 #ifdef __ICL

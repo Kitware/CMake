@@ -13,7 +13,10 @@
 =========================================================================*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(auto_ptr.hxx)
-
+#ifdef __BORLANDC__
+# pragma warn -8027 /* 'for' not inlined.  */
+# pragma warn -8026 /* exception not inlined.  */
+#endif 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0

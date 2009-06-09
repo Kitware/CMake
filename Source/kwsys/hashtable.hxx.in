@@ -36,6 +36,10 @@
  * purpose.  It is provided "as is" without express or implied warranty.
  *
  */
+#ifdef __BORLANDC__
+# pragma warn -8027 /* 'for' not inlined.  */
+# pragma warn -8026 /* 'exception' not inlined.  */
+#endif 
 #ifndef @KWSYS_NAMESPACE@_hashtable_hxx
 #define @KWSYS_NAMESPACE@_hashtable_hxx
 
