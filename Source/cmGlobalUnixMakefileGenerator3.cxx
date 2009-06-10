@@ -31,7 +31,7 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
   this->ToolSupportsColor = true;
   this->ForceVerboseMakefiles = false;
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__VMS)
   this->UseLinkScript = false;
 #else
   this->UseLinkScript = true;
