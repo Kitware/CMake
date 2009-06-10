@@ -11,6 +11,14 @@
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
+#ifdef KWSYS_STRING_C
+/*
+All code in this source file is conditionally compiled to work-around
+template definition auto-search on VMS.  Other source files in this
+directory that use the stl string cause the compiler to load this
+source to try to get the definition of the string template.  This
+condition blocks the compiler from seeing the symbols defined here.
+*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(String.h)
 
@@ -105,3 +113,5 @@ int kwsysString_strncasecmp(const char* lhs, const char* rhs, size_t n)
   return result;
 #endif
 }
+
+#endif /* KWSYS_STRING_C */

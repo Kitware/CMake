@@ -848,6 +848,12 @@ ENDIF(KWSYS_ENABLE_C AND KWSYS_C_SRCS)
 # line to configure the namespace in the C and C++ source files.
 ADD_DEFINITIONS("-DKWSYS_NAMESPACE=${KWSYS_NAMESPACE}")
 
+IF(KWSYS_USE_String)
+  # Activate code in "String.c".  See the comment in the source.
+  SET_SOURCE_FILES_PROPERTIES(String.c PROPERTIES
+    COMPILE_FLAGS "-DKWSYS_STRING_C")
+ENDIF(KWSYS_USE_String)
+
 #-----------------------------------------------------------------------------
 # Process execution on windows needs to build a forwarding executable
 # that works around a Win9x bug.  We encode the executable into a C

@@ -39,7 +39,5 @@
 #define KWSYS_NAMESPACE_STRING1(x) #x
 
 #else
-# ifndef __VMS /* Avoid strange false positive on VMS compiler.  */
-#  error "kwsysPrivate.h included multiple times."
-# endif
+# error "kwsysPrivate.h included multiple times."
 #endif
