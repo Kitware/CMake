@@ -37,7 +37,6 @@ cmake_system=`uname`
 cmake_source_dir=`echo $0 | sed -n '/\//{s/\/[^\/]*$//;p;}'`
 cmake_source_dir=`(cd "${cmake_source_dir}";pwd)`
 cmake_binary_dir=`pwd`
-cmake_bootstrap_dir="${cmake_binary_dir}/Bootstrap.cmk"
 cmake_version_major="`cmake_version_component MAJOR`"
 cmake_version_minor="`cmake_version_component MINOR`"
 if echo "${cmake_version_minor}" | grep "[0-9]*[13579]" > /dev/null 2>&1; then
@@ -90,6 +89,13 @@ else
   cmake_system_haiku=false
 fi
 
+# Determine whether this is OpenVMS
+if echo "${cmake_system}" | grep OpenVMS >/dev/null 2>&1; then
+  cmake_system_openvms=true
+else
+  cmake_system_openvms=false
+fi
+
 # Choose the generator to use for bootstrapping.
 if ${cmake_system_mingw}; then
   # Bootstrapping from an MSYS prompt.
@@ -98,6 +104,20 @@ else
   # Bootstrapping from a standard UNIX prompt.
   cmake_bootstrap_generator="Unix Makefiles"
 fi
+
+# Choose tools and extensions for this platform.
+if ${cmake_system_openvms}; then
+  _tmp="_tmp"
+  _cmk="_cmk"
+  _diff=`which diff`
+else
+  _tmp=".tmp"
+  _cmk=".cmk"
+  _diff="diff"
+fi
+
+# Construct bootstrap directory name.
+cmake_bootstrap_dir="${cmake_binary_dir}/Bootstrap${_cmk}"
 
 # Helper function to fix windows paths.
 cmake_fix_slashes ()
@@ -261,8 +281,8 @@ KWSYS_IOS_FILES="
 # Display CMake bootstrap usage
 cmake_usage()
 {
-  cat <<EOF
-Usage: $0 [options]
+echo '
+Usage: '"$0"' [options]
 Options: [defaults in brackets after descriptions]
 Configuration:
   --help                  print this message
@@ -288,7 +308,7 @@ Directory and file names:
                           [/doc/CMake]
   --mandir=DIR            install man pages files in PREFIX/DIR/manN
                           [/man]
-EOF
+'
   exit 10
 }
 
@@ -322,15 +342,15 @@ cmake_replace_string ()
   OUTFILE="$2"
   SEARCHFOR="$3"
   REPLACEWITH="$4"
-  if [ -f "${INFILE}" ]; then
+  if [ -f "${INFILE}" ] || ${cmake_system_openvms}; then
     cat "${INFILE}" | 
-      sed "s/\@${SEARCHFOR}\@/${REPLACEWITH}/g" > "${OUTFILE}.tmp"
-    if [ -f "${OUTFILE}.tmp" ]; then
-      if diff "${OUTFILE}" "${OUTFILE}.tmp" > /dev/null 2> /dev/null ; then
+      sed "s/\@${SEARCHFOR}\@/${REPLACEWITH}/g" > "${OUTFILE}${_tmp}"
+    if [ -f "${OUTFILE}${_tmp}" ]; then
+      if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
         #echo "Files are the same"
-        rm -f "${OUTFILE}.tmp"
+        rm -f "${OUTFILE}${_tmp}"
       else
-        mv -f "${OUTFILE}.tmp" "${OUTFILE}"
+        mv -f "${OUTFILE}${_tmp}" "${OUTFILE}"
       fi
     fi
   else
@@ -344,8 +364,8 @@ cmake_kwsys_config_replace_string ()
   OUTFILE="$2"
   shift 2
   APPEND="$*"
-  if [ -f "${INFILE}" ]; then
-    echo "${APPEND}" > "${OUTFILE}.tmp"
+  if [ -f "${INFILE}" ] || ${cmake_system_openvms}; then
+    echo "${APPEND}" > "${OUTFILE}${_tmp}"
     cat "${INFILE}" | 
       sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
                 s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
@@ -374,13 +394,13 @@ cmake_kwsys_config_replace_string ()
                 s/@KWSYS_CXX_HAS_MEMBER_TEMPLATES@/${KWSYS_CXX_HAS_MEMBER_TEMPLATES}/g;
                 s/@KWSYS_CXX_HAS_FULL_SPECIALIZATION@/${KWSYS_CXX_HAS_FULL_SPECIALIZATION}/g;
                 s/@KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP@/${KWSYS_CXX_HAS_ARGUMENT_DEPENDENT_LOOKUP}/g;
-                s/@KWSYS_STAT_HAS_ST_MTIM@/${KWSYS_STAT_HAS_ST_MTIM}/g;}" >> "${OUTFILE}.tmp"
-    if [ -f "${OUTFILE}.tmp" ]; then
-      if diff "${OUTFILE}" "${OUTFILE}.tmp" > /dev/null 2> /dev/null ; then
+                s/@KWSYS_STAT_HAS_ST_MTIM@/${KWSYS_STAT_HAS_ST_MTIM}/g;}" >> "${OUTFILE}${_tmp}"
+    if [ -f "${OUTFILE}${_tmp}" ]; then
+      if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
         #echo "Files are the same"
-        rm -f "${OUTFILE}.tmp"
+        rm -f "${OUTFILE}${_tmp}"
       else
-        mv -f "${OUTFILE}.tmp" "${OUTFILE}"
+        mv -f "${OUTFILE}${_tmp}" "${OUTFILE}"
       fi
     fi
   else
@@ -410,7 +430,7 @@ cmake_log ()
 # Return temp file
 cmake_tmp_file ()
 {
-  echo "cmake_bootstrap_$$.test"
+  echo "cmake_bootstrap_$$_test"
 }
 
 # Run a compiler test. First argument is compiler, second one are compiler
@@ -559,10 +579,10 @@ fi
 # If this is not an in-source build, then Bootstrap stuff should not exist.
 if [ -z "${cmake_in_source_build}" ]; then
   # Did somebody bootstrap in the source tree?
-  if [ -d "${cmake_source_dir}/Bootstrap.cmk" ]; then
-    cmake_error 10 "Found directory \"${cmake_source_dir}/Bootstrap.cmk\".
+  if [ -d "${cmake_source_dir}/Bootstrap${_cmk}" ]; then
+    cmake_error 10 "Found directory \"${cmake_source_dir}/Bootstrap${_cmk}\".
 Looks like somebody did bootstrap CMake in the source tree, but now you are
-trying to do bootstrap in the binary tree. Please remove Bootstrap.cmk
+trying to do bootstrap in the binary tree. Please remove Bootstrap${_cmk}
 directory from the source tree."
   fi
   # Is there a cache in the source tree?
@@ -597,8 +617,8 @@ done
 
 # Delete all the bootstrap files
 rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
-rm -f "${cmake_bootstrap_dir}/cmConfigure.h.tmp"
-rm -f "${cmake_bootstrap_dir}/cmVersionConfig.h.tmp"
+rm -f "${cmake_bootstrap_dir}/cmConfigure.h${_tmp}"
+rm -f "${cmake_bootstrap_dir}/cmVersionConfig.h${_tmp}"
 
 # If exist compiler flags, set them
 cmake_c_flags=${CFLAGS}
@@ -637,7 +657,7 @@ fi
 
 # Check if C compiler works
 TMPFILE=`cmake_tmp_file`
-cat > "${TMPFILE}.c" <<EOF
+echo '
 #ifdef __cplusplus
 # error "The CMAKE_C_COMPILER is set to a C++ compiler"
 #endif
@@ -655,7 +675,7 @@ int main(int argc, char* argv[])
   printf("%d\n", (argv != 0));
   return argc-1;
 }
-EOF
+' > "${TMPFILE}.c"
 for a in ${cmake_c_compilers}; do
   if [ -z "${cmake_c_compiler}" ] && \
     cmake_try_run "${a}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
@@ -686,7 +706,7 @@ fi
 
 # Check if C++ compiler works
 TMPFILE=`cmake_tmp_file`
-cat > "${TMPFILE}.cxx" <<EOF
+echo '
 #if defined(TEST1)
 # include <iostream>
 #else
@@ -711,7 +731,7 @@ int main()
 #endif
   return 0;
 }
-EOF
+' > "${TMPFILE}.cxx"
 for a in ${cmake_cxx_compilers}; do
   for b in 1 2 3; do
     if [ -z "${cmake_cxx_compiler}" ] && \
@@ -745,14 +765,14 @@ TMPFILE="`cmake_tmp_file`_dir"
 rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
 mkdir "${cmake_bootstrap_dir}/${TMPFILE}"
 cd "${cmake_bootstrap_dir}/${TMPFILE}"
-cat>"Makefile"<<EOF
+echo '
 test: test.c
-	"${cmake_c_compiler}" -o test test.c
-EOF
-cat>"test.c"<<EOF
+	"'"${cmake_c_compiler}"'" -o test test.c
+'>"Makefile"
+echo '
 #include <stdio.h>
 int main(){ printf("1\n"); return 0; }
-EOF
+' > "test.c"
 cmake_original_make_flags="${cmake_make_flags}"
 if [ "x${cmake_parallel_make}" != "x" ]; then
   cmake_make_flags="${cmake_make_flags} -j ${cmake_parallel_make}"
@@ -794,12 +814,12 @@ fi
 # Are we GCC?
 
 TMPFILE=`cmake_tmp_file`
-cat > ${TMPFILE}.cxx <<EOF
+echo '
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 #include <iostream>
 int main() { std::cout << "This is GNU" << std::endl; return 0;}
 #endif
-EOF
+' > ${TMPFILE}.cxx
 cmake_cxx_compiler_is_gnu=0
 if cmake_try_run "${cmake_cxx_compiler}" \
   "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
@@ -819,10 +839,10 @@ if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
   cmake_test_flags="-LANG:std"
   if [ "x${cmake_system}" = "xIRIX64" ]; then
     TMPFILE=`cmake_tmp_file`
-    cat > ${TMPFILE}.cxx <<EOF
+    echo '
     #include <iostream>
-    int main() { std::cout << "No need for ${cmake_test_flags}" << std::endl; return 0;}
-EOF
+    int main() { std::cout << "No need for '"${cmake_test_flags}"'" << std::endl; return 0;}
+' > ${TMPFILE}.cxx
     cmake_need_lang_std=0
     if cmake_try_run "${cmake_cxx_compiler}" \
       "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
@@ -847,10 +867,10 @@ EOF
   cmake_test_flags="-timplicit_local -no_implicit_include"
   if [ "x${cmake_system}" = "xOSF1" ]; then
     TMPFILE=`cmake_tmp_file`
-    cat > ${TMPFILE}.cxx <<EOF
+    echo '
     #include <iostream>
-    int main() { std::cout << "We need ${cmake_test_flags}" << std::endl; return 0;}
-EOF
+    int main() { std::cout << "We need '"${cmake_test_flags}"'" << std::endl; return 0;}
+' > ${TMPFILE}.cxx
     cmake_need_flags=1
     if cmake_try_run "${cmake_cxx_compiler}" \
       "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
@@ -872,10 +892,10 @@ EOF
   cmake_test_flags="-std strict_ansi -nopure_cname"
   if [ "x${cmake_system}" = "xOSF1" ]; then
     TMPFILE=`cmake_tmp_file`
-    cat > ${TMPFILE}.cxx <<EOF
+    echo '
     #include <iostream>
-    int main() { std::cout << "We need ${cmake_test_flags}" << std::endl; return 0;}
-EOF
+    int main() { std::cout << "We need '"${cmake_test_flags}"'" << std::endl; return 0;}
+' > ${TMPFILE}.cxx
     cmake_need_flags=1
     if cmake_try_run "${cmake_cxx_compiler}" \
       "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
@@ -897,9 +917,9 @@ EOF
   cmake_test_flags="-Ae"
   if [ "x${cmake_system}" = "xHP-UX" ]; then
     TMPFILE=`cmake_tmp_file`
-    cat > ${TMPFILE}.c <<EOF
+    echo '
     int main(int argc, char** argv) { (void)argc; (void)argv; return 0; }
-EOF
+' > ${TMPFILE}.c
     cmake_need_Ae=0
     if cmake_try_run "${cmake_c_compiler}" "${cmake_c_flags}" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1; then
       :
@@ -1174,34 +1194,34 @@ cmake_compiler_settings_comment="/*
  */
 "
 
-cmake_report cmConfigure.h.tmp "${cmake_compiler_settings_comment}"
+cmake_report cmConfigure.h${_tmp} "${cmake_compiler_settings_comment}"
 
 if [ "x$KWSYS_STL_HAVE_STD" = "x1" ]; then
-  cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_STD_NAMESPACE */"
+  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_STD_NAMESPACE */"
 else
-  cmake_report cmConfigure.h.tmp "#define CMAKE_NO_STD_NAMESPACE 1"
+  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_STD_NAMESPACE 1"
 fi
 
 if [ "x$KWSYS_IOS_USE_ANSI" = "x1" ]; then
-  cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_ANSI_STREAM_HEADERS */"
+  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_ANSI_STREAM_HEADERS */"
 else
-  cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_STREAM_HEADERS 1"
+  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_ANSI_STREAM_HEADERS 1"
 fi
 
 if [ "x$KWSYS_IOS_USE_SSTREAM" = "x1" ]; then
-  cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_ANSI_STRING_STREAM */"
+  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_ANSI_STRING_STREAM */"
 else
-  cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_STRING_STREAM 1"
+  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_ANSI_STRING_STREAM 1"
 fi
 
 # Test for ansi FOR scope
 if cmake_try_run "${cmake_cxx_compiler}" \
   "${cmake_cxx_flags}" \
   "${cmake_source_dir}/Modules/TestForAnsiForScope.cxx" >> cmake_bootstrap.log 2>&1; then
-  cmake_report cmConfigure.h.tmp "/* #undef CMAKE_NO_ANSI_FOR_SCOPE */"
+  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_ANSI_FOR_SCOPE */"
   echo "${cmake_cxx_compiler} has ANSI for scoping"
 else
-  cmake_report cmConfigure.h.tmp "#define CMAKE_NO_ANSI_FOR_SCOPE 1"
+  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_ANSI_FOR_SCOPE 1"
   echo "${cmake_cxx_compiler} does not have ANSI for scoping"
 fi
 
@@ -1214,19 +1234,19 @@ else
 fi
 
 # Write CMake version
-cmake_report cmVersionConfig.h.tmp "#define CMake_VERSION_MAJOR ${cmake_version_major}"
-cmake_report cmVersionConfig.h.tmp "#define CMake_VERSION_MINOR ${cmake_version_minor}"
-cmake_report cmVersionConfig.h.tmp "#define CMake_VERSION_PATCH ${cmake_version_patch}"
-cmake_report cmConfigure.h.tmp "#define CMAKE_ROOT_DIR \"${cmake_root_dir}\""
-cmake_report cmConfigure.h.tmp "#define CMAKE_DATA_DIR \"${cmake_data_dir}\""
-cmake_report cmConfigure.h.tmp "#define CMAKE_BOOTSTRAP"
+cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_MAJOR ${cmake_version_major}"
+cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_MINOR ${cmake_version_minor}"
+cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_PATCH ${cmake_version_patch}"
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_ROOT_DIR \"${cmake_root_dir}\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"${cmake_data_dir}\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"
 
 # Regenerate configured headers
 for h in Configure VersionConfig; do
-  if diff cm${h}.h cm${h}.h.tmp > /dev/null 2> /dev/null; then
-    rm -f cm${h}.h.tmp
+  if "${_diff}" cm${h}.h cm${h}.h${_tmp} > /dev/null 2> /dev/null; then
+    rm -f cm${h}.h${_tmp}
   else
-    mv -f cm${h}.h.tmp cm${h}.h
+    mv -f cm${h}.h${_tmp} cm${h}.h
   fi
 done
 
@@ -1251,13 +1271,13 @@ for a in ${KWSYS_IOS_FILES}; do
 done
 
 cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_stl.hxx.in" \
-   "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx.in" KWSYS_STL_HEADER_EXTRA ""
+   "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx_a" KWSYS_STL_HEADER_EXTRA ""
 
-cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx.in" \
-   "${cmake_bootstrap_dir}/cmsys/stl/stl.h.in" KWSYS_NAMESPACE cmsys
+cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx_a" \
+   "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx_b" KWSYS_NAMESPACE cmsys
 
 for a in string vector map algorithm; do
-  cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.h.in" \
+  cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx_b" \
     "${cmake_bootstrap_dir}/cmsys/stl/${a}" KWSYS_STL_HEADER ${a}
 done
 
@@ -1329,31 +1349,31 @@ if ${cmake_system_mingw}; then
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmake_c_compiler} ${cmake_c_flags} -I`cmake_escape \"${cmake_source_dir}/Source/kwsys\"` -DKWSYS_NAMESPACE=cmsys -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 fi
-cat>>"${cmake_bootstrap_dir}/Makefile"<<EOF
+echo '
 rebuild_cache:
 	cd "${cmake_binary_dir}" && "${cmake_source_dir}/bootstrap"
-EOF
+' >> "${cmake_bootstrap_dir}/Makefile"
 
-# Write our default settings to Bootstrap.cmk/InitialCacheFlags.cmake.
-cat > "${cmake_bootstrap_dir}/InitialCacheFlags.cmake" <<EOF
-# Generated by ${cmake_source_dir}/bootstrap
+# Write our default settings to Bootstrap${_cmk}/InitialCacheFlags.cmake.
+echo '
+# Generated by '"${cmake_source_dir}"'/bootstrap
 # Default cmake settings.  These may be overridden any settings below.
-SET (CMAKE_INSTALL_PREFIX "${cmake_prefix_dir}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-SET (CMAKE_DOC_DIR "${cmake_doc_dir}" CACHE PATH "Install location for documentation (relative to prefix)." FORCE)
-SET (CMAKE_MAN_DIR "${cmake_man_dir}" CACHE PATH "Install location for man pages (relative to prefix)." FORCE)
-SET (CMAKE_DATA_DIR "${cmake_data_dir}" CACHE PATH "Install location for data (relative to prefix)." FORCE)
-EOF
+SET (CMAKE_INSTALL_PREFIX "'"${cmake_prefix_dir}"'" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+SET (CMAKE_DOC_DIR "'"${cmake_doc_dir}"'" CACHE PATH "Install location for documentation (relative to prefix)." FORCE)
+SET (CMAKE_MAN_DIR "'"${cmake_man_dir}"'" CACHE PATH "Install location for man pages (relative to prefix)." FORCE)
+SET (CMAKE_DATA_DIR "'"${cmake_data_dir}"'" CACHE PATH "Install location for data (relative to prefix)." FORCE)
+' > "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 
 # Add configuration settings given as command-line options.
 if [ "x${cmake_bootstrap_qt_gui}" != "x" ]; then
-  cat >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake" <<EOF
-SET (BUILD_QtDialog ${cmake_bootstrap_qt_gui} CACHE BOOL "Build Qt dialog for CMake" FORCE)
-EOF
+  echo '
+SET (BUILD_QtDialog '"${cmake_bootstrap_qt_gui}"' CACHE BOOL "Build Qt dialog for CMake" FORCE)
+' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_bootstrap_qt_qmake}" != "x" ]; then
-  cat >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake" <<EOF
-SET (QT_QMAKE_EXECUTABLE "${cmake_bootstrap_qt_qmake}" CACHE FILEPATH "Location of Qt qmake" FORCE)
-EOF
+  echo '
+SET (QT_QMAKE_EXECUTABLE "'"${cmake_bootstrap_qt_qmake}"'" CACHE FILEPATH "Location of Qt qmake" FORCE)
+' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 
 # Add user-specified settings.  Handle relative-path case for
