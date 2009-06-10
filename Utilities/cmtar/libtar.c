@@ -19,7 +19,9 @@
 #include <libtar/compat.h>
 #include <io.h>
 #else
-#include <sys/param.h>
+# ifdef HAVE_SYS_PARAM_H
+#  include <sys/param.h>
+# endif
 #endif
 
 #ifdef STDC_HEADERS

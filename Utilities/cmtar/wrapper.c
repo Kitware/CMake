@@ -17,7 +17,7 @@
 
 #include <libtar/compat.h>
 #if defined(HAVE_SYS_PARAM_H)
-#include <sys/param.h>
+# include <sys/param.h>
 #endif
 #if defined(HAVE_DIRENT_H)
 #include <dirent.h>

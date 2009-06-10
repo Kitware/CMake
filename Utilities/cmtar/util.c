@@ -23,7 +23,9 @@
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include <direct.h>
 #else
-#include <sys/param.h>
+# ifdef HAVE_SYS_PARAM_H
+#  include <sys/param.h>
+# endif
 #endif
 
 /* hashing function for pathnames */

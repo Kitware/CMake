@@ -28,7 +28,9 @@
 # include <direct.h>
 #else
 # include <utime.h>
-# include <sys/param.h>
+# ifdef HAVE_SYS_PARAM_H
+#  include <sys/param.h>
+# endif
 #endif
 
 #ifdef STDC_HEADERS

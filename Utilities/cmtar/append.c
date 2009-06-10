@@ -18,7 +18,9 @@
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # include <libtar/compat.h>
 #else
-# include <sys/param.h>
+# ifdef HAVE_SYS_PARAM_H
+#  include <sys/param.h>
+# endif
 #endif
 #include <libtar/compat.h>
 #include <sys/types.h>
