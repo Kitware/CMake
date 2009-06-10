@@ -1705,10 +1705,15 @@ std::string cmComputeLinkInformation::GetRPathString(bool for_install)
     rpath += *ri;
     }
 
-  // If the rpath will be replaced at install time make sure it is
-  // long enough now.
+  // If the rpath will be replaced at install time, prepare space.
   if(!for_install && this->RuntimeUseChrpath)
     {
+    // Always add one trailing separator so the linker does not re-use
+    // the rpath .dynstr entry for a symbol name that happens to match
+    // the end of the rpath string.
+    rpath += this->GetRuntimeSep();
+
+    // Make sure it is long enough to hold the replacement value.
     std::string::size_type minLength = this->GetChrpathString().length();
     while(rpath.length() < minLength)
       {
