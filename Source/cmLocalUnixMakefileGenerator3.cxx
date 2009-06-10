@@ -676,10 +676,12 @@ cmLocalUnixMakefileGenerator3
     }
   else
     {
+#if !defined(__VMS)
       makefileStream
         << "# The shell in which to execute make rules.\n"
         << "SHELL = /bin/sh\n"
         << "\n";
+#endif
     }
 
   std::string cmakecommand =
