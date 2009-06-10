@@ -67,6 +67,12 @@ do.
 #undef __BEOS__
 #endif
 
+#if defined(__VMS)
+# define KWSYSPE_VMS_NONBLOCK , O_NONBLOCK
+#else
+# define KWSYSPE_VMS_NONBLOCK
+#endif
+
 #if defined(KWSYS_C_HAS_PTRDIFF_T) && KWSYS_C_HAS_PTRDIFF_T
 typedef ptrdiff_t kwsysProcess_ptrdiff_t;
 #else
@@ -100,7 +106,7 @@ static inline void kwsysProcess_usleep(unsigned int msec)
  * pipes' file handles to be non-blocking and just poll them directly
  * without select().
  */
-#if !defined(__BEOS__)
+#if !defined(__BEOS__) && !defined(__VMS)
 # define KWSYSPE_USE_SELECT 1
 #endif
 
@@ -170,6 +176,7 @@ static void kwsysProcessRestoreDefaultSignalHandlers(void);
 static pid_t kwsysProcessFork(kwsysProcess* cp,
                               kwsysProcessCreateInformation* si);
 static void kwsysProcessKill(pid_t process_id);
+static int kwsysProcessSetVMSFeature(char* name, int value);
 static int kwsysProcessesAdd(kwsysProcess* cp);
 static void kwsysProcessesRemove(kwsysProcess* cp);
 #if KWSYSPE_USE_SIGINFO
@@ -720,6 +727,13 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     return;
     }
 
+  /* Make sure pipes behave like streams on VMS.  */
+  if(!kwsysProcessSetVMSFeature("DECC$STREAM_PIPE", 1))
+    {
+    kwsysProcessCleanup(cp, 1);
+    return;
+    }
+
   /* Save the real working directory of this process and change to
      the working directory for the child processes.  This is needed
      to make pipe file paths evaluate correctly.  */
@@ -759,7 +773,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   {
   /* Create the pipe.  */
   int p[2];
-  if(pipe(p) < 0)
+  if(pipe(p KWSYSPE_VMS_NONBLOCK) < 0)
     {
     kwsysProcessCleanup(cp, 1);
     return;
@@ -1185,11 +1199,24 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
       else if (n == 0)  /* EOF */
         {
         /* We are done reading from this pipe.  */
-        kwsysProcessCleanupDescriptor(&cp->PipeReadEnds[i]);
-        --cp->PipesLeft;
+#if defined(__VMS)
+        if(!cp->CommandsLeft)
+#endif
+          {
+          kwsysProcessCleanupDescriptor(&cp->PipeReadEnds[i]);
+          --cp->PipesLeft;
+          }
         }
       else if (n < 0)  /* error */
         {
+#if defined(__VMS)
+        if(!cp->CommandsLeft)
+          {
+          kwsysProcessCleanupDescriptor(&cp->PipeReadEnds[i]);
+          --cp->PipesLeft;
+          }
+        else
+#endif
         if((errno != EINTR) && (errno != EAGAIN))
           {
           strncpy(cp->ErrorMessage,strerror(errno),
@@ -1566,6 +1593,11 @@ static int kwsysProcessSetNonBlocking(int fd)
 }
 
 /*--------------------------------------------------------------------------*/
+#if defined(__VMS)
+int decc$set_child_standard_streams(int fd1, int fd2, int fd3);
+#endif
+
+/*--------------------------------------------------------------------------*/
 static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
                               kwsysProcessCreateInformation* si, int* readEnd)
 {
@@ -1616,7 +1648,7 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
   {
   /* Create the pipe.  */
   int p[2];
-  if(pipe(p) < 0)
+  if(pipe(p KWSYSPE_VMS_NONBLOCK) < 0)
     {
     return 0;
     }
@@ -1674,7 +1706,14 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
     }
 
   /* Fork off a child process.  */
+#if defined(__VMS)
+  /* VMS needs vfork and execvp to be in the same function because
+     they use setjmp/longjmp to run the child startup code in the
+     parent!  TODO: OptionDetach.  */
+  cp->ForkPIDs[prIndex] = vfork();
+#else
   cp->ForkPIDs[prIndex] = kwsysProcessFork(cp, si);
+#endif
   if(cp->ForkPIDs[prIndex] < 0)
     {
     return 0;
@@ -1682,6 +1721,10 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
 
   if(cp->ForkPIDs[prIndex] == 0)
     {
+#if defined(__VMS)
+    /* Specify standard pipes for child process.  */
+    decc$set_child_standard_streams(si->StdIn, si->StdOut, si->StdErr);
+#else
     /* Close the read end of the error reporting pipe.  */
     close(si->ErrorPipe[0]);
 
@@ -1711,13 +1754,20 @@ static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
 
     /* Restore all default signal handlers. */
     kwsysProcessRestoreDefaultSignalHandlers();
+#endif
 
     /* Execute the real process.  If successful, this does not return.  */
     execvp(cp->Commands[prIndex][0], cp->Commands[prIndex]);
+    /* TODO: What does VMS do if the child fails to start?  */
 
     /* Failure.  Report error to parent and terminate.  */
     kwsysProcessChildErrorExit(si->ErrorPipe[1]);
     }
+
+#if defined(__VMS)
+  /* Restore the standard pipes of this process.  */
+  decc$set_child_standard_streams(0, 1, 2);
+#endif
 
   /* A child has been created.  */
   ++cp->CommandsLeft;
@@ -2266,9 +2316,6 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
   if(cp->OptionDetach)
     {
     /* Create an intermediate process.  */
-#ifdef __VMS
-#define fork vfork
-#endif
     pid_t middle_pid = fork();
     if(middle_pid < 0)
       {
@@ -2437,6 +2484,26 @@ static void kwsysProcessKill(pid_t process_id)
 }
 
 /*--------------------------------------------------------------------------*/
+#if defined(__VMS)
+int decc$feature_get_index(char *name);
+int decc$feature_set_value(int index, int mode, int value);
+static int kwsysProcessSetVMSFeature(char* name, int value)
+{
+  int i;
+  errno = 0;
+  i = decc$feature_get_index(name);
+  return i >= 0 && (decc$feature_set_value(i, 1, value) >= 0 || errno == 0);
+}
+#else
+static int kwsysProcessSetVMSFeature(char* name, int value)
+{
+  (void)name;
+  (void)value;
+  return 1;
+}
+#endif
+
+/*--------------------------------------------------------------------------*/
 /* Global set of executing processes for use by the signal handler.
    This global instance will be zero-initialized by the compiler.  */
 typedef struct kwsysProcessInstances_s
@@ -2477,7 +2544,7 @@ static int kwsysProcessesAdd(kwsysProcess* cp)
   {
   /* Create the pipe.  */
   int p[2];
-  if(pipe(p) < 0)
+  if(pipe(p KWSYSPE_VMS_NONBLOCK) < 0)
     {
     return 0;
     }
