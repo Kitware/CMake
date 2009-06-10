@@ -930,7 +930,11 @@ std::string cmTarget::GetSupportDirectory() const
   dir += cmake::GetCMakeFilesDirectory();
   dir += "/";
   dir += this->Name;
+#if defined(__VMS)
+  dir += "_dir";
+#else
   dir += ".dir";
+#endif
   return dir;
 }
 

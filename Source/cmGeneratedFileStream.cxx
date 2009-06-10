@@ -150,7 +150,11 @@ void cmGeneratedFileStreamBase::Open(const char* name)
 
   // Create the name of the temporary file.
   this->TempName = name;
+#if defined(__VMS)
+  this->TempName += "_tmp";
+#else
   this->TempName += ".tmp";
+#endif
 
   // Make sure the temporary file that will be used is not present.
   cmSystemTools::RemoveFile(this->TempName.c_str());

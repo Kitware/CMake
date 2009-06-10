@@ -2158,7 +2158,11 @@ cmLocalUnixMakefileGenerator3
 {
   std::string dir = cmake::GetCMakeFilesDirectoryPostSlash();
   dir += target.GetName();
+#if defined(__VMS)
+  dir += "_dir";
+#else
   dir += ".dir";
+#endif
   return dir;
 }
 
