@@ -303,9 +303,11 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     }
   // Sort the list and remove duplicates.
   std::sort(lfiles.begin(), lfiles.end(), std::less<std::string>());
+#if !defined(__VMS) // The Compaq STL on VMS crashes, so accept duplicates.
   std::vector<std::string>::iterator new_end = 
     std::unique(lfiles.begin(),lfiles.end());
   lfiles.erase(new_end, lfiles.end());
+#endif
 
   // reset lg to the first makefile
   lg = static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[0]);
