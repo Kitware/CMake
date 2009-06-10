@@ -895,6 +895,16 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_NO_BUILTIN_CHRPATH", cmProperty::VARIABLE,
+     "Do not use the builtin ELF editor to fix RPATHs on installation.",
+     "When an ELF binary needs to have a different RPATH after installation "
+     "than it does in the build tree, CMake uses a builtin editor to change "
+     "the RPATH in the installed copy.  "
+     "If this variable is set to true then CMake will relink the binary "
+     "before installation instead of using its builtin editor.",false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_SKIP_BUILD_RPATH", cmProperty::VARIABLE,
      "Do not include RPATHs in the build tree.",
      "Normally CMake uses the build tree for the RPATH when building "
