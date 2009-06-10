@@ -264,6 +264,10 @@ typedef unsigned char bool;
 
 #else /* MSDOS */
 
+#ifdef __VMS
+#define IOCTL_3_ARGS 1
+#endif
+
 #ifdef __BEOS__
 #define sclose(x) closesocket(x)
 #else /* __BEOS__ */
