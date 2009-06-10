@@ -672,7 +672,7 @@ int main(argc, argv)
 int main(int argc, char* argv[])
 #endif
 {
-  printf("%d\n", (argv != 0));
+  printf("%d%c", (argv != 0), (char)0x0a);
   return argc-1;
 }
 ' > "${TMPFILE}.c"
@@ -771,7 +771,7 @@ test: test.c
 '>"Makefile"
 echo '
 #include <stdio.h>
-int main(){ printf("1\n"); return 0; }
+int main(){ printf("1%c", (char)0x0a); return 0; }
 ' > "test.c"
 cmake_original_make_flags="${cmake_make_flags}"
 if [ "x${cmake_parallel_make}" != "x" ]; then
