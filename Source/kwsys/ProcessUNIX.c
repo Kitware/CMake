@@ -156,7 +156,8 @@ static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
                                       kwsysProcessTime* timeoutTime);
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
                                       double* userTimeout,
-                                      kwsysProcessTimeNative* timeoutLength);
+                                      kwsysProcessTimeNative* timeoutLength,
+                                      int zeroIsExpired);
 static kwsysProcessTime kwsysProcessTimeGetCurrent(void);
 static double kwsysProcessTimeToDouble(kwsysProcessTime t);
 static kwsysProcessTime kwsysProcessTimeFromDouble(double d);
@@ -1097,7 +1098,7 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
     }
   if(kwsysProcessGetTimeoutLeft(&wd->TimeoutTime,
                                 wd->User?wd->UserTimeout:0,
-                                &timeoutLength))
+                                &timeoutLength, 0))
     {
     /* Timeout has already expired.  */
     wd->Expired = 1;
@@ -1210,14 +1211,7 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
     }
 
   if(kwsysProcessGetTimeoutLeft(&wd->TimeoutTime, wd->User?wd->UserTimeout:0,
-                                &timeoutLength))
-    {
-    /* Timeout has already expired.  */
-    wd->Expired = 1;
-    return 1;
-    }
-
-  if((timeoutLength.tv_sec == 0) && (timeoutLength.tv_usec == 0))
+                                &timeoutLength, 1))
     {
     /* Timeout has already expired.  */
     wd->Expired = 1;
@@ -1905,7 +1899,8 @@ static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
    Returns 1 if the time has already arrived, and 0 otherwise.  */
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
                                       double* userTimeout,
-                                      kwsysProcessTimeNative* timeoutLength)
+                                      kwsysProcessTimeNative* timeoutLength,
+                                      int zeroIsExpired)
 {
   if(timeoutTime->tv_sec < 0)
     {
@@ -1925,7 +1920,8 @@ static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
       timeLeft.tv_usec = 0;
       }
 
-    if(timeLeft.tv_sec < 0)
+    if(timeLeft.tv_sec < 0 ||
+       (timeLeft.tv_sec == 0 && timeLeft.tv_usec == 0 && zeroIsExpired))
       {
       /* Timeout has already expired.  */
       return 1;
