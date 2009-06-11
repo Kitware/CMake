@@ -12,7 +12,6 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "not sorted slower link editing will result"
   "stl_deque.h:479"
   "Utilities.cmzlib."
-  "Utilities.cmxmlrpc."
   "Source.CTest.Curl"
   "Utilities.cmcurl"
   "Source.CursesDialog.form"

@@ -727,6 +727,7 @@ bool cmCTestSubmitHandler::SubmitUsingCP(
 
 
 //----------------------------------------------------------------------------
+#if defined(CTEST_USE_XMLRPC)
 bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
   const std::set<cmStdString>& files,
   const cmStdString& remoteprefix,
@@ -824,6 +825,15 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
   xmlrpc_client_cleanup();
   return true;
 }
+#else
+bool cmCTestSubmitHandler::SubmitUsingXMLRPC(cmStdString const&,
+                                             std::set<cmStdString> const&,
+                                             cmStdString const&,
+                                             cmStdString const&)
+{
+  return false;
+}
+#endif
 
 //----------------------------------------------------------------------------
 int cmCTestSubmitHandler::ProcessHandler()
@@ -1137,6 +1147,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     }
   else if ( dropMethod == "xmlrpc" )
     {
+#if defined(CTEST_USE_XMLRPC)
     ofs << "Using drop method: XML-RPC" << std::endl;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using XML-RPC submit method"
       << std::endl);
@@ -1154,6 +1165,12 @@ int cmCTestSubmitHandler::ProcessHandler()
       << std::endl);
     ofs << "   Submission successful" << std::endl;
     return 0;
+#else
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "   Submission method \"xmlrpc\" not compiled into CTest!"
+               << std::endl);
+    return -1;
+#endif
     }
   else if ( dropMethod == "scp" )
     {

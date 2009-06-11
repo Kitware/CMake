@@ -19,12 +19,9 @@
 
 /* Use the xmlrpc library configured for CMake.  */
 #include "cmThirdParty.h"
-#ifdef CMAKE_USE_SYSTEM_XMLRPC
+#ifdef CTEST_USE_XMLRPC
 # include <xmlrpc.h>
 # include <xmlrpc_client.h>
-#else
-# include <cmxmlrpc/xmlrpc.h>
-# include <cmxmlrpc/xmlrpc_client.h>
 #endif
 
 #endif

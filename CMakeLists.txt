@@ -16,6 +16,10 @@ MACRO(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   # Options have dependencies.
   INCLUDE(CMakeDependentOption)
 
+  # Optionally use system xmlrpc.  We no longer build or use it by default.
+  OPTION(CTEST_USE_XMLRPC "Enable xmlrpc submission method in CTest." OFF)
+  MARK_AS_ADVANCED(CTEST_USE_XMLRPC)
+
   # Allow the user to enable/disable all system utility library options
   # by setting CMAKE_USE_SYSTEM_LIBRARIES on the command line.
   IF(DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
@@ -31,19 +35,15 @@ MACRO(CMAKE_HANDLE_SYSTEM_LIBRARIES)
       CACHE BOOL "Use system-installed curl" FORCE)
     SET(CMAKE_USE_SYSTEM_EXPAT "${CMAKE_USE_SYSTEM_LIBRARIES}"
       CACHE BOOL "Use system-installed expat" FORCE)
-    SET(CMAKE_USE_SYSTEM_XMLRPC "${CMAKE_USE_SYSTEM_LIBRARIES}"
-      CACHE BOOL "Use system-installed xmlrpc" FORCE)
     SET(CMAKE_USE_SYSTEM_ZLIB "${CMAKE_USE_SYSTEM_LIBRARIES}"
       CACHE BOOL "Use system-installed zlib" FORCE)
   ENDIF(CMAKE_USE_SYSTEM_LIBRARIES_USER)
 
   # Optionally use system utility libraries.
-  OPTION(CMAKE_USE_SYSTEM_CURL   "Use system-installed curl"
-    ${CMAKE_USE_SYSTEM_LIBRARIES})
-  OPTION(CMAKE_USE_SYSTEM_XMLRPC "Use system-installed xmlrpc"
-    ${CMAKE_USE_SYSTEM_LIBRARIES})
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_CURL "Use system-installed curl"
+    ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CTEST_USE_XMLRPC" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat"
-    ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_XMLRPC" ON)
+    ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CTEST_USE_XMLRPC" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
     ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_CURL" ON)
 
@@ -294,19 +294,15 @@ MACRO (CMAKE_BUILD_UTILITIES)
   
   #---------------------------------------------------------------------
   # Build XMLRPC library for CMake and CTest.
-  IF(CMAKE_USE_SYSTEM_XMLRPC)
+  IF(CTEST_USE_XMLRPC)
     FIND_PACKAGE(XMLRPC QUIET REQUIRED libwww-client)
     IF(NOT XMLRPC_FOUND)
       MESSAGE(FATAL_ERROR
-        "CMAKE_USE_SYSTEM_XMLRPC is ON but a xmlrpc is not found!")
+        "CTEST_USE_XMLRPC is ON but xmlrpc is not found!")
     ENDIF(NOT XMLRPC_FOUND)
     SET(CMAKE_XMLRPC_INCLUDES ${XMLRPC_INCLUDE_DIRS})
     SET(CMAKE_XMLRPC_LIBRARIES ${XMLRPC_LIBRARIES})
-  ELSE(CMAKE_USE_SYSTEM_XMLRPC)
-    SET(CMAKE_XMLRPC_INCLUDES)
-    SET(CMAKE_XMLRPC_LIBRARIES cmXMLRPC)
-    SUBDIRS(Utilities/cmxmlrpc)
-  ENDIF(CMAKE_USE_SYSTEM_XMLRPC)
+  ENDIF(CTEST_USE_XMLRPC)
   
   #---------------------------------------------------------------------
   # Use curses?
@@ -426,20 +422,19 @@ IF(BUILD_QtDialog)
 ENDIF(BUILD_QtDialog)
 
 
-# The same might be true on other systems for other libraries if 
-# CMAKE_USE_SYSTEM_XMLRPC or other variables like this are enabled.
+# The same might be true on other systems for other libraries.
 # Then only enable RPATH if we have are building at least with cmake 2.4, 
 # since this one has much better RPATH features than cmake 2.2.
 # The executables are then built with the RPATH for the libraries outside
 # the build tree, which is both the build and the install RPATH.
 IF (UNIX)
   IF(   CMAKE_USE_SYSTEM_CURL   OR  CMAKE_USE_SYSTEM_ZLIB
-        OR  CMAKE_USE_SYSTEM_EXPAT  OR  CMAKE_USE_SYSTEM_XMLRPC  OR  CURSES_NEED_RPATH  OR  QT_NEED_RPATH)
+        OR  CMAKE_USE_SYSTEM_EXPAT  OR  CTEST_USE_XMLRPC  OR  CURSES_NEED_RPATH  OR  QT_NEED_RPATH)
     SET(CMAKE_SKIP_RPATH OFF CACHE INTERNAL "CMake built with RPATH.")
     SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
     SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
   ENDIF(CMAKE_USE_SYSTEM_CURL   OR  CMAKE_USE_SYSTEM_ZLIB
-        OR  CMAKE_USE_SYSTEM_EXPAT  OR  CMAKE_USE_SYSTEM_XMLRPC  OR  CURSES_NEED_RPATH  OR  QT_NEED_RPATH)
+        OR  CMAKE_USE_SYSTEM_EXPAT  OR  CTEST_USE_XMLRPC  OR  CURSES_NEED_RPATH  OR  QT_NEED_RPATH)
 ENDIF (UNIX)
 
 
