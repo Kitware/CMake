@@ -431,7 +431,7 @@ bool SystemTools::PutEnv(const char* value)
 
 const char* SystemTools::GetExecutableExtension()
 {
-#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__VMS)
   return ".exe";
 #else
   return "";
