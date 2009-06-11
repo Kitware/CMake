@@ -257,13 +257,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     ENDIF(NOT CMAKE_BUILD_CURL_SHARED)
     SET(CMAKE_CURL_INCLUDES)
     SET(CMAKE_CURL_LIBRARIES cmcurl)
-    IF(CMAKE_USE_NEW_CURL)
-      # for cmake never build examples
-      SET(CURL_SKIP_EXAMPLES TRUE)
-      ADD_SUBDIRECTORY(Utilities/cmcurl-7.19.0)
-    ELSE(CMAKE_USE_NEW_CURL)
-      SUBDIRS(Utilities/cmcurl)
-    ENDIF(CMAKE_USE_NEW_CURL)
+    SUBDIRS(Utilities/cmcurl)
   ENDIF(CMAKE_USE_SYSTEM_CURL)
 
   #---------------------------------------------------------------------

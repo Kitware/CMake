@@ -22,6 +22,5 @@
 #cmakedefine CMAKE_USE_SYSTEM_EXPAT
 #cmakedefine CMAKE_USE_SYSTEM_XMLRPC
 #cmakedefine CMAKE_USE_SYSTEM_ZLIB
-#cmakedefine CMAKE_USE_NEW_CURL
 
 #endif
