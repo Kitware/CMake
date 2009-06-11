@@ -13,59 +13,44 @@ MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 # simply to improve readability of the main script
 #-----------------------------------------------------------------------
 MACRO(CMAKE_HANDLE_SYSTEM_LIBRARIES)
-  # Third party libraries must be something that can be found.
-  IF(EXISTS ${CMAKE_ROOT}/Modules/FindXMLRPC.cmake)
-    SET(CMAKE_ALLOW_SYSTEM_LIBRARIES 1)
-  ELSE(EXISTS ${CMAKE_ROOT}/Modules/FindXMLRPC.cmake)
-    SET(CMAKE_ALLOW_SYSTEM_LIBRARIES 0)
-  ENDIF(EXISTS ${CMAKE_ROOT}/Modules/FindXMLRPC.cmake)
-  
-  IF(CMAKE_ALLOW_SYSTEM_LIBRARIES)
-    # Options have dependencies.
-    INCLUDE(CMakeDependentOption)
-    
-    # Allow the user to enable/disable all system utility library options
-    # by setting CMAKE_USE_SYSTEM_LIBRARIES on the command line.
-    IF(DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
-      SET(CMAKE_USE_SYSTEM_LIBRARIES_USER 1)
-    ENDIF(DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
-    IF(CMAKE_USE_SYSTEM_LIBRARIES)
-      SET(CMAKE_USE_SYSTEM_LIBRARIES ON)
-    ELSE(CMAKE_USE_SYSTEM_LIBRARIES)
-      SET(CMAKE_USE_SYSTEM_LIBRARIES OFF)
-    ENDIF(CMAKE_USE_SYSTEM_LIBRARIES)
-    IF(CMAKE_USE_SYSTEM_LIBRARIES_USER)
-      SET(CMAKE_USE_SYSTEM_CURL "${CMAKE_USE_SYSTEM_LIBRARIES}" 
-        CACHE BOOL "Use system-installed curl" FORCE)
-      SET(CMAKE_USE_SYSTEM_EXPAT "${CMAKE_USE_SYSTEM_LIBRARIES}" 
-        CACHE BOOL "Use system-installed expat" FORCE)
-      SET(CMAKE_USE_SYSTEM_XMLRPC "${CMAKE_USE_SYSTEM_LIBRARIES}" 
-        CACHE BOOL "Use system-installed xmlrpc" FORCE)
-      SET(CMAKE_USE_SYSTEM_ZLIB "${CMAKE_USE_SYSTEM_LIBRARIES}" 
-        CACHE BOOL "Use system-installed zlib" FORCE)
-    ENDIF(CMAKE_USE_SYSTEM_LIBRARIES_USER)
-    
-    # Optionally use system utility libraries.
-    OPTION(CMAKE_USE_SYSTEM_CURL   "Use system-installed curl" 
-      ${CMAKE_USE_SYSTEM_LIBRARIES})
-    OPTION(CMAKE_USE_SYSTEM_XMLRPC "Use system-installed xmlrpc" 
-      ${CMAKE_USE_SYSTEM_LIBRARIES})
-    CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat"
-      ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_XMLRPC" ON)
-    CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
-      ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_CURL" ON)
-    
-    # There is currently no option for system tar because the upstream
-    # libtar does not have our modifications to allow reentrant
-    # object-oriented use of the library.
-    # OPTION(CMAKE_USE_SYSTEM_TAR    "Use system-installed tar"   OFF)
-  ELSE(CMAKE_ALLOW_SYSTEM_LIBRARIES)
-    SET(CMAKE_USE_SYSTEM_CURL 0)
-    SET(CMAKE_USE_SYSTEM_EXPAT 0)
-    SET(CMAKE_USE_SYSTEM_XMLRPC 0)
-    SET(CMAKE_USE_SYSTEM_ZLIB 0)
-  ENDIF(CMAKE_ALLOW_SYSTEM_LIBRARIES)
+  # Options have dependencies.
+  INCLUDE(CMakeDependentOption)
 
+  # Allow the user to enable/disable all system utility library options
+  # by setting CMAKE_USE_SYSTEM_LIBRARIES on the command line.
+  IF(DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
+    SET(CMAKE_USE_SYSTEM_LIBRARIES_USER 1)
+  ENDIF(DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
+  IF(CMAKE_USE_SYSTEM_LIBRARIES)
+    SET(CMAKE_USE_SYSTEM_LIBRARIES ON)
+  ELSE(CMAKE_USE_SYSTEM_LIBRARIES)
+    SET(CMAKE_USE_SYSTEM_LIBRARIES OFF)
+  ENDIF(CMAKE_USE_SYSTEM_LIBRARIES)
+  IF(CMAKE_USE_SYSTEM_LIBRARIES_USER)
+    SET(CMAKE_USE_SYSTEM_CURL "${CMAKE_USE_SYSTEM_LIBRARIES}"
+      CACHE BOOL "Use system-installed curl" FORCE)
+    SET(CMAKE_USE_SYSTEM_EXPAT "${CMAKE_USE_SYSTEM_LIBRARIES}"
+      CACHE BOOL "Use system-installed expat" FORCE)
+    SET(CMAKE_USE_SYSTEM_XMLRPC "${CMAKE_USE_SYSTEM_LIBRARIES}"
+      CACHE BOOL "Use system-installed xmlrpc" FORCE)
+    SET(CMAKE_USE_SYSTEM_ZLIB "${CMAKE_USE_SYSTEM_LIBRARIES}"
+      CACHE BOOL "Use system-installed zlib" FORCE)
+  ENDIF(CMAKE_USE_SYSTEM_LIBRARIES_USER)
+
+  # Optionally use system utility libraries.
+  OPTION(CMAKE_USE_SYSTEM_CURL   "Use system-installed curl"
+    ${CMAKE_USE_SYSTEM_LIBRARIES})
+  OPTION(CMAKE_USE_SYSTEM_XMLRPC "Use system-installed xmlrpc"
+    ${CMAKE_USE_SYSTEM_LIBRARIES})
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat"
+    ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_XMLRPC" ON)
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
+    ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_CURL" ON)
+
+  # There is currently no option for system tar because the upstream
+  # libtar does not have our modifications to allow reentrant
+  # object-oriented use of the library.
+  # OPTION(CMAKE_USE_SYSTEM_TAR    "Use system-installed tar"   OFF)
 
   # Mention to the user what system libraries are being used.
   FOREACH(util CURL EXPAT XMLRPC ZLIB)
