@@ -176,7 +176,7 @@ static void kwsysProcessRestoreDefaultSignalHandlers(void);
 static pid_t kwsysProcessFork(kwsysProcess* cp,
                               kwsysProcessCreateInformation* si);
 static void kwsysProcessKill(pid_t process_id);
-static int kwsysProcessSetVMSFeature(char* name, int value);
+static int kwsysProcessSetVMSFeature(const char* name, int value);
 static int kwsysProcessesAdd(kwsysProcess* cp);
 static void kwsysProcessesRemove(kwsysProcess* cp);
 #if KWSYSPE_USE_SIGINFO
@@ -2487,7 +2487,7 @@ static void kwsysProcessKill(pid_t process_id)
 #if defined(__VMS)
 int decc$feature_get_index(char *name);
 int decc$feature_set_value(int index, int mode, int value);
-static int kwsysProcessSetVMSFeature(char* name, int value)
+static int kwsysProcessSetVMSFeature(const char* name, int value)
 {
   int i;
   errno = 0;
@@ -2495,7 +2495,7 @@ static int kwsysProcessSetVMSFeature(char* name, int value)
   return i >= 0 && (decc$feature_set_value(i, 1, value) >= 0 || errno == 0);
 }
 #else
-static int kwsysProcessSetVMSFeature(char* name, int value)
+static int kwsysProcessSetVMSFeature(const char* name, int value)
 {
   (void)name;
   (void)value;
