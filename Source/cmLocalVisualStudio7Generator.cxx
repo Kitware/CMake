@@ -549,6 +549,64 @@ private:
                       bool& flag_handled);
 };
 
+//----------------------------------------------------------------------------
+// Helper class to write build event <Tool .../> elements.
+class cmLocalVisualStudio7Generator::EventWriter
+{
+public:
+  EventWriter(cmLocalVisualStudio7Generator* lg,
+              const char* config, std::ostream& os):
+    LG(lg), Config(config), Stream(os), First(true) {}
+  void Start(const char* tool)
+    {
+    this->First = true;
+    this->Stream << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"";
+    }
+  void Finish()
+    {
+    this->Stream << (this->First? "" : "\"") << "/>\n";
+    }
+  void Write(std::vector<cmCustomCommand> const& ccs)
+    {
+    for(std::vector<cmCustomCommand>::const_iterator ci = ccs.begin();
+        ci != ccs.end(); ++ci)
+      {
+      this->Write(*ci);
+      }
+    }
+  void Write(cmCustomCommand const& cc)
+    {
+    if(this->First)
+      {
+      const char* comment = cc.GetComment();
+      if(comment && *comment)
+        {
+        this->Stream << "\nDescription=\""
+                     << this->LG->EscapeForXML(comment) << "\"";
+        }
+      this->Stream << "\nCommandLine=\"";
+      this->First = false;
+      }
+    else
+      {
+      this->Stream << this->LG->EscapeForXML("\n");
+      }
+    std::string script =
+      this->LG->ConstructScript(cc.GetCommandLines(),
+                                cc.GetWorkingDirectory(),
+                                this->Config,
+                                cc.GetEscapeOldStyle(),
+                                cc.GetEscapeAllowMakeVars());
+    this->Stream << this->LG->EscapeForXML(script.c_str());
+    }
+private:
+  cmLocalVisualStudio7Generator* LG;
+  const char* Config;
+  std::ostream& Stream;
+  bool First;
+};
+
+//----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
                                                        const char* configName,
                                                        const char *libName,
@@ -1628,128 +1686,26 @@ void cmLocalVisualStudio7Generator
     {
     return;
     }
-  const char* tool = "VCPreBuildEventTool";
-  if(this->FortranProject)
-    {
-    tool = "VFPreBuildEventTool";
-    }
-  // add the pre build rules
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"";
-  bool init = false;
-  for (std::vector<cmCustomCommand>::const_iterator cr =
-         target.GetPreBuildCommands().begin();
-       cr != target.GetPreBuildCommands().end(); ++cr)
-    {
-    if(!init)
-      {
-      const char* comment = cr->GetComment();
-      if(comment && *comment)
-        {
-        fout << "\nDescription=\""
-             << this->EscapeForXML(comment) << "\"";
-        }
-      fout << "\nCommandLine=\"";
-      init = true;
-      }
-    else
-      {
-      fout << this->EscapeForXML("\n");
-      }
-    std::string script =
-      this->ConstructScript(cr->GetCommandLines(),
-                            cr->GetWorkingDirectory(),
-                            configName,
-                            cr->GetEscapeOldStyle(),
-                            cr->GetEscapeAllowMakeVars());
-    fout << this->EscapeForXML(script.c_str()).c_str();
-    }
-  if (init)
-    {
-    fout << "\"";
-    }
-  fout << "/>\n";
+  EventWriter event(this, configName, fout);
 
-  // add the pre Link rules
-  tool = "VCPreLinkEventTool";
-  if(this->FortranProject)
-    {
-    tool = "VFPreLinkEventTool";
-    }
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"";
-  init = false;
-  for (std::vector<cmCustomCommand>::const_iterator cr =
-         target.GetPreLinkCommands().begin();
-       cr != target.GetPreLinkCommands().end(); ++cr)
-    {
-    if(!init)
-      {
-      const char* comment = cr->GetComment();
-      if(comment && *comment)
-        {
-        fout << "\nDescription=\""
-             << this->EscapeForXML(comment) << "\"";
-        }
-      fout << "\nCommandLine=\"";
-      init = true;
-      }
-    else
-      {
-      fout << this->EscapeForXML("\n");
-      }
-    std::string script =
-      this->ConstructScript(cr->GetCommandLines(),
-                            cr->GetWorkingDirectory(),
-                            configName,
-                            cr->GetEscapeOldStyle(),
-                            cr->GetEscapeAllowMakeVars());
-    fout << this->EscapeForXML(script.c_str()).c_str();
-    }
-  if (init)
-    {
-    fout << "\"";
-    }
-  fout << "/>\n";
+  // Add pre-build event.
+  const char* tool =
+    this->FortranProject? "VFPreBuildEventTool":"VCPreBuildEventTool";
+  event.Start(tool);
+  event.Write(target.GetPreBuildCommands());
+  event.Finish();
 
-  // add the PostBuild rules
-  tool = "VCPostBuildEventTool";
-  if(this->FortranProject)
-    {
-    tool = "VFPostBuildEventTool";
-    }
-  fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"";
-  init = false;
-  for (std::vector<cmCustomCommand>::const_iterator cr =
-         target.GetPostBuildCommands().begin();
-       cr != target.GetPostBuildCommands().end(); ++cr)
-    {
-    if(!init)
-      {
-      const char* comment = cr->GetComment();
-      if(comment && *comment)
-        {
-        fout << "\nDescription=\""
-             << this->EscapeForXML(comment) << "\"";
-        }
-      fout << "\nCommandLine=\"";
-      init = true;
-      }
-    else
-      {
-      fout << this->EscapeForXML("\n");
-      }
-    std::string script =
-      this->ConstructScript(cr->GetCommandLines(),
-                            cr->GetWorkingDirectory(),
-                            configName,
-                            cr->GetEscapeOldStyle(),
-                            cr->GetEscapeAllowMakeVars());
-    fout << this->EscapeForXML(script.c_str()).c_str();
-    }
-  if (init)
-    {
-    fout << "\"";
-    }
-  fout << "/>\n";
+  // Add pre-link event.
+  tool = this->FortranProject? "VFPreLinkEventTool":"VCPreLinkEventTool";
+  event.Start(tool);
+  event.Write(target.GetPreLinkCommands());
+  event.Finish();
+
+  // Add post-build event.
+  tool = this->FortranProject? "VFPostBuildEventTool":"VCPostBuildEventTool";
+  event.Start(tool);
+  event.Write(target.GetPostBuildCommands());
+  event.Finish();
 }
 
 void

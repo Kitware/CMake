@@ -123,6 +123,9 @@ private:
   friend class cmLocalVisualStudio7GeneratorFCInfo;
   friend class cmLocalVisualStudio7GeneratorInternals;
 
+  class EventWriter;
+  friend class EventWriter;
+
   cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;
   int Version;
