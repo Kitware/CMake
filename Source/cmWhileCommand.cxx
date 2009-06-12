@@ -41,11 +41,35 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     
       std::vector<std::string> expandedArguments;
       mf.ExpandArguments(this->Args, expandedArguments);
+      cmake::MessageType messageType;
       bool isTrue = 
-        cmIfCommand::IsTrue(expandedArguments,errorString,&mf);
+        cmIfCommand::IsTrue(expandedArguments,errorString,
+                            &mf, messageType);
 
       while (isTrue)
         {      
+        if (errorString.size())
+          {
+          std::string err = "had incorrect arguments: ";
+          unsigned int i;
+          for(i =0; i < this->Args.size(); ++i)
+            {
+            err += (this->Args[i].Quoted?"\"":"");
+            err += this->Args[i].Value;
+            err += (this->Args[i].Quoted?"\"":"");
+            err += " ";
+            }
+          err += "(";
+          err += errorString;
+          err += ").";
+          mf.IssueMessage(messageType, err);
+          if (messageType == cmake::FATAL_ERROR)
+            {
+            cmSystemTools::SetFatalErrorOccured();
+            return true;
+            }
+          }
+
         // Invoke all the functions that were collected in the block.
         for(unsigned int c = 0; c < this->Functions.size(); ++c)
           {
@@ -68,7 +92,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
         expandedArguments.clear();
         mf.ExpandArguments(this->Args, expandedArguments);
         isTrue = 
-          cmIfCommand::IsTrue(expandedArguments,errorString,&mf);
+          cmIfCommand::IsTrue(expandedArguments,errorString,
+                              &mf, messageType);
         }
       return true;
       }

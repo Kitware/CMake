@@ -191,6 +191,71 @@ public:
       "examples. Where there are nested parenthesis the innermost are "
       "evaluated as part of evaluating the expression "
       "that contains them."
+      "\n"
+
+      "The if statement was written fairly early in CMake's history "
+      "and it has some convenience features that may be confusing for "
+      "new users. The if statement reduces operations until there is "
+      "a single remaining value, at that point if the case "
+      "insensitive value is: ON, 1, YES, TRUE, Y it returns true, if "
+      "it is OFF, 0, NO, FALSE, N, NOTFOUND, *-NOTFOUND, IGNORE it "
+      "will return false. \n"
+
+      "This is fairly reasonable. The convenience feature that makes "
+      "it more confusing is how CMake handles values that do not "
+      "match the true or false list. Those values are treated as "
+      "variables and are dereferenced even though they do not have "
+      "the required ${} syntax. This means that if you write\n"
+
+      "  if (boobah)\n"
+
+      "CMake will treat it as if you wrote \n"
+
+      "  if (${boobah})\n"
+
+      "likewise if you write \n"
+
+      "  if (fubar AND sol)\n"
+
+      "CMake will conveniently treat it as \n"
+
+      "  if (\"${fubar}\" AND \"${sol}\")\n"
+
+      "The later is really the correct way to write it, but the "
+      "former will work as well. Only some operations in the if "
+      "statement have this special handling of arguments. The "
+      "specific details follow: \n"
+
+      "1) The left hand argument to MATCHES is first checked to see "
+      "if it is a defined variable, if so the variable's value is "
+      "used, otherwise the original value is used. \n"
+
+      "2) If the left hand argument to MATCHES is missing it returns "
+      "false without error \n"
+
+      "3) Both left and right hand arguments to LESS GREATER EQUAL "
+      "are independently tested to see if they are defined variables, "
+      "if so their defined values are used otherwise the original "
+      "value is used. \n"
+
+      "4) Both left and right hand arguments to STRLESS STREQUAL "
+      "STRGREATER are independently tested to see if they are defined "
+      "variables, if so their defined values are used otherwise the "
+      "original value is used. \n"
+
+      "5) Both left and right hand argumemnts to VERSION_LESS "
+      "VERSION_EQUAL VERSION_GREATER are independently tested to see "
+      "if they are defined variables, if so their defined values are "
+      "used otherwise the original value is used. \n"
+
+      "6) The right hand argument to NOT is tested to see if it is a "
+      "boolean constant, if so the value is used, otherwise it is "
+      "assumed to be a variable and it is dereferenced. \n"
+
+      "7) The left and right hand arguments to AND OR are "
+      "independently tested to see if they are boolean constants, if "
+      "so they are used as such, otherwise they are assumed to be "
+      "variables and are dereferenced. \n"    
       ;
     }
 
@@ -198,15 +263,13 @@ public:
   // arguments were valid, and if so, was the response true. If there is
   // an error, the errorString will be set.
   static bool IsTrue(const std::vector<std::string> &args, 
-    std::string &errorString, cmMakefile *mf);
+    std::string &errorString, cmMakefile *mf, 
+    cmake::MessageType &status);
   
   // Get a definition from the makefile.  If it doesn't exist,
   // return the original string.
   static const char* GetVariableOrString(const char* str,
                                          const cmMakefile* mf);
-  static const char* GetVariableOrNumber(const char* str,
-                                         const cmMakefile* mf);
-  
   
   cmTypeMacro(cmIfCommand, cmCommand);
 };

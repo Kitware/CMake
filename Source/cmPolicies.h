@@ -52,6 +52,7 @@ public:
     CMP0009, // GLOB_RECURSE should not follow symlinks by default
     CMP0010, // Bad variable reference syntax is an error
     CMP0011, // Strong policy scope for include and find_package
+    CMP0012, // Strong handling of boolean constants
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.
