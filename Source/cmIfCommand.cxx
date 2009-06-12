@@ -83,10 +83,10 @@ IsFunctionBlocked(const cmListFileFunction& lff,
             mf.ExpandArguments(this->Functions[c].Arguments,
                                expandedArguments);
 
-            cmake::MessageType status;
+            cmake::MessageType messType;
             bool isTrue =
               cmIfCommand::IsTrue(expandedArguments, errorString,
-                                  &mf, status);
+                                  &mf, messType);
 
             if (errorString.size())
               {
@@ -102,8 +102,8 @@ IsFunctionBlocked(const cmListFileFunction& lff,
               err += "(";
               err += errorString;
               err += ").";
-              mf.IssueMessage(status, err);
-              if (status == cmake::FATAL_ERROR)
+              mf.IssueMessage(messType, err);
+              if (messType == cmake::FATAL_ERROR)
                 {
                 cmSystemTools::SetFatalErrorOccured();
                 return true;
