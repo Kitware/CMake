@@ -86,7 +86,7 @@ int kwsysString_strcasecmp(const char* lhs, const char* rhs)
   const char* const lower = kwsysString_strcasecmp_tolower;
   unsigned char const* us1 = (unsigned char const*)lhs;
   unsigned char const* us2 = (unsigned char const*)rhs;
-  int result = 0;
+  int result;
   while((result = lower[*us1] - lower[*us2++], result == 0) && *us1++)
     {
     }
