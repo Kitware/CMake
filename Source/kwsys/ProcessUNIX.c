@@ -176,7 +176,9 @@ static void kwsysProcessRestoreDefaultSignalHandlers(void);
 static pid_t kwsysProcessFork(kwsysProcess* cp,
                               kwsysProcessCreateInformation* si);
 static void kwsysProcessKill(pid_t process_id);
+#if defined(__VMS)
 static int kwsysProcessSetVMSFeature(const char* name, int value);
+#endif
 static int kwsysProcessesAdd(kwsysProcess* cp);
 static void kwsysProcessesRemove(kwsysProcess* cp);
 #if KWSYSPE_USE_SIGINFO
@@ -727,12 +729,14 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     return;
     }
 
+#if defined(__VMS)
   /* Make sure pipes behave like streams on VMS.  */
   if(!kwsysProcessSetVMSFeature("DECC$STREAM_PIPE", 1))
     {
     kwsysProcessCleanup(cp, 1);
     return;
     }
+#endif
 
   /* Save the real working directory of this process and change to
      the working directory for the child processes.  This is needed
@@ -2309,6 +2313,7 @@ static void kwsysProcessExit(void)
 }
 
 /*--------------------------------------------------------------------------*/
+#if !defined(__VMS)
 static pid_t kwsysProcessFork(kwsysProcess* cp,
                               kwsysProcessCreateInformation* si)
 {
@@ -2363,6 +2368,7 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
     return fork();
     }
 }
+#endif
 
 /*--------------------------------------------------------------------------*/
 /* We try to obtain process information by invoking the ps command.
@@ -2485,7 +2491,7 @@ static void kwsysProcessKill(pid_t process_id)
 
 /*--------------------------------------------------------------------------*/
 #if defined(__VMS)
-int decc$feature_get_index(char *name);
+int decc$feature_get_index(const char* name);
 int decc$feature_set_value(int index, int mode, int value);
 static int kwsysProcessSetVMSFeature(const char* name, int value)
 {
@@ -2493,13 +2499,6 @@ static int kwsysProcessSetVMSFeature(const char* name, int value)
   errno = 0;
   i = decc$feature_get_index(name);
   return i >= 0 && (decc$feature_set_value(i, 1, value) >= 0 || errno == 0);
-}
-#else
-static int kwsysProcessSetVMSFeature(const char* name, int value)
-{
-  (void)name;
-  (void)value;
-  return 1;
 }
 #endif
 
