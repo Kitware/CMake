@@ -78,6 +78,10 @@ public:
 #if defined(_MSC_VER)
 # pragma warning (push,1)
 #endif
+#if defined(__BORLANDC__)
+# pragma warn -8008 /* condition is always false (RESET BELOW!) */
+# pragma warn -8066 /* unreachable code (RESET BELOW!) */
+#endif
 
 #ifndef CMAKE_NO_ANSI_STREAM_HEADERS
 #  include <fstream>
@@ -108,6 +112,10 @@ public:
 #include <set>
 #include <deque>
 
+#if defined(__BORLANDC__)
+# pragma warn .8008 /* condition is always false (disabled above) */
+# pragma warn .8066 /* unreachable code (disabled above) */
+#endif
 #if defined(_MSC_VER)
 # pragma warning(pop)
 #endif
