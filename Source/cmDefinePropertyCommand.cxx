@@ -98,13 +98,11 @@ bool cmDefinePropertyCommand
       }
     else if(doing == DoingBrief)
       {
-      doing = DoingNone;
-      this->BriefDocs = args[i];
+      this->BriefDocs += args[i];
       }
     else if(doing == DoingFull)
       {
-      doing = DoingNone;
-      this->FullDocs = args[i];
+      this->FullDocs += args[i];
       }
     else
       {
