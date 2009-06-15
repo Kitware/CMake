@@ -50,7 +50,9 @@ ELSE (WIN32)
     IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
       SET(HPUX_IA_OPENGL_LIB_PATH /opt/graphics/OpenGL/lib/hpux32/)
     ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
-      SET(HPUX_IA_OPENGL_LIB_PATH /opt/graphics/OpenGL/lib/hpux64/)
+      SET(HPUX_IA_OPENGL_LIB_PATH 
+        /opt/graphics/OpenGL/lib/hpux64/
+        /opt/graphics/OpenGL/lib/pa20_64)
     ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
     # The first line below is to make sure that the proper headers
