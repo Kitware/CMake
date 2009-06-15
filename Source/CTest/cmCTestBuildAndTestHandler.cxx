@@ -179,6 +179,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   // after this function exits so that they do not point at a destroyed
   // string cmakeOutString
   cmSetupOutputCaptureCleanup cleanup;
+  static_cast<void>(cleanup);
   cmOStringStream out;
 
   // if the generator and make program are not specified then it is an error
