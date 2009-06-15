@@ -45,6 +45,13 @@ ELSE (WIN32)
     FIND_PATH(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OSX")
 
   ELSE(APPLE)
+    # Handle HP-UX cases where we only want to find OpenGL in either hpux64
+    # or hpux32 depending on if we're doing a 64 bit build.
+    IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
+      SET(HPUX_IA_OPENGL_LIB_PATH /opt/graphics/OpenGL/lib/hpux32/)
+    ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
+      SET(HPUX_IA_OPENGL_LIB_PATH /opt/graphics/OpenGL/lib/hpux64/)
+    ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
     # The first line below is to make sure that the proper headers
     # are used on a Linux machine with the NVidia drivers installed.
@@ -71,6 +78,7 @@ ELSE (WIN32)
       PATHS /opt/graphics/OpenGL/lib
             /usr/openwin/lib
             /usr/shlib /usr/X11R6/lib
+            ${HPUX_IA_OPENGL_LIB_PATH}
     )
 
     # On Unix OpenGL most certainly always requires X11.
