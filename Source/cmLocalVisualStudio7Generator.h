@@ -125,6 +125,8 @@ private:
 
   class EventWriter;
   friend class EventWriter;
+  void MaybeCreateImplibDir(cmTarget& target, const char* config,
+                            EventWriter& event);
 
   cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;

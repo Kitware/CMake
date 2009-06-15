@@ -34,6 +34,8 @@ ADD_EXECUTABLE(example_exe src/example_exe.cxx)
 SET_TARGET_PROPERTIES(example_exe PROPERTIES
   ENABLE_EXPORTS 1
   OUTPUT_NAME example
+  # Test placing exe import library in unique directory.
+  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/exe
   )
 TARGET_LINK_LIBRARIES(example_exe kwsys)
 

@@ -1674,6 +1674,33 @@ void cmLocalVisualStudio7Generator::WriteVCProjEndGroup(std::ostream& fout)
   fout << "\t\t</Filter>\n";
 }
 
+void cmLocalVisualStudio7Generator::MaybeCreateImplibDir(cmTarget& target,
+                                                         const char* config,
+                                                         EventWriter& event)
+{
+  // If an executable exports symbols then VS wants to create an
+  // import library but forgets to create the output directory.
+  if(target.GetType() != cmTarget::EXECUTABLE) { return; }
+  std::string outDir = target.GetDirectory(config, false);
+  std::string impDir = target.GetDirectory(config, true);
+  if(impDir == outDir) { return; }
+
+  // Add a pre-build event to create the directory.
+  cmCustomCommandLine command;
+  command.push_back(this->Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
+  command.push_back("-E");
+  command.push_back("make_directory");
+  command.push_back(impDir);
+  std::vector<std::string> no_output;
+  std::vector<std::string> no_depends;
+  cmCustomCommandLines commands;
+  commands.push_back(command);
+  cmCustomCommand cc(no_output, no_depends, commands, 0, 0);
+  cc.SetEscapeOldStyle(false);
+  cc.SetEscapeAllowMakeVars(true);
+  event.Write(cc);
+}
+
 
 // look for custom rules on a target and collect them together
 void cmLocalVisualStudio7Generator
@@ -1693,6 +1720,7 @@ void cmLocalVisualStudio7Generator
     this->FortranProject? "VFPreBuildEventTool":"VCPreBuildEventTool";
   event.Start(tool);
   event.Write(target.GetPreBuildCommands());
+  this->MaybeCreateImplibDir(target, configName, event);
   event.Finish();
 
   // Add pre-link event.
