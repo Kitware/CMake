@@ -159,6 +159,14 @@ void CMakeStdoutCallback(const char* m, int len, void* s)
   std::string* out = (std::string*)s;
   out->append(m, len);
 }
+struct cmSetupOutputCaptureCleanup
+{
+  ~cmSetupOutputCaptureCleanup()
+  {
+    cmSystemTools::SetErrorCallback(0, 0);
+    cmSystemTools::SetStdoutCallback(0, 0);
+  }
+};
 
 //----------------------------------------------------------------------
 int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
@@ -167,6 +175,10 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   std::string cmakeOutString;
   cmSystemTools::SetErrorCallback(CMakeMessageCallback, &cmakeOutString);
   cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
+  // make sure SetStdoutCallback and SetErrorCallback are set to null
+  // after this function exits so that they do not point at a destroyed
+  // string cmakeOutString
+  cmSetupOutputCaptureCleanup cleanup;
   cmOStringStream out;
 
   // if the generator and make program are not specified then it is an error
