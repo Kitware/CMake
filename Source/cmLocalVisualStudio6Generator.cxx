@@ -845,6 +845,12 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
   event.Start("PreLink");
   event.Write(target.GetPreBuildCommands());
   event.Write(target.GetPreLinkCommands());
+  cmsys::auto_ptr<cmCustomCommand> pcc(
+    this->MaybeCreateImplibDir(target, configName));
+  if(pcc.get())
+    {
+    event.Write(*pcc);
+    }
   event.Finish();
 
   // Write the post-build rules.
