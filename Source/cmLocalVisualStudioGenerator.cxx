@@ -34,6 +34,36 @@ cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 }
 
 //----------------------------------------------------------------------------
+cmsys::auto_ptr<cmCustomCommand>
+cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
+                                                   const char* config)
+{
+  cmsys::auto_ptr<cmCustomCommand> pcc;
+
+  // If an executable exports symbols then VS wants to create an
+  // import library but forgets to create the output directory.
+  if(target.GetType() != cmTarget::EXECUTABLE) { return pcc; }
+  std::string outDir = target.GetDirectory(config, false);
+  std::string impDir = target.GetDirectory(config, true);
+  if(impDir == outDir) { return pcc; }
+
+  // Add a pre-build event to create the directory.
+  cmCustomCommandLine command;
+  command.push_back(this->Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
+  command.push_back("-E");
+  command.push_back("make_directory");
+  command.push_back(impDir);
+  std::vector<std::string> no_output;
+  std::vector<std::string> no_depends;
+  cmCustomCommandLines commands;
+  commands.push_back(command);
+  pcc.reset(new cmCustomCommand(no_output, no_depends, commands, 0, 0));
+  pcc->SetEscapeOldStyle(false);
+  pcc->SetEscapeAllowMakeVars(true);
+  return pcc;
+}
+
+//----------------------------------------------------------------------------
 bool cmLocalVisualStudioGenerator::SourceFileCompiles(const cmSourceFile* sf)
 {
   // Identify the language of the source file.

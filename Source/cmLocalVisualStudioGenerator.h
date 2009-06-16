@@ -19,6 +19,8 @@
 
 #include "cmLocalGenerator.h"
 
+#include <cmsys/auto_ptr.hxx>
+
 class cmSourceFile;
 class cmSourceGroup;
 
@@ -34,6 +36,10 @@ public:
   cmLocalVisualStudioGenerator();
   virtual ~cmLocalVisualStudioGenerator();
 protected:
+
+  /** Construct a custom command to make exe import lib dir.  */
+  cmsys::auto_ptr<cmCustomCommand>
+  MaybeCreateImplibDir(cmTarget& target, const char* config);
 
   /** Construct a script from the given list of command lines.  */
   std::string ConstructScript(const cmCustomCommandLines& commandLines,
