@@ -93,6 +93,8 @@ private:
                              const cmCustomCommand& origCommand);
   void WriteGroup(const cmSourceGroup *sg, cmTarget& target,
                   std::ostream &fout, const char *libName);
+  class EventWriter;
+  friend class EventWriter;
   std::string CreateTargetRules(cmTarget &target, 
                                 const char* configName, 
                                 const char *libName);

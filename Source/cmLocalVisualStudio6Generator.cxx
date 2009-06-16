@@ -34,6 +34,58 @@ cmLocalVisualStudio6Generator::~cmLocalVisualStudio6Generator()
 {
 }
 
+//----------------------------------------------------------------------------
+// Helper class to write build events.
+class cmLocalVisualStudio6Generator::EventWriter
+{
+public:
+  EventWriter(cmLocalVisualStudio6Generator* lg,
+              const char* config, std::string& code):
+    LG(lg), Config(config), Code(code), First(true) {}
+  void Start(const char* event)
+    {
+    this->First = true;
+    this->Event = event;
+    }
+  void Finish()
+    {
+    this->Code += (this->First? "" : "\n");
+    }
+  void Write(std::vector<cmCustomCommand> const& ccs)
+    {
+    for(std::vector<cmCustomCommand>::const_iterator ci = ccs.begin();
+        ci != ccs.end(); ++ci)
+      {
+      this->Write(*ci);
+      }
+    }
+  void Write(cmCustomCommand const& cc)
+    {
+    if(this->First)
+      {
+      this->Code += this->Event + "_Cmds=";
+      this->First = false;
+      }
+    else
+      {
+      this->Code += "\\\n\t";
+      }
+    this->Code +=
+      this->LG->ConstructScript(cc.GetCommandLines(),
+                                cc.GetWorkingDirectory(),
+                                this->Config,
+                                cc.GetEscapeOldStyle(),
+                                cc.GetEscapeAllowMakeVars(),
+                                "\\\n\t");
+    }
+private:
+  cmLocalVisualStudio6Generator* LG;
+  const char* Config;
+  std::string& Code;
+  bool First;
+  std::string Event;
+};
+
 void cmLocalVisualStudio6Generator::AddHelperCommands()
 {
   std::set<cmStdString> lang;
@@ -781,97 +833,24 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
                                                  const char* configName, 
                                                  const char * /* libName */)
 {
-  std::string customRuleCode = "";
-
   if (target.GetType() >= cmTarget::UTILITY )
     {
-    return customRuleCode;
+    return "";
     }
 
-  // are there any rules?
-  if (target.GetPreBuildCommands().size() + 
-      target.GetPreLinkCommands().size() + 
-      target.GetPostBuildCommands().size() == 0)
-    {
-    return customRuleCode;
-    }
-    
-  customRuleCode = "# Begin Special Build Tool\n";
+  std::string customRuleCode = "# Begin Special Build Tool\n";
+  EventWriter event(this, configName, customRuleCode);
 
-  // Write the pre-build and pre-link together (VS6 does not support
-  // both).  Make sure no continuation character is put on the last
-  // line.
-  int prelink_total = (static_cast<int>(target.GetPreBuildCommands().size())+
-                       static_cast<int>(target.GetPreLinkCommands().size()));
-  int prelink_count = 0;
-  if(prelink_total > 0)
-    {
-    // header stuff
-    customRuleCode += "PreLink_Cmds=";
-    }
-  for (std::vector<cmCustomCommand>::const_iterator cr =
-         target.GetPreBuildCommands().begin();
-       cr != target.GetPreBuildCommands().end(); ++cr)
-    {
-    if(prelink_count++ > 0)
-      {
-      customRuleCode += "\\\n\t";
-      }
-    customRuleCode += this->ConstructScript(cr->GetCommandLines(),
-                                            cr->GetWorkingDirectory(),
-                                            configName, 
-                                            cr->GetEscapeOldStyle(),
-                                            cr->GetEscapeAllowMakeVars(),
-                                            "\\\n\t");
-    }
-  for (std::vector<cmCustomCommand>::const_iterator cr =
-         target.GetPreLinkCommands().begin();
-       cr != target.GetPreLinkCommands().end(); ++cr)
-    {
-    if(prelink_count++ > 0)
-      {
-      customRuleCode += "\\\n\t";
-      }
-    customRuleCode += this->ConstructScript(cr->GetCommandLines(),
-                                            cr->GetWorkingDirectory(),
-                                            configName,
-                                            cr->GetEscapeOldStyle(),
-                                            cr->GetEscapeAllowMakeVars(),
-                                            "\\\n\t");
-    }
-  if(prelink_total > 0)
-    {
-    customRuleCode += "\n";
-    }
+  // Write the pre-build and pre-link together (VS6 does not support both).
+  event.Start("PreLink");
+  event.Write(target.GetPreBuildCommands());
+  event.Write(target.GetPreLinkCommands());
+  event.Finish();
 
-  // Write the post-build rules.  Make sure no continuation character
-  // is put on the last line.
-  int postbuild_total = 
-    static_cast<int>(target.GetPostBuildCommands().size());
-  int postbuild_count = 0;
-  if(postbuild_total > 0)
-    {
-    customRuleCode += "PostBuild_Cmds=";
-    }
-  for (std::vector<cmCustomCommand>::const_iterator cr =
-         target.GetPostBuildCommands().begin();
-       cr != target.GetPostBuildCommands().end(); ++cr)
-    {
-    if(postbuild_count++ > 0)
-      {
-      customRuleCode += "\\\n\t";
-      }
-    customRuleCode += this->ConstructScript(cr->GetCommandLines(),
-                                            cr->GetWorkingDirectory(),
-                                            configName,
-                                            cr->GetEscapeOldStyle(),
-                                            cr->GetEscapeAllowMakeVars(),
-                                            "\\\n\t");
-    }
-  if(postbuild_total > 0)
-    {
-    customRuleCode += "\n";
-    }
+  // Write the post-build rules.
+  event.Start("PostBuild");
+  event.Write(target.GetPostBuildCommands());
+  event.Finish();
 
   customRuleCode += "# End Special Build Tool\n";
   return customRuleCode;
