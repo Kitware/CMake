@@ -900,6 +900,8 @@ private:
 
   bool ParseDefineFlag(std::string const& definition, bool remove);
 
+  bool EnforceUniqueDir(const char* srcPath, const char* binPath);
+
   void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;    // make depend needs direct access
                                 // to the Sources array 

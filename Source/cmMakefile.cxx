@@ -1545,17 +1545,8 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
     }
 
   // Make sure the binary directory is unique.
-  cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
-  if(!gg->BinaryDirectoryIsNew(binPath))
+  if(!this->EnforceUniqueDir(srcPath, binPath))
     {
-    cmOStringStream e;
-    e << "The binary directory\n"
-      << "  " << binPath << "\n"
-      << "is already used to build another source directory, so it cannot "
-      << "be used to build source directory\n"
-      << "  " << srcPath << "\n"
-      << "Specify a unique binary directory name.";
-    this->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
 
@@ -3717,6 +3708,54 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       }
     }
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefile::EnforceUniqueDir(const char* srcPath, const char* binPath)
+{
+  // Make sure the binary directory is unique.
+  cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
+  if(gg->BinaryDirectoryIsNew(binPath))
+    {
+    return true;
+    }
+  cmOStringStream e;
+  switch (this->GetPolicyStatus(cmPolicies::CMP0013))
+    {
+    case cmPolicies::WARN:
+      // Print the warning.
+      e << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0013)
+        << "\n"
+        << "The binary directory\n"
+        << "  " << binPath << "\n"
+        << "is already used to build a source directory.  "
+        << "This command uses it to build source directory\n"
+        << "  " << srcPath << "\n"
+        << "which can generate conflicting build files.  "
+        << "CMake does not support this use case but it used "
+        << "to work accidentally and is being allowed for "
+        << "compatibility.";
+      this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+    case cmPolicies::OLD:
+      // OLD behavior does not warn.
+      return true;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      e << this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0013)
+        << "\n";
+    case cmPolicies::NEW:
+      // NEW behavior prints the error.
+      e << "The binary directory\n"
+        << "  " << binPath << "\n"
+        << "is already used to build a source directory.  "
+        << "It cannot be used to build source directory\n"
+        << "  " << srcPath << "\n"
+        << "Specify a unique binary directory name.";
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      break;
+    }
+
+  return false;
 }
 
 //----------------------------------------------------------------------------
