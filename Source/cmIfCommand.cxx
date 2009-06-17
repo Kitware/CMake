@@ -90,7 +90,7 @@ IsFunctionBlocked(const cmListFileFunction& lff,
 
             if (errorString.size())
               {
-              std::string err = "had incorrect arguments: ";
+              std::string err = "given arguments\n  ";
               unsigned int i;
               for(i =0; i < this->Functions[c].Arguments.size(); ++i)
                 {
@@ -99,9 +99,8 @@ IsFunctionBlocked(const cmListFileFunction& lff,
                 err += (this->Functions[c].Arguments[i].Quoted?"\"":"");
                 err += " ";
                 }
-              err += "(";
+              err += "\n";
               err += errorString;
-              err += ").";
               mf.IssueMessage(messType, err);
               if (messType == cmake::FATAL_ERROR)
                 {
@@ -181,7 +180,7 @@ bool cmIfCommand
 
   if (errorString.size())
     {
-    std::string err = "had incorrect arguments: ";
+    std::string err = "given arguments\n  ";
     unsigned int i;
     for(i =0; i < args.size(); ++i)
       {
@@ -190,9 +189,8 @@ bool cmIfCommand
       err += (args[i].Quoted?"\"":"");
       err += " ";
       }
-    err += "(";
+    err += "\n";
     err += errorString;
-    err += ").";
     if (status == cmake::FATAL_ERROR)
       {
       this->SetError(err.c_str());
