@@ -3963,7 +3963,6 @@ bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
 
     // Append the data read to the line.
     line.append(buffer);
-    sizeLimit = sizeLimit - static_cast<long>(length);
     }
 
   // Return the results.
