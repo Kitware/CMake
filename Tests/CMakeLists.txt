@@ -897,25 +897,20 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     ENDIF(Subversion_FOUND)
 
     # Test CTest Update with CVS
-    IF(UNIX)
-      # The test is expected to work by default on UNIX-like systems.
-      SET(CTEST_TEST_UPDATE_CVS 1)
-    ELSE(UNIX)
-      # Special CVS configuration is needed for test to pass on Windows.
-      OPTION(CTEST_TEST_UPDATE_CVS
-        "Enable CTest.UpdateCVS test.  Requires extra CVS setup on windows."
-        OFF)
-      MARK_AS_ADVANCED(CTEST_TEST_UPDATE_CVS)
-    ENDIF(UNIX)
+    IF(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
+      FIND_PACKAGE(CVS QUIET)
+    ELSE(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
+      FIND_PROGRAM(CVS_EXECUTABLE NAMES cvs)
+      SET(CVS_FOUND ${CVS_EXECUTABLE})
+    ENDIF(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
+    SET(CTEST_TEST_UPDATE_CVS ${CVS_FOUND})
+    IF(CTEST_TEST_UPDATE_CVS AND NOT UNIX)
+      IF("${CVS_EXECUTABLE}" MATCHES "cygwin")
+        MESSAGE(STATUS "No CTest.UpdateCVS test with cygwin cvs.exe outside cygwin!")
+        SET(CTEST_TEST_UPDATE_CVS 0)
+      ENDIF("${CVS_EXECUTABLE}" MATCHES "cygwin")
+    ENDIF(CTEST_TEST_UPDATE_CVS AND NOT UNIX)
     IF(CTEST_TEST_UPDATE_CVS)
-      IF(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
-        FIND_PACKAGE(CVS QUIET)
-      ELSE(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
-        FIND_PROGRAM(CVS_EXECUTABLE NAMES cvs)
-        SET(CVS_FOUND ${CVS_EXECUTABLE})
-      ENDIF(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
-    ENDIF(CTEST_TEST_UPDATE_CVS)
-    IF(CTEST_TEST_UPDATE_CVS AND CVS_FOUND)
       SET(CTestUpdateCVS_DIR "CTest UpdateCVS")
       CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestUpdateCVS.cmake.in"
         "${CMake_BINARY_DIR}/Tests/CTestUpdateCVS.cmake" @ONLY)
@@ -923,7 +918,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
         -P "${CMake_BINARY_DIR}/Tests/CTestUpdateCVS.cmake"
         )
       LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateCVS_DIR}")
-    ENDIF(CTEST_TEST_UPDATE_CVS AND CVS_FOUND)
+    ENDIF(CTEST_TEST_UPDATE_CVS)
 
     # Test CTest Update with BZR
     FIND_PROGRAM(BZR_EXECUTABLE NAMES bzr)

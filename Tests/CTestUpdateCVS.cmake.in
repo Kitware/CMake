@@ -18,6 +18,19 @@ message(" cvs = ${CVS}")
 set(REPO ${TOP}/repo)
 set(CVSCMD ${CVS} -d${REPO})
 
+# CVSNT requires an extra option to 'cvs init'.
+set(CVS_INIT_OPT)
+execute_process(
+  COMMAND ${CVS} --version
+  RESULT_VARIABLE RESULT
+  OUTPUT_VARIABLE OUTPUT
+  ERROR_VARIABLE OUTPUT
+  )
+if("${RESULT}" STREQUAL "0" AND "${OUTPUT}" MATCHES "\\(CVSNT\\)")
+  set(CVS_INIT_OPT -n)
+  message(" cvs init needs -n")
+endif()
+
 #-----------------------------------------------------------------------------
 # Initialize the testing directory.
 message("Creating test directory...")
@@ -28,7 +41,7 @@ init_testing()
 message("Creating repository...")
 file(MAKE_DIRECTORY ${TOP}/repo)
 run_child(
-  COMMAND ${CVSCMD} init
+  COMMAND ${CVSCMD} init ${CVS_INIT_OPT}
   )
 
 #-----------------------------------------------------------------------------
