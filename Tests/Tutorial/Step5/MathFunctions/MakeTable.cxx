@@ -20,7 +20,7 @@ int main (int argc, char *argv[])
     return 1;
     }
   
-  // crate a source file with a table of square roots
+  // create a source file with a table of square roots
   fprintf(fout,"double sqrtTable[] = {\n");
   for (i = 0; i < 10; ++i)
     {
