@@ -44,9 +44,10 @@ public:
     this->RegexFileModified.compile("^([MRA])  *(.*)");
     this->RegexFileConflicting.compile("^([C])  *(.*)");
     this->RegexFileRemoved1.compile(
-      "cvs update: `?([^']*)'? is no longer in the repository");
+      "cvs[^ ]* update: `?([^']*)'? is no longer in the repository");
     this->RegexFileRemoved2.compile(
-      "cvs update: warning: `?([^']*)'? is not \\(any longer\\) pertinent");
+      "cvs[^ ]* update: "
+      "warning: `?([^']*)'? is not \\(any longer\\) pertinent");
     }
 private:
   cmCTestCVS* CVS;
