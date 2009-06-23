@@ -639,6 +639,7 @@ ELSE (_boost_IN_CACHE)
     C:/boost/lib
     C:/boost
     "$ENV{ProgramFiles}/boost/boost_${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}_${Boost_SUBMINOR_VERSION}/lib"
+    "$ENV{ProgramFiles}/boost/boost_${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}/lib"
     "$ENV{ProgramFiles}/boost"
     /sw/local/lib
   )
