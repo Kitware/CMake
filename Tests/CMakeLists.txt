@@ -545,6 +545,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProject")
+  # The ExternalProject test takes 900 seconds on some machines!
+  GET_TEST_PROPERTY(ExternalProject TIMEOUT PREVIOUS_TIMEOUT)
+  IF("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
+    SET_TESTS_PROPERTIES(ExternalProject PROPERTIES TIMEOUT 1000)
+  ENDIF("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
 
   # do each of the tutorial steps
   FOREACH(STP RANGE 1 7)
