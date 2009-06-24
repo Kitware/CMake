@@ -59,13 +59,7 @@ public:
 
   ///! Escape quotes in a string.
   static std::string EscapeQuotes(const char* str);
-  
-  /**
-   * Given a string, replace any escape sequences with the corresponding
-   * characters.
-   */
-  static std::string RemoveEscapes(const char*);
-  
+
   typedef  void (*ErrorCallback)(const char*, const char*, bool&, void*);
   /**
    *  Set the function used by GUI's to display error messages

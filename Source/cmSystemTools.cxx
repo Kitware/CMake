@@ -235,48 +235,6 @@ std::string cmSystemTools::EscapeSpaces(const char* str)
     }
 }
 
-
-std::string cmSystemTools::RemoveEscapes(const char* s)
-{
-  std::string result = "";
-  for(const char* ch = s; *ch; ++ch)
-    {
-    if(*ch == '\\' && *(ch+1) != ';')
-      {
-      ++ch;
-      switch (*ch)
-        {
-        case '\\': result.insert(result.end(), '\\'); break;
-        case '"': result.insert(result.end(), '"'); break;
-        case ' ': result.insert(result.end(), ' '); break;
-        case 't': result.insert(result.end(), '\t'); break;
-        case 'n': result.insert(result.end(), '\n'); break;
-        case 'r': result.insert(result.end(), '\r'); break;
-        case '#': result.insert(result.end(), '#'); break;
-        case '(': result.insert(result.end(), '('); break;
-        case ')': result.insert(result.end(), ')'); break;
-        case '0': result.insert(result.end(), '\0'); break;
-        case '\0':
-          {
-          cmSystemTools::Error("Trailing backslash in argument:\n", s);
-          return result;
-          }
-        default:
-          {
-          std::string chStr(1, *ch);
-          cmSystemTools::Error("Invalid escape sequence \\", chStr.c_str(),
-                               "\nin argument ", s);
-          }
-        }
-      }
-    else
-      {
-      result.insert(result.end(), *ch);
-      }
-    }
-  return result;
-}
-
 void cmSystemTools::Error(const char* m1, const char* m2,
                           const char* m3, const char* m4)
 {
