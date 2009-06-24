@@ -77,6 +77,9 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->ProgressBar->reset();
   this->RemoveEntry->setEnabled(false);
   this->AddEntry->setEnabled(false);
+  
+  QByteArray p = settings.value("SplitterSizes").toByteArray();
+  this->Splitter->restoreState(p);
 
   bool groupView = settings.value("GroupView", false).toBool();
   if(groupView)
@@ -255,6 +258,7 @@ CMakeSetupDialog::~CMakeSetupDialog()
   settings.beginGroup("Settings/StartPath");
   settings.setValue("Height", this->height());
   settings.setValue("Width", this->width());
+  settings.setValue("SplitterSizes", this->Splitter->saveState());
 
   // wait for thread to stop
   this->CMakeThread->quit();
