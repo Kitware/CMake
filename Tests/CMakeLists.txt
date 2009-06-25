@@ -939,8 +939,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
         ADD_TEST(CTest.UpdateBZR ${CMAKE_CMAKE_COMMAND}
           -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake"
           )
+        LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
+        SET(CTestUpdateBZR_DIR "CTest UpdateBZR_CLocale")
+        CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestUpdateBZR.cmake.in"
+          "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR_CLocale.cmake" @ONLY)
         ADD_TEST(CTest.UpdateBZR.CLocale ${CMAKE_CMAKE_COMMAND}
-          -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR.cmake"
+          -P "${CMake_BINARY_DIR}/Tests/CTestUpdateBZR_CLocale.cmake"
           )
         SET_TESTS_PROPERTIES(CTest.UpdateBZR.CLocale PROPERTIES ENVIRONMENT LC_ALL=C)
         LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateBZR_DIR}")
