@@ -164,7 +164,12 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
     ext = ".vfproj"; 
     project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";
     }
-  
+  const char* targetExt = t.GetProperty("GENERATOR_FILE_NAME_EXT");
+  if(targetExt)
+    {
+    ext = targetExt;
+    }
+
   fout << project
        << dspname << "\", \""
        << this->ConvertToSolutionPath(dir)

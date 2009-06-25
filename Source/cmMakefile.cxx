@@ -897,7 +897,6 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     // Construct a rule file associated with the first output produced.
     std::string outName = outputs[0];
     outName += ".rule";
-
     // Check if the rule file already exists.
     file = this->GetSource(outName.c_str());
     if(file && file->GetCustomCommand() && !replace)
@@ -2715,7 +2714,8 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang,
                                bool optional)
 {
   this->AddDefinition("CMAKE_CFG_INTDIR",
-  this->LocalGenerator->GetGlobalGenerator()->GetCMakeCFGInitDirectory());
+                      this->LocalGenerator->GetGlobalGenerator()
+                      ->GetCMakeCFGInitDirectory());
   this->LocalGenerator->GetGlobalGenerator()->EnableLanguage(lang, this, 
                                                              optional);
 }

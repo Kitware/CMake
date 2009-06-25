@@ -282,6 +282,14 @@ IF (WIN32)
       cmGlobalVisualStudio8Win64Generator.h
       cmGlobalVisualStudio9Win64Generator.cxx
       cmGlobalVisualStudio9Win64Generator.h
+      cmVisualStudioGeneratorOptions.h
+      cmVisualStudioGeneratorOptions.cxx
+      cmVisualStudio10TargetGenerator.h
+      cmVisualStudio10TargetGenerator.cxx
+      cmLocalVisualStudio10Generator.cxx
+      cmLocalVisualStudio10Generator.h
+      cmGlobalVisualStudio10Generator.h
+      cmGlobalVisualStudio10Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx

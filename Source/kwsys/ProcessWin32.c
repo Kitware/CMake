@@ -806,7 +806,7 @@ int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, const char* file)
     }
   if(file)
     {
-    *pfile = malloc(strlen(file)+1);
+    *pfile = (char*)malloc(strlen(file)+1);
     if(!*pfile)
       {
       return 0;
@@ -1666,7 +1666,7 @@ int kwsysProcessInitialize(kwsysProcess* cp)
     cp->RealWorkingDirectoryLength = GetCurrentDirectory(0, 0);
     if(cp->RealWorkingDirectoryLength > 0)
       {
-      cp->RealWorkingDirectory = malloc(cp->RealWorkingDirectoryLength);
+      cp->RealWorkingDirectory = (char*)malloc(cp->RealWorkingDirectoryLength);
       if(!cp->RealWorkingDirectory)
         {
         return 0;
@@ -1834,7 +1834,7 @@ int kwsysProcessCreate(kwsysProcess* cp, int index,
 
     /* The forwarding executable is given a handle to the error pipe
        and resume and kill events.  */
-    realCommand = malloc(strlen(cp->Win9x)+strlen(cp->Commands[index])+100);
+    realCommand = (char*)malloc(strlen(cp->Win9x)+strlen(cp->Commands[index])+100);
     if(!realCommand)
       {
       return 0;
@@ -2672,7 +2672,7 @@ static int kwsysProcess_List__New_NT4(kwsysProcess_List* self)
      loaded in this program.  This does not actually increment the
      reference count to the module so we do not need to close the
      handle.  */
-  HANDLE hNT = GetModuleHandle("ntdll.dll");
+  HMODULE hNT = GetModuleHandle("ntdll.dll");
   if(hNT)
     {
     /* Get pointers to the needed API functions.  */
@@ -2776,7 +2776,7 @@ static int kwsysProcess_List__New_Snapshot(kwsysProcess_List* self)
      loaded in this program.  This does not actually increment the
      reference count to the module so we do not need to close the
      handle.  */
-  HANDLE hKernel = GetModuleHandle("kernel32.dll");
+  HMODULE hKernel = GetModuleHandle("kernel32.dll");
   if(hKernel)
     {
     self->P_CreateToolhelp32Snapshot =

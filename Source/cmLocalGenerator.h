@@ -299,11 +299,11 @@ public:
   void GenerateFrameworkInfoPList(cmTarget* target,
                                   const char* targetName,
                                   const char* fname);
-protected:
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,
                                const char* default_comment = "");
 
+protected:
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
   void GetTargetFlags(std::string& linkLibs, 

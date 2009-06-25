@@ -18,12 +18,13 @@
 #define cmLocalVisualStudio7Generator_h
 
 #include "cmLocalVisualStudioGenerator.h"
+#include "cmVisualStudioGeneratorOptions.h" // to get cmVS7FlagTable
 
 class cmTarget;
 class cmSourceFile;
 class cmCustomCommand;
 class cmSourceGroup;
-struct cmVS7FlagTable;
+
 
 class cmLocalVisualStudio7GeneratorOptions;
 class cmLocalVisualStudio7GeneratorFCInfo;
@@ -68,6 +69,10 @@ public:
 
   void SetExtraFlagTable(cmVS7FlagTable const* table)
     { this->ExtraFlagTable = table; }
+  virtual std::string GetTargetDirectory(cmTarget const&) const;
+  cmSourceFile* CreateVCProjBuildRule();
+  void WriteStampFiles();
+
 private:
   typedef cmLocalVisualStudio7GeneratorOptions Options;
   typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
@@ -77,14 +82,12 @@ private:
                                       const char* configName);
   void FixGlobalTargets();
   void WriteProjectFiles();
-  void WriteStampFiles();
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteVCProjFooter(std::ostream& fout);
   void CreateSingleVCProj(const char *lname, cmTarget &tgt);
   void WriteVCProjFile(std::ostream& fout, const char *libName, 
                        cmTarget &tgt);
-  cmSourceFile* CreateVCProjBuildRule();
   void WriteConfigurations(std::ostream& fout,
                            const char *libName, cmTarget &tgt);
   void WriteConfiguration(std::ostream& fout,
@@ -118,7 +121,6 @@ private:
   void WriteGroup(const cmSourceGroup *sg, 
                   cmTarget& target, std::ostream &fout,
                   const char *libName, std::vector<std::string> *configs);
-  virtual std::string GetTargetDirectory(cmTarget const&) const;
 
   friend class cmLocalVisualStudio7GeneratorFCInfo;
   friend class cmLocalVisualStudio7GeneratorInternals;
@@ -134,30 +136,6 @@ private:
   cmLocalVisualStudio7GeneratorInternals* Internal;
 };
 
-// This is a table mapping XML tag IDE names to command line options
-struct cmVS7FlagTable
-{
-  const char* IDEName;  // name used in the IDE xml file
-  const char* commandFlag; // command line flag
-  const char* comment;     // comment
-  const char* value; // string value
-  unsigned int special; // flags for special handling requests
-  enum
-  {
-    UserValue    = (1<<0), // flag contains a user-specified value
-    UserIgnored  = (1<<1), // ignore any user value
-    UserRequired = (1<<2), // match only when user value is non-empty
-    Continue     = (1<<3), // continue looking for matching entries
-    SemicolonAppendable = (1<<4), // a flag that if specified multiple times
-                                  // should have its value appended to the
-                                  // old value with semicolons (e.g.
-                                  // /NODEFAULTLIB: => 
-                                  // IgnoreDefaultLibraryNames)
-
-    UserValueIgnored  = UserValue | UserIgnored,
-    UserValueRequired = UserValue | UserRequired
-  };
-};
 
 #endif
 

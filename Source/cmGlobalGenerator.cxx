@@ -2068,9 +2068,14 @@ void cmGlobalGenerator::CheckRuleHashes()
 #else
   std::ifstream fin(pfile.c_str(), std::ios::in);
 #endif
+  bool goodStream = true;
+  if(!fin)
+    {
+    goodStream = false;
+    }
   std::string line;
   std::string fname;
-  while(cmSystemTools::GetLineFromStream(fin, line))
+  while(goodStream && cmSystemTools::GetLineFromStream(fin, line))
     {
     // Line format is a 32-byte hex string followed by a space
     // followed by a file name (with no escaping).

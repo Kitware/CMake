@@ -2127,7 +2127,7 @@ static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
     }
 
   /* We need to extend the buffer.  */
-  temp = malloc(newSize);
+  temp = (char*)malloc(newSize);
   if(lexer->token.text)
     {
     memcpy(temp, lexer->token.text, lexer->token.length);

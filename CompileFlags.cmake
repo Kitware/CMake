@@ -10,9 +10,12 @@ ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
 INCLUDE (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
 
 # Disable deprecation warnings for standard C functions.
-IF(MSVC80 OR MSVC90)
+# really only needed for newer versions of VS, but should
+# not hurt other versions, and this will work into the 
+# future
+IF(MSVC)
   ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
-ENDIF(MSVC80 OR MSVC90)
+ENDIF(MSVC)
 
 #silence duplicate symbol warnings on AIX
 IF(CMAKE_SYSTEM MATCHES "AIX.*")

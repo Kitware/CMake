@@ -35,12 +35,6 @@ class cmLocalVisualStudioGenerator : public cmLocalGenerator
 public:
   cmLocalVisualStudioGenerator();
   virtual ~cmLocalVisualStudioGenerator();
-protected:
-
-  /** Construct a custom command to make exe import lib dir.  */
-  cmsys::auto_ptr<cmCustomCommand>
-  MaybeCreateImplibDir(cmTarget& target, const char* config);
-
   /** Construct a script from the given list of command lines.  */
   std::string ConstructScript(const cmCustomCommandLines& commandLines,
                               const char* workingDirectory,
@@ -48,6 +42,12 @@ protected:
                               bool escapeOldStyle,
                               bool escapeAllowMakeVars,
                               const char* newline = "\n");
+
+protected:
+
+  /** Construct a custom command to make exe import lib dir.  */
+  cmsys::auto_ptr<cmCustomCommand>
+  MaybeCreateImplibDir(cmTarget& target, const char* config);
 
   // Safe object file name generation.
   void ComputeObjectNameRequirements(std::vector<cmSourceGroup> const&);
