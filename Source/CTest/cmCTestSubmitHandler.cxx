@@ -125,6 +125,11 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
 
       // enable uploading
       ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1) ;
+      // if there is little to no activity for 30 seconds stop submitting
+      ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1) ;
+      ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, 30) ;
+      
+      ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1) ;
 
       cmStdString local_file = *file;
       if ( !cmSystemTools::FileExists(local_file.c_str()) )
