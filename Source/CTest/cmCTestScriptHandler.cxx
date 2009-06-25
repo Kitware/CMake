@@ -236,6 +236,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   // now pass through all the other arguments
   std::vector<cmStdString> &initArgs = 
     this->CTest->GetInitialCommandLineArguments();
+  //*** need to make sure this does not have the current script ***
   for(size_t i=1; i < initArgs.size(); ++i)
     {
     argv.push_back(initArgs[i].c_str());
