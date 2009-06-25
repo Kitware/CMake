@@ -126,7 +126,6 @@ void cmLocalUnixMakefileGenerator3::Generate()
 
   // Generate the rule files for each target.
   cmTargets& targets = this->Makefile->GetTargets();
-  std::string empty;
   for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
     cmMakefileTargetGenerator *tg =
