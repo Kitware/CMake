@@ -17,6 +17,7 @@
 
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
+#include "cmMakefileTargetGenerator.h"
 #include "cmMakefile.h"
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
@@ -150,13 +151,11 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   this->cmGlobalGenerator::Generate();
 
   // initialize progress
-  unsigned int i;
   unsigned long total = 0;
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
+  for(ProgressMapType::const_iterator pmi = this->ProgressMap.begin();
+      pmi != this->ProgressMap.end(); ++pmi)
     {
-    cmLocalUnixMakefileGenerator3 *lg = 
-      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
-    total += lg->GetNumberOfProgressActions();
+    total += pmi->second.NumberOfActions;
     }
 
   // write each target's progress.make this loop is done twice. Bascially the
@@ -167,17 +166,21 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   // well. This is because the all targets require more information that is
   // computed in the first loop.
   unsigned long current = 0;
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
+  for(ProgressMapType::iterator pmi = this->ProgressMap.begin();
+      pmi != this->ProgressMap.end(); ++pmi)
     {
-    cmLocalUnixMakefileGenerator3 *lg = 
-      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
-    lg->WriteProgressVariables(total,current);
+    pmi->second.WriteProgressVariables(total, current);
     }
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
+  for(unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
     cmLocalUnixMakefileGenerator3 *lg = 
       static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
-    lg->WriteAllProgressVariable();
+    std::string markFileName = lg->GetMakefile()->GetStartOutputDirectory();
+    markFileName += "/";
+    markFileName += cmake::GetCMakeFilesDirectory();
+    markFileName += "/progress.marks";
+    cmGeneratedFileStream markFile(markFileName.c_str());
+    markFile << this->CountProgressMarksInAll(lg) << "\n";
     }
   
   // write the main makefile
@@ -752,7 +755,7 @@ cmGlobalUnixMakefileGenerator3
                                 cmLocalGenerator::FULL,
                                 cmLocalGenerator::SHELL);
         progCmd << " ";
-        std::vector<int> &progFiles = lg->ProgressFiles[t->first];
+        std::vector<int> &progFiles = this->ProgressMap[t->first].Marks;
         for (std::vector<int>::iterator i = progFiles.begin();
               i != progFiles.end(); ++i)
           {
@@ -794,8 +797,7 @@ cmGlobalUnixMakefileGenerator3
       //
       std::set<cmTarget *> emitted;
       progCmd << " " 
-              << this->GetTargetTotalNumberOfActions(t->second,
-                                                      emitted);
+              << this->CountProgressMarksInTarget(&t->second, emitted);
       commands.push_back(progCmd.str());
       }
       std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
@@ -868,46 +870,77 @@ cmGlobalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
-int cmGlobalUnixMakefileGenerator3
-::GetTargetTotalNumberOfActions(cmTarget &target,
-                                std::set<cmTarget *> &emitted)
+size_t
+cmGlobalUnixMakefileGenerator3
+::CountProgressMarksInTarget(cmTarget* target,
+                             std::set<cmTarget*>& emitted)
 {
-  // do not double count
-  int result = 0;
-
-  if(emitted.insert(&target).second)
+  size_t count = 0;
+  if(emitted.insert(target).second)
     {
-    cmLocalUnixMakefileGenerator3 *lg = 
-      static_cast<cmLocalUnixMakefileGenerator3 *>
-      (target.GetMakefile()->GetLocalGenerator());
-    result = static_cast<int>(lg->ProgressFiles[target.GetName()].size());
-    
-    TargetDependSet & depends = this->GetTargetDirectDepends(target);
-    
-    TargetDependSet::iterator i;
-    for (i = depends.begin(); i != depends.end(); ++i)
+    count = this->ProgressMap[target->GetName()].Marks.size();
+    TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
+    for(TargetDependSet::const_iterator di = depends.begin();
+        di != depends.end(); ++di)
       {
-      result += this->GetTargetTotalNumberOfActions(**i, emitted);
+      count += this->CountProgressMarksInTarget(*di, emitted);
       }
     }
-  
-  return result;
+  return count;
 }
 
-unsigned long cmGlobalUnixMakefileGenerator3
-::GetNumberOfProgressActionsInAll(cmLocalUnixMakefileGenerator3 *lg)
+//----------------------------------------------------------------------------
+size_t
+cmGlobalUnixMakefileGenerator3
+::CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg)
 {
-  unsigned long result = 0;
-  std::set<cmTarget *> emitted;
-  std::set<cmTarget *>& targets = this->LocalGeneratorToTargetMap[lg];
-  for(std::set<cmTarget *>::iterator t = targets.begin();
+  size_t count = 0;
+  std::set<cmTarget*> emitted;
+  std::set<cmTarget*> const& targets = this->LocalGeneratorToTargetMap[lg];
+  for(std::set<cmTarget*>::const_iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    result += this->GetTargetTotalNumberOfActions(**t,emitted);
+    count += this->CountProgressMarksInTarget(*t, emitted);
     }
-  return result;
+  return count;
 }
 
+//----------------------------------------------------------------------------
+void
+cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
+  cmMakefileTargetGenerator* tg)
+{
+  TargetProgress& tp = this->ProgressMap[tg->GetTarget()->GetName()];
+  tp.NumberOfActions = tg->GetNumberOfProgressActions();
+  tp.VariableFile = tg->GetProgressFileNameFull();
+}
+
+//----------------------------------------------------------------------------
+void
+cmGlobalUnixMakefileGenerator3::TargetProgress
+::WriteProgressVariables(unsigned long total, unsigned long &current)
+{
+  cmGeneratedFileStream fout(this->VariableFile.c_str());
+  for(unsigned long i = 1; i <= this->NumberOfActions; ++i)
+    {
+    fout << "CMAKE_PROGRESS_" << i << " = ";
+    if (total <= 100)
+      {
+      unsigned long num = i + current;
+      fout << num;
+      this->Marks.push_back(num);
+      }
+    else if (((i+current)*100)/total > ((i-1+current)*100)/total)
+      {
+      unsigned long num = ((i+current)*100)/total;
+      fout << num;
+      this->Marks.push_back(num);
+      }
+    fout << "\n";
+    }
+  fout << "\n";
+  current += this->NumberOfActions;
+}
 
 //----------------------------------------------------------------------------
 void

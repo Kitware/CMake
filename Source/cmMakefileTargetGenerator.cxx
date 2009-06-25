@@ -96,8 +96,6 @@ void cmMakefileTargetGenerator::CreateRuleFile()
   this->BuildFileNameFull += "/build.make";
 
   // Construct the rule file name.
-  this->ProgressFileName = this->TargetBuildDirectory;
-  this->ProgressFileName += "/progress.make";
   this->ProgressFileNameFull = this->TargetBuildDirectoryFull;
   this->ProgressFileNameFull += "/progress.make";
 
@@ -1533,43 +1531,6 @@ void cmMakefileTargetGenerator::RemoveForbiddenFlags(const char* flagVar,
     {
     cmSystemTools::ReplaceString(linkFlags, i->c_str(), "");
     }
-}
-
-void cmMakefileTargetGenerator::WriteProgressVariables(unsigned long total,
-                                                       unsigned long &current)
-{
-  cmGeneratedFileStream *progressFileStream = 
-    new cmGeneratedFileStream(this->ProgressFileNameFull.c_str());
-  if(!progressFileStream)
-    {
-    return;
-    }
-
-  unsigned long num;
-  unsigned long i;
-  for (i = 1; i <= this->NumberOfProgressActions; ++i)
-    {
-    *progressFileStream
-      << "CMAKE_PROGRESS_" << i << " = ";
-    if (total <= 100)
-      {
-      num = i + current;
-      *progressFileStream << num;
-      this->LocalGenerator->ProgressFiles[this->Target->GetName()]
-        .push_back(num);
-      }
-    else if (((i+current)*100)/total > ((i-1+current)*100)/total)
-      {
-      num = ((i+current)*100)/total;
-      *progressFileStream << num;
-      this->LocalGenerator->ProgressFiles[this->Target->GetName()]
-        .push_back(num);
-      }
-    *progressFileStream << "\n";
-    }
-  *progressFileStream << "\n";
-  current += this->NumberOfProgressActions;
-  delete progressFileStream;
 }
 
 //----------------------------------------------------------------------------

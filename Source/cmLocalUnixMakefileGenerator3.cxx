@@ -35,6 +35,8 @@
 # include <cmsys/Terminal.h>
 #endif
 
+#include <cmsys/auto_ptr.hxx>
+
 #include <memory> // auto_ptr
 #include <queue>
 
@@ -126,14 +128,16 @@ void cmLocalUnixMakefileGenerator3::Generate()
 
   // Generate the rule files for each target.
   cmTargets& targets = this->Makefile->GetTargets();
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    cmMakefileTargetGenerator *tg =
-      cmMakefileTargetGenerator::New(&(t->second));
-    if (tg)
+    cmsys::auto_ptr<cmMakefileTargetGenerator> tg(
+      cmMakefileTargetGenerator::New(&(t->second)));
+    if (tg.get())
       {
-      this->TargetGenerators.push_back(tg);
       tg->WriteRuleFiles();
+      gg->RecordTargetProgress(tg.get());
       }
     }
 
@@ -142,75 +146,6 @@ void cmLocalUnixMakefileGenerator3::Generate()
   
   // Write the cmake file with information for this directory.
   this->WriteDirectoryInformationFile();
-}
-
-//----------------------------------------------------------------------------
-// return info about progress actions
-unsigned long cmLocalUnixMakefileGenerator3::GetNumberOfProgressActions()
-{
-  unsigned long result = 0;
-
-  for (std::vector<cmMakefileTargetGenerator *>::iterator mtgIter = 
-         this->TargetGenerators.begin();
-       mtgIter != this->TargetGenerators.end(); ++mtgIter)
-    {
-    result += (*mtgIter)->GetNumberOfProgressActions();
-    }  
-  return result;
-}
-
-//----------------------------------------------------------------------------
-// return info about progress actions
-unsigned long cmLocalUnixMakefileGenerator3
-::GetNumberOfProgressActionsForTarget(const char *name)
-{
-  for (std::vector<cmMakefileTargetGenerator *>::iterator mtgIter = 
-         this->TargetGenerators.begin();
-       mtgIter != this->TargetGenerators.end(); ++mtgIter)
-    {
-    if (!strcmp(name,(*mtgIter)->GetTarget()->GetName()))
-      {
-      return (*mtgIter)->GetNumberOfProgressActions();
-      }
-    }  
-  return 0;
-}
-
-
-//----------------------------------------------------------------------------
-// writes the progreess variables and also closes out the targets
-void cmLocalUnixMakefileGenerator3
-::WriteProgressVariables(unsigned long total,
-                         unsigned long &current)
-{
-  // delete the makefile target generator objects
-  for (std::vector<cmMakefileTargetGenerator *>::iterator mtgIter = 
-         this->TargetGenerators.begin();
-       mtgIter != this->TargetGenerators.end(); ++mtgIter)
-    {
-    (*mtgIter)->WriteProgressVariables(total,current);
-    delete *mtgIter;
-    }  
-  this->TargetGenerators.clear();
-}
-
-void cmLocalUnixMakefileGenerator3::WriteAllProgressVariable()
-{
-  // write the top level progress for the all target
-  std::string progressFile = cmake::GetCMakeFilesDirectory();
-  progressFile += "/progress.make";
-  std::string progressFileNameFull = 
-    this->ConvertToFullPath(progressFile.c_str());
-  cmGeneratedFileStream ruleFileStream(progressFileNameFull.c_str());
-  if(!ruleFileStream)
-    {
-    return;
-    }
-
-  cmGlobalUnixMakefileGenerator3 *gg = 
-    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-
-  ruleFileStream << gg->GetNumberOfProgressActionsInAll(this) << "\n";
 }
 
 //----------------------------------------------------------------------------
@@ -1717,7 +1652,7 @@ void cmLocalUnixMakefileGenerator3
                              cmLocalGenerator::SHELL);
 
     std::string progressFile = cmake::GetCMakeFilesDirectory();
-    progressFile += "/progress.make";
+    progressFile += "/progress.marks";
     std::string progressFileNameFull =
       this->ConvertToFullPath(progressFile.c_str());
     progCmd << " " << this->Convert(progressFileNameFull.c_str(),

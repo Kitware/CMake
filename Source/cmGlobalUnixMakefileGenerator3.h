@@ -20,6 +20,7 @@
 #include "cmGlobalGenerator.h"
 
 class cmGeneratedFileStream;
+class cmMakefileTargetGenerator;
 class cmLocalUnixMakefileGenerator3;
 
 /** \class cmGlobalUnixMakefileGenerator3
@@ -113,11 +114,8 @@ public:
    const char *targetName,
    const char* config, bool ignoreErrors, bool fast);
 
-  // returns some progress informaiton
-  int GetTargetTotalNumberOfActions(cmTarget & target,
-                                    std::set<cmTarget *> &emitted);
-  unsigned long GetNumberOfProgressActionsInAll
-  (cmLocalUnixMakefileGenerator3 *lg);
+  /** Record per-target progress information.  */
+  void RecordTargetProgress(cmMakefileTargetGenerator* tg);
 
   /**
    * If true, the CMake variable CMAKE_VERBOSE_MAKEFILES doesn't have effect
@@ -177,6 +175,22 @@ protected:
   std::string EmptyRuleHackCommand;
 
   bool ForceVerboseMakefiles;
+
+  // Store per-target progress counters.
+  struct TargetProgress
+  {
+    TargetProgress(): NumberOfActions(0) {}
+    unsigned long NumberOfActions;
+    std::string VariableFile;
+    std::vector<int> Marks;
+    void WriteProgressVariables(unsigned long total, unsigned long& current);
+  };
+  typedef std::map<cmStdString, TargetProgress> ProgressMapType;
+  ProgressMapType ProgressMap;
+
+  size_t CountProgressMarksInTarget(cmTarget* target,
+                                    std::set<cmTarget*>& emitted);
+  size_t CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg);
 };
 
 #endif

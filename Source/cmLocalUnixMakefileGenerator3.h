@@ -66,10 +66,6 @@ public:
   // write the main variables used by the makefiles
   void WriteMakeVariables(std::ostream& makefileStream);
 
-  // write the progress variables used by the makefiles
-  void WriteProgressVariables(unsigned long total, unsigned long &current);
-  void WriteAllProgressVariable();
-
   /**
    * If true, then explicitly pass MAKEFLAGS on the make all target for makes
    * that do not use environment variables.
@@ -256,10 +252,6 @@ public:
 
   std::vector<cmStdString> const& GetLocalHelp() { return this->LocalHelp; }
 
-  // return info about progress actions
-  unsigned long GetNumberOfProgressActions();
-  unsigned long GetNumberOfProgressActionsForTarget(const char *);
-
   /** Get whether to create rules to generate preprocessed and
       assembly sources.  This could be converted to a variable lookup
       later.  */
@@ -340,8 +332,6 @@ protected:
                           const std::vector<std::string>& files,
                           cmTarget& target, const char* filename =0);
 
-  std::map<cmStdString, std::vector<int> > ProgressFiles;
-
   // Helper methods for dependeny updates.
   bool ScanDependencies(const char* targetDir);
   void CheckMultipleOutputs(bool verbose);
@@ -390,7 +380,6 @@ private:
   std::vector<cmStdString> LocalHelp;
 
   /* does the work for each target */
-  std::vector<cmMakefileTargetGenerator *> TargetGenerators;
   std::map<cmStdString, cmStdString> MakeVariableMap;
   std::map<cmStdString, cmStdString> ShortMakeVariableMap;
 };
