@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <Description>
-<LineLength>80</LineLength>
+<LineLength>79</LineLength>
 <!--
 <Header>"@CMAKE_SOURCE_DIR@/Utilities/KWStyle/Headers",false,true</Header>
 <Functions>
