@@ -135,14 +135,14 @@ if(CVS_EXECUTABLE)
 
   # CVS by date stamp:
   #
-  set(proj TutorialStep1-CVS-20090625)
+  set(proj TutorialStep1-CVS-20090626)
   ep_add(${proj}
     CVS_REPOSITORY "${local_cvs_repo}"
     CVS_MODULE "TutorialStep1"
-    CVS_TAG "-D2009-06-25 16:00:00 UTC"
+    CVS_TAG "-D2009-06-26 16:50:00 UTC"
+    UPDATE_COMMAND ""
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    UPDATE_COMMAND ""
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalCVSRepository"
   )
@@ -154,9 +154,9 @@ if(CVS_EXECUTABLE)
     CVS_REPOSITORY "${local_cvs_repo}"
     CVS_MODULE "TutorialStep1"
     CVS_TAG -rtesttag1
+    UPDATE_COMMAND ""
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    UPDATE_COMMAND ""
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalCVSRepository"
   )
@@ -176,7 +176,7 @@ if(CVS_EXECUTABLE)
     DEPENDS "TutorialStep1-LocalNoDirTAR"
     DEPENDS "TutorialStep1-LocalTGZ"
     DEPENDS "TutorialStep1-LocalNoDirTGZ"
-    DEPENDS "TutorialStep1-CVS-20090625"
+    DEPENDS "TutorialStep1-CVS-20090626"
     DEPENDS "TutorialStep1-CVS-testtag1"
   )
 endif()
@@ -199,10 +199,11 @@ if(Subversion_SVN_EXECUTABLE)
 
   # SVN by date stamp:
   #
-  set(proj TutorialStep1-SVN-20090625)
+  set(proj TutorialStep1-SVN-20090626)
   ep_add(${proj}
     SVN_REPOSITORY "${local_svn_repo_url}"
-    SVN_TAG "-r{2009-06-25 16:00:00 +0000}"
+    SVN_TAG "-r{2009-06-26 16:50:00 +0000}"
+    UPDATE_COMMAND ""
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
@@ -215,6 +216,7 @@ if(Subversion_SVN_EXECUTABLE)
   ep_add(${proj}
     SVN_REPOSITORY "${local_svn_repo_url}"
     SVN_TAG "-r2"
+    UPDATE_COMMAND ""
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
@@ -262,8 +264,8 @@ add_test(TutorialStep1-LocalNoDirTGZ-BuildTreeTest
   "${binary_base}/TutorialStep1-LocalNoDirTGZ/Tutorial" 9)
 
 if(CVS_EXECUTABLE)
-  add_test(TutorialStep1-CVS-20090625-BuildTreeTest
-    "${binary_base}/TutorialStep1-CVS-20090625/Tutorial" 4)
+  add_test(TutorialStep1-CVS-20090626-BuildTreeTest
+    "${binary_base}/TutorialStep1-CVS-20090626/Tutorial" 4)
 
   add_test(TutorialStep1-CVS-testtag1-BuildTreeTest
     "${binary_base}/TutorialStep1-CVS-testtag1/Tutorial" 64)
@@ -273,8 +275,8 @@ if(CVS_EXECUTABLE)
 endif()
 
 if(Subversion_SVN_EXECUTABLE)
-  add_test(TutorialStep1-SVN-20090625-BuildTreeTest
-    "${binary_base}/TutorialStep1-SVN-20090625/Tutorial" 100)
+  add_test(TutorialStep1-SVN-20090626-BuildTreeTest
+    "${binary_base}/TutorialStep1-SVN-20090626/Tutorial" 100)
 
   add_test(TutorialStep1-SVN-r2-BuildTreeTest
     "${binary_base}/TutorialStep1-SVN-r2/Tutorial" 99)
