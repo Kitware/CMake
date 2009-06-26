@@ -58,32 +58,6 @@ ep_add(${proj}
 )
 
 
-# Unzip/untar the repositories in our source folder so that other
-# projects below may use them to test the various source control
-# systems
-#
-set(proj SetupLocalCVSRepository)
-set(local_cvs_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/CVS")
-ep_add(${proj}
-  SOURCE_DIR ${local_cvs_repo}
-  URL ${CMAKE_CURRENT_SOURCE_DIR}/cvsrepo.tgz
-  BUILD_COMMAND ""
-  CONFIGURE_COMMAND ""
-  INSTALL_COMMAND ""
-)
-
-set(proj SetupLocalSVNRepository)
-set(local_svn_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/SVN")
-set(local_svn_repo_url "file:///${local_svn_repo}/TutorialStep1")
-ep_add(${proj}
-  SOURCE_DIR ${local_svn_repo}
-  URL ${CMAKE_CURRENT_SOURCE_DIR}/svnrepo.tgz
-  BUILD_COMMAND ""
-  CONFIGURE_COMMAND ""
-  INSTALL_COMMAND ""
-)
-
-
 # Local DIR:
 #
 if(can_build_tutorial_step5)
@@ -146,6 +120,19 @@ ep_add(${proj}
 
 
 if(CVS_EXECUTABLE)
+  # Unzip/untar the CVS repository in our source folder so that other
+  # projects below may use it to test CVS args of ep_add
+  #
+  set(proj SetupLocalCVSRepository)
+  set(local_cvs_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/CVS")
+  ep_add(${proj}
+    SOURCE_DIR ${local_cvs_repo}
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/cvsrepo.tgz
+    BUILD_COMMAND ""
+    CONFIGURE_COMMAND ${CVS_EXECUTABLE} --version
+    INSTALL_COMMAND ""
+  )
+
   # CVS by date stamp:
   #
   set(proj TutorialStep1-CVS-20090625)
@@ -196,6 +183,20 @@ endif()
 
 
 if(Subversion_SVN_EXECUTABLE)
+  # Unzip/untar the SVN repository in our source folder so that other
+  # projects below may use it to test SVN args of ep_add
+  #
+  set(proj SetupLocalSVNRepository)
+  set(local_svn_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/SVN")
+  set(local_svn_repo_url "file:///${local_svn_repo}/TutorialStep1")
+  ep_add(${proj}
+    SOURCE_DIR ${local_svn_repo}
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/svnrepo.tgz
+    BUILD_COMMAND ""
+    CONFIGURE_COMMAND ${Subversion_SVN_EXECUTABLE} --version
+    INSTALL_COMMAND ""
+  )
+
   # SVN by date stamp:
   #
   set(proj TutorialStep1-SVN-20090625)
