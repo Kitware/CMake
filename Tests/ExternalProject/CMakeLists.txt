@@ -3,24 +3,12 @@ project(ExternalProjectTest NONE)
 
 include(ExternalProject)
 
+find_package(CVS)
+find_package(Subversion)
+
 set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
 set(binary_base "${base}/Build")
 set_property(DIRECTORY PROPERTY EP_BASE ${base})
-
-# Use a "TryCheckout" technique on small subtrees of certain projects
-# to see if cvs checkout and svn checkout may be used on this machine
-# without problems. If so, we can test the projects that use those
-# download techniques. If not, we skip them on this machine...
-#
-include("${CMAKE_CURRENT_SOURCE_DIR}/TryCheckout.cmake")
-
-if(NOT DEFINED can_build_kwstyle)
-  if(WATCOM)
-    set(can_build_kwstyle 0)
-  else()
-    set(can_build_kwstyle 1)
-  endif()
-endif()
 
 if(NOT DEFINED can_build_tutorial_step5)
   set(can_build_tutorial_step5 1)
@@ -38,29 +26,7 @@ if(NOT DEFINED can_build_tutorial_step5)
   endif()
 endif()
 
-if(NOT DEFINED can_use_cvs)
-  try_cvs_checkout(
-    ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
-    "CMake/Tests/Tutorial/Step1"
-    "${CMAKE_CURRENT_BINARY_DIR}/TryCheckout/TutorialStep1"
-    can_use_cvs
-    )
-  set(can_use_cvs ${can_use_cvs} CACHE STRING "Was try_cvs_checkout successful?")
-endif()
-
-if(NOT DEFINED can_use_svn)
-  try_svn_checkout(
-    "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
-    "${CMAKE_CURRENT_BINARY_DIR}/TryCheckout/gdcmmd5"
-    can_use_svn
-    )
-  set(can_use_svn ${can_use_svn} CACHE STRING "Was try_svn_checkout successful?")
-endif()
-
-message(STATUS "can_build_kwstyle='${can_build_kwstyle}'")
 message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
-message(STATUS "can_use_cvs='${can_use_cvs}'")
-message(STATUS "can_use_svn='${can_use_svn}'")
 
 
 # Empty projects that test all the known ep_add argument key words:
@@ -89,6 +55,32 @@ ep_add(${proj}
   SVN_TAG ""
   URL ""
   UPDATE_COMMAND ""
+)
+
+
+# Unzip/untar the repositories in our source folder so that other
+# projects below may use them to test the various source control
+# systems
+#
+set(proj SetupLocalCVSRepository)
+set(local_cvs_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/CVS")
+ep_add(${proj}
+  SOURCE_DIR ${local_cvs_repo}
+  URL ${CMAKE_CURRENT_SOURCE_DIR}/cvsrepo.tgz
+  BUILD_COMMAND ""
+  CONFIGURE_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+set(proj SetupLocalSVNRepository)
+set(local_svn_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/SVN")
+set(local_svn_repo_url "file:///${local_svn_repo}/TutorialStep1")
+ep_add(${proj}
+  SOURCE_DIR ${local_svn_repo}
+  URL ${CMAKE_CURRENT_SOURCE_DIR}/svnrepo.tgz
+  BUILD_COMMAND ""
+  CONFIGURE_COMMAND ""
+  INSTALL_COMMAND ""
 )
 
 
@@ -153,101 +145,90 @@ ep_add(${proj}
 )
 
 
-# Download TAR:
-#
-# TODO: Add a remote .tar file
-
-
-# Download TGZ:
-#
-# TODO: Add a remote .tgz file
-
-
-# Download CVS:
-#
-if(can_use_cvs)
+if(CVS_EXECUTABLE)
   # CVS by date stamp:
   #
-  set(proj TutorialStep1-20081201)
+  set(proj TutorialStep1-CVS-20090625)
   ep_add(${proj}
-    CVS_REPOSITORY ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
-    CVS_MODULE "CMake/Tests/Tutorial/Step1"
-    CVS_TAG "-D2008-12-01 01:00:00 UTC"
+    CVS_REPOSITORY "${local_cvs_repo}"
+    CVS_MODULE "TutorialStep1"
+    CVS_TAG "-D2009-06-25 16:00:00 UTC"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    UPDATE_COMMAND ""
     INSTALL_COMMAND ""
+    DEPENDS "SetupLocalCVSRepository"
   )
 
   # CVS by tag:
   #
-  set(proj kwsys-from-CMake-2-6-2)
+  set(proj TutorialStep1-CVS-testtag1)
   ep_add(${proj}
-    CVS_REPOSITORY ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake"
-    CVS_MODULE "CMake/Source/kwsys"
-    CVS_TAG -rCMake-2-6-2
+    CVS_REPOSITORY "${local_cvs_repo}"
+    CVS_MODULE "TutorialStep1"
+    CVS_TAG -rtesttag1
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    UPDATE_COMMAND ""
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalCVSRepository"
+  )
+
+  # Live CVS / HEAD (no CVS_TAG):
+  #
+  set(proj TutorialStep1-CVS-HEAD)
+  ep_add(${proj}
+    CVS_REPOSITORY "${local_cvs_repo}"
+    CVS_MODULE "TutorialStep1"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
+    DEPENDS "SetupLocalCVSRepository"
+    DEPENDS "EmptyNoOpProject"
+    DEPENDS "TutorialStep1-LocalTAR"
+    DEPENDS "TutorialStep1-LocalNoDirTAR"
+    DEPENDS "TutorialStep1-LocalTGZ"
+    DEPENDS "TutorialStep1-LocalNoDirTGZ"
+    DEPENDS "TutorialStep1-CVS-20090625"
+    DEPENDS "TutorialStep1-CVS-testtag1"
   )
-
-  if(can_build_kwstyle)
-    # Live CVS / HEAD (no CVS_TAG):
-    #
-    set(proj KWStyle-CVSHEAD)
-    ep_add(${proj}
-      CVS_REPOSITORY ":pserver:anoncvs@public.kitware.com:/cvsroot/KWStyle"
-      CVS_MODULE "KWStyle"
-      CMAKE_GENERATOR "${CMAKE_GENERATOR}"
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-      DEPENDS "EmptyNoOpProject"
-      DEPENDS "TutorialStep1-LocalTAR"
-      DEPENDS "TutorialStep1-LocalNoDirTAR"
-      DEPENDS "TutorialStep1-LocalTGZ"
-      DEPENDS "TutorialStep1-LocalNoDirTGZ"
-      DEPENDS "TutorialStep1-20081201"
-      DEPENDS "kwsys-from-CMake-2-6-2"
-    )
-    ep_get(${proj} source_dir install_dir)
-    set(kwstyle_source_dir ${source_dir})
-    set(kwstyle_install_dir ${install_dir})
-  endif()
 endif()
 
 
-# Download SVN:
-#
-if(can_use_svn)
+if(Subversion_SVN_EXECUTABLE)
   # SVN by date stamp:
   #
-  set(proj gdcm-md5-20081204)
+  set(proj TutorialStep1-SVN-20090625)
   ep_add(${proj}
-    SVN_REPOSITORY "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
-    SVN_TAG "-r{2008-12-04 01:00:00 +0000}"
-    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-  )
-  ep_get(${proj} install_dir)
-  set(gdcm_install_dir ${install_dir})
-
-  # SVN by revision number:
-  #
-  set(proj gdcm-md5-r4824)
-  ep_add(${proj}
-    SVN_REPOSITORY "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
-    SVN_TAG "-r4824"
+    SVN_REPOSITORY "${local_svn_repo_url}"
+    SVN_TAG "-r{2009-06-25 16:00:00 +0000}"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
+    DEPENDS "SetupLocalSVNRepository"
+  )
+
+  # SVN by revision number:
+  #
+  set(proj TutorialStep1-SVN-r2)
+  ep_add(${proj}
+    SVN_REPOSITORY "${local_svn_repo_url}"
+    SVN_TAG "-r2"
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalSVNRepository"
   )
 
   # Live SVN / trunk (no SVN_TAG):
   #
-  set(proj gdcm-md5-SVNtrunk)
+  set(proj TutorialStep1-SVN-trunk)
   ep_add(${proj}
-    SVN_REPOSITORY "http://gdcm.svn.sourceforge.net/svnroot/gdcm/trunk/Utilities/gdcmmd5"
+    SVN_REPOSITORY "${local_svn_repo_url}"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
+    DEPENDS "SetupLocalSVNRepository"
   )
 endif()
 
@@ -255,12 +236,6 @@ endif()
 # Test the testable built/installed products:
 #
 enable_testing()
-
-
-# Use these as input to the KWStyle tests:
-#
-set(kwstyleXmlFile "${kwstyle_source_dir}/Testing/Data/0001-KWStyleConfiguration.kws.xml")
-set(header "${TutorialStep5_install_dir}/include/TutorialConfig.h")
 
 
 # Do at least a smoke test of a built executable from each
@@ -285,28 +260,26 @@ add_test(TutorialStep1-LocalTGZ-BuildTreeTest
 add_test(TutorialStep1-LocalNoDirTGZ-BuildTreeTest
   "${binary_base}/TutorialStep1-LocalNoDirTGZ/Tutorial" 9)
 
-if(can_use_cvs)
-  add_test(TutorialStep1-20081201-BuildTreeTest
-    "${binary_base}/TutorialStep1-20081201/Tutorial" 4)
+if(CVS_EXECUTABLE)
+  add_test(TutorialStep1-CVS-20090625-BuildTreeTest
+    "${binary_base}/TutorialStep1-CVS-20090625/Tutorial" 4)
 
-  add_test(kwsys-from-CMake-2-6-2-BuildTreeTest
-    "${binary_base}/kwsys-from-CMake-2-6-2/kwsysTestProcess" 1)
+  add_test(TutorialStep1-CVS-testtag1-BuildTreeTest
+    "${binary_base}/TutorialStep1-CVS-testtag1/Tutorial" 64)
 
-  if(can_build_kwstyle)
-    add_test(KWStyle-CVSHEAD-BuildTreeTest
-      "${binary_base}/KWStyle-CVSHEAD/KWStyle" -xml "${kwstyleXmlFile}" "${header}")
-  endif()
+  add_test(TutorialStep1-CVS-HEAD-BuildTreeTest
+    "${binary_base}/TutorialStep1-CVS-HEAD/Tutorial" 81)
 endif()
 
-if(can_use_svn)
-  add_test(gdcm-md5-20081204-BuildTreeTest
-    "${binary_base}/gdcm-md5-20081204/md5main" --version)
+if(Subversion_SVN_EXECUTABLE)
+  add_test(TutorialStep1-SVN-20090625-BuildTreeTest
+    "${binary_base}/TutorialStep1-SVN-20090625/Tutorial" 100)
 
-  add_test(gdcm-md5-r4824-BuildTreeTest
-    "${binary_base}/gdcm-md5-r4824/md5main" --version)
+  add_test(TutorialStep1-SVN-r2-BuildTreeTest
+    "${binary_base}/TutorialStep1-SVN-r2/Tutorial" 99)
 
-  add_test(gdcm-md5-SVNtrunk-BuildTreeTest
-    "${binary_base}/gdcm-md5-SVNtrunk/md5main" --version)
+  add_test(TutorialStep1-SVN-trunk-BuildTreeTest
+    "${binary_base}/TutorialStep1-SVN-trunk/Tutorial" 98)
 endif()
 
 
@@ -315,16 +288,4 @@ endif()
 if(can_build_tutorial_step5)
   add_test(TutorialStep5-InstallTreeTest
     "${TutorialStep5_install_dir}/bin/Tutorial" 49)
-endif()
-
-if(can_use_cvs)
-  if(can_build_kwstyle)
-    add_test(KWStyle-InstallTreeTest
-      "${kwstyle_install_dir}/bin/KWStyle" -xml "${kwstyleXmlFile}" "${header}")
-  endif()
-endif()
-
-if(can_use_svn)
-  add_test(gdcm-md5-InstallTreeTest
-    "${gdcm_install_dir}/bin/md5main" --version)
 endif()
