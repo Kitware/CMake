@@ -358,8 +358,6 @@ void cmVisualStudio10TargetGenerator::WriteObjSources()
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {
-    std::cerr << (*source)->GetExtension() << "\n";
-    std::cerr << (*source)->GetFullPath() << "\n";
     if((*source)->GetExtension() == "obj")
       {
       if(first)
