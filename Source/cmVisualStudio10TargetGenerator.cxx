@@ -142,7 +142,8 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WritePathAndIncrementalLinkOptions();
   this->WriteItemDefinitionGroups();
   this->WriteCustomCommands();
-  this->WriteSources();
+  this->WriteObjSources();
+  this->WriteCLSources();
   this->WriteProjectReferences();
   this->WriteString(
     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\""
@@ -346,7 +347,38 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
 }
 
 
-void cmVisualStudio10TargetGenerator::WriteSources()
+void cmVisualStudio10TargetGenerator::WriteObjSources()
+{ 
+  if(this->Target->GetType() > cmTarget::MODULE_LIBRARY)
+    {
+    return;
+    }
+  bool first = true;
+  std::vector<cmSourceFile*>const & sources = this->Target->GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
+      source != sources.end(); ++source)
+    {
+    std::cerr << (*source)->GetExtension() << "\n";
+    std::cerr << (*source)->GetFullPath() << "\n";
+    if((*source)->GetExtension() == "obj")
+      {
+      if(first)
+        {
+        this->WriteString("<ItemGroup>\n", 1);
+        first = false;
+        }
+      this->WriteString("<None Include=\"", 2);
+      (*this->BuildFileStream ) << (*source)->GetFullPath() << "\" />\n";
+      }
+    }
+  if(!first)
+    {
+    this->WriteString("</ItemGroup>\n", 1); 
+    }
+}
+
+
+void cmVisualStudio10TargetGenerator::WriteCLSources()
 {
   this->WriteString("<ItemGroup>\n", 1);
   if(this->Target->GetType() > cmTarget::MODULE_LIBRARY)
@@ -590,8 +622,7 @@ OutputLinkIncremental(std::string const& configName)
 
 void 
 cmVisualStudio10TargetGenerator::
-WriteClOptions(std::string const& 
-               configName,
+WriteClOptions(std::string const& configName,
                std::vector<std::string> const & includes)
 {
   
@@ -699,7 +730,7 @@ OutputIncludes(std::vector<std::string> const & includes)
 
 
 void cmVisualStudio10TargetGenerator::
-WriteRCOptions(std::string const& config,
+WriteRCOptions(std::string const& ,
                std::vector<std::string> const & includes)
 {
   this->WriteString("<ResourceCompile>\n", 2);
@@ -898,8 +929,7 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
 
 
 void cmVisualStudio10TargetGenerator::
-WriteMidlOptions(std::string const&
-                 config,
+WriteMidlOptions(std::string const& /*config*/,
                  std::vector<std::string> const & includes)
 {
   this->WriteString("<Midl>\n", 2);
@@ -949,7 +979,6 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     }
 }
 
-// TODO handle .obj file direct stuff
 
 void cmVisualStudio10TargetGenerator::WriteProjectReferences()
 {
