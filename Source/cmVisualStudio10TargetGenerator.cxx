@@ -66,7 +66,7 @@ void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   stream->width(indentLevel*2 ); 
   (*stream ) << "";
   (*stream ) << "<" << tag 
-                            << " Condition=\"'$(Configuration)|$(Platform)'=='";
+             << " Condition=\"'$(Configuration)|$(Platform)'=='";
   (*stream ) << config << this->Platform << "'\"";
   if(attribute)
     {
@@ -268,11 +268,12 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {
-    std::string script = lg->ConstructScript(command.GetCommandLines(),
-                                             command.GetWorkingDirectory(),
-                                             i->c_str(),
-                                             command.GetEscapeOldStyle(),
-                                             command.GetEscapeAllowMakeVars());
+    std::string script = 
+      lg->ConstructScript(command.GetCommandLines(),
+                          command.GetWorkingDirectory(),
+                          i->c_str(),
+                          command.GetEscapeOldStyle(),
+                          command.GetEscapeAllowMakeVars());
     this->WritePlatformConfigTag("Message",i->c_str(), 3);
     (*this->BuildFileStream ) << comment << "</Message>\n";
     this->WritePlatformConfigTag("Command", i->c_str(), 3);
@@ -325,13 +326,15 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   
 /*
   ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" 
+xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <CustomBuild Include="..\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{05072589-c7be-439a-8fd7-5db6ee5008a9}</UniqueIdentifier>
+      <UniqueIdentifier>{05072589-c7be-439a-8fd7-5db6ee5008a9}
+      </UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -388,7 +391,7 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
     }
   else
     {
-    std::vector<cmSourceFile*>const & sources = this->Target->GetSourceFiles();
+    std::vector<cmSourceFile*>const& sources = this->Target->GetSourceFiles();
     for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
         source != sources.end(); ++source)
       {
@@ -943,7 +946,8 @@ WriteMidlOptions(std::string const& /*config*/,
       <HeaderFileName>%(FileName).h</HeaderFileName>
       <DllDataFileName>
       </DllDataFileName>
-      <InterfaceIdentifierFileName>%(FileName)_i.c</InterfaceIdentifierFileName>
+      <InterfaceIdentifierFileName>%(FileName)_i.c
+      </InterfaceIdentifierFileName>
       <ProxyFileName>%(FileName)_p.c</ProxyFileName>
   */
   this->WriteString("</Midl>\n", 2);

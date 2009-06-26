@@ -65,6 +65,7 @@ public:
    * Studio?
    */
   virtual std::string GetUserMacrosRegKeyBase();
-  virtual const char* GetCMakeCFGInitDirectory()  { return "$(ConfigurationName)";} 
+  virtual const char* GetCMakeCFGInitDirectory() 
+    { return "$(ConfigurationName)";} 
 };
 #endif

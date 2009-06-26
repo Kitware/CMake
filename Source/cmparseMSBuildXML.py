@@ -217,7 +217,7 @@ class MSBuildToCMake:
     toReturn += "\n  //Enum Properties\n"
     for i in self.enumProperties:
       for j in i.values:
-        toReturn+="  {\""+i.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\", \""+j.DisplayName+"\", \""+j.attributes["Name"]+"\", 0},\n"
+        toReturn+="  {\""+i.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.DisplayName+"\", \""+j.attributes["Name"]+"\", 0},\n"
       toReturn += "\n"
 
     
@@ -234,14 +234,17 @@ class MSBuildToCMake:
       if i.argumentProperty != "":
         if i.attributes["ReverseSwitch"] != "":
           toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["ReverseSwitch"]+"\", \"\", \"false\", cmVS7FlagTable::Continue},\n"
-          toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["ReverseSwitch"]+"\", \""+i.DisplayName+"\", \"\", cmVS7FlagTable::UserValueRequired},\n"
+          toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["ReverseSwitch"]+"\", \""+i.DisplayName+"\", \"\",\n   cmVS7FlagTable::UserValueRequired},\n"
         if i.attributes["Switch"] != "":
           toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+"\", \"\", \"true\", cmVS7FlagTable::Continue},\n"
-          toReturn += "  {\""+i.argumentProperty+"\", \""+i.attributes["Switch"]+"\", \""+i.DisplayName+"\", \"\", cmVS7FlagTable::UserValueRequired},\n"
+          toReturn += "  {\""+i.argumentProperty+"\", \""+i.attributes["Switch"]+"\", \""+i.DisplayName+"\", \"\",\n   cmVS7FlagTable::UserValueRequired},\n"
     
     toReturn += "\n  //String List Properties\n"
     for i in self.stringListProperties:
-      toReturn+="  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+"\", \""+i.DisplayName+"\", \"\", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},\n"
+      if i.attributes["Switch"] == "":
+        toReturn += "  // Skip [" + i.attributes["Name"] + "] - no command line Switch.\n";
+      else:
+        toReturn +="  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+"\",\n   \""+i.DisplayName+"\",\n   \"\", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},\n"
 
     toReturn += "  {0,0,0,0,0}\n};"
     return toReturn
