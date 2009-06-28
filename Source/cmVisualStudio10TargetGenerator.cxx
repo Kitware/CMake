@@ -26,6 +26,7 @@
 
 #include "cmVS10CLFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
+#include "cmVS10LibFlagTable.h"
 
 
 
@@ -395,8 +396,8 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
     for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
         source != sources.end(); ++source)
       {
-      // if it is not a custom command then add it as a c file,
-      // TODO: need to check for idl or rc, or exclude from build
+      // if it is not a custom command then add it as a c/c++ file,
+      // TODO: need to check for idl or rc
       if(!(*source)->GetCustomCommand()
          && !(*source)->GetPropertyAsBool("HEADER_FILE_ONLY")
          && !this->GlobalGenerator->IgnoreFile
@@ -508,8 +509,8 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       clOptions.SetConfiguration((*config).c_str());
       clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
       clOptions.OutputFlagMap(*this->BuildFileStream, "      "); 
-      clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ", 
-                                              "\n");
+      clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream,
+                                              "      ", "\n");
       
       }
     }
@@ -737,6 +738,29 @@ WriteRCOptions(std::string const& ,
   this->WriteString("<ResourceCompile>\n", 2);
   this->OutputIncludes(includes);
   this->WriteString("</ResourceCompile>\n", 2);
+}
+
+
+void cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const&
+                                                      )
+{
+  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    return;
+    }
+  if(const char* libflags = this->Target
+     ->GetProperty("STATIC_LIBRARY_FLAGS"))
+    {
+    this->WriteString("<Lib>\n", 2);
+    cmVisualStudioGeneratorOptions 
+      libOptions(this->LocalGenerator,
+                  10, cmVisualStudioGeneratorOptions::Compiler,
+                  cmVS10LibFlagTable, 0, this); 
+    libOptions.Parse(libflags);  
+    libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
+    libOptions.OutputFlagMap(*this->BuildFileStream, "      "); 
+    this->WriteString("</Lib>\n", 2);
+    }
 }
 
 
@@ -974,9 +998,10 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
       }
     //    output midl flags       <Midl></Midl>
     this->WriteMidlOptions(*i, includes);
-    //    output link flags       <Link></Link> or <Lib></Lib>
+    //    output link flags       <Link></Link> 
     this->WriteLinkOptions(*i);
-    // TODO:  need a WriteLibOptions for static
+    //    output lib flags       <Lib></Lib> 
+    this->WriteLibOptions(*i);
     this->WriteString("</ItemDefinitionGroup>\n", 1);
     }
 }
