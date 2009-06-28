@@ -25,6 +25,21 @@ MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _result)
   ENDIF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
 ENDMACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang)
 
+# Save the current LC_ALL, LC_MESSAGES, and LANG environment variables and set them
+# to "C" that way GCC's "search starts here" text is in English and we can grok it.
+SET(_orig_lc_all      $ENV{LC_ALL})
+SET(_orig_lc_messages $ENV{LC_MESSAGES})
+SET(_orig_lang        $ENV{LANG})
+IF(_orig_lc_all)
+  SET(ENV{LC_ALL}      C)
+ENDIF(_orig_lc_all)
+IF(_orig_lc_messages)
+  SET(ENV{LC_MESSAGES} C)
+ENDIF(_orig_lc_messages)
+IF(_orig_lang)
+  SET(ENV{LANG}        C)
+ENDIF(_orig_lang)
+
 # Now check for C
 IF ("${CMAKE_C_COMPILER_ID}" MATCHES GNU  AND NOT  CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS)
   _DETERMINE_GCC_SYSTEM_INCLUDE_DIRS(c _dirs)
@@ -37,3 +52,13 @@ IF ("${CMAKE_CXX_COMPILER_ID}" MATCHES GNU  AND NOT  CMAKE_ECLIPSE_CXX_SYSTEM_IN
   SET(CMAKE_ECLIPSE_CXX_SYSTEM_INCLUDE_DIRS "${_dirs}" CACHE INTERNAL "CXX compiler system include directories")
 ENDIF ("${CMAKE_CXX_COMPILER_ID}" MATCHES GNU  AND NOT  CMAKE_ECLIPSE_CXX_SYSTEM_INCLUDE_DIRS)
 
+# Restore original LC_ALL, LC_MESSAGES, and LANG
+IF(_orig_lc_all)
+  SET(ENV{LC_ALL}      ${_orig_lc_all})
+ENDIF(_orig_lc_all)
+IF(_orig_lc_messages)
+  SET(ENV{LC_MESSAGES} ${_orig_lc_messages})
+ENDIF(_orig_lc_messages)
+IF(_orig_lang)
+  SET(ENV{LANG}        ${_orig_lang})
+ENDIF(_orig_lang)
