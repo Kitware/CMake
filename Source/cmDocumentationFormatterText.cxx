@@ -30,7 +30,7 @@ void cmDocumentationFormatterText
                const cmDocumentationSection &section,
                const char* name)
 {
-  if(name)
+  if(name && (strcmp(name, "SingleItem")!=0))
     {
     os <<
       "---------------------------------------"
