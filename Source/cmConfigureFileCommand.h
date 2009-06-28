@@ -75,7 +75,9 @@ public:
         "This is useful for configuring scripts that use ${VAR}. "
         "Any occurrences of #cmakedefine VAR will be replaced with "
         "either #define VAR or /* #undef VAR */ depending on "
-        "the setting of VAR in CMake";
+        "the setting of VAR in CMake. Any occurrences of #cmakedefine01 VAR "
+        "will be replaced with either #define VAR 1 or #define VAR 0 "
+        "depending on whether VAR evaluates to TRUE or FALSE in CMake";
     }
 
   virtual void FinalPass();
