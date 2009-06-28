@@ -61,8 +61,8 @@ cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
 {
 #if defined(_WIN32)
   this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
+  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
 // disable until somebody actually tests it:
-//  this->SupportedGlobalGenerators.push_back("NMake Makefiles");
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 #endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
@@ -428,7 +428,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
   std::string compiler = "gcc";
   if (compilerId == "MSVC")
     {
-    compiler = "msvc";
+    compiler = "msvc8";
     }
   else if (compilerId == "Borland")
     {
