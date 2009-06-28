@@ -69,6 +69,7 @@ private:
   void WriteProjectReferences();
   bool OutputSourceSpecificFlags(cmSourceFile* source);
   void AddLibraries(cmComputeLinkInformation& cli, std::string& libstring);
+  void WriteLibOptions(std::string const& config);
 private:
   cmTarget* Target;
   cmMakefile* Makefile;
