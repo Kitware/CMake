@@ -110,6 +110,146 @@ void cmExtraCodeBlocksGenerator::CreateProjectFile(
 }
 
 
+/* Tree is used to create a "Virtual Folder" in CodeBlocks, in which all
+ CMake files this project depends on will be put. This means additionally
+ to the "Sources" and "Headers" virtual folders of CodeBlocks, there will
+ now also be a "CMake Files" virtual folder. 
+ Patch by Daniel Teske <daniel.teske AT nokia.com> (which use C::B project
+ files in QtCreator).*/
+struct Tree
+{
+  std::string path; //only one component of the path
+  std::vector<Tree> folders;
+  std::vector<std::string> files;
+  void InsertPath(const std::vector<std::string>& splitted, 
+                  std::vector<std::string>::size_type start, 
+                  const std::string& fileName);
+  void BuildVirtualFolder(std::string& virtualFolders) const;
+  void BuildVirtualFolderImpl(std::string& virtualFolders, 
+                              const std::string& prefix) const;
+  void BuildUnit(std::string& unitString, const std::string& fsPath) const;
+  void BuildUnitImpl(std::string& unitString, 
+                     const std::string& virtualFolderPath, 
+                     const std::string& fsPath) const;
+};
+
+
+void Tree::InsertPath(const std::vector<std::string>& splitted, 
+                      std::vector<std::string>::size_type start, 
+                      const std::string& fileName)
+{
+  if (start == splitted.size()) 
+    {
+    files.push_back(fileName);
+    return;
+    }
+  for (std::vector<Tree>::iterator
+       it = folders.begin();
+       it != folders.end();
+       ++it)
+    {
+    if ((*it).path == splitted.at(start))
+      {
+      if (start + 1 <  splitted.size())
+        {
+        it->InsertPath(splitted, start + 1, fileName);
+        return;
+        }
+      else
+        {
+        // last part of splitted
+        it->files.push_back(fileName);
+        return;
+        }
+      }
+    }
+  // Not found in folders, thus insert
+  Tree newFolder;
+  newFolder.path = splitted.at(start);
+  if (start + 1 <  splitted.size())
+    {
+    newFolder.InsertPath(splitted, start + 1, fileName);
+    folders.push_back(newFolder);
+    return;
+    }
+  else
+    {
+    // last part of splitted
+    newFolder.files.push_back(fileName);
+    folders.push_back(newFolder);
+    return;
+    }
+}
+
+
+void Tree::BuildVirtualFolder(std::string& virtualFolders) const
+{
+  virtualFolders += "<Option virtualFolders=\"CMake Files\\;";
+  for (std::vector<Tree>::const_iterator it = folders.begin();
+     it != folders.end();
+     ++it)
+    {
+    it->BuildVirtualFolderImpl(virtualFolders, "");
+    }
+  virtualFolders += "\" />";
+}
+
+
+void Tree::BuildVirtualFolderImpl(std::string& virtualFolders,
+                                  const std::string& prefix) const
+{
+  virtualFolders += "CMake Files\\" + prefix +  path + "\\;";
+  for (std::vector<Tree>::const_iterator it = folders.begin();
+     it != folders.end();
+     ++it)
+    {
+    it->BuildVirtualFolderImpl(virtualFolders, prefix + path + "\\");
+    }
+}
+
+
+void Tree::BuildUnit(std::string& unitString, const std::string& fsPath) const
+{
+  for (std::vector<std::string>::const_iterator it = files.begin();
+       it != files.end();
+       ++it)
+    {
+    unitString += "      <Unit filename=\"" + fsPath + *it + "\">\n";
+    unitString += "          <Option virtualFolder=\"CMake Files\\\" />\n";
+    unitString += "      </Unit>\n";
+    }
+  for (std::vector<Tree>::const_iterator it = folders.begin();
+     it != folders.end();
+     ++it)
+    {
+    it->BuildUnitImpl(unitString, "", fsPath);
+    }
+}
+
+
+void Tree::BuildUnitImpl(std::string& unitString,
+                         const std::string& virtualFolderPath,
+                         const std::string& fsPath) const
+{
+  for (std::vector<std::string>::const_iterator it = files.begin();
+       it != files.end();
+       ++it)
+    {
+    unitString += "      <Unit filename=\"" +fsPath+path+ "/" + *it + "\">\n";
+    unitString += "          <Option virtualFolder=\"CMake Files\\"
+               + virtualFolderPath + path + "\\\" />\n";
+    unitString += "      </Unit>\n";
+    }
+  for (std::vector<Tree>::const_iterator it = folders.begin();
+     it != folders.end();
+     ++it)
+    {
+    it->BuildUnitImpl(unitString,
+                      virtualFolderPath + path + "\\", fsPath + path + "/");
+    }
+}
+
+
 void cmExtraCodeBlocksGenerator
   ::CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
                          const std::string& filename)
@@ -120,6 +260,54 @@ void cmExtraCodeBlocksGenerator
     {
     return;
     }
+
+  Tree tree;
+
+  // build tree of virtual folders
+  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+          it = this->GlobalGenerator->GetProjectMap().begin();
+         it != this->GlobalGenerator->GetProjectMap().end();
+         ++it)
+    {
+      // Convert
+      std::vector<std::string> listFiles =
+              it->second[0]->GetMakefile()->GetListFiles();
+
+      for (std::vector<std::string>::const_iterator jt = listFiles.begin();
+           jt != listFiles.end();
+           ++jt)
+         {
+         const std::string &relative =
+                 cmSystemTools::RelativePath(
+                         it->second[0]->GetMakefile()->GetHomeDirectory(),
+                         jt->c_str());
+         std::vector<std::string> splitted;
+         cmSystemTools::SplitPath(relative.c_str(), splitted, false);
+         // Split filename from path
+         std::string fileName = *(splitted.end()-1);
+         splitted.erase(splitted.end() - 1, splitted.end());
+
+         // We don't want paths with ".." in them
+         // reasons are that we don't want files outside the project
+         // TODO: the path should be normalized first though
+         // We don't want paths with CMakeFiles in them
+         // or do we?
+         // In speedcrunch those where purely internal
+         if (splitted.size() >= 1
+             && relative.find("..") == std::string::npos
+             && relative.find("CMakeFiles") == std::string::npos)
+           {
+           tree.InsertPath(splitted, 1, fileName);
+           }
+         }
+    }
+
+  // Now build a virtual tree string
+  std::string virtualFolders;  
+  tree.BuildVirtualFolder(virtualFolders);
+  // And one for <Unit>
+  std::string unitFiles;
+  tree.BuildUnit(unitFiles, std::string(mf->GetHomeDirectory()) + "/");
 
   // figure out the compiler
   std::string compiler = this->GetCBCompilerId(mf);
@@ -132,6 +320,7 @@ void cmExtraCodeBlocksGenerator
         "      <Option title=\"" << mf->GetProjectName()<<"\" />\n"
         "      <Option makefile_is_custom=\"1\" />\n"
         "      <Option compiler=\"" << compiler << "\" />\n"
+        "      "<<virtualFolders<<"\n"
         "      <Build>\n";
 
   bool installTargetCreated = false;
@@ -344,6 +533,9 @@ void cmExtraCodeBlocksGenerator
     fout<<"      <Unit filename=\""<< sit->c_str() <<"\">\n"
           "      </Unit>\n";
     }
+
+  // Add CMakeLists.txt
+  fout<<unitFiles;
 
   fout<<"   </Project>\n"
         "</CodeBlocks_project_file>\n";
