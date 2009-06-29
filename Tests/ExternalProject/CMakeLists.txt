@@ -119,7 +119,20 @@ ep_add(${proj}
 )
 
 
+set(do_cvs_tests 0)
+
 if(CVS_EXECUTABLE)
+  set(do_cvs_tests 1)
+endif()
+
+if(do_cvs_tests AND NOT UNIX)
+  if("${CVS_EXECUTABLE}" MATCHES "cygwin")
+    message(STATUS "No ExternalProject cvs tests with cygwin cvs.exe outside cygwin!")
+    set(do_cvs_tests 0)
+  endif()
+endif()
+
+if(do_cvs_tests)
   # Unzip/untar the CVS repository in our source folder so that other
   # projects below may use it to test CVS args of ep_add
   #
@@ -182,7 +195,13 @@ if(CVS_EXECUTABLE)
 endif()
 
 
+set(do_svn_tests 0)
+
 if(Subversion_SVN_EXECUTABLE)
+  set(do_svn_tests 1)
+endif()
+
+if(do_svn_tests)
   # Unzip/untar the SVN repository in our source folder so that other
   # projects below may use it to test SVN args of ep_add
   #
@@ -263,7 +282,7 @@ add_test(TutorialStep1-LocalTGZ-BuildTreeTest
 add_test(TutorialStep1-LocalNoDirTGZ-BuildTreeTest
   "${binary_base}/TutorialStep1-LocalNoDirTGZ/Tutorial" 9)
 
-if(CVS_EXECUTABLE)
+if(do_cvs_tests)
   add_test(TutorialStep1-CVS-20090626-BuildTreeTest
     "${binary_base}/TutorialStep1-CVS-20090626/Tutorial" 4)
 
@@ -274,7 +293,7 @@ if(CVS_EXECUTABLE)
     "${binary_base}/TutorialStep1-CVS-HEAD/Tutorial" 81)
 endif()
 
-if(Subversion_SVN_EXECUTABLE)
+if(do_svn_tests)
   add_test(TutorialStep1-SVN-20090626-BuildTreeTest
     "${binary_base}/TutorialStep1-SVN-20090626/Tutorial" 100)
 
