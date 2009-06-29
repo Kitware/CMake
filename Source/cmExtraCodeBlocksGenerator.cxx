@@ -148,7 +148,7 @@ void Tree::InsertPath(const std::vector<std::string>& splitted,
        it != folders.end();
        ++it)
     {
-    if ((*it).path == splitted.at(start))
+    if ((*it).path == splitted[start])
       {
       if (start + 1 <  splitted.size())
         {
@@ -165,7 +165,7 @@ void Tree::InsertPath(const std::vector<std::string>& splitted,
     }
   // Not found in folders, thus insert
   Tree newFolder;
-  newFolder.path = splitted.at(start);
+  newFolder.path = splitted[start];
   if (start + 1 <  splitted.size())
     {
     newFolder.InsertPath(splitted, start + 1, fileName);
