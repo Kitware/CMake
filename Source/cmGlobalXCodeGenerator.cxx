@@ -451,6 +451,57 @@ cmStdString GetGroupMapKey(cmTarget& cmtarget, cmSourceFile* sf)
   return key;
 }
 
+// Builds either an object list or a space-separated string from the
+// given inputs.
+class cmGlobalXCodeGenerator::BuildObjectListOrString
+{
+  cmGlobalXCodeGenerator *Generator;
+  cmXCodeObject *Group;
+  bool Empty;
+  std::string String;
+
+public:
+  BuildObjectListOrString(cmGlobalXCodeGenerator *gen, bool buildObjectList)
+    : Generator(gen), Group(0), Empty(true)
+    {
+    if (buildObjectList)
+      {
+      this->Group = this->Generator->CreateObject(cmXCodeObject::OBJECT_LIST);
+      }
+    }
+
+  bool IsEmpty() const { return this->Empty; }
+
+  void Add(const char *newString)
+    {
+    this->Empty = false;
+
+    if (this->Group)
+      {
+      this->Group->AddObject(this->Generator->CreateString(newString));
+      }
+    else
+      {
+      this->String += newString;
+      this->String += ' ';
+      }
+    }
+
+  const std::string &GetString() const { return this->String; }
+
+  cmXCodeObject *CreateList()
+    {
+    if (this->Group)
+      {
+      return this->Group;
+      }
+    else
+      {
+      return this->Generator->CreateString(this->String.c_str());
+      }
+    }
+};
+
 //----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
@@ -466,7 +517,17 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
   lg->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
 
   // Add per-source definitions.
-  this->AppendDefines(flags, sf->GetProperty("COMPILE_DEFINITIONS"), true);
+  BuildObjectListOrString flagsBuild(this, false);
+  this->AppendDefines(flagsBuild,
+                      sf->GetProperty("COMPILE_DEFINITIONS"), true);
+  if (!flagsBuild.IsEmpty())
+    {
+    if (flags.size())
+      {
+      flags += ' ';
+      }
+    flags += flagsBuild.GetString();
+    }
 
   // Using a map and the full path guarantees that we will always get the same
   // fileRef object for any given full path.
@@ -1348,7 +1409,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                 this->CurrentMakefile->GetDefineFlags());
 
   // Add preprocessor definitions for this target and configuration.
-  std::string ppDefs;
+  BuildObjectListOrString ppDefs(this, this->XcodeVersion >= 30);
   if(this->XcodeVersion > 15)
     {
     this->AppendDefines(ppDefs, "CMAKE_INTDIR=\"$(CONFIGURATION)\"");
@@ -1370,7 +1431,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     this->AppendDefines(ppDefs, target.GetProperty(defVarName.c_str()));
     }
   buildSettings->AddAttribute
-    ("GCC_PREPROCESSOR_DEFINITIONS", this->CreateString(ppDefs.c_str()));
+    ("GCC_PREPROCESSOR_DEFINITIONS", ppDefs.CreateList());
 
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
@@ -1563,10 +1624,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     buildSettings->AddAttribute("PREBINDING", 
                                 this->CreateString("NO"));
     }
-  std::string dirs;
+
+  BuildObjectListOrString dirs(this, this->XcodeVersion >= 30);
+  BuildObjectListOrString fdirs(this, this->XcodeVersion >= 30);
   std::vector<std::string> includes;
   this->CurrentLocalGenerator->GetIncludeDirectories(includes);
-  std::string fdirs;
   std::set<cmStdString> emitted;
   emitted.insert("/System/Library/Frameworks");
   for(std::vector<std::string>::iterator i = includes.begin();
@@ -1579,15 +1641,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
       if(emitted.insert(frameworkDir).second)
         {
-        fdirs += this->XCodeEscapePath(frameworkDir.c_str());
-        fdirs += " ";
+        fdirs.Add(this->XCodeEscapePath(frameworkDir.c_str()).c_str());
         }
       }
     else
       {
       std::string incpath = 
         this->XCodeEscapePath(i->c_str());
-      dirs += incpath + " ";
+      dirs.Add(incpath.c_str());
       }
     }
   std::vector<std::string>& frameworks = target.GetFrameworks();
@@ -1598,20 +1659,19 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       {
       if(emitted.insert(*fmIt).second)
         {
-        fdirs += this->XCodeEscapePath(fmIt->c_str());
-        fdirs += " ";
+        fdirs.Add(this->XCodeEscapePath(fmIt->c_str()).c_str());
         }
       }
     }
-  if(fdirs.size())
+  if(!fdirs.IsEmpty())
     {
     buildSettings->AddAttribute("FRAMEWORK_SEARCH_PATHS", 
-                                this->CreateString(fdirs.c_str()));
+                                fdirs.CreateList());
     }
-  if(dirs.size())
+  if(!dirs.IsEmpty())
     {
     buildSettings->AddAttribute("HEADER_SEARCH_PATHS", 
-                                this->CreateString(dirs.c_str()));
+                                dirs.CreateList());
     }
   std::string oflagc = this->ExtractFlag("-O", cflags);
   char optLevel[2];
@@ -1714,10 +1774,21 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString(""));
   buildSettings->AddAttribute("USE_HEADERMAP",
                               this->CreateString("NO"));
-  buildSettings->AddAttribute("WARNING_CFLAGS",
-                              this->CreateString(
-                                "-Wmost -Wno-four-char-constants"
-                                " -Wno-unknown-pragmas"));
+  if (this->XcodeVersion >= 30)
+    {
+    cmXCodeObject *group = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    group->AddObject(this->CreateString("-Wmost"));
+    group->AddObject(this->CreateString("-Wno-four-char-constants"));
+    group->AddObject(this->CreateString("-Wno-unknown-pragmas"));
+    buildSettings->AddAttribute("WARNING_CFLAGS", group);
+    }
+  else
+    {
+    buildSettings->AddAttribute("WARNING_CFLAGS",
+                                this->CreateString(
+                                  "-Wmost -Wno-four-char-constants"
+                                  " -Wno-unknown-pragmas"));
+    }
 
   // Runtime version information.
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
@@ -2432,6 +2503,20 @@ void cmGlobalXCodeGenerator
   this->RootObject->AddAttribute("buildStyles", listObjs);
   this->RootObject->AddAttribute("hasScannedForEncodings",
                              this->CreateString("0"));
+  if (this->XcodeVersion >= 30)
+    {
+    group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+    group->AddAttribute("BuildIndependentTargetsInParallel",
+                        this->CreateString("YES"));
+    this->RootObject->AddAttribute("attributes", group);
+    if (this->XcodeVersion >= 31)
+      this->RootObject->AddAttribute("compatibilityVersion",
+                                     this->CreateString("Xcode 3.1"));
+    else
+      this->RootObject->AddAttribute("compatibilityVersion",
+                                     this->CreateString("Xcode 3.0"));
+    this->RootObject->AddAttribute("projectDirPath", this->CreateString(""));
+    }
   // Point Xcode at the top of the source tree.
   {
   std::string proot = root->GetMakefile()->GetCurrentDirectory();
@@ -2946,7 +3031,7 @@ std::string cmGlobalXCodeGenerator::LookupFlags(const char* varNamePrefix,
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::AppendDefines(std::string& defs,
+void cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
                                            const char* defines_list,
                                            bool dflag)
 {
@@ -2967,21 +3052,18 @@ void cmGlobalXCodeGenerator::AppendDefines(std::string& defs,
   //   - Escape a backslash as \\\\ since it itself is an escape
   // Note that in the code below we need one more level of escapes for
   // C string syntax in this source file.
-  const char* sep = defs.empty()? "" : " ";
   for(std::vector<std::string>::const_iterator di = defines.begin();
       di != defines.end(); ++di)
     {
-    // Separate from previous definition.
-    defs += sep;
-    sep = " ";
+    std::string def;
 
     // Open single quote.
-    defs += "'";
+    def += "'";
 
     // Add -D flag if requested.
     if(dflag)
       {
-      defs += "-D";
+      def += "-D";
       }
 
     // Escaped definition string.
@@ -2989,20 +3071,22 @@ void cmGlobalXCodeGenerator::AppendDefines(std::string& defs,
       {
       if(*c == '\'')
         {
-        defs += "\\\\'";
+        def += "\\\\'";
         }
       else if(*c == '\\')
         {
-        defs += "\\\\\\\\";
+        def += "\\\\\\\\";
         }
       else
         {
-        defs += *c;
+        def += *c;
         }
       }
 
     // Close single quote.
-    defs += "'";
+    def += "'";
+
+    defs.Add(def.c_str());
     }
 }
 
