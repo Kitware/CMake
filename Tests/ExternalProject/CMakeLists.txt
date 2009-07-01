@@ -201,6 +201,32 @@ if(Subversion_SVN_EXECUTABLE)
   set(do_svn_tests 1)
 endif()
 
+# Only do svn tests with svn >= version 1.2
+#
+if(do_svn_tests)
+  execute_process(COMMAND ${Subversion_SVN_EXECUTABLE} --version
+    OUTPUT_VARIABLE Subversion_VERSION_SVN
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  string(REGEX REPLACE "^(.*\n)?svn, version ([.0-9]+).*"
+    "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
+  message(STATUS "Subversion_VERSION_SVN='${Subversion_VERSION_SVN}'")
+
+  if(Subversion_VERSION_SVN VERSION_LESS 1.2)
+    message(STATUS "No ExternalProject svn tests with svn client less than version 1.2")
+    set(do_svn_tests 0)
+  endif()
+endif()
+
+# Only do svn tests in cygwin/cygwin or not-cygwin/not-cygwin arrangements:
+#
+if(do_svn_tests)
+  if(CMAKE_CURRENT_BINARY_DIR MATCHES "cygdrive/" AND
+     NOT "${Subversion_SVN_EXECUTABLE}" MATCHES "cygwin")
+    message(STATUS "No ExternalProject svn tests with non-cygwin svn client in a /cygdrive based build")
+    set(do_svn_tests 0)
+  endif()
+endif()
+
 if(do_svn_tests)
   # Unzip/untar the SVN repository in our source folder so that other
   # projects below may use it to test SVN args of ep_add
