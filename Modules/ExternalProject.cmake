@@ -527,6 +527,7 @@ endfunction(_ep_add_download_command)
 function(_ep_add_update_command name)
   ep_get(${name} source_dir)
 
+  get_property(cmd_set TARGET ${name} PROPERTY _EP_UPDATE_COMMAND SET)
   get_property(cmd TARGET ${name} PROPERTY _EP_UPDATE_COMMAND)
   get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
   get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
@@ -534,7 +535,8 @@ function(_ep_add_update_command name)
   set(work_dir)
   set(comment)
   set(always)
-  if(cmd)
+
+  if(cmd_set)
     set(work_dir ${source_dir})
   elseif(cvs_repository)
     if(NOT CVS_EXECUTABLE)
@@ -569,9 +571,12 @@ endfunction(_ep_add_update_command)
 function(_ep_add_patch_command name)
   ep_get(${name} source_dir)
 
-  set(work_dir)
+  get_property(cmd_set TARGET ${name} PROPERTY _EP_PATCH_COMMAND SET)
   get_property(cmd TARGET ${name} PROPERTY _EP_PATCH_COMMAND)
-  if(cmd)
+
+  set(work_dir)
+
+  if(cmd_set)
     set(work_dir ${source_dir})
   endif()
 
