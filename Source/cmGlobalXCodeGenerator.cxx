@@ -1839,19 +1839,19 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   this->CreateCustomCommands(buildPhases, 0, 0, 0, emptyContentVector, 0,
                              cmtarget);
   target->AddAttribute("buildPhases", buildPhases);
-  cmXCodeObject* buildSettings =
-    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  const char* globalConfig = 0;
   if(this->XcodeVersion > 20)
     {
     this->AddConfigurations(target, cmtarget);
     }
   else
     {
-    globalConfig = this->CurrentMakefile->GetDefinition("CMAKE_BUILD_TYPE");  
+    const char* theConfig =
+      this->CurrentMakefile->GetDefinition("CMAKE_BUILD_TYPE");
+    cmXCodeObject* buildSettings =
+      this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+    this->CreateBuildSettings(cmtarget, buildSettings, theConfig);
+    target->AddAttribute("buildSettings", buildSettings);
     }
-  this->CreateBuildSettings(cmtarget, buildSettings, globalConfig);
-  target->AddAttribute("buildSettings", buildSettings);
   cmXCodeObject* dependencies = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("dependencies", dependencies);
@@ -1877,8 +1877,8 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
-                                               cmTarget& cmtarget)
+std::string cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
+                                                      cmTarget& cmtarget)
 {
   std::string configTypes = 
     this->CurrentMakefile->GetRequiredDefinition("CMAKE_CONFIGURATION_TYPES");
@@ -1918,7 +1918,9 @@ void cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
                              this->CreateString(configVector[0].c_str()));
     configlist->AddAttribute("defaultConfigurationIsVisible", 
                              this->CreateString("0"));
+    return configVector[0];
     }
+  return "";
 }
 
 //----------------------------------------------------------------------------
@@ -1974,19 +1976,19 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   target->AddAttribute("buildPhases", buildPhases);
   cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("buildRules", buildRules);
-  cmXCodeObject* buildSettings =
-    this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  const char* globalConfig = 0;
+  std::string defConfig;
   if(this->XcodeVersion > 20)
     {
-    this->AddConfigurations(target, cmtarget);
+    defConfig = this->AddConfigurations(target, cmtarget);
     }
   else
     {
-    globalConfig = this->CurrentMakefile->GetDefinition("CMAKE_BUILD_TYPE");  
+    cmXCodeObject* buildSettings =
+      this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
+    defConfig = this->CurrentMakefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+    this->CreateBuildSettings(cmtarget, buildSettings, defConfig.c_str());
+    target->AddAttribute("buildSettings", buildSettings);
     }
-  this->CreateBuildSettings(cmtarget, buildSettings, globalConfig);
-  target->AddAttribute("buildSettings", buildSettings);
   cmXCodeObject* dependencies = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("dependencies", dependencies);
@@ -1999,7 +2001,7 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
     {
     fileRef->AddAttribute("explicitFileType", this->CreateString(fileType));
     }
-  std::string fullName = cmtarget.GetFullName(globalConfig);
+  std::string fullName = cmtarget.GetFullName(defConfig.c_str());
   fileRef->AddAttribute("path", this->CreateString(fullName.c_str()));
   fileRef->AddAttribute("refType", this->CreateString("0"));
   fileRef->AddAttribute("sourceTree",

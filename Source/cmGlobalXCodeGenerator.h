@@ -130,8 +130,7 @@ private:
                                    cmXCodeObject* buildPhases);
   const char* GetTargetFileType(cmTarget& cmtarget);
   const char* GetTargetProductType(cmTarget& cmtarget);
-  void AddConfigurations(cmXCodeObject* target,
-                         cmTarget& cmtarget);
+  std::string AddConfigurations(cmXCodeObject* target, cmTarget& cmtarget);
   void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr, 
                                const char* value);
   void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr, 
