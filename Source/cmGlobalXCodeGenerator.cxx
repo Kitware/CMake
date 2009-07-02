@@ -1375,9 +1375,6 @@ void  cmGlobalXCodeGenerator
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                                  cmXCodeObject* buildSettings,
-                                                 std::string& fileType,
-                                                 std::string& productType,
-                                                 std::string& productName,
                                                  const char* configName)
 {
   std::string flags;
@@ -1457,9 +1454,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     extraLinkOptions += targetLinkFlags;
     }
 
-  // The product name is the full name of the target for this configuration.
-  productName = target.GetFullName(configName);
-
   // Get the product name components.
   std::string pnprefix;
   std::string pnbase;
@@ -1490,9 +1484,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     case cmTarget::STATIC_LIBRARY:
     {
-    fileType = "archive.ar";
-    productType = "com.apple.product-type.library.static";
-
     buildSettings->AddAttribute("LIBRARY_STYLE", 
                                 this->CreateString("STATIC"));
     break;
@@ -1504,9 +1495,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                 this->CreateString("BUNDLE"));
     if(this->XcodeVersion >= 22)
       {
-      fileType = "compiled.mach-o.executable";
-      productType = "com.apple.product-type.tool";
-
       buildSettings->AddAttribute("MACH_O_TYPE", 
                                   this->CreateString("mh_bundle"));
       buildSettings->AddAttribute("GCC_DYNAMIC_NO_PIC", 
@@ -1522,9 +1510,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       }
     else
       {
-      fileType = "compiled.mach-o.dylib";
-      productType = "com.apple.product-type.library.dynamic";
-
       // Add the flags to create a module.
       std::string createFlags =
         this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", lang, "_FLAGS",
@@ -1541,9 +1526,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     if(target.GetPropertyAsBool("FRAMEWORK"))
       {
-      fileType = "wrapper.framework";
-      productType = "com.apple.product-type.framework";
-
       std::string version = target.GetFrameworkVersion();
       buildSettings->AddAttribute("FRAMEWORK_VERSION",
                                   this->CreateString(version.c_str()));
@@ -1562,9 +1544,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       }
     else
       {
-      fileType = "compiled.mach-o.dylib";
-      productType = "com.apple.product-type.library.dynamic";
-
       // Add the flags to create a shared library.
       std::string createFlags =
         this->LookupFlags("CMAKE_SHARED_LIBRARY_CREATE_", lang, "_FLAGS",
@@ -1582,8 +1561,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     }
     case cmTarget::EXECUTABLE:
     {
-    fileType = "compiled.mach-o.executable";
-
     // Add the flags to create an executable.
     std::string createFlags =
       this->LookupFlags("CMAKE_", lang, "_LINK_FLAGS", "");
@@ -1596,7 +1573,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     // Handle bundles and normal executables separately.
     if(target.GetPropertyAsBool("MACOSX_BUNDLE"))
       {
-      productType = "com.apple.product-type.application";
       std::string plist = this->ComputeInfoPListLocation(target);
       // Xcode will create the final version of Info.plist at build time,
       // so let it replace the executable name.  This avoids creating
@@ -1609,10 +1585,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       buildSettings->AddAttribute("INFOPLIST_FILE", 
                                   this->CreateString(path.c_str()));
 
-      }
-    else
-      {
-      productType = "com.apple.product-type.tool";
       }
     }
     break;
@@ -1754,7 +1726,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       // is not given or is empty.  We must explicitly put the flag in the
       // link flags to create an install_name with just the library soname.
       extraLinkOptions += " -install_name ";
-      extraLinkOptions += productName;
+      extraLinkOptions += target.GetFullName(configName);
       }
     else
       {
@@ -1869,9 +1841,6 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   target->AddAttribute("buildPhases", buildPhases);
   cmXCodeObject* buildSettings =
     this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  std::string fileTypeString;
-  std::string productTypeString;
-  std::string productName;
   const char* globalConfig = 0;
   if(this->XcodeVersion > 20)
     {
@@ -1881,9 +1850,7 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
     {
     globalConfig = this->CurrentMakefile->GetDefinition("CMAKE_BUILD_TYPE");  
     }
-  this->CreateBuildSettings(cmtarget, 
-                            buildSettings, fileTypeString, 
-                            productTypeString, productName, globalConfig);
+  this->CreateBuildSettings(cmtarget, buildSettings, globalConfig);
   target->AddAttribute("buildSettings", buildSettings);
   cmXCodeObject* dependencies = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -1939,12 +1906,7 @@ void cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
     buildConfigurations->AddObject(config);
     cmXCodeObject* buildSettings =
       this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-    std::string fileTypeString;
-    std::string productTypeString;
-    std::string productName;
-    this->CreateBuildSettings(cmtarget, 
-                              buildSettings, fileTypeString, 
-                              productTypeString, productName,
+    this->CreateBuildSettings(cmtarget, buildSettings,
                               configVector[i].c_str());
     config->AddAttribute("name", this->CreateString(configVector[i].c_str()));
     config->SetComment(configVector[i].c_str());
@@ -1960,6 +1922,49 @@ void cmGlobalXCodeGenerator::AddConfigurations(cmXCodeObject* target,
 }
 
 //----------------------------------------------------------------------------
+const char* cmGlobalXCodeGenerator::GetTargetFileType(cmTarget& cmtarget)
+{
+  switch(cmtarget.GetType())
+    {
+    case cmTarget::STATIC_LIBRARY:
+      return "archive.ar";
+    case cmTarget::MODULE_LIBRARY:
+      return ((this->XcodeVersion >= 22)?
+              "compiled.mach-o.executable" : "compiled.mach-o.dylib");
+    case cmTarget::SHARED_LIBRARY:
+      return (cmtarget.GetPropertyAsBool("FRAMEWORK")?
+              "wrapper.framework" : "compiled.mach-o.dylib");
+    case cmTarget::EXECUTABLE:
+      return "compiled.mach-o.executable";
+    default: break;
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+const char* cmGlobalXCodeGenerator::GetTargetProductType(cmTarget& cmtarget)
+{
+  switch(cmtarget.GetType())
+    {
+    case cmTarget::STATIC_LIBRARY:
+      return "com.apple.product-type.library.static";
+    case cmTarget::MODULE_LIBRARY:
+      return ((this->XcodeVersion >= 22)? "com.apple.product-type.tool" :
+              "com.apple.product-type.library.dynamic");
+    case cmTarget::SHARED_LIBRARY:
+      return (cmtarget.GetPropertyAsBool("FRAMEWORK")?
+              "com.apple.product-type.framework" :
+              "com.apple.product-type.library.dynamic");
+    case cmTarget::EXECUTABLE:
+      return (cmtarget.GetPropertyAsBool("MACOSX_BUNDLE")?
+              "com.apple.product-type.application" :
+              "com.apple.product-type.tool");
+    default: break;
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
 cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
                                           cmXCodeObject* buildPhases)
@@ -1971,9 +1976,6 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   target->AddAttribute("buildRules", buildRules);
   cmXCodeObject* buildSettings =
     this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
-  std::string fileTypeString;
-  std::string productTypeString;
-  std::string productName;
   const char* globalConfig = 0;
   if(this->XcodeVersion > 20)
     {
@@ -1983,9 +1985,7 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
     {
     globalConfig = this->CurrentMakefile->GetDefinition("CMAKE_BUILD_TYPE");  
     }
-  this->CreateBuildSettings(cmtarget, 
-                            buildSettings, fileTypeString, 
-                            productTypeString, productName, globalConfig);
+  this->CreateBuildSettings(cmtarget, buildSettings, globalConfig);
   target->AddAttribute("buildSettings", buildSettings);
   cmXCodeObject* dependencies = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -1995,17 +1995,22 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
 
   cmXCodeObject* fileRef = 
     this->CreateObject(cmXCodeObject::PBXFileReference);
-  fileRef->AddAttribute("explicitFileType", 
-                        this->CreateString(fileTypeString.c_str()));
-  fileRef->AddAttribute("path", this->CreateString(productName.c_str()));
+  if(const char* fileType = this->GetTargetFileType(cmtarget))
+    {
+    fileRef->AddAttribute("explicitFileType", this->CreateString(fileType));
+    }
+  std::string fullName = cmtarget.GetFullName(globalConfig);
+  fileRef->AddAttribute("path", this->CreateString(fullName.c_str()));
   fileRef->AddAttribute("refType", this->CreateString("0"));
   fileRef->AddAttribute("sourceTree",
                         this->CreateString("BUILT_PRODUCTS_DIR"));
   fileRef->SetComment(cmtarget.GetName());
   target->AddAttribute("productReference", 
                        this->CreateObjectReference(fileRef));
-  target->AddAttribute("productType", 
-                       this->CreateString(productTypeString.c_str()));
+  if(const char* productType = this->GetTargetProductType(cmtarget))
+    {
+    target->AddAttribute("productType", this->CreateString(productType));
+    }
   target->SetTarget(&cmtarget);
   return target;
 }

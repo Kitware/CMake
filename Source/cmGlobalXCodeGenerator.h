@@ -128,6 +128,8 @@ private:
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
   cmXCodeObject* CreateXCodeTarget(cmTarget& target,
                                    cmXCodeObject* buildPhases);
+  const char* GetTargetFileType(cmTarget& cmtarget);
+  const char* GetTargetProductType(cmTarget& cmtarget);
   void AddConfigurations(cmXCodeObject* target,
                          cmTarget& cmtarget);
   void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr, 
@@ -138,9 +140,6 @@ private:
   void AddDependAndLinkInformation(cmXCodeObject* target);
   void CreateBuildSettings(cmTarget& target,
                            cmXCodeObject* buildSettings,
-                           std::string& fileType,
-                           std::string& productType,
-                           std::string& projectName,
                            const char* buildType);
   std::string ExtractFlag(const char* flag, std::string& flags);
   // delete all objects in the this->XCodeObjects vector.
