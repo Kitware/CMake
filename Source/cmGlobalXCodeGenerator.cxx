@@ -1888,8 +1888,8 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   cmXCodeObject* dependencies = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("dependencies", dependencies);
-  target->AddAttribute("name", this->CreateString(productName.c_str()));
-  target->AddAttribute("productName",this->CreateString(productName.c_str()));
+  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
+  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
   target->SetTarget(&cmtarget);
 
   // Add source files without build rules for editing convenience.
@@ -1990,8 +1990,8 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   cmXCodeObject* dependencies = 
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("dependencies", dependencies);
-  target->AddAttribute("name", this->CreateString(productName.c_str()));
-  target->AddAttribute("productName",this->CreateString(productName.c_str()));
+  target->AddAttribute("name", this->CreateString(cmtarget.GetName()));
+  target->AddAttribute("productName",this->CreateString(cmtarget.GetName()));
 
   cmXCodeObject* fileRef = 
     this->CreateObject(cmXCodeObject::PBXFileReference);
@@ -2800,7 +2800,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
           universal += ".build/";
           universal += configName;
           universal += "/";
-          universal += t->GetFullName(configName);
+          universal += t->GetName();
           universal += ".build/Objects-normal/";
           for( std::vector<std::string>::iterator arch = 
                  this->Architectures.begin();
@@ -2953,23 +2953,7 @@ GetTargetObjectFileDirectories(cmTarget* target,
   dir += ".build/";
   dir += this->GetCMakeCFGInitDirectory();
   dir += "/";
-  if(target->GetType() != cmTarget::EXECUTABLE)
-    {
-    dir += "lib";
-    }
   dir += target->GetName();
-  if(target->GetType() == cmTarget::STATIC_LIBRARY)
-    {
-    dir += ".a";
-    }
-  if(target->GetType() == cmTarget::SHARED_LIBRARY)
-    {
-    dir += ".dylib";
-    }
-  if(target->GetType() == cmTarget::MODULE_LIBRARY)
-    {
-    dir += ".so";
-    }
   dir += ".build/Objects-normal/";
   std::string dirsave = dir;
   if(this->Architectures.size())
