@@ -768,7 +768,6 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
   std::string reason;
   if ( !this->CTest->GetShowOnly() )
     {
-    bool testFailed = false;
     std::vector<std::pair<cmsys::RegularExpression,
       std::string> >::iterator passIt;
     bool forceFail = false;
@@ -816,87 +815,69 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
           }
         }
       }
-    
-    if (res == cmsysProcess_State_Exited &&
-        (retVal == 0 || it->RequiredRegularExpressions.size()) &&
-        !forceFail)
+
+    if (res == cmsysProcess_State_Exited)
       {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,   "   Passed");
-      if ( it->WillFail )
+      bool success =
+        !forceFail && (retVal == 0 || it->RequiredRegularExpressions.size());
+      if((success && !it->WillFail) || (!success && it->WillFail))
         {
-        cmCTestLog(this->CTest, HANDLER_OUTPUT,   " - But it should fail!");
-        cres.Status = cmCTestTestHandler::FAILED;
-        testFailed = true;
+        cres.Status = cmCTestTestHandler::COMPLETED;
+        cmCTestLog(this->CTest, HANDLER_OUTPUT,   "   Passed" << std::endl);
         }
       else
         {
-        cres.Status = cmCTestTestHandler::COMPLETED;
+        cres.Status = cmCTestTestHandler::FAILED;
+        cmCTestLog(this->CTest, HANDLER_OUTPUT,
+                   "***Failed " << reason << std::endl);
+        }
+      }
+    else if ( res == cmsysProcess_State_Expired )
+      {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout" << std::endl);
+      cres.Status = cmCTestTestHandler::TIMEOUT;
+      }
+    else if ( res == cmsysProcess_State_Exception )
+      {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Exception: ");
+      switch ( retVal )
+        {
+        case cmsysProcess_Exception_Fault:
+          cmCTestLog(this->CTest, HANDLER_OUTPUT, "SegFault");
+          cres.Status = cmCTestTestHandler::SEGFAULT;
+          break;
+        case cmsysProcess_Exception_Illegal:
+          cmCTestLog(this->CTest, HANDLER_OUTPUT, "Illegal");
+          cres.Status = cmCTestTestHandler::ILLEGAL;
+          break;
+        case cmsysProcess_Exception_Interrupt:
+          cmCTestLog(this->CTest, HANDLER_OUTPUT, "Interrupt");
+          cres.Status = cmCTestTestHandler::INTERRUPT;
+          break;
+        case cmsysProcess_Exception_Numerical:
+          cmCTestLog(this->CTest, HANDLER_OUTPUT, "Numerical");
+          cres.Status = cmCTestTestHandler::NUMERICAL;
+          break;
+        default:
+          cmCTestLog(this->CTest, HANDLER_OUTPUT, "Other");
+          cres.Status = cmCTestTestHandler::OTHER_FAULT;
         }
       cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
       }
-    else
+    else // if ( res == cmsysProcess_State_Error )
       {
-      testFailed = true;
-      
-      cres.Status = cmCTestTestHandler::FAILED;
-      if ( res == cmsysProcess_State_Expired )
-        {
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout" << std::endl);
-        cres.Status = cmCTestTestHandler::TIMEOUT;
-        }
-      else if ( res == cmsysProcess_State_Exception )
-        {
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Exception: ");
-        switch ( retVal )
-          {
-          case cmsysProcess_Exception_Fault:
-            cmCTestLog(this->CTest, HANDLER_OUTPUT, "SegFault");
-            cres.Status = cmCTestTestHandler::SEGFAULT;
-            break;
-          case cmsysProcess_Exception_Illegal:
-            cmCTestLog(this->CTest, HANDLER_OUTPUT, "Illegal");
-            cres.Status = cmCTestTestHandler::ILLEGAL;
-            break;
-          case cmsysProcess_Exception_Interrupt:
-            cmCTestLog(this->CTest, HANDLER_OUTPUT, "Interrupt");
-            cres.Status = cmCTestTestHandler::INTERRUPT;
-            break;
-          case cmsysProcess_Exception_Numerical:
-            cmCTestLog(this->CTest, HANDLER_OUTPUT, "Numerical");
-            cres.Status = cmCTestTestHandler::NUMERICAL;
-            break;
-          default:
-            cmCTestLog(this->CTest, HANDLER_OUTPUT, "Other");
-            cres.Status = cmCTestTestHandler::OTHER_FAULT;
-          }
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
-        }
-      else if ( res == cmsysProcess_State_Error )
-        {
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Bad command " << res
-                   << std::endl);
-        cres.Status = cmCTestTestHandler::BAD_COMMAND;
-        }
-      else
-        {
-        // Force fail will also be here?
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Failed " << reason);
-        if ( it->WillFail )
-          {
-          cres.Status = cmCTestTestHandler::COMPLETED;
-          cmCTestLog(this->CTest, HANDLER_OUTPUT, " - supposed to fail");
-          testFailed = false;
-          }
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
-        }
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Bad command " << res
+                 << std::endl);
+      cres.Status = cmCTestTestHandler::BAD_COMMAND;
       }
-    if ( testFailed )
-      {
-      failed.push_back(testname);
-      }
-    else
+
+    if(cres.Status == cmCTestTestHandler::COMPLETED)
       {
       passed.push_back(testname);
+      }
+    else
+      {
+      failed.push_back(testname);
       }
     if (!output.empty() && output.find("<DartMeasurement") != output.npos)
       {
