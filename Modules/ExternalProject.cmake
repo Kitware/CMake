@@ -121,31 +121,45 @@ function(_ep_parse_arguments f name ns args)
   # upper-case letter followed by at least two more upper-case letters
   # or underscores to be keywords.
   set(key)
+
   foreach(arg IN LISTS args)
+    set(is_value 1)
+
     if(arg MATCHES "^[A-Z][A-Z_][A-Z_]+$" AND
         NOT ((arg STREQUAL "${key}") AND (key STREQUAL "COMMAND")) AND
         NOT arg MATCHES "^(TRUE|FALSE)$")
-      # Keyword
-      set(key "${arg}")
-      if(_ep_keywords_${f} AND NOT key MATCHES "${_ep_keywords_${f}}")
-        message(AUTHOR_WARNING "unknown ${f} keyword: ${key}")
-      endif()
-    elseif(key)
-      # Value
-      if(NOT arg STREQUAL "")
-        set_property(TARGET ${name} APPEND PROPERTY ${ns}${key} "${arg}")
+      if(_ep_keywords_${f} AND arg MATCHES "${_ep_keywords_${f}}")
+        set(is_value 0)
       else()
-        get_property(have_key TARGET ${name} PROPERTY ${ns}${key} SET)
-        if(have_key)
-          get_property(value TARGET ${name} PROPERTY ${ns}${key})
-          set_property(TARGET ${name} PROPERTY ${ns}${key} "${value};${arg}")
-        else()
-          set_property(TARGET ${name} PROPERTY ${ns}${key} "${arg}")
+        if(NOT (key STREQUAL "COMMAND")
+          AND NOT (key STREQUAL "CVS_MODULE")
+          AND NOT (key STREQUAL "DEPENDS")
+          )
+          message(AUTHOR_WARNING "unknown ${f} keyword: ${arg}")
         endif()
       endif()
+    endif()
+
+    if(is_value)
+      if(key)
+        # Value
+        if(NOT arg STREQUAL "")
+          set_property(TARGET ${name} APPEND PROPERTY ${ns}${key} "${arg}")
+        else()
+          get_property(have_key TARGET ${name} PROPERTY ${ns}${key} SET)
+          if(have_key)
+            get_property(value TARGET ${name} PROPERTY ${ns}${key})
+            set_property(TARGET ${name} PROPERTY ${ns}${key} "${value};${arg}")
+          else()
+            set_property(TARGET ${name} PROPERTY ${ns}${key} "${arg}")
+          endif()
+        endif()
+      else()
+        # Missing Keyword
+        message(AUTHOR_WARNING "value '${arg}' with no previous keyword in ${f}")
+      endif()
     else()
-      # Missing Keyword
-      message(AUTHOR_WARNING "value with no keyword in ${f}")
+      set(key "${arg}")
     endif()
   endforeach()
 endfunction(_ep_parse_arguments)
