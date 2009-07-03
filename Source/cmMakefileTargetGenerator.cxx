@@ -43,6 +43,7 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
   this->LocalGenerator =
     static_cast<cmLocalUnixMakefileGenerator3*>(
       this->Makefile->GetLocalGenerator());
+  this->ConfigName = this->LocalGenerator->ConfigurationName.c_str();
   this->GlobalGenerator =
     static_cast<cmGlobalUnixMakefileGenerator3*>(
       this->LocalGenerator->GetGlobalGenerator());
@@ -602,7 +603,6 @@ cmMakefileTargetGenerator
   std::string targetOutPathPDB;
   {
   std::string targetFullPathPDB;
-  const char* configName = this->LocalGenerator->ConfigurationName.c_str();
   if(this->Target->GetType() == cmTarget::EXECUTABLE ||
      this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
      this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -610,7 +610,7 @@ cmMakefileTargetGenerator
     {
     targetFullPathPDB = this->Target->GetDirectory();
     targetFullPathPDB += "/";
-    targetFullPathPDB += this->Target->GetPDBName(configName);
+    targetFullPathPDB += this->Target->GetPDBName(this->ConfigName);
     }
   targetOutPathPDB =
     this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::FULL,

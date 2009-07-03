@@ -34,8 +34,7 @@ cmMakefileLibraryTargetGenerator
   this->CustomCommandDriver = OnDepends;
   this->Target->GetLibraryNames(
     this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
-    this->TargetNameImport, this->TargetNamePDB,
-    this->LocalGenerator->ConfigurationName.c_str());
+    this->TargetNameImport, this->TargetNamePDB, this->ConfigName);
 
   if(this->Target->IsFrameworkOnApple())
     {
@@ -146,14 +145,12 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   this->LocalGenerator->AppendFlags
     (extraFlags, this->Target->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += 
-    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
+  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
     (extraFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
                                     
   this->LocalGenerator->AddConfigVariableFlags
-    (extraFlags, "CMAKE_SHARED_LINKER_FLAGS",
-     this->LocalGenerator->ConfigurationName.c_str());
+    (extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
   if(this->Makefile->IsOn("WIN32") && !(this->Makefile->IsOn("CYGWIN") 
                                         || this->Makefile->IsOn("MINGW")))
     {
@@ -194,13 +191,11 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   this->LocalGenerator->AppendFlags(extraFlags, 
                                     this->Target->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += 
-    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
+  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
     (extraFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
   this->LocalGenerator->AddConfigVariableFlags
-    (extraFlags, "CMAKE_MODULE_LINKER_FLAGS",
-     this->LocalGenerator->ConfigurationName.c_str());
+    (extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->ConfigName);
 
   // TODO: .def files should be supported here also.
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
@@ -222,13 +217,11 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
   this->LocalGenerator->AppendFlags(extraFlags, 
                                     this->Target->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += 
-    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
+  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
     (extraFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
   this->LocalGenerator->AddConfigVariableFlags
-    (extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS",
-     this->LocalGenerator->ConfigurationName.c_str());
+    (extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS", this->ConfigName);
 
   // TODO: .def files should be supported here also.
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
@@ -389,7 +382,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string targetNamePDB;
   this->Target->GetLibraryNames(
     targetName, targetNameSO, targetNameReal, targetNameImport, targetNamePDB,
-    this->LocalGenerator->ConfigurationName.c_str());
+    this->ConfigName);
 
   // Construct the full path version of the names.
   std::string outpath;
@@ -685,8 +678,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
     {
     // Get the install_name directory for the build tree.
-    const char* config = this->LocalGenerator->ConfigurationName.c_str();
-    install_name_dir = this->Target->GetInstallNameDirForBuildTree(config);
+    install_name_dir =
+      this->Target->GetInstallNameDirForBuildTree(this->ConfigName);
 
     // Set the rule variable replacement value.
     if(install_name_dir.empty())
@@ -705,8 +698,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
   std::string langFlags;
   this->LocalGenerator
-    ->AddLanguageFlags(langFlags, linkLanguage,
-                       this->LocalGenerator->ConfigurationName.c_str());
+    ->AddLanguageFlags(langFlags, linkLanguage, this->ConfigName);
   // remove any language flags that might not work with the
   // particular os
   if(forbiddenFlagVar)

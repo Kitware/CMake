@@ -32,7 +32,7 @@ cmMakefileExecutableTargetGenerator
   this->CustomCommandDriver = OnDepends;
   this->Target->GetExecutableNames(
     this->TargetNameOut, this->TargetNameReal, this->TargetNameImport,
-    this->TargetNamePDB, this->LocalGenerator->ConfigurationName.c_str());
+    this->TargetNamePDB, this->ConfigName);
 
   if(this->Target->IsAppBundleOnApple())
     {
@@ -123,7 +123,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetNamePDB;
   this->Target->GetExecutableNames
     (targetName, targetNameReal, targetNameImport, targetNamePDB,
-     this->LocalGenerator->ConfigurationName.c_str());
+     this->ConfigName);
 
   // Construct the full path version of the names.
   std::string outpath = this->Target->GetDirectory();
@@ -212,7 +212,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Add flags to create an executable.
   this->LocalGenerator->
     AddConfigVariableFlags(linkFlags, "CMAKE_EXE_LINKER_FLAGS",
-                           this->LocalGenerator->ConfigurationName.c_str());
+                           this->ConfigName);
 
 
   if(this->Target->GetPropertyAsBool("WIN32_EXECUTABLE"))
@@ -238,15 +238,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add language-specific flags.
   this->LocalGenerator
-    ->AddLanguageFlags(flags, linkLanguage,
-                       this->LocalGenerator->ConfigurationName.c_str());
+    ->AddLanguageFlags(flags, linkLanguage, this->ConfigName);
 
   // Add target-specific linker flags.
   this->LocalGenerator->AppendFlags
     (linkFlags, this->Target->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
-  linkFlagsConfig += 
-    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName.c_str());
+  linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
     (linkFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
 

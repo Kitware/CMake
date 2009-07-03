@@ -155,6 +155,7 @@ protected:
   cmLocalUnixMakefileGenerator3 *LocalGenerator;
   cmGlobalUnixMakefileGenerator3 *GlobalGenerator;
   cmMakefile *Makefile;
+  const char *ConfigName;
 
   enum CustomCommandDriveType { OnBuild, OnDepends, OnUtility };
   CustomCommandDriveType CustomCommandDriver;
