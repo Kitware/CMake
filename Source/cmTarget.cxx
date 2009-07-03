@@ -1937,6 +1937,48 @@ void cmTarget::MarkAsImported()
 }
 
 //----------------------------------------------------------------------------
+cmTarget::OutputInfo const* cmTarget::GetOutputInfo(const char* config)
+{
+  // There is no output information for imported targets.
+  if(this->IsImported())
+    {
+    return 0;
+    }
+
+  // Only libraries and executables have well-defined output files.
+  if(this->GetType() != cmTarget::STATIC_LIBRARY &&
+     this->GetType() != cmTarget::SHARED_LIBRARY &&
+     this->GetType() != cmTarget::MODULE_LIBRARY &&
+     this->GetType() != cmTarget::EXECUTABLE)
+    {
+    std::string msg = "cmTarget::GetOutputInfo called for ";
+    msg += this->GetName();
+    msg += " which has type ";
+    msg += cmTarget::TargetTypeNames[this->GetType()];
+    this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    return 0;
+    }
+
+  // Lookup/compute/cache the output information for this configuration.
+  std::string config_upper;
+  if(config && *config)
+    {
+    config_upper = cmSystemTools::UpperCase(config);
+    }
+  OutputInfoMapType::const_iterator i =
+    this->OutputInfoMap.find(config_upper);
+  if(i == this->OutputInfoMap.end())
+    {
+    OutputInfo info;
+    this->ComputeOutputDir(config, false, info.OutDir);
+    this->ComputeOutputDir(config, true, info.ImpDir);
+    OutputInfoMapType::value_type entry(config_upper, info);
+    i = this->OutputInfoMap.insert(entry).first;
+    }
+  return &i->second;
+}
+
+//----------------------------------------------------------------------------
 std::string cmTarget::GetDirectory(const char* config, bool implib)
 {
   if (this->IsImported())
@@ -1946,22 +1988,12 @@ std::string cmTarget::GetDirectory(const char* config, bool implib)
       cmSystemTools::GetFilenamePath(
       this->ImportedGetFullPath(config, implib));
     }
-  else
+  else if(OutputInfo const* info = this->GetOutputInfo(config))
     {
     // Return the directory in which the target will be built.
-    if(config && *config)
-      {
-      // Add the configuration's subdirectory.
-      std::string dir = this->GetOutputDir(implib);
-      this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
-        AppendDirectoryForConfig("/", config, "", dir);
-      return dir;
-      }
-    else
-      {
-      return this->GetOutputDir(implib);
-      }
+    return implib? info->ImpDir : info->OutDir;
     }
+  return "";
 }
 
 //----------------------------------------------------------------------------
@@ -3153,56 +3185,9 @@ const char* cmTarget::GetOutputTargetType(bool implib)
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetOutputDir(bool implib)
+void cmTarget::ComputeOutputDir(const char* config,
+                                bool implib, std::string& out)
 {
-  // The implib option is only allowed for shared libraries, module
-  // libraries, and executables.
-  if(this->GetType() != cmTarget::SHARED_LIBRARY &&
-     this->GetType() != cmTarget::MODULE_LIBRARY &&
-     this->GetType() != cmTarget::EXECUTABLE)
-    {
-    implib = false;
-    }
-
-  // Sanity check.  Only generators on platforms supporting import
-  // libraries should be asking for the import library output
-  // directory.
-  if(implib &&
-     !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
-    {
-    std::string msg =  "GetOutputDir, imlib set but there is no "
-      "CMAKE_IMPORT_LIBRARY_SUFFIX for target: ";
-    msg += this->GetName();
-    this->GetMakefile()->
-      IssueMessage(cmake::INTERNAL_ERROR,
-                   msg.c_str());
-    }
-  if(implib && !this->DLLPlatform)
-    {
-    std::string msg =  "implib set for platform that does not "
-      " support DLL's for target: ";
-    msg += this->GetName();
-    this->GetMakefile()->
-      IssueMessage(cmake::INTERNAL_ERROR,
-                   msg.c_str());
-    }
-
-  return this->ComputeBaseOutputDir(implib);
-}
-
-//----------------------------------------------------------------------------
-std::string const& cmTarget::ComputeBaseOutputDir(bool implib)
-{
-  // Select whether we are constructing the directory for the main
-  // target or the import library.
-  std::string& out = implib? this->BaseOutputDirImplib : this->BaseOutputDir;
-
-  // Return immediately if the directory has already been computed.
-  if(!out.empty())
-    {
-    return out;
-    }
-
   // Look for a target property defining the target output directory
   // based on the target type.
   const char* propertyName = 0;
@@ -3242,7 +3227,13 @@ std::string const& cmTarget::ComputeBaseOutputDir(bool implib)
   // relative to the current output directory for this makefile.
   out = (cmSystemTools::CollapseFullPath
          (out.c_str(), this->Makefile->GetStartOutputDirectory()));
-  return out;
+
+  // The generator may add the configuration's subdirectory.
+  if(config && *config)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+      AppendDirectoryForConfig("/", config, "", out);
+    }
 }
 
 //----------------------------------------------------------------------------

@@ -462,10 +462,6 @@ private:
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
   const char* GetOutputTargetType(bool implib);
 
-  // Get the full path to the target output directory.
-  std::string GetOutputDir(bool implib);
-  std::string const& ComputeBaseOutputDir(bool implib);
-
   // Get the target base name.
   std::string GetOutputName(const char* config, bool implib);
 
@@ -500,8 +496,6 @@ private:
   bool HaveInstallRule;
   std::string InstallPath;
   std::string RuntimeInstallPath;
-  std::string BaseOutputDir;
-  std::string BaseOutputDirImplib;
   std::string Location;
   std::string ExportMacro;
   std::set<cmStdString> Utilities;
@@ -510,6 +504,17 @@ private:
   LinkLibraryVectorType OriginalLinkLibraries;
   bool DLLPlatform;
   bool IsImportedTarget;
+
+  // Cache target output paths for each configuration.
+  struct OutputInfo
+  {
+    std::string OutDir;
+    std::string ImpDir;
+  };
+  typedef std::map<cmStdString, OutputInfo> OutputInfoMapType;
+  OutputInfoMapType OutputInfoMap;
+  OutputInfo const* GetOutputInfo(const char* config);
+  void ComputeOutputDir(const char* config, bool implib, std::string& out);
 
   // Cache import information from properties for each configuration.
   struct ImportInfo
