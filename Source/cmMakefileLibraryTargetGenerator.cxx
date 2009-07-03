@@ -39,7 +39,7 @@ cmMakefileLibraryTargetGenerator
   if(this->Target->IsFrameworkOnApple())
     {
     this->FrameworkVersion = this->Target->GetFrameworkVersion();
-    this->MacContentDirectory = this->Target->GetDirectory();
+    this->MacContentDirectory = this->Target->GetDirectory(this->ConfigName);
     this->MacContentDirectory += "/";
     this->MacContentDirectory += this->TargetNameOut;
     this->MacContentDirectory += ".framework/Versions/";
@@ -245,7 +245,7 @@ cmMakefileLibraryTargetGenerator
   std::string newName;
 
   // Compute the location of the top-level foo.framework directory.
-  std::string top = this->Target->GetDirectory();
+  std::string top = this->Target->GetDirectory(this->ConfigName);
   top += "/";
   top += this->TargetNameOut;
   top += ".framework/";
@@ -406,12 +406,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
   else
     {
-    outpath = this->Target->GetDirectory();
+    outpath = this->Target->GetDirectory(this->ConfigName);
     cmSystemTools::MakeDirectory(outpath.c_str());
     outpath += "/";
     if(!targetNameImport.empty())
       {
-      outpathImp = this->Target->GetDirectory(0, true);
+      outpathImp = this->Target->GetDirectory(this->ConfigName, true);
       cmSystemTools::MakeDirectory(outpathImp.c_str());
       outpathImp += "/";
       }

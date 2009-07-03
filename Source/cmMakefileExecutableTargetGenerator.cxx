@@ -36,7 +36,7 @@ cmMakefileExecutableTargetGenerator
 
   if(this->Target->IsAppBundleOnApple())
     {
-    this->MacContentDirectory = this->Target->GetDirectory();
+    this->MacContentDirectory = this->Target->GetDirectory(this->ConfigName);
     this->MacContentDirectory += "/";
     this->MacContentDirectory += this->TargetNameOut;
     this->MacContentDirectory += ".app/Contents/";
@@ -126,7 +126,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
      this->ConfigName);
 
   // Construct the full path version of the names.
-  std::string outpath = this->Target->GetDirectory();
+  std::string outpath = this->Target->GetDirectory(this->ConfigName);
   outpath += "/";
   if(this->Target->IsAppBundleOnApple())
     {
@@ -150,7 +150,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     cmSystemTools::MakeDirectory(outpath.c_str());
     if(!targetNameImport.empty())
       {
-      outpathImp = this->Target->GetDirectory(0, true);
+      outpathImp = this->Target->GetDirectory(this->ConfigName, true);
       cmSystemTools::MakeDirectory(outpathImp.c_str());
       outpathImp += "/";
       }

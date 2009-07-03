@@ -608,7 +608,7 @@ cmMakefileTargetGenerator
      this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
      this->Target->GetType() == cmTarget::MODULE_LIBRARY)
     {
-    targetFullPathPDB = this->Target->GetDirectory();
+    targetFullPathPDB = this->Target->GetDirectory(this->ConfigName);
     targetFullPathPDB += "/";
     targetFullPathPDB += this->Target->GetPDBName(this->ConfigName);
     }
