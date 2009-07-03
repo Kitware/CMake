@@ -885,6 +885,8 @@ void cmLocalVisualStudio6Generator
   // Lookup the output directory for the target.
   std::string outPath = target.GetDirectory();
 
+  bool targetBuilds = (target.GetType() >= cmTarget::EXECUTABLE &&
+                       target.GetType() <= cmTarget::MODULE_LIBRARY);
 #ifdef CM_USE_OLD_VS6
   // Lookup the library and executable output directories.
   std::string libPath;
@@ -1136,8 +1138,7 @@ void cmLocalVisualStudio6Generator
     }
 
   // Get standard libraries for this language.
-  if(target.GetType() >= cmTarget::EXECUTABLE && 
-     target.GetType() <= cmTarget::MODULE_LIBRARY)
+  if(targetBuilds)
     {
     // Get the language to use for linking.
     const char* linkLanguage = 

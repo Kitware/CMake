@@ -627,6 +627,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // 10 == utility
   const char* configType = "10";
   const char* projectType = 0;
+  bool targetBuilds = true;
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
@@ -645,6 +646,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     case cmTarget::GLOBAL_TARGET:
       configType = "10";
     default:
+      targetBuilds = false;
       break;
     }
   if(this->FortranProject && projectType)
@@ -801,10 +803,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
-  if(target.GetType() == cmTarget::EXECUTABLE ||
-     target.GetType() == cmTarget::STATIC_LIBRARY ||
-     target.GetType() == cmTarget::SHARED_LIBRARY ||
-     target.GetType() == cmTarget::MODULE_LIBRARY)
+  if(targetBuilds)
     {
     // We need to specify a program database file name even for
     // non-debug configurations because VS still creates .idb files.
