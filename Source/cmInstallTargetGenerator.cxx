@@ -58,20 +58,6 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
     cmSystemTools::Message(msg.str().c_str(), "Warning");
     }
 
-  // Compute the build tree directory from which to copy the target.
-  std::string& fromDir = this->FromDir;
-  if(this->Target->NeedRelinkBeforeInstall())
-    {
-    fromDir = this->Target->GetMakefile()->GetStartOutputDirectory();
-    fromDir += cmake::GetCMakeFilesDirectory();
-    fromDir += "/CMakeRelink.dir/";
-    }
-  else
-    {
-    fromDir = this->Target->GetDirectory(0, this->ImportLibrary);
-    fromDir += "/";
-    }
-
   // Perform the main install script generation.
   this->cmInstallGenerator::GenerateScript(os);
 }
@@ -81,10 +67,19 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
                                                        const char* config,
                                                        Indent const& indent)
 {
-  // Compute the per-configuration directory containing the files.
-  std::string fromDirConfig = this->FromDir;
-  this->Target->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()
-    ->AppendDirectoryForConfig("", config, "/", fromDirConfig);
+  // Compute the build tree directory from which to copy the target.
+  std::string fromDirConfig;
+  if(this->Target->NeedRelinkBeforeInstall())
+    {
+    fromDirConfig = this->Target->GetMakefile()->GetStartOutputDirectory();
+    fromDirConfig += cmake::GetCMakeFilesDirectory();
+    fromDirConfig += "/CMakeRelink.dir/";
+    }
+  else
+    {
+    fromDirConfig = this->Target->GetDirectory(config, this->ImportLibrary);
+    fromDirConfig += "/";
+    }
 
   // Compute the full path to the main installed file for this target.
   NameType nameType = this->ImportLibrary? NameImplib : NameNormal;

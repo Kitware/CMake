@@ -90,7 +90,6 @@ protected:
   std::string FilePermissions;
   bool Optional;
   NamelinkModeType NamelinkMode;
-  std::string FromDir;
 };
 
 #endif
