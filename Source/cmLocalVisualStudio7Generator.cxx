@@ -864,7 +864,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // end of <Tool Name=VCMIDLTool
 
   // Check if we need the FAT32 workaround.
-  if ( this->Version >= 8 )
+  if(targetBuilds && this->Version >= 8)
     {
     // Check the filesystem type where the target will be written.
     if(cmLVS6G_IsFAT(target.GetDirectory(configName).c_str()))

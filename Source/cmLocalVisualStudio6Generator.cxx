@@ -882,9 +882,6 @@ void cmLocalVisualStudio6Generator
                  const char *libName, cmTarget &target, 
                  std::vector<cmSourceGroup> &)
 {
-  // Lookup the output directory for the target.
-  std::string outPath = target.GetDirectory();
-
   bool targetBuilds = (target.GetType() >= cmTarget::EXECUTABLE &&
                        target.GetType() <= cmTarget::MODULE_LIBRARY);
 #ifdef CM_USE_OLD_VS6
@@ -1415,10 +1412,15 @@ void cmLocalVisualStudio6Generator
        removeQuotes(this->ConvertToOptionallyRelativeOutputPath
                     (exePath.c_str())).c_str());
 #endif
-    cmSystemTools::ReplaceString
-      (line, "OUTPUT_DIRECTORY",
-       removeQuotes(this->ConvertToOptionallyRelativeOutputPath
-                    (outPath.c_str())).c_str());
+
+    if(targetBuilds)
+      {
+      std::string outPath = target.GetDirectory();
+      cmSystemTools::ReplaceString
+        (line, "OUTPUT_DIRECTORY",
+         removeQuotes(this->ConvertToOptionallyRelativeOutputPath
+                      (outPath.c_str())).c_str());
+      }
 
     cmSystemTools::ReplaceString(line, 
                                  "EXTRA_DEFINES", 
