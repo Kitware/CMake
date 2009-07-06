@@ -46,6 +46,10 @@ struct cmTargetLinkInterface
 
   // Shared library dependencies needed for linking on some platforms.
   std::vector<std::string> SharedDeps;
+
+  // Libraries listed for other configurations.
+  // Needed only for OLD behavior of CMP0003.
+  std::vector<std::string> WrongConfigLibraries;
 };
 
 struct cmTargetLinkInterfaceMap:

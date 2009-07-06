@@ -83,8 +83,7 @@ private:
   AllocateLinkEntry(std::string const& item);
   int AddLinkEntry(int depender_index, std::string const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
-  void AddTargetLinkEntries(int depender_index,
-                            LinkLibraryVectorType const& libs);
+  void AddDirectLinkEntries();
   void AddLinkEntries(int depender_index,
                       std::vector<std::string> const& libs);
   cmTarget* FindTargetToLink(int depender_index, const char* name);

@@ -150,10 +150,8 @@ cmExportFileGenerator
     }
 
   // Add the transitive link dependencies for this configuration.
-  if(cmTargetLinkInterface const* iface =
-     target->GetLinkInterface(config))
+  if(cmTargetLinkInterface const* iface = target->GetLinkInterface(config))
     {
-    // This target provides a link interface, so use it.
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
                                 iface->Libraries, properties);
@@ -161,47 +159,6 @@ cmExportFileGenerator
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
                                 iface->SharedDeps, properties);
     }
-  else if(target->GetType() == cmTarget::STATIC_LIBRARY ||
-          target->GetType() == cmTarget::SHARED_LIBRARY)
-    {
-    // The default link interface for static and shared libraries is
-    // their link implementation library list.
-    this->SetImportLinkProperties(config, suffix, target, properties);
-    }
-}
-
-//----------------------------------------------------------------------------
-void
-cmExportFileGenerator
-::SetImportLinkProperties(const char* config, std::string const& suffix,
-                          cmTarget* target, ImportPropertyMap& properties)
-{
-  // Compute which library configuration to link.
-  cmTarget::LinkLibraryType linkType = target->ComputeLinkType(config);
-
-  // Construct the list of libs linked for this configuration.
-  std::vector<std::string> actual_libs;
-  cmTarget::LinkLibraryVectorType const& libs =
-    target->GetOriginalLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
-      li != libs.end(); ++li)
-    {
-    // Skip entries that will resolve to the target itself, are empty,
-    // or are not meant for this configuration.
-    if(li->first == target->GetName() || li->first.empty() ||
-       !(li->second == cmTarget::GENERAL || li->second == linkType))
-      {
-      continue;
-      }
-
-    // Store this entry.
-    actual_libs.push_back(li->first);
-    }
-
-  // Store the entries in the property.
-  this->SetImportLinkProperty(suffix, target,
-                              "IMPORTED_LINK_INTERFACE_LIBRARIES",
-                              actual_libs, properties);
 }
 
 //----------------------------------------------------------------------------

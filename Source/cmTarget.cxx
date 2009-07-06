@@ -3682,10 +3682,10 @@ cmTargetLinkInterface const* cmTarget::GetLinkInterface(const char* config)
     return 0;
     }
 
-  // Link interfaces are supported only for shared libraries and
-  // executables that export symbols.
-  if((this->GetType() != cmTarget::SHARED_LIBRARY &&
-      !this->IsExecutableWithExports()))
+  // Link interfaces are not supported for executables that do not
+  // export symbols.
+  if(this->GetType() == cmTarget::EXECUTABLE &&
+     !this->IsExecutableWithExports())
     {
     return 0;
     }
@@ -3724,23 +3724,27 @@ cmTarget::ComputeLinkInterface(const char* config)
     suffix += "NOCONFIG";
     }
 
-  // Lookup the link interface libraries.
-  const char* libs = 0;
-  {
-  // Lookup the per-configuration property.
-  std::string propName = "LINK_INTERFACE_LIBRARIES";
-  propName += suffix;
-  libs = this->GetProperty(propName.c_str());
-
-  // If not set, try the generic property.
-  if(!libs)
+  // An explicit list of interface libraries may be set for shared
+  // libraries and executables that export symbols.
+  const char* explicitLibraries = 0;
+  if(this->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->IsExecutableWithExports())
     {
-    libs = this->GetProperty("LINK_INTERFACE_LIBRARIES");
-    }
-  }
+    // Lookup the per-configuration property.
+    std::string propName = "LINK_INTERFACE_LIBRARIES";
+    propName += suffix;
+    explicitLibraries = this->GetProperty(propName.c_str());
 
-  // If still not set, there is no link interface.
-  if(!libs)
+    // If not set, try the generic property.
+    if(!explicitLibraries)
+      {
+      explicitLibraries = this->GetProperty("LINK_INTERFACE_LIBRARIES");
+      }
+    }
+
+  // There is no implicit link interface for executables, so if none
+  // was explicitly set, there is no link interface.
+  if(!explicitLibraries && this->GetType() == cmTarget::EXECUTABLE)
     {
     return cmsys::auto_ptr<cmTargetLinkInterface>();
     }
@@ -3752,23 +3756,31 @@ cmTarget::ComputeLinkInterface(const char* config)
     return cmsys::auto_ptr<cmTargetLinkInterface>();
     }
 
-  // Expand the list of libraries in the interface.
-  cmSystemTools::ExpandListArgument(libs, iface->Libraries);
+  // Is the link interface just the link implementation?
+  bool doLibraries = !explicitLibraries;
 
-  // Now we need to construct a list of shared library dependencies
-  // not included in the interface.
-  if(this->GetType() == cmTarget::SHARED_LIBRARY)
+  // Do we need to construct a list of shared library dependencies not
+  // included in the interface?
+  bool doSharedDeps = (explicitLibraries &&
+                       this->GetType() == cmTarget::SHARED_LIBRARY);
+
+  // Keep track of what libraries have been emitted.
+  std::set<cmStdString> emitted;
+  std::set<cmStdString> emittedWrongConfig;
+
+  if(explicitLibraries)
     {
-    // Use a set to keep track of what libraries have been emitted to
-    // either list.
-    std::set<cmStdString> emitted;
+    // The interface libraries have been explicitly set.
+    cmSystemTools::ExpandListArgument(explicitLibraries, iface->Libraries);
     for(std::vector<std::string>::const_iterator
-          li = iface->Libraries.begin();
-        li != iface->Libraries.end(); ++li)
+          li = iface->Libraries.begin(); li != iface->Libraries.end(); ++li)
       {
       emitted.insert(*li);
       }
+    }
 
+  if(doLibraries || doSharedDeps)
+    {
     // Compute which library configuration to link.
     cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
 
@@ -3778,26 +3790,42 @@ cmTarget::ComputeLinkInterface(const char* config)
     for(cmTarget::LinkLibraryVectorType::const_iterator li = llibs.begin();
         li != llibs.end(); ++li)
       {
-      // Skip entries that will resolve to the target itself, are empty,
-      // or are not meant for this configuration.
-      if(li->first == this->GetName() || li->first.empty() ||
-         !(li->second == cmTarget::GENERAL || li->second == linkType))
+      // Skip entries that resolve to the target itself or are empty.
+      std::string item = this->CheckCMP0004(li->first);
+      if(item == this->GetName() || item.empty())
         {
         continue;
         }
 
-      // Skip entries that have already been emitted into either list.
-      if(!emitted.insert(li->first).second)
+      // Skip entries not meant for this configuration.
+      if(li->second != cmTarget::GENERAL && li->second != linkType)
+        {
+        // Support OLD behavior for CMP0003.
+        if(doLibraries && !emittedWrongConfig.insert(item).second)
+          {
+          iface->WrongConfigLibraries.push_back(item);
+          }
+        continue;
+        }
+
+      // Skip entries that have already been emitted.
+      if(!emitted.insert(item).second)
         {
         continue;
         }
 
-      // Add this entry if it is a shared library.
-      if(cmTarget* tgt = this->Makefile->FindTargetToUse(li->first.c_str()))
+      // Emit this item.
+      if(doLibraries)
         {
+        // This implementation dependency goes in the implicit interface.
+        iface->Libraries.push_back(item);
+        }
+      else if(cmTarget* tgt = this->Makefile->FindTargetToUse(item.c_str()))
+        {
+        // This is a runtime dependency on another shared library.
         if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
           {
-          iface->SharedDeps.push_back(li->first);
+          iface->SharedDeps.push_back(item);
           }
         }
       else

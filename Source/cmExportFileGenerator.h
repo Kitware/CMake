@@ -67,9 +67,6 @@ protected:
   void SetImportDetailProperties(const char* config,
                                  std::string const& suffix, cmTarget* target,
                                  ImportPropertyMap& properties);
-  void SetImportLinkProperties(const char* config,
-                               std::string const& suffix, cmTarget* target,
-                               ImportPropertyMap& properties);
   void SetImportLinkProperty(std::string const& suffix,
                              cmTarget* target, const char* propName,
                              std::vector<std::string> const& libs,

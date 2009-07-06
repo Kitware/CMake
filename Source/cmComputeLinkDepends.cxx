@@ -223,7 +223,7 @@ std::vector<cmComputeLinkDepends::LinkEntry> const&
 cmComputeLinkDepends::Compute()
 {
   // Follow the link dependencies of the target to be linked.
-  this->AddTargetLinkEntries(-1, this->Target->GetOriginalLinkLibraries());
+  this->AddDirectLinkEntries();
 
   // Complete the breadth-first search of dependencies.
   while(!this->BFSQueue.empty())
@@ -364,13 +364,14 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
 
       // Handle dependent shared libraries.
       this->QueueSharedDependencies(depender_index, iface->SharedDeps);
-      }
-    else if(!entry.Target->IsImported() &&
-            entry.Target->GetType() != cmTarget::EXECUTABLE)
-      {
-      // Use the target's link implementation as the interface.
-      this->AddTargetLinkEntries(depender_index,
-                                 entry.Target->GetOriginalLinkLibraries());
+
+      // Support for CMP0003.
+      for(std::vector<std::string>::const_iterator
+            oi = iface->WrongConfigLibraries.begin();
+          oi != iface->WrongConfigLibraries.end(); ++oi)
+        {
+        this->CheckWrongConfigItem(depender_index, *oi);
+        }
       }
     }
   else
@@ -516,11 +517,11 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
 }
 
 //----------------------------------------------------------------------------
-void
-cmComputeLinkDepends::AddTargetLinkEntries(int depender_index,
-                                           LinkLibraryVectorType const& libs)
+void cmComputeLinkDepends::AddDirectLinkEntries()
 {
-  // Look for entries meant for this configuration.
+  // Add direct link dependencies in this configuration.
+  int depender_index = -1;
+  LinkLibraryVectorType const& libs=this->Target->GetOriginalLinkLibraries();
   std::vector<std::string> actual_libs;
   for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
       li != libs.end(); ++li)
@@ -534,8 +535,6 @@ cmComputeLinkDepends::AddTargetLinkEntries(int depender_index,
       this->CheckWrongConfigItem(depender_index, li->first);
       }
     }
-
-  // Add these entries.
   this->AddLinkEntries(depender_index, actual_libs);
 }
 
