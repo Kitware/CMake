@@ -260,6 +260,10 @@ public:
       such dependencies or for static libraries.  */
   cmTargetLinkInterface const* GetLinkInterface(const char* config);
 
+  /** Strip off leading and trailing whitespace from an item named in
+      the link dependencies of this target.  */
+  std::string CheckCMP0004(std::string const& item);
+
   /** Get the directory in which this target will be built.  If the
       configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical

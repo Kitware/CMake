@@ -553,7 +553,7 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
     {
     // Skip entries that will resolve to the target getting linked or
     // are empty.
-    std::string item = this->CleanItemName(*li);
+    std::string item = this->Target->CheckCMP0004(*li);
     if(item == this->Target->GetName() || item.empty())
       {
       continue;
@@ -603,66 +603,6 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
     {
     this->InferredDependSets[dsi->first]->push_back(dsi->second);
     }
-}
-
-//----------------------------------------------------------------------------
-std::string cmComputeLinkDepends::CleanItemName(std::string const& item)
-{
-  // Strip whitespace off the library names because we used to do this
-  // in case variables were expanded at generate time.  We no longer
-  // do the expansion but users link to libraries like " ${VAR} ".
-  std::string lib = item;
-  std::string::size_type pos = lib.find_first_not_of(" \t\r\n");
-  if(pos != lib.npos)
-    {
-    lib = lib.substr(pos, lib.npos);
-    }
-  pos = lib.find_last_not_of(" \t\r\n");
-  if(pos != lib.npos)
-    {
-    lib = lib.substr(0, pos+1);
-    }
-  if(lib != item)
-    {
-    switch(this->Target->GetPolicyStatusCMP0004())
-      {
-      case cmPolicies::WARN:
-        {
-        cmOStringStream w;
-        w << (this->Makefile->GetPolicies()
-              ->GetPolicyWarning(cmPolicies::CMP0004)) << "\n"
-          << "Target \"" << this->Target->GetName() << "\" links to item \""
-          << item << "\" which has leading or trailing whitespace.";
-        this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
-                                          this->Target->GetBacktrace());
-        }
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-        {
-        cmOStringStream e;
-        e << "Target \"" << this->Target->GetName() << "\" links to item \""
-          << item << "\" which has leading or trailing whitespace.  "
-          << "This is now an error according to policy CMP0004.";
-        this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                          this->Target->GetBacktrace());
-        }
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        {
-        cmOStringStream e;
-        e << (this->Makefile->GetPolicies()
-              ->GetRequiredPolicyError(cmPolicies::CMP0004)) << "\n"
-          << "Target \"" << this->Target->GetName() << "\" links to item \""
-          << item << "\" which has leading or trailing whitespace.";
-        this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                          this->Target->GetBacktrace());
-        }
-        break;
-      }
-    }
-  return lib;
 }
 
 //----------------------------------------------------------------------------

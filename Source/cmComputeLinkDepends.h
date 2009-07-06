@@ -87,7 +87,6 @@ private:
                             LinkLibraryVectorType const& libs);
   void AddLinkEntries(int depender_index,
                       std::vector<std::string> const& libs);
-  std::string CleanItemName(std::string const& item);
   cmTarget* FindTargetToLink(int depender_index, const char* name);
 
   // One entry for each unique item.
