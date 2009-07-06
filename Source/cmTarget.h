@@ -21,6 +21,8 @@
 #include "cmPropertyMap.h"
 #include "cmPolicies.h"
 
+#include <cmsys/auto_ptr.hxx>
+
 class cmake;
 class cmMakefile;
 class cmSourceFile;
@@ -533,7 +535,8 @@ private:
   cmTargetLinkInformationMap LinkInformation;
 
   // Link interface.
-  cmTargetLinkInterface* ComputeLinkInterface(const char* config);
+  cmsys::auto_ptr<cmTargetLinkInterface>
+  ComputeLinkInterface(const char* config);
   cmTargetLinkInterfaceMap LinkInterface;
 
   // The cmMakefile instance that owns this target.  This should

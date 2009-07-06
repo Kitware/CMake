@@ -3696,19 +3696,22 @@ cmTargetLinkInterface const* cmTarget::GetLinkInterface(const char* config)
   if(i == this->LinkInterface.end())
     {
     // Compute the link interface for this configuration.
-    cmTargetLinkInterface* iface = this->ComputeLinkInterface(config);
+    cmsys::auto_ptr<cmTargetLinkInterface>
+      iface(this->ComputeLinkInterface(config));
 
     // Store the information for this configuration.
     std::map<cmStdString, cmTargetLinkInterface*>::value_type
-      entry(config?config:"", iface);
+      entry(config?config:"", 0);
     i = this->LinkInterface.insert(entry).first;
+    i->second = iface.release();
     }
 
   return i->second;
 }
 
 //----------------------------------------------------------------------------
-cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
+cmsys::auto_ptr<cmTargetLinkInterface>
+cmTarget::ComputeLinkInterface(const char* config)
 {
   // Construct the property name suffix for this configuration.
   std::string suffix = "_";
@@ -3739,14 +3742,14 @@ cmTargetLinkInterface* cmTarget::ComputeLinkInterface(const char* config)
   // If still not set, there is no link interface.
   if(!libs)
     {
-    return 0;
+    return cmsys::auto_ptr<cmTargetLinkInterface>();
     }
 
   // Allocate the interface.
-  cmTargetLinkInterface* iface = new cmTargetLinkInterface;
-  if(!iface)
+  cmsys::auto_ptr<cmTargetLinkInterface> iface(new cmTargetLinkInterface);
+  if(!iface.get())
     {
-    return 0;
+    return cmsys::auto_ptr<cmTargetLinkInterface>();
     }
 
   // Expand the list of libraries in the interface.
