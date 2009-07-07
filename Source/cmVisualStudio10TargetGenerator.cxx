@@ -446,8 +446,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     this->GlobalGenerator->GetLanguageFromExtension
     (sf.GetExtension().c_str());
   const char* sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  const char* linkLanguage = this->Target->GetLinkerLanguage
-    (this->LocalGenerator->GetGlobalGenerator());
+  const char* linkLanguage = this->Target->GetLinkerLanguage();
   bool needForceLang = false;
   // source file does not match its extension language
   if(lang && sourceLang && strcmp(lang, sourceLang) != 0)
@@ -583,8 +582,7 @@ OutputLinkIncremental(std::string const& configName)
   
   // assume incremental linking
   const char* incremental = "true";
-  const char* linkLanguage = 
-    this->Target->GetLinkerLanguage(this->GlobalGenerator);
+  const char* linkLanguage = this->Target->GetLinkerLanguage();
   if(!linkLanguage)
     {
     cmSystemTools::Error
@@ -640,8 +638,7 @@ WriteClOptions(std::string const& configName,
   // collect up flags for 
   if(this->Target->GetType() < cmTarget::UTILITY)
     {
-    const char* linkLanguage = 
-      this->Target->GetLinkerLanguage(this->GlobalGenerator);
+    const char* linkLanguage = this->Target->GetLinkerLanguage();
     if(!linkLanguage)
       {
       cmSystemTools::Error
@@ -775,8 +772,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     {
     return;
     }
-  const char* linkLanguage = 
-    this->Target->GetLinkerLanguage(this->GlobalGenerator);
+  const char* linkLanguage = this->Target->GetLinkerLanguage();
   if(!linkLanguage)
     {
     cmSystemTools::Error

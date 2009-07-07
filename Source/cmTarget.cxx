@@ -2283,8 +2283,10 @@ bool cmTarget::GetPropertyAsBool(const char* prop)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetLinkerLanguage(cmGlobalGenerator* gg)
+const char* cmTarget::GetLinkerLanguage()
 {
+  cmGlobalGenerator* gg =
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
   if(this->GetProperty("HAS_CXX"))
     {
     const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", "CXX");
@@ -2669,9 +2671,7 @@ void cmTarget::GetFullNameInternal(const char* config,
     }
   const char* prefixVar = this->GetPrefixVariableInternal(implib);
   const char* suffixVar = this->GetSuffixVariableInternal(implib);
-  const char* ll =
-    this->GetLinkerLanguage(
-      this->Makefile->GetLocalGenerator()->GetGlobalGenerator());
+  const char* ll = this->GetLinkerLanguage();
   // first try language specific suffix
   if(ll)
     {
@@ -2750,9 +2750,7 @@ void cmTarget::GetLibraryNames(std::string& name,
     }
 
   // Construct the name of the soname flag variable for this language.
-  const char* ll =
-    this->GetLinkerLanguage(
-      this->Makefile->GetLocalGenerator()->GetGlobalGenerator());
+  const char* ll = this->GetLinkerLanguage();
   std::string sonameFlag = "CMAKE_SHARED_LIBRARY_SONAME";
   if(ll)
     {
@@ -3042,8 +3040,7 @@ bool cmTarget::NeedRelinkBeforeInstall()
     }
 
   // Check for rpath support on this platform.
-  if(const char* ll = this->GetLinkerLanguage(
-       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()))
+  if(const char* ll = this->GetLinkerLanguage())
     {
     std::string flagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
     flagVar += ll;
@@ -3368,8 +3365,7 @@ bool cmTarget::IsChrpathUsed()
 
   // Enable if the rpath flag uses a separator and the target uses ELF
   // binaries.
-  if(const char* ll = this->GetLinkerLanguage(
-       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()))
+  if(const char* ll = this->GetLinkerLanguage())
     {
     std::string sepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
     sepVar += ll;

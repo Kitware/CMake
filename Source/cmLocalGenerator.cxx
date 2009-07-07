@@ -697,8 +697,7 @@ void cmLocalGenerator
       case cmTarget::MODULE_LIBRARY:
       case cmTarget::EXECUTABLE: 
         {
-        const char* llang = 
-          target.GetLinkerLanguage(this->GetGlobalGenerator());
+        const char* llang = target.GetLinkerLanguage();
         if(!llang)
           {
           cmSystemTools::Error
@@ -1455,8 +1454,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += this->Makefile->GetSafeDefinition(build.c_str());
         linkFlags += " ";
         } 
-      const char* linkLanguage = 
-        target.GetLinkerLanguage(this->GetGlobalGenerator());
+      const char* linkLanguage = target.GetLinkerLanguage();
       if(!linkLanguage)
         {
         cmSystemTools::Error

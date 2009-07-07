@@ -1138,8 +1138,7 @@ void cmLocalVisualStudio6Generator
   if(targetBuilds)
     {
     // Get the language to use for linking.
-    const char* linkLanguage = 
-      target.GetLinkerLanguage(this->GetGlobalGenerator());
+    const char* linkLanguage = target.GetLinkerLanguage();
     if(!linkLanguage)
       {
       cmSystemTools::Error
@@ -1438,8 +1437,7 @@ void cmLocalVisualStudio6Generator
     if(target.GetType() >= cmTarget::EXECUTABLE && 
        target.GetType() <= cmTarget::MODULE_LIBRARY)
       {
-      const char* linkLanguage = 
-        target.GetLinkerLanguage(this->GetGlobalGenerator());
+      const char* linkLanguage = target.GetLinkerLanguage();
       if(!linkLanguage)
         {
         cmSystemTools::Error

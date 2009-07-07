@@ -264,8 +264,7 @@ cmComputeLinkInformation
   this->OrderDependentRPath = 0;
 
   // Get the language used for linking this target.
-  this->LinkLanguage =
-    this->Target->GetLinkerLanguage(this->GlobalGenerator);
+  this->LinkLanguage = this->Target->GetLinkerLanguage();
   if(!this->LinkLanguage)
     {
     // The Compute method will do nothing, so skip the rest of the

@@ -301,7 +301,7 @@ public:
   bool FindSourceFiles();
 
   ///! Return the prefered linker language for this target
-  const char* GetLinkerLanguage(cmGlobalGenerator*);
+  const char* GetLinkerLanguage();
 
   ///! Return the rule variable used to create this type of target,
   //  need to add CMAKE_(LANG) for full name.

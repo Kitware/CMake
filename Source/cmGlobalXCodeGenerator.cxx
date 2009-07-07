@@ -635,7 +635,7 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     }
   else if(ext == "h" || ext == "hxx" || ext == "hpp")
     {
-    const char* linkLanguage = cmtarget.GetLinkerLanguage(this);
+    const char* linkLanguage = cmtarget.GetLinkerLanguage();
     if(linkLanguage && (std::string(linkLanguage) == "CXX"))
       {
       sourcecode += ".cpp.h";
@@ -1382,7 +1382,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
 
-  const char* lang = target.GetLinkerLanguage(this);
+  const char* lang = target.GetLinkerLanguage();
   std::string cflags;
   if(lang)
     {

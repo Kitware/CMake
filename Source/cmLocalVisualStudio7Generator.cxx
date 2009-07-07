@@ -656,8 +656,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::string flags;
   if(strcmp(configType, "10") != 0)
     {
-    const char* linkLanguage = 
-      target.GetLinkerLanguage(this->GetGlobalGenerator());
+    const char* linkLanguage = target.GetLinkerLanguage();
     if(!linkLanguage)
       {
       cmSystemTools::Error
@@ -1363,8 +1362,7 @@ cmLocalVisualStudio7GeneratorFCInfo
       lg->GlobalGenerator->GetLanguageFromExtension
       (sf.GetExtension().c_str());
     const char* sourceLang = lg->GetSourceFileLanguage(sf);
-    const char* linkLanguage = target.GetLinkerLanguage
-      (lg->GetGlobalGenerator());
+    const char* linkLanguage = target.GetLinkerLanguage();
     bool needForceLang = false;
     // source file does not match its extension language
     if(lang && sourceLang && strcmp(lang, sourceLang) != 0)

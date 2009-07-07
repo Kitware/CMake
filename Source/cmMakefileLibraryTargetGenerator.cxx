@@ -109,8 +109,7 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
-  const char* linkLanguage =
-    this->Target->GetLinkerLanguage(this->GlobalGenerator);
+  const char* linkLanguage = this->Target->GetLinkerLanguage();
   std::string linkRuleVar = "CMAKE_";
   if (linkLanguage)
     {
@@ -132,8 +131,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
     this->WriteFrameworkRules(relink);
     return;
     }
-  const char* linkLanguage =
-    this->Target->GetLinkerLanguage(this->GlobalGenerator);
+  const char* linkLanguage = this->Target->GetLinkerLanguage();
   std::string linkRuleVar = "CMAKE_";
   if (linkLanguage)
     {
@@ -178,8 +176,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 {
-  const char* linkLanguage =
-    this->Target->GetLinkerLanguage(this->GlobalGenerator);
+  const char* linkLanguage = this->Target->GetLinkerLanguage();
   std::string linkRuleVar = "CMAKE_";
   if (linkLanguage)
     {
@@ -204,8 +201,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 {
-  const char* linkLanguage =
-    this->Target->GetLinkerLanguage(this->GlobalGenerator);
+  const char* linkLanguage = this->Target->GetLinkerLanguage();
   std::string linkRuleVar = "CMAKE_";
   if (linkLanguage)
     {
@@ -351,8 +347,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
   
   // Get the language to use for linking this library.
-  const char* linkLanguage =
-    this->Target->GetLinkerLanguage(this->GlobalGenerator);
+  const char* linkLanguage = this->Target->GetLinkerLanguage();
 
   // Make sure we have a link language.
   if(!linkLanguage)
