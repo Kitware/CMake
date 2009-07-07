@@ -3797,7 +3797,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
       if(li->second != cmTarget::GENERAL && li->second != linkType)
         {
         // Support OLD behavior for CMP0003.
-        if(doLibraries && !emittedWrongConfig.insert(item).second)
+        if(doLibraries && emittedWrongConfig.insert(item).second)
           {
           iface.WrongConfigLibraries.push_back(item);
           }
