@@ -558,7 +558,8 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
   if (target!=0)
     {
     int cbTargetType = this->GetCBTargetType(target);
-    fout<<"         <Option output=\"" << target->GetLocation(0) 
+    const char* buildType = makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    fout<<"         <Option output=\"" << target->GetLocation(buildType)
                             << "\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
           "         <Option working_dir=\"" 
                             << makefile->GetStartOutputDirectory() << "\" />\n"
