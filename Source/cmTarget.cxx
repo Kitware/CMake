@@ -49,6 +49,15 @@ public:
 
   // The backtrace when the target was created.
   cmListFileBacktrace Backtrace;
+
+  // Cache link interface computation from each configuration.
+  struct OptionalLinkInterface: public cmTarget::LinkInterface
+  {
+    OptionalLinkInterface(): Exists(false) {}
+    bool Exists;
+  };
+  typedef std::map<cmStdString, OptionalLinkInterface> LinkInterfaceMapType;
+  LinkInterfaceMapType LinkInterfaceMap;
 };
 
 //----------------------------------------------------------------------------
@@ -3666,7 +3675,7 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
 }
 
 //----------------------------------------------------------------------------
-cmTargetLinkInterface const* cmTarget::GetLinkInterface(const char* config)
+cmTarget::LinkInterface const* cmTarget::GetLinkInterface(const char* config)
 {
   // Imported targets have their own link interface.
   if(this->IsImported())
@@ -3687,27 +3696,25 @@ cmTargetLinkInterface const* cmTarget::GetLinkInterface(const char* config)
     }
 
   // Lookup any existing link interface for this configuration.
-  std::map<cmStdString, cmTargetLinkInterface*>::iterator
-    i = this->LinkInterface.find(config?config:"");
-  if(i == this->LinkInterface.end())
+  cmTargetInternals::LinkInterfaceMapType::iterator
+    i = this->Internal->LinkInterfaceMap.find(config?config:"");
+  if(i == this->Internal->LinkInterfaceMap.end())
     {
     // Compute the link interface for this configuration.
-    cmsys::auto_ptr<cmTargetLinkInterface>
-      iface(this->ComputeLinkInterface(config));
+    cmTargetInternals::OptionalLinkInterface iface;
+    iface.Exists = this->ComputeLinkInterface(config, iface);
 
     // Store the information for this configuration.
-    std::map<cmStdString, cmTargetLinkInterface*>::value_type
-      entry(config?config:"", 0);
-    i = this->LinkInterface.insert(entry).first;
-    i->second = iface.release();
+    cmTargetInternals::LinkInterfaceMapType::value_type
+      entry(config?config:"", iface);
+    i = this->Internal->LinkInterfaceMap.insert(entry).first;
     }
 
-  return i->second;
+  return i->second.Exists? &i->second : 0;
 }
 
 //----------------------------------------------------------------------------
-cmsys::auto_ptr<cmTargetLinkInterface>
-cmTarget::ComputeLinkInterface(const char* config)
+bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
 {
   // Construct the property name suffix for this configuration.
   std::string suffix = "_";
@@ -3742,14 +3749,7 @@ cmTarget::ComputeLinkInterface(const char* config)
   // was explicitly set, there is no link interface.
   if(!explicitLibraries && this->GetType() == cmTarget::EXECUTABLE)
     {
-    return cmsys::auto_ptr<cmTargetLinkInterface>();
-    }
-
-  // Allocate the interface.
-  cmsys::auto_ptr<cmTargetLinkInterface> iface(new cmTargetLinkInterface);
-  if(!iface.get())
-    {
-    return cmsys::auto_ptr<cmTargetLinkInterface>();
+    return false;
     }
 
   // Is the link interface just the link implementation?
@@ -3767,9 +3767,9 @@ cmTarget::ComputeLinkInterface(const char* config)
   if(explicitLibraries)
     {
     // The interface libraries have been explicitly set.
-    cmSystemTools::ExpandListArgument(explicitLibraries, iface->Libraries);
+    cmSystemTools::ExpandListArgument(explicitLibraries, iface.Libraries);
     for(std::vector<std::string>::const_iterator
-          li = iface->Libraries.begin(); li != iface->Libraries.end(); ++li)
+          li = iface.Libraries.begin(); li != iface.Libraries.end(); ++li)
       {
       emitted.insert(*li);
       }
@@ -3799,7 +3799,7 @@ cmTarget::ComputeLinkInterface(const char* config)
         // Support OLD behavior for CMP0003.
         if(doLibraries && !emittedWrongConfig.insert(item).second)
           {
-          iface->WrongConfigLibraries.push_back(item);
+          iface.WrongConfigLibraries.push_back(item);
           }
         continue;
         }
@@ -3814,14 +3814,14 @@ cmTarget::ComputeLinkInterface(const char* config)
       if(doLibraries)
         {
         // This implementation dependency goes in the implicit interface.
-        iface->Libraries.push_back(item);
+        iface.Libraries.push_back(item);
         }
       else if(cmTarget* tgt = this->Makefile->FindTargetToUse(item.c_str()))
         {
         // This is a runtime dependency on another shared library.
         if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
           {
-          iface->SharedDeps.push_back(item);
+          iface.SharedDeps.push_back(item);
           }
         }
       else
@@ -3834,8 +3834,7 @@ cmTarget::ComputeLinkInterface(const char* config)
       }
     }
 
-  // Return the completed interface.
-  return iface;
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -3939,29 +3938,6 @@ cmTargetLinkInformationMap
 
 //----------------------------------------------------------------------------
 cmTargetLinkInformationMap::~cmTargetLinkInformationMap()
-{
-  for(derived::iterator i = this->begin(); i != this->end(); ++i)
-    {
-    delete i->second;
-    }
-}
-
-//----------------------------------------------------------------------------
-cmTargetLinkInterfaceMap
-::cmTargetLinkInterfaceMap(cmTargetLinkInterfaceMap const& r): derived()
-{
-  // Ideally cmTarget instances should never be copied.  However until
-  // we can make a sweep to remove that, this copy constructor avoids
-  // allowing the resources (LinkInterface) from getting copied.  In
-  // the worst case this will lead to extra cmTargetLinkInterface
-  // instances.  We also enforce in debug mode that the map be emptied
-  // when copied.
-  static_cast<void>(r);
-  assert(r.empty());
-}
-
-//----------------------------------------------------------------------------
-cmTargetLinkInterfaceMap::~cmTargetLinkInterfaceMap()
 {
   for(derived::iterator i = this->begin(); i != this->end(); ++i)
     {

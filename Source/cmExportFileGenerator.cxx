@@ -150,7 +150,7 @@ cmExportFileGenerator
     }
 
   // Add the transitive link dependencies for this configuration.
-  if(cmTargetLinkInterface const* iface = target->GetLinkInterface(config))
+  if(cmTarget::LinkInterface const* iface = target->GetLinkInterface(config))
     {
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",

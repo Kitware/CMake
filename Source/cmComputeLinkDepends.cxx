@@ -356,7 +356,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
   if(entry.Target)
     {
     // Follow the target dependencies.
-    if(cmTargetLinkInterface const* iface =
+    if(cmTarget::LinkInterface const* iface =
        entry.Target->GetLinkInterface(this->Config))
       {
       // This target provides its own link interface information.
@@ -431,7 +431,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // Target items may have their own dependencies.
   if(entry.Target)
     {
-    if(cmTargetLinkInterface const* iface =
+    if(cmTarget::LinkInterface const* iface =
        entry.Target->GetLinkInterface(this->Config))
       {
       // We use just the shared dependencies, not the interface.

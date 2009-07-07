@@ -39,28 +39,6 @@ struct cmTargetLinkInformationMap:
   ~cmTargetLinkInformationMap();
 };
 
-struct cmTargetLinkInterface
-{
-  // Libraries listed in the interface.
-  std::vector<std::string> Libraries;
-
-  // Shared library dependencies needed for linking on some platforms.
-  std::vector<std::string> SharedDeps;
-
-  // Libraries listed for other configurations.
-  // Needed only for OLD behavior of CMP0003.
-  std::vector<std::string> WrongConfigLibraries;
-};
-
-struct cmTargetLinkInterfaceMap:
-  public std::map<cmStdString, cmTargetLinkInterface*>
-{
-  typedef std::map<cmStdString, cmTargetLinkInterface*> derived;
-  cmTargetLinkInterfaceMap() {}
-  cmTargetLinkInterfaceMap(cmTargetLinkInterfaceMap const& r);
-  ~cmTargetLinkInterfaceMap();
-};
-
 class cmTargetInternals;
 class cmTargetInternalPointer
 {
@@ -258,11 +236,25 @@ public:
 
   bool IsImported() const {return this->IsImportedTarget;}
 
-  /** Get the library interface dependencies.  This is the set of
-      libraries from which something that links to this target may
-      also receive symbols.  Returns 0 if the user has not specified
-      such dependencies or for static libraries.  */
-  cmTargetLinkInterface const* GetLinkInterface(const char* config);
+  /** The link interface specifies the transitive librarty
+      dependencies and other information needed by targets that link
+      to this target.  */
+  struct LinkInterface
+  {
+    // Libraries listed in the interface.
+    std::vector<std::string> Libraries;
+
+    // Shared library dependencies needed for linking on some platforms.
+    std::vector<std::string> SharedDeps;
+
+    // Libraries listed for other configurations.
+    // Needed only for OLD behavior of CMP0003.
+    std::vector<std::string> WrongConfigLibraries;
+  };
+
+  /** Get the link interface for the given configuration.  Returns 0
+      if the target cannot be linked.  */
+  LinkInterface const* GetLinkInterface(const char* config);
 
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
@@ -533,7 +525,7 @@ private:
     std::string Location;
     std::string SOName;
     std::string ImportLibrary;
-    cmTargetLinkInterface LinkInterface;
+    cmTarget::LinkInterface LinkInterface;
   };
   typedef std::map<cmStdString, ImportInfo> ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
@@ -542,10 +534,7 @@ private:
 
   cmTargetLinkInformationMap LinkInformation;
 
-  // Link interface.
-  cmsys::auto_ptr<cmTargetLinkInterface>
-  ComputeLinkInterface(const char* config);
-  cmTargetLinkInterfaceMap LinkInterface;
+  bool ComputeLinkInterface(const char* config, LinkInterface& iface);
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.
