@@ -3696,8 +3696,9 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(const char* config)
     }
 
   // Lookup any existing link interface for this configuration.
+  std::string key = cmSystemTools::UpperCase(config? config : "");
   cmTargetInternals::LinkInterfaceMapType::iterator
-    i = this->Internal->LinkInterfaceMap.find(config?config:"");
+    i = this->Internal->LinkInterfaceMap.find(key);
   if(i == this->Internal->LinkInterfaceMap.end())
     {
     // Compute the link interface for this configuration.
@@ -3705,8 +3706,7 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(const char* config)
     iface.Exists = this->ComputeLinkInterface(config, iface);
 
     // Store the information for this configuration.
-    cmTargetInternals::LinkInterfaceMapType::value_type
-      entry(config?config:"", iface);
+    cmTargetInternals::LinkInterfaceMapType::value_type entry(key, iface);
     i = this->Internal->LinkInterfaceMap.insert(entry).first;
     }
 
