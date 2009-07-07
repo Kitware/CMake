@@ -236,9 +236,8 @@ public:
 
   bool IsImported() const {return this->IsImportedTarget;}
 
-  /** The link interface specifies the transitive librarty
-      dependencies and other information needed by targets that link
-      to this target.  */
+  /** The link interface specifies transitive library dependencies and
+      other information needed by targets that link to this target.  */
   struct LinkInterface
   {
     // Libraries listed in the interface.
