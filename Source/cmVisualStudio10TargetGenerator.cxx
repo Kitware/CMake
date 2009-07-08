@@ -582,7 +582,8 @@ OutputLinkIncremental(std::string const& configName)
   
   // assume incremental linking
   const char* incremental = "true";
-  const char* linkLanguage = this->Target->GetLinkerLanguage();
+  const char* linkLanguage =
+    this->Target->GetLinkerLanguage(configName.c_str());
   if(!linkLanguage)
     {
     cmSystemTools::Error
@@ -638,7 +639,8 @@ WriteClOptions(std::string const& configName,
   // collect up flags for 
   if(this->Target->GetType() < cmTarget::UTILITY)
     {
-    const char* linkLanguage = this->Target->GetLinkerLanguage();
+    const char* linkLanguage =
+      this->Target->GetLinkerLanguage(configName.c_str());
     if(!linkLanguage)
       {
       cmSystemTools::Error
@@ -772,7 +774,8 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     {
     return;
     }
-  const char* linkLanguage = this->Target->GetLinkerLanguage();
+  const char* linkLanguage =
+    this->Target->GetLinkerLanguage(config.c_str());
   if(!linkLanguage)
     {
     cmSystemTools::Error

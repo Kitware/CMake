@@ -1378,7 +1378,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
 
-  const char* lang = target.GetLinkerLanguage();
+  const char* lang = target.GetLinkerLanguage(configName);
   std::string cflags;
   if(lang)
     {

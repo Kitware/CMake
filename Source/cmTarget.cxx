@@ -2320,7 +2320,7 @@ bool cmTarget::GetPropertyAsBool(const char* prop)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetLinkerLanguage()
+const char* cmTarget::GetLinkerLanguage(const char*)
 {
   cmGlobalGenerator* gg =
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
@@ -2772,7 +2772,7 @@ void cmTarget::GetLibraryNames(std::string& name,
     }
 
   // Construct the name of the soname flag variable for this language.
-  const char* ll = this->GetLinkerLanguage();
+  const char* ll = this->GetLinkerLanguage(config);
   std::string sonameFlag = "CMAKE_SHARED_LIBRARY_SONAME";
   if(ll)
     {
@@ -3062,7 +3062,7 @@ bool cmTarget::NeedRelinkBeforeInstall(const char* config)
     }
 
   // Check for rpath support on this platform.
-  if(const char* ll = this->GetLinkerLanguage())
+  if(const char* ll = this->GetLinkerLanguage(config))
     {
     std::string flagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
     flagVar += ll;
@@ -3387,7 +3387,7 @@ bool cmTarget::IsChrpathUsed(const char* config)
 
   // Enable if the rpath flag uses a separator and the target uses ELF
   // binaries.
-  if(const char* ll = this->GetLinkerLanguage())
+  if(const char* ll = this->GetLinkerLanguage(config))
     {
     std::string sepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
     sepVar += ll;
