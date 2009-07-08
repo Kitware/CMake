@@ -482,13 +482,14 @@ static void kwsys_shared_forward_strerror(char* message)
 
 /*--------------------------------------------------------------------------*/
 /* Functions to execute a child process.  */
-static void kwsys_shared_forward_execvp(const char* cmd, char* const* argv)
+static void kwsys_shared_forward_execvp(const char* cmd,
+                                        char const* const* argv)
 {
 #ifdef KWSYS_SHARED_FORWARD_ESCAPE_ARGV
   /* Count the number of arguments.  */
   int argc = 0;
   {
-  char* const* argvc;
+  char const* const* argvc;
   for(argvc = argv; *argvc; ++argvc,++argc) {}
   }
 
@@ -513,10 +514,9 @@ static void kwsys_shared_forward_execvp(const char* cmd, char* const* argv)
 #if defined(_MSC_VER)
   _execvp(cmd, argv);
 #elif defined(__MINGW32__)
-   /* Avoid incompatible pointer warning with a cast.  */
-  execvp(cmd, (char const* const*)argv);
-#else
   execvp(cmd, argv);
+#else
+  execvp(cmd, (char* const*)argv);
 #endif
 }
 
@@ -800,10 +800,10 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
 
 /*--------------------------------------------------------------------------*/
 /* Function to print why execution of a command line failed.  */
-static void kwsys_shared_forward_print_failure(char** argv)
+static void kwsys_shared_forward_print_failure(char const* const* argv)
 {
   char msg[KWSYS_SHARED_FORWARD_MAXPATH];
-  char** arg = argv;
+  char const* const* arg = argv;
   kwsys_shared_forward_strerror(msg);
   fprintf(stderr, "Error running");
   for(; *arg; ++arg)
@@ -818,8 +818,9 @@ static char kwsys_shared_forward_ldpath[KWSYS_SHARED_FORWARD_MAXPATH*16] = KWSYS
 
 /*--------------------------------------------------------------------------*/
 /* Main driver function to be called from main.  */
-static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv)
+static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv_in)
 {
+  char const** argv = (char const**)argv_in;
   /* Get the directory containing this executable.  */
   char self_path[KWSYS_SHARED_FORWARD_MAXPATH];
   if(kwsys_shared_forward_self_path(argv[0], self_path))
@@ -877,7 +878,7 @@ static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv)
         {
 # if defined(KWSYS_SHARED_FORWARD_LDD)
         /* Use the named ldd-like executable and arguments.  */
-        char* ldd_argv[] = {KWSYS_SHARED_FORWARD_LDD, 0, 0};
+        char const* ldd_argv[] = {KWSYS_SHARED_FORWARD_LDD, 0, 0};
         ldd_argv[KWSYS_SHARED_FORWARD_LDD_N] = exe;
         kwsys_shared_forward_execvp(ldd_argv[0], ldd_argv);
 
