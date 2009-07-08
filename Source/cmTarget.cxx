@@ -36,6 +36,23 @@ const char* cmTarget::TargetTypeNames[] = {
 };
 
 //----------------------------------------------------------------------------
+struct cmTarget::OutputInfo
+{
+  std::string OutDir;
+  std::string ImpDir;
+};
+
+//----------------------------------------------------------------------------
+struct cmTarget::ImportInfo
+{
+  bool NoSOName;
+  std::string Location;
+  std::string SOName;
+  std::string ImportLibrary;
+  cmTarget::LinkInterface LinkInterface;
+};
+
+//----------------------------------------------------------------------------
 class cmTargetInternals
 {
 public:
@@ -58,6 +75,12 @@ public:
   };
   typedef std::map<cmStdString, OptionalLinkInterface> LinkInterfaceMapType;
   LinkInterfaceMapType LinkInterfaceMap;
+
+  typedef std::map<cmStdString, cmTarget::OutputInfo> OutputInfoMapType;
+  OutputInfoMapType OutputInfoMap;
+
+  typedef std::map<cmStdString, cmTarget::ImportInfo> ImportInfoMapType;
+  ImportInfoMapType ImportInfoMap;
 };
 
 //----------------------------------------------------------------------------
@@ -1855,7 +1878,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
   // information.
   if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
     {
-    this->ImportInfoMap.clear();
+    this->Internal->ImportInfoMap.clear();
     }
 }
 
@@ -1872,7 +1895,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value)
   // information.
   if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
     {
-    this->ImportInfoMap.clear();
+    this->Internal->ImportInfoMap.clear();
     }
 }
 
@@ -1974,15 +1997,16 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(const char* config)
     {
     config_upper = cmSystemTools::UpperCase(config);
     }
+  typedef cmTargetInternals::OutputInfoMapType OutputInfoMapType;
   OutputInfoMapType::const_iterator i =
-    this->OutputInfoMap.find(config_upper);
-  if(i == this->OutputInfoMap.end())
+    this->Internal->OutputInfoMap.find(config_upper);
+  if(i == this->Internal->OutputInfoMap.end())
     {
     OutputInfo info;
     this->ComputeOutputDir(config, false, info.OutDir);
     this->ComputeOutputDir(config, true, info.ImpDir);
     OutputInfoMapType::value_type entry(config_upper, info);
-    i = this->OutputInfoMap.insert(entry).first;
+    i = this->Internal->OutputInfoMap.insert(entry).first;
     }
   return &i->second;
 }
@@ -3416,14 +3440,15 @@ cmTarget::GetImportInfo(const char* config)
     {
     config_upper = "NOCONFIG";
     }
+  typedef cmTargetInternals::ImportInfoMapType ImportInfoMapType;
   ImportInfoMapType::const_iterator i =
-    this->ImportInfoMap.find(config_upper);
-  if(i == this->ImportInfoMap.end())
+    this->Internal->ImportInfoMap.find(config_upper);
+  if(i == this->Internal->ImportInfoMap.end())
     {
     ImportInfo info;
     this->ComputeImportInfo(config_upper, info);
     ImportInfoMapType::value_type entry(config_upper, info);
-    i = this->ImportInfoMap.insert(entry).first;
+    i = this->Internal->ImportInfoMap.insert(entry).first;
     }
 
   // If the location is empty then the target is not available for

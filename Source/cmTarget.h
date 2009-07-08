@@ -507,27 +507,12 @@ private:
   bool IsImportedTarget;
 
   // Cache target output paths for each configuration.
-  struct OutputInfo
-  {
-    std::string OutDir;
-    std::string ImpDir;
-  };
-  typedef std::map<cmStdString, OutputInfo> OutputInfoMapType;
-  OutputInfoMapType OutputInfoMap;
+  struct OutputInfo;
   OutputInfo const* GetOutputInfo(const char* config);
   void ComputeOutputDir(const char* config, bool implib, std::string& out);
 
   // Cache import information from properties for each configuration.
-  struct ImportInfo
-  {
-    bool NoSOName;
-    std::string Location;
-    std::string SOName;
-    std::string ImportLibrary;
-    cmTarget::LinkInterface LinkInterface;
-  };
-  typedef std::map<cmStdString, ImportInfo> ImportInfoMapType;
-  ImportInfoMapType ImportInfoMap;
+  struct ImportInfo;
   ImportInfo const* GetImportInfo(const char* config);
   void ComputeImportInfo(std::string const& desired_config, ImportInfo& info);
 
