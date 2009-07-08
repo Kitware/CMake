@@ -20,6 +20,7 @@
 # include "MD5.h.in"
 #endif
 
+#include <stddef.h>    /* size_t */
 #include <stdlib.h>    /* malloc, free */
 #include <string.h>    /* memcpy, strlen */
 
@@ -238,7 +239,8 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 #    define xbuf X              /* (static only) */
 #  endif
             for (i = 0; i < 16; ++i, xp += 4)
-              xbuf[i] = xp[0] + (xp[1] << 8) + (xp[2] << 16) + (xp[3] << 24);
+              xbuf[i] = (md5_word_t)(xp[0] + (xp[1] << 8) +
+                                     (xp[2] << 16) + (xp[3] << 24));
         }
 #endif
     }
@@ -369,11 +371,11 @@ static void md5_init(md5_state_t *pms)
 }
 
 /* Append a string to the message. */
-static void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes)
+static void md5_append(md5_state_t *pms, const md5_byte_t *data, size_t nbytes)
 {
     const md5_byte_t *p = data;
-    int left = nbytes;
-    int offset = (pms->count[0] >> 3) & 63;
+    size_t left = nbytes;
+    size_t offset = (pms->count[0] >> 3) & 63;
     md5_word_t nbits = (md5_word_t)(nbytes << 3);
 
     if (nbytes <= 0)
@@ -387,7 +389,7 @@ static void md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes)
 
     /* Process an initial partial block. */
     if (offset) {
-        int copy = (offset + nbytes > 64 ? 64 - offset : nbytes);
+        size_t copy = (offset + nbytes > 64 ? 64 - offset : nbytes);
 
         memcpy(pms->buf + offset, p, copy);
         if (offset + copy < 64)
@@ -474,7 +476,7 @@ void kwsysMD5_Append(kwsysMD5* md5, unsigned char const* data, int length)
     {
     length = (int)strlen((char const*)data);
     }
-  md5_append(&md5->md5_state, (md5_byte_t const*)data, length);
+  md5_append(&md5->md5_state, (md5_byte_t const*)data, (size_t)length);
 }
 
 /*--------------------------------------------------------------------------*/
