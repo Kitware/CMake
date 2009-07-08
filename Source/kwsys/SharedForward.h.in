@@ -147,6 +147,7 @@
 /*--------------------------------------------------------------------------*/
 /* Include needed system headers.  */
 
+#include <stddef.h> /* size_t */
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
@@ -550,7 +551,7 @@ static void kwsys_shared_forward_dirname(const char* begin, char* result)
   else if(last_slash_index == 2 && begin[1] == ':')
     {
     /* Only one leading drive letter and slash.  */
-    strncpy(result, begin, last_slash_index);
+    strncpy(result, begin, (size_t)last_slash_index);
     result[last_slash_index] = KWSYS_SHARED_FORWARD_PATH_SLASH;
     result[last_slash_index+1] = 0;
     }
@@ -558,7 +559,7 @@ static void kwsys_shared_forward_dirname(const char* begin, char* result)
   else
     {
     /* A non-leading slash.  */
-    strncpy(result, begin, last_slash_index);
+    strncpy(result, begin, (size_t)last_slash_index);
     result[last_slash_index] = 0;
     }
 }
@@ -630,7 +631,7 @@ static int kwsys_shared_forward_self_path(const char* argv0, char* result)
       if(first < last)
         {
         /* Determine the length without trailing slash.  */
-        int length = (int)(last-first);
+        size_t length = (size_t)(last-first);
         if(*(last-1) == '/' || *(last-1) == '\\')
           {
           --length;
