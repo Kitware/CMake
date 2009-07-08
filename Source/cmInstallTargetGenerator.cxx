@@ -69,7 +69,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
 {
   // Compute the build tree directory from which to copy the target.
   std::string fromDirConfig;
-  if(this->Target->NeedRelinkBeforeInstall())
+  if(this->Target->NeedRelinkBeforeInstall(config))
     {
     fromDirConfig = this->Target->GetMakefile()->GetStartOutputDirectory();
     fromDirConfig += cmake::GetCMakeFilesDirectory();
@@ -529,7 +529,7 @@ cmInstallTargetGenerator
                     const char* config, std::string const& toDestDirPath)
 {
   // Skip the chrpath if the target does not need it.
-  if(this->ImportLibrary || !this->Target->IsChrpathUsed())
+  if(this->ImportLibrary || !this->Target->IsChrpathUsed(config))
     {
     return;
     }
@@ -560,7 +560,7 @@ cmInstallTargetGenerator
                       const char* config, std::string const& toDestDirPath)
 {
   // Skip the chrpath if the target does not need it.
-  if(this->ImportLibrary || !this->Target->IsChrpathUsed())
+  if(this->ImportLibrary || !this->Target->IsChrpathUsed(config))
     {
     return;
     }

@@ -315,7 +315,7 @@ cmComputeLinkInformation
     this->RuntimeAlways =
       (this->Makefile->
        GetSafeDefinition("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH"));
-    this->RuntimeUseChrpath = this->Target->IsChrpathUsed();
+    this->RuntimeUseChrpath = this->Target->IsChrpathUsed(config);
 
     // Get options needed to help find dependent libraries.
     std::string rlVar = "CMAKE_";

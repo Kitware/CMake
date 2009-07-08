@@ -3025,7 +3025,7 @@ bool cmTarget::HaveInstallTreeRPATH()
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::NeedRelinkBeforeInstall()
+bool cmTarget::NeedRelinkBeforeInstall(const char* config)
 {
   // Only executables and shared libraries can have an rpath and may
   // need relinking.
@@ -3056,7 +3056,7 @@ bool cmTarget::NeedRelinkBeforeInstall()
     }
 
   // If chrpath is going to be used no relinking is needed.
-  if(this->IsChrpathUsed())
+  if(this->IsChrpathUsed(config))
     {
     return false;
     }
@@ -3349,7 +3349,7 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::IsChrpathUsed()
+bool cmTarget::IsChrpathUsed(const char* config)
 {
 #if defined(CMAKE_USE_ELF_PARSER)
   // Only certain target types have an rpath.
@@ -3405,6 +3405,7 @@ bool cmTarget::IsChrpathUsed()
       }
     }
 #endif
+  static_cast<void>(config);
   return false;
 }
 

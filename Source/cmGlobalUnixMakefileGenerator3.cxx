@@ -451,7 +451,8 @@ cmGlobalUnixMakefileGenerator3
       {
       // Add this to the list of depends rules in this directory.
       if((!check_all || !l->second.GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
-         (!check_relink || l->second.NeedRelinkBeforeInstall()))
+         (!check_relink ||
+          l->second.NeedRelinkBeforeInstall(lg->ConfigurationName.c_str())))
         {
         std::string tname = lg->GetRelativeTargetDirectory(l->second);
         tname += "/";
@@ -659,7 +660,7 @@ cmGlobalUnixMakefileGenerator3
 
         // Add a local name for the rule to relink the target before
         // installation.
-        if(t->second.NeedRelinkBeforeInstall())
+        if(t->second.NeedRelinkBeforeInstall(lg->ConfigurationName.c_str()))
           {
           makeTargetName = lg->GetRelativeTargetDirectory(t->second);
           makeTargetName += "/preinstall";
@@ -829,7 +830,7 @@ cmGlobalUnixMakefileGenerator3
                         t->second.GetName(), depends, commands, true);
       
       // Add rules to prepare the target for installation.
-      if(t->second.NeedRelinkBeforeInstall())
+      if(t->second.NeedRelinkBeforeInstall(lg->ConfigurationName.c_str()))
         {
         localName = lg->GetRelativeTargetDirectory(t->second);
         localName += "/preinstall";

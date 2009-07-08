@@ -353,13 +353,13 @@ public:
   /**
    * Compute whether this target must be relinked before installing.
    */
-  bool NeedRelinkBeforeInstall();
+  bool NeedRelinkBeforeInstall(const char* config);
 
   bool HaveBuildTreeRPATH();
   bool HaveInstallTreeRPATH();
 
   /** Return true if builtin chrpath will work for this target */
-  bool IsChrpathUsed();
+  bool IsChrpathUsed(const char* config);
 
   std::string GetInstallNameDirForBuildTree(const char* config,
                                             bool for_xcode = false);
