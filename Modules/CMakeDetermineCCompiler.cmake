@@ -107,6 +107,9 @@ IF(NOT CMAKE_C_COMPILER_ID_RUN)
   SET(CMAKE_C_COMPILER_ID_TEST_FLAGS
     # Try compiling to an object file only.
     "-c"
+
+    # Try enabling ANSI mode on HP.
+    "-Aa"
     )
 
   # Try to identify the compiler.
