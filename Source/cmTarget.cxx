@@ -2709,6 +2709,21 @@ void cmTarget::GetFullNameInternal(const char* config,
   const char* prefixVar = this->GetPrefixVariableInternal(implib);
   const char* suffixVar = this->GetSuffixVariableInternal(implib);
 
+  // Check for language-specific default prefix and suffix.
+  if(const char* ll = this->GetLinkerLanguage(config))
+    {
+    if(!targetSuffix && suffixVar && *suffixVar)
+      {
+      std::string langSuff = suffixVar + std::string("_") + ll;
+      targetSuffix = this->Makefile->GetDefinition(langSuff.c_str());
+      }
+    if(!targetPrefix && prefixVar && *prefixVar)
+      {
+      std::string langPrefix = prefixVar + std::string("_") + ll;
+      targetPrefix = this->Makefile->GetDefinition(langPrefix.c_str());
+      }
+    }
+
   // if there is no prefix on the target use the cmake definition
   if(!targetPrefix && prefixVar)
     {

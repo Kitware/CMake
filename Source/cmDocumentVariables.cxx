@@ -203,8 +203,10 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_EXECUTABLE_SUFFIX", cmProperty::VARIABLE,
      "The suffix for executables on this platform.",
      "The suffix to use for the end of an executable if any, "
-     ".exe on Windows.",false,
-     "Variables that Provide Information");
+     ".exe on Windows."
+     "\n"
+     "CMAKE_EXECUTABLE_SUFFIX_<LANG> overrides this for language <LANG>."
+     ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_MAJOR_VERSION", cmProperty::VARIABLE,
      "The Major version of cmake (i.e. the 2 in 2.X.X)",
@@ -346,52 +348,60 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_IMPORT_LIBRARY_PREFIX", cmProperty::VARIABLE,
      "The prefix for import libraries that you link to.",
      "The prefix to use for the name of an import library if used "
-     "on this platform.",
-     false,
-     "Variables that Provide Information");
+     "on this platform."
+     "\n"
+     "CMAKE_IMPORT_LIBRARY_PREFIX_<LANG> overrides this for language <LANG>."
+     ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_IMPORT_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for import  libraries that you link to.",
      "The suffix to use for the end of an import library if used "
-     "on this platform.",
-     false,
-     "Variables that Provide Information");
+     "on this platform."
+     "\n"
+     "CMAKE_IMPORT_LIBRARY_SUFFIX_<LANG> overrides this for language <LANG>."
+     ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_SHARED_LIBRARY_PREFIX", cmProperty::VARIABLE,
      "The prefix for shared libraries that you link to.",
-     "The prefix to use for the name of a shared library, lib on UNIX.",
-     false,
-     "Variables that Provide Information");
+     "The prefix to use for the name of a shared library, lib on UNIX."
+     "\n"
+     "CMAKE_SHARED_LIBRARY_PREFIX_<LANG> overrides this for language <LANG>."
+     ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_SHARED_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for shared libraries that you link to.",
-     "The suffix to use for the end of a shared library, .dll on Windows.",
-     false,
-     "Variables that Provide Information");
+     "The suffix to use for the end of a shared library, .dll on Windows."
+     "\n"
+     "CMAKE_SHARED_LIBRARY_SUFFIX_<LANG> overrides this for language <LANG>."
+     ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_SHARED_MODULE_PREFIX", cmProperty::VARIABLE,
      "The prefix for loadable modules that you link to.",
-     "The prefix to use for the name of a loadable module on this platform.",
-     false,
-     "Variables that Provide Information");
+     "The prefix to use for the name of a loadable module on this platform."
+     "\n"
+     "CMAKE_SHARED_MODULE_PREFIX_<LANG> overrides this for language <LANG>."
+     ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_SHARED_MODULE_SUFFIX", cmProperty::VARIABLE,
      "The suffix for shared libraries that you link to.",
-     "The suffix to use for the end of a loadable module on this platform",
-     false,
-     "Variables that Provide Information");
+     "The suffix to use for the end of a loadable module on this platform"
+     "\n"
+     "CMAKE_SHARED_MODULE_SUFFIX_<LANG> overrides this for language <LANG>."
+     ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_STATIC_LIBRARY_PREFIX", cmProperty::VARIABLE,
      "The prefix for static libraries that you link to.",
-     "The prefix to use for the name of a static library, lib on UNIX.",
-     false,
-     "Variables that Provide Information");
+     "The prefix to use for the name of a static library, lib on UNIX."
+     "\n"
+     "CMAKE_STATIC_LIBRARY_PREFIX_<LANG> overrides this for language <LANG>."
+     ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_STATIC_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for static libraries that you link to.",
-     "The suffix to use for the end of a static library, .lib on Windows.",
-     false,
-     "Variables that Provide Information");
+     "The suffix to use for the end of a static library, .lib on Windows."
+     "\n"
+     "CMAKE_STATIC_LIBRARY_SUFFIX_<LANG> overrides this for language <LANG>."
+     ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES", cmProperty::VARIABLE,
      "Additional suffixes for shared libraries.",
@@ -1245,11 +1255,17 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_USE_RESPONSE_FILE_FOR_OBJECTS",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_EXECUTABLE_SUFFIX_<LANG>",
+                     cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_EXE_LINK_DYNAMIC_<LANG>_FLAGS",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_EXE_LINK_STATIC_<LANG>_FLAGS",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_GENERATOR_<LANG>",
+                     cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_IMPORT_LIBRARY_PREFIX_<LANG>",
+                     cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_IMPORT_LIBRARY_SUFFIX_<LANG>",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_INCLUDE_FLAG_<LANG>",
                      cmProperty::VARIABLE,0,0);
@@ -1268,6 +1284,10 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty("CMAKE_SHARED_LIBRARY_LINK_DYNAMIC_<LANG>_FLAGS",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_LIBRARY_LINK_STATIC_<LANG>_FLAGS",
+                     cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_LIBRARY_PREFIX_<LANG>",
+                     cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_LIBRARY_SUFFIX_<LANG>",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_LIBRARY_RUNTIME_<LANG>_FLAG",
                      cmProperty::VARIABLE,0,0);
@@ -1291,9 +1311,17 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_LINK_STATIC_<LANG>_FLAGS",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_MODULE_PREFIX_<LANG>",
+                     cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_SHARED_MODULE_SUFFIX_<LANG>",
+                     cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_RUNTIME_<LANG>_FLAG",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_RUNTIME_<LANG>_FLAG_SEP",
+                     cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_STATIC_LIBRARY_PREFIX_<LANG>",
+                     cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_STATIC_LIBRARY_SUFFIX_<LANG>",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_LINK_DEPENDENT_LIBRARY_FILES",
                      cmProperty::VARIABLE,0,0);
