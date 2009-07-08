@@ -633,17 +633,13 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     {
     sourcecode += ".text.plist";
     }
-  else if(ext == "h" || ext == "hxx" || ext == "hpp")
+  else if(ext == "h")
     {
-    const char* linkLanguage = cmtarget.GetLinkerLanguage();
-    if(linkLanguage && (std::string(linkLanguage) == "CXX"))
-      {
-      sourcecode += ".cpp.h";
-      }
-    else
-      {
-      sourcecode += ".c.h";
-      }
+    sourcecode += ".c.h";
+    }
+  else if(ext == "hxx" || ext == "hpp" || ext == "txx")
+    {
+    sourcecode += ".cpp.h";
     }
   else if(lang && strcmp(lang, "CXX") == 0)
     {
