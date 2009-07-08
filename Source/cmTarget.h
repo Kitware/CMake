@@ -255,6 +255,19 @@ public:
       if the target cannot be linked.  */
   LinkInterface const* GetLinkInterface(const char* config);
 
+  /** The link implementation specifies the direct library
+      dependencies needed by the object files of the target.  */
+  struct LinkImplementation
+  {
+    // Libraries linked directly in this configuration.
+    std::vector<std::string> Libraries;
+
+    // Libraries linked directly in other configurations.
+    // Needed only for OLD behavior of CMP0003.
+    std::vector<std::string> WrongConfigLibraries;
+  };
+  LinkImplementation const* GetLinkImplementation(const char* config);
+
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
   std::string CheckCMP0004(std::string const& item);
@@ -519,6 +532,9 @@ private:
   cmTargetLinkInformationMap LinkInformation;
 
   bool ComputeLinkInterface(const char* config, LinkInterface& iface);
+
+  void ComputeLinkImplementation(const char* config,
+                                 LinkImplementation& impl);
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.

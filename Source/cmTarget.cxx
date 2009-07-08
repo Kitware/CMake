@@ -81,6 +81,10 @@ public:
 
   typedef std::map<cmStdString, cmTarget::ImportInfo> ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
+
+  // Cache link implementation computation from each configuration.
+  typedef std::map<cmStdString, cmTarget::LinkImplementation> LinkImplMapType;
+  LinkImplMapType LinkImplMap;
 };
 
 //----------------------------------------------------------------------------
@@ -3777,89 +3781,114 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
     return false;
     }
 
-  // Is the link interface just the link implementation?
-  bool doLibraries = !explicitLibraries;
-
-  // Do we need to construct a list of shared library dependencies not
-  // included in the interface?
-  bool doSharedDeps = (explicitLibraries &&
-                       this->GetType() == cmTarget::SHARED_LIBRARY);
-
-  // Keep track of what libraries have been emitted.
-  std::set<cmStdString> emitted;
-  std::set<cmStdString> emittedWrongConfig;
-
   if(explicitLibraries)
     {
     // The interface libraries have been explicitly set.
     cmSystemTools::ExpandListArgument(explicitLibraries, iface.Libraries);
-    for(std::vector<std::string>::const_iterator
-          li = iface.Libraries.begin(); li != iface.Libraries.end(); ++li)
+
+    if(this->GetType() == cmTarget::SHARED_LIBRARY)
       {
-      emitted.insert(*li);
+      // Shared libraries may have runtime implementation dependencies
+      // on other shared libraries that are not in the interface.
+      std::set<cmStdString> emitted;
+      for(std::vector<std::string>::const_iterator
+            li = iface.Libraries.begin(); li != iface.Libraries.end(); ++li)
+        {
+        emitted.insert(*li);
+        }
+      LinkImplementation const* impl = this->GetLinkImplementation(config);
+      for(std::vector<std::string>::const_iterator
+            li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
+        {
+        if(emitted.insert(*li).second)
+          {
+          if(cmTarget* tgt = this->Makefile->FindTargetToUse(li->c_str()))
+            {
+            // This is a runtime dependency on another shared library.
+            if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
+              {
+              iface.SharedDeps.push_back(*li);
+              }
+            }
+          else
+            {
+            // TODO: Recognize shared library file names.  Perhaps this
+            // should be moved to cmComputeLinkInformation, but that creates
+            // a chicken-and-egg problem since this list is needed for its
+            // construction.
+            }
+          }
+        }
       }
     }
-
-  if(doLibraries || doSharedDeps)
+  else
     {
-    // Compute which library configuration to link.
-    cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
-
-    // Construct the list of libs linked for this configuration.
-    cmTarget::LinkLibraryVectorType const& llibs =
-      this->GetOriginalLinkLibraries();
-    for(cmTarget::LinkLibraryVectorType::const_iterator li = llibs.begin();
-        li != llibs.end(); ++li)
-      {
-      // Skip entries that resolve to the target itself or are empty.
-      std::string item = this->CheckCMP0004(li->first);
-      if(item == this->GetName() || item.empty())
-        {
-        continue;
-        }
-
-      // Skip entries not meant for this configuration.
-      if(li->second != cmTarget::GENERAL && li->second != linkType)
-        {
-        // Support OLD behavior for CMP0003.
-        if(doLibraries && emittedWrongConfig.insert(item).second)
-          {
-          iface.WrongConfigLibraries.push_back(item);
-          }
-        continue;
-        }
-
-      // Skip entries that have already been emitted.
-      if(!emitted.insert(item).second)
-        {
-        continue;
-        }
-
-      // Emit this item.
-      if(doLibraries)
-        {
-        // This implementation dependency goes in the implicit interface.
-        iface.Libraries.push_back(item);
-        }
-      else if(cmTarget* tgt = this->Makefile->FindTargetToUse(item.c_str()))
-        {
-        // This is a runtime dependency on another shared library.
-        if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
-          {
-          iface.SharedDeps.push_back(item);
-          }
-        }
-      else
-        {
-        // TODO: Recognize shared library file names.  Perhaps this
-        // should be moved to cmComputeLinkInformation, but that creates
-        // a chicken-and-egg problem since this list is needed for its
-        // construction.
-        }
-      }
+    // The link implementation is the default link interface.
+    LinkImplementation const* impl = this->GetLinkImplementation(config);
+    iface.Libraries = impl->Libraries;
+    iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     }
 
   return true;
+}
+
+//----------------------------------------------------------------------------
+cmTarget::LinkImplementation const*
+cmTarget::GetLinkImplementation(const char* config)
+{
+  // There is no link implementation for imported targets.
+  if(this->IsImported())
+    {
+    return 0;
+    }
+
+  // Lookup any existing link implementation for this configuration.
+  std::string key = cmSystemTools::UpperCase(config? config : "");
+  cmTargetInternals::LinkImplMapType::iterator
+    i = this->Internal->LinkImplMap.find(key);
+  if(i == this->Internal->LinkImplMap.end())
+    {
+    // Compute the link implementation for this configuration.
+    LinkImplementation impl;
+    this->ComputeLinkImplementation(config, impl);
+
+    // Store the information for this configuration.
+    cmTargetInternals::LinkImplMapType::value_type entry(key, impl);
+    i = this->Internal->LinkImplMap.insert(entry).first;
+    }
+
+  return &i->second;
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::ComputeLinkImplementation(const char* config,
+                                         LinkImplementation& impl)
+{
+  // Compute which library configuration to link.
+  cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
+
+  LinkLibraryVectorType const& llibs = this->GetOriginalLinkLibraries();
+  for(cmTarget::LinkLibraryVectorType::const_iterator li = llibs.begin();
+      li != llibs.end(); ++li)
+    {
+    // Skip entries that resolve to the target itself or are empty.
+    std::string item = this->CheckCMP0004(li->first);
+    if(item == this->GetName() || item.empty())
+      {
+      continue;
+      }
+
+    if(li->second == cmTarget::GENERAL || li->second == linkType)
+      {
+      // The entry is meant for this configuration.
+      impl.Libraries.push_back(item);
+      }
+    else
+      {
+      // Support OLD behavior for CMP0003.
+      impl.WrongConfigLibraries.push_back(item);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------

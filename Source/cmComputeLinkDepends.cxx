@@ -520,22 +520,15 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
 void cmComputeLinkDepends::AddDirectLinkEntries()
 {
   // Add direct link dependencies in this configuration.
-  int depender_index = -1;
-  LinkLibraryVectorType const& libs=this->Target->GetOriginalLinkLibraries();
-  std::vector<std::string> actual_libs;
-  for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
-      li != libs.end(); ++li)
+  cmTarget::LinkImplementation const* impl =
+    this->Target->GetLinkImplementation(this->Config);
+  this->AddLinkEntries(-1, impl->Libraries);
+  for(std::vector<std::string>::const_iterator
+        wi = impl->WrongConfigLibraries.begin();
+      wi != impl->WrongConfigLibraries.end(); ++wi)
     {
-    if(li->second == cmTarget::GENERAL || li->second == this->LinkType)
-      {
-      actual_libs.push_back(li->first);
-      }
-    else if(this->OldLinkDirMode)
-      {
-      this->CheckWrongConfigItem(depender_index, li->first);
-      }
+    this->CheckWrongConfigItem(-1, *wi);
     }
-  this->AddLinkEntries(depender_index, actual_libs);
 }
 
 //----------------------------------------------------------------------------
