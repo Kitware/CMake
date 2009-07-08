@@ -1245,17 +1245,11 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_USE_RESPONSE_FILE_FOR_OBJECTS",
                      cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_EXECUTABLE_SUFFIX_<LANG>",
-                     cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_EXE_LINK_DYNAMIC_<LANG>_FLAGS",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_EXE_LINK_STATIC_<LANG>_FLAGS",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_GENERATOR_<LANG>",
-                     cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_IMPORT_LIBRARY_PREFIX_<LANG>",
-                     cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_IMPORT_LIBRARY_SUFFIX_<LANG>",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_INCLUDE_FLAG_<LANG>",
                      cmProperty::VARIABLE,0,0);
