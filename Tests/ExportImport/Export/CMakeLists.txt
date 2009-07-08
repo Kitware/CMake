@@ -1,11 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project(Export C)
 
-# We need ansi C support.
-if(CMAKE_ANSI_CFLAGS)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
-endif(CMAKE_ANSI_CFLAGS)
-
 # Pretend that RelWithDebInfo should link to debug libraries to test
 # the DEBUG_CONFIGURATIONS property.
 set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug RelWithDebInfo)

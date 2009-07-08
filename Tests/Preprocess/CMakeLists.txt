@@ -4,11 +4,6 @@ project(Preprocess)
 # This test is meant both as a test and as a reference for supported
 # syntax on native tool command lines.
 
-# We need ansi C support.
-IF(CMAKE_ANSI_CFLAGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
-ENDIF(CMAKE_ANSI_CFLAGS)
-
 # Determine the build tool being used.  Not all characters can be
 # escaped for all build tools.  This test checks all characters known
 # to work with each tool and documents those known to not work.

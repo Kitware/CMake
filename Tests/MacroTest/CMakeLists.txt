@@ -2,8 +2,6 @@
 cmake_minimum_required (VERSION 2.6)
 PROJECT (MacroTest)
 
-SET(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
-
 MACRO(FAILED testname)
   MESSAGE(SEND_ERROR "${testname} failed ${ARGN}")
 ENDMACRO(FAILED)

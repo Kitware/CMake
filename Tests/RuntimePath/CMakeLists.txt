@@ -1,10 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project(RuntimePath C)
 
-if(CMAKE_ANSI_CFLAGS)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
-endif(CMAKE_ANSI_CFLAGS)
-
 # Add a simple chain of shared libraries that must be found.
 add_library(foo1 SHARED foo1.c)
 set_property(TARGET foo1 PROPERTY OUTPUT_NAME foo)

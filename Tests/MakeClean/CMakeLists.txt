@@ -1,8 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 PROJECT(MakeClean)
 
-SET(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
-
 # Build the to-clean project.
 TRY_COMPILE(TOCLEAN_BUILT
   ${MakeClean_BINARY_DIR}/ToClean
@@ -32,11 +30,6 @@ FOREACH(f ${TOCLEAN_FILES})
     MESSAGE(FATAL_ERROR "File \"${f}\" does not exist!")
   ENDIF(EXISTS "${f}")
 ENDFOREACH(f)
-
-# Enable ANSI flags for the C executable.
-IF(CMAKE_ANSI_CFLAGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
-ENDIF(CMAKE_ANSI_CFLAGS)
 
 # Configure an executable to check that all the files are missing.
 SET(CHECK_FILES)

@@ -354,7 +354,6 @@ FOREACH(arg ${CHECK_ARGS} "")
     "${EXPECTED_ARGUMENTS}  \"${ARG}\",
 ")
 ENDFOREACH(arg)
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/check_command_line.c.in
                ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c
                @ONLY IMMEDIATE)

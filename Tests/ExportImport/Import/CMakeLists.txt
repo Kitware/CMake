@@ -1,11 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project(Import C)
 
-# We need ansi C support.
-if(CMAKE_ANSI_CFLAGS)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
-endif(CMAKE_ANSI_CFLAGS)
-
 # Import everything in a subdirectory.
 add_subdirectory(A)
 

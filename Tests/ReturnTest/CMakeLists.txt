@@ -2,8 +2,6 @@
 cmake_minimum_required (VERSION 2.6)
 project (ReturnTest)
 
-set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
-
 function (FAILED testname)
   message (SEND_ERROR "${testname} failed ${ARGN}")
 endfunction (FAILED)

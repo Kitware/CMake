@@ -1,9 +1,5 @@
 project(CASE4 C)
 
-IF(CMAKE_ANSI_CFLAGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
-ENDIF(CMAKE_ANSI_CFLAGS)
-
 # This is not really a circular dependency.  "case4Bar" refers to a
 # third-party library that happens to match the executable name, which
 # is okay when the executable is not a linkable target (ENABLE_EXPORTS
