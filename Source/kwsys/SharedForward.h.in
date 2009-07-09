@@ -507,7 +507,7 @@ static void kwsys_shared_forward_execvp(const char* cmd,
   nargv[argc] = 0;
 
   /* Replace the command line to be used.  */
-  argv = nargv;
+  argv = (char const* const*)nargv;
   }
 #endif
 
