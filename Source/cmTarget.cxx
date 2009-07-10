@@ -196,10 +196,9 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("HAS_CXX", cmProperty::TARGET,
-     "Force a target to use the CXX linker.",
-     "Setting HAS_CXX on a target will force the target to use the "
-     "C++ linker (and C++ runtime libraries) for linking even if the "
-     "target has no C++ code in it.");
+     "Link the target using the C++ linker tool (obselete).",
+     "This is equivalent to setting the LINKER_LANGUAGE property to CXX.  "
+     "See that property's documentation for details.");
 
   cm->DefineProperty
     ("IMPLICIT_DEPENDS_INCLUDE_TRANSFORM", cmProperty::TARGET,
@@ -418,11 +417,18 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("LINKER_LANGUAGE", cmProperty::TARGET,
-     "What tool to use for linking, based on language.",
-     "The LINKER_LANGUAGE property is used to change the tool "
-     "used to link an executable or shared library. The default is "
-     "set the language to match the files in the library. CXX and C "
-     "are common values for this property.");
+     "Specifies language whose link tool should be used (obselete).",
+     "For executables, shared libraries, and modules, this sets the "
+     "language whose link tool is used to link the target "
+     "(such as \"C\" or \"CXX\").  "
+     "CMake 2.6 and below select a linker language automatically "
+     "based on the languages compiled into the target.  "
+     "This property overrides the default in case one of the "
+     "linked libraries uses another language.  "
+     "A typical example is a C executable linking to a static archive "
+     "containing C++ object files.  "
+     "CMake 2.8 and above account for languages in linked targets "
+     "automatically, making this property unnecessary.");
 
   cm->DefineProperty
     ("LOCATION", cmProperty::TARGET,
