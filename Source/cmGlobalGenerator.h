@@ -317,6 +317,9 @@ protected:
   // This is computed just before local generators generate.
   cmTargetManifest TargetManifest;
 
+  // All targets in the entire project.
+  std::map<cmStdString,cmTarget *> TotalTargets;
+
 private:
   float FirstTimeProgress;
   // If you add a new map here, make sure it is copied
@@ -327,9 +330,6 @@ private:
   std::map<cmStdString, cmStdString> LanguageToOutputExtension;
   std::map<cmStdString, cmStdString> ExtensionToLanguage;
   std::map<cmStdString, int> LanguageToLinkerPreference; 
-
-  // this is used to improve performance
-  std::map<cmStdString,cmTarget *> TotalTargets;
 
   // Record hashes for rules and outputs.
   struct RuleHash { char Data[32]; };

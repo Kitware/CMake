@@ -128,6 +128,8 @@ private:
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
   cmXCodeObject* CreateXCodeTarget(cmTarget& target,
                                    cmXCodeObject* buildPhases);
+  void ForceLinkerLanguages();
+  void ForceLinkerLanguage(cmTarget& cmtarget);
   const char* GetTargetFileType(cmTarget& cmtarget);
   const char* GetTargetProductType(cmTarget& cmtarget);
   std::string AddConfigurations(cmXCodeObject* target, cmTarget& cmtarget);

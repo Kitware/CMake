@@ -239,6 +239,7 @@ void cmGlobalXCodeGenerator::Generate()
     // add ALL_BUILD, INSTALL, etc
     this->AddExtraTargets(root, it->second);
     }
+  this->ForceLinkerLanguages();
   this->cmGlobalGenerator::Generate();
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     { 
@@ -965,6 +966,62 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                frameworkBuildPhase, cmtarget);
 
     targets.push_back(this->CreateXCodeTarget(cmtarget, buildPhases));
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::ForceLinkerLanguages()
+{
+  // This makes sure all targets link using the proper language.
+  for(std::map<cmStdString, cmTarget*>::const_iterator
+        ti = this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
+    {
+    this->ForceLinkerLanguage(*ti->second);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
+{
+  // This matters only for targets that link.
+  if(cmtarget.GetType() != cmTarget::EXECUTABLE &&
+     cmtarget.GetType() != cmTarget::SHARED_LIBRARY &&
+     cmtarget.GetType() != cmTarget::MODULE_LIBRARY)
+    {
+    return;
+    }
+
+  const char* llang = cmtarget.GetLinkerLanguage("NOCONFIG");
+  if(!llang) { return; }
+
+  // If the language is compiled as a source trust Xcode to link with it.
+  cmTarget::LinkImplementation const* impl =
+    cmtarget.GetLinkImplementation("NOCONFIG");
+  for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
+      li != impl->Languages.end(); ++li)
+    {
+    if(*li == llang) { return; }
+    }
+
+  // Add an empty source file to the target that compiles with the
+  // linker language.  This should convince Xcode to choose the proper
+  // language.
+  cmMakefile* mf = cmtarget.GetMakefile();
+  std::string fname = mf->GetCurrentOutputDirectory();
+  fname += cmake::GetCMakeFilesDirectory();
+  fname += "/";
+  fname += cmtarget.GetName();
+  fname += "-CMakeForceLinker";
+  fname += ".";
+  fname += cmSystemTools::LowerCase(llang);
+  {
+  cmGeneratedFileStream fout(fname.c_str());
+  fout << "\n";
+  }
+  if(cmSourceFile* sf = mf->GetOrCreateSource(fname.c_str()))
+    {
+    sf->SetProperty("LANGUAGE", llang);
+    cmtarget.AddSourceFile(sf);
     }
 }
 
