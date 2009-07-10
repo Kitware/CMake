@@ -270,9 +270,12 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations(); 
   this->WriteString("<CustomBuild Include=\"", 2);
-  (*this->BuildFileStream ) << 
-    cmSystemTools::RelativePath(this->Makefile->GetCurrentOutputDirectory(),
-                                sourcePath.c_str()) << "\">\n";
+  std::string path =
+    cmSystemTools::RelativePath(
+      this->Makefile->GetCurrentOutputDirectory(),
+      sourcePath.c_str());
+  this->ConvertToWindowsSlash(path);
+  (*this->BuildFileStream ) << path << "\">\n";
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {
