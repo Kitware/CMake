@@ -194,7 +194,6 @@ void cmGlobalVisualStudio7Generator::Generate()
 
   // Now write out the DSW
   this->OutputSLNFile();
-
   // If any solution or project files changed during the generation,
   // tell Visual Studio to reload them...
   if(!cmSystemTools::GetErrorOccuredFlag())
@@ -240,24 +239,6 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile()
 }
 
 
-void cmGlobalVisualStudio7Generator::AddAllBuildDepends(
-  cmLocalGenerator* root,
-  cmTarget* target,
-  cmGlobalGenerator::TargetDependSet& originalTargets)
-{
-  // if this is the special ALL_BUILD utility, then
-  // make it depend on every other non UTILITY project.
-  for(cmGlobalGenerator::TargetDependSet::iterator ot =
-        originalTargets.begin(); ot != originalTargets.end(); ++ot)
-    {
-    cmTarget* t = const_cast<cmTarget*>(*ot);
-    if(!this->IsExcluded(root, *t))
-      {
-      target->AddUtility(t->GetName());
-      }
-    }
-}
-
 void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   std::ostream& fout, 
   cmLocalGenerator* root,
@@ -296,9 +277,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
 void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     std::ostream& fout,
     cmLocalGenerator* root,
-    OrderedTargetDependSet const& projectTargets,
-    cmGlobalGenerator::TargetDependSet& originalTargets
-    )
+    OrderedTargetDependSet const& projectTargets)
 {
   std::string rootdir = root->GetMakefile()->GetStartOutputDirectory();
   rootdir += "/";
@@ -306,14 +285,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
     cmTarget* target = *tt;
-    cmMakefile* mf = target->GetMakefile();
-    // look for the all_build rule and add depends to all
-    // of the original targets (none that were "pulled" into this project)
-    if(mf == root->GetMakefile() &&
-       strcmp(target->GetName(), "ALL_BUILD") == 0)
-      {
-      this->AddAllBuildDepends(root, target, originalTargets);
-      }
     // handle external vc project files
     if (strncmp(target->GetName(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
       { 
@@ -427,8 +398,7 @@ void cmGlobalVisualStudio7Generator
                       originalTargets,
                       root, generators);
   OrderedTargetDependSet orderedProjectTargets(projectTargets);
-  this->WriteTargetsToSolution(fout, root, orderedProjectTargets,
-                               originalTargets);
+  this->WriteTargetsToSolution(fout, root, orderedProjectTargets);
   // Write out the configurations information for the solution
   fout << "Global\n"
        << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
@@ -594,7 +564,6 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
                                const char* location,
                                const std::vector<std::string>&)
 { 
-  std::cout << "WriteExternalProject vs7\n";
   std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << name << "\", \""

@@ -70,7 +70,13 @@ private:
   bool OutputSourceSpecificFlags(cmSourceFile* source);
   void AddLibraries(cmComputeLinkInformation& cli, std::string& libstring);
   void WriteLibOptions(std::string const& config);
+  void WriteEvents(std::string const& configName);
+  void WriteEvent(const char* name, std::vector<cmCustomCommand> & commands,
+                  std::string const& configName);
+  void ComputeObjectNames();
 private:
+  std::string ModuleDefinitionFile;
+  std::string PathToVcxproj;
   cmTarget* Target;
   cmMakefile* Makefile;
   std::string Platform;

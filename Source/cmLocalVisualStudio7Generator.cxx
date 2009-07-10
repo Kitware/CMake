@@ -1405,26 +1405,14 @@ cmLocalVisualStudio7GeneratorFCInfo
     }
 }
 
+
 void cmLocalVisualStudio7Generator
-::WriteGroup(const cmSourceGroup *sg, cmTarget& target,
-             std::ostream &fout, const char *libName, 
-             std::vector<std::string> *configs)
-{
-  const std::vector<const cmSourceFile *> &sourceFiles =
-    sg->GetSourceFiles();
-  // If the group is empty, don't write it at all.
-  if(sourceFiles.empty() && sg->GetGroupChildren().empty())
-    {
-    return;
-    }
-
-  // If the group has a name, write the header.
-  std::string name = sg->GetName();
-  if(name != "")
-    {
-    this->WriteVCProjBeginGroup(fout, name.c_str(), "");
-    }
-
+::ComputeMaxDirectoryLength(std::string& maxdir,
+  cmTarget& target)
+{  
+  std::vector<std::string> *configs =
+    static_cast<cmGlobalVisualStudio7Generator *>
+    (this->GlobalGenerator)->GetConfigurations();
   // Compute the maximum length configuration name.
   std::string config_max;
   for(std::vector<std::string>::iterator i = configs->begin();
@@ -1446,6 +1434,34 @@ void cmLocalVisualStudio7Generator
   dir_max += "/";
   dir_max += config_max;
   dir_max += "/";
+  maxdir = dir_max;
+}
+
+void cmLocalVisualStudio7Generator
+::WriteGroup(const cmSourceGroup *sg, cmTarget& target,
+             std::ostream &fout, const char *libName, 
+             std::vector<std::string> *configs)
+{
+  const std::vector<const cmSourceFile *> &sourceFiles =
+    sg->GetSourceFiles();
+  // If the group is empty, don't write it at all.
+  if(sourceFiles.empty() && sg->GetGroupChildren().empty())
+    {
+    return;
+    }
+
+  // If the group has a name, write the header.
+  std::string name = sg->GetName();
+  if(name != "")
+    {
+    this->WriteVCProjBeginGroup(fout, name.c_str(), "");
+    }
+
+  // Compute the maximum length full path to the intermediate
+  // files directory for any configuration.  This is used to construct
+  // object file names that do not produce paths that are too long.
+  std::string dir_max;
+  this->ComputeMaxDirectoryLength(dir_max, target);
 
   // Loop through each source in the source group.
   std::string objectName;

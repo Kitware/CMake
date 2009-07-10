@@ -128,8 +128,7 @@ protected:
   virtual void WriteTargetsToSolution(
     std::ostream& fout,
     cmLocalGenerator* root,
-    OrderedTargetDependSet const& projectTargets,
-    cmGlobalGenerator::TargetDependSet& originalTargets);
+    OrderedTargetDependSet const& projectTargets);
   virtual void WriteTargetDepends(
     std::ostream& fout,
     OrderedTargetDependSet const& projectTargets);
@@ -138,10 +137,6 @@ protected:
     cmLocalGenerator* root,
     OrderedTargetDependSet const& projectTargets);
   
-  void AddAllBuildDepends(cmLocalGenerator* root,
-                          cmTarget* target,
-                          cmGlobalGenerator::TargetDependSet& targets);
-                                       
   void GenerateConfigurations(cmMakefile* mf);
 
   virtual void WriteExternalProject(std::ostream& fout, 

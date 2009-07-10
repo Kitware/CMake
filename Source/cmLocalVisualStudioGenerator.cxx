@@ -26,6 +26,7 @@ cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator()
 {
   this->WindowsShell = true;
   this->WindowsVSIDE = true;
+  this->NeedXMLEscape = false;
 }
 
 //----------------------------------------------------------------------------
@@ -231,8 +232,26 @@ cmLocalVisualStudioGenerator
         }
       else
         {
-        script += this->EscapeForShell(commandLine[j].c_str(),
+        if(this->NeedXMLEscape)
+          {
+          std::string arg = commandLine[j];
+          cmSystemTools::ReplaceString(arg, "&", "&amp;");
+          cmSystemTools::ReplaceString(arg, "<", "&lt;");
+          cmSystemTools::ReplaceString(arg, ">", "&gt;");
+          if(arg.find(" ") != arg.npos)
+            {
+            std::string q("\"");
+            arg = q + arg +q;
+            }
+          script += arg;
+          //script += this->EscapeForShell(arg.c_str(),
+          //escapeAllowMakeVars);
+          }
+        else
+          {
+          script += this->EscapeForShell(commandLine[j].c_str(),
                                        escapeAllowMakeVars);
+          }
         }
       }
     }

@@ -1992,6 +1992,7 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(const char* config)
     msg += " which has type ";
     msg += cmTarget::TargetTypeNames[this->GetType()];
     this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    abort();
     return 0;
     }
 

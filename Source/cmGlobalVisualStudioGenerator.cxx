@@ -48,10 +48,26 @@ void cmGlobalVisualStudioGenerator::Generate()
       {
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
-      gen[0]->GetMakefile()->
+      cmTarget* allBuild = 
+        gen[0]->GetMakefile()->
         AddUtilityCommand("ALL_BUILD", true, no_working_dir,
                           no_depends, no_commands, false,
                           "Build all projects");
+      // Now make all targets depend on the ALL_BUILD target
+      cmTargets targets;
+      for(std::vector<cmLocalGenerator*>::iterator i = gen.begin();
+          i != gen.end(); ++i)
+        {
+        cmTargets& targets = (*i)->GetMakefile()->GetTargets();
+        for(cmTargets::iterator t = targets.begin();
+            t != targets.end(); ++t)
+          {
+          if(!this->IsExcluded(gen[0], t->second))
+            {
+            allBuild->AddUtility(t->second.GetName());
+            }
+          }
+        }
       }
     }
 

@@ -116,8 +116,7 @@ void cmGlobalVisualStudio71Generator
                       originalTargets,
                       root, generators);
   OrderedTargetDependSet orderedProjectTargets(projectTargets);
-  this->WriteTargetsToSolution(fout, root, orderedProjectTargets,
-                               originalTargets);
+  this->WriteTargetsToSolution(fout, root, orderedProjectTargets);
   // Write out the configurations information for the solution
   fout << "Global\n";
   // Write out the configurations for the solution
@@ -257,7 +256,6 @@ void cmGlobalVisualStudio71Generator
                        const char* location,
                        const std::vector<std::string>& depends)
 { 
-  std::cout << "WriteExternalProject vs71\n";
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"

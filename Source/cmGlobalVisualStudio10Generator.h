@@ -33,6 +33,12 @@ public:
   static cmGlobalGenerator* New() { 
     return new cmGlobalVisualStudio10Generator; }
   
+  virtual std::string 
+  GenerateBuildCommand(const char* makeProgram,
+                       const char *projectName, 
+                       const char* additionalOptions, const char *targetName,
+                       const char* config, bool ignoreErrors, bool);
+  
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalVisualStudio10Generator::GetActualName();}

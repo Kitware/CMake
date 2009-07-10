@@ -23,7 +23,7 @@
 //----------------------------------------------------------------------------
 cmLocalVisualStudio10Generator::cmLocalVisualStudio10Generator()
 {
-
+  this->NeedXMLEscape = true;
 }
 
 cmLocalVisualStudio10Generator::~cmLocalVisualStudio10Generator()

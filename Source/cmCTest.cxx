@@ -2767,7 +2767,10 @@ double cmCTest::GetRemainingTimeAllowed()
 void cmCTest::OutputTestErrors(std::vector<char> const &process_output)
 {
   std::string test_outputs("\n*** Test Failed:\n");
-  test_outputs.append(&*process_output.begin(), process_output.size());
+  if(process_output.size())
+    {
+    test_outputs.append(&*process_output.begin(), process_output.size());
+    }
   cmCTestLog(this, HANDLER_OUTPUT, test_outputs << std::endl << std::flush);
 }
 

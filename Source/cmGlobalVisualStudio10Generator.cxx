@@ -96,3 +96,64 @@ std::string cmGlobalVisualStudio10Generator::GetUserMacrosRegKeyBase()
 {
   return "Software\\Microsoft\\VisualStudio\\10.0\\vsmacros";
 }
+
+
+std::string cmGlobalVisualStudio10Generator
+::GenerateBuildCommand(const char* makeProgram,
+                       const char *projectName, 
+                       const char* additionalOptions, const char *targetName,
+                       const char* config, bool ignoreErrors, bool)
+{
+  // Ingoring errors is not implemented in visual studio 6
+  (void) ignoreErrors;
+
+  
+  // now build the test
+  std::string makeCommand 
+    = cmSystemTools::ConvertToOutputPath(makeProgram);
+  std::string lowerCaseCommand = makeCommand;
+  cmSystemTools::LowerCase(lowerCaseCommand);
+
+  // if there are spaces in the makeCommand, assume a full path
+  // and convert it to a path with no spaces in it as the
+  // RunSingleCommand does not like spaces
+  if(makeCommand.find(' ') != std::string::npos)
+    {
+    cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
+    }
+  // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
+  if(!targetName || strlen(targetName) == 0)
+    {
+    targetName = "ALL_BUILD";
+    }    
+  bool clean = false;
+  if ( targetName && strcmp(targetName, "clean") == 0 )
+    {
+    clean = true;
+    makeCommand += " ";
+    makeCommand += projectName;
+    makeCommand += ".sln ";
+    makeCommand += "/t:Clean ";
+    }
+  else
+    {
+    makeCommand += " ";
+    makeCommand += targetName;
+    makeCommand += ".vcxproj ";
+    }
+  makeCommand += "/p:Configuration=";
+  if(config && strlen(config))
+    {
+    makeCommand += config;
+    }
+  else
+    {
+    makeCommand += "Debug";
+    }
+  if ( additionalOptions )
+    {
+    makeCommand += " ";
+    makeCommand += additionalOptions;
+    }
+  return makeCommand;
+}

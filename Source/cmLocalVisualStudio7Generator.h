@@ -72,10 +72,15 @@ public:
   virtual std::string GetTargetDirectory(cmTarget const&) const;
   cmSourceFile* CreateVCProjBuildRule();
   void WriteStampFiles();
+  void ComputeMaxDirectoryLength(std::string& maxdir,
+                                 cmTarget& target);
 
 private:
   typedef cmLocalVisualStudio7GeneratorOptions Options;
   typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
+  // Compute the maximum length full path to the intermediate
+  // files directory for any configuration.  This is used to construct
+  // object file names that do not produce paths that are too long.
   void ReadAndStoreExternalGUID(const char* name,
                                 const char* path);
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
