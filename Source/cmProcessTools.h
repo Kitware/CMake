@@ -35,6 +35,8 @@ public:
         in any more data and false if it is done.  */
     bool Process(const char* data, int length)
       { return this->ProcessChunk(data, length); }
+    bool Process(const char* data)
+      { return this->Process(data, static_cast<int>(strlen(data))); }
 
     virtual ~OutputParser() {}
   protected:
