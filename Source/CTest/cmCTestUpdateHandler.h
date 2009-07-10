@@ -48,6 +48,7 @@ public:
     e_SVN,
     e_BZR,
     e_GIT,
+    e_HG,
     e_LAST
   };
 

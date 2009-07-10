@@ -373,6 +373,8 @@ SET(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestBZR.h
   CTest/cmCTestGIT.cxx
   CTest/cmCTestGIT.h
+  CTest/cmCTestHG.cxx
+  CTest/cmCTestHG.h
   )
 
 # Build CTestLib

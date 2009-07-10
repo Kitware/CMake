@@ -32,6 +32,7 @@
 #include "cmCTestSVN.h"
 #include "cmCTestBZR.h"
 #include "cmCTestGIT.h"
+#include "cmCTestHG.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -54,7 +55,8 @@ static const char* cmCTestUpdateHandlerUpdateStrings[] =
   "CVS",
   "SVN",
   "BZR",
-  "GIT"
+  "GIT",
+  "HG"
 };
 
 static const char* cmCTestUpdateHandlerUpdateToString(int type)
@@ -145,6 +147,10 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
       {
       return cmCTestUpdateHandler::e_GIT;
       }
+    if ( stype.find("hg") != std::string::npos )
+      {
+      return cmCTestUpdateHandler::e_HG;
+      }
     }
   else
     {
@@ -166,6 +172,10 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
     if ( stype.find("git") != std::string::npos )
       {
       return cmCTestUpdateHandler::e_GIT;
+      }
+    if ( stype.find("hg") != std::string::npos )
+      {
+      return cmCTestUpdateHandler::e_HG;
       }
     }
   return cmCTestUpdateHandler::e_UNKNOWN;
@@ -226,6 +236,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     case e_SVN: vc.reset(new cmCTestSVN(this->CTest, ofs)); break;
     case e_BZR: vc.reset(new cmCTestBZR(this->CTest, ofs)); break;
     case e_GIT: vc.reset(new cmCTestGIT(this->CTest, ofs)); break;
+    case e_HG:  vc.reset(new cmCTestHG(this->CTest, ofs)); break;
     default:    vc.reset(new cmCTestVC(this->CTest, ofs));  break;
     }
   vc->SetCommandLineTool(this->UpdateCommand);
@@ -371,6 +382,12 @@ int cmCTestUpdateHandler::DetectVCS(const char* dir)
     {
     return cmCTestUpdateHandler::e_GIT;
     }
+  sourceDirectory = dir;
+  sourceDirectory += "/.hg";
+  if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
+    {
+    return cmCTestUpdateHandler::e_HG;
+    }
   return cmCTestUpdateHandler::e_UNKNOWN;
 }
 
@@ -400,6 +417,7 @@ bool cmCTestUpdateHandler::SelectVCS()
       case e_SVN: key = "SVNCommand"; break;
       case e_BZR: key = "BZRCommand"; break;
       case e_GIT: key = "GITCommand"; break;
+      case e_HG:  key = "HGCommand";  break;
       default: break;
       }
     if (key)

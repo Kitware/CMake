@@ -80,6 +80,7 @@ IF(BUILD_TESTING)
     "Options passed to the cvs update command.")
   FIND_PROGRAM(SVNCOMMAND svn)
   FIND_PROGRAM(BZRCOMMAND bzr)
+  FIND_PROGRAM(HGCOMMAND hg)
 
   IF(NOT UPDATE_TYPE)
     IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/CVS")
@@ -90,6 +91,10 @@ IF(BUILD_TESTING)
       ELSE(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.svn")
         IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.bzr")
           SET(UPDATE_TYPE bzr)
+        ELSE(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.bzr")
+          IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.hg")
+            SET(UPDATE_TYPE hg)
+          ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.hg")
         ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.bzr")
       ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.svn")
     ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/CVS")
@@ -114,6 +119,11 @@ IF(BUILD_TESTING)
       IF("${_update_type}" STREQUAL "bzr")
         SET(UPDATE_COMMAND "${BZRCOMMAND}")
         SET(UPDATE_OPTIONS "${BZR_UPDATE_OPTIONS}")
+      ELSE("${_update_type}" STREQUAL "bzr")
+        IF("${_update_type}" STREQUAL "hg")
+          SET(UPDATE_COMMAND "${HGCOMMAND}")
+          SET(UPDATE_OPTIONS "${HG_UPDATE_OPTIONS}")
+        ENDIF("${_update_type}" STREQUAL "hg")
       ENDIF("${_update_type}" STREQUAL "bzr")
     ENDIF("${_update_type}" STREQUAL "svn")
   ENDIF("${_update_type}" STREQUAL "cvs")
@@ -193,6 +203,7 @@ IF(BUILD_TESTING)
     CVSCOMMAND
     SVNCOMMAND
     BZRCOMMAND
+    HGCOMMAND
     CVS_UPDATE_OPTIONS
     SVN_UPDATE_OPTIONS
     BZR_UPDATE_OPTIONS

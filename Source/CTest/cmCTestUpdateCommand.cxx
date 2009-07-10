@@ -56,6 +56,10 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
     "GITCommand", "CTEST_GIT_COMMAND");
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "GITUpdateOptions", "CTEST_GIT_UPDATE_OPTIONS");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "HGCommand", "CTEST_HG_COMMAND");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "HGUpdateOptions", "CTEST_HG_UPDATE_OPTIONS");
 
   const char* initialCheckoutCommand
     = this->Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
