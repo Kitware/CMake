@@ -280,12 +280,12 @@ private:
       {
       if(this->CData[i] != ' ')
         {
-        currPath.push_back(this->CData[i]);
+        currPath += this->CData[i];
         }
       else
         {
         output.push_back(currPath);
-        currPath.erase();
+        currPath = "";
         }
       }
     output.push_back(currPath);
