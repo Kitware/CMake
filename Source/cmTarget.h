@@ -240,6 +240,9 @@ public:
       other information needed by targets that link to this target.  */
   struct LinkInterface
   {
+    // Languages whose runtime libraries must be linked.
+    std::vector<std::string> Languages;
+
     // Libraries listed in the interface.
     std::vector<std::string> Libraries;
 
@@ -259,6 +262,9 @@ public:
       dependencies needed by the object files of the target.  */
   struct LinkImplementation
   {
+    // Languages whose runtime libraries must be linked.
+    std::vector<std::string> Languages;
+
     // Libraries linked directly in this configuration.
     std::vector<std::string> Libraries;
 
@@ -267,6 +273,18 @@ public:
     std::vector<std::string> WrongConfigLibraries;
   };
   LinkImplementation const* GetLinkImplementation(const char* config);
+
+  /** Link information from the transitive closure of the link
+      implementation and the interfaces of its dependencies.  */
+  struct LinkClosure
+  {
+    // The preferred linker language.
+    std::string LinkerLanguage;
+
+    // Languages whose runtime libraries must be linked.
+    std::vector<std::string> Languages;
+  };
+  LinkClosure const* GetLinkClosure(const char* config);
 
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
@@ -535,6 +553,7 @@ private:
 
   void ComputeLinkImplementation(const char* config,
                                  LinkImplementation& impl);
+  void ComputeLinkClosure(const char* config, LinkClosure& lc);
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.

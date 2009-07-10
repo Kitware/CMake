@@ -85,6 +85,9 @@ public:
   // Cache link implementation computation from each configuration.
   typedef std::map<cmStdString, cmTarget::LinkImplementation> LinkImplMapType;
   LinkImplMapType LinkImplMap;
+
+  typedef std::map<cmStdString, cmTarget::LinkClosure> LinkClosureMapType;
+  LinkClosureMapType LinkClosureMap;
 };
 
 //----------------------------------------------------------------------------
@@ -2321,22 +2324,106 @@ bool cmTarget::GetPropertyAsBool(const char* prop)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetLinkerLanguage(const char*)
+class cmTargetCollectLinkLanguages
 {
-  cmGlobalGenerator* gg =
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+public:
+  cmTargetCollectLinkLanguages(cmTarget* target, const char* config,
+                               std::set<cmStdString>& languages):
+    Config(config), Languages(languages) { this->Visited.insert(target); }
+  void Visit(cmTarget* target)
+    {
+    if(!target || !this->Visited.insert(target).second)
+      {
+      return;
+      }
+
+    cmTarget::LinkInterface const* iface =
+      target->GetLinkInterface(this->Config);
+    if(!iface) { return; }
+
+    for(std::vector<std::string>::const_iterator
+          li = iface->Languages.begin(); li != iface->Languages.end(); ++li)
+      {
+      this->Languages.insert(*li);
+      }
+
+    cmMakefile* mf = target->GetMakefile();
+    for(std::vector<std::string>::const_iterator
+          li = iface->Libraries.begin(); li != iface->Libraries.end(); ++li)
+      {
+      this->Visit(mf->FindTargetToUse(li->c_str()));
+      }
+    }
+private:
+  const char* Config;
+  std::set<cmStdString>& Languages;
+  std::set<cmTarget*> Visited;
+};
+
+//----------------------------------------------------------------------------
+const char* cmTarget::GetLinkerLanguage(const char* config)
+{
+  const char* lang = this->GetLinkClosure(config)->LinkerLanguage.c_str();
+  return *lang? lang : 0;
+}
+
+//----------------------------------------------------------------------------
+cmTarget::LinkClosure const* cmTarget::GetLinkClosure(const char* config)
+{
+  std::string key = cmSystemTools::UpperCase(config? config : "");
+  cmTargetInternals::LinkClosureMapType::iterator
+    i = this->Internal->LinkClosureMap.find(key);
+  if(i == this->Internal->LinkClosureMap.end())
+    {
+    LinkClosure lc;
+    this->ComputeLinkClosure(config, lc);
+    cmTargetInternals::LinkClosureMapType::value_type entry(key, lc);
+    i = this->Internal->LinkClosureMap.insert(entry).first;
+    }
+  return &i->second;
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc)
+{
+  // Get languages built in this target.
+  std::set<cmStdString> languages;
+  LinkImplementation const* impl = this->GetLinkImplementation(config);
+  for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
+      li != impl->Languages.end(); ++li)
+    {
+    languages.insert(*li);
+    }
+
+  // Add interface languages from linked targets.
+  cmTargetCollectLinkLanguages cll(this, config, languages);
+  for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
+      li != impl->Libraries.end(); ++li)
+    {
+    cll.Visit(this->Makefile->FindTargetToUse(li->c_str()));
+    }
+
+  // Store the transitive closure of languages.
+  for(std::set<cmStdString>::const_iterator li = languages.begin();
+      li != languages.end(); ++li)
+    {
+    lc.Languages.push_back(*li);
+    }
+
+  // Choose the language whose linker should be used.
   if(this->GetProperty("HAS_CXX"))
     {
-    const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", "CXX");
+    lc.LinkerLanguage = "CXX";
     }
-  const char* linkerLang = this->GetProperty("LINKER_LANGUAGE");
-  if (linkerLang==0)
+  else if(const char* linkerLang = this->GetProperty("LINKER_LANGUAGE"))
     {
-    // if the property has not yet been set, collect all languages in the
-    // target and then find the language with the highest preference value
-    std::set<cmStdString> languages;
-    this->GetLanguages(languages);
-
+    lc.LinkerLanguage = linkerLang;
+    }
+  else
+    {
+    // Find the language with the highest preference value.
+    cmGlobalGenerator* gg =
+      this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
     std::string linkerLangList;              // only used for the error message
     int maxLinkerPref = 0;
     bool multiplePreferedLanguages = false;
@@ -2344,10 +2431,10 @@ const char* cmTarget::GetLinkerLanguage(const char*)
         sit != languages.end(); ++sit)
       {
       int linkerPref = gg->GetLinkerPreference(sit->c_str());
-      if ((linkerPref > maxLinkerPref) || (linkerLang==0))
+      if (lc.LinkerLanguage.empty() || (linkerPref > maxLinkerPref))
         {
         maxLinkerPref = linkerPref;
-        linkerLang = sit->c_str();
+        lc.LinkerLanguage = *sit;
         linkerLangList = *sit;
         multiplePreferedLanguages = false;
         }
@@ -2359,21 +2446,16 @@ const char* cmTarget::GetLinkerLanguage(const char*)
         }
       }
 
-    if (linkerLang!=0)
-      {
-      const_cast<cmTarget*>(this)->SetProperty("LINKER_LANGUAGE", linkerLang);
-      }
     if (multiplePreferedLanguages)
       {
       cmOStringStream err;
       err << "Error: Target " << this->Name << " contains multiple languages "
-          << "with the highest linker preference (" << maxLinkerPref << "): " 
+          << "with the highest linker preference (" << maxLinkerPref << "): "
           << linkerLangList << "\n"
           << "You must set the LINKER_LANGUAGE property for this target.";
       cmSystemTools::Error(err.str().c_str());
       }
     }
-  return this->GetProperty("LINKER_LANGUAGE");
 }
 
 //----------------------------------------------------------------------------
@@ -3829,6 +3911,11 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
     LinkImplementation const* impl = this->GetLinkImplementation(config);
     iface.Libraries = impl->Libraries;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
+    if(this->GetType() == cmTarget::STATIC_LIBRARY)
+      {
+      // Targets using this archive need its language runtime libraries.
+      iface.Languages = impl->Languages;
+      }
     }
 
   return true;
@@ -3869,6 +3956,7 @@ void cmTarget::ComputeLinkImplementation(const char* config,
   // Compute which library configuration to link.
   cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
 
+  // Collect libraries directly linked in this configuration.
   LinkLibraryVectorType const& llibs = this->GetOriginalLinkLibraries();
   for(cmTarget::LinkLibraryVectorType::const_iterator li = llibs.begin();
       li != llibs.end(); ++li)
@@ -3890,6 +3978,15 @@ void cmTarget::ComputeLinkImplementation(const char* config,
       // Support OLD behavior for CMP0003.
       impl.WrongConfigLibraries.push_back(item);
       }
+    }
+
+  // This target needs runtime libraries for its source languages.
+  std::set<cmStdString> languages;
+  this->GetLanguages(languages);
+  for(std::set<cmStdString>::iterator li = languages.begin();
+      li != languages.end(); ++li)
+    {
+    impl.Languages.push_back(*li);
     }
 }
 
