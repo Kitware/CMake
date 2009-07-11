@@ -151,7 +151,7 @@ private:
   cmStdString CTestCmd;
   cmStdString UpdateCmd;
   cmStdString CTestEnv;
-  cmStdString InitCache;
+  cmStdString InitialCache;
   cmStdString CMakeCmd;
   cmStdString CMOutFile;
   std::vector<cmStdString> ExtraUpdates;

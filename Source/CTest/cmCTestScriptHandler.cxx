@@ -117,7 +117,7 @@ void cmCTestScriptHandler::Initialize()
   this->CTestCmd = "";
   this->UpdateCmd = "";
   this->CTestEnv = "";
-  this->InitCache = "";
+  this->InitialCache = "";
   this->CMakeCmd = "";
   this->CMOutFile = "";
   this->ExtraUpdates.clear();
@@ -488,7 +488,7 @@ int cmCTestScriptHandler::ExtractVariables()
     }
   this->CTestEnv
     = this->Makefile->GetSafeDefinition("CTEST_ENVIRONMENT");
-  this->InitCache
+  this->InitialCache
     = this->Makefile->GetSafeDefinition("CTEST_INITIAL_CACHE");
   this->CMakeCmd
     = this->Makefile->GetSafeDefinition("CTEST_CMAKE_COMMAND");
@@ -879,7 +879,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     }
 
   // put the initial cache into the bin dir
-  if (!this->InitCache.empty())
+  if (!this->InitialCache.empty())
     {
     std::string cacheFile = this->BinaryDir;
     cacheFile += "/CMakeCache.txt";
@@ -890,7 +890,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
       return 9;
       }
 
-    fout.write(this->InitCache.c_str(), this->InitCache.size());
+    fout.write(this->InitialCache.c_str(), this->InitialCache.size());
 
     // Make sure the operating system has finished writing the file
     // before closing it.  This will ensure the file is finished before
