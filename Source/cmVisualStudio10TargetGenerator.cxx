@@ -331,35 +331,137 @@ void cmVisualStudio10TargetGenerator::ConvertToWindowsSlash(std::string& s)
     }
 }
 void cmVisualStudio10TargetGenerator::WriteGroups()
-{
-  // This should create a target.vcxproj.filters file
-  // something like this:
+{ 
+  // collect up group information
+  std::vector<cmSourceGroup> sourceGroups = 
+    this->Makefile->GetSourceGroups();
+  std::vector<cmSourceFile*>  classes = this->Target->GetSourceFiles();
   
-/*
-  ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" 
-xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup>
-    <CustomBuild Include="..\CMakeLists.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{05072589-c7be-439a-8fd7-5db6ee5008a9}
-      </UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\foo.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\testCCompiler.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-</Project>
-*/
+  std::set<cmSourceGroup*> groupsUsed;
+  std::vector<cmSourceFile*> clCompile;
+  std::vector<cmSourceFile*> customBuild;
+  std::vector<cmSourceFile*> none;
+  
+  for(std::vector<cmSourceFile*>::const_iterator s = classes.begin(); 
+      s != classes.end(); s++)
+    {
+    cmSourceFile* sf = *s; 
+    std::string const& source = sf->GetFullPath();
+    cmSourceGroup& sourceGroup = 
+      this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
+    groupsUsed.insert(&sourceGroup);
+    const char* lang = sf->GetLanguage();
+    if(!lang)
+      {
+      lang = "None";
+      }
+    if(lang[0] == 'C')
+      {
+      clCompile.push_back(sf);
+      }
+    else if(sf->GetCustomCommand())
+      {
+      customBuild.push_back(sf);
+      }
+    else
+      {
+      none.push_back(sf);
+      }
+    }
+  // Write out group file
+  std::string path =  this->Makefile->GetStartOutputDirectory();
+  path += "/";
+  path += this->Target->GetName();
+  path += ".vcxproj.filters";
+  cmGeneratedFileStream fout(path.c_str());
+  char magic[] = {0xEF,0xBB, 0xBF};
+  fout.write(magic, 3);
+  cmGeneratedFileStream* save = this->BuildFileStream;
+  this->BuildFileStream = & fout;
+  this->WriteString("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+                    "<Project "
+                    "ToolsVersion=\"4.0\" "
+                    "xmlns=\"http://schemas.microsoft.com/"
+                    "developer/msbuild/2003\">\n",
+                    0);
+  this->WriteGroupSources("ClCompile", clCompile, sourceGroups);
+  this->WriteGroupSources("CustomBuild", customBuild, sourceGroups);
+
+  this->WriteString("<ItemGroup>\n", 1);
+  for(std::set<cmSourceGroup*>::iterator g = groupsUsed.begin();
+      g != groupsUsed.end(); ++g)
+    {
+    cmSourceGroup* sg = *g;
+    const char* name = sg->GetFullName();
+    if(strlen(name) != 0)
+      {
+      this->WriteString("<Filter Include=\"", 2);
+      (*this->BuildFileStream) << name << "\">\n";
+      std::string guidName = "SG_Filter_";
+      guidName += name;
+      this->GlobalGenerator->CreateGUID(guidName.c_str());
+      this->WriteString("<UniqueIdentifier>", 3);
+      std::string guid 
+        = this->GlobalGenerator->GetGUID(guidName.c_str());
+      (*this->BuildFileStream) 
+        << "{"
+        << guid << "}"
+        << "</UniqueIdentifier>\n";
+      this->WriteString("</Filter>\n", 2);
+      }
+    }
+  this->WriteString("</ItemGroup>\n", 1);
+  this->WriteGroupSources("None", none, sourceGroups);
+  this->WriteString("</Project>\n", 0);
+  // restore stream pointer
+  this->BuildFileStream = save;
 }
 
+void 
+cmVisualStudio10TargetGenerator::
+WriteGroupSources(const char* name,
+                  std::vector<cmSourceFile*> const& sources,
+                  std::vector<cmSourceGroup>& sourceGroups)
+{
+  this->WriteString("<ItemGroup>\n", 1);
+  for(std::vector<cmSourceFile*>::const_iterator s = sources.begin();
+      s != sources.end(); ++s)
+    {
+    cmSourceFile* sf = *s; 
+    std::string const& source = sf->GetFullPath();
+    cmSourceGroup& sourceGroup = 
+      this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
+    const char* filter = sourceGroup.GetFullName();
+    this->WriteString("<", 2); 
+    std::string path = source;
+    // custom command source are done with relative paths 
+    // so that the custom command display in the GUI
+    // the source groups have to EXACTLY match the string
+    // used in the .vcxproj file
+    if(sf->GetCustomCommand())
+      {
+      path = cmSystemTools::RelativePath(
+        this->Makefile->GetCurrentOutputDirectory(),
+        source.c_str());
+      }
+    this->ConvertToWindowsSlash(path);
+    (*this->BuildFileStream) << name << " Include=\""
+                             << path;
+    if(strlen(filter))
+      {
+      (*this->BuildFileStream) << "\">\n";
+      this->WriteString("<Filter>", 3);
+      (*this->BuildFileStream) << filter << "</Filter>\n";
+      this->WriteString("</", 2);
+      (*this->BuildFileStream) << name << ">\n";
+      }
+    else
+      {
+      (*this->BuildFileStream) << "\" />\n";
+      }
+    }
+  this->WriteString("</ItemGroup>\n", 1);
+}
 
 void cmVisualStudio10TargetGenerator::WriteObjSources()
 { 
@@ -412,6 +514,7 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
       if(lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0))
         {
         std::string sourceFile = (*source)->GetFullPath();
+        this->ConvertToWindowsSlash(sourceFile);
         // output the source file
         this->WriteString("<ClCompile Include=\"", 2);
         (*this->BuildFileStream ) << sourceFile << "\"";
@@ -1025,21 +1128,6 @@ WriteMidlOptions(std::string const& /*config*/,
 {
   this->WriteString("<Midl>\n", 2);
   this->OutputIncludes(includes);
-  // Need this stuff, but there is an midl.xml file...
-  // should we look for .idl language?, and flags?
-  /*
-       <MkTypLibCompatible>false</MkTypLibCompatible>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>%(FileName).tlb</TypeLibraryName>
-      <OutputDirectory>$(IntDir)\</OutputDirectory>
-      <HeaderFileName>%(FileName).h</HeaderFileName>
-      <DllDataFileName>
-      </DllDataFileName>
-      <InterfaceIdentifierFileName>%(FileName)_i.c
-      </InterfaceIdentifierFileName>
-      <ProxyFileName>%(FileName)_p.c</ProxyFileName>
-  */
   this->WriteString("</Midl>\n", 2);
 }
   

@@ -302,6 +302,10 @@ public:
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,
                                const char* default_comment = "");
+  // Compute object file names.
+  std::string GetObjectFileNameWithoutTarget(const cmSourceFile& source,
+                                             std::string const& dir_max,
+                                             bool* hasSourceExtension = 0);
 
 protected:
   /** Fill out these strings for the given target.  Libraries to link,
@@ -346,10 +350,6 @@ protected:
     std::ostream& os, const char* config,
     std::vector<std::string> const& configurationTypes);
 
-  // Compute object file names.
-  std::string GetObjectFileNameWithoutTarget(const cmSourceFile& source,
-                                             std::string const& dir_max,
-                                             bool* hasSourceExtension = 0);
   std::string& CreateSafeUniqueObjectFileName(const char* sin,
                                               std::string const& dir_max);
 

@@ -1958,7 +1958,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   // build the whole source group path
   for(++i; i<=lastElement; ++i)
     {
-    sg->AddChild(cmSourceGroup(name[i].c_str(), 0));
+    sg->AddChild(cmSourceGroup(name[i].c_str(), 0, sg->GetFullName()));
     sg = sg->lookupChild(name[i].c_str());
     }
 

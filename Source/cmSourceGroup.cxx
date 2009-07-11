@@ -23,10 +23,17 @@ public:
 };
 
 //----------------------------------------------------------------------------
-cmSourceGroup::cmSourceGroup(const char* name, const char* regex): Name(name)
+cmSourceGroup::cmSourceGroup(const char* name, const char* regex,
+                             const char* parentName): Name(name)
 {
   this->Internal = new cmSourceGroupInternals;
   this->SetGroupRegex(regex);
+  if(parentName)
+    {
+    this->FullName = parentName;
+    this->FullName += "\\";
+    }
+  this->FullName += this->Name;
 }
 
 //----------------------------------------------------------------------------
@@ -39,6 +46,7 @@ cmSourceGroup::~cmSourceGroup()
 cmSourceGroup::cmSourceGroup(cmSourceGroup const& r)
 {
   this->Name = r.Name;
+  this->FullName = r.FullName;
   this->GroupRegex = r.GroupRegex;
   this->GroupFiles = r.GroupFiles;
   this->SourceFiles = r.SourceFiles;
@@ -79,6 +87,12 @@ void cmSourceGroup::AddGroupFile(const char* name)
 const char* cmSourceGroup::GetName() const
 {
   return this->Name.c_str();
+}
+
+//----------------------------------------------------------------------------
+const char* cmSourceGroup::GetFullName() const
+{
+  return this->FullName.c_str();
 }
   
 //----------------------------------------------------------------------------

@@ -26,6 +26,7 @@ class cmSourceFile;
 class cmCustomCommand;
 class cmLocalVisualStudio7Generator;
 class cmComputeLinkInformation;
+#include "cmSourceGroup.h"
 
 class cmVisualStudio10TargetGenerator
 {
@@ -74,6 +75,9 @@ private:
   void WriteEvent(const char* name, std::vector<cmCustomCommand> & commands,
                   std::string const& configName);
   void ComputeObjectNames();
+  void WriteGroupSources(const char* name,
+                         std::vector<cmSourceFile*> const& sources,
+                         std::vector<cmSourceGroup>& );
 private:
   std::string ModuleDefinitionFile;
   std::string PathToVcxproj;

@@ -37,7 +37,8 @@ class cmSourceGroupInternals;
 class cmSourceGroup
 {
 public:
-  cmSourceGroup(const char* name, const char* regex);
+  cmSourceGroup(const char* name, const char* regex,
+                const char* parentName=0);
   cmSourceGroup(cmSourceGroup const& r);
   ~cmSourceGroup();
   cmSourceGroup& operator=(cmSourceGroup const&);
@@ -66,6 +67,11 @@ public:
    * Get the name of this group.
    */
   const char* GetName() const;
+
+  /**
+   * Get the full path name for group.
+   */
+  const char* GetFullName() const;
   
   /**
    * Check if the given name matches this group's regex.
@@ -107,6 +113,8 @@ private:
    * The name of the source group.
    */
   std::string Name;
+  // Full path to group
+  std::string FullName;
   
   /**
    * The regular expression matching the files in the group.

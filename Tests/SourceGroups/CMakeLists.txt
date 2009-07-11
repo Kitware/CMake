@@ -31,5 +31,5 @@ source_group(Base\\Sub1\\Base FILES bar.c)
 source_group(EmptyGroup)
 
 
-add_executable(SourceGroups main.c bar.c foo.c sub1/foo.c sub1/foobar.c baz.c)
+add_executable(SourceGroups main.c bar.c foo.c sub1/foo.c sub1/foobar.c baz.c README.txt)
 
