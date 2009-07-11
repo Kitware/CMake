@@ -153,6 +153,9 @@ cmExportFileGenerator
   if(cmTarget::LinkInterface const* iface = target->GetLinkInterface(config))
     {
     this->SetImportLinkProperty(suffix, target,
+                                "IMPORTED_LINK_INTERFACE_LANGUAGES",
+                                iface->Languages, properties);
+    this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
                                 iface->Libraries, properties);
     this->SetImportLinkProperty(suffix, target,

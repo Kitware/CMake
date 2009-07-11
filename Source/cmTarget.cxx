@@ -311,6 +311,30 @@ void cmTarget::DefineProperties(cmake *cm)
      "for the named configuration.");
 
   cm->DefineProperty
+    ("IMPORTED_LINK_INTERFACE_LANGUAGES", cmProperty::TARGET,
+     "Languages compiled into an IMPORTED static library.",
+     "Lists languages of soure files compiled to produce a STATIC IMPORTED "
+     "library (such as \"C\" or \"CXX\").  "
+     "CMake accounts for these languages when computing how to link a "
+     "target to the imported library.  "
+     "For example, when a C executable links to an imported C++ static "
+     "library CMake chooses the C++ linker to satisfy language runtime "
+     "dependencies of the static library.  "
+     "\n"
+     "This property is ignored for targets that are not STATIC libraries.  "
+     "This property is ignored for non-imported targets.");
+
+  cm->DefineProperty
+    ("IMPORTED_LINK_INTERFACE_LANGUAGES_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration version of IMPORTED_LINK_INTERFACE_LANGUAGES.",
+     "This property is used when loading settings for the <CONFIG> "
+     "configuration of an imported target.  "
+     "Configuration names correspond to those provided by the project "
+     "from which the target is imported.  "
+     "If set, this property completely overrides the generic property "
+     "for the named configuration.");
+
+  cm->DefineProperty
     ("IMPORTED_LOCATION", cmProperty::TARGET,
      "Full path to the main file on disk for an IMPORTED target.",
      "Specifies the location of an IMPORTED target file on disk.  "
@@ -3791,6 +3815,24 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
     cmSystemTools::ExpandListArgument(libs, info.LinkInterface.SharedDeps);
     }
   }
+
+  // Get the link languages.
+  if(this->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    std::string linkProp = "IMPORTED_LINK_INTERFACE_LANGUAGES";
+    linkProp += suffix;
+    if(const char* config_libs = this->GetProperty(linkProp.c_str()))
+      {
+      cmSystemTools::ExpandListArgument(config_libs,
+                                        info.LinkInterface.Languages);
+      }
+    else if(const char* libs =
+            this->GetProperty("IMPORTED_LINK_INTERFACE_LANGUAGES"))
+      {
+      cmSystemTools::ExpandListArgument(libs,
+                                        info.LinkInterface.Languages);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
