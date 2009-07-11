@@ -881,22 +881,12 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   // put the initial cache into the bin dir
   if (!this->InitialCache.empty())
     {
-    std::string cacheFile = this->BinaryDir;
-    cacheFile += "/CMakeCache.txt";
-    cmGeneratedFileStream fout(cacheFile.c_str());
-    if(!fout)
+    if (!this->WriteInitialCache(this->BinaryDir.c_str(), 
+         this->InitialCache.c_str()))
       {
       this->RestoreBackupDirectories();
       return 9;
       }
-
-    fout.write(this->InitialCache.c_str(), this->InitialCache.size());
-
-    // Make sure the operating system has finished writing the file
-    // before closing it.  This will ensure the file is finished before
-    // the check below.
-    fout.flush();
-    fout.close();
     }
 
   // do an initial cmake to setup the DartConfig file
@@ -995,6 +985,30 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   return 0;
 }
 
+//-------------------------------------------------------------------------
+bool cmCTestScriptHandler::WriteInitialCache(const char* directory, 
+                                             const char* text)
+{
+  std::string cacheFile = directory;
+  cacheFile += "/CMakeCache.txt";
+  cmGeneratedFileStream fout(cacheFile.c_str());
+  if(!fout)
+    {
+    return false;
+    }
+
+  if (text!=0)
+    {
+    fout.write(text, strlen(text));
+    }
+
+  // Make sure the operating system has finished writing the file
+  // before closing it.  This will ensure the file is finished before
+  // the check below.
+  fout.flush();
+  fout.close();
+  return true;
+}
 
 //-------------------------------------------------------------------------
 void cmCTestScriptHandler::RestoreBackupDirectories()
