@@ -5,6 +5,7 @@ extern int testLib3();
 extern int testLib4();
 extern int testLib4lib();
 extern int testLib5();
+extern int testLib6();
 
 /* Switch a symbol between debug and optimized builds to make sure the
    proper library is found from the testLib4 link interface.  */
@@ -18,6 +19,6 @@ extern testLib4libcfg(void);
 int main()
 {
   return (testLib2() + generated_by_testExe1() + testLib3() + testLib4()
-          + testLib5()
+          + testLib5() + testLib6()
           + generated_by_testExe3() + testLib4lib() + testLib4libcfg());
 }

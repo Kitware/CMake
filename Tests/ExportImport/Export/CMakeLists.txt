@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 2.6)
-project(Export C)
+cmake_minimum_required (VERSION 2.7.20090711)
+project(Export C CXX)
 
 # Pretend that RelWithDebInfo should link to debug libraries to test
 # the DEBUG_CONFIGURATIONS property.
@@ -45,6 +45,8 @@ set_property(TARGET testLib4 PROPERTY FRAMEWORK 1)
 
 add_library(testLib5 SHARED testLib5.c)
 
+add_library(testLib6 STATIC testLib6.cxx testLib6.c)
+
 # Work-around: Visual Studio 6 does not support per-target object files.
 set(VS6)
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
@@ -76,6 +78,7 @@ install(
   TARGETS
   testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
+  testLib6
   EXPORT exp
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib NAMELINK_SKIP
@@ -111,7 +114,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
-export(TARGETS testExe2 testLib4 testLib5 testExe3 testExe2lib
+export(TARGETS testExe2 testLib4 testLib5 testLib6 testExe3 testExe2lib
   testLib4lib testLib4libdbg testLib4libopt
   NAMESPACE bld_
   APPEND FILE ExportBuildTree.cmake

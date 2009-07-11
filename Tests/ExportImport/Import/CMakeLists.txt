@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 2.6)
-project(Import C)
+cmake_minimum_required (VERSION 2.7.20090711)
+project(Import C CXX)
 
 # Import everything in a subdirectory.
 add_subdirectory(A)
