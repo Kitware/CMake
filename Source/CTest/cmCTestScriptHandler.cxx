@@ -418,25 +418,16 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->Makefile->AddFunctionBlocker(f);
 
 
-  /* Execute CMakeDetermineSystem and CMakeSystemSpecificInformation, so 
+  /* Execute CTestScriptMode.cmake, which loads CMakeDetermineSystem and 
+  CMakeSystemSpecificInformation, so 
   that variables like CMAKE_SYSTEM and also the search paths for libraries,
   header and executables are set correctly and can be used. Makes new-style
   ctest scripting easier. */
   std::string systemFile = 
-      this->Makefile->GetModulesFile("CMakeDetermineSystem.cmake");
+      this->Makefile->GetModulesFile("CTestScriptMode.cmake");
   if (!this->Makefile->ReadListFile(0, systemFile.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag())
     {  
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:" 
-               << systemFile.c_str() << "\n");
-    return 2;
-    }
-
-  systemFile = 
-      this->Makefile->GetModulesFile("CMakeSystemSpecificInformation.cmake");
-  if (!this->Makefile->ReadListFile(0, systemFile.c_str()) ||
-      cmSystemTools::GetErrorOccuredFlag())
-    {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:" 
                << systemFile.c_str() << "\n");
     return 2;
@@ -966,7 +957,8 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         }
       cmCTestLog(this->CTest, ERROR_MESSAGE,
         "Unable to run ctest:" << std::endl
-        << output.c_str() << std::endl);
+        << "command: " << command.c_str() << std::endl
+        << "output: " << output.c_str() << std::endl);
       if (!res)
         {
         return 11;
