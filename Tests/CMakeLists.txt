@@ -880,9 +880,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   # A simple test for ctest in script mode
   CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake.in"
           "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake" @ONLY)
-  ADD_TEST(CTest.ScriptMode ${CMAKE_CTEST_COMMAND}
-        -S "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake"
-        )
+#  ADD_TEST(CTest.ScriptMode ${CMAKE_CTEST_COMMAND}
+#        -S "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake"
+#        )
 
   SET(CTEST_TEST_UPDATE 1)
   IF(CTEST_TEST_UPDATE)
