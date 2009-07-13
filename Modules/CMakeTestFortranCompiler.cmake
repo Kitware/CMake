@@ -34,6 +34,20 @@ ELSE(NOT CMAKE_Fortran_COMPILER_WORKS)
       "the following output:\n${OUTPUT}\n\n")
   ENDIF(FORTRAN_TEST_WAS_RUN)
   SET(CMAKE_Fortran_COMPILER_WORKS 1 CACHE INTERNAL "")
+
+  IF(CMAKE_Fortran_COMPILER_FORCED)
+    # The compiler configuration was forced by the user.
+    # Assume the user has configured all compiler information.
+  ELSE(CMAKE_Fortran_COMPILER_FORCED)
+    # Try to identify the ABI and configure it into CMakeFortranCompiler.cmake
+    INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
+    CMAKE_DETERMINE_COMPILER_ABI(Fortran ${CMAKE_ROOT}/Modules/CMakeFortranCompilerABI.F)
+    CONFIGURE_FILE(
+      ${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake
+      @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
+      )
+  ENDIF(CMAKE_Fortran_COMPILER_FORCED)
 ENDIF(NOT CMAKE_Fortran_COMPILER_WORKS)
 
 IF(CMAKE_Fortran_COMPILER_WORKS)
