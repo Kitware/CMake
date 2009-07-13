@@ -239,6 +239,10 @@ public:
   static void ParseWindowsCommandLine(const char* command,
                                       std::vector<std::string>& args);
 
+  /** Parse arguments out of a unix command line string.  */
+  static void ParseUnixCommandLine(const char* command,
+                                   std::vector<std::string>& args);
+
   /** Compute an escaped version of the given argument for use in a
       windows shell.  See kwsys/System.h.in for details.  */
   static std::string EscapeWindowsShellArgument(const char* arg,

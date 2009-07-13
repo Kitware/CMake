@@ -448,6 +448,38 @@ void cmSystemTools::ParseWindowsCommandLine(const char* command,
     }
 }
 
+//----------------------------------------------------------------------------
+class cmSystemToolsArgV
+{
+  char** ArgV;
+public:
+  cmSystemToolsArgV(char** argv): ArgV(argv) {}
+  ~cmSystemToolsArgV()
+    {
+    for(char** arg = this->ArgV; arg && *arg; ++arg)
+      {
+      free(*arg);
+      }
+    free(this->ArgV);
+    }
+  void Store(std::vector<std::string>& args) const
+    {
+    for(char** arg = this->ArgV; arg && *arg; ++arg)
+      {
+      args.push_back(*arg);
+      }
+    }
+};
+
+//----------------------------------------------------------------------------
+void cmSystemTools::ParseUnixCommandLine(const char* command,
+                                         std::vector<std::string>& args)
+{
+  // Invoke the underlying parser.
+  cmSystemToolsArgV argv = cmsysSystem_Parse_CommandForUnix(command, 0);
+  argv.Store(args);
+}
+
 std::string cmSystemTools::EscapeWindowsShellArgument(const char* arg,
                                                       int shell_flags)
 {
