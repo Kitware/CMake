@@ -13,11 +13,13 @@
 =========================================================================*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Process.h)
+#include KWSYS_HEADER(System.h)
 
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
 # include "Process.h.in"
+# include "System.h.in"
 #endif
 
 /*
@@ -187,7 +189,6 @@ static void kwsysProcessesSignalHandler(int signum, siginfo_t* info,
 #else
 static void kwsysProcessesSignalHandler(int signum);
 #endif
-static char** kwsysProcessParseVerbatimCommand(const char* command);
 
 /*--------------------------------------------------------------------------*/
 /* Structure containing data used to implement the child's execution.  */
@@ -422,7 +423,7 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
     /* In order to run the given command line verbatim we need to
        parse it.  */
     newCommands[cp->NumberOfCommands] =
-      kwsysProcessParseVerbatimCommand(*command);
+      kwsysSystem_Parse_CommandForUnix(*command, 0);
     if(!newCommands[cp->NumberOfCommands])
       {
       /* Out of memory.  */
@@ -2729,257 +2730,3 @@ static void kwsysProcessesSignalHandler(int signum
   }
 #endif
 }
-
-/*--------------------------------------------------------------------------*/
-static int kwsysProcessAppendByte(char* local,
-                                  char** begin, char** end,
-                                  int* size, char c)
-{
-  /* Allocate space for the character.  */
-  if((*end - *begin) >= *size)
-    {
-    kwsysProcess_ptrdiff_t length = *end - *begin;
-    char* newBuffer = (char*)malloc((size_t)(*size*2));
-    if(!newBuffer)
-      {
-      return 0;
-      }
-    memcpy(newBuffer, *begin, (size_t)(length)*sizeof(char));
-    if(*begin != local)
-      {
-      free(*begin);
-      }
-    *begin = newBuffer;
-    *end = *begin + length;
-    *size *= 2;
-    }
-
-  /* Store the character.  */
-  *(*end)++ = c;
-  return 1;
-}
-
-/*--------------------------------------------------------------------------*/
-static int kwsysProcessAppendArgument(char** local,
-                                      char*** begin, char*** end,
-                                      int* size,
-                                      char* arg_local,
-                                      char** arg_begin, char** arg_end,
-                                      int* arg_size)
-{
-  /* Append a null-terminator to the argument string.  */
-  if(!kwsysProcessAppendByte(arg_local, arg_begin, arg_end, arg_size, '\0'))
-    {
-    return 0;
-    }
-
-  /* Allocate space for the argument pointer.  */
-  if((*end - *begin) >= *size)
-    {
-    kwsysProcess_ptrdiff_t length = *end - *begin;
-    char** newPointers = (char**)malloc((size_t)(*size)*2*sizeof(char*));
-    if(!newPointers)
-      {
-      return 0;
-      }
-    memcpy(newPointers, *begin, (size_t)(length)*sizeof(char*));
-    if(*begin != local)
-      {
-      free(*begin);
-      }
-    *begin = newPointers;
-    *end = *begin + length;
-    *size *= 2;
-    }
-
-  /* Allocate space for the argument string.  */
-  **end = (char*)malloc((size_t)(*arg_end - *arg_begin));
-  if(!**end)
-    {
-    return 0;
-    }
-
-  /* Store the argument in the command array.  */
-  memcpy(**end, *arg_begin,(size_t)(*arg_end - *arg_begin));
-  ++(*end);
-
-  /* Reset the argument to be empty.  */
-  *arg_end = *arg_begin;
-
-  return 1;
-}
-
-/*--------------------------------------------------------------------------*/
-#define KWSYSPE_LOCAL_BYTE_COUNT 1024
-#define KWSYSPE_LOCAL_ARGS_COUNT 32
-static char** kwsysProcessParseVerbatimCommand(const char* command)
-{
-  /* Create a buffer for argument pointers during parsing.  */
-  char* local_pointers[KWSYSPE_LOCAL_ARGS_COUNT];
-  int pointers_size = KWSYSPE_LOCAL_ARGS_COUNT;
-  char** pointer_begin = local_pointers;
-  char** pointer_end = pointer_begin;
-
-  /* Create a buffer for argument strings during parsing.  */
-  char local_buffer[KWSYSPE_LOCAL_BYTE_COUNT];
-  int buffer_size = KWSYSPE_LOCAL_BYTE_COUNT;
-  char* buffer_begin = local_buffer;
-  char* buffer_end = buffer_begin;
-
-  /* Parse the command string.  Try to behave like a UNIX shell.  */
-  char** newCommand = 0;
-  const char* c = command;
-  int in_argument = 0;
-  int in_escape = 0;
-  int in_single = 0;
-  int in_double = 0;
-  int failed = 0;
-  for(;*c; ++c)
-    {
-    if(in_escape)
-      {
-      /* This character is escaped so do no special handling.  */
-      if(!in_argument)
-        {
-        in_argument = 1;
-        }
-      if(!kwsysProcessAppendByte(local_buffer, &buffer_begin,
-                                 &buffer_end, &buffer_size, *c))
-        {
-        failed = 1;
-        break;
-        }
-      in_escape = 0;
-      }
-    else if(*c == '\\' && !in_single)
-      {
-      /* The next character should be escaped.  */
-      in_escape = 1;
-      }
-    else if(*c == '\'' && !in_double)
-      {
-      /* Enter or exit single-quote state.  */
-      if(in_single)
-        {
-        in_single = 0;
-        }
-      else
-        {
-        in_single = 1;
-        if(!in_argument)
-          {
-          in_argument = 1;
-          }
-        }
-      }
-    else if(*c == '"' && !in_single)
-      {
-      /* Enter or exit double-quote state.  */
-      if(in_double)
-        {
-        in_double = 0;
-        }
-      else
-        {
-        in_double = 1;
-        if(!in_argument)
-          {
-          in_argument = 1;
-          }
-        }
-      }
-    else if(isspace((unsigned char) *c))
-      {
-      if(in_argument)
-        {
-        if(in_single || in_double)
-          {
-          /* This space belongs to a quoted argument.  */
-          if(!kwsysProcessAppendByte(local_buffer, &buffer_begin,
-                                     &buffer_end, &buffer_size, *c))
-            {
-            failed = 1;
-            break;
-            }
-          }
-        else
-          {
-          /* This argument has been terminated by whitespace.  */
-          if(!kwsysProcessAppendArgument(local_pointers, &pointer_begin,
-                                         &pointer_end, &pointers_size,
-                                         local_buffer, &buffer_begin,
-                                         &buffer_end, &buffer_size))
-            {
-            failed = 1;
-            break;
-            }
-          in_argument = 0;
-          }
-        }
-      }
-    else
-      {
-      /* This character belong to an argument.  */
-      if(!in_argument)
-        {
-        in_argument = 1;
-        }
-      if(!kwsysProcessAppendByte(local_buffer, &buffer_begin,
-                                 &buffer_end, &buffer_size, *c))
-        {
-        failed = 1;
-        break;
-        }
-      }
-    }
-
-  /* Finish the last argument.  */
-  if(in_argument)
-    {
-    if(!kwsysProcessAppendArgument(local_pointers, &pointer_begin,
-                                   &pointer_end, &pointers_size,
-                                   local_buffer, &buffer_begin,
-                                   &buffer_end, &buffer_size))
-      {
-      failed = 1;
-      }
-    }
-
-  /* If we still have memory allocate space for the new command
-     buffer.  */
-  if(!failed)
-    {
-    kwsysProcess_ptrdiff_t n = pointer_end - pointer_begin;
-    newCommand = (char**)malloc((size_t)(n+1)*sizeof(char*));
-    }
-
-  if(newCommand)
-    {
-    /* Copy the arguments into the new command buffer.  */
-    kwsysProcess_ptrdiff_t n = pointer_end - pointer_begin;
-    memcpy(newCommand, pointer_begin, sizeof(char*)*(size_t)(n));
-    newCommand[n] = 0;
-    }
-  else
-    {
-    /* Free arguments already allocated.  */
-    while(pointer_end != pointer_begin)
-      {
-      free(*(--pointer_end));
-      }
-    }
-
-  /* Free temporary buffers.  */
-  if(pointer_begin != local_pointers)
-    {
-    free(pointer_begin);
-    }
-  if(buffer_begin != local_buffer)
-    {
-    free(buffer_begin);
-    }
-
-  /* Return the final command buffer.  */
-  return newCommand;
-}
-
