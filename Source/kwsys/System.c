@@ -709,7 +709,7 @@ static char** kwsysSystem__ParseUnixCommand(const char* command, int flags)
         }
       in_escape = 0;
       }
-    else if(*c == '\\' && !in_single)
+    else if(*c == '\\')
       {
       /* The next character should be escaped.  */
       in_escape = 1;
