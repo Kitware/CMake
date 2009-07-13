@@ -512,8 +512,11 @@ function(_ep_add_download_command name)
     else()
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
-        string(REGEX MATCH "\\.(tar|tgz|tar\\.gz)" ext "${url}")
-        set(file ${download_dir}/${name}${ext})
+        string(REGEX MATCH "[^/]*$" fname "${url}")
+        if(NOT "${fname}" MATCHES "\\.(tar|tgz|tar\\.gz)$")
+          message(FATAL_ERROR "Could not extract tarball filename from url:\n  ${url}")
+        endif()
+        set(file ${download_dir}/${fname})
         set(cmd ${CMAKE_COMMAND} -Dremote=${url} -Dlocal=${file} -P ${CMAKE_ROOT}/Modules/DownloadFile.cmake
           COMMAND)
         set(comment "Performing download step (download and extract) for '${name}'")
