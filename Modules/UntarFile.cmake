@@ -59,6 +59,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} -E tar ${args} ${filename}
   RESULT_VARIABLE rv)
 
 if(NOT rv EQUAL 0)
+  file(REMOVE_RECURSE "${ut_dir}")
   message(FATAL_ERROR "error: untar of '${filename}' failed")
 endif()
 
