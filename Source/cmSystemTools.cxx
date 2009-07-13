@@ -20,6 +20,9 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
+#ifdef __QNX__
+# include <malloc.h> /* for malloc/free on QNX */
+#endif
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
