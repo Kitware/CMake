@@ -45,7 +45,7 @@ set_property(TARGET testLib4 PROPERTY FRAMEWORK 1)
 
 add_library(testLib5 SHARED testLib5.c)
 
-add_library(testLib6 STATIC testLib6.cxx testLib6.c)
+add_library(testLib6 STATIC testLib6.cxx testLib6c.c)
 
 # Work-around: Visual Studio 6 does not support per-target object files.
 set(VS6)
