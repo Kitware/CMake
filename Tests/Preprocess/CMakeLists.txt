@@ -34,6 +34,9 @@ endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   set(PP_VS 1)
 endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 10")
+  set(PP_VS100 1)
+endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 10")
 
 # Some tests below check the PP_* variables set above.  They are meant
 # to test the case that the build tool is at fault.  Other tests below
@@ -49,7 +52,7 @@ endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
 # must not have it escaped inside the configured header.
 set(STRING_EXTRA "")
 
-if(NOT BORLAND AND NOT PP_VS70)
+if(NOT BORLAND AND NOT PP_VS70 AND NOT PP_VS100)
   # Borland, VS70 IDE: ;
   # The Borland compiler will simply not accept a non-escaped semicolon
   # on the command line.  If it is escaped \; then the escape character
@@ -57,8 +60,9 @@ if(NOT BORLAND AND NOT PP_VS70)
   #
   # The VS 7.0 IDE separates definitions on semicolons and commas with
   # no regard for quotes.  Fortunately VS 7.1 and above are okay.
+  # VS 10 seems to also not like semicolons
   set(SEMICOLON "\;")
-endif(NOT BORLAND AND NOT PP_VS70)
+endif()
 
 if(NOT PP_VS6)
   # VS 6 IDE: spaces and '"', '$', or ';'

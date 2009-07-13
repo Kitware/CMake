@@ -23,11 +23,9 @@
 #include "cmSourceFile.h"
 #include "cmVisualStudioGeneratorOptions.h"
 #include "cmLocalVisualStudio7Generator.h"
-
 #include "cmVS10CLFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
-
 
 
 cmVisualStudio10TargetGenerator::
@@ -35,19 +33,36 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
                                 cmGlobalVisualStudio7Generator* gg)
 {
   this->GlobalGenerator = gg;
-  this->GlobalGenerator->CreateGUID(target->GetName());
-  this->GUID = this->GlobalGenerator->GetGUID(target->GetName());
   this->Target = target;
   this->Makefile = target->GetMakefile();
   this->LocalGenerator =  
     (cmLocalVisualStudio7Generator*)
     this->Makefile->GetLocalGenerator();
+  const char* name = this->Target->GetName();
+  if (strncmp(name, "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+    {
+    cmCustomCommand cc = this->Target->GetPostBuildCommands()[0];
+    const cmCustomCommandLines& cmds = cc.GetCommandLines();
+    this->Name = cmds[0][0];
+    this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
+    }
+  else
+    {
+    this->Name = name;
+    this->GlobalGenerator->CreateGUID(this->Name.c_str());
+    this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
+    }
   this->Platform = "|Win32";
   this->ComputeObjectNames();
+  this->BuildFileStream = 0;
 }
 
 cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
 {
+  if(!this->BuildFileStream)
+    {
+    return;
+    }
   if (this->BuildFileStream->Close())
     {
     this->GlobalGenerator
@@ -97,16 +112,17 @@ void cmVisualStudio10TargetGenerator::WriteString(const char* line,
   (*this->BuildFileStream ) << line;
 }
 
+
 void cmVisualStudio10TargetGenerator::Generate()
-{
+{      
   // Tell the global generator the name of the project file
-  this->Target->SetProperty("GENERATOR_FILE_NAME",this->Target->GetName());
+  this->Target->SetProperty("GENERATOR_FILE_NAME",this->Name.c_str());
   this->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
                             ".vcxproj");
   cmMakefile* mf = this->Target->GetMakefile();
   std::string path =  mf->GetStartOutputDirectory();
   path += "/";
-  path += this->Target->GetName();
+  path += this->Name;
   path += ".vcxproj";
   this->BuildFileStream =
     new cmGeneratedFileStream(path.c_str());
@@ -371,7 +387,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   // Write out group file
   std::string path =  this->Makefile->GetStartOutputDirectory();
   path += "/";
-  path += this->Target->GetName();
+  path += this->Name;
   path += ".vcxproj.filters";
   cmGeneratedFileStream fout(path.c_str());
   char magic[] = {0xEF,0xBB, 0xBF};
@@ -434,16 +450,9 @@ WriteGroupSources(const char* name,
     const char* filter = sourceGroup.GetFullName();
     this->WriteString("<", 2); 
     std::string path = source;
-    // custom command source are done with relative paths 
-    // so that the custom command display in the GUI
-    // the source groups have to EXACTLY match the string
-    // used in the .vcxproj file
-    if(sf->GetCustomCommand())
-      {
-      path = cmSystemTools::RelativePath(
-        this->Makefile->GetCurrentOutputDirectory(),
-        source.c_str());
-      }
+    path = cmSystemTools::RelativePath(
+      this->Makefile->GetCurrentOutputDirectory(),
+      source.c_str());
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << name << " Include=\""
                              << path;
@@ -514,6 +523,9 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
       if(lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0))
         {
         std::string sourceFile = (*source)->GetFullPath();
+        sourceFile =  cmSystemTools::RelativePath(
+          this->Makefile->GetCurrentOutputDirectory(),
+          sourceFile.c_str());
         this->ConvertToWindowsSlash(sourceFile);
         // output the source file
         this->WriteString("<ClCompile Include=\"", 2);
@@ -642,7 +654,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       {
       if(configDefines.size())
         {
-        configDefines += ",";
+        configDefines += ";";
         }
       configDefines += ccdefs;
       }
@@ -746,7 +758,7 @@ OutputLinkIncremental(std::string const& configName)
     {
     cmSystemTools::Error
       ("CMake can not determine linker language for target:",
-       this->Target->GetName());
+       this->Name.c_str());
     return;
     }
   std::string linkFlagVarBase = "CMAKE_";
@@ -803,7 +815,7 @@ WriteClOptions(std::string const& configName,
       {
       cmSystemTools::Error
         ("CMake can not determine linker language for target:",
-         this->Target->GetName());
+         this->Name.c_str());
       return;
       }
     if(strcmp(linkLanguage, "C") == 0 || strcmp(linkLanguage, "CXX") == 0
@@ -944,7 +956,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     {
     cmSystemTools::Error
       ("CMake can not determine linker language for target:",
-       this->Target->GetName());
+       this->Name.c_str());
     return;
     }
 
@@ -1027,7 +1039,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     {
     cmSystemTools::Error
       ("CMake can not compute cmComputeLinkInformation for target:",
-       this->Target->GetName());
+       this->Name.c_str());
     return;
     }
   // add the libraries for the target to libs string
@@ -1224,14 +1236,26 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     cmTarget* dt = *i;
     this->WriteString("<ProjectReference Include=\"", 2);
     cmMakefile* mf = dt->GetMakefile();
-    std::string path =  mf->GetStartOutputDirectory();
-    path += "/";
-    path += dt->GetName();
-    path += ".vcxproj";
+    std::string name = dt->GetName();
+    std::string path;
+    if (strncmp(name.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+      {
+      cmCustomCommand cc = dt->GetPostBuildCommands()[0];
+      const cmCustomCommandLines& cmds = cc.GetCommandLines();
+      path = cmds[0][1];
+      name = cmds[0][0].c_str();
+      }
+    else
+      {
+      path =  mf->GetStartOutputDirectory();
+      path += "/";
+      path += dt->GetName();
+      path += ".vcxproj";
+      }
     (*this->BuildFileStream) << path << "\">\n";
     this->WriteString("<Project>", 3);
     (*this->BuildFileStream) 
-      << this->GlobalGenerator->GetGUID(dt->GetName())
+      << this->GlobalGenerator->GetGUID(name.c_str())
       << "</Project>\n";
     this->WriteString("</ProjectReference>\n", 2);
     }

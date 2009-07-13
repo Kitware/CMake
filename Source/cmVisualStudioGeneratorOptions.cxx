@@ -3,6 +3,15 @@
 #include <cmsys/System.h>
 #include "cmVisualStudio10TargetGenerator.h"
 
+inline std::string cmVisualStudio10GeneratorOptionsEscapeForXML(const char* s)
+{
+  std::string ret = s;
+  cmSystemTools::ReplaceString(ret, "&", "&amp;");
+  cmSystemTools::ReplaceString(ret, "<", "&lt;");
+  cmSystemTools::ReplaceString(ret, ">", "&gt;");
+  return ret;
+}
+
 inline std::string cmVisualStudioGeneratorOptionsEscapeForXML(const char* s)
 {
   std::string ret = s;
@@ -321,7 +330,11 @@ cmVisualStudioGeneratorOptions
       define = *di;
       }
     // Escape this flag for the IDE.
-    if(this->Version != 10)
+    if(this->Version == 10)
+      {
+      define = cmVisualStudio10GeneratorOptionsEscapeForXML(define.c_str());
+      }
+    else
       {
       define = cmVisualStudioGeneratorOptionsEscapeForXML(define.c_str());
       }

@@ -6,7 +6,9 @@ IF(${CMAKE_GENERATOR} MATCHES "Visual Studio 6")
 ELSE(${CMAKE_GENERATOR} MATCHES "Visual Studio 6")
   SET(PROJECT_EXT vcproj)
 ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio 6")
-
+IF(${CMAKE_GENERATOR} MATCHES "Visual Studio 10")
+  SET(PROJECT_EXT vcxproj)
+ENDIF()
 
 # make sure directories exists
 SET(LIB1_BINARY_DIR ${VSExternalInclude_BINARY_DIR}/Lib1)
@@ -38,3 +40,4 @@ ADD_EXECUTABLE(VSExternalInclude ${SOURCES})
 
 # target depends on lib2
 ADD_DEPENDENCIES(VSExternalInclude lib2)
+

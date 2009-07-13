@@ -85,6 +85,7 @@ private:
   cmMakefile* Makefile;
   std::string Platform;
   std::string GUID;
+  std::string Name;
   cmGlobalVisualStudio7Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
