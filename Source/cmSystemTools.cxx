@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <time.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
