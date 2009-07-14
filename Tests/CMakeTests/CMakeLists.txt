@@ -18,6 +18,7 @@ AddCMakeTest(GetFilenameComponentRealpath "")
 AddCMakeTest(Version "")
 AddCMakeTest(Message "")
 AddCMakeTest(File "")
+AddCMakeTest(SeparateArguments "")
 
 SET(GetPrerequisites_PreArgs
   "-DCTEST_CONFIGURATION_TYPE:STRING=\\\${CTEST_CONFIGURATION_TYPE}"

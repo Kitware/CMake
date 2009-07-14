@@ -20,19 +20,95 @@
 bool cmSeparateArgumentsCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
-  if(args.size() != 1 )
+  if(args.empty())
     {
-    this->SetError("called with incorrect number of arguments");
+    this->SetError("must be given at least one argument.");
     return false;
     }
-  const char* cacheValue = this->Makefile->GetDefinition(args[0].c_str());
-  if(!cacheValue)
+
+  std::string var;
+  std::string command;
+  enum Mode { ModeOld, ModeUnix, ModeWindows };
+  Mode mode = ModeOld;
+  enum Doing { DoingNone, DoingVariable, DoingMode, DoingCommand };
+  Doing doing = DoingVariable;
+  for(unsigned int i=0; i < args.size(); ++i)
     {
-    return true;
+    if(doing == DoingVariable)
+      {
+      var = args[i];
+      doing = DoingMode;
+      }
+    else if(doing == DoingMode && args[i] == "UNIX_COMMAND")
+      {
+      mode = ModeUnix;
+      doing = DoingCommand;
+      }
+    else if(doing == DoingMode && args[i] == "WINDOWS_COMMAND")
+      {
+      mode = ModeWindows;
+      doing = DoingCommand;
+      }
+    else if(doing == DoingCommand)
+      {
+      command = args[i];
+      doing = DoingNone;
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "given unknown argument " << args[i];
+      this->SetError(e.str().c_str());
+      return false;
+      }
     }
-  std::string value = cacheValue;
-  cmSystemTools::ReplaceString(value," ", ";");
-  this->Makefile->AddDefinition(args[0].c_str(), value.c_str());
+
+  if(mode == ModeOld)
+    {
+    // Original space-replacement version of command.
+    if(const char* def = this->Makefile->GetDefinition(var.c_str()))
+      {
+      std::string value = def;
+      cmSystemTools::ReplaceString(value, " ", ";");
+      this->Makefile->AddDefinition(var.c_str(), value.c_str());
+      }
+    }
+  else
+    {
+    // Parse the command line.
+    std::vector<std::string> vec;
+    if(mode == ModeUnix)
+      {
+      cmSystemTools::ParseUnixCommandLine(command.c_str(), vec);
+      }
+    else // if(mode == ModeWindows)
+      {
+      cmSystemTools::ParseWindowsCommandLine(command.c_str(), vec);
+      }
+
+    // Construct the result list value.
+    std::string value;
+    const char* sep = "";
+    for(std::vector<std::string>::const_iterator vi = vec.begin();
+        vi != vec.end(); ++vi)
+      {
+      // Separate from the previous argument.
+      value += sep;
+      sep = ";";
+
+      // Preserve semicolons.
+      for(std::string::const_iterator si = vi->begin();
+          si != vi->end(); ++si)
+        {
+        if(*si == ';')
+          {
+          value += '\\';
+          }
+        value += *si;
+        }
+      }
+    this->Makefile->AddDefinition(var.c_str(), value.c_str());
+    }
+
   return true;
 }
-
