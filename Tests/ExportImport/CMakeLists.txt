@@ -22,20 +22,8 @@ else(CMAKE_CONFIGURATION_TYPES)
   endif(CMAKE_BUILD_TYPE)
 endif(CMAKE_CONFIGURATION_TYPES)
 
-set(SAME_COMPILER
-  -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER}
-  -DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}
-  -DCMAKE_C_FLAGS_DEBUG:STRING=${CMAKE_C_FLAGS_DEBUG}
-  -DCMAKE_C_FLAGS_RELEASE:STRING=${CMAKE_C_FLAGS_RELEASE}
-  -DCMAKE_C_FLAGS_MINSIZEREL:STRING=${CMAKE_C_FLAGS_MINSIZEREL}
-  -DCMAKE_C_FLAGS_RELWITHDEBINFO:STRING=${CMAKE_C_FLAGS_RELWITHDEBINFO}
-  -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER}
-  -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
-  -DCMAKE_CXX_FLAGS_DEBUG:STRING=${CMAKE_CXX_FLAGS_DEBUG}
-  -DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}
-  -DCMAKE_CXX_FLAGS_MINSIZEREL:STRING=${CMAKE_CXX_FLAGS_MINSIZEREL}
-  -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=${CMAKE_CXX_FLAGS_RELWITHDEBINFO}
-  )
+configure_file(${ExportImport_SOURCE_DIR}/InitialCache.cmake.in
+               ${ExportImport_BINARY_DIR}/InitialCache.cmake @ONLY)
 
 # Build and install the exporter.
 add_custom_command(
@@ -49,10 +37,8 @@ add_custom_command(
     --build-target install
     --build-generator ${CMAKE_GENERATOR}
     --build-makeprogram ${CMAKE_MAKE_PROGRAM}
-    --build-options ${SAME_COMPILER}
-      -DCMAKE_INSTALL_PREFIX:STRING=${ExportImport_BINARY_DIR}/Root
-      -DCMAKE_SKIP_RPATH:BOOL=ON
-       )
+    --build-options -C${ExportImport_BINARY_DIR}/InitialCache.cmake
+    )
 add_custom_target(ExportTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/ExportProject)
 add_dependencies(ExportTarget CleanupTarget)
 set_property(
@@ -71,10 +57,8 @@ add_custom_command(
    --build-project Import
    --build-generator ${CMAKE_GENERATOR}
    --build-makeprogram ${CMAKE_MAKE_PROGRAM}
-   --build-options ${SAME_COMPILER}
-     -DCMAKE_INSTALL_PREFIX:STRING=${ExportImport_BINARY_DIR}/Root
-     -DCMAKE_SKIP_RPATH:BOOL=ON
-     )
+   --build-options -C${ExportImport_BINARY_DIR}/InitialCache.cmake
+   )
 add_custom_target(ImportTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/ImportProject)
 add_dependencies(ImportTarget ExportTarget)
 set_property(
