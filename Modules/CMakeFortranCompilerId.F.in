@@ -25,7 +25,11 @@
         PRINT *, 'INFO:compiler[MIPSpro]'
 #elif defined(__hpux) || defined(__hpux__)
         PRINT *, 'INFO:compiler[HP]'
-#else
+#elif 1
+#       if 0
+!       The above 'elif 1' instead of 'else' is to work around a bug in the
+!       SGI preprocessor which produces both the __sgi and else blocks.
+#       endif
         PRINT *, 'INFO:compiler[]'
 #endif
 
@@ -86,7 +90,11 @@
         PRINT *, 'INFO:platform[ULTRIX]'
 #elif defined(__XENIX__) || defined(_XENIX) || defined(XENIX)
         PRINT *, 'INFO:platform[Xenix]'
-#else
+#elif 1
+#       if 0
+!       The above 'elif 1' instead of 'else' is to work around a bug in the
+!       SGI preprocessor which produces both the __sgi and else blocks.
+#       endif
         PRINT *, 'INFO:platform[]'
 #endif
       END
