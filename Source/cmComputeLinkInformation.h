@@ -160,6 +160,7 @@ private:
   cmOrderDirectories* OrderLinkerSearchPath;
   bool FinishLinkerSearchDirectories();
   void PrintLinkPolicyDiagnosis(std::ostream&);
+  void LoadImplicitLinkInfo();
   std::set<cmStdString> ImplicitLinkDirs;
 
   // Linker search path compatibility mode.

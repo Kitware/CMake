@@ -365,26 +365,14 @@ cmComputeLinkInformation
                              "dependent library path");
     }
 
-  // Get the implicit link directories for this platform.
-  if(const char* implicitLinks =
-     (this->Makefile->GetDefinition
-      ("CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES")))
-    {
-    std::vector<std::string> implicitLinkVec;
-    cmSystemTools::ExpandListArgument(implicitLinks, implicitLinkVec);
-    for(std::vector<std::string>::const_iterator
-          i = implicitLinkVec.begin();
-        i != implicitLinkVec.end(); ++i)
-      {
-      this->ImplicitLinkDirs.insert(*i);
-      }
-    }
-
   // Add the search path entries requested by the user to path ordering.
   this->OrderLinkerSearchPath
     ->AddUserDirectories(this->Target->GetLinkDirectories());
   this->OrderRuntimeSearchPath
     ->AddUserDirectories(this->Target->GetLinkDirectories());
+
+  // Set up the implicit link directories.
+  this->LoadImplicitLinkInfo();
   this->OrderLinkerSearchPath
     ->SetImplicitDirectories(this->ImplicitLinkDirs);
   this->OrderRuntimeSearchPath
@@ -1548,6 +1536,27 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
      << "Set policy CMP0003 to OLD or NEW to enable or disable this "
      << "behavior explicitly.  "
      << "Run \"cmake --help-policy CMP0003\" for more information.";
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkInformation::LoadImplicitLinkInfo()
+{
+  std::vector<std::string> implicitDirVec;
+
+  // Get platform-wide implicit directories.
+  if(const char* implicitLinks =
+     (this->Makefile->GetDefinition
+      ("CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES")))
+    {
+    cmSystemTools::ExpandListArgument(implicitLinks, implicitDirVec);
+    }
+
+  // Store implicit link directories.
+  for(std::vector<std::string>::const_iterator i = implicitDirVec.begin();
+      i != implicitDirVec.end(); ++i)
+    {
+    this->ImplicitLinkDirs.insert(*i);
+    }
 }
 
 //----------------------------------------------------------------------------
