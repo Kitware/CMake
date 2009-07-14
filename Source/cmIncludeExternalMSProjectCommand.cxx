@@ -37,7 +37,8 @@ bool cmIncludeExternalMSProjectCommand
     cmTarget* target=this->Makefile->AddNewTarget(cmTarget::UTILITY, 
                                                   args[0].c_str());
     target->SetProperty("EXTERNAL_MSPROJECT", path.c_str());
-    target->SetProperty("EXCLUDE_FROM_ALL","FALSE");
+    target->SetProperty("EXCLUDE_FROM_ALL","FALSE"); 
+    target->SetProperty("GENERATOR_FILE_NAME", args[0].c_str());
     for (unsigned int i=2; i<args.size(); ++i) 
       {
       target->AddUtility(args[i].c_str());
