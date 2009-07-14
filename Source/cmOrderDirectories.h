@@ -66,6 +66,7 @@ private:
   std::vector<int> DirectoryVisited;
   void CollectOriginalDirectories();
   int AddOriginalDirectory(std::string const& dir);
+  void AddOriginalDirectories(std::vector<std::string> const& dirs);
   void FindConflicts();
   void FindImplicitConflicts();
   void OrderDirectories();

@@ -393,26 +393,7 @@ void cmOrderDirectories::CollectOriginalDirectories()
   // Add user directories specified for inclusion.  These should be
   // indexed first so their original order is preserved as much as
   // possible subject to the constraints.
-  for(std::vector<std::string>::const_iterator
-        di = this->UserDirectories.begin();
-      di != this->UserDirectories.end(); ++di)
-    {
-    // We never explicitly specify implicit link directories.
-    if(this->ImplicitDirectories.find(*di) !=
-       this->ImplicitDirectories.end())
-      {
-      continue;
-      }
-
-    // Skip the empty string.
-    if(di->empty())
-      {
-      continue;
-      }
-
-    // Add this directory.
-    this->AddOriginalDirectory(*di);
-    }
+  this->AddOriginalDirectories(this->UserDirectories);
 
   // Add directories containing constraints.
   for(unsigned int i=0; i < this->ConstraintEntries.size(); ++i)
@@ -436,6 +417,32 @@ int cmOrderDirectories::AddOriginalDirectory(std::string const& dir)
     }
 
   return i->second;
+}
+
+//----------------------------------------------------------------------------
+void
+cmOrderDirectories
+::AddOriginalDirectories(std::vector<std::string> const& dirs)
+{
+  for(std::vector<std::string>::const_iterator di = dirs.begin();
+      di != dirs.end(); ++di)
+    {
+    // We never explicitly specify implicit link directories.
+    if(this->ImplicitDirectories.find(*di) !=
+       this->ImplicitDirectories.end())
+      {
+      continue;
+      }
+
+    // Skip the empty string.
+    if(di->empty())
+      {
+      continue;
+      }
+
+    // Add this directory.
+    this->AddOriginalDirectory(*di);
+    }
 }
 
 //----------------------------------------------------------------------------
