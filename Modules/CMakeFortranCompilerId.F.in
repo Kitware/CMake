@@ -12,7 +12,7 @@
         PRINT *, 'INFO:compiler[VisualAge]'
 #elif defined(__PGI)
         PRINT *, 'INFO:compiler[PGI]'
-#elif defined(_COMPILER_VERSION)
+#elif defined(_SGI_COMPILER_VERSION) || defined(_COMPILER_VERSION)
         PRINT *, 'INFO:compiler[MIPSpro]'
 #       if 0
 !       This compiler is either not known or is too old to define an

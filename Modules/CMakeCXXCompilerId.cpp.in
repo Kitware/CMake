@@ -43,7 +43,7 @@
    SHARC (21000) DSPs */
 # define COMPILER_ID "ADSP"
 
-#elif defined(_COMPILER_VERSION)
+#elif defined(_SGI_COMPILER_VERSION) || defined(_COMPILER_VERSION)
 # define COMPILER_ID "MIPSpro"
 
 /* This compiler is either not known or is too old to define an

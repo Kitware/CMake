@@ -52,7 +52,7 @@
 #elif defined(SDCC)
 # define COMPILER_ID "SDCC"
 
-#elif defined(_COMPILER_VERSION)
+#elif defined(_SGI_COMPILER_VERSION) || defined(_COMPILER_VERSION)
 # define COMPILER_ID "MIPSpro"
 
 /* This compiler is either not known or is too old to define an
