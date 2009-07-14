@@ -247,14 +247,14 @@ void cmGlobalVisualStudio6Generator
           }
         }
       // Write the project into the DSW file
-      if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+      cmTarget* target = &l->second;
+      const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
+      if(expath)
         {
-        cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-        const cmCustomCommandLines& cmds = cc.GetCommandLines();
-        std::string project = cmds[0][0];
-        std::string location = cmds[0][1];
+        std::string project = target->GetName();
+        std::string location = expath;
         this->WriteExternalProject(fout, project.c_str(), 
-                                   location.c_str(), cc.GetDepends());
+                                   location.c_str(), target->GetUtilities());
         }
       else 
         {
@@ -451,7 +451,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
 void cmGlobalVisualStudio6Generator::WriteExternalProject(std::ostream& fout, 
                                const char* name,
                                const char* location,
-                               const std::vector<std::string>& dependencies)
+                               const std::set<cmStdString>& dependencies)
 {
  fout << "#########################################################"
     "######################\n\n";
@@ -462,7 +462,7 @@ void cmGlobalVisualStudio6Generator::WriteExternalProject(std::ostream& fout,
   fout << "{{{\n";
 
   
-  std::vector<std::string>::const_iterator i, end;
+  std::set<cmStdString>::const_iterator i, end;
   // write dependencies.
   i = dependencies.begin();
   end = dependencies.end();

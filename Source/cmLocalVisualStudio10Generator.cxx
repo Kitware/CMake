@@ -31,7 +31,7 @@ class cmVS10XMLParser : public cmXMLParser
     { 
       if(this->DoGUID )
         {
-        this->GUID.assign(data, length);
+        this->GUID.assign(data+1, length-2);
         this->DoGUID = false;
         }
     }
@@ -112,7 +112,6 @@ void cmLocalVisualStudio10Generator
 ::ReadAndStoreExternalGUID(const char* name,
                            const char* path)
 {
-  
   cmVS10XMLParser parser;
   parser.ParseFile(path); 
   std::string guidStoreName = name;

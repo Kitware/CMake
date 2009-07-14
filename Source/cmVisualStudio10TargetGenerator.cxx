@@ -38,20 +38,9 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->LocalGenerator =  
     (cmLocalVisualStudio7Generator*)
     this->Makefile->GetLocalGenerator();
-  const char* name = this->Target->GetName();
-  if (strncmp(name, "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
-    {
-    cmCustomCommand cc = this->Target->GetPostBuildCommands()[0];
-    const cmCustomCommandLines& cmds = cc.GetCommandLines();
-    this->Name = cmds[0][0];
-    this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
-    }
-  else
-    {
-    this->Name = name;
-    this->GlobalGenerator->CreateGUID(this->Name.c_str());
-    this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
-    }
+  this->Name = this->Target->GetName();
+  this->GlobalGenerator->CreateGUID(this->Name.c_str());
+  this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = "|Win32";
   this->ComputeObjectNames();
   this->BuildFileStream = 0;
@@ -114,7 +103,12 @@ void cmVisualStudio10TargetGenerator::WriteString(const char* line,
 
 
 void cmVisualStudio10TargetGenerator::Generate()
-{      
+{
+  // do not generate external ms projects
+  if(this->Target->GetProperty("EXTERNAL_MSPROJECT"))
+    {
+    return;
+    }
   // Tell the global generator the name of the project file
   this->Target->SetProperty("GENERATOR_FILE_NAME",this->Name.c_str());
   this->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
@@ -1227,6 +1221,11 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
 
 void cmVisualStudio10TargetGenerator::WriteProjectReferences()
 {
+  // for static libs do not list references
+  if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    return;
+    }
   cmGlobalGenerator::TargetDependSet& depends
     = this->GlobalGenerator->GetTargetDirectDepends(*this->Target);
   this->WriteString("<ItemGroup>\n", 1);
@@ -1238,12 +1237,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     cmMakefile* mf = dt->GetMakefile();
     std::string name = dt->GetName();
     std::string path;
-    if (strncmp(name.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+    const char* p = dt->GetProperty("EXTERNAL_MSPROJECT");
+    if(p)
       {
-      cmCustomCommand cc = dt->GetPostBuildCommands()[0];
-      const cmCustomCommandLines& cmds = cc.GetCommandLines();
-      path = cmds[0][1];
-      name = cmds[0][0].c_str();
+      path = p;
       }
     else
       {

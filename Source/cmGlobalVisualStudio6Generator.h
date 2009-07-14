@@ -96,7 +96,7 @@ private:
                     const char* name, const char* path, cmTarget &t);
   void WriteExternalProject(std::ostream& fout, 
                             const char* name, const char* path,
-                            const std::vector<std::string>& dependencies);
+                            const std::set<cmStdString>& dependencies);
   void WriteDSWFooter(std::ostream& fout);
 };
 

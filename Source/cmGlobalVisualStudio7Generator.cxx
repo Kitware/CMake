@@ -250,12 +250,10 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
     cmTarget* target = *tt;
-    if (strncmp(target->GetName(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+    const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
+    if(expath)
       {
-      cmCustomCommand cc = target->GetPostBuildCommands()[0];
-      const cmCustomCommandLines& cmds = cc.GetCommandLines();
-      std::string project = cmds[0][0];
-      this->WriteProjectConfigurations(fout, project.c_str(),
+      this->WriteProjectConfigurations(fout, target->GetName(),
                                        true);
       }
     else
@@ -286,14 +284,13 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     {
     cmTarget* target = *tt;
     // handle external vc project files
-    if (strncmp(target->GetName(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
-      { 
-      cmCustomCommand cc = target->GetPostBuildCommands()[0];
-      const cmCustomCommandLines& cmds = cc.GetCommandLines();
-      std::string project = cmds[0][0];
-      std::string location = cmds[0][1];
+    const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
+    if(expath)
+      {
+      std::string project = target->GetName();
+      std::string location = expath;
       this->WriteExternalProject(fout, project.c_str(), 
-                                 location.c_str(), cc.GetDepends());
+                                 location.c_str(), target->GetUtilities());
       }
     else
       {
@@ -340,45 +337,18 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
     cmTarget* target = *tt;
-    cmMakefile* mf = target->GetMakefile();
-    if (strncmp(target->GetName(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
-      {
-      cmCustomCommand cc = target->GetPostBuildCommands()[0];
-      const cmCustomCommandLines& cmds = cc.GetCommandLines();
-      std::string name = cmds[0][0];
-      std::vector<std::string> depends = cc.GetDepends();
-      std::vector<std::string>::iterator iter;
-      int depcount = 0;
-      for(iter = depends.begin(); iter != depends.end(); ++iter)
-        {
-        std::string guid = this->GetGUID(iter->c_str());
-        if(guid.size() == 0)
-          {
-          std::string m = "Target: ";
-          m += target->GetName();
-          m += " depends on unknown target: ";
-          m += iter->c_str();
-          cmSystemTools::Error(m.c_str());
-          }
-        
-        fout << "\t\t{" << this->GetGUID(name.c_str()) 
-             << "}." << depcount << " = {" << guid.c_str() << "}\n";
-        depcount++;
-        }
-      }
-    else
-      {
-      const char *vcprojName = 
-        target->GetProperty("GENERATOR_FILE_NAME");
-      if (vcprojName)
-        { 
-        std::string dir = mf->GetStartDirectory();
-        this->WriteProjectDepends(fout, vcprojName, 
-                                  dir.c_str(), *target);
-        }
+    cmMakefile* mf = target->GetMakefile(); 
+    const char *vcprojName = 
+      target->GetProperty("GENERATOR_FILE_NAME");
+    if (vcprojName)
+      { 
+      std::string dir = mf->GetStartDirectory();
+      this->WriteProjectDepends(fout, vcprojName, 
+                                dir.c_str(), *target);
       }
     }
 }
+
 // Write a SLN file to the stream
 void cmGlobalVisualStudio7Generator
 ::WriteSLNFile(std::ostream& fout,
@@ -562,7 +532,7 @@ void cmGlobalVisualStudio7Generator
 void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout, 
                                const char* name,
                                const char* location,
-                               const std::vector<std::string>&)
+                               const std::set<cmStdString>&)
 { 
   std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 

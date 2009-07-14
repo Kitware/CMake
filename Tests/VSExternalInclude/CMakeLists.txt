@@ -40,4 +40,13 @@ ADD_EXECUTABLE(VSExternalInclude ${SOURCES})
 
 # target depends on lib2
 ADD_DEPENDENCIES(VSExternalInclude lib2)
+# VS 10 vcxproj files have depends in them
+# Since lib1 and lib2 do not depend on each other
+# then the vcxproj files do not depend on each other
+# and the sln file can no longer be the only source
+# of that depend.  So, for VS 10 make the executable
+# depend on lib1 and lib2
+IF(MSVC10)
+  ADD_DEPENDENCIES(VSExternalInclude lib1)
+ENDIF()
 

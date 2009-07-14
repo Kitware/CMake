@@ -72,7 +72,7 @@ protected:
   virtual void WriteExternalProject(std::ostream& fout,
                                     const char* name,
                                     const char* path,
-                                    const std::vector<std::string>& depends);
+                                    const std::set<cmStdString>& depends);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
 

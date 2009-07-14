@@ -200,7 +200,9 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
       }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
-    if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
+    const char* path = 
+      l->second.GetProperty("EXTERNAL_MSPROJECT");
+    if(!path)
       {
       // check to see if the dsp is going into a sub-directory
       std::string::size_type pos = l->first.rfind('/');

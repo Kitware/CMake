@@ -66,11 +66,11 @@ public:
   
   // return true if target is fortran only
   bool TargetIsFortranOnly(cmTarget& t);
+  const char* GetUtilityForTarget(cmTarget& target, const char*);
 
 protected:
   virtual void CreateGUID(const char*) {}
   void FixUtilityDepends();
-  const char* GetUtilityForTarget(cmTarget& target, const char*);
 
   // Does this VS version link targets to each other if there are
   // dependencies in the SLN file?  This was done for VS versions

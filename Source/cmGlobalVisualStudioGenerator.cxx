@@ -376,19 +376,6 @@ const char*
 cmGlobalVisualStudioGenerator::GetUtilityForTarget(cmTarget& target,
                                                    const char* name)
 {
-  // Handle the external MS project special case.
-  if(strncmp(name, "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
-    {
-    // Note from Ken:
-    // kind of weird removing the first 27 letters.  my
-    // recommendatsions: use cmCustomCommand::GetCommand() to get the
-    // project name or get rid of the target name starting with
-    // "INCLUDE_EXTERNAL_MSPROJECT_" and use another indicator/flag
-    // somewhere.  These external project names shouldn't conflict
-    // with cmake target names anyways.
-    return name+27;
-    }
-
   // Possibly depend on an intermediate utility target to avoid
   // linking.
   if(target.GetType() == cmTarget::STATIC_LIBRARY ||

@@ -254,7 +254,7 @@ void cmGlobalVisualStudio71Generator
 ::WriteExternalProject(std::ostream& fout, 
                        const char* name,
                        const char* location,
-                       const std::vector<std::string>& depends)
+                       const std::set<cmStdString>& depends)
 { 
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << name << "\", \""
@@ -267,7 +267,7 @@ void cmGlobalVisualStudio71Generator
   if(!depends.empty())
     {
     fout << "\tProjectSection(ProjectDependencies) = postProject\n";
-    std::vector<std::string>::const_iterator it;
+    std::set<cmStdString>::const_iterator it;
     for(it = depends.begin(); it != depends.end(); ++it)
       {
       if(it->size() > 0)

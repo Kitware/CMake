@@ -30,37 +30,18 @@ bool cmIncludeExternalMSProjectCommand
 #ifdef _WIN32
   if(this->Makefile->GetDefinition("WIN32"))
     {
-    std::string location = args[1];
-    
-    std::vector<std::string> depends;
-    if (args.size() > 2)
-      {
-      for (unsigned int i=2; i<args.size(); ++i) 
-        {
-        depends.push_back(args[i]); 
-        }
-      }
-
-    // Hack together a utility target storing enough information
-    // to reproduce the target inclusion.
-    std::string utility_name("INCLUDE_EXTERNAL_MSPROJECT");
-    utility_name += "_";
-    utility_name += args[0];
     std::string path = args[1];
     cmSystemTools::ConvertToUnixSlashes(path);
 
     // Create a target instance for this utility.
     cmTarget* target=this->Makefile->AddNewTarget(cmTarget::UTILITY, 
-                                                  utility_name.c_str());
+                                                  args[0].c_str());
+    target->SetProperty("EXTERNAL_MSPROJECT", path.c_str());
     target->SetProperty("EXCLUDE_FROM_ALL","FALSE");
-    std::vector<std::string> no_outputs;
-    cmCustomCommandLines commandLines;
-    cmCustomCommandLine commandLine;
-    commandLine.push_back(args[0]);
-    commandLine.push_back(path);
-    commandLines.push_back(commandLine);
-    cmCustomCommand cc(no_outputs, depends, commandLines, 0, 0);
-    target->GetPostBuildCommands().push_back(cc);
+    for (unsigned int i=2; i<args.size(); ++i) 
+      {
+      target->AddUtility(args[i].c_str());
+      }
     }
 #endif
   return true;

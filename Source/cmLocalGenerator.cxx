@@ -193,17 +193,12 @@ void cmLocalGenerator::TraceDependencies()
   cmTargets& targets = this->Makefile->GetTargets();
   for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
-    // so don't build a projectfile for it
-    if (strncmp(t->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
+    const char* projectFilename = 0;
+    if (this->IsMakefileGenerator == false)  // only use of this variable
       {
-      const char* projectFilename = 0;
-      if (this->IsMakefileGenerator == false)  // only use of this variable
-        {
-        projectFilename = t->second.GetName();
-        }
-      t->second.TraceDependencies(projectFilename);
+      projectFilename = t->second.GetName();
       }
+    t->second.TraceDependencies(projectFilename);
     }
 }
 

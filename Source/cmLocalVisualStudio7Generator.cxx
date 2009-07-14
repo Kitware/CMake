@@ -159,7 +159,7 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
     {
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
-    if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) != 0)
+    if(!l->second.GetProperty("EXTERNAL_MSPROJECT"))
       {
       this->CreateSingleVCProj(l->first.c_str(),l->second);
       }
@@ -1976,13 +1976,11 @@ void cmLocalVisualStudio7Generator::ConfigureFinalPass()
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     {
-    if (strncmp(l->first.c_str(), "INCLUDE_EXTERNAL_MSPROJECT", 26) == 0)
+    const char* path = l->second.GetProperty("EXTERNAL_MSPROJECT");
+    if(path)
       {
-      cmCustomCommand cc = l->second.GetPostBuildCommands()[0];
-      const cmCustomCommandLines& cmds = cc.GetCommandLines();
-      std::string project_name = cmds[0][0];
-      this->ReadAndStoreExternalGUID(project_name.c_str(),
-                                     cmds[0][1].c_str());
+      this->ReadAndStoreExternalGUID(
+        l->second.GetName(), path);
       }
     else
       {
