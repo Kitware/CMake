@@ -136,7 +136,10 @@
 #   whether the program directory should be added to the system PATH
 #   variable.
 #
-#   CPACK_NSIS_DISPLAY_NAME - The title displayed at the top of the
+#   CPACK_NSIS_DISPLAY_NAME - The display name string that appears in
+#   the Windows Add/Remove Program control panel
+#
+#   CPACK_NSIS_PACKAGE_NAME - The title displayed at the top of the
 #   installer.
 #
 #   CPACK_NSIS_INSTALLED_ICON_NAME - A path to the executable that
@@ -779,6 +782,7 @@ cpack_set_if_not_set(CPACK_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 cpack_set_if_not_set(CPACK_TOPLEVEL_TAG "${CPACK_SYSTEM_NAME}")
 
 cpack_set_if_not_set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+cpack_set_if_not_set(CPACK_NSIS_PACKAGE_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
 
 cpack_set_if_not_set(CPACK_OUTPUT_CONFIG_FILE
   "${CMAKE_BINARY_DIR}/CPackConfig.cmake")
