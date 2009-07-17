@@ -978,9 +978,9 @@ void CMakeSetupDialog::showUserChanges()
   QTextEdit* textedit = new QTextEdit(&dialog);
   textedit->setReadOnly(true);
   l->addWidget(textedit);
-  QDialogButtonBox* btns = new QDialogButtonBox(QDialogButtonBox::Ok,
+  QDialogButtonBox* btns = new QDialogButtonBox(QDialogButtonBox::Close,
                                                 Qt::Horizontal, &dialog);
-  QObject::connect(btns, SIGNAL(accepted()), &dialog, SLOT(accept()));
+  QObject::connect(btns, SIGNAL(rejected()), &dialog, SLOT(accept()));
   l->addWidget(btns);
 
   QString command;
