@@ -80,17 +80,6 @@ cmMakefile::cmMakefile()
   this->DefineFlags = " ";
   this->LocalGenerator = 0;
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-  this->AddSourceGroup("", "^.*$");
-  this->AddSourceGroup
-    ("Source Files",
-     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp"
-     "|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
-  this->AddSourceGroup("Header Files",
-                       "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
-  this->AddSourceGroup("CMake Rules", "\\.rule$");
-  this->AddSourceGroup("Resources", "\\.plist$");
-#endif
   this->AddDefaultDefinitions();
   this->Initialize();
   this->PreOrder = false;
@@ -755,6 +744,20 @@ void cmMakefile::AddCommand(cmCommand* wg)
 void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
 {
   this->LocalGenerator = lg;
+  // the source groups need to access the global generator
+  // so don't create them until the lg is set
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->AddSourceGroup("", "^.*$");
+  this->AddSourceGroup
+    ("Source Files",
+     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp"
+     "|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
+  this->AddSourceGroup("Header Files",
+                       "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
+  this->AddSourceGroup("CMake Rules", "\\.rule$");
+  this->AddSourceGroup("Resources", "\\.plist$");
+#endif
+
 }
 
 bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
@@ -1956,10 +1959,25 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
     }
 
   // build the whole source group path
+  const char* fullname = sg->GetFullName();
+  cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
+  if(strlen(fullname))
+    {
+    std::string guidName = "SG_Filter_";
+    guidName += fullname;
+    gg->CreateGUID(guidName.c_str());
+    }
   for(++i; i<=lastElement; ++i)
     {
     sg->AddChild(cmSourceGroup(name[i].c_str(), 0, sg->GetFullName()));
     sg = sg->lookupChild(name[i].c_str());
+    fullname = sg->GetFullName();
+    if(strlen(fullname))
+      {
+      std::string guidName = "SG_Filter_";
+      guidName += fullname;
+      gg->CreateGUID(guidName.c_str());
+      }
     }
 
   sg->SetGroupRegex(regex);

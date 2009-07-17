@@ -69,7 +69,6 @@ public:
   const char* GetUtilityForTarget(cmTarget& target, const char*);
 
 protected:
-  virtual void CreateGUID(const char*) {}
   void FixUtilityDepends();
 
   // Does this VS version link targets to each other if there are

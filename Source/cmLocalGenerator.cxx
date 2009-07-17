@@ -43,8 +43,7 @@
 
 cmLocalGenerator::cmLocalGenerator()
 {
-  this->Makefile = new cmMakefile;
-  this->Makefile->SetLocalGenerator(this);
+  this->Makefile = 0; // moved to after set on global
   this->Parent = 0;
   this->WindowsShell = false;
   this->WindowsVSIDE = false;
@@ -173,6 +172,8 @@ void cmLocalGenerator::SetupPathConversions()
 void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
 {
   this->GlobalGenerator = gg;
+  this->Makefile = new cmMakefile;
+  this->Makefile->SetLocalGenerator(this);
 
   // setup the home directories
   this->Makefile->GetProperties().SetCMakeInstance(gg->GetCMakeInstance());

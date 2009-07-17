@@ -259,7 +259,9 @@ public:
   bool BinaryDirectoryIsNew(const char* dir)
     {
     return this->BinaryDirectories.insert(dir).second;
-    }
+    } 
+  /** Supported systems creates a GUID for the given name */
+  virtual void CreateGUID(const char*) {}
 
 protected:
   // for a project collect all its targets by following depend
