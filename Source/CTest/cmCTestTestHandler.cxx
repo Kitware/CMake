@@ -1108,6 +1108,21 @@ void cmCTestTestHandler::ComputeTestList()
   this->TotalNumberOfTests = this->TestList.size();
   // Set the TestList to the final list of all test
   this->TestList = finalList;
+  std::string::size_type max = this->CTest->GetMaxTestNameWidth();
+  for (ListOfTests::iterator it = this->TestList.begin();
+       it != this->TestList.end(); it ++ )
+    {
+    cmCTestTestProperties& p = *it;
+    if(max < p.Name.size())
+      {
+      max = p.Name.size();
+      }
+    }
+  if(static_cast<std::string::size_type>(this->CTest->GetMaxTestNameWidth()) 
+     != max)
+    {
+    this->CTest->SetMaxTestNameWidth(max);
+    }
 }
  
 bool cmCTestTestHandler::GetValue(const char* tag,
