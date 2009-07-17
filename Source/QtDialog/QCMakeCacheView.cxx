@@ -23,6 +23,7 @@
 #include <QStyle>
 #include <QKeyEvent>
 #include <QSortFilterProxyModel>
+#include <QMetaProperty>
 
 #include "QCMakeWidgets.h"
 
@@ -633,14 +634,22 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
 
   Qt::CheckState state = (static_cast<Qt::CheckState>(value.toInt()) == Qt::Checked
                           ? Qt::Unchecked : Qt::Checked);
-  return model->setData(index, state, Qt::CheckStateRole);
+  bool success = model->setData(index, state, Qt::CheckStateRole);
+  if(success)
+    {
+    this->recordChange(model, index);
+    }
+  return success;
 }
   
+// Issue 205903 fixed in Qt 4.5.0.
+// Can remove this function and FileDialogFlag when minimum Qt version is 4.5
 bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* event)
 {
   // workaround for what looks like a bug in Qt on Mac OS X
   // where it doesn't create a QWidget wrapper for the native file dialog
   // so the Qt library ends up assuming the focus was lost to something else
+
   if(event->type() == QEvent::FocusOut && this->FileDialogFlag)
     {
     return false;
@@ -648,4 +657,47 @@ bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* event)
   return QItemDelegate::eventFilter(object, event);
 }
 
+void QCMakeCacheModelDelegate::setModelData(QWidget* editor,
+  QAbstractItemModel* model, const QModelIndex& index ) const
+{
+  QItemDelegate::setModelData(editor, model, index);
+  const_cast<QCMakeCacheModelDelegate*>(this)->recordChange(model, index);
+}
   
+QSet<QCMakeProperty> QCMakeCacheModelDelegate::changes() const
+{
+  return mChanges;
+}
+
+void QCMakeCacheModelDelegate::clearChanges()
+{
+  mChanges.clear();
+}
+
+void QCMakeCacheModelDelegate::recordChange(QAbstractItemModel* model, const QModelIndex& index)
+{
+  QModelIndex idx = index;
+  QAbstractItemModel* mymodel = model;
+  while(qobject_cast<QAbstractProxyModel*>(mymodel))
+    {
+    idx = static_cast<QAbstractProxyModel*>(mymodel)->mapToSource(idx);
+    mymodel = static_cast<QAbstractProxyModel*>(mymodel)->sourceModel();
+    }
+  QCMakeCacheModel* cache_model = qobject_cast<QCMakeCacheModel*>(mymodel);
+  if(cache_model && idx.isValid())
+    {
+    QCMakeProperty property;
+    idx = idx.sibling(idx.row(), 0);
+    cache_model->getPropertyData(idx, property);
+    
+    // clean out an old one
+    QSet<QCMakeProperty>::iterator iter = mChanges.find(property);
+    if(iter != mChanges.end())
+      {
+      mChanges.erase(iter);
+      }
+    // now add the new item
+    mChanges.insert(property);
+    }
+}
+

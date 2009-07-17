@@ -20,6 +20,7 @@
 
 #include "QCMake.h"
 #include <QTreeView>
+#include <QSet>
 #include <QStandardItemModel>
 #include <QItemDelegate>
 
@@ -111,6 +112,10 @@ public:
   // return flags (overloaded to modify flag based on EditEnabled flag)
   Qt::ItemFlags flags (const QModelIndex& index) const;
   QModelIndex buddy(const QModelIndex& idx) const;
+  
+  // get the data in the model for this property
+  void getPropertyData(const QModelIndex& idx1,
+                       QCMakeProperty& prop) const;
 
 protected:
   bool EditEnabled;
@@ -120,9 +125,6 @@ protected:
   // set the data in the model for this property
   void setPropertyData(const QModelIndex& idx1, 
                        const QCMakeProperty& p, bool isNew);
-  // get the data in the model for this property
-  void getPropertyData(const QModelIndex& idx1,
-                       QCMakeProperty& prop) const;
 
   // breaks up he property list into groups
   // where each group has the same prefix up to the first underscore
@@ -147,10 +149,21 @@ public:
   bool editorEvent (QEvent* event, QAbstractItemModel* model, 
        const QStyleOptionViewItem& option, const QModelIndex& index);
   bool eventFilter(QObject* object, QEvent* event);
+  void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const;
+
+  QSet<QCMakeProperty> changes() const;
+  void clearChanges();
+
 protected slots:
   void setFileDialogFlag(bool);
 protected:
   bool FileDialogFlag;
+  // record a change to an item in the model.
+  // this simply saves the item in the set of changes
+  void recordChange(QAbstractItemModel* model, const QModelIndex& index);
+
+  // properties changed by user via this delegate
+  QSet<QCMakeProperty> mChanges;
 };
 
 #endif

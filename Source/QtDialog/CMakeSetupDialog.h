@@ -76,6 +76,7 @@ protected slots:
   void startSearch();
   void setDebugOutput(bool);
   void setViewType(int);
+  void showUserChanges();
 
 protected:
 

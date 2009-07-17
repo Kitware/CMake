@@ -108,6 +108,9 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->GenerateAction = ToolsMenu->addAction(tr("&Generate"));
   QObject::connect(this->GenerateAction, SIGNAL(triggered(bool)), 
                    this, SLOT(doGenerate()));
+  QAction* showChangesAction = ToolsMenu->addAction(tr("&Show My Changes"));
+  QObject::connect(showChangesAction, SIGNAL(triggered(bool)), 
+                   this, SLOT(showUserChanges()));
 #if defined(Q_WS_MAC)
   this->InstallForCommandLineAction 
     = ToolsMenu->addAction(tr("&Install For Command Line Use"));
@@ -512,6 +515,7 @@ void CMakeSetupDialog::onBinaryDirectoryChanged(const QString& dir)
 {
   this->CacheModified = false;
   this->CacheValues->cacheModel()->clear();
+  qobject_cast<QCMakeCacheModelDelegate*>(this->CacheValues->itemDelegate())->clearChanges();
   this->Output->clear();
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
     "setBinaryDirectory", Qt::QueuedConnection, Q_ARG(QString, dir));
@@ -960,5 +964,70 @@ void CMakeSetupDialog::setViewType(int v)
   settings.beginGroup("Settings/StartPath");
   settings.setValue("GroupView", v == 2);
   
+}
+
+void CMakeSetupDialog::showUserChanges()
+{
+  QSet<QCMakeProperty> changes =
+    qobject_cast<QCMakeCacheModelDelegate*>(this->CacheValues->itemDelegate())->changes();
+
+  QDialog dialog(this);
+  dialog.setWindowTitle(tr("My Changes"));
+  dialog.resize(600, 400);
+  QVBoxLayout* l = new QVBoxLayout(&dialog);
+  QTextEdit* textedit = new QTextEdit(&dialog);
+  textedit->setReadOnly(true);
+  l->addWidget(textedit);
+  QDialogButtonBox* btns = new QDialogButtonBox(QDialogButtonBox::Ok,
+                                                Qt::Horizontal, &dialog);
+  QObject::connect(btns, SIGNAL(accepted()), &dialog, SLOT(accept()));
+  l->addWidget(btns);
+
+  QString command;
+  QString cache;
+  
+  foreach(QCMakeProperty prop, changes)
+    {
+    QString type;
+    switch(prop.Type)
+      {
+      case QCMakeProperty::BOOL:
+        type = "BOOL";
+        break;
+      case QCMakeProperty::PATH:
+        type = "PATH";
+        break;
+      case QCMakeProperty::FILEPATH:
+        type = "FILEPATH";
+        break;
+      case QCMakeProperty::STRING:
+        type = "STRING";
+        break;
+      }
+    QString value;
+    if(prop.Type == QCMakeProperty::BOOL)
+      {
+      value = prop.Value.toBool() ? "1" : "0";
+      }
+    else
+      {
+      value = prop.Value.toString();
+      }
+
+    QString line("%1:%2=");
+    line = line.arg(prop.Key);
+    line = line.arg(type);
+
+    command += QString("-D%1\"%2\" ").arg(line).arg(value);
+    cache += QString("%1%2\n").arg(line).arg(value);
+    }
+  
+  textedit->append(tr("Commandline options:"));
+  textedit->append(command);
+  textedit->append("\n");
+  textedit->append(tr("Cache file:"));
+  textedit->append(cache);
+  
+  dialog.exec();
 }
 
