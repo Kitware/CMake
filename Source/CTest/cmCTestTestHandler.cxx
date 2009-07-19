@@ -1121,7 +1121,7 @@ void cmCTestTestHandler::ComputeTestList()
   if(static_cast<std::string::size_type>(this->CTest->GetMaxTestNameWidth()) 
      != max)
     {
-    this->CTest->SetMaxTestNameWidth(max);
+    this->CTest->SetMaxTestNameWidth(static_cast<int>(max));
     }
 }
  
