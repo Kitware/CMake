@@ -27,11 +27,13 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   # tell cpack to create a desktop link to CMakeSetup
   SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\CMakeSetup.exe")
   SET(CPACK_NSIS_DISPLAY_NAME "CMake @CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@ a cross-platform, open-source build system")
-  SET(CPACK_NSIS_HELP_LINK "http:\\\\www.cmake.org")
-  SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\www.kitware.com")
+  SET(CPACK_NSIS_PACKAGE_NAME "CMake @CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@")
+  SET(CPACK_NSIS_HELP_LINK "http://www.cmake.org")
+  SET(CPACK_NSIS_URL_INFO_ABOUT "http://www.kitware.com")
   SET(CPACK_NSIS_CONTACT @CPACK_PACKAGE_CONTACT@)
   SET(CPACK_NSIS_MODIFY_PATH ON)
 endif(CPACK_GENERATOR MATCHES "NSIS")
+
 # include the cpack options for qt dialog if they exisit
 # they might not if qt was not enabled for the build
 INCLUDE("@QT_DIALOG_CPACK_OPTIONS_FILE@" OPTIONAL)
