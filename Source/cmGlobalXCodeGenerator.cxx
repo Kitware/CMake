@@ -672,6 +672,23 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
   cmSystemTools::SplitProgramPath(sf->GetFullPath().c_str(),
                                   dir, file);
 
+  // Try to make the path relative to the project root.
+  bool Absolute = true;
+  if (this->XcodeVersion >= 30)
+    {
+    std::string relative = 
+      this->CurrentLocalGenerator->Convert(sf->GetFullPath().c_str(), 
+                                           cmLocalGenerator::HOME,
+                                           cmLocalGenerator::MAKEFILE, 
+                                           false);
+    relative = cmSystemTools::ConvertToOutputPath(relative.c_str());
+    if (!relative.empty() && relative[0] != '/') 
+      {
+      Absolute = false;
+      path = relative;
+      }
+    }
+
   fileRef->AddAttribute("name", this->CreateString(file.c_str()));
   fileRef->AddAttribute("path", this->CreateString(path.c_str()));
   if(this->XcodeVersion == 15)
@@ -682,9 +699,13 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     {
     fileRef->AddAttribute("sourceTree", this->CreateString("<group>"));
     }
-  else
+  else if (Absolute)
     {
     fileRef->AddAttribute("sourceTree", this->CreateString("<absolute>"));
+    }
+  else
+    {
+    fileRef->AddAttribute("sourceTree", this->CreateString("SOURCE_ROOT"));
     }
 
   return fileRef;
@@ -2581,8 +2602,18 @@ void cmGlobalXCodeGenerator
   {
   std::string proot = root->GetMakefile()->GetCurrentDirectory();
   proot = this->ConvertToRelativeForXCode(proot.c_str());
-  this->RootObject->AddAttribute("projectRoot",
-                                 this->CreateString(proot.c_str()));
+  if (this->XcodeVersion >= 30) 
+    {
+    this->RootObject->AddAttribute("projectRoot",
+                                   this->CreateString(""));
+    this->RootObject->AddAttribute("projectDirPath",
+                                   this->CreateString(proot.c_str()));
+    }
+  else
+    {
+    this->RootObject->AddAttribute("projectRoot",
+                                   this->CreateString(proot.c_str()));
+    }
   }
   cmXCodeObject* configlist = 
     this->CreateObject(cmXCodeObject::XCConfigurationList);
