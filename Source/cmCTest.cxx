@@ -2092,7 +2092,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
       res = this->GetHandler("script")->ProcessHandler();
       if(res != 0)
         {
-        cmCTestLog(this, DEBUG, "running script failing returing: " << res 
+        cmCTestLog(this, DEBUG, "running script failing returning: " << res 
                    << std::endl);
         }
 
