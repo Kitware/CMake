@@ -172,6 +172,7 @@ CMAKE_CXX_SOURCES="\
   cmCommandArgumentLexer \
   cmCommandArgumentParser \
   cmCommandArgumentParserHelper \
+  cmDefinitions \
   cmDepends \
   cmDependsC \
   cmDocumentationFormatter \

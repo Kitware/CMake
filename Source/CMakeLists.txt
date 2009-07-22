@@ -116,6 +116,8 @@ SET(SRCS
   cmComputeTargetDepends.cxx
   cmCustomCommand.cxx
   cmCustomCommand.h
+  cmDefinitions.cxx
+  cmDefinitions.h
   cmDepends.cxx
   cmDepends.h
   cmDependsC.cxx

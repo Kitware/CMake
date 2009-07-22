@@ -33,6 +33,7 @@
 #endif
 #include "cmInstallGenerator.h"
 #include "cmTestGenerator.h"
+#include "cmDefinitions.h"
 #include "cmake.h"
 #include <stdlib.h> // required for atoi
 
@@ -40,12 +41,19 @@
 
 #include <cmsys/auto_ptr.hxx>
 
+#include <stack>
 #include <ctype.h> // for isspace
 
-// default is not to be building executables
-cmMakefile::cmMakefile()
+class cmMakefile::Internals
 {
-  this->DefinitionStack.push_back(DefinitionMap());
+public:
+  std::stack<cmDefinitions, std::list<cmDefinitions> > VarStack;
+};
+
+// default is not to be building executables
+cmMakefile::cmMakefile(): Internal(new Internals)
+{
+  this->Internal->VarStack.push(cmDefinitions());
 
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
@@ -85,8 +93,10 @@ cmMakefile::cmMakefile()
   this->PreOrder = false;
 }
 
-cmMakefile::cmMakefile(const cmMakefile& mf)
+cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
 {
+  this->Internal->VarStack.push(mf.Internal->VarStack.top().Closure());
+
   this->Prefix = mf.Prefix;
   this->AuxSourceDirectories = mf.AuxSourceDirectories;
   this->cmStartDirectory = mf.cmStartDirectory;
@@ -117,13 +127,11 @@ cmMakefile::cmMakefile(const cmMakefile& mf)
   this->SourceGroups = mf.SourceGroups;
 #endif
 
-  this->DefinitionStack.push_back(mf.DefinitionStack.back());
   this->LocalGenerator = mf.LocalGenerator;
   this->FunctionBlockers = mf.FunctionBlockers;
   this->DataMap = mf.DataMap;
   this->MacrosMap = mf.MacrosMap;
   this->SubDirectoryOrder = mf.SubDirectoryOrder;
-  this->TemporaryDefinitionKey = mf.TemporaryDefinitionKey;
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
   this->ListFileStack = mf.ListFileStack;
@@ -1421,7 +1429,7 @@ void cmMakefile::InitializeFromParent()
   cmMakefile *parent = this->LocalGenerator->GetParent()->GetMakefile();
 
   // copy the definitions
-  this->DefinitionStack.front() = parent->DefinitionStack.back();
+  this->Internal->VarStack.top().Reset(&parent->Internal->VarStack.top());
 
   // copy include paths
   this->IncludeDirectories = parent->IncludeDirectories;
@@ -1640,14 +1648,13 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
     }
 #endif
 
-  this->TemporaryDefinitionKey = name;
-  this->DefinitionStack.back()[this->TemporaryDefinitionKey] = value;
+  this->Internal->VarStack.top().Set(name, value);
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
     {
-    vv->VariableAccessed(this->TemporaryDefinitionKey,
+    vv->VariableAccessed(name,
                          cmVariableWatch::VARIABLE_MODIFIED_ACCESS,
                          value,
                          this);
@@ -1696,26 +1703,13 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
     }
   this->GetCacheManager()->AddCacheEntry(name, val, doc, type);
   // if there was a definition then remove it
-  this->DefinitionStack.back().erase( DefinitionMap::key_type(name));
+  this->Internal->VarStack.top().Set(name, 0);
 }
 
 
 void cmMakefile::AddDefinition(const char* name, bool value)
 {
-  if(value)
-    {
-    this->DefinitionStack.back()
-      .erase( DefinitionMap::key_type(name));
-    this->DefinitionStack.back()
-      .insert(DefinitionMap::value_type(name, "ON"));
-    }
-  else
-    {
-    this->DefinitionStack.back()
-      .erase( DefinitionMap::key_type(name));
-    this->DefinitionStack.back()
-      .insert(DefinitionMap::value_type(name, "OFF"));
-    }
+  this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -1745,7 +1739,7 @@ void cmMakefile::AddCacheDefinition(const char* name,
 
 void cmMakefile::RemoveDefinition(const char* name)
 {
-  this->DefinitionStack.back().erase(DefinitionMap::key_type(name));
+  this->Internal->VarStack.top().Set(name, 0);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -2087,14 +2081,8 @@ const char* cmMakefile::GetRequiredDefinition(const char* name) const
 
 bool cmMakefile::IsDefinitionSet(const char* name) const
 {
-  const char* def = 0;
-  DefinitionMap::const_iterator pos = 
-    this->DefinitionStack.back().find(name);
-  if(pos != this->DefinitionStack.back().end())
-    {
-    def = (*pos).second.c_str();
-    }
-  else
+  const char* def = this->Internal->VarStack.top().Get(name);
+  if(!def)
     {
     def = this->GetCacheManager()->GetCacheValue(name);
     }
@@ -2121,14 +2109,8 @@ const char* cmMakefile::GetDefinition(const char* name) const
       RecordPropertyAccess(name,cmProperty::VARIABLE);
     }
 #endif
-  const char* def = 0;
-  DefinitionMap::const_iterator pos = 
-    this->DefinitionStack.back().find(name);
-  if(pos != this->DefinitionStack.back().end())
-    {
-    def = (*pos).second.c_str();
-    }
-  else
+  const char* def = this->Internal->VarStack.top().Get(name);
+  if(!def)
     {
     def = this->GetCacheManager()->GetCacheValue(name);
     }
@@ -2144,11 +2126,9 @@ const char* cmMakefile::GetDefinition(const char* name) const
     else
       {
       // are unknown access allowed
-      DefinitionMap::const_iterator pos2 =
-        this->DefinitionStack.back()
-        .find("CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS");
-      if (pos2 != this->DefinitionStack.back().end() &&
-          cmSystemTools::IsOn((*pos2).second.c_str()))
+      const char* allow = this->Internal->VarStack.top()
+        .Get("CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS");
+      if(cmSystemTools::IsOn(allow))
         {
         vv->VariableAccessed(name,
           cmVariableWatch::ALLOWED_UNKNOWN_VARIABLE_READ_ACCESS, def, this);
@@ -2177,29 +2157,24 @@ const char* cmMakefile::GetSafeDefinition(const char* def) const
 std::vector<std::string> cmMakefile
 ::GetDefinitions(int cacheonly /* = 0 */) const
 {
-  std::map<cmStdString, int> definitions;
+  std::set<cmStdString> definitions;
   if ( !cacheonly )
     {
-    DefinitionMap::const_iterator it;
-    for ( it = this->DefinitionStack.back().begin();
-          it != this->DefinitionStack.back().end(); it ++ )
-      {
-      definitions[it->first] = 1;
-      }
+    definitions = this->Internal->VarStack.top().ClosureKeys();
     }
   cmCacheManager::CacheIterator cit =
     this->GetCacheManager()->GetCacheIterator();
   for ( cit.Begin(); !cit.IsAtEnd(); cit.Next() )
     {
-    definitions[cit.GetName()] = 1;
+    definitions.insert(cit.GetName());
     }
 
   std::vector<std::string> res;
 
-  std::map<cmStdString, int>::iterator fit;
+  std::set<cmStdString>::iterator fit;
   for ( fit = definitions.begin(); fit != definitions.end(); fit ++ )
     {
-    res.push_back(fit->first);
+    res.push_back(*fit);
     }
   return res;
 }
@@ -3387,19 +3362,13 @@ std::string cmMakefile::GetListFileStack()
 
 void cmMakefile::PushScope()
 {
-  // Get the index of the next stack entry.
-  std::vector<DefinitionMap>::size_type index = this->DefinitionStack.size();
-
-  // Allocate a new stack entry.
-  this->DefinitionStack.push_back(DefinitionMap());
-
-  // Copy the previous top to the new top.
-  this->DefinitionStack[index] = this->DefinitionStack[index-1];
+  cmDefinitions* parent = &this->Internal->VarStack.top();
+  this->Internal->VarStack.push(cmDefinitions(parent));
 }
 
 void cmMakefile::PopScope()
 {
-  this->DefinitionStack.pop_back();
+  this->Internal->VarStack.pop();
 }
 
 void cmMakefile::RaiseScope(const char *var, const char *varDef)
@@ -3409,33 +3378,14 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
     return;
     }
 
-  // multiple scopes in this directory?
-  if (this->DefinitionStack.size() > 1)
+  cmDefinitions& cur = this->Internal->VarStack.top();
+  if(cmDefinitions* up = cur.GetParent())
     {
-    if(varDef)
-      {
-      this->DefinitionStack[this->DefinitionStack.size()-2][var] = varDef;
-      }
-    else
-      {
-      this->DefinitionStack[this->DefinitionStack.size()-2].erase(var);
-      }
-    }
-  // otherwise do the parent (if one exists)
-  else if (this->LocalGenerator->GetParent())
-    {
-    cmMakefile *parent = this->LocalGenerator->GetParent()->GetMakefile();
-    if (parent)
-      {
-      if(varDef)
-        {
-        parent->AddDefinition(var,varDef);
-        }
-      else
-        {
-        parent->RemoveDefinition(var);
-        }
-      }
+    // First localize the definition in the current scope.
+    cur.Get(var);
+
+    // Now update the definition in the parent scope.
+    up->Set(var, varDef);
     }
 }
 

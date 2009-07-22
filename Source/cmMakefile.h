@@ -56,6 +56,8 @@ class cmCMakePolicyCommand;
  */
 class cmMakefile
 {
+  class Internals;
+  cmsys::auto_ptr<Internals> Internal;
 public:
   /**
    * Return the major and minor version of the cmake that
@@ -792,7 +794,6 @@ public:
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
 
-  typedef std::map<cmStdString, cmStdString> DefinitionMap;
   ///! Initialize a makefile from its parent
   void InitializeFromParent();
   
@@ -889,7 +890,6 @@ protected:
   std::vector<cmSourceGroup> SourceGroups;
 #endif
 
-  std::vector<DefinitionMap> DefinitionStack;
   std::vector<cmCommand*> UsedCommands;
   cmLocalGenerator* LocalGenerator;
   bool IsFunctionBlocked(const cmListFileFunction& lff, 
@@ -924,8 +924,6 @@ private:
   StringStringMap MacrosMap;
 
   std::map<cmStdString, bool> SubDirectoryOrder;
-  // used in AddDefinition for performance improvement
-  DefinitionMap::key_type  TemporaryDefinitionKey;
 
   cmsys::RegularExpression cmDefineRegex;
   cmsys::RegularExpression cmDefine01Regex;
