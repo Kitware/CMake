@@ -45,9 +45,10 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
       ENDIF(ABI_NAME)
 
       # Parse implicit linker information for this language, if available.
+      # Skip this with Xcode for now.
       SET(implicit_dirs "")
       SET(implicit_libs "")
-      IF(CMAKE_${lang}_VERBOSE_FLAG)
+      IF(CMAKE_${lang}_VERBOSE_FLAG AND NOT "${CMAKE_GENERATOR}" MATCHES Xcode)
         CMAKE_PARSE_IMPLICIT_LINK_INFO("${OUTPUT}" implicit_libs implicit_dirs)
       ENDIF()
       SET(CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES "${implicit_libs}" PARENT_SCOPE)
