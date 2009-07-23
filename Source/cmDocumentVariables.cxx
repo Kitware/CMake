@@ -1179,7 +1179,28 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This prevents system include directories from being treated as user "
      "include directories on some compilers.", false,
      "Variables for Languages");
-  
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES", cmProperty::VARIABLE,
+     "Implicit linker search path detected for language <LANG>.",
+     "Compilers typically pass directories containing language runtime "
+     "libraries and default library search paths when they invoke a linker.  "
+     "These paths are implicit linker search directories for the compiler's "
+     "language.  "
+     "CMake automatically detects these directories for each language and "
+     "reports the results in this variable.", false,
+     "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES", cmProperty::VARIABLE,
+     "Implicit link libraries and flags detected for language <LANG>.",
+     "Compilers typically pass language runtime library names and "
+     "other flags when they invoke a linker.  "
+     "These flags are implicit link options for the compiler's language.  "
+     "CMake automatically detects these libraries and flags for each "
+     "language and reports the results in this variable.", false,
+     "Variables for Languages");
+
   cm->DefineProperty
     ("CMAKE_<LANG>_LINKER_PREFERENCE", cmProperty::VARIABLE,
      "Determine if a language should be used for linking.",

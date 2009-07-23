@@ -3,6 +3,8 @@
 # This is used internally by CMake and should not be included by user
 # code.
 
+INCLUDE(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
+
 FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
   IF(NOT DEFINED CMAKE_DETERMINE_${lang}_ABI_COMPILED)
     MESSAGE(STATUS "Detecting ${lang} compiler ABI info")
@@ -11,6 +13,8 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
     SET(BIN "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeDetermineCompilerABI_${lang}.bin")
     TRY_COMPILE(CMAKE_DETERMINE_${lang}_ABI_COMPILED
       ${CMAKE_BINARY_DIR} ${src}
+      CMAKE_FLAGS "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}"
+                  "-DCMAKE_${lang}_STANDARD_LIBRARIES="
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
       )
@@ -39,6 +43,15 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
         SET(CMAKE_${lang}_COMPILER_ABI "${ABI_NAME}" PARENT_SCOPE)
         SET(CMAKE_INTERNAL_PLATFORM_ABI "${ABI_NAME}" PARENT_SCOPE)
       ENDIF(ABI_NAME)
+
+      # Parse implicit linker information for this language, if available.
+      SET(implicit_dirs "")
+      SET(implicit_libs "")
+      IF(CMAKE_${lang}_VERBOSE_FLAG)
+        CMAKE_PARSE_IMPLICIT_LINK_INFO("${OUTPUT}" implicit_libs implicit_dirs)
+      ENDIF()
+      SET(CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES "${implicit_libs}" PARENT_SCOPE)
+      SET(CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES "${implicit_dirs}" PARENT_SCOPE)
 
     ELSE(CMAKE_DETERMINE_${lang}_ABI_COMPILED)
       MESSAGE(STATUS "Detecting ${lang} compiler ABI info - failed")
