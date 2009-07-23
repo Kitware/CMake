@@ -3,6 +3,11 @@
 # It also loads the available platform file for the system-compiler
 # if it exists.
 
+# Load compiler-specific information.
+IF(CMAKE_Fortran_COMPILER_ID)
+  INCLUDE(Compiler/${CMAKE_Fortran_COMPILER_ID}-Fortran OPTIONAL)
+ENDIF(CMAKE_Fortran_COMPILER_ID)
+
 SET(CMAKE_BASE_NAME)
 GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_Fortran_COMPILER} NAME_WE)
 # since the gnu compiler has several names force g++
