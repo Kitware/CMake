@@ -1251,9 +1251,3 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)
-
-if(BUILD_TESTING)
-  if(do_cvs_tests)
-    add_test(IsSourceTreeUnmodified ${CMAKE_CMAKE_COMMAND} -P "IsSourceTreeUnmodified.cmake")
-  endif(do_cvs_tests)
-endif(BUILD_TESTING)
