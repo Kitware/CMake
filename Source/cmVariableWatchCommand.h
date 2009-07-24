@@ -56,6 +56,10 @@ public:
    */
   virtual bool IsScriptable() { return true; }
 
+  /** This command does not really have a final pass but it needs to
+      stay alive since it owns variable watch callback information. */
+  virtual bool HasFinalPass() const { return true; }
+
   /**
    * The name of the command as specified in CMakeList.txt.
    */
