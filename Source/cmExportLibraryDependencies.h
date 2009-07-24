@@ -48,6 +48,7 @@ public:
    * specified by the command is accumulated. 
    */
   virtual void FinalPass();
+  virtual bool HasFinalPass() const { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.

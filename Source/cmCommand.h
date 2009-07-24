@@ -87,6 +87,11 @@ public:
    * writing to the cache can be done.
    */
   virtual void FinalPass() {};
+
+  /**
+   * Does this command have a final pass?  Query after InitialPass.
+   */
+  virtual bool HasFinalPass() const { return false; }
   
   /**
    * This is a virtual constructor for the command.

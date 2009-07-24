@@ -63,6 +63,7 @@ public:
    * writing to the cache can be done.
    */
   virtual void FinalPass();
+  virtual bool HasFinalPass() const { return !this->IsFilesForm; }
 
   /**
    * More documentation.

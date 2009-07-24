@@ -415,7 +415,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
           cmSystemTools::SetFatalErrorOccured();
           }
         }
-      else
+      else if(pcmd->HasFinalPass())
         {
         // use the command
         this->UsedCommands.push_back(pcmd.release());

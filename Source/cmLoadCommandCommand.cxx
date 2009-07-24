@@ -68,6 +68,8 @@ public:
    * writing to the cache can be done.
    */
   virtual void FinalPass();
+  virtual bool HasFinalPass() const
+    { return this->info.FinalPass? true:false; }
 
   /**
    * The name of the command as specified in CMakeList.txt.

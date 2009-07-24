@@ -64,6 +64,8 @@ public:
    */
   virtual void FinalPass();
 
+  virtual bool HasFinalPass() const { return true; }
+
   /**
    * More documentation.
    */

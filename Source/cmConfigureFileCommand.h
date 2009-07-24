@@ -81,6 +81,7 @@ public:
     }
 
   virtual void FinalPass();
+  virtual bool HasFinalPass() const { return !this->Immediate; }
 private:
   int ConfigureFile();
   
