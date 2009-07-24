@@ -43,11 +43,13 @@ IF(BUILD_TESTING)
 
   if(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
     find_package(CVS QUIET)
-
-    if(CVS_EXECUTABLE)
-      set(do_cvs_tests 1)
-    endif(CVS_EXECUTABLE)
+  else(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
+    find_program(CVS_EXECUTABLE NAMES cvs)
   endif(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
+
+  if(CVS_EXECUTABLE)
+    set(do_cvs_tests 1)
+  endif(CVS_EXECUTABLE)
 
   if(do_cvs_tests AND NOT UNIX)
     if("${CVS_EXECUTABLE}" MATCHES "cygwin")
