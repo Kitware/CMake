@@ -374,6 +374,7 @@ SET(CMAKE_DOC_DIR "/doc/cmake-${CMake_VERSION}" CACHE STRING
 SET(CMAKE_MAN_DIR "/man" CACHE STRING
   "Install location for man pages (relative to prefix).")
 MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
+STRING(REGEX REPLACE "^/" "" CMake_DATA_DEST "${CMAKE_DATA_DIR}")
 
 # include special compile flags for some compilers
 INCLUDE(CompileFlags.cmake)
@@ -465,14 +466,26 @@ MARK_AS_ADVANCED(CMAKE_STRICT)
 
 # build the remaining subdirectories
 SUBDIRS(Source)
-SUBDIRS(Modules)
-SUBDIRS(Templates)
 SUBDIRS(Utilities)
 SUBDIRS(Tests)
 
 # add a test
 ADD_TEST(SystemInformationNew "${CMAKE_CMAKE_COMMAND}" 
   --system-information  -G "${CMAKE_TEST_GENERATOR}" )
+
+# Install script directories.
+INSTALL(
+  DIRECTORY Modules Templates
+  DESTINATION "${CMake_DATA_DEST}"
+  FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+  DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
+                        GROUP_READ GROUP_EXECUTE
+                        WORLD_READ WORLD_EXECUTE
+  PATTERN "*.sh.in" PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
+                                GROUP_READ GROUP_EXECUTE
+                                WORLD_READ WORLD_EXECUTE
+  PATTERN "CVS" EXCLUDE
+  )
 
 #-----------------------------------------------------------------------
 # End of the main section of the CMakeLists file
