@@ -220,7 +220,7 @@ static const char kwsys_shared_forward_path_slash[2] = {KWSYS_SHARED_FORWARD_PAT
 #endif
 
 /* SUN */
-#if defined(__sparc)
+#if defined(__sparc) && !defined(__linux)
 # define KWSYS_SHARED_FORWARD_LDD "ldd"
 # define KWSYS_SHARED_FORWARD_LDD_N 1
 # include <sys/isa_defs.h>
