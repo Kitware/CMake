@@ -36,4 +36,4 @@ if(do_cvs_tests)
     "-DCVS_EXECUTABLE:STRING=${CVS_EXECUTABLE}"
     )
   AddCMakeTest(CheckSourceTree "${CheckSourceTree_PreArgs}")
-endif()
+endif(do_cvs_tests)
