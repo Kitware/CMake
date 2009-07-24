@@ -25,3 +25,15 @@ SET(GetPrerequisites_PreArgs
   "-DCTEST_CONFIGURATION_TYPE:STRING=\\\${CTEST_CONFIGURATION_TYPE}"
   )
 AddCMakeTest(GetPrerequisites "${GetPrerequisites_PreArgs}")
+
+# Run CheckSourceTree as the very last test in the CMake/CTest/CPack test
+# suite. It detects if any changes have been made to the CMake source tree
+# by any previous configure, build or test steps.
+#
+if(do_cvs_tests)
+  set(CheckSourceTree_PreArgs
+    "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
+    "-DCVS_EXECUTABLE:STRING=${CVS_EXECUTABLE}"
+    )
+  AddCMakeTest(CheckSourceTree "${CheckSourceTree_PreArgs}")
+endif()

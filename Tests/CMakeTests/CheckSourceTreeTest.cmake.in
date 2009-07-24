@@ -1,0 +1,49 @@
+# Check the CMake source tree and report anything suspicious...
+#
+message(STATUS
+  "=============================================================================")
+message(STATUS "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
+message(STATUS "")
+message(STATUS "CMake_SOURCE_DIR='${CMake_SOURCE_DIR}'")
+message(STATUS "CVS_EXECUTABLE='${CVS_EXECUTABLE}'")
+message(STATUS "ENV{DASHBOARD_TEST_FROM_CTEST}='$ENV{DASHBOARD_TEST_FROM_CTEST}'")
+message(STATUS "")
+
+
+# Check with "cvs -q -n up -dP" if there are any local modifications to the
+# CMake source tree:
+#
+message(STATUS
+  "=============================================================================")
+execute_process(COMMAND ${CVS_EXECUTABLE} -q -n up -dP
+  WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+  OUTPUT_VARIABLE ov
+  ERROR_VARIABLE ev
+  RESULT_VARIABLE rv)
+
+set(modifications 0)
+if(NOT ov STREQUAL "")
+  set(modifications 1)
+endif()
+
+message(STATUS "Results of running '${CVS_EXECUTABLE} -q -n up -dP'")
+message(STATUS "rv='${rv}'")
+message(STATUS "ov='${ov}'")
+message(STATUS "ev='${ev}'")
+message(STATUS "modifications='${modifications}'")
+
+
+# Decide if the test passes or fails:
+#
+if("$ENV{DASHBOARD_TEST_FROM_CTEST}" STREQUAL "")
+  message(STATUS "non-dashboard interactive test run")
+    # developers are allowed to have local modifications... :-)
+else()
+  message(STATUS "dashboard test run")
+
+  if(modifications)
+    message(FATAL_ERROR "test fails: source tree modifications")
+  endif()
+endif()
+
+message(STATUS "test passes")

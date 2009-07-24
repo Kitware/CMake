@@ -2714,11 +2714,17 @@ void cmGlobalXCodeGenerator
     buildSettings->AddAttribute("MACOSX_DEPLOYMENT_TARGET",
                                 this->CreateString(deploymentTarget));
     }
+
+  std::string symroot = root->GetMakefile()->GetCurrentOutputDirectory();
+  symroot += "/build";
+  buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot.c_str()));
+
   for( std::vector<cmXCodeObject*>::iterator i = configs.begin();
        i != configs.end(); ++i)
     {
     (*i)->AddAttribute("buildSettings", buildSettings);
     }
+
   this->RootObject->AddAttribute("buildConfigurationList", 
                              this->CreateObjectReference(configlist));
 

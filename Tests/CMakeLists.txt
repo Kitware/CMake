@@ -37,6 +37,21 @@ IF(BUILD_TESTING)
     MARK_AS_ADVANCED(CTEST_TEST_CTEST)
   ENDIF (CMAKE_RUN_LONG_TESTS)
 
+  # Should tests that use CVS be run?
+  #
+  find_package(CVS)
+  set(do_cvs_tests 0)
+
+  if(CVS_EXECUTABLE)
+    set(do_cvs_tests 1)
+  endif()
+
+  if(do_cvs_tests AND NOT UNIX)
+    if("${CVS_EXECUTABLE}" MATCHES "cygwin")
+      set(do_cvs_tests 0)
+    endif()
+  endif()
+
   # Should CPack tests be run? By default, yes, but...
   #
   # Disable packaging test on Apple 10.3 and below. PackageMaker starts
@@ -947,9 +962,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     MARK_AS_ADVANCED(BZR_EXECUTABLE)
     SET(CTEST_TEST_UPDATE_BZR 0)
     IF(BZR_EXECUTABLE)
-      IF(NOT "${CVS_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+      IF(NOT "${BZR_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
         SET(CTEST_TEST_UPDATE_BZR 1)
-      ENDIF(NOT "${CVS_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+      ENDIF(NOT "${BZR_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
     ENDIF(BZR_EXECUTABLE)
     IF(CTEST_TEST_UPDATE_BZR)
       # Check if xmloutput plugin is there
@@ -979,9 +994,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     MARK_AS_ADVANCED(GIT_EXECUTABLE)
     SET(CTEST_TEST_UPDATE_GIT 0)
     IF(GIT_EXECUTABLE)
-      IF(NOT "${CVS_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+      IF(NOT "${GIT_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
         SET(CTEST_TEST_UPDATE_GIT 1)
-      ENDIF(NOT "${CVS_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+      ENDIF(NOT "${GIT_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
     ENDIF(GIT_EXECUTABLE)
     IF(CTEST_TEST_UPDATE_GIT)
       SET(CTestUpdateGIT_DIR "CTest UpdateGIT")
@@ -998,9 +1013,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     MARK_AS_ADVANCED(HG_EXECUTABLE)
     SET(CTEST_TEST_UPDATE_HG 0)
     IF(HG_EXECUTABLE)
-      IF(NOT "${CVS_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+      IF(NOT "${HG_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
         SET(CTEST_TEST_UPDATE_HG 1)
-      ENDIF(NOT "${CVS_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+      ENDIF(NOT "${HG_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
     ENDIF(HG_EXECUTABLE)
     IF(CTEST_TEST_UPDATE_HG)
       SET(CTestUpdateHG_DIR "CTest UpdateHG")
@@ -1236,3 +1251,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)
+
+if(BUILD_TESTING)
+  if(do_cvs_tests)
+    add_test(IsSourceTreeUnmodified ${CMAKE_CMAKE_COMMAND} -P "IsSourceTreeUnmodified.cmake")
+  endif(do_cvs_tests)
+endif(BUILD_TESTING)
