@@ -39,18 +39,21 @@ IF(BUILD_TESTING)
 
   # Should tests that use CVS be run?
   #
-  find_package(CVS)
   set(do_cvs_tests 0)
 
-  if(CVS_EXECUTABLE)
-    set(do_cvs_tests 1)
-  endif()
+  if(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
+    find_package(CVS QUIET)
+
+    if(CVS_EXECUTABLE)
+      set(do_cvs_tests 1)
+    endif(CVS_EXECUTABLE)
+  endif(EXISTS ${CMAKE_ROOT}/Modules/FindCVS.cmake)
 
   if(do_cvs_tests AND NOT UNIX)
     if("${CVS_EXECUTABLE}" MATCHES "cygwin")
       set(do_cvs_tests 0)
-    endif()
-  endif()
+    endif("${CVS_EXECUTABLE}" MATCHES "cygwin")
+  endif(do_cvs_tests AND NOT UNIX)
 
   # Should CPack tests be run? By default, yes, but...
   #
