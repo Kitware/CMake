@@ -13,6 +13,7 @@ message(STATUS "")
 # Check with "cvs -q -n up -dP" if there are any local modifications to the
 # CMake source tree:
 #
+message(STATUS "")
 message(STATUS
   "=============================================================================")
 execute_process(COMMAND ${CVS_EXECUTABLE} -q -n up -dP
@@ -21,29 +22,78 @@ execute_process(COMMAND ${CVS_EXECUTABLE} -q -n up -dP
   ERROR_VARIABLE ev
   RESULT_VARIABLE rv)
 
+set(additions 0)
+set(conflicts 0)
 set(modifications 0)
+
 if(NOT ov STREQUAL "")
-  set(modifications 1)
+  string(REPLACE "\\\\;" ";" lines "${ov}")
+  string(REPLACE "\n" "E;" lines "${lines}")
+
+  foreach(line ${lines})
+    message(STATUS "${line}")
+
+    if(line MATCHES "^\\? ")
+      message(STATUS "locally added file/directory detected...")
+      set(additions 1)
+    endif()
+
+    if(line MATCHES "^C ")
+      message(STATUS "conflict detected...")
+      set(conflicts 1)
+    endif()
+
+    if(line MATCHES "^M ")
+      message(STATUS "locally modified file detected...")
+      set(modifications 1)
+    endif()
+  endforeach()
 endif()
 
 message(STATUS "Results of running '${CVS_EXECUTABLE} -q -n up -dP'")
 message(STATUS "rv='${rv}'")
 message(STATUS "ov='${ov}'")
 message(STATUS "ev='${ev}'")
+message(STATUS "")
+message(STATUS "additions='${additions}'")
+message(STATUS "conflicts='${conflicts}'")
 message(STATUS "modifications='${modifications}'")
 
 
 # Decide if the test passes or fails:
 #
-if("$ENV{DASHBOARD_TEST_FROM_CTEST}" STREQUAL "")
-  message(STATUS "non-dashboard interactive test run")
-    # developers are allowed to have local modifications... :-)
-else()
-  message(STATUS "dashboard test run")
+message(STATUS "")
+message(STATUS
+  "=============================================================================")
 
+if("$ENV{DASHBOARD_TEST_FROM_CTEST}" STREQUAL "")
+
+  # developers are allowed to have local modifications...
+  message(STATUS "interactive test run")
+  message(STATUS "")
+
+else()
+
+  message(STATUS "dashboard test run")
+  message(STATUS "")
+
+  # but dashboard machines are not allowed to have local modifications...
   if(modifications)
     message(FATAL_ERROR "test fails: source tree modifications")
   endif()
+
+endif()
+
+# ...and nobody is allowed to have local additions or conflicts...
+# Not even developers.
+#
+if(additions)
+  message(FATAL_ERROR "test fails: source tree additions: use cvs add before committing or remove the files from the source tree")
+endif()
+
+if(conflicts)
+  message(FATAL_ERROR "test fails: source tree conflicts: resolve before committing")
 endif()
 
 message(STATUS "test passes")
+message(STATUS "")
