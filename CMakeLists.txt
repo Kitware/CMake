@@ -6,6 +6,8 @@ ENDIF(COMMAND CMAKE_POLICY)
 
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 
+# Allow empty endif() and such with CMake 2.4.
+SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 1)
 
 
 #-----------------------------------------------------------------------
