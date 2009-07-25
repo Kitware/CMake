@@ -1,99 +1,136 @@
 # Check the CMake source tree and report anything suspicious...
 #
-message(STATUS
-  "=============================================================================")
-message(STATUS "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
-message(STATUS "")
-message(STATUS "CMake_SOURCE_DIR='${CMake_SOURCE_DIR}'")
-message(STATUS "CVS_EXECUTABLE='${CVS_EXECUTABLE}'")
-message(STATUS "ENV{DASHBOARD_TEST_FROM_CTEST}='$ENV{DASHBOARD_TEST_FROM_CTEST}'")
-message(STATUS "")
+message("=============================================================================")
+message("CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
+message("")
+message("CMake_SOURCE_DIR='${CMake_SOURCE_DIR}'")
+message("CVS_EXECUTABLE='${CVS_EXECUTABLE}'")
+message("ENV{DASHBOARD_TEST_FROM_CTEST}='$ENV{DASHBOARD_TEST_FROM_CTEST}'")
+message("")
 
 
 # Check with "cvs -q -n up -dP" if there are any local modifications to the
 # CMake source tree:
 #
-message(STATUS "")
-message(STATUS
-  "=============================================================================")
+message("=============================================================================")
+message("Copy/paste this command to reproduce:")
+message("cd \"${CMake_SOURCE_DIR}\" && \"${CVS_EXECUTABLE}\" -q -n up -dP")
+message("")
 execute_process(COMMAND ${CVS_EXECUTABLE} -q -n up -dP
   WORKING_DIRECTORY ${CMake_SOURCE_DIR}
   OUTPUT_VARIABLE ov
   ERROR_VARIABLE ev
   RESULT_VARIABLE rv)
 
+message("Results of running '${CVS_EXECUTABLE} -q -n up -dP'")
+message("rv='${rv}'")
+message("ov='${ov}'")
+message("ev='${ev}'")
+message("")
+
+# Analyze cvs output:
+#
 set(additions 0)
 set(conflicts 0)
 set(modifications 0)
+set(nonadditions 0)
 
 if(NOT ov STREQUAL "")
-  string(REPLACE "\\\\;" ";" lines "${ov}")
+  string(REPLACE ";" "\\\\;" lines "${ov}")
   string(REPLACE "\n" "E;" lines "${lines}")
 
   foreach(line ${lines})
-    message(STATUS "${line}")
+    message("'${line}'")
 
-    if(line MATCHES "^\\? ")
-      message(STATUS "locally added file/directory detected...")
-      set(additions 1)
+    # But do not consider files that exist just because some user poked around
+    # the file system with Windows Explorer or with the Finder from a Mac...
+    # ('Thumbs.db' and '.DS_Store' files...)
+    #
+    set(consider 1)
+    set(ignore_files_regex "^(. |.*(/|\\\\))(\\.DS_Store|Thumbs.db)E$")
+    if(line MATCHES "${ignore_files_regex}")
+      message("   line matches '${ignore_files_regex}' -- not considered")
+      set(consider 0)
     endif()
 
-    if(line MATCHES "^C ")
-      message(STATUS "conflict detected...")
-      set(conflicts 1)
-    endif()
+    if(consider)
+      if(line MATCHES "^A ")
+        message("   locally added file/directory detected...")
+        set(additions 1)
+      endif()
 
-    if(line MATCHES "^M ")
-      message(STATUS "locally modified file detected...")
-      set(modifications 1)
+      if(line MATCHES "^C ")
+        message("   conflict detected...")
+        set(conflicts 1)
+      endif()
+
+      if(line MATCHES "^M ")
+        message("   locally modified file detected...")
+        set(modifications 1)
+      endif()
+
+      if(line MATCHES "^\\? ")
+        message("   locally non-added file/directory detected...")
+        set(nonadditions 1)
+      endif()
     endif()
   endforeach()
 endif()
 
-message(STATUS "Results of running '${CVS_EXECUTABLE} -q -n up -dP'")
-message(STATUS "rv='${rv}'")
-message(STATUS "ov='${ov}'")
-message(STATUS "ev='${ev}'")
-message(STATUS "")
-message(STATUS "additions='${additions}'")
-message(STATUS "conflicts='${conflicts}'")
-message(STATUS "modifications='${modifications}'")
+message("=============================================================================")
+message("additions='${additions}'")
+message("conflicts='${conflicts}'")
+message("modifications='${modifications}'")
+message("nonadditions='${nonadditions}'")
+message("")
 
 
 # Decide if the test passes or fails:
 #
-message(STATUS "")
-message(STATUS
-  "=============================================================================")
+message("=============================================================================")
 
 if("$ENV{DASHBOARD_TEST_FROM_CTEST}" STREQUAL "")
 
-  # developers are allowed to have local modifications...
-  message(STATUS "interactive test run")
-  message(STATUS "")
+  # developers are allowed to have local additions and modifications...
+  message("interactive test run")
+  message("")
 
 else()
 
-  message(STATUS "dashboard test run")
-  message(STATUS "")
+  message("dashboard test run")
+  message("")
 
-  # but dashboard machines are not allowed to have local modifications...
-  if(modifications)
-    message(FATAL_ERROR "test fails: source tree modifications")
+  # but dashboard machines are not allowed to have local additions or modifications...
+  if(additions)
+    message(FATAL_ERROR "test fails: local source tree additions")
   endif()
+
+  if(modifications)
+    message(FATAL_ERROR "test fails: local source tree modifications")
+  endif()
+
+  #
+  # It's a dashboard run if ctest was run with '-D ExperimentalTest' or some other
+  # -D arg on its command line or if ctest is running a -S script to run a dashboard...
+  # Running ctest like that causes the DASHBOARD_TEST_FROM_CTEST env var to be set.
+  #
 
 endif()
 
-# ...and nobody is allowed to have local additions or conflicts...
+
+# ...and nobody is allowed to have local non-additions or conflicts...
 # Not even developers.
 #
-if(additions)
-  message(FATAL_ERROR "test fails: source tree additions: use cvs add before committing or remove the files from the source tree")
+if(nonadditions)
+  message(FATAL_ERROR "test fails: local source tree non-additions: use cvs add before committing, or remove the files from the source tree")
 endif()
 
 if(conflicts)
-  message(FATAL_ERROR "test fails: source tree conflicts: resolve before committing")
+  message(FATAL_ERROR "test fails: local source tree conflicts: resolve before committing")
 endif()
 
-message(STATUS "test passes")
-message(STATUS "")
+
+# Still here? Good then...
+#
+message("test passes")
+message("")
