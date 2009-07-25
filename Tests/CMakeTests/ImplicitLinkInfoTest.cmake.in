@@ -281,21 +281,21 @@ list(APPEND platforms cygwin_gfortran)
 # MSYS
 
 # gcc dummy.c -v
-set(msys_gcc_text " C:/some-mingw/bin/../libexec/gcc/mingw32/3.4.5/collect2.exe -Bdynamic /mingw/lib/crt2.o C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtbegin.o -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5 -LC:/some-mingw/bin/../lib/gcc -L/mingw/lib -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/../../.. C:/home/user/AppData/Local/Temp/cckQmvRt.o -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtend.o")
+set(msys_gcc_text " C:/some-mingw/bin/../libexec/gcc/mingw32/3.4.5/collect2.exe -Bdynamic /some-mingw/lib/crt2.o C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtbegin.o -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5 -LC:/some-mingw/bin/../lib/gcc -L/some-mingw/lib -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/../../.. C:/home/user/AppData/Local/Temp/cckQmvRt.o -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtend.o")
 set(msys_gcc_libs "mingw32;gcc;moldname;mingwex;msvcrt;user32;kernel32;advapi32;shell32;mingw32;gcc;moldname;mingwex;msvcrt")
-set(msys_gcc_dirs "C:/some-mingw/lib/gcc/mingw32/3.4.5;C:/some-mingw/lib/gcc;/mingw/lib;C:/some-mingw/lib")
+set(msys_gcc_dirs "C:/some-mingw/lib/gcc/mingw32/3.4.5;C:/some-mingw/lib/gcc;/some-mingw/lib;C:/some-mingw/lib")
 list(APPEND platforms msys_gcc)
 
 # g++ dummy.cxx -v
-set(msys_g++_text " C:/some-mingw/bin/../libexec/gcc/mingw32/3.4.5/collect2.exe -Bdynamic /mingw/lib/crt2.o C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtbegin.o -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5 -LC:/some-mingw/bin/../lib/gcc -L/mingw/lib -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/../../.. C:/home/user/AppData/Local/Temp/cci5hYPk.o -lstdc++ -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtend.o")
+set(msys_g++_text " C:/some-mingw/bin/../libexec/gcc/mingw32/3.4.5/collect2.exe -Bdynamic /some-mingw/lib/crt2.o C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtbegin.o -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5 -LC:/some-mingw/bin/../lib/gcc -L/some-mingw/lib -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/../../.. C:/home/user/AppData/Local/Temp/cci5hYPk.o -lstdc++ -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtend.o")
 set(msys_g++_libs "stdc++;mingw32;gcc;moldname;mingwex;msvcrt;user32;kernel32;advapi32;shell32;mingw32;gcc;moldname;mingwex;msvcrt")
-set(msys_g++_dirs "C:/some-mingw/lib/gcc/mingw32/3.4.5;C:/some-mingw/lib/gcc;/mingw/lib;C:/some-mingw/lib")
+set(msys_g++_dirs "C:/some-mingw/lib/gcc/mingw32/3.4.5;C:/some-mingw/lib/gcc;/some-mingw/lib;C:/some-mingw/lib")
 list(APPEND platforms msys_g++)
 
 # g77 dummy.f -v
-set(msys_g77_text " C:/some-mingw/bin/../libexec/gcc/mingw32/3.4.5/collect2.exe -Bdynamic /mingw/lib/crt2.o C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtbegin.o -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5 -LC:/some-mingw/bin/../lib/gcc -L/mingw/lib -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/../../.. C:/home/user/AppData/Local/Temp/ccabRxQ1.o -lfrtbegin -lg2c -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtend.o")
+set(msys_g77_text " C:/some-mingw/bin/../libexec/gcc/mingw32/3.4.5/collect2.exe -Bdynamic /some-mingw/lib/crt2.o C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtbegin.o -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5 -LC:/some-mingw/bin/../lib/gcc -L/some-mingw/lib -LC:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/../../.. C:/home/user/AppData/Local/Temp/ccabRxQ1.o -lfrtbegin -lg2c -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -luser32 -lkernel32 -ladvapi32 -lshell32 -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt C:/some-mingw/bin/../lib/gcc/mingw32/3.4.5/crtend.o")
 set(msys_g77_libs "frtbegin;g2c;mingw32;gcc;moldname;mingwex;msvcrt;user32;kernel32;advapi32;shell32;mingw32;gcc;moldname;mingwex;msvcrt")
-set(msys_g77_dirs "C:/some-mingw/lib/gcc/mingw32/3.4.5;C:/some-mingw/lib/gcc;/mingw/lib;C:/some-mingw/lib")
+set(msys_g77_dirs "C:/some-mingw/lib/gcc/mingw32/3.4.5;C:/some-mingw/lib/gcc;/some-mingw/lib;C:/some-mingw/lib")
 list(APPEND platforms msys_g77)
 
 
