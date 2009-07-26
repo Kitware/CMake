@@ -3325,18 +3325,18 @@ SystemTools
   // The first two components do not add a slash.
   if(first != last)
     {
-    result += *first++;
+    result.append(*first++);
     }
   if(first != last)
     {
-    result += *first++;
+    result.append(*first++);
     }
 
   // All remaining components are always separated with a slash.
   while(first != last)
     {
-    result += "/";
-    result += *first++;
+    result.append("/");
+    result.append(*first++);
     }
 
   // Return the concatenated result.
