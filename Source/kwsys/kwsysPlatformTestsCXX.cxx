@@ -91,6 +91,11 @@ bool f(const kwsys_stl::string& s) { return s != ""; }
 int main() { return 0; }
 #endif
 
+#ifdef TEST_KWSYS_CXX_HAS_CSTDIO
+#include <cstdio>
+int main() { return 0; }
+#endif
+
 #ifdef TEST_KWSYS_CXX_HAS_CSTDDEF
 #include <cstddef>
 void f(size_t) {}
@@ -331,6 +336,9 @@ int main()
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <assert.h>
+#if KWSYS_CXX_HAS_CSTDIO
+# include <cstdio>
+#endif
 #include <stdio.h>
 
 int main(int, char **argv)

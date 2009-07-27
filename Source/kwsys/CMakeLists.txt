@@ -337,14 +337,19 @@ ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
 
 #-----------------------------------------------------------------------------
 # Configure Large File Support.
+KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_CSTDIO
+  "Checking whether header cstdio is available" DIRECT)
 SET(KWSYS_LFS_AVAILABLE 0)
 IF(KWSYS_LFS_REQUESTED)
   # Large File Support is requested.
   SET(KWSYS_LFS_REQUESTED 1)
 
   # Check for large file support.
+  SET(KWSYS_PLATFORM_CXX_TEST_DEFINES
+    -DKWSYS_CXX_HAS_CSTDIO=${KWSYS_CXX_HAS_CSTDIO})
   KWSYS_PLATFORM_CXX_TEST_RUN(KWSYS_LFS_WORKS
     "Checking for Large File Support" DIRECT)
+  SET(KWSYS_PLATFORM_CXX_TEST_DEFINES)
 
   IF(KWSYS_LFS_WORKS)
     SET(KWSYS_LFS_AVAILABLE 1)
