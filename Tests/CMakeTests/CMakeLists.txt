@@ -32,6 +32,7 @@ AddCMakeTest(GetPrerequisites "${GetPrerequisites_PreArgs}")
 #
 if(do_cvs_tests)
   set(CheckSourceTree_PreArgs
+    "-DCMake_BINARY_DIR:PATH=${CMake_BINARY_DIR}"
     "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
     "-DCVS_EXECUTABLE:STRING=${CVS_EXECUTABLE}"
     )

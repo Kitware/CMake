@@ -3,9 +3,40 @@
 message("=============================================================================")
 message("CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
 message("")
+message("CMake_BINARY_DIR='${CMake_BINARY_DIR}'")
 message("CMake_SOURCE_DIR='${CMake_SOURCE_DIR}'")
 message("CVS_EXECUTABLE='${CVS_EXECUTABLE}'")
 message("ENV{DASHBOARD_TEST_FROM_CTEST}='$ENV{DASHBOARD_TEST_FROM_CTEST}'")
+message("")
+
+
+# Is the build directory the same as or underneath the source directory?
+# (i.e. - is it an "in source" build?)
+#
+set(in_source_build 0)
+
+if(CMake_SOURCE_DIR STREQUAL "${CMake_BINARY_DIR}")
+  message("build dir *is* source dir")
+  set(in_source_build 1)
+else()
+  string(LENGTH "${CMake_SOURCE_DIR}" src_len)
+  string(LENGTH "${CMake_BINARY_DIR}" bin_len)
+
+  if(bin_len GREATER src_len)
+    math(EXPR substr_len "${src_len}+1")
+    string(SUBSTRING "${CMake_BINARY_DIR}" 0 ${substr_len} bin_dir)
+    if(bin_dir STREQUAL "${CMake_SOURCE_DIR}/")
+      message("build dir is under source dir")
+      set(in_source_build 1)
+    endif()
+  endif()
+endif()
+
+message("src_len='${src_len}'")
+message("bin_len='${bin_len}'")
+message("substr_len='${substr_len}'")
+message("bin_dir='${bin_dir}'")
+message("in_source_build='${in_source_build}'")
 message("")
 
 
@@ -92,11 +123,13 @@ message("=======================================================================
 if("$ENV{DASHBOARD_TEST_FROM_CTEST}" STREQUAL "")
 
   # developers are allowed to have local additions and modifications...
+  set(is_dashboard 0)
   message("interactive test run")
   message("")
 
 else()
 
+  set(is_dashboard 1)
   message("dashboard test run")
   message("")
 
@@ -110,9 +143,10 @@ else()
   endif()
 
   #
-  # It's a dashboard run if ctest was run with '-D ExperimentalTest' or some other
-  # -D arg on its command line or if ctest is running a -S script to run a dashboard...
-  # Running ctest like that causes the DASHBOARD_TEST_FROM_CTEST env var to be set.
+  # It's a dashboard run if ctest was run with '-D ExperimentalTest' or some
+  # other -D arg on its command line or if ctest is running a -S script to run
+  # a dashboard... Running ctest like that sets the DASHBOARD_TEST_FROM_CTEST
+  # env var.
   #
 
 endif()
@@ -122,7 +156,19 @@ endif()
 # Not even developers.
 #
 if(nonadditions)
-  message(FATAL_ERROR "test fails: local source tree non-additions: use cvs add before committing, or remove the files from the source tree")
+  if(in_source_build AND is_dashboard)
+    message("
+warning: test results confounded because this is an 'in-source' build - cannot
+distinguish between non-added files that are in-source build products and
+non-added source files that somebody forgot to 'cvs add'... - this is only ok
+if this is intentionally an in-source dashboard build... Developers should
+use out-of-source builds to verify a clean source tree with this test...
+
+Allowing test to pass despite the warning message...
+")
+  else()
+    message(FATAL_ERROR "test fails: local source tree non-additions: use cvs add before committing, or remove the files from the source tree")
+  endif()
 endif()
 
 if(conflicts)
