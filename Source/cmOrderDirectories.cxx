@@ -372,6 +372,15 @@ cmOrderDirectories
 //----------------------------------------------------------------------------
 void
 cmOrderDirectories
+::AddLanguageDirectories(std::vector<std::string> const& dirs)
+{
+  this->LanguageDirectories.insert(this->LanguageDirectories.end(),
+                                   dirs.begin(), dirs.end());
+}
+
+//----------------------------------------------------------------------------
+void
+cmOrderDirectories
 ::SetImplicitDirectories(std::set<cmStdString> const& implicitDirs)
 {
   this->ImplicitDirectories = implicitDirs;
@@ -400,6 +409,9 @@ void cmOrderDirectories::CollectOriginalDirectories()
     {
     this->ConstraintEntries[i]->AddDirectory();
     }
+
+  // Add language runtime directories last.
+  this->AddOriginalDirectories(this->LanguageDirectories);
 }
 
 //----------------------------------------------------------------------------

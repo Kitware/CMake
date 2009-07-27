@@ -38,6 +38,7 @@ public:
   void AddRuntimeLibrary(std::string const& fullPath, const char* soname = 0);
   void AddLinkLibrary(std::string const& fullPath);
   void AddUserDirectories(std::vector<std::string> const& extra);
+  void AddLanguageDirectories(std::vector<std::string> const& dirs);
   void SetImplicitDirectories(std::set<cmStdString> const& implicitDirs);
   void SetLinkExtensionInfo(std::vector<std::string> const& linkExtensions,
                             std::string const& removeExtRegex);
@@ -56,6 +57,7 @@ private:
   std::vector<cmOrderDirectoriesConstraint*> ConstraintEntries;
   std::vector<cmOrderDirectoriesConstraint*> ImplicitDirEntries;
   std::vector<std::string> UserDirectories;
+  std::vector<std::string> LanguageDirectories;
   cmsys::RegularExpression RemoveLibraryExtension;
   std::vector<std::string> LinkExtensions;
   std::set<cmStdString> ImplicitDirectories;

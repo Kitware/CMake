@@ -552,6 +552,47 @@ bool cmComputeLinkInformation::Compute()
     return false;
     }
 
+  // Add implicit language runtime libraries and directories.
+  cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config);
+  for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
+      li != lc->Languages.end(); ++li)
+    {
+    // Skip those of the linker language.  They are implicit.
+    if(*li != this->LinkLanguage)
+      {
+      // Add libraries for this language that are not implied by the
+      // linker language.
+      std::string libVar = "CMAKE_";
+      libVar += *li;
+      libVar += "_IMPLICIT_LINK_LIBRARIES";
+      if(const char* libs = this->Makefile->GetDefinition(libVar.c_str()))
+        {
+        std::vector<std::string> libsVec;
+        cmSystemTools::ExpandListArgument(libs, libsVec);
+        for(std::vector<std::string>::const_iterator i = libsVec.begin();
+            i != libsVec.end(); ++i)
+          {
+          if(this->ImplicitLinkLibs.find(*i) == this->ImplicitLinkLibs.end())
+            {
+            this->AddItem(i->c_str(), 0);
+            }
+          }
+        }
+
+      // Add linker search paths for this language that are not
+      // implied by the linker language.
+      std::string dirVar = "CMAKE_";
+      dirVar += *li;
+      dirVar += "_IMPLICIT_LINK_DIRECTORIES";
+      if(const char* dirs = this->Makefile->GetDefinition(dirVar.c_str()))
+        {
+        std::vector<std::string> dirsVec;
+        cmSystemTools::ExpandListArgument(dirs, dirsVec);
+        this->OrderLinkerSearchPath->AddLanguageDirectories(dirsVec);
+        }
+      }
+    }
+
   return true;
 }
 
@@ -1551,11 +1592,39 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
     cmSystemTools::ExpandListArgument(implicitLinks, implicitDirVec);
     }
 
+  // Get language-specific implicit directories.
+  std::string implicitDirVar = "CMAKE_";
+  implicitDirVar += this->LinkLanguage;
+  implicitDirVar += "_IMPLICIT_LINK_DIRECTORIES";
+  if(const char* implicitDirs =
+     this->Makefile->GetDefinition(implicitDirVar.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(implicitDirs, implicitDirVec);
+    }
+
   // Store implicit link directories.
   for(std::vector<std::string>::const_iterator i = implicitDirVec.begin();
       i != implicitDirVec.end(); ++i)
     {
     this->ImplicitLinkDirs.insert(*i);
+    }
+
+  // Get language-specific implicit libraries.
+  std::vector<std::string> implicitLibVec;
+  std::string implicitLibVar = "CMAKE_";
+  implicitLibVar += this->LinkLanguage;
+  implicitLibVar += "_IMPLICIT_LINK_LIBRARIES";
+  if(const char* implicitLibs =
+     this->Makefile->GetDefinition(implicitLibVar.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(implicitLibs, implicitLibVec);
+    }
+
+  // Store implicit link libraries.
+  for(std::vector<std::string>::const_iterator i = implicitLibVec.begin();
+      i != implicitLibVec.end(); ++i)
+    {
+    this->ImplicitLinkLibs.insert(*i);
     }
 }
 
