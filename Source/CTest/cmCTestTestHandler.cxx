@@ -574,12 +574,27 @@ int cmCTestTestHandler::ProcessHandler()
       {
       percent = 99;
       }
+    
     if(!this->CTest->GetParallelSubprocess())
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
                  << static_cast<int>(percent + .5) << "% tests passed, "
                  << failed.size() << " tests failed out of " 
-                 << total << std::endl);
+                 << total << std::endl); 
+      double totalTestTime = 0;
+
+      for(cmCTestTestHandler::TestResultsVector::size_type cc = 0;
+          cc < this->TestResults.size(); cc ++ )
+        {
+        cmCTestTestResult *result = &this->TestResults[cc];
+        totalTestTime += result->ExecutionTime;
+        }
+      
+      char buf[1024];
+      sprintf(buf, "%6.2f sec", totalTestTime); 
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "\nTotal CPU time = " 
+                 <<  buf << "\n" );
+      
       }
 
     if (failed.size())
@@ -823,18 +838,18 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
       if((success && !it->WillFail) || (!success && it->WillFail))
         {
         cres.Status = cmCTestTestHandler::COMPLETED;
-        cmCTestLog(this->CTest, HANDLER_OUTPUT,   "   Passed" << std::endl);
+        cmCTestLog(this->CTest, HANDLER_OUTPUT,   "   Passed  " );
         }
       else
         {
         cres.Status = cmCTestTestHandler::FAILED;
         cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                   "***Failed " << reason << std::endl);
+                   "***Failed " << reason );
         }
       }
     else if ( res == cmsysProcess_State_Expired )
       {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout" << std::endl);
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout");
       cres.Status = cmCTestTestHandler::TIMEOUT;
       }
     else if ( res == cmsysProcess_State_Exception )
@@ -862,12 +877,10 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
           cmCTestLog(this->CTest, HANDLER_OUTPUT, "Other");
           cres.Status = cmCTestTestHandler::OTHER_FAULT;
         }
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
       }
     else // if ( res == cmsysProcess_State_Error )
       {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Bad command " << res
-                 << std::endl);
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Bad command " << res );
       cres.Status = cmCTestTestHandler::BAD_COMMAND;
       }
 
@@ -879,6 +892,9 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
       {
       failed.push_back(testname);
       }
+    char buf[1024];
+    sprintf(buf, "%6.2f sec", cres.ExecutionTime);
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, buf << "\n" );
     if (!output.empty() && output.find("<DartMeasurement") != output.npos)
       {
       if (this->DartStuff.find(output.c_str()))
@@ -1541,7 +1557,6 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     this->ProcessOneTest(&(*it), passed, failed, it->Index, 
                          static_cast<int>(this->TotalNumberOfTests));
     }
-
   this->EndTest = this->CTest->CurrentTime();
   this->EndTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
   this->ElapsedTestingTime = cmSystemTools::GetTime() - elapsed_time_start;
