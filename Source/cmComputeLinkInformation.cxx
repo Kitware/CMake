@@ -1626,7 +1626,13 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
   for(std::vector<std::string>::const_iterator i = implicitLibVec.begin();
       i != implicitLibVec.end(); ++i)
     {
-    this->ImplicitLinkLibs.insert(*i);
+    // Items starting in '-' but not '-l' are flags, not libraries,
+    // and should not be filtered by this implicit list.
+    std::string const& item = *i;
+    if(item[0] != '-' || item[1] == 'l')
+      {
+      this->ImplicitLinkLibs.insert(item);
+      }
     }
 }
 
