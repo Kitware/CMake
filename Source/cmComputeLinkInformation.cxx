@@ -1184,7 +1184,28 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
   //
   //   foo       ==>  -lfoo
   //   libfoo.a  ==>  -Wl,-Bstatic -lfoo
-  std::string lib;
+
+  // Pass flags through untouched.
+  if(item[0] == '-' || item[0] == '$' || item[0] == '`')
+    {
+    // if this is a -l option then we might need to warn about
+    // CMP0003 so put it in OldUserFlagItems, if it is not a -l
+    // or -Wl,-l (-framework -pthread), then allow it without a 
+    // CMP0003 as -L will not affect those other linker flags
+    if(item.find("-l") == 0 ||  item.find("-Wl,-l") == 0)
+      {
+      // This is a linker option provided by the user.
+      this->OldUserFlagItems.push_back(item);
+      }
+
+    // Restore the target link type since this item does not specify
+    // one.
+    this->SetCurrentLinkType(this->StartLinkType);
+
+    // Use the item verbatim.
+    this->Items.push_back(Item(item, false));
+    return;
+    }
 
   // Parse out the prefix, base, and suffix components of the
   // library name.  If the name matches that of a shared or static
@@ -1196,6 +1217,7 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
   // libfoo.dll.a for import libraries and libfoo.a for static
   // libraries.  On AIX a library with the name libfoo.a can be
   // shared!
+  std::string lib;
   if(this->ExtractSharedLibraryName.find(item))
     {
     // This matches a shared library file name.
@@ -1241,26 +1263,6 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
 
     // Use just the library name so the linker will search.
     lib = this->ExtractAnyLibraryName.match(2);
-    }
-  else if(item[0] == '-' || item[0] == '$' || item[0] == '`')
-    {
-    // if this is a -l option then we might need to warn about
-    // CMP0003 so put it in OldUserFlagItems, if it is not a -l
-    // or -Wl,-l (-framework -pthread), then allow it without a 
-    // CMP0003 as -L will not affect those other linker flags
-    if(item.find("-l") == 0 ||  item.find("-Wl,-l") == 0)
-      {
-      // This is a linker option provided by the user.
-      this->OldUserFlagItems.push_back(item);
-      }
-
-    // Restore the target link type since this item does not specify
-    // one.
-    this->SetCurrentLinkType(this->StartLinkType);
-
-    // Use the item verbatim.
-    this->Items.push_back(Item(item, false));
-    return;
     }
   else
     {
