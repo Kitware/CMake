@@ -875,7 +875,7 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
     reg += "|";
     }
   reg += ")";
-  reg += "([^/]*)";
+  reg += "([^/:]*)";
 
   // Create a regex to match any library name.
   std::string reg_any = reg;
