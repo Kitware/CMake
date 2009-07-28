@@ -25,7 +25,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var)
       list(GET args 0 cmd)
     endif()
     if("${cmd}" MATCHES "${linker_regex}")
-      string(REGEX REPLACE ";-([LY]);" ";-\\1" args "${args}")
+      string(REGEX REPLACE ";-([LYz]);" ";-\\1" args "${args}")
       foreach(arg IN LISTS args)
         if("${arg}" MATCHES "^-L(.:)?[/\\]")
           # Unix search path.
@@ -45,6 +45,9 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var)
           list(APPEND implicit_dirs_tmp ${dirs})
         elseif("${arg}" MATCHES "^-l:")
           # HP named library.
+          list(APPEND implicit_libs ${arg})
+        elseif("${arg}" MATCHES "^-z(all|default|weak)extract")
+          # Link editor option.
           list(APPEND implicit_libs ${arg})
         endif()
       endforeach()

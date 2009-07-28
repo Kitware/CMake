@@ -58,13 +58,13 @@ list(APPEND platforms sun_CC)
 
 # f77 dummy.f -v
 set(sun_f77_text "/usr/ccs/bin/ld -t -R/opt/SUNWspro/lib/v8plus:/opt/SUNWspro/lib -o a.out /opt/SUNWspro/prod/lib/crti.o /opt/SUNWspro/prod/lib/crt1.o /opt/SUNWspro/prod/lib/misalign.o /opt/SUNWspro/prod/lib/values-xi.o -Y P,/opt/SUNWspro/lib/v8plus:/opt/SUNWspro/prod/lib/v8plus:/opt/SUNWspro/lib:/opt/SUNWspro/prod/lib:/usr/ccs/lib:/lib:/usr/lib dummy.o -lf77compat -zallextract -lompstubs -zdefaultextract -lfui -lfai -lfai2 -lfsumai -lfprodai -lfminlai -lfmaxlai -lfminvai -lfmaxvai -lfsu -lsunmath -lm -lc /opt/SUNWspro/prod/lib/crtn.o")
-set(sun_f77_libs "f77compat;ompstubs;fui;fai;fai2;fsumai;fprodai;fminlai;fmaxlai;fminvai;fmaxvai;fsu;sunmath;m;c")
+set(sun_f77_libs "f77compat;-zallextract;ompstubs;-zdefaultextract;fui;fai;fai2;fsumai;fprodai;fminlai;fmaxlai;fminvai;fmaxvai;fsu;sunmath;m;c")
 set(sun_f77_dirs "/opt/SUNWspro/lib/v8plus;/opt/SUNWspro/prod/lib/v8plus;/opt/SUNWspro/lib;/opt/SUNWspro/prod/lib;/usr/ccs/lib;/lib;/usr/lib")
 list(APPEND platforms sun_f77)
 
 # f90 dummy.f -v
 set(sun_f90_text "/usr/ccs/bin/ld -t -R/opt/SUNWspro/lib/v8plus:/opt/SUNWspro/lib -o a.out /opt/SUNWspro/prod/lib/crti.o /opt/SUNWspro/prod/lib/crt1.o /opt/SUNWspro/prod/lib/misalign.o /opt/SUNWspro/prod/lib/values-xi.o -Y P,/opt/SUNWspro/lib/v8plus:/opt/SUNWspro/prod/lib/v8plus:/opt/SUNWspro/lib:/opt/SUNWspro/prod/lib:/usr/ccs/lib:/lib:/usr/lib dummy.o -zallextract -lompstubs -zdefaultextract -lfui -lfai -lfai2 -lfsumai -lfprodai -lfminlai -lfmaxlai -lfminvai -lfmaxvai -lfsu -lsunmath -lm -lc /opt/SUNWspro/prod/lib/crtn.o")
-set(sun_f90_libs "ompstubs;fui;fai;fai2;fsumai;fprodai;fminlai;fmaxlai;fminvai;fmaxvai;fsu;sunmath;m;c")
+set(sun_f90_libs "-zallextract;ompstubs;-zdefaultextract;fui;fai;fai2;fsumai;fprodai;fminlai;fmaxlai;fminvai;fmaxvai;fsu;sunmath;m;c")
 set(sun_f90_dirs "/opt/SUNWspro/lib/v8plus;/opt/SUNWspro/prod/lib/v8plus;/opt/SUNWspro/lib;/opt/SUNWspro/prod/lib;/usr/ccs/lib;/lib;/usr/lib")
 list(APPEND platforms sun_f90)
 
