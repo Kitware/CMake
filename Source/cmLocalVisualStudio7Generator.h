@@ -81,7 +81,7 @@ public:
   virtual void ReadAndStoreExternalGUID(const char* name,
                                         const char* path);
 private:
-  typedef cmLocalVisualStudio7GeneratorOptions Options;
+  typedef cmVisualStudioGeneratorOptions Options;
   typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const char* configName);
