@@ -350,7 +350,6 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
   std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
-  lg->SetGlobalGenerator(&gg);
   cmMakefile *mf = lg->GetMakefile();
   if ( !this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str(), mf) )
     {

@@ -500,7 +500,6 @@ void cmake::ReadListFile(const char *path)
   if(path)
     {
     std::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
-    lg->SetGlobalGenerator(gg);
     lg->GetMakefile()->SetHomeOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     lg->GetMakefile()->SetStartOutputDirectory
@@ -1532,7 +1531,6 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         {
         cm.SetGlobalGenerator(ggd);
         std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
-        lgd->SetGlobalGenerator(ggd);
         lgd->GetMakefile()->SetStartDirectory(startDir.c_str());
         lgd->GetMakefile()->SetStartOutputDirectory(startOutDir.c_str());
         lgd->GetMakefile()->MakeStartDirectoriesCurrent();
@@ -2625,7 +2623,6 @@ int cmake::CheckBuildSystem()
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
   std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
-  lg->SetGlobalGenerator(&gg);
   cmMakefile* mf = lg->GetMakefile();
   if(!mf->ReadListFile(0, this->CheckBuildSystemArgument.c_str()) ||
      cmSystemTools::GetErrorOccuredFlag())
@@ -2656,7 +2653,6 @@ int cmake::CheckBuildSystem()
     if(ggd.get())
       {
       std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
-      lgd->SetGlobalGenerator(ggd.get());
       lgd->ClearDependencies(mf, verbose);
       }
     }
@@ -2895,7 +2891,6 @@ void cmake::GenerateGraphViz(const char* fileName) const
   cmGlobalGenerator ggi;
   ggi.SetCMakeInstance(&cm);
   std::auto_ptr<cmLocalGenerator> lg(ggi.CreateLocalGenerator());
-  lg->SetGlobalGenerator(&ggi);
   cmMakefile *mf = lg->GetMakefile();
 
   std::string infile = this->GetHomeOutputDirectory();

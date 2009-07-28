@@ -335,7 +335,6 @@ void cmCTestScriptHandler::CreateCMake()
   this->GlobalGenerator->SetCMakeInstance(this->CMake);
 
   this->LocalGenerator = this->GlobalGenerator->CreateLocalGenerator();
-  this->LocalGenerator->SetGlobalGenerator(this->GlobalGenerator);
   this->Makefile = this->LocalGenerator->GetMakefile();
 
   // remove all cmake commands which are not scriptable, since they can't be 

@@ -1970,7 +1970,6 @@ void cmCTestTestHandler::GetListOfTests()
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
   std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
-  lg->SetGlobalGenerator(&gg);
   cmMakefile *mf = lg->GetMakefile();
   mf->AddDefinition("CTEST_CONFIGURATION_TYPE",
     this->CTest->GetConfigType().c_str());
