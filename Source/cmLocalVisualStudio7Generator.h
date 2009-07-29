@@ -18,7 +18,7 @@
 #define cmLocalVisualStudio7Generator_h
 
 #include "cmLocalVisualStudioGenerator.h"
-#include "cmVisualStudioGeneratorOptions.h" // to get cmVS7FlagTable
+#include "cmVisualStudioGeneratorOptions.h"
 
 class cmTarget;
 class cmSourceFile;

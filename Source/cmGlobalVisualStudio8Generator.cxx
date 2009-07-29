@@ -348,7 +348,7 @@ static cmVS7FlagTable cmVS8ExtraFlagTable[] =
 
   {0,0,0,0,0}
 };
-cmVS7FlagTable const* cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8()
+cmIDEFlagTable const* cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8()
 {
   return cmVS8ExtraFlagTable;
 }

@@ -295,6 +295,7 @@ IF (WIN32)
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx
+      cmIDEFlagTable.h
       cmLocalVisualStudio6Generator.cxx
       cmLocalVisualStudio6Generator.h
       cmLocalVisualStudio7Generator.cxx

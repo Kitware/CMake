@@ -67,7 +67,7 @@ protected:
 
   virtual bool VSLinksDependencies() const { return false; }
 
-  static cmVS7FlagTable const* GetExtraFlagTableVS8();
+  static cmIDEFlagTable const* GetExtraFlagTableVS8();
   virtual void AddPlatformDefinitions(cmMakefile* mf);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
