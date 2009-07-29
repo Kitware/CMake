@@ -59,6 +59,24 @@ set(linux64_ifort_libs "ifport;ifcore;imf;svml;m;ipgo;irc;pthread;c;gcc_s;gcc;ir
 set(linux64_ifort_dirs "/opt/compiler/intel/compiler/11.0/lib/intel64;/usr/lib64/gcc/x86_64-suse-linux/4.1.2;/usr/lib64;/lib64;/usr/x86_64-suse-linux/lib;/lib;/usr/lib")
 list(APPEND platforms linux64_ifort)
 
+# pgcc dummy.c -v
+set(linux64_pgcc_text "/usr/bin/ld /usr/lib64/crt1.o /usr/lib64/crti.o /opt/compiler/pgi/linux86-64/8.0-3/lib/trace_init.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtbegin.o -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 /opt/compiler/pgi/linux86-64/8.0-3/lib/pgi.ld -L/opt/compiler/pgi/linux86-64/8.0-3/lib -L/usr/lib64 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2 /tmp/pgcc7OscXa5ur7Zk.o -rpath /opt/compiler/pgi/linux86-64/8.0-3/lib -lnspgc -lpgc -lm -lgcc -lc -lgcc /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtend.o /usr/lib64/crtn.o")
+set(linux64_pgcc_libs "nspgc;pgc;m;gcc;c;gcc")
+set(linux64_pgcc_dirs "/opt/compiler/pgi/linux86-64/8.0-3/lib;/usr/lib64;/usr/lib64/gcc/x86_64-suse-linux/4.1.2")
+list(APPEND platforms linux64_pgcc)
+
+# pgCC dummy.cxx -v
+set(linux64_pgCC_text "/usr/bin/ld /usr/lib64/crt1.o /usr/lib64/crti.o /opt/compiler/pgi/linux86-64/8.0-3/lib/trace_init.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtbegin.o -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 /opt/compiler/pgi/linux86-64/8.0-3/lib/pgi.ld -L/opt/compiler/pgi/linux86-64/8.0-3/lib -L/usr/lib64 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2 /tmp/pgCCFhjcDt1fs1Ki.o -rpath /opt/compiler/pgi/linux86-64/8.0-3/lib -lstd -lC -lnspgc -lpgc -lm -lgcc -lc -lgcc /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtend.o /usr/lib64/crtn.o")
+set(linux64_pgCC_libs "std;C;nspgc;pgc;m;gcc;c;gcc")
+set(linux64_pgCC_dirs "/opt/compiler/pgi/linux86-64/8.0-3/lib;/usr/lib64;/usr/lib64/gcc/x86_64-suse-linux/4.1.2")
+list(APPEND platforms linux64_pgCC)
+
+# pgf90 dummy.f -v
+set(linux64_pgf90_text "/usr/bin/ld /usr/lib64/crt1.o /usr/lib64/crti.o /opt/compiler/pgi/linux86-64/8.0-3/lib/trace_init.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtbegin.o /opt/compiler/pgi/linux86-64/8.0-3/lib/f90main.o -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 /opt/compiler/pgi/linux86-64/8.0-3/lib/pgi.ld -L/opt/compiler/pgi/linux86-64/8.0-3/lib -L/usr/lib64 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2 /tmp/pgf90QOIc_eB9xY5h.o -rpath /opt/compiler/pgi/linux86-64/8.0-3/lib -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl -lnspgc -lpgc -lrt -lpthread -lm -lgcc -lc -lgcc /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtend.o /usr/lib64/crtn.o")
+set(linux64_pgf90_libs "pgf90;pgf90_rpm1;pgf902;pgf90rtl;pgftnrtl;nspgc;pgc;rt;pthread;m;gcc;c;gcc")
+set(linux64_pgf90_dirs "/opt/compiler/pgi/linux86-64/8.0-3/lib;/usr/lib64;/usr/lib64/gcc/x86_64-suse-linux/4.1.2")
+list(APPEND platforms linux64_pgf90)
+
 #-----------------------------------------------------------------------------
 # Sun
 
