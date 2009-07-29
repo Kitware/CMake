@@ -62,6 +62,57 @@ public:
 };
 #endif
 
+// Builds either an object list or a space-separated string from the
+// given inputs.
+class cmGlobalXCodeGenerator::BuildObjectListOrString
+{
+  cmGlobalXCodeGenerator *Generator;
+  cmXCodeObject *Group;
+  bool Empty;
+  std::string String;
+
+public:
+  BuildObjectListOrString(cmGlobalXCodeGenerator *gen, bool buildObjectList)
+    : Generator(gen), Group(0), Empty(true)
+    {
+    if (buildObjectList)
+      {
+      this->Group = this->Generator->CreateObject(cmXCodeObject::OBJECT_LIST);
+      }
+    }
+
+  bool IsEmpty() const { return this->Empty; }
+
+  void Add(const char *newString)
+    {
+    this->Empty = false;
+
+    if (this->Group)
+      {
+      this->Group->AddObject(this->Generator->CreateString(newString));
+      }
+    else
+      {
+      this->String += newString;
+      this->String += ' ';
+      }
+    }
+
+  const std::string &GetString() const { return this->String; }
+
+  cmXCodeObject *CreateList()
+    {
+    if (this->Group)
+      {
+      return this->Group;
+      }
+    else
+      {
+      return this->Generator->CreateString(this->String.c_str());
+      }
+    }
+};
+
 //----------------------------------------------------------------------------
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
 {
@@ -451,57 +502,6 @@ cmStdString GetGroupMapKey(cmTarget& cmtarget, cmSourceFile* sf)
   key += sf->GetFullPath();
   return key;
 }
-
-// Builds either an object list or a space-separated string from the
-// given inputs.
-class cmGlobalXCodeGenerator::BuildObjectListOrString
-{
-  cmGlobalXCodeGenerator *Generator;
-  cmXCodeObject *Group;
-  bool Empty;
-  std::string String;
-
-public:
-  BuildObjectListOrString(cmGlobalXCodeGenerator *gen, bool buildObjectList)
-    : Generator(gen), Group(0), Empty(true)
-    {
-    if (buildObjectList)
-      {
-      this->Group = this->Generator->CreateObject(cmXCodeObject::OBJECT_LIST);
-      }
-    }
-
-  bool IsEmpty() const { return this->Empty; }
-
-  void Add(const char *newString)
-    {
-    this->Empty = false;
-
-    if (this->Group)
-      {
-      this->Group->AddObject(this->Generator->CreateString(newString));
-      }
-    else
-      {
-      this->String += newString;
-      this->String += ' ';
-      }
-    }
-
-  const std::string &GetString() const { return this->String; }
-
-  cmXCodeObject *CreateList()
-    {
-    if (this->Group)
-      {
-      return this->Group;
-      }
-    else
-      {
-      return this->Generator->CreateString(this->String.c_str());
-      }
-    }
-};
 
 //----------------------------------------------------------------------------
 cmXCodeObject*
