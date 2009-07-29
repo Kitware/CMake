@@ -41,6 +41,24 @@ set(linux64_sunf90_libs "fui;fai;fsu;mtsk;pthread;m;c;/opt/sun/sunstudio12/prod/
 set(linux64_sunf90_dirs "/opt/sun/sunstudio12/lib/amd64;/opt/sun/sunstudio12/rtlibs/amd64;/opt/sun/sunstudio12/prod/lib/amd64;/lib64;/usr/lib64")
 list(APPEND platforms linux64_sunf90)
 
+# icc dummy.c -v
+set(linux64_icc_text "ld    /usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64/crt1.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64/crti.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtbegin.o --eh-frame-hdr -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o a.out /tmp/iccBP8OfN.o -L/opt/compiler/intel/compiler/11.0/lib/intel64 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../x86_64-suse-linux/lib -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../.. -L/lib64 -L/lib -L/usr/lib64 -L/usr/lib -Bstatic -limf -lsvml -Bdynamic -lm -Bstatic -lipgo -ldecimal -lirc -Bdynamic -lgcc_s -lgcc -Bstatic -lirc -Bdynamic -lc -lgcc_s -lgcc -Bstatic -lirc_s -Bdynamic -ldl -lc /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtend.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64/crtn.o")
+set(linux64_icc_libs "imf;svml;m;ipgo;decimal;irc;gcc_s;gcc;irc;c;gcc_s;gcc;irc_s;dl;c")
+set(linux64_icc_dirs "/opt/compiler/intel/compiler/11.0/lib/intel64;/usr/lib64/gcc/x86_64-suse-linux/4.1.2;/usr/lib64;/lib64;/usr/x86_64-suse-linux/lib;/lib;/usr/lib")
+list(APPEND platforms linux64_icc)
+
+# icxx dummy.cxx -v
+set(linux64_icxx_text "ld    /usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64/crt1.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64/crti.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtbegin.o --eh-frame-hdr -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o a.out /tmp/icpc270GoT.o -L/opt/compiler/intel/compiler/11.0/lib/intel64 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../x86_64-suse-linux/lib -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../.. -L/lib64 -L/lib -L/usr/lib64 -L/usr/lib -Bstatic -limf -lsvml -Bdynamic -lm -Bstatic -lipgo -ldecimal -Bdynamic -lstdc++ -Bstatic -lirc -Bdynamic -lgcc_s -lgcc -Bstatic -lirc -Bdynamic -lc -lgcc_s -lgcc -Bstatic -lirc_s -Bdynamic -ldl -lc /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtend.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64/crtn.o")
+set(linux64_icxx_libs "imf;svml;m;ipgo;decimal;stdc++;irc;gcc_s;gcc;irc;c;gcc_s;gcc;irc_s;dl;c")
+set(linux64_icxx_dirs "/opt/compiler/intel/compiler/11.0/lib/intel64;/usr/lib64/gcc/x86_64-suse-linux/4.1.2;/usr/lib64;/lib64;/usr/x86_64-suse-linux/lib;/lib;/usr/lib")
+list(APPEND platforms linux64_icxx)
+
+# ifort dummy.f -v
+set(linux64_ifort_text "ld    --eh-frame-hdr -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o a.out -L/opt/compiler/intel/compiler/11.0/lib/intel64 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../x86_64-suse-linux/lib -L/usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../.. -L/lib64 -L/lib -L/usr/lib64 -L/usr/lib /usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64/crt1.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64/crti.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtbegin.o /opt/compiler/intel/compiler/11.0/lib/intel64/for_main.o dum.cxx -Bstatic -lifport -lifcore -limf -lsvml -Bdynamic -lm -Bstatic -lipgo -lirc -Bdynamic -lpthread -lc -lgcc_s -lgcc -Bstatic -lirc_s -Bdynamic -ldl -lc /usr/lib64/gcc/x86_64-suse-linux/4.1.2/crtend.o /usr/lib64/gcc/x86_64-suse-linux/4.1.2/../../../../lib64/crtn.o")
+set(linux64_ifort_libs "ifport;ifcore;imf;svml;m;ipgo;irc;pthread;c;gcc_s;gcc;irc_s;dl;c")
+set(linux64_ifort_dirs "/opt/compiler/intel/compiler/11.0/lib/intel64;/usr/lib64/gcc/x86_64-suse-linux/4.1.2;/usr/lib64;/lib64;/usr/x86_64-suse-linux/lib;/lib;/usr/lib")
+list(APPEND platforms linux64_ifort)
+
 #-----------------------------------------------------------------------------
 # Sun
 
