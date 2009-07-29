@@ -31,10 +31,20 @@ cmVisualStudioGeneratorOptions
                                  cmVS7FlagTable const* table,
                                  cmVS7FlagTable const* extraTable,
                                  cmVisualStudio10TargetGenerator* g):
+  cmIDEOptions(),
   LocalGenerator(lg), Version(version), CurrentTool(tool),
-  DoingDefine(false), FlagTable(table), ExtraFlagTable(extraTable),
   TargetGenerator(g)
 {
+  // Store the given flag tables.
+  cmIDEFlagTable const** ft = this->FlagTable;
+  if(table) { *ft++ = table; }
+  if(extraTable) { *ft++ = extraTable; }
+
+  // Preprocessor definitions are not allowed for linker tools.
+  this->AllowDefine = (tool != Linker);
+
+  // Slash options are allowed for VS.
+  this->AllowSlash = true;
 }
 
 //----------------------------------------------------------------------------
@@ -85,30 +95,6 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
     }
 }
 
-//----------------------------------------------------------------------------
-void cmVisualStudioGeneratorOptions::AddDefine(const std::string& def)
-{
-  this->Defines.push_back(def);
-}
-
-//----------------------------------------------------------------------------
-void cmVisualStudioGeneratorOptions::AddDefines(const char* defines)
-{
-  if(defines)
-    {
-    // Expand the list of definitions.
-    cmSystemTools::ExpandListArgument(defines, this->Defines);
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmVisualStudioGeneratorOptions::AddFlag(const char* flag,
-                                                   const char* value)
-{
-  this->FlagMap[flag] = value;
-}
-
-
 bool cmVisualStudioGeneratorOptions::IsDebug()
 {
   return this->FlagMap.find("DebugInformationFormat") != this->FlagMap.end();
@@ -147,54 +133,8 @@ void cmVisualStudioGeneratorOptions::Parse(const char* flags)
 }
 
 //----------------------------------------------------------------------------
-void cmVisualStudioGeneratorOptions::HandleFlag(const char* flag)
+void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
 {
-  // If the last option was -D then this option is the definition.
-  if(this->DoingDefine)
-    {
-    this->DoingDefine = false;
-    this->Defines.push_back(flag);
-    return;
-    }
-
-  // Look for known arguments.
-  if(flag[0] == '-' || flag[0] == '/')
-    {
-    // Look for preprocessor definitions.
-    if(this->CurrentTool == Compiler && flag[1] == 'D')
-      {
-      if(flag[2] == '\0')
-        {
-        // The next argument will have the definition.
-        this->DoingDefine = true;
-        }
-      else
-        {
-        // Store this definition.
-        this->Defines.push_back(flag+2);
-        }
-      return;
-      }
-
-    // Look through the available flag tables.
-    bool flag_handled = false;
-    if(this->FlagTable &&
-       this->CheckFlagTable(this->FlagTable, flag, flag_handled))
-      {
-      return;
-      }
-    if(this->ExtraFlagTable &&
-       this->CheckFlagTable(this->ExtraFlagTable, flag, flag_handled))
-      {
-      return;
-      }
-
-    // If any map entry handled the flag we are done.
-    if(flag_handled)
-      {
-      return;
-      }
-    }
   // This option is not known.  Store it in the output flags.
   this->FlagString += " ";
   this->FlagString +=
@@ -205,77 +145,6 @@ void cmVisualStudioGeneratorOptions::HandleFlag(const char* flag)
 }
 
 //----------------------------------------------------------------------------
-bool
-cmVisualStudioGeneratorOptions
-::CheckFlagTable(cmVS7FlagTable const* table, const char* flag,
-                 bool& flag_handled)
-{
-  // Look for an entry in the flag table matching this flag.
-  for(cmVS7FlagTable const* entry = table; entry->IDEName; ++entry)
-    {
-    bool entry_found = false;
-    if(entry->special & cmVS7FlagTable::UserValue)
-      {
-      // This flag table entry accepts a user-specified value.  If
-      // the entry specifies UserRequired we must match only if a
-      // non-empty value is given.
-      int n = static_cast<int>(strlen(entry->commandFlag));
-      if(strncmp(flag+1, entry->commandFlag, n) == 0 &&
-         (!(entry->special & cmVS7FlagTable::UserRequired) ||
-          static_cast<int>(strlen(flag+1)) > n))
-        {
-        if(entry->special & cmVS7FlagTable::UserIgnored)
-          {
-          // Ignore the user-specified value.
-          this->FlagMap[entry->IDEName] = entry->value;
-          }
-        else if(entry->special & cmVS7FlagTable::SemicolonAppendable)
-          {
-          const char *new_value = flag+1+n;
-          
-          std::map<cmStdString,cmStdString>::iterator itr;
-          itr = this->FlagMap.find(entry->IDEName);
-          if(itr != this->FlagMap.end())
-            {
-            // Append to old value (if present) with semicolons;
-            itr->second += ";";
-            itr->second += new_value;
-            }
-          else
-            {
-            this->FlagMap[entry->IDEName] = new_value;
-            }
-          }
-        else
-          {
-          // Use the user-specified value.
-          this->FlagMap[entry->IDEName] = flag+1+n;
-          }
-        entry_found = true;
-        }
-      }
-    else if(strcmp(flag+1, entry->commandFlag) == 0)
-      {
-      // This flag table entry provides a fixed value.
-      this->FlagMap[entry->IDEName] = entry->value;
-      entry_found = true;
-      }
-    
-    // If the flag has been handled by an entry not requesting a
-    // search continuation we are done.
-    if(entry_found && !(entry->special & cmVS7FlagTable::Continue))
-      {
-      return true;
-      }
-    
-    // If the entry was found the flag has been handled.
-    flag_handled = flag_handled || entry_found;
-    }
-  
-  return false;
-}
-
-
 void cmVisualStudioGeneratorOptions::SetConfiguration(const char* config)
 {
   this->Configuration = config;

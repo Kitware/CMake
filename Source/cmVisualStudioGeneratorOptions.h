@@ -19,13 +19,13 @@
 
 #include "cmLocalGenerator.h"
 
-#include "cmIDEFlagTable.h"
+#include "cmIDEOptions.h"
 typedef cmIDEFlagTable cmVS7FlagTable;
 
 class cmVisualStudio10TargetGenerator;
 
 //----------------------------------------------------------------------------
-class cmVisualStudioGeneratorOptions
+class cmVisualStudioGeneratorOptions: public cmIDEOptions
 {
 public:
   // Construct an options table for a given tool.
@@ -51,11 +51,6 @@ public:
   // Store options for verbose builds.
   void SetVerboseMakefile(bool verbose);
 
-  // Store definitions and flags.
-  void AddDefine(const std::string& define);
-  void AddDefines(const char* defines);
-  void AddFlag(const char* flag, const char* value);
-
   // Check for specific options.
   bool UsingUnicode();
 
@@ -73,29 +68,11 @@ private:
   cmLocalGenerator* LocalGenerator;
   int Version;
 
-  // create a map of xml tags to the values they should have in the output
-  // for example, "BufferSecurityCheck" = "TRUE"
-  // first fill this table with the values for the configuration
-  // Debug, Release, etc,
-  // Then parse the command line flags specified in CMAKE_CXX_FLAGS
-  // and CMAKE_C_FLAGS
-  // and overwrite or add new values to this map
-  std::map<cmStdString, cmStdString> FlagMap;
-
-  // Preprocessor definitions.
-  std::vector<std::string> Defines;
-
-  // Unrecognized flags that get no special handling.
-  cmStdString FlagString;
   std::string Configuration;
-  cmVisualStudio10TargetGenerator* TargetGenerator;
   Tool CurrentTool;
-  bool DoingDefine;
-  cmVS7FlagTable const* FlagTable;
-  cmVS7FlagTable const* ExtraFlagTable;
-  void HandleFlag(const char* flag);
-  bool CheckFlagTable(cmVS7FlagTable const* table, const char* flag,
-                      bool& flag_handled);
+  cmVisualStudio10TargetGenerator* TargetGenerator;
+
+  virtual void StoreUnknownFlag(const char* flag);
 };
 
 #endif
