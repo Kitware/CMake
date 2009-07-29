@@ -183,6 +183,10 @@ private:
 
   void AppendDefines(BuildObjectListOrString& defs, const char* defines_list,
                      bool dflag = false);
+  void AppendDefines(BuildObjectListOrString& defs,
+                     std::vector<std::string> const& defines,
+                     bool dflag = false);
+  void AppendFlag(std::string& flags, std::string const& flag);
 
 protected:
   virtual const char* GetInstallTargetName()      { return "install"; }

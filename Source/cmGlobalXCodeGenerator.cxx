@@ -3126,48 +3126,89 @@ void cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
   std::vector<std::string> defines;
   cmSystemTools::ExpandListArgument(defines_list, defines);
 
+  // Store the definitions in the string.
+  this->AppendDefines(defs, defines, dflag);
+}
+
+//----------------------------------------------------------------------------
+void
+cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
+                                      std::vector<std::string> const& defines,
+                                      bool dflag)
+{
   // GCC_PREPROCESSOR_DEFINITIONS is a space-separated list of definitions.
-  // We escape everything as follows:
-  //   - Place each definition in single quotes ''
+  std::string def;
+  for(std::vector<std::string>::const_iterator di = defines.begin();
+      di != defines.end(); ++di)
+    {
+    // Start with -D if requested.
+    def = dflag? "-D": "";
+    def += *di;
+
+    // Append the flag with needed escapes.
+    std::string tmp;
+    this->AppendFlag(tmp, def);
+    defs.Add(tmp.c_str());
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::AppendFlag(std::string& flags,
+                                        std::string const& flag)
+{
+  // Short-circuit for an empty flag.
+  if(flag.empty())
+    {
+    return;
+    }
+
+  // Separate from previous flags.
+  if(!flags.empty())
+    {
+    flags += " ";
+    }
+
+  // Check if the flag needs quoting.
+  bool quoteFlag =
+    flag.find_first_of("`~!@#$%^&*()+={}[]|:;\"'<>,.? ") != flag.npos;
+
+  // We escape a flag as follows:
+  //   - Place each flag in single quotes ''
   //   - Escape a single quote as \\'
   //   - Escape a backslash as \\\\ since it itself is an escape
   // Note that in the code below we need one more level of escapes for
   // C string syntax in this source file.
-  for(std::vector<std::string>::const_iterator di = defines.begin();
-      di != defines.end(); ++di)
+  //
+  // The final level of escaping is done when the string is stored
+  // into the project file by cmXCodeObject::PrintString.
+
+  if(quoteFlag)
     {
-    std::string def;
-
     // Open single quote.
-    def += "'";
+    flags += "'";
+    }
 
-    // Add -D flag if requested.
-    if(dflag)
+  // Flag value with escaped quotes and backslashes.
+  for(const char* c = flag.c_str(); *c; ++c)
+    {
+    if(*c == '\'')
       {
-      def += "-D";
+      flags += "\\\\'";
       }
-
-    // Escaped definition string.
-    for(const char* c = di->c_str(); *c; ++c)
+    else if(*c == '\\')
       {
-      if(*c == '\'')
-        {
-        def += "\\\\'";
-        }
-      else if(*c == '\\')
-        {
-        def += "\\\\\\\\";
-        }
-      else
-        {
-        def += *c;
-        }
+      flags += "\\\\\\\\";
       }
+    else
+      {
+      flags += *c;
+      }
+    }
 
+  if(quoteFlag)
+    {
     // Close single quote.
-    def += "'";
-
-    defs.Add(def.c_str());
+    flags += "'";
     }
 }
 
