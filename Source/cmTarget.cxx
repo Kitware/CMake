@@ -441,18 +441,15 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("LINKER_LANGUAGE", cmProperty::TARGET,
-     "Specifies language whose link tool should be used (obselete).",
+     "Specifies language whose compiler will invoke the linker.",
      "For executables, shared libraries, and modules, this sets the "
-     "language whose link tool is used to link the target "
+     "language whose compiler is used to link the target "
      "(such as \"C\" or \"CXX\").  "
-     "CMake 2.6 and below select a linker language automatically "
-     "based on the languages compiled into the target.  "
-     "This property overrides the default in case one of the "
-     "linked libraries uses another language.  "
-     "A typical example is a C executable linking to a static archive "
-     "containing C++ object files.  "
-     "CMake 2.8 and above account for languages in linked targets "
-     "automatically, making this property unnecessary.");
+     "A typical value for an executable is the language of the source "
+     "file providing the program entry point (main).  "
+     "If not set, the language with the highest linker preference "
+     "value is the default.  "
+     "See documentation of CMAKE_<LANG>_LINKER_PREFERENCE variables.");
 
   cm->DefineProperty
     ("LOCATION", cmProperty::TARGET,
@@ -2506,11 +2503,25 @@ void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc)
     {
     // Find the language with the highest preference value.
     cmTargetSelectLinker tsl(this);
+
+    // First select from the languages compiled directly in this target.
+    for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
+        li != impl->Languages.end(); ++li)
+      {
+      tsl.Consider(li->c_str());
+      }
+
+    // Now consider languages that propagate from linked targets.
     for(std::set<cmStdString>::const_iterator sit = languages.begin();
         sit != languages.end(); ++sit)
       {
-      tsl.Consider(sit->c_str());
+      std::string propagates = "CMAKE_"+*sit+"_LINKER_PREFERENCE_PROPAGATES";
+      if(this->Makefile->IsOn(propagates.c_str()))
+        {
+        tsl.Consider(sit->c_str());
+        }
       }
+
     lc.LinkerLanguage = tsl.Choose();
     }
 }

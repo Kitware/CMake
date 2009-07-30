@@ -1202,11 +1202,24 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables for Languages");
 
   cm->DefineProperty
+    ("CMAKE_<LANG>_LINKER_PREFERENCE_PROPAGATES", cmProperty::VARIABLE,
+     "True if CMAKE_<LANG>_LINKER_PREFERENCE propagates across targets.",
+     "This is used when CMake selects a linker language for a target.  "
+     "Languages compiled directly into the target are always considered.  "
+     "A language compiled into static libraries linked by the target is "
+     "considered if this variable is true.", false,
+     "Variables for Languages");
+
+  cm->DefineProperty
     ("CMAKE_<LANG>_LINKER_PREFERENCE", cmProperty::VARIABLE,
-     "Determine if a language should be used for linking.",
-     "If this is \"Preferred\" then if there is a mixed "
-     "language shared library or executable, then this "
-     "languages linker command will be used.",false,
+     "Preference value for linker language selection.",
+     "The \"linker language\" for executable, shared library, and module "
+     "targets is the language whose compiler will invoke the linker.  "
+     "The LINKER_LANGUAGE target property sets the language explicitly.  "
+     "Otherwise, the linker language is that whose linker preference value "
+     "is highest among languages compiled and linked into the target.  "
+     "See also the CMAKE_<LANG>_LINKER_PREFERENCE_PROPAGATES variable.",
+     false,
      "Variables for Languages");
   
   cm->DefineProperty
