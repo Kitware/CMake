@@ -2414,6 +2414,59 @@ cmTarget::LinkClosure const* cmTarget::GetLinkClosure(const char* config)
 }
 
 //----------------------------------------------------------------------------
+class cmTargetSelectLinker
+{
+  int Preference;
+  cmTarget* Target;
+  cmMakefile* Makefile;
+  cmGlobalGenerator* GG;
+  std::set<cmStdString> Preferred;
+public:
+  cmTargetSelectLinker(cmTarget* target): Preference(0), Target(target)
+    {
+    this->Makefile = this->Target->GetMakefile();
+    this->GG = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+    }
+  void Consider(const char* lang)
+    {
+    int preference = this->GG->GetLinkerPreference(lang);
+    if(preference > this->Preference)
+      {
+      this->Preference = preference;
+      this->Preferred.clear();
+      }
+    if(preference == this->Preference)
+      {
+      this->Preferred.insert(lang);
+      }
+    }
+  std::string Choose()
+    {
+    if(this->Preferred.empty())
+      {
+      return "";
+      }
+    else if(this->Preferred.size() > 1)
+      {
+      cmOStringStream e;
+      e << "Target " << this->Target->GetName()
+        << " contains multiple languages with the highest linker preference"
+        << " (" << this->Preference << "):\n";
+      for(std::set<cmStdString>::const_iterator
+            li = this->Preferred.begin(); li != this->Preferred.end(); ++li)
+        {
+        e << "  " << *li << "\n";
+        }
+      e << "Set the LINKER_LANGUAGE property for this target.";
+      cmake* cm = this->Makefile->GetCMakeInstance();
+      cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                       this->Target->GetBacktrace());
+      }
+    return *this->Preferred.begin();
+    }
+};
+
+//----------------------------------------------------------------------------
 void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc)
 {
   // Get languages built in this target.
@@ -2452,39 +2505,13 @@ void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc)
   else
     {
     // Find the language with the highest preference value.
-    cmGlobalGenerator* gg =
-      this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
-    std::string linkerLangList;              // only used for the error message
-    int maxLinkerPref = 0;
-    bool multiplePreferedLanguages = false;
+    cmTargetSelectLinker tsl(this);
     for(std::set<cmStdString>::const_iterator sit = languages.begin();
         sit != languages.end(); ++sit)
       {
-      int linkerPref = gg->GetLinkerPreference(sit->c_str());
-      if (lc.LinkerLanguage.empty() || (linkerPref > maxLinkerPref))
-        {
-        maxLinkerPref = linkerPref;
-        lc.LinkerLanguage = *sit;
-        linkerLangList = *sit;
-        multiplePreferedLanguages = false;
-        }
-      else if (linkerPref == maxLinkerPref)
-        {
-        linkerLangList += "; ";
-        linkerLangList += *sit;
-        multiplePreferedLanguages = true;
-        }
+      tsl.Consider(sit->c_str());
       }
-
-    if (multiplePreferedLanguages)
-      {
-      cmOStringStream err;
-      err << "Error: Target " << this->Name << " contains multiple languages "
-          << "with the highest linker preference (" << maxLinkerPref << "): "
-          << linkerLangList << "\n"
-          << "You must set the LINKER_LANGUAGE property for this target.";
-      cmSystemTools::Error(err.str().c_str());
-      }
+    lc.LinkerLanguage = tsl.Choose();
     }
 }
 
