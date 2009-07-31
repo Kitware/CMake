@@ -337,6 +337,12 @@ void cmCTestScriptHandler::CreateCMake()
   this->LocalGenerator = this->GlobalGenerator->CreateLocalGenerator();
   this->Makefile = this->LocalGenerator->GetMakefile();
 
+  // Set CMAKE_CURRENT_SOURCE_DIR and CMAKE_CURRENT_BINARY_DIR.
+  // Also, some commands need Makefile->GetCurrentDirectory().
+  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  this->Makefile->SetStartDirectory(cwd.c_str());
+  this->Makefile->SetStartOutputDirectory(cwd.c_str());
+
   // remove all cmake commands which are not scriptable, since they can't be 
   // used in ctest scripts
   this->CMake->RemoveUnscriptableCommands();
