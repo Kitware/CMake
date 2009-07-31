@@ -9,6 +9,12 @@ MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 # Allow empty endif() and such with CMake 2.4.
 SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 1)
 
+IF(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
+  # Since the built CMake will install itself instead of the
+  # generating CMake, tell it that the install rules were generated
+  # by CMake 2.4.
+  INSTALL(CODE "SET(CMAKE_INSTALL_SELF_2_4 1)")
+ENDIF()
 
 #-----------------------------------------------------------------------
 # a macro to deal with system libraries, implemented as a macro
