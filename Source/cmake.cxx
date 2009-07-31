@@ -385,7 +385,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         {
         std::cerr << "Parse error in command line argument: " << arg << "\n"
                   << "Should be: VAR:type=value\n";
-        cmSystemTools::Error("No cmake scrpt provided.");
+        cmSystemTools::Error("No cmake script provided.");
         return false;
         }
       }
