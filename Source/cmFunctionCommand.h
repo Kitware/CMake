@@ -104,7 +104,7 @@ public:
       "will have the actual values of the arguments passed in. This "
       "facilitates creating functions with optional arguments. Additionally "
       "ARGV holds the list of all arguments given to the function and ARGN "
-      "holds the list of argument pass the last expected argument."
+      "holds the list of argument past the last expected argument."
       "\n"
       "See the cmake_policy() command documentation for the behavior of "
       "policies inside functions."

@@ -106,7 +106,7 @@ public:
       "facilitates creating macros with optional arguments. Additionally "
       "${ARGV} holds the list of all arguments given to the macro and "
       "${ARGN} "
-      "holds the list of argument pass the last expected argument. "
+      "holds the list of argument past the last expected argument. "
       "Note that the parameters to a macro and values such as ARGN "
       "are not variables in the usual CMake sense. They are string "
       "replacements much like the c preprocessor would do with a "
