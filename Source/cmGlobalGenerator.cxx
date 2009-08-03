@@ -1343,9 +1343,7 @@ cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
 
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
 {
-  std::string cfp = gen->GetCMakeInstance()->GetHomeOutputDirectory();
-  cfp += cmake::GetCMakeFilesDirectory();
-  this->SetConfiguredFilesPath(cfp.c_str());
+  this->SetConfiguredFilesPath(gen);
   const char* make =
     gen->GetCMakeInstance()->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
   this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", make,
@@ -1358,6 +1356,20 @@ void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
   this->LanguageToOutputExtension = gen->LanguageToOutputExtension;
   this->LanguageToLinkerPreference = gen->LanguageToLinkerPreference;
   this->OutputExtensions = gen->OutputExtensions;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::SetConfiguredFilesPath(cmGlobalGenerator* gen)
+{
+  if(!gen->ConfiguredFilesPath.empty())
+    {
+    this->ConfiguredFilesPath = gen->ConfiguredFilesPath;
+    }
+  else
+    {
+    this->ConfiguredFilesPath = gen->CMakeInstance->GetHomeOutputDirectory();
+    this->ConfiguredFilesPath += cmake::GetCMakeFilesDirectory();
+    }
 }
 
 //----------------------------------------------------------------------------

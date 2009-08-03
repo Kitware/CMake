@@ -123,7 +123,7 @@ public:
   ///! Get the CMake instance
   cmake *GetCMakeInstance() { return this->CMakeInstance; };
 
-  void SetConfiguredFilesPath(const char* s){this->ConfiguredFilesPath = s;}
+  void SetConfiguredFilesPath(cmGlobalGenerator* gen);
   const std::vector<cmLocalGenerator *>& GetLocalGenerators() const { 
     return this->LocalGenerators;}
 
