@@ -106,6 +106,13 @@ ELSE(CMAKE_ANSI_FOR_SCOPE)
    MESSAGE("Compiler does not support ansi for scope")
 ENDIF(CMAKE_ANSI_FOR_SCOPE)
 
+MESSAGE("Testing try_compile project mode")
+TRY_COMPILE(TEST_INNER
+  ${TryCompile_BINARY_DIR}/CMakeFiles/Inner
+  ${TryCompile_SOURCE_DIR}/Inner
+  TryCompileInner)
+TEST_ASSERT(TEST_INNER "try_compile project mode failed")
+
 ADD_EXECUTABLE(TryCompile pass.c)
 
 ######################################
