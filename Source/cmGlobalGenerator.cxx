@@ -1026,7 +1026,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
 
 int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
                                   const char *projectName,
-                                  const char *target,
+                                  const char *target, bool fast,
                                   std::string *output, cmMakefile *mf)
 {
   // if this is not set, then this is a first time configure
@@ -1077,7 +1077,7 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
   const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   return this->Build(srcdir,bindir,projectName,
                      newTarget.c_str(),
-                     output,makeCommand.c_str(),config,false,true,
+                     output,makeCommand.c_str(),config,false,fast,
                      this->TryCompileTimeout);
 }
 

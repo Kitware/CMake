@@ -91,7 +91,7 @@ public:
    */
   virtual int TryCompile(const char *srcdir, const char *bindir,
                          const char *projectName, const char *targetName,
-                         std::string *output, cmMakefile* mf);
+                         bool fast, std::string *output, cmMakefile* mf);
 
   
   /**

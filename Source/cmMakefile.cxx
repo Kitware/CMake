@@ -2728,6 +2728,7 @@ void cmMakefile::ExpandSourceListArguments(
 
 int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
                            const char *projectName, const char *targetName,
+                           bool fast,
                            const std::vector<std::string> *cmakeArgs,
                            std::string *output)
 {
@@ -2808,6 +2809,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
     this->LocalGenerator->GetGlobalGenerator()->TryCompile(srcdir,bindir,
                                                            projectName,
                                                            targetName,
+                                                           fast,
                                                            output,
                                                            this);
 

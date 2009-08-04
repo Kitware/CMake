@@ -10,4 +10,6 @@ if(NOT SHOULD_PASS)
   message(FATAL_ERROR "Inner try-compile SHOULD_PASS failed!")
 endif()
 
-add_executable(inner ../pass.c)
+add_library(innerlib innerlib.c)
+add_executable(innerexe innerexe.c)
+target_link_libraries(innerexe innerlib)

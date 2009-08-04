@@ -297,6 +297,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
                                        this->BinaryDirectory.c_str(),
                                        projectName, 
                                        targetName, 
+                                       this->SrcFileSignature,
                                        &cmakeFlags, 
                                        &output);
   if ( erroroc )

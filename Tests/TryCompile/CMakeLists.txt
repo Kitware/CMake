@@ -110,8 +110,9 @@ MESSAGE("Testing try_compile project mode")
 TRY_COMPILE(TEST_INNER
   ${TryCompile_BINARY_DIR}/CMakeFiles/Inner
   ${TryCompile_SOURCE_DIR}/Inner
-  TryCompileInner)
-TEST_ASSERT(TEST_INNER "try_compile project mode failed")
+  TryCompileInner innerexe
+  OUTPUT_VARIABLE output)
+TEST_ASSERT(TEST_INNER "try_compile project mode failed:\n${output}")
 
 ADD_EXECUTABLE(TryCompile pass.c)
 

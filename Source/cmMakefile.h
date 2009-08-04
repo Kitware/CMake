@@ -121,6 +121,7 @@ public:
    */
   int TryCompile(const char *srcdir, const char *bindir, 
                  const char *projectName, const char *targetName,
+                 bool fast,
                  const std::vector<std::string> *cmakeArgs,
                  std::string *output);
     
