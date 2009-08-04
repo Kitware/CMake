@@ -30,7 +30,6 @@ function(test_fortran_c_interface_module)
     endif(FORTRAN_C_MODULE_MANGLING_FOUND)
   endif()
   set(FORTRAN_FUNCTIONS ${FORTRAN_FUNCTIONS} my_sub mysub )
-  set(srcs ${srcs} mysub.f foo.c foo.cxx)
   create_fortran_c_interface("F_" FORTRAN_FUNCTIONS 
     "${testf_BINARY_DIR}/foo.h")
   include_directories("${testf_BINARY_DIR}")
@@ -61,7 +60,20 @@ function(test_fortran_c_interface_module)
   endif()
   message("Fortran = ${CMAKE_Fortran_COMPILER_ID}")
   message("C = ${CMAKE_C_COMPILER_ID}")
-  add_executable(foo ${srcs})
+
+  add_library(myfort mysub.f ${srcs})
+
+  add_library(myc myc.c)
+  target_link_libraries(myc myfort)
+
+  add_library(mycxx mycxx.cxx)
+  target_link_libraries(mycxx myc)
+
+  add_executable(mainc mainc.c)
+  target_link_libraries(mainc myc)
+  add_executable(maincxx maincxx.c)
+  target_link_libraries(maincxx mycxx)
+
   # print out some stuff to help debug on machines via cdash
   file(READ "${testf_BINARY_DIR}/foo.h" fooh)
   message("foo.h contents:\n${fooh}")
