@@ -236,12 +236,10 @@ void cmLocalGenerator::GenerateTestFiles()
        << "# Build directory: " 
        << this->Makefile->GetStartOutputDirectory() << std::endl
        << "# " << std::endl
-       << "# This file replicates the SUBDIRS() and ADD_TEST() commands "
-       << "from the source" << std::endl
-       << "# tree CMakeLists.txt file, skipping any SUBDIRS() or "
-       << "ADD_TEST() commands" << std::endl
-       << "# that are excluded by CMake control structures, i.e. IF() "
-       << "commands." << std::endl;
+       << "# This file includes the relevent testing commands "
+       << "required for " << std::endl
+       << "# testing this directory and lists subdirectories to "
+       << "be tested as well." << std::endl;
   
   const char* testIncludeFile = 
     this->Makefile->GetProperty("TEST_INCLUDE_FILE");
