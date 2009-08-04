@@ -121,8 +121,8 @@ void cmTest::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("MEASUREMENT", cmProperty::TEST, 
-     "Specify a DART measurement and value to be reported for a test.",
-     "If set to a name then that name will be reported to DART as a "
+     "Specify a CDASH measurement and value to be reported for a test.",
+     "If set to a name then that name will be reported to CDASH as a "
      "named measurement with a value of 1. You may also specify a value "
      "by setting MEASUREMENT to \"measurement=value\".");
 
@@ -139,7 +139,7 @@ void cmTest::DefineProperties(cmake *cm)
      "This property if set will limit a test to not take more than "
      "the specified number of seconds to run. If it exceeds that the "
      "test process will be killed and ctest will move to the next test. "
-     "This setting takes precedence over DART_TESTING_TIMEOUT and "
+     "This setting takes precedence over "
      "CTEST_TESTING_TIMEOUT.");
 
   cm->DefineProperty
