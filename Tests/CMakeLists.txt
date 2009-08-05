@@ -1198,22 +1198,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     
   ENDIF(CMAKE_TEST_GENERATOR MATCHES "Makefiles" OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
 
-  IF(BUILD_WXDialog AND wxWidgets_CONFIG_EXECUTABLE)
-    # Will be set if the WX gui is on
-    ADD_TEST(UseWX ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/UseWX"
-      "${CMake_BINARY_DIR}/Tests/UseWX"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-exe-dir ${CMake_BINARY_DIR}/Tests/UseWX
-      --build-project UsewxWidgets
-      --build-options -DwxWidgets_CONFIG_EXECUTABLE=${wxWidgets_CONFIG_EXECUTABLE}
-      --test-command UseWX
-      )
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/UseWX")
-  ENDIF(BUILD_WXDialog AND wxWidgets_CONFIG_EXECUTABLE)
-
   IF(UNIX)
     STRING(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "${CMake_BINARY_DIR}/Tests/TestShellInstall/Prefix"
       PREFIX_IS_FOR_TEST)

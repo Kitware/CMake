@@ -41,7 +41,6 @@ INPUT                = \
  "@CMAKE_SOURCE_DIR@/Source/CTest" \
  "@CMAKE_SOURCE_DIR@/Source/CursesDialog" \
  "@CMAKE_SOURCE_DIR@/Source/MFCDialog" \
- "@CMAKE_SOURCE_DIR@/Source/WXDialog" \
  "@CMAKE_BINARY_DIR@/Source/kwsys" \
  "@CMAKE_BINARY_DIR@/Source/cmsys" \
  "@CMAKE_BINARY_DIR@/Utilities/Doxygen/dox/doc_CMake_contributors.dox" \

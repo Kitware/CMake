@@ -478,13 +478,6 @@ IF(BUILD_QtDialog)
   SUBDIRS(QtDialog)
 ENDIF(BUILD_QtDialog)
 
-# WX Widgets GUI
-OPTION(BUILD_WXDialog "Build wxWidgets dialog for CMake" FALSE)
-MARK_AS_ADVANCED(BUILD_WXDialog)
-IF(BUILD_WXDialog)
-  SUBDIRS(WXDialog)
-ENDIF(BUILD_WXDialog)
-
 INCLUDE (${CMAKE_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 INCLUDE (${CMAKE_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
