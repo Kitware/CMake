@@ -1137,7 +1137,7 @@ void cmFindPackageCommand::AddPrefixesBuilds()
   if(!this->NoBuilds && !this->NoDefaultPath)
     {
     // It is likely that CMake will have recently built the project.
-    for(int i=1; i <= 10; ++i)
+    for(int i=0; i <= 10; ++i)
       {
       cmOStringStream r;
       r <<
