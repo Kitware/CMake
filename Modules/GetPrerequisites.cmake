@@ -10,12 +10,13 @@
 #
 # The following functions are provided by this script:
 #   gp_append_unique
-#   gp_file_type
 #   is_file_executable
 #   gp_item_default_embedded_path
 #     (projects can override with gp_item_default_embedded_path_override)
 #   gp_resolve_item
 #     (projects can override with gp_resolve_item_override)
+#   gp_resolved_file_type
+#   gp_file_type
 #   get_prerequisites
 #   list_prerequisites
 #   list_prerequisites_by_glob
@@ -43,83 +44,6 @@ function(gp_append_unique list_var value)
     set(${list_var} ${${list_var}} "${value}" PARENT_SCOPE)
   endif(NOT contains)
 endfunction(gp_append_unique)
-
-
-# gp_file_type original_file file type_var
-#
-# Return the type of ${file} with respect to ${original_file}. String
-# describing type of prerequisite is returned in variable named ${type_var}.
-#
-# Possible types are:
-#   system
-#   local
-#   embedded
-#   other
-#
-function(gp_file_type original_file file type_var)
-  set(is_embedded 0)
-  set(is_local 0)
-  set(is_system 0)
-
-  string(TOLOWER "${original_file}" original_lower)
-  string(TOLOWER "${file}" lower)
-
-  if("${file}" MATCHES "^@(executable|loader)_path")
-    set(is_embedded 1)
-  endif("${file}" MATCHES "^@(executable|loader)_path")
-
-  if(NOT is_embedded)
-    if(UNIX)
-      if("${file}" MATCHES "^(/lib/|/lib32/|/lib64/)")
-        set(is_system 1)
-      endif("${file}" MATCHES "^(/lib/|/lib32/|/lib64/)")
-    endif(UNIX)
-
-    if(APPLE)
-      if("${file}" MATCHES "^(/System/Library/|/usr/lib/)")
-        set(is_system 1)
-      endif("${file}" MATCHES "^(/System/Library/|/usr/lib/)")
-    endif(APPLE)
-
-    if(WIN32)
-      string(TOLOWER "$ENV{SystemRoot}" sysroot)
-      string(REGEX REPLACE "\\\\" "/" sysroot "${sysroot}")
-
-      string(TOLOWER "$ENV{windir}" windir)
-      string(REGEX REPLACE "\\\\" "/" windir "${windir}")
-
-      if("${lower}" MATCHES "^(${sysroot}/system|${windir}/system|msvc[^/]+dll)")
-        set(is_system 1)
-      endif("${lower}" MATCHES "^(${sysroot}/system|${windir}/system|msvc[^/]+dll)")
-    endif(WIN32)
-
-    if(NOT is_system)
-      get_filename_component(original_path "${original_lower}" PATH)
-      get_filename_component(path "${lower}" PATH)
-      if("${original_path}" STREQUAL "${path}")
-        set(is_local 1)
-      endif("${original_path}" STREQUAL "${path}")
-    endif(NOT is_system)
-  endif(NOT is_embedded)
-
-  # Return type string based on computed booleans:
-  #
-  set(type "other")
-
-  if(is_system)
-    set(type "system")
-  else(is_system)
-    if(is_embedded)
-      set(type "embedded")
-    else(is_embedded)
-      if(is_local)
-        set(type "local")
-      endif(is_local)
-    endif(is_embedded)
-  endif(is_system)
-
-  set(${type_var} "${type}" PARENT_SCOPE)
-endfunction(gp_file_type)
 
 
 # is_file_executable file result_var
@@ -204,39 +128,49 @@ endfunction(is_file_executable)
 # gp_item_default_embedded_path_override function.
 #
 function(gp_item_default_embedded_path item default_embedded_path_var)
-  #
-  # The assumption here is that all executables in the bundle will be
-  # in same-level-directories inside the bundle. The parent directory
-  # of an executable inside the bundle should be MacOS or a sibling of
-  # MacOS and all embedded paths returned from here will begin with
-  # "@executable_path/../" and will work from all executables in all
-  # such same-level-directories inside the bundle.
-  #
 
-  # By default, embed things right next to the main bundle executable:
+  # On Windows and Linux, "embed" prerequisites in the same directory
+  # as the executable by default:
   #
-  set(path "@executable_path/../../Contents/MacOS")
-
+  set(path "@executable_path")
   set(overridden 0)
 
-  # Embed .dylibs right next to the main bundle executable:
+  # On the Mac, relative to the executable depending on the type
+  # of the thing we are embedding:
   #
-  if(item MATCHES "\\.dylib$")
-    set(path "@executable_path/../MacOS")
-    set(overridden 1)
-  endif(item MATCHES "\\.dylib$")
+  if(APPLE)
+    #
+    # The assumption here is that all executables in the bundle will be
+    # in same-level-directories inside the bundle. The parent directory
+    # of an executable inside the bundle should be MacOS or a sibling of
+    # MacOS and all embedded paths returned from here will begin with
+    # "@executable_path/../" and will work from all executables in all
+    # such same-level-directories inside the bundle.
+    #
 
-  # Embed frameworks in the embedded "Frameworks" directory (sibling of MacOS):
-  #
-  if(NOT overridden)
-    if(item MATCHES "[^/]+\\.framework/")
-      set(path "@executable_path/../Frameworks")
+    # By default, embed things right next to the main bundle executable:
+    #
+    set(path "@executable_path/../../Contents/MacOS")
+
+    # Embed .dylibs right next to the main bundle executable:
+    #
+    if(item MATCHES "\\.dylib$")
+      set(path "@executable_path/../MacOS")
       set(overridden 1)
-    endif(item MATCHES "[^/]+\\.framework/")
-  endif(NOT overridden)
+    endif(item MATCHES "\\.dylib$")
 
-  # Provide a hook so that projects can override the default embedded location of
-  # any given library by whatever logic they choose:
+    # Embed frameworks in the embedded "Frameworks" directory (sibling of MacOS):
+    #
+    if(NOT overridden)
+      if(item MATCHES "[^/]+\\.framework/")
+        set(path "@executable_path/../Frameworks")
+        set(overridden 1)
+      endif(item MATCHES "[^/]+\\.framework/")
+    endif(NOT overridden)
+  endif()
+
+  # Provide a hook so that projects can override the default embedded location
+  # of any given library by whatever logic they choose:
   #
   if(COMMAND gp_item_default_embedded_path_override)
     gp_item_default_embedded_path_override("${item}" path)
@@ -276,7 +210,7 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
         set(resolved 1)
         set(resolved_item "${ri}")
       else(EXISTS "${ri}")
-        message(STATUS "info: embedded item does not exist '${ri}'")
+        message(STATUS "warning: embedded item does not exist '${ri}'")
       endif(EXISTS "${ri}")
     endif(item MATCHES "@executable_path")
   endif(NOT resolved)
@@ -296,16 +230,17 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
         set(resolved 1)
         set(resolved_item "${ri}")
       else(EXISTS "${ri}")
-        message(STATUS "info: embedded item does not exist '${ri}'")
+        message(STATUS "warning: embedded item does not exist '${ri}'")
       endif(EXISTS "${ri}")
     endif(item MATCHES "@loader_path")
   endif(NOT resolved)
 
   if(NOT resolved)
     set(ri "ri-NOTFOUND")
-    find_file(ri "${item}" ${dirs})
+    find_file(ri "${item}" ${exepath} ${dirs} NO_DEFAULT_PATH)
+    find_file(ri "${item}" ${exepath} ${dirs} /usr/lib)
     if(ri)
-      #message(STATUS "info: found item in dirs (${ri})")
+      #message(STATUS "info: 'find_file' in exepath/dirs (${ri})")
       set(resolved 1)
       set(resolved_item "${ri}")
       set(ri "ri-NOTFOUND")
@@ -321,7 +256,7 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
         "/System/Library/Frameworks"
       )
       if(fw)
-        #message(STATUS "info: found framework (${fw})")
+        #message(STATUS "info: 'find_file' found framework (${fw})")
         set(resolved 1)
         set(resolved_item "${fw}")
         set(fw "fw-NOTFOUND")
@@ -335,8 +270,10 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
   if(WIN32)
   if(NOT resolved)
     set(ri "ri-NOTFOUND")
-    find_program(ri "${item}" PATHS "${dirs}")
+    find_program(ri "${item}" PATHS "${exepath};${dirs}" NO_DEFAULT_PATH)
+    find_program(ri "${item}" PATHS "${exepath};${dirs}")
     if(ri)
+      #message(STATUS "info: 'find_program' in exepath/dirs (${ri})")
       set(resolved 1)
       set(resolved_item "${ri}")
       set(ri "ri-NOTFOUND")
@@ -352,11 +289,162 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
   endif(COMMAND gp_resolve_item_override)
 
   if(NOT resolved)
-    message(STATUS "warning: cannot resolve item '${item}'")
+    message(STATUS "
+warning: cannot resolve item '${item}'
+
+  possible problems:
+    need more directories?
+    need to use InstallRequiredSystemLibraries?
+    run in install tree instead of build tree?
+")
+#    message(STATUS "
+#******************************************************************************
+#warning: cannot resolve item '${item}'
+#
+#  possible problems:
+#    need more directories?
+#    need to use InstallRequiredSystemLibraries?
+#    run in install tree instead of build tree?
+#
+#    context='${context}'
+#    item='${item}'
+#    exepath='${exepath}'
+#    dirs='${dirs}'
+#    resolved_item_var='${resolved_item_var}'
+#******************************************************************************
+#")
   endif(NOT resolved)
 
   set(${resolved_item_var} "${resolved_item}" PARENT_SCOPE)
 endfunction(gp_resolve_item)
+
+
+# gp_resolved_file_type original_file file exepath dirs type_var
+#
+# Return the type of ${file} with respect to ${original_file}. String
+# describing type of prerequisite is returned in variable named ${type_var}.
+#
+# Use ${exepath} and ${dirs} if necessary to resolve non-absolute ${file}
+# values -- but only for non-embedded items.
+#
+# Possible types are:
+#   system
+#   local
+#   embedded
+#   other
+#
+function(gp_resolved_file_type original_file file exepath dirs type_var)
+  #message(STATUS "**")
+
+  if(NOT IS_ABSOLUTE "${original_file}")
+    message(STATUS "warning: gp_resolved_file_type expects absolute full path for first arg original_file")
+  endif()
+
+  set(is_embedded 0)
+  set(is_local 0)
+  set(is_system 0)
+
+  set(resolved_file "${file}")
+
+  if("${file}" MATCHES "^@(executable|loader)_path")
+    set(is_embedded 1)
+  endif()
+
+  if(NOT is_embedded)
+    if(NOT IS_ABSOLUTE "${file}")
+      gp_resolve_item("${original_file}" "${file}" "${exepath}" "${dirs}" resolved_file)
+    endif()
+
+    string(TOLOWER "${original_file}" original_lower)
+    string(TOLOWER "${resolved_file}" lower)
+
+    if(UNIX)
+      if(resolved_file MATCHES "^(/lib/|/lib32/|/lib64/|/usr/lib/|/usr/lib32/|/usr/lib64/|/usr/X11R6/)")
+        set(is_system 1)
+      endif()
+    endif()
+
+    if(APPLE)
+      if(resolved_file MATCHES "^(/System/Library/|/usr/lib/)")
+        set(is_system 1)
+      endif()
+    endif()
+
+    if(WIN32)
+      string(TOLOWER "$ENV{SystemRoot}" sysroot)
+      string(REGEX REPLACE "\\\\" "/" sysroot "${sysroot}")
+
+      string(TOLOWER "$ENV{windir}" windir)
+      string(REGEX REPLACE "\\\\" "/" windir "${windir}")
+
+      if(lower MATCHES "^(${sysroot}/system|${windir}/system|(.*/)*msvc[^/]+dll)")
+        set(is_system 1)
+      endif()
+    endif()
+
+    if(NOT is_system)
+      get_filename_component(original_path "${original_lower}" PATH)
+      get_filename_component(path "${lower}" PATH)
+      if("${original_path}" STREQUAL "${path}")
+        set(is_local 1)
+      endif()
+    endif()
+  endif()
+
+  # Return type string based on computed booleans:
+  #
+  set(type "other")
+
+  if(is_system)
+    set(type "system")
+  elseif(is_embedded)
+    set(type "embedded")
+  elseif(is_local)
+    set(type "local")
+  endif()
+
+  #message(STATUS "gp_resolved_file_type: '${file}' '${resolved_file}'")
+  #message(STATUS "                type: '${type}'")
+
+  if(NOT is_embedded)
+    if(NOT IS_ABSOLUTE "${resolved_file}")
+      if(lower MATCHES "^msvc[^/]+dll" AND is_system)
+        message(STATUS "info: non-absolute msvc file '${file}' returning type '${type}'")
+      else()
+        message(STATUS "warning: gp_resolved_file_type non-absolute file '${file}' returning type '${type}' -- possibly incorrect")
+      endif()
+    endif()
+  endif()
+
+  set(${type_var} "${type}" PARENT_SCOPE)
+
+  #message(STATUS "**")
+endfunction()
+
+
+# gp_file_type original_file file type_var
+#
+# Return the type of ${file} with respect to ${original_file}. String
+# describing type of prerequisite is returned in variable named ${type_var}.
+#
+# Possible types are:
+#   system
+#   local
+#   embedded
+#   other
+#
+function(gp_file_type original_file file type_var)
+  if(NOT IS_ABSOLUTE "${original_file}")
+    message(STATUS "warning: gp_file_type expects absolute full path for first arg original_file")
+  endif()
+
+  get_filename_component(exepath "${original_file}" PATH)
+
+  set(type "")
+  gp_resolved_file_type("${original_file}" "${file}" "${exepath}" "" type)
+
+  set(${type_var} "${type}" PARENT_SCOPE)
+endfunction(gp_file_type)
 
 
 # get_prerequisites target prerequisites_var exclude_system recurse dirs
@@ -477,6 +565,14 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   #
   # </setup-gp_tool-vars>
 
+  if("${gp_tool}" STREQUAL "ldd")
+    set(old_ld_env "$ENV{LD_LIBRARY_PATH}")
+    foreach(dir ${exepath} ${dirs})
+      set(ENV{LD_LIBRARY_PATH} "${dir}:$ENV{LD_LIBRARY_PATH}")
+    endforeach(dir)
+  endif("${gp_tool}" STREQUAL "ldd")
+
+
   # Track new prerequisites at each new level of recursion. Start with an
   # empty list at each level:
   #
@@ -488,6 +584,10 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     COMMAND ${gp_cmd} ${gp_cmd_args} ${target}
     OUTPUT_VARIABLE gp_cmd_ov
     )
+
+  if("${gp_tool}" STREQUAL "ldd")
+    set(ENV{LD_LIBRARY_PATH} "${old_ld_env}")
+  endif("${gp_tool}" STREQUAL "ldd")
 
   if(verbose)
     message(STATUS "<RawOutput cmd='${gp_cmd} ${gp_cmd_args} ${target}'>")
@@ -535,7 +635,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
 
     if(${exclude_system})
       set(type "")
-      gp_file_type("${target}" "${item}" type)
+      gp_resolved_file_type("${target}" "${item}" "${exepath}" "${dirs}" type)
 
       if("${type}" STREQUAL "system")
         set(add_item 0)
