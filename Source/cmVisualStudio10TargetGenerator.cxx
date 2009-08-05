@@ -1221,11 +1221,6 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
 
 void cmVisualStudio10TargetGenerator::WriteProjectReferences()
 {
-  // for static libs do not list references
-  if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
-    {
-    return;
-    }
   cmGlobalGenerator::TargetDependSet& depends
     = this->GlobalGenerator->GetTargetDirectDepends(*this->Target);
   this->WriteString("<ItemGroup>\n", 1);
