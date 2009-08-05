@@ -22,17 +22,17 @@ list(REMOVE_DUPLICATES global_symbols)
 # List manglings of module symbol names to try.
 set(module_symbols
   __my_module_MOD_my_sub  # GNU 4.3
-  __my_module__my_sub     # GNU 4.2
-  __mymodule__mysub       # GNU 4.2
   __my_module_NMOD_my_sub # VisualAge
-  __mymodule_MOD_mysub    # GNU
+  __my_module__my_sub     # GNU 4.2
+  __mymodule_MOD_mysub    # GNU 4.3
   __mymodule_NMOD_mysub   # VisualAge
-  my_module_my_sub_       # PGI 8
+  __mymodule__mysub       # GNU 4.2
   my_module$my_sub        # HP
   my_module_mp_my_sub_    # Intel
-  mymodule_mysub_         # PGI 8
+  my_module_my_sub_       # PGI
   mymodule$mysub          # HP
   mymodule_mp_mysub_      # Intel
+  mymodule_mysub_         # PGI
   ${FortranCInterface_MODULE_SYMBOLS}
   )
 list(REMOVE_DUPLICATES module_symbols)
@@ -70,7 +70,7 @@ endforeach()
 add_library(myfort STATIC mysub.f my_sub.f ${myfort_modules})
 
 # Provide symbols through C but fall back to Fortran.
-add_library(symbols STATIC ${symbol_sources} mymodule_.c my_module_.c)
+add_library(symbols STATIC mymodule_.c my_module_.c ${symbol_sources})
 target_link_libraries(symbols myfort)
 
 # Require symbols through Fortran.
