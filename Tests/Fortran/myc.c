@@ -5,7 +5,7 @@ int myc(void)
 {
   F_mysub();
   F_my_sub();
-#ifdef F_test_mod_sub
+#ifdef TEST_MOD
   F_test_mod_sub();
 #endif
   return 0;
