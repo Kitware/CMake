@@ -485,13 +485,6 @@ IF(BUILD_WXDialog)
   SUBDIRS(WXDialog)
 ENDIF(BUILD_WXDialog)
 
-# FLTK GUI, needs some work: generator selection, paths with spaces, ...
-# OPTION(BUILD_FLTKDialog "Build FLTK dialog for CMake" FALSE)
-# MARK_AS_ADVANCED(BUILD_FLTKDialog)
-# IF(BUILD_FLTKDialog)
-#  SUBDIRS(FLTKDialog)
-# ENDIF(BUILD_FLTKDialog)
-
 INCLUDE (${CMAKE_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 INCLUDE (${CMAKE_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
