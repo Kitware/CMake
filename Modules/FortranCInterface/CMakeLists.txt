@@ -11,10 +11,10 @@ int main() { return 0; }
 
 # List manglings of global symbol names to try.
 set(global_symbols
-  my_sub_   # GNU, Intel, HP, SunPro, MIPSpro
   my_sub    # VisualAge
-  mysub_    # GNU, Intel, HP, SunPro, MIPSpro
+  my_sub_   # GNU, Intel, HP, SunPro, MIPSpro
   mysub     # VisualAge
+  mysub_    # GNU, Intel, HP, SunPro, MIPSpro
   ${FortranCInterface_GLOBAL_SYMBOLS}
   )
 list(REMOVE_DUPLICATES global_symbols)
