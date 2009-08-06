@@ -13,6 +13,7 @@ int main() { return 0; }
 set(global_symbols
   my_sub    # VisualAge
   my_sub_   # GNU, Intel, HP, SunPro, MIPSpro
+  my_sub__  # GNU g77
   mysub     # VisualAge
   mysub_    # GNU, Intel, HP, SunPro, MIPSpro
   ${FortranCInterface_GLOBAL_SYMBOLS}
