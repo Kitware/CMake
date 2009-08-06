@@ -3336,7 +3336,7 @@ SystemTools
   while(first != last)
     {
     result.append("/");
-    result.append(*first++);
+    result.append((*first++));
     }
 
   // Return the concatenated result.
