@@ -1,1 +1,1 @@
-SET(CMAKE_C_VERBOSE_FLAG "-V")
+include(Compiler/XL-C)

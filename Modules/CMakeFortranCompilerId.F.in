@@ -8,8 +8,14 @@
         PRINT *, 'INFO:compiler[SunPro]'
 #elif defined(__GNUC__)
         PRINT *, 'INFO:compiler[GNU]'
-#elif defined(__IBM__) || defined(__IBMC__)
+#elif defined(__IBMC__)
+# if defined(__COMPILER_VER__)
+        PRINT *, 'INFO:compiler[zOS]'
+# elif __IBMC__ >= 800
+        PRINT *, 'INFO:compiler[XL]'
+# else
         PRINT *, 'INFO:compiler[VisualAge]'
+# endif
 #elif defined(__PGI)
         PRINT *, 'INFO:compiler[PGI]'
 #elif defined(_SGI_COMPILER_VERSION) || defined(_COMPILER_VERSION)

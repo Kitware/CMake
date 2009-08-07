@@ -1,1 +1,1 @@
-SET(CMAKE_CXX_VERBOSE_FLAG "-V")
+include(Compiler/XL-CXX)

@@ -1,0 +1,2 @@
+SET(CMAKE_Fortran_VERBOSE_FLAG "-V")
+SET(CMAKE_Fortran_DEFINE_FLAG "-WF,-D")
