@@ -24,6 +24,7 @@
 #include <QKeyEvent>
 #include <QSortFilterProxyModel>
 #include <QMetaProperty>
+#include <QApplication>
 
 #include "QCMakeWidgets.h"
 
@@ -139,10 +140,9 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
   QCMakeCacheModelDelegate* delegate = new QCMakeCacheModelDelegate(this);
   this->setItemDelegate(delegate);
   
-  this->setEditTriggers(QAbstractItemView::DoubleClicked |
-                        QAbstractItemView::SelectedClicked |
-                        QAbstractItemView::EditKeyPressed |
-                        QAbstractItemView::AnyKeyPressed);
+  this->setUniformRowHeights(true);
+ 
+  this->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
   // tab, backtab doesn't step through items
   this->setTabKeyNavigation(false);
@@ -662,6 +662,19 @@ void QCMakeCacheModelDelegate::setModelData(QWidget* editor,
 {
   QItemDelegate::setModelData(editor, model, index);
   const_cast<QCMakeCacheModelDelegate*>(this)->recordChange(model, index);
+}
+  
+QSize QCMakeCacheModelDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+  QSize sz = QItemDelegate::sizeHint(option, index);
+  QStyle *style = QApplication::style();
+
+  // increase to checkbox size
+  QStyleOptionButton opt;
+  opt.QStyleOption::operator=(option);
+  sz = sz.expandedTo(style->subElementRect(QStyle::SE_ViewItemCheckIndicator, &opt, NULL).size());
+
+  return sz;
 }
   
 QSet<QCMakeProperty> QCMakeCacheModelDelegate::changes() const
