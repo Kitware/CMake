@@ -50,6 +50,8 @@ void cmTestGenerator::GenerateScriptConfigs(std::ostream& os,
   if(this->TestGenerated)
     {
     cmTest* test = this->Test;
+    cmMakefile* mf = test->GetMakefile();
+    cmLocalGenerator* lg = mf->GetLocalGenerator();
     std::ostream& fout = os;
     cmPropertyMap::const_iterator pit;
     cmPropertyMap* mpit = &test->GetProperties();
@@ -58,36 +60,8 @@ void cmTestGenerator::GenerateScriptConfigs(std::ostream& os,
       fout << "SET_TESTS_PROPERTIES(" << test->GetName() << " PROPERTIES ";
       for ( pit = mpit->begin(); pit != mpit->end(); ++ pit )
         {
-        fout << " " << pit->first.c_str() << " \"";
-        const char* value = pit->second.GetValue();
-        for ( ; *value; ++ value )
-          {
-          switch ( *value )
-            {
-            case '\\':
-            case '"':
-            case ' ':
-            case '#':
-            case '(':
-            case ')':
-            case '$':
-            case '^':
-              fout << "\\" << *value;
-              break;
-            case '\t':
-              fout << "\\t";
-              break;
-            case '\n':
-              fout << "\\n";
-              break;
-            case '\r':
-              fout << "\\r";
-              break;
-            default:
-              fout << *value;
-            }
-          }
-        fout << "\"";
+        fout << " " << pit->first
+             << " " << lg->EscapeForCMake(pit->second.GetValue());
         }
       fout << ")" << std::endl;
       }
