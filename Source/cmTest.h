@@ -20,6 +20,7 @@
 #include "cmCustomCommand.h"
 #include "cmPropertyMap.h"
 class cmMakefile;
+class cmListFileBacktrace;
 
 /** \class cmTest
  * \brief Represent a test
@@ -31,7 +32,7 @@ class cmTest
 public:
   /**
    */
-  cmTest();
+  cmTest(cmMakefile* mf);
   ~cmTest();
 
   ///! Set the test name
@@ -59,9 +60,11 @@ public:
   // Define the properties
   static void DefineProperties(cmake *cm);
 
-  ///! Set the cmMakefile that owns this test
-  void SetMakefile(cmMakefile *mf);
+  /** Get the cmMakefile instance that owns this test.  */
   cmMakefile *GetMakefile() { return this->Makefile;};
+
+  /** Get the backtrace of the command that created this test.  */
+  cmListFileBacktrace const& GetBacktrace() const;
 
   /** Get/Set whether this is an old-style test.  */
   bool GetOldStyle() const { return this->OldStyle; }
@@ -74,9 +77,8 @@ private:
 
   bool OldStyle;
 
-  // The cmMakefile instance that owns this target.  This should
-  // always be set.
-  cmMakefile* Makefile;  
+  cmMakefile* Makefile;
+  cmListFileBacktrace* Backtrace;
 };
 
 #endif

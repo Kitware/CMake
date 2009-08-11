@@ -21,15 +21,25 @@
 #include "cmMakefile.h"
 
 //----------------------------------------------------------------------------
-cmTest::cmTest() 
+cmTest::cmTest(cmMakefile* mf)
 {
-  this->Makefile = 0;
+  this->Makefile = mf;
   this->OldStyle = true;
+  this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
+  this->Backtrace = new cmListFileBacktrace;
+  this->Makefile->GetBacktrace(*this->Backtrace);
 }
 
 //----------------------------------------------------------------------------
 cmTest::~cmTest()
 {
+  delete this->Backtrace;
+}
+
+//----------------------------------------------------------------------------
+cmListFileBacktrace const& cmTest::GetBacktrace() const
+{
+  return *this->Backtrace;
 }
 
 //----------------------------------------------------------------------------
@@ -86,13 +96,6 @@ void cmTest::AppendProperty(const char* prop, const char* value)
     return;
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TEST);
-}
-
-//----------------------------------------------------------------------------
-void cmTest::SetMakefile(cmMakefile* mf)
-{
-  this->Makefile = mf;
-  this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
 }
 
 //----------------------------------------------------------------------------

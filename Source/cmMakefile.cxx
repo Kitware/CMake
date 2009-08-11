@@ -3314,9 +3314,8 @@ cmTest* cmMakefile::CreateTest(const char* testName)
     {
     return test;
     }
-  test = new cmTest;
+  test = new cmTest(this);
   test->SetName(testName);
-  test->SetMakefile(this);
   this->Tests[testName] = test;
   return test;
 }
