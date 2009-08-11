@@ -159,6 +159,8 @@ SET(SRCS
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmGeneratedFileStream.cxx
+  cmGeneratorExpression.cxx
+  cmGeneratorExpression.h
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
   cmGlobalUnixMakefileGenerator3.cxx

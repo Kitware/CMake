@@ -16,6 +16,7 @@
 =========================================================================*/
 #include "cmTestGenerator.h"
 
+#include "cmGeneratorExpression.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
@@ -94,6 +95,10 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 {
   this->TestGenerated = true;
 
+  // Set up generator expression evaluation context.
+  cmMakefile* mf = this->Test->GetMakefile();
+  cmGeneratorExpression ge(mf, config, this->Test->GetBacktrace());
+
   // Start the test command.
   os << indent << "ADD_TEST(" << this->Test->GetName() << " ";
 
@@ -103,7 +108,6 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   // Check whether the command executable is a target whose name is to
   // be translated.
   std::string exe = command[0];
-  cmMakefile* mf = this->Test->GetMakefile();
   cmTarget* target = mf->FindTargetToUse(exe.c_str());
   if(target && target->GetType() == cmTarget::EXECUTABLE)
     {
@@ -113,6 +117,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   else
     {
     // Use the command name given.
+    exe = ge.Process(exe.c_str());
     cmSystemTools::ConvertToUnixSlashes(exe);
     }
 
@@ -122,7 +127,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   for(std::vector<std::string>::const_iterator ci = command.begin()+1;
       ci != command.end(); ++ci)
     {
-    os << " " << lg->EscapeForCMake(ci->c_str());
+    os << " " << lg->EscapeForCMake(ge.Process(*ci));
     }
 
   // Finish the test command.
