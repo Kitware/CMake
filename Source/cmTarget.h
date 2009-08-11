@@ -413,6 +413,12 @@ public:
   /** Return whether this target may be used to link another target.  */
   bool IsLinkable();
 
+  /** Return whether or not the target is for a DLL platform.  */
+  bool IsDLLPlatform() { return this->DLLPlatform; }
+
+  /** Return whether or not the target has a DLL import library.  */
+  bool HasImportLibrary();
+
   /** Return whether this target is a shared library Framework on
       Apple.  */
   bool IsFrameworkOnApple();

@@ -1023,6 +1023,14 @@ bool cmTarget::IsLinkable()
 }
 
 //----------------------------------------------------------------------------
+bool cmTarget::HasImportLibrary()
+{
+  return (this->DLLPlatform &&
+          (this->GetType() == cmTarget::SHARED_LIBRARY ||
+           this->IsExecutableWithExports()));
+}
+
+//----------------------------------------------------------------------------
 bool cmTarget::IsFrameworkOnApple()
 {
   return (this->GetType() == cmTarget::SHARED_LIBRARY &&
@@ -3635,9 +3643,7 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
 
   // On a DLL platform there may be only IMPORTED_IMPLIB for a shared
   // library or an executable with exports.
-  bool allowImp =
-    this->DLLPlatform && (this->GetType() == cmTarget::SHARED_LIBRARY ||
-                          this->IsExecutableWithExports());
+  bool allowImp = this->HasImportLibrary();
 
   // Look for a mapping from the current project's configuration to
   // the imported project's configuration.
