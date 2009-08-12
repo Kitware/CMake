@@ -248,7 +248,7 @@ void cmCTestMultiProcessHandler::EndTest(cmProcess* p)
   int exitVal = p->GetExitValue();
   cmCTestTestHandler::cmCTestTestResult cres;
   cres.Properties = 0;
-  cres.ExecutionTime = 0;// ???
+  cres.ExecutionTime = p->GetTotalTime();
   cres.ReturnValue = exitVal;
   cres.Status = cmCTestTestHandler::COMPLETED;
   cres.TestCount = test;  

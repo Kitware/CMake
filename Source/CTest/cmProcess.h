@@ -53,6 +53,7 @@ public:
   int GetId() { return this->Id; }
   void SetId(int id) { this->Id = id;}
   int GetExitValue() { return this->ExitValue;}
+  double GetTotalTime() { return this->TotalTime;}
 private:
   int LastOutputPipe;
   double Timeout;
