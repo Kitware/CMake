@@ -423,13 +423,13 @@ private:
     // See "svn help status".
     switch(status)
       {
-      case 'M': case '!': case 'A': case 'D': case 'R': case 'X':
+      case 'M': case '!': case 'A': case 'D': case 'R':
         this->SVN->DoModification(PathModified, path);
         break;
       case 'C': case '~':
         this->SVN->DoModification(PathConflicting, path);
         break;
-      case 'I': case '?': case ' ': default:
+      case 'X': case 'I': case '?': case ' ': default:
         break;
       }
     }
