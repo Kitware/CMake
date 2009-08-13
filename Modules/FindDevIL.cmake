@@ -22,7 +22,7 @@ FIND_PATH(IL_INCLUDE_DIR il.h
 #MESSAGE("IL_INCLUDE_DIR is ${IL_INCLUDE_DIR}")
 
 FIND_LIBRARY(IL_LIBRARIES
-  NAMES IL
+  NAMES IL DEVIL
   PATH_SUFFIXES lib64 lib lib32
   DOC "The file that corresponds to the base il library."
 )
