@@ -186,6 +186,7 @@ private:
    */
   virtual void GenerateDartOutput(std::ostream& os);
 
+  void PrintLabelSummary();
   /**
    * Run the tests for a directory and any subdirectories
    */
