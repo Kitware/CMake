@@ -49,6 +49,7 @@ class cmCTestScriptHandler;
 
 class cmCTest
 {
+  friend class cmCTestRunTest;
 public:
   /** Enumerate parts of the testing and submission process.  */
   enum Part

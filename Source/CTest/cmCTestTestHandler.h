@@ -30,6 +30,7 @@ class cmMakefile;
  */
 class cmCTestTestHandler : public cmCTestGenericHandler
 {
+  friend class cmCTestRunTest;
 public:
   cmTypeMacro(cmCTestTestHandler, cmCTestGenericHandler);
 
@@ -185,7 +186,6 @@ private:
    */
   virtual void GenerateDartOutput(std::ostream& os);
 
-  void PrintLabelSummary();
   /**
    * Run the tests for a directory and any subdirectories
    */

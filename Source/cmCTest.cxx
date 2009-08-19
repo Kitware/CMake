@@ -1192,6 +1192,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     {
     if ( output )
       {
+      //ZACH: need to grab the output here
       tempOutput.insert(tempOutput.end(), data, data+length);
       }
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, cmCTestLogWrite(data, length));
@@ -1204,6 +1205,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
   cmsysProcess_WaitForExit(cp, 0);
   if(output && tempOutput.begin() != tempOutput.end())
     {
+    //We are waiting for exit before finally appending to the output
     output->append(&*tempOutput.begin(), tempOutput.size());
     }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "-- Process completed"

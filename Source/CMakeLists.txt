@@ -358,6 +358,7 @@ SET(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestMultiProcessHandler.cxx
   CTest/cmCTestReadCustomFilesCommand.cxx
   CTest/cmCTestRunScriptCommand.cxx
+  CTest/cmCTestRunTest.cxx
   CTest/cmCTestScriptHandler.cxx
   CTest/cmCTestSleepCommand.cxx
   CTest/cmCTestStartCommand.cxx
