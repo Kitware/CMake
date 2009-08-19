@@ -54,7 +54,7 @@
 #   BINARY_DIR   = <base>/Build/<name>
 #   INSTALL_DIR  = <base>/Install/<name>
 # If no PREFIX, EP_PREFIX, or EP_BASE is specified then the default
-# is to set PREIFX to "<name>-prefix".
+# is to set PREFIX to "<name>-prefix".
 # Relative paths are interpreted with respect to the build directory
 # corresponding to the source directory in which ep_add is invoked.
 #
@@ -88,6 +88,7 @@
 # It stores property values in variables of the same name.
 # Property names correspond to the keyword argument names of 'ep_add'.
 
+
 # Pre-compute a regex to match documented keywords for each command.
 file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines LIMIT_COUNT 100
      REGEX "^#  (  \\[[A-Z_]+ [^]]*\\] +#.*$|[a-z_]+\\()")
@@ -111,6 +112,7 @@ endforeach()
 if(_ep_func)
   set(_ep_keywords_${_ep_func} "${_ep_keywords_${_ep_func}})$")
 endif()
+
 
 function(_ep_parse_arguments f name ns args)
   # Transfer the arguments to this function into target properties for the
@@ -164,6 +166,7 @@ function(_ep_parse_arguments f name ns args)
   endforeach()
 endfunction(_ep_parse_arguments)
 
+
 define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED
   BRIEF_DOCS "Base directory for External Project storage."
   FULL_DOCS
@@ -177,6 +180,121 @@ define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
   "See documentation of the ep_add() function in the "
   "ExternalProject module."
   )
+
+
+function(_ep_write_downloadfile_script script_filename remote local timeout)
+  if(NOT timeout)
+    set(timeout 30)
+  endif()
+
+  file(WRITE ${script_filename}
+"message(STATUS \"downloading...
+     src='${remote}'
+     dst='${local}'\")
+
+file(DOWNLOAD
+  \"${remote}\"
+  \"${local}\"
+  TIMEOUT ${timeout}
+  STATUS status
+  LOG log)
+
+list(GET status 0 status_code)
+list(GET status 1 status_string)
+
+if(NOT status_code EQUAL 0)
+  message(FATAL_ERROR \"error: downloading '${remote}' failed
+  status_code: \${status_code}
+  status_string: \${status_string}
+  log: \${log}
+\")
+endif()
+
+message(STATUS \"downloading... done\")
+"
+)
+
+endfunction(_ep_write_downloadfile_script)
+
+
+function(_ep_write_extractfile_script script_filename filename tmp directory)
+  set(args "")
+
+  if(filename MATCHES ".tar$")
+    set(args xf)
+  endif()
+
+  if(filename MATCHES ".tgz$")
+    set(args xfz)
+  endif()
+
+  if(filename MATCHES ".tar.gz$")
+    set(args xfz)
+  endif()
+
+  if(args STREQUAL "")
+    message(SEND_ERROR "error: do not know how to extract '${filename}' -- known types are .tar, .tgz and .tar.gz")
+    return()
+  endif()
+
+  file(WRITE ${script_filename}
+"# Make file names absolute:
+#
+get_filename_component(filename \"${filename}\" ABSOLUTE)
+get_filename_component(tmp \"${tmp}\" ABSOLUTE)
+get_filename_component(directory \"${directory}\" ABSOLUTE)
+
+message(STATUS \"extracting...
+     src='\${filename}'
+     dst='\${directory}'\")
+
+# Prepare a space for extracting:
+#
+set(i 1)
+while(EXISTS \"\${tmp}/extract\${i}\")
+  math(EXPR i \"\${i} + 1\")
+endwhile()
+set(ut_dir \"\${tmp}/extract\${i}\")
+file(MAKE_DIRECTORY \"\${ut_dir}\")
+
+# Extract it:
+#
+message(STATUS \"extracting... [tar ${args}]\")
+execute_process(COMMAND \${CMAKE_COMMAND} -E tar ${args} \${filename}
+  WORKING_DIRECTORY \${ut_dir}
+  RESULT_VARIABLE rv)
+
+if(NOT rv EQUAL 0)
+  message(STATUS \"extracting... [error clean up]\")
+  file(REMOVE_RECURSE \"\${ut_dir}\")
+  message(FATAL_ERROR \"error: extract of '\${filename}' failed\")
+endif()
+
+# Analyze what came out of the tar file:
+#
+message(STATUS \"extracting... [analysis]\")
+file(GLOB contents \"\${ut_dir}/*\")
+list(LENGTH contents n)
+if(NOT n EQUAL 1 OR NOT IS_DIRECTORY \"\${contents}\")
+  set(contents \"\${ut_dir}\")
+endif()
+
+# Copy \"the one\" directory to the final directory:
+#
+message(STATUS \"extracting... [copy]\")
+file(COPY \"\${contents}/\" DESTINATION \${directory})
+
+# Clean up:
+#
+message(STATUS \"extracting... [clean up]\")
+file(REMOVE_RECURSE \"\${ut_dir}\")
+
+message(STATUS \"extracting... done\")
+"
+)
+
+endfunction(_ep_write_extractfile_script)
+
 
 function(_ep_set_directories name)
   get_property(prefix TARGET ${name} PROPERTY _EP_PREFIX)
@@ -248,6 +366,7 @@ function(_ep_set_directories name)
   endforeach()
 endfunction(_ep_set_directories)
 
+
 function(ep_get name)
   foreach(var ${ARGN})
     string(TOUPPER "${var}" VAR)
@@ -258,6 +377,7 @@ function(ep_get name)
     set(${var} "${${var}}" PARENT_SCOPE)
   endforeach()
 endfunction(ep_get)
+
 
 function(_ep_get_configure_command_id name cfg_cmd_id_var)
   get_target_property(cmd ${name} _EP_CONFIGURE_COMMAND)
@@ -283,6 +403,7 @@ function(_ep_get_configure_command_id name cfg_cmd_id_var)
     endif()
   endif()
 endfunction(_ep_get_configure_command_id)
+
 
 function(_ep_get_build_command name step cmd_var)
   set(cmd "${${cmd_var}}")
@@ -331,6 +452,7 @@ function(_ep_get_build_command name step cmd_var)
 
   set(${cmd_var} "${cmd}" PARENT_SCOPE)
 endfunction(_ep_get_build_command)
+
 
 function(ep_add_step name step)
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
@@ -412,6 +534,7 @@ function(ep_add_step name step)
     )
 endfunction(ep_add_step)
 
+
 function(_ep_add_mkdir_command name)
   ep_get(${name}
     source_dir binary_dir install_dir stamp_dir download_dir tmp_dir)
@@ -425,6 +548,7 @@ function(_ep_add_mkdir_command name)
     COMMAND ${CMAKE_COMMAND} -E make_directory ${download_dir}
     )
 endfunction(_ep_add_mkdir_command)
+
 
 function(_ep_add_download_command name)
   ep_get(${name} source_dir stamp_dir download_dir tmp_dir)
@@ -517,7 +641,8 @@ function(_ep_add_download_command name)
           message(FATAL_ERROR "Could not extract tarball filename from url:\n  ${url}")
         endif()
         set(file ${download_dir}/${fname})
-        set(cmd ${CMAKE_COMMAND} -Dremote=${url} -Dlocal=${file} -P ${CMAKE_ROOT}/Modules/DownloadFile.cmake
+        _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake" "${url}" "${file}")
+        set(cmd ${CMAKE_COMMAND} -P ${stamp_dir}/download-${name}.cmake
           COMMAND)
         set(comment "Performing download step (download and extract) for '${name}'")
       else()
@@ -525,7 +650,8 @@ function(_ep_add_download_command name)
         set(comment "Performing download step (extract) for '${name}'")
       endif()
       # TODO: Support other archive formats.
-      list(APPEND cmd ${CMAKE_COMMAND} -Dfilename=${file} -Dtmp=${tmp_dir} -Ddirectory=${source_dir} -P ${CMAKE_ROOT}/Modules/UntarFile.cmake)
+      _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${file}" "${tmp_dir}" "${source_dir}")
+      list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
     endif()
   else()
     message(SEND_ERROR "error: no download info for '${name}'")
@@ -678,6 +804,7 @@ function(_ep_add_install_command name)
     DEPENDEES build
     )
 endfunction(_ep_add_install_command)
+
 
 function(ep_add name)
   # Add a custom target for the external project.
