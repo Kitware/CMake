@@ -76,6 +76,15 @@ if(FortranCInterface_SOURCE_DIR)
 endif()
 
 #-----------------------------------------------------------------------------
+# Verify that C and Fortran are available.
+foreach(lang C Fortran)
+  if(NOT CMAKE_${lang}_COMPILER_LOADED)
+    message(FATAL_ERROR
+      "FortranCInterface requires the ${lang} language to be enabled.")
+  endif()
+endforeach()
+
+#-----------------------------------------------------------------------------
 # Set up an interface detection project.
 set(FortranCInterface_SOURCE_DIR ${CMAKE_ROOT}/Modules/FortranCInterface)
 set(FortranCInterface_BINARY_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/FortranCInterface)
