@@ -488,7 +488,8 @@ int cmCTestRunTest::RunTestProcess(std::vector<const char*> argv,
       {
       tempOutput.insert(tempOutput.end(), data, data+length);
       }
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, cmCTestLogWrite(data, length));
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      cmCTestLogWrite(data, length));
     if ( log )
       {
       log->write(data, length);
@@ -524,16 +525,16 @@ int cmCTestRunTest::RunTestProcess(std::vector<const char*> argv,
     std::string outerr = "\n*** Exception executing: ";
     outerr += cmsysProcess_GetExceptionString(cp);
     *output += outerr;
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, outerr.c_str() << std::endl
-      << std::flush);
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, outerr.c_str()
+      << std::endl << std::flush);
     }
   else if(result == cmsysProcess_State_Error)
     {
     std::string outerr = "\n*** ERROR executing: ";
     outerr += cmsysProcess_GetErrorString(cp);
     *output += outerr;
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, outerr.c_str() << std::endl
-      << std::flush);
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, outerr.c_str()
+      << std::endl << std::flush);
     }
   cmsysProcess_Delete(cp);
 
