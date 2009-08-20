@@ -1241,6 +1241,13 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This is the list of extensions for a "
      "given languages source files.",false,"Variables for Languages");
 
+  cm->DefineProperty(
+    "CMAKE_<LANG>_COMPILER_LOADED", cmProperty::VARIABLE,
+    "Defined to true if the language is enabled.",
+    "When language <LANG> is enabled by project() or enable_language() "
+    "this variable is defined to 1.",
+    false,"Variables for Languages");
+
   // variables that are used by cmake but not to be documented
   cm->DefineProperty("CMAKE_MATCH_0", cmProperty::VARIABLE,0,0);  
   cm->DefineProperty("CMAKE_MATCH_1", cmProperty::VARIABLE,0,0);  
@@ -1258,8 +1265,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty("CMAKE_<LANG>_COMPILER_ENV_VAR",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_COMPILER_ID_RUN",
-                     cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_<LANG>_COMPILER_LOADED",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_CREATE_ASSEMBLY_SOURCE",
                      cmProperty::VARIABLE,0,0);
