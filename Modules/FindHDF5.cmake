@@ -253,10 +253,18 @@ else()
     # We may have picked up some duplicates in various lists during the above
     # process for the language bindings (both the C and C++ bindings depend on
     # libz for example).  Remove the duplicates.
-    list( REMOVE_DUPLICATES HDF5_INCLUDE_DIR )
-    list( REMOVE_DUPLICATES HDF5_LIBRARIES_DEBUG )
-    list( REMOVE_DUPLICATES HDF5_LIBRARIES_RELEASE )
-    list( REMOVE_DUPLICATES HDF5_LIBRARY_DIRS )
+    if( HDF5_INCLUDE_DIR )
+        list( REMOVE_DUPLICATES HDF5_INCLUDE_DIR )
+    endif()
+    if( HDF5_LIBRARIES_DEBUG )
+        list( REMOVE_DUPLICATES HDF5_LIBRARIES_DEBUG )
+    endif()
+    if( HDF5_LIBRARIES_RELEASE )
+        list( REMOVE_DUPLICATES HDF5_LIBRARIES_RELEASE )
+    endif()
+    if( HDF5_LIBRARY_DIRS )
+        list( REMOVE_DUPLICATES HDF5_LIBRARY_DIRS )
+    endif()
 
     # Construct the complete list of HDF5 libraries with debug and optimized
     # variants when the generator supports them.
