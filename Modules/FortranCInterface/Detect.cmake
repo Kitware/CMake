@@ -17,6 +17,10 @@ else()
   return()
 endif()
 
+# Invalidate verification results.
+unset(FortranCInterface_VERIFIED_C CACHE)
+unset(FortranCInterface_VERIFIED_CXX CACHE)
+
 set(_result)
 
 # Build a sample project which reports symbols.

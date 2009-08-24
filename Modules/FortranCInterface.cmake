@@ -51,6 +51,18 @@
 # macros as the previous example plus preprocessor symbols FC_mysub
 # and FC_mymod_my_sub.
 #
+# Another function is provided to verify that the Fortran and C/C++
+# compilers work together:
+#   FortranCInterface_VERIFY([CXX] [QUIET])
+# It tests whether a simple test executable using Fortran and C (and
+# C++ when the CXX option is given) compiles and links successfully.
+# The result is stored in the cache entry FortranCInterface_VERIFIED_C
+# (or FortranCInterface_VERIFIED_CXX if CXX is given) as a boolean.
+# If the check fails and QUIET is not given the function terminates
+# with a FATAL_ERROR message describing the problem.  The purpose of
+# this check is to stop a build early for incompatible compiler
+# combinations.
+#
 # FortranCInterface is aware of possible GLOBAL and MODULE manglings
 # for many Fortran compilers, but it also provides an interface to
 # specify new possible manglings.  Set the variables
@@ -182,4 +194,68 @@ ${_desc_${macro}}
 
   # Store the content.
   configure_file(${FortranCInterface_SOURCE_DIR}/Macro.h.in ${FILE} @ONLY)
+endfunction()
+
+function(FortranCInterface_VERIFY)
+  # Check arguments.
+
+  set(lang C)
+  set(quiet 0)
+  set(verify_cxx 0)
+  foreach(arg ${ARGN})
+    if("${arg}" STREQUAL "QUIET")
+      set(quiet 1)
+    elseif("${arg}" STREQUAL "CXX")
+      set(lang CXX)
+      set(verify_cxx 1)
+    else()
+      message(FATAL_ERROR
+        "FortranCInterface_VERIFY - called with unknown argument:\n  ${arg}")
+    endif()
+  endforeach()
+
+  if(NOT CMAKE_${lang}_COMPILER_LOADED)
+    message(FATAL_ERROR
+      "FortranCInterface_VERIFY(${lang}) requires ${lang} to be enabled.")
+  endif()
+
+  # Build the verification project if not yet built.
+  if(NOT DEFINED FortranCInterface_VERIFIED_${lang})
+    set(_desc "Verifying Fortran/${lang} Compiler Compatibility")
+    message(STATUS "${_desc}")
+
+    # Build a sample project which reports symbols.
+    try_compile(FortranCInterface_VERIFY_${lang}_COMPILED
+      ${FortranCInterface_BINARY_DIR}/Verify${lang}
+      ${FortranCInterface_SOURCE_DIR}/Verify
+      VerifyFortranC
+      CMAKE_FLAGS -DVERIFY_CXX=${verify_cxx}
+      OUTPUT_VARIABLE _output)
+    file(WRITE "${FortranCInterface_BINARY_DIR}/Verify${lang}/output.txt" "${_output}")
+
+    # Report results.
+    if(FortranCInterface_VERIFY_${lang}_COMPILED)
+      message(STATUS "${_desc} - Success")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+        "${_desc} passed with the following output:\n${_output}\n\n")
+      set(FortranCInterface_VERIFIED_${lang} 1 CACHE INTERNAL "Fortran/${lang} compatibility")
+    else()
+      message(STATUS "${_desc} - Failed")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+        "${_desc} failed with the following output:\n${_output}\n\n")
+      set(FortranCInterface_VERIFIED_${lang} 0 CACHE INTERNAL "Fortran/${lang} compatibility")
+    endif()
+    unset(FortranCInterface_VERIFY_${lang}_COMPILED CACHE)
+  endif()
+
+  # Error if compilers are incompatible.
+  if(NOT FortranCInterface_VERIFIED_${lang} AND NOT quiet)
+    file(READ "${FortranCInterface_BINARY_DIR}/Verify${lang}/output.txt" _output)
+    string(REGEX REPLACE "\n" "\n  " _output "${_output}")
+    message(FATAL_ERROR
+      "The Fortran compiler:\n  ${CMAKE_Fortran_COMPILER}\n"
+      "and the ${lang} compiler:\n  ${CMAKE_${lang}_COMPILER}\n"
+      "failed to compile a simple test project using both languages.  "
+      "The output was:\n  ${_output}")
+  endif()
 endfunction()
