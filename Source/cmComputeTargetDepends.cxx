@@ -103,6 +103,7 @@ cmComputeTargetDepends::cmComputeTargetDepends(cmGlobalGenerator* gg)
   this->GlobalGenerator = gg;
   cmake* cm = this->GlobalGenerator->GetCMakeInstance();
   this->DebugMode = cm->GetPropertyAsBool("GLOBAL_DEPENDS_DEBUG_MODE");
+  this->NoCycles = cm->GetPropertyAsBool("GLOBAL_DEPENDS_NO_CYCLES");
 }
 
 //----------------------------------------------------------------------------
@@ -344,6 +345,13 @@ cmComputeTargetDepends
       continue;
       }
 
+    // Immediately complain if no cycles are allowed at all.
+    if(this->NoCycles)
+      {
+      this->ComplainAboutBadComponent(ccg, c);
+      return false;
+      }
+
     // Make sure the component is all STATIC_LIBRARY targets.
     for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
       {
@@ -391,8 +399,16 @@ cmComputeTargetDepends
         }
       }
     }
-  e << "At least one of these targets is not a STATIC_LIBRARY.  "
-    << "Cyclic dependencies are allowed only among static libraries.";
+  if(this->NoCycles)
+    {
+    e << "The GLOBAL_DEPENDS_NO_CYCLES global property is enabled, so "
+      << "cyclic dependencies are not allowed even among static libraries.";
+    }
+  else
+    {
+    e << "At least one of these targets is not a STATIC_LIBRARY.  "
+      << "Cyclic dependencies are allowed only among static libraries.";
+    }
   cmSystemTools::Error(e.str().c_str());
 }
 

@@ -54,6 +54,7 @@ private:
 
   cmGlobalGenerator* GlobalGenerator;
   bool DebugMode;
+  bool NoCycles;
 
   // Collect all targets.
   std::vector<cmTarget*> Targets;

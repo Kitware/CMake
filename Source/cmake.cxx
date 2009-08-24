@@ -3415,6 +3415,16 @@ void cmake::DefineProperties(cmake *cm)
     "This property causes it to display details of its analysis to stderr.");
 
   cm->DefineProperty(
+    "GLOBAL_DEPENDS_NO_CYCLES", cmProperty::GLOBAL,
+    "Disallow global target dependency graph cycles.",
+    "CMake automatically analyzes the global inter-target dependency graph "
+    "at the beginning of native build system generation.  "
+    "It reports an error if the dependency graph contains a cycle that "
+    "does not consist of all STATIC library targets.  "
+    "This property tells CMake to disallow all cycles completely, even "
+    "among static libraries.");
+
+  cm->DefineProperty(
     "ALLOW_DUPLICATE_CUSTOM_TARGETS", cmProperty::GLOBAL,
     "Allow duplicate custom targets to be created.",
     "Normally CMake requires that all targets built in a project have "
