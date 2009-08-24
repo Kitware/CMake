@@ -163,6 +163,8 @@ private:
 
   // Implicit link libraries and directories for linker language.
   void LoadImplicitLinkInfo();
+  void AddImplicitLinkInfo();
+  void AddImplicitLinkInfo(std::string const& lang);
   std::set<cmStdString> ImplicitLinkDirs;
   std::set<cmStdString> ImplicitLinkLibs;
 

@@ -553,6 +553,15 @@ bool cmComputeLinkInformation::Compute()
     }
 
   // Add implicit language runtime libraries and directories.
+  this->AddImplicitLinkInfo();
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+void cmComputeLinkInformation::AddImplicitLinkInfo()
+{
+  // The link closure lists all languages whose implicit info is needed.
   cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
@@ -560,40 +569,44 @@ bool cmComputeLinkInformation::Compute()
     // Skip those of the linker language.  They are implicit.
     if(*li != this->LinkLanguage)
       {
-      // Add libraries for this language that are not implied by the
-      // linker language.
-      std::string libVar = "CMAKE_";
-      libVar += *li;
-      libVar += "_IMPLICIT_LINK_LIBRARIES";
-      if(const char* libs = this->Makefile->GetDefinition(libVar.c_str()))
-        {
-        std::vector<std::string> libsVec;
-        cmSystemTools::ExpandListArgument(libs, libsVec);
-        for(std::vector<std::string>::const_iterator i = libsVec.begin();
-            i != libsVec.end(); ++i)
-          {
-          if(this->ImplicitLinkLibs.find(*i) == this->ImplicitLinkLibs.end())
-            {
-            this->AddItem(i->c_str(), 0);
-            }
-          }
-        }
+      this->AddImplicitLinkInfo(*li);
+      }
+    }
+}
 
-      // Add linker search paths for this language that are not
-      // implied by the linker language.
-      std::string dirVar = "CMAKE_";
-      dirVar += *li;
-      dirVar += "_IMPLICIT_LINK_DIRECTORIES";
-      if(const char* dirs = this->Makefile->GetDefinition(dirVar.c_str()))
+//----------------------------------------------------------------------------
+void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
+{
+  // Add libraries for this language that are not implied by the
+  // linker language.
+  std::string libVar = "CMAKE_";
+  libVar += lang;
+  libVar += "_IMPLICIT_LINK_LIBRARIES";
+  if(const char* libs = this->Makefile->GetDefinition(libVar.c_str()))
+    {
+    std::vector<std::string> libsVec;
+    cmSystemTools::ExpandListArgument(libs, libsVec);
+    for(std::vector<std::string>::const_iterator i = libsVec.begin();
+        i != libsVec.end(); ++i)
+      {
+      if(this->ImplicitLinkLibs.find(*i) == this->ImplicitLinkLibs.end())
         {
-        std::vector<std::string> dirsVec;
-        cmSystemTools::ExpandListArgument(dirs, dirsVec);
-        this->OrderLinkerSearchPath->AddLanguageDirectories(dirsVec);
+        this->AddItem(i->c_str(), 0);
         }
       }
     }
 
-  return true;
+  // Add linker search paths for this language that are not
+  // implied by the linker language.
+  std::string dirVar = "CMAKE_";
+  dirVar += lang;
+  dirVar += "_IMPLICIT_LINK_DIRECTORIES";
+  if(const char* dirs = this->Makefile->GetDefinition(dirVar.c_str()))
+    {
+    std::vector<std::string> dirsVec;
+    cmSystemTools::ExpandListArgument(dirs, dirsVec);
+    this->OrderLinkerSearchPath->AddLanguageDirectories(dirsVec);
+    }
 }
 
 //----------------------------------------------------------------------------
