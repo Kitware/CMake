@@ -31,6 +31,7 @@ class cmMakefile;
 class cmCTestTestHandler : public cmCTestGenericHandler
 {
   friend class cmCTestRunTest;
+  friend class cmCTestMultiProcessHandler;
 public:
   cmTypeMacro(cmCTestTestHandler, cmCTestGenericHandler);
 
@@ -129,6 +130,7 @@ public:
                                     std::vector<std::string> &extraPaths,
                                     std::vector<std::string> &failed);
 
+  typedef std::vector<cmCTestTestProperties> ListOfTests;
 protected:
   // comput a final test list
   virtual int PreProcessHandler();
@@ -193,7 +195,6 @@ private:
   void ProcessDirectory(std::vector<cmStdString> &passed,
                         std::vector<cmStdString> &failed);
 
-  typedef std::vector<cmCTestTestProperties> ListOfTests;
   /**
    * Get the list of tests in directory and subdirectories.
    */
@@ -221,9 +222,6 @@ private:
   bool GetValue(const char* tag,
                 double& value,
                 std::ifstream& fin);
-  // run in -j N mode
-  void ProcessParallel(std::vector<cmStdString> &passed,
-                       std::vector<cmStdString> &failed);
   /**
    * Find the executable for a test
    */

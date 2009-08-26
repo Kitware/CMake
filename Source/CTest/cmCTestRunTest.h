@@ -19,6 +19,7 @@
 
 #include <cmStandardIncludes.h>
 #include <cmCTestTestHandler.h>
+#include <cmProcess.h>
 
 /** \class cmRunTest
  * \brief represents a single test to be run
@@ -38,44 +39,53 @@ public:
   { return this->TestProperties; }
   
   void SetTestHandler(cmCTestTestHandler * handler);
-  
-  void SetOptimizeForCTest(bool optimize)
-  { this->OptimizeForCTest = optimize; }
 
-  bool GetOptimizeForCTest()
-  { return this->OptimizeForCTest; }
+  void SetIndex(int i) { this->Index = i; }
 
-  std::string GetProcessOutput()
-  { return this->ProcessOutput; }
+  void SetCTest(cmCTest * ct) { this->CTest = ct; }
 
-  //Provides a handle to the log stream in case someone wants
-  // to asynchronously process the log
-  std::ostream * GetLogStream()
-  { return this->TestHandler->LogFile; }
+  int GetIndex() { return this->Index; }
+
+  std::string GetProcessOutput() { return this->ProcessOutput; }
 
   cmCTestTestHandler::cmCTestTestResult GetTestResults()
   { return this->TestResult; }
 
-  //Runs the test
-  bool Execute();
+  bool IsRunning();
+  void CheckOutput();
+  //launch the test process, return whether it started correctly
+  bool StartTest();
+  //capture the test results and send them back to the test handler
+  bool EndTest();
 protected:
-  void DartProcessing(std::string& output);
-  int RunTestProcess(std::vector<const char*> argv,
-                     std::string* output, int *retVal,
-                     std::ostream* log, double testTimeOut,
+  void DartProcessing();
+  bool CreateProcess(std::string executable,
+                     std::vector<std::string> args,
+                     double testTimeOut,
                      std::vector<std::string>* environment);
 private:
   cmCTestTestHandler::cmCTestTestProperties * TestProperties;
   //Pointer back to the "parent"; the handler that invoked this test run
   cmCTestTestHandler * TestHandler;
   cmCTest * CTest;
+  cmProcess * TestProcess;
   //If the executable to run is ctest, don't create a new process; 
   //just instantiate a new cmTest.  (Can be disabled for a single test
   //if this option is set to false.)
-  bool OptimizeForCTest;
+  //bool OptimizeForCTest;
+
+  //flag for whether the env was modified for this run
+  bool ModifyEnv;
+  //stores the original environment if we are modifying it
+  std::vector<std::string> OrigEnv;
   std::string ProcessOutput;
   //The test results
   cmCTestTestHandler::cmCTestTestResult TestResult;
+  int Index;
+  std::string StartTime;
+  std::string TestCommand;
+  std::string ActualCommand;
+  void WriteLogOutputTop();
 };
 
 #endif

@@ -209,7 +209,7 @@ std::string cmCTest::DecodeURL(const std::string& in)
 cmCTest::cmCTest()
 {
   this->ParallelSubprocess     = false;
-  this->ParallelLevel          = 0;
+  this->ParallelLevel          = 1;
   this->SubmitIndex            = 0;
   this->ForceNewCTestProcess   = false;
   this->TomorrowTag            = false;
@@ -290,6 +290,11 @@ cmCTest::~cmCTest()
     it->second = 0;
     }
   this->SetOutputLogFileName(0);
+}
+
+void cmCTest::SetParallelLevel(int level)
+{
+  this->ParallelLevel = level < 1 ? 1 : level;
 }
 
 //----------------------------------------------------------------------------

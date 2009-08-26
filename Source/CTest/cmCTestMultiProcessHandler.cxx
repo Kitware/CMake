@@ -23,12 +23,11 @@
 cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 {
   this->ParallelLevel = 1;
-  this->ProcessId = 0;
 }
   // Set the tests
 void 
 cmCTestMultiProcessHandler::SetTests(TestMap& tests,
-                                     std::map<int,cmStdString>& testNames)
+                                     PropertiesMap& properties)
 {
   // set test run map to false for all
   for(TestMap::iterator i = this->Tests.begin();
@@ -38,14 +37,13 @@ cmCTestMultiProcessHandler::SetTests(TestMap& tests,
     this->TestFinishMap[i->first] = false;
     }
   this->Tests = tests;
-  this->TestNames = testNames;
+  this->Properties = properties;
 }
   // Set the max number of tests that can be run at the same time.
-void cmCTestMultiProcessHandler::SetParallelLevel(size_t l)
+void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
 {
-  this->ParallelLevel = l;
+  this->ParallelLevel = level < 1 ? 1 : level;
 }
-
 
 void cmCTestMultiProcessHandler::RunTests()
 {
@@ -59,65 +57,28 @@ void cmCTestMultiProcessHandler::RunTests()
   while(this->CheckOutput())
     {
     }
-  
-  for(std::map<int, cmStdString>::iterator i =
-        this->TestOutput.begin();
-      i != this->TestOutput.end(); ++i)
-    {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
-               i->second << std::endl);
-    }
-      
 }
 
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
-            " test " << test << "\n");
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, test << ": "
+            << " test " << test << "\n");
   this->TestRunningMap[test] = true; // mark the test as running
   // now remove the test itself
   this->Tests.erase(test);
-  // now run the test
-  cmProcess* newp = new cmProcess;
-  newp->SetId(this->ProcessId);
-  newp->SetId(test);
-  newp->SetCommand(this->CTestCommand.c_str());
-  std::vector<std::string> args;
-  cmOStringStream width;
-  if(this->CTest->GetMaxTestNameWidth())
+  cmCTestRunTest* testRun = new cmCTestRunTest;
+  testRun->SetCTest(this->CTest);
+  testRun->SetTestHandler(this->TestHandler);
+  testRun->SetIndex(test);
+  testRun->SetTestProperties(this->Properties[test]);
+  if(testRun->StartTest())
     {
-    args.push_back("-W");
-    width << this->CTest->GetMaxTestNameWidth();
-    args.push_back(width.str().c_str());
-    }
-  args.push_back("-I");
-  cmOStringStream strm;
-  strm << test << "," << test;
-  args.push_back(strm.str());
-  args.push_back("--parallel-cache");
-  args.push_back(this->CTestCacheFile.c_str());
-  args.push_back("--internal-ctest-parallel"); 
-  cmOStringStream strm2;
-  strm2 << test;
-  args.push_back(strm2.str());
-  if(this->CTest->GetExtraVerbose())
-    {
-    args.push_back("-VV");
-    }
-  newp->SetCommandArguments(args);
-  if(!newp->StartProcess())
-    {
-     cmCTestLog(this->CTest, ERROR_MESSAGE, 
-                "Error starting " << newp->GetCommand() << "\n");
-    this->EndTest(newp);
+    this->RunningTests.insert(testRun);
     }
   else
     {
-    this->RunningTests.insert(newp);
+    testRun->EndTest();
     }
- cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
-            "ctest -I " << test << "\n");
- this->ProcessId++;
 }
 
 bool cmCTestMultiProcessHandler::StartTest(int test)
@@ -160,7 +121,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
     }
   // This test was not able to start because it is waiting 
   // on depends to run
-  return false;  
+  return false;
 }
 
 void cmCTestMultiProcessHandler::StartNextTests()
@@ -195,7 +156,6 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
 }
 
-
 bool cmCTestMultiProcessHandler::CheckOutput()
 {
   // no more output we are done
@@ -203,81 +163,47 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     {
     return false;
     }
-  std::vector<cmProcess*> finished;
+  std::vector<cmCTestRunTest*> finished;
   std::string out, err;
-  for(std::set<cmProcess*>::const_iterator i = this->RunningTests.begin();
+  for(std::set<cmCTestRunTest*>::const_iterator i = this->RunningTests.begin();
       i != this->RunningTests.end(); ++i)
     {
-    cmProcess* p = *i;
-    int pipe = p->CheckOutput(.1, out, err);
-    if(pipe == cmsysProcess_Pipe_STDOUT)
-      {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, 
-                 p->GetId() << ": " << out << std::endl);
-      this->TestOutput[ p->GetId() ] += out;
-      this->TestOutput[ p->GetId() ] += "\n";
-      }
-    else if(pipe == cmsysProcess_Pipe_STDERR)
-      {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, 
-                 p->GetId() << ": " << err << std::endl);
-      this->TestOutput[ p->GetId() ] += err;
-      this->TestOutput[ p->GetId() ] += "\n";
-      }
+    cmCTestRunTest* p = *i;
+    p->CheckOutput(); //reads and stores the process output
+    
     if(!p->IsRunning())
       {
       finished.push_back(p);
       }
     }
-  for( std::vector<cmProcess*>::iterator i = finished.begin();
+
+  for( std::vector<cmCTestRunTest*>::iterator i = finished.begin();
        i != finished.end(); ++i)
     {
-    cmProcess* p = *i;
-    this->EndTest(p);
+    cmCTestRunTest* p = *i;
+    int test = p->GetIndex();
+    
+    if(p->EndTest())
+      {
+        this->Passed->push_back(p->GetTestProperties()->Name);
+      }
+    else
+      {
+        this->Failed->push_back(p->GetTestProperties()->Name);
+      }
+    for(TestMap::iterator j = this->Tests.begin();
+       j!=  this->Tests.end(); ++j)
+    {
+    j->second.erase(test);
+    }
+    this->TestFinishMap[test] = true;
+    this->TestRunningMap[test] = false;
+    this->RunningTests.erase(p);
+
+    delete p;
     }
   return true;
 }
-
-void cmCTestMultiProcessHandler::EndTest(cmProcess* p)
-{
-  // Should have a way of getting this stuff from the 
-  // launched ctest, maybe a temp file or some extra xml
-  // stuff in the stdout
-  // Need things like Reason and ExecutionTime, Path, etc.
-  int test = p->GetId();
-  int exitVal = p->GetExitValue();
-  cmCTestTestHandler::cmCTestTestResult cres;
-  cres.Properties = 0;
-  cres.ExecutionTime = p->GetTotalTime();
-  cres.ReturnValue = exitVal;
-  cres.Status = cmCTestTestHandler::COMPLETED;
-  cres.TestCount = test;  
-  cres.Name = this->TestNames[test];
-  cres.Path = "";
-  if(exitVal)
-    {
-    cres.Status = cmCTestTestHandler::FAILED;
-    this->Failed->push_back(this->TestNames[test]);
-    }
-  else
-    {
-    this->Passed->push_back(this->TestNames[test]);
-    }
-  this->TestResults->push_back(cres);
-  // remove test from depend of all other tests
-  for(TestMap::iterator i = this->Tests.begin();
-       i!=  this->Tests.end(); ++i)
-    {
-    i->second.erase(test);
-    }
-  this->TestFinishMap[test] = true;
-  this->TestRunningMap[test] = false;
-  this->RunningTests.erase(p);
-  delete p;
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
-             "finish test " << test << "\n");
-}
-
 
 void cmCTestMultiProcessHandler::PrintTests()
 {

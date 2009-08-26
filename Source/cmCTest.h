@@ -136,7 +136,7 @@ public:
   void SetTimeOut(double t) { this->TimeOut = t; }
   // how many test to run at the same time
   int GetParallelLevel() { return this->ParallelLevel; }
-  void SetParallelLevel(int t) { this->ParallelLevel = t; }
+  void SetParallelLevel(int);
 
   bool GetParallelSubprocess() { return this->ParallelSubprocess; }
   void SetParallelSubprocess() { this->ParallelSubprocess = true; }

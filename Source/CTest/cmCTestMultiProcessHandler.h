@@ -17,9 +17,9 @@
 #ifndef cmCTestMultiProcessHandler_h
 #define cmCTestMultiProcessHandler_h
 
-class cmProcess;
 #include <cmStandardIncludes.h>
 #include <cmCTestTestHandler.h>
+#include <cmCTestRunTest.h>
 
 /** \class cmCTestMultiProcessHandler
  * \brief run parallel ctest
@@ -31,16 +31,18 @@ class cmCTestMultiProcessHandler
 public:
   struct TestSet : public std::set<int> {};
   struct TestMap : public std::map<int, TestSet> {};
+  struct PropertiesMap : public 
+     std::map<int, cmCTestTestHandler::cmCTestTestProperties*> {};
+
   cmCTestMultiProcessHandler();
   // Set the tests
-  void SetTests(TestMap& tests,
-                std::map<int, cmStdString>& testNames);
+  void SetTests(TestMap& tests, PropertiesMap& properties);
   // Set the max number of tests that can be run at the same time.
   void SetParallelLevel(size_t);
   void RunTests();
   void PrintTests();
-  void SetCTestCommand(const char* c) { this->CTestCommand = c;}
-  void SetTestCacheFile(const char* c) { this->CTestCacheFile = c;}
+  //void SetCTestCommand(const char* c) { this->CTestCommand = c;}
+  //void SetTestCacheFile(const char* c) { this->CTestCacheFile = c;}
   void SetPassFailVectors(std::vector<cmStdString>* passed,
                           std::vector<cmStdString>* failed)
     {
@@ -51,7 +53,14 @@ public:
     {
       this->TestResults = r;
     }
+
   void SetCTest(cmCTest* ctest) { this->CTest = ctest;}
+
+  void SetTestHandler(cmCTestTestHandler * handler)
+  { this->TestHandler = handler; }
+
+  cmCTestTestHandler * GetTestHandler()
+  { return this->TestHandler; }
 protected:  
   cmCTest* CTest;
   // Start the next test or tests as many as are allowed by
@@ -59,24 +68,25 @@ protected:
   void StartNextTests();
   void StartTestProcess(int test);
   bool StartTest(int test);
-  void EndTest(cmProcess*);
+  //void EndTest(cmProcess*);
   // Return true if there are still tests running
   // check all running processes for output and exit case
   bool CheckOutput();
   // map from test number to set of depend tests
   TestMap Tests;
-  std::map<int, cmStdString> TestNames;
+  //list of test properties (indices concurrent to the test map)
+  PropertiesMap Properties;
   std::map<int, bool> TestRunningMap;
   std::map<int, bool> TestFinishMap;
   std::map<int, cmStdString> TestOutput;
-  std::string CTestCommand;
-  std::string CTestCacheFile;
+  //std::string CTestCommand;
+  //std::string CTestCacheFile;
   std::vector<cmStdString>* Passed;
   std::vector<cmStdString>* Failed;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
-  int ProcessId;
   size_t ParallelLevel; // max number of process that can be run at once
-  std::set<cmProcess*> RunningTests;  // current running tests
+  std::set<cmCTestRunTest*> RunningTests;  // current running tests
+  cmCTestTestHandler * TestHandler;
 };
 
 #endif
