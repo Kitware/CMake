@@ -641,7 +641,7 @@ function(_ep_add_download_command name)
           message(FATAL_ERROR "Could not extract tarball filename from url:\n  ${url}")
         endif()
         set(file ${download_dir}/${fname})
-        _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake" "${url}" "${file}")
+        _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake" "${url}" "${file}" "")
         set(cmd ${CMAKE_COMMAND} -P ${stamp_dir}/download-${name}.cmake
           COMMAND)
         set(comment "Performing download step (download and extract) for '${name}'")
