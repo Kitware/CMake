@@ -138,15 +138,6 @@ public:
   int GetParallelLevel() { return this->ParallelLevel; }
   void SetParallelLevel(int);
 
-  bool GetParallelSubprocess() { return this->ParallelSubprocess; }
-  void SetParallelSubprocess() { this->ParallelSubprocess = true; }
-
-  void SetParallelSubprocessId(int id) { this->ParallelSubprocessId = id;}
-  int GetParallelSubprocessId() { return this->ParallelSubprocessId;}
-  const char* GetParallelCacheFile()
-    { return this->ParallelCacheFile.c_str();}
-  void SetParallelCacheFile(const char* c) { this->ParallelCacheFile = c; }
-
   /**
    * Check if CTest file exists
    */
@@ -371,6 +362,9 @@ public:
   void SetSpecificTrack(const char* track);
   const char* GetSpecificTrack();
 
+  void SetFailover(bool failover) { this->Failover = failover; }
+  bool GetFailover() { return this->Failover; }
+
   bool GetVerbose() { return this->Verbose;}
   bool GetExtraVerbose() { return this->ExtraVerbose;}
 
@@ -383,6 +377,8 @@ private:
   bool Verbose;
   bool ExtraVerbose;
   bool ProduceXML;
+
+  bool Failover;
 
   bool ForceNewCTestProcess;
 
@@ -420,10 +416,8 @@ private:
 
   int                     MaxTestNameWidth;
 
-  std::string             ParallelCacheFile;
   int                     ParallelLevel;
-  int                     ParallelSubprocessId;
-  bool                    ParallelSubprocess;
+
   int                     CompatibilityMode;
 
   // information for the --build-and-test options

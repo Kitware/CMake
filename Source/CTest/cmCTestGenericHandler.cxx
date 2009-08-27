@@ -166,12 +166,6 @@ bool cmCTestGenericHandler::StartLogFile(const char* name,
     ostr << "_" << this->CTest->GetCurrentTag();
     }
   ostr << ".log";
-  // if this is a parallel subprocess then add the id to the
-  // file so they don't clobber each other
-  if(this->CTest->GetParallelSubprocess())
-    {
-    ostr << "." << this->CTest->GetParallelSubprocessId();
-    }
   if( !this->CTest->OpenOutputFile("Temporary", ostr.str().c_str(), xofs) )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create log file: "

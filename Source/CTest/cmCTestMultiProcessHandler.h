@@ -68,10 +68,16 @@ protected:
   void StartNextTests();
   void StartTestProcess(int test);
   bool StartTest(int test);
-  //void EndTest(cmProcess*);
+  // Mark the checkpoint for the given test
+  void WriteCheckpoint(int index);
+  // Removes the checkpoint file
+  void MarkFinished();
   // Return true if there are still tests running
   // check all running processes for output and exit case
   bool CheckOutput();
+  void RemoveTest(int index);
+  //Check if we need to resume an interrupted test set
+  void CheckResume();
   // map from test number to set of depend tests
   TestMap Tests;
   //list of test properties (indices concurrent to the test map)
@@ -79,8 +85,6 @@ protected:
   std::map<int, bool> TestRunningMap;
   std::map<int, bool> TestFinishMap;
   std::map<int, cmStdString> TestOutput;
-  //std::string CTestCommand;
-  //std::string CTestCacheFile;
   std::vector<cmStdString>* Passed;
   std::vector<cmStdString>* Failed;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;

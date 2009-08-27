@@ -18,7 +18,8 @@
 #include "cmProcess.h"
 #include "cmStandardIncludes.h"
 #include "cmCTest.h"
-
+#include "cmSystemTools.h"
+#include <stdlib.h>
 
 cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 {
@@ -39,6 +40,7 @@ cmCTestMultiProcessHandler::SetTests(TestMap& tests,
   this->Tests = tests;
   this->Properties = properties;
 }
+
   // Set the max number of tests that can be run at the same time.
 void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
 {
@@ -47,6 +49,7 @@ void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
 
 void cmCTestMultiProcessHandler::RunTests()
 {
+  this->CheckResume();
   this->StartNextTests();
   while(this->Tests.size() != 0)
     {
@@ -57,6 +60,7 @@ void cmCTestMultiProcessHandler::RunTests()
   while(this->CheckOutput())
     {
     }
+  this->MarkFinished();
 }
 
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
@@ -176,7 +180,6 @@ bool cmCTestMultiProcessHandler::CheckOutput()
       finished.push_back(p);
       }
     }
-
   for( std::vector<cmCTestRunTest*>::iterator i = finished.begin();
        i != finished.end(); ++i)
     {
@@ -199,10 +202,28 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     this->TestFinishMap[test] = true;
     this->TestRunningMap[test] = false;
     this->RunningTests.erase(p);
+    this->WriteCheckpoint(test);
 
     delete p;
     }
   return true;
+}
+
+void cmCTestMultiProcessHandler::WriteCheckpoint(int index)
+{
+  std::string fname = this->CTest->GetBinaryDir()
+    + "/Testing/Temporary/CTestCheckpoint.txt";
+  std::fstream fout;
+  fout.open(fname.c_str(), std::ios::app);
+  fout << index << "\n";
+  fout.close();
+}
+
+void cmCTestMultiProcessHandler::MarkFinished()
+{
+  std::string fname = this->CTest->GetBinaryDir()
+    + "/Testing/Temporary/CTestCheckpoint.txt";
+  cmSystemTools::RemoveFile(fname.c_str());
 }
 
 void cmCTestMultiProcessHandler::PrintTests()
@@ -219,6 +240,48 @@ void cmCTestMultiProcessHandler::PrintTests()
       }
     std::cout << ")\n";
     }
+}
+
+//----------------------------------------------------------------
+void cmCTestMultiProcessHandler::CheckResume()
+{
+  std::string fname = this->CTest->GetBinaryDir()
+      + "/Testing/Temporary/CTestCheckpoint.txt";
+  if(this->CTest->GetFailover())
+    {
+    if(cmSystemTools::FileExists(fname.c_str(), true))
+      {
+      *this->TestHandler->LogFile << "Resuming previously interrupted test set"
+        << std::endl
+        << "----------------------------------------------------------"
+        << std::endl;
+        
+      std::ifstream fin;
+      fin.open(fname.c_str());
+      std::string line;
+      while(std::getline(fin, line))
+        {
+        int index = atoi(line.c_str());
+        this->RemoveTest(index);
+        }
+      fin.close();
+      }
+    }
+  else
+    {
+    if(cmSystemTools::FileExists(fname.c_str(), true))
+      {
+      cmSystemTools::RemoveFile(fname.c_str());
+      }
+    }
+}
+
+void cmCTestMultiProcessHandler::RemoveTest(int index)
+{
+  this->Tests.erase(index);
+  this->Properties.erase(index);
+  this->TestRunningMap[index] = false;
+  this->TestFinishMap[index] = true;
 }
 
 #if 0

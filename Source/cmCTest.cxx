@@ -208,9 +208,9 @@ std::string cmCTest::DecodeURL(const std::string& in)
 //----------------------------------------------------------------------
 cmCTest::cmCTest()
 {
-  this->ParallelSubprocess     = false;
   this->ParallelLevel          = 1;
   this->SubmitIndex            = 0;
+  this->Failover               = false;
   this->ForceNewCTestProcess   = false;
   this->TomorrowTag            = false;
   this->Verbose                = false;
@@ -795,11 +795,7 @@ int cmCTest::ProcessTests()
   bool notest = true;
   int update_count = 0;
 
-  // do not output startup if this is a sub-process for parallel tests
-  if(!this->GetParallelSubprocess())
-    {
-    cmCTestLog(this, OUTPUT, "Start processing tests" << std::endl);
-    }
+  cmCTestLog(this, OUTPUT, "Start processing tests" << std::endl);
 
   for(Part p = PartStart; notest && p != PartCount; p = Part(p+1))
     {
@@ -908,11 +904,8 @@ int cmCTest::ProcessTests()
     }
   if ( res != 0 )
     {
-    if(!this->GetParallelSubprocess())
-      {
-      cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest"
+    cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest"
                  << std::endl);
-      }
     }
   return res;
 }
@@ -1707,6 +1700,10 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
 {
   std::string arg = args[i];
 
+  if(this->CheckArgument(arg, "-F"))
+    {
+    this->Failover = true;
+    }
   if(this->CheckArgument(arg, "-j", "--parallel") && i < args.size() - 1)
     {
     i++;
@@ -1717,20 +1714,6 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     {
     int plevel = atoi(arg.substr(2).c_str());
     this->SetParallelLevel(plevel);
-    }
-  if(this->CheckArgument(arg, "--internal-ctest-parallel") 
-     && i < args.size() - 1)
-    {
-    i++;
-    int pid = atoi(args[i].c_str());
-    this->SetParallelSubprocessId(pid);
-    this->SetParallelSubprocess();
-    }
-  
-  if(this->CheckArgument(arg, "--parallel-cache") && i < args.size() - 1)
-    {
-    i++;
-    this->SetParallelCacheFile(args[i].c_str());
     }
   
   if(this->CheckArgument(arg, "-C", "--build-config") &&

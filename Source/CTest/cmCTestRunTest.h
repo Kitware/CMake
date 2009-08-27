@@ -63,7 +63,8 @@ protected:
                      std::vector<std::string> args,
                      double testTimeOut,
                      std::vector<std::string>* environment);
-private:
+  void WriteLogOutputTop();
+
   cmCTestTestHandler::cmCTestTestProperties * TestProperties;
   //Pointer back to the "parent"; the handler that invoked this test run
   cmCTestTestHandler * TestHandler;
@@ -85,7 +86,6 @@ private:
   std::string StartTime;
   std::string TestCommand;
   std::string ActualCommand;
-  void WriteLogOutputTop();
 };
 
 #endif

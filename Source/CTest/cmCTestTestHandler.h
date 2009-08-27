@@ -141,6 +141,7 @@ protected:
   void WriteTestResultHeader(std::ostream& os, cmCTestTestResult* result);
   void WriteTestResultFooter(std::ostream& os, cmCTestTestResult* result);
 
+  void PrintTestList();
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);
 
@@ -203,10 +204,6 @@ private:
   // based on union regex and -I stuff
   void ComputeTestList();
   
-  // Save the state of the test list and return the file
-  // name it was saved to
-  std::string SaveTestList();
-  void LoadTestList();
   bool GetValue(const char* tag,
                 std::string& value,
                 std::ifstream& fin);
