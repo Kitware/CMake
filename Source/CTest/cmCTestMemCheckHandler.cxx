@@ -249,15 +249,14 @@ int cmCTestMemCheckHandler::PostProcessHandler()
 
 //----------------------------------------------------------------------
 void cmCTestMemCheckHandler::GenerateTestCommand(
-  std::vector<const char*>& args)
+  std::vector<std::string>& args)
 {
   std::vector<cmStdString>::size_type pp;
-  args.push_back(this->MemoryTester.c_str());
   std::string memcheckcommand = "";
   memcheckcommand = this->MemoryTester;
   for ( pp = 0; pp < this->MemoryTesterOptionsParsed.size(); pp ++ )
     {
-    args.push_back(this->MemoryTesterOptionsParsed[pp].c_str());
+    args.push_back(this->MemoryTesterOptionsParsed[pp]);
     memcheckcommand += " ";
     memcheckcommand += cmSystemTools::EscapeSpaces(
       this->MemoryTesterOptionsParsed[pp].c_str());
@@ -866,27 +865,6 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
     return false;
     }
   return true;
-}
-//TODO ZACH move this logic into cmCTestRunTest
-void 
-cmCTestMemCheckHandler::ProcessOneTest(cmCTestTestProperties *props,
-                                       std::vector<cmStdString> &passed,
-                                       std::vector<cmStdString> &failed,
-                                       int count, int tmsize)
-{
-  // run parent test
-  cmCTestTestHandler::ProcessOneTest(props, passed, failed, count, tmsize);
-  cmCTestTestResult& res = this->TestResults[this->TestResults.size()-1];
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "process test output now: "
-             << props->Name.c_str() << " " << res.Name.c_str() << std::endl);
-  if( this->MemoryTesterStyle == cmCTestMemCheckHandler::BOUNDS_CHECKER)
-    {
-    this->PostProcessBoundsCheckerTest(res);
-    }
-  else if(this->MemoryTesterStyle == cmCTestMemCheckHandler::PURIFY )
-    {
-    this->PostProcessPurifyTest(res); 
-    }
 }
 
 // This method puts the bounds checker output file into the output

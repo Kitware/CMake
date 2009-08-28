@@ -16,6 +16,7 @@
 =========================================================================*/
 
 #include "cmCTestRunTest.h"
+#include "cmCTestMemCheckHandler.h"
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 
@@ -245,8 +246,33 @@ bool cmCTestRunTest::EndTest(int completed, int total)
   this->TestResult.ExecutionTime = this->TestProcess->GetTotalTime();
   this->TestHandler->TestResults.push_back( this->TestResult );
 
+  this->MemCheckPostProcess();
+
   delete this->TestProcess;
   return passed;
+}
+
+//--------------------------------------------------------------
+void cmCTestRunTest::MemCheckPostProcess()
+{
+  if(!this->TestHandler->MemCheck)
+    {
+    return;
+    }
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index 
+             << ": process test output now: "
+             << this->TestProperties->Name.c_str() << " "
+             << this->TestResult.Name.c_str() << std::endl);
+  cmCTestMemCheckHandler * handler = static_cast<cmCTestMemCheckHandler*>
+    (this->TestHandler);
+  if(handler->MemoryTesterStyle == cmCTestMemCheckHandler::BOUNDS_CHECKER)
+    {
+    handler->PostProcessBoundsCheckerTest(this->TestResult);
+    }
+  else if(handler->MemoryTesterStyle == cmCTestMemCheckHandler::PURIFY)
+    {
+    handler->PostProcessPurifyTest(this->TestResult); 
+    }
 }
 
 void cmCTestRunTest::SetTestHandler(cmCTestTestHandler * handler)
@@ -292,21 +318,36 @@ bool cmCTestRunTest::StartTest()
 
 void cmCTestRunTest::ComputeArguments()
 {
-  std::vector<std::string>& args = this->TestProperties->Args;
-  // find the test executable
-  this->ActualCommand 
-    = this->TestHandler->FindTheExecutable(args[1].c_str());
-  this->TestCommand
-    = cmSystemTools::ConvertToOutputPath(this->ActualCommand.c_str());
-  // add the arguments
   std::vector<std::string>::const_iterator j = 
     this->TestProperties->Args.begin();
   ++j; // skip test name
-  ++j; // skip command as it is in actualCommand
 
-    //TODO ZACH the problem is here for memcheck.  We need to call
-//memcheckhandler.GenerateTestCommand BEFORE we run the process.
-//  this->TestHandler->GenerateTestCommand(this->Arguments);
+  // find the test executable
+  if(this->TestHandler->MemCheck)
+    {
+    cmCTestMemCheckHandler * handler = static_cast<cmCTestMemCheckHandler*>
+      (this->TestHandler);
+    this->ActualCommand = handler->MemoryTester.c_str();
+    }
+  else
+    {
+    this->ActualCommand = 
+      this->TestHandler->FindTheExecutable(
+      this->TestProperties->Args[1].c_str());
+    ++j; //skip the executable (it will be actualCommand)
+    }
+  this->TestCommand
+    = cmSystemTools::ConvertToOutputPath(this->ActualCommand.c_str());
+
+  //Prepends memcheck args to our command string
+  this->TestHandler->GenerateTestCommand(this->Arguments);
+  for(std::vector<std::string>::iterator i = this->Arguments.begin();
+      i != this->Arguments.end(); ++i)
+    {
+    this->TestCommand += " ";
+    this->TestCommand += cmSystemTools::EscapeSpaces(j->c_str());
+    }
+
   for(;j != this->TestProperties->Args.end(); ++j)
     {
     this->TestCommand += " ";
@@ -413,10 +454,10 @@ void cmCTestRunTest::WriteLogOutputTop(int completed, int total)
   std::string outname = this->TestProperties->Name + " ";
   outname.resize(maxTestNameWidth, '.');
 
-  *this->TestHandler->LogFile << this->TestProperties->Index << "/" 
+  *this->TestHandler->LogFile << this->TestProperties->Index << "/"
     << this->TestHandler->TotalNumberOfTests << " Testing: " 
     << this->TestProperties->Name << std::endl;
-  *this->TestHandler->LogFile << this->TestProperties->Index << "/" 
+  *this->TestHandler->LogFile << this->TestProperties->Index << "/"
     << this->TestHandler->TotalNumberOfTests
     << " Test: " << this->TestProperties->Name.c_str() << std::endl;
   *this->TestHandler->LogFile << "Command: \"" << this->ActualCommand << "\"";

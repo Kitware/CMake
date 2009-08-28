@@ -247,9 +247,9 @@ void cmCTestMultiProcessHandler::PrintTestList()
     testRun.SetTestProperties(&p);
     testRun.ComputeArguments(); //logs the command in verbose mode
 
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3) 
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3)
              << count << "/");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3) 
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3)
              << this->Total << " ");
     if (this->TestHandler->MemCheck)
       {

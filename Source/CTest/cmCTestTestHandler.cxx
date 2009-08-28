@@ -709,7 +709,7 @@ void cmCTestTestHandler::PrintLabelSummary()
         }
     }
 }
-
+/*
 //----------------------------------------------------------------------
 void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
                                         std::vector<cmStdString> &passed,
@@ -791,9 +791,6 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
     }
   arguments.push_back(0);
   
-  /**
-   * Run an executable command and put the stdout in output.
-   */
   std::string output;
   int retVal = 0;
   
@@ -1026,7 +1023,7 @@ void cmCTestTestHandler::ProcessOneTest(cmCTestTestProperties *it,
   cres.CompletionStatus = "Completed";
   this->TestResults.push_back( cres );
 }
-
+*/
 //----------------------------------------------------------------------
 void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
 {
@@ -1363,7 +1360,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
 }
 
 //----------------------------------------------------------------------
-void cmCTestTestHandler::GenerateTestCommand(std::vector<const char*>&)
+void cmCTestTestHandler::GenerateTestCommand(std::vector<std::string>&)
 {
 }
 

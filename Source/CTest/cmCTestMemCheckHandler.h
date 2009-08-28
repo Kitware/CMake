@@ -30,6 +30,7 @@ class cmMakefile;
  */
 class cmCTestMemCheckHandler : public cmCTestTestHandler
 {
+  friend class cmCTestRunTest;
 public:
   cmTypeMacro(cmCTestMemCheckHandler, cmCTestTestHandler);
 
@@ -41,7 +42,7 @@ public:
 protected:
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
-  virtual void GenerateTestCommand(std::vector<const char*>& args);
+  virtual void GenerateTestCommand(std::vector<std::string>& args);
 
 private:
 
@@ -121,13 +122,7 @@ private:
                                    std::string& log, int* results);
   bool ProcessMemCheckBoundsCheckerOutput(const std::string& str, 
                                           std::string& log, int* results);
-  /**
-   *  Run one test
-   */
-  virtual void ProcessOneTest(cmCTestTestProperties *props,
-                              std::vector<cmStdString> &passed,
-                              std::vector<cmStdString> &failed,
-                              int count, int tmsize);
+
   void PostProcessPurifyTest(cmCTestTestResult& res);
   void PostProcessBoundsCheckerTest(cmCTestTestResult& res);
 };

@@ -135,7 +135,7 @@ protected:
   // comput a final test list
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
-  virtual void GenerateTestCommand(std::vector<const char*>& args);
+  virtual void GenerateTestCommand(std::vector<std::string>& args);
   int ExecuteCommands(std::vector<cmStdString>& vec);
 
   void WriteTestResultHeader(std::ostream& os, cmCTestTestResult* result);
@@ -157,17 +157,6 @@ protected:
   bool MemCheck;
   int CustomMaximumPassedTestOutputSize;
   int CustomMaximumFailedTestOutputSize;
-protected:
-  /**
-   *  Run one test
-   */
-  virtual void ProcessOneTest(cmCTestTestProperties *props,
-                              std::vector<cmStdString> &passed,
-                              std::vector<cmStdString> &failed,
-                              int count, int tmsize);
-
-
-
 public:
   enum { // Program statuses
     NOT_RUN = 0,

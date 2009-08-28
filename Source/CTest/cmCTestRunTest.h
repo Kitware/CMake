@@ -64,6 +64,8 @@ private:
   bool CreateProcess(double testTimeOut,
                      std::vector<std::string>* environment);
   void WriteLogOutputTop(int completed, int total);
+  //Run post processing of the process output for MemCheck
+  void MemCheckPostProcess();
 
   cmCTestTestHandler::cmCTestTestProperties * TestProperties;
   //Pointer back to the "parent"; the handler that invoked this test run
