@@ -404,7 +404,7 @@ void cmCTestRunTest::WriteLogOutputTop(int completed, int total)
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "Testing");
     }
 
-  std::stringstream indexStr;
+  cmOStringStream indexStr;
   indexStr << " (" << this->Index << ")";
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(6) 
              << indexStr.str().c_str());
