@@ -55,14 +55,14 @@ void cmCTestRunTest::CheckOutput()
 }
 
 //---------------------------------------------------------
-bool cmCTestRunTest::EndTest()
+bool cmCTestRunTest::EndTest(int completed, int total)
 {
   //restore the old environment
   if (this->ModifyEnv)
     {
     cmSystemTools::RestoreEnv(this->OrigEnv);
     }
-  this->WriteLogOutputTop();
+  this->WriteLogOutputTop(completed, total);
   std::string reason;
   bool passed = true;
   int res = this->TestProcess->GetProcessStatus();
@@ -259,6 +259,7 @@ void cmCTestRunTest::SetTestHandler(cmCTestTestHandler * handler)
 // Starts the execution of a test.  Returns once it has started
 bool cmCTestRunTest::StartTest()
 {
+  this->ComputeArguments();
   std::vector<std::string>& args = this->TestProperties->Args;
   this->TestResult.Properties = this->TestProperties;
   this->TestResult.ExecutionTime = 0;
@@ -268,12 +269,6 @@ bool cmCTestRunTest::StartTest()
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory.c_str();
   
-  // find the test executable
-  this->ActualCommand 
-    = this->TestHandler->FindTheExecutable(args[1].c_str());
-  this->TestCommand
-    = cmSystemTools::ConvertToOutputPath(this->ActualCommand.c_str());
-
   // continue if we did not find the executable
   if (this->TestCommand == "")
     {
@@ -289,22 +284,42 @@ bool cmCTestRunTest::StartTest()
       return false;
       }
     }
+  this->StartTime = this->CTest->CurrentTime();
 
-  /**
-   * Run an executable command and put the stdout in output.
-   */
+  return this->CreateProcess(this->TestProperties->Timeout,
+                             &this->TestProperties->Environment);
+}
+
+void cmCTestRunTest::ComputeArguments()
+{
+  std::vector<std::string>& args = this->TestProperties->Args;
+  // find the test executable
+  this->ActualCommand 
+    = this->TestHandler->FindTheExecutable(args[1].c_str());
+  this->TestCommand
+    = cmSystemTools::ConvertToOutputPath(this->ActualCommand.c_str());
+  // add the arguments
+  std::vector<std::string>::const_iterator j = 
+    this->TestProperties->Args.begin();
+  ++j; // skip test name
+  ++j; // skip command as it is in actualCommand
+
+    //TODO ZACH the problem is here for memcheck.  We need to call
+//memcheckhandler.GenerateTestCommand BEFORE we run the process.
+//  this->TestHandler->GenerateTestCommand(this->Arguments);
+  for(;j != this->TestProperties->Args.end(); ++j)
+    {
+    this->TestCommand += " ";
+    this->TestCommand += cmSystemTools::EscapeSpaces(j->c_str());
+    this->Arguments.push_back(*j);
+    }
+  this->TestResult.FullCommandLine = this->TestCommand;
+
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
              << this->Index << ": "
              << (this->TestHandler->MemCheck?"MemCheck":"Test") 
              << " command: " << this->TestCommand
              << std::endl);
-
-  this->StartTime = this->CTest->CurrentTime();
-
-  return this->CreateProcess(this->ActualCommand,
-                             this->TestProperties->Args,
-                             this->TestProperties->Timeout,
-                             &this->TestProperties->Environment);
 }
 
 //----------------------------------------------------------------------
@@ -330,24 +345,14 @@ void cmCTestRunTest::DartProcessing()
 }
 
 //----------------------------------------------------------------------
-bool cmCTestRunTest::CreateProcess(std::string command,
-                     std::vector<std::string> args,
-                     double testTimeOut,
+bool cmCTestRunTest::CreateProcess(double testTimeOut,
                      std::vector<std::string>* environment)
 {
-  std::vector<std::string> commandArgs;
-  std::vector<std::string>::iterator i = args.begin();
-
-  ++i; //skip test name
-  ++i; //skip executable name
-  for(; i != args.end(); ++i)
-    {
-    commandArgs.push_back(*i);
-    }
   this->TestProcess = new cmProcess;
   this->TestProcess->SetId(this->Index);
-  this->TestProcess->SetCommand(command.c_str());
-  this->TestProcess->SetCommandArguments(commandArgs);
+  this->TestProcess->SetWorkingDirectory(this->TestProperties->Directory.c_str());
+  this->TestProcess->SetCommand(this->ActualCommand.c_str());
+  this->TestProcess->SetCommandArguments(this->Arguments);
 
   std::vector<std::string> origEnv;
   this->ModifyEnv = (environment && environment->size()>0);
@@ -380,15 +385,16 @@ bool cmCTestRunTest::CreateProcess(std::string command,
   return this->TestProcess->StartProcess();
 }
 
-void cmCTestRunTest::WriteLogOutputTop()
+void cmCTestRunTest::WriteLogOutputTop(int completed, int total)
 {
   /* Not sure whether we want to prepend the test index anymore
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3)
              << this->Index << ": ");*/
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3) 
-             << this->TestProperties->Index << "/");
+             << completed << "/");
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3) 
-             << this->TestHandler->TotalNumberOfTests << " ");
+             << total << " ");
+
   if ( this->TestHandler->MemCheck )
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "Memory Check");
@@ -397,27 +403,15 @@ void cmCTestRunTest::WriteLogOutputTop()
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "Testing");
     }
+
+  std::stringstream indexStr;
+  indexStr << " (" << this->Index << ")";
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(6) 
+             << indexStr.str().c_str());
   cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
   const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
   std::string outname = this->TestProperties->Name + " ";
   outname.resize(maxTestNameWidth, '.');
-
-  // add the arguments
-  std::vector<std::string>::const_iterator j = 
-    this->TestProperties->Args.begin();
-  ++j; // skip test name
-  ++j; // skip command as it is in actualCommand
-  std::vector<const char*> arguments;
-  this->TestHandler->GenerateTestCommand(arguments);
-  arguments.push_back(this->ActualCommand.c_str());
-  for(;j != this->TestProperties->Args.end(); ++j)
-    {
-    this->TestCommand += " ";
-    this->TestCommand += cmSystemTools::EscapeSpaces(j->c_str());
-    arguments.push_back(j->c_str());
-    }
-  arguments.push_back(0);
-  this->TestResult.FullCommandLine = this->TestCommand;
 
   *this->TestHandler->LogFile << this->TestProperties->Index << "/" 
     << this->TestHandler->TotalNumberOfTests << " Testing: " 
@@ -425,11 +419,13 @@ void cmCTestRunTest::WriteLogOutputTop()
   *this->TestHandler->LogFile << this->TestProperties->Index << "/" 
     << this->TestHandler->TotalNumberOfTests
     << " Test: " << this->TestProperties->Name.c_str() << std::endl;
-  *this->TestHandler->LogFile << "Command: ";
-  std::vector<cmStdString>::size_type ll;
-  for ( ll = 0; ll < arguments.size()-1; ll ++ )
+  *this->TestHandler->LogFile << "Command: \"" << this->ActualCommand << "\"";
+  
+  for (std::vector<std::string>::iterator i = this->Arguments.begin();
+       i != this->Arguments.end(); ++i)
     {
-    *this->TestHandler->LogFile << "\"" << arguments[ll] << "\" ";
+    *this->TestHandler->LogFile 
+      << " \"" << i->c_str() << "\"";
     }
   *this->TestHandler->LogFile << std::endl
     << "Directory: " << this->TestProperties->Directory << std::endl

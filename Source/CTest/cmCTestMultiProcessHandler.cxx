@@ -24,6 +24,7 @@
 cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 {
   this->ParallelLevel = 1;
+  this->Completed = 0;
 }
   // Set the tests
 void 
@@ -38,6 +39,7 @@ cmCTestMultiProcessHandler::SetTests(TestMap& tests,
     this->TestFinishMap[i->first] = false;
     }
   this->Tests = tests;
+  this->Total = this->Tests.size();
   this->Properties = properties;
 }
 
@@ -81,7 +83,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     }
   else
     {
-    testRun->EndTest();
+    testRun->EndTest(this->Completed, this->Total);
     }
 }
 
@@ -130,9 +132,9 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
 
 void cmCTestMultiProcessHandler::StartNextTests()
 {
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
-             << "Number of running tests : " << this->RunningTests.size()
-             << "\n");
+  //cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
+  //           << "Number of running tests : " << this->RunningTests.size()
+  //           << "\n");
   size_t numToStart = this->ParallelLevel - this->RunningTests.size();
   if(numToStart == 0)
     {
@@ -183,16 +185,17 @@ bool cmCTestMultiProcessHandler::CheckOutput()
   for( std::vector<cmCTestRunTest*>::iterator i = finished.begin();
        i != finished.end(); ++i)
     {
+    this->Completed++;
     cmCTestRunTest* p = *i;
     int test = p->GetIndex();
-    
-    if(p->EndTest())
+
+    if(p->EndTest(this->Completed, this->Total))
       {
-        this->Passed->push_back(p->GetTestProperties()->Name);
+      this->Passed->push_back(p->GetTestProperties()->Name);
       }
     else
       {
-        this->Failed->push_back(p->GetTestProperties()->Name);
+      this->Failed->push_back(p->GetTestProperties()->Name);
       }
     for(TestMap::iterator j = this->Tests.begin();
        j!=  this->Tests.end(); ++j)
@@ -226,19 +229,38 @@ void cmCTestMultiProcessHandler::MarkFinished()
   cmSystemTools::RemoveFile(fname.c_str());
 }
 
-void cmCTestMultiProcessHandler::PrintTests()
+//---------------------------------------------------------------------
+//For ShowOnly mode
+void cmCTestMultiProcessHandler::PrintTestList()
 {
-#undef cout
-  for( TestMap::iterator i = this->Tests.begin();
-       i!=  this->Tests.end(); ++i)
+  int count = 0;
+  for (PropertiesMap::iterator it = this->Properties.begin();
+       it != this->Properties.end(); it ++ )
     {
-    std::cout << "Test " << i->first << "  (";
-    for(TestSet::iterator j = i->second.begin(); 
-        j != i->second.end(); ++j)
+    count++;
+    cmCTestTestHandler::cmCTestTestProperties& p = *it->second;
+
+    cmCTestRunTest testRun;
+    testRun.SetCTest(this->CTest);
+    testRun.SetTestHandler(this->TestHandler);
+    testRun.SetIndex(p.Index);
+    testRun.SetTestProperties(&p);
+    testRun.ComputeArguments(); //logs the command in verbose mode
+
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3) 
+             << count << "/");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3) 
+             << this->Total << " ");
+    if (this->TestHandler->MemCheck)
       {
-      std::cout << *j << " ";
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Memory Check");
       }
-    std::cout << ")\n";
+     else
+      {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Testing");
+      }
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, p.Name.c_str() << std::endl);
     }
 }
 
@@ -282,42 +304,5 @@ void cmCTestMultiProcessHandler::RemoveTest(int index)
   this->Properties.erase(index);
   this->TestRunningMap[index] = false;
   this->TestFinishMap[index] = true;
+  this->Completed++;
 }
-
-#if 0
-int main()
-{
-  cmCTestMultiProcessHandler h;
-  h.SetParallelLevel(4);
-  std::map<int, std::set<int> > tests;
-  std::set<int> depends;
-  for(int i =1; i < 92; i++)
-    {
-    tests[i] = depends;
-    }
-  depends.clear();
-  depends.insert(45);  subprject
-  tests[46] = depends;  subproject-stage2
-  depends.clear();
-  depends.insert(55);  simpleinstall simpleinstall-s2
-  tests[56] = depends;
-  depends.clear();
-  depends.insert(70);  wrapping
-  tests[71] = depends; qtwrapping
-  depends.clear();
-  depends.insert(71);  qtwrapping
-  tests[72] = depends;  testdriver1
-  depends.clear();
-  depends.insert(72)    testdriver1
-  tests[73] = depends;  testdriver2
-  depends.clear();
-  depends.insert(73);   testdriver2
-  tests[74] = depends;  testdriver3
-  depends.clear();
-  depends.insert(79);   linkorder1
-  tests[80] = depends;  linkorder2
-  h.SetTests(tests);
-  h.PrintTests();
-  h.RunTests();
-}
-#endif

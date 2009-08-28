@@ -867,7 +867,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
     }
   return true;
 }
-
+//TODO ZACH move this logic into cmCTestRunTest
 void 
 cmCTestMemCheckHandler::ProcessOneTest(cmCTestTestProperties *props,
                                        std::vector<cmStdString> &passed,

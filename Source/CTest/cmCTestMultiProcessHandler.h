@@ -40,7 +40,7 @@ public:
   // Set the max number of tests that can be run at the same time.
   void SetParallelLevel(size_t);
   void RunTests();
-  void PrintTests();
+  void PrintTestList();
   //void SetCTestCommand(const char* c) { this->CTestCommand = c;}
   //void SetTestCacheFile(const char* c) { this->CTestCacheFile = c;}
   void SetPassFailVectors(std::vector<cmStdString>* passed,
@@ -80,6 +80,10 @@ protected:
   void CheckResume();
   // map from test number to set of depend tests
   TestMap Tests;
+  //Total number of tests we'll be running
+  int Total;
+  //Number of tests that are complete
+  int Completed;
   //list of test properties (indices concurrent to the test map)
   PropertiesMap Properties;
   std::map<int, bool> TestRunningMap;

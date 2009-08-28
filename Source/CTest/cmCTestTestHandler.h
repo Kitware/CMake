@@ -141,7 +141,6 @@ protected:
   void WriteTestResultHeader(std::ostream& os, cmCTestTestResult* result);
   void WriteTestResultFooter(std::ostream& os, cmCTestTestResult* result);
 
-  void PrintTestList();
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);
 

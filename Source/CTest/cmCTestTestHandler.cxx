@@ -1304,41 +1304,11 @@ bool cmCTestTestHandler::GetValue(const char* tag,
 }
 
 //---------------------------------------------------------------------
-void cmCTestTestHandler::PrintTestList()
-{
-  int total = this->TotalNumberOfTests;
-  for (ListOfTests::iterator it = this->TestList.begin();
-       it != this->TestList.end(); it ++ )
-    { 
-    cmCTestTestProperties& p = *it;
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3) 
-             << p.Index << "/");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3) 
-             << total << " ");
-    if (this->MemCheck)
-      {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Memory Check");
-      }
-     else
-      {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Testing");
-      }
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, p.Name.c_str() << std::endl);
-    }
-}
-
-//---------------------------------------------------------------------
 void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
                                          std::vector<cmStdString> &failed)
 {
   this->ComputeTestList();
 
-  if(this->CTest->GetShowOnly())
-    {
-    this->PrintTestList();
-    return;
-    }
   cmCTestMultiProcessHandler parallel;
   parallel.SetCTest(this->CTest);
   parallel.SetParallelLevel(this->CTest->GetParallelLevel());
@@ -1380,8 +1350,14 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   parallel.SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
   parallel.SetTestResults(&this->TestResults);
-  parallel.RunTests();
-
+  if(this->CTest->GetShowOnly())
+    {
+    parallel.PrintTestList();
+    }
+  else
+    {
+    parallel.RunTests();
+    }
   *this->LogFile << "End testing: "
      << this->CTest->CurrentTime() << std::endl;
 }

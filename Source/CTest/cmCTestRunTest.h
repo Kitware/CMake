@@ -55,15 +55,15 @@ public:
   void CheckOutput();
   //launch the test process, return whether it started correctly
   bool StartTest();
-  //capture the test results and send them back to the test handler
-  bool EndTest();
-protected:
+  //capture and report the test results
+  bool EndTest(int completed, int total);
+  //Called by ctest -N to log the command string
+  void ComputeArguments();
+private:
   void DartProcessing();
-  bool CreateProcess(std::string executable,
-                     std::vector<std::string> args,
-                     double testTimeOut,
+  bool CreateProcess(double testTimeOut,
                      std::vector<std::string>* environment);
-  void WriteLogOutputTop();
+  void WriteLogOutputTop(int completed, int total);
 
   cmCTestTestHandler::cmCTestTestProperties * TestProperties;
   //Pointer back to the "parent"; the handler that invoked this test run
@@ -86,6 +86,7 @@ protected:
   std::string StartTime;
   std::string TestCommand;
   std::string ActualCommand;
+  std::vector<std::string> Arguments;
 };
 
 #endif

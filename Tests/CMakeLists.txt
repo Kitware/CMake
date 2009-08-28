@@ -1052,6 +1052,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       -S "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" -V
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest3/testOutput.log"
       )
+    ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND}
+      -N
+      )
     # these tests take a long time, make sure they have it
     # if timeouts have not already been set
     GET_TEST_PROPERTY(CTestTest TIMEOUT PREVIOUS_TIMEOUT)
