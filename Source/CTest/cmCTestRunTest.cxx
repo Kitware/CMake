@@ -391,7 +391,8 @@ bool cmCTestRunTest::CreateProcess(double testTimeOut,
 {
   this->TestProcess = new cmProcess;
   this->TestProcess->SetId(this->Index);
-  this->TestProcess->SetWorkingDirectory(this->TestProperties->Directory.c_str());
+  this->TestProcess->SetWorkingDirectory(
+        this->TestProperties->Directory.c_str());
   this->TestProcess->SetCommand(this->ActualCommand.c_str());
   this->TestProcess->SetCommandArguments(this->Arguments);
 
