@@ -81,9 +81,9 @@ protected:
   // map from test number to set of depend tests
   TestMap Tests;
   //Total number of tests we'll be running
-  int Total;
+  size_t Total;
   //Number of tests that are complete
-  int Completed;
+  size_t Completed;
   //list of test properties (indices concurrent to the test map)
   PropertiesMap Properties;
   std::map<int, bool> TestRunningMap;

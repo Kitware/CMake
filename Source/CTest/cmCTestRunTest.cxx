@@ -56,7 +56,7 @@ void cmCTestRunTest::CheckOutput()
 }
 
 //---------------------------------------------------------
-bool cmCTestRunTest::EndTest(int completed, int total)
+bool cmCTestRunTest::EndTest(size_t completed, size_t total)
 {
   //restore the old environment
   if (this->ModifyEnv)
@@ -427,7 +427,7 @@ bool cmCTestRunTest::CreateProcess(double testTimeOut,
   return this->TestProcess->StartProcess();
 }
 
-void cmCTestRunTest::WriteLogOutputTop(int completed, int total)
+void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 {
   /* Not sure whether we want to prepend the test index anymore
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3)

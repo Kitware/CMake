@@ -56,14 +56,14 @@ public:
   //launch the test process, return whether it started correctly
   bool StartTest();
   //capture and report the test results
-  bool EndTest(int completed, int total);
+  bool EndTest(size_t completed, size_t total);
   //Called by ctest -N to log the command string
   void ComputeArguments();
 private:
   void DartProcessing();
   bool CreateProcess(double testTimeOut,
                      std::vector<std::string>* environment);
-  void WriteLogOutputTop(int completed, int total);
+  void WriteLogOutputTop(size_t completed, size_t total);
   //Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
 
