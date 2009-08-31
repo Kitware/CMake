@@ -1,6 +1,7 @@
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(stl/vector)
 #include KWSYS_HEADER(ios/sstream)
+#include KWSYS_HEADER(ios/fstream)
 #include KWSYS_HEADER(ios/iostream)
 
 // Work-around CMake dependency scanning limitation.  This must
@@ -9,6 +10,7 @@
 # include "kwsys_stl_string.hxx.in"
 # include "kwsys_stl_vector.h.in"
 # include "kwsys_ios_sstream.h.in"
+# include "kwsys_ios_fstream.h.in"
 # include "kwsys_ios_iostream.h.in"
 #endif
 
@@ -140,6 +142,13 @@ int testIOS(int, char*[])
     {
     kwsys_ios::cerr << "Failed to read str2 from sstr" << kwsys_ios::endl;
     return 1;
+    }
+
+  // Just try to compile this.
+  if(x == 12345)
+    {
+    kwsys_ios::ifstream fin("/does_not_exist",
+                            kwsys_ios::ios::in | kwsys_ios_binary);
     }
 
   kwsys_ios::cout << "IOS tests passed" << kwsys_ios::endl;

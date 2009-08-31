@@ -32,6 +32,9 @@
 /* Whether old C++ <strstrea.h> header is to be used.  */
 #define @KWSYS_NAMESPACE@_IOS_USE_STRSTREA_H @KWSYS_IOS_USE_STRSTREA_H@
 
+/* Whether C++ streams support the ios::binary openmode.  */
+#define @KWSYS_NAMESPACE@_IOS_HAVE_BINARY @KWSYS_IOS_HAVE_BINARY@
+
 /* Whether STL is in std namespace.  */
 #define @KWSYS_NAMESPACE@_STL_HAVE_STD @KWSYS_STL_HAVE_STD@
 
@@ -61,6 +64,13 @@
 # define @KWSYS_NAMESPACE@_ios @KWSYS_NAMESPACE@_ios_namespace
 #else
 # define @KWSYS_NAMESPACE@_ios @KWSYS_NAMESPACE@_ios
+#endif
+
+/* Define the ios::binary openmode macro.  */
+#if @KWSYS_NAMESPACE@_IOS_HAVE_BINARY
+# define @KWSYS_NAMESPACE@_ios_binary @KWSYS_NAMESPACE@_ios::ios::binary
+#else
+# define @KWSYS_NAMESPACE@_ios_binary 0
 #endif
 
 /* Whether the cstddef header is available.  */
@@ -133,6 +143,7 @@
 #  define kwsys_stl @KWSYS_NAMESPACE@_stl
 #  define kwsys_ios @KWSYS_NAMESPACE@_ios
 #  define kwsys     @KWSYS_NAMESPACE@
+#  define kwsys_ios_binary @KWSYS_NAMESPACE@_ios_binary
 # endif
 # define KWSYS_NAME_IS_KWSYS            @KWSYS_NAMESPACE@_NAME_IS_KWSYS
 # define KWSYS_STL_HAVE_STD             @KWSYS_NAMESPACE@_STL_HAVE_STD
@@ -141,6 +152,7 @@
 # define KWSYS_IOS_USE_SSTREAM          @KWSYS_NAMESPACE@_IOS_USE_SSTREAM
 # define KWSYS_IOS_USE_STRSTREAM_H      @KWSYS_NAMESPACE@_IOS_USE_STRSTREAM_H
 # define KWSYS_IOS_USE_STRSTREA_H       @KWSYS_NAMESPACE@_IOS_USE_STRSTREA_H
+# define KWSYS_IOS_HAVE_BINARY          @KWSYS_NAMESPACE@_IOS_HAVE_BINARY
 # define KWSYS_STAT_HAS_ST_MTIM         @KWSYS_NAMESPACE@_STAT_HAS_ST_MTIM
 # define KWSYS_CXX_HAS_CSTDDEF          @KWSYS_NAMESPACE@_CXX_HAS_CSTDDEF
 # define KWSYS_STL_STRING_HAVE_OSTREAM  @KWSYS_NAMESPACE@_STL_STRING_HAVE_OSTREAM

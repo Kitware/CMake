@@ -294,6 +294,17 @@ int main()
 }
 #endif
 
+#ifdef TEST_KWSYS_IOS_HAVE_BINARY
+int test_binary(int, ...)
+{
+  return 0;
+}
+int main()
+{
+  return test_binary(1, kwsys_ios::ios::binary);
+}
+#endif
+
 #ifdef TEST_KWSYS_IOS_HAS_ISTREAM_LONG_LONG
 int test_istream(kwsys_ios::istream& is, long long& x)
 {
