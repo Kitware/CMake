@@ -379,6 +379,7 @@ cmake_kwsys_config_replace_string ()
                 s/@KWSYS_IOS_USE_SSTREAM@/${KWSYS_IOS_USE_SSTREAM}/g;
                 s/@KWSYS_IOS_USE_STRSTREAM_H@/${KWSYS_IOS_USE_STRSTREAM_H}/g;
                 s/@KWSYS_IOS_USE_STRSTREA_H@/${KWSYS_IOS_USE_STRSTREA_H}/g;
+                s/@KWSYS_IOS_HAVE_BINARY@/${KWSYS_IOS_HAVE_BINARY}/g;
                 s/@KWSYS_STL_HAVE_STD@/${KWSYS_STL_HAVE_STD}/g;
                 s/@KWSYS_STL_STRING_HAVE_ISTREAM@/${KWSYS_STL_STRING_HAVE_ISTREAM}/g;
                 s/@KWSYS_STL_STRING_HAVE_OSTREAM@/${KWSYS_STL_STRING_HAVE_OSTREAM}/g;
@@ -952,6 +953,7 @@ KWSYS_IOS_USE_STRSTREA_H=0
 KWSYS_IOS_HAVE_STD=0
 KWSYS_IOS_USE_SSTREAM=0
 KWSYS_IOS_USE_ANSI=0
+KWSYS_IOS_HAVE_BINARY=0
 KWSYS_STL_HAVE_STD=0
 KWSYS_STAT_HAS_ST_MTIM=0
 KWSYS_STL_STRING_HAVE_NEQ_CHAR=0
@@ -1169,6 +1171,15 @@ if cmake_try_run "${cmake_cxx_compiler}" \
   echo "${cmake_cxx_compiler} has struct stat with st_mtim member"
 else
   echo "${cmake_cxx_compiler} does not have struct stat with st_mtim member"
+fi
+
+if cmake_try_run "${cmake_cxx_compiler}" \
+  "${cmake_cxx_flags} -DTEST_KWSYS_IOS_HAVE_BINARY -DKWSYS_IOS_USE_ANSI=${KWSYS_IOS_USE_ANSI} -DKWSYS_IOS_HAVE_STD=${KWSYS_IOS_HAVE_STD}" \
+  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
+  KWSYS_IOS_HAVE_BINARY=1
+  echo "${cmake_cxx_compiler} has ios::binary openmode"
+else
+  echo "${cmake_cxx_compiler} does not have ios::binary openmode"
 fi
 
 # Just to be safe, let us store compiler and flags to the header file
