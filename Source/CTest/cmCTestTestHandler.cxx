@@ -991,6 +991,9 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
                                          std::vector<cmStdString> &failed)
 {
   this->ComputeTestList();
+  this->StartTest = this->CTest->CurrentTime();
+  this->StartTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
+  double elapsed_time_start = cmSystemTools::GetTime();
 
   cmCTestMultiProcessHandler parallel;
   parallel.SetCTest(this->CTest);
@@ -1041,6 +1044,9 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     {
     parallel.RunTests();
     }
+  this->EndTest = this->CTest->CurrentTime();
+  this->EndTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
+  this->ElapsedTestingTime = cmSystemTools::GetTime() - elapsed_time_start;
   *this->LogFile << "End testing: "
      << this->CTest->CurrentTime() << std::endl;
 }
