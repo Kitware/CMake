@@ -180,3 +180,16 @@ ENDIF()
 IF(NOT "1.2" VERSION_EQUAL "1.2.0.0")
   MESSAGE(SEND_ERROR "1.2 VERSION_EQUAL 1.2.0.0 is not true!")
 ENDIF()
+
+#-----------------------------------------------------------------------------
+# Test export(PACKAGE) with find_package.
+MESSAGE(STATUS "Preparing export(PACKAGE) test project")
+TRY_COMPILE(EXPORTER_COMPILED
+  ${FindPackageTest_BINARY_DIR}/Exporter
+  ${FindPackageTest_SOURCE_DIR}/Exporter
+  CMakeTestExportPackage dummy
+  OUTPUT_VARIABLE output)
+MESSAGE(STATUS "Searching for export(PACKAGE) test project")
+SET(CMakeTestExportPackage_DIR "" CACHE FILEPATH
+  "Wipe out find results for testing." FORCE)
+FIND_PACKAGE(CMakeTestExportPackage 1.${CMAKE_VERSION} EXACT REQUIRED)
