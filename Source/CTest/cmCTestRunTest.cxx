@@ -429,12 +429,18 @@ bool cmCTestRunTest::CreateProcess(double testTimeOut,
 
 void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 {
-  /* Not sure whether we want to prepend the test index anymore
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3)
-             << this->Index << ": ");*/
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3) 
+  int numWidth = 1;
+  if(total >= 10)
+    {
+    numWidth = 2;
+    }
+  if(total >= 100)
+    {
+    numWidth = 3;
+    }
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(numWidth)
              << completed << "/");
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3) 
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(numWidth)
              << total << " ");
 
   if ( this->TestHandler->MemCheck )
@@ -443,12 +449,12 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
     }
   else
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "Testing");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "Test");
     }
 
   cmOStringStream indexStr;
-  indexStr << " (" << this->Index << ")";
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(6) 
+  indexStr << " #" << this->Index << ":";
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3 + numWidth) 
              << indexStr.str().c_str());
   cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
   const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
