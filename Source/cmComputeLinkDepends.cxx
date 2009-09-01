@@ -900,13 +900,34 @@ cmComputeLinkDepends::MakePendingComponent(unsigned int component)
     // advantage that the item directly linked by a target requiring
     // this component will come first which minimizes the number of
     // repeats needed.
-    pc.Count = 2;
+    pc.Count = this->ComputeComponentCount(nl);
     }
 
   // Store the entries to be seen.
   pc.Entries.insert(nl.begin(), nl.end());
 
   return pc;
+}
+
+//----------------------------------------------------------------------------
+int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
+{
+  int count = 2;
+  for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
+    {
+    if(cmTarget* target = this->EntryList[*ni].Target)
+      {
+      if(cmTarget::LinkInterface const* iface =
+         target->GetLinkInterface(this->Config))
+        {
+        if(iface->Multiplicity > count)
+          {
+          count = iface->Multiplicity;
+          }
+        }
+      }
+    }
+  return count;
 }
 
 //----------------------------------------------------------------------------

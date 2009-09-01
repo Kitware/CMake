@@ -335,6 +335,18 @@ void cmTarget::DefineProperties(cmake *cm)
      "for the named configuration.");
 
   cm->DefineProperty
+    ("IMPORTED_LINK_INTERFACE_MULTIPLICITY", cmProperty::TARGET,
+     "Repetition count for cycles of IMPORTED static libraries.",
+     "This is LINK_INTERFACE_MULTIPLICITY for IMPORTED targets.");
+  cm->DefineProperty
+    ("IMPORTED_LINK_INTERFACE_MULTIPLICITY_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration repetition count for cycles of IMPORTED archives.",
+     "This is the configuration-specific version of "
+     "IMPORTED_LINK_INTERFACE_MULTIPLICITY.  "
+     "If set, this property completely overrides the generic property "
+     "for the named configuration.");
+
+  cm->DefineProperty
     ("IMPORTED_LOCATION", cmProperty::TARGET,
      "Full path to the main file on disk for an IMPORTED target.",
      "Specifies the location of an IMPORTED target file on disk.  "
@@ -504,6 +516,25 @@ void cmTarget::DefineProperties(cmake *cm)
      "Per-configuration list of public interface libraries for a target.",
      "This is the configuration-specific version of "
      "LINK_INTERFACE_LIBRARIES.  "
+     "If set, this property completely overrides the generic property "
+     "for the named configuration.");
+
+  cm->DefineProperty
+    ("LINK_INTERFACE_MULTIPLICITY", cmProperty::TARGET,
+     "Repetition count for STATIC libraries with cyclic dependencies.",
+     "When linking to a STATIC library target with cyclic dependencies the "
+     "linker may need to scan more than once through the archives in the "
+     "strongly connected component of the dependency graph.  "
+     "CMake by default constructs the link line so that the linker will "
+     "scan through the component at least twice.  "
+     "This property specifies the minimum number of scans if it is larger "
+     "than the default.  "
+     "CMake uses the largest value specified by any target in a component.");
+  cm->DefineProperty
+    ("LINK_INTERFACE_MULTIPLICITY_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration repetition count for cycles of STATIC libraries.",
+     "This is the configuration-specific version of "
+     "LINK_INTERFACE_MULTIPLICITY.  "
      "If set, this property completely overrides the generic property "
      "for the named configuration.");
 
@@ -3877,6 +3908,22 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
                                         info.LinkInterface.Languages);
       }
     }
+
+  // Get the cyclic repetition count.
+  if(this->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    std::string linkProp = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
+    linkProp += suffix;
+    if(const char* config_reps = this->GetProperty(linkProp.c_str()))
+      {
+      sscanf(config_reps, "%u", &info.LinkInterface.Multiplicity);
+      }
+    else if(const char* reps =
+            this->GetProperty("IMPORTED_LINK_INTERFACE_MULTIPLICITY"))
+      {
+      sscanf(reps, "%u", &info.LinkInterface.Multiplicity);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -4007,6 +4054,23 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
       {
       // Targets using this archive need its language runtime libraries.
       iface.Languages = impl->Languages;
+      }
+    }
+
+  if(this->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    // How many repetitions are needed if this library has cyclic
+    // dependencies?
+    std::string propName = "LINK_INTERFACE_MULTIPLICITY";
+    propName += suffix;
+    if(const char* config_reps = this->GetProperty(propName.c_str()))
+      {
+      sscanf(config_reps, "%u", &iface.Multiplicity);
+      }
+    else if(const char* reps =
+            this->GetProperty("LINK_INTERFACE_MULTIPLICITY"))
+      {
+      sscanf(reps, "%u", &iface.Multiplicity);
       }
     }
 

@@ -153,6 +153,7 @@ private:
   void VisitComponent(unsigned int c);
   void VisitEntry(int index);
   PendingComponent& MakePendingComponent(unsigned int component);
+  int ComputeComponentCount(NodeList const& nl);
   void DisplayFinalEntries();
 
   // Record of the original link line.

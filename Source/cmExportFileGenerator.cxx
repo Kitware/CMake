@@ -161,6 +161,14 @@ cmExportFileGenerator
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
                                 iface->SharedDeps, properties);
+    if(iface->Multiplicity > 0)
+      {
+      std::string prop = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
+      prop += suffix;
+      cmOStringStream m;
+      m << iface->Multiplicity;
+      properties[prop] = m.str();
+      }
     }
 }
 

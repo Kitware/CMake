@@ -249,9 +249,15 @@ public:
     // Shared library dependencies needed for linking on some platforms.
     std::vector<std::string> SharedDeps;
 
+    // Number of repetitions of a strongly connected component of two
+    // or more static libraries.
+    int Multiplicity;
+
     // Libraries listed for other configurations.
     // Needed only for OLD behavior of CMP0003.
     std::vector<std::string> WrongConfigLibraries;
+
+    LinkInterface(): Multiplicity(0) {}
   };
 
   /** Get the link interface for the given configuration.  Returns 0
