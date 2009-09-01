@@ -15,6 +15,8 @@
 
 =========================================================================*/
 #include "cmFindPackageCommand.h"
+
+#include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -60,6 +62,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->CMakePathName = "PACKAGE";
   this->Quiet = false;
   this->Required = false;
+  this->NoRegistry = false;
   this->NoBuilds = false;
   this->NoModule = false;
   this->DebugMode = false;
@@ -128,6 +131,7 @@ cmFindPackageCommand::cmFindPackageCommand()
     "               [NO_CMAKE_ENVIRONMENT_PATH]\n"
     "               [NO_CMAKE_PATH]\n"
     "               [NO_SYSTEM_ENVIRONMENT_PATH]\n"
+    "               [NO_CMAKE_PACKAGE_REGISTRY]\n"
     "               [NO_CMAKE_BUILDS_PATH]\n"
     "               [NO_CMAKE_SYSTEM_PATH]\n"
     "               [CMAKE_FIND_ROOT_PATH_BOTH |\n"
@@ -281,13 +285,19 @@ cmFindPackageCommand::cmFindPackageCommand()
     "This can be skipped if NO_CMAKE_BUILDS_PATH is passed.  "
     "It is intended for the case when a user is building multiple "
     "dependent projects one after another.\n"
-    "6. Search cmake variables defined in the Platform files "
+    "6. Search paths stored in the CMake user package registry.  "
+    "This can be skipped if NO_CMAKE_PACKAGE_REGISTRY is passed.  "
+    "Paths are stored in the registry when CMake configures a project "
+    "that invokes export(PACKAGE <name>).  "
+    "See the export(PACKAGE) command documentation for more details."
+    "\n"
+    "7. Search cmake variables defined in the Platform files "
     "for the current system.  This can be skipped if NO_CMAKE_SYSTEM_PATH "
     "is passed.\n"
     "   CMAKE_SYSTEM_PREFIX_PATH\n"
     "   CMAKE_SYSTEM_FRAMEWORK_PATH\n"
     "   CMAKE_SYSTEM_APPBUNDLE_PATH\n"
-    "7. Search paths specified by the PATHS option.  "
+    "8. Search paths specified by the PATHS option.  "
     "These are typically hard-coded guesses.\n"
     ;
   this->CommandDocumentation += this->GenericDocumentationMacPolicy;
@@ -417,6 +427,13 @@ bool cmFindPackageCommand
     else if(args[i] == "NO_POLICY_SCOPE")
       {
       this->PolicyScope = false;
+      this->Compatibility_1_6 = false;
+      doing = DoingNone;
+      }
+    else if(args[i] == "NO_CMAKE_PACKAGE_REGISTRY")
+      {
+      this->NoRegistry = true;
+      this->NoModule = true;
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
@@ -1065,6 +1082,7 @@ void cmFindPackageCommand::ComputePrefixes()
   this->AddPrefixesCMakeEnvironment();
   this->AddPrefixesUserHints();
   this->AddPrefixesSystemEnvironment();
+  this->AddPrefixesRegistry();
   this->AddPrefixesBuilds();
   this->AddPrefixesCMakeSystemVariable();
   this->AddPrefixesUserGuess();
@@ -1128,6 +1146,172 @@ void cmFindPackageCommand::AddPrefixesSystemEnvironment()
         this->AddPathInternal(d, EnvPath);
         }
       }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AddPrefixesRegistry()
+{
+  if(this->NoRegistry || this->NoDefaultPath)
+    {
+    return;
+    }
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  this->LoadPackageRegistryWin();
+#else
+  if(const char* home = cmSystemTools::GetEnv("HOME"))
+    {
+    std::string dir = home;
+    dir += "/.cmake/packages/";
+    dir += this->Name;
+    this->LoadPackageRegistryDir(dir);
+    }
+#endif
+}
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# include <windows.h>
+# undef GetCurrentDirectory
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::LoadPackageRegistryWin()
+{
+  std::string key = "Software\\Kitware\\CMake\\Packages\\";
+  key += this->Name;
+  std::set<cmStdString> bad;
+  HKEY hKey;
+  if(RegOpenKeyEx(HKEY_CURRENT_USER, key.c_str(),
+                  0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
+    {
+    DWORD valueType = REG_NONE;
+    char name[16384];
+    std::vector<char> data(512);
+    bool done = false;
+    DWORD index = 0;
+    while(!done)
+      {
+      DWORD nameSize = static_cast<DWORD>(sizeof(name));
+      DWORD dataSize = static_cast<DWORD>(data.size()-1);
+      switch(RegEnumValue(hKey, index, name, &nameSize,
+                          0, &valueType, (BYTE*)&data[0], &dataSize))
+        {
+        case ERROR_SUCCESS:
+          ++index;
+          if(valueType == REG_SZ)
+            {
+            data[dataSize] = 0;
+            cmsys_ios::stringstream ss(&data[0]);
+            if(this->CheckPackageRegistryEntry(ss))
+              {
+              // The entry is okay.
+              continue;
+              }
+            }
+          bad.insert(name);
+          break;
+        case ERROR_MORE_DATA:
+          data.resize(dataSize+1);
+          break;
+        case ERROR_NO_MORE_ITEMS: default: done = true; break;
+        }
+      }
+    RegCloseKey(hKey);
+    }
+
+  // Remove bad values if possible.
+  if(!bad.empty() &&
+     RegOpenKeyEx(HKEY_CURRENT_USER, key.c_str(),
+                  0, KEY_SET_VALUE, &hKey) == ERROR_SUCCESS)
+    {
+    for(std::set<cmStdString>::const_iterator vi = bad.begin();
+        vi != bad.end(); ++vi)
+      {
+      RegDeleteValue(hKey, vi->c_str());
+      }
+    RegCloseKey(hKey);
+    }
+}
+#else
+//----------------------------------------------------------------------------
+class cmFindPackageCommandHoldFile
+{
+  const char* File;
+public:
+  cmFindPackageCommandHoldFile(const char* f): File(f) {}
+  ~cmFindPackageCommandHoldFile()
+    { if(this->File) { cmSystemTools::RemoveFile(this->File); } }
+  void Release() { this->File = 0; }
+};
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir)
+{
+  cmsys::Directory files;
+  if(!files.Load(dir.c_str()))
+    {
+    return;
+    }
+
+  std::string fname;
+  for(unsigned long i=0; i < files.GetNumberOfFiles(); ++i)
+    {
+    fname = dir;
+    fname += "/";
+    fname += files.GetFile(i);
+
+    if(!cmSystemTools::FileIsDirectory(fname.c_str()))
+      {
+      // Hold this file hostage until it behaves.
+      cmFindPackageCommandHoldFile holdFile(fname.c_str());
+
+      // Load the file.
+      std::ifstream fin(fname.c_str(), std::ios::in | cmsys_ios_binary);
+      if(fin && this->CheckPackageRegistryEntry(fin))
+        {
+        // The file references an existing package, so release it.
+        holdFile.Release();
+        }
+      }
+    }
+
+  // TODO: Wipe out the directory if it is empty.
+}
+#endif
+
+//----------------------------------------------------------------------------
+bool cmFindPackageCommand::CheckPackageRegistryEntry(std::istream& is)
+{
+  // Parse the content of one package registry entry.
+  std::string fname;
+  if(cmSystemTools::GetLineFromStream(is, fname) &&
+     cmSystemTools::FileIsFullPath(fname.c_str()))
+    {
+    // The first line in the stream is the full path to a file or
+    // directory containing the package.
+    if(cmSystemTools::FileExists(fname.c_str()))
+      {
+      // The path exists.  Look for the package here.
+      if(!cmSystemTools::FileIsDirectory(fname.c_str()))
+        {
+        fname = cmSystemTools::GetFilenamePath(fname);
+        }
+      this->AddPathInternal(fname, FullPath);
+      return true;
+      }
+    else
+      {
+      // The path does not exist.  Assume the stream content is
+      // associated with an old package that no longer exists, and
+      // delete it to keep the package registry clean.
+      return false;
+      }
+    }
+  else
+    {
+    // The first line in the stream is not the full path to a file or
+    // directory.  Assume the stream content was created by a future
+    // version of CMake that uses a different format, and leave it.
+    return true;
     }
 }
 
@@ -1396,7 +1580,6 @@ void cmFindPackageCommand::StoreVersionFound()
 }
 
 //----------------------------------------------------------------------------
-#include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/String.h>
 #include <cmsys/auto_ptr.hxx>
