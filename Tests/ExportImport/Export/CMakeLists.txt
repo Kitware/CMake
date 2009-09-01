@@ -73,12 +73,22 @@ target_link_libraries(testLib4
 add_executable(testExe3 testExe3.c)
 set_property(TARGET testExe3 PROPERTY MACOSX_BUNDLE 1)
 
+# Test cyclic dependencies.
+add_library(testLibCycleA STATIC
+  testLibCycleA1.c testLibCycleA2.c testLibCycleA3.c)
+add_library(testLibCycleB STATIC
+  testLibCycleB1.c testLibCycleB2.c testLibCycleB3.c)
+target_link_libraries(testLibCycleA testLibCycleB)
+target_link_libraries(testLibCycleB testLibCycleA)
+set_property(TARGET testLibCycleA PROPERTY LINK_INTERFACE_MULTIPLICITY 3)
+
 # Install and export from install tree.
 install(
   TARGETS
   testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
   testLib6
+  testLibCycleA testLibCycleB
   EXPORT exp
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib NAMELINK_SKIP
@@ -116,6 +126,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   )
 export(TARGETS testExe2 testLib4 testLib5 testLib6 testExe3 testExe2lib
   testLib4lib testLib4libdbg testLib4libopt
+  testLibCycleA testLibCycleB
   NAMESPACE bld_
   APPEND FILE ExportBuildTree.cmake
   )

@@ -29,6 +29,7 @@ target_link_libraries(imp_testExe1
   exp_testLib4
   exp_testLib5
   exp_testLib6
+  exp_testLibCycleA
   )
 
 # Try building a plugin to an executable imported from the install tree.
@@ -60,6 +61,7 @@ target_link_libraries(imp_testExe1b
   bld_testLib4
   bld_testLib5
   bld_testLib6
+  bld_testLibCycleA
   )
 
 # Try building a plugin to an executable imported from the build tree.
