@@ -4154,7 +4154,13 @@ int cmake::VisualStudioLinkIncremental(std::vector<std::string>& args,
     {
     return -1;
     }
-  std::string manifestArg = "/MANIFESTFILE:";
+  std::string link = cmSystemTools::LowerCase(linkCommand[0]);
+  std::string manifestArg;
+  if(link.find("ifort") != link.npos)
+    {
+    manifestArg += "/MANIFEST ";
+    }
+  manifestArg += "/MANIFESTFILE:";
   std::vector<cmStdString> rcCommand;
   rcCommand.push_back(cmSystemTools::FindProgram("rc.exe"));
   std::vector<cmStdString> mtCommand;
