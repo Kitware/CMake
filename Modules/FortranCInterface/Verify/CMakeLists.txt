@@ -14,3 +14,8 @@ FortranCInterface_HEADER(VerifyFortran.h SYMBOLS VerifyFortran)
 include_directories(${VerifyFortranC_BINARY_DIR})
 
 add_executable(VerifyFortranC main.c VerifyC.c VerifyFortran.f ${VerifyCXX})
+
+if(NOT VERIFY_CXX)
+  # The entry point (main) is defined in C; link with the C compiler.
+  set_property(TARGET VerifyFortranC PROPERTY LINKER_LANGUAGE C)
+endif()
