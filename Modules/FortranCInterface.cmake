@@ -230,6 +230,7 @@ function(FortranCInterface_VERIFY)
       ${FortranCInterface_SOURCE_DIR}/Verify
       VerifyFortranC
       CMAKE_FLAGS -DVERIFY_CXX=${verify_cxx}
+                  -DCMAKE_VERBOSE_MAKEFILE=ON
       OUTPUT_VARIABLE _output)
     file(WRITE "${FortranCInterface_BINARY_DIR}/Verify${lang}/output.txt" "${_output}")
 
