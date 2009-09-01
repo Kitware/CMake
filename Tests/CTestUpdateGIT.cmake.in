@@ -135,6 +135,13 @@ run_child(
   COMMAND ${GIT} reset --hard master~2
   )
 
+# Make sure pull does not try to rebase (which does not work with
+# modified files) even if ~/.gitconfig sets "branch.master.rebase".
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${GIT} config branch.master.rebase false
+  )
+
 # Create a modified file.
 modify_content(user-source)
 
