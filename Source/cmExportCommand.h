@@ -84,7 +84,19 @@ public:
       "The file created by this command is specific to the build tree and "
       "should never be installed.  "
       "See the install(EXPORT) command to export targets from an "
-      "installation tree.";
+      "installation tree."
+      "\n"
+      "  export(PACKAGE <name>)\n"
+      "Store the current build directory in the CMake user package registry "
+      "for package <name>.  "
+      "The find_package command may consider the directory while searching "
+      "for package <name>.  "
+      "This helps dependent projects find and use a package from the "
+      "current project's build tree without help from the user.  "
+      "Note that the entry in the package registry that this command "
+      "creates works only in conjunction with a package configuration "
+      "file (<name>Config.cmake) that works with the build tree."
+      ;
     }
 
   cmTypeMacro(cmExportCommand, cmCommand);
@@ -98,6 +110,14 @@ private:
 
   friend class cmExportBuildFileGenerator;
   std::string ErrorMessage;
+
+  bool HandlePackage(std::vector<std::string> const& args);
+  void StorePackageRegistryWin(std::string const& package,
+                               const char* content, const char* hash);
+  void StorePackageRegistryDir(std::string const& package,
+                               const char* content, const char* hash);
+  void ReportRegistryError(std::string const& msg, std::string const& key,
+                           long err);
 };
 
 
