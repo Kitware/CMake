@@ -246,6 +246,10 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   makefileIn = cmSystemTools::CollapseFullPath(makefileIn.c_str());
+  if(!cmSystemTools::FileExists(makefileIn.c_str()))
+    {
+    return 0;
+    }
   std::string comment = "Building Custom Rule ";
   comment += makefileIn;
   std::string args;
