@@ -73,9 +73,12 @@ void cmCTestMultiProcessHandler::RunTests()
 
 void cmCTestMultiProcessHandler::SubmitBatchTests()
 {
-  for(cmCTest::CTestConfigurationMap::iterator i = this->CTest->CTestConfiguration.begin(); i != this->CTest->CTestConfiguration.end(); ++i)
+  for(cmCTest::CTestConfigurationMap::iterator i =
+    this->CTest->CTestConfiguration.begin();
+    i != this->CTest->CTestConfiguration.end(); ++i)
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, i->first << " = " << i->second << std::endl);
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, i->first
+               << " = " << i->second << std::endl);
     }
 }
 
