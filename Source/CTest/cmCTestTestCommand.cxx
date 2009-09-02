@@ -28,6 +28,7 @@ cmCTestTestCommand::cmCTestTestCommand()
   this->Arguments[ctt_INCLUDE] = "INCLUDE";
   this->Arguments[ctt_EXCLUDE_LABEL] = "EXCLUDE_LABEL";
   this->Arguments[ctt_INCLUDE_LABEL] = "INCLUDE_LABEL";
+  this->Arguments[ctt_PARALLEL_LEVEL] = "PARALLEL_LEVEL";
   this->Arguments[ctt_LAST] = 0;
   this->Last = ctt_LAST;
 }
@@ -89,6 +90,11 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     {
     handler->SetOption("LabelRegularExpression", 
                        this->Values[ctt_INCLUDE_LABEL]);
+    }
+  if(this->Values[ctt_PARALLEL_LEVEL])
+    {
+    handler->SetOption("ParallelLevel",
+                       this->Values[ctt_PARALLEL_LEVEL]);
     }
   return handler;
 }

@@ -495,7 +495,11 @@ int cmCTestTestHandler::ProcessHandler()
 {
   // Update internal data structure from generic one
   this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
-  this->SetUseUnion(cmSystemTools::IsOn(this->GetOption("UseUnion")));
+  this->SetUseUnion(cmSystemTools::IsOn(this->GetOption("UseUnion"))); 
+  if(this->GetOption("ParallelLevel"))
+    {
+    this->CTest->SetParallelLevel(atoi(this->GetOption("ParallelLevel")));
+    }
   const char* val;
   val = this->GetOption("LabelRegularExpression");
   if ( val )
