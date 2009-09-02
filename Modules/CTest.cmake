@@ -137,6 +137,12 @@ IF(BUILD_TESTING)
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Rational Software\\Purify\\Setup;InstallFolder]"
     DOC "Path to the memory checking command, used for memory error detection."
     )
+  FIND_PROGRAM(SLURM_SBATCH_COMMAND sbatch DOC
+    "Path to the SLURM sbatch executable"
+    )
+  FIND_PROGRAM(SLURM_SRUN_COMMAND srun DOC
+    "Path to the SLURM srun executable"
+    )
   SET(MEMORYCHECK_SUPPRESSIONS_FILE "" CACHE FILEPATH 
     "File that contains suppressions for the memory checker")
   FIND_PROGRAM(SCPCOMMAND scp DOC 
@@ -212,6 +218,8 @@ IF(BUILD_TESTING)
     MEMORYCHECK_SUPPRESSIONS_FILE
     PURIFYCOMMAND
     SCPCOMMAND
+    SLURM_SBATCH_COMMAND
+    SLURM_SRUN_COMMAND
     SITE 
     )
   #  BUILDNAME 

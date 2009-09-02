@@ -50,6 +50,7 @@ class cmCTestScriptHandler;
 class cmCTest
 {
   friend class cmCTestRunTest;
+  friend class cmCTestMultiProcessHandler;
 public:
   /** Enumerate parts of the testing and submission process.  */
   enum Part
@@ -365,6 +366,9 @@ public:
   void SetFailover(bool failover) { this->Failover = failover; }
   bool GetFailover() { return this->Failover; }
 
+  void SetBatchJobs(bool batch = true) { this->BatchJobs = batch; }
+  bool GetBatchJobs() { return this->BatchJobs; }
+
   bool GetVerbose() { return this->Verbose;}
   bool GetExtraVerbose() { return this->ExtraVerbose;}
 
@@ -379,6 +383,7 @@ private:
   bool ProduceXML;
 
   bool Failover;
+  bool BatchJobs;
 
   bool ForceNewCTestProcess;
 

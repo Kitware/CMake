@@ -211,6 +211,7 @@ cmCTest::cmCTest()
   this->ParallelLevel          = 1;
   this->SubmitIndex            = 0;
   this->Failover               = false;
+  this->BatchJobs              = false;
   this->ForceNewCTestProcess   = false;
   this->TomorrowTag            = false;
   this->Verbose                = false;
@@ -1744,6 +1745,10 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
   if(this->CheckArgument(arg, "-V", "--verbose"))
     {
     this->Verbose = true;
+    }
+  if(this->CheckArgument(arg, "-B"))
+    {
+    this->BatchJobs = true;
     }
   if(this->CheckArgument(arg, "-VV", "--extra-verbose"))
     {

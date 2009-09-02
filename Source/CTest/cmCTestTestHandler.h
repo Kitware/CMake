@@ -59,6 +59,8 @@ public:
   void SetIncludeRegExp(const char *);
   void SetExcludeRegExp(const char *);
 
+  void SetMaxIndex(int n) {this->MaxIndex = n;}
+  int GetMaxIndex() {return this->MaxIndex;}
 
   ///! pass the -I argument down
   void SetTestsToRunInformation(const char*);
@@ -157,6 +159,7 @@ protected:
   bool MemCheck;
   int CustomMaximumPassedTestOutputSize;
   int CustomMaximumFailedTestOutputSize;
+  int MaxIndex;
 public:
   enum { // Program statuses
     NOT_RUN = 0,

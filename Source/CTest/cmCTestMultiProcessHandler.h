@@ -41,17 +41,17 @@ public:
   void SetParallelLevel(size_t);
   void RunTests();
   void PrintTestList();
-  //void SetCTestCommand(const char* c) { this->CTestCommand = c;}
-  //void SetTestCacheFile(const char* c) { this->CTestCacheFile = c;}
+  void SubmitBatchTests();
+
   void SetPassFailVectors(std::vector<cmStdString>* passed,
                           std::vector<cmStdString>* failed)
     {
-      this->Passed = passed;
-      this->Failed = failed;
+    this->Passed = passed;
+    this->Failed = failed;
     }
   void SetTestResults(std::vector<cmCTestTestHandler::cmCTestTestResult>* r)
     {
-      this->TestResults = r;
+    this->TestResults = r;
     }
 
   void SetCTest(cmCTest* ctest) { this->CTest = ctest;}
@@ -78,6 +78,7 @@ protected:
   void RemoveTest(int index);
   //Check if we need to resume an interrupted test set
   void CheckResume();
+  int FindMaxIndex();
   // map from test number to set of depend tests
   TestMap Tests;
   //Total number of tests we'll be running

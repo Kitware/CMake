@@ -429,18 +429,10 @@ bool cmCTestRunTest::CreateProcess(double testTimeOut,
 
 void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 {
-  int numWidth = 1;
-  if(total >= 10)
-    {
-    numWidth = 2;
-    }
-  if(total >= 100)
-    {
-    numWidth = 3;
-    }
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(numWidth)
+  
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(getNumWidth(total))
              << completed << "/");
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(numWidth)
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(getNumWidth(total))
              << total << " ");
 
   if ( this->TestHandler->MemCheck )
@@ -454,7 +446,8 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 
   cmOStringStream indexStr;
   indexStr << " #" << this->Index << ":";
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3 + numWidth) 
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, 
+             std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
              << indexStr.str().c_str());
   cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
   const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();

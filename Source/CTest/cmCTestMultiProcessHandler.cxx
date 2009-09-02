@@ -51,7 +51,13 @@ void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
 
 void cmCTestMultiProcessHandler::RunTests()
 {
+  if(this->CTest->GetBatchJobs())
+    {
+    this->SubmitBatchTests();
+    return;
+    }
   this->CheckResume();
+  this->TestHandler->SetMaxIndex(this->FindMaxIndex());
   this->StartNextTests();
   while(this->Tests.size() != 0)
     {
@@ -63,6 +69,14 @@ void cmCTestMultiProcessHandler::RunTests()
     {
     }
   this->MarkFinished();
+}
+
+void cmCTestMultiProcessHandler::SubmitBatchTests()
+{
+  for(cmCTest::CTestConfigurationMap::iterator i = this->CTest->CTestConfiguration.begin(); i != this->CTest->CTestConfiguration.end(); ++i)
+    {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, i->first << " = " << i->second << std::endl);
+    }
 }
 
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
@@ -305,4 +319,18 @@ void cmCTestMultiProcessHandler::RemoveTest(int index)
   this->TestRunningMap[index] = false;
   this->TestFinishMap[index] = true;
   this->Completed++;
+}
+
+int cmCTestMultiProcessHandler::FindMaxIndex()
+{
+  int max = 0;
+  cmCTestMultiProcessHandler::TestMap::iterator i = this->Tests.begin();
+  for(; i != this->Tests.end(); ++i)
+    {
+    if(i->first > max)
+      {
+      max = i->first;
+      }
+    }
+  return max;
 }
