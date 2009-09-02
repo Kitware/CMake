@@ -1971,14 +1971,12 @@ cmGlobalGenerator::AddTargetDepends(cmTarget* target,
                                     projectTargets)
 {
   // add the target itself
-  projectTargets.insert(target);
-  // get the direct depends of target
-  cmGlobalGenerator::TargetDependSet const& tset 
-    = this->GetTargetDirectDepends(*target);
-  if(tset.size())
+  if(projectTargets.insert(target).second)
     {
-    // if there are targets that depend on target 
-    // add them and their depends as well
+    // This is the first time we have encountered the target.
+    // Recursively follow its dependencies.
+    cmGlobalGenerator::TargetDependSet const& tset
+      = this->GetTargetDirectDepends(*target);
     for(cmGlobalGenerator::TargetDependSet::const_iterator i =
           tset.begin(); i != tset.end(); ++i)
       {
