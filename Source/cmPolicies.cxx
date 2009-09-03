@@ -387,6 +387,18 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to disallow duplicate binary "
     "directories with an error.",
     2,6,5, cmPolicies::WARN);
+
+    this->DefinePolicy(
+    CMP0014, "CMP0014",
+    "Input directories must have CMakeLists.txt.",
+    "CMake versions before 2.8 silently ignored missing CMakeLists.txt "
+    "files in directories referenced by add_subdirectory() or subdirs(), "
+    "treating them as if present but empty.  "
+    "In CMake 2.8.0 and above this policy determines whether or not "
+    "the case is an error.  "
+    "The OLD behavior for this policy is to silently ignore the problem.  "
+    "The NEW behavior for this policy is to report an error.",
+    2,7,20090902, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

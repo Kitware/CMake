@@ -54,6 +54,7 @@ public:
     CMP0011, // Strong policy scope for include and find_package
     CMP0012, // Strong handling of boolean constants
     CMP0013, // Duplicate binary directories not allowed
+    CMP0014, // Input directories must have CMakeLists.txt
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.
