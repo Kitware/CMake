@@ -365,6 +365,9 @@ protected:
       definition.  Issues a warning.  */
   virtual bool CheckDefinition(std::string const& define) const;
 
+  /** Read the input CMakeLists.txt file.  */
+  void ReadInputFile();
+
   cmMakefile *Makefile;
   cmGlobalGenerator *GlobalGenerator;
   // members used for relative path function ConvertToMakefilePath

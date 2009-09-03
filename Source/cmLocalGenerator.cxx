@@ -99,9 +99,7 @@ void cmLocalGenerator::Configure()
   cmSystemTools::MakeDirectory(filesDir.c_str());
   
   // find & read the list file
-  std::string currentStart = this->Makefile->GetStartDirectory();
-  currentStart += "/CMakeLists.txt";
-  this->Makefile->ReadListFile(currentStart.c_str());
+  this->ReadInputFile();
 
   // at the end of the ReadListFile handle any old style subdirs
   // first get all the subdirectories
@@ -164,6 +162,14 @@ void cmLocalGenerator::ComputeObjectMaxPath()
       }
     }
   this->ObjectMaxPathViolations.clear();
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::ReadInputFile()
+{
+  std::string currentStart = this->Makefile->GetStartDirectory();
+  currentStart += "/CMakeLists.txt";
+  this->Makefile->ReadListFile(currentStart.c_str());
 }
 
 void cmLocalGenerator::SetupPathConversions()
