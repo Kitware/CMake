@@ -352,6 +352,7 @@ protected:
 
   std::string& CreateSafeUniqueObjectFileName(const char* sin,
                                               std::string const& dir_max);
+  void ComputeObjectMaxPath();
 
   void ConfigureRelativePaths();
   std::string FindRelativePathTopSource();

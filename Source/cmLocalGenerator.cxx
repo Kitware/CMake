@@ -121,8 +121,15 @@ void cmLocalGenerator::Configure()
   // relative paths.
   this->UseRelativePaths = this->Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
 
+  this->ComputeObjectMaxPath();
+
+  this->Configured = true;
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::ComputeObjectMaxPath()
+{
   // Choose a maximum object file name length.
-  {
 #if defined(_WIN32) || defined(__CYGWIN__)
   this->ObjectPathMax = 250;
 #else
@@ -157,9 +164,6 @@ void cmLocalGenerator::Configure()
       }
     }
   this->ObjectMaxPathViolations.clear();
-  }
-
-  this->Configured = true;
 }
 
 void cmLocalGenerator::SetupPathConversions()
