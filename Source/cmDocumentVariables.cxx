@@ -176,10 +176,10 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_EDIT_COMMAND", cmProperty::VARIABLE,
-     "Full path to CMakeSetup or ccmake.",
+     "Full path to cmake-gui or ccmake.",
      "This is the full path to the CMake executable "
      "that can graphically edit the cache.  For example,"
-     " CMakeSetup, ccmake, or cmake -i.",false,
+     " cmake-gui, ccmake, or cmake -i.",false,
      "Variables that Provide Information");
 
   cm->DefineProperty
@@ -289,7 +289,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Source directory for project.",
      "This is the top level source directory for the project. "
      "It corresponds to the source directory given to "
-     "CMakeSetup or ccmake.",false,
+     "cmake-gui or ccmake.",false,
      "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_STANDARD_LIBRARIES", cmProperty::VARIABLE,
@@ -631,7 +631,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "to 1 for static the static MFC library, and 2 for "
      "the shared MFC library.  This is used in visual "
      "studio 6 and 7 project files.   The CMakeSetup "
-     "dialog uses MFC and the CMakeLists.txt looks like this:\n"
+     "dialog used MFC and the CMakeLists.txt looks like this:\n"
      "add_definitions(-D_AFXDLL)\n"
      "set(CMAKE_MFC_FLAG 2)\n"
      "add_executable(CMakeSetup WIN32 ${SRCS})\n",false,

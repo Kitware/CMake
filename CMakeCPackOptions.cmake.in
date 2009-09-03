@@ -18,14 +18,9 @@ if(CPACK_GENERATOR MATCHES "NSIS")
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/ctest.html" "CTest Help"
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake-modules.html" "CMake Modules Help"
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake-commands.html" "CMake Commands Help"
-    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/CMakeSetup.html" "CMakeSetup Help"
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cpack.html" "CPack Help"
     "http://www.cmake.org" "CMake Web Site"
     )
-  # tell cpack the executables you want in the start menu as links
-  SET(CPACK_PACKAGE_EXECUTABLES "CMakeSetup" "CMakeSetup(deprecated)" )
-  # tell cpack to create a desktop link to CMakeSetup
-  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\CMakeSetup.exe")
   SET(CPACK_NSIS_DISPLAY_NAME "CMake @CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@ a cross-platform, open-source build system")
   SET(CPACK_NSIS_PACKAGE_NAME "CMake @CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@")
   SET(CPACK_NSIS_HELP_LINK "http://www.cmake.org")

@@ -469,12 +469,6 @@ IF(BUILD_CursesDialog)
   INCLUDE(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
 ENDIF(BUILD_CursesDialog)
 
-# MFC GUI
-# MFC libraries are only available on Visual Studio
-IF(BUILD_MFCDialog)
-  SUBDIRS(MFCDialog)
-ENDIF(BUILD_MFCDialog)
-
 # Qt GUI
 OPTION(BUILD_QtDialog "Build Qt dialog for CMake" FALSE)
 IF(BUILD_QtDialog)

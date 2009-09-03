@@ -840,7 +840,7 @@ int cmake::AddCMakePaths()
     if( !cmSystemTools::FileExists(editCacheCommand.c_str()))
       {
       editCacheCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
-        "/CMakeSetup" + cmSystemTools::GetFilenameExtension(cMakeSelf);
+        "/cmake-gui" + cmSystemTools::GetFilenameExtension(cMakeSelf);
       }
     if(cmSystemTools::FileExists(editCacheCommand.c_str()))
       {
