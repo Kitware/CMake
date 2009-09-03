@@ -152,14 +152,12 @@ int cmProcess::CheckOutput(double timeout)
       }
     else if(pipe == cmsysProcess_Pipe_STDOUT)
       {
-      // Append to the stdout buffer.
-      std::vector<char>::size_type size = this->StdOutBuffer.size();
+        // Append to the stdout buffer.
       this->StdOutBuffer.insert(this->StdOutBuffer.end(), data, data+length);
       }
     else if(pipe == cmsysProcess_Pipe_STDERR)
       {
       // Append to the stderr buffer.
-      std::vector<char>::size_type size = this->StdErrorBuffer.size();
       this->StdErrorBuffer.insert(this->StdErrorBuffer.end(),
                                   data, data+length);
       }
