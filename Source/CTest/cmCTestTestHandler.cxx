@@ -1982,6 +1982,14 @@ bool cmCTestTestHandler::SetTestsProperties(
                   std::string(crit->c_str())));
               }
             }
+          if ( key == "PROCESSORS" )
+            {
+            rtit->Processors = atoi(val.c_str());
+            if(rtit->Processors < 1)
+              {
+              rtit->Processors = 1;
+              }
+            }
           if ( key == "DEPENDS" )
             {
             std::vector<std::string> lval;
@@ -2109,6 +2117,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.IsInBasedOnREOptions = true;
   test.WillFail = false;
   test.Timeout = 0;
+  test.Processors = 1;
   if (this->UseIncludeRegExpFlag &&
     !this->IncludeTestsRegularExpression.find(testname.c_str()))
     {

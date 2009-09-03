@@ -98,6 +98,8 @@ public:
     bool WillFail;
     double Timeout;
     int Index;
+    //Requested number of process slots
+    int Processors;
     std::vector<std::string> Environment;
     std::vector<std::string> Labels;
   };

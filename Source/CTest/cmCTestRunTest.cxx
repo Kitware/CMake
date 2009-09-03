@@ -437,7 +437,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 
   if ( this->TestHandler->MemCheck )
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "Memory Check");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "MemCheck");
     }
   else
     {

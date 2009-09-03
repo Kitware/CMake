@@ -67,7 +67,8 @@ public:
       "             [STRIDE stride number] [EXCLUDE exclude regex ]\n"
       "             [INCLUDE include regex] \n" 
       "             [EXCLUDE_LABEL exclude regex] \n"
-      "             [INCLUDE_LABEL label regex] )\n"
+      "             [INCLUDE_LABEL label regex] \n"
+      "             [PARALLEL_LEVEL level] )\n"
       "Tests the given build directory and stores results in MemCheck.xml. "
       "The second argument is a variable that will hold value. Optionally, "
       "you can specify the starting test number START, the ending test number "
@@ -75,7 +76,8 @@ public:
       "expression for tests to run INCLUDE, or a regular expression for tests "
       "not to run EXCLUDE. EXCLUDE_LABEL and INCLUDE_LABEL are regular "
       "expressions for tests to be included or excluded by the test "
-      "property LABEL."
+      "property LABEL. PARALLEL_LEVEL should be set to a positive number "
+      "representing the number of tests to be run in parallel."
       "\n"
       CTEST_COMMAND_APPEND_OPTION_DOCS;
     }

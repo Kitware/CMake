@@ -74,10 +74,10 @@ void cmCTestMultiProcessHandler::RunTests()
 void cmCTestMultiProcessHandler::SubmitBatchTests()
 {
   for(cmCTest::CTestConfigurationMap::iterator i =
-    this->CTest->CTestConfiguration.begin();
-    i != this->CTest->CTestConfiguration.end(); ++i)
+      this->CTest->CTestConfiguration.begin();
+      i != this->CTest->CTestConfiguration.end(); ++i)
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, i->first
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, i->first 
                << " = " << i->second << std::endl);
     }
 }
@@ -161,6 +161,9 @@ void cmCTestMultiProcessHandler::StartNextTests()
   for(TestMap::iterator i = tests.begin();
       i !=  tests.end(); ++i)
     {
+    int processors = this->Properties[i->first]->Processors;
+    
+//    if(processors > )
     // start test should start only one test
     if(this->StartTest(i->first))
       {
