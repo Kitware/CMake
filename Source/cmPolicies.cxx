@@ -699,7 +699,7 @@ cmPolicies::DiagnoseAncientPolicies(std::vector<PolicyID> const& ancient,
   cmOStringStream e;
   e << "The project requests behavior compatible with CMake version \""
     << majorVer << "." << minorVer << "." << patchVer
-    << "\", which requires OLD the behavior for some policies:\n";
+    << "\", which requires the OLD behavior for some policies:\n";
   for(std::vector<PolicyID>::const_iterator
         i = ancient.begin(); i != ancient.end(); ++i)
     {
