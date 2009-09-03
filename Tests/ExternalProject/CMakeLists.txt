@@ -52,7 +52,8 @@ ep_add(${proj}
   INSTALL_COMMAND ""
   PATCH_COMMAND ""
   SVN_REPOSITORY ""
-  SVN_TAG ""
+  SVN_REVISION ""
+  TEST_COMMAND ""
   URL ""
   UPDATE_COMMAND ""
 )
@@ -65,9 +66,17 @@ if(can_build_tutorial_step5)
   ep_add(${proj}
     URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+    TEST_BEFORE_INSTALL 1
   )
   ep_get(${proj} install_dir)
   set(TutorialStep5_install_dir ${install_dir})
+
+  set(proj TutorialStep5-Local-TestAfterInstall)
+  ep_add(${proj}
+    URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+    TEST_AFTER_INSTALL 1
+  )
 endif()
 
 
@@ -247,7 +256,7 @@ if(do_svn_tests)
   set(proj TutorialStep1-SVN-20090626)
   ep_add(${proj}
     SVN_REPOSITORY "${local_svn_repo_url}"
-    SVN_TAG "-r{2009-06-26 16:50:00 +0000}"
+    SVN_REVISION "-r{2009-06-26 16:50:00 +0000}"
     UPDATE_COMMAND ""
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
@@ -260,7 +269,7 @@ if(do_svn_tests)
   set(proj TutorialStep1-SVN-r2)
   ep_add(${proj}
     SVN_REPOSITORY "${local_svn_repo_url}"
-    SVN_TAG "-r2"
+    SVN_REVISION "-r2"
     UPDATE_COMMAND ""
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
@@ -268,7 +277,7 @@ if(do_svn_tests)
     DEPENDS "SetupLocalSVNRepository"
   )
 
-  # Live SVN / trunk (no SVN_TAG):
+  # Live SVN / trunk (no SVN_REVISION):
   #
   set(proj TutorialStep1-SVN-trunk)
   ep_add(${proj}

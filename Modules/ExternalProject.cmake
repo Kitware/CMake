@@ -15,7 +15,7 @@
 #    [CVS_MODULE mod]            # Module to checkout from CVS repo
 #    [CVS_TAG tag]               # Tag to checkout from CVS repo
 #    [SVN_REPOSITORY url]        # URL of Subversion repo
-#    [SVN_TAG tag]               # Tag to checkout from Subversion repo
+#    [SVN_REVISION rev]          # Revision to checkout from Subversion repo
 #    [URL /.../src.tgz]          # Full path or URL of source
 #   #--Update/Patch step----------
 #    [UPDATE_COMMAND cmd...]     # Source work-tree update command
@@ -33,6 +33,10 @@
 #   #--Install step---------------
 #    [INSTALL_DIR dir]           # Installation prefix
 #    [INSTALL_COMMAND cmd...]    # Command to drive install after build
+#   #--Test step---------------
+#    [TEST_BEFORE_INSTALL 1]     # Add test step executed before install step
+#    [TEST_AFTER_INSTALL 1]      # Add test step executed after install step
+#    [TEST_COMMAND cmd...]       # Command to drive test
 #    )
 # The *_DIR options specify directories for the project, with default
 # directories computed as follows.
@@ -420,6 +424,9 @@ function(_ep_get_build_command name step cmd_var)
         if(step STREQUAL "INSTALL")
           set(args install)
         endif()
+        if(step STREQUAL "TEST")
+          set(args test)
+        endif()
       else()
         # Drive the project with "cmake --build".
         get_target_property(cmake_command ${name} _EP_CMAKE_COMMAND)
@@ -432,12 +439,20 @@ function(_ep_get_build_command name step cmd_var)
         if(step STREQUAL "INSTALL")
           list(APPEND args --target install)
         endif()
+        # But for "TEST" drive the project with corresponding "ctest".
+        if(step STREQUAL "TEST")
+          string(REGEX REPLACE "^(.*/)cmake([^/]*)$" "\\1ctest\\2" cmd "${cmd}")
+          set(args "")
+        endif()
       endif()
     else() # if(cfg_cmd_id STREQUAL "configure")
-      # Non-CMake project.  Guess "make" and "make install".
+      # Non-CMake project.  Guess "make" and "make install" and "make test".
       set(cmd "make")
       if(step STREQUAL "INSTALL")
         set(args install)
+      endif()
+      if(step STREQUAL "TEST")
+        set(args test)
       endif()
     endif()
 
@@ -601,11 +616,11 @@ function(_ep_add_download_command name)
       message(FATAL_ERROR "error: could not find svn for checkout of ${name}")
     endif()
 
-    get_property(svn_tag TARGET ${name} PROPERTY _EP_SVN_TAG)
+    get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
 
     set(repository ${svn_repository})
     set(module)
-    set(tag ${svn_tag})
+    set(tag ${svn_revision})
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-svninfo.txt"
@@ -615,7 +630,7 @@ function(_ep_add_download_command name)
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
     set(comment "Performing download step (SVN checkout) for '${name}'")
-    set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_tag} ${src_name})
+    set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_revision} ${src_name})
     list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
   elseif(url)
     get_filename_component(work_dir "${source_dir}" PATH)
@@ -696,8 +711,8 @@ function(_ep_add_update_command name)
     endif()
     set(work_dir ${source_dir})
     set(comment "Performing update step (SVN update) for '${name}'")
-    get_property(svn_tag TARGET ${name} PROPERTY _EP_SVN_TAG)
-    set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_tag})
+    get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
+    set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_revision})
     set(always 1)
   endif()
 
@@ -781,6 +796,7 @@ function(_ep_add_build_command name)
   else()
     _ep_get_build_command(${name} BUILD cmd)
   endif()
+
   ep_add_step(${name} build
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
@@ -798,12 +814,45 @@ function(_ep_add_install_command name)
   else()
     _ep_get_build_command(${name} INSTALL cmd)
   endif()
+
   ep_add_step(${name} install
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES build
     )
 endfunction(_ep_add_install_command)
+
+
+function(_ep_add_test_command name)
+  ep_get(${name} binary_dir)
+
+  get_property(before TARGET ${name} PROPERTY _EP_TEST_BEFORE_INSTALL)
+  get_property(after TARGET ${name} PROPERTY _EP_TEST_AFTER_INSTALL)
+  get_property(cmd_set TARGET ${name} PROPERTY _EP_TEST_COMMAND SET)
+
+  # Only actually add the test step if one of the test related properties is
+  # explicitly set. (i.e. the test step is omitted unless requested...)
+  #
+  if(cmd_set OR before OR after)
+    if(cmd_set)
+      get_property(cmd TARGET ${name} PROPERTY _EP_TEST_COMMAND)
+    else()
+      _ep_get_build_command(${name} TEST cmd)
+    endif()
+
+    if(before)
+      set(dep_args DEPENDEES build DEPENDERS install)
+    else()
+      set(dep_args DEPENDEES install)
+    endif()
+
+    ep_add_step(${name} test
+      COMMAND ${cmd}
+      WORKING_DIRECTORY ${binary_dir}
+      ${dep_args}
+      )
+  endif()
+endfunction(_ep_add_test_command)
 
 
 function(ep_add name)
@@ -850,4 +899,9 @@ function(ep_add name)
   _ep_add_configure_command(${name})
   _ep_add_build_command(${name})
   _ep_add_install_command(${name})
+
+  # Test is special in that it might depend on build, or it might depend
+  # on install.
+  #
+  _ep_add_test_command(${name})
 endfunction(ep_add)
