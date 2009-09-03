@@ -65,7 +65,7 @@ public:
     return
       "Add a list of subdirectories to the build.\n"
       "  subdirs(dir1 dir2 ..."
-      "[EXCLUDE_FROM_ALL exclude_dir1 exclude_dir2 ...]\n
+      "[EXCLUDE_FROM_ALL exclude_dir1 exclude_dir2 ...]\n"
       "          [PREORDER] )\n"
       "Add a list of subdirectories to the build. The add_subdirectory "
       "command should be used instead of subdirs although subdirs will "
