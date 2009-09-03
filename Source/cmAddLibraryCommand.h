@@ -62,7 +62,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  add_library(<name> [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL]\n"
+      "  add_library(<name> [STATIC | SHARED | MODULE]\n"
+      "              [EXCLUDE_FROM_ALL]\n"
       "              source1 source2 ... sourceN)\n"
       "Adds a library target called <name> to be built from the "
       "source files listed in the command invocation.  "

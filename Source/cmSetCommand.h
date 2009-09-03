@@ -66,8 +66,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  set(<variable> <value> [[CACHE <type> <docstring> [FORCE]] | "
-      "PARENT_SCOPE])\n"
+      "  set(<variable> <value>\n"
+      "      [[CACHE <type> <docstring> [FORCE]] | PARENT_SCOPE])\n"
       "Within CMake sets <variable> to the value <value>.  <value> is expanded"
       "  before <variable> is set to it.  If CACHE is present, then the "
       "<variable> is put in the cache. <type> and <docstring> are then "

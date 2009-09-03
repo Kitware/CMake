@@ -66,8 +66,8 @@ public:
     {
     return
       "  list(LENGTH <list> <output variable>)\n"
-      "  list(GET <list> <element index> [<element index> ...] "
-      "<output variable>)\n"
+      "  list(GET <list> <element index> [<element index> ...]\n"
+      "       <output variable>)\n"
       "  list(APPEND <list> <element> [<element> ...])\n"
       "  list(FIND <list> <value> <output variable>)\n"
       "  list(INSERT <list> <element_index> <element> [<element> ...])\n"

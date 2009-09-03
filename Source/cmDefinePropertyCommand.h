@@ -68,7 +68,7 @@ public:
         "  DIRECTORY = associated with one directory\n"
         "  TARGET    = associated with one target\n"
         "  SOURCE    = associated with one source file\n"
-        "  TEST      = associated with a test named with add_test command\n"
+        "  TEST      = associated with a test named with add_test\n"
         "  VARIABLE  = documents a CMake language variable\n"
         "  CACHED_VARIABLE = documents a CMake cache variable\n"
         "Note that unlike set_property and get_property no actual scope "

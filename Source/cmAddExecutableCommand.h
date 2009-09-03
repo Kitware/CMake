@@ -63,7 +63,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  add_executable(<name> [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]\n"
+      "  add_executable(<name> [WIN32] [MACOSX_BUNDLE]\n"
+      "                 [EXCLUDE_FROM_ALL]\n"
       "                 source1 source2 ... sourceN)\n"
       "Adds an executable target called <name> to be built from the "
       "source files listed in the command invocation.  "

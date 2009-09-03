@@ -70,7 +70,7 @@ public:
         "Set a property for the current directory and subdirectories. If the "
         "property is not found, CMake will report an error. The properties "
         "include: INCLUDE_DIRECTORIES, LINK_DIRECTORIES, "
-        "INCLUDE_REGULAR_EXPRESSION, and ADDITIONAL_MAKE_CLEAN_FILES.\n"
+        "INCLUDE_REGULAR_EXPRESSION, and ADDITIONAL_MAKE_CLEAN_FILES. "
         "ADDITIONAL_MAKE_CLEAN_FILES is a list of files that will be cleaned "
         "as a part of \"make clean\" stage.";
     }

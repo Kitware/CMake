@@ -49,7 +49,7 @@ cmFindCommon::cmFindCommon()
     "   \"LAST\"   - Try to find frameworks after standard\n"
     "              libraries or headers.\n"
     "   \"ONLY\"   - Only try to find frameworks.\n"
-    "   \"NEVER\". - Never try to find frameworks.\n"
+    "   \"NEVER\" - Never try to find frameworks.\n"
     "On Darwin or systems supporting OS X Application Bundles, the cmake "
     "variable CMAKE_FIND_APPBUNDLE can be set to empty or one of the "
     "following:\n"
@@ -58,7 +58,7 @@ cmFindCommon::cmFindCommon()
     "   \"LAST\"   - Try to find application bundles after standard\n"
     "              programs.\n"
     "   \"ONLY\"   - Only try to find application bundles.\n"
-    "   \"NEVER\". - Never try to find application bundles.\n";
+    "   \"NEVER\" - Never try to find application bundles.\n";
   this->GenericDocumentationRootPath =
     "The CMake variable CMAKE_FIND_ROOT_PATH specifies one or more "
     "directories to be prepended to all other search directories. "

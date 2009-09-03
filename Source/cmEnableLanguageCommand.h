@@ -68,7 +68,7 @@ public:
       "This command enables support for the named language in CMake. "
       "This is the same as the project command but does not create "
       "any of the extra variables that are created by the project command. "
-      "Example languages are CXX, C, Fortran.\n"
+      "Example languages are CXX, C, Fortran. "
       "If OPTIONAL is used, use the CMAKE_<languageName>_COMPILER_WORKS "
       "variable to check whether the language has been enabled successfully.";
     }

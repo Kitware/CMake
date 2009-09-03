@@ -2,19 +2,21 @@
 #
 # PRINT_ENABLED_FEATURES()
 #   Print a summary of all enabled features. By default all successfull
-#   FIND_PACKAGE() calls will appear here, except the ones which used the QUIET keyword.
-#   Additional features can be added by appending an entry to the global ENABLED_FEATURES
-#   property. If SET_FEATURE_INFO() is used for that feature, the output will be much 
-#   more informative.
+#   FIND_PACKAGE() calls will appear here, except the ones which used the
+#   QUIET keyword. Additional features can be added by appending an entry
+#   to the global ENABLED_FEATURES property. If SET_FEATURE_INFO() is
+#   used for that feature, the output will be much more informative.
 #
 # PRINT_DISABLED_FEATURES()
-#   Same as PRINT_ENABLED_FEATURES(), but for disabled features. It can be extended
-#   the same way by adding to the global property DISABLED_FEATURES.
+#   Same as PRINT_ENABLED_FEATURES(), but for disabled features. It can
+#   be extended the same way by adding to the global property 
+#   DISABLED_FEATURES.
 #
 # SET_FEATURE_INFO(NAME DESCRIPTION [URL [COMMENT] ] )
 #    Use this macro to set up information about the named feature, which will
 #    then be displayed by PRINT_ENABLED/DISABLED_FEATURES().
-#    Example: SET_FEATURE_INFO(LibXml2 "XML processing library." "http://xmlsoft.org/")
+#    Example: SET_FEATURE_INFO(LibXml2 "XML processing library." 
+#    "http://xmlsoft.org/")
 #
 
 

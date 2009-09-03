@@ -375,8 +375,9 @@
 #   UPLOAD_DIRECTORY is the local directory where CPack will create the 
 #   various archives for each of the components. The contents of this
 #   directory should be uploaded to a location accessible by the URL given
-#   in the site argument. If omitted, CPack will use the directory CPackUploads
-#   inside the CMake binary directory to store the generated archives.
+#   in the site argument. If omitted, CPack will use the directory 
+#   CPackUploads inside the CMake binary directory to store the generated
+#   archives.
 #
 #   The ALL flag indicates that all components be downloaded. Otherwise, only 
 #   those components explicitly marked as DOWNLOADED or that have a specified 

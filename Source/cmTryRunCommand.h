@@ -77,7 +77,7 @@ public:
       "the compile step goes. RUN_OUTPUT_VARIABLE specifies the variable "
       "where the output from the running executable goes.\n"
       "For compatibility reasons OUTPUT_VARIABLE is still supported, which "
-      "gives you the output from the compile and run step combined.\n\n"
+      "gives you the output from the compile and run step combined.\n"
       "Cross compiling issues\n"
       "When cross compiling, the executable compiled in the first step "
       "usually cannot be run on the build host. try_run() checks the "
