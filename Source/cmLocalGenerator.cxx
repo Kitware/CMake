@@ -68,11 +68,30 @@ cmLocalGenerator::~cmLocalGenerator()
   delete this->Makefile;
 }
 
+//----------------------------------------------------------------------------
+class cmLocalGeneratorCurrent
+{
+  cmGlobalGenerator* GG;
+  cmLocalGenerator* LG;
+public:
+  cmLocalGeneratorCurrent(cmLocalGenerator* lg)
+    {
+    this->GG = lg->GetGlobalGenerator();
+    this->LG = this->GG->GetCurrentLocalGenerator();
+    this->GG->SetCurrentLocalGenerator(lg);
+    }
+  ~cmLocalGeneratorCurrent()
+    {
+    this->GG->SetCurrentLocalGenerator(this->LG);
+    }
+};
+
+//----------------------------------------------------------------------------
 void cmLocalGenerator::Configure()
 {
-  cmLocalGenerator* previousLg = 
-                        this->GetGlobalGenerator()->GetCurrentLocalGenerator();
-  this->GetGlobalGenerator()->SetCurrentLocalGenerator(this);
+  // Manage the global generator's current local generator.
+  cmLocalGeneratorCurrent clg(this);
+  static_cast<void>(clg);
 
   // make sure the CMakeFiles dir is there
   std::string filesDir = this->Makefile->GetStartOutputDirectory();
@@ -141,8 +160,6 @@ void cmLocalGenerator::Configure()
   }
 
   this->Configured = true;
-
-  this->GetGlobalGenerator()->SetCurrentLocalGenerator(previousLg);
 }
 
 void cmLocalGenerator::SetupPathConversions()
