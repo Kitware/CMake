@@ -96,6 +96,7 @@ public:
     std::map<cmStdString, cmStdString> Measurements;
     bool IsInBasedOnREOptions;
     bool WillFail;
+    bool Expensive;
     double Timeout;
     int Index;
     //Requested number of process slots

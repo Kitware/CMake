@@ -66,7 +66,7 @@ public:
       "             [INCLUDE include regex] [RETURN_VALUE res] \n" 
       "             [EXCLUDE_LABEL exclude regex] \n"
       "             [INCLUDE_LABEL label regex] \n"
-      "             [PARALLEL_LEVEL level] )\n"
+      "             [PARALLEL_LEVEL level]) \n"
       "Tests the given build directory and stores results in Test.xml. The "
       "second argument is a variable that will hold value. Optionally, "
       "you can specify the starting test number START, the ending test number "

@@ -161,7 +161,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
   for(TestMap::iterator i = tests.begin();
       i !=  tests.end(); ++i)
     {
-    int processors = this->Properties[i->first]->Processors;
+    //int processors = this->Properties[i->first]->Processors;
     
 //    if(processors > )
     // start test should start only one test
