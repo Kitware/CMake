@@ -38,25 +38,36 @@ bool cmCTestRunTest::IsRunning()
 void cmCTestRunTest::CheckOutput()
 {
   std::string out, err;
-  int pipe = this->TestProcess->CheckOutput(.1, out, err);
-  if(pipe == cmsysProcess_Pipe_STDOUT)
+  int pipe = this->TestProcess->CheckOutput(.1);
+  //start our timeout for reading the process output
+  double clock_start = cmSystemTools::GetTime();
+  while(this->TestProcess->GetNextOutputLine(out, err))
     {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
-               this->GetIndex() << ": " << out << std::endl);
-    this->ProcessOutput += out;
-    this->ProcessOutput += "\n";
-    }
-  else if(pipe == cmsysProcess_Pipe_STDERR)
-    {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
-               this->GetIndex() << ": " << err << std::endl);
-    this->ProcessOutput += err;
-    this->ProcessOutput += "\n";
+
+    if(pipe == cmsysProcess_Pipe_STDOUT)
+      {
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+                 this->GetIndex() << ": " << out << std::endl);
+      this->ProcessOutput += out;
+      this->ProcessOutput += "\n";
+      }
+    else if(pipe == cmsysProcess_Pipe_STDERR)
+      {
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+                 this->GetIndex() << ": " << err << std::endl);
+      this->ProcessOutput += err;
+      this->ProcessOutput += "\n";
+      }
+    //timeout while reading process output (could denote infinite output)
+    if(cmSystemTools::GetTime() - clock_start > .1)
+      {
+      break;
+      }
     }
 }
 
 //---------------------------------------------------------
-bool cmCTestRunTest::EndTest(size_t completed, size_t total)
+bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 {
   //restore the old environment
   if (this->ModifyEnv)
@@ -240,12 +251,14 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total)
       << "----------------------------------------------------------"
       << std::endl << std::endl;
     }
-  this->TestResult.Output = this->ProcessOutput;
-  this->TestResult.ReturnValue = this->TestProcess->GetExitValue();
-  this->TestResult.CompletionStatus = "Completed";
-  this->TestResult.ExecutionTime = this->TestProcess->GetTotalTime();
-  this->TestHandler->TestResults.push_back( this->TestResult );
-
+  if(started)
+    {
+    this->TestResult.Output = this->ProcessOutput;
+    this->TestResult.ReturnValue = this->TestProcess->GetExitValue();
+    this->TestResult.CompletionStatus = "Completed";
+    this->TestResult.ExecutionTime = this->TestProcess->GetTotalTime();
+    this->TestHandler->TestResults.push_back( this->TestResult );
+    }
   this->MemCheckPostProcess();
 
   delete this->TestProcess;
@@ -290,6 +303,7 @@ bool cmCTestRunTest::StartTest()
   this->TestResult.Properties = this->TestProperties;
   this->TestResult.ExecutionTime = 0;
   this->TestResult.ReturnValue = -1;
+  this->TestResult.CompletionStatus = "Not Run";
   this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = this->TestProperties->Index;  
   this->TestResult.Name = this->TestProperties->Name;

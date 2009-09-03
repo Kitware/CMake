@@ -68,72 +68,80 @@ bool cmProcess::StartProcess()
   return (cmsysProcess_GetState(this->Process)
           == cmsysProcess_State_Executing);
 }
-  
-// return true if there is a new line of data
-// return false if there is no new data
-int cmProcess::CheckOutput(double timeout, 
-                            std::string& stdOutLine,
+
+bool cmProcess::GetNextOutputLine(std::string& stdOutLine,
                             std::string& stdErrLine)
 {
+  if(this->StdErrorBuffer.empty() && this->StdOutBuffer.empty())
+    {
+    return false;
+    }
   stdOutLine = "";
   stdErrLine = "";
   std::vector<char>::iterator outiter = 
     this->StdOutBuffer.begin();
   std::vector<char>::iterator erriter = 
     this->StdErrorBuffer.begin();
+  // Check for a newline in stdout.
+  for(;outiter != this->StdOutBuffer.end(); ++outiter)
+    {
+    if((*outiter == '\r') && ((outiter+1) == this->StdOutBuffer.end()))
+      {
+      break;
+      }
+    else if(*outiter == '\n' || *outiter == '\0')
+      {
+      int length = outiter-this->StdOutBuffer.begin();
+      if(length > 1 && *(outiter-1) == '\r')
+        {
+        --length;
+        }
+      if(length > 0)
+        {
+        stdOutLine.append(&this->StdOutBuffer[0], length);
+        }
+      this->StdOutBuffer.erase(this->StdOutBuffer.begin(), outiter+1);
+      this->LastOutputPipe = cmsysProcess_Pipe_STDOUT;
+      return true;
+      }
+    }
+
+  // Check for a newline in stderr.
+  for(;erriter != this->StdErrorBuffer.end(); ++erriter)
+    {
+    if((*erriter == '\r') && ((erriter+1) == this->StdErrorBuffer.end()))
+      {
+      break;
+      }
+    else if(*erriter == '\n' || *erriter == '\0')
+      {
+      int length = erriter-this->StdErrorBuffer.begin();
+      if(length > 1 && *(erriter-1) == '\r')
+        {
+        --length;
+        }
+      if(length > 0)
+        {
+        stdErrLine.append(&this->StdErrorBuffer[0], length);
+        }
+      this->StdErrorBuffer.erase(this->StdErrorBuffer.begin(), erriter+1);
+      this->LastOutputPipe = cmsysProcess_Pipe_STDERR;
+      return true;
+      }
+    }
+  //If we get here, we have stuff waiting in the buffers, but no newline
+  return false;
+}
+// return true if there is a new line of data
+// return false if there is no new data
+int cmProcess::CheckOutput(double timeout)
+{
+  // Wait for data from the process.
+  int length;
+  char* data;
+
   while(1)
     {
-    // Check for a newline in stdout.
-    for(;outiter != this->StdOutBuffer.end(); ++outiter)
-      {
-      if((*outiter == '\r') && ((outiter+1) == this->StdOutBuffer.end()))
-        {
-        break;
-        }
-      else if(*outiter == '\n' || *outiter == '\0')
-        {
-        int length = outiter-this->StdOutBuffer.begin();
-        if(length > 1 && *(outiter-1) == '\r')
-          {
-          --length;
-          }
-        if(length > 0)
-          {
-          stdOutLine.append(&this->StdOutBuffer[0], length);
-          }
-        this->StdOutBuffer.erase(this->StdOutBuffer.begin(), outiter+1);
-        this->LastOutputPipe = cmsysProcess_Pipe_STDOUT;
-        return  this->LastOutputPipe;;
-        }
-      }
-
-    // Check for a newline in stderr.
-    for(;erriter != this->StdErrorBuffer.end(); ++erriter)
-      {
-      if((*erriter == '\r') && ((erriter+1) == this->StdErrorBuffer.end()))
-        {
-        break;
-        }
-      else if(*erriter == '\n' || *erriter == '\0')
-        {
-        int length = erriter-this->StdErrorBuffer.begin();
-        if(length > 1 && *(erriter-1) == '\r')
-          {
-          --length;
-          }
-        if(length > 0)
-          {
-          stdErrLine.append(&this->StdErrorBuffer[0], length);
-          }
-        this->StdErrorBuffer.erase(this->StdErrorBuffer.begin(), erriter+1);
-        this->LastOutputPipe = cmsysProcess_Pipe_STDERR;
-        return this->LastOutputPipe;
-        }
-      }
-
-    // No newlines found.  Wait for more data from the process.
-    int length;
-    char* data;
     int pipe = cmsysProcess_WaitForData(this->Process, &data, 
                                         &length, &timeout);
     if(pipe == cmsysProcess_Pipe_Timeout)
@@ -147,7 +155,6 @@ int cmProcess::CheckOutput(double timeout,
       // Append to the stdout buffer.
       std::vector<char>::size_type size = this->StdOutBuffer.size();
       this->StdOutBuffer.insert(this->StdOutBuffer.end(), data, data+length);
-      outiter = this->StdOutBuffer.begin()+size;
       }
     else if(pipe == cmsysProcess_Pipe_STDERR)
       {
@@ -155,26 +162,17 @@ int cmProcess::CheckOutput(double timeout,
       std::vector<char>::size_type size = this->StdErrorBuffer.size();
       this->StdErrorBuffer.insert(this->StdErrorBuffer.end(),
                                   data, data+length);
-      erriter = this->StdErrorBuffer.begin()+size;
       }
     else if(pipe == cmsysProcess_Pipe_None)
       {
       // Both stdout and stderr pipes have broken.  Return leftover data.
       if(!this->StdOutBuffer.empty())
         {
-        stdOutLine.append(&this->StdOutBuffer[0],
-                          outiter-this->StdOutBuffer.begin());
-        this->StdOutBuffer.erase(this->StdOutBuffer.begin(),
-                                 this->StdOutBuffer.end());
         this->LastOutputPipe = cmsysProcess_Pipe_STDOUT;
         return this->LastOutputPipe;
         }
       else if(!this->StdErrorBuffer.empty())
         {
-        stdErrLine.append(&this->StdErrorBuffer[0],
-                          erriter-this->StdErrorBuffer.begin());
-        this->StdErrorBuffer.erase(this->StdErrorBuffer.begin(), 
-                                   this->StdErrorBuffer.end());
         this->LastOutputPipe = cmsysProcess_Pipe_STDERR;
         return this->LastOutputPipe;
         }
@@ -186,7 +184,6 @@ int cmProcess::CheckOutput(double timeout,
       }
     }
 }
-
 
 // return the process status
 int cmProcess::GetProcessStatus()

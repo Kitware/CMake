@@ -100,7 +100,8 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     }
   else
     {
-    testRun->EndTest(this->Completed, this->Total);
+    this->Completed++;
+    testRun->EndTest(this->Completed, this->Total, false);
     }
 }
 
@@ -209,7 +210,7 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     cmCTestRunTest* p = *i;
     int test = p->GetIndex();
 
-    if(p->EndTest(this->Completed, this->Total))
+    if(p->EndTest(this->Completed, this->Total, true))
       {
       this->Passed->push_back(p->GetTestProperties()->Name);
       }

@@ -56,7 +56,7 @@ public:
   //launch the test process, return whether it started correctly
   bool StartTest();
   //capture and report the test results
-  bool EndTest(size_t completed, size_t total);
+  bool EndTest(size_t completed, size_t total, bool started);
   //Called by ctest -N to log the command string
   void ComputeArguments();
 private:
