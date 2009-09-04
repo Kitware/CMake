@@ -41,7 +41,7 @@ public:
   bool StartProcess();
   
   // return process state
-  int CheckOutput(double timeout);
+  void CheckOutput(double timeout);
   // return the process status
   int GetProcessStatus();
   // return true if the process is running
@@ -52,7 +52,8 @@ public:
   void SetId(int id) { this->Id = id;}
   int GetExitValue() { return this->ExitValue;}
   double GetTotalTime() { return this->TotalTime;}
-  bool GetNextOutputLine(std::string& stdOutLine, std::string& stdErrLine);
+  int GetNextOutputLine(std::string& stdOutLine, std::string& stdErrLine,
+                        bool& gotStdOut, bool& gotStdErr);
 private:
   int LastOutputPipe;
   double Timeout;
