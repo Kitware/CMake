@@ -242,46 +242,19 @@ void cmGlobalVisualStudio8Generator::Generate()
       }
     }
 
-  // Now perform the main generation.
-  this->cmGlobalVisualStudio7Generator::Generate();
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio8Generator::WriteSLNFile(
-  std::ostream& fout, cmLocalGenerator* root,
-  std::vector<cmLocalGenerator*>& generators)
-{
-  // Make all targets depend on their respective project's build
-  // system check target.
-  unsigned int i;
-  for(i = 0; i < generators.size(); ++i)
+  // All targets depend on the build-system check target.
+  for(std::map<cmStdString,cmTarget *>::const_iterator
+        ti = this->TotalTargets.begin();
+      ti != this->TotalTargets.end(); ++ti)
     {
-    if(this->IsExcluded(root, generators[i]))
+    if(ti->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
       {
-      continue;
-      }
-    cmMakefile* mf = generators[i]->GetMakefile();
-    cmTargets& tgts = mf->GetTargets();
-    for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
-      {
-      if(l->first == CMAKE_CHECK_BUILD_SYSTEM_TARGET)
-        {
-        for(unsigned int j = 0; j < generators.size(); ++j)
-          {
-          // Every target in all generators should depend on this target.
-          cmMakefile* lmf = generators[j]->GetMakefile();
-          cmTargets &atgts = lmf->GetTargets();
-          for(cmTargets::iterator al = atgts.begin(); al != atgts.end(); ++al)
-            {
-            al->second.AddUtility(l->first.c_str());
-            }
-          }
-        }
+      ti->second->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
       }
     }
 
-  // Now write the solution file.
-  this->cmGlobalVisualStudio71Generator::WriteSLNFile(fout, root, generators);
+  // Now perform the main generation.
+  this->cmGlobalVisualStudio7Generator::Generate();
 }
 
 //----------------------------------------------------------------------------
