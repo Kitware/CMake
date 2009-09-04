@@ -63,7 +63,7 @@ find_program(MPIEXEC
   NAMES mpiexec mpirun lamexec
   PATHS /usr/bin /usr/local/bin /usr/local/mpi/bin
   "$ENV{SystemDrive}/Program Files/MPICH/SDK/Bin"
-  "${ProgramFiles}/MPICH2/Bin
+  "${ProgramFiles}/MPICH2/Bin"
   "$ENV{SystemDrive}/Program Files/Microsoft Compute Cluster Pack/Bin"
   "$ENV{SystemDrive}/Program Files/Microsoft HPC Pack 2008 SDK/Bin"
   DOC "Executable for running MPI programs.")
@@ -270,7 +270,7 @@ else (MPI_COMPILE_CMDLINE)
     NAMES mpi mpich msmpi
     PATHS /usr/lib /usr/local/lib /usr/local/mpi/lib
     "$ENV{SystemDrive}/Program Files/MPICH/SDK/Lib"
-    "${ProgramFiles}/MPICH2/Lib
+    "${ProgramFiles}/MPICH2/Lib"
     "$ENV{SystemDrive}/Program Files/Microsoft Compute Cluster Pack/Lib/${MS_MPI_ARCH_DIR}"
     "$ENV{SystemDrive}/Program Files/Microsoft HPC Pack 2008 SDK/Lib/${MS_MPI_ARCH_DIR}"
     )
