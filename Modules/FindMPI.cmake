@@ -58,8 +58,14 @@ find_program(MPI_COMPILER
   DOC "MPI compiler. Used only to detect MPI compilation flags.")
 mark_as_advanced(MPI_COMPILER)
 
+file(TO_CMAKE_PATH "$ENV{ProgramFiles}" ProgramFiles)
 find_program(MPIEXEC
   NAMES mpiexec mpirun lamexec
+  PATHS /usr/bin /usr/local/bin /usr/local/mpi/bin
+  "$ENV{SystemDrive}/Program Files/MPICH/SDK/Bin"
+  "${ProgramFiles}/MPICH2/Bin
+  "$ENV{SystemDrive}/Program Files/Microsoft Compute Cluster Pack/Bin"
+  "$ENV{SystemDrive}/Program Files/Microsoft HPC Pack 2008 SDK/Bin"
   DOC "Executable for running MPI programs.")
 
 set(MPIEXEC_NUMPROC_FLAG "-np" CACHE STRING "Flag used by MPI to specify the number of processes for MPIEXEC; the next option will be the number of processes.")
@@ -247,34 +253,36 @@ else (MPI_COMPILE_CMDLINE)
     /usr/include 
     /usr/include/mpi
     /usr/local/mpi/include
-    "C:/Program Files/MPICH/SDK/Include" 
-    "$ENV{SystemDrive}/Program Files/MPICH2/include"
+    "$ENV{SystemDrive}/Program Files/MPICH/SDK/Include" 
+    "${ProgramFiles}/MPICH2/include"
     "$ENV{SystemDrive}/Program Files/Microsoft Compute Cluster Pack/Include"
+    "$ENV{SystemDrive}/Program Files/Microsoft HPC Pack 2008 SDK/Include"
     )
-  
+
   # Decide between 32-bit and 64-bit libraries for Microsoft's MPI
   if (CMAKE_CL_64)
     set(MS_MPI_ARCH_DIR amd64)
   else (CMAKE_CL_64)
     set(MS_MPI_ARCH_DIR i386)
   endif (CMAKE_CL_64)
-  
+
   find_library(MPI_LIBRARY 
     NAMES mpi mpich msmpi
     PATHS /usr/lib /usr/local/lib /usr/local/mpi/lib
-    "C:/Program Files/MPICH/SDK/Lib" 
     "$ENV{SystemDrive}/Program Files/MPICH/SDK/Lib"
+    "${ProgramFiles}/MPICH2/Lib
     "$ENV{SystemDrive}/Program Files/Microsoft Compute Cluster Pack/Lib/${MS_MPI_ARCH_DIR}"
+    "$ENV{SystemDrive}/Program Files/Microsoft HPC Pack 2008 SDK/Lib/${MS_MPI_ARCH_DIR}"
     )
-  find_library(MPI_LIBRARY 
+  find_library(MPI_LIBRARY
     NAMES mpich2
     PATHS
-    "$ENV{SystemDrive}/Program Files/MPICH2/Lib")
+    "${ProgramFiles}/MPICH2/Lib")
 
   find_library(MPI_EXTRA_LIBRARY 
     NAMES mpi++
     PATHS /usr/lib /usr/local/lib /usr/local/mpi/lib
-    "C:/Program Files/MPICH/SDK/Lib" 
+    "$ENV{SystemDrive}/Program Files/MPICH/SDK/Lib" 
     DOC "Extra MPI libraries to link against.")
 
   set(MPI_COMPILE_FLAGS "" CACHE STRING "MPI compilation flags")
