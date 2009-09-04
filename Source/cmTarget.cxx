@@ -1087,12 +1087,14 @@ private:
   cmTarget* Target;
   cmMakefile* Makefile;
   cmGlobalGenerator* GlobalGenerator;
-  std::queue<cmStdString> DependencyQueue;
-  std::set<cmStdString> DependenciesQueued;
+  std::queue<cmSourceFile*> SourceQueue;
+  std::set<cmSourceFile*> SourcesQueued;
+  typedef std::map<cmStdString, cmSourceFile*> NameMapType;
+  NameMapType NameMap;
 
-  void QueueOnce(std::string const& name);
-  void QueueOnce(std::vector<std::string> const& names);
-  void QueueDependencies(cmSourceFile* sf);
+  void QueueSource(cmSourceFile* sf);
+  void FollowName(std::string const& name);
+  void FollowNames(std::vector<std::string> const& names);
   bool IsUtility(std::string const& dep);
   void CheckCustomCommand(cmCustomCommand const& cc);
   void CheckCustomCommands(const std::vector<cmCustomCommand>& commands);
@@ -1113,19 +1115,14 @@ cmTargetTraceDependencies
   for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
       si != sources.end(); ++si)
     {
-    // Queue the source file itself in case it is generated.
-    this->QueueOnce((*si)->GetFullPath());
-
-    // Queue the dependencies of the source file in case they are
-    // generated.
-    this->QueueDependencies(*si);
+    this->QueueSource(*si);
     }
 
   // Queue the VS project file to check dependencies on the rule to
   // generate it.
   if(vsProjectFile)
     {
-    this->QueueOnce(vsProjectFile);
+    this->FollowName(vsProjectFile);
     }
 
   // Queue pre-build, pre-link, and post-build rule dependencies.
@@ -1138,42 +1135,71 @@ cmTargetTraceDependencies
 void cmTargetTraceDependencies::Trace()
 {
   // Process one dependency at a time until the queue is empty.
-  while(!this->DependencyQueue.empty())
+  while(!this->SourceQueue.empty())
     {
-    // Get the next dependency in from queue.
-    std::string dep = this->DependencyQueue.front();
-    this->DependencyQueue.pop();
+    // Get the next source from the queue.
+    cmSourceFile* sf = this->SourceQueue.front();
+    this->SourceQueue.pop();
 
-    // Check if we know how to generate this dependency.
-    if(cmSourceFile* sf =
-       this->Makefile->GetSourceFileWithOutput(dep.c_str()))
+    // Queue dependencies added explicitly by the user.
+    if(const char* additionalDeps = sf->GetProperty("OBJECT_DEPENDS"))
       {
-      // Queue dependencies needed to generate this file.
-      this->QueueDependencies(sf);
+      std::vector<std::string> objDeps;
+      cmSystemTools::ExpandListArgument(additionalDeps, objDeps);
+      this->FollowNames(objDeps);
+      }
 
-      // Make sure this file is in the target.
-      this->Target->AddSourceFile(sf);
+    // Queue the source needed to generate this file, if any.
+    this->FollowName(sf->GetFullPath());
+
+    // Queue dependencies added programatically by commands.
+    this->FollowNames(sf->GetDepends());
+
+    // Queue custom command dependencies.
+    if(cmCustomCommand const* cc = sf->GetCustomCommand())
+      {
+      this->CheckCustomCommand(*cc);
       }
     }
 }
 
 //----------------------------------------------------------------------------
-void cmTargetTraceDependencies::QueueOnce(std::string const& name)
+void cmTargetTraceDependencies::QueueSource(cmSourceFile* sf)
 {
-  if(this->DependenciesQueued.insert(name).second)
+  if(this->SourcesQueued.insert(sf).second)
     {
-    this->DependencyQueue.push(name);
+    this->SourceQueue.push(sf);
+
+    // Make sure this file is in the target.
+    this->Target->AddSourceFile(sf);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTargetTraceDependencies::FollowName(std::string const& name)
+{
+  NameMapType::iterator i = this->NameMap.find(name);
+  if(i == this->NameMap.end())
+    {
+    // Check if we know how to generate this file.
+    cmSourceFile* sf = this->Makefile->GetSourceFileWithOutput(name.c_str());
+    NameMapType::value_type entry(name, sf);
+    i = this->NameMap.insert(entry).first;
+    }
+  if(cmSourceFile* sf = i->second)
+    {
+    this->QueueSource(sf);
     }
 }
 
 //----------------------------------------------------------------------------
 void
-cmTargetTraceDependencies::QueueOnce(std::vector<std::string> const& names)
+cmTargetTraceDependencies::FollowNames(std::vector<std::string> const& names)
 {
   for(std::vector<std::string>::const_iterator i = names.begin();
       i != names.end(); ++i)
     {
-    this->QueueOnce(*i);
+    this->FollowName(*i);
     }
 }
 
@@ -1227,28 +1253,6 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
 }
 
 //----------------------------------------------------------------------------
-void cmTargetTraceDependencies::QueueDependencies(cmSourceFile* sf)
-{
-  // Queue dependency added explicitly by the user.
-  if(const char* additionalDeps = sf->GetProperty("OBJECT_DEPENDS"))
-    {
-    std::vector<std::string> objDeps;
-    cmSystemTools::ExpandListArgument(additionalDeps, objDeps);
-    this->QueueOnce(objDeps);
-    }
-
-  // Queue dependencies added programatically by commands.
-  this->QueueOnce(sf->GetDepends());
-
-  // Queue custom command dependencies.
-  if(cmCustomCommand const* cc = sf->GetCustomCommand())
-    {
-    this->CheckCustomCommand(*cc);
-    }
-
-}
-
-//----------------------------------------------------------------------------
 void
 cmTargetTraceDependencies
 ::CheckCustomCommand(cmCustomCommand const& cc)
@@ -1283,7 +1287,7 @@ cmTargetTraceDependencies
       {
       // The dependency does not name a target and may be a file we
       // know how to generate.  Queue it.
-      this->QueueOnce(dep);
+      this->FollowName(dep);
       }
     }
 }
