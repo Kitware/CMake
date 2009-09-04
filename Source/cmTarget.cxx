@@ -1089,7 +1089,6 @@ private:
   cmGlobalGenerator* GlobalGenerator;
   std::queue<cmStdString> DependencyQueue;
   std::set<cmStdString> DependenciesQueued;
-  std::set<cmSourceFile*> TargetSources;
 
   void QueueOnce(std::string const& name);
   void QueueOnce(std::vector<std::string> const& names);
@@ -1120,9 +1119,6 @@ cmTargetTraceDependencies
     // Queue the dependencies of the source file in case they are
     // generated.
     this->QueueDependencies(*si);
-
-    // Track the sources already known to the target.
-    this->TargetSources.insert(*si);
     }
 
   // Queue the VS project file to check dependencies on the rule to
@@ -1156,10 +1152,7 @@ void cmTargetTraceDependencies::Trace()
       this->QueueDependencies(sf);
 
       // Make sure this file is in the target.
-      if(this->TargetSources.insert(sf).second)
-        {
-        this->Target->AddSourceFile(sf);
-        }
+      this->Target->AddSourceFile(sf);
       }
     }
 }
@@ -1328,6 +1321,21 @@ bool cmTarget::FindSourceFiles()
       }
     }
   return true;
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmTarget::GetSourceFiles()
+{
+  return this->SourceFiles;
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::AddSourceFile(cmSourceFile* sf)
+{
+  if(this->SourceFileSet.insert(sf).second)
+    {
+    this->SourceFiles.push_back(sf);
+    }
 }
 
 //----------------------------------------------------------------------------

@@ -119,9 +119,8 @@ public:
   /**
    * Get the list of the source files used by this target
    */
-  std::vector<cmSourceFile*> const &GetSourceFiles()
-    {return this->SourceFiles;}
-  void AddSourceFile(cmSourceFile* sf) { this->SourceFiles.push_back(sf); }
+  std::vector<cmSourceFile*> const& GetSourceFiles();
+  void AddSourceFile(cmSourceFile* sf);
 
   /**
    * Flags for a given source file as used in this target. Typically assigned
@@ -531,6 +530,7 @@ private:
   std::vector<cmCustomCommand> PostBuildCommands;
   TargetType TargetTypeValue;
   std::vector<cmSourceFile*> SourceFiles;
+  std::set<cmSourceFile*> SourceFileSet;
   LinkLibraryVectorType LinkLibraries;
   LinkLibraryVectorType PrevLinkedLibraries;
   bool LinkLibrariesAnalyzed;
