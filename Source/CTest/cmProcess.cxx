@@ -159,12 +159,16 @@ int cmProcess::CheckOutput(double timeout)
       {
         // Append to the stdout buffer.
       this->StdOutBuffer.insert(this->StdOutBuffer.end(), data, data+length);
+      this->LastOutputPipe = pipe;
+      return pipe;
       }
     else if(pipe == cmsysProcess_Pipe_STDERR)
       {
       // Append to the stderr buffer.
       this->StdErrorBuffer.insert(this->StdErrorBuffer.end(),
                                   data, data+length);
+      this->LastOutputPipe = pipe;
+      return pipe;
       }
     else if(pipe == cmsysProcess_Pipe_None)
       {
