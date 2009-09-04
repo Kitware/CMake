@@ -221,7 +221,7 @@ void CMakeSetupDialog::initialize()
   QObject::connect(this->ViewType, SIGNAL(currentIndexChanged(int)), 
                    this, SLOT(setViewType(int)));
   QObject::connect(this->Search, SIGNAL(textChanged(QString)), 
-                   this->CacheValues, SLOT(setSearchFilter(QString)));
+                   this, SLOT(setSearchFilter(QString)));
   
   QObject::connect(this->CMakeThread->cmakeInstance(),
                    SIGNAL(generatorChanged(QString)),
@@ -1030,4 +1030,11 @@ void CMakeSetupDialog::showUserChanges()
   
   dialog.exec();
 }
+
+void CMakeSetupDialog::setSearchFilter(const QString& str)
+{
+  this->CacheValues->selectionModel()->clear();
+  this->CacheValues->setSearchFilter(str);
+}
+
 

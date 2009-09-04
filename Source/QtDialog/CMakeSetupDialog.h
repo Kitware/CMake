@@ -77,6 +77,7 @@ protected slots:
   void setDebugOutput(bool);
   void setViewType(int);
   void showUserChanges();
+  void setSearchFilter(const QString& str);
 
 protected:
 
