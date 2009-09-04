@@ -36,7 +36,8 @@ public:
 
   cmCTestMultiProcessHandler();
   // Set the tests
-  void SetTests(TestMap& tests, PropertiesMap& properties);
+  void SetTests(TestMap& tests, TestMap& expensiveTests,
+                PropertiesMap& properties);
   // Set the max number of tests that can be run at the same time.
   void SetParallelLevel(size_t);
   void RunTests();
@@ -81,6 +82,7 @@ protected:
   int FindMaxIndex();
   // map from test number to set of depend tests
   TestMap Tests;
+  TestMap ExpensiveTests;
   //Total number of tests we'll be running
   size_t Total;
   //Number of tests that are complete

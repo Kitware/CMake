@@ -1009,14 +1009,16 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     << "----------------------------------------------------------"
     << std::endl;
 
-  cmCTestMultiProcessHandler::TestSet depends;
   cmCTestMultiProcessHandler::TestMap tests;
+  cmCTestMultiProcessHandler::TestMap expensiveTests;
   cmCTestMultiProcessHandler::PropertiesMap properties;
+  
   for (ListOfTests::iterator it = this->TestList.begin();
        it != this->TestList.end(); it ++ )
     { 
     cmCTestTestProperties& p = *it;
-    
+    cmCTestMultiProcessHandler::TestSet depends;
+
     if(p.Depends.size())
       {
       for(std::vector<std::string>::iterator i = p.Depends.begin();
@@ -1035,8 +1037,12 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       }
     tests[it->Index] = depends;
     properties[it->Index] = &*it;
+    if(it->Expensive)
+      {
+      expensiveTests[it->Index] = depends;
+      }
     }
-  parallel.SetTests(tests, properties);
+  parallel.SetTests(tests, expensiveTests, properties);
   parallel.SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
   parallel.SetTestResults(&this->TestResults);

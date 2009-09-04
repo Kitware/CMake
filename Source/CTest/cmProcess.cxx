@@ -22,6 +22,11 @@ cmProcess::cmProcess()
 {
   this->Process = 0;
   this->Timeout = 0;
+  this->TotalTime = 0;
+  this->LastOutputPipe = cmsysProcess_Pipe_None;
+  this->ExitValue = 0;
+  this->Id = 0;
+  this->StartTime = 0;
 }
 
 cmProcess::~cmProcess()
