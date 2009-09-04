@@ -82,7 +82,8 @@ public:
   /*
    * Run a script
    */
-  static bool RunScript(cmCTest* ctest, const char *script, bool InProcess);
+  static bool RunScript(cmCTest* ctest, const char *script, bool InProcess,
+    int* returnValue);
   int RunCurrentScript();
 
   /*

@@ -34,10 +34,35 @@ bool cmCTestRunScriptCommand
     np = true;
     i++;
     }
+  int start = i;
   // run each script
-  for (; i < args.size(); ++i)
+  std::string returnVariable;
+  for (i = start; i < args.size(); ++i)
     {
-    cmCTestScriptHandler::RunScript(this->CTest, args[i].c_str(), !np);
+    if(args[i] == "RETURN_VALUE")
+      {
+      ++i;
+      if(i < args.size())
+        {
+        returnVariable = args[i];
+        }
+      }
+    }
+  for (i = start; i < args.size(); ++i)
+    {
+    if(args[i] == "RETURN_VALUE")
+      {
+      ++i;
+      }
+    else
+      {
+      int ret;
+      cmCTestScriptHandler::RunScript(this->CTest, args[i].c_str(), !np,
+        &ret);
+      cmOStringStream str;
+      str << ret;
+      this->Makefile->AddDefinition(returnVariable.c_str(), str.str().c_str());
+      }
     }
   return true;
 }

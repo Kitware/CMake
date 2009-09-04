@@ -445,6 +445,10 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read script: "
                << script.c_str()
                << std::endl);
+    // Reset the error flag so that it can run more than 
+    // one script with an error when you 
+    // use ctest_run_script
+    cmSystemTools::ResetErrorOccuredFlag();
     return 2;
     }
 
@@ -1030,12 +1034,16 @@ void cmCTestScriptHandler::RestoreBackupDirectories()
 }
 
 bool cmCTestScriptHandler::RunScript(cmCTest* ctest, const char *sname, 
-                                     bool InProcess)
+                                     bool InProcess, int* returnValue)
 {
   cmCTestScriptHandler* sh = new cmCTestScriptHandler();
   sh->SetCTestInstance(ctest);
   sh->AddConfigurationScript(sname,InProcess);
-  sh->ProcessHandler();
+  int res = sh->ProcessHandler();
+  if(returnValue)
+    {
+    *returnValue = res;
+    }
   delete sh;
   return true;
 }
