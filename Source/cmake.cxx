@@ -3880,17 +3880,6 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
 //----------------------------------------------------------------------------
 static bool cmakeCheckStampFile(const char* stampName)
 {
-  // If the stamp file still exists then it must really be out of
-  // date.
-  if(cmSystemTools::FileExists(stampName))
-    {
-    // Notify the user why CMake is re-running.  It is safe to
-    // just print to stdout here because this code is only reachable
-    // through an undocumented flag used by the VS generator.
-    std::cout << "CMake is re-running because build system is out-of-date.\n";
-    return false;
-    }
-
   // The stamp file does not exist.  Use the stamp dependencies to
   // determine whether it is really out of date.  This works in
   // conjunction with cmLocalVisualStudio7Generator to avoid
