@@ -273,7 +273,6 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   // Properly handle output of the build command
   cmsysProcess_WaitForExit(cp, 0);
   int result = cmsysProcess_GetState(cp);
-
   int retVal = 0;
   bool failed = false;
   if(result == cmsysProcess_State_Exited)
@@ -300,6 +299,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
                << cmsysProcess_GetErrorString(cp) << std::endl);
     failed = true;
     }
+  cmsysProcess_Delete(cp);
   if(failed)
     {
     cmOStringStream message;
