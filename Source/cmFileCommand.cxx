@@ -305,7 +305,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
     while((sizeLimit != 0) && (c = file.get(), file))
       {
       char hex[4];
-      sprintf(hex, "%x", c&0xff);
+      sprintf(hex, "%.2x", c&0xff);
       output += hex;
       if (sizeLimit > 0)
         {
