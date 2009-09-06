@@ -323,15 +323,6 @@ void cmExtraCodeBlocksGenerator
         "      "<<virtualFolders<<"\n"
         "      <Build>\n";
 
-  bool installTargetCreated = false;
-  bool installStripTargetCreated = false;
-  bool testTargetCreated = false;
-  bool experimentalTargetCreated = false;
-  bool nightlyTargetCreated = false;
-  bool packageTargetCreated = false;
-  bool packageSourceTargetCreated = false;
-  bool rebuildCacheTargetCreated = false;
-
   this->AppendTarget(fout, "all", 0, make.c_str(), mf, compiler.c_str());
 
   // add all executable and library targets and some of the GLOBAL 
@@ -346,51 +337,29 @@ void cmExtraCodeBlocksGenerator
       {
         switch(ti->second.GetType())
         {
-          case cmTarget::UTILITY:
           case cmTarget::GLOBAL_TARGET:
-            // only add these targets once
-            if ((ti->first=="install") && (installTargetCreated==false)) 
+            // Only add the global targets from CMAKE_BINARY_DIR, 
+            // not from the subdirs
+            if (strcmp(makefile->GetStartOutputDirectory(), 
+                       makefile->GetHomeOutputDirectory())==0)
               {
-              installTargetCreated=true;
+              this->AppendTarget(fout, ti->first.c_str(), 0, 
+                                 make.c_str(), makefile, compiler.c_str());
               }
-            else if ((ti->first=="install/strip") 
-                      && (installStripTargetCreated==false)) 
-              {
-              installStripTargetCreated=true;
-              }
-            else if ((ti->first=="test") && (testTargetCreated==false)) 
-              {
-              testTargetCreated=true;
-              }
-            else if ((ti->first=="Experimental") 
-                      && (experimentalTargetCreated==false)) 
-              {
-              experimentalTargetCreated=true;
-              }
-            else if ((ti->first=="Nightly") && (nightlyTargetCreated==false)) 
-              {
-              nightlyTargetCreated=true;
-              }
-            else if ((ti->first=="package") && (packageTargetCreated==false)) 
-              {
-              packageTargetCreated=true;
-              }
-            else if ((ti->first=="package_source") 
-                      && (packageSourceTargetCreated==false)) 
-              {
-              packageSourceTargetCreated=true;
-              }
-            else if ((ti->first=="rebuild_cache") 
-                      && (rebuildCacheTargetCreated==false)) 
-              {
-              rebuildCacheTargetCreated=true;
-              }
-            else
+            break;
+          case cmTarget::UTILITY:
+            // Add all utility targets, except the Nightly/Continuous/
+            // Experimental-"sub"targets as e.g. NightlyStart
+            if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
+             || ((ti->first.find("Continuous")==0)&&(ti->first!="Continuous"))
+             || ((ti->first.find("Experimental")==0) 
+                                               && (ti->first!="Experimental")))
               {
               break;
               }
+
             this->AppendTarget(fout, ti->first.c_str(), 0, 
-                               make.c_str(), makefile, compiler.c_str());
+                                 make.c_str(), makefile, compiler.c_str());
             break;
           case cmTarget::EXECUTABLE:
           case cmTarget::STATIC_LIBRARY:
