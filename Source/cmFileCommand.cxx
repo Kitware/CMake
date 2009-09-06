@@ -301,8 +301,8 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   if (hexOutputArg.IsEnabled())
     {
     // Convert part of the file into hex code
-    int c;
-    while((sizeLimit != 0) && (c = file.get(), file))
+    char c;
+    while((sizeLimit != 0) && (file.get(c)))
       {
       char hex[4];
       sprintf(hex, "%.2x", c&0xff);
