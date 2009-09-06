@@ -5,6 +5,15 @@ INCLUDE_DIRECTORIES(${StringFileTest_BINARY_DIR})
 # Read file test
 FILE(READ "${CMAKE_CURRENT_SOURCE_DIR}/InputFile.h.in" infile)
 
+# Test reading a binary file into hex representation
+FILE(READ "${CMAKE_CURRENT_SOURCE_DIR}/test.bin" hexContents HEX)
+
+IF("${hexContents}" STREQUAL "0001027700")
+  MESSAGE("FILE(READ HEX) correctly read [${hexContents}]")
+ELSE("${hexContents}" STREQUAL "0001027700")
+  MESSAGE(SEND_ERROR "FILE(READ HEX) incorrectly read [${hexContents}], but expected was [0001027700]")
+ENDIF("${hexContents}" STREQUAL "0001027700")
+
 # FILE(STRINGS) test
 FILE(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/InputFile.h.in" infile_strings
   LIMIT_COUNT 1 LIMIT_INPUT 1024 LIMIT_OUTPUT 1024
