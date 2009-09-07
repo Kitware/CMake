@@ -97,6 +97,7 @@ public:
     bool IsInBasedOnREOptions;
     bool WillFail;
     bool Expensive;
+    bool RunSerial;
     double Timeout;
     int Index;
     //Requested number of process slots

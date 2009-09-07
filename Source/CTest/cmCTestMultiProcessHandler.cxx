@@ -25,6 +25,7 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 {
   this->ParallelLevel = 1;
   this->Completed = 0;
+  this->RunningCount = 0;
 }
   // Set the tests
 void 
@@ -112,8 +113,25 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   else
     {
     this->Completed++;
+    this->RunningCount -= GetProcessorsUsed(test);
     testRun->EndTest(this->Completed, this->Total, false);
     }
+}
+
+inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
+{
+  size_t processors = 
+    static_cast<int>(this->Properties[test]->Processors);
+  //If this is set to run serially, it must run alone.
+  //Also, if processors setting is set higher than the -j
+  //setting, we default to using all of the process slots.
+  if(this->Properties[test]->RunSerial
+     || processors > this->ParallelLevel)
+    {
+    processors = this->ParallelLevel;
+    }
+
+  return processors;
 }
 
 bool cmCTestMultiProcessHandler::StartTest(int test)
@@ -160,7 +178,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
 
 void cmCTestMultiProcessHandler::StartNextTests()
 {
-  size_t numToStart = this->ParallelLevel - this->RunningTests.size();
+  size_t numToStart = this->ParallelLevel - this->RunningCount;
   if(numToStart == 0)
     {
     return;
@@ -171,13 +189,16 @@ void cmCTestMultiProcessHandler::StartNextTests()
   for(TestMap::iterator i = tests.begin();
       i !=  tests.end(); ++i)
     {
-    //int processors = this->Properties[i->first]->Processors;
-    
-//    if(processors > )
+    size_t processors = GetProcessorsUsed(i->first);
+    if(processors > numToStart)
+      {
+      return;
+      }
     // start test should start only one test
     if(this->StartTest(i->first))
       {
-      numToStart--;
+      numToStart -= processors;
+      this->RunningCount += processors;
       }
     else
       {
@@ -241,7 +262,7 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     this->TestRunningMap[test] = false;
     this->RunningTests.erase(p);
     this->WriteCheckpoint(test);
-
+    this->RunningCount -= GetProcessorsUsed(test);
     delete p;
     }
   return true;

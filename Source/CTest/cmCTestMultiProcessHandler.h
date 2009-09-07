@@ -80,6 +80,7 @@ protected:
   //Check if we need to resume an interrupted test set
   void CheckResume();
   int FindMaxIndex();
+  inline size_t GetProcessorsUsed(int index);
   // map from test number to set of depend tests
   TestMap Tests;
   TestMap ExpensiveTests;
@@ -87,6 +88,7 @@ protected:
   size_t Total;
   //Number of tests that are complete
   size_t Completed;
+  size_t RunningCount;
   //list of test properties (indices concurrent to the test map)
   PropertiesMap Properties;
   std::map<int, bool> TestRunningMap;

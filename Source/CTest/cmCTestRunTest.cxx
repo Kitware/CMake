@@ -476,7 +476,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
   const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
   std::string outname = this->TestProperties->Name + " ";
-  outname.resize(maxTestNameWidth, '.');
+  outname.resize(maxTestNameWidth + 4, '.');
 
   *this->TestHandler->LogFile << this->TestProperties->Index << "/"
     << this->TestHandler->TotalNumberOfTests << " Testing: " 

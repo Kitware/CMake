@@ -1979,6 +1979,10 @@ bool cmCTestTestHandler::SetTestsProperties(
             {
             rtit->Expensive = cmSystemTools::IsOn(val.c_str());
             }
+          if ( key == "RUN_SERIAL" )
+            {
+            rtit->RunSerial = cmSystemTools::IsOn(val.c_str());
+            }
           if ( key == "FAIL_REGULAR_EXPRESSION" )
             {
             std::vector<std::string> lval;
@@ -2127,6 +2131,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.IsInBasedOnREOptions = true;
   test.WillFail = false;
   test.Expensive = false;
+  test.RunSerial = false;
   test.Timeout = 0;
   test.Processors = 1;
   if (this->UseIncludeRegExpFlag &&
