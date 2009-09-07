@@ -88,6 +88,10 @@ public:
 
   typedef std::map<cmStdString, cmTarget::LinkClosure> LinkClosureMapType;
   LinkClosureMapType LinkClosureMap;
+
+  struct SourceEntry { std::vector<cmSourceFile*> Depends; };
+  typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
+  SourceEntriesType SourceEntries;
 };
 
 //----------------------------------------------------------------------------
@@ -1081,12 +1085,16 @@ bool cmTarget::IsAppBundleOnApple()
 class cmTargetTraceDependencies
 {
 public:
-  cmTargetTraceDependencies(cmTarget* target, const char* vsProjectFile);
+  cmTargetTraceDependencies(cmTarget* target, cmTargetInternals* internal,
+                            const char* vsProjectFile);
   void Trace();
 private:
   cmTarget* Target;
+  cmTargetInternals* Internal;
   cmMakefile* Makefile;
   cmGlobalGenerator* GlobalGenerator;
+  typedef cmTargetInternals::SourceEntry SourceEntry;
+  SourceEntry* CurrentEntry;
   std::queue<cmSourceFile*> SourceQueue;
   std::set<cmSourceFile*> SourcesQueued;
   typedef std::map<cmStdString, cmSourceFile*> NameMapType;
@@ -1102,13 +1110,15 @@ private:
 
 //----------------------------------------------------------------------------
 cmTargetTraceDependencies
-::cmTargetTraceDependencies(cmTarget* target, const char* vsProjectFile):
-  Target(target)
+::cmTargetTraceDependencies(cmTarget* target, cmTargetInternals* internal,
+                            const char* vsProjectFile):
+  Target(target), Internal(internal)
 {
   // Convenience.
   this->Makefile = this->Target->GetMakefile();
   this->GlobalGenerator =
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
   std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
@@ -1140,6 +1150,7 @@ void cmTargetTraceDependencies::Trace()
     // Get the next source from the queue.
     cmSourceFile* sf = this->SourceQueue.front();
     this->SourceQueue.pop();
+    this->CurrentEntry = &this->Internal->SourceEntries[sf];
 
     // Queue dependencies added explicitly by the user.
     if(const char* additionalDeps = sf->GetProperty("OBJECT_DEPENDS"))
@@ -1161,6 +1172,7 @@ void cmTargetTraceDependencies::Trace()
       this->CheckCustomCommand(*cc);
       }
     }
+  this->CurrentEntry = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -1188,6 +1200,12 @@ void cmTargetTraceDependencies::FollowName(std::string const& name)
     }
   if(cmSourceFile* sf = i->second)
     {
+    // Record the dependency we just followed.
+    if(this->CurrentEntry)
+      {
+      this->CurrentEntry->Depends.push_back(sf);
+      }
+
     this->QueueSource(sf);
     }
 }
@@ -1308,7 +1326,7 @@ cmTargetTraceDependencies
 void cmTarget::TraceDependencies(const char* vsProjectFile)
 {
   // Use a helper object to trace the dependencies.
-  cmTargetTraceDependencies tracer(this, vsProjectFile);
+  cmTargetTraceDependencies tracer(this, this->Internal.Get(), vsProjectFile);
   tracer.Trace();
 }
 
@@ -1336,10 +1354,28 @@ std::vector<cmSourceFile*> const& cmTarget::GetSourceFiles()
 //----------------------------------------------------------------------------
 void cmTarget::AddSourceFile(cmSourceFile* sf)
 {
-  if(this->SourceFileSet.insert(sf).second)
+  typedef cmTargetInternals::SourceEntriesType SourceEntriesType;
+  SourceEntriesType::iterator i = this->Internal->SourceEntries.find(sf);
+  if(i == this->Internal->SourceEntries.end())
     {
+    typedef cmTargetInternals::SourceEntry SourceEntry;
+    SourceEntriesType::value_type entry(sf, SourceEntry());
+    i = this->Internal->SourceEntries.insert(entry).first;
     this->SourceFiles.push_back(sf);
     }
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const*
+cmTarget::GetSourceDepends(cmSourceFile* sf)
+{
+  typedef cmTargetInternals::SourceEntriesType SourceEntriesType;
+  SourceEntriesType::iterator i = this->Internal->SourceEntries.find(sf);
+  if(i != this->Internal->SourceEntries.end())
+    {
+    return &i->second.Depends;
+    }
+  return 0;
 }
 
 //----------------------------------------------------------------------------

@@ -48,6 +48,7 @@ public:
   ~cmTargetInternalPointer();
   cmTargetInternalPointer& operator=(cmTargetInternalPointer const& r);
   cmTargetInternals* operator->() const { return this->Pointer; }
+  cmTargetInternals* Get() const { return this->Pointer; }
 private:
   cmTargetInternals* Pointer;
 };
@@ -121,6 +122,9 @@ public:
    */
   std::vector<cmSourceFile*> const& GetSourceFiles();
   void AddSourceFile(cmSourceFile* sf);
+
+  /** Get sources that must be built before the given source.  */
+  std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf);
 
   /**
    * Flags for a given source file as used in this target. Typically assigned
@@ -530,7 +534,6 @@ private:
   std::vector<cmCustomCommand> PostBuildCommands;
   TargetType TargetTypeValue;
   std::vector<cmSourceFile*> SourceFiles;
-  std::set<cmSourceFile*> SourceFileSet;
   LinkLibraryVectorType LinkLibraries;
   LinkLibraryVectorType PrevLinkedLibraries;
   bool LinkLibrariesAnalyzed;
