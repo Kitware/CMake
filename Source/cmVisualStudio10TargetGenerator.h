@@ -66,6 +66,7 @@ private:
   void WriteCustomRule(cmSourceFile* source,
                        cmCustomCommand const & command);
   void WriteCustomCommands();
+  void WriteCustomCommand(cmSourceFile* sf);
   void WriteGroups();
   void WriteProjectReferences();
   bool OutputSourceSpecificFlags(cmSourceFile* source);
@@ -89,6 +90,7 @@ private:
   cmGlobalVisualStudio7Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
+  std::set<cmSourceFile*> SourcesVisited;
 };
 
 #endif

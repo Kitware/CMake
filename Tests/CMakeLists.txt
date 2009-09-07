@@ -571,15 +571,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   IF("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
     SET_TESTS_PROPERTIES(ExternalProject PROPERTIES TIMEOUT 1000)
   ENDIF("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-  # CustomCommand and ExternalProject fail because of this bug:
-  # http://connect.microsoft.com/VisualStudio/feedback/ViewFeedback.aspx?FeedbackID=473709
-  # so for this version of the compiler with the IDE expect failure
-  IF("${MSVC_VERSION}" EQUAL 1600 
-      AND "${CMAKE_TEST_GENERATOR}"
-      MATCHES "Visual Studio 10" )
-    SET_TESTS_PROPERTIES(ExternalProject PROPERTIES WILL_FAIL TRUE)
-    SET_TESTS_PROPERTIES(CustomCommand PROPERTIES WILL_FAIL TRUE)
-  ENDIF()
 
   # do each of the tutorial steps
   FOREACH(STP RANGE 1 7)

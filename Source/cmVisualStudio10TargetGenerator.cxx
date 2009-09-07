@@ -247,18 +247,38 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 }
 
 void cmVisualStudio10TargetGenerator::WriteCustomCommands()
-{ 
-  this->WriteString("<ItemGroup>\n", 1); 
-  std::vector<cmSourceFile*>const & sources = this->Target->GetSourceFiles();
+{
+  this->SourcesVisited.clear();
+  std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {
-    if(cmCustomCommand const* command = (*source)->GetCustomCommand())
+    cmSourceFile* sf = *source;
+    this->WriteCustomCommand(sf);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator::WriteCustomCommand(cmSourceFile* sf)
+{
+  if(this->SourcesVisited.insert(sf).second)
+    {
+    if(std::vector<cmSourceFile*> const* depends =
+       this->Target->GetSourceDepends(sf))
       {
-      this->WriteCustomRule(*source, *command);
+      for(std::vector<cmSourceFile*>::const_iterator di = depends->begin();
+          di != depends->end(); ++di)
+        {
+        this->WriteCustomCommand(*di);
+        }
       }
-    } 
-  this->WriteString("</ItemGroup>\n", 1);
+    if(cmCustomCommand const* command = sf->GetCustomCommand())
+      {
+      this->WriteString("<ItemGroup>\n", 1);
+      this->WriteCustomRule(sf, *command);
+      this->WriteString("</ItemGroup>\n", 1);
+      }
+    }
 }
 
 void 
