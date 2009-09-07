@@ -56,7 +56,6 @@ protected:
                         std::map<cmStdString, int>& count);
   void InsertNeedObjectNames(const std::vector<cmSourceGroup>& groups,
                              std::map<cmStdString, int>& count);
-  bool NeedXMLEscape;
   std::set<const cmSourceFile*> NeedObjectName;
   friend class cmVisualStudio10TargetGenerator;
 };

@@ -27,6 +27,13 @@
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
 
+static std::string cmVS10EscapeXML(std::string arg)
+{
+  cmSystemTools::ReplaceString(arg, "&", "&amp;");
+  cmSystemTools::ReplaceString(arg, "<", "&lt;");
+  cmSystemTools::ReplaceString(arg, ">", "&gt;");
+  return arg;
+}
 
 cmVisualStudio10TargetGenerator::
 cmVisualStudio10TargetGenerator(cmTarget* target,
@@ -289,12 +296,14 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {
-    std::string script = 
-      lg->ConstructScript(command.GetCommandLines(),
-                          command.GetWorkingDirectory(),
-                          i->c_str(),
-                          command.GetEscapeOldStyle(),
-                          command.GetEscapeAllowMakeVars());
+    std::string script =
+      cmVS10EscapeXML(
+        lg->ConstructScript(command.GetCommandLines(),
+                            command.GetWorkingDirectory(),
+                            i->c_str(),
+                            command.GetEscapeOldStyle(),
+                            command.GetEscapeAllowMakeVars())
+        );
     this->WritePlatformConfigTag("Message",i->c_str(), 3);
     (*this->BuildFileStream ) << comment << "</Message>\n";
     this->WritePlatformConfigTag("Command", i->c_str(), 3);
@@ -1202,12 +1211,14 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
     comment += lg->ConstructComment(command);
     script += pre;
     pre = "\n";
-    script += 
-      lg->ConstructScript(command.GetCommandLines(),
-                          command.GetWorkingDirectory(),
-                          configName.c_str(),
-                          command.GetEscapeOldStyle(),
-                          command.GetEscapeAllowMakeVars());
+    script +=
+      cmVS10EscapeXML(
+        lg->ConstructScript(command.GetCommandLines(),
+                            command.GetWorkingDirectory(),
+                            configName.c_str(),
+                            command.GetEscapeOldStyle(),
+                            command.GetEscapeAllowMakeVars())
+        );
     }
   this->WriteString("<Message>",3);
   (*this->BuildFileStream ) << comment << "</Message>\n";

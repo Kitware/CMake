@@ -68,7 +68,6 @@ class cmVS10XMLParser : public cmXMLParser
 //----------------------------------------------------------------------------
 cmLocalVisualStudio10Generator::cmLocalVisualStudio10Generator()
 {
-  this->NeedXMLEscape = true;
 }
 
 cmLocalVisualStudio10Generator::~cmLocalVisualStudio10Generator()
