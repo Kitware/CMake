@@ -72,9 +72,8 @@ public:
       "PROCESSORS: Denotes the number of processors that this test will "
       "require. This is typically used for MPI tests, and should be used in "
       "conjunction with the ctest_test PARALLEL_LEVEL option.\n"
-      "EXPENSIVE: If set to true, this test will be run before tests that "
-      "are not marked as expensive. This should be used in conjunction with "
-      "the ctest_test PARALLEL_LEVEL option.\n"
+      "COST: Set this to a floating point value. Tests in a test set will be "
+      "run in descending order of cost.\n"
       "RUN_SERIAL: If set to true, this test will not run in parallel with "
       "any other tests. This should be used in conjunction with "
       "the ctest_test PARALLEL_LEVEL option.\n";

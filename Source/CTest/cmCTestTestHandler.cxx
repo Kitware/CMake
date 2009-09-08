@@ -1010,7 +1010,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     << std::endl;
 
   cmCTestMultiProcessHandler::TestMap tests;
-  cmCTestMultiProcessHandler::TestMap expensiveTests;
+  cmCTestMultiProcessHandler::TestCostMap testCosts;
   cmCTestMultiProcessHandler::PropertiesMap properties;
   
   for (ListOfTests::iterator it = this->TestList.begin();
@@ -1037,12 +1037,9 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       }
     tests[it->Index] = depends;
     properties[it->Index] = &*it;
-    if(it->Expensive)
-      {
-      expensiveTests[it->Index] = depends;
-      }
+    testCosts[p.Cost].insert(p.Index);
     }
-  parallel.SetTests(tests, expensiveTests, properties);
+  parallel.SetTests(tests, testCosts, properties);
   parallel.SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
   parallel.SetTestResults(&this->TestResults);
@@ -1975,9 +1972,9 @@ bool cmCTestTestHandler::SetTestsProperties(
             {
             rtit->Timeout = atof(val.c_str());
             }
-          if ( key == "EXPENSIVE" )
+          if ( key == "COST" )
             {
-            rtit->Expensive = cmSystemTools::IsOn(val.c_str());
+            rtit->Cost = atof(val.c_str());
             }
           if ( key == "RUN_SERIAL" )
             {
@@ -2130,9 +2127,9 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   
   test.IsInBasedOnREOptions = true;
   test.WillFail = false;
-  test.Expensive = false;
   test.RunSerial = false;
   test.Timeout = 0;
+  test.Cost = 0;
   test.Processors = 1;
   if (this->UseIncludeRegExpFlag &&
     !this->IncludeTestsRegularExpression.find(testname.c_str()))

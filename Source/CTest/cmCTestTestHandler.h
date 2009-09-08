@@ -96,7 +96,7 @@ public:
     std::map<cmStdString, cmStdString> Measurements;
     bool IsInBasedOnREOptions;
     bool WillFail;
-    bool Expensive;
+    float Cost;
     bool RunSerial;
     double Timeout;
     int Index;

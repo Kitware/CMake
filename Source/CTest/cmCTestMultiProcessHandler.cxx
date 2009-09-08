@@ -30,25 +30,20 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   // Set the tests
 void 
 cmCTestMultiProcessHandler::SetTests(TestMap& tests,
-                                     TestMap& expensiveTests,
+                                     TestCostMap& testCosts,
                                      PropertiesMap& properties)
 {
+  this->Tests = tests;
+  this->TestCosts = testCosts;
+  this->Properties = properties;
+  this->Total = this->Tests.size();
   // set test run map to false for all
   for(TestMap::iterator i = this->Tests.begin();
       i != this->Tests.end(); ++i)
     {
     this->TestRunningMap[i->first] = false;
     this->TestFinishMap[i->first] = false;
-
-    if(this->Properties[i->first]->Expensive)
-      {
-      this->ExpensiveTests[i->first] = i->second;
-      }
     }
-  this->Tests = tests;
-  this->ExpensiveTests = expensiveTests;
-  this->Properties = properties;
-  this->Total = this->Tests.size();
 }
 
   // Set the max number of tests that can be run at the same time.
@@ -57,6 +52,7 @@ void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
   this->ParallelLevel = level < 1 ? 1 : level;
 }
 
+//---------------------------------------------------------
 void cmCTestMultiProcessHandler::RunTests()
 {
   if(this->CTest->GetBatchJobs())
@@ -67,7 +63,7 @@ void cmCTestMultiProcessHandler::RunTests()
   this->CheckResume();
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
   this->StartNextTests();
-  while(this->Tests.size() != 0 || this->ExpensiveTests.size() != 0)
+  while(this->Tests.size() != 0)
     {
     this->CheckOutput();
     this->StartNextTests();
@@ -79,6 +75,7 @@ void cmCTestMultiProcessHandler::RunTests()
   this->MarkFinished();
 }
 
+//---------------------------------------------------------
 void cmCTestMultiProcessHandler::SubmitBatchTests()
 {
   for(cmCTest::CTestConfigurationMap::iterator i =
@@ -90,17 +87,14 @@ void cmCTestMultiProcessHandler::SubmitBatchTests()
     }
 }
 
+//---------------------------------------------------------
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, test << ": "
-            << " test " << test << "\n");
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, " test " << test << "\n");
   this->TestRunningMap[test] = true; // mark the test as running
   // now remove the test itself
-  if(this->ExpensiveTests.size() > 0)
-    {
-    this->ExpensiveTests.erase(test);
-    }
-  this->Tests.erase(test);
+  this->EraseTest(test);
+
   cmCTestRunTest* testRun = new cmCTestRunTest;
   testRun->SetCTest(this->CTest);
   testRun->SetTestHandler(this->TestHandler);
@@ -118,6 +112,22 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     }
 }
 
+//---------------------------------------------------------
+void cmCTestMultiProcessHandler::EraseTest(int test)
+{
+  this->Tests.erase(test);
+  for(TestCostMap::iterator i = this->TestCosts.begin();
+      i != this->TestCosts.end(); ++i)
+    {
+    if(i->second.find(test) != i->second.end())
+      {
+      i->second.erase(test);
+      return;
+      }
+    }
+}
+
+//---------------------------------------------------------
 inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
 {
   size_t processors = 
@@ -130,10 +140,10 @@ inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
     {
     processors = this->ParallelLevel;
     }
-
   return processors;
 }
 
+//---------------------------------------------------------
 bool cmCTestMultiProcessHandler::StartTest(int test)
 {
   // copy the depend tests locally because when 
@@ -176,6 +186,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
   return false;
 }
 
+//---------------------------------------------------------
 void cmCTestMultiProcessHandler::StartNextTests()
 {
   size_t numToStart = this->ParallelLevel - this->RunningCount;
@@ -183,36 +194,39 @@ void cmCTestMultiProcessHandler::StartNextTests()
     {
     return;
     }
-  TestMap tests = this->ExpensiveTests.size() > 0 ? 
-    this->ExpensiveTests : this->Tests;
 
-  for(TestMap::iterator i = tests.begin();
-      i !=  tests.end(); ++i)
+  for(TestCostMap::reverse_iterator i = this->TestCosts.rbegin();
+      i != this->TestCosts.rend(); ++i)
     {
-    size_t processors = GetProcessorsUsed(i->first);
-    if(processors > numToStart)
+    TestSet tests = i->second; //copy the test set
+    for(TestSet::iterator test = tests.begin();
+        test != tests.end(); ++test)
       {
-      return;
-      }
-    // start test should start only one test
-    if(this->StartTest(i->first))
-      {
-      numToStart -= processors;
-      this->RunningCount += processors;
-      }
-    else
-      {
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
-             << "Test did not start waiting on depends to finish: " 
-                 << i->first << "\n");
-      }
-    if(numToStart == 0 )
-      {
-      return;
+      size_t processors = GetProcessorsUsed(*test);
+      if(processors > numToStart)
+        {
+        return;
+        }
+      if(this->StartTest(*test))
+        {
+        numToStart -= processors;
+        this->RunningCount += processors;
+        }
+      else
+        {
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
+                   << "Test did not start waiting on depends to finish: "
+                   << *test << "\n");
+        }
+      if(numToStart == 0)
+        {
+        return;
+        }
       }
     }
 }
 
+//---------------------------------------------------------
 bool cmCTestMultiProcessHandler::CheckOutput()
 {
   // no more output we are done
@@ -248,11 +262,6 @@ bool cmCTestMultiProcessHandler::CheckOutput()
       {
       this->Failed->push_back(p->GetTestProperties()->Name);
       }
-    for(TestMap::iterator j = this->ExpensiveTests.begin();
-        j != this->ExpensiveTests.end(); ++j)
-      {
-      j->second.erase(test);
-      }
     for(TestMap::iterator j = this->Tests.begin();
         j != this->Tests.end(); ++j)
       {
@@ -268,6 +277,7 @@ bool cmCTestMultiProcessHandler::CheckOutput()
   return true;
 }
 
+//---------------------------------------------------------
 void cmCTestMultiProcessHandler::WriteCheckpoint(int index)
 {
   std::string fname = this->CTest->GetBinaryDir()
@@ -354,16 +364,17 @@ void cmCTestMultiProcessHandler::CheckResume()
     }
 }
 
+//---------------------------------------------------------
 void cmCTestMultiProcessHandler::RemoveTest(int index)
 {
-  this->Tests.erase(index);
+  this->EraseTest(index);
   this->Properties.erase(index);
-  this->ExpensiveTests.erase(index);
   this->TestRunningMap[index] = false;
   this->TestFinishMap[index] = true;
   this->Completed++;
 }
 
+//---------------------------------------------------------
 int cmCTestMultiProcessHandler::FindMaxIndex()
 {
   int max = 0;

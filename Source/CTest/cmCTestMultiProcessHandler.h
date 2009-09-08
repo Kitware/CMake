@@ -31,12 +31,13 @@ class cmCTestMultiProcessHandler
 public:
   struct TestSet : public std::set<int> {};
   struct TestMap : public std::map<int, TestSet> {};
+  struct TestCostMap : public std::map<float, TestSet> {};
   struct PropertiesMap : public 
      std::map<int, cmCTestTestHandler::cmCTestTestProperties*> {};
 
   cmCTestMultiProcessHandler();
   // Set the tests
-  void SetTests(TestMap& tests, TestMap& expensiveTests,
+  void SetTests(TestMap& tests, TestCostMap& testCosts,
                 PropertiesMap& properties);
   // Set the max number of tests that can be run at the same time.
   void SetParallelLevel(size_t);
@@ -51,9 +52,7 @@ public:
     this->Failed = failed;
     }
   void SetTestResults(std::vector<cmCTestTestHandler::cmCTestTestResult>* r)
-    {
-    this->TestResults = r;
-    }
+  { this->TestResults = r; }
 
   void SetCTest(cmCTest* ctest) { this->CTest = ctest;}
 
@@ -73,6 +72,7 @@ protected:
   void WriteCheckpoint(int index);
   // Removes the checkpoint file
   void MarkFinished();
+  void EraseTest(int index);
   // Return true if there are still tests running
   // check all running processes for output and exit case
   bool CheckOutput();
@@ -83,7 +83,7 @@ protected:
   inline size_t GetProcessorsUsed(int index);
   // map from test number to set of depend tests
   TestMap Tests;
-  TestMap ExpensiveTests;
+  TestCostMap TestCosts;
   //Total number of tests we'll be running
   size_t Total;
   //Number of tests that are complete
