@@ -879,6 +879,7 @@ function(ExternalProject_Add name)
   add_custom_command(
     OUTPUT ${cmf_dir}/${CMAKE_CFG_INTDIR}/${name}-complete
     COMMENT "Completed '${name}'"
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${cmf_dir}/${CMAKE_CFG_INTDIR}
     COMMAND ${CMAKE_COMMAND} -E touch ${cmf_dir}/${CMAKE_CFG_INTDIR}/${name}-complete
     COMMAND ${CMAKE_COMMAND} -E touch ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-done
     DEPENDS ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-install
