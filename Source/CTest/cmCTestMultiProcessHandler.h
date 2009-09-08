@@ -37,8 +37,7 @@ public:
 
   cmCTestMultiProcessHandler();
   // Set the tests
-  void SetTests(TestMap& tests, TestCostMap& testCosts,
-                PropertiesMap& properties);
+  void SetTests(TestMap& tests, PropertiesMap& properties);
   // Set the max number of tests that can be run at the same time.
   void SetParallelLevel(size_t);
   void RunTests();
@@ -70,6 +69,9 @@ protected:
   bool StartTest(int test);
   // Mark the checkpoint for the given test
   void WriteCheckpoint(int index);
+  void WriteCostData(int index, float cost);
+  void ReadCostData();
+  void CreateTestCostList();
   // Removes the checkpoint file
   void MarkFinished();
   void EraseTest(int index);
