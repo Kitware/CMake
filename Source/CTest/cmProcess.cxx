@@ -93,26 +93,6 @@ int cmProcess::GetNextOutputLine(std::string& stdOutLine,
   std::vector<char>::iterator erriter = 
     this->StdErrorBuffer.begin();
 
-  //If process terminated, flush the buffer
-  if(!running)
-    {
-    if(!this->StdErrorBuffer.empty())
-      {
-      gotStdErr = true;
-      stdErrLine.append(&this->StdErrorBuffer[0], this->StdErrorBuffer.size());
-      this->StdErrorBuffer.erase(this->StdErrorBuffer.begin(), 
-        this->StdErrorBuffer.end());
-      }
-    if(!this->StdOutBuffer.empty())
-      {
-      gotStdOut = true;
-      stdOutLine.append(&this->StdOutBuffer[0], this->StdOutBuffer.size());
-      this->StdOutBuffer.erase(this->StdOutBuffer.begin(),
-        this->StdOutBuffer.end());
-      }
-    return cmsysProcess_Pipe_None;
-    }
-
   // Check for a newline in stdout.
   for(;outiter != this->StdOutBuffer.end(); ++outiter)
     {
@@ -160,6 +140,31 @@ int cmProcess::GetNextOutputLine(std::string& stdOutLine,
       this->LastOutputPipe = cmsysProcess_Pipe_STDERR;
       gotStdErr = true;
       break;
+      }
+    }
+
+  if(!running && !gotStdErr && !gotStdOut)
+  {
+    //If process terminated with no newline, flush the buffer
+    if(!running)
+      {
+      if(!this->StdErrorBuffer.empty())
+        {
+        gotStdErr = true;
+        stdErrLine.append(&this->StdErrorBuffer[0],
+                          this->StdErrorBuffer.size());
+        this->StdErrorBuffer.erase(this->StdErrorBuffer.begin(), 
+          this->StdErrorBuffer.end());
+        }
+      if(!this->StdOutBuffer.empty())
+        {
+        gotStdOut = true;
+        stdOutLine.append(&this->StdOutBuffer[0],
+                          this->StdOutBuffer.size());
+        this->StdOutBuffer.erase(this->StdOutBuffer.begin(),
+          this->StdOutBuffer.end());
+        }
+      return cmsysProcess_Pipe_None;
       }
     }
   //If we get here, we have stuff waiting in the buffers, but no newline

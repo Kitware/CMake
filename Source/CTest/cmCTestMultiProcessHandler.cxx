@@ -90,7 +90,7 @@ void cmCTestMultiProcessHandler::SubmitBatchTests()
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, " test " << test << "\n");
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "test " << test << "\n");
   this->TestRunningMap[test] = true; // mark the test as running
   // now remove the test itself
   this->EraseTest(test);
