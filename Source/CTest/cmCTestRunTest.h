@@ -91,7 +91,7 @@ private:
   std::vector<std::string> Arguments;
 };
 
-inline int getNumWidth(int n)
+inline int getNumWidth(size_t n)
 {
   int numWidth = 1;
   if(n >= 10)
