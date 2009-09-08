@@ -563,7 +563,7 @@ function(_ep_add_mkdir_command name)
     COMMAND ${CMAKE_COMMAND} -E make_directory ${binary_dir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${install_dir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${tmp_dir}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${stamp_dir}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${stamp_dir}/${CMAKE_CFG_INTDIR}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${download_dir}
     )
 endfunction(_ep_add_mkdir_command)
