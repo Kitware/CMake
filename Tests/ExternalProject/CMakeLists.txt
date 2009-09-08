@@ -29,10 +29,10 @@ endif()
 message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
 
 
-# Empty projects that test all the known ep_add argument key words:
+# Empty projects that test all the known ExternalProject_Add argument key words:
 #
 set(proj MinimalNoOpProject)
-ep_add(${proj}
+ExternalProject_Add(${proj}
   BUILD_COMMAND ""
   CONFIGURE_COMMAND ""
   DOWNLOAD_COMMAND ""
@@ -40,7 +40,7 @@ ep_add(${proj}
 )
 
 set(proj EmptyNoOpProject)
-ep_add(${proj}
+ExternalProject_Add(${proj}
   BUILD_COMMAND ""
   CMAKE_ARGS ""
   CONFIGURE_COMMAND ""
@@ -63,16 +63,16 @@ ep_add(${proj}
 #
 if(can_build_tutorial_step5)
   set(proj TutorialStep5-Local)
-  ep_add(${proj}
+  ExternalProject_Add(${proj}
     URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
     TEST_BEFORE_INSTALL 1
   )
-  ep_get(${proj} install_dir)
+  ExternalProject_Get_Property(${proj} install_dir)
   set(TutorialStep5_install_dir ${install_dir})
 
   set(proj TutorialStep5-Local-TestAfterInstall)
-  ep_add(${proj}
+  ExternalProject_Add(${proj}
     URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
     TEST_AFTER_INSTALL 1
@@ -83,7 +83,7 @@ endif()
 # Local TAR:
 #
 set(proj TutorialStep1-LocalTAR)
-ep_add(${proj}
+ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tar"
   LIST_SEPARATOR ::
   PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Step1Patch.cmake
@@ -94,14 +94,14 @@ ep_add(${proj}
 )
 
 set(proj TutorialStep1-LocalNoDirTAR)
-ep_add(${proj}
+ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tar"
   LIST_SEPARATOR @@
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
              -DTEST_LIST:STRING=1@@2@@3
   INSTALL_COMMAND ""
 )
-ep_add_step(${proj} mypatch
+ExternalProject_Add_Step(${proj} mypatch
   COMMAND ${CMAKE_COMMAND} -E echo "This is a custom external project step."
   COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Step1Patch.cmake
   WORKING_DIRECTORY <SOURCE_DIR>
@@ -113,14 +113,14 @@ ep_add_step(${proj} mypatch
 # Local TGZ:
 #
 set(proj TutorialStep1-LocalTGZ)
-ep_add(${proj}
+ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tgz"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
   INSTALL_COMMAND ""
 )
 
 set(proj TutorialStep1-LocalNoDirTGZ)
-ep_add(${proj}
+ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tgz"
   CMAKE_GENERATOR "${CMAKE_GENERATOR}"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
@@ -143,11 +143,11 @@ endif()
 
 if(do_cvs_tests)
   # Unzip/untar the CVS repository in our source folder so that other
-  # projects below may use it to test CVS args of ep_add
+  # projects below may use it to test CVS args of ExternalProject_Add
   #
   set(proj SetupLocalCVSRepository)
   set(local_cvs_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/CVS")
-  ep_add(${proj}
+  ExternalProject_Add(${proj}
     SOURCE_DIR ${local_cvs_repo}
     URL ${CMAKE_CURRENT_SOURCE_DIR}/cvsrepo.tgz
     BUILD_COMMAND ""
@@ -158,7 +158,7 @@ if(do_cvs_tests)
   # CVS by date stamp:
   #
   set(proj TutorialStep1-CVS-20090626)
-  ep_add(${proj}
+  ExternalProject_Add(${proj}
     CVS_REPOSITORY "${local_cvs_repo}"
     CVS_MODULE "TutorialStep1"
     CVS_TAG "-D2009-06-26 16:50:00 UTC"
@@ -172,7 +172,7 @@ if(do_cvs_tests)
   # CVS by tag:
   #
   set(proj TutorialStep1-CVS-testtag1)
-  ep_add(${proj}
+  ExternalProject_Add(${proj}
     CVS_REPOSITORY "${local_cvs_repo}"
     CVS_MODULE "TutorialStep1"
     CVS_TAG -rtesttag1
@@ -186,7 +186,7 @@ if(do_cvs_tests)
   # Live CVS / HEAD (no CVS_TAG):
   #
   set(proj TutorialStep1-CVS-HEAD)
-  ep_add(${proj}
+  ExternalProject_Add(${proj}
     CVS_REPOSITORY "${local_cvs_repo}"
     CVS_MODULE "TutorialStep1"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
@@ -238,12 +238,12 @@ endif()
 
 if(do_svn_tests)
   # Unzip/untar the SVN repository in our source folder so that other
-  # projects below may use it to test SVN args of ep_add
+  # projects below may use it to test SVN args of ExternalProject_Add
   #
   set(proj SetupLocalSVNRepository)
   set(local_svn_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/SVN")
   set(local_svn_repo_url "file:///${local_svn_repo}/TutorialStep1")
-  ep_add(${proj}
+  ExternalProject_Add(${proj}
     SOURCE_DIR ${local_svn_repo}
     URL ${CMAKE_CURRENT_SOURCE_DIR}/svnrepo.tgz
     BUILD_COMMAND ""
@@ -254,7 +254,7 @@ if(do_svn_tests)
   # SVN by date stamp:
   #
   set(proj TutorialStep1-SVN-20090626)
-  ep_add(${proj}
+  ExternalProject_Add(${proj}
     SVN_REPOSITORY "${local_svn_repo_url}"
     SVN_REVISION "-r{2009-06-26 16:50:00 +0000}"
     UPDATE_COMMAND ""
@@ -267,7 +267,7 @@ if(do_svn_tests)
   # SVN by revision number:
   #
   set(proj TutorialStep1-SVN-r2)
-  ep_add(${proj}
+  ExternalProject_Add(${proj}
     SVN_REPOSITORY "${local_svn_repo_url}"
     SVN_REVISION "-r2"
     UPDATE_COMMAND ""
@@ -280,7 +280,7 @@ if(do_svn_tests)
   # Live SVN / trunk (no SVN_REVISION):
   #
   set(proj TutorialStep1-SVN-trunk)
-  ep_add(${proj}
+  ExternalProject_Add(${proj}
     SVN_REPOSITORY "${local_svn_repo_url}"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
@@ -303,16 +303,22 @@ enable_testing()
 if(can_build_tutorial_step5)
   add_test(TutorialStep5-Local-BuildTreeTest
     "${binary_base}/TutorialStep5-Local/Tutorial" 42)
+  set_property(TEST TutorialStep5-Local-BuildTreeTest
+    APPEND PROPERTY LABELS Step5 BuildTree)
 endif()
 
 add_test(TutorialStep1-LocalTAR-BuildTreeTest
   "${binary_base}/TutorialStep1-LocalTAR/EP-Tutorial" 36)
+set_property(TEST TutorialStep1-LocalTAR-BuildTreeTest
+  APPEND PROPERTY LABELS TAR)
 
 add_test(TutorialStep1-LocalNoDirTAR-BuildTreeTest
   "${binary_base}/TutorialStep1-LocalNoDirTAR/EP-Tutorial" 25)
 
 add_test(TutorialStep1-LocalTGZ-BuildTreeTest
   "${binary_base}/TutorialStep1-LocalTGZ/Tutorial" 16)
+set_property(TEST TutorialStep1-LocalTGZ-BuildTreeTest
+  APPEND PROPERTY LABELS TGZ)
 
 add_test(TutorialStep1-LocalNoDirTGZ-BuildTreeTest
   "${binary_base}/TutorialStep1-LocalNoDirTGZ/Tutorial" 9)
@@ -345,4 +351,6 @@ endif()
 if(can_build_tutorial_step5)
   add_test(TutorialStep5-InstallTreeTest
     "${TutorialStep5_install_dir}/bin/Tutorial" 49)
+  set_property(TEST TutorialStep5-InstallTreeTest
+    APPEND PROPERTY LABELS Step5 InstallTree)
 endif()

@@ -1,8 +1,8 @@
 # - Create custom targets to build projects in external trees
-# The 'ep_add' function creates a custom target to drive download,
-# update/patch, configure, build, and install steps of an external
-# project:
-#  ep_add(<name>                 # Name for custom target
+# The 'ExternalProject_Add' function creates a custom target to drive
+# download, update/patch, configure, build, install and test steps of an
+# external project:
+#  ExternalProject_Add(<name>    # Name for custom target
 #    [DEPENDS projects...]       # Targets on which the project depends
 #    [PREFIX dir]                # Root dir for entire project
 #    [LIST_SEPARATOR sep]        # Sep to be replaced by ; in cmd lines
@@ -40,8 +40,8 @@
 #    )
 # The *_DIR options specify directories for the project, with default
 # directories computed as follows.
-# If the PREFIX option is given to ep_add() or the EP_PREFIX directory
-# property is set, then an external project is built and installed
+# If the PREFIX option is given to ExternalProject_Add() or the EP_PREFIX
+# directory property is set, then an external project is built and installed
 # under the specified prefix:
 #   TMP_DIR      = <prefix>/tmp
 #   STAMP_DIR    = <prefix>/src/<name>-stamp
@@ -60,7 +60,8 @@
 # If no PREFIX, EP_PREFIX, or EP_BASE is specified then the default
 # is to set PREFIX to "<name>-prefix".
 # Relative paths are interpreted with respect to the build directory
-# corresponding to the source directory in which ep_add is invoked.
+# corresponding to the source directory in which ExternalProject_Add is
+# invoked.
 #
 # If SOURCE_DIR is explicitly set to an existing directory the project
 # will be built from it.
@@ -69,8 +70,9 @@
 # The URL option may refer locally to a directory or source tarball,
 # or refer to a remote tarball (e.g. http://.../src.tgz).
 #
-# The 'ep_add_step' function adds a custom steps to an external project:
-#  ep_add_step(<name> <step> # Names of project and custom step
+# The 'ExternalProject_Add_Step' function adds a custom step to an external
+# project:
+#  ExternalProject_Add_Step(<name> <step> # Names of project and custom step
 #    [COMMAND cmd...]        # Command line invoked by this step
 #    [COMMENT "text..."]     # Text printed when step executes
 #    [DEPENDEES steps...]    # Steps on which this step depends
@@ -87,21 +89,23 @@
 # and <TMP_DIR>
 # with corresponding property values.
 #
-# The 'ep_get' function retrieves external project target properties:
-#  ep_get(<name> [prop1 [prop2 [...]]])
+# The 'ExternalProject_Get_Property' function retrieves external project
+# target properties:
+#  ExternalProject_Get_Property(<name> [prop1 [prop2 [...]]])
 # It stores property values in variables of the same name.
-# Property names correspond to the keyword argument names of 'ep_add'.
+# Property names correspond to the keyword argument names of
+# 'ExternalProject_Add'.
 
 
 # Pre-compute a regex to match documented keywords for each command.
 file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines LIMIT_COUNT 100
-     REGEX "^#  (  \\[[A-Z_]+ [^]]*\\] +#.*$|[a-z_]+\\()")
+     REGEX "^#  (  \\[[A-Z_]+ [^]]*\\] +#.*$|[A-Za-z_]+\\()")
 foreach(line IN LISTS lines)
-  if("${line}" MATCHES "^#  [a-z_]+\\(")
+  if("${line}" MATCHES "^#  [A-Za-z_]+\\(")
     if(_ep_func)
       set(_ep_keywords_${_ep_func} "${_ep_keywords_${_ep_func}})$")
     endif()
-    string(REGEX REPLACE "^#  ([a-z_]+)\\(.*" "\\1" _ep_func "${line}")
+    string(REGEX REPLACE "^#  ([A-Za-z_]+)\\(.*" "\\1" _ep_func "${line}")
     #message("function [${_ep_func}]")
     set(_ep_keywords_${_ep_func} "^(")
     set(_ep_keyword_sep)
@@ -174,14 +178,14 @@ endfunction(_ep_parse_arguments)
 define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED
   BRIEF_DOCS "Base directory for External Project storage."
   FULL_DOCS
-  "See documentation of the ep_add() function in the "
+  "See documentation of the ExternalProject_Add() function in the "
   "ExternalProject module."
   )
 
 define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
   BRIEF_DOCS "Top prefix for External Project storage."
   FULL_DOCS
-  "See documentation of the ep_add() function in the "
+  "See documentation of the ExternalProject_Add() function in the "
   "ExternalProject module."
   )
 
@@ -371,7 +375,7 @@ function(_ep_set_directories name)
 endfunction(_ep_set_directories)
 
 
-function(ep_get name)
+function(ExternalProject_Get_Property name)
   foreach(var ${ARGN})
     string(TOUPPER "${var}" VAR)
     get_property(${var} TARGET ${name} PROPERTY _EP_${VAR})
@@ -380,7 +384,7 @@ function(ep_get name)
     endif()
     set(${var} "${${var}}" PARENT_SCOPE)
   endforeach()
-endfunction(ep_get)
+endfunction(ExternalProject_Get_Property)
 
 
 function(_ep_get_configure_command_id name cfg_cmd_id_var)
@@ -469,23 +473,23 @@ function(_ep_get_build_command name step cmd_var)
 endfunction(_ep_get_build_command)
 
 
-function(ep_add_step name step)
+function(ExternalProject_Add_Step name step)
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  ep_get(${name} stamp_dir)
+  ExternalProject_Get_Property(${name} stamp_dir)
 
   add_custom_command(APPEND
-    OUTPUT ${cmf_dir}/${name}-complete
-    DEPENDS ${stamp_dir}/${name}-${step}
+    OUTPUT ${cmf_dir}/${CMAKE_CFG_INTDIR}/${name}-complete
+    DEPENDS ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${step}
     )
-  _ep_parse_arguments(ep_add_step
+  _ep_parse_arguments(ExternalProject_Add_Step
                        ${name} _EP_${step}_ "${ARGN}")
 
   # Steps depending on this step.
   get_property(dependers TARGET ${name} PROPERTY _EP_${step}_DEPENDERS)
   foreach(depender IN LISTS dependers)
     add_custom_command(APPEND
-      OUTPUT ${stamp_dir}/${name}-${depender}
-      DEPENDS ${stamp_dir}/${name}-${step}
+      OUTPUT ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${depender}
+      DEPENDS ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${step}
       )
   endforeach()
 
@@ -495,7 +499,7 @@ function(ep_add_step name step)
   # Dependencies on steps.
   get_property(dependees TARGET ${name} PROPERTY _EP_${step}_DEPENDEES)
   foreach(dependee IN LISTS dependees)
-    list(APPEND depends ${stamp_dir}/${name}-${dependee})
+    list(APPEND depends ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${dependee})
   endforeach()
 
   # The command to run.
@@ -532,14 +536,14 @@ function(ep_add_step name step)
   # Run every time?
   get_property(always TARGET ${name} PROPERTY _EP_${step}_ALWAYS)
   if(always)
-    set_property(SOURCE ${stamp_dir}/${name}-${step} PROPERTY SYMBOLIC 1)
+    set_property(SOURCE ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${step} PROPERTY SYMBOLIC 1)
     set(touch)
   else()
-    set(touch ${CMAKE_COMMAND} -E touch ${stamp_dir}/${name}-${step})
+    set(touch ${CMAKE_COMMAND} -E touch ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${step})
   endif()
 
   add_custom_command(
-    OUTPUT ${stamp_dir}/${name}-${step}
+    OUTPUT ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${step}
     COMMENT ${comment}
     COMMAND ${command}
     COMMAND ${touch}
@@ -547,13 +551,13 @@ function(ep_add_step name step)
     WORKING_DIRECTORY ${work_dir}
     VERBATIM
     )
-endfunction(ep_add_step)
+endfunction(ExternalProject_Add_Step)
 
 
 function(_ep_add_mkdir_command name)
-  ep_get(${name}
+  ExternalProject_Get_Property(${name}
     source_dir binary_dir install_dir stamp_dir download_dir tmp_dir)
-  ep_add_step(${name} mkdir
+  ExternalProject_Add_Step(${name} mkdir
     COMMENT "Creating directories for '${name}'"
     COMMAND ${CMAKE_COMMAND} -E make_directory ${source_dir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${binary_dir}
@@ -566,7 +570,7 @@ endfunction(_ep_add_mkdir_command)
 
 
 function(_ep_add_download_command name)
-  ep_get(${name} source_dir stamp_dir download_dir tmp_dir)
+  ExternalProject_Get_Property(${name} source_dir stamp_dir download_dir tmp_dir)
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_DOWNLOAD_COMMAND SET)
   get_property(cmd TARGET ${name} PROPERTY _EP_DOWNLOAD_COMMAND)
@@ -672,7 +676,7 @@ function(_ep_add_download_command name)
     message(SEND_ERROR "error: no download info for '${name}'")
   endif()
 
-  ep_add_step(${name} download
+  ExternalProject_Add_Step(${name} download
     COMMENT ${comment}
     COMMAND ${cmd}
     WORKING_DIRECTORY ${work_dir}
@@ -683,7 +687,7 @@ endfunction(_ep_add_download_command)
 
 
 function(_ep_add_update_command name)
-  ep_get(${name} source_dir)
+  ExternalProject_Get_Property(${name} source_dir)
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_UPDATE_COMMAND SET)
   get_property(cmd TARGET ${name} PROPERTY _EP_UPDATE_COMMAND)
@@ -716,7 +720,7 @@ function(_ep_add_update_command name)
     set(always 1)
   endif()
 
-  ep_add_step(${name} update
+  ExternalProject_Add_Step(${name} update
     COMMENT ${comment}
     COMMAND ${cmd}
     ALWAYS ${always}
@@ -727,7 +731,7 @@ endfunction(_ep_add_update_command)
 
 
 function(_ep_add_patch_command name)
-  ep_get(${name} source_dir)
+  ExternalProject_Get_Property(${name} source_dir)
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_PATCH_COMMAND SET)
   get_property(cmd TARGET ${name} PROPERTY _EP_PATCH_COMMAND)
@@ -738,7 +742,7 @@ function(_ep_add_patch_command name)
     set(work_dir ${source_dir})
   endif()
 
-  ep_add_step(${name} patch
+  ExternalProject_Add_Step(${name} patch
     COMMAND ${cmd}
     WORKING_DIRECTORY ${work_dir}
     DEPENDEES download
@@ -748,14 +752,14 @@ endfunction(_ep_add_patch_command)
 
 # TODO: Make sure external projects use the proper compiler
 function(_ep_add_configure_command name)
-  ep_get(${name} source_dir binary_dir)
+  ExternalProject_Get_Property(${name} source_dir binary_dir)
 
   # Depend on other external projects (file-level).
   set(file_deps)
   get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
   foreach(dep IN LISTS deps)
     get_property(dep_stamp_dir TARGET ${dep} PROPERTY _EP_STAMP_DIR)
-    list(APPEND file_deps ${dep_stamp_dir}/${dep}-done)
+    list(APPEND file_deps ${dep_stamp_dir}/${CMAKE_CFG_INTDIR}/${dep}-done)
   endforeach()
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_CONFIGURE_COMMAND SET)
@@ -775,10 +779,12 @@ function(_ep_add_configure_command name)
     get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
     if(cmake_generator)
       list(APPEND cmd "-G${cmake_generator}" "${source_dir}")
+    else()
+      list(APPEND cmd "-G${CMAKE_GENERATOR}" "${source_dir}")
     endif()
   endif()
 
-  ep_add_step(${name} configure
+  ExternalProject_Add_Step(${name} configure
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES update patch
@@ -788,7 +794,7 @@ endfunction(_ep_add_configure_command)
 
 
 function(_ep_add_build_command name)
-  ep_get(${name} binary_dir)
+  ExternalProject_Get_Property(${name} binary_dir)
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_BUILD_COMMAND SET)
   if(cmd_set)
@@ -797,7 +803,7 @@ function(_ep_add_build_command name)
     _ep_get_build_command(${name} BUILD cmd)
   endif()
 
-  ep_add_step(${name} build
+  ExternalProject_Add_Step(${name} build
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES configure
@@ -806,7 +812,7 @@ endfunction(_ep_add_build_command)
 
 
 function(_ep_add_install_command name)
-  ep_get(${name} binary_dir)
+  ExternalProject_Get_Property(${name} binary_dir)
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_INSTALL_COMMAND SET)
   if(cmd_set)
@@ -815,7 +821,7 @@ function(_ep_add_install_command name)
     _ep_get_build_command(${name} INSTALL cmd)
   endif()
 
-  ep_add_step(${name} install
+  ExternalProject_Add_Step(${name} install
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES build
@@ -824,7 +830,7 @@ endfunction(_ep_add_install_command)
 
 
 function(_ep_add_test_command name)
-  ep_get(${name} binary_dir)
+  ExternalProject_Get_Property(${name} binary_dir)
 
   get_property(before TARGET ${name} PROPERTY _EP_TEST_BEFORE_INSTALL)
   get_property(after TARGET ${name} PROPERTY _EP_TEST_AFTER_INSTALL)
@@ -846,7 +852,7 @@ function(_ep_add_test_command name)
       set(dep_args DEPENDEES install)
     endif()
 
-    ep_add_step(${name} test
+    ExternalProject_Add_Step(${name} test
       COMMAND ${cmd}
       WORKING_DIRECTORY ${binary_dir}
       ${dep_args}
@@ -855,14 +861,14 @@ function(_ep_add_test_command name)
 endfunction(_ep_add_test_command)
 
 
-function(ep_add name)
+function(ExternalProject_Add name)
   # Add a custom target for the external project.
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  add_custom_target(${name} ALL DEPENDS ${cmf_dir}/${name}-complete)
+  add_custom_target(${name} ALL DEPENDS ${cmf_dir}/${CMAKE_CFG_INTDIR}/${name}-complete)
   set_property(TARGET ${name} PROPERTY _EP_IS_EXTERNAL_PROJECT 1)
-  _ep_parse_arguments(ep_add ${name} _EP_ "${ARGN}")
+  _ep_parse_arguments(ExternalProject_Add ${name} _EP_ "${ARGN}")
   _ep_set_directories(${name})
-  ep_get(${name} stamp_dir)
+  ExternalProject_Get_Property(${name} stamp_dir)
 
   # The 'complete' step depends on all other steps and creates a
   # 'done' mark.  A dependent external project's 'configure' step
@@ -871,11 +877,11 @@ function(ep_add name)
   # custom command so that CMake does not propagate build rules to
   # other external project targets.
   add_custom_command(
-    OUTPUT ${cmf_dir}/${name}-complete
+    OUTPUT ${cmf_dir}/${CMAKE_CFG_INTDIR}/${name}-complete
     COMMENT "Completed '${name}'"
-    COMMAND ${CMAKE_COMMAND} -E touch ${cmf_dir}/${name}-complete
-    COMMAND ${CMAKE_COMMAND} -E touch ${stamp_dir}/${name}-done
-    DEPENDS ${stamp_dir}/${name}-install
+    COMMAND ${CMAKE_COMMAND} -E touch ${cmf_dir}/${CMAKE_CFG_INTDIR}/${name}-complete
+    COMMAND ${CMAKE_COMMAND} -E touch ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-done
+    DEPENDS ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-install
     VERBATIM
     )
 
@@ -904,4 +910,4 @@ function(ep_add name)
   # on install.
   #
   _ep_add_test_command(${name})
-endfunction(ep_add)
+endfunction(ExternalProject_Add)
