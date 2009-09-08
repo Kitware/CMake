@@ -1,7 +1,18 @@
-# - export build settings from a project.
-#  CMAKE_EXPORT_BUILD_SETTINGS(SETTINGS_FILE)
-# macro defined to export the build settings for use by another project.
-#  SETTINGS_FILE - the file into which the settings are to be stored.
+
+# This module is purposely no longer documented.  It does nothing useful.
+IF(NOT "${CMAKE_MINIMUM_REQUIRED_VERSION}" VERSION_LESS 2.7)
+  MESSAGE(FATAL_ERROR
+    "The functionality of this module has been dropped as of CMake 2.8.  "
+    "It was deemed harmful (confusing users by changing their compiler).  "
+    "Please remove calls to the CMAKE_EXPORT_BUILD_SETTINGS macro and "
+    "stop including this module.  "
+    "If this project generates any files for use by external projects, "
+    "remove any use of the CMakeImportBuildSettings module from them.")
+ENDIF()
+
+# This macro used to store build settings of a project in a file to be
+# loaded by another project using CMAKE_IMPORT_BUILD_SETTINGS.  Now it
+# creates a file that refuses to load (with comment explaining why).
 MACRO(CMAKE_EXPORT_BUILD_SETTINGS SETTINGS_FILE)
   IF(${SETTINGS_FILE} MATCHES ".+")
     CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeBuildSettings.cmake.in
