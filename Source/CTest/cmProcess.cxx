@@ -77,7 +77,8 @@ bool cmProcess::StartProcess()
 int cmProcess::GetNextOutputLine(std::string& stdOutLine,
                             std::string& stdErrLine,
                             bool& gotStdOut,
-                            bool& gotStdErr)
+                            bool& gotStdErr,
+                            bool running)
 {
   if(this->StdErrorBuffer.empty() && this->StdOutBuffer.empty())
     {
@@ -91,6 +92,27 @@ int cmProcess::GetNextOutputLine(std::string& stdOutLine,
     this->StdOutBuffer.begin();
   std::vector<char>::iterator erriter = 
     this->StdErrorBuffer.begin();
+
+  //If process terminated, flush the buffer
+  if(!running)
+    {
+    if(!this->StdErrorBuffer.empty())
+      {
+      gotStdErr = true;
+      stdErrLine.append(&this->StdErrorBuffer[0], this->StdErrorBuffer.size());
+      this->StdErrorBuffer.erase(this->StdErrorBuffer.begin(), 
+        this->StdErrorBuffer.end());
+      }
+    if(!this->StdOutBuffer.empty())
+      {
+      gotStdOut = true;
+      stdOutLine.append(&this->StdOutBuffer[0], this->StdOutBuffer.size());
+      this->StdOutBuffer.erase(this->StdOutBuffer.begin(),
+        this->StdOutBuffer.end());
+      }
+    return cmsysProcess_Pipe_None;
+    }
+
   // Check for a newline in stdout.
   for(;outiter != this->StdOutBuffer.end(); ++outiter)
     {
@@ -145,7 +167,7 @@ int cmProcess::GetNextOutputLine(std::string& stdOutLine,
 }
 // return true if there is a new line of data
 // return false if there is no new data
-void cmProcess::CheckOutput(double timeout)
+bool cmProcess::CheckOutput(double timeout)
 {
   // Wait for data from the process.
   int length;
@@ -159,7 +181,7 @@ void cmProcess::CheckOutput(double timeout)
       {
       // Timeout has been exceeded.
       this->LastOutputPipe = pipe;
-      return;
+      return true;
       }
     else if(pipe == cmsysProcess_Pipe_STDOUT)
       {
@@ -180,17 +202,17 @@ void cmProcess::CheckOutput(double timeout)
       if(!this->StdOutBuffer.empty())
         {
         this->LastOutputPipe = cmsysProcess_Pipe_STDOUT;
-        return;
+        return false;
         }
       else if(!this->StdErrorBuffer.empty())
         {
         this->LastOutputPipe = cmsysProcess_Pipe_STDERR;
-        return;
+        return false;
         }
       else
         {
         this->LastOutputPipe = cmsysProcess_Pipe_None;
-        return;
+        return false;
         }
       }
     }

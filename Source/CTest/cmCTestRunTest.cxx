@@ -38,18 +38,19 @@ bool cmCTestRunTest::IsRunning()
 void cmCTestRunTest::CheckOutput()
 {
   std::string out, err;
-  this->TestProcess->CheckOutput(.1);
+  bool running = this->TestProcess->CheckOutput(.1);
   //start our timeout for reading the process output
   double clock_start = cmSystemTools::GetTime();
   int pipe;
   bool gotStdOut = false;
   bool gotStdErr = false;
   while((pipe = this->TestProcess->
-        GetNextOutputLine(out, err, gotStdOut, gotStdErr) )
+        GetNextOutputLine(out, err, gotStdOut, gotStdErr, running) )
         != cmsysProcess_Pipe_Timeout)
     {
     if(pipe == cmsysProcess_Pipe_STDOUT ||
-       pipe == cmsysProcess_Pipe_STDERR)
+       pipe == cmsysProcess_Pipe_STDERR ||
+       pipe == cmsysProcess_Pipe_None)
       {
       if(gotStdErr)
         {
@@ -64,6 +65,10 @@ void cmCTestRunTest::CheckOutput()
                    this->GetIndex() << ": " << out << std::endl);
         this->ProcessOutput += out;
         this->ProcessOutput += "\n";
+        }
+      if(pipe == cmsysProcess_Pipe_None)
+        {
+        break;
         }
       }
     gotStdOut = false;

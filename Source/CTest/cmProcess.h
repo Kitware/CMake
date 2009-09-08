@@ -40,8 +40,8 @@ public:
   // Return true if the process starts
   bool StartProcess();
   
-  // return process state
-  void CheckOutput(double timeout);
+  // return false if process has exited, true otherwise
+  bool CheckOutput(double timeout);
   // return the process status
   int GetProcessStatus();
   // return true if the process is running
@@ -53,7 +53,7 @@ public:
   int GetExitValue() { return this->ExitValue;}
   double GetTotalTime() { return this->TotalTime;}
   int GetNextOutputLine(std::string& stdOutLine, std::string& stdErrLine,
-                        bool& gotStdOut, bool& gotStdErr);
+                        bool& gotStdOut, bool& gotStdErr, bool running);
 private:
   int LastOutputPipe;
   double Timeout;
