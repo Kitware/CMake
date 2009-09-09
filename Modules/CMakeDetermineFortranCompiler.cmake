@@ -56,9 +56,44 @@ IF(NOT CMAKE_Fortran_COMPILER)
       ifort ifc efc f95 pgf95 lf95 xlf95 fort gfortran gfortran-4 g95 f90
       pgf90 xlf90 epcf90 fort77 frt pgf77 xlf fl32 af77 g77 f77
       )
+
+    # Vendor-specific compiler names.
+    SET(_Fortran_COMPILER_NAMES_GNU       gfortran gfortran-4 g95 g77)
+    SET(_Fortran_COMPILER_NAMES_Intel     ifort ifc efc)
+    SET(_Fortran_COMPILER_NAMES_PGI       pgf95 pgf90 pgf77)
+    SET(_Fortran_COMPILER_NAMES_XL        xlf)
+    SET(_Fortran_COMPILER_NAMES_VisualAge xlf95 xlf90 xlf)
+
+    # Prefer vendors matching the C and C++ compilers.
+    SET(CMAKE_Fortran_COMPILER_LIST
+      ${_Fortran_COMPILER_NAMES_${CMAKE_C_COMPILER_ID}}
+      ${_Fortran_COMPILER_NAMES_${CMAKE_CXX_COMPILER_ID}}
+      ${CMAKE_Fortran_COMPILER_LIST})
+    LIST(REMOVE_DUPLICATES CMAKE_Fortran_COMPILER_LIST)
   ENDIF(CMAKE_Fortran_COMPILER_INIT)
 
+  # Look for directories containing the C and C++ compilers.
+  SET(_Fortran_COMPILER_HINTS)
+  FOREACH(lang C CXX)
+    IF(CMAKE_${lang}_COMPILER AND IS_ABSOLUTE "${CMAKE_${lang}_COMPILER}")
+      GET_FILENAME_COMPONENT(_hint "${CMAKE_${lang}_COMPILER}" PATH)
+      IF(IS_DIRECTORY "${_hint}")
+        LIST(APPEND _Fortran_COMPILER_HINTS "${_hint}")
+      ENDIF()
+      SET(_hint)
+    ENDIF()
+  ENDFOREACH()
+
   # Find the compiler.
+  IF(_Fortran_COMPILER_HINTS)
+    # Prefer directories containing C and C++ compilers.
+    LIST(REMOVE_DUPLICATES _Fortran_COMPILER_HINTS)
+    FIND_PROGRAM(CMAKE_Fortran_COMPILER
+      NAMES ${CMAKE_Fortran_COMPILER_LIST}
+      PATHS ${_Fortran_COMPILER_HINTS}
+      NO_DEFAULT_PATH
+      DOC "Fortran compiler")
+  ENDIF()
   FIND_PROGRAM(CMAKE_Fortran_COMPILER NAMES ${CMAKE_Fortran_COMPILER_LIST} DOC "Fortran compiler")
   IF(CMAKE_Fortran_COMPILER_INIT AND NOT CMAKE_Fortran_COMPILER)
     SET(CMAKE_Fortran_COMPILER "${CMAKE_Fortran_COMPILER_INIT}" CACHE FILEPATH "Fortran compiler" FORCE)
