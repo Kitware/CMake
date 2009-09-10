@@ -40,36 +40,6 @@ cmExtraEclipseCDT4Generator
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 #endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
-
-  // don't create these targets in Eclipse, they are too many and 
-  // should be only rarely used directly
-  this->TargetsToIgnore.insert("preinstall");
-  this->TargetsToIgnore.insert("install/local");
-  this->TargetsToIgnore.insert("ContinuousBuild");
-  this->TargetsToIgnore.insert("ContinuousConfigure");
-  this->TargetsToIgnore.insert("ContinuousCoverage");
-  this->TargetsToIgnore.insert("ContinuousMemCheck");
-  this->TargetsToIgnore.insert("ContinuousStart");
-  this->TargetsToIgnore.insert("ContinuousSubmit");
-  this->TargetsToIgnore.insert("ContinuousTest");
-  this->TargetsToIgnore.insert("ContinuousUpdate");
-  this->TargetsToIgnore.insert("ExperimentalBuild");
-  this->TargetsToIgnore.insert("ExperimentalConfigure");
-  this->TargetsToIgnore.insert("ExperimentalCoverage");
-  this->TargetsToIgnore.insert("ExperimentalMemCheck");
-  this->TargetsToIgnore.insert("ExperimentalStart");
-  this->TargetsToIgnore.insert("ExperimentalSubmit");
-  this->TargetsToIgnore.insert("ExperimentalTest");
-  this->TargetsToIgnore.insert("ExperimentalUpdate");
-  this->TargetsToIgnore.insert("NightlyBuild");
-  this->TargetsToIgnore.insert("NightlyConfigure");
-  this->TargetsToIgnore.insert("NightlyCoverage");
-  this->TargetsToIgnore.insert("NightlyMemCheck");
-  this->TargetsToIgnore.insert("NightlyMemoryCheck");
-  this->TargetsToIgnore.insert("NightlyStart");
-  this->TargetsToIgnore.insert("NightlySubmit");
-  this->TargetsToIgnore.insert("NightlyTest");
-  this->TargetsToIgnore.insert("NightlyUpdate");
 }
 
 //----------------------------------------------------------------------------
@@ -669,59 +639,61 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        ++it)
     {
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
-    for(cmTargets::const_iterator t = targets.begin(); t != targets.end(); ++t)
+    cmMakefile* makefile=(*it)->GetMakefile();
+    for(cmTargets::const_iterator ti=targets.begin(); ti!=targets.end(); ++ti)
       {
-      bool addFastTarget = false;
-      switch(t->second.GetType())
+      switch(ti->second.GetType())
         {
-        case cmTarget::EXECUTABLE:
-        case cmTarget::STATIC_LIBRARY:
-        case cmTarget::SHARED_LIBRARY:
-        case cmTarget::MODULE_LIBRARY:
-           addFastTarget = true;
-           // no break here
-        case cmTarget::UTILITY:
         case cmTarget::GLOBAL_TARGET:
           {
-          bool insertTarget = true;
-          if(insertTarget &&
-             (std::set<std::string>::const_iterator(
-               this->TargetsToIgnore.find(t->first)) !=
-              this->TargetsToIgnore.end()))
-            {
-            insertTarget = false;
-            }
+          bool insertTarget = false;
+          // Only add the global targets from CMAKE_BINARY_DIR, 
+          // not from the subdirs
+          if (strcmp(makefile->GetStartOutputDirectory(), 
+                     makefile->GetHomeOutputDirectory())==0)
+           {
+           insertTarget = true;
+           // only add the "edit_cache" target if it's not ccmake, because
+           // this will not work within the IDE
+           if (ti->first == "edit_cache")
+             {
+             if (strstr(makefile->GetRequiredDefinition
+                                    ("CMAKE_EDIT_COMMAND"), "ccmake")!=NULL)
+               {
+               insertTarget = false;
+               }
+             }
+           }
+         if (insertTarget)
+           {
+           this->AppendTarget(fout, ti->first, make);
+           }
+         }
+         break;
+       case cmTarget::UTILITY:
+         // Add all utility targets, except the Nightly/Continuous/
+         // Experimental-"sub"targets as e.g. NightlyStart
+         if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
+          || ((ti->first.find("Continuous")==0)&&(ti->first!="Continuous"))
+          || ((ti->first.find("Experimental")==0) 
+                                            && (ti->first!="Experimental")))
+           {
+           break;
+           }
 
-          if(insertTarget && (emmited.find(t->first) != emmited.end()))
-            {
-            insertTarget = false;
-            }
-
-          // add the edit_cache target only if it's not ccmake
-          // otherwise ccmake will be executed in the log view of Eclipse,
-          // which is no terminal, so curses don't work there, Alex
-          if (insertTarget && (t->first=="edit_cache"))
-            {
-            if (strstr(mf->GetRequiredDefinition("CMAKE_EDIT_COMMAND"), 
-                                                 "ccmake")!=NULL)
-              {
-              insertTarget = false;
-              }
-            }
-
-          if (insertTarget)
-            {
-            emmited.insert(t->first);
-            this->AppendTarget(fout, t->first, make);
-            if (addFastTarget || t->first=="install")
-              {
-              std::string fastTarget = t->first;
-              fastTarget = fastTarget + "/fast";
-              this->AppendTarget(fout, fastTarget, make);
-              }
-            }
-          break;
-          }
+         this->AppendTarget(fout, ti->first, make);
+         break;
+       case cmTarget::EXECUTABLE:
+       case cmTarget::STATIC_LIBRARY:
+       case cmTarget::SHARED_LIBRARY:
+       case cmTarget::MODULE_LIBRARY:
+         {
+         this->AppendTarget(fout, ti->first, make);
+         std::string fastTarget = ti->first;
+         fastTarget += "/fast";
+         this->AppendTarget(fout, fastTarget, make);
+         }
+         break;
         // ignore these:
         case cmTarget::INSTALL_FILES:
         case cmTarget::INSTALL_PROGRAMS:

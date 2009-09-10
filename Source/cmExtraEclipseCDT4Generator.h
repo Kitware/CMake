@@ -119,7 +119,6 @@ private:
   std::vector<std::string> OutLinkedResources;
   std::string HomeDirectory;
   std::string HomeOutputDirectory;
-  std::set<std::string> TargetsToIgnore;
   bool IsOutOfSourceBuild;
   bool GenerateSourceProject;
 
