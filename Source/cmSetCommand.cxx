@@ -160,6 +160,7 @@ bool cmSetCommand
     // or the makefile
     if(cache && type != cmCacheManager::INTERNAL && !force)
       {
+      this->Makefile->UseCacheDefinition(it);
       return true;
       }
     }

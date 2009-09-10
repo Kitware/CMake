@@ -399,6 +399,37 @@ cmPolicies::cmPolicies()
     "The OLD behavior for this policy is to silently ignore the problem.  "
     "The NEW behavior for this policy is to report an error.",
     2,7,20090902, cmPolicies::WARN);
+
+    this->DefinePolicy(
+    CMP0015, "CMP0015",
+    "The set() CACHE mode and option() command make the cache value visible.",
+    "In CMake 2.6 and below the CACHE mode of the set() command and the "
+    "option() command did not expose the value from the named cache entry "
+    "if it was already set both in the cache and as a local variable.  "
+    "This led to subtle differences between first and later configurations "
+    "because a conflicting local variable would be overridden only when the "
+    "cache value was first created.  "
+    "For example, the code\n"
+    "  set(x 1)\n"
+    "  set(before ${x})\n"
+    "  set(x 2 CACHE STRING \"X\")\n"
+    "  set(after ${x})\n"
+    "  message(STATUS \"${before},${after}\")\n"
+    "would print \"1,2\" on the first run and \"1,1\" on future runs."
+    "\n"
+    "CMake 2.8.0 and above prefer to expose the cache value in all cases by "
+    "removing the local variable definition, but this changes behavior in "
+    "subtle cases when the local variable has a different value than that "
+    "exposed from the cache.  "
+    "The example above will always print \"1,2\"."
+    "\n"
+    "This policy determines whether the commands should always expose the "
+    "cache value.  "
+    "The OLD behavior for this policy is to leave conflicting local "
+    "variable values untouched and hide the true cache value.  "
+    "The NEW behavior for this policy is to always expose the cache value.",
+    2,7,20090910, cmPolicies::WARN);
+
 }
 
 cmPolicies::~cmPolicies()

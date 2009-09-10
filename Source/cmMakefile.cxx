@@ -1662,6 +1662,57 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 }
 
+//----------------------------------------------------------------------------
+void cmMakefile::UseCacheDefinition(cmCacheManager::CacheIterator const& it)
+{
+  // Check for a local definition that might hide the cache value.
+  const char* name = it.GetName();
+  const char* def = this->Internal->VarStack.top().Get(name);
+  if(!def)
+    {
+    return;
+    }
+
+  // If the visible value will change then check policy CMP0015.
+  const char* cache = it.GetValue();
+  if(strcmp(def, cache) != 0)
+    {
+    cmOStringStream e;
+    switch (this->GetPolicyStatus(cmPolicies::CMP0015))
+      {
+      case cmPolicies::WARN:
+        e << "Local variable \"" << name << "\" is set to\n"
+          << "  " << def << "\n"
+          << "but the CACHE entry of the same name is set to\n"
+          << "  " << cache << "\n"
+          << "The local variable is hiding the cache value."
+          << "\n"
+          << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0015);
+        this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      case cmPolicies::OLD:
+        // OLD behavior is to leave local definition.
+        return;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        e << "Local variable \"" << name << "\" is set to\n"
+          << "  " << def << "\n"
+          << "but the CACHE entry of the same name is set to\n"
+          << "  " << cache << "\n"
+          << "This command is removing the local variable to expose "
+          << "the cache value."
+          << "\n"
+          << this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0015);
+        this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      case cmPolicies::NEW:
+        // NEW behavior is to remove local definition (done below).
+        break;
+      }
+    }
+
+  // Remove the local definition to make the cache value visible.
+  this->RemoveDefinition(name);
+}
+
 
 void cmMakefile::AddCacheDefinition(const char* name, const char* value,
                                     const char* doc,

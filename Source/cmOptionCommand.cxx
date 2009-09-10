@@ -58,6 +58,7 @@ bool cmOptionCommand
     if ( it.GetType() != cmCacheManager::UNINITIALIZED )
       {
       it.SetProperty("HELPSTRING", args[1].c_str());
+      this->Makefile->UseCacheDefinition(it);
       return true;
       }
     if ( it.GetValue() )
