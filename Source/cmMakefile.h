@@ -294,8 +294,6 @@ public:
    * Add bool variable definition to the build. 
    */
   void AddDefinition(const char* name, bool);
-  ///! Add a definition to this makefile and the global cmake cache.
-  void AddCacheDefinition(const char* name, bool, const char* doc);
 
   /**
    * Remove a variable definition from the build.  This is not valid

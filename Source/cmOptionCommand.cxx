@@ -69,9 +69,7 @@ bool cmOptionCommand
     {
     initialValue = args[2];
     }
-  this->Makefile->AddCacheDefinition(args[0].c_str(),
-    cmSystemTools::IsOn(initialValue.c_str()),
-    args[1].c_str());
-
+  this->Makefile->AddCacheDefinition(args[0].c_str(), initialValue.c_str(),
+                                     args[1].c_str(), cmCacheManager::BOOL);
   return true;
 }
