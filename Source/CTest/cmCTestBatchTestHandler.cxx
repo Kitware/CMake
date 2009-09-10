@@ -1,0 +1,119 @@
+#include "cmCTestBatchTestHandler.h"
+#include "cmProcess.h"
+#include "cmStandardIncludes.h"
+#include "cmCTest.h"
+#include "cmSystemTools.h"
+#include <stdlib.h>
+
+cmCTestBatchTestHandler::~cmCTestBatchTestHandler()
+{
+}
+
+//---------------------------------------------------------
+void cmCTestBatchTestHandler::RunTests()
+{
+  this->WriteBatchScript();
+  //this->SubmitBatchScript();
+}
+
+//---------------------------------------------------------
+void cmCTestBatchTestHandler::WriteBatchScript()
+{
+  this->Script = this->CTest->GetBinaryDir()
+    + "/Testing/CTestBatch.txt";
+  std::fstream fout;
+  fout.open(this->Script.c_str(), std::ios::out);
+  fout << "# !/bin/sh\n";
+
+  for(TestMap::iterator i = this->Tests.begin(); i != this->Tests.end(); ++i)
+    {
+    this->WriteSrunArgs(i->first, fout);
+    this->WriteTestCommand(i->first, fout);
+    fout << "&\n"; //fork and continue
+    }
+  fout.flush();
+  fout.close();
+}
+
+//---------------------------------------------------------
+void cmCTestBatchTestHandler::WriteSrunArgs(int test, std::fstream& fout)
+{
+  cmCTestTestHandler::cmCTestTestProperties* properties =
+      this->Properties[test];
+
+  fout << "srun --jobid=" << test << " ";
+  fout << "J=" << properties->Name << " ";
+ 
+  //Write dependency information
+  if(this->Tests[test].size() > 0)
+    {
+      fout << "-P=afterany";
+      for(TestSet::iterator i = this->Tests[test].begin();
+          i != this->Tests[test].end(); ++i)
+        {
+          fout << ":" << *i;
+        }
+      fout << " ";
+    }
+  if(properties->RunSerial)
+    {
+    fout << "--exclusive ";
+    }
+  if(properties->Processors > 1)
+    {
+    fout << "-n" << properties->Processors << " ";
+    }
+}
+
+//---------------------------------------------------------
+void cmCTestBatchTestHandler::WriteTestCommand(int test, std::fstream& fout)
+{
+  std::vector<std::string> args = this->Properties[test]->Args;
+  std::vector<std::string> processArgs;
+  std::string command;
+
+  command = this->TestHandler->FindTheExecutable(args[1].c_str());
+  command = cmSystemTools::ConvertToOutputPath(command.c_str());
+
+  //Prepends memcheck args to our command string if this is a memcheck
+  this->TestHandler->GenerateTestCommand(processArgs);
+  processArgs.push_back(command);
+
+  for(std::vector<std::string>::iterator arg = processArgs.begin();
+      arg != processArgs.end(); ++arg)
+    {
+    fout << *arg << " ";
+    }
+
+  std::vector<std::string>::iterator i = args.begin();
+  ++i; //the test name
+  ++i; //the executable (command)
+  for(; i != args.end(); ++i)
+    {
+    fout << *i << " "; //args to the test executable
+    }
+  //TODO ZACH build TestResult.FullCommandLine
+  //this->TestResult.FullCommandLine = this->TestCommand;
+}
+
+//---------------------------------------------------------
+void cmCTestBatchTestHandler::SubmitBatchScript()
+{
+  cmProcess sbatch;
+  std::vector<std::string> args;
+  args.push_back(this->Script);
+  args.push_back("-o");
+  args.push_back(this->CTest->GetBinaryDir()
+                 + "/Testing/CTestBatchOutput.txt");
+
+  sbatch.SetCommand("sbatch");
+  sbatch.SetCommandArguments(args);
+  if(sbatch.StartProcess())
+    {
+      //success condition
+    }
+  else
+    {
+      //fail condition
+    }
+}
