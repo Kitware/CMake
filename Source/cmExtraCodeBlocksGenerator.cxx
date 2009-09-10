@@ -338,14 +338,31 @@ void cmExtraCodeBlocksGenerator
         switch(ti->second.GetType())
         {
           case cmTarget::GLOBAL_TARGET:
+            {
+            bool insertTarget = false;
             // Only add the global targets from CMAKE_BINARY_DIR, 
             // not from the subdirs
             if (strcmp(makefile->GetStartOutputDirectory(), 
                        makefile->GetHomeOutputDirectory())==0)
               {
-              this->AppendTarget(fout, ti->first.c_str(), 0, 
-                                 make.c_str(), makefile, compiler.c_str());
+              insertTarget = true;
+              // only add the "edit_cache" target if it's not ccmake, because
+              // this will not work within the IDE
+              if (ti->first == "edit_cache")
+                {
+                if (strstr(makefile->GetRequiredDefinition
+                                       ("CMAKE_EDIT_COMMAND"), "ccmake")!=NULL)
+                  {
+                  insertTarget = false;
+                  }
+                }
               }
+            if (insertTarget)
+              {
+              this->AppendTarget(fout, ti->first.c_str(), 0, 
+                               make.c_str(), makefile, compiler.c_str());
+              }
+            }
             break;
           case cmTarget::UTILITY:
             // Add all utility targets, except the Nightly/Continuous/
