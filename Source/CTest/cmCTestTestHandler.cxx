@@ -17,6 +17,7 @@
 
 #include "cmCTestTestHandler.h"
 #include "cmCTestMultiProcessHandler.h"
+#include "cmCTestBatchTestHandler.h"
 #include "cmCTest.h"
 #include "cmCTestRunTest.h"
 #include "cmake.h"
@@ -999,10 +1000,11 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   this->StartTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
   double elapsed_time_start = cmSystemTools::GetTime();
 
-  cmCTestMultiProcessHandler parallel;
-  parallel.SetCTest(this->CTest);
-  parallel.SetParallelLevel(this->CTest->GetParallelLevel());
-  parallel.SetTestHandler(this);
+  cmCTestMultiProcessHandler* parallel = this->CTest->GetBatchJobs() ?
+    new cmCTestBatchTestHandler : new cmCTestMultiProcessHandler;
+  parallel->SetCTest(this->CTest);
+  parallel->SetParallelLevel(this->CTest->GetParallelLevel());
+  parallel->SetTestHandler(this);
 
   *this->LogFile << "Start testing: "
     << this->CTest->CurrentTime() << std::endl
@@ -1013,7 +1015,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   cmCTestMultiProcessHandler::PropertiesMap properties;
   
   for (ListOfTests::iterator it = this->TestList.begin();
-       it != this->TestList.end(); it ++ )
+       it != this->TestList.end(); ++it)
     { 
     cmCTestTestProperties& p = *it;
     cmCTestMultiProcessHandler::TestSet depends;
@@ -1021,10 +1023,10 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     if(p.Depends.size())
       {
       for(std::vector<std::string>::iterator i = p.Depends.begin();
-        i != p.Depends.end(); ++i)
+          i != p.Depends.end(); ++i)
         {
         for(ListOfTests::iterator it2 = this->TestList.begin();
-            it2 != this->TestList.end(); it2 ++ )
+            it2 != this->TestList.end(); ++it2)
           {
           if(it2->Name == *i)
             {
@@ -1037,18 +1039,19 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
     tests[it->Index] = depends;
     properties[it->Index] = &*it;
     }
-  parallel.SetTests(tests, properties);
-  parallel.SetPassFailVectors(&passed, &failed);
+  parallel->SetTests(tests, properties);
+  parallel->SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
-  parallel.SetTestResults(&this->TestResults);
+  parallel->SetTestResults(&this->TestResults);
   if(this->CTest->GetShowOnly())
     {
-    parallel.PrintTestList();
+    parallel->PrintTestList();
     }
   else
     {
-    parallel.RunTests();
+    parallel->RunTests();
     }
+  delete parallel;
   this->EndTest = this->CTest->CurrentTime();
   this->EndTestTime = static_cast<unsigned int>(cmSystemTools::GetTime());
   this->ElapsedTestingTime = cmSystemTools::GetTime() - elapsed_time_start;

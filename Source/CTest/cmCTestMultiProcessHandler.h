@@ -36,13 +36,13 @@ public:
      std::map<int, cmCTestTestHandler::cmCTestTestProperties*> {};
 
   cmCTestMultiProcessHandler();
+  virtual ~cmCTestMultiProcessHandler();
   // Set the tests
   void SetTests(TestMap& tests, PropertiesMap& properties);
   // Set the max number of tests that can be run at the same time.
   void SetParallelLevel(size_t);
-  void RunTests();
+  virtual void RunTests();
   void PrintTestList();
-  void SubmitBatchTests();
 
   void SetPassFailVectors(std::vector<cmStdString>* passed,
                           std::vector<cmStdString>* failed)

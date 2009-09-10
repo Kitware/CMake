@@ -342,6 +342,7 @@ INCLUDE_DIRECTORIES(
 #
 SET(CTEST_SRCS cmCTest.cxx
   CTest/cmProcess.cxx
+  CTest/cmCTestBatchTestHandler.cxx
   CTest/cmCTestBuildAndTestHandler.cxx
   CTest/cmCTestBuildCommand.cxx
   CTest/cmCTestBuildHandler.cxx

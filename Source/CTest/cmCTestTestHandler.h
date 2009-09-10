@@ -32,6 +32,7 @@ class cmCTestTestHandler : public cmCTestGenericHandler
 {
   friend class cmCTestRunTest;
   friend class cmCTestMultiProcessHandler;
+  friend class cmCTestBatchTestHandler;
 public:
   cmTypeMacro(cmCTestTestHandler, cmCTestGenericHandler);
 

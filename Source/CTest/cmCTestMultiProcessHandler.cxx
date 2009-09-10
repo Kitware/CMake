@@ -27,6 +27,11 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   this->Completed = 0;
   this->RunningCount = 0;
 }
+
+cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler()
+{
+}
+
   // Set the tests
 void 
 cmCTestMultiProcessHandler::SetTests(TestMap& tests,
@@ -55,11 +60,6 @@ void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::RunTests()
 {
-  if(this->CTest->GetBatchJobs())
-    {
-    this->SubmitBatchTests();
-    return;
-    }
   this->CheckResume();
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
   this->StartNextTests();
@@ -73,18 +73,6 @@ void cmCTestMultiProcessHandler::RunTests()
     {
     }
   this->MarkFinished();
-}
-
-//---------------------------------------------------------
-void cmCTestMultiProcessHandler::SubmitBatchTests()
-{
-  for(cmCTest::CTestConfigurationMap::iterator i =
-      this->CTest->CTestConfiguration.begin();
-      i != this->CTest->CTestConfiguration.end(); ++i)
-    {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, i->first 
-               << " = " << i->second << std::endl);
-    }
 }
 
 //---------------------------------------------------------
