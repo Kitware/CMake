@@ -114,6 +114,7 @@ bool cmProcess::Buffer::GetLast(std::string& line)
   if(!this->empty())
     {
     line.assign(&*this->begin(), this->size());
+    this->First = this->Last = 0;
     this->clear();
     return true;
     }
