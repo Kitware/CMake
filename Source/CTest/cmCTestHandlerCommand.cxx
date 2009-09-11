@@ -111,7 +111,7 @@ bool cmCTestHandlerCommand
     {
     this->CTest->SetCTestConfiguration("SourceDirectory",
       cmSystemTools::CollapseFullPath(
-        this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY")).c_str());
+        this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY")).c_str());
     }
   if ( this->Values[ct_SUBMIT_INDEX] )
     {
