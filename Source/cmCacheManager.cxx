@@ -766,19 +766,6 @@ void cmCacheManager::AddCacheEntry(const char* key,
   this->Cache[key] = e;
 }
 
-void cmCacheManager::AddCacheEntry(const char* key, bool v,
-                                   const char* helpString)
-{
-  if(v)
-    {
-    this->AddCacheEntry(key, "ON", helpString, cmCacheManager::BOOL);
-    }
-  else
-    {
-    this->AddCacheEntry(key, "OFF", helpString, cmCacheManager::BOOL);
-    }
-}
-
 bool cmCacheManager::CacheIterator::IsAtEnd() const
 {
   return this->Position == this->Container.Cache.end();

@@ -164,9 +164,6 @@ protected:
   void AddCacheEntry(const char* key, const char* value, 
                      const char* helpString, CacheEntryType type);
 
-  ///! Add a BOOL entry into the cache
-  void AddCacheEntry(const char* key, bool, const char* helpString);
-
   ///! Get a cache entry object for a key
   CacheEntry *GetCacheEntry(const char *key);
   ///! Clean out the CMakeFiles directory if no CMakeCache.txt

@@ -2153,8 +2153,9 @@ int cmake::ActualConfigure()
   if(!this->CacheManager->GetCacheValue("CMAKE_USE_RELATIVE_PATHS"))
     {
     this->CacheManager->AddCacheEntry
-      ("CMAKE_USE_RELATIVE_PATHS", false,
-       "If true, cmake will use relative paths in makefiles and projects.");
+      ("CMAKE_USE_RELATIVE_PATHS", "OFF",
+       "If true, cmake will use relative paths in makefiles and projects.",
+       cmCacheManager::BOOL);
     cmCacheManager::CacheIterator it =
       this->CacheManager->GetCacheIterator("CMAKE_USE_RELATIVE_PATHS");
     if ( !it.PropertyExists("ADVANCED") )
