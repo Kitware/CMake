@@ -87,12 +87,12 @@ bool cmCMakeMinimumRequired
     }
 
   // Compare the version numbers.
-  if(current_major < required_major ||
-     current_major == required_major &&
-     current_minor < required_minor ||
-     current_major == required_major &&
-     current_minor == required_minor &&
-     current_patch < required_patch)
+  if((current_major < required_major) ||
+     (current_major == required_major &&
+      current_minor < required_minor) ||
+     (current_major == required_major &&
+      current_minor == required_minor &&
+      current_patch < required_patch))
     {
     // The current version is too low.
     cmOStringStream e;
@@ -110,7 +110,7 @@ bool cmCMakeMinimumRequired
     return false;
     }
 
-  if (required_major < 2 || required_major == 2 && required_minor < 4)
+  if (required_major < 2 || (required_major == 2 && required_minor < 4))
   {
     this->Makefile->SetPolicyVersion("2.4");
   }

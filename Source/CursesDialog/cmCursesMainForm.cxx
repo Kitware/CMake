@@ -231,7 +231,8 @@ void cmCursesMainForm::RePost()
       {
       cmCacheManager::CacheIterator mit = 
         this->CMakeInstance->GetCacheManager()->GetCacheIterator((*it)->GetValue());
-      if (mit.IsAtEnd() || !this->AdvancedMode && mit.GetPropertyAsBool("ADVANCED"))
+      if (mit.IsAtEnd() ||
+          (!this->AdvancedMode && mit.GetPropertyAsBool("ADVANCED")))
         {
         continue;
         }
@@ -259,7 +260,8 @@ void cmCursesMainForm::RePost()
     {
     cmCacheManager::CacheIterator mit = 
       this->CMakeInstance->GetCacheManager()->GetCacheIterator((*it)->GetValue());
-    if (mit.IsAtEnd() || !this->AdvancedMode && mit.GetPropertyAsBool("ADVANCED"))
+    if (mit.IsAtEnd() ||
+        (!this->AdvancedMode && mit.GetPropertyAsBool("ADVANCED")))
       {
       continue;
       }
@@ -327,7 +329,8 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
       {
       cmCacheManager::CacheIterator mit = 
         this->CMakeInstance->GetCacheManager()->GetCacheIterator((*it)->GetValue());
-      if (mit.IsAtEnd() || !this->AdvancedMode && mit.GetPropertyAsBool("ADVANCED"))
+      if (mit.IsAtEnd() ||
+          (!this->AdvancedMode && mit.GetPropertyAsBool("ADVANCED")))
         {
         continue;
         }
@@ -344,7 +347,8 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
     {
     cmCacheManager::CacheIterator mit = 
       this->CMakeInstance->GetCacheManager()->GetCacheIterator((*it)->GetValue());
-    if (mit.IsAtEnd() || !this->AdvancedMode && mit.GetPropertyAsBool("ADVANCED"))
+    if (mit.IsAtEnd() ||
+        (!this->AdvancedMode && mit.GetPropertyAsBool("ADVANCED")))
       {
       continue;
       }
@@ -914,10 +918,10 @@ void cmCursesMainForm::HandleInput()
         this->SearchMode = false;
         }
       */
-      else if ( key >= 'a' && key <= 'z' || 
-                key >= 'A' && key <= 'Z' ||
-                key >= '0' && key <= '9' ||
-                key == '_' )
+      else if ((key >= 'a' && key <= 'z') ||
+               (key >= 'A' && key <= 'Z') ||
+               (key >= '0' && key <= '9') ||
+               (key == '_' ))
         {
         if ( this->SearchString.size() < static_cast<std::string::size_type>(x-10) )
           {

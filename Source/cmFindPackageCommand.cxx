@@ -900,13 +900,13 @@ void cmFindPackageCommand::FindConfig()
   bool found = false;
 
   // Search for frameworks.
-  if(!found && this->SearchFrameworkFirst || this->SearchFrameworkOnly)
+  if(!found && (this->SearchFrameworkFirst || this->SearchFrameworkOnly))
     {
     found = this->FindFrameworkConfig();
     }
 
   // Search for apps.
-  if(!found && this->SearchAppBundleFirst || this->SearchAppBundleOnly)
+  if(!found && (this->SearchAppBundleFirst || this->SearchAppBundleOnly))
     {
     found = this->FindAppBundleConfig();
     }
@@ -1136,8 +1136,8 @@ void cmFindPackageCommand::AddPrefixesSystemEnvironment()
       std::string const& d = *i;
 
       // If the path is a PREFIX/bin case then add its parent instead.
-      if(d.size() >= 4 && strcmp(d.c_str()+d.size()-4, "/bin") == 0 ||
-         d.size() >= 5 && strcmp(d.c_str()+d.size()-5, "/sbin") == 0)
+      if((d.size() >= 4 && strcmp(d.c_str()+d.size()-4, "/bin") == 0) ||
+         (d.size() >= 5 && strcmp(d.c_str()+d.size()-5, "/sbin") == 0))
         {
         this->AddPathInternal(cmSystemTools::GetFilenamePath(d), EnvPath);
         }

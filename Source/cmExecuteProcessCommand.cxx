@@ -298,8 +298,8 @@ bool cmExecuteProcessCommand
   while((p = cmsysProcess_WaitForData(cp, &data, &length, 0), p))
     {
     // Put the output in the right place.
-    if(p == cmsysProcess_Pipe_STDOUT && !output_quiet ||
-       p == cmsysProcess_Pipe_STDERR && !error_quiet && merge_output)
+    if((p == cmsysProcess_Pipe_STDOUT && !output_quiet) ||
+       (p == cmsysProcess_Pipe_STDERR && !error_quiet && merge_output))
       {
       if(output_variable.empty())
         {

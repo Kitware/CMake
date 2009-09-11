@@ -134,9 +134,9 @@ bool cmSetCommand
   // we should be nice and try to catch some simple screwups if the last or
   // next to last args are CACHE then they screwed up.  If they used FORCE
   // without CACHE they screwed up
-  if (args[args.size() - 1] == "CACHE" ||
-      args.size() > 1 && args[args.size() - 2] == "CACHE" ||
-      force && !cache)
+  if ((args[args.size() - 1] == "CACHE") ||
+      (args.size() > 1 && args[args.size() - 2] == "CACHE") ||
+      (force && !cache))
     {
     this->SetError("given invalid arguments for CACHE mode.");
     return false;

@@ -590,7 +590,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       {
       // Ignore CR character to make output always have UNIX newlines.
       }
-    else if(c >= 0x20 && c < 0x7F || c == '\t' || c == '\f' ||
+    else if((c >= 0x20 && c < 0x7F) || c == '\t' || c == '\f' ||
             (c == '\n' && newline_consume))
       {
       // This is an ASCII character that may be part of a string.
@@ -1973,7 +1973,7 @@ bool cmFileInstaller::HandleInstallDestination()
     if ( ch1 != '/' )
       {
       int relative = 0;
-      if ( ( ch1 >= 'a' && ch1 <= 'z' || ch1 >= 'A' && ch1 <= 'Z' ) &&
+      if (((ch1 >= 'a' && ch1 <= 'z') || (ch1 >= 'A' && ch1 <= 'Z')) &&
              ch2 == ':' )
         {
         // Assume windows

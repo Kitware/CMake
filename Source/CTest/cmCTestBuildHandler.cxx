@@ -611,8 +611,8 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
         it != ew.end() && (numErrorsAllowed || numWarningsAllowed); it++ )
     {
     cmCTestBuildErrorWarning *cm = &(*it);
-    if (cm->Error && numErrorsAllowed ||
-        !cm->Error && numWarningsAllowed)
+    if ((cm->Error && numErrorsAllowed) ||
+        (!cm->Error && numWarningsAllowed))
       {
       if (cm->Error)
         {
@@ -681,8 +681,8 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
          << "</PreContext>\n"
          << "\t\t<PostContext>" << cmXMLSafe(cm->PostContext).Quotes(false);
       // is this the last warning or error, if so notify
-      if (cm->Error && !numErrorsAllowed ||
-          !cm->Error && !numWarningsAllowed)
+      if ((cm->Error && !numErrorsAllowed) ||
+          (!cm->Error && !numWarningsAllowed))
         {
         os << "\nThe maximum number of reported warnings or errors has been "
           "reached!!!\n";

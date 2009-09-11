@@ -56,7 +56,7 @@ bool cmUtilitySourceCommand
     {
     haveCacheValue = (cacheValue &&
      (strstr(cacheValue, "(IntDir)") == 0 ||
-      intDir && strcmp(intDir, "$(IntDir)") == 0) &&
+      (intDir && strcmp(intDir, "$(IntDir)") == 0)) &&
      (this->Makefile->GetCacheMajorVersion() != 0 &&
       this->Makefile->GetCacheMinorVersion() != 0 ));
     }

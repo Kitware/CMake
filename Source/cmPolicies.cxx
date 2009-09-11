@@ -497,7 +497,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     }
   
   // it is an error if the policy version is less than 2.4
-  if (majorVer < 2 || majorVer == 2 && minorVer < 4)
+  if (majorVer < 2 || (majorVer == 2 && minorVer < 4))
     {
     mf->IssueMessage(cmake::FATAL_ERROR,
       "An attempt was made to set the policy version of CMake to something "

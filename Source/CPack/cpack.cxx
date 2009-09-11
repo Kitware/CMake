@@ -359,10 +359,11 @@ int main (int argc, char *argv[])
             "CPack project name not specified" << std::endl);
           parsed = 0;
           }
-        if ( parsed && !(mf->GetDefinition("CPACK_PACKAGE_VERSION")
-            || mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR") &&
-            mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR")
-            && mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH")) )
+        if (parsed &&
+            !(mf->GetDefinition("CPACK_PACKAGE_VERSION") ||
+              (mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR") &&
+               mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR") &&
+               mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH"))))
           {
           cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
             "CPack project version not specified" << std::endl
