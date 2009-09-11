@@ -156,6 +156,10 @@ static const char * cmDocumentationOptions[][3] =
    "When just running tests not for a dashboard the default is to allow "
    "popups and interactive "
    "debugging."},
+  {"--no-label-summary", "Disable timing summary information for labels.",
+   "This option tells ctest to not print summary information for each label "
+   "associated with the tests run. If there are no labels on the "
+   "tests, nothing extra is printed."},
   {"--build-and-test", "Configure, build and run a test.",
    "This option tells ctest to configure (i.e. run cmake on), build, and or "
    "execute a test. The configure and test steps are optional. The arguments "

@@ -208,6 +208,7 @@ std::string cmCTest::DecodeURL(const std::string& in)
 //----------------------------------------------------------------------
 cmCTest::cmCTest()
 {
+  this->LabelSummary           = true;
   this->ParallelLevel          = 1;
   this->SubmitIndex            = 0;
   this->Failover               = false;
@@ -1737,6 +1738,10 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
   if(this->CheckArgument(arg, "--show-line-numbers"))
     {
     this->ShowLineNumbers = true;
+    }
+  if(this->CheckArgument(arg, "--no-label-summary"))
+    {
+    this->LabelSummary = false;
     }
   if(this->CheckArgument(arg, "-Q", "--quiet"))
     {

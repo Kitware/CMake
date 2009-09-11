@@ -376,11 +376,13 @@ public:
   void SetStreams(std::ostream* out, std::ostream* err)
     { this->StreamOut = out; this->StreamErr = err; }
   void AddSiteProperties(std::ostream& );
+  bool GetLabelSummary() { return this->LabelSummary;}
 private:
   std::string ConfigType;
   bool Verbose;
   bool ExtraVerbose;
   bool ProduceXML;
+  bool LabelSummary;
 
   bool Failover;
   bool BatchJobs;
