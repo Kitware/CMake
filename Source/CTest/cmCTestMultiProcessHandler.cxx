@@ -83,9 +83,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   // now remove the test itself
   this->EraseTest(test);
 
-  cmCTestRunTest* testRun = new cmCTestRunTest;
-  testRun->SetCTest(this->CTest);
-  testRun->SetTestHandler(this->TestHandler);
+  cmCTestRunTest* testRun = new cmCTestRunTest(this->TestHandler);
   testRun->SetIndex(test);
   testRun->SetTestProperties(this->Properties[test]);
   if(testRun->StartTest())
@@ -346,9 +344,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
     count++;
     cmCTestTestHandler::cmCTestTestProperties& p = *it->second;
 
-    cmCTestRunTest testRun;
-    testRun.SetCTest(this->CTest);
-    testRun.SetTestHandler(this->TestHandler);
+    cmCTestRunTest testRun(this->TestHandler);
     testRun.SetIndex(p.Index);
     testRun.SetTestProperties(&p);
     testRun.ComputeArguments(); //logs the command in verbose mode

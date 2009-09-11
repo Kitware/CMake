@@ -29,7 +29,7 @@
 class cmCTestRunTest
 {
 public:
-  cmCTestRunTest();
+  cmCTestRunTest(cmCTestTestHandler* handler);
   ~cmCTestRunTest();
 
   void SetTestProperties(cmCTestTestHandler::cmCTestTestProperties * prop)
@@ -37,12 +37,8 @@ public:
 
   cmCTestTestHandler::cmCTestTestProperties * GetTestProperties()
   { return this->TestProperties; }
-  
-  void SetTestHandler(cmCTestTestHandler * handler);
 
   void SetIndex(int i) { this->Index = i; }
-
-  void SetCTest(cmCTest * ct) { this->CTest = ct; }
 
   int GetIndex() { return this->Index; }
 

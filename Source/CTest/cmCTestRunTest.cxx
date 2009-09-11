@@ -20,8 +20,10 @@
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 
-cmCTestRunTest::cmCTestRunTest()
+cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
 {
+  this->CTest = handler->CTest;
+  this->TestHandler = handler;
 }
 
 cmCTestRunTest::~cmCTestRunTest()
@@ -300,12 +302,6 @@ void cmCTestRunTest::MemCheckPostProcess()
     {
     handler->PostProcessPurifyTest(this->TestResult); 
     }
-}
-
-void cmCTestRunTest::SetTestHandler(cmCTestTestHandler * handler)
-{
-  this->TestHandler = handler;
-  this->CTest = handler->CTest;
 }
 
 //----------------------------------------------------------------------
