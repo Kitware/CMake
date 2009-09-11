@@ -23,7 +23,6 @@ cmProcess::cmProcess()
   this->Process = 0;
   this->Timeout = 0;
   this->TotalTime = 0;
-  this->LastOutputPipe = cmsysProcess_Pipe_None;
   this->ExitValue = 0;
   this->Id = 0;
   this->StartTime = 0;
@@ -74,153 +73,112 @@ bool cmProcess::StartProcess()
           == cmsysProcess_State_Executing);
 }
 
-int cmProcess::GetNextOutputLine(std::string& stdOutLine,
-                            std::string& stdErrLine,
-                            bool& gotStdOut,
-                            bool& gotStdErr,
-                            bool running)
+//----------------------------------------------------------------------------
+bool cmProcess::Buffer::GetLine(std::string& line)
 {
-  if(this->StdErrorBuffer.empty() && this->StdOutBuffer.empty())
+  // Scan for the next newline.
+  for(size_type sz = this->size(); this->Last != sz; ++this->Last)
+    {
+    if((*this)[this->Last] == '\n' || (*this)[this->Last] == '\0')
+      {
+      // Extract the range first..last as a line.
+      const char* data = &*this->begin() + this->First;
+      size_type length = this->Last - this->First;
+      length -= (length && data[length-1] == '\r')? 1:0;
+      line.assign(data, length);
+
+      // Start a new range for the next line.
+      ++this->Last;
+      this->First = Last;
+
+      // Return the line extracted.
+      return true;
+      }
+    }
+
+  // Available data have been exhausted without a newline.
+  if(this->First != 0)
+    {
+    // Move the partial line to the beginning of the buffer.
+    this->erase(this->begin(), this->begin() + this->First);
+    this->First = 0;
+    this->Last = this->size();
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmProcess::Buffer::GetLast(std::string& line)
+{
+  // Return the partial last line, if any.
+  if(!this->empty())
+    {
+    line.assign(&*this->begin(), this->size());
+    this->clear();
+    return true;
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+int cmProcess::GetNextOutputLine(std::string& line, double timeout)
+{
+  for(;;)
+    {
+    // Look for lines already buffered.
+    if(this->StdOut.GetLine(line))
+      {
+      return cmsysProcess_Pipe_STDOUT;
+      }
+    else if(this->StdErr.GetLine(line))
+      {
+      return cmsysProcess_Pipe_STDERR;
+      }
+
+    // Check for more data from the process.
+    char* data;
+    int length;
+    int p = cmsysProcess_WaitForData(this->Process, &data, &length, &timeout);
+    if(p == cmsysProcess_Pipe_Timeout)
+      {
+      return cmsysProcess_Pipe_Timeout;
+      }
+    else if(p == cmsysProcess_Pipe_STDOUT)
+      {
+      this->StdOut.insert(this->StdOut.end(), data, data+length);
+      }
+    else if(p == cmsysProcess_Pipe_STDERR)
+      {
+      this->StdErr.insert(this->StdErr.end(), data, data+length);
+      }
+    else // p == cmsysProcess_Pipe_None
+      {
+      // The process will provide no more data.
+      break;
+      }
+    }
+
+  // Look for partial last lines.
+  if(this->StdOut.GetLast(line))
+    {
+    return cmsysProcess_Pipe_STDOUT;
+    }
+  else if(this->StdErr.GetLast(line))
+    {
+    return cmsysProcess_Pipe_STDERR;
+    }
+
+  // No more data.  Wait for process exit.
+  if(!cmsysProcess_WaitForExit(this->Process, &timeout))
     {
     return cmsysProcess_Pipe_Timeout;
     }
-  stdOutLine = "";
-  stdErrLine = "";
 
-  this->LastOutputPipe = cmsysProcess_Pipe_Timeout;
-  std::vector<char>::iterator outiter = 
-    this->StdOutBuffer.begin();
-  std::vector<char>::iterator erriter = 
-    this->StdErrorBuffer.begin();
-
-  // Check for a newline in stdout.
-  for(;outiter != this->StdOutBuffer.end(); ++outiter)
-    {
-    if((*outiter == '\r') && ((outiter+1) == this->StdOutBuffer.end()))
-      {
-      break;
-      }
-    else if(*outiter == '\n' || *outiter == '\0')
-      {
-      int length = outiter-this->StdOutBuffer.begin();
-      if(length > 1 && *(outiter-1) == '\r')
-        {
-        --length;
-        }
-      if(length > 0)
-        {
-        stdOutLine.append(&this->StdOutBuffer[0], length);
-        }
-      this->StdOutBuffer.erase(this->StdOutBuffer.begin(), outiter+1);
-      this->LastOutputPipe = cmsysProcess_Pipe_STDOUT;
-      gotStdOut = true;
-      break;
-      }
-    }
-
-  // Check for a newline in stderr.
-  for(;erriter != this->StdErrorBuffer.end(); ++erriter)
-    {
-    if((*erriter == '\r') && ((erriter+1) == this->StdErrorBuffer.end()))
-      {
-      break;
-      }
-    else if(*erriter == '\n' || *erriter == '\0')
-      {
-      int length = erriter-this->StdErrorBuffer.begin();
-      if(length > 1 && *(erriter-1) == '\r')
-        {
-        --length;
-        }
-      if(length > 0)
-        {
-        stdErrLine.append(&this->StdErrorBuffer[0], length);
-        }
-      this->StdErrorBuffer.erase(this->StdErrorBuffer.begin(), erriter+1);
-      this->LastOutputPipe = cmsysProcess_Pipe_STDERR;
-      gotStdErr = true;
-      break;
-      }
-    }
-
-  if(!running && !gotStdErr && !gotStdOut)
-  {
-    //If process terminated with no newline, flush the buffer
-    if(!running)
-      {
-      if(!this->StdErrorBuffer.empty())
-        {
-        gotStdErr = true;
-        stdErrLine.append(&this->StdErrorBuffer[0],
-                          this->StdErrorBuffer.size());
-        this->StdErrorBuffer.erase(this->StdErrorBuffer.begin(), 
-          this->StdErrorBuffer.end());
-        }
-      if(!this->StdOutBuffer.empty())
-        {
-        gotStdOut = true;
-        stdOutLine.append(&this->StdOutBuffer[0],
-                          this->StdOutBuffer.size());
-        this->StdOutBuffer.erase(this->StdOutBuffer.begin(),
-          this->StdOutBuffer.end());
-        }
-      return cmsysProcess_Pipe_None;
-      }
-    }
-  //If we get here, we have stuff waiting in the buffers, but no newline
-  return this->LastOutputPipe;
-}
-// return true if there is a new line of data
-// return false if there is no new data
-bool cmProcess::CheckOutput(double timeout)
-{
-  // Wait for data from the process.
-  int length;
-  char* data;
-
-  while(1)
-    {
-    int pipe = cmsysProcess_WaitForData(this->Process, &data, 
-                                        &length, &timeout);
-    if(pipe == cmsysProcess_Pipe_Timeout)
-      {
-      // Timeout has been exceeded.
-      this->LastOutputPipe = pipe;
-      return true;
-      }
-    else if(pipe == cmsysProcess_Pipe_STDOUT)
-      {
-      // Append to the stdout buffer.
-      this->StdOutBuffer.insert(this->StdOutBuffer.end(), data, data+length);
-      this->LastOutputPipe = pipe;
-      }
-    else if(pipe == cmsysProcess_Pipe_STDERR)
-      {
-      // Append to the stderr buffer.
-      this->StdErrorBuffer.insert(this->StdErrorBuffer.end(),
-                                  data, data+length);
-      this->LastOutputPipe = pipe;
-      }
-    else if(pipe == cmsysProcess_Pipe_None)
-      {
-      // Both stdout and stderr pipes have broken.  Return leftover data.
-      if(!this->StdOutBuffer.empty())
-        {
-        this->LastOutputPipe = cmsysProcess_Pipe_STDOUT;
-        return false;
-        }
-      else if(!this->StdErrorBuffer.empty())
-        {
-        this->LastOutputPipe = cmsysProcess_Pipe_STDERR;
-        return false;
-        }
-      else
-        {
-        this->LastOutputPipe = cmsysProcess_Pipe_None;
-        return false;
-        }
-      }
-    }
+  // Record exit information.
+  this->ExitValue = cmsysProcess_GetExitValue(this->Process);
+  this->TotalTime = cmSystemTools::GetTime() - this->StartTime;
+  //  std::cerr << "Time to run: " << this->TotalTime << "\n";
+  return cmsysProcess_Pipe_None;
 }
 
 // return the process status
@@ -232,26 +190,6 @@ int cmProcess::GetProcessStatus()
     }
   return cmsysProcess_GetState(this->Process);
 }
-
-// return true if the process is running
-bool cmProcess::IsRunning()
-{
-  int status = this->GetProcessStatus();
-  if(status == cmsysProcess_State_Executing )
-    {
-    if(this->LastOutputPipe != 0)
-      {
-      return true;
-      }
-    }
-  // if the process is done, then wait for it to exit
-  cmsysProcess_WaitForExit(this->Process, 0);
-  this->ExitValue = cmsysProcess_GetExitValue(this->Process);
-  this->TotalTime = cmSystemTools::GetTime() - this->StartTime;
-//  std::cerr << "Time to run: " << this->TotalTime << "\n";
-  return false;
-}
-
 
 int cmProcess::ReportStatus()
 {

@@ -226,9 +226,7 @@ bool cmCTestMultiProcessHandler::CheckOutput()
       i != this->RunningTests.end(); ++i)
     {
     cmCTestRunTest* p = *i;
-    p->CheckOutput(); //reads and stores the process output
-    
-    if(!p->IsRunning())
+    if(!p->CheckOutput())
       {
       finished.push_back(p);
       }

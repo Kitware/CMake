@@ -39,29 +39,42 @@ public:
   void SetTimeout(double t) { this->Timeout = t;}
   // Return true if the process starts
   bool StartProcess();
-  
-  // return false if process has exited, true otherwise
-  bool CheckOutput(double timeout);
+
   // return the process status
   int GetProcessStatus();
-  // return true if the process is running
-  bool IsRunning();
   // Report the status of the program 
   int ReportStatus();
   int GetId() { return this->Id; }
   void SetId(int id) { this->Id = id;}
   int GetExitValue() { return this->ExitValue;}
   double GetTotalTime() { return this->TotalTime;}
-  int GetNextOutputLine(std::string& stdOutLine, std::string& stdErrLine,
-                        bool& gotStdOut, bool& gotStdErr, bool running);
+
+  /**
+   * Read one line of output but block for no more than timeout.
+   * Returns:
+   *   cmsysProcess_Pipe_None    = Process terminated and all output read
+   *   cmsysProcess_Pipe_STDOUT  = Line came from stdout
+   *   cmsysProcess_Pipe_STDOUT  = Line came from stderr
+   *   cmsysProcess_Pipe_Timeout = Timeout expired while waiting
+   */
+  int GetNextOutputLine(std::string& line, double timeout);
 private:
-  int LastOutputPipe;
   double Timeout;
   double StartTime;
   double TotalTime;
   cmsysProcess* Process;
-  std::vector<char> StdErrorBuffer;
-  std::vector<char> StdOutBuffer;
+  class Buffer: public std::vector<char>
+  {
+    // Half-open index range of partial line already scanned.
+    size_type First;
+    size_type Last;
+  public:
+    Buffer(): First(0), Last(0) {}
+    bool GetLine(std::string& line);
+    bool GetLast(std::string& line);
+  };
+  Buffer StdErr;
+  Buffer StdOut;
   std::string Command;
   std::string WorkingDirectory;
   std::vector<std::string> Arguments;

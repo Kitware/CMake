@@ -47,8 +47,9 @@ public:
   cmCTestTestHandler::cmCTestTestResult GetTestResults()
   { return this->TestResult; }
 
-  bool IsRunning();
-  void CheckOutput();
+  // Read and store output.  Returns true if it must be called again.
+  bool CheckOutput();
+
   //launch the test process, return whether it started correctly
   bool StartTest();
   //capture and report the test results

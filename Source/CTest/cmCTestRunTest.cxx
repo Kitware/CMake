@@ -30,57 +30,36 @@ cmCTestRunTest::~cmCTestRunTest()
 {
 }
 
-bool cmCTestRunTest::IsRunning()
+//----------------------------------------------------------------------------
+bool cmCTestRunTest::CheckOutput()
 {
-  return this->TestProcess->IsRunning();
-}
-
-//---------------------------------------------------------
-//waits .1 sec for output from this process.
-void cmCTestRunTest::CheckOutput()
-{
-  std::string out, err;
-  bool running = this->TestProcess->CheckOutput(.1);
-  //start our timeout for reading the process output
-  double clock_start = cmSystemTools::GetTime();
-  int pipe;
-  bool gotStdOut = false;
-  bool gotStdErr = false;
-  while((pipe = this->TestProcess->
-        GetNextOutputLine(out, err, gotStdOut, gotStdErr, running) )
-        != cmsysProcess_Pipe_Timeout)
+  // Read lines for up to 0.1 seconds of total time.
+  double timeout = 0.1;
+  double timeEnd = cmSystemTools::GetTime() + timeout;
+  std::string line;
+  while((timeout = timeEnd - cmSystemTools::GetTime(), timeout > 0))
     {
-    if(pipe == cmsysProcess_Pipe_STDOUT ||
-       pipe == cmsysProcess_Pipe_STDERR ||
-       pipe == cmsysProcess_Pipe_None)
+    int p = this->TestProcess->GetNextOutputLine(line, timeout);
+    if(p == cmsysProcess_Pipe_None)
       {
-      if(gotStdErr)
-        {
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
-                   this->GetIndex() << ": " << err << std::endl);
-        this->ProcessOutput += err;
-        this->ProcessOutput += "\n";
-        }
-      if(gotStdOut)
-        {
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
-                   this->GetIndex() << ": " << out << std::endl);
-        this->ProcessOutput += out;
-        this->ProcessOutput += "\n";
-        }
-      if(pipe == cmsysProcess_Pipe_None)
-        {
-        break;
-        }
+      // Process has terminated and all output read.
+      return false;
       }
-    gotStdOut = false;
-    gotStdErr = false;
-    //timeout while reading process output (could denote infinite output)
-    if(cmSystemTools::GetTime() - clock_start > .1)
+    else if(p == cmsysProcess_Pipe_STDOUT ||
+            p == cmsysProcess_Pipe_STDERR)
+      {
+      // Store this line of output.
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                 this->GetIndex() << ": " << line << std::endl);
+      this->ProcessOutput += line;
+      this->ProcessOutput += "\n";
+      }
+    else // if(p == cmsysProcess_Pipe_Timeout)
       {
       break;
       }
     }
+  return true;
 }
 
 //---------------------------------------------------------
