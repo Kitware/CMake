@@ -68,15 +68,15 @@ SET(RUBY_RUBY_LIB_PATH ${RUBY_RUBY_LIB_DIR})
 
 FIND_PATH(RUBY_INCLUDE_PATH
    NAMES ruby.h
-   PATHS
+   HINTS
    ${RUBY_ARCH_DIR}
   /usr/lib/ruby/1.8/i586-linux-gnu/ )
 
 # search the ruby library, the version for MSVC can have the "msvc" prefix and the "static" suffix
 FIND_LIBRARY(RUBY_LIBRARY
-  NAMES ruby ruby1.8 ruby1.9
+  NAMES ruby ruby-static ruby1.8 ruby1.9
         msvcrt-ruby18 msvcrt-ruby19 msvcrt-ruby18-static msvcrt-ruby19-static
-  PATHS ${RUBY_POSSIBLE_LIB_DIR}
+  HINTS ${RUBY_POSSIBLE_LIB_DIR}
   )
 
 MARK_AS_ADVANCED(
