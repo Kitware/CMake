@@ -82,10 +82,10 @@ bool cmProcess::Buffer::GetLine(std::string& line)
     if((*this)[this->Last] == '\n' || (*this)[this->Last] == '\0')
       {
       // Extract the range first..last as a line.
-      const char* data = &*this->begin() + this->First;
+      const char* text = &*this->begin() + this->First;
       size_type length = this->Last - this->First;
-      length -= (length && data[length-1] == '\r')? 1:0;
-      line.assign(data, length);
+      length -= (length && text[length-1] == '\r')? 1:0;
+      line.assign(text, length);
 
       // Start a new range for the next line.
       ++this->Last;
