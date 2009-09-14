@@ -52,8 +52,8 @@ void cmDependsJavaParserHelper::CurrentClass
   rname += this->Name;
   files->push_back(rname);
   std::vector<CurrentClass>::iterator it;
-  for ( it = this->NestedClasses.begin();
-    it != this->NestedClasses.end();
+  for ( it = this->NestedClasses->begin();
+    it != this->NestedClasses->end();
     ++ it )
     {
     it->AddFileNamesForPrinting(files, rname.c_str(), sep);
@@ -249,7 +249,7 @@ void cmDependsJavaParserHelper::EndClass()
     abort();
     }
   this->CurrentDepth --;
-  parent->NestedClasses.push_back(*current);
+  parent->NestedClasses->push_back(*current);
   this->ClassStack.erase(this->ClassStack.end()-1, this->ClassStack.end());
 }
 
@@ -275,8 +275,8 @@ std::vector<cmStdString> cmDependsJavaParserHelper::GetFilesProduced()
   std::vector<cmStdString> files;
   CurrentClass* toplevel = &(*(this->ClassStack.begin()));
   std::vector<CurrentClass>::iterator it;
-  for ( it = toplevel->NestedClasses.begin(); 
-    it != toplevel->NestedClasses.end();
+  for ( it = toplevel->NestedClasses->begin(); 
+    it != toplevel->NestedClasses->end();
     ++ it )
     {
     it->AddFileNamesForPrinting(&files, 0, "$");

@@ -70,14 +70,37 @@ public:
 
 private:
   class CurrentClass
-    {
+  {
   public:
     cmStdString Name;
-    std::vector<CurrentClass> NestedClasses;
-    CurrentClass() {}
+    std::vector<CurrentClass>* NestedClasses;
+    CurrentClass() 
+      {
+        this->NestedClasses = new std::vector<CurrentClass>;
+      }
+    ~CurrentClass()
+      {
+        delete this->NestedClasses;
+      }
+    CurrentClass& operator=(CurrentClass const& c) 
+      {
+        this->NestedClasses->clear();
+        this->Name = c.Name;
+        std::copy(
+          c.NestedClasses->begin(),
+          c.NestedClasses->end(),
+          std::back_inserter(
+            *this->NestedClasses)
+          );
+        return *this;
+      }
+    CurrentClass(CurrentClass const& c)
+      {
+        (*this) = c;
+      }
     void AddFileNamesForPrinting(std::vector<cmStdString> *files, 
                                  const char* prefix, const char* sep);
-    };
+  };
   cmStdString CurrentPackage;
   cmStdString::size_type InputBufferPos;
   cmStdString InputBuffer;
