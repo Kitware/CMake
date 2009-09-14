@@ -9,7 +9,12 @@
 #  PNG_LIBRARY, where to find the PNG library.
 # None of the above will be defined unles zlib can be found.
 # PNG depends on Zlib
-include(FindZLIB)
+
+
+if(PNG_FIND_QUIETLY)
+  set(_FIND_ZLIB_ARG QUIET)
+endif(PNG_FIND_QUIETLY)
+find_package(ZLIB ${_FIND_ZLIB_ARG})
 
 if(ZLIB_FOUND)
   find_path(PNG_PNG_INCLUDE_DIR png.h
@@ -39,6 +44,6 @@ endif(ZLIB_FOUND)
 # handle the QUIETLY and REQUIRED arguments and set PNG_FOUND to TRUE if
 # all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(PNG DEFAULT_MSG PNG_LIBRARY PNG_PNG_INCLUDE_DIR)
+find_package_handle_standard_args(PNG  DEFAULT_MSG  PNG_LIBRARY PNG_PNG_INCLUDE_DIR)
 
 mark_as_advanced(PNG_PNG_INCLUDE_DIR PNG_LIBRARY )
