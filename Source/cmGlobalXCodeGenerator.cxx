@@ -650,6 +650,10 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     {
     sourcecode += ".c.c";
     }
+  else if(ext == "png" || ext == "gif" || ext == "jpg")
+    {
+    sourcecode = "image";
+    }
   else if(ext == "txt")
     {
     sourcecode += ".text";
