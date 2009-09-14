@@ -79,7 +79,8 @@ public:
       whole strings, but may be disabled to support concatenating
       expressions more easily (regex1|regex2|etc).  */
   static kwsys_stl::string PatternToRegex(const kwsys_stl::string& pattern,
-                                          bool require_whole_string = true);
+                                          bool require_whole_string = true,
+                                          bool preserve_case = false);
 
 protected:
   //! Process directory

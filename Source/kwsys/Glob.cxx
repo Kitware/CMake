@@ -84,7 +84,8 @@ kwsys_stl::vector<kwsys_stl::string>& Glob::GetFiles()
 
 //----------------------------------------------------------------------------
 kwsys_stl::string Glob::PatternToRegex(const kwsys_stl::string& pattern,
-                                       bool require_whole_string)
+                                       bool require_whole_string,
+                                       bool preserve_case)
 {
   // Incrementally build the regular expression from the pattern.
   kwsys_stl::string regex = require_whole_string? "^" : "";
@@ -195,10 +196,13 @@ kwsys_stl::string Glob::PatternToRegex(const kwsys_stl::string& pattern,
         {
         // On case-insensitive systems file names are converted to lower
         // case before matching.
-        ch = tolower(ch);
+        if(!preserve_case)
+          {
+          ch = tolower(ch);
+          }
         }
 #endif
-
+      (void)preserve_case;
       // Store the character.
       regex.append(1, static_cast<char>(ch));
       }

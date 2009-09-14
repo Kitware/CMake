@@ -416,7 +416,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           }
         }
       cmsys::RegularExpression regex(
-              cmsys::Glob::PatternToRegex(entryPattern.c_str(), true).c_str());
+        cmsys::Glob::PatternToRegex(entryPattern.c_str(), true, true).c_str());
       //go through all cache entries and collect the vars which will be removed
       std::vector<std::string> entriesToDelete;
       cmCacheManager::CacheIterator it = 
