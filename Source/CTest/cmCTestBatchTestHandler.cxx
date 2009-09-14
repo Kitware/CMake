@@ -29,7 +29,7 @@ void cmCTestBatchTestHandler::WriteBatchScript()
     {
     this->WriteSrunArgs(i->first, fout);
     this->WriteTestCommand(i->first, fout);
-    fout << "&\n"; //fork and continue
+    fout << "\n";
     }
   fout.flush();
   fout.close();

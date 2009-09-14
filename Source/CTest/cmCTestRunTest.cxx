@@ -430,7 +430,6 @@ bool cmCTestRunTest::CreateProcess(double testTimeOut,
 
 void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 {
-  
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(getNumWidth(total))
              << completed << "/");
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(getNumWidth(total))
