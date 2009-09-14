@@ -1509,6 +1509,15 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     extraLinkOptions = 
       this->CurrentMakefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
+    std::string var = "CMAKE_EXE_LINKER_FLAGS_";
+    var += cmSystemTools::UpperCase(configName);
+    std::string val =  
+      this->CurrentMakefile->GetSafeDefinition(var.c_str());
+    if(val.size())
+      {
+      extraLinkOptions += " ";
+      extraLinkOptions += val;
+      }
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
