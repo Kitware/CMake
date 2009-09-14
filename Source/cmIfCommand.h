@@ -176,7 +176,7 @@ public:
       "  if(variable STREQUAL string)\n"
       "  if(string STREQUAL string)\n"
       "True if the given string or variable's value is lexicographically "
-      "less (or greater, or equal) than the string on the right.\n"
+      "less (or greater, or equal) than the string or variable on the right.\n"
       "  if(version1 VERSION_LESS version2)\n"
       "  if(version1 VERSION_EQUAL version2)\n"
       "  if(version1 VERSION_GREATER version2)\n"
