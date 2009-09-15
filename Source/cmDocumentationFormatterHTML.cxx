@@ -16,7 +16,7 @@
 =========================================================================*/
 #include "cmDocumentationFormatterHTML.h"
 #include "cmDocumentationSection.h"
-
+#include "cmVersion.h"
 //----------------------------------------------------------------------------
 static bool cmDocumentationIsHyperlinkChar(char c)
 {
@@ -258,7 +258,9 @@ void cmDocumentationFormatterHTML
     return;
     }
 
-  os << "<h2><a name=\"section_Index\"/>Master Index</h2>\n";
+  os << "<h2><a name=\"section_Index\"/>Master Index "
+     << "CMake " << cmVersion::GetCMakeVersion()
+     << "</h2>\n";
   os << "<ul>\n";
   for(unsigned int i=0; i < sections.size(); ++i)
     {
