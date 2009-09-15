@@ -2029,35 +2029,31 @@ int cmake::ActualConfigure()
       this->SetGlobalGenerator(new cmGlobalBorlandMakefileGenerator);
 #elif defined(_WIN32) && !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
       std::string installedCompiler;
-      std::string mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft"
-        "\\VisualStudio\\8.0\\Setup;Dbghelp_path]";
-      cmSystemTools::ExpandRegistryValues(mp);
-      if (!(mp == "/registry"))
+      // Try to find the newest VS installed on the computer and 
+      // use that as a default if -G is not specified
+      std::string vsregBase =
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\";
+      struct VSRegistryEntryName
+      {
+        const char* MSVersion;
+        const char* GeneratorName;
+      };
+      VSRegistryEntryName version[] = {
+        {"6.0", "Visual Studio 6"},
+        {"7.0", "Visual Studio 7"},
+        {"7.1", "Visual Stuido 7 .NET 2003"},
+        {"8.0", "Visual Studio 8 2005"},
+        {"9.0", "Visual Studio 9 2008"},
+        {"10.0", "Visual Studio 10"},
+        {0, 0}};
+      for(int i =0; version[i].MSVersion != 0; i++)
         {
-        installedCompiler = "Visual Studio 8 2005";
-        }
-      else
-        {
-        mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft"
-          "\\VisualStudio\\7.1;InstallDir]";
-        cmSystemTools::ExpandRegistryValues(mp);
-        if (!(mp == "/registry"))
+        std::string reg = vsregBase + version[i].MSVersion;
+        reg += ";InstallDir]";
+        cmSystemTools::ExpandRegistryValues(reg);
+        if (!(reg == "/registry"))
           {
-          installedCompiler = "Visual Studio 7 .NET 2003";
-          }
-        else
-          {
-          mp = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft"
-            "\\VisualStudio\\7.0;InstallDir]";
-          cmSystemTools::ExpandRegistryValues(mp);
-          if (!(mp == "/registry"))
-            {
-            installedCompiler = "Visual Studio 7";
-            }
-          else
-            {
-            installedCompiler = "Visual Studio 6";
-            }
+          installedCompiler = version[i].GeneratorName;
           }
         }
       cmGlobalGenerator* gen
@@ -2067,6 +2063,7 @@ int cmake::ActualConfigure()
         gen = new cmGlobalNMakeMakefileGenerator;
         }
       this->SetGlobalGenerator(gen);
+      std::cout << "-- Building for: " << gen->GetName() << "\n";
 #else
       this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator3);
 #endif
