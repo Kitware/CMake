@@ -53,6 +53,11 @@ MACRO(PKGCONFIG _package _include_DIR _link_DIR _link_FLAGS _cflags)
       MESSAGE(STATUS "PKGCONFIG() indicates that ${_package} is not installed (install the package which contains ${_package}.pc if you want to support this feature)")
 
     ENDIF(NOT _return_VALUE)
+    
+  # if pkg-config has NOT been found, INFORM the user
+  ELSE(PKGCONFIG_EXECUTABLE)
+  
+    MESSAGE(STATUS "WARNING: PKGCONFIG() indicates that the tool pkg-config has not been found on your system. You should install it.")
 
   ENDIF(PKGCONFIG_EXECUTABLE)
 
