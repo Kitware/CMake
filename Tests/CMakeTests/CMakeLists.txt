@@ -18,6 +18,7 @@ AddCMakeTest(GetFilenameComponentRealpath "")
 AddCMakeTest(Version "")
 AddCMakeTest(Message "")
 AddCMakeTest(File "")
+AddCMakeTest(ConfigureFile "")
 AddCMakeTest(SeparateArguments "")
 AddCMakeTest(ImplicitLinkInfo "")
 
