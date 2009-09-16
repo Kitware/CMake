@@ -24,6 +24,13 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
 {
   this->CTest = handler->CTest;
   this->TestHandler = handler;
+  this->ModifyEnv = false;
+  this->TestProcess = 0;
+  this->TestResult.ExecutionTime =0;
+  this->TestResult.ReturnValue = 0;
+  this->TestResult.Status = 0;
+  this->TestResult.TestCount = 0;
+  this->TestResult.Properties = 0;
 }
 
 cmCTestRunTest::~cmCTestRunTest()
