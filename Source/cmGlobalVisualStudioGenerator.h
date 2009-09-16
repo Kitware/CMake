@@ -68,6 +68,8 @@ public:
   bool TargetIsFortranOnly(cmTarget& t);
   const char* GetUtilityForTarget(cmTarget& target, const char*);
 
+  /** Get the top-level registry key for this VS version.  */
+  std::string GetRegistryBase();
 protected:
   void FixUtilityDepends();
 
@@ -76,6 +78,7 @@ protected:
   // below 8.
   virtual bool VSLinksDependencies() const { return true; }
 
+  virtual const char* GetIDEVersion() = 0;
 private:
   void FixUtilityDependsForTarget(cmTarget& target);
   void CreateUtilityDependTarget(cmTarget& target);

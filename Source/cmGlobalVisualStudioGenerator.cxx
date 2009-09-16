@@ -32,6 +32,14 @@ cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
 }
 
 //----------------------------------------------------------------------------
+std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
+{
+  std::string key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\";
+  key += this->GetIDEVersion();
+  return key;
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::Generate()
 {
   // Add a special target that depends on ALL projects for easy build

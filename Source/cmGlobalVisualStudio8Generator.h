@@ -64,6 +64,7 @@ public:
   virtual std::string GetUserMacrosRegKeyBase();
 
 protected:
+  virtual const char* GetIDEVersion() { return "8.0"; }
 
   virtual bool VSLinksDependencies() const { return false; }
 

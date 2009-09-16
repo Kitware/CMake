@@ -103,6 +103,8 @@ public:
   };
 
 protected:
+  virtual const char* GetIDEVersion() { return "7.0"; }
+
   static cmIDEFlagTable const* GetExtraFlagTableVS7();
   virtual void OutputSLNFile(cmLocalGenerator* root, 
                              std::vector<cmLocalGenerator*>& generators);

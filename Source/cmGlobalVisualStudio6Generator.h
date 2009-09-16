@@ -88,6 +88,9 @@ public:
 
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGInitDirectory()  { return "$(IntDir)"; }
+
+protected:
+  virtual const char* GetIDEVersion() { return "6.0"; }
 private:
   void GenerateConfigurations(cmMakefile* mf);
   void WriteDSWFile(std::ostream& fout);

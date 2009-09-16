@@ -65,5 +65,7 @@ public:
    * Studio?
    */
   virtual std::string GetUserMacrosRegKeyBase();
+protected:
+  virtual const char* GetIDEVersion() { return "9.0"; }
 };
 #endif
