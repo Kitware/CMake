@@ -36,6 +36,17 @@ bool cmConfigureFileCommand
     }
   this->InputFile += inFile;
 
+  // If the input location is a directory, error out.
+  if(cmSystemTools::FileIsDirectory(this->InputFile.c_str()))
+    {
+    cmOStringStream e;
+    e << "input location\n"
+      << "  " << this->InputFile << "\n"
+      << "is a directory but a file was expected.";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
   const char* outFile = args[1].c_str();
   if(!cmSystemTools::FileIsFullPath(outFile))
     {
@@ -43,6 +54,13 @@ bool cmConfigureFileCommand
     this->OutputFile += "/";
     }
   this->OutputFile += outFile;
+
+  // If the output location is already a directory put the file in it.
+  if(cmSystemTools::FileIsDirectory(this->OutputFile.c_str()))
+    {
+    this->OutputFile += "/";
+    this->OutputFile += cmSystemTools::GetFilenameName(inFile);
+    }
 
   if ( !this->Makefile->CanIWriteThisFile(this->OutputFile.c_str()) )
     {
