@@ -28,10 +28,10 @@ bool cmConfigureFileCommand
     return false;
     }
   this->InputFile = args[0];
-  this->OuputFile = args[1];
-  if ( !this->Makefile->CanIWriteThisFile(this->OuputFile.c_str()) )
+  this->OutputFile = args[1];
+  if ( !this->Makefile->CanIWriteThisFile(this->OutputFile.c_str()) )
     {
-    std::string e = "attempted to configure a file: " + this->OuputFile 
+    std::string e = "attempted to configure a file: " + this->OutputFile
       + " into a source directory.";
     this->SetError(e.c_str());
     cmSystemTools::SetFatalErrorOccured();
@@ -97,7 +97,7 @@ int cmConfigureFileCommand::ConfigureFile()
     inFile += this->InputFile;
     }
   return this->Makefile->ConfigureFile(inFile.c_str(),
-    this->OuputFile.c_str(),
+    this->OutputFile.c_str(),
     this->CopyOnly,
     this->AtOnly,
     this->EscapeQuotes);

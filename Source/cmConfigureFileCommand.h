@@ -86,7 +86,7 @@ private:
   int ConfigureFile();
   
   std::string InputFile;
-  std::string OuputFile;
+  std::string OutputFile;
   bool CopyOnly;
   bool EscapeQuotes;
   bool Immediate;
