@@ -27,8 +27,23 @@ bool cmConfigureFileCommand
     this->SetError("called with incorrect number of arguments, expected 2");
     return false;
     }
-  this->InputFile = args[0];
-  this->OutputFile = args[1];
+
+  const char* inFile = args[0].c_str();
+  if(!cmSystemTools::FileIsFullPath(inFile))
+    {
+    this->InputFile = this->Makefile->GetCurrentDirectory();
+    this->InputFile += "/";
+    }
+  this->InputFile += inFile;
+
+  const char* outFile = args[1].c_str();
+  if(!cmSystemTools::FileIsFullPath(outFile))
+    {
+    this->OutputFile = this->Makefile->GetCurrentOutputDirectory();
+    this->OutputFile += "/";
+    }
+  this->OutputFile += outFile;
+
   if ( !this->Makefile->CanIWriteThisFile(this->OutputFile.c_str()) )
     {
     std::string e = "attempted to configure a file: " + this->OutputFile
@@ -89,14 +104,8 @@ void cmConfigureFileCommand::FinalPass()
 
 int cmConfigureFileCommand::ConfigureFile()
 {
-  std::string inFile = this->InputFile;
-  if (!cmSystemTools::FileIsFullPath(inFile.c_str()))
-    {
-    inFile = this->Makefile->GetStartDirectory();
-    inFile += "/";
-    inFile += this->InputFile;
-    }
-  return this->Makefile->ConfigureFile(inFile.c_str(),
+  return this->Makefile->ConfigureFile(
+    this->InputFile.c_str(),
     this->OutputFile.c_str(),
     this->CopyOnly,
     this->AtOnly,

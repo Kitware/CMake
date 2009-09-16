@@ -60,9 +60,15 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  configure_file(InputFile OutputFile\n"
+        "  configure_file(<input> <output>\n"
         "                 [COPYONLY] [ESCAPE_QUOTES] [@ONLY])\n"
-        "The Input and Output files have to have full paths.  "
+        "Copies a file <input> to file <output> and substitutes variable "
+        "values referenced in the file content.  "
+        "If <input> is a relative path it is evaluated with respect to "
+        "the current source directory.  "
+        "If <output> is a relative path it is evaluated with respect to "
+        "the current binary directory.  "
+        "\n"
         "This command replaces any variables in the input file referenced as "
         "${VAR} or @VAR@ with their values as determined by CMake.  If a "
         "variable is not defined, it will be replaced with nothing.  "
