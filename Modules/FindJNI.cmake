@@ -19,9 +19,20 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
-  $ENV{JAVA_HOME}/jre/lib/i386
+  $ENV{JAVA_HOME}/jre/lib/alpha
   $ENV{JAVA_HOME}/jre/lib/amd64
+  $ENV{JAVA_HOME}/jre/lib/arm
+  $ENV{JAVA_HOME}/jre/lib/i386
+  $ENV{JAVA_HOME}/jre/lib/ia64
+  $ENV{JAVA_HOME}/jre/lib/m68k
+  $ENV{JAVA_HOME}/jre/lib/mips
+  $ENV{JAVA_HOME}/jre/lib/mipsel
+  $ENV{JAVA_HOME}/jre/lib/parisc
+  $ENV{JAVA_HOME}/jre/lib/powerpc
   $ENV{JAVA_HOME}/jre/lib/ppc
+  $ENV{JAVA_HOME}/jre/lib/s390
+  $ENV{JAVA_HOME}/jre/lib/sparc
+  $ENV{JAVA_HOME}/jre/lib/x86_64
   $ENV{JAVA_HOME}/lib
   /usr/lib
   /usr/local/lib
