@@ -246,6 +246,10 @@ public:
   struct LocalObjectInfo: public std::vector<LocalObjectEntry>
   {
     bool HasSourceExtension;
+    bool HasPreprocessRule;
+    bool HasAssembleRule;
+    LocalObjectInfo():HasSourceExtension(false), HasPreprocessRule(false), 
+                      HasAssembleRule(false) {}
   };
   std::map<cmStdString, LocalObjectInfo> const& GetLocalObjectFiles()
     { return this->LocalObjectFiles;}
@@ -266,6 +270,12 @@ public:
   // Get the directories into which the .o files will go for this target
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& dirs);
+
+  // Fill the vector with the target names for the object files, 
+  // preprocessed files and assembly files. Currently only used by the 
+  // Eclipse generator.
+  void GetIndividualFileTargets(std::vector<std::string>& targets);
+  
 protected:
   void WriteLocalMakefile();
   

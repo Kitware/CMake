@@ -152,6 +152,30 @@ void cmLocalUnixMakefileGenerator3::Generate()
 }
 
 //----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator3::GetIndividualFileTargets
+                                            (std::vector<std::string>& targets)
+{
+  for (std::map<cmStdString, LocalObjectInfo>::iterator lo = 
+         this->LocalObjectFiles.begin();
+       lo != this->LocalObjectFiles.end(); ++lo)
+    {
+    targets.push_back(lo->first);
+
+    std::string::size_type dot_pos = lo->first.rfind(".");
+    std::string base = lo->first.substr(0, dot_pos);
+    if(lo->second.HasPreprocessRule)
+      {
+      targets.push_back(base + ".i");
+      }
+
+    if(lo->second.HasAssembleRule)
+      {
+      targets.push_back(base + ".s");
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 {
   // generate the includes
@@ -228,12 +252,14 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
         this->WriteObjectConvenienceRule(
           ruleFileStream, "target to preprocess a source file",
           (base + ".i").c_str(), lo->second);
+          lo->second.HasPreprocessRule = true;
         }
       if(do_assembly_rules)
         {
         this->WriteObjectConvenienceRule(
           ruleFileStream, "target to generate assembly for a file",
           (base + ".s").c_str(), lo->second);
+          lo->second.HasAssembleRule = true;
         }
       }
     }

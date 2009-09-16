@@ -689,15 +689,16 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   cmGlobalGenerator* generator
     = const_cast<cmGlobalGenerator*>(this->GlobalGenerator);
+  
+  std::string allTarget;
+  std::string cleanTarget;
   if (generator->GetAllTargetName())
     {
-    emmited.insert(generator->GetAllTargetName());
-    this->AppendTarget(fout, generator->GetAllTargetName(), make);
+    allTarget = generator->GetAllTargetName();
     }
   if (generator->GetCleanTargetName())
     {
-    emmited.insert(generator->GetCleanTargetName());
-    this->AppendTarget(fout, generator->GetCleanTargetName(), make);
+    cleanTarget = generator->GetCleanTargetName();
     }
 
   // add all executable and library targets and some of the GLOBAL 
@@ -709,6 +710,13 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     {
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
     cmMakefile* makefile=(*it)->GetMakefile();
+    std::string subdir = (*it)->Convert(makefile->GetCurrentOutputDirectory(),
+                           cmLocalGenerator::HOME_OUTPUT);
+    if (subdir == ".")
+      {
+      subdir = "";
+      }
+
     for(cmTargets::const_iterator ti=targets.begin(); ti!=targets.end(); ++ti)
       {
       switch(ti->second.GetType())
@@ -718,8 +726,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           bool insertTarget = false;
           // Only add the global targets from CMAKE_BINARY_DIR, 
           // not from the subdirs
-          if (strcmp(makefile->GetStartOutputDirectory(), 
-                     makefile->GetHomeOutputDirectory())==0)
+          if (subdir.empty())
            {
            insertTarget = true;
            // only add the "edit_cache" target if it's not ccmake, because
@@ -735,7 +742,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
            }
          if (insertTarget)
            {
-           this->AppendTarget(fout, ti->first, make);
+           this->AppendTarget(fout, ti->first, make, subdir, ": ");
            }
          }
          break;
@@ -750,17 +757,19 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
            break;
            }
 
-         this->AppendTarget(fout, ti->first, make);
+         this->AppendTarget(fout, ti->first, make, subdir, ": ");
          break;
        case cmTarget::EXECUTABLE:
        case cmTarget::STATIC_LIBRARY:
        case cmTarget::SHARED_LIBRARY:
        case cmTarget::MODULE_LIBRARY:
          {
-         this->AppendTarget(fout, ti->first, make);
+         const char* prefix = (ti->second.GetType()==cmTarget::EXECUTABLE ?
+                                                          "[exe] " : "[lib] ");
+         this->AppendTarget(fout, ti->first, make, subdir, prefix);
          std::string fastTarget = ti->first;
          fastTarget += "/fast";
-         this->AppendTarget(fout, fastTarget, make);
+         this->AppendTarget(fout, fastTarget, make, subdir, prefix);
          }
          break;
         // ignore these:
@@ -771,7 +780,38 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           break;
         }
       }
+      
+    // insert the all and clean targets in every subdir
+    if (!allTarget.empty())
+      {
+      this->AppendTarget(fout, allTarget, make, subdir, ": ");
+      }
+    if (!cleanTarget.empty())
+      {
+      this->AppendTarget(fout, cleanTarget, make, subdir, ": ");
+      }
+
+    //insert rules for compiling, preprocessing and assembling individual files
+    cmLocalUnixMakefileGenerator3* lumg=(cmLocalUnixMakefileGenerator3*)*it;
+    std::vector<std::string> objectFileTargets;
+    lumg->GetIndividualFileTargets(objectFileTargets);
+    for(std::vector<std::string>::const_iterator fit=objectFileTargets.begin();
+        fit != objectFileTargets.end();
+        ++fit)
+      {
+      const char* prefix = "[obj] ";
+      if ((*fit)[fit->length()-1] == 's')
+        {
+        prefix = "[to asm] ";
+        }
+      else if ((*fit)[fit->length()-1] == 'i')
+        {
+        prefix = "[pre] ";
+        }
+      this->AppendTarget(fout, *fit, make, subdir, prefix);
+      }
     }
+
   fout << "</buildTargets>\n"
           "</storageModule>\n"
           ;
@@ -924,13 +964,23 @@ void cmExtraEclipseCDT4Generator
   fout << "</storageModule>\n";
 }
 
+// The prefix is prepended before the actual name of the target. The purpose
+// of that is to sort the targets in the view of Eclipse, so that at first
+// the global/utility/all/clean targets appear ": ", then the executable
+// targets "[exe] ", then the libraries "[lib]", then the rules for the
+// object files "[obj]", then for preprocessing only "[pre] " and 
+// finally the assembly files "[to asm] ". Note the "to" in "to asm", 
+// without it, "asm" would be the first targets in the list, with the "to"
+// they are the last targets, which makes more sense.
 void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
                                                const std::string&     target,
-                                               const std::string&     make)
+                                               const std::string&     make,
+                                               const std::string&     path,
+                                               const char* prefix)
 {
   fout << 
-    "<target name=\"" << target << "\""
-    " path=\"\""
+    "<target name=\"" << prefix << target << "\""
+    " path=\"" << path.c_str() << "\""
     " targetID=\"org.eclipse.cdt.make.MakeTargetBuilder\">\n"
     "<buildCommand>"
     << cmExtraEclipseCDT4Generator::GetEclipsePath(make)

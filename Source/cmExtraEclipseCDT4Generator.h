@@ -91,7 +91,9 @@ private:
                                     const cmMakefile& makefile);
   static void AppendTarget         (cmGeneratedFileStream& fout,
                                     const std::string&     target,
-                                    const std::string&     make);
+                                    const std::string&     make,
+                                    const std::string&     path,
+                                    const char* prefix = "");
   static void AppendScannerProfile (cmGeneratedFileStream& fout,
                                     const std::string&   profileID,
                                     bool                 openActionEnabled,
