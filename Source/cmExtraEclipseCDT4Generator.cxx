@@ -574,6 +574,75 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         }
       }
     }
+  // add system defined c macros
+  const char* cDefs=mf->GetDefinition("CMAKE_ECLIPSE_C_SYSTEM_DEFINED_MACROS");
+  if(cDefs)
+    {
+    // Expand the list.
+    std::vector<std::string> defs;
+    cmSystemTools::ExpandListArgument(cDefs, defs, true);
+
+    // the list must contain only definition-value pairs:
+    if ((defs.size() % 2) == 0)
+      {
+      std::vector<std::string>::const_iterator di = defs.begin();
+      while (di != defs.end())
+        {
+        std::string def = *di;
+        ++di;
+        std::string val;
+        if (di != defs.end())
+          {
+          val = *di;
+          ++di;
+          }
+
+        // insert the definition if not already added.
+        if(emmited.find(def) == emmited.end())
+          {
+          emmited.insert(def);
+          fout << "<pathentry kind=\"mac\" name=\"" << def
+               << "\" path=\"\" value=\"" << this->EscapeForXML(val)
+               << "\"/>\n";
+          }
+        }
+      }
+    }
+  // add system defined c++ macros
+  const char* cxxDefs = mf->GetDefinition(
+                                    "CMAKE_ECLIPSE_CXX_SYSTEM_DEFINED_MACROS");
+  if(cxxDefs)
+    {
+    // Expand the list.
+    std::vector<std::string> defs;
+    cmSystemTools::ExpandListArgument(cxxDefs, defs, true);
+
+    // the list must contain only definition-value pairs:
+    if ((defs.size() % 2) == 0)
+      {
+      std::vector<std::string>::const_iterator di = defs.begin();
+      while (di != defs.end())
+        {
+        std::string def = *di;
+        ++di;
+        std::string val;
+        if (di != defs.end())
+          {
+          val = *di;
+          ++di;
+          }
+
+        // insert the definition if not already added.
+        if(emmited.find(def) == emmited.end())
+          {
+          emmited.insert(def);
+          fout << "<pathentry kind=\"mac\" name=\"" << def
+               << "\" path=\"\" value=\"" << this->EscapeForXML(val)
+               << "\"/>\n";
+          }
+        }
+      }
+    }
 
   // include dirs
   emmited.clear();

@@ -8,14 +8,14 @@ FIND_PROGRAM(CMAKE_ECLIPSE_EXECUTABLE NAMES eclipse DOC "The Eclipse executable"
 # so that Eclipse ca find the headers at runtime and parsing etc. works better
 # This is done here by actually running gcc with the options so it prints its
 # system include directories, which are parsed then and stored in the cache.
-MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _result)
+MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _result _resultDefines)
   SET(${_result})
   SET(_gccOutput)
   FILE(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/dummy" "\n" )
-  EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -v -E -x ${_lang} dummy
+  EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -v -E -x ${_lang} -dD dummy
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles
                   ERROR_VARIABLE _gccOutput
-                  OUTPUT_QUIET )
+                  OUTPUT_VARIABLE _gccStdout )
   FILE(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/dummy")
 
   IF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
@@ -23,6 +23,19 @@ MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _result)
     STRING(REPLACE "\n" " " ${_result} "${${_result}}")
     SEPARATE_ARGUMENTS(${_result})
   ENDIF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
+  
+  IF( "${_gccStdout}" MATCHES "built-in>\"\n(.+)# 1 +\"dummy\"" )
+    SET(_builtinDefines ${CMAKE_MATCH_1})
+    # Remove the '# 1 "<command-line>"' lines
+    STRING(REGEX REPLACE "# 1[^\n]+\n" "" _filteredOutput "${_builtinDefines}")
+    # Remove the "#define " parts from the output:
+    STRING(REGEX REPLACE "#define " "" _defineRemoved "${_filteredOutput}")
+    # Replace the line breaks with spaces, so we can use separate arguments afterwards
+    STRING(REGEX REPLACE "\n" " " _defineRemoved "${_defineRemoved}")
+    # Remove space at the end, this would produce empty list items
+    STRING(REGEX REPLACE " +$" "" ${_resultDefines} "${_defineRemoved}")
+    SEPARATE_ARGUMENTS(${_resultDefines})
+  ENDIF( "${_gccStdout}" MATCHES "built-in>\"\n(.+)# 1 +\"dummy\"" )
 ENDMACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang)
 
 # Save the current LC_ALL, LC_MESSAGES, and LANG environment variables and set them
@@ -42,14 +55,16 @@ ENDIF(_orig_lang)
 
 # Now check for C
 IF ("${CMAKE_C_COMPILER_ID}" MATCHES GNU  AND NOT  CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS)
-  _DETERMINE_GCC_SYSTEM_INCLUDE_DIRS(c _dirs)
+  _DETERMINE_GCC_SYSTEM_INCLUDE_DIRS(c _dirs _defines)
   SET(CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS "${_dirs}" CACHE INTERNAL "C compiler system include directories")
+  SET(CMAKE_ECLIPSE_C_SYSTEM_DEFINED_MACROS "${_defines}" CACHE INTERNAL "C compiler system defined macros")
 ENDIF ("${CMAKE_C_COMPILER_ID}" MATCHES GNU  AND NOT  CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS)
 
 # And now the same for C++
 IF ("${CMAKE_CXX_COMPILER_ID}" MATCHES GNU  AND NOT  CMAKE_ECLIPSE_CXX_SYSTEM_INCLUDE_DIRS)
-  _DETERMINE_GCC_SYSTEM_INCLUDE_DIRS(c++ _dirs)
+  _DETERMINE_GCC_SYSTEM_INCLUDE_DIRS(c++ _dirs _defines)
   SET(CMAKE_ECLIPSE_CXX_SYSTEM_INCLUDE_DIRS "${_dirs}" CACHE INTERNAL "CXX compiler system include directories")
+  SET(CMAKE_ECLIPSE_CXX_SYSTEM_DEFINED_MACROS "${_defines}" CACHE INTERNAL "CXX compiler system defined macros")
 ENDIF ("${CMAKE_CXX_COMPILER_ID}" MATCHES GNU  AND NOT  CMAKE_ECLIPSE_CXX_SYSTEM_INCLUDE_DIRS)
 
 # Restore original LC_ALL, LC_MESSAGES, and LANG
