@@ -1428,8 +1428,8 @@ void cmMakefile::InitializeFromParent()
 {
   cmMakefile *parent = this->LocalGenerator->GetParent()->GetMakefile();
 
-  // copy the definitions
-  this->Internal->VarStack.top().Reset(&parent->Internal->VarStack.top());
+  // Initialize definitions with the closure of the parent scope.
+  this->Internal->VarStack.top() = parent->Internal->VarStack.top().Closure();
 
   // copy include paths
   this->IncludeDirectories = parent->IncludeDirectories;
@@ -3421,6 +3421,14 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
 
     // Now update the definition in the parent scope.
     up->Set(var, varDef);
+    }
+  else if(cmMakefile* parent =
+          this->LocalGenerator->GetParent()->GetMakefile())
+    {
+    // Update the definition in the parent directory top scope.  This
+    // directory's scope was initialized by the closure of the parent
+    // scope, so we do not need to localize the definition first.
+    parent->Internal->VarStack.top().Set(var, varDef);
     }
 }
 
