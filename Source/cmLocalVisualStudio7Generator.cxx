@@ -451,6 +451,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"SmallerTypeCheck", "RTCc", "smaller type check", "TRUE", 0},
   {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "TRUE", 0},
   {"WarnAsError", "WX", "Treat warnings as errors", "TRUE", 0},
+  {"BrowseInformation", "FR", "Generate browse information", "1", 0},
   {0,0,0,0,0}
 };
 
