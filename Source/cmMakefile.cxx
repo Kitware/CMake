@@ -1539,21 +1539,6 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
                                  bool excludeFromAll, bool preorder,
                                  bool immediate)
 {
-  std::vector<cmLocalGenerator *>& children =
-    this->LocalGenerator->GetChildren();
-  // has this directory already been added? If so error
-  unsigned int i;
-  for (i = 0; i < children.size(); ++i)
-    {
-    if (srcPath == children[i]->GetMakefile()->GetStartDirectory())
-      {
-      cmSystemTools::Error
-        ("Attempt to add subdirectory multiple times for directory.\n",
-         srcPath);
-      return;
-      }
-    }
-
   // Make sure the binary directory is unique.
   if(!this->EnforceUniqueDir(srcPath, binPath))
     {
