@@ -1,9 +1,7 @@
-# - Check if the C source code provided in the SOURCE argument compiles.
-# CHECK_C_SOURCE_COMPILES(SOURCE VAR)
-#
-#  SOURCE   - source code to try to compile
-#  VAR      - variable to store whether the source code compiled
-#
+# - Check if the given C source code compiles.
+# CHECK_C_SOURCE_COMPILES(<code> <var>)
+#  <code>       - source code to try to compile
+#  <var>        - variable to store whether the source code compiled
 # The following variables may be set before calling this macro to
 # modify the way the check is run:
 #

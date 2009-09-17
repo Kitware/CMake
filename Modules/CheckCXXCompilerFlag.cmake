@@ -1,8 +1,10 @@
 # - Check whether the CXX compiler supports a given flag.
-# CHECK_CXX_COMPILER_FLAG(FLAG VARIABLE)
-#
-#  FLAG - the compiler flag
-#  VARIABLE - variable to store the result
+# CHECK_CXX_COMPILER_FLAG(<flag> <var>)
+#  <flag> - the compiler flag
+#  <var>  - variable to store the result
+# This internally calls the check_cxx_source_compiles macro.  See help
+# for CheckCXXSourceCompiles for a listing of variables that can
+# modify the build.
 
 # Copyright (c) 2006, Alexander Neundorf, <neundorf@kde.org>
 #
