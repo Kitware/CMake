@@ -1770,10 +1770,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       bool addArchFlag = true;
       if(archs.size() == 1)
         {
-        const char* archOrig = 
-          this->Makefile->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES_DEFAULT");
-
-        if(archs[0] == archOrig)
+        if(archs[0] == "")
           {
           addArchFlag = false;
           }

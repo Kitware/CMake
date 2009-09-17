@@ -2675,6 +2675,20 @@ void cmGlobalXCodeGenerator
       this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   const char* osxArch = 
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_ARCHITECTURES");
+  if(strlen(osxArch) == 0)
+    {
+    if(this->XcodeVersion >= 32)
+      {
+      osxArch = "$(ARCHS_STANDARD_32_64_BIT)";
+      }
+    else
+      {
+      osxArch = "$(ARCHS_STANDARD_32_BIT)";
+      }
+    buildSettings->AddAttribute("ONLY_ACTIVE_ARCH",
+                                this->CreateString("YES"));
+    }
+
   const char* sysroot = 
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
   const char* sysrootDefault = 
@@ -2688,33 +2702,19 @@ void cmGlobalXCodeGenerator
     this->Architectures.clear();
     cmSystemTools::ExpandListArgument(std::string(osxArch),
                                       this->Architectures);
-    bool addArchFlag = true;
-    if(this->Architectures.size() == 1)
+    flagsUsed = true;
+    buildSettings->AddAttribute("SDKROOT", 
+                                this->CreateString(sysroot));
+    std::string archString;
+    for( std::vector<std::string>::iterator i = 
+           this->Architectures.begin();
+         i != this->Architectures.end(); ++i)
       {
-      const char* archOrig = 
-        this->
-        CurrentMakefile->GetSafeDefinition("CMAKE_OSX_ARCHITECTURES_DEFAULT");
-      if(this->Architectures[0] == archOrig)
-        {
-        addArchFlag = false;
-        }
+      archString += *i;
+      archString += " ";
       }
-    if(addArchFlag)
-      {
-      flagsUsed = true;
-      buildSettings->AddAttribute("SDKROOT", 
-                                  this->CreateString(sysroot));
-      std::string archString;
-      for( std::vector<std::string>::iterator i = 
-             this->Architectures.begin();
-           i != this->Architectures.end(); ++i)
-        {
-        archString += *i;
-        archString += " ";
-        }
-      buildSettings->AddAttribute("ARCHS", 
-                                  this->CreateString(archString.c_str()));
-      }
+    buildSettings->AddAttribute("ARCHS", 
+                                this->CreateString(archString.c_str()));
     if(!flagsUsed && sysrootDefault &&
        strcmp(sysroot, sysrootDefault) != 0)
       {
