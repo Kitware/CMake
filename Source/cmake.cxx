@@ -2041,7 +2041,7 @@ int cmake::ActualConfigure()
       VSRegistryEntryName version[] = {
         {"6.0", "Visual Studio 6"},
         {"7.0", "Visual Studio 7"},
-        {"7.1", "Visual Stuido 7 .NET 2003"},
+        {"7.1", "Visual Studio 7 .NET 2003"},
         {"8.0", "Visual Studio 8 2005"},
         {"9.0", "Visual Studio 9 2008"},
         {"10.0", "Visual Studio 10"},
