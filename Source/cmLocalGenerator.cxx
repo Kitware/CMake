@@ -1767,12 +1767,12 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       std::vector<std::string> archs;
       cmSystemTools::ExpandListArgument(std::string(osxArch),
                                         archs);
-      bool addArchFlag = true;
-      if(archs.size() == 1)
+      bool addArchFlag = false;
+      if(archs.size() >= 1)
         {
-        if(archs[0] == "")
+        if(archs[0] != "")
           {
-          addArchFlag = false;
+          addArchFlag = true;
           }
         }
       // if there is more than one arch add the -arch and
