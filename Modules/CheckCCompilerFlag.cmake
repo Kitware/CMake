@@ -21,6 +21,7 @@ MACRO (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
      # Some compilers do not fail with a bad flag
      FAIL_REGEX "unrecognized option"                       # GNU
      FAIL_REGEX "ignoring unknown option"                   # MSVC
+     FAIL_REGEX "[Uu]nknown option"                         # HP
      )
    SET (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
 ENDMACRO (CHECK_C_COMPILER_FLAG)
