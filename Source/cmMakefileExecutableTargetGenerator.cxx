@@ -161,7 +161,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetFullPathImport = outpathImp + targetNameImport;
   std::string targetOutPathPDB = 
     this->Convert(targetFullPathPDB.c_str(),
-                  cmLocalGenerator::FULL,
+                  cmLocalGenerator::NONE,
                   cmLocalGenerator::SHELL);
   // Convert to the output path to use in constructing commands.
   std::string targetOutPath =

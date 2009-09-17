@@ -426,7 +426,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Construct the output path version of the names for use in command
   // arguments.
   std::string targetOutPathPDB = 
-    this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::FULL,
+    this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::NONE,
                   cmLocalGenerator::SHELL);
   std::string targetOutPath = 
     this->Convert(targetFullPath.c_str(),cmLocalGenerator::START_OUTPUT,

@@ -613,7 +613,7 @@ cmMakefileTargetGenerator
     targetFullPathPDB += this->Target->GetPDBName(this->ConfigName);
     }
   targetOutPathPDB =
-    this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::FULL,
+    this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::NONE,
                   cmLocalGenerator::SHELL);
   }
   cmLocalGenerator::RuleVariables vars;
