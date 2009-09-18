@@ -1748,7 +1748,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   std::string flagsVar = "CMAKE_";
   flagsVar += lang;
   flagsVar += "_FLAGS";
-
+  // Add special OSX flags
+#ifdef __APPLE__
   if(this->EmitUniversalBinaryFlags)
     {
     const char* osxArch = 
@@ -1815,7 +1816,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       flags += deploymentTarget;
       }
     }
-
+#endif
   this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
 }
 
