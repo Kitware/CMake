@@ -2681,6 +2681,15 @@ void cmGlobalXCodeGenerator
       {
       osxArch = "$(ARCHS_STANDARD_32_64_BIT)";
       }
+    else if(this->XcodeVersion <= 25)
+      {
+#ifdef __i386
+      osxArch = "i386";
+#endif
+#ifdef __ppc__
+      osxArch = "ppc";
+#endif
+      }
     else
       {
       osxArch = "$(ARCHS_STANDARD_32_BIT)";
