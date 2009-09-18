@@ -1047,6 +1047,39 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       -S "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" -V
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest3/testOutput.log"
       )
+    
+    CONFIGURE_FILE(
+      "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoBuild.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake"
+      @ONLY ESCAPE_QUOTES)
+    ADD_TEST(CTestTestNoBuild ${CMAKE_CTEST_COMMAND}
+      -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake" -V
+      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut1.log"
+      )
+    SET_TESTS_PROPERTIES(CTestTestNoBuild PROPERTIES WILL_FAIL 1)
+    
+    CONFIGURE_FILE(
+      "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoExe.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake"
+      @ONLY ESCAPE_QUOTES)
+    ADD_TEST(CTestTestNoExe ${CMAKE_CTEST_COMMAND}
+      -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake" -V
+      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut2.log"
+      )
+    SET_TESTS_PROPERTIES(CTestTestNoExe PROPERTIES DEPENDS CTestTestNoBuild
+      PASS_REGULAR_EXPRESSION "Could not find executable"
+      FAIL_REGULAR_EXPRESSION "SegFault")
+
+    CONFIGURE_FILE(
+      "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake"
+      @ONLY ESCAPE_QUOTES)
+    ADD_TEST(CTestTestCrash ${CMAKE_CTEST_COMMAND}
+      -S "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake" -V
+      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestCrash/testOutput.log"
+      )
+    SET_TESTS_PROPERTIES(CTestTestCrash PROPERTIES
+      PASS_REGULAR_EXPRESSION "SegFault")
     ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND}
       -N
       )
