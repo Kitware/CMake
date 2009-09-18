@@ -182,6 +182,20 @@ IF(XCODE)
   SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
 ENDIF(XCODE)
 
+IF(NOT CMAKE_OSX_GCC_SUPPORT_ISYSROOT)
+  IF("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
+    EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} "--version"
+      OUTPUT_VARIABLE GCC_VERSION)
+  ENDIF("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
+  STRING(REGEX REPLACE "^[^ ]+[ ][^ ]+[ ]([^ ]+).*$" "\\1"
+         gcc_version_tmp "${GCC_VERSION}")
+  IF(${gcc_version_tmp} VERSION_GREATER 3.9)
+    SET(CMAKE_OSX_GCC_SUPPORT_ISYSROOT TRUE CACHE INTERNAL "GCC supports isysroot")
+  ELSE(${gcc_version_tmp} VERSION_GREATER 3.9)
+    SET(CMAKE_OSX_GCC_SUPPORT_ISYSROOT FALSE CACHE INTERNAL "GCC supports isysroot")
+  ENDIF(${gcc_version_tmp} VERSION_GREATER 3.9)
+ENDIF(NOT CMAKE_OSX_GCC_SUPPORT_ISYSROOT)
+
 # Need to list dependent shared libraries on link line.  When building
 # with -isysroot (for universal binaries), the linker always looks for
 # dependent libraries under the sysroot.  Listing them on the link

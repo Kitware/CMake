@@ -1759,9 +1759,14 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT_DEFAULT");
     const char* deploymentTarget = 
       this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
-
+    const char* gccHasIsysroot = 
+      this->Makefile->GetRequiredDefinition("CMAKE_OSX_GCC_SUPPORT_ISYSROOT");
+    bool hasIsysroot = true;
+    if(cmSystemTools::IsOff(gccHasIsysroot))
+      {
+      hasIsysroot = false;
+      }
     bool flagsUsed = false;
-
     if(osxArch && sysroot && lang && (lang[0] =='C' || lang[0] == 'F'))
       {
       std::vector<std::string> archs;
@@ -1787,16 +1792,17 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
           flags += " -arch ";
           flags += *i;
           }
-
-        flags += " -isysroot ";
-        flags += sysroot;
-
+        if(hasIsysroot)
+          {
+          flags += " -isysroot ";
+          flags += sysroot;
+          }
         flagsUsed = true;
         }
       }
 
     if(!flagsUsed && sysroot && sysrootDefault &&
-       strcmp(sysroot, sysrootDefault) != 0)
+       strcmp(sysroot, sysrootDefault) != 0 && hasIsysroot)
       {
       flags += " -isysroot ";
       flags += sysroot;
