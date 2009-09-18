@@ -1056,7 +1056,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake" -V
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut1.log"
       )
-    SET_TESTS_PROPERTIES(CTestTestNoBuild PROPERTIES WILL_FAIL TRUE)
+    SET_TESTS_PROPERTIES(CTestTestNoBuild PROPERTIES
+      FAIL_REGULAR_EXPRESSION "Error" WILL_FAIL true)
     
     CONFIGURE_FILE(
       "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoExe.cmake.in"
