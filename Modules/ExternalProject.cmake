@@ -673,7 +673,7 @@ function(_ep_add_download_command name)
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
     endif()
   else()
-    message(SEND_ERROR "error: no download info for '${name}'")
+    message(SEND_ERROR "error: no download info for '${name}' -- please specify existing SOURCE_DIR or one of URL, CVS_REPOSITORY and CVS_MODULE, SVN_REPOSITORY or DOWNLOAD_COMMAND")
   endif()
 
   ExternalProject_Add_Step(${name} download
