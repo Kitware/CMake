@@ -1760,13 +1760,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT_DEFAULT");
     const char* deploymentTarget = 
       this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
-    const char* gccHasIsysroot = 
-      this->Makefile->GetRequiredDefinition("CMAKE_OSX_GCC_SUPPORT_ISYSROOT");
-    bool hasIsysroot = true;
-    if(cmSystemTools::IsOff(gccHasIsysroot))
-      {
-      hasIsysroot = false;
-      }
+    std::string isysrootVar = std::string("CMAKE_") + lang + "_HAS_ISYSROOT";
+    bool hasIsysroot = this->Makefile->IsOn(isysrootVar.c_str());
     bool flagsUsed = false;
     if(osxArch && sysroot && lang && (lang[0] =='C' || lang[0] == 'F'))
       {
