@@ -152,6 +152,7 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
   // or newer than the depender then dependencies should be
   // regenerated.
   bool okay = true;
+  bool dependerExists = false;
   while(internalDepends.getline(this->Dependee, this->MaxPath))
     {
     if ( this->Dependee[0] == 0 || this->Dependee[0] == '#' || 
@@ -168,6 +169,11 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
     if ( this->Dependee[0] != ' ' )
       {
       memcpy(this->Depender, this->Dependee, len+1);
+      // Calling FileExists() for the depender here saves in many cases 50%
+      // of the calls to FileExists() further down in the loop. E.g. for
+      // kdelibs/khtml this reduces the number of calls from 184k down to 92k,
+      // or the time for cmake -E cmake_depends from 0.3 s down to 0.21 s.
+      dependerExists = cmSystemTools::FileExists(this->Depender);
       continue;
       }
     /*
@@ -198,7 +204,7 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
         cmSystemTools::Stdout(msg.str().c_str());
         }
       }
-    else if(cmSystemTools::FileExists(depender))
+    else if(dependerExists)
       {
       // The dependee and depender both exist.  Compare file times.
       int result = 0;
@@ -225,7 +231,11 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
       okay = false;
 
       // Remove the depender to be sure it is rebuilt.
-      cmSystemTools::RemoveFile(depender);
+      if (dependerExists)
+        {
+        cmSystemTools::RemoveFile(depender);
+        dependerExists = false;
+        }
       }
     }
 
