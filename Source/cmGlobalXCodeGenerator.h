@@ -80,7 +80,7 @@ public:
                                         std::string& dir);
 
   ///! What is the configurations directory variable called?
-  virtual const char* GetCMakeCFGInitDirectory()  { return "."; }
+  virtual const char* GetCMakeCFGInitDirectory();
 
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& 
@@ -149,9 +149,8 @@ private:
                           std::vector<cmLocalGenerator*>& generators);
   void OutputXCodeProject(cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
-  virtual void  WriteXCodePBXProj(std::ostream& fout,
-                                  cmLocalGenerator* root,
-                                  std::vector<cmLocalGenerator*>& generators);
+  void WriteXCodePBXProj(std::ostream& fout, cmLocalGenerator* root,
+                         std::vector<cmLocalGenerator*>& generators);
   cmXCodeObject* CreateXCodeFileReference(cmSourceFile* sf,
                                           cmTarget& cmtarget);
   cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, 

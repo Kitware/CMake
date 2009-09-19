@@ -15,7 +15,6 @@ PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
 #include "cmGlobalXCodeGenerator.h"
-#include "cmGlobalXCode21Generator.h"
 #include "cmLocalXCodeGenerator.h"
 #include "cmMakefile.h"
 #include "cmXCodeObject.h"
@@ -24,6 +23,8 @@ PURPOSE.  See the above copyright notices for more information.
 #include "cmGeneratedFileStream.h"
 #include "cmComputeLinkInformation.h"
 #include "cmSourceFile.h"
+
+#include <cmsys/auto_ptr.hxx>
 
 //----------------------------------------------------------------------------
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -133,19 +134,14 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
   cmXcodeVersionParser parser;
   parser.ParseFile
     ("/Developer/Applications/Xcode.app/Contents/version.plist");
-  if(parser.Version == 15)
-    {
-    return new cmGlobalXCodeGenerator;
-    }
-  else if (parser.Version == 20)
+  cmsys::auto_ptr<cmGlobalXCodeGenerator> gg(new cmGlobalXCodeGenerator);
+  if (parser.Version == 20)
     {
     cmSystemTools::Message("Xcode 2.0 not really supported by cmake, "
                            "using Xcode 15 generator\n");
-    return new cmGlobalXCodeGenerator;
     }
-  cmGlobalXCodeGenerator* ret = new cmGlobalXCode21Generator;
-  ret->SetVersion(parser.Version);
-  return ret;
+  gg->SetVersion(parser.Version);
+  return gg.release();
 #else
   std::cerr << "CMake should be built with cmake to use XCode, "
     "default to Xcode 1.5\n";
@@ -2998,11 +2994,30 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
   cmXCodeObject::Indent(1, fout);
   fout << "};\n";
   cmXCodeObject::Indent(1, fout);
-  fout << "objectVersion = 39;\n";
-  cmXCodeObject::PrintList(this->XCodeObjects, fout);
+  if(this->XcodeVersion >= 21)
+    {
+    if (this->XcodeVersion >= 31)
+      fout << "objectVersion = 45;\n";
+    else if (this->XcodeVersion >= 30)
+      fout << "objectVersion = 44;\n";
+    else
+      fout << "objectVersion = 42;\n";
+    cmXCode21Object::PrintList(this->XCodeObjects, fout);
+    }
+  else
+    {
+    fout << "objectVersion = 39;\n";
+    cmXCodeObject::PrintList(this->XCodeObjects, fout);
+    }
   cmXCodeObject::Indent(1, fout);
   fout << "rootObject = " << this->RootObject->GetId() << ";\n";
   fout << "}\n";
+}
+
+//----------------------------------------------------------------------------
+const char* cmGlobalXCodeGenerator::GetCMakeCFGInitDirectory()
+{
+  return this->XcodeVersion >= 21? "$(CONFIGURATION)" : ".";
 }
 
 //----------------------------------------------------------------------------

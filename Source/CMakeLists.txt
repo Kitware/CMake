@@ -251,8 +251,6 @@ IF(APPLE)
     cmXCode21Object.cxx
     cmGlobalXCodeGenerator.cxx
     cmGlobalXCodeGenerator.h
-    cmGlobalXCode21Generator.cxx
-    cmGlobalXCode21Generator.h
     cmLocalXCodeGenerator.cxx
     cmLocalXCodeGenerator.h)
 ENDIF(APPLE)
