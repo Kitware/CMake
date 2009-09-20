@@ -1059,17 +1059,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     #SET_TESTS_PROPERTIES(CTestTestNoBuild PROPERTIES
     #  FAIL_REGULAR_EXPRESSION "Error" WILL_FAIL true)
     
-    CONFIGURE_FILE(
-      "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoExe.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake"
-      @ONLY ESCAPE_QUOTES)
-    ADD_TEST(CTestTestNoExe ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut2.log"
-      )
-    SET_TESTS_PROPERTIES(CTestTestNoExe PROPERTIES #DEPENDS CTestTestNoBuild
-      PASS_REGULAR_EXPRESSION "Could not find executable"
-      FAIL_REGULAR_EXPRESSION "SegFault")
+    #CONFIGURE_FILE(
+    #  "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoExe.cmake.in"
+#      "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake"
+#      @ONLY ESCAPE_QUOTES)
+#     ADD_TEST(CTestTestNoExe ${CMAKE_CTEST_COMMAND}
+#       -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake" -V
+#       --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut2.log"
+#       )
+#     SET_TESTS_PROPERTIES(CTestTestNoExe PROPERTIES #DEPENDS CTestTestNoBuild
+#       PASS_REGULAR_EXPRESSION "Could not find executable"
+#       FAIL_REGULAR_EXPRESSION "SegFault")
 
     CONFIGURE_FILE(
       "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
