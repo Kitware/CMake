@@ -563,6 +563,8 @@ ELSE (_boost_IN_CACHE)
       else()
         set (_boost_COMPILER "-il")
       endif()
+    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "SunPro")
+      set(_boost_COMPILER "-sw")
     elseif (MINGW)
       if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
           SET(_boost_COMPILER "-mgw") # no GCC version encoding prior to 1.34
