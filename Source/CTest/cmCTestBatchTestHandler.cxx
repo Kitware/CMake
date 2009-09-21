@@ -58,11 +58,12 @@ void cmCTestBatchTestHandler::WriteSrunArgs(int test, std::fstream& fout)
   cmCTestTestHandler::cmCTestTestProperties* properties =
       this->Properties[test];
 
-  fout << "srun --jobid=" << test << " ";
+  fout << "srun ";
+  //fout << "--jobid=" << test << " ";
   fout << "-J=" << properties->Name << " ";
  
   //Write dependency information
-  if(this->Tests[test].size() > 0)
+  /*if(this->Tests[test].size() > 0)
     {
       fout << "-P=afterany";
       for(TestSet::iterator i = this->Tests[test].begin();
@@ -71,7 +72,7 @@ void cmCTestBatchTestHandler::WriteSrunArgs(int test, std::fstream& fout)
           fout << ":" << *i;
         }
       fout << " ";
-    }
+    }*/
   if(properties->RunSerial)
     {
     fout << "--exclusive ";
@@ -105,9 +106,20 @@ void cmCTestBatchTestHandler::WriteTestCommand(int test, std::fstream& fout)
   std::vector<std::string>::iterator i = args.begin();
   ++i; //the test name
   ++i; //the executable (command)
-  for(; i != args.end(); ++i)
+  if(args.size() > 2)
     {
-    fout << "\"" << *i << "\" "; //args to the test executable
+    fout << "'";
+    }
+  while(i != args.end())
+    {
+    fout << "\"" << *i << "\""; //args to the test executable
+    ++i;
+
+    if(i == args.end() && args.size() > 2)
+      {
+      fout << "'";
+      }
+    fout << " ";
     }
   //TODO ZACH build TestResult.FullCommandLine
   //this->TestResult.FullCommandLine = this->TestCommand;
