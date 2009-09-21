@@ -1,4 +1,4 @@
-set(CVSROOT ":pserver:anonymous@www.cmake.org:/cvsroot/CMake")
+set(CVSROOT ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake")
 get_filename_component(SCRIPT_PATH "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 # default to self extracting tgz, tgz, and tar.Z
