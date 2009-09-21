@@ -98,7 +98,7 @@ mark_as_advanced(PROTOBUF_INCLUDE_DIR
 
 # Restore original find library prefixes
 if(WIN32)
-    set(CMAKE_FIND_LIBRARY_PREFIXES ${PROTOBUF_ORIG_FIND_LIBRARY_PREFIXES})
+    set(CMAKE_FIND_LIBRARY_PREFIXES "${PROTOBUF_ORIG_FIND_LIBRARY_PREFIXES}")
 endif()
 
 include(FindPackageHandleStandardArgs)
