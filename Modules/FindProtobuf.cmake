@@ -91,6 +91,11 @@ find_program(PROTOBUF_PROTOC_EXECUTABLE NAMES protoc
              DOC "The Google Protocol Buffers Compiler"
 )
 
+mark_as_advanced(PROTOBUF_INCLUDE_DIR
+                 PROTOBUF_LIBRARY
+                 PROTOBUF_PROTOC_LIBRARY
+                 PROTOBUF_PROTOC_EXECUTABLE)
+
 # Restore original find library prefixes
 if(WIN32)
     set(CMAKE_FIND_LIBRARY_PREFIXES ${PROTOBUF_ORIG_FIND_LIBRARY_PREFIXES})
