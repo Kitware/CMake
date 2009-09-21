@@ -1,3 +1,20 @@
+/*=========================================================================
+
+  Program:   CMake - Cross-Platform Makefile Generator
+  Module:    $RCSfile$
+  Language:  C++
+  Date:      $Date$
+  Version:   $Revision$
+
+  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
+  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+
 #include "cmCTestBatchTestHandler.h"
 #include "cmProcess.h"
 #include "cmStandardIncludes.h"
@@ -23,7 +40,7 @@ void cmCTestBatchTestHandler::WriteBatchScript()
     + "/Testing/CTestBatch.txt";
   std::fstream fout;
   fout.open(this->Script.c_str(), std::ios::out);
-  fout << "# !/bin/sh\n";
+  fout << "#!/bin/sh\n";
 
   for(TestMap::iterator i = this->Tests.begin(); i != this->Tests.end(); ++i)
     {
@@ -90,7 +107,7 @@ void cmCTestBatchTestHandler::WriteTestCommand(int test, std::fstream& fout)
   ++i; //the executable (command)
   for(; i != args.end(); ++i)
     {
-    fout << *i << " "; //args to the test executable
+    fout << "\"" << *i << "\" "; //args to the test executable
     }
   //TODO ZACH build TestResult.FullCommandLine
   //this->TestResult.FullCommandLine = this->TestCommand;
