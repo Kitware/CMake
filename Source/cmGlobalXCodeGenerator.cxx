@@ -638,7 +638,8 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     {
     sourcecode += ".c.h";
     }
-  else if(ext == "hxx" || ext == "hpp" || ext == "txx")
+  else if(ext == "hxx" || ext == "hpp" || ext == "txx"
+    || ext == "pch")
     {
     sourcecode += ".cpp.h";
     }
