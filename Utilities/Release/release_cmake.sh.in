@@ -101,7 +101,7 @@ check_exit_value $? "Build cmake" || exit 1
 
 if [ -z "@SKIP_TESTS@" ]; then
     echo "Run cmake tests"
-    @MAKE@ test
+    ./bin/ctest -j @PROCESSORS@ test
     check_exit_value $? "Test cmake" || exit 1
 fi
 
