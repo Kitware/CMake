@@ -445,11 +445,6 @@ int cmCTestBuildHandler::ProcessHandler()
   this->EndBuild = this->CTest->CurrentTime();
   this->EndBuildTime = cmSystemTools::GetTime();
   double elapsed_build_time = cmSystemTools::GetTime() - elapsed_time_start;
-  if (res != cmsysProcess_State_Exited || retVal )
-    {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error(s) when building project"
-      << std::endl);
-    }
 
   // Cleanups strings in the errors and warnings list.
   t_ErrorsAndWarningsVector::iterator evit;
@@ -501,6 +496,12 @@ int cmCTestBuildHandler::ProcessHandler()
     this->GenerateXMLLogScraped(xofs);
     }
   this->GenerateXMLFooter(xofs, elapsed_build_time);
+
+  if (res != cmsysProcess_State_Exited || retVal || this->TotalErrors > 0)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error(s) when building project"
+      << std::endl);
+    }
 
   // Display message about number of errors and warnings
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   " << this->TotalErrors
