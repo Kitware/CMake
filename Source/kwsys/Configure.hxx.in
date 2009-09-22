@@ -22,7 +22,8 @@
 #define KWSYS_DO_NOT_CLEAN_PUTENV 
 #else
 #undef KWSYS_DO_NOT_CLEAN_PUTENV
-#else
+#endif
+
 
 
 /* Whether ANSI C++ stream headers are to be used.  */
