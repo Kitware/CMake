@@ -2303,7 +2303,7 @@ static bool cmLocalGeneratorNotAbove(const char* a, const char* b)
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
-                                        const char* in_remote)
+                                        const char* in_remote, bool force)
 {
   // The path should never be quoted.
   assert(in_remote[0] != '\"');
@@ -2324,19 +2324,22 @@ cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
     this->RelativePathsConfigured = true;
     }
 
-  // Skip conversion if the path and local are not both in the source
-  // or both in the binary tree.
-  std::string local_path = cmSystemTools::JoinPath(local);
-  if(!((cmLocalGeneratorNotAbove(local_path.c_str(),
-                                 this->RelativePathTopBinary.c_str()) &&
-        cmLocalGeneratorNotAbove(in_remote,
-                                 this->RelativePathTopBinary.c_str())) ||
-       (cmLocalGeneratorNotAbove(local_path.c_str(),
-                                 this->RelativePathTopSource.c_str()) &&
-        cmLocalGeneratorNotAbove(in_remote,
-                                 this->RelativePathTopSource.c_str()))))
+  if(!force)
     {
-    return in_remote;
+    // Skip conversion if the path and local are not both in the source
+    // or both in the binary tree.
+    std::string local_path = cmSystemTools::JoinPath(local);
+    if(!((cmLocalGeneratorNotAbove(local_path.c_str(),
+                                   this->RelativePathTopBinary.c_str()) &&
+          cmLocalGeneratorNotAbove(in_remote,
+                                   this->RelativePathTopBinary.c_str())) ||
+         (cmLocalGeneratorNotAbove(local_path.c_str(),
+                                   this->RelativePathTopSource.c_str()) &&
+          cmLocalGeneratorNotAbove(in_remote,
+                                   this->RelativePathTopSource.c_str()))))
+      {
+      return in_remote;
+      }
     }
 
   // Identify the longest shared path component between the remote
