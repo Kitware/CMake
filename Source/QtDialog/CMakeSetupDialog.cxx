@@ -62,6 +62,10 @@ void QCMakeThread::run()
 CMakeSetupDialog::CMakeSetupDialog()
   : ExitAfterGenerate(true), CacheModified(false), CurrentState(Interrupting)
 {
+  QString title = QString(tr("CMake %1"));
+  title = title.arg(cmVersion::GetCMakeVersion());
+  this->setWindowTitle(title);
+
   // create the GUI
   QSettings settings;
   settings.beginGroup("Settings/StartPath");
@@ -513,6 +517,11 @@ void CMakeSetupDialog::onSourceDirectoryChanged(const QString& dir)
 
 void CMakeSetupDialog::onBinaryDirectoryChanged(const QString& dir)
 {
+  QString title = QString(tr("CMake %1 - %2"));
+  title = title.arg(cmVersion::GetCMakeVersion());
+  title = title.arg(dir);
+  this->setWindowTitle(title);
+
   this->CacheModified = false;
   this->CacheValues->cacheModel()->clear();
   qobject_cast<QCMakeCacheModelDelegate*>(this->CacheValues->itemDelegate())->clearChanges();

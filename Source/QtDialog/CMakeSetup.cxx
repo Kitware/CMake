@@ -151,9 +151,6 @@ int main(int argc, char** argv)
   app.setWindowIcon(QIcon(":/Icons/CMakeSetup.png"));
   
   CMakeSetupDialog dialog;
-  QString title = QString("CMake %1");
-  title = title.arg(cmVersion::GetCMakeVersion());
-  dialog.setWindowTitle(title);
   dialog.show();
  
   cmsys::CommandLineArguments arg;
