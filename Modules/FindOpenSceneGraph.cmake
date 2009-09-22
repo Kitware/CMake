@@ -6,7 +6,7 @@
 # NOTE: To use this module effectively you must either require CMake >= 2.6.3
 # with cmake_minimum_required(VERSION 2.6.3) or download and place
 # FindOpenThreads.cmake, Findosg_functions.cmake, Findosg.cmake,
-# and Find<foo>.cmake files for whatever nodekits you need.
+# and Find<etc>.cmake files into your CMAKE_MODULE_PATH.
 #
 #==================================
 #
@@ -46,7 +46,7 @@
 #  add_executable(foo foo.cc)
 #  target_link_libraries(foo ${OPENSCENEGRAPH_LIBRARIES})
 #
-#==================================
+
 #
 # Naming convention:
 #  Local variables of the form _osg_foo

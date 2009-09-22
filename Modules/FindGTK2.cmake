@@ -49,7 +49,7 @@
 #      target_link_libraries(mygui ${GTK2_LIBRARIES})
 #   endif()
 #
-#=================
+
 # 
 # Copyright (c) 2008-2009
 #     Philip Lowman <philip@yhbt.com>
