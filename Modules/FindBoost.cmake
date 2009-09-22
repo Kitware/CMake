@@ -381,6 +381,7 @@ ELSE (_boost_IN_CACHE)
   SET(_boost_INCLUDE_SEARCH_DIRS
     C:/boost/include
     C:/boost
+    "$ENV{ProgramFiles}/boost/include"
     "$ENV{ProgramFiles}/boost"
     /sw/local/include
   )
@@ -638,13 +639,15 @@ ELSE (_boost_IN_CACHE)
   # ------------------------------------------------------------------------
   #  Begin finding boost libraries
   # ------------------------------------------------------------------------
-  
+
   SET(_boost_LIBRARIES_SEARCH_DIRS
     ${Boost_INCLUDE_DIR}/lib
+    ${Boost_INCLUDE_DIR}/../lib
     C:/boost/lib
     C:/boost
     "$ENV{ProgramFiles}/boost/boost_${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}_${Boost_SUBMINOR_VERSION}/lib"
     "$ENV{ProgramFiles}/boost/boost_${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}/lib"
+    "$ENV{ProgramFiles}/boost/lib"
     "$ENV{ProgramFiles}/boost"
     /sw/local/lib
   )
