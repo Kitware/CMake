@@ -415,11 +415,13 @@ public:
 
 kwsysDeletingCharVector::~kwsysDeletingCharVector()
 {
+#ifndef KWSYS_DO_NOT_CLEAN_PUTENV
   for(kwsys_stl::vector<char*>::iterator i = this->begin();
       i != this->end(); ++i)
     {
     delete []*i;
     }
+#endif
 }
 bool SystemTools::PutEnv(const char* value)
 { 
