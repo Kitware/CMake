@@ -247,14 +247,15 @@
 #  QT_QTSCRIPTTOOLS_LIBRARY         The QtScriptTools library
 #  
 # also defined, but NOT for general use are
-#  QT_MOC_EXECUTABLE          Where to find the moc tool.
-#  QT_UIC_EXECUTABLE          Where to find the uic tool.
-#  QT_UIC3_EXECUTABLE         Where to find the uic3 tool.
-#  QT_RCC_EXECUTABLE          Where to find the rcc tool
-#  QT_DBUSCPP2XML_EXECUTABLE  Where to find the qdbuscpp2xml tool.
-#  QT_DBUSXML2CPP_EXECUTABLE  Where to find the qdbusxml2cpp tool.
-#  QT_LUPDATE_EXECUTABLE      Where to find the lupdate tool.
-#  QT_LRELEASE_EXECUTABLE     Where to find the lrelease tool.
+#  QT_MOC_EXECUTABLE                   Where to find the moc tool.
+#  QT_UIC_EXECUTABLE                   Where to find the uic tool.
+#  QT_UIC3_EXECUTABLE                  Where to find the uic3 tool.
+#  QT_RCC_EXECUTABLE                   Where to find the rcc tool
+#  QT_DBUSCPP2XML_EXECUTABLE           Where to find the qdbuscpp2xml tool.
+#  QT_DBUSXML2CPP_EXECUTABLE           Where to find the qdbusxml2cpp tool.
+#  QT_LUPDATE_EXECUTABLE               Where to find the lupdate tool.
+#  QT_LRELEASE_EXECUTABLE              Where to find the lrelease tool.
+#  QT_QCOLLECTIONGENERATOR_EXECUTABLE  Where to find the qcollectiongenerator tool.
 #  
 #
 # These are around for backwards compatibility 
@@ -880,6 +881,7 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_DBUSXML2CPP_EXECUTABLE NOTFOUND)
     SET(QT_LUPDATE_EXECUTABLE NOTFOUND)
     SET(QT_LRELEASE_EXECUTABLE NOTFOUND)
+    SET(QT_QCOLLECTIONGENERATOR_EXECUTABLE NOTFOUND)
   ENDIF(QT_QMAKE_CHANGED)
   
   FIND_PROGRAM(QT_MOC_EXECUTABLE
@@ -930,6 +932,12 @@ IF (QT4_QMAKE_FOUND)
     NO_DEFAULT_PATH
     )
 
+  FIND_PROGRAM(QT_QCOLLECTIONGENERATOR_EXECUTABLE
+    NAMES qcollectiongenerator-qt4 qcollectiongenerator
+    PATHS ${QT_BINARY_DIR}
+    NO_DEFAULT_PATH
+    )
+
   IF (QT_MOC_EXECUTABLE)
      SET(QT_WRAP_CPP "YES")
   ENDIF (QT_MOC_EXECUTABLE)
@@ -942,7 +950,7 @@ IF (QT4_QMAKE_FOUND)
 
   MARK_AS_ADVANCED( QT_UIC_EXECUTABLE QT_UIC3_EXECUTABLE QT_MOC_EXECUTABLE
     QT_RCC_EXECUTABLE QT_DBUSXML2CPP_EXECUTABLE QT_DBUSCPP2XML_EXECUTABLE
-    QT_LUPDATE_EXECUTABLE QT_LRELEASE_EXECUTABLE)
+    QT_LUPDATE_EXECUTABLE QT_LRELEASE_EXECUTABLE QT_QCOLLECTIONGENERATOR_EXECUTABLE)
 
   ######################################
   #
