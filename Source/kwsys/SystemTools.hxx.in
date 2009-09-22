@@ -275,7 +275,17 @@ public:
    * not a directory.  If isFile = false, then return true
    * if it is a file or a directory.
    */
-  static bool FileExists(const char* filename, bool isFile=false);
+  static bool FileExists(const char* filename, bool isFile);
+  static bool FileExists(const char* filename);
+
+  /**
+   * Converts Cygwin path to Win32 path. Uses dictionary container for
+   * caching and calls to cygwin_conv_to_win32_path from Cygwin dll
+   * for actual translation.  Returns true on success, else false.
+   */
+#ifdef __CYGWIN__
+  static bool PathCygwinToWin32(const char *path, char *win32_path);
+#endif
 
   /**
    * Return file length
@@ -890,6 +900,9 @@ private:
    */
   static SystemToolsTranslationMap *TranslationMap;
   static SystemToolsTranslationMap *LongPathMap;
+#ifdef __CYGWIN__
+  static SystemToolsTranslationMap *Cyg2Win32Map;
+#endif
   friend class SystemToolsManager;
 };
 
