@@ -352,20 +352,6 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     << "  \"" 
     << lg->Convert(check.c_str(),
                    cmLocalGenerator::START_OUTPUT).c_str() << "\"\n";
-
-  // add in all the directory information files
-  std::string tmpStr;
-  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    lg = 
-      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
-    tmpStr = lg->GetMakefile()->GetStartOutputDirectory();
-    tmpStr += cmake::GetCMakeFilesDirectory();
-    tmpStr += "/CMakeDirectoryInformation.cmake";
-    cmakefileStream << "  \"" << 
-      lg->Convert(tmpStr.c_str(),cmLocalGenerator::HOME_OUTPUT).c_str() 
-                    << "\"\n";
-    }
   cmakefileStream << "  )\n\n";
 
   // CMake must rerun if a byproduct is missing.
@@ -380,6 +366,20 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     {
     cmakefileStream << "  \"" <<
       lg->Convert(k->c_str(),cmLocalGenerator::HOME_OUTPUT).c_str()
+                    << "\"\n";
+    }
+
+  // add in all the directory information files
+  std::string tmpStr;
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    lg = 
+      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
+    tmpStr = lg->GetMakefile()->GetStartOutputDirectory();
+    tmpStr += cmake::GetCMakeFilesDirectory();
+    tmpStr += "/CMakeDirectoryInformation.cmake";
+    cmakefileStream << "  \"" << 
+      lg->Convert(tmpStr.c_str(),cmLocalGenerator::HOME_OUTPUT).c_str() 
                     << "\"\n";
     }
   cmakefileStream << "  )\n\n";

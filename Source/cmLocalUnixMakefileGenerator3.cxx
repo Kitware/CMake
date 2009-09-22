@@ -436,6 +436,7 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
     return;
     }
 
+  infoFileStream.SetCopyIfDifferent(true);
   // Write the do not edit header.
   this->WriteDisclaimer(infoFileStream);
 
@@ -1352,7 +1353,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
   // time dependencies were scanned then force rescanning.  This may
   // happen when a new source file is added and CMake regenerates the
   // project but no other sources were touched.
-  bool needRescan = false;
+  bool needRescanDependInfo = false;
   cmFileTimeComparison* ftc =
     this->GlobalGenerator->GetCMakeInstance()->GetFileComparison();
   {
@@ -1368,19 +1369,48 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
           << internalDependFile << "\"." << std::endl;
       cmSystemTools::Stdout(msg.str().c_str());
       }
-    needRescan = true;
+    needRescanDependInfo = true;
     }
   }
 
+  // If the directory information is newer than depend.internal, include dirs
+  // may have changed. In this case discard all old dependencies.
+  bool needRescanDirInfo = false;
+  std::string dirInfoFile = this->Makefile->GetStartOutputDirectory();
+  dirInfoFile += cmake::GetCMakeFilesDirectory();
+  dirInfoFile += "/CMakeDirectoryInformation.cmake";
+  {
+  int result;
+  if(!ftc->FileTimeCompare(internalDependFile.c_str(), 
+                           dirInfoFile.c_str(), &result) || result < 0)
+    {
+    if(verbose)
+      {
+      cmOStringStream msg;
+      msg << "Dependee \"" << internalDependFile
+          << "\" is newer than depender \""
+          << dirInfoFile << "\"." << std::endl;
+      cmSystemTools::Stdout(msg.str().c_str());
+      }
+    needRescanDirInfo = true;
+    }
+  }
+  
   // Check the implicit dependencies to see if they are up to date.
   // The build.make file may have explicit dependencies for the object
   // files but these will not affect the scanning process so they need
   // not be considered.
-  cmDependsC checker;
-  checker.SetVerbose(verbose);
-  checker.SetFileComparison(ftc);
-  if(needRescan ||
-     !checker.Check(dependFile.c_str(), internalDependFile.c_str()))
+  bool needRescanDependencies = false;
+  if (needRescanDirInfo == false)
+    {
+    cmDependsC checker;
+    checker.SetVerbose(verbose);
+    checker.SetFileComparison(ftc);
+    needRescanDependencies = !checker.Check(dependFile.c_str(),
+                                            internalDependFile.c_str());
+    }
+
+  if(needRescanDependInfo || needRescanDirInfo || needRescanDependencies)
     {
     // The dependencies must be regenerated.
     std::string targetName = cmSystemTools::GetFilenameName(dir);
