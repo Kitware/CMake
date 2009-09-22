@@ -93,6 +93,8 @@ private:
                     std::vector<cmLocalGenerator*>&
                     generators);
   std::string XCodeEscapePath(const char* p);
+  std::string RelativeToSource(const char* p);
+  std::string RelativeToBinary(const char* p);
   std::string ConvertToRelativeForXCode(const char* p);
   std::string ConvertToRelativeForMake(const char* p);
   void CreateCustomCommands(cmXCodeObject* buildPhases,
@@ -206,6 +208,7 @@ private:
   std::string CurrentProject;
   std::set<cmStdString> TargetDoneSet;
   std::vector<std::string> CurrentOutputDirectoryComponents;
+  std::vector<std::string> ProjectSourceDirectoryComponents;
   std::vector<std::string> ProjectOutputDirectoryComponents;
   std::map<cmStdString, cmXCodeObject* > GroupMap;
   std::map<cmStdString, cmXCodeObject* > GroupNameMap;

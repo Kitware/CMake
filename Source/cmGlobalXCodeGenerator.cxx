@@ -302,9 +302,9 @@ void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
 {
   this->CurrentProject = root->GetMakefile()->GetProjectName();
   this->SetCurrentLocalGenerator(root);
-  std::string outDir = this->CurrentMakefile->GetHomeOutputDirectory();
-  outDir =cmSystemTools::CollapseFullPath(outDir.c_str());
-  cmSystemTools::SplitPath(outDir.c_str(),
+  cmSystemTools::SplitPath(this->CurrentMakefile->GetCurrentDirectory(),
+                           this->ProjectSourceDirectoryComponents);
+  cmSystemTools::SplitPath(this->CurrentMakefile->GetCurrentOutputDirectory(),
                            this->ProjectOutputDirectoryComponents);
 
   this->CurrentXCodeHackMakefile =
@@ -670,49 +670,18 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
   fileRef->AddAttribute("lastKnownFileType", 
                         this->CreateString(sourcecode.c_str()));
 
-  std::string path =
-    this->ConvertToRelativeForXCode(sf->GetFullPath().c_str());
-  std::string dir;
-  std::string file;
-  cmSystemTools::SplitProgramPath(sf->GetFullPath().c_str(),
-                                  dir, file);
-
-  // Try to make the path relative to the project root.
-  bool Absolute = true;
-  if (this->XcodeVersion >= 30)
-    {
-    std::string relative = 
-      this->CurrentLocalGenerator->Convert(sf->GetFullPath().c_str(), 
-                                           cmLocalGenerator::HOME,
-                                           cmLocalGenerator::MAKEFILE, 
-                                           false);
-    relative = cmSystemTools::ConvertToOutputPath(relative.c_str());
-    if (!relative.empty() && relative[0] != '/') 
-      {
-      Absolute = false;
-      path = relative;
-      }
-    }
-
-  fileRef->AddAttribute("name", this->CreateString(file.c_str()));
+  // Store the file path relative to the top of the source tree.
+  std::string path = this->RelativeToSource(sf->GetFullPath().c_str());
+  std::string name = cmSystemTools::GetFilenameName(path.c_str());
+  const char* sourceTree = (cmSystemTools::FileIsFullPath(path.c_str())?
+                            "<absolute>" : "SOURCE_ROOT");
+  fileRef->AddAttribute("name", this->CreateString(name.c_str()));
   fileRef->AddAttribute("path", this->CreateString(path.c_str()));
+  fileRef->AddAttribute("sourceTree", this->CreateString(sourceTree));
   if(this->XcodeVersion == 15)
     {
     fileRef->AddAttribute("refType", this->CreateString("4"));
     }
-  if(path.size() > 1 && path[0] == '.' && path[1] == '.')
-    {
-    fileRef->AddAttribute("sourceTree", this->CreateString("<group>"));
-    }
-  else if (Absolute)
-    {
-    fileRef->AddAttribute("sourceTree", this->CreateString("<absolute>"));
-    }
-  else
-    {
-    fileRef->AddAttribute("sourceTree", this->CreateString("SOURCE_ROOT"));
-    }
-
   return fileRef;
 }
 
@@ -2610,24 +2579,14 @@ void cmGlobalXCodeGenerator
     else
       this->RootObject->AddAttribute("compatibilityVersion",
                                      this->CreateString("Xcode 3.0"));
-    this->RootObject->AddAttribute("projectDirPath", this->CreateString(""));
     }
   // Point Xcode at the top of the source tree.
   {
-  std::string proot = root->GetMakefile()->GetCurrentDirectory();
-  proot = this->ConvertToRelativeForXCode(proot.c_str());
-  if (this->XcodeVersion >= 30) 
-    {
-    this->RootObject->AddAttribute("projectRoot",
-                                   this->CreateString(""));
-    this->RootObject->AddAttribute("projectDirPath",
-                                   this->CreateString(proot.c_str()));
-    }
-  else
-    {
-    this->RootObject->AddAttribute("projectRoot",
-                                   this->CreateString(proot.c_str()));
-    }
+  std::string pdir =
+    this->RelativeToBinary(root->GetMakefile()->GetCurrentDirectory());
+  this->RootObject->AddAttribute("projectDirPath",
+                                 this->CreateString(pdir.c_str()));
+  this->RootObject->AddAttribute("projectRoot", this->CreateString(""));
   }
   cmXCodeObject* configlist = 
     this->CreateObject(cmXCodeObject::XCConfigurationList);
@@ -3064,6 +3023,22 @@ std::string cmGlobalXCodeGenerator::ConvertToRelativeForXCode(const char* p)
         ConvertToRelativePath(this->ProjectOutputDirectoryComponents, p);
     return cmSystemTools::ConvertToOutputPath(ret.c_str());
     }
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalXCodeGenerator::RelativeToSource(const char* p)
+{
+  // We force conversion because Xcode breakpoints do not work unless
+  // they are in a file named relative to the source tree.
+  return this->CurrentLocalGenerator->
+    ConvertToRelativePath(this->ProjectSourceDirectoryComponents, p, true);
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalXCodeGenerator::RelativeToBinary(const char* p)
+{
+  return this->CurrentLocalGenerator->
+    ConvertToRelativePath(this->ProjectOutputDirectoryComponents, p);
 }
 
 //----------------------------------------------------------------------------
