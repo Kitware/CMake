@@ -1083,6 +1083,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       )
     SET_TESTS_PROPERTIES(CTestTestCrash PROPERTIES
       PASS_REGULAR_EXPRESSION "SegFault")
+      
+    CONFIGURE_FILE(
+      "${CMake_SOURCE_DIR}/Tests/CTestTestParallel/test.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake"
+      @ONLY ESCAPE_QUOTES)
+    ADD_TEST(CTestTestParallel ${CMAKE_CTEST_COMMAND}
+      -S "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake" -V
+      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
+      )
     ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND}
       -N
       )

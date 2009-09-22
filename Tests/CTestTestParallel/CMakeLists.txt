@@ -1,0 +1,24 @@
+cmake_minimum_required (VERSION 2.6)
+PROJECT(CTestTestParallel)
+
+SET(DART_ROOT "" CACHE STRING "" FORCE)
+ENABLE_TESTING()
+INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
+
+GET_FILENAME_COMPONENT(CTEST_COMMAND "${CMAKE_COMMAND}" PATH)
+SET(CTEST_COMMAND "${CTEST_COMMAND}/ctest")
+
+ADD_EXECUTABLE (LockFile lockFile.cxx)
+TARGET_LINK_LIBRARIES (NoBuild ${EXTRA_LIBS})
+
+ENABLE_TESTING ()
+
+ADD_TEST (TestRunSerial1 LockFile)
+ADD_TEST (TestRunSerial2 LockFile)
+SET_TESTS_PROPERTIES(TestRunSerial1 TestRunSerial2 PROPERTIES RUN_SERIAL true)
+
+ADD_TEST (TestProcessorsGreaterThanMPL1 LockFile)
+ADD_TEST (TestProcessorsGreaterThanMPL2 LockFile)
+SET_TESTS_PROPERTIES(TestProcessorsGreaterThanMPL1 PROPERTIES PROCESSORS 10)
+
+INCLUDE (CTest)
