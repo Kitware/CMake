@@ -1544,6 +1544,33 @@ IF (QT4_QMAKE_FOUND)
           ${QT_GTHREAD_LIBRARY} ${QT_GLIB_LIBRARY})
     ENDIF(QT_GLIB_LIBRARY AND QT_GTHREAD_LIBRARY)
 
+
+    # Qt 4.5+ also links to gobject-2.0
+    IF(QT_VERSION_MINOR GREATER 4)
+       IF(NOT QT_GOBJECT_LIBRARY)
+         EXECUTE_PROCESS(COMMAND pkg-config --libs-only-L gobject-2.0
+           OUTPUT_VARIABLE _glib_query_output
+           RESULT_VARIABLE _glib_result
+           ERROR_VARIABLE _glib_query_output )
+
+         IF(_glib_result MATCHES 0)
+           STRING(REPLACE "-L" "" _glib_query_output "${_glib_query_output}")
+           SEPARATE_ARGUMENTS(_glib_query_output)
+         ELSE(_glib_result MATCHES 0)
+           SET(_glib_query_output)
+         ENDIF(_glib_result MATCHES 0)
+
+         FIND_LIBRARY(QT_GOBJECT_LIBRARY NAMES gobject-2.0 PATHS ${_glib_query_output} )
+       
+         MARK_AS_ADVANCED(QT_GOBJECT_LIBRARY)
+       ENDIF(NOT QT_GOBJECT_LIBRARY)
+
+       IF(QT_GOBJECT_LIBRARY)
+         SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES}
+             ${QT_GOBJECT_LIBRARY})
+       ENDIF(QT_GOBJECT_LIBRARY)
+    ENDIF(QT_VERSION_MINOR GREATER 4)
+
   ENDIF(QT_QCONFIG MATCHES "glib")
   
   ## clock-monotonic, just see if we need to link with rt
