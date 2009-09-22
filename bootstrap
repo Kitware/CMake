@@ -370,6 +370,7 @@ cmake_kwsys_config_replace_string ()
     echo "${APPEND}" > "${OUTFILE}${_tmp}"
     cat "${INFILE}" | 
       sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
+                s/@KWSYS_DO_NOT_CLEAN_PUTENV@/0/g;
                 s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
                 s/@KWSYS_LFS_AVAILABLE@/${KWSYS_LFS_AVAILABLE}/g;
                 s/@KWSYS_LFS_REQUESTED@/${KWSYS_LFS_REQUESTED}/g;
