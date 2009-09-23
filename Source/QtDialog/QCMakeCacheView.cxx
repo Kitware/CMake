@@ -250,18 +250,18 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
     QCMakePropertyList newP2 = newProps2.toList();
     qSort(newP);
     qSort(newP2);
-    int rowCount = 0;
+    int row_count = 0;
     foreach(QCMakeProperty p, newP)
     {
-      this->insertRow(rowCount);
-      this->setPropertyData(this->index(rowCount, 0), p, true);
-      rowCount++;
+      this->insertRow(row_count);
+      this->setPropertyData(this->index(row_count, 0), p, true);
+      row_count++;
     }
     foreach(QCMakeProperty p, newP2)
     {
-      this->insertRow(rowCount);
-      this->setPropertyData(this->index(rowCount, 0), p, false);
-      rowCount++;
+      this->insertRow(row_count);
+      this->setPropertyData(this->index(row_count, 0), p, false);
+      row_count++;
     }
   }
   else if(this->View == GroupView)
@@ -275,7 +275,7 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
     
     foreach(QString key, newPropsTree.keys())
       {
-      QCMakePropertyList props = newPropsTree[key];
+      QCMakePropertyList props2 = newPropsTree[key];
 
       QList<QStandardItem*> parentItems;
       parentItems.append(
@@ -286,8 +286,10 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
       parentItems[1]->setData(QBrush(QColor(255,100,100)), Qt::BackgroundColorRole);
       root->appendRow(parentItems);
 
-      foreach(QCMakeProperty prop, props)
+      int num = props2.size();
+      for(int i=0; i<num; i++)
         {
+        QCMakeProperty prop = props2[i];
         QList<QStandardItem*> items;
         items.append(new QStandardItem());
         items.append(new QStandardItem());
@@ -298,14 +300,16 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
     
     foreach(QString key, newPropsTree2.keys())
       {
-      QCMakePropertyList props = newPropsTree2[key];
+      QCMakePropertyList props2 = newPropsTree2[key];
 
       QStandardItem* parentItem = 
         new QStandardItem(key.isEmpty() ? tr("Ungrouped Entries") : key);
       root->appendRow(parentItem);
 
-      foreach(QCMakeProperty prop, props)
+      int num = props2.size();
+      for(int i=0; i<num; i++)
         {
+        QCMakeProperty prop = props2[i];
         QList<QStandardItem*> items;
         items.append(new QStandardItem());
         items.append(new QStandardItem());
@@ -644,17 +648,17 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
   
 // Issue 205903 fixed in Qt 4.5.0.
 // Can remove this function and FileDialogFlag when minimum Qt version is 4.5
-bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* event)
+bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* evt)
 {
   // workaround for what looks like a bug in Qt on Mac OS X
   // where it doesn't create a QWidget wrapper for the native file dialog
   // so the Qt library ends up assuming the focus was lost to something else
 
-  if(event->type() == QEvent::FocusOut && this->FileDialogFlag)
+  if(evt->type() == QEvent::FocusOut && this->FileDialogFlag)
     {
     return false;
     }
-  return QItemDelegate::eventFilter(object, event);
+  return QItemDelegate::eventFilter(object, evt);
 }
 
 void QCMakeCacheModelDelegate::setModelData(QWidget* editor,
@@ -699,18 +703,18 @@ void QCMakeCacheModelDelegate::recordChange(QAbstractItemModel* model, const QMo
   QCMakeCacheModel* cache_model = qobject_cast<QCMakeCacheModel*>(mymodel);
   if(cache_model && idx.isValid())
     {
-    QCMakeProperty property;
+    QCMakeProperty prop;
     idx = idx.sibling(idx.row(), 0);
-    cache_model->getPropertyData(idx, property);
+    cache_model->getPropertyData(idx, prop);
     
     // clean out an old one
-    QSet<QCMakeProperty>::iterator iter = mChanges.find(property);
+    QSet<QCMakeProperty>::iterator iter = mChanges.find(prop);
     if(iter != mChanges.end())
       {
       mChanges.erase(iter);
       }
     // now add the new item
-    mChanges.insert(property);
+    mChanges.insert(prop);
     }
 }
 

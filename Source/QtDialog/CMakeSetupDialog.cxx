@@ -286,14 +286,14 @@ void CMakeSetupDialog::doConfigure()
   QDir dir(bindir);
   if(!dir.exists())
     {
-    QString message = tr("Build directory does not exist, "
+    QString msg = tr("Build directory does not exist, "
                          "should I create it?")
                       + "\n\n"
                       + tr("Directory: ");
-    message += bindir;
+    msg += bindir;
     QString title = tr("Create Directory");
     QMessageBox::StandardButton btn;
-    btn = QMessageBox::information(this, title, message, 
+    btn = QMessageBox::information(this, title, msg, 
                                    QMessageBox::Yes | QMessageBox::No);
     if(btn == QMessageBox::No)
       {
@@ -380,11 +380,11 @@ void CMakeSetupDialog::closeEvent(QCloseEvent* e)
   // prompt for close if there are unsaved changes, and we're not busy
   if(this->CacheModified)
     {
-    QString message = tr("You have changed options but not rebuilt, "
+    QString msg = tr("You have changed options but not rebuilt, "
                     "are you sure you want to exit?");
     QString title = tr("Confirm Exit");
     QMessageBox::StandardButton btn;
-    btn = QMessageBox::critical(this, title, message,
+    btn = QMessageBox::critical(this, title, msg,
                                 QMessageBox::Yes | QMessageBox::No);
     if(btn == QMessageBox::No)
       {
@@ -395,12 +395,12 @@ void CMakeSetupDialog::closeEvent(QCloseEvent* e)
   // don't close if we're busy, unless the user really wants to
   if(this->CurrentState == Configuring)
     {
-    QString message = "You are in the middle of a Configure.\n"
+    QString msg = "You are in the middle of a Configure.\n"
                    "If you Exit now the configure information will be lost.\n"
                    "Are you sure you want to Exit?";
     QString title = tr("Confirm Exit");
     QMessageBox::StandardButton btn;
-    btn = QMessageBox::critical(this, title, message,
+    btn = QMessageBox::critical(this, title, msg,
                                 QMessageBox::Yes | QMessageBox::No);
     if(btn == QMessageBox::No)
       {
@@ -540,16 +540,16 @@ void CMakeSetupDialog::showProgress(const QString& /*msg*/, float percent)
   this->ProgressBar->setValue(qRound(percent * 100));
 }
 
-void CMakeSetupDialog::error(const QString& message)
+void CMakeSetupDialog::error(const QString& msg)
 {
   this->Output->setCurrentCharFormat(this->ErrorFormat);
-  this->Output->append(message);
+  this->Output->append(msg);
 }
 
-void CMakeSetupDialog::message(const QString& message)
+void CMakeSetupDialog::message(const QString& msg)
 {
   this->Output->setCurrentCharFormat(this->MessageFormat);
-  this->Output->append(message);
+  this->Output->append(msg);
 }
 
 void CMakeSetupDialog::setEnabledState(bool enabled)
@@ -677,9 +677,9 @@ void CMakeSetupDialog::doReloadCache()
 void CMakeSetupDialog::doDeleteCache()
 {   
   QString title = tr("Delete Cache");
-  QString message = "Are you sure you want to delete the cache?";
+  QString msg = "Are you sure you want to delete the cache?";
   QMessageBox::StandardButton btn;
-  btn = QMessageBox::information(this, title, message, 
+  btn = QMessageBox::information(this, title, msg, 
                                  QMessageBox::Yes | QMessageBox::No);
   if(btn == QMessageBox::No)
     {

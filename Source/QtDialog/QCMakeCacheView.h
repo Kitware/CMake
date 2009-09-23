@@ -42,7 +42,7 @@ public:
   // get whether to show advanced entries
   bool showAdvanced() const;
 
-  QSize sizeHint(int) { return QSize(200,200); }
+  QSize sizeHint() const { return QSize(200,200); }
 
 public slots:
   // set whether to show advanced entries
