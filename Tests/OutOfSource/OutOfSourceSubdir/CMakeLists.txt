@@ -20,9 +20,9 @@ IF ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
   # path of the source file for no good reason.  Reduce the length
   # limit by 46 characters to account for it.  It should still be long
   # enough to require special object file name conversion.
-  IF(${CMAKE_GENERATOR} MATCHES "Visual Studio 8")
+  IF(${CMAKE_GENERATOR} MATCHES "Visual Studio (8|10)")
     MATH(EXPR MAXPATH "${MAXPATH} - 46")
-  ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio 8")
+  ENDIF()
 
   # MAXPATH less 25 for last /and/deeper/simple.cxx part and small safety
   MATH(EXPR MAXPATH "${MAXPATH} - 25")
