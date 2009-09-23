@@ -1531,19 +1531,20 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString(pnbase.c_str()));
 
   // Set attributes to specify the proper name for the target.
+  std::string pndir = this->CurrentMakefile->GetCurrentOutputDirectory();
   if(target.GetType() == cmTarget::STATIC_LIBRARY ||
      target.GetType() == cmTarget::SHARED_LIBRARY ||
      target.GetType() == cmTarget::MODULE_LIBRARY ||
      target.GetType() == cmTarget::EXECUTABLE)
     {
-    std::string pndir = target.GetDirectory();
-    buildSettings->AddAttribute("SYMROOT", 
-                                this->CreateString(pndir.c_str()));
+    pndir = target.GetDirectory();
     buildSettings->AddAttribute("EXECUTABLE_PREFIX", 
                                 this->CreateString(pnprefix.c_str()));
     buildSettings->AddAttribute("EXECUTABLE_SUFFIX", 
                                 this->CreateString(pnsuffix.c_str()));
     }
+  buildSettings->AddAttribute("SYMROOT",
+                              this->CreateString(pndir.c_str()));
 
   // Handle settings for each target type.
   switch(target.GetType())
