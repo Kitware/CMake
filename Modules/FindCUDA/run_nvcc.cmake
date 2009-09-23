@@ -120,6 +120,12 @@ cuda_execute_process(
   COMMAND "${CMAKE_COMMAND}" -E remove "${generated_file}"
   )
 
+# Make sure the output directory is present
+cuda_execute_process(
+  "Creating output directory: ${generated_file_path}"
+  COMMAND "${CMAKE_COMMAND}" -E make_directory "${generated_file_path}"
+  )
+
 # Generate the dependency file
 cuda_execute_process(
   "Generating dependency file: ${NVCC_generated_dependency_file}"
