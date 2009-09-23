@@ -1030,6 +1030,51 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     ENDIF(CTEST_TEST_UPDATE_HG)
   ENDIF(CTEST_TEST_UPDATE)
 
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoBuild.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestNoBuild ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut1.log"
+    )
+  SET_TESTS_PROPERTIES(CTestTestNoBuild PROPERTIES
+    FAIL_REGULAR_EXPRESSION "Error" WILL_FAIL true)
+  
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoExe.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestNoExe ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut2.log"
+    )
+  SET_TESTS_PROPERTIES(CTestTestNoExe PROPERTIES #DEPENDS CTestTestNoBuild
+    PASS_REGULAR_EXPRESSION "Could not find executable"
+    FAIL_REGULAR_EXPRESSION "SegFault")
+
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestCrash ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestCrash/testOutput.log"
+    )
+  SET_TESTS_PROPERTIES(CTestTestCrash PROPERTIES
+    PASS_REGULAR_EXPRESSION "SegFault")
+    
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestParallel/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestParallel ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
+    )
+  ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND}
+    -N
+    )
   IF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" @ONLY ESCAPE_QUOTES)
@@ -1050,51 +1095,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest3/testOutput.log"
       )
     
-    CONFIGURE_FILE(
-      "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoBuild.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake"
-      @ONLY ESCAPE_QUOTES)
-    ADD_TEST(CTestTestNoBuild ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut1.log"
-      )
-    SET_TESTS_PROPERTIES(CTestTestNoBuild PROPERTIES
-      FAIL_REGULAR_EXPRESSION "Error" WILL_FAIL true)
-    
-    CONFIGURE_FILE(
-      "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoExe.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake"
-      @ONLY ESCAPE_QUOTES)
-    ADD_TEST(CTestTestNoExe ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut2.log"
-      )
-    SET_TESTS_PROPERTIES(CTestTestNoExe PROPERTIES #DEPENDS CTestTestNoBuild
-      PASS_REGULAR_EXPRESSION "Could not find executable"
-      FAIL_REGULAR_EXPRESSION "SegFault")
-
-    CONFIGURE_FILE(
-      "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake"
-      @ONLY ESCAPE_QUOTES)
-    ADD_TEST(CTestTestCrash ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestCrash/testOutput.log"
-      )
-    SET_TESTS_PROPERTIES(CTestTestCrash PROPERTIES
-      PASS_REGULAR_EXPRESSION "SegFault")
-      
-    CONFIGURE_FILE(
-      "${CMake_SOURCE_DIR}/Tests/CTestTestParallel/test.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake"
-      @ONLY ESCAPE_QUOTES)
-    ADD_TEST(CTestTestParallel ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
-      )
-    ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND}
-      -N
-      )
     # these tests take a long time, make sure they have it
     # if timeouts have not already been set
     GET_TEST_PROPERTY(CTestTest TIMEOUT PREVIOUS_TIMEOUT)
