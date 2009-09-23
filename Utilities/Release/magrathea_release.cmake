@@ -1,4 +1,5 @@
 set(PROCESSORS 1)
+set(CVSROOT ":pserver:anonymous@www.cmake.org:/cvsroot/CMake")
 set(HOST magrathea)
 set(MAKE_PROGRAM "make")
 set(CC gcc332s)
