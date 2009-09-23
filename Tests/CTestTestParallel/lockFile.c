@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-//if run serially, works fine
-//if run in parallel, someone will attempt to delete
-//a locked file, which will fail
-int main()
+/*if run serially, works fine.
+  If run in parallel, someone will attempt to delete
+  a locked file, which will fail */
+int main(void)
 {
   FILE* file;
   int i;
