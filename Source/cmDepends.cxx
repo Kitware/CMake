@@ -87,7 +87,8 @@ bool cmDepends::Finalize(std::ostream&,
 }
 
 //----------------------------------------------------------------------------
-bool cmDepends::Check(const char *makeFile, const char *internalFile)
+bool cmDepends::Check(const char *makeFile, const char *internalFile,
+                      std::map<std::string, DependencyVector>& validDeps)
 {
   // Dependency checks must be done in proper working directory.
   std::string oldcwd = ".";
@@ -102,7 +103,7 @@ bool cmDepends::Check(const char *makeFile, const char *internalFile)
   // Check whether dependencies must be regenerated.
   bool okay = true;
   std::ifstream fin(internalFile);
-  if(!(fin && this->CheckDependencies(fin)))
+  if(!(fin && this->CheckDependencies(fin, validDeps)))
     {
     // Clear all dependencies so they will be regenerated.
     this->Clear(makeFile);
@@ -146,13 +147,16 @@ bool cmDepends::WriteDependencies(const char*, const char*,
 }
 
 //----------------------------------------------------------------------------
-bool cmDepends::CheckDependencies(std::istream& internalDepends)
+bool cmDepends::CheckDependencies(std::istream& internalDepends,
+                            std::map<std::string, DependencyVector>& validDeps)
 {
   // Parse dependencies from the stream.  If any dependee is missing
   // or newer than the depender then dependencies should be
   // regenerated.
   bool okay = true;
   bool dependerExists = false;
+  DependencyVector* currentDependencies = 0;
+
   while(internalDepends.getline(this->Dependee, this->MaxPath))
     {
     if ( this->Dependee[0] == 0 || this->Dependee[0] == '#' || 
@@ -174,6 +178,9 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
       // kdelibs/khtml this reduces the number of calls from 184k down to 92k,
       // or the time for cmake -E cmake_depends from 0.3 s down to 0.21 s.
       dependerExists = cmSystemTools::FileExists(this->Depender);
+      DependencyVector tmp;
+      validDeps[this->Depender] = tmp;
+      currentDependencies = &validDeps[this->Depender];
       continue;
       }
     /*
@@ -189,6 +196,11 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
     bool regenerate = false;
     const char* dependee = this->Dependee+1;
     const char* depender = this->Depender;
+    if (currentDependencies != 0)
+      {
+      currentDependencies->push_back(dependee);
+      }
+
     if(!cmSystemTools::FileExists(dependee))
       {
       // The dependee does not exist.
@@ -229,6 +241,14 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends)
       {
       // Dependencies must be regenerated.
       okay = false;
+
+      // Remove the information of this depender from the map, it needs
+      // to be rescanned
+      if (currentDependencies != 0)
+        {
+        validDeps.erase(this->Depender);
+        currentDependencies = 0;
+        }
 
       // Remove the depender to be sure it is rebuilt.
       if (dependerExists)

@@ -19,6 +19,9 @@
 
 #include "cmLocalGenerator.h"
 
+// for cmDepends::DependencyVector
+#include "cmDepends.h"
+
 class cmCustomCommand;
 class cmDependInformation;
 class cmDepends;
@@ -343,7 +346,8 @@ protected:
                           cmTarget& target, const char* filename =0);
 
   // Helper methods for dependeny updates.
-  bool ScanDependencies(const char* targetDir);
+  bool ScanDependencies(const char* targetDir,
+                std::map<std::string, cmDepends::DependencyVector>& validDeps);
   void CheckMultipleOutputs(bool verbose);
 
 private:

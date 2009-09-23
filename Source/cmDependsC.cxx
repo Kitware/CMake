@@ -34,12 +34,17 @@
 
 //----------------------------------------------------------------------------
 cmDependsC::cmDependsC()
+: ValidDeps(0)
 {
 }
 
 //----------------------------------------------------------------------------
-cmDependsC::cmDependsC(cmLocalGenerator* lg, const char* targetDir,
-                       const char* lang): cmDepends(lg, targetDir)
+cmDependsC::cmDependsC(cmLocalGenerator* lg,
+                   const char* targetDir,
+                   const char* lang,
+                   const std::map<std::string, DependencyVector>* validDeps)
+: cmDepends(lg, targetDir)
+, ValidDeps(validDeps)
 {
   cmMakefile* mf = lg->GetMakefile();
 
@@ -111,6 +116,32 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
     {
     cmSystemTools::Error("Cannot scan dependencies without an object file.");
     return false;
+    }
+
+  if (this->ValidDeps != 0)
+    {
+    std::map<std::string, DependencyVector>::const_iterator tmpIt =
+                                                    this->ValidDeps->find(obj);
+    if (tmpIt!= this->ValidDeps->end())
+      {
+      // Write the dependencies to the output stream.  Makefile rules
+      // written by the original local generator for this directory
+      // convert the dependencies to paths relative to the home output
+      // directory.  We must do the same here.
+      internalDepends << obj << std::endl;
+      for(DependencyVector::const_iterator i=tmpIt->second.begin();
+         i != tmpIt->second.end(); ++i)
+        {
+        makeDepends << obj << ": " <<
+           this->LocalGenerator->Convert(i->c_str(),
+                                         cmLocalGenerator::HOME_OUTPUT,
+                                         cmLocalGenerator::MAKEFILE)
+           << std::endl;
+        internalDepends << " " << i->c_str() << std::endl;
+        }
+      makeDepends << std::endl;
+      return true;
+      }
     }
 
   // Walk the dependency graph starting with the source file.

@@ -30,7 +30,8 @@ public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
   cmDependsC();
-  cmDependsC(cmLocalGenerator* lg, const char* targetDir, const char* lang);
+  cmDependsC(cmLocalGenerator* lg, const char* targetDir, const char* lang,
+             const std::map<std::string, DependencyVector>* validDeps);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDependsC();
@@ -83,6 +84,7 @@ public:
     bool Used;
   };
 protected:
+  const std::map<std::string, DependencyVector>* ValidDeps;
   std::set<cmStdString> Encountered;
   std::queue<UnscannedEntry> Unscanned;
   t_CharBuffer Buffer;
