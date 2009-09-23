@@ -95,6 +95,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     this->Completed++;
     this->RunningCount -= GetProcessorsUsed(test);
     testRun->EndTest(this->Completed, this->Total, false);
+    this->Failed->push_back(this->Properties[test]->Name);
     }
 }
 
