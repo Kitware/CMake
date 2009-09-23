@@ -1059,7 +1059,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut2.log"
     )
-  SET_TESTS_PROPERTIES(CTestTestNoExe PROPERTIES #DEPENDS CTestTestNoBuild
+  SET_TESTS_PROPERTIES(CTestTestNoExe PROPERTIES DEPENDS CTestTestNoBuild
     PASS_REGULAR_EXPRESSION "Could not find executable"
     FAIL_REGULAR_EXPRESSION "SegFault")
 
