@@ -70,7 +70,6 @@
 #endif
 
 #ifdef __CYGWIN__
-# undef _WIN32
 extern "C" void cygwin_conv_to_win32_path(const char *path, char *win32_path);
 #endif
 
@@ -2614,7 +2613,7 @@ bool SystemTools::FileIsDirectory(const char* name)
   struct stat fs;
   if(stat(name, &fs) == 0)
     {
-#if defined( _WIN32 )
+#if defined( _WIN32 ) && !defined(__CYGWIN__)
     return ((fs.st_mode & _S_IFDIR) != 0);
 #else
     return S_ISDIR(fs.st_mode);
