@@ -35,6 +35,7 @@ PURPOSE.  See the above copyright notices for more information.
 class cmXcodeVersionParser : public cmXMLParser
 {
 public:
+  cmXcodeVersionParser(): Version("1.5") {}
   void StartElement(const char* , const char** )
     {
       this->Data = "";
@@ -49,7 +50,7 @@ public:
         {
         if(this->Key == "CFBundleShortVersionString")
           {
-          this->Version = (int)(10.0 * atof(this->Data.c_str()));
+          this->Version = this->Data;
           }
         }
     }
@@ -57,7 +58,7 @@ public:
     {
       this->Data.append(data, length);
     }
-  int Version;
+  std::string Version;
   std::string Key;
   std::string Data;
 };
@@ -115,8 +116,15 @@ public:
 };
 
 //----------------------------------------------------------------------------
-cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
+cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(std::string const& version)
 {
+  this->VersionString = version;
+
+  // Compute an integer form of the version number.
+  unsigned int v[2] = {0,0};
+  sscanf(this->VersionString.c_str(), "%u.%u", &v[0], &v[1]);
+  this->XcodeVersion = 10*v[0] + v[1];
+
   this->FindMakeProgramFile = "CMakeFindXCode.cmake";
   this->RootObject = 0;
   this->MainGroupChildren = 0;
@@ -124,7 +132,6 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator()
   this->ResourcesGroupChildren = 0;
   this->CurrentMakefile = 0;
   this->CurrentLocalGenerator = 0;
-  this->XcodeVersion = 15;
 }
 
 //----------------------------------------------------------------------------
@@ -134,13 +141,14 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
   cmXcodeVersionParser parser;
   parser.ParseFile
     ("/Developer/Applications/Xcode.app/Contents/version.plist");
-  cmsys::auto_ptr<cmGlobalXCodeGenerator> gg(new cmGlobalXCodeGenerator);
-  if (parser.Version == 20)
+  cmsys::auto_ptr<cmGlobalXCodeGenerator>
+    gg(new cmGlobalXCodeGenerator(parser.Version));
+  if (gg->XcodeVersion == 20)
     {
     cmSystemTools::Message("Xcode 2.0 not really supported by cmake, "
                            "using Xcode 15 generator\n");
+    gg->XcodeVersion = 15;
     }
-  gg->SetVersion(parser.Version);
   return gg.release();
 #else
   std::cerr << "CMake should be built with cmake to use XCode, "
@@ -155,6 +163,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
                                             cmMakefile * mf, bool optional)
 { 
   mf->AddDefinition("XCODE","1");
+  mf->AddDefinition("XCODE_VERSION", this->VersionString.c_str());
   if(this->XcodeVersion == 15)
     {
     }

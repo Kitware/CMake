@@ -33,10 +33,9 @@ class cmSourceGroup;
 class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
 public:
-  cmGlobalXCodeGenerator();
+  cmGlobalXCodeGenerator(std::string const& version);
   static cmGlobalGenerator* New();
 
-  void SetVersion(int v) { this->XcodeVersion = v;}
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalXCodeGenerator::GetActualName();}
@@ -193,7 +192,8 @@ protected:
   virtual const char* GetInstallTargetName()      { return "install"; }
   virtual const char* GetPackageTargetName()      { return "package"; }
 
-  int XcodeVersion;
+  unsigned int XcodeVersion;
+  std::string VersionString;
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
