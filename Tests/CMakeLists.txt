@@ -221,19 +221,29 @@ IF(BUILD_TESTING)
   IF (CMAKE_STRICT)
     ADD_TEST_MACRO(DocTest DocTest)
   ENDIF (CMAKE_STRICT)
-    
-  IF(CMAKE_BUILD_NIGHTLY_WINDOWS_TEST)
-    FILE(MAKE_DIRECTORY "${CMake_BINARY_DIR}/Tests/CMake-CVS")
-    FILE(WRITE "${CMake_BINARY_DIR}/Tests/CMake-CVS/nightly-cmake.sh"
-"cd ${CMake_BINARY_DIR}/Tests/CMake-CVS
-${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Release/vogon_release.cmake
+  # macro to add a test that will build a nightly release
+  # of CMake for given platform using the release scripts
+  MACRO(ADD_NIGHTLY_BUILD_TEST name script)
+    SET(_TEST_DIR "${CMake_BINARY_DIR}/Tests/${name}")
+    FILE(MAKE_DIRECTORY "${_TEST_DIR}")
+    FILE(WRITE "${_TEST_DIR}/nightly-cmake.sh"
+      "cd ${_TEST_DIR}
+${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
 ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Release/upload_release.cmake
-")
-    ADD_TEST(NightlyCMakeBuild 
-      /bin/sh ${CMake_BINARY_DIR}/Tests/CMake-CVS/nightly-cmake.sh)
-    SET_TESTS_PROPERTIES ( NightlyCMakeBuild PROPERTIES TIMEOUT 3500)
-  ENDIF(CMAKE_BUILD_NIGHTLY_WINDOWS_TEST)
-
+    ")
+    ADD_TEST(${name} /bin/sh ${_TEST_DIR}/nightly-cmake.sh)
+    IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
+      SET_TESTS_PROPERTIES (${name} PROPERTIES TIMEOUT 3500)
+    ENDIF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
+  ENDMACRO(ADD_NIGHTLY_BUILD_TEST)
+  IF(CMAKE_BUILD_NIGHTLY_RELEASES)
+    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyWindows
+      dash2win64_release.cmake)
+    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyMac
+      dashmacmini2_release.cmake)
+    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux
+      magrathea_release.cmake)
+  ENDIF(CMAKE_BUILD_NIGHTLY_RELEASES)
 
   # add tests with more complex invocations
   ADD_TEST(Framework ${CMAKE_CTEST_COMMAND}
