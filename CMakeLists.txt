@@ -301,7 +301,7 @@ ENDMACRO (CMAKE_BUILD_UTILITIES)
 #-----------------------------------------------------------------------
 # The CMake version number.
 SET(CMake_VERSION_MAJOR 2)
-SET(CMake_VERSION_MINOR 7)
+SET(CMake_VERSION_MINOR 9)
 SET(CMake_VERSION_PATCH 0)
 
 # We use odd minor numbers for development versions.
