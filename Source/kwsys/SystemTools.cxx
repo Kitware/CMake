@@ -64,9 +64,12 @@
 #include <signal.h>    /* sigprocmask */
 #endif
 
-// Windows API.  Some parts used even on cygwin.
-#if defined(_WIN32) || defined (__CYGWIN__)
+// Windows API.
+#if defined(_WIN32)
 # include <windows.h>
+#elif defined (__CYGWIN__)
+# include <windows.h>
+# undef _WIN32
 #endif
 
 #ifdef __CYGWIN__
