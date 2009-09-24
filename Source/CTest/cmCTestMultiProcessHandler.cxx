@@ -348,21 +348,24 @@ void cmCTestMultiProcessHandler::PrintTestList()
     testRun.SetTestProperties(&p);
     testRun.ComputeArguments(); //logs the command in verbose mode
 
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3)
-             << count << "/");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(3)
-             << this->Total << " ");
     if (this->TestHandler->MemCheck)
       {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Memory Check");
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "  Memory Check");
       }
      else
       {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Testing");
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "  Test");
       }
+    cmOStringStream indexStr;
+    indexStr << " #" << p.Index << ":";
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, 
+      std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
+      << indexStr.str().c_str());
     cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
     cmCTestLog(this->CTest, HANDLER_OUTPUT, p.Name.c_str() << std::endl);
     }
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl << "Total Tests: "
+    << this->Total << std::endl);
 }
 
 //---------------------------------------------------------
