@@ -1071,8 +1071,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     -S "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestCrash/testOutput.log"
     )
-  SET_TESTS_PROPERTIES(CTestTestCrash PROPERTIES
-    PASS_REGULAR_EXPRESSION "SegFault")
+  # with watcom the SEGFAULT is not found, it just fails
+  IF(CMAKE_TEST_GENERATOR MATCHES "Watcom WMake")
+    SET_TESTS_PROPERTIES(CTestTestCrash PROPERTIES
+      PASS_REGULAR_EXPRESSION "Failed")
+  ELSE(CMAKE_TEST_GENERATOR MATCHES "Watcom WMake")
+    SET_TESTS_PROPERTIES(CTestTestCrash PROPERTIES
+      PASS_REGULAR_EXPRESSION "SegFault")
+  ENDIF(CMAKE_TEST_GENERATOR MATCHES "Watcom WMake")
     
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestParallel/test.cmake.in"
