@@ -294,6 +294,9 @@ void cmCTestRunTest::MemCheckPostProcess()
 // Starts the execution of a test.  Returns once it has started
 bool cmCTestRunTest::StartTest()
 {
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, "        Start "
+    << this->TestProperties->Index << ": "
+    << this->TestProperties->Name << std::endl);
   this->ComputeArguments();
   std::vector<std::string>& args = this->TestProperties->Args;
   this->TestResult.Properties = this->TestProperties;
