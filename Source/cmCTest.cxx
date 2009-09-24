@@ -797,8 +797,6 @@ int cmCTest::ProcessTests()
   bool notest = true;
   int update_count = 0;
 
-  //cmCTestLog(this, OUTPUT, "Start processing tests" << std::endl);
-
   for(Part p = PartStart; notest && p != PartCount; p = Part(p+1))
     {
     notest = !this->Parts[p];
