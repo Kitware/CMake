@@ -1,7 +1,6 @@
 # - Tools for building CUDA C files: libraries and build dependencies.
-# This script locates the Nvidia Compute Unified Driver Architecture (CUDA)
-# tools. It should work on linux, windows, and mac and should be reasonably
-# up to date with cuda releases.
+# This script locates the NVIDIA CUDA C tools. It should work on linux, windows,
+# and mac and should be reasonably up to date with CUDA C releases.
 #
 # This script makes use of the standard find_package arguments of <VERSION>,
 # REQUIRED and QUIET.  CUDA_FOUND will report if an acceptable version of CUDA
@@ -11,8 +10,10 @@
 # cannot be determined by the location of nvcc in the system path and REQUIRED
 # is specified to find_package(). To use a different installed version of the
 # toolkit set the environment variable CUDA_BIN_PATH before running cmake
-# (e.g. CUDA_BIN_PATH=/usr/local/cuda1.0 instead of the default
-# /usr/local/cuda) or set CUDA_TOOLKIT_ROOT_DIR after configuring.
+# (e.g. CUDA_BIN_PATH=/usr/local/cuda1.0 instead of the default /usr/local/cuda)
+# or set CUDA_TOOLKIT_ROOT_DIR after configuring.  If you change the value of
+# CUDA_TOOLKIT_ROOT_DIR, various components that depend on the path will be
+# relocated.
 #
 # It might be necessary to set CUDA_TOOLKIT_ROOT_DIR manually on certain
 # platforms, or to use a cuda runtime not installed in the default location. In
@@ -20,70 +21,103 @@
 # driver- be sure that the driver version matches what is needed by the cuda
 # runtime version.
 #
-# Set CUDA_BUILD_EMULATION to ON for Emulation mode.  Defaults to OFF (device
-# mode). -D_DEVICEEMU is defined for CUDA C files when CUDA_BUILD_EMULATION is
-# TRUE.
+# The following variables affect the behavior of the macros in the script (in
+# alphebetical order).  Note that any of these flags can be changed multiple
+# times in the same directory before calling CUDA_ADD_EXECUTABLE,
+# CUDA_ADD_LIBRARY, CUDA_COMPILE, CUDA_COMPILE_PTX or CUDA_WRAP_SRCS.
 #
-# Set CUDA_HOST_COMPILATION_CPP to OFF for C compilation of host code.  Default
-# TRUE.
+#  CUDA_64_BIT_DEVICE_CODE (Default matches host bit size)
+#  -- Set to ON to compile for 64 bit device code, OFF for 32 bit device code.
+#     Note that making this different from the host code when generating object
+#     or C files from CUDA code just won't work, because size_t gets defined by
+#     nvcc in the generated source.  If you compile to PTX and then load the
+#     file yourself, you can mix bit sizes between device and host.
 #
-# Set CUDA_BUILD_CUBIN to "ON" or "OFF" to enable and extra compilation pass
-# with the -cubin option in Device mode. The output is parsed and register,
-# shared memory usage is printed during build. Default OFF.
+#  CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE (Default ON)
+#  -- Set to ON if you want the custom build rule to be attached to the source
+#     file in Visual Studio.  Turn OFF if you add the same cuda file to multiple
+#     targets.
 #
-# Set CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE to ON if you want the custom build
-# rule to be attached to the source file in Visual Studio.  Defaults to ON.
-# Turn OFF if you add the same cuda file to multiple targets.
+#     This allows the user to build the target from the CUDA file; however, bad
+#     things can happen if the CUDA source file is added to multiple targets.
+#     When performing parallel builds it is possible for the custom build
+#     command to be run more than once and in parallel causing cryptic build
+#     errors.  VS runs the rules for every source file in the target, and a
+#     source can have only one rule no matter how many projects it is added to.
+#     When the rule is run from multiple targets race conditions can occur on
+#     the generated file.  Eventually everything will get built, but if the user
+#     is unaware of this behavior, there may be confusion.  It would be nice if
+#     this script could detect the reuse of source files across multiple targets
+#     and turn the option off for the user, but no good solution could be found.
 #
-# This allows the user to build the target from the CUDA file, however bad
-# things can happen if the CUDA source file is added to multiple targets.  When
-# performing parallel builds it is possible for the custom build command to be
-# run more than once and in parallel causing cryptic build errors.  This is
-# because VS runs the rules for every source file in the target, and a source
-# can have only one rule no matter how many projects it is added to.  Therefore,
-# the rule assigned to the source file really only applies to one target you get
-# clashes when it is run from multiple targets.  Eventually everything will get
-# built, but if the user is unaware of this behavior, there may be confusion.
-# It would be nice if we could detect the reuse of source files across multiple
-# targets and turn the option off for the user, but no good solution could be
-# found.
+#  CUDA_BUILD_CUBIN (Default OFF)
+#  -- Set to ON to enable and extra compilation pass with the -cubin option in
+#     Device mode. The output is parsed and register, shared memory usage is
+#     printed during build.
 #
-# Set CUDA_64_BIT_DEVICE_CODE to ON to compile for 64 bit devices.  Defaults to
-# match host bit size.  Note that making this different than the host code when
-# generating C files from CUDA code just won't work, because size_t gets defined
-# by nvcc in the generated source.  If you compile to PTX and then load the file
-# yourself, you can mix bit sizes between device and host.
+#  CUDA_BUILD_EMULATION (Default OFF for device mode)
+#  -- Set to ON for Emulation mode. -D_DEVICEEMU is defined for CUDA C files
+#     when CUDA_BUILD_EMULATION is TRUE.
 #
-# Set CUDA_VERBOSE_BUILD to ON to see all the commands used when building the
-# CUDA file.  When using a Makefile generator the value defaults to VERBOSE (run
-# make VERBOSE=1 to see output).  You can override this by setting
-# CUDA_VERBOSE_BUILD to ON.
+#  CUDA_GENERATED_OUTPUT_DIR (Default CMAKE_CURRENT_BINARY_DIR)
+#  -- Set to the path you wish to have the generated files placed.  If it is
+#     blank output files will be placed in CMAKE_CURRENT_BINARY_DIR.
+#     Intermediate files will always be placed in
+#     CMAKE_CURRENT_BINARY_DIR/CMakeFiles.
 #
-# Set CUDA_GENERATED_OUTPUT_DIR to the path you wish to have the generated files
-# placed.  If it is blank output files will be placed in
-# CMAKE_CURRENT_BINARY_DIR.  Intermediate files will always be placed in
-# CMAKE_CURRENT_BINARY_DIR.
+#  CUDA_HOST_COMPILATION_CPP (Default ON)
+#  -- Set to OFF for C compilation of host code.
 #
-# The script creates the following macros:
+#  CUDA_NVCC_FLAGS
+#  CUDA_NVCC_FLAGS_<CONFIG>
+#  -- Additional NVCC command line arguments.  NOTE: multiple arguments must be
+#     semi-colon delimited (e.g. --compiler-options;-Wall)
 #
-#  CUDA_INCLUDE_DIRECTORIES( path0 path1 ... )
-#  -- Sets the directories that should be passed to nvcc
-#     (e.g. nvcc -Ipath0 -Ipath1 ... ). These paths usually contain other .cu
-#     files.
+#  CUDA_PROPAGATE_HOST_FLAGS (Default ON)
+#  -- Set to ON to propagate CMAKE_{C,CXX}_FLAGS and their configuration
+#     dependent counterparts (e.g. CMAKE_C_FLAGS_DEBUG) automatically to the
+#     host compiler through nvcc's -Xcompiler flag.  This helps make the
+#     generated host code match the rest of the system better.  Sometimes
+#     certain flags give nvcc problems, and this will help you turn the flag
+#     propagation off.  This does not affect the flags supplied directly to nvcc
+#     via CUDA_NVCC_FLAGS or through the OPTION flags specified through
+#     CUDA_ADD_LIBRARY, CUDA_ADD_EXECUTABLE, or CUDA_WRAP_SRCS.  Flags used for
+#     shared library compilation are not affected by this flag.
 #
-#  CUDA_ADD_LIBRARY( cuda_target file0 file1 ...
-#                    [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL] [OPTIONS ...] )
-#  -- Creates a shared library "cuda_target" which contains all of the source
-#     (*.c, *.cc, etc.) specified and all of the nvcc'ed .cu files specified.
-#     All of the specified source files and generated .cpp files are compiled
-#     using the standard CMake compiler, so the normal INCLUDE_DIRECTORIES,
-#     LINK_DIRECTORIES, and TARGET_LINK_LIBRARIES can be used to affect their
-#     build and link.  In addition CUDA_INCLUDE_DIRS is added automatically
-#     added to include_directories().
+#  CUDA_VERBOSE_BUILD (Default OFF)
+#  -- Set to ON to see all the commands used when building the CUDA file.  When
+#     using a Makefile generator the value defaults to VERBOSE (run make
+#     VERBOSE=1 to see output), although setting CUDA_VERBOSE_BUILD to ON will
+#     always print the output.
+#
+# The script creates the following macros (in alphebetical order):
+#
+#  CUDA_ADD_CUFFT_TO_TARGET( cuda_target )
+#  -- Adds the cufft library to the target (can be any target).  Handles whether
+#     you are in emulation mode or not.
+#
+#  CUDA_ADD_CUBLAS_TO_TARGET( cuda_target )
+#  -- Adds the cublas library to the target (can be any target).  Handles
+#     whether you are in emulation mode or not.
 #
 #  CUDA_ADD_EXECUTABLE( cuda_target file0 file1 ...
 #                       [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL] [OPTIONS ...] )
-#  -- Same as CUDA_ADD_LIBRARY except that an exectuable is created.
+#  -- Creates an executable "cuda_target" which is made up of the files
+#     specified.  All of the non CUDA C files are compiled using the standard
+#     build rules specified by CMAKE and the cuda files are compiled to object
+#     files using nvcc and the host compiler.  In addition CUDA_INCLUDE_DIRS is
+#     added automatically to include_directories().  Standard CMake target calls
+#     can be used on the target after calling this macro
+#     (e.g. set_target_properties and target_link_libraries).
+#
+#  CUDA_ADD_LIBRARY( cuda_target file0 file1 ...
+#                    [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL] [OPTIONS ...] )
+#  -- Same as CUDA_ADD_EXECUTABLE except that a library is created.
+#
+#  CUDA_BUILD_CLEAN_TARGET()
+#  -- Creates a convience target that deletes all the dependency files
+#     generated.  You should make clean after running this target to ensure the
+#     dependency files get regenerated.
 #
 #  CUDA_COMPILE( generated_files file0 file1 ... [STATIC | SHARED | MODULE]
 #                [OPTIONS ...] )
@@ -93,6 +127,11 @@
 #  CUDA_COMPILE_PTX( generated_files file0 file1 ... [OPTIONS ...] )
 #  -- Returns a list of PTX files generated from the input source files.
 #
+#  CUDA_INCLUDE_DIRECTORIES( path0 path1 ... )
+#  -- Sets the directories that should be passed to nvcc
+#     (e.g. nvcc -Ipath0 -Ipath1 ... ). These paths usually contain other .cu
+#     files.
+#
 #  CUDA_WRAP_SRCS ( cuda_target format generated_files file0 file1 ...
 #                   [STATIC | SHARED | MODULE] [OPTIONS ...] )
 #  -- This is where all the magic happens.  CUDA_ADD_EXECUTABLE,
@@ -101,11 +140,11 @@
 #
 #     Given the list of files (file0 file1 ... fileN) this macro generates
 #     custom commands that generate either PTX or linkable objects (use "PTX" or
-#     "OBJ" for the format argument to switch.  Files that don't end with .cu or
-#     have the HEADER_FILE_ONLY property are ignored.
+#     "OBJ" for the format argument to switch).  Files that don't end with .cu
+#     or have the HEADER_FILE_ONLY property are ignored.
 #
 #     The arguments passed in after OPTIONS are extra command line options to
-#     give to NVCC.  You can also specify per configuration options by
+#     give to nvcc.  You can also specify per configuration options by
 #     specifying the name of the configuration followed by the options.  General
 #     options must preceed configuration specific options.  Not all
 #     configurations need to be specified, only the ones provided will be used.
@@ -119,8 +158,8 @@
 #     For certain configurations (namely VS generating object files with
 #     CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE set to ON), no generated file will
 #     be produced for the given cuda file.  This is because when you add the
-#     cuda file to Visual Studio it knows that this file produces and will link
-#     in the resulting object file automatically.
+#     cuda file to Visual Studio it knows that this file produces an object file
+#     and will link in the resulting object file automatically.
 #
 #     This script also looks at optional arguments STATIC, SHARED, or MODULE to
 #     override the behavior specified by the value of the CMake variable
@@ -131,35 +170,28 @@
 #
 #       1. nvcc can return negative numbers as return values which confuses
 #       Visual Studio into thinking that the command succeeded.  The script now
-#       checks the error codes and produces errors when there was a problem
+#       checks the error codes and produces errors when there was a problem.
 #
-#       2. nvcc has been known to not delete intermediate results when it
-#       encounters problems.  The build rules then don't complete, because there
-#       exists a partially written output file.  The script now deletes the
-#       output files if there was an error.
+#       2. nvcc has been known to not delete incomplete results when it
+#       encounters problems.  This confuses build systems into thinking the
+#       target was generated when in fact an unusable file exists.  The script
+#       now deletes the output files if there was an error.
 #
 #       3. By putting all the options that affect the build into a file and then
-#       make the build rule dependent on the file, when the options change the
-#       output files will be regenerated.
+#       make the build rule dependent on the file, the output files will be
+#       regenerated when the options change.
 #
-#  CUDA_ADD_CUFFT_TO_TARGET( cuda_target )
-#  -- Adds the cufft library to the target.  Handles whether you are in
-#     emulation mode or not.
+#     In addition, on some systems special flags are added for building objects
+#     intended for shared libraries.  FindCUDA make use of the CMake variable
+#     BUILD_SHARED_LIBS and the usual STATIC, SHARED, and MODULE arguments to
+#     determine if these flags should be used.  Please set BUILD_SHARED_LIBS or
+#     pass in STATIC, SHARED, or MODULE according to how the objects are to be
+#     used before calling CUDA_ADD_LIBRARY.  A preprocessor macro,
+#     <target_name>_EXPORTS is defined when BUILD_SHARED_LIBS is defined.
 #
-#  CUDA_ADD_CUBLAS_TO_TARGET( cuda_target )
-#  -- Adds the cublas library to the target.  Handles whether you are in
-#     emulation mode or not.
-#
-#  CUDA_BUILD_CLEAN_TARGET()
-#  -- Creates a convience target that deletes all the dependency files
-#     generated.  You should make clean after running this target to ensure the
-#     dependency files get regenerated.
+#     Flags passed into add_definitions with -D or /D are passed along to nvcc.
 #
 # The script defines the following variables:
-#
-#  ( Note CUDA_ADD_* macros setup cuda/cut library dependencies automatically.
-#  These variables are only needed if a cuda API call must be made from code in
-#  a outside library or executable. )
 #
 #  CUDA_VERSION_MAJOR    -- The major version of cuda as reported by nvcc.
 #  CUDA_VERSION_MINOR    -- The minor version.
@@ -171,10 +203,6 @@
 #  CUDA_LIBRARIES        -- Cuda RT library.
 #  CUDA_CUT_INCLUDE_DIR  -- Include directory for cuda SDK headers (cutil.h).
 #  CUDA_CUT_LIBRARIES    -- SDK libraries.
-#  CUDA_NVCC_FLAGS       -- Additional NVCC command line arguments. NOTE:
-#                           multiple arguments must be semi-colon delimited
-#                           e.g. --compiler-options;-Wall
-#  CUDA_NVCC_FLAGS_<CONFIG> -- Confugration specific flags for NVCC.
 #  CUDA_CUFFT_LIBRARIES  -- Device or emulation library for the Cuda FFT
 #                           implementation (alternative to:
 #                           CUDA_ADD_CUFFT_TO_TARGET macro)
@@ -182,21 +210,6 @@
 #                           implementation (alterative to:
 #                           CUDA_ADD_CUBLAS_TO_TARGET macro).
 #
-#
-# The script generates object files by default.  In order to facilitate this,
-# the script makes use of the CMAKE_{C,CXX}_FLAGS along with their configuration
-# dependent counterparts (i.e. CMAKE_C_FLAGS_DEBUG).  These flags are passed
-# through nvcc to the native compiler.  In addition, on some systems special
-# flags are added for building objects intended for shared libraries.  FindCUDA
-# make use of the CMake variable BUILD_SHARED_LIBS and the usual STATIC, SHARED,
-# and MODULE arguments to determine if these flags should be used.  Please set
-# BUILD_SHARED_LIBS or pass in STATIC, SHARED, or MODULE according to how the
-# objects are to be used before calling CUDA_ADD_LIBRARY.  A preprocessor macro,
-# <target_name>_EXPORTS is defined when BUILD_SHARED_LIBS is defined.  In
-# addition, flags passed into add_definitions with -D or /D are passed along to
-# nvcc.
-#
-# Files with the HEADER_FILE_ONLY property set will not be compiled.
 #
 #  James Bigler, NVIDIA Corp
 #  Abe Stephens, SCI Institute -- http://www.sci.utah.edu/~abe/FindCuda.html
@@ -327,14 +340,10 @@ endmacro(CUDA_INCLUDE_NVCC_DEPENDENCIES)
 
 ###############################################################################
 ###############################################################################
-# Setup default variables
+# Setup variables' defaults
 ###############################################################################
 ###############################################################################
 
-# Set whether we are using emulation or device mode.
-option(CUDA_BUILD_EMULATION "Build in Emulation mode" OFF)
-# Parse HOST_COMPILATION mode.
-option(CUDA_HOST_COMPILATION_CPP "Generated file extension" ON)
 # Allow the user to specify if the device code is supposed to be 32 or 64 bit.
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(CUDA_64_BIT_DEVICE_CODE_DEFAULT ON)
@@ -342,22 +351,38 @@ else()
   set(CUDA_64_BIT_DEVICE_CODE_DEFAULT OFF)
 endif()
 option(CUDA_64_BIT_DEVICE_CODE "Compile device code in 64 bit mode" ${CUDA_64_BIT_DEVICE_CODE_DEFAULT})
-# Prints out extra information about the cuda file during compilation
-option(CUDA_BUILD_CUBIN "Generate and parse .cubin files in Device mode." OFF)
-# Extra user settable flags
-set(CUDA_NVCC_FLAGS "" CACHE STRING "Semi-colon delimit multiple arguments.")
+
 # Attach the build rule to the source file in VS.  This option
 option(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE "Attach the build rule to the CUDA source file.  Enable only when the CUDA source file is added to at most one target." ON)
-# Specifies whether the commands used when compiling the .cu file will be printed out.
-option(CUDA_VERBOSE_BUILD "Print out the commands run while compiling the CUDA source file.  With the Makefile generator this defaults to VERBOSE variable specified on the command line, but can be forced on with this option." OFF)
+
+# Prints out extra information about the cuda file during compilation
+option(CUDA_BUILD_CUBIN "Generate and parse .cubin files in Device mode." OFF)
+
+# Set whether we are using emulation or device mode.
+option(CUDA_BUILD_EMULATION "Build in Emulation mode" OFF)
+
 # Where to put the generated output.
 set(CUDA_GENERATED_OUTPUT_DIR "" CACHE PATH "Directory to put all the output files.  If blank it will default to the CMAKE_CURRENT_BINARY_DIR")
+
+# Parse HOST_COMPILATION mode.
+option(CUDA_HOST_COMPILATION_CPP "Generated file extension" ON)
+
+# Extra user settable flags
+set(CUDA_NVCC_FLAGS "" CACHE STRING "Semi-colon delimit multiple arguments.")
+
+# Propagate the host flags to the host compiler via -Xcompiler
+option(CUDA_PROPAGATE_HOST_FLAGS "Propage C/CXX_FLAGS and friends to the host compiler via -Xcompile" ON)
+
+# Specifies whether the commands used when compiling the .cu file will be printed out.
+option(CUDA_VERBOSE_BUILD "Print out the commands run while compiling the CUDA source file.  With the Makefile generator this defaults to VERBOSE variable specified on the command line, but can be forced on with this option." OFF)
+
 mark_as_advanced(
-  CUDA_HOST_COMPILATION_CPP
   CUDA_64_BIT_DEVICE_CODE
-  CUDA_NVCC_FLAGS
   CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
   CUDA_GENERATED_OUTPUT_DIR
+  CUDA_HOST_COMPILATION_CPP
+  CUDA_NVCC_FLAGS
+  CUDA_PROPAGATE_HOST_FLAGS
   )
 
 # Makefile and similar generators don't define CMAKE_CONFIGURATION_TYPES, so we
@@ -828,30 +853,37 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     # compiling objects for shared libraries.
     set(CUDA_HOST_SHARED_FLAGS ${CMAKE_SHARED_LIBRARY_${CUDA_C_OR_CXX}_FLAGS})
   endif()
-  set(CUDA_HOST_FLAGS "set(CMAKE_HOST_FLAGS ${CMAKE_${CUDA_C_OR_CXX}_FLAGS} ${CUDA_HOST_SHARED_FLAGS})")
-  set(CUDA_NVCC_FLAGS_CONFIG "# Build specific configuration flags")
-  # Loop over all the configuration types to generate appropriate flags for run_nvcc.cmake
-  foreach(config ${CUDA_configuration_types})
-    string(TOUPPER ${config} config_upper)
-    # CMAKE_FLAGS are strings and not lists.  By not putting quotes around CMAKE_FLAGS
-    # we convert the strings to lists (like we want).
+  # Only add the CMAKE_{C,CXX}_FLAGS if we are propagating host flags.  We
+  # always need to set the SHARED_FLAGS, though.
+  if(NOT CUDA_PROPAGATE_HOST_FLAGS)
+    set(CUDA_HOST_FLAGS "set(CMAKE_HOST_FLAGS ${CUDA_HOST_SHARED_FLAGS})")
+  else()
+    set(CUDA_HOST_FLAGS "set(CMAKE_HOST_FLAGS ${CMAKE_${CUDA_C_OR_CXX}_FLAGS} ${CUDA_HOST_SHARED_FLAGS})")
+    set(CUDA_NVCC_FLAGS_CONFIG "# Build specific configuration flags")
+    # Loop over all the configuration types to generate appropriate flags for run_nvcc.cmake
+    foreach(config ${CUDA_configuration_types})
+      string(TOUPPER ${config} config_upper)
+      # CMAKE_FLAGS are strings and not lists.  By not putting quotes around CMAKE_FLAGS
+      # we convert the strings to lists (like we want).
 
-    # nvcc chokes on -g3, so replace it with -g
-    if(CMAKE_COMPILER_IS_GNUCC)
-      string(REPLACE "-g3" "-g" _cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
-    else()
-      set(_cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
-    endif()
-    set(CUDA_HOST_FLAGS "${CUDA_HOST_FLAGS}\nset(CMAKE_HOST_FLAGS_${config_upper} ${_cuda_C_FLAGS})")
-    # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list
-    # like it is currently), we can remove the quotes around the
-    # ${CUDA_NVCC_FLAGS_${config_upper}} variable like the CMAKE_HOST_FLAGS_<CONFIG> variable.
-    set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} \"${CUDA_NVCC_FLAGS_${config_upper}};${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}}\")")
-  endforeach()
+      # nvcc chokes on -g3, so replace it with -g
+      if(CMAKE_COMPILER_IS_GNUCC)
+        string(REPLACE "-g3" "-g" _cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
+      else()
+        set(_cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
+      endif()
+      set(CUDA_HOST_FLAGS "${CUDA_HOST_FLAGS}\nset(CMAKE_HOST_FLAGS_${config_upper} ${_cuda_C_FLAGS})")
+      # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list
+      # like it is currently), we can remove the quotes around the
+      # ${CUDA_NVCC_FLAGS_${config_upper}} variable like the CMAKE_HOST_FLAGS_<CONFIG> variable.
+      set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} \"${CUDA_NVCC_FLAGS_${config_upper}};${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}}\")")
+    endforeach()
+  endif()
 
   if(compile_to_ptx)
-    # Don't use any of the host compilation flags for PTX targets
+    # Don't use any of the host compilation flags for PTX targets.
     set(CUDA_HOST_FLAGS)
+    set(CUDA_NVCC_FLAGS_CONFIG)
   endif()
 
   # Get the list of definitions from the directory property
@@ -902,10 +934,10 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       # argument, so that the ${CMAKE_CFG_INTDIR} gets expanded at run time
       # instead of configure time.
       set(generated_file "${generated_file_path}/${generated_file_basename}")
-      set(cmake_dependency_file "${CMAKE_CURRENT_BINARY_DIR}/${generated_file_basename}.depend")
-      set(NVCC_generated_dependency_file "${CMAKE_CURRENT_BINARY_DIR}/${generated_file_basename}.NVCC-depend")
+      set(cmake_dependency_file "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${generated_file_basename}.depend")
+      set(NVCC_generated_dependency_file "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${generated_file_basename}.NVCC-depend")
       set(generated_cubin_file "${generated_file_path}/${generated_file_basename}.cubin.txt")
-      set(custom_target_script "${CMAKE_CURRENT_BINARY_DIR}/${generated_file_basename}.cmake")
+      set(custom_target_script "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${generated_file_basename}.cmake")
 
       # Setup properties for obj files:
       if( NOT compile_to_ptx )
