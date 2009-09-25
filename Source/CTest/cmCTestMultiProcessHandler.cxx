@@ -336,6 +336,7 @@ void cmCTestMultiProcessHandler::MarkFinished()
 //For ShowOnly mode
 void cmCTestMultiProcessHandler::PrintTestList()
 {
+  this->TestHandler->SetMaxIndex(this->FindMaxIndex());
   int count = 0;
   for (PropertiesMap::iterator it = this->Properties.begin();
        it != this->Properties.end(); it ++ )

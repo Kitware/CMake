@@ -1,0 +1,45 @@
+Changes in CMake 2.8.0 RC 1 
+
+- Qt based GUI cmake-gui is now the default GUI, MFC CMakeSetup is no
+  longer included in CMake.  ccmake is still supported.
+- cmake-gui supports multi-state values options.
+- CMake now has cmake --build command that can build any CMake generated
+  project from the command line.
+- Visual Studio 2010 beta support has been added.
+- KDevelop generator now has color output for builds.
+- CTest supports running tests in parallel with a -j N option.
+- A new CTest CTEST_USE_LAUNCHERS option can be used to get better
+  dashboard error reports with make based tools.
+- CTest has support for sub-projects and labels which can interact
+  with CDash.
+- CTest now supports Git, Mercurial, and Bazaar.
+- It is now possible to use DESTDIR in CPack for any CMake based projects
+  giving more flexibility on the final path names.
+- The CPack Deb generator now computes the arch instead of hard coding it.
+- Fortran/C mixed language projects made much easier. CMake now
+  automatically can compute the run time libraries for a compiler. In
+  addition, a new FortranCInterface module can determine the correct
+  name mangling needed to mix C and Fortran.
+- Intel compiler support added to OSX, and support for embedded
+  manifests in the windows intel compiler was added.
+- Depend scanning is now much faster with makefiles.
+- Many FindQt4 improvements to stay working with current Qt releases
+- FindMPI has improvements for windows.
+- FindBoost has been updated to work with the most recent boost releases.
+- New External Project Module.  The 'ExternalProject_Add' function
+  creates a custom target to drive download, update/patch, configure,
+  build, install and test steps of an external project.
+- xmlrpc dependancy has been removed
+- CMAKE_OSX_DEPLOYMENT_TARGET cache variable has been created to set the
+  deployment OS for a build on OSX.
+- Several new policies were added:
+  CMP0012
+       The if() command can recognize named boolean constants.
+  CMP0013
+       Duplicate binary directories are not allowed.
+  CMP0014
+       Input directories must have CMakeLists.txt.
+  CMP0015
+       The set() CACHE mode and option() command make the cache value
+       visible.
+- Lots of bug fixes.
