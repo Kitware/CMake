@@ -24,9 +24,9 @@
 #include <string.h>
 
 static const unsigned char testMD5input1[] =
-"  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.\n"
-"  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.\n";
-static const char testMD5output1[] = "04051e509e81ef0b1612ddf0e52ca89e";
+"  A quick brown fox jumps over the lazy dog.\n"
+"  This is sample text for MD5 sum input.\n";
+static const char testMD5output1[] = "8f146af46ed4f267921bb937d4d3500c";
 
 static const int testMD5input2len = 28;
 static const unsigned char testMD5input2[] = "the cow jumped over the moon";
