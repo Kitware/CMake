@@ -21,6 +21,9 @@ if(CPACK_GENERATOR MATCHES "NSIS")
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cpack.html" "CPack Help"
     "http://www.cmake.org" "CMake Web Site"
     )
+  # Use the icond from cmake-gui for add-remove programs
+  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\cmake-gui.exe")
+
   SET(CPACK_NSIS_DISPLAY_NAME "CMake @CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@ a cross-platform, open-source build system")
   SET(CPACK_NSIS_PACKAGE_NAME "CMake @CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@")
   SET(CPACK_NSIS_HELP_LINK "http://www.cmake.org")
