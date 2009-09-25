@@ -34,8 +34,7 @@ cmake_date_stamp_component()
 
 # Detect system and directory information.
 cmake_system=`uname`
-cmake_source_dir=`echo $0 | sed -n '/\//{s/\/[^\/]*$//;p;}'`
-cmake_source_dir=`(cd "${cmake_source_dir}";pwd)`
+cmake_source_dir=`cd "\`dirname \"$0\"\`";pwd`
 cmake_binary_dir=`pwd`
 cmake_version_major="`cmake_version_component MAJOR`"
 cmake_version_minor="`cmake_version_component MINOR`"
