@@ -1837,12 +1837,17 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
     // found is part of the inName
     if(cmSystemTools::FileIsFullPath(inName))
       {
-      std::string tLocation = target->GetLocation(config);
-      tLocation = cmSystemTools::GetFilenamePath(tLocation);
+      std::string tLocation;
+      if(target->GetType() >= cmTarget::EXECUTABLE && 
+         target->GetType() <= cmTarget::MODULE_LIBRARY)
+        {
+        tLocation = target->GetLocation(config);
+        tLocation = cmSystemTools::GetFilenamePath(tLocation);
+        tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
+        }
       std::string depLocation = cmSystemTools::GetFilenamePath(
         std::string(inName));
       depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
-      tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
       if(depLocation != tLocation)
         {
         // it is a full path to a depend that has the same name

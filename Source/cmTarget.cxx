@@ -1244,17 +1244,21 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     // the fact that the name matched a target was just a coincidence.
     if(cmSystemTools::FileIsFullPath(dep.c_str()))
       {
-      // This is really only for compatibility so we do not need to
-      // worry about configuration names and output names.
-      std::string tLocation = t->GetLocation(0);
-      tLocation = cmSystemTools::GetFilenamePath(tLocation);
-      std::string depLocation = cmSystemTools::GetFilenamePath(dep);
-      depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
-      tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
-      if(depLocation == tLocation)
+      if(t->GetType() >= cmTarget::EXECUTABLE && 
+         t->GetType() <= cmTarget::MODULE_LIBRARY)
         {
-        this->Target->AddUtility(util.c_str());
-        return true;
+        // This is really only for compatibility so we do not need to
+        // worry about configuration names and output names.
+        std::string tLocation = t->GetLocation(0);
+        tLocation = cmSystemTools::GetFilenamePath(tLocation);
+        std::string depLocation = cmSystemTools::GetFilenamePath(dep);
+        depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
+        tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
+        if(depLocation == tLocation)
+          {
+          this->Target->AddUtility(util.c_str());
+          return true;
+          }
         }
       }
     else

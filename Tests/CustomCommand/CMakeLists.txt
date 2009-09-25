@@ -386,3 +386,30 @@ ADD_CUSTOM_TARGET(pre_check_command_line
   COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_BINARY_DIR}/check_mark.txt
   )
 ADD_DEPENDENCIES(do_check_command_line pre_check_command_line)
+
+# <SameNameTest>
+#
+# Add a custom target called "SameName" -- then add a custom command in a
+# different target whose output is a full-path file called "SameName" -- then
+# add a second custom target that depends on the full-path file ".../SameName"
+#
+# At first, this reproduces a bug reported by a customer. After fixing it,
+# having this test here makes sure it stays fixed moving forward.
+#
+ADD_CUSTOM_COMMAND(
+  OUTPUT SameName1.txt
+  COMMAND ${CMAKE_COMMAND} -E touch SameName1.txt
+  )
+ADD_CUSTOM_TARGET(SameName ALL
+  DEPENDS SameName1.txt
+  )
+
+ADD_CUSTOM_COMMAND(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subdir/SameName
+  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/subdir/SameName
+  )
+ADD_CUSTOM_TARGET(DifferentName ALL
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/subdir/SameName
+  )
+#
+# </SameNameTest>
