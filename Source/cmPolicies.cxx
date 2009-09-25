@@ -398,7 +398,7 @@ cmPolicies::cmPolicies()
     "the case is an error.  "
     "The OLD behavior for this policy is to silently ignore the problem.  "
     "The NEW behavior for this policy is to report an error.",
-    2,7,20090902, cmPolicies::WARN);
+    2,8,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0015, "CMP0015",
@@ -428,7 +428,7 @@ cmPolicies::cmPolicies()
     "The OLD behavior for this policy is to leave conflicting local "
     "variable values untouched and hide the true cache value.  "
     "The NEW behavior for this policy is to always expose the cache value.",
-    2,7,20090910, cmPolicies::WARN);
+    2,8,0, cmPolicies::WARN);
 
 }
 
