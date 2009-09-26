@@ -544,11 +544,32 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
   if (target!=0)
     {
     int cbTargetType = this->GetCBTargetType(target);
+    std::string workingDir = makefile->GetStartOutputDirectory();
+    if ( target->GetType()==cmTarget::EXECUTABLE)
+      {
+      // Determine the directory where the executable target is created, and
+      // set the working directory to this dir.
+      const char* runtimeOutputDir = makefile->GetDefinition(
+                                             "CMAKE_RUNTIME_OUTPUT_DIRECTORY");
+      if (runtimeOutputDir != 0)
+        {
+        workingDir = runtimeOutputDir;
+        }
+      else
+        {
+        const char* executableOutputDir = makefile->GetDefinition(
+                                                     "EXECUTABLE_OUTPUT_PATH");
+        if (executableOutputDir != 0)
+          {
+          workingDir = executableOutputDir;
+          }
+        }
+      }
+
     const char* buildType = makefile->GetDefinition("CMAKE_BUILD_TYPE");
     fout<<"         <Option output=\"" << target->GetLocation(buildType)
                             << "\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
-          "         <Option working_dir=\"" 
-                            << makefile->GetStartOutputDirectory() << "\" />\n"
+          "         <Option working_dir=\"" << workingDir << "\" />\n"
           "         <Option object_output=\"./\" />\n"
           "         <Option type=\"" << cbTargetType << "\" />\n"
           "         <Option compiler=\"" << compiler << "\" />\n"
