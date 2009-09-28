@@ -13,7 +13,6 @@
 # If the cmake version includes cpack, use it
 IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   IF(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
-    SET(CMAKE_INSTALL_MFC_LIBRARIES 1)
     OPTION(CMAKE_INSTALL_DEBUG_LIBRARIES 
       "Install Microsoft runtime debug libraries with CMake." FALSE)
     MARK_AS_ADVANCED(CMAKE_INSTALL_DEBUG_LIBRARIES)
