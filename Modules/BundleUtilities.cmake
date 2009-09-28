@@ -426,6 +426,10 @@ function(copy_resolved_item_into_bundle resolved_item resolved_embedded_item)
     #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy ${resolved_item} ${resolved_embedded_item}")
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}" "${resolved_embedded_item}")
   endif()
+
+  if(UNIX AND NOT APPLE)
+    file(RPATH_REMOVE FILE "${resolved_embedded_item}")
+  endif(UNIX AND NOT APPLE)
 endfunction(copy_resolved_item_into_bundle)
 
 
