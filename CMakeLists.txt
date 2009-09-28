@@ -435,6 +435,9 @@ SUBDIRS(Tests)
 ADD_TEST(SystemInformationNew "${CMAKE_CMAKE_COMMAND}" 
   --system-information  -G "${CMAKE_TEST_GENERATOR}" )
 
+# Install license file as it requires.
+INSTALL(FILES Copyright.txt DESTINATION ${CMake_DOC_DEST})
+
 # Install script directories.
 INSTALL(
   DIRECTORY Modules Templates
