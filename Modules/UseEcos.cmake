@@ -16,6 +16,19 @@
 # for internal use only:
 #  ECOS_ADD_TARGET_LIB
 
+#=============================================================================
+# Copyright 2006-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 # first check that ecosconfig is available
 FIND_PROGRAM(ECOSCONFIG_EXECUTABLE NAMES ecosconfig)
 IF(NOT ECOSCONFIG_EXECUTABLE)

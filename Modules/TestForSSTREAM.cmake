@@ -2,6 +2,20 @@
 # check if the compiler supports std:: on stl classes
 #  CMAKE_NO_ANSI_STRING_STREAM - defined by the results
 #
+
+#=============================================================================
+# Copyright 2006-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 IF("CMAKE_HAS_ANSI_STRING_STREAM" MATCHES "^CMAKE_HAS_ANSI_STRING_STREAM$")
   MESSAGE(STATUS "Check for sstream")
   TRY_COMPILE(CMAKE_HAS_ANSI_STRING_STREAM  ${CMAKE_BINARY_DIR} 

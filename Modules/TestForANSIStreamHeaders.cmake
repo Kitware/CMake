@@ -2,6 +2,20 @@
 # check if we they have the standard ansi stream files (without the .h)
 #  CMAKE_NO_ANSI_STREAM_HEADERS - defined by the results
 #
+
+#=============================================================================
+# Copyright 2002-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 INCLUDE(CheckIncludeFileCXX)
 
 IF(NOT CMAKE_NO_ANSI_STREAM_HEADERS)

@@ -12,7 +12,21 @@
 #   if you are sure you need GL then
 # SET(WXWINDOWS_USE_GL 1)
 #   *before* you include this file.
+
+#=============================================================================
+# Copyright 2003-2009 Kitware, Inc.
+# Copyright 2003      Jan Woetzel
 #
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 # -----------------------------------------------------
 # 16.Feb.2004: changed INCLUDE to FIND_PACKAGE to read from users own non-system CMAKE_MODULE_PATH (Jan Woetzel JW)
 # 07/2006: rewrite as FindwxWidgets.cmake, kept for backward compatibility JW

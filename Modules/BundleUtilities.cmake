@@ -23,6 +23,18 @@
 # Requires CMake 2.6 or greater because it uses function, break and
 # PARENT_SCOPE. Also depends on GetPrerequisites.cmake.
 
+#=============================================================================
+# Copyright 2008-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 # The functions defined in this file depend on the get_prerequisites function
 # (and possibly others) found in:

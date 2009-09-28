@@ -2,6 +2,19 @@
 # Adds the given files as dependencies to source_file
 #
 
+#=============================================================================
+# Copyright 2006-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 MACRO(ADD_FILE_DEPENDENCIES _file)
 
    GET_SOURCE_FILE_PROPERTY(_deps ${_file} OBJECT_DEPENDS)

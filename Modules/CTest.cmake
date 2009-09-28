@@ -9,6 +9,19 @@
 # The BUILD_TESTING option is created by the CTest module to determine
 # whether testing support should be enabled.  The default is ON.
 
+#=============================================================================
+# Copyright 2005-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 OPTION(BUILD_TESTING "Build the testing tree." ON)
 
 # function to turn generator name into a version string
