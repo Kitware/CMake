@@ -67,6 +67,18 @@
 #
 #   pkg_search_module (BAR     libxml-2.0 libxml2 libxml>=2)
 
+#=============================================================================
+# Copyright 2006-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 # Copyright (C) 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 #

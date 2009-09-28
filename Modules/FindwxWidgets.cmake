@@ -63,6 +63,20 @@
 #   # and for each of your dependant executable/library targets:
 #   TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
 
+#=============================================================================
+# Copyright 2004-2009 Kitware, Inc.
+# Copyright 2007-2009 Miguel A. Figueroa-Villanueva <miguelf at ieee dot org>
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 #
 # FIXME: check this and provide a correct sample usage...
 #        Remember to connect back to the upper text.
@@ -70,7 +84,6 @@
 #
 #   FIND_PACKAGE(wxWidgets COMPONENTS mono)
 #   ...
-
 
 # NOTES
 #

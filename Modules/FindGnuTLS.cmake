@@ -7,15 +7,22 @@
 #  GNUTLS_LIBRARIES - The libraries needed to use gnutls
 #  GNUTLS_DEFINITIONS - Compiler switches required for using gnutls
 
-# Adapted from FindXml2.cmake, which is:
-#   Copyright (c) 2006, Alexander Neundorf, <neundorf@kde.org>
+#=============================================================================
+# Copyright 2009 Kitware, Inc.
+# Copyright 2009 Philip Lowman <philip@yhbt.com>
+# Copyright 2009 Brad Hards <bradh@kde.org>
+# Copyright 2006 Alexander Neundorf <neundorf@kde.org>
 #
-# Changes are Copyright 2009, Brad Hards, <bradh@kde.org>
-#             Copyright 2009, Philip Lowman, <philip@yhbt.com>
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
 #
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 # Note that this doesn't try to find the gnutls-extra package.
 
 

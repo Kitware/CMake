@@ -5,6 +5,19 @@
 # Examples:
 #  UPX: http://wildsau.idv.uni-linz.ac.at/mfx/upx.html
 
+#=============================================================================
+# Copyright 2001-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 INCLUDE(FindCygwin)
 
 FIND_PROGRAM(SELF_PACKER_FOR_EXECUTABLE

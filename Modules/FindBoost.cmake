@@ -147,21 +147,23 @@
 #   Boost_${COMPONENT}_LIBRARY          Contains the libraries for the specified Boost
 #                                       "component" (includes debug and optimized keywords
 #                                       when needed).
-#
-# =====================================================================
-#
-#
-#  Copyright (c) 2006-2008 Andreas Schneider <mail@cynapses.org>
-#  Copyright (c) 2007      Wengo
-#  Copyright (c) 2007      Mike Jackson
-#  Copyright (c) 2008      Andreas Pakulat <apaku@gmx.de>
-#
-#  Redistribution AND use is allowed according to the terms of the New
-#  BSD license.
-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-#
 
-
+#=============================================================================
+# Copyright 2006-2009 Kitware, Inc.
+# Copyright 2006-2008 Andreas Schneider <mail@cynapses.org>
+# Copyright 2007      Wengo
+# Copyright 2007      Mike Jackson
+# Copyright 2008      Andreas Pakulat <apaku@gmx.de>
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 #-------------------------------------------------------------------------------
 #  FindBoost functions & macros

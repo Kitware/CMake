@@ -12,11 +12,19 @@
 #   GTEST_ROOT - The root directory of the gtest install prefix
 #
 
-# Copyright (c) 2009, Philip Lowman <philip@yhbt.com>
+#=============================================================================
+# Copyright 2009 Kitware, Inc.
+# Copyright 2009 Philip Lowman <philip@yhbt.com>
 #
-# Redistribution AND use is allowed according to the terms of the New
-# BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 find_path(GTEST_INCLUDE_DIR gtest/gtest.h
     HINTS

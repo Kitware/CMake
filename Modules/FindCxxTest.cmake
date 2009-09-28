@@ -64,6 +64,20 @@
 #          };
 #
 
+#=============================================================================
+# Copyright 2008-2009 Kitware, Inc.
+# Copyright 2008-2009 Philip Lowman <philip@yhbt.com>
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 # Version 1.2 (3/2/08)
 #     Included patch from Tyler Roscoe to have the perl & python binaries
 #     detected based on CXXTEST_INCLUDE_DIR
@@ -75,14 +89,6 @@
 #     Fixed CXXTEST_INCLUDE_DIRS so it will work properly
 #     Eliminated superfluous CXXTEST_FOUND assignment
 #     Cleaned up and added more documentation
-#
-# FindCxxTest.cmake
-# Copyright (c) 2008-2009
-#     Philip Lowman <philip@yhbt.com>
-#
-#  Redistribution AND use is allowed according to the terms of the New
-#  BSD license.
-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 #=============================================================
 # CXXTEST_ADD_TEST (public macro)

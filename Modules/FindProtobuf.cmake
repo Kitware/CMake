@@ -35,11 +35,21 @@
 #
 #====================================================================
 
-# Esben Mose Hansen <[EMAIL PROTECTED]>, (c) Ange Optimization ApS 2008
-# Adapted by Philip Lowman <philip@yhbt.com> (c) 2009
+
+#=============================================================================
+# Copyright 2009 Kitware, Inc.
+# Copyright 2009 Philip Lowman <philip@yhbt.com>
+# Copyright 2008 Esben Mose Hansen, Ange Optimization ApS
 #
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 function(PROTOBUF_GENERATE_CPP SRCS HDRS)
   if(NOT ARGN)

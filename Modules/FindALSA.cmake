@@ -10,6 +10,20 @@
 #     ALSA_LIBRARY     - the asound library
 #
 
+#=============================================================================
+# Copyright 2009 Kitware, Inc.
+# Copyright 2009 Philip Lowman <philip@yhbt.com>
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 find_path(ALSA_INCLUDE_DIR NAMES asoundlib.h
           PATH_SUFFIXES alsa
           DOC "The ALSA (asound) include directory"

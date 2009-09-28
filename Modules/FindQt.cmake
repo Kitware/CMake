@@ -17,6 +17,18 @@
 #  QT4_INSTALLED is set to TRUE if qt4 is found.
 #  QT3_INSTALLED is set to TRUE if qt3 is found.
 
+#=============================================================================
+# Copyright 2001-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 # look for signs of qt3 installations
 FILE(GLOB GLOB_TEMP_VAR /usr/lib/qt-3*/bin/qmake)

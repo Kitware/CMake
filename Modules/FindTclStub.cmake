@@ -21,6 +21,19 @@
 #      Let's leave that choice to the user by allowing him to assign 
 #      TCL_STUB_LIBRARY to any Tcl library, debug or not.
 
+#=============================================================================
+# Copyright 2008-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 INCLUDE(FindTCL)
 
 GET_FILENAME_COMPONENT(TCL_TCLSH_PATH "${TCL_TCLSH}" PATH)

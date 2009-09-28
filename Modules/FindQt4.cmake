@@ -270,6 +270,18 @@
 # (They make no sense in Qt4)
 #  QT_QT_LIBRARY        Qt-Library is now split
 
+#=============================================================================
+# Copyright 2005-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 # Use FIND_PACKAGE( Qt4 COMPONENTS ... ) to enable modules
 IF( Qt4_FIND_COMPONENTS )

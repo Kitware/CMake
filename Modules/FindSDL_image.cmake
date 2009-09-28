@@ -12,6 +12,19 @@
 # module, but with modifications to recognize OS X frameworks and 
 # additional Unix paths (FreeBSD, etc).
 
+#=============================================================================
+# Copyright 2005-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 FIND_PATH(SDLIMAGE_INCLUDE_DIR SDL_image.h
   HINTS
   $ENV{SDLIMAGEDIR}

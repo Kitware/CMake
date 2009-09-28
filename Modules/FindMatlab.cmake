@@ -6,6 +6,18 @@
 #  MATLAB_MX_LIBRARY:  path to libmx.lib
 #  MATLAB_ENG_LIBRARY: path to libeng.lib
 
+#=============================================================================
+# Copyright 2005-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 SET(MATLAB_FOUND 0)
 IF(WIN32)

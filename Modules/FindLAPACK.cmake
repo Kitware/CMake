@@ -22,6 +22,20 @@
 #  BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
 ### List of vendors (BLA_VENDOR) valid in this module
 ##  Intel(mkl), ACML,Apple, NAS, Generic
+
+#=============================================================================
+# Copyright 2007-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
 if(NOT _LANGUAGES_ MATCHES Fortran)
   if(LAPACK_FIND_REQUIRED)
