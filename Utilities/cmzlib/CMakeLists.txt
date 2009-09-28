@@ -42,3 +42,5 @@ ENDFOREACH(name)
 
 
 ADD_LIBRARY(cmzlib ${ZLIB_SRCS})
+
+INSTALL(FILES Copyright.txt DESTINATION ${CMake_DOC_DEST}/cmzlib)
