@@ -170,6 +170,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_CommandLineArguments 1)
   SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
+  SET(KWSYS_INSTALL_DOC_DIR "${CMake_DOC_DEST}")
   SUBDIRS(Source/kwsys)
   
   #---------------------------------------------------------------------
@@ -340,6 +341,7 @@ SET(CMAKE_MAN_DIR "/man" CACHE STRING
   "Install location for man pages (relative to prefix).")
 MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
 STRING(REGEX REPLACE "^/" "" CMake_DATA_DEST "${CMAKE_DATA_DIR}")
+STRING(REGEX REPLACE "^/" "" CMake_DOC_DEST "${CMAKE_DOC_DIR}")
 
 # include special compile flags for some compilers
 INCLUDE(CompileFlags.cmake)
