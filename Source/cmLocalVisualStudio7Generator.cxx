@@ -1688,6 +1688,12 @@ cmLocalVisualStudio7Generator
   cmSystemTools::ReadRegistryValue(vskey.c_str(), intelVersion,
                                    cmSystemTools::KeyWOW64_32);
 
+  // Version 10.1 actually uses 9.10 in project files!
+  if(intelVersion == "10.1")
+    {
+    intelVersion = "9.10";
+    }
+
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectCreator=\"Intel Fortran\"\n"
