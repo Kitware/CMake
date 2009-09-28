@@ -24,6 +24,10 @@
 
 #include "cmExportBuildFileGenerator.h"
 
+#if defined(__HAIKU__)
+#include <StorageKit.h>
+#endif
+
 cmExportCommand::cmExportCommand()
 :cmCommand()
 ,ArgumentGroup()
@@ -303,6 +307,16 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
                                               const char* content,
                                               const char* hash)
 {
+#if defined(__HAIKU__)
+  BPath dir;
+  if (find_directory(B_USER_SETTINGS_DIRECTORY, &dir) != B_OK)
+    {
+    return;
+    }
+  dir.Append("cmake/packages");
+  dir.Append(package.c_str());
+  std::string fname = dir.Path();
+#else
   const char* home = cmSystemTools::GetEnv("HOME");
   if(!home)
     {
@@ -312,6 +326,7 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
   cmSystemTools::ConvertToUnixSlashes(fname);
   fname += "/.cmake/packages/";
   fname += package;
+#endif
   cmSystemTools::MakeDirectory(fname.c_str());
   fname += "/";
   fname += hash;

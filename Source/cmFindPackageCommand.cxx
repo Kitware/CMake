@@ -23,6 +23,10 @@
 #include "cmVariableWatch.h"
 #endif
 
+#if defined(__HAIKU__)
+#include <StorageKit.h>
+#endif
+
 void cmFindPackageNeedBackwardsCompatibility(const std::string& variable,
   int access_type, void*, const char* newValue,
   const cmMakefile*)
@@ -1159,6 +1163,14 @@ void cmFindPackageCommand::AddPrefixesRegistry()
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   this->LoadPackageRegistryWin();
+#elif defined(__HAIKU__)
+  BPath dir;
+  if (find_directory(B_USER_SETTINGS_DIRECTORY, &dir) == B_OK)
+    {
+    dir.Append("cmake/packages");
+    dir.Append(this->Name.c_str());
+    this->LoadPackageRegistryDir(dir.Path());
+    }
 #else
   if(const char* home = cmSystemTools::GetEnv("HOME"))
     {
