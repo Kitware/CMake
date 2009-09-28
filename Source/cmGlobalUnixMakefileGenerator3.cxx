@@ -750,7 +750,7 @@ cmGlobalUnixMakefileGenerator3
                                 cmLocalGenerator::FULL,
                                 cmLocalGenerator::SHELL);
         progCmd << " ";
-        std::vector<int> &progFiles = this->ProgressMap[t->first].Marks;
+        std::vector<int> &progFiles = this->ProgressMap[&t->second].Marks;
         for (std::vector<int>::iterator i = progFiles.begin();
               i != progFiles.end(); ++i)
           {
@@ -873,7 +873,7 @@ cmGlobalUnixMakefileGenerator3
   size_t count = 0;
   if(emitted.insert(target).second)
     {
-    count = this->ProgressMap[target->GetName()].Marks.size();
+    count = this->ProgressMap[target].Marks.size();
     TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
@@ -905,9 +905,24 @@ void
 cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
   cmMakefileTargetGenerator* tg)
 {
-  TargetProgress& tp = this->ProgressMap[tg->GetTarget()->GetName()];
+  TargetProgress& tp = this->ProgressMap[tg->GetTarget()];
   tp.NumberOfActions = tg->GetNumberOfProgressActions();
   tp.VariableFile = tg->GetProgressFileNameFull();
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalUnixMakefileGenerator3::ProgressMapCompare
+::operator()(cmTarget* l, cmTarget* r)
+{
+  // Order by target name.
+  if(int c = strcmp(l->GetName(), r->GetName()))
+    {
+    return c < 0;
+    }
+  // Order duplicate targets by binary directory.
+  return strcmp(l->GetMakefile()->GetCurrentOutputDirectory(),
+                r->GetMakefile()->GetCurrentOutputDirectory()) < 0;
 }
 
 //----------------------------------------------------------------------------
