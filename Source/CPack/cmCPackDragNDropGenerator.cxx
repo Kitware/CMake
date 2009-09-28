@@ -379,6 +379,13 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel,
       {
         std::string line;
         std::getline(ifs, line);
+        // escape quotes
+        std::string::size_type pos = line.find('\"');
+        while(pos != std::string::npos)
+        {
+          line.replace(pos, 1, "\\\"");
+          pos = line.find('\"', pos+2);
+        }
         osf << "        \"" << line << "\\n\"\n";
       }
       osf << "};\n";
