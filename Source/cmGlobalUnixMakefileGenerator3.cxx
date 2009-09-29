@@ -913,7 +913,7 @@ cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
 //----------------------------------------------------------------------------
 bool
 cmGlobalUnixMakefileGenerator3::ProgressMapCompare
-::operator()(cmTarget* l, cmTarget* r)
+::operator()(cmTarget* l, cmTarget* r) const
 {
   // Order by target name.
   if(int c = strcmp(l->GetName(), r->GetName()))
