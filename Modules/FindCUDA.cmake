@@ -198,6 +198,7 @@
 #  CUDA_VERSION
 #  CUDA_VERSION_STRING   -- CUDA_VERSION_MAJOR.CUDA_VERSION_MINOR
 #
+#  CUDA_TOOLKIT_ROOT_DIR -- Path to the CUDA Toolkit (defined if not set).
 #  CUDA_INCLUDE_DIRS     -- Include directory for cuda headers.  Added automatically
 #                           for CUDA_ADD_EXECUTABLE and CUDA_ADD_LIBRARY.
 #  CUDA_LIBRARIES        -- Cuda RT library.
@@ -578,6 +579,7 @@ endif()
 find_path(CUDA_SDK_ROOT_DIR common/inc/cutil.h
   "$ENV{NVSDKCUDA_ROOT}"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\NVIDIA Corporation\\Installed Products\\NVIDIA SDK 10\\Compute;InstallDir]"
+  "/Developer/GPU\ Computing/C"
   )
 
 # Keep the CUDA_SDK_ROOT_DIR first in order to be able to override the
@@ -855,30 +857,35 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   endif()
   # Only add the CMAKE_{C,CXX}_FLAGS if we are propagating host flags.  We
   # always need to set the SHARED_FLAGS, though.
-  if(NOT CUDA_PROPAGATE_HOST_FLAGS)
-    set(CUDA_HOST_FLAGS "set(CMAKE_HOST_FLAGS ${CUDA_HOST_SHARED_FLAGS})")
-  else()
+  if(CUDA_PROPAGATE_HOST_FLAGS)
     set(CUDA_HOST_FLAGS "set(CMAKE_HOST_FLAGS ${CMAKE_${CUDA_C_OR_CXX}_FLAGS} ${CUDA_HOST_SHARED_FLAGS})")
-    set(CUDA_NVCC_FLAGS_CONFIG "# Build specific configuration flags")
-    # Loop over all the configuration types to generate appropriate flags for run_nvcc.cmake
-    foreach(config ${CUDA_configuration_types})
-      string(TOUPPER ${config} config_upper)
-      # CMAKE_FLAGS are strings and not lists.  By not putting quotes around CMAKE_FLAGS
-      # we convert the strings to lists (like we want).
+  else()
+    set(CUDA_HOST_FLAGS "set(CMAKE_HOST_FLAGS ${CUDA_HOST_SHARED_FLAGS})")
+  endif()
 
+  set(CUDA_NVCC_FLAGS_CONFIG "# Build specific configuration flags")
+  # Loop over all the configuration types to generate appropriate flags for run_nvcc.cmake
+  foreach(config ${CUDA_configuration_types})
+    string(TOUPPER ${config} config_upper)
+    # CMAKE_FLAGS are strings and not lists.  By not putting quotes around CMAKE_FLAGS
+    # we convert the strings to lists (like we want).
+
+    if(CUDA_PROPAGATE_HOST_FLAGS)
       # nvcc chokes on -g3, so replace it with -g
       if(CMAKE_COMPILER_IS_GNUCC)
         string(REPLACE "-g3" "-g" _cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
       else()
         set(_cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
       endif()
+
       set(CUDA_HOST_FLAGS "${CUDA_HOST_FLAGS}\nset(CMAKE_HOST_FLAGS_${config_upper} ${_cuda_C_FLAGS})")
-      # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list
-      # like it is currently), we can remove the quotes around the
-      # ${CUDA_NVCC_FLAGS_${config_upper}} variable like the CMAKE_HOST_FLAGS_<CONFIG> variable.
-      set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} \"${CUDA_NVCC_FLAGS_${config_upper}};${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}}\")")
-    endforeach()
-  endif()
+    endif()
+
+    # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list
+    # like it is currently), we can remove the quotes around the
+    # ${CUDA_NVCC_FLAGS_${config_upper}} variable like the CMAKE_HOST_FLAGS_<CONFIG> variable.
+    set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} \"${CUDA_NVCC_FLAGS_${config_upper}};;${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}}\")")
+  endforeach()
 
   if(compile_to_ptx)
     # Don't use any of the host compilation flags for PTX targets.
