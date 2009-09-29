@@ -199,11 +199,18 @@
 #  CUDA_VERSION_STRING   -- CUDA_VERSION_MAJOR.CUDA_VERSION_MINOR
 #
 #  CUDA_TOOLKIT_ROOT_DIR -- Path to the CUDA Toolkit (defined if not set).
+#  CUDA_SDK_ROOT_DIR     -- Path to the CUDA SDK.  Use this to find files in the
+#                           SDK.  This script will not directly support finding
+#                           specific libraries or headers, as that isn't
+#                           supported by NVIDIA.  If you want to change
+#                           libraries when the path changes see the
+#                           FindCUDA.cmake script for an example of how to clear
+#                           these variables.  There are also examples of how to
+#                           use the CUDA_SDK_ROOT_DIR to locate headers or
+#                           libraries, if you so choose (at your own risk).
 #  CUDA_INCLUDE_DIRS     -- Include directory for cuda headers.  Added automatically
 #                           for CUDA_ADD_EXECUTABLE and CUDA_ADD_LIBRARY.
 #  CUDA_LIBRARIES        -- Cuda RT library.
-#  CUDA_CUT_INCLUDE_DIR  -- Include directory for cuda SDK headers (cutil.h).
-#  CUDA_CUT_LIBRARIES    -- SDK libraries.
 #  CUDA_CUFFT_LIBRARIES  -- Device or emulation library for the Cuda FFT
 #                           implementation (alternative to:
 #                           CUDA_ADD_CUFFT_TO_TARGET macro)
@@ -212,7 +219,7 @@
 #                           CUDA_ADD_CUBLAS_TO_TARGET macro).
 #
 #
-#  James Bigler, NVIDIA Corp
+#  James Bigler, NVIDIA Corp (nvidia.com - jbigler)
 #  Abe Stephens, SCI Institute -- http://www.sci.utah.edu/~abe/FindCuda.html
 #
 #  Copyright (c) 2008-2009
@@ -421,8 +428,11 @@ if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
 endif()
 
 if(NOT "${CUDA_SDK_ROOT_DIR}" STREQUAL "${CUDA_SDK_ROOT_DIR_INTERNAL}")
-  unset(CUDA_CUT_INCLUDE_DIR CACHE)
-  unset(CUDA_CUT_LIBRARY CACHE)
+  # No specific variables to catch.  Use this kind of code before calling
+  # find_package(CUDA) to clean up any variables that may depend on this path.
+
+  #   unset(MY_SPECIAL_CUDA_SDK_INCLUDE_DIR CACHE)
+  #   unset(MY_SPECIAL_CUDA_SDK_LIBRARY CACHE)
 endif()
 
 # Search for the cuda distribution.
@@ -593,43 +603,46 @@ set(CUDA_SDK_SEARCH_PATH
   "$ENV{HOME}/NVIDIA_CUDA_SDK_MACOSX"
   "/Developer/CUDA"
   )
-# CUDA_CUT_INCLUDE_DIR
-find_path(CUDA_CUT_INCLUDE_DIR
-  cutil.h
-  PATHS ${CUDA_SDK_SEARCH_PATH}
-  PATH_SUFFIXES "common/inc"
-  DOC "Location of cutil.h"
-  NO_DEFAULT_PATH
-  )
-# Now search system paths
-find_path(CUDA_CUT_INCLUDE_DIR cutil.h DOC "Location of cutil.h")
 
-mark_as_advanced(CUDA_CUT_INCLUDE_DIR)
+# Example of how to find an include file from the CUDA_SDK_ROOT_DIR
+
+# find_path(CUDA_CUT_INCLUDE_DIR
+#   cutil.h
+#   PATHS ${CUDA_SDK_SEARCH_PATH}
+#   PATH_SUFFIXES "common/inc"
+#   DOC "Location of cutil.h"
+#   NO_DEFAULT_PATH
+#   )
+# # Now search system paths
+# find_path(CUDA_CUT_INCLUDE_DIR cutil.h DOC "Location of cutil.h")
+
+# mark_as_advanced(CUDA_CUT_INCLUDE_DIR)
 
 
-# CUDA_CUT_LIBRARIES
+# Example of how to find a library in the CUDA_SDK_ROOT_DIR
 
-# cutil library is called cutil64 for 64 bit builds on windows.  We don't want
-# to get these confused, so we are setting the name based on the word size of
-# the build.
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(cuda_cutil_name cutil64)
-else(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(cuda_cutil_name cutil32)
-endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+# # cutil library is called cutil64 for 64 bit builds on windows.  We don't want
+# # to get these confused, so we are setting the name based on the word size of
+# # the build.
 
-find_library(CUDA_CUT_LIBRARY
-  NAMES cutil ${cuda_cutil_name}
-  PATHS ${CUDA_SDK_SEARCH_PATH}
-  # The new version of the sdk shows up in common/lib, but the old one is in lib
-  PATH_SUFFIXES "common/lib" "lib"
-  DOC "Location of cutil library"
-  NO_DEFAULT_PATH
-  )
-# Now search system paths
-find_library(CUDA_CUT_LIBRARY NAMES cutil ${cuda_cutil_name} DOC "Location of cutil library")
-mark_as_advanced(CUDA_CUT_LIBRARY)
-set(CUDA_CUT_LIBRARIES ${CUDA_CUT_LIBRARY})
+# if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+#   set(cuda_cutil_name cutil64)
+# else(CMAKE_SIZEOF_VOID_P EQUAL 8)
+#   set(cuda_cutil_name cutil32)
+# endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+
+# find_library(CUDA_CUT_LIBRARY
+#   NAMES cutil ${cuda_cutil_name}
+#   PATHS ${CUDA_SDK_SEARCH_PATH}
+#   # The new version of the sdk shows up in common/lib, but the old one is in lib
+#   PATH_SUFFIXES "common/lib" "lib"
+#   DOC "Location of cutil library"
+#   NO_DEFAULT_PATH
+#   )
+# # Now search system paths
+# find_library(CUDA_CUT_LIBRARY NAMES cutil ${cuda_cutil_name} DOC "Location of cutil library")
+# mark_as_advanced(CUDA_CUT_LIBRARY)
+# set(CUDA_CUT_LIBRARIES ${CUDA_CUT_LIBRARY})
 
 
 
