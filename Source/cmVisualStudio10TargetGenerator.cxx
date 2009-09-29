@@ -951,10 +951,10 @@ void cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const&
      ->GetProperty("STATIC_LIBRARY_FLAGS"))
     {
     this->WriteString("<Lib>\n", 2);
-    cmVisualStudioGeneratorOptions 
-      libOptions(this->LocalGenerator,
-                  10, cmVisualStudioGeneratorOptions::Compiler,
-                  cmVS10LibFlagTable, 0, this); 
+    cmVisualStudioGeneratorOptions
+      libOptions(this->LocalGenerator, 10,
+                 cmVisualStudioGeneratorOptions::Linker,
+                 cmVS10LibFlagTable, 0, this);
     libOptions.Parse(libflags);  
     libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
     libOptions.OutputFlagMap(*this->BuildFileStream, "      "); 
@@ -1023,10 +1023,10 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     flags += " ";
     flags += targetLinkFlags;
     }
-  cmVisualStudioGeneratorOptions 
-    linkOptions(this->LocalGenerator, 
-              10, cmVisualStudioGeneratorOptions::Compiler,
-                cmVS10LinkFlagTable);
+  cmVisualStudioGeneratorOptions
+    linkOptions(this->LocalGenerator, 10,
+                cmVisualStudioGeneratorOptions::Linker,
+                cmVS10LinkFlagTable, 0, this);
   if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
     {
     flags += " /SUBSYSTEM:WINDOWS";
