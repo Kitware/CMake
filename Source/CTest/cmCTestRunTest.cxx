@@ -81,6 +81,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   std::vector<std::pair<cmsys::RegularExpression,
     std::string> >::iterator passIt;
   bool forceFail = false;
+  bool outputTestErrorsToConsole = false;
   if ( this->TestProperties->RequiredRegularExpressions.size() > 0 )
     {
     bool found = false;
@@ -140,15 +141,18 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       {
       this->TestResult.Status = cmCTestTestHandler::FAILED;
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Failed  " << reason );
+      outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
       }
     }
   else if ( res == cmsysProcess_State_Expired )
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout");
     this->TestResult.Status = cmCTestTestHandler::TIMEOUT;
+    outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
     }
   else if ( res == cmsysProcess_State_Exception )
     {
+    outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Exception: ");
     switch ( retVal )
       {
@@ -183,6 +187,12 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   char buf[1024];
   sprintf(buf, "%6.2f sec", this->TestProcess->GetTotalTime());
   cmCTestLog(this->CTest, HANDLER_OUTPUT, buf << "\n" );
+
+  if ( outputTestErrorsToConsole )
+    {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, this->ProcessOutput << std::endl );
+    }
+
   if ( this->TestHandler->LogFile )
     {
     *this->TestHandler->LogFile << "Test time = " << buf << std::endl;
