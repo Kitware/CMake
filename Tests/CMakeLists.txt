@@ -1091,9 +1091,20 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     -S "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
-  ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND}
-    -N
+  
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestTimeout/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestTimeout ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/testOutput.log"
     )
+  SET_TESTS_PROPERTIES(CTestTestTimeout PROPERTIES
+    PASS_REGULAR_EXPRESSION "\\*\\*\\*Timeout")
+  
+  ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
+  
   IF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" @ONLY ESCAPE_QUOTES)
