@@ -435,6 +435,8 @@ bool cmCTestRunTest::CreateProcess(double testTimeOut,
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index << ": "
              << "Test timeout computed to be: " << timeout << "\n");
 
+  this->TestProcess->SetTimeout(timeout);
+
   if (this->ModifyEnv)
     {
     this->OrigEnv = cmSystemTools::AppendEnv(environment);
