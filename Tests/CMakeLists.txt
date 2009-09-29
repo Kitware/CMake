@@ -846,6 +846,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
 
   IF(CMAKE_TEST_MSVC)
     ADD_TEST_MACRO(PrecompiledHeader foo)
+    ADD_TEST_MACRO(ModuleDefinition example_exe)
   ENDIF(CMAKE_TEST_MSVC)
 
   IF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
