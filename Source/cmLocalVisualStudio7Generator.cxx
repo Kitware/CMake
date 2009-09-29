@@ -887,6 +887,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
   Options linkOptions(this, this->Version, Options::Linker,
                       cmLocalVisualStudio7GeneratorLinkFlagTable);
   linkOptions.Parse(extraLinkOptions.c_str());
+  if(!this->ModuleDefinitionFile.empty())
+    {
+    std::string defFile =
+      this->ConvertToXMLOutputPath(this->ModuleDefinitionFile.c_str());
+    linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
+    }
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
@@ -960,7 +966,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
     this->OutputLibraryDirectories(fout, cli.GetDirectories());
     fout << "\"\n";
-    this->OutputModuleDefinitionFile(fout, target);
     temp = target.GetDirectory(configName);
     temp += "/";
     temp += targetNamePDB;
@@ -1080,26 +1085,6 @@ cmLocalVisualStudio7Generator
   fout << "\t\t\t\tVersion=\"" << major << "." << minor << "\"\n";
 }
 
-void cmLocalVisualStudio7Generator
-::OutputModuleDefinitionFile(std::ostream& fout,
-                             cmTarget &target)
-{
-  std::vector<cmSourceFile*> const& classes = target.GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
-      i != classes.end(); i++)
-    {
-    cmSourceFile* sf = *i;
-    if(cmSystemTools::UpperCase(sf->GetExtension()) == "DEF")
-      {
-      fout << "\t\t\t\tModuleDefinitionFile=\""
-           << this->ConvertToXMLOutputPath(sf->GetFullPath().c_str())
-           << "\"\n";
-      return;
-      }
-    }
-
-}
-
 //----------------------------------------------------------------------------
 void
 cmLocalVisualStudio7GeneratorInternals
@@ -1174,6 +1159,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
 
   // get the classes from the source lists then add them to the groups
+  this->ModuleDefinitionFile = "";
   std::vector<cmSourceFile*>const & classes = target.GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); i++)

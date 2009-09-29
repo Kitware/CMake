@@ -243,6 +243,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   this->LocalGenerator->AppendFlags
     (linkFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
 
+  this->AddModuleDefinitionFlag(linkFlags);
+
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;

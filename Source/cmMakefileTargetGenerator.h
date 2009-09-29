@@ -186,6 +186,9 @@ protected:
   std::vector<std::string> Objects;
   std::vector<std::string> ExternalObjects;
 
+  // The windows module definition source file (.def), if any.
+  std::string ModuleDefinitionFile;
+
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> ObjectFiles;
 
@@ -213,6 +216,9 @@ protected:
 
   // Compute target-specific Fortran language flags.
   void AddFortranFlags(std::string& flags);
+
+  // Helper to add flag for windows .def file.
+  void AddModuleDefinitionFlag(std::string& flags);
 
   //==================================================================
   // Convenience routines that do nothing more than forward to

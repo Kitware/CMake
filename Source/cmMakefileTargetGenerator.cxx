@@ -170,6 +170,10 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
         // This is an external object file.  Just add it.
         this->ExternalObjects.push_back((*source)->GetFullPath());
         }
+      else if(cmSystemTools::UpperCase((*source)->GetExtension()) == "DEF")
+        {
+        this->ModuleDefinitionFile = (*source)->GetFullPath();
+        }
       else
         {
         // We only get here if a source file is not an external object
@@ -1733,4 +1737,28 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
       this->LocalGenerator->AppendFlags(flags, flg.c_str());
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
+{
+  if(this->ModuleDefinitionFile.empty())
+    {
+    return;
+    }
+
+  // TODO: Create a per-language flag variable.
+  const char* defFileFlag =
+    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+  if(!defFileFlag)
+    {
+    return;
+    }
+
+  // Append the flag and value.
+  std::string flag = defFileFlag;
+  flag += this->Convert(this->ModuleDefinitionFile.c_str(),
+                        cmLocalGenerator::START_OUTPUT,
+                        cmLocalGenerator::SHELL);
+  this->LocalGenerator->AppendFlags(flags, flag.c_str());
 }

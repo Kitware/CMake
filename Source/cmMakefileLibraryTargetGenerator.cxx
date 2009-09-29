@@ -146,27 +146,8 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
                                     
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
-  if(this->Makefile->IsOn("WIN32") && !(this->Makefile->IsOn("CYGWIN") 
-                                        || this->Makefile->IsOn("MINGW")))
-    {
-    const std::vector<cmSourceFile*>& sources = 
-      this->Target->GetSourceFiles();
-    for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
-        i != sources.end(); ++i)
-      {
-      cmSourceFile* sf = *i;
-      if(sf->GetExtension() == "def")
-        {
-        extraFlags += " ";
-        extraFlags += 
-          this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-        extraFlags += 
-          this->Convert(sf->GetFullPath().c_str(),
-                        cmLocalGenerator::START_OUTPUT,
-                        cmLocalGenerator::SHELL);
-        }
-      }
-    }
+  this->AddModuleDefinitionFlag(extraFlags);
+
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
 
@@ -191,8 +172,8 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
     (extraFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->ConfigName);
+  this->AddModuleDefinitionFlag(extraFlags);
 
-  // TODO: .def files should be supported here also.
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
 
@@ -218,7 +199,6 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS", this->ConfigName);
 
-  // TODO: .def files should be supported here also.
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
 
