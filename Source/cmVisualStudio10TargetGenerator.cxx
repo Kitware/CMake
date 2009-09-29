@@ -798,6 +798,12 @@ OutputLinkIncremental(std::string const& configName)
     std::string flagVar = baseFlagVar + std::string("_") + CONFIG;
     flags += 
       Target->GetMakefile()->GetRequiredDefinition(flagVar.c_str());
+    }  
+  const char* targetLinkFlags = this->Target->GetProperty("LINK_FLAGS");
+  if(targetLinkFlags)
+    {
+    flags += " ";
+    flags += targetLinkFlags;
     }
   if(flags.find("INCREMENTAL:NO") != flags.npos)
     {
