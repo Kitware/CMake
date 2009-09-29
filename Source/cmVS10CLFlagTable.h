@@ -235,5 +235,24 @@ static cmVS7FlagTable cmVS10CLFlagTable[] =
   {"TreatSpecificWarningsAsErrors", "we",
    "Treat Specific Warnings As Errors",
    "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
+
+  //String Properties
+  // Skip [TrackerLogDirectory] - no command line Switch.
+  // Skip [PrecompiledHeaderFile] - no command line Switch.
+  {"PrecompiledHeaderOutputFile", "Fp",
+   "Precompiled Header Output File",
+   "", cmVS7FlagTable::UserValue},
+  {"AssemblerListingLocation", "Fa",
+   "ASM List Location",
+   "", cmVS7FlagTable::UserValue},
+  {"ObjectFileName", "Fo",
+   "Object File Name",
+   "", cmVS7FlagTable::UserValue},
+  {"ProgramDataBaseFileName", "Fd",
+   "Program Database File Name",
+   "", cmVS7FlagTable::UserValue},
+  // Skip [XMLDocumentationFileName] - no command line Switch.
+  // Skip [BrowseInformationFile] - no command line Switch.
+  // Skip [AdditionalOptions] - no command line Switch.
   {0,0,0,0,0}
 };

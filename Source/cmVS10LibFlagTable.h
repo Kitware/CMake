@@ -78,5 +78,25 @@ static cmVS7FlagTable cmVS10LibFlagTable[] =
   {"RemoveObjects", "REMOVE:",
    "Remove Objects",
    "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
+
+  //String Properties
+  {"OutputFile", "OUT:",
+   "Output File",
+   "", cmVS7FlagTable::UserValue},
+  {"ModuleDefinitionFile", "DEF:",
+   "Module Definition File Name",
+   "", cmVS7FlagTable::UserValue},
+  {"ForceSymbolReferences", "INCLUDE:",
+   "Force Symbol References",
+   "", cmVS7FlagTable::UserValue},
+  {"DisplayLibrary", "LIST:",
+   "Display Library to standard output",
+   "", cmVS7FlagTable::UserValue},
+  // Skip [MinimumRequiredVersion] - no command line Switch.
+  {"Name", "NAME:",
+   "Name",
+   "", cmVS7FlagTable::UserValue},
+  // Skip [TrackerLogDirectory] - no command line Switch.
+  // Skip [AdditionalOptions] - no command line Switch.
   {0,0,0,0,0}
 };
