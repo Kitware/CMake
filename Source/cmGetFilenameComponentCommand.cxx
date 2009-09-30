@@ -35,7 +35,27 @@ bool cmGetFilenameComponentCommand
   
   std::string result;
   std::string filename = args[1];
-  cmSystemTools::ExpandRegistryValues(filename);
+  if(filename.find("[HKEY") != filename.npos)
+    {
+    // Check the registry as the target application would view it.
+    cmSystemTools::KeyWOW64 view = cmSystemTools::KeyWOW64_32;
+    cmSystemTools::KeyWOW64 other_view = cmSystemTools::KeyWOW64_64;
+    if(this->Makefile->PlatformIs64Bit())
+      {
+      view = cmSystemTools::KeyWOW64_64;
+      other_view = cmSystemTools::KeyWOW64_32;
+      }
+    cmSystemTools::ExpandRegistryValues(filename, view);
+    if(filename.find("/registry") != filename.npos)
+      {
+      std::string other = args[1];
+      cmSystemTools::ExpandRegistryValues(other, other_view);
+      if(other.find("/registry") == other.npos)
+        {
+        filename = other;
+        }
+      }
+    }
   std::string storeArgs;
   std::string programArgs;
   if (args[2] == "PATH")
