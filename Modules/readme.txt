@@ -1,3 +1,6 @@
+For more information about how to contribute modules to CMake, see this page:
+http://www.itk.org/Wiki/CMake:Module_Maintainers
+
 Note to authors of FindXXX.cmake files
 
 We would like all FindXXX.cmake files to produce consistent variable names.
@@ -106,3 +109,4 @@ error if the module is not found.
 
 To get this behaviour you can use the FIND_PACKAGE_HANDLE_STANDARD_ARGS() 
 macro, as an example see FindJPEG.cmake.
+
