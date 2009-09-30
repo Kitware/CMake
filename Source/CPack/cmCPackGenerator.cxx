@@ -25,6 +25,10 @@
 #include <cmsys/Glob.hxx>
 #include <memory> // auto_ptr
 
+#if defined(__HAIKU__)
+#include <StorageKit.h>
+#endif
+
 //----------------------------------------------------------------------
 cmCPackGenerator::cmCPackGenerator()
 {
@@ -1020,6 +1024,16 @@ const char* cmCPackGenerator::GetInstallPath()
   this->InstallPath += this->GetOption("CPACK_PACKAGE_NAME");
   this->InstallPath += "-";
   this->InstallPath += this->GetOption("CPACK_PACKAGE_VERSION");
+#elif defined(__HAIKU__)
+  BPath dir;
+  if (find_directory(B_COMMON_DIRECTORY, &dir) == B_OK)
+    {
+    this->InstallPath = dir.Path();
+    }
+  else
+    {
+    this->InstallPath = "/boot/common";
+    }
 #else
   this->InstallPath = "/usr/local/";
 #endif

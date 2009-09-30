@@ -131,6 +131,8 @@ if ${cmake_system_mingw}; then
   else
     cmake_default_prefix="c:/Program Files/CMake"
   fi
+elif ${cmake_system_haiku}; then
+  cmake_default_prefix=`/bin/finddir B_COMMON_DIRECTORY`
 else
   cmake_default_prefix="/usr/local"
 fi

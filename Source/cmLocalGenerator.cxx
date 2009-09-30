@@ -36,6 +36,10 @@
 
 #include <assert.h>
 
+#if defined(__HAIKU__)
+#include <StorageKit.h>
+#endif
+
 cmLocalGenerator::cmLocalGenerator()
 {
   this->Makefile = 0; // moved to after set on global
@@ -356,6 +360,19 @@ void cmLocalGenerator::GenerateInstallRules()
       prefix_win32 += "/InstalledCMakeProject";
       }
     prefix = prefix_win32.c_str();
+    }
+#elif defined(__HAIKU__)
+  if (!prefix)
+    {
+    BPath dir;
+    if (find_directory(B_COMMON_DIRECTORY, &dir) == B_OK)
+      {
+      prefix = dir.Path();
+      }
+    else
+      {
+      prefix = "/boot/common";
+      }
     }
 #else
   if (!prefix)
