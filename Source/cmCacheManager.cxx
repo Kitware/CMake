@@ -462,11 +462,13 @@ bool cmCacheManager::SaveCache(const char* path)
   if ( currentcwd[0] >= 'A' && currentcwd[0] <= 'Z' &&
        currentcwd[1] == ':' )
     {
-    currentcwd[0] = currentcwd[0] - 'A' + 'a';
+    // Cast added to avoid compiler warning. Cast is ok because
+    // value is guaranteed to fit in char by the above if...
+    currentcwd[0] = static_cast<char>(currentcwd[0] - 'A' + 'a');
     }
   cmSystemTools::ConvertToUnixSlashes(currentcwd);
   this->AddCacheEntry("CMAKE_CACHEFILE_DIR", currentcwd.c_str(),
-                      "This is the directory where this CMakeCahe.txt"
+                      "This is the directory where this CMakeCache.txt"
                       " was created", cmCacheManager::INTERNAL);
 
   fout << "# This is the CMakeCache file.\n"

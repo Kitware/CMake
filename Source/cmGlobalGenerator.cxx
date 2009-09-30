@@ -889,7 +889,8 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->GenerateInstallRules();
     this->LocalGenerators[i]->GenerateTestFiles();
     this->CMakeInstance->UpdateProgress("Generating",
-                                    (i+1.0f)/this->LocalGenerators.size());
+      (static_cast<float>(i)+1.0f)/
+       static_cast<float>(this->LocalGenerators.size()));
     }
   this->SetCurrentLocalGenerator(0);
 
@@ -996,7 +997,8 @@ void cmGlobalGenerator::CheckLocalGenerators()
         }
       }
     this->CMakeInstance->UpdateProgress
-      ("Configuring", 0.9f+0.1f*(i+1.0f)/this->LocalGenerators.size());
+      ("Configuring", 0.9f+0.1f*(static_cast<float>(i)+1.0f)/
+        static_cast<float>(this->LocalGenerators.size()));
     }
 
   if(notFoundMap.size())
@@ -1262,7 +1264,8 @@ void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
     }
 
   int numGen = atoi(numGenC);
-  float prog = 0.9f*this->LocalGenerators.size()/numGen;
+  float prog = 0.9f*static_cast<float>(this->LocalGenerators.size())/
+    static_cast<float>(numGen);
   if (prog > 0.9f)
     {
     prog = 0.9f;

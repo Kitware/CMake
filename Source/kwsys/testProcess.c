@@ -266,7 +266,7 @@ int runChild2(kwsysProcess* kp,
           }
         else
           {
-          fwrite(data, 1, length, stdout);
+          fwrite(data, 1, (size_t) length, stdout);
           fflush(stdout);
           }
         }

@@ -126,7 +126,7 @@ bool cmStringCommand::HandleAsciiCommand(std::vector<std::string> const& args)
     else
       {
       std::string error = "Character with code ";
-      error += ch;
+      error += args[cc];
       error += " does not exist.";
       this->SetError(error.c_str());
       return false;

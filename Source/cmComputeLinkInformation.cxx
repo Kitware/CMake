@@ -987,8 +987,8 @@ std::string cmComputeLinkInformation::NoCaseExpression(const char* str)
     else
       {
       ret += "[";
-      ret += tolower(*s);
-      ret += toupper(*s);
+      ret += static_cast<char>(tolower(*s));
+      ret += static_cast<char>(toupper(*s));
       ret += "]";
       }
     s++;
