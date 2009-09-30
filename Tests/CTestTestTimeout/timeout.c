@@ -1,10 +1,15 @@
-#include <stdio.h>
+#if defined(_WIN32)
+# include <windows.h>
+#else
+# include <unistd.h>
+#endif
 
-/* infinite loop */
 int main(void)
 {
-  while(1)
-    {
-    }
-  return 0;
+#if defined(_WIN32)
+  Sleep(5000);
+#else
+  sleep(5);
+#endif
+  return -1;
 }
