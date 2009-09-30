@@ -1755,10 +1755,10 @@ void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
     return;
     }
 
-  // Append the flag and value.
+  // Append the flag and value.  Use ConvertToLinkReference to help
+  // vs6's "cl -link" pass it to the linker.
   std::string flag = defFileFlag;
-  flag += this->Convert(this->ModuleDefinitionFile.c_str(),
-                        cmLocalGenerator::START_OUTPUT,
-                        cmLocalGenerator::SHELL);
+  flag += (this->LocalGenerator->ConvertToLinkReference(
+             this->ModuleDefinitionFile.c_str()));
   this->LocalGenerator->AppendFlags(flags, flag.c_str());
 }
