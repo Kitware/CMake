@@ -485,13 +485,32 @@ function(_ep_get_build_command name step cmd_var)
 endfunction(_ep_get_build_command)
 
 
+# This module used to use "/${CMAKE_CFG_INTDIR}" directly and produced
+# makefiles with "/./" in paths for custom command dependencies. Which
+# resulted in problems with parallel make -j invocations.
+#
+# This function was added so that the suffix (search below for ${cfgdir}) is
+# only set to "/${CMAKE_CFG_INTDIR}" when ${CMAKE_CFG_INTDIR} is not going to
+# be "." (multi-configuration build systems like Visual Studio and Xcode...)
+#
+function(_ep_get_configuration_subdir_suffix suffix_var)
+  set(suffix "")
+  if(CMAKE_CONFIGURATION_TYPES)
+    set(suffix "/${CMAKE_CFG_INTDIR}")
+  endif()
+  set(${suffix_var} "${suffix}" PARENT_SCOPE)
+endfunction(_ep_get_configuration_subdir_suffix)
+
+
 function(ExternalProject_Add_Step name step)
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
   ExternalProject_Get_Property(${name} stamp_dir)
 
+  _ep_get_configuration_subdir_suffix(cfgdir)
+
   add_custom_command(APPEND
-    OUTPUT ${cmf_dir}/${CMAKE_CFG_INTDIR}/${name}-complete
-    DEPENDS ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${step}
+    OUTPUT ${cmf_dir}${cfgdir}/${name}-complete
+    DEPENDS ${stamp_dir}${cfgdir}/${name}-${step}
     )
   _ep_parse_arguments(ExternalProject_Add_Step
                        ${name} _EP_${step}_ "${ARGN}")
@@ -500,8 +519,8 @@ function(ExternalProject_Add_Step name step)
   get_property(dependers TARGET ${name} PROPERTY _EP_${step}_DEPENDERS)
   foreach(depender IN LISTS dependers)
     add_custom_command(APPEND
-      OUTPUT ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${depender}
-      DEPENDS ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${step}
+      OUTPUT ${stamp_dir}${cfgdir}/${name}-${depender}
+      DEPENDS ${stamp_dir}${cfgdir}/${name}-${step}
       )
   endforeach()
 
@@ -511,7 +530,7 @@ function(ExternalProject_Add_Step name step)
   # Dependencies on steps.
   get_property(dependees TARGET ${name} PROPERTY _EP_${step}_DEPENDEES)
   foreach(dependee IN LISTS dependees)
-    list(APPEND depends ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${dependee})
+    list(APPEND depends ${stamp_dir}${cfgdir}/${name}-${dependee})
   endforeach()
 
   # The command to run.
@@ -548,14 +567,14 @@ function(ExternalProject_Add_Step name step)
   # Run every time?
   get_property(always TARGET ${name} PROPERTY _EP_${step}_ALWAYS)
   if(always)
-    set_property(SOURCE ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${step} PROPERTY SYMBOLIC 1)
+    set_property(SOURCE ${stamp_dir}${cfgdir}/${name}-${step} PROPERTY SYMBOLIC 1)
     set(touch)
   else()
-    set(touch ${CMAKE_COMMAND} -E touch ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${step})
+    set(touch ${CMAKE_COMMAND} -E touch ${stamp_dir}${cfgdir}/${name}-${step})
   endif()
 
   add_custom_command(
-    OUTPUT ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-${step}
+    OUTPUT ${stamp_dir}${cfgdir}/${name}-${step}
     COMMENT ${comment}
     COMMAND ${command}
     COMMAND ${touch}
@@ -569,13 +588,16 @@ endfunction(ExternalProject_Add_Step)
 function(_ep_add_mkdir_command name)
   ExternalProject_Get_Property(${name}
     source_dir binary_dir install_dir stamp_dir download_dir tmp_dir)
+
+  _ep_get_configuration_subdir_suffix(cfgdir)
+
   ExternalProject_Add_Step(${name} mkdir
     COMMENT "Creating directories for '${name}'"
     COMMAND ${CMAKE_COMMAND} -E make_directory ${source_dir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${binary_dir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${install_dir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${tmp_dir}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${stamp_dir}/${CMAKE_CFG_INTDIR}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${stamp_dir}${cfgdir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${download_dir}
     )
 endfunction(_ep_add_mkdir_command)
@@ -766,12 +788,14 @@ endfunction(_ep_add_patch_command)
 function(_ep_add_configure_command name)
   ExternalProject_Get_Property(${name} source_dir binary_dir)
 
+  _ep_get_configuration_subdir_suffix(cfgdir)
+
   # Depend on other external projects (file-level).
   set(file_deps)
   get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
   foreach(dep IN LISTS deps)
     get_property(dep_stamp_dir TARGET ${dep} PROPERTY _EP_STAMP_DIR)
-    list(APPEND file_deps ${dep_stamp_dir}/${CMAKE_CFG_INTDIR}/${dep}-done)
+    list(APPEND file_deps ${dep_stamp_dir}${cfgdir}/${dep}-done)
   endforeach()
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_CONFIGURE_COMMAND SET)
@@ -874,9 +898,11 @@ endfunction(_ep_add_test_command)
 
 
 function(ExternalProject_Add name)
+  _ep_get_configuration_subdir_suffix(cfgdir)
+
   # Add a custom target for the external project.
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  add_custom_target(${name} ALL DEPENDS ${cmf_dir}/${CMAKE_CFG_INTDIR}/${name}-complete)
+  add_custom_target(${name} ALL DEPENDS ${cmf_dir}${cfgdir}/${name}-complete)
   set_property(TARGET ${name} PROPERTY _EP_IS_EXTERNAL_PROJECT 1)
   _ep_parse_arguments(ExternalProject_Add ${name} _EP_ "${ARGN}")
   _ep_set_directories(${name})
@@ -889,12 +915,12 @@ function(ExternalProject_Add name)
   # custom command so that CMake does not propagate build rules to
   # other external project targets.
   add_custom_command(
-    OUTPUT ${cmf_dir}/${CMAKE_CFG_INTDIR}/${name}-complete
+    OUTPUT ${cmf_dir}${cfgdir}/${name}-complete
     COMMENT "Completed '${name}'"
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${cmf_dir}/${CMAKE_CFG_INTDIR}
-    COMMAND ${CMAKE_COMMAND} -E touch ${cmf_dir}/${CMAKE_CFG_INTDIR}/${name}-complete
-    COMMAND ${CMAKE_COMMAND} -E touch ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-done
-    DEPENDS ${stamp_dir}/${CMAKE_CFG_INTDIR}/${name}-install
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${cmf_dir}${cfgdir}
+    COMMAND ${CMAKE_COMMAND} -E touch ${cmf_dir}${cfgdir}/${name}-complete
+    COMMAND ${CMAKE_COMMAND} -E touch ${stamp_dir}${cfgdir}/${name}-done
+    DEPENDS ${stamp_dir}${cfgdir}/${name}-install
     VERBATIM
     )
 
