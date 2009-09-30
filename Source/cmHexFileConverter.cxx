@@ -63,7 +63,7 @@ static bool OutputBin(FILE* file, const char * buf,
       success = false;
       break;
       }
-    outBuf[outBufCount] = convertedByte & 0xff;
+    outBuf[outBufCount] = static_cast<char>(convertedByte & 0xff);
     outBufCount++;
     }
   if (success)
