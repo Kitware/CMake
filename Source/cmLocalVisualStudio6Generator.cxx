@@ -153,8 +153,6 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
   
   // Create the DSP or set of DSP's for libraries and executables
 
-  // clear project names
-  this->CreatedProjectNames.clear();
   cmTargets &tgts = this->Makefile->GetTargets(); 
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
@@ -227,7 +225,6 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname,
   // add to the list of projects
   std::string pname = GetVS6TargetName(lname);
 
-  this->CreatedProjectNames.push_back(pname);
   // create the dsp.cmake file
   std::string fname;
   fname = this->Makefile->GetStartOutputDirectory();

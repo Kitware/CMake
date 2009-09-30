@@ -49,14 +49,6 @@ public:
    */
   void SetBuildType(BuildType, const char* libName, cmTarget&);
 
-  /**
-   * Return array of created DSP names in a STL vector.
-   * Each executable must have its own dsp.
-   */
-  std::vector<std::string> GetCreatedProjectNames() 
-    {
-    return this->CreatedProjectNames;
-    }
   virtual std::string GetTargetDirectory(cmTarget const& target) const;
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& 
@@ -64,8 +56,7 @@ public:
 private:
   std::string DSPHeaderTemplate;
   std::string DSPFooterTemplate;
-  std::vector<std::string> CreatedProjectNames;
-  
+
   void CreateSingleDSP(const char *lname, cmTarget &tgt);
   void WriteDSPFile(std::ostream& fout, const char *libName, 
                     cmTarget &tgt);
