@@ -659,34 +659,6 @@ bool cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,
 }
 
 //----------------------------------------------------------------------------
-bool
-cmGlobalVisualStudio7Generator::TargetCompare
-::operator()(cmTarget const* l, cmTarget const* r)
-{
-  // Make sure ALL_BUILD is first so it is the default active project.
-  if(strcmp(r->GetName(), "ALL_BUILD") == 0)
-    {
-    return false;
-    }
-  if(strcmp(l->GetName(), "ALL_BUILD") == 0)
-    {
-    return true;
-    }
-  return strcmp(l->GetName(), r->GetName()) < 0;
-}
-
-//----------------------------------------------------------------------------
-cmGlobalVisualStudio7Generator::OrderedTargetDependSet
-::OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const& targets)
-{
-  for(cmGlobalGenerator::TargetDependSet::const_iterator ti =
-        targets.begin(); ti != targets.end(); ++ti)
-    {
-    this->insert(*ti);
-    }
-}
-
-//----------------------------------------------------------------------------
 static cmVS7FlagTable cmVS7ExtraFlagTable[] =
 {
   // Precompiled header and related options.  Note that the

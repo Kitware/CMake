@@ -74,6 +74,17 @@ protected:
   virtual bool VSLinksDependencies() const { return true; }
 
   virtual const char* GetIDEVersion() = 0;
+
+  struct TargetCompare
+  {
+    bool operator()(cmTarget const* l, cmTarget const* r) const;
+  };
+  class OrderedTargetDependSet: public std::multiset<cmTarget*, TargetCompare>
+  {
+  public:
+    OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const&);
+  };
+
 private:
   void FixUtilityDependsForTarget(cmTarget& target);
   void CreateUtilityDependTarget(cmTarget& target);

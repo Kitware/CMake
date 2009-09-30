@@ -726,3 +726,31 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget& target)
     }
   return false;
 }
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudioGenerator::TargetCompare
+::operator()(cmTarget const* l, cmTarget const* r) const
+{
+  // Make sure ALL_BUILD is first so it is the default active project.
+  if(strcmp(r->GetName(), "ALL_BUILD") == 0)
+    {
+    return false;
+    }
+  if(strcmp(l->GetName(), "ALL_BUILD") == 0)
+    {
+    return true;
+    }
+  return strcmp(l->GetName(), r->GetName()) < 0;
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudioGenerator::OrderedTargetDependSet
+::OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const& targets)
+{
+  for(cmGlobalGenerator::TargetDependSet::const_iterator ti =
+        targets.begin(); ti != targets.end(); ++ti)
+    {
+    this->insert(*ti);
+    }
+}
