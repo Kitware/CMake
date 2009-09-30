@@ -1434,11 +1434,9 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
 
     return this->ScanDependencies(dir.c_str(), validDependencies);
     }
-  else
-    {
-    // The dependencies are already up-to-date.
-    return true;
-    }
+
+  // The dependencies are already up-to-date.
+  return true;
 }
 
 //----------------------------------------------------------------------------
