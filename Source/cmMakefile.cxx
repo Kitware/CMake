@@ -2050,6 +2050,15 @@ bool cmMakefile::IsSet(const char* name) const
   return true;
 }
 
+bool cmMakefile::PlatformIs64Bit() const
+{
+  if(const char* sizeof_dptr = this->GetDefinition("CMAKE_SIZEOF_VOID_P"))
+    {
+    return atoi(sizeof_dptr) == 8;
+    }
+  return false;
+}
+
 bool cmMakefile::CanIWriteThisFile(const char* fileName)
 {
   if ( !this->IsOn("CMAKE_DISABLE_SOURCE_CHANGES") )

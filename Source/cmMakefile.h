@@ -588,6 +588,9 @@ public:
   bool IsOn(const char* name) const;
   bool IsSet(const char* name) const;
 
+  /** Return whether the target platform is 64-bit.  */
+  bool PlatformIs64Bit() const;
+
   /**
    * Get a list of preprocessor define flags.
    */

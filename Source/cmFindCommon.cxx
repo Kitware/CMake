@@ -324,14 +324,10 @@ void cmFindCommon::AddUserPath(std::string const& p,
   // it.
   cmSystemTools::KeyWOW64 view = cmSystemTools::KeyWOW64_32;
   cmSystemTools::KeyWOW64 other_view = cmSystemTools::KeyWOW64_64;
-  if(const char* psize =
-     this->Makefile->GetDefinition("CMAKE_SIZEOF_VOID_P"))
+  if(this->Makefile->PlatformIs64Bit())
     {
-    if(atoi(psize) == 8)
-      {
-      view = cmSystemTools::KeyWOW64_64;
-      other_view = cmSystemTools::KeyWOW64_32;
-      }
+    view = cmSystemTools::KeyWOW64_64;
+    other_view = cmSystemTools::KeyWOW64_32;
     }
 
   // Expand using the view of the target application.

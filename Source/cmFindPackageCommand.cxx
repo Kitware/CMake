@@ -329,15 +329,11 @@ bool cmFindPackageCommand
   this->DebugMode = this->Makefile->IsOn("CMAKE_FIND_DEBUG_MODE");
 
   // Lookup whether lib64 paths should be used.
-  if(const char* sizeof_dptr =
-     this->Makefile->GetDefinition("CMAKE_SIZEOF_VOID_P"))
+  if(this->Makefile->PlatformIs64Bit() &&
+     this->Makefile->GetCMakeInstance()
+     ->GetPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
     {
-    if(atoi(sizeof_dptr) == 8 &&
-       this->Makefile->GetCMakeInstance()
-       ->GetPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
-      {
-      this->UseLib64Paths = true;
-      }
+    this->UseLib64Paths = true;
     }
 
   // Find the current root path mode.
