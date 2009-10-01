@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #include "cmGlobalVisualStudioGenerator.h"
 
 #include "cmCallVisualStudioMacro.h"
@@ -414,6 +409,30 @@ cmGlobalVisualStudioGenerator::GetUtilityForTarget(cmTarget& target,
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::GetTargetSets(
+  TargetDependSet& projectTargets, TargetDependSet& originalTargets,
+  cmLocalGenerator* root, GeneratorVector const& generators
+  )
+{
+  this->cmGlobalGenerator::GetTargetSets(projectTargets, originalTargets,
+                                         root, generators);
+
+  // Add alternative dependency targets created by FixUtilityDepends.
+  for(TargetDependSet::iterator ti = projectTargets.begin();
+      ti != projectTargets.end(); ++ti)
+    {
+    cmTarget* tgt = *ti;
+    if(const char* altName = tgt->GetProperty("ALTERNATIVE_DEPENDENCY_NAME"))
+      {
+      if(cmTarget* alt = tgt->GetMakefile()->FindTarget(altName))
+        {
+        projectTargets.insert(alt);
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 #include <windows.h>
 
 //----------------------------------------------------------------------------
@@ -730,4 +749,32 @@ bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget& target)
       }
     }
   return false;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudioGenerator::TargetCompare
+::operator()(cmTarget const* l, cmTarget const* r) const
+{
+  // Make sure ALL_BUILD is first so it is the default active project.
+  if(strcmp(r->GetName(), "ALL_BUILD") == 0)
+    {
+    return false;
+    }
+  if(strcmp(l->GetName(), "ALL_BUILD") == 0)
+    {
+    return true;
+    }
+  return strcmp(l->GetName(), r->GetName()) < 0;
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudioGenerator::OrderedTargetDependSet
+::OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const& targets)
+{
+  for(cmGlobalGenerator::TargetDependSet::const_iterator ti =
+        targets.begin(); ti != targets.end(); ++ti)
+    {
+    this->insert(*ti);
+    }
 }

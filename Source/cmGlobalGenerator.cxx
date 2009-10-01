@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #include "windows.h" // this must be first to define GetCurrentDirectory
 #endif
@@ -894,7 +889,8 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->GenerateInstallRules();
     this->LocalGenerators[i]->GenerateTestFiles();
     this->CMakeInstance->UpdateProgress("Generating",
-                                    (i+1.0f)/this->LocalGenerators.size());
+      (static_cast<float>(i)+1.0f)/
+       static_cast<float>(this->LocalGenerators.size()));
     }
   this->SetCurrentLocalGenerator(0);
 
@@ -1001,7 +997,8 @@ void cmGlobalGenerator::CheckLocalGenerators()
         }
       }
     this->CMakeInstance->UpdateProgress
-      ("Configuring", 0.9f+0.1f*(i+1.0f)/this->LocalGenerators.size());
+      ("Configuring", 0.9f+0.1f*(static_cast<float>(i)+1.0f)/
+        static_cast<float>(this->LocalGenerators.size()));
     }
 
   if(notFoundMap.size())
@@ -1267,7 +1264,8 @@ void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
     }
 
   int numGen = atoi(numGenC);
-  float prog = 0.9f*this->LocalGenerators.size()/numGen;
+  float prog = 0.9f*static_cast<float>(this->LocalGenerators.size())/
+    static_cast<float>(numGen);
   if (prog > 0.9f)
     {
     prog = 0.9f;
@@ -1933,12 +1931,11 @@ cmGlobalGenerator
     std::back_inserter(filenames));
 }
 
-void
-cmGlobalGenerator
-::GetTargetSets(cmGlobalGenerator::TargetDependSet& projectTargets,
-                cmGlobalGenerator::TargetDependSet& originalTargets,
-                cmLocalGenerator* root,
-                std::vector<cmLocalGenerator*> const& generators)
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
+                                      TargetDependSet& originalTargets,
+                                      cmLocalGenerator* root,
+                                      GeneratorVector const& generators)
 {
   // loop over all local generators
   for(std::vector<cmLocalGenerator*>::const_iterator i = generators.begin();
@@ -1951,7 +1948,7 @@ cmGlobalGenerator
       }
     cmMakefile* mf = (*i)->GetMakefile();
     // Get the targets in the makefile
-    cmTargets &tgts = mf->GetTargets();  
+    cmTargets &tgts = mf->GetTargets();
     // loop over all the targets
     for (cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
       {
@@ -1959,26 +1956,22 @@ cmGlobalGenerator
       // put the target in the set of original targets
       originalTargets.insert(target);
       // Get the set of targets that depend on target
-      this->AddTargetDepends(target,
-                             projectTargets);
+      this->AddTargetDepends(target, projectTargets);
       }
     }
 }
-                
-void
-cmGlobalGenerator::AddTargetDepends(cmTarget* target,
-                                    cmGlobalGenerator::TargetDependSet&
-                                    projectTargets)
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::AddTargetDepends(cmTarget* target,
+                                         TargetDependSet& projectTargets)
 {
   // add the target itself
   if(projectTargets.insert(target).second)
     {
     // This is the first time we have encountered the target.
     // Recursively follow its dependencies.
-    cmGlobalGenerator::TargetDependSet const& tset
-      = this->GetTargetDirectDepends(*target);
-    for(cmGlobalGenerator::TargetDependSet::const_iterator i =
-          tset.begin(); i != tset.end(); ++i)
+    TargetDependSet const& ts = this->GetTargetDirectDepends(*target);
+    for(TargetDependSet::const_iterator i = ts.begin(); i != ts.end(); ++i)
       {
       cmTarget* dtarget = *i;
       this->AddTargetDepends(dtarget, projectTargets);

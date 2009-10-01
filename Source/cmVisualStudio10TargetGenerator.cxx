@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #include "cmVisualStudio10TargetGenerator.h"
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmTarget.h"
@@ -803,6 +798,12 @@ OutputLinkIncremental(std::string const& configName)
     std::string flagVar = baseFlagVar + std::string("_") + CONFIG;
     flags += 
       Target->GetMakefile()->GetRequiredDefinition(flagVar.c_str());
+    }  
+  const char* targetLinkFlags = this->Target->GetProperty("LINK_FLAGS");
+  if(targetLinkFlags)
+    {
+    flags += " ";
+    flags += targetLinkFlags;
     }
   if(flags.find("INCREMENTAL:NO") != flags.npos)
     {
@@ -950,10 +951,10 @@ void cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const&
      ->GetProperty("STATIC_LIBRARY_FLAGS"))
     {
     this->WriteString("<Lib>\n", 2);
-    cmVisualStudioGeneratorOptions 
-      libOptions(this->LocalGenerator,
-                  10, cmVisualStudioGeneratorOptions::Compiler,
-                  cmVS10LibFlagTable, 0, this); 
+    cmVisualStudioGeneratorOptions
+      libOptions(this->LocalGenerator, 10,
+                 cmVisualStudioGeneratorOptions::Linker,
+                 cmVS10LibFlagTable, 0, this);
     libOptions.Parse(libflags);  
     libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
     libOptions.OutputFlagMap(*this->BuildFileStream, "      "); 
@@ -1022,10 +1023,10 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     flags += " ";
     flags += targetLinkFlags;
     }
-  cmVisualStudioGeneratorOptions 
-    linkOptions(this->LocalGenerator, 
-              10, cmVisualStudioGeneratorOptions::Compiler,
-                cmVS10LinkFlagTable);
+  cmVisualStudioGeneratorOptions
+    linkOptions(this->LocalGenerator, 10,
+                cmVisualStudioGeneratorOptions::Linker,
+                cmVS10LinkFlagTable, 0, this);
   if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
     {
     flags += " /SUBSYSTEM:WINDOWS";
@@ -1124,6 +1125,11 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFileName", pdb.c_str());
   linkOptions.Parse(flags.c_str());
+  if(!this->ModuleDefinitionFile.empty())
+    {
+    linkOptions.AddFlag("ModuleDefinitionFile",
+                        this->ModuleDefinitionFile.c_str());
+    }
   linkOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
   linkOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   

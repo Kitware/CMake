@@ -50,10 +50,20 @@
 #   endif()
 #
 
-# 
-# Copyright (c) 2008-2009
-#     Philip Lowman <philip@yhbt.com>
+#=============================================================================
+# Copyright 2009 Kitware, Inc.
+# Copyright 2008-2009 Philip Lowman <philip@yhbt.com>
 #
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 # Version 0.7 (3/22/09)
 #   * Checked into CMake CVS
 #   * Added versioning support
@@ -70,10 +80,6 @@
 #   Added GTK2_SKIP_MARK_AS_ADVANCED option
 # Version 0.5 (12/19/08)
 #   Second release to cmake mailing list
-#
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-
 
 #=============================================================
 # _GTK2_GET_VERSION

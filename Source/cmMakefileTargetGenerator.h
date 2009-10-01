@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #ifndef cmMakefileTargetGenerator_h
 #define cmMakefileTargetGenerator_h
 
@@ -191,6 +186,9 @@ protected:
   std::vector<std::string> Objects;
   std::vector<std::string> ExternalObjects;
 
+  // The windows module definition source file (.def), if any.
+  std::string ModuleDefinitionFile;
+
   // Set of object file names that will be built in this directory.
   std::set<cmStdString> ObjectFiles;
 
@@ -218,6 +216,9 @@ protected:
 
   // Compute target-specific Fortran language flags.
   void AddFortranFlags(std::string& flags);
+
+  // Helper to add flag for windows .def file.
+  void AddModuleDefinitionFlag(std::string& flags);
 
   //==================================================================
   // Convenience routines that do nothing more than forward to

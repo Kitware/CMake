@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 
 #include "cmCPackGenerator.h"
 
@@ -29,6 +24,10 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
 #include <memory> // auto_ptr
+
+#if defined(__HAIKU__)
+#include <StorageKit.h>
+#endif
 
 //----------------------------------------------------------------------
 cmCPackGenerator::cmCPackGenerator()
@@ -1025,6 +1024,16 @@ const char* cmCPackGenerator::GetInstallPath()
   this->InstallPath += this->GetOption("CPACK_PACKAGE_NAME");
   this->InstallPath += "-";
   this->InstallPath += this->GetOption("CPACK_PACKAGE_VERSION");
+#elif defined(__HAIKU__)
+  BPath dir;
+  if (find_directory(B_COMMON_DIRECTORY, &dir) == B_OK)
+    {
+    this->InstallPath = dir.Path();
+    }
+  else
+    {
+    this->InstallPath = "/boot/common";
+    }
 #else
   this->InstallPath = "/usr/local/";
 #endif

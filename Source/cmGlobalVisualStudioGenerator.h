@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #ifndef cmGlobalVisualStudioGenerator_h
 #define cmGlobalVisualStudioGenerator_h
 
@@ -79,6 +74,20 @@ protected:
   virtual bool VSLinksDependencies() const { return true; }
 
   virtual const char* GetIDEVersion() = 0;
+
+  struct TargetCompare
+  {
+    bool operator()(cmTarget const* l, cmTarget const* r) const;
+  };
+  class OrderedTargetDependSet: public std::multiset<cmTarget*, TargetCompare>
+  {
+  public:
+    OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const&);
+  };
+
+  virtual void GetTargetSets(TargetDependSet& projectTargets,
+                             TargetDependSet& originalTargets,
+                             cmLocalGenerator* root, GeneratorVector const&);
 private:
   void FixUtilityDependsForTarget(cmTarget& target);
   void CreateUtilityDependTarget(cmTarget& target);

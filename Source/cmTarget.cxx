@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #include "cmTarget.h"
 #include "cmake.h"
 #include "cmMakefile.h"
@@ -1244,17 +1239,21 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     // the fact that the name matched a target was just a coincidence.
     if(cmSystemTools::FileIsFullPath(dep.c_str()))
       {
-      // This is really only for compatibility so we do not need to
-      // worry about configuration names and output names.
-      std::string tLocation = t->GetLocation(0);
-      tLocation = cmSystemTools::GetFilenamePath(tLocation);
-      std::string depLocation = cmSystemTools::GetFilenamePath(dep);
-      depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
-      tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
-      if(depLocation == tLocation)
+      if(t->GetType() >= cmTarget::EXECUTABLE && 
+         t->GetType() <= cmTarget::MODULE_LIBRARY)
         {
-        this->Target->AddUtility(util.c_str());
-        return true;
+        // This is really only for compatibility so we do not need to
+        // worry about configuration names and output names.
+        std::string tLocation = t->GetLocation(0);
+        tLocation = cmSystemTools::GetFilenamePath(tLocation);
+        std::string depLocation = cmSystemTools::GetFilenamePath(dep);
+        depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
+        tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
+        if(depLocation == tLocation)
+          {
+          this->Target->AddUtility(util.c_str());
+          return true;
+          }
         }
       }
     else

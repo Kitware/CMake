@@ -1,3 +1,52 @@
+Changes in CMake 2.8.0 RC 2
+- Fix FindQt4 so that QtHelp depends on QtNetwork
+- Add missing copyright notice to CMake.cmake module
+- Add alternative _UTILITY targets to all VS solutions 
+- FindGTest.cmake some bugfixes, also added public function for closer integration btwn GoogleTest & CTest, contributed by Dan Blezek.
+- Eliminate ExternalProject's use of CMAKE_CFG_INTDIR subdir for Makefile generators. It was causing problems with parallel make -j invocations. Keep it for multi-configuration build systems so that Debug and Release stamp files remain separate.
+- Fix for bug #9611, some more paths for OpenJDK.
+- Fix get_filename_component() registry view with wow64
+- Fix warnings in CMake source code.
+- Fix module definition file reference for VS6 NMake
+- Fix for bug #9611 do not hard code archs for search paths of java, look at the machine type.
+- Fix bug#9619 add a link to module maintainers page in readme.txt for Modules
+- Add cmake-help-command function to emacs-mode
+- Add initial XL C compiler flags for safer builds
+- Split XL compiler information files
+- Fix default install prefix on Haiku
+- Fix use of module .def files for MS tools
+- Add StringProperty options includeing /def: for VS 10 flag table
+- Convert copyright to OSI BSD and clean up licenses
+- ENH: Added ctest test coverage for a test timeout
+- CTest honors test timeouts again.
+- Remove ctest_submit from CTestTestParallel
+- Fix shared library creation flag for XL on Linux
+- Fix BUG: 0009612: --output-on-failure option doesn't work with
+  the new parallel CTest handler
+- Removed support for cutil library and header file.
+- Fixed CUDA_PROPAGATE_HOST_FLAGS, added path for Mac SDK.
+- Make sure LINK_FLAGS are seen by generator, fix for part of bug#9613
+- Fix issue #9412 - remove RPATH from files copied by
+  BundleUtilities.cmake on Linux. Thank
+- Fix support for OLD behavior of policy CMP0002
+- Fix issue #8818 - escape quotes in the license file when using the
+  DragNDrop cpack genera
+- Fix .vfproj file version for Intel Fortran 10.1
+- Use BeAPI for per-user package registry on Haiku
+- Correct comments and use ASM${ASM_DIALECT} env. var instead of ASM
+  env. var to initialize
+- Fix bug #9529.
+- Fix Windows GUI implib and image version in VS 6
+- Convert newlines from CRLF to LF
+- Oops. Last commit did not create subdir before doing a touch on a
+  file in it. So it fails of a type that is expected to have a
+  location...
+- Policies 14 and 15 will be first released in 2.8.0
+- Document full version number with policy default
+- Simplify bootstrap script source dir detection
+- Documentation fixes, new CUDA_PROPAGATE_HOST_FLAGS, changed output
+  directory.
+
 Changes in CMake 2.8.0 RC 1 
 
 - Qt based GUI cmake-gui is now the default GUI, MFC CMakeSetup is no

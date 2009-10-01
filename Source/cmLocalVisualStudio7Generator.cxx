@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmXMLParser.h"
@@ -892,6 +887,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
   Options linkOptions(this, this->Version, Options::Linker,
                       cmLocalVisualStudio7GeneratorLinkFlagTable);
   linkOptions.Parse(extraLinkOptions.c_str());
+  if(!this->ModuleDefinitionFile.empty())
+    {
+    std::string defFile =
+      this->ConvertToXMLOutputPath(this->ModuleDefinitionFile.c_str());
+    linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
+    }
   switch(target.GetType())
     {
     case cmTarget::STATIC_LIBRARY:
@@ -965,7 +966,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
     this->OutputLibraryDirectories(fout, cli.GetDirectories());
     fout << "\"\n";
-    this->OutputModuleDefinitionFile(fout, target);
     temp = target.GetDirectory(configName);
     temp += "/";
     temp += targetNamePDB;
@@ -1085,26 +1085,6 @@ cmLocalVisualStudio7Generator
   fout << "\t\t\t\tVersion=\"" << major << "." << minor << "\"\n";
 }
 
-void cmLocalVisualStudio7Generator
-::OutputModuleDefinitionFile(std::ostream& fout,
-                             cmTarget &target)
-{
-  std::vector<cmSourceFile*> const& classes = target.GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
-      i != classes.end(); i++)
-    {
-    cmSourceFile* sf = *i;
-    if(cmSystemTools::UpperCase(sf->GetExtension()) == "DEF")
-      {
-      fout << "\t\t\t\tModuleDefinitionFile=\""
-           << this->ConvertToXMLOutputPath(sf->GetFullPath().c_str())
-           << "\"\n";
-      return;
-      }
-    }
-
-}
-
 //----------------------------------------------------------------------------
 void
 cmLocalVisualStudio7GeneratorInternals
@@ -1179,6 +1159,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
 
   // get the classes from the source lists then add them to the groups
+  this->ModuleDefinitionFile = "";
   std::vector<cmSourceFile*>const & classes = target.GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); i++)
@@ -1687,6 +1668,12 @@ cmLocalVisualStudio7Generator
   vskey += "\\Packages\\" CM_INTEL_PLUGIN_GUID ";ProductVersion";
   cmSystemTools::ReadRegistryValue(vskey.c_str(), intelVersion,
                                    cmSystemTools::KeyWOW64_32);
+
+  // Version 10.1 actually uses 9.10 in project files!
+  if(intelVersion == "10.1")
+    {
+    intelVersion = "9.10";
+    }
 
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
        << "<VisualStudioProject\n"

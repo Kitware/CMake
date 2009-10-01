@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #include "cmMakefileTargetGenerator.h"
 
 #include "cmGeneratedFileStream.h"
@@ -174,6 +169,10 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
         {
         // This is an external object file.  Just add it.
         this->ExternalObjects.push_back((*source)->GetFullPath());
+        }
+      else if(cmSystemTools::UpperCase((*source)->GetExtension()) == "DEF")
+        {
+        this->ModuleDefinitionFile = (*source)->GetFullPath();
         }
       else
         {
@@ -1738,4 +1737,28 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
       this->LocalGenerator->AppendFlags(flags, flg.c_str());
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
+{
+  if(this->ModuleDefinitionFile.empty())
+    {
+    return;
+    }
+
+  // TODO: Create a per-language flag variable.
+  const char* defFileFlag =
+    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+  if(!defFileFlag)
+    {
+    return;
+    }
+
+  // Append the flag and value.  Use ConvertToLinkReference to help
+  // vs6's "cl -link" pass it to the linker.
+  std::string flag = defFileFlag;
+  flag += (this->LocalGenerator->ConvertToLinkReference(
+             this->ModuleDefinitionFile.c_str()));
+  this->LocalGenerator->AppendFlags(flags, flag.c_str());
 }

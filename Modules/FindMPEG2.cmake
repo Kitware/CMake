@@ -7,6 +7,19 @@
 #  MPEG2_mpeg2_LIBRARY, where to find the MPEG2 library.
 #  MPEG2_vo_LIBRARY, where to find the vo library.
 
+#=============================================================================
+# Copyright 2003-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 FIND_PATH(MPEG2_INCLUDE_DIR 
   NAMES mpeg2.h mpeg2dec/mpeg2.h
   PATHS /usr/local/livid

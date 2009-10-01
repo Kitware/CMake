@@ -1,15 +1,13 @@
 #=============================================================================
+# KWSys - Kitware System Library
+# Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 #
-#  Program:   KWSys - Kitware System Library
-#  Module:    $RCSfile$
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
 #
-#  Copyright (c) Kitware, Inc., Insight Consortium.  All rights reserved.
-#  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
-#
-#     This software is distributed WITHOUT ANY WARRANTY; without even
-#     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-#     PURPOSE.  See the above copyright notices for more information.
-#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
 #=============================================================================
 
 # The Kitware System Library is intended to be included in other
@@ -55,6 +53,8 @@
 #  KWSYS_INSTALL_INCLUDE_DIR   kwsys should be installed by a "make install".
 #                              The values should be specified relative to
 #                              the installation prefix and NOT start with '/'.
+#  KWSYS_INSTALL_DOC_DIR     = The installation target directory for documentation
+#                              such as copyright information.
 #
 #  KWSYS_INSTALL_COMPONENT_NAME_RUNTIME     = Name of runtime and development
 #  KWSYS_INSTALL_COMPONENT_NAME_DEVELOPMENT   installation components.
@@ -572,6 +572,22 @@ IF(NOT KWSYS_HEADER_ROOT)
 ENDIF(NOT KWSYS_HEADER_ROOT)
 SET(KWSYS_HEADER_DIR "${KWSYS_HEADER_ROOT}/${KWSYS_NAMESPACE}")
 INCLUDE_DIRECTORIES(${KWSYS_HEADER_ROOT})
+
+#-----------------------------------------------------------------------------
+IF(KWSYS_INSTALL_DOC_DIR)
+  # Assign the license to the runtime component since it must be
+  # distributed with binary forms of this software.
+  IF(KWSYS_INSTALL_COMPONENT_NAME_RUNTIME)
+    SET(KWSYS_INSTALL_LICENSE_OPTIONS ${KWSYS_INSTALL_LICENSE_OPTIONS}
+      COMPONENT ${KWSYS_INSTALL_COMPONENT_NAME_RUNTIME}
+      )
+  ENDIF(KWSYS_INSTALL_COMPONENT_NAME_RUNTIME)
+
+  # Install the license under the documentation directory.
+  INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt
+    DESTINATION ${KWSYS_INSTALL_DOC_DIR}/${KWSYS_NAMESPACE}
+    ${KWSYS_INSTALL_LICENSE_OPTIONS})
+ENDIF(KWSYS_INSTALL_DOC_DIR)
 
 #-----------------------------------------------------------------------------
 # Create STL header wrappers to block warnings in the STL headers and

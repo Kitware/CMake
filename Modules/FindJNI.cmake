@@ -12,6 +12,53 @@
 #  JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
 #
 
+#=============================================================================
+# Copyright 2001-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
+# Expand {libarch} occurences to java_libarch subdirectory(-ies) and set ${_var}
+MACRO(java_append_library_directories _var)
+    # Determine java arch-specific library subdir
+    IF (CMAKE_SYSTEM_NAME MATCHES "Linux")
+        # Based on openjdk/jdk/make/common/shared/Platform.gmk as of 6b16
+        # and kaffe as of 1.1.8 which uses the first part of the
+        # GNU config.guess platform triplet.
+        IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^i[3-9]86$")
+            SET(_java_libarch "i386")
+        ELSEIF(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+            SET(_java_libarch "amd64" "x86_64")
+        ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^ppc")
+            SET(_java_libarch "ppc" "powerpc" "ppc64")
+        ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^sparc")
+            SET(_java_libarch "sparc" "sparcv9")
+        ELSE(CMAKE_SYSTEM_PROCESSOR MATCHES "^i[3-9]86$")
+            SET(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}")
+        ENDIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^i[3-9]86$")
+    ELSE(CMAKE_SYSTEM_NAME MATCHES "Linux")
+        SET(_java_libarch "i386" "amd64" "ppc") # previous default
+    ENDIF(CMAKE_SYSTEM_NAME MATCHES "Linux")
+
+    FOREACH(_path ${ARGN})
+        IF(_path MATCHES "{libarch}")
+            FOREACH(_libarch ${_java_libarch})
+                STRING(REPLACE "{libarch}" "${_libarch}" _newpath "${_path}")
+                LIST(APPEND ${_var} "${_newpath}")
+            ENDFOREACH(_libarch)
+        ELSE(_path MATCHES "{libarch}")
+            LIST(APPEND ${_var} "${_path}")
+        ENDIF(_path MATCHES "{libarch}")
+    ENDFOREACH(_path)
+ENDMACRO(java_append_library_directories)
+
 GET_FILENAME_COMPONENT(java_install_version
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit;CurrentVersion]" NAME)
 
@@ -19,45 +66,29 @@ SET(JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
-  $ENV{JAVA_HOME}/jre/lib/alpha
-  $ENV{JAVA_HOME}/jre/lib/amd64
-  $ENV{JAVA_HOME}/jre/lib/arm
-  $ENV{JAVA_HOME}/jre/lib/i386
-  $ENV{JAVA_HOME}/jre/lib/ia64
-  $ENV{JAVA_HOME}/jre/lib/m68k
-  $ENV{JAVA_HOME}/jre/lib/mips
-  $ENV{JAVA_HOME}/jre/lib/mipsel
-  $ENV{JAVA_HOME}/jre/lib/parisc
-  $ENV{JAVA_HOME}/jre/lib/powerpc
-  $ENV{JAVA_HOME}/jre/lib/ppc
-  $ENV{JAVA_HOME}/jre/lib/s390
-  $ENV{JAVA_HOME}/jre/lib/sparc
-  $ENV{JAVA_HOME}/jre/lib/x86_64
+  )
+JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
+  $ENV{JAVA_HOME}/jre/lib/{libarch}
+  $ENV{JAVA_HOME}/jre/lib
   $ENV{JAVA_HOME}/lib
+  $ENV{JAVA_HOME}
   /usr/lib
   /usr/local/lib
   /usr/lib/jvm/java/lib
-  /usr/lib/java/jre/lib/i386
-  /usr/local/lib/java/jre/lib/i386
-  /usr/local/share/java/jre/lib/i386
-  /usr/lib/j2sdk1.4-sun/jre/lib/i386
-  /usr/lib/j2sdk1.5-sun/jre/lib/i386
-  /opt/sun-jdk-1.5.0.04/jre/lib/amd64
-  /usr/lib/jvm/java-6-sun/jre/lib/i386
-  /usr/lib/jvm/java-6-sun/jre/lib/amd64
-  /usr/lib/jvm/java-1.5.0-sun/jre/lib/i386
-  /usr/lib/jvm/java-1.5.0-sun/jre/lib/amd64
-  /usr/lib/jvm/java-6-sun-1.6.0.00/jre/lib/amd64       # can this one be removed according to #8821 ? Alex
-  /usr/lib/java/jre/lib/amd64
-  /usr/local/lib/java/jre/lib/amd64
-  /usr/local/share/java/jre/lib/amd64
-  /usr/lib/j2sdk1.4-sun/jre/lib/amd64
-  /usr/lib/j2sdk1.5-sun/jre/lib/amd64
-  /usr/lib/java/jre/lib/ppc
-  /usr/local/lib/java/jre/lib/ppc
-  /usr/local/share/java/jre/lib/ppc
-  /usr/lib/j2sdk1.4-sun/jre/lib/ppc
-  /usr/lib/j2sdk1.5-sun/jre/lib/ppc
+  /usr/lib/java/jre/lib/{libarch}
+  /usr/local/lib/java/jre/lib/{libarch}
+  /usr/local/share/java/jre/lib/{libarch}
+  /usr/lib/j2sdk1.4-sun/jre/lib/{libarch}
+  /usr/lib/j2sdk1.5-sun/jre/lib/{libarch}
+  /opt/sun-jdk-1.5.0.04/jre/lib/{libarch}
+  /usr/lib/jvm/java-6-sun/jre/lib/{libarch}
+  /usr/lib/jvm/java-1.5.0-sun/jre/lib/{libarch}
+  /usr/lib/jvm/java-6-sun-1.6.0.00/jre/lib/{libarch}       # can this one be removed according to #8821 ? Alex
+  /usr/lib/jvm/java-6-openjdk/jre/lib/{libarch}
+  # Debian specific paths for default JVM
+  /usr/lib/jvm/default-java/jre/lib/{libarch}
+  /usr/lib/jvm/default-java/jre/lib
+  /usr/lib/jvm/default-java/lib
   )
 
 SET(JAVA_JVM_LIBRARY_DIRECTORIES)
@@ -84,10 +115,13 @@ SET(JAVA_AWT_INCLUDE_DIRECTORIES
   /usr/lib/jvm/java-6-sun/include
   /usr/lib/jvm/java-1.5.0-sun/include
   /usr/lib/jvm/java-6-sun-1.6.0.00/include       # can this one be removed according to #8821 ? Alex
+  /usr/lib/jvm/java-6-openjdk/include
   /usr/local/share/java/include
   /usr/lib/j2sdk1.4-sun/include
   /usr/lib/j2sdk1.5-sun/include
   /opt/sun-jdk-1.5.0.04/include
+  # Debian specific path for default JVM
+  /usr/lib/jvm/default-java/include
   )
 
 FOREACH(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")

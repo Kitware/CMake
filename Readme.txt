@@ -1,5 +1,5 @@
 This is CMake, the cross-platform, open-source make system.
-CMake is free software under a BSD-like license, see Copyright.txt.
+CMake is distributed under the BSD License, see Copyright.txt.
 For documentation see the Docs/ directory once you have built CMake
 or visit http://www.cmake.org.
 

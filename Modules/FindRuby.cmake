@@ -8,13 +8,24 @@
 #  RUBY_EXECUTABLE   = full path to the ruby binary
 #  RUBY_INCLUDE_DIRS = include dirs to be used when using the ruby library
 #  RUBY_LIBRARY      = full path to the ruby library
+#  RUBY_VERSION      = the version of ruby which was found, e.g. "1.8.7"
 #  RUBY_FOUND        = set to true if ruby ws found successfully
 #
 #  RUBY_INCLUDE_PATH = same as RUBY_INCLUDE_DIRS, only provided for compatibility reasons, don't use it
 
-# Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-# See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
+#=============================================================================
+# Copyright 2004-2009 Kitware, Inc.
+# Copyright 2008-2009 Alexander Neundorf <neundorf@kde.org>
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 #   RUBY_ARCHDIR=`$RUBY -r rbconfig -e 'printf("%s",Config::CONFIG@<:@"archdir"@:>@)'`
 #   RUBY_SITEARCHDIR=`$RUBY -r rbconfig -e 'printf("%s",Config::CONFIG@<:@"sitearchdir"@:>@)'`

@@ -246,6 +246,13 @@ class MSBuildToCMake:
       else:
         toReturn +="  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+"\",\n   \""+i.DisplayName+"\",\n   \"\", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},\n"
 
+    toReturn += "\n  //String Properties\n"
+    for i in self.stringProperties:
+      if i.attributes["Switch"] == "":
+        toReturn += "  // Skip [" + i.attributes["Name"] + "] - no command line Switch.\n";
+      else:
+        toReturn +="  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+i.attributes["Separator"]+"\",\n   \""+i.DisplayName+"\",\n   \"\", cmVS7FlagTable::UserValue},\n"
+
     toReturn += "  {0,0,0,0,0}\n};"
     return toReturn
     pass

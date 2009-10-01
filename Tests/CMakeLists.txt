@@ -124,6 +124,9 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(ExportImport ExportImport)
   ADD_TEST_MACRO(Unset Unset)
   ADD_TEST_MACRO(PolicyScope PolicyScope)
+  IF("${CMAKE_TEST_GENERATOR}" MATCHES "Make")
+    ADD_TEST_MACRO(Policy0002 Policy0002)
+  ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES "Make")
 
   SET(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
   SET(CMAKE_BUILD_TEST_BINARY_DIR "${CMake_BINARY_DIR}/Tests/CMakeBuildCOnly")
@@ -843,6 +846,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
 
   IF(CMAKE_TEST_MSVC)
     ADD_TEST_MACRO(PrecompiledHeader foo)
+    ADD_TEST_MACRO(ModuleDefinition example_exe)
   ENDIF(CMAKE_TEST_MSVC)
 
   IF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
@@ -1088,9 +1092,20 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     -S "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
-  ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND}
-    -N
+  
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestTimeout/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestTimeout ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/testOutput.log"
     )
+  SET_TESTS_PROPERTIES(CTestTestTimeout PROPERTIES
+    PASS_REGULAR_EXPRESSION "\\*\\*\\*Timeout")
+  
+  ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
+  
   IF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" @ONLY ESCAPE_QUOTES)

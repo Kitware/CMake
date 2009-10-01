@@ -24,6 +24,18 @@
 # Requires CMake 2.6 or greater because it uses function, break, return and
 # PARENT_SCOPE.
 
+#=============================================================================
+# Copyright 2008-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 # gp_append_unique list_var value
 #
@@ -61,16 +73,16 @@ function(is_file_executable file result_var)
   get_filename_component(file_full "${file}" ABSOLUTE)
   string(TOLOWER "${file_full}" file_full_lower)
 
-  # If file name ends in .exe or .dll on Windows, *assume* executable:
+  # If file name ends in .exe on Windows, *assume* executable:
   #
   if(WIN32)
-    if("${file_full_lower}" MATCHES "\\.(exe|dll)$")
+    if("${file_full_lower}" MATCHES "\\.exe$")
       set(${result_var} 1 PARENT_SCOPE)
       return()
-    endif("${file_full_lower}" MATCHES "\\.(exe|dll)$")
+    endif("${file_full_lower}" MATCHES "\\.exe$")
 
     # A clause could be added here that uses output or return value of dumpbin
-    # to determine ${result_var}. In 99%+? practical cases, the exe|dll name
+    # to determine ${result_var}. In 99%+? practical cases, the exe name
     # match will be sufficient...
     #
   endif(WIN32)

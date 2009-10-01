@@ -1,3 +1,17 @@
+
+#=============================================================================
+# Copyright 2007-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 # determine the compiler to use for ASM programs
 
 IF(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
@@ -21,7 +35,7 @@ IF(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
 
 ELSE(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
 
-  # we only get here if CMAKE_C_COMPILER was specified using -D or a pre-made CMakeCache.txt
+  # we only get here if CMAKE_ASM${ASM_DIALECT}_COMPILER was specified using -D or a pre-made CMakeCache.txt
   # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
   #
   # if a compiler was specified by the user but without path, 
@@ -43,11 +57,11 @@ IF (NOT _CMAKE_TOOLCHAIN_LOCATION)
   GET_FILENAME_COMPONENT(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_ASM${ASM_DIALECT}_COMPILER}" PATH)
 ENDIF (NOT _CMAKE_TOOLCHAIN_LOCATION)
 
-# If we have a gcc cross compiler, they have usually some prefix, like 
-# e.g. powerpc-linux-gcc, arm-elf-gcc or i586-mingw32msvc-gcc .
+# If we have a gas/as cross compiler, they have usually some prefix, like 
+# e.g. powerpc-linux-gas, arm-elf-gas or i586-mingw32msvc-gas .
 # The other tools of the toolchain usually have the same prefix
 # NAME_WE cannot be used since then this test will fail for names lile
-# "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be 
+# "arm-unknown-nto-qnx6.3.0-gas.exe", where BASENAME would be 
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
 IF (NOT _CMAKE_TOOLCHAIN_PREFIX)
   GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_ASM${ASM_DIALECT}_COMPILER}" NAME)
@@ -58,7 +72,7 @@ ENDIF (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
 INCLUDE(CMakeFindBinUtils)
 
-SET(CMAKE_ASM${ASM_DIALECT}_COMPILER_ENV_VAR "ASM")
+SET(CMAKE_ASM${ASM_DIALECT}_COMPILER_ENV_VAR "ASM${ASM_DIALECT}")
 
 IF(CMAKE_ASM${ASM_DIALECT}_COMPILER)
   MESSAGE(STATUS "Found assembler: ${CMAKE_ASM${ASM_DIALECT}_COMPILER}")

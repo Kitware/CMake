@@ -1,3 +1,14 @@
+#=============================================================================
+# CMake - Cross Platform Makefile Generator
+# Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5 FATAL_ERROR)
 PROJECT(CMake)
 IF(COMMAND CMAKE_POLICY)
@@ -170,6 +181,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_CommandLineArguments 1)
   SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
+  SET(KWSYS_INSTALL_DOC_DIR "${CMake_DOC_DEST}")
   SUBDIRS(Source/kwsys)
   
   #---------------------------------------------------------------------
@@ -303,7 +315,7 @@ ENDMACRO (CMAKE_BUILD_UTILITIES)
 SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 8)
 SET(CMake_VERSION_PATCH 0)
-SET(CMake_VERSION_RC 1)
+SET(CMake_VERSION_RC 2)
 
 # We use odd minor numbers for development versions.
 # Use a date for the development patch level.
@@ -341,6 +353,7 @@ SET(CMAKE_MAN_DIR "/man" CACHE STRING
   "Install location for man pages (relative to prefix).")
 MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
 STRING(REGEX REPLACE "^/" "" CMake_DATA_DEST "${CMAKE_DATA_DIR}")
+STRING(REGEX REPLACE "^/" "" CMake_DOC_DEST "${CMAKE_DOC_DIR}")
 
 # include special compile flags for some compilers
 INCLUDE(CompileFlags.cmake)
@@ -435,6 +448,9 @@ SUBDIRS(Tests)
 # add a test
 ADD_TEST(SystemInformationNew "${CMAKE_CMAKE_COMMAND}" 
   --system-information  -G "${CMAKE_TEST_GENERATOR}" )
+
+# Install license file as it requires.
+INSTALL(FILES Copyright.txt DESTINATION ${CMake_DOC_DEST})
 
 # Install script directories.
 INSTALL(

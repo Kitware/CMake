@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #include "cmMakefileLibraryTargetGenerator.h"
 
 #include "cmGeneratedFileStream.h"
@@ -151,27 +146,8 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
                                     
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
-  if(this->Makefile->IsOn("WIN32") && !(this->Makefile->IsOn("CYGWIN") 
-                                        || this->Makefile->IsOn("MINGW")))
-    {
-    const std::vector<cmSourceFile*>& sources = 
-      this->Target->GetSourceFiles();
-    for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
-        i != sources.end(); ++i)
-      {
-      cmSourceFile* sf = *i;
-      if(sf->GetExtension() == "def")
-        {
-        extraFlags += " ";
-        extraFlags += 
-          this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
-        extraFlags += 
-          this->Convert(sf->GetFullPath().c_str(),
-                        cmLocalGenerator::START_OUTPUT,
-                        cmLocalGenerator::SHELL);
-        }
-      }
-    }
+  this->AddModuleDefinitionFlag(extraFlags);
+
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
 
@@ -196,8 +172,8 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
     (extraFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->ConfigName);
+  this->AddModuleDefinitionFlag(extraFlags);
 
-  // TODO: .def files should be supported here also.
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
 
@@ -223,7 +199,6 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS", this->ConfigName);
 
-  // TODO: .def files should be supported here also.
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), relink);
 }
 

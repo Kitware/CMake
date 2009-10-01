@@ -1,20 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator3
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
-
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefileTargetGenerator.h"
@@ -756,7 +750,7 @@ cmGlobalUnixMakefileGenerator3
                                 cmLocalGenerator::FULL,
                                 cmLocalGenerator::SHELL);
         progCmd << " ";
-        std::vector<int> &progFiles = this->ProgressMap[t->first].Marks;
+        std::vector<int> &progFiles = this->ProgressMap[&t->second].Marks;
         for (std::vector<int>::iterator i = progFiles.begin();
               i != progFiles.end(); ++i)
           {
@@ -879,7 +873,7 @@ cmGlobalUnixMakefileGenerator3
   size_t count = 0;
   if(emitted.insert(target).second)
     {
-    count = this->ProgressMap[target->GetName()].Marks.size();
+    count = this->ProgressMap[target].Marks.size();
     TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
@@ -911,9 +905,24 @@ void
 cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
   cmMakefileTargetGenerator* tg)
 {
-  TargetProgress& tp = this->ProgressMap[tg->GetTarget()->GetName()];
+  TargetProgress& tp = this->ProgressMap[tg->GetTarget()];
   tp.NumberOfActions = tg->GetNumberOfProgressActions();
   tp.VariableFile = tg->GetProgressFileNameFull();
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalUnixMakefileGenerator3::ProgressMapCompare
+::operator()(cmTarget* l, cmTarget* r) const
+{
+  // Order by target name.
+  if(int c = strcmp(l->GetName(), r->GetName()))
+    {
+    return c < 0;
+    }
+  // Order duplicate targets by binary directory.
+  return strcmp(l->GetMakefile()->GetCurrentOutputDirectory(),
+                r->GetMakefile()->GetCurrentOutputDirectory()) < 0;
 }
 
 //----------------------------------------------------------------------------

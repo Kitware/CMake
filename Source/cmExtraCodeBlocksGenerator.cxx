@@ -1,21 +1,15 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2004-2009 Kitware, Inc.
+  Copyright 2004 Alexander Neundorf (neundorf@kde.org)
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  Copyright (c) 2004 Alexander Neundorf neundorf@kde.org, All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
-
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #include "cmExtraCodeBlocksGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
@@ -544,11 +538,32 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
   if (target!=0)
     {
     int cbTargetType = this->GetCBTargetType(target);
+    std::string workingDir = makefile->GetStartOutputDirectory();
+    if ( target->GetType()==cmTarget::EXECUTABLE)
+      {
+      // Determine the directory where the executable target is created, and
+      // set the working directory to this dir.
+      const char* runtimeOutputDir = makefile->GetDefinition(
+                                             "CMAKE_RUNTIME_OUTPUT_DIRECTORY");
+      if (runtimeOutputDir != 0)
+        {
+        workingDir = runtimeOutputDir;
+        }
+      else
+        {
+        const char* executableOutputDir = makefile->GetDefinition(
+                                                     "EXECUTABLE_OUTPUT_PATH");
+        if (executableOutputDir != 0)
+          {
+          workingDir = executableOutputDir;
+          }
+        }
+      }
+
     const char* buildType = makefile->GetDefinition("CMAKE_BUILD_TYPE");
     fout<<"         <Option output=\"" << target->GetLocation(buildType)
                             << "\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
-          "         <Option working_dir=\"" 
-                            << makefile->GetStartOutputDirectory() << "\" />\n"
+          "         <Option working_dir=\"" << workingDir << "\" />\n"
           "         <Option object_output=\"./\" />\n"
           "         <Option type=\"" << cbTargetType << "\" />\n"
           "         <Option compiler=\"" << compiler << "\" />\n"

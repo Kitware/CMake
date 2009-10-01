@@ -1,10 +1,6 @@
-This package was cmakified by Andy Cedilnik <andy . cedilnik @ kitware.com> 
-
-It was downloaded from http://curl.haxx.se
-
 COPYRIGHT AND PERMISSION NOTICE
 
-Copyright (c) 1996 - 2007, Daniel Stenberg, <daniel@haxx.se>.
+Copyright (c) 1996 - 2009, Daniel Stenberg, <daniel@haxx.se>.
 
 All rights reserved.
 

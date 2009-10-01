@@ -1,4 +1,17 @@
 
+#=============================================================================
+# Copyright 2004-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 # VCExpress does not support cross compiling, which is necessary for Win CE
 SET( _CMAKE_MAKE_PROGRAM_NAMES devenv)
 IF(NOT CMAKE_CROSSCOMPILING)

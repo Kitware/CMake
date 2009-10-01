@@ -1,21 +1,15 @@
 #!/bin/sh
-
-#=========================================================================
+#=============================================================================
+# CMake - Cross Platform Makefile Generator
+# Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 #
-#  Program:   CMake - Cross-Platform Makefile Generator
-#  Module:    $RCSfile$
-#  Language:  Bourne Shell
-#  Date:      $Date$
-#  Version:   $Revision$
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
 #
-#  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-#  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-#
-#     This software is distributed WITHOUT ANY WARRANTY; without even 
-#     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-#     PURPOSE.  See the above copyright notices for more information.
-#
-#=========================================================================
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
 
 # Version number extraction function.
 cmake_version_component()
@@ -34,8 +28,7 @@ cmake_date_stamp_component()
 
 # Detect system and directory information.
 cmake_system=`uname`
-cmake_source_dir=`echo $0 | sed -n '/\//{s/\/[^\/]*$//;p;}'`
-cmake_source_dir=`(cd "${cmake_source_dir}";pwd)`
+cmake_source_dir=`cd "\`dirname \"$0\"\`";pwd`
 cmake_binary_dir=`pwd`
 cmake_version_major="`cmake_version_component MAJOR`"
 cmake_version_minor="`cmake_version_component MINOR`"
@@ -138,6 +131,8 @@ if ${cmake_system_mingw}; then
   else
     cmake_default_prefix="c:/Program Files/CMake"
   fi
+elif ${cmake_system_haiku}; then
+  cmake_default_prefix=`/bin/finddir B_COMMON_DIRECTORY`
 else
   cmake_default_prefix="/usr/local"
 fi
@@ -317,7 +312,7 @@ Directory and file names:
 # Display CMake bootstrap usage
 cmake_version_display()
 {
-  echo "CMake ${cmake_version_full}, Copyright (c) 2000-2009 Kitware, Inc., Insight Consortium"
+  echo "CMake ${cmake_version_full}, Copyright 2000-2009 Kitware, Inc."
 }
 
 # Display CMake bootstrap error, display the log file and exit

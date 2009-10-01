@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 
 #include "cmCacheManager.h"
 #include "cmSystemTools.h"
@@ -467,11 +462,13 @@ bool cmCacheManager::SaveCache(const char* path)
   if ( currentcwd[0] >= 'A' && currentcwd[0] <= 'Z' &&
        currentcwd[1] == ':' )
     {
-    currentcwd[0] = currentcwd[0] - 'A' + 'a';
+    // Cast added to avoid compiler warning. Cast is ok because
+    // value is guaranteed to fit in char by the above if...
+    currentcwd[0] = static_cast<char>(currentcwd[0] - 'A' + 'a');
     }
   cmSystemTools::ConvertToUnixSlashes(currentcwd);
   this->AddCacheEntry("CMAKE_CACHEFILE_DIR", currentcwd.c_str(),
-                      "This is the directory where this CMakeCahe.txt"
+                      "This is the directory where this CMakeCache.txt"
                       " was created", cmCacheManager::INTERNAL);
 
   fout << "# This is the CMakeCache file.\n"

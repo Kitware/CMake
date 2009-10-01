@@ -22,6 +22,19 @@
 #   CMAKE_FORCE_C_COMPILER   (chc12 MetrowerksHicross)
 #   CMAKE_FORCE_CXX_COMPILER (chc12 MetrowerksHicross)
 
+#=============================================================================
+# Copyright 2007-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 MACRO(CMAKE_FORCE_C_COMPILER compiler id)
   SET(CMAKE_C_COMPILER "${compiler}")
   SET(CMAKE_C_COMPILER_ID_RUN TRUE)

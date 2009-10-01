@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #include "cmExportCommand.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -23,6 +18,10 @@
 #include <cmsys/RegularExpression.hxx>
 
 #include "cmExportBuildFileGenerator.h"
+
+#if defined(__HAIKU__)
+#include <StorageKit.h>
+#endif
 
 cmExportCommand::cmExportCommand()
 :cmCommand()
@@ -303,6 +302,16 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
                                               const char* content,
                                               const char* hash)
 {
+#if defined(__HAIKU__)
+  BPath dir;
+  if (find_directory(B_USER_SETTINGS_DIRECTORY, &dir) != B_OK)
+    {
+    return;
+    }
+  dir.Append("cmake/packages");
+  dir.Append(package.c_str());
+  std::string fname = dir.Path();
+#else
   const char* home = cmSystemTools::GetEnv("HOME");
   if(!home)
     {
@@ -312,6 +321,7 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
   cmSystemTools::ConvertToUnixSlashes(fname);
   fname += "/.cmake/packages/";
   fname += package;
+#endif
   cmSystemTools::MakeDirectory(fname.c_str());
   fname += "/";
   fname += hash;

@@ -1,19 +1,14 @@
-/*=========================================================================
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
 
-  Program:   CMake - Cross-Platform Makefile Generator
-  Module:    $RCSfile$
-  Language:  C++
-  Date:      $Date$
-  Version:   $Revision$
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
 
-  Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
-  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
-
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
-
-=========================================================================*/
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
 #include "cmLocalGenerator.h"
 
 #include "cmComputeLinkInformation.h"
@@ -40,6 +35,10 @@
 #include <ctype.h> // for isalpha
 
 #include <assert.h>
+
+#if defined(__HAIKU__)
+#include <StorageKit.h>
+#endif
 
 cmLocalGenerator::cmLocalGenerator()
 {
@@ -361,6 +360,19 @@ void cmLocalGenerator::GenerateInstallRules()
       prefix_win32 += "/InstalledCMakeProject";
       }
     prefix = prefix_win32.c_str();
+    }
+#elif defined(__HAIKU__)
+  if (!prefix)
+    {
+    BPath dir;
+    if (find_directory(B_COMMON_DIRECTORY, &dir) == B_OK)
+      {
+      prefix = dir.Path();
+      }
+    else
+      {
+      prefix = "/boot/common";
+      }
     }
 #else
   if (!prefix)
@@ -1837,12 +1849,17 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
     // found is part of the inName
     if(cmSystemTools::FileIsFullPath(inName))
       {
-      std::string tLocation = target->GetLocation(config);
-      tLocation = cmSystemTools::GetFilenamePath(tLocation);
+      std::string tLocation;
+      if(target->GetType() >= cmTarget::EXECUTABLE && 
+         target->GetType() <= cmTarget::MODULE_LIBRARY)
+        {
+        tLocation = target->GetLocation(config);
+        tLocation = cmSystemTools::GetFilenamePath(tLocation);
+        tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
+        }
       std::string depLocation = cmSystemTools::GetFilenamePath(
         std::string(inName));
       depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
-      tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
       if(depLocation != tLocation)
         {
         // it is a full path to a depend that has the same name
