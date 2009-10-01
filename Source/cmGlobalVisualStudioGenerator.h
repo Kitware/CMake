@@ -85,6 +85,9 @@ protected:
     OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const&);
   };
 
+  virtual void GetTargetSets(TargetDependSet& projectTargets,
+                             TargetDependSet& originalTargets,
+                             cmLocalGenerator* root, GeneratorVector const&);
 private:
   void FixUtilityDependsForTarget(cmTarget& target);
   void CreateUtilityDependTarget(cmTarget& target);

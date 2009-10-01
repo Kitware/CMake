@@ -409,6 +409,30 @@ cmGlobalVisualStudioGenerator::GetUtilityForTarget(cmTarget& target,
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::GetTargetSets(
+  TargetDependSet& projectTargets, TargetDependSet& originalTargets,
+  cmLocalGenerator* root, GeneratorVector const& generators
+  )
+{
+  this->cmGlobalGenerator::GetTargetSets(projectTargets, originalTargets,
+                                         root, generators);
+
+  // Add alternative dependency targets created by FixUtilityDepends.
+  for(TargetDependSet::iterator ti = projectTargets.begin();
+      ti != projectTargets.end(); ++ti)
+    {
+    cmTarget* tgt = *ti;
+    if(const char* altName = tgt->GetProperty("ALTERNATIVE_DEPENDENCY_NAME"))
+      {
+      if(cmTarget* alt = tgt->GetMakefile()->FindTarget(altName))
+        {
+        projectTargets.insert(alt);
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 #include <windows.h>
 
 //----------------------------------------------------------------------------
