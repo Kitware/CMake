@@ -352,17 +352,14 @@ void cmGlobalVisualStudio7Generator
 {
   // Write out the header for a SLN file
   this->WriteSLNHeader(fout);
-  
-   // collect the set of targets for this project by 
-  // tracing depends of all targets.
-  // also collect the set of targets that are explicitly
-  // in this project. 
-  cmGlobalGenerator::TargetDependSet projectTargets;
-  cmGlobalGenerator::TargetDependSet originalTargets;
-  this->GetTargetSets(projectTargets,
-                      originalTargets,
-                      root, generators);
+
+  // Collect all targets under this root generator and the transitive
+  // closure of their dependencies.
+  TargetDependSet projectTargets;
+  TargetDependSet originalTargets;
+  this->GetTargetSets(projectTargets, originalTargets, root, generators);
   OrderedTargetDependSet orderedProjectTargets(projectTargets);
+
   this->WriteTargetsToSolution(fout, root, orderedProjectTargets);
   // Write out the configurations information for the solution
   fout << "Global\n"

@@ -259,15 +259,13 @@ public:
   virtual void CreateGUID(const char*) {}
 
 protected:
+  typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
-  void GetTargetSets(cmGlobalGenerator::TargetDependSet& projectTargets,
-                     cmGlobalGenerator::TargetDependSet& originalTargets,
-                     cmLocalGenerator* root,
-                     std::vector<cmLocalGenerator*> const& generators);
-  void AddTargetDepends(cmTarget* target,
-                        cmGlobalGenerator::TargetDependSet&
-                        projectTargets);
+  virtual void GetTargetSets(TargetDependSet& projectTargets,
+                             TargetDependSet& originalTargets,
+                             cmLocalGenerator* root, GeneratorVector const&);
+  void AddTargetDepends(cmTarget* target, TargetDependSet& projectTargets);
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);
   void FillExtensionToLanguageMap(const char* l, cmMakefile* mf);

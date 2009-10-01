@@ -189,11 +189,9 @@ void cmGlobalVisualStudio6Generator
 
   // Collect all targets under this root generator and the transitive
   // closure of their dependencies.
-  cmGlobalGenerator::TargetDependSet projectTargets;
-  cmGlobalGenerator::TargetDependSet originalTargets;
-  this->GetTargetSets(projectTargets,
-                      originalTargets,
-                      root, generators);
+  TargetDependSet projectTargets;
+  TargetDependSet originalTargets;
+  this->GetTargetSets(projectTargets, originalTargets, root, generators);
   OrderedTargetDependSet orderedProjectTargets(projectTargets);
 
   std::string rootdir = root->GetMakefile()->GetStartOutputDirectory();
