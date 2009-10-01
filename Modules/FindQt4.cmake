@@ -162,6 +162,9 @@
 #  QT_PHONON_FOUND          True if phonon was found.
 #  QT_QTSCRIPTTOOLS_FOUND   True if QtScriptTools was found.
 #
+#  QT_MAC_USE_COCOA    For Mac OS X, its whether Cocoa or Carbon is used.
+#                      In general, this should not be used, but its useful
+#                      when having platform specific code.
 #
 #  QT_DEFINITIONS   Definitions to use when compiling code that uses Qt.
 #                   You do not need to use this if you include QT_USE_FILE.
@@ -865,8 +868,13 @@ IF (QT4_QMAKE_FOUND)
   _QT4_ADJUST_LIB_VARS(QTXMLPATTERNS)
   _QT4_ADJUST_LIB_VARS(PHONON)
   _QT4_ADJUST_LIB_VARS(QTCLUCENE)
-  _QT4_ADJUST_LIB_VARS(QTMOTIF)
   _QT4_ADJUST_LIB_VARS(QTSCRIPTTOOLS)
+ 
+
+  # platform dependent libraries
+  IF(Q_WS_X11)
+    _QT4_ADJUST_LIB_VARS(QTMOTIF)
+  ENDIF(Q_WS_X11)
 
   # platform dependent libraries
   IF(WIN32)
