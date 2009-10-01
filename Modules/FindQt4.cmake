@@ -14,6 +14,14 @@
 #   add_executable(myexe main.cpp)
 #   target_link_libraries(myexe ${QT_LIBRARIES})
 #
+# The minimum required version can be specified using the standard find_package()-syntax
+# (see example above). 
+# For compatibility with older versions of FindQt4.cmake it is also possible to
+# set the variable QT_MIN_VERSION to the minimum required version of Qt4 before the 
+# find_package(Qt4) command. 
+# If both are used, the version used in the find_package() command overrides the
+# one from QT_MIN_VERSION.
+#
 # When using the components argument, QT_USE_QT* variables are automatically set
 # for the QT_USE_FILE to pick up.  If one wishes to manually set them, the
 # available ones to set include:
@@ -329,27 +337,27 @@ SET(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
 #  macro for asking qmake to process pro files
 MACRO(QT_QUERY_QMAKE outvar invar)
   IF(QT_QMAKE_EXECUTABLE)
-  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake/tmp.pro
-    "message(CMAKE_MESSAGE<$$${invar}>)")
+    FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake/tmp.pro
+         "message(CMAKE_MESSAGE<$$${invar}>)")
 
-  # Invoke qmake with the tmp.pro program to get the desired
-  # information.  Use the same variable for both stdout and stderr
-  # to make sure we get the output on all platforms.
-  EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
-    WORKING_DIRECTORY  
-    ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake
-    OUTPUT_VARIABLE _qmake_query_output
-    RESULT_VARIABLE _qmake_result
-    ERROR_VARIABLE _qmake_query_output )
-  
-  FILE(REMOVE_RECURSE 
-    "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake")
+    # Invoke qmake with the tmp.pro program to get the desired
+    # information.  Use the same variable for both stdout and stderr
+    # to make sure we get the output on all platforms.
+    EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
+      WORKING_DIRECTORY  
+      ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake
+      OUTPUT_VARIABLE _qmake_query_output
+      RESULT_VARIABLE _qmake_result
+      ERROR_VARIABLE _qmake_query_output )
 
-  IF(_qmake_result)
-    MESSAGE(WARNING " querying qmake for ${invar}.  qmake reported:\n${_qmake_query_output}")
-  ELSE(_qmake_result)
-    STRING(REGEX REPLACE ".*CMAKE_MESSAGE<([^>]*).*" "\\1" ${outvar} "${_qmake_query_output}")
-  ENDIF(_qmake_result)
+    FILE(REMOVE_RECURSE 
+         "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake")
+
+    IF(_qmake_result)
+      MESSAGE(WARNING " querying qmake for ${invar}.  qmake reported:\n${_qmake_query_output}")
+    ELSE(_qmake_result)
+      STRING(REGEX REPLACE ".*CMAKE_MESSAGE<([^>]*).*" "\\1" ${outvar} "${_qmake_query_output}")
+    ENDIF(_qmake_result)
 
   ENDIF(QT_QMAKE_EXECUTABLE)
 ENDMACRO(QT_QUERY_QMAKE)
@@ -409,17 +417,15 @@ IF (QT_QMAKE_EXECUTABLE)
     STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_qt_minor_vers "${QT_MIN_VERSION}")
     STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
 
-  # Suppport finding at least a particular version, for instance FIND_PACKAGE( Qt4 4.4.3 )
-  # This implementation is a hack to avoid duplicating code and make sure we stay
-  # source-compatible with CMake 2.6.x
-  # For CMake 2.8, we should not set QT_MIN_VERSION but only use Qt4_FIND_VERSION_MAJOR,
-  # Qt4_FIND_VERSION_MINOR, etc
-  IF( Qt4_FIND_VERSION )
-    SET( QT_MIN_VERSION ${Qt4_FIND_VERSION} )
-    SET( req_qt_major_vers ${Qt4_FIND_VERSION_MAJOR} )
-    SET( req_qt_minor_vers ${Qt4_FIND_VERSION_MINOR} )
-    SET( req_qt_patch_vers ${Qt4_FIND_VERSION_PATCH} )
-  ENDIF( Qt4_FIND_VERSION )
+    # Suppport finding at least a particular version, for instance FIND_PACKAGE( Qt4 4.4.3 )
+    # This implementation is a hack to avoid duplicating code and make sure we stay
+    # source-compatible with CMake 2.6.x
+    IF( Qt4_FIND_VERSION )
+      SET( QT_MIN_VERSION ${Qt4_FIND_VERSION} )
+      SET( req_qt_major_vers ${Qt4_FIND_VERSION_MAJOR} )
+      SET( req_qt_minor_vers ${Qt4_FIND_VERSION_MINOR} )
+      SET( req_qt_patch_vers ${Qt4_FIND_VERSION_PATCH} )
+    ENDIF( Qt4_FIND_VERSION )
 
     IF (NOT req_qt_major_vers EQUAL 4)
       MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", major version 4 is required, e.g. \"4.0.1\"")
@@ -434,27 +440,26 @@ IF (QT_QMAKE_EXECUTABLE)
     MATH(EXPR req_vers "${req_qt_major_vers}*10000 + ${req_qt_minor_vers}*100 + ${req_qt_patch_vers}")
     MATH(EXPR found_vers "${QT_VERSION_MAJOR}*10000 + ${QT_VERSION_MINOR}*100 + ${QT_VERSION_PATCH}")
 
-  # Support finding *exactly* a particular version, for instance FIND_PACKAGE( Qt4 4.4.3 EXACT )
-  # The 'else' branch should be removed for CMake 2.8
-  IF( Qt4_FIND_VERSION_EXACT )
-    IF(found_vers EQUAL req_vers)
-      SET( QT4_QMAKE_FOUND TRUE )
-    ELSE(found_vers EQUAL req_vers)
-      SET( QT4_QMAKE_FOUND FALSE )
+    # Support finding *exactly* a particular version, for instance FIND_PACKAGE( Qt4 4.4.3 EXACT )
+    IF( Qt4_FIND_VERSION_EXACT )
+      IF(found_vers EQUAL req_vers)
+        SET( QT4_QMAKE_FOUND TRUE )
+      ELSE(found_vers EQUAL req_vers)
+        SET( QT4_QMAKE_FOUND FALSE )
+        IF (found_vers LESS req_vers)
+          SET(QT4_INSTALLED_VERSION_TOO_OLD TRUE)
+        ELSE (found_vers LESS req_vers)
+          SET(QT4_INSTALLED_VERSION_TOO_NEW TRUE)
+        ENDIF (found_vers LESS req_vers)
+      ENDIF(found_vers EQUAL req_vers)
+    ELSE( Qt4_FIND_VERSION_EXACT )
       IF (found_vers LESS req_vers)
+        SET(QT4_QMAKE_FOUND FALSE)
         SET(QT4_INSTALLED_VERSION_TOO_OLD TRUE)
       ELSE (found_vers LESS req_vers)
-        SET(QT4_INSTALLED_VERSION_TOO_NEW TRUE)
+        SET(QT4_QMAKE_FOUND TRUE)
       ENDIF (found_vers LESS req_vers)
-    ENDIF(found_vers EQUAL req_vers)
-  ELSE( Qt4_FIND_VERSION_EXACT )
-    IF (found_vers LESS req_vers)
-      SET(QT4_QMAKE_FOUND FALSE)
-      SET(QT4_INSTALLED_VERSION_TOO_OLD TRUE)
-    ELSE (found_vers LESS req_vers)
-      SET(QT4_QMAKE_FOUND TRUE)
-    ENDIF (found_vers LESS req_vers)
-  ENDIF( Qt4_FIND_VERSION_EXACT )
+    ENDIF( Qt4_FIND_VERSION_EXACT )
   ENDIF (qt_version_tmp)
 
 ENDIF (QT_QMAKE_EXECUTABLE)
@@ -660,7 +665,7 @@ IF (QT4_QMAKE_FOUND)
       MESSAGE( FATAL_ERROR "Could NOT find QtCore header")
     ENDIF(Qt4_FIND_REQUIRED)
   ENDIF( NOT QT_INCLUDE_DIR)
-  
+
   # Make variables changeble to the advanced user
   MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_INCLUDE_DIR QT_DOC_DIR QT_MKSPECS_DIR
                     QT_PLUGINS_DIR QT_TRANSLATIONS_DIR)
@@ -727,9 +732,9 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_EDITION_DESKTOPLIGHT 1)
   ENDIF("${QT_EDITION}" MATCHES "DesktopLight")
 
-  
 
-  
+
+
   # find the libraries
   FOREACH(QT_MODULE ${QT_MODULES})
     STRING(TOUPPER ${QT_MODULE} _upper_qt_module)
@@ -875,8 +880,6 @@ IF (QT4_QMAKE_FOUND)
   IF(Q_WS_X11)
     _QT4_ADJUST_LIB_VARS(QTMOTIF)
   ENDIF(Q_WS_X11)
-
-  # platform dependent libraries
   IF(WIN32)
     _QT4_ADJUST_LIB_VARS(QTMAIN)
     _QT4_ADJUST_LIB_VARS(QAXSERVER)
