@@ -176,12 +176,12 @@ int cmCPackTGZ_Data_Close(void *client_data)
     int n;
     uLong x = mydata->CRC;
     for (n = 0; n < 4; n++) {
-      buffer[n] = (int)(x & 0xff);
+      buffer[n] = static_cast<char>(x & 0xff);
       x >>= 8;
     }
     x = mydata->ZLibStream.total_in;
     for (n = 0; n < 4; n++) {
-      buffer[n+4] = (int)(x & 0xff);
+      buffer[n+4] = static_cast<char>(x & 0xff);
       x >>= 8;
     }
 

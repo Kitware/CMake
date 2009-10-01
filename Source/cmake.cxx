@@ -1276,7 +1276,10 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       int count;
       if (countFile)
         {
-        fscanf(countFile,"%i",&count);
+        if (1!=fscanf(countFile,"%i",&count))
+          {
+          cmSystemTools::Message("Could not read from count file.");
+          }
         fclose(countFile);
         }
       else
@@ -1318,7 +1321,10 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       else
         {
-        fscanf(progFile,"%i",&count);
+        if (1!=fscanf(progFile,"%i",&count))
+          {
+          cmSystemTools::Message("Could not read from progress file.");
+          }
         fclose(progFile);
         }
       unsigned int i;

@@ -1590,13 +1590,13 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
       std::string shortFileName =
         this->CTest->GetShortPathToFile(file.c_str());
 
-      float cper = percentBranch + percentFunction;
+      float cper = static_cast<float>(percentBranch + percentFunction);
       if(totalBranches > 0)
         {
         cper /= 2.0f;
         }
       percent_coverage += cper;
-      float cmet = percentFunction + percentBranch;
+      float cmet = static_cast<float>(percentFunction + percentBranch);
       if(totalBranches > 0)
         {
         cmet /= 2.0f;
