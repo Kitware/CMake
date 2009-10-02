@@ -1762,6 +1762,18 @@ void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 }
 
 //----------------------------------------------------------------------------
+const char* cmMakefileTargetGenerator::GetFeature(const char* feature)
+{
+  return this->Target->GetFeature(feature, this->ConfigName);
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefileTargetGenerator::GetFeatureAsBool(const char* feature)
+{
+  return cmSystemTools::IsOn(this->GetFeature(feature));
+}
+
+//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::AddFeatureFlags(
   std::string& flags, const char* lang
   )

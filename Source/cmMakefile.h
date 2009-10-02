@@ -793,6 +793,8 @@ public:
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);
 
+  const char* GetFeature(const char* feature, const char* config);
+
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
 

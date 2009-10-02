@@ -232,6 +232,8 @@ public:
   bool GetPropertyAsBool(const char *prop);
   void CheckProperty(const char* prop, cmMakefile* context);
 
+  const char* GetFeature(const char* feature, const char* config);
+
   bool IsImported() const {return this->IsImportedTarget;}
 
   /** The link interface specifies transitive library dependencies and

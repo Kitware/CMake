@@ -3311,6 +3311,31 @@ bool cmMakefile::GetPropertyAsBool(const char* prop)
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
+//----------------------------------------------------------------------------
+const char* cmMakefile::GetFeature(const char* feature, const char* config)
+{
+  // TODO: Define accumulation policy for features (prepend, append, replace).
+  // Currently we always replace.
+  if(config && *config)
+    {
+    std::string featureConfig = feature;
+    featureConfig += "_";
+    featureConfig += cmSystemTools::UpperCase(config);
+    if(const char* value = this->GetProperty(featureConfig.c_str()))
+      {
+      return value;
+      }
+    }
+  if(const char* value = this->GetProperty(feature))
+    {
+    return value;
+    }
+  if(cmLocalGenerator* parent = this->LocalGenerator->GetParent())
+    {
+    return parent->GetMakefile()->GetFeature(feature, config);
+    }
+  return 0;
+}
 
 cmTarget* cmMakefile::FindTarget(const char* name)
 {

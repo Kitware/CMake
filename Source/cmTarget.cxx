@@ -2245,6 +2245,26 @@ void cmTarget::GetTargetVersion(bool soversion,
 }
 
 //----------------------------------------------------------------------------
+const char* cmTarget::GetFeature(const char* feature, const char* config)
+{
+  if(config && *config)
+    {
+    std::string featureConfig = feature;
+    featureConfig += "_";
+    featureConfig += cmSystemTools::UpperCase(config);
+    if(const char* value = this->GetProperty(featureConfig.c_str()))
+      {
+      return value;
+      }
+    }
+  if(const char* value = this->GetProperty(feature))
+    {
+    return value;
+    }
+  return this->Makefile->GetFeature(feature, config);
+}
+
+//----------------------------------------------------------------------------
 const char *cmTarget::GetProperty(const char* prop)
 {
   return this->GetProperty(prop, cmProperty::TARGET);

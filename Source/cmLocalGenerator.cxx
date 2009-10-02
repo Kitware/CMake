@@ -2083,6 +2083,26 @@ void cmLocalGenerator::AppendDefines(std::string& defines,
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator::AppendFeatureOptions(
+  std::string& flags, const char* lang, const char* feature)
+{
+  std::string optVar = "CMAKE_";
+  optVar += lang;
+  optVar += "_COMPILE_OPTIONS_";
+  optVar += feature;
+  if(const char* optionList = this->Makefile->GetDefinition(optVar.c_str()))
+    {
+    std::vector<std::string> options;
+    cmSystemTools::ExpandListArgument(optionList, options);
+    for(std::vector<std::string>::const_iterator oi = options.begin();
+        oi != options.end(); ++oi)
+      {
+      this->AppendFlags(flags, this->EscapeForShell(oi->c_str()).c_str());
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConstructComment(const cmCustomCommand& cc,
                                    const char* default_comment)
