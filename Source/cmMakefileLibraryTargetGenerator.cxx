@@ -671,9 +671,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       vars.TargetInstallNameDir = install_name_dir.c_str();
       }
     }
+
+  // Add language feature flags.
   std::string langFlags;
-  this->LocalGenerator
-    ->AddLanguageFlags(langFlags, linkLanguage, this->ConfigName);
+  this->AddFeatureFlags(langFlags, linkLanguage);
+
   // remove any language flags that might not work with the
   // particular os
   if(forbiddenFlagVar)

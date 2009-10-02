@@ -231,9 +231,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       (linkFlags, this->Makefile->GetDefinition(export_flag_var.c_str()));
     }
 
-  // Add language-specific flags.
-  this->LocalGenerator
-    ->AddLanguageFlags(flags, linkLanguage, this->ConfigName);
+  // Add language feature flags.
+  this->AddFeatureFlags(flags, linkLanguage);
 
   // Add target-specific linker flags.
   this->LocalGenerator->AppendFlags

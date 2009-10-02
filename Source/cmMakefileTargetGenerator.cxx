@@ -291,10 +291,8 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     this->LocalGenerator->AppendDefines
       (defines, this->Target->GetProperty(defPropName.c_str()), lang);
 
-    // Add language-specific flags.
-    this->LocalGenerator
-      ->AddLanguageFlags(flags, lang,
-                         this->LocalGenerator->ConfigurationName.c_str());
+    // Add language feature flags.
+    this->AddFeatureFlags(flags, lang);
 
     // Fortran-specific flags computed for this target.
     if(*l == "Fortran")
@@ -1761,4 +1759,13 @@ void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   flag += (this->LocalGenerator->ConvertToLinkReference(
              this->ModuleDefinitionFile.c_str()));
   this->LocalGenerator->AppendFlags(flags, flag.c_str());
+}
+
+//----------------------------------------------------------------------------
+void cmMakefileTargetGenerator::AddFeatureFlags(
+  std::string& flags, const char* lang
+  )
+{
+  // Add language-specific flags.
+  this->LocalGenerator->AddLanguageFlags(flags, lang, this->ConfigName);
 }
