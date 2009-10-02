@@ -915,8 +915,10 @@ bool RunCommandViaPopen(const char* command,
 #endif
     return false;
     }
-  buffer[0] = 0;
-  (void) fgets(buffer, BUFFER_SIZE, cpipe);
+  if (!fgets(buffer, BUFFER_SIZE, cpipe))
+    {
+    buffer[0] = 0;
+    }
   while(!feof(cpipe))
     {
     if(verbose)
@@ -924,8 +926,10 @@ bool RunCommandViaPopen(const char* command,
       cmSystemTools::Stdout(buffer);
       }
     output += buffer;
-    buffer[0] = 0;
-    (void) fgets(buffer, BUFFER_SIZE, cpipe);
+    if(!fgets(buffer, BUFFER_SIZE, cpipe))
+      {
+      buffer[0] = 0;
+      }
     }
 
   retVal = pclose(cpipe);
