@@ -22,6 +22,7 @@ AddCMakeTest(ConfigureFile "")
 AddCMakeTest(SeparateArguments "")
 AddCMakeTest(ImplicitLinkInfo "")
 AddCMakeTest(ModuleNotices "")
+AddCMakeTest(String "")
 
 SET(GetPrerequisites_PreArgs
   "-DCTEST_CONFIGURATION_TYPE:STRING=\\\${CTEST_CONFIGURATION_TYPE}"

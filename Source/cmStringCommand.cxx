@@ -381,7 +381,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
         {
         std::string e = "sub-command REGEX, mode REPLACE: Unknown escape \"";
         e += replace.substr(r, 2);
-        e += "\"in replace-expression.";
+        e += "\" in replace-expression.";
         this->SetError(e.c_str());
         return false;
         }
@@ -559,7 +559,7 @@ bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const&
 {
   if(args.size() < 5)
     {
-    this->SetError("sub-command REPLACE requires four arguments.");
+    this->SetError("sub-command REPLACE requires at least four arguments.");
     return false;
     }
 
@@ -586,7 +586,7 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
 {
   if(args.size() != 5)
     {
-    this->SetError("sub-command REPLACE requires four arguments.");
+    this->SetError("sub-command SUBSTRING requires four arguments.");
     return false;
     }
 
@@ -647,7 +647,7 @@ bool cmStringCommand::HandleStripCommand(
 {
  if(args.size() != 3)
     {
-    this->SetError("sub-command LENGTH requires two arguments.");
+    this->SetError("sub-command STRIP requires two arguments.");
     return false;
     }
 
