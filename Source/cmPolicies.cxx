@@ -359,7 +359,7 @@ cmPolicies::cmPolicies()
     this->DefinePolicy(
     CMP0012, "CMP0012",
     "The if() command can recognize named boolean constants.",
-    "In CMake versions prior to 2.6.5 the only boolean constants were 0 "
+    "In CMake versions 2.6.4 and lower the only boolean constants were 0 "
     "and 1. Other boolean constants such as true, false, yes, no, "
     "on, off, y, n, notfound, ignore (all case insensitive) were recognized "
     "in some cases but not all. In later versions of cmake these values are "
@@ -369,7 +369,7 @@ cmPolicies::cmPolicies()
     "such as true and to dereference them. "
     "The NEW behavior for this policy is to treat strings like true as a "
     "boolean constant.",
-    2,6,5, cmPolicies::WARN);
+    2,8,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0013, "CMP0013",
@@ -380,13 +380,13 @@ cmPolicies::cmPolicies()
     "overwritten in the build tree and could lead to strange behavior.  "
     "CMake 2.6.4 and above explicitly detect duplicate binary directories.  "
     "CMake 2.6.4 always considers this case an error.  "
-    "In CMake 2.6.5 and above this policy determines whether or not "
+    "In CMake 2.8.0 and above this policy determines whether or not "
     "the case is an error.  "
     "The OLD behavior for this policy is to allow duplicate binary "
     "directories.  "
     "The NEW behavior for this policy is to disallow duplicate binary "
     "directories with an error.",
-    2,6,5, cmPolicies::WARN);
+    2,8,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0014, "CMP0014",
