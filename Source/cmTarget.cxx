@@ -421,6 +421,19 @@ void cmTarget::DefineProperties(cmake *cm)
      "created.");
 
   cm->DefineProperty
+    ("INTERPROCEDURAL_OPTIMIZATION", cmProperty::TARGET,
+     "Enable interprocedural optimization for a target.",
+     "If set to true, enables interprocedural optimizations "
+     "if they are known to be supported by the compiler.");
+
+  cm->DefineProperty
+    ("INTERPROCEDURAL_OPTIMIZATION_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration interprocedural optimization for a target.",
+     "This is a per-configuration version of INTERPROCEDURAL_OPTIMIZATION.  "
+     "If set, this property overrides the generic property "
+     "for the named configuration.");
+
+  cm->DefineProperty
     ("LABELS", cmProperty::TARGET,
      "Specify a list of text labels associated with a target.",
      "Target label semantics are currently unspecified.");

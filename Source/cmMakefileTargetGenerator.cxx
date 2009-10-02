@@ -1780,4 +1780,9 @@ void cmMakefileTargetGenerator::AddFeatureFlags(
 {
   // Add language-specific flags.
   this->LocalGenerator->AddLanguageFlags(flags, lang, this->ConfigName);
+
+  if(this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION"))
+    {
+    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
+    }
 }

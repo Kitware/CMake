@@ -3555,6 +3555,19 @@ void cmMakefile::DefineProperties(cmake *cm)
      "be followed.  See the include_regular_expression command.", false);
 
   cm->DefineProperty
+    ("INTERPROCEDURAL_OPTIMIZATION", cmProperty::DIRECTORY,
+     "Enable interprocedural optimization for targets in a directory.",
+     "If set to true, enables interprocedural optimizations "
+     "if they are known to be supported by the compiler.");
+
+  cm->DefineProperty
+    ("INTERPROCEDURAL_OPTIMIZATION_<CONFIG>", cmProperty::DIRECTORY,
+     "Per-configuration interprocedural optimization for a directory.",
+     "This is a per-configuration version of INTERPROCEDURAL_OPTIMIZATION.  "
+     "If set, this property overrides the generic property "
+     "for the named configuration.");
+
+  cm->DefineProperty
     ("VARIABLES", cmProperty::DIRECTORY,
      "List of variables defined in the current directory.",
      "This read-only property specifies the list of CMake variables "
