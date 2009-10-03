@@ -576,9 +576,6 @@ cmMakefileTargetGenerator
   sourceFile = this->Convert(sourceFile.c_str(),
                              cmLocalGenerator::NONE,
                              cmLocalGenerator::SHELL);
-  std::string objectFile = this->Convert(obj.c_str(),
-                                         cmLocalGenerator::START_OUTPUT,
-                                         cmLocalGenerator::SHELL);
 
   // Construct the build message.
   std::vector<std::string> no_commands;

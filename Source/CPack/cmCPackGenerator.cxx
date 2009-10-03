@@ -390,8 +390,6 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
 {
   const char* cmakeScripts
     = this->GetOption("CPACK_INSTALL_SCRIPT");
-  std::string currentWorkingDirectory =
-    cmSystemTools::GetCurrentWorkingDirectory();
   if ( cmakeScripts && *cmakeScripts )
     {
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
@@ -460,8 +458,6 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   const char* cmakeGenerator
     = this->GetOption("CPACK_CMAKE_GENERATOR");
-  std::string currentWorkingDirectory =
-    cmSystemTools::GetCurrentWorkingDirectory();
   if ( cmakeProjects && *cmakeProjects )
     {
     if ( !cmakeGenerator )
