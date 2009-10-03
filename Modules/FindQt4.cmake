@@ -98,18 +98,21 @@
 #        for all listed interface xml files
 #        the name will be automatically determined from the name of the xml file
 #
-#  macro QT4_ADD_DBUS_ADAPTOR(outfiles xmlfile parentheader parentclassname [basename] )
+#  macro QT4_ADD_DBUS_ADAPTOR(outfiles xmlfile parentheader parentclassname [basename] [classname])
 #        create a dbus adaptor (header and implementation file) from the xml file
 #        describing the interface, and add it to the list of sources. The adaptor
 #        forwards the calls to a parent class, defined in parentheader and named
 #        parentclassname. The name of the generated files will be
-#        <basename>adaptor.{cpp,h} where basename is the basename of the xml file.
+#        <basename>adaptor.{cpp,h} where basename defaults to the basename of the xml file.
+#        If <classname> is provided, then it will be used as the classname of the
+#        adaptor itself.
 #
-#  macro QT4_GENERATE_DBUS_INTERFACE( header [interfacename] )
+#  macro QT4_GENERATE_DBUS_INTERFACE( header [interfacename] OPTIONS ...)
 #        generate the xml interface file from the given header.
 #        If the optional argument interfacename is omitted, the name of the 
 #        interface file is constructed from the basename of the header with
 #        the suffix .xml appended.
+#        Options may be given to qdbuscpp2xml, such as those found when executing "qdbuscpp2xml --help"
 #
 #  macro QT4_CREATE_TRANSLATION( qm_files directories ... sources ... 
 #                                ts_files ... OPTIONS ...)
@@ -1078,6 +1081,7 @@ IF (QT4_QMAKE_FOUND)
 
   
   MACRO (QT4_GENERATE_MOC infile outfile )
+  # get include dirs and flags
      QT4_GET_MOC_FLAGS(moc_flags)
      GET_FILENAME_COMPONENT(abs_infile ${infile} ABSOLUTE)
      QT4_CREATE_MOC_COMMAND(${abs_infile} ${outfile} "${moc_flags}" "")
@@ -1185,8 +1189,9 @@ IF (QT4_QMAKE_FOUND)
   ENDMACRO(QT4_ADD_DBUS_INTERFACES)
   
   
-  MACRO(QT4_GENERATE_DBUS_INTERFACE _header) # _customName )
-    SET(_customName "${ARGV1}")
+  MACRO(QT4_GENERATE_DBUS_INTERFACE _header) # _customName OPTIONS -some -options )
+    QT4_EXTRACT_OPTIONS(_customName _qt4_dbus_options ${ARGN})
+
     GET_FILENAME_COMPONENT(_in_file ${_header} ABSOLUTE)
     GET_FILENAME_COMPONENT(_basename ${_header} NAME_WE)
     
@@ -1197,13 +1202,13 @@ IF (QT4_QMAKE_FOUND)
     ENDIF (_customName)
   
     ADD_CUSTOM_COMMAND(OUTPUT ${_target}
-        COMMAND ${QT_DBUSCPP2XML_EXECUTABLE} -o ${_target} ${_in_file}
+        COMMAND ${QT_DBUSCPP2XML_EXECUTABLE} ${_qt4_dbus_options} ${_in_file} -o ${_target}
         DEPENDS ${_in_file}
     )
   ENDMACRO(QT4_GENERATE_DBUS_INTERFACE)
   
   
-  MACRO(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optionalBasename )
+  MACRO(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optionalBasename _optionalClassName)
     GET_FILENAME_COMPONENT(_infile ${_xml_file} ABSOLUTE)
     
     SET(_optionalBasename "${ARGV4}")
@@ -1264,6 +1269,7 @@ IF (QT4_QMAKE_FOUND)
             IF(_match)
                FOREACH (_current_MOC_INC ${_match})
                   STRING(REGEX MATCH "[^ <\"]+\\.moc" _current_MOC "${_current_MOC_INC}")
+
                   GET_FILENAME_COMPONENT(_basename ${_current_MOC} NAME_WE)
                   IF(EXISTS ${_abs_PATH}/${_basename}.hpp)
                     SET(_header ${_abs_PATH}/${_basename}.hpp)
