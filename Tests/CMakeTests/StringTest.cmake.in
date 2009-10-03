@@ -1,74 +1,18 @@
-function(test_string_command testname expected_result)
-  message("testname=[${testname}]")
+# Execute each test listed in StringTestScript.cmake:
+#
+set(scriptname "@CMAKE_CURRENT_SOURCE_DIR@/StringTestScript.cmake")
+set(number_of_tests_expected 52)
 
-  execute_process(
-    COMMAND ${CMAKE_COMMAND}
-      -D "testname:STRING=${testname}"
-      -P "@CMAKE_CURRENT_SOURCE_DIR@/StringTestScript.cmake"
-    OUTPUT_VARIABLE out
-    ERROR_VARIABLE err
-    RESULT_VARIABLE result
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_STRIP_TRAILING_WHITESPACE
-    )
+include("@CMAKE_CURRENT_SOURCE_DIR@/ExecuteScriptTests.cmake")
+execute_all_script_tests(${scriptname} number_of_tests_executed)
 
-  message("out=[${out}]")
-  message("err=[${err}]")
+# And verify that number_of_tests_executed is at least as many as we know
+# about as of this writing...
+#
+message(STATUS "scriptname='${scriptname}'")
+message(STATUS "number_of_tests_executed='${number_of_tests_executed}'")
+message(STATUS "number_of_tests_expected='${number_of_tests_expected}'")
 
-  if(expected_result STREQUAL "fail")
-    # case expected to fail, result should be non-0...
-    # error if it's 0
-    if("${result}" STREQUAL "0")
-      message(SEND_ERROR "StringTestScript failed: testname='${testname}' [${result}] actually passed, but expected to fail...")
-    endif()
-  else()
-    # case expected to pass, result should be 0...
-    # error if it's non-0
-    if(NOT "${result}" STREQUAL "0")
-      message(SEND_ERROR "StringTestScript failed: testname='${testname}' [${result}] actually failed, but expected to pass...")
-   endif()
-  endif()
-
-  message("")
-endfunction()
-
-
-test_string_command(empty fail)
-test_string_command(bogus fail)
-test_string_command(random pass)
-test_string_command(toupper_no_variable fail)
-test_string_command(ascii_no_variable fail)
-test_string_command(ascii_bad_code fail)
-test_string_command(configure_no_input fail)
-test_string_command(configure_no_variable fail)
-test_string_command(configure_escape_quotes pass)
-test_string_command(configure_bogus fail)
-test_string_command(regex_no_mode fail)
-test_string_command(regex_match_not_enough_args fail)
-test_string_command(regex_matchall_not_enough_args fail)
-test_string_command(regex_replace_not_enough_args fail)
-test_string_command(regex_bogus_mode fail)
-test_string_command(regex_match_multiple_inputs pass)
-test_string_command(regex_match_bad_regex fail)
-test_string_command(regex_match_empty_string fail)
-test_string_command(regex_matchall_multiple_inputs pass)
-test_string_command(regex_matchall_bad_regex fail)
-test_string_command(regex_matchall_empty_string fail)
-test_string_command(regex_replace_ends_with_backslash fail)
-test_string_command(regex_replace_ends_with_escaped_backslash pass)
-test_string_command(regex_replace_has_linefeed pass)
-test_string_command(regex_replace_has_bogus_escape fail)
-test_string_command(regex_replace_bad_regex fail)
-test_string_command(regex_replace_empty_string fail)
-test_string_command(compare_no_mode fail)
-test_string_command(compare_bogus_mode fail)
-test_string_command(compare_not_enough_args fail)
-test_string_command(replace_not_enough_args fail)
-test_string_command(replace_multiple_inputs pass)
-test_string_command(substring_not_enough_args fail)
-test_string_command(substring_bad_begin fail)
-test_string_command(substring_bad_end fail)
-test_string_command(length_not_enough_args fail)
-
-
-test_string_command(no_such_testname fail)
+if(number_of_tests_executed LESS number_of_tests_expected)
+  message(FATAL_ERROR "error: some test cases were skipped")
+endif()
