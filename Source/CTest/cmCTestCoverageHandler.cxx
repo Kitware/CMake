@@ -361,9 +361,6 @@ int cmCTestCoverageHandler::ProcessHandler()
   cmSystemTools::ConvertToUnixSlashes(sourceDir);
   cmSystemTools::ConvertToUnixSlashes(binaryDir);
 
-  std::string asfGlob = sourceDir + "/*";
-  std::string abfGlob = binaryDir + "/*";
-
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "Performing coverage" << std::endl);
 
   cmCTestCoverageHandlerContainer cont;
