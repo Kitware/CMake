@@ -498,38 +498,38 @@ IF (QT4_QMAKE_FOUND)
   ENDIF (APPLE)
   
   # ask qmake for the binary dir
-  IF ((QT_LIBRARY_DIR AND NOT QT_BINARY_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_BINARY_DIR  OR  QT_QMAKE_CHANGED)
      EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
        ARGS "-query QT_INSTALL_BINS"
        OUTPUT_VARIABLE qt_bins )
      # make sure we have / and not \ as qmake gives on windows
      FILE(TO_CMAKE_PATH "${qt_bins}" qt_bins)
      SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "" FORCE)
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_BINARY_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_BINARY_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the include dir
-  IF ((QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR  OR  QT_QMAKE_CHANGED)
       EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
         ARGS "-query QT_INSTALL_HEADERS" 
         OUTPUT_VARIABLE qt_headers ) 
       # make sure we have / and not \ as qmake gives on windows
       FILE(TO_CMAKE_PATH "${qt_headers}" qt_headers)
       SET(QT_HEADERS_DIR ${qt_headers} CACHE INTERNAL "" FORCE)
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR  OR  QT_QMAKE_CHANGED)
 
 
   # ask qmake for the documentation directory
-  IF ((QT_LIBRARY_DIR AND NOT QT_DOC_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_DOC_DIR  OR  QT_QMAKE_CHANGED)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_DOCS"
       OUTPUT_VARIABLE qt_doc_dir )
     # make sure we have / and not \ as qmake gives on windows
     FILE(TO_CMAKE_PATH "${qt_doc_dir}" qt_doc_dir)
     SET(QT_DOC_DIR ${qt_doc_dir} CACHE PATH "The location of the Qt docs" FORCE)
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_DOC_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_DOC_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the mkspecs directory
-  IF ((QT_LIBRARY_DIR AND NOT QT_MKSPECS_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_MKSPECS_DIR  OR  QT_QMAKE_CHANGED)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QMAKE_MKSPECS"
       OUTPUT_VARIABLE qt_mkspecs_dirs )
@@ -542,27 +542,27 @@ IF (QT4_QMAKE_FOUND)
     FIND_PATH(QT_MKSPECS_DIR qconfig.pri PATHS ${qt_mkspecs_dirs}
       DOC "The location of the Qt mkspecs containing qconfig.pri"
       NO_DEFAULT_PATH )
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_MKSPECS_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_MKSPECS_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the plugins directory
-  IF ((QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR  OR  QT_QMAKE_CHANGED)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_PLUGINS"
       OUTPUT_VARIABLE qt_plugins_dir )
     # make sure we have / and not \ as qmake gives on windows
     FILE(TO_CMAKE_PATH "${qt_plugins_dir}" qt_plugins_dir)
     SET(QT_PLUGINS_DIR ${qt_plugins_dir} CACHE PATH "The location of the Qt plugins" FORCE)
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the translations directory
-  IF ((QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR  OR  QT_QMAKE_CHANGED)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_TRANSLATIONS"
       OUTPUT_VARIABLE qt_translations_dir )
     # make sure we have / and not \ as qmake gives on windows
     FILE(TO_CMAKE_PATH "${qt_translations_dir}" qt_translations_dir)
     SET(QT_TRANSLATIONS_DIR ${qt_translations_dir} CACHE PATH "The location of the Qt translations" FORCE)
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR  OR  QT_QMAKE_CHANGED)
 
   ########################################
   #
@@ -1360,7 +1360,7 @@ IF (QT4_QMAKE_FOUND)
       QT_UIC_EXECUTABLE AND QT_RCC_EXECUTABLE AND QT_QTCORE_LIBRARY)
     SET( QT4_FOUND "YES" )
     INCLUDE(FindPackageMessage)
-    FIND_PACKAGE_MESSAGE(Qt4 "Found Qt-Version ${QTVERSION}"
+    FIND_PACKAGE_MESSAGE(Qt4 "Found Qt-Version ${QTVERSION} (using ${QT_QMAKE_EXECUTABLE})"
       "[${QT_LIBRARY_DIR}][${QT_INCLUDE_DIR}][${QT_MOC_EXECUTABLE}][${QT_UIC_EXECUTABLE}][${QT_RCC_EXECUTABLE}]")
   ELSE( QT_LIBRARY_DIR AND QT_INCLUDE_DIR AND QT_MOC_EXECUTABLE AND
         QT_UIC_EXECUTABLE AND QT_RCC_EXECUTABLE AND QT_QTCORE_LIBRARY)
