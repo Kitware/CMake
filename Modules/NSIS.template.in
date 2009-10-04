@@ -705,9 +705,9 @@ Section "-Core installation"
   Push "$INSTALL_DESKTOP"
   Call ConditionalAddToRegisty
 
-@CPACK_NSIS_EXTRA_INSTALL_COMMANDS@
-  
   !insertmacro MUI_STARTMENU_WRITE_END
+
+@CPACK_NSIS_EXTRA_INSTALL_COMMANDS@
 
 SectionEnd
 
