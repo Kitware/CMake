@@ -1,6 +1,5 @@
 [Desktop Entry]
 Version=1.0
-Encoding=UTF-8
 Name=CMake
 Comment=Cross-platform buildsystem
 Exec=cmake-gui %f
