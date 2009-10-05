@@ -1606,18 +1606,6 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::AddLinkLibrary(const std::string& lib,
-                              LinkLibraryType llt)
-{
-  this->AddFramework(lib.c_str(), llt);
-  cmTarget::LibraryID tmp;
-  tmp.first = lib;
-  tmp.second = llt;
-  this->LinkLibraries.push_back(tmp);
-  this->OriginalLinkLibraries.push_back(tmp);
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::NameResolvesToFramework(const std::string& libname)
 {
   return this->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->

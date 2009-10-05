@@ -183,9 +183,6 @@ public:
                       const char *target, const char* lib,
                       LinkLibraryType llt);
 
-  void AddLinkLibrary(const std::string& lib,
-                      LinkLibraryType llt);
-
   void MergeLinkLibraries( cmMakefile& mf, const char* selfname,
                            const LinkLibraryVectorType& libs );
 
