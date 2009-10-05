@@ -3,6 +3,11 @@ project(LinkLanguage C CXX)
 
 add_library(foo STATIC foo.cxx)
 add_executable(LinkLanguage LinkLanguage.c)
+
+# Export the target now to compute its link interface and implementation.
+# This tests that the link info is recomputed after the library is linked.
+export(TARGETS LinkLanguage FILE LinkLanguageTargets.cmake)
+
 target_link_libraries(LinkLanguage foo)
 
 # CMake should now automatically choose CXX for linking, so we need
