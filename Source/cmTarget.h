@@ -567,6 +567,8 @@ private:
                                  LinkImplementation& impl);
   void ComputeLinkClosure(const char* config, LinkClosure& lc);
 
+  void MaybeInvalidatePropertyCache(const char* prop);
+
   // The cmMakefile instance that owns this target.  This should
   // always be set.
   cmMakefile* Makefile;

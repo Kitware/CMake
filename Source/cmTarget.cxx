@@ -2001,13 +2001,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     }
 
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
-
-  // If imported information is being set, wipe out cached
-  // information.
-  if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
-    {
-    this->Internal->ImportInfoMap.clear();
-    }
+  this->MaybeInvalidatePropertyCache(prop);
 }
 
 //----------------------------------------------------------------------------
@@ -2018,9 +2012,13 @@ void cmTarget::AppendProperty(const char* prop, const char* value)
     return;
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET);
+  this->MaybeInvalidatePropertyCache(prop);
+}
 
-  // If imported information is being set, wipe out cached
-  // information.
+//----------------------------------------------------------------------------
+void cmTarget::MaybeInvalidatePropertyCache(const char* prop)
+{
+  // Wipe wipe out maps caching information affected by this property.
   if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
     {
     this->Internal->ImportInfoMap.clear();
