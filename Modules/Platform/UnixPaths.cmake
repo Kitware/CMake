@@ -12,6 +12,16 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+# Block multiple inclusion because "CMakeCInformation.cmake" includes
+# "Platform/${CMAKE_SYSTEM_NAME}" even though the generic module
+# "CMakeSystemSpecificInformation.cmake" already included it.
+# The extra inclusion is a work-around documented next to the include()
+# call, so this can be removed when the work-around is removed.
+IF(__UNIX_PATHS_INCLUDED)
+  RETURN()
+ENDIF()
+SET(__UNIX_PATHS_INCLUDED 1)
+
 SET(UNIX 1)
 
 # also add the install directory of the running cmake to the search directories
