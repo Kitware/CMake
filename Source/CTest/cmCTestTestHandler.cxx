@@ -596,7 +596,7 @@ int cmCTestTestHandler::ProcessHandler()
     if (failed.size())
       {
       cmGeneratedFileStream ofs;
-      cmCTestLog(this->CTest, ERROR_MESSAGE, std::endl
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
                  << "The following tests FAILED:" << std::endl);
       this->StartLogFile("TestsFailed", ofs);
       
