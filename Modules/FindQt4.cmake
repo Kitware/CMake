@@ -1032,7 +1032,12 @@ IF (QT4_QMAKE_FOUND)
      GET_DIRECTORY_PROPERTY(_inc_DIRS INCLUDE_DIRECTORIES)
 
      FOREACH(_current ${_inc_DIRS})
-        SET(${_moc_flags} ${${_moc_flags}} "-I${_current}")
+        IF("${_current}" MATCHES ".framework/?$")
+          STRING(REGEX REPLACE "/[^/]+.framework" "" framework_path "${_current}")
+          SET(${_moc_flags} ${${_moc_flags}} "-F${framework_path}")
+        ELSE("${_current}" MATCHES ".framework/?$")
+          SET(${_moc_flags} ${${_moc_flags}} "-I${_current}")
+        ENDIF("${_current}" MATCHES ".framework/?$")
      ENDFOREACH(_current ${_inc_DIRS})
      
      GET_DIRECTORY_PROPERTY(_defines COMPILE_DEFINITIONS)
