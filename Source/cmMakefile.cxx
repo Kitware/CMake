@@ -810,7 +810,7 @@ void cmMakefile::ConfigureFinalPass()
   for (cmTargets::iterator l = this->Targets.begin();
        l != this->Targets.end(); l++)
     {
-    l->second.AnalyzeLibDependencies(*this);
+    l->second.FinishConfigure();
     }
 }
 

@@ -1028,6 +1028,13 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::FinishConfigure()
+{
+  // Do old-style link dependency analysis.
+  this->AnalyzeLibDependencies(*this->Makefile);
+}
+
+//----------------------------------------------------------------------------
 cmListFileBacktrace const& cmTarget::GetBacktrace() const
 {
   return this->Internal->Backtrace;

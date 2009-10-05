@@ -219,7 +219,8 @@ public:
   ///! Get the utilities used by this target
   std::set<cmStdString>const& GetUtilities() const { return this->Utilities; }
 
-  void AnalyzeLibDependencies( const cmMakefile& mf );
+  /** Finalize the target at the end of the Configure step.  */
+  void FinishConfigure();
 
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);
@@ -488,6 +489,8 @@ private:
   void GatherDependencies( const cmMakefile& mf,
                            const LibraryID& lib,
                            DependencyMap& dep_map);
+
+  void AnalyzeLibDependencies( const cmMakefile& mf );
 
   const char* GetSuffixVariableInternal(bool implib);
   const char* GetPrefixVariableInternal(bool implib);
