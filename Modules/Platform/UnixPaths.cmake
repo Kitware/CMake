@@ -9,7 +9,7 @@ GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
 # search types.
 LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
   # Standard
-  / /usr /usr/local
+  /usr/local / /usr
 
   # CMake install location
   "${_CMAKE_INSTALL_DIR}"
