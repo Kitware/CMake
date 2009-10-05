@@ -117,8 +117,9 @@ if(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
 endif(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
 
 set(EXPR_OP1 "/")
-if(NOT MSVC OR PP_NMAKE)
-  # MSVC cl: %
+if((NOT MSVC OR PP_NMAKE) AND
+   NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
+  # MSVC cl, Intel icl: %
   # When the cl compiler is invoked from the command line then % must
   # be written %% (to distinguish from %ENV% syntax).  However cl does
   # not seem to accept the syntax when it is invoked from inside a
@@ -128,9 +129,14 @@ if(NOT MSVC OR PP_NMAKE)
   # line.  Currently only NMake supports running cl with a response
   # file.  Supporting other make tools would require CMake to generate
   # response files explicitly for each object file.
+  #
+  # When the icl compiler is invoked from the command line then % must
+  # be written just '%'.  However nmake requires '%%' except when using
+  # response files.  Currently we have no way to affect escaping based
+  # on whether flags go in a response file, so we just have to skip it.
   set(STRING_EXTRA "${STRING_EXTRA}%")
   set(EXPR_OP1 "%")
-endif(NOT MSVC OR PP_NMAKE)
+endif()
 
 # General: \"
 # Make tools do not reliably accept \\\" syntax:
