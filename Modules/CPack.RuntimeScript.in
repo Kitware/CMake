@@ -3,28 +3,8 @@
 # Modified from: Aaron Voisine <aaron@voisine.org>
 
 CWD="`dirname \"$0\"`"
-TMP=/tmp/$UID/TemporaryItems
+TMP=/tmp/$(id -ru)/TemporaryItems
 
-version=`sw_vers -productVersion`
-if [ "$?" == "0" ]; then
-  major=${version%%\.*}
-  rest=${version#*\.}
-  minor=${rest%%\.*}
-  build=${rest#*\.}
-else
-  major=10
-  minor=4
-  build=0
-fi
-
-echo $version
-echo "Major = $major"
-echo "Minor = $minor"
-echo "Build = $build"
-
-
-# if 10.5 or greater, then all the open-x11 stuff need not occur
-if ((( $major < 10 )) || ((( $major == 10)) && (( $minor < 5 )))); then
 version=`sw_vers -productVersion`
 if [ "$?" = "0" ]; then
   major=${version%%\.*}
@@ -44,7 +24,27 @@ echo "Build = $build"
 
 
 # if 10.5 or greater, then all the open-x11 stuff need not occur
-if ((( $major < 10 )) || ((( $major == 10)) && (( $minor < 5 )))); then
+if [ "$major" -lt 10 ] || ([ "$major" -eq 10 ] && [ "$minor" -lt 5 ]); then
+version=`sw_vers -productVersion`
+if [ "$?" = "0" ]; then
+  major=${version%%\.*}
+  rest=${version#*\.}
+  minor=${rest%%\.*}
+  build=${rest#*\.}
+else
+  major=10
+  minor=4
+  build=0
+fi
+
+echo $version
+echo "Major = $major"
+echo "Minor = $minor"
+echo "Build = $build"
+
+
+# if 10.5 or greater, then all the open-x11 stuff need not occur
+if [ "$major" -lt 10 ] || ([ "$major" -eq 10 ] && [ "$minor" -lt 5 ]); then
 ps -wx -ocommand | grep -e '[X]11.app' > /dev/null
 if [ "$?" != "0" -a ! -f ~/.xinitrc ]; then
     echo "rm -f ~/.xinitrc" > ~/.xinitrc
