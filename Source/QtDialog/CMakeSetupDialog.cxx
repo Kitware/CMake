@@ -342,7 +342,7 @@ void CMakeSetupDialog::finishConfigure(int err)
 
 void CMakeSetupDialog::finishGenerate(int err)
 {
-  this->enterState(ReadyGenerate);
+  this->enterState(ReadyConfigure);
   if(err != 0)
     {
     QMessageBox::critical(this, tr("Error"), 
