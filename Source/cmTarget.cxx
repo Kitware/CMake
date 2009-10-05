@@ -1030,8 +1030,22 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 //----------------------------------------------------------------------------
 void cmTarget::FinishConfigure()
 {
+  // Erase any cached link information that might have been comptued
+  // on-demand during the configuration.  This ensures that build
+  // system generation uses up-to-date information even if other cache
+  // invalidation code in this source file is buggy.
+  this->ClearLinkMaps();
+
   // Do old-style link dependency analysis.
   this->AnalyzeLibDependencies(*this->Makefile);
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::ClearLinkMaps()
+{
+  this->Internal->LinkImplMap.clear();
+  this->Internal->LinkInterfaceMap.clear();
+  this->Internal->LinkClosureMap.clear();
 }
 
 //----------------------------------------------------------------------------
@@ -1656,6 +1670,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   tmp.second = llt;
   this->LinkLibraries.push_back( tmp );
   this->OriginalLinkLibraries.push_back(tmp);
+  this->ClearLinkMaps();
 
   // Add the explicit dependency information for this target. This is
   // simply a set of libraries separated by ";". There should always
@@ -2022,6 +2037,10 @@ void cmTarget::MaybeInvalidatePropertyCache(const char* prop)
   if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
     {
     this->Internal->ImportInfoMap.clear();
+    }
+  if(!this->IsImported() && strncmp(prop, "LINK_INTERFACE_", 15) == 0)
+    {
+    this->ClearLinkMaps();
     }
 }
 
