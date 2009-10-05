@@ -55,6 +55,12 @@ public:
     {
     this->SourceFileFlagsConstructed = false;
     }
+  cmTargetInternals(cmTargetInternals const& r)
+    {
+    // Only some of these entries are part of the object state.
+    // Others not copied here are result caches.
+    this->SourceEntries = r.SourceEntries;
+    }
   typedef cmTarget::SourceFileFlags SourceFileFlags;
   std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
   bool SourceFileFlagsConstructed;
@@ -4354,12 +4360,12 @@ cmTargetInternalPointer::cmTargetInternalPointer()
 
 //----------------------------------------------------------------------------
 cmTargetInternalPointer
-::cmTargetInternalPointer(cmTargetInternalPointer const&)
+::cmTargetInternalPointer(cmTargetInternalPointer const& r)
 {
   // Ideally cmTarget instances should never be copied.  However until
   // we can make a sweep to remove that, this copy constructor avoids
   // allowing the resources (Internals) to be copied.
-  this->Pointer = new cmTargetInternals;
+  this->Pointer = new cmTargetInternals(*r.Pointer);
 }
 
 //----------------------------------------------------------------------------
@@ -4377,7 +4383,7 @@ cmTargetInternalPointer::operator=(cmTargetInternalPointer const& r)
   // we can make a sweep to remove that, this copy constructor avoids
   // allowing the resources (Internals) to be copied.
   cmTargetInternals* oldPointer = this->Pointer;
-  this->Pointer = new cmTargetInternals;
+  this->Pointer = new cmTargetInternals(*r.Pointer);
   delete oldPointer;
   return *this;
 }
