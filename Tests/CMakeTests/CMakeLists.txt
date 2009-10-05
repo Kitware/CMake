@@ -23,6 +23,8 @@ AddCMakeTest(SeparateArguments "")
 AddCMakeTest(ImplicitLinkInfo "")
 AddCMakeTest(ModuleNotices "")
 AddCMakeTest(String "")
+AddCMakeTest(Math "")
+AddCMakeTest(CMakeMinimumRequired "")
 
 SET(GetPrerequisites_PreArgs
   "-DCTEST_CONFIGURATION_TYPE:STRING=\\\${CTEST_CONFIGURATION_TYPE}"
