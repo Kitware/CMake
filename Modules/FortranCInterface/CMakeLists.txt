@@ -25,8 +25,10 @@ set(global_symbols
   my_sub    # VisualAge
   my_sub_   # GNU, Intel, HP, SunPro, MIPSpro
   my_sub__  # GNU g77
+  MY_SUB    # Intel on Windows
   mysub     # VisualAge
   mysub_    # GNU, Intel, HP, SunPro, MIPSpro
+  MYSUB     # Intel on Windows
   ${FortranCInterface_GLOBAL_SYMBOLS}
   )
 list(REMOVE_DUPLICATES global_symbols)
@@ -41,9 +43,11 @@ set(module_symbols
   __mymodule__mysub       # GNU 4.2
   my_module$my_sub        # HP
   my_module_mp_my_sub_    # Intel
+  MY_MODULE_mp_MY_SUB     # Intel on Windows
   my_module_my_sub_       # PGI
   mymodule$mysub          # HP
   mymodule_mp_mysub_      # Intel
+  MYMODULE_mp_MYSUB       # Intel on Windows
   mymodule_mysub_         # PGI
   ${FortranCInterface_MODULE_SYMBOLS}
   )
