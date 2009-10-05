@@ -81,7 +81,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   cmCTestRunTest* testRun = new cmCTestRunTest(this->TestHandler);
   testRun->SetIndex(test);
   testRun->SetTestProperties(this->Properties[test]);
-  if(testRun->StartTest())
+  if(testRun->StartTest(this->Total))
     {
     this->RunningTests.insert(testRun);
     }
