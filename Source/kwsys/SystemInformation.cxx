@@ -242,6 +242,7 @@ protected:
 
   // For Mac
   bool ParseSysCtl();
+  void CallSwVers();
   kwsys_stl::string ExtractValueFromSysCtl(const char* word);
   kwsys_stl::string SysCtlBuffer;
 
@@ -3369,10 +3370,37 @@ bool SystemInformationImplementation::QueryOSInformation()
     this->OSVersion = unameInfo.version;
     this->OSPlatform = unameInfo.machine;
     }
+#ifdef __APPLE__
+  this->CallSwVers();
+#endif
 #endif
 
   return true;
 
+}
+
+void SystemInformationImplementation::CallSwVers()
+{
+#ifdef __APPLE__
+  kwsys_stl::string output;
+  kwsys_stl::vector<const char*> args;
+  args.clear();
+  args.push_back("sw_vers");
+  
+  args.push_back("-productName");
+  output = this->RunProcess(args);
+  this->OSName = output;
+  args.pop_back();
+
+  args.push_back("-productVersion");
+  output = this->RunProcess(args);
+  this->OSRelease = output;
+  args.pop_back();
+
+  args.push_back("-buildVersion");
+  output = this->RunProcess(args);
+  this->OSVersion = output;
+#endif
 }
 
 /** Return true if the machine is 64 bits */
