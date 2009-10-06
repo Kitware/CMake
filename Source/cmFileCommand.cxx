@@ -535,7 +535,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   // with some extra characters in strings.
   char extra[256]; // = {}; // some compilers do not like this
   memset(extra, 0, sizeof(extra));
-  extra['\f'] = 1; // FF  (form feed)
+  extra[0x0c] = 1; // FF  (form feed)
   extra[0x14] = 1; // DC4 (device control 4)
 
   // Parse strings out of the file.
