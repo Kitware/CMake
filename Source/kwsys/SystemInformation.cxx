@@ -3007,13 +3007,13 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
     if(buffer[i] == ' ' || buffer[i] == '\t')
       {
       break;
-      }   
+      }
     if(buffer[i] != '\n' && buffer[i] != '\r')
       {
       kwsys_stl::string val = value;
       value = buffer[i];
       value += val;
-      }          
+      }
     }
   return value;
 }
@@ -3385,19 +3385,24 @@ void SystemInformationImplementation::CallSwVers()
   kwsys_stl::string output;
   kwsys_stl::vector<const char*> args;
   args.clear();
-  args.push_back("sw_vers");
   
+  args.push_back("sw_vers");
   args.push_back("-productName");
+  args.push_back(0);
   output = this->RunProcess(args);
   this->OSName = output;
-  args.pop_back();
+  args.clear();
 
+  args.push_back("sw_vers");
   args.push_back("-productVersion");
+  args.push_back(0);
   output = this->RunProcess(args);
   this->OSRelease = output;
-  args.pop_back();
+  args.clear();
 
+  args.push_back("sw_vers");
   args.push_back("-buildVersion");
+  args.push_back(0);
   output = this->RunProcess(args);
   this->OSVersion = output;
 #endif
