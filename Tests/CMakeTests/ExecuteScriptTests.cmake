@@ -6,6 +6,7 @@ function(execute_one_script_test scriptname testname expected_result)
 
   execute_process(
     COMMAND ${CMAKE_COMMAND}
+      -D "dir:STRING=${dir}"
       -D "testname:STRING=${testname}"
       -P "${scriptname}"
     OUTPUT_VARIABLE out
