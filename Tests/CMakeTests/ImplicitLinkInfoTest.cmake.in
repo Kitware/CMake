@@ -339,7 +339,7 @@ list(APPEND platforms msys_g77)
 # Test parsing for all above examples.
 
 foreach(p IN LISTS platforms)
-  cmake_parse_implicit_link_info("${${p}_text}" libs dirs)
+  cmake_parse_implicit_link_info("${${p}_text}" libs dirs log)
 
   foreach(v libs dirs)
     if(NOT "${${v}}" STREQUAL "${${p}_${v}}")
@@ -349,6 +349,8 @@ foreach(p IN LISTS platforms)
         "  [${${p}_${v}}]\n"
         "but got\n"
         "  [${${v}}]\n"
+        "Parse log was:\n"
+        "${log}"
         )
     endif()
   endforeach()
