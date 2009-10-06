@@ -28,13 +28,20 @@ IF(CMAKE_COMPILER_IS_GNUG77)
   SET(CMAKE_BASE_NAME g77)
 ENDIF(CMAKE_COMPILER_IS_GNUG77)
 IF(CMAKE_Fortran_COMPILER_ID)
-  IF(EXISTS ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_Fortran_COMPILER_ID}-Fortran.cmake)
-    SET(CMAKE_BASE_NAME ${CMAKE_Fortran_COMPILER_ID}-Fortran)
-  ENDIF(EXISTS ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_Fortran_COMPILER_ID}-Fortran.cmake)
+  INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_Fortran_COMPILER_ID}-Fortran OPTIONAL RESULT_VARIABLE _INCLUDED_FILE)
 ENDIF(CMAKE_Fortran_COMPILER_ID)
-SET(CMAKE_SYSTEM_AND_Fortran_COMPILER_INFO_FILE
-  ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}.cmake)
-INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
+IF (NOT _INCLUDED_FILE)
+  INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL
+          RESULT_VARIABLE _INCLUDED_FILE)
+ENDIF (NOT _INCLUDED_FILE)
+# We specify the compiler information in the system file for some
+# platforms, but this language may not have been enabled when the file
+# was first included.  Include it again to get the language info.
+# Remove this when all compiler info is removed from system files.
+IF (NOT _INCLUDED_FILE)
+  INCLUDE(Platform/${CMAKE_SYSTEM_NAME} OPTIONAL)
+ENDIF (NOT _INCLUDED_FILE)
+
 
 # This should be included before the _INIT variables are
 # used to initialize the cache.  Since the rule variables 

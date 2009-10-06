@@ -58,13 +58,12 @@ IF (NOT _INCLUDED_FILE)
   INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} 
     OPTIONAL RESULT_VARIABLE _INCLUDED_FILE)
 ENDIF (NOT _INCLUDED_FILE)
-# some systems include the compiler information in the system file
-# and if this is the enable_language command then it may not have been
-# included at this point, or needs to be included again so that the
-# language_INIT variables are set correctly
+# We specify the compiler information in the system file for some
+# platforms, but this language may not have been enabled when the file
+# was first included.  Include it again to get the language info.
+# Remove this when all compiler info is removed from system files.
 IF (NOT _INCLUDED_FILE)
-  INCLUDE(Platform/${CMAKE_SYSTEM_NAME} 
-    OPTIONAL RESULT_VARIABLE _INCLUDED_FILE)
+  INCLUDE(Platform/${CMAKE_SYSTEM_NAME} OPTIONAL)
 ENDIF (NOT _INCLUDED_FILE)
 
 

@@ -54,7 +54,15 @@ IF(CMAKE_CXX_COMPILER_ID)
   INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_CXX_COMPILER_ID}-CXX OPTIONAL RESULT_VARIABLE _INCLUDED_FILE)
 ENDIF(CMAKE_CXX_COMPILER_ID)
 IF (NOT _INCLUDED_FILE)
-  INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
+  INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL
+          RESULT_VARIABLE _INCLUDED_FILE)
+ENDIF (NOT _INCLUDED_FILE)
+# We specify the compiler information in the system file for some
+# platforms, but this language may not have been enabled when the file
+# was first included.  Include it again to get the language info.
+# Remove this when all compiler info is removed from system files.
+IF (NOT _INCLUDED_FILE)
+  INCLUDE(Platform/${CMAKE_SYSTEM_NAME} OPTIONAL)
 ENDIF (NOT _INCLUDED_FILE)
 
 
