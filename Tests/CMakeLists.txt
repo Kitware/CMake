@@ -1312,6 +1312,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       )
   ENDIF(NOT EXISTS "${CMAKE_BINARY_DIR}/CMakeLists.txt")
 
+  ADD_TEST(CMakeWizardTest ${CMAKE_COMMAND}
+    -D build_dir:STRING=${CMAKE_CURRENT_BINARY_DIR}/CMakeWizardTest
+    -D source_dir:STRING=${CMAKE_CURRENT_SOURCE_DIR}/Tutorial/Step3
+    -D CMAKE_CTEST_COMMAND:STRING=${CMAKE_CTEST_COMMAND}
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/CMakeWizardTest.cmake)
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)
