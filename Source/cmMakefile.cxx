@@ -1719,7 +1719,10 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
       cmSystemTools::ExpandListArgument(val, files);
       for ( cc = 0; cc < files.size(); cc ++ )
         {
-        files[cc] = cmSystemTools::CollapseFullPath(files[cc].c_str());
+        if(!cmSystemTools::IsOff(files[cc].c_str()))
+          {
+          files[cc] = cmSystemTools::CollapseFullPath(files[cc].c_str());
+          }
         if ( cc > 0 )
           {
           nvalue += ";";
