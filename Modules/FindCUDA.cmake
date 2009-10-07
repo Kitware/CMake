@@ -1027,6 +1027,8 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
         ${main_dep}
         DEPENDS ${CUDA_NVCC_DEPEND}
         DEPENDS ${custom_target_script}
+        # Make sure the output directory exists before trying to write to it.
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${generated_file_path}"
         COMMAND ${CMAKE_COMMAND} ARGS
           -D verbose:BOOL=${verbose_output}
           ${ccbin_flags}
