@@ -26,7 +26,9 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var)
   if(CMAKE_LINKER)
     get_filename_component(linker ${CMAKE_LINKER} NAME)
   endif()
-  set(linker_regex "^( *|.*/)(${linker}|ld|collect2)")
+  # Construct a regex to match linker lines.  It must match both the
+  # whole line and just the command (argv[0]).
+  set(linker_regex "^( *|.*[/\\])(${linker}|ld|collect2)[^/\\]*( |$)")
   set(log "${log}  link line regex: [${linker_regex}]\n")
   string(REGEX REPLACE "\r?\n" ";" output_lines "${text}")
   foreach(line IN LISTS output_lines)
