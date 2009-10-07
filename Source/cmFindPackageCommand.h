@@ -73,7 +73,7 @@ private:
   void AddFindDefinition(const char* var, const char* val);
   void RestoreFindDefinitions();
   bool HandlePackageMode();
-  void FindConfig();
+  bool FindConfig();
   bool FindPrefixedConfig();
   bool FindFrameworkConfig();
   bool FindAppBundleConfig();

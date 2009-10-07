@@ -736,7 +736,7 @@ bool cmFindPackageCommand::HandlePackageMode()
     }
 
   // Try to load the config file if the directory is known
-  bool cachedDirectoryOk = false;
+  bool fileFound = false;
   if(!cmSystemTools::IsOff(def))
     {
     // Get the directory from the variable value.
@@ -754,25 +754,30 @@ bool cmFindPackageCommand::HandlePackageMode()
     if (this->FindConfigFile(dir, file))
       {
       this->FileFound = file;
-      cachedDirectoryOk = true;
+      fileFound = true;
       }
     def = this->Makefile->GetDefinition(this->Variable.c_str());
     }
 
   // Search for the config file if it is not already found.
-  if(cmSystemTools::IsOff(def) || !cachedDirectoryOk)
+  if(cmSystemTools::IsOff(def) || !fileFound)
     {
-    this->FindConfig();
+    fileFound = this->FindConfig();
     def = this->Makefile->GetDefinition(this->Variable.c_str());
+    }
+
+  // Sanity check.
+  if(fileFound && this->FileFound.empty())
+    {
+    this->Makefile->IssueMessage(
+      cmake::INTERNAL_ERROR, "fileFound is true but FileFound is empty!");
+    fileFound = false;
     }
 
   // If the directory for the config file was found, try to read the file.
   bool result = true;
   bool found = false;
-  // in the following test FileFound should never be empty if def is valid
-  // but I don't want to put an assert() in there now, in case this still
-  // makes it into 2.6.3
-  if(!cmSystemTools::IsOff(def) && (!this->FileFound.empty()))
+  if(fileFound)
     {
     // Set the version variables before loading the config file.
     // It may override them.
@@ -886,7 +891,7 @@ bool cmFindPackageCommand::HandlePackageMode()
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::FindConfig()
+bool cmFindPackageCommand::FindConfig()
 {
   // Compute the set of search prefixes.
   this->ComputePrefixes();
@@ -938,9 +943,11 @@ void cmFindPackageCommand::FindConfig()
     "The directory containing a CMake configuration file for ";
   help += this->Name;
   help += ".";
+  // We force the value since we do not get here if it was already set.
   this->Makefile->AddCacheDefinition(this->Variable.c_str(),
                                      init.c_str(), help.c_str(),
-                                     cmCacheManager::PATH);
+                                     cmCacheManager::PATH, true);
+  return found;
 }
 
 //----------------------------------------------------------------------------
