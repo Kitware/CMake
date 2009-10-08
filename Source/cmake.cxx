@@ -1493,11 +1493,12 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         startOutDir = args[6];
         depInfo = args[7];
         if(args.size() >= 9 &&
-           args[8].length() > 8 &&
+           args[8].length() >= 8 &&
            args[8].substr(0, 8) == "--color=")
           {
           // Enable or disable color based on the switch value.
-          color = cmSystemTools::IsOn(args[8].substr(8).c_str());
+          color = (args[8].size() == 8 ||
+                   cmSystemTools::IsOn(args[8].substr(8).c_str()));
           }
         }
       else
