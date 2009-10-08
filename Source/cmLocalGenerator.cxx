@@ -1951,15 +1951,6 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     flagsVar += "_FLAGS";
     this->AppendFlags(flags, this->Makefile->GetDefinition(flagsVar.c_str()));
     }
-
-  // Add flags specific to shared builds.
-  if(cmSystemTools::IsOn(this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
-    {
-    flagsVar = "CMAKE_SHARED_BUILD_";
-    flagsVar += lang;
-    flagsVar += "_FLAGS";
-    this->AppendFlags(flags, this->Makefile->GetDefinition(flagsVar.c_str()));
-    }
 }
 
 //----------------------------------------------------------------------------
