@@ -1475,7 +1475,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string homeOutDir;
       std::string startOutDir;
       std::string depInfo;
-      bool color = true;
+      bool color = false;
       if(args.size() >= 8)
         {
         // Full signature:
