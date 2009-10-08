@@ -243,6 +243,7 @@ protected:
   // For Mac
   bool ParseSysCtl();
   void CallSwVers();
+  void TrimNewline(kwsys_stl::string&);
   kwsys_stl::string ExtractValueFromSysCtl(const char* word);
   kwsys_stl::string SysCtlBuffer;
 
@@ -3390,6 +3391,7 @@ void SystemInformationImplementation::CallSwVers()
   args.push_back("-productName");
   args.push_back(0);
   output = this->RunProcess(args);
+  this->TrimNewline(output);
   this->OSName = output;
   args.clear();
 
@@ -3397,6 +3399,7 @@ void SystemInformationImplementation::CallSwVers()
   args.push_back("-productVersion");
   args.push_back(0);
   output = this->RunProcess(args);
+  this->TrimNewline(output);
   this->OSRelease = output;
   args.clear();
 
@@ -3404,8 +3407,26 @@ void SystemInformationImplementation::CallSwVers()
   args.push_back("-buildVersion");
   args.push_back(0);
   output = this->RunProcess(args);
+  this->TrimNewline(output);
   this->OSVersion = output;
 #endif
+}
+
+void SystemInformationImplementation::TrimNewline(kwsys_stl::string& output)
+{  
+  // remove \r
+  kwsys_stl::string::size_type pos=0;
+  while((pos = output.find("\r", pos)) != kwsys_stl::string::npos)
+    {
+    output.erase(pos);
+    }
+
+  // remove \n
+  pos = 0;
+  while((pos = output.find("\n", pos)) != kwsys_stl::string::npos)
+    {
+    output.erase(pos);
+    }
 }
 
 /** Return true if the machine is 64 bits */
