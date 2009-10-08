@@ -286,11 +286,6 @@ public:
                           bool force = false);
 
   /**
-   * Update the variable scope to make the cache definition visible.
-   */
-  void UseCacheDefinition(cmCacheManager::CacheIterator const& it);
-
-  /**
    * Add bool variable definition to the build. 
    */
   void AddDefinition(const char* name, bool);
