@@ -596,8 +596,8 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
   std::vector<cmCTestBuildErrorWarning>::iterator it;
 
   // only report the first 50 warnings and first 50 errors
-  unsigned short numErrorsAllowed = this->MaxErrors;
-  unsigned short numWarningsAllowed = this->MaxWarnings;
+  int numErrorsAllowed = this->MaxErrors;
+  int numWarningsAllowed = this->MaxWarnings;
   std::string srcdir = this->CTest->GetCTestConfiguration("SourceDirectory");
   // make sure the source dir is in the correct case on windows
   // via a call to collapse full path.

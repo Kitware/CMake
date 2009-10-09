@@ -149,6 +149,10 @@ public:
   void AppendDefines(std::string& defines, const char* defines_list,
                      const char* lang);
 
+  /** Lookup and append options associated with a particular feature.  */
+  void AppendFeatureOptions(std::string& flags, const char* lang,
+                            const char* feature);
+
   /** Translate a dependency as given in CMake code to the name to
       appear in a generated build file.  If the given name is that of
       a CMake target it will be transformed to the real output

@@ -242,6 +242,8 @@ protected:
 
   // For Mac
   bool ParseSysCtl();
+  void CallSwVers();
+  void TrimNewline(kwsys_stl::string&);
   kwsys_stl::string ExtractValueFromSysCtl(const char* word);
   kwsys_stl::string SysCtlBuffer;
 
@@ -3006,13 +3008,13 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
     if(buffer[i] == ' ' || buffer[i] == '\t')
       {
       break;
-      }   
+      }
     if(buffer[i] != '\n' && buffer[i] != '\r')
       {
       kwsys_stl::string val = value;
       value = buffer[i];
       value += val;
-      }          
+      }
     }
   return value;
 }
@@ -3356,6 +3358,12 @@ bool SystemInformationImplementation::QueryOSInformation()
     WSACleanup( );
     }
   this->Hostname = name;
+  
+  const char* arch = getenv("PROCESSOR_ARCHITECTURE");
+  if(arch)
+    {
+    this->OSPlatform = arch;
+    }
 
 #else
 
@@ -3369,10 +3377,62 @@ bool SystemInformationImplementation::QueryOSInformation()
     this->OSVersion = unameInfo.version;
     this->OSPlatform = unameInfo.machine;
     }
+#ifdef __APPLE__
+  this->CallSwVers();
+#endif
 #endif
 
   return true;
 
+}
+
+void SystemInformationImplementation::CallSwVers()
+{
+#ifdef __APPLE__
+  kwsys_stl::string output;
+  kwsys_stl::vector<const char*> args;
+  args.clear();
+  
+  args.push_back("sw_vers");
+  args.push_back("-productName");
+  args.push_back(0);
+  output = this->RunProcess(args);
+  this->TrimNewline(output);
+  this->OSName = output;
+  args.clear();
+
+  args.push_back("sw_vers");
+  args.push_back("-productVersion");
+  args.push_back(0);
+  output = this->RunProcess(args);
+  this->TrimNewline(output);
+  this->OSRelease = output;
+  args.clear();
+
+  args.push_back("sw_vers");
+  args.push_back("-buildVersion");
+  args.push_back(0);
+  output = this->RunProcess(args);
+  this->TrimNewline(output);
+  this->OSVersion = output;
+#endif
+}
+
+void SystemInformationImplementation::TrimNewline(kwsys_stl::string& output)
+{  
+  // remove \r
+  kwsys_stl::string::size_type pos=0;
+  while((pos = output.find("\r", pos)) != kwsys_stl::string::npos)
+    {
+    output.erase(pos);
+    }
+
+  // remove \n
+  pos = 0;
+  while((pos = output.find("\n", pos)) != kwsys_stl::string::npos)
+    {
+    output.erase(pos);
+    }
 }
 
 /** Return true if the machine is 64 bits */

@@ -531,6 +531,13 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
     return false;
     }
 
+  // At least one compiler (Portland Group Fortran) produces binaries
+  // with some extra characters in strings.
+  char extra[256]; // = {}; // some compilers do not like this
+  memset(extra, 0, sizeof(extra));
+  extra[0x0c] = 1; // FF  (form feed)
+  extra[0x14] = 1; // DC4 (device control 4)
+
   // Parse strings out of the file.
   int output_size = 0;
   std::vector<std::string> strings;
@@ -585,7 +592,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       {
       // Ignore CR character to make output always have UNIX newlines.
       }
-    else if((c >= 0x20 && c < 0x7F) || c == '\t' || c == '\f' ||
+    else if((c >= 0x20 && c < 0x7F) || c == '\t' || extra[c] ||
             (c == '\n' && newline_consume))
       {
       // This is an ASCII character that may be part of a string.

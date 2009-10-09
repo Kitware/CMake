@@ -1276,7 +1276,10 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       int count;
       if (countFile)
         {
-        fscanf(countFile,"%i",&count);
+        if (1!=fscanf(countFile,"%i",&count))
+          {
+          cmSystemTools::Message("Could not read from count file.");
+          }
         fclose(countFile);
         }
       else
@@ -1318,7 +1321,10 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       else
         {
-        fscanf(progFile,"%i",&count);
+        if (1!=fscanf(progFile,"%i",&count))
+          {
+          cmSystemTools::Message("Could not read from progress file.");
+          }
         fclose(progFile);
         }
       unsigned int i;
@@ -1469,7 +1475,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string homeOutDir;
       std::string startOutDir;
       std::string depInfo;
-      bool color = true;
+      bool color = false;
       if(args.size() >= 8)
         {
         // Full signature:
@@ -1487,11 +1493,12 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         startOutDir = args[6];
         depInfo = args[7];
         if(args.size() >= 9 &&
-           args[8].length() > 8 &&
+           args[8].length() >= 8 &&
            args[8].substr(0, 8) == "--color=")
           {
           // Enable or disable color based on the switch value.
-          color = cmSystemTools::IsOn(args[8].substr(8).c_str());
+          color = (args[8].size() == 8 ||
+                   cmSystemTools::IsOn(args[8].substr(8).c_str()));
           }
         }
       else

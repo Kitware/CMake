@@ -25,6 +25,7 @@
 # HP-UX                         HP-UX  
 # IRIX                          IRIX  
 # Linux                         Linux  
+# GNU/kFreeBSD                  GNU/kFreeBSD
 # NetBSD                        NetBSD  
 # OpenBSD                       OpenBSD  
 # OFS/1 (Digital Unix)          OSF1  
@@ -120,6 +121,11 @@ MACRO(ADJUST_CMAKE_SYSTEM_VARIABLES _PREFIX)
   IF(${_PREFIX}_NAME MATCHES BSD.OS)
     SET(${_PREFIX}_NAME BSDOS)
   ENDIF(${_PREFIX}_NAME MATCHES BSD.OS)
+
+  # fix for GNU/kFreeBSD, remove the GNU/
+  IF(${_PREFIX}_NAME MATCHES kFreeBSD)
+    SET(${_PREFIX}_NAME kFreeBSD)
+  ENDIF(${_PREFIX}_NAME MATCHES kFreeBSD)
 
   # fix for CYGWIN which has windows version in it 
   IF(${_PREFIX}_NAME MATCHES CYGWIN)

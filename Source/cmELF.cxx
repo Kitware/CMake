@@ -540,7 +540,7 @@ bool cmELFInternalImpl<Types>::LoadDynamicSection()
 
   // Allocate the dynamic section entries.
   ELF_Shdr const& sec = this->SectionHeaders[this->DynamicSectionIndex];
-  int n = sec.sh_size / sec.sh_entsize;
+  int n = static_cast<int>(sec.sh_size / sec.sh_entsize);
   this->DynamicSectionEntries.resize(n);
 
   // Read each entry.
@@ -592,7 +592,7 @@ unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
     return 0;
     }
   ELF_Shdr const& sec = this->SectionHeaders[this->DynamicSectionIndex];
-  return sec.sh_offset + sec.sh_entsize*j;
+  return static_cast<unsigned long>(sec.sh_offset + sec.sh_entsize*j);
 }
 
 //----------------------------------------------------------------------------

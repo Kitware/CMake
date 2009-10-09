@@ -4,12 +4,12 @@
 ###################################################################
 
 # this is the cvs module name that should be checked out
-SET (CTEST_MODULE_NAME kwsys)
+SET (CTEST_MODULE_NAME SmallAndFast)
 
 # these are the the name of the source and binary directory on disk. 
 # They will be appended to DASHBOARD_ROOT
-SET (CTEST_SOURCE_NAME kwsys)
-SET (CTEST_BINARY_NAME kwsysBin)
+SET (CTEST_SOURCE_NAME SmallAndFast)
+SET (CTEST_BINARY_NAME SmallAndFastBuild)
 
 # which ctest command to use for running the dashboard
 SET (CTEST_COMMAND 
@@ -24,8 +24,8 @@ SET(CTEST_CMAKE_COMMAND "\"${CTEST_EXECUTABLE_PATH}/cmake\"")
 MESSAGE("CTest executable: ${CTEST_EXECUTABLE_NAME}")
 MESSAGE("CMake executable: ${CTEST_CMAKE_COMMAND}")
 
-CTEST_SLEEP(5)
-CTEST_SLEEP(5 5 7)
+CTEST_SLEEP(1)
+CTEST_SLEEP(1 1 1)
 
 ####################################################################
 # The values in this section are optional you can either
@@ -39,7 +39,7 @@ SET (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
 # any quotes inside of this string if you use it
 SET (CTEST_INITIAL_CACHE "
 SITE:STRING=@SITE@
-BUILDNAME:STRING=KWSys-@BUILDNAME@
+BUILDNAME:STRING=SmallAndFast-@BUILDNAME@
 CMAKE_GENERATOR:INTERNAL=@CMAKE_GENERATOR@
 CMAKE_CXX_FLAGS:STRING=@CMAKE_CXX_FLAGS@
 CMAKE_C_FLAGS:STRING=@CMAKE_C_FLAGS@
@@ -52,9 +52,6 @@ MEMORYCHECK_COMMAND:STRING=@MEMORYCHECK_COMMAND@
 MEMORYCHECK_SUPPRESSIONS_FILE:FILEPATH=@MEMORYCHECK_SUPPRESSIONS_FILE@
 MEMORYCHECK_COMMAND_OPTIONS:STRING=@MEMORYCHECK_COMMAND_OPTIONS@
 COVERAGE_COMMAND:FILEPATH=@COVERAGE_COMMAND@
-
-# This one is needed for testing advanced ctest features
-CTEST_TEST_KWSYS:BOOL=ON
 ")
 
 # if you do not want to use the default location for a 
@@ -67,5 +64,5 @@ SET (CTEST_DASHBOARD_ROOT "@CMAKE_CURRENT_BINARY_DIR@/Tests/CTestTest")
 SET (CTEST_ENVIRONMENT
 )
 
-SET (CTEST_SOURCE_DIRECTORY "@CMake_SOURCE_DIR@/Source/kwsys")
+SET (CTEST_SOURCE_DIRECTORY "@CMake_SOURCE_DIR@/Tests/CTestTest/SmallAndFast")
 SET (CTEST_BINARY_DIRECTORY "@CMake_BINARY_DIR@/Tests/CTestTest/${CTEST_BINARY_NAME}")

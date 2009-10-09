@@ -37,6 +37,7 @@ FIND_PACKAGE(VersionTestD 1.2.3.4)
 SET(PACKAGES
   foo Foo Bar TFramework Tframework TApp Tapp Special
   VersionedA VersionedB VersionedC VersionedD VersionedE
+  WrongA WrongB WrongC WrongD
   wibbleA wibbleB
   RecursiveA RecursiveB RecursiveC
   )
@@ -67,6 +68,24 @@ FIND_PACKAGE(VersionedC 4.0 EXACT NAMES zot)
 FIND_PACKAGE(VersionedD 1.1 EXACT NAMES Baz)
 FIND_PACKAGE(VersionedE 1.2 EXACT NAMES Baz)
 
+# Test wrong initial path when result is present.
+SET(WrongA_DIR "${VersionedD_DIR}")
+FIND_PACKAGE(WrongA 1.2 EXACT NAMES Baz)
+
+# Test wrong initial cache entry of UNINITIALIZED type when result is present.
+SET(WrongB_DIR "${VersionedD_DIR}" CACHE UNINITIALIZED "Wrong Value" FORCE)
+GET_PROPERTY(type CACHE WrongB_DIR PROPERTY TYPE)
+FIND_PACKAGE(WrongB 1.2 EXACT NAMES Baz)
+
+# Test wrong initial path when result is missing.
+SET(WrongC_DIR "${VersionedD_DIR}")
+FIND_PACKAGE(WrongC 1.3 EXACT QUIET NAMES Baz)
+
+# Test wrong initial cache entry of UNINITIALIZED type when result is missing.
+SET(WrongD_DIR "${VersionedD_DIR}" CACHE UNINITIALIZED "Wrong Value" FORCE)
+GET_PROPERTY(type CACHE WrongD_DIR PROPERTY TYPE)
+FIND_PACKAGE(WrongD 1.3 EXACT QUIET NAMES Baz)
+
 # HINTS should override the system but PATHS should not
 LIST(INSERT CMAKE_SYSTEM_PREFIX_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/A")
 FIND_PACKAGE(wibbleA NAMES wibble PATHS B)
@@ -95,6 +114,10 @@ SET(VersionedB_EXPECTED "lib/zot-3.1/zot-config.cmake")
 SET(VersionedC_EXPECTED "lib/cmake/zot-4.0/zot-config.cmake")
 SET(VersionedD_EXPECTED "Baz 1.1/BazConfig.cmake")
 SET(VersionedE_EXPECTED "Baz 1.2/CMake/BazConfig.cmake")
+SET(WrongA_EXPECTED "${VersionedE_EXPECTED}")
+SET(WrongB_EXPECTED "${VersionedE_EXPECTED}")
+SET(WrongC_MISSING "WrongC_DIR-NOTFOUND")
+SET(WrongD_MISSING "WrongD_DIR-NOTFOUND")
 SET(wibbleA_EXPECTED "A/wibble-config.cmake")
 SET(wibbleB_EXPECTED "B/wibble-config.cmake")
 SET(RecursiveA_EXPECTED "lib/RecursiveA/recursivea-config.cmake")
@@ -103,7 +126,14 @@ SET(RecursiveC_EXPECTED "lib/zot-3.1/zot-config.cmake")
 
 # Check the results.
 FOREACH(p ${PACKAGES})
-  IF(${p}_FOUND)
+  IF(DEFINED ${p}_MISSING)
+    # Check and report failure.
+    IF(NOT "${${p}_DIR}" STREQUAL "${${p}_MISSING}")
+      MESSAGE(SEND_ERROR
+        "Package ${p} should have been [${${p}_MISSING}] but "
+        "was [${${p}_DIR}]")
+    ENDIF()
+  ELSEIF(${p}_FOUND)
     # Convert to relative path for comparison to expected location.
     FILE(RELATIVE_PATH REL_${p}_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}"
       "${${p}_CONFIG}")
@@ -119,9 +149,9 @@ FOREACH(p ${PACKAGES})
         "Package ${p} should have been [${${p}_EXPECTED}] but "
         "was [${REL_${p}_CONFIG}]")
     ENDIF(NOT "${REL_${p}_CONFIG}" STREQUAL "${${p}_EXPECTED}")
-  ELSE(${p}_FOUND)
+  ELSE()
     MESSAGE(SEND_ERROR "Package ${p} not found!")
-  ENDIF(${p}_FOUND)
+  ENDIF()
 ENDFOREACH(p)
 
 # Check that version information was extracted.

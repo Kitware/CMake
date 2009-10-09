@@ -286,11 +286,6 @@ public:
                           bool force = false);
 
   /**
-   * Update the variable scope to make the cache definition visible.
-   */
-  void UseCacheDefinition(cmCacheManager::CacheIterator const& it);
-
-  /**
    * Add bool variable definition to the build. 
    */
   void AddDefinition(const char* name, bool);
@@ -792,6 +787,8 @@ public:
   const char *GetPropertyOrDefinition(const char *prop);
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);
+
+  const char* GetFeature(const char* feature, const char* config);
 
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };

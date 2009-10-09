@@ -55,6 +55,13 @@ public:
     {
     this->SourceFileFlagsConstructed = false;
     }
+  cmTargetInternals(cmTargetInternals const& r)
+    {
+    this->SourceFileFlagsConstructed = false;
+    // Only some of these entries are part of the object state.
+    // Others not copied here are result caches.
+    this->SourceEntries = r.SourceEntries;
+    }
   typedef cmTarget::SourceFileFlags SourceFileFlags;
   std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
   bool SourceFileFlagsConstructed;
@@ -419,6 +426,19 @@ void cmTarget::DefineProperties(cmake *cm)
      "This property is initialized by the value of the variable "
      "CMAKE_INSTALL_RPATH_USE_LINK_PATH if it is set when a target is "
      "created.");
+
+  cm->DefineProperty
+    ("INTERPROCEDURAL_OPTIMIZATION", cmProperty::TARGET,
+     "Enable interprocedural optimization for a target.",
+     "If set to true, enables interprocedural optimizations "
+     "if they are known to be supported by the compiler.");
+
+  cm->DefineProperty
+    ("INTERPROCEDURAL_OPTIMIZATION_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration interprocedural optimization for a target.",
+     "This is a per-configuration version of INTERPROCEDURAL_OPTIMIZATION.  "
+     "If set, this property overrides the generic property "
+     "for the named configuration.");
 
   cm->DefineProperty
     ("LABELS", cmProperty::TARGET,
@@ -1015,6 +1035,27 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::FinishConfigure()
+{
+  // Erase any cached link information that might have been comptued
+  // on-demand during the configuration.  This ensures that build
+  // system generation uses up-to-date information even if other cache
+  // invalidation code in this source file is buggy.
+  this->ClearLinkMaps();
+
+  // Do old-style link dependency analysis.
+  this->AnalyzeLibDependencies(*this->Makefile);
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::ClearLinkMaps()
+{
+  this->Internal->LinkImplMap.clear();
+  this->Internal->LinkInterfaceMap.clear();
+  this->Internal->LinkClosureMap.clear();
+}
+
+//----------------------------------------------------------------------------
 cmListFileBacktrace const& cmTarget::GetBacktrace() const
 {
   return this->Internal->Backtrace;
@@ -1593,18 +1634,6 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::AddLinkLibrary(const std::string& lib,
-                              LinkLibraryType llt)
-{
-  this->AddFramework(lib.c_str(), llt);
-  cmTarget::LibraryID tmp;
-  tmp.first = lib;
-  tmp.second = llt;
-  this->LinkLibraries.push_back(tmp);
-  this->OriginalLinkLibraries.push_back(tmp);
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::NameResolvesToFramework(const std::string& libname)
 {
   return this->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->
@@ -1648,6 +1677,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   tmp.second = llt;
   this->LinkLibraries.push_back( tmp );
   this->OriginalLinkLibraries.push_back(tmp);
+  this->ClearLinkMaps();
 
   // Add the explicit dependency information for this target. This is
   // simply a set of libraries separated by ";". There should always
@@ -1993,13 +2023,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     }
 
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
-
-  // If imported information is being set, wipe out cached
-  // information.
-  if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
-    {
-    this->Internal->ImportInfoMap.clear();
-    }
+  this->MaybeInvalidatePropertyCache(prop);
 }
 
 //----------------------------------------------------------------------------
@@ -2010,12 +2034,20 @@ void cmTarget::AppendProperty(const char* prop, const char* value)
     return;
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET);
+  this->MaybeInvalidatePropertyCache(prop);
+}
 
-  // If imported information is being set, wipe out cached
-  // information.
+//----------------------------------------------------------------------------
+void cmTarget::MaybeInvalidatePropertyCache(const char* prop)
+{
+  // Wipe wipe out maps caching information affected by this property.
   if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
     {
     this->Internal->ImportInfoMap.clear();
+    }
+  if(!this->IsImported() && strncmp(prop, "LINK_INTERFACE_", 15) == 0)
+    {
+    this->ClearLinkMaps();
     }
 }
 
@@ -2242,6 +2274,26 @@ void cmTarget::GetTargetVersion(bool soversion,
       default: break;
       }
     }
+}
+
+//----------------------------------------------------------------------------
+const char* cmTarget::GetFeature(const char* feature, const char* config)
+{
+  if(config && *config)
+    {
+    std::string featureConfig = feature;
+    featureConfig += "_";
+    featureConfig += cmSystemTools::UpperCase(config);
+    if(const char* value = this->GetProperty(featureConfig.c_str()))
+      {
+      return value;
+      }
+    }
+  if(const char* value = this->GetProperty(feature))
+    {
+    return value;
+    }
+  return this->Makefile->GetFeature(feature, config);
 }
 
 //----------------------------------------------------------------------------
@@ -4309,12 +4361,12 @@ cmTargetInternalPointer::cmTargetInternalPointer()
 
 //----------------------------------------------------------------------------
 cmTargetInternalPointer
-::cmTargetInternalPointer(cmTargetInternalPointer const&)
+::cmTargetInternalPointer(cmTargetInternalPointer const& r)
 {
   // Ideally cmTarget instances should never be copied.  However until
   // we can make a sweep to remove that, this copy constructor avoids
   // allowing the resources (Internals) to be copied.
-  this->Pointer = new cmTargetInternals;
+  this->Pointer = new cmTargetInternals(*r.Pointer);
 }
 
 //----------------------------------------------------------------------------
@@ -4332,7 +4384,7 @@ cmTargetInternalPointer::operator=(cmTargetInternalPointer const& r)
   // we can make a sweep to remove that, this copy constructor avoids
   // allowing the resources (Internals) to be copied.
   cmTargetInternals* oldPointer = this->Pointer;
-  this->Pointer = new cmTargetInternals;
+  this->Pointer = new cmTargetInternals(*r.Pointer);
   delete oldPointer;
   return *this;
 }

@@ -810,7 +810,7 @@ void cmMakefile::ConfigureFinalPass()
   for (cmTargets::iterator l = this->Targets.begin();
        l != this->Targets.end(); l++)
     {
-    l->second.AnalyzeLibDependencies(*this);
+    l->second.FinishConfigure();
     }
 }
 
@@ -1642,57 +1642,6 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 }
 
-//----------------------------------------------------------------------------
-void cmMakefile::UseCacheDefinition(cmCacheManager::CacheIterator const& it)
-{
-  // Check for a local definition that might hide the cache value.
-  const char* name = it.GetName();
-  const char* def = this->Internal->VarStack.top().Get(name);
-  if(!def)
-    {
-    return;
-    }
-
-  // If the visible value will change then check policy CMP0015.
-  const char* cache = it.GetValue();
-  if(strcmp(def, cache) != 0)
-    {
-    cmOStringStream e;
-    switch (this->GetPolicyStatus(cmPolicies::CMP0015))
-      {
-      case cmPolicies::WARN:
-        e << "Local variable \"" << name << "\" is set to\n"
-          << "  " << def << "\n"
-          << "but the CACHE entry of the same name is set to\n"
-          << "  " << cache << "\n"
-          << "The local variable is hiding the cache value."
-          << "\n"
-          << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0015);
-        this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
-      case cmPolicies::OLD:
-        // OLD behavior is to leave local definition.
-        return;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        e << "Local variable \"" << name << "\" is set to\n"
-          << "  " << def << "\n"
-          << "but the CACHE entry of the same name is set to\n"
-          << "  " << cache << "\n"
-          << "This command is removing the local variable to expose "
-          << "the cache value."
-          << "\n"
-          << this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0015);
-        this->IssueMessage(cmake::FATAL_ERROR, e.str());
-      case cmPolicies::NEW:
-        // NEW behavior is to remove local definition (done below).
-        break;
-      }
-    }
-
-  // Remove the local definition to make the cache value visible.
-  this->RemoveDefinition(name);
-}
-
 
 void cmMakefile::AddCacheDefinition(const char* name, const char* value,
                                     const char* doc,
@@ -1719,7 +1668,10 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
       cmSystemTools::ExpandListArgument(val, files);
       for ( cc = 0; cc < files.size(); cc ++ )
         {
-        files[cc] = cmSystemTools::CollapseFullPath(files[cc].c_str());
+        if(!cmSystemTools::IsOff(files[cc].c_str()))
+          {
+          files[cc] = cmSystemTools::CollapseFullPath(files[cc].c_str());
+          }
         if ( cc > 0 )
           {
           nvalue += ";";
@@ -3311,6 +3263,31 @@ bool cmMakefile::GetPropertyAsBool(const char* prop)
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
+//----------------------------------------------------------------------------
+const char* cmMakefile::GetFeature(const char* feature, const char* config)
+{
+  // TODO: Define accumulation policy for features (prepend, append, replace).
+  // Currently we always replace.
+  if(config && *config)
+    {
+    std::string featureConfig = feature;
+    featureConfig += "_";
+    featureConfig += cmSystemTools::UpperCase(config);
+    if(const char* value = this->GetProperty(featureConfig.c_str()))
+      {
+      return value;
+      }
+    }
+  if(const char* value = this->GetProperty(feature))
+    {
+    return value;
+    }
+  if(cmLocalGenerator* parent = this->LocalGenerator->GetParent())
+    {
+    return parent->GetMakefile()->GetFeature(feature, config);
+    }
+  return 0;
+}
 
 cmTarget* cmMakefile::FindTarget(const char* name)
 {
@@ -3528,6 +3505,19 @@ void cmMakefile::DefineProperties(cmake *cm)
      "This read-only property specifies the regular expression used "
      "during dependency scanning to match include files that should "
      "be followed.  See the include_regular_expression command.", false);
+
+  cm->DefineProperty
+    ("INTERPROCEDURAL_OPTIMIZATION", cmProperty::DIRECTORY,
+     "Enable interprocedural optimization for targets in a directory.",
+     "If set to true, enables interprocedural optimizations "
+     "if they are known to be supported by the compiler.");
+
+  cm->DefineProperty
+    ("INTERPROCEDURAL_OPTIMIZATION_<CONFIG>", cmProperty::DIRECTORY,
+     "Per-configuration interprocedural optimization for a directory.",
+     "This is a per-configuration version of INTERPROCEDURAL_OPTIMIZATION.  "
+     "If set, this property overrides the generic property "
+     "for the named configuration.");
 
   cm->DefineProperty
     ("VARIABLES", cmProperty::DIRECTORY,

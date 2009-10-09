@@ -291,10 +291,8 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     this->LocalGenerator->AppendDefines
       (defines, this->Target->GetProperty(defPropName.c_str()), lang);
 
-    // Add language-specific flags.
-    this->LocalGenerator
-      ->AddLanguageFlags(flags, lang,
-                         this->LocalGenerator->ConfigurationName.c_str());
+    // Add language feature flags.
+    this->AddFeatureFlags(flags, lang);
 
     // Fortran-specific flags computed for this target.
     if(*l == "Fortran")
@@ -578,9 +576,6 @@ cmMakefileTargetGenerator
   sourceFile = this->Convert(sourceFile.c_str(),
                              cmLocalGenerator::NONE,
                              cmLocalGenerator::SHELL);
-  std::string objectFile = this->Convert(obj.c_str(),
-                                         cmLocalGenerator::START_OUTPUT,
-                                         cmLocalGenerator::SHELL);
 
   // Construct the build message.
   std::vector<std::string> no_commands;
@@ -1761,4 +1756,30 @@ void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   flag += (this->LocalGenerator->ConvertToLinkReference(
              this->ModuleDefinitionFile.c_str()));
   this->LocalGenerator->AppendFlags(flags, flag.c_str());
+}
+
+//----------------------------------------------------------------------------
+const char* cmMakefileTargetGenerator::GetFeature(const char* feature)
+{
+  return this->Target->GetFeature(feature, this->ConfigName);
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefileTargetGenerator::GetFeatureAsBool(const char* feature)
+{
+  return cmSystemTools::IsOn(this->GetFeature(feature));
+}
+
+//----------------------------------------------------------------------------
+void cmMakefileTargetGenerator::AddFeatureFlags(
+  std::string& flags, const char* lang
+  )
+{
+  // Add language-specific flags.
+  this->LocalGenerator->AddLanguageFlags(flags, lang, this->ConfigName);
+
+  if(this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION"))
+    {
+    this->LocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
+    }
 }

@@ -1,3 +1,58 @@
+Changes in CMake 2.8.0 RC 3
+- CTest Added OS Platform (cpu architecture) detection support to windows system
+- Several minor FindBoost changes to address posts on mailing list
+- Resolve #9685: Fix include dir to be correct path for gnutils
+- Fix color check for dependency scanning
+- Remove CMP00015 for now as it breaks more things than it fixes
+- Reduce duration of ctest_sleep arguments. Add SmallAndFast project. Replace kwsys with SmallAndFast to make CTestTest faster. (I will keep an eye on coverage results after this commit and make sure we still have equivalent ctest coverage.)
+-  Do not use -fPIC to link executables
+- Split Borland compiler information files
+- Trimmed off the newline from sw_vers output on mac, it could cause xml parsing errors if left in
+- Check for openssl-linked option with Qt 4.4+ before making ssl a dependency.
+- Make Complex test of CMakeLib more optional
+- Modernize FindVTK module
+- Fix find_package() when <pkg>_DIR is wrong
+- Do not collapse path of NOTFOUND values
+- More robust implicit link line detection regex
+- fix Xcode 30 generator
+- Use the correct CMake (the freshly built one) to drive the CMakeWizardTest.
+- Support more special characters in file(STRINGS)
+- Log implicit link line detection regex
+- speedup C dependency scanning even more
+- Avoid non-root copies of root-only targets
+- Added better OS information for Mac OS X
+- Use work-around from bug 4772 for C++ and Fortran
+- FortranCInterface: Mangling for Intel on Windows
+- cmake-gui don't allow consecutive generates without a configure.
+- Fix Preprocess test for Intel on Windows
+- Teach intel compiler on windows to place .lib files and .pdb files.
+- CPack: Fix bash-isms in launch script
+- BUG: #0009648 Change "The following tests FAILED" message to print on stdout rather than stderr
+- Avoid (Unix|Windows)Paths.cmake multiple include
+- When getting include dirs for moc, also watch for framework includes and use -F instead of -I.
+- Find locally installed software first
+- Add '#!/bin/sh' to cygwin-package.sh
+- Fix permsissions of installed SquishRunTestCase.sh
+- Fix module docs to be manpage (groff) friendly
+- Support GNU/kFreeBSD
+- Remove old Encoding field from CMake.desktop
+- FindQt3: Prefer (moc|uic)-qt3 names over (moc|uic)
+- Match width of ctest "Start xx: " line to line up with the end test line
+- Remove old license from FindPkgConfig.cmake module
+- Test target link information invalidation
+- Invalidate target link info when necessary
+- Use new style header generation and get rid of OBJECT_DEPENDS in tutorial
+- Fix issue #8649 - move the location of CPACK_NSIS_EXTRA_INSTALL_COMMANDS so that it is not excluded from execution when 'Do not create shortcuts' is checked.
+- add the additional features for the dbus macros from KDE's FindQt4.cmake
+fc9f7a5 Fix warnings in CMake source code.
+- Correct some typos in error messages in the string command. Add a test that covers more of the code implemented in cmStringCommand.cxx, especially the error handlers.
+- Create INTERPROCEDURAL_OPTIMIZATION build feature
+- Document CMAKE_CURRENT_LIST_FILE more precisely
+- Fix the documentation to say what it really does. Bug #9638
+- document how the minimum version can be specified
+- Fix warnings in CMake source code. Suppress rampant warnings emanating from Qt files.
+- Add documentation for Cocoa flag and move Motif under X11 flag.
+
 Changes in CMake 2.8.0 RC 2
 - Fix FindQt4 so that QtHelp depends on QtNetwork
 - Add missing copyright notice to CMake.cmake module

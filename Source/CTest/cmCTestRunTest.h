@@ -46,7 +46,7 @@ public:
   bool CheckOutput();
 
   //launch the test process, return whether it started correctly
-  bool StartTest();
+  bool StartTest(size_t total);
   //capture and report the test results
   bool EndTest(size_t completed, size_t total, bool started);
   //Called by ctest -N to log the command string

@@ -56,7 +56,18 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Full path to the listfile currently being processed.",
      "As CMake processes the listfiles in your project this "
      "variable will always be set to the one currently being "
-     "processed. See also CMAKE_PARENT_LIST_FILE.",false,
+     "processed.  "
+     "The value has dynamic scope.  "
+     "When CMake starts processing commands in a source file "
+     "it sets this variable to the location of the file.  "
+     "When CMake finishes processing commands from the file it "
+     "restores the previous value.  "
+     "Therefore the value of the variable inside a macro or "
+     "function is the file invoking the bottom-most entry on "
+     "the call stack, not the file containing the macro or "
+     "function definition."
+     "\n"
+     "See also CMAKE_PARENT_LIST_FILE.",false,
      "Variables that Provide Information");
 
   cm->DefineProperty

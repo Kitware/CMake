@@ -321,8 +321,19 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
     << "\" \"" << outFileName << "\"";
   std::string output;
   int retVal = 1;
-  bool res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
-    &retVal, 0, this->GeneratorVerbose, 0);
+  int numTries = 4;
+  bool res;
+  while(numTries > 0)
+    {
+    res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
+                                          &retVal, 0, this->GeneratorVerbose, 
+                                          0);
+    if(res && retVal)
+      {
+      numTries = -1;
+      }
+    numTries--;
+    }
   if ( !res || retVal )
     {
     cmGeneratedFileStream ofs(tmpFile.c_str());

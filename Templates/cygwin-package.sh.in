@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # this is a sample shell script used for building a cmake
 # based project for a cygwin setup package.
 

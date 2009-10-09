@@ -213,27 +213,10 @@ void cmGlobalVisualStudio6Generator
       }
     else
       {
-      bool skip = false;
-      // if it is a global target or the check build system target
-      // or the all_build target
-      // then only use the one that is for the root
-      if(target->GetType() == cmTarget::GLOBAL_TARGET
-         || !strcmp(target->GetName(), this->GetAllTargetName()))
-        {
-        if(target->GetMakefile() != root->GetMakefile())
-          {
-          skip = true;
-          }
-        }
-      // if not skipping the project then write it into the
-      // solution
-      if(!skip)
-        {
-        std::string dspname = GetVS6TargetName(target->GetName());
-        std::string dir = target->GetMakefile()->GetStartOutputDirectory();
-        dir = root->Convert(dir.c_str(), cmLocalGenerator::START_OUTPUT);
-        this->WriteProject(fout, dspname.c_str(), dir.c_str(), *target);
-        }
+      std::string dspname = GetVS6TargetName(target->GetName());
+      std::string dir = target->GetMakefile()->GetStartOutputDirectory();
+      dir = root->Convert(dir.c_str(), cmLocalGenerator::START_OUTPUT);
+      this->WriteProject(fout, dspname.c_str(), dir.c_str(), *target);
       }
     }
 

@@ -81,7 +81,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   cmCTestRunTest* testRun = new cmCTestRunTest(this->TestHandler);
   testRun->SetIndex(test);
   testRun->SetTestProperties(this->Properties[test]);
-  if(testRun->StartTest())
+  if(testRun->StartTest(this->Total))
     {
     this->RunningTests.insert(testRun);
     }
@@ -251,7 +251,8 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     this->TestRunningMap[test] = false;
     this->RunningTests.erase(p);
     this->WriteCheckpoint(test);
-    this->WriteCostData(test, p->GetTestResults().ExecutionTime);
+    this->WriteCostData(test, static_cast<float>(
+      p->GetTestResults().ExecutionTime));
     this->RunningCount -= GetProcessorsUsed(test);
     delete p;
     }
@@ -276,7 +277,7 @@ void cmCTestMultiProcessHandler::ReadCostData()
         cmSystemTools::SplitString(line.c_str(), ' ');
 
       int index = atoi(parts[0].c_str());
-      float cost = atof(parts[1].c_str());
+      float cost = static_cast<float>(atof(parts[1].c_str()));
       if(this->Properties[index] && this->Properties[index]->Cost == 0)
         {
         this->Properties[index]->Cost = cost;

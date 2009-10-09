@@ -920,7 +920,7 @@ void cmCursesMainForm::HandleInput()
         {
         if ( this->SearchString.size() < static_cast<std::string::size_type>(x-10) )
           {
-          this->SearchString += key;
+          this->SearchString += static_cast<char>(key);
           }
         }
       else if ( key == ctrl('h') || key == KEY_BACKSPACE || key == KEY_DC )

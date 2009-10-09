@@ -2646,18 +2646,18 @@ void cmGlobalXCodeGenerator
       {
       osxArch = "$(ARCHS_STANDARD_32_64_BIT)";
       }
-    else if(this->XcodeVersion <= 25)
+    else if(this->XcodeVersion == 31)
       {
-#ifdef __i386
-      osxArch = "i386";
-#endif
+      osxArch = "$(ARCHS_STANDARD_32_BIT)";
+      }
+    else if(this->XcodeVersion <= 30)
+      {
 #ifdef __ppc__
       osxArch = "ppc";
 #endif
-      }
-    else
-      {
-      osxArch = "$(ARCHS_STANDARD_32_BIT)";
+#ifdef __i386
+      osxArch = "i386";
+#endif
       }
     buildSettings->AddAttribute("ONLY_ACTIVE_ARCH",
                                 this->CreateString("YES"));

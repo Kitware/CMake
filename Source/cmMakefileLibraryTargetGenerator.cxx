@@ -113,6 +113,12 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
     }
   linkRuleVar += "_CREATE_STATIC_LIBRARY";
 
+  if(this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION") &&
+     this->Makefile->GetDefinition((linkRuleVar+"_IPO").c_str()))
+    {
+    linkRuleVar += "_IPO";
+    }
+
   std::string extraFlags;
   this->LocalGenerator->AppendFlags
     (extraFlags,this->Target->GetProperty("STATIC_LIBRARY_FLAGS"));
@@ -671,9 +677,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       vars.TargetInstallNameDir = install_name_dir.c_str();
       }
     }
+
+  // Add language feature flags.
   std::string langFlags;
-  this->LocalGenerator
-    ->AddLanguageFlags(langFlags, linkLanguage, this->ConfigName);
+  this->AddFeatureFlags(langFlags, linkLanguage);
+
   // remove any language flags that might not work with the
   // particular os
   if(forbiddenFlagVar)

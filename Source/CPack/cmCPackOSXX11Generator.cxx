@@ -149,8 +149,21 @@ int cmCPackOSXX11Generator::CompressFiles(const char* outFileName,
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Compress disk image using command: " 
                 << dmgCmd.str().c_str() << std::endl);
-  bool res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
-    &retVal, 0, this->GeneratorVerbose, 0);
+  // since we get random dashboard failures with this one
+  // try running it more than once
+  int numTries = 4;
+  bool res;
+  while(numTries > 0)
+    {
+    res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
+                                          &retVal, 0, 
+                                          this->GeneratorVerbose, 0);
+    if(res && retVal)
+      {
+      numTries = -1;
+      }
+    numTries--;
+    }
   if ( !res || retVal )
     {
     cmGeneratedFileStream ofs(tmpFile.c_str());

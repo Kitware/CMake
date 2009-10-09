@@ -199,11 +199,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string flags;
   std::string linkFlags;
 
-  // Add flags to deal with shared libraries.  Any library being
-  // linked in might be shared, so always use shared flags for an
-  // executable.
-  this->LocalGenerator->AddSharedFlags(linkFlags, linkLanguage, true);
-
   // Add flags to create an executable.
   this->LocalGenerator->
     AddConfigVariableFlags(linkFlags, "CMAKE_EXE_LINKER_FLAGS",
@@ -231,9 +226,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       (linkFlags, this->Makefile->GetDefinition(export_flag_var.c_str()));
     }
 
-  // Add language-specific flags.
-  this->LocalGenerator
-    ->AddLanguageFlags(flags, linkLanguage, this->ConfigName);
+  // Add language feature flags.
+  this->AddFeatureFlags(flags, linkLanguage);
 
   // Add target-specific linker flags.
   this->LocalGenerator->AppendFlags

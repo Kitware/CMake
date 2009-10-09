@@ -183,9 +183,6 @@ public:
                       const char *target, const char* lib,
                       LinkLibraryType llt);
 
-  void AddLinkLibrary(const std::string& lib,
-                      LinkLibraryType llt);
-
   void MergeLinkLibraries( cmMakefile& mf, const char* selfname,
                            const LinkLibraryVectorType& libs );
 
@@ -222,7 +219,8 @@ public:
   ///! Get the utilities used by this target
   std::set<cmStdString>const& GetUtilities() const { return this->Utilities; }
 
-  void AnalyzeLibDependencies( const cmMakefile& mf );
+  /** Finalize the target at the end of the Configure step.  */
+  void FinishConfigure();
 
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);
@@ -231,6 +229,8 @@ public:
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);
   void CheckProperty(const char* prop, cmMakefile* context);
+
+  const char* GetFeature(const char* feature, const char* config);
 
   bool IsImported() const {return this->IsImportedTarget;}
 
@@ -490,6 +490,8 @@ private:
                            const LibraryID& lib,
                            DependencyMap& dep_map);
 
+  void AnalyzeLibDependencies( const cmMakefile& mf );
+
   const char* GetSuffixVariableInternal(bool implib);
   const char* GetPrefixVariableInternal(bool implib);
   std::string GetFullNameInternal(const char* config, bool implib);
@@ -564,6 +566,10 @@ private:
   void ComputeLinkImplementation(const char* config,
                                  LinkImplementation& impl);
   void ComputeLinkClosure(const char* config, LinkClosure& lc);
+
+  void ClearLinkMaps();
+
+  void MaybeInvalidatePropertyCache(const char* prop);
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.

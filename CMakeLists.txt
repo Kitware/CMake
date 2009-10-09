@@ -315,7 +315,7 @@ ENDMACRO (CMAKE_BUILD_UTILITIES)
 SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 8)
 SET(CMake_VERSION_PATCH 0)
-SET(CMake_VERSION_RC 2)
+SET(CMake_VERSION_RC 3)
 
 # We use odd minor numbers for development versions.
 # Use a date for the development patch level.
@@ -460,9 +460,9 @@ INSTALL(
   DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                         GROUP_READ GROUP_EXECUTE
                         WORLD_READ WORLD_EXECUTE
-  PATTERN "*.sh.in" PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
-                                GROUP_READ GROUP_EXECUTE
-                                WORLD_READ WORLD_EXECUTE
+  PATTERN "*.sh*" PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
+                              GROUP_READ GROUP_EXECUTE
+                              WORLD_READ WORLD_EXECUTE
   PATTERN "CVS" EXCLUDE
   )
 

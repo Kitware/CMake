@@ -1951,15 +1951,6 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     flagsVar += "_FLAGS";
     this->AppendFlags(flags, this->Makefile->GetDefinition(flagsVar.c_str()));
     }
-
-  // Add flags specific to shared builds.
-  if(cmSystemTools::IsOn(this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
-    {
-    flagsVar = "CMAKE_SHARED_BUILD_";
-    flagsVar += lang;
-    flagsVar += "_FLAGS";
-    this->AppendFlags(flags, this->Makefile->GetDefinition(flagsVar.c_str()));
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -2078,6 +2069,26 @@ void cmLocalGenerator::AppendDefines(std::string& defines,
         defines += "=";
         defines += this->EscapeForShell(di->c_str() + eq + 1, true);
         }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AppendFeatureOptions(
+  std::string& flags, const char* lang, const char* feature)
+{
+  std::string optVar = "CMAKE_";
+  optVar += lang;
+  optVar += "_COMPILE_OPTIONS_";
+  optVar += feature;
+  if(const char* optionList = this->Makefile->GetDefinition(optVar.c_str()))
+    {
+    std::vector<std::string> options;
+    cmSystemTools::ExpandListArgument(optionList, options);
+    for(std::vector<std::string>::const_iterator oi = options.begin();
+        oi != options.end(); ++oi)
+      {
+      this->AppendFlags(flags, this->EscapeForShell(oi->c_str()).c_str());
       }
     }
 }

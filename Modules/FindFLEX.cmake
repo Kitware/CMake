@@ -26,23 +26,23 @@
 # where  <FlexTarget>  and <BisonTarget>  are  the  first parameters  of
 # respectively FLEX_TARGET and BISON_TARGET macros.
 #
-#====================================================================
-# Example:
+#  ====================================================================
+#  Example:
 #
-#  find_package(BISON)
-#  find_package(FLEX)
+#   find_package(BISON)
+#   find_package(FLEX)
 #
-#  BISON_TARGET(MyParser parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp
-#  FLEX_TARGET(MyScanner lexer.l  ${CMAKE_CURRENT_BIANRY_DIR}/lexer.cpp)
-#  ADD_FLEX_BISON_DEPENDENCY(MyScanner MyParser)
+#   BISON_TARGET(MyParser parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp
+#   FLEX_TARGET(MyScanner lexer.l  ${CMAKE_CURRENT_BIANRY_DIR}/lexer.cpp)
+#   ADD_FLEX_BISON_DEPENDENCY(MyScanner MyParser)
 #
-#  include_directories(${CMAKE_CURRENT_BINARY_DIR})
-#  add_executable(Foo
-#     Foo.cc
-#     ${BISON_MyParser_OUTPUTS}
-#     ${FLEX_MyScanner_OUTPUTS}
-#  )
-#====================================================================
+#   include_directories(${CMAKE_CURRENT_BINARY_DIR})
+#   add_executable(Foo
+#      Foo.cc
+#      ${BISON_MyParser_OUTPUTS}
+#      ${FLEX_MyScanner_OUTPUTS}
+#   )
+#  ====================================================================
 
 #=============================================================================
 # Copyright 2009 Kitware, Inc.

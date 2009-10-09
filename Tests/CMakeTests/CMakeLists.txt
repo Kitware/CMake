@@ -22,6 +22,14 @@ AddCMakeTest(ConfigureFile "")
 AddCMakeTest(SeparateArguments "")
 AddCMakeTest(ImplicitLinkInfo "")
 AddCMakeTest(ModuleNotices "")
+AddCMakeTest(String "")
+AddCMakeTest(Math "")
+AddCMakeTest(CMakeMinimumRequired "")
+
+SET(EndStuff_PreArgs
+  "-Ddir:STRING=${CMAKE_CURRENT_BINARY_DIR}/EndStuffTest"
+  )
+AddCMakeTest(EndStuff "${EndStuff_PreArgs}")
 
 SET(GetPrerequisites_PreArgs
   "-DCTEST_CONFIGURATION_TYPE:STRING=\\\${CTEST_CONFIGURATION_TYPE}"

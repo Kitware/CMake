@@ -77,6 +77,14 @@ set(linux64_pgf90_libs "pgf90;pgf90_rpm1;pgf902;pgf90rtl;pgftnrtl;nspgc;pgc;rt;p
 set(linux64_pgf90_dirs "/opt/compiler/pgi/linux86-64/8.0-3/lib;/usr/lib64;/usr/lib64/gcc/x86_64-suse-linux/4.1.2")
 list(APPEND platforms linux64_pgf90)
 
+# gcc dummy.c -v # in strange path
+set(linux64_test1_text "
+/this/might/match/as/a/linker/ld/but/it/is/not because the ld is not the last path component
+${linux64_gcc_text}")
+set(linux64_test1_libs "${linux64_gcc_libs}")
+set(linux64_test1_dirs "${linux64_gcc_dirs}")
+list(APPEND platforms linux64_test1)
+
 #-----------------------------------------------------------------------------
 # Sun
 
@@ -339,7 +347,7 @@ list(APPEND platforms msys_g77)
 # Test parsing for all above examples.
 
 foreach(p IN LISTS platforms)
-  cmake_parse_implicit_link_info("${${p}_text}" libs dirs)
+  cmake_parse_implicit_link_info("${${p}_text}" libs dirs log)
 
   foreach(v libs dirs)
     if(NOT "${${v}}" STREQUAL "${${p}_${v}}")
@@ -349,6 +357,8 @@ foreach(p IN LISTS platforms)
         "  [${${p}_${v}}]\n"
         "but got\n"
         "  [${${v}}]\n"
+        "Parse log was:\n"
+        "${log}"
         )
     endif()
   endforeach()

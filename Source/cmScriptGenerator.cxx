@@ -53,7 +53,7 @@ static void cmScriptGeneratorEncodeConfig(const char* config,
     if(*c >= 'a' && *c <= 'z')
       {
       result += "[";
-      result += *c + ('A' - 'a');
+      result += static_cast<char>(*c + 'A' - 'a');
       result += *c;
       result += "]";
       }
@@ -61,7 +61,7 @@ static void cmScriptGeneratorEncodeConfig(const char* config,
       {
       result += "[";
       result += *c;
-      result += *c + ('a' - 'A');
+      result += static_cast<char>(*c + 'a' - 'A');
       result += "]";
       }
     else

@@ -172,7 +172,10 @@ cmHexFileConverter::FileType cmHexFileConverter::DetermineFileType(
     return Binary;
     }
 
-  fgets(buf, 1024, inFile);
+  if(!fgets(buf, 1024, inFile))
+    {
+    buf[0] = 0;
+    }
   fclose(inFile);
   FileType type = Binary;
   unsigned int minLineLength = 0;

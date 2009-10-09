@@ -1,7 +1,6 @@
 #  James Bigler, NVIDIA Corp (nvidia.com - jbigler)
 #
-#  Copyright (c) 2008-2009
-#  NVIDIA Corp.
+#  Copyright (c) 2008 - 2009 NVIDIA Corporation.  All rights reserved.
 #
 #  This code is licensed under the MIT License.  See the FindCUDA.cmake script
 #  for the text of the license.
@@ -149,12 +148,6 @@ endmacro()
 cuda_execute_process(
   "Removing ${generated_file}"
   COMMAND "${CMAKE_COMMAND}" -E remove "${generated_file}"
-  )
-
-# Make sure the output directory is present
-cuda_execute_process(
-  "Creating output directory: ${generated_file_path}"
-  COMMAND "${CMAKE_COMMAND}" -E make_directory "${generated_file_path}"
   )
 
 # Generate the dependency file

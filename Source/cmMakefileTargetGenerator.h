@@ -220,6 +220,13 @@ protected:
   // Helper to add flag for windows .def file.
   void AddModuleDefinitionFlag(std::string& flags);
 
+  // Add language feature flags.
+  void AddFeatureFlags(std::string& flags, const char* lang);
+
+  // Feature query methods.
+  const char* GetFeature(const char* feature);
+  bool GetFeatureAsBool(const char* feature);
+
   //==================================================================
   // Convenience routines that do nothing more than forward to
   // implementaitons

@@ -289,34 +289,16 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       }
     else
       {
-      bool skip = false;
-      // if it is a global target or the check build system target
-      // or the all_build target
-      // then only use the one that is for the root
-      if(target->GetType() == cmTarget::GLOBAL_TARGET
-         || !strcmp(target->GetName(), CMAKE_CHECK_BUILD_SYSTEM_TARGET)
-         || !strcmp(target->GetName(), this->GetAllTargetName()))
+      const char *vcprojName =
+        target->GetProperty("GENERATOR_FILE_NAME");
+      if(vcprojName)
         {
-        if(target->GetMakefile() != root->GetMakefile())
-          {
-          skip = true;
-          }
-        }
-      // if not skipping the project then write it into the 
-      // solution
-      if(!skip)
-        { 
-        const char *vcprojName = 
-          target->GetProperty("GENERATOR_FILE_NAME");
-        if(vcprojName)
-          {
-          cmMakefile* tmf = target->GetMakefile();
-          std::string dir = tmf->GetStartOutputDirectory();
-          dir = root->Convert(dir.c_str(), 
-                              cmLocalGenerator::START_OUTPUT);
-          this->WriteProject(fout, vcprojName, dir.c_str(),
-                             *target);
-          }
+        cmMakefile* tmf = target->GetMakefile();
+        std::string dir = tmf->GetStartOutputDirectory();
+        dir = root->Convert(dir.c_str(),
+                            cmLocalGenerator::START_OUTPUT);
+        this->WriteProject(fout, vcprojName, dir.c_str(),
+                           *target);
         }
       }
     }
@@ -631,6 +613,13 @@ cmGlobalVisualStudio7Generator
     dir += config;
     dir += suffix;
     }
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio7Generator::IsRootOnlyTarget(cmTarget* target)
+{
+  return (this->cmGlobalVisualStudioGenerator::IsRootOnlyTarget(target) ||
+          strcmp(target->GetName(), CMAKE_CHECK_BUILD_SYSTEM_TARGET) == 0);
 }
 
 bool cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,

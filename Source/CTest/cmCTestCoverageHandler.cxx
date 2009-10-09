@@ -361,9 +361,6 @@ int cmCTestCoverageHandler::ProcessHandler()
   cmSystemTools::ConvertToUnixSlashes(sourceDir);
   cmSystemTools::ConvertToUnixSlashes(binaryDir);
 
-  std::string asfGlob = sourceDir + "/*";
-  std::string abfGlob = binaryDir + "/*";
-
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "Performing coverage" << std::endl);
 
   cmCTestCoverageHandlerContainer cont;
@@ -1590,13 +1587,13 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
       std::string shortFileName =
         this->CTest->GetShortPathToFile(file.c_str());
 
-      float cper = percentBranch + percentFunction;
+      float cper = static_cast<float>(percentBranch + percentFunction);
       if(totalBranches > 0)
         {
         cper /= 2.0f;
         }
       percent_coverage += cper;
-      float cmet = percentFunction + percentBranch;
+      float cmet = static_cast<float>(percentFunction + percentBranch);
       if(totalBranches > 0)
         {
         cmet /= 2.0f;

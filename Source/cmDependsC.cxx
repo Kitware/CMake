@@ -149,10 +149,8 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
   std::set<cmStdString> dependencies;
   std::set<cmStdString> scanned;
 
-  // Use reserve to allocate enough memory for both strings,
+  // Use reserve to allocate enough memory for tempPathStr
   // so that during the loops no memory is allocated or freed
-  std::string cacheKey;
-  cacheKey.reserve(4*1024);
   std::string tempPathStr;
   tempPathStr.reserve(4*1024);
 
@@ -181,22 +179,8 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
       }
     else
       {
-      // With GCC distribution of STL, assigning to a string directly
-      // throws away the internal buffer of the left-hand-side.  We
-      // want to keep the pre-allocated buffer so we use C-style
-      // string assignment and then operator+=.  We could call
-      // .clear() instead of assigning to an empty string but the
-      // method does not exist on some older compilers.
-      cacheKey = "";
-      cacheKey += current.FileName;
-
-      for(std::vector<std::string>::const_iterator i = 
-            this->IncludePath.begin(); i != this->IncludePath.end(); ++i)
-        {
-        cacheKey+=*i;
-        }
       std::map<cmStdString, cmStdString>::iterator
-        headerLocationIt=this->HeaderLocationCache.find(cacheKey);
+        headerLocationIt=this->HeaderLocationCache.find(current.FileName);
       if (headerLocationIt!=this->HeaderLocationCache.end())
         {
         fullName=headerLocationIt->second;
@@ -214,16 +198,16 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
           }
         else
           {
-            tempPathStr += *i;
-            tempPathStr+="/";
-            tempPathStr+=current.FileName;
+          tempPathStr += *i;
+          tempPathStr+="/";
+          tempPathStr+=current.FileName;
           }
 
         // Look for the file in this location.
         if(cmSystemTools::FileExists(tempPathStr.c_str(), true))
           {
-            fullName = tempPathStr;
-            HeaderLocationCache[cacheKey]=fullName;
+          fullName = tempPathStr;
+          HeaderLocationCache[current.FileName]=fullName;
           break;
           }
         }

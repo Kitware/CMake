@@ -1,8 +1,7 @@
 #  James Bigler, NVIDIA Corp (nvidia.com - jbigler)
 #  Abe Stephens, SCI Institute -- http://www.sci.utah.edu/~abe/FindCuda.html
 #
-#  Copyright (c) 2008-2009
-#  NVIDIA Corp.
+#  Copyright (c) 2008 - 2009 NVIDIA Corporation.  All rights reserved.
 #
 #  Copyright (c) 2007-2009
 #  Scientific Computing and Imaging Institute, University of Utah

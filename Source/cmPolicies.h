@@ -50,7 +50,6 @@ public:
     CMP0012, // Strong handling of boolean constants
     CMP0013, // Duplicate binary directories not allowed
     CMP0014, // Input directories must have CMakeLists.txt
-    CMP0015, // set(CACHE) and option() make CACHE value visible
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.

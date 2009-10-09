@@ -269,10 +269,9 @@ namespace
       if (cmSystemTools::IsOff(def))
         {
         cmPolicies* policies = makefile->GetPolicies();
-        errorString = "You have used a variable or argument named \""
+        errorString = "A variable or argument named \""
           + newArg
-          + "\" in a conditional statement. Please be aware of issues "
-          + "related to policy CMP0012. "
+          + "\" appears in a conditional statement.  "
           + policies->GetPolicyWarning(cmPolicies::CMP0012);
         status = cmake::AUTHOR_WARNING;
         }
@@ -285,10 +284,9 @@ namespace
       if (!cmSystemTools::IsOff(def))
         {
         cmPolicies* policies = makefile->GetPolicies();
-        errorString = "You have used a variable or argument named \""
+        errorString = "A variable or argument named \""
           + newArg
-          + "\" in a conditional statement. Please be aware of issues "
-          + "related to policy CMP0012. "
+          + "\" appears in a conditional statement.  "
           + policies->GetPolicyWarning(cmPolicies::CMP0012);
         status = cmake::AUTHOR_WARNING;
         }

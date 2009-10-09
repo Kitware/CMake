@@ -574,16 +574,16 @@ int cmCTestTestHandler::ProcessHandler()
         }
       }
 
-    float percent = float(passed.size()) * 100.0f / total;
+    float percent = float(passed.size()) * 100.0f / float(total);
     if ( failed.size() > 0 &&  percent > 99)
       {
       percent = 99;
       }
-    
+
     cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
                << static_cast<int>(percent + .5) << "% tests passed, "
-               << failed.size() << " tests failed out of " 
-               << total << std::endl); 
+               << failed.size() << " tests failed out of "
+               << total << std::endl);
     if(this->CTest->GetLabelSummary())
       {
       this->PrintLabelSummary();
@@ -596,7 +596,7 @@ int cmCTestTestHandler::ProcessHandler()
     if (failed.size())
       {
       cmGeneratedFileStream ofs;
-      cmCTestLog(this->CTest, ERROR_MESSAGE, std::endl
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
                  << "The following tests FAILED:" << std::endl);
       this->StartLogFile("TestsFailed", ofs);
       
@@ -1982,7 +1982,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
           if ( key == "COST" )
             {
-            rtit->Cost = atof(val.c_str());
+            rtit->Cost = static_cast<float>(atof(val.c_str()));
             }
           if ( key == "RUN_SERIAL" )
             {

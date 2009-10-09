@@ -1,3 +1,27 @@
+
+#=============================================================================
+# Copyright 2006-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
+# Block multiple inclusion because "CMakeCInformation.cmake" includes
+# "Platform/${CMAKE_SYSTEM_NAME}" even though the generic module
+# "CMakeSystemSpecificInformation.cmake" already included it.
+# The extra inclusion is a work-around documented next to the include()
+# call, so this can be removed when the work-around is removed.
+IF(__UNIX_PATHS_INCLUDED)
+  RETURN()
+ENDIF()
+SET(__UNIX_PATHS_INCLUDED 1)
+
 SET(UNIX 1)
 
 # also add the install directory of the running cmake to the search directories
@@ -9,7 +33,7 @@ GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
 # search types.
 LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
   # Standard
-  / /usr /usr/local
+  /usr/local / /usr
 
   # CMake install location
   "${_CMAKE_INSTALL_DIR}"

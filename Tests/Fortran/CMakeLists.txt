@@ -149,8 +149,10 @@ if(TEST_MODULE_DEPENDS)
   # Make sure it uses the same build configuration as this test.
   if(CMAKE_CONFIGURATION_TYPES)
     set(External_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
+    set(External_BUILD_TYPE)
   else(CMAKE_CONFIGURATION_TYPES)
     set(External_CONFIG_TYPE)
+    set(External_BUILD_TYPE -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE})
   endif(CMAKE_CONFIGURATION_TYPES)
   add_custom_command(
     OUTPUT ${testf_BINARY_DIR}/ExternalProject
@@ -170,6 +172,7 @@ if(TEST_MODULE_DEPENDS)
                          -DCMAKE_Fortran_FLAGS_RELEASE:STRING=${CMAKE_Fortran_FLAGS_RELEASE}
                          -DCMAKE_Fortran_FLAGS_MINSIZEREL:STRING=${CMAKE_Fortran_FLAGS_MINSIZEREL}
                          -DCMAKE_Fortran_FLAGS_RELWITHDEBINFO:STRING=${CMAKE_Fortran_FLAGS_RELWITHDEBINFO}
+                         ${External_BUILD_TYPE}
          )
   add_custom_target(ExternalTarget ALL DEPENDS ${testf_BINARY_DIR}/ExternalProject)
 

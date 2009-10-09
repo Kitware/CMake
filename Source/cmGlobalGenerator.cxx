@@ -1953,12 +1953,24 @@ void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
     for (cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
       {
       cmTarget* target = &l->second;
+      if(this->IsRootOnlyTarget(target) &&
+         target->GetMakefile() != root->GetMakefile())
+        {
+        continue;
+        }
       // put the target in the set of original targets
       originalTargets.insert(target);
       // Get the set of targets that depend on target
       this->AddTargetDepends(target, projectTargets);
       }
     }
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalGenerator::IsRootOnlyTarget(cmTarget* target)
+{
+  return (target->GetType() == cmTarget::GLOBAL_TARGET ||
+          strcmp(target->GetName(), this->GetAllTargetName()) == 0);
 }
 
 //----------------------------------------------------------------------------

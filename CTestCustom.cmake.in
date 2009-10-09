@@ -25,6 +25,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "remark\\(1209"
   "stl_deque.h:1051"
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
+  "[Qq]t([Cc]ore|[Gg]ui).*warning.*conversion.*may alter its value"
   "Parser.cxx.*warning.*2111-D.*statement is unreachable"
   "CMakeSetupManifest.xml.*manifest authoring warning.*Unrecognized Element"
   )

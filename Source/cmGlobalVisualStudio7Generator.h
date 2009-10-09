@@ -133,6 +133,7 @@ protected:
 
   std::string ConvertToSolutionPath(const char* path);
 
+  virtual bool IsRootOnlyTarget(cmTarget* target);
   bool IsPartOfDefaultBuild(const char* project,
                             cmTarget* target);
   std::vector<std::string> Configurations;

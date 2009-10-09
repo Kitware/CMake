@@ -338,7 +338,7 @@ bool cmSystemTools::IsOn(const char* val)
   for(std::basic_string<char>::iterator c = v.begin();
       c != v.end(); c++)
     {
-    *c = toupper(*c);
+    *c = static_cast<char>(toupper(*c));
     }
   return (v == "ON" || v == "1" || v == "YES" || v == "TRUE" || v == "Y");
 }
@@ -371,7 +371,7 @@ bool cmSystemTools::IsOff(const char* val)
   for(std::basic_string<char>::iterator c = v.begin();
       c != v.end(); c++)
     {
-    *c = toupper(*c);
+    *c = static_cast<char>(toupper(*c));
     }
   return (v == "OFF" || v == "0" || v == "NO" || v == "FALSE" || 
           v == "N" || cmSystemTools::IsNOTFOUND(v.c_str()) || v == "IGNORE");
@@ -915,7 +915,10 @@ bool RunCommandViaPopen(const char* command,
 #endif
     return false;
     }
-  fgets(buffer, BUFFER_SIZE, cpipe);
+  if (!fgets(buffer, BUFFER_SIZE, cpipe))
+    {
+    buffer[0] = 0;
+    }
   while(!feof(cpipe))
     {
     if(verbose)
@@ -923,8 +926,10 @@ bool RunCommandViaPopen(const char* command,
       cmSystemTools::Stdout(buffer);
       }
     output += buffer;
-    buffer[0] = 0;
-    fgets(buffer, BUFFER_SIZE, cpipe);
+    if(!fgets(buffer, BUFFER_SIZE, cpipe))
+      {
+      buffer[0] = 0;
+      }
     }
 
   retVal = pclose(cpipe);

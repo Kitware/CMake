@@ -265,6 +265,7 @@ protected:
   virtual void GetTargetSets(TargetDependSet& projectTargets,
                              TargetDependSet& originalTargets,
                              cmLocalGenerator* root, GeneratorVector const&);
+  virtual bool IsRootOnlyTarget(cmTarget* target);
   void AddTargetDepends(cmTarget* target, TargetDependSet& projectTargets);
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);

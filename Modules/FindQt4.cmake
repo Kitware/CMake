@@ -14,6 +14,14 @@
 #   add_executable(myexe main.cpp)
 #   target_link_libraries(myexe ${QT_LIBRARIES})
 #
+# The minimum required version can be specified using the standard find_package()-syntax
+# (see example above). 
+# For compatibility with older versions of FindQt4.cmake it is also possible to
+# set the variable QT_MIN_VERSION to the minimum required version of Qt4 before the 
+# find_package(Qt4) command. 
+# If both are used, the version used in the find_package() command overrides the
+# one from QT_MIN_VERSION.
+#
 # When using the components argument, QT_USE_QT* variables are automatically set
 # for the QT_USE_FILE to pick up.  If one wishes to manually set them, the
 # available ones to set include:
@@ -90,18 +98,21 @@
 #        for all listed interface xml files
 #        the name will be automatically determined from the name of the xml file
 #
-#  macro QT4_ADD_DBUS_ADAPTOR(outfiles xmlfile parentheader parentclassname [basename] )
+#  macro QT4_ADD_DBUS_ADAPTOR(outfiles xmlfile parentheader parentclassname [basename] [classname])
 #        create a dbus adaptor (header and implementation file) from the xml file
 #        describing the interface, and add it to the list of sources. The adaptor
 #        forwards the calls to a parent class, defined in parentheader and named
 #        parentclassname. The name of the generated files will be
-#        <basename>adaptor.{cpp,h} where basename is the basename of the xml file.
+#        <basename>adaptor.{cpp,h} where basename defaults to the basename of the xml file.
+#        If <classname> is provided, then it will be used as the classname of the
+#        adaptor itself.
 #
-#  macro QT4_GENERATE_DBUS_INTERFACE( header [interfacename] )
+#  macro QT4_GENERATE_DBUS_INTERFACE( header [interfacename] OPTIONS ...)
 #        generate the xml interface file from the given header.
 #        If the optional argument interfacename is omitted, the name of the 
 #        interface file is constructed from the basename of the header with
 #        the suffix .xml appended.
+#        Options may be given to qdbuscpp2xml, such as those found when executing "qdbuscpp2xml --help"
 #
 #  macro QT4_CREATE_TRANSLATION( qm_files directories ... sources ... 
 #                                ts_files ... OPTIONS ...)
@@ -162,6 +173,9 @@
 #  QT_PHONON_FOUND          True if phonon was found.
 #  QT_QTSCRIPTTOOLS_FOUND   True if QtScriptTools was found.
 #
+#  QT_MAC_USE_COCOA    For Mac OS X, its whether Cocoa or Carbon is used.
+#                      In general, this should not be used, but its useful
+#                      when having platform specific code.
 #
 #  QT_DEFINITIONS   Definitions to use when compiling code that uses Qt.
 #                   You do not need to use this if you include QT_USE_FILE.
@@ -326,27 +340,27 @@ SET(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
 #  macro for asking qmake to process pro files
 MACRO(QT_QUERY_QMAKE outvar invar)
   IF(QT_QMAKE_EXECUTABLE)
-  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake/tmp.pro
-    "message(CMAKE_MESSAGE<$$${invar}>)")
+    FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake/tmp.pro
+         "message(CMAKE_MESSAGE<$$${invar}>)")
 
-  # Invoke qmake with the tmp.pro program to get the desired
-  # information.  Use the same variable for both stdout and stderr
-  # to make sure we get the output on all platforms.
-  EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
-    WORKING_DIRECTORY  
-    ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake
-    OUTPUT_VARIABLE _qmake_query_output
-    RESULT_VARIABLE _qmake_result
-    ERROR_VARIABLE _qmake_query_output )
-  
-  FILE(REMOVE_RECURSE 
-    "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake")
+    # Invoke qmake with the tmp.pro program to get the desired
+    # information.  Use the same variable for both stdout and stderr
+    # to make sure we get the output on all platforms.
+    EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
+      WORKING_DIRECTORY  
+      ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake
+      OUTPUT_VARIABLE _qmake_query_output
+      RESULT_VARIABLE _qmake_result
+      ERROR_VARIABLE _qmake_query_output )
 
-  IF(_qmake_result)
-    MESSAGE(WARNING " querying qmake for ${invar}.  qmake reported:\n${_qmake_query_output}")
-  ELSE(_qmake_result)
-    STRING(REGEX REPLACE ".*CMAKE_MESSAGE<([^>]*).*" "\\1" ${outvar} "${_qmake_query_output}")
-  ENDIF(_qmake_result)
+    FILE(REMOVE_RECURSE 
+         "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake")
+
+    IF(_qmake_result)
+      MESSAGE(WARNING " querying qmake for ${invar}.  qmake reported:\n${_qmake_query_output}")
+    ELSE(_qmake_result)
+      STRING(REGEX REPLACE ".*CMAKE_MESSAGE<([^>]*).*" "\\1" ${outvar} "${_qmake_query_output}")
+    ENDIF(_qmake_result)
 
   ENDIF(QT_QMAKE_EXECUTABLE)
 ENDMACRO(QT_QUERY_QMAKE)
@@ -406,17 +420,15 @@ IF (QT_QMAKE_EXECUTABLE)
     STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_qt_minor_vers "${QT_MIN_VERSION}")
     STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
 
-  # Suppport finding at least a particular version, for instance FIND_PACKAGE( Qt4 4.4.3 )
-  # This implementation is a hack to avoid duplicating code and make sure we stay
-  # source-compatible with CMake 2.6.x
-  # For CMake 2.8, we should not set QT_MIN_VERSION but only use Qt4_FIND_VERSION_MAJOR,
-  # Qt4_FIND_VERSION_MINOR, etc
-  IF( Qt4_FIND_VERSION )
-    SET( QT_MIN_VERSION ${Qt4_FIND_VERSION} )
-    SET( req_qt_major_vers ${Qt4_FIND_VERSION_MAJOR} )
-    SET( req_qt_minor_vers ${Qt4_FIND_VERSION_MINOR} )
-    SET( req_qt_patch_vers ${Qt4_FIND_VERSION_PATCH} )
-  ENDIF( Qt4_FIND_VERSION )
+    # Suppport finding at least a particular version, for instance FIND_PACKAGE( Qt4 4.4.3 )
+    # This implementation is a hack to avoid duplicating code and make sure we stay
+    # source-compatible with CMake 2.6.x
+    IF( Qt4_FIND_VERSION )
+      SET( QT_MIN_VERSION ${Qt4_FIND_VERSION} )
+      SET( req_qt_major_vers ${Qt4_FIND_VERSION_MAJOR} )
+      SET( req_qt_minor_vers ${Qt4_FIND_VERSION_MINOR} )
+      SET( req_qt_patch_vers ${Qt4_FIND_VERSION_PATCH} )
+    ENDIF( Qt4_FIND_VERSION )
 
     IF (NOT req_qt_major_vers EQUAL 4)
       MESSAGE( FATAL_ERROR "Invalid Qt version string given: \"${QT_MIN_VERSION}\", major version 4 is required, e.g. \"4.0.1\"")
@@ -431,27 +443,26 @@ IF (QT_QMAKE_EXECUTABLE)
     MATH(EXPR req_vers "${req_qt_major_vers}*10000 + ${req_qt_minor_vers}*100 + ${req_qt_patch_vers}")
     MATH(EXPR found_vers "${QT_VERSION_MAJOR}*10000 + ${QT_VERSION_MINOR}*100 + ${QT_VERSION_PATCH}")
 
-  # Support finding *exactly* a particular version, for instance FIND_PACKAGE( Qt4 4.4.3 EXACT )
-  # The 'else' branch should be removed for CMake 2.8
-  IF( Qt4_FIND_VERSION_EXACT )
-    IF(found_vers EQUAL req_vers)
-      SET( QT4_QMAKE_FOUND TRUE )
-    ELSE(found_vers EQUAL req_vers)
-      SET( QT4_QMAKE_FOUND FALSE )
+    # Support finding *exactly* a particular version, for instance FIND_PACKAGE( Qt4 4.4.3 EXACT )
+    IF( Qt4_FIND_VERSION_EXACT )
+      IF(found_vers EQUAL req_vers)
+        SET( QT4_QMAKE_FOUND TRUE )
+      ELSE(found_vers EQUAL req_vers)
+        SET( QT4_QMAKE_FOUND FALSE )
+        IF (found_vers LESS req_vers)
+          SET(QT4_INSTALLED_VERSION_TOO_OLD TRUE)
+        ELSE (found_vers LESS req_vers)
+          SET(QT4_INSTALLED_VERSION_TOO_NEW TRUE)
+        ENDIF (found_vers LESS req_vers)
+      ENDIF(found_vers EQUAL req_vers)
+    ELSE( Qt4_FIND_VERSION_EXACT )
       IF (found_vers LESS req_vers)
+        SET(QT4_QMAKE_FOUND FALSE)
         SET(QT4_INSTALLED_VERSION_TOO_OLD TRUE)
       ELSE (found_vers LESS req_vers)
-        SET(QT4_INSTALLED_VERSION_TOO_NEW TRUE)
+        SET(QT4_QMAKE_FOUND TRUE)
       ENDIF (found_vers LESS req_vers)
-    ENDIF(found_vers EQUAL req_vers)
-  ELSE( Qt4_FIND_VERSION_EXACT )
-    IF (found_vers LESS req_vers)
-      SET(QT4_QMAKE_FOUND FALSE)
-      SET(QT4_INSTALLED_VERSION_TOO_OLD TRUE)
-    ELSE (found_vers LESS req_vers)
-      SET(QT4_QMAKE_FOUND TRUE)
-    ENDIF (found_vers LESS req_vers)
-  ENDIF( Qt4_FIND_VERSION_EXACT )
+    ENDIF( Qt4_FIND_VERSION_EXACT )
   ENDIF (qt_version_tmp)
 
 ENDIF (QT_QMAKE_EXECUTABLE)
@@ -487,38 +498,38 @@ IF (QT4_QMAKE_FOUND)
   ENDIF (APPLE)
   
   # ask qmake for the binary dir
-  IF ((QT_LIBRARY_DIR AND NOT QT_BINARY_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_BINARY_DIR  OR  QT_QMAKE_CHANGED)
      EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
        ARGS "-query QT_INSTALL_BINS"
        OUTPUT_VARIABLE qt_bins )
      # make sure we have / and not \ as qmake gives on windows
      FILE(TO_CMAKE_PATH "${qt_bins}" qt_bins)
      SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "" FORCE)
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_BINARY_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_BINARY_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the include dir
-  IF ((QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR  OR  QT_QMAKE_CHANGED)
       EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
         ARGS "-query QT_INSTALL_HEADERS" 
         OUTPUT_VARIABLE qt_headers ) 
       # make sure we have / and not \ as qmake gives on windows
       FILE(TO_CMAKE_PATH "${qt_headers}" qt_headers)
       SET(QT_HEADERS_DIR ${qt_headers} CACHE INTERNAL "" FORCE)
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_HEADERS_DIR  OR  QT_QMAKE_CHANGED)
 
 
   # ask qmake for the documentation directory
-  IF ((QT_LIBRARY_DIR AND NOT QT_DOC_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_DOC_DIR  OR  QT_QMAKE_CHANGED)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_DOCS"
       OUTPUT_VARIABLE qt_doc_dir )
     # make sure we have / and not \ as qmake gives on windows
     FILE(TO_CMAKE_PATH "${qt_doc_dir}" qt_doc_dir)
     SET(QT_DOC_DIR ${qt_doc_dir} CACHE PATH "The location of the Qt docs" FORCE)
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_DOC_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_DOC_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the mkspecs directory
-  IF ((QT_LIBRARY_DIR AND NOT QT_MKSPECS_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_MKSPECS_DIR  OR  QT_QMAKE_CHANGED)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QMAKE_MKSPECS"
       OUTPUT_VARIABLE qt_mkspecs_dirs )
@@ -531,27 +542,27 @@ IF (QT4_QMAKE_FOUND)
     FIND_PATH(QT_MKSPECS_DIR qconfig.pri PATHS ${qt_mkspecs_dirs}
       DOC "The location of the Qt mkspecs containing qconfig.pri"
       NO_DEFAULT_PATH )
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_MKSPECS_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_MKSPECS_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the plugins directory
-  IF ((QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR  OR  QT_QMAKE_CHANGED)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_PLUGINS"
       OUTPUT_VARIABLE qt_plugins_dir )
     # make sure we have / and not \ as qmake gives on windows
     FILE(TO_CMAKE_PATH "${qt_plugins_dir}" qt_plugins_dir)
     SET(QT_PLUGINS_DIR ${qt_plugins_dir} CACHE PATH "The location of the Qt plugins" FORCE)
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the translations directory
-  IF ((QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR) OR QT_QMAKE_CHANGED)
+  IF (QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR  OR  QT_QMAKE_CHANGED)
     EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
       ARGS "-query QT_INSTALL_TRANSLATIONS"
       OUTPUT_VARIABLE qt_translations_dir )
     # make sure we have / and not \ as qmake gives on windows
     FILE(TO_CMAKE_PATH "${qt_translations_dir}" qt_translations_dir)
     SET(QT_TRANSLATIONS_DIR ${qt_translations_dir} CACHE PATH "The location of the Qt translations" FORCE)
-  ENDIF ((QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR) OR QT_QMAKE_CHANGED)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR  OR  QT_QMAKE_CHANGED)
 
   ########################################
   #
@@ -657,7 +668,7 @@ IF (QT4_QMAKE_FOUND)
       MESSAGE( FATAL_ERROR "Could NOT find QtCore header")
     ENDIF(Qt4_FIND_REQUIRED)
   ENDIF( NOT QT_INCLUDE_DIR)
-  
+
   # Make variables changeble to the advanced user
   MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_INCLUDE_DIR QT_DOC_DIR QT_MKSPECS_DIR
                     QT_PLUGINS_DIR QT_TRANSLATIONS_DIR)
@@ -724,9 +735,9 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_EDITION_DESKTOPLIGHT 1)
   ENDIF("${QT_EDITION}" MATCHES "DesktopLight")
 
-  
 
-  
+
+
   # find the libraries
   FOREACH(QT_MODULE ${QT_MODULES})
     STRING(TOUPPER ${QT_MODULE} _upper_qt_module)
@@ -865,10 +876,13 @@ IF (QT4_QMAKE_FOUND)
   _QT4_ADJUST_LIB_VARS(QTXMLPATTERNS)
   _QT4_ADJUST_LIB_VARS(PHONON)
   _QT4_ADJUST_LIB_VARS(QTCLUCENE)
-  _QT4_ADJUST_LIB_VARS(QTMOTIF)
   _QT4_ADJUST_LIB_VARS(QTSCRIPTTOOLS)
+ 
 
   # platform dependent libraries
+  IF(Q_WS_X11)
+    _QT4_ADJUST_LIB_VARS(QTMOTIF)
+  ENDIF(Q_WS_X11)
   IF(WIN32)
     _QT4_ADJUST_LIB_VARS(QTMAIN)
     _QT4_ADJUST_LIB_VARS(QAXSERVER)
@@ -1018,7 +1032,12 @@ IF (QT4_QMAKE_FOUND)
      GET_DIRECTORY_PROPERTY(_inc_DIRS INCLUDE_DIRECTORIES)
 
      FOREACH(_current ${_inc_DIRS})
-        SET(${_moc_flags} ${${_moc_flags}} "-I${_current}")
+        IF("${_current}" MATCHES ".framework/?$")
+          STRING(REGEX REPLACE "/[^/]+.framework" "" framework_path "${_current}")
+          SET(${_moc_flags} ${${_moc_flags}} "-F${framework_path}")
+        ELSE("${_current}" MATCHES ".framework/?$")
+          SET(${_moc_flags} ${${_moc_flags}} "-I${_current}")
+        ENDIF("${_current}" MATCHES ".framework/?$")
      ENDFOREACH(_current ${_inc_DIRS})
      
      GET_DIRECTORY_PROPERTY(_defines COMPILE_DEFINITIONS)
@@ -1067,6 +1086,7 @@ IF (QT4_QMAKE_FOUND)
 
   
   MACRO (QT4_GENERATE_MOC infile outfile )
+  # get include dirs and flags
      QT4_GET_MOC_FLAGS(moc_flags)
      GET_FILENAME_COMPONENT(abs_infile ${infile} ABSOLUTE)
      QT4_CREATE_MOC_COMMAND(${abs_infile} ${outfile} "${moc_flags}" "")
@@ -1174,8 +1194,9 @@ IF (QT4_QMAKE_FOUND)
   ENDMACRO(QT4_ADD_DBUS_INTERFACES)
   
   
-  MACRO(QT4_GENERATE_DBUS_INTERFACE _header) # _customName )
-    SET(_customName "${ARGV1}")
+  MACRO(QT4_GENERATE_DBUS_INTERFACE _header) # _customName OPTIONS -some -options )
+    QT4_EXTRACT_OPTIONS(_customName _qt4_dbus_options ${ARGN})
+
     GET_FILENAME_COMPONENT(_in_file ${_header} ABSOLUTE)
     GET_FILENAME_COMPONENT(_basename ${_header} NAME_WE)
     
@@ -1186,13 +1207,13 @@ IF (QT4_QMAKE_FOUND)
     ENDIF (_customName)
   
     ADD_CUSTOM_COMMAND(OUTPUT ${_target}
-        COMMAND ${QT_DBUSCPP2XML_EXECUTABLE} -o ${_target} ${_in_file}
+        COMMAND ${QT_DBUSCPP2XML_EXECUTABLE} ${_qt4_dbus_options} ${_in_file} -o ${_target}
         DEPENDS ${_in_file}
     )
   ENDMACRO(QT4_GENERATE_DBUS_INTERFACE)
   
   
-  MACRO(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optionalBasename )
+  MACRO(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optionalBasename _optionalClassName)
     GET_FILENAME_COMPONENT(_infile ${_xml_file} ABSOLUTE)
     
     SET(_optionalBasename "${ARGV4}")
@@ -1253,6 +1274,7 @@ IF (QT4_QMAKE_FOUND)
             IF(_match)
                FOREACH (_current_MOC_INC ${_match})
                   STRING(REGEX MATCH "[^ <\"]+\\.moc" _current_MOC "${_current_MOC_INC}")
+
                   GET_FILENAME_COMPONENT(_basename ${_current_MOC} NAME_WE)
                   IF(EXISTS ${_abs_PATH}/${_basename}.hpp)
                     SET(_header ${_abs_PATH}/${_basename}.hpp)
@@ -1343,7 +1365,7 @@ IF (QT4_QMAKE_FOUND)
       QT_UIC_EXECUTABLE AND QT_RCC_EXECUTABLE AND QT_QTCORE_LIBRARY)
     SET( QT4_FOUND "YES" )
     INCLUDE(FindPackageMessage)
-    FIND_PACKAGE_MESSAGE(Qt4 "Found Qt-Version ${QTVERSION}"
+    FIND_PACKAGE_MESSAGE(Qt4 "Found Qt-Version ${QTVERSION} (using ${QT_QMAKE_EXECUTABLE})"
       "[${QT_LIBRARY_DIR}][${QT_INCLUDE_DIR}][${QT_MOC_EXECUTABLE}][${QT_UIC_EXECUTABLE}][${QT_RCC_EXECUTABLE}]")
   ELSE( QT_LIBRARY_DIR AND QT_INCLUDE_DIR AND QT_MOC_EXECUTABLE AND
         QT_UIC_EXECUTABLE AND QT_RCC_EXECUTABLE AND QT_QTCORE_LIBRARY)
@@ -1497,12 +1519,21 @@ IF (QT4_QMAKE_FOUND)
   ENDIF(QT_QCONFIG MATCHES "system-zlib")
 
   ## openssl
-  IF(QT_QCONFIG MATCHES "openssl" AND NOT Q_WS_WIN)
-    FIND_PACKAGE(OpenSSL)
-    IF(OPENSSL_LIBRARIES)
-      SET(QT_QTNETWORK_LIB_DEPENDENCIES ${QT_QTNETWORK_LIB_DEPENDENCIES} ${OPENSSL_LIBRARIES})
-    ENDIF(OPENSSL_LIBRARIES)
-  ENDIF(QT_QCONFIG MATCHES "openssl" AND NOT Q_WS_WIN)
+  IF(NOT Q_WS_WIN)
+    SET(_QT_NEED_OPENSSL 0)
+    IF(QT_VERSION_MINOR LESS 4 AND QT_QCONFIG MATCHES "openssl")
+      SET(_QT_NEED_OPENSSL 1)
+    ENDIF(QT_VERSION_MINOR LESS 4 AND QT_QCONFIG MATCHES "openssl")
+    IF(QT_VERSION_MINOR GREATER 3 AND QT_QCONFIG MATCHES "openssl-linked")
+      SET(_QT_NEED_OPENSSL 1)
+    ENDIF(QT_VERSION_MINOR GREATER 3 AND QT_QCONFIG MATCHES "openssl-linked")
+    IF(_QT_NEED_OPENSSL)
+      FIND_PACKAGE(OpenSSL)
+      IF(OPENSSL_LIBRARIES)
+        SET(QT_QTNETWORK_LIB_DEPENDENCIES ${QT_QTNETWORK_LIB_DEPENDENCIES} ${OPENSSL_LIBRARIES})
+      ENDIF(OPENSSL_LIBRARIES)
+    ENDIF(_QT_NEED_OPENSSL)
+  ENDIF(NOT Q_WS_WIN)
   
   ## dbus
   IF(QT_QCONFIG MATCHES "dbus")
