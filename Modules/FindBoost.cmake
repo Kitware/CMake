@@ -1,6 +1,11 @@
 # - Try to find Boost include dirs and libraries
 # Usage of this module as follows:
 #
+# NOTE: Take note of the Boost_ADDITIONAL_VERSIONS variable below.
+# Due to Boost naming conventions and limitations in CMake this find
+# module is NOT future safe with respect to Boost version numbers,
+# and may break.
+#
 # == Using Header-Only libraries from within Boost: ==
 #
 #   find_package( Boost 1.36.0 )
@@ -65,7 +70,7 @@
 # omit the 3rd version number from include paths if it is 0 although not all
 # binary Boost releases do so.
 #
-# SET(Boost_ADDITIONAL_VERSIONS "0.99" "0.99.0" "1.78" "1.78.0")
+# SET(Boost_ADDITIONAL_VERSIONS "1.78" "1.78.0" "1.79" "1.79.0")
 #
 # ===================================== ============= ========================
 #
@@ -90,6 +95,12 @@
 #                                of FindBoost.cmake if you are having problems.
 #                                Please enable this before filing any bug
 #                                reports.
+#
+#   Boost_DETAILED_FAILURE_MSG   FindBoost doesn't output detailed information
+#                                about why it failed or how to fix the problem
+#                                unless this is set to TRUE or the REQUIRED
+#                                keyword is specified in find_package().
+#                                  [Since CMake 2.8.0]
 # 
 #   Boost_COMPILER               Set this to the compiler suffix used by Boost
 #                                (e.g. "-gcc43") if FindBoost has problems finding
@@ -154,6 +165,7 @@
 # Copyright 2007      Wengo
 # Copyright 2007      Mike Jackson
 # Copyright 2008      Andreas Pakulat <apaku@gmx.de>
+# Copyright 2008-2009 Philip Lowman <philip@yhbt.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -547,8 +559,9 @@ ELSE (_boost_IN_CACHE)
     # NOTE: this is not perfect yet, if you experience any issues
     # please report them and use the Boost_COMPILER variable
     # to work around the problems.
-    if("${CMAKE_CXX_COMPILER}" MATCHES "icl" 
-        OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc") 
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel"
+        OR "${CMAKE_CXX_COMPILER}" MATCHES "icl" 
+        OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc")
       if(WIN32)
         set (_boost_COMPILER "-iw")
       else()
@@ -874,11 +887,23 @@ ELSE (_boost_IN_CACHE)
           SET(Boost_LIBRARIES ${Boost_LIBRARIES} ${Boost_${UPPERCOMPONENT}_LIBRARY})
         ENDIF ( Boost_${UPPERCOMPONENT}_FOUND )
       ENDFOREACH(COMPONENT)
-  ELSE (Boost_FOUND)
-      IF (Boost_FIND_REQUIRED)
-        message(SEND_ERROR "Unable to find the requested Boost libraries.\n${Boost_ERROR_REASON}")
-      ENDIF(Boost_FIND_REQUIRED)
-  ENDIF(Boost_FOUND)
+  else()
+    if(Boost_FIND_REQUIRED)
+      message(SEND_ERROR "Unable to find the requested Boost libraries.\n${Boost_ERROR_REASON}")
+    else()
+      if(NOT Boost_FIND_QUIETLY)
+        # we opt not to automatically output Boost_ERROR_REASON here as
+        # it could be quite lengthy and somewhat imposing in it's requests
+        # Since Boost is not always a required dependency we'll leave this
+        # up to the end-user.
+        if(Boost_DEBUG OR Boost_DETAILED_FAILURE_MSG)
+          message(STATUS "Could NOT find Boost\n${Boost_ERROR_REASON}")
+        else()
+          message(STATUS "Could NOT find Boost")
+        endif()
+      endif()
+    endif(Boost_FIND_REQUIRED)
+  endif()
 
   # show the Boost_INCLUDE_DIRS AND Boost_LIBRARIES variables only in the advanced view
   MARK_AS_ADVANCED(Boost_INCLUDE_DIR
