@@ -3358,6 +3358,12 @@ bool SystemInformationImplementation::QueryOSInformation()
     WSACleanup( );
     }
   this->Hostname = name;
+  
+  const char* arch = getenv("PROCESSOR_ARCHITECTURE");
+  if(arch)
+    {
+    this->OSPlatform = arch;
+    }
 
 #else
 
