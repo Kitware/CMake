@@ -263,11 +263,19 @@ void cmExtraCodeBlocksGenerator
          it != this->GlobalGenerator->GetProjectMap().end();
          ++it)
     {
-      // Convert
-      std::vector<std::string> listFiles =
-              it->second[0]->GetMakefile()->GetListFiles();
+    // Collect all files
+    std::vector<std::string> listFiles;
+    for (std::vector<cmLocalGenerator *>::const_iterator
+         jt = it->second.begin();
+         jt != it->second.end();
+         ++jt)
+      {
+      const std::vector<std::string> & files = (*jt)->GetMakefile()->GetListFiles();
+      listFiles.insert(listFiles.end(), files.begin(), files.end());
+      }
 
-      for (std::vector<std::string>::const_iterator jt = listFiles.begin();
+    // Convert
+    for (std::vector<std::string>::const_iterator jt = listFiles.begin();
            jt != listFiles.end();
            ++jt)
          {
