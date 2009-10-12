@@ -454,10 +454,10 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
 //----------------------------------------------------------------------
 bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
 {
-  //if ( !first && !this->CurrentTag.empty() )
-   // {
-   // return true;
-   // }
+  if ( !first && !this->CurrentTag.empty() )
+    {
+    return true;
+    }
 
   std::string src_dir
     = this->GetCTestConfiguration("SourceDirectory").c_str();
