@@ -454,10 +454,10 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
 //----------------------------------------------------------------------
 bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
 {
-  if ( !first && !this->CurrentTag.empty() )
-    {
-    return true;
-    }
+  //if ( !first && !this->CurrentTag.empty() )
+   // {
+   // return true;
+   // }
 
   std::string src_dir
     = this->GetCTestConfiguration("SourceDirectory").c_str();
@@ -564,6 +564,7 @@ bool cmCTest::UpdateCTestConfiguration()
                << fileName.c_str() << "\n");
     // parse the dart test file
     std::ifstream fin(fileName.c_str());
+
     if(!fin)
       {
       return false;
@@ -1265,6 +1266,10 @@ void cmCTest::StartXML(std::ostream& ostr, bool append)
        << this->GetCTestConfiguration("Site") << "\"\n\tGenerator=\"ctest-"
        << cmVersion::GetCMakeVersion()  << "\"\n"
        << (append? "\tAppend=\"true\"\n":"")
+       << "\tCompilerName=\"" << this->GetCTestConfiguration("Compiler") << "\"\n"
+#ifdef _COMPILER_VERSION
+       << "\tCompilerVersion=\"_COMPILER_VERSION\"\n"
+#endif
        << "\tOSName=\"" << info.GetOSName() << "\"\n"
        << "\tHostname=\"" << info.GetHostname() << "\"\n"
        << "\tOSRelease=\"" << info.GetOSRelease() << "\"\n"
