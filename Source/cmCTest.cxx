@@ -1266,7 +1266,8 @@ void cmCTest::StartXML(std::ostream& ostr, bool append)
        << this->GetCTestConfiguration("Site") << "\"\n\tGenerator=\"ctest-"
        << cmVersion::GetCMakeVersion()  << "\"\n"
        << (append? "\tAppend=\"true\"\n":"")
-       << "\tCompilerName=\"" << this->GetCTestConfiguration("Compiler") << "\"\n"
+       << "\tCompilerName=\"" << this->GetCTestConfiguration("Compiler") 
+       << "\"\n"
 #ifdef _COMPILER_VERSION
        << "\tCompilerVersion=\"_COMPILER_VERSION\"\n"
 #endif
