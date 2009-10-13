@@ -419,11 +419,11 @@ bool cmCTestRunTest::CreateProcess(double testTimeOut,
 
   // determine how much time we have
   double timeout = this->CTest->GetRemainingTimeAllowed() - 120;
-  if (this->CTest->GetTimeOut() && this->CTest->GetTimeOut() < timeout)
+  if (this->CTest->GetTimeOut() > 0 && this->CTest->GetTimeOut() < timeout)
     {
     timeout = this->CTest->GetTimeOut();
     }
-  if (testTimeOut 
+  if (testTimeOut > 0
       && testTimeOut < this->CTest->GetRemainingTimeAllowed())
     {
     timeout = testTimeOut;
