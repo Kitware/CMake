@@ -270,7 +270,8 @@ void cmExtraCodeBlocksGenerator
          jt != it->second.end();
          ++jt)
       {
-      const std::vector<std::string> & files = (*jt)->GetMakefile()->GetListFiles();
+      const std::vector<std::string> & files =
+                                          (*jt)->GetMakefile()->GetListFiles();
       listFiles.insert(listFiles.end(), files.begin(), files.end());
       }
 
