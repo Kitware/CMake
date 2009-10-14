@@ -1113,11 +1113,20 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
 
 
-  function(add_failed_submit_test name source build in out log regex)
+  # Use macro, not function so that build can still be driven by CMake 2.4.
+  # After 2.6 is required, this could be a function without the extra 'set'
+  # calls.
+  #
+  macro(add_failed_submit_test name source build in out log regex)
+    # Have variables named source, build and drop_method because the
+    # configure_file call expects those variables to be defined.
+    #
+    set(source "${source}")
+    set(build "${build}")
     configure_file("${in}" "${out}" @ONLY)
     add_test(${name} ${CMAKE_CTEST_COMMAND} -S "${out}" -V --output-log "${log}")
     set_tests_properties(${name} PROPERTIES PASS_REGULAR_EXPRESSION "${regex}")
-  endfunction()
+  endmacro()
 
   set(regex "(Problems when submitting via S*CP")
   set(regex "${regex}|Error message was: ")
