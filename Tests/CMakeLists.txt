@@ -1111,7 +1111,32 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     PASS_REGULAR_EXPRESSION "\\*\\*\\*Timeout")
   
   ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
-  
+
+
+  function(add_failed_submit_test name source build in out log regex)
+    configure_file("${in}" "${out}" @ONLY)
+    add_test(${name} ${CMAKE_CTEST_COMMAND} -S "${out}" -V --output-log "${log}")
+    set_tests_properties(${name} PROPERTIES PASS_REGULAR_EXPRESSION "${regex}")
+  endfunction()
+
+  set(regex "(Problems when submitting via S*CP")
+  set(regex "${regex}|Error message was: ")
+  set(regex "${regex}(Couldn.t resolve host ")
+  set(regex "${regex}|libcurl was built with SSL disabled. https: not supported)")
+  set(regex "${regex}|Submission method .xmlrpc. not compiled into CTest)")
+
+  foreach(drop_method cp ftp http https scp xmlrpc)
+    add_failed_submit_test(CTestTestFailedSubmit-${drop_method}
+      "${CMake_SOURCE_DIR}/Tests/CTestTest/SmallAndFast"
+      "${CMake_BINARY_DIR}/Tests/CTestTestFailedSubmits/${drop_method}"
+      "${CMake_SOURCE_DIR}/Tests/CTestTestFailedSubmits/test.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTestFailedSubmits/test-${drop_method}.cmake"
+      "${CMake_BINARY_DIR}/Tests/CTestTestFailedSubmits/test-${drop_method}.log"
+      "${regex}"
+      )
+  endforeach()
+
+
   IF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" @ONLY ESCAPE_QUOTES)
