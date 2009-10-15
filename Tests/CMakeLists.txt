@@ -35,6 +35,11 @@ IF(BUILD_TESTING)
       "Should the tests that run a full sub ctest process be run?" 
       OFF)
     MARK_AS_ADVANCED(CTEST_TEST_CTEST)
+
+    OPTION(TEST_KDE4_STABLE_BRANCH
+      "Should the KDE4 stable branch test be run?" 
+      OFF)
+    MARK_AS_ADVANCED(TEST_KDE4_STABLE_BRANCH)
   ENDIF (CMAKE_RUN_LONG_TESTS)
 
   # Should tests that use CVS be run?
@@ -1198,6 +1203,43 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
         PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
     ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
+
+  IF (CMAKE_RUN_LONG_TESTS AND TEST_KDE4_STABLE_BRANCH)
+    IF(UNIX)
+      IF(NOT QT4_FOUND)
+         FIND_PACKAGE(Qt4)
+      ENDIF(NOT QT4_FOUND)
+
+      SET(TRY_BUILD_KDE4 TRUE)
+      IF(QT4_FOUND)
+        # check whether it's Qt 4.5 in a cmake 2.4. compatible way:
+        IF(NOT EXISTS "${QT_QTNETWORK_INCLUDE_DIR}/QAbstractNetworkCache")
+          SET(TRY_BUILD_KDE4 FALSE)
+        ENDIF(NOT EXISTS "${QT_QTNETWORK_INCLUDE_DIR}/QAbstractNetworkCache")
+      ELSE(QT4_FOUND)
+        SET(TRY_BUILD_KDE4 FALSE)
+      ENDIF(QT4_FOUND)
+
+      FIND_PACKAGE(Perl)
+      IF(NOT PERL_FOUND)
+        SET(TRY_BUILD_KDE4 FALSE)
+      ENDIF(NOT PERL_FOUND)
+
+      FIND_PACKAGE(ZLIB)
+      IF(NOT ZLIB_FOUND)
+        SET(TRY_BUILD_KDE4 FALSE)
+      ENDIF(NOT ZLIB_FOUND)
+
+      IF(TRY_BUILD_KDE4)
+        FILE(MAKE_DIRECTORY ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest)
+        SET(TEST_KDE4_BASE_DIR ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest)
+        CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh.in ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh @ONLY)
+        EXECUTE_PROCESS(COMMAND chmod 755 ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh )
+        ADD_TEST(KDE4StableBranchTest ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh)
+      ENDIF(TRY_BUILD_KDE4)
+
+    ENDIF(UNIX)
+  ENDIF (CMAKE_RUN_LONG_TESTS AND TEST_KDE4_STABLE_BRANCH)
   
   IF("${CMAKE_TEST_GENERATOR}" MATCHES Xcode)
     SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)

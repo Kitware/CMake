@@ -1,0 +1,62 @@
+#!/bin/sh
+
+# This shell script tests whether cmake is able to build the latest
+# stable KDE4 release, or at least some part of it.
+# It downloads automoc from KDE svn, builds and installs it, then it 
+# downloads phonon from KDE svn, builds and installs it, and finally
+# it downloads kdelibs (currently from the 4.3 branch), and builds 
+# a (small) part of it, i.e. libkdecore and one unit test depending on it.
+#
+# <neundorf AT kde.org>
+
+CMAKE="@CMAKE_CMAKE_COMMAND@"
+BASEDIR="@TEST_KDE4_BASE_DIR@"
+INSTALLDIR="$BASEDIR/install"
+QMAKE="@QT_QMAKE_EXECUTABLE@"
+
+cd "$BASEDIR"  || exit -1
+echo "Removing old install dir " $INSTALLDIR
+
+rm -rf install       || exit -1
+rm -rf build-automoc || exit -1
+rm -rf build-phonon  || exit -1
+rm -rf build-kdelibs || exit -1
+
+
+
+# build and install automoc
+cd "$BASEDIR"  || exit -1
+svn co svn://anonsvn.kde.org/home/kde/tags/kdesupport-for-4.3/kdesupport/automoc  || exit -1
+
+mkdir -p build-automoc  || exit -1
+
+cd build-automoc  || exit -1
+"$CMAKE" -DCMAKE_INSTALL_PREFIX="$INSTALLDIR" -DQT_QMAKE_EXECUTABLE:STRING="$QMAKE" ../automoc  || exit -1
+"$CMAKE" --build .  || exit -1
+"$CMAKE" -P cmake_install.cmake  || exit -1
+
+export CMAKE_PREFIX_PATH="$INSTALLDIR:$CMAKE_PREFIX_PATH"
+
+
+# build and install phonon
+cd "$BASEDIR"  || exit -1
+svn co svn://anonsvn.kde.org/home/kde/tags/kdesupport-for-4.3/kdesupport/phonon  || exit -1
+
+mkdir -p build-phonon  || exit -1
+
+cd build-phonon  || exit -1
+"$CMAKE" -DCMAKE_INSTALL_PREFIX="$INSTALLDIR" -DQT_QMAKE_EXECUTABLE:STRING="$QMAKE" -DWITH_GLIB2=FALSE -DWITH_GObject=FALSE -DWITH_GStreamer=FALSE -DWITH_GStreamerPlugins=FALSE -DWITH_OpenGL=FALSE -DWITH_XCB=FALSE -DWITH_Xine=FALSE ../phonon  || exit -1
+"$CMAKE" --build .  || exit -1
+"$CMAKE" -P cmake_install.cmake  || exit -1
+
+
+# finally build kdelibs/kdecore
+cd "$BASEDIR"  || exit -1
+
+svn co svn://anonsvn.kde.org/home/kde/branches/KDE/4.3/kdelibs/  || exit -1
+mkdir -p build-kdelibs  || exit -1
+cd build-kdelibs  || exit -1
+# trick cmake into not searching strigi and not searching sharedmimeinfo
+"$CMAKE" -DCMAKE_INSTALL_PREFIX="$INSTALLDIR" -DQT_QMAKE_EXECUTABLE:STRING="$QMAKE" -DSTRIGI_FOUND=TRUE -DSTRIGI_INCLUDE_DIR=/usr/include -DSTRIGI_STREAMANALYZER_LIBRARY=-lc -DSTRIGI_STREAMS_LIBRARY=-lc -DSTRIGI_STRIGIQTDBUSCLIENT_LIBRARY=-lc  -DSTRIGI_NEEDS_SIGNED_CHAR=TRUE -DSTRIGI_NEEDS_CHAR=FALSE  -DUPDATE_MIME_DATABASE_EXECUTABLE=/bin/sh ../kdelibs  || exit -1
+make -C kdecore/tests kurltest  || exit -1
+
