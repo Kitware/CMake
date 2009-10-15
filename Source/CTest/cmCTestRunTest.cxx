@@ -301,7 +301,7 @@ bool cmCTestRunTest::StartTest(size_t total)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(2*getNumWidth(total) + 8)
     << "Start "
-    << std::setw(getNumWidth(total))
+    << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
     << this->TestProperties->Index << ": "
     << this->TestProperties->Name << std::endl);
   this->ComputeArguments();
