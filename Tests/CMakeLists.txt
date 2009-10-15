@@ -1135,7 +1135,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   set(regex "${regex}|libcurl was built with SSL disabled. https: not supported)")
   set(regex "${regex}|Submission method .xmlrpc. not compiled into CTest)")
 
+  set(ctest_coverage_labels_args "")
+
   foreach(drop_method cp ftp http https scp xmlrpc)
+    # Cycle through these values each time through the loop:
+    if(ctest_coverage_labels_args STREQUAL "")
+      set(ctest_coverage_labels_args "LABELS Everything")
+    elseif(ctest_coverage_labels_args STREQUAL "LABELS Everything")
+      set(ctest_coverage_labels_args "LABELS 0ArgTest")
+    else()
+      set(ctest_coverage_labels_args "")
+    endif()
+
     add_failed_submit_test(CTestTestFailedSubmit-${drop_method}
       "${CMake_SOURCE_DIR}/Tests/CTestTest/SmallAndFast"
       "${CMake_BINARY_DIR}/Tests/CTestTestFailedSubmits/${drop_method}"
