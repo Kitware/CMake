@@ -2369,7 +2369,7 @@ void cmCTest::EmptyCTestConfiguration()
 void cmCTest::SetCTestConfiguration(const char *name, const char* value)
 {
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "SetCTestConfiguration:"
-             << name << ":" << value << "\n");
+    << name << ":" << (value ? value : "(null)") << "\n");
 
   if ( !name )
     {
