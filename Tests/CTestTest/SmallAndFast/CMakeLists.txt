@@ -15,3 +15,11 @@ set_property(TEST test1 APPEND PROPERTY LABELS TestLabel 1ArgTest Everything)
 
 add_test(test2 echoargs 1 2)
 set_property(TEST test2 APPEND PROPERTY LABELS TestLabel 2ArgTest Everything)
+
+if(SAF_INTENTIONAL_COMPILE_ERROR)
+  add_executable(ice intentional_compile_error.cxx)
+endif()
+
+if(SAF_INTENTIONAL_COMPILE_WARNING)
+  add_executable(icw intentional_compile_warning.cxx)
+endif()
