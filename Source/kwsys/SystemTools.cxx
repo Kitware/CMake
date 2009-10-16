@@ -3960,10 +3960,22 @@ bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
 
   long leftToRead = sizeLimit;
 
+  // Early short circuit return if stream is no good. Just return
+  // false and the empty line. (Probably means caller tried to
+  // create a file stream with a non-existent file name...)
+  //
+  if(!is)
+    {
+    if(has_newline)
+      {
+      *has_newline = false;
+      }
+    return false;
+    }
+
   // If no characters are read from the stream, the end of file has
   // been reached.  Clear the fail bit just before reading.
-  while(is &&
-        !haveNewline &&
+  while(!haveNewline &&
         leftToRead != 0 &&
         (is.clear(is.rdstate() & ~kwsys_ios::ios::failbit),
          is.getline(buffer, bufferSize), is.gcount() > 0))
