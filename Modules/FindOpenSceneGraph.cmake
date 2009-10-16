@@ -96,13 +96,16 @@ if(OSG_INCLUDE_DIR)
         message("[ FindOpenSceneGraph.cmake:${CMAKE_CURRENT_LIST_LINE} ] "
             "Detected OSG_INCLUDE_DIR = ${OSG_INCLUDE_DIR}")
     endif()
-
-    file(READ "${OSG_INCLUDE_DIR}/osg/Version" _osg_Version_contents)
+    if(EXISTS "${OSG_INCLUDE_DIR}/osg/Version")
+      file(READ "${OSG_INCLUDE_DIR}/osg/Version" _osg_Version_contents)
+    else()
+      set(_osg_Version_contents "unknown")
+    endif()
 
     string(REGEX MATCH ".*#define OSG_VERSION_MAJOR[ \t]+[0-9]+.*"
-        _osg_old_defines ${_osg_Version_contents})
+        _osg_old_defines "${_osg_Version_contents}")
     string(REGEX MATCH ".*#define OPENSCENEGRAPH_MAJOR_VERSION[ \t]+[0-9]+.*"
-        _osg_new_defines ${_osg_Version_contents})
+        _osg_new_defines "${_osg_Version_contents}")
     if(_osg_old_defines)
         string(REGEX REPLACE ".*#define OSG_VERSION_MAJOR[ \t]+([0-9]+).*"
             "\\1" _osg_VERSION_MAJOR ${_osg_Version_contents})
