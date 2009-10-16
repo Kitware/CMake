@@ -1138,7 +1138,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   set(regex "${regex}(Couldn.t resolve host ")
   set(regex "${regex}|couldn.t connect to host")
   set(regex "${regex}|libcurl was built with SSL disabled. https: not supported)")
-  set(regex "${regex}|Submission method .xmlrpc. not compiled into CTest)")
+  set(regex "${regex}|Submission method .xmlrpc. not compiled into CTest")
+  set(regex "${regex}|Submission successful)")
 
   set(ctest_coverage_labels_args "")
 
