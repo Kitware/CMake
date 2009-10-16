@@ -3959,10 +3959,11 @@ bool SystemTools::GetLineFromStream(kwsys_ios::istream& is,
   line = "";
 
   long leftToRead = sizeLimit;
-  
+
   // If no characters are read from the stream, the end of file has
   // been reached.  Clear the fail bit just before reading.
-  while(!haveNewline &&
+  while(is &&
+        !haveNewline &&
         leftToRead != 0 &&
         (is.clear(is.rdstate() & ~kwsys_ios::ios::failbit),
          is.getline(buffer, bufferSize), is.gcount() > 0))
