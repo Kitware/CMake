@@ -132,8 +132,8 @@ elseif(testname STREQUAL rpath_remove_bad_file) # fail
 elseif(testname STREQUAL rpath_remove_file_does_not_exist) # fail
   file(RPATH_REMOVE FILE ffff)
 
-elseif(testname STREQUAL rpath_remove_file_is_not_executable) # fail
-  file(RPATH_REMOVE FILE ${CMAKE_CURRENT_LIST_FILE})
+#elseif(testname STREQUAL rpath_remove_file_is_not_executable) # fail
+#  file(RPATH_REMOVE FILE ${CMAKE_CURRENT_LIST_FILE})
 
 elseif(testname STREQUAL rpath_check_unknown_arg) # fail
   file(RPATH_CHECK BOGUS)
