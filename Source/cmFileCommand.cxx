@@ -2290,7 +2290,7 @@ bool cmFileCommand::HandleRelativePathCommand(
 {
   if(args.size() != 4 )
     {
-    this->SetError("called with incorrect number of arguments");
+    this->SetError("RELATIVE_PATH called with incorrect number of arguments");
     return false;
     }
 
@@ -2301,7 +2301,7 @@ bool cmFileCommand::HandleRelativePathCommand(
   if(!cmSystemTools::FileIsFullPath(directoryName.c_str()))
     {
     std::string errstring =
-      "RelativePath must be passed a full path to the directory: "
+      "RELATIVE_PATH must be passed a full path to the directory: "
       + directoryName;
     this->SetError(errstring.c_str());
     return false;
@@ -2309,7 +2309,7 @@ bool cmFileCommand::HandleRelativePathCommand(
   if(!cmSystemTools::FileIsFullPath(fileName.c_str()))
     {
     std::string errstring =
-      "RelativePath must be passed a full path to the file: "
+      "RELATIVE_PATH must be passed a full path to the file: "
       + fileName;
     this->SetError(errstring.c_str());
     return false;
@@ -2328,7 +2328,7 @@ bool cmFileCommand::HandleRename(std::vector<std::string> const& args)
 {
   if(args.size() != 3)
     {
-    this->SetError("given incorrect number of arguments.");
+    this->SetError("RENAME given incorrect number of arguments.");
     return false;
     }
 
@@ -2400,8 +2400,8 @@ bool cmFileCommand::HandleCMakePathCommand(std::vector<std::string>
   std::vector<std::string>::const_iterator i = args.begin();
   if(args.size() != 3)
     {
-    this->SetError("FILE(SYSTEM_PATH ENV result) must be called with "
-                   "only three arguments.");
+    this->SetError("FILE([TO_CMAKE_PATH|TO_NATIVE_PATH] path result) must be "
+      "called with exactly three arguments.");
     return false;
     }
   i++; // Get rid of subcommand
@@ -2539,8 +2539,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
   if(!cmSystemTools::FileExists(dir.c_str()) &&
      !cmSystemTools::MakeDirectory(dir.c_str()))
     {
-    std::string errstring = "FILE(DOWNLOAD ) error; cannot create directory: "
-      + dir + ". Maybe need administrative privileges.";
+    std::string errstring = "DOWNLOAD error: cannot create directory '"
+      + dir + "' - Specify file by full path name and verify that you "
+      "have directory creation and file write privileges.";
     this->SetError(errstring.c_str());
     return false;
     }
