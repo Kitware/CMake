@@ -615,13 +615,6 @@ cmGlobalVisualStudio7Generator
     }
 }
 
-//----------------------------------------------------------------------------
-bool cmGlobalVisualStudio7Generator::IsRootOnlyTarget(cmTarget* target)
-{
-  return (this->cmGlobalVisualStudioGenerator::IsRootOnlyTarget(target) ||
-          strcmp(target->GetName(), CMAKE_CHECK_BUILD_SYSTEM_TARGET) == 0);
-}
-
 bool cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,
                                                           cmTarget* target)
 {

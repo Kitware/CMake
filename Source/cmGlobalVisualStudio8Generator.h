@@ -63,6 +63,8 @@ protected:
 
   virtual bool VSLinksDependencies() const { return false; }
 
+  void AddCheckTarget();
+
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   virtual void AddPlatformDefinitions(cmMakefile* mf);
   virtual void WriteSLNHeader(std::ostream& fout);
