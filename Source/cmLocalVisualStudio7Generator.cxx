@@ -588,7 +588,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::string flags;
   if(strcmp(configType, "10") != 0)
     {
-    const char* linkLanguage = target.GetLinkerLanguage(configName);
+    const char* linkLanguage = (this->FortranProject? "Fortran":
+                                target.GetLinkerLanguage(configName));
     if(!linkLanguage)
       {
       cmSystemTools::Error
