@@ -3,27 +3,27 @@
 # This module can be used to find Squish (currently support is aimed at version 3).
 #
 # ---- Variables and Macros
-# SQUISH_FOUND                    If false, don't try to use Squish
-# SQUISH_VERSION_MAJOR            The major version of Squish found
-# SQUISH_VERSION_MINOR            The minor version of Squish found
-# SQUISH_VERSION_PATCH            The patch version of Squish found
+#  SQUISH_FOUND                    If false, don't try to use Squish
+#  SQUISH_VERSION_MAJOR            The major version of Squish found
+#  SQUISH_VERSION_MINOR            The minor version of Squish found
+#  SQUISH_VERSION_PATCH            The patch version of Squish found
 #
-# SQUISH_INSTALL_DIR              The Squish installation directory (containing bin, lib, etc)
-# SQUISH_SERVER_EXECUTABLE        The squishserver executable
-# SQUISH_CLIENT_EXECUTABLE        The squishrunner executable
+#  SQUISH_INSTALL_DIR              The Squish installation directory (containing bin, lib, etc)
+#  SQUISH_SERVER_EXECUTABLE        The squishserver executable
+#  SQUISH_CLIENT_EXECUTABLE        The squishrunner executable
 #
-# SQUISH_INSTALL_DIR_FOUND        Was the install directory found?
-# SQUISH_SERVER_EXECUTABLE_FOUND  Was the server executable found?
-# SQUISH_CLIENT_EXECUTABLE_FOUND  Was the client executable found?
+#  SQUISH_INSTALL_DIR_FOUND        Was the install directory found?
+#  SQUISH_SERVER_EXECUTABLE_FOUND  Was the server executable found?
+#  SQUISH_CLIENT_EXECUTABLE_FOUND  Was the client executable found?
 #
 # macro SQUISH_ADD_TEST(testName applicationUnderTest testSuite testCase)
 #
 # ---- Typical Use
-# ENABLE_TESTING()
-# FIND_PACKAGE(Squish)
-# IF (SQUISH_FOUND)
-#   SQUISH_ADD_TEST(myTestName myApplication testSuiteName testCaseName)
-# ENDIF (SQUISH_FOUND)
+#  ENABLE_TESTING()
+#  FIND_PACKAGE(Squish)
+#  IF (SQUISH_FOUND)
+#    SQUISH_ADD_TEST(myTestName myApplication testSuiteName testCaseName)
+#  ENDIF (SQUISH_FOUND)
 #
 
 #=============================================================================
