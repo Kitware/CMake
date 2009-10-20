@@ -141,12 +141,13 @@ MACRO(CMAKE_SETUP_TESTING)
     # cmake.
     SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
     SET(CMAKE_CMAKE_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cmake")
+    SET(CMAKE_CPACK_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cpack")
   ENDIF(BUILD_TESTING)
 
   # configure some files for testing
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Templates/CTestScript.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/CTestScript.cmake"
-    @ONLY)  
+    @ONLY)
   CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
     ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)
   CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage

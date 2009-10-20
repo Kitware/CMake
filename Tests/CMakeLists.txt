@@ -456,6 +456,40 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponents")
   ENDIF(CTEST_RUN_CPackComponents)
 
+  # By default, turn this test off (because it takes a long time...)
+  #
+  if(NOT DEFINED CTEST_RUN_CPackTestAllGenerators)
+    set(CTEST_RUN_CPackTestAllGenerators OFF)
+
+    # ...but: if it appears to be a coverage dashboard, or long tests are
+    # on, then set it to the generic CTEST_TEST_CPACK setting.
+    #
+    if(CMAKE_CXX_FLAGS MATCHES "-ftest-coverage" OR
+      NOT "$ENV{COVFILE}" STREQUAL "" OR
+      CMAKE_RUN_LONG_TESTS)
+      set(CTEST_RUN_CPackTestAllGenerators ${CTEST_TEST_CPACK})
+    endif(CMAKE_CXX_FLAGS MATCHES "-ftest-coverage" OR
+      NOT "$ENV{COVFILE}" STREQUAL "" OR
+      CMAKE_RUN_LONG_TESTS)
+  endif(NOT DEFINED CTEST_RUN_CPackTestAllGenerators)
+
+  IF(CTEST_RUN_CPackTestAllGenerators)
+    ADD_TEST(CPackTestAllGenerators ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackTestAllGenerators"
+      "${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project CPackTestAllGenerators
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --test-command
+      ${CMAKE_CMAKE_COMMAND}
+        -D dir=${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators
+        -D cpack=${CMAKE_CPACK_COMMAND}
+        -P ${CMake_SOURCE_DIR}/Tests/CPackTestAllGenerators/RunCPack.cmake
+      )
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators")
+  ENDIF(CTEST_RUN_CPackTestAllGenerators)
+
   IF(CTEST_package_X11_TEST)
     SET(X11_build_target_arg --build-target package)
   ELSE(CTEST_package_X11_TEST)
