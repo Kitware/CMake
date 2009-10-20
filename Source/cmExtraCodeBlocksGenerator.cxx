@@ -352,8 +352,13 @@ void cmExtraCodeBlocksGenerator
             // this will not work within the IDE
             if (ti->first == "edit_cache")
               {
-              if (strstr(makefile->GetRequiredDefinition
-                                       ("CMAKE_EDIT_COMMAND"), "ccmake")!=NULL)
+              const char* editCommand = makefile->GetDefinition
+                                                        ("CMAKE_EDIT_COMMAND");
+              if (editCommand == 0)
+                {
+                insertTarget = false;
+                }
+              else if (strstr(editCommand, "ccmake")!=NULL)
                 {
                 insertTarget = false;
                 }
