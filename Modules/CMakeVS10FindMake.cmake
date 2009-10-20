@@ -23,6 +23,8 @@ FIND_PROGRAM(CMAKE_MAKE_PROGRAM
   HINTS 
   "$ENV{SYSTEMROOT}/Microsoft.NET/Framework/v4.0.20506/"
   c:/WINDOWS/Microsoft.NET/Framework/v4.0.20506/
+  "$ENV{SYSTEMROOT}/Microsoft.NET/Framework/v4.0.21006/"
+  c:/WINDOWS/Microsoft.NET/Framework/v4.0.21006/
   )
 
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM
