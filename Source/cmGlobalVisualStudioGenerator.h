@@ -88,10 +88,11 @@ protected:
   virtual void GetTargetSets(TargetDependSet& projectTargets,
                              TargetDependSet& originalTargets,
                              cmLocalGenerator* root, GeneratorVector const&);
+
+  bool CheckTargetLinks(cmTarget& target, const char* name);
 private:
   void FixUtilityDependsForTarget(cmTarget& target);
   void CreateUtilityDependTarget(cmTarget& target);
-  bool CheckTargetLinks(cmTarget& target, const char* name);
 };
 
 #endif

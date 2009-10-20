@@ -92,6 +92,10 @@ public:
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGInitDirectory()  { return "$(OutDir)"; }
 
+  /** Return true if the target project file should have the option
+      LinkLibraryDependencies and link to .sln dependencies. */
+  virtual bool NeedLinkLibraryDependencies(cmTarget&) { return false; }
+
 protected:
   virtual const char* GetIDEVersion() { return "7.0"; }
 

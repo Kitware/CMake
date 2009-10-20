@@ -58,6 +58,10 @@ public:
    */
   virtual std::string GetUserMacrosRegKeyBase();
 
+  /** Return true if the target project file should have the option
+      LinkLibraryDependencies and link to .sln dependencies. */
+  virtual bool NeedLinkLibraryDependencies(cmTarget& target);
+
 protected:
   virtual const char* GetIDEVersion() { return "8.0"; }
 

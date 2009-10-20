@@ -1134,6 +1134,13 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   linkOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   
   this->WriteString("</Link>\n", 2);
+  if(!this->GlobalGenerator->NeedLinkLibraryDependencies(*this->Target))
+    {
+    this->WriteString("<ProjectReference>\n", 2);
+    this->WriteString(
+      "  <LinkLibraryDependencies>false</LinkLibraryDependencies>\n", 2);
+    this->WriteString("</ProjectReference>\n", 2);
+    }
 }
 
 void cmVisualStudio10TargetGenerator::AddLibraries(

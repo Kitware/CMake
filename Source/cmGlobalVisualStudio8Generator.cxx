@@ -281,6 +281,29 @@ cmGlobalVisualStudio8Generator
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
+  cmTarget& target)
+{
+  // Look for utility dependencies that magically link.
+  for(std::set<cmStdString>::const_iterator ui =
+        target.GetUtilities().begin();
+      ui != target.GetUtilities().end(); ++ui)
+    {
+    if(cmTarget* depTarget = this->FindTarget(0, ui->c_str()))
+      {
+      if(depTarget->GetProperty("EXTERNAL_MSPROJECT"))
+        {
+        // This utility dependency names an external .vcproj target.
+        // We use LinkLibraryDependencies="true" to link to it without
+        // predicting the .lib file location or name.
+        return true;
+        }
+      }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
 static cmVS7FlagTable cmVS8ExtraFlagTable[] =
 { 
   {"CallingConvention", "Gd", "cdecl", "0", 0 },
