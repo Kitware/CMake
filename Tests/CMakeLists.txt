@@ -1105,6 +1105,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     )
   
   CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestSubdir/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestSubdir/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestSubdir ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestSubdir/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestSubdir/testOutput.log"
+    )
+    
+  CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestTimeout/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/test.cmake"
     @ONLY ESCAPE_QUOTES)
