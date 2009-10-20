@@ -96,8 +96,14 @@ if(OSG_INCLUDE_DIR)
         message("[ FindOpenSceneGraph.cmake:${CMAKE_CURRENT_LIST_LINE} ] "
             "Detected OSG_INCLUDE_DIR = ${OSG_INCLUDE_DIR}")
     endif()
-    if(EXISTS "${OSG_INCLUDE_DIR}/osg/Version")
-      file(READ "${OSG_INCLUDE_DIR}/osg/Version" _osg_Version_contents)
+    
+    set(_osg_Version_file "${OSG_INCLUDE_DIR}/osg/Version")
+    if("${OSG_INCLUDE_DIR}" MATCHES "\\.framework$" AND NOT EXISTS "${_osg_Version_file}")
+        set(_osg_Version_file "${OSG_INCLUDE_DIR}/Headers/Version")
+    endif()
+    
+    if(EXISTS "${_osg_Version_file}")
+      file(READ "${_osg_Version_file}" _osg_Version_contents)
     else()
       set(_osg_Version_contents "unknown")
     endif()
