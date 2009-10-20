@@ -81,6 +81,10 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   cmCTestRunTest* testRun = new cmCTestRunTest(this->TestHandler);
   testRun->SetIndex(test);
   testRun->SetTestProperties(this->Properties[test]);
+
+  std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
+  cmSystemTools::ChangeDirectory(this->Properties[test]->Directory.c_str());
+
   if(testRun->StartTest(this->Total))
     {
     this->RunningTests.insert(testRun);
@@ -92,6 +96,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     testRun->EndTest(this->Completed, this->Total, false);
     this->Failed->push_back(this->Properties[test]->Name);
     }
+  cmSystemTools::ChangeDirectory(current_dir.c_str());
 }
 
 //---------------------------------------------------------
