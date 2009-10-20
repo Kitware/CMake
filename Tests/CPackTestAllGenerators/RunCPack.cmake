@@ -14,13 +14,13 @@ execute_process(COMMAND ${cpack} --help
   ERROR_VARIABLE stderr
   WORKING_DIRECTORY ${dir})
 
-string(REPLACE ";" "\\;" stdout ${stdout})
-string(REPLACE "\n" "E;" stdout ${stdout})
+string(REPLACE ";" "\\;" stdout "${stdout}")
+string(REPLACE "\n" "E;" stdout "${stdout}")
 
 set(collecting 0)
 set(generators)
 foreach(eline ${stdout})
-  string(REGEX REPLACE "^(.*)E$" "\\1" line ${eline})
+  string(REGEX REPLACE "^(.*)E$" "\\1" line "${eline}")
   if(collecting AND NOT line STREQUAL "")
     string(REGEX REPLACE "^  ([^ ]+) += (.*)$" "\\1" gen "${line}")
     string(REGEX REPLACE "^  ([^ ]+) += (.*)$" "\\2" doc "${line}")
