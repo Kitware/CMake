@@ -315,8 +315,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     cmOStringStream tw;
     this->AddInstallNamePatchRule(tw, indent.Next(), config, toDestDirPath);
     this->AddChrpathPatchRule(tw, indent.Next(), config, toDestDirPath);
-    this->AddRanlibRule(tw, indent.Next(), type, toDestDirPath);
-    this->AddStripRule(tw, indent.Next(), type, toDestDirPath);
+    this->AddRanlibRule(tw, indent.Next(), toDestDirPath);
+    this->AddStripRule(tw, indent.Next(), toDestDirPath);
     std::string tws = tw.str();
 
     // Add the rules, if any.
@@ -599,13 +599,12 @@ cmInstallTargetGenerator
 void
 cmInstallTargetGenerator::AddStripRule(std::ostream& os,
                                        Indent const& indent,
-                                       cmTarget::TargetType type,
                                        const std::string& toDestDirPath)
 {
 
   // don't strip static libraries, because it removes the only symbol table
   // they have so you can't link to them anymore
-  if(type == cmTarget::STATIC_LIBRARY)
+  if(this->Target->GetType() == cmTarget::STATIC_LIBRARY)
     {
     return;
     }
@@ -633,11 +632,10 @@ cmInstallTargetGenerator::AddStripRule(std::ostream& os,
 void
 cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
                                         Indent const& indent,
-                                        cmTarget::TargetType type,
                                         const std::string& toDestDirPath)
 {
   // Static libraries need ranlib on this platform.
-  if(type != cmTarget::STATIC_LIBRARY)
+  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
     return;
     }

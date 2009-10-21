@@ -74,10 +74,8 @@ protected:
                          std::string const& toDestDirPath);
   
   void AddStripRule(std::ostream& os, Indent const& indent,
-                    cmTarget::TargetType type,
                     const std::string& toDestDirPath);
   void AddRanlibRule(std::ostream& os, Indent const& indent,
-                     cmTarget::TargetType type,
                      const std::string& toDestDirPath);
 
   cmTarget* Target;
