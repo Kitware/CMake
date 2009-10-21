@@ -3129,8 +3129,12 @@ bool cmake::SymlinkInternal(std::string const& file, std::string const& link)
     {
     cmSystemTools::RemoveFile(link.c_str());
     }
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  return cmSystemTools::CopyFileAlways(file.c_str(), link.c_str());
+#else
   std::string linktext = cmSystemTools::GetFilenameName(file);
   return cmSystemTools::CreateSymlink(linktext.c_str(), link.c_str());
+#endif
 }
 
 //----------------------------------------------------------------------------
