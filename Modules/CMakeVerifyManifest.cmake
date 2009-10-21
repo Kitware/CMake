@@ -16,6 +16,7 @@
 # of CRT are compared to those found in the .manifest files
 # from the first glob.
 
+# crt_version:
 # function to extract the CRT version from a file
 # this can be passed a .exe, .dll, or a .manifest file
 # it will put the list of versions found into the variable
@@ -44,6 +45,9 @@ function(crt_version file list_var)
   endif()
 endfunction(crt_version)
 set(fatal_error FALSE)
+
+# check_version:
+# 
 # test a file against the shipped manifest versions
 # for a directory
 function(check_version file manifest_versions)
