@@ -65,7 +65,11 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
   if ( !key )
     {
     return this->ExpandVariable(var);
-    } 
+    }
+  if(!var)
+    {
+    return this->EmptyVariable;
+    }
   if ( strcmp(key, "ENV") == 0 )
     {
     char *ptr = getenv(var);
