@@ -77,7 +77,8 @@ IF(BUILD_TESTING)
     "Should the tests that use '--build-target package' be run?"
     ON)
   MARK_AS_ADVANCED(CTEST_TEST_CPACK)
-  IF(APPLE AND CTEST_TEST_CPACK)
+  SET(CTEST_TEST_OSX_ARCH 0)
+  IF(APPLE)
     EXECUTE_PROCESS(
       COMMAND sw_vers -productVersion
       OUTPUT_VARIABLE OSX_VERSION
@@ -87,8 +88,10 @@ IF(BUILD_TESTING)
       MESSAGE(STATUS "Forcing CTEST_TEST_CPACK=OFF on OSX < 10.4")
       MESSAGE(STATUS "OSX_VERSION='${OSX_VERSION}'")
       SET(CTEST_TEST_CPACK OFF)
+    ELSE(OSX_VERSION MATCHES "^10\\.[0123]" OR OSX_VERSION MATCHES "ProductVersion:\t10\\.[0123]")
+      SET(CTEST_TEST_OSX_ARCH 1)
     ENDIF(OSX_VERSION MATCHES "^10\\.[0123]" OR OSX_VERSION MATCHES "ProductVersion:\t10\\.[0123]")
-  ENDIF(APPLE AND CTEST_TEST_CPACK)
+  ENDIF(APPLE)
 
   # Use 1500 or CTEST_TEST_TIMEOUT for long test timeout value,
   # whichever is greater.
@@ -133,6 +136,11 @@ IF(BUILD_TESTING)
   IF("${CMAKE_TEST_GENERATOR}" MATCHES "Make")
     ADD_TEST_MACRO(Policy0002 Policy0002)
   ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES "Make")
+  IF(CTEST_TEST_OSX_ARCH)
+    ADD_TEST_MACRO(Architecture Architecture)
+    SET_TESTS_PROPERTIES(Architecture PROPERTIES
+      PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype)")
+  ENDIF(CTEST_TEST_OSX_ARCH)
 
   SET(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
   SET(CMAKE_BUILD_TEST_BINARY_DIR "${CMake_BINARY_DIR}/Tests/CMakeBuildCOnly")
