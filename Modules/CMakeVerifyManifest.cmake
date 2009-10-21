@@ -76,7 +76,9 @@ foreach(f ${manifest_files})
   crt_version("${f}" manifest_version_list)
 endforeach(f)
 message("Versions found in ${manifest_files}: ${manifest_version_list}")
-message("Extra versions allowed ${allow_versions}")
+if(DEFINED allow_versions)
+  message("Extra versions allowed: ${allow_versions}")
+endif()
 
 # now find all .exe and .dll files
 # and call check_version on each of them
