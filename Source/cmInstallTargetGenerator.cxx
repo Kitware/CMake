@@ -78,10 +78,6 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   std::string toDir = this->GetInstallDestination();
   toDir += "/";
 
-  // Track whether post-install operations should be added to the
-  // script.
-  bool tweakInstalledFile = true;
-
   // Compute the list of files to install for this target.
   std::vector<std::string> filesFrom;
   std::vector<std::string> filesTo;
@@ -223,7 +219,6 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
           // Install the namelink only.
           filesFrom.push_back(fromName);
           filesTo.push_back(toName);
-          tweakInstalledFile = false;
           }
         else
           {
@@ -271,32 +266,9 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     return;
     }
 
-  // Construct the path of the file on disk after installation on
-  // which tweaks may be performed.
-  std::string const& toInstallPath = filesTo[0];
-  std::string toDestDirPath = "$ENV{DESTDIR}";
-  if(toInstallPath[0] != '/' && toInstallPath[0] != '$')
-    {
-    toDestDirPath += "/";
-    }
-  toDestDirPath += toInstallPath;
-
   // Add pre-installation tweaks.
-  if(tweakInstalledFile)
-    {
-    // Collect tweaking rules.
-    cmOStringStream tw;
-    this->AddRPathCheckRule(tw, indent.Next(), config, toDestDirPath);
-    std::string tws = tw.str();
-
-    // Add the rules, if any.
-    if(!tws.empty())
-      {
-      os << indent << "IF(EXISTS \"" << toDestDirPath << "\")\n";
-      os << tws;
-      os << indent << "ENDIF(EXISTS \"" << toDestDirPath << "\")\n";
-      }
-    }
+  this->AddTweak(os, indent, config, filesTo,
+                 &cmInstallTargetGenerator::PreReplacementTweaks);
 
   // Write code to install the target file.
   const char* no_dir_permissions = 0;
@@ -309,24 +281,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
                        indent);
 
   // Add post-installation tweaks.
-  if(tweakInstalledFile)
-    {
-    // Collect tweaking rules.
-    cmOStringStream tw;
-    this->AddInstallNamePatchRule(tw, indent.Next(), config, toDestDirPath);
-    this->AddChrpathPatchRule(tw, indent.Next(), config, toDestDirPath);
-    this->AddRanlibRule(tw, indent.Next(), toDestDirPath);
-    this->AddStripRule(tw, indent.Next(), toDestDirPath);
-    std::string tws = tw.str();
-
-    // Add the rules, if any.
-    if(!tws.empty())
-      {
-      os << indent << "IF(EXISTS \"" << toDestDirPath << "\")\n";
-      os << tws;
-      os << indent << "ENDIF(EXISTS \"" << toDestDirPath << "\")\n";
-      }
-    }
+  this->AddTweak(os, indent, config, filesTo,
+                 &cmInstallTargetGenerator::PostReplacementTweaks);
 }
 
 //----------------------------------------------------------------------------
@@ -403,6 +359,92 @@ std::string cmInstallTargetGenerator::GetInstallFilename(cmTarget* target,
     }
 
   return fname;
+}
+
+//----------------------------------------------------------------------------
+void
+cmInstallTargetGenerator
+::AddTweak(std::ostream& os, Indent const& indent, const char* config,
+           std::string const& file, TweakMethod tweak)
+{
+  cmOStringStream tw;
+  (this->*tweak)(tw, indent.Next(), config, file);
+  std::string tws = tw.str();
+  if(!tws.empty())
+    {
+    os << indent << "IF(EXISTS \"" << file << "\" AND\n"
+       << indent << "   NOT IS_SYMLINK \"" << file << "\")\n";
+    os << tws;
+    os << indent << "ENDIF()\n";
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmInstallTargetGenerator
+::AddTweak(std::ostream& os, Indent const& indent, const char* config,
+           std::vector<std::string> const& files, TweakMethod tweak)
+{
+  if(files.size() == 1)
+    {
+    // Tweak a single file.
+    this->AddTweak(os, indent, config, this->GetDestDirPath(files[0]), tweak);
+    }
+  else
+    {
+    // Generate a foreach loop to tweak multiple files.
+    cmOStringStream tw;
+    this->AddTweak(tw, indent.Next(), config, "${file}", tweak);
+    std::string tws = tw.str();
+    if(!tws.empty())
+      {
+      Indent indent2 = indent.Next().Next();
+      os << indent << "FOREACH(file\n";
+      for(std::vector<std::string>::const_iterator i = files.begin();
+          i != files.end(); ++i)
+        {
+        os << indent2 << "\"" << this->GetDestDirPath(*i) << "\"\n";
+        }
+      os << indent2 << ")\n";
+      os << tws;
+      os << indent << "ENDFOREACH()\n";
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmInstallTargetGenerator::GetDestDirPath(std::string const& file)
+{
+  // Construct the path of the file on disk after installation on
+  // which tweaks may be performed.
+  std::string toDestDirPath = "$ENV{DESTDIR}";
+  if(file[0] != '/' && file[0] != '$')
+    {
+    toDestDirPath += "/";
+    }
+  toDestDirPath += file;
+  return toDestDirPath;
+}
+
+//----------------------------------------------------------------------------
+void cmInstallTargetGenerator::PreReplacementTweaks(std::ostream& os,
+                                                    Indent const& indent,
+                                                    const char* config,
+                                                    std::string const& file)
+{
+  this->AddRPathCheckRule(os, indent, config, file);
+}
+
+//----------------------------------------------------------------------------
+void cmInstallTargetGenerator::PostReplacementTweaks(std::ostream& os,
+                                                     Indent const& indent,
+                                                     const char* config,
+                                                     std::string const& file)
+{
+  this->AddInstallNamePatchRule(os, indent, config, file);
+  this->AddChrpathPatchRule(os, indent, config, file);
+  this->AddRanlibRule(os, indent, file);
+  this->AddStripRule(os, indent, file);
 }
 
 //----------------------------------------------------------------------------
