@@ -573,6 +573,23 @@ void cmTarget::DefineProperties(cmake *cm)
      false /* TODO: make this chained */ );
 
   cm->DefineProperty
+    ("OSX_ARCHITECTURES", cmProperty::TARGET,
+     "Target specific architectures for OS X.",
+     "The OSX_ARCHITECTURES property sets the target binary architecture "
+     "for targets on OS X.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_OSX_ARCHITECTURES if it is set when a target is created.  "
+     "Use OSX_ARCHITECTURES_<CONFIG> to set the binary architectures on a "
+     "per-configuration basis.  "
+     "<CONFIG> is an upper-case name (ex: \"OSX_ARCHITECTURES_DEBUG\").");
+
+  cm->DefineProperty
+    ("OSX_ARCHITECTURES_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration OS X binary architectures for a target.",
+     "This property is the configuration-specific version of "
+     "OSX_ARCHITECTURES.");
+
+  cm->DefineProperty
     ("OUTPUT_NAME", cmProperty::TARGET,
      "Output name for target files.",
      "This sets the base name for output files created for an executable or "
@@ -988,6 +1005,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("LIBRARY_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
+  this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
@@ -3649,6 +3667,27 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
       {
       languages.insert(lang);
       }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetAppleArchs(const char* config,
+                             std::vector<std::string>& archVec)
+{
+  const char* archs = 0;
+  if(config && *config)
+    {
+    std::string defVarName = "OSX_ARCHITECTURES_";
+    defVarName += cmSystemTools::UpperCase(config);
+    archs = this->GetProperty(defVarName.c_str());
+    }
+  if(!archs)
+    {
+    archs = this->GetProperty("OSX_ARCHITECTURES");
+    }
+  if(archs)
+    {
+    cmSystemTools::ExpandListArgument(std::string(archs), archVec);
     }
 }
 

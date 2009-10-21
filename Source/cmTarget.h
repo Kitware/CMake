@@ -410,6 +410,9 @@ public:
   // until we have per-target object file properties.
   void GetLanguages(std::set<cmStdString>& languages) const;
 
+  /** Get the list of OS X target architectures to be built.  */
+  void GetAppleArchs(const char* config, std::vector<std::string>& archVec);
+
   /** Return whether this target is an executable with symbol exports
       enabled.  */
   bool IsExecutableWithExports();

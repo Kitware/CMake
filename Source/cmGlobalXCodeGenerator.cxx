@@ -1515,6 +1515,34 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     extraLinkOptions += targetLinkFlags;
     }
 
+  // Set target-specific architectures.
+  std::vector<std::string> archs;
+  target.GetAppleArchs(configName, archs);
+  if(!archs.empty())
+    {
+    // Enable ARCHS attribute.
+    buildSettings->AddAttribute("ONLY_ACTIVE_ARCH",
+                                this->CreateString("NO"));
+
+    // Store ARCHS value.
+    if(archs.size() == 1)
+      {
+      buildSettings->AddAttribute("ARCHS",
+                                  this->CreateString(archs[0].c_str()));
+      }
+    else
+      {
+      cmXCodeObject* archObjects =
+        this->CreateObject(cmXCodeObject::OBJECT_LIST);
+      for(std::vector<std::string>::iterator i = archs.begin();
+          i != archs.end(); i++)
+        {
+        archObjects->AddObject(this->CreateString((*i).c_str()));
+        }
+      buildSettings->AddAttribute("ARCHS", archObjects);
+      }
+    }
+
   // Get the product name components.
   std::string pnprefix;
   std::string pnbase;
