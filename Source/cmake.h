@@ -414,6 +414,10 @@ protected:
 
   void GenerateGraphViz(const char* fileName) const;
 
+  static int SymlinkLibrary(std::vector<std::string>& args);
+  static int SymlinkExecutable(std::vector<std::string>& args);
+  static bool SymlinkInternal(std::string const& file,
+                              std::string const& link);
   static int ExecuteEchoColor(std::vector<std::string>& args);
   static int ExecuteLinkScript(std::vector<std::string>& args);
   static int VisualStudioLink(std::vector<std::string>& args, int type);

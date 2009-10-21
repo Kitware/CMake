@@ -1377,61 +1377,12 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Internal CMake shared library support.
     else if (args[1] == "cmake_symlink_library" && args.size() == 5)
       {
-      int result = 0;
-      std::string realName = args[2];
-      std::string soName = args[3];
-      std::string name = args[4];
-      if(soName != realName)
-        {
-        std::string fname = cmSystemTools::GetFilenameName(realName);
-        if(cmSystemTools::FileExists(soName.c_str()) ||
-           cmSystemTools::FileIsSymlink(soName.c_str()))
-          {
-          cmSystemTools::RemoveFile(soName.c_str());
-          }
-        if(!cmSystemTools::CreateSymlink(fname.c_str(), soName.c_str()))
-          {
-          cmSystemTools::ReportLastSystemError("cmake_symlink_library");
-          result = 1;
-          }
-        }
-      if(name != soName)
-        {
-        std::string fname = cmSystemTools::GetFilenameName(soName);
-        if(cmSystemTools::FileExists(name.c_str()) ||
-           cmSystemTools::FileIsSymlink(name.c_str()))
-          {
-          cmSystemTools::RemoveFile(name.c_str());
-          }
-        if(!cmSystemTools::CreateSymlink(fname.c_str(), name.c_str()))
-          {
-          cmSystemTools::ReportLastSystemError("cmake_symlink_library");
-          result = 1;
-          }
-        }
-      return result;
+      return cmake::SymlinkLibrary(args);
       }
     // Internal CMake versioned executable support.
     else if (args[1] == "cmake_symlink_executable" && args.size() == 4)
       {
-      int result = 0;
-      std::string realName = args[2];
-      std::string name = args[3];
-      if(name != realName)
-        {
-        std::string fname = cmSystemTools::GetFilenameName(realName);
-        if(cmSystemTools::FileExists(name.c_str()) ||
-           cmSystemTools::FileIsSymlink(name.c_str()))
-          {
-          cmSystemTools::RemoveFile(name.c_str());
-          }
-        if(!cmSystemTools::CreateSymlink(fname.c_str(), name.c_str()))
-          {
-          cmSystemTools::ReportLastSystemError("cmake_symlink_executable");
-          result = 1;
-          }
-        }
-      return result;
+      return cmake::SymlinkExecutable(args);
       }
 
 #if defined(CMAKE_HAVE_VS_GENERATORS)
@@ -3125,6 +3076,61 @@ void cmake::GenerateGraphViz(const char* fileName) const
   //<< std::endl;
   //
   str << "}" << std::endl;
+}
+
+//----------------------------------------------------------------------------
+int cmake::SymlinkLibrary(std::vector<std::string>& args)
+{
+  int result = 0;
+  std::string realName = args[2];
+  std::string soName = args[3];
+  std::string name = args[4];
+  if(soName != realName)
+    {
+    if(!cmake::SymlinkInternal(realName, soName))
+      {
+      cmSystemTools::ReportLastSystemError("cmake_symlink_library");
+      result = 1;
+      }
+    }
+  if(name != soName)
+    {
+    if(!cmake::SymlinkInternal(soName, name))
+      {
+      cmSystemTools::ReportLastSystemError("cmake_symlink_library");
+      result = 1;
+      }
+    }
+  return result;
+}
+
+//----------------------------------------------------------------------------
+int cmake::SymlinkExecutable(std::vector<std::string>& args)
+{
+  int result = 0;
+  std::string realName = args[2];
+  std::string name = args[3];
+  if(name != realName)
+    {
+    if(!cmake::SymlinkInternal(realName, name))
+      {
+      cmSystemTools::ReportLastSystemError("cmake_symlink_executable");
+      result = 1;
+      }
+    }
+  return result;
+}
+
+//----------------------------------------------------------------------------
+bool cmake::SymlinkInternal(std::string const& file, std::string const& link)
+{
+  if(cmSystemTools::FileExists(link.c_str()) ||
+     cmSystemTools::FileIsSymlink(link.c_str()))
+    {
+    cmSystemTools::RemoveFile(link.c_str());
+    }
+  std::string linktext = cmSystemTools::GetFilenameName(file);
+  return cmSystemTools::CreateSymlink(linktext.c_str(), link.c_str());
 }
 
 //----------------------------------------------------------------------------
