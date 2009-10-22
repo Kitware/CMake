@@ -655,6 +655,10 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     {
     sourcecode += ".c.c";
     }
+  else if(lang && strcmp(lang, "Fortran") == 0)
+    {
+    sourcecode += ".fortran.f90";
+    }
   else if(ext == "png" || ext == "gif" || ext == "jpg")
     {
     sourcecode = "image";
