@@ -10,7 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmVisualStudio10TargetGenerator.h"
-#include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudio10Generator.h"
 #include "cmTarget.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
@@ -32,7 +32,7 @@ static std::string cmVS10EscapeXML(std::string arg)
 
 cmVisualStudio10TargetGenerator::
 cmVisualStudio10TargetGenerator(cmTarget* target,
-                                cmGlobalVisualStudio7Generator* gg)
+                                cmGlobalVisualStudio10Generator* gg)
 {
   this->GlobalGenerator = gg;
   this->Target = target;
@@ -43,7 +43,7 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->Name = this->Target->GetName();
   this->GlobalGenerator->CreateGUID(this->Name.c_str());
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
-  this->Platform = "|Win32";
+  this->Platform = gg->GetPlatformName();
   this->ComputeObjectNames();
   this->BuildFileStream = 0;
 }
@@ -80,7 +80,7 @@ void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   (*stream ) << "";
   (*stream ) << "<" << tag 
              << " Condition=\"'$(Configuration)|$(Platform)'=='";
-  (*stream ) << config << this->Platform << "'\"";
+  (*stream ) << config << "|" << this->Platform << "'\"";
   if(attribute)
     {
     (*stream ) << attribute;
@@ -141,6 +141,8 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<SccProjectName />\n", 2);
   this->WriteString("<SccLocalPath />\n", 2);
   this->WriteString("<Keyword>Win32Proj</Keyword>\n", 2);
+  this->WriteString("<Platform>", 2);
+  (*this->BuildFileStream) << this->Platform << "</Platform>\n";
   this->WriteString("</PropertyGroup>\n", 1);
   this->WriteString("<Import Project="
                     "\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n",
@@ -187,10 +189,11 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
       i != configs->end(); ++i)
     {
     this->WriteString("<ProjectConfiguration Include=\"", 2);
-    (*this->BuildFileStream ) <<  *i << this->Platform << "\">\n";
+    (*this->BuildFileStream ) <<  *i << "|" << this->Platform << "\">\n";
     this->WriteString("<Configuration>", 3);
     (*this->BuildFileStream ) <<  *i << "</Configuration>\n";
-    this->WriteString("<Platform>Win32</Platform>\n", 3);
+    this->WriteString("<Platform>", 3);
+    (*this->BuildFileStream) << this->Platform << "</Platform>\n";
     this->WriteString("</ProjectConfiguration>\n", 2);
     }
   this->WriteString("</ItemGroup>\n", 1);

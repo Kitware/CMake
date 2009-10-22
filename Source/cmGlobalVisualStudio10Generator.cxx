@@ -37,7 +37,8 @@ void cmGlobalVisualStudio10Generator::WriteSLNHeader(std::ostream& fout)
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalVisualStudio10Generator::CreateLocalGenerator()
 {
-  cmLocalGenerator*lg =  new cmLocalVisualStudio10Generator;
+  cmLocalVisualStudio10Generator* lg =  new cmLocalVisualStudio10Generator;
+  lg->SetPlatformName(this->PlatformName.c_str());
   lg->SetGlobalGenerator(this);
   return lg;
 }

@@ -16,7 +16,7 @@
 class cmTarget;
 class cmMakefile;
 class cmGeneratedFileStream;
-class cmGlobalVisualStudio7Generator;
+class cmGlobalVisualStudio10Generator;
 class cmSourceFile;
 class cmCustomCommand;
 class cmLocalVisualStudio7Generator;
@@ -27,7 +27,7 @@ class cmVisualStudio10TargetGenerator
 {
 public:
   cmVisualStudio10TargetGenerator(cmTarget* target, 
-                                  cmGlobalVisualStudio7Generator* gg);
+                                  cmGlobalVisualStudio10Generator* gg);
   ~cmVisualStudio10TargetGenerator();
   void Generate();
   // used by cmVisualStudioGeneratorOptions 
@@ -82,7 +82,7 @@ private:
   std::string Platform;
   std::string GUID;
   std::string Name;
-  cmGlobalVisualStudio7Generator* GlobalGenerator;
+  cmGlobalVisualStudio10Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
   std::set<cmSourceFile*> SourcesVisited;

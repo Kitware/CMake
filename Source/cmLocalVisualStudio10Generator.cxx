@@ -13,7 +13,7 @@
 #include "cmTarget.h"
 #include "cmMakefile.h"
 #include "cmVisualStudio10TargetGenerator.h"
-#include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudio10Generator.h"
 #include <cm_expat.h>
 #include "cmXMLParser.h"
 class cmVS10XMLParser : public cmXMLParser
@@ -93,9 +93,9 @@ void cmLocalVisualStudio10Generator::Generate()
 
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
     {
-    cmVisualStudio10TargetGenerator tg(&l->second, 
-                                       (cmGlobalVisualStudio7Generator*)
-                                       this->GetGlobalGenerator());
+    cmVisualStudio10TargetGenerator tg(
+      &l->second, static_cast<cmGlobalVisualStudio10Generator*>(
+        this->GetGlobalGenerator()));
     tg.Generate();
     }
   this->WriteStampFiles();

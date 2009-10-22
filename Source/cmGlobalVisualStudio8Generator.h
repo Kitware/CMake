@@ -38,6 +38,8 @@ public:
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
+  std::string const& GetPlatformName() const { return this->PlatformName; }
+
   /**
    * Override Configure and Generate to add the build-system check
    * target.
