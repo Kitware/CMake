@@ -516,6 +516,20 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --test-command  UseX11)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/X11")
 
+  if(NOT DEFINED CTEST_RUN_CMakeTestAllGenerators)
+    set(CTEST_RUN_CMakeTestAllGenerators ON)
+  endif(NOT DEFINED CTEST_RUN_CMakeTestAllGenerators)
+
+  IF(CTEST_RUN_CMakeTestAllGenerators)
+    ADD_TEST(CMakeTestAllGenerators ${CMAKE_CMAKE_COMMAND}
+        -D dir=${CMake_BINARY_DIR}/Tests/CMakeTestAllGenerators
+        -D CMake_SOURCE_DIR=${CMake_SOURCE_DIR}
+        -P ${CMake_SOURCE_DIR}/Tests/CMakeTestAllGenerators/RunCMake.cmake
+      )
+    LIST(APPEND TEST_BUILD_DIRS
+      "${CMake_BINARY_DIR}/Tests/CMakeTestAllGenerators")
+  ENDIF(CTEST_RUN_CMakeTestAllGenerators)
+
   ADD_TEST(LoadedCommandOneConfig  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/LoadCommandOneConfig"
