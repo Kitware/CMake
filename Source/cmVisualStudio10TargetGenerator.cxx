@@ -375,6 +375,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::vector<cmSourceFile*> clCompile;
   std::vector<cmSourceFile*> customBuild;
   std::vector<cmSourceFile*> none;
+  std::vector<cmSourceFile*> headers;
   
   for(std::vector<cmSourceFile*>::const_iterator s = classes.begin(); 
       s != classes.end(); s++)
@@ -384,7 +385,10 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     cmSourceGroup& sourceGroup = 
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
     groupsUsed.insert(&sourceGroup);
-    const char* lang = sf->GetLanguage();
+    const char* lang = sf->GetLanguage(); 
+    bool header = (*s)->GetPropertyAsBool("HEADER_FILE_ONLY")
+      || this->GlobalGenerator->IgnoreFile
+      ((*s)->GetExtension().c_str());
     if(!lang)
       {
       lang = "None";
@@ -396,6 +400,10 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     else if(sf->GetCustomCommand())
       {
       customBuild.push_back(sf);
+      }
+    else if(header)
+      {
+      headers.push_back(sf);
       }
     else
       {
@@ -419,6 +427,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
                     "developer/msbuild/2003\">\n",
                     0);
   this->WriteGroupSources("ClCompile", clCompile, sourceGroups);
+  this->WriteGroupSources("ClInclude", headers, sourceGroups);
   this->WriteGroupSources("CustomBuild", customBuild, sourceGroups);
 
   this->WriteString("<ItemGroup>\n", 1);
@@ -532,13 +541,13 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
     {
     // if it is not a custom command then add it as a c/c++ file,
     // TODO: need to check for idl or rc
-    if(!(*source)->GetCustomCommand()
-       && !(*source)->GetPropertyAsBool("HEADER_FILE_ONLY")
-       && !this->GlobalGenerator->IgnoreFile
-       ((*source)->GetExtension().c_str()))
+    if(!(*source)->GetCustomCommand())
       {
+      bool header = (*source)->GetPropertyAsBool("HEADER_FILE_ONLY")
+        || this->GlobalGenerator->IgnoreFile
+        ((*source)->GetExtension().c_str());
       const char* lang = (*source)->GetLanguage();
-      if(lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0))
+      if(header || lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0))
         {
         std::string sourceFile = (*source)->GetFullPath();
         sourceFile =  cmSystemTools::RelativePath(
@@ -546,7 +555,14 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
           sourceFile.c_str());
         this->ConvertToWindowsSlash(sourceFile);
         // output the source file
-        this->WriteString("<ClCompile Include=\"", 2);
+        if(header)
+          {
+          this->WriteString("<ClInclude Include=\"", 2);
+          }
+        else
+          {
+          this->WriteString("<ClCompile Include=\"", 2);
+          }
         (*this->BuildFileStream ) << sourceFile << "\"";
         // ouput any flags specific to this source file
         if(this->OutputSourceSpecificFlags(*source))
@@ -1080,11 +1096,12 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     // first just full path
     linkDirs += sep;
     linkDirs += *d;
+    sep = ";";
     linkDirs += sep;
     // next path with configuration type Debug, Release, etc
     linkDirs += *d;
     linkDirs += "/$(Configuration)";
-    sep = ";";
+    linkDirs += sep;
     }
   linkDirs += "%(AdditionalLibraryDirectories)";
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs.c_str());
