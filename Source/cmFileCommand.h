@@ -152,7 +152,7 @@ public:
       "and the second element is a string value for the error. A 0 "
       "numeric error means no error in the operation. "
       "If TIMEOUT time is specified, the operation will "
-      "timeout after time seconds, time can be specified as a float."
+      "timeout after time seconds, time should be specified as an integer."
       "\n"
       "The file() command also provides COPY and INSTALL signatures:\n"
       "  file(<COPY|INSTALL> files... DESTINATION <dir>\n"
