@@ -103,6 +103,7 @@ void cmVisualStudio10TargetGenerator::WriteString(const char* line,
   (*this->BuildFileStream ) << line;
 }
 
+#define VS10_USER_PROPS "$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props"
 
 void cmVisualStudio10TargetGenerator::Generate()
 {
@@ -153,12 +154,9 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ImportGroup Label=\"ExtensionSettings\">\n", 1);
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<ImportGroup Label=\"PropertySheets\">\n", 1);
-  this->WriteString("<Import Project="
-                    "\"$(LocalAppData)\\Microsoft\\VisualStudio\\10.0\\"
-                    "Microsoft.Cpp.$(Platform).user.props\" "
-                    "Condition=\"exists('$(LocalAppData)\\Microsoft"
-                    "\\VisualStudio\\10.0\\"
-                    "Microsoft.Cpp.$(Platform).user.props')\" />\n", 2);
+  this->WriteString("<Import Project=\"" VS10_USER_PROPS "\""
+                    " Condition=\"exists('" VS10_USER_PROPS "')\""
+                    " Label=\"LocalAppDataPlatform\" />", 2);
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<PropertyGroup Label=\"UserMacros\" />\n", 1);
   this->WritePathAndIncrementalLinkOptions();
