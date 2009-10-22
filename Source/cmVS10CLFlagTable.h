@@ -102,9 +102,11 @@ static cmVS7FlagTable cmVS10CLFlagTable[] =
    "Fast", "Fast", 0},
 
   {"PrecompiledHeader", "Yc",
-   "Create", "Create", 0},
+   "Create", "Create",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"PrecompiledHeader", "Yu",
-   "Use", "Use", 0},
+   "Use", "Use",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"PrecompiledHeader", "",
    "Not Using Precompiled Headers", "NotUsing", 0},
 
@@ -238,7 +240,12 @@ static cmVS7FlagTable cmVS10CLFlagTable[] =
 
   //String Properties
   // Skip [TrackerLogDirectory] - no command line Switch.
-  // Skip [PrecompiledHeaderFile] - no command line Switch.
+  {"PrecompiledHeaderFile", "Yc",
+   "Precompiled Header Name",
+   "", cmVS7FlagTable::UserValueRequired},
+  {"PrecompiledHeaderFile", "Yu",
+   "Precompiled Header Name",
+   "", cmVS7FlagTable::UserValueRequired},
   {"PrecompiledHeaderOutputFile", "Fp",
    "Precompiled Header Output File",
    "", cmVS7FlagTable::UserValue},
