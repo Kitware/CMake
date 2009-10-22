@@ -63,8 +63,9 @@ if(HELP_XCODE)
     OUTPUT_VARIABLE OUTPUT)
 endif(HELP_XCODE)
 
+message("Output from first build:\n${OUTPUT}")
 if(NOT RESULT)
-  message(SEND_ERROR "Could not build test project: ${OUTPUT}")
+  message(SEND_ERROR "Could not build test project (1)!")
 endif(NOT RESULT)
 
 set(bar ${BuildDepends_BINARY_DIR}/Project/bar${CMAKE_EXECUTABLE_SUFFIX})
@@ -146,8 +147,9 @@ if(HELP_XCODE)
     OUTPUT_VARIABLE OUTPUT)
 endif(HELP_XCODE)
 
+message("Output from second build:\n${OUTPUT}")
 if(NOT RESULT)
-  message(SEND_ERROR "Could not build test project: ${OUTPUT}")
+  message(SEND_ERROR "Could not build test project (2)!")
 endif(NOT RESULT)
 if(EXISTS 
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
