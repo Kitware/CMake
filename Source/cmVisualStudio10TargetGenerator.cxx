@@ -567,7 +567,7 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
         || this->GlobalGenerator->IgnoreFile
         ((*source)->GetExtension().c_str());
       const char* lang = (*source)->GetLanguage();
-      if(header || lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0))
+      bool cl = lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0);
         {
         std::string sourceFile = (*source)->GetFullPath();
         sourceFile =  cmSystemTools::RelativePath(
@@ -579,13 +579,17 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
           {
           this->WriteString("<ClInclude Include=\"", 2);
           }
-        else
+        else if(cl)
           {
           this->WriteString("<ClCompile Include=\"", 2);
           }
+        else
+          {
+          this->WriteString("<None Include=\"", 2);
+          }
         (*this->BuildFileStream ) << sourceFile << "\"";
         // ouput any flags specific to this source file
-        if(this->OutputSourceSpecificFlags(*source))
+        if(cl && this->OutputSourceSpecificFlags(*source))
           {
           // if the source file has specific flags the tag
           // is ended on a new line
