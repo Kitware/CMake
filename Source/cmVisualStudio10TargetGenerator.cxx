@@ -22,6 +22,8 @@
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
 
+#include <cmsys/auto_ptr.hxx>
+
 static std::string cmVS10EscapeXML(std::string arg)
 {
   cmSystemTools::ReplaceString(arg, "&", "&amp;");
@@ -50,6 +52,11 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
 
 cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
 {
+  for(OptionsMap::iterator i = this->ClOptions.begin();
+      i != this->ClOptions.end(); ++i)
+    {
+    delete i->second;
+    }
   if(!this->BuildFileStream)
     {
     return;
@@ -116,6 +123,10 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->Target->SetProperty("GENERATOR_FILE_NAME",this->Name.c_str());
   this->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
                             ".vcxproj");
+  if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY)
+    {
+    this->ComputeClOptions();
+    }
   cmMakefile* mf = this->Target->GetMakefile();
   std::string path =  mf->GetStartOutputDirectory();
   path += "/";
@@ -237,7 +248,15 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       {
       this->WriteString("<UseOfMfc>false</UseOfMfc>\n", 2);
       }
-    this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
+    if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
+       this->ClOptions[*i]->UsingUnicode())
+      {
+      this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
+      }
+    else
+      {
+      this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
+      }
     this->WriteString("</PropertyGroup>\n", 1);
     }
 }
@@ -831,21 +850,31 @@ OutputLinkIncremental(std::string const& configName)
                          << "</LinkIncremental>\n"; 
 }
 
-
-void 
-cmVisualStudio10TargetGenerator::
-WriteClOptions(std::string const& configName,
-               std::vector<std::string> const & includes)
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator::ComputeClOptions()
 {
-  
+  std::vector<std::string> const* configs =
+    this->GlobalGenerator->GetConfigurations();
+  for(std::vector<std::string>::const_iterator i = configs->begin();
+      i != configs->end(); ++i)
+    {
+    this->ComputeClOptions(*i);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator::ComputeClOptions(
+  std::string const& configName)
+{
   // much of this was copied from here:
   // copied from cmLocalVisualStudio7Generator.cxx 805
+  // TODO: Integrate code below with cmLocalVisualStudio7Generator.
 
-  this->WriteString("<ClCompile>\n", 2);
-  cmVisualStudioGeneratorOptions 
-    clOptions(this->LocalGenerator,
-              10, cmVisualStudioGeneratorOptions::Compiler,
-              cmVS10CLFlagTable);
+  cmsys::auto_ptr<Options> pOptions(
+    new Options(this->LocalGenerator, 10, Options::Compiler,
+                cmVS10CLFlagTable));
+  Options& clOptions = *pOptions;
+
   std::string flags;
   // collect up flags for 
   if(this->Target->GetType() < cmTarget::UTILITY)
@@ -915,6 +944,17 @@ WriteClOptions(std::string const& configName,
     {
     clOptions.AddDefine(exportMacro);
     }
+
+  this->ClOptions[configName] = pOptions.release();
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator::WriteClOptions(
+  std::string const& configName,
+  std::vector<std::string> const& includes)
+{
+  Options& clOptions = *(this->ClOptions[configName]);
+  this->WriteString("<ClCompile>\n", 2);
   clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
   this->OutputIncludes(includes);
   clOptions.OutputFlagMap(*this->BuildFileStream, "      ");

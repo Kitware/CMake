@@ -21,6 +21,7 @@ class cmSourceFile;
 class cmCustomCommand;
 class cmLocalVisualStudio7Generator;
 class cmComputeLinkInformation;
+class cmVisualStudioGeneratorOptions;
 #include "cmSourceGroup.h"
 
 class cmVisualStudio10TargetGenerator
@@ -49,6 +50,8 @@ private:
   void WriteObjSources();
   void WritePathAndIncrementalLinkOptions();
   void WriteItemDefinitionGroups();
+  void ComputeClOptions();
+  void ComputeClOptions(std::string const& configName);
   void WriteClOptions(std::string const& config,
                       std::vector<std::string> const & includes);
   void WriteRCOptions(std::string const& config,
@@ -75,6 +78,9 @@ private:
                          std::vector<cmSourceFile*> const& sources,
                          std::vector<cmSourceGroup>& );
 private:
+  typedef cmVisualStudioGeneratorOptions Options;
+  typedef std::map<cmStdString, Options*> OptionsMap;
+  OptionsMap ClOptions;
   std::string ModuleDefinitionFile;
   std::string PathToVcxproj;
   cmTarget* Target;
