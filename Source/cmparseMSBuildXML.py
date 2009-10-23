@@ -3,7 +3,9 @@
 # more information see here:
 
 #  http://blogs.msdn.com/vcblog/archive/2008/12/16/msbuild-task.aspx
-#  cl.xml
+#  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/1033/cl.xml"
+#  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/1033/lib.xml"
+#  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/1033/link.xml"
 #
 #  BoolProperty  <Name>true|false</Name>
 #   simple example:
@@ -233,10 +235,10 @@ class MSBuildToCMake:
     for i in self.boolProperties:
       if i.argumentProperty != "":
         if i.attributes["ReverseSwitch"] != "":
-          toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["ReverseSwitch"]+"\", \"\", \"false\", cmVS7FlagTable::Continue},\n"
+          toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["ReverseSwitch"]+"\", \"\", \"false\",\n   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},\n"
           toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["ReverseSwitch"]+"\", \""+i.DisplayName+"\", \"\",\n   cmVS7FlagTable::UserValueRequired},\n"
         if i.attributes["Switch"] != "":
-          toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+"\", \"\", \"true\", cmVS7FlagTable::Continue},\n"
+          toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+"\", \"\", \"true\",\n   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},\n"
           toReturn += "  {\""+i.argumentProperty+"\", \""+i.attributes["Switch"]+"\", \""+i.DisplayName+"\", \"\",\n   cmVS7FlagTable::UserValueRequired},\n"
     
     toReturn += "\n  //String List Properties\n"

@@ -138,7 +138,7 @@ static cmVS7FlagTable cmVS10CLFlagTable[] =
   {"ErrorReporting", "errorReport:none",
    "Do Not Send Report", "None", 0},
   {"ErrorReporting", "errorReport:prompt",
-   "Prompt Immediatelly", "Prompt", 0},
+   "Prompt Immediately", "Prompt", 0},
   {"ErrorReporting", "errorReport:queue",
    "Queue For Next Login", "Queue", 0},
   {"ErrorReporting", "errorReport:send",
@@ -182,7 +182,7 @@ static cmVS7FlagTable cmVS10CLFlagTable[] =
   {"FunctionLevelLinking", "Gy", "", "true", 0},
   {"FloatingPointExceptions", "fp:except-", "", "false", 0},
   {"FloatingPointExceptions", "fp:except", "", "true", 0},
-  {"CodeGeneration", "hotpatch", "", "true", 0},
+  {"CreateHotpatchableImage", "hotpatch", "", "true", 0},
   {"DisableLanguageExtensions", "Za", "", "true", 0},
   {"TreatWChar_tAsBuiltInType", "Zc:wchar_t-", "", "false", 0},
   {"TreatWChar_tAsBuiltInType", "Zc:wchar_t", "", "true", 0},
@@ -201,14 +201,16 @@ static cmVS7FlagTable cmVS10CLFlagTable[] =
   {"UseUnicodeForAssemblerListing", "FAu", "", "true", 0},
 
   //Bool Properties With Argument
-  {"MultiProcessorCompilation", "MP", "", "true", cmVS7FlagTable::Continue},
+  {"MultiProcessorCompilation", "MP", "", "true",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"ProcessorNumber", "MP", "Multi-processor Compilation", "",
    cmVS7FlagTable::UserValueRequired},
   {"GenerateXMLDocumentationFiles", "doc", "", "true",
-   cmVS7FlagTable::Continue},
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"XMLDocumentationFileName", "doc", "Generate XML Documentation Files", "",
    cmVS7FlagTable::UserValueRequired},
-  {"BrowseInformation", "FR", "", "true", cmVS7FlagTable::Continue},
+  {"BrowseInformation", "FR", "", "true",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"BrowseInformationFile", "FR", "Enable Browse Information", "",
    cmVS7FlagTable::UserValueRequired},
 
@@ -240,6 +242,9 @@ static cmVS7FlagTable cmVS10CLFlagTable[] =
 
   //String Properties
   // Skip [TrackerLogDirectory] - no command line Switch.
+  {"PreprocessOutputPath", "Fi",
+   "Preprocess Output Path",
+   "", cmVS7FlagTable::UserValue},
   {"PrecompiledHeaderFile", "Yc",
    "Precompiled Header Name",
    "", cmVS7FlagTable::UserValueRequired},
