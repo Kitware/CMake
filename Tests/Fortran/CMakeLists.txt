@@ -7,8 +7,11 @@ message("CMAKE_Fortran_COMPILER_INIT = ${CMAKE_Fortran_COMPILER_INIT}")
 message("CMAKE_Fortran_COMPILER_FULLPATH = ${CMAKE_Fortran_COMPILER_FULLPATH}")
 message("CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
 message("CMAKE_Fortran_FLAGS = ${CMAKE_Fortran_FLAGS}")
-add_executable(testf hello.f)
 
+add_library(hello STATIC hello.f)
+add_library(world SHARED world.f)
+add_executable(testf testf.f)
+target_link_libraries(testf hello world)
 
 function(test_fortran_c_interface_module)
   message(STATUS "Testing FortranCInterface module")
