@@ -423,14 +423,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   set(CTEST_RUN_CPackComponents ${CTEST_TEST_CPACK})
   set(CTEST_package_X11_TEST ${CTEST_TEST_CPACK})
 
+  find_program(NSIS_MAKENSIS_EXECUTABLE NAMES makensis
+    PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS]
+    DOC "makensis program location"
+    )
+
   # But on Windows, only run the CPackComponents test if the NSIS
   # installer builder is available:
   #
   if(WIN32)
-    find_program(NSIS_MAKENSIS_EXECUTABLE NAMES makensis
-      PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS]
-      DOC "makensis.exe location"
-      )
     if(NSIS_MAKENSIS_EXECUTABLE)
       set(CTEST_RUN_CPackComponents ON)
     else(NSIS_MAKENSIS_EXECUTABLE)
@@ -444,6 +445,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     if(APPLE)
       set(CPackComponents_EXTRA_OPTIONS -DCPACK_BINARY_DRAGNDROP:BOOL=ON)
     endif(APPLE)
+    if(NSIS_MAKENSIS_EXECUTABLE)
+      set(CPackComponents_EXTRA_OPTIONS ${CPackComponents_EXTRA_OPTIONS}
+        -DCPACK_BINARY_NSIS:BOOL=ON)
+    endif(NSIS_MAKENSIS_EXECUTABLE)
 
     ADD_TEST(CPackComponents ${CMAKE_CTEST_COMMAND}
       --build-and-test
