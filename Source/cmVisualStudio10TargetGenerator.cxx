@@ -1180,15 +1180,12 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
 
   std::string dir = this->Target->GetDirectory(config.c_str());
   dir += "/";
-  std::string out = dir;
-  out += targetNameFull;
   std::string pdb = dir;
   pdb += targetNamePDB;
   std::string imLib = this->Target->GetDirectory(config.c_str(), true);
   imLib += "/";
   imLib += targetNameImport;
 
-  linkOptions.AddFlag("OutputFile", out.c_str());
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFileName", pdb.c_str());
   linkOptions.Parse(flags.c_str());
