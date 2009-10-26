@@ -25,7 +25,7 @@ cmCTestBatchTestHandler::~cmCTestBatchTestHandler()
 void cmCTestBatchTestHandler::RunTests()
 {
   this->WriteBatchScript();
-  //this->SubmitBatchScript();
+  this->SubmitBatchScript();
 }
 
 //---------------------------------------------------------
@@ -128,16 +128,16 @@ void cmCTestBatchTestHandler::SubmitBatchScript()
   args.push_back(this->Script);
   args.push_back("-o");
   args.push_back(this->CTest->GetBinaryDir()
-                 + "/Testing/CTestBatchOutput.txt");
+                 + "/Testing/CTestBatch.txt");
 
   sbatch.SetCommand("sbatch");
   sbatch.SetCommandArguments(args);
-  if(sbatch.StartProcess())
+  /*if(sbatch.StartProcess())
     {
       //success condition
     }
   else
     {
       //fail condition
-    }
+    }*/
 }

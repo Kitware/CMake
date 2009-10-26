@@ -1186,8 +1186,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     PASS_REGULAR_EXPRESSION "\\*\\*\\*Timeout")
   
   ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
-
-
+  
+  ADD_TEST(CTestBatchTest ${CMAKE_CTEST_COMMAND} -B)
+  
   # Use macro, not function so that build can still be driven by CMake 2.4.
   # After 2.6 is required, this could be a function without the extra 'set'
   # calls.
