@@ -11,7 +11,7 @@ set(INITIAL_CACHE "CMAKE_BUILD_TYPE:STRING=Release
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
 CMAKE_GENERATOR:INTERNAL=Unix Makefiles
 BUILD_QtDialog:BOOL:=TRUE
-QT_QMAKE_EXECUTABLE:FILEPATH=C:/cygwin/home/dashboard/qt/qt-all-opensource-src-4.5.2/bin/qmake.exe
+QT_QMAKE_EXECUTABLE:FILEPATH=c:/Dashboards/Support/qt-4.5.3-static/bin/qmake.exe
 ")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)
