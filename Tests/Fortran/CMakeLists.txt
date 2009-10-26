@@ -9,7 +9,7 @@ message("CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
 message("CMAKE_Fortran_FLAGS = ${CMAKE_Fortran_FLAGS}")
 
 add_library(hello STATIC hello.f)
-add_library(world SHARED world.f)
+add_library(world SHARED world.f world.def)
 add_executable(testf testf.f)
 target_link_libraries(testf hello world)
 
