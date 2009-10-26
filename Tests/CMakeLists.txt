@@ -1185,6 +1185,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   SET_TESTS_PROPERTIES(CTestTestTimeout PROPERTIES
     PASS_REGULAR_EXPRESSION "\\*\\*\\*Timeout")
   
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/test.cmake"
+    "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/hello.cmake"
+    "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/hello.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestRunScript ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/testOutput.log"
+    )
+  
   ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
   
   ADD_TEST(CTestBatchTest ${CMAKE_CTEST_COMMAND} -B)
