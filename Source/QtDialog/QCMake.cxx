@@ -20,6 +20,10 @@
 #include "cmSystemTools.h"
 #include "cmExternalMakefileProjectGenerator.h"
 
+#ifdef Q_OS_WIN
+#include "qt_windows.h"  // For SetErrorMode
+#endif
+
 QCMake::QCMake(QObject* p)
   : QObject(p)
 {
@@ -148,6 +152,10 @@ void QCMake::setGenerator(const QString& gen)
 
 void QCMake::configure()
 {
+#ifdef Q_OS_WIN
+  UINT lastErrorMode = SetErrorMode(0);
+#endif
+
   this->CMakeInstance->SetHomeDirectory(this->SourceDirectory.toAscii().data());
   this->CMakeInstance->SetStartDirectory(this->SourceDirectory.toAscii().data());
   this->CMakeInstance->SetHomeOutputDirectory(this->BinaryDirectory.toAscii().data());
@@ -162,14 +170,27 @@ void QCMake::configure()
 
   int err = this->CMakeInstance->Configure();
 
+#ifdef Q_OS_WIN
+  SetErrorMode(lastErrorMode);
+#endif
+
   emit this->propertiesChanged(this->properties());
   emit this->configureDone(err);
 }
 
 void QCMake::generate()
 {
+#ifdef Q_OS_WIN
+  UINT lastErrorMode = SetErrorMode(0);
+#endif
+
   cmSystemTools::ResetErrorOccuredFlag();
   int err = this->CMakeInstance->Generate();
+
+#ifdef Q_OS_WIN
+  SetErrorMode(lastErrorMode);
+#endif
+
   emit this->generateDone(err);
 }
   

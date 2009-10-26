@@ -16,11 +16,6 @@
 #include <QTranslator>
 #include <QLocale>
 #include "QMacInstallDialog.h"
-
-#ifdef Q_OS_WIN
-#include "windows.h"  // for SetErrorMode
-#endif
-
 #include "CMakeSetupDialog.h"
 #include "cmDocumentation.h"
 #include "cmake.h"
@@ -103,10 +98,6 @@ int main(int argc, char** argv)
     }
 
   QApplication app(argc, argv);
-#ifdef Q_OS_WIN
-  // QApplication changes error mode, let's put it back
-  SetErrorMode(0);
-#endif
   
   // clean out standard Qt paths for plugins, which we don't use anyway
   // when creating Mac bundles, it potentially causes problems
