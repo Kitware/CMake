@@ -535,6 +535,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       "${CMake_BINARY_DIR}/Tests/CMakeTestAllGenerators")
   ENDIF(CTEST_RUN_CMakeTestAllGenerators)
 
+  if(NOT DEFINED CTEST_RUN_CMakeTestMultipleConfigures)
+    set(CTEST_RUN_CMakeTestMultipleConfigures ON)
+  endif(NOT DEFINED CTEST_RUN_CMakeTestMultipleConfigures)
+
+  IF(CTEST_RUN_CMakeTestMultipleConfigures)
+    ADD_TEST(CMakeTestMultipleConfigures ${CMAKE_CMAKE_COMMAND}
+        -D dir=${CMake_BINARY_DIR}/Tests/CMakeTestMultipleConfigures
+        -D gen=${CMAKE_TEST_GENERATOR}
+        -D CMake_SOURCE_DIR=${CMake_SOURCE_DIR}
+        -P ${CMake_SOURCE_DIR}/Tests/CMakeTestMultipleConfigures/RunCMake.cmake
+      )
+    LIST(APPEND TEST_BUILD_DIRS
+      "${CMake_BINARY_DIR}/Tests/CMakeTestMultipleConfigures")
+  ENDIF(CTEST_RUN_CMakeTestMultipleConfigures)
+
   ADD_TEST(LoadedCommandOneConfig  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/LoadCommandOneConfig"
