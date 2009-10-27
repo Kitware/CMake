@@ -36,7 +36,7 @@
 # it will put the list of versions found into the variable
 # specified by list_var
 function(crt_version file list_var)
-  file(STRINGS "${file}" strings REGEX "Microsoft.VC...CRT")
+  file(STRINGS "${file}" strings REGEX "Microsoft.VC...CRT" NEWLINE_CONSUME)
   foreach(s ${strings})
     set(has_match 1)
     string(REGEX
@@ -89,6 +89,10 @@ file(GLOB_RECURSE manifest_files "*.manifest")
 foreach(f ${manifest_files})
   crt_version("${f}" manifest_version_list)
 endforeach(f)
+list(LENGTH manifest_version_list LEN)
+if(LEN EQUAL 0)
+  message(FATAL_ERROR "No .manifest files found, no version check can be done.")
+endif()
 message("Versions found in ${manifest_files}: ${manifest_version_list}")
 if(DEFINED allow_versions)
   message("Extra versions allowed: ${allow_versions}")
