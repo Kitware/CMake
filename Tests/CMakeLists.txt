@@ -463,6 +463,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
         -DCPACK_BINARY_DEB:BOOL=${CPACK_BINARY_DEB}
         -DCPACK_BINARY_RPM:BOOL=${CPACK_BINARY_RPM}
         ${CPackComponents_EXTRA_OPTIONS}
+        --graphviz=CPackComponents.dot
       --test-command ${CMAKE_CMAKE_COMMAND}
         "-DCPackComponents_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponents"
         -P "${CMake_SOURCE_DIR}/Tests/CPackComponents/VerifyResult.cmake")
@@ -534,6 +535,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     LIST(APPEND TEST_BUILD_DIRS
       "${CMake_BINARY_DIR}/Tests/CMakeTestAllGenerators")
   ENDIF(CTEST_RUN_CMakeTestAllGenerators)
+
+  if(NOT DEFINED CTEST_RUN_CMakeTestBadCommandLines)
+    set(CTEST_RUN_CMakeTestBadCommandLines ON)
+  endif(NOT DEFINED CTEST_RUN_CMakeTestBadCommandLines)
+
+  IF(CTEST_RUN_CMakeTestBadCommandLines)
+    ADD_TEST(CMakeTestBadCommandLines ${CMAKE_CMAKE_COMMAND}
+        -D dir=${CMake_BINARY_DIR}/Tests/CMakeTestBadCommandLines
+        -D gen=${CMAKE_TEST_GENERATOR}
+        -D CMake_SOURCE_DIR=${CMake_SOURCE_DIR}
+        -P ${CMake_SOURCE_DIR}/Tests/CMakeTestBadCommandLines/RunCMake.cmake
+      )
+    LIST(APPEND TEST_BUILD_DIRS
+      "${CMake_BINARY_DIR}/Tests/CMakeTestBadCommandLines")
+  ENDIF(CTEST_RUN_CMakeTestBadCommandLines)
 
   if(NOT DEFINED CTEST_RUN_CMakeTestMultipleConfigures)
     set(CTEST_RUN_CMakeTestMultipleConfigures ON)
