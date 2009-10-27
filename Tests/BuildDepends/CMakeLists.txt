@@ -28,6 +28,12 @@ function(help_xcode_depends)
   endif(HELP_XCODE)
 endfunction(help_xcode_depends)
 
+# The Intel compiler causes the MSVC linker to crash during
+# incremental linking, so avoid the /INCREMENTAL:YES flag.
+if(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")
+  set(_cmake_options "-DCMAKE_EXE_LINKER_FLAGS=")
+endif()
+
 file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
 message("Creating Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx 
@@ -49,6 +55,7 @@ try_compile(RESULT
   ${BuildDepends_BINARY_DIR}/Project
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
+  CMAKE_FLAGS ${_cmake_options}
   OUTPUT_VARIABLE OUTPUT)
 if(HELP_XCODE)
   try_compile(RESULT 
@@ -131,6 +138,7 @@ try_compile(RESULT
   ${BuildDepends_BINARY_DIR}/Project
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
+  CMAKE_FLAGS ${_cmake_options}
   OUTPUT_VARIABLE OUTPUT)
 
 # Xcode is in serious need of help here
