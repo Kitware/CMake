@@ -217,11 +217,25 @@ class MSBuildToCMake:
   def toCMake(self):
     toReturn = "static cmVS7FlagTable cmVS10CxxTable[] =\n{\n"
     toReturn += "\n  //Enum Properties\n"
+    lastProp = {}
     for i in self.enumProperties:
+      if i.attributes["Name"] == "CompileAsManaged":
+        #write these out after the rest of the enumProperties
+        lastProp = i
+        continue
       for j in i.values:
-        toReturn+="  {\""+i.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.DisplayName+"\", \""+j.attributes["Name"]+"\", 0},\n"
+        #hardcore Brad King's manual fixes for cmVS10CLFlagTable.h
+        if i.attributes["Name"] == "PrecompiledHeader" and j.attributes["Switch"] != "":
+          toReturn+="  {\""+i.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.DisplayName+"\", \""+j.attributes["Name"]+"\",\n   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},\n"
+        else:
+          #default (normal, non-hardcoded) case
+          toReturn+="  {\""+i.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.DisplayName+"\", \""+j.attributes["Name"]+"\", 0},\n"
       toReturn += "\n"
 
+    if lastProp != {}:
+      for j in lastProp.values:
+          toReturn+="  {\""+lastProp.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.DisplayName+"\", \""+j.attributes["Name"]+"\", 0},\n"
+      toReturn += "\n"
     
     toReturn += "\n  //Bool Properties\n"
     for i in self.boolProperties:
@@ -251,7 +265,16 @@ class MSBuildToCMake:
     toReturn += "\n  //String Properties\n"
     for i in self.stringProperties:
       if i.attributes["Switch"] == "":
-        toReturn += "  // Skip [" + i.attributes["Name"] + "] - no command line Switch.\n";
+        if i.attributes["Name"] == "PrecompiledHeaderFile":
+          #more hardcoding
+          toReturn += "  {\"PrecompiledHeaderFile\", \"Yc\",\n"
+          toReturn += "   \"Precompiled Header Name\",\n"
+          toReturn += "   \"\", cmVS7FlagTable::UserValueRequired},\n"
+          toReturn += "  {\"PrecompiledHeaderFile\", \"Yu\",\n"
+          toReturn += "   \"Precompiled Header Name\",\n"
+          toReturn += "   \"\", cmVS7FlagTable::UserValueRequired},\n"
+        else:
+          toReturn += "  // Skip [" + i.attributes["Name"] + "] - no command line Switch.\n";
       else:
         toReturn +="  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+i.attributes["Separator"]+"\",\n   \""+i.DisplayName+"\",\n   \"\", cmVS7FlagTable::UserValue},\n"
 
