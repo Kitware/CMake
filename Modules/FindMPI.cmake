@@ -309,7 +309,7 @@ else (MPI_COMPILE_CMDLINE)
     )
 
   # Decide between 32-bit and 64-bit libraries for Microsoft's MPI
-  if(CMAKE_SIZEOF_VOID_P EQUALS 8)
+  if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
     set(MS_MPI_ARCH_DIR amd64)
   else()
     set(MS_MPI_ARCH_DIR i386)
