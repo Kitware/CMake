@@ -27,6 +27,10 @@ AddCMakeTest(String "")
 AddCMakeTest(Math "")
 AddCMakeTest(CMakeMinimumRequired "")
 
+if(HAVE_ELF_H)
+  AddCMakeTest(ELF "")
+endif()
+
 SET(EndStuff_PreArgs
   "-Ddir:STRING=${CMAKE_CURRENT_BINARY_DIR}/EndStuffTest"
   )
