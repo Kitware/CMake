@@ -106,8 +106,8 @@ find_program(MPIEXEC
 
 # call get_filename_component twice to remove mpiexec and the directory it exists in (typically bin).
 # This gives us a fairly reliable base directory to search for /bin /lib and /include from.
-get_filename_component(MPI_BASE_DIR ${MPIEXEC} PATH)
-get_filename_component(MPI_BASE_DIR ${MPI_BASE_DIR} PATH)
+get_filename_component(MPI_BASE_DIR "${MPIEXEC}" PATH)
+get_filename_component(MPI_BASE_DIR "${MPI_BASE_DIR}" PATH)
 
 # If there is an mpi compiler find it and interogate (farther below) it for the include
 # and lib dirs otherwise we will continue to search from ${MPI_BASE_DIR}.
