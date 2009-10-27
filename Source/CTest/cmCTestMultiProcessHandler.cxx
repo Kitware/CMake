@@ -344,6 +344,9 @@ void cmCTestMultiProcessHandler::PrintTestList()
     {
     count++;
     cmCTestTestHandler::cmCTestTestProperties& p = *it->second;
+    //push working dir
+    std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
+    cmSystemTools::ChangeDirectory(p.Directory.c_str());
 
     cmCTestRunTest testRun(this->TestHandler);
     testRun.SetIndex(p.Index);
@@ -365,6 +368,8 @@ void cmCTestMultiProcessHandler::PrintTestList()
       << indexStr.str().c_str());
     cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
     cmCTestLog(this->CTest, HANDLER_OUTPUT, p.Name.c_str() << std::endl);
+    //pop working dir
+    cmSystemTools::ChangeDirectory(current_dir.c_str());
     }
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl << "Total Tests: "
     << this->Total << std::endl);
