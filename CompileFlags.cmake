@@ -25,9 +25,9 @@ INCLUDE (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
 # really only needed for newer versions of VS, but should
 # not hurt other versions, and this will work into the 
 # future
-IF(MSVC)
+IF(MSVC OR WIN32 AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
   ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
-ENDIF(MSVC)
+ENDIF()
 
 #silence duplicate symbol warnings on AIX
 IF(CMAKE_SYSTEM MATCHES "AIX.*")
