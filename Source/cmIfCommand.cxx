@@ -16,6 +16,22 @@
 #include <list>
 #include <cmsys/RegularExpression.hxx>
 
+
+static std::string cmIfCommandError(
+  cmMakefile* mf, std::vector<std::string> const& args)
+{
+  cmLocalGenerator* lg = mf->GetLocalGenerator();
+  std::string err = "given arguments:\n ";
+  for(std::vector<std::string>::const_iterator i = args.begin();
+      i != args.end(); ++i)
+    {
+    err += " ";
+    err += lg->EscapeForCMake(i->c_str());
+    }
+  err += "\n";
+  return err;
+}
+
 //=========================================================================
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff,
@@ -85,16 +101,7 @@ IsFunctionBlocked(const cmListFileFunction& lff,
 
             if (errorString.size())
               {
-              std::string err = "given arguments\n  ";
-              unsigned int i;
-              for(i =0; i < this->Functions[c].Arguments.size(); ++i)
-                {
-                err += (this->Functions[c].Arguments[i].Quoted?"\"":"");
-                err += this->Functions[c].Arguments[i].Value;
-                err += (this->Functions[c].Arguments[i].Quoted?"\"":"");
-                err += " ";
-                }
-              err += "\n";
+              std::string err = cmIfCommandError(&mf, expandedArguments);
               err += errorString;
               mf.IssueMessage(messType, err);
               if (messType == cmake::FATAL_ERROR)
@@ -175,16 +182,7 @@ bool cmIfCommand
 
   if (errorString.size())
     {
-    std::string err = "given arguments\n  ";
-    unsigned int i;
-    for(i =0; i < args.size(); ++i)
-      {
-      err += (args[i].Quoted?"\"":"");
-      err += args[i].Value;
-      err += (args[i].Quoted?"\"":"");
-      err += " ";
-      }
-    err += "\n";
+    std::string err = cmIfCommandError(this->Makefile, expandedArguments);
     err += errorString;
     if (status == cmake::FATAL_ERROR)
       {
