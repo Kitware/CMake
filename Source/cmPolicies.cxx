@@ -358,19 +358,24 @@ cmPolicies::cmPolicies()
 
     this->DefinePolicy(
     CMP0012, "CMP0012",
-    "The if() command can recognize named boolean constants.",
-    "In CMake versions 2.6.4 and lower the only boolean constants were 0 "
-    "and 1. Other boolean constants such as true, false, yes, no, "
+    "if() recognizes numbers and boolean constants.",
+    "In CMake versions 2.6.4 and lower the if() command implicitly "
+    "dereferenced arguments corresponding to variables, even those named "
+    "like numbers or boolean constants, except for 0 and 1.  "
+    "Numbers and boolean constants such as true, false, yes, no, "
     "on, off, y, n, notfound, ignore (all case insensitive) were recognized "
     "in some cases but not all.  "
     "For example, the code \"if(TRUE)\" might have evaluated as false.  "
-    "In later versions of cmake these values are "
-    "treated as boolean constants more consistently and should not be used "
-    "as variable names. "
-    "The OLD behavior for this policy is to allow variables to have names "
-    "such as true and to dereference them. "
-    "The NEW behavior for this policy is to treat strings like true as a "
-    "boolean constant.",
+    "Numbers such as 2 were recognized only in "
+    "boolean expressions like \"if(NOT 2)\" (leading to false) "
+    "but not as a single-argument like \"if(2)\" (also leading to false). "
+    "Later versions of CMake prefer to treat numbers and boolean constants "
+    "literally, so they should not be used as variable names."
+    "\n"
+    "The OLD behavior for this policy is to implicitly dereference variables "
+    "named like numbers and boolean constants. "
+    "The NEW behavior for this policy is to recognize numbers and "
+    "boolean constants without dereferencing variables with such names.",
     2,8,0, cmPolicies::WARN);
 
     this->DefinePolicy(
