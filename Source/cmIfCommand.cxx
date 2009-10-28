@@ -315,7 +315,6 @@ namespace
         }
       case cmPolicies::OLD:
         return oldResult;
-        break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         {
