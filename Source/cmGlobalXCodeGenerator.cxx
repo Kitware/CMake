@@ -1564,7 +1564,18 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
      target.GetType() == cmTarget::MODULE_LIBRARY ||
      target.GetType() == cmTarget::EXECUTABLE)
     {
-    pndir = target.GetDirectory();
+    if(this->XcodeVersion >= 21)
+      {
+      std::string pncdir = target.GetDirectory(configName);
+      buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
+                                  this->CreateString(pncdir.c_str()));
+      }
+    else
+      {
+      buildSettings->AddAttribute("OBJROOT",
+                                  this->CreateString(pndir.c_str()));
+      pndir = target.GetDirectory(configName);
+      }
     buildSettings->AddAttribute("EXECUTABLE_PREFIX", 
                                 this->CreateString(pnprefix.c_str()));
     buildSettings->AddAttribute("EXECUTABLE_SUFFIX", 
@@ -2910,7 +2921,8 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         // then remove those exectuables as well
         if(this->Architectures.size() > 1)
           {
-          std::string universal = t->GetDirectory();
+          std::string universal =
+            t->GetMakefile()->GetCurrentOutputDirectory();
           universal += "/";
           universal += this->CurrentProject;
           universal += ".build/";
