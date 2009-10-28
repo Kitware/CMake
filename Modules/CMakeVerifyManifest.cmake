@@ -40,7 +40,7 @@ function(crt_version file list_var)
   foreach(s ${strings})
     set(has_match 1)
     string(REGEX
-      REPLACE ".*version=.([^\"]*). (.*)$" "\\1" 
+      REPLACE ".*<assembly.*\"Microsoft.VC...CRT\".*version=\"([^\"]*)\".*</assembly>.*$" "\\1" 
       version "${s}")
     if(NOT "${version}" STREQUAL "")
       list(APPEND version_list ${version})
@@ -72,7 +72,7 @@ function(check_version file manifest_versions)
   foreach(ver ${file_versions})
     list(FIND manifest_versions "${ver}" found_version)
     if("${found_version}" EQUAL -1)
-      message("ERROR: ${file} uses ${ver} not found in shipped manifest.")
+      message("ERROR: ${file} uses ${ver} not found in shipped manifests:[${manifest_versions}].")
       set(fatal_error TRUE PARENT_SCOPE)
     endif()
   endforeach(ver)
@@ -104,12 +104,12 @@ file(GLOB_RECURSE exe_files "*.exe")
 file(GLOB_RECURSE dll_files "*.dll")
 set(exe_files ${exe_files} ${dll_files})
 foreach(f ${exe_files})
-  check_version(${f} ${manifest_version_list})
+  check_version(${f} "${manifest_version_list}")
 endforeach()
 
 # report a fatal error if there were any so that cmake will return
 # a non zero value
 if(fatal_error)
-  message(FATAL_ERROR "This distribution has mis-matched dll"
-    " versions and may not work on other machines.")
+  message(FATAL_ERROR "This distribution embeds dll "
+    " versions that it does not ship, and may not work on other machines.")
 endif()
