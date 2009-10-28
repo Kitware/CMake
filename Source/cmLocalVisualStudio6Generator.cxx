@@ -1193,6 +1193,30 @@ void cmLocalVisualStudio6Generator
     outputNameRelWithDebInfo = target.GetFullName("RelWithDebInfo");
     }
 
+  // Compute the output directory for the target.
+  std::string outputDirDebug;
+  std::string outputDirRelease;
+  std::string outputDirMinSizeRel;
+  std::string outputDirRelWithDebInfo;
+  if(target.GetType() == cmTarget::EXECUTABLE ||
+     target.GetType() == cmTarget::STATIC_LIBRARY ||
+     target.GetType() == cmTarget::SHARED_LIBRARY ||
+     target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    outputDirDebug =
+        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
+                       target.GetDirectory("Debug").c_str()));
+    outputDirRelease =
+        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
+                 target.GetDirectory("Release").c_str()));
+    outputDirMinSizeRel =
+        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
+                 target.GetDirectory("MinSizeRel").c_str()));
+    outputDirRelWithDebInfo =
+        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
+                 target.GetDirectory("RelWithDebInfo").c_str()));
+    }
+
   // Compute the proper link information for the target.
   std::string optionsDebug;
   std::string optionsRelease;
@@ -1412,11 +1436,21 @@ void cmLocalVisualStudio6Generator
 
     if(targetBuilds)
       {
+      cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_DEBUG",
+                                   outputDirDebug.c_str());
+      cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_RELEASE",
+                                   outputDirRelease.c_str());
+      cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_MINSIZEREL",
+                                   outputDirMinSizeRel.c_str());
+      cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_RELWITHDEBINFO",
+                                   outputDirRelWithDebInfo.c_str());
+#ifdef CM_USE_OLD_VS6
       std::string outPath = target.GetDirectory();
       cmSystemTools::ReplaceString
         (line, "OUTPUT_DIRECTORY",
          removeQuotes(this->ConvertToOptionallyRelativeOutputPath
                       (outPath.c_str())).c_str());
+#endif
       }
 
     cmSystemTools::ReplaceString(line, 
