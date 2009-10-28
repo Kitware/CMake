@@ -1218,11 +1218,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     PASS_REGULAR_EXPRESSION "\\*\\*\\*Timeout")
   
   CONFIGURE_FILE(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/test.cmake"
+    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/test.cmake"
     @ONLY ESCAPE_QUOTES)
   CONFIGURE_FILE(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/hello.cmake"
+    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/hello.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/hello.cmake"
     @ONLY ESCAPE_QUOTES)
   #ADD_TEST(CTestTestRunScript ${CMAKE_CTEST_COMMAND}
