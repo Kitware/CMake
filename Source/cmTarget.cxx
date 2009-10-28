@@ -901,22 +901,44 @@ void cmTarget::DefineProperties(cmake *cm)
 #define CM_TARGET_OUTDIR_DOC(TYPE, type)                                    \
      "This property specifies the directory into which " #type " target "   \
      "files should be built. "                                              \
+     "Multi-configuration generators (VS, Xcode) append "                   \
+     "a per-configuration subdirectory to the specified directory.  "       \
      CM_TARGET_FILE_TYPES_DOC "  "                                          \
      "This property is initialized by the value of the variable "           \
      "CMAKE_" #TYPE "_OUTPUT_DIRECTORY if it is set when a target is created."
+
+#define CM_TARGET_OUTDIR_CONFIG_DOC(TYPE)                                   \
+     "This is a per-configuration version of " #TYPE "_OUTPUT_DIRECTORY, "  \
+     "but multi-configuration generators (VS, Xcode) do NOT append "        \
+     "a per-configuration subdirectory to the specified directory.  "       \
+     "This property is initialized by the value of the variable "           \
+     "CMAKE_" #TYPE "_OUTPUT_DIRECTORY_<CONFIG> "                           \
+     "if it is set when a target is created."
 
   cm->DefineProperty
     ("ARCHIVE_OUTPUT_DIRECTORY", cmProperty::TARGET,
      "Output directory in which to build ARCHIVE target files.",
      CM_TARGET_OUTDIR_DOC(ARCHIVE, archive));
   cm->DefineProperty
+    ("ARCHIVE_OUTPUT_DIRECTORY_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration output directory for ARCHIVE target files.",
+     CM_TARGET_OUTDIR_CONFIG_DOC(ARCHIVE));
+  cm->DefineProperty
     ("LIBRARY_OUTPUT_DIRECTORY", cmProperty::TARGET,
      "Output directory in which to build LIBRARY target files.",
      CM_TARGET_OUTDIR_DOC(LIBRARY, library));
   cm->DefineProperty
+    ("LIBRARY_OUTPUT_DIRECTORY_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration output directory for LIBRARY target files.",
+     CM_TARGET_OUTDIR_CONFIG_DOC(LIBRARY));
+  cm->DefineProperty
     ("RUNTIME_OUTPUT_DIRECTORY", cmProperty::TARGET,
      "Output directory in which to build RUNTIME target files.",
      CM_TARGET_OUTDIR_DOC(RUNTIME, runtime));
+  cm->DefineProperty
+    ("RUNTIME_OUTPUT_DIRECTORY_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration output directory for RUNTIME target files.",
+     CM_TARGET_OUTDIR_CONFIG_DOC(RUNTIME));
 
   cm->DefineProperty
     ("ARCHIVE_OUTPUT_NAME", cmProperty::TARGET,
@@ -1018,9 +1040,22 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     }
 
   // Setup per-configuration property default values.
+  const char* configProps[] = {
+    "ARCHIVE_OUTPUT_DIRECTORY_",
+    "LIBRARY_OUTPUT_DIRECTORY_",
+    "RUNTIME_OUTPUT_DIRECTORY_",
+    0};
   for(std::vector<std::string>::iterator ci = configNames.begin();
       ci != configNames.end(); ++ci)
     {
+    std::string configUpper = cmSystemTools::UpperCase(*ci);
+    for(const char** p = configProps; *p; ++p)
+      {
+      std::string property = *p;
+      property += configUpper;
+      this->SetPropertyDefault(property.c_str(), 0);
+      }
+
     // Initialize per-configuration name postfix property from the
     // variable only for non-executable targets.  This preserves
     // compatibility with previous CMake versions in which executables
@@ -3526,16 +3561,36 @@ void cmTarget::ComputeOutputDir(const char* config,
 {
   // Look for a target property defining the target output directory
   // based on the target type.
+  std::string targetTypeName = this->GetOutputTargetType(implib);
   const char* propertyName = 0;
-  std::string propertyNameStr = this->GetOutputTargetType(implib);
+  std::string propertyNameStr = targetTypeName;
   if(!propertyNameStr.empty())
     {
     propertyNameStr += "_OUTPUT_DIRECTORY";
     propertyName = propertyNameStr.c_str();
     }
 
+  // Check for a per-configuration output directory target property.
+  std::string configUpper = cmSystemTools::UpperCase(config? config : "");
+  const char* configProp = 0;
+  std::string configPropStr = targetTypeName;
+  if(!configPropStr.empty())
+    {
+    configPropStr += "_OUTPUT_DIRECTORY_";
+    configPropStr += configUpper;
+    configProp = configPropStr.c_str();
+    }
+
   // Select an output directory.
-  if(const char* outdir = this->GetProperty(propertyName))
+  if(const char* config_outdir = this->GetProperty(configProp))
+    {
+    // Use the user-specified per-configuration output directory.
+    out = config_outdir;
+
+    // Skip per-configuration subdirectory.
+    config = 0;
+    }
+  else if(const char* outdir = this->GetProperty(propertyName))
     {
     // Use the user-specified output directory.
     out = outdir;
