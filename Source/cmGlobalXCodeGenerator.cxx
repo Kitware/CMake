@@ -1281,7 +1281,10 @@ void  cmGlobalXCodeGenerator
                            )
 {
   std::string makefileName=makefileBasename;
-  makefileName+=configName;
+  if(this->XcodeVersion > 20)
+    {
+    makefileName+=configName;
+    }
   cmGeneratedFileStream makefileStream(makefileName.c_str());
   if(!makefileStream)
     {
