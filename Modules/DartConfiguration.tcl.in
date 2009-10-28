@@ -45,7 +45,10 @@ UpdateCommand: @UPDATE_COMMAND@
 UpdateOptions: @UPDATE_OPTIONS@
 UpdateType: @UPDATE_TYPE@
 
-# Dynamic analisys and coverage
+# Compiler info
+Compiler: @CMAKE_CXX_COMPILER@
+
+# Dynamic analysis and coverage
 PurifyCommand: @PURIFYCOMMAND@
 ValgrindCommand: @VALGRIND_COMMAND@
 ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@

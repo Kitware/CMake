@@ -564,6 +564,7 @@ bool cmCTest::UpdateCTestConfiguration()
                << fileName.c_str() << "\n");
     // parse the dart test file
     std::ifstream fin(fileName.c_str());
+
     if(!fin)
       {
       return false;
@@ -1081,11 +1082,11 @@ int cmCTest::RunTest(std::vector<const char*> argv,
 
   // determine how much time we have
   double timeout = this->GetRemainingTimeAllowed() - 120;
-  if (this->TimeOut && this->TimeOut < timeout)
+  if (this->TimeOut > 0 && this->TimeOut < timeout)
     {
     timeout = this->TimeOut;
     }
-  if (testTimeOut 
+  if (testTimeOut > 0
       && testTimeOut < this->GetRemainingTimeAllowed())
     {
     timeout = testTimeOut;
@@ -1117,7 +1118,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
         // make sure we pass the timeout in for any build and test 
         // invocations. Since --build-generator is required this is a 
         // good place to check for it, and to add the arguments in
-        if (strcmp(argv[i],"--build-generator") == 0 && timeout)
+        if (strcmp(argv[i],"--build-generator") == 0 && timeout > 0)
           {
           args.push_back("--test-timeout");
           cmOStringStream msg;
@@ -1265,6 +1266,11 @@ void cmCTest::StartXML(std::ostream& ostr, bool append)
        << this->GetCTestConfiguration("Site") << "\"\n\tGenerator=\"ctest-"
        << cmVersion::GetCMakeVersion()  << "\"\n"
        << (append? "\tAppend=\"true\"\n":"")
+       << "\tCompilerName=\"" << this->GetCTestConfiguration("Compiler") 
+       << "\"\n"
+#ifdef _COMPILER_VERSION
+       << "\tCompilerVersion=\"_COMPILER_VERSION\"\n"
+#endif
        << "\tOSName=\"" << info.GetOSName() << "\"\n"
        << "\tHostname=\"" << info.GetHostname() << "\"\n"
        << "\tOSRelease=\"" << info.GetOSRelease() << "\"\n"
@@ -2363,7 +2369,7 @@ void cmCTest::EmptyCTestConfiguration()
 void cmCTest::SetCTestConfiguration(const char *name, const char* value)
 {
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "SetCTestConfiguration:"
-             << name << ":" << value << "\n");
+    << name << ":" << (value ? value : "(null)") << "\n");
 
   if ( !name )
     {

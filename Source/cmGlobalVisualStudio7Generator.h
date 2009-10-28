@@ -92,6 +92,10 @@ public:
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGInitDirectory()  { return "$(OutDir)"; }
 
+  /** Return true if the target project file should have the option
+      LinkLibraryDependencies and link to .sln dependencies. */
+  virtual bool NeedLinkLibraryDependencies(cmTarget&) { return false; }
+
 protected:
   virtual const char* GetIDEVersion() { return "7.0"; }
 
@@ -133,7 +137,6 @@ protected:
 
   std::string ConvertToSolutionPath(const char* path);
 
-  virtual bool IsRootOnlyTarget(cmTarget* target);
   bool IsPartOfDefaultBuild(const char* project,
                             cmTarget* target);
   std::vector<std::string> Configurations;

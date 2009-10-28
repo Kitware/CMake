@@ -677,6 +677,24 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile *mf)
 #endif
 
 //----------------------------------------------------------------------
+bool IsFileInDir(const std::string &infile, const std::string &indir)
+{
+  std::string file = cmSystemTools::CollapseFullPath(infile.c_str());
+  std::string dir = cmSystemTools::CollapseFullPath(indir.c_str());
+
+  if (
+    file.size() > dir.size() &&
+    (fnc(file.substr(0, dir.size())) == fnc(dir)) &&
+    file[dir.size()] == '/'
+    )
+    {
+    return true;
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleGCovCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
@@ -735,16 +753,27 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     "   Processing coverage (each . represents one file):" << std::endl);
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "    ");
   int file_count = 0;
+
   // make sure output from gcov is in English!
   cmSystemTools::PutEnv("LC_ALL=POSIX");
+
+  // files is a list of *.da and *.gcda files with coverage data in them.
+  // These are binary files that you give as input to gcov so that it will
+  // give us text output we can analyze to summarize coverage.
+  //
   for ( it = files.begin(); it != files.end(); ++ it )
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
+
+    // Call gcov to get coverage data for this *.gcda file:
+    //
     std::string fileDir = cmSystemTools::GetFilenamePath(it->c_str());
     std::string command = "\"" + gcovCommand + "\" -l -o \"" + fileDir
       + "\" \"" + *it + "\"";
+
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, command.c_str()
       << std::endl);
+
     std::string output = "";
     std::string errors = "";
     int retVal = 0;
@@ -777,34 +806,36 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
       << output << std::endl
       << "--------------------------------------------------------------"
       << std::endl);
+
     std::vector<cmStdString> lines;
     std::vector<cmStdString>::iterator line;
 
-
-    // Globals for storing current source file and current gcov file;
     cmSystemTools::Split(output.c_str(), lines);
+
     for ( line = lines.begin(); line != lines.end(); ++line)
       {
       std::string sourceFile;
       std::string gcovFile;
+
       cmCTestLog(this->CTest, DEBUG, "Line: [" << line->c_str() << "]"
         << std::endl);
+
       if ( line->size() == 0 )
         {
         // Ignore empty line; probably style 2
         }
       else if ( st1re1.find(line->c_str()) )
         {
-        if ( gcovStyle != 0 )
+        if ( gcovStyle == 0 )
           {
-          if ( gcovStyle != 1 )
-            {
-            cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style"
-              << std::endl);
-            cont->Error ++;
-            break;
-            }
           gcovStyle = 1;
+          }
+        if ( gcovStyle != 1 )
+          {
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e1"
+            << std::endl);
+          cont->Error ++;
+          break;
           }
 
         actualSourceFile = "";
@@ -812,32 +843,32 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         }
       else if ( st1re2.find(line->c_str() ) )
         {
-        if ( gcovStyle != 0 )
+        if ( gcovStyle == 0 )
           {
-          if ( gcovStyle != 1 )
-            {
-            cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style"
-              << std::endl);
-            cont->Error ++;
-            break;
-            }
           gcovStyle = 1;
+          }
+        if ( gcovStyle != 1 )
+          {
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e2"
+            << std::endl);
+          cont->Error ++;
+          break;
           }
 
         gcovFile = st1re2.match(1);
         }
       else if ( st2re1.find(line->c_str() ) )
         {
-        if ( gcovStyle != 0 )
+        if ( gcovStyle == 0 )
           {
-          if ( gcovStyle != 2 )
-            {
-            cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style"
-              << std::endl);
-            cont->Error ++;
-            break;
-            }
           gcovStyle = 2;
+          }
+        if ( gcovStyle != 2 )
+          {
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e3"
+            << std::endl);
+          cont->Error ++;
+          break;
           }
 
         actualSourceFile = "";
@@ -845,46 +876,46 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         }
       else if ( st2re2.find(line->c_str() ) )
         {
-        if ( gcovStyle != 0 )
+        if ( gcovStyle == 0 )
           {
-          if ( gcovStyle != 2 )
-            {
-            cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style"
-              << std::endl);
-            cont->Error ++;
-            break;
-            }
           gcovStyle = 2;
+          }
+        if ( gcovStyle != 2 )
+          {
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e4"
+            << std::endl);
+          cont->Error ++;
+          break;
           }
         }
       else if ( st2re3.find(line->c_str() ) )
         {
-        if ( gcovStyle != 0 )
+        if ( gcovStyle == 0 )
           {
-          if ( gcovStyle != 2 )
-            {
-            cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style"
-              << std::endl);
-            cont->Error ++;
-            break;
-            }
           gcovStyle = 2;
+          }
+        if ( gcovStyle != 2 )
+          {
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e5"
+            << std::endl);
+          cont->Error ++;
+          break;
           }
 
         gcovFile = st2re3.match(2);
         }
       else if ( st2re4.find(line->c_str() ) )
         {
-        if ( gcovStyle != 0 )
+        if ( gcovStyle == 0 )
           {
-          if ( gcovStyle != 2 )
-            {
-            cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style"
-              << std::endl);
-            cont->Error ++;
-            break;
-            }
           gcovStyle = 2;
+          }
+        if ( gcovStyle != 2 )
+          {
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e6"
+            << std::endl);
+          cont->Error ++;
+          break;
           }
 
         cmCTestLog(this->CTest, WARNING, "Warning: " << st2re4.match(1)
@@ -892,16 +923,16 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         }
       else if ( st2re5.find(line->c_str() ) )
         {
-        if ( gcovStyle != 0 )
+        if ( gcovStyle == 0 )
           {
-          if ( gcovStyle != 2 )
-            {
-            cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style"
-              << std::endl);
-            cont->Error ++;
-            break;
-            }
           gcovStyle = 2;
+          }
+        if ( gcovStyle != 2 )
+          {
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e7"
+            << std::endl);
+          cont->Error ++;
+          break;
           }
 
         cmCTestLog(this->CTest, WARNING, "Warning: Cannot open file: "
@@ -909,16 +940,16 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         }
       else if ( st2re6.find(line->c_str() ) )
         {
-        if ( gcovStyle != 0 )
+        if ( gcovStyle == 0 )
           {
-          if ( gcovStyle != 2 )
-            {
-            cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style"
-              << std::endl);
-            cont->Error ++;
-            break;
-            }
           gcovStyle = 2;
+          }
+        if ( gcovStyle != 2 )
+          {
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e8"
+            << std::endl);
+          cont->Error ++;
+          break;
           }
 
         cmCTestLog(this->CTest, WARNING, "Warning: File: " << st2re6.match(1)
@@ -927,16 +958,24 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
       else
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
-          "Unknown line: [" << line->c_str() << "]" << std::endl);
+          "Unknown gcov output line: [" << line->c_str() << "]" << std::endl);
         cont->Error ++;
         //abort();
         }
-      if ( !gcovFile.empty() && actualSourceFile.size() )
+
+
+      // If the last line of gcov output gave us a valid value for gcovFile,
+      // and we have an actualSourceFile, then insert a (or add to existing)
+      // SingleFileCoverageVector for actualSourceFile:
+      //
+      if ( !gcovFile.empty() && !actualSourceFile.empty() )
         {
-        cmCTestCoverageHandlerContainer::SingleFileCoverageVector* vec
-          = &cont->TotalCoverage[actualSourceFile];
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   in file: "
+        cmCTestCoverageHandlerContainer::SingleFileCoverageVector& vec
+          = cont->TotalCoverage[actualSourceFile];
+
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   in gcovFile: "
           << gcovFile << std::endl);
+
         std::ifstream ifile(gcovFile.c_str());
         if ( ! ifile )
           {
@@ -969,41 +1008,45 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
             // line
             std::string prefix = nl.substr(0, 12);
             int cov = atoi(prefix.c_str());
+
             // Read the line number starting at the 10th character of the gcov
             // output line
             std::string lineNumber = nl.substr(10, 5);
+
             int lineIdx = atoi(lineNumber.c_str())-1;
             if ( lineIdx >= 0 )
               {
-              while ( vec->size() <=
-                static_cast<size_t>(lineIdx) )
+              while ( vec.size() <= static_cast<size_t>(lineIdx) )
                 {
-                vec->push_back(-1);
+                vec.push_back(-1);
                 }
+
               // Initially all entries are -1 (not used). If we get coverage
               // information, increment it to 0 first.
-              if ( (*vec)[lineIdx] < 0 )
+              if ( vec[lineIdx] < 0 )
                 {
                 if ( cov > 0 || prefix.find("#") != prefix.npos )
                   {
-                  (*vec)[lineIdx] = 0;
+                  vec[lineIdx] = 0;
                   }
                 }
-              (*vec)[lineIdx] += cov;
+
+              vec[lineIdx] += cov;
               }
             }
           }
+
         actualSourceFile = "";
         }
+
+
       if ( !sourceFile.empty() && actualSourceFile.empty() )
         {
         gcovFile = "";
 
-        // Is it in the source dir?
-        if ( sourceFile.size() > cont->SourceDir.size() &&
-          (fnc(sourceFile.substr(0, cont->SourceDir.size())) ==
-            fnc(cont->SourceDir)) &&
-          sourceFile[cont->SourceDir.size()] == '/' )
+        // Is it in the source dir or the binary dir?
+        //
+        if ( IsFileInDir(sourceFile, cont->SourceDir) )
           {
           cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   produced s: "
             << sourceFile.c_str() << std::endl);
@@ -1012,12 +1055,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           actualSourceFile
             = cmSystemTools::CollapseFullPath(sourceFile.c_str());
           }
-
-        // Binary dir?
-        if ( sourceFile.size() > cont->BinaryDir.size() &&
-          (fnc(sourceFile.substr(0, cont->BinaryDir.size())) ==
-            fnc(cont->BinaryDir)) &&
-          sourceFile[cont->BinaryDir.size()] == '/' )
+        else if ( IsFileInDir(sourceFile, cont->BinaryDir) )
           {
           cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   produced b: "
             << sourceFile.c_str() << std::endl);
@@ -1029,7 +1067,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
         if ( actualSourceFile.empty() )
           {
-          if ( missingFiles.find(actualSourceFile) == missingFiles.end() )
+          if ( missingFiles.find(sourceFile) == missingFiles.end() )
             {
             cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
               "Something went wrong" << std::endl);
@@ -1048,12 +1086,15 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
               << sourceFile.c_str()
               << " in source dir: " << cont->SourceDir.c_str()
               << " or binary dir: " << cont->BinaryDir.c_str() << std::endl;
-            missingFiles.insert(actualSourceFile);
+
+            missingFiles.insert(sourceFile);
             }
           }
         }
       }
-    file_count ++;
+
+    file_count++;
+
     if ( file_count % 50 == 0 )
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT, " processed: " << file_count
@@ -1061,6 +1102,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "    ");
       }
     }
+
   cmSystemTools::ChangeDirectory(currentDirectory.c_str());
   return file_count;
 }

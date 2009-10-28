@@ -194,7 +194,7 @@ void Tree::BuildVirtualFolderImpl(std::string& virtualFolders,
 {
   virtualFolders += "CMake Files\\" + prefix +  path + "\\;";
   for (std::vector<Tree>::const_iterator it = folders.begin();
-     it != folders.end();
+       it != folders.end();
      ++it)
     {
     it->BuildVirtualFolderImpl(virtualFolders, prefix + path + "\\");
@@ -263,37 +263,45 @@ void cmExtraCodeBlocksGenerator
          it != this->GlobalGenerator->GetProjectMap().end();
          ++it)
     {
-      // Convert
-      std::vector<std::string> listFiles =
-              it->second[0]->GetMakefile()->GetListFiles();
+    // Collect all files
+    std::vector<std::string> listFiles;
+    for (std::vector<cmLocalGenerator *>::const_iterator
+         jt = it->second.begin();
+         jt != it->second.end();
+         ++jt)
+      {
+      const std::vector<std::string> & files =
+                                          (*jt)->GetMakefile()->GetListFiles();
+      listFiles.insert(listFiles.end(), files.begin(), files.end());
+      }
 
-      for (std::vector<std::string>::const_iterator jt = listFiles.begin();
-           jt != listFiles.end();
-           ++jt)
-         {
-         const std::string &relative =
-                 cmSystemTools::RelativePath(
+    // Convert
+    for (std::vector<std::string>::const_iterator jt = listFiles.begin();
+         jt != listFiles.end();
+         ++jt)
+      {
+      const std::string &relative = cmSystemTools::RelativePath(
                          it->second[0]->GetMakefile()->GetHomeDirectory(),
                          jt->c_str());
-         std::vector<std::string> splitted;
-         cmSystemTools::SplitPath(relative.c_str(), splitted, false);
-         // Split filename from path
-         std::string fileName = *(splitted.end()-1);
-         splitted.erase(splitted.end() - 1, splitted.end());
+      std::vector<std::string> splitted;
+      cmSystemTools::SplitPath(relative.c_str(), splitted, false);
+      // Split filename from path
+      std::string fileName = *(splitted.end()-1);
+      splitted.erase(splitted.end() - 1, splitted.end());
 
-         // We don't want paths with ".." in them
-         // reasons are that we don't want files outside the project
-         // TODO: the path should be normalized first though
-         // We don't want paths with CMakeFiles in them
-         // or do we?
-         // In speedcrunch those where purely internal
-         if (splitted.size() >= 1
-             && relative.find("..") == std::string::npos
-             && relative.find("CMakeFiles") == std::string::npos)
-           {
-           tree.InsertPath(splitted, 1, fileName);
-           }
-         }
+      // We don't want paths with ".." in them
+      // reasons are that we don't want files outside the project
+      // TODO: the path should be normalized first though
+      // We don't want paths with CMakeFiles in them
+      // or do we?
+      // In speedcrunch those where purely internal
+      if (splitted.size() >= 1
+          && relative.find("..") == std::string::npos
+          && relative.find("CMakeFiles") == std::string::npos)
+        {
+        tree.InsertPath(splitted, 1, fileName);
+        }
+      }
     }
 
   // Now build a virtual tree string
@@ -329,68 +337,73 @@ void cmExtraCodeBlocksGenerator
     for (cmTargets::iterator ti = targets.begin();
          ti != targets.end(); ti++)
       {
-        switch(ti->second.GetType())
+      switch(ti->second.GetType())
         {
-          case cmTarget::GLOBAL_TARGET:
+        case cmTarget::GLOBAL_TARGET:
+          {
+          bool insertTarget = false;
+          // Only add the global targets from CMAKE_BINARY_DIR, 
+          // not from the subdirs
+          if (strcmp(makefile->GetStartOutputDirectory(), 
+                     makefile->GetHomeOutputDirectory())==0)
             {
-            bool insertTarget = false;
-            // Only add the global targets from CMAKE_BINARY_DIR, 
-            // not from the subdirs
-            if (strcmp(makefile->GetStartOutputDirectory(), 
-                       makefile->GetHomeOutputDirectory())==0)
+            insertTarget = true;
+            // only add the "edit_cache" target if it's not ccmake, because
+            // this will not work within the IDE
+            if (ti->first == "edit_cache")
               {
-              insertTarget = true;
-              // only add the "edit_cache" target if it's not ccmake, because
-              // this will not work within the IDE
-              if (ti->first == "edit_cache")
+              const char* editCommand = makefile->GetDefinition
+                                                        ("CMAKE_EDIT_COMMAND");
+              if (editCommand == 0)
                 {
-                if (strstr(makefile->GetRequiredDefinition
-                                       ("CMAKE_EDIT_COMMAND"), "ccmake")!=NULL)
-                  {
-                  insertTarget = false;
-                  }
+                insertTarget = false;
+                }
+              else if (strstr(editCommand, "ccmake")!=NULL)
+                {
+                insertTarget = false;
                 }
               }
-            if (insertTarget)
-              {
-              this->AppendTarget(fout, ti->first.c_str(), 0, 
-                               make.c_str(), makefile, compiler.c_str());
-              }
             }
-            break;
-          case cmTarget::UTILITY:
-            // Add all utility targets, except the Nightly/Continuous/
-            // Experimental-"sub"targets as e.g. NightlyStart
-            if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
+          if (insertTarget)
+            {
+            this->AppendTarget(fout, ti->first.c_str(), 0, 
+                               make.c_str(), makefile, compiler.c_str());
+            }
+          }
+          break;
+        case cmTarget::UTILITY:
+          // Add all utility targets, except the Nightly/Continuous/
+          // Experimental-"sub"targets as e.g. NightlyStart
+          if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
              || ((ti->first.find("Continuous")==0)&&(ti->first!="Continuous"))
              || ((ti->first.find("Experimental")==0) 
                                                && (ti->first!="Experimental")))
-              {
-              break;
-              }
-
-            this->AppendTarget(fout, ti->first.c_str(), 0, 
-                                 make.c_str(), makefile, compiler.c_str());
-            break;
-          case cmTarget::EXECUTABLE:
-          case cmTarget::STATIC_LIBRARY:
-          case cmTarget::SHARED_LIBRARY:
-          case cmTarget::MODULE_LIBRARY:
             {
-            this->AppendTarget(fout, ti->first.c_str(), &ti->second, 
-                               make.c_str(), makefile, compiler.c_str());
-            std::string fastTarget = ti->first;
-            fastTarget += "/fast";
-            this->AppendTarget(fout, fastTarget.c_str(), &ti->second, 
-                               make.c_str(), makefile, compiler.c_str());
+            break;
             }
-            break;
-          // ignore these:
-          case cmTarget::INSTALL_FILES:
-          case cmTarget::INSTALL_PROGRAMS:
-          case cmTarget::INSTALL_DIRECTORY:
-          default:
-            break;
+
+          this->AppendTarget(fout, ti->first.c_str(), 0, 
+                                 make.c_str(), makefile, compiler.c_str());
+          break;
+        case cmTarget::EXECUTABLE:
+        case cmTarget::STATIC_LIBRARY:
+        case cmTarget::SHARED_LIBRARY:
+        case cmTarget::MODULE_LIBRARY:
+          {
+          this->AppendTarget(fout, ti->first.c_str(), &ti->second, 
+                             make.c_str(), makefile, compiler.c_str());
+          std::string fastTarget = ti->first;
+          fastTarget += "/fast";
+          this->AppendTarget(fout, fastTarget.c_str(), &ti->second, 
+                             make.c_str(), makefile, compiler.c_str());
+          }
+          break;
+        // ignore these:
+        case cmTarget::INSTALL_FILES:
+        case cmTarget::INSTALL_PROGRAMS:
+        case cmTarget::INSTALL_DIRECTORY:
+        default:
+          break;
         }
       }
     }
@@ -668,7 +681,7 @@ int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
     return 2;
     }
   else if ((target->GetType()==cmTarget::SHARED_LIBRARY) 
-     || (target->GetType()==cmTarget::MODULE_LIBRARY))
+           || (target->GetType()==cmTarget::MODULE_LIBRARY))
     {
     return 3;
     }

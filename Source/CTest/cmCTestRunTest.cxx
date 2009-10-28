@@ -301,7 +301,7 @@ bool cmCTestRunTest::StartTest(size_t total)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::setw(2*getNumWidth(total) + 8)
     << "Start "
-    << std::setw(getNumWidth(total))
+    << std::setw(getNumWidth(this->TestHandler->GetMaxIndex()))
     << this->TestProperties->Index << ": "
     << this->TestProperties->Name << std::endl);
   this->ComputeArguments();
@@ -419,11 +419,11 @@ bool cmCTestRunTest::CreateProcess(double testTimeOut,
 
   // determine how much time we have
   double timeout = this->CTest->GetRemainingTimeAllowed() - 120;
-  if (this->CTest->GetTimeOut() && this->CTest->GetTimeOut() < timeout)
+  if (this->CTest->GetTimeOut() > 0 && this->CTest->GetTimeOut() < timeout)
     {
     timeout = this->CTest->GetTimeOut();
     }
-  if (testTimeOut 
+  if (testTimeOut > 0
       && testTimeOut < this->CTest->GetRemainingTimeAllowed())
     {
     timeout = testTimeOut;

@@ -317,7 +317,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
 
     if ((res==0) && (copyFile.size()))
       {
-      if(!cmSystemTools::CopyFileAlways(this->OutputFile.c_str(), 
+      if(this->OutputFile.empty() ||
+         !cmSystemTools::CopyFileAlways(this->OutputFile.c_str(),
                                         copyFile.c_str()))
         {
         cmOStringStream emsg;

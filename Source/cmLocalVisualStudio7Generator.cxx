@@ -588,7 +588,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::string flags;
   if(strcmp(configType, "10") != 0)
     {
-    const char* linkLanguage = target.GetLinkerLanguage(configName);
+    const char* linkLanguage = (this->FortranProject? "Fortran":
+                                target.GetLinkerLanguage(configName));
     if(!linkLanguage)
       {
       cmSystemTools::Error
@@ -845,6 +846,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                                                     cmTarget &target,
                                                     bool isDebug)
 {
+  cmGlobalVisualStudio7Generator* gg =
+    static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
   std::string temp;
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
@@ -948,6 +951,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"" << tool << "\"\n";
+    if(!gg->NeedLinkLibraryDependencies(target))
+      {
+      fout << "\t\t\t\tLinkLibraryDependencies=\"false\"\n";
+      }
     linkOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
     // Use the NOINHERIT macro to avoid getting VS project default
     // libraries which may be set by the user to something bad.
@@ -1020,6 +1027,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"" << tool << "\"\n";
+    if(!gg->NeedLinkLibraryDependencies(target))
+      {
+      fout << "\t\t\t\tLinkLibraryDependencies=\"false\"\n";
+      }
     linkOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
     // Use the NOINHERIT macro to avoid getting VS project default
     // libraries which may be set by the user to something bad.

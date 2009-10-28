@@ -31,13 +31,14 @@ void cmGlobalVisualStudio10Generator::AddPlatformDefinitions(cmMakefile* mf)
 void cmGlobalVisualStudio10Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 11.00\n";
-  fout << "# Visual Studio 10\n";
+  fout << "# Visual Studio 2010\n";
 }
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalVisualStudio10Generator::CreateLocalGenerator()
 {
-  cmLocalGenerator*lg =  new cmLocalVisualStudio10Generator;
+  cmLocalVisualStudio10Generator* lg =  new cmLocalVisualStudio10Generator;
+  lg->SetPlatformName(this->PlatformName.c_str());
   lg->SetGlobalGenerator(this);
   return lg;
 }

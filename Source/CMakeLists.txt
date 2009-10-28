@@ -303,6 +303,8 @@ IF (WIN32)
       cmLocalVisualStudio10Generator.h
       cmGlobalVisualStudio10Generator.h
       cmGlobalVisualStudio10Generator.cxx
+      cmGlobalVisualStudio10Win64Generator.h
+      cmGlobalVisualStudio10Win64Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx

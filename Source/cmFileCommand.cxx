@@ -2290,7 +2290,7 @@ bool cmFileCommand::HandleRelativePathCommand(
 {
   if(args.size() != 4 )
     {
-    this->SetError("called with incorrect number of arguments");
+    this->SetError("RELATIVE_PATH called with incorrect number of arguments");
     return false;
     }
 
@@ -2301,7 +2301,7 @@ bool cmFileCommand::HandleRelativePathCommand(
   if(!cmSystemTools::FileIsFullPath(directoryName.c_str()))
     {
     std::string errstring =
-      "RelativePath must be passed a full path to the directory: "
+      "RELATIVE_PATH must be passed a full path to the directory: "
       + directoryName;
     this->SetError(errstring.c_str());
     return false;
@@ -2309,7 +2309,7 @@ bool cmFileCommand::HandleRelativePathCommand(
   if(!cmSystemTools::FileIsFullPath(fileName.c_str()))
     {
     std::string errstring =
-      "RelativePath must be passed a full path to the file: "
+      "RELATIVE_PATH must be passed a full path to the file: "
       + fileName;
     this->SetError(errstring.c_str());
     return false;
@@ -2328,7 +2328,7 @@ bool cmFileCommand::HandleRename(std::vector<std::string> const& args)
 {
   if(args.size() != 3)
     {
-    this->SetError("given incorrect number of arguments.");
+    this->SetError("RENAME given incorrect number of arguments.");
     return false;
     }
 
@@ -2400,8 +2400,8 @@ bool cmFileCommand::HandleCMakePathCommand(std::vector<std::string>
   std::vector<std::string>::const_iterator i = args.begin();
   if(args.size() != 3)
     {
-    this->SetError("FILE(SYSTEM_PATH ENV result) must be called with "
-                   "only three arguments.");
+    this->SetError("FILE([TO_CMAKE_PATH|TO_NATIVE_PATH] path result) must be "
+      "called with exactly three arguments.");
     return false;
     }
   i++; // Get rid of subcommand
@@ -2465,17 +2465,48 @@ namespace{
     cmFileCommandVectorOfChar *vec
       = static_cast<cmFileCommandVectorOfChar*>(data);
     vec->insert(vec->end(), chPtr, chPtr + size);
-    
+
     return size;
   }
-  
-  
+
+
 }
 
 #endif
 
-bool 
-cmFileCommand::HandleDownloadCommand(std::vector<std::string> 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+namespace {
+
+  class cURLEasyGuard
+  {
+  public:
+    cURLEasyGuard(CURL * easy)
+      : Easy(easy)
+      {}
+    
+    ~cURLEasyGuard(void) 
+      {
+        if (this->Easy)
+          {
+          ::curl_easy_cleanup(this->Easy);
+          }
+      }
+    
+    inline void release(void) 
+      {
+        this->Easy = 0;
+        return;
+      }
+    
+  private:
+    ::CURL * Easy;
+  };
+  
+}
+#endif
+
+bool
+cmFileCommand::HandleDownloadCommand(std::vector<std::string>
                                      const& args)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -2486,25 +2517,25 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
                    "at least three arguments.");
     return false;
     }
-  i++; // Get rid of subcommand
+  ++i; // Get rid of subcommand
   std::string url = *i;
-  i++;
+  ++i;
   std::string file = *i;
-  i++;
-  double timeout = 0;
+  ++i;
+  long timeout = 0;
   std::string verboseLog;
   std::string statusVar;
   while(i != args.end())
     {
     if(*i == "TIMEOUT")
       {
-      i++;
+      ++i;
       if(i != args.end())
         {
-        timeout = atof(i->c_str());
+        timeout = atol(i->c_str());
         }
       else
-        { 
+        {
         this->SetError("FILE(DOWNLOAD url file TIMEOUT time) missing "
                        "time for TIMEOUT.");
         return false;
@@ -2512,7 +2543,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       }
     else if(*i == "LOG")
       {
-      i++;
+      ++i;
       if( i == args.end())
         {
         this->SetError("FILE(DOWNLOAD url file LOG VAR) missing "
@@ -2523,7 +2554,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       }
     else if(*i == "STATUS")
       {
-      i++;
+      ++i;
       if( i == args.end())
         {
         this->SetError("FILE(DOWNLOAD url file STATUS VAR) missing "
@@ -2532,15 +2563,16 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
         }
       statusVar = *i;
       }
-    i++;
+    ++i;
     }
 
   std::string dir = cmSystemTools::GetFilenamePath(file.c_str());
   if(!cmSystemTools::FileExists(dir.c_str()) &&
      !cmSystemTools::MakeDirectory(dir.c_str()))
     {
-    std::string errstring = "FILE(DOWNLOAD ) error; cannot create directory: "
-      + dir + ". Maybe need administrative privileges.";
+    std::string errstring = "DOWNLOAD error: cannot create directory '"
+      + dir + "' - Specify file by full path name and verify that you "
+      "have directory creation and file write privileges.";
     this->SetError(errstring.c_str());
     return false;
     }
@@ -2552,50 +2584,106 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
                        "file for write.");
     return false;
     }
-  CURL *curl;
-  curl_global_init(CURL_GLOBAL_DEFAULT);
-  curl = curl_easy_init();
+  ::CURL *curl;
+  ::curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl = ::curl_easy_init();
   if(!curl)
     {
     this->SetError("FILE(DOWNLOAD ) error "
                    "initializing curl.");
     return false;
     }
-  
-  curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, 
-                   cmFileCommandWriteMemoryCallback);
-  curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION,
-                   cmFileCommandCurlDebugCallback);
+
+  cURLEasyGuard g_curl(curl);
+
+  ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+  if (res != CURLE_OK)
+    {
+      std::string errstring = "FILE(DOWNLOAD ) error; cannot set url: ";
+      errstring += ::curl_easy_strerror(res);
+    return false;
+    }
+
+  res = ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+                             cmFileCommandWriteMemoryCallback);
+  if (res != CURLE_OK)
+      {
+      std::string errstring =
+        "FILE(DOWNLOAD ) error; cannot set write function: ";
+      errstring += ::curl_easy_strerror(res);
+    return false;
+    }
+
+  res = ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION,
+                             cmFileCommandCurlDebugCallback);
+  if (res != CURLE_OK)
+    {
+     std::string errstring =
+       "FILE(DOWNLOAD ) error; cannot set debug function: ";
+     errstring += ::curl_easy_strerror(res);
+    return false;
+    }
+
   cmFileCommandVectorOfChar chunkDebug;
-  ::curl_easy_setopt(curl, CURLOPT_FILE, (void *)&fout);
-  ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void *)&chunkDebug);
+
+  res = ::curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&fout);
+
+  if (res != CURLE_OK)
+    {
+    std::string errstring = "FILE(DOWNLOAD ) error; cannot set write data: ";
+    errstring += ::curl_easy_strerror(res);
+    return false;
+    }
+
+  res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void *)&chunkDebug);
+  if (res != CURLE_OK)
+    {
+    std::string errstring = "FILE(DOWNLOAD ) error; cannot set write data: ";
+    errstring += ::curl_easy_strerror(res);
+    return false;
+    }
+
   if(verboseLog.size())
     {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+    res = ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
+
+    if (res != CURLE_OK)
+      {
+      std::string errstring = "FILE(DOWNLOAD ) error; cannot set verbose: ";
+      errstring += ::curl_easy_strerror(res);
+      return false;
+      }
     }
   if(timeout > 0)
     {
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout ); 
+    res = ::curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout );
+
+    if (res != CURLE_OK)
+      {
+      std::string errstring = "FILE(DOWNLOAD ) error; cannot set verbose: ";
+      errstring += ::curl_easy_strerror(res);
+      return false;
+      }
     }
-  CURLcode res = curl_easy_perform(curl);
+  res = ::curl_easy_perform(curl);
   /* always cleanup */
-  curl_easy_cleanup(curl);
+  g_curl.release();
+  ::curl_easy_cleanup(curl);
   if(statusVar.size())
     {
     cmOStringStream result;
-    result << (int)res << ";\"" << curl_easy_strerror(res) << "\"";
-    this->Makefile->AddDefinition(statusVar.c_str(), 
+    result << (int)res << ";\"" << ::curl_easy_strerror(res) << "\"";
+    this->Makefile->AddDefinition(statusVar.c_str(),
                                   result.str().c_str());
     }
-  curl_global_cleanup();
+  ::curl_global_cleanup();
   if(chunkDebug.size())
     {
     chunkDebug.push_back(0);
     if(CURLE_OPERATION_TIMEOUTED == res)
-      { 
+      {
       std::string output = &*chunkDebug.begin();
-      
+
       if(verboseLog.size())
         {
         this->Makefile->AddDefinition(verboseLog.c_str(),
@@ -2607,9 +2695,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
                                   &*chunkDebug.begin());
     }
   return true;
-#else 
+#else
   this->SetError("FILE(DOWNLOAD ) "
                  "not supported in bootstrap cmake ");
   return false;
-#endif  
+#endif
 }

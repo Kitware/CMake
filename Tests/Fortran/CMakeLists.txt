@@ -7,8 +7,25 @@ message("CMAKE_Fortran_COMPILER_INIT = ${CMAKE_Fortran_COMPILER_INIT}")
 message("CMAKE_Fortran_COMPILER_FULLPATH = ${CMAKE_Fortran_COMPILER_FULLPATH}")
 message("CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
 message("CMAKE_Fortran_FLAGS = ${CMAKE_Fortran_FLAGS}")
-add_executable(testf hello.f)
 
+set(_SHARED SHARED)
+if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "^(XL|VisualAge)$")
+  # We do not implement SHARED Fortran libs on AIX yet!
+  # Workaround: Set LINKER_LANGUAGE to C, which uses 'xlc' and Fortran implicits.
+  set(_SHARED STATIC)
+elseif("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU")
+  # g77 2.96 does not support shared libs on Itanium because g2c is not -fPIC
+  execute_process(COMMAND ${CMAKE_Fortran_COMPILER} --version
+                  OUTPUT_VARIABLE output ERROR_VARIABLE output)
+  if("${output}" MATCHES "Red Hat .* 2\\.96")
+    set(_SHARED STATIC)
+  endif()
+endif()
+
+add_library(hello STATIC hello.f)
+add_library(world ${_SHARED} world.f world.def)
+add_executable(testf testf.f)
+target_link_libraries(testf hello world)
 
 function(test_fortran_c_interface_module)
   message(STATUS "Testing FortranCInterface module")

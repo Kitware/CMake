@@ -312,7 +312,7 @@ extract(char *tarfile, char *rootdir)
   return 0;
 }
 
-
+#if !defined(_WIN32) || defined(__CYGWIN__)
 static void
 usage()
 {
@@ -322,7 +322,7 @@ usage()
          progname);
   exit(-1);
 }
-
+#endif
 
 #define MODE_LIST  1
 #define MODE_CREATE  2

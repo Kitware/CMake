@@ -47,7 +47,7 @@ public:
     CMP0009, // GLOB_RECURSE should not follow symlinks by default
     CMP0010, // Bad variable reference syntax is an error
     CMP0011, // Strong policy scope for include and find_package
-    CMP0012, // Strong handling of boolean constants
+    CMP0012, // Recognize numbers and boolean constants in if()
     CMP0013, // Duplicate binary directories not allowed
     CMP0014, // Input directories must have CMakeLists.txt
 

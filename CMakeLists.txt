@@ -141,12 +141,13 @@ MACRO(CMAKE_SETUP_TESTING)
     # cmake.
     SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
     SET(CMAKE_CMAKE_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cmake")
+    SET(CMAKE_CPACK_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cpack")
   ENDIF(BUILD_TESTING)
 
   # configure some files for testing
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Templates/CTestScript.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/CTestScript.cmake"
-    @ONLY)  
+    @ONLY)
   CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
     ${CMake_BINARY_DIR}/Tests/.NoDartCoverage)
   CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/.NoDartCoverage
@@ -315,7 +316,7 @@ ENDMACRO (CMAKE_BUILD_UTILITIES)
 SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 8)
 SET(CMake_VERSION_PATCH 0)
-SET(CMake_VERSION_RC 3)
+SET(CMake_VERSION_RC 4)
 
 # We use odd minor numbers for development versions.
 # Use a date for the development patch level.

@@ -38,6 +38,8 @@ public:
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
+  std::string const& GetPlatformName() const { return this->PlatformName; }
+
   /**
    * Override Configure and Generate to add the build-system check
    * target.
@@ -58,10 +60,16 @@ public:
    */
   virtual std::string GetUserMacrosRegKeyBase();
 
+  /** Return true if the target project file should have the option
+      LinkLibraryDependencies and link to .sln dependencies. */
+  virtual bool NeedLinkLibraryDependencies(cmTarget& target);
+
 protected:
   virtual const char* GetIDEVersion() { return "8.0"; }
 
   virtual bool VSLinksDependencies() const { return false; }
+
+  void AddCheckTarget();
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   virtual void AddPlatformDefinitions(cmMakefile* mf);

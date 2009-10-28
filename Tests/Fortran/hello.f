@@ -1,6 +1,6 @@
-	PROGRAM GREETINGS
+	SUBROUTINE HELLO
 
-	PRINT *, 'Real programmers write Fortran!'
+	PRINT *, 'Hello'
 
 	END
 

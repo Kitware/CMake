@@ -1,3 +1,50 @@
+Changes in CMake 2.8.0 RC 4
+- Fix try_compile when file cannot be found
+- Add new module to test manifest installation issues on windows.
+- Add more test coverage
+-Improvements in finding MPI on windows. ENH: reorganized searching mpi for mpi components (include,lib,bin) using a single set of search paths instead of seperately mainted lists of paths for each.
+- Look for nvcc in the 32 bit bin directory before the 64 bin directory.
+- BUG: hardcore some values so output matches cmVS10CLFlagTable.h (addresses bug #9753)
+- Avoid Intel linker crash in BuildDepends test
+- Fix Intel Fortran SHARED libraries on Linux
+- Fix working dir issue for ctest
+- Fix if() command and CMP0012 OLD/NEW behavior
+- Allow for /D to change install directory on the command line for NSIS
+- Move SetErrorMode around calls to generate and configure instead of setting it for the whole application for cmake-gui on windows.  Allows for bad installs of windows shell programs to not break file completion.
+- Fix Intel and MinGW Fortran DLL import libraries
+- Fix Xcode dylib version default
+- Fix the showing of non-cpp files in the IDE for VS 10
+- Fix optionally-valued booleans in VS 10 flag table
+- Detect and set Unicode character set in VS 10
+- Add support for the g95 Fortran compiler
+- Test all target types in Fortran
+- Add Xcode file association for Fortran
+- Fix VS 10 flag table for precompiled headers
+- Fix VS 10 .sln files for Windows Explorer
+- Fix Microsoft.Cpp.$(Platform).user.props in VS10b2
+- Fix up file(DOWNLOAD ) a bit, better error checking and uses of long not double for timeout as curl needs, bug# 9748
+- Add a VS 10 Win64 generator
+- Fix for bug#9686 convert java_home to a cmake path before using.
+- fix for bug# 9751, add check for MSVC10
+- Fix for bugs #9756, #9690 and #9755, header files were not included, and link_directories we incorrect
+- Add a module to test an install tree to verify that the MS CRT version is correct.
+- Fix seg fault for empty ENV{} call bug #9747
+- Better fix for finding the MSBuild that matches the VS 10 install.
+- make testing the CodeBlocks and Eclipse generators easier by not requiring the CMAKE_EDIT_COMMAND variable
+- Do not link library dependencies in VS solutions
+- Ctest was broken for subdirs.  Restored working directory state for tests so that their executables could be found.
+- Fixes version detection using osg/Version on Mac OSX when OSG is installed as a framework
+- Avoid C++ linker language in VS Fortran project
+- Avoid duplicate ZERO_CHECK in VS solutions
+- Fixed bug 8319, search for the Python shared library in the standard locations.
+- Fix bug#9714, should not crash when version file is not where it should be...
+- Fix ctest output alignment for cases where total tests run is not the same width as max test index.
+- make it more robust wrt. #9621
+- Add another possible error message that curl might emit with an empty drop location.
+- Fix issue #5668 - use CollapseFullPath when determining if covered file is within source or binary tree. Allows gcc/gcov coverage analysis using MinGW on Windows.
+- CTest-side support for compiler name and compiler version information.  Requires CDash update to show on CDash.
+- Add a bunch more testing coverage.
+
 Changes in CMake 2.8.0 RC 3
 - CTest Added OS Platform (cpu architecture) detection support to windows system
 - Several minor FindBoost changes to address posts on mailing list

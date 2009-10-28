@@ -10,7 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmVisualStudio10TargetGenerator.h"
-#include "cmGlobalVisualStudio7Generator.h"
+#include "cmGlobalVisualStudio10Generator.h"
 #include "cmTarget.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
@@ -22,6 +22,8 @@
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
 
+#include <cmsys/auto_ptr.hxx>
+
 static std::string cmVS10EscapeXML(std::string arg)
 {
   cmSystemTools::ReplaceString(arg, "&", "&amp;");
@@ -32,7 +34,7 @@ static std::string cmVS10EscapeXML(std::string arg)
 
 cmVisualStudio10TargetGenerator::
 cmVisualStudio10TargetGenerator(cmTarget* target,
-                                cmGlobalVisualStudio7Generator* gg)
+                                cmGlobalVisualStudio10Generator* gg)
 {
   this->GlobalGenerator = gg;
   this->Target = target;
@@ -43,13 +45,18 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->Name = this->Target->GetName();
   this->GlobalGenerator->CreateGUID(this->Name.c_str());
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
-  this->Platform = "|Win32";
+  this->Platform = gg->GetPlatformName();
   this->ComputeObjectNames();
   this->BuildFileStream = 0;
 }
 
 cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
 {
+  for(OptionsMap::iterator i = this->ClOptions.begin();
+      i != this->ClOptions.end(); ++i)
+    {
+    delete i->second;
+    }
   if(!this->BuildFileStream)
     {
     return;
@@ -80,7 +87,7 @@ void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   (*stream ) << "";
   (*stream ) << "<" << tag 
              << " Condition=\"'$(Configuration)|$(Platform)'=='";
-  (*stream ) << config << this->Platform << "'\"";
+  (*stream ) << config << "|" << this->Platform << "'\"";
   if(attribute)
     {
     (*stream ) << attribute;
@@ -103,6 +110,7 @@ void cmVisualStudio10TargetGenerator::WriteString(const char* line,
   (*this->BuildFileStream ) << line;
 }
 
+#define VS10_USER_PROPS "$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props"
 
 void cmVisualStudio10TargetGenerator::Generate()
 {
@@ -115,6 +123,10 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->Target->SetProperty("GENERATOR_FILE_NAME",this->Name.c_str());
   this->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
                             ".vcxproj");
+  if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY)
+    {
+    this->ComputeClOptions();
+    }
   cmMakefile* mf = this->Target->GetMakefile();
   std::string path =  mf->GetStartOutputDirectory();
   path += "/";
@@ -141,6 +153,8 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<SccProjectName />\n", 2);
   this->WriteString("<SccLocalPath />\n", 2);
   this->WriteString("<Keyword>Win32Proj</Keyword>\n", 2);
+  this->WriteString("<Platform>", 2);
+  (*this->BuildFileStream) << this->Platform << "</Platform>\n";
   this->WriteString("</PropertyGroup>\n", 1);
   this->WriteString("<Import Project="
                     "\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n",
@@ -151,12 +165,9 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ImportGroup Label=\"ExtensionSettings\">\n", 1);
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<ImportGroup Label=\"PropertySheets\">\n", 1);
-  this->WriteString("<Import Project="
-                    "\"$(LocalAppData)\\Microsoft\\VisualStudio\\10.0\\"
-                    "Microsoft.Cpp.$(Platform).user.props\" "
-                    "Condition=\"exists('$(LocalAppData)\\Microsoft"
-                    "\\VisualStudio\\10.0\\"
-                    "Microsoft.Cpp.$(Platform).user.props')\" />\n", 2);
+  this->WriteString("<Import Project=\"" VS10_USER_PROPS "\""
+                    " Condition=\"exists('" VS10_USER_PROPS "')\""
+                    " Label=\"LocalAppDataPlatform\" />", 2);
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<PropertyGroup Label=\"UserMacros\" />\n", 1);
   this->WritePathAndIncrementalLinkOptions();
@@ -187,10 +198,11 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
       i != configs->end(); ++i)
     {
     this->WriteString("<ProjectConfiguration Include=\"", 2);
-    (*this->BuildFileStream ) <<  *i << this->Platform << "\">\n";
+    (*this->BuildFileStream ) <<  *i << "|" << this->Platform << "\">\n";
     this->WriteString("<Configuration>", 3);
     (*this->BuildFileStream ) <<  *i << "</Configuration>\n";
-    this->WriteString("<Platform>Win32</Platform>\n", 3);
+    this->WriteString("<Platform>", 3);
+    (*this->BuildFileStream) << this->Platform << "</Platform>\n";
     this->WriteString("</ProjectConfiguration>\n", 2);
     }
   this->WriteString("</ItemGroup>\n", 1);
@@ -236,7 +248,15 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       {
       this->WriteString("<UseOfMfc>false</UseOfMfc>\n", 2);
       }
-    this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
+    if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
+       this->ClOptions[*i]->UsingUnicode())
+      {
+      this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
+      }
+    else
+      {
+      this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
+      }
     this->WriteString("</PropertyGroup>\n", 1);
     }
 }
@@ -375,6 +395,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::vector<cmSourceFile*> clCompile;
   std::vector<cmSourceFile*> customBuild;
   std::vector<cmSourceFile*> none;
+  std::vector<cmSourceFile*> headers;
   
   for(std::vector<cmSourceFile*>::const_iterator s = classes.begin(); 
       s != classes.end(); s++)
@@ -384,7 +405,10 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     cmSourceGroup& sourceGroup = 
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
     groupsUsed.insert(&sourceGroup);
-    const char* lang = sf->GetLanguage();
+    const char* lang = sf->GetLanguage(); 
+    bool header = (*s)->GetPropertyAsBool("HEADER_FILE_ONLY")
+      || this->GlobalGenerator->IgnoreFile
+      ((*s)->GetExtension().c_str());
     if(!lang)
       {
       lang = "None";
@@ -396,6 +420,10 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     else if(sf->GetCustomCommand())
       {
       customBuild.push_back(sf);
+      }
+    else if(header)
+      {
+      headers.push_back(sf);
       }
     else
       {
@@ -419,6 +447,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
                     "developer/msbuild/2003\">\n",
                     0);
   this->WriteGroupSources("ClCompile", clCompile, sourceGroups);
+  this->WriteGroupSources("ClInclude", headers, sourceGroups);
   this->WriteGroupSources("CustomBuild", customBuild, sourceGroups);
 
   this->WriteString("<ItemGroup>\n", 1);
@@ -532,13 +561,13 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
     {
     // if it is not a custom command then add it as a c/c++ file,
     // TODO: need to check for idl or rc
-    if(!(*source)->GetCustomCommand()
-       && !(*source)->GetPropertyAsBool("HEADER_FILE_ONLY")
-       && !this->GlobalGenerator->IgnoreFile
-       ((*source)->GetExtension().c_str()))
+    if(!(*source)->GetCustomCommand())
       {
+      bool header = (*source)->GetPropertyAsBool("HEADER_FILE_ONLY")
+        || this->GlobalGenerator->IgnoreFile
+        ((*source)->GetExtension().c_str());
       const char* lang = (*source)->GetLanguage();
-      if(lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0))
+      bool cl = lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0);
         {
         std::string sourceFile = (*source)->GetFullPath();
         sourceFile =  cmSystemTools::RelativePath(
@@ -546,10 +575,21 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
           sourceFile.c_str());
         this->ConvertToWindowsSlash(sourceFile);
         // output the source file
-        this->WriteString("<ClCompile Include=\"", 2);
+        if(header)
+          {
+          this->WriteString("<ClInclude Include=\"", 2);
+          }
+        else if(cl)
+          {
+          this->WriteString("<ClCompile Include=\"", 2);
+          }
+        else
+          {
+          this->WriteString("<None Include=\"", 2);
+          }
         (*this->BuildFileStream ) << sourceFile << "\"";
         // ouput any flags specific to this source file
-        if(this->OutputSourceSpecificFlags(*source))
+        if(cl && this->OutputSourceSpecificFlags(*source))
           {
           // if the source file has specific flags the tag
           // is ended on a new line
@@ -814,21 +854,31 @@ OutputLinkIncremental(std::string const& configName)
                          << "</LinkIncremental>\n"; 
 }
 
-
-void 
-cmVisualStudio10TargetGenerator::
-WriteClOptions(std::string const& configName,
-               std::vector<std::string> const & includes)
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator::ComputeClOptions()
 {
-  
+  std::vector<std::string> const* configs =
+    this->GlobalGenerator->GetConfigurations();
+  for(std::vector<std::string>::const_iterator i = configs->begin();
+      i != configs->end(); ++i)
+    {
+    this->ComputeClOptions(*i);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator::ComputeClOptions(
+  std::string const& configName)
+{
   // much of this was copied from here:
   // copied from cmLocalVisualStudio7Generator.cxx 805
+  // TODO: Integrate code below with cmLocalVisualStudio7Generator.
 
-  this->WriteString("<ClCompile>\n", 2);
-  cmVisualStudioGeneratorOptions 
-    clOptions(this->LocalGenerator,
-              10, cmVisualStudioGeneratorOptions::Compiler,
-              cmVS10CLFlagTable);
+  cmsys::auto_ptr<Options> pOptions(
+    new Options(this->LocalGenerator, 10, Options::Compiler,
+                cmVS10CLFlagTable));
+  Options& clOptions = *pOptions;
+
   std::string flags;
   // collect up flags for 
   if(this->Target->GetType() < cmTarget::UTILITY)
@@ -898,6 +948,17 @@ WriteClOptions(std::string const& configName,
     {
     clOptions.AddDefine(exportMacro);
     }
+
+  this->ClOptions[configName] = pOptions.release();
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator::WriteClOptions(
+  std::string const& configName,
+  std::vector<std::string> const& includes)
+{
+  Options& clOptions = *(this->ClOptions[configName]);
+  this->WriteString("<ClCompile>\n", 2);
   clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
   this->OutputIncludes(includes);
   clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
@@ -1080,11 +1141,12 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     // first just full path
     linkDirs += sep;
     linkDirs += *d;
+    sep = ";";
     linkDirs += sep;
     // next path with configuration type Debug, Release, etc
     linkDirs += *d;
     linkDirs += "/$(Configuration)";
-    sep = ";";
+    linkDirs += sep;
     }
   linkDirs += "%(AdditionalLibraryDirectories)";
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs.c_str());
@@ -1115,13 +1177,15 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
                                   targetNameImport, targetNamePDB, 
                                   config.c_str());
     }
-  std::string imLib = this->Target->GetDirectory(config.c_str(), true);
-  std::string dir = this->Target->GetDirectory(config.c_str(), true);
+
+  std::string dir = this->Target->GetDirectory(config.c_str());
   dir += "/";
-  imLib += "/";
-  imLib += targetNameImport;
   std::string pdb = dir;
   pdb += targetNamePDB;
+  std::string imLib = this->Target->GetDirectory(config.c_str(), true);
+  imLib += "/";
+  imLib += targetNameImport;
+
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFileName", pdb.c_str());
   linkOptions.Parse(flags.c_str());
@@ -1134,6 +1198,13 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   linkOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   
   this->WriteString("</Link>\n", 2);
+  if(!this->GlobalGenerator->NeedLinkLibraryDependencies(*this->Target))
+    {
+    this->WriteString("<ProjectReference>\n", 2);
+    this->WriteString(
+      "  <LinkLibraryDependencies>false</LinkLibraryDependencies>\n", 2);
+    this->WriteString("</ProjectReference>\n", 2);
+    }
 }
 
 void cmVisualStudio10TargetGenerator::AddLibraries(

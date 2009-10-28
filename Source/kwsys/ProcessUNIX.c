@@ -1921,7 +1921,7 @@ static int kwsysProcessGetTimeoutTime(kwsysProcess* cp, double* userTimeout,
 {
   /* The first time this is called, we need to calculate the time at
      which the child will timeout.  */
-  if(cp->Timeout && cp->TimeoutTime.tv_sec < 0)
+  if(cp->Timeout > 0 && cp->TimeoutTime.tv_sec < 0)
     {
     kwsysProcessTime length = kwsysProcessTimeFromDouble(cp->Timeout);
     cp->TimeoutTime = kwsysProcessTimeAdd(cp->StartTime, length);
@@ -2710,7 +2710,7 @@ static void kwsysProcessesSignalHandler(int signum
     kwsysProcess_ssize_t status=
       read(cp->PipeReadEnds[KWSYSPE_PIPE_SIGNAL], &buf, 1);
     status=write(cp->SignalPipe, &buf, 1);
-    
+    (void)status;
     }
   }
 

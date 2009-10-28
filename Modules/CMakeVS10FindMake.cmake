@@ -21,8 +21,8 @@ ENDIF(NOT CMAKE_CROSSCOMPILING)
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM
   NAMES MSBuild
   HINTS 
-  "$ENV{SYSTEMROOT}/Microsoft.NET/Framework/v4.0.20506/"
-  c:/WINDOWS/Microsoft.NET/Framework/v4.0.20506/
+  "$ENV{SYSTEMROOT}/Microsoft.NET/Framework/[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0;CLR Version]/"
+  "c:/WINDOWS/Microsoft.NET/Framework/[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0;CLR Version]/"
   )
 
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM

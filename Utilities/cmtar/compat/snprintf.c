@@ -42,6 +42,10 @@
 
 #include <libtar/config.h>
 
+#if defined(__INTEL_COMPILER)
+# pragma warning disable 177 /* function declared but not referenced */
+#endif
+
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)
 
 #include <stdio.h>

@@ -21,13 +21,18 @@ IF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
 ENDIF(CMAKE_GENERATOR MATCHES "Visual Studio 6")
 INCLUDE (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
 
+IF(WIN32 AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
+  SET(_INTEL_WINDOWS 1)
+ENDIF()
+
 # Disable deprecation warnings for standard C functions.
 # really only needed for newer versions of VS, but should
 # not hurt other versions, and this will work into the 
 # future
-IF(MSVC)
+IF(MSVC OR _INTEL_WINDOWS)
   ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
-ENDIF(MSVC)
+ELSE()
+ENDIF()
 
 #silence duplicate symbol warnings on AIX
 IF(CMAKE_SYSTEM MATCHES "AIX.*")

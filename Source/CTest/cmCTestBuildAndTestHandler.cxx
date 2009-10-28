@@ -251,7 +251,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
         tarIt != this->BuildTargets.end(); ++ tarIt )
     {
     double remainingTime = 0;
-    if (this->Timeout)
+    if (this->Timeout > 0)
       {
       remainingTime = this->Timeout - cmSystemTools::GetTime() + clock_start;
       if (remainingTime <= 0)
@@ -376,7 +376,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   // how much time is remaining
   double remainingTime = 0;
-  if (this->Timeout)
+  if (this->Timeout > 0)
     {
     remainingTime = this->Timeout - cmSystemTools::GetTime() + clock_start;
     if (remainingTime <= 0)

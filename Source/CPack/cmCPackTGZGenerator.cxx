@@ -23,7 +23,6 @@
 #include <cmsys/SystemTools.hxx>
 #include <cm_zlib.h>
 #include <libtar/libtar.h>
-#include <memory> // auto_ptr
 #include <fcntl.h>
 #include <errno.h>
 
@@ -219,9 +218,8 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName,
     &mydata
   };
 
-  // Ok, this libtar is not const safe. for now use auto_ptr hack
+  // Ok, this libtar is not const safe. Make a non-const copy of outFileName
   char* realName = new char[ strlen(outFileName) + 1 ];
-  std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
   int flags = O_WRONLY | O_CREAT;
   int options = 0;
@@ -239,6 +237,7 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName,
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): "
       << strerror(errno) << std::endl);
+    delete [] realName;
     return 0;
     }
 
@@ -257,6 +256,7 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName,
         << pathname << "\"): "
         << strerror(errno) << std::endl);
       tar_close(t);
+      delete [] realName;
       return 0;
       }
     }
@@ -265,6 +265,7 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName,
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_append_eof(): "
       << strerror(errno) << std::endl);
     tar_close(t);
+    delete [] realName;
     return 0;
     }
 
@@ -272,8 +273,10 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName,
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_close(): "
       << strerror(errno) << std::endl);
+    delete [] realName;
     return 0;
     }
+  delete [] realName;
   return 1;
 }
 

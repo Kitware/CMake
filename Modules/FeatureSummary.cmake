@@ -32,7 +32,7 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-MACRO(SET_FEATURE_INFO _name _desc)
+FUNCTION(SET_FEATURE_INFO _name _desc)
   SET(_url "${ARGV2}")
   SET(_comment "${ARGV3}")
   SET_PROPERTY(GLOBAL PROPERTY ${_name}_DESCRIPTION "${_desc}" )
@@ -42,10 +42,10 @@ MACRO(SET_FEATURE_INFO _name _desc)
   IF(_comment MATCHES ".+")
     SET_PROPERTY(GLOBAL PROPERTY ${_name}_COMMENT "${_comment}" )
   ENDIF(_comment MATCHES ".+")
-ENDMACRO(SET_FEATURE_INFO)
+ENDFUNCTION(SET_FEATURE_INFO)
 
 
-MACRO(_PRINT_FEATURES _property _text)
+FUNCTION(_PRINT_FEATURES _property _text)
   SET(_currentFeatureText "${_text}")
   GET_PROPERTY(_EnabledFeatures  GLOBAL PROPERTY ${_property})
   FOREACH(_currentFeature ${_EnabledFeatures})
@@ -64,15 +64,15 @@ MACRO(_PRINT_FEATURES _property _text)
     ENDIF(_info)
   ENDFOREACH(_currentFeature)
   MESSAGE(STATUS "${_currentFeatureText}\n")
-ENDMACRO(_PRINT_FEATURES)
+ENDFUNCTION(_PRINT_FEATURES)
 
 
-MACRO(PRINT_ENABLED_FEATURES)
+FUNCTION(PRINT_ENABLED_FEATURES)
    _PRINT_FEATURES( ENABLED_FEATURES "Enabled features:")
-ENDMACRO(PRINT_ENABLED_FEATURES)
+ENDFUNCTION(PRINT_ENABLED_FEATURES)
 
 
-MACRO(PRINT_DISABLED_FEATURES)
+FUNCTION(PRINT_DISABLED_FEATURES)
    _PRINT_FEATURES( DISABLED_FEATURES "Disabled features:")
-ENDMACRO(PRINT_DISABLED_FEATURES)
+ENDFUNCTION(PRINT_DISABLED_FEATURES)
 

@@ -16,6 +16,22 @@
 #include <list>
 #include <cmsys/RegularExpression.hxx>
 
+
+static std::string cmIfCommandError(
+  cmMakefile* mf, std::vector<std::string> const& args)
+{
+  cmLocalGenerator* lg = mf->GetLocalGenerator();
+  std::string err = "given arguments:\n ";
+  for(std::vector<std::string>::const_iterator i = args.begin();
+      i != args.end(); ++i)
+    {
+    err += " ";
+    err += lg->EscapeForCMake(i->c_str());
+    }
+  err += "\n";
+  return err;
+}
+
 //=========================================================================
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff,
@@ -85,16 +101,7 @@ IsFunctionBlocked(const cmListFileFunction& lff,
 
             if (errorString.size())
               {
-              std::string err = "given arguments\n  ";
-              unsigned int i;
-              for(i =0; i < this->Functions[c].Arguments.size(); ++i)
-                {
-                err += (this->Functions[c].Arguments[i].Quoted?"\"":"");
-                err += this->Functions[c].Arguments[i].Value;
-                err += (this->Functions[c].Arguments[i].Quoted?"\"":"");
-                err += " ";
-                }
-              err += "\n";
+              std::string err = cmIfCommandError(&mf, expandedArguments);
               err += errorString;
               mf.IssueMessage(messType, err);
               if (messType == cmake::FATAL_ERROR)
@@ -175,16 +182,7 @@ bool cmIfCommand
 
   if (errorString.size())
     {
-    std::string err = "given arguments\n  ";
-    unsigned int i;
-    for(i =0; i < args.size(); ++i)
-      {
-      err += (args[i].Quoted?"\"":"");
-      err += args[i].Value;
-      err += (args[i].Quoted?"\"":"");
-      err += " ";
-      }
-    err += "\n";
+    std::string err = cmIfCommandError(this->Makefile, expandedArguments);
     err += errorString;
     if (status == cmake::FATAL_ERROR)
       {
@@ -215,84 +213,69 @@ bool cmIfCommand
 namespace
 {
   //=========================================================================
-  // returns true if succesfull, the resulting bool parsed is stored in result
-  bool GetBooleanValue(std::string &newArg,
-                       cmMakefile *makefile,
-                       bool &result,
-                       std::string &errorString,
-                       cmPolicies::PolicyStatus Policy12Status,
-                       cmake::MessageType &status)
+  bool GetBooleanValue(std::string& arg, cmMakefile* mf)
   {
-    if (Policy12Status != cmPolicies::OLD &&
-        Policy12Status != cmPolicies::WARN)
-      {
-      // please note IsOn(var) does not always equal !IsOff(var)
-      // that is why each is called
-      if (cmSystemTools::IsOn(newArg.c_str()))
-        {
-        result = true;
-        return true;
-        }
-      if (cmSystemTools::IsOff(newArg.c_str()))
-        {
-        result = false;
-        return true;
-        }
-      return false;
-      }
-
-    // Old policy is more complex...
-    // 0 and 1 are very common, test for them first quickly
-    if (newArg == "0")
+  // Check basic constants.
+  if (arg == "0")
     {
-      result = false;
-      return true;
-    }
-    if (newArg == "1")
-    {
-      result = true;
-      return true;
-    }
-
-    // old behavior is to dereference the var
-    if (Policy12Status == cmPolicies::OLD)
-    {
-      return false;
-    }
-
-    // now test for values that may be the name of a variable
-    // warn if used
-    if (cmSystemTools::IsOn(newArg.c_str()))
-      {
-      // only warn if the value would change
-      const char *def = makefile->GetDefinition(newArg.c_str());
-      if (cmSystemTools::IsOff(def))
-        {
-        cmPolicies* policies = makefile->GetPolicies();
-        errorString = "A variable or argument named \""
-          + newArg
-          + "\" appears in a conditional statement.  "
-          + policies->GetPolicyWarning(cmPolicies::CMP0012);
-        status = cmake::AUTHOR_WARNING;
-        }
-      return false;
-      }
-    if (cmSystemTools::IsOff(newArg.c_str()))
-      {
-      // only warn if the value would change
-      const char *def = makefile->GetDefinition(newArg.c_str());
-      if (!cmSystemTools::IsOff(def))
-        {
-        cmPolicies* policies = makefile->GetPolicies();
-        errorString = "A variable or argument named \""
-          + newArg
-          + "\" appears in a conditional statement.  "
-          + policies->GetPolicyWarning(cmPolicies::CMP0012);
-        status = cmake::AUTHOR_WARNING;
-        }
-      return false;
-      }
     return false;
+    }
+  if (arg == "1")
+    {
+    return true;
+    }
+
+  // Check named constants.
+  if (cmSystemTools::IsOn(arg.c_str()))
+    {
+    return true;
+    }
+  if (cmSystemTools::IsOff(arg.c_str()))
+    {
+    return false;
+    }
+
+  // Check for numbers.
+  if(!arg.empty())
+    {
+    char* end;
+    double d = strtod(arg.c_str(), &end);
+    if(*end == '\0')
+      {
+      // The whole string is a number.  Use C conversion to bool.
+      return d? true:false;
+      }
+    }
+
+  // Check definition.
+  const char* def = mf->GetDefinition(arg.c_str());
+  return !cmSystemTools::IsOff(def);
+  }
+
+  //=========================================================================
+  // Boolean value behavior from CMake 2.6.4 and below.
+  bool GetBooleanValueOld(std::string const& arg, cmMakefile* mf, bool one)
+  {
+  if(one)
+    {
+    // Old IsTrue behavior for single argument.
+    if(arg == "0")
+      { return false; }
+    else if(arg == "1")
+      { return true; }
+    else
+      { return !cmSystemTools::IsOff(mf->GetDefinition(arg.c_str())); }
+    }
+  else
+    {
+    // Old GetVariableOrNumber behavior.
+    const char* def = mf->GetDefinition(arg.c_str());
+    if(!def && atoi(arg.c_str()))
+      {
+      def = arg.c_str();
+      }
+    return !cmSystemTools::IsOff(def);
+    }
   }
 
   //=========================================================================
@@ -302,16 +285,50 @@ namespace
     cmMakefile *makefile,
     std::string &errorString,
     cmPolicies::PolicyStatus Policy12Status,
-    cmake::MessageType &status)
+    cmake::MessageType &status,
+    bool oneArg = false)
   {
-    bool result = false;
-    if (GetBooleanValue(newArg, makefile, result,
-                        errorString, Policy12Status, status))
+  // Use the policy if it is set.
+  if (Policy12Status == cmPolicies::NEW)
     {
-      return result;
+    return GetBooleanValue(newArg, makefile);
     }
-    const char *def = makefile->GetDefinition(newArg.c_str());
-    return !cmSystemTools::IsOff(def);
+  else if (Policy12Status == cmPolicies::OLD)
+    {
+    return GetBooleanValueOld(newArg, makefile, oneArg);
+    }
+
+  // Check policy only if old and new results differ.
+  bool newResult = GetBooleanValue(newArg, makefile);
+  bool oldResult = GetBooleanValueOld(newArg, makefile, oneArg);
+  if(newResult != oldResult)
+    {
+    switch(Policy12Status)
+      {
+      case cmPolicies::WARN:
+        {
+        cmPolicies* policies = makefile->GetPolicies();
+        errorString = "An argument named \"" + newArg
+          + "\" appears in a conditional statement.  "
+          + policies->GetPolicyWarning(cmPolicies::CMP0012);
+        status = cmake::AUTHOR_WARNING;
+        }
+      case cmPolicies::OLD:
+        return oldResult;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        {
+        cmPolicies* policies = makefile->GetPolicies();
+        errorString = "An argument named \"" + newArg
+          + "\" appears in a conditional statement.  "
+          + policies->GetRequiredPolicyError(cmPolicies::CMP0012);
+        status = cmake::FATAL_ERROR;
+        }
+      case cmPolicies::NEW:
+        break;
+      }
+    }
+  return newResult;
   }
 
   //=========================================================================
@@ -893,7 +910,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
                                             makefile,
                                             errorString,
                                             Policy12Status,
-                                            status);
+                                            status, true);
 }
 
 //=========================================================================

@@ -35,6 +35,11 @@ IF(BUILD_TESTING)
       "Should the tests that run a full sub ctest process be run?" 
       OFF)
     MARK_AS_ADVANCED(CTEST_TEST_CTEST)
+
+    OPTION(TEST_KDE4_STABLE_BRANCH
+      "Should the KDE4 stable branch test be run?" 
+      OFF)
+    MARK_AS_ADVANCED(TEST_KDE4_STABLE_BRANCH)
   ENDIF (CMAKE_RUN_LONG_TESTS)
 
   # Should tests that use CVS be run?
@@ -410,14 +415,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   set(CTEST_RUN_CPackComponents ${CTEST_TEST_CPACK})
   set(CTEST_package_X11_TEST ${CTEST_TEST_CPACK})
 
+  find_program(NSIS_MAKENSIS_EXECUTABLE NAMES makensis
+    PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS]
+    DOC "makensis program location"
+    )
+
   # But on Windows, only run the CPackComponents test if the NSIS
   # installer builder is available:
   #
   if(WIN32)
-    find_program(NSIS_MAKENSIS_EXECUTABLE NAMES makensis
-      PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS]
-      DOC "makensis.exe location"
-      )
     if(NSIS_MAKENSIS_EXECUTABLE)
       set(CTEST_RUN_CPackComponents ON)
     else(NSIS_MAKENSIS_EXECUTABLE)
@@ -431,6 +437,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     if(APPLE)
       set(CPackComponents_EXTRA_OPTIONS -DCPACK_BINARY_DRAGNDROP:BOOL=ON)
     endif(APPLE)
+    if(NSIS_MAKENSIS_EXECUTABLE)
+      set(CPackComponents_EXTRA_OPTIONS ${CPackComponents_EXTRA_OPTIONS}
+        -DCPACK_BINARY_NSIS:BOOL=ON)
+    endif(NSIS_MAKENSIS_EXECUTABLE)
 
     ADD_TEST(CPackComponents ${CMAKE_CTEST_COMMAND}
       --build-and-test
@@ -445,11 +455,46 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
         -DCPACK_BINARY_DEB:BOOL=${CPACK_BINARY_DEB}
         -DCPACK_BINARY_RPM:BOOL=${CPACK_BINARY_RPM}
         ${CPackComponents_EXTRA_OPTIONS}
+        --graphviz=CPackComponents.dot
       --test-command ${CMAKE_CMAKE_COMMAND}
         "-DCPackComponents_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponents"
         -P "${CMake_SOURCE_DIR}/Tests/CPackComponents/VerifyResult.cmake")
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponents")
   ENDIF(CTEST_RUN_CPackComponents)
+
+  # By default, turn this test off (because it takes a long time...)
+  #
+  if(NOT DEFINED CTEST_RUN_CPackTestAllGenerators)
+    set(CTEST_RUN_CPackTestAllGenerators OFF)
+
+    # ...but: if it appears to be a coverage dashboard, or long tests are
+    # on, then set it to the generic CTEST_TEST_CPACK setting.
+    #
+    if(CMAKE_CXX_FLAGS MATCHES "-ftest-coverage" OR
+      NOT "$ENV{COVFILE}" STREQUAL "" OR
+      CMAKE_RUN_LONG_TESTS)
+      set(CTEST_RUN_CPackTestAllGenerators ${CTEST_TEST_CPACK})
+    endif(CMAKE_CXX_FLAGS MATCHES "-ftest-coverage" OR
+      NOT "$ENV{COVFILE}" STREQUAL "" OR
+      CMAKE_RUN_LONG_TESTS)
+  endif(NOT DEFINED CTEST_RUN_CPackTestAllGenerators)
+
+  IF(CTEST_RUN_CPackTestAllGenerators)
+    ADD_TEST(CPackTestAllGenerators ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackTestAllGenerators"
+      "${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project CPackTestAllGenerators
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --test-command
+      ${CMAKE_CMAKE_COMMAND}
+        -D dir=${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators
+        -D cpack=${CMAKE_CPACK_COMMAND}
+        -P ${CMake_SOURCE_DIR}/Tests/CPackTestAllGenerators/RunCPack.cmake
+      )
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators")
+  ENDIF(CTEST_RUN_CPackTestAllGenerators)
 
   IF(CTEST_package_X11_TEST)
     SET(X11_build_target_arg --build-target package)
@@ -468,6 +513,50 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     ${X11_build_target_arg}
     --test-command  UseX11)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/X11")
+
+  if(NOT DEFINED CTEST_RUN_CMakeTestAllGenerators)
+    set(CTEST_RUN_CMakeTestAllGenerators ON)
+  endif(NOT DEFINED CTEST_RUN_CMakeTestAllGenerators)
+
+  IF(CTEST_RUN_CMakeTestAllGenerators)
+    ADD_TEST(CMakeTestAllGenerators ${CMAKE_CMAKE_COMMAND}
+        -D dir=${CMake_BINARY_DIR}/Tests/CMakeTestAllGenerators
+        -D CMake_SOURCE_DIR=${CMake_SOURCE_DIR}
+        -P ${CMake_SOURCE_DIR}/Tests/CMakeTestAllGenerators/RunCMake.cmake
+      )
+    LIST(APPEND TEST_BUILD_DIRS
+      "${CMake_BINARY_DIR}/Tests/CMakeTestAllGenerators")
+  ENDIF(CTEST_RUN_CMakeTestAllGenerators)
+
+  if(NOT DEFINED CTEST_RUN_CMakeTestBadCommandLines)
+    set(CTEST_RUN_CMakeTestBadCommandLines ON)
+  endif(NOT DEFINED CTEST_RUN_CMakeTestBadCommandLines)
+
+  IF(CTEST_RUN_CMakeTestBadCommandLines)
+    ADD_TEST(CMakeTestBadCommandLines ${CMAKE_CMAKE_COMMAND}
+        -D dir=${CMake_BINARY_DIR}/Tests/CMakeTestBadCommandLines
+        -D gen=${CMAKE_TEST_GENERATOR}
+        -D CMake_SOURCE_DIR=${CMake_SOURCE_DIR}
+        -P ${CMake_SOURCE_DIR}/Tests/CMakeTestBadCommandLines/RunCMake.cmake
+      )
+    LIST(APPEND TEST_BUILD_DIRS
+      "${CMake_BINARY_DIR}/Tests/CMakeTestBadCommandLines")
+  ENDIF(CTEST_RUN_CMakeTestBadCommandLines)
+
+  if(NOT DEFINED CTEST_RUN_CMakeTestMultipleConfigures)
+    set(CTEST_RUN_CMakeTestMultipleConfigures ON)
+  endif(NOT DEFINED CTEST_RUN_CMakeTestMultipleConfigures)
+
+  IF(CTEST_RUN_CMakeTestMultipleConfigures)
+    ADD_TEST(CMakeTestMultipleConfigures ${CMAKE_CMAKE_COMMAND}
+        -D dir=${CMake_BINARY_DIR}/Tests/CMakeTestMultipleConfigures
+        -D gen=${CMAKE_TEST_GENERATOR}
+        -D CMake_SOURCE_DIR=${CMake_SOURCE_DIR}
+        -P ${CMake_SOURCE_DIR}/Tests/CMakeTestMultipleConfigures/RunCMake.cmake
+      )
+    LIST(APPEND TEST_BUILD_DIRS
+      "${CMake_BINARY_DIR}/Tests/CMakeTestMultipleConfigures")
+  ENDIF(CTEST_RUN_CMakeTestMultipleConfigures)
 
   ADD_TEST(LoadedCommandOneConfig  ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -1100,6 +1189,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     )
   
   CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestSubdir/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestSubdir/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestSubdir ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestSubdir/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestSubdir/testOutput.log"
+    )
+    
+  CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestTimeout/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/test.cmake"
     @ONLY ESCAPE_QUOTES)
@@ -1110,8 +1208,69 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   SET_TESTS_PROPERTIES(CTestTestTimeout PROPERTIES
     PASS_REGULAR_EXPRESSION "\\*\\*\\*Timeout")
   
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/test.cmake"
+    "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/hello.cmake"
+    "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/hello.cmake"
+    @ONLY ESCAPE_QUOTES)
+  #ADD_TEST(CTestTestRunScript ${CMAKE_CTEST_COMMAND}
+  #  -S "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/test.cmake" -V
+  #  --output-log "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/testOutput.log"
+  #  )
+  
   ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
   
+  ADD_TEST(CTestBatchTest ${CMAKE_CTEST_COMMAND} -B)
+  
+  # Use macro, not function so that build can still be driven by CMake 2.4.
+  # After 2.6 is required, this could be a function without the extra 'set'
+  # calls.
+  #
+  macro(add_failed_submit_test name source build in out log regex)
+    # Have variables named source, build and drop_method because the
+    # configure_file call expects those variables to be defined.
+    #
+    set(source "${source}")
+    set(build "${build}")
+    configure_file("${in}" "${out}" @ONLY)
+    add_test(${name} ${CMAKE_CTEST_COMMAND} -S "${out}" -V --output-log "${log}")
+    set_tests_properties(${name} PROPERTIES PASS_REGULAR_EXPRESSION "${regex}")
+  endmacro()
+
+  set(regex "(Problems when submitting via S*CP")
+  set(regex "${regex}|Error message was: ")
+  set(regex "${regex}(Couldn.t resolve host ")
+  set(regex "${regex}|couldn.t connect to host")
+  set(regex "${regex}|libcurl was built with SSL disabled. https: not supported)")
+  set(regex "${regex}|Submission method .xmlrpc. not compiled into CTest")
+  set(regex "${regex}|Submission successful)")
+
+  set(ctest_coverage_labels_args "")
+
+  foreach(drop_method cp ftp http https scp xmlrpc)
+    # Cycle through these values each time through the loop:
+    if(ctest_coverage_labels_args STREQUAL "")
+      set(ctest_coverage_labels_args "LABELS Everything")
+    elseif(ctest_coverage_labels_args STREQUAL "LABELS Everything")
+      set(ctest_coverage_labels_args "LABELS 0ArgTest")
+    else()
+      set(ctest_coverage_labels_args "")
+    endif()
+
+    add_failed_submit_test(CTestTestFailedSubmit-${drop_method}
+      "${CMake_SOURCE_DIR}/Tests/CTestTest/SmallAndFast"
+      "${CMake_BINARY_DIR}/Tests/CTestTestFailedSubmits/${drop_method}"
+      "${CMake_SOURCE_DIR}/Tests/CTestTestFailedSubmits/test.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTestFailedSubmits/test-${drop_method}.cmake"
+      "${CMake_BINARY_DIR}/Tests/CTestTestFailedSubmits/test-${drop_method}.log"
+      "${regex}"
+      )
+  endforeach()
+
+
   IF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTest/test.cmake" @ONLY ESCAPE_QUOTES)
@@ -1152,6 +1311,43 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
         PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
     ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS)
+
+  IF (CMAKE_RUN_LONG_TESTS AND TEST_KDE4_STABLE_BRANCH)
+    IF(UNIX)
+      IF(NOT QT4_FOUND)
+         FIND_PACKAGE(Qt4)
+      ENDIF(NOT QT4_FOUND)
+
+      SET(TRY_BUILD_KDE4 TRUE)
+      IF(QT4_FOUND)
+        # check whether it's Qt 4.5 in a cmake 2.4. compatible way:
+        IF(NOT EXISTS "${QT_QTNETWORK_INCLUDE_DIR}/QAbstractNetworkCache")
+          SET(TRY_BUILD_KDE4 FALSE)
+        ENDIF(NOT EXISTS "${QT_QTNETWORK_INCLUDE_DIR}/QAbstractNetworkCache")
+      ELSE(QT4_FOUND)
+        SET(TRY_BUILD_KDE4 FALSE)
+      ENDIF(QT4_FOUND)
+
+      FIND_PACKAGE(Perl)
+      IF(NOT PERL_FOUND)
+        SET(TRY_BUILD_KDE4 FALSE)
+      ENDIF(NOT PERL_FOUND)
+
+      FIND_PACKAGE(ZLIB)
+      IF(NOT ZLIB_FOUND)
+        SET(TRY_BUILD_KDE4 FALSE)
+      ENDIF(NOT ZLIB_FOUND)
+
+      IF(TRY_BUILD_KDE4)
+        FILE(MAKE_DIRECTORY ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest)
+        SET(TEST_KDE4_BASE_DIR ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest)
+        CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh.in ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh @ONLY)
+        EXECUTE_PROCESS(COMMAND chmod 755 ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh )
+        ADD_TEST(KDE4StableBranchTest ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh)
+      ENDIF(TRY_BUILD_KDE4)
+
+    ENDIF(UNIX)
+  ENDIF (CMAKE_RUN_LONG_TESTS AND TEST_KDE4_STABLE_BRANCH)
   
   IF("${CMAKE_TEST_GENERATOR}" MATCHES Xcode)
     SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)
