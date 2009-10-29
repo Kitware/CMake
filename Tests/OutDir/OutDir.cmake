@@ -1,5 +1,5 @@
 set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a" ".so" ".dylib")
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".a" ".so" ".sl" ".dylib" ".dll.a")
 
 find_library(TESTC1_LIB
   NAMES testc1 testc1_test_debug_postfix
