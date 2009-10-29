@@ -208,6 +208,9 @@ static const char * cmDocumentationOptions[][3] =
    "By default CTest will run child CTest instances within the same process. "
    "If this behavior is not desired, this argument will enforce new "
    "processes for child CTest processes." },
+  {"--schedule-random", "Use a random order for scheduling tests",
+   "This option will run the tests in a random order. It is commonly used to "
+   "detect implicit dependencies in a test suite." },
   {"--submit-index", "Submit individual dashboard tests with specific index",
    "This option allows performing the same CTest action (such as test) "
    "multiple times and submit all stages to the same dashboard (Dart2 "

@@ -225,6 +225,7 @@ cmCTest::cmCTest()
   this->TimeOut                = 0;
   this->CompressXMLFiles       = false;
   this->CTestConfigFile        = "";
+  this->ScheduleType           = "";
   this->OutputLogFile          = 0;
   this->OutputLogFileLastTag   = -1;
   this->SuppressUpdatingCTestConfiguration = false;
@@ -2025,6 +2026,11 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
     if(this->CheckArgument(arg, "--build-and-test") && i < args.size() - 1)
       {
       cmakeAndTest = true;
+      }
+
+    if(this->CheckArgument(arg, "--schedule-random"))
+      {
+      this->ScheduleType = "Random";
       }
 
     // pass the argument to all the handlers as well, but i may no longer be

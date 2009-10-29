@@ -191,6 +191,9 @@ public:
   ///! Should we only show what we would do?
   bool GetShowOnly();
 
+  //Used for parallel ctest job scheduling
+  std::string GetScheduleType() { return this->ScheduleType; }
+  void SetScheduleType(std::string type) { this->ScheduleType = type; }
 
   ///! The max output width
   int GetMaxTestNameWidth() const;
@@ -374,6 +377,7 @@ public:
   bool GetLabelSummary() { return this->LabelSummary;}
 private:
   std::string ConfigType;
+  std::string ScheduleType;
   bool Verbose;
   bool ExtraVerbose;
   bool ProduceXML;

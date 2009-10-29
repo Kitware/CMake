@@ -491,11 +491,16 @@ int cmCTestTestHandler::ProcessHandler()
 {
   // Update internal data structure from generic one
   this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
-  this->SetUseUnion(cmSystemTools::IsOn(this->GetOption("UseUnion"))); 
+  this->SetUseUnion(cmSystemTools::IsOn(this->GetOption("UseUnion")));
+  if(cmSystemTools::IsOn(this->GetOption("ScheduleRandom")))
+    {
+    this->CTest->SetScheduleType("Random");
+    }
   if(this->GetOption("ParallelLevel"))
     {
     this->CTest->SetParallelLevel(atoi(this->GetOption("ParallelLevel")));
     }
+
   const char* val;
   val = this->GetOption("LabelRegularExpression");
   if ( val )
@@ -1021,11 +1026,22 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   cmCTestMultiProcessHandler::TestMap tests;
   cmCTestMultiProcessHandler::PropertiesMap properties;
   
+  bool randomSchedule = this->CTest->GetScheduleType() == "Random";
+  if(randomSchedule)
+  {
+    srand((unsigned)time(0));
+  }
+
   for (ListOfTests::iterator it = this->TestList.begin();
        it != this->TestList.end(); ++it)
     { 
     cmCTestTestProperties& p = *it;
     cmCTestMultiProcessHandler::TestSet depends;
+
+    if(randomSchedule)
+      {
+      p.Cost = rand();
+      }
 
     if(p.Depends.size())
       {
