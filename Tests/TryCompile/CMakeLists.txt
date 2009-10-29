@@ -142,6 +142,17 @@ IF(NOT "${TRY_OUT}" MATCHES "hello world")
   MESSAGE(SEND_ERROR " TRY_OUT didn't contain \"hello world\": \"${TRY_OUT}\"")
 ENDIF(NOT "${TRY_OUT}" MATCHES "hello world")
 
+TRY_RUN(ARG_TEST_RUN ARG_TEST_COMPILE
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+    ${TryCompile_SOURCE_DIR}/expect_arg.c
+    OUTPUT_VARIABLE TRY_OUT
+    ARGS arg1 arg2)
+IF(NOT ARG_TEST_COMPILE)
+  MESSAGE(SEND_ERROR "expect_arg failed compiling: ${TRY_OUT}")
+ENDIF(NOT ARG_TEST_COMPILE)
+IF(NOT "${ARG_TEST_RUN}" STREQUAL "0")
+  MESSAGE(SEND_ERROR "expect_arg failed running with exit code ${ARG_TEST_RUN} ${TRY_OUT}")
+ENDIF(NOT "${ARG_TEST_RUN}" STREQUAL "0")
 
 # try to run a file that should compile and run, but return an error
 TRY_RUN(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
