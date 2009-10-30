@@ -48,6 +48,9 @@ MACRO(SWIG_MODULE_INITIALIZE name language)
 
   SET(SWIG_MODULE_${name}_REAL_NAME "${name}")
   IF("x${SWIG_MODULE_${name}_LANGUAGE}x" MATCHES "^xPYTHONx$")
+    # when swig is used without the -interface it will produce in the module.py
+    # a 'import _modulename' statement, which implies having a corresponding 
+    # _modulename.so (*NIX), _modulename.pyd (Win32).
     SET(SWIG_MODULE_${name}_REAL_NAME "_${name}")
   ENDIF("x${SWIG_MODULE_${name}_LANGUAGE}x" MATCHES "^xPYTHONx$")
   IF("x${SWIG_MODULE_${name}_LANGUAGE}x" MATCHES "^xPERLx$")
@@ -117,6 +120,8 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   # If CMAKE_SWIG_OUTDIR was specified then pass it to -outdir
   IF(CMAKE_SWIG_OUTDIR)
     SET(swig_outdir ${CMAKE_SWIG_OUTDIR})
+    # it may not exist, so create it:
+    file(MAKE_DIRECTORY ${CMAKE_SWIG_OUTDIR})
   ELSE(CMAKE_SWIG_OUTDIR)
     SET(swig_outdir ${CMAKE_CURRENT_BINARY_DIR})
   ENDIF(CMAKE_SWIG_OUTDIR)
@@ -203,8 +208,33 @@ MACRO(SWIG_ADD_MODULE name language)
     MODULE
     ${swig_generated_sources}
     ${swig_other_sources})
-  SET_TARGET_PROPERTIES(${SWIG_MODULE_${name}_REAL_NAME}
-    PROPERTIES PREFIX "")
+  STRING(TOLOWER "${language}" swig_lowercase_language)
+  IF ("${swig_lowercase_language}" STREQUAL "java")
+    IF (APPLE)
+        # In java you want:
+        #      System.loadLibrary("LIBRARY");
+        # then JNI will look for a library whose name is platform dependent, namely
+        #   MacOS  : libLIBRARY.jnilib
+        #   Windows: LIBRARY.dll
+        #   Linux  : libLIBRARY.so
+        SET_TARGET_PROPERTIES (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".jnilib")
+      ENDIF (APPLE)
+  ENDIF ("${swig_lowercase_language}" STREQUAL "java")
+  IF ("${swig_lowercase_language}" STREQUAL "python")
+    # this is only needed for the python case where a _modulename.so is generated
+    SET_TARGET_PROPERTIES(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
+    # Python extension modules on Windows must have the extension ".pyd"
+    # instead of ".dll" as of Python 2.5.  Older python versions do support
+    # this suffix.
+    # http://docs.python.org/whatsnew/ports.html#SECTION0001510000000000000000
+    # <quote>
+    # Windows: .dll is no longer supported as a filename extension for extension modules.
+    # .pyd is now the only filename extension that will be searched for.
+    # </quote>
+    IF(WIN32 AND NOT CYGWIN)
+      SET_TARGET_PROPERTIES(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".pyd")
+    ENDIF(WIN32 AND NOT CYGWIN)
+  ENDIF ("${swig_lowercase_language}" STREQUAL "python")
 ENDMACRO(SWIG_ADD_MODULE)
 
 #
