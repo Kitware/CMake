@@ -56,8 +56,12 @@
 #include <stdlib.h>
 #include <wchar.h>
 #include <windows.h>
+#if defined(_MSC_VER) &&  _MSC_VER <= 1300
+# define EPOC_TIME   (116444736000000000)
+#else
+# define EPOC_TIME   (116444736000000000ULL)
+#endif
 
-#define EPOC_TIME   (116444736000000000ULL)
 
 struct ustat {
     int64_t     st_atime;
