@@ -4,13 +4,14 @@
 # variables:
 #
 #  Java_JAVA_EXECUTABLE    = the full path to the Java runtime
-#  Java_JAVA_EXECUTABLE    = the full path to the Java compiler
-#  Java_JAVA_EXECUTABLE    = the full path to the Java archiver
-#  Java_VERSION_STRING     = Version of the package found (java version)
+#  Java_JAVAC_EXECUTABLE   = the full path to the Java compiler
+#  Java_JAR_EXECUTABLE     = the full path to the Java archiver
+#  Java_VERSION_STRING     = Version of the package found (java version), eg. 1.6.0_12
 #  Java_VERSION_MAJOR      = The major version of the package found.
 #  Java_VERSION_MINOR      = The minor version of the package found.
 #  Java_VERSION_PATCH      = The patch version of the package found.
 #  Java_VERSION_TWEAK      = The tweak version of the package found (after '_')
+#  Java_VERSION            = This is set to: $major.$minor.$patch(.$tweak)
 #
 
 #=============================================================================
