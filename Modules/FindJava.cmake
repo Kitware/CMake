@@ -10,7 +10,7 @@
 #  Java_VERSION_MAJOR      = The major version of the package found.
 #  Java_VERSION_MINOR      = The minor version of the package found.
 #  Java_VERSION_PATCH      = The patch version of the package found.
-#                            The patch version may contains underscore '_'
+#  Java_VERSION_TWEAK      = The tweak version of the package found (after '_')
 #
 
 #=============================================================================
@@ -65,56 +65,50 @@ IF(Java_JAVA_EXECUTABLE)
     IF( res )
       MESSAGE( FATAL_ERROR "Error executing java -version" )
     ELSE()
-        # extract major/minor version and patch level from "java -version" output
-        # Tested on linux using 
-        # 1. Sun
-        # 2. OpenJDK 1.6
-        # 3. GCJ 1.5
+      # extract major/minor version and patch level from "java -version" output
+      # Tested on linux using 
+      # 1. Sun
+      # 2. OpenJDK 1.6
+      # 3. GCJ 1.5
+      # 4. Kaffe 1.4.2
+      IF(var MATCHES "java version \"[0-9]+\\.[0-9]+\\.[0-9_]+\".*")
+        # This is most likely Sun / OpenJDK, or maybe GCJ-java compat layer
         STRING( REGEX REPLACE ".* version \"([0-9]+\\.[0-9]+\\.[0-9_]+).*"
                 "\\1" Java_VERSION_STRING "${var}" )
-        STRING( REGEX REPLACE ".* version \"([0-9]+)\\.[0-9]+\\.[0-9_]+.*"
-                "\\1" Java_VERSION_MAJOR "${var}" )
-        STRING( REGEX REPLACE ".* version \"[0-9]+\\.([0-9]+)\\.[0-9_]+.*"
-                "\\1" Java_VERSION_MINOR "${var}" )
-        STRING( REGEX REPLACE ".* version \"[0-9]+\\.[0-9]+\\.([0-9_]+).*"
-                "\\1" Java_VERSION_PATCH "${var}" )
-        # display info
-        MESSAGE( STATUS "Java version ${Java_VERSION_STRING} configured successfully!" )
-        MESSAGE( STATUS "Java version ${Java_VERSION_MAJOR}.${Java_VERSION_MINOR} configured successfully!" )
+      ELSEIF(var MATCHES "java full version \"kaffe-[0-9]+\\.[0-9]+\\.[0-9_]+\".*")
+        # Kaffe style
+        STRING( REGEX REPLACE "java full version \"kaffe-([0-9]+\\.[0-9]+\\.[0-9_]+).*"
+                "\\1" Java_VERSION_STRING "${var}" )
+      ELSE()
+        message(FATAL_ERROR "regex not supported: ${var}. Please report")
+      ENDIF()
+      STRING( REGEX REPLACE "([0-9]+).*" "\\1" Java_VERSION_MAJOR "${Java_VERSION_STRING}" )
+      STRING( REGEX REPLACE "[0-9]+\\.([0-9]+).*" "\\1" Java_VERSION_MINOR "${Java_VERSION_STRING}" )
+      STRING( REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" Java_VERSION_PATCH "${Java_VERSION_STRING}" )
+      # warning tweak version can be empty:
+      STRING( REGEX REPLACE "[0-9]+\\.[0-9]+\\.[0-9]+\\_?([0-9]*)$" "\\1" Java_VERSION_TWEAK "${Java_VERSION_STRING}" )
+      if( Java_VERSION_TWEAK STREQUAL "" ) # check case where tweak is not defined
+        set(Java_VERSION ${Java_VERSION_MAJOR}.${Java_VERSION_MINOR}.${Java_VERSION_PATCH})
+      else( )
+        set(Java_VERSION ${Java_VERSION_MAJOR}.${Java_VERSION_MINOR}.${Java_VERSION_PATCH}.${Java_VERSION_TWEAK})
+      endif( )
+      # display info
+      #MESSAGE( STATUS "Java version ${Java_VERSION_STRING} configured successfully!" ) # keep me, used for debug
+      MESSAGE( STATUS "Java version ${Java_VERSION} configured successfully!" )
     ENDIF()
 
-    # If any version numbers are given to the command it will set the
-    # following variables before loading the module:
-    #
-    #  XXX_FIND_VERSION       = full requested version string
-    #  XXX_FIND_VERSION_MAJOR = major version if requested, else 0
-    #  XXX_FIND_VERSION_MINOR = minor version if requested, else 0
-    #  XXX_FIND_VERSION_PATCH = patch version if requested, else 0
-    #  XXX_FIND_VERSION_TWEAK = tweak version if requested, else 0
-    #  XXX_FIND_VERSION_COUNT = number of version components, 0 to 4
-    #  XXX_FIND_VERSION_EXACT = true if EXACT option was given
+    # check version if requested:
     set(_java_version_acceptable TRUE)
     if( Java_FIND_VERSION )
-      if( Java_FIND_VERSION_MAJOR GREATER Java_VERSION_MAJOR )
+      if("${Java_VERSION}" VERSION_LESS "${Java_FIND_VERSION}")
         set(_java_version_acceptable FALSE)
-      endif( Java_FIND_VERSION_MAJOR  GREATER Java_VERSION_MAJOR )
-      if( Java_FIND_VERSION_MINOR GREATER Java_VERSION_MINOR )
-        set(_java_version_acceptable FALSE)
-      endif( Java_FIND_VERSION_MINOR  GREATER Java_VERSION_MINOR )
-      # Is it exact ?
+      endif("${Java_VERSION}" VERSION_LESS "${Java_FIND_VERSION}")
       if( Java_FIND_VERSION_EXACT )
-        # since GREATER operation worked ok, simply check LESS operation
-        if( Java_FIND_VERSION_MAJOR LESS Java_VERSION_MAJOR )
+        if("${Java_VERSION}" VERSION_GREATER "${Java_FIND_VERSION}")
           set(_java_version_acceptable FALSE)
-        endif( Java_FIND_VERSION_MAJOR  LESS Java_VERSION_MAJOR )
-        if( Java_FIND_VERSION_MINOR LESS Java_VERSION_MINOR )
-          set(_java_version_acceptable FALSE)
-        endif( Java_FIND_VERSION_MINOR LESS Java_VERSION_MINOR )
+        endif("${Java_VERSION}" VERSION_GREATER "${Java_FIND_VERSION}")
       endif( Java_FIND_VERSION_EXACT )
-    else( Java_FIND_VERSION )
-      # no version requested we are all set
     endif( Java_FIND_VERSION )
-
 ENDIF(Java_JAVA_EXECUTABLE)
 
 
