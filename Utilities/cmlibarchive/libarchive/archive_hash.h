@@ -108,7 +108,7 @@ typedef SHA256_CTX archive_sha256_ctx;
 #  define archive_sha256_init(ctx)      SHA256Init(ctx)
 #  define archive_sha256_final(ctx, buf)    SHA256Final(buf, ctx)
 #  define archive_sha256_update(ctx, buf, n)    SHA256Update(ctx, buf, n)
-#elif defined(HAVE_OPENSSL_SHA_H)
+#elif defined(HAVE_OPENSSL_SHA_H) && defined(HAVE_SHA256_INIT)
 #  include <openssl/sha.h>
 #  define ARCHIVE_HAS_SHA256
 typedef SHA256_CTX archive_sha256_ctx;
@@ -131,7 +131,7 @@ typedef SHA384_CTX archive_sha384_ctx;
 #  define archive_sha384_init(ctx)      SHA384Init(ctx)
 #  define archive_sha384_final(ctx, buf)    SHA384Final(buf, ctx)
 #  define archive_sha384_update(ctx, buf, n)    SHA384Update(ctx, buf, n)
-#elif defined(HAVE_OPENSSL_SHA_H)
+#elif defined(HAVE_OPENSSL_SHA_H) && defined(HAVE_SHA384_INIT)
 #  include <openssl/sha.h>
 #  define ARCHIVE_HAS_SHA384
 typedef SHA512_CTX archive_sha384_ctx;
@@ -154,7 +154,7 @@ typedef SHA512_CTX archive_sha512_ctx;
 #  define archive_sha512_init(ctx)      SHA512Init(ctx)
 #  define archive_sha512_final(ctx, buf)    SHA512Final(buf, ctx)
 #  define archive_sha512_update(ctx, buf, n)    SHA512Update(ctx, buf, n)
-#elif defined(HAVE_OPENSSL_SHA_H)
+#elif defined(HAVE_OPENSSL_SHA_H) && defined(HAVE_SHA512_INIT)
 #  include <openssl/sha.h>
 #  define ARCHIVE_HAS_SHA512
 typedef SHA512_CTX archive_sha512_ctx;
