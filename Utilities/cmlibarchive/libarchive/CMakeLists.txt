@@ -18,7 +18,7 @@ SET(libarchive_SOURCES
   archive_entry.c
   archive_entry.h
   archive_entry_copy_stat.c
-  archive_entry_copy_bhfi.c
+#  archive_entry_copy_bhfi.c
   archive_entry_link_resolver.c
   archive_entry_private.h
   archive_entry_stat.c
@@ -105,7 +105,7 @@ SET(libarchive_MANS
 )
 
 IF(WIN32 AND NOT CYGWIN)
-#  LIST(APPEND libarchive_SOURCES archive_entry_copy_bhfi.c)
+  LIST(APPEND libarchive_SOURCES archive_entry_copy_bhfi.c)
   LIST(APPEND libarchive_SOURCES archive_windows.c)
   LIST(APPEND libarchive_SOURCES archive_windows.h)
   LIST(APPEND libarchive_SOURCES filter_fork_windows.c)
