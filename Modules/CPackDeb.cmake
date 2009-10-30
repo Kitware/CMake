@@ -1,6 +1,50 @@
+# - The builtin (binary) CPack Deb generator (Unix only)
+# CPackDeb may be used to create Deb package using CPack.
+# CPackDeb is a CPack generator thus it uses the CPACK_XXX variables
+# used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration
+#
+# However CPackRPM has specific features which are controlled by
+# the specifics CPACK_RPM_XXX variables.You'll find a detailed usage on 
+# the wiki: 
+#  http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29
+# However as a handy reminder here comes the list of specific variables:
+#
+#  CPACK_DEBIAN_PACKAGE_NAME
+#     Mandatory : YES
+#     Default   : CPACK_PACKAGE_NAME (lower case)
+#     The debian package summary
+# CPACK_DEBIAN_PACKAGE_VERSION
+#     Mandatory : YES
+#     Default   : CPACK_PACKAGE_VERSION
+#     The debian package version
+# CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
+#     Mandatory : YES
+#     Default   : Output of dpkg --print-architecture or i386
+#     The debian package architecture
+# CPACK_DEBIAN_PACKAGE_DEPENDS
+#     Mandatory : NO
+#     Default   : -
+#     May be used to set deb dependencies. 
+# CPACK_DEBIAN_PACKAGE_MAINTAINER
+#     Mandatory : YES
+#     Default   : CPACK_PACKAGE_CONTACT
+#     The debian package maintainer
+# CPACK_DEBIAN_PACKAGE_DESCRIPTION
+#     Mandatory : YES
+#     Default   : CPACK_PACKAGE_DESCRIPTION_SUMMARY
+#     The debian package description
+# CPACK_DEBIAN_PACKAGE_SECTION
+#     Mandatory : YES
+#     Default   : 'devel'
+#     The debian package section
+# CPACK_DEBIAN_PACKAGE_PRIORITY
+#     Mandatory : YES
+#     Default   : 'optional'
+#     The debian package priority
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
+# Copyright 2007-2009 Mathieu Malaterre <mathieu.malaterre@gmail.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
