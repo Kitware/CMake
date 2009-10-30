@@ -46,7 +46,6 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include <libtar/libtar.h>
-#  include <memory> // auto_ptr
 #  include <fcntl.h>
 #  include <cm_zlib.h>
 #  include <cmsys/MD5.h>
@@ -1807,9 +1806,8 @@ bool cmSystemTools::CreateTar(const char* outFileName,
     &gzs
   };
 
-  // Ok, this libtar is not const safe. for now use auto_ptr hack
+  // This libtar is not const safe. Make a non-const copy of outFileName
   char* realName = new char[ strlen(outFileName) + 1 ];
-  std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
   int options = 0;
   if(verbose)
@@ -1825,8 +1823,11 @@ bool cmSystemTools::CreateTar(const char* outFileName,
       options) == -1)
     {
     cmSystemTools::Error("Problem with tar_open(): ", strerror(errno));
+    delete [] realName;
     return false;
     }
+
+  delete [] realName;
 
   std::vector<cmStdString>::const_iterator it;
   for (it = files.begin(); it != files.end(); ++ it )
@@ -1859,6 +1860,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
     cmSystemTools::Error("Problem with tar_close(): ", strerror(errno));
     return false;
     }
+
   return true;
 #else
   (void)outFileName;
@@ -1886,9 +1888,8 @@ bool cmSystemTools::ExtractTar(const char* outFileName,
     &gzs
   };
 
-  // Ok, this libtar is not const safe. for now use auto_ptr hack
+  // This libtar is not const safe. Make a non-const copy of outFileName
   char* realName = new char[ strlen(outFileName) + 1 ];
-  std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
   if (tar_open(&t, realName,
       (gzip? &gztype : NULL),
@@ -1901,8 +1902,11 @@ bool cmSystemTools::ExtractTar(const char* outFileName,
       | 0) == -1)
     {
     cmSystemTools::Error("Problem with tar_open(): ", strerror(errno));
+    delete [] realName;
     return false;
     }
+
+  delete [] realName;
 
   if (tar_extract_all(t, 0) != 0)
   {
@@ -1940,9 +1944,8 @@ bool cmSystemTools::ListTar(const char* outFileName,
     &gzs
   };
 
-  // Ok, this libtar is not const safe. for now use auto_ptr hack
+  // This libtar is not const safe. Make a non-const copy of outFileName
   char* realName = new char[ strlen(outFileName) + 1 ];
-  std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
   if (tar_open(&t, realName,
       (gzip? &gztype : NULL),
@@ -1955,8 +1958,11 @@ bool cmSystemTools::ListTar(const char* outFileName,
       | 0) == -1)
     {
     cmSystemTools::Error("Problem with tar_open(): ", strerror(errno));
+    delete [] realName;
     return false;
     }
+
+  delete [] realName;
 
   while ((th_read(t)) == 0)
   {
