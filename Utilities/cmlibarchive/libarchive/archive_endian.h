@@ -45,7 +45,7 @@
  * - SGI MIPSpro
  * - Microsoft Visual C++ 6.0 (supposedly newer versions too)
  */
-#if defined(__WATCOMC__) || defined(__sgi)
+#if defined(__WATCOMC__) || defined(__sgi) || defined(__hpux)
 #define inline
 #elif defined(_MSC_VER)
 #define inline __inline

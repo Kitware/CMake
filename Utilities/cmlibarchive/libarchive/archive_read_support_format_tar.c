@@ -773,7 +773,11 @@ header_Solaris_ACL(struct archive_read *a, struct tar *tar,
         }
         p++;
     }
+#ifdef __hpux
+    switch ((int)type & ~0777777) {
+#else
     switch (type & ~0777777) {
+#endif
     case 01000000:
         /* POSIX.1e ACL */
         break;
