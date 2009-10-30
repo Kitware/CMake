@@ -294,7 +294,14 @@ void CMakeSetupDialog::doConfigure()
       {
       return;
       }
-    dir.mkpath(".");
+    if(!dir.mkpath("."))
+      {
+      QMessageBox::information(this, tr("Create Directory Failed"), 
+        QString(tr("Failed to create directory %1")).arg(dir.path()), 
+        QMessageBox::Ok);
+
+      return;
+      }
     }
 
   // if no generator, prompt for it and other setup stuff
