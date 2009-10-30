@@ -51,14 +51,18 @@ IF(NOT CMAKE_Java_COMPILER)
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5;JavaHome]/bin"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
+    $ENV{JAVA_HOME}/bin
     /usr/bin
     /usr/lib/java/bin
     /usr/share/java/bin
     /usr/local/bin
     /usr/local/java/bin
+    /usr/local/java/share/bin
     /usr/java/j2sdk1.4.2_04
     /usr/lib/j2sdk1.4-sun/bin
+    /usr/java/j2sdk1.4.2_09/bin
     /usr/lib/j2sdk1.5-sun/bin
+    /opt/sun-jdk-1.5.0.04/bin
     )
   # if no compiler has been specified yet, then look for one
   IF(CMAKE_Java_COMPILER_INIT)
