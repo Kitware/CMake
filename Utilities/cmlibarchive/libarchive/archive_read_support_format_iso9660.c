@@ -477,7 +477,7 @@ archive_read_format_iso9660_options(struct archive_read *a,
 }
 
 static int
-isVDSetTerminator(struct iso9660 *iso9660, const unsigned char *h)
+isVDSetTerminator(struct iso9660 *, const unsigned char *h)
 {
     int i;
 
