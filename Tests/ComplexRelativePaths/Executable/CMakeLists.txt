@@ -18,7 +18,10 @@ IF(COMPLEX_TEST_CMAKELIB)
   IF(EXISTS ${Complex_BINARY_DIR}/../../Utilities/cmcurl)
     LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmcurl)
   ENDIF(EXISTS ${Complex_BINARY_DIR}/../../Utilities/cmcurl)
-  LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmtar)
+  LINK_DIRECTORIES(
+  ${Complex_BINARY_DIR}/../../Utilities/cmlibarchive/libarchive
+  ${Complex_BINARY_DIR}/../../Utilities/cmbzip2
+  )
 ENDIF(COMPLEX_TEST_CMAKELIB)
 
 # Create an imported target for if(TARGET) test below.
@@ -51,7 +54,7 @@ ADD_EXECUTABLE(complex complex testcflags.c )
 #  Sub1/NameConflictTest.c Sub2/NameConflictTest.c)
 ADD_EXECUTABLE(complex.file complex.file.cxx complex_nobuild.cxx)
 IF(COMPLEX_TEST_CMAKELIB)
-  TARGET_LINK_LIBRARIES(complex CMakeLib cmsys cmexpat cmzlib cmtar cmcurl)
+  TARGET_LINK_LIBRARIES(complex CMakeLib cmsys cmexpat cmzlib cmlibarchive cmbzip2 cmcurl)
 ENDIF(COMPLEX_TEST_CMAKELIB)
 
 IF (UNIX)

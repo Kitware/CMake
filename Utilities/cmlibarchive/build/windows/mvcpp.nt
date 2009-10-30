@@ -1,0 +1,117 @@
+#/* FILE: mvcpp.nt
+# *
+# *          Copyright (c) 2008
+# *          TouchNet Information Systems, Inc.
+# *          All Rights Reserved
+# *
+# *  This program is an unpublished copyright work of TouchNet Information
+# *  Systems, Inc. of Lenexa, KS.  The program, all information disclosed
+# *  and the matter shown and described hereon or herewith are confidential
+# *  and proprietary to TouchNet Information Systems, Inc.
+# *
+# ******************************************************************************
+# *
+# * $LastChangedBy: kientzle $
+# * $Locker: $
+# * $ProjectName: $
+# * $ProjectRevision: $
+# * $LastChangedRevision: 29 $
+# * $LastChangedDate: 2008-05-05 18:10:33 -0400 (Mon, 05 May 2008) $
+# * $State$
+# * $RCSfile$
+# * $Source$
+# *
+# * Change Log:
+# * $Log: $
+# *
+# */
+
+.SUFFIXES : .c .cpp .obm
+
+ZLIB_INCL=\3rdParty\ZLib\Current\Include
+
+EXTRA_DEFINES=/DLIBARCHIVE_STATIC=1
+
+!ifdef DEBUG
+DEST_PATH=.\lib\mvcpp\debug
+OBJ_DIR=obj\debug
+COMPILE_FLAG=/MTd /DDEBUG=1 $(EXTRA_DEFINES) /Zi /Fd$(OBJ_DIR)\libarchive.pdb
+!else
+DEST_PATH=.\lib\mvcpp
+OBJ_DIR=obj
+COMPILE_FLAG=/MT $(EXTRA_DEFINES) /Fd$(OBJ_DIR)\libarchive.pdb
+!endif
+
+INCLUDE=.;$(MSDEVDIR)\INCLUDE;$(ZLIB_INCL);
+INCLUDE_OPTS=
+
+NT_CPP=cl
+NT_C=cl
+NT_LIBRARIAN=lib
+
+###
+NT_C_OPTS=$(COMPILE_FLAG) /GX /Zl /Zp1 /nologo /c /G5 /Oi /Ot /TC /DVC_EXTRANLEAN /DWIN32_LEAN_AND_MEAN $(INCLUDE_OPTS)
+NT_CPP_OPTS=$(COMPILE_FLAG) /GX /Zl /Zp1 /nologo /c /G5 /Oi /Ot /TP /DVC_EXTRANLEAN /DWIN32_LEAN_AND_MEAN $(INCLUDE_OPTS)
+NT_LIB_OPTS=
+
+.cpp{$(OBJ_DIR)}.obm:
+      -md $(OBJ_DIR) > nul 2>nul
+      $(NT_CPP) $(NT_CPP_OPTS) -Fo$*.obm $<
+
+.c{$(OBJ_DIR)}.obm:
+      -md $(OBJ_DIR) > nul 2>nul
+      $(NT_C) $(NT_C_OPTS) -Fo$*.obm $<
+
+
+OBJS=\
+  $(OBJ_DIR)\archive_check_magic.obm      $(OBJ_DIR)\archive_entry.obm \
+  $(OBJ_DIR)\archive_entry_copy_stat.obm  $(OBJ_DIR)\archive_entry_link_resolver.obm \
+  $(OBJ_DIR)\archive_entry_stat.obm       $(OBJ_DIR)\archive_entry_strmode.obm \
+  $(OBJ_DIR)\archive_read.obm             $(OBJ_DIR)\archive_read_data_into_fd.obm \
+  $(OBJ_DIR)\archive_read_extract.obm     $(OBJ_DIR)\archive_read_open_fd.obm \
+  $(OBJ_DIR)\archive_read_open_file.obm   $(OBJ_DIR)\archive_read_open_filename.obm \
+  $(OBJ_DIR)\archive_read_open_memory.obm $(OBJ_DIR)\archive_read_support_compression_all.obm \
+  $(OBJ_DIR)\archive_read_support_compression_bzip2.obm \
+  $(OBJ_DIR)\archive_read_support_compression_compress.obm \
+  $(OBJ_DIR)\archive_read_support_compression_gzip.obm \
+  $(OBJ_DIR)\archive_read_support_compression_none.obm \
+  $(OBJ_DIR)\archive_read_support_compression_program.obm \
+  $(OBJ_DIR)\archive_read_support_format_all.obm \
+  $(OBJ_DIR)\archive_read_support_format_ar.obm \
+  $(OBJ_DIR)\archive_read_support_format_cpio.obm \
+  $(OBJ_DIR)\archive_read_support_format_empty.obm \
+  $(OBJ_DIR)\archive_read_support_format_iso9660.obm \
+  $(OBJ_DIR)\archive_read_support_format_mtree.obm \
+  $(OBJ_DIR)\archive_read_support_format_tar.obm \
+  $(OBJ_DIR)\archive_read_support_format_zip.obm \
+  $(OBJ_DIR)\archive_string.obm                        $(OBJ_DIR)\archive_string_sprintf.obm \
+  $(OBJ_DIR)\archive_util.obm                          $(OBJ_DIR)\archive_virtual.obm \
+  $(OBJ_DIR)\archive_write.obm                         $(OBJ_DIR)\archive_write_disk.obm \
+  $(OBJ_DIR)\archive_write_disk_set_standard_lookup.obm \
+  $(OBJ_DIR)\archive_write_open_fd.obm                 $(OBJ_DIR)\archive_write_open_file.obm \
+  $(OBJ_DIR)\archive_write_open_filename.obm           $(OBJ_DIR)\archive_write_open_memory.obm \
+  $(OBJ_DIR)\archive_write_set_compression_bzip2.obm   $(OBJ_DIR)\archive_write_set_compression_compress.obm \
+  $(OBJ_DIR)\archive_write_set_compression_gzip.obm    $(OBJ_DIR)\archive_write_set_compression_none.obm \
+  $(OBJ_DIR)\archive_write_set_compression_program.obm $(OBJ_DIR)\archive_write_set_format.obm \
+  $(OBJ_DIR)\archive_write_set_format_ar.obm           $(OBJ_DIR)\archive_write_set_format_by_name.obm \
+  $(OBJ_DIR)\archive_write_set_format_cpio.obm         $(OBJ_DIR)\archive_write_set_format_cpio_newc.obm \
+  $(OBJ_DIR)\archive_write_set_format_pax.obm          $(OBJ_DIR)\archive_write_set_format_shar.obm \
+  $(OBJ_DIR)\archive_write_set_format_ustar.obm        $(OBJ_DIR)\filter_fork.obm \
+  $(OBJ_DIR)\libarchive-nonposix.obm
+
+all: CLEAN $(DEST_PATH)\libarchive.lib
+
+$(DEST_PATH)\libarchive.lib :: $(OBJS) $(DEST_PATH)
+
+$(DEST_PATH)\libarchive.lib ::
+    $(NT_LIBRARIAN) $(NT_LIB_OPTS) /OUT:$(DEST_PATH)\libarchive.lib $(OBJS) 
+
+$(DEST_PATH):
+    -md $(DEST_PATH) > nul 2>nul
+
+CLEAN:
+!ifdef CLEAN
+  -del $(OBJ_DIR)\*.pd? > nul 2>nul
+  -ren $(OBJ_DIR)\*.pdb *.pd1 > nul 2>nul
+  -ren $(OBJ_DIR)\*.pdb *.pd2 > nul 2>nul
+!endif

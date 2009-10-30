@@ -66,11 +66,6 @@ MACRO(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
     ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_CURL" ON)
 
-  # There is currently no option for system tar because the upstream
-  # libtar does not have our modifications to allow reentrant
-  # object-oriented use of the library.
-  # OPTION(CMAKE_USE_SYSTEM_TAR    "Use system-installed tar"   OFF)
-
   # Mention to the user what system libraries are being used.
   FOREACH(util CURL EXPAT XMLRPC ZLIB)
     IF(CMAKE_USE_SYSTEM_${util})
@@ -239,21 +234,31 @@ MACRO (CMAKE_BUILD_UTILITIES)
   ENDIF(CMAKE_USE_SYSTEM_CURL)
 
   #---------------------------------------------------------------------
-  # Build Tar library for CTest.
-  SET(CMTAR_ZLIB_HEADER ${CMAKE_ZLIB_HEADER})
-  SET(CMTAR_ZLIB_LIBRARIES ${CMAKE_ZLIB_LIBRARIES})
-  SET(CMTAR_ZLIB_INCLUDE_DIRS ${CMAKE_ZLIB_INCLUDES})
-  SET(CMAKE_TAR_INCLUDES ${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmtar)
-  SET(CMAKE_TAR_LIBRARIES cmtar)
-  SUBDIRS(Utilities/cmtar)
-  
-  #---------------------------------------------------------------------
   # Build Compress library for CTest.
   SET(CMAKE_COMPRESS_INCLUDES 
     "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmcompress")
   SET(CMAKE_COMPRESS_LIBRARIES "cmcompress")
   SUBDIRS(Utilities/cmcompress)
-  
+  IF(CMAKE_USE_SYSTEM_BZIP2)
+    FIND_PACKAGE(BZip2)
+  ELSE()
+    SET(BZIP2_INCLUDE_DIR 
+      "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmbzip2")
+    SET(BZIP2_LIBRARIES cmbzip2)
+    SUBDIRS(Utilities/cmbzip2)
+  ENDIF()
+  IF(CMAKE_USE_SYSTEM_LIBARCHIVE)
+    FIND_PACKAGE(libarchive)
+    SET(CMAKE_TAR_LIBRARIES libarchive)
+  ELSE(CMAKE_USE_SYSTEM_LIBARCHIVE)
+    SET(HAVE_LIBZ 1)
+    SET(HAVE_ZLIB_H 1)
+    SET(BUILD_ARCHIVE_WITHIN_CMAKE TRUE)
+    ADD_DEFINITIONS(-DLIBARCHIVE_STATIC)
+    SUBDIRS(Utilities/cmlibarchive)
+    SET(CMAKE_TAR_LIBRARIES cmlibarchive ${BZIP2_LIBRARIES})
+  ENDIF(CMAKE_USE_SYSTEM_LIBARCHIVE)
+
   #---------------------------------------------------------------------
   # Build expat library for CMake and CTest.
   IF(CMAKE_USE_SYSTEM_EXPAT)

@@ -1,0 +1,107 @@
+#/* FILE: wccpp.nt
+# *
+# *          Copyright (c) 2008
+# *          TouchNet Information Systems, Inc.
+# *          All Rights Reserved
+# *
+# *  This program is an unpublished copyright work of TouchNet Information
+# *  Systems, Inc. of Lenexa, KS.  The program, all information disclosed
+# *  and the matter shown and described hereon or herewith are confidential
+# *  and proprietary to TouchNet Information Systems, Inc.
+# *
+# ******************************************************************************
+# *
+# * $LastChangedBy: kientzle $
+# * $Locker: $
+# * $ProjectName: $
+# * $ProjectRevision: $
+# * $LastChangedRevision: 29 $
+# * $LastChangedDate: 2008-05-05 18:10:33 -0400 (Mon, 05 May 2008) $
+# * $State$
+# * $RCSfile$
+# * $Source$
+# *
+# * Change Log:
+# * $Log: $
+# *
+# */
+
+.EXTENSIONS:
+.EXTENSIONS: .obn .cpp .c
+
+ZLIB_INCL=\3rdParty\ZLib\Current\Include
+
+!ifdef DEBUG
+DEST_PATH=.\lib\wccpp\debug
+OBJ_DIR=obj\debug
+EXT_COMPILE_FLAG=-d2 -DLIBARCHIVE_STATIC=1
+!else
+DEST_PATH=.\lib\wccpp
+OBJ_DIR=obj
+EXT_COMPILE_FLAG=-DLIBARCHIVE_STATIC=1
+!endif
+
+# ----- NT compiler options -----------------------------------------------
+NT_CPP=wpp386
+NT_C=wcc386
+NT_LIBRARIAN=wlib
+
+
+###
+INCLUDE_OPTS=/I.;$(%watcom)\h;$(%watcom)\h\nt;$(ZLIB_INCL);
+NT_CPP_OPTS=-ei -wx -xs -xss -xst -od -of+ -zp1 -5 -bt=nt -bm $(EXT_COMPILE_FLAG) $(INCLUDE_OPTS) -DWIN32_LEAN_AND_MEAN
+NT_C_OPTS=-ei -wx -od -of+ -zp1 -5 -bt=nt -bm $(EXT_COMPILE_FLAG) $(INCLUDE_OPTS) -DWIN32_LEAN_AND_MEAN
+NT_LIB_OPTS=
+
+.cpp{$(OBJ_DIR)}.obn:
+      -md $(OBJ_DIR) > nul 2>nul
+      $(NT_CPP) $(NT_CPP_OPTS) -zp1 -fo=$*.obn $<
+
+.c{$(OBJ_DIR)}.obn:
+      -md $(OBJ_DIR) > nul 2>nul
+      $(NT_C) $(NT_C_OPTS) -zp1 -fo=$*.obn $<
+
+OBJS = &
+  $(OBJ_DIR)\archive_check_magic.obn      $(OBJ_DIR)\archive_entry.obn &
+  $(OBJ_DIR)\archive_entry_copy_stat.obn  $(OBJ_DIR)\archive_entry_link_resolver.obn &
+  $(OBJ_DIR)\archive_entry_stat.obn       $(OBJ_DIR)\archive_entry_strmode.obn &
+  $(OBJ_DIR)\archive_read.obn             $(OBJ_DIR)\archive_read_data_into_fd.obn &
+  $(OBJ_DIR)\archive_read_extract.obn     $(OBJ_DIR)\archive_read_open_fd.obn &
+  $(OBJ_DIR)\archive_read_open_file.obn   $(OBJ_DIR)\archive_read_open_filename.obn &
+  $(OBJ_DIR)\archive_read_open_memory.obn $(OBJ_DIR)\archive_read_support_compression_all.obn &
+  $(OBJ_DIR)\archive_read_support_compression_bzip2.obn &
+  $(OBJ_DIR)\archive_read_support_compression_compress.obn &
+  $(OBJ_DIR)\archive_read_support_compression_gzip.obn &
+  $(OBJ_DIR)\archive_read_support_compression_none.obn &
+  $(OBJ_DIR)\archive_read_support_compression_program.obn &
+  $(OBJ_DIR)\archive_read_support_format_all.obn &
+  $(OBJ_DIR)\archive_read_support_format_ar.obn &
+  $(OBJ_DIR)\archive_read_support_format_cpio.obn &
+  $(OBJ_DIR)\archive_read_support_format_empty.obn &
+  $(OBJ_DIR)\archive_read_support_format_iso9660.obn &
+  $(OBJ_DIR)\archive_read_support_format_mtree.obn &
+  $(OBJ_DIR)\archive_read_support_format_tar.obn &
+  $(OBJ_DIR)\archive_read_support_format_zip.obn &
+  $(OBJ_DIR)\archive_string.obn                        $(OBJ_DIR)\archive_string_sprintf.obn &
+  $(OBJ_DIR)\archive_util.obn                          $(OBJ_DIR)\archive_virtual.obn &
+  $(OBJ_DIR)\archive_write.obn                         $(OBJ_DIR)\archive_write_disk.obn &
+  $(OBJ_DIR)\archive_write_disk_set_standard_lookup.obn &
+  $(OBJ_DIR)\archive_write_open_fd.obn                 $(OBJ_DIR)\archive_write_open_file.obn &
+  $(OBJ_DIR)\archive_write_open_filename.obn           $(OBJ_DIR)\archive_write_open_memory.obn &
+  $(OBJ_DIR)\archive_write_set_compression_bzip2.obn   $(OBJ_DIR)\archive_write_set_compression_compress.obn &
+  $(OBJ_DIR)\archive_write_set_compression_gzip.obn    $(OBJ_DIR)\archive_write_set_compression_none.obn &
+  $(OBJ_DIR)\archive_write_set_compression_program.obn $(OBJ_DIR)\archive_write_set_format.obn &
+  $(OBJ_DIR)\archive_write_set_format_ar.obn           $(OBJ_DIR)\archive_write_set_format_by_name.obn &
+  $(OBJ_DIR)\archive_write_set_format_cpio.obn         $(OBJ_DIR)\archive_write_set_format_cpio_newc.obn &
+  $(OBJ_DIR)\archive_write_set_format_pax.obn          $(OBJ_DIR)\archive_write_set_format_shar.obn &
+  $(OBJ_DIR)\archive_write_set_format_ustar.obn        $(OBJ_DIR)\filter_fork.obn &
+  $(OBJ_DIR)\libarchive-nonposix.obn
+
+$(DEST_PATH)\LibArchive.lib :: $(OBJS) $(DEST_PATH)
+
+$(DEST_PATH)\LibArchive.lib ::
+    -md $(DEST_PATH) > nul 2>nul
+    $(NT_LIBRARIAN) $@ -+ $(OBJS)
+
+$(DEST_PATH):
+    -md $(DEST_PATH) > nul 2>nul

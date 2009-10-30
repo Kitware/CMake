@@ -18,12 +18,10 @@
 /** \class cmCPackTarCompressGenerator
  * \brief A generator for TarCompress files
  */
-class cmCPackTarCompressGenerator : public cmCPackTGZGenerator
+class cmCPackTarCompressGenerator : public cmCPackArchiveGenerator
 {
 public:
-  friend class cmCPackTarCompressGeneratorForward;
-  cmCPackTypeMacro(cmCPackTarCompressGenerator, cmCPackTGZGenerator);
-
+  cmCPackTypeMacro(cmCPackTarCompressGenerator, cmCPackArchiveGenerator);
   /**
    * Construct generator
    */
@@ -31,13 +29,7 @@ public:
   virtual ~cmCPackTarCompressGenerator();
 
 protected:
-  virtual int InitializeInternal();
-  int CompressFiles(const char* outFileName, const char* toplevel,
-    const std::vector<std::string>& files);
   virtual const char* GetOutputExtension() { return ".tar.Z"; }
-
-  int RenameFile(const char* oldname, const char* newname);
-  int GenerateHeader(std::ostream* os);
 };
 
 #endif

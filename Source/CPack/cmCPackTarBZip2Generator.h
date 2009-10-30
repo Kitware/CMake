@@ -13,30 +13,22 @@
 #ifndef cmCPackTarBZip2Generator_h
 #define cmCPackTarBZip2Generator_h
 
-#include "cmCPackTGZGenerator.h"
+#include "cmCPackArchiveGenerator.h"
 
 /** \class cmCPackTarBZip2Generator
  * \brief A generator for TarBZip2 files
  */
-class cmCPackTarBZip2Generator : public cmCPackTGZGenerator
+class cmCPackTarBZip2Generator : public cmCPackArchiveGenerator
 {
 public:
-  friend class cmCPackTarBZip2GeneratorForward;
-  cmCPackTypeMacro(cmCPackTarBZip2Generator, cmCPackTGZGenerator);
-
+  cmCPackTypeMacro(cmCPackTarBZip2Generator, cmCPackArchiveGenerator);
   /**
    * Construct generator
    */
   cmCPackTarBZip2Generator();
   virtual ~cmCPackTarBZip2Generator();
-
 protected:
-  virtual int InitializeInternal();
-  int CompressFiles(const char* outFileName, const char* toplevel,
-    const std::vector<std::string>& files);
   virtual const char* GetOutputExtension() { return ".tar.bz2"; }
-  int BZip2File(const char* filename);
-  int RenameFile(const char* oldname, const char* newname);
 };
 
 #endif

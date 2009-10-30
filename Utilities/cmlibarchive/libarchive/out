@@ -1,0 +1,185 @@
+LIBARCHIVE(3)            BSD Library Functions Manual            LIBARCHIVE(3)
+
+[1mNAME[0m
+     [1mlibarchive [22m-- functions for reading and writing streaming archives
+
+[1mLIBRARY[0m
+     library ``libarchive''
+
+[1mOVERVIEW[0m
+     The [1mlibarchive [22mlibrary provides a flexible interface for reading and
+     writing streaming archive files such as tar and cpio.  The library is
+     inherently stream-oriented; readers serially iterate through the archive,
+     writers serially add things to the archive.  In particular, note that
+     there is no built-in support for random access nor for in-place modifica-
+     tion.
+
+     When reading an archive, the library automatically detects the format and
+     the compression.  The library currently has read support for:
+     [1m+o   [22mold-style tar archives,
+     [1m+o   [22mmost variants of the POSIX ``ustar'' format,
+     [1m+o   [22mthe POSIX ``pax interchange'' format,
+     [1m+o   [22mGNU-format tar archives,
+     [1m+o   [22mmost common cpio archive formats,
+     [1m+o   [22mISO9660 CD images (with or without RockRidge extensions),
+     [1m+o   [22mZip archives.
+     The library automatically detects archives compressed with gzip(1),
+     bzip2(1), or compress(1) and decompresses them transparently.
+
+     When writing an archive, you can specify the compression to be used and
+     the format to use.  The library can write
+     [1m+o   [22mPOSIX-standard ``ustar'' archives,
+     [1m+o   [22mPOSIX ``pax interchange format'' archives,
+     [1m+o   [22mPOSIX octet-oriented cpio archives,
+     [1m+o   [22mtwo different variants of shar archives.
+     Pax interchange format is an extension of the tar archive format that
+     eliminates essentially all of the limitations of historic tar formats in
+     a standard fashion that is supported by POSIX-compliant pax(1) implemen-
+     tations on many systems as well as several newer implementations of
+     tar(1).  Note that the default write format will suppress the pax
+     extended attributes for most entries; explicitly requesting pax format
+     will enable those attributes for all entries.
+
+     The read and write APIs are accessed through the [1marchive_read_XXX[22m() func-
+     tions and the [1marchive_write_XXX[22m() functions, respectively, and either can
+     be used independently of the other.
+
+     The rest of this manual page provides an overview of the library opera-
+     tion.  More detailed information can be found in the individual manual
+     pages for each API or utility function.
+
+[1mREADING AN ARCHIVE[0m
+     To read an archive, you must first obtain an initialized struct archive
+     object from [1marchive_read_new[22m().  You can then modify this object for the
+     desired operations with the various [1marchive_read_set_XXX[22m() and
+     [1marchive_read_support_XXX[22m() functions.  In particular, you will need to
+     invoke appropriate [1marchive_read_support_XXX[22m() functions to enable the
+     corresponding compression and format support.  Note that these latter
+     functions perform two distinct operations: they cause the corresponding
+     support code to be linked into your program, and they enable the corre-
+     sponding auto-detect code.  Unless you have specific constraints, you
+     will generally want to invoke [1marchive_read_support_compression_all[22m() and
+     [1marchive_read_support_format_all[22m() to enable auto-detect for all formats
+     and compression types currently supported by the library.
+
+     Once you have prepared the struct archive object, you call
+     [1marchive_read_open[22m() to actually open the archive and prepare it for read-
+     ing.  There are several variants of this function; the most basic expects
+     you to provide pointers to several functions that can provide blocks of
+     bytes from the archive.  There are convenience forms that allow you to
+     specify a filename, file descriptor, [4mFILE[24m [4m*[24m object, or a block of memory
+     from which to read the archive data.  Note that the core library makes no
+     assumptions about the size of the blocks read; callback functions are
+     free to read whatever block size is most appropriate for the medium.
+
+     Each archive entry consists of a header followed by a certain amount of
+     data.  You can obtain the next header with [1marchive_read_next_header[22m(),
+     which returns a pointer to an struct archive_entry structure with infor-
+     mation about the current archive element.  If the entry is a regular
+     file, then the header will be followed by the file data.  You can use
+     [1marchive_read_data[22m() (which works much like the read(2) system call) to
+     read this data from the archive.  You may prefer to use the higher-level
+     [1marchive_read_data_skip[22m(), which reads and discards the data for this
+     entry, [1marchive_read_data_to_buffer[22m(), which reads the data into an in-
+     memory buffer, [1marchive_read_data_to_file[22m(), which copies the data to the
+     provided file descriptor, or [1marchive_read_extract[22m(), which recreates the
+     specified entry on disk and copies data from the archive.  In particular,
+     note that [1marchive_read_extract[22m() uses the struct archive_entry structure
+     that you provide it, which may differ from the entry just read from the
+     archive.  In particular, many applications will want to override the
+     pathname, file permissions, or ownership.
+
+     Once you have finished reading data from the archive, you should call
+     [1marchive_read_close[22m() to close the archive, then call
+     [1marchive_read_finish[22m() to release all resources, including all memory
+     allocated by the library.
+
+     The archive_read(3) manual page provides more detailed calling informa-
+     tion for this API.
+
+[1mWRITING AN ARCHIVE[0m
+     You use a similar process to write an archive.  The [1marchive_write_new[22m()
+     function creates an archive object useful for writing, the various
+     [1marchive_write_set_XXX[22m() functions are used to set parameters for writing
+     the archive, and [1marchive_write_open[22m() completes the setup and opens the
+     archive for writing.
+
+     Individual archive entries are written in a three-step process: You first
+     initialize a struct archive_entry structure with information about the
+     new entry.  At a minimum, you should set the pathname of the entry and
+     provide a [4mstruct[24m [4mstat[24m with a valid [4mst_mode[24m field, which specifies the
+     type of object and [4mst_size[24m field, which specifies the size of the data
+     portion of the object.  The [1marchive_write_header[22m() function actually
+     writes the header data to the archive.  You can then use
+     [1marchive_write_data[22m() to write the actual data.
+
+     After all entries have been written, use the [1marchive_write_finish[22m() func-
+     tion to release all resources.
+
+     The archive_write(3) manual page provides more detailed calling informa-
+     tion for this API.
+
+[1mDESCRIPTION[0m
+     Detailed descriptions of each function are provided by the corresponding
+     manual pages.
+
+     All of the functions utilize an opaque struct archive datatype that pro-
+     vides access to the archive contents.
+
+     The struct archive_entry structure contains a complete description of a
+     single archive entry.  It uses an opaque interface that is fully docu-
+     mented in archive_entry(3).
+
+     Users familiar with historic formats should be aware that the newer vari-
+     ants have eliminated most restrictions on the length of textual fields.
+     Clients should not assume that filenames, link names, user names, or
+     group names are limited in length.  In particular, pax interchange format
+     can easily accommodate pathnames in arbitrary character sets that exceed
+     [4mPATH_MAX[24m.
+
+[1mRETURN VALUES[0m
+     Most functions return zero on success, non-zero on error.  The return
+     value indicates the general severity of the error, ranging from
+     [1mARCHIVE_WARN[22m, which indicates a minor problem that should probably be
+     reported to the user, to [1mARCHIVE_FATAL[22m, which indicates a serious problem
+     that will prevent any further operations on this archive.  On error, the
+     [1marchive_errno[22m() function can be used to retrieve a numeric error code
+     (see errno(2)).  The [1marchive_error_string[22m() returns a textual error mes-
+     sage suitable for display.
+
+     [1marchive_read_new[22m() and [1marchive_write_new[22m() return pointers to an allo-
+     cated and initialized struct archive object.
+
+     [1marchive_read_data[22m() and [1marchive_write_data[22m() return a count of the number
+     of bytes actually read or written.  A value of zero indicates the end of
+     the data for this entry.  A negative value indicates an error, in which
+     case the [1marchive_errno[22m() and [1marchive_error_string[22m() functions can be used
+     to obtain more information.
+
+[1mENVIRONMENT[0m
+     There are character set conversions within the archive_entry(3) functions
+     that are impacted by the currently-selected locale.
+
+[1mSEE ALSO[0m
+     tar(1), archive_entry(3), archive_read(3), archive_util(3),
+     archive_write(3), tar(5)
+
+[1mHISTORY[0m
+     The [1mlibarchive [22mlibrary first appeared in FreeBSD 5.3.
+
+[1mAUTHORS[0m
+     The [1mlibarchive [22mlibrary was written by Tim Kientzle <kientzle@acm.org>.
+
+[1mBUGS[0m
+     Some archive formats support information that is not supported by struct
+     archive_entry.  Such information cannot be fully archived or restored
+     using this library.  This includes, for example, comments, character
+     sets, or the arbitrary key/value pairs that can appear in pax interchange
+     format archives.
+
+     Conversely, of course, not all of the information that can be stored in
+     an struct archive_entry is supported by all formats.  For example, cpio
+     formats do not support nanosecond timestamps; old tar formats do not sup-
+     port large device numbers.
+
+BSD                             August 19, 2006                            BSD
