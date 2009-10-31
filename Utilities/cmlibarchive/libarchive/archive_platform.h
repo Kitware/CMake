@@ -60,6 +60,10 @@
 #include "archive_windows.h"
 #endif
 
+#if defined(__HAIKU__)
+#include "archive_haiku.h"
+#endif
+
 /*
  * The config files define a lot of feature macros.  The following
  * uses those macros to select/define replacements and include key
