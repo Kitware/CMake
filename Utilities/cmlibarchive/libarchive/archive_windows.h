@@ -125,11 +125,13 @@
 #define waitpid     __la_waitpid
 #define write       __la_write
 
-#define O_RDONLY    _O_RDONLY
-#define O_WRONLY    _O_WRONLY
-#define O_TRUNC     _O_TRUNC
-#define O_CREAT     _O_CREAT
-#define O_EXCL      _O_EXCL
+#ifndef O_RDONLY
+ #define O_RDONLY    _O_RDONLY
+ #define O_WRONLY    _O_WRONLY
+ #define O_TRUNC     _O_TRUNC
+ #define O_CREAT     _O_CREAT
+ #define O_EXCL      _O_EXCL
+#endif
 
 #ifndef _S_IFIFO
   #define   _S_IFIFO        0010000   /* pipe */
@@ -155,21 +157,29 @@
 #ifndef _S_IFMT
   #define   _S_IFMT         0170000   /* file type mask */
 #endif
-
-#define S_IFIFO     _S_IFIFO
+#ifndef S_IFIFO
+ #define S_IFIFO     _S_IFIFO
+#endif
 //#define   S_IFCHR  _S_IFCHR
 //#define   S_IFDIR  _S_IFDIR
-#define S_IFBLK     _S_IFBLK
-#define S_IFLNK     _S_IFLNK
-#define S_IFSOCK    _S_IFSOCK
+#ifndef S_IFBLK
+  #define S_IFBLK     _S_IFBLK
+#endif
+#ifndef S_IFLNK
+  #define S_IFLNK     _S_IFLNK
+#endif
+#ifndef S_IFSOCK
+  #define S_IFSOCK    _S_IFSOCK
+#endif
 //#define   S_IFREG  _S_IFREG
 //#define   S_IFMT   _S_IFMT
-
-#define S_ISBLK(m)  (((m) & S_IFMT) == S_IFBLK) /* block special */
-#define S_ISFIFO(m) (((m) & S_IFMT) == S_IFIFO) /* fifo or socket */
-#define S_ISCHR(m)  (((m) & S_IFMT) == S_IFCHR) /* char special */
-#define S_ISDIR(m)  (((m) & S_IFMT) == S_IFDIR) /* directory */
-#define S_ISREG(m)  (((m) & S_IFMT) == S_IFREG) /* regular file */
+#ifndef S_ISBLK
+ #define S_ISBLK(m)  (((m) & S_IFMT) == S_IFBLK) /* block special */
+ #define S_ISFIFO(m) (((m) & S_IFMT) == S_IFIFO) /* fifo or socket */
+ #define S_ISCHR(m)  (((m) & S_IFMT) == S_IFCHR) /* char special */
+ #define S_ISDIR(m)  (((m) & S_IFMT) == S_IFDIR) /* directory */
+ #define S_ISREG(m)  (((m) & S_IFMT) == S_IFREG) /* regular file */
+#endif
 #define S_ISLNK(m)  (((m) & S_IFMT) == S_IFLNK) /* Symbolic link */
 #define S_ISSOCK(m) (((m) & S_IFMT) == S_IFSOCK) /* Socket */
 
@@ -194,10 +204,12 @@
 #define _S_IWOTH        (_S_IWGRP >> 3) /* write permission, other */
 #define _S_IROTH        (_S_IRGRP  >> 3) /* execute/search permission, other */
 
-#define S_IRWXU      _S_IRWXU
-#define S_IXUSR      _S_IXUSR
-#define S_IWUSR      _S_IWUSR
-#define S_IRUSR      _S_IRUSR
+#ifndef S_IRWXU
+ #define S_IRWXU      _S_IRWXU
+ #define S_IXUSR      _S_IXUSR
+ #define S_IWUSR      _S_IWUSR
+ #define S_IRUSR      _S_IRUSR
+#endif
 #define S_IRWXG        _S_IRWXG
 #define S_IXGRP        _S_IXGRP
 #define S_IWGRP        _S_IWGRP

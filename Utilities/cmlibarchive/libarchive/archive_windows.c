@@ -50,13 +50,15 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stddef.h>
+#ifndef __BORLANDC__
 #include <sys/utime.h>
+#endif
 #include <sys/stat.h>
 #include <process.h>
 #include <stdlib.h>
 #include <wchar.h>
 #include <windows.h>
-#if defined(_MSC_VER) &&  _MSC_VER <= 1300
+#if defined(__BORLANDC__) || (defined(_MSC_VER) &&  _MSC_VER <= 1300)
 # define EPOC_TIME   (116444736000000000)
 #else
 # define EPOC_TIME   (116444736000000000ULL)
@@ -376,7 +378,6 @@ __la_ftruncate(int fd, off_t length)
     }
     return (0);
 }
-
 #define WINTIME(sec, usec)  ((Int32x32To64(sec, 10000000) + EPOC_TIME) + (usec * 10))
 static int
 __hutimes(HANDLE handle, const struct __timeval *times)
@@ -623,7 +624,11 @@ __la_open(const char *path, int flags, ...)
         }
     }
     if (ws == NULL) {
+#ifdef __BORLANDC__
+        r = _open(path, flags);
+#else
         r = _open(path, flags, pmode);
+#endif
         if (r < 0 && errno == EACCES && (flags & O_CREAT) != 0) {
             /* simular other POSIX system action to pass a test */
             attr = GetFileAttributesA(path);

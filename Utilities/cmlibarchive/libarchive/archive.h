@@ -46,7 +46,7 @@
 
 /* Get appropriate definitions of standard POSIX-style types. */
 /* These should match the types used in 'struct stat' */
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__BORLANDC__)
 #define __LA_INT64_T    __int64
 # if    defined(_WIN64)
 #  define   __LA_SSIZE_T    __int64
@@ -56,7 +56,11 @@
 #define __LA_UID_T      short
 #define __LA_GID_T  short
 #else
+#if defined(__BORLANDC__)
+#include <sys/types.h>
+#else
 #include <unistd.h>  /* ssize_t, uid_t, and gid_t */
+#endif
 #define __LA_INT64_T    int64_t
 #define __LA_SSIZE_T    ssize_t
 #define __LA_UID_T  uid_t

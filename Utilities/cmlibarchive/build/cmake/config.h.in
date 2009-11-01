@@ -698,3 +698,7 @@
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #cmakedefine uintptr_t  ${uintptr_t }
 
+#ifdef __BORLANDC__
+#define uintptr_t unsigned int
+#define intptr_t  int
+#endif
