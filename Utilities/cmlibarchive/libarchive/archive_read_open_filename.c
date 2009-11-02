@@ -99,7 +99,7 @@ archive_read_open_filename(struct archive *a, const char *filename,
          */
         filename = ""; /* Normalize NULL to "" */
         fd = 0;
-#if defined(__CYGWIN__)
+#if defined(__CYGWIN__) || defined(__BORLANDC__)
         setmode(0, O_BINARY);
 #elif defined(_WIN32)
         _setmode(0, _O_BINARY);

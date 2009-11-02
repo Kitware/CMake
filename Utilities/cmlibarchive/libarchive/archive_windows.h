@@ -117,7 +117,9 @@
 #define read        __la_read
 #define rmdir       __la_rmdir
 #define stat(path,stref)        __la_stat(path,stref)
+#ifndef __BORLANDC__
 #define strdup      _strdup
+#endif
 #define tzset       _tzset
 #define umask       _umask
 #define unlink      __la_unlink
