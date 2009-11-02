@@ -38,10 +38,8 @@ SET(JAVA_BIN_PATH
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
   $ENV{JAVA_HOME}/bin
-  /usr/bin
   /usr/lib/java/bin
   /usr/share/java/bin
-  /usr/local/bin
   /usr/local/java/bin
   /usr/local/java/share/bin
   /usr/java/j2sdk1.4.2_04
@@ -52,8 +50,7 @@ SET(JAVA_BIN_PATH
   )
 FIND_PROGRAM(Java_JAVA_EXECUTABLE
   NAMES java
-  PATHS ${JAVA_BIN_PATH}
-  NO_DEFAULT_PATH
+  HINTS ${JAVA_BIN_PATH}
 )
 
 IF(Java_JAVA_EXECUTABLE)
@@ -115,14 +112,12 @@ ENDIF(Java_JAVA_EXECUTABLE)
 
 FIND_PROGRAM(Java_JAR_EXECUTABLE
   NAMES jar
-  PATHS ${JAVA_BIN_PATH}
-  NO_DEFAULT_PATH
+  HINTS ${JAVA_BIN_PATH}
 )
 
 FIND_PROGRAM(Java_JAVAC_EXECUTABLE
   NAMES javac
-  PATHS ${JAVA_BIN_PATH}
-  NO_DEFAULT_PATH
+  HINTS ${JAVA_BIN_PATH}
 )
 
 include(FindPackageHandleStandardArgs)
