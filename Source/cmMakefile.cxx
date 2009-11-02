@@ -3388,13 +3388,19 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
     // Now update the definition in the parent scope.
     up->Set(var, varDef);
     }
-  else if(cmMakefile* parent =
-          this->LocalGenerator->GetParent()->GetMakefile())
+  else if(cmLocalGenerator* plg = this->LocalGenerator->GetParent())
     {
     // Update the definition in the parent directory top scope.  This
     // directory's scope was initialized by the closure of the parent
     // scope, so we do not need to localize the definition first.
+    cmMakefile* parent = plg->GetMakefile();
     parent->Internal->VarStack.top().Set(var, varDef);
+    }
+  else
+    {
+    cmOStringStream m;
+    m << "Cannot set \"" << var << "\": current scope has no parent.";
+    this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
     }
 }
 
