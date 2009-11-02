@@ -28,16 +28,21 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-SET(JAVA_BIN_PATH
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\2.0;JavaHome]/bin"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.9;JavaHome]/bin"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.8;JavaHome]/bin"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.7;JavaHome]/bin"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.6;JavaHome]/bin"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5;JavaHome]/bin"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
+# The HINTS option should only be used for values computed from the system.
+SET(_JAVA_HINTS
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\2.0;JavaHome]/bin"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.9;JavaHome]/bin"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.8;JavaHome]/bin"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.7;JavaHome]/bin"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.6;JavaHome]/bin"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5;JavaHome]/bin"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
   $ENV{JAVA_HOME}/bin
+  )
+# Hard-coded guesses should still go in PATHS. This ensures that the user
+# environment can always override hard guesses.
+SET(_JAVA_PATHS
   /usr/lib/java/bin
   /usr/share/java/bin
   /usr/local/java/bin
@@ -50,7 +55,8 @@ SET(JAVA_BIN_PATH
   )
 FIND_PROGRAM(Java_JAVA_EXECUTABLE
   NAMES java
-  HINTS ${JAVA_BIN_PATH}
+  HINTS ${_JAVA_HINTS}
+  PATHS ${_JAVA_PATHS}
 )
 
 IF(Java_JAVA_EXECUTABLE)
@@ -112,12 +118,14 @@ ENDIF(Java_JAVA_EXECUTABLE)
 
 FIND_PROGRAM(Java_JAR_EXECUTABLE
   NAMES jar
-  HINTS ${JAVA_BIN_PATH}
+  HINTS ${_JAVA_HINTS}
+  PATHS ${_JAVA_PATHS}
 )
 
 FIND_PROGRAM(Java_JAVAC_EXECUTABLE
   NAMES javac
-  HINTS ${JAVA_BIN_PATH}
+  HINTS ${_JAVA_HINTS}
+  PATHS ${_JAVA_PATHS}
 )
 
 include(FindPackageHandleStandardArgs)
