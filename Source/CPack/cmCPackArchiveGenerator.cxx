@@ -111,7 +111,7 @@ int OpenArchive(struct archive *a, void *client_data)
 {
   struct StreamData *data = (StreamData*)client_data;
   if(data->GeneratedFileStream && 
-     data->GeneratedFileStream->is_open())
+     *data->GeneratedFileStream)
     {
     if(data->Generator->
        GenerateHeader(data->GeneratedFileStream))
