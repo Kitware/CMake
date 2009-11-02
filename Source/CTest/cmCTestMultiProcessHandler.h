@@ -76,6 +76,8 @@ protected:
   void RemoveTest(int index);
   //Check if we need to resume an interrupted test set
   void CheckResume();
+  //Check if there are any circular dependencies
+  bool CheckCycles();
   int FindMaxIndex();
   inline size_t GetProcessorsUsed(int index);
   // map from test number to set of depend tests

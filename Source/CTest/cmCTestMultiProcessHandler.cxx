@@ -15,6 +15,7 @@
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 #include <stdlib.h>
+#include <stack>
 
 cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 {
@@ -56,6 +57,10 @@ void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
 void cmCTestMultiProcessHandler::RunTests()
 {
   this->CheckResume();
+  if(!this->CheckCycles())
+    {
+    return;
+    }
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
   this->StartNextTests();
   while(this->Tests.size() != 0)
@@ -340,7 +345,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
   int count = 0;
   for (PropertiesMap::iterator it = this->Properties.begin();
-       it != this->Properties.end(); it ++ )
+       it != this->Properties.end(); ++it)
     {
     count++;
     cmCTestTestHandler::cmCTestTestProperties& p = *it->second;
@@ -432,4 +437,48 @@ int cmCTestMultiProcessHandler::FindMaxIndex()
       }
     }
   return max;
+}
+
+//Returns true if no cycles exist in the dependency graph
+bool cmCTestMultiProcessHandler::CheckCycles()
+{
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+             "Checking test dependency graph..." << std::endl);
+  for(TestMap::iterator it = this->Tests.begin();
+      it != this->Tests.end(); ++it)
+    {
+    //DFS from each element to itself
+    std::stack<int> s;
+    std::vector<int> visited;
+    s.push(it->first);
+    visited.push_back(it->first);
+
+    while(!s.empty())
+      {
+      int test = s.top();
+      s.pop();
+      
+      for(TestSet::iterator d = this->Tests[test].begin();
+          d != this->Tests[test].end(); ++d)
+        {
+        s.push(*d);
+        for(std::vector<int>::iterator v = visited.begin();
+            v != visited.end(); ++v)
+          {
+          if(*v == *d)
+            {
+            //cycle exists
+            cmCTestLog(this->CTest, ERROR_MESSAGE, "Error: a cycle exists in "
+              "the test dependency graph for the test \""
+              << this->Properties[*d]->Name << "\"." << std::endl
+              << "Please fix the cycle and run ctest again." << std::endl);
+            return false;
+            }
+          }
+        visited.push_back(*d);
+        }
+      visited.pop_back();
+      }
+    }
+  return true;
 }
