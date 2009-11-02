@@ -133,6 +133,11 @@ find_package_handle_standard_args(Java DEFAULT_MSG
   _java_version_acceptable
 )
 
+MARK_AS_ADVANCED(
+  Java_JAVA_EXECUTABLE
+  Java_JAR_EXECUTABLE
+  Java_JAVAC_EXECUTABLE
+  )
 
 # LEGACY
 SET(JAVA_RUNTIME ${Java_JAVA_EXECUTABLE})
