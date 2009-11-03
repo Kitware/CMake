@@ -49,8 +49,25 @@ bool SetArchiveType(struct archive* a,
                      cmCPackArchiveGenerator::CompressType ct,
                      cmCPackArchiveGenerator::ArchiveType at)
 {
-  // pick a compression type
   int res;
+  // pick the archive type
+  switch(at)
+    {
+    case cmCPackArchiveGenerator::TAR:
+      // maybe this:
+      //res =  archive_write_set_format_pax(a);
+      res = archive_write_set_format_ustar(a); // is this what we want?
+      break;
+    case cmCPackArchiveGenerator::ZIP:
+      res = archive_write_set_format_zip(a);
+      break;
+    }
+  if(res != ARCHIVE_OK)
+    {
+    return false;
+    }
+
+  // pick a compression type
   switch(ct)
     {
     case cmCPackArchiveGenerator::GZIP:
@@ -68,27 +85,18 @@ bool SetArchiveType(struct archive* a,
     case cmCPackArchiveGenerator::NONE:
     default:
       res = archive_write_set_compression_none(a);
-    }
+    } 
   if(res != ARCHIVE_OK)
     {
     return false;
     }
-  // pick the archive type
-  switch(at)
-    {
-    case cmCPackArchiveGenerator::TAR:
-      // maybe this:
-      //  archive_write_set_format_pax(a);
-      res = archive_write_set_format_ustar(a); // is this what we want?
-      break;
-    case cmCPackArchiveGenerator::ZIP:
-      res = archive_write_set_format_zip(a);
-      break;
-    }
+  // do not pad the last block!!
+  res = archive_write_set_bytes_in_last_block(a, 1);
   if(res != ARCHIVE_OK)
     {
     return false;
     }
+  
   return true;
 }
   
@@ -201,7 +209,7 @@ int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
     if(!file)
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with fopen(): " 
-                    << file
+                    << fileIt->c_str()
                     << strerror(errno)
                     << std::endl);
       return 0;

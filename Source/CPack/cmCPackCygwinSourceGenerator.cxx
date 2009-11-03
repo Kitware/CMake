@@ -33,7 +33,6 @@
 //----------------------------------------------------------------------
 cmCPackCygwinSourceGenerator::cmCPackCygwinSourceGenerator()
 {
-  this->Compress = false;
 }
 
 //----------------------------------------------------------------------
@@ -45,18 +44,6 @@ cmCPackCygwinSourceGenerator::~cmCPackCygwinSourceGenerator()
 int cmCPackCygwinSourceGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", "0");
-  std::vector<std::string> path;
-  std::string pkgPath = cmSystemTools::FindProgram("bzip2", path, false);
-  if ( pkgPath.empty() )
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find BZip2" << std::endl);
-    return 0;
-    }
-  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Found Compress program: "
-    << pkgPath.c_str()
-    << std::endl);
-
   return this->Superclass::InitializeInternal();
 }
 
@@ -67,26 +54,22 @@ int cmCPackCygwinSourceGenerator::CompressFiles(const char* outFileName,
   // Create a tar file of the sources
   std::string packageDirFileName
     = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  packageDirFileName += ".tar";
+  packageDirFileName += ".tar.bz2";
   std::string output;
-  // skip one parent up to the cmCPackTGZGenerator to create tar file
-  this->Compress = false; // just create tar not tar.gz
-  if ( !this->cmCPackTGZGenerator::CompressFiles(packageDirFileName.c_str(),
+  // skip one parent up to the cmCPackTarBZip2Generator
+  // to create tar.bz2 file with the list of source
+  // files
+  this->Compress = BZIP2; 
+  if ( !this->cmCPackTarBZip2Generator::
+       CompressFiles(packageDirFileName.c_str(),
       toplevel, files) )
     {
-    return 0;
-    }
-  // Now bzip2 the source tar file
-  if(!this->BZip2File(packageDirFileName.c_str()))
-    { 
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running BZip2 on file: "
-                  << packageDirFileName.c_str());
     return 0;
     }
   // Now create a tar file that contains the above .tar.bz2 file
   // and the CPACK_CYGWIN_PATCH_FILE and CPACK_TOPLEVEL_DIRECTORY
   // files
-  std::string compressOutFile = packageDirFileName + ".bz2";
+  std::string compressOutFile = packageDirFileName;
   // at this point compressOutFile is the full path to 
   // _CPack_Package/.../package-2.5.0.tar.bz2
   // we want to create a tar _CPack_Package/.../package-2.5.0-1-src.tar.bz2
@@ -95,7 +78,17 @@ int cmCPackCygwinSourceGenerator::CompressFiles(const char* outFileName,
   //   _CPack_Package/.../package-2.5.0-1.sh
   //   _CPack_Package/.../package-2.5.0.tar.bz2
   // the -1 is CPACK_CYGWIN_PATCH_NUMBER
+  
+  // first copy the patch file and the .sh file
+  // to the toplevel cpack temp dir
+  
   // copy the patch file into place
+  if(!this->GetOption("CPACK_CYGWIN_PATCH_FILE"))
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "No patch file specified for cygwin sources.");
+    return 0;
+    }
   if(!cmSystemTools::CopyFileAlways(
        this->GetOption("CPACK_CYGWIN_PATCH_FILE"),
        this->GetOption("CPACK_TOPLEVEL_DIRECTORY")))
@@ -103,6 +96,12 @@ int cmCPackCygwinSourceGenerator::CompressFiles(const char* outFileName,
     cmCPackLogger(cmCPackLog::LOG_ERROR, "problem copying: ["
                   << this->GetOption("CPACK_CYGWIN_PATCH_FILE") << "]\nto\n["
                   << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "]\n");
+    return 0;
+    }
+  if(!this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT"))
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR, 
+                  "No build script specified for cygwin sources.");
     return 0;
     }
   // copy the build script into place
@@ -115,7 +114,6 @@ int cmCPackCygwinSourceGenerator::CompressFiles(const char* outFileName,
                   << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") << "]\n");
     return 0;
     }
-  // create the tar file 
   std::string outerTarFile
     = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   outerTarFile += "-";
@@ -127,43 +125,33 @@ int cmCPackCygwinSourceGenerator::CompressFiles(const char* outFileName,
     patch = "1";
     }
   outerTarFile += patch;
-  outerTarFile += "-src.tar";
-  std::string buildScript = cmSystemTools::GetFilenameName(
+  outerTarFile += "-src.tar.bz2";
+  std::string tmpDir = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+  std::string buildScript = tmpDir;
+  buildScript += "/";
+  buildScript += cmSystemTools::GetFilenameName(
     this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT"));
-  std::string patchFile = cmSystemTools::GetFilenameName(
+  std::string patchFile = tmpDir;
+  patchFile += "/";
+  patchFile += cmSystemTools::GetFilenameName(
     this->GetOption("CPACK_CYGWIN_PATCH_FILE"));
-  std::vector<cmStdString> outerFiles;
+  std::vector<std::string> outerFiles;
   std::string file = cmSystemTools::GetFilenameName(compressOutFile);
-  std::string path = cmSystemTools::GetFilenamePath(compressOutFile);
+  std::string sourceTar = cmSystemTools::GetFilenamePath(compressOutFile);
+  sourceTar += "/";
+  sourceTar += file;
   // a source release in cygwin should have the build script used
   // to build the package, the patch file that is different from the
   // regular upstream version of the sources, and a bziped tar file
   // of the original sources
   outerFiles.push_back(buildScript);
   outerFiles.push_back(patchFile);
-  outerFiles.push_back(file);
-  std::string saveDir= cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(path.c_str());
-  cmSystemTools::CreateTar(outerTarFile.c_str(),
-                           outerFiles, false, false);
-  cmSystemTools::ChangeDirectory(saveDir.c_str());
-  // now compress the outer tar file
-  if(!this->BZip2File(outerTarFile.c_str()))
+  outerFiles.push_back(sourceTar);
+  if ( !this->cmCPackTarBZip2Generator::
+       CompressFiles(outerTarFile.c_str(),
+                     tmpDir.c_str(), outerFiles) )
     {
     return 0;
-    }
-  compressOutFile = outerTarFile;
-  compressOutFile += ".bz2";
-  // now rename the file to its final name
-  if ( !cmSystemTools::SameFile(compressOutFile.c_str(), outFileName ) )
-    {
-    if ( !this->RenameFile(compressOutFile.c_str(), outFileName) )
-      {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem renaming: \""
-        << compressOutFile.c_str() << "\" to \""
-        << (outFileName ? outFileName : "(NULL)") << std::endl);
-      return 0;
-      }
     }
   return 1;
 }
