@@ -84,7 +84,9 @@ IF(Java_JAVA_EXECUTABLE)
         STRING( REGEX REPLACE "java full version \"kaffe-([0-9]+\\.[0-9]+\\.[0-9_]+).*"
                 "\\1" Java_VERSION_STRING "${var}" )
       ELSE()
-        message(FATAL_ERROR "regex not supported: ${var}. Please report")
+        IF(NOT Java_FIND_QUIETLY)
+          message(STATUS "regex not supported: ${var}. Please report")
+        ENDIF(NOT Java_FIND_QUIETLY)
       ENDIF()
       STRING( REGEX REPLACE "([0-9]+).*" "\\1" Java_VERSION_MAJOR "${Java_VERSION_STRING}" )
       STRING( REGEX REPLACE "[0-9]+\\.([0-9]+).*" "\\1" Java_VERSION_MINOR "${Java_VERSION_STRING}" )
@@ -98,7 +100,9 @@ IF(Java_JAVA_EXECUTABLE)
       endif( )
       # display info
       #MESSAGE( STATUS "Java version ${Java_VERSION_STRING} configured successfully!" ) # keep me, used for debug
-      MESSAGE( STATUS "Java version ${Java_VERSION} configured successfully!" )
+      IF(NOT Java_FIND_QUIETLY)
+        MESSAGE( STATUS "Java version ${Java_VERSION} configured successfully!" )
+      ENDIF(NOT Java_FIND_QUIETLY)
     ENDIF()
 
     # check version if requested:
