@@ -881,30 +881,25 @@ void cmTarget::DefineProperties(cmake *cm)
      "an archive target. "                                                  \
      "All Windows-based systems including Cygwin are DLL platforms."
 
+#define CM_TARGET_OUTDIR_DOC(TYPE, type)                                    \
+     "This property specifies the directory into which " #type " target "   \
+     "files should be built. "                                              \
+     CM_TARGET_FILE_TYPES_DOC "  "                                          \
+     "This property is initialized by the value of the variable "           \
+     "CMAKE_" #TYPE "_OUTPUT_DIRECTORY if it is set when a target is created."
+
   cm->DefineProperty
     ("ARCHIVE_OUTPUT_DIRECTORY", cmProperty::TARGET,
      "Output directory in which to build ARCHIVE target files.",
-     "This property specifies the directory into which archive target files "
-     "should be built. "
-     CM_TARGET_FILE_TYPES_DOC " "
-     "This property is initialized by the value of the variable "
-     "CMAKE_ARCHIVE_OUTPUT_DIRECTORY if it is set when a target is created.");
+     CM_TARGET_OUTDIR_DOC(ARCHIVE, archive));
   cm->DefineProperty
     ("LIBRARY_OUTPUT_DIRECTORY", cmProperty::TARGET,
      "Output directory in which to build LIBRARY target files.",
-     "This property specifies the directory into which library target files "
-     "should be built. "
-     CM_TARGET_FILE_TYPES_DOC " "
-     "This property is initialized by the value of the variable "
-     "CMAKE_LIBRARY_OUTPUT_DIRECTORY if it is set when a target is created.");
+     CM_TARGET_OUTDIR_DOC(LIBRARY, library));
   cm->DefineProperty
     ("RUNTIME_OUTPUT_DIRECTORY", cmProperty::TARGET,
      "Output directory in which to build RUNTIME target files.",
-     "This property specifies the directory into which runtime target files "
-     "should be built. "
-     CM_TARGET_FILE_TYPES_DOC " "
-     "This property is initialized by the value of the variable "
-     "CMAKE_RUNTIME_OUTPUT_DIRECTORY if it is set when a target is created.");
+     CM_TARGET_OUTDIR_DOC(RUNTIME, runtime));
 
   cm->DefineProperty
     ("ARCHIVE_OUTPUT_NAME", cmProperty::TARGET,

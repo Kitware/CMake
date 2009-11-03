@@ -1,3 +1,22 @@
+Changes in CMake 2.8.0 RC 5
+- CTest now detects cycles in test dependency graph
+- Warn on set(PARENT_SCOPE) at top scope
+- Fix Xcode <= 2.0 projects with CMAKE_BUILD_TYPE
+- Fix flags for Intel Fortran on Windows
+- Fix #2199: UseSWIG documentation for swig_generated_file_fullname
+- Fix #7915: UseSWIG interaction with JNI
+- Fix #8971: FindOpenSSL now works on windows
+- Fix #9124: CPackDeb documentation
+- Fix #9722: cmake-gui reports error when not able to create build directory
+- Fix #9767: Match more valgrind-reported leaks in CTest memcheck
+- Fix #9777: Sync CMakeDetermineJavaCompiler paths with FindJava
+- Fix #9793: FindJNI should find matching jni.h and jni_md.h
+- Fix #9817: FindJNI on Solaris
+- Fix FindHDF5 when hdf5.h exists without H5pubconf.h
+- Fix FindZLIB to follow variable name conventions
+- Fix invalid use of auto_ptr on array
+- Mention temp var convention in Modules/readme.txt documentation
+
 Changes in CMake 2.8.0 RC 4
 - Fix try_compile when file cannot be found
 - Add new module to test manifest installation issues on windows.

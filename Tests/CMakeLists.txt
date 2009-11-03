@@ -242,7 +242,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     ")
     ADD_TEST(${name} /bin/sh ${_TEST_DIR}/nightly-cmake.sh)
     IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
-      SET_TESTS_PROPERTIES (${name} PROPERTIES TIMEOUT 3500)
+      SET_TESTS_PROPERTIES (${name} PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
     ENDIF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
   ENDMACRO(ADD_NIGHTLY_BUILD_TEST)
   IF(CMAKE_BUILD_NIGHTLY_RELEASES)
@@ -1209,17 +1209,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     PASS_REGULAR_EXPRESSION "\\*\\*\\*Timeout")
   
   CONFIGURE_FILE(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/test.cmake"
+    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/test.cmake"
     @ONLY ESCAPE_QUOTES)
   CONFIGURE_FILE(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/hello.cmake"
+    "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/hello.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/hello.cmake"
     @ONLY ESCAPE_QUOTES)
-  #ADD_TEST(CTestTestRunScript ${CMAKE_CTEST_COMMAND}
-  #  -S "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/test.cmake" -V
-  #  --output-log "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/testOutput.log"
-  #  )
+  ADD_TEST(CTestTestRunScript ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/testOutput.log"
+    )
   
   ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
   
@@ -1242,8 +1242,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
 
   set(regex "(Problems when submitting via S*CP")
   set(regex "${regex}|Error message was: ")
-  set(regex "${regex}(Couldn.t resolve host ")
-  set(regex "${regex}|couldn.t connect to host")
+  set(regex "${regex}([Cc]ould *n.t resolve host")
+  set(regex "${regex}|[Cc]ould *n.t connect to host")
   set(regex "${regex}|libcurl was built with SSL disabled. https: not supported)")
   set(regex "${regex}|Submission method .xmlrpc. not compiled into CTest")
   set(regex "${regex}|Submission successful)")

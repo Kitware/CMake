@@ -88,7 +88,7 @@ If the find module supports versioning it should locate a version of
 the package that is compatible with the version requested.  If a
 compatible version of the package cannot be found the module should
 not report success.  The version of the package found should be stored
-in "XXX_VERSION..." version variables docmented by the module.
+in "XXX_VERSION..." version variables documented by the module.
 
 If the QUIET option is given to the command it will set the variable
 XXX_FIND_QUIETLY to true before loading the FindXXX.cmake module.  If
@@ -110,3 +110,6 @@ error if the module is not found.
 To get this behaviour you can use the FIND_PACKAGE_HANDLE_STANDARD_ARGS() 
 macro, as an example see FindJPEG.cmake.
 
+For internal implementation, it's a generally accepted convention that variables starting with
+underscore are for temporary use only. (variable starting with an underscore
+are not intended as a reserved prefix).

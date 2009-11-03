@@ -659,8 +659,12 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
     "== .*Invalid free\\(\\) / delete / delete\\[\\]");
   cmsys::RegularExpression vgFMM(
     "== .*Mismatched free\\(\\) / delete / delete \\[\\]");
-  cmsys::RegularExpression vgMLK(
+  cmsys::RegularExpression vgMLK1(
     "== .*[0-9][0-9]* bytes in [0-9][0-9]* blocks are definitely lost"
+   " in loss record [0-9][0-9]* of [0-9]");
+  cmsys::RegularExpression vgMLK2(
+    "== .*[0-9][0-9]* \\([0-9]*,?[0-9]* direct, [0-9]*,?[0-9]* indirect\\)"
+        " bytes in [0-9][0-9]* blocks are definitely lost"
     " in loss record [0-9][0-9]* of [0-9]");
   cmsys::RegularExpression vgPAR(
     "== .*Syscall param .* contains unaddressable byte\\(s\\)");
@@ -705,7 +709,11 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
         {
         failure = cmCTestMemCheckHandler::FMM;
         }
-      else if ( vgMLK.find(lines[cc]) )
+      else if ( vgMLK1.find(lines[cc]) )
+        {
+        failure = cmCTestMemCheckHandler::MLK;
+        }
+      else if ( vgMLK2.find(lines[cc]) )
         {
         failure = cmCTestMemCheckHandler::MLK;
         }

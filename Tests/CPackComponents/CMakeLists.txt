@@ -16,8 +16,16 @@ target_link_libraries(mylibapp mylib)
 
 # On Linux, enable using an absolute install path to verify that
 # CMAKE_INSTALL_PREFIX and CPACK_SET_DESTDIR interact properly.
+#
+# But only use absolute paths if not targeting an NSIS installer
+# as indicated by CPACK_BINARY_NSIS. (If we allow this, the test
+# fails on Linux machines with makensis installed when we are not
+# cross-compiling...)
+#
 if(UNIX AND NOT APPLE)
-  set(mylib_install_to_absolute_path ON)
+  if(NOT CPACK_BINARY_NSIS)
+    set(mylib_install_to_absolute_path ON)
+  endif()
 endif()
 
 if(mylib_install_to_absolute_path)

@@ -23,7 +23,6 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmcompress/cmcompress.h>
 #include <libtar/libtar.h>
-#include <memory> // auto_ptr
 #include <fcntl.h>
 #include <errno.h>
 
@@ -165,9 +164,8 @@ int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
     &mydata
   };
 
-  // Ok, this libtar is not const safe. for now use auto_ptr hack
+  // This libtar is not const safe. Make a non-const copy of outFileName
   char* realName = new char[ strlen(outFileName) + 1 ];
-  std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
   int flags = O_WRONLY | O_CREAT;  
   int options = 0;
@@ -185,8 +183,11 @@ int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): "
       << strerror(errno) << std::endl);
+    delete [] realName;
     return 0;
     }
+
+  delete [] realName;
 
   std::vector<std::string>::const_iterator fileIt;
   for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
