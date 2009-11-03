@@ -23,7 +23,11 @@ cmCTestBuildCommand::cmCTestBuildCommand()
 {
   this->GlobalGenerator = 0;
   this->Arguments[ctb_NUMBER_ERRORS] = "NUMBER_ERRORS";
-  this->Arguments[ctb_NUMBER_WARNINGS] = "NUMBER_WARNINGS"; 
+  this->Arguments[ctb_NUMBER_WARNINGS] = "NUMBER_WARNINGS";
+  this->Arguments[ctb_TARGET] = "TARGET";
+  this->Arguments[ctb_CONFIGURATION] = "CONFIGURATION";
+  this->Arguments[ctb_FLAGS] = "FLAGS";
+  this->Arguments[ctb_PROJECT_NAME] = "PROJECT_NAME";
   this->Arguments[ctb_LAST] = 0;
   this->Last = ctb_LAST;
 }
@@ -60,13 +64,22 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
     const char* cmakeGeneratorName
       = this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
     const char* cmakeProjectName
-      = this->Makefile->GetDefinition("CTEST_PROJECT_NAME");
+      = (this->Values[ctb_PROJECT_NAME] && *this->Values[ctb_PROJECT_NAME])
+      ? this->Values[ctb_PROJECT_NAME]
+      : this->Makefile->GetDefinition("CTEST_PROJECT_NAME");
     const char* cmakeBuildConfiguration
-      = this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
+      = (this->Values[ctb_CONFIGURATION] && *this->Values[ctb_CONFIGURATION])
+      ? this->Values[ctb_CONFIGURATION]
+      : this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
     const char* cmakeBuildAdditionalFlags
-      = this->Makefile->GetDefinition("CTEST_BUILD_FLAGS");
+      = (this->Values[ctb_FLAGS] && *this->Values[ctb_FLAGS])
+      ? this->Values[ctb_FLAGS]
+      : this->Makefile->GetDefinition("CTEST_BUILD_FLAGS");
     const char* cmakeBuildTarget
-      = this->Makefile->GetDefinition("CTEST_BUILD_TARGET");
+      = (this->Values[ctb_TARGET] && *this->Values[ctb_TARGET])
+      ? this->Values[ctb_TARGET]
+      : this->Makefile->GetDefinition("CTEST_BUILD_TARGET");
+
     if ( cmakeGeneratorName && *cmakeGeneratorName &&
       cmakeProjectName && *cmakeProjectName )
       {
