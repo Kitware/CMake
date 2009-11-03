@@ -49,7 +49,7 @@ bool SetArchiveType(struct archive* a,
                      cmCPackArchiveGenerator::CompressType ct,
                      cmCPackArchiveGenerator::ArchiveType at)
 {
-  int res;
+  int res = 0;
   // pick the archive type
   switch(at)
     {
