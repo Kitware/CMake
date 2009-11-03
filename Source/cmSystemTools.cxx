@@ -2051,7 +2051,7 @@ bool cmSystemTools::ExtractTar(const char* outFileName,
 }
 
 bool cmSystemTools::ListTar(const char* outFileName, 
-                            std::vector<cmStdString>& files, bool gzip,
+                            std::vector<cmStdString>& files, bool ,
                             bool verbose)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -2059,7 +2059,6 @@ bool cmSystemTools::ListTar(const char* outFileName,
 #else
   (void)outFileName;
   (void)files;
-  (void)gzip;
   (void)verbose;
   return false;
 #endif

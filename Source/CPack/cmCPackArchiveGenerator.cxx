@@ -115,7 +115,7 @@ struct StreamData
 
 extern "C"
 {
-int OpenArchive(struct archive *a, void *client_data)
+int OpenArchive(struct archive *, void *client_data)
 {
   struct StreamData *data = (StreamData*)client_data;
   if(data->GeneratedFileStream && 
@@ -130,7 +130,7 @@ int OpenArchive(struct archive *a, void *client_data)
   return (ARCHIVE_FATAL);
 }
   
-__LA_SSIZE_T WriteArchive(struct archive *a,
+__LA_SSIZE_T WriteArchive(struct archive *,
                           void *client_data, 
                           const void *buff,
                           size_t n)
@@ -146,7 +146,7 @@ __LA_SSIZE_T WriteArchive(struct archive *a,
 }
 
 
-int CloseArchive(struct archive *a, void *client_data)
+int CloseArchive(struct archive *, void *client_data)
 {
   struct StreamData *data = (StreamData*)client_data;
   if(data->GeneratedFileStream->Close())
