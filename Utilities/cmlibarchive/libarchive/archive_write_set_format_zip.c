@@ -399,8 +399,8 @@ archive_write_zip_data(struct archive_write *a, const void *buff, size_t s)
     struct zip *zip = a->format_data;
     struct zip_file_header_link *l = zip->central_directory_end;
 
-    if (s > zip->remaining_data_bytes)
-        s = zip->remaining_data_bytes;
+    if (s > (size_t)zip->remaining_data_bytes)
+      s = (size_t)zip->remaining_data_bytes;
 
     if (s == 0) return 0;
 
