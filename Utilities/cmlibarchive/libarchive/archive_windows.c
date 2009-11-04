@@ -65,6 +65,20 @@
 # define EPOC_TIME   (116444736000000000ULL)
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER < 1300
+/* VS 6 does not provide SetFilePointerEx, so define it here.  */
+static BOOL SetFilePointerEx(HANDLE hFile,
+                             LARGE_INTEGER liDistanceToMove,
+                             PLARGE_INTEGER lpNewFilePointer,
+                             DWORD dwMoveMethod)
+{
+  LARGE_INTEGER li;
+  li.QuadPart = liDistanceToMove.QuadPart;
+  li.LowPart = SetFilePointer(hFile, li.LowPart, &li.HighPart, dwMoveMethod);
+  if(lpNewFilePointer) { lpNewFilePointer->QuadPart = li.QuadPart; }
+  return li.LowPart != -1 || GetLastError() == NO_ERROR;
+}
+#endif
 
 struct ustat {
     int64_t     st_atime;
