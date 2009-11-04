@@ -666,6 +666,9 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #cmakedefine mode_t ${mode_t}
 
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#cmakedefine dev_t ${dev_t}
+
 /* Define to `long long' if <sys/types.h> does not define. */
 #cmakedefine off_t ${off_t}
 
