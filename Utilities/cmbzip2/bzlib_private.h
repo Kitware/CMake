@@ -33,6 +33,12 @@
 #include "bzlib.h"
 
 
+#if defined(__BORLANDC__)
+# pragma warn -8004 /* Assigned value never used.  */
+# pragma warn -8008 /* Condition is always true/false.  */
+# pragma warn -8066 /* Unreachable code.  */
+# pragma warn -8057 /* Unused parameter.  */
+#endif
 
 /*-- General stuff. --*/
 
