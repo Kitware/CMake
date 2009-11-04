@@ -24,6 +24,7 @@
  */
 
 #include "archive_platform.h"
+#include "archive_private.h"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 

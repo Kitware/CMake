@@ -35,6 +35,19 @@
 #include "archive.h"
 #include "archive_string.h"
 
+#if defined(__BORLANDC__)
+# pragma warn -8004 /* Assigned value never used.  */
+# pragma warn -8008 /* Condition is always true/false.  */
+# pragma warn -8012 /* Compare signed/unsigned.  */
+# pragma warn -8053 /* Called function is obsolete.  */
+# pragma warn -8057 /* Unused parameter.  */
+# pragma warn -8060 /* Possibly incorrect assignment.  */
+# pragma warn -8065 /* Call to function without prototype.  */
+# pragma warn -8066 /* Unreachable code.  */
+# pragma warn -8068 /* Constant out of range in comparison.  */
+# pragma warn -8072 /* Suspicious pointer arithmetic.  */
+#endif
+
 #if defined(_MSC_VER)
 # pragma warning (push,1)
 #endif

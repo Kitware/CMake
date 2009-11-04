@@ -47,6 +47,7 @@
 #if defined(_WIN32) && !defined(__CYGWIN__)
 
 #include "archive_platform.h"
+#include "archive_private.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stddef.h>
