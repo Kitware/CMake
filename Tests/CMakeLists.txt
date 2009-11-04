@@ -612,6 +612,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
       --test-command complex)
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ComplexOneConfig")
+    # because of the registry write these tests depend on each other
+    SET_TESTS_PROPERTIES ( complex PROPERTIES DEPENDS complexOneConfig)
 
 # This fails on VS 70
 # works on Xcode and makefiles
