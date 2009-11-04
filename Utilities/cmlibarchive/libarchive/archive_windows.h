@@ -59,6 +59,7 @@
 #include <sys/stat.h>
 #include <process.h>
 #include <direct.h>
+#define NOCRYPT
 #include <windows.h>
 //#define   EFTYPE 7
 
@@ -296,6 +297,9 @@ typedef int pid_t;
 
 /* Message digest define */
 #if !defined(HAVE_OPENSSL_MD5_H) && !defined(HAVE_OPENSSL_SHA_H)
+# if defined(_MSC_VER) && _MSC_VER < 1300
+#  define _WIN32_WINNT 0x0400
+# endif
 #include <wincrypt.h>
 typedef struct {
     int     valid;
