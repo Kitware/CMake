@@ -46,23 +46,22 @@
 
 /* Get appropriate definitions of standard POSIX-style types. */
 /* These should match the types used in 'struct stat' */
-#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__BORLANDC__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #define __LA_INT64_T    __int64
-#define __LA_UID_T  short
-#define __LA_GID_T  short
-#define __LA_DEV_T  unsigned int
-#define __LA_MODE_T unsigned short
-#else
-#ifdef __BORLANDC__
-# include <sys/types.h>
+# if defined(__BORLANDC__)
+#  define __LA_UID_T  uid_t
+#  define __LA_GID_T  gid_t
+#  define __LA_DEV_T  dev_t
+#  define __LA_MODE_T mode_t
+# else
+#  define __LA_UID_T  short
+#  define __LA_GID_T  short
+#  define __LA_DEV_T  unsigned int
+#  define __LA_MODE_T unsigned short
+# endif
 #else
 # include <unistd.h>
-#endif
-#if defined(__BORLANDC__) && !defined(HAVE_SYS_TYPES_H)
-#define __LA_INT64_T    __int64
-#else
 #define __LA_INT64_T    int64_t
-#endif
 #define __LA_UID_T  uid_t
 #define __LA_GID_T  gid_t
 #define __LA_DEV_T  dev_t
