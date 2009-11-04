@@ -13,6 +13,20 @@
 #  Java_VERSION_TWEAK      = The tweak version of the package found (after '_')
 #  Java_VERSION            = This is set to: $major.$minor.$patch(.$tweak)
 #
+# NOTE: ${Java_VERSION} and ${Java_VERSION_STRING} are not guaranteed to be
+# identical. For example some java version may return:
+# Java_VERSION_STRING = 1.5.0_17
+# and
+# Java_VERSION        = 1.5.0.17
+# 
+# another example is the Java OEM, with:
+# Java_VERSION_STRING = 1.6.0-oem
+# and
+# Java_VERSION        = 1.6.0
+#
+# NOTE: At the moment this script will look for javac and jar component,
+# which means it will fail if javac or jar is not found.:w
+# See Bug #9840
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
