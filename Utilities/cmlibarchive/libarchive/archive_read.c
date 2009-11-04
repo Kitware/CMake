@@ -768,7 +768,7 @@ _archive_read_close(struct archive *_a)
 /*
  * Release memory and other resources.
  */
-int
+static int
 _archive_read_finish(struct archive *_a)
 {
     struct archive_read *a = (struct archive_read *)_a;

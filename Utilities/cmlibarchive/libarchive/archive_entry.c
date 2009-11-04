@@ -1199,7 +1199,7 @@ archive_entry_acl_add_entry_w(struct archive_entry *entry,
     archive_entry_acl_add_entry_w_len(entry, type, permset, tag, id, name, wcslen(name));
 }
 
-void
+static void
 archive_entry_acl_add_entry_w_len(struct archive_entry *entry,
     int type, int permset, int tag, int id, const wchar_t *name, size_t len)
 {
