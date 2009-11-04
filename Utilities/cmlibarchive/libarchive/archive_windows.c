@@ -60,7 +60,7 @@
 #include <wchar.h>
 #include <windows.h>
 #if defined(__BORLANDC__) || (defined(_MSC_VER) &&  _MSC_VER <= 1300)
-# define EPOC_TIME   (116444736000000000)
+# define EPOC_TIME   (116444736000000000UI64)
 #else
 # define EPOC_TIME   (116444736000000000ULL)
 #endif

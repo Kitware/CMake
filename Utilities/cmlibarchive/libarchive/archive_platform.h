@@ -86,6 +86,30 @@
 #include <stdint.h>
 #endif
 
+/* Borland warns about its own constants!  */
+#if defined(__BORLANDC__)
+# if HAVE_DECL_UINT64_MAX
+#  undef UINT64_MAX
+#  undef HAVE_DECL_UINT64_MAX
+#  define HAVE_DECL_UINT64_MAX 0
+# endif
+# if HAVE_DECL_UINT64_MIN
+#  undef UINT64_MIN
+#  undef HAVE_DECL_UINT64_MIN
+#  define HAVE_DECL_UINT64_MIN 0
+# endif
+# if HAVE_DECL_INT64_MAX
+#  undef INT64_MAX
+#  undef HAVE_DECL_INT64_MAX
+#  define HAVE_DECL_INT64_MAX 0
+# endif
+# if HAVE_DECL_INT64_MIN
+#  undef INT64_MIN
+#  undef HAVE_DECL_INT64_MIN
+#  define HAVE_DECL_INT64_MIN 0
+# endif
+#endif
+
 /* Some platforms lack the standard *_MAX definitions. */
 #if !HAVE_DECL_SIZE_MAX
 #define SIZE_MAX (~(size_t)0)

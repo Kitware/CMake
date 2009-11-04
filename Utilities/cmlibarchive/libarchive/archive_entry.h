@@ -58,7 +58,7 @@
 #else
 # include <unistd.h>
 #endif
-#if defined(__BORLANDC__)
+#if defined(__BORLANDC__) && !defined(HAVE_SYS_TYPES_H)
 #define __LA_INT64_T    __int64
 #else
 #define __LA_INT64_T    int64_t

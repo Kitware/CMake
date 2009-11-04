@@ -61,7 +61,7 @@
 #else
 #include <unistd.h>  /* ssize_t, uid_t, and gid_t */
 #endif
-#if defined(__BORLANDC__)
+#if defined(__BORLANDC__) && !defined(HAVE_SYS_TYPES_H)
 #define __LA_INT64_T    __int64
 #define __LA_SSIZE_T  long
 #else
