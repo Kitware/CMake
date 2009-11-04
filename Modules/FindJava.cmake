@@ -60,6 +60,7 @@ FIND_PROGRAM(Java_JAVA_EXECUTABLE
 )
 
 IF(Java_JAVA_EXECUTABLE)
+    set(_java_version_acceptable TRUE)
     EXECUTE_PROCESS(COMMAND ${Java_JAVA_EXECUTABLE} -version
       RESULT_VARIABLE res
       OUTPUT_VARIABLE var
@@ -71,13 +72,13 @@ IF(Java_JAVA_EXECUTABLE)
     ELSE()
       # extract major/minor version and patch level from "java -version" output
       # Tested on linux using 
-      # 1. Sun
+      # 1. Sun / Sun OEM
       # 2. OpenJDK 1.6
       # 3. GCJ 1.5
       # 4. Kaffe 1.4.2
-      IF(var MATCHES "java version \"[0-9]+\\.[0-9]+\\.[0-9_]+\".*")
+      IF(var MATCHES "java version \"[0-9]+\\.[0-9]+\\.[0-9_]+[oem-]*\".*")
         # This is most likely Sun / OpenJDK, or maybe GCJ-java compat layer
-        STRING( REGEX REPLACE ".* version \"([0-9]+\\.[0-9]+\\.[0-9_]+).*"
+        STRING( REGEX REPLACE ".* version \"([0-9]+\\.[0-9]+\\.[0-9_]+)[oem-]*\".*"
                 "\\1" Java_VERSION_STRING "${var}" )
       ELSEIF(var MATCHES "java full version \"kaffe-[0-9]+\\.[0-9]+\\.[0-9_]+\".*")
         # Kaffe style
@@ -85,7 +86,8 @@ IF(Java_JAVA_EXECUTABLE)
                 "\\1" Java_VERSION_STRING "${var}" )
       ELSE()
         IF(NOT Java_FIND_QUIETLY)
-          message(STATUS "regex not supported: ${var}. Please report")
+          message(WARNING "regex not supported: ${var}. Please report")
+          set(_java_version_acceptable FALSE)
         ENDIF(NOT Java_FIND_QUIETLY)
       ENDIF()
       STRING( REGEX REPLACE "([0-9]+).*" "\\1" Java_VERSION_MAJOR "${Java_VERSION_STRING}" )
@@ -106,7 +108,6 @@ IF(Java_JAVA_EXECUTABLE)
     ENDIF()
 
     # check version if requested:
-    set(_java_version_acceptable TRUE)
     if( Java_FIND_VERSION )
       if("${Java_VERSION}" VERSION_LESS "${Java_FIND_VERSION}")
         set(_java_version_acceptable FALSE)
