@@ -2055,6 +2055,7 @@ bool cmSystemTools::ListTar(const char* outFileName,
                             bool verbose)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+  (void)files;
   return extract_tar(outFileName, verbose, false);
 #else
   (void)outFileName;
