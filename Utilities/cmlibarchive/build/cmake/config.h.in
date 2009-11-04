@@ -695,10 +695,8 @@
    do not define. */
 #cmakedefine uintmax_t ${uintmax_t}
 
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-#cmakedefine uintptr_t  ${uintptr_t }
+/* Define to `int' if <sys/types.h> does not define. */
+#cmakedefine intptr_t ${intptr_t}
 
-#if defined(__BORLANDC__) && !defined(HAVE_STDINT_H)
-#define uintptr_t unsigned int
-#define intptr_t  int
-#endif
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#cmakedefine uintptr_t ${uintptr_t}
