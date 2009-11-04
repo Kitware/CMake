@@ -123,8 +123,8 @@ static const char * cmDocumentationOptions[][3] =
   {"-SP <script>, --script-new-process <script>", "Execute a dashboard for a "
    "configuration",
    "This option does the same operations as -S but it will do them in a "
-   "seperate process. This is primarily useful in cases where the script "
-   "may modify the environment and you do not want the modified enviroment "
+   "separate process. This is primarily useful in cases where the script "
+   "may modify the environment and you do not want the modified environment "
    "to impact other -S scripts."},
   {"-A <file>, --add-notes <file>", "Add a notes file with submission",
    "This option tells ctest to include a notes file when submitting "
@@ -141,7 +141,7 @@ static const char * cmDocumentationOptions[][3] =
    "tests are run. By specifying -U the union of tests is run instead."},
   {"--max-width <width>", "Set the max width for a test name to output",
    "Set the maximum width for each test name to show in the output.  This "
-   "allows the user to widen the output to avoid cliping the test name which "
+   "allows the user to widen the output to avoid clipping the test name which "
    "can be very annoying."},
   {"--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1.",
    "This option causes ctest to run tests in either an interactive mode or "
@@ -181,8 +181,8 @@ static const char * cmDocumentationOptions[][3] =
   {"--build-makeprogram", "Specify the make program to use.", "" },
   {"--build-noclean", "Skip the make clean step.", "" },
   {"--build-config-sample", 
-   "A sample executable to use to determine the configuraiton", 
-   "A sample executable to use to determine the configuraiton that "
+   "A sample executable to use to determine the configuration", 
+   "A sample executable to use to determine the configuration that "
    "should be used. e.g. Debug/Release/etc" },
   {"--build-options", "Add extra options to the build step.",
    "This option must be the last option with the exception of --test-command"
