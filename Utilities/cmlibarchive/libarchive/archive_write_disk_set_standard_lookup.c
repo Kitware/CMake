@@ -122,10 +122,14 @@ lookup_gid(void *private_data, const char *gname, gid_t gid)
         size_t bufsize = 128;
         char *buffer = _buffer;
         struct group    grent, *result;
-        int r;
+        int r = 0;
 
         for (;;) {
+#if defined(__sun)
+            result = getgrnam_r(gname, &grent, buffer, bufsize);
+#else
             r = getgrnam_r(gname, &grent, buffer, bufsize, &result);
+#endif
             if (r == 0)
                 break;
             if (r != ERANGE)
@@ -181,10 +185,14 @@ lookup_uid(void *private_data, const char *uname, uid_t uid)
         size_t bufsize = 128;
         char *buffer = _buffer;
         struct passwd   pwent, *result;
-        int r;
+        int r = 0;
 
         for (;;) {
+#if defined(__sun)
+            result = getpwnam_r(uname, &pwent, buffer, bufsize);
+#else
             r = getpwnam_r(uname, &pwent, buffer, bufsize, &result);
+#endif
             if (r == 0)
                 break;
             if (r != ERANGE)
