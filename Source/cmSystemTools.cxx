@@ -1910,7 +1910,8 @@ list_item_verbose(FILE *out, struct archive_entry *entry)
   tim = archive_entry_mtime(entry);
 #define HALF_YEAR (time_t)365 * 86400 / 2
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#define DAY_FMT  "%d"  /* Windows' strftime function does not support %e format. */
+  /* Windows' strftime function does not support %e format. */
+#define DAY_FMT  "%d"  
 #else
 #define DAY_FMT  "%e"  /* Day number without leading zeros */
 #endif

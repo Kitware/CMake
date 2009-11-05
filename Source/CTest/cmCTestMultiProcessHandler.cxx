@@ -407,12 +407,9 @@ void cmCTestMultiProcessHandler::CheckResume()
       fin.close();
       }
     }
-  else
+  else if(cmSystemTools::FileExists(fname.c_str(), true))
     {
-    if(cmSystemTools::FileExists(fname.c_str(), true))
-      {
-      cmSystemTools::RemoveFile(fname.c_str());
-      }
+    cmSystemTools::RemoveFile(fname.c_str());
     }
 }
 
