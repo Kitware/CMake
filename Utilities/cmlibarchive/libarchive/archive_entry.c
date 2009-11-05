@@ -29,6 +29,10 @@ __FBSDID("$FreeBSD: src/lib/libarchive/archive_entry.c,v 1.55 2008/12/23 05:01:4
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#if defined(__sun)
+#include <sys/types.h>
+#include <sys/mkdev.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
