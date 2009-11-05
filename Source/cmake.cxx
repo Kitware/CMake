@@ -67,6 +67,7 @@
 #    include "cmGlobalVisualStudio8Win64Generator.h"
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
+#    include "cmGlobalJOMMakefileGenerator.h"
 #    include "cmGlobalWatcomWMakeGenerator.h"
 #    define CMAKE_HAVE_VS_GENERATORS
 #  endif
@@ -969,7 +970,7 @@ void CMakeCommandUsage(const char* program)
     << "  remove_directory dir      - remove a directory and its contents\n"
     << "  remove [-f] file1 file2 ... - remove the file(s), use -f to force "
        "it\n"
-    << "  tar [cxt][vfz] file.tar file/dir1 file/dir2 ... - create a tar "
+    << "  tar [cxt][vfz][cvfj] file.tar file/dir1 file/dir2 ... - create a tar "
        "archive\n"
     << "  time command [args] ...   - run command and return elapsed time\n"
     << "  touch file                - touch a file.\n"
@@ -1540,7 +1541,12 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         files.push_back(args[cc]);
         }
       bool gzip = false;
+      bool bzip2 = false;
       bool verbose = false;
+      if ( flags.find_first_of('j') != flags.npos )
+        {
+        bzip2 = true;
+        }
       if ( flags.find_first_of('z') != flags.npos )
         {
         gzip = true;
@@ -1552,7 +1558,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
 
       if ( flags.find_first_of('t') != flags.npos )
         {
-        if ( !cmSystemTools::ListTar(outFile.c_str(), files, gzip, verbose) )
+        if ( !cmSystemTools::ListTar(outFile.c_str(), gzip, verbose) )
           {
           cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
           return 1;
@@ -1561,7 +1567,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       else if ( flags.find_first_of('c') != flags.npos )
         {
         if ( !cmSystemTools::CreateTar(
-            outFile.c_str(), files, gzip, verbose) )
+               outFile.c_str(), files, gzip, bzip2, verbose) )
           {
           cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
           return 1;
@@ -1570,7 +1576,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       else if ( flags.find_first_of('x') != flags.npos )
         {
         if ( !cmSystemTools::ExtractTar(
-            outFile.c_str(), files, gzip, verbose) )
+            outFile.c_str(), gzip, verbose) )
           {
           cmSystemTools::Error("Problem extracting tar: ", outFile.c_str());
           return 1;
@@ -2381,6 +2387,8 @@ void cmake::AddDefaultGenerators()
     &cmGlobalBorlandMakefileGenerator::New;
   this->Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
     &cmGlobalNMakeMakefileGenerator::New;
+  this->Generators[cmGlobalJOMMakefileGenerator::GetActualName()] =
+    &cmGlobalJOMMakefileGenerator::New;
   this->Generators[cmGlobalWatcomWMakeGenerator::GetActualName()] =
     &cmGlobalWatcomWMakeGenerator::New;
 # endif

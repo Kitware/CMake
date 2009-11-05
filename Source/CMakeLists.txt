@@ -281,6 +281,8 @@ IF (WIN32)
       cmGlobalMinGWMakefileGenerator.cxx
       cmGlobalNMakeMakefileGenerator.cxx
       cmGlobalNMakeMakefileGenerator.h
+      cmGlobalJOMMakefileGenerator.cxx
+      cmGlobalJOMMakefileGenerator.h
       cmGlobalVisualStudio6Generator.cxx
       cmGlobalVisualStudio6Generator.h
       cmGlobalVisualStudio71Generator.cxx
