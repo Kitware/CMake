@@ -23,6 +23,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef _XOPEN_SOURCE
+# define _XOPEN_SOURCE 500 /* getpwuid_r and getgrgid_r signatures */
+#endif
+
 #include "archive_platform.h"
 __FBSDID("$FreeBSD$");
 
@@ -186,7 +190,7 @@ static const char *
 lookup_uname_helper(struct name_cache *cache, id_t id)
 {
     struct passwd   pwent, *result;
-    int r = 0;
+    int r;
 
     if (cache->buff_size == 0) {
         cache->buff_size = 256;
@@ -195,12 +199,8 @@ lookup_uname_helper(struct name_cache *cache, id_t id)
     if (cache->buff == NULL)
         return (NULL);
     for (;;) {
-#if defined(__sun)
-        result = getpwuid_r((uid_t)id, &pwent, cache->buff, cache->buff_size);
-#else
         r = getpwuid_r((uid_t)id, &pwent,
                    cache->buff, cache->buff_size, &result);
-#endif
         if (r == 0)
             break;
         if (r != ERANGE)
@@ -238,7 +238,7 @@ static const char *
 lookup_gname_helper(struct name_cache *cache, id_t id)
 {
     struct group    grent, *result;
-    int r = 0;
+    int r;
 
     if (cache->buff_size == 0) {
         cache->buff_size = 256;
@@ -247,12 +247,8 @@ lookup_gname_helper(struct name_cache *cache, id_t id)
     if (cache->buff == NULL)
         return (NULL);
     for (;;) {
-#if defined(__sun)
-        result = getgrgid_r((gid_t)id, &grent, cache->buff, cache->buff_size);
-#else
         r = getgrgid_r((gid_t)id, &grent,
                    cache->buff, cache->buff_size, &result);
-#endif
         if (r == 0)
             break;
         if (r != ERANGE)
