@@ -149,7 +149,6 @@ archive_read_format_raw_read_data(struct archive_read *a,
         *offset = info->offset;
         return (avail);
     }
-    return (ARCHIVE_OK);
 }
 
 static int
