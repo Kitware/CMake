@@ -2065,7 +2065,6 @@ bool cmSystemTools::ListTar(const char* outFileName,
   return extract_tar(outFileName, verbose, false);
 #else
   (void)outFileName;
-  (void)files;
   (void)verbose;
   return false;
 #endif
