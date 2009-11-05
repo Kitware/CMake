@@ -1,4 +1,5 @@
 set(CMAKE_RELEASE_DIRECTORY "/bench1/noibm34/CMakeReleaseDirectory" )
+set(CVSROOT ":pserver:anonymous@www.cmake.org:/cvsroot/CMake")
 set(FINAL_PATH /u/noibm34/cmake-release)
 set(PROCESSORS 2)
 set(CVS_COMMAND /vol/local/bin/cvs)

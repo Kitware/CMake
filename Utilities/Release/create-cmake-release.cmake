@@ -7,18 +7,16 @@ set(RELEASE_SCRIPTS
   dashsun1_release.cmake      # SunOS
   destiny_release.cmake       # HPUX
   magrathea_release.cmake     # Linux
-  vogon_release.cmake         # Windows
+  dash2win64_release.cmake    # Windows
   v20n17_aix_release.cmake    # AIX 5.3
-  vogon_cygwin.cmake          # Cygwin
+#  vogon_cygwin.cmake          # Cygwin
   ferrari_sgi64_release.cmake # IRIX 64
   ferrari_sgi_release.cmake   # IRIX 64
-#  dashsgi1_release.cmake      # IRIX
-#  dashsgi1_release64.cmake    # IRIX 64
 #  r36n11_aix_release.cmake    # AIX 5.3
 #  r15n65_aix_release.cmake    # AIX 5.2
 )
 
-file(WRITE create-${CMAKE_CREATE_VERSION}.sh "#!/bin/sh")
+file(WRITE create-${CMAKE_CREATE_VERSION}.sh "#!/bin/bash")
 make_directory(${CMAKE_CURRENT_SOURCE_DIR}/logs)
 
 foreach(f ${RELEASE_SCRIPTS})

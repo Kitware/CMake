@@ -1,4 +1,5 @@
 set(PROCESSORS 1)
+set(CVSROOT ":pserver:anonymous@www.cmake.org:/cvsroot/CMake")
 set(RUN_SHELL "/usr/local/bin/zsh -l -c /bin/sh")
 set(CVS_COMMAND "/usr/local/bin/cvs")
 set(HOST destiny)
