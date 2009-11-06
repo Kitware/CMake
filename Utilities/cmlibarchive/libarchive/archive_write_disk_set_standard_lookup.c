@@ -24,7 +24,7 @@
  */
 
 #ifndef _XOPEN_SOURCE
-# define _XOPEN_SOURCE 500 /* getpwuid_r and getgrgid_r signatures */
+# define _XOPEN_SOURCE 500 /* getpwnam_r and getgrnam_r signatures */
 #endif
 
 #include "archive_platform.h"
