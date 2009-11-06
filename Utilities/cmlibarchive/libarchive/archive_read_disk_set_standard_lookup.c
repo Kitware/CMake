@@ -199,6 +199,7 @@ lookup_uname_helper(struct name_cache *cache, id_t id)
     if (cache->buff == NULL)
         return (NULL);
     for (;;) {
+        result = &pwent; /* Old getpwuid_r ignores last argument.  */
         r = getpwuid_r((uid_t)id, &pwent,
                    cache->buff, cache->buff_size, &result);
         if (r == 0)
@@ -247,6 +248,7 @@ lookup_gname_helper(struct name_cache *cache, id_t id)
     if (cache->buff == NULL)
         return (NULL);
     for (;;) {
+        result = &grent; /* Old getgrgid_r ignores last argument.  */
         r = getgrgid_r((gid_t)id, &grent,
                    cache->buff, cache->buff_size, &result);
         if (r == 0)
