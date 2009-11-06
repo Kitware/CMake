@@ -22,6 +22,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef _XOPEN_SOURCE
+# define _XOPEN_SOURCE 500 /* mbstate_t define on some hpux */
+#endif
 
 #include "archive_platform.h"
 __FBSDID("$FreeBSD: src/lib/libarchive/archive_string.c,v 1.17 2008/12/06 05:56:43 kientzle Exp $");
