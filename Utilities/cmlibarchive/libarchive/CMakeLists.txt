@@ -115,6 +115,7 @@ IF(BUILD_ARCHIVE_WITHIN_CMAKE)
   # when building inside the CMake tree only use static
   # and call the library cmlibarchive
   ADD_LIBRARY(cmlibarchive STATIC ${libarchive_SOURCES} ${include_HEADERS})
+  TARGET_LINK_LIBRARIES(cmlibarchive ${ADDITIONAL_LIBS})
 ELSE()
   # Libarchive is a shared library
   ADD_LIBRARY(archive SHARED ${libarchive_SOURCES} ${include_HEADERS})
