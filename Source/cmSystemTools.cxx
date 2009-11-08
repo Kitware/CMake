@@ -1800,8 +1800,10 @@ bool cmSystemTools::CreateTar(const char* outFileName,
       std::cout << rp << "\n";
       }
     // Set the name of the entry to the file name
-    archive_entry_set_pathname(entry, rp.c_str());
-    res = archive_read_disk_entry_from_file(disk, entry, -1, 0);
+    archive_entry_set_pathname(entry, rp.c_str()); 
+    struct stat s;           
+    stat(fileIt->c_str(), &s);   
+    archive_read_disk_entry_from_file(disk, entry, -1, &s);
     CHECK_ARCHIVE_ERROR(res, "read disk entry:");
 
     // write  entry header
@@ -1821,7 +1823,6 @@ bool cmSystemTools::CreateTar(const char* outFileName,
     while (len > 0)
       {
       int wlen = archive_write_data(a, buff, len);
-#if 0
       if(wlen != len)
         { 
         cmOStringStream error;
@@ -1833,7 +1834,6 @@ bool cmSystemTools::CreateTar(const char* outFileName,
           );
         return false;
         }
-#endif
       len = fread(buff, 1, sizeof(buff), file);
       }
     // close the file and free the entry
