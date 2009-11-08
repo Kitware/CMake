@@ -78,8 +78,13 @@
 
 #if defined(_MSC_VER)
 /* TODO: Fix the code, don't suppress the warnings. */
-#pragma warning(disable:4244)   /* 'conversion' conversion from 'type1' to 'type2', possible loss of data */
+#pragma warning(disable:4761)   /* 'conversion' conversion from 'type1' to 'type2', possible loss of data */
+/* this one shows up on vs 6 */
+# if  _MSC_VER < 1300
+#  pragma warning(disable:4244)   /* 'integral size mismatch in argument; conversion supplied */
+# endif
 #pragma warning(default: 4365)  /* 'action':conversion from 'type_1' to 'type_2', signed/unsigned mismatch */
+#pragma warning(disable: 4244)  /* conversion from '__int64' to 'off_t', possible loss of data */
 #endif
 
 #ifndef NULL
