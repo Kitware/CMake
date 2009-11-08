@@ -1634,7 +1634,7 @@ pax_time(const char *p, int64_t *ps, long *pn)
         digit = *p - '0';
         if (s > limit ||
             (s == limit && digit > last_digit_limit)) {
-            s = UINT64_MAX;
+            s = INT64_MAX;
             break;
         }
         s = (s * 10) + digit;
@@ -1933,7 +1933,7 @@ gnu_sparse_10_atol(struct archive_read *a, struct tar *tar,
             return (ARCHIVE_WARN);
         digit = *p - '0';
         if (l > limit || (l == limit && digit > last_digit_limit))
-            l = UINT64_MAX; /* Truncate on overflow. */
+            l = INT64_MAX; /* Truncate on overflow. */
         else
             l = (l * base) + digit;
         p++;
@@ -2039,7 +2039,7 @@ tar_atol8(const char *p, unsigned char_cnt)
     digit = *p - '0';
     while (digit >= 0 && digit < base  && char_cnt-- > 0) {
         if (l>limit || (l == limit && digit > last_digit_limit)) {
-            l = UINT64_MAX; /* Truncate on overflow. */
+            l = INT64_MAX; /* Truncate on overflow. */
             break;
         }
         l = (l * base) + digit;
@@ -2075,7 +2075,7 @@ tar_atol10(const char *p, unsigned char_cnt)
     digit = *p - '0';
     while (digit >= 0 && digit < base  && char_cnt-- > 0) {
         if (l > limit || (l == limit && digit > last_digit_limit)) {
-            l = UINT64_MAX; /* Truncate on overflow. */
+            l = INT64_MAX; /* Truncate on overflow. */
             break;
         }
         l = (l * base) + digit;
