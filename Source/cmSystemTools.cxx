@@ -1821,6 +1821,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
     while (len > 0)
       {
       int wlen = archive_write_data(a, buff, len);
+#if 0
       if(wlen != len)
         { 
         cmOStringStream error;
@@ -1832,6 +1833,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
           );
         return false;
         }
+#endif
       len = fread(buff, 1, sizeof(buff), file);
       }
     // close the file and free the entry
