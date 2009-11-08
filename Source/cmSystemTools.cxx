@@ -1819,10 +1819,10 @@ bool cmSystemTools::CreateTar(const char* outFileName,
       return false;
       }
     char buff[16384];
-    int len = fread(buff, 1, sizeof(buff), file);
+    size_t len = fread(buff, 1, sizeof(buff), file);
     while (len > 0)
       {
-      int wlen = archive_write_data(a, buff, len);
+      size_t wlen = archive_write_data(a, buff, len);
       if(wlen != len)
         { 
         cmOStringStream error;
