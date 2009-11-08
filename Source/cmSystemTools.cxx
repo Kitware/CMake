@@ -1706,7 +1706,18 @@ bool cmSystemTools::CreateTar(const char* outFileName,
                               const std::vector<cmStdString>& files,
                               bool gzip, bool bzip2, bool verbose)
 {
-#if defined(CMAKE_BUILD_WITH_CMAKE)  
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  
+  // Create a macro to handle return from libarchive 
+  // functions
+#define CHECK_ARCHIVE_ERROR(res, msg)\
+   if(res != ARCHIVE_OK)\
+    {\
+    cmSystemTools::Error(msg, \
+                         archive_error_string(a));\
+    return false;\
+    }
+  
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   // recursively expand all directories in files so that we have a list
   // of files
@@ -1747,28 +1758,31 @@ bool cmSystemTools::CreateTar(const char* outFileName,
   int res;
   // create a new archive
   struct archive* a = archive_write_new();
+  if(!a)
+    {
+    cmSystemTools::Error("Unable to use create archive");
+    return false;
+    }
+
   if(gzip)
     {
-    res = archive_write_set_compression_gzip(a); 
-    if(res != ARCHIVE_OK)
-      {
-      cmSystemTools::Error("Unable to use gzip in libarchive");
-      }
+    res = archive_write_set_compression_gzip(a);
+    CHECK_ARCHIVE_ERROR(res, "Can not set gzip:");
     } 
   if(bzip2)
     {
     res = archive_write_set_compression_bzip2(a); 
-    if(res != ARCHIVE_OK)
-      {
-      cmSystemTools::Error("Unable to use bzip2 in libarchive");
-      }
-    } 
-  res = archive_write_set_format_ustar(a);
-  if(res != ARCHIVE_OK)
-    {
-    cmSystemTools::Error("Unable to use tar libarchive");
+    CHECK_ARCHIVE_ERROR(res, "Can not set bzip2:");
     }
-  archive_write_open_file(a, outFileName);
+  if(!bzip2 && !gzip)
+    { 
+    res = archive_write_set_compression_none(a); 
+    CHECK_ARCHIVE_ERROR(res, "Can not set none:");
+    }
+  res = archive_write_set_format_ustar(a);
+  CHECK_ARCHIVE_ERROR(res, "Can not set tar format:");
+  res = archive_write_open_file(a, outFileName);
+  CHECK_ARCHIVE_ERROR(res, "write open:");
     // create a new disk struct
   struct archive* disk = archive_read_disk_new();
   archive_read_disk_set_standard_lookup(disk);
@@ -1787,12 +1801,13 @@ bool cmSystemTools::CreateTar(const char* outFileName,
       }
     // Set the name of the entry to the file name
     archive_entry_set_pathname(entry, rp.c_str());
-    // get the information about the file from stat
-    struct stat s;
-    stat(fileIt->c_str(), &s);
-    archive_read_disk_entry_from_file(disk, entry, -1, &s);
+    res = archive_read_disk_entry_from_file(disk, entry, -1, 0);
+    CHECK_ARCHIVE_ERROR(res, "read disk entry:");
+
     // write  entry header
-    archive_write_header(a, entry);
+    res = archive_write_header(a, entry);
+    CHECK_ARCHIVE_ERROR(res, "write header: ");
+
     // now copy contents of file into archive a
     FILE* file = fopen(fileIt->c_str(), "rb");
     if(!file)
@@ -1805,7 +1820,14 @@ bool cmSystemTools::CreateTar(const char* outFileName,
     int len = fread(buff, 1, sizeof(buff), file);
     while (len > 0)
       {
-      archive_write_data(a, buff, len);
+      int wlen = archive_write_data(a, buff, len);
+      if(wlen != len)
+        { 
+        cmSystemTools::Error("Problem with archive_write_data:",
+                             archive_error_string(a)
+          );
+        return false;
+        }
       len = fread(buff, 1, sizeof(buff), file);
       }
     // close the file and free the entry
