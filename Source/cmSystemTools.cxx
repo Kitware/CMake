@@ -1823,7 +1823,11 @@ bool cmSystemTools::CreateTar(const char* outFileName,
       int wlen = archive_write_data(a, buff, len);
       if(wlen != len)
         { 
-        cmSystemTools::Error("Problem with archive_write_data:",
+        cmOStringStream error;
+        error << "Problem with archive_write_data\n"
+              << "Tried to write  [" << len << "] bytes.\n"
+              << "archive_write_data wrote  [" << wlen << "] bytes.\n";
+        cmSystemTools::Error(error.str().c_str(),
                              archive_error_string(a)
           );
         return false;
