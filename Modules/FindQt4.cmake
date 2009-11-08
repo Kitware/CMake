@@ -564,6 +564,11 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_TRANSLATIONS_DIR ${qt_translations_dir} CACHE PATH "The location of the Qt translations" FORCE)
   ENDIF (QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR  OR  QT_QMAKE_CHANGED)
 
+  # Make variables changeble to the advanced user
+  MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_DOC_DIR QT_MKSPECS_DIR
+                    QT_PLUGINS_DIR QT_TRANSLATIONS_DIR)
+
+
   ########################################
   #
   #       Setting the INCLUDE-Variables
@@ -613,7 +618,7 @@ IF (QT4_QMAKE_FOUND)
               NO_DEFAULT_PATH
       )
   ENDFOREACH(QT_MODULE)
-  
+
   IF(WIN32)
     SET(QT_MODULES ${QT_MODULES} QAxContainer QAxServer)
     # Set QT_AXCONTAINER_INCLUDE_DIR and QT_AXSERVER_INCLUDE_DIR
@@ -628,7 +633,7 @@ IF (QT4_QMAKE_FOUND)
       NO_DEFAULT_PATH
       )
   ENDIF(WIN32)
-  
+
   # Set QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR
   FIND_PATH(QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR QDesignerComponents
     PATHS
@@ -652,7 +657,10 @@ IF (QT4_QMAKE_FOUND)
     ${QT_LIBRARY_DIR}/QtAssistant.framework/Headers
     NO_DEFAULT_PATH
     )
-  
+
+  # Make variables changeble to the advanced user
+  MARK_AS_ADVANCED( QT_INCLUDE_DIR )
+
   # Set QT_INCLUDE_DIR by removine "/QtCore" in the string ${QT_QTCORE_INCLUDE_DIR}
   IF( QT_QTCORE_INCLUDE_DIR )
     IF (QT_USE_FRAMEWORKS)
@@ -668,10 +676,6 @@ IF (QT4_QMAKE_FOUND)
       MESSAGE( FATAL_ERROR "Could NOT find QtCore header")
     ENDIF(Qt4_FIND_REQUIRED)
   ENDIF( NOT QT_INCLUDE_DIR)
-
-  # Make variables changeble to the advanced user
-  MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_INCLUDE_DIR QT_DOC_DIR QT_MKSPECS_DIR
-                    QT_PLUGINS_DIR QT_TRANSLATIONS_DIR)
 
   # Set QT_INCLUDES
   SET( QT_INCLUDES ${QT_MKSPECS_DIR}/default ${QT_INCLUDE_DIR} )
@@ -735,8 +739,11 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_EDITION_DESKTOPLIGHT 1)
   ENDIF("${QT_EDITION}" MATCHES "DesktopLight")
 
-
-
+  ########################################
+  #
+  #       Setting the LIBRARY-Variables
+  #
+  ########################################
 
   # find the libraries
   FOREACH(QT_MODULE ${QT_MODULES})
