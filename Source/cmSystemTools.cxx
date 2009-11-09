@@ -1801,43 +1801,43 @@ bool cmSystemTools::CreateTar(const char* outFileName,
       }
     // Set the name of the entry to the file name
     archive_entry_set_pathname(entry, rp.c_str()); 
-    struct stat s;           
-    stat(fileIt->c_str(), &s);   
-    archive_read_disk_entry_from_file(disk, entry, -1, &s);
+    archive_read_disk_entry_from_file(disk, entry, -1, 0);
     CHECK_ARCHIVE_ERROR(res, "read disk entry:");
 
     // write  entry header
     res = archive_write_header(a, entry);
     CHECK_ARCHIVE_ERROR(res, "write header: ");
-
-    // now copy contents of file into archive a
-    FILE* file = fopen(fileIt->c_str(), "rb");
-    if(!file)
+    if(archive_entry_size(entry) > 0)
       {
-      cmSystemTools::Error("Problem with fopen(): ",
-                           fileIt->c_str());
-      return false;
-      }
-    char buff[16384];
-    size_t len = fread(buff, 1, sizeof(buff), file);
-    while (len > 0)
-      {
-      size_t wlen = archive_write_data(a, buff, len);
-      if(wlen != len)
-        { 
-        cmOStringStream error;
-        error << "Problem with archive_write_data\n"
-              << "Tried to write  [" << len << "] bytes.\n"
-              << "archive_write_data wrote  [" << wlen << "] bytes.\n";
-        cmSystemTools::Error(error.str().c_str(),
-                             archive_error_string(a)
-          );
-        return false;
+      // now copy contents of file into archive a
+      FILE* file = fopen(fileIt->c_str(), "rb");
+      if(!file)
+        {
+          cmSystemTools::Error("Problem with fopen(): ",
+                               fileIt->c_str());
+          return false;
         }
-      len = fread(buff, 1, sizeof(buff), file);
+      char buff[16384];
+      size_t len = fread(buff, 1, sizeof(buff), file);
+      while (len > 0)
+        {
+          size_t wlen = archive_write_data(a, buff, len);
+          if(wlen != len)
+            { 
+              cmOStringStream error;
+              error << "Problem with archive_write_data\n"
+                    << "Tried to write  [" << len << "] bytes.\n"
+                    << "archive_write_data wrote  [" << wlen << "] bytes.\n";
+              cmSystemTools::Error(error.str().c_str(),
+                                   archive_error_string(a)
+                                   );
+              return false;
+            }
+          len = fread(buff, 1, sizeof(buff), file);
+        }
+      // close the file and free the entry
+      fclose(file);
       }
-    // close the file and free the entry
-    fclose(file);
     archive_entry_free(entry);
     }
   // close the archive and finish the write
