@@ -172,12 +172,13 @@ int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
 {
   int res = ARCHIVE_OK;
 #define CHECK_ARCHIVE_ERROR(res, msg)           \
-   if(res != ARCHIVE_OK)\
+  if(res != ARCHIVE_OK)                         \
     {\
     cmCPackLogger(cmCPackLog::LOG_ERROR, msg      \
                   << archive_error_string(a)      \
+                  << cmSystemTools::GetLastSystemError()  \
+                  << " " << res                   \
                   << "\n");                       \
-    return 0;                                     \
     }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: "
                 << (toplevel ? toplevel : "(NULL)") << std::endl);
@@ -198,9 +199,13 @@ int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
   CHECK_ARCHIVE_ERROR(res, "archive_write_open:");
   // create a new disk struct
   struct archive* disk = archive_read_disk_new();
+#if !defined(_WIN32) || defined(__CYGWIN__)
   res = archive_read_disk_set_standard_lookup(disk);
+#endif
   CHECK_ARCHIVE_ERROR(res, "archive_read_disk_set_standard_lookup:");
   std::vector<std::string>::const_iterator fileIt;
+  std::string dir = cmSystemTools::GetCurrentWorkingDirectory();
+  cmSystemTools::ChangeDirectory(toplevel);
   for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
     {
     // create a new entry for each file
@@ -208,7 +213,7 @@ int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
     // Get the relative path to the file
     std::string rp = cmSystemTools::RelativePath(toplevel, fileIt->c_str());
     // Set the name of the entry to the file name
-    archive_entry_set_pathname(entry, rp.c_str());
+    archive_entry_set_pathname(entry, rp.c_str());  
     res = archive_read_disk_entry_from_file(disk, entry, -1, 0);
     CHECK_ARCHIVE_ERROR(res, "archive_read_disk_entry_from_file:");
     // write  entry header
@@ -246,6 +251,7 @@ int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
       }
     archive_entry_free(entry);
     }
+  cmSystemTools::ChangeDirectory(dir.c_str());
   // close the archive and finish the write
   archive_write_close(a);
   archive_write_finish(a);
