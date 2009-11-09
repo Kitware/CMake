@@ -28,8 +28,18 @@ IF(UNIX)
   SET(CHECK_FILES ${CHECK_FILES} "d1/f2.txt")
 ENDIF(UNIX)
 
+# cleanup first in case there are files left from previous runs
+# if the umask is odd on the machine it might create files that
+# are not automatically over written.  These tests are run
+# each time the configure step is run.
+FILE(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/test_tar.tar")
+FILE(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/test_tgz.tgz")
+FILE(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/test_output_tar")
+FILE(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/test_output_tgz")
+
 MAKE_DIRECTORY("${CMAKE_CURRENT_BINARY_DIR}/test_output_tar")
 MAKE_DIRECTORY("${CMAKE_CURRENT_BINARY_DIR}/test_output_tgz")
+
 
 # Run tests
 EXEC_TAR_COMMAND("${CMAKE_CURRENT_BINARY_DIR}" "cvf \"${CMAKE_CURRENT_BINARY_DIR}/test_tar.tar\" tar_dir")
