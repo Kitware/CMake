@@ -135,6 +135,8 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(Unset Unset)
   ADD_TEST_MACRO(PolicyScope PolicyScope)
   ADD_TEST_MACRO(CrossCompile CrossCompile)
+  SET_TESTS_PROPERTIES(CrossCompile PROPERTIES
+    PASS_REGULAR_EXPRESSION "TRY_RUN.. invoked in cross-compiling mode")
   IF("${CMAKE_TEST_GENERATOR}" MATCHES "Make")
     ADD_TEST_MACRO(Policy0002 Policy0002)
   ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES "Make")

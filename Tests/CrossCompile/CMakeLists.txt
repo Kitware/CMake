@@ -1,8 +1,9 @@
 cmake_minimum_required (VERSION 2.6)
 PROJECT(CrossCompile)
 
+UNSET(run_result CACHE)
+
 #Simulate the cross compile condition
-SET(CMAKE_SYSTEM_NAME "systemName")
 SET(CMAKE_CROSSCOMPILING ON)
 
 ADD_EXECUTABLE(CrossCompile main.c)
