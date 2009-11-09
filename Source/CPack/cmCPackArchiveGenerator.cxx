@@ -170,6 +170,15 @@ int cmCPackArchiveGenerator::InitializeInternal()
 int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {
+  int res = ARCHIVE_OK;
+#define CHECK_ARCHIVE_ERROR(res, msg)           \
+   if(res != ARCHIVE_OK)\
+    {\
+    cmCPackLogger(cmCPackLog::LOG_ERROR, msg      \
+                  << archive_error_string(a)      \
+                  << "\n");                       \
+    return 0;                                     \
+    }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: "
                 << (toplevel ? toplevel : "(NULL)") << std::endl);
   // create a new archive
@@ -181,14 +190,16 @@ int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
   gf->Open(outFileName, false, true);
   StreamData data(gf, this);
   // pass callbacks to archive_write_open to handle stream
-  archive_write_open(a,
-                     &data,
-                     OpenArchive,
-                     WriteArchive, 
-                     CloseArchive);
+  res = archive_write_open(a,
+                           &data,
+                           OpenArchive,
+                           WriteArchive, 
+                           CloseArchive);
+  CHECK_ARCHIVE_ERROR(res, "archive_write_open:");
   // create a new disk struct
   struct archive* disk = archive_read_disk_new();
-  archive_read_disk_set_standard_lookup(disk);
+  res = archive_read_disk_set_standard_lookup(disk);
+  CHECK_ARCHIVE_ERROR(res, "archive_read_disk_set_standard_lookup:");
   std::vector<std::string>::const_iterator fileIt;
   for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
     {
@@ -198,31 +209,41 @@ int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
     std::string rp = cmSystemTools::RelativePath(toplevel, fileIt->c_str());
     // Set the name of the entry to the file name
     archive_entry_set_pathname(entry, rp.c_str());
-    // get the information about the file from stat
-    struct stat s;
-    stat(fileIt->c_str(), &s);
-    archive_read_disk_entry_from_file(disk, entry, -1, &s);
+    res = archive_read_disk_entry_from_file(disk, entry, -1, 0);
+    CHECK_ARCHIVE_ERROR(res, "archive_read_disk_entry_from_file:");
     // write  entry header
-    archive_write_header(a, entry);
-    // now copy contents of file into archive a
-    FILE* file = fopen(fileIt->c_str(), "rb");
-    if(!file)
+    res = archive_write_header(a, entry);
+    CHECK_ARCHIVE_ERROR(res, "archive_write_header:");
+    // the entry size can be 0 if it is a symlink
+    if(archive_entry_size(entry) > 0)
       {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with fopen(): " 
-                    << fileIt->c_str()
-                    << strerror(errno)
-                    << std::endl);
-      return 0;
+      // now copy contents of file into archive a
+      FILE* file = fopen(fileIt->c_str(), "rb");
+      if(!file)
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with fopen(): " 
+                      << fileIt->c_str()
+                      << strerror(errno)
+                      << std::endl);
+        return 0;
+        }
+      char buff[cmCPackTGZ_Data_BlockSize];
+      size_t len = fread(buff, 1, sizeof(buff), file);
+      while (len > 0)
+        {
+        size_t wlen = archive_write_data(a, buff, len);
+        if(wlen != len)
+          {
+          cmCPackLogger(cmCPackLog::LOG_ERROR, "archive_write_data(): " 
+                        << "tried to write " << len  << "\n"
+                        << "write " << wlen << "\n");
+          return 0;
+          }
+        len = fread(buff, 1, sizeof(buff), file);
+        }
+      // close the file and free the entry
+      fclose(file);
       }
-    char buff[cmCPackTGZ_Data_BlockSize];
-    int len = fread(buff, 1, sizeof(buff), file);
-    while (len > 0)
-      {
-      archive_write_data(a, buff, len);
-      len = fread(buff, 1, sizeof(buff), file);
-      }
-    // close the file and free the entry
-    fclose(file);
     archive_entry_free(entry);
     }
   // close the archive and finish the write
