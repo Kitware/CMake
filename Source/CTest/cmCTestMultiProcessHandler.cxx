@@ -196,6 +196,11 @@ void cmCTestMultiProcessHandler::StartNextTests()
     for(TestSet::iterator test = tests.begin();
         test != tests.end(); ++test)
       {
+      //in case this test has already been started due to dependency
+      if(this->TestRunningMap[*test] || this->TestFinishMap[*test])
+        {
+        continue;
+        }
       size_t processors = GetProcessorsUsed(*test);
       if(processors > numToStart)
         {
