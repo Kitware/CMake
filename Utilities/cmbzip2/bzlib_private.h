@@ -39,6 +39,12 @@
 # pragma warn -8066 /* Unreachable code.  */
 # pragma warn -8057 /* Unused parameter.  */
 #endif
+#if defined(_MSC_VER)
+/* 'integral size mismatch in argument; conversion supplied */
+# pragma warning(disable:4244)
+/* conversion from 'size_t' to 'off_t', possible loss of data */
+# pragma warning(disable:4267)
+#endif
 
 /*-- General stuff. --*/
 
