@@ -86,6 +86,12 @@ bool cmCTestSubdirCommand
     fname += "/";
     fname += *it;
 
+    //sanity check on relative path; if not, try absolute path
+    if ( !cmSystemTools::FileIsDirectory(fname.c_str()))
+      {
+      fname = *it;
+      }
+
     if ( !cmSystemTools::FileExists(fname.c_str()) )
       {
       // No subdirectory? So what...

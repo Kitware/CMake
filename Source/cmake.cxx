@@ -3387,11 +3387,6 @@ void cmake::DefineProperties(cmake *cm)
      "List of packages which were not found during the CMake run. Whether a "
      "package has been found is determined using the <NAME>_FOUND variables.");
 
-  cm->DefineProperty
-    ("PACKAGES_NOT_FOUND", cmProperty::GLOBAL,
-     "List of packages which were not found during the CMake run.",
-     "List of packages which were not found during the CMake run. Whether a "
-     "package has been found is determined using the <NAME>_FOUND variables.");
   cm->DefineProperty(
     "__CMAKE_DELETE_CACHE_CHANGE_VARS_", cmProperty::GLOBAL,
     "Internal property",

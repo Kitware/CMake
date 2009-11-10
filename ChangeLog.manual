@@ -1,3 +1,8 @@
+Changes in CMake 2.8.0 RC 6
+- Sync FindQt4 with KDE version
+- Fix #9090: Teach CTest subdirs() command to handle absolute paths
+- Fix CTest bug that could start a test twice
+
 Changes in CMake 2.8.0 RC 5
 - CTest now detects cycles in test dependency graph
 - Warn on set(PARENT_SCOPE) at top scope

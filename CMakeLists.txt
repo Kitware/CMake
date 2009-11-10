@@ -316,7 +316,7 @@ ENDMACRO (CMAKE_BUILD_UTILITIES)
 SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 8)
 SET(CMake_VERSION_PATCH 0)
-SET(CMake_VERSION_RC 5)
+SET(CMake_VERSION_RC 6)
 
 # We use odd minor numbers for development versions.
 # Use a date for the development patch level.

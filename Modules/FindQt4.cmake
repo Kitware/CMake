@@ -197,6 +197,7 @@
 #  QT_INCLUDE_DIR              Path to "include" of Qt4
 #  QT_QT3SUPPORT_INCLUDE_DIR   Path to "include/Qt3Support" 
 #  QT_QTASSISTANT_INCLUDE_DIR  Path to "include/QtAssistant" 
+#  QT_QTASSISTANTCLIENT_INCLUDE_DIR       Path to "include/QtAssistant"
 #  QT_QAXCONTAINER_INCLUDE_DIR  Path to "include/ActiveQt" (Windows only)
 #  QT_QAXSERVER_INCLUDE_DIR  Path to "include/ActiveQt" (Windows only)
 #  QT_QTCORE_INCLUDE_DIR       Path to "include/QtCore"         
@@ -204,18 +205,17 @@
 #  QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR   Path to "include/QtDesigner"
 #  QT_QTDBUS_INCLUDE_DIR       Path to "include/QtDBus" 
 #  QT_QTGUI_INCLUDE_DIR        Path to "include/QtGui" 
+#  QT_QTHELP_INCLUDE_DIR       Path to "include/QtHelp"
 #  QT_QTMOTIF_INCLUDE_DIR      Path to "include/QtMotif" 
 #  QT_QTNETWORK_INCLUDE_DIR    Path to "include/QtNetwork" 
 #  QT_QTNSPLUGIN_INCLUDE_DIR   Path to "include/QtNsPlugin" 
 #  QT_QTOPENGL_INCLUDE_DIR     Path to "include/QtOpenGL" 
-#  QT_QTSQL_INCLUDE_DIR        Path to "include/QtSql" 
-#  QT_QTXML_INCLUDE_DIR        Path to "include/QtXml" 
-#  QT_QTSVG_INCLUDE_DIR        Path to "include/QtSvg"
 #  QT_QTSCRIPT_INCLUDE_DIR     Path to "include/QtScript"
+#  QT_QTSQL_INCLUDE_DIR        Path to "include/QtSql" 
+#  QT_QTSVG_INCLUDE_DIR        Path to "include/QtSvg"
 #  QT_QTTEST_INCLUDE_DIR       Path to "include/QtTest"
-#  QT_QTASSISTANTCLIENT_INCLUDE_DIR       Path to "include/QtAssistant"
-#  QT_QTHELP_INCLUDE_DIR       Path to "include/QtHelp"
 #  QT_QTWEBKIT_INCLUDE_DIR     Path to "include/QtWebKit"
+#  QT_QTXML_INCLUDE_DIR        Path to "include/QtXml" 
 #  QT_QTXMLPATTERNS_INCLUDE_DIR  Path to "include/QtXmlPatterns"
 #  QT_PHONON_INCLUDE_DIR       Path to "include/phonon"
 #  QT_QTSCRIPTTOOLS_INCLUDE_DIR       Path to "include/QtScriptTools"
@@ -235,6 +235,7 @@
 #
 #  QT_QT3SUPPORT_LIBRARY            The Qt3Support library
 #  QT_QTASSISTANT_LIBRARY           The QtAssistant library
+#  QT_QTASSISTANTCLIENT_LIBRARY     The QtAssistantClient library
 #  QT_QAXCONTAINER_LIBRARY           The QAxContainer library (Windows only)
 #  QT_QAXSERVER_LIBRARY                The QAxServer library (Windows only)
 #  QT_QTCORE_LIBRARY                The QtCore library
@@ -242,21 +243,20 @@
 #  QT_QTDESIGNER_LIBRARY            The QtDesigner library
 #  QT_QTDESIGNERCOMPONENTS_LIBRARY  The QtDesignerComponents library
 #  QT_QTGUI_LIBRARY                 The QtGui library
+#  QT_QTHELP_LIBRARY                The QtHelp library
 #  QT_QTMOTIF_LIBRARY               The QtMotif library
 #  QT_QTNETWORK_LIBRARY             The QtNetwork library
 #  QT_QTNSPLUGIN_LIBRARY            The QtNsPLugin library
 #  QT_QTOPENGL_LIBRARY              The QtOpenGL library
-#  QT_QTSQL_LIBRARY                 The QtSql library
-#  QT_QTXML_LIBRARY                 The QtXml library
-#  QT_QTSVG_LIBRARY                 The QtSvg library
 #  QT_QTSCRIPT_LIBRARY              The QtScript library
+#  QT_QTSQL_LIBRARY                 The QtSql library
+#  QT_QTSVG_LIBRARY                 The QtSvg library
 #  QT_QTTEST_LIBRARY                The QtTest library
-#  QT_QTMAIN_LIBRARY                The qtmain library for Windows
 #  QT_QTUITOOLS_LIBRARY             The QtUiTools library
-#  QT_QTASSISTANTCLIENT_LIBRARY     The QtAssistantClient library
-#  QT_QTHELP_LIBRARY                The QtHelp library
 #  QT_QTWEBKIT_LIBRARY              The QtWebKit library
+#  QT_QTXML_LIBRARY                 The QtXml library
 #  QT_QTXMLPATTERNS_LIBRARY         The QtXmlPatterns library
+#  QT_QTMAIN_LIBRARY                The qtmain library for Windows
 #  QT_PHONON_LIBRARY                The phonon library
 #  QT_QTSCRIPTTOOLS_LIBRARY         The QtScriptTools library
 #  
@@ -564,6 +564,11 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_TRANSLATIONS_DIR ${qt_translations_dir} CACHE PATH "The location of the Qt translations" FORCE)
   ENDIF (QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR  OR  QT_QMAKE_CHANGED)
 
+  # Make variables changeble to the advanced user
+  MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_DOC_DIR QT_MKSPECS_DIR
+                    QT_PLUGINS_DIR QT_TRANSLATIONS_DIR)
+
+
   ########################################
   #
   #       Setting the INCLUDE-Variables
@@ -613,7 +618,7 @@ IF (QT4_QMAKE_FOUND)
               NO_DEFAULT_PATH
       )
   ENDFOREACH(QT_MODULE)
-  
+
   IF(WIN32)
     SET(QT_MODULES ${QT_MODULES} QAxContainer QAxServer)
     # Set QT_AXCONTAINER_INCLUDE_DIR and QT_AXSERVER_INCLUDE_DIR
@@ -628,7 +633,7 @@ IF (QT4_QMAKE_FOUND)
       NO_DEFAULT_PATH
       )
   ENDIF(WIN32)
-  
+
   # Set QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR
   FIND_PATH(QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR QDesignerComponents
     PATHS
@@ -652,7 +657,7 @@ IF (QT4_QMAKE_FOUND)
     ${QT_LIBRARY_DIR}/QtAssistant.framework/Headers
     NO_DEFAULT_PATH
     )
-  
+
   # Set QT_INCLUDE_DIR by removine "/QtCore" in the string ${QT_QTCORE_INCLUDE_DIR}
   IF( QT_QTCORE_INCLUDE_DIR )
     IF (QT_USE_FRAMEWORKS)
@@ -670,8 +675,7 @@ IF (QT4_QMAKE_FOUND)
   ENDIF( NOT QT_INCLUDE_DIR)
 
   # Make variables changeble to the advanced user
-  MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_INCLUDE_DIR QT_DOC_DIR QT_MKSPECS_DIR
-                    QT_PLUGINS_DIR QT_TRANSLATIONS_DIR)
+  MARK_AS_ADVANCED( QT_INCLUDE_DIR )
 
   # Set QT_INCLUDES
   SET( QT_INCLUDES ${QT_MKSPECS_DIR}/default ${QT_INCLUDE_DIR} )
@@ -735,8 +739,11 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_EDITION_DESKTOPLIGHT 1)
   ENDIF("${QT_EDITION}" MATCHES "DesktopLight")
 
-
-
+  ########################################
+  #
+  #       Setting the LIBRARY-Variables
+  #
+  ########################################
 
   # find the libraries
   FOREACH(QT_MODULE ${QT_MODULES})
@@ -1168,9 +1175,13 @@ IF (QT4_QMAKE_FOUND)
     SET(_header ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.h)
     SET(_impl   ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.cpp)
     SET(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.moc)
-  
+
+    # handling more arguments (as in FindQt4.cmake from KDE4) will come soon, then
+    # _params will be used for more than just -m
+    SET(_params -m)
+
     ADD_CUSTOM_COMMAND(OUTPUT ${_impl} ${_header}
-        COMMAND ${QT_DBUSXML2CPP_EXECUTABLE} -m -p ${_basename} ${_infile}
+        COMMAND ${QT_DBUSXML2CPP_EXECUTABLE} ${_params} -p ${_basename} ${_infile}
         DEPENDS ${_infile})
   
     SET_SOURCE_FILES_PROPERTIES(${_impl} PROPERTIES SKIP_AUTOMOC TRUE)
