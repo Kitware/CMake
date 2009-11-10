@@ -643,7 +643,7 @@ IF (QT4_QMAKE_FOUND)
     )
   
   # Set QT_QTASSISTANT_INCLUDE_DIR
-  FIND_PATH(QT_QTASSISTANT_INCLUDE_DIR QAssistantClient
+  FIND_PATH(QT_QTASSISTANT_INCLUDE_DIR QtAssistant
     PATHS
     ${QT_HEADERS_DIR}/QtAssistant
     ${QT_LIBRARY_DIR}/QtAssistant.framework/Headers
