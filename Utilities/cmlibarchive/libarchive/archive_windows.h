@@ -127,7 +127,9 @@
 #define strdup      _strdup
 #endif
 #define tzset       _tzset
+#ifndef __BORLANDC__
 #define umask       _umask
+#endif
 #define unlink      __la_unlink
 #define utimes      __la_utimes
 #define waitpid     __la_waitpid
