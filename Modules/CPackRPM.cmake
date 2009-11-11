@@ -52,7 +52,11 @@
 #  CPACK_RPM_PACKAGE_REQUIRES
 #     Mandatory : NO
 #     Default   : -
-#     May be used to set RPM dependencies. 
+#     May be used to set RPM dependencies (requires).
+#  CPACK_RPM_PACKAGES_PROVIDES
+#     Mandatory : NO
+#     Default   : -
+#     May be used to set RPM dependencies (provides).
 #  CPACK_RPM_SPEC_INSTALL_POST
 #     Mandatory : NO
 #     Default   : -
@@ -250,6 +254,16 @@ IF(CPACK_RPM_PACKAGE_REQUIRES)
   SET(TMP_RPM_REQUIRES "Requires: ${CPACK_RPM_PACKAGE_REQUIRES}")
 ENDIF(CPACK_RPM_PACKAGE_REQUIRES)
 
+# CPACK_RPM_PACKAGE_PROVIDES
+# Placeholder used to specify binary RPM dependencies (if any)
+# see http://www.rpm.org/max-rpm/s1-rpm-depend-manual-dependencies.html
+IF(CPACK_RPM_PACKAGE_PROVIDES)
+  IF(CPACK_RPM_PACKAGE_DEBUG)
+    MESSAGE("CPackRPM:Debug: User defined Provides:\n ${CPACK_RPM_PACKAGE_PROVIDES}")
+  ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+  SET(TMP_RPM_PROVIDES "Provides: ${CPACK_RPM_PACKAGE_PROVIDES}")
+ENDIF(CPACK_RPM_PACKAGE_PROVIDES)
+
 # CPACK_RPM_SPEC_INSTALL_POST
 # May be used to define a RPM post intallation script
 # for example setting it to "/bin/true" may prevent
@@ -327,6 +341,7 @@ License:        \@CPACK_RPM_PACKAGE_LICENSE\@
 Group:          \@CPACK_RPM_PACKAGE_GROUP\@
 Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_REQUIRES\@
+\@TMP_RPM_PROVIDES\@
 \@TMP_RPM_BUILDARCH\@
  
 #p define prefix \@CMAKE_INSTALL_PREFIX\@
