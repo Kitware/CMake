@@ -44,7 +44,7 @@
 #     The RPM package group.
 #  CPACK_RPM_PACKAGE_VENDOR 
 #     Mandatory : YES
-#     Default   : CPACK_PACKAGE_VENDOR if set or"unknown"
+#     Default   : CPACK_PACKAGE_VENDOR if set or "unknown"
 #     The RPM package group.
 #  CPACK_RPM_PACKAGE_DESCRIPTION
 #     Mandatory : YES
@@ -87,6 +87,24 @@
 #     cpack -D CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE=1 -G RPM
 #     The user may then use this file in order to hand-craft is own
 #     binary spec file which may be used with CPACK_RPM_USER_BINARY_SPECFILE.
+#  CPACK_RPM_PRE_INSTALL_SCRIPT_FILE
+#  CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE
+#     Mandatory : NO
+#     Default   : -
+#     May be used to embbed a pre (un)installation script in the spec file.
+#     The refered script file(s) will be read and directly
+#     put after the %pre or %preun section
+#     One may verify which scriptlet has been included with
+#      rpm -qp --scripts  package.rpm
+#  CPACK_RPM_POST_INSTALL_SCRIPT_FILE
+#  CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE
+#     Mandatory : NO
+#     Default   : -
+#     May be used to embbed a post (un)installation script in the spec file.
+#     The refered script file(s) will be read and directly
+#     put after the %post or %postun section
+#     One may verify which scriptlet has been included with
+#      rpm -qp --scripts  package.rpm
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -275,6 +293,48 @@ IF(CPACK_RPM_SPEC_INSTALL_POST)
   SET(TMP_RPM_SPEC_INSTALL_POST "%define __spec_install_post ${CPACK_RPM_SPEC_INSTALL_POST}")
 ENDIF(CPACK_RPM_SPEC_INSTALL_POST)
 
+# CPACK_RPM_POST_INSTALL_SCRIPT_FILE
+# CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE
+# May be used to embbed a post (un)installation script in the spec file.
+# The refered script file(s) will be read and directly
+# put after the %post or %postun section
+if(CPACK_RPM_POST_INSTALL_SCRIPT_FILE)
+  if(EXISTS ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
+    file(READ ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE} CPACK_RPM_SPEC_POSTINSTALL)
+  else(EXISTS ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
+    message("CPackRPM:Warning: CPACK_RPM_POST_INSTALL_SCRIPT_FILE <${CPACK_RPM_POST_INSTALL_SCRIPT_FILE}> does not exists - ignoring")
+  endif(EXISTS ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
+endif(CPACK_RPM_POST_INSTALL_SCRIPT_FILE)
+
+if(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE)
+  if(EXISTS ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
+    file(READ ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE} CPACK_RPM_SPEC_POSTUNINSTALL)
+  else(EXISTS ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
+    message("CPackRPM:Warning: CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE}> does not exists - ignoring")
+  endif(EXISTS ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
+endif(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE)
+
+# CPACK_RPM_PRE_INSTALL_SCRIPT_FILE
+# CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE
+# May be used to embbed a pre (un)installation script in the spec file.
+# The refered script file(s) will be read and directly
+# put after the %pre or %preun section
+if(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE)
+  if(EXISTS ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
+    file(READ ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE} CPACK_RPM_SPEC_PREINSTALL)
+  else(EXISTS ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
+    message("CPackRPM:Warning: CPACK_RPM_PRE_INSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE}> does not exists - ignoring")
+  endif(EXISTS ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
+endif(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE)
+
+if(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE)
+  if(EXISTS ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
+    file(READ ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE} CPACK_RPM_SPEC_PREUNINSTALL)
+  else(EXISTS ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
+    message("CPackRPM:Warning: CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE}> does not exists - ignoring")
+  endif(EXISTS ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
+endif(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE)
+
 # CPACK_RPM_SPEC_MORE_DEFINE
 # This is a generated spec rpm file spaceholder
 IF(CPACK_RPM_SPEC_MORE_DEFINE)
@@ -368,6 +428,18 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 #p install
 
 %clean
+
+%post
+\@CPACK_RPM_SPEC_POSTINSTALL\@
+
+%postun
+\@CPACK_RPM_SPEC_POSTUNINSTALL\@
+
+%pre
+\@CPACK_RPM_SPEC_PREINSTALL\@
+
+%preun
+\@CPACK_RPM_SPEC_PREUNINSTALL\@
 
 %files
 %defattr(-,root,root,-)
