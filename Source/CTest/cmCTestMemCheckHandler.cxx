@@ -462,7 +462,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     if ( !this->MemoryTesterOptions.size() )
       {
       this->MemoryTesterOptions = "-q --tool=memcheck --leak-check=yes "
-        "--show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=100";
+        "--show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=50";
       }
     if ( this->CTest->GetCTestConfiguration(
         "MemoryCheckSuppressionFile").size() )
