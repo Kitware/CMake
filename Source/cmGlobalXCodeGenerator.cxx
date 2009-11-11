@@ -1521,6 +1521,16 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
     }
+  if(configName && *configName)
+    {
+    std::string linkFlagsVar = "LINK_FLAGS_";
+    linkFlagsVar += cmSystemTools::UpperCase(configName);
+    if(const char* linkFlags = target.GetProperty(linkFlagsVar.c_str()))
+      {
+      extraLinkOptions += " ";
+      extraLinkOptions += linkFlags;
+      }
+    }
 
   // Get the product name components.
   std::string pnprefix;

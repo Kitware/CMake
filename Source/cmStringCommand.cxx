@@ -700,6 +700,9 @@ bool cmStringCommand
     return false;
     }
 
+  static bool seeded = false;
+  bool force_seed = false;
+  int seed = (int) time(NULL);
   int length = 5;
   const char cmStringCommandDefaultAlphabet[] = "qwertyuiopasdfghjklzxcvbnm"
     "QWERTYUIOPASDFGHJKLZXCVBNM"
@@ -723,6 +726,12 @@ bool cmStringCommand
         ++i;
         alphabet = args[i];
         }
+      else if ( args[i] == "RANDOM_SEED" )
+        {
+        ++i;
+        seed = atoi(args[i].c_str());
+        force_seed = true;
+        }
       }
     }
   if ( !alphabet.size() )
@@ -744,7 +753,13 @@ bool cmStringCommand
   const std::string& variableName = args[args.size()-1];
 
   std::vector<char> result;
-  srand((int)time(NULL));
+
+  if (!seeded || force_seed)
+    {
+    seeded = true;
+    srand(seed);
+    }
+
   const char* alphaPtr = alphabet.c_str();
   int cc;
   for ( cc = 0; cc < length; cc ++ )

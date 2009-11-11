@@ -1198,6 +1198,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     -S "${CMake_BINARY_DIR}/Tests/CTestTestSubdir/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestSubdir/testOutput.log"
     )
+  #make sure all 3 subdirs were added
+  SET_TESTS_PROPERTIES(CTestTestSubdir PROPERTIES
+    PASS_REGULAR_EXPRESSION "0 tests failed out of 3")
     
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestTimeout/test.cmake.in"

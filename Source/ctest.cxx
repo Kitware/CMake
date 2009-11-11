@@ -212,6 +212,13 @@ static const char * cmDocumentationOptions[][3] =
    "This option allows performing the same CTest action (such as test) "
    "multiple times and submit all stages to the same dashboard (Dart2 "
    "required). Each execution requires different index." },
+  {"--help-command <cmd> [<file>]", "Show help for a single command and exit.",
+   "Prints the help for the command to stdout or to the specified file." },
+  {"--help-command-list [<file>]", "List available commands and exit.",
+   "Prints the list of all available listfile commands to stdout or the "
+   "specified file." },
+  {"--help-commands [<file>]", "Print help for all commands and exit.",
+   "Prints the help for all commands to stdout or to the specified file." },
   {0,0,0}
 };
 

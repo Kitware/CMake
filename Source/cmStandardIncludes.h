@@ -18,7 +18,7 @@
 
 // include configure generated  header to define CMAKE_NO_ANSI_STREAM_HEADERS,
 // CMAKE_NO_STD_NAMESPACE, and other macros.
-#include "cmConfigure.h"
+#include <cmConfigure.h>
 #include <cmsys/Configure.hxx>
 
 #ifdef _MSC_VER

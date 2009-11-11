@@ -182,6 +182,14 @@ elseif(testname STREQUAL random_with_various_alphabets) # pass
   string(RANDOM LENGTH 1 ALPHABET "Q" v)
   message(STATUS "v='${v}'")
 
+  # seed values -- 2 same, then 1 different
+  string(RANDOM LENGTH 32 ALPHABET "ACGT" RANDOM_SEED 987654 v)
+  message(STATUS "v='${v}'")
+  string(RANDOM LENGTH 32 ALPHABET "ACGT" RANDOM_SEED 987654 v)
+  message(STATUS "v='${v}'")
+  string(RANDOM LENGTH 32 ALPHABET "ACGT" RANDOM_SEED 876543 v)
+  message(STATUS "v='${v}'")
+
   # alphabet of many colors - use all the crazy keyboard characters
   string(RANDOM LENGTH 78 ALPHABET "~`!@#$%^&*()_-+={}[]\\|:\\;'\",.<>/?" v)
   message(STATUS "v='${v}'")

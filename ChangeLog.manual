@@ -1,5 +1,18 @@
+Changes in CMake 2.8.0 RC 7
+- Partially sync FindQt4 with KDE version
+- Improve implementation of fix for #9090
+- Fix CTest infinite loop when test executable could not be found
+- Fix #9833: Document ctest --help-command
+- FindCUDA: Fix -fPIC from being used on executable object files
+- Fix #9654: %files section in spec file should not list directories
+- Fix #9851: Better STRING(RANDOM) seeding
+- Fix double bootstrap build for in source builds
+- Fix CTest to use allowed value for valgrind --num-callers
+- Remove non-language implicit link dependencies
+- Implement LINK_FLAGS_<CONFIG> property on Xcode
+
 Changes in CMake 2.8.0 RC 6
-- Sync FindQt4 with KDE version
+- Partially sync FindQt4 with KDE version
 - Fix #9090: Teach CTest subdirs() command to handle absolute paths
 - Fix CTest bug that could start a test twice
 

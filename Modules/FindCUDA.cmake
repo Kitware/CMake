@@ -161,10 +161,6 @@
 #     cuda file to Visual Studio it knows that this file produces an object file
 #     and will link in the resulting object file automatically.
 #
-#     This script also looks at optional arguments STATIC, SHARED, or MODULE to
-#     override the behavior specified by the value of the CMake variable
-#     BUILD_SHARED_LIBS.  See BUILD_SHARED_LIBS below for more details.
-#
 #     This script will also generate a separate cmake script that is used at
 #     build time to invoke nvcc.  This is for serveral reasons.
 #
@@ -181,13 +177,13 @@
 #       make the build rule dependent on the file, the output files will be
 #       regenerated when the options change.
 #
-#     In addition, on some systems special flags are added for building objects
-#     intended for shared libraries.  FindCUDA make use of the CMake variable
-#     BUILD_SHARED_LIBS and the usual STATIC, SHARED, and MODULE arguments to
-#     determine if these flags should be used.  Please set BUILD_SHARED_LIBS or
-#     pass in STATIC, SHARED, or MODULE according to how the objects are to be
-#     used before calling CUDA_ADD_LIBRARY.  A preprocessor macro,
-#     <target_name>_EXPORTS is defined when BUILD_SHARED_LIBS is defined.
+#     This script also looks at optional arguments STATIC, SHARED, or MODULE to
+#     determine when to target the object compilation for a shared library.
+#     BUILD_SHARED_LIBS is ignored in CUDA_WRAP_SRCS, but it is respected in
+#     CUDA_ADD_LIBRARY.  On some systems special flags are added for building
+#     objects intended for shared libraries.  A preprocessor macro,
+#     <target_name>_EXPORTS is defined when a shared library compilation is
+#     detected.
 #
 #     Flags passed into add_definitions with -D or /D are passed along to nvcc.
 #
@@ -755,6 +751,27 @@ function(CUDA_ADD_CUDA_INCLUDE_ONCE)
   endif()
 endfunction()
 
+function(CUDA_BUILD_SHARED_LIBRARY shared_flag)
+  set(cmake_args ${ARGN})
+  # If SHARED, MODULE, or STATIC aren't already in the list of arguments, then
+  # add SHARED or STATIC based on the value of BUILD_SHARED_LIBS.
+  list(FIND cmake_args SHARED _cuda_found_SHARED)
+  list(FIND cmake_args MODULE _cuda_found_MODULE)
+  list(FIND cmake_args STATIC _cuda_found_STATIC)
+  if( _cuda_found_SHARED GREATER -1 OR
+      _cuda_found_MODULE GREATER -1 OR
+      _cuda_found_STATIC GREATER -1)
+    set(_cuda_build_shared_libs)
+  else()
+    if (BUILD_SHARED_LIBS)
+      set(_cuda_build_shared_libs SHARED)
+    else()
+      set(_cuda_build_shared_libs STATIC)
+    endif()
+  endif()
+  set(${shared_flag} ${_cuda_build_shared_libs} PARENT_SCOPE)
+endfunction()
+
 ##############################################################################
 # This helper macro populates the following variables and setups up custom
 # commands and targets to invoke the nvcc compiler to generate C or PTX source
@@ -847,8 +864,9 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   CUDA_GET_SOURCES_AND_OPTIONS(_cuda_wrap_sources _cuda_wrap_cmake_options _cuda_wrap_options ${ARGN})
   CUDA_PARSE_NVCC_OPTIONS(CUDA_WRAP_OPTION_NVCC_FLAGS ${_cuda_wrap_options})
 
-  # Figure out if we are building a shared library.  Default the value of BUILD_SHARED_LIBS.
-  set(_cuda_build_shared_libs ${BUILD_SHARED_LIBS})
+  # Figure out if we are building a shared library.  BUILD_SHARED_LIBS is
+  # respected in CUDA_ADD_LIBRARY.
+  set(_cuda_build_shared_libs FALSE)
   # SHARED, MODULE
   list(FIND _cuda_wrap_cmake_options SHARED _cuda_found_SHARED)
   list(FIND _cuda_wrap_cmake_options MODULE _cuda_found_MODULE)
@@ -866,6 +884,8 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     # If we are setting up code for a shared library, then we need to add extra flags for
     # compiling objects for shared libraries.
     set(CUDA_HOST_SHARED_FLAGS ${CMAKE_SHARED_LIBRARY_${CUDA_C_OR_CXX}_FLAGS})
+  else()
+    set(CUDA_HOST_SHARED_FLAGS)
   endif()
   # Only add the CMAKE_{C,CXX}_FLAGS if we are propagating host flags.  We
   # always need to set the SHARED_FLAGS, though.
@@ -1083,8 +1103,10 @@ macro(CUDA_ADD_LIBRARY cuda_target)
 
   # Separate the sources from the options
   CUDA_GET_SOURCES_AND_OPTIONS(_sources _cmake_options _options ${ARGN})
+  CUDA_BUILD_SHARED_LIBRARY(_cuda_shared_flag ${ARGN})
   # Create custom commands and targets for each file.
-  CUDA_WRAP_SRCS( ${cuda_target} OBJ _generated_files ${_sources} ${_cmake_options}
+  CUDA_WRAP_SRCS( ${cuda_target} OBJ _generated_files ${_sources}
+    ${_cmake_options} ${_cuda_shared_flag}
     OPTIONS ${_options} )
 
   # Add the library.

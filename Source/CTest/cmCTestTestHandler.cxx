@@ -82,17 +82,20 @@ bool cmCTestSubdirCommand
   for ( it = args.begin(); it != args.end(); ++ it )
     {
     cmSystemTools::ChangeDirectory(cwd.c_str());
-    std::string fname = cwd;
-    fname += "/";
-    fname += *it;
+    std::string fname;
 
-    //sanity check on relative path; if not, try absolute path
-    if ( !cmSystemTools::FileIsDirectory(fname.c_str()))
+    if(cmSystemTools::FileIsFullPath(it->c_str()))
       {
       fname = *it;
       }
+    else
+      {
+      fname = cwd;
+      fname += "/";
+      fname += *it;
+      }
 
-    if ( !cmSystemTools::FileExists(fname.c_str()) )
+    if ( !cmSystemTools::FileIsDirectory(fname.c_str()) )
       {
       // No subdirectory? So what...
       continue;

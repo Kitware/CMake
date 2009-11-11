@@ -17,7 +17,7 @@
 # code.
 
 function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var)
-  set(implicit_libs "")
+  set(implicit_libs_tmp "")
   set(implicit_dirs_tmp)
   set(log "")
 
@@ -53,11 +53,11 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var)
         elseif("${arg}" MATCHES "^-l[^:]")
           # Unix library.
           string(REGEX REPLACE "^-l" "" lib "${arg}")
-          list(APPEND implicit_libs ${lib})
+          list(APPEND implicit_libs_tmp ${lib})
           set(log "${log}    arg [${arg}] ==> lib [${lib}]\n")
         elseif("${arg}" MATCHES "^(.:)?[/\\].*\\.a$")
           # Unix library full path.
-          list(APPEND implicit_libs ${arg})
+          list(APPEND implicit_libs_tmp ${arg})
           set(log "${log}    arg [${arg}] ==> lib [${arg}]\n")
         elseif("${arg}" MATCHES "^-Y(P,)?")
           # Sun search path.
@@ -67,11 +67,11 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var)
           set(log "${log}    arg [${arg}] ==> dirs [${dirs}]\n")
         elseif("${arg}" MATCHES "^-l:")
           # HP named library.
-          list(APPEND implicit_libs ${arg})
+          list(APPEND implicit_libs_tmp ${arg})
           set(log "${log}    arg [${arg}] ==> lib [${arg}]\n")
         elseif("${arg}" MATCHES "^-z(all|default|weak)extract")
           # Link editor option.
-          list(APPEND implicit_libs ${arg})
+          list(APPEND implicit_libs_tmp ${arg})
           set(log "${log}    arg [${arg}] ==> opt [${arg}]\n")
         else()
           set(log "${log}    arg [${arg}] ==> ignore\n")
@@ -87,6 +87,17 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var)
       set(log "${log}    dirs [${paths}]\n")
     else()
       set(log "${log}  ignore line: [${line}]\n")
+    endif()
+  endforeach()
+
+  # Cleanup list of libraries and flags.
+  # We remove items that are not language-specific.
+  set(implicit_libs "")
+  foreach(lib IN LISTS implicit_libs_tmp)
+    if("${lib}" MATCHES "^(crt.*\\.o|gcc.*|System.*)$")
+      set(log "${log}  remove lib [${lib}]\n")
+    else()
+      list(APPEND implicit_libs "${lib}")
     endif()
   endforeach()
 
