@@ -284,7 +284,8 @@ archive_compressor_bzip2_finish(struct archive_write *a)
         }
 
         /* Finish compression cycle. */
-        if ((ret = drive_compressor(a, state, 1)))
+        ret = drive_compressor(a, state, 1);
+        if (ret)
             goto cleanup;
 
         /* Optionally, pad the final compressed block. */

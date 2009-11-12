@@ -237,7 +237,8 @@ hash(const char *p)
     unsigned g, h = 0;
     while (*p != '\0') {
         h = ( h << 4 ) + *p++;
-        if (( g = h & 0xF0000000 )) {
+        g = h & 0xF0000000;
+        if (g) {
             h ^= g >> 24;
             h &= 0x0FFFFFFF;
         }
