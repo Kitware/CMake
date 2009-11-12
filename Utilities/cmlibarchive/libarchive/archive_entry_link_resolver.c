@@ -268,7 +268,7 @@ find_entry(struct archive_entry_linkresolver *res,
     hash = (int)(dev ^ ino);
 
     /* Try to locate this entry in the links cache. */
-    bucket = hash % res->number_buckets;
+    bucket = hash % (int)res->number_buckets;
     for (le = res->buckets[bucket]; le != NULL; le = le->next) {
         if (le->hash == hash
             && dev == archive_entry_dev(le->canonical)
@@ -351,7 +351,7 @@ insert_entry(struct archive_entry_linkresolver *res,
         grow_hash(res);
 
     hash = archive_entry_dev(entry) ^ archive_entry_ino64(entry);
-    bucket = hash % res->number_buckets;
+    bucket = hash % (int)res->number_buckets;
 
     /* If we could allocate the entry, record it. */
     if (res->buckets[bucket] != NULL)
