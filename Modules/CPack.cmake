@@ -793,9 +793,23 @@ cpack_set_if_not_set(CPACK_INSTALL_CMAKE_PROJECTS
   "${CMAKE_BINARY_DIR};${CMAKE_PROJECT_NAME};ALL;/")
 cpack_set_if_not_set(CPACK_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 cpack_set_if_not_set(CPACK_TOPLEVEL_TAG "${CPACK_SYSTEM_NAME}")
-
+# if the user has set CPACK_NSIS_DISPLAY_NAME remember it
+if(DEFINED CPACK_NSIS_DISPLAY_NAME)
+  SET(CPACK_NSIS_DISPLAY_NAME_SET TRUE)
+endif()
+# if the user has set CPACK_NSIS_DISPLAY
+# explicitly, then use that as the default
+# value of CPACK_NSIS_PACKAGE_NAME  instead
+# of CPACK_PACKAGE_INSTALL_DIRECTORY 
 cpack_set_if_not_set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
-cpack_set_if_not_set(CPACK_NSIS_PACKAGE_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+
+if(CPACK_NSIS_DISPLAY_NAME_SET)
+  string(REPLACE "\\" "\\\\" 
+    _NSIS_DISPLAY_NAME_TMP  "${CPACK_NSIS_DISPLAY_NAME}")
+  cpack_set_if_not_set(CPACK_NSIS_PACKAGE_NAME "${_NSIS_DISPLAY_NAME_TMP}")
+else()
+  cpack_set_if_not_set(CPACK_NSIS_PACKAGE_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+endif()
 
 cpack_set_if_not_set(CPACK_OUTPUT_CONFIG_FILE
   "${CMAKE_BINARY_DIR}/CPackConfig.cmake")
