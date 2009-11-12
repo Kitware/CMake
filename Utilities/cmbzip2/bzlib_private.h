@@ -44,6 +44,8 @@
 # pragma warning(disable:4244)
 /* conversion from 'size_t' to 'off_t', possible loss of data */
 # pragma warning(disable:4267)
+/* warning C4127: conditional expression is constant*/
+# pragma warning(disable:4127)
 #endif
 
 /*-- General stuff. --*/
