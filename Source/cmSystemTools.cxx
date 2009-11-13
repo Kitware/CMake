@@ -2052,6 +2052,8 @@ bool extract_tar(const char* outFileName, bool verbose,
         {
         cmSystemTools::Error("Problem with archive_write_header(): ",
                              archive_error_string(a));
+        cmSystemTools::Error("Curren file:", 
+                             archive_entry_pathname(entry));
         }
       else 
         {
