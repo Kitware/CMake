@@ -106,14 +106,14 @@ find_program(MPIEXEC
 
 # call get_filename_component twice to remove mpiexec and the directory it exists in (typically bin).
 # This gives us a fairly reliable base directory to search for /bin /lib and /include from.
-get_filename_component(MPI_BASE_DIR "${MPIEXEC}" PATH)
-get_filename_component(MPI_BASE_DIR "${MPI_BASE_DIR}" PATH)
+get_filename_component(_MPI_BASE_DIR "${MPIEXEC}" PATH)
+get_filename_component(_MPI_BASE_DIR "${_MPI_BASE_DIR}" PATH)
 
 # If there is an mpi compiler find it and interogate (farther below) it for the include
-# and lib dirs otherwise we will continue to search from ${MPI_BASE_DIR}.
+# and lib dirs otherwise we will continue to search from ${_MPI_BASE_DIR}.
 find_program(MPI_COMPILER
   NAMES mpic++ mpicxx mpiCC mpicc
-  HINTS "${MPI_BASE_DIR}"
+  HINTS "${_MPI_BASE_DIR}"
   PATH_SUFFIXES bin
   DOC "MPI compiler. Used only to detect MPI compilation flags.")
 mark_as_advanced(MPI_COMPILER)
@@ -222,7 +222,7 @@ elseif (MPI_COMPILE_CMDLINE)
     # If all else fails, just search for mpi.h in the normal include
     # paths.
     find_path(MPI_INCLUDE_PATH mpi.h
-  HINTS ${MPI_BASE_DIR} ${MPI_PREFIX_PATH}
+  HINTS ${_MPI_BASE_DIR} ${MPI_PREFIX_PATH}
   PATH_SUFFIXES include
     )
     set(MPI_INCLUDE_PATH_WORK ${MPI_INCLUDE_PATH})
@@ -304,7 +304,7 @@ elseif (MPI_COMPILE_CMDLINE)
 else (MPI_COMPILE_CMDLINE)
 # No MPI compiler to interogate so attempt to find everything with find functions.
   find_path(MPI_INCLUDE_PATH mpi.h
-    HINTS ${MPI_BASE_DIR} ${MPI_PREFIX_PATH}
+    HINTS ${_MPI_BASE_DIR} ${MPI_PREFIX_PATH}
     PATH_SUFFIXES include
     )
 
@@ -317,13 +317,13 @@ else (MPI_COMPILE_CMDLINE)
 
   find_library(MPI_LIBRARY
     NAMES mpi mpich msmpi
-    HINTS ${MPI_BASE_DIR} ${MPI_PREFIX_PATH}
+    HINTS ${_MPI_BASE_DIR} ${MPI_PREFIX_PATH}
     PATH_SUFFIXES lib lib/${MS_MPI_ARCH_DIR} Lib Lib/${MS_MPI_ARCH_DIR}
     )
 
   find_library(MPI_EXTRA_LIBRARY
     NAMES mpi++
-    HINTS ${MPI_BASE_DIR} ${MPI_PREFIX_PATH}
+    HINTS ${_MPI_BASE_DIR} ${MPI_PREFIX_PATH}
     PATH_SUFFIXES lib
     DOC "Extra MPI libraries to link against.")
 
@@ -360,4 +360,4 @@ mark_as_advanced(MPI_INCLUDE_PATH MPI_COMPILE_FLAGS MPI_LINK_FLAGS MPI_LIBRARY
 # unset to cleanup namespace
 unset(MPI_PACKAGE_DIR)
 unset(MPI_PREFIX_PATH)
-unset(MPI_BASE_DIR)
+unset(_MPI_BASE_DIR)
