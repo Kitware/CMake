@@ -1,3 +1,6 @@
+Changes in CMake 2.8.0 Release
+- CPack: Honor CPACK_NSIS_DISPLAY_NAME (fixes regression)
+
 Changes in CMake 2.8.0 RC 7
 - Partially sync FindQt4 with KDE version
 - Improve implementation of fix for #9090
