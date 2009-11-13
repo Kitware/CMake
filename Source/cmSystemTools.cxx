@@ -1973,6 +1973,9 @@ namespace{
     fprintf(out, " -> %s", archive_entry_symlink(entry));
     }
 }
+#ifdef __BORLANDC__
+# pragma warn -8066 /* unreachable code */
+#endif
   
 int copy_data(struct archive *ar, struct archive *aw)
 {
