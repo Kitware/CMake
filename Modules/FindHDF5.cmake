@@ -28,7 +28,7 @@
 # with the HDF5 distribution that may be useful for regression testing.
 # 
 # This module will define the following variables:
-#  HDF5_INCLUDE_DIR - Location of the hdf5 includes
+#  HDF5_INCLUDE_DIRS - Location of the hdf5 includes
 #  HDF5_DEFINITIONS - Required compiler definitions for HDF5
 #  HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings.
 #  HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
@@ -151,7 +151,7 @@ macro( _HDF5_parse_compile_line
     endforeach()
 endmacro()
 
-if( HDF5_INCLUDE_DIR AND HDF5_LIBRARIES )
+if( HDF5_INCLUDE_DIRS AND HDF5_LIBRARIES )
     # Do nothing: we already have HDF5_INCLUDE_PATH and HDF5_LIBRARIES in the
     # cache, it would be a shame to override them
 else()
@@ -209,7 +209,7 @@ else()
                 Include
         )
         mark_as_advanced( HDF5_${LANGUAGE}_INCLUDE_DIR )
-        list( APPEND HDF5_INCLUDE_DIR ${HDF5_${LANGUAGE}_INCLUDE_DIR} )
+        list( APPEND HDF5_INCLUDE_DIRS ${HDF5_${LANGUAGE}_INCLUDE_DIR} )
         
         set( HDF5_${LANGUAGE}_LIBRARY_NAMES 
             ${HDF5_${LANGUAGE}_LIBRARY_NAMES_INIT} 
@@ -266,8 +266,8 @@ else()
     # We may have picked up some duplicates in various lists during the above
     # process for the language bindings (both the C and C++ bindings depend on
     # libz for example).  Remove the duplicates.
-    if( HDF5_INCLUDE_DIR )
-        list( REMOVE_DUPLICATES HDF5_INCLUDE_DIR )
+    if( HDF5_INCLUDE_DIRS )
+        list( REMOVE_DUPLICATES HDF5_INCLUDE_DIRS )
     endif()
     if( HDF5_LIBRARIES_DEBUG )
         list( REMOVE_DUPLICATES HDF5_LIBRARIES_DEBUG )
@@ -292,9 +292,9 @@ else()
     # If the HDF5 include directory was found, open H5pubconf.h to determine if
     # HDF5 was compiled with parallel IO support
     set( HDF5_IS_PARALLEL FALSE )
-    if( HDF5_INCLUDE_DIR )
-        if( EXISTS "${HDF5_INCLUDE_DIR}/h5pubconf.h" )
-            file( STRINGS "${HDF5_INCLUDE_DIR}/H5pubconf.h" 
+    if( HDF5_INCLUDE_DIRS )
+        if( EXISTS "${HDF5_INCLUDE_DIRS}/h5pubconf.h" )
+            file( STRINGS "${HDF5_INCLUDE_DIRS}/H5pubconf.h" 
                 HDF5_HAVE_PARALLEL_DEFINE
                 REGEX "HAVE_PARALLEL 1" )
             if( HDF5_HAVE_PARALLEL_DEFINE )
@@ -310,11 +310,11 @@ endif()
 
 find_package_handle_standard_args( HDF5 DEFAULT_MSG 
     HDF5_LIBRARIES 
-    HDF5_INCLUDE_DIR
+    HDF5_INCLUDE_DIRS
 )
 
 mark_as_advanced( 
-    HDF5_INCLUDE_DIR 
+    HDF5_INCLUDE_DIRS 
     HDF5_LIBRARIES 
     HDF5_DEFINTIONS
     HDF5_LIBRARY_DIRS
