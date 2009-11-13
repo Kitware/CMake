@@ -16,7 +16,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "Source.CursesDialog.form"
   "Utilities.cmcurl"
   "Utilities.cmexpat."
-  "Utilities.cmtar"
+  "Utilities.cmlibarchive"
   "/usr/include.*warning.*shadowed declaration is here"
   "/usr/bin/ld.*warning.*-..*directory.name.*bin.*does not exist"
   "Redeclaration of .send..... with a different storage class specifier"
