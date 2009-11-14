@@ -55,8 +55,7 @@ bool SetArchiveType(struct archive* a,
     {
     case cmCPackArchiveGenerator::TAR:
       // maybe this:
-      //res =  archive_write_set_format_pax(a);
-      res = archive_write_set_format_ustar(a); // is this what we want?
+      res = archive_write_set_format_pax_restricted(a);
       break;
     case cmCPackArchiveGenerator::ZIP:
       res = archive_write_set_format_zip(a);

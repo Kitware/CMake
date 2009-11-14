@@ -1779,7 +1779,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
     res = archive_write_set_compression_none(a); 
     CHECK_ARCHIVE_ERROR(res, "Can not set none:");
     }
-  res = archive_write_set_format_ustar(a);
+  res = archive_write_set_format_pax_restricted(a);
   CHECK_ARCHIVE_ERROR(res, "Can not set tar format:");
   res = archive_write_open_file(a, outFileName);
   CHECK_ARCHIVE_ERROR(res, "write open:");
