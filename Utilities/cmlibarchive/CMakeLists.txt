@@ -732,9 +732,9 @@ ENDIF(MSVC)
 # Especially for early development, we want to be a little
 # aggressive about diagnosing build problems; this can get
 # relaxed somewhat in final shipping versions.
-IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
-  ADD_DEFINITIONS(-Wall -Werror)
-ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+#IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+#  ADD_DEFINITIONS(-Wall -Werror)
+#ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
 
 IF(ENABLE_TEST)
 ADD_CUSTOM_TARGET(run_all_tests)
