@@ -257,10 +257,10 @@ protected:
 
   // Evaluate the memory information.
   int QueryMemory();
-  unsigned long TotalVirtualMemory;
-  unsigned long AvailableVirtualMemory;
-  unsigned long TotalPhysicalMemory;
-  unsigned long AvailablePhysicalMemory;
+  size_t TotalVirtualMemory;
+  size_t AvailableVirtualMemory;
+  size_t TotalPhysicalMemory;
+  size_t AvailablePhysicalMemory;
 
   size_t CurrentPositionInFile;
 
@@ -2771,7 +2771,7 @@ bool SystemInformationImplementation::ParseSysCtl()
   uint64_t value = 0;
   size_t len = sizeof(value);
   sysctlbyname("hw.memsize", &value, &len, NULL, 0);
-  this->TotalPhysicalMemory = value/1048576;
+  this->TotalPhysicalMemory = static_cast< size_t >( value/1048576 );
 
   // Parse values for Mac
   this->AvailablePhysicalMemory = 0;
@@ -2782,7 +2782,7 @@ bool SystemInformationImplementation::ParseSysCtl()
     {
     err = sysctlbyname("hw.pagesize", &value, &len, NULL, 0);
     int64_t available_memory = vmstat.free_count * value;
-    this->AvailablePhysicalMemory = available_memory / 1048576;
+    this->AvailablePhysicalMemory = static_cast< size_t >( available_memory / 1048576 );
     }
 
 #ifdef VM_SWAPUSAGE
@@ -2794,8 +2794,8 @@ bool SystemInformationImplementation::ParseSysCtl()
   err = sysctl(mib, miblen, &swap, &len, NULL, 0);
   if (err == 0)
     {
-    this->AvailableVirtualMemory = swap.xsu_avail/1048576;
-    this->TotalVirtualMemory = swap.xsu_total/1048576;
+    this->AvailableVirtualMemory = static_cast< size_t >( swap.xsu_avail/1048576 );
+    this->TotalVirtualMemory = static_cast< size_t >( swap.xsu_total/1048576 );
     }
 #else
    this->AvailableVirtualMemory = 0;
@@ -2811,7 +2811,7 @@ bool SystemInformationImplementation::ParseSysCtl()
 
   len = sizeof(value);
   sysctlbyname("hw.cpufrequency", &value, &len, NULL, 0);
-  this->CPUSpeedInMHz = value / 1048576;
+  this->CPUSpeedInMHz = static_cast< float >( value )/ 1048576;
 
 
   // Chip family
@@ -2859,14 +2859,14 @@ bool SystemInformationImplementation::ParseSysCtl()
     // Chip Model
     len = sizeof(value);
     err = sysctlbyname("machdep.cpu.model", &value, &len, NULL, 0);
-    this->ChipID.Model = value;
+    this->ChipID.Model = static_cast< int >( value );
     }
   // Cache size
   len = sizeof(value);
   err = sysctlbyname("hw.l1icachesize", &value, &len, NULL, 0);
-  this->Features.L1CacheSize = value;
+  this->Features.L1CacheSize = static_cast< int >( value );
   err = sysctlbyname("hw.l2cachesize", &value, &len, NULL, 0);
-  this->Features.L2CacheSize = value;
+  this->Features.L2CacheSize = static_cast< int >( value );
   
   return true;
 #else
