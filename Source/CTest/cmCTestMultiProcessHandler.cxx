@@ -43,8 +43,11 @@ cmCTestMultiProcessHandler::SetTests(TestMap& tests,
     this->TestRunningMap[i->first] = false;
     this->TestFinishMap[i->first] = false;
     }
-  this->ReadCostData();
-  this->CreateTestCostList();
+  if(!this->CTest->GetShowOnly())
+    {
+    this->ReadCostData();
+    this->CreateTestCostList();
+    }
 }
 
   // Set the max number of tests that can be run at the same time.
