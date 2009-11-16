@@ -364,13 +364,20 @@ SET(CPACK_PACKAGE_EXECUTABLES "SimpleInstall" "Simple Install")
 SET(CMAKE_INSTALL_MFC_LIBRARIES 1)
 SET(CMAKE_INSTALL_DEBUG_LIBRARIES 1)
 INCLUDE(InstallRequiredSystemLibraries)
-INCLUDE(CPack)
 
 IF(CTEST_TEST_CPACK)
   SET(PACKAGE_TARGET --build-target package)
+
+  # Avoid settings that require the .zip file command line tools...
+  # (just build an NSIS installer without component support)
+  #
+  SET(CPACK_BINARY_ZIP OFF)
+  SET(CPACK_MONOLITHIC_INSTALL ON)
 ELSE(CTEST_TEST_CPACK)
   SET(PACKAGE_TARGET)
 ENDIF(CTEST_TEST_CPACK)
+
+INCLUDE(CPack)
 
 ADD_CUSTOM_COMMAND(
   TARGET ${install_target}

@@ -405,6 +405,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --build-two-config
     --build-options
     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
+    "-DCTEST_TEST_CPACK:BOOL=${CTEST_TEST_CPACK}"
     --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExe)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SimpleInstall")
   ADD_TEST(SimpleInstall-Stage2 ${CMAKE_CTEST_COMMAND}
