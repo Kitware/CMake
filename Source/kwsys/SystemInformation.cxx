@@ -128,10 +128,10 @@ public:
   bool DoesCPUSupportCPUID();
 
   // Retrieve memory information in megabyte.
-  unsigned long GetTotalVirtualMemory();
-  unsigned long GetAvailableVirtualMemory();
-  unsigned long GetTotalPhysicalMemory();
-  unsigned long GetAvailablePhysicalMemory();  
+  size_t GetTotalVirtualMemory();
+  size_t GetAvailableVirtualMemory();
+  size_t GetTotalPhysicalMemory();
+  size_t GetAvailablePhysicalMemory();  
 
   /** Run the different checks */
   void RunCPUCheck();
@@ -385,20 +385,20 @@ bool SystemInformation::DoesCPUSupportCPUID()
 }
 
 // Retrieve memory information in megabyte.
-unsigned long SystemInformation::GetTotalVirtualMemory()
+size_t SystemInformation::GetTotalVirtualMemory()
 {
   return this->Implementation->GetTotalVirtualMemory();
 }
-unsigned long SystemInformation::GetAvailableVirtualMemory()
+size_t SystemInformation::GetAvailableVirtualMemory()
 {
   return this->Implementation->GetAvailableVirtualMemory();
 }
-unsigned long SystemInformation::GetTotalPhysicalMemory()
+size_t SystemInformation::GetTotalPhysicalMemory()
 {
   return this->Implementation->GetTotalPhysicalMemory();
 }
 
-unsigned long SystemInformation::GetAvailablePhysicalMemory()
+size_t SystemInformation::GetAvailablePhysicalMemory()
 {
   return this->Implementation->GetAvailablePhysicalMemory();
 }
@@ -2446,24 +2446,24 @@ int SystemInformationImplementation::QueryMemory()
 }
 
 /** */
-unsigned long SystemInformationImplementation::GetTotalVirtualMemory() 
+size_t SystemInformationImplementation::GetTotalVirtualMemory() 
 { 
   return this->TotalVirtualMemory; 
 }
 
 /** */
-unsigned long SystemInformationImplementation::GetAvailableVirtualMemory() 
+size_t SystemInformationImplementation::GetAvailableVirtualMemory() 
 { 
   return this->AvailableVirtualMemory; 
 }
 
-unsigned long SystemInformationImplementation::GetTotalPhysicalMemory() 
+size_t SystemInformationImplementation::GetTotalPhysicalMemory() 
 { 
   return this->TotalPhysicalMemory; 
 }
 
 /** */
-unsigned long SystemInformationImplementation::GetAvailablePhysicalMemory() 
+size_t SystemInformationImplementation::GetAvailablePhysicalMemory() 
 { 
   return this->AvailablePhysicalMemory; 
 }

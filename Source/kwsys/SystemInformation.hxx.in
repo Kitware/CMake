@@ -63,10 +63,10 @@ public:
   bool DoesCPUSupportCPUID();
 
   // Retrieve memory information in megabyte.
-  unsigned long GetTotalVirtualMemory();
-  unsigned long GetAvailableVirtualMemory();
-  unsigned long GetTotalPhysicalMemory();
-  unsigned long GetAvailablePhysicalMemory();  
+  size_t GetTotalVirtualMemory();
+  size_t GetAvailableVirtualMemory();
+  size_t GetTotalPhysicalMemory();
+  size_t GetAvailablePhysicalMemory();  
 
   /** Run the different checks */
   void RunCPUCheck();
