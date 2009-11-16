@@ -19,6 +19,7 @@
 # define kwsys_ios @KWSYS_NAMESPACE@_ios
 #endif
 #include <@KWSYS_NAMESPACE@/stl/string>
+#include <stddef.h> /* size_t */
 
 namespace @KWSYS_NAMESPACE@
 {
