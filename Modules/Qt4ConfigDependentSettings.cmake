@@ -36,11 +36,11 @@ SET(QT_QTHELP_LIB_DEPENDENCIES ${QT_QTCLUCENE_LIBRARY})
 
 
 # build using shared Qt needs -DQT_DLL
-IF(NOT QT_CONFIG MATCHES "static")
+IF(WIN32  AND  NOT QT_CONFIG MATCHES "static")
   # warning currently only qconfig.pri on Windows potentially contains "static"
   # so QT_DLL might not get defined properly on other platforms.
   SET(QT_DEFINITIONS ${QT_DEFINITIONS} -DQT_DLL)
-ENDIF(NOT QT_CONFIG MATCHES "static")
+ENDIF(WIN32  AND  NOT QT_CONFIG MATCHES "static")
 
 
 # QtOpenGL dependencies
