@@ -2279,11 +2279,16 @@ int SystemInformationImplementation::QueryMemory()
 #elif _WIN32
 #if  _MSC_VER < 1300
   MEMORYSTATUS ms;
+  ms.dwLength = sizeof(ms);
   GlobalMemoryStatus(&ms);
 #define MEM_VAL(value) dw##value
 #else
   MEMORYSTATUSEX ms;
-  GlobalMemoryStatusEx(&ms);
+  ms.dwLength = sizeof(ms);
+  if (0 == GlobalMemoryStatusEx(&ms))
+  {
+    return 0;
+  }
 #define MEM_VAL(value) ull##value
 #endif
   unsigned long tv = ms.MEM_VAL(TotalVirtual);
