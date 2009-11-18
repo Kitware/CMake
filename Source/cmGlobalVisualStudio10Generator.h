@@ -67,7 +67,7 @@ public:
    */
   virtual std::string GetUserMacrosRegKeyBase();
   virtual const char* GetCMakeCFGInitDirectory() 
-    { return "$(ConfigurationName)";} 
+    { return "$(Configuration)";}
 protected:
   virtual const char* GetIDEVersion() { return "10.0"; }
 };
