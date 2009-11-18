@@ -101,7 +101,7 @@ bool cmGetFilenameComponentCommand
     if(args[2] == "REALPATH")
       {
       // Resolve symlinks if possible
-      result = cmSystemTools::GetRealPath(filename.c_str());
+      result = cmSystemTools::GetRealPath(result.c_str());
       }
     }
   else 
