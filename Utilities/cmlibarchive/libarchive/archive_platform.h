@@ -52,6 +52,14 @@
 #error Oops: No config.h and no pre-built configuration in archive_platform.h.
 #endif
 
+/* Try to get standard C99-style integer type definitions. */
+#if HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+#if HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
 /* It should be possible to get rid of this by extending the feature-test
  * macros to cover Windows API functions, probably along with non-trivial
  * refactoring of code to find structures that sit more cleanly on top of
@@ -76,14 +84,6 @@
 #else
 /* Just leaving this macro replacement empty leads to a dangling semicolon. */
 #define __FBSDID(a)     struct _undefined_hack
-#endif
-
-/* Try to get standard C99-style integer type definitions. */
-#if HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
-#if HAVE_STDINT_H
-#include <stdint.h>
 #endif
 
 /* Borland warns about its own constants!  */
