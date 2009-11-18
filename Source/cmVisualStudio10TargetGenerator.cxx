@@ -1222,6 +1222,7 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
         Convert(l->Value.c_str(),
                 cmLocalGenerator::START_OUTPUT,
                 cmLocalGenerator::UNCHANGED);
+      this->ConvertToWindowsSlash(path);
       libstring += sep;
       libstring += path;
       }
