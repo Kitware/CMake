@@ -30,7 +30,7 @@ public:
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
 
-  virtual void EnableLanguage(std::vector<std::string>const& languages,
-                              cmMakefile *, bool optional);
+  virtual void AddPlatformDefinitions(cmMakefile* mf);
+
 };
 #endif

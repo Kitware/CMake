@@ -36,6 +36,7 @@ cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio71Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
+  this->cmGlobalVisualStudio7Generator::AddPlatformDefinitions(mf);
   mf->AddDefinition("MSVC71", "1");
 }
 

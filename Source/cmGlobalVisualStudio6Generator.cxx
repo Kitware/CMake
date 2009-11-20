@@ -44,6 +44,8 @@ void cmGlobalVisualStudio6Generator
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc"); 
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   mf->AddDefinition("CMAKE_GENERATOR_Fortran", "ifort");
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
   mf->AddDefinition("MSVC60", "1");
   this->GenerateConfigurations(mf);
   this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);

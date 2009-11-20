@@ -55,6 +55,8 @@ void cmGlobalVisualStudio8Generator
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
   mf->AddDefinition("MSVC80", "1");
 }
 
