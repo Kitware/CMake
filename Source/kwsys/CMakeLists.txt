@@ -103,6 +103,11 @@
 # any outside mailing list and no documentation of the change will be
 # written.
 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5 FATAL_ERROR)
+
+# Allow empty endif() and such with CMake 2.4.
+SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 1)
+
 #-----------------------------------------------------------------------------
 # If a namespace is not specified, use "kwsys" and enable testing.
 # This should be the case only when kwsys is not included inside
@@ -112,7 +117,6 @@ IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_STANDALONE 1)
 ENDIF(NOT KWSYS_NAMESPACE)
 IF(KWSYS_STANDALONE)
-  CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
   IF(COMMAND CMAKE_POLICY)
     CMAKE_POLICY(SET CMP0003 NEW)
   ENDIF(COMMAND CMAKE_POLICY)
