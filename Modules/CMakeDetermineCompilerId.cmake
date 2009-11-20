@@ -57,6 +57,8 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
 
   SET(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
   SET(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
+  SET(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}" 
+    PARENT_SCOPE)
 ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID)
 
 #-----------------------------------------------------------------------------
@@ -171,7 +173,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     SET(COMPILER_ID)
     SET(PLATFORM_ID)
     FILE(STRINGS ${file}
-      CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 2 REGEX "INFO:")
+      CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 3 REGEX "INFO:")
     SET(HAVE_COMPILER_TWICE 0)
     FOREACH(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
       IF("${info}" MATCHES ".*INFO:compiler\\[([^]\"]*)\\].*")
@@ -185,12 +187,17 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
         STRING(REGEX REPLACE ".*INFO:platform\\[([^]]*)\\].*" "\\1"
           PLATFORM_ID "${info}")
       ENDIF("${info}" MATCHES ".*INFO:platform\\[([^]\"]*)\\].*")
+      IF("${info}" MATCHES ".*INFO:arch\\[([^]\"]*)\\].*")
+        STRING(REGEX REPLACE ".*INFO:arch\\[([^]]*)\\].*" "\\1"
+          ARCHITECTURE_ID "${info}")
+      ENDIF("${info}" MATCHES ".*INFO:arch\\[([^]\"]*)\\].*")
     ENDFOREACH(info)
 
     # Check if a valid compiler and platform were found.
     IF(COMPILER_ID AND NOT COMPILER_ID_TWICE)
       SET(CMAKE_${lang}_COMPILER_ID "${COMPILER_ID}")
       SET(CMAKE_${lang}_PLATFORM_ID "${PLATFORM_ID}")
+      SET(MSVC_${lang}_ARCHITECTURE_ID "${ARCHITECTURE_ID}")
     ENDIF(COMPILER_ID AND NOT COMPILER_ID_TWICE)
 
     # Check the compiler identification string.
@@ -234,5 +241,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
   # Return the information extracted.
   SET(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
   SET(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
+  SET(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}" 
+    PARENT_SCOPE)
   SET(CMAKE_EXECUTABLE_FORMAT "${CMAKE_EXECUTABLE_FORMAT}" PARENT_SCOPE)
 ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang)
