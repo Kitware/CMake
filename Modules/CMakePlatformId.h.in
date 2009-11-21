@@ -98,9 +98,11 @@
 #  define ARCHITECTURE_ID "X86"
 
 # else /* unknown architecture */
-#  defined ARCHITECTURE_ID ""
+#  define ARCHITECTURE_ID ""
 # endif
 
+#else
+#  define ARCHITECTURE_ID ""
 #endif
 
 /* Construct the string literal in pieces to prevent the source from
