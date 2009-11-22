@@ -56,18 +56,6 @@ private:
   // create .cproject file
   void CreateCProjectFile() const;
 
-  // Eclipse supported toolchain types
-  enum EclipseToolchainType
-    {
-    EclipseToolchainOther,
-    EclipseToolchainLinux,
-    EclipseToolchainCygwin,
-    EclipseToolchainMinGW,
-    EclipseToolchainSolaris,
-    EclipseToolchainMacOSX
-    };
-  static EclipseToolchainType GetToolChainType(const cmMakefile& makefile);
-
   // If built with cygwin cmake, convert posix to windows path.
   static std::string GetEclipsePath(const std::string& path);
 

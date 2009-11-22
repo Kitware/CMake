@@ -285,9 +285,18 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     "\t\t\t\t\t<key>org.eclipse.cdt.core.errorOutputParser</key>\n"
     "\t\t\t\t\t<value>"
     ;
-  if (this->GetToolChainType(*mf) == EclipseToolchainOther)
+  std::string compilerId = mf->GetSafeDefinition("CMAKE_C_COMPILER_ID");
+  if (compilerId.empty())  // no C compiler, try the C++ compiler:
+    {
+    compilerId = mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
+    }
+  if (compilerId == "MSVC")
     {
     fout << "org.eclipse.cdt.core.VCErrorParser;";
+    }
+  else if (compilerId == "Intel")
+    {
+    fout << "org.eclipse.cdt.core.ICCErrorParser;";
     }
   fout <<
     "org.eclipse.cdt.core.MakeErrorParser;"
@@ -418,20 +427,25 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     "<extensions>\n"
     ;
   // TODO: refactor this out...
-  switch (this->GetToolChainType(*mf))
-  {
-    case EclipseToolchainLinux   :
-      fout << "<extension id=\"org.eclipse.cdt.core.ELF\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
-              ;
-      fout << "<extension id=\"org.eclipse.cdt.core.GNU_ELF\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
-              "<attribute key=\"addr2line\" value=\"addr2line\"/>\n"
-              "<attribute key=\"c++filt\" value=\"c++filt\"/>\n"
-              "</extension>\n"
-              ;
-      break;
-    case EclipseToolchainCygwin  :
+  std::string executableFormat = mf->GetSafeDefinition(
+                                                    "CMAKE_EXECUTABLE_FORMAT");
+  if (executableFormat == "ELF")
+    {
+    fout << "<extension id=\"org.eclipse.cdt.core.ELF\""
+            " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
+            ;
+    fout << "<extension id=\"org.eclipse.cdt.core.GNU_ELF\""
+            " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
+            "<attribute key=\"addr2line\" value=\"addr2line\"/>\n"
+            "<attribute key=\"c++filt\" value=\"c++filt\"/>\n"
+            "</extension>\n"
+            ;
+    }
+  else
+    {
+    std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
+    if (systemName == "CYGWIN")
+      {
       fout << "<extension id=\"org.eclipse.cdt.core.Cygwin_PE\""
               " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
               "<attribute key=\"addr2line\" value=\"addr2line\"/>\n"
@@ -440,36 +454,28 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
               "<attribute key=\"nm\" value=\"nm\"/>\n"
               "</extension>\n"
               ;
-      break;
-    case EclipseToolchainMinGW   :
+      }
+    else if (systemName == "Windows")
+      {
       fout << "<extension id=\"org.eclipse.cdt.core.PE\""
               " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
               ;
-      break;
-    case EclipseToolchainSolaris :
-      fout << "<extension id=\"org.eclipse.cdt.core.ELF\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
-              ;
-      break;
-    case EclipseToolchainMacOSX  :
+      }
+    else if (systemName == "Darwin")
+      {
       fout << "<extension id=\"org.eclipse.cdt.core.MachO\""
               " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
               "<attribute key=\"c++filt\" value=\"c++filt\"/>\n"
               "</extension>\n"
               ;
-      break;
-    case EclipseToolchainOther   :
-      fout << "<extension id=\"org.eclipse.cdt.core.PE\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
-              ;
-      fout << "<extension id=\"org.eclipse.cdt.core.ELF\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
-              ;
-      break;
-    default      :
+      }
+    else
+      {
       // *** Should never get here ***
       fout << "<error_toolchain_type/>\n";
-  }
+      }
+    }
+
   fout << "</extensions>\n"
           "</storageModule>\n"
           ;
@@ -828,40 +834,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 }
 
 //----------------------------------------------------------------------------
-cmExtraEclipseCDT4Generator::EclipseToolchainType
-cmExtraEclipseCDT4Generator::GetToolChainType(const cmMakefile& makefile)
-{
-  if (makefile.IsSet("UNIX"))
-    {
-    if (makefile.IsSet("CYGWIN"))
-      {
-      return EclipseToolchainCygwin;
-      }
-    if (makefile.IsSet("APPLE" ))
-      {
-      return EclipseToolchainMacOSX;
-      }
-    // *** how do I determine if it is Solaris ???
-    return EclipseToolchainLinux;
-    }
-  else if (makefile.IsSet("WIN32"))
-    {
-    if (makefile.IsSet("MINGW"))
-      {
-      return EclipseToolchainMinGW;
-      }
-    if (makefile.IsSet("MSYS" ))
-      {
-      return EclipseToolchainMinGW;
-      }
-    return EclipseToolchainOther;
-    }
-  else
-    {
-    return EclipseToolchainOther;
-    }
-}
-
 std::string
 cmExtraEclipseCDT4Generator::GetEclipsePath(const std::string& path)
 {
