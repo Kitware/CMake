@@ -363,7 +363,9 @@ SET(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
 SET(CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
 
 # Use files tree to construct files command (spec file)
-EXECUTE_PROCESS(COMMAND find -type f
+# We should not forget to include symlinks (thus -o -type l)
+# We must remove the './' due to the local search (thus the sed)
+EXECUTE_PROCESS(COMMAND find -type f -o -type l
                COMMAND sed {s/\\.//}
                WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}"
                OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
@@ -446,6 +448,8 @@ mv \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot $RPM_BUILD_ROOT
 ${CPACK_RPM_INSTALL_FILES}
 
 %changelog
+* Sun Nov 22 2009 Erk <eric.noulard@gmail.com>
+  Include symlinks in the file list.
 * Sat Nov 14 2009 Erk <eric.noulard@gmail.com>
   Replace prep and build step with backup and restore
   of the previously CPack installed tree. This should
