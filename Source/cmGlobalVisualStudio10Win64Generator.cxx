@@ -34,6 +34,6 @@ void cmGlobalVisualStudio10Win64Generator
 {
   this->cmGlobalVisualStudio10Generator::AddPlatformDefinitions(mf);
   mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "x64");
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "x64");
 }
