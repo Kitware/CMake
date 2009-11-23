@@ -1095,6 +1095,11 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       KWSYS_SET_PROPERTY(TEST kwsys.testProcess-${n} PROPERTY LABELS ${KWSYS_LABELS_TEST})
     ENDFOREACH(n)
 
+    # Some Apple compilers produce bad optimizations in this source.
+    IF(APPLE AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU|LLVM)$")
+      SET_SOURCE_FILES_PROPERTIES(testProcess.c PROPERTIES COMPILE_FLAGS -O0)
+    ENDIF()
+
     # Test SharedForward
     CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/testSharedForward.c.in
                    ${PROJECT_BINARY_DIR}/testSharedForward.c @ONLY IMMEDIATE)
