@@ -33,8 +33,8 @@ QMacInstallDialog::~QMacInstallDialog()
 void QMacInstallDialog::DoInstall()
 {  
   QDir installDir(this->Internals->InstallPrefix->text());
-  std::string installTo = installDir.path().toStdString();
-  if(!cmSystemTools::FileExists(installTo.c_str()))
+  QString installTo = installDir.path();
+  if(!cmSystemTools::FileExists(installTo.toAscii().data()))
     {
     QString message = tr("Build install does not exist, "
                          "should I create it?")
@@ -47,7 +47,7 @@ void QMacInstallDialog::DoInstall()
                                    QMessageBox::Yes | QMessageBox::No);
     if(btn == QMessageBox::Yes)
       {
-      cmSystemTools::MakeDirectory(installTo.c_str());
+      cmSystemTools::MakeDirectory(installTo.toAscii().data());
       }
     }
   QDir cmExecDir(QApplication::applicationDirPath());
@@ -56,24 +56,24 @@ void QMacInstallDialog::DoInstall()
   for (int i = 0; i < list.size(); ++i) 
     {
     QFileInfo fileInfo = list.at(i);
-    std::string filename = fileInfo.fileName().toStdString();
+    QString filename = fileInfo.fileName();
     if(filename.size() && filename[0] == '.')
       {
       continue;
       }
-    std::string file = fileInfo.absoluteFilePath().toStdString();
-    std::string newName = installTo;
+    QString file = fileInfo.absoluteFilePath();
+    QString newName = installTo;
     newName += "/";
     newName += filename;
     // Remove the old files
-    if(cmSystemTools::FileExists(newName.c_str()))
+    if(cmSystemTools::FileExists(newName.toAscii().data()))
       {
-      std::cout << "rm [" << newName << "]\n";
-      if(!cmSystemTools::RemoveFile(newName.c_str()))
+      std::cout << "rm [" << newName.toAscii().data() << "]\n";
+      if(!cmSystemTools::RemoveFile(newName.toAscii().data()))
         {
         QString message = tr("Failed to remove file "
                              "installation may be incomplete: ");
-        message += newName.c_str();
+        message += newName.toAscii().data();
         QString title = tr("Error Removing file");
         QMessageBox::StandardButton btn =
           QMessageBox::critical(this, title, message, 
@@ -84,14 +84,14 @@ void QMacInstallDialog::DoInstall()
           }
         }
       }
-    std::cout << "ln -s [" << file << "] [";
-    std::cout << newName << "]\n";
-    if(!cmSystemTools::CreateSymlink(file.c_str(),
-                                     newName.c_str()))
+    std::cout << "ln -s [" << file.toAscii().data() << "] [";
+    std::cout << newName.toAscii().data() << "]\n";
+    if(!cmSystemTools::CreateSymlink(file.toAscii().data(),
+                                     newName.toAscii().data()))
       {
       QString message = tr("Failed create symlink "
                            "installation may be incomplete: ");
-      message += newName.c_str();
+      message += newName.toAscii().data();
       QString title = tr("Error Creating Symlink");
       QMessageBox::StandardButton btn =
         QMessageBox::critical(this, title, message, 
