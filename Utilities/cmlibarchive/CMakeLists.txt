@@ -4,6 +4,13 @@ PROJECT(libarchive C)
 #
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.1)
 SET(CMAKE_MODULE_PATH "${libarchive_SOURCE_DIR}/build/cmake")
+
+# We use CHECK_TYPE_SIZE for existence tests, so use only one arch.
+LIST(LENGTH CMAKE_OSX_ARCHITECTURES NUM_ARCHS)
+IF(${NUM_ARCHS} GREATER 1)
+  LIST(GET CMAKE_OSX_ARCHITECTURES 0 CMAKE_TRY_COMPILE_OSX_ARCHITECTURES)
+ENDIF()
+
 #
 # Version - read from 'version' file.
 #
