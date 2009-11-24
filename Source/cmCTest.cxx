@@ -311,8 +311,7 @@ cmCTest::Part cmCTest::GetPartFromName(const char* name)
 }
 
 //----------------------------------------------------------------------
-int cmCTest::Initialize(const char* binary_dir, bool new_tag,
-  bool verbose_tag)
+int cmCTest::Initialize(const char* binary_dir, bool script)
 {
   cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
   if(!this->InteractiveDebugMode)
@@ -416,7 +415,7 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
         }
       tfin.close();
       }
-    if (tag.size() == 0 || new_tag || this->Parts[PartStart])
+    if (tag.size() == 0 || script || this->Parts[PartStart])
       {
       cmCTestLog(this, DEBUG, "TestModel: " << this->GetTestModelString()
         << std::endl);
@@ -441,7 +440,7 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
         ofs << this->GetTestModelString() << std::endl;
         }
       ofs.close();
-      if ( verbose_tag )
+      if ( !script )
         {
         cmCTestLog(this, OUTPUT, "Create new tag: " << tag << " - "
           << this->GetTestModelString() << std::endl);
@@ -517,7 +516,7 @@ bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
       }
     }
 
-  if ( !this->Initialize(bld_dir.c_str(), true, false) )
+  if ( !this->Initialize(bld_dir.c_str(), true) )
     {
     if ( this->GetCTestConfiguration("NightlyStartTime").empty() && first)
       {
@@ -2113,8 +2112,8 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
         it->second->SetVerbose(this->Verbose);
         it->second->SetSubmitIndex(this->SubmitIndex);
         }
-      if ( !this->Initialize(
-          cmSystemTools::GetCurrentWorkingDirectory().c_str()) )
+      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+      if(!this->Initialize(cwd.c_str(), false))
         {
         res = 12;
         cmCTestLog(this, ERROR_MESSAGE, "Problem initializing the dashboard."

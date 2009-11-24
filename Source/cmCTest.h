@@ -93,8 +93,6 @@ public:
   /**
    * Initialize and finalize testing
    */
-  int Initialize(const char* binary_dir, bool new_tag = false,
-    bool verbose_tag = true);
   bool InitializeFromCommand(cmCTestCommand* command, bool first = false);
   void Finalize();
 
@@ -446,6 +444,15 @@ private:
 
   void BlockTestErrorDiagnostics();
 
+  /**
+   * Initialize a dashboard run in the given build tree.  The "script"
+   * argument is true when running from a command-driven (ctest_start)
+   * dashboard script, and false when running from the CTest command
+   * line.  Note that a declarative dashboard script does not actually
+   * call this method because it sets CTEST_COMMAND to drive a build
+   * through the ctest command line.
+   */
+  int Initialize(const char* binary_dir, bool script);
 
   //! parse the option after -D and convert it into the appropriate steps
   bool AddTestsForDashboardType(std::string &targ);
