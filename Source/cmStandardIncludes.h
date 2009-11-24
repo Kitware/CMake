@@ -37,6 +37,7 @@
 
 #ifdef __ICL
 #pragma warning ( disable : 985 )
+#pragma warning ( disable : 1572 ) /* floating-point equality test */
 #endif
 
 #include <stdarg.h> // Work-around for SGI MIPSpro 7.4.2m header bug
