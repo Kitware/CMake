@@ -13,6 +13,15 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${NAME}")
 ENDMACRO(ADD_TEST_MACRO)
 
+# Fake a user home directory to avoid polluting the real one.
+IF(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
+  SET(TEST_HOME "${CMake_BINARY_DIR}/Tests/CMakeFiles/TestHome")
+  FILE(MAKE_DIRECTORY "${TEST_HOME}")
+  FILE(WRITE "${TEST_HOME}/.cvspass" ":pserver:anoncvs@www.cmake.org:/cvsroot/KWSys A\n")
+  SET(TEST_HOME_ENV_CODE "# Fake a user home directory to avoid polluting the real one.
+SET(ENV{HOME} \"${TEST_HOME}\")")
+ENDIF()
+
 # Make sure the 'testing' test gets a proper configuration.
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
                ${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake @ONLY)
