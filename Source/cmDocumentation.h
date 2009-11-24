@@ -57,6 +57,8 @@ public:
   
   /** Print help of the given type.  */
   bool PrintDocumentation(Type ht, std::ostream& os, const char* docname=0);
+
+  void SetShowGenerators(bool showGen) { this->ShowGenerators = showGen; }
   
   /** Set the program name for standard document generation.  */
   void SetName(const char* name);
@@ -158,6 +160,8 @@ private:
   const char* GetDocName(bool fallbackToNameString = true) const;
   const char* GetDefaultDocName(Type ht) const;
   bool IsOption(const char* arg) const;
+
+  bool ShowGenerators;
 
   std::string NameString;
   std::string DocName;

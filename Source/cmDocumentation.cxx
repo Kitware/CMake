@@ -267,6 +267,8 @@ cmDocumentation::cmDocumentation()
   this->VariableSections.push_back("Variables That Describe the System");
   this->VariableSections.push_back("Variables that Control the Build");
   this->VariableSections.push_back("Variables for Languages");
+
+  this->ShowGenerators = true;
 }
 
 //----------------------------------------------------------------------------
@@ -1279,7 +1281,10 @@ bool cmDocumentation::PrintDocumentationUsage(std::ostream& os)
   this->ClearSections();
   this->AddSectionToPrint("Usage");
   this->AddSectionToPrint("Options");
-  this->AddSectionToPrint("Generators");
+  if(this->ShowGenerators)
+    {
+    this->AddSectionToPrint("Generators");
+    }
   this->Print(os);
   return true;
 }

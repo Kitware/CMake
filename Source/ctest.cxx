@@ -279,6 +279,7 @@ int main (int argc, char *argv[])
       ch->CreateCMake();
       ch->GetCommandDocumentation(commands);
 
+      doc.SetShowGenerators(false);
       doc.SetName("ctest");
       doc.SetSection("Name",cmDocumentationName);
       doc.SetSection("Usage",cmDocumentationUsage);
