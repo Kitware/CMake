@@ -72,6 +72,8 @@ public:
 
   cmTypeMacro(cmCTestStartCommand, cmCTestCommand);
 
+private:
+  bool InitialCheckout(std::ostream& ofs, std::string const& sourceDir);
 };
 
 

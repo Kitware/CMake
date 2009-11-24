@@ -23,6 +23,7 @@
 #include "cmXMLSafe.h"
 #include "cmVersionMacros.h"
 #include "cmCTestCommand.h"
+#include "cmCTestStartCommand.h"
 
 #include "cmCTestBuildHandler.h"
 #include "cmCTestBuildAndTestHandler.h"
@@ -452,13 +453,8 @@ int cmCTest::Initialize(const char* binary_dir, bool script)
 }
 
 //----------------------------------------------------------------------
-bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
+bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
 {
-  if ( !first && !this->CurrentTag.empty() )
-    {
-    return true;
-    }
-
   std::string src_dir
     = this->GetCTestConfiguration("SourceDirectory").c_str();
   std::string bld_dir = this->GetCTestConfiguration("BuildDirectory").c_str();
@@ -486,16 +482,10 @@ bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
       return false;
       }
     }
-  else if ( !first )
+  else
     {
     cmCTestLog(this, WARNING, "Cannot locate CTest configuration: "
       << fname.c_str() << std::endl);
-    }
-  else
-    {
-    cmCTestLog(this, HANDLER_OUTPUT, "   Cannot locate CTest configuration: "
-      << fname.c_str() << std::endl
-      << "   Delay the initialization of CTest" << std::endl);
     }
 
   this->SetCTestConfigurationFromCMakeVariable(mf, "NightlyStartTime",
@@ -518,10 +508,6 @@ bool cmCTest::InitializeFromCommand(cmCTestCommand* command, bool first)
 
   if ( !this->Initialize(bld_dir.c_str(), true) )
     {
-    if ( this->GetCTestConfiguration("NightlyStartTime").empty() && first)
-      {
-      return true;
-      }
     return false;
     }
   cmCTestLog(this, OUTPUT, "   Use " << this->GetTestModelString()

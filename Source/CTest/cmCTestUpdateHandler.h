@@ -65,7 +65,6 @@ private:
   std::string UpdateCommand;
   int UpdateType;
 
-  bool InitialCheckout(std::ostream& ofs);
   int DetectVCS(const char* dir);
   bool SelectVCS();
 };

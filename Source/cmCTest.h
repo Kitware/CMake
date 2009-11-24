@@ -23,6 +23,7 @@ class cmCTestGenericHandler;
 class cmGeneratedFileStream;
 class cmCTestCommand;
 class cmCTestScriptHandler;
+class cmCTestStartCommand;
 
 #define cmCTestLog(ctSelf, logType, msg) \
   do { \
@@ -93,7 +94,7 @@ public:
   /**
    * Initialize and finalize testing
    */
-  bool InitializeFromCommand(cmCTestCommand* command, bool first = false);
+  bool InitializeFromCommand(cmCTestStartCommand* command);
   void Finalize();
 
   /**

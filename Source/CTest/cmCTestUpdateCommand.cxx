@@ -56,14 +56,6 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "HGUpdateOptions", "CTEST_HG_UPDATE_OPTIONS");
 
-  const char* initialCheckoutCommand
-    = this->Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
-  if ( !initialCheckoutCommand )
-    {
-    initialCheckoutCommand = 
-      this->Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
-    }
-
   cmCTestGenericHandler* handler
     = this->CTest->GetInitializedHandler("update");
   if ( !handler )
@@ -78,24 +70,6 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
     return 0;
     }
   handler->SetOption("SourceDirectory", source_dir.c_str());
-  if ( initialCheckoutCommand )
-    {
-    handler->SetOption("InitialCheckout", initialCheckoutCommand);
-    }
-  if ( (!cmSystemTools::FileExists(source_dir.c_str()) ||
-      !cmSystemTools::FileIsDirectory(source_dir.c_str()))
-    && !initialCheckoutCommand )
-    {
-    cmOStringStream str;
-    str << "cannot find source directory: " << source_dir.c_str() << ".";
-    if ( !cmSystemTools::FileExists(source_dir.c_str()) )
-      {
-      str << " Looks like it is not checked out yet. Please specify "
-        "CTEST_CHECKOUT_COMMAND.";
-      }
-    this->SetError(str.str().c_str());
-    return 0;
-    }
   return handler;
 }
 
