@@ -423,7 +423,7 @@ int do_cmake(int ac, char** av)
   std::vector<std::string> args;
   for(int i =0; i < ac; ++i)
     {
-    if(strcmp(av[i], "-i") == 0)
+    if(!command && strcmp(av[i], "-i") == 0)
       {
       wiz = true;
       }
