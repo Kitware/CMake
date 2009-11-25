@@ -69,6 +69,8 @@ public:
       "conjunction with the ctest_test PARALLEL_LEVEL option.\n"
       "COST: Set this to a floating point value. Tests in a test set will be "
       "run in descending order of cost.\n"
+      "TIMEOUT: Setting this will limit the test runtime to the number of "
+      "seconds specified.\n"
       "RUN_SERIAL: If set to true, this test will not run in parallel with "
       "any other tests. This should be used in conjunction with "
       "the ctest_test PARALLEL_LEVEL option.\n";
