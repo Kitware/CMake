@@ -4,7 +4,7 @@
 # used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration
 #
 # However CPackRPM has specific features which are controlled by
-# the specifics CPACK_RPM_XXX variables.You'll find a detailed usage on 
+# the specifics CPACK_RPM_XXX variables. You'll find a detailed usage on 
 # the wiki: 
 #  http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
 # However as a handy reminder here comes the list of specific variables:
@@ -53,6 +53,9 @@
 #     Mandatory : NO
 #     Default   : -
 #     May be used to set RPM dependencies (requires).
+#     Note that you must enclose the complete requires string between quotes, 
+#     for example:
+#     set(CPACK_RPM_PACKAGE_REQUIRES "python >= 2.5.0, cmake >= 2.8")
 #  CPACK_RPM_PACKAGES_PROVIDES
 #     Mandatory : NO
 #     Default   : -
@@ -365,11 +368,14 @@ SET(CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
 # Use files tree to construct files command (spec file)
 # We should not forget to include symlinks (thus -o -type l)
 # We must remove the './' due to the local search (thus the sed)
+# Then we must authorize any man pages extension (adding * at the end)
+# because rpmbuild may automatically compress those files
 EXECUTE_PROCESS(COMMAND find -type f -o -type l
                COMMAND sed {s/\\.//}
+               COMMAND sed {s/.*man.*\\/.*/&*/}
                WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}"
                OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
-                              
+
 # The name of the final spec file to be used by rpmbuild
 SET(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}.spec")
  
@@ -424,10 +430,15 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 %prep
 mv $RPM_BUILD_ROOT \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot
 
-%build
-mv \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot $RPM_BUILD_ROOT 
+#p build
   
-#p install
+%install
+if [ -e $RPM_BUILD_ROOT ];
+then
+  mv \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot/* $RPM_BUILD_ROOT 
+else
+  mv \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot $RPM_BUILD_ROOT 
+fi 
 
 %clean
 
@@ -448,6 +459,8 @@ mv \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot $RPM_BUILD_ROOT
 ${CPACK_RPM_INSTALL_FILES}
 
 %changelog
+* Sat Nov 28 2009 Erk <eric.noulard@gmail.com>
+  Refix backup/restore install tree for OpenSuSE 11.2
 * Sun Nov 22 2009 Erk <eric.noulard@gmail.com>
   Include symlinks in the file list.
 * Sat Nov 14 2009 Erk <eric.noulard@gmail.com>
