@@ -911,6 +911,16 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         }
       return targetQuoted;
       }
+    if(variable == "TARGET_UNQUOTED")
+      {
+      std::string unquoted = replaceValues.Target;
+      std::string::size_type sz = unquoted.size();
+      if(sz > 2 && unquoted[0] == '\"' && unquoted[sz-1] == '\"')
+        {
+        unquoted = unquoted.substr(1, sz-2);
+        }
+      return unquoted;
+      }
     if(replaceValues.LanguageCompileFlags)
       {
       if(variable == "LANGUAGE_COMPILE_FLAGS")
