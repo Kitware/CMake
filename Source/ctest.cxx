@@ -215,6 +215,9 @@ static const char * cmDocumentationOptions[][3] =
    "This option allows performing the same CTest action (such as test) "
    "multiple times and submit all stages to the same dashboard (Dart2 "
    "required). Each execution requires different index." },
+  {"--timeout <seconds>", "Set a global timeout on all tests.",
+   "This option will set a global timeout on all tests that do not already "
+   "have a timeout set on them."},
   {"--help-command <cmd> [<file>]", "Show help for a single command and exit.",
    "Prints the help for the command to stdout or to the specified file." },
   {"--help-command-list [<file>]", "List available commands and exit.",
