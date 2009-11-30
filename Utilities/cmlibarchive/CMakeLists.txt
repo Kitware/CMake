@@ -62,7 +62,6 @@ INCLUDE(CheckCSourceRuns)
 INCLUDE(CheckFileOffsetBits)
 INCLUDE(CheckFuncs)
 INCLUDE(CheckHeaderDirent)
-INCLUDE(CheckHeaderSTDC)
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckIncludeFiles)
 INCLUDE(CheckLibraryExists)
@@ -207,7 +206,6 @@ ENDIF(LZMA_FOUND)
 #
 # Check headers
 #
-CHECK_HEADER_STDC()
 CHECK_HEADER_DIRENT()
 
 SET(INCLUDES "")

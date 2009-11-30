@@ -465,9 +465,6 @@
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 /* #undef NO_MINUS_C_MINUS_O */
 
-/* Define to 1 if you have the ANSI C header files. */
-#define STDC_HEADERS 1
-
 /* Define to 1 if strerror_r returns char *. */
 /* #undef STRERROR_R_CHAR_P */
 

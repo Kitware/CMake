@@ -140,7 +140,6 @@
 #define HAVE_WMEMCMP 1
 #define HAVE_WMEMCPY 1
 #define HAVE_ZLIB_H 1
-#define STDC_HEADERS 1
 #define TIME_WITH_SYS_TIME 1
 
 /* FreeBSD 4 and earlier lack intmax_t/uintmax_t */

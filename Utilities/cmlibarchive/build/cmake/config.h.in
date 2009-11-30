@@ -620,9 +620,6 @@
 /* The size of `wchar_t', as computed by sizeof. */
 #cmakedefine SIZEOF_WCHAR_T ${SIZEOF_WCHAR_T}
 
-/* Define to 1 if you have the ANSI C header files. */
-#cmakedefine STDC_HEADERS 1
-
 /* Define to 1 if strerror_r returns char *. */
 #cmakedefine STRERROR_R_CHAR_P 1
 
