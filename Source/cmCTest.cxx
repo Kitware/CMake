@@ -224,6 +224,7 @@ cmCTest::cmCTest()
   this->MaxTestNameWidth       = 30;
   this->InteractiveDebugMode   = true;
   this->TimeOut                = 0;
+  this->GlobalTimeout          = 0;
   this->CompressXMLFiles       = false;
   this->CTestConfigFile        = "";
   this->ScheduleType           = "";
@@ -1702,6 +1703,13 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     int plevel = atoi(arg.substr(2).c_str());
     this->SetParallelLevel(plevel);
     }
+
+  if(this->CheckArgument(arg, "--timeout")  && i < args.size() - 1)
+    {
+    i++;
+    double timeout = (double)atof(args[i].c_str());
+    this->GlobalTimeout = timeout;
+    }
   
   if(this->CheckArgument(arg, "-C", "--build-config") &&
      i < args.size() - 1)
@@ -2760,4 +2768,3 @@ void cmCTest::OutputTestErrors(std::vector<char> const &process_output)
     }
   cmCTestLog(this, HANDLER_OUTPUT, test_outputs << std::endl << std::flush);
 }
-

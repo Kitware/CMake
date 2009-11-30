@@ -1052,6 +1052,11 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       p.Cost = rand();
       }
 
+    if(p.Timeout == 0 && this->CTest->GetGlobalTimeout() != 0)
+      {
+      p.Timeout = this->CTest->GetGlobalTimeout();
+      }
+
     if(p.Depends.size())
       {
       for(std::vector<std::string>::iterator i = p.Depends.begin();

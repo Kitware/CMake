@@ -129,6 +129,9 @@ public:
   std::string const& GetConfigType();
   double GetTimeOut() { return this->TimeOut; }
   void SetTimeOut(double t) { this->TimeOut = t; }
+
+  double GetGlobalTimeout() { return this->GlobalTimeout; }
+
   // how many test to run at the same time
   int GetParallelLevel() { return this->ParallelLevel; }
   void SetParallelLevel(int);
@@ -418,6 +421,8 @@ private:
   std::string             SpecificTrack;
 
   double                  TimeOut;
+
+  double                  GlobalTimeout;
 
   int                     MaxTestNameWidth;
 
