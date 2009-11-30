@@ -4,6 +4,8 @@
 # include <unistd.h>
 #endif
 
+#include <stdio.h>
+
 int main(void)
 {
 #if defined(_WIN32)
@@ -11,5 +13,6 @@ int main(void)
 #else
   sleep(5);
 #endif
+  printf("timeout process finished sleeping!\n");
   return -1;
 }

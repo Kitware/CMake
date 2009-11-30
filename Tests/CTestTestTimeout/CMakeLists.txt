@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 PROJECT(CTestTestTimeout)
 
 SET(DART_ROOT "" CACHE STRING "" FORCE)
@@ -12,7 +12,19 @@ ADD_EXECUTABLE (Timeout timeout.c)
 
 ENABLE_TESTING ()
 
-ADD_TEST (TestTimeout Timeout)
+ADD_TEST(NAME TestTimeout
+  COMMAND ${CMAKE_COMMAND} -D Timeout=$<TARGET_FILE:Timeout>
+                           -D Log=${CMAKE_CURRENT_BINARY_DIR}/timeout.log
+                           -P ${CMAKE_CURRENT_SOURCE_DIR}/timeout.cmake
+  )
 SET_TESTS_PROPERTIES(TestTimeout PROPERTIES TIMEOUT 1)
+
+ADD_TEST(NAME CheckChild
+  COMMAND ${CMAKE_COMMAND} -D Timeout=$<TARGET_FILE:Timeout>
+                           -D Log=${CMAKE_CURRENT_BINARY_DIR}/timeout.log
+                           -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
+  )
+SET_TESTS_PROPERTIES(CheckChild PROPERTIES DEPENDS TestTimeout)
+
 
 INCLUDE (CTest)
