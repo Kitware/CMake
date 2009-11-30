@@ -2516,6 +2516,11 @@ struct _SYSTEM_PROCESS_INFORMATION
 /*--------------------------------------------------------------------------*/
 /* Toolhelp32 API definitions.  */
 #define TH32CS_SNAPPROCESS  0x00000002
+#if defined(_WIN64)
+typedef unsigned __int64 ProcessULONG_PTR;
+#else
+typedef unsigned long ProcessULONG_PTR;
+#endif
 typedef struct tagPROCESSENTRY32 PROCESSENTRY32;
 typedef PROCESSENTRY32* LPPROCESSENTRY32;
 struct tagPROCESSENTRY32
@@ -2523,7 +2528,7 @@ struct tagPROCESSENTRY32
   DWORD dwSize;
   DWORD cntUsage;
   DWORD th32ProcessID;
-  DWORD th32DefaultHeapID;
+  ProcessULONG_PTR th32DefaultHeapID;
   DWORD th32ModuleID;
   DWORD cntThreads;
   DWORD th32ParentProcessID;
