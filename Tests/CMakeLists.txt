@@ -162,6 +162,7 @@ IF(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/CMakeBuildTest.cmake" @ONLY)
   ADD_TEST(CMakeBuildTest ${CMAKE_CMAKE_COMMAND} -P
     "${CMake_BINARY_DIR}/Tests/CMakeBuildTest.cmake")
+  LIST(APPEND TEST_BUILD_DIRS ${CMAKE_BUILD_TEST_BINARY_DIR})
 
   # If we are running right now with a UnixMakefiles based generator,
   # build the "Simple" test with the ExtraGenerators, if available
