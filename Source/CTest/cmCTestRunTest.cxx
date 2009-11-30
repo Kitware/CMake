@@ -146,7 +146,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     }
   else if ( res == cmsysProcess_State_Expired )
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout ");
     this->TestResult.Status = cmCTestTestHandler::TIMEOUT;
     outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
     }
