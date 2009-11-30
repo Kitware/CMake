@@ -150,12 +150,26 @@ cuda_execute_process(
   COMMAND "${CMAKE_COMMAND}" -E remove "${generated_file}"
   )
 
+# For CUDA 2.3 and below, -G -M doesn't work, so remove the -G flag
+# for dependency generation and hope for the best.
+set(depends_CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS}")
+set(CUDA_VERSION @CUDA_VERSION@)
+if(CUDA_VERSION VERSION_LESS "3.0")
+  cmake_policy(PUSH)
+  # CMake policy 0007 NEW states that empty list elements are not
+  # ignored.  I'm just setting it to avoid the warning that's printed.
+  cmake_policy(SET CMP0007 NEW)
+  # Note that this will remove all occurances of -G.
+  list(REMOVE_ITEM depends_CUDA_NVCC_FLAGS "-G")
+  cmake_policy(POP)
+endif()
+
 # Generate the dependency file
 cuda_execute_process(
   "Generating dependency file: ${NVCC_generated_dependency_file}"
   COMMAND "${CUDA_NVCC_EXECUTABLE}"
   "${source_file}"
-  ${CUDA_NVCC_FLAGS}
+  ${depends_CUDA_NVCC_FLAGS}
   ${nvcc_flags}
   ${CCBIN}
   ${nvcc_host_compiler_flags}
