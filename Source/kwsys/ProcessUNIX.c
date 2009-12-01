@@ -2380,6 +2380,9 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
 #elif defined(__hpux) || defined(__sparc) || defined(__sgi) || defined(_AIX)
 # define KWSYSPE_PS_COMMAND "ps -ef"
 # define KWSYSPE_PS_FORMAT  "%*s %d %d %*[^\n]\n"
+#elif defined(__QNX__)
+# define KWSYSPE_PS_COMMAND "ps -Af"
+# define KWSYSPE_PS_FORMAT  "%*d %d %d %*[^\n]\n"
 #elif defined(__CYGWIN__)
 # define KWSYSPE_PS_COMMAND "ps aux"
 # define KWSYSPE_PS_FORMAT  "%d %d %*[^\n]\n"
