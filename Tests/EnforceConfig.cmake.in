@@ -1,3 +1,10 @@
+# Choose a configuration with which to drive CTest tests.
+IF(CTEST_CONFIGURATION_TYPE)
+  SET(CTestTest_CONFIG "${CTEST_CONFIGURATION_TYPE}")
+ELSE(CTEST_CONFIGURATION_TYPE)
+  SET(CTestTest_CONFIG "@CTestTest_CONFIG@")
+ENDIF(CTEST_CONFIGURATION_TYPE)
+
 # Older versions of CMake do not support an empty configuration name in
 # CTEST_CONFIGURATION_TYPE for the 'testing' test.
 SET(CONFIG_REQUIRED)

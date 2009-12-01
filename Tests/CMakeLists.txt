@@ -22,6 +22,12 @@ IF(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
 SET(ENV{HOME} \"${TEST_HOME}\")")
 ENDIF()
 
+# Choose a default configuration for CTest tests.
+SET(CTestTest_CONFIG Debug)
+IF(NOT CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
+  SET(CTestTest_CONFIG ${CMAKE_BUILD_TYPE})
+ENDIF()
+
 # Make sure the 'testing' test gets a proper configuration.
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
                ${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake @ONLY)
@@ -1231,7 +1237,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/test.cmake"
     @ONLY ESCAPE_QUOTES)
   ADD_TEST(CTestTestTimeout ${CMAKE_CTEST_COMMAND}
-    -C "\${CTEST_CONFIGURATION_TYPE}"
+    -C "\${CTestTest_CONFIG}"
     -S "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/testOutput.log"
     )
