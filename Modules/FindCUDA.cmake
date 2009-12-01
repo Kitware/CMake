@@ -476,7 +476,7 @@ mark_as_advanced(CUDA_NVCC_EXECUTABLE)
 
 if(CUDA_NVCC_EXECUTABLE AND NOT CUDA_VERSION)
   # Compute the version.
-  exec_program(${CUDA_NVCC_EXECUTABLE} ARGS "--version" OUTPUT_VARIABLE NVCC_OUT)
+  execute_process (COMMAND ${CUDA_NVCC_EXECUTABLE} "--version" OUTPUT_VARIABLE NVCC_OUT)
   string(REGEX REPLACE ".*release ([0-9]+)\\.([0-9]+).*" "\\1" CUDA_VERSION_MAJOR ${NVCC_OUT})
   string(REGEX REPLACE ".*release ([0-9]+)\\.([0-9]+).*" "\\2" CUDA_VERSION_MINOR ${NVCC_OUT})
   set(CUDA_VERSION "${CUDA_VERSION_MAJOR}.${CUDA_VERSION_MINOR}" CACHE STRING "Version of CUDA as computed from nvcc.")
