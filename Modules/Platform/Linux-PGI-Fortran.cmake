@@ -1,5 +1,3 @@
-SET(CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS "")
-
 SET(CMAKE_Fortran_MODDIR_FLAG "-module ")
 SET(CMAKE_Fortran_FLAGS_INIT "-Mpreprocess -Kieee -fpic")
 SET(CMAKE_Fortran_FLAGS_DEBUG_INIT "-g -O0 -Mbounds")
