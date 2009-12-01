@@ -2377,7 +2377,8 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
 #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
 # define KWSYSPE_PS_COMMAND "ps axo pid,ppid"
 # define KWSYSPE_PS_FORMAT  "%d %d\n"
-#elif defined(__hpux) || defined(__sparc) || defined(__sgi) || defined(_AIX)
+#elif defined(__hpux) || defined(__sun__) || defined(__sgi) || defined(_AIX) \
+   || defined(__sparc)
 # define KWSYSPE_PS_COMMAND "ps -ef"
 # define KWSYSPE_PS_FORMAT  "%*s %d %d %*[^\n]\n"
 #elif defined(__QNX__)
