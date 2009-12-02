@@ -14,9 +14,7 @@ SET(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")            # -pic
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")       # -shared
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")         # +s, flag for exe link to use shared lib
 SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,-soname,")
-SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-Wl,-soname,")
 #SET(CMAKE_EXE_EXPORTS_C_FLAG "-Wl,--export-dynamic")
-#SET(CMAKE_EXE_EXPORTS_CXX_FLAG "-Wl,--export-dynamic")
 
 # Initialize C link type selection flags.  These flags are used when
 # building a shared library, shared module, or executable that links
