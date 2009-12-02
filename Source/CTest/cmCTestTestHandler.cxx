@@ -689,13 +689,12 @@ void cmCTestTestHandler::PrintLabelSummary()
         }
       }
     }
-  it = this->TestList.begin();
   ri = this->TestResults.begin();
   // fill maps
-  for(; it != this->TestList.end(); ++it, ++ri)
+  for(; ri != this->TestResults.end(); ++ri)
     {
-    cmCTestTestProperties& p = *it;
-    cmCTestTestResult &result = *ri;
+    cmCTestTestResult &result = *ri; 
+    cmCTestTestProperties& p = *result.Properties;
     if(p.Labels.size() != 0)
       {
       for(std::vector<std::string>::iterator l = p.Labels.begin();
