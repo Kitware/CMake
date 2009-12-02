@@ -1380,10 +1380,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_SUFFIX_<LANG>",
                      cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_SHARED_MODULE_RUNTIME_<LANG>_FLAG",
-                     cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_SHARED_MODULE_RUNTIME_<LANG>_FLAG_SEP",
-                     cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_STATIC_LIBRARY_PREFIX_<LANG>",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_STATIC_LIBRARY_SUFFIX_<LANG>",
