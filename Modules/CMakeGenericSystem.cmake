@@ -88,6 +88,3 @@ MARK_AS_ADVANCED(
   CMAKE_SKIP_RPATH
   CMAKE_VERBOSE_MAKEFILE
 )
-
-# always include the gcc compiler information
-INCLUDE(Platform/gcc)

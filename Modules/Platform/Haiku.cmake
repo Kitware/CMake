@@ -1,8 +1,5 @@
 SET(BEOS 1)
 
-# GCC is the default compiler on Haiku.
-INCLUDE(${CMAKE_ROOT}/Modules/Platform/gcc.cmake)
-
 SET(CMAKE_DL_LIBS root be)
 SET(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-nostart")

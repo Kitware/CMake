@@ -1,8 +1,5 @@
 SET(QNXNTO 1)
 
-# GCC is the default compiler on QNX 6.3.
-INCLUDE(Platform/gcc)
-
 # The QNX GCC does not seem to have -isystem so remove the flag.
 SET(CMAKE_INCLUDE_SYSTEM_FLAG_C)
 SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)

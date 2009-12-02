@@ -1,1 +1,2 @@
-SET(CMAKE_C_VERBOSE_FLAG "-v")
+include(Compiler/GNU)
+__compiler_gnu(C)

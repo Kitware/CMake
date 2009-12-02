@@ -58,5 +58,3 @@ INCLUDE(Platform/UnixPaths)
 IF(EXISTS "/etc/debian_version")
   SET_PROPERTY(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
 ENDIF(EXISTS "/etc/debian_version")
-# always include the gcc compiler information
-INCLUDE(Platform/gcc)

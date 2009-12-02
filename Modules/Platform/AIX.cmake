@@ -15,16 +15,6 @@ SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
 # Files named "libfoo.a" may actually be shared libraries.
 SET_PROPERTY(GLOBAL PROPERTY TARGET_ARCHIVES_MAY_BE_SHARED_LIBS 1)
 
-# CXX Compiler
-IF(CMAKE_COMPILER_IS_GNUCXX) 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-shared -Wl,-G")       # -shared
-ENDIF(CMAKE_COMPILER_IS_GNUCXX) 
-
-# C Compiler
-IF(CMAKE_COMPILER_IS_GNUCC)
-  SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared -Wl,-G")       # -shared
-ENDIF(CMAKE_COMPILER_IS_GNUCC)
-
 # since .a can be a static or shared library on AIX, we can not do this.
 # at some point if we wanted it, we would have to figure out if a .a is
 # static or shared, then we could add this back:
