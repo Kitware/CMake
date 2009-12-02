@@ -1420,6 +1420,10 @@ void cmLocalVisualStudio7Generator
       else if(!fcinfo.FileConfigMap.empty())
         {
         const char* aCompilerTool = "VCCLCompilerTool";
+        if(this->FortranProject)
+          {
+          aCompilerTool = "VFFortranCompilerTool";
+          }
         std::string ext = (*sf)->GetExtension();
         ext = cmSystemTools::LowerCase(ext);
         if(ext == "idl")
