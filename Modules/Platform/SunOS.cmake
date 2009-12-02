@@ -21,23 +21,6 @@ IF("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
     /opt/SUNWspro/lib /opt/SUNWspro/prod/lib /usr/ccs/lib)
 ENDIF("${CMAKE_C_COMPILER_ID} ${CMAKE_CXX_COMPILER_ID}" MATCHES SunPro)
 
-# Initialize C link type selection flags.  These flags are used when
-# building a shared library, shared module, or executable that links
-# to other libraries to select whether to use the static or shared
-# versions of the libraries.
-IF(CMAKE_COMPILER_IS_GNUCC)
-  FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
-    SET(CMAKE_${type}_LINK_STATIC_C_FLAGS "-Wl,-Bstatic")
-    SET(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-Bdynamic")
-  ENDFOREACH(type)
-ENDIF(CMAKE_COMPILER_IS_GNUCC)
-IF(CMAKE_COMPILER_IS_GNUCXX)
-  FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
-    SET(CMAKE_${type}_LINK_STATIC_CXX_FLAGS "-Wl,-Bstatic")
-    SET(CMAKE_${type}_LINK_DYNAMIC_CXX_FLAGS "-Wl,-Bdynamic")
-  ENDFOREACH(type)
-ENDIF(CMAKE_COMPILER_IS_GNUCXX)
-
 # The Sun linker needs to find transitive shared library dependencies
 # in the -L path.
 SET(CMAKE_LINK_DEPENDENT_LIBRARY_DIRS 1)
