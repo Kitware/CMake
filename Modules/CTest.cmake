@@ -84,10 +84,6 @@ IF(BUILD_TESTING)
   ENDIF(EXISTS "${PROJECT_SOURCE_DIR}/DartConfig.cmake")
   SET_IF_NOT_SET (NIGHTLY_START_TIME "00:00:00 EDT")
 
-  # make program just needs to use CMAKE_MAKE_PROGRAM which is required
-  # to be defined by cmake 
-  SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
-
   FIND_PROGRAM(CVSCOMMAND cvs )
   SET(CVS_UPDATE_OPTIONS "-d -A -P" CACHE STRING 
     "Options passed to the cvs update command.")
@@ -202,8 +198,17 @@ IF(BUILD_TESTING)
     ENDIF(DART_CXX_NAME MATCHES "devenv")
     SET(BUILDNAME "${BUILD_NAME_SYSTEM_NAME}-${DART_CXX_NAME}")
   ENDIF(NOT BUILDNAME)
-  # set the build command
-  BUILD_COMMAND(MAKECOMMAND ${MAKEPROGRAM} )
+
+  # the build command
+  BUILD_COMMAND(MAKECOMMAND CONFIGURATION "\${CTEST_CONFIGURATION_TYPE}")
+  SET(MAKECOMMAND ${MAKECOMMAND} CACHE STRING "Command to build the project")
+
+  # the default build configuration the ctest build handler will use
+  # if there is no -C arg given to ctest:
+  SET(DEFAULT_CTEST_CONFIGURATION_TYPE "$ENV{CMAKE_CONFIG_TYPE}")
+  IF(DEFAULT_CTEST_CONFIGURATION_TYPE STREQUAL "")
+    SET(DEFAULT_CTEST_CONFIGURATION_TYPE "Release")
+  ENDIF(DEFAULT_CTEST_CONFIGURATION_TYPE STREQUAL "")
 
   IF(NOT "${CMAKE_GENERATOR}" MATCHES "Make")
     SET(CTEST_USE_LAUNCHERS 0)

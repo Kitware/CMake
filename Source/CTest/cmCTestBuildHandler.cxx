@@ -265,6 +265,32 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 }
 
 //----------------------------------------------------------------------
+std::string cmCTestBuildHandler::GetMakeCommand()
+{
+  std::string makeCommand
+    = this->CTest->GetCTestConfiguration("MakeCommand");
+  cmCTestLog(this->CTest,
+             HANDLER_VERBOSE_OUTPUT, "MakeCommand:" << makeCommand << 
+             "\n");
+
+  std::string configType = this->CTest->GetConfigType();
+  if (configType == "")
+    {
+    configType
+      = this->CTest->GetCTestConfiguration("DefaultCTestConfigurationType");
+    }
+  if (configType == "")
+    {
+    configType = "Release";
+    }
+
+  cmSystemTools::ReplaceString(makeCommand,
+    "${CTEST_CONFIGURATION_TYPE}", configType.c_str());
+
+  return makeCommand;
+}
+
+//----------------------------------------------------------------------
 //clearly it would be nice if this were broken up into a few smaller
 //functions and commented...
 int cmCTestBuildHandler::ProcessHandler()
@@ -300,11 +326,7 @@ int cmCTestBuildHandler::ProcessHandler()
     }
 
   // Determine build command and build directory
-  const std::string &makeCommand
-    = this->CTest->GetCTestConfiguration("MakeCommand");
-  cmCTestLog(this->CTest,
-             HANDLER_VERBOSE_OUTPUT, "MakeCommand:" << makeCommand << 
-             "\n");
+  std::string makeCommand = this->GetMakeCommand();
   if ( makeCommand.size() == 0 )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -312,6 +334,7 @@ int cmCTestBuildHandler::ProcessHandler()
       << std::endl);
     return -1;
     }
+
   const std::string &buildDirectory
     = this->CTest->GetCTestConfiguration("BuildDirectory");
   if ( buildDirectory.size() == 0 )
@@ -519,8 +542,7 @@ void cmCTestBuildHandler::GenerateXMLHeader(std::ostream& os)
     static_cast<unsigned int>(this->StartBuildTime)
      << "</StartBuildTime>\n"
      << "<BuildCommand>"
-     << cmXMLSafe(
-       this->CTest->GetCTestConfiguration("MakeCommand"))
+     << cmXMLSafe(this->GetMakeCommand())
      << "</BuildCommand>" << std::endl;
 }
 

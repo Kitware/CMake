@@ -30,6 +30,7 @@ NightlyStartTime: @NIGHTLY_START_TIME@
 # Commands for the build/test/submit cycle
 ConfigureCommand: "@CMAKE_COMMAND@" "@PROJECT_SOURCE_DIR@"
 MakeCommand: @MAKECOMMAND@
+DefaultCTestConfigurationType: @DEFAULT_CTEST_CONFIGURATION_TYPE@
 
 # CVS options
 # Default is "-d -P -A"

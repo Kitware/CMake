@@ -53,6 +53,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
     return 0;
     }
   this->Handler =  (cmCTestBuildHandler*)handler;
+
   const char* ctestBuildCommand
     = this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");
   if ( ctestBuildCommand && *ctestBuildCommand )
@@ -67,10 +68,21 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       = (this->Values[ctb_PROJECT_NAME] && *this->Values[ctb_PROJECT_NAME])
       ? this->Values[ctb_PROJECT_NAME]
       : this->Makefile->GetDefinition("CTEST_PROJECT_NAME");
+
+    // Build configuration is determined by: CONFIGURATION argument,
+    // or CTEST_BUILD_CONFIGURATION script variable, or
+    // CTEST_CONFIGURATION_TYPE script variable, or ctest -C command
+    // line argument... in that order.
+    //
+    const char* ctestBuildConfiguration
+      = this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
     const char* cmakeBuildConfiguration
       = (this->Values[ctb_CONFIGURATION] && *this->Values[ctb_CONFIGURATION])
       ? this->Values[ctb_CONFIGURATION]
-      : this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
+      : ((ctestBuildConfiguration && *ctestBuildConfiguration)
+        ? ctestBuildConfiguration
+        : this->CTest->GetConfigType().c_str());
+
     const char* cmakeBuildAdditionalFlags
       = (this->Values[ctb_FLAGS] && *this->Values[ctb_FLAGS])
       ? this->Values[ctb_FLAGS]
@@ -117,7 +129,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
           }
         cmakeBuildConfiguration = config;
         }
-      
+
       std::string buildCommand
         = this->GlobalGenerator->
         GenerateBuildCommand(cmakeMakeProgram,

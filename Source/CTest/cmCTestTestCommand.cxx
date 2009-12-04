@@ -33,6 +33,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 {
   const char* ctestTimeout = 
     this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
+
   double timeout = this->CTest->GetTimeOut();
   if ( ctestTimeout )
     {
@@ -104,4 +105,3 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeActualHandler()
 {
   return this->CTest->GetInitializedHandler("test");
 }
-

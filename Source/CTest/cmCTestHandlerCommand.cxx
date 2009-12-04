@@ -59,6 +59,17 @@ bool cmCTestHandlerCommand
       }
     }
 
+  // Set the config type of this ctest to the current value of the
+  // CTEST_CONFIGURATION_TYPE script variable if it is defined.
+  // The current script value trumps the -C argument on the command
+  // line.
+  const char* ctestConfigType =
+    this->Makefile->GetDefinition("CTEST_CONFIGURATION_TYPE");
+  if (ctestConfigType)
+    {
+    this->CTest->SetConfigType(ctestConfigType);
+    }
+
   cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl;);
   cmCTestGenericHandler* handler = this->InitializeHandler();
   if ( !handler )

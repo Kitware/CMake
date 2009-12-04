@@ -3302,3 +3302,18 @@ cmGlobalXCodeGenerator::ComputeInfoPListLocation(cmTarget& target)
   plist += ".dir/Info.plist";
   return plist;
 }
+
+//----------------------------------------------------------------------------
+// Return true if the generated build tree may contain multiple builds.
+// i.e. "Can I build Debug and Release in the same tree?"
+bool cmGlobalXCodeGenerator::IsMultiConfig()
+{
+  // Old Xcode 1.5 is single config:
+  if(this->XcodeVersion == 15)
+    {
+    return false;
+    }
+
+  // Newer Xcode versions are multi config:
+  return true;
+}

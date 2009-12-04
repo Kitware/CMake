@@ -258,6 +258,10 @@ public:
   /** Supported systems creates a GUID for the given name */
   virtual void CreateGUID(const char*) {}
 
+  /** Return true if the generated build tree may contain multiple builds.
+      i.e. "Can I build Debug and Release in the same tree?" */
+  virtual bool IsMultiConfig() { return false; }
+
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend

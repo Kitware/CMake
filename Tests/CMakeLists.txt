@@ -1181,7 +1181,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     )
   SET_TESTS_PROPERTIES(CTestTestNoBuild PROPERTIES
     FAIL_REGULAR_EXPRESSION "Error" WILL_FAIL true)
-  
+
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoExe.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake"
@@ -1193,6 +1193,50 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   SET_TESTS_PROPERTIES(CTestTestNoExe PROPERTIES DEPENDS CTestTestNoBuild
     PASS_REGULAR_EXPRESSION "Could not find executable"
     FAIL_REGULAR_EXPRESSION "SegFault")
+
+
+  # Use macro, not function so that build can still be driven by CMake 2.4.
+  # After 2.6 is required, this could be a function without the extra 'set'
+  # calls.
+  #
+  macro(add_config_tests cfg)
+    set(cfg "${cfg}")
+    set(base "${CMake_BINARY_DIR}/Tests/CTestConfig")
+
+    # Test -S script with a -C config arg to ctest:
+    configure_file(
+      "${CMake_SOURCE_DIR}/Tests/CTestConfig/script.cmake.in"
+      "${base}/${cfg}-script.cmake"
+      @ONLY ESCAPE_QUOTES)
+    add_test(CTestConfig.Script.${cfg} ${CMAKE_CTEST_COMMAND}
+      -C ${cfg}
+      -S "${base}/${cfg}-script.cmake" -VV
+      --output-log "${base}/${cfg}-script.log"
+      )
+
+    # Test -D dashboard with a -C config arg to ctest.
+    # (Actual commands inside a cmake -P script because we need to be able to set
+    #  the working directory reliably...)
+    configure_file(
+      "${CMake_SOURCE_DIR}/Tests/CTestConfig/dashboard.cmake.in"
+      "${base}/${cfg}-dashboard.cmake"
+      @ONLY ESCAPE_QUOTES)
+    add_test(CTestConfig.Dashboard.${cfg} ${CMAKE_CMAKE_COMMAND}
+      -P "${base}/${cfg}-dashboard.cmake" -VV
+      )
+  endmacro()
+
+  add_config_tests(Debug)
+  add_config_tests(MinSizeRel)
+  add_config_tests(Release)
+  add_config_tests(RelWithDebInfo)
+
+  add_test(CMakeCommands.build_command ${CMAKE_CMAKE_COMMAND}
+    -DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}
+    -Ddir=${CMake_BINARY_DIR}/Tests/CMakeCommands/build_command
+    -Dgen=${CMAKE_TEST_GENERATOR}
+    -P "${CMake_SOURCE_DIR}/Tests/CMakeCommands/build_command/RunCMake.cmake"
+  )
 
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
@@ -1256,11 +1300,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     -S "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/testOutput.log"
     )
-  
+
   ADD_TEST(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
-  
+
   ADD_TEST(CTestBatchTest ${CMAKE_CTEST_COMMAND} -B)
-  
+
   # Use macro, not function so that build can still be driven by CMake 2.4.
   # After 2.6 is required, this could be a function without the extra 'set'
   # calls.
