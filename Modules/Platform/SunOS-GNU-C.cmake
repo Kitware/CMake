@@ -1,2 +1,2 @@
 include(Platform/SunOS-GNU)
-__sunos_compiler_gnu(Fortran)
+__sunos_compiler_gnu(C)
