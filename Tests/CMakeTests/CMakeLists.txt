@@ -50,6 +50,7 @@ if(do_cvs_tests)
     "-DCMake_BINARY_DIR:PATH=${CMake_BINARY_DIR}"
     "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
     "-DCVS_EXECUTABLE:STRING=${CVS_EXECUTABLE}"
+    "-DHOME:STRING=$ENV{HOME}"
     )
   AddCMakeTest(CheckSourceTree "${CheckSourceTree_PreArgs}")
 endif(do_cvs_tests)
