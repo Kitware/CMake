@@ -1263,7 +1263,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     -S "${CMake_BINARY_DIR}/Tests/CTestTestBadExe/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestBadExe/testOutput.log"
     )
-  SET_TESTS_PROPERTIES(CTestTestBadExe PROPERTIES WILL_FAIL TRUE)
+  SET_TESTS_PROPERTIES(CTestTestBadExe PROPERTIES
+    PASS_REGULAR_EXPRESSION "BAD_COMMAND")
   
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestParallel/test.cmake.in"
