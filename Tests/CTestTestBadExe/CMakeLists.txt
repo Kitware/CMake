@@ -1,0 +1,7 @@
+cmake_minimum_required (VERSION 2.6)
+PROJECT(CTestTestBadExe)
+INCLUDE(CTest)
+
+CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/notAnExe.txt" "${CMAKE_CURRENT_BINARY_DIR}/notAnExe.txt" COPYONLY)
+
+ADD_TEST (TestBadExe "${CMAKE_CURRENT_BINARY_DIR}/notAnExe.txt")

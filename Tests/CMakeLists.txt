@@ -1256,6 +1256,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
   ENDIF(CMAKE_TEST_GENERATOR MATCHES "Watcom WMake")
     
   CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestBadExe/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestBadExe/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestBadExe ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestBadExe/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestBadExe/testOutput.log"
+    )
+  SET_TESTS_PROPERTIES(CTestTestBadExe PROPERTIES WILL_FAIL TRUE)
+  
+  CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestParallel/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake"
     @ONLY ESCAPE_QUOTES)
