@@ -9,6 +9,7 @@ message("CVS_EXECUTABLE='${CVS_EXECUTABLE}'")
 message("HOME='${HOME}'")
 message("ENV{DASHBOARD_TEST_FROM_CTEST}='$ENV{DASHBOARD_TEST_FROM_CTEST}'")
 message("")
+string(REPLACE "\\" "\\\\" HOME "${HOME}")
 
 
 # Is the build directory the same as or underneath the source directory?
@@ -39,6 +40,16 @@ message("substr_len='${substr_len}'")
 message("bin_dir='${bin_dir}'")
 message("in_source_build='${in_source_build}'")
 message("")
+
+
+# If this does not appear to be a CVS checkout, just pass the test here and now.
+# (Do not let the test fail if it is run in a tree *exported* from CVS or
+# unpacked from a .zip file source installer...)
+#
+if(NOT EXISTS "${CMake_SOURCE_DIR}/CVS/Root")
+  message("source tree is not a CVS checkout... test passes by early return...")
+  return()
+endif()
 
 
 # Check with "cvs -q -n up -dP" if there are any local modifications to the
