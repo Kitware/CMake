@@ -1051,8 +1051,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
       p.Cost = rand();
       }
 
-    if((p.Timeout == 0 || p.Timeout > this->CTest->GetGlobalTimeout())
-       && this->CTest->GetGlobalTimeout() != 0)
+    if(p.Timeout == 0 && this->CTest->GetGlobalTimeout() != 0)
       {
       p.Timeout = this->CTest->GetGlobalTimeout();
       }
