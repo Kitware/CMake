@@ -5,6 +5,7 @@ include_directories(
   )
 
 set(CMakeLib_TESTS
+  testUTF8
   testXMLParser
   )
 
