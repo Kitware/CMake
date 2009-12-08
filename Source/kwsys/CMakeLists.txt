@@ -301,13 +301,6 @@ ELSE(COMMAND INSTALL)
   SET(KWSYS_INSTALL_LIB_DIR)
 ENDIF(COMMAND INSTALL)
 
-# Work-around for CMake 1.6.7 bug in custom command dependencies when
-# there is no executable output path.
-IF(NOT EXECUTABLE_OUTPUT_PATH)
-  SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}" CACHE PATH
-      "Output directory for executables.")
-ENDIF(NOT EXECUTABLE_OUTPUT_PATH)
-
 # Generated source files will need this header.
 STRING(COMPARE EQUAL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}"
   KWSYS_IN_SOURCE_BUILD)
