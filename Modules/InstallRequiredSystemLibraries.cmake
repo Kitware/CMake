@@ -1,11 +1,11 @@
 # By including this file, all files in the CMAKE_INSTALL_DEBUG_LIBRARIES,
 # will be installed with INSTALL_PROGRAMS into /bin for WIN32 and /lib
 # for non-win32. If CMAKE_SKIP_INSTALL_RULES is set to TRUE before including
-# this file, then the INSTALL command is not called.  The use can use 
+# this file, then the INSTALL command is not called.  The user can use 
 # the variable CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS to use a custom install 
 # command and install them into any directory they want.
 # If it is the MSVC compiler, then the microsoft run
-# time libraries will be found add automatically added to the
+# time libraries will be found and automatically added to the
 # CMAKE_INSTALL_DEBUG_LIBRARIES, and installed.  
 # If CMAKE_INSTALL_DEBUG_LIBRARIES is set and it is the MSVC
 # compiler, then the debug libraries are installed when available.
