@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmXMLSafe.h"
 
+#include "cm_utf8.h"
+
 #include <cmsys/ios/iostream>
 #include <cmsys/ios/sstream>
 
@@ -53,44 +55,47 @@ cmsys_ios::ostream& operator<<(cmsys_ios::ostream& os, cmXMLSafe const& self)
 {
   char const* first = self.Data;
   char const* last = self.Data + self.Size;
-  for(char const* ci = first; ci != last; ++ci)
+  while(first != last)
     {
-    unsigned char c = static_cast<unsigned char>(*ci);
-    switch(c)
+    unsigned int ch;
+    if(const char* next = cm_utf8_decode_character(first, last, &ch))
       {
-      case '&': os << "&amp;"; break;
-      case '<': os << "&lt;"; break;
-      case '>': os << "&gt;"; break;
-      case '"': os << (self.DoQuotes? "&quot;" : "\""); break;
-      case '\'': os << (self.DoQuotes? "&apos;" : "'"); break;
-      case '\t': os << "\t"; break;
-      case '\n': os << "\n"; break;
-      case '\r': break; // Ignore CR
-      default:
-        if(c >= 0x20 && c <= 0x7f)
+      // http://www.w3.org/TR/REC-xml/#NT-Char
+      if((ch >= 0x20 && ch <= 0xD7FF) ||
+         (ch >= 0xE000 && ch <= 0xFFFD) ||
+         (ch >= 0x10000 && ch <= 0x10FFFF) ||
+          ch == 0x9 || ch == 0xA || ch == 0xD)
+        {
+        switch(ch)
           {
-          os.put(static_cast<char>(c));
+          // Escape XML control characters.
+          case '&': os << "&amp;"; break;
+          case '<': os << "&lt;"; break;
+          case '>': os << "&gt;"; break;
+          case '"': os << (self.DoQuotes? "&quot;" : "\""); break;
+          case '\'': os << (self.DoQuotes? "&apos;" : "'"); break;
+          case '\r': break; // Ignore CR
+          // Print the UTF-8 character.
+          default: os.write(first, next-first); break;
           }
-        else
-          {
-          // TODO: More complete treatment of program output character
-          // encoding.  Instead of escaping these bytes, we should
-          // handle the current locale and its encoding.
-          char buf[16];
-          // http://www.w3.org/TR/REC-xml/#NT-Char
-          if(c >= 0x80)
-            {
-            sprintf(buf, "&#x%hx;", static_cast<unsigned short>(c));
-            }
-          else
-            {
-            // We cannot use "&#x%hx;" here because this value is not
-            // valid in XML.  Instead use a human-readable hex value.
-            sprintf(buf, "&lt;0x%hx&gt;", static_cast<unsigned short>(c));
-            }
-          os << buf;
-          }
-        break;
+        }
+      else
+        {
+        // Use a human-readable hex value for this invalid character.
+        char buf[16];
+        sprintf(buf, "%X", ch);
+        os << "[NON-XML-CHAR-0x" << buf << "]";
+        }
+
+      first = next;
+      }
+    else
+      {
+      ch = static_cast<unsigned char>(*first++);
+      // Use a human-readable hex value for this invalid byte.
+      char buf[16];
+      sprintf(buf, "%X", ch);
+      os << "[NON-UTF-8-BYTE-0x" << buf << "]";
       }
     }
   return os;

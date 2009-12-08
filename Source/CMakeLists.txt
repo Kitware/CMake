@@ -246,6 +246,9 @@ SET(SRCS
   cmake.h
   cmakewizard.cxx
   cmakewizard.h
+
+  cm_utf8.h
+  cm_utf8.c
   )
 
 # Kdevelop only works on UNIX and not windows
