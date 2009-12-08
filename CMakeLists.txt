@@ -346,7 +346,6 @@ SET(EXECUTABLE_OUTPUT_PATH ${CMake_BINARY_DIR}/bin CACHE INTERNAL
   "Where to put the executables for CMake")
 SET(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL 
   "Where to put the libraries for CMake")
-INCLUDE_REGULAR_EXPRESSION("^.*$")
 
 # The CMake executables usually do not need any rpath to run in the build or
 # install tree.

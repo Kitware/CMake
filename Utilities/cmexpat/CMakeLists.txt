@@ -1,5 +1,4 @@
 PROJECT(CMEXPAT)
-INCLUDE_REGULAR_EXPRESSION("^.*$")
 
 SET(expat_SRCS
   xmlparse.c
