@@ -459,8 +459,6 @@ ENDIF(APPLE)
 # Build CMake executable
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 TARGET_LINK_LIBRARIES(cmake CMakeLib)
-ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
-TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
 
 # Build special executable for running programs on Windows 98
 IF(WIN32)

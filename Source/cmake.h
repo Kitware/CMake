@@ -123,12 +123,6 @@ class cmake
   //@}
 
   /**
-   * Dump documentation to a file. If 0 is returned, the
-   * operation failed.
-   */
-  int DumpDocumentationToFile(std::ostream&);
-
-  /**
    * Handle a command line invocation of cmake.
    */
   int Run(const std::vector<std::string>&args)
