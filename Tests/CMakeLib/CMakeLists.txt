@@ -7,6 +7,7 @@ include_directories(
 set(CMakeLib_TESTS
   testUTF8
   testXMLParser
+  testXMLSafe
   )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testXMLParser.h.in
