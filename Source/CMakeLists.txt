@@ -18,6 +18,8 @@ ELSE(HAVE_ELF_H)
   SET(CMAKE_USE_ELF_PARSER)
 ENDIF(HAVE_ELF_H)
 
+SET(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
+
 # configure the .h file
 CONFIGURE_FILE(
   "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"

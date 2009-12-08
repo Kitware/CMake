@@ -20,6 +20,8 @@ MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 # Allow empty endif() and such with CMake 2.4.
 SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 1)
 
+SET(CMake_BIN_DIR ${CMake_BINARY_DIR}/bin)
+
 IF(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
   # Since the built CMake will install itself instead of the
   # generating CMake, tell it that the install rules were generated
@@ -134,9 +136,9 @@ MACRO(CMAKE_SETUP_TESTING)
     # the ctest from this cmake is used for testing
     # and not the ctest from the cmake building and testing
     # cmake.
-    SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
-    SET(CMAKE_CMAKE_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cmake")
-    SET(CMAKE_CPACK_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cpack")
+    SET(CMAKE_CTEST_COMMAND "${CMake_BIN_DIR}/ctest")
+    SET(CMAKE_CMAKE_COMMAND "${CMake_BIN_DIR}/cmake")
+    SET(CMAKE_CPACK_COMMAND "${CMake_BIN_DIR}/cpack")
   ENDIF(BUILD_TESTING)
 
   # configure some files for testing
@@ -342,8 +344,7 @@ INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
 
 # where to write the resulting executables and libraries
 SET(BUILD_SHARED_LIBS OFF)
-SET(EXECUTABLE_OUTPUT_PATH ${CMake_BINARY_DIR}/bin CACHE INTERNAL 
-  "Where to put the executables for CMake")
+SET(EXECUTABLE_OUTPUT_PATH "" CACHE INTERNAL "No configurable exe dir.")
 SET(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL 
   "Where to put the libraries for CMake")
 

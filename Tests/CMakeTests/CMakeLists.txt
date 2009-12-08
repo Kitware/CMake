@@ -1,4 +1,4 @@
-SET(CMAKE_EXECUTABLE "${EXECUTABLE_OUTPUT_PATH}/cmake")
+SET(CMAKE_EXECUTABLE "${CMake_BIN_DIR}/cmake")
 
 
 MACRO(AddCMakeTest TestName PreArgs)
