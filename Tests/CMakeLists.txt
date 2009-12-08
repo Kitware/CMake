@@ -37,6 +37,8 @@ SET_DIRECTORY_PROPERTIES(PROPERTIES
 
 # Testing
 IF(BUILD_TESTING)
+  ADD_SUBDIRECTORY(CMakeLib)
+
   # Collect a list of all test build directories.
   SET(TEST_BUILD_DIRS)
 
