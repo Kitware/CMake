@@ -73,7 +73,9 @@ public:
       "seconds specified.\n"
       "RUN_SERIAL: If set to true, this test will not run in parallel with "
       "any other tests. This should be used in conjunction with "
-      "the ctest_test PARALLEL_LEVEL option.\n";
+      "the ctest_test PARALLEL_LEVEL option.\n"
+      "REQUIRED_FILE: Set this to a file that must exist in order for the "
+      "test to be run.\n";
     }
 
   cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);

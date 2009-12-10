@@ -56,8 +56,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  add_test(testname Exename arg1 arg2 ... \n"
-      "           [EXEC_PREFIX_CMD wrapperExe args...])\n"
+      "  add_test(testname Exename arg1 arg2 ... )\n"
       "If the ENABLE_TESTING command has been run, this command adds a "
       "test target to the current directory. If ENABLE_TESTING has not "
       "been run, this command does nothing.  "
@@ -67,9 +66,6 @@ public:
       "system (like tclsh).  The test will be run with the current working "
       "directory set to the CMakeList.txt files corresponding directory "
       "in the binary tree.\n"
-      "Use EXEC_PREFIX_CMD to wrap an executable built by this project "
-      "in another executable such as mpiexec.  This will only run the "
-      "test if the wrapped executable was built."
       "\n"
       "  add_test(NAME <name> [CONFIGURATIONS [Debug|Release|...]]\n"
       "           COMMAND <command> [arg1 [arg2 ...]])\n"

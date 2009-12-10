@@ -269,30 +269,7 @@ bool cmCTestAddTestCommand
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
-  bool prefixCmdFound = false;
-  std::vector<std::string> actualArgs, prefix;
-
-  //separate the regular command and the prefix command (bug 8668)
-  for(std::vector<std::string>::const_iterator i = args.begin();
-      i != args.end(); ++i)
-    {
-    if(*i == "EXEC_PREFIX_CMD")
-      {
-      prefixCmdFound = true;
-      continue;
-      }
-    if(prefixCmdFound)
-      {
-      prefix.push_back(*i);
-      }
-    else
-      {
-      actualArgs.push_back(*i);
-      }
-    }
-
-  return this->TestHandler->AddTest(actualArgs, prefix);
+  return this->TestHandler->AddTest(args);
 }
 
 //----------------------------------------------------------------------
@@ -2036,6 +2013,10 @@ bool cmCTestTestHandler::SetTestsProperties(
             {
             rtit->Cost = static_cast<float>(atof(val.c_str()));
             }
+          if ( key == "REQUIRED_FILE" )
+            {
+            rtit->RequiredFiles.push_back(val);
+            }
           if ( key == "RUN_SERIAL" )
             {
             rtit->RunSerial = cmSystemTools::IsOn(val.c_str());
@@ -2127,8 +2108,7 @@ bool cmCTestTestHandler::SetTestsProperties(
 }
 
 //----------------------------------------------------------------------
-bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args,
-                                 const std::vector<std::string>& prefix)
+bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
 {
   const std::string& testname = args[0];
   cmCTestLog(this->CTest, DEBUG, "Add test: " << args[0] << std::endl);
@@ -2183,7 +2163,6 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args,
   cmCTestTestProperties test;
   test.Name = testname;
   test.Args = args;
-  test.PrefixArgs = prefix;
   test.Directory = cmSystemTools::GetCurrentWorkingDirectory();
   cmCTestLog(this->CTest, DEBUG, "Set test directory: "
     << test.Directory << std::endl);

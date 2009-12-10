@@ -66,8 +66,7 @@ public:
   /*
    * Add the test to the list of tests to be executed
    */
-  bool AddTest(const std::vector<std::string>& args,
-               const std::vector<std::string>& prefix);
+  bool AddTest(const std::vector<std::string>& args);
 
   /*
    * Set tests properties
@@ -85,7 +84,7 @@ public:
     cmStdString Name;
     cmStdString Directory;
     std::vector<std::string> Args;
-    std::vector<std::string> PrefixArgs;
+    std::vector<std::string> RequiredFiles;
     std::vector<std::string> Depends;
     std::vector<std::pair<cmsys::RegularExpression,
                           std::string> > ErrorRegularExpressions;
