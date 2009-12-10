@@ -105,6 +105,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     this->RunningCount -= GetProcessorsUsed(test);
     testRun->EndTest(this->Completed, this->Total, false);
     this->Failed->push_back(this->Properties[test]->Name);
+    delete testRun;
     }
   cmSystemTools::ChangeDirectory(current_dir.c_str());
 }
