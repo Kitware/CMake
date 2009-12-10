@@ -160,6 +160,8 @@ IF(BUILD_TESTING)
       PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype)")
   ENDIF(CTEST_TEST_OSX_ARCH)
 
+  LIST(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
+
   SET(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
   SET(CMAKE_BUILD_TEST_BINARY_DIR "${CMake_BINARY_DIR}/Tests/CMakeBuildCOnly")
   CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CMakeBuildTest.cmake.in"

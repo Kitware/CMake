@@ -366,6 +366,10 @@ MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
 STRING(REGEX REPLACE "^/" "" CMake_DATA_DEST "${CMAKE_DATA_DIR}")
 STRING(REGEX REPLACE "^/" "" CMake_DOC_DEST "${CMAKE_DOC_DIR}")
 
+IF(BUILD_TESTING)
+  INCLUDE(${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake)
+ENDIF()
+
 # include special compile flags for some compilers
 INCLUDE(CompileFlags.cmake)
 
