@@ -342,6 +342,10 @@ SET(CMake_VERSION_FULL "${CMake_VERSION}.${CMake_VERSION_PATCH}")
 ENABLE_TESTING()
 INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
 
+# Set up test-time configuration.
+SET_DIRECTORY_PROPERTIES(PROPERTIES
+  TEST_INCLUDE_FILE "${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake")
+
 # where to write the resulting executables and libraries
 SET(BUILD_SHARED_LIBS OFF)
 SET(EXECUTABLE_OUTPUT_PATH "" CACHE INTERNAL "No configurable exe dir.")

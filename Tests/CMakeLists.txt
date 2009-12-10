@@ -28,12 +28,8 @@ IF(NOT CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
   SET(CTestTest_CONFIG ${CMAKE_BUILD_TYPE})
 ENDIF()
 
-# Make sure the 'testing' test gets a proper configuration.
 CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
                ${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake @ONLY)
-SET_DIRECTORY_PROPERTIES(PROPERTIES
-  TEST_INCLUDE_FILE "${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake"
-  )
 
 # Testing
 IF(BUILD_TESTING)
