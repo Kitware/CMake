@@ -26,6 +26,8 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
   this->TestResult.Status = 0;
   this->TestResult.TestCount = 0;
   this->TestResult.Properties = 0;
+  this->PrefixCommand = "";
+  this->UsePrefixCommand = false;
 }
 
 cmCTestRunTest::~cmCTestRunTest()
@@ -303,29 +305,27 @@ bool cmCTestRunTest::StartTest(size_t total)
     << this->TestProperties->Name << std::endl);
   this->ComputeArguments();
   std::vector<std::string>& args = this->TestProperties->Args;
+  std::vector<std::string>& pargs = this->TestProperties->PrefixArgs;
   this->TestResult.Properties = this->TestProperties;
   this->TestResult.ExecutionTime = 0;
   this->TestResult.ReturnValue = -1;
   this->TestResult.CompletionStatus = "Failed to start";
   this->TestResult.Status = cmCTestTestHandler::BAD_COMMAND;
-  this->TestResult.TestCount = this->TestProperties->Index;  
+  this->TestResult.TestCount = this->TestProperties->Index;
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory.c_str();
   
+  // if we are using a prefix command, make sure THAT executable exists
+  if (this->UsePrefixCommand && this->PrefixCommand == "")
+    {
+    this->ExeNotFound(pargs[0]);
+    return false;
+    }
+
   // log and return if we did not find the executable
   if (this->ActualCommand == "")
     {
-    // if the command was not found create a TestResult object
-    // that has that information 
-    this->TestProcess = new cmProcess;
-    *this->TestHandler->LogFile << "Unable to find executable: " 
-                   << args[1].c_str() << std::endl;
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Unable to find executable: "
-               << args[1].c_str() << std::endl);
-    this->TestResult.Output = "Unable to find executable: " + args[1];
-    this->TestResult.FullCommandLine = "";
-    this->TestResult.CompletionStatus = "Not Run";
-    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+    this->ExeNotFound(args[1]);
     return false;
     }
   this->StartTime = this->CTest->CurrentTime();
@@ -334,11 +334,35 @@ bool cmCTestRunTest::StartTest(size_t total)
                              &this->TestProperties->Environment);
 }
 
+void cmCTestRunTest::ExeNotFound(std::string exe)
+{
+  this->TestProcess = new cmProcess;
+  *this->TestHandler->LogFile << "Unable to find executable: "
+             << exe.c_str() << std::endl;
+  cmCTestLog(this->CTest, ERROR_MESSAGE, "Unable to find executable: "
+             << exe.c_str() << std::endl);
+  this->TestResult.Output = "Unable to find executable: " + exe;
+  this->TestResult.FullCommandLine = "";
+  this->TestResult.CompletionStatus = "Not Run";
+  this->TestResult.Reason = "";
+  this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+}
+
 void cmCTestRunTest::ComputeArguments()
 {
   std::vector<std::string>::const_iterator j = 
     this->TestProperties->Args.begin();
   ++j; // skip test name
+
+  this->TestCommand = "";
+
+  //If we are using a prefix command, find the exe for it
+  if(this->TestProperties->PrefixArgs.size())
+    {
+    this->UsePrefixCommand = true;
+    this->PrefixCommand = this->TestHandler->FindTheExecutable(
+      this->TestProperties->PrefixArgs[0].c_str());
+    }
 
   // find the test executable
   if(this->TestHandler->MemCheck)
@@ -354,8 +378,6 @@ void cmCTestRunTest::ComputeArguments()
       this->TestProperties->Args[1].c_str());
     ++j; //skip the executable (it will be actualCommand)
     }
-  this->TestCommand
-    = cmSystemTools::ConvertToOutputPath(this->ActualCommand.c_str());
 
   //Prepends memcheck args to our command string
   this->TestHandler->GenerateTestCommand(this->Arguments);
@@ -365,6 +387,27 @@ void cmCTestRunTest::ComputeArguments()
     this->TestCommand += " ";
     this->TestCommand += cmSystemTools::EscapeSpaces(j->c_str());
     }
+  //Add user specified prefix args
+  if(this->UsePrefixCommand)
+    {
+    this->TestCommand +=
+      cmSystemTools::ConvertToOutputPath(this->PrefixCommand.c_str());
+
+    std::vector<std::string>::iterator i = 
+        this->TestProperties->PrefixArgs.begin();
+    ++i; //skip the exe name
+    for(; i != this->TestProperties->PrefixArgs.end(); ++i)
+      {
+      this->TestCommand += " ";
+      this->TestCommand += cmSystemTools::EscapeSpaces(i->c_str());
+      this->Arguments.push_back(*i);
+      }
+    this->Arguments.push_back(this->ActualCommand);
+    this->TestCommand += " ";
+    }
+  //Add regular test args
+  this->TestCommand
+    += cmSystemTools::ConvertToOutputPath(this->ActualCommand.c_str());
 
   for(;j != this->TestProperties->Args.end(); ++j)
     {
@@ -411,7 +454,9 @@ bool cmCTestRunTest::CreateProcess(double testTimeOut,
   this->TestProcess->SetId(this->Index);
   this->TestProcess->SetWorkingDirectory(
         this->TestProperties->Directory.c_str());
-  this->TestProcess->SetCommand(this->ActualCommand.c_str());
+  this->TestProcess->SetCommand(this->UsePrefixCommand ?
+    this->PrefixCommand.c_str() :
+    this->ActualCommand.c_str());
   this->TestProcess->SetCommandArguments(this->Arguments);
 
   std::vector<std::string> origEnv;

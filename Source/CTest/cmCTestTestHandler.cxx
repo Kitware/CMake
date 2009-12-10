@@ -269,7 +269,30 @@ bool cmCTestAddTestCommand
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  return this->TestHandler->AddTest(args);
+
+  bool prefixCmdFound = false;
+  std::vector<std::string> actualArgs, prefix;
+
+  //separate the regular command and the prefix command (bug 8668)
+  for(std::vector<std::string>::const_iterator i = args.begin();
+      i != args.end(); ++i)
+    {
+    if(*i == "EXEC_PREFIX_CMD")
+      {
+      prefixCmdFound = true;
+      continue;
+      }
+    if(prefixCmdFound)
+      {
+      prefix.push_back(*i);
+      }
+    else
+      {
+      actualArgs.push_back(*i);
+      }
+    }
+
+  return this->TestHandler->AddTest(actualArgs, prefix);
 }
 
 //----------------------------------------------------------------------
@@ -2104,10 +2127,12 @@ bool cmCTestTestHandler::SetTestsProperties(
 }
 
 //----------------------------------------------------------------------
-bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
+bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args,
+                                 const std::vector<std::string>& prefix)
 {
   const std::string& testname = args[0];
   cmCTestLog(this->CTest, DEBUG, "Add test: " << args[0] << std::endl);
+
   if (this->UseExcludeRegExpFlag &&
     this->UseExcludeRegExpFirst &&
     this->ExcludeTestsRegularExpression.find(testname.c_str()))
@@ -2158,6 +2183,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   cmCTestTestProperties test;
   test.Name = testname;
   test.Args = args;
+  test.PrefixArgs = prefix;
   test.Directory = cmSystemTools::GetCurrentWorkingDirectory();
   cmCTestLog(this->CTest, DEBUG, "Set test directory: "
     << test.Directory << std::endl);

@@ -53,6 +53,7 @@ public:
   void ComputeArguments();
 private:
   void DartProcessing();
+  void ExeNotFound(std::string exe);
   bool CreateProcess(double testTimeOut,
                      std::vector<std::string>* environment);
   void WriteLogOutputTop(size_t completed, size_t total);
@@ -71,6 +72,10 @@ private:
 
   //flag for whether the env was modified for this run
   bool ModifyEnv;
+
+  bool UsePrefixCommand;
+  std::string PrefixCommand;
+
   //stores the original environment if we are modifying it
   std::vector<std::string> OrigEnv;
   std::string ProcessOutput;
@@ -96,5 +101,6 @@ inline int getNumWidth(size_t n)
     }
   return numWidth;
 }
+
 #endif
 
