@@ -180,7 +180,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   SET(KWSYS_USE_CommandLineArguments 1)
   SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
   SET(KWSYS_INSTALL_DOC_DIR "${CMake_DOC_DEST}")
-  SUBDIRS(Source/kwsys)
+  ADD_SUBDIRECTORY(Source/kwsys)
   
   #---------------------------------------------------------------------
   # Setup third-party libraries.
@@ -209,7 +209,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   ELSE(CMAKE_USE_SYSTEM_ZLIB)
     SET(CMAKE_ZLIB_INCLUDES)
     SET(CMAKE_ZLIB_LIBRARIES cmzlib)
-    SUBDIRS(Utilities/cmzlib)
+    ADD_SUBDIRECTORY(Utilities/cmzlib)
   ENDIF(CMAKE_USE_SYSTEM_ZLIB)
   
   #---------------------------------------------------------------------
@@ -232,7 +232,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     ENDIF(NOT CMAKE_BUILD_CURL_SHARED)
     SET(CMAKE_CURL_INCLUDES)
     SET(CMAKE_CURL_LIBRARIES cmcurl)
-    SUBDIRS(Utilities/cmcurl)
+    ADD_SUBDIRECTORY(Utilities/cmcurl)
   ENDIF(CMAKE_USE_SYSTEM_CURL)
 
   #---------------------------------------------------------------------
@@ -240,14 +240,14 @@ MACRO (CMAKE_BUILD_UTILITIES)
   SET(CMAKE_COMPRESS_INCLUDES 
     "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmcompress")
   SET(CMAKE_COMPRESS_LIBRARIES "cmcompress")
-  SUBDIRS(Utilities/cmcompress)
+  ADD_SUBDIRECTORY(Utilities/cmcompress)
   IF(CMAKE_USE_SYSTEM_BZIP2)
     FIND_PACKAGE(BZip2)
   ELSE()
     SET(BZIP2_INCLUDE_DIR 
       "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmbzip2")
     SET(BZIP2_LIBRARIES cmbzip2)
-    SUBDIRS(Utilities/cmbzip2)
+    ADD_SUBDIRECTORY(Utilities/cmbzip2)
   ENDIF()
   IF(CMAKE_USE_SYSTEM_LIBARCHIVE)
     FIND_PACKAGE(libarchive)
@@ -259,7 +259,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     SET(ZLIB_LIBRARIES ${CMAKE_ZLIB_LIBRARIES})
     SET(BUILD_ARCHIVE_WITHIN_CMAKE TRUE)
     ADD_DEFINITIONS(-DLIBARCHIVE_STATIC)
-    SUBDIRS(Utilities/cmlibarchive)
+    ADD_SUBDIRECTORY(Utilities/cmlibarchive)
     SET(CMAKE_TAR_LIBRARIES cmlibarchive ${BZIP2_LIBRARIES})
   ENDIF(CMAKE_USE_SYSTEM_LIBARCHIVE)
 
@@ -276,7 +276,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   ELSE(CMAKE_USE_SYSTEM_EXPAT)
     SET(CMAKE_EXPAT_INCLUDES)
     SET(CMAKE_EXPAT_LIBRARIES cmexpat)
-    SUBDIRS(Utilities/cmexpat)
+    ADD_SUBDIRECTORY(Utilities/cmexpat)
   ENDIF(CMAKE_USE_SYSTEM_EXPAT)
   
   #---------------------------------------------------------------------
@@ -311,7 +311,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     SET(BUILD_CursesDialog 0)
   ENDIF (UNIX)
   IF(BUILD_CursesDialog)
-    SUBDIRS(Source/CursesDialog/form)
+    ADD_SUBDIRECTORY(Source/CursesDialog/form)
   ENDIF(BUILD_CursesDialog)
 ENDMACRO (CMAKE_BUILD_UTILITIES)
 
@@ -448,9 +448,9 @@ MARK_AS_ADVANCED(CMAKE_STRICT)
 
 
 # build the remaining subdirectories
-SUBDIRS(Source)
-SUBDIRS(Utilities)
-SUBDIRS(Tests)
+ADD_SUBDIRECTORY(Source)
+ADD_SUBDIRECTORY(Utilities)
+ADD_SUBDIRECTORY(Tests)
 
 # add a test
 ADD_TEST(SystemInformationNew "${CMAKE_CMAKE_COMMAND}" 
