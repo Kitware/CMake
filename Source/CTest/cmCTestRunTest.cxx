@@ -177,6 +177,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         this->TestResult.Status = cmCTestTestHandler::OTHER_FAULT;
       }
     }
+  else //cmsysProcess_State_Error
+    {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run ");
+    }
+
   passed = this->TestResult.Status == cmCTestTestHandler::COMPLETED;
   char buf[1024];
   sprintf(buf, "%6.2f sec", this->TestProcess->GetTotalTime());
