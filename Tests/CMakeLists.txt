@@ -1472,17 +1472,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
 
   # fortran does not work for IDE builds because
   # CMAKE_STANDARD_LIBRARIES needs to be per language
-  IF(CMAKE_TEST_GENERATOR MATCHES "Makefiles"
-     OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
-    # see if we can find a fortran compiler on the machine
-    # if so, add the fortran test and see if it works.
-    SET(CMAKE_Fortran_COMPILER_LIST ifort ifc efc f95 pgf95
-      lf95 xlf95 fort gfortran gfortran-4 f90  pgf90   xlf90
-      epcf90 f77  fort77 frt pgf77  xlf  fl32 af77 g77  )
-    FIND_PROGRAM(CMAKE_Fortran_COMPILER_FULLPATH NAMES 
-      ${CMAKE_Fortran_COMPILER_LIST} )
-    MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER_FULLPATH)
-    IF(CMAKE_Fortran_COMPILER_FULLPATH)
+  IF(CMAKE_TEST_GENERATOR MATCHES "Make|KDevelop")
+    INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
+    IF(CMAKE_Fortran_COMPILER)
       ADD_TEST(Fortran ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/Fortran"
@@ -1493,9 +1485,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
         --build-two-config
         --test-command testf)
       LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
-    ENDIF(CMAKE_Fortran_COMPILER_FULLPATH)
-  ENDIF(CMAKE_TEST_GENERATOR MATCHES "Makefiles"
-     OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
+    ENDIF()
+  ENDIF()
 
   IF(NOT CMAKE_TEST_GENERATOR MATCHES "Xcode")
     INCLUDE(FindJava)
