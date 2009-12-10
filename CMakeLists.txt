@@ -476,3 +476,10 @@ INSTALL(
 #-----------------------------------------------------------------------
 # End of the main section of the CMakeLists file
 #-----------------------------------------------------------------------
+
+# As a special case when building CMake itself, CMake 2.8.0 and below
+# look up EXECUTABLE_OUTPUT_PATH in the top-level CMakeLists.txt file
+# to compute the location of the "cmake" executable.  We set it here
+# so that those CMake versions can find it.  We wait until after all
+# the add_subdirectory() calls to avoid affecting the subdirectories.
+SET(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
