@@ -218,6 +218,9 @@ static const char * cmDocumentationOptions[][3] =
   {"--timeout <seconds>", "Set a global timeout on all tests.",
    "This option will set a global timeout on all tests that do not already "
    "have a timeout set on them."},
+  {"--http1.0", "Submit using HTTP 1.0.",
+  "This option will force CTest to use HTTP 1.0 to submit files to the "
+  "dashboard, instead of HTTP 1.1."},
   {"--help-command <cmd> [<file>]", "Show help for a single command and exit.",
    "Prints the help for the command to stdout or to the specified file." },
   {"--help-command-list [<file>]", "List available commands and exit.",
