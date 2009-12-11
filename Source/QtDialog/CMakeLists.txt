@@ -97,7 +97,7 @@ ELSE(NOT QT4_FOUND)
     # install a desktop file so CMake appears in the application start menu
     # with an icon
     INSTALL(FILES CMake.desktop DESTINATION share/applications )
-    INSTALL(FILES CMakeSetup.png DESTINATION share/pixmaps )
+    INSTALL(FILES CMakeSetup32.png DESTINATION share/pixmaps )
     INSTALL(FILES cmakecache.xml DESTINATION share/mime/packages )
   ENDIF(UNIX)
 
