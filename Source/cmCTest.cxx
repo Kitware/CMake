@@ -220,6 +220,7 @@ cmCTest::cmCTest()
   this->ProduceXML             = false;
   this->ShowOnly               = false;
   this->RunConfigurationScript = false;
+  this->UseHTTP10              = false;
   this->TestModel              = cmCTest::EXPERIMENTAL;
   this->MaxTestNameWidth       = 30;
   this->InteractiveDebugMode   = true;
@@ -1704,7 +1705,12 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     this->SetParallelLevel(plevel);
     }
 
-  if(this->CheckArgument(arg, "--timeout")  && i < args.size() - 1)
+  if(this->CheckArgument(arg, "--http1.0"))
+    {
+    this->UseHTTP10 = true;
+    }
+
+  if(this->CheckArgument(arg, "--timeout") && i < args.size() - 1)
     {
     i++;
     double timeout = (double)atof(args[i].c_str());

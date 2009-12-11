@@ -75,6 +75,8 @@ private:
                        const cmStdString& remoteprefix, 
                        const cmStdString& url);
 
+  void ParseResponse(std::vector<char>);
+
   std::string GetSubmitResultsPrefix();
 
   cmStdString   HTTPProxy;
@@ -85,6 +87,8 @@ private:
   std::ostream* LogFile;
   bool SubmitPart[cmCTest::PartCount];
   bool CDash;
+  bool HasWarnings;
+  bool HasErrors;
   cmCTest::SetOfStrings Files;
 };
 

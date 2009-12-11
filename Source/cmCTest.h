@@ -193,6 +193,8 @@ public:
   ///! Should we only show what we would do?
   bool GetShowOnly();
 
+  bool ShouldUseHTTP10() { return this->UseHTTP10; }
+
   //Used for parallel ctest job scheduling
   std::string GetScheduleType() { return this->ScheduleType; }
   void SetScheduleType(std::string type) { this->ScheduleType = type; }
@@ -384,7 +386,7 @@ private:
   bool ExtraVerbose;
   bool ProduceXML;
   bool LabelSummary;
-
+  bool UseHTTP10;
   bool Failover;
   bool BatchJobs;
 
