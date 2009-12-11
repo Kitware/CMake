@@ -389,7 +389,7 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
       string(TOLOWER "$ENV{windir}" windir)
       string(REGEX REPLACE "\\\\" "/" windir "${windir}")
 
-      if(lower MATCHES "^(${sysroot}/system|${windir}/system|(.*/)*msvc[^/]+dll)")
+      if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
         set(is_system 1)
       endif()
     endif()
