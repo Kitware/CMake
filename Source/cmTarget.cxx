@@ -3476,14 +3476,20 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config,
 std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
                                                       bool for_xcode)
 {
-  // Lookup the target property.
-  const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
-  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME") &&
-     !this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
-     install_name_dir && *install_name_dir)
+  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
-    std::string dir = install_name_dir;
-    dir += "/";
+    std::string dir;
+
+    if(!this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
+      {
+      const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
+      if(install_name_dir && *install_name_dir)
+        {
+        dir = install_name_dir;
+        dir += "/";
+        }
+      }
+
     if(this->IsFrameworkOnApple() && !for_xcode)
       {
       dir += this->GetFullName(config, false);
@@ -3491,6 +3497,7 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
       dir += this->GetFrameworkVersion();
       dir += "/";
       }
+
     return dir;
     }
   else
