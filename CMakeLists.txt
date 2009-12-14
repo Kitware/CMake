@@ -29,6 +29,17 @@ IF(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
   INSTALL(CODE "SET(CMAKE_INSTALL_SELF_2_4 1)")
 ENDIF()
 
+IF("${CMake_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
+  # Disallow architecture-specific try_run.  It may not run on the host.
+  MACRO(TRY_RUN)
+    IF(CMAKE_TRY_COMPILE_OSX_ARCHITECTURES)
+      MESSAGE(FATAL_ERROR "TRY_RUN not allowed with CMAKE_TRY_COMPILE_OSX_ARCHITECTURES=[${CMAKE_TRY_COMPILE_OSX_ARCHITECTURES}]")
+    ELSE()
+      _TRY_RUN(${ARGV})
+    ENDIF()
+  ENDMACRO()
+ENDIF()
+
 #-----------------------------------------------------------------------
 # a macro to deal with system libraries, implemented as a macro
 # simply to improve readability of the main script
