@@ -181,8 +181,10 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
       // kdelibs/khtml this reduces the number of calls from 184k down to 92k,
       // or the time for cmake -E cmake_depends from 0.3 s down to 0.21 s.
       dependerExists = cmSystemTools::FileExists(this->Depender);
-      DependencyVector tmp;
-      validDeps[this->Depender] = tmp;
+      // If we erase validDeps[this->Depender] by overwriting it with an empty
+      // vector, we lose dependencies for dependers that have multiple
+      // entries. No need to initialize the entry, std::map will do so on first
+      // access.
       currentDependencies = &validDeps[this->Depender];
       continue;
       }
