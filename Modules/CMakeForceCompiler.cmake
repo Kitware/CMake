@@ -16,6 +16,13 @@
 # It also bypasses the check for working compiler and basic compiler
 # information tests.
 #
+# Macro CMAKE_FORCE_Fortran_COMPILER has the following signature:
+#   CMAKE_FORCE_Fortran_COMPILER(<compiler> <compiler-id>)
+# It sets CMAKE_Fortran_COMPILER to the given compiler and the cmake
+# internal variable CMAKE_Fortran_COMPILER_ID to the given compiler-id.
+# It also bypasses the check for working compiler and basic compiler
+# information tests.
+#
 # So a simple toolchain file could look like this:
 #   INCLUDE (CMakeForceCompiler)
 #   SET(CMAKE_SYSTEM_NAME Generic)
@@ -60,3 +67,16 @@ MACRO(CMAKE_FORCE_CXX_COMPILER compiler id)
     SET(CMAKE_COMPILER_IS_GNUCXX 1)
   ENDIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 ENDMACRO(CMAKE_FORCE_CXX_COMPILER)
+
+MACRO(CMAKE_FORCE_Fortran_COMPILER compiler id)
+  SET(CMAKE_Fortran_COMPILER "${compiler}")
+  SET(CMAKE_Fortran_COMPILER_ID_RUN TRUE)
+  SET(CMAKE_Fortran_COMPILER_ID ${id})
+  SET(CMAKE_Fortran_COMPILER_WORKS TRUE)
+  SET(CMAKE_Fortran_COMPILER_FORCED TRUE)
+
+  # Set old compiler id variables.
+  IF("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+    SET(CMAKE_COMPILER_IS_GNUG77 1)
+  ENDIF("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+ENDMACRO(CMAKE_FORCE_Fortran_COMPILER)
