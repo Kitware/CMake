@@ -44,6 +44,14 @@ FOREACH(_CURRENT_VERSION 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
     # Avoid finding the .dll in the PATH.  We want the .lib.
     NO_SYSTEM_ENVIRONMENT_PATH
   )
+  # Look for the static library in the Python config directory
+  FIND_LIBRARY(PYTHON_LIBRARY
+    NAMES python${_CURRENT_VERSION_NO_DOTS} python${_CURRENT_VERSION}
+    # Avoid finding the .dll in the PATH.  We want the .lib.
+    NO_SYSTEM_ENVIRONMENT_PATH
+    # This is where the static library is usually located
+    PATH_SUFFIXES python${_CURRENT_VERSION}/config
+  )
 
   # For backward compatibility, honour value of PYTHON_INCLUDE_PATH, if 
   # PYTHON_INCLUDE_DIR is not set.
