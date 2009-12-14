@@ -1485,6 +1485,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
         --build-two-config
         --test-command testf)
       LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
+
+      # FortranCInterface tests.
+      IF(UNIX)
+        CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/FortranC/Flags.cmake.in
+                       ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake @ONLY)
+        ADD_TEST(FortranC.Flags ${CMAKE_CMAKE_COMMAND} -P
+          ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake)
+        LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranC/Flags")
+      ENDIF()
     ENDIF()
   ENDIF()
 
