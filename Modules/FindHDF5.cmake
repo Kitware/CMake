@@ -29,6 +29,7 @@
 # 
 # This module will define the following variables:
 #  HDF5_INCLUDE_DIRS - Location of the hdf5 includes
+#  HDF5_INCLUDE_DIR - Location of the hdf5 includes (deprecated)
 #  HDF5_DEFINITIONS - Required compiler definitions for HDF5
 #  HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings.
 #  HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
@@ -320,4 +321,8 @@ mark_as_advanced(
     HDF5_LIBRARY_DIRS
     HDF5_C_COMPILER_EXECUTABLE
     HDF5_CXX_COMPILER_EXECUTABLE )
+
+# For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
+# HDF5_INCLUDE_DIRS
+set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
 
