@@ -146,6 +146,27 @@
 #   automatically detected command (or specify its location if the
 #   auto-detection fails to find it.)
 #
+# Installers built on Mac OS X using the Bundle generator use the
+# aforementioned DragNDrop variables, plus the following Bundle-specific
+# parameters:
+#
+#   CPACK_BUNDLE_NAME - The name of the generated bundle.  This
+#   appears in the OSX finder as the bundle name.  Required.
+#
+#   CPACK_BUNDLE_PLIST - Path to an OSX plist file that will be used
+#   as the Info.plist for the generated bundle.  This assumes that
+#   the caller has generated or specified their own Info.plist file.
+#   Required.
+#
+#   CPACK_BUNDLE_ICON - Path to an OSX icns file that will be used as
+#   the icon for the generated bundle.  This is the icon that appears
+#   in the OSX finder for the bundle, and in the OSX dock when the
+#   bundle is opened.  Required.
+#
+#   CPACK_BUNDLE_STARTUP_SCRIPT - Path to an executable or script that
+#   will be run whenever an end-user double-clicks the generated bundle
+#   in the OSX Finder.  Optional.
+#
 # The following variables are specific to the graphical installers built
 # on Windows using the Nullsoft Installation System.
 #
