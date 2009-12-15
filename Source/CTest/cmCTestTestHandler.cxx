@@ -1192,6 +1192,8 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
       << "</Value>\n"
       << "\t\t\t</Measurement>\n"
       << "\t\t</Results>\n";
+
+    this->AttachFiles(os, result);
     this->WriteTestResultFooter(os, result);
     }
 
@@ -1251,6 +1253,74 @@ void cmCTestTestHandler::WriteTestResultFooter(std::ostream& os,
 
   os
     << "\t</Test>" << std::endl;
+}
+
+void cmCTestTestHandler::AttachFiles(std::ostream& os,
+                                     cmCTestTestResult* result)
+{
+  if(result->Properties->AttachedFiles.empty())
+    {
+    return;
+    }
+
+  std::string base64 = this->EncodeFiles(result);
+  if(base64 == "")
+    {
+    return;
+    }
+  os << "\t\t<AttachedFiles encoding=\"base64\" compression=\"tar/gzip\">\n"
+     << base64 << "\n"
+     << "\t\t</AttachedFiles>\n";
+}
+
+//----------------------------------------------------------------------
+std::string cmCTestTestHandler::EncodeFiles(cmCTestTestResult* result)
+{
+  //create the temp tar file
+  std::string tarFile = result->Name + "_attached.tar.gz";
+  std::vector<cmStdString> files;
+
+  for(std::vector<std::string>::iterator f = 
+      result->Properties->AttachedFiles.begin();
+      f != result->Properties->AttachedFiles.end(); ++f)
+    {
+    const cmStdString fname = f->c_str();
+    files.push_back(fname);
+    }
+
+  if(!cmSystemTools::CreateTar(tarFile.c_str(), files, true, false, false))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error creating tar while "
+      "attaching files to the following test: " << result->Name << std::endl);
+    return "";
+    }
+
+  long len = cmSystemTools::FileLength(tarFile.c_str());
+  std::ifstream ifs(tarFile.c_str(), std::ios::in
+#ifdef _WIN32
+    | std::ios::binary
+#endif
+    );
+  unsigned char *file_buffer = new unsigned char [ len + 1 ];
+  ifs.read(reinterpret_cast<char*>(file_buffer), len);
+  ifs.close();
+  cmSystemTools::RemoveFile(tarFile.c_str());
+
+  unsigned char *encoded_buffer
+    = new unsigned char [ static_cast<int>(len * 1.5 + 5) ];
+
+  unsigned long rlen
+    = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
+  
+  std::string base64 = "";
+  for(unsigned long i = 0; i < rlen; i++)
+    {
+    base64 += encoded_buffer[i];
+    }
+  delete [] file_buffer;
+  delete [] encoded_buffer;
+
+  return base64;
 }
 
 //----------------------------------------------------------------------
@@ -2005,6 +2075,17 @@ bool cmCTestTestHandler::SetTestsProperties(
             {
             rtit->WillFail = cmSystemTools::IsOn(val.c_str());
             }
+          if ( key == "ATTACHED_FILES" )
+            {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+
+            for(std::vector<std::string>::iterator f = lval.begin();
+                f != lval.end(); ++f)
+              {
+              rtit->AttachedFiles.push_back(*f);
+              }
+            }
           if ( key == "TIMEOUT" )
             {
             rtit->Timeout = atof(val.c_str());
@@ -2013,9 +2094,16 @@ bool cmCTestTestHandler::SetTestsProperties(
             {
             rtit->Cost = static_cast<float>(atof(val.c_str()));
             }
-          if ( key == "REQUIRED_FILE" )
+          if ( key == "REQUIRED_FILES" )
             {
-            rtit->RequiredFiles.push_back(val);
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+
+            for(std::vector<std::string>::iterator f = lval.begin();
+                f != lval.end(); ++f)
+              {
+              rtit->RequiredFiles.push_back(*f);
+              }
             }
           if ( key == "RUN_SERIAL" )
             {

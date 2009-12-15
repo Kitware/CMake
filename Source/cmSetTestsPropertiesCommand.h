@@ -74,8 +74,11 @@ public:
       "RUN_SERIAL: If set to true, this test will not run in parallel with "
       "any other tests. This should be used in conjunction with "
       "the ctest_test PARALLEL_LEVEL option.\n"
-      "REQUIRED_FILE: Set this to a file that must exist in order for the "
-      "test to be run.\n";
+      "REQUIRED_FILES: Set this to a list of files that must exist in order "
+      "for the test to be run.\n"
+      "ATTACHED_FILES: Set this property to a list of files that will be "
+      "encoded and submitted to the dashboard as an addition to the test "
+      "result.\n";
     }
 
   cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);
