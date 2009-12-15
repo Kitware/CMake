@@ -1,10 +1,11 @@
 SET(APPLE 1)
 
 # Darwin versions:
-#   6.x == Mac OSX 10.2
-#   7.x == Mac OSX 10.3
-#   8.x == Mac OSX 10.4
-#   9.x == Mac OSX 10.5
+#   6.x == Mac OSX 10.2 (Jaguar)
+#   7.x == Mac OSX 10.3 (Panther)
+#   8.x == Mac OSX 10.4 (Tiger)
+#   9.x == Mac OSX 10.5 (Leopard)
+#  10.x == Mac OSX 10.6 (Snow Leopard)
 STRING(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\1" DARWIN_MAJOR_VERSION "${CMAKE_SYSTEM_VERSION}")
 STRING(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\2" DARWIN_MINOR_VERSION "${CMAKE_SYSTEM_VERSION}")
 
@@ -72,10 +73,20 @@ IF(NOT _CMAKE_OSX_SDKS)
   ENDIF(CMAKE_XCODE_SELECT)
 ENDIF(NOT _CMAKE_OSX_SDKS)
 
-# Set CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT to the current version of OS X
-EXECUTE_PROCESS(COMMAND sw_vers -productVersion OUTPUT_VARIABLE CURRENT_OSX_VERSION)
-STRING(REGEX REPLACE "^.*(10)\\.([0-9]+)\\.*([0-9]+)*.*$" "\\1.\\2"
-  CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT ${CURRENT_OSX_VERSION})
+EXECUTE_PROCESS(COMMAND sw_vers -productVersion
+  OUTPUT_VARIABLE CURRENT_OSX_VERSION
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# Set CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT - if user has already specified an SDK
+# with CMAKE_OSX_SYSROOT, then deployment target should default to "", otherwise,
+# default it to the current OSX version.
+#
+IF(CMAKE_OSX_SYSROOT)
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT "")
+ELSE(CMAKE_OSX_SYSROOT)
+  STRING(REGEX REPLACE "^.*(10)\\.([0-9]+)\\.*([0-9]+)*.*$" "\\1.\\2"
+    CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT ${CURRENT_OSX_VERSION})
+ENDIF(CMAKE_OSX_SYSROOT)
 
 # Set CMAKE_OSX_SYSROOT_DEFAULT based on CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT.
 # This next block assumes that Apple will start being consistent with
@@ -125,15 +136,19 @@ SET(CMAKE_OSX_SYSROOT ${CMAKE_OSX_SYSROOT_VALUE} CACHE PATH
 
 #----------------------------------------------------------------------------
 function(SanityCheckSDKAndDeployTarget _sdk_path _deploy)
-  if (_deploy STREQUAL "")
+  if(_deploy STREQUAL "")
     return()
   endif()
 
-  string (REGEX REPLACE "(.*MacOSX*)(....)(.*\\.sdk)" "\\2" SDK ${_sdk_path})
-  if (_deploy GREATER SDK)
-    message (FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET (${_deploy}) is greater than CMAKE_OSX_SYSROOT SDK (${_sdk_path}). Please set CMAKE_OSX_DEPLOYMENT_TARGET to ${SDK}")
-  endif (_deploy GREATER SDK)
-endfunction(SanityCheckSDKAndDeployTarget _sdk_path _deploy)
+  if(_sdk_path STREQUAL "")
+    message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET='${_deploy}' but CMAKE_OSX_SYSROOT is empty... - either set CMAKE_OSX_SYSROOT to a valid SDK or set CMAKE_OSX_DEPLOYMENT_TARGET to empty")
+  endif()
+
+  string(REGEX REPLACE "(.*MacOSX*)(....)(.*\\.sdk)" "\\2" SDK "${_sdk_path}")
+  if(_deploy GREATER "${SDK}")
+    message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET (${_deploy}) is greater than CMAKE_OSX_SYSROOT SDK (${_sdk_path}). Please set CMAKE_OSX_DEPLOYMENT_TARGET to ${SDK}")
+  endif()
+endfunction(SanityCheckSDKAndDeployTarget)
 #----------------------------------------------------------------------------
 
 # Make sure the combination of SDK and Deployment Target are allowed
