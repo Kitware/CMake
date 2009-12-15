@@ -15,11 +15,14 @@
 if(NOT DEFINED CMAKE_Fortran_COMPILER)
   set(_desc "Looking for a Fortran compiler")
   message(STATUS ${_desc})
+  file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CheckFortran)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CheckFortran/CMakeLists.txt"
     "cmake_minimum_required(VERSION 2.4)
 project(CheckFortran Fortran)
 file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
-  \"set(CMAKE_Fortran_COMPILER \\\"\${CMAKE_Fortran_COMPILER}\\\")\\n\")
+  \"set(CMAKE_Fortran_COMPILER \\\"\${CMAKE_Fortran_COMPILER}\\\")\\n\"
+  \"set(CMAKE_Fortran_FLAGS \\\"\${CMAKE_Fortran_FLAGS}\\\")\\n\"
+  )
 ")
   execute_process(
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/CheckFortran
@@ -42,4 +45,6 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
   message(STATUS "${_desc} - ${CMAKE_Fortran_COMPILER}")
   set(CMAKE_Fortran_COMPILER "${CMAKE_Fortran_COMPILER}" CACHE FILEPATH "Fortran compiler")
   mark_as_advanced(CMAKE_Fortran_COMPILER)
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}" CACHE STRING "Fortran flags")
+  mark_as_advanced(CMAKE_Fortran_FLAGS)
 endif()

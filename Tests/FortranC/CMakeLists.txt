@@ -14,11 +14,11 @@ file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/CMakeFiles/FortranCInterface)
 if(FortranC_TEST_FLAGS)
   # Test whether FortranCInterface checks see C flags.
   set(ENV{TEST_OPT_CC} "--test-opt-cc=1")
-  set(CMAKE_C_FLAGS "$ENV{TEST_OPT_CC}")
+  set(CMAKE_C_FLAGS "$ENV{TEST_OPT_CC} ${CMAKE_C_FLAGS}")
 
   # Test whether FortranCInterface checks see Fortran flags.
   set(ENV{TEST_OPT_FC} "--test-opt-fc=1")
-  set(CMAKE_Fortran_FLAGS "$ENV{TEST_OPT_FC}")
+  set(CMAKE_Fortran_FLAGS "$ENV{TEST_OPT_FC} ${CMAKE_Fortran_FLAGS}")
 endif()
 
 include(FortranCInterface)
