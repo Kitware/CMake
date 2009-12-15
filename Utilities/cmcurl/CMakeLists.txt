@@ -36,13 +36,7 @@ INCLUDE (CheckIncludeFile)
 INCLUDE (CheckIncludeFiles)
 INCLUDE (CheckLibraryExists)
 INCLUDE (CheckSymbolExists)
-# if crosscompiling is on, the CHECK_TYPE_SIZE macro coming with cmake uses
-# TRY_COMPILE instead of TRY_RUN which makes crosscompiling easier, Alex
-IF(CMAKE_CROSSCOMPILING)  
-  INCLUDE ("${CMAKE_ROOT}/Modules/CheckTypeSize.cmake")
-ELSE(CMAKE_CROSSCOMPILING)
-  INCLUDE (CheckTypeSize)
-ENDIF(CMAKE_CROSSCOMPILING)
+INCLUDE (CheckTypeSize)
 
 SET(libCurl_SRCS
   #  amigaos.c - does not build on AmigaOS
