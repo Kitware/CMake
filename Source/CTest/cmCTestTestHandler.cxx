@@ -1255,46 +1255,37 @@ void cmCTestTestHandler::WriteTestResultFooter(std::ostream& os,
     << "\t</Test>" << std::endl;
 }
 
+//----------------------------------------------------------------------
 void cmCTestTestHandler::AttachFiles(std::ostream& os,
                                      cmCTestTestResult* result)
 {
-  if(result->Properties->AttachedFiles.empty())
+  for(std::vector<std::string>::const_iterator file = 
+      result->Properties->AttachedFiles.begin();
+      file != result->Properties->AttachedFiles.end(); ++file)
     {
-    return;
-    }
-
-  std::string base64 = this->EncodeFiles(result);
-  if(base64 == "")
-    {
-    return;
-    }
-  os << "\t\t<AttachedFiles encoding=\"base64\" compression=\"tar/gzip\">\n"
-     << base64 << "\n"
-     << "\t\t</AttachedFiles>\n";
+    std::string base64 = this->EncodeFile(*file);
+    std::string fname = cmSystemTools::GetFilenameName(*file);
+    os << "\t\t<NamedMeasurement name=\"Attached File\" encoding=\"base64\" "
+      "compression=\"tar/gzip\" filename=\"" << fname << "\" type=\"file\">"
+      "\n\t\t\t<Value>\n\t\t\t"
+     << base64
+     << "\n\t\t\t</Value>\n\t\t</NamedMeasurement>\n";
+    } 
 }
 
 //----------------------------------------------------------------------
-std::string cmCTestTestHandler::EncodeFiles(cmCTestTestResult* result)
+std::string cmCTestTestHandler::EncodeFile(std::string file)
 {
-  //create the temp tar file
-  std::string tarFile = result->Name + "_attached.tar.gz";
+  std::string tarFile = file + "_temp.tar.gz";
   std::vector<cmStdString> files;
-
-  for(std::vector<std::string>::iterator f = 
-      result->Properties->AttachedFiles.begin();
-      f != result->Properties->AttachedFiles.end(); ++f)
-    {
-    const cmStdString fname = f->c_str();
-    files.push_back(fname);
-    }
+  files.push_back(file);
 
   if(!cmSystemTools::CreateTar(tarFile.c_str(), files, true, false, false))
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error creating tar while "
-      "attaching files to the following test: " << result->Name << std::endl);
+      "attaching file: " << file << std::endl);
     return "";
     }
-
   long len = cmSystemTools::FileLength(tarFile.c_str());
   std::ifstream ifs(tarFile.c_str(), std::ios::in
 #ifdef _WIN32

@@ -147,7 +147,7 @@ protected:
   // Write attached test files into the xml
   void AttachFiles(std::ostream& os, cmCTestTestResult* result);
   // Helper function to encode attached test files
-  std::string EncodeFiles(cmCTestTestResult* result);
+  std::string EncodeFile(std::string file);
 
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);
