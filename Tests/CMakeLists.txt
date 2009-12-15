@@ -1579,6 +1579,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     ENDIF(PREFIX_IS_FOR_TEST)
   ENDIF(UNIX)
 
+  IF(CMAKE_TEST_PROJECT_CSE_DIR)
+    SET(script "${CMAKE_TEST_PROJECT_CSE_DIR}/BuildProjectCSE.cmake")
+    IF(NOT EXISTS "${script}")
+      SET(script "${CMAKE_TEST_PROJECT_CSE_DIR}/cse_build.cmake")
+    ENDIF(NOT EXISTS "${script}")
+    IF(NOT EXISTS "${script}")
+      MESSAGE("warning: CMAKE_TEST_PROJECT_CSE_DIR set, but no build script found...")
+    ENDIF(NOT EXISTS "${script}")
+
+    ADD_TEST(BuildCSE ${CMAKE_CTEST_COMMAND} -V -S "${script}")
+    SET_TESTS_PROPERTIES(BuildCSE PROPERTIES TIMEOUT 5400)
+  ENDIF(CMAKE_TEST_PROJECT_CSE_DIR)
+
   IF(CMAKE_TEST_PLPLOT_DIR)
     ADD_TEST(plplot ${CMAKE_CTEST_COMMAND} -V -S ${CMAKE_TEST_PLPLOT_DIR}/../../EasyDashboardScripts/plplot.cmake )
     SET_TESTS_PROPERTIES ( plplot PROPERTIES TIMEOUT 5400)
