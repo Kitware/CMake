@@ -1259,6 +1259,14 @@ void cmCTestTestHandler::WriteTestResultFooter(std::ostream& os,
 void cmCTestTestHandler::AttachFiles(std::ostream& os,
                                      cmCTestTestResult* result)
 {
+  if(result->Status != cmCTestTestHandler::COMPLETED
+     && result->Properties->AttachOnFail.size())
+    {
+    result->Properties->AttachedFiles.insert(
+      result->Properties->AttachedFiles.end(),
+      result->Properties->AttachOnFail.begin(),
+      result->Properties->AttachOnFail.end());
+    }
   for(std::vector<std::string>::const_iterator file = 
       result->Properties->AttachedFiles.begin();
       file != result->Properties->AttachedFiles.end(); ++file)
@@ -1268,9 +1276,9 @@ void cmCTestTestHandler::AttachFiles(std::ostream& os,
     os << "\t\t<NamedMeasurement name=\"Attached File\" encoding=\"base64\" "
       "compression=\"tar/gzip\" filename=\"" << fname << "\" type=\"file\">"
       "\n\t\t\t<Value>\n\t\t\t"
-     << base64
-     << "\n\t\t\t</Value>\n\t\t</NamedMeasurement>\n";
-    } 
+      << base64
+      << "\n\t\t\t</Value>\n\t\t</NamedMeasurement>\n";
+    }
 }
 
 //----------------------------------------------------------------------
@@ -1355,7 +1363,7 @@ void cmCTestTestHandler
                     std::vector<std::string> &attemptedConfigs,
                     std::string filepath,
                     std::string &filename)
-{   
+{
   std::string tempPath;
 
   if (filepath.size() && 
@@ -2075,6 +2083,17 @@ bool cmCTestTestHandler::SetTestsProperties(
                 f != lval.end(); ++f)
               {
               rtit->AttachedFiles.push_back(*f);
+              }
+            }
+          if ( key == "ATTACHED_FILES_ON_FAIL" )
+            {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+
+            for(std::vector<std::string>::iterator f = lval.begin();
+                f != lval.end(); ++f)
+              {
+              rtit->AttachOnFail.push_back(*f);
               }
             }
           if ( key == "TIMEOUT" )

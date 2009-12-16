@@ -195,6 +195,8 @@ public:
 
   bool ShouldUseHTTP10() { return this->UseHTTP10; }
 
+  bool ShouldCompressTestOutput() { return this->CompressTestOutput; }
+
   //Used for parallel ctest job scheduling
   std::string GetScheduleType() { return this->ScheduleType; }
   void SetScheduleType(std::string type) { this->ScheduleType = type; }
@@ -445,6 +447,8 @@ private:
   bool                     ShortDateFormat;
 
   bool                     CompressXMLFiles;
+
+  bool                     CompressTestOutput;
 
   void InitStreams();
   std::ostream* StreamOut;

@@ -221,6 +221,7 @@ cmCTest::cmCTest()
   this->ShowOnly               = false;
   this->RunConfigurationScript = false;
   this->UseHTTP10              = false;
+  this->CompressTestOutput     = true;
   this->TestModel              = cmCTest::EXPERIMENTAL;
   this->MaxTestNameWidth       = 30;
   this->InteractiveDebugMode   = true;
@@ -1703,6 +1704,11 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     {
     int plevel = atoi(arg.substr(2).c_str());
     this->SetParallelLevel(plevel);
+    }
+
+  if(this->CheckArgument(arg, "--no-compress-output"))
+    {
+    this->CompressTestOutput = false;
     }
 
   if(this->CheckArgument(arg, "--http1.0"))

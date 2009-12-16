@@ -87,6 +87,7 @@ public:
     std::vector<std::string> RequiredFiles;
     std::vector<std::string> Depends;
     std::vector<std::string> AttachedFiles;
+    std::vector<std::string> AttachOnFail;
     std::vector<std::pair<cmsys::RegularExpression,
                           std::string> > ErrorRegularExpressions;
     std::vector<std::pair<cmsys::RegularExpression,

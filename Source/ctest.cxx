@@ -221,6 +221,10 @@ static const char * cmDocumentationOptions[][3] =
   {"--http1.0", "Submit using HTTP 1.0.",
   "This option will force CTest to use HTTP 1.0 to submit files to the "
   "dashboard, instead of HTTP 1.1."},
+  {"--no-compress-output", "Do not compress test output when submitting.",
+   "This flag will turn off automatic compression of test output.  Use this "
+   "to maintain compatibility with an older version of CDash which doesn't "
+   "support compressed test output."},
   {"--help-command <cmd> [<file>]", "Show help for a single command and exit.",
    "Prints the help for the command to stdout or to the specified file." },
   {"--help-command-list [<file>]", "List available commands and exit.",

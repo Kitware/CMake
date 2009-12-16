@@ -78,7 +78,9 @@ public:
       "for the test to be run.\n"
       "ATTACHED_FILES: Set this property to a list of files that will be "
       "encoded and submitted to the dashboard as an addition to the test "
-      "result.\n";
+      "result.\n"
+      "ATTACHED_FILES_ON_FAIL: Same as ATTACHED_FILES, but these files will "
+      "only be included if the test does not pass.\n";
     }
 
   cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);
