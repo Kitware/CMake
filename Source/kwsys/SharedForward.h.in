@@ -194,31 +194,27 @@ static const char kwsys_shared_forward_path_slash[2] = {KWSYS_SHARED_FORWARD_PAT
 # define KWSYS_SHARED_FORWARD_LDD "ldd"
 # define KWSYS_SHARED_FORWARD_LDD_N 1
 # define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY_PATH"
-#endif
 
 /* FreeBSD */
-#if defined(__FreeBSD__)
+#elif defined(__FreeBSD__)
 # define KWSYS_SHARED_FORWARD_LDD "ldd"
 # define KWSYS_SHARED_FORWARD_LDD_N 1
 # define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY_PATH"
-#endif
 
 /* OSX */
-#if defined(__APPLE__)
+#elif defined(__APPLE__)
 # define KWSYS_SHARED_FORWARD_LDD "otool", "-L"
 # define KWSYS_SHARED_FORWARD_LDD_N 2
 # define KWSYS_SHARED_FORWARD_LDPATH "DYLD_LIBRARY_PATH"
-#endif
 
 /* AIX */
-#if defined(_AIX)
+#elif defined(_AIX)
 # define KWSYS_SHARED_FORWARD_LDD "dump", "-H"
 # define KWSYS_SHARED_FORWARD_LDD_N 2
 # define KWSYS_SHARED_FORWARD_LDPATH "LIBPATH"
-#endif
 
 /* SUN */
-#if defined(__sparc) && !defined(__linux)
+#elif defined(__sun)
 # define KWSYS_SHARED_FORWARD_LDD "ldd"
 # define KWSYS_SHARED_FORWARD_LDD_N 1
 # include <sys/isa_defs.h>
@@ -227,10 +223,9 @@ static const char kwsys_shared_forward_path_slash[2] = {KWSYS_SHARED_FORWARD_PAT
 # elif defined(_LP64)
 #  define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY_PATH_64"
 # endif
-#endif
 
 /* HP-UX */
-#if defined(__hpux)
+#elif defined(__hpux)
 # define KWSYS_SHARED_FORWARD_LDD "chatr"
 # define KWSYS_SHARED_FORWARD_LDD_N 1
 # if defined(__LP64__)
@@ -238,10 +233,9 @@ static const char kwsys_shared_forward_path_slash[2] = {KWSYS_SHARED_FORWARD_PAT
 # else
 #  define KWSYS_SHARED_FORWARD_LDPATH "SHLIB_PATH"
 # endif
-#endif
 
 /* SGI MIPS */
-#if defined(__sgi) && defined(_MIPS_SIM)
+#elif defined(__sgi) && defined(_MIPS_SIM)
 # define KWSYS_SHARED_FORWARD_LDD "ldd"
 # define KWSYS_SHARED_FORWARD_LDD_N 1
 # if _MIPS_SIM == _ABIO32
@@ -251,19 +245,17 @@ static const char kwsys_shared_forward_path_slash[2] = {KWSYS_SHARED_FORWARD_PAT
 # elif _MIPS_SIM == _ABI64
 #  define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY64_PATH"
 # endif
-#endif
 
 /* Windows */
-#if defined(_WIN32)
+#elif defined(_WIN32)
 # if defined(__CYGWIN__)
 #  define KWSYS_SHARED_FORWARD_LDD "cygcheck"
 #  define KWSYS_SHARED_FORWARD_LDD_N 1
 # endif
 # define KWSYS_SHARED_FORWARD_LDPATH "PATH"
-#endif
 
 /* Guess on this unknown system.  */
-#if !defined(KWSYS_SHARED_FORWARD_LDPATH)
+#else
 # define KWSYS_SHARED_FORWARD_LDD "ldd"
 # define KWSYS_SHARED_FORWARD_LDD_N 1
 # define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY_PATH"
