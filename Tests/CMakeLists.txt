@@ -1,16 +1,18 @@
 # a macro for tests that have a simple format where the name matches the
 # directory and project
 MACRO(ADD_TEST_MACRO NAME COMMAND)
+  STRING(REPLACE "." "/" dir "${NAME}")
+  STRING(REGEX REPLACE "[^.]*\\." "" proj "${NAME}")
   ADD_TEST(${NAME} ${CMAKE_CTEST_COMMAND}
     --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/${NAME}"
-    "${CMake_BINARY_DIR}/Tests/${NAME}"
+    "${CMake_SOURCE_DIR}/Tests/${dir}"
+    "${CMake_BINARY_DIR}/Tests/${dir}"
     --build-two-config
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project ${NAME}
+    --build-project ${proj}
     --test-command ${COMMAND})
-  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${NAME}")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 ENDMACRO(ADD_TEST_MACRO)
 
 # Fake a user home directory to avoid polluting the real one.
