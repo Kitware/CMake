@@ -15,6 +15,9 @@
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 
+#include <cm_zlib.h>
+#include <cmsys/Base64.h>
+
 cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
 {
   this->CTest = handler->CTest;
@@ -26,6 +29,9 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
   this->TestResult.Status = 0;
   this->TestResult.TestCount = 0;
   this->TestResult.Properties = 0;
+  this->ProcessOutput = "";
+  this->CompressedOutput = "";
+  this->CompressionRatio = 2;
 }
 
 cmCTestRunTest::~cmCTestRunTest()
@@ -52,7 +58,7 @@ bool cmCTestRunTest::CheckOutput()
       {
       // Store this line of output.
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                 this->GetIndex() << ": " << line << std::endl);
+                 this->GetIndex() << ": " << line << std::endl);  
       this->ProcessOutput += line;
       this->ProcessOutput += "\n";
       }
@@ -65,8 +71,71 @@ bool cmCTestRunTest::CheckOutput()
 }
 
 //---------------------------------------------------------
+// Streamed compression of test output.  The compressed data
+// is appended to this->CompressedOutput
+void cmCTestRunTest::CompressOutput()
+{
+  int ret;
+  z_stream strm;
+
+  unsigned char* in = 
+    reinterpret_cast<unsigned char*>(
+    const_cast<char*>(this->ProcessOutput.c_str()));
+  //zlib makes the guarantee that this is the maximum output size
+  int outSize = static_cast<int>(this->ProcessOutput.size() * 1.001 + 13);
+  unsigned char* out = new unsigned char[outSize];
+
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
+  ret = deflateInit(&strm, -1); //default compression level
+  if (ret != Z_OK)
+    {
+    //log deflate init error?
+    return;
+    }
+
+  strm.avail_in = this->ProcessOutput.size();
+  strm.next_in = in;
+  strm.avail_out = outSize;
+  strm.next_out = out;
+  ret = deflate(&strm, Z_FINISH);
+
+  if(ret == Z_STREAM_ERROR || ret != Z_STREAM_END)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error initializing stream "
+      "compression. Sending uncompressed output." << std::endl);
+    return;
+    }
+
+  (void)deflateEnd(&strm);
+  
+  unsigned char *encoded_buffer
+    = new unsigned char[static_cast<int>(outSize * 1.5)];
+
+  unsigned long rlen
+    = cmsysBase64_Encode(out, strm.total_out, encoded_buffer, 1);
+  
+  for(unsigned long i = 0; i < rlen; i++)
+    {
+    this->CompressedOutput += encoded_buffer[i];
+    }
+
+  this->CompressionRatio = static_cast<double>(strm.total_out) /
+                           static_cast<double>(strm.total_in);
+
+  delete [] encoded_buffer;
+  delete [] out;
+}
+
+//---------------------------------------------------------
 bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 {
+  if (this->CTest->ShouldCompressTestOutput())
+    {
+    this->CompressOutput();
+    }
+
   //restore the old environment
   if (this->ModifyEnv)
     {
@@ -261,7 +330,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   // record the results in TestResult 
   if(started)
     {
-    this->TestResult.Output = this->ProcessOutput;
+    bool compress = this->CompressionRatio < 1 &&
+      this->CTest->ShouldCompressTestOutput();
+    this->TestResult.Output = compress ? this->CompressedOutput 
+      : this->ProcessOutput;
+    this->TestResult.CompressOutput = compress;
     this->TestResult.ReturnValue = this->TestProcess->GetExitValue();
     this->TestResult.CompletionStatus = "Completed";
     this->TestResult.ExecutionTime = this->TestProcess->GetTotalTime();
@@ -310,6 +383,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   std::vector<std::string>& args = this->TestProperties->Args;
   this->TestResult.Properties = this->TestProperties;
   this->TestResult.ExecutionTime = 0;
+  this->TestResult.CompressOutput = false;
   this->TestResult.ReturnValue = -1;
   this->TestResult.CompletionStatus = "Failed to start";
   this->TestResult.Status = cmCTestTestHandler::BAD_COMMAND;

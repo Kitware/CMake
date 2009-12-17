@@ -1186,7 +1186,10 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
       }
     os
       << "\t\t\t<Measurement>\n"
-      << "\t\t\t\t<Value>";
+      << "\t\t\t\t<Value"
+      << (result->CompressOutput ? 
+      " encoding=\"base64\" compression=\"gzip\">"
+      : ">");
     os << cmXMLSafe(result->Output);
     os
       << "</Value>\n"

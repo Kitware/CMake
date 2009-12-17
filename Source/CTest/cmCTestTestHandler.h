@@ -114,6 +114,7 @@ public:
     double      ExecutionTime;
     int         ReturnValue;
     int         Status;
+    bool        CompressOutput;
     std::string CompletionStatus;
     std::string Output;
     std::string RegressionImages;

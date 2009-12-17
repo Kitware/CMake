@@ -45,6 +45,9 @@ public:
   // Read and store output.  Returns true if it must be called again.
   bool CheckOutput();
 
+  // Compresses the output, writing to CompressedOutput
+  void CompressOutput();
+
   //launch the test process, return whether it started correctly
   bool StartTest(size_t total);
   //capture and report the test results
@@ -79,6 +82,8 @@ private:
   //stores the original environment if we are modifying it
   std::vector<std::string> OrigEnv;
   std::string ProcessOutput;
+  std::string CompressedOutput;
+  double CompressionRatio;
   //The test results
   cmCTestTestHandler::cmCTestTestResult TestResult;
   int Index;
