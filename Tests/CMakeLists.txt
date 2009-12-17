@@ -172,6 +172,8 @@ IF(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/CMakeBuildTest.cmake")
   LIST(APPEND TEST_BUILD_DIRS ${CMAKE_BUILD_TEST_BINARY_DIR})
 
+  ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
+
   # If we are running right now with a UnixMakefiles based generator,
   # build the "Simple" test with the ExtraGenerators, if available
   # This doesn't test whether the generated project files work (unfortunately), 
