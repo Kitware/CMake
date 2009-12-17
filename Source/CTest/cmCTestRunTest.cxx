@@ -91,7 +91,6 @@ void cmCTestRunTest::CompressOutput()
   ret = deflateInit(&strm, -1); //default compression level
   if (ret != Z_OK)
     {
-    //log deflate init error?
     return;
     }
 
@@ -103,7 +102,7 @@ void cmCTestRunTest::CompressOutput()
 
   if(ret == Z_STREAM_ERROR || ret != Z_STREAM_END)
     {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error initializing stream "
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error during output "
       "compression. Sending uncompressed output." << std::endl);
     return;
     }
