@@ -64,23 +64,8 @@ public:
       "  Example: PASS_REGULAR_EXPRESSION \"[^a-z]Error;ERROR;Failed\"\n"
       "Both PASS_REGULAR_EXPRESSION and FAIL_REGULAR_EXPRESSION expect a "
       "list of regular expressions.\n"
-      "PROCESSORS: Denotes the number of processors that this test will "
-      "require. This is typically used for MPI tests, and should be used in "
-      "conjunction with the ctest_test PARALLEL_LEVEL option.\n"
-      "COST: Set this to a floating point value. Tests in a test set will be "
-      "run in descending order of cost.\n"
       "TIMEOUT: Setting this will limit the test runtime to the number of "
-      "seconds specified.\n"
-      "RUN_SERIAL: If set to true, this test will not run in parallel with "
-      "any other tests. This should be used in conjunction with "
-      "the ctest_test PARALLEL_LEVEL option.\n"
-      "REQUIRED_FILES: Set this to a list of files that must exist in order "
-      "for the test to be run.\n"
-      "ATTACHED_FILES: Set this property to a list of files that will be "
-      "encoded and submitted to the dashboard as an addition to the test "
-      "result.\n"
-      "ATTACHED_FILES_ON_FAIL: Same as ATTACHED_FILES, but these files will "
-      "only be included if the test does not pass.\n";
+      "seconds specified.\n";
     }
 
   cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);
