@@ -45,6 +45,25 @@ function(check_updates build)
     endif()
   endforeach(f)
 
+  if(NOT UPDATE_NOT_GLOBAL)
+    set(rev_elements "Revision|PriorRevision")
+    set(rev_regex "^\t<(${rev_elements})>[^<\n]+</(${rev_elements})>$")
+    file(STRINGS ${TOP}/${UPDATE_XML_FILE} UPDATE_XML_REVISIONS
+      REGEX "${rev_regex}"
+      LIMIT_INPUT 4096
+      )
+    foreach(r IN LISTS UPDATE_XML_REVISIONS)
+      string(REGEX REPLACE "${rev_regex}" "\\1" element "${r}")
+      set(element_${element} 1)
+    endforeach()
+    string(REPLACE "|" ";" rev_elements "${rev_elements}")
+    foreach(element ${rev_elements})
+      if(NOT element_${element})
+        list(APPEND MISSING "global <${element}> element")
+      endif()
+    endforeach()
+  endif()
+
   # Report the result
   if(MISSING)
     # List the missing entries
