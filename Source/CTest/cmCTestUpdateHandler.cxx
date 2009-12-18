@@ -258,7 +258,8 @@ int cmCTestUpdateHandler::ProcessHandler()
     << this->CTest->GetTestModelString() << "</BuildStamp>" << std::endl;
   os << "\t<StartDateTime>" << start_time << "</StartDateTime>\n"
     << "\t<StartTime>" << start_time_time << "</StartTime>\n"
-    << "\t<UpdateCommand>" << cmXMLSafe(vc->GetUpdateCommandLine())
+    << "\t<UpdateCommand>"
+     << cmXMLSafe(vc->GetUpdateCommandLine()).Quotes(false)
     << "</UpdateCommand>\n"
     << "\t<UpdateType>" << cmXMLSafe(
       cmCTestUpdateHandlerUpdateToString(this->UpdateType))
