@@ -107,7 +107,7 @@ endmacro()
 
 # Parse a compile line for definitions, includes, library paths, and libraries.
 macro( _HDF5_parse_compile_line 
-    compile_line 
+    compile_line_var
     include_paths
     definitions
     library_paths
@@ -115,7 +115,7 @@ macro( _HDF5_parse_compile_line
 
     # Match the include paths
     string( REGEX MATCHALL "-I([^\" ]+)" include_path_flags 
-        "${compile_line}" 
+        "${${compile_line_var}}"
     )
     foreach( IPATH ${include_path_flags} )
         string( REGEX REPLACE "^-I" "" IPATH ${IPATH} )
@@ -124,14 +124,14 @@ macro( _HDF5_parse_compile_line
     endforeach()
 
     # Match the definitions
-    string( REGEX MATCHALL "-D[^ ]*" definition_flags "${compile_line}" )
+    string( REGEX MATCHALL "-D[^ ]*" definition_flags "${${compile_line_var}}" )
     foreach( DEF ${definition_flags} )
         list( APPEND ${definitions} ${DEF} )
     endforeach()
 
     # Match the library paths
     string( REGEX MATCHALL "-L([^\" ]+|\"[^\"]+\")" library_path_flags
-        "${compile_line}"
+        "${${compile_line_var}}"
     )
     
     foreach( LPATH ${library_path_flags} )
@@ -144,7 +144,7 @@ macro( _HDF5_parse_compile_line
     # match only -l's preceded by a space or comma
     # this is to exclude directory names like xxx-linux/
     string( REGEX MATCHALL "[, ]-l([^\", ]+)" library_name_flags
-        "${compile_line}" )
+        "${${compile_line_var}}" )
     # strip the -l from all of the library flags and add to the search list
     foreach( LIB ${library_name_flags} )
         string( REGEX REPLACE "^[, ]-l" "" LIB ${LIB} )
@@ -180,7 +180,7 @@ else()
     
     foreach( LANGUAGE ${HDF5_LANGUAGE_BINDINGS} )
         if( HDF5_${LANGUAGE}_COMPILE_LINE )
-            _HDF5_parse_compile_line( ${HDF5_${LANGUAGE}_COMPILE_LINE} 
+            _HDF5_parse_compile_line( HDF5_${LANGUAGE}_COMPILE_LINE
                 HDF5_${LANGUAGE}_INCLUDE_FLAGS
                 HDF5_${LANGUAGE}_DEFINITIONS
                 HDF5_${LANGUAGE}_LIBRARY_DIRS
