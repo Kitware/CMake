@@ -26,7 +26,7 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
   this->TestProcess = 0;
   this->TestResult.ExecutionTime =0;
   this->TestResult.ReturnValue = 0;
-  this->TestResult.Status = 0;
+  this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
   this->TestResult.Properties = 0;
   this->ProcessOutput = "";
@@ -108,20 +108,23 @@ void cmCTestRunTest::CompressOutput()
     }
 
   (void)deflateEnd(&strm);
-  
+ 
   unsigned char *encoded_buffer
     = new unsigned char[static_cast<int>(outSize * 1.5)];
 
   unsigned long rlen
     = cmsysBase64_Encode(out, strm.total_out, encoded_buffer, 1);
-  
+
   for(unsigned long i = 0; i < rlen; i++)
     {
     this->CompressedOutput += encoded_buffer[i];
     }
 
-  this->CompressionRatio = static_cast<double>(strm.total_out) /
-                           static_cast<double>(strm.total_in);
+  if(strm.total_in)
+    {
+    this->CompressionRatio = static_cast<double>(strm.total_out) /
+                             static_cast<double>(strm.total_in);
+    }
 
   delete [] encoded_buffer;
   delete [] out;
@@ -269,18 +272,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   // Output since that is what is parsed by cmCTestMemCheckHandler
   if(!this->TestHandler->MemCheck && started)
     {
-    if (this->TestResult.Status == cmCTestTestHandler::COMPLETED)
-      {
       this->TestHandler->CleanTestOutput(this->ProcessOutput, 
           static_cast<size_t>
-          (this->TestHandler->CustomMaximumPassedTestOutputSize));
-      }
-    else
-      {
-      this->TestHandler->CleanTestOutput(this->ProcessOutput,
-          static_cast<size_t>
-          (this->TestHandler->CustomMaximumFailedTestOutputSize));
-      }
+          (this->TestResult.Status == cmCTestTestHandler::COMPLETED ? 
+          this->TestHandler->CustomMaximumPassedTestOutputSize :
+          this->TestHandler->CustomMaximumFailedTestOutputSize));
     }
   this->TestResult.Reason = reason;
   if (this->TestHandler->LogFile)
@@ -325,7 +321,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       << "----------------------------------------------------------"
       << std::endl << std::endl;
     }
-  // if the test actually stared and ran 
+  // if the test actually started and ran 
   // record the results in TestResult 
   if(started)
     {
