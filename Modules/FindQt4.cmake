@@ -34,6 +34,7 @@
 #                    QT_USE_QTDESIGNER
 #                    QT_USE_QTMOTIF
 #                    QT_USE_QTMAIN
+#                    QT_USE_QTMULTIMEDIA
 #                    QT_USE_QTNETWORK
 #                    QT_USE_QTNSPLUGIN
 #                    QT_USE_QTOPENGL
@@ -151,27 +152,28 @@
 #  QT_QTGUI_FOUND           True if QtGui was found.
 #  QT_QT3SUPPORT_FOUND      True if Qt3Support was found.
 #  QT_QTASSISTANT_FOUND     True if QtAssistant was found.
+#  QT_QTASSISTANTCLIENT_FOUND  True if QtAssistantClient was found.
 #  QT_QAXCONTAINER_FOUND    True if QAxContainer was found (Windows only).
 #  QT_QAXSERVER_FOUND       True if QAxServer was found (Windows only).
 #  QT_QTDBUS_FOUND          True if QtDBus was found.
 #  QT_QTDESIGNER_FOUND      True if QtDesigner was found.
 #  QT_QTDESIGNERCOMPONENTS  True if QtDesignerComponents was found.
+#  QT_QTHELP_FOUND          True if QtHelp was found.
 #  QT_QTMOTIF_FOUND         True if QtMotif was found.
+#  QT_QTMULTIMEDIA_FOUND    True if QtMultimedia was found (since Qt 4.6.0).
 #  QT_QTNETWORK_FOUND       True if QtNetwork was found.
 #  QT_QTNSPLUGIN_FOUND      True if QtNsPlugin was found.
 #  QT_QTOPENGL_FOUND        True if QtOpenGL was found.
 #  QT_QTSQL_FOUND           True if QtSql was found.
-#  QT_QTXML_FOUND           True if QtXml was found.
 #  QT_QTSVG_FOUND           True if QtSvg was found.
 #  QT_QTSCRIPT_FOUND        True if QtScript was found.
+#  QT_QTSCRIPTTOOLS_FOUND   True if QtScriptTools was found.
 #  QT_QTTEST_FOUND          True if QtTest was found.
 #  QT_QTUITOOLS_FOUND       True if QtUiTools was found.
-#  QT_QTASSISTANTCLIENT_FOUND  True if QtAssistantClient was found.
-#  QT_QTHELP_FOUND          True if QtHelp was found.
 #  QT_QTWEBKIT_FOUND        True if QtWebKit was found.
+#  QT_QTXML_FOUND           True if QtXml was found.
 #  QT_QTXMLPATTERNS_FOUND   True if QtXmlPatterns was found.
 #  QT_PHONON_FOUND          True if phonon was found.
-#  QT_QTSCRIPTTOOLS_FOUND   True if QtScriptTools was found.
 #
 #  QT_MAC_USE_COCOA    For Mac OS X, its whether Cocoa or Carbon is used.
 #                      In general, this should not be used, but its useful
@@ -207,6 +209,7 @@
 #  QT_QTGUI_INCLUDE_DIR        Path to "include/QtGui" 
 #  QT_QTHELP_INCLUDE_DIR       Path to "include/QtHelp"
 #  QT_QTMOTIF_INCLUDE_DIR      Path to "include/QtMotif" 
+#  QT_QTMULTIMEDIA_INCLUDE_DIR Path to "include/QtMultimedia" 
 #  QT_QTNETWORK_INCLUDE_DIR    Path to "include/QtNetwork" 
 #  QT_QTNSPLUGIN_INCLUDE_DIR   Path to "include/QtNsPlugin" 
 #  QT_QTOPENGL_INCLUDE_DIR     Path to "include/QtOpenGL" 
@@ -226,7 +229,7 @@
 #  QT_TRANSLATIONS_DIR         Path to "translations" of Qt4
 #  QT_DOC_DIR                  Path to "doc" of Qt4
 #  QT_MKSPECS_DIR              Path to "mkspecs" of Qt4
-#                            
+#
 #
 # The Qt toolkit may contain both debug and release libraries.
 # In that case, the following library variables will contain both.
@@ -245,6 +248,7 @@
 #  QT_QTGUI_LIBRARY                 The QtGui library
 #  QT_QTHELP_LIBRARY                The QtHelp library
 #  QT_QTMOTIF_LIBRARY               The QtMotif library
+#  QT_QTMULTIMEDIA_LIBRARY          The QtMultimedia library
 #  QT_QTNETWORK_LIBRARY             The QtNetwork library
 #  QT_QTNSPLUGIN_LIBRARY            The QtNsPLugin library
 #  QT_QTOPENGL_LIBRARY              The QtOpenGL library
@@ -621,7 +625,7 @@ IF (QT4_QMAKE_FOUND)
   ########################################
 
   SET(QT_MODULES QtCore QtGui Qt3Support QtSvg QtScript QtTest QtUiTools 
-                 QtHelp QtWebKit QtXmlPatterns phonon QtNetwork 
+                 QtHelp QtWebKit QtXmlPatterns phonon QtNetwork QtMultimedia
                  QtNsPlugin QtOpenGL QtSql QtXml QtDesigner QtDBus QtScriptTools)
   
   IF(Q_WS_X11)
@@ -878,6 +882,7 @@ IF (QT4_QMAKE_FOUND)
   _QT4_ADJUST_LIB_VARS(QTASSISTANT)
   _QT4_ADJUST_LIB_VARS(QTDESIGNER)
   _QT4_ADJUST_LIB_VARS(QTDESIGNERCOMPONENTS)
+  _QT4_ADJUST_LIB_VARS(QTMULTIMEDIA)
   _QT4_ADJUST_LIB_VARS(QTNETWORK)
   _QT4_ADJUST_LIB_VARS(QTNSPLUGIN)
   _QT4_ADJUST_LIB_VARS(QTOPENGL)
