@@ -2942,6 +2942,7 @@ HTTPResponseCallback(void *ptr, size_t size, size_t nmemb, void *data)
   return realsize;
 }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
 //----------------------------------------------------------------------------
 int cmSystemTools::HTTPRequest(std::string url, HTTPMethod method,
                                        std::string& response,
@@ -2977,3 +2978,4 @@ int cmSystemTools::HTTPRequest(std::string url, HTTPMethod method,
   
   return static_cast<int>(res);
 }
+#endif

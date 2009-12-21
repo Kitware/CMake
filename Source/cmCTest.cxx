@@ -320,6 +320,7 @@ bool cmCTest::ShouldCompressTestOutput()
 //----------------------------------------------------------------------------
 std::string cmCTest::GetCDashVersion()
 {
+#ifdef CMAKE_BUILD_WITH_CMAKE
   //First query the server.  If that fails, fall back to the local setting
   std::string response;
   std::string url = "http://";
@@ -328,6 +329,9 @@ std::string cmCTest::GetCDashVersion()
   int res = cmSystemTools::HTTPRequest(url, cmSystemTools::HTTP_GET, response);
   
   return res ? this->GetCTestConfiguration("CDashVersion") : response;
+#else
+  return this->GetCTestConfiguration("CDashVersion");
+#endif
 }
 
 //----------------------------------------------------------------------------
