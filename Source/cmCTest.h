@@ -197,6 +197,8 @@ public:
 
   bool ShouldCompressTestOutput();
 
+  std::string GetCDashVersion();
+
   //Used for parallel ctest job scheduling
   std::string GetScheduleType() { return this->ScheduleType; }
   void SetScheduleType(std::string type) { this->ScheduleType = type; }

@@ -304,9 +304,8 @@ void cmCTest::SetParallelLevel(int level)
 bool cmCTest::ShouldCompressTestOutput()
 {
   if(!this->ComputedCompressOutput)
-    {   
-    std::string cdashVersion = 
-      this->GetCTestConfiguration("CDashVersion");
+    {
+    std::string cdashVersion = this->GetCDashVersion();
     //version >= 1.6?
     bool cdashSupportsGzip = cmSystemTools::VersionCompare(
       cmSystemTools::OP_GREATER, cdashVersion.c_str(), "1.6") ||
@@ -316,6 +315,19 @@ bool cmCTest::ShouldCompressTestOutput()
     this->ComputedCompressOutput = true;
     }
   return this->CompressTestOutput;
+}
+
+//----------------------------------------------------------------------------
+std::string cmCTest::GetCDashVersion()
+{
+  //First query the server.  If that fails, fall back to the local setting
+  std::string response;
+  std::string url = "http://";
+  url += this->GetCTestConfiguration("DropSite") + "/CDash/api/getversion.php";
+  
+  int res = cmSystemTools::HTTPRequest(url, cmSystemTools::HTTP_GET, response);
+  
+  return res ? this->GetCTestConfiguration("CDashVersion") : response;
 }
 
 //----------------------------------------------------------------------------
