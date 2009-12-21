@@ -3,7 +3,11 @@ PROJECT(CTestTestTimeout)
 INCLUDE(CTest)
 
 IF(NOT TIMEOUT)
-  SET(TIMEOUT 1)
+  IF(CYGWIN)
+    SET(TIMEOUT 4) # Cygwin CMake sometimes takes > 1 second to load!
+  ELSE()
+    SET(TIMEOUT 1)
+  ENDIF()
 ENDIF()
 
 ADD_DEFINITIONS(-DTIMEOUT=${TIMEOUT})
