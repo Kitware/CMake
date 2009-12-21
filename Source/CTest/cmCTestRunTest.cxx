@@ -94,7 +94,7 @@ void cmCTestRunTest::CompressOutput()
     return;
     }
 
-  strm.avail_in = this->ProcessOutput.size();
+  strm.avail_in = static_cast<uInt>(this->ProcessOutput.size());
   strm.next_in = in;
   strm.avail_out = outSize;
   strm.next_out = out;
