@@ -15,6 +15,7 @@ BuildName: @BUILDNAME@
 
 # Submission information
 IsCDash: @CTEST_DROP_SITE_CDASH@
+CDashVersion: @CTEST_CDASH_VERSION@
 DropSite: @DROP_SITE@
 DropLocation: @DROP_LOCATION@
 DropSiteUser: @DROP_SITE_USER@

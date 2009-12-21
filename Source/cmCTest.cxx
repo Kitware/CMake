@@ -222,6 +222,7 @@ cmCTest::cmCTest()
   this->RunConfigurationScript = false;
   this->UseHTTP10              = false;
   this->CompressTestOutput     = true;
+  this->ComputedCompressOutput = false;
   this->TestModel              = cmCTest::EXPERIMENTAL;
   this->MaxTestNameWidth       = 30;
   this->InteractiveDebugMode   = true;
@@ -297,6 +298,24 @@ cmCTest::~cmCTest()
 void cmCTest::SetParallelLevel(int level)
 {
   this->ParallelLevel = level < 1 ? 1 : level;
+}
+
+//----------------------------------------------------------------------------
+bool cmCTest::ShouldCompressTestOutput()
+{
+  if(!this->ComputedCompressOutput)
+    {   
+    std::string cdashVersion = 
+      this->GetCTestConfiguration("CDashVersion");
+    //version >= 1.6?
+    bool cdashSupportsGzip = cmSystemTools::VersionCompare(
+      cmSystemTools::OP_GREATER, cdashVersion.c_str(), "1.6") ||
+      cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
+      cdashVersion.c_str(), "1.6");
+    this->CompressTestOutput &= cdashSupportsGzip;
+    this->ComputedCompressOutput = true;
+    }
+  return this->CompressTestOutput;
 }
 
 //----------------------------------------------------------------------------

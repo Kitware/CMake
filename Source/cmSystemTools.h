@@ -268,6 +268,17 @@ public:
     UNKNOWN_FILE_FORMAT
   };
 
+  enum CompareOp {
+    OP_LESS,
+    OP_GREATER,
+    OP_EQUAL
+  };
+
+  /**
+   * Compare versions
+   */
+  static bool VersionCompare(CompareOp op, const char* lhs, const char* rhs);
+
   /**
    * Determine the file type based on the extension
    */

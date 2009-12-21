@@ -195,7 +195,7 @@ public:
 
   bool ShouldUseHTTP10() { return this->UseHTTP10; }
 
-  bool ShouldCompressTestOutput() { return this->CompressTestOutput; }
+  bool ShouldCompressTestOutput();
 
   //Used for parallel ctest job scheduling
   std::string GetScheduleType() { return this->ScheduleType; }
@@ -395,6 +395,9 @@ private:
   bool ForceNewCTestProcess;
 
   bool RunConfigurationScript;
+
+  //flag for lazy getter (optimization)
+  bool ComputedCompressOutput;
 
   int GenerateNotesFile(const char* files);
 
