@@ -46,6 +46,18 @@ public:
   static void ExpandRegistryValues(std::string& source,
                                    KeyWOW64 view = KeyWOW64_Default);
 
+  enum HTTPMethod {
+    HTTP_GET,
+    HTTP_POST
+  };
+
+  /**
+   * Perform an HTTP request.
+   */
+  static int HTTPRequest(std::string url, HTTPMethod method,
+                          std::string& response,
+                          std::string fields = "", int timeout = 10);
+
   /**
    * Platform independent escape spaces, unix uses backslash,
    * windows double quotes the string.
