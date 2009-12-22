@@ -154,6 +154,58 @@ std::string cmCTest::CurrentTime()
   return cmXMLSafe(cmCTest::CleanString(current_time)).str();
 }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
+//----------------------------------------------------------------------------
+static size_t
+HTTPResponseCallback(void *ptr, size_t size, size_t nmemb, void *data)
+{
+  register int realsize = (int)(size * nmemb);
+
+  std::string *response
+    = static_cast<std::string*>(data);
+  const char* chPtr = static_cast<char*>(ptr);
+  *response += chPtr;
+
+  return realsize;
+}
+
+//----------------------------------------------------------------------------
+int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
+                                       std::string& response,
+                                       std::string fields, int timeout)
+{
+  CURL* curl;
+  ::curl_global_init(CURL_GLOBAL_ALL);
+  curl = ::curl_easy_init();
+
+  //set request options
+  if(method == cmCTest::HTTP_GET && fields.size())
+    {
+    url += "?" + fields;
+    }
+  else
+    {
+    ::curl_easy_setopt(curl, CURLOPT_POST, 1);
+    ::curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields.c_str());
+    }
+  ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+  ::curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
+  ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
+
+  //set response options
+  ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, HTTPResponseCallback);
+  ::curl_easy_setopt(curl, CURLOPT_FILE, (void *)&response);
+  ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+
+  CURLcode res = ::curl_easy_perform(curl);
+
+  ::curl_easy_cleanup(curl);
+  ::curl_global_cleanup();
+  
+  return static_cast<int>(res);
+}
+#endif
+
 //----------------------------------------------------------------------
 std::string cmCTest::MakeURLSafe(const std::string& str)
 {
@@ -326,7 +378,7 @@ std::string cmCTest::GetCDashVersion()
   std::string url = "http://";
   url += this->GetCTestConfiguration("DropSite") + "/CDash/api/getversion.php";
   
-  int res = cmSystemTools::HTTPRequest(url, cmSystemTools::HTTP_GET, response);
+  int res = cmCTest::HTTPRequest(url, cmCTest::HTTP_GET, response);
   
   return res ? this->GetCTestConfiguration("CDashVersion") : response;
 #else

@@ -80,6 +80,19 @@ public:
     bool Enabled;
     std::string Name;
   };
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  enum HTTPMethod {
+    HTTP_GET,
+    HTTP_POST
+  };
+
+  /**
+   * Perform an HTTP request.
+   */
+  static int HTTPRequest(std::string url, HTTPMethod method,
+                          std::string& response,
+                          std::string fields = "", int timeout = 10);
+#endif
 
   /** Get a testing part id from its string name.  Returns PartCount
       if the string does not name a valid part.  */
