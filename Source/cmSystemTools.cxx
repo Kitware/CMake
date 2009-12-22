@@ -26,6 +26,7 @@
 #include <cmlibarchive/libarchive/archive.h>
 #include <cmlibarchive/libarchive/archive_entry.h>
 # include <cmsys/Terminal.h>
+#include "cm_curl.h"
 #endif
 #include <cmsys/stl/algorithm>
 
@@ -37,8 +38,6 @@
 # include <utime.h>
 # include <sys/wait.h>
 #endif
-
-#include "cm_curl.h"
 
 #include <sys/stat.h>
 
