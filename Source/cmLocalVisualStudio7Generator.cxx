@@ -744,7 +744,9 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     // We need to specify a program database file name even for
     // non-debug configurations because VS still creates .idb files.
     fout <<  "\t\t\t\tProgramDataBaseFileName=\""
-         << target.GetDirectory(configName) << "/"
+         << this->ConvertToOptionallyRelativeOutputPath(
+              target.GetDirectory(configName).c_str())
+         << "/"
          << target.GetPDBName(configName) << "\"\n";
     }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
@@ -1049,8 +1051,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
     this->OutputLibraryDirectories(fout, cli.GetDirectories());
     fout << "\"\n";
+    std::string path = this->ConvertToOptionallyRelativeOutputPath(
+      target.GetDirectory(configName).c_str());
     fout << "\t\t\t\tProgramDataBaseFile=\""
-         << target.GetDirectory(configName) << "/" << targetNamePDB
+         << path << "/" << targetNamePDB
          << "\"\n";
     if(isDebug)
       {
