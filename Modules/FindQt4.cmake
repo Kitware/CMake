@@ -829,6 +829,20 @@ IF (QT4_QMAKE_FOUND)
   MACRO (_QT4_ADJUST_LIB_VARS basename)
     IF (QT_${basename}_LIBRARY_RELEASE OR QT_${basename}_LIBRARY_DEBUG)
 
+      # if the release- as well as the debug-version of the library have been found:
+      IF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
+        # if the generator supports configuration types then set
+        # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
+        IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+          SET(QT_${basename}_LIBRARY       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
+        ELSE(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+          # if there are no configuration types and CMAKE_BUILD_TYPE has no value
+          # then just use the release libraries
+          SET(QT_${basename}_LIBRARY       ${QT_${basename}_LIBRARY_RELEASE} )
+        ENDIF(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+        SET(QT_${basename}_LIBRARIES       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
+      ENDIF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
+
       # if only the release version was found, set the debug variable also to the release version
       IF (QT_${basename}_LIBRARY_RELEASE AND NOT QT_${basename}_LIBRARY_DEBUG)
         SET(QT_${basename}_LIBRARY_DEBUG ${QT_${basename}_LIBRARY_RELEASE})
@@ -843,19 +857,7 @@ IF (QT4_QMAKE_FOUND)
         SET(QT_${basename}_LIBRARIES       ${QT_${basename}_LIBRARY_DEBUG})
       ENDIF (QT_${basename}_LIBRARY_DEBUG AND NOT QT_${basename}_LIBRARY_RELEASE)
 
-      IF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
-        # if the generator supports configuration types then set
-        # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
-        IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-          SET(QT_${basename}_LIBRARY       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
-        ELSE(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-          # if there are no configuration types and CMAKE_BUILD_TYPE has no value
-          # then just use the release libraries
-          SET(QT_${basename}_LIBRARY       ${QT_${basename}_LIBRARY_RELEASE} )
-        ENDIF(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-        SET(QT_${basename}_LIBRARIES       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
-      ENDIF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
-
+      # put the value in the cache:
       SET(QT_${basename}_LIBRARY ${QT_${basename}_LIBRARY} CACHE STRING "The Qt ${basename} library" FORCE)
 
       IF (QT_${basename}_LIBRARY)
