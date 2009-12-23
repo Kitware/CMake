@@ -1673,6 +1673,18 @@ void cmSystemTools::RestoreEnv(const std::vector<std::string>& env)
     PutEnv(eit->c_str());
     }
 }
+
+//----------------------------------------------------------------------
+cmSystemTools::SaveRestoreEnvironment::SaveRestoreEnvironment()
+{
+  this->Env = cmSystemTools::GetEnvironmentVariables();
+}
+
+//----------------------------------------------------------------------
+cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
+{
+  cmSystemTools::RestoreEnv(this->Env);
+}
 #endif
 
 void cmSystemTools::EnableVSConsoleOutput()

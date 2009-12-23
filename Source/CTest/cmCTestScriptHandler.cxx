@@ -583,6 +583,10 @@ void cmCTestScriptHandler::SleepInSeconds(unsigned int secondsToWait)
 int cmCTestScriptHandler::RunConfigurationScript
 (const std::string& total_script_arg, bool pscope)
 {
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  cmSystemTools::SaveRestoreEnvironment sre;
+#endif
+
   int result;
 
   this->ScriptStartTime =
