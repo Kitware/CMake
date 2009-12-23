@@ -77,10 +77,16 @@ EXECUTE_PROCESS(COMMAND sw_vers -productVersion
   OUTPUT_VARIABLE CURRENT_OSX_VERSION
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+#----------------------------------------------------------------------------
+# CMAKE_OSX_DEPLOYMENT_TARGET
+
+# Environment variable set by the user overrides our default.
+# Use the same environment variable that Xcode uses.
+SET(ENV_MACOSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}")
+
 # Set CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT - if user has already specified an SDK
 # with CMAKE_OSX_SYSROOT, then deployment target should default to "", otherwise,
 # default it to the current OSX version.
-#
 IF(CMAKE_OSX_SYSROOT)
   SET(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT "")
 ELSE(CMAKE_OSX_SYSROOT)
@@ -88,49 +94,49 @@ ELSE(CMAKE_OSX_SYSROOT)
     CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT ${CURRENT_OSX_VERSION})
 ENDIF(CMAKE_OSX_SYSROOT)
 
-# Set CMAKE_OSX_SYSROOT_DEFAULT based on CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT.
-# This next block assumes that Apple will start being consistent with
-# its SDK names from here on out...
-IF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT GREATER "10.4")
-  SET(CMAKE_OSX_SYSROOT_DEFAULT
-    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX${CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT}.sdk")
-ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT GREATER "10.4")
-
-IF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.4")
-  SET(CMAKE_OSX_SYSROOT_DEFAULT
-    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX10.4u.sdk")
-ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.4")
-
-IF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.3")
-  SET(CMAKE_OSX_SYSROOT_DEFAULT
-    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX10.3.9.sdk")
-ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.3")
-
-# Allow environment variables set by the user to override our defaults.
-# Use the same environment variables that Xcode uses.
-SET(ENV_MACOSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}")
-SET(ENV_SDKROOT "$ENV{SDKROOT}")
-
-# See if we need to override the default SDK or Deployment target with the
-# environment variables
+# Use environment or default as initial cache value:
 IF(NOT ENV_MACOSX_DEPLOYMENT_TARGET STREQUAL "")
   SET(CMAKE_OSX_DEPLOYMENT_TARGET_VALUE ${ENV_MACOSX_DEPLOYMENT_TARGET})
 ELSE(NOT ENV_MACOSX_DEPLOYMENT_TARGET STREQUAL "")
   SET(CMAKE_OSX_DEPLOYMENT_TARGET_VALUE ${CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT})
 ENDIF(NOT ENV_MACOSX_DEPLOYMENT_TARGET STREQUAL "")
 
+# Set cache variable - end user may change this during ccmake or cmake-gui configure.
+IF(CURRENT_OSX_VERSION GREATER 10.3)
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET ${CMAKE_OSX_DEPLOYMENT_TARGET_VALUE} CACHE STRING
+    "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
+ENDIF(CURRENT_OSX_VERSION GREATER 10.3)
+
+#----------------------------------------------------------------------------
+# CMAKE_OSX_SYSROOT
+
+# Environment variable set by the user overrides our default.
+# Use the same environment variable that Xcode uses.
+SET(ENV_SDKROOT "$ENV{SDKROOT}")
+
+# Set CMAKE_OSX_SYSROOT_DEFAULT based on CMAKE_OSX_DEPLOYMENT_TARGET,
+# accounting for the known specially named SDKs.
+SET(CMAKE_OSX_SYSROOT_DEFAULT
+  "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX${CMAKE_OSX_DEPLOYMENT_TARGET}.sdk")
+
+IF(CMAKE_OSX_DEPLOYMENT_TARGET EQUAL "10.4")
+  SET(CMAKE_OSX_SYSROOT_DEFAULT
+    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX10.4u.sdk")
+ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET EQUAL "10.4")
+
+IF(CMAKE_OSX_DEPLOYMENT_TARGET EQUAL "10.3")
+  SET(CMAKE_OSX_SYSROOT_DEFAULT
+    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX10.3.9.sdk")
+ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET EQUAL "10.3")
+
+# Use environment or default as initial cache value:
 IF(NOT ENV_SDKROOT STREQUAL "")
   SET(CMAKE_OSX_SYSROOT_VALUE ${ENV_SDKROOT})
 ELSE(NOT ENV_SDKROOT STREQUAL "")
   SET(CMAKE_OSX_SYSROOT_VALUE ${CMAKE_OSX_SYSROOT_DEFAULT})
 ENDIF(NOT ENV_SDKROOT STREQUAL "")
 
-# Set cache variables - end user may change these during ccmake or cmake-gui configure.
-IF(CURRENT_OSX_VERSION GREATER 10.3)
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET ${CMAKE_OSX_DEPLOYMENT_TARGET_VALUE} CACHE STRING
-    "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
-ENDIF(CURRENT_OSX_VERSION GREATER 10.3)
-
+# Set cache variable - end user may change this during ccmake or cmake-gui configure.
 SET(CMAKE_OSX_SYSROOT ${CMAKE_OSX_SYSROOT_VALUE} CACHE PATH
   "The product will be built against the headers and libraries located inside the indicated SDK.")
 
