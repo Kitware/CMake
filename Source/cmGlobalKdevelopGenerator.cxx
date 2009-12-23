@@ -475,6 +475,7 @@ void cmGlobalKdevelopGenerator
         "      <environments>\n"
         "        <default>\n"
         "          <envvar value=\"1\" name=\"VERBOSE\" />\n"
+        "          <envvar value=\"1\" name=\"CMAKE_NO_VERBOSE\" />\n"
         "        </default>\n"
         "      </environments>\n"
         "    </make>\n";

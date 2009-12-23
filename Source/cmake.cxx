@@ -1418,8 +1418,10 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "cmake_depends" && args.size() >= 6)
       {
       // Use the make system's VERBOSE environment variable to enable
-      // verbose output.
-      bool verbose = cmSystemTools::GetEnv("VERBOSE") != 0;
+      // verbose output. This can be skipped by also setting CMAKE_NO_VERBOSE
+      // (which is set by the Eclipse and KDevelop generators).
+      bool verbose = ((cmSystemTools::GetEnv("VERBOSE") != 0) 
+                       && (cmSystemTools::GetEnv("CMAKE_NO_VERBOSE") == 0));
 
       // Create a cmake object instance to process dependencies.
       cmake cm;
@@ -2520,9 +2522,11 @@ int cmake::CheckBuildSystem()
 {
   // We do not need to rerun CMake.  Check dependency integrity.  Use
   // the make system's VERBOSE environment variable to enable verbose
-  // output.
-  bool verbose = cmSystemTools::GetEnv("VERBOSE") != 0;
-  
+  // output. This can be skipped by setting CMAKE_NO_VERBOSE (which is set
+  // by the Eclipse and KDevelop generators).
+  bool verbose = ((cmSystemTools::GetEnv("VERBOSE") != 0) 
+                   && (cmSystemTools::GetEnv("CMAKE_NO_VERBOSE") == 0));
+
   // This method will check the integrity of the build system if the
   // option was given on the command line.  It reads the given file to
   // determine whether CMake should rerun.

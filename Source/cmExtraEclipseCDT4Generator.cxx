@@ -214,23 +214,22 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.environment</key>\n"
-    "\t\t\t\t\t<value>VERBOSE=1|</value>\n"  // enforce VERBOSE Makefile output
-    "\t\t\t\t\t<value>"
+    "\t\t\t\t\t<value>VERBOSE=1|CMAKE_NO_VERBOSE=1|"  // enforce VERBOSE Makefile output
     ;
   // set vsvars32.bat environment available at CMake time,
   //   but not necessarily when eclipse is open
   if (make.find("nmake") != std::string::npos)
     {
     if (getenv("PATH"))
-      {
+    {
       fout << "PATH=" << getenv("PATH") << "|";
-      }
+    }
     if (getenv("INCLUDE"))
       {
       fout << "INCLUDE=" << getenv("INCLUDE") << "|";
       }
     if (getenv("LIB"))
-      {
+    {
       fout << "LIB=" << getenv("LIB") << "|";
       }
     if (getenv("LIBPATH"))
