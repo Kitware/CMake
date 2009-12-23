@@ -124,10 +124,72 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile() const
     ;
 }
 
+
+//----------------------------------------------------------------------------
+void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
+                                            const char* envVar, cmMakefile* mf)
+{
+  // get the variables from the environment and from the cache and then 
+  // figure out which one to use:
+
+  const char* envVarValue = getenv(envVar);
+
+  std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
+  cacheEntryName += envVar;
+  const char* cacheValue = mf->GetCacheManager()->GetCacheValue(
+                                                       cacheEntryName.c_str());
+
+  // now we have both, decide which one to use
+  std::string valueToUse;
+  if (envVarValue==0 && cacheValue==0)
+    {
+    // nothing known, do nothing
+    valueToUse = "";
+    }
+  else if (envVarValue!=0 && cacheValue==0)
+    {
+    // The variable is in the env, but not in the cache. Use it and put it 
+    // in the cache
+    valueToUse = envVarValue;
+    mf->AddCacheDefinition(cacheEntryName.c_str(), valueToUse.c_str(),
+                           cacheEntryName.c_str(), cmCacheManager::STRING,
+                           true);
+    mf->GetCacheManager()->SaveCache(mf->GetHomeOutputDirectory());
+    }
+  else if (envVarValue==0 && cacheValue!=0)
+    {
+    // It is already in the cache, but not in the env, so use it from the cache
+    valueToUse = cacheValue;
+    }
+  else
+    {
+    // It is both in the cache and in the env.
+    // Use the version from the env. except if the value from the env is
+    // completely contained in the value from the cache (for the case that we
+    // now have a PATH without MSVC dirs in the env. but had the full PATH with
+    // all MSVC dirs during the cmake run which stored the var in the cache:
+    valueToUse = cacheValue;
+    if (valueToUse.find(envVarValue) == std::string::npos)
+      {
+      valueToUse = envVarValue;
+      mf->AddCacheDefinition(cacheEntryName.c_str(), valueToUse.c_str(),
+                             cacheEntryName.c_str(), cmCacheManager::STRING,
+                             true);
+      mf->GetCacheManager()->SaveCache(mf->GetHomeOutputDirectory());
+      }
+    }
+
+  if (!valueToUse.empty())
+    {
+    fout << envVar << "=" << valueToUse << "|";
+    }
+}
+
+
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateProjectFile()
 {
-  const cmMakefile* mf
+  cmMakefile* mf
     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
 
   const std::string filename = this->HomeOutputDirectory + "/.project";
@@ -136,6 +198,12 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   if (!fout)
     {
     return;
+    }
+
+  std::string compilerId = mf->GetSafeDefinition("CMAKE_C_COMPILER_ID");
+  if (compilerId.empty())  // no C compiler, try the C++ compiler:
+    {
+    compilerId = mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
     }
 
   fout << 
@@ -218,24 +286,19 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     ;
   // set vsvars32.bat environment available at CMake time,
   //   but not necessarily when eclipse is open
-  if (make.find("nmake") != std::string::npos)
+  if (compilerId == "MSVC")
     {
-    if (getenv("PATH"))
-    {
-      fout << "PATH=" << getenv("PATH") << "|";
+    AddEnvVar(fout, "PATH", mf);
+    AddEnvVar(fout, "INCLUDE", mf);
+    AddEnvVar(fout, "LIB", mf);
+    AddEnvVar(fout, "LIBPATH", mf);
+    AddEnvVar(fout, "INCLUDE", mf);
     }
-    if (getenv("INCLUDE"))
-      {
-      fout << "INCLUDE=" << getenv("INCLUDE") << "|";
-      }
-    if (getenv("LIB"))
+  else if (compilerId == "Intel")
     {
-      fout << "LIB=" << getenv("LIB") << "|";
-      }
-    if (getenv("LIBPATH"))
-      {
-      fout << "LIBPATH=" << getenv("LIBPATH") << "|";
-      }
+    // if the env.var is set, use this one and put it in the cache
+    // if the env.var is not set, but the value is in the cache, use it from the cache:
+    AddEnvVar(fout, "INTEL_LICENSE_FILE", mf);
     }
   fout <<
     "</value>\n"
@@ -284,11 +347,6 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     "\t\t\t\t\t<key>org.eclipse.cdt.core.errorOutputParser</key>\n"
     "\t\t\t\t\t<value>"
     ;
-  std::string compilerId = mf->GetSafeDefinition("CMAKE_C_COMPILER_ID");
-  if (compilerId.empty())  // no C compiler, try the C++ compiler:
-    {
-    compilerId = mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
-    }
   if (compilerId == "MSVC")
     {
     fout << "org.eclipse.cdt.core.VCErrorParser;";
