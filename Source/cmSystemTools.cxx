@@ -1852,9 +1852,9 @@ bool cmSystemTools::CreateTar(const char* outFileName,
       }
     archive_entry_free(entry);
     }
-  // close the archive and finish the write
   archive_write_close(a);
   archive_write_finish(a);
+  archive_read_finish(disk);
   return true;
 #else
   (void)outFileName;

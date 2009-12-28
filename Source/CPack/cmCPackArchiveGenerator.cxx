@@ -254,6 +254,7 @@ int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
   // close the archive and finish the write
   archive_write_close(a);
   archive_write_finish(a);
+  archive_read_finish(disk);
   return 1;
 }
 
