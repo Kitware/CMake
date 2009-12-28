@@ -4397,7 +4397,7 @@ int cmake::Build(const std::string& dir,
                  const std::string& config,
                  const std::vector<std::string>& nativeOptions,
                  bool clean)
-{ 
+{
   if(!cmSystemTools::FileIsDirectory(dir.c_str()))
     {
     std::cerr << "Error: " << dir << " is not a directory\n";
@@ -4417,8 +4417,8 @@ int cmake::Build(const std::string& dir,
     std::cerr << "Error: could find generator in Cache\n";
     return 1;
     }
-  cmGlobalGenerator* gen =
-    this->CreateGlobalGenerator(it.GetValue());
+  std::auto_ptr<cmGlobalGenerator> gen(
+    this->CreateGlobalGenerator(it.GetValue()));
   std::string output;
   std::string projName;
   std::string makeProgram;
