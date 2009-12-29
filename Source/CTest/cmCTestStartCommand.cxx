@@ -17,6 +17,11 @@
 #include "cmCTestVC.h"
 #include "cmGeneratedFileStream.h"
 
+cmCTestStartCommand::cmCTestStartCommand()
+{
+  this->CreateNewTag = true;
+}
+
 bool cmCTestStartCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -41,6 +46,15 @@ bool cmCTestStartCommand
       cnt ++;
       this->CTest->SetSpecificTrack(args[cnt].c_str());
       cnt ++;
+      }
+    }
+
+  if (cnt < args.size())
+    {
+    if (args[cnt] == "APPEND")
+      {
+      cnt ++;
+      this->CreateNewTag = false;
       }
     }
 
