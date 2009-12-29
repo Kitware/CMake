@@ -477,11 +477,17 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
 
     // Create new "TAG" file or read existing one:
     //
+    bool createNewTag = true;
+    if (command)
+      {
+      createNewTag = command->ShouldCreateNewTag();
+      }
+
     std::string tagfile = testingDir + "/TAG";
     std::ifstream tfin(tagfile.c_str());
     std::string tag;
 
-    if (command->ShouldCreateNewTag())
+    if (createNewTag)
       {
       time_t tctime = time(0);
       if ( this->TomorrowTag )
