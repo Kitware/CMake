@@ -144,10 +144,17 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
     else
       {
       cmOStringStream ostr;
-      ostr << "CTEST_BUILD_COMMAND or CTEST_CMAKE_GENERATOR not specified. "
-        "Please specify the CTEST_CMAKE_GENERATOR and CTEST_PROJECT_NAME if "
-        "this is a CMake project, or specify the CTEST_BUILD_COMMAND for "
-        "cmake or any other project.";
+      ostr << "has no project to build. If this is a "
+        "\"built with CMake\" project, verify that CTEST_CMAKE_GENERATOR "
+        "and CTEST_PROJECT_NAME are set."
+        "\n"
+        "CTEST_PROJECT_NAME is usually set in CTestConfig.cmake. Verify "
+        "that CTestConfig.cmake exists, or CTEST_PROJECT_NAME "
+        "is set in the script, or PROJECT_NAME is passed as an argument "
+        "to ctest_build."
+        "\n"
+        "Alternatively, set CTEST_BUILD_COMMAND to build the project "
+        "with a custom command line.";
       this->SetError(ostr.str().c_str());
       return 0;
       }

@@ -89,6 +89,16 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         return 0;
         }
 
+      const std::string cmakelists_file = source_dir + "/CMakeLists.txt";
+      if ( !cmSystemTools::FileExists(cmakelists_file.c_str()) )
+        {
+        cmOStringStream e;
+        e << "CMakeLists.txt file does not exist ["
+          << cmakelists_file << "]";
+        this->SetError(e.str().c_str());
+        return 0;
+        }
+
       bool multiConfig = false;
       bool cmakeBuildTypeInOptions = false;
 
