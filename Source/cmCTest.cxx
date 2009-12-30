@@ -172,22 +172,42 @@ HTTPResponseCallback(void *ptr, size_t size, size_t nmemb, void *data)
 //----------------------------------------------------------------------------
 int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
                                        std::string& response,
-                                       std::string fields, int timeout)
+                                       std::string fields,
+                                       std::string putFile, int timeout)
 {
   CURL* curl;
+  FILE* file;
   ::curl_global_init(CURL_GLOBAL_ALL);
   curl = ::curl_easy_init();
 
-  //set request options
-  if(method == cmCTest::HTTP_GET && fields.size())
+  //set request options based on method
+  switch(method)
     {
-    url += "?" + fields;
+    case cmCTest::HTTP_POST:
+      ::curl_easy_setopt(curl, CURLOPT_POST, 1);
+      ::curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields.c_str());
+      break;
+    case cmCTest::HTTP_PUT:
+      if(!cmSystemTools::FileExists(putFile.c_str()))
+        {
+        response = "Error: File ";
+        response += putFile + " does not exist.\n";
+        return -1;
+        }
+      ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
+      file = ::fopen(putFile.c_str(), "rb");
+      ::curl_easy_setopt(curl, CURLOPT_INFILE, file);
+      //fall through to append GET fields
+    case cmCTest::HTTP_GET:
+      if(fields.size())
+        {
+        url += "?" + fields;
+        }
+      break;
+    default:
+      break;
     }
-  else
-    {
-    ::curl_easy_setopt(curl, CURLOPT_POST, 1);
-    ::curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fields.c_str());
-    }
+  
   ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   ::curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
   ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);

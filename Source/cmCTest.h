@@ -83,7 +83,8 @@ public:
 #ifdef CMAKE_BUILD_WITH_CMAKE
   enum HTTPMethod {
     HTTP_GET,
-    HTTP_POST
+    HTTP_POST,
+    HTTP_PUT
   };
 
   /**
@@ -91,7 +92,8 @@ public:
    */
   static int HTTPRequest(std::string url, HTTPMethod method,
                           std::string& response,
-                          std::string fields = "", int timeout = 10);
+                          std::string fields = "", 
+                          std::string putFile = "", int timeout = 0);
 #endif
 
   /** Get a testing part id from its string name.  Returns PartCount
