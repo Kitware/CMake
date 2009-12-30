@@ -282,7 +282,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.environment</key>\n"
-    "\t\t\t\t\t<value>VERBOSE=1|CMAKE_NO_VERBOSE=1|"  // enforce VERBOSE Makefile output
+    "\t\t\t\t\t<value>VERBOSE=1|CMAKE_NO_VERBOSE=1|"  //verbose Makefile output
     ;
   // set vsvars32.bat environment available at CMake time,
   //   but not necessarily when eclipse is open
@@ -297,7 +297,8 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   else if (compilerId == "Intel")
     {
     // if the env.var is set, use this one and put it in the cache
-    // if the env.var is not set, but the value is in the cache, use it from the cache:
+    // if the env.var is not set, but the value is in the cache, 
+    // use it from the cache:
     AddEnvVar(fout, "INTEL_LICENSE_FILE", mf);
     }
   fout <<
