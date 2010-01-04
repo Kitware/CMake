@@ -442,9 +442,11 @@ cmDependsFortran
   for(std::set<cmStdString>::const_iterator i = info.Includes.begin();
       i != info.Includes.end(); ++i)
     {
-    makeDepends << obj << ": "
-       << cmSystemTools::ConvertToOutputPath(i->c_str()).c_str()
-       << std::endl;
+    makeDepends << obj << ": " <<
+      this->LocalGenerator->Convert(i->c_str(),
+                                    cmLocalGenerator::HOME_OUTPUT,
+                                    cmLocalGenerator::MAKEFILE)
+                << std::endl;
     internalDepends << " " << i->c_str() << std::endl;
     }
   makeDepends << std::endl;
@@ -491,7 +493,7 @@ cmDependsFortran
       std::string stampFile =
         this->LocalGenerator->Convert(required->second.c_str(),
                                       cmLocalGenerator::HOME_OUTPUT,
-                                      cmLocalGenerator::SHELL);
+                                      cmLocalGenerator::MAKEFILE);
       makeDepends << obj << ": " << stampFile << "\n";
       }
     else
@@ -504,7 +506,7 @@ cmDependsFortran
         module =
           this->LocalGenerator->Convert(module.c_str(),
                                         cmLocalGenerator::HOME_OUTPUT,
-                                        cmLocalGenerator::SHELL);
+                                        cmLocalGenerator::MAKEFILE);
         makeDepends << obj << ": " << module << "\n";
         }
       }
