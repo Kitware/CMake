@@ -15,16 +15,17 @@
 #
 # Accepts the following variables as input:
 #
-#   GTEST_ROOT - (as CMake or env. variable)
+#   GTEST_ROOT - (as a CMake or environment variable)
 #                The root directory of the gtest install prefix
 #
-#   GTEST_MSVC_SEARCH - If on MSVC, enables searching the build tree of
-#                       GTest if set to MD or MT (defaults: MD)
+#   GTEST_MSVC_SEARCH - If compiling with MSVC, this variable can be set to
+#                       "MD" or "MT" to enable searching a GTest build tree
+#                       (defaults: "MD")
 #
 #-----------------------
 # Example Usage:
 #
-#    enable_testing(true)
+#    enable_testing()
 #    find_package(GTest REQUIRED)
 #    include_directories(${GTEST_INCLUDE_DIRS})
 #
@@ -36,8 +37,10 @@
 #-----------------------
 #
 # If you would like each Google test to show up in CTest as
-# a test you may use the following macro.  NOTE: It WILL slow
-# down your tests, so be warned.
+# a test you may use the following macro.
+# NOTE: It will slow down your tests by running an executable
+# for each test and test fixture.  You will also have to rerun
+# CMake after adding or removing tests or test fixtures.
 #
 # GTEST_ADD_TESTS(executable extra_args ARGN)
 #    executable = The path to the test executable
@@ -76,7 +79,7 @@ function(GTEST_ADD_TESTS executable extra_args)
         file(READ "${source}" contents)
         string(REGEX MATCHALL "TEST_?F?\\(([A-Za-z_0-9 ,]+)\\)" found_tests ${contents})
         foreach(hit ${found_tests})
-            string(REGEX REPLACE ".*\\(([A-Za-z_0-9]+)[, ]*([A-Za-z_0-9]+)\\).*" "\\1.\\2" test_name ${hit})
+            string(REGEX REPLACE ".*\\( *([A-Za-z_0-9]+), *([A-Za-z_0-9]+) *\\).*" "\\1.\\2" test_name ${hit})
             add_test(${test_name} ${executable} --gtest_filter=${test_name} ${extra_args})
         endforeach()
     endforeach()
