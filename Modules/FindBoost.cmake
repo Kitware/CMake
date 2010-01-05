@@ -63,7 +63,7 @@
 # Currently this module searches for the following version numbers:
 # 1.33, 1.33.0, 1.33.1, 1.34, 1.34.0, 1.34.1, 1.35, 1.35.0, 1.35.1,
 # 1.36, 1.36.0, 1.36.1, 1.37, 1.37.0, 1.38, 1.38.0, 1.39, 1.39.0,
-# 1.40, 1.40.0
+# 1.40, 1.40.0, 1.41, 1.41.0
 #
 # NOTE: If you add a new major 1.x version in Boost_ADDITIONAL_VERSIONS you should
 # add both 1.x and 1.x.0 as shown above.  Official Boost include directories
@@ -265,6 +265,17 @@ FUNCTION(_Boost_COMPILER_DUMPVERSION _OUTPUT_VERSION)
 ENDFUNCTION()
 
 #
+# A convenience function for marking desired components
+# as found or not
+#
+function(_Boost_MARK_COMPONENTS_FOUND _yes_or_no)
+  foreach(COMPONENT ${Boost_FIND_COMPONENTS})
+    string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
+    set(Boost_${UPPERCOMPONENT}_FOUND ${_yes_or_no} CACHE INTERNAL "Whether the Boost ${COMPONENT} library found" FORCE)
+  endforeach()
+endfunction()
+
+#
 # End functions/macros
 #  
 #-------------------------------------------------------------------------------
@@ -286,7 +297,7 @@ else(Boost_FIND_VERSION_EXACT)
   # The user has not requested an exact version.  Among known
   # versions, find those that are acceptable to the user request.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
-    "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37"
+    "1.41.0" "1.41" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37"
     "1.36.1" "1.36.0" "1.36" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0"
     "1.34" "1.33.1" "1.33.0" "1.33")
   set(_boost_TEST_VERSIONS)
@@ -760,6 +771,10 @@ ELSE (_boost_IN_CACHE)
       endif( Boost_MINOR_VERSION LESS "${Boost_FIND_VERSION_MINOR}" )
     endif( Boost_MAJOR_VERSION LESS "${Boost_FIND_VERSION_MAJOR}" )
 
+    if (NOT Boost_FOUND)
+      _Boost_MARK_COMPONENTS_FOUND(OFF)
+    endif()
+
     if (Boost_FOUND AND Boost_FIND_VERSION_EXACT)
       # If the user requested an exact version of Boost, check
       # that. We already know that the Boost version we have is >= the
@@ -773,10 +788,12 @@ ELSE (_boost_IN_CACHE)
       
       # We'll set Boost_FOUND true again if we have an exact version match.
       set(Boost_FOUND FALSE)
+      _Boost_MARK_COMPONENTS_FOUND(OFF)
       if(Boost_MAJOR_VERSION EQUAL "${Boost_FIND_VERSION_MAJOR}" )
         if(Boost_MINOR_VERSION EQUAL "${Boost_FIND_VERSION_MINOR}" )
           if(Boost_SUBMINOR_VERSION EQUAL "${Boost_FIND_VERSION_PATCH}" )
             set( Boost_FOUND TRUE )
+            _Boost_MARK_COMPONENTS_FOUND(ON)
           endif(Boost_SUBMINOR_VERSION EQUAL "${Boost_FIND_VERSION_PATCH}" )
         endif( Boost_MINOR_VERSION EQUAL "${Boost_FIND_VERSION_MINOR}" )
       endif( Boost_MAJOR_VERSION EQUAL "${Boost_FIND_VERSION_MAJOR}" )
@@ -796,19 +813,18 @@ ELSE (_boost_IN_CACHE)
       set(Boost_ERROR_REASON "${Boost_ERROR_REASON}.")
     endif (NOT Boost_FOUND)
 
-    if (Boost_FOUND)
-      set(_boost_CHECKED_COMPONENT FALSE)
-      set(_Boost_MISSING_COMPONENTS)
-      foreach(COMPONENT ${Boost_FIND_COMPONENTS})
-        string(TOUPPER ${COMPONENT} COMPONENT)
-        set(_boost_CHECKED_COMPONENT TRUE)
-        if(NOT Boost_${COMPONENT}_FOUND)
-          string(TOLOWER ${COMPONENT} COMPONENT)
-          list(APPEND _Boost_MISSING_COMPONENTS ${COMPONENT})
-          set( Boost_FOUND FALSE)
-        endif(NOT Boost_${COMPONENT}_FOUND)
-      endforeach(COMPONENT)
-    endif (Boost_FOUND)
+    # Always check for missing components
+    set(_boost_CHECKED_COMPONENT FALSE)
+    set(_Boost_MISSING_COMPONENTS "")
+    foreach(COMPONENT ${Boost_FIND_COMPONENTS})
+      string(TOUPPER ${COMPONENT} COMPONENT)
+      set(_boost_CHECKED_COMPONENT TRUE)
+      if(NOT Boost_${COMPONENT}_FOUND)
+        string(TOLOWER ${COMPONENT} COMPONENT)
+        list(APPEND _Boost_MISSING_COMPONENTS ${COMPONENT})
+        set( Boost_FOUND FALSE)
+      endif(NOT Boost_${COMPONENT}_FOUND)
+    endforeach(COMPONENT)
 
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] Boost_FOUND = ${Boost_FOUND}")
@@ -876,9 +892,9 @@ ELSE (_boost_IN_CACHE)
   IF (Boost_FOUND)
       IF (NOT Boost_FIND_QUIETLY)
         MESSAGE(STATUS "Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
-      ENDIF(NOT Boost_FIND_QUIETLY)
-      IF (NOT Boost_FIND_QUIETLY)
-        MESSAGE(STATUS "Found the following Boost libraries:")
+        if(Boost_FIND_COMPONENTS)
+          message(STATUS "Found the following Boost libraries:")
+        endif()
       ENDIF(NOT Boost_FIND_QUIETLY)
       FOREACH ( COMPONENT  ${Boost_FIND_COMPONENTS} )
         STRING( TOUPPER ${COMPONENT} UPPERCOMPONENT )
