@@ -548,7 +548,8 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         if ( this->TestModel == cmCTest::NIGHTLY )
           {
           lctime = this->GetNightlyTime(
-            this->GetCTestConfiguration("NightlyStartTime"), this->TomorrowTag);
+            this->GetCTestConfiguration("NightlyStartTime"),
+            this->TomorrowTag);
           }
         char datestring[100];
         sprintf(datestring, "%04d%02d%02d-%02d%02d",
