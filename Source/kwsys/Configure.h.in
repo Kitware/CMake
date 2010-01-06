@@ -97,6 +97,8 @@
 #  endif
 # elif __GNUC__ >= 4
 #  define @KWSYS_NAMESPACE@_EXPORT __attribute__ ((visibility("default")))
+# else
+#  define @KWSYS_NAMESPACE@_EXPORT
 # endif
 #else
 # define @KWSYS_NAMESPACE@_EXPORT
