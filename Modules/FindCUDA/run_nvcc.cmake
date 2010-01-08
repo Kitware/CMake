@@ -168,14 +168,14 @@ endif()
 cuda_execute_process(
   "Generating dependency file: ${NVCC_generated_dependency_file}"
   COMMAND "${CUDA_NVCC_EXECUTABLE}"
-  "${source_file}"
-  ${depends_CUDA_NVCC_FLAGS}
-  ${nvcc_flags}
-  ${CCBIN}
-  ${nvcc_host_compiler_flags}
-  -DNVCC
   -M
+  "${source_file}"
   -o "${NVCC_generated_dependency_file}"
+  ${CCBIN}
+  ${nvcc_flags}
+  ${nvcc_host_compiler_flags}
+  ${depends_CUDA_NVCC_FLAGS}
+  -DNVCC
   ${CUDA_NVCC_INCLUDE_ARGS}
   )
 
@@ -223,12 +223,12 @@ cuda_execute_process(
   "Generating ${generated_file}"
   COMMAND "${CUDA_NVCC_EXECUTABLE}"
   "${source_file}"
-  ${CUDA_NVCC_FLAGS}
-  ${nvcc_flags}
-  ${CCBIN}
-  ${nvcc_host_compiler_flags}
-  -DNVCC
   ${format_flag} -o "${generated_file}"
+  ${CCBIN}
+  ${nvcc_flags}
+  ${nvcc_host_compiler_flags}
+  ${CUDA_NVCC_FLAGS}
+  -DNVCC
   ${CUDA_NVCC_INCLUDE_ARGS}
   )
 
