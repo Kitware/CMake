@@ -1875,9 +1875,8 @@ static int kwsysProcessSetupOutputPipeFile(int* p, const char* name)
   /* Close the existing descriptor.  */
   kwsysProcessCleanupDescriptor(p);
 
-  /* Open a file for the pipe to write (permissions 644).  */
-  if((fout = open(name, O_WRONLY | O_CREAT | O_TRUNC,
-                  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
+  /* Open a file for the pipe to write.  */
+  if((fout = open(name, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
     {
     return 0;
     }

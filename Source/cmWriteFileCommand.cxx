@@ -60,9 +60,7 @@ bool cmWriteFileCommand
 #elif defined( __BORLANDC__ )
     S_IRUSR | S_IWUSR
 #else
-    S_IRUSR | S_IWUSR |
-    S_IRGRP |
-    S_IROTH
+    0666
 #endif
     ;
 
@@ -73,7 +71,7 @@ bool cmWriteFileCommand
 #if defined( _MSC_VER ) || defined( __MINGW32__ )
       S_IREAD | S_IWRITE
 #else
-      S_IRUSR | S_IWUSR
+      0666
 #endif
     );
     }
