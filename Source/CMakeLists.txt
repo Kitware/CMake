@@ -425,12 +425,12 @@ SET(CPACK_SRCS
   CPack/cmCPackZIPGenerator.cxx
   )
 
-IF(WIN32 AND UNIX)
+IF(CYGWIN)
   SET(CPACK_SRCS ${CPACK_SRCS}
     CPack/cmCPackCygwinBinaryGenerator.cxx
     CPack/cmCPackCygwinSourceGenerator.cxx
     )
-ENDIF(WIN32 AND UNIX)
+ENDIF(CYGWIN)
   
 IF(UNIX)
   SET(CPACK_SRCS ${CPACK_SRCS}

@@ -20,9 +20,9 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-IF(WIN32 AND UNIX)
+IF(CYGWIN)
   FIND_PROGRAM(TCL_TCLSH NAMES cygtclsh83 cygtclsh80)
-ENDIF(WIN32 AND UNIX)
+ENDIF(CYGWIN)
 
 GET_FILENAME_COMPONENT(TK_WISH_PATH "${TK_WISH}" PATH)
 GET_FILENAME_COMPONENT(TK_WISH_PATH_PARENT "${TK_WISH_PATH}" PATH)
