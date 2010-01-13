@@ -34,6 +34,10 @@ macro(__linux_compiler_intel lang)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-fPIC")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
 
+  # We pass this for historical reasons.  Projects may have
+  # executables that use dlopen but do not set ENABLE_EXPORTS.
+  set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-rdynamic")
+
   if(XIAR)
     # INTERPROCEDURAL_OPTIMIZATION
     set(CMAKE_${lang}_COMPILE_OPTIONS_IPO -ipo)
