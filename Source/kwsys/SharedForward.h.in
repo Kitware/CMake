@@ -246,12 +246,14 @@ static const char kwsys_shared_forward_path_slash[2] = {KWSYS_SHARED_FORWARD_PAT
 #  define KWSYS_SHARED_FORWARD_LDPATH "LD_LIBRARY64_PATH"
 # endif
 
+/* Cygwin */
+#elif defined(__CYGWIN__)
+# define KWSYS_SHARED_FORWARD_LDD "cygcheck" /* TODO: cygwin 1.7 has ldd */
+# define KWSYS_SHARED_FORWARD_LDD_N 1
+# define KWSYS_SHARED_FORWARD_LDPATH "PATH"
+
 /* Windows */
 #elif defined(_WIN32)
-# if defined(__CYGWIN__)
-#  define KWSYS_SHARED_FORWARD_LDD "cygcheck"
-#  define KWSYS_SHARED_FORWARD_LDD_N 1
-# endif
 # define KWSYS_SHARED_FORWARD_LDPATH "PATH"
 
 /* Guess on this unknown system.  */
