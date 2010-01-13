@@ -22,10 +22,6 @@
 
 #include <cmsys/RegularExpression.hxx>
 
-#if defined(_WIN32) || defined(__CYGWIN__)
-# include <windows.h>
-#endif // _WIN32
-
 const char* cmCacheManagerTypes[] =
 { "BOOL",
   "PATH",
