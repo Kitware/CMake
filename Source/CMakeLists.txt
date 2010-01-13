@@ -167,6 +167,8 @@ SET(SRCS
   cmExportFileGenerator.cxx
   cmExportInstallFileGenerator.h
   cmExportInstallFileGenerator.cxx
+  cmExtraCodeBlocksGenerator.cxx
+  cmExtraCodeBlocksGenerator.h
   cmExtraEclipseCDT4Generator.cxx
   cmExtraEclipseCDT4Generator.h
   cmFileTimeComparison.cxx
@@ -255,10 +257,6 @@ SET(SRCS
 IF(UNIX)
   SET(SRCS ${SRCS} cmGlobalKdevelopGenerator.cxx)
 ENDIF(UNIX)
-
-IF(NOT CYGWIN)
-  SET(SRCS ${SRCS} cmExtraCodeBlocksGenerator.cxx)
-ENDIF(NOT CYGWIN)
 
 # XCode only works on apple
 IF(APPLE)

@@ -82,7 +82,7 @@
 #include "cmCallVisualStudioMacro.h"
 #endif
 
-#if !defined(__CYGWIN__) && !defined(CMAKE_BOOT_MINGW)
+#if !defined(CMAKE_BOOT_MINGW)
 # include "cmExtraCodeBlocksGenerator.h"
 #endif
 
@@ -1653,10 +1653,8 @@ void cmake::AddDefaultExtraGenerators()
   // e.g. kdevelop4 ?
 #endif
 
-#if !defined(__CYGWIN__)
   this->AddExtraGenerator(cmExtraCodeBlocksGenerator::GetActualName(),
                           &cmExtraCodeBlocksGenerator::New);
-#endif
 
 #ifdef CMAKE_USE_ECLIPSE
   this->AddExtraGenerator(cmExtraEclipseCDT4Generator::GetActualName(),
