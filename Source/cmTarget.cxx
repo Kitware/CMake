@@ -3089,13 +3089,13 @@ void cmTarget::GetFullNameInternal(const char* config,
   outBase += configPostfix?configPostfix:"";
 
   // Name shared libraries with their version number on some platforms.
-  if(const char* version = this->GetProperty("VERSION"))
+  if(const char* soversion = this->GetProperty("SOVERSION"))
     {
     if(this->GetType() == cmTarget::SHARED_LIBRARY && !implib &&
        this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION"))
       {
       outBase += "-";
-      outBase += version;
+      outBase += soversion;
       }
     }
 
