@@ -670,6 +670,16 @@ IF (QT4_QMAKE_FOUND)
               ${QT_LIBRARY_DIR}/${QT_MODULE}.framework/Headers
               NO_DEFAULT_PATH
       )
+    # phonon doesn't seem consistent, let's try phonondefs.h for some
+    # installations
+    IF(${QT_MODULE} STREQUAL "phonon")
+      FIND_PATH(QT_${_upper_qt_module}_INCLUDE_DIR phonondefs.h
+                PATHS
+                ${QT_HEADERS_DIR}/${QT_MODULE}
+                ${QT_LIBRARY_DIR}/${QT_MODULE}.framework/Headers
+                NO_DEFAULT_PATH
+        )
+    ENDIF(${QT_MODULE} STREQUAL "phonon")
   ENDFOREACH(QT_MODULE)
 
   IF(WIN32)
