@@ -842,34 +842,22 @@ IF (QT4_QMAKE_FOUND)
     # here, this would lead to the imported Qt4-library targets not being resolved by cmake anymore.
     IF (QT_${basename}_LIBRARY_RELEASE OR QT_${basename}_LIBRARY_DEBUG)
       IF(NOT TARGET Qt4ImportedTarget__${basename})
-        ADD_LIBRARY(Qt4ImportedTarget__${basename} SHARED IMPORTED )
-
-        IF(WIN32)
-          SET(_QT4_LIBRARY_PROPERTY_NAME IMPLIB)
-        ELSE(WIN32)
-          SET(_QT4_LIBRARY_PROPERTY_NAME LOCATION)
-        ENDIF(WIN32)
-
+        ADD_LIBRARY(Qt4ImportedTarget__${basename} UNKNOWN IMPORTED )
 
         IF (QT_${basename}_LIBRARY_RELEASE)
           SET_PROPERTY(TARGET Qt4ImportedTarget__${basename} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-          SET_PROPERTY(TARGET Qt4ImportedTarget__${basename}        PROPERTY IMPORTED_${_QT4_LIBRARY_PROPERTY_NAME}_RELEASE "${QT_${basename}_LIBRARY_RELEASE}" )
+          SET_PROPERTY(TARGET Qt4ImportedTarget__${basename}        PROPERTY IMPORTED_LOCATION_RELEASE "${QT_${basename}_LIBRARY_RELEASE}" )
         ENDIF (QT_${basename}_LIBRARY_RELEASE)
 
         IF (QT_${basename}_LIBRARY_DEBUG)
           SET_PROPERTY(TARGET Qt4ImportedTarget__${basename} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-          SET_PROPERTY(TARGET Qt4ImportedTarget__${basename}        PROPERTY IMPORTED_${_QT4_LIBRARY_PROPERTY_NAME}_DEBUG "${QT_${basename}_LIBRARY_DEBUG}" )
-
-          SET_PROPERTY(TARGET Qt4ImportedTarget__${basename} PROPERTY MAP_IMPORTED_CONFIG_PROFILE   DEBUG)
-          SET_PROPERTY(TARGET Qt4ImportedTarget__${basename} PROPERTY MAP_IMPORTED_CONFIG_DEBUGFULL DEBUG)
+          SET_PROPERTY(TARGET Qt4ImportedTarget__${basename}        PROPERTY IMPORTED_LOCATION_DEBUG "${QT_${basename}_LIBRARY_DEBUG}" )
         ENDIF (QT_${basename}_LIBRARY_DEBUG)
 
         SET(QT_${basename}_LIBRARY       Qt4ImportedTarget__${basename} )
         SET(QT_${basename}_LIBRARIES     Qt4ImportedTarget__${basename} )
 
-        IF (QT_${basename}_LIBRARY)
-          SET(QT_${basename}_FOUND 1)
-        ENDIF (QT_${basename}_LIBRARY)
+        SET(QT_${basename}_FOUND 1)
 
       ENDIF(NOT TARGET Qt4ImportedTarget__${basename})
     ENDIF (QT_${basename}_LIBRARY_RELEASE OR QT_${basename}_LIBRARY_DEBUG)
