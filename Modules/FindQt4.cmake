@@ -52,6 +52,18 @@
 #                    QT_USE_PHONON
 #                    QT_USE_QTSCRIPTTOOLS
 #
+#  QT_USE_IMPORTED_TARGETS 
+#        If this variable is set to TRUE, FindQt4.cmake will create imported
+#        library targets for the various Qt libraries and set the 
+#        library variables like QT_QTCORE_LIBRARY to point at these imported
+#        targets instead of the library file on disk. This provides much better 
+#        handling of the release and debug versions of the Qt libraries and is 
+#       also always backwards compatible, except for the case that dependencies
+#       of libraries are exported, these will then also list the names of the 
+#       imported targets as dependency and not the file location on disk. This
+#       is much more flexible, but requires that FindQt4.cmake is executed before
+#       such an exported dependency file is processed.
+#
 # There are also some files that need processing by some Qt tools such as moc
 # and uic.  Listed below are macros that may be used to process those files.
 #  
@@ -836,30 +848,86 @@ IF (QT4_QMAKE_FOUND)
   #
   ############################################
 
-  MACRO (_QT4_ADJUST_LIB_VARS basename)
-    # The name of the imported targets, i.e. the prefix "Qt4ImportedTarget__" must not change,
+  # On OSX when Qt is found as framework, never use the imported targets for now, since 
+  # in this case the handling of the framework directory currently does not work correctly.
+  IF(QT_USE_FRAMEWORKS)
+    SET(QT_USE_IMPORTED_TARGETS FALSE)
+  ENDIF(QT_USE_FRAMEWORKS)
+
+
+  MACRO (_QT4_ADJUST_LIB_VARS _camelCaseBasename)
+
+    STRING(TOUPPER "${_camelCaseBasename}" basename)
+
+    # The name of the imported targets, i.e. the prefix "Qt4::" must not change,
     # since it is stored in EXPORT-files as name of a required library. If the name would change
     # here, this would lead to the imported Qt4-library targets not being resolved by cmake anymore.
     IF (QT_${basename}_LIBRARY_RELEASE OR QT_${basename}_LIBRARY_DEBUG)
-      IF(NOT TARGET Qt4ImportedTarget__${basename})
-        ADD_LIBRARY(Qt4ImportedTarget__${basename} UNKNOWN IMPORTED )
+
+      IF(NOT TARGET Qt4::${_camelCaseBasename})
+        ADD_LIBRARY(Qt4::${_camelCaseBasename} UNKNOWN IMPORTED )
 
         IF (QT_${basename}_LIBRARY_RELEASE)
-          SET_PROPERTY(TARGET Qt4ImportedTarget__${basename} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-          SET_PROPERTY(TARGET Qt4ImportedTarget__${basename}        PROPERTY IMPORTED_LOCATION_RELEASE "${QT_${basename}_LIBRARY_RELEASE}" )
+          SET_PROPERTY(TARGET Qt4::${_camelCaseBasename} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+          SET_PROPERTY(TARGET Qt4::${_camelCaseBasename}        PROPERTY IMPORTED_LOCATION_RELEASE "${QT_${basename}_LIBRARY_RELEASE}" )
         ENDIF (QT_${basename}_LIBRARY_RELEASE)
 
         IF (QT_${basename}_LIBRARY_DEBUG)
-          SET_PROPERTY(TARGET Qt4ImportedTarget__${basename} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-          SET_PROPERTY(TARGET Qt4ImportedTarget__${basename}        PROPERTY IMPORTED_LOCATION_DEBUG "${QT_${basename}_LIBRARY_DEBUG}" )
+          SET_PROPERTY(TARGET Qt4::${_camelCaseBasename} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+          SET_PROPERTY(TARGET Qt4::${_camelCaseBasename}        PROPERTY IMPORTED_LOCATION_DEBUG "${QT_${basename}_LIBRARY_DEBUG}" )
         ENDIF (QT_${basename}_LIBRARY_DEBUG)
+      ENDIF(NOT TARGET Qt4::${_camelCaseBasename})
 
-        SET(QT_${basename}_LIBRARY       Qt4ImportedTarget__${basename} )
-        SET(QT_${basename}_LIBRARIES     Qt4ImportedTarget__${basename} )
+      # If QT_USE_IMPORTED_TARGETS is enabled, the QT_QTFOO_LIBRARY variables are set to point at these
+      # imported targets. This works better in general, and is also in almost all cases fully
+      # backward compatible. The only issue is when a project A which had this enabled then exports its 
+      # libraries via export or EXPORT_LIBRARY_DEPENDENCIES(). In this case the libraries from project
+      # A will depend on the imported Qt targets, and the names of these imported targets will be stored
+      # in the dependency files on disk. This means when a project B then uses project A, these imported
+      # targets must be created again, otherwise e.g. "Qt4__QtCore" will be interpreted as name of a 
+      # library file on disk, and not as a target, and linking will fail:
+      IF(QT_USE_IMPORTED_TARGETS)
+          SET(QT_${basename}_LIBRARY       Qt4::${_camelCaseBasename} )
+          SET(QT_${basename}_LIBRARIES     Qt4::${_camelCaseBasename} )
+      ELSE(QT_USE_IMPORTED_TARGETS)
 
-        SET(QT_${basename}_FOUND 1)
+        # if the release- as well as the debug-version of the library have been found:
+        IF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
+          # if the generator supports configuration types then set
+          # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
+          IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+            SET(QT_${basename}_LIBRARY       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
+          ELSE(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+            # if there are no configuration types and CMAKE_BUILD_TYPE has no value
+            # then just use the release libraries
+            SET(QT_${basename}_LIBRARY       ${QT_${basename}_LIBRARY_RELEASE} )
+          ENDIF(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+          SET(QT_${basename}_LIBRARIES       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
+        ENDIF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
 
-      ENDIF(NOT TARGET Qt4ImportedTarget__${basename})
+        # if only the release version was found, set the debug variable also to the release version
+        IF (QT_${basename}_LIBRARY_RELEASE AND NOT QT_${basename}_LIBRARY_DEBUG)
+          SET(QT_${basename}_LIBRARY_DEBUG ${QT_${basename}_LIBRARY_RELEASE})
+          SET(QT_${basename}_LIBRARY       ${QT_${basename}_LIBRARY_RELEASE})
+          SET(QT_${basename}_LIBRARIES     ${QT_${basename}_LIBRARY_RELEASE})
+        ENDIF (QT_${basename}_LIBRARY_RELEASE AND NOT QT_${basename}_LIBRARY_DEBUG)
+
+        # if only the debug version was found, set the release variable also to the debug version
+        IF (QT_${basename}_LIBRARY_DEBUG AND NOT QT_${basename}_LIBRARY_RELEASE)
+          SET(QT_${basename}_LIBRARY_RELEASE ${QT_${basename}_LIBRARY_DEBUG})
+          SET(QT_${basename}_LIBRARY         ${QT_${basename}_LIBRARY_DEBUG})
+          SET(QT_${basename}_LIBRARIES       ${QT_${basename}_LIBRARY_DEBUG})
+        ENDIF (QT_${basename}_LIBRARY_DEBUG AND NOT QT_${basename}_LIBRARY_RELEASE)
+
+        # put the value in the cache:
+        SET(QT_${basename}_LIBRARY ${QT_${basename}_LIBRARY} CACHE STRING "The Qt ${basename} library" FORCE)
+
+      ENDIF(QT_USE_IMPORTED_TARGETS)
+
+# message(STATUS "QT_${basename}_LIBRARY: ${QT_${basename}_LIBRARY}")
+
+      SET(QT_${basename}_FOUND 1)
+
     ENDIF (QT_${basename}_LIBRARY_RELEASE OR QT_${basename}_LIBRARY_DEBUG)
 
     IF (QT_${basename}_INCLUDE_DIR)
@@ -874,39 +942,39 @@ IF (QT4_QMAKE_FOUND)
 
   # Set QT_xyz_LIBRARY variable and add 
   # library include path to QT_INCLUDES
-  _QT4_ADJUST_LIB_VARS(QTCORE)
-  _QT4_ADJUST_LIB_VARS(QTGUI)
-  _QT4_ADJUST_LIB_VARS(QT3SUPPORT)
-  _QT4_ADJUST_LIB_VARS(QTASSISTANT)
-  _QT4_ADJUST_LIB_VARS(QTASSISTANTCLIENT)
-  _QT4_ADJUST_LIB_VARS(QTCLUCENE)
-  _QT4_ADJUST_LIB_VARS(QTDBUS)
-  _QT4_ADJUST_LIB_VARS(QTDESIGNER)
-  _QT4_ADJUST_LIB_VARS(QTDESIGNERCOMPONENTS)
-  _QT4_ADJUST_LIB_VARS(QTHELP)
-  _QT4_ADJUST_LIB_VARS(QTMULTIMEDIA)
-  _QT4_ADJUST_LIB_VARS(QTNETWORK)
-  _QT4_ADJUST_LIB_VARS(QTNSPLUGIN)
-  _QT4_ADJUST_LIB_VARS(QTOPENGL)
-  _QT4_ADJUST_LIB_VARS(QTSCRIPT)
-  _QT4_ADJUST_LIB_VARS(QTSCRIPTTOOLS)
-  _QT4_ADJUST_LIB_VARS(QTSQL)
-  _QT4_ADJUST_LIB_VARS(QTSVG)
-  _QT4_ADJUST_LIB_VARS(QTTEST)
-  _QT4_ADJUST_LIB_VARS(QTUITOOLS)
-  _QT4_ADJUST_LIB_VARS(QTWEBKIT)
-  _QT4_ADJUST_LIB_VARS(QTXML)
-  _QT4_ADJUST_LIB_VARS(QTXMLPATTERNS)
-  _QT4_ADJUST_LIB_VARS(PHONON)
+  _QT4_ADJUST_LIB_VARS(QtCore)
+  _QT4_ADJUST_LIB_VARS(QtGui)
+  _QT4_ADJUST_LIB_VARS(Qt3Support)
+  _QT4_ADJUST_LIB_VARS(QtAssistant)
+  _QT4_ADJUST_LIB_VARS(QtAssistantClient)
+  _QT4_ADJUST_LIB_VARS(QtCLucene)
+  _QT4_ADJUST_LIB_VARS(QtDBus)
+  _QT4_ADJUST_LIB_VARS(QtDesigner)
+  _QT4_ADJUST_LIB_VARS(QtDesignerComponents)
+  _QT4_ADJUST_LIB_VARS(QtHelp)
+  _QT4_ADJUST_LIB_VARS(QtMultimedia)
+  _QT4_ADJUST_LIB_VARS(QtNetwork)
+  _QT4_ADJUST_LIB_VARS(QtNsPlugin)
+  _QT4_ADJUST_LIB_VARS(QtOpenGL)
+  _QT4_ADJUST_LIB_VARS(QtScript)
+  _QT4_ADJUST_LIB_VARS(QtScriptTools)
+  _QT4_ADJUST_LIB_VARS(QtSql)
+  _QT4_ADJUST_LIB_VARS(QtSvg)
+  _QT4_ADJUST_LIB_VARS(QtTest)
+  _QT4_ADJUST_LIB_VARS(QtUiTools)
+  _QT4_ADJUST_LIB_VARS(QtWebKit)
+  _QT4_ADJUST_LIB_VARS(QtXml)
+  _QT4_ADJUST_LIB_VARS(QtXmlPatterns)
+  _QT4_ADJUST_LIB_VARS(phonon)
 
   # platform dependent libraries
   IF(Q_WS_X11)
-    _QT4_ADJUST_LIB_VARS(QTMOTIF)
+    _QT4_ADJUST_LIB_VARS(QtMotif)
   ENDIF(Q_WS_X11)
   IF(WIN32)
-    _QT4_ADJUST_LIB_VARS(QTMAIN)
-    _QT4_ADJUST_LIB_VARS(QAXSERVER)
-    _QT4_ADJUST_LIB_VARS(QAXCONTAINER)
+    _QT4_ADJUST_LIB_VARS(qtmain)
+    _QT4_ADJUST_LIB_VARS(QAxServer)
+    _QT4_ADJUST_LIB_VARS(QAxContainer)
   ENDIF(WIN32)
 
   # If Qt is installed as a framework, we need to add QT_QTCORE_LIBRARY here (which
