@@ -18,7 +18,6 @@ if(__CYGWIN_COMPILER_GNU)
 endif()
 set(__CYGWIN_COMPILER_GNU 1)
 
-set(CMAKE_DL_LIBS "-lgdi32" )
 set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--enable-auto-import")
 set(CMAKE_CREATE_WIN32_EXE  "-mwindows")
 
