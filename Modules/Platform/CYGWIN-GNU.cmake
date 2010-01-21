@@ -18,6 +18,7 @@ if(__CYGWIN_COMPILER_GNU)
 endif()
 set(__CYGWIN_COMPILER_GNU 1)
 
+# TODO: Is -Wl,--enable-auto-import now always default?
 set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--enable-auto-import")
 set(CMAKE_CREATE_WIN32_EXE  "-mwindows")
 
@@ -44,7 +45,7 @@ macro(__cygwin_compiler_gnu lang)
     SET(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-Bdynamic")
   ENDFOREACH(type)
 
-  # To simulate UNIX shared libs we export/import all DLL symbols.
-  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS} -Wl,--export-all-symbols -Wl,--enable-auto-import")
+  # TODO: Is -Wl,--enable-auto-import now always default?
+  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS} -Wl,--enable-auto-import")
   set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS}")
 endmacro()
