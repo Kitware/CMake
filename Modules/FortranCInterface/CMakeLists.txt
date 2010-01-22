@@ -56,6 +56,7 @@ list(REMOVE_DUPLICATES module_symbols)
 # Note that some compiler manglings cannot be invoked from C:
 #   MIPSpro uses "MY_SUB.in.MY_MODULE"
 #   SunPro uses "my_module.my_sub_"
+#   PathScale uses "MY_SUB.in.MY_MODULE"
 
 # Add module symbols only with Fortran90.
 if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
