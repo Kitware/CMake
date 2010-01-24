@@ -545,7 +545,6 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
 {
   std::string makefileName = makefile->GetStartOutputDirectory();
   makefileName += "/Makefile";
-  makefileName = cmSystemTools::ConvertToOutputPath(makefileName.c_str());
 
   fout<<"      <Target title=\"" << targetName << "\">\n";
   if (target!=0)
@@ -696,22 +695,27 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
   std::string command = make;
   if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)
     {
+    std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += " /NOLOGO /f &quot;";
-    command += makefile;
+    command += makefileName;
     command += "&quot; ";
     command += target;
     }
   else if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
     {
-    command += " -f ";
-    command += makefile;
-    command += " ";
+    // no escaping of spaces in this case, see 
+    // http://public.kitware.com/Bug/view.php?id=10014
+    std::string makefileName = makefile; 
+    command += " -f &quot;";
+    command += makefileName;
+    command += "&quot; ";
     command += target;
     }
   else
     {
+    std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += " -f &quot;";
-    command += makefile;
+    command += makefileName;
     command += "&quot; ";
     command += target;
     }
