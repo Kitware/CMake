@@ -181,7 +181,6 @@ SET(RUBY_INCLUDE_DIRS ${RUBY_INCLUDE_DIR} )
 
 # if ruby > 1.8 is required or if ruby > 1.8 was found, search for the config.h dir
 IF( ${Ruby_FIND_VERSION_SHORT_NODOT} GREATER 18  OR  ${_RUBY_VERSION_SHORT_NODOT} GREATER 18  OR  RUBY_HDR_DIR)
-   message(STATUS "lookign for config.h")
    FIND_PATH(RUBY_CONFIG_INCLUDE_DIR
      NAMES ruby/config.h  config.h
      HINTS 
