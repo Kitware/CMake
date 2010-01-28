@@ -44,10 +44,6 @@
 
 #include <curl/mprintf.h>
 
-#ifndef SIZEOF_LONG_DOUBLE
-#define SIZEOF_LONG_DOUBLE 0
-#endif
-
 #ifndef SIZEOF_SIZE_T
 /* default to 4 bytes for size_t unless defined in the config.h */
 #define SIZEOF_SIZE_T 4

@@ -201,15 +201,6 @@ int cmCTestUpdateHandler::ProcessHandler()
     this->StartLogFile("Update", ofs);
     }
 
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
-    "Updating the repository" << std::endl);
-
-  // Make sure the source directory exists.
-  if(!this->InitialCheckout(ofs))
-    {
-    return -1;
-    }
-
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Updating the repository: "
     << sourceDirectory << std::endl);
 
@@ -267,7 +258,8 @@ int cmCTestUpdateHandler::ProcessHandler()
     << this->CTest->GetTestModelString() << "</BuildStamp>" << std::endl;
   os << "\t<StartDateTime>" << start_time << "</StartDateTime>\n"
     << "\t<StartTime>" << start_time_time << "</StartTime>\n"
-    << "\t<UpdateCommand>" << cmXMLSafe(vc->GetUpdateCommandLine())
+    << "\t<UpdateCommand>"
+     << cmXMLSafe(vc->GetUpdateCommandLine()).Quotes(false)
     << "</UpdateCommand>\n"
     << "\t<UpdateType>" << cmXMLSafe(
       cmCTestUpdateHandlerUpdateToString(this->UpdateType))
@@ -320,32 +312,6 @@ int cmCTestUpdateHandler::ProcessHandler()
   os << "</UpdateReturnStatus>" << std::endl;
   os << "</Update>" << std::endl;
   return numUpdated;
-}
-
-//----------------------------------------------------------------------
-bool cmCTestUpdateHandler::InitialCheckout(std::ostream& ofs)
-{
-  // Use the user-provided command to create the source tree.
-  if(const char* command = this->GetOption("InitialCheckout"))
-    {
-    // Use a generic VC object to run and log the command.
-    cmCTestVC vc(this->CTest, ofs);
-    vc.SetSourceDirectory(this->GetOption("SourceDirectory"));
-    if(!vc.InitialCheckout(command))
-      {
-      return false;
-      }
-
-    if(!this->CTest->InitializeFromCommand(this->Command))
-      {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
-                 " Fatal Error in initialize: "
-                 << std::endl);
-      cmSystemTools::SetFatalErrorOccured();
-      return false;
-      }
-    }
-  return true;
 }
 
 //----------------------------------------------------------------------

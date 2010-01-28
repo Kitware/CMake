@@ -60,6 +60,7 @@ protected:
   virtual void LoadModifications() = 0;
   virtual void LoadRevisions() = 0;
 
+  virtual void WriteXMLGlobal(std::ostream& xml);
   void WriteXMLDirectory(std::ostream& xml, std::string const& path,
                          Directory const& dir);
 };

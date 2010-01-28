@@ -1,4 +1,4 @@
-# - find DCMTK libraries
+# - find DCMTK libraries and applications
 #
 
 #  DCMTK_INCLUDE_DIR   - Directories to include to use DCMTK
@@ -9,10 +9,11 @@
 # DCMTK_DIR can be used to make it simpler to find the various include
 # directories and compiled libraries if you've just compiled it in the
 # source tree. Just set it to the root of the tree where you extracted
-# the source.
+# the source (default to /usr/include/dcmtk/)
 
 #=============================================================================
 # Copyright 2004-2009 Kitware, Inc.
+# Copyright 2009 Mathieu Malaterre <mathieu.malaterre@gmail.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -26,14 +27,26 @@
 
 #
 # Written for VXL by Amitha Perera.
+# Upgraded for GDCM by Mathieu Malaterre.
 # 
 
+IF( NOT DCMTK_FOUND )
+  SET( DCMTK_DIR "/usr/include/dcmtk/"
+    CACHE PATH "Root of DCMTK source tree (optional)." )
+  MARK_AS_ADVANCED( DCMTK_DIR )
+ENDIF( NOT DCMTK_FOUND )
+
+
 FIND_PATH( DCMTK_config_INCLUDE_DIR osconfig.h
-  ${DCMTK_DIR}/config/include ${DCMTK_DIR}/include
+  ${DCMTK_DIR}/config/include
+  ${DCMTK_DIR}/config
+  ${DCMTK_DIR}/include
 )
 
 FIND_PATH( DCMTK_ofstd_INCLUDE_DIR ofstdinc.h
-  ${DCMTK_DIR}/ofstd/include ${DCMTK_DIR}/include/ofstd
+  ${DCMTK_DIR}/ofstd/include
+  ${DCMTK_DIR}/ofstd
+  ${DCMTK_DIR}/include/ofstd
 )
 
 FIND_LIBRARY( DCMTK_ofstd_LIBRARY ofstd
@@ -47,8 +60,9 @@ FIND_LIBRARY( DCMTK_ofstd_LIBRARY ofstd
 
 
 FIND_PATH( DCMTK_dcmdata_INCLUDE_DIR dctypes.h
-  ${DCMTK_DIR}/dcmdata/include
   ${DCMTK_DIR}/include/dcmdata
+  ${DCMTK_DIR}/dcmdata
+  ${DCMTK_DIR}/dcmdata/include
 )
 
 FIND_LIBRARY( DCMTK_dcmdata_LIBRARY dcmdata
@@ -63,6 +77,7 @@ FIND_LIBRARY( DCMTK_dcmdata_LIBRARY dcmdata
 
 FIND_PATH( DCMTK_dcmimgle_INCLUDE_DIR dcmimage.h
   ${DCMTK_DIR}/dcmimgle/include
+  ${DCMTK_DIR}/dcmimgle
   ${DCMTK_DIR}/include/dcmimgle
 )
 
@@ -75,17 +90,18 @@ FIND_LIBRARY( DCMTK_dcmimgle_LIBRARY dcmimgle
   ${DCMTK_DIR}/lib
 )
 
+# MM: I could not find this library on debian system / dcmtk 3.5.4
 FIND_LIBRARY(DCMTK_imagedb_LIBRARY imagedb 
-${DCMTK_DIR}/imagectn/libsrc/Release
-${DCMTK_DIR}/imagectn/libsrc/
-${DCMTK_DIR}/imagectn/libsrc/Debug
-)
+  ${DCMTK_DIR}/imagectn/libsrc/Release
+  ${DCMTK_DIR}/imagectn/libsrc/
+  ${DCMTK_DIR}/imagectn/libsrc/Debug
+  )
 
 FIND_LIBRARY(DCMTK_dcmnet_LIBRARY dcmnet 
-${DCMTK_DIR}/dcmnet/libsrc/Release
-${DCMTK_DIR}/dcmnet/libsrc/Debug
-${DCMTK_DIR}/dcmnet/libsrc/
-)
+  ${DCMTK_DIR}/dcmnet/libsrc/Release
+  ${DCMTK_DIR}/dcmnet/libsrc/Debug
+  ${DCMTK_DIR}/dcmnet/libsrc/
+  )
 
 
 IF( DCMTK_config_INCLUDE_DIR 
@@ -137,7 +153,30 @@ ENDIF( DCMTK_config_INCLUDE_DIR
     AND DCMTK_dcmimgle_INCLUDE_DIR
     AND DCMTK_dcmimgle_LIBRARY )
 
-IF( NOT DCMTK_FOUND )
-  SET( DCMTK_DIR "" CACHE PATH "Root of DCMTK source tree (optional)." )
-  MARK_AS_ADVANCED( DCMTK_DIR )
-ENDIF( NOT DCMTK_FOUND )
+FIND_PROGRAM(DCMTK_DCMDUMP_EXECUTABLE dcmdump
+  ${DCMTK_DIR}/bin
+  )
+
+FIND_PROGRAM(DCMTK_DCMDJPEG_EXECUTABLE dcmdjpeg
+  ${DCMTK_DIR}/bin
+  )
+
+FIND_PROGRAM(DCMTK_DCMDRLE_EXECUTABLE dcmdrle
+  ${DCMTK_DIR}/bin
+  )
+
+MARK_AS_ADVANCED(
+  DCMTK_DCMDUMP_EXECUTABLE
+  DCMTK_DCMDJPEG_EXECUTABLE
+  DCMTK_DCMDRLE_EXECUTABLE
+  DCMTK_config_INCLUDE_DIR
+  DCMTK_dcmdata_INCLUDE_DIR
+  DCMTK_dcmdata_LIBRARY
+  DCMTK_dcmimgle_INCLUDE_DIR
+  DCMTK_dcmimgle_LIBRARY
+  DCMTK_imagedb_LIBRARY 
+  DCMTK_dcmnet_LIBRARY
+  DCMTK_ofstd_INCLUDE_DIR
+  DCMTK_ofstd_LIBRARY
+  )
+

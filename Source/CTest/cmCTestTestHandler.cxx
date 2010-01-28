@@ -500,11 +500,16 @@ int cmCTestTestHandler::ProcessHandler()
 {
   // Update internal data structure from generic one
   this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
-  this->SetUseUnion(cmSystemTools::IsOn(this->GetOption("UseUnion"))); 
+  this->SetUseUnion(cmSystemTools::IsOn(this->GetOption("UseUnion")));
+  if(cmSystemTools::IsOn(this->GetOption("ScheduleRandom")))
+    {
+    this->CTest->SetScheduleType("Random");
+    }
   if(this->GetOption("ParallelLevel"))
     {
     this->CTest->SetParallelLevel(atoi(this->GetOption("ParallelLevel")));
     }
+
   const char* val;
   val = this->GetOption("LabelRegularExpression");
   if ( val )
@@ -684,13 +689,12 @@ void cmCTestTestHandler::PrintLabelSummary()
         }
       }
     }
-  it = this->TestList.begin();
   ri = this->TestResults.begin();
   // fill maps
-  for(; it != this->TestList.end(); ++it, ++ri)
+  for(; ri != this->TestResults.end(); ++ri)
     {
-    cmCTestTestProperties& p = *it;
-    cmCTestTestResult &result = *ri;
+    cmCTestTestResult &result = *ri; 
+    cmCTestTestProperties& p = *result.Properties;
     if(p.Labels.size() != 0)
       {
       for(std::vector<std::string>::iterator l = p.Labels.begin();
@@ -1030,11 +1034,27 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   cmCTestMultiProcessHandler::TestMap tests;
   cmCTestMultiProcessHandler::PropertiesMap properties;
   
+  bool randomSchedule = this->CTest->GetScheduleType() == "Random";
+  if(randomSchedule)
+  {
+    srand((unsigned)time(0));
+  }
+
   for (ListOfTests::iterator it = this->TestList.begin();
        it != this->TestList.end(); ++it)
     { 
     cmCTestTestProperties& p = *it;
     cmCTestMultiProcessHandler::TestSet depends;
+
+    if(randomSchedule)
+      {
+      p.Cost = rand();
+      }
+
+    if(p.Timeout == 0 && this->CTest->GetGlobalTimeout() != 0)
+      {
+      p.Timeout = this->CTest->GetGlobalTimeout();
+      }
 
     if(p.Depends.size())
       {
@@ -1166,12 +1186,17 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
       }
     os
       << "\t\t\t<Measurement>\n"
-      << "\t\t\t\t<Value>";
+      << "\t\t\t\t<Value"
+      << (result->CompressOutput ? 
+      " encoding=\"base64\" compression=\"gzip\">"
+      : ">");
     os << cmXMLSafe(result->Output);
     os
       << "</Value>\n"
       << "\t\t\t</Measurement>\n"
       << "\t\t</Results>\n";
+
+    this->AttachFiles(os, result);
     this->WriteTestResultFooter(os, result);
     }
 
@@ -1234,6 +1259,73 @@ void cmCTestTestHandler::WriteTestResultFooter(std::ostream& os,
 }
 
 //----------------------------------------------------------------------
+void cmCTestTestHandler::AttachFiles(std::ostream& os,
+                                     cmCTestTestResult* result)
+{
+  if(result->Status != cmCTestTestHandler::COMPLETED
+     && result->Properties->AttachOnFail.size())
+    {
+    result->Properties->AttachedFiles.insert(
+      result->Properties->AttachedFiles.end(),
+      result->Properties->AttachOnFail.begin(),
+      result->Properties->AttachOnFail.end());
+    }
+  for(std::vector<std::string>::const_iterator file = 
+      result->Properties->AttachedFiles.begin();
+      file != result->Properties->AttachedFiles.end(); ++file)
+    {
+    std::string base64 = this->EncodeFile(*file);
+    std::string fname = cmSystemTools::GetFilenameName(*file);
+    os << "\t\t<NamedMeasurement name=\"Attached File\" encoding=\"base64\" "
+      "compression=\"tar/gzip\" filename=\"" << fname << "\" type=\"file\">"
+      "\n\t\t\t<Value>\n\t\t\t"
+      << base64
+      << "\n\t\t\t</Value>\n\t\t</NamedMeasurement>\n";
+    }
+}
+
+//----------------------------------------------------------------------
+std::string cmCTestTestHandler::EncodeFile(std::string file)
+{
+  std::string tarFile = file + "_temp.tar.gz";
+  std::vector<cmStdString> files;
+  files.push_back(file);
+
+  if(!cmSystemTools::CreateTar(tarFile.c_str(), files, true, false))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error creating tar while "
+      "attaching file: " << file << std::endl);
+    return "";
+    }
+  long len = cmSystemTools::FileLength(tarFile.c_str());
+  std::ifstream ifs(tarFile.c_str(), std::ios::in
+#ifdef _WIN32
+    | std::ios::binary
+#endif
+    );
+  unsigned char *file_buffer = new unsigned char [ len + 1 ];
+  ifs.read(reinterpret_cast<char*>(file_buffer), len);
+  ifs.close();
+  cmSystemTools::RemoveFile(tarFile.c_str());
+
+  unsigned char *encoded_buffer
+    = new unsigned char [ static_cast<int>(len * 1.5 + 5) ];
+
+  unsigned long rlen
+    = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
+  
+  std::string base64 = "";
+  for(unsigned long i = 0; i < rlen; i++)
+    {
+    base64 += encoded_buffer[i];
+    }
+  delete [] file_buffer;
+  delete [] encoded_buffer;
+
+  return base64;
+}
+
+//----------------------------------------------------------------------
 int cmCTestTestHandler::ExecuteCommands(std::vector<cmStdString>& vec)
 {
   std::vector<cmStdString>::iterator it;
@@ -1274,7 +1366,7 @@ void cmCTestTestHandler
                     std::vector<std::string> &attemptedConfigs,
                     std::string filepath,
                     std::string &filename)
-{   
+{
   std::string tempPath;
 
   if (filepath.size() && 
@@ -1985,6 +2077,28 @@ bool cmCTestTestHandler::SetTestsProperties(
             {
             rtit->WillFail = cmSystemTools::IsOn(val.c_str());
             }
+          if ( key == "ATTACHED_FILES" )
+            {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+
+            for(std::vector<std::string>::iterator f = lval.begin();
+                f != lval.end(); ++f)
+              {
+              rtit->AttachedFiles.push_back(*f);
+              }
+            }
+          if ( key == "ATTACHED_FILES_ON_FAIL" )
+            {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+
+            for(std::vector<std::string>::iterator f = lval.begin();
+                f != lval.end(); ++f)
+              {
+              rtit->AttachOnFail.push_back(*f);
+              }
+            }
           if ( key == "TIMEOUT" )
             {
             rtit->Timeout = atof(val.c_str());
@@ -1992,6 +2106,17 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "COST" )
             {
             rtit->Cost = static_cast<float>(atof(val.c_str()));
+            }
+          if ( key == "REQUIRED_FILES" )
+            {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+
+            for(std::vector<std::string>::iterator f = lval.begin();
+                f != lval.end(); ++f)
+              {
+              rtit->RequiredFiles.push_back(*f);
+              }
             }
           if ( key == "RUN_SERIAL" )
             {
@@ -2088,6 +2213,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
 {
   const std::string& testname = args[0];
   cmCTestLog(this->CTest, DEBUG, "Add test: " << args[0] << std::endl);
+
   if (this->UseExcludeRegExpFlag &&
     this->UseExcludeRegExpFirst &&
     this->ExcludeTestsRegularExpression.find(testname.c_str()))

@@ -20,11 +20,24 @@ MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 # Allow empty endif() and such with CMake 2.4.
 SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 1)
 
+SET(CMake_BIN_DIR ${CMake_BINARY_DIR}/bin)
+
 IF(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
   # Since the built CMake will install itself instead of the
   # generating CMake, tell it that the install rules were generated
   # by CMake 2.4.
   INSTALL(CODE "SET(CMAKE_INSTALL_SELF_2_4 1)")
+ENDIF()
+
+IF("${CMake_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
+  # Disallow architecture-specific try_run.  It may not run on the host.
+  MACRO(TRY_RUN)
+    IF(CMAKE_TRY_COMPILE_OSX_ARCHITECTURES)
+      MESSAGE(FATAL_ERROR "TRY_RUN not allowed with CMAKE_TRY_COMPILE_OSX_ARCHITECTURES=[${CMAKE_TRY_COMPILE_OSX_ARCHITECTURES}]")
+    ELSE()
+      _TRY_RUN(${ARGV})
+    ENDIF()
+  ENDMACRO()
 ENDIF()
 
 #-----------------------------------------------------------------------
@@ -139,9 +152,9 @@ MACRO(CMAKE_SETUP_TESTING)
     # the ctest from this cmake is used for testing
     # and not the ctest from the cmake building and testing
     # cmake.
-    SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
-    SET(CMAKE_CMAKE_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cmake")
-    SET(CMAKE_CPACK_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cpack")
+    SET(CMAKE_CTEST_COMMAND "${CMake_BIN_DIR}/ctest")
+    SET(CMAKE_CMAKE_COMMAND "${CMake_BIN_DIR}/cmake")
+    SET(CMAKE_CPACK_COMMAND "${CMake_BIN_DIR}/cpack")
   ENDIF(BUILD_TESTING)
 
   # configure some files for testing
@@ -183,7 +196,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   SET(KWSYS_USE_CommandLineArguments 1)
   SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
   SET(KWSYS_INSTALL_DOC_DIR "${CMake_DOC_DEST}")
-  SUBDIRS(Source/kwsys)
+  ADD_SUBDIRECTORY(Source/kwsys)
   
   #---------------------------------------------------------------------
   # Setup third-party libraries.
@@ -212,7 +225,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   ELSE(CMAKE_USE_SYSTEM_ZLIB)
     SET(CMAKE_ZLIB_INCLUDES)
     SET(CMAKE_ZLIB_LIBRARIES cmzlib)
-    SUBDIRS(Utilities/cmzlib)
+    ADD_SUBDIRECTORY(Utilities/cmzlib)
   ENDIF(CMAKE_USE_SYSTEM_ZLIB)
   
   #---------------------------------------------------------------------
@@ -235,7 +248,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     ENDIF(NOT CMAKE_BUILD_CURL_SHARED)
     SET(CMAKE_CURL_INCLUDES)
     SET(CMAKE_CURL_LIBRARIES cmcurl)
-    SUBDIRS(Utilities/cmcurl)
+    ADD_SUBDIRECTORY(Utilities/cmcurl)
   ENDIF(CMAKE_USE_SYSTEM_CURL)
 
   #---------------------------------------------------------------------
@@ -252,7 +265,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   SET(CMAKE_COMPRESS_INCLUDES 
     "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmcompress")
   SET(CMAKE_COMPRESS_LIBRARIES "cmcompress")
-  SUBDIRS(Utilities/cmcompress)
+  ADD_SUBDIRECTORY(Utilities/cmcompress)
   
   #---------------------------------------------------------------------
   # Build expat library for CMake and CTest.
@@ -267,7 +280,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   ELSE(CMAKE_USE_SYSTEM_EXPAT)
     SET(CMAKE_EXPAT_INCLUDES)
     SET(CMAKE_EXPAT_LIBRARIES cmexpat)
-    SUBDIRS(Utilities/cmexpat)
+    ADD_SUBDIRECTORY(Utilities/cmexpat)
   ENDIF(CMAKE_USE_SYSTEM_EXPAT)
   
   #---------------------------------------------------------------------
@@ -302,7 +315,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     SET(BUILD_CursesDialog 0)
   ENDIF (UNIX)
   IF(BUILD_CursesDialog)
-    SUBDIRS(Source/CursesDialog/form)
+    ADD_SUBDIRECTORY(Source/CursesDialog/form)
   ENDIF(BUILD_CursesDialog)
 ENDMACRO (CMAKE_BUILD_UTILITIES)
 
@@ -315,8 +328,8 @@ ENDMACRO (CMAKE_BUILD_UTILITIES)
 # The CMake version number.
 SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 8)
-SET(CMake_VERSION_PATCH 0)
-#SET(CMake_VERSION_RC 8)
+SET(CMake_VERSION_PATCH 1)
+SET(CMake_VERSION_RC 1)
 
 # We use odd minor numbers for development versions.
 # Use a date for the development patch level.
@@ -334,13 +347,15 @@ SET(CMake_VERSION_FULL "${CMake_VERSION}.${CMake_VERSION_PATCH}")
 ENABLE_TESTING()
 INCLUDE (${CMAKE_ROOT}/Modules/Dart.cmake)
 
+# Set up test-time configuration.
+SET_DIRECTORY_PROPERTIES(PROPERTIES
+  TEST_INCLUDE_FILE "${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake")
+
 # where to write the resulting executables and libraries
 SET(BUILD_SHARED_LIBS OFF)
-SET(EXECUTABLE_OUTPUT_PATH ${CMake_BINARY_DIR}/bin CACHE INTERNAL 
-  "Where to put the executables for CMake")
+SET(EXECUTABLE_OUTPUT_PATH "" CACHE INTERNAL "No configurable exe dir.")
 SET(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL 
   "Where to put the libraries for CMake")
-INCLUDE_REGULAR_EXPRESSION("^.*$")
 
 # The CMake executables usually do not need any rpath to run in the build or
 # install tree.
@@ -355,6 +370,10 @@ SET(CMAKE_MAN_DIR "/man" CACHE STRING
 MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
 STRING(REGEX REPLACE "^/" "" CMake_DATA_DEST "${CMAKE_DATA_DIR}")
 STRING(REGEX REPLACE "^/" "" CMake_DOC_DEST "${CMAKE_DOC_DIR}")
+
+IF(BUILD_TESTING)
+  INCLUDE(${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake)
+ENDIF()
 
 # include special compile flags for some compilers
 INCLUDE(CompileFlags.cmake)
@@ -442,9 +461,9 @@ MARK_AS_ADVANCED(CMAKE_STRICT)
 
 
 # build the remaining subdirectories
-SUBDIRS(Source)
-SUBDIRS(Utilities)
-SUBDIRS(Tests)
+ADD_SUBDIRECTORY(Source)
+ADD_SUBDIRECTORY(Utilities)
+ADD_SUBDIRECTORY(Tests)
 
 # add a test
 ADD_TEST(SystemInformationNew "${CMAKE_CMAKE_COMMAND}" 
@@ -470,3 +489,10 @@ INSTALL(
 #-----------------------------------------------------------------------
 # End of the main section of the CMakeLists file
 #-----------------------------------------------------------------------
+
+# As a special case when building CMake itself, CMake 2.8.0 and below
+# look up EXECUTABLE_OUTPUT_PATH in the top-level CMakeLists.txt file
+# to compute the location of the "cmake" executable.  We set it here
+# so that those CMake versions can find it.  We wait until after all
+# the add_subdirectory() calls to avoid affecting the subdirectories.
+SET(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})

@@ -23,7 +23,7 @@ class cmCTestStartCommand : public cmCTestCommand
 {
 public:
 
-  cmCTestStartCommand() {}
+  cmCTestStartCommand();
 
   /**
    * This is a virtual constructor for the command.
@@ -33,6 +33,7 @@ public:
     cmCTestStartCommand* ni = new cmCTestStartCommand;
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
+    ni->CreateNewTag = this->CreateNewTag;
     return ni;
     }
 
@@ -42,6 +43,14 @@ public:
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
+
+  /**
+   * Will this invocation of ctest_start create a new TAG file?
+   */
+  bool ShouldCreateNewTag()
+    {
+    return this->CreateNewTag;
+    }
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -62,16 +71,21 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_start(Model [TRACK <track>] [source [binary]])\n"
+      "  ctest_start(Model [TRACK <track>] [APPEND] [source [binary]])\n"
       "Starts the testing for a given model. The command should be called "
       "after the binary directory is initialized. If the 'source' and "
       "'binary' directory are not specified, it reads the "
       "CTEST_SOURCE_DIRECTORY and CTEST_BINARY_DIRECTORY. If the track is "
-      "specified, the submissions will go to the specified track.";
+      "specified, the submissions will go to the specified track. "
+      "If APPEND is used, the existing TAG is used rather than "
+      "creating a new one based on the current time stamp.";
     }
 
   cmTypeMacro(cmCTestStartCommand, cmCTestCommand);
 
+private:
+  bool InitialCheckout(std::ostream& ofs, std::string const& sourceDir);
+  bool CreateNewTag;
 };
 
 

@@ -45,3 +45,7 @@ CTEST_COVERAGE(BUILD "${CTEST_BINARY_DIRECTORY}" @ctest_coverage_labels_args@ RE
 # ok to call ctest_submit - still avoids network activity because there is
 # not a valid drop location given above...
 CTEST_SUBMIT(RETURN_VALUE res)
+
+# Add coverage for the new APPEND arg to ctest_start:
+#
+CTEST_START(Experimental APPEND)

@@ -84,7 +84,10 @@ public:
     cmStdString Name;
     cmStdString Directory;
     std::vector<std::string> Args;
+    std::vector<std::string> RequiredFiles;
     std::vector<std::string> Depends;
+    std::vector<std::string> AttachedFiles;
+    std::vector<std::string> AttachOnFail;
     std::vector<std::pair<cmsys::RegularExpression,
                           std::string> > ErrorRegularExpressions;
     std::vector<std::pair<cmsys::RegularExpression,
@@ -111,6 +114,7 @@ public:
     double      ExecutionTime;
     int         ReturnValue;
     int         Status;
+    bool        CompressOutput;
     std::string CompletionStatus;
     std::string Output;
     std::string RegressionImages;
@@ -142,6 +146,10 @@ protected:
 
   void WriteTestResultHeader(std::ostream& os, cmCTestTestResult* result);
   void WriteTestResultFooter(std::ostream& os, cmCTestTestResult* result);
+  // Write attached test files into the xml
+  void AttachFiles(std::ostream& os, cmCTestTestResult* result);
+  // Helper function to encode attached test files
+  std::string EncodeFile(std::string file);
 
   //! Clean test output to specified length
   bool CleanTestOutput(std::string& output, size_t length);

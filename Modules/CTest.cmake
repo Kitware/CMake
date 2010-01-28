@@ -1,13 +1,49 @@
 # - Configure a project for testing with CTest/CDash
-# This file configures a project to use the CTest/CDash/Dart
-# testing/dashboard process.  This module should be included
-# in the CMakeLists.txt file at the top of a project.  Typical usage:
-#  INCLUDE(CTest)
-#  IF(BUILD_TESTING)
-#    # ... testing related CMake code ...
-#  ENDIF(BUILD_TESTING)
-# The BUILD_TESTING option is created by the CTest module to determine
-# whether testing support should be enabled.  The default is ON.
+# Include this module in the top CMakeLists.txt file of a project to
+# enable testing with CTest and dashboard submissions to CDash:
+#   project(MyProject)
+#   ...
+#   include(CTest)
+# The module automatically creates a BUILD_TESTING option that selects
+# whether to enable testing support (ON by default).  After including
+# the module, use code like
+#   if(BUILD_TESTING)
+#     # ... CMake code to create tests ...
+#   endif()
+# to creating tests when testing is enabled.
+#
+# To enable submissions to a CDash server, create a CTestConfig.cmake
+# file at the top of the project with content such as
+#   set(CTEST_PROJECT_NAME "MyProject")
+#   set(CTEST_NIGHTLY_START_TIME "01:00:00 UTC")
+#   set(CTEST_DROP_METHOD "http")
+#   set(CTEST_DROP_SITE "my.cdash.org")
+#   set(CTEST_DROP_LOCATION "/submit.php?project=MyProject")
+#   set(CTEST_DROP_SITE_CDASH TRUE)
+# (the CDash server can provide the file to a project administrator
+# who configures 'MyProject').
+# Settings in the config file are shared by both this CTest module and
+# the CTest command-line tool's dashboard script mode (ctest -S).
+#
+# While building a project for submission to CDash, CTest scans the
+# build output for errors and warnings and reports them with
+# surrounding context from the build log.  This generic approach works
+# for all build tools, but does not give details about the command
+# invocation that produced a given problem.  One may get more detailed
+# reports by adding
+#   set(CTEST_USE_LAUNCHERS 1)
+# to the CTestConfig.cmake file.  When this option is enabled, the
+# CTest module tells CMake's Makefile generators to invoke every
+# command in the generated build system through a CTest launcher
+# program.  (Currently the CTEST_USE_LAUNCHERS option is ignored on
+# non-Makefile generators.)  During a manual build each launcher
+# transparently runs the command it wraps.  During a CTest-driven
+# build for submission to CDash each launcher reports detailed
+# information when its command fails or warns.
+# (Setting CTEST_USE_LAUNCHERS in CTestConfig.cmake is convenient, but
+# also adds the launcher overhead even for manual builds.  One may
+# instead set it in a CTest dashboard script and add it to the CMake
+# cache for the build tree.)
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.
@@ -83,10 +119,6 @@ IF(BUILD_TESTING)
     SET_IF_NOT_SET (COMPRESS_SUBMISSION ON)
   ENDIF(EXISTS "${PROJECT_SOURCE_DIR}/DartConfig.cmake")
   SET_IF_NOT_SET (NIGHTLY_START_TIME "00:00:00 EDT")
-
-  # make program just needs to use CMAKE_MAKE_PROGRAM which is required
-  # to be defined by cmake 
-  SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
 
   FIND_PROGRAM(CVSCOMMAND cvs )
   SET(CVS_UPDATE_OPTIONS "-d -A -P" CACHE STRING 
@@ -202,8 +234,17 @@ IF(BUILD_TESTING)
     ENDIF(DART_CXX_NAME MATCHES "devenv")
     SET(BUILDNAME "${BUILD_NAME_SYSTEM_NAME}-${DART_CXX_NAME}")
   ENDIF(NOT BUILDNAME)
-  # set the build command
-  BUILD_COMMAND(MAKECOMMAND ${MAKEPROGRAM} )
+
+  # the build command
+  BUILD_COMMAND(MAKECOMMAND CONFIGURATION "\${CTEST_CONFIGURATION_TYPE}")
+  SET(MAKECOMMAND ${MAKECOMMAND} CACHE STRING "Command to build the project")
+
+  # the default build configuration the ctest build handler will use
+  # if there is no -C arg given to ctest:
+  SET(DEFAULT_CTEST_CONFIGURATION_TYPE "$ENV{CMAKE_CONFIG_TYPE}")
+  IF(DEFAULT_CTEST_CONFIGURATION_TYPE STREQUAL "")
+    SET(DEFAULT_CTEST_CONFIGURATION_TYPE "Release")
+  ENDIF(DEFAULT_CTEST_CONFIGURATION_TYPE STREQUAL "")
 
   IF(NOT "${CMAKE_GENERATOR}" MATCHES "Make")
     SET(CTEST_USE_LAUNCHERS 0)

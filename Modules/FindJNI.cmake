@@ -5,6 +5,7 @@
 #   
 #  JNI_INCLUDE_DIRS      = the include dirs to use
 #  JNI_LIBRARIES         = the libraries to use
+#  JNI_FOUND             = TRUE if JNI headers and libraries were found.
 #  JAVA_AWT_LIBRARY      = the path to the jawt library
 #  JAVA_JVM_LIBRARY      = the path to the jvm library
 #  JAVA_INCLUDE_PATH     = the include path to jni.h
@@ -205,6 +206,10 @@ FIND_PATH(JAVA_INCLUDE_PATH2 jni_md.h
 FIND_PATH(JAVA_AWT_INCLUDE_PATH jawt.h
   ${JAVA_INCLUDE_PATH}
 )
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(JNI  DEFAULT_MSG  JAVA_AWT_LIBRARY JAVA_JVM_LIBRARY
+                                                    JAVA_INCLUDE_PATH  JAVA_INCLUDE_PATH2 JAVA_AWT_INCLUDE_PATH)
 
 MARK_AS_ADVANCED(
   JAVA_AWT_LIBRARY

@@ -287,7 +287,7 @@ extern int putenv (char *__string) __THROW;
 #    define FTIME _ftime
 #    define TIMEB _timeb
 #  endif
-#elif defined( __CYGWIN__ ) || defined( __linux__ )
+#elif defined( __CYGWIN__ ) || defined( __linux__ ) || defined(__APPLE__)
 #  include <sys/time.h>
 #  include <time.h>
 #  define HAVE_GETTIMEOFDAY

@@ -1,4 +1,4 @@
-# - Try to find LibXml2
+# - Try to find the LibXml2 xml processing library
 # Once done this will define
 #
 #  LIBXML2_FOUND - System has LibXml2
@@ -21,20 +21,13 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-IF (LIBXML2_INCLUDE_DIR AND LIBXML2_LIBRARIES)
-   # in cache already
-   SET(LibXml2_FIND_QUIETLY TRUE)
-ENDIF (LIBXML2_INCLUDE_DIR AND LIBXML2_LIBRARIES)
+# use pkg-config to get the directories and then use these values
+# in the FIND_PATH() and FIND_LIBRARY() calls
+FIND_PACKAGE(PkgConfig)
+PKG_CHECK_MODULES(PC_LIBXML libxml-2.0)
+SET(LIBXML2_DEFINITIONS ${PC_LIBXML_CFLAGS_OTHER})
 
-IF (NOT WIN32)
-   # use pkg-config to get the directories and then use these values
-   # in the FIND_PATH() and FIND_LIBRARY() calls
-   FIND_PACKAGE(PkgConfig)
-   PKG_CHECK_MODULES(PC_LIBXML libxml-2.0)
-   SET(LIBXML2_DEFINITIONS ${PC_LIBXML_CFLAGS_OTHER})
-ENDIF (NOT WIN32)
-
-FIND_PATH(LIBXML2_INCLUDE_DIR libxml/xpath.h
+FIND_PATH(LIBXML2_INCLUDE_DIR NAMES libxml/xpath.h
    HINTS
    ${PC_LIBXML_INCLUDEDIR}
    ${PC_LIBXML_INCLUDE_DIRS}

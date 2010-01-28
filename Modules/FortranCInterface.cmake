@@ -100,6 +100,10 @@ if(FortranCInterface_SOURCE_DIR)
   return()
 endif()
 
+# Use CMake 2.8.0 behavior for this module regardless of including context.
+cmake_policy(PUSH)
+cmake_policy(VERSION 2.8.0)
+
 #-----------------------------------------------------------------------------
 # Verify that C and Fortran are available.
 foreach(lang C Fortran)
@@ -244,6 +248,9 @@ function(FortranCInterface_VERIFY)
       VerifyFortranC
       CMAKE_FLAGS -DVERIFY_CXX=${verify_cxx}
                   -DCMAKE_VERBOSE_MAKEFILE=ON
+                 "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}"
+                 "-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}"
+                 "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
       OUTPUT_VARIABLE _output)
     file(WRITE "${FortranCInterface_BINARY_DIR}/Verify${lang}/output.txt" "${_output}")
 
@@ -273,3 +280,6 @@ function(FortranCInterface_VERIFY)
       "The output was:\n  ${_output}")
   endif()
 endfunction()
+
+# Restore including context policies.
+cmake_policy(POP)

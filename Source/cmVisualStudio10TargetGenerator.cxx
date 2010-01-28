@@ -396,6 +396,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::vector<cmSourceFile*> customBuild;
   std::vector<cmSourceFile*> none;
   std::vector<cmSourceFile*> headers;
+  std::vector<cmSourceFile*> resource;
   
   for(std::vector<cmSourceFile*>::const_iterator s = classes.begin(); 
       s != classes.end(); s++)
@@ -416,6 +417,10 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     if(lang[0] == 'C')
       {
       clCompile.push_back(sf);
+      }
+    if(strcmp(lang, "RC") == 0)
+      {
+      resource.push_back(sf);
       }
     else if(sf->GetCustomCommand())
       {
@@ -448,6 +453,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
                     0);
   this->WriteGroupSources("ClCompile", clCompile, sourceGroups);
   this->WriteGroupSources("ClInclude", headers, sourceGroups);
+  this->WriteGroupSources("ResourceCompile", resource, sourceGroups);
   this->WriteGroupSources("CustomBuild", customBuild, sourceGroups);
 
   this->WriteString("<ItemGroup>\n", 1);
@@ -568,37 +574,40 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
         ((*source)->GetExtension().c_str());
       const char* lang = (*source)->GetLanguage();
       bool cl = lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0);
+      bool rc = lang && (strcmp(lang, "RC") == 0);
+      std::string sourceFile = (*source)->GetFullPath();
+      sourceFile =  cmSystemTools::RelativePath(
+        this->Makefile->GetCurrentOutputDirectory(),
+        sourceFile.c_str());
+      this->ConvertToWindowsSlash(sourceFile);
+      // output the source file
+      if(header)
         {
-        std::string sourceFile = (*source)->GetFullPath();
-        sourceFile =  cmSystemTools::RelativePath(
-          this->Makefile->GetCurrentOutputDirectory(),
-          sourceFile.c_str());
-        this->ConvertToWindowsSlash(sourceFile);
-        // output the source file
-        if(header)
-          {
-          this->WriteString("<ClInclude Include=\"", 2);
-          }
-        else if(cl)
-          {
-          this->WriteString("<ClCompile Include=\"", 2);
-          }
-        else
-          {
-          this->WriteString("<None Include=\"", 2);
-          }
-        (*this->BuildFileStream ) << sourceFile << "\"";
-        // ouput any flags specific to this source file
-        if(cl && this->OutputSourceSpecificFlags(*source))
-          {
-          // if the source file has specific flags the tag
-          // is ended on a new line
-          this->WriteString("</ClCompile>\n", 2);
-          }
-        else
-          {
-          (*this->BuildFileStream ) << " />\n";
-          }
+        this->WriteString("<ClInclude Include=\"", 2);
+        }
+      else if(cl)
+        {
+        this->WriteString("<ClCompile Include=\"", 2);
+        }
+      else if(rc)
+        {
+        this->WriteString("<ResourceCompile Include=\"", 2);
+        }
+      else
+        {
+        this->WriteString("<None Include=\"", 2);
+        }
+      (*this->BuildFileStream ) << sourceFile << "\"";
+      // ouput any flags specific to this source file
+      if(cl && this->OutputSourceSpecificFlags(*source))
+        {
+        // if the source file has specific flags the tag
+        // is ended on a new line
+        this->WriteString("</ClCompile>\n", 2);
+        }
+      else
+        {
+        (*this->BuildFileStream ) << " />\n";
         }
       }
     }
@@ -1222,6 +1231,7 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
         Convert(l->Value.c_str(),
                 cmLocalGenerator::START_OUTPUT,
                 cmLocalGenerator::UNCHANGED);
+      this->ConvertToWindowsSlash(path);
       libstring += sep;
       libstring += path;
       }

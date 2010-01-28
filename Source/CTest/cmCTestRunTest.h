@@ -45,6 +45,9 @@ public:
   // Read and store output.  Returns true if it must be called again.
   bool CheckOutput();
 
+  // Compresses the output, writing to CompressedOutput
+  void CompressOutput();
+
   //launch the test process, return whether it started correctly
   bool StartTest(size_t total);
   //capture and report the test results
@@ -53,6 +56,7 @@ public:
   void ComputeArguments();
 private:
   void DartProcessing();
+  void ExeNotFound(std::string exe);
   bool CreateProcess(double testTimeOut,
                      std::vector<std::string>* environment);
   void WriteLogOutputTop(size_t completed, size_t total);
@@ -71,9 +75,15 @@ private:
 
   //flag for whether the env was modified for this run
   bool ModifyEnv;
+
+  bool UsePrefixCommand;
+  std::string PrefixCommand;
+
   //stores the original environment if we are modifying it
   std::vector<std::string> OrigEnv;
   std::string ProcessOutput;
+  std::string CompressedOutput;
+  double CompressionRatio;
   //The test results
   cmCTestTestHandler::cmCTestTestResult TestResult;
   int Index;
@@ -96,5 +106,6 @@ inline int getNumWidth(size_t n)
     }
   return numWidth;
 }
+
 #endif
 

@@ -29,9 +29,11 @@ void cmGlobalVisualStudio10Win64Generator
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio10Win64Generator::EnableLanguage(
-  std::vector<std::string> const& lang, cmMakefile *mf, bool optional)
+void cmGlobalVisualStudio10Win64Generator
+::AddPlatformDefinitions(cmMakefile* mf)
 {
+  this->cmGlobalVisualStudio10Generator::AddPlatformDefinitions(mf);
   mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
-  cmGlobalVisualStudio10Generator::EnableLanguage(lang, mf, optional);
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "x64");
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "x64");
 }

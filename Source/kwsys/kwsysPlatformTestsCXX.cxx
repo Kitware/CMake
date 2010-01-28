@@ -113,6 +113,15 @@ void f(size_t) {}
 int main() { return 0; }
 #endif
 
+#ifdef TEST_KWSYS_CXX_HAS_LONG_LONG
+long long f(long long n) { return n; }
+int main()
+{
+  long long n = 0;
+  return static_cast<int>(f(n));
+}
+#endif
+
 #ifdef TEST_KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS
 template <class T> class A;
 template <class T> int f(A<T>&);

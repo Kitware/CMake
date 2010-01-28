@@ -15,6 +15,9 @@
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 
+#include <cm_zlib.h>
+#include <cmsys/Base64.h>
+
 cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
 {
   this->CTest = handler->CTest;
@@ -23,9 +26,12 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
   this->TestProcess = 0;
   this->TestResult.ExecutionTime =0;
   this->TestResult.ReturnValue = 0;
-  this->TestResult.Status = 0;
+  this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
   this->TestResult.TestCount = 0;
   this->TestResult.Properties = 0;
+  this->ProcessOutput = "";
+  this->CompressedOutput = "";
+  this->CompressionRatio = 2;
 }
 
 cmCTestRunTest::~cmCTestRunTest()
@@ -52,7 +58,7 @@ bool cmCTestRunTest::CheckOutput()
       {
       // Store this line of output.
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                 this->GetIndex() << ": " << line << std::endl);
+                 this->GetIndex() << ": " << line << std::endl);  
       this->ProcessOutput += line;
       this->ProcessOutput += "\n";
       }
@@ -65,8 +71,73 @@ bool cmCTestRunTest::CheckOutput()
 }
 
 //---------------------------------------------------------
+// Streamed compression of test output.  The compressed data
+// is appended to this->CompressedOutput
+void cmCTestRunTest::CompressOutput()
+{
+  int ret;
+  z_stream strm;
+
+  unsigned char* in = 
+    reinterpret_cast<unsigned char*>(
+    const_cast<char*>(this->ProcessOutput.c_str()));
+  //zlib makes the guarantee that this is the maximum output size
+  int outSize = static_cast<int>(this->ProcessOutput.size() * 1.001 + 13);
+  unsigned char* out = new unsigned char[outSize];
+
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
+  ret = deflateInit(&strm, -1); //default compression level
+  if (ret != Z_OK)
+    {
+    return;
+    }
+
+  strm.avail_in = static_cast<uInt>(this->ProcessOutput.size());
+  strm.next_in = in;
+  strm.avail_out = outSize;
+  strm.next_out = out;
+  ret = deflate(&strm, Z_FINISH);
+
+  if(ret == Z_STREAM_ERROR || ret != Z_STREAM_END)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error during output "
+      "compression. Sending uncompressed output." << std::endl);
+    return;
+    }
+
+  (void)deflateEnd(&strm);
+ 
+  unsigned char *encoded_buffer
+    = new unsigned char[static_cast<int>(outSize * 1.5)];
+
+  unsigned long rlen
+    = cmsysBase64_Encode(out, strm.total_out, encoded_buffer, 1);
+
+  for(unsigned long i = 0; i < rlen; i++)
+    {
+    this->CompressedOutput += encoded_buffer[i];
+    }
+
+  if(strm.total_in)
+    {
+    this->CompressionRatio = static_cast<double>(strm.total_out) /
+                             static_cast<double>(strm.total_in);
+    }
+
+  delete [] encoded_buffer;
+  delete [] out;
+}
+
+//---------------------------------------------------------
 bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 {
+  if (this->CTest->ShouldCompressTestOutput())
+    {
+    this->CompressOutput();
+    }
+
   //restore the old environment
   if (this->ModifyEnv)
     {
@@ -146,7 +217,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     }
   else if ( res == cmsysProcess_State_Expired )
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Timeout ");
     this->TestResult.Status = cmCTestTestHandler::TIMEOUT;
     outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
     }
@@ -177,10 +248,9 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         this->TestResult.Status = cmCTestTestHandler::OTHER_FAULT;
       }
     }
-  else // if ( res == cmsysProcess_State_Error )
+  else //cmsysProcess_State_Error
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Bad command " << res );
-    this->TestResult.Status = cmCTestTestHandler::BAD_COMMAND;
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Not Run ");
     }
 
   passed = this->TestResult.Status == cmCTestTestHandler::COMPLETED;
@@ -202,18 +272,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   // Output since that is what is parsed by cmCTestMemCheckHandler
   if(!this->TestHandler->MemCheck && started)
     {
-    if (this->TestResult.Status == cmCTestTestHandler::COMPLETED)
-      {
       this->TestHandler->CleanTestOutput(this->ProcessOutput, 
           static_cast<size_t>
-          (this->TestHandler->CustomMaximumPassedTestOutputSize));
-      }
-    else
-      {
-      this->TestHandler->CleanTestOutput(this->ProcessOutput,
-          static_cast<size_t>
-          (this->TestHandler->CustomMaximumFailedTestOutputSize));
-      }
+          (this->TestResult.Status == cmCTestTestHandler::COMPLETED ? 
+          this->TestHandler->CustomMaximumPassedTestOutputSize :
+          this->TestHandler->CustomMaximumFailedTestOutputSize));
     }
   this->TestResult.Reason = reason;
   if (this->TestHandler->LogFile)
@@ -258,16 +321,23 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       << "----------------------------------------------------------"
       << std::endl << std::endl;
     }
+  // if the test actually started and ran 
+  // record the results in TestResult 
   if(started)
     {
-    this->TestResult.Output = this->ProcessOutput;
+    bool compress = this->CompressionRatio < 1 &&
+      this->CTest->ShouldCompressTestOutput();
+    this->TestResult.Output = compress ? this->CompressedOutput 
+      : this->ProcessOutput;
+    this->TestResult.CompressOutput = compress;
     this->TestResult.ReturnValue = this->TestProcess->GetExitValue();
     this->TestResult.CompletionStatus = "Completed";
     this->TestResult.ExecutionTime = this->TestProcess->GetTotalTime();
-    this->TestHandler->TestResults.push_back(this->TestResult);
-
     this->MemCheckPostProcess();
     }
+  // Always push the current TestResult onto the
+  // TestHandler vector
+  this->TestHandler->TestResults.push_back(this->TestResult);
   delete this->TestProcess;
   return passed;
 }
@@ -308,16 +378,41 @@ bool cmCTestRunTest::StartTest(size_t total)
   std::vector<std::string>& args = this->TestProperties->Args;
   this->TestResult.Properties = this->TestProperties;
   this->TestResult.ExecutionTime = 0;
+  this->TestResult.CompressOutput = false;
   this->TestResult.ReturnValue = -1;
-  this->TestResult.CompletionStatus = "Not Run";
-  this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+  this->TestResult.CompletionStatus = "Failed to start";
+  this->TestResult.Status = cmCTestTestHandler::BAD_COMMAND;
   this->TestResult.TestCount = this->TestProperties->Index;  
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory.c_str();
   
+  // Check if all required files exist
+  for(std::vector<std::string>::iterator i =
+    this->TestProperties->RequiredFiles.begin();
+    i != this->TestProperties->RequiredFiles.end(); ++i)
+    {
+    std::string file = *i;
+
+    if(!cmSystemTools::FileExists(file.c_str()))
+      {
+      //Required file was not found
+      this->TestProcess = new cmProcess;
+      *this->TestHandler->LogFile << "Unable to find required file: "
+               << file.c_str() << std::endl;
+      cmCTestLog(this->CTest, ERROR_MESSAGE, "Unable to find required file: "
+               << file.c_str() << std::endl);
+      this->TestResult.Output = "Unable to find required file: " + file;
+      this->TestResult.FullCommandLine = "";
+      this->TestResult.CompletionStatus = "Not Run";
+      this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+      return false;
+      }
+    }
   // log and return if we did not find the executable
   if (this->ActualCommand == "")
     {
+    // if the command was not found create a TestResult object
+    // that has that information 
     this->TestProcess = new cmProcess;
     *this->TestHandler->LogFile << "Unable to find executable: " 
                    << args[1].c_str() << std::endl;
@@ -325,7 +420,8 @@ bool cmCTestRunTest::StartTest(size_t total)
                << args[1].c_str() << std::endl);
     this->TestResult.Output = "Unable to find executable: " + args[1];
     this->TestResult.FullCommandLine = "";
-    this->TestHandler->TestResults.push_back(this->TestResult);
+    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
     }
   this->StartTime = this->CTest->CurrentTime();

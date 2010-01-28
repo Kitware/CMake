@@ -64,6 +64,9 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+# Version 0.8 (1/4/2010)
+#   * Get module working under MacOSX fink by adding /sw/include, /sw/lib
+#     to PATHS and the gobject library
 # Version 0.7 (3/22/09)
 #   * Checked into CMake CVS
 #   * Added versioning support
@@ -167,6 +170,8 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
             /opt/gnome/lib
             /opt/openwin/include
             /usr/openwin/lib
+            /sw/include
+            /sw/lib
             $ENV{GTKMM_BASEPATH}/include
             $ENV{GTKMM_BASEPATH}/lib
             [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]/include
@@ -277,6 +282,7 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
             /opt/gnome/lib64
             /usr/openwin/lib
             /usr/openwin/lib64
+            /sw/lib
             $ENV{GTKMM_BASEPATH}/lib
             [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]/lib
             [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]/lib
@@ -386,10 +392,12 @@ endif()
 
 foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
     if(_GTK2_component STREQUAL "gtk")
-        
         _GTK2_FIND_INCLUDE_DIR(GTK2_GLIB_INCLUDE_DIR glib.h)
         _GTK2_FIND_INCLUDE_DIR(GTK2_GLIBCONFIG_INCLUDE_DIR glibconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_GLIB_LIBRARY glib false true)
+        
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GOBJECT_INCLUDE_DIR gobject/gobject.h)
+        _GTK2_FIND_LIBRARY    (GTK2_GOBJECT_LIBRARY gobject false true)
 
         _GTK2_FIND_INCLUDE_DIR(GTK2_GDK_INCLUDE_DIR gdk/gdk.h)
         _GTK2_FIND_INCLUDE_DIR(GTK2_GDKCONFIG_INCLUDE_DIR gdkconfig.h)

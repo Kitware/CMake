@@ -134,7 +134,10 @@ int main(int argc, char** argv)
   // app setup
   app.setApplicationName("CMakeSetup");
   app.setOrganizationName("Kitware");
-  app.setWindowIcon(QIcon(":/Icons/CMakeSetup.png"));
+  QIcon appIcon;
+  appIcon.addFile(":/Icons/CMakeSetup32.png");
+  appIcon.addFile(":/Icons/CMakeSetup128.png");
+  app.setWindowIcon(appIcon);
   
   CMakeSetupDialog dialog;
   dialog.show();

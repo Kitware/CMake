@@ -24,6 +24,7 @@ cmCTestTestCommand::cmCTestTestCommand()
   this->Arguments[ctt_EXCLUDE_LABEL] = "EXCLUDE_LABEL";
   this->Arguments[ctt_INCLUDE_LABEL] = "INCLUDE_LABEL";
   this->Arguments[ctt_PARALLEL_LEVEL] = "PARALLEL_LEVEL";
+  this->Arguments[ctt_SCHEDULE_RANDOM] = "SCHEDULE_RANDOM";
   this->Arguments[ctt_LAST] = 0;
   this->Last = ctt_LAST;
 }
@@ -32,6 +33,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 {
   const char* ctestTimeout = 
     this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
+
   double timeout = this->CTest->GetTimeOut();
   if ( ctestTimeout )
     {
@@ -91,6 +93,11 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     handler->SetOption("ParallelLevel",
                        this->Values[ctt_PARALLEL_LEVEL]);
     }
+  if(this->Values[ctt_SCHEDULE_RANDOM])
+    {
+    handler->SetOption("ScheduleRandom",
+                       this->Values[ctt_SCHEDULE_RANDOM]);
+    }
   return handler;
 }
 
@@ -98,4 +105,3 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeActualHandler()
 {
   return this->CTest->GetInitializedHandler("test");
 }
-

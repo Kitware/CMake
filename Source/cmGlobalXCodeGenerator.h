@@ -80,6 +80,11 @@ public:
                                       std::vector<std::string>& 
                                       dirs);
   void SetCurrentLocalGenerator(cmLocalGenerator*);
+
+  /** Return true if the generated build tree may contain multiple builds.
+      i.e. "Can I build Debug and Release in the same tree?" */
+  virtual bool IsMultiConfig();
+
 private: 
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
                                      cmSourceGroup* sg);

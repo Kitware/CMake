@@ -1,8 +1,5 @@
 SET(QNXNTO 1)
 
-# GCC is the default compiler on QNX 6.3.
-INCLUDE(Platform/gcc)
-
 # The QNX GCC does not seem to have -isystem so remove the flag.
 SET(CMAKE_INCLUDE_SYSTEM_FLAG_C)
 SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
@@ -15,9 +12,7 @@ SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
 SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
 SET(CMAKE_SHARED_LIBRARY_RPATH_LINK_C_FLAG "-Wl,-rpath-link,")
 SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,-soname,")
-SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-Wl,-soname,")
 SET(CMAKE_EXE_EXPORTS_C_FLAG "-Wl,--export-dynamic")
-SET(CMAKE_EXE_EXPORTS_CXX_FLAG "-Wl,--export-dynamic")
 
 # Shared libraries with no builtin soname may not be linked safely by
 # specifying the file path.

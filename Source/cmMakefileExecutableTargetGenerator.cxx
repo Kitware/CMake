@@ -229,6 +229,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Add language feature flags.
   this->AddFeatureFlags(flags, linkLanguage);
 
+#ifdef __APPLE__
+  this->LocalGenerator->AddArchitectureFlags(flags, this->Target,
+                                             linkLanguage, this->ConfigName);
+#endif /* __APPLE__ */
+
   // Add target-specific linker flags.
   this->LocalGenerator->AppendFlags
     (linkFlags, this->Target->GetProperty("LINK_FLAGS"));

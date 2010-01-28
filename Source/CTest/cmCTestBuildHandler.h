@@ -46,7 +46,10 @@ public:
 
   int GetTotalErrors() { return this->TotalErrors;}
   int GetTotalWarnings() { return this->TotalWarnings;}
+
 private:
+  std::string GetMakeCommand();
+
   //! Run command specialized for make and configure. Returns process status
   // and retVal is return value or exception.
   int RunMakeCommand(const char* command,

@@ -39,6 +39,9 @@ try_compile(FortranCInterface_COMPILED
   ${FortranCInterface_BINARY_DIR}
   ${FortranCInterface_SOURCE_DIR}
   FortranCInterface
+  CMAKE_FLAGS
+    "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS}"
+    "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
   OUTPUT_VARIABLE FortranCInterface_OUTPUT)
 set(FortranCInterface_COMPILED ${FortranCInterface_COMPILED})
 unset(FortranCInterface_COMPILED CACHE)

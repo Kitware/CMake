@@ -1875,9 +1875,8 @@ static int kwsysProcessSetupOutputPipeFile(int* p, const char* name)
   /* Close the existing descriptor.  */
   kwsysProcessCleanupDescriptor(p);
 
-  /* Open a file for the pipe to write (permissions 644).  */
-  if((fout = open(name, O_WRONLY | O_CREAT | O_TRUNC,
-                  S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
+  /* Open a file for the pipe to write.  */
+  if((fout = open(name, O_WRONLY | O_CREAT | O_TRUNC, 0666)) < 0)
     {
     return 0;
     }
@@ -2377,9 +2376,13 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
 #if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
 # define KWSYSPE_PS_COMMAND "ps axo pid,ppid"
 # define KWSYSPE_PS_FORMAT  "%d %d\n"
-#elif defined(__hpux) || defined(__sparc) || defined(__sgi) || defined(_AIX)
+#elif defined(__hpux) || defined(__sun__) || defined(__sgi) || defined(_AIX) \
+   || defined(__sparc)
 # define KWSYSPE_PS_COMMAND "ps -ef"
 # define KWSYSPE_PS_FORMAT  "%*s %d %d %*[^\n]\n"
+#elif defined(__QNX__)
+# define KWSYSPE_PS_COMMAND "ps -Af"
+# define KWSYSPE_PS_FORMAT  "%*d %d %d %*[^\n]\n"
 #elif defined(__CYGWIN__)
 # define KWSYSPE_PS_COMMAND "ps aux"
 # define KWSYSPE_PS_FORMAT  "%d %d %*[^\n]\n"
@@ -2392,13 +2395,8 @@ static void kwsysProcessKill(pid_t process_id)
   DIR* procdir;
 #endif
 
-  /* Kill the process now to make sure it does not create more
-     children.  Do not reap it yet so we can identify its existing
-     children.  There is a small race condition here.  If the child
-     forks after we begin looking for children below but before it
-     receives this kill signal we might miss a child.  Also we might
-     not be able to catch up to a fork bomb.  */
-  kill(process_id, SIGKILL);
+  /* Suspend the process to be sure it will not create more children.  */
+  kill(process_id, SIGSTOP);
 
   /* Kill all children if we can find them.  */
 #if defined(__linux__) || defined(__CYGWIN__)
@@ -2486,6 +2484,19 @@ static void kwsysProcessKill(pid_t process_id)
       }
 #endif
     }
+
+  /* Kill the process.  */
+  kill(process_id, SIGKILL);
+
+#if defined(__APPLE__)
+  /* On OS X 10.3 the above SIGSTOP occasionally prevents the SIGKILL
+     from working.  Just in case, we resume the child and kill it
+     again.  There is a small race condition in this obscure case.  If
+     the child manages to fork again between these two signals, we
+     will not catch its children.  */
+  kill(process_id, SIGCONT);
+  kill(process_id, SIGKILL);
+#endif
 }
 
 /*--------------------------------------------------------------------------*/

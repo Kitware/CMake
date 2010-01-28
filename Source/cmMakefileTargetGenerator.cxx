@@ -294,6 +294,11 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     // Add language feature flags.
     this->AddFeatureFlags(flags, lang);
 
+#ifdef __APPLE__
+    this->LocalGenerator->AddArchitectureFlags(flags, this->Target,
+                                               lang, this->ConfigName);
+#endif /* __APPLE__ */
+
     // Fortran-specific flags computed for this target.
     if(*l == "Fortran")
       {

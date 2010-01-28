@@ -406,6 +406,21 @@ cmPolicies::cmPolicies()
     "The OLD behavior for this policy is to silently ignore the problem.  "
     "The NEW behavior for this policy is to report an error.",
     2,8,0, cmPolicies::WARN);
+
+    this->DefinePolicy(
+    CMP0015, "CMP0015",
+    "link_directories() treats paths relative to the source dir.",
+    "In CMake 2.6.4 and lower the link_directories() command passed relative "
+    "paths unchanged to the linker.  "
+    "In CMake 2.8.1 and above the link_directories() command prefers to "
+    "interpret relative paths with respect to CMAKE_CURRENT_SOURCE_DIR, "
+    "which is consistent with include_directories() and other commands.  "
+    "The OLD behavior for this policy is to use relative paths verbatim in "
+    "the linker command.  "
+    "The NEW behavior for this policy is to convert relative paths to "
+    "absolute paths by appending the relative path to "
+    "CMAKE_CURRENT_SOURCE_DIR.",
+    2,8,1, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

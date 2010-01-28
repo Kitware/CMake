@@ -1761,7 +1761,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
           ostr.str().c_str(),
           &cpackCommandLines, depends, 0);
       }
-    std::string cmd;
+    std::string cmd = cmakeCommand;
     cpackCommandLines.erase(cpackCommandLines.begin(),
       cpackCommandLines.end());
     singleLine.erase(singleLine.begin(), singleLine.end());
@@ -1782,18 +1782,9 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     if(mf->GetDefinition("CMake_BINARY_DIR"))
       {
       // We are building CMake itself.  We cannot use the original
-      // executable to install over itself.
-      cmd = mf->GetDefinition("EXECUTABLE_OUTPUT_PATH");
-      if(cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.')
-        {
-        cmd += "/";
-        cmd += cmakeCfgIntDir;
-        }
-      cmd += "/cmake";
-      }
-    else
-      {
-      cmd = cmakeCommand;
+      // executable to install over itself.  The generator will
+      // automatically convert this name to the build-time location.
+      cmd = "cmake";
       }
     singleLine.push_back(cmd.c_str());
     if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.' )

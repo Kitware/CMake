@@ -1,3 +1,29 @@
+
+#=============================================================================
+# Copyright 2002-2009 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distributed this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
+# This module is shared by multiple languages; use include blocker.
+if(__DARWIN_COMPILER_GNU)
+  return()
+endif()
+set(__DARWIN_COMPILER_GNU 1)
+
+macro(__darwin_compiler_gnu lang)
+  # GNU does not have -shared on OS X
+  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-dynamiclib -headerpad_max_install_names")
+  set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "-bundle -headerpad_max_install_names")
+endmacro()
+
 macro(cmake_gnu_has_isysroot lang)
   if("x${CMAKE_${lang}_HAS_ISYSROOT}" STREQUAL "x")
     set(_doc "${lang} compiler has -isysroot")

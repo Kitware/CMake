@@ -23,10 +23,48 @@ bool cmLinkDirectoriesCommand
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
     {
-    std::string unixPath = *i;
-    cmSystemTools::ConvertToUnixSlashes(unixPath);
-    this->Makefile->AddLinkDirectory(unixPath.c_str());
+    this->AddLinkDir(*i);
     }
   return true;
 }
 
+//----------------------------------------------------------------------------
+void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
+{
+  std::string unixPath = dir;
+  cmSystemTools::ConvertToUnixSlashes(unixPath);
+  if(!cmSystemTools::FileIsFullPath(unixPath.c_str()))
+    {
+    bool convertToAbsolute = false;
+    cmOStringStream e;
+    e << "This command specifies the relative path\n"
+      << "  " << unixPath << "\n"
+      << "as a link directory.\n";
+    cmPolicies* policies = this->Makefile->GetPolicies();
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0015))
+      {
+      case cmPolicies::WARN:
+        e << policies->GetPolicyWarning(cmPolicies::CMP0015);
+        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      case cmPolicies::OLD:
+        // OLD behavior does not convert
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        e << policies->GetRequiredPolicyError(cmPolicies::CMP0015);
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      case cmPolicies::NEW:
+        // NEW behavior converts
+        convertToAbsolute = true;
+        break;
+      }
+    if (convertToAbsolute)
+      {
+      std::string tmp = this->Makefile->GetStartDirectory();
+      tmp += "/";
+      tmp += unixPath;
+      unixPath = tmp;
+      }
+    }
+  this->Makefile->AddLinkDirectory(unixPath.c_str());
+}

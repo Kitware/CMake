@@ -38,6 +38,9 @@
 #elif defined(__PGI)
 # define COMPILER_ID "PGI"
 
+#elif defined(__PATHSCALE__)
+# define COMPILER_ID "PathScale"
+
 #elif defined(__GNUC__)
 # define COMPILER_ID "GNU"
 

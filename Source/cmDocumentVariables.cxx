@@ -201,6 +201,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "\"Visual Studio 6\", etc.)",false,
      "Variables that Provide Information");
   cm->DefineProperty
+    ("CMAKE_EXTRA_GENERATOR", cmProperty::VARIABLE,
+     "The extra generator used to build the project.",
+     "When using the Eclipse, CodeBlocks or KDevelop generators, CMake "
+     "generates Makefiles (CMAKE_GENERATOR) and additionally project files "
+     "for the respective IDE. This IDE project file generator is stored in "
+     "CMAKE_EXTRA_GENERATOR (e.g. \"Eclipse CDT4\").",false,
+     "Variables that Provide Information");
+  cm->DefineProperty
     ("CMAKE_HOME_DIRECTORY", cmProperty::VARIABLE,
      "Path to top of source tree.",
      "This is the path to the top level of the source tree.",false,
@@ -1371,10 +1379,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty("CMAKE_SHARED_MODULE_PREFIX_<LANG>",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_SUFFIX_<LANG>",
-                     cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_SHARED_MODULE_RUNTIME_<LANG>_FLAG",
-                     cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_SHARED_MODULE_RUNTIME_<LANG>_FLAG_SEP",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_STATIC_LIBRARY_PREFIX_<LANG>",
                      cmProperty::VARIABLE,0,0);

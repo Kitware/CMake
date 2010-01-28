@@ -1,1 +1,2 @@
-SET(CMAKE_CXX_VERBOSE_FLAG "-v")
+include(Compiler/GNU)
+__compiler_gnu(CXX)

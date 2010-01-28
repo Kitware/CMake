@@ -23,6 +23,7 @@ class cmCTestGenericHandler;
 class cmGeneratedFileStream;
 class cmCTestCommand;
 class cmCTestScriptHandler;
+class cmCTestStartCommand;
 
 #define cmCTestLog(ctSelf, logType, msg) \
   do { \
@@ -79,6 +80,21 @@ public:
     bool Enabled;
     std::string Name;
   };
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  enum HTTPMethod {
+    HTTP_GET,
+    HTTP_POST,
+    HTTP_PUT
+  };
+
+  /**
+   * Perform an HTTP request.
+   */
+  static int HTTPRequest(std::string url, HTTPMethod method,
+                          std::string& response,
+                          std::string fields = "", 
+                          std::string putFile = "", int timeout = 0);
+#endif
 
   /** Get a testing part id from its string name.  Returns PartCount
       if the string does not name a valid part.  */
@@ -93,9 +109,7 @@ public:
   /**
    * Initialize and finalize testing
    */
-  int Initialize(const char* binary_dir, bool new_tag = false,
-    bool verbose_tag = true);
-  bool InitializeFromCommand(cmCTestCommand* command, bool first = false);
+  bool InitializeFromCommand(cmCTestStartCommand* command);
   void Finalize();
 
   /**
@@ -130,6 +144,9 @@ public:
   std::string const& GetConfigType();
   double GetTimeOut() { return this->TimeOut; }
   void SetTimeOut(double t) { this->TimeOut = t; }
+
+  double GetGlobalTimeout() { return this->GlobalTimeout; }
+
   // how many test to run at the same time
   int GetParallelLevel() { return this->ParallelLevel; }
   void SetParallelLevel(int);
@@ -191,6 +208,15 @@ public:
   ///! Should we only show what we would do?
   bool GetShowOnly();
 
+  bool ShouldUseHTTP10() { return this->UseHTTP10; }
+
+  bool ShouldCompressTestOutput();
+
+  std::string GetCDashVersion();
+
+  //Used for parallel ctest job scheduling
+  std::string GetScheduleType() { return this->ScheduleType; }
+  void SetScheduleType(std::string type) { this->ScheduleType = type; }
 
   ///! The max output width
   int GetMaxTestNameWidth() const;
@@ -374,17 +400,21 @@ public:
   bool GetLabelSummary() { return this->LabelSummary;}
 private:
   std::string ConfigType;
+  std::string ScheduleType;
   bool Verbose;
   bool ExtraVerbose;
   bool ProduceXML;
   bool LabelSummary;
-
+  bool UseHTTP10;
   bool Failover;
   bool BatchJobs;
 
   bool ForceNewCTestProcess;
 
   bool RunConfigurationScript;
+
+  //flag for lazy getter (optimization)
+  bool ComputedCompressOutput;
 
   int GenerateNotesFile(const char* files);
 
@@ -416,6 +446,8 @@ private:
 
   double                  TimeOut;
 
+  double                  GlobalTimeout;
+
   int                     MaxTestNameWidth;
 
   int                     ParallelLevel;
@@ -436,12 +468,23 @@ private:
 
   bool                     CompressXMLFiles;
 
+  bool                     CompressTestOutput;
+
   void InitStreams();
   std::ostream* StreamOut;
   std::ostream* StreamErr;
 
   void BlockTestErrorDiagnostics();
 
+  /**
+   * Initialize a dashboard run in the given build tree.  The "command"
+   * argument is non-NULL when running from a command-driven (ctest_start)
+   * dashboard script, and NULL when running from the CTest command
+   * line.  Note that a declarative dashboard script does not actually
+   * call this method because it sets CTEST_COMMAND to drive a build
+   * through the ctest command line.
+   */
+  int Initialize(const char* binary_dir, cmCTestStartCommand* command);
 
   //! parse the option after -D and convert it into the appropriate steps
   bool AddTestsForDashboardType(std::string &targ);

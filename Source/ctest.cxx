@@ -123,8 +123,8 @@ static const char * cmDocumentationOptions[][3] =
   {"-SP <script>, --script-new-process <script>", "Execute a dashboard for a "
    "configuration",
    "This option does the same operations as -S but it will do them in a "
-   "seperate process. This is primarily useful in cases where the script "
-   "may modify the environment and you do not want the modified enviroment "
+   "separate process. This is primarily useful in cases where the script "
+   "may modify the environment and you do not want the modified environment "
    "to impact other -S scripts."},
   {"-A <file>, --add-notes <file>", "Add a notes file with submission",
    "This option tells ctest to include a notes file when submitting "
@@ -141,7 +141,7 @@ static const char * cmDocumentationOptions[][3] =
    "tests are run. By specifying -U the union of tests is run instead."},
   {"--max-width <width>", "Set the max width for a test name to output",
    "Set the maximum width for each test name to show in the output.  This "
-   "allows the user to widen the output to avoid cliping the test name which "
+   "allows the user to widen the output to avoid clipping the test name which "
    "can be very annoying."},
   {"--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1.",
    "This option causes ctest to run tests in either an interactive mode or "
@@ -181,8 +181,8 @@ static const char * cmDocumentationOptions[][3] =
   {"--build-makeprogram", "Specify the make program to use.", "" },
   {"--build-noclean", "Skip the make clean step.", "" },
   {"--build-config-sample", 
-   "A sample executable to use to determine the configuraiton", 
-   "A sample executable to use to determine the configuraiton that "
+   "A sample executable to use to determine the configuration", 
+   "A sample executable to use to determine the configuration that "
    "should be used. e.g. Debug/Release/etc" },
   {"--build-options", "Add extra options to the build step.",
    "This option must be the last option with the exception of --test-command"
@@ -208,10 +208,23 @@ static const char * cmDocumentationOptions[][3] =
    "By default CTest will run child CTest instances within the same process. "
    "If this behavior is not desired, this argument will enforce new "
    "processes for child CTest processes." },
+  {"--schedule-random", "Use a random order for scheduling tests",
+   "This option will run the tests in a random order. It is commonly used to "
+   "detect implicit dependencies in a test suite." },
   {"--submit-index", "Submit individual dashboard tests with specific index",
    "This option allows performing the same CTest action (such as test) "
    "multiple times and submit all stages to the same dashboard (Dart2 "
    "required). Each execution requires different index." },
+  {"--timeout <seconds>", "Set a global timeout on all tests.",
+   "This option will set a global timeout on all tests that do not already "
+   "have a timeout set on them."},
+  {"--http1.0", "Submit using HTTP 1.0.",
+  "This option will force CTest to use HTTP 1.0 to submit files to the "
+  "dashboard, instead of HTTP 1.1."},
+  {"--no-compress-output", "Do not compress test output when submitting.",
+   "This flag will turn off automatic compression of test output.  Use this "
+   "to maintain compatibility with an older version of CDash which doesn't "
+   "support compressed test output."},
   {"--help-command <cmd> [<file>]", "Show help for a single command and exit.",
    "Prints the help for the command to stdout or to the specified file." },
   {"--help-command-list [<file>]", "List available commands and exit.",
@@ -276,6 +289,7 @@ int main (int argc, char *argv[])
       ch->CreateCMake();
       ch->GetCommandDocumentation(commands);
 
+      doc.SetShowGenerators(false);
       doc.SetName("ctest");
       doc.SetSection("Name",cmDocumentationName);
       doc.SetSection("Usage",cmDocumentationUsage);

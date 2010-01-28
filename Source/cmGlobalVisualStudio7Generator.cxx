@@ -31,7 +31,6 @@ void cmGlobalVisualStudio7Generator
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   mf->AddDefinition("CMAKE_GENERATOR_FC", "ifort");
-
   this->AddPlatformDefinitions(mf);
   
   // Create list of configurations requested by user's cache, if any.
@@ -59,6 +58,8 @@ void cmGlobalVisualStudio7Generator
 void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   mf->AddDefinition("MSVC70", "1");
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
 }
 
 std::string cmGlobalVisualStudio7Generator

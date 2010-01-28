@@ -8,6 +8,8 @@
         PRINT *, 'INFO:compiler[SunPro]'
 #elif defined(__G95__)
         PRINT *, 'INFO:compiler[G95]'
+#elif defined(__PATHSCALE__)
+        PRINT *, 'INFO:compiler[PathScale]'
 #elif defined(__GNUC__)
         PRINT *, 'INFO:compiler[GNU]'
 #elif defined(__IBMC__)

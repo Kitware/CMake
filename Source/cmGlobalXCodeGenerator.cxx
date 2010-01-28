@@ -1532,6 +1532,34 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       }
     }
 
+  // Set target-specific architectures.
+  std::vector<std::string> archs;
+  target.GetAppleArchs(configName, archs);
+  if(!archs.empty())
+    {
+    // Enable ARCHS attribute.
+    buildSettings->AddAttribute("ONLY_ACTIVE_ARCH",
+                                this->CreateString("NO"));
+
+    // Store ARCHS value.
+    if(archs.size() == 1)
+      {
+      buildSettings->AddAttribute("ARCHS",
+                                  this->CreateString(archs[0].c_str()));
+      }
+    else
+      {
+      cmXCodeObject* archObjects =
+        this->CreateObject(cmXCodeObject::OBJECT_LIST);
+      for(std::vector<std::string>::iterator i = archs.begin();
+          i != archs.end(); i++)
+        {
+        archObjects->AddObject(this->CreateString((*i).c_str()));
+        }
+      buildSettings->AddAttribute("ARCHS", archObjects);
+      }
+    }
+
   // Get the product name components.
   std::string pnprefix;
   std::string pnbase;
@@ -1549,7 +1577,18 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
      target.GetType() == cmTarget::MODULE_LIBRARY ||
      target.GetType() == cmTarget::EXECUTABLE)
     {
-    pndir = target.GetDirectory();
+    if(this->XcodeVersion >= 21)
+      {
+      std::string pncdir = target.GetDirectory(configName);
+      buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
+                                  this->CreateString(pncdir.c_str()));
+      }
+    else
+      {
+      buildSettings->AddAttribute("OBJROOT",
+                                  this->CreateString(pndir.c_str()));
+      pndir = target.GetDirectory(configName);
+      }
     buildSettings->AddAttribute("EXECUTABLE_PREFIX", 
                                 this->CreateString(pnprefix.c_str()));
     buildSettings->AddAttribute("EXECUTABLE_SUFFIX", 
@@ -2895,7 +2934,8 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         // then remove those exectuables as well
         if(this->Architectures.size() > 1)
           {
-          std::string universal = t->GetDirectory();
+          std::string universal =
+            t->GetMakefile()->GetCurrentOutputDirectory();
           universal += "/";
           universal += this->CurrentProject;
           universal += ".build/";
@@ -3261,4 +3301,19 @@ cmGlobalXCodeGenerator::ComputeInfoPListLocation(cmTarget& target)
   plist += target.GetName();
   plist += ".dir/Info.plist";
   return plist;
+}
+
+//----------------------------------------------------------------------------
+// Return true if the generated build tree may contain multiple builds.
+// i.e. "Can I build Debug and Release in the same tree?"
+bool cmGlobalXCodeGenerator::IsMultiConfig()
+{
+  // Old Xcode 1.5 is single config:
+  if(this->XcodeVersion == 15)
+    {
+    return false;
+    }
+
+  // Newer Xcode versions are multi config:
+  return true;
 }

@@ -124,10 +124,72 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile() const
     ;
 }
 
+
+//----------------------------------------------------------------------------
+void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
+                                            const char* envVar, cmMakefile* mf)
+{
+  // get the variables from the environment and from the cache and then 
+  // figure out which one to use:
+
+  const char* envVarValue = getenv(envVar);
+
+  std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
+  cacheEntryName += envVar;
+  const char* cacheValue = mf->GetCacheManager()->GetCacheValue(
+                                                       cacheEntryName.c_str());
+
+  // now we have both, decide which one to use
+  std::string valueToUse;
+  if (envVarValue==0 && cacheValue==0)
+    {
+    // nothing known, do nothing
+    valueToUse = "";
+    }
+  else if (envVarValue!=0 && cacheValue==0)
+    {
+    // The variable is in the env, but not in the cache. Use it and put it 
+    // in the cache
+    valueToUse = envVarValue;
+    mf->AddCacheDefinition(cacheEntryName.c_str(), valueToUse.c_str(),
+                           cacheEntryName.c_str(), cmCacheManager::STRING,
+                           true);
+    mf->GetCacheManager()->SaveCache(mf->GetHomeOutputDirectory());
+    }
+  else if (envVarValue==0 && cacheValue!=0)
+    {
+    // It is already in the cache, but not in the env, so use it from the cache
+    valueToUse = cacheValue;
+    }
+  else
+    {
+    // It is both in the cache and in the env.
+    // Use the version from the env. except if the value from the env is
+    // completely contained in the value from the cache (for the case that we
+    // now have a PATH without MSVC dirs in the env. but had the full PATH with
+    // all MSVC dirs during the cmake run which stored the var in the cache:
+    valueToUse = cacheValue;
+    if (valueToUse.find(envVarValue) == std::string::npos)
+      {
+      valueToUse = envVarValue;
+      mf->AddCacheDefinition(cacheEntryName.c_str(), valueToUse.c_str(),
+                             cacheEntryName.c_str(), cmCacheManager::STRING,
+                             true);
+      mf->GetCacheManager()->SaveCache(mf->GetHomeOutputDirectory());
+      }
+    }
+
+  if (!valueToUse.empty())
+    {
+    fout << envVar << "=" << valueToUse << "|";
+    }
+}
+
+
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateProjectFile()
 {
-  const cmMakefile* mf
+  cmMakefile* mf
     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
 
   const std::string filename = this->HomeOutputDirectory + "/.project";
@@ -136,6 +198,12 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   if (!fout)
     {
     return;
+    }
+
+  std::string compilerId = mf->GetSafeDefinition("CMAKE_C_COMPILER_ID");
+  if (compilerId.empty())  // no C compiler, try the C++ compiler:
+    {
+    compilerId = mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
     }
 
   fout << 
@@ -214,29 +282,24 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.environment</key>\n"
-    "\t\t\t\t\t<value>VERBOSE=1|</value>\n"  // enforce VERBOSE Makefile output
-    "\t\t\t\t\t<value>"
+    "\t\t\t\t\t<value>VERBOSE=1|CMAKE_NO_VERBOSE=1|"  //verbose Makefile output
     ;
   // set vsvars32.bat environment available at CMake time,
   //   but not necessarily when eclipse is open
-  if (make.find("nmake") != std::string::npos)
+  if (compilerId == "MSVC")
     {
-    if (getenv("PATH"))
-      {
-      fout << "PATH=" << getenv("PATH") << "|";
-      }
-    if (getenv("INCLUDE"))
-      {
-      fout << "INCLUDE=" << getenv("INCLUDE") << "|";
-      }
-    if (getenv("LIB"))
-      {
-      fout << "LIB=" << getenv("LIB") << "|";
-      }
-    if (getenv("LIBPATH"))
-      {
-      fout << "LIBPATH=" << getenv("LIBPATH") << "|";
-      }
+    AddEnvVar(fout, "PATH", mf);
+    AddEnvVar(fout, "INCLUDE", mf);
+    AddEnvVar(fout, "LIB", mf);
+    AddEnvVar(fout, "LIBPATH", mf);
+    AddEnvVar(fout, "INCLUDE", mf);
+    }
+  else if (compilerId == "Intel")
+    {
+    // if the env.var is set, use this one and put it in the cache
+    // if the env.var is not set, but the value is in the cache, 
+    // use it from the cache:
+    AddEnvVar(fout, "INTEL_LICENSE_FILE", mf);
     }
   fout <<
     "</value>\n"
@@ -285,9 +348,13 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     "\t\t\t\t\t<key>org.eclipse.cdt.core.errorOutputParser</key>\n"
     "\t\t\t\t\t<value>"
     ;
-  if (this->GetToolChainType(*mf) == EclipseToolchainOther)
+  if (compilerId == "MSVC")
     {
     fout << "org.eclipse.cdt.core.VCErrorParser;";
+    }
+  else if (compilerId == "Intel")
+    {
+    fout << "org.eclipse.cdt.core.ICCErrorParser;";
     }
   fout <<
     "org.eclipse.cdt.core.MakeErrorParser;"
@@ -418,20 +485,25 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     "<extensions>\n"
     ;
   // TODO: refactor this out...
-  switch (this->GetToolChainType(*mf))
-  {
-    case EclipseToolchainLinux   :
-      fout << "<extension id=\"org.eclipse.cdt.core.ELF\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
-              ;
-      fout << "<extension id=\"org.eclipse.cdt.core.GNU_ELF\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
-              "<attribute key=\"addr2line\" value=\"addr2line\"/>\n"
-              "<attribute key=\"c++filt\" value=\"c++filt\"/>\n"
-              "</extension>\n"
-              ;
-      break;
-    case EclipseToolchainCygwin  :
+  std::string executableFormat = mf->GetSafeDefinition(
+                                                    "CMAKE_EXECUTABLE_FORMAT");
+  if (executableFormat == "ELF")
+    {
+    fout << "<extension id=\"org.eclipse.cdt.core.ELF\""
+            " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
+            ;
+    fout << "<extension id=\"org.eclipse.cdt.core.GNU_ELF\""
+            " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
+            "<attribute key=\"addr2line\" value=\"addr2line\"/>\n"
+            "<attribute key=\"c++filt\" value=\"c++filt\"/>\n"
+            "</extension>\n"
+            ;
+    }
+  else
+    {
+    std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
+    if (systemName == "CYGWIN")
+      {
       fout << "<extension id=\"org.eclipse.cdt.core.Cygwin_PE\""
               " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
               "<attribute key=\"addr2line\" value=\"addr2line\"/>\n"
@@ -440,36 +512,28 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
               "<attribute key=\"nm\" value=\"nm\"/>\n"
               "</extension>\n"
               ;
-      break;
-    case EclipseToolchainMinGW   :
+      }
+    else if (systemName == "Windows")
+      {
       fout << "<extension id=\"org.eclipse.cdt.core.PE\""
               " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
               ;
-      break;
-    case EclipseToolchainSolaris :
-      fout << "<extension id=\"org.eclipse.cdt.core.ELF\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
-              ;
-      break;
-    case EclipseToolchainMacOSX  :
+      }
+    else if (systemName == "Darwin")
+      {
       fout << "<extension id=\"org.eclipse.cdt.core.MachO\""
               " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
               "<attribute key=\"c++filt\" value=\"c++filt\"/>\n"
               "</extension>\n"
               ;
-      break;
-    case EclipseToolchainOther   :
-      fout << "<extension id=\"org.eclipse.cdt.core.PE\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
-              ;
-      fout << "<extension id=\"org.eclipse.cdt.core.ELF\""
-              " point=\"org.eclipse.cdt.core.BinaryParser\"/>\n"
-              ;
-      break;
-    default      :
+      }
+    else
+      {
       // *** Should never get here ***
       fout << "<error_toolchain_type/>\n";
-  }
+      }
+    }
+
   fout << "</extensions>\n"
           "</storageModule>\n"
           ;
@@ -828,40 +892,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 }
 
 //----------------------------------------------------------------------------
-cmExtraEclipseCDT4Generator::EclipseToolchainType
-cmExtraEclipseCDT4Generator::GetToolChainType(const cmMakefile& makefile)
-{
-  if (makefile.IsSet("UNIX"))
-    {
-    if (makefile.IsSet("CYGWIN"))
-      {
-      return EclipseToolchainCygwin;
-      }
-    if (makefile.IsSet("APPLE" ))
-      {
-      return EclipseToolchainMacOSX;
-      }
-    // *** how do I determine if it is Solaris ???
-    return EclipseToolchainLinux;
-    }
-  else if (makefile.IsSet("WIN32"))
-    {
-    if (makefile.IsSet("MINGW"))
-      {
-      return EclipseToolchainMinGW;
-      }
-    if (makefile.IsSet("MSYS" ))
-      {
-      return EclipseToolchainMinGW;
-      }
-    return EclipseToolchainOther;
-    }
-  else
-    {
-    return EclipseToolchainOther;
-    }
-}
-
 std::string
 cmExtraEclipseCDT4Generator::GetEclipsePath(const std::string& path)
 {

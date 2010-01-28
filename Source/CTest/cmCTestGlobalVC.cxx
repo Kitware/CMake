@@ -107,6 +107,19 @@ void cmCTestGlobalVC::WriteXMLDirectory(std::ostream& xml,
 }
 
 //----------------------------------------------------------------------------
+void cmCTestGlobalVC::WriteXMLGlobal(std::ostream& xml)
+{
+  if(!this->NewRevision.empty())
+    {
+    xml << "\t<Revision>" << this->NewRevision << "</Revision>\n";
+    }
+  if(!this->OldRevision.empty() && this->OldRevision != this->NewRevision)
+    {
+    xml << "\t<PriorRevision>" << this->OldRevision << "</PriorRevision>\n";
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmCTestGlobalVC::WriteXMLUpdates(std::ostream& xml)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
@@ -116,6 +129,8 @@ bool cmCTestGlobalVC::WriteXMLUpdates(std::ostream& xml)
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
 
   this->LoadModifications();
+
+  this->WriteXMLGlobal(xml);
 
   for(std::map<cmStdString, Directory>::const_iterator
         di = this->Dirs.begin(); di != this->Dirs.end(); ++di)

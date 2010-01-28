@@ -4,7 +4,7 @@
 # used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration
 #
 # However CPackRPM has specific features which are controlled by
-# the specifics CPACK_RPM_XXX variables.You'll find a detailed usage on 
+# the specifics CPACK_RPM_XXX variables. You'll find a detailed usage on 
 # the wiki: 
 #  http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
 # However as a handy reminder here comes the list of specific variables:
@@ -44,7 +44,7 @@
 #     The RPM package group.
 #  CPACK_RPM_PACKAGE_VENDOR 
 #     Mandatory : YES
-#     Default   : CPACK_PACKAGE_VENDOR if set or"unknown"
+#     Default   : CPACK_PACKAGE_VENDOR if set or "unknown"
 #     The RPM package group.
 #  CPACK_RPM_PACKAGE_DESCRIPTION
 #     Mandatory : YES
@@ -52,7 +52,14 @@
 #  CPACK_RPM_PACKAGE_REQUIRES
 #     Mandatory : NO
 #     Default   : -
-#     May be used to set RPM dependencies. 
+#     May be used to set RPM dependencies (requires).
+#     Note that you must enclose the complete requires string between quotes, 
+#     for example:
+#     set(CPACK_RPM_PACKAGE_REQUIRES "python >= 2.5.0, cmake >= 2.8")
+#  CPACK_RPM_PACKAGES_PROVIDES
+#     Mandatory : NO
+#     Default   : -
+#     May be used to set RPM dependencies (provides).
 #  CPACK_RPM_SPEC_INSTALL_POST
 #     Mandatory : NO
 #     Default   : -
@@ -69,6 +76,38 @@
 #     May be set when invoking cpack in order to trace debug informations 
 #     during CPack RPM run. For example you may launch CPack like this 
 #     cpack -D CPACK_RPM_PACKAGE_DEBUG=1 -G RPM
+#  CPACK_RPM_USER_BINARY_SPECFILE
+#     Mandatory : NO
+#     Default   : - 
+#     May be set by the user in order to specify a USER binary spec file
+#     to be used by CPackRPM instead of generating the file.
+#     The specified file will be processed by CONFIGURE_FILE( @ONLY).
+#  CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
+#     Mandatory : NO
+#     Default   : -
+#     If set CPack will generate a template for USER specified binary 
+#     spec file and stop with an error. For example launch CPack like this
+#     cpack -D CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE=1 -G RPM
+#     The user may then use this file in order to hand-craft is own
+#     binary spec file which may be used with CPACK_RPM_USER_BINARY_SPECFILE.
+#  CPACK_RPM_PRE_INSTALL_SCRIPT_FILE
+#  CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE
+#     Mandatory : NO
+#     Default   : -
+#     May be used to embbed a pre (un)installation script in the spec file.
+#     The refered script file(s) will be read and directly
+#     put after the %pre or %preun section
+#     One may verify which scriptlet has been included with
+#      rpm -qp --scripts  package.rpm
+#  CPACK_RPM_POST_INSTALL_SCRIPT_FILE
+#  CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE
+#     Mandatory : NO
+#     Default   : -
+#     May be used to embbed a post (un)installation script in the spec file.
+#     The refered script file(s) will be read and directly
+#     put after the %post or %postun section
+#     One may verify which scriptlet has been included with
+#      rpm -qp --scripts  package.rpm
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -236,6 +275,16 @@ IF(CPACK_RPM_PACKAGE_REQUIRES)
   SET(TMP_RPM_REQUIRES "Requires: ${CPACK_RPM_PACKAGE_REQUIRES}")
 ENDIF(CPACK_RPM_PACKAGE_REQUIRES)
 
+# CPACK_RPM_PACKAGE_PROVIDES
+# Placeholder used to specify binary RPM dependencies (if any)
+# see http://www.rpm.org/max-rpm/s1-rpm-depend-manual-dependencies.html
+IF(CPACK_RPM_PACKAGE_PROVIDES)
+  IF(CPACK_RPM_PACKAGE_DEBUG)
+    MESSAGE("CPackRPM:Debug: User defined Provides:\n ${CPACK_RPM_PACKAGE_PROVIDES}")
+  ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+  SET(TMP_RPM_PROVIDES "Provides: ${CPACK_RPM_PACKAGE_PROVIDES}")
+ENDIF(CPACK_RPM_PACKAGE_PROVIDES)
+
 # CPACK_RPM_SPEC_INSTALL_POST
 # May be used to define a RPM post intallation script
 # for example setting it to "/bin/true" may prevent
@@ -247,6 +296,48 @@ IF(CPACK_RPM_SPEC_INSTALL_POST)
   SET(TMP_RPM_SPEC_INSTALL_POST "%define __spec_install_post ${CPACK_RPM_SPEC_INSTALL_POST}")
 ENDIF(CPACK_RPM_SPEC_INSTALL_POST)
 
+# CPACK_RPM_POST_INSTALL_SCRIPT_FILE
+# CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE
+# May be used to embbed a post (un)installation script in the spec file.
+# The refered script file(s) will be read and directly
+# put after the %post or %postun section
+if(CPACK_RPM_POST_INSTALL_SCRIPT_FILE)
+  if(EXISTS ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
+    file(READ ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE} CPACK_RPM_SPEC_POSTINSTALL)
+  else(EXISTS ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
+    message("CPackRPM:Warning: CPACK_RPM_POST_INSTALL_SCRIPT_FILE <${CPACK_RPM_POST_INSTALL_SCRIPT_FILE}> does not exists - ignoring")
+  endif(EXISTS ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
+endif(CPACK_RPM_POST_INSTALL_SCRIPT_FILE)
+
+if(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE)
+  if(EXISTS ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
+    file(READ ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE} CPACK_RPM_SPEC_POSTUNINSTALL)
+  else(EXISTS ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
+    message("CPackRPM:Warning: CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE}> does not exists - ignoring")
+  endif(EXISTS ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
+endif(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE)
+
+# CPACK_RPM_PRE_INSTALL_SCRIPT_FILE
+# CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE
+# May be used to embbed a pre (un)installation script in the spec file.
+# The refered script file(s) will be read and directly
+# put after the %pre or %preun section
+if(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE)
+  if(EXISTS ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
+    file(READ ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE} CPACK_RPM_SPEC_PREINSTALL)
+  else(EXISTS ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
+    message("CPackRPM:Warning: CPACK_RPM_PRE_INSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE}> does not exists - ignoring")
+  endif(EXISTS ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
+endif(CPACK_RPM_PRE_INSTALL_SCRIPT_FILE)
+
+if(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE)
+  if(EXISTS ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
+    file(READ ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE} CPACK_RPM_SPEC_PREUNINSTALL)
+  else(EXISTS ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
+    message("CPackRPM:Warning: CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE}> does not exists - ignoring")
+  endif(EXISTS ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
+endif(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE)
+
 # CPACK_RPM_SPEC_MORE_DEFINE
 # This is a generated spec rpm file spaceholder
 IF(CPACK_RPM_SPEC_MORE_DEFINE)
@@ -254,10 +345,6 @@ IF(CPACK_RPM_SPEC_MORE_DEFINE)
     MESSAGE("CPackRPM:Debug: User defined more define spec line specified:\n ${CPACK_RPM_SPEC_MORE_DEFINE}")
   ENDIF(CPACK_RPM_PACKAGE_DEBUG)
 ENDIF(CPACK_RPM_SPEC_MORE_DEFINE)
-
-# CPACK_RPM_USER_BINARY_SPECFILE 
-# FIXME when this is set then CPack should us the 
-# user provided file.
 
 # Now we may create the RPM build tree structure
 SET(CPACK_RPM_ROOTDIR "${CPACK_TOPLEVEL_DIRECTORY}")
@@ -279,75 +366,111 @@ SET(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
 SET(CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
 
 # Use files tree to construct files command (spec file)
-EXECUTE_PROCESS(COMMAND find -type f
+# We should not forget to include symlinks (thus -o -type l)
+# We must remove the './' due to the local search (thus the sed)
+# Then we must authorize any man pages extension (adding * at the end)
+# because rpmbuild may automatically compress those files
+EXECUTE_PROCESS(COMMAND find -type f -o -type l
                COMMAND sed {s/\\.//}
+               COMMAND sed {s/.*man.*\\/.*/&*/}
                WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}"
                OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
- 
+
+# The name of the final spec file to be used by rpmbuild
 SET(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}.spec")
-IF(CPACK_RPM_USER_BINARY_SPECFILE)
-  # User may have specified SPECFILE just use it
-  MESSAGE("CPackRPM: Will use user specified spec file: ${CPACK_RPM_USER_BINARY_SPECFILE}")
-  # Note that user provided file is processed for @var replacement
-  CONFIGURE_FILE(${CPACK_RPM_USER_BINARY_SPECFILE} ${CPACK_RPM_BINARY_SPECFILE} @ONLY)
-ELSE(CPACK_RPM_USER_BINARY_SPECFILE)
-  # No User specified spec file generate a valid one using var values
-  IF(CPACK_RPM_PACKAGE_DEBUG)
-    MESSAGE("CPackRPM:Debug: CPACK_TOPLEVEL_DIRECTORY          = ${CPACK_TOPLEVEL_DIRECTORY}")
-    MESSAGE("CPackRPM:Debug: CPACK_TOPLEVEL_TAG                = ${CPACK_TOPLEVEL_TAG}")
-    MESSAGE("CPackRPM:Debug: CPACK_TEMPORARY_DIRECTORY         = ${CPACK_TEMPORARY_DIRECTORY}")
-    MESSAGE("CPackRPM:Debug: CPACK_OUTPUT_FILE_NAME            = ${CPACK_OUTPUT_FILE_NAME}")
-    MESSAGE("CPackRPM:Debug: CPACK_OUTPUT_FILE_PATH            = ${CPACK_OUTPUT_FILE_PATH}")
-    MESSAGE("CPackRPM:Debug: CPACK_PACKAGE_FILE_NAME           = ${CPACK_PACKAGE_FILE_NAME}")
-    MESSAGE("CPackRPM:Debug: CPACK_RPM_BINARY_SPECFILE         = ${CPACK_RPM_BINARY_SPECFILE}")
-    MESSAGE("CPackRPM:Debug: CPACK_PACKAGE_INSTALL_DIRECTORY   = ${CPACK_PACKAGE_INSTALL_DIRECTORY}")
-    MESSAGE("CPackRPM:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = ${CPACK_TEMPORARY_PACKAGE_FILE_NAME}")
-  ENDIF(CPACK_RPM_PACKAGE_DEBUG)
-  FILE(WRITE ${CPACK_RPM_BINARY_SPECFILE}
-    "# -*- rpm-spec -*-
-Buildroot:      ${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}
-Summary:        ${CPACK_RPM_PACKAGE_SUMMARY}
-Name:           ${CPACK_RPM_PACKAGE_NAME}
-Version:        ${CPACK_RPM_PACKAGE_VERSION}
-Release:        ${CPACK_RPM_PACKAGE_RELEASE}
-License:        ${CPACK_RPM_PACKAGE_LICENSE}
-Group:          ${CPACK_RPM_PACKAGE_GROUP}
-Vendor:         ${CPACK_RPM_PACKAGE_VENDOR}
-${TMP_RPM_REQUIRES}
-${TMP_RPM_BUILDARCH}
-
-#p define prefix ${CMAKE_INSTALL_PREFIX}
-%define _rpmdir ${CPACK_RPM_DIRECTORY}
-%define _rpmfilename ${CPACK_RPM_FILE_NAME}
+ 
+# Print out some debug information if we were asked for that
+IF(CPACK_RPM_PACKAGE_DEBUG)
+   MESSAGE("CPackRPM:Debug: CPACK_TOPLEVEL_DIRECTORY          = ${CPACK_TOPLEVEL_DIRECTORY}")
+   MESSAGE("CPackRPM:Debug: CPACK_TOPLEVEL_TAG                = ${CPACK_TOPLEVEL_TAG}")
+   MESSAGE("CPackRPM:Debug: CPACK_TEMPORARY_DIRECTORY         = ${CPACK_TEMPORARY_DIRECTORY}")
+   MESSAGE("CPackRPM:Debug: CPACK_OUTPUT_FILE_NAME            = ${CPACK_OUTPUT_FILE_NAME}")
+   MESSAGE("CPackRPM:Debug: CPACK_OUTPUT_FILE_PATH            = ${CPACK_OUTPUT_FILE_PATH}")
+   MESSAGE("CPackRPM:Debug: CPACK_PACKAGE_FILE_NAME           = ${CPACK_PACKAGE_FILE_NAME}")
+   MESSAGE("CPackRPM:Debug: CPACK_RPM_BINARY_SPECFILE         = ${CPACK_RPM_BINARY_SPECFILE}")
+   MESSAGE("CPackRPM:Debug: CPACK_PACKAGE_INSTALL_DIRECTORY   = ${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+   MESSAGE("CPackRPM:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = ${CPACK_TEMPORARY_PACKAGE_FILE_NAME}")
+ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+ 
+# USER generated spec file handling.
+# We should generate a spec file template:
+#  - either because the user asked for it : CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
+#  - or the user did not provide one : NOT CPACK_RPM_USER_BINARY_SPECFILE
+#
+IF(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
+   FILE(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
+      "# -*- rpm-spec -*-
+Buildroot:      \@CPACK_RPM_DIRECTORY\@/\@CPACK_PACKAGE_FILE_NAME\@
+Summary:        \@CPACK_RPM_PACKAGE_SUMMARY\@
+Name:           \@CPACK_RPM_PACKAGE_NAME\@
+Version:        \@CPACK_RPM_PACKAGE_VERSION\@
+Release:        \@CPACK_RPM_PACKAGE_RELEASE\@
+License:        \@CPACK_RPM_PACKAGE_LICENSE\@
+Group:          \@CPACK_RPM_PACKAGE_GROUP\@
+Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
+\@TMP_RPM_REQUIRES\@
+\@TMP_RPM_PROVIDES\@
+\@TMP_RPM_BUILDARCH\@
+ 
+#p define prefix \@CMAKE_INSTALL_PREFIX\@
+%define _rpmdir \@CPACK_RPM_DIRECTORY\@
+%define _rpmfilename \@CPACK_RPM_FILE_NAME\@
 %define _unpackaged_files_terminate_build 0
-%define _topdir ${CPACK_RPM_DIRECTORY}
-${TMP_RPM_SPEC_INSTALL_POST}
-${CPACK_RPM_SPEC_MORE_DEFINE}
-
+%define _topdir \@CPACK_RPM_DIRECTORY\@
+\@TMP_RPM_SPEC_INSTALL_POST\@
+\@CPACK_RPM_SPEC_MORE_DEFINE\@
+  
 %description
-${CPACK_RPM_PACKAGE_DESCRIPTION}
+\@CPACK_RPM_PACKAGE_DESCRIPTION\@
 
-# This is a shortcutted spec file
-# generated by CMake RPM generator
-# we skip the _prepn _build and _install
-# steps because CPack does that for us
-# WE MUST NOT DO ANYTHING in those steps because they
-# may fail for non-privileged user
-#p prep
+# This is a shortcutted spec file generated by CMake RPM generator
+# we skip _install step because CPack does that for us.
+# We do only save CPack installed tree in _prepr
+# and then restore it in build.
+%prep
+mv $RPM_BUILD_ROOT \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot
 
 #p build
   
-#p install
+%install
+if [ -e $RPM_BUILD_ROOT ];
+then
+  mv \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot/* $RPM_BUILD_ROOT 
+else
+  mv \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot $RPM_BUILD_ROOT 
+fi 
 
 %clean
 
+%post
+\@CPACK_RPM_SPEC_POSTINSTALL\@
+
+%postun
+\@CPACK_RPM_SPEC_POSTUNINSTALL\@
+
+%pre
+\@CPACK_RPM_SPEC_PREINSTALL\@
+
+%preun
+\@CPACK_RPM_SPEC_PREUNINSTALL\@
+
 %files
 %defattr(-,root,root,-)
-#p dir %{prefix}
-#p {prefix}/*
 ${CPACK_RPM_INSTALL_FILES}
 
 %changelog
+* Sat Nov 28 2009 Erk <eric.noulard@gmail.com>
+  Refix backup/restore install tree for OpenSuSE 11.2
+* Sun Nov 22 2009 Erk <eric.noulard@gmail.com>
+  Include symlinks in the file list.
+* Sat Nov 14 2009 Erk <eric.noulard@gmail.com>
+  Replace prep and build step with backup and restore
+  of the previously CPack installed tree. This should
+  mimic what is expected in rpmbuild usual steps
+* Wed Nov 11 2009 Erk <eric.noulard@gmail.com>
+  Add support for USER defined pre/post[un]install scripts
+* Wed Oct 07 2009 Erk <eric.noulard@gmail.com>
+  Add user custom spec file support 
 * Sat Oct 03 2009 Kami <cmoidavid@gmail.com>
   Update to handle more precisely the files section
 * Mon Oct 03 2008 Erk <eric.noulard@gmail.com>
@@ -358,8 +481,27 @@ ${CPACK_RPM_INSTALL_FILES}
 * Tue Aug 16 2007 Erk <eric.noulard@gmail.com>
   Generated by CPack RPM Generator and associated macros
 ")
-ENDIF(CPACK_RPM_USER_BINARY_SPECFILE)
+  # Stop here if we were asked to only generate a template USER spec file
+  # The generated file may then be used as a template by user who wants
+  # to customize their own spec file.  
+  IF(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE)
+     MESSAGE(FATAL_ERROR "CPackRPM: STOP here Generated USER binary spec file templare is: ${CPACK_RPM_BINARY_SPECFILE}.in")
+  ENDIF(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE)
+ENDIF(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
 
+# After that we may either use a user provided spec file
+# or generate one using appropriate variables value.  
+IF(CPACK_RPM_USER_BINARY_SPECFILE)
+  # User may have specified SPECFILE just use it
+  MESSAGE("CPackRPM: Will use USER specified spec file: ${CPACK_RPM_USER_BINARY_SPECFILE}")
+  # The user provided file is processed for @var replacement
+  CONFIGURE_FILE(${CPACK_RPM_USER_BINARY_SPECFILE} ${CPACK_RPM_BINARY_SPECFILE} @ONLY)
+ELSE(CPACK_RPM_USER_BINARY_SPECFILE)
+  # No User specified spec file, will use the generated spec file    
+  MESSAGE("CPackRPM: Will use GENERATED spec file: ${CPACK_RPM_BINARY_SPECFILE}")      
+  # Note the just created file is processed for @var replacement  
+  CONFIGURE_FILE(${CPACK_RPM_BINARY_SPECFILE}.in ${CPACK_RPM_BINARY_SPECFILE} @ONLY)
+ENDIF(CPACK_RPM_USER_BINARY_SPECFILE)
 
 IF(RPMBUILD_EXECUTABLE)
   # Now call rpmbuild using the SPECFILE

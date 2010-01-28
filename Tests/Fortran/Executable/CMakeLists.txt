@@ -1,6 +1,6 @@
 include_directories(${Library_MODDIR})
-include_directories(${testf_BINARY_DIR}/External)
-link_directories(${testf_BINARY_DIR}/External)
+include_directories(${External_BINARY_DIR})
+link_directories(${External_BINARY_DIR})
 
 add_executable(subdir_exe2 main.f90)
 target_link_libraries(subdir_exe2 subdir_mods)

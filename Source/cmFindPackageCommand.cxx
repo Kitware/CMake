@@ -268,6 +268,7 @@ cmFindPackageCommand::cmFindPackageCommand()
     "2. Search paths specified in cmake-specific environment variables.  "
     "These are intended to be set in the user's shell configuration.  "
     "This can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
+    "   <package>_DIR\n"
     "   CMAKE_PREFIX_PATH\n"
     "   CMAKE_FRAMEWORK_PATH\n"
     "   CMAKE_APPBUNDLE_PATH\n"

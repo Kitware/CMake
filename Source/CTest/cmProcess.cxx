@@ -79,7 +79,10 @@ bool cmProcess::Buffer::GetLine(std::string& line)
       // Extract the range first..last as a line.
       const char* text = &*this->begin() + this->First;
       size_type length = this->Last - this->First;
-      length -= (length && text[length-1] == '\r')? 1:0;
+      while(length && text[length-1] == '\r')
+        {
+        length --;
+        }
       line.assign(text, length);
 
       // Start a new range for the next line.

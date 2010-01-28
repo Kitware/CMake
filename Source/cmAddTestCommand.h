@@ -56,7 +56,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  add_test(testname Exename arg1 arg2 ...)\n"
+      "  add_test(testname Exename arg1 arg2 ... )\n"
       "If the ENABLE_TESTING command has been run, this command adds a "
       "test target to the current directory. If ENABLE_TESTING has not "
       "been run, this command does nothing.  "
@@ -65,7 +65,7 @@ public:
       "built by this project or an arbitrary executable on the "
       "system (like tclsh).  The test will be run with the current working "
       "directory set to the CMakeList.txt files corresponding directory "
-      "in the binary tree."
+      "in the binary tree.\n"
       "\n"
       "  add_test(NAME <name> [CONFIGURATIONS [Debug|Release|...]]\n"
       "           COMMAND <command> [arg1 [arg2 ...]])\n"

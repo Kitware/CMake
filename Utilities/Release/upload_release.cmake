@@ -1,6 +1,6 @@
 set(PROJECT_PREFIX cmake-)
 if(NOT VERSION)
- set(VERSION 2.6)
+ set(VERSION 2.8)
 endif(NOT VERSION)
 file(GLOB FILES ${CMAKE_CURRENT_SOURCE_DIR} "${PROJECT_PREFIX}*")
 message("${FILES}")

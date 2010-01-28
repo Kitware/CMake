@@ -268,6 +268,17 @@ public:
     UNKNOWN_FILE_FORMAT
   };
 
+  enum CompareOp {
+    OP_LESS,
+    OP_GREATER,
+    OP_EQUAL
+  };
+
+  /**
+   * Compare versions
+   */
+  static bool VersionCompare(CompareOp op, const char* lhs, const char* rhs);
+
   /**
    * Determine the file type based on the extension
    */
@@ -347,6 +358,20 @@ public:
       AppendEnv to put the environment back to the way it
       was. */
   static void RestoreEnv(const std::vector<std::string>& env);
+
+  /** Helper class to save and restore the environment.
+      Instantiate this class as an automatic variable on
+      the stack. Its constructor saves a copy of the current
+      environment and then its destructor restores the
+      original environment. */
+  class SaveRestoreEnvironment
+  {
+  public:
+    SaveRestoreEnvironment();
+    virtual ~SaveRestoreEnvironment();
+  private:
+    std::vector<std::string> Env;
+  };
 #endif
 
   /** Setup the environment to enable VS 8 IDE output.  */

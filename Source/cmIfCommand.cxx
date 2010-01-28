@@ -525,6 +525,13 @@ namespace
           cmSystemTools::FileIsDirectory((argP1)->c_str()),
           reducible, arg, newArgs, argP1, argP2);
         }
+      // does a symlink with this name exist
+      if (*arg == "IS_SYMLINK" && argP1  != newArgs.end())
+        {
+        HandlePredicate(
+          cmSystemTools::FileIsSymlink((argP1)->c_str()),
+          reducible, arg, newArgs, argP1, argP2);
+        }
       // is the given path an absolute path ?
       if (*arg == "IS_ABSOLUTE" && argP1  != newArgs.end())
         {

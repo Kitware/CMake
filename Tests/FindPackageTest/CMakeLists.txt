@@ -40,6 +40,7 @@ SET(PACKAGES
   WrongA WrongB WrongC WrongD
   wibbleA wibbleB
   RecursiveA RecursiveB RecursiveC
+  EnvA EnvB
   )
 FOREACH(p ${PACKAGES})
   SET(${p}_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
@@ -96,6 +97,13 @@ FIND_PACKAGE(RecursiveA)
 FIND_PACKAGE(RecursiveB 2)
 FIND_PACKAGE(RecursiveC 3.1 EXACT)
 
+# Test <Package>_DIR environment variable.
+# We erase the main prefix path to ensure the env var is used.
+SET(CMAKE_PREFIX_PATH)
+SET(ENV{EnvA_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/lib/zot-3.1")
+FIND_PACKAGE(EnvA 3.1 EXACT QUIET NAMES zot) # Should Work
+FIND_PACKAGE(EnvB 3.1 EXACT QUIET NAMES zot) # Should Fail
+
 # Expected locations at which packages should be found.
 SET(foo_EXPECTED "lib/foo-1.2/foo-config.cmake")
 SET(Foo_EXPECTED "lib/foo-1.2/CMake/FooConfig.cmake")
@@ -123,6 +131,8 @@ SET(wibbleB_EXPECTED "B/wibble-config.cmake")
 SET(RecursiveA_EXPECTED "lib/RecursiveA/recursivea-config.cmake")
 SET(RecursiveB_EXPECTED "lib/zot-2.0/zot-config.cmake")
 SET(RecursiveC_EXPECTED "lib/zot-3.1/zot-config.cmake")
+SET(EnvA_EXPECTED "lib/zot-3.1/zot-config.cmake")
+SET(EnvB_MISSING "EnvB_DIR-NOTFOUND")
 
 # Check the results.
 FOREACH(p ${PACKAGES})

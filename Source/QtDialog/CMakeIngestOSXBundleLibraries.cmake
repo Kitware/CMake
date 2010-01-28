@@ -210,7 +210,7 @@ macro(copy_library_into_bundle clib_bundle clib_libsrc clib_dstlibs clib_fixups)
     get_filename_component(fwdirname "${fw_srcdir}" NAME)
     string(REGEX REPLACE "^(.*)\\.framework$" "\\1" fwname "${fwdirname}")
     string(REGEX REPLACE "^.*/${fwname}\\.framework/(.*)$" "\\1" fwlibname "${clib_libsrc}")
-    set(fw_dstdir "${clib_bundle}/Contents/Frameworks/${fwdirname}")
+    set(fw_dstdir "${clib_bundle}/Contents/Frameworks")
 
 #     message("")
 #     message("fwdirname: '${fwdirname}'")
@@ -240,17 +240,25 @@ macro(copy_library_into_bundle clib_bundle clib_libsrc clib_dstlibs clib_fixups)
       "${fw_src}" "${fw_dstdir}/${fwlibname}"
     )
 
+    get_filename_component(fw_src_path "${fw_src}" PATH)
+    message("Checking ${fw_src_path}/Resources")
+    if(EXISTS "${fw_src_path}/Resources")
+      message("Copy: ${CMAKE_COMMAND} -E copy_directory \"${fw_src_path}/Resources/\"  \"${fw_dstdir}/Resources/\"")
+      execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${fw_src_path}/Resources/" "${fw_dstdir}/${fwdirname}/Resources/")
+    endif(EXISTS "${fw_src_path}/Resources")
+
     execute_process(COMMAND install_name_tool
-      -id "@executable_path/../Frameworks/${fwdirname}/${fwlibname}"
-      "${clib_bundle}/Contents/Frameworks/${fwdirname}/${fwlibname}"
+      -id "@executable_path/../Frameworks/${fwlibname}"
+      "${clib_bundle}/Contents/Frameworks/${fwlibname}"
     )
     set(${clib_dstlibs} ${${clib_dstlibs}}
-      "${clib_bundle}/Contents/Frameworks/${fwdirname}/${fwlibname}"
+      "${clib_bundle}/Contents/Frameworks/${fwlibname}"
     )
     set(${clib_fixups} ${${clib_fixups}}
       "-change"
       "${clib_libsrc}"
-      "@executable_path/../Frameworks/${fwdirname}/${fwlibname}"
+      "@executable_path/../Frameworks/${fwlibname}"
     )
   else("${clib_libsrc}" MATCHES ".framework/.*/.*/.*")
     if("${clib_libsrc}" MATCHES "/")

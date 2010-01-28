@@ -825,6 +825,34 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
     }
 }
 
+//----------------------------------------------------------------------------
+cmsys::auto_ptr<cmCustomCommand>
+cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
+                                                    const char* config)
+{
+  cmsys::auto_ptr<cmCustomCommand> pcc;
+
+  // VS6 forgets to create the output directory for archives if it
+  // differs from the intermediate directory.
+  if(target.GetType() != cmTarget::STATIC_LIBRARY) { return pcc; }
+  std::string outDir = target.GetDirectory(config, false);
+
+  // Add a pre-link event to create the directory.
+  cmCustomCommandLine command;
+  command.push_back(this->Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
+  command.push_back("-E");
+  command.push_back("make_directory");
+  command.push_back(outDir);
+  std::vector<std::string> no_output;
+  std::vector<std::string> no_depends;
+  cmCustomCommandLines commands;
+  commands.push_back(command);
+  pcc.reset(new cmCustomCommand(no_output, no_depends, commands, 0, 0));
+  pcc->SetEscapeOldStyle(false);
+  pcc->SetEscapeAllowMakeVars(true);
+  return pcc;
+}
+
 // look for custom rules on a target and collect them together
 std::string 
 cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target, 
@@ -845,6 +873,11 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
   event.Write(target.GetPreLinkCommands());
   cmsys::auto_ptr<cmCustomCommand> pcc(
     this->MaybeCreateImplibDir(target, configName));
+  if(pcc.get())
+    {
+    event.Write(*pcc);
+    }
+  pcc = this->MaybeCreateOutputDir(target, configName);
   if(pcc.get())
     {
     event.Write(*pcc);
@@ -1193,6 +1226,30 @@ void cmLocalVisualStudio6Generator
     outputNameRelWithDebInfo = target.GetFullName("RelWithDebInfo");
     }
 
+  // Compute the output directory for the target.
+  std::string outputDirDebug;
+  std::string outputDirRelease;
+  std::string outputDirMinSizeRel;
+  std::string outputDirRelWithDebInfo;
+  if(target.GetType() == cmTarget::EXECUTABLE ||
+     target.GetType() == cmTarget::STATIC_LIBRARY ||
+     target.GetType() == cmTarget::SHARED_LIBRARY ||
+     target.GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    outputDirDebug =
+        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
+                       target.GetDirectory("Debug").c_str()));
+    outputDirRelease =
+        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
+                 target.GetDirectory("Release").c_str()));
+    outputDirMinSizeRel =
+        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
+                 target.GetDirectory("MinSizeRel").c_str()));
+    outputDirRelWithDebInfo =
+        removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
+                 target.GetDirectory("RelWithDebInfo").c_str()));
+    }
+
   // Compute the proper link information for the target.
   std::string optionsDebug;
   std::string optionsRelease;
@@ -1412,11 +1469,21 @@ void cmLocalVisualStudio6Generator
 
     if(targetBuilds)
       {
+      cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_DEBUG",
+                                   outputDirDebug.c_str());
+      cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_RELEASE",
+                                   outputDirRelease.c_str());
+      cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_MINSIZEREL",
+                                   outputDirMinSizeRel.c_str());
+      cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_RELWITHDEBINFO",
+                                   outputDirRelWithDebInfo.c_str());
+#ifdef CM_USE_OLD_VS6
       std::string outPath = target.GetDirectory();
       cmSystemTools::ReplaceString
         (line, "OUTPUT_DIRECTORY",
          removeQuotes(this->ConvertToOptionallyRelativeOutputPath
                       (outPath.c_str())).c_str());
+#endif
       }
 
     cmSystemTools::ReplaceString(line, 

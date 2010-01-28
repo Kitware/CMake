@@ -13,6 +13,21 @@ if(NOT nonexistent2 STREQUAL "${bindir}/THIS_IS_A_NONEXISTENT_FILE")
 endif()
 
 #
+# Test treatment of relative paths
+#
+foreach(c REALPATH ABSOLUTE)
+  get_filename_component(dir "subdir/THIS_IS_A_NONEXISTENT_FILE" ${c})
+  if(NOT "${dir}" STREQUAL "${bindir}/subdir/THIS_IS_A_NONEXISTENT_FILE")
+    message(FATAL_ERROR
+      "${c} does not handle relative paths.  Expected:\n"
+      "  ${bindir}/subdir/THIS_IS_A_NONEXISTENT_FILE\n"
+      "but got:\n"
+      "  ${nonexistent1}\n"
+      )
+  endif()
+endforeach()
+
+#
 # Test symbolic link resolution
 #
 if(UNIX)

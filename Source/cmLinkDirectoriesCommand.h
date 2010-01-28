@@ -70,6 +70,8 @@ public:
     }
   
   cmTypeMacro(cmLinkDirectoriesCommand, cmCommand);
+private:
+  void AddLinkDir(std::string const& dir);
 };
 
 

@@ -52,6 +52,8 @@ private:
   void DoRevision(Revision const& revision,
                   std::vector<Change> const& changes);
 
+  void WriteXMLGlobal(std::ostream& xml);
+
   // Parsing helper classes.
   class InfoParser;
   class LogParser;

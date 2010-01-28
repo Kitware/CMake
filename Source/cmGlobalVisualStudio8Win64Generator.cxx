@@ -42,10 +42,12 @@ void cmGlobalVisualStudio8Win64Generator
   entry.Full = "";
 }
 
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Win64Generator
-::EnableLanguage(std::vector<std::string>const &  lang, 
-                 cmMakefile *mf, bool optional)
+::AddPlatformDefinitions(cmMakefile* mf)
 {
+  this->cmGlobalVisualStudio8Generator::AddPlatformDefinitions(mf);
   mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
-  cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "x64");
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "x64");
 }

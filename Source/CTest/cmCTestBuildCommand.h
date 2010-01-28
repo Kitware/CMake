@@ -82,6 +82,10 @@ protected:
     ctb_BUILD = ct_LAST,
     ctb_NUMBER_ERRORS,
     ctb_NUMBER_WARNINGS,
+    ctb_TARGET,
+    ctb_CONFIGURATION,
+    ctb_FLAGS,
+    ctb_PROJECT_NAME,
     ctb_LAST
   };
 

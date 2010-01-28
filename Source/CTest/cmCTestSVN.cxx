@@ -440,3 +440,11 @@ void cmCTestSVN::LoadModifications()
   OutputLogger err(this->Log, "status-err> ");
   this->RunChild(svn_status, &out, &err);
 }
+
+//----------------------------------------------------------------------------
+void cmCTestSVN::WriteXMLGlobal(std::ostream& xml)
+{
+  this->cmCTestGlobalVC::WriteXMLGlobal(xml);
+
+  xml << "\t<SVNPath>" << this->Base << "</SVNPath>\n";
+}

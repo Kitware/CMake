@@ -1,16 +1,9 @@
-# GCC is the default compiler on Linux.
 SET(CMAKE_DL_LIBS "dl")
-SET(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")        
-SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")
-SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-rdynamic")  
 SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
 SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
 SET(CMAKE_SHARED_LIBRARY_RPATH_LINK_C_FLAG "-Wl,-rpath-link,")
 SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,-soname,")
-SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-Wl,-soname,")
-SET(CMAKE_SHARED_LIBRARY_SONAME_Fortran_FLAG "-Wl,-soname,")
 SET(CMAKE_EXE_EXPORTS_C_FLAG "-Wl,--export-dynamic")
-SET(CMAKE_EXE_EXPORTS_CXX_FLAG "-Wl,--export-dynamic")
 
 # Shared libraries with no builtin soname may not be linked safely by
 # specifying the file path.
@@ -59,5 +52,3 @@ INCLUDE(Platform/UnixPaths)
 IF(EXISTS "/etc/debian_version")
   SET_PROPERTY(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
 ENDIF(EXISTS "/etc/debian_version")
-# always include the gcc compiler information
-INCLUDE(Platform/gcc)

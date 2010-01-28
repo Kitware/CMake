@@ -34,7 +34,7 @@ function(test_fortran_c_interface_module)
   FortranCInterface_VERIFY()
   FortranCInterface_VERIFY(CXX)
   if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
-    if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "SunPro|MIPSpro")
+    if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "SunPro|MIPSpro|PathScale")
       set(module_expected 1)
     endif()
     if(FortranCInterface_MODULE_FOUND OR module_expected)
@@ -171,13 +171,20 @@ if(TEST_MODULE_DEPENDS)
     set(External_CONFIG_TYPE)
     set(External_BUILD_TYPE -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE})
   endif(CMAKE_CONFIGURATION_TYPES)
+  set(External_SOURCE_DIR "${testf_SOURCE_DIR}/External")
+  set(External_BINARY_DIR "${testf_BINARY_DIR}/External")
+  if("${testf_BINARY_DIR}" MATCHES " ")
+    # Our build tree has a space, so the build tool supports spaces.
+    # Test using modules from a path with spaces.
+    set(External_BINARY_DIR "${External_BINARY_DIR} Build")
+  endif()
   add_custom_command(
     OUTPUT ${testf_BINARY_DIR}/ExternalProject
     COMMAND ${CMAKE_CTEST_COMMAND}
     ARGS ${External_CONFIG_TYPE}
          --build-and-test
-         ${testf_SOURCE_DIR}/External
-         ${testf_BINARY_DIR}/External
+         ${External_SOURCE_DIR}
+         ${External_BINARY_DIR}
          --build-noclean
          --build-two-config
          --build-project ExtFort

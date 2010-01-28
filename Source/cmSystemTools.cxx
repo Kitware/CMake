@@ -1672,6 +1672,18 @@ void cmSystemTools::RestoreEnv(const std::vector<std::string>& env)
     PutEnv(eit->c_str());
     }
 }
+
+//----------------------------------------------------------------------
+cmSystemTools::SaveRestoreEnvironment::SaveRestoreEnvironment()
+{
+  this->Env = cmSystemTools::GetEnvironmentVariables();
+}
+
+//----------------------------------------------------------------------
+cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
+{
+  cmSystemTools::RestoreEnv(this->Env);
+}
 #endif
 
 void cmSystemTools::EnableVSConsoleOutput()
@@ -2588,6 +2600,33 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
   (void)changed;
   return false;
 #endif
+}
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
+                                   const char* lhss, const char* rhss)
+{
+  unsigned int lhs[4] = {0,0,0,0};
+  unsigned int rhs[4] = {0,0,0,0};
+  sscanf(lhss, "%u.%u.%u.%u", &lhs[0], &lhs[1], &lhs[2], &lhs[3]);
+  sscanf(rhss, "%u.%u.%u.%u", &rhs[0], &rhs[1], &rhs[2], &rhs[3]);
+
+  // Do component-wise comparison.
+  for(unsigned int i=0; i < 4; ++i)
+    {
+    if(lhs[i] < rhs[i])
+      {
+      // lhs < rhs, so true if operation is LESS
+      return op == cmSystemTools::OP_LESS;
+      }
+    else if(lhs[i] > rhs[i])
+      {
+      // lhs > rhs, so true if operation is GREATER
+        return op == cmSystemTools::OP_GREATER;
+      }
+    }
+  // lhs == rhs, so true if operation is EQUAL
+  return op == cmSystemTools::OP_EQUAL;
 }
 
 //----------------------------------------------------------------------------

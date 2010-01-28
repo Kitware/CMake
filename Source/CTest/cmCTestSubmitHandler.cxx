@@ -72,6 +72,8 @@ void cmCTestSubmitHandler::Initialize()
     this->SubmitPart[p] = true;
     }
   this->CDash = false;
+  this->HasWarnings = false;
+  this->HasErrors = false;
   this->Superclass::Initialize();
   this->HTTPProxy = "";
   this->HTTPProxyType = 0;
@@ -309,7 +311,12 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
             }
           }
         }
-
+      if(this->CTest->ShouldUseHTTP10())
+        {
+        curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+        }
+      // enable HTTP ERROR parsing
+      curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
       /* enable uploading */
       curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);
 
@@ -409,6 +416,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
         cmCTestLog(this->CTest, DEBUG, "CURL output: ["
           << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
           << std::endl);
+        this->ParseResponse(chunk);
         }
       if ( chunkDebug.size() > 0 )
         {
@@ -452,6 +460,36 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
     }
   ::curl_global_cleanup();
   return true;
+}
+
+//----------------------------------------------------------------------------
+void cmCTestSubmitHandler
+::ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk)
+{
+  std::string output = "";
+
+  for(cmCTestSubmitHandlerVectorOfChar::iterator i = chunk.begin();
+      i != chunk.end(); ++i)
+    {
+    output += *i;
+    }
+  output = cmSystemTools::UpperCase(output);
+  
+  if(output.find("WARNING") != std::string::npos)
+    {
+    this->HasWarnings = true;
+    }
+  if(output.find("ERROR") != std::string::npos)
+    {
+    this->HasErrors = true;
+    }
+  
+  if(this->HasWarnings || this->HasErrors)
+    {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Server Response:\n" <<
+          cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "\n");
+    }
+  
 }
 
 //----------------------------------------------------------------------------
@@ -1149,9 +1187,20 @@ int cmCTestSubmitHandler::ProcessHandler()
         return -1;
         }
       }
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Submission successful"
-               << std::endl);
-    ofs << "   Submission successful" << std::endl;
+    if(this->HasErrors)
+      {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Errors occurred during "
+        "submission." << std::endl);
+      ofs << "   Errors occurred during submission. " << std::endl;
+      }
+    else
+      {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Submission successful" <<
+        (this->HasWarnings ? ", with warnings." : "") << std::endl);
+      ofs << "   Submission successful" << 
+        (this->HasWarnings ? ", with warnings." : "") << std::endl;
+      }
+
     return 0;
     }
   else if ( dropMethod == "xmlrpc" )

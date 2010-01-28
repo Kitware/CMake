@@ -133,6 +133,11 @@ public:
   std::vector<cmLocalGenerator*>& GetChildren() { return this->Children; };
     
 
+#ifdef __APPLE__
+  void AddArchitectureFlags(std::string& flags, cmTarget* target,
+                            const char *lang, const char* config);
+#endif /* __APPLE__ */
+
   void AddLanguageFlags(std::string& flags, const char* lang,
                         const char* config);
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);

@@ -15,13 +15,6 @@ SET(CMAKE_PLATFORM_USES_PATH_WHEN_NO_SONAME 1)
 
 # fortran
 IF(CMAKE_COMPILER_IS_GNUG77)
-  SET(CMAKE_SHARED_LIBRARY_Fortran_FLAGS "-fPIC")            # -pic 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS "-shared -Wl,-E,-b,+nodefaultrpath")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS "-Wl,+s,-E,+nodefaultrpath")  # +s, flag for exe link to use shared lib
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_Fortran_FLAG "-Wl,+b")       # -rpath
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_Fortran_FLAG_SEP ":")   # : or empty
-  SET(CMAKE_SHARED_LIBRARY_SONAME_Fortran_FLAG "-Wl,+h")
-  SET(CMAKE_SHARED_LIBRARY_Fortran_FLAGS "-fPIC")     # -pic 
 ELSE(CMAKE_COMPILER_IS_GNUG77)
   # use ld directly to create shared libraries for hp cc
   SET(CMAKE_Fortran_CREATE_SHARED_LIBRARY
@@ -37,14 +30,6 @@ ENDIF(CMAKE_COMPILER_IS_GNUG77)
 
 # C compiler
 IF(CMAKE_COMPILER_IS_GNUCC)
-  # gnu gcc
-  SET(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")            # -pic 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared -Wl,-E,-b,+nodefaultrpath")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "-Wl,+s,-E,+nodefaultrpath")  # +s, flag for exe link to use shared lib
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,+b")       # -rpath
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")   # : or empty
-  SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,+h")
-  SET(CMAKE_SHARED_LIBRARY_C_FLAGS "-fPIC")     # -pic 
 ELSE(CMAKE_COMPILER_IS_GNUCC)
   # hp cc
   # use ld directly to create shared libraries for hp cc
@@ -64,14 +49,6 @@ ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 # CXX compiler
 IF(CMAKE_COMPILER_IS_GNUCXX) 
-  # for gnu C++
-  SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "-fPIC")            # -pic 
-  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "-shared -Wl,-E,-b,+nodefaultrpath")       # -shared
-  SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "-Wl,+s,-E,+nodefaultrpath")  # +s, flag for exe link to use shared lib
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG "-Wl,+b")       # -rpath
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG_SEP ":")   # : or empty
-  SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "-fPIC")     # -pic 
-  SET(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-Wl,+h")
 ELSE(CMAKE_COMPILER_IS_GNUCXX)
   # for hp aCC
   SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "+Z")            # -pic 

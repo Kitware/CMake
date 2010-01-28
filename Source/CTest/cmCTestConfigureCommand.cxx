@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmCTestConfigureCommand.h"
 
+#include "cmGlobalGenerator.h"
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 
@@ -66,6 +67,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
 
   const char* ctestConfigureCommand
     = this->Makefile->GetDefinition("CTEST_CONFIGURE_COMMAND");
+
   if ( ctestConfigureCommand && *ctestConfigureCommand )
     {
     this->CTest->SetCTestConfiguration("ConfigureCommand",
@@ -86,6 +88,29 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
           "variable");
         return 0;
         }
+
+      const std::string cmakelists_file = source_dir + "/CMakeLists.txt";
+      if ( !cmSystemTools::FileExists(cmakelists_file.c_str()) )
+        {
+        cmOStringStream e;
+        e << "CMakeLists.txt file does not exist ["
+          << cmakelists_file << "]";
+        this->SetError(e.str().c_str());
+        return 0;
+        }
+
+      bool multiConfig = false;
+      bool cmakeBuildTypeInOptions = false;
+
+      cmGlobalGenerator *gg =
+        this->Makefile->GetCMakeInstance()->CreateGlobalGenerator(
+          cmakeGeneratorName);
+      if(gg)
+        {
+        multiConfig = gg->IsMultiConfig();
+        delete gg;
+        }
+
       std::string cmakeConfigureCommand = "\"";
       cmakeConfigureCommand += this->CTest->GetCMakeExecutable();
       cmakeConfigureCommand += "\"";
@@ -95,8 +120,22 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       for (it= options.begin(); it!=options.end(); ++it)
         {
         option = *it;
+
         cmakeConfigureCommand += " \"";
         cmakeConfigureCommand += option;
+        cmakeConfigureCommand += "\"";
+
+        if ((0 != strstr(option.c_str(), "CMAKE_BUILD_TYPE=")) ||
+           (0 != strstr(option.c_str(), "CMAKE_BUILD_TYPE:STRING=")))
+          {
+          cmakeBuildTypeInOptions = true;
+          }
+        }
+
+      if (!multiConfig && !cmakeBuildTypeInOptions)
+        {
+        cmakeConfigureCommand += " \"-DCMAKE_BUILD_TYPE:STRING=";
+        cmakeConfigureCommand += this->CTest->GetConfigType();
         cmakeConfigureCommand += "\"";
         }
 
@@ -113,9 +152,9 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       }
     else
       {
-      this->SetError("Configure command is not specified. If this is a CMake "
-        "project, specify CTEST_CMAKE_GENERATOR, or if this is not CMake "
-        "project, specify CTEST_CONFIGURE_COMMAND.");
+      this->SetError("Configure command is not specified. If this is a "
+        "\"built with CMake\" project, set CTEST_CMAKE_GENERATOR. If not, "
+        "set CTEST_CONFIGURE_COMMAND.");
       return 0;
       }
     }

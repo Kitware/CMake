@@ -103,6 +103,14 @@
 # any outside mailing list and no documentation of the change will be
 # written.
 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5 FATAL_ERROR)
+IF(COMMAND CMAKE_POLICY)
+  CMAKE_POLICY(SET CMP0003 NEW)
+ENDIF(COMMAND CMAKE_POLICY)
+
+# Allow empty endif() and such with CMake 2.4.
+SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 1)
+
 #-----------------------------------------------------------------------------
 # If a namespace is not specified, use "kwsys" and enable testing.
 # This should be the case only when kwsys is not included inside
@@ -111,12 +119,6 @@ IF(NOT KWSYS_NAMESPACE)
   SET(KWSYS_NAMESPACE "kwsys")
   SET(KWSYS_STANDALONE 1)
 ENDIF(NOT KWSYS_NAMESPACE)
-IF(KWSYS_STANDALONE)
-  CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
-  IF(COMMAND CMAKE_POLICY)
-    CMAKE_POLICY(SET CMP0003 NEW)
-  ENDIF(COMMAND CMAKE_POLICY)
-ENDIF(KWSYS_STANDALONE)
 
 #-----------------------------------------------------------------------------
 # The project name is that of the specified namespace.
@@ -299,13 +301,6 @@ ELSE(COMMAND INSTALL)
   SET(KWSYS_INSTALL_LIB_DIR)
 ENDIF(COMMAND INSTALL)
 
-# Work-around for CMake 1.6.7 bug in custom command dependencies when
-# there is no executable output path.
-IF(NOT EXECUTABLE_OUTPUT_PATH)
-  SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}" CACHE PATH
-      "Output directory for executables.")
-ENDIF(NOT EXECUTABLE_OUTPUT_PATH)
-
 # Generated source files will need this header.
 STRING(COMPARE EQUAL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}"
   KWSYS_IN_SOURCE_BUILD)
@@ -474,19 +469,54 @@ IF(UNIX)
 ENDIF(UNIX)
 
 IF(KWSYS_USE_FundamentalType)
-  # Determine type sizes.
-  CHECK_TYPE_SIZE("char"      KWSYS_SIZEOF_CHAR)
-  CHECK_TYPE_SIZE("short"     KWSYS_SIZEOF_SHORT)
-  CHECK_TYPE_SIZE("int"       KWSYS_SIZEOF_INT)
-  CHECK_TYPE_SIZE("long"      KWSYS_SIZEOF_LONG)
-  CHECK_TYPE_SIZE("long long" KWSYS_SIZEOF_LONG_LONG)
-  CHECK_TYPE_SIZE("__int64"   KWSYS_SIZEOF___INT64)
-  IF(NOT KWSYS_SIZEOF_LONG_LONG)
-    SET(KWSYS_SIZEOF_LONG_LONG 0)
-  ENDIF(NOT KWSYS_SIZEOF_LONG_LONG)
-  IF(NOT KWSYS_SIZEOF___INT64)
-    SET(KWSYS_SIZEOF___INT64 0)
-  ENDIF(NOT KWSYS_SIZEOF___INT64)
+  # Look for type size helper macros.
+  KWSYS_PLATFORM_INFO_TEST(C KWSYS_C_TYPE_MACROS
+    "Checking for C type size macros")
+  SET(macro_regex ".*INFO:macro\\[([^]]*)\\].*")
+  FOREACH(info ${KWSYS_C_TYPE_MACROS})
+    IF("${info}" MATCHES "${macro_regex}")
+      STRING(REGEX REPLACE "${macro_regex}" "\\1" macro "${info}")
+      SET(KWSYS_C_HAS_MACRO_${macro} 1)
+    ENDIF()
+  ENDFOREACH()
+
+  # Determine type sizes at preprocessing time if possible, and
+  # otherwise fall back to a try-compile.
+  SET(KWSYS_C_TYPE_NAME_CHAR      "char")
+  SET(KWSYS_C_TYPE_NAME_SHORT     "short")
+  SET(KWSYS_C_TYPE_NAME_INT       "int")
+  SET(KWSYS_C_TYPE_NAME_LONG      "long")
+  SET(KWSYS_C_TYPE_NAME_LONG_LONG "long long")
+  SET(KWSYS_C_TYPE_NAME___INT64   "__int64")
+  FOREACH(type CHAR SHORT INT LONG LONG_LONG __INT64)
+    IF(KWSYS_C_HAS_MACRO___SIZEOF_${type}__)
+      # Use __SIZEOF_${type}__ macro.
+      SET(KWSYS_SIZEOF_${type} TRUE)
+      SET(KWSYS_C_CODE_SIZEOF_${type} "#define ${KWSYS_NAMESPACE}_SIZEOF_${type} __SIZEOF_${type}__")
+    ELSEIF(KWSYS_C_HAS_MACRO___${type}_MAX__)
+      # Use __${type}_MAX__ macro.
+      SET(KWSYS_SIZEOF_${type} TRUE)
+      SET(KWSYS_C_CODE_SIZEOF_${type} "#if __${type}_MAX__ == 0x7f
+# define ${KWSYS_NAMESPACE}_SIZEOF_${type} 1
+#elif __${type}_MAX__ == 0x7fff
+# define ${KWSYS_NAMESPACE}_SIZEOF_${type} 2
+#elif __${type}_MAX__ == 0x7fffffff
+# define ${KWSYS_NAMESPACE}_SIZEOF_${type} 4
+#elif __${type}_MAX__>>32 == 0x7fffffff
+# define ${KWSYS_NAMESPACE}_SIZEOF_${type} 8
+#else
+# error \"Cannot determine sizeof(${KWSYS_C_TYPE_NAME_${type}}).\"
+#endif")
+    ELSE()
+      # Configure a hard-coded type size.
+      CHECK_TYPE_SIZE("${KWSYS_C_TYPE_NAME_${type}}" KWSYS_SIZEOF_${type})
+      IF(NOT KWSYS_SIZEOF_${type})
+        SET(KWSYS_SIZEOF_${type} 0)
+      ENDIF()
+      SET(KWSYS_C_CODE_SIZEOF_${type}
+        "#define ${KWSYS_NAMESPACE}_SIZEOF_${type} ${KWSYS_SIZEOF_${type}}")
+    ENDIF()
+  ENDFOREACH()
 
   # Check uniqueness of types.
   IF(KWSYS_SIZEOF___INT64)
@@ -530,8 +560,9 @@ ENDIF(KWSYS_USE_FundamentalType)
 
 IF(KWSYS_USE_IOStream)
   # Determine whether iostreams support long long.
-  CHECK_TYPE_SIZE("long long" KWSYS_SIZEOF_LONG_LONG)
-  IF(KWSYS_SIZEOF_LONG_LONG)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_LONG_LONG
+    "Checking whether C++ compiler has 'long long'" DIRECT)
+  IF(KWSYS_CXX_HAS_LONG_LONG)
     SET(KWSYS_PLATFORM_CXX_TEST_DEFINES
       -DKWSYS_IOS_USE_ANSI=${KWSYS_IOS_USE_ANSI}
       -DKWSYS_IOS_HAVE_STD=${KWSYS_IOS_HAVE_STD})
@@ -540,10 +571,10 @@ IF(KWSYS_USE_IOStream)
     KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAS_OSTREAM_LONG_LONG
       "Checking if ostream supports long long" DIRECT)
     SET(KWSYS_PLATFORM_CXX_TEST_DEFINES)
-  ELSE(KWSYS_SIZEOF_LONG_LONG)
+  ELSE()
     SET(KWSYS_IOS_HAS_ISTREAM_LONG_LONG 0)
     SET(KWSYS_IOS_HAS_OSTREAM_LONG_LONG 0)
-  ENDIF(KWSYS_SIZEOF_LONG_LONG)
+  ENDIF()
 ENDIF(KWSYS_USE_IOStream)
 
 IF(KWSYS_NAMESPACE MATCHES "^kwsys$")
@@ -989,6 +1020,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       # If kwsys contains the DynamicLoader, need extra library
       ADD_LIBRARY(${KWSYS_NAMESPACE}TestDynload MODULE testDynload.c)
       KWSYS_SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}TestDynload PROPERTY LABELS ${KWSYS_LABELS_LIB})
+      ADD_DEPENDENCIES(${KWSYS_NAMESPACE}TestDynload ${KWSYS_NAMESPACE})
     ENDIF(KWSYS_USE_DynamicLoader)
     CREATE_TEST_SOURCELIST(
       KWSYS_CXX_TEST_SRCS ${KWSYS_NAMESPACE}TestsCxx.cxx
@@ -1057,12 +1089,18 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       KWSYS_SET_PROPERTY(TEST kwsys.testProcess-${n} PROPERTY LABELS ${KWSYS_LABELS_TEST})
     ENDFOREACH(n)
 
+    # Some Apple compilers produce bad optimizations in this source.
+    IF(APPLE AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU|LLVM)$")
+      SET_SOURCE_FILES_PROPERTIES(testProcess.c PROPERTIES COMPILE_FLAGS -O0)
+    ENDIF()
+
     # Test SharedForward
     CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/testSharedForward.c.in
                    ${PROJECT_BINARY_DIR}/testSharedForward.c @ONLY IMMEDIATE)
     ADD_EXECUTABLE(${KWSYS_NAMESPACE}TestSharedForward
                    ${PROJECT_BINARY_DIR}/testSharedForward.c)
     KWSYS_SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}TestSharedForward PROPERTY LABELS ${KWSYS_LABELS_EXE})
+    ADD_DEPENDENCIES(${KWSYS_NAMESPACE}TestSharedForward ${KWSYS_NAMESPACE}_c)
     ADD_TEST(kwsys.testSharedForward ${EXEC_DIR}/${KWSYS_NAMESPACE}TestSharedForward 1)
     KWSYS_SET_PROPERTY(TEST kwsys.testSharedForward PROPERTY LABELS ${KWSYS_LABELS_TEST})
 

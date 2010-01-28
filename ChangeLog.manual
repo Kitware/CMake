@@ -1,3 +1,61 @@
+Changes in CMake 2.8.1 RC 1
+- Add "NMake Makefiles JOM" generator
+- Add PathScale compiler support
+- Add per-configuration OUTPUT_DIRECTORY properties
+- Add per-target OSX_ARCHITECTURES property
+- check_type_size(): Handle mixed-size universal binaries
+- CPack: Document Mac generators
+- CPack: Improve RPM spec files
+- Create CMAKE_FORCE_Fortran_COMPILER for cross-compiling
+- CTest: Add --http1.0 command-line option
+- CTest: Add --timeout command-line option
+- CTest: Do not munge UTF-8 output in XML files
+- CTest: Document CTEST_USE_LAUNCHERS option
+- CTest: Fix killing of whole test process trees
+- CTest: Handle failure of running invalid executables
+- CTest: Honor the -C arg to ctest (#2336)
+- CTest: Improve host system introspection
+- CTest: Optionally randomize test order (--schedule-random)
+- CTest: Skip tests with unsatisfied REQUIRED_FILES test property
+- CTest: Submit arbitrary results with ATTACHED_FILES test property
+- ctest_build(): Enhance signature
+- ctest_start(): Add APPEND option
+- ctest_start(): Move CTEST_CHECKOUT_COMMAND from ctest_update
+- ctest_update(): Submit global tree revision in Update.xml
+- Cygwin: Do not export all symbols from DLLs (#10122)
+- Cygwin: Name DLLs with SOVERSION, not VERSION (#10122)
+- Detect 32/64-bit Windows with Intel compiler
+- Eclipse generator enhancements
+- ExternalProject: Add TIMEOUT parameter
+- FindCUDA: Respect CUDA version differences
+- FindCURL: Find import libraries on Windows
+- FindDCMTK: Look in more places
+- FindGTest: Handle spaces better (#10065)
+- FindGTK2: Look in fink locations on Mac OS X
+- FindHDF5: Follow find-module API conventions
+- FindJava: Support for versioned find
+- FindJNI: Honor find_package() REQUIRED and QUIET options
+- FindMPI: Improve Windows support
+- FindOpenSSL: Fix MinGW support
+- FindPythonLibs: Look in config for static library
+- FindQt4: Misc enhancements, sync with KDE vesion
+- FindRuby: Fix version convention on Windows
+- FindX11: Improve documentation
+- Fortran: Detect address size (#10119)
+- FortranCInterface: Honor user flags
+- Improve VS 2010 beta2 support
+- link_directories(): Treat relative paths consistently (CMP0015)
+- Modernize FindLibXslt and FindLibXml.cmake
+- Refactor platform info to simplify adding new compilers
+- Support cross-compiling versioned DLLs
+- UseQt4: Provide dependencies only for static Qt (#10021)
+- Address issues:
+  #2336, #3571, #5041, #7541, #8725, #9011, #9042, #9054, #9163,
+  #9171, #9450, #9697, #9764, #9782, #9792, #9862, #9894, #9913,
+  #9916, #9917, #9918, #9949, #9965, #9970, #9982, #9985, #10003,
+  #10014, #10021, #10032, #10055, #10060, #10065, #10114, #10119,
+  #10122, #10126, #10136.
+
 Changes in CMake 2.8.0 Release
 - CPack: Honor CPACK_NSIS_DISPLAY_NAME (fixes regression)
 

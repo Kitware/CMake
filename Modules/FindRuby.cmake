@@ -152,6 +152,7 @@ ENDIF(NOT RUBY_VERSION_MAJOR)
 SET(RUBY_VERSION "${RUBY_VERSION_MAJOR}.${RUBY_VERSION_MINOR}.${RUBY_VERSION_PATCH}")
 SET(_RUBY_VERSION_SHORT "${RUBY_VERSION_MAJOR}.${RUBY_VERSION_MINOR}")
 SET(_RUBY_VERSION_SHORT_NODOT "${RUBY_VERSION_MAJOR}${RUBY_VERSION_MINOR}")
+SET(_RUBY_NODOT_VERSION "${RUBY_VERSION_MAJOR}${RUBY_VERSION_MINOR}${RUBY_VERSION_PATCH}")
 
 # Now we know which version we found
 IF(Ruby_FIND_VERSION)
@@ -180,7 +181,6 @@ SET(RUBY_INCLUDE_DIRS ${RUBY_INCLUDE_DIR} )
 
 # if ruby > 1.8 is required or if ruby > 1.8 was found, search for the config.h dir
 IF( ${Ruby_FIND_VERSION_SHORT_NODOT} GREATER 18  OR  ${_RUBY_VERSION_SHORT_NODOT} GREATER 18  OR  RUBY_HDR_DIR)
-   message(STATUS "lookign for config.h")
    FIND_PATH(RUBY_CONFIG_INCLUDE_DIR
      NAMES ruby/config.h  config.h
      HINTS 
@@ -214,10 +214,10 @@ IF(WIN32)
    ENDIF( MSVC90 )
 
    LIST(APPEND _RUBY_POSSIBLE_LIB_NAMES
-               "msvcr${_RUBY_MSVC_RUNTIME}-ruby${RUBY_NODOT_VERSION}"
-               "msvcr${_RUBY_MSVC_RUNTIME}-ruby${RUBY_NODOT_VERSION}-static" 
-               "msvcrt-ruby${RUBY_NODOT_VERSION}"
-               "msvcrt-ruby${RUBY_NODOT_VERSION}-static" )
+               "msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}"
+               "msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}-static" 
+               "msvcrt-ruby${_RUBY_NODOT_VERSION}"
+               "msvcrt-ruby${_RUBY_NODOT_VERSION}-static" )
 ENDIF(WIN32)
 
 FIND_LIBRARY(RUBY_LIBRARY NAMES ${_RUBY_POSSIBLE_LIB_NAMES} HINTS ${RUBY_POSSIBLE_LIB_DIR} )

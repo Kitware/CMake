@@ -97,6 +97,31 @@ void cmTest::AppendProperty(const char* prop, const char* value)
 void cmTest::DefineProperties(cmake *cm)
 {
   cm->DefineProperty
+    ("ATTACHED_FILES", cmProperty::TEST,
+     "Attach a list of files to a dashboard submission.",
+     "Set this property to a list of files that will be encoded and "
+     "submitted to the dashboard as an addition to the test result.");
+
+  cm->DefineProperty
+    ("ATTACHED_FILES_ON_FAIL", cmProperty::TEST,
+     "Attach a list of files to a dashboard submission if the test fails.",
+     "Same as ATTACHED_FILES, but these files will only be included if the "
+     "test does not pass.");
+
+  cm->DefineProperty
+    ("COST", cmProperty::TEST,
+     "Set this to a floating point value. Tests in a test set will be "
+     "run in descending order of cost.", "This property describes the cost "
+     "of a test. You can explicitly set this value; tests with higher COST "
+     "values will run first.");
+
+  cm->DefineProperty
+    ("DEPENDS", cmProperty::TEST,
+     "Specifies that this test should only be run after the specified "
+     "list of tests.",
+     "Set this to a list of tests that must finish before this test is run.");
+
+  cm->DefineProperty
     ("ENVIRONMENT", cmProperty::TEST,
      "Specify environment variables that should be defined for running "
      "a test.",
@@ -130,6 +155,26 @@ void cmTest::DefineProperties(cmake *cm)
      "If set, the test output will be checked "
      "against the specified regular expressions and at least one of the"
      " regular expressions has to match, otherwise the test will fail.");
+
+  cm->DefineProperty
+    ("PROCESSORS", cmProperty::TEST,
+     "How many process slots this test requires",
+     "Denotes the number of processors that this test will require. This is "
+     "typically used for MPI tests, and should be used in conjunction with "
+     "the ctest_test PARALLEL_LEVEL option.");
+
+  cm->DefineProperty
+    ("REQUIRED_FILES", cmProperty::TEST,
+     "List of files required to run the test.",
+     "If set to a list of files, the test will not be run unless all of the "
+     "files exist.");
+
+  cm->DefineProperty
+    ("RUN_SERIAL", cmProperty::TEST,
+     "Do not run this test in parallel with any other test.",
+     "Use this option in conjunction with the ctest_test PARALLEL_LEVEL "
+     "option to specify that this test should not be run in parallel with "
+     "any other tests.");
 
   cm->DefineProperty
     ("TIMEOUT", cmProperty::TEST, 

@@ -18,6 +18,8 @@ ELSE(HAVE_ELF_H)
   SET(CMAKE_USE_ELF_PARSER)
 ENDIF(HAVE_ELF_H)
 
+SET(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
+
 # configure the .h file
 CONFIGURE_FILE(
   "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"
@@ -165,6 +167,8 @@ SET(SRCS
   cmExportFileGenerator.cxx
   cmExportInstallFileGenerator.h
   cmExportInstallFileGenerator.cxx
+  cmExtraCodeBlocksGenerator.cxx
+  cmExtraCodeBlocksGenerator.h
   cmExtraEclipseCDT4Generator.cxx
   cmExtraEclipseCDT4Generator.h
   cmFileTimeComparison.cxx
@@ -244,16 +248,15 @@ SET(SRCS
   cmake.h
   cmakewizard.cxx
   cmakewizard.h
+
+  cm_utf8.h
+  cm_utf8.c
   )
 
 # Kdevelop only works on UNIX and not windows
 IF(UNIX)
   SET(SRCS ${SRCS} cmGlobalKdevelopGenerator.cxx)
 ENDIF(UNIX)
-
-IF(NOT CYGWIN)
-  SET(SRCS ${SRCS} cmExtraCodeBlocksGenerator.cxx)
-ENDIF(NOT CYGWIN)
 
 # XCode only works on apple
 IF(APPLE)
@@ -281,6 +284,8 @@ IF (WIN32)
       cmGlobalMinGWMakefileGenerator.cxx
       cmGlobalNMakeMakefileGenerator.cxx
       cmGlobalNMakeMakefileGenerator.h
+      cmGlobalJOMMakefileGenerator.cxx
+      cmGlobalJOMMakefileGenerator.h
       cmGlobalVisualStudio6Generator.cxx
       cmGlobalVisualStudio6Generator.h
       cmGlobalVisualStudio71Generator.cxx
@@ -417,12 +422,12 @@ SET(CPACK_SRCS
   CPack/cmCPackZIPGenerator.cxx
   )
 
-IF(WIN32 AND UNIX)
+IF(CYGWIN)
   SET(CPACK_SRCS ${CPACK_SRCS}
     CPack/cmCPackCygwinBinaryGenerator.cxx
     CPack/cmCPackCygwinSourceGenerator.cxx
     )
-ENDIF(WIN32 AND UNIX)
+ENDIF(CYGWIN)
   
 IF(UNIX)
   SET(CPACK_SRCS ${CPACK_SRCS}
@@ -456,8 +461,6 @@ ENDIF(APPLE)
 # Build CMake executable
 ADD_EXECUTABLE(cmake cmakemain.cxx)
 TARGET_LINK_LIBRARIES(cmake CMakeLib)
-ADD_EXECUTABLE(DumpDocumentation cmDumpDocumentation)
-TARGET_LINK_LIBRARIES(DumpDocumentation CMakeLib)
 
 # Build special executable for running programs on Windows 98
 IF(WIN32)

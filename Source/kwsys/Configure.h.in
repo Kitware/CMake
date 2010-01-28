@@ -25,6 +25,9 @@
 # if defined(__BORLANDC__)
 #  pragma warn -8027 /* function not inlined.  */
 # endif
+# if defined(__INTEL_COMPILER)
+#  pragma warning (disable: 1572) /* floating-point equality test */
+# endif
 #endif
 
 /* Whether kwsys namespace is "kwsys".  */
@@ -85,11 +88,17 @@
 #endif
 
 /* Setup the export macro.  */
-#if defined(_WIN32) && @KWSYS_BUILD_SHARED@
-# if defined(@KWSYS_NAMESPACE@_EXPORTS)
-#  define @KWSYS_NAMESPACE@_EXPORT __declspec(dllexport)
+#if @KWSYS_BUILD_SHARED@
+# if defined(_WIN32) || defined(__CYGWIN__)
+#  if defined(@KWSYS_NAMESPACE@_EXPORTS)
+#   define @KWSYS_NAMESPACE@_EXPORT __declspec(dllexport)
+#  else
+#   define @KWSYS_NAMESPACE@_EXPORT __declspec(dllimport)
+#  endif
+# elif __GNUC__ >= 4
+#  define @KWSYS_NAMESPACE@_EXPORT __attribute__ ((visibility("default")))
 # else
-#  define @KWSYS_NAMESPACE@_EXPORT __declspec(dllimport)
+#  define @KWSYS_NAMESPACE@_EXPORT
 # endif
 #else
 # define @KWSYS_NAMESPACE@_EXPORT

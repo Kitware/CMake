@@ -573,6 +573,23 @@ void cmTarget::DefineProperties(cmake *cm)
      false /* TODO: make this chained */ );
 
   cm->DefineProperty
+    ("OSX_ARCHITECTURES", cmProperty::TARGET,
+     "Target specific architectures for OS X.",
+     "The OSX_ARCHITECTURES property sets the target binary architecture "
+     "for targets on OS X.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_OSX_ARCHITECTURES if it is set when a target is created.  "
+     "Use OSX_ARCHITECTURES_<CONFIG> to set the binary architectures on a "
+     "per-configuration basis.  "
+     "<CONFIG> is an upper-case name (ex: \"OSX_ARCHITECTURES_DEBUG\").");
+
+  cm->DefineProperty
+    ("OSX_ARCHITECTURES_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration OS X binary architectures for a target.",
+     "This property is the configuration-specific version of "
+     "OSX_ARCHITECTURES.");
+
+  cm->DefineProperty
     ("OUTPUT_NAME", cmProperty::TARGET,
      "Output name for target files.",
      "This sets the base name for output files created for an executable or "
@@ -884,22 +901,44 @@ void cmTarget::DefineProperties(cmake *cm)
 #define CM_TARGET_OUTDIR_DOC(TYPE, type)                                    \
      "This property specifies the directory into which " #type " target "   \
      "files should be built. "                                              \
+     "Multi-configuration generators (VS, Xcode) append "                   \
+     "a per-configuration subdirectory to the specified directory.  "       \
      CM_TARGET_FILE_TYPES_DOC "  "                                          \
      "This property is initialized by the value of the variable "           \
      "CMAKE_" #TYPE "_OUTPUT_DIRECTORY if it is set when a target is created."
+
+#define CM_TARGET_OUTDIR_CONFIG_DOC(TYPE)                                   \
+     "This is a per-configuration version of " #TYPE "_OUTPUT_DIRECTORY, "  \
+     "but multi-configuration generators (VS, Xcode) do NOT append "        \
+     "a per-configuration subdirectory to the specified directory.  "       \
+     "This property is initialized by the value of the variable "           \
+     "CMAKE_" #TYPE "_OUTPUT_DIRECTORY_<CONFIG> "                           \
+     "if it is set when a target is created."
 
   cm->DefineProperty
     ("ARCHIVE_OUTPUT_DIRECTORY", cmProperty::TARGET,
      "Output directory in which to build ARCHIVE target files.",
      CM_TARGET_OUTDIR_DOC(ARCHIVE, archive));
   cm->DefineProperty
+    ("ARCHIVE_OUTPUT_DIRECTORY_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration output directory for ARCHIVE target files.",
+     CM_TARGET_OUTDIR_CONFIG_DOC(ARCHIVE));
+  cm->DefineProperty
     ("LIBRARY_OUTPUT_DIRECTORY", cmProperty::TARGET,
      "Output directory in which to build LIBRARY target files.",
      CM_TARGET_OUTDIR_DOC(LIBRARY, library));
   cm->DefineProperty
+    ("LIBRARY_OUTPUT_DIRECTORY_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration output directory for LIBRARY target files.",
+     CM_TARGET_OUTDIR_CONFIG_DOC(LIBRARY));
+  cm->DefineProperty
     ("RUNTIME_OUTPUT_DIRECTORY", cmProperty::TARGET,
      "Output directory in which to build RUNTIME target files.",
      CM_TARGET_OUTDIR_DOC(RUNTIME, runtime));
+  cm->DefineProperty
+    ("RUNTIME_OUTPUT_DIRECTORY_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration output directory for RUNTIME target files.",
+     CM_TARGET_OUTDIR_CONFIG_DOC(RUNTIME));
 
   cm->DefineProperty
     ("ARCHIVE_OUTPUT_NAME", cmProperty::TARGET,
@@ -983,6 +1022,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("LIBRARY_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
+  this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
@@ -1000,9 +1040,22 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     }
 
   // Setup per-configuration property default values.
+  const char* configProps[] = {
+    "ARCHIVE_OUTPUT_DIRECTORY_",
+    "LIBRARY_OUTPUT_DIRECTORY_",
+    "RUNTIME_OUTPUT_DIRECTORY_",
+    0};
   for(std::vector<std::string>::iterator ci = configNames.begin();
       ci != configNames.end(); ++ci)
     {
+    std::string configUpper = cmSystemTools::UpperCase(*ci);
+    for(const char** p = configProps; *p; ++p)
+      {
+      std::string property = *p;
+      property += configUpper;
+      this->SetPropertyDefault(property.c_str(), 0);
+      }
+
     // Initialize per-configuration name postfix property from the
     // variable only for non-executable targets.  This preserves
     // compatibility with previous CMake versions in which executables
@@ -3036,13 +3089,13 @@ void cmTarget::GetFullNameInternal(const char* config,
   outBase += configPostfix?configPostfix:"";
 
   // Name shared libraries with their version number on some platforms.
-  if(const char* version = this->GetProperty("VERSION"))
+  if(const char* soversion = this->GetProperty("SOVERSION"))
     {
     if(this->GetType() == cmTarget::SHARED_LIBRARY && !implib &&
        this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION"))
       {
       outBase += "-";
-      outBase += version;
+      outBase += soversion;
       }
     }
 
@@ -3423,14 +3476,20 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config,
 std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
                                                       bool for_xcode)
 {
-  // Lookup the target property.
-  const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
-  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME") &&
-     !this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
-     install_name_dir && *install_name_dir)
+  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
-    std::string dir = install_name_dir;
-    dir += "/";
+    std::string dir;
+
+    if(!this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
+      {
+      const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
+      if(install_name_dir && *install_name_dir)
+        {
+        dir = install_name_dir;
+        dir += "/";
+        }
+      }
+
     if(this->IsFrameworkOnApple() && !for_xcode)
       {
       dir += this->GetFullName(config, false);
@@ -3438,6 +3497,7 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
       dir += this->GetFrameworkVersion();
       dir += "/";
       }
+
     return dir;
     }
   else
@@ -3508,16 +3568,36 @@ void cmTarget::ComputeOutputDir(const char* config,
 {
   // Look for a target property defining the target output directory
   // based on the target type.
+  std::string targetTypeName = this->GetOutputTargetType(implib);
   const char* propertyName = 0;
-  std::string propertyNameStr = this->GetOutputTargetType(implib);
+  std::string propertyNameStr = targetTypeName;
   if(!propertyNameStr.empty())
     {
     propertyNameStr += "_OUTPUT_DIRECTORY";
     propertyName = propertyNameStr.c_str();
     }
 
+  // Check for a per-configuration output directory target property.
+  std::string configUpper = cmSystemTools::UpperCase(config? config : "");
+  const char* configProp = 0;
+  std::string configPropStr = targetTypeName;
+  if(!configPropStr.empty())
+    {
+    configPropStr += "_OUTPUT_DIRECTORY_";
+    configPropStr += configUpper;
+    configProp = configPropStr.c_str();
+    }
+
   // Select an output directory.
-  if(const char* outdir = this->GetProperty(propertyName))
+  if(const char* config_outdir = this->GetProperty(configProp))
+    {
+    // Use the user-specified per-configuration output directory.
+    out = config_outdir;
+
+    // Skip per-configuration subdirectory.
+    config = 0;
+    }
+  else if(const char* outdir = this->GetProperty(propertyName))
     {
     // Use the user-specified output directory.
     out = outdir;
@@ -3644,6 +3724,27 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
       {
       languages.insert(lang);
       }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetAppleArchs(const char* config,
+                             std::vector<std::string>& archVec)
+{
+  const char* archs = 0;
+  if(config && *config)
+    {
+    std::string defVarName = "OSX_ARCHITECTURES_";
+    defVarName += cmSystemTools::UpperCase(config);
+    archs = this->GetProperty(defVarName.c_str());
+    }
+  if(!archs)
+    {
+    archs = this->GetProperty("OSX_ARCHITECTURES");
+    }
+  if(archs)
+    {
+    cmSystemTools::ExpandListArgument(std::string(archs), archVec);
     }
 }
 

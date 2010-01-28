@@ -63,6 +63,20 @@ protected:
   virtual void GenerateScriptForConfig(std::ostream& os,
                                        const char* config,
                                        Indent const& indent);
+  typedef void (cmInstallTargetGenerator::*TweakMethod)(
+    std::ostream&, Indent const&, const char*, std::string const&
+    );
+  void AddTweak(std::ostream& os, Indent const& indent,
+                const char* config, std::string const& file,
+                TweakMethod tweak);
+  void AddTweak(std::ostream& os, Indent const& indent,
+                const char* config, std::vector<std::string> const& files,
+                TweakMethod tweak);
+  std::string GetDestDirPath(std::string const& file);
+  void PreReplacementTweaks(std::ostream& os, Indent const& indent,
+                            const char* config, std::string const& file);
+  void PostReplacementTweaks(std::ostream& os, Indent const& indent,
+                             const char* config, std::string const& file);
   void AddInstallNamePatchRule(std::ostream& os, Indent const& indent,
                                const char* config,
                                const std::string& toDestDirPath);
@@ -74,10 +88,8 @@ protected:
                          std::string const& toDestDirPath);
   
   void AddStripRule(std::ostream& os, Indent const& indent,
-                    cmTarget::TargetType type,
                     const std::string& toDestDirPath);
   void AddRanlibRule(std::ostream& os, Indent const& indent,
-                     cmTarget::TargetType type,
                      const std::string& toDestDirPath);
 
   cmTarget* Target;

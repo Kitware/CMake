@@ -6,8 +6,10 @@ message("")
 message("CMake_BINARY_DIR='${CMake_BINARY_DIR}'")
 message("CMake_SOURCE_DIR='${CMake_SOURCE_DIR}'")
 message("CVS_EXECUTABLE='${CVS_EXECUTABLE}'")
+message("HOME='${HOME}'")
 message("ENV{DASHBOARD_TEST_FROM_CTEST}='$ENV{DASHBOARD_TEST_FROM_CTEST}'")
 message("")
+string(REPLACE "\\" "\\\\" HOME "${HOME}")
 
 
 # Is the build directory the same as or underneath the source directory?
@@ -40,6 +42,16 @@ message("in_source_build='${in_source_build}'")
 message("")
 
 
+# If this does not appear to be a CVS checkout, just pass the test here and now.
+# (Do not let the test fail if it is run in a tree *exported* from CVS or
+# unpacked from a .zip file source installer...)
+#
+if(NOT EXISTS "${CMake_SOURCE_DIR}/CVS/Root")
+  message("source tree is not a CVS checkout... test passes by early return...")
+  return()
+endif()
+
+
 # Check with "cvs -q -n up -dP" if there are any local modifications to the
 # CMake source tree:
 #
@@ -47,17 +59,30 @@ message("=======================================================================
 message("Copy/paste this command to reproduce:")
 message("cd \"${CMake_SOURCE_DIR}\" && \"${CVS_EXECUTABLE}\" -q -n up -dP")
 message("")
+
+# Use the HOME value passed in to the script for calling cvs so it can find
+# its .cvspass and other file(s)
+#
+set(original_ENV_HOME "$ENV{HOME}")
+set(ENV{HOME} "${HOME}")
+
 execute_process(COMMAND ${CVS_EXECUTABLE} -q -n up -dP
   WORKING_DIRECTORY ${CMake_SOURCE_DIR}
   OUTPUT_VARIABLE ov
   ERROR_VARIABLE ev
   RESULT_VARIABLE rv)
 
+set(ENV{HOME} "${original_ENV_HOME}")
+
 message("Results of running '${CVS_EXECUTABLE} -q -n up -dP'")
 message("rv='${rv}'")
 message("ov='${ov}'")
 message("ev='${ev}'")
 message("")
+
+if(NOT rv STREQUAL 0)
+  message(FATAL_ERROR "error: 'cvs -q -n up -dP' attempt failed... (see output above)")
+endif()
 
 # Analyze cvs output:
 #

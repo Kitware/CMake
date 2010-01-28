@@ -712,6 +712,9 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
  
   std::string langFlags;
   this->AddLanguageFlags(langFlags, llang, 0);
+#ifdef __APPLE__
+  this->AddArchitectureFlags(langFlags, &target, llang, 0);
+#endif /* __APPLE__ */
   vars.LanguageCompileFlags = langFlags.c_str();
   
   cmCustomCommandLines commandLines;
@@ -907,6 +910,16 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         targetQuoted += '\"';
         }
       return targetQuoted;
+      }
+    if(variable == "TARGET_UNQUOTED")
+      {
+      std::string unquoted = replaceValues.Target;
+      std::string::size_type sz = unquoted.size();
+      if(sz > 2 && unquoted[0] == '\"' && unquoted[sz-1] == '\"')
+        {
+        unquoted = unquoted.substr(1, sz-2);
+        }
+      return unquoted;
       }
     if(replaceValues.LanguageCompileFlags)
       {
@@ -1751,21 +1764,18 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     }
 }
 
+
 //----------------------------------------------------------------------------
-void cmLocalGenerator::AddLanguageFlags(std::string& flags,
-                                        const char* lang,
-                                        const char* config)
-{
-  // Add language-specific flags.
-  std::string flagsVar = "CMAKE_";
-  flagsVar += lang;
-  flagsVar += "_FLAGS";
-  // Add special OSX flags
 #ifdef __APPLE__
+void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
+                                            cmTarget* target,
+                                            const char *lang,
+                                            const char* config)
+{
   if(this->EmitUniversalBinaryFlags)
     {
-    const char* osxArch = 
-      this->Makefile->GetDefinition("CMAKE_OSX_ARCHITECTURES");
+    std::vector<std::string> archs;
+    target->GetAppleArchs(config, archs);
     const char* sysroot = 
       this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
     const char* sysrootDefault = 
@@ -1775,24 +1785,13 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     std::string isysrootVar = std::string("CMAKE_") + lang + "_HAS_ISYSROOT";
     bool hasIsysroot = this->Makefile->IsOn(isysrootVar.c_str());
     bool flagsUsed = false;
-    if(osxArch && sysroot && lang && (lang[0] =='C' || lang[0] == 'F'))
+    if(!archs.empty() && sysroot && lang && (lang[0] =='C' || lang[0] == 'F'))
       {
-      std::vector<std::string> archs;
-      cmSystemTools::ExpandListArgument(std::string(osxArch),
-                                        archs);
-      bool addArchFlag = false;
-      if(archs.size() >= 1)
-        {
-        if(archs[0] != "")
-          {
-          addArchFlag = true;
-          }
-        }
       // if there is more than one arch add the -arch and
       // -isysroot flags, or if there is one arch flag, but
       // it is not the default -arch flag for the system, then
       // add it.  Otherwize do not add -arch and -isysroot
-      if(addArchFlag)
+      if(archs[0] != "")
         {
         for( std::vector<std::string>::iterator i = archs.begin();
              i != archs.end(); ++i)
@@ -1823,7 +1822,19 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
       flags += deploymentTarget;
       }
     }
-#endif
+}
+#endif /* __APPLE__ */
+
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AddLanguageFlags(std::string& flags,
+                                        const char* lang,
+                                        const char* config)
+{
+  // Add language-specific flags.
+  std::string flagsVar = "CMAKE_";
+  flagsVar += lang;
+  flagsVar += "_FLAGS";
   this->AddConfigVariableFlags(flags, flagsVar.c_str(), config);
 }
 

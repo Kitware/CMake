@@ -36,12 +36,12 @@
 #endif
 
 /* The size of fundamental types.  Types that do not exist have size 0.  */
-#define @KWSYS_NAMESPACE@_SIZEOF_CHAR @KWSYS_SIZEOF_CHAR@
-#define @KWSYS_NAMESPACE@_SIZEOF_SHORT @KWSYS_SIZEOF_SHORT@
-#define @KWSYS_NAMESPACE@_SIZEOF_INT @KWSYS_SIZEOF_INT@
-#define @KWSYS_NAMESPACE@_SIZEOF_LONG @KWSYS_SIZEOF_LONG@
-#define @KWSYS_NAMESPACE@_SIZEOF_LONG_LONG @KWSYS_SIZEOF_LONG_LONG@
-#define @KWSYS_NAMESPACE@_SIZEOF___INT64 @KWSYS_SIZEOF___INT64@
+@KWSYS_C_CODE_SIZEOF_CHAR@
+@KWSYS_C_CODE_SIZEOF_SHORT@
+@KWSYS_C_CODE_SIZEOF_INT@
+@KWSYS_C_CODE_SIZEOF_LONG@
+@KWSYS_C_CODE_SIZEOF_LONG_LONG@
+@KWSYS_C_CODE_SIZEOF___INT64@
 
 /* Whether types "long long" and "__int64" are enabled.  If a type is
    enabled then it is a unique fundamental type.  */

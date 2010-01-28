@@ -28,7 +28,8 @@
 # with the HDF5 distribution that may be useful for regression testing.
 # 
 # This module will define the following variables:
-#  HDF5_INCLUDE_DIR - Location of the hdf5 includes
+#  HDF5_INCLUDE_DIRS - Location of the hdf5 includes
+#  HDF5_INCLUDE_DIR - Location of the hdf5 includes (deprecated)
 #  HDF5_DEFINITIONS - Required compiler definitions for HDF5
 #  HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings.
 #  HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
@@ -106,7 +107,7 @@ endmacro()
 
 # Parse a compile line for definitions, includes, library paths, and libraries.
 macro( _HDF5_parse_compile_line 
-    compile_line 
+    compile_line_var
     include_paths
     definitions
     library_paths
@@ -114,7 +115,7 @@ macro( _HDF5_parse_compile_line
 
     # Match the include paths
     string( REGEX MATCHALL "-I([^\" ]+)" include_path_flags 
-        "${compile_line}" 
+        "${${compile_line_var}}"
     )
     foreach( IPATH ${include_path_flags} )
         string( REGEX REPLACE "^-I" "" IPATH ${IPATH} )
@@ -123,14 +124,14 @@ macro( _HDF5_parse_compile_line
     endforeach()
 
     # Match the definitions
-    string( REGEX MATCHALL "-D[^ ]*" definition_flags "${compile_line}" )
+    string( REGEX MATCHALL "-D[^ ]*" definition_flags "${${compile_line_var}}" )
     foreach( DEF ${definition_flags} )
         list( APPEND ${definitions} ${DEF} )
     endforeach()
 
     # Match the library paths
     string( REGEX MATCHALL "-L([^\" ]+|\"[^\"]+\")" library_path_flags
-        "${compile_line}"
+        "${${compile_line_var}}"
     )
     
     foreach( LPATH ${library_path_flags} )
@@ -143,7 +144,7 @@ macro( _HDF5_parse_compile_line
     # match only -l's preceded by a space or comma
     # this is to exclude directory names like xxx-linux/
     string( REGEX MATCHALL "[, ]-l([^\", ]+)" library_name_flags
-        "${compile_line}" )
+        "${${compile_line_var}}" )
     # strip the -l from all of the library flags and add to the search list
     foreach( LIB ${library_name_flags} )
         string( REGEX REPLACE "^[, ]-l" "" LIB ${LIB} )
@@ -151,7 +152,7 @@ macro( _HDF5_parse_compile_line
     endforeach()
 endmacro()
 
-if( HDF5_INCLUDE_DIR AND HDF5_LIBRARIES )
+if( HDF5_INCLUDE_DIRS AND HDF5_LIBRARIES )
     # Do nothing: we already have HDF5_INCLUDE_PATH and HDF5_LIBRARIES in the
     # cache, it would be a shame to override them
 else()
@@ -179,7 +180,7 @@ else()
     
     foreach( LANGUAGE ${HDF5_LANGUAGE_BINDINGS} )
         if( HDF5_${LANGUAGE}_COMPILE_LINE )
-            _HDF5_parse_compile_line( ${HDF5_${LANGUAGE}_COMPILE_LINE} 
+            _HDF5_parse_compile_line( HDF5_${LANGUAGE}_COMPILE_LINE
                 HDF5_${LANGUAGE}_INCLUDE_FLAGS
                 HDF5_${LANGUAGE}_DEFINITIONS
                 HDF5_${LANGUAGE}_LIBRARY_DIRS
@@ -209,7 +210,7 @@ else()
                 Include
         )
         mark_as_advanced( HDF5_${LANGUAGE}_INCLUDE_DIR )
-        list( APPEND HDF5_INCLUDE_DIR ${HDF5_${LANGUAGE}_INCLUDE_DIR} )
+        list( APPEND HDF5_INCLUDE_DIRS ${HDF5_${LANGUAGE}_INCLUDE_DIR} )
         
         set( HDF5_${LANGUAGE}_LIBRARY_NAMES 
             ${HDF5_${LANGUAGE}_LIBRARY_NAMES_INIT} 
@@ -266,8 +267,8 @@ else()
     # We may have picked up some duplicates in various lists during the above
     # process for the language bindings (both the C and C++ bindings depend on
     # libz for example).  Remove the duplicates.
-    if( HDF5_INCLUDE_DIR )
-        list( REMOVE_DUPLICATES HDF5_INCLUDE_DIR )
+    if( HDF5_INCLUDE_DIRS )
+        list( REMOVE_DUPLICATES HDF5_INCLUDE_DIRS )
     endif()
     if( HDF5_LIBRARIES_DEBUG )
         list( REMOVE_DUPLICATES HDF5_LIBRARIES_DEBUG )
@@ -292,16 +293,16 @@ else()
     # If the HDF5 include directory was found, open H5pubconf.h to determine if
     # HDF5 was compiled with parallel IO support
     set( HDF5_IS_PARALLEL FALSE )
-    if( HDF5_INCLUDE_DIR )
-        if( EXISTS "${HDF5_INCLUDE_DIR}/h5pubconf.h" )
-            file( STRINGS "${HDF5_INCLUDE_DIR}/H5pubconf.h" 
+    foreach( _dir HDF5_INCLUDE_DIRS )
+        if( EXISTS "${_dir}/H5pubconf.h" )
+            file( STRINGS "${_dir}/H5pubconf.h" 
                 HDF5_HAVE_PARALLEL_DEFINE
                 REGEX "HAVE_PARALLEL 1" )
             if( HDF5_HAVE_PARALLEL_DEFINE )
                 set( HDF5_IS_PARALLEL TRUE )
             endif()
         endif()
-    endif()
+    endforeach()
     set( HDF5_IS_PARALLEL ${HDF5_IS_PARALLEL} CACHE BOOL
         "HDF5 library compiled with parallel IO support" )
     mark_as_advanced( HDF5_IS_PARALLEL )
@@ -310,14 +311,18 @@ endif()
 
 find_package_handle_standard_args( HDF5 DEFAULT_MSG 
     HDF5_LIBRARIES 
-    HDF5_INCLUDE_DIR
+    HDF5_INCLUDE_DIRS
 )
 
 mark_as_advanced( 
-    HDF5_INCLUDE_DIR 
+    HDF5_INCLUDE_DIRS 
     HDF5_LIBRARIES 
     HDF5_DEFINTIONS
     HDF5_LIBRARY_DIRS
     HDF5_C_COMPILER_EXECUTABLE
     HDF5_CXX_COMPILER_EXECUTABLE )
+
+# For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
+# HDF5_INCLUDE_DIRS
+set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
 

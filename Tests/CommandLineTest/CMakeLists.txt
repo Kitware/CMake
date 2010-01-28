@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 2.6)
 PROJECT(CommandLineTest)
 
 GET_FILENAME_COMPONENT(CMAKE_BIN_DIR ${CMAKE_COMMAND} PATH)
-FIND_PROGRAM(DUMP_DOC_EXE NAMES DumpDocumentation PATHS ${CMAKE_BIN_DIR})
 MACRO(EXEC_CMAKE_COMMAND CMAKE_ARGS)
   EXEC_PROGRAM("${CMAKE_COMMAND}" ARGS "${CMAKE_ARGS}" RETURN_VALUE RET)
   IF(${RET})
@@ -24,15 +23,6 @@ EXEC_CMAKE_COMMAND("--help-man \"${CMAKE_CURRENT_BINARY_DIR}/cmake.man\"")
 EXEC_CMAKE_COMMAND("--help-html \"${CMAKE_CURRENT_BINARY_DIR}/cmake.html\"")
 EXEC_CMAKE_COMMAND("--copyright \"${CMAKE_CURRENT_BINARY_DIR}/Copyright.txt\"")
 EXEC_CMAKE_COMMAND("--version \"${CMAKE_CURRENT_BINARY_DIR}/version.txt\"")
-
-IF(DUMP_DOC_EXE)
-  EXEC_PROGRAM(${DUMP_DOC_EXE} ARGS "--all-for-coverage \"${CMAKE_CURRENT_BINARY_DIR}/all_for_coverage.txt\"" RETURN_VALUE RET)
-  IF(${RET})
-    MESSAGE(SEND_ERROR "DumpDoc command failed ")
-  ENDIF(${RET})
-ELSE(DUMP_DOC_EXE)
-  MESSAGE(SEND_ERROR "Cannot find DumpDocumentation executable.")
-ENDIF(DUMP_DOC_EXE)
 
 ADD_EXECUTABLE(CommandLineTest CommandLineTest.cxx)
 

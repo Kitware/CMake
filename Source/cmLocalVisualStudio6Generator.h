@@ -81,6 +81,8 @@ private:
                   std::ostream &fout, const char *libName);
   class EventWriter;
   friend class EventWriter;
+  cmsys::auto_ptr<cmCustomCommand>
+  MaybeCreateOutputDir(cmTarget& target, const char* config);
   std::string CreateTargetRules(cmTarget &target, 
                                 const char* configName, 
                                 const char *libName);

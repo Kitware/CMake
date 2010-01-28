@@ -171,11 +171,13 @@ ENDIF (CMAKE_CROSSCOMPILING
 
 
 INCLUDE(CMakeFindBinUtils)
-
+IF(MSVC_C_ARCHITECTURE_ID)
+  SET(SET_MSVC_C_ARCHITECTURE_ID
+    "SET(MSVC_C_ARCHITECTURE_ID ${MSVC_C_ARCHITECTURE_ID})")
+ENDIF(MSVC_C_ARCHITECTURE_ID)
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
   "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCCompiler.cmake"
   @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
-  )
-
+  ) 
 SET(CMAKE_C_COMPILER_ENV_VAR "CC")
