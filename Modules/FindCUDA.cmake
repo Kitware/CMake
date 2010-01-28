@@ -546,6 +546,14 @@ endmacro()
 # CUDA_LIBRARIES
 find_library_local_first(CUDA_CUDART_LIBRARY cudart "\"cudart\" library")
 set(CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
+if(APPLE)
+  # We need to add the path to cudart to the linker using rpath, since the
+  # library name for the cuda libraries is prepended with @rpath.
+  get_filename_component(_cuda_path_to_cudart "${CUDA_CUDART_LIBRARY}" PATH)
+  if(_cuda_path_to_cudart)
+    list(APPEND CUDA_LIBRARIES -Wl,-rpath "-Wl,${_cuda_path_to_cudart}")
+  endif()
+endif()
 
 # 1.1 toolkit on linux doesn't appear to have a separate library on
 # some platforms.
