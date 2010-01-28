@@ -106,9 +106,12 @@
 #     specified.  All of the non CUDA C files are compiled using the standard
 #     build rules specified by CMAKE and the cuda files are compiled to object
 #     files using nvcc and the host compiler.  In addition CUDA_INCLUDE_DIRS is
-#     added automatically to include_directories().  Standard CMake target calls
-#     can be used on the target after calling this macro
-#     (e.g. set_target_properties and target_link_libraries).
+#     added automatically to include_directories().  Some standard CMake target
+#     calls can be used on the target after calling this macro
+#     (e.g. set_target_properties and target_link_libraries), but setting
+#     properties that adjust compilation flags will not affect code compiled by
+#     nvcc.  Such flags should be modified before calling CUDA_ADD_EXECUTABLE,
+#     CUDA_ADD_LIBRARY or CUDA_WRAP_SRCS.
 #
 #  CUDA_ADD_LIBRARY( cuda_target file0 file1 ...
 #                    [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL] [OPTIONS ...] )
