@@ -164,11 +164,18 @@ if(CUDA_VERSION VERSION_LESS "3.0")
   cmake_policy(POP)
 endif()
 
+# nvcc doesn't define __CUDACC__ for some reason when generating dependency files.  This
+# can cause incorrect dependencies when #including files based on this macro which is
+# defined in the generating passes of nvcc invokation.  We will go ahead and manually
+# define this for now until a future version fixes this bug.
+set(CUDACC_DEFINE -D__CUDACC__)
+
 # Generate the dependency file
 cuda_execute_process(
   "Generating dependency file: ${NVCC_generated_dependency_file}"
   COMMAND "${CUDA_NVCC_EXECUTABLE}"
   -M
+  ${CUDACC_DEFINE}
   "${source_file}"
   -o "${NVCC_generated_dependency_file}"
   ${CCBIN}
