@@ -42,6 +42,11 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     ENDIF(NOT CMAKE_${lang}_COMPILER_ID)
   ENDFOREACH(flags)
 
+  # If the compiler is still unknown, try to query its vendor.
+  IF(NOT CMAKE_${lang}_COMPILER_ID)
+    CMAKE_DETERMINE_COMPILER_ID_VENDOR(${lang})
+  ENDIF()
+
   # if the format is unknown after all files have been checked, put "Unknown" in the cache
   IF(NOT CMAKE_EXECUTABLE_FORMAT)
     SET(CMAKE_EXECUTABLE_FORMAT "Unknown" CACHE INTERNAL "Executable file format")
@@ -245,3 +250,38 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     PARENT_SCOPE)
   SET(CMAKE_EXECUTABLE_FORMAT "${CMAKE_EXECUTABLE_FORMAT}" PARENT_SCOPE)
 ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang)
+
+#-----------------------------------------------------------------------------
+# Function to query the compiler vendor.
+# This uses a table with entries of the form
+#   list(APPEND CMAKE_${lang}_COMPILER_ID_VENDORS ${vendor})
+#   set(CMAKE_${lang}_COMPILER_ID_VENDOR_FLAGS_${vendor} -some-vendor-flag)
+#   set(CMAKE_${lang}_COMPILER_ID_VENDOR_REGEX_${vendor} "Some Vendor Output")
+# We try running the compiler with the flag for each vendor and
+# matching its regular expression in the output.
+FUNCTION(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
+  FOREACH(vendor ${CMAKE_${lang}_COMPILER_ID_VENDORS})
+    SET(flags ${CMAKE_${lang}_COMPILER_ID_VENDOR_FLAGS_${vendor}})
+    SET(regex ${CMAKE_${lang}_COMPILER_ID_VENDOR_REGEX_${vendor}})
+    EXECUTE_PROCESS(
+      COMMAND ${CMAKE_${lang}_COMPILER}
+      ${CMAKE_${lang}_COMPILER_ID_ARG1}
+      ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
+      ${flags}
+      WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
+      OUTPUT_VARIABLE output ERROR_VARIABLE output
+      RESULT_VARIABLE result
+      )
+    IF("${output}" MATCHES "${regex}")
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+        "Checking whether the ${lang} compiler is ${vendor} using \"${flags}\" "
+        "matched \"${regex}\":\n${output}")
+      SET(CMAKE_${lang}_COMPILER_ID "${vendor}" PARENT_SCOPE)
+      BREAK()
+    ELSE()
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+        "Checking whether the ${lang} compiler is ${vendor} using \"${flags}\" "
+        "did not match \"${regex}\":\n${output}")
+    ENDIF()
+  ENDFOREACH()
+ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_VENDOR)

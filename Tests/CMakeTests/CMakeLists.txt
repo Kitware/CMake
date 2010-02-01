@@ -26,6 +26,7 @@ AddCMakeTest(If "")
 AddCMakeTest(String "")
 AddCMakeTest(Math "")
 AddCMakeTest(CMakeMinimumRequired "")
+AddCMakeTest(CompilerIdVendor "")
 
 if(HAVE_ELF_H)
   AddCMakeTest(ELF "")
