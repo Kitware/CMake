@@ -1784,7 +1784,8 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
     std::string isysrootVar = std::string("CMAKE_") + lang + "_HAS_ISYSROOT";
     bool hasIsysroot = this->Makefile->IsOn(isysrootVar.c_str());
-    std::string deploymentTargetFlagVar = std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
+    std::string deploymentTargetFlagVar =
+      std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
     const char* deploymentTargetFlag =
       this->Makefile->GetDefinition(deploymentTargetFlagVar.c_str());
     bool flagsUsed = false;
