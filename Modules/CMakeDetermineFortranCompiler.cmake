@@ -162,6 +162,11 @@ IF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
     "-fpp"
     )
 
+  # Table of per-vendor compiler id flags with expected output.
+  LIST(APPEND CMAKE_Fortran_COMPILER_ID_VENDORS Compaq)
+  SET(CMAKE_Fortran_COMPILER_ID_VENDOR_FLAGS_Compaq "-what")
+  SET(CMAKE_Fortran_COMPILER_ID_VENDOR_REGEX_Compaq "Compaq Visual Fortran")
+
   # Try to identify the compiler.
   SET(CMAKE_Fortran_COMPILER_ID)
   INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
