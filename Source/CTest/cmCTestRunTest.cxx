@@ -442,6 +442,8 @@ void cmCTestRunTest::ComputeArguments()
     cmCTestMemCheckHandler * handler = static_cast<cmCTestMemCheckHandler*>
       (this->TestHandler);
     this->ActualCommand = handler->MemoryTester.c_str();
+    this->TestProperties->Args[1] = this->TestHandler->FindTheExecutable(
+      this->TestProperties->Args[1].c_str());
     }
   else
     {
@@ -459,7 +461,7 @@ void cmCTestRunTest::ComputeArguments()
       i != this->Arguments.end(); ++i)
     {
     this->TestCommand += " ";
-    this->TestCommand += cmSystemTools::EscapeSpaces(j->c_str());
+    this->TestCommand += cmSystemTools::EscapeSpaces(i->c_str());
     }
 
   for(;j != this->TestProperties->Args.end(); ++j)
