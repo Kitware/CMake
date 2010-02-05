@@ -349,7 +349,9 @@ cmCTest::cmCTest()
     {
     it->second->SetCTestInstance(this);
     }
-
+  // call this so that the information is cached up front
+  // and not the first time EndTest is called.
+  this->ShouldCompressTestOutput();
   // Make sure we can capture the build tool output.
   cmSystemTools::EnableVSConsoleOutput();
 }
