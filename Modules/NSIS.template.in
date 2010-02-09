@@ -213,6 +213,15 @@ Function AddToPath
   IfFileExists "$0\*.*" "" AddToPath_done
  
   ReadEnvStr $1 PATH
+  ; if the path is too long for a NSIS variable NSIS will return a 0 
+  ; length string.  If we find that, then warn and skip any path
+  ; modification as it will trash the existing path.
+  StrLen $2 $1
+  IntCmp $2 0 CheckPathLength_ShowPathWarning CheckPathLength_Done CheckPathLength_Done
+    CheckPathLength_ShowPathWarning:
+    Messagebox MB_OK|MB_ICONEXCLAMATION "Warning! PATH too long installer unable to modify PATH!"
+    Goto AddToPath_done
+  CheckPathLength_Done:
   Push "$1;"
   Push "$0;"
   Call StrStr
