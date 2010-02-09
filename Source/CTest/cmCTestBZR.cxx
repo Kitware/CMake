@@ -276,12 +276,14 @@ private:
             && !this->CData.empty())
       {
       this->CurChange.Path.assign(&this->CData[0], this->CData.size());
+      cmSystemTools::ConvertToUnixSlashes(this->CurChange.Path);
       this->Changes.push_back(this->CurChange);
       }
     else if(strcmp(name, "symlink") == 0 && !this->CData.empty())
       {
       // symlinks have an arobase at the end in the log
       this->CurChange.Path.assign(&this->CData[0], this->CData.size()-1);
+      cmSystemTools::ConvertToUnixSlashes(this->CurChange.Path);
       this->Changes.push_back(this->CurChange);
       }
     else if(strcmp(name, "committer") == 0 && !this->CData.empty())
@@ -377,9 +379,10 @@ private:
     return true;
     }
 
-  void DoPath(char c0, char c1, char c2, std::string const& path)
+  void DoPath(char c0, char c1, char c2, std::string path)
     {
     if(path.empty()) return;
+    cmSystemTools::ConvertToUnixSlashes(path);
 
     const std::string dir = cmSystemTools::GetFilenamePath(path);
     const std::string name = cmSystemTools::GetFilenameName(path);
@@ -488,9 +491,10 @@ private:
     return true;
     }
 
-  void DoPath(char c0, char c1, char c2, std::string const& path)
+  void DoPath(char c0, char c1, char c2, std::string path)
     {
     if(path.empty()) return;
+    cmSystemTools::ConvertToUnixSlashes(path);
 
     if ( c0=='C' )
       {
