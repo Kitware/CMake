@@ -30,20 +30,20 @@ function(check_updates build)
   message(" found ${UPDATE_XML_FILE}")
 
   # Read entries from the Update.xml file
+  set(types "Updated|Modified|Conflicting")
   file(STRINGS ${TOP}/${UPDATE_XML_FILE} UPDATE_XML_ENTRIES
-    REGEX "FullName"
+    REGEX "<(${types}|FullName)>"
     LIMIT_INPUT 4096
     )
+  string(REGEX REPLACE
+    "[ \t]*<(${types})>[ \t]*;[ \t]*<FullName>([^<]*)</FullName>"
+    "\\1{\\2}" UPDATE_XML_ENTRIES "${UPDATE_XML_ENTRIES}")
 
-  # Verify that expected entries exist
-  set(MISSING)
-  foreach(f ${ARGN})
-    string(REPLACE "/" "[/\\\\]" regex "${f}")
-    string(REPLACE "." "\\." regex "${regex}")
-    if(NOT "${UPDATE_XML_ENTRIES}" MATCHES "<FullName>${regex}</FullName>")
-      list(APPEND MISSING ${f})
-    endif()
-  endforeach(f)
+  # Compare expected and actual entries
+  set(EXTRA "${UPDATE_XML_ENTRIES}")
+  list(REMOVE_ITEM EXTRA ${ARGN} ${UPDATE_MAYBE})
+  set(MISSING "${ARGN}")
+  list(REMOVE_ITEM MISSING ${UPDATE_XML_ENTRIES})
 
   if(NOT UPDATE_NOT_GLOBAL)
     set(rev_elements Revision PriorRevision ${UPDATE_GLOBAL_ELEMENTS})
@@ -65,13 +65,31 @@ function(check_updates build)
   endif()
 
   # Report the result
+  set(MSG "")
   if(MISSING)
     # List the missing entries
-    set(MSG "Update.xml is missing an entry for:\n")
+    set(MSG "${MSG}Update.xml is missing expected entries:\n")
     foreach(f ${MISSING})
       set(MSG "${MSG}  ${f}\n")
     endforeach(f)
+  else(MISSING)
+    # Success
+    message(" no entries missing from Update.xml")
+  endif(MISSING)
 
+  # Report the result
+  if(EXTRA)
+    # List the extra entries
+    set(MSG "${MSG}Update.xml has extra unexpected entries:\n")
+    foreach(f ${EXTRA})
+      set(MSG "${MSG}  ${f}\n")
+    endforeach(f)
+  else(EXTRA)
+    # Success
+    message(" no extra entries in Update.xml")
+  endif(EXTRA)
+
+  if(MSG)
     # Provide the log file
     file(GLOB UPDATE_LOG_FILE
       ${TOP}/${build}/Testing/Temporary/LastUpdate*.log)
@@ -85,10 +103,7 @@ function(check_updates build)
 
     # Display the error message
     message(FATAL_ERROR "${MSG}")
-  else(MISSING)
-    # Success
-    message(" no entries missing from Update.xml")
-  endif(MISSING)
+  endif(MSG)
 endfunction(check_updates)
 
 #-----------------------------------------------------------------------------
@@ -175,8 +190,15 @@ function(run_dashboard_command_line bin_dir)
     )
 
   # Verify the updates reported by CTest.
-  check_updates(${bin_dir} foo.txt bar.txt zot.txt CTestConfig.cmake
-                           subdir/foo.txt subdir/bar.txt)
+  set(UPDATE_MAYBE Updated{subdir})
+  check_updates(${bin_dir}
+    Updated{foo.txt}
+    Updated{bar.txt}
+    Updated{zot.txt}
+    Updated{subdir/foo.txt}
+    Updated{subdir/bar.txt}
+    Modified{CTestConfig.cmake}
+    )
 endfunction(run_dashboard_command_line)
 
 #-----------------------------------------------------------------------------
@@ -188,8 +210,14 @@ function(run_dashboard_script name)
     )
 
   # Verify the updates reported by CTest.
-  check_updates(dash-binary foo.txt bar.txt zot.txt
-                            subdir/foo.txt subdir/bar.txt)
+  set(UPDATE_MAYBE Updated{subdir})
+  check_updates(dash-binary
+    Updated{foo.txt}
+    Updated{bar.txt}
+    Updated{zot.txt}
+    Updated{subdir/foo.txt}
+    Updated{subdir/bar.txt}
+    )
 endfunction(run_dashboard_script)
 
 #-----------------------------------------------------------------------------
