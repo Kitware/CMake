@@ -1,0 +1,6 @@
+#!/bin/sh
+if test "x$1" = "xpull"; then
+    "@GIT@" "$@" && sleep 1 && touch foo.txt
+else
+    exec "@GIT@" "$@"
+fi
