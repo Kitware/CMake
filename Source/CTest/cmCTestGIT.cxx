@@ -409,10 +409,16 @@ void cmCTestGIT::LoadRevisions()
 //----------------------------------------------------------------------------
 void cmCTestGIT::LoadModifications()
 {
-  // Use 'git diff-index' to get modified files.
   const char* git = this->CommandLineTool.c_str();
-  const char* git_diff_index[] = {git, "diff-index", "-z", "HEAD", 0};
 
+  // Use 'git update-index' to refresh the index w.r.t. the work tree.
+  const char* git_update_index[] = {git, "update-index", "--refresh", 0};
+  OutputLogger ui_out(this->Log, "ui-out> ");
+  OutputLogger ui_err(this->Log, "ui-err> ");
+  this->RunChild(git_update_index, &ui_out, &ui_err);
+
+  // Use 'git diff-index' to get modified files.
+  const char* git_diff_index[] = {git, "diff-index", "-z", "HEAD", 0};
   DiffParser out(this, "di-out> ");
   OutputLogger err(this->Log, "di-err> ");
   this->RunChild(git_diff_index, &out, &err);
