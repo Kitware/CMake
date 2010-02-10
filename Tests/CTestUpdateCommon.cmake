@@ -190,7 +190,7 @@ function(run_dashboard_command_line bin_dir)
     )
 
   # Verify the updates reported by CTest.
-  set(UPDATE_MAYBE Updated{subdir})
+  list(APPEND UPDATE_MAYBE Updated{subdir})
   check_updates(${bin_dir}
     Updated{foo.txt}
     Updated{bar.txt}
@@ -210,7 +210,7 @@ function(run_dashboard_script name)
     )
 
   # Verify the updates reported by CTest.
-  set(UPDATE_MAYBE Updated{subdir})
+  list(APPEND UPDATE_MAYBE Updated{subdir})
   check_updates(dash-binary
     Updated{foo.txt}
     Updated{bar.txt}
