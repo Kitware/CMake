@@ -325,7 +325,7 @@ void cmCTestMultiProcessHandler::WriteCostData(int index, float cost)
   std::string fname = this->CTest->GetBinaryDir()
     + "/Testing/Temporary/CTestCostData.txt";
   std::fstream fout;
-  fout.open(fname.c_str(), std::ios::app);
+  fout.open(fname.c_str(), std::ios::out | std::ios::app);
   fout << index << " " << cost << "\n";
   fout.close();
 }

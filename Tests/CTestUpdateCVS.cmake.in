@@ -6,6 +6,7 @@
 get_filename_component(TOP "${CMAKE_CURRENT_LIST_FILE}" PATH)
 set(TOP "${TOP}/@CTestUpdateCVS_DIR@")
 set(UPDATE_NOT_GLOBAL 1)
+set(UPDATE_MAYBE Updated{CTestConfig.cmake})
 
 # Include code common to all update tests.
 include("@CMAKE_CURRENT_SOURCE_DIR@/CTestUpdateCommon.cmake")

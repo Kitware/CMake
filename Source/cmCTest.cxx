@@ -398,7 +398,7 @@ std::string cmCTest::GetCDashVersion()
   std::string url = "http://";
   url += this->GetCTestConfiguration("DropSite") + "/CDash/api/getversion.php";
   
-  int res = cmCTest::HTTPRequest(url, cmCTest::HTTP_GET, response);
+  int res = cmCTest::HTTPRequest(url, cmCTest::HTTP_GET, response, "", "", 3);
   
   return res ? this->GetCTestConfiguration("CDashVersion") : response;
 #else
@@ -470,6 +470,10 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
       << std::endl);
     return 0;
     }
+
+  // call this so that the information is cached up front
+  // and not the first time EndTest is called.
+  this->ShouldCompressTestOutput();
 
   if ( this->ProduceXML )
     {

@@ -25,6 +25,12 @@ set(AUTHOR_CONFIG "[user]
 message("Creating test directory...")
 init_testing()
 
+if(UNIX)
+  set(src "@CMAKE_CURRENT_SOURCE_DIR@")
+  configure_file(${src}/CTestUpdateGIT.sh.in ${TOP}/git.sh @ONLY)
+  set(GIT ${TOP}/git.sh)
+endif()
+
 #-----------------------------------------------------------------------------
 # Create the repository.
 message("Creating repository...")

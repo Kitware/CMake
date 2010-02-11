@@ -132,7 +132,8 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
           }
         }
 
-      if (!multiConfig && !cmakeBuildTypeInOptions)
+      if (!multiConfig && !cmakeBuildTypeInOptions &&
+          !this->CTest->GetConfigType().empty())
         {
         cmakeConfigureCommand += " \"-DCMAKE_BUILD_TYPE:STRING=";
         cmakeConfigureCommand += this->CTest->GetConfigType();

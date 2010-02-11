@@ -1,10 +1,11 @@
 SET(APPLE 1)
 
 # Darwin versions:
-#   6.x == Mac OSX 10.2
-#   7.x == Mac OSX 10.3
-#   8.x == Mac OSX 10.4
-#   9.x == Mac OSX 10.5
+#   6.x == Mac OSX 10.2 (Jaguar)
+#   7.x == Mac OSX 10.3 (Panther)
+#   8.x == Mac OSX 10.4 (Tiger)
+#   9.x == Mac OSX 10.5 (Leopard)
+#  10.x == Mac OSX 10.6 (Snow Leopard)
 STRING(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\1" DARWIN_MAJOR_VERSION "${CMAKE_SYSTEM_VERSION}")
 STRING(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\2" DARWIN_MINOR_VERSION "${CMAKE_SYSTEM_VERSION}")
 
@@ -72,68 +73,73 @@ IF(NOT _CMAKE_OSX_SDKS)
   ENDIF(CMAKE_XCODE_SELECT)
 ENDIF(NOT _CMAKE_OSX_SDKS)
 
-# Set CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT to the current version of OS X
-EXECUTE_PROCESS(COMMAND sw_vers -productVersion OUTPUT_VARIABLE CURRENT_OSX_VERSION)
-STRING(REGEX REPLACE "^.*(10)\\.([0-9]+)\\.*([0-9]+)*.*$" "\\1.\\2"
-  CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT ${CURRENT_OSX_VERSION})
+EXECUTE_PROCESS(COMMAND sw_vers -productVersion
+  OUTPUT_VARIABLE CURRENT_OSX_VERSION
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-# Set CMAKE_OSX_SYSROOT_DEFAULT based on CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT.
-# This next block assumes that Apple will start being consistent with
-# its SDK names from here on out...
-IF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT GREATER "10.4")
-  SET(CMAKE_OSX_SYSROOT_DEFAULT
-    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX${CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT}.sdk")
-ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT GREATER "10.4")
+#----------------------------------------------------------------------------
+# _CURRENT_OSX_VERSION - as a two-component string: 10.5, 10.6, ...
+#
+STRING(REGEX REPLACE "^([0-9]+\\.[0-9]+).*$" "\\1"
+  _CURRENT_OSX_VERSION "${CURRENT_OSX_VERSION}")
 
-IF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.4")
-  SET(CMAKE_OSX_SYSROOT_DEFAULT
-    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX10.4u.sdk")
-ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.4")
+#----------------------------------------------------------------------------
+# CMAKE_OSX_DEPLOYMENT_TARGET
 
-IF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.3")
-  SET(CMAKE_OSX_SYSROOT_DEFAULT
-    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX10.3.9.sdk")
-ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT EQUAL "10.3")
+# Set cache variable - end user may change this during ccmake or cmake-gui configure.
+IF(_CURRENT_OSX_VERSION VERSION_GREATER 10.3)
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}" CACHE STRING
+    "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
+ENDIF(_CURRENT_OSX_VERSION VERSION_GREATER 10.3)
 
-# Allow environment variables set by the user to override our defaults.
-# Use the same environment variables that Xcode uses.
-SET(ENV_MACOSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}")
+#----------------------------------------------------------------------------
+# CMAKE_OSX_SYSROOT
+
+# Environment variable set by the user overrides our default.
+# Use the same environment variable that Xcode uses.
 SET(ENV_SDKROOT "$ENV{SDKROOT}")
 
-# See if we need to override the default SDK or Deployment target with the
-# environment variables
-IF(NOT ENV_MACOSX_DEPLOYMENT_TARGET STREQUAL "")
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET_VALUE ${ENV_MACOSX_DEPLOYMENT_TARGET})
-ELSE(NOT ENV_MACOSX_DEPLOYMENT_TARGET STREQUAL "")
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET_VALUE ${CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT})
-ENDIF(NOT ENV_MACOSX_DEPLOYMENT_TARGET STREQUAL "")
+# Set CMAKE_OSX_SYSROOT_DEFAULT based on _CURRENT_OSX_VERSION,
+# accounting for the known specially named SDKs.
+SET(CMAKE_OSX_SYSROOT_DEFAULT
+  "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX${_CURRENT_OSX_VERSION}.sdk")
 
+IF(_CURRENT_OSX_VERSION STREQUAL "10.4")
+  SET(CMAKE_OSX_SYSROOT_DEFAULT
+    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX10.4u.sdk")
+ENDIF(_CURRENT_OSX_VERSION STREQUAL "10.4")
+
+IF(_CURRENT_OSX_VERSION STREQUAL "10.3")
+  SET(CMAKE_OSX_SYSROOT_DEFAULT
+    "${OSX_DEVELOPER_ROOT}/SDKs/MacOSX10.3.9.sdk")
+ENDIF(_CURRENT_OSX_VERSION STREQUAL "10.3")
+
+# Use environment or default as initial cache value:
 IF(NOT ENV_SDKROOT STREQUAL "")
   SET(CMAKE_OSX_SYSROOT_VALUE ${ENV_SDKROOT})
 ELSE(NOT ENV_SDKROOT STREQUAL "")
   SET(CMAKE_OSX_SYSROOT_VALUE ${CMAKE_OSX_SYSROOT_DEFAULT})
 ENDIF(NOT ENV_SDKROOT STREQUAL "")
 
-# Set cache variables - end user may change these during ccmake or cmake-gui configure.
-IF(CURRENT_OSX_VERSION GREATER 10.3)
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET ${CMAKE_OSX_DEPLOYMENT_TARGET_VALUE} CACHE STRING
-    "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
-ENDIF(CURRENT_OSX_VERSION GREATER 10.3)
-
+# Set cache variable - end user may change this during ccmake or cmake-gui configure.
 SET(CMAKE_OSX_SYSROOT ${CMAKE_OSX_SYSROOT_VALUE} CACHE PATH
   "The product will be built against the headers and libraries located inside the indicated SDK.")
 
 #----------------------------------------------------------------------------
 function(SanityCheckSDKAndDeployTarget _sdk_path _deploy)
-  if (_deploy STREQUAL "")
+  if(_deploy STREQUAL "")
     return()
   endif()
 
-  string (REGEX REPLACE "(.*MacOSX*)(....)(.*\\.sdk)" "\\2" SDK ${_sdk_path})
-  if (_deploy GREATER SDK)
-    message (FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET (${_deploy}) is greater than CMAKE_OSX_SYSROOT SDK (${_sdk_path}). Please set CMAKE_OSX_DEPLOYMENT_TARGET to ${SDK}")
-  endif (_deploy GREATER SDK)
-endfunction(SanityCheckSDKAndDeployTarget _sdk_path _deploy)
+  if(_sdk_path STREQUAL "")
+    message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET='${_deploy}' but CMAKE_OSX_SYSROOT is empty... - either set CMAKE_OSX_SYSROOT to a valid SDK or set CMAKE_OSX_DEPLOYMENT_TARGET to empty")
+  endif()
+
+  string(REGEX REPLACE "(.*MacOSX*)(....)(.*\\.sdk)" "\\2" SDK "${_sdk_path}")
+  if(_deploy GREATER "${SDK}")
+    message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET (${_deploy}) is greater than CMAKE_OSX_SYSROOT SDK (${_sdk_path}). Please set CMAKE_OSX_DEPLOYMENT_TARGET to ${SDK} or lower")
+  endif()
+endfunction(SanityCheckSDKAndDeployTarget)
 #----------------------------------------------------------------------------
 
 # Make sure the combination of SDK and Deployment Target are allowed

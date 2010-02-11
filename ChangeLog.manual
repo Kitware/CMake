@@ -1,3 +1,13 @@
+Changes in CMake 2.8.1 RC 2
+- CPack: Avoid deleting long PATH values with NSIS (#10257)
+- CTest: Fix and test cost-based test scheduler
+- CTest: Fix and test git updates for case of out-dated index
+- CTest: Fix regression caused by fix for (#2336) in rc1
+- CTest: Setup command-line dashboard support with Git
+- FindCUDA: Improve docs, use -rpath on Apple, fix dependency scanning
+- Fix OS X deployment-target and sysroot defaults (#9959,#9898,#10155)
+- Recognize the Compaq Fortran compiler
+
 Changes in CMake 2.8.1 RC 1
 - Add "NMake Makefiles JOM" generator
 - Add PathScale compiler support

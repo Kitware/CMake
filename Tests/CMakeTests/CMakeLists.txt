@@ -26,6 +26,7 @@ AddCMakeTest(If "")
 AddCMakeTest(String "")
 AddCMakeTest(Math "")
 AddCMakeTest(CMakeMinimumRequired "")
+AddCMakeTest(CompilerIdVendor "")
 
 if(HAVE_ELF_H)
   AddCMakeTest(ELF "")
@@ -46,11 +47,12 @@ AddCMakeTest(GetPrerequisites "${GetPrerequisites_PreArgs}")
 # by any previous configure, build or test steps.
 #
 if(do_cvs_tests)
+  string(REPLACE "\\" "/" ENV_HOME "$ENV{HOME}")
   set(CheckSourceTree_PreArgs
     "-DCMake_BINARY_DIR:PATH=${CMake_BINARY_DIR}"
     "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
     "-DCVS_EXECUTABLE:STRING=${CVS_EXECUTABLE}"
-    "-DHOME:STRING=$ENV{HOME}"
+    "-DHOME:STRING=${ENV_HOME}"
     )
   AddCMakeTest(CheckSourceTree "${CheckSourceTree_PreArgs}")
 endif(do_cvs_tests)
