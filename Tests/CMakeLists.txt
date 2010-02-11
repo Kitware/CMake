@@ -1483,6 +1483,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
       --test-command 
       ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BootstrapTest")
+    # Make this test run early during parallel execution
+    SET_TESTS_PROPERTIES(BootstrapTest PROPERTIES COST 5000)
 
     # provide more time for the bootstrap test
     GET_TEST_PROPERTY(BootstrapTest TIMEOUT PREVIOUS_TIMEOUT)
