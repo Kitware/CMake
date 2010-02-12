@@ -177,7 +177,7 @@ MACRO(KWSYS_PLATFORM_INFO_TEST lang var description)
       ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/${var}.bin)
 
     # Compile the test binary.
-    IF(NOT DEFINED ${var}_COMPILED)
+    IF(NOT EXISTS ${KWSYS_PLATFORM_INFO_FILE})
       MESSAGE(STATUS "${description}")
       TRY_COMPILE(${var}_COMPILED
         ${CMAKE_CURRENT_BINARY_DIR}
