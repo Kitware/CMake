@@ -12,13 +12,15 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+INCLUDE(CMakeTestCompilerCommon)
+
 # This file is used by EnableLanguage in cmGlobalGenerator to
 # determine that that selected Fortran compiler can actually compile
 # and link the most basic of programs.   If not, a fatal error
 # is set and cmake stops processing commands and will not generate
 # any makefiles or projects.
 IF(NOT CMAKE_Fortran_COMPILER_WORKS)
-  MESSAGE(STATUS "Check for working Fortran compiler: ${CMAKE_Fortran_COMPILER}")
+  PrintTestCompilerStatus("Fortran" "")
   FILE(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f "
         PROGRAM TESTFortran
         PRINT *, 'Hello'
@@ -31,7 +33,7 @@ IF(NOT CMAKE_Fortran_COMPILER_WORKS)
 ENDIF(NOT CMAKE_Fortran_COMPILER_WORKS)
 
 IF(NOT CMAKE_Fortran_COMPILER_WORKS)
-  MESSAGE(STATUS "Check for working Fortran compiler: ${CMAKE_Fortran_COMPILER} -- broken")
+  PrintTestCompilerStatus("Fortran" "  -- broken")
   FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the Fortran compiler works failed with "
     "the following output:\n${OUTPUT}\n\n")
@@ -41,7 +43,7 @@ IF(NOT CMAKE_Fortran_COMPILER_WORKS)
     "CMake will not be able to correctly generate this project.")
 ELSE(NOT CMAKE_Fortran_COMPILER_WORKS)
   IF(FORTRAN_TEST_WAS_RUN)
-    MESSAGE(STATUS "Check for working Fortran compiler: ${CMAKE_Fortran_COMPILER} -- works")
+    PrintTestCompilerStatus("Fortran" "  -- works")
     FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the Fortran compiler works passed with "
       "the following output:\n${OUTPUT}\n\n")
