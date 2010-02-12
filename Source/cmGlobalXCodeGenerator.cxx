@@ -2758,8 +2758,8 @@ void cmGlobalXCodeGenerator
                                 this->CreateString(deploymentTarget));
     }
 
-  // put this last so it can override existing settings
-  // Convert "CMAKE_XCODE_ATTRIBUTE_*" properties directly.
+  // Put this last so it can override existing settings
+  // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
   {
     std::vector<std::string> vars = this->CurrentMakefile->GetDefinitions();
     for(std::vector<std::string>::const_iterator i = vars.begin();
@@ -2768,7 +2768,8 @@ void cmGlobalXCodeGenerator
       if(i->find("CMAKE_XCODE_ATTRIBUTE_") == 0)
       {
         buildSettings->AddAttribute(i->substr(22).c_str(),
-          this->CreateString(this->CurrentMakefile->GetDefinition(i->c_str())));
+          this->CreateString(
+            this->CurrentMakefile->GetDefinition(i->c_str())));
       }
     }
   }
