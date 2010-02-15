@@ -376,6 +376,8 @@ cmComputeLinkInformation
     {
     this->OrderDependentRPath
       ->SetImplicitDirectories(this->ImplicitLinkDirs);
+    this->OrderDependentRPath
+      ->AddLanguageDirectories(this->RuntimeLinkDirs);
     }
 
   // Decide whether to enable compatible library search path mode.
@@ -1641,6 +1643,14 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
       {
       this->ImplicitLinkLibs.insert(item);
       }
+    }
+
+  // Get platform specific rpath link directories
+  if(const char *rpathDirs =
+     (this->Makefile->GetDefinition
+      ("CMAKE_PLATFORM_RUNTIME_PATH")))
+    {
+    cmSystemTools::ExpandListArgument(rpathDirs, this->RuntimeLinkDirs);
     }
 }
 

@@ -163,6 +163,9 @@ private:
   std::set<cmStdString> ImplicitLinkDirs;
   std::set<cmStdString> ImplicitLinkLibs;
 
+  // Additional paths configured by the runtime linker
+  std::vector<std::string> RuntimeLinkDirs;
+
   // Linker search path compatibility mode.
   std::set<cmStdString> OldLinkDirMask;
   std::vector<std::string> OldLinkDirItems;
