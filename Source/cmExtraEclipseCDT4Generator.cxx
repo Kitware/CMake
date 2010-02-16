@@ -43,9 +43,9 @@ void cmExtraEclipseCDT4Generator
   entry.Name = this->GetName();
   entry.Brief = "Generates Eclipse CDT 4.0 project files.";
   entry.Full =
-    "Project files for Eclipse will be created in the top directory "
-    "and will have a linked resource to every subdirectory which "
-    "features a CMakeLists.txt file containing a PROJECT() call."
+    "Project files for Eclipse will be created in the top directory. "
+    "In out of source builds, a linked resource to the top level source "
+    "directory will be created."
     "Additionally a hierarchy of makefiles is generated into the "
     "build tree. The appropriate make program can build the project through "
     "the default make target. A \"make install\" target is also provided.";
@@ -392,24 +392,24 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   if (this->IsOutOfSourceBuild)
     {
     fout << "\t<linkedResources>\n";
-    // for each sub project create a linked resource to the source dir
-    // - only if it is an out-of-source build
-    for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
-          it = this->GlobalGenerator->GetProjectMap().begin();
-         it != this->GlobalGenerator->GetProjectMap().end();
-         ++it)
-      {
-      std::string linkSourceDirectory = this->GetEclipsePath(
-                            it->second[0]->GetMakefile()->GetStartDirectory());
-      // .project dir can't be subdir of a linked resource dir
-      if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
+    // create a linked resource to CMAKE_SOURCE_DIR
+    // (this is not done anymore for each project because of 
+    // http://public.kitware.com/Bug/view.php?id=9978 and because I found it 
+    // actually quite confusing in bigger projects with many directories and 
+    // projects, Alex
+
+    std::string sourceLinkedResourceName = "[Source directory]";
+    std::string linkSourceDirectory = this->GetEclipsePath(
+                                                      mf->GetStartDirectory());
+    // .project dir can't be subdir of a linked resource dir
+    if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
                                          linkSourceDirectory.c_str()))
-        {
-        this->AppendLinkedResource(fout, it->first,
-                                   this->GetEclipsePath(linkSourceDirectory));
-        this->SrcLinkedResources.push_back(it->first);
-        }
+      {
+      this->AppendLinkedResource(fout, sourceLinkedResourceName,
+                                 this->GetEclipsePath(linkSourceDirectory));
+      this->SrcLinkedResources.push_back(sourceLinkedResourceName);
       }
+
     // for EXECUTABLE_OUTPUT_PATH when not in binary dir
     this->AppendOutLinkedResource(fout,
       mf->GetSafeDefinition("CMAKE_RUNTIME_OUTPUT_DIRECTORY"),

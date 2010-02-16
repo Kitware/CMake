@@ -1,3 +1,9 @@
+Changes in CMake 2.8.1 RC 3
+- Add CMAKE_XCODE_ATTRIBUTE_<attr> interface to set compiler (#9125)
+- Fix Eclipse files for targets in subdirectories (#9978)
+- Fix custom command rule hashes to avoid extra rebuilds
+- Print non-make generator name in initial compiler test
+
 Changes in CMake 2.8.1 RC 2
 - CPack: Avoid deleting long PATH values with NSIS (#10257)
 - CTest: Fix and test cost-based test scheduler
