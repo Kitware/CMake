@@ -89,22 +89,6 @@ MARK_AS_ADVANCED(
   PYTHON_INCLUDE_DIR
 )
 
-# Python Should be built and installed as a Framework on OSX
-IF(Python_FRAMEWORKS)
-  # If a framework has been selected for the include path,
-  # make sure "-framework" is used to link it.
-  IF("${PYTHON_INCLUDE_DIR}" MATCHES "Python\\.framework")
-    SET(PYTHON_LIBRARY "")
-    SET(PYTHON_DEBUG_LIBRARY "")
-  ENDIF("${PYTHON_INCLUDE_DIR}" MATCHES "Python\\.framework")
-  IF(NOT PYTHON_LIBRARY)
-    SET (PYTHON_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
-  ENDIF(NOT PYTHON_LIBRARY)
-  IF(NOT PYTHON_DEBUG_LIBRARY)
-    SET (PYTHON_DEBUG_LIBRARY "-framework Python" CACHE FILEPATH "Python Framework" FORCE)
-  ENDIF(NOT PYTHON_DEBUG_LIBRARY)
-ENDIF(Python_FRAMEWORKS)
-
 # We use PYTHON_INCLUDE_DIR, PYTHON_LIBRARY and PYTHON_DEBUG_LIBRARY for the
 # cache entries because they are meant to specify the location of a single
 # library. We now set the variables listed by the documentation for this
