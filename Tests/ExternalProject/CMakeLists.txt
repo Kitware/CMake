@@ -24,6 +24,17 @@ if(NOT DEFINED can_build_tutorial_step5)
       set(can_build_tutorial_step5 0)
     endif()
   endif()
+
+  # The ExternalProject builds of Tutorial Step5 cannot be built
+  # correctly 2nd and later times in an in-source build...
+  # (because the CMakeCache.txt from the real in-source build of
+  # the Tests/Tutorial/Step5 directory gets copied when we do
+  # the "source directory copy" step... but it still refers to
+  # its original path which yields a configure error.) So:
+  #
+  if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+    set(can_build_tutorial_step5 0)
+  endif()
 endif()
 
 message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
