@@ -61,7 +61,6 @@ bool cmProcess::StartProcess()
     cmsysProcess_SetWorkingDirectory(this->Process,
                                      this->WorkingDirectory.c_str());
     }
-  cmsysProcess_SetOption(this->Process, cmsysProcess_Option_HideWindow, 1);
   cmsysProcess_SetTimeout(this->Process, this->Timeout);
   cmsysProcess_Execute(this->Process);
   return (cmsysProcess_GetState(this->Process)
