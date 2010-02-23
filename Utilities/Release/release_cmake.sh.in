@@ -74,7 +74,7 @@ cd @CMAKE_RELEASE_DIRECTORY@
 if [ ! -z "@GIT_COMMAND@" ]; then
    # clone the repo without creating any source files in the directory
    # matching the branch being built (i.e. master CMake-2-8, etc)
-   @GIT_COMMAND@ clone -n git://cmake.org/cmake-tmp.git @CMAKE_CREATE_VERSION@
+   @GIT_COMMAND@ clone -n git://cmake.org/cmake.git @CMAKE_CREATE_VERSION@
    check_exit_value $? "Checkout git cmake source" || exit 1
    # go into the git directory
    cd @CMAKE_CREATE_VERSION@
