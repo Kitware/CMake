@@ -69,13 +69,28 @@ echo "Create initial cache"
 echo "@INITIAL_CACHE@" > @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build/CMakeCache.txt
 check_exit_value $? "Create initial cache" || exit 1
 
-#echo "Login into cvs."
-#echo "cmake" | @CVS_COMMAND@ -d @CVSROOT@ login
-
 echo "Checkout the source for @CMAKE_CREATE_VERSION@"
 cd @CMAKE_RELEASE_DIRECTORY@ 
-@CMAKE_CHECKOUT@ -d @CMAKE_CREATE_VERSION@ CMake
-check_exit_value $? "Checkout cmake source" || exit 1
+if [ ! -z "@GIT_COMMAND@" ]; then
+   # clone the repo without creating any source files in the directory
+   # matching the branch being built (i.e. master CMake-2-8, etc)
+   @GIT_COMMAND@ clone -n git://cmake.org/cmake-tmp.git @CMAKE_CREATE_VERSION@
+   check_exit_value $? "Checkout git cmake source" || exit 1
+   # go into the git directory
+   cd @CMAKE_CREATE_VERSION@
+   # run any extra commands if they exist
+   @GIT_EXTRA@
+   check_exit_value $? "git extra cmake source" || exit 1
+   # now checkout a copy on the local branch working
+   @GIT_COMMAND@ checkout -b working origin/@GIT_BRANCH@
+   check_exit_value $? "git checkout" || exit 1
+   cd ..
+else
+   # for CVS just run the CMAKE_CHECKOUT command as set
+   # in release_cmake.cmake
+   @CMAKE_CHECKOUT@
+   check_exit_value $? "CVS Checkout cmake source" || exit 1
+fi
 
 cd @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build 
 

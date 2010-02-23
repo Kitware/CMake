@@ -1,6 +1,4 @@
-if(NOT DEFINED CVSROOT)
-  set(CVSROOT ":pserver:anonymous:cmake@www.cmake.org:/cvsroot/CMake")
-endif()
+set(CVSROOT ":pserver:anonymous@cmake.org:/cmake.git")
 
 get_filename_component(SCRIPT_PATH "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
@@ -36,12 +34,9 @@ if(NOT DEFINED CVS_COMMAND)
   set(CVS_COMMAND cvs)
 endif(NOT DEFINED CVS_COMMAND)
 
-if("${CMAKE_CREATE_VERSION}" STREQUAL "CVS")
-  set( CMAKE_CHECKOUT "${CVS_COMMAND} -q -z3 -d ${CVSROOT} export -D now ")
-  set( CMAKE_CREATE_VERSION "CurrentCVS")
-else("${CMAKE_CREATE_VERSION}" STREQUAL "CVS")
-  set( CMAKE_CHECKOUT "${CVS_COMMAND} -q -z3 -d ${CVSROOT} export -r ${CMAKE_CREATE_VERSION} ")
-endif("${CMAKE_CREATE_VERSION}" STREQUAL "CVS")
+set(GIT_BRANCH ${CMAKE_CREATE_VERSION})
+set( CMAKE_CHECKOUT "${CVS_COMMAND} -q -d ${CVSROOT} co -d ${CMAKE_CREATE_VERSION} ${CMAKE_CREATE_VERSION}")
+
 
 if(NOT DEFINED FINAL_PATH )
   set(FINAL_PATH ${CMAKE_RELEASE_DIRECTORY}/${CMAKE_CREATE_VERSION}-build)
@@ -72,7 +67,6 @@ macro(remote_command comment command)
 endmacro(remote_command)
 
 # set this so configure file will work from script mode
-set(CMAKE_BACKWARDS_COMPATIBILITY 2.4)
 # create the script specific for the given host
 set(SCRIPT_FILE release_cmake-${SCRIPT_NAME}.sh)
 configure_file(${SCRIPT_PATH}/release_cmake.sh.in ${SCRIPT_FILE} @ONLY)

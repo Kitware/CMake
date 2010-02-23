@@ -8,7 +8,7 @@ set(RELEASE_SCRIPTS
   destiny_release.cmake       # HPUX
   magrathea_release.cmake     # Linux
   dash2win64_release.cmake    # Windows
-  dash2win64_cygwin.cmake     # Cygwin
+#  dash2win64_cygwin.cmake     # Cygwin
 #  blight_cygwin.cmake     # Cygwin
   v20n250_aix_release.cmake    # AIX 5.3
 #  vogon_cygwin.cmake          # Cygwin

@@ -15,4 +15,6 @@ BUILD_QtDialog:BOOL:=TRUE
 QT_QMAKE_EXECUTABLE:FILEPATH=c:/Dashboards/Support/qt-4.5.3-static/bin/qmake.exe
 ")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(GIT_COMMAND git)
+set(GIT_EXTRA "git config core.autocrlf true")
 include(${path}/release_cmake.cmake)
