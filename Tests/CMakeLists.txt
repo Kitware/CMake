@@ -270,8 +270,8 @@ IF(BUILD_TESTING)
     FILE(MAKE_DIRECTORY "${_TEST_DIR}")
     FILE(WRITE "${_TEST_DIR}/nightly-cmake.sh"
       "cd ${_TEST_DIR}
-${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
-${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Release/upload_release.cmake
+${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=master -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
+${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/Release/upload_release.cmake
     ")
     ADD_TEST(${name} /bin/sh ${_TEST_DIR}/nightly-cmake.sh)
     IF(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
