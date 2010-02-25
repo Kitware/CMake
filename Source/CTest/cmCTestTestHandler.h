@@ -96,6 +96,7 @@ public:
     bool IsInBasedOnREOptions;
     bool WillFail;
     float Cost;
+    int PreviousRuns;
     bool RunSerial;
     double Timeout;
     int Index;

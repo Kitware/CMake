@@ -2274,6 +2274,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.Timeout = 0;
   test.Cost = 0;
   test.Processors = 1;
+  test.PreviousRuns = 0;
   if (this->UseIncludeRegExpFlag &&
     !this->IncludeTestsRegularExpression.find(testname.c_str()))
     {

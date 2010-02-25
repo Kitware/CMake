@@ -64,8 +64,12 @@ protected:
   bool StartTest(int test);
   // Mark the checkpoint for the given test
   void WriteCheckpoint(int index);
-  void WriteCostData(int index, float cost);
+
+  void UpdateCostData();
   void ReadCostData();
+  // Return index of a test based on its name
+  int SearchByName(std::string name);
+
   void CreateTestCostList();
   // Removes the checkpoint file
   void MarkFinished();

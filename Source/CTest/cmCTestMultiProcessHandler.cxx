@@ -76,6 +76,7 @@ void cmCTestMultiProcessHandler::RunTests()
     {
     }
   this->MarkFinished();
+  this->UpdateCostData();
 }
 
 //---------------------------------------------------------
@@ -272,8 +273,7 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     this->TestRunningMap[test] = false;
     this->RunningTests.erase(p);
     this->WriteCheckpoint(test);
-    this->WriteCostData(test, static_cast<float>(
-      p->GetTestResults().ExecutionTime));
+
     this->RunningCount -= GetProcessorsUsed(test);
     delete p;
     }
@@ -281,24 +281,88 @@ bool cmCTestMultiProcessHandler::CheckOutput()
 }
 
 //---------------------------------------------------------
-void cmCTestMultiProcessHandler::ReadCostData()
+void cmCTestMultiProcessHandler::UpdateCostData()
 {
   std::string fname = this->CTest->GetBinaryDir()
     + "/Testing/Temporary/CTestCostData.txt";
+  std::string tmpout = fname + ".tmp";
+  std::fstream fout;
+  fout.open(tmpout.c_str(), std::ios::out);
 
-  if(cmSystemTools::FileExists(fname.c_str(), true)
-     && this->ParallelLevel > 1)
-    {       
+  PropertiesMap temp = this->Properties;
+
+  if(cmSystemTools::FileExists(fname.c_str()))
+    {
     std::ifstream fin;
     fin.open(fname.c_str());
+
     std::string line;
     while(std::getline(fin, line))
       {
       std::vector<cmsys::String> parts = 
         cmSystemTools::SplitString(line.c_str(), ' ');
+      //Format: <name> <previous_runs> <avg_cost>
+      if(parts.size() < 3) break;
 
-      int index = atoi(parts[0].c_str());
-      float cost = static_cast<float>(atof(parts[1].c_str()));
+      std::string name = parts[0];
+      int prev = atoi(parts[1].c_str());
+      float cost = static_cast<float>(atof(parts[2].c_str()));
+
+      int index = this->SearchByName(name);
+      if(index == -1)
+        {
+        // This test is not in memory. We just rewrite the entry
+        fout << name << " " << prev << " " << cost << "\n";
+        }
+      else
+        {
+        // Update with our new average cost
+        fout << name << " " << this->Properties[index]->PreviousRuns << " "
+          << this->Properties[index]->Cost << "\n";
+        temp.erase(index);
+        }
+      }
+    fin.close();
+    cmSystemTools::RemoveFile(fname.c_str());
+    }
+
+  // Add all tests not previously listed in the file
+  for(PropertiesMap::iterator i = temp.begin(); i != temp.end(); ++i)
+    {
+    fout << i->second->Name << " " << i->second->PreviousRuns << " "
+      << i->second->Cost << "\n";
+    }
+  fout.close();
+  cmSystemTools::RenameFile(tmpout.c_str(), fname.c_str());
+}
+
+//---------------------------------------------------------
+void cmCTestMultiProcessHandler::ReadCostData()
+{
+  //TODO variable location of the cost data file
+  std::string fname = this->CTest->GetBinaryDir()
+    + "/Testing/Temporary/CTestCostData.txt";
+  if(cmSystemTools::FileExists(fname.c_str(), true))
+    {
+    std::ifstream fin;
+    fin.open(fname.c_str());
+    std::string line;
+    while(std::getline(fin, line))
+      {
+      std::vector<cmsys::String> parts =
+        cmSystemTools::SplitString(line.c_str(), ' ');
+
+      // Probably an older version of the file, will be fixed next run
+      if(parts.size() < 3) break;
+
+      std::string name = parts[0];
+      int prev = atoi(parts[1].c_str());
+      float cost = static_cast<float>(atof(parts[2].c_str()));
+
+      int index = this->SearchByName(name);
+      if(index == -1) continue;
+
+      this->Properties[index]->PreviousRuns = prev;
       if(this->Properties[index] && this->Properties[index]->Cost == 0)
         {
         this->Properties[index]->Cost = cost;
@@ -306,7 +370,22 @@ void cmCTestMultiProcessHandler::ReadCostData()
       }
     fin.close();
     }
-  cmSystemTools::RemoveFile(fname.c_str());
+}
+
+//---------------------------------------------------------
+int cmCTestMultiProcessHandler::SearchByName(std::string name)
+{
+  int index = -1;
+
+  for(PropertiesMap::iterator i = this->Properties.begin();
+      i != this->Properties.end(); ++i)
+    {
+    if(i->second->Name == name)
+      {
+      index = i->first;
+      }
+    }
+  return index;
 }
 
 //---------------------------------------------------------
@@ -320,23 +399,12 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
 }
 
 //---------------------------------------------------------
-void cmCTestMultiProcessHandler::WriteCostData(int index, float cost)
-{
-  std::string fname = this->CTest->GetBinaryDir()
-    + "/Testing/Temporary/CTestCostData.txt";
-  std::fstream fout;
-  fout.open(fname.c_str(), std::ios::out | std::ios::app);
-  fout << index << " " << cost << "\n";
-  fout.close();
-}
-
-//---------------------------------------------------------
 void cmCTestMultiProcessHandler::WriteCheckpoint(int index)
 {
   std::string fname = this->CTest->GetBinaryDir()
     + "/Testing/Temporary/CTestCheckpoint.txt";
   std::fstream fout;
-  fout.open(fname.c_str(), std::ios::app);
+  fout.open(fname.c_str(), std::ios::app | std::ios::out);
   fout << index << "\n";
   fout.close();
 }

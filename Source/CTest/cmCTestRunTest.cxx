@@ -334,6 +334,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     this->TestResult.CompletionStatus = "Completed";
     this->TestResult.ExecutionTime = this->TestProcess->GetTotalTime();
     this->MemCheckPostProcess();
+    this->ComputeWeightedCost();
     }
   // Always push the current TestResult onto the
   // TestHandler vector
@@ -342,7 +343,21 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   return passed;
 }
 
-//--------------------------------------------------------------
+//----------------------------------------------------------------------
+void cmCTestRunTest::ComputeWeightedCost()
+{
+  int prev = this->TestProperties->PreviousRuns;
+  float avgcost = this->TestProperties->Cost;
+  double current = this->TestResult.ExecutionTime;
+
+  if(this->TestResult.Status == cmCTestTestHandler::COMPLETED)
+    {
+    this->TestProperties->Cost = ((prev * avgcost) + current) / (prev + 1);
+    this->TestProperties->PreviousRuns++;
+    }
+}
+
+//----------------------------------------------------------------------
 void cmCTestRunTest::MemCheckPostProcess()
 {
   if(!this->TestHandler->MemCheck)
@@ -430,6 +445,7 @@ bool cmCTestRunTest::StartTest(size_t total)
                              &this->TestProperties->Environment);
 }
 
+//----------------------------------------------------------------------
 void cmCTestRunTest::ComputeArguments()
 {
   std::vector<std::string>::const_iterator j = 

@@ -54,6 +54,8 @@ public:
   bool EndTest(size_t completed, size_t total, bool started);
   //Called by ctest -N to log the command string
   void ComputeArguments();
+
+  void ComputeWeightedCost();
 private:
   void DartProcessing();
   void ExeNotFound(std::string exe);
