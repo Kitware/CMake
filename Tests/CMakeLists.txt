@@ -1268,10 +1268,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=CVS -P ${CMake_SOURCE_DIR}/Utilities/Rel
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestBadExe/testOutput.log"
     )
   SET(CTestTestBadExe_REGEX "BAD_COMMAND")
-  # cygwin can not be made to produce a BAD_COMMAND error
+  # some cygwin can not be made to produce a BAD_COMMAND error
   # the best we can get from it is a failed test
   IF(CYGWIN)
-    SET(CTestTestBadExe_REGEX "\\*\\*\\*Failed")
+    SET(CTestTestBadExe_REGEX "(\\*\\*\\*Failed)|BAD_COMMAND")
   ENDIF()
   SET_TESTS_PROPERTIES(CTestTestBadExe PROPERTIES
     PASS_REGULAR_EXPRESSION "${CTestTestBadExe_REGEX}")
