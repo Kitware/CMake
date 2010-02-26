@@ -16,6 +16,7 @@
 #   gp_resolve_item
 #     (projects can override with gp_resolve_item_override)
 #   gp_resolved_file_type
+#     (projects can override with gp_resolved_file_type_override)
 #   gp_file_type
 #   get_prerequisites
 #   list_prerequisites
@@ -345,6 +346,9 @@ endfunction(gp_resolve_item)
 #   embedded
 #   other
 #
+# Override on a per-project basis by providing a project-specific
+# gp_resolved_file_type_override function.
+#
 function(gp_resolved_file_type original_file file exepath dirs type_var)
   #message(STATUS "**")
 
@@ -426,6 +430,13 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
         message(STATUS "warning: gp_resolved_file_type non-absolute file '${file}' returning type '${type}' -- possibly incorrect")
       endif()
     endif()
+  endif()
+
+  # Provide a hook so that projects can override the decision on whether a
+  # library belongs to the system or not by whatever logic they choose:
+  #
+  if(COMMAND gp_resolved_file_type_override)
+    gp_resolved_file_type_override("${resolved_file}" type)
   endif()
 
   set(${type_var} "${type}" PARENT_SCOPE)
