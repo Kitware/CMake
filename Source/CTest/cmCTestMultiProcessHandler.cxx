@@ -363,7 +363,11 @@ void cmCTestMultiProcessHandler::ReadCostData()
         cmSystemTools::SplitString(line.c_str(), ' ');
 
       // Probably an older version of the file, will be fixed next run
-      if(parts.size() < 3) return;
+      if(parts.size() < 3)
+        {
+        fin.close();
+        return;
+        }
 
       std::string name = parts[0];
       int prev = atoi(parts[1].c_str());
