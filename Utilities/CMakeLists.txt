@@ -129,3 +129,17 @@ INSTALL_FILES(${CMAKE_DOC_DIR} FILES ${HTML_FILES} ${TEXT_FILES})
 
 # Drive documentation generation.
 ADD_CUSTOM_TARGET(documentation ALL DEPENDS ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt )
+
+# Documentation testing.
+if(BUILD_TESTING)
+  find_package(LibXml2 QUIET)
+  if(NOT DEFINED LIBXML2_XMLLINT_EXECUTABLE)
+    find_program(LIBXML2_XMLLINT_EXECUTABLE xmllint)
+  endif()
+  mark_as_advanced(LIBXML2_XMLLINT_EXECUTABLE)
+  if(LIBXML2_XMLLINT_EXECUTABLE)
+    add_test(CMake.HTML
+      ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout ${HTML_FILES}
+      )
+  endif()
+endif()
