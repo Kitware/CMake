@@ -29,7 +29,6 @@ DropMethod: @DROP_METHOD@
 TriggerSite: @TRIGGER_SITE@
 ScpCommand: @SCPCOMMAND@
 
-
 # Dashboard start time
 NightlyStartTime: @NIGHTLY_START_TIME@
 

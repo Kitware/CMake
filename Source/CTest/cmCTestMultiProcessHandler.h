@@ -56,7 +56,6 @@ public:
   cmCTestTestHandler * GetTestHandler()
   { return this->TestHandler; }
 protected:  
-  cmCTest* CTest;
   // Start the next test or tests as many as are allowed by
   // ParallelLevel
   void StartNextTests();
@@ -99,10 +98,12 @@ protected:
   std::map<int, cmStdString> TestOutput;
   std::vector<cmStdString>* Passed;
   std::vector<cmStdString>* Failed;
+  std::vector<std::string> LastTestsFailed;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
   size_t ParallelLevel; // max number of process that can be run at once
   std::set<cmCTestRunTest*> RunningTests;  // current running tests
   cmCTestTestHandler * TestHandler;
+  cmCTest* CTest;
 };
 
 #endif

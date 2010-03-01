@@ -16,6 +16,7 @@
 #include "cmSystemTools.h"
 #include <stdlib.h>
 #include <stack>
+#include <float.h>
 
 cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 {
@@ -298,6 +299,7 @@ void cmCTestMultiProcessHandler::UpdateCostData()
     std::string line;
     while(std::getline(fin, line))
       {
+      if(line == "---") break;
       std::vector<cmsys::String> parts = 
         cmSystemTools::SplitString(line.c_str(), ' ');
       //Format: <name> <previous_runs> <avg_cost>
@@ -331,6 +333,14 @@ void cmCTestMultiProcessHandler::UpdateCostData()
     fout << i->second->Name << " " << i->second->PreviousRuns << " "
       << i->second->Cost << "\n";
     }
+
+  // Write list of failed tests
+  fout << "---\n";
+  for(std::vector<cmStdString>::iterator i = this->Failed->begin();
+      i != this->Failed->end(); ++i)
+    {
+    fout << i->c_str() << "\n";
+    }
   fout.close();
   cmSystemTools::RenameFile(tmpout.c_str(), fname.c_str());
 }
@@ -347,11 +357,13 @@ void cmCTestMultiProcessHandler::ReadCostData()
     std::string line;
     while(std::getline(fin, line))
       {
+      if(line == "---") break;
+
       std::vector<cmsys::String> parts =
         cmSystemTools::SplitString(line.c_str(), ' ');
 
       // Probably an older version of the file, will be fixed next run
-      if(parts.size() < 3) break;
+      if(parts.size() < 3) return;
 
       std::string name = parts[0];
       int prev = atoi(parts[1].c_str());
@@ -364,6 +376,14 @@ void cmCTestMultiProcessHandler::ReadCostData()
       if(this->Properties[index] && this->Properties[index]->Cost == 0)
         {
         this->Properties[index]->Cost = cost;
+        }
+      }
+    // Next part of the file is the failed tests
+    while(std::getline(fin, line))
+      {
+      if(line != "")
+        {
+        this->LastTestsFailed.push_back(line);
         }
       }
     fin.close();
@@ -392,7 +412,16 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
   for(TestMap::iterator i = this->Tests.begin();
       i != this->Tests.end(); ++i)
     {
-    this->TestCosts[this->Properties[i->first]->Cost].insert(i->first);
+    std::string name = this->Properties[i->first]->Name;
+    if(std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
+       name) != this->LastTestsFailed.end())
+      {
+      this->TestCosts[FLT_MAX].insert(i->first);
+      }
+    else
+      {
+      this->TestCosts[this->Properties[i->first]->Cost].insert(i->first);
+      }
     }
 }
 
