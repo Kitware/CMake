@@ -16,6 +16,35 @@ MAKE_DIRECTORY(${CMake_BINARY_DIR}/Docs)
 # Add a documentation target.
 SET(DOC_FILES "")
 
+SET(MAN_FILES
+  ${CMake_BINARY_DIR}/Docs/cmake.1
+  ${CMake_BINARY_DIR}/Docs/cmakecommands.1
+  ${CMake_BINARY_DIR}/Docs/cmakecompat.1
+  ${CMake_BINARY_DIR}/Docs/cmakeprops.1
+  ${CMake_BINARY_DIR}/Docs/cmakepolicies.1
+  ${CMake_BINARY_DIR}/Docs/cmakevars.1
+  ${CMake_BINARY_DIR}/Docs/cmakemodules.1
+  )
+SET(TEXT_FILES
+  ${CMake_BINARY_DIR}/Docs/cmake.txt
+  ${CMake_BINARY_DIR}/Docs/cmake.docbook
+  ${CMake_BINARY_DIR}/Docs/cmake-policies.txt
+  ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
+  ${CMake_BINARY_DIR}/Docs/cmake-variables.txt
+  ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
+  ${CMake_BINARY_DIR}/Docs/cmake-commands.txt
+  ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.txt
+  )
+SET(HTML_FILES
+  ${CMake_BINARY_DIR}/Docs/cmake.html
+  ${CMake_BINARY_DIR}/Docs/cmake-policies.html
+  ${CMake_BINARY_DIR}/Docs/cmake-properties.html
+  ${CMake_BINARY_DIR}/Docs/cmake-variables.html
+  ${CMake_BINARY_DIR}/Docs/cmake-modules.html
+  ${CMake_BINARY_DIR}/Docs/cmake-commands.html
+  ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html
+  )
+
 MACRO(ADD_DOCS target dependency)
   # Generate documentation for "ctest" executable.
   GET_TARGET_PROPERTY(CMD ${target} LOCATION)
@@ -32,13 +61,13 @@ MACRO(ADD_DOCS target dependency)
       DEPENDS ${target}
       MAIN_DEPENDENCY ${dependency}
       )
-    INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES ${CMake_BINARY_DIR}/Docs/${target}.1)
-    INSTALL_FILES(${CMAKE_DOC_DIR} FILES
+    SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/${target}.txt)
+    LIST(APPEND MAN_FILES ${CMake_BINARY_DIR}/Docs/${target}.1)
+    LIST(APPEND TEXT_FILES
       ${CMake_BINARY_DIR}/Docs/${target}.txt
-      ${CMake_BINARY_DIR}/Docs/${target}.html
       ${CMake_BINARY_DIR}/Docs/${target}.docbook
       )
-    SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/${target}.txt)
+    LIST(APPEND HTML_FILES ${CMake_BINARY_DIR}/Docs/${target}.html)
   ENDIF(CMD)
 ENDMACRO(ADD_DOCS target dependency)
 
@@ -95,31 +124,8 @@ ADD_CUSTOM_COMMAND(
   MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
   )
 
-INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES
-              ${CMake_BINARY_DIR}/Docs/cmake.1
-              ${CMake_BINARY_DIR}/Docs/cmakecommands.1
-              ${CMake_BINARY_DIR}/Docs/cmakecompat.1
-              ${CMake_BINARY_DIR}/Docs/cmakeprops.1
-              ${CMake_BINARY_DIR}/Docs/cmakepolicies.1
-              ${CMake_BINARY_DIR}/Docs/cmakevars.1
-              ${CMake_BINARY_DIR}/Docs/cmakemodules.1)
-
-INSTALL_FILES(${CMAKE_DOC_DIR} FILES
-    ${CMake_BINARY_DIR}/Docs/cmake.txt
-    ${CMake_BINARY_DIR}/Docs/cmake.html
-    ${CMake_BINARY_DIR}/Docs/cmake.docbook
-    ${CMake_BINARY_DIR}/Docs/cmake-policies.txt
-    ${CMake_BINARY_DIR}/Docs/cmake-policies.html
-    ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
-    ${CMake_BINARY_DIR}/Docs/cmake-properties.html
-    ${CMake_BINARY_DIR}/Docs/cmake-variables.txt
-    ${CMake_BINARY_DIR}/Docs/cmake-variables.html 
-    ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
-    ${CMake_BINARY_DIR}/Docs/cmake-modules.html
-    ${CMake_BINARY_DIR}/Docs/cmake-commands.txt
-    ${CMake_BINARY_DIR}/Docs/cmake-commands.html
-    ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.txt
-    ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html )
+INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES ${MAN_FILES})
+INSTALL_FILES(${CMAKE_DOC_DIR} FILES ${HTML_FILES} ${TEXT_FILES})
 
 # Drive documentation generation.
 ADD_CUSTOM_TARGET(documentation ALL DEPENDS ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt )
