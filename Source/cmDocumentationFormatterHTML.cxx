@@ -39,7 +39,7 @@ static void cmDocumentationPrintHTMLChar(std::ostream& os, char c)
       os << "&amp;";
       break;
     case '\n':
-      os << "<br>";
+      os << "<br />";
       break;
     default:
       os << c;
@@ -125,23 +125,33 @@ void cmDocumentationFormatterHTML
     {
     if (name)
       {
-      os << "<h2><a name=\"section_" << name << "\"/>" << name << "</h2>\n";
+      os << "<h2><a name=\"section_";
+      cmDocumentationPrintHTMLId(os, name);
+      os << "\"/>" << name << "</h2>\n";
       }
 
-    os << "<ul>\n";
+    // Is a list needed?
     for(std::vector<cmDocumentationEntry>::const_iterator op 
          = entries.begin(); op != entries.end(); ++ op )
       {
-      if(op->Name.size())
-         {
-         os << "    <li><a href=\"#" << prefix << ":";
-         cmDocumentationPrintHTMLId(os, op->Name.c_str());
-         os << "\"><b><code>";
-         this->PrintHTMLEscapes(os, op->Name.c_str());
-         os << "</code></b></a></li>";
-         }
+      if (op->Name.size())
+        {
+        os << "<ul>\n";
+        for(;op != entries.end() && op->Name.size(); ++op)
+          {
+          if(op->Name.size())
+            {
+            os << "    <li><a href=\"#" << prefix << ":";
+            cmDocumentationPrintHTMLId(os, op->Name.c_str());
+            os << "\"><b><code>";
+            this->PrintHTMLEscapes(os, op->Name.c_str());
+            os << "</code></b></a></li>";
+            }
+          }
+        os << "</ul>\n" ;
+        break; // Skip outer loop termination test
+        }
       }
-    os << "</ul>\n" ;
     }
 
   for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
@@ -164,7 +174,7 @@ void cmDocumentationFormatterHTML
         this->PrintHTMLEscapes(os, op->Brief.c_str());
         if(op->Full.size())
           {
-          os << "<br>\n    ";
+          os << "<br />\n    ";
           this->PrintFormatted(os, op->Full.c_str());
           }
         os << "\n";
@@ -194,6 +204,7 @@ void cmDocumentationFormatterHTML::PrintParagraph(std::ostream& os,
 {
   os << "<p>";
   this->PrintHTMLEscapes(os, text);
+  os << "</p>\n";
 }
 
 //----------------------------------------------------------------------------
@@ -201,7 +212,12 @@ void cmDocumentationFormatterHTML::PrintHeader(const char* docname,
                                                const char* appname,
                                                std::ostream& os)
 {
-  os << "<html><head><title>";
+  os << "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
+     << " \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n";
+  os << "<html xmlns=\"http://www.w3.org/1999/xhtml\""
+     << " xml:lang=\"en\" lang=\"en\">\n";
+  os << "<head><meta http-equiv=\"Content-Type\" "
+     << "content=\"text/html;charset=utf-8\" /><title>";
   os << docname << " - " << appname;
   os << "</title></head><body>\n";
 }
@@ -253,16 +269,20 @@ void cmDocumentationFormatterHTML
     return;
     }
 
-  os << "<h2><a name=\"section_Index\"/>Master Index "
+  os << "<h2><a name=\"section_Index\">Master Index "
      << "CMake " << cmVersion::GetCMakeVersion()
-     << "</h2>\n";
-  os << "<ul>\n";
-  for(unsigned int i=0; i < sections.size(); ++i)
+     << "</a></h2>\n";
+
+  if (!sections.empty())
     {
-    std::string name = sections[i]->
-      GetName((this->GetForm()));
-    os << "  <li><a href=\"#section_" 
-       << name << "\"<b>" << name << "</b></a></li>\n";
+    os << "<ul>\n";
+    for(unsigned int i=0; i < sections.size(); ++i)
+      {
+      std::string name = sections[i]->GetName((this->GetForm()));
+      os << "  <li><a href=\"#section_";
+      cmDocumentationPrintHTMLId(os, name.c_str());
+      os << "\"><b>" << name << "</b></a></li>\n";
+      }
+    os << "</ul>\n";
     }
-  os << "</ul>\n";
 }
