@@ -154,6 +154,17 @@ std::string cmCTest::CurrentTime()
   return cmXMLSafe(cmCTest::CleanString(current_time)).str();
 }
 
+//----------------------------------------------------------------------
+std::string cmCTest::GetCostDataFile()
+{
+  std::string fname = this->GetCTestConfiguration("CostDataFile");
+  if(fname == "")
+    {
+    fname= this->GetBinaryDir() + "/Testing/Temporary/CTestCostData.txt";
+    }
+  return fname;
+}
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
 //----------------------------------------------------------------------------
 static size_t

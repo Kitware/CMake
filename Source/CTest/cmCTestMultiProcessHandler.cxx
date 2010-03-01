@@ -283,8 +283,7 @@ bool cmCTestMultiProcessHandler::CheckOutput()
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::UpdateCostData()
 {
-  std::string fname = this->CTest->GetBinaryDir()
-    + "/Testing/Temporary/CTestCostData.txt";
+  std::string fname = this->CTest->GetCostDataFile();
   std::string tmpout = fname + ".tmp";
   std::fstream fout;
   fout.open(tmpout.c_str(), std::ios::out);
@@ -339,9 +338,8 @@ void cmCTestMultiProcessHandler::UpdateCostData()
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::ReadCostData()
 {
-  //TODO variable location of the cost data file
-  std::string fname = this->CTest->GetBinaryDir()
-    + "/Testing/Temporary/CTestCostData.txt";
+  std::string fname = this->CTest->GetCostDataFile();
+
   if(cmSystemTools::FileExists(fname.c_str(), true))
     {
     std::ifstream fin;

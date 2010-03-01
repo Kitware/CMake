@@ -398,6 +398,8 @@ public:
     { this->StreamOut = out; this->StreamErr = err; }
   void AddSiteProperties(std::ostream& );
   bool GetLabelSummary() { return this->LabelSummary;}
+
+  std::string GetCostDataFile();
 private:
   std::string ConfigType;
   std::string ScheduleType;
