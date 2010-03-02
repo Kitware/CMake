@@ -2099,6 +2099,17 @@ bool cmCTestTestHandler::SetTestsProperties(
               rtit->AttachOnFail.push_back(*f);
               }
             }
+          if ( key == "RESOURCE_LOCK" )
+            {
+            std::vector<std::string> lval;
+            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+
+            for(std::vector<std::string>::iterator f = lval.begin();
+                f != lval.end(); ++f)
+              {
+              rtit->LockedResources.insert(*f);
+              }
+            }
           if ( key == "TIMEOUT" )
             {
             rtit->Timeout = atof(val.c_str());

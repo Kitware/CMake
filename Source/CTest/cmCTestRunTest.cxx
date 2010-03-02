@@ -448,7 +448,7 @@ bool cmCTestRunTest::StartTest(size_t total)
 //----------------------------------------------------------------------
 void cmCTestRunTest::ComputeArguments()
 {
-  std::vector<std::string>::const_iterator j = 
+  std::vector<std::string>::const_iterator j =
     this->TestProperties->Args.begin();
   ++j; // skip test name
 
@@ -463,7 +463,7 @@ void cmCTestRunTest::ComputeArguments()
     }
   else
     {
-    this->ActualCommand = 
+    this->ActualCommand =
       this->TestHandler->FindTheExecutable(
       this->TestProperties->Args[1].c_str());
     ++j; //skip the executable (it will be actualCommand)

@@ -95,12 +95,16 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(this->Properties[test]->Directory.c_str());
 
+  // Lock the resources we'll be using
+  this->LockResources(test);
+
   if(testRun->StartTest(this->Total))
     {
     this->RunningTests.insert(testRun);
     }
   else
     {
+    this->UnlockResources(test);
     this->Completed++;
     this->TestFinishMap[test] = true;
     this->TestRunningMap[test] = false;
@@ -110,6 +114,25 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     delete testRun;
     }
   cmSystemTools::ChangeDirectory(current_dir.c_str());
+}
+
+//---------------------------------------------------------
+void cmCTestMultiProcessHandler::LockResources(int index)
+{
+  this->LockedResources.insert(
+    this->Properties[index]->LockedResources.begin(),
+    this->Properties[index]->LockedResources.end());
+}
+
+//---------------------------------------------------------
+void cmCTestMultiProcessHandler::UnlockResources(int index)
+{
+  for(std::set<std::string>::iterator i =
+      this->Properties[index]->LockedResources.begin();
+      i != this->Properties[index]->LockedResources.end(); ++i)
+    {
+    this->LockedResources.erase(*i);
+    }
 }
 
 //---------------------------------------------------------
@@ -146,6 +169,17 @@ inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
 //---------------------------------------------------------
 bool cmCTestMultiProcessHandler::StartTest(int test)
 {
+  //Check for locked resources
+  for(std::set<std::string>::iterator i =
+      this->Properties[test]->LockedResources.begin();
+      i != this->Properties[test]->LockedResources.end(); ++i)
+    {
+    if(this->LockedResources.find(*i) != this->LockedResources.end())
+      {
+      return false;
+      }
+    }
+
   // copy the depend tests locally because when 
   // a test is finished it will be removed from the depend list
   // and we don't want to be iterating a list while removing from it
@@ -274,7 +308,7 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     this->TestRunningMap[test] = false;
     this->RunningTests.erase(p);
     this->WriteCheckpoint(test);
-
+    this->UnlockResources(test);
     this->RunningCount -= GetProcessorsUsed(test);
     delete p;
     }

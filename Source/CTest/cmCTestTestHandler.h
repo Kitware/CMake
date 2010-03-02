@@ -104,6 +104,7 @@ public:
     int Processors;
     std::vector<std::string> Environment;
     std::vector<std::string> Labels;
+    std::set<std::string> LockedResources;
   };
 
   struct cmCTestTestResult

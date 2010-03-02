@@ -143,6 +143,12 @@ void cmTest::DefineProperties(cmake *cm)
      "The list is reported in dashboard submissions.");
 
   cm->DefineProperty
+    ("RESOURCE_LOCK", cmProperty::TEST,
+    "Specify a list of resources that are locked by this test.",
+    "If multiple tests specify the same resource lock, they are guaranteed "
+    "not to run concurrently.");
+
+  cm->DefineProperty
     ("MEASUREMENT", cmProperty::TEST, 
      "Specify a CDASH measurement and value to be reported for a test.",
      "If set to a name then that name will be reported to CDASH as a "
