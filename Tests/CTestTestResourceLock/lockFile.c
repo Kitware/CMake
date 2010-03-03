@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 /* Disable deprecation warning for fopen */
-#define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable: 4996)
 
 /*if run serially, works fine.
   If run in parallel, someone will attempt to delete
