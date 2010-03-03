@@ -1284,7 +1284,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -S "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
-  
+
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestResourceLock/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestResourceLock/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestResourceLock ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestResourceLock/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestResourceLock/output.log"
+    )
+
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestScheduler/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestScheduler/test.cmake"

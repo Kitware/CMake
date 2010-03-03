@@ -119,9 +119,12 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::LockResources(int index)
 {
-  this->LockedResources.insert(
-    this->Properties[index]->LockedResources.begin(),
-    this->Properties[index]->LockedResources.end());
+  for(std::set<std::string>::iterator i =
+      this->Properties[index]->LockedResources.begin();
+      i != this->Properties[index]->LockedResources.end(); ++i)
+    {
+    this->LockedResources.insert(*i);
+    }
 }
 
 //---------------------------------------------------------
