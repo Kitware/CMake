@@ -1,3 +1,10 @@
+Changes in CMake 2.8.1 RC 4
+- CTest: Do not hide test GUI windows (fixes 2.8.0 regression)
+- Documentation: Clarify CMAKE_MODULE_PATH variable
+- FindQt4: Add support for QtDeclartive module
+- FortranCInterface: Fix PathScale detection
+- Suppress GNU flag -fPIC on Windows (fixes 2.8.1-rc1 regression)
+
 Changes in CMake 2.8.1 RC 3
 - Add CMAKE_XCODE_ATTRIBUTE_<attr> interface to set compiler (#9125)
 - Fix Eclipse files for targets in subdirectories (#9978)

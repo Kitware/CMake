@@ -67,6 +67,8 @@ macro(__windows_compiler_gnu lang)
     endforeach(type)
   endif()
 
+  set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "") # No -fPIC on Windows
+
   # Binary link rules.
   set(CMAKE_${lang}_CREATE_SHARED_MODULE
     "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_MODULE_${lang}_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS> -o <TARGET> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")

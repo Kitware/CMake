@@ -515,10 +515,10 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_MODULE_PATH", cmProperty::VARIABLE,
-     "Path to look for cmake modules to load.",
-     "Specifies a path to override the default search path for "
-     "CMake modules. For example include commands will look "
-     "in this path first for modules to include.",
+     "List of directories to search for CMake modules.",
+     "Commands like include() and find_package() search for files in "
+     "directories listed by this variable before checking the default "
+     "modules that come with CMake.",
      false,
      "Variables That Change Behavior");
 
