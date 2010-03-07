@@ -18,6 +18,10 @@
 #                            (e.g., C:/wxWidgets-2.6.3/lib/vc_lib).
 #  wxWidgets_CONFIGURATION - Configuration to use
 #                            (e.g., msw, mswd, mswu, mswunivud, etc.)
+#  wxWidgets_EXCLUDE_COMMON_LIBRARIES
+#                          - Set to TRUE to exclude linking of
+#                            commonly required libs (e.g., png tiff
+#                            jpeg zlib regex expat).
 # 
 # For unix style it uses the wx-config utility. You can select between
 # debug/release, unicode/ansi, universal/non-universal, and
@@ -213,8 +217,12 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     ENDIF(wxWidgets_USE_MONOLITHIC)
   ENDIF(NOT wxWidgets_FIND_COMPONENTS)
 
-  # Always add the common required libs.
-  LIST(APPEND wxWidgets_FIND_COMPONENTS ${wxWidgets_COMMON_LIBRARIES})
+  # Add the common (usually required libs) unless
+  # wxWidgets_EXCLUDE_COMMON_LIBRARIES has been set.
+  IF(NOT wxWidgets_EXCLUDE_COMMON_LIBRARIES)
+    LIST(APPEND wxWidgets_FIND_COMPONENTS
+      ${wxWidgets_COMMON_LIBRARIES})
+  ENDIF(NOT wxWidgets_EXCLUDE_COMMON_LIBRARIES)
 
   #-------------------------------------------------------------------
   # WIN32: Helper MACROS
