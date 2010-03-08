@@ -1,3 +1,7 @@
+Changes in CMake 2.8.1 RC 5
+- Fix FindQt4 to work with OpenGL on the mac
+- Add .git .bzr and .hg to the list of default CPack ignore directories.
+
 Changes in CMake 2.8.1 RC 4
 - CTest: Do not hide test GUI windows (fixes 2.8.0 regression)
 - Documentation: Clarify CMAKE_MODULE_PATH variable
