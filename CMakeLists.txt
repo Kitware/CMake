@@ -243,6 +243,9 @@ MACRO (CMAKE_BUILD_UTILITIES)
     ENDIF(NOT CMAKE_BUILD_CURL_SHARED)
     SET(CMAKE_CURL_INCLUDES)
     SET(CMAKE_CURL_LIBRARIES cmcurl)
+    IF(CMAKE_TESTS_CDASH_SERVER)
+      SET(CMAKE_CURL_TEST_URL "${CMAKE_TESTS_CDASH_SERVER}/user.php")
+    ENDIF(CMAKE_TESTS_CDASH_SERVER)
     ADD_SUBDIRECTORY(Utilities/cmcurl)
   ENDIF(CMAKE_USE_SYSTEM_CURL)
 
@@ -388,6 +391,23 @@ INCLUDE(CompileFlags.cmake)
 INCLUDE(CheckSymbolExists)
 CHECK_SYMBOL_EXISTS(unsetenv "stdlib.h" HAVE_UNSETENV)
 CHECK_SYMBOL_EXISTS(environ "stdlib.h" HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
+
+# CMAKE_TESTS_CDASH_SERVER: CDash server used by CMake/Tests.
+#
+# If not defined or "", this variable defaults to the server at
+# http://www.cdash.org/CDash.
+#
+# If set explicitly to "NOTFOUND", curl tests and ctest tests that use
+# the network are skipped.
+#
+# If set to something starting with "http://localhost/", the CDash is
+# expected to be an instance of CDash used for CDash testing, pointing
+# to a cdash4simpletest database. In these cases, the CDash dashboards
+# should be run first.
+#
+IF("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
+  SET(CMAKE_TESTS_CDASH_SERVER "http://www.cdash.org/CDash")
+ENDIF("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
 
 # build the utilities (a macro defined in this file) 
 CMAKE_BUILD_UTILITIES()
