@@ -63,7 +63,21 @@ ENDIF(WIN32  AND  NOT QT_IS_STATIC)
 
 # QtOpenGL dependencies
 QT_QUERY_QMAKE(QMAKE_LIBS_OPENGL "QMAKE_LIBS_OPENGL")
-SEPARATE_ARGUMENTS(QMAKE_LIBS_OPENGL)
+IF(Q_WS_MAC)
+# On the Mac OpenGL is probably frameworks and QMAKE_LIBS_OPENGL can be
+# e.g. "-framework OpenGL -framework AGL".  The separate_arguments() call in
+# the other branch makes "-framework;-OpenGL;-framework;-lAGL" appear in the
+# linker command. So we need to protect the "-framework foo" as
+# non-separatable strings.  We do this by replacing the space after
+# "-framework" with an underscore, then calling separate_arguments(), and
+# then we replace the underscores again with spaces. So we get proper linker
+# commands. Alex
+  STRING(REGEX REPLACE "-framework +" "-framework_" QMAKE_LIBS_OPENGL "${QMAKE_LIBS_OPENGL}")
+  SEPARATE_ARGUMENTS(QMAKE_LIBS_OPENGL)
+  STRING(REGEX REPLACE "-framework_" "-framework " QMAKE_LIBS_OPENGL "${QMAKE_LIBS_OPENGL}")
+ELSE(Q_WS_MAC)
+  SEPARATE_ARGUMENTS(QMAKE_LIBS_OPENGL)
+ENDIF(Q_WS_MAC)
 SET (QT_QTOPENGL_LIB_DEPENDENCIES ${QT_QTOPENGL_LIB_DEPENDENCIES} ${QMAKE_LIBS_OPENGL})
 
 
