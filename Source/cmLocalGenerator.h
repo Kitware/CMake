@@ -102,7 +102,7 @@ public:
    * path setting
    */
   enum RelativeRoot { NONE, FULL, HOME, START, HOME_OUTPUT, START_OUTPUT };
-  enum OutputFormat { UNCHANGED, MAKEFILE, SHELL };
+  enum OutputFormat { UNCHANGED, MAKEFILE, SHELL, RESPONSE };
   std::string ConvertToOutputFormat(const char* source, OutputFormat output);
   std::string Convert(const char* remote, RelativeRoot local,
                       OutputFormat output = UNCHANGED,

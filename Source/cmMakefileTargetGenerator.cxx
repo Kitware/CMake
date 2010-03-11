@@ -1329,7 +1329,7 @@ public:
     this->NextObject =
       this->LocalGenerator->Convert(obj.c_str(),
                                     cmLocalGenerator::START_OUTPUT,
-                                    cmLocalGenerator::SHELL);
+                                    cmLocalGenerator::RESPONSE);
 
     // Roll over to next string if the limit will be exceeded.
     if(this->LengthLimit != std::string::npos &&

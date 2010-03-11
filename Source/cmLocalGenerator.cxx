@@ -2247,6 +2247,10 @@ std::string cmLocalGenerator::ConvertToOutputFormat(const char* source,
       }
     result = this->EscapeForShell(result.c_str(), true, false);
     }
+  else if(output == RESPONSE)
+    {
+    result = this->EscapeForShell(result.c_str(), false, false);
+    }
   return result;
 }
 
