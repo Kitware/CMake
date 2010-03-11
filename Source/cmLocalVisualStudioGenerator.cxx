@@ -230,7 +230,15 @@ cmLocalVisualStudioGenerator
                                        escapeAllowMakeVars);
         }
       }
+
+    // After each custom command, check for an error result.
+    // If there was an error, jump to the VCReportError label,
+    // skipping the run of any subsequent commands in this
+    // sequence.
+    //
+    script += newline_text;
+    script += "if errorlevel 1 goto VCReportError";
     }
+
   return script;
 }
-
