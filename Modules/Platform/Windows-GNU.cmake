@@ -68,6 +68,8 @@ macro(__windows_compiler_gnu lang)
   endif()
 
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "") # No -fPIC on Windows
+  set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+  set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-Wl,@")
 
   # Binary link rules.
   set(CMAKE_${lang}_CREATE_SHARED_MODULE
