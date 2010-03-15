@@ -630,8 +630,8 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 
   std::string hostSystemName = mf->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
   std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
-  std::string compilerId = mf->GetRequiredDefinition(compilerIdVar.c_str());
-  std::string compiler = "gcc";
+  std::string compilerId = mf->GetSafeDefinition(compilerIdVar.c_str());
+  std::string compiler = "gcc";  // default to gcc
   if (compilerId == "MSVC")
     {
     compiler = "msvc8";
