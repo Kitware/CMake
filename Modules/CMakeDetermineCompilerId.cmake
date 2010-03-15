@@ -19,6 +19,7 @@
 FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # Make sure the compiler arguments are clean.
   STRING(STRIP "${CMAKE_${lang}_COMPILER_ARG1}" CMAKE_${lang}_COMPILER_ID_ARG1)
+  STRING(REGEX REPLACE " +" ";" CMAKE_${lang}_COMPILER_ID_ARG1 "${CMAKE_${lang}_COMPILER_ID_ARG1}")
 
   # Make sure user-specified compiler flags are used.
   IF(CMAKE_${lang}_FLAGS)
