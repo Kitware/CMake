@@ -14,6 +14,7 @@
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTest.h"
 #include "cmSystemTools.h"
+#include "cm_curl.h"
 
 #include <cm_zlib.h>
 #include <cmsys/Base64.h>
@@ -441,7 +442,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     }
   this->StartTime = this->CTest->CurrentTime();
 
-  return this->CreateProcess(this->TestProperties->Timeout,
+  return this->ForkProcess(this->ResolveTimeout(),
                              &this->TestProperties->Environment);
 }
 
@@ -518,7 +519,56 @@ void cmCTestRunTest::DartProcessing()
 }
 
 //----------------------------------------------------------------------
-bool cmCTestRunTest::CreateProcess(double testTimeOut,
+double cmCTestRunTest::ResolveTimeout()
+{
+  double timeout = this->TestProperties->Timeout;
+
+  if(this->CTest->GetStopTime() == "")
+    {
+    return timeout;
+    }
+  struct tm* lctime;
+  time_t current_time = time(0);
+  lctime = gmtime(&current_time);
+  int gm_hour = lctime->tm_hour;
+  lctime = localtime(&current_time);
+  int local_hour = lctime->tm_hour;
+
+  int timezone = (local_hour - gm_hour) * 100;
+  char buf[1024];
+  // add todays year day and month to the time in str because
+  // curl_getdate no longer assumes the day is today
+  sprintf(buf, "%d%02d%02d %s %+05i",
+          lctime->tm_year + 1900,
+          lctime->tm_mon + 1,
+          lctime->tm_mday,
+          this->CTest->GetStopTime().c_str(),
+          timezone);
+
+  time_t stop_time = curl_getdate(buf, &current_time);
+  if(stop_time == -1)
+    {
+    return timeout;
+    }
+
+  //the stop time refers to the next day
+  if(this->CTest->NextDayStopTime)
+    {
+    stop_time += 24*60*60;
+    }
+  double stop_timeout = stop_time - current_time;
+
+  if(stop_timeout <= 0)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
+      "Exiting ctest." << std::endl);
+    exit(-1);
+    }
+  return timeout == 0 ? stop_timeout : min(timeout, stop_timeout);
+}
+
+//----------------------------------------------------------------------
+bool cmCTestRunTest::ForkProcess(double testTimeOut,
                      std::vector<std::string>* environment)
 {
   this->TestProcess = new cmProcess;

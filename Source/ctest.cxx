@@ -218,6 +218,10 @@ static const char * cmDocumentationOptions[][3] =
   {"--timeout <seconds>", "Set a global timeout on all tests.",
    "This option will set a global timeout on all tests that do not already "
    "have a timeout set on them."},
+  {"--stop-time <time>", "Set a time at which all tests should stop running.",
+   "Set a real time of day at which all tests should timeout. Example: "
+   "7:00:00 -0400. Any time format understood by the curl date parser is "
+   "accepted. Local time is assumed if no timezone is specified."},
   {"--http1.0", "Submit using HTTP 1.0.",
   "This option will force CTest to use HTTP 1.0 to submit files to the "
   "dashboard, instead of HTTP 1.1."},

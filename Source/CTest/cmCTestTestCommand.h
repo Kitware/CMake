@@ -62,7 +62,8 @@ public:
       "             [EXCLUDE_LABEL exclude regex] \n"
       "             [INCLUDE_LABEL label regex] \n"
       "             [PARALLEL_LEVEL level] \n"
-      "             [SCHEDULE_RANDOM on]) \n"
+      "             [SCHEDULE_RANDOM on] \n"
+      "             [STOP_TIME time of day]) \n"
       "Tests the given build directory and stores results in Test.xml. The "
       "second argument is a variable that will hold value. Optionally, "
       "you can specify the starting test number START, the ending test number "
@@ -73,7 +74,8 @@ public:
       "property LABEL. PARALLEL_LEVEL should be set to a positive number "
       "representing the number of tests to be run in parallel. "
       "SCHEDULE_RANDOM will launch tests in a random order, and is "
-      "typically used to detect implicit test dependencies."
+      "typically used to detect implicit test dependencies. STOP_TIME is the "
+      "time of day at which the tests should all stop running."
       "\n"
       CTEST_COMMAND_APPEND_OPTION_DOCS;
     }
@@ -96,6 +98,7 @@ protected:
     ctt_INCLUDE_LABEL,
     ctt_PARALLEL_LEVEL,
     ctt_SCHEDULE_RANDOM,
+    ctt_STOP_TIME,
     ctt_LAST
   };
 };

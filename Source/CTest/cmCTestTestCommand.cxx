@@ -25,6 +25,7 @@ cmCTestTestCommand::cmCTestTestCommand()
   this->Arguments[ctt_INCLUDE_LABEL] = "INCLUDE_LABEL";
   this->Arguments[ctt_PARALLEL_LEVEL] = "PARALLEL_LEVEL";
   this->Arguments[ctt_SCHEDULE_RANDOM] = "SCHEDULE_RANDOM";
+  this->Arguments[ctt_STOP_TIME] = "STOP_TIME";
   this->Arguments[ctt_LAST] = 0;
   this->Last = ctt_LAST;
 }
@@ -97,6 +98,10 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     {
     handler->SetOption("ScheduleRandom",
                        this->Values[ctt_SCHEDULE_RANDOM]);
+    }
+  if(this->Values[ctt_STOP_TIME])
+    {
+    this->CTest->SetStopTime(this->Values[ctt_STOP_TIME]);
     }
   return handler;
 }

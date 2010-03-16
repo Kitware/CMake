@@ -1304,7 +1304,22 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   SET_TESTS_PROPERTIES(CTestTestScheduler PROPERTIES
     PASS_REGULAR_EXPRESSION "Start 1.*Start 2.*Start 3.*Start 4.*Start 5.*Start 5.*Start 4.*Start 3.*Start 2.*Start 1")
-  
+
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestStopTime/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestStopTime/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestStopTime/GetDate.cmake"
+    "${CMake_BINARY_DIR}/Tests/CTestTestStopTime/GetDate.cmake"
+    COPYONLY)
+  ADD_TEST(CTestTestStopTime ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestStopTime/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestStopTime/testOutput.log"
+    )
+  SET_TESTS_PROPERTIES(CTestTestStopTime PROPERTIES
+    PASS_REGULAR_EXPRESSION "The stop time has been passed")
+
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestSubdir/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestSubdir/test.cmake"

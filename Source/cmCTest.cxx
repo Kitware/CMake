@@ -314,6 +314,8 @@ cmCTest::cmCTest()
   this->CompressXMLFiles       = false;
   this->CTestConfigFile        = "";
   this->ScheduleType           = "";
+  this->StopTime               = "";
+  this->NextDayStopTime        = false;
   this->OutputLogFile          = 0;
   this->OutputLogFileLastTag   = -1;
   this->SuppressUpdatingCTestConfiguration = false;
@@ -1881,6 +1883,12 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     double timeout = (double)atof(args[i].c_str());
     this->GlobalTimeout = timeout;
     }
+
+  if(this->CheckArgument(arg, "--stop-time") && i < args.size() - 1)
+    {
+    i++;
+    this->SetStopTime(args[i]);
+    }
   
   if(this->CheckArgument(arg, "-C", "--build-config") &&
      i < args.size() - 1)
@@ -2335,6 +2343,13 @@ void cmCTest::SetNotesFiles(const char* notes)
 }
 
 //----------------------------------------------------------------------
+void cmCTest::SetStopTime(std::string time)
+{
+  this->StopTime = time;
+  this->DetermineNextDayStop();
+}
+
+//----------------------------------------------------------------------
 int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
 {
   bool found = false;
@@ -2533,6 +2548,33 @@ std::string cmCTest::GetCTestConfiguration(const char *name)
 void cmCTest::EmptyCTestConfiguration()
 {
   this->CTestConfiguration.clear();
+}
+
+//----------------------------------------------------------------------
+void cmCTest::DetermineNextDayStop()
+{
+  struct tm* lctime;
+  time_t current_time = time(0);
+  lctime = gmtime(&current_time);
+  int gm_hour = lctime->tm_hour;
+  lctime = localtime(&current_time);
+  int local_hour = lctime->tm_hour;
+
+  int timezone = (local_hour - gm_hour) * 100;
+  char buf[1024];
+  sprintf(buf, "%d%02d%02d %s %+05i",
+          lctime->tm_year + 1900,
+          lctime->tm_mon + 1,
+          lctime->tm_mday,
+          this->StopTime.c_str(),
+          timezone);
+
+  time_t stop_time = curl_getdate(buf, &current_time);
+
+  if(stop_time < current_time)
+    {
+    this->NextDayStopTime = true;
+    }
 }
 
 //----------------------------------------------------------------------

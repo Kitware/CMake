@@ -59,7 +59,9 @@ public:
 private:
   void DartProcessing();
   void ExeNotFound(std::string exe);
-  bool CreateProcess(double testTimeOut,
+  // Figures out a final timeout which is min(STOP_TIME, NOW+TIMEOUT)
+  double ResolveTimeout();
+  bool ForkProcess(double testTimeOut,
                      std::vector<std::string>* environment);
   void WriteLogOutputTop(size_t completed, size_t total);
   //Run post processing of the process output for MemCheck
