@@ -564,8 +564,8 @@ double cmCTestRunTest::ResolveTimeout()
       "Exiting ctest." << std::endl);
     exit(-1);
     }
-  return timeout == 0 ? stop_timeout :
-    (timeout < stop_timeout ? timeout : stop_timeout);
+#undef min
+  return timeout == 0 ? stop_timeout : std::min(timeout, stop_timeout);
 }
 
 //----------------------------------------------------------------------
