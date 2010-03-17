@@ -159,7 +159,7 @@ MACRO (QT4_WRAP_UI outfiles )
   FOREACH (it ${ui_files})
     GET_FILENAME_COMPONENT(outfile ${it} NAME_WE)
     GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
-    SET(outfile ${CMAKE_CURRENT_BINARY_DIR}/ui_${outfile}.h)
+    QT4_MAKE_OUTPUT_FILE(${infile} ui_ h outfile)
     ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
       COMMAND ${QT_UIC_EXECUTABLE}
       ARGS ${ui_options} -o ${outfile} ${infile}
@@ -179,7 +179,7 @@ MACRO (QT4_ADD_RESOURCES outfiles )
     GET_FILENAME_COMPONENT(outfilename ${it} NAME_WE)
     GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
     GET_FILENAME_COMPONENT(rc_path ${infile} PATH)
-    SET(outfile ${CMAKE_CURRENT_BINARY_DIR}/qrc_${outfilename}.cxx)
+    QT4_MAKE_OUTPUT_FILE(${infile} qrc_ cxx outfile)
     #  parse file for dependencies 
     #  all files are absolute paths or relative to the location of the qrc file
     FILE(READ "${infile}" _RC_FILE_CONTENTS)
