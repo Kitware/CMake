@@ -545,6 +545,8 @@ double cmCTestRunTest::ResolveTimeout()
           this->CTest->GetStopTime().c_str(),
           timezone);
 
+  cmCTestLog(this->CTest, HANDLER_OUTPUT, "Computed stop time="
+    << buf << std::endl);
   time_t stop_time = curl_getdate(buf, &current_time);
   if(stop_time == -1)
     {
