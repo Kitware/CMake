@@ -2557,10 +2557,22 @@ void cmCTest::DetermineNextDayStop()
   time_t current_time = time(0);
   lctime = gmtime(&current_time);
   int gm_hour = lctime->tm_hour;
+  time_t gm_time = mktime(lctime);
   lctime = localtime(&current_time);
   int local_hour = lctime->tm_hour;
 
-  int timezone = (local_hour - gm_hour) * 100;
+  int tzone_offset = 0;
+  if(gm_time > current_time && gm_hour < local_hour)
+    {
+    // this means gm_time is on the next day
+    tzone_offset = local_hour - gm_hour - 24;
+    }
+  else
+    {
+    tzone_offset = local_hour - gm_hour;
+    }
+
+  tzone_offset *= 100;
   char buf[1024];
   sprintf(buf, "%d%02d%02d %s %+05i",
           lctime->tm_year + 1900,

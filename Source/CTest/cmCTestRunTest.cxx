@@ -531,10 +531,22 @@ double cmCTestRunTest::ResolveTimeout()
   time_t current_time = time(0);
   lctime = gmtime(&current_time);
   int gm_hour = lctime->tm_hour;
+  time_t gm_time = mktime(lctime);
   lctime = localtime(&current_time);
   int local_hour = lctime->tm_hour;
 
-  int timezone = (local_hour - gm_hour) * 100;
+  int tzone_offset = 0;
+  if(gm_time > current_time && gm_hour < local_hour)
+    {
+    // this means gm_time is on the next day
+    tzone_offset = local_hour - gm_hour - 24;
+    }
+  else
+    {
+    tzone_offset = local_hour - gm_hour;
+    }
+
+  tzone_offset *= 100;
   char buf[1024];
   // add todays year day and month to the time in str because
   // curl_getdate no longer assumes the day is today
@@ -543,10 +555,8 @@ double cmCTestRunTest::ResolveTimeout()
           lctime->tm_mon + 1,
           lctime->tm_mday,
           this->CTest->GetStopTime().c_str(),
-          timezone);
+          tzone_offset);
 
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "Computed stop time="
-    << buf << std::endl);
   time_t stop_time = curl_getdate(buf, &current_time);
   if(stop_time == -1)
     {
@@ -558,7 +568,7 @@ double cmCTestRunTest::ResolveTimeout()
     {
     stop_time += 24*60*60;
     }
-  double stop_timeout = stop_time - current_time;
+  int stop_timeout = (stop_time - current_time) % (24*60*60);
 
   if(stop_timeout <= 0)
     {
@@ -567,7 +577,8 @@ double cmCTestRunTest::ResolveTimeout()
     exit(-1);
     }
 #undef min
-  return timeout == 0 ? stop_timeout : std::min(timeout, stop_timeout);
+  return timeout == 0 ? stop_timeout :
+    std::min(timeout, static_cast<double>(stop_timeout));
 }
 
 //----------------------------------------------------------------------
