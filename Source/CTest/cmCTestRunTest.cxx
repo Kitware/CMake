@@ -535,15 +535,16 @@ double cmCTestRunTest::ResolveTimeout()
   lctime = localtime(&current_time);
   int local_hour = lctime->tm_hour;
 
-  int tzone_offset = 0;
+  int tzone_offset = local_hour - gm_hour;
   if(gm_time > current_time && gm_hour < local_hour)
     {
     // this means gm_time is on the next day
-    tzone_offset = local_hour - gm_hour - 24;
+    tzone_offset -= 24;
     }
-  else
+  else if(gm_time < current_time && gm_hour > local_hour)
     {
-    tzone_offset = local_hour - gm_hour;
+    // this means gm_time is on the previous day
+    tzone_offset += 24;
     }
 
   tzone_offset *= 100;
