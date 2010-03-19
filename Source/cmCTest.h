@@ -457,6 +457,8 @@ private:
 
   double                  GlobalTimeout;
 
+  int                     LastStopTimeout;
+
   int                     MaxTestNameWidth;
 
   int                     ParallelLevel;

@@ -311,6 +311,7 @@ cmCTest::cmCTest()
   this->InteractiveDebugMode   = true;
   this->TimeOut                = 0;
   this->GlobalTimeout          = 0;
+  this->LastStopTimeout        = 24 * 60 * 60;
   this->CompressXMLFiles       = false;
   this->CTestConfigFile        = "";
   this->ScheduleType           = "";
@@ -2580,7 +2581,7 @@ void cmCTest::DetermineNextDayStop()
           lctime->tm_mon + 1,
           lctime->tm_mday,
           this->StopTime.c_str(),
-          timezone);
+          tzone_offset);
 
   time_t stop_time = curl_getdate(buf, &current_time);
 

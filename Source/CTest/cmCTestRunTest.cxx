@@ -570,16 +570,16 @@ double cmCTestRunTest::ResolveTimeout()
     stop_time += 24*60*60;
     }
   int stop_timeout = (stop_time - current_time) % (24*60*60);
+  this->CTest->LastStopTimeout = stop_timeout;
 
-  if(stop_timeout <= 0)
+  if(stop_timeout <= 0 || stop_timeout > this->CTest->LastStopTimeout)
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
       "Exiting ctest." << std::endl);
     exit(-1);
     }
-#undef min
   return timeout == 0 ? stop_timeout :
-    std::min(timeout, static_cast<double>(stop_timeout));
+    (timeout < stop_timeout ? timeout : stop_timeout);
 }
 
 //----------------------------------------------------------------------
