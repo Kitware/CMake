@@ -444,7 +444,7 @@ const char* DynamicLoader::LastError()
 // 5. Implementation for systems without dynamic libs
 // __gnu_blrts__ is IBM BlueGene/L
 // __LIBCATAMOUNT__ is defined on Catamount on Cray compute nodes
-#if defined(__gnu_blrts__) || defined(__LIBCATAMOUNT__)
+#if defined(__gnu_blrts__) || defined(__LIBCATAMOUNT__) || defined(__CRAYXT_COMPUTE_LINUX_TARGET)
 #include <string.h> // for strerror()
 #define DYNAMICLOADER_DEFINED 1
 
