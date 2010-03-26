@@ -2395,11 +2395,13 @@ int SystemInformationImplementation::QueryMemory()
 #elif _WIN32
 #if  _MSC_VER < 1300
   MEMORYSTATUS ms;
+  unsigned long tv, tp, av, ap;
   ms.dwLength = sizeof(ms);
   GlobalMemoryStatus(&ms);
-#define MEM_VAL(value) dw##value
+  #define MEM_VAL(value) dw##value
 #else
   MEMORYSTATUSEX ms;
+  DWORDLONG tv, tp, av, ap;
   ms.dwLength = sizeof(ms);
   if (0 == GlobalMemoryStatusEx(&ms))
   {
@@ -2407,10 +2409,10 @@ int SystemInformationImplementation::QueryMemory()
   }
 #define MEM_VAL(value) ull##value
 #endif
-  unsigned long tv = ms.MEM_VAL(TotalVirtual);
-  unsigned long tp = ms.MEM_VAL(TotalPhys);
-  unsigned long av = ms.MEM_VAL(AvailVirtual);
-  unsigned long ap = ms.MEM_VAL(AvailPhys);
+  tv = ms.MEM_VAL(TotalVirtual);
+  tp = ms.MEM_VAL(TotalPhys);
+  av = ms.MEM_VAL(AvailVirtual);
+  ap = ms.MEM_VAL(AvailPhys);
   this->TotalVirtualMemory = tv>>10>>10;
   this->TotalPhysicalMemory = tp>>10>>10;
   this->AvailableVirtualMemory = av>>10>>10;
