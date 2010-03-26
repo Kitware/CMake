@@ -1177,11 +1177,18 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
                                  this->CurrentArgument.c_str(),
                                  *this->AllSections["Modules"]))
       {
-      this->PrintDocumentationCommand
-        (os,  this->AllSections["Modules"]->GetEntries()[0]);
-      os <<  "\n       Defined in: ";
-      os << moduleName << "\n";
-      return true;
+      if(this->AllSections["Modules"]->GetEntries().size())
+        {
+        this->PrintDocumentationCommand
+          (os,  this->AllSections["Modules"]->GetEntries()[0]);
+        os <<  "\n       Defined in: ";
+        os << moduleName << "\n";
+        return true;
+        }
+      else
+        {
+        return false;
+        }
       }
     }
 
