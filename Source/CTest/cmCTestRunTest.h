@@ -77,14 +77,9 @@ private:
   //if this option is set to false.)
   //bool OptimizeForCTest;
 
-  //flag for whether the env was modified for this run
-  bool ModifyEnv;
-
   bool UsePrefixCommand;
   std::string PrefixCommand;
 
-  //stores the original environment if we are modifying it
-  std::vector<std::string> OrigEnv;
   std::string ProcessOutput;
   std::string CompressedOutput;
   double CompressionRatio;

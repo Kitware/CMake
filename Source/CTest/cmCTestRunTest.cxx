@@ -23,7 +23,6 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
 {
   this->CTest = handler->CTest;
   this->TestHandler = handler;
-  this->ModifyEnv = false;
   this->TestProcess = 0;
   this->TestResult.ExecutionTime =0;
   this->TestResult.ReturnValue = 0;
@@ -139,11 +138,6 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     this->CompressOutput();
     }
 
-  //restore the old environment
-  if (this->ModifyEnv)
-    {
-    cmSystemTools::RestoreEnv(this->OrigEnv);
-    }
   this->WriteLogOutputTop(completed, total);
   std::string reason;
   bool passed = true;
@@ -593,9 +587,6 @@ bool cmCTestRunTest::ForkProcess(double testTimeOut,
   this->TestProcess->SetCommand(this->ActualCommand.c_str());
   this->TestProcess->SetCommandArguments(this->Arguments);
 
-  std::vector<std::string> origEnv;
-  this->ModifyEnv = (environment && environment->size()>0);
-
   // determine how much time we have
   double timeout = this->CTest->GetRemainingTimeAllowed() - 120;
   if (this->CTest->GetTimeOut() > 0 && this->CTest->GetTimeOut() < timeout)
@@ -618,9 +609,13 @@ bool cmCTestRunTest::ForkProcess(double testTimeOut,
 
   this->TestProcess->SetTimeout(timeout);
 
-  if (this->ModifyEnv)
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  cmSystemTools::SaveRestoreEnvironment sre;
+#endif
+
+  if (environment && environment->size()>0)
     {
-    this->OrigEnv = cmSystemTools::AppendEnv(environment);
+    cmSystemTools::AppendEnv(environment);
     }
 
   return this->TestProcess->StartProcess();
