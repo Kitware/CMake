@@ -169,7 +169,7 @@ cmLocalVisualStudioGenerator
     script += newline;
     newline = newline_text;
     script += "cd ";
-    script += this->Convert(workingDirectory, START_OUTPUT, SHELL);
+    script += this->Convert(workingDirectory, FULL, SHELL);
 
     // Change the working drive.
     if(workingDirectory[0] && workingDirectory[1] == ':')

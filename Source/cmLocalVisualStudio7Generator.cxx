@@ -236,7 +236,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 {
   std::string stampName = cmake::GetCMakeFilesDirectoryPostSlash();
   stampName += "generate.stamp";
-  const char* dsprule = 
+  const char* dsprule =
     this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
   commandLine.push_back(dsprule);
@@ -261,7 +261,9 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
                   START_OUTPUT, UNCHANGED, true);
   commandLine.push_back(args);
   commandLine.push_back("--check-stamp-file");
-  commandLine.push_back(stampName.c_str());
+  std::string stampFilename = this->Convert(stampName.c_str(), FULL,
+                                            SHELL);
+  commandLine.push_back(stampFilename.c_str());
 
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
 
