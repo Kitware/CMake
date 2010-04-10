@@ -18,16 +18,11 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-IF (ZLIB_INCLUDE_DIR)
-  # Already in cache, be silent
-  SET(ZLIB_FIND_QUIETLY TRUE)
-ENDIF (ZLIB_INCLUDE_DIR)
-
 FIND_PATH(ZLIB_INCLUDE_DIR zlib.h)
 
 SET(ZLIB_NAMES z zlib zdll)
-FIND_LIBRARY(ZLIB_LIBRARY NAMES ${ZLIB_NAMES} )
-MARK_AS_ADVANCED( ZLIB_LIBRARY ZLIB_INCLUDE_DIR )
+FIND_LIBRARY(ZLIB_LIBRARY NAMES ${ZLIB_NAMES})
+MARK_AS_ADVANCED(ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
 
 # Per-recommendation
 SET(ZLIB_INCLUDE_DIRS "${ZLIB_INCLUDE_DIR}")
