@@ -49,6 +49,14 @@
 #  CPACK_RPM_PACKAGE_DESCRIPTION
 #     Mandatory : YES
 #     Default   : CPACK_PACKAGE_DESCRIPTION_FILE if set or "no package description available"
+#  CPACK_RPM_COMPRESSION_TYPE
+#     Mandatory : NO
+#     Default   : -
+#     May be used to override RPM compression type to be used
+#     to build the RPM. For example some Linux distribution now default
+#     to lzma or xz compression whereas older cannot use such RPM.
+#     Using this one can enforce compression type to be used.
+#     Possible value are: lzma, xz, bzip2 and gzip.
 #  CPACK_RPM_PACKAGE_REQUIRES
 #     Mandatory : NO
 #     Default   : -
@@ -265,6 +273,27 @@ IF (NOT CPACK_RPM_PACKAGE_DESCRIPTION)
         ENDIF (CPACK_PACKAGE_DESCRIPTION_FILE)
 ENDIF (NOT CPACK_RPM_PACKAGE_DESCRIPTION)
 
+# CPACK_RPM_COMPRESSION_TYPE
+#
+IF (CPACK_RPM_COMPRESSION_TYPE)
+   IF(CPACK_RPM_PACKAGE_DEBUG)
+     MESSAGE("CPackRPM:Debug: User Specified RPM compression type: ${CPACK_RPM_COMPRESSION_TYPE}")
+   ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+   IF(CPACK_RPM_COMPRESSION_TYPE STREQUAL "lzma")
+     SET(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.lzdio")
+   ENDIF(CPACK_RPM_COMPRESSION_TYPE STREQUAL "lzma")
+   IF(CPACK_RPM_COMPRESSION_TYPE STREQUAL "xz")
+     SET(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w7.xzdio")
+   ENDIF(CPACK_RPM_COMPRESSION_TYPE STREQUAL "xz")
+   IF(CPACK_RPM_COMPRESSION_TYPE STREQUAL "bzip2")
+     SET(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.bzdio")
+   ENDIF(CPACK_RPM_COMPRESSION_TYPE STREQUAL "bzip2")
+   IF(CPACK_RPM_COMPRESSION_TYPE STREQUAL "gzip")
+     SET(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.gzdio")
+   ENDIF(CPACK_RPM_COMPRESSION_TYPE STREQUAL "gzip")
+ELSE(CPACK_RPM_COMPRESSION_TYPE)
+   SET(CPACK_RPM_COMPRESSION_TYPE_TMP "")
+ENDIF(CPACK_RPM_COMPRESSION_TYPE)
 # CPACK_RPM_PACKAGE_REQUIRES
 # Placeholder used to specify binary RPM dependencies (if any)
 # see http://www.rpm.org/max-rpm/s1-rpm-depend-manual-dependencies.html
@@ -419,6 +448,7 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 %define _topdir \@CPACK_RPM_DIRECTORY\@
 \@TMP_RPM_SPEC_INSTALL_POST\@
 \@CPACK_RPM_SPEC_MORE_DEFINE\@
+\@CPACK_RPM_COMPRESSION_TYPE_TMP\@
   
 %description
 \@CPACK_RPM_PACKAGE_DESCRIPTION\@
@@ -459,6 +489,8 @@ fi
 ${CPACK_RPM_INSTALL_FILES}
 
 %changelog
+* Sun Apr 4 2010 Erk <eric.noulard@gmail.com>
+  Add support for specifying RPM compression type
 * Sat Nov 28 2009 Erk <eric.noulard@gmail.com>
   Refix backup/restore install tree for OpenSuSE 11.2
 * Sun Nov 22 2009 Erk <eric.noulard@gmail.com>
