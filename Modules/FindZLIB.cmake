@@ -18,10 +18,17 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(ZLIB_INCLUDE_DIR zlib.h)
+FIND_PATH(ZLIB_INCLUDE_DIR zlib.h
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]/include"
+)
 
 SET(ZLIB_NAMES z zlib zdll)
-FIND_LIBRARY(ZLIB_LIBRARY NAMES ${ZLIB_NAMES})
+FIND_LIBRARY(ZLIB_LIBRARY
+    NAMES
+        ${ZLIB_NAMES}
+    PATHS
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]/lib"
+)
 MARK_AS_ADVANCED(ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
 
 # Per-recommendation
