@@ -17,6 +17,16 @@ const char info_sizeof_dptr[] =  {
 # define ABI_ID "ELF N32"
 #elif defined(__sgi) && defined(_ABI64)
 # define ABI_ID "ELF 64"
+
+/* Check for (some) ARM ABIs.
+ * See e.g. http://wiki.debian.org/ArmEabiPort for some information on this. */
+#elif defined(__GNU__) && defined(__ELF__) && defined(__ARM_EABI__)
+# define ABI_ID "ELF ARMEABI"
+#elif defined(__GNU__) && defined(__ELF__) && defined(__ARMEB__)
+# define ABI_ID "ELF ARM"
+#elif defined(__GNU__) && defined(__ELF__) && defined(__ARMEL__)
+# define ABI_ID "ELF ARM"
+
 #elif defined(__ELF__)
 # define ABI_ID "ELF"
 #endif
