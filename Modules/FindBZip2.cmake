@@ -4,7 +4,6 @@
 #  BZIP2_FOUND - system has BZip2
 #  BZIP2_INCLUDE_DIR - the BZip2 include directory
 #  BZIP2_LIBRARIES - Link these to use BZip2
-#  BZIP2_DEFINITIONS - Compiler switches required for using BZip2
 #  BZIP2_NEED_PREFIX - this is set if the functions are prefixed with BZ2_
 
 #=============================================================================
