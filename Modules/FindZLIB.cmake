@@ -1,9 +1,14 @@
 # - Find zlib
 # Find the native ZLIB includes and library
 #
-#  ZLIB_INCLUDE_DIRS - where to find zlib.h, etc.
-#  ZLIB_LIBRARIES    - List of libraries when using zlib.
-#  ZLIB_FOUND        - True if zlib found.
+#  ZLIB_INCLUDE_DIRS   - where to find zlib.h, etc.
+#  ZLIB_LIBRARIES      - List of libraries when using zlib.
+#  ZLIB_FOUND          - True if zlib found.
+#
+#  ZLIB_VERSION_STRING - The version of zlib found (x.y.z)
+#  ZLIB_MAJOR_VERSION  - the major version of zlib
+#  ZLIB_MINOR_VERSION  - The minor version of zlib
+#  ZLIB_PATCH_VERSION  - The patch version of zlib
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
@@ -30,6 +35,11 @@ FIND_LIBRARY(ZLIB_LIBRARY
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]/lib"
 )
 MARK_AS_ADVANCED(ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
+
+IF (ZLIB_INCLUDE_DIR)
+    FILE(READ "${ZLIB_INCLUDE_DIR}/zlib.h" ZLIB_H)
+    STRING(REGEX REPLACE ".*#define ZLIB_VERSION \"([0-9]+)\\.([0-9]+)\\.([0-9]+)\".*" "\\1.\\2.\\3" ZLIB_VERSION_STRING "${ZLIB_H}")
+ENDIF()
 
 # Per-recommendation
 SET(ZLIB_INCLUDE_DIRS "${ZLIB_INCLUDE_DIR}")
