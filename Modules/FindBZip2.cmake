@@ -20,10 +20,6 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-IF (BZIP2_INCLUDE_DIR AND BZIP2_LIBRARIES)
-    SET(BZip2_FIND_QUIETLY TRUE)
-ENDIF (BZIP2_INCLUDE_DIR AND BZIP2_LIBRARIES)
-
 FIND_PATH(BZIP2_INCLUDE_DIR bzlib.h )
 
 FIND_LIBRARY(BZIP2_LIBRARIES NAMES bz2 bzip2 )
