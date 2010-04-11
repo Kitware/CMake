@@ -109,14 +109,5 @@ IF(Subversion_SVN_EXECUTABLE)
 
 ENDIF(Subversion_SVN_EXECUTABLE)
 
-IF(NOT Subversion_FOUND)
-  IF(NOT Subversion_FIND_QUIETLY)
-    MESSAGE(STATUS "Subversion was not found.")
-  ELSE(NOT Subversion_FIND_QUIETLY)
-    IF(Subversion_FIND_REQUIRED)
-      MESSAGE(FATAL_ERROR "Subversion was not found.")
-    ENDIF(Subversion_FIND_REQUIRED)
-  ENDIF(NOT Subversion_FIND_QUIETLY)
-ENDIF(NOT Subversion_FOUND)
-
-# FindSubversion.cmake ends here.
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Subversion DEFAULT_MSG Subversion_SVN_EXECUTABLE)
