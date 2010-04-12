@@ -296,7 +296,9 @@ struct _timeval64i32 {
 #define __timeval _timeval64i32
 #endif
 
-typedef int pid_t;
+#if defined(_MSC_VER)
+    typedef int pid_t;
+#endif // _MSC_VER
 
 /* Message digest define */
 #if !defined(HAVE_OPENSSL_MD5_H) && !defined(HAVE_OPENSSL_SHA_H)

@@ -22,7 +22,8 @@
 #if defined(__BORLANDC__)
 #  define STRICMP stricmp
 #  define TO_INTPTR(x) ((long)(x))
-#else // Visual studio
+#endif // Borland
+#if defined(_MSC_VER) // Visual studio
 #  if ( _MSC_VER >= 1300 )
 #    include <stddef.h>
 #    define TO_INTPTR(x) ((intptr_t)(x))
@@ -30,7 +31,12 @@
 #    define TO_INTPTR(x) ((long)(x))
 #  endif // Visual studio .NET
 #  define STRICMP _stricmp
-#endif // Borland
+#endif // Visual Studio
+#if defined(__MINGW32__)
+# include <stdint.h>
+# define TO_INTPTR(x) ((intptr_t)(x))
+# define STRICMP _stricmp
+#endif // MinGW
 
 #define POPEN_1 1
 #define POPEN_2 2
