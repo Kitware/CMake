@@ -31,6 +31,7 @@ public:
     // we must copy when we clone
     newC->Args = this->Args;
     newC->Functions = this->Functions;
+    newC->FilePath = this->FilePath;
     newC->Policies = this->Policies;
     return newC;
   }
@@ -78,6 +79,7 @@ public:
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
   cmPolicies::PolicyMap Policies;
+  std::string FilePath;
 };
 
 
@@ -121,7 +123,10 @@ bool cmMacroHelperCommand::InvokeInitialPass
   std::string argnDef;
   bool argnDefInitialized = false;
   bool argvDefInitialized = false;
-
+  if( this->Functions.size())
+    {
+    this->FilePath = this->Functions[0].FilePath;
+    }
   // Invoke all the functions that were collected in the block.
   cmListFileFunction newLFF;
   // for each function
@@ -135,10 +140,13 @@ bool cmMacroHelperCommand::InvokeInitialPass
     newLFF.Line = this->Functions[c].Line;
 
     // for each argument of the current function
-    for (std::vector<cmListFileArgument>::const_iterator k = 
+    for (std::vector<cmListFileArgument>::iterator k =
            this->Functions[c].Arguments.begin();
          k != this->Functions[c].Arguments.end(); ++k)
       {
+      // Set the FilePath on the arguments to match the function since it is
+      // not stored and the original values may be freed
+      k->FilePath = this->FilePath.c_str();
       tmps = k->Value;
       // replace formal arguments
       for (unsigned int j = 1; j < this->Args.size(); ++j)
