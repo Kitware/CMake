@@ -777,7 +777,7 @@ if [ "x${cmake_parallel_make}" != "x" ]; then
   cmake_make_flags="${cmake_make_flags} -j ${cmake_parallel_make}"
 fi
 for a in ${cmake_make_processors}; do
-  if [ -z "${cmake_make_processor}" ] && cmake_try_make "${a}" "${cmake_make_flags}" >> cmake_bootstrap.log 2>&1; then
+  if [ -z "${cmake_make_processor}" ] && cmake_try_make "${a}" "${cmake_make_flags}" >> ../cmake_bootstrap.log 2>&1; then
     cmake_make_processor="${a}"
   fi
 done
@@ -786,19 +786,19 @@ if [ "x${cmake_original_make_flags}" != "x${cmake_make_flags}" ]; then
   if [ -z "${cmake_make_processor}" ]; then
     cmake_make_flags="${cmake_original_make_flags}"
     for a in ${cmake_make_processors}; do
-      if [ -z "${cmake_make_processor}" ] && cmake_try_make "${a}" "${cmake_make_flags}" >> cmake_bootstrap.log 2>&1; then
+      if [ -z "${cmake_make_processor}" ] && cmake_try_make "${a}" "${cmake_make_flags}" >> ../cmake_bootstrap.log 2>&1; then
         cmake_make_processor="${a}"
       fi
     done
   fi
 fi
 cd "${cmake_bootstrap_dir}"
-rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
 
 if [ -z "${cmake_make_processor}" ]; then
   cmake_error 8 "Cannot find appropriate Makefile processor on this system.
 Please specify one using environment variable MAKE."
 fi
+rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
 echo "Makefile processor on this system is: ${cmake_make_processor}"
 if [ "x${cmake_full_make_flags}" != "x${cmake_make_flags}" ]; then
   echo "---------------------------------------------"
