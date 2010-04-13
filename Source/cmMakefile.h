@@ -61,6 +61,10 @@ public:
   unsigned int GetCacheMajorVersion();
   unsigned int GetCacheMinorVersion();
 
+  /* return true if a variable has been set with
+     set(foo )
+  */
+  bool VariableCleared(const char* ) const;
   /** Return whether compatibility features needed for a version of
       the cache or lower should be enabled.  */
   bool NeedCacheCompatibility(int major, int minor);

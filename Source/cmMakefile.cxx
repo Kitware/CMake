@@ -43,6 +43,7 @@ class cmMakefile::Internals
 {
 public:
   std::stack<cmDefinitions, std::list<cmDefinitions> > VarStack;
+  std::set<cmStdString> VarRemoved;
 };
 
 // default is not to be building executables
@@ -1694,9 +1695,19 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 #endif
 }
 
+bool cmMakefile::VariableCleared(const char* var) const
+{
+  if(this->Internal->VarRemoved.find(var) != this->Internal->VarRemoved.end())
+    {
+    return true;
+    }
+  return false;
+}
+
 void cmMakefile::RemoveDefinition(const char* name)
 {
   this->Internal->VarStack.top().Set(name, 0);
+  this->Internal->VarRemoved.insert(name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )

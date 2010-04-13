@@ -119,10 +119,15 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     cmOStringStream ostr;
     ostr << this->FileLine;
     return this->AddString(ostr.str().c_str());
-    } 
+    }
   const char* value = this->Makefile->GetDefinition(var);
   if(!value && !this->RemoveEmpty)
     {
+    if(!this->Makefile->VariableCleared(var))
+      {
+      std::cerr << this->FileName << ":" << this->FileLine << ":" <<
+        " warning: uninitialized variable \'" << var << "\'\n";
+      }
     return 0;
     }
   if (this->EscapeQuotes && value)
