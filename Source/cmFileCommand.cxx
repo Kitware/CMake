@@ -529,13 +529,6 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
     return false;
     }
 
-  // At least one compiler (Portland Group Fortran) produces binaries
-  // with some extra characters in strings.
-  char extra[256]; // = {}; // some compilers do not like this
-  memset(extra, 0, sizeof(extra));
-  extra[0x0c] = 1; // FF  (form feed)
-  extra[0x14] = 1; // DC4 (device control 4)
-
   // Parse strings out of the file.
   int output_size = 0;
   std::vector<std::string> strings;
@@ -545,28 +538,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
         (limit_input < 0 || static_cast<int>(fin.tellg()) < limit_input) &&
         (c = fin.get(), fin))
     {
-    if(c == '\0')
-      {
-      // A terminating null character has been found.  Check if the
-      // current string matches the requirements.  Since it was
-      // terminated by a null character, we require that the length be
-      // at least one no matter what the user specified.
-      if(s.length() >= minlen && s.length() >= 1 &&
-         (!have_regex || regex.find(s.c_str())))
-        {
-        output_size += static_cast<int>(s.size()) + 1;
-        if(limit_output >= 0 && output_size >= limit_output)
-          {
-          s = "";
-          break;
-          }
-        strings.push_back(s);
-        }
-
-      // Reset the string to empty.
-      s = "";
-      }
-    else if(c == '\n' && !newline_consume)
+    if(c == '\n' && !newline_consume)
       {
       // The current line has been terminated.  Check if the current
       // string matches the requirements.  The length may now be as
@@ -590,7 +562,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       {
       // Ignore CR character to make output always have UNIX newlines.
       }
-    else if((c >= 0x20 && c < 0x7F) || c == '\t' || extra[c] ||
+    else if((c >= 0x20 && c < 0x7F) || c == '\t' ||
             (c == '\n' && newline_consume))
       {
       // This is an ASCII character that may be part of a string.
@@ -600,7 +572,23 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       }
     else
       {
-      // This is a non-string character.  Reset the string to emtpy.
+      // TODO: Support ENCODING option.  See issue #10519.
+      // A non-string character has been found.  Check if the current
+      // string matches the requirements.  We require that the length
+      // be at least one no matter what the user specified.
+      if(s.length() >= minlen && s.length() >= 1 &&
+         (!have_regex || regex.find(s.c_str())))
+        {
+        output_size += static_cast<int>(s.size()) + 1;
+        if(limit_output >= 0 && output_size >= limit_output)
+          {
+          s = "";
+          break;
+          }
+        strings.push_back(s);
+        }
+
+      // Reset the string to empty.
       s = "";
       }
 
