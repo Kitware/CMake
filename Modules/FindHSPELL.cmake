@@ -5,6 +5,10 @@
 #  HSPELL_INCLUDE_DIR - the HSPELL include directory
 #  HSPELL_LIBRARIES - The libraries needed to use HSPELL
 #  HSPELL_DEFINITIONS - Compiler switches required for using HSPELL
+#
+#  HSPELL_VERSION_STRING - The version of Hspell found (x.y)
+#  HSPELL_MAJOR_VERSION  - the major version of Hspell
+#  HSPELL_MINOR_VERSION  - The minor version of Hspell
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -23,6 +27,12 @@
 FIND_PATH(HSPELL_INCLUDE_DIR hspell.h)
 
 FIND_LIBRARY(HSPELL_LIBRARIES NAMES hspell)
+
+IF (HSPELL_INCLUDE_DIR)
+    FILE(READ "${HSPELL_INCLUDE_DIR}/hspell.h" HSPELL_H)
+    STRING(REGEX REPLACE ".*#define HSPELL_VERSION_MAJOR ([0-9]+).*" "\\1" HSPELL_VERSION_MAJOR "${HSPELL_H}")
+    STRING(REGEX REPLACE ".*#define HSPELL_VERSION_MINOR ([0-9]+).*" "\\1" HSPELL_VERSION_MINOR "${HSPELL_H}")
+ENDIF()
 
 # handle the QUIETLY and REQUIRED arguments and set HSPELL_FOUND to TRUE if 
 # all listed variables are TRUE
