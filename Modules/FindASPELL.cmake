@@ -20,11 +20,6 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-IF (ASPELL_INCLUDE_DIR AND ASPELL_LIBRARIES)
-  # Already in cache, be silent
-  SET(ASPELL_FIND_QUIETLY TRUE)
-ENDIF (ASPELL_INCLUDE_DIR AND ASPELL_LIBRARIES)
-
 FIND_PATH(ASPELL_INCLUDE_DIR aspell.h )
 
 FIND_LIBRARY(ASPELL_LIBRARIES NAMES aspell aspell-15 libaspell-15 libaspell)
@@ -33,6 +28,5 @@ FIND_LIBRARY(ASPELL_LIBRARIES NAMES aspell aspell-15 libaspell-15 libaspell)
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ASPELL DEFAULT_MSG ASPELL_LIBRARIES ASPELL_INCLUDE_DIR)
-
 
 MARK_AS_ADVANCED(ASPELL_INCLUDE_DIR ASPELL_LIBRARIES)
