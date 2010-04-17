@@ -20,3 +20,5 @@ FIND_PROGRAM(GCCXML
   "$ENV{ProgramFiles}/GCC_XML"
   "C:/Program Files/GCC_XML"
 )
+
+MARK_AS_ADVANCED(GCCXML)
