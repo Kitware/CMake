@@ -28,4 +28,9 @@ FIND_PATH(DART_ROOT README.INSTALL
     DOC "If you have Dart installed, where is it located?"
     )
 
+# handle the QUIETLY and REQUIRED arguments and set DART_FOUND to TRUE if
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Dart DEFAULT_MSG DART_ROOT)
+
 MARK_AS_ADVANCED(DART_ROOT)
