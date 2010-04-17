@@ -27,3 +27,5 @@ FIND_PATH(DART_ROOT README.INSTALL
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Dart\\InstallPath]
     DOC "If you have Dart installed, where is it located?"
     )
+
+MARK_AS_ADVANCED(DART_ROOT)
