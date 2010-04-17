@@ -15,7 +15,9 @@
 # Use of this file is deprecated, and is here for backwards compatibility with CMake 1.4
 # GLU library is now found by FindOpenGL.cmake
 #
-#
+
+MESSAGE(STATUS
+  "WARNING: you are using the obsolete 'GLU' package, please use 'OpenGL' instead")
 
 INCLUDE(FindOpenGL)
 
