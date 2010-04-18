@@ -292,7 +292,6 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     AddEnvVar(fout, "INCLUDE", mf);
     AddEnvVar(fout, "LIB", mf);
     AddEnvVar(fout, "LIBPATH", mf);
-    AddEnvVar(fout, "INCLUDE", mf);
     }
   else if (compilerId == "Intel")
     {
