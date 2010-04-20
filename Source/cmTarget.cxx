@@ -202,7 +202,7 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("HAS_CXX", cmProperty::TARGET,
-     "Link the target using the C++ linker tool (obselete).",
+     "Link the target using the C++ linker tool (obsolete).",
      "This is equivalent to setting the LINKER_LANGUAGE property to CXX.  "
      "See that property's documentation for details.");
 
