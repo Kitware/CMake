@@ -5,8 +5,8 @@ set(CVS_COMMAND /vol/local/bin/cvs)
 set(HOST "sshserv.centers.ihost.com" )
 set(EXTRA_HOP "rsh v20n250" )
 set(MAKE_PROGRAM "make")
-set(CC "xlc")
-set(CXX "xlC")
+set(CC "xlc_r")
+set(CXX "xlC_r")
 set(FC "xlf")
 set(INITIAL_CACHE "
 CMAKE_BUILD_TYPE:STRING=Release
