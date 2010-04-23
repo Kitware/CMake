@@ -66,14 +66,17 @@ bool cmCMakeMinimumRequired
   int current_major = cmVersion::GetMajorVersion();
   int current_minor = cmVersion::GetMinorVersion();
   int current_patch = cmVersion::GetPatchVersion();
+  int current_tweak = cmVersion::GetTweakVersion();
 
-  // Parse the required version number.  If no patch-level is given
-  // use zero.
+  // Parse at least two components of the version number.
+  // Use zero for those not specified.
   int required_major = 0;
   int required_minor = 0;
   int required_patch = 0;
-  if(sscanf(version_string.c_str(), "%d.%d.%d",
-            &required_major, &required_minor, &required_patch) < 2)
+  int required_tweak = 0;
+  if(sscanf(version_string.c_str(), "%u.%u.%u.%u",
+            &required_major, &required_minor,
+            &required_patch, &required_tweak) < 2)
     {
     cmOStringStream e;
     e << "could not parse VERSION \"" << version_string.c_str() << "\".";
@@ -87,13 +90,17 @@ bool cmCMakeMinimumRequired
       current_minor < required_minor) ||
      (current_major == required_major &&
       current_minor == required_minor &&
-      current_patch < required_patch))
+      current_patch < required_patch) ||
+     (current_major == required_major &&
+      current_minor == required_minor &&
+      current_patch == required_patch &&
+      current_tweak < required_tweak))
     {
     // The current version is too low.
     cmOStringStream e;
     e << "CMake " << version_string.c_str()
       << " or higher is required.  You are running version "
-      << current_major << "." << current_minor << "." << current_patch;
+      << cmVersion::GetCMakeVersion();
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
     return true;

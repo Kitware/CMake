@@ -61,13 +61,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  cmake_minimum_required(VERSION major[.minor[.patch]]\n"
+      "  cmake_minimum_required(VERSION major[.minor[.patch[.tweak]]]\n"
       "                         [FATAL_ERROR])\n"
       "If the current version of CMake is lower than that required "
       "it will stop processing the project and report an error.  "
       "When a version higher than 2.4 is specified the command implicitly "
       "invokes\n"
-      "  cmake_policy(VERSION major[.minor[.patch]])\n"
+      "  cmake_policy(VERSION major[.minor[.patch[.tweak]]])\n"
       "which sets the cmake policy version level to the version specified.  "
       "When version 2.4 or lower is given the command implicitly invokes\n"
       "  cmake_policy(VERSION 2.4)\n"
