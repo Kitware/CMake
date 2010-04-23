@@ -380,7 +380,6 @@ int cmCTestCoverageHandler::ProcessHandler()
       cmsys::RegularExpression(rexIt->c_str()));
     }
 
-
   if(this->HandleBullseyeCoverage(&cont))
     {
     return cont.Error;
@@ -398,6 +397,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     }
   error = cont.Error;
 
+  std::set<std::string> uncovered = this->FindUncoveredFiles(&cont);
 
   if ( file_count == 0 )
     {
@@ -577,6 +577,49 @@ int cmCTestCoverageHandler::ProcessHandler()
     this->WriteXMLLabels(covSumFile, shortFileName);
     covSumFile << "\t</File>" << std::endl;
     }
+
+  //Handle all the files in the extra coverage globs that have no cov data
+  for(std::set<std::string>::iterator i = uncovered.begin();
+      i != uncovered.end(); ++i)
+    {
+    std::string shortFileName = this->CTest->GetShortPathToFile(i->c_str());
+    covLogFile << "\t<File Name=\"" << cmXMLSafe(i->c_str())
+      << "\" FullPath=\"" << cmXMLSafe(shortFileName) << "\">\n"
+      << "\t\t<Report>" << std::endl;
+
+    std::ifstream ifs(i->c_str());
+    if (!ifs)
+      {
+      cmOStringStream ostr;
+      ostr <<  "Cannot open source file: " << i->c_str();
+      errorsWhileAccumulating.push_back(ostr.str());
+      error ++;
+      continue;
+      }
+    int untested = 0;
+    std::string line;
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "Actually perfoming coverage for: " << i->c_str() << std::endl);
+    while (cmSystemTools::GetLineFromStream(ifs, line))
+      {
+      covLogFile << "\t\t<Line Number=\"" << untested << "\" Count=\"0\">"
+        << cmXMLSafe(line) << "</Line>" << std::endl;
+      untested ++;
+      }
+    covLogFile << "\t\t</Report>\n\t</File>" << std::endl;
+
+    total_untested += untested;
+    covSumFile << "\t<File Name=\"" << cmXMLSafe(i->c_str())
+      << "\" FullPath=\"" << cmXMLSafe(shortFileName.c_str())
+      << "\" Covered=\"true\">\n"
+      << "\t\t<LOCTested>0</LOCTested>\n"
+      << "\t\t<LOCUnTested>" << untested << "</LOCUnTested>\n"
+      << "\t\t<PercentCoverage>0</PercentCoverage>\n"
+      << "\t\t<CoverageMetric>0</CoverageMetric>\n";
+    this->WriteXMLLabels(covSumFile, shortFileName);
+    covSumFile << "\t</File>" << std::endl;
+    }
+
   this->EndCoverageLogFile(covLogFile, logFileCount);
 
   if ( errorsWhileAccumulating.size() > 0 )
@@ -654,12 +697,20 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile *mf)
     " Add coverage exclude regular expressions." << std::endl);
   this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_COVERAGE_EXCLUDE",
                                 this->CustomCoverageExclude);
+  this->CTest->PopulateCustomVector(mf, "CTEST_EXTRA_COVERAGE_GLOB",
+                                this->ExtraCoverageGlobs);
   std::vector<cmStdString>::iterator it;
   for ( it = this->CustomCoverageExclude.begin();
     it != this->CustomCoverageExclude.end();
     ++ it )
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, " Add coverage exclude: "
+      << it->c_str() << std::endl);
+    }
+  for ( it = this->ExtraCoverageGlobs.begin();
+    it != this->ExtraCoverageGlobs.end(); ++it)
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, " Add coverage glob: "
       << it->c_str() << std::endl);
     }
 }
@@ -1703,6 +1754,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
     << "</ElapsedMinutes>"
     << "</Coverage>" << std::endl;
   this->CTest->EndXML(covSumFile);
+
   // Now create the coverage information for each file
   return this->RunBullseyeCoverageBranch(cont,
                                          coveredFileNames,
@@ -1960,4 +2012,33 @@ bool cmCTestCoverageHandler::IsFilteredOut(std::string const& source)
     return !this->IntersectsFilter(li->second);
     }
   return true;
+}
+
+//----------------------------------------------------------------------
+std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  std::set<std::string> extraMatches;
+
+  for(std::vector<cmStdString>::iterator i = this->ExtraCoverageGlobs.begin();
+      i != this->ExtraCoverageGlobs.end(); ++i)
+    {
+    cmsys::Glob gl;
+    gl.RecurseOn();
+    gl.RecurseThroughSymlinksOff();
+    std::string glob = cont->BinaryDir + "/" + *i;
+    gl.FindFiles(glob);
+    std::vector<std::string> files = gl.GetFiles();
+    extraMatches.insert(files.begin(), files.end());
+    }
+
+  if(extraMatches.size())
+    {
+    for(cmCTestCoverageHandlerContainer::TotalCoverageMap::iterator i =
+        cont->TotalCoverage.begin(); i != cont->TotalCoverage.end(); ++i)
+      {
+      extraMatches.erase(i->first);
+      }
+    }
+  return extraMatches;
 }

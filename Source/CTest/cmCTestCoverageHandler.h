@@ -66,6 +66,7 @@ private:
                                 std::set<cmStdString>& coveredFileNames,
                                 std::vector<std::string>& files,
                                 std::vector<std::string>& filesFullPath);
+
   int RunBullseyeCommand(
     cmCTestCoverageHandlerContainer* cont,
     const char* cmd,
@@ -90,6 +91,9 @@ private:
   // Trace.py mode, since that one does not tell us where the source file is.
   std::string FindFile(cmCTestCoverageHandlerContainer* cont,
     std::string fileName);
+
+  std::set<std::string> FindUncoveredFiles(
+    cmCTestCoverageHandlerContainer* cont);
 
   struct cmCTestCoverage
     {
@@ -135,6 +139,7 @@ private:
 
   std::vector<cmStdString> CustomCoverageExclude;
   std::vector<cmsys::RegularExpression> CustomCoverageExcludeRegex;
+  std::vector<cmStdString> ExtraCoverageGlobs;
 
   typedef std::map<std::string, cmCTestCoverage> CoverageMap;
 
