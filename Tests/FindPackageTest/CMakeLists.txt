@@ -232,4 +232,5 @@ TRY_COMPILE(EXPORTER_COMPILED
 MESSAGE(STATUS "Searching for export(PACKAGE) test project")
 SET(CMakeTestExportPackage_DIR "" CACHE FILEPATH
   "Wipe out find results for testing." FORCE)
-FIND_PACKAGE(CMakeTestExportPackage 1.${CMAKE_VERSION} EXACT REQUIRED)
+STRING(REGEX REPLACE "-.*$" "" version ${CMAKE_VERSION})
+FIND_PACKAGE(CMakeTestExportPackage 1.${version} EXACT REQUIRED)

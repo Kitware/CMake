@@ -344,6 +344,7 @@ SET(CMake_VERSION_PATCH 0)
 # Releases define a tweak level.
 IF(DEFINED CMake_VERSION_TWEAK)
   SET(CMake_VERSION_IS_RELEASE 1)
+  SET(CMake_VERSION_SOURCE "")
 ELSE()
   SET(CMake_VERSION_IS_RELEASE 0)
 
@@ -352,6 +353,8 @@ ELSE()
   SET(CMake_VERSION_TWEAK
     "${KWSYS_DATE_STAMP_YEAR}${KWSYS_DATE_STAMP_MONTH}${KWSYS_DATE_STAMP_DAY}"
     )
+
+  INCLUDE(${CMake_SOURCE_DIR}/Source/CMakeVersionSource.cmake)
 ENDIF()
 
 # Compute the full version string.
@@ -361,6 +364,9 @@ IF(${CMake_VERSION_TWEAK} GREATER 0)
 ENDIF()
 IF(CMake_VERSION_RC)
   SET(CMake_VERSION ${CMake_VERSION}-rc${CMake_VERSION_RC})
+ENDIF()
+IF(CMake_VERSION_SOURCE)
+  SET(CMake_VERSION ${CMake_VERSION}-${CMake_VERSION_SOURCE})
 ENDIF()
 
 # Include the standard Dart testing module
