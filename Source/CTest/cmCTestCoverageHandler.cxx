@@ -582,8 +582,10 @@ int cmCTestCoverageHandler::ProcessHandler()
   for(std::set<std::string>::iterator i = uncovered.begin();
       i != uncovered.end(); ++i)
     {
+    std::string fileName = cmSystemTools::GetFilenameName(*i);
     std::string shortFileName = this->CTest->GetShortPathToFile(i->c_str());
-    covLogFile << "\t<File Name=\"" << cmXMLSafe(i->c_str())
+
+    covLogFile << "\t<File Name=\"" << cmXMLSafe(fileName)
       << "\" FullPath=\"" << cmXMLSafe(shortFileName) << "\">\n"
       << "\t\t<Report>" << std::endl;
 
@@ -2026,7 +2028,7 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
     cmsys::Glob gl;
     gl.RecurseOn();
     gl.RecurseThroughSymlinksOff();
-    std::string glob = cont->BinaryDir + "/" + *i;
+    std::string glob = cont->SourceDir + "/" + *i;
     gl.FindFiles(glob);
     std::vector<std::string> files = gl.GetFiles();
     extraMatches.insert(files.begin(), files.end());
@@ -2037,7 +2039,11 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
     for(cmCTestCoverageHandlerContainer::TotalCoverageMap::iterator i =
         cont->TotalCoverage.begin(); i != cont->TotalCoverage.end(); ++i)
       {
-      extraMatches.erase(i->first);
+      std::string shortPath = this->CTest->GetShortPathToFile(
+        i->first.c_str());
+      shortPath= shortPath.substr(2, shortPath.length() - 1);
+      std::string fullPath = cont->SourceDir + "/" + shortPath;
+      extraMatches.erase(fullPath);
       }
     }
   return extraMatches;
