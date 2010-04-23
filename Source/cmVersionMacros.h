@@ -14,22 +14,9 @@
 
 #include "cmVersionConfig.h"
 
-#define CMAKE_TO_STRING(x) CMAKE_TO_STRING0(x)
-#define CMAKE_TO_STRING0(x) #x
-
-#define CMake_VERSION                      \
-  CMAKE_TO_STRING(CMake_VERSION_MAJOR) "." \
-  CMAKE_TO_STRING(CMake_VERSION_MINOR)
-
-#define CMake_VERSION_FULL \
-  CMAKE_TO_STRING(CMake_VERSION_MAJOR) "." \
-  CMAKE_TO_STRING(CMake_VERSION_MINOR) "." \
-  CMAKE_TO_STRING(CMake_VERSION_PATCH)
-
-#if !(CMake_VERSION_MINOR & 1) && defined(CMake_VERSION_RC)
-# define CMake_VERSION_RC_SUFFIX "-rc" CMAKE_TO_STRING(CMake_VERSION_RC)
-#else
-# define CMake_VERSION_RC_SUFFIX ""
+#define CMake_VERSION_TWEAK_IS_RELEASE(tweak) ((tweak) < 20000000)
+#if CMake_VERSION_TWEAK_IS_RELEASE(CMake_VERSION_TWEAK)
+# define CMake_VERSION_IS_RELEASE 1
 #endif
 
 #endif

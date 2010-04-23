@@ -30,17 +30,22 @@ cmake_date_stamp_component()
 cmake_system=`uname`
 cmake_source_dir=`cd "\`dirname \"$0\"\`";pwd`
 cmake_binary_dir=`pwd`
+
+# Load version information.
 cmake_version_major="`cmake_version_component MAJOR`"
 cmake_version_minor="`cmake_version_component MINOR`"
-if echo "${cmake_version_minor}" | grep "[0-9]*[13579]" > /dev/null 2>&1; then
-  cmake_version_patch="`cmake_date_stamp_component YEAR``cmake_date_stamp_component MONTH``cmake_date_stamp_component DAY`"
-else
-  cmake_version_patch="`cmake_version_component PATCH`"
+cmake_version_patch="`cmake_version_component PATCH`"
+cmake_version="${cmake_version_major}.${cmake_version_minor}.${cmake_version_patch}"
+cmake_version_tweak="`cmake_version_component TWEAK`"
+if [ "x$cmake_version_tweak" = "x" ]; then
+  cmake_version_tweak="`cmake_date_stamp_component YEAR``cmake_date_stamp_component MONTH``cmake_date_stamp_component DAY`"
 fi
-cmake_version="${cmake_version_major}.${cmake_version_minor}"
-cmake_version_full="${cmake_version_major}.${cmake_version_minor}.${cmake_version_patch}"
-cmake_data_dir="/share/cmake-${cmake_version}"
-cmake_doc_dir="/doc/cmake-${cmake_version}"
+if [ "$cmake_version_tweak" != "0" ]; then
+  cmake_version="${cmake_version}.${cmake_version_tweak}"
+fi
+
+cmake_data_dir="/share/cmake-${cmake_version_major}.${cmake_version_minor}"
+cmake_doc_dir="/doc/cmake-${cmake_version_major}.${cmake_version_minor}"
 cmake_man_dir="/man"
 cmake_init_file=""
 cmake_bootstrap_system_libs=""
@@ -312,7 +317,7 @@ Directory and file names:
 # Display CMake bootstrap usage
 cmake_version_display()
 {
-  echo "CMake ${cmake_version_full}, Copyright 2000-2009 Kitware, Inc."
+  echo "CMake ${cmake_version}, Copyright 2000-2009 Kitware, Inc."
 }
 
 # Display CMake bootstrap error, display the log file and exit
@@ -1246,6 +1251,8 @@ fi
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_MAJOR ${cmake_version_major}"
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_MINOR ${cmake_version_minor}"
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_PATCH ${cmake_version_patch}"
+cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_TWEAK ${cmake_version_tweak}"
+cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION \"${cmake_version}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_ROOT_DIR \"${cmake_root_dir}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"${cmake_data_dir}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"

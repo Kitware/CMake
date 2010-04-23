@@ -339,18 +339,29 @@ ENDMACRO (CMAKE_BUILD_UTILITIES)
 SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 9)
 SET(CMake_VERSION_PATCH 0)
+#SET(CMake_VERSION_TWEAK 0)
 
-# We use odd minor numbers for development versions.
-# Use a date for the development patch level.
-IF("${CMake_VERSION_MINOR}" MATCHES "[13579]$")
+# Releases define a tweak level.
+IF(DEFINED CMake_VERSION_TWEAK)
+  SET(CMake_VERSION_IS_RELEASE 1)
+ELSE()
+  SET(CMake_VERSION_IS_RELEASE 0)
+
+  # Use the date as the tweak level.
   INCLUDE(${CMake_SOURCE_DIR}/Source/kwsys/kwsysDateStamp.cmake)
-  SET(CMake_VERSION_PATCH
+  SET(CMake_VERSION_TWEAK
     "${KWSYS_DATE_STAMP_YEAR}${KWSYS_DATE_STAMP_MONTH}${KWSYS_DATE_STAMP_DAY}"
     )
-ENDIF("${CMake_VERSION_MINOR}" MATCHES "[13579]$")
+ENDIF()
 
-SET(CMake_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
-SET(CMake_VERSION_FULL "${CMake_VERSION}.${CMake_VERSION_PATCH}")
+# Compute the full version string.
+SET(CMake_VERSION ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH})
+IF(${CMake_VERSION_TWEAK} GREATER 0)
+  SET(CMake_VERSION ${CMake_VERSION}.${CMake_VERSION_TWEAK})
+ENDIF()
+IF(CMake_VERSION_RC)
+  SET(CMake_VERSION ${CMake_VERSION}-rc${CMake_VERSION_RC})
+ENDIF()
 
 # Include the standard Dart testing module
 ENABLE_TESTING()
@@ -370,9 +381,9 @@ SET(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL
 # install tree.
 SET(CMAKE_SKIP_RPATH ON CACHE INTERNAL "CMake does not need RPATHs.")
 
-SET(CMAKE_DATA_DIR "/share/cmake-${CMake_VERSION}" CACHE STRING
+SET(CMAKE_DATA_DIR "/share/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CACHE STRING
   "Install location for data (relative to prefix).")
-SET(CMAKE_DOC_DIR "/doc/cmake-${CMake_VERSION}" CACHE STRING
+SET(CMAKE_DOC_DIR "/doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CACHE STRING
   "Install location for documentation (relative to prefix).")
 SET(CMAKE_MAN_DIR "/man" CACHE STRING
   "Install location for man pages (relative to prefix).")

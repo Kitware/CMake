@@ -16,8 +16,9 @@
 unsigned int cmVersion::GetMajorVersion() { return CMake_VERSION_MAJOR; }
 unsigned int cmVersion::GetMinorVersion() { return CMake_VERSION_MINOR; }
 unsigned int cmVersion::GetPatchVersion() { return CMake_VERSION_PATCH; }
+unsigned int cmVersion::GetTweakVersion() { return CMake_VERSION_TWEAK; }
 
 const char* cmVersion::GetCMakeVersion()
 {
-  return CMake_VERSION_FULL CMake_VERSION_RC_SUFFIX;
+  return CMake_VERSION;
 }

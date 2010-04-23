@@ -2368,11 +2368,9 @@ void cmMakefile::AddDefaultDefinitions()
   this->AddDefinition("CMAKE_MAJOR_VERSION", temp);
   sprintf(temp, "%d", cmVersion::GetPatchVersion());
   this->AddDefinition("CMAKE_PATCH_VERSION", temp);
-  sprintf(temp, "%u.%u.%u",
-          cmVersion::GetMajorVersion(),
-          cmVersion::GetMinorVersion(),
-          cmVersion::GetPatchVersion());
-  this->AddDefinition("CMAKE_VERSION", temp);
+  sprintf(temp, "%d", cmVersion::GetTweakVersion());
+  this->AddDefinition("CMAKE_TWEAK_VERSION", temp);
+  this->AddDefinition("CMAKE_VERSION", cmVersion::GetCMakeVersion());
 
   this->AddDefinition("CMAKE_FILES_DIRECTORY",
                       cmake::GetCMakeFilesDirectory());
