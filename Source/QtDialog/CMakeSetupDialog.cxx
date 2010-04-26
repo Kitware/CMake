@@ -81,11 +81,8 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->Splitter->restoreState(p);
 
   bool groupView = settings.value("GroupView", false).toBool();
-  if(groupView)
-  {
-    this->setViewType(2);
-    this->ViewType->setCurrentIndex(2);
-  }
+  this->setGroupedView(groupView);
+  this->groupedCheck->setCheckState(groupView ? Qt::Checked : Qt::Unchecked);
 
   QMenu* FileMenu = this->menuBar()->addMenu(tr("&File"));
   this->ReloadCacheAction = FileMenu->addAction(tr("&Reload Cache"));
@@ -217,8 +214,10 @@ void CMakeSetupDialog::initialize()
                    SIGNAL(outputMessage(QString)),
                    this, SLOT(message(QString)));
 
-  QObject::connect(this->ViewType, SIGNAL(currentIndexChanged(int)), 
-                   this, SLOT(setViewType(int)));
+  QObject::connect(this->groupedCheck, SIGNAL(toggled(bool)),
+                   this, SLOT(setGroupedView(bool)));
+  QObject::connect(this->advancedCheck, SIGNAL(toggled(bool)),
+                   this, SLOT(setAdvancedView(bool)));
   QObject::connect(this->Search, SIGNAL(textChanged(QString)), 
                    this, SLOT(setSearchFilter(QString)));
   
@@ -950,31 +949,20 @@ void CMakeSetupDialog::setDebugOutput(bool flag)
     "setDebugOutput", Qt::QueuedConnection, Q_ARG(bool, flag));
 }
 
-void CMakeSetupDialog::setViewType(int v)
+void CMakeSetupDialog::setGroupedView(bool v)
 {
-  if(v == 0)  // simple view
-    {
-    this->CacheValues->cacheModel()->setViewType(QCMakeCacheModel::FlatView);
-    this->CacheValues->setRootIsDecorated(false);
-    this->CacheValues->setShowAdvanced(false);
-    }
-  else if(v == 1)  // advanced view
-    {
-    this->CacheValues->cacheModel()->setViewType(QCMakeCacheModel::FlatView);
-    this->CacheValues->setRootIsDecorated(false);
-    this->CacheValues->setShowAdvanced(true);
-    }
-  else if(v == 2)  // grouped view
-    {
-    this->CacheValues->cacheModel()->setViewType(QCMakeCacheModel::GroupView);
-    this->CacheValues->setRootIsDecorated(true);
-    this->CacheValues->setShowAdvanced(true);
-    }
+  this->CacheValues->cacheModel()->setViewType(v ? QCMakeCacheModel::GroupView : QCMakeCacheModel::FlatView);
+  this->CacheValues->setRootIsDecorated(v);
   
   QSettings settings;
   settings.beginGroup("Settings/StartPath");
-  settings.setValue("GroupView", v == 2);
+  settings.setValue("GroupView", v);
   
+}
+
+void CMakeSetupDialog::setAdvancedView(bool v)
+{
+  this->CacheValues->setShowAdvanced(v);
 }
 
 void CMakeSetupDialog::showUserChanges()

@@ -70,7 +70,8 @@ protected slots:
   void addCacheEntry();
   void startSearch();
   void setDebugOutput(bool);
-  void setViewType(int);
+  void setAdvancedView(bool);
+  void setGroupedView(bool);
   void showUserChanges();
   void setSearchFilter(const QString& str);
 
