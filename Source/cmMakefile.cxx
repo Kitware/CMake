@@ -124,7 +124,6 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
 
   this->LocalGenerator = mf.LocalGenerator;
   this->FunctionBlockers = mf.FunctionBlockers;
-  this->DataMap = mf.DataMap;
   this->MacrosMap = mf.MacrosMap;
   this->SubDirectoryOrder = mf.SubDirectoryOrder;
   this->Properties = mf.Properties;
@@ -199,14 +198,6 @@ cmMakefile::~cmMakefile()
   for(unsigned int i=0; i < this->UsedCommands.size(); i++)
     {
     delete this->UsedCommands[i];
-    }
-  for(DataMapType::const_iterator d = this->DataMap.begin();
-      d != this->DataMap.end(); ++d)
-    {
-    if(d->second)
-      {
-      delete d->second;
-      }
     }
   std::vector<cmFunctionBlocker*>::iterator pos;
   for (pos = this->FunctionBlockers.begin();
@@ -2590,54 +2581,6 @@ void cmMakefile::SetHomeOutputDirectory(const char* lib)
     {
     this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
                         this->GetHomeOutputDirectory());
-    }
-}
-
-
-/**
- * Register the given cmData instance with its own name.
- */
-void cmMakefile::RegisterData(cmData* data)
-{
-  std::string name = data->GetName();
-  DataMapType::const_iterator d = this->DataMap.find(name);
-  if((d != this->DataMap.end()) && (d->second != 0) && (d->second != data))
-    {
-    delete d->second;
-    }
-  this->DataMap[name] = data;
-}
-
-
-/**
- * Register the given cmData instance with the given name.  This can be used
- * to register a NULL pointer.
- */
-void cmMakefile::RegisterData(const char* name, cmData* data)
-{
-  DataMapType::const_iterator d = this->DataMap.find(name);
-  if((d != this->DataMap.end()) && (d->second != 0) && (d->second != data))
-    {
-    delete d->second;
-    }
-  this->DataMap[name] = data;
-}
-
-
-/**
- * Lookup a cmData instance previously registered with the given name.  If
- * the instance cannot be found, return NULL.
- */
-cmData* cmMakefile::LookupData(const char* name) const
-{
-  DataMapType::const_iterator d = this->DataMap.find(name);
-  if(d != this->DataMap.end())
-    {
-    return d->second;
-    }
-  else
-    {
-    return 0;
     }
 }
 

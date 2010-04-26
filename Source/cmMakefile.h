@@ -13,7 +13,6 @@
 #define cmMakefile_h
 
 #include "cmCacheManager.h"
-#include "cmData.h"
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
@@ -692,10 +691,6 @@ public:
                                  std::vector<cmSourceGroup> &groups);
 #endif
 
-  void RegisterData(cmData*);
-  void RegisterData(const char*, cmData*);
-  cmData* LookupData(const char*) const;
-  
   /**
    * Execute a single CMake command.  Returns true if the command
    * succeeded or false if it failed.
@@ -915,9 +910,6 @@ private:
   std::vector<FunctionBlockersType::size_type> FunctionBlockerBarriers;
   void PushFunctionBlockerBarrier();
   void PopFunctionBlockerBarrier(bool reportError = true);
-
-  typedef std::map<cmStdString, cmData*> DataMapType;
-  DataMapType DataMap;
 
   typedef std::map<cmStdString, cmStdString> StringStringMap;
   StringStringMap MacrosMap;
