@@ -1326,10 +1326,8 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddDirectoryItem(std::string const& item)
 {
-  std::string systemName =
-                        this->Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME");
-  if(systemName == "Darwin" && cmSystemTools::IsPathToFramework(item.c_str()))
-  if(cmSystemTools::IsPathToFramework(item.c_str()))
+  if(this->Makefile->IsOn("APPLE")
+     && cmSystemTools::IsPathToFramework(item.c_str()))
     {
     this->AddFrameworkItem(item);
     }
