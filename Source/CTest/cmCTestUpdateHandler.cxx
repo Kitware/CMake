@@ -306,6 +306,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     }
   if(!updated)
     {
+    os << "Update command failed:\n" << vc->GetUpdateCommandLine();
     cmCTestLog(this->CTest, ERROR_MESSAGE, "   Update command failed: "
                << vc->GetUpdateCommandLine() << "\n");
     }
