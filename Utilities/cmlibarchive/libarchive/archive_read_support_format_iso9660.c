@@ -1403,7 +1403,7 @@ add_entry(struct iso9660 *iso9660, struct file_info *file)
             iso9660->pending_files[hole] = file;
             return;
         }
-        // Move parent into hole <==> move hole up tree.
+        /* Move parent into hole <==> move hole up tree. */
         iso9660->pending_files[hole] = iso9660->pending_files[parent];
         hole = parent;
     }
@@ -1933,16 +1933,16 @@ next_entry(struct iso9660 *iso9660)
     /*
      * Rebalance the heap.
      */
-    a = 0; // Starting element and its offset
+    a = 0; /* Starting element and its offset */
     a_offset = iso9660->pending_files[a]->offset
         + iso9660->pending_files[a]->size;
     for (;;) {
-        b = a + a + 1; // First child
+        b = a + a + 1; /* First child */
         if (b >= iso9660->pending_files_used)
             return (r);
         b_offset = iso9660->pending_files[b]->offset
             + iso9660->pending_files[b]->size;
-        c = b + 1; // Use second child if it is smaller.
+        c = b + 1; /* Use second child if it is smaller. */
         if (c < iso9660->pending_files_used) {
             c_offset = iso9660->pending_files[c]->offset
                 + iso9660->pending_files[c]->size;

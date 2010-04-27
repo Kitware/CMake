@@ -53,7 +53,7 @@
 #include <errno.h>
 #define set_errno(val)  ((errno)=val)
 #include <io.h>
-#include <stdlib.h>   //brings in NULL
+#include <stdlib.h>   /* brings in NULL */
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -61,7 +61,6 @@
 #include <direct.h>
 #define NOCRYPT
 #include <windows.h>
-//#define   EFTYPE 7
 
 #if !defined(STDIN_FILENO)
 #define STDIN_FILENO 0
@@ -170,8 +169,7 @@
 #ifndef S_IFIFO
  #define S_IFIFO     _S_IFIFO
 #endif
-//#define   S_IFCHR  _S_IFCHR
-//#define   S_IFDIR  _S_IFDIR
+
 #ifndef S_IFBLK
   #define S_IFBLK     _S_IFBLK
 #endif
@@ -181,8 +179,6 @@
 #ifndef S_IFSOCK
   #define S_IFSOCK    _S_IFSOCK
 #endif
-//#define   S_IFREG  _S_IFREG
-//#define   S_IFMT   _S_IFMT
 #ifndef S_ISBLK
  #define S_ISBLK(m)  (((m) & S_IFMT) == S_IFBLK) /* block special */
  #define S_ISFIFO(m) (((m) & S_IFMT) == S_IFIFO) /* fifo or socket */
@@ -248,9 +244,9 @@
 /* File descriptor flags used with F_GETFD and F_SETFD.  */
 #define FD_CLOEXEC  1   /* Close on exec.  */
 
-//NOT SURE IF O_NONBLOCK is OK here but at least the 0x0004 flag is not used by anything else...
+/*NOT SURE IF O_NONBLOCK is OK here but at least the 0x0004 flag is not used by anything else... */
 #define O_NONBLOCK 0x0004 /* Non-blocking I/O.  */
-//#define   O_NDELAY   O_NONBLOCK
+/*#define   O_NDELAY   O_NONBLOCK */
 
 /* Symbolic constants for the access() function */
 #if !defined(F_OK)
