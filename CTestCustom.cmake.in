@@ -29,6 +29,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "Warning: library was too large for page size.*"
   "Warning: public.*_archive_.*in module.*archive_*clashes with prior module.*archive_.*"
   "Warning: public.*BZ2_bz.*in module.*bzlib.*clashes with prior module.*bzlib.*"
+  "Warning: public.*_archive.*clashes with prior module.*"
   "Warning: LINN32: Last line.*is less.*"
   "stl_deque.h:1051"
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
