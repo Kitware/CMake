@@ -980,7 +980,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp = target.GetDirectory(configName);
     temp += "/";
     temp += targetNamePDB;
-    fout << "\t\t\t\tProgramDataBaseFile=\"" <<
+    fout << "\t\t\t\tProgramDatabaseFile=\"" <<
       this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
     if(isDebug)
       {
@@ -1055,7 +1055,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\"\n";
     std::string path = this->ConvertToXMLOutputPathSingle(
       target.GetDirectory(configName).c_str());
-    fout << "\t\t\t\tProgramDataBaseFile=\""
+    fout << "\t\t\t\tProgramDatabaseFile=\""
          << path << "/" << targetNamePDB
          << "\"\n";
     if(isDebug)
