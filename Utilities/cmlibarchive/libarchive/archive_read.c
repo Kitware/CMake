@@ -1153,7 +1153,7 @@ __archive_read_skip(struct archive_read *a, int64_t request)
     if (skipped == request)
         return (skipped);
     /* We hit EOF before we satisfied the skip request. */
-    if (skipped < 0)  // Map error code to 0 for error message below.
+    if (skipped < 0)  /* Map error code to 0 for error message below. */
         skipped = 0;
     archive_set_error(&a->archive,
         ARCHIVE_ERRNO_MISC,
