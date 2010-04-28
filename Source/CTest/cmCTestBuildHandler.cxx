@@ -551,6 +551,7 @@ class cmCTestBuildHandler::FragmentCompare
 {
 public:
   FragmentCompare(cmFileTimeComparison* ftc): FTC(ftc) {}
+  FragmentCompare(): FTC(0) {}
   bool operator()(std::string const& l, std::string const& r)
     {
     // Order files by modification time.  Use lexicographic order
