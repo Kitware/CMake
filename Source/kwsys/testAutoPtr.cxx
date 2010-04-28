@@ -25,7 +25,7 @@
 
 #define ASSERT(x,y) if (!(x)) { printf("FAIL: " y "\n"); status = 1; }
 
-static int instances = 0;
+int instances = 0; // don't declare as static
 
 struct A
 {

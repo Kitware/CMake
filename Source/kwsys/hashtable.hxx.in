@@ -388,6 +388,10 @@ struct _Hashtable_const_iterator {
 // Note: assumes long is at least 32 bits.
 enum { _stl_num_primes = 31 };
 
+// create a function with a static local to that function that returns
+// the static
+const unsigned long* get_stl_prime_list() {
+
 static const unsigned long _stl_prime_list[_stl_num_primes] =
 {
   5ul,          11ul,         23ul,
@@ -399,10 +403,12 @@ static const unsigned long _stl_prime_list[_stl_num_primes] =
   1610612741ul, 3221225473ul, 4294967291ul
 };
 
+return &_stl_prime_list[0]; }
+
 inline size_t _stl_next_prime(size_t __n)
 {
-  const unsigned long* __first = _stl_prime_list;
-  const unsigned long* __last = _stl_prime_list + (int)_stl_num_primes;
+  const unsigned long* __first = get_stl_prime_list();
+  const unsigned long* __last = get_stl_prime_list() + (int)_stl_num_primes;
   const unsigned long* pos = @KWSYS_NAMESPACE@_stl::lower_bound(__first, __last, __n);
   return pos == __last ? *(__last - 1) : *pos;
 }
@@ -587,7 +593,7 @@ public:
   size_type bucket_count() const { return _M_buckets.size(); }
 
   size_type max_bucket_count() const
-    { return _stl_prime_list[(int)_stl_num_primes - 1]; }
+    { return get_stl_prime_list()[(int)_stl_num_primes - 1]; }
 
   size_type elems_in_bucket(size_type __bucket) const
   {
