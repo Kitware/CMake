@@ -390,7 +390,7 @@ enum { _stl_num_primes = 31 };
 
 // create a function with a static local to that function that returns
 // the static
-const unsigned long* get_stl_prime_list() {
+inline const unsigned long* get_stl_prime_list() {
 
 static const unsigned long _stl_prime_list[_stl_num_primes] =
 {
