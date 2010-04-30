@@ -980,6 +980,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ADD_TEST_MACRO(ModuleDefinition example_exe)
   ENDIF(CMAKE_TEST_MSVC)
 
+  ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
+
   IF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
     ADD_TEST(MakeClean ${CMAKE_CTEST_COMMAND}
       --build-and-test
