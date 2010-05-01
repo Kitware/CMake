@@ -682,10 +682,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string langFlags;
   this->AddFeatureFlags(langFlags, linkLanguage);
 
-#ifdef __APPLE__
   this->LocalGenerator->AddArchitectureFlags(langFlags, this->Target,
                                              linkLanguage, this->ConfigName);
-#endif /* __APPLE__ */
 
   // remove any language flags that might not work with the
   // particular os

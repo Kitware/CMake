@@ -294,10 +294,8 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     // Add language feature flags.
     this->AddFeatureFlags(flags, lang);
 
-#ifdef __APPLE__
     this->LocalGenerator->AddArchitectureFlags(flags, this->Target,
                                                lang, this->ConfigName);
-#endif /* __APPLE__ */
 
     // Fortran-specific flags computed for this target.
     if(*l == "Fortran")
@@ -1439,11 +1437,15 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
 //----------------------------------------------------------------------------
 std::string cmMakefileTargetGenerator::GetFrameworkFlags()
 {
-#ifndef __APPLE__
-  return std::string();
-#else
-  std::set<cmStdString> emitted;
+ if(!this->Makefile->IsOn("APPLE"))
+   {
+   return std::string();
+   }
+
+ std::set<cmStdString> emitted;
+#ifdef __APPLE__  /* don't insert this when crosscompiling e.g. to iphone */
   emitted.insert("/System/Library/Frameworks");
+#else
   std::vector<std::string> includes;
   this->LocalGenerator->GetIncludeDirectories(includes);
   std::vector<std::string>::iterator i;

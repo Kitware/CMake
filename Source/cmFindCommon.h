@@ -61,6 +61,8 @@ protected:
                         PathType pathType);
   void AddPathInternal(std::string const& in_path, PathType pathType);
 
+  void SetMakefile(cmMakefile* makefile);
+
   bool NoDefaultPath;
   bool NoCMakePath;
   bool NoCMakeEnvironmentPath;

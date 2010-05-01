@@ -712,9 +712,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
  
   std::string langFlags;
   this->AddLanguageFlags(langFlags, llang, 0);
-#ifdef __APPLE__
   this->AddArchitectureFlags(langFlags, &target, llang, 0);
-#endif /* __APPLE__ */
   vars.LanguageCompileFlags = langFlags.c_str();
   
   cmCustomCommandLines commandLines;
@@ -1272,8 +1270,8 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
 #endif
   for(i = includes.begin(); i != includes.end(); ++i)
     {
-#ifdef __APPLE__
-    if(cmSystemTools::IsPathToFramework(i->c_str()))
+    if(this->Makefile->IsOn("APPLE")
+       && cmSystemTools::IsPathToFramework(i->c_str()))
       {
       std::string frameworkDir = *i;
       frameworkDir += "/../";
@@ -1288,7 +1286,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
         }
       continue;
       }
-#endif
+
     std::string include = *i;
     if(!flagUsed || repeatFlag)
       {
@@ -1766,12 +1764,17 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
 
 
 //----------------------------------------------------------------------------
-#ifdef __APPLE__
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
                                             cmTarget* target,
                                             const char *lang,
                                             const char* config)
 {
+  // Only add Mac OS X specific flags on Darwin platforms (OSX and iphone):
+  if(!this->Makefile->IsOn("APPLE"))
+    {
+    return;
+    }
+
   if(this->EmitUniversalBinaryFlags)
     {
     std::vector<std::string> archs;
@@ -1828,7 +1831,6 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       }
     }
 }
-#endif /* __APPLE__ */
 
 
 //----------------------------------------------------------------------------

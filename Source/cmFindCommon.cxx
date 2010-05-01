@@ -423,3 +423,17 @@ void cmFindCommon::AddTrailingSlashes(std::vector<std::string>& paths)
       }
     }
 }
+
+//----------------------------------------------------------------------------
+void cmFindCommon::SetMakefile(cmMakefile* makefile)
+{
+  cmCommand::SetMakefile(makefile);
+
+  // If we are building for Apple (OSX or also iphone), make sure
+  // that frameworks and bundles are searched first.
+  if(this->Makefile->IsOn("APPLE"))
+    {
+    this->SearchFrameworkFirst = true;
+    this->SearchAppBundleFirst = true;
+    }
+}
