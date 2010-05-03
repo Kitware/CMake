@@ -1445,7 +1445,7 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags()
  std::set<cmStdString> emitted;
 #ifdef __APPLE__  /* don't insert this when crosscompiling e.g. to iphone */
   emitted.insert("/System/Library/Frameworks");
-#else
+#endif
   std::vector<std::string> includes;
   this->LocalGenerator->GetIncludeDirectories(includes);
   std::vector<std::string>::iterator i;
@@ -1477,7 +1477,6 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags()
       }
     }
   return flags;
-#endif
 }
 
 //----------------------------------------------------------------------------
