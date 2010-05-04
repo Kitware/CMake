@@ -286,10 +286,10 @@ int ZEXPORT deflateInit2_(strm, level, method, windowBits, memLevel, strategy,
 
     s->window = (Bytef *) ZALLOC(strm, s->w_size, 2*sizeof(Byte));
 
-    // The following memset eliminates the valgrind uninitialized warning
-    // "swept under the carpet" here:
-    // http://www.zlib.net/zlib_faq.html#faq36
-    //
+    /* The following memset eliminates the valgrind uninitialized warning
+      "swept under the carpet" here:
+      http://www.zlib.net/zlib_faq.html#faq36 */
+
     memset(s->window, 0, s->w_size*2*sizeof(Byte));
 
     s->prev   = (Posf *)  ZALLOC(strm, s->w_size, sizeof(Pos));

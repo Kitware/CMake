@@ -43,9 +43,11 @@
  * Disabling inline keyword for compilers known to choke on it:
  * - Watcom C++ in C code.  (For any version?)
  * - SGI MIPSpro
+ * - SunPro C
  * - Microsoft Visual C++ 6.0 (supposedly newer versions too)
  */
-#if defined(__WATCOMC__) || defined(__sgi) || defined(__hpux) || defined(__BORLANDC__)
+#if defined(__WATCOMC__) || defined(__sgi) || defined(__hpux)
+ || defined(__BORLANDC__) || defined(__SUNPRO_C)
 #define inline
 #elif defined(_MSC_VER)
 #define inline __inline
