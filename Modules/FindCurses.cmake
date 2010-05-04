@@ -33,6 +33,15 @@ SET(CURSES_USE_NCURSES FALSE)
 IF(CURSES_NCURSES_LIBRARY  AND NOT  CURSES_CURSES_LIBRARY)
   SET(CURSES_USE_NCURSES TRUE)
 ENDIF(CURSES_NCURSES_LIBRARY  AND NOT  CURSES_CURSES_LIBRARY)
+# http://cygwin.com/ml/cygwin-announce/2010-01/msg00002.html
+# cygwin ncurses stopped providing curses.h symlinks see above
+# message.  Cygwin is an ncurses package, so force ncurses on
+# cygwin if the curses.h is missing
+IF(CYGWIN)
+  IF(NOT EXISTS /usr/include/curses.h)
+    SET(CURSES_USE_NCURSES TRUE)
+  ENDIF()
+ENDIF()
 
 
 # Not sure the logic is correct here.
