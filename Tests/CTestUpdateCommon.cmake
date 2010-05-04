@@ -41,8 +41,8 @@ function(check_updates build)
 
   # Compare expected and actual entries
   set(EXTRA "${UPDATE_XML_ENTRIES}")
-  list(REMOVE_ITEM EXTRA ${ARGN} ${UPDATE_MAYBE})
-  set(MISSING "${ARGN}")
+  list(REMOVE_ITEM EXTRA ${ARGN} ${UPDATE_EXTRA} ${UPDATE_MAYBE})
+  set(MISSING "${ARGN}" ${UPDATE_EXTRA})
   list(REMOVE_ITEM MISSING ${UPDATE_XML_ENTRIES})
 
   if(NOT UPDATE_NOT_GLOBAL)

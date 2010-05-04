@@ -87,9 +87,11 @@ void cmCTestGIT::NoteNewRevision()
 //----------------------------------------------------------------------------
 bool cmCTestGIT::UpdateImpl()
 {
+  const char* git = this->CommandLineTool.c_str();
+
   // Use "git pull" to update the working tree.
   std::vector<char const*> git_pull;
-  git_pull.push_back(this->CommandLineTool.c_str());
+  git_pull.push_back(git);
   git_pull.push_back("pull");
 
   // TODO: if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
@@ -112,7 +114,14 @@ bool cmCTestGIT::UpdateImpl()
 
   OutputLogger out(this->Log, "pull-out> ");
   OutputLogger err(this->Log, "pull-err> ");
-  return this->RunUpdateCommand(&git_pull[0], &out, &err);
+  if(this->RunUpdateCommand(&git_pull[0], &out, &err))
+    {
+    char const* git_submodule[] = {git, "submodule", "update", 0};
+    OutputLogger out2(this->Log, "submodule-out> ");
+    OutputLogger err2(this->Log, "submodule-err> ");
+    return this->RunChild(git_submodule, &out, &err);
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------
