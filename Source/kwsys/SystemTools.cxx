@@ -9,6 +9,13 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+
+#ifdef __osf__
+#  define _OSF_SOURCE
+#  define _POSIX_C_SOURCE 199506L
+#  define _XOPEN_SOURCE_EXTENDED
+#endif
+
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(RegularExpression.hxx)
 #include KWSYS_HEADER(SystemTools.hxx)
