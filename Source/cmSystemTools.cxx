@@ -2048,12 +2048,13 @@ bool extract_tar(const char* outFileName, bool verbose,
     if (verbose && extract)
       {
       cmSystemTools::Stdout("x ");
+      cmSystemTools::Stdout(archive_entry_pathname(entry));
       }
     if(verbose && !extract)
       {
       list_item_verbose(stdout, entry);
       }
-    else
+    else if(!extract)
       {
       cmSystemTools::Stdout(archive_entry_pathname(entry));
       }
