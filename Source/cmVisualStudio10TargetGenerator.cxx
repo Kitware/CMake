@@ -441,6 +441,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   path += this->Name;
   path += ".vcxproj.filters";
   cmGeneratedFileStream fout(path.c_str());
+  fout.SetCopyIfDifferent(true);
   char magic[] = {0xEF,0xBB, 0xBF};
   fout.write(magic, 3);
   cmGeneratedFileStream* save = this->BuildFileStream;
@@ -484,9 +485,14 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   this->WriteString("</Project>\n", 0);
   // restore stream pointer
   this->BuildFileStream = save;
+
+  if (fout.Close())
+    {
+    this->GlobalGenerator->FileReplacedDuringGenerate(path);
+    }
 }
 
-void 
+void
 cmVisualStudio10TargetGenerator::
 WriteGroupSources(const char* name,
                   std::vector<cmSourceFile*> const& sources,
