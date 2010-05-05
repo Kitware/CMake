@@ -11,7 +11,6 @@
 ============================================================================*/
 #include "QCMake.h"  // include to disable MS warnings
 #include <QApplication>
-#include <QFileInfo>
 #include <QDir>
 #include <QTranslator>
 #include <QLocale>
@@ -21,6 +20,7 @@
 #include "cmake.h"
 #include "cmVersion.h"
 #include <cmsys/CommandLineArguments.hxx>
+#include <cmsys/SystemTools.hxx>
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][3] =
@@ -164,16 +164,19 @@ int main(int argc, char** argv)
     QStringList args = app.arguments();
     if(args.count() == 2)
       {
-      QFileInfo buildFileInfo(args[1], "CMakeCache.txt");
-      QFileInfo srcFileInfo(args[1], "CMakeLists.txt");
-      if(buildFileInfo.exists())
+      cmsys_stl::string filePath = cmSystemTools::CollapseFullPath("..");
+      cmsys_stl::string buildFilePath =
+        cmSystemTools::CollapseFullPath("CMakeCache.txt", filePath.c_str());
+      cmsys_stl::string srcFilePath =
+        cmSystemTools::CollapseFullPath("CMakeLists.txt", filePath.c_str());
+      if(cmSystemTools::FileExists(buildFilePath.c_str()))
         {
-        dialog.setBinaryDirectory(buildFileInfo.absolutePath());
+        dialog.setBinaryDirectory(filePath.c_str());
         }
-      else if(srcFileInfo.exists())
+      else if(cmSystemTools::FileExists(srcFilePath.c_str()))
         {
-        dialog.setSourceDirectory(srcFileInfo.absolutePath());
-        dialog.setBinaryDirectory(QDir::currentPath());
+        dialog.setSourceDirectory(filePath.c_str());
+        dialog.setBinaryDirectory(cmSystemTools::CollapseFullPath(".").c_str());
         }
       }
     }
