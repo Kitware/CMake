@@ -72,7 +72,7 @@ archive_read_support_compression_program(struct archive *a, const char *cmd)
  */
 int
 archive_read_support_compression_program_signature(struct archive *_a,
-    const char *cmd, void *signature, size_t signature_len)
+    const char *cmd, const void *signature, size_t signature_len)
 {
     (void)_a; /* UNUSED */
     (void)cmd; /* UNUSED */
