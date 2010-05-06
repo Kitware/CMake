@@ -90,5 +90,6 @@ ELSE(NOT CMAKE_Fortran_COMPILER_WORKS)
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake
       @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
       )
+    INCLUDE(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake)
   ENDIF(CMAKE_Fortran_COMPILER_FORCED)
 ENDIF(NOT CMAKE_Fortran_COMPILER_WORKS)

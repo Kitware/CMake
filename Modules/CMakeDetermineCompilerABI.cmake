@@ -49,12 +49,10 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
 
       IF(ABI_SIZEOF_DPTR)
         SET(CMAKE_${lang}_SIZEOF_DATA_PTR "${ABI_SIZEOF_DPTR}" PARENT_SCOPE)
-        SET(CMAKE_SIZEOF_VOID_P "${ABI_SIZEOF_DPTR}" PARENT_SCOPE)
       ENDIF(ABI_SIZEOF_DPTR)
 
       IF(ABI_NAME)
         SET(CMAKE_${lang}_COMPILER_ABI "${ABI_NAME}" PARENT_SCOPE)
-        SET(CMAKE_INTERNAL_PLATFORM_ABI "${ABI_NAME}" PARENT_SCOPE)
       ENDIF(ABI_NAME)
 
       # Parse implicit linker information for this language, if available.
