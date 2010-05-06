@@ -159,7 +159,7 @@ IF(BUILD_TESTING)
   IF(CTEST_TEST_OSX_ARCH)
     ADD_TEST_MACRO(Architecture Architecture)
     SET_TESTS_PROPERTIES(Architecture PROPERTIES
-      PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype)")
+      PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype|not the architecture being linked)")
   ENDIF(CTEST_TEST_OSX_ARCH)
 
   LIST(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
