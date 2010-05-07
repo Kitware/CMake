@@ -583,17 +583,17 @@ int cmCTestCoverageHandler::ProcessHandler()
       i != uncovered.end(); ++i)
     {
     std::string fileName = cmSystemTools::GetFilenameName(*i);
-    std::string shortFileName = this->CTest->GetShortPathToFile(i->c_str());
+    std::string fullPath = cont.SourceDir + "/" + *i;
 
     covLogFile << "\t<File Name=\"" << cmXMLSafe(fileName)
-      << "\" FullPath=\"" << cmXMLSafe(shortFileName) << "\">\n"
+      << "\" FullPath=\"" << cmXMLSafe(*i) << "\">\n"
       << "\t\t<Report>" << std::endl;
 
-    std::ifstream ifs(i->c_str());
+    std::ifstream ifs(fullPath.c_str());
     if (!ifs)
       {
       cmOStringStream ostr;
-      ostr <<  "Cannot open source file: " << i->c_str();
+      ostr <<  "Cannot open source file: " << fullPath.c_str();
       errorsWhileAccumulating.push_back(ostr.str());
       error ++;
       continue;
@@ -611,14 +611,14 @@ int cmCTestCoverageHandler::ProcessHandler()
     covLogFile << "\t\t</Report>\n\t</File>" << std::endl;
 
     total_untested += untested;
-    covSumFile << "\t<File Name=\"" << cmXMLSafe(i->c_str())
-      << "\" FullPath=\"" << cmXMLSafe(shortFileName.c_str())
+    covSumFile << "\t<File Name=\"" << cmXMLSafe(fileName)
+      << "\" FullPath=\"" << cmXMLSafe(i->c_str())
       << "\" Covered=\"true\">\n"
       << "\t\t<LOCTested>0</LOCTested>\n"
       << "\t\t<LOCUnTested>" << untested << "</LOCUnTested>\n"
       << "\t\t<PercentCoverage>0</PercentCoverage>\n"
       << "\t\t<CoverageMetric>0</CoverageMetric>\n";
-    this->WriteXMLLabels(covSumFile, shortFileName);
+    this->WriteXMLLabels(covSumFile, *i);
     covSumFile << "\t</File>" << std::endl;
     }
 
@@ -628,7 +628,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, std::endl);
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-      "Error(s) while acumulating results:" << std::endl);
+      "Error(s) while accumulating results:" << std::endl);
     std::vector<std::string>::iterator erIt;
     for ( erIt = errorsWhileAccumulating.begin();
       erIt != errorsWhileAccumulating.end();
@@ -2031,7 +2031,12 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
     std::string glob = cont->SourceDir + "/" + *i;
     gl.FindFiles(glob);
     std::vector<std::string> files = gl.GetFiles();
-    extraMatches.insert(files.begin(), files.end());
+    for(std::vector<std::string>::iterator i = files.begin();
+        i != files.end(); ++i)
+      {
+      extraMatches.insert(this->CTest->GetShortPathToFile(
+        i->c_str()));
+      }
     }
 
   if(extraMatches.size())
@@ -2041,9 +2046,7 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
       {
       std::string shortPath = this->CTest->GetShortPathToFile(
         i->first.c_str());
-      shortPath= shortPath.substr(2, shortPath.length() - 1);
-      std::string fullPath = cont->SourceDir + "/" + shortPath;
-      extraMatches.erase(fullPath);
+      extraMatches.erase(shortPath);
       }
     }
   return extraMatches;
