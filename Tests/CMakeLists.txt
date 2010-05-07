@@ -1305,7 +1305,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestScheduler/testOutput.log"
     )
   SET_TESTS_PROPERTIES(CTestTestScheduler PROPERTIES
-    PASS_REGULAR_EXPRESSION "Start 1.*Start 2.*Start 3.*Start 4.*Start 5.*Start 5.*Start 4.*Start 3.*Start 2.*Start 1")
+    PASS_REGULAR_EXPRESSION "Start 1.*Start 2.*Start 3.*Start 4.*Start 4.*Start 3.*Start 2.*Start 1")
 
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestStopTime/test.cmake.in"

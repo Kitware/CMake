@@ -4,13 +4,13 @@
 # include <unistd.h>
 #endif
 
-/* sleeps for 2n seconds, where n is the argument to the program */
+/* sleeps for 4n seconds, where n is the argument to the program */
 int main(int argc, char** argv)
 {
   int time;
   if(argc > 1)
     {
-    time = 3 * atoi(argv[1]);
+    time = 4 * atoi(argv[1]);
     }
 #if defined(_WIN32)
   Sleep(time * 1000);
