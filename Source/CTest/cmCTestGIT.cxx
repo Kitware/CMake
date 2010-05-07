@@ -347,6 +347,7 @@ private:
       Person author;
       this->ParsePerson(this->Line.c_str()+7, author);
       this->Rev.Author = author.Name;
+      this->Rev.EMail = author.EMail;
 
       // Convert the time to a human-readable format that is also easy
       // to machine-parse: "CCYY-MM-DD hh:mm:ss".

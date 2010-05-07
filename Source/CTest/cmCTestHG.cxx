@@ -220,7 +220,7 @@ private:
       }
     else if ( strcmp(name, "email") == 0 && !this->CData.empty())
       {
-      // this->Rev.Email.assign(&this->CData[0], this->CData.size());
+      this->Rev.EMail.assign(&this->CData[0], this->CData.size());
       }
     else if(strcmp(name, "date") == 0 && !this->CData.empty())
       {

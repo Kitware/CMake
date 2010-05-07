@@ -39,6 +39,9 @@ create_content(import)
 run_child(WORKING_DIRECTORY ${TOP}/import
   COMMAND ${BZR} init
   )
+run_child(WORKING_DIRECTORY ${TOP}/import
+  COMMAND ${BZR} whoami --branch "Test Author <testauthor@cmake.org>"
+  )
 
 run_child(WORKING_DIRECTORY ${TOP}/import
   COMMAND ${BZR} add .
@@ -56,6 +59,10 @@ message("Checking out revision 1...")
 run_child(
   WORKING_DIRECTORY ${TOP}
   COMMAND ${BZR} branch "${REPO}" user-source
+  )
+run_child(
+  WORKING_DIRECTORY ${TOP}/user-source
+  COMMAND ${BZR} whoami --branch "Test Author <testauthor@cmake.org>"
   )
 
 #-----------------------------------------------------------------------------

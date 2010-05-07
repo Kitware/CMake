@@ -73,6 +73,7 @@ protected:
     std::string Rev;
     std::string Date;
     std::string Author;
+    std::string EMail;
     std::string Log;
   };
 

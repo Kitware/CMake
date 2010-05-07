@@ -227,6 +227,7 @@ void cmCTestVC::WriteXMLEntry(std::ostream& xml,
       << "\t\t\t<FullName>" << cmXMLSafe(full) << "</FullName>\n"
       << "\t\t\t<CheckinDate>" << cmXMLSafe(rev.Date) << "</CheckinDate>\n"
       << "\t\t\t<Author>" << cmXMLSafe(rev.Author) << "</Author>\n"
+      << "\t\t\t<Email>" << cmXMLSafe(rev.EMail) << "</Email>\n"
       << "\t\t\t<Log>" << cmXMLSafe(rev.Log) << "</Log>\n"
       << "\t\t\t<Revision>" << cmXMLSafe(rev.Rev) << "</Revision>\n"
       << "\t\t\t<PriorRevision>" << cmXMLSafe(prior) << "</PriorRevision>\n"

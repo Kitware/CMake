@@ -292,7 +292,7 @@ private:
       if(this->EmailRegex.find(this->Rev.Author))
         {
         this->Rev.Author = this->EmailRegex.match(1);
-        //email = email_regex.match(2);
+        this->Rev.EMail = this->EmailRegex.match(2);
         }
       }
     else if(strcmp(name, "timestamp") == 0 && !this->CData.empty())
