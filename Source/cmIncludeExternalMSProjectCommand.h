@@ -62,9 +62,8 @@ public:
       "                             dep1 dep2 ...)\n"
       "Includes an external Microsoft project in the generated workspace "
       "file.  Currently does nothing on UNIX. This will create a "
-      "target named INCLUDE_EXTERNAL_MSPROJECT_[projectname].  This can "
-      "be used in the add_dependencies command to make things depend "
-      "on the external project.";
+      "target named [projectname].  This can be used in the add_dependencies "
+      "command to make things depend on the external project.";
     }
   
   cmTypeMacro(cmIncludeExternalMSProjectCommand, cmCommand);
