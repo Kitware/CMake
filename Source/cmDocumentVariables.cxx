@@ -598,7 +598,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "will check each of the contained directories for the existence of the "
      "library which is currently searched. By default it contains the "
      "standard directories for the current system. It is NOT intended to be "
-     "modified by the project, use CMAKE_SYSTEM_LIBRARY_PATH for this. See "
+     "modified by the project, use CMAKE_LIBRARY_PATH for this. See "
      "also CMAKE_SYSTEM_PREFIX_PATH.", false,
      "Variables That Change Behavior");
 
