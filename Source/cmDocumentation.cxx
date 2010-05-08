@@ -606,20 +606,22 @@ bool cmDocumentation::CreateSingleModule(const char* fname,
       }
     else
       {
-      if(text.length() < 2 && brief.length() == 1)
-        {
-        return false;
-        }
-      char* pname = strcpy(new char[strlen(moduleName)+1], moduleName);
-      char* ptext = strcpy(new char[text.length()+1], text.c_str());
-      this->ModuleStrings.push_back(pname);
-      this->ModuleStrings.push_back(ptext);
-      char* pbrief = strcpy(new char[brief.length()+1], brief.c_str());
-      this->ModuleStrings.push_back(pbrief);
-      moduleSection.Append(pname, pbrief, ptext);
-      return true;
+      break;
       }
     }
+
+  if(text.length() < 2 && brief.length() == 1)
+    {
+    return false;
+    }
+
+  char* pname = strcpy(new char[strlen(moduleName)+1], moduleName);
+  char* ptext = strcpy(new char[text.length()+1], text.c_str());
+  this->ModuleStrings.push_back(pname);
+  this->ModuleStrings.push_back(ptext);
+  char* pbrief = strcpy(new char[brief.length()+1], brief.c_str());
+  this->ModuleStrings.push_back(pbrief);
+  moduleSection.Append(pname, pbrief, ptext);
   return true;
 }
 
