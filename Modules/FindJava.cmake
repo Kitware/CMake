@@ -24,9 +24,18 @@
 # and
 # Java_VERSION        = 1.6.0
 #
-# NOTE: At the moment this script will look for javac and jar component,
-# which means it will fail if javac or jar is not found.:w
-# See Bug #9840
+# For these components the following variables are set:
+#
+#  Java_FOUND                    - TRUE if all components are found.
+#  Java_INCLUDE_DIRS             - Full paths to all include dirs.
+#  Java_LIBRARIES                - Full paths to all libraries.
+#  Java_<component>_FOUND        - TRUE if <component> is found.
+#
+# Example Usages:
+#  FIND_PACKAGE(Java)
+#  FIND_PACKAGE(Java COMPONENTS Runtime)
+#  FIND_PACKAGE(Java COMPONENTS Development)
+#
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
@@ -152,12 +161,36 @@ FIND_PROGRAM(Java_JAVAC_EXECUTABLE
 )
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Java DEFAULT_MSG
-  Java_JAVA_EXECUTABLE
-  Java_JAR_EXECUTABLE
-  Java_JAVAC_EXECUTABLE
-  _java_version_acceptable
-)
+if(Java_FIND_COMPONENTS)
+  foreach(component ${Java_FIND_COMPONENTS})
+    # User just want to execute some Java byte-compiled
+    if(component STREQUAL "Runtime")
+      find_package_handle_standard_args(Java DEFAULT_MSG
+        Java_JAVA_EXECUTABLE
+        _java_version_acceptable
+      )
+    elseif(component STREQUAL "Development")
+      find_package_handle_standard_args(Java DEFAULT_MSG
+        Java_JAVA_EXECUTABLE
+        Java_JAR_EXECUTABLE
+        Java_JAVAC_EXECUTABLE
+        _java_version_acceptable
+      )
+    else()
+      message(FATAL_ERROR "Comp: ${component} is not handled")
+    endif()
+    set(Java_${component}_FOUND TRUE)
+  endforeach(component)
+else()
+  # Check for everything
+  find_package_handle_standard_args(Java DEFAULT_MSG
+    Java_JAVA_EXECUTABLE
+    Java_JAR_EXECUTABLE
+    Java_JAVAC_EXECUTABLE
+    _java_version_acceptable
+  )
+endif()
+
 
 MARK_AS_ADVANCED(
   Java_JAVA_EXECUTABLE
