@@ -723,10 +723,13 @@ ELSE(wxWidgets_FIND_STYLE STREQUAL "win32")
 
         DBG_MSG_V("wxWidgets_CXX_FLAGS=${wxWidgets_CXX_FLAGS}")
 
-        # parse definitions from cxxflags; drop -D* from CXXFLAGS and the -D prefix
+        # parse definitions from cxxflags;
+        #   drop -D* from CXXFLAGS and the -D prefix
         STRING(REGEX MATCHALL "-D[^;]+"
           wxWidgets_DEFINITIONS  "${wxWidgets_CXX_FLAGS}")
-        STRING(REGEX REPLACE "-D[^;]+;" ""
+        STRING(REGEX REPLACE "-D[^;]+(;|$)" ""
+          wxWidgets_CXX_FLAGS "${wxWidgets_CXX_FLAGS}")
+        STRING(REGEX REPLACE ";$" ""
           wxWidgets_CXX_FLAGS "${wxWidgets_CXX_FLAGS}")
         STRING(REPLACE "-D" ""
           wxWidgets_DEFINITIONS "${wxWidgets_DEFINITIONS}")
