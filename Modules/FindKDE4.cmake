@@ -73,7 +73,7 @@ IF(NOT KDE4_DATA_DIR)
         EXECUTE_PROCESS(COMMAND "${KDE4_KDECONFIG_EXECUTABLE}" --path data OUTPUT_VARIABLE _data_DIR ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
         FILE(TO_CMAKE_PATH "${_data_DIR}" _data_DIR)
         # then check the data dirs for FindKDE4Internal.cmake
-        FIND_PATH(KDE4_DATA_DIR cmake/modules/FindKDE4Internal.cmake ${_data_DIR})
+        FIND_PATH(KDE4_DATA_DIR cmake/modules/FindKDE4Internal.cmake HINTS ${_data_DIR})
       ENDIF(KDE4_KDECONFIG_EXECUTABLE)
    ENDIF(CMAKE_CROSSCOMPILING)
 ENDIF(NOT KDE4_DATA_DIR)
