@@ -46,6 +46,10 @@ CVSUpdateOptions: @CVS_UPDATE_OPTIONS@
 SVNCommand: @SVNCOMMAND@
 SVNUpdateOptions: @SVN_UPDATE_OPTIONS@
 
+# Git options
+GITCommand: @GITCOMMAND@
+GITUpdateOptions: @GIT_UPDATE_OPTIONS@
+
 # Generic update command
 UpdateCommand: @UPDATE_COMMAND@
 UpdateOptions: @UPDATE_OPTIONS@
