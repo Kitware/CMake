@@ -1420,7 +1420,7 @@ void cmLocalVisualStudio6Generator
                                  outputNameDebug.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_NAME_RELEASE", 
                                  outputNameRelease.c_str());
-    cmSystemTools::ReplaceString(line, "OUTPUT_NAME_MINSIZEREL", 
+    cmSystemTools::ReplaceString(line, "OUTPUT_NAME_MINSIZEREL",
                                  outputNameMinSizeRel.c_str());
     cmSystemTools::ReplaceString(line, "OUTPUT_NAME_RELWITHDEBINFO", 
                                  outputNameRelWithDebInfo.c_str());
@@ -1431,7 +1431,7 @@ void cmLocalVisualStudio6Generator
                                  optionsDebug.c_str());
     cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIONS_RELEASE", 
                                  optionsRelease.c_str());
-    cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIONS_MINSIZEREL", 
+    cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIONS_MINSIZEREL",
                                  optionsMinSizeRel.c_str());
     cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIONS_RELWITHDEBINFO", 
                                  optionsRelWithDebInfo.c_str());
@@ -1619,7 +1619,7 @@ void cmLocalVisualStudio6Generator
     // There are not separate CXX and C template files, so we use the same
     // variable names.   The previous code sets up flags* variables to contain
     // the correct C or CXX flags
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL", 
+    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL",
                                  flagsMinSize.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG", 
                                  flagsDebug.c_str());
@@ -1629,7 +1629,7 @@ void cmLocalVisualStudio6Generator
                                  flagsRelease.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());
 
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_MINSIZE", 
+    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_MINSIZEREL",
                                  minsizeDefines.c_str());
     cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_DEBUG", 
                                  debugDefines.c_str());
