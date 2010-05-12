@@ -45,6 +45,7 @@
 // This is a hack to prevent warnings about these functions being
 // declared but not referenced.
 #if defined(__sgi) && !defined(__GNUC__)
+# pragma set woff 3970 /* conversion from pointer to same-sized */
 # include <sys/termios.h>
 class cmStandardIncludesHack
 {
