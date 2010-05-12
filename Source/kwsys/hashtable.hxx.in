@@ -38,6 +38,7 @@
 # pragma warn -8027 /* 'for' not inlined.  */
 # pragma warn -8026 /* 'exception' not inlined.  */
 #endif 
+
 #ifndef @KWSYS_NAMESPACE@_hashtable_hxx
 #define @KWSYS_NAMESPACE@_hashtable_hxx
 
@@ -56,6 +57,9 @@
 # pragma warning (disable:4284)
 # pragma warning (disable:4786)
 # pragma warning (disable:4512) /* no assignment operator for class */
+#endif
+#if defined(__sgi) && !defined(__GNUC__)
+# pragma set woff 3970 /* pointer to int conversion */ 3321 3968
 #endif
 
 #if @KWSYS_NAMESPACE@_STL_HAS_ALLOCATOR_TEMPLATE

@@ -28,6 +28,10 @@
 # if defined(__INTEL_COMPILER)
 #  pragma warning (disable: 1572) /* floating-point equality test */
 # endif
+# if defined(__sgi) && !defined(__GNUC__)
+#  pragma set woff 3970 /* pointer to int conversion */
+#  pragma set woff 3968 /* 64 bit conversion */
+# endif
 #endif
 
 /* Whether kwsys namespace is "kwsys".  */
