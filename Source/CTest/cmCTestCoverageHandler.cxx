@@ -2031,11 +2031,11 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
     std::string glob = cont->SourceDir + "/" + *i;
     gl.FindFiles(glob);
     std::vector<std::string> files = gl.GetFiles();
-    for(std::vector<std::string>::iterator i = files.begin();
-        i != files.end(); ++i)
+    for(std::vector<std::string>::iterator f = files.begin();
+        f != files.end(); ++f)
       {
       extraMatches.insert(this->CTest->GetShortPathToFile(
-        i->c_str()));
+        f->c_str()));
       }
     }
 
