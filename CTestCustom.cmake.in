@@ -31,7 +31,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "Warning: public.*BZ2_bz.*in module.*bzlib.*clashes with prior module.*bzlib.*"
   "Warning: public.*_archive.*clashes with prior module.*"
   "Warning: LINN32: Last line.*is less.*"
-  "warning.*directory name.*CMake-Xcode/bin/Release.*does not exist.*"
+  "warning.*directory name.*CMake-Xcode.*/bin/.*does not exist.*"
   "stl_deque.h:1051"
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
   "[Qq]t([Cc]ore|[Gg]ui).*warning.*conversion.*may alter its value"
