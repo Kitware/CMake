@@ -28,6 +28,7 @@ public:
   static unsigned int GetMajorVersion();
   static unsigned int GetMinorVersion();
   static unsigned int GetPatchVersion();
+  static unsigned int GetTweakVersion();
   static const char* GetCMakeVersion();
 };
 

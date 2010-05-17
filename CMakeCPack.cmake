@@ -31,12 +31,7 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   SET(CPACK_PACKAGE_VERSION_MINOR "${CMake_VERSION_MINOR}")
   SET(CPACK_PACKAGE_VERSION_PATCH "${CMake_VERSION_PATCH}")
   SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
-  SET(CPACK_SOURCE_PACKAGE_FILE_NAME
-    "cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
-  IF(CMake_VERSION_RC)
-    SET(CPACK_SOURCE_PACKAGE_FILE_NAME
-      "${CPACK_SOURCE_PACKAGE_FILE_NAME}-rc${CMake_VERSION_RC}")
-  ENDIF(CMake_VERSION_RC)
+  SET(CPACK_SOURCE_PACKAGE_FILE_NAME "cmake-${CMake_VERSION}")
   IF(NOT DEFINED CPACK_SYSTEM_NAME)
     # make sure package is not Cygwin-unknown, for Cygwin just
     # cygwin is good for the system name
@@ -88,7 +83,7 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     SET(CPACK_PACKAGE_NAME cmake)
     # setup the name of the package for cygwin cmake-2.4.3
     SET(CPACK_PACKAGE_FILE_NAME
-      "${CPACK_PACKAGE_NAME}-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
+      "${CPACK_PACKAGE_NAME}-${CMake_VERSION}")
     # the source has the same name as the binary
     SET(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_FILE_NAME})
     # Create a cygwin version number in case there are changes for cygwin

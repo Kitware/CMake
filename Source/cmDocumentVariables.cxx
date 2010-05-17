@@ -251,12 +251,22 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      " executable being run.",false,
      "Variables that Provide Information");
   cm->DefineProperty
+    ("CMAKE_TWEAK_VERSION", cmProperty::VARIABLE,
+     "The tweak version of cmake (i.e. the 1 in X.X.X.1).",
+     "This specifies the tweak version of the CMake executable being run.  "
+     "Releases use tweak < 20000000 and development versions use the date "
+     "format CCYYMMDD for the tweak level."
+     ,false, "Variables that Provide Information");
+  cm->DefineProperty
     ("CMAKE_VERSION", cmProperty::VARIABLE,
-     "The full version of cmake in major.minor.patch format.",
+     "The full version of cmake in major.minor.patch[.tweak[-id]] format.",
      "This specifies the full version of the CMake executable being run.  "
      "This variable is defined by versions 2.6.3 and higher.  "
-     "See variables CMAKE_MAJOR_VERSION, CMAKE_MINOR_VERSION, and "
-     "CMAKE_PATCH_VERSION for individual version components.", false,
+     "See variables CMAKE_MAJOR_VERSION, CMAKE_MINOR_VERSION, "
+     "CMAKE_PATCH_VERSION, and CMAKE_TWEAK_VERSION "
+     "for individual version components.  "
+     "The [-id] component appears in non-release versions "
+     "and may be arbitrary text.", false,
      "Variables that Provide Information");
 
   cm->DefineProperty

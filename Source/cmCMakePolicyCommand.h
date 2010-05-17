@@ -80,7 +80,7 @@ public:
       "behavior.  "
       "While setting policies individually is supported, we encourage "
       "projects to set policies based on CMake versions.\n"
-      "  cmake_policy(VERSION major.minor[.patch])\n"
+      "  cmake_policy(VERSION major.minor[.patch[.tweak]])\n"
       "Specify that the current CMake list file is written for the "
       "given version of CMake.  "
       "All policies introduced in the specified version or earlier "

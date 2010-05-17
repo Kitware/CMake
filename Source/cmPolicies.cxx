@@ -3,6 +3,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
+#include "cmVersionMacros.h"
 #include <map>
 #include <set>
 #include <queue>
@@ -22,6 +23,7 @@ public:
             unsigned int majorVersionIntroduced,
             unsigned int minorVersionIntroduced,
             unsigned int patchVersionIntroduced,
+            unsigned int tweakVersionIntroduced,
             cmPolicies::PolicyStatus status)
   {
     if (!idString || !shortDescription || ! longDescription)
@@ -37,21 +39,26 @@ public:
     this->MajorVersionIntroduced = majorVersionIntroduced;
     this->MinorVersionIntroduced = minorVersionIntroduced;
     this->PatchVersionIntroduced = patchVersionIntroduced;
+    this->TweakVersionIntroduced = tweakVersionIntroduced;
     this->Status = status;
   }
 
   std::string GetVersionString()
   {
-    cmOStringStream error;
-    error << this->MajorVersionIntroduced << "." <<
-      this->MinorVersionIntroduced << "." <<
-      this->PatchVersionIntroduced; 
-    return error.str();
+    cmOStringStream v;
+    v << this->MajorVersionIntroduced << "." << this->MinorVersionIntroduced;
+    v << "." << this->PatchVersionIntroduced;
+    if(this->TweakVersionIntroduced > 0)
+      {
+      v << "." << this->TweakVersionIntroduced;
+      }
+    return v.str();
   }
 
   bool IsPolicyNewerThan(unsigned int majorV, 
                          unsigned int minorV,
-                         unsigned int patchV)
+                         unsigned int patchV,
+                         unsigned int tweakV)
   {
     if (majorV < this->MajorVersionIntroduced)
     {
@@ -69,7 +76,15 @@ public:
     {
       return false;
     }
-    return (patchV < this->PatchVersionIntroduced);
+    if (patchV < this->PatchVersionIntroduced)
+    {
+      return true;
+    }
+    if (patchV > this->PatchVersionIntroduced)
+    {
+      return false;
+    }
+    return (tweakV < this->TweakVersionIntroduced);
   }
   
   cmPolicies::PolicyID ID;
@@ -79,6 +94,7 @@ public:
   unsigned int MajorVersionIntroduced;
   unsigned int MinorVersionIntroduced;
   unsigned int PatchVersionIntroduced;
+  unsigned int TweakVersionIntroduced;
   cmPolicies::PolicyStatus Status;
 };
 
@@ -110,7 +126,7 @@ cmPolicies::cmPolicies()
     "The NEW behavior is to issue an error instead of a warning.  "
     "An included file may set CMP0000 explicitly to affect how this "
     "policy is enforced for the main CMakeLists.txt file.",
-    2,6,0, cmPolicies::WARN
+    2,6,0,0, cmPolicies::WARN
     );
 
   this->DefinePolicy(
@@ -126,7 +142,7 @@ cmPolicies::cmPolicies()
     "and the cmake_policy command.  "
     "However, CMake must still check CMAKE_BACKWARDS_COMPATIBILITY for "
     "projects written for CMake 2.4 and below.",
-    2,6,0, cmPolicies::WARN
+    2,6,0,0, cmPolicies::WARN
     );
 
   this->DefinePolicy(
@@ -148,7 +164,7 @@ cmPolicies::cmPolicies()
     "Custom targets must simply have globally unique names (unless one "
     "uses the global property ALLOW_DUPLICATE_CUSTOM_TARGETS with a "
     "Makefiles generator).",
-    2,6,0, cmPolicies::WARN
+    2,6,0,0, cmPolicies::WARN
     );
 
   this->DefinePolicy(
@@ -213,7 +229,7 @@ cmPolicies::cmPolicies()
     "Note that the warning for this policy will be issued for at most "
     "one target.  This avoids flooding users with messages for every "
     "target when setting the policy once will probably fix all targets.",
-    2,6,0, cmPolicies::WARN);
+    2,6,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0004, "CMP0004",
@@ -229,7 +245,7 @@ cmPolicies::cmPolicies()
     "The setting for this policy used when checking the library names is "
     "that in effect when the target is created by an add_executable or "
     "add_library command.",
-    2,6,0, cmPolicies::WARN);
+    2,6,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0005, "CMP0005",
@@ -250,7 +266,7 @@ cmPolicies::cmPolicies()
     "for all native build tools automatically.  "
     "See documentation of the COMPILE_DEFINITIONS target property for "
     "limitations of the escaping implementation.",
-    2,6,0, cmPolicies::WARN);
+    2,6,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0006, "CMP0006",
@@ -268,7 +284,7 @@ cmPolicies::cmPolicies()
     "DESTINATION if a BUNDLE DESTINATION is not given.  "
     "The NEW behavior for this policy is to produce an error if a bundle "
     "target is installed without a BUNDLE DESTINATION.",
-    2,6,0, cmPolicies::WARN);
+    2,6,0,0, cmPolicies::WARN);
   
   this->DefinePolicy(
     CMP0007, "CMP0007",
@@ -280,7 +296,7 @@ cmPolicies::cmPolicies()
     "The OLD behavior for this policy is to ignore empty list elements. "
     "The NEW behavior for this policy is to correctly count empty "
     "elements in a list. ",
-    2,6,0, cmPolicies::WARN);
+    2,6,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0008, "CMP0008",
@@ -306,7 +322,7 @@ cmPolicies::cmPolicies()
     "path and ask the linker to search for it.  "
     "The NEW behavior for this policy is to trust the given path and "
     "pass it directly to the native build tool unchanged.",
-    2,6,1, cmPolicies::WARN);
+    2,6,1,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0009, "CMP0009",
@@ -322,7 +338,7 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is not to follow the symlinks "
     "by default, but only if FOLLOW_SYMLINKS is given as an additional "
     "argument to the FILE command.",
-    2,6,2, cmPolicies::WARN);
+    2,6,2,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0010, "CMP0010",
@@ -334,7 +350,7 @@ cmPolicies::cmPolicies()
     "The OLD behavior for this policy is to warn about the error, leave "
     "the string untouched, and continue. "
     "The NEW behavior for this policy is to report an error.",
-    2,6,3, cmPolicies::WARN);
+    2,6,3,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0011, "CMP0011",
@@ -354,7 +370,7 @@ cmPolicies::cmPolicies()
     "include() and find_package() commands.  "
     "The NEW behavior for this policy is to allow the commands to do their "
     "default cmake_policy PUSH and POP.",
-    2,6,3, cmPolicies::WARN);
+    2,6,3,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0012, "CMP0012",
@@ -376,7 +392,7 @@ cmPolicies::cmPolicies()
     "named like numbers and boolean constants. "
     "The NEW behavior for this policy is to recognize numbers and "
     "boolean constants without dereferencing variables with such names.",
-    2,8,0, cmPolicies::WARN);
+    2,8,0,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0013, "CMP0013",
@@ -393,7 +409,7 @@ cmPolicies::cmPolicies()
     "directories.  "
     "The NEW behavior for this policy is to disallow duplicate binary "
     "directories with an error.",
-    2,8,0, cmPolicies::WARN);
+    2,8,0,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0014, "CMP0014",
@@ -405,7 +421,7 @@ cmPolicies::cmPolicies()
     "the case is an error.  "
     "The OLD behavior for this policy is to silently ignore the problem.  "
     "The NEW behavior for this policy is to report an error.",
-    2,8,0, cmPolicies::WARN);
+    2,8,0,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0015, "CMP0015",
@@ -420,7 +436,7 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to convert relative paths to "
     "absolute paths by appending the relative path to "
     "CMAKE_CURRENT_SOURCE_DIR.",
-    2,8,1, cmPolicies::WARN);
+    2,8,1,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
@@ -441,6 +457,7 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                               unsigned int majorVersionIntroduced,
                               unsigned int minorVersionIntroduced,
                               unsigned int patchVersionIntroduced,
+                              unsigned int tweakVersionIntroduced,
                               cmPolicies::PolicyStatus status)
 {
   // a policy must be unique and can only be defined once
@@ -457,6 +474,7 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                                     majorVersionIntroduced,
                                     minorVersionIntroduced,
                                     patchVersionIntroduced,
+                                    tweakVersionIntroduced,
                                     status);
   this->PolicyStringMap[idString] = iD;
 }
@@ -475,14 +493,15 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   unsigned int majorVer = 2;
   unsigned int minorVer = 0;
   unsigned int patchVer = 0;
+  unsigned int tweakVer = 0;
 
   // parse the string
-  if(sscanf(ver.c_str(), "%u.%u.%u",
-            &majorVer, &minorVer, &patchVer) < 2)
+  if(sscanf(ver.c_str(), "%u.%u.%u.%u",
+            &majorVer, &minorVer, &patchVer, &tweakVer) < 2)
     {
     cmOStringStream e;
     e << "Invalid policy version value \"" << ver << "\".  "
-      << "A numeric major.minor[.patch] must be given.";
+      << "A numeric major.minor[.patch[.tweak]] must be given.";
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
@@ -510,7 +529,11 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
        minorVer > cmVersion::GetMinorVersion()) ||
       (majorVer == cmVersion::GetMajorVersion() &&
        minorVer == cmVersion::GetMinorVersion() &&
-       patchVer > cmVersion::GetPatchVersion()))
+       patchVer > cmVersion::GetPatchVersion()) ||
+      (majorVer == cmVersion::GetMajorVersion() &&
+       minorVer == cmVersion::GetMinorVersion() &&
+       patchVer == cmVersion::GetPatchVersion() &&
+       tweakVer > cmVersion::GetTweakVersion()))
     {
     cmOStringStream e;
     e << "An attempt was made to set the policy version of CMake to \""
@@ -528,7 +551,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     = this->Policies.begin();
   for (;i != this->Policies.end(); ++i)
   {
-    if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer))
+  if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer,tweakVer))
     {
       if(i->second->Status == cmPolicies::REQUIRED_ALWAYS)
       {
