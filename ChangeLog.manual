@@ -1,0 +1,325 @@
+Changes in CMake 2.8.1
+- Fix failing test on cygwin
+- Add a new serach path for MPICH2
+
+Changes in CMake 2.8.1 RC 5
+- Fix FindQt4 to work with OpenGL on the mac
+- Add .git .bzr and .hg to the list of default CPack ignore directories.
+
+Changes in CMake 2.8.1 RC 4
+- CTest: Do not hide test GUI windows (fixes 2.8.0 regression)
+- Documentation: Clarify CMAKE_MODULE_PATH variable
+- FindQt4: Add support for QtDeclartive module
+- FortranCInterface: Fix PathScale detection
+- Suppress GNU flag -fPIC on Windows (fixes 2.8.1-rc1 regression)
+
+Changes in CMake 2.8.1 RC 3
+- Add CMAKE_XCODE_ATTRIBUTE_<attr> interface to set compiler (#9125)
+- Fix Eclipse files for targets in subdirectories (#9978)
+- Fix custom command rule hashes to avoid extra rebuilds
+- Print non-make generator name in initial compiler test
+
+Changes in CMake 2.8.1 RC 2
+- CPack: Avoid deleting long PATH values with NSIS (#10257)
+- CTest: Fix and test cost-based test scheduler
+- CTest: Fix and test git updates for case of out-dated index
+- CTest: Fix regression caused by fix for (#2336) in rc1
+- CTest: Setup command-line dashboard support with Git
+- FindCUDA: Improve docs, use -rpath on Apple, fix dependency scanning
+- Fix OS X deployment-target and sysroot defaults (#9959,#9898,#10155)
+- Recognize the Compaq Fortran compiler
+
+Changes in CMake 2.8.1 RC 1
+- Add "NMake Makefiles JOM" generator
+- Add PathScale compiler support
+- Add per-configuration OUTPUT_DIRECTORY properties
+- Add per-target OSX_ARCHITECTURES property
+- check_type_size(): Handle mixed-size universal binaries
+- CPack: Document Mac generators
+- CPack: Improve RPM spec files
+- Create CMAKE_FORCE_Fortran_COMPILER for cross-compiling
+- CTest: Add --http1.0 command-line option
+- CTest: Add --timeout command-line option
+- CTest: Do not munge UTF-8 output in XML files
+- CTest: Document CTEST_USE_LAUNCHERS option
+- CTest: Fix killing of whole test process trees
+- CTest: Handle failure of running invalid executables
+- CTest: Honor the -C arg to ctest (#2336)
+- CTest: Improve host system introspection
+- CTest: Optionally randomize test order (--schedule-random)
+- CTest: Skip tests with unsatisfied REQUIRED_FILES test property
+- CTest: Submit arbitrary results with ATTACHED_FILES test property
+- ctest_build(): Enhance signature
+- ctest_start(): Add APPEND option
+- ctest_start(): Move CTEST_CHECKOUT_COMMAND from ctest_update
+- ctest_update(): Submit global tree revision in Update.xml
+- Cygwin: Do not export all symbols from DLLs (#10122)
+- Cygwin: Name DLLs with SOVERSION, not VERSION (#10122)
+- Detect 32/64-bit Windows with Intel compiler
+- Eclipse generator enhancements
+- ExternalProject: Add TIMEOUT parameter
+- FindCUDA: Respect CUDA version differences
+- FindCURL: Find import libraries on Windows
+- FindDCMTK: Look in more places
+- FindGTest: Handle spaces better (#10065)
+- FindGTK2: Look in fink locations on Mac OS X
+- FindHDF5: Follow find-module API conventions
+- FindJava: Support for versioned find
+- FindJNI: Honor find_package() REQUIRED and QUIET options
+- FindMPI: Improve Windows support
+- FindOpenSSL: Fix MinGW support
+- FindPythonLibs: Look in config for static library
+- FindQt4: Misc enhancements, sync with KDE vesion
+- FindRuby: Fix version convention on Windows
+- FindX11: Improve documentation
+- Fortran: Detect address size (#10119)
+- FortranCInterface: Honor user flags
+- Improve VS 2010 beta2 support
+- link_directories(): Treat relative paths consistently (CMP0015)
+- Modernize FindLibXslt and FindLibXml.cmake
+- Refactor platform info to simplify adding new compilers
+- Support cross-compiling versioned DLLs
+- UseQt4: Provide dependencies only for static Qt (#10021)
+- Address issues:
+  #2336, #3571, #5041, #7541, #8725, #9011, #9042, #9054, #9163,
+  #9171, #9450, #9697, #9764, #9782, #9792, #9862, #9894, #9913,
+  #9916, #9917, #9918, #9949, #9965, #9970, #9982, #9985, #10003,
+  #10014, #10021, #10032, #10055, #10060, #10065, #10114, #10119,
+  #10122, #10126, #10136.
+
+Changes in CMake 2.8.0 Release
+- CPack: Honor CPACK_NSIS_DISPLAY_NAME (fixes regression)
+
+Changes in CMake 2.8.0 RC 7
+- Partially sync FindQt4 with KDE version
+- Improve implementation of fix for #9090
+- Fix CTest infinite loop when test executable could not be found
+- Fix #9833: Document ctest --help-command
+- FindCUDA: Fix -fPIC from being used on executable object files
+- Fix #9654: %files section in spec file should not list directories
+- Fix #9851: Better STRING(RANDOM) seeding
+- Fix double bootstrap build for in source builds
+- Fix CTest to use allowed value for valgrind --num-callers
+- Remove non-language implicit link dependencies
+- Implement LINK_FLAGS_<CONFIG> property on Xcode
+
+Changes in CMake 2.8.0 RC 6
+- Partially sync FindQt4 with KDE version
+- Fix #9090: Teach CTest subdirs() command to handle absolute paths
+- Fix CTest bug that could start a test twice
+
+Changes in CMake 2.8.0 RC 5
+- CTest now detects cycles in test dependency graph
+- Warn on set(PARENT_SCOPE) at top scope
+- Fix Xcode <= 2.0 projects with CMAKE_BUILD_TYPE
+- Fix flags for Intel Fortran on Windows
+- Fix #2199: UseSWIG documentation for swig_generated_file_fullname
+- Fix #7915: UseSWIG interaction with JNI
+- Fix #8971: FindOpenSSL now works on windows
+- Fix #9124: CPackDeb documentation
+- Fix #9722: cmake-gui reports error when not able to create build directory
+- Fix #9767: Match more valgrind-reported leaks in CTest memcheck
+- Fix #9777: Sync CMakeDetermineJavaCompiler paths with FindJava
+- Fix #9793: FindJNI should find matching jni.h and jni_md.h
+- Fix #9817: FindJNI on Solaris
+- Fix FindHDF5 when hdf5.h exists without H5pubconf.h
+- Fix FindZLIB to follow variable name conventions
+- Fix invalid use of auto_ptr on array
+- Mention temp var convention in Modules/readme.txt documentation
+
+Changes in CMake 2.8.0 RC 4
+- Fix try_compile when file cannot be found
+- Add new module to test manifest installation issues on windows.
+- Add more test coverage
+-Improvements in finding MPI on windows. ENH: reorganized searching mpi for mpi components (include,lib,bin) using a single set of search paths instead of seperately mainted lists of paths for each.
+- Look for nvcc in the 32 bit bin directory before the 64 bin directory.
+- BUG: hardcore some values so output matches cmVS10CLFlagTable.h (addresses bug #9753)
+- Avoid Intel linker crash in BuildDepends test
+- Fix Intel Fortran SHARED libraries on Linux
+- Fix working dir issue for ctest
+- Fix if() command and CMP0012 OLD/NEW behavior
+- Allow for /D to change install directory on the command line for NSIS
+- Move SetErrorMode around calls to generate and configure instead of setting it for the whole application for cmake-gui on windows.  Allows for bad installs of windows shell programs to not break file completion.
+- Fix Intel and MinGW Fortran DLL import libraries
+- Fix Xcode dylib version default
+- Fix the showing of non-cpp files in the IDE for VS 10
+- Fix optionally-valued booleans in VS 10 flag table
+- Detect and set Unicode character set in VS 10
+- Add support for the g95 Fortran compiler
+- Test all target types in Fortran
+- Add Xcode file association for Fortran
+- Fix VS 10 flag table for precompiled headers
+- Fix VS 10 .sln files for Windows Explorer
+- Fix Microsoft.Cpp.$(Platform).user.props in VS10b2
+- Fix up file(DOWNLOAD ) a bit, better error checking and uses of long not double for timeout as curl needs, bug# 9748
+- Add a VS 10 Win64 generator
+- Fix for bug#9686 convert java_home to a cmake path before using.
+- fix for bug# 9751, add check for MSVC10
+- Fix for bugs #9756, #9690 and #9755, header files were not included, and link_directories we incorrect
+- Add a module to test an install tree to verify that the MS CRT version is correct.
+- Fix seg fault for empty ENV{} call bug #9747
+- Better fix for finding the MSBuild that matches the VS 10 install.
+- make testing the CodeBlocks and Eclipse generators easier by not requiring the CMAKE_EDIT_COMMAND variable
+- Do not link library dependencies in VS solutions
+- Ctest was broken for subdirs.  Restored working directory state for tests so that their executables could be found.
+- Fixes version detection using osg/Version on Mac OSX when OSG is installed as a framework
+- Avoid C++ linker language in VS Fortran project
+- Avoid duplicate ZERO_CHECK in VS solutions
+- Fixed bug 8319, search for the Python shared library in the standard locations.
+- Fix bug#9714, should not crash when version file is not where it should be...
+- Fix ctest output alignment for cases where total tests run is not the same width as max test index.
+- make it more robust wrt. #9621
+- Add another possible error message that curl might emit with an empty drop location.
+- Fix issue #5668 - use CollapseFullPath when determining if covered file is within source or binary tree. Allows gcc/gcov coverage analysis using MinGW on Windows.
+- CTest-side support for compiler name and compiler version information.  Requires CDash update to show on CDash.
+- Add a bunch more testing coverage.
+
+Changes in CMake 2.8.0 RC 3
+- CTest Added OS Platform (cpu architecture) detection support to windows system
+- Several minor FindBoost changes to address posts on mailing list
+- Resolve #9685: Fix include dir to be correct path for gnutils
+- Fix color check for dependency scanning
+- Remove CMP00015 for now as it breaks more things than it fixes
+- Reduce duration of ctest_sleep arguments. Add SmallAndFast project. Replace kwsys with SmallAndFast to make CTestTest faster. (I will keep an eye on coverage results after this commit and make sure we still have equivalent ctest coverage.)
+-  Do not use -fPIC to link executables
+- Split Borland compiler information files
+- Trimmed off the newline from sw_vers output on mac, it could cause xml parsing errors if left in
+- Check for openssl-linked option with Qt 4.4+ before making ssl a dependency.
+- Make Complex test of CMakeLib more optional
+- Modernize FindVTK module
+- Fix find_package() when <pkg>_DIR is wrong
+- Do not collapse path of NOTFOUND values
+- More robust implicit link line detection regex
+- fix Xcode 30 generator
+- Use the correct CMake (the freshly built one) to drive the CMakeWizardTest.
+- Support more special characters in file(STRINGS)
+- Log implicit link line detection regex
+- speedup C dependency scanning even more
+- Avoid non-root copies of root-only targets
+- Added better OS information for Mac OS X
+- Use work-around from bug 4772 for C++ and Fortran
+- FortranCInterface: Mangling for Intel on Windows
+- cmake-gui don't allow consecutive generates without a configure.
+- Fix Preprocess test for Intel on Windows
+- Teach intel compiler on windows to place .lib files and .pdb files.
+- CPack: Fix bash-isms in launch script
+- BUG: #0009648 Change "The following tests FAILED" message to print on stdout rather than stderr
+- Avoid (Unix|Windows)Paths.cmake multiple include
+- When getting include dirs for moc, also watch for framework includes and use -F instead of -I.
+- Find locally installed software first
+- Add '#!/bin/sh' to cygwin-package.sh
+- Fix permsissions of installed SquishRunTestCase.sh
+- Fix module docs to be manpage (groff) friendly
+- Support GNU/kFreeBSD
+- Remove old Encoding field from CMake.desktop
+- FindQt3: Prefer (moc|uic)-qt3 names over (moc|uic)
+- Match width of ctest "Start xx: " line to line up with the end test line
+- Remove old license from FindPkgConfig.cmake module
+- Test target link information invalidation
+- Invalidate target link info when necessary
+- Use new style header generation and get rid of OBJECT_DEPENDS in tutorial
+- Fix issue #8649 - move the location of CPACK_NSIS_EXTRA_INSTALL_COMMANDS so that it is not excluded from execution when 'Do not create shortcuts' is checked.
+- add the additional features for the dbus macros from KDE's FindQt4.cmake
+fc9f7a5 Fix warnings in CMake source code.
+- Correct some typos in error messages in the string command. Add a test that covers more of the code implemented in cmStringCommand.cxx, especially the error handlers.
+- Create INTERPROCEDURAL_OPTIMIZATION build feature
+- Document CMAKE_CURRENT_LIST_FILE more precisely
+- Fix the documentation to say what it really does. Bug #9638
+- document how the minimum version can be specified
+- Fix warnings in CMake source code. Suppress rampant warnings emanating from Qt files.
+- Add documentation for Cocoa flag and move Motif under X11 flag.
+
+Changes in CMake 2.8.0 RC 2
+- Fix FindQt4 so that QtHelp depends on QtNetwork
+- Add missing copyright notice to CMake.cmake module
+- Add alternative _UTILITY targets to all VS solutions 
+- FindGTest.cmake some bugfixes, also added public function for closer integration btwn GoogleTest & CTest, contributed by Dan Blezek.
+- Eliminate ExternalProject's use of CMAKE_CFG_INTDIR subdir for Makefile generators. It was causing problems with parallel make -j invocations. Keep it for multi-configuration build systems so that Debug and Release stamp files remain separate.
+- Fix for bug #9611, some more paths for OpenJDK.
+- Fix get_filename_component() registry view with wow64
+- Fix warnings in CMake source code.
+- Fix module definition file reference for VS6 NMake
+- Fix for bug #9611 do not hard code archs for search paths of java, look at the machine type.
+- Fix bug#9619 add a link to module maintainers page in readme.txt for Modules
+- Add cmake-help-command function to emacs-mode
+- Add initial XL C compiler flags for safer builds
+- Split XL compiler information files
+- Fix default install prefix on Haiku
+- Fix use of module .def files for MS tools
+- Add StringProperty options includeing /def: for VS 10 flag table
+- Convert copyright to OSI BSD and clean up licenses
+- ENH: Added ctest test coverage for a test timeout
+- CTest honors test timeouts again.
+- Remove ctest_submit from CTestTestParallel
+- Fix shared library creation flag for XL on Linux
+- Fix BUG: 0009612: --output-on-failure option doesn't work with
+  the new parallel CTest handler
+- Removed support for cutil library and header file.
+- Fixed CUDA_PROPAGATE_HOST_FLAGS, added path for Mac SDK.
+- Make sure LINK_FLAGS are seen by generator, fix for part of bug#9613
+- Fix issue #9412 - remove RPATH from files copied by
+  BundleUtilities.cmake on Linux. Thank
+- Fix support for OLD behavior of policy CMP0002
+- Fix issue #8818 - escape quotes in the license file when using the
+  DragNDrop cpack genera
+- Fix .vfproj file version for Intel Fortran 10.1
+- Use BeAPI for per-user package registry on Haiku
+- Correct comments and use ASM${ASM_DIALECT} env. var instead of ASM
+  env. var to initialize
+- Fix bug #9529.
+- Fix Windows GUI implib and image version in VS 6
+- Convert newlines from CRLF to LF
+- Oops. Last commit did not create subdir before doing a touch on a
+  file in it. So it fails of a type that is expected to have a
+  location...
+- Policies 14 and 15 will be first released in 2.8.0
+- Document full version number with policy default
+- Simplify bootstrap script source dir detection
+- Documentation fixes, new CUDA_PROPAGATE_HOST_FLAGS, changed output
+  directory.
+
+Changes in CMake 2.8.0 RC 1 
+
+- Qt based GUI cmake-gui is now the default GUI, MFC CMakeSetup is no
+  longer included in CMake.  ccmake is still supported.
+- cmake-gui supports multi-state values options.
+- CMake now has cmake --build command that can build any CMake generated
+  project from the command line.
+- Visual Studio 2010 beta support has been added.
+- KDevelop generator now has color output for builds.
+- CTest supports running tests in parallel with a -j N option.
+- A new CTest CTEST_USE_LAUNCHERS option can be used to get better
+  dashboard error reports with make based tools.
+- CTest has support for sub-projects and labels which can interact
+  with CDash.
+- CTest now supports Git, Mercurial, and Bazaar.
+- It is now possible to use DESTDIR in CPack for any CMake based projects
+  giving more flexibility on the final path names.
+- The CPack Deb generator now computes the arch instead of hard coding it.
+- Fortran/C mixed language projects made much easier. CMake now
+  automatically can compute the run time libraries for a compiler. In
+  addition, a new FortranCInterface module can determine the correct
+  name mangling needed to mix C and Fortran.
+- Intel compiler support added to OSX, and support for embedded
+  manifests in the windows intel compiler was added.
+- Depend scanning is now much faster with makefiles.
+- Many FindQt4 improvements to stay working with current Qt releases
+- FindMPI has improvements for windows.
+- FindBoost has been updated to work with the most recent boost releases.
+- New External Project Module.  The 'ExternalProject_Add' function
+  creates a custom target to drive download, update/patch, configure,
+  build, install and test steps of an external project.
+- xmlrpc dependancy has been removed
+- CMAKE_OSX_DEPLOYMENT_TARGET cache variable has been created to set the
+  deployment OS for a build on OSX.
+- Several new policies were added:
+  CMP0012
+       The if() command can recognize named boolean constants.
+  CMP0013
+       Duplicate binary directories are not allowed.
+  CMP0014
+       Input directories must have CMakeLists.txt.
+  CMP0015
+       The set() CACHE mode and option() command make the cache value
+       visible.
+- Lots of bug fixes.
