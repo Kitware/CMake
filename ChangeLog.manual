@@ -1,3 +1,66 @@
+Changes since CMake 2.8.1
+- Build on Tru64 (#10542)
+- Build on mingw-w64
+- Build on old Sun (#10550, #10543)
+- CPack: Add native BZip2 support
+- CPack: Set compression type in RPM spec (#10363)
+- CTest: Add --stop-time argument
+- CTest: Cost data with '-j'
+- CTest: Fix memory report
+- CTest: Glob for uncovered files during coverage tests
+- CTest: Option to specify cdash server
+- CTest: Process tree kill for OpenBSD, FreeBSD, kFreeBSD, GNU/Hurd
+- CTest: Report failure in Update.xml
+- CTest: Submit author email in Update.xml
+- CTest: Teach ctest_update about Git submodules
+- Do not list file names during 'cmake -E tar xz'
+- Documentation: Comply with "XHTML 1.0 Strict"
+- Documentation: Fix typo in CMAKE_LIBRARY_PATH (#10291)
+- Documentation: Fix typo in HAS_CXX docs (#10578)
+- Documentation: More consistent command signatures
+- Eclipse: Do not add INCLUDE to environment twice
+- Enable extra CodeBlocks generator on Cygwin
+- FindCurses: Fix for cygwin ncurses package
+- FindHSPELL: Version support
+- FindJava: Error if version is not found only when REQUIRED
+- FindJava: Support runtime and development components (#9840)
+- FindKDE4: Prefer kdeconfig results over system paths
+- FindMPEG: Check for 'vo' library
+- FindPNG: Support png 1.4 versioned lib names (#10551)
+- FindPkgConfig: Add QUIET keyword to pkgconfig macros (see #10469)
+- FindZLIB: GnuWin32 support, version support (#5588)
+- FindwxWidget: Fix CXX flag parsing (#10209)
+- Fix .pdb name attribute in VS project files (#10614)
+- Fix CodeBlocks to work with Fortran-only
+- Fix VS 2010 custom commands (#10503)
+- Fix VS 6 support for COMPILE_DEFINITIONS_MINSIZEREL (#10700)
+- Fix cross-compiling from Linux to iPhone (#10526)
+- Fix documentation typos
+- Fix g95 Fortran compiler support
+- GetPrerequisites: Provide an override hook
+- Handle non-ASCII terminators in file(STRINGS)
+- Module fixes: FindPythonLibs, FindQt4, FindX11, FindwxWidgets
+- PathScale Fortran compiler tool detection
+- Qt4 OpenGL framework fix
+- Qt4ConfigDependentSettings.cmake Qt4Macros.cmake UseQt4.cmake
+- Recognize ARM ABI/EABI with GNU compilers
+- Search basic directories on "Generic" platform
+- Set MSVC* variables consistently on all generators, and test
+- Support VS 10 Express (related to #10670)
+- Support compression with 'cmake -E tar'
+- Support multiple arguments in CC,CXX,FC environment variables
+- Support per-platform initial ASM language flags (#10577)
+- Use Fortran ABI detection results conservatively
+- Use libarchive to replace the unmaintained libtar
+- UseQt4: Support QtMultimedia (#10675)
+- bootstrap: Fix make tool detection (#10544)
+- cmake-gui: Add simple grouped view
+- cmake-gui: Support build tree under symlink (#9975)
+- Cleanup modules FindASPELL, FindAVIFile, FindBZip2, FindDart,
+  FindEXPAT, FindGCCXML, FindGLU, FindHSPELL, FindJasper, FindLibXml2,
+  FindLibXslt, FindMPEG, FindOpenAL, FindPhysFS, FindQuickTime,
+  FindSubversion, FindZLIB.
+
 Changes in CMake 2.8.1
 - Fix failing test on cygwin
 - Add a new serach path for MPICH2
