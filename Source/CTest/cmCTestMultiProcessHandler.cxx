@@ -453,24 +453,15 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
   for(TestMap::iterator i = this->Tests.begin();
       i != this->Tests.end(); ++i)
     {
-    //We only want to schedule them by cost in a parallel situation
-    if(this->ParallelLevel > 1)
+    std::string name = this->Properties[i->first]->Name;
+    if(std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
+       name) != this->LastTestsFailed.end())
       {
-      std::string name = this->Properties[i->first]->Name;
-      if(std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
-         name) != this->LastTestsFailed.end())
-        {
-        this->TestCosts[FLT_MAX].insert(i->first);
-        }
-      else
-        {
-        this->TestCosts[this->Properties[i->first]->Cost].insert(i->first);
-        }
+      this->TestCosts[FLT_MAX].insert(i->first);
       }
-    else //we ignore their cost
+    else
       {
-      this->TestCosts[this->Tests.size()
-        - this->Properties[i->first]->Index].insert(i->first);
+      this->TestCosts[this->Properties[i->first]->Cost].insert(i->first);
       }
     }
 }
