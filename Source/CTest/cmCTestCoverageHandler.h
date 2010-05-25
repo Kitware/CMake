@@ -20,8 +20,17 @@
 #include <cmsys/RegularExpression.hxx>
 
 class cmGeneratedFileStream;
-class cmCTestCoverageHandlerContainer;
-
+class cmCTestCoverageHandlerContainer
+{
+public:
+  int Error;
+  std::string SourceDir;
+  std::string BinaryDir;
+  typedef std::vector<int> SingleFileCoverageVector;
+  typedef std::map<std::string, SingleFileCoverageVector> TotalCoverageMap;
+  TotalCoverageMap TotalCoverage;
+  std::ostream* OFS;
+};
 /** \class cmCTestCoverageHandler
  * \brief A class that handles coverage computaiton for ctest
  *
@@ -59,6 +68,9 @@ private:
   int HandleGCovCoverage(cmCTestCoverageHandlerContainer* cont);
   void FindGCovFiles(std::vector<std::string>& files);
 
+  //! Handle coverage using xdebug php coverage
+  int HandlePHPCoverage(cmCTestCoverageHandlerContainer* cont);
+
   //! Handle coverage using Bullseye
   int HandleBullseyeCoverage(cmCTestCoverageHandlerContainer* cont);
   int RunBullseyeSourceSummary(cmCTestCoverageHandlerContainer* cont);
@@ -94,54 +106,10 @@ private:
 
   std::set<std::string> FindUncoveredFiles(
     cmCTestCoverageHandlerContainer* cont);
-
-  struct cmCTestCoverage
-    {
-    cmCTestCoverage()
-      {
-      this->AbsolutePath = "";
-      this->FullPath = "";
-      this->Covered = false;
-      this->Tested = 0;
-      this->UnTested = 0;
-      this->Lines.clear();
-      this->Show = false;
-      }
-    cmCTestCoverage(const cmCTestCoverage& rhs) :
-      AbsolutePath(rhs.AbsolutePath),
-      FullPath(rhs.FullPath),
-      Covered(rhs.Covered),
-      Tested(rhs.Tested),
-      UnTested(rhs.UnTested),
-      Lines(rhs.Lines),
-      Show(rhs.Show)
-      {
-      }
-    cmCTestCoverage& operator=(const cmCTestCoverage& rhs)
-      {
-      this->AbsolutePath = rhs.AbsolutePath;
-      this->FullPath = rhs.FullPath;
-      this->Covered = rhs.Covered;
-      this->Tested = rhs.Tested;
-      this->UnTested = rhs.UnTested;
-      this->Lines = rhs.Lines;
-      this->Show = rhs.Show;
-      return *this;
-      }
-    std::string      AbsolutePath;
-    std::string      FullPath;
-    bool             Covered;
-    int              Tested;
-    int              UnTested;
-    std::vector<int> Lines;
-    bool             Show;
-    };
-
   std::vector<cmStdString> CustomCoverageExclude;
   std::vector<cmsys::RegularExpression> CustomCoverageExcludeRegex;
   std::vector<cmStdString> ExtraCoverageGlobs;
 
-  typedef std::map<std::string, cmCTestCoverage> CoverageMap;
 
   // Map from source file to label ids.
   class LabelSet: public std::set<int> {};
