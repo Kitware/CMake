@@ -157,6 +157,7 @@ function(_ep_parse_arguments f name ns args)
         if(NOT (key STREQUAL "COMMAND")
           AND NOT (key STREQUAL "CVS_MODULE")
           AND NOT (key STREQUAL "DEPENDS")
+          AND NOT (key STREQUAL "DOWNLOAD_COMMAND")
           )
           message(AUTHOR_WARNING "unknown ${f} keyword: ${arg}")
         endif()
@@ -793,7 +794,7 @@ endfunction(_ep_add_patch_command)
 
 # TODO: Make sure external projects use the proper compiler
 function(_ep_add_configure_command name)
-  ExternalProject_Get_Property(${name} source_dir binary_dir)
+  ExternalProject_Get_Property(${name} source_dir binary_dir tmp_dir)
 
   _ep_get_configuration_subdir_suffix(cfgdir)
 
@@ -826,6 +827,16 @@ function(_ep_add_configure_command name)
       list(APPEND cmd "-G${CMAKE_GENERATOR}" "${source_dir}")
     endif()
   endif()
+
+  # If anything about the configure command changes, (command itself, cmake
+  # used, cmake args or cmake generator) then re-run the configure step.
+  # Fixes issue http://public.kitware.com/Bug/view.php?id=10258
+  #
+  if(NOT EXISTS ${tmp_dir}/${name}-cfgcmd.txt.in)
+    file(WRITE ${tmp_dir}/${name}-cfgcmd.txt.in "cmd='@cmd@'\n")
+  endif()
+  configure_file(${tmp_dir}/${name}-cfgcmd.txt.in ${tmp_dir}/${name}-cfgcmd.txt)
+  list(APPEND file_deps ${tmp_dir}/${name}-cfgcmd.txt)
 
   ExternalProject_Add_Step(${name} configure
     COMMAND ${cmd}
