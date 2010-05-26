@@ -246,7 +246,7 @@ message(STATUS \"downloading... done\")
 endfunction(_ep_write_downloadfile_script)
 
 
-function(_ep_write_extractfile_script script_filename filename tmp directory)
+function(_ep_write_extractfile_script script_filename filename directory)
   set(args "")
 
   if(filename MATCHES ".tar$")
@@ -270,7 +270,6 @@ function(_ep_write_extractfile_script script_filename filename tmp directory)
 "# Make file names absolute:
 #
 get_filename_component(filename \"${filename}\" ABSOLUTE)
-get_filename_component(tmp \"${tmp}\" ABSOLUTE)
 get_filename_component(directory \"${directory}\" ABSOLUTE)
 
 message(STATUS \"extracting...
@@ -279,11 +278,11 @@ message(STATUS \"extracting...
 
 # Prepare a space for extracting:
 #
-set(i 1)
-while(EXISTS \"\${tmp}/extract\${i}\")
+set(i 1234)
+while(EXISTS \"\${directory}/../ex\${i}\")
   math(EXPR i \"\${i} + 1\")
 endwhile()
-set(ut_dir \"\${tmp}/extract\${i}\")
+set(ut_dir \"\${directory}/../ex\${i}\")
 file(MAKE_DIRECTORY \"\${ut_dir}\")
 
 # Extract it:
@@ -308,10 +307,12 @@ if(NOT n EQUAL 1 OR NOT IS_DIRECTORY \"\${contents}\")
   set(contents \"\${ut_dir}\")
 endif()
 
-# Copy \"the one\" directory to the final directory:
+# Move \"the one\" directory to the final directory:
 #
-message(STATUS \"extracting... [copy]\")
-file(COPY \"\${contents}/\" DESTINATION \${directory})
+message(STATUS \"extracting... [rename]\")
+file(REMOVE_RECURSE \${directory})
+get_filename_component(contents \${contents} ABSOLUTE)
+file(RENAME \${contents} \${directory})
 
 # Clean up:
 #
@@ -716,7 +717,7 @@ function(_ep_add_download_command name)
         set(comment "Performing download step (extract) for '${name}'")
       endif()
       # TODO: Support other archive formats.
-      _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${file}" "${tmp_dir}" "${source_dir}")
+      _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${file}" "${source_dir}")
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
     endif()
   else()
