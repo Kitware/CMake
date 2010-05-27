@@ -99,6 +99,15 @@ if(is_cvs_checkout AND CVS_EXECUTABLE)
   message("This is a cvs checkout, using cvs to verify source tree....")
   message("")
 
+  execute_process(COMMAND ${CVS_EXECUTABLE} --version
+    WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+    OUTPUT_VARIABLE version_output
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message("=== output of 'cvs --version' ===")
+  message("${version_output}")
+  message("=== end output ===")
+  message("")
+
   file(READ "${CMake_SOURCE_DIR}/CVS/Root" contents)
   message("=== content of CVS/Root ===")
   message("${contents}")
@@ -125,6 +134,15 @@ if(is_git_checkout AND GIT_EXECUTABLE)
   #
   message("=============================================================================")
   message("This is a git checkout, using git to verify source tree....")
+  message("")
+
+  execute_process(COMMAND ${GIT_EXECUTABLE} --version
+    WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+    OUTPUT_VARIABLE version_output
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message("=== output of 'git --version' ===")
+  message("${version_output}")
+  message("=== end output ===")
   message("")
 
   execute_process(COMMAND ${GIT_EXECUTABLE} branch -a
@@ -159,15 +177,20 @@ if(cmd)
 
   set(ENV{HOME} "${original_ENV_HOME}")
 
-  if(NOT rv STREQUAL 0)
-    message(FATAL_ERROR "error: ${cmd} attempt failed... (see output above)")
-  endif()
-
   message("Results of running ${cmd}")
   message("rv='${rv}'")
   message("ov='${ov}'")
   message("ev='${ev}'")
   message("")
+
+  if(NOT rv STREQUAL 0)
+    if(is_git_checkout AND (rv STREQUAL "1") AND ("${version_output}" STREQUAL "git version 1.5.5"))
+      # git 1.5.5 returns "1" from a "nothing is changed" git status call...
+      # (perhaps broader logic is required here... we'll see on tomorrow's dashboard...)
+    else()
+      message(FATAL_ERROR "error: ${cmd} attempt failed... (see output above)")
+    endif()
+  endif()
 else()
   message(FATAL_ERROR "error: no COMMAND to run to analyze source tree...")
 endif()
