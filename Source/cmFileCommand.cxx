@@ -2510,6 +2510,9 @@ namespace{
     cURLProgressHelper *helper =
       reinterpret_cast<cURLProgressHelper *>(clientp);
 
+    static_cast<void>(ultotal);
+    static_cast<void>(ulnow);
+
     std::string status;
     if (helper->UpdatePercentage(dlnow, dltotal, status))
       {
