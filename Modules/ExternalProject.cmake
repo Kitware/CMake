@@ -17,6 +17,7 @@
 #    [SVN_REPOSITORY url]        # URL of Subversion repo
 #    [SVN_REVISION rev]          # Revision to checkout from Subversion repo
 #    [URL /.../src.tgz]          # Full path or URL of source
+#    [URL_MD5 md5]               # MD5 checksum of file at URL
 #    [TIMEOUT seconds]           # Time allowed for file download operations
 #   #--Update/Patch step----------
 #    [UPDATE_COMMAND cmd...]     # Source work-tree update command
@@ -111,19 +112,19 @@
 #  License text for the above reference.)
 
 # Pre-compute a regex to match documented keywords for each command.
-file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines LIMIT_COUNT 100
-     REGEX "^#  (  \\[[A-Z_]+ [^]]*\\] +#.*$|[A-Za-z_]+\\()")
+file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines LIMIT_COUNT 103
+     REGEX "^#  (  \\[[A-Z0-9_]+ [^]]*\\] +#.*$|[A-Za-z0-9_]+\\()")
 foreach(line IN LISTS lines)
-  if("${line}" MATCHES "^#  [A-Za-z_]+\\(")
+  if("${line}" MATCHES "^#  [A-Za-z0-9_]+\\(")
     if(_ep_func)
       set(_ep_keywords_${_ep_func} "${_ep_keywords_${_ep_func}})$")
     endif()
-    string(REGEX REPLACE "^#  ([A-Za-z_]+)\\(.*" "\\1" _ep_func "${line}")
+    string(REGEX REPLACE "^#  ([A-Za-z0-9_]+)\\(.*" "\\1" _ep_func "${line}")
     #message("function [${_ep_func}]")
     set(_ep_keywords_${_ep_func} "^(")
     set(_ep_keyword_sep)
   else()
-    string(REGEX REPLACE "^#    \\[([A-Z_]+) .*" "\\1" _ep_key "${line}")
+    string(REGEX REPLACE "^#    \\[([A-Z0-9_]+) .*" "\\1" _ep_key "${line}")
     #message("  keyword [${_ep_key}]")
     set(_ep_keywords_${_ep_func}
       "${_ep_keywords_${_ep_func}}${_ep_keyword_sep}${_ep_key}")
@@ -148,7 +149,7 @@ function(_ep_parse_arguments f name ns args)
   foreach(arg IN LISTS args)
     set(is_value 1)
 
-    if(arg MATCHES "^[A-Z][A-Z_][A-Z_]+$" AND
+    if(arg MATCHES "^[A-Z][A-Z0-9_][A-Z0-9_]+$" AND
         NOT ((arg STREQUAL "${key}") AND (key STREQUAL "COMMAND")) AND
         NOT arg MATCHES "^(TRUE|FALSE)$")
       if(_ep_keywords_${f} AND arg MATCHES "${_ep_keywords_${f}}")
@@ -203,13 +204,19 @@ define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
   )
 
 
-function(_ep_write_downloadfile_script script_filename remote local timeout)
+function(_ep_write_downloadfile_script script_filename remote local timeout md5)
   if(timeout)
     set(timeout_args TIMEOUT ${timeout})
     set(timeout_msg "${timeout} seconds")
   else()
     set(timeout_args "# no TIMEOUT")
     set(timeout_msg "none")
+  endif()
+
+  if(md5)
+    set(md5_args EXPECTED_MD5 ${md5})
+  else()
+    set(md5_args "# no EXPECTED_MD5")
   endif()
 
   file(WRITE ${script_filename}
@@ -221,6 +228,8 @@ function(_ep_write_downloadfile_script script_filename remote local timeout)
 file(DOWNLOAD
   \"${remote}\"
   \"${local}\"
+  SHOW_PROGRESS
+  ${md5_args}
   ${timeout_args}
   STATUS status
   LOG log)
@@ -241,6 +250,51 @@ message(STATUS \"downloading... done\")
 )
 
 endfunction(_ep_write_downloadfile_script)
+
+
+function(_ep_write_verifyfile_script script_filename local md5)
+  file(WRITE ${script_filename}
+"message(STATUS \"verifying file...
+     file='${local}'\")
+
+set(verified 0)
+
+# If an expected md5 checksum exists, compare against it:
+#
+if(NOT \"${md5}\" STREQUAL \"\")
+  execute_process(COMMAND \${CMAKE_COMMAND} -E md5sum \"${local}\"
+    OUTPUT_VARIABLE ov
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE rv)
+
+  if(NOT rv EQUAL 0)
+    message(FATAL_ERROR \"error: computing md5sum of '${local}' failed\")
+  endif()
+
+  string(REGEX MATCH \"^([0-9A-Fa-f]+)\" md5_actual \"\${ov}\")
+
+  string(TOLOWER \"\${md5_actual}\" md5_actual)
+  string(TOLOWER \"${md5}\" md5)
+
+  if(NOT \"\${md5}\" STREQUAL \"\${md5_actual}\")
+    message(FATAL_ERROR \"error: md5sum of '${local}' does not match expected value
+  md5_expected: \${md5}
+    md5_actual: \${md5_actual}
+\")
+  endif()
+
+  set(verified 1)
+endif()
+
+if(verified)
+  message(STATUS \"verifying file... done\")
+else()
+  message(STATUS \"verifying file... warning: did not verify file - no URL_MD5 checksum argument? corrupt file?\")
+endif()
+"
+)
+
+endfunction(_ep_write_verifyfile_script)
 
 
 function(_ep_write_extractfile_script script_filename filename tmp directory)
@@ -678,9 +732,10 @@ function(_ep_add_download_command name)
     list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
   elseif(url)
     get_filename_component(work_dir "${source_dir}" PATH)
+    get_property(md5 TARGET ${name} PROPERTY _EP_URL_MD5)
     set(repository "external project URL")
     set(module "${url}")
-    set(tag "")
+    set(tag "${md5}")
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-urlinfo.txt"
@@ -701,14 +756,16 @@ function(_ep_add_download_command name)
         endif()
         set(file ${download_dir}/${fname})
         get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
-        _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake" "${url}" "${file}" "${timeout}")
+        _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake" "${url}" "${file}" "${timeout}" "${md5}")
         set(cmd ${CMAKE_COMMAND} -P ${stamp_dir}/download-${name}.cmake
           COMMAND)
-        set(comment "Performing download step (download and extract) for '${name}'")
+        set(comment "Performing download step (download, verify and extract) for '${name}'")
       else()
         set(file "${url}")
-        set(comment "Performing download step (extract) for '${name}'")
+        set(comment "Performing download step (verify and extract) for '${name}'")
       endif()
+      _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${md5}")
+      list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake)
       # TODO: Support other archive formats.
       _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${file}" "${tmp_dir}" "${source_dir}")
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
