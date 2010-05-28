@@ -184,9 +184,9 @@ if(cmd)
   message("")
 
   if(NOT rv STREQUAL 0)
-    if(is_git_checkout AND (rv STREQUAL "1") AND ("${version_output}" STREQUAL "git version 1.5.5"))
-      # git 1.5.5 returns "1" from a "nothing is changed" git status call...
-      # (perhaps broader logic is required here... we'll see on tomorrow's dashboard...)
+    if(is_git_checkout AND (rv STREQUAL "1"))
+      # Many builds of git return "1" from a "nothing is changed" git status call...
+      # Do not fail with an error for rv==1 with git...
     else()
       message(FATAL_ERROR "error: ${cmd} attempt failed... (see output above)")
     endif()
