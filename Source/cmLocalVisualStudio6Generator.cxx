@@ -1142,6 +1142,10 @@ void cmLocalVisualStudio6Generator
 
   // Get extra linker options for this target type.
   std::string extraLinkOptions;
+  std::string extraLinkOptionsDebug;
+  std::string extraLinkOptionsRelease;
+  std::string extraLinkOptionsMinSizeRel;
+  std::string extraLinkOptionsRelWithDebInfo;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
     extraLinkOptions = 
@@ -1164,6 +1168,33 @@ void cmLocalVisualStudio6Generator
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
     }
+
+  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_DEBUG"))
+    {
+    extraLinkOptionsDebug += " ";
+    extraLinkOptionsDebug += targetLinkFlags;
+    }
+
+  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_RELEASE"))
+    {
+    extraLinkOptionsRelease += " ";
+    extraLinkOptionsRelease += targetLinkFlags;
+    }
+
+  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_MINSIZEREL"))
+    {
+    extraLinkOptionsMinSizeRel += " ";
+    extraLinkOptionsMinSizeRel += targetLinkFlags;
+    }
+
+  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_RELWITHDEBINFO"))
+    {
+    extraLinkOptionsRelWithDebInfo += " ";
+    extraLinkOptionsRelWithDebInfo += targetLinkFlags;
+    }
+
+
+
 
   // Get standard libraries for this language.
   if(targetBuilds)
@@ -1259,13 +1290,21 @@ void cmLocalVisualStudio6Generator
      target.GetType() == cmTarget::SHARED_LIBRARY ||
      target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    this->ComputeLinkOptions(target, "Debug", extraLinkOptions,
+    extraLinkOptionsDebug =
+      extraLinkOptions + " " + extraLinkOptionsDebug;
+    extraLinkOptionsRelease =
+      extraLinkOptions + " " + extraLinkOptionsRelease;
+    extraLinkOptionsMinSizeRel =
+      extraLinkOptions + " " + extraLinkOptionsMinSizeRel;
+    extraLinkOptionsRelWithDebInfo =
+      extraLinkOptions + " " + extraLinkOptionsRelWithDebInfo;
+    this->ComputeLinkOptions(target, "Debug", extraLinkOptionsDebug,
                              optionsDebug);
-    this->ComputeLinkOptions(target, "Release", extraLinkOptions,
+    this->ComputeLinkOptions(target, "Release", extraLinkOptionsRelease,
                              optionsRelease);
-    this->ComputeLinkOptions(target, "MinSizeRel", extraLinkOptions,
+    this->ComputeLinkOptions(target, "MinSizeRel", extraLinkOptionsMinSizeRel,
                              optionsMinSizeRel);
-    this->ComputeLinkOptions(target, "RelWithDebInfo", extraLinkOptions,
+    this->ComputeLinkOptions(target, "RelWithDebInfo", extraLinkOptionsRelWithDebInfo,
                              optionsRelWithDebInfo);
     }
 
@@ -1519,41 +1558,18 @@ void cmLocalVisualStudio6Generator
       std::string flagVar = baseFlagVar + "_RELEASE";
       flagsRelease = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
-      if(const char* targetLinkFlags = 
-         target.GetProperty("LINK_FLAGS_RELEASE"))
-        {
-        flagsRelease += targetLinkFlags;
-        flagsRelease += " ";
-        }
+
       flagVar = baseFlagVar + "_MINSIZEREL";
       flagsMinSize = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
-      if(const char* targetLinkFlags = 
-         target.GetProperty("LINK_FLAGS_MINSIZEREL"))
-        {
-        flagsMinSize += targetLinkFlags;
-        flagsMinSize += " ";
-        }
-      
+
       flagVar = baseFlagVar + "_DEBUG";
       flagsDebug = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
-      if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_DEBUG"))
-        {
-        flagsDebug += targetLinkFlags;
-        flagsDebug += " ";
-        }
 
       flagVar = baseFlagVar + "_RELWITHDEBINFO";
       flagsDebugRel = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
-      if(const char* targetLinkFlags = 
-         target.GetProperty("LINK_FLAGS_RELWITHDEBINFO"))
-        {
-        flagsDebugRel += targetLinkFlags;
-        flagsDebugRel += " ";
-        }
-
       }
     
     // if unicode is not found, then add -D_MBCS
