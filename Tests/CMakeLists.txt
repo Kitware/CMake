@@ -202,9 +202,6 @@ IF(BUILD_TESTING)
   ADD_LINK_FLAGS_TEST(dll_config lib_config)
   ADD_LINK_FLAGS_TEST(exe_config dll_config)
 
-  # STATIC_LIBRARY_FLAGS_<CONFIG> not yet implemented
-  SET_TESTS_PROPERTIES(LinkFlags-lib_config PROPERTIES WILL_FAIL 1)
-
   # If we are running right now with a UnixMakefiles based generator,
   # build the "Simple" test with the ExtraGenerators, if available
   # This doesn't test whether the generated project files work (unfortunately), 

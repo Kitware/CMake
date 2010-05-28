@@ -1023,22 +1023,27 @@ WriteRCOptions(std::string const& ,
 }
 
 
-void cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const&
-                                                      )
+void
+cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
 {
   if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
     return;
     }
-  if(const char* libflags = this->Target
-     ->GetProperty("STATIC_LIBRARY_FLAGS"))
+  const char* libflags = this->Target->GetProperty("STATIC_LIBRARY_FLAGS");
+  std::string flagsConfigVar = "STATIC_LIBRARY_FLAGS_";
+  flagsConfigVar += cmSystemTools::UpperCase(config);
+  const char* libflagsConfig =
+    this->Target->GetProperty(flagsConfigVar.c_str());
+  if(libflags || libflagsConfig)
     {
     this->WriteString("<Lib>\n", 2);
     cmVisualStudioGeneratorOptions
       libOptions(this->LocalGenerator, 10,
                  cmVisualStudioGeneratorOptions::Linker,
                  cmVS10LibFlagTable, 0, this);
-    libOptions.Parse(libflags);  
+    libOptions.Parse(libflags?libflags:"");
+    libOptions.Parse(libflagsConfig?libflagsConfig:"");
     libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
     libOptions.OutputFlagMap(*this->BuildFileStream, "      "); 
     this->WriteString("</Lib>\n", 2);

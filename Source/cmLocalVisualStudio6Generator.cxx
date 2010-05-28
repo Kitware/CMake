@@ -1381,11 +1381,43 @@ void cmLocalVisualStudio6Generator
     cmSystemTools::Error("Error Reading ", this->DSPHeaderTemplate.c_str());
     }
   std::string staticLibOptions;
+  std::string staticLibOptionsDebug;
+  std::string staticLibOptionsRelease;
+  std::string staticLibOptionsMinSizeRel;
+  std::string staticLibOptionsRelWithDebInfo;
   if(target.GetType() == cmTarget::STATIC_LIBRARY )
     { 
     if(const char* libflags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
       {
       staticLibOptions = libflags;
+      staticLibOptionsDebug = libflags;
+      staticLibOptionsRelease = libflags;
+      staticLibOptionsMinSizeRel = libflags;
+      staticLibOptionsRelWithDebInfo = libflags;
+      }
+    if(const char* libflagsDebug =
+       target.GetProperty("STATIC_LIBRARY_FLAGS_DEBUG"))
+      {
+      staticLibOptionsDebug += " ";
+      staticLibOptionsDebug = libflagsDebug;
+      }
+    if(const char* libflagsRelease =
+       target.GetProperty("STATIC_LIBRARY_FLAGS_RELEASE"))
+      {
+      staticLibOptionsRelease += " ";
+      staticLibOptionsRelease = libflagsRelease;
+      }
+    if(const char* libflagsMinSizeRel =
+       target.GetProperty("STATIC_LIBRARY_FLAGS_MINSIZEREL"))
+      {
+      staticLibOptionsMinSizeRel += " ";
+      staticLibOptionsMinSizeRel = libflagsMinSizeRel;
+      }
+    if(const char* libflagsRelWithDebInfo =
+       target.GetProperty("STATIC_LIBRARY_FLAGS_RELWITHDEBINFO"))
+      {
+      staticLibOptionsRelWithDebInfo += " ";
+      staticLibOptionsRelWithDebInfo = libflagsRelWithDebInfo;
       }
     }
 
@@ -1417,6 +1449,14 @@ void cmLocalVisualStudio6Generator
                                  mfcFlag);
     if(target.GetType() == cmTarget::STATIC_LIBRARY )
       {
+      cmSystemTools::ReplaceString(line, "CM_STATIC_LIB_ARGS_DEBUG",
+                                   staticLibOptionsDebug.c_str());
+      cmSystemTools::ReplaceString(line, "CM_STATIC_LIB_ARGS_RELEASE",
+                                   staticLibOptionsRelease.c_str());
+      cmSystemTools::ReplaceString(line, "CM_STATIC_LIB_ARGS_MINSIZEREL",
+                                   staticLibOptionsMinSizeRel.c_str());
+      cmSystemTools::ReplaceString(line, "CM_STATIC_LIB_ARGS_RELWITHDEBINFO",
+                                   staticLibOptionsRelWithDebInfo.c_str());
       cmSystemTools::ReplaceString(line, "CM_STATIC_LIB_ARGS",
                                    staticLibOptions.c_str());
       } 
