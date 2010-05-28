@@ -860,6 +860,13 @@ OutputLinkIncremental(std::string const& configName)
     flags += " ";
     flags += targetLinkFlags;
     }
+  std::string flagsProp = "LINK_FLAGS_";
+  flagsProp += CONFIG;
+  if(const char* flagsConfig = this->Target->GetProperty(flagsProp.c_str()))
+    {
+    flags += " ";
+    flags += flagsConfig;
+    }
   if(flags.find("INCREMENTAL:NO") != flags.npos)
     {
     incremental = "false";
@@ -1098,6 +1105,13 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     {
     flags += " ";
     flags += targetLinkFlags;
+    }
+  std::string flagsProp = "LINK_FLAGS_";
+  flagsProp += CONFIG;
+  if(const char* flagsConfig = this->Target->GetProperty(flagsProp.c_str()))
+    {
+    flags += " ";
+    flags += flagsConfig;
     }
   cmVisualStudioGeneratorOptions
     linkOptions(this->LocalGenerator, 10,
