@@ -174,6 +174,34 @@ IF(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
 
+  ADD_TEST(LinkFlags-prepare
+    ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/LinkFlags"
+    "${CMake_BINARY_DIR}/Tests/LinkFlags"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-project LinkFlags
+    --build-target LinkFlags
+    --build-options -DTEST_CONFIG=\${CTEST_CONFIGURATION_TYPE}
+    )
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LinkFlags")
+
+  MACRO(ADD_LINK_FLAGS_TEST name depends)
+    ADD_TEST(LinkFlags-${name}
+      ${CMAKE_CMAKE_COMMAND} --build "${CMake_BINARY_DIR}/Tests/LinkFlags"
+      --target LinkFlags_${name} --config \${CTEST_CONFIGURATION_TYPE}
+      )
+    SET_TESTS_PROPERTIES(LinkFlags-${name} PROPERTIES
+      PASS_REGULAR_EXPRESSION "BADFLAG" DEPENDS LinkFlags-${depends})
+  ENDMACRO()
+  ADD_LINK_FLAGS_TEST(lib prepare)
+  ADD_LINK_FLAGS_TEST(dll lib)
+  ADD_LINK_FLAGS_TEST(exe dll)
+  ADD_LINK_FLAGS_TEST(lib_config exe)
+  ADD_LINK_FLAGS_TEST(dll_config lib_config)
+  ADD_LINK_FLAGS_TEST(exe_config dll_config)
+
   # If we are running right now with a UnixMakefiles based generator,
   # build the "Simple" test with the ExtraGenerators, if available
   # This doesn't test whether the generated project files work (unfortunately), 
