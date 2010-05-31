@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 project(ExternalProjectTest NONE)
 
 include(ExternalProject)
@@ -139,6 +139,56 @@ ExternalProject_Add(${proj}
 )
 
 
+# Local BZ2:
+#
+# (The bz2 tests are here just to verify that the bz2 decompression is executed
+#  during a test suite run... The configure and build commands are set to
+#  nothing to make the test quicker. To make this more complete, I should add
+#  a diff between this and the TGZ source tree since that one does build...)
+#
+set(proj TutorialStep1-LocalBZ2)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tar.bz2"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+set(proj TutorialStep1-LocalNoDirBZ2)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tar.bz2"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+
+# Local ZIP:
+#
+# (The zip tests are here just to verify that the zip decompression is executed
+#  during a test suite run... The configure and build commands are set to
+#  nothing to make the test quicker. To make this more complete, I should add
+#  a diff between this and the TGZ source tree since that one does build...)
+#
+set(proj TutorialStep1-LocalZIP)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.zip"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+set(proj TutorialStep1-LocalNoDirZIP)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.zip"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+
+# CVS-based tests:
+#
 set(do_cvs_tests 0)
 
 if(CVS_EXECUTABLE)
@@ -215,6 +265,8 @@ if(do_cvs_tests)
 endif()
 
 
+# SVN-based tests:
+#
 set(do_svn_tests 0)
 
 if(Subversion_SVN_EXECUTABLE)
