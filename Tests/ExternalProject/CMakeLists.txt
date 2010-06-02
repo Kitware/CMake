@@ -218,7 +218,7 @@ if(do_cvs_tests)
     URL ${CMAKE_CURRENT_SOURCE_DIR}/cvsrepo.tgz
     URL_MD5 55fc85825ffdd9ed2597123c68b79f7e
     BUILD_COMMAND ""
-    CONFIGURE_COMMAND ${CVS_EXECUTABLE} --version
+    CONFIGURE_COMMAND "${CVS_EXECUTABLE}" --version
     INSTALL_COMMAND ""
   )
 
@@ -317,7 +317,7 @@ if(do_svn_tests)
     URL ${CMAKE_CURRENT_SOURCE_DIR}/svnrepo.tgz
     URL_MD5 2f468be4ed1fa96377fca0cc830819c4
     BUILD_COMMAND ""
-    CONFIGURE_COMMAND ${Subversion_SVN_EXECUTABLE} --version
+    CONFIGURE_COMMAND "${Subversion_SVN_EXECUTABLE}" --version
     INSTALL_COMMAND ""
   )
 
@@ -364,6 +364,19 @@ set(do_git_tests 0)
 
 if(git_EXECUTABLE)
   set(do_git_tests 1)
+
+  execute_process(
+    COMMAND "${git_EXECUTABLE}" --version
+    OUTPUT_VARIABLE ov
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  string(REGEX REPLACE "^git version (.+)$" "\\1" git_version "${ov}")
+  message(STATUS "git_version='${git_version}'")
+
+  if(git_version VERSION_LESS 1.6.5)
+    message(STATUS "No ExternalProject git tests with git client less than version 1.6.5")
+    set(do_git_tests 0)
+  endif()
 endif()
 
 
@@ -378,7 +391,7 @@ if(do_git_tests)
     SOURCE_DIR ${local_git_repo}
     URL ${CMAKE_CURRENT_SOURCE_DIR}/gitrepo.tgz
     BUILD_COMMAND ""
-    CONFIGURE_COMMAND ${git_EXECUTABLE} --version
+    CONFIGURE_COMMAND "${git_EXECUTABLE}" --version
     INSTALL_COMMAND ""
   )
 
