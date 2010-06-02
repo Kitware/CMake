@@ -5,6 +5,7 @@ include(ExternalProject)
 
 find_package(CVS)
 find_package(Subversion)
+find_program(git_EXECUTABLE NAMES git.cmd git eg.cmd eg DOC "git command line client")
 
 set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
 set(binary_base "${base}/Build")
@@ -36,8 +37,6 @@ if(NOT DEFINED can_build_tutorial_step5)
     set(can_build_tutorial_step5 0)
   endif()
 endif()
-
-message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
 
 
 # Empty projects that test all the known ExternalProject_Add argument key words:
@@ -361,6 +360,67 @@ if(do_svn_tests)
 endif()
 
 
+set(do_git_tests 0)
+
+if(git_EXECUTABLE)
+  set(do_git_tests 1)
+endif()
+
+
+if(do_git_tests)
+  set(local_git_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/GIT")
+
+  # Unzip/untar the git repository in our source folder so that other
+  # projects below may use it to test git args of ExternalProject_Add
+  #
+  set(proj SetupLocalGITRepository)
+  ExternalProject_Add(${proj}
+    SOURCE_DIR ${local_git_repo}
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/gitrepo.tgz
+    BUILD_COMMAND ""
+    CONFIGURE_COMMAND ${git_EXECUTABLE} --version
+    INSTALL_COMMAND ""
+  )
+
+  # git by commit id:
+  #
+  set(proj TutorialStep1-GIT-byhash)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    GIT_TAG d1970730310fe8bc07e73f15dc570071f9f9654a
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
+  )
+
+  # git by explicit branch/tag name:
+  #
+  set(proj TutorialStep1-GIT-bytag)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    GIT_TAG "origin/master"
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
+  )
+
+  # Live git / master (no GIT_TAG):
+  #
+  set(proj TutorialStep1-GIT-master)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
+  )
+endif()
+
+
 # Test the testable built/installed products:
 #
 enable_testing()
@@ -425,3 +485,10 @@ if(can_build_tutorial_step5)
   set_property(TEST TutorialStep5-InstallTreeTest
     APPEND PROPERTY LABELS Step5 InstallTree)
 endif()
+
+
+message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
+message(STATUS "do_cvs_tests='${do_cvs_tests}'")
+message(STATUS "do_svn_tests='${do_svn_tests}'")
+message(STATUS "do_git_tests='${do_git_tests}'")
+message(STATUS "git_EXECUTABLE='${git_EXECUTABLE}'")
