@@ -749,15 +749,14 @@ function(_ep_add_download_command name)
     set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_revision} ${src_name})
     list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
   elseif(git_repository)
-    find_program(git_EXECUTABLE NAMES git.cmd git eg.cmd eg DOC "git command line client")
-    mark_as_advanced(git_EXECUTABLE)
-    if(NOT git_EXECUTABLE)
+    find_package(Git)
+    if(NOT GIT_EXECUTABLE)
       message(FATAL_ERROR "error: could not find git for clone of ${name}")
     endif()
 
     # The git submodule update '--recursive' flag requires git >= v1.6.5
     #
-    _ep_get_git_version("${git_EXECUTABLE}" git_version)
+    _ep_get_git_version("${GIT_EXECUTABLE}" git_version)
     if(git_version VERSION_LESS 1.6.5)
       message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': git_version='${git_version}'")
     endif()
@@ -784,7 +783,7 @@ function(_ep_add_download_command name)
     # The script will delete the source directory and then call git clone.
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
-      ${git_EXECUTABLE} ${git_repository} ${git_tag} ${src_name} ${work_dir}
+      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${src_name} ${work_dir}
       )
     set(comment "Performing download step (git clone) for '${name}'")
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
@@ -874,7 +873,7 @@ function(_ep_add_update_command name)
     set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_revision})
     set(always 1)
   elseif(git_repository)
-    if(NOT git_EXECUTABLE)
+    if(NOT GIT_EXECUTABLE)
       message(FATAL_ERROR "error: could not find git for fetch of ${name}")
     endif()
     set(work_dir ${source_dir})
@@ -883,9 +882,9 @@ function(_ep_add_update_command name)
     if(NOT git_tag)
       set(git_tag "master")
     endif()
-    set(cmd ${git_EXECUTABLE} fetch
-      COMMAND ${git_EXECUTABLE} checkout ${git_tag}
-      COMMAND ${git_EXECUTABLE} submodule update --recursive
+    set(cmd ${GIT_EXECUTABLE} fetch
+      COMMAND ${GIT_EXECUTABLE} checkout ${git_tag}
+      COMMAND ${GIT_EXECUTABLE} submodule update --recursive
       )
     set(always 1)
   endif()

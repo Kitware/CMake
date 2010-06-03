@@ -5,7 +5,7 @@ include(ExternalProject)
 
 find_package(CVS)
 find_package(Subversion)
-find_program(git_EXECUTABLE NAMES git.cmd git eg.cmd eg DOC "git command line client")
+find_package(Git)
 
 set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
 set(binary_base "${base}/Build")
@@ -302,11 +302,11 @@ endif()
 
 set(do_git_tests 0)
 
-if(git_EXECUTABLE)
+if(GIT_EXECUTABLE)
   set(do_git_tests 1)
 
   execute_process(
-    COMMAND "${git_EXECUTABLE}" --version
+    COMMAND "${GIT_EXECUTABLE}" --version
     OUTPUT_VARIABLE ov
     OUTPUT_STRIP_TRAILING_WHITESPACE
     )
@@ -328,10 +328,10 @@ if(do_git_tests)
   #
   set(proj SetupLocalGITRepository)
   ExternalProject_Add(${proj}
-    SOURCE_DIR ${local_git_repo}
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/GIT
     URL ${CMAKE_CURRENT_SOURCE_DIR}/gitrepo.tgz
     BUILD_COMMAND ""
-    CONFIGURE_COMMAND "${git_EXECUTABLE}" --version
+    CONFIGURE_COMMAND "${GIT_EXECUTABLE}" --version
     INSTALL_COMMAND ""
   )
 
@@ -444,4 +444,4 @@ message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
 message(STATUS "do_cvs_tests='${do_cvs_tests}'")
 message(STATUS "do_svn_tests='${do_svn_tests}'")
 message(STATUS "do_git_tests='${do_git_tests}'")
-message(STATUS "git_EXECUTABLE='${git_EXECUTABLE}'")
+message(STATUS "GIT_EXECUTABLE='${GIT_EXECUTABLE}'")
