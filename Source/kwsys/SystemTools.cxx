@@ -1924,21 +1924,9 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination,
   fin.close();
   fout.close();
 
-  // More checks.
-  struct stat statSource, statDestination;
-  statSource.st_size = 12345;
-  statDestination.st_size = 12345;
-  if(stat(source, &statSource) != 0)
+  if(!fout)
     {
     return false;
-    }
-  else if(stat(destination, &statDestination) != 0)
-    {
-    return false;
-    }
-  else if(statSource.st_size != statDestination.st_size)
-    {
-   return false;
     }
   if ( copyPermissions && perms )
     {
