@@ -973,6 +973,24 @@ cmLocalUnixMakefileGenerator3
                                       this->ConfigurationName.c_str());
     if (cmd.size())
       {
+      // Use "call " before any invocations of .bat or .cmd files
+      // invoked as custom commands in the WindowsShell.
+      //
+      bool useCall = false;
+
+      if (this->WindowsShell)
+        {
+        std::string suffix;
+        if (cmd.size() > 4)
+          {
+          suffix = cmSystemTools::LowerCase(cmd.substr(cmd.size()-4));
+          if (suffix == ".bat" || suffix == ".cmd")
+            {
+            useCall = true;
+            }
+          }
+        }
+
       cmSystemTools::ReplaceString(cmd, "/./", "/");
       // Convert the command to a relative path only if the current
       // working directory will be the start-output directory.
@@ -1043,6 +1061,10 @@ cmLocalUnixMakefileGenerator3
             cmd = hack_cmd;
             }
           }
+        }
+      if (useCall && launcher.empty())
+        {
+        cmd = "call " + cmd;
         }
       commands1.push_back(cmd);
       }
