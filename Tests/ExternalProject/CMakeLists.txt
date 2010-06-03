@@ -321,7 +321,7 @@ endif()
 
 
 if(do_git_tests)
-  set(local_git_repo "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/GIT")
+  set(local_git_repo "../../LocalRepositories/GIT")
 
   # Unzip/untar the git repository in our source folder so that other
   # projects below may use it to test git args of ExternalProject_Add
