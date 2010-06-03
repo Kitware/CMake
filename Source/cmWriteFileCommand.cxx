@@ -62,6 +62,8 @@ bool cmWriteFileCommand
     cmSystemTools::SetPermissions(fileName.c_str(),
 #if defined( _MSC_VER ) || defined( __MINGW32__ )
       mode | S_IWRITE
+#elif defined( __BORLANDC__ )
+      mode | S_IWUSR
 #else
       mode | S_IWUSR | S_IWGRP
 #endif
