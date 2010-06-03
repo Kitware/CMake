@@ -55,12 +55,19 @@ public:
   std::string Message;
 
 private:
-  std::string CurrentValue;
-  std::string CurrentTag;
+
+  std::vector<char> CurrentValue;
+
+  std::string GetCurrentValue()
+    {
+    std::string val;
+    val.assign(&this->CurrentValue[0], this->CurrentValue.size());
+    return val;
+    }
 
   virtual void StartElement(const char* name, const char** atts)
     {
-    this->CurrentValue = "";
+    this->CurrentValue.clear();
     if(strcmp(name, "cdash") == 0)
       {
       this->CDashVersion = this->FindAttribute(atts, "version");
@@ -76,12 +83,12 @@ private:
     {
     if(strcmp(name, "status") == 0)
       {
-      this->CurrentValue = cmSystemTools::UpperCase(this->CurrentValue);
-      if(this->CurrentValue == "OK" || this->CurrentValue == "SUCCESS")
+      std::string status = cmSystemTools::UpperCase(this->GetCurrentValue());
+      if(status == "OK" || status == "SUCCESS")
         {
         this->Status = STATUS_OK;
         }
-      else if(this->CurrentValue == "WARNING")
+      else if(status == "WARNING")
         {
         this->Status = STATUS_WARNING;
         }
@@ -92,15 +99,15 @@ private:
       }
     else if(strcmp(name, "filename") == 0)
       {
-      this->Filename = this->CurrentValue;
+      this->Filename = this->GetCurrentValue();
       }
     else if(strcmp(name, "md5") == 0)
       {
-      this->MD5 = this->CurrentValue;
+      this->MD5 = this->GetCurrentValue();
       }
     else if(strcmp(name, "message") == 0)
       {
-      this->Message = this->CurrentValue;
+      this->Message = this->GetCurrentValue();
       }
     }
 };
@@ -445,9 +452,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       char md5[33];
       cmSystemTools::ComputeFileMD5(local_file.c_str(), md5);
       md5[32] = 0;
-      std::stringstream md5string;
-      md5string << "&MD5=" << md5;
-      upload_as += md5string.str();
+      upload_as += "&MD5=";
+      upload_as += md5;
 
       struct stat st;
       if ( ::stat(local_file.c_str(), &st) )
@@ -501,9 +507,9 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
           "" : this->GetOption("RetryCount");
 
         int time = retryTime == "" ? atoi(this->CTest->GetCTestConfiguration(
-          "CTestRetryTime").c_str()) : atoi(retryTime.c_str());
+          "CTestSubmitRetryDelay").c_str()) : atoi(retryTime.c_str());
         int count = retryCount == "" ? atoi(this->CTest->GetCTestConfiguration(
-          "CTestRetryCount").c_str()) : atoi(retryCount.c_str());
+          "CTestSubmitRetryCount").c_str()) : atoi(retryCount.c_str());
 
         for(int i = 0; i < count; i++)
           {
