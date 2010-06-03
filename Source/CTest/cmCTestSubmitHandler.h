@@ -79,6 +79,7 @@ private:
 
   std::string GetSubmitResultsPrefix();
 
+  class         ResponseParser;
   cmStdString   HTTPProxy;
   int           HTTPProxyType;
   cmStdString   HTTPProxyAuth;
