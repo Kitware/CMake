@@ -85,5 +85,5 @@ CurlOptions: @CTEST_CURL_OPTIONS@
 
 # For CTest submissions that timeout, these options
 # specify behavior for retrying the submission
-CTestRetryTime: @CTEST_SUBMIT_RETRY_DELAY@
-CTestRetryCount: @CTEST_SUBMIT_RETRY_COUNT@
+CTestSubmitRetryDelay: @CTEST_SUBMIT_RETRY_DELAY@
+CTestSubmitRetryCount: @CTEST_SUBMIT_RETRY_COUNT@
