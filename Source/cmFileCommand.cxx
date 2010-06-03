@@ -183,24 +183,16 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   std::string dir = cmSystemTools::GetFilenamePath(fileName);
   cmSystemTools::MakeDirectory(dir.c_str());
 
-  mode_t mode =
-#if defined( _MSC_VER ) || defined( __MINGW32__ )
-    S_IREAD | S_IWRITE
-#elif defined( __BORLANDC__ )
-    S_IRUSR | S_IWUSR
-#else
-    0666
-#endif
-    ;
+  mode_t mode = 0;
 
   // Set permissions to writable
   if ( cmSystemTools::GetPermissions(fileName.c_str(), mode) )
     {
     cmSystemTools::SetPermissions(fileName.c_str(),
 #if defined( _MSC_VER ) || defined( __MINGW32__ )
-      S_IREAD | S_IWRITE
+      mode | S_IWRITE
 #else
-      0666
+      mode | S_IWUSR | S_IWGRP
 #endif
     );
     }
@@ -217,7 +209,10 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
     }
   file << message;
   file.close();
-  cmSystemTools::SetPermissions(fileName.c_str(), mode);
+  if(mode)
+    {
+    cmSystemTools::SetPermissions(fileName.c_str(), mode);
+    }
   return true;
 }
 
