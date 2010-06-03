@@ -1521,6 +1521,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     #
     SET_TESTS_PROPERTIES(CTestSubmitLargeOutput PROPERTIES
       PASS_REGULAR_EXPRESSION "Errors occurred during submission")
+
+    # Give this test plenty of time to run on slower machines:
+    #
+    SET_TESTS_PROPERTIES(CTestSubmitLargeOutput PROPERTIES
+      TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
   ENDIF(CTEST_RUN_CTestSubmitLargeOutput)
 
   IF (CMAKE_RUN_LONG_TESTS AND TEST_KDE4_STABLE_BRANCH)
