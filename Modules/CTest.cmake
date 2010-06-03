@@ -163,6 +163,11 @@ IF(BUILD_TESTING)
   SET(DART_TESTING_TIMEOUT 1500 CACHE STRING 
     "Maximum time allowed before CTest will kill the test.")
 
+  SET(CTEST_SUBMIT_RETRY_DELAY 5 CACHE STRING
+    "How long to wait between timed-out CTest submissions.")
+  SET(CTEST_SUBMIT_RETRY_COUNT 3 CACHE STRING
+    "How many times to retry timed-out CTest submissions.")
+
   FIND_PROGRAM(MEMORYCHECK_COMMAND
     NAMES purify valgrind boundscheck
     PATHS
@@ -262,7 +267,9 @@ IF(BUILD_TESTING)
     SCPCOMMAND
     SLURM_SBATCH_COMMAND
     SLURM_SRUN_COMMAND
-    SITE 
+    SITE
+    CTEST_SUBMIT_RETRY_DELAY
+    CTEST_SUBMIT_RETRY_COUNT
     )
   #  BUILDNAME 
   IF(NOT RUN_FROM_DART)

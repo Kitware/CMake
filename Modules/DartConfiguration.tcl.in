@@ -83,3 +83,7 @@ CurlOptions: @CTEST_CURL_OPTIONS@
 # warning, if you add new options here that have to do with submit,
 # you have to update cmCTestSubmitCommand.cxx
 
+# For CTest submissions that timeout, these options
+# specify behavior for retrying the submission
+CTestRetryTime: @CTEST_SUBMIT_RETRY_DELAY@
+CTestRetryCount: @CTEST_SUBMIT_RETRY_COUNT@

@@ -29,6 +29,8 @@ public:
     {
     this->PartsMentioned = false;
     this->FilesMentioned = false;
+    this->RetryCount = "";
+    this->RetryDelay = "";
     }
 
   /**
@@ -92,6 +94,8 @@ protected:
   {
     ArgumentDoingParts = Superclass::ArgumentDoingLast1,
     ArgumentDoingFiles,
+    ArgumentDoingRetryDelay,
+    ArgumentDoingRetryCount,
     ArgumentDoingLast2
   };
 
@@ -99,6 +103,8 @@ protected:
   std::set<cmCTest::Part> Parts;
   bool FilesMentioned;
   cmCTest::SetOfStrings Files;
+  std::string RetryCount;
+  std::string RetryDelay;
 };
 
 

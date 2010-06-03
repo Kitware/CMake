@@ -15,6 +15,7 @@
 #include "cmVersion.h"
 #include "cmGeneratedFileStream.h"
 #include "cmCTest.h"
+#include "cmXMLParser.h"
 
 #include <cmsys/Process.h>
 #include <cmsys/Base64.h>
@@ -30,6 +31,80 @@
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120
 
 typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
+
+//----------------------------------------------------------------------------
+class cmCTestSubmitHandler::ResponseParser: public cmXMLParser
+{
+public:
+  ResponseParser() { this->Status = STATUS_OK; }
+  ~ResponseParser() {}
+
+public:
+
+  enum StatusType
+    {
+    STATUS_OK,
+    STATUS_WARNING,
+    STATUS_ERROR
+    };
+
+  StatusType Status;
+  std::string CDashVersion;
+  std::string Filename;
+  std::string MD5;
+  std::string Message;
+
+private:
+  std::string CurrentValue;
+  std::string CurrentTag;
+
+  virtual void StartElement(const char* name, const char** atts)
+    {
+    this->CurrentValue = "";
+    if(strcmp(name, "cdash") == 0)
+      {
+      this->CDashVersion = this->FindAttribute(atts, "version");
+      }
+    }
+
+  virtual void CharacterDataHandler(const char* data, int length)
+    {
+    this->CurrentValue.insert(this->CurrentValue.end(), data, data+length);
+    }
+
+  virtual void EndElement(const char* name)
+    {
+    if(strcmp(name, "status") == 0)
+      {
+      this->CurrentValue = cmSystemTools::UpperCase(this->CurrentValue);
+      if(this->CurrentValue == "OK" || this->CurrentValue == "SUCCESS")
+        {
+        this->Status = STATUS_OK;
+        }
+      else if(this->CurrentValue == "WARNING")
+        {
+        this->Status = STATUS_WARNING;
+        }
+      else
+        {
+        this->Status = STATUS_ERROR;
+        }
+      }
+    else if(strcmp(name, "filename") == 0)
+      {
+      this->Filename = this->CurrentValue;
+      }
+    else if(strcmp(name, "md5") == 0)
+      {
+      this->MD5 = this->CurrentValue;
+      }
+    else if(strcmp(name, "message") == 0)
+      {
+      this->Message = this->CurrentValue;
+      }
+    }
+};
+
 
 static size_t
 cmCTestSubmitHandlerWriteMemoryCallback(void *ptr, size_t size, size_t nmemb,
@@ -367,6 +442,13 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
         = url + ((url.find("?",0) == cmStdString::npos) ? "?" : "&")
         + "FileName=" + ofile;
 
+      char md5[33];
+      cmSystemTools::ComputeFileMD5(local_file.c_str(), md5);
+      md5[32] = 0;
+      std::stringstream md5string;
+      md5string << "&MD5=" << md5;
+      upload_as += md5string.str();
+
       struct stat st;
       if ( ::stat(local_file.c_str(), &st) )
         {
@@ -381,7 +463,6 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   Upload file: "
         << local_file.c_str() << " to "
         << upload_as.c_str() << " Size: " << st.st_size << std::endl);
-
 
       // specify target
       ::curl_easy_setopt(curl,CURLOPT_URL, upload_as.c_str());
@@ -410,6 +491,47 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
 
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
+
+      // If we time out or operation is too slow, wait and retry
+      if(res == CURLE_OPERATION_TIMEOUTED)
+        {
+        std::string retryTime = this->GetOption("RetryTime") == NULL ?
+          "" : this->GetOption("RetryTime");
+        std::string retryCount = this->GetOption("RetryCount") == NULL ?
+          "" : this->GetOption("RetryCount");
+
+        int time = retryTime == "" ? atoi(this->CTest->GetCTestConfiguration(
+          "CTestRetryTime").c_str()) : atoi(retryTime.c_str());
+        int count = retryCount == "" ? atoi(this->CTest->GetCTestConfiguration(
+          "CTestRetryCount").c_str()) : atoi(retryCount.c_str());
+
+        for(int i = 0; i < count; i++)
+          {
+          cmCTestLog(this->CTest, HANDLER_OUTPUT,
+            "   Connection timed out, waiting " << time << " seconds...\n");
+
+          double stop = cmSystemTools::GetTime() + time;
+          while(cmSystemTools::GetTime() < stop) {} //wait <time> seconds
+
+          cmCTestLog(this->CTest, HANDLER_OUTPUT,
+            "   Retry submission: Attempt " << (i + 1) << " of "
+            << count << std::endl);
+
+          ::fclose(ftpfile);
+          ftpfile = ::fopen(local_file.c_str(), "rb");
+          ::curl_easy_setopt(curl, CURLOPT_INFILE, ftpfile);
+
+          chunk.clear();
+          chunkDebug.clear();
+
+          res = ::curl_easy_perform(curl);
+
+          if(res != CURLE_OPERATION_TIMEDOUT)
+            {
+            break;
+            }
+          }
+        }
 
       if ( chunk.size() > 0 )
         {
@@ -467,29 +589,39 @@ void cmCTestSubmitHandler
 ::ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk)
 {
   std::string output = "";
+  output.append(chunk.begin(), chunk.end());
 
-  for(cmCTestSubmitHandlerVectorOfChar::iterator i = chunk.begin();
-      i != chunk.end(); ++i)
+  if(output.find("<cdash") != output.npos)
     {
-    output += *i;
+    ResponseParser parser;
+    parser.Parse(output.c_str());
+
+    if(parser.Status != ResponseParser::STATUS_OK)
+      {
+      this->HasErrors = true;
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Submission failed: " <<
+        parser.Message << std::endl);
+      return;
+      }
     }
-  output = cmSystemTools::UpperCase(output);
-  
-  if(output.find("WARNING") != std::string::npos)
+  else
     {
-    this->HasWarnings = true;
+    output = cmSystemTools::UpperCase(output);
+    if(output.find("WARNING") != std::string::npos)
+      {
+      this->HasWarnings = true;
+      }
+    if(output.find("ERROR") != std::string::npos)
+      {
+      this->HasErrors = true;
+      }
+
+    if(this->HasWarnings || this->HasErrors)
+      {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Server Response:\n" <<
+            cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "\n");
+      }
     }
-  if(output.find("ERROR") != std::string::npos)
-    {
-    this->HasErrors = true;
-    }
-  
-  if(this->HasWarnings || this->HasErrors)
-    {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Server Response:\n" <<
-          cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "\n");
-    }
-  
 }
 
 //----------------------------------------------------------------------------
