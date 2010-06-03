@@ -61,7 +61,10 @@ private:
   std::string GetCurrentValue()
     {
     std::string val;
-    val.assign(&this->CurrentValue[0], this->CurrentValue.size());
+    if(this->CurrentValue.size())
+      {
+      val.assign(&this->CurrentValue[0], this->CurrentValue.size());
+      }
     return val;
     }
 
