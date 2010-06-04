@@ -1507,7 +1507,7 @@ bool cmFileCopier::InstallFile(const char* fromFile, const char* toFile,
   this->ReportCopy(toFile, TypeFile, copy);
 
   // Copy the file.
-  if(copy && !cmSystemTools::CopyAFile(fromFile, toFile, true, false))
+  if(copy && !cmSystemTools::CopyAFile(fromFile, toFile, true))
     {
     cmOStringStream e;
     e << this->Name << " cannot copy file \"" << fromFile
@@ -1519,6 +1519,13 @@ bool cmFileCopier::InstallFile(const char* fromFile, const char* toFile,
   // Set the file modification time of the destination file.
   if(copy && !this->Always)
     {
+    // Add write permission so we can set the file time.
+    // Permissions are set unconditionally below anyway.
+    mode_t perm = 0;
+    if(cmSystemTools::GetPermissions(toFile, perm))
+      {
+      cmSystemTools::SetPermissions(toFile, perm | mode_owner_write);
+      }
     if (!cmSystemTools::CopyFileTime(fromFile, toFile))
       {
       cmOStringStream e;
