@@ -2763,6 +2763,15 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
     return false;
     }
 
+  res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  if (res != CURLE_OK)
+    {
+    std::string errstring = "FILE(DOWNLOAD ) error; cannot set follow-redirect option: ";
+    errstring += ::curl_easy_strerror(res);
+    this->SetError(errstring.c_str());
+    return false;
+    }
+
   if(verboseLog.size())
     {
     res = ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
