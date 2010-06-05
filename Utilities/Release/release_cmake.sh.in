@@ -123,7 +123,7 @@ check_exit_value $? "Build cmake" || exit 1
 
 if [ -z "@SKIP_TESTS@" ]; then
     echo "Run cmake tests"
-    ./bin/ctest -j @PROCESSORS@ test
+    ./bin/ctest --output-on-failure -j @PROCESSORS@ test
     check_exit_value $? "Test cmake" || exit 1
 fi
 
