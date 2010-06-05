@@ -501,8 +501,22 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
 
-      // If we time out or operation is too slow, wait and retry
-      if(res == CURLE_OPERATION_TIMEOUTED)
+      if ( chunk.size() > 0 )
+        {
+        cmCTestLog(this->CTest, DEBUG, "CURL output: ["
+          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
+          << std::endl);
+        this->ParseResponse(chunk);
+        }
+      if ( chunkDebug.size() > 0 )
+        {
+        cmCTestLog(this->CTest, DEBUG, "CURL debug output: ["
+          << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]"
+          << std::endl);
+        }
+
+      // If we time out or checksum fails, wait and retry
+      if(res == CURLE_OPERATION_TIMEDOUT || this->HasErrors)
         {
         std::string retryTime = this->GetOption("RetryTime") == NULL ?
           "" : this->GetOption("RetryTime");
@@ -532,28 +546,23 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
 
           chunk.clear();
           chunkDebug.clear();
+          this->HasErrors = false;
 
           res = ::curl_easy_perform(curl);
 
-          if(res != CURLE_OPERATION_TIMEDOUT)
+          if ( chunk.size() > 0 )
+            {
+            cmCTestLog(this->CTest, DEBUG, "CURL output: ["
+              << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
+              << std::endl);
+            this->ParseResponse(chunk);
+            }
+
+          if(res != CURLE_OPERATION_TIMEDOUT && !this->HasErrors)
             {
             break;
             }
           }
-        }
-
-      if ( chunk.size() > 0 )
-        {
-        cmCTestLog(this->CTest, DEBUG, "CURL output: ["
-          << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
-          << std::endl);
-        this->ParseResponse(chunk);
-        }
-      if ( chunkDebug.size() > 0 )
-        {
-        cmCTestLog(this->CTest, DEBUG, "CURL debug output: ["
-          << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]"
-          << std::endl);
         }
 
       fclose(ftpfile);
