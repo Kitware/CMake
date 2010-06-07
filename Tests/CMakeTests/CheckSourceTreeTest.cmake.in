@@ -6,6 +6,7 @@ message("")
 message("CMake_BINARY_DIR='${CMake_BINARY_DIR}'")
 message("CMake_SOURCE_DIR='${CMake_SOURCE_DIR}'")
 message("CVS_EXECUTABLE='${CVS_EXECUTABLE}'")
+message("GIT_EXECUTABLE='${GIT_EXECUTABLE}'")
 message("HOME='${HOME}'")
 message("ENV{DASHBOARD_TEST_FROM_CTEST}='$ENV{DASHBOARD_TEST_FROM_CTEST}'")
 message("")
@@ -42,55 +43,161 @@ message("in_source_build='${in_source_build}'")
 message("")
 
 
-# If this does not appear to be a CVS checkout, just pass the test here and now.
-# (Do not let the test fail if it is run in a tree *exported* from CVS or
-# unpacked from a .zip file source installer...)
+# If this does not appear to be a git or CVS checkout, just pass the test here
+# and now. (Do not let the test fail if it is run in a tree *exported* from a
+# repository or unpacked from a .zip file source installer...)
 #
-if(NOT EXISTS "${CMake_SOURCE_DIR}/CVS/Root")
-  message("source tree is not a CVS checkout... test passes by early return...")
+set(is_git_checkout 0)
+if(EXISTS "${CMake_SOURCE_DIR}/.git")
+  set(is_git_checkout 1)
+endif()
+
+set(is_cvs_checkout 0)
+if(EXISTS "${CMake_SOURCE_DIR}/CVS/Root")
+  set(is_cvs_checkout 1)
+endif()
+
+message("is_git_checkout='${is_git_checkout}'")
+message("is_cvs_checkout='${is_cvs_checkout}'")
+message("")
+
+if(NOT is_cvs_checkout)
+if(NOT is_git_checkout)
+  message("source tree is neither git nor CVS checkout... test passes by early return...")
   return()
 endif()
-
-
-# Check with "cvs -q -n up -dP" if there are any local modifications to the
-# CMake source tree:
-#
-message("=============================================================================")
-message("Copy/paste this command to reproduce:")
-message("cd \"${CMake_SOURCE_DIR}\" && \"${CVS_EXECUTABLE}\" -q -n up -dP")
-message("")
-
-# Use the HOME value passed in to the script for calling cvs so it can find
-# its .cvspass and other file(s)
-#
-set(original_ENV_HOME "$ENV{HOME}")
-set(ENV{HOME} "${HOME}")
-
-execute_process(COMMAND ${CVS_EXECUTABLE} -q -n up -dP
-  WORKING_DIRECTORY ${CMake_SOURCE_DIR}
-  OUTPUT_VARIABLE ov
-  ERROR_VARIABLE ev
-  RESULT_VARIABLE rv)
-
-set(ENV{HOME} "${original_ENV_HOME}")
-
-message("Results of running '${CVS_EXECUTABLE} -q -n up -dP'")
-message("rv='${rv}'")
-message("ov='${ov}'")
-message("ev='${ev}'")
-message("")
-
-if(NOT rv STREQUAL 0)
-  message(FATAL_ERROR "error: 'cvs -q -n up -dP' attempt failed... (see output above)")
 endif()
 
-# Analyze cvs output:
+if(is_cvs_checkout)
+if(is_git_checkout)
+  message("warning: source tree has both git *and* CVS file system bits???")
+  # should this condition be a FATAL_ERROR test failure...?
+endif()
+endif()
+
+
+# This test looks for the following types of changes in the source tree:
 #
 set(additions 0)
 set(conflicts 0)
 set(modifications 0)
 set(nonadditions 0)
 
+# ov == output variable... conditionally filled in by either cvs or git below:
+#
+set(cmd "")
+set(ov "")
+set(ev "")
+set(rv "")
+
+
+if(is_cvs_checkout AND CVS_EXECUTABLE)
+  # Check with "cvs -q -n up -dP" if there are any local modifications to the
+  # CMake source tree:
+  #
+  message("=============================================================================")
+  message("This is a cvs checkout, using cvs to verify source tree....")
+  message("")
+
+  execute_process(COMMAND ${CVS_EXECUTABLE} --version
+    WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+    OUTPUT_VARIABLE version_output
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message("=== output of 'cvs --version' ===")
+  message("${version_output}")
+  message("=== end output ===")
+  message("")
+
+  file(READ "${CMake_SOURCE_DIR}/CVS/Root" contents)
+  message("=== content of CVS/Root ===")
+  message("${contents}")
+  message("=== end content ===")
+  message("")
+
+  file(READ "${CMake_SOURCE_DIR}/CVS/Repository" contents)
+  message("=== content of CVS/Repository ===")
+  message("${contents}")
+  message("=== end content ===")
+  message("")
+
+  message("Copy/paste this command to reproduce:")
+  message("cd \"${CMake_SOURCE_DIR}\" && \"${CVS_EXECUTABLE}\" -q -n up -dP")
+  message("")
+
+  set(cmd ${CVS_EXECUTABLE} -q -n up -dP)
+endif()
+
+
+if(is_git_checkout AND GIT_EXECUTABLE)
+  # Check with "git status" if there are any local modifications to the
+  # CMake source tree:
+  #
+  message("=============================================================================")
+  message("This is a git checkout, using git to verify source tree....")
+  message("")
+
+  execute_process(COMMAND ${GIT_EXECUTABLE} --version
+    WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+    OUTPUT_VARIABLE version_output
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message("=== output of 'git --version' ===")
+  message("${version_output}")
+  message("=== end output ===")
+  message("")
+
+  execute_process(COMMAND ${GIT_EXECUTABLE} branch -a
+    WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+    OUTPUT_VARIABLE git_branch_output
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message("=== output of 'git branch -a' ===")
+  message("${git_branch_output}")
+  message("=== end output ===")
+  message("")
+
+  message("Copy/paste this command to reproduce:")
+  message("cd \"${CMake_SOURCE_DIR}\" && \"${GIT_EXECUTABLE}\" status")
+  message("")
+
+  set(cmd ${GIT_EXECUTABLE} status)
+endif()
+
+
+if(cmd)
+  # Use the HOME value passed in to the script for calling cvs/git so it can
+  # find its .cvspass or user/global config settings...
+  #
+  set(original_ENV_HOME "$ENV{HOME}")
+  set(ENV{HOME} "${HOME}")
+
+  execute_process(COMMAND ${cmd}
+    WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+    OUTPUT_VARIABLE ov
+    ERROR_VARIABLE ev
+    RESULT_VARIABLE rv)
+
+  set(ENV{HOME} "${original_ENV_HOME}")
+
+  message("Results of running ${cmd}")
+  message("rv='${rv}'")
+  message("ov='${ov}'")
+  message("ev='${ev}'")
+  message("")
+
+  if(NOT rv STREQUAL 0)
+    if(is_git_checkout AND (rv STREQUAL "1"))
+      # Many builds of git return "1" from a "nothing is changed" git status call...
+      # Do not fail with an error for rv==1 with git...
+    else()
+      message(FATAL_ERROR "error: ${cmd} attempt failed... (see output above)")
+    endif()
+  endif()
+else()
+  message(FATAL_ERROR "error: no COMMAND to run to analyze source tree...")
+endif()
+
+
+# Analyze output:
+#
 if(NOT ov STREQUAL "")
   string(REPLACE ";" "\\\\;" lines "${ov}")
   string(REPLACE "\n" "E;" lines "${lines}")
@@ -110,28 +217,43 @@ if(NOT ov STREQUAL "")
     endif()
 
     if(consider)
-      if(line MATCHES "^A ")
-        message("   locally added file/directory detected...")
-        set(additions 1)
+      if(is_cvs_checkout)
+        if(line MATCHES "^A ")
+          message("   locally added file/directory detected...")
+          set(additions 1)
+        endif()
+
+        if(line MATCHES "^C ")
+          message("   conflict detected...")
+          set(conflicts 1)
+        endif()
+
+        if(line MATCHES "^M ")
+          message("   locally modified file detected...")
+          set(modifications 1)
+        endif()
+
+        if(line MATCHES "^\\? ")
+          message("   locally non-added file/directory detected...")
+          set(nonadditions 1)
+        endif()
       endif()
 
-      if(line MATCHES "^C ")
-        message("   conflict detected...")
-        set(conflicts 1)
-      endif()
+      if(is_git_checkout)
+        if(line MATCHES "^#[ \t]*modified:")
+          message("   locally modified file detected...")
+          set(modifications 1)
+        endif()
 
-      if(line MATCHES "^M ")
-        message("   locally modified file detected...")
-        set(modifications 1)
-      endif()
-
-      if(line MATCHES "^\\? ")
-        message("   locally non-added file/directory detected...")
-        set(nonadditions 1)
+        if(line MATCHES "^# Untracked")
+          message("   locally non-added file/directory detected...")
+          set(nonadditions 1)
+        endif()
       endif()
     endif()
   endforeach()
 endif()
+
 
 message("=============================================================================")
 message("additions='${additions}'")
@@ -185,14 +307,14 @@ if(nonadditions)
     message("
 warning: test results confounded because this is an 'in-source' build - cannot
 distinguish between non-added files that are in-source build products and
-non-added source files that somebody forgot to 'cvs add'... - this is only ok
+non-added source files that somebody forgot to 'git add'... - this is only ok
 if this is intentionally an in-source dashboard build... Developers should
 use out-of-source builds to verify a clean source tree with this test...
 
 Allowing test to pass despite the warning message...
 ")
   else()
-    message(FATAL_ERROR "test fails: local source tree non-additions: use cvs add before committing, or remove the files from the source tree")
+    message(FATAL_ERROR "test fails: local source tree non-additions: use git add before committing, or remove the files from the source tree")
   endif()
 endif()
 
