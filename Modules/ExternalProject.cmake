@@ -16,6 +16,8 @@
 #    [CVS_TAG tag]               # Tag to checkout from CVS repo
 #    [SVN_REPOSITORY url]        # URL of Subversion repo
 #    [SVN_REVISION rev]          # Revision to checkout from Subversion repo
+#    [SVN_USERNAME john ]        # Username for Subversion checkout and update
+#    [SVN_PASSWORD doe ]         # Password for Subversion checkout and update
 #    [URL /.../src.tgz]          # Full path or URL of source
 #    [TIMEOUT seconds]           # Time allowed for file download operations
 #   #--Update/Patch step----------
@@ -661,8 +663,10 @@ function(_ep_add_download_command name)
     endif()
 
     get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
+    get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
+    get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
 
-    set(repository ${svn_repository})
+    set(repository "${svn_repository} user=${svn_username} password=${svn_password}")
     set(module)
     set(tag ${svn_revision})
     configure_file(
@@ -674,7 +678,8 @@ function(_ep_add_download_command name)
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
     set(comment "Performing download step (SVN checkout) for '${name}'")
-    set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_revision} ${src_name})
+    set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_revision}
+      --username=${svn_username} --password=${svn_password} ${src_name})
     list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
   elseif(url)
     get_filename_component(work_dir "${source_dir}" PATH)
@@ -757,7 +762,10 @@ function(_ep_add_update_command name)
     set(work_dir ${source_dir})
     set(comment "Performing update step (SVN update) for '${name}'")
     get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
-    set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_revision})
+    get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
+    get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
+    set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_revision}
+      --username=${svn_username} --password=${svn_password})
     set(always 1)
   endif()
 
