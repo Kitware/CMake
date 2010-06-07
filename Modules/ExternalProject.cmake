@@ -249,20 +249,16 @@ endfunction(_ep_write_downloadfile_script)
 function(_ep_write_extractfile_script script_filename filename directory)
   set(args "")
 
-  if(filename MATCHES ".tar$")
+  if(filename MATCHES "(\\.bz2|\\.tar\\.gz|\\.tgz|\\.zip)$")
+    set(args xfz)
+  endif()
+
+  if(filename MATCHES "\\.tar$")
     set(args xf)
   endif()
 
-  if(filename MATCHES ".tgz$")
-    set(args xfz)
-  endif()
-
-  if(filename MATCHES ".tar.gz$")
-    set(args xfz)
-  endif()
-
   if(args STREQUAL "")
-    message(SEND_ERROR "error: do not know how to extract '${filename}' -- known types are .tar, .tgz and .tar.gz")
+    message(SEND_ERROR "error: do not know how to extract '${filename}' -- known types are .bz2, .tar, .tar.gz, .tgz and .zip")
     return()
   endif()
 
@@ -275,6 +271,10 @@ get_filename_component(directory \"${directory}\" ABSOLUTE)
 message(STATUS \"extracting...
      src='\${filename}'
      dst='\${directory}'\")
+
+if(NOT EXISTS \"\${filename}\")
+  message(FATAL_ERROR \"error: file to extract does not exist: '\${filename}'\")
+endif()
 
 # Prepare a space for extracting:
 #
@@ -703,7 +703,7 @@ function(_ep_add_download_command name)
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
         string(REGEX MATCH "[^/]*$" fname "${url}")
-        if(NOT "${fname}" MATCHES "\\.(tar|tgz|tar\\.gz)$")
+        if(NOT "${fname}" MATCHES "\\.(bz2|tar|tgz|tar\\.gz|zip)$")
           message(FATAL_ERROR "Could not extract tarball filename from url:\n  ${url}")
         endif()
         set(file ${download_dir}/${fname})
