@@ -122,6 +122,10 @@ void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
   std::string extraFlags;
   this->LocalGenerator->AppendFlags
     (extraFlags,this->Target->GetProperty("STATIC_LIBRARY_FLAGS"));
+  std::string staticLibraryFlagsConfig = "STATIC_LIBRARY_FLAGS_";
+  staticLibraryFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
+  this->LocalGenerator->AppendFlags
+    (extraFlags, this->Target->GetProperty(staticLibraryFlagsConfig.c_str()));
   this->WriteLibraryRules(linkRuleVar.c_str(), extraFlags.c_str(), false);
 }
 
