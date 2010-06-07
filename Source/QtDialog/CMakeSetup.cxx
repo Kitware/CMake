@@ -164,7 +164,7 @@ int main(int argc, char** argv)
     QStringList args = app.arguments();
     if(args.count() == 2)
       {
-      cmsys_stl::string filePath = cmSystemTools::CollapseFullPath("..");
+      cmsys_stl::string filePath = cmSystemTools::CollapseFullPath(args[1].toAscii().data());
       cmsys_stl::string buildFilePath =
         cmSystemTools::CollapseFullPath("CMakeCache.txt", filePath.c_str());
       cmsys_stl::string srcFilePath =
