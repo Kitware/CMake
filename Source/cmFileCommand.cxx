@@ -2450,7 +2450,8 @@ namespace{
     fout->write(chPtr, realsize);
     return realsize;
   }
-  
+
+
   static size_t
   cmFileCommandCurlDebugCallback(CURL *, curl_infotype, char *chPtr,
                                         size_t size, void *data)
@@ -2463,6 +2464,72 @@ namespace{
   }
 
 
+  class cURLProgressHelper
+  {
+  public:
+    cURLProgressHelper(cmFileCommand *fc)
+      {
+      this->CurrentPercentage = -1;
+      this->FileCommand = fc;
+      }
+
+    bool UpdatePercentage(double value, double total, std::string &status)
+      {
+      int OldPercentage = this->CurrentPercentage;
+
+      if (0.0 == total)
+        {
+        this->CurrentPercentage = 100;
+        }
+      else
+        {
+        this->CurrentPercentage = static_cast<int>(value/total*100.0 + 0.5);
+        }
+
+      bool updated = (OldPercentage != this->CurrentPercentage);
+
+      if (updated)
+        {
+        cmOStringStream oss;
+        oss << "[download " << this->CurrentPercentage << "% complete]";
+        status = oss.str();
+        }
+
+      return updated;
+      }
+
+    cmFileCommand *GetFileCommand()
+      {
+      return this->FileCommand;
+      }
+
+  private:
+    int CurrentPercentage;
+    cmFileCommand *FileCommand;
+  };
+
+
+  static int
+  cmFileCommandCurlProgressCallback(void *clientp,
+                                    double dltotal, double dlnow,
+                                    double ultotal, double ulnow)
+  {
+    cURLProgressHelper *helper =
+      reinterpret_cast<cURLProgressHelper *>(clientp);
+
+    static_cast<void>(ultotal);
+    static_cast<void>(ulnow);
+
+    std::string status;
+    if (helper->UpdatePercentage(dlnow, dltotal, status))
+      {
+      cmFileCommand *fc = helper->GetFileCommand();
+      cmMakefile *mf = fc->GetMakefile();
+      mf->DisplayStatus(status.c_str(), -1);
+      }
+
+    return 0;
+  }
 }
 
 #endif
@@ -2476,8 +2543,8 @@ namespace {
     cURLEasyGuard(CURL * easy)
       : Easy(easy)
       {}
-    
-    ~cURLEasyGuard(void) 
+
+    ~cURLEasyGuard(void)
       {
         if (this->Easy)
           {
@@ -2498,6 +2565,7 @@ namespace {
 }
 #endif
 
+
 bool
 cmFileCommand::HandleDownloadCommand(std::vector<std::string>
                                      const& args)
@@ -2515,9 +2583,13 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
   ++i;
   std::string file = *i;
   ++i;
+
   long timeout = 0;
   std::string verboseLog;
   std::string statusVar;
+  std::string expectedMD5sum;
+  bool showProgress = false;
+
   while(i != args.end())
     {
     if(*i == "TIMEOUT")
@@ -2556,9 +2628,65 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
         }
       statusVar = *i;
       }
+    else if(*i == "EXPECTED_MD5")
+      {
+      ++i;
+      if( i == args.end())
+        {
+        this->SetError("FILE(DOWNLOAD url file EXPECTED_MD5 sum) missing "
+                       "sum value for EXPECTED_MD5.");
+        return false;
+        }
+      expectedMD5sum = cmSystemTools::LowerCase(*i);
+      }
+    else if(*i == "SHOW_PROGRESS")
+      {
+      showProgress = true;
+      }
     ++i;
     }
 
+  // If file exists already, and caller specified an expected md5 sum,
+  // and the existing file already has the expected md5 sum, then simply
+  // return.
+  //
+  if(cmSystemTools::FileExists(file.c_str()) &&
+    !expectedMD5sum.empty())
+    {
+    char computedMD5[32];
+
+    if (!cmSystemTools::ComputeFileMD5(file.c_str(), computedMD5))
+      {
+      this->SetError("FILE(DOWNLOAD ) error; cannot compute MD5 sum on "
+        "pre-existing file");
+      return false;
+      }
+
+    std::string actualMD5sum = cmSystemTools::LowerCase(
+      std::string(computedMD5, 32));
+
+    if (expectedMD5sum == actualMD5sum)
+      {
+      this->Makefile->DisplayStatus(
+        "FILE(DOWNLOAD ) returning early: file already exists with "
+        "expected MD5 sum", -1);
+
+      if(statusVar.size())
+        {
+        cmOStringStream result;
+        result << (int)0 << ";\""
+          "returning early: file already exists with expected MD5 sum\"";
+        this->Makefile->AddDefinition(statusVar.c_str(),
+                                      result.str().c_str());
+        }
+
+      return true;
+      }
+    }
+
+  // Make sure parent directory exists so we can write to the file
+  // as we receive downloaded bits from curl...
+  //
   std::string dir = cmSystemTools::GetFilenamePath(file.c_str());
   if(!cmSystemTools::FileExists(dir.c_str()) &&
      !cmSystemTools::MakeDirectory(dir.c_str()))
@@ -2577,6 +2705,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
                        "file for write.");
     return false;
     }
+
   ::CURL *curl;
   ::curl_global_init(CURL_GLOBAL_DEFAULT);
   curl = ::curl_easy_init();
@@ -2592,28 +2721,31 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
   ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   if (res != CURLE_OK)
     {
-      std::string errstring = "FILE(DOWNLOAD ) error; cannot set url: ";
-      errstring += ::curl_easy_strerror(res);
+    std::string errstring = "FILE(DOWNLOAD ) error; cannot set url: ";
+    errstring += ::curl_easy_strerror(res);
+    this->SetError(errstring.c_str());
     return false;
     }
 
   res = ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-                             cmFileCommandWriteMemoryCallback);
+                           cmFileCommandWriteMemoryCallback);
   if (res != CURLE_OK)
-      {
-      std::string errstring =
-        "FILE(DOWNLOAD ) error; cannot set write function: ";
-      errstring += ::curl_easy_strerror(res);
+    {
+    std::string errstring =
+      "FILE(DOWNLOAD ) error; cannot set write function: ";
+    errstring += ::curl_easy_strerror(res);
+    this->SetError(errstring.c_str());
     return false;
     }
 
   res = ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION,
-                             cmFileCommandCurlDebugCallback);
+                           cmFileCommandCurlDebugCallback);
   if (res != CURLE_OK)
     {
-     std::string errstring =
-       "FILE(DOWNLOAD ) error; cannot set debug function: ";
-     errstring += ::curl_easy_strerror(res);
+    std::string errstring =
+      "FILE(DOWNLOAD ) error; cannot set debug function: ";
+    errstring += ::curl_easy_strerror(res);
+    this->SetError(errstring.c_str());
     return false;
     }
 
@@ -2625,14 +2757,25 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
     {
     std::string errstring = "FILE(DOWNLOAD ) error; cannot set write data: ";
     errstring += ::curl_easy_strerror(res);
+    this->SetError(errstring.c_str());
     return false;
     }
 
   res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void *)&chunkDebug);
   if (res != CURLE_OK)
     {
-    std::string errstring = "FILE(DOWNLOAD ) error; cannot set write data: ";
+    std::string errstring = "FILE(DOWNLOAD ) error; cannot set debug data: ";
     errstring += ::curl_easy_strerror(res);
+    this->SetError(errstring.c_str());
+    return false;
+    }
+
+  res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  if (res != CURLE_OK)
+    {
+    std::string errstring = "FILE(DOWNLOAD ) error; cannot set follow-redirect option: ";
+    errstring += ::curl_easy_strerror(res);
+    this->SetError(errstring.c_str());
     return false;
     }
 
@@ -2644,24 +2787,70 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       {
       std::string errstring = "FILE(DOWNLOAD ) error; cannot set verbose: ";
       errstring += ::curl_easy_strerror(res);
+      this->SetError(errstring.c_str());
       return false;
       }
     }
+
   if(timeout > 0)
     {
     res = ::curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout );
 
     if (res != CURLE_OK)
       {
-      std::string errstring = "FILE(DOWNLOAD ) error; cannot set verbose: ";
+      std::string errstring = "FILE(DOWNLOAD ) error; cannot set timeout: ";
       errstring += ::curl_easy_strerror(res);
+      this->SetError(errstring.c_str());
       return false;
       }
     }
+
+  // Need the progress helper's scope to last through the duration of
+  // the curl_easy_perform call... so this object is declared at function
+  // scope intentionally, rather than inside the "if(showProgress)"
+  // block...
+  //
+  cURLProgressHelper helper(this);
+
+  if(showProgress)
+    {
+    res = ::curl_easy_setopt(curl,
+      CURLOPT_NOPROGRESS, 0);
+    if (res != CURLE_OK)
+      {
+      std::string errstring = "FILE(DOWNLOAD ) error; cannot set noprogress value: ";
+      errstring += ::curl_easy_strerror(res);
+      this->SetError(errstring.c_str());
+      return false;
+      }
+
+    res = ::curl_easy_setopt(curl,
+      CURLOPT_PROGRESSFUNCTION, cmFileCommandCurlProgressCallback);
+    if (res != CURLE_OK)
+      {
+      std::string errstring = "FILE(DOWNLOAD ) error; cannot set progress function: ";
+      errstring += ::curl_easy_strerror(res);
+      this->SetError(errstring.c_str());
+      return false;
+      }
+
+    res = ::curl_easy_setopt(curl,
+      CURLOPT_PROGRESSDATA, reinterpret_cast<void*>(&helper));
+    if (res != CURLE_OK)
+      {
+      std::string errstring = "FILE(DOWNLOAD ) error; cannot set progress data: ";
+      errstring += ::curl_easy_strerror(res);
+      this->SetError(errstring.c_str());
+      return false;
+      }
+    }
+
   res = ::curl_easy_perform(curl);
+
   /* always cleanup */
   g_curl.release();
   ::curl_easy_cleanup(curl);
+
   if(statusVar.size())
     {
     cmOStringStream result;
@@ -2669,7 +2858,44 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
     this->Makefile->AddDefinition(statusVar.c_str(),
                                   result.str().c_str());
     }
+
   ::curl_global_cleanup();
+
+  // Explicitly flush/close so we can measure the md5 accurately.
+  //
+  fout.flush();
+  fout.close();
+
+  // Verify MD5 sum if requested:
+  //
+  if (!expectedMD5sum.empty())
+    {
+    char computedMD5[32];
+
+    if (!cmSystemTools::ComputeFileMD5(file.c_str(), computedMD5))
+      {
+      this->SetError("FILE(DOWNLOAD ) error; cannot compute MD5 sum on "
+        "downloaded file");
+      return false;
+      }
+
+    std::string actualMD5sum = cmSystemTools::LowerCase(
+      std::string(computedMD5, 32));
+
+    if (expectedMD5sum != actualMD5sum)
+      {
+      cmOStringStream oss;
+      oss << "FILE(DOWNLOAD ) error; expected and actual MD5 sums differ"
+        << std::endl
+        << "  for file: [" << file << "]" << std::endl
+        << "    expected MD5 sum: [" << expectedMD5sum << "]" << std::endl
+        << "      actual MD5 sum: [" << actualMD5sum << "]" << std::endl
+        ;
+      this->SetError(oss.str().c_str());
+      return false;
+      }
+    }
+
   if(chunkDebug.size())
     {
     chunkDebug.push_back(0);
@@ -2687,6 +2913,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
     this->Makefile->AddDefinition(verboseLog.c_str(),
                                   &*chunkDebug.begin());
     }
+
   return true;
 #else
   this->SetError("FILE(DOWNLOAD ) "

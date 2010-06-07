@@ -64,7 +64,9 @@ ExternalProject_Add(${proj}
   SVN_REPOSITORY ""
   SVN_REVISION ""
   TEST_COMMAND ""
+  TIMEOUT ""
   URL ""
+  URL_MD5 ""
   UPDATE_COMMAND ""
 )
 
@@ -95,6 +97,7 @@ endif()
 set(proj TutorialStep1-LocalTAR)
 ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tar"
+  URL_MD5 a87c5b47c0201c09ddfe1d5738fdb1e3
   LIST_SEPARATOR ::
   PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Step1Patch.cmake
   CMAKE_GENERATOR "${CMAKE_GENERATOR}"
@@ -106,6 +109,7 @@ ExternalProject_Add(${proj}
 set(proj TutorialStep1-LocalNoDirTAR)
 ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tar"
+  URL_MD5 d09e3d370c5c908fa035c30939ee438e
   LIST_SEPARATOR @@
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
              -DTEST_LIST:STRING=1@@2@@3
@@ -125,6 +129,7 @@ ExternalProject_Add_Step(${proj} mypatch
 set(proj TutorialStep1-LocalTGZ)
 ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tgz"
+  URL_MD5 38c648e817339c356f6be00eeed79bd0
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
   INSTALL_COMMAND ""
 )
@@ -132,6 +137,7 @@ ExternalProject_Add(${proj}
 set(proj TutorialStep1-LocalNoDirTGZ)
 ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tgz"
+  URL_MD5 0b8182edcecdf40bf1c9d71d7d259f78
   CMAKE_GENERATOR "${CMAKE_GENERATOR}"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
   INSTALL_COMMAND ""
@@ -210,6 +216,7 @@ if(do_cvs_tests)
   ExternalProject_Add(${proj}
     SOURCE_DIR ${local_cvs_repo}
     URL ${CMAKE_CURRENT_SOURCE_DIR}/cvsrepo.tgz
+    URL_MD5 55fc85825ffdd9ed2597123c68b79f7e
     BUILD_COMMAND ""
     CONFIGURE_COMMAND "${CVS_EXECUTABLE}" --version
     INSTALL_COMMAND ""
@@ -308,6 +315,7 @@ if(do_svn_tests)
   ExternalProject_Add(${proj}
     SOURCE_DIR ${local_svn_repo}
     URL ${CMAKE_CURRENT_SOURCE_DIR}/svnrepo.tgz
+    URL_MD5 2f468be4ed1fa96377fca0cc830819c4
     BUILD_COMMAND ""
     CONFIGURE_COMMAND "${Subversion_SVN_EXECUTABLE}" --version
     INSTALL_COMMAND ""
