@@ -18,6 +18,8 @@
 #    [SVN_REVISION rev]          # Revision to checkout from Subversion repo
 #    [SVN_USERNAME john ]        # Username for Subversion checkout and update
 #    [SVN_PASSWORD doe ]         # Password for Subversion checkout and update
+#    [GIT_REPOSITORY url]        # URL of git repo
+#    [GIT_TAG tag]               # Git branch name, commit id or tag
 #    [URL /.../src.tgz]          # Full path or URL of source
 #    [TIMEOUT seconds]           # Time allowed for file download operations
 #   #--Update/Patch step----------
@@ -204,6 +206,62 @@ define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
   "See documentation of the ExternalProject_Add() function in the "
   "ExternalProject module."
   )
+
+
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag src_name work_dir)
+  file(WRITE ${script_filename}
+"if(\"${git_tag}\" STREQUAL \"\")
+  message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
+endif()
+
+execute_process(
+  COMMAND \${CMAKE_COMMAND} -E remove_directory \"${source_dir}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" clone \"${git_repository}\" \"${src_name}\"
+  WORKING_DIRECTORY \"${work_dir}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to clone repository: '${git_repository}'\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" checkout ${git_tag}
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" submodule init
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to init submodules in: '${work_dir}/${src_name}'\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" submodule update --recursive
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
+endif()
+
+"
+)
+
+endfunction(_ep_write_gitclone_script)
 
 
 function(_ep_write_downloadfile_script script_filename remote local timeout)
@@ -613,6 +671,19 @@ function(_ep_add_mkdir_command name)
 endfunction(_ep_add_mkdir_command)
 
 
+function(_ep_get_git_version git_EXECUTABLE git_version_var)
+  if(git_EXECUTABLE)
+    execute_process(
+      COMMAND "${git_EXECUTABLE}" --version
+      OUTPUT_VARIABLE ov
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+    string(REGEX REPLACE "^git version (.+)$" "\\1" version "${ov}")
+    set(${git_version_var} "${version}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+
 function(_ep_add_download_command name)
   ExternalProject_Get_Property(${name} source_dir stamp_dir download_dir tmp_dir)
 
@@ -620,6 +691,7 @@ function(_ep_add_download_command name)
   get_property(cmd TARGET ${name} PROPERTY _EP_DOWNLOAD_COMMAND)
   get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
   get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
+  get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
   get_property(url TARGET ${name} PROPERTY _EP_URL)
 
   # TODO: Perhaps file:// should be copied to download dir before extraction.
@@ -683,6 +755,46 @@ function(_ep_add_download_command name)
     set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_revision}
       --username=${svn_username} --password=${svn_password} ${src_name})
     list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
+  elseif(git_repository)
+    find_package(Git)
+    if(NOT GIT_EXECUTABLE)
+      message(FATAL_ERROR "error: could not find git for clone of ${name}")
+    endif()
+
+    # The git submodule update '--recursive' flag requires git >= v1.6.5
+    #
+    _ep_get_git_version("${GIT_EXECUTABLE}" git_version)
+    if(git_version VERSION_LESS 1.6.5)
+      message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': git_version='${git_version}'")
+    endif()
+
+    get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
+    if(NOT git_tag)
+      set(git_tag "master")
+    endif()
+
+    set(repository ${git_repository})
+    set(module)
+    set(tag ${git_tag})
+    configure_file(
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${stamp_dir}/${name}-gitinfo.txt"
+      @ONLY
+      )
+
+    get_filename_component(src_name "${source_dir}" NAME)
+    get_filename_component(work_dir "${source_dir}" PATH)
+
+    # Since git clone doesn't succeed if the non-empty source_dir exists,
+    # create a cmake script to invoke as download command.
+    # The script will delete the source directory and then call git clone.
+    #
+    _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
+      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${src_name} ${work_dir}
+      )
+    set(comment "Performing download step (git clone) for '${name}'")
+    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
+    list(APPEND depends ${stamp_dir}/${name}-gitinfo.txt)
   elseif(url)
     get_filename_component(work_dir "${source_dir}" PATH)
     set(repository "external project URL")
@@ -741,6 +853,7 @@ function(_ep_add_update_command name)
   get_property(cmd TARGET ${name} PROPERTY _EP_UPDATE_COMMAND)
   get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
   get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
+  get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
 
   set(work_dir)
   set(comment)
@@ -768,6 +881,21 @@ function(_ep_add_update_command name)
     get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
     set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_revision}
       --username=${svn_username} --password=${svn_password})
+    set(always 1)
+  elseif(git_repository)
+    if(NOT GIT_EXECUTABLE)
+      message(FATAL_ERROR "error: could not find git for fetch of ${name}")
+    endif()
+    set(work_dir ${source_dir})
+    set(comment "Performing update step (git fetch) for '${name}'")
+    get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
+    if(NOT git_tag)
+      set(git_tag "master")
+    endif()
+    set(cmd ${GIT_EXECUTABLE} fetch
+      COMMAND ${GIT_EXECUTABLE} checkout ${git_tag}
+      COMMAND ${GIT_EXECUTABLE} submodule update --recursive
+      )
     set(always 1)
   endif()
 
