@@ -46,6 +46,7 @@ Changes since CMake 2.8.1
 - Recognize ARM ABI/EABI with GNU compilers
 - Search basic directories on "Generic" platform
 - Set MSVC* variables consistently on all generators, and test
+- Support SunPro C++ 5.11 on Linux (new compiler)
 - Support VS 10 Express (related to #10670)
 - Support compression with 'cmake -E tar'
 - Support multiple arguments in CC,CXX,FC environment variables
