@@ -32,7 +32,7 @@ private:
   virtual void NoteNewRevision();
   virtual bool UpdateImpl();
 
-  bool UpdateByPull();
+  bool UpdateByFetchAndReset();
   bool UpdateByCustom(std::string const& custom);
   bool UpdateInternal();
 

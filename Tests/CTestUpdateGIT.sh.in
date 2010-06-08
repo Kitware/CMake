@@ -1,5 +1,5 @@
 #!/bin/sh
-if test "x$1" = "xpull"; then
+if test "x$1" = "xpull" -o "x$1" = "xreset"; then
     "@GIT@" "$@" && sleep 1 && touch foo.txt
 else
     exec "@GIT@" "$@"

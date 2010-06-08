@@ -227,7 +227,9 @@ UpdateCommand: ${GIT}
 ")
 
 # Run the dashboard command line interface.
+set(UPDATE_NO_MODIFIED 1)
 run_dashboard_command_line(user-binary)
+set(UPDATE_NO_MODIFIED 0)
 
 rewind_source(user-source)
 modify_content(user-source)

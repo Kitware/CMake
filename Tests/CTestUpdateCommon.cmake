@@ -191,13 +191,17 @@ function(run_dashboard_command_line bin_dir)
 
   # Verify the updates reported by CTest.
   list(APPEND UPDATE_MAYBE Updated{subdir})
+  set(_modified Modified{CTestConfig.cmake})
+  if(UPDATE_NO_MODIFIED)
+    set(_modified "")
+  endif()
   check_updates(${bin_dir}
     Updated{foo.txt}
     Updated{bar.txt}
     Updated{zot.txt}
     Updated{subdir/foo.txt}
     Updated{subdir/bar.txt}
-    Modified{CTestConfig.cmake}
+    ${_modified}
     )
 endfunction(run_dashboard_command_line)
 

@@ -15,6 +15,7 @@ Changes since CMake 2.8.1
 - CTest: Report failure in Update.xml
 - CTest: Submit author email in Update.xml
 - CTest: Teach ctest_update about Git submodules
+- CTest: Teach ctest_update to handle Git upstream branch rewrites
 - Cygwin: Export all symbols with ENABLE_EXPORTS (#10122)
 - Do not list file names during 'cmake -E tar xz'
 - Documentation: Comply with "XHTML 1.0 Strict"
