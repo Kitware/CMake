@@ -85,7 +85,7 @@ void cmCTestGIT::NoteNewRevision()
 }
 
 //----------------------------------------------------------------------------
-bool cmCTestGIT::UpdateImpl()
+bool cmCTestGIT::UpdateByPull()
 {
   const char* git = this->CommandLineTool.c_str();
 
@@ -114,14 +114,51 @@ bool cmCTestGIT::UpdateImpl()
 
   OutputLogger out(this->Log, "pull-out> ");
   OutputLogger err(this->Log, "pull-err> ");
-  if(this->RunUpdateCommand(&git_pull[0], &out, &err))
+  return this->RunUpdateCommand(&git_pull[0], &out, &err);
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestGIT::UpdateByCustom(std::string const& custom)
+{
+  std::vector<std::string> git_custom_command;
+  cmSystemTools::ExpandListArgument(custom, git_custom_command, true);
+  std::vector<char const*> git_custom;
+  for(std::vector<std::string>::const_iterator
+        i = git_custom_command.begin(); i != git_custom_command.end(); ++i)
     {
-    char const* git_submodule[] = {git, "submodule", "update", 0};
-    OutputLogger out2(this->Log, "submodule-out> ");
-    OutputLogger err2(this->Log, "submodule-err> ");
-    return this->RunChild(git_submodule, &out2, &err2);
+    git_custom.push_back(i->c_str());
     }
-  return false;
+  git_custom.push_back(0);
+
+  OutputLogger custom_out(this->Log, "custom-out> ");
+  OutputLogger custom_err(this->Log, "custom-err> ");
+  return this->RunUpdateCommand(&git_custom[0], &custom_out, &custom_err);
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestGIT::UpdateInternal()
+{
+  std::string custom = this->CTest->GetCTestConfiguration("GITUpdateCustom");
+  if(!custom.empty())
+    {
+    return this->UpdateByCustom(custom);
+    }
+  return this->UpdateByPull();
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestGIT::UpdateImpl()
+{
+  if(!this->UpdateInternal())
+    {
+    return false;
+    }
+
+  const char* git = this->CommandLineTool.c_str();
+  char const* git_submodule[] = {git, "submodule", "update", 0};
+  OutputLogger submodule_out(this->Log, "submodule-out> ");
+  OutputLogger submodule_err(this->Log, "submodule-err> ");
+  return this->RunChild(git_submodule, &submodule_out, &submodule_err);
 }
 
 //----------------------------------------------------------------------------

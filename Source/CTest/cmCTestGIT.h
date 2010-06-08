@@ -32,6 +32,10 @@ private:
   virtual void NoteNewRevision();
   virtual bool UpdateImpl();
 
+  bool UpdateByPull();
+  bool UpdateByCustom(std::string const& custom);
+  bool UpdateInternal();
+
   void LoadRevisions();
   void LoadModifications();
 
