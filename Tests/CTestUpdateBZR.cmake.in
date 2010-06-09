@@ -142,7 +142,7 @@ run_dashboard_command_line(user-binary)
 # Test initial checkout and update with a dashboard script.
 message("Running CTest Dashboard Script...")
 
-create_dashboard_script(dashboard.cmake
+create_dashboard_script(dash-binary
   "# bzr command configuration
 set(CTEST_BZR_COMMAND \"${BZR}\")
 set(CTEST_CHECKOUT_COMMAND
@@ -150,4 +150,4 @@ set(CTEST_CHECKOUT_COMMAND
 ")
 
 # Run the dashboard script with CTest.
-run_dashboard_script(dashboard.cmake)
+run_dashboard_script(dash-binary)

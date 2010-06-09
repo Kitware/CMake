@@ -165,15 +165,15 @@ endfunction(create_build_tree)
 
 #-----------------------------------------------------------------------------
 # Function to write the dashboard test script.
-function(create_dashboard_script name custom_text)
+function(create_dashboard_script bin_dir custom_text)
   # Write the dashboard script.
-  file(WRITE ${TOP}/dashboard.cmake
+  file(WRITE ${TOP}/${bin_dir}.cmake
     "# CTest Dashboard Script
 set(CTEST_DASHBOARD_ROOT \"${TOP}\")
 set(CTEST_SITE test.site)
 set(CTEST_BUILD_NAME dash-test)
 set(CTEST_SOURCE_DIRECTORY \${CTEST_DASHBOARD_ROOT}/dash-source)
-set(CTEST_BINARY_DIRECTORY \${CTEST_DASHBOARD_ROOT}/dash-binary)
+set(CTEST_BINARY_DIRECTORY \${CTEST_DASHBOARD_ROOT}/${bin_dir})
 ${custom_text}
 # Start a dashboard and run the update step
 ctest_start(Experimental)
@@ -191,27 +191,31 @@ function(run_dashboard_command_line bin_dir)
 
   # Verify the updates reported by CTest.
   list(APPEND UPDATE_MAYBE Updated{subdir})
+  set(_modified Modified{CTestConfig.cmake})
+  if(UPDATE_NO_MODIFIED)
+    set(_modified "")
+  endif()
   check_updates(${bin_dir}
     Updated{foo.txt}
     Updated{bar.txt}
     Updated{zot.txt}
     Updated{subdir/foo.txt}
     Updated{subdir/bar.txt}
-    Modified{CTestConfig.cmake}
+    ${_modified}
     )
 endfunction(run_dashboard_command_line)
 
 #-----------------------------------------------------------------------------
 # Function to run the dashboard through a script
-function(run_dashboard_script name)
+function(run_dashboard_script bin_dir)
   run_child(
     WORKING_DIRECTORY ${TOP}
-    COMMAND ${CMAKE_CTEST_COMMAND} -S ${name} -V
+    COMMAND ${CMAKE_CTEST_COMMAND} -S ${bin_dir}.cmake -V
     )
 
   # Verify the updates reported by CTest.
   list(APPEND UPDATE_MAYBE Updated{subdir})
-  check_updates(dash-binary
+  check_updates(${bin_dir}
     Updated{foo.txt}
     Updated{bar.txt}
     Updated{zot.txt}

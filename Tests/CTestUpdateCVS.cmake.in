@@ -147,7 +147,7 @@ run_dashboard_command_line(user-binary)
 # Test initial checkout and update with a dashboard script.
 message("Running CTest Dashboard Script...")
 
-create_dashboard_script(dashboard.cmake
+create_dashboard_script(dash-binary
   "# CVS command configuration
 set(CTEST_CVS_COMMAND \"${CVS}\")
 set(CTEST_CVS_UPDATE_OPTIONS -dAP)
@@ -156,4 +156,4 @@ set(CTEST_CHECKOUT_COMMAND
 ")
 
 # Run the dashboard script with CTest.
-run_dashboard_script(dashboard.cmake)
+run_dashboard_script(dash-binary)
