@@ -48,35 +48,15 @@ public:
   virtual const char* GetFullDocumentation()
     {
       return
-        "  set_source_files_properties(file1 file2 ...\n"
+        "  set_source_files_properties([file1 [file2 [...]]]\n"
         "                              PROPERTIES prop1 value1\n"
-        "                              prop2 value2 ...)\n"
-        "Set properties on a file. The syntax for the command is to list all "
-        "the files you want "
-        "to change, and then provide the values you want to set next.  You "
-        "can make up your own properties as well.  "
-        "The following are used by CMake.  "
-        "The ABSTRACT flag (boolean) is used by some class wrapping "
-        "commands. "
-        "If WRAP_EXCLUDE (boolean) is true then many wrapping commands "
-        "will ignore this file. If GENERATED (boolean) is true then it "
-        "is not an error if this source file does not exist when it is "
-        "added to a target.  Obviously, "
-        "it must be created (presumably by a custom command) before the "
-        "target is built.  "
-        "If the HEADER_FILE_ONLY (boolean) property is true then the "
-        "file is not compiled.  This is useful if you want to add extra "
-        "non build files to an IDE. "
-        "OBJECT_DEPENDS (string) adds dependencies to the object file.  "
-        "COMPILE_FLAGS (string) is passed to the compiler as additional "
-        "command line arguments when the source file is compiled.  "
-        "LANGUAGE (string) CXX|C will change the default compiler used "
-        "to compile the source file. The languages used need to be enabled " 
-        "in the PROJECT command. "
-        "If SYMBOLIC (boolean) is set to true the build system will be "
-        "informed that the source file is not actually created on disk but "
-        "instead used as a symbolic name for a build rule.";
-      
+        "                              [prop2 value2 [...]])\n"
+        "Set properties associated with source files using a key/value "
+        "paired list.  "
+        "See properties documentation for those known to CMake.  "
+        "Unrecognized properties are ignored.  "
+        "Source file properties are visible only to targets "
+        "added in the same directory (CMakeLists.txt).";
     }
   
   cmTypeMacro(cmSetSourceFilesPropertiesCommand, cmCommand);
