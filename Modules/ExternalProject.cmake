@@ -738,6 +738,16 @@ function(_ep_get_git_version git_EXECUTABLE git_version_var)
 endfunction()
 
 
+function(_ep_is_dir_empty dir empty_var)
+  file(GLOB gr "${dir}/*")
+  if("${gr}" STREQUAL "")
+    set(${empty_var} 1 PARENT_SCOPE)
+  else()
+    set(${empty_var} 0 PARENT_SCOPE)
+  endif()
+endfunction()
+
+
 function(_ep_add_download_command name)
   ExternalProject_Get_Property(${name} source_dir stamp_dir download_dir tmp_dir)
 
@@ -890,7 +900,10 @@ function(_ep_add_download_command name)
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
     endif()
   else()
-    message(SEND_ERROR "error: no download info for '${name}' -- please specify existing SOURCE_DIR or one of URL, CVS_REPOSITORY and CVS_MODULE, SVN_REPOSITORY or DOWNLOAD_COMMAND")
+    _ep_is_dir_empty("${source_dir}" empty)
+    if(${empty})
+      message(SEND_ERROR "error: no download info for '${name}' -- please specify existing/non-empty SOURCE_DIR or one of URL, CVS_REPOSITORY and CVS_MODULE, SVN_REPOSITORY, GIT_REPOSITORY or DOWNLOAD_COMMAND")
+    endif()
   endif()
 
   ExternalProject_Add_Step(${name} download
