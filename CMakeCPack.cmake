@@ -27,9 +27,7 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   SET(CPACK_PACKAGE_VENDOR "Kitware")
   SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
   SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
-  SET(CPACK_PACKAGE_VERSION_MAJOR "${CMake_VERSION_MAJOR}")
-  SET(CPACK_PACKAGE_VERSION_MINOR "${CMake_VERSION_MINOR}")
-  SET(CPACK_PACKAGE_VERSION_PATCH "${CMake_VERSION_PATCH}")
+  SET(CPACK_PACKAGE_VERSION "${CMake_VERSION}")
   SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
   SET(CPACK_SOURCE_PACKAGE_FILE_NAME "cmake-${CMake_VERSION}")
   IF(NOT DEFINED CPACK_SYSTEM_NAME)
@@ -67,17 +65,6 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   ENDIF(UNIX)
 # cygwin specific packaging stuff
   IF(CYGWIN)
-    
-    # if we are on cygwin and have cpack, then force the 
-    # doc, data and man dirs to conform to cygwin style directories
-    SET(CMAKE_DOC_DIR "/share/doc/${CPACK_PACKAGE_FILE_NAME}")
-    SET(CMAKE_DATA_DIR "/share/${CPACK_PACKAGE_FILE_NAME}")
-    SET(CMAKE_MAN_DIR "/share/man")
-    # let the user know we just forced these values
-    MESSAGE(STATUS "Setup for Cygwin packaging")
-    MESSAGE(STATUS "Override cache CMAKE_DOC_DIR = ${CMAKE_DOC_DIR}")
-    MESSAGE(STATUS "Override cache CMAKE_DATA_DIR = ${CMAKE_DATA_DIR}")
-    MESSAGE(STATUS "Override cache CMAKE_MAN_DIR = ${CMAKE_MAN_DIR}")
     
     # setup the cygwin package name
     SET(CPACK_PACKAGE_NAME cmake)
