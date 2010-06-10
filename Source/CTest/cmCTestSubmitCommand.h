@@ -29,6 +29,7 @@ public:
     {
     this->PartsMentioned = false;
     this->FilesMentioned = false;
+    this->InternalTest = false;
     this->RetryCount = "";
     this->RetryDelay = "";
     }
@@ -107,6 +108,7 @@ protected:
   bool PartsMentioned;
   std::set<cmCTest::Part> Parts;
   bool FilesMentioned;
+  bool InternalTest;
   cmCTest::SetOfStrings Files;
   std::string RetryCount;
   std::string RetryDelay;
