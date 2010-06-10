@@ -1398,4 +1398,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_LINK_DEPENDENT_LIBRARY_DIRS",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_MAKE_INCLUDE_FROM_ROOT",
+                     cmProperty::VARIABLE,0,0);
 }
