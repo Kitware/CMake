@@ -1324,6 +1324,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_LINK_FLAGS",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_RESPONSE_FILE_LINK_FLAG",
+                     cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_STANDARD_LIBRARIES",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_STANDARD_LIBRARIES_INIT",
