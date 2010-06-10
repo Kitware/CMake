@@ -509,6 +509,19 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
 
+      if(cmSystemTools::IsOn(this->GetOption("InternalTest")) &&
+         cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+         this->CTest->GetCDashVersion().c_str(), "1.7"))
+        {
+        // mock failure output for internal test case
+        std::string mock_output = "<cdash version=\"1.7.0\">\n"
+          "  <status>ERROR</status>\n"
+          "  <message>Checksum failed for file.</message>\n"
+          "</cdash>\n";
+        chunk.clear();
+        chunk.assign(mock_output.begin(), mock_output.end());
+        }
+
       if ( chunk.size() > 0 )
         {
         cmCTestLog(this->CTest, DEBUG, "CURL output: ["
