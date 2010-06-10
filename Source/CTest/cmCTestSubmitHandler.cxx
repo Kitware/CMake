@@ -452,11 +452,19 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
         = url + ((url.find("?",0) == cmStdString::npos) ? "?" : "&")
         + "FileName=" + ofile;
 
-      char md5[33];
-      cmSystemTools::ComputeFileMD5(local_file.c_str(), md5);
-      md5[32] = 0;
       upload_as += "&MD5=";
-      upload_as += md5;
+
+      if(cmSystemTools::IsOn(this->GetOption("InternalTest")))
+        {
+        upload_as += "bad_md5sum";
+        }
+      else
+        {
+        char md5[33];
+        cmSystemTools::ComputeFileMD5(local_file.c_str(), md5);
+        md5[32] = 0;
+        upload_as += md5;
+        }
 
       struct stat st;
       if ( ::stat(local_file.c_str(), &st) )
@@ -518,23 +526,26 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       // If we time out or checksum fails, wait and retry
       if(res == CURLE_OPERATION_TIMEDOUT || this->HasErrors)
         {
-        std::string retryTime = this->GetOption("RetryTime") == NULL ?
-          "" : this->GetOption("RetryTime");
+        std::string retryDelay = this->GetOption("RetryDelay") == NULL ?
+          "" : this->GetOption("RetryDelay");
         std::string retryCount = this->GetOption("RetryCount") == NULL ?
           "" : this->GetOption("RetryCount");
 
-        int time = retryTime == "" ? atoi(this->CTest->GetCTestConfiguration(
-          "CTestSubmitRetryDelay").c_str()) : atoi(retryTime.c_str());
+        int delay = retryDelay == "" ? atoi(this->CTest->GetCTestConfiguration(
+          "CTestSubmitRetryDelay").c_str()) : atoi(retryDelay.c_str());
         int count = retryCount == "" ? atoi(this->CTest->GetCTestConfiguration(
           "CTestSubmitRetryCount").c_str()) : atoi(retryCount.c_str());
 
         for(int i = 0; i < count; i++)
           {
           cmCTestLog(this->CTest, HANDLER_OUTPUT,
-            "   Connection timed out, waiting " << time << " seconds...\n");
+            "   Connection timed out, waiting " << delay << " seconds...\n");
 
-          double stop = cmSystemTools::GetTime() + time;
-          while(cmSystemTools::GetTime() < stop) {} //wait <time> seconds
+          double stop = cmSystemTools::GetTime() + delay;
+          while(cmSystemTools::GetTime() < stop)
+            {
+            cmSystemTools::Delay(100);
+            }
 
           cmCTestLog(this->CTest, HANDLER_OUTPUT,
             "   Retry submission: Attempt " << (i + 1) << " of "
@@ -622,23 +633,20 @@ void cmCTestSubmitHandler
       return;
       }
     }
-  else
+  output = cmSystemTools::UpperCase(output);
+  if(output.find("WARNING") != std::string::npos)
     {
-    output = cmSystemTools::UpperCase(output);
-    if(output.find("WARNING") != std::string::npos)
-      {
-      this->HasWarnings = true;
-      }
-    if(output.find("ERROR") != std::string::npos)
-      {
-      this->HasErrors = true;
-      }
+    this->HasWarnings = true;
+    }
+  if(output.find("ERROR") != std::string::npos)
+    {
+    this->HasErrors = true;
+    }
 
-    if(this->HasWarnings || this->HasErrors)
-      {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Server Response:\n" <<
-            cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "\n");
-      }
+  if(this->HasWarnings || this->HasErrors)
+    {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Server Response:\n" <<
+          cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "\n");
     }
 }
 
