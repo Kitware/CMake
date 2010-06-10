@@ -1076,7 +1076,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   # Make sure CTest can handle a test with no newline in output.
   ADD_TEST(CTest.NoNewline
-    ${CMAKE_COMMAND} -E echo_append "This line has no newline!")
+    ${CMAKE_CMAKE_COMMAND} -E echo_append "This line has no newline!")
 
   # A simple test for ctest in script mode
   CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake.in"
