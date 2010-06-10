@@ -111,6 +111,7 @@ ENDIF(CMAKE_USE_ELF_PARSER)
 # Sources for CMakeLib
 #
 SET(SRCS
+  cmStandardIncludes.cxx
   cmBootstrapCommands.cxx
   cmCacheManager.cxx
   cmCacheManager.h

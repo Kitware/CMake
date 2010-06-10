@@ -166,6 +166,7 @@ CMAKE_UNUSED_SOURCES="\
 "
 
 CMAKE_CXX_SOURCES="\
+  cmStandardIncludes \
   cmake  \
   cmakemain \
   cmakewizard  \

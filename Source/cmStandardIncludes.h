@@ -241,7 +241,8 @@ typedef cmsys::String cmStdString;
 class cmOStringStream: public std::ostringstream
 {
 public:
-  cmOStringStream() {}
+  cmOStringStream();
+  ~cmOStringStream();
 private:
   cmOStringStream(const cmOStringStream&);
   void operator=(const cmOStringStream&);
