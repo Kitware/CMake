@@ -987,6 +987,14 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     return;
     }
 
+  /* Make sure we have something to run.  */
+  if(cp->NumberOfCommands < 1)
+    {
+    strcpy(cp->ErrorMessage, "No command");
+    cp->State = kwsysProcess_State_Error;
+    return;
+    }
+
   /* Initialize the control structure for a new process.  */
   if(!kwsysProcessInitialize(cp))
     {
