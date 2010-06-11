@@ -2038,8 +2038,12 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
     for(std::vector<std::string>::iterator f = files.begin();
         f != files.end(); ++f)
       {
-      extraMatches.insert(this->CTest->GetShortPathToFile(
-        f->c_str()));
+      if(this->ShouldIDoCoverage(f->c_str(),
+         cont->SourceDir.c_str(), cont->BinaryDir.c_str()))
+        {
+        extraMatches.insert(this->CTest->GetShortPathToFile(
+          f->c_str()));
+        }
       }
     }
 
