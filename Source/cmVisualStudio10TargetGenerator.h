@@ -77,6 +77,10 @@ private:
   void WriteGroupSources(const char* name,
                          std::vector<cmSourceFile*> const& sources,
                          std::vector<cmSourceGroup>& );
+  void AddMissingSourceGroups(std::set<cmSourceGroup*>& groupsUsed,
+                              const std::vector<cmSourceGroup>& allGroups);
+
+
 private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef std::map<cmStdString, Options*> OptionsMap;

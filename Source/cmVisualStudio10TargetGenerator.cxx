@@ -435,6 +435,9 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       none.push_back(sf);
       }
     }
+
+  this->AddMissingSourceGroups(groupsUsed, sourceGroups);
+
   // Write out group file
   std::string path =  this->Makefile->GetStartOutputDirectory();
   path += "/";
@@ -489,6 +492,52 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   if (fout.Close())
     {
     this->GlobalGenerator->FileReplacedDuringGenerate(path);
+    }
+}
+
+// Add to groupsUsed empty source groups that have non-empty children.
+void
+cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
+  std::set<cmSourceGroup*>& groupsUsed,
+  const std::vector<cmSourceGroup>& allGroups
+  )
+{
+  for(std::vector<cmSourceGroup>::const_iterator current = allGroups.begin();
+      current != allGroups.end(); ++current)
+    {
+    std::vector<cmSourceGroup> const& children = current->GetGroupChildren();
+    if(children.empty())
+      {
+      continue; // the group is really empty
+      }
+
+    this->AddMissingSourceGroups(groupsUsed, children);
+
+    cmSourceGroup* current_ptr = const_cast<cmSourceGroup*>(&(*current));
+    if(groupsUsed.find(current_ptr) != groupsUsed.end())
+      {
+      continue; // group has already been added to set
+      }
+
+    // check if it least one of the group's descendants is not empty
+    // (at least one child must already have been added)
+    std::vector<cmSourceGroup>::const_iterator child_it = children.begin();
+    while(child_it != children.end())
+      {
+      cmSourceGroup* child_ptr = const_cast<cmSourceGroup*>(&(*child_it));
+      if(groupsUsed.find(child_ptr) != groupsUsed.end())
+        {
+        break; // found a child that was already added => add current group too
+        }
+      child_it++;
+      }
+
+    if(child_it == children.end())
+      {
+      continue; // no descendants have source files => ignore this group
+      }
+
+    groupsUsed.insert(current_ptr);
     }
 }
 
