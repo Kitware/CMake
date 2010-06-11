@@ -1572,16 +1572,24 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     # If there is CMakeLists.txt in the binary tree, assume in-source build
     SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)
   ENDIF(EXISTS "${CMAKE_BINARY_DIR}/CMakeLists.txt")
-  IF(UNIX AND CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
-
-
+  SET(bootstrap "")
+  IF(CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
+    IF(UNIX)
+      SET(bootstrap ${CMake_SOURCE_DIR}/bootstrap)
+    ELSEIF(MSYS)
+      CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/bootstrap.bat.in
+                     ${CMAKE_CURRENT_BINARY_DIR}/bootstrap.bat @ONLY)
+      SET(bootstrap ${CMAKE_CURRENT_BINARY_DIR}/bootstrap.bat)
+    ENDIF()
+  ENDIF()
+  IF(bootstrap)
     ADD_TEST(BootstrapTest ${CMAKE_CTEST_COMMAND}
       --build-and-test
       ${CMake_SOURCE_DIR}
       ${CMake_BINARY_DIR}/Tests/BootstrapTest
       --build-nocmake
       --build-noclean
-      --build-makeprogram ${CMake_SOURCE_DIR}/bootstrap
+      --build-makeprogram ${bootstrap}
       --build-generator "${CMAKE_TEST_GENERATOR}"
       --test-command 
       ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
@@ -1595,7 +1603,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       SET_TESTS_PROPERTIES ( BootstrapTest
         PROPERTIES TIMEOUT 5400)
     ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-  ENDIF(UNIX AND CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
+  ENDIF()
 
   # fortran does not work for IDE builds because
   # CMAKE_STANDARD_LIBRARIES needs to be per language
