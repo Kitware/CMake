@@ -360,34 +360,6 @@ SET( QT_DEFINITIONS "")
 
 SET(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
 
-#  macro for asking qmake to process pro files
-MACRO(QT_QUERY_QMAKE outvar invar)
-  IF(QT_QMAKE_EXECUTABLE)
-    FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake/tmp.pro
-         "message(CMAKE_MESSAGE<$$${invar}>)")
-
-    # Invoke qmake with the tmp.pro program to get the desired
-    # information.  Use the same variable for both stdout and stderr
-    # to make sure we get the output on all platforms.
-    EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
-      WORKING_DIRECTORY  
-      ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake
-      OUTPUT_VARIABLE _qmake_query_output
-      RESULT_VARIABLE _qmake_result
-      ERROR_VARIABLE _qmake_query_output )
-
-    FILE(REMOVE_RECURSE 
-         "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake")
-
-    IF(_qmake_result)
-      MESSAGE(WARNING " querying qmake for ${invar}.  qmake reported:\n${_qmake_query_output}")
-    ELSE(_qmake_result)
-      STRING(REGEX REPLACE ".*CMAKE_MESSAGE<([^>]*).*" "\\1" ${outvar} "${_qmake_query_output}")
-    ENDIF(_qmake_result)
-
-  ENDIF(QT_QMAKE_EXECUTABLE)
-ENDMACRO(QT_QUERY_QMAKE)
-
 GET_FILENAME_COMPONENT(qt_install_version "[HKEY_CURRENT_USER\\Software\\trolltech\\Versions;DefaultQtVersion]" NAME)
 # check for qmake
 # Debian uses qmake-qt4
