@@ -5,6 +5,8 @@
 #  CMAKE_USE_WIN32_THREADS_INIT - using WIN32 threads?
 #  CMAKE_USE_PTHREADS_INIT    - are we using pthreads
 #  CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
+# For systems with multiple thread libraries, caller can set
+#  CMAKE_THREAD_PREFER_PTHREADS
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
@@ -24,11 +26,11 @@ INCLUDE (CheckLibraryExists)
 SET(Threads_FOUND FALSE)
 
 # Do we have sproc?
-IF(CMAKE_SYSTEM MATCHES IRIX)
+IF(CMAKE_SYSTEM MATCHES IRIX AND NOT CMAKE_THREAD_PREFER_PTHREAD)
   CHECK_INCLUDE_FILES("sys/types.h;sys/prctl.h"  CMAKE_HAVE_SPROC_H)
 ENDIF()
 
-IF(CMAKE_HAVE_SPROC_H)
+IF(CMAKE_HAVE_SPROC_H AND NOT CMAKE_THREAD_PREFER_PTHREAD)
   # We have sproc
   SET(CMAKE_USE_SPROC_INIT 1)
 ELSE()
