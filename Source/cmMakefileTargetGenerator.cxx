@@ -189,12 +189,15 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteCommonCodeRules()
 {
+  const char* root = (this->Makefile->IsOn("CMAKE_MAKE_INCLUDE_FROM_ROOT")?
+                      "$(CMAKE_BINARY_DIR)/" : "");
+
   // Include the dependencies for the target.
   std::string dependFileNameFull = this->TargetBuildDirectoryFull;
   dependFileNameFull += "/depend.make";
   *this->BuildFileStream
     << "# Include any dependencies generated for this target.\n"
-    << this->LocalGenerator->IncludeDirective << " "
+    << this->LocalGenerator->IncludeDirective << " " << root
     << this->Convert(dependFileNameFull.c_str(),
                      cmLocalGenerator::HOME_OUTPUT,
                      cmLocalGenerator::MAKEFILE)
@@ -205,7 +208,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     // Include the progress variables for the target.
     *this->BuildFileStream
       << "# Include the progress variables for this target.\n"
-      << this->LocalGenerator->IncludeDirective << " "
+      << this->LocalGenerator->IncludeDirective << " " << root
       << this->Convert(this->ProgressFileNameFull.c_str(),
                        cmLocalGenerator::HOME_OUTPUT,
                        cmLocalGenerator::MAKEFILE)
@@ -238,7 +241,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
   // Include the flags for the target.
   *this->BuildFileStream
     << "# Include the compile flags for this target's objects.\n"
-    << this->LocalGenerator->IncludeDirective << " "
+    << this->LocalGenerator->IncludeDirective << " " << root
     << this->Convert(this->FlagFileNameFull.c_str(),
                                      cmLocalGenerator::HOME_OUTPUT,
                                      cmLocalGenerator::MAKEFILE)
