@@ -1327,7 +1327,7 @@ public:
     this->NextObject =
       this->LocalGenerator->Convert(obj.c_str(),
                                     cmLocalGenerator::START_OUTPUT,
-                                    cmLocalGenerator::SHELL);
+                                    cmLocalGenerator::RESPONSE);
 
     // Roll over to next string if the limit will be exceeded.
     if(this->LengthLimit != std::string::npos &&
@@ -1621,6 +1621,17 @@ cmMakefileTargetGenerator
     std::vector<std::string> object_strings;
     this->WriteObjectsStrings(object_strings, responseFileLimit);
 
+    // Lookup the response file reference flag.
+    std::string responseFlagVar = "CMAKE_";
+    responseFlagVar += this->Target->GetLinkerLanguage(this->ConfigName);
+    responseFlagVar += "_RESPONSE_FILE_LINK_FLAG";
+    const char* responseFlag =
+      this->Makefile->GetDefinition(responseFlagVar.c_str());
+    if(!responseFlag)
+      {
+      responseFlag = "@";
+      }
+
     // Write a response file for each string.
     const char* sep = "";
     for(unsigned int i = 0; i < object_strings.size(); ++i)
@@ -1638,7 +1649,7 @@ cmMakefileTargetGenerator
       sep = " ";
 
       // Reference the response file.
-      buildObjs += "@";
+      buildObjs += responseFlag;
       buildObjs += this->Convert(objects_rsp.c_str(),
                                  cmLocalGenerator::NONE,
                                  cmLocalGenerator::SHELL);
