@@ -1470,13 +1470,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
       )
 
-    CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest3/test.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" @ONLY ESCAPE_QUOTES)
-    ADD_TEST(CTestTest3 ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTest3/testOutput.log"
-      )
-
     # these tests take a long time, make sure they have it
     # if timeouts have not already been set
     GET_TEST_PROPERTY(CTestTest TIMEOUT PREVIOUS_TIMEOUT)
@@ -1488,12 +1481,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     GET_TEST_PROPERTY(CTestTest2 TIMEOUT PREVIOUS_TIMEOUT)
     IF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
       SET_TESTS_PROPERTIES ( CTestTest2
-        PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
-    ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-
-    GET_TEST_PROPERTY(CTestTest3 TIMEOUT PREVIOUS_TIMEOUT)
-    IF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-      SET_TESTS_PROPERTIES ( CTestTest3
         PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
     ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS AND CMAKE_TESTS_CDASH_SERVER)
