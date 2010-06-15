@@ -39,6 +39,8 @@ public:
 
   std::string GetProcessOutput() { return this->ProcessOutput; }
 
+  bool IsStopTimePassed() { return this->StopTimePassed; }
+
   cmCTestTestHandler::cmCTestTestResult GetTestResults()
   { return this->TestResult; }
 
@@ -90,6 +92,7 @@ private:
   std::string TestCommand;
   std::string ActualCommand;
   std::vector<std::string> Arguments;
+  bool StopTimePassed;
 };
 
 inline int getNumWidth(size_t n)
