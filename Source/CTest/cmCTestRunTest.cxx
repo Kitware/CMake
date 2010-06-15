@@ -32,6 +32,7 @@ cmCTestRunTest::cmCTestRunTest(cmCTestTestHandler* handler)
   this->ProcessOutput = "";
   this->CompressedOutput = "";
   this->CompressionRatio = 2;
+  this->StopTimePassed = false;
 }
 
 cmCTestRunTest::~cmCTestRunTest()
@@ -436,8 +437,13 @@ bool cmCTestRunTest::StartTest(size_t total)
     }
   this->StartTime = this->CTest->CurrentTime();
 
-  return this->ForkProcess(this->ResolveTimeout(),
-                             &this->TestProperties->Environment);
+  double timeout = this->ResolveTimeout();
+
+  if(this->StopTimePassed)
+    {
+    return false;
+    }
+  return this->ForkProcess(timeout, &this->TestProperties->Environment);
 }
 
 //----------------------------------------------------------------------
@@ -569,8 +575,9 @@ double cmCTestRunTest::ResolveTimeout()
   if(stop_timeout <= 0 || stop_timeout > this->CTest->LastStopTimeout)
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "The stop time has been passed. "
-      "Exiting ctest." << std::endl);
-    exit(-1);
+      "Stopping all tests." << std::endl);
+    this->StopTimePassed = true;
+    return 0;
     }
   return timeout == 0 ? stop_timeout :
     (timeout < stop_timeout ? timeout : stop_timeout);

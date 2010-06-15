@@ -23,6 +23,7 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   this->ParallelLevel = 1;
   this->Completed = 0;
   this->RunningCount = 0;
+  this->StopTimePassed = false;
 }
 
 cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler()
@@ -69,6 +70,10 @@ void cmCTestMultiProcessHandler::RunTests()
   this->StartNextTests();
   while(this->Tests.size() != 0)
     {
+    if(this->StopTimePassed)
+      {
+      return;
+      }
     this->CheckOutput();
     this->StartNextTests();
     }
@@ -101,6 +106,12 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   if(testRun->StartTest(this->Total))
     {
     this->RunningTests.insert(testRun);
+    }
+  else if(testRun->IsStopTimePassed())
+    {
+    this->StopTimePassed = true;
+    delete testRun;
+    return;
     }
   else
     {
@@ -251,6 +262,10 @@ void cmCTestMultiProcessHandler::StartNextTests()
         }
       if(this->StartTest(*test))
         {
+        if(this->StopTimePassed)
+          {
+          return;
+          }
         numToStart -= processors;
         this->RunningCount += processors;
         }

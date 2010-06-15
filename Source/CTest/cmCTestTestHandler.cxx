@@ -1036,9 +1036,9 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   
   bool randomSchedule = this->CTest->GetScheduleType() == "Random";
   if(randomSchedule)
-  {
+    {
     srand((unsigned)time(0));
-  }
+    }
 
   for (ListOfTests::iterator it = this->TestList.begin();
        it != this->TestList.end(); ++it)

@@ -94,6 +94,7 @@ protected:
   //Number of tests that are complete
   size_t Completed;
   size_t RunningCount;
+  bool StopTimePassed;
   //list of test properties (indices concurrent to the test map)
   PropertiesMap Properties;
   std::map<int, bool> TestRunningMap;
