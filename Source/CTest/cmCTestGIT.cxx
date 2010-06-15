@@ -85,16 +85,14 @@ void cmCTestGIT::NoteNewRevision()
 }
 
 //----------------------------------------------------------------------------
-bool cmCTestGIT::UpdateImpl()
+bool cmCTestGIT::UpdateByFetchAndReset()
 {
   const char* git = this->CommandLineTool.c_str();
 
-  // Use "git pull" to update the working tree.
-  std::vector<char const*> git_pull;
-  git_pull.push_back(git);
-  git_pull.push_back("pull");
-
-  // TODO: if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
+  // Use "git fetch" to get remote commits.
+  std::vector<char const*> git_fetch;
+  git_fetch.push_back(git);
+  git_fetch.push_back("fetch");
 
   // Add user-specified update options.
   std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
@@ -106,22 +104,88 @@ bool cmCTestGIT::UpdateImpl()
   for(std::vector<cmStdString>::const_iterator ai = args.begin();
       ai != args.end(); ++ai)
     {
-    git_pull.push_back(ai->c_str());
+    git_fetch.push_back(ai->c_str());
     }
 
   // Sentinel argument.
-  git_pull.push_back(0);
+  git_fetch.push_back(0);
 
-  OutputLogger out(this->Log, "pull-out> ");
-  OutputLogger err(this->Log, "pull-err> ");
-  if(this->RunUpdateCommand(&git_pull[0], &out, &err))
+  // Fetch upstream refs.
+  OutputLogger fetch_out(this->Log, "fetch-out> ");
+  OutputLogger fetch_err(this->Log, "fetch-err> ");
+  if(!this->RunUpdateCommand(&git_fetch[0], &fetch_out, &fetch_err))
     {
-    char const* git_submodule[] = {git, "submodule", "update", 0};
-    OutputLogger out2(this->Log, "submodule-out> ");
-    OutputLogger err2(this->Log, "submodule-err> ");
-    return this->RunChild(git_submodule, &out2, &err2);
+    return false;
     }
-  return false;
+
+  // Identify the merge head that would be used by "git pull".
+  std::string sha1;
+  {
+  std::string fetch_head = this->SourceDirectory + "/.git/FETCH_HEAD";
+  std::ifstream fin(fetch_head.c_str(), std::ios::in | std::ios::binary);
+  std::string line;
+  while(sha1.empty() && cmSystemTools::GetLineFromStream(fin, line))
+    {
+    if(line.find("\tnot-for-merge\t") == line.npos)
+      {
+      std::string::size_type pos = line.find('\t');
+      if(pos != line.npos)
+        {
+        sha1 = line.substr(0, pos);
+        }
+      }
+    }
+  }
+
+  // Reset the local branch to point at that tracked from upstream.
+  char const* git_reset[] = {git, "reset", "--hard", sha1.c_str(), 0};
+  OutputLogger reset_out(this->Log, "reset-out> ");
+  OutputLogger reset_err(this->Log, "reset-err> ");
+  return this->RunChild(&git_reset[0], &reset_out, &reset_err);
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestGIT::UpdateByCustom(std::string const& custom)
+{
+  std::vector<std::string> git_custom_command;
+  cmSystemTools::ExpandListArgument(custom, git_custom_command, true);
+  std::vector<char const*> git_custom;
+  for(std::vector<std::string>::const_iterator
+        i = git_custom_command.begin(); i != git_custom_command.end(); ++i)
+    {
+    git_custom.push_back(i->c_str());
+    }
+  git_custom.push_back(0);
+
+  OutputLogger custom_out(this->Log, "custom-out> ");
+  OutputLogger custom_err(this->Log, "custom-err> ");
+  return this->RunUpdateCommand(&git_custom[0], &custom_out, &custom_err);
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestGIT::UpdateInternal()
+{
+  std::string custom = this->CTest->GetCTestConfiguration("GITUpdateCustom");
+  if(!custom.empty())
+    {
+    return this->UpdateByCustom(custom);
+    }
+  return this->UpdateByFetchAndReset();
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestGIT::UpdateImpl()
+{
+  if(!this->UpdateInternal())
+    {
+    return false;
+    }
+
+  const char* git = this->CommandLineTool.c_str();
+  char const* git_submodule[] = {git, "submodule", "update", 0};
+  OutputLogger submodule_out(this->Log, "submodule-out> ");
+  OutputLogger submodule_err(this->Log, "submodule-err> ");
+  return this->RunChild(git_submodule, &submodule_out, &submodule_err);
 }
 
 //----------------------------------------------------------------------------

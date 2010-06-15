@@ -127,7 +127,7 @@ run_dashboard_command_line(user-binary)
 # Test initial checkout and update with a dashboard script.
 message("Running CTest Dashboard Script...")
 
-create_dashboard_script(dashboard.cmake
+create_dashboard_script(dash-binary
   "# Subversion command configuration
 set(CTEST_SVN_COMMAND \"${SVN}\")
 set(CTEST_SVN_UPDATE_OPTIONS
@@ -137,4 +137,4 @@ set(CTEST_CHECKOUT_COMMAND
 ")
 
 # Run the dashboard script with CTest.
-run_dashboard_script(dashboard.cmake)
+run_dashboard_script(dash-binary)

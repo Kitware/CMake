@@ -192,15 +192,18 @@ run_child(
 
 #-----------------------------------------------------------------------------
 # Go back to before the changes so we can test updating.
-message("Backing up to revision 1...")
-run_child(
-  WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${GIT} reset --hard master~2
-  )
-run_child(
-  WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${GIT} submodule update
-  )
+macro(rewind_source src_dir)
+  message("Backing up to revision 1...")
+  run_child(
+    WORKING_DIRECTORY ${TOP}/${src_dir}
+    COMMAND ${GIT} reset --hard origin/master~2
+    )
+  run_child(
+    WORKING_DIRECTORY ${TOP}/${src_dir}
+    COMMAND ${GIT} submodule update
+    )
+endmacro(rewind_source)
+rewind_source(user-source)
 
 # Make sure pull does not try to rebase (which does not work with
 # modified files) even if ~/.gitconfig sets "branch.master.rebase".
@@ -224,13 +227,31 @@ UpdateCommand: ${GIT}
 ")
 
 # Run the dashboard command line interface.
+set(UPDATE_NO_MODIFIED 1)
 run_dashboard_command_line(user-binary)
+set(UPDATE_NO_MODIFIED 0)
+
+rewind_source(user-source)
+modify_content(user-source)
+
+message("Running CTest Dashboard Command Line (custom update)...")
+
+# Create the user build tree.
+create_build_tree(user-source user-binary-custom)
+file(APPEND ${TOP}/user-binary-custom/CTestConfiguration.ini
+  "# GIT command configuration
+UpdateCommand: ${GIT}
+GITUpdateCustom: ${GIT};pull;origin;master
+")
+
+# Run the dashboard command line interface.
+run_dashboard_command_line(user-binary-custom)
 
 #-----------------------------------------------------------------------------
 # Test initial checkout and update with a dashboard script.
 message("Running CTest Dashboard Script...")
 
-create_dashboard_script(dashboard.cmake
+create_dashboard_script(dash-binary
   "# git command configuration
 set(CTEST_GIT_COMMAND \"${GIT}\")
 set(CTEST_GIT_UPDATE_OPTIONS)
@@ -253,4 +274,20 @@ execute_process(
 ")
 
 # Run the dashboard script with CTest.
-run_dashboard_script(dashboard.cmake)
+run_dashboard_script(dash-binary)
+
+rewind_source(dash-source)
+
+#-----------------------------------------------------------------------------
+# Test custom update with a dashboard script.
+message("Running CTest Dashboard Script (custom update)...")
+
+create_dashboard_script(dash-binary-custom
+  "# git command configuration
+set(CTEST_GIT_COMMAND \"${GIT}\")
+set(CTEST_GIT_UPDATE_OPTIONS)
+set(CTEST_GIT_UPDATE_CUSTOM \${CTEST_GIT_COMMAND} pull origin master)
+")
+
+# Run the dashboard script with CTest.
+run_dashboard_script(dash-binary-custom)
