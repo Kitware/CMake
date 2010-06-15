@@ -395,6 +395,17 @@ SET(CMAKE_DOC_DIR "/doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CAC
 SET(CMAKE_MAN_DIR "/man" CACHE STRING
   "Install location for man pages (relative to prefix).")
 MARK_AS_ADVANCED(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
+IF(CYGWIN AND EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
+  # Force doc, data and man dirs to conform to cygwin layout.
+  SET(CMAKE_DOC_DIR  "/share/doc/cmake-${CMake_VERSION}")
+  SET(CMAKE_DATA_DIR "/share/cmake-${CMake_VERSION}")
+  SET(CMAKE_MAN_DIR  "/share/man")
+  # let the user know we just forced these values
+  MESSAGE(STATUS "Setup for Cygwin packaging")
+  MESSAGE(STATUS "Override cache CMAKE_DOC_DIR = ${CMAKE_DOC_DIR}")
+  MESSAGE(STATUS "Override cache CMAKE_DATA_DIR = ${CMAKE_DATA_DIR}")
+  MESSAGE(STATUS "Override cache CMAKE_MAN_DIR = ${CMAKE_MAN_DIR}")
+ENDIF()
 STRING(REGEX REPLACE "^/" "" CMake_DATA_DEST "${CMAKE_DATA_DIR}")
 STRING(REGEX REPLACE "^/" "" CMake_DOC_DEST "${CMAKE_DOC_DIR}")
 
