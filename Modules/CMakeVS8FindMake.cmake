@@ -28,9 +28,6 @@ FIND_PROGRAM(CMAKE_MAKE_PROGRAM
   "$ENV{ProgramFiles} (x86)/Microsoft Visual Studio 8/Common7/IDE"
   "$ENV{ProgramFiles} (x86)/Microsoft Visual Studio8/Common7/IDE"
   "/Program Files/Microsoft Visual Studio 8/Common7/IDE/"
-  PATHS
-  "$ENV{ProgramFiles} (x86)/Microsoft Visual Studio .NET/Common7/IDE"
-  "$ENV{ProgramFiles}/Microsoft Visual Studio .NET/Common7/IDE"
   )
 MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
 SET(MSVC80 1)
