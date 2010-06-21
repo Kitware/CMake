@@ -79,6 +79,7 @@ if(can_build_tutorial_step5)
     URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
     TEST_BEFORE_INSTALL 1
+    LOG_INSTALL 1
   )
   ExternalProject_Get_Property(${proj} install_dir)
   set(TutorialStep5_install_dir ${install_dir})
@@ -88,6 +89,7 @@ if(can_build_tutorial_step5)
     URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
     TEST_AFTER_INSTALL 1
+    LOG_TEST 1
   )
 endif()
 
@@ -104,6 +106,7 @@ ExternalProject_Add(${proj}
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
              -DTEST_LIST:STRING=A::B::C
   INSTALL_COMMAND ""
+  LOG_CONFIGURE 1
 )
 
 set(proj TutorialStep1-LocalNoDirTAR)
@@ -132,6 +135,7 @@ ExternalProject_Add(${proj}
   URL_MD5 38c648e817339c356f6be00eeed79bd0
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
   INSTALL_COMMAND ""
+  LOG_BUILD 1
 )
 
 set(proj TutorialStep1-LocalNoDirTGZ)
@@ -356,6 +360,7 @@ if(do_svn_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalSVNRepository"
+    LOG_DOWNLOAD 1
   )
 endif()
 
@@ -430,6 +435,7 @@ if(do_git_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
+    LOG_UPDATE 1
   )
 endif()
 
