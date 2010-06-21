@@ -418,6 +418,10 @@ if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
   unset(CUDA_VERSION CACHE)
   unset(CUDA_TOOLKIT_INCLUDE CACHE)
   unset(CUDA_CUDART_LIBRARY CACHE)
+  if(CUDA_VERSION VERSION_EQUAL "3.0")
+    # This only existed in the 3.0 version of the CUDA toolkit
+    unset(CUDA_CUDARTEMU_LIBRARY CACHE)
+  endif()
   unset(CUDA_CUDA_LIBRARY CACHE)
   unset(CUDA_cublas_LIBRARY CACHE)
   unset(CUDA_cublasemu_LIBRARY CACHE)
@@ -549,11 +553,28 @@ endmacro()
 
 # CUDA_LIBRARIES
 find_library_local_first(CUDA_CUDART_LIBRARY cudart "\"cudart\" library")
-set(CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
+if(CUDA_VERSION VERSION_EQUAL "3.0")
+  # The cudartemu library only existed for the 3.0 version of CUDA.
+  find_library_local_first(CUDA_CUDARTEMU_LIBRARY cudartemu "\"cudartemu\" library")
+  mark_as_advanced(
+    CUDA_CUDARTEMU_LIBRARY
+    )
+endif()
+# If we are using emulation mode and we found the cudartemu library then use
+# that one instead of cudart.
+if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
+  set(CUDA_LIBRARIES ${CUDA_CUDARTEMU_LIBRARY})
+else()
+  set(CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
+endif()
 if(APPLE)
   # We need to add the path to cudart to the linker using rpath, since the
   # library name for the cuda libraries is prepended with @rpath.
-  get_filename_component(_cuda_path_to_cudart "${CUDA_CUDART_LIBRARY}" PATH)
+  if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
+    get_filename_component(_cuda_path_to_cudart "${CUDA_CUDARTEMU_LIBRARY}" PATH)
+  else()
+    get_filename_component(_cuda_path_to_cudart "${CUDA_CUDART_LIBRARY}" PATH)
+  endif()
   if(_cuda_path_to_cudart)
     list(APPEND CUDA_LIBRARIES -Wl,-rpath "-Wl,${_cuda_path_to_cudart}")
   endif()
