@@ -128,6 +128,51 @@ if(is_cvs_checkout AND CVS_EXECUTABLE)
 endif()
 
 
+# If no GIT_EXECUTABLE, see if we can figure out which git was used
+# for the ctest_update step on this dashboard...
+#
+if(is_git_checkout AND NOT GIT_EXECUTABLE)
+  set(ctest_ini_file "")
+  set(exe "")
+
+  # Use the old name:
+  if(EXISTS "${CMake_BINARY_DIR}/DartConfiguration.tcl")
+    set(ctest_ini_file "${CMake_BINARY_DIR}/DartConfiguration.tcl")
+  endif()
+
+  # But if it exists, prefer the new name:
+  if(EXISTS "${CMake_BINARY_DIR}/CTestConfiguration.ini")
+    set(ctest_ini_file "${CMake_BINARY_DIR}/CTestConfiguration.ini")
+  endif()
+
+  # If there is a ctest ini file, read the update command or git command
+  # from it:
+  #
+  if(ctest_ini_file)
+    file(STRINGS "${ctest_ini_file}" lines REGEX "^GITCommand: (.*)$")
+    string(REGEX REPLACE "^GITCommand: (.*)$" "\\1" exe "${lines}")
+    if("${exe}" STREQUAL "GITCOMMAND-NOTFOUND")
+      set(exe "")
+    endif()
+
+    if(NOT exe)
+      file(STRINGS "${ctest_ini_file}" lines REGEX "^UpdateCommand: (.*)$")
+      string(REGEX REPLACE "^UpdateCommand: (.*)$" "\\1" exe "${lines}")
+      if("${exe}" STREQUAL "GITCOMMAND-NOTFOUND")
+        set(exe "")
+      endif()
+    endif()
+  endif()
+
+  if(exe)
+    set(GIT_EXECUTABLE "${exe}")
+    message("info: set GIT_EXECUTABLE to '${GIT_EXECUTABLE}' based on '${ctest_ini_file}'")
+  else()
+    message(FATAL_ERROR "could not determine GIT_EXECUTABLE based on '${ctest_ini_file}'...")
+  endif()
+endif()
+
+
 if(is_git_checkout AND GIT_EXECUTABLE)
   # Check with "git status" if there are any local modifications to the
   # CMake source tree:
@@ -151,6 +196,15 @@ if(is_git_checkout AND GIT_EXECUTABLE)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   message("=== output of 'git branch -a' ===")
   message("${git_branch_output}")
+  message("=== end output ===")
+  message("")
+
+  execute_process(COMMAND ${GIT_EXECUTABLE} log -1
+    WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+    OUTPUT_VARIABLE git_log_output
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message("=== output of 'git log -1' ===")
+  message("${git_log_output}")
   message("=== end output ===")
   message("")
 
