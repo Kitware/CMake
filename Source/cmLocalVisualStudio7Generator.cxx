@@ -270,9 +270,11 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
   const char* no_working_directory = 0;
-  this->Makefile->AddCustomCommandToOutput(stampName.c_str(), listFiles,
-                                           makefileIn.c_str(), commandLines,
-                                           comment.c_str(),
+  std::string fullpathStampName = this->Convert(stampName.c_str(), FULL,
+                                            UNCHANGED);
+  this->Makefile->AddCustomCommandToOutput(fullpathStampName.c_str(),
+                                           listFiles, makefileIn.c_str(),
+                                           commandLines, comment.c_str(),
                                            no_working_directory, true);
   if(cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str()))
     {
