@@ -154,8 +154,6 @@ void cmGlobalVisualStudio8Generator::AddCheckTarget()
     stampFile += "/";
     stampFile += cmake::GetCMakeFilesDirectoryPostSlash();
     stampFile += "generate.stamp";
-    stampFile = generators[0]->Convert(stampFile.c_str(),
-                                       cmLocalGenerator::START_OUTPUT);
     fout << stampFile << "\n";
     stamps.push_back(stampFile);
     }

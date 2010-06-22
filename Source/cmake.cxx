@@ -3906,6 +3906,9 @@ static bool cmakeCheckStampFile(const char* stampName)
       // build system is really out of date.
       std::cout << "CMake is re-running because " << stampName
                 << " is out-of-date.\n";
+      std::cout << "  the file '" << dep << "'\n";
+      std::cout << "  is newer than '" << stampDepends << "'\n";
+      std::cout << "  result='" << result << "'\n";
       return false;
       }
     }
