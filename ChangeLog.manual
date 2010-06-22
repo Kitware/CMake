@@ -1,3 +1,25 @@
+Changes in CMake 2.8.2-rc3 (since 2.8.2-rc2)
+--------------------------------------------
+Brad King (1):
+      Preserve ENV{MAKEFLAGS} in CMake script mode
+
+David Cole (4):
+      Remove "Microsoft Visual Studio .NET" from VS8 and VS9 find modules.
+      Use full path file names in generate.stamp.list.
+      Use full path file names to express dependencies.
+      Look in the ctest ini file for GitCommand.
+
+James Bigler (2):
+      Fixed: CUDA_VERSION_MAJOR/MINOR now computed after first run.
+      CUDA_VERSION variable passed to REGEX needs quotes to work when not defined.
+
+Mathieu Malaterre (1):
+      Cleanup FindDCMTK (using foreach). Fix linking on win32 static libs.
+
+Zach Mullen (2):
+      Do not exit if stoptime is passed.
+      Document ctest_build() TARGET option
+
 Changes in CMake 2.8.2-rc2 (since 2.8.2-rc1)
 --------------------------------------------
 
