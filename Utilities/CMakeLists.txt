@@ -139,7 +139,7 @@ if(BUILD_TESTING)
   mark_as_advanced(LIBXML2_XMLLINT_EXECUTABLE)
   if(LIBXML2_XMLLINT_EXECUTABLE)
     add_test(CMake.HTML
-      ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet ${HTML_FILES}
+      ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout ${HTML_FILES}
       )
   endif()
 endif()
