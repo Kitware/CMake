@@ -38,7 +38,7 @@ MARK_AS_ADVANCED(ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
 
 IF (ZLIB_INCLUDE_DIR AND EXISTS "${ZLIB_INCLUDE_DIR}/zlib.h")
     FILE(READ "${ZLIB_INCLUDE_DIR}/zlib.h" ZLIB_H)
-    STRING(REGEX REPLACE ".*#define ZLIB_VERSION \"([0-9]+)\\.([0-9]+)\\.([0-9]+)\".*" "\\1.\\2.\\3" ZLIB_VERSION_STRING "${ZLIB_H}")
+    STRING(REGEX REPLACE ".*#define ZLIB_VERSION \"([0-9]+)\\.([0-9]+)\\.([0-9]+).*" "\\1.\\2.\\3" ZLIB_VERSION_STRING "${ZLIB_H}")
 ENDIF()
 
 # handle the QUIETLY and REQUIRED arguments and set ZLIB_FOUND to TRUE if 
