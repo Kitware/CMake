@@ -162,16 +162,6 @@ cmake::cmake()
     }
 #endif
 
-  // If MAKEFLAGS are given in the environment, remove the environment
-  // variable.  This will prevent try-compile from succeeding when it
-  // should fail (if "-i" is an option).  We cannot simply test
-  // whether "-i" is given and remove it because some make programs
-  // encode the MAKEFLAGS variable in a strange way.
-  if(getenv("MAKEFLAGS"))
-    {
-    cmSystemTools::PutEnv("MAKEFLAGS=");
-    }
-
   this->Verbose = false;
   this->InTryCompile = false;
   this->CacheManager = new cmCacheManager(this);
@@ -2229,6 +2219,16 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
       {
       return 0;
       }
+    }
+
+  // If MAKEFLAGS are given in the environment, remove the environment
+  // variable.  This will prevent try-compile from succeeding when it
+  // should fail (if "-i" is an option).  We cannot simply test
+  // whether "-i" is given and remove it because some make programs
+  // encode the MAKEFLAGS variable in a strange way.
+  if(getenv("MAKEFLAGS"))
+    {
+    cmSystemTools::PutEnv("MAKEFLAGS=");
     }
 
   this->PreLoadCMakeFiles();
