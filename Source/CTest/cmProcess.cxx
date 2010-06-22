@@ -264,3 +264,9 @@ int cmProcess::ReportStatus()
   return result;
 
 }
+
+
+int cmProcess::GetExitException()
+{
+  return cmsysProcess_GetExitException(this->Process);
+}
