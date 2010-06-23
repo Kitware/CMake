@@ -92,6 +92,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->TestRunningMap[test] = true; // mark the test as running
   // now remove the test itself
   this->EraseTest(test);
+  this->RunningCount += GetProcessorsUsed(test);
 
   cmCTestRunTest* testRun = new cmCTestRunTest(this->TestHandler);
   testRun->SetIndex(test);
@@ -267,7 +268,6 @@ void cmCTestMultiProcessHandler::StartNextTests()
           return;
           }
         numToStart -= processors;
-        this->RunningCount += processors;
         }
       else
         {
