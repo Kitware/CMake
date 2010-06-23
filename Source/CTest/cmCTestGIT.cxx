@@ -317,8 +317,12 @@ protected:
    \n
        Log message indented by (4) spaces\n
        (even blank lines have the spaces)\n
+ [[
    \n
    [Diff format]
+ OR
+   \0
+ ]]
 
    The header may have more fields.  See 'git help diff-tree'.
 */
@@ -372,6 +376,11 @@ private:
     {
     if(this->Line.empty())
       {
+      if(this->Section == SectionBody && this->LineEnd == '\0')
+        {
+        // Skip SectionDiff
+        this->NextSection();
+        }
       this->NextSection();
       }
     else
