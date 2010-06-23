@@ -138,16 +138,24 @@ if(BUILD_TESTING)
   endif()
   mark_as_advanced(LIBXML2_XMLLINT_EXECUTABLE)
   if(LIBXML2_XMLLINT_EXECUTABLE)
-    # We provide the XHTML DTD and its dependencies in the 'xml'
-    # directory so that xmllint can run without network access.
-    # However, it's --path option accepts a space-separated list of
-    # paths so it cannot handle spaces in the path to the source tree.
-    # Therefore we run the tool with the current work directory set to
-    # the 'xml' directory and use '.' as the path.
-    add_test(CMake.HTML
-      ${CMAKE_CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/xml
-      ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet --path .
-      ${HTML_FILES}
-      )
+    execute_process(COMMAND ${LIBXML2_XMLLINT_EXECUTABLE} --help
+      OUTPUT_VARIABLE _help ERROR_VARIABLE _err)
+    if("${_help}" MATCHES "--path" AND "${_help}" MATCHES "--nonet")
+      # We provide the XHTML DTD and its dependencies in the 'xml'
+      # directory so that xmllint can run without network access.
+      # However, it's --path option accepts a space-separated list of
+      # paths so it cannot handle spaces in the path to the source tree.
+      # Therefore we run the tool with the current work directory set to
+      # the 'xml' directory and use '.' as the path.
+      add_test(CMake.HTML
+        ${CMAKE_CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/xml
+        ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet --path .
+        ${HTML_FILES}
+        )
+    else()
+      add_test(CMake.HTML
+        ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout ${HTML_FILES}
+        )
+    endif()
   endif()
 endif()
