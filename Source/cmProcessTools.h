@@ -55,6 +55,7 @@ public:
     bool IgnoreCR;
     std::ostream* Log;
     const char* Prefix;
+    char LineEnd;
     std::string Line;
     virtual bool ProcessChunk(const char* data, int length);
 

@@ -44,7 +44,7 @@ void cmProcessTools::RunProcess(struct cmsysProcess_s* cp,
 
 //----------------------------------------------------------------------------
 cmProcessTools::LineParser::LineParser(char sep, bool ignoreCR):
-  Separator(sep), IgnoreCR(ignoreCR), Log(0), Prefix(0)
+  Separator(sep), IgnoreCR(ignoreCR), Log(0), Prefix(0), LineEnd('\0')
 {
 }
 
@@ -61,8 +61,10 @@ bool cmProcessTools::LineParser::ProcessChunk(const char* first, int length)
   const char* last = first + length;
   for(const char* c = first; c != last; ++c)
     {
-    if(*c == this->Separator)
+    if(*c == this->Separator || *c == '\0')
       {
+      this->LineEnd = *c;
+
       // Log this line.
       if(this->Log && this->Prefix)
         {
