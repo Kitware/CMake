@@ -358,7 +358,7 @@ endif()
 endfunction(_ep_write_verifyfile_script)
 
 
-function(_ep_write_extractfile_script script_filename filename directory)
+function(_ep_write_extractfile_script script_filename name filename directory)
   set(args "")
 
   if(filename MATCHES "(\\.bz2|\\.tar\\.gz|\\.tgz|\\.zip)$")
@@ -391,10 +391,10 @@ endif()
 # Prepare a space for extracting:
 #
 set(i 1234)
-while(EXISTS \"\${directory}/../ex\${i}\")
+while(EXISTS \"\${directory}/../ex-${name}\${i}\")
   math(EXPR i \"\${i} + 1\")
 endwhile()
-set(ut_dir \"\${directory}/../ex\${i}\")
+set(ut_dir \"\${directory}/../ex-${name}\${i}\")
 file(MAKE_DIRECTORY \"\${ut_dir}\")
 
 # Extract it:
@@ -895,8 +895,7 @@ function(_ep_add_download_command name)
       endif()
       _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${md5}")
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake)
-      # TODO: Support other archive formats.
-      _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${file}" "${source_dir}")
+      _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${name}" "${file}" "${source_dir}")
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
     endif()
   else()
