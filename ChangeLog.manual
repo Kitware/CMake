@@ -1,4 +1,60 @@
-Changes since CMake 2.8.1
+Changes in CMake 2.8.2-rc3 (since 2.8.2-rc2)
+--------------------------------------------
+Brad King (1):
+      Preserve ENV{MAKEFLAGS} in CMake script mode
+
+David Cole (4):
+      Remove "Microsoft Visual Studio .NET" from VS8 and VS9 find modules.
+      Use full path file names in generate.stamp.list.
+      Use full path file names to express dependencies.
+      Look in the ctest ini file for GitCommand.
+
+James Bigler (2):
+      Fixed: CUDA_VERSION_MAJOR/MINOR now computed after first run.
+      CUDA_VERSION variable passed to REGEX needs quotes to work when not defined.
+
+Mathieu Malaterre (1):
+      Cleanup FindDCMTK (using foreach). Fix linking on win32 static libs.
+
+Zach Mullen (2):
+      Do not exit if stoptime is passed.
+      Document ctest_build() TARGET option
+
+Changes in CMake 2.8.2-rc2 (since 2.8.2-rc1)
+--------------------------------------------
+
+Bill Hoffman (1):
+      Make sure libarchive uses cmzlib and not the system libz if found.
+
+Brad King (12):
+      Use forward slashes for objects in response files
+      Use platform variable for response file flag
+      Use response file for objects on MinGW and MSYS
+      Generalize CTest.Update* test dashboard script helpers
+      ctest_update: Support custom Git update command
+      ctest_update: Support Git upstream branch rewrites
+      Fix CMake data and doc paths in Cygwin package
+      Document scope of source file properties
+      Run CTest.NoNewline test using built CMake
+      Tru64: Place cmOStringStream vtable uniquely (#10541)
+      Enable BootstrapTest on MSYS
+      Tru64: Use full-path include directives in Makefiles (#10569)
+
+Christoph Watzl (1):
+      Fix nested source groups with VS 10 (#9863)
+
+Clinton Stimpson (2):
+      Support pthreads on irix.
+      Remove macro for querying qmake for qmake variables.
+
+David Cole (2):
+      Fix issue #10346. Error if SOURCE_DIR is empty.
+      Remove CTestTest3.
+
+Zach Mullen (1):
+      Extra coverage glob should subtract the explicitly defined excluded files
+
+Changes in CMake 2.8.2-rc1 (since 2.8.1):
 - Build on Tru64 (#10542)
 - Build on mingw-w64
 - Build on old Sun (#10550, #10543)
