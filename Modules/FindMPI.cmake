@@ -263,13 +263,13 @@ elseif (MPI_COMPILE_CMDLINE)
 
   # Extract the set of libraries to link against from the link command
   # line
-  string(REGEX MATCHALL "-l([^\" ]+|\"[^\"]+\")" MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
+  string(REGEX MATCHALL "(^| )-l([^\" ]+|\"[^\"]+\")" MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
 
   # Determine full path names for all of the libraries that one needs
   # to link against in an MPI program
   set(MPI_LIBRARIES)
   foreach(LIB ${MPI_LIBNAMES})
-    string(REGEX REPLACE "^-l" "" LIB ${LIB})
+    string(REGEX REPLACE "^ ?-l" "" LIB ${LIB})
     set(MPI_LIB "MPI_LIB-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
     find_library(MPI_LIB ${LIB} HINTS ${MPI_LINK_PATH})
     if (MPI_LIB)
