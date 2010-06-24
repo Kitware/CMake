@@ -526,6 +526,8 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   if("${gp_tool}" STREQUAL "ldd")
     set(gp_cmd_args "")
     set(gp_regex "^[\t ]*[^\t ]+ => ([^\t ]+).*${eol_char}$")
+    set(gp_regex_error "not found${eol_char}$")
+    set(gp_regex_fallback "^[\t ]*([^\t ]+) => ([^\t ]+).*${eol_char}$")
     set(gp_regex_cmp_count 1)
     set(gp_tool_known 1)
   endif("${gp_tool}" STREQUAL "ldd")
@@ -533,6 +535,8 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   if("${gp_tool}" STREQUAL "otool")
     set(gp_cmd_args "-L")
     set(gp_regex "^\t([^\t]+) \\(compatibility version ([0-9]+.[0-9]+.[0-9]+), current version ([0-9]+.[0-9]+.[0-9]+)\\)${eol_char}$")
+    set(gp_regex_error "")
+    set(gp_regex_fallback "")
     set(gp_regex_cmp_count 3)
     set(gp_tool_known 1)
   endif("${gp_tool}" STREQUAL "otool")
@@ -540,6 +544,8 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   if("${gp_tool}" STREQUAL "dumpbin")
     set(gp_cmd_args "/dependents")
     set(gp_regex "^    ([^ ].*[Dd][Ll][Ll])${eol_char}$")
+    set(gp_regex_error "")
+    set(gp_regex_fallback "")
     set(gp_regex_cmp_count 1)
     set(gp_tool_known 1)
     set(ENV{VS_UNICODE_OUTPUT} "") # Block extra output from inside VS IDE.
@@ -629,8 +635,13 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   #
   foreach(candidate ${candidates})
   if("${candidate}" MATCHES "${gp_regex}")
+
     # Extract information from each candidate:
-    string(REGEX REPLACE "${gp_regex}" "\\1" raw_item "${candidate}")
+    if(gp_regex_error AND "${candidate}" MATCHES ${gp_regex_error})
+      string(REGEX REPLACE "${gp_regex_fallback}" "\\1" raw_item "${candidate}")
+    else(gp_regex_error AND "${candidate}" MATCHES ${gp_regex_error})
+      string(REGEX REPLACE "${gp_regex}" "\\1" raw_item "${candidate}")
+    endif(gp_regex_error AND "${candidate}" MATCHES ${gp_regex_error})
 
     if(gp_regex_cmp_count GREATER 1)
       string(REGEX REPLACE "${gp_regex}" "\\2" raw_compat_version "${candidate}")
