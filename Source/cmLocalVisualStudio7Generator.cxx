@@ -234,7 +234,9 @@ void cmLocalVisualStudio7Generator
 //----------------------------------------------------------------------------
 cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 {
-  std::string stampName = cmake::GetCMakeFilesDirectoryPostSlash();
+  std::string stampName = this->Makefile->GetCurrentOutputDirectory();
+  stampName += "/";
+  stampName += cmake::GetCMakeFilesDirectoryPostSlash();
   stampName += "generate.stamp";
   const char* dsprule =
     this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
