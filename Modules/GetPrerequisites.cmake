@@ -637,11 +637,11 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   if("${candidate}" MATCHES "${gp_regex}")
 
     # Extract information from each candidate:
-    if(gp_regex_error AND "${candidate}" MATCHES ${gp_regex_error})
+    if(gp_regex_error AND "${candidate}" MATCHES "${gp_regex_error}")
       string(REGEX REPLACE "${gp_regex_fallback}" "\\1" raw_item "${candidate}")
-    else(gp_regex_error AND "${candidate}" MATCHES ${gp_regex_error})
+    else(gp_regex_error AND "${candidate}" MATCHES "${gp_regex_error}")
       string(REGEX REPLACE "${gp_regex}" "\\1" raw_item "${candidate}")
-    endif(gp_regex_error AND "${candidate}" MATCHES ${gp_regex_error})
+    endif(gp_regex_error AND "${candidate}" MATCHES "${gp_regex_error}")
 
     if(gp_regex_cmp_count GREATER 1)
       string(REGEX REPLACE "${gp_regex}" "\\2" raw_compat_version "${candidate}")
