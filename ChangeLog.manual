@@ -1,3 +1,26 @@
+Changes in CMake 2.8.2-rc4 (since 2.8.2-rc3)
+--------------------------------------------
+Bill Hoffman (1):
+      Fix for bug #10859, ctest exit exception incorrectly reported.
+
+Brad King (3):
+      Run CMake.HTML test without net access (#10857)
+      Run CMake.HTML test with older xmllint (#10857)
+      CTest: Parse empty Git commits correctly
+
+David Cole (2):
+      Qualify name of extraction location with ExternalProject name.
+      For VS10: Really use full path file names.
+
+James Bigler (1):
+      Add support for the emulation version of the cudart library.
+
+Mathieu Malaterre (1):
+      Cleanup FindOpenSSL. Add support for win64 installation.
+
+Zach Mullen (1):
+      Parallel CTest hangs if serial test has depends
+
 Changes in CMake 2.8.2-rc3 (since 2.8.2-rc2)
 --------------------------------------------
 Brad King (1):
