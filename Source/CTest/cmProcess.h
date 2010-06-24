@@ -43,7 +43,7 @@ public:
   void SetId(int id) { this->Id = id;}
   int GetExitValue() { return this->ExitValue;}
   double GetTotalTime() { return this->TotalTime;}
-
+  int GetExitException();
   /**
    * Read one line of output but block for no more than timeout.
    * Returns:

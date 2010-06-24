@@ -221,7 +221,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     {
     outputTestErrorsToConsole = this->CTest->OutputTestOutputOnTestFailure;
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Exception: ");
-    switch ( retVal )
+    switch(this->TestProcess->GetExitException())
       {
       case cmsysProcess_Exception_Fault:
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "SegFault");
