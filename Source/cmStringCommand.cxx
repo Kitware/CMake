@@ -739,7 +739,7 @@ bool cmStringCommand
     alphabet = cmStringCommandDefaultAlphabet;
     }
 
-  double sizeofAlphabet = alphabet.size();
+  double sizeofAlphabet = static_cast<double>(alphabet.size());
   if ( sizeofAlphabet < 1 )
     {
     this->SetError("sub-command RANDOM invoked with bad alphabet.");
