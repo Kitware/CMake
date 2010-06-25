@@ -71,11 +71,8 @@ SET (QT_QTOPENGL_LIB_DEPENDENCIES ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY})
 
 ## system png
 IF(QT_QCONFIG MATCHES "system-png")
-  FIND_LIBRARY(QT_PNG_LIBRARY NAMES png)
-  MARK_AS_ADVANCED(QT_PNG_LIBRARY)
-  IF(QT_PNG_LIBRARY)
-    SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${QT_PNG_LIBRARY})
-  ENDIF(QT_PNG_LIBRARY)
+  find_package(PNG)
+  SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${PNG_LIBRARY})
 ENDIF(QT_QCONFIG MATCHES "system-png")
 
 
@@ -141,16 +138,6 @@ IF(QT_QCONFIG MATCHES "xfixes")
 ENDIF(QT_QCONFIG MATCHES "xfixes")
 
 
-## system-freetype
-IF(QT_QCONFIG MATCHES "system-freetype")
-  FIND_LIBRARY(QT_FREETYPE_LIBRARY NAMES freetype)
-  MARK_AS_ADVANCED(QT_FREETYPE_LIBRARY)
-  IF(QT_FREETYPE_LIBRARY)
-    SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${QT_FREETYPE_LIBRARY})
-  ENDIF(QT_FREETYPE_LIBRARY)
-ENDIF(QT_QCONFIG MATCHES "system-freetype")
-
-
 ## fontconfig
 IF(QT_QCONFIG MATCHES "fontconfig")
   FIND_LIBRARY(QT_FONTCONFIG_LIBRARY NAMES fontconfig)
@@ -161,13 +148,19 @@ IF(QT_QCONFIG MATCHES "fontconfig")
 ENDIF(QT_QCONFIG MATCHES "fontconfig")
 
 
+## system-freetype
+IF(QT_QCONFIG MATCHES "system-freetype")
+  find_package(Freetype)
+  if(FREETYPE_LIBRARIES)
+    SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${FREETYPE_LIBRARIES})
+  endif(FREETYPE_LIBRARIES)
+ENDIF(QT_QCONFIG MATCHES "system-freetype")
+
+
 ## system-zlib
 IF(QT_QCONFIG MATCHES "system-zlib")
-  FIND_LIBRARY(QT_ZLIB_LIBRARY NAMES z)
-  MARK_AS_ADVANCED(QT_ZLIB_LIBRARY)
-  IF(QT_ZLIB_LIBRARY)
-    SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} ${QT_ZLIB_LIBRARY})
-  ENDIF(QT_ZLIB_LIBRARY)
+  find_package(ZLIB)
+  SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} ${ZLIB_LIBRARIES})
 ENDIF(QT_QCONFIG MATCHES "system-zlib")
 
 
@@ -192,29 +185,11 @@ ENDIF(NOT Q_WS_WIN)
 ## dbus
 IF(QT_QCONFIG MATCHES "dbus")
 
-  # if the dbus library isn't found, we'll assume its not required to build
-  # shared Qt on Linux doesn't require it
-  IF(NOT QT_DBUS_LIBRARY)
-    EXECUTE_PROCESS(COMMAND pkg-config --libs-only-L dbus-1
-      OUTPUT_VARIABLE _dbus_query_output
-      RESULT_VARIABLE _dbus_result
-      ERROR_VARIABLE _dbus_query_output )
-
-    IF(_dbus_result MATCHES 0)
-      STRING(REPLACE "-L" "" _dbus_query_output "${_dbus_query_output}")
-      SEPARATE_ARGUMENTS(_dbus_query_output)
-    ELSE(_dbus_result MATCHES 0)
-      SET(_dbus_query_output)
-    ENDIF(_dbus_result MATCHES 0)
-
-    FIND_LIBRARY(QT_DBUS_LIBRARY NAMES dbus-1 PATHS ${_dbus_query_output} )
-
-    IF(QT_DBUS_LIBRARY)
-      SET(QT_QTDBUS_LIB_DEPENDENCIES ${QT_QTDBUS_LIB_DEPENDENCIES} ${QT_DBUS_LIBRARY})
-    ENDIF(QT_DBUS_LIBRARY)
-
-    MARK_AS_ADVANCED(QT_DBUS_LIBRARY)
-  ENDIF(NOT QT_DBUS_LIBRARY)
+  FIND_LIBRARY(QT_DBUS_LIBRARY NAMES dbus-1 )
+  IF(QT_DBUS_LIBRARY)
+    SET(QT_QTDBUS_LIB_DEPENDENCIES ${QT_QTDBUS_LIB_DEPENDENCIES} ${QT_DBUS_LIBRARY})
+  ENDIF(QT_DBUS_LIBRARY)
+  MARK_AS_ADVANCED(QT_DBUS_LIBRARY)
 
 ENDIF(QT_QCONFIG MATCHES "dbus")
 
@@ -222,29 +197,11 @@ ENDIF(QT_QCONFIG MATCHES "dbus")
 ## glib
 IF(QT_QCONFIG MATCHES "glib")
 
-  # if the glib libraries aren't found, we'll assume its not required to build
-  # shared Qt on Linux doesn't require it
-
   # Qt 4.2.0+ uses glib-2.0
-  IF(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
-    EXECUTE_PROCESS(COMMAND pkg-config --libs-only-L glib-2.0 gthread-2.0
-      OUTPUT_VARIABLE _glib_query_output
-      RESULT_VARIABLE _glib_result
-      ERROR_VARIABLE _glib_query_output )
-
-    IF(_glib_result MATCHES 0)
-      STRING(REPLACE "-L" "" _glib_query_output "${_glib_query_output}")
-      SEPARATE_ARGUMENTS(_glib_query_output)
-    ELSE(_glib_result MATCHES 0)
-      SET(_glib_query_output)
-    ENDIF(_glib_result MATCHES 0)
-
-    FIND_LIBRARY(QT_GLIB_LIBRARY NAMES glib-2.0 PATHS ${_glib_query_output} )
-    FIND_LIBRARY(QT_GTHREAD_LIBRARY NAMES gthread-2.0 PATHS ${_glib_query_output} )
-
-    MARK_AS_ADVANCED(QT_GLIB_LIBRARY)
-    MARK_AS_ADVANCED(QT_GTHREAD_LIBRARY)
-  ENDIF(NOT QT_GLIB_LIBRARY OR NOT QT_GTHREAD_LIBRARY)
+  FIND_LIBRARY(QT_GLIB_LIBRARY NAMES glib-2.0 )
+  FIND_LIBRARY(QT_GTHREAD_LIBRARY NAMES gthread-2.0 )
+  MARK_AS_ADVANCED(QT_GLIB_LIBRARY)
+  MARK_AS_ADVANCED(QT_GTHREAD_LIBRARY)
 
   IF(QT_GLIB_LIBRARY AND QT_GTHREAD_LIBRARY)
     SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES}
@@ -254,23 +211,8 @@ IF(QT_QCONFIG MATCHES "glib")
 
   # Qt 4.5+ also links to gobject-2.0
   IF(QT_VERSION_MINOR GREATER 4)
-     IF(NOT QT_GOBJECT_LIBRARY)
-       EXECUTE_PROCESS(COMMAND pkg-config --libs-only-L gobject-2.0
-         OUTPUT_VARIABLE _glib_query_output
-         RESULT_VARIABLE _glib_result
-         ERROR_VARIABLE _glib_query_output )
-
-       IF(_glib_result MATCHES 0)
-         STRING(REPLACE "-L" "" _glib_query_output "${_glib_query_output}")
-         SEPARATE_ARGUMENTS(_glib_query_output)
-       ELSE(_glib_result MATCHES 0)
-         SET(_glib_query_output)
-       ENDIF(_glib_result MATCHES 0)
-
-       FIND_LIBRARY(QT_GOBJECT_LIBRARY NAMES gobject-2.0 PATHS ${_glib_query_output} )
-
-       MARK_AS_ADVANCED(QT_GOBJECT_LIBRARY)
-     ENDIF(NOT QT_GOBJECT_LIBRARY)
+     FIND_LIBRARY(QT_GOBJECT_LIBRARY NAMES gobject-2.0 PATHS ${_glib_query_output} )
+     MARK_AS_ADVANCED(QT_GOBJECT_LIBRARY)
 
      IF(QT_GOBJECT_LIBRARY)
        SET(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES}
