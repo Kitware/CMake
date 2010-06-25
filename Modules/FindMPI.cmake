@@ -188,7 +188,7 @@ if (MPI_INCLUDE_PATH AND MPI_LIBRARY)
   # the cache, and we don't want to override those settings.
 elseif (MPI_COMPILE_CMDLINE)
   # Extract compile flags from the compile command line.
-  string(REGEX MATCHALL "-D([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_FLAGS "${MPI_COMPILE_CMDLINE}")
+  string(REGEX MATCHALL "(^| )-D([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_FLAGS "${MPI_COMPILE_CMDLINE}")
   set(MPI_COMPILE_FLAGS_WORK)
   foreach(FLAG ${MPI_ALL_COMPILE_FLAGS})
     if (MPI_COMPILE_FLAGS_WORK)
@@ -199,10 +199,10 @@ elseif (MPI_COMPILE_CMDLINE)
   endforeach(FLAG)
 
   # Extract include paths from compile command line
-  string(REGEX MATCHALL "-I([^\" ]+|\"[^\"]+\")" MPI_ALL_INCLUDE_PATHS "${MPI_COMPILE_CMDLINE}")
+  string(REGEX MATCHALL "(^| )-I([^\" ]+|\"[^\"]+\")" MPI_ALL_INCLUDE_PATHS "${MPI_COMPILE_CMDLINE}")
   set(MPI_INCLUDE_PATH_WORK)
   foreach(IPATH ${MPI_ALL_INCLUDE_PATHS})
-    string(REGEX REPLACE "^-I" "" IPATH ${IPATH})
+    string(REGEX REPLACE "^ ?-I" "" IPATH ${IPATH})
     string(REGEX REPLACE "//" "/" IPATH ${IPATH})
     list(APPEND MPI_INCLUDE_PATH_WORK ${IPATH})
   endforeach(IPATH)
@@ -230,10 +230,10 @@ elseif (MPI_COMPILE_CMDLINE)
   endif (NOT MPI_INCLUDE_PATH_WORK)
 
   # Extract linker paths from the link command line
-  string(REGEX MATCHALL "-L([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
+  string(REGEX MATCHALL "(^| )-L([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
   set(MPI_LINK_PATH)
   foreach(LPATH ${MPI_ALL_LINK_PATHS})
-    string(REGEX REPLACE "^-L" "" LPATH ${LPATH})
+    string(REGEX REPLACE "^ ?-L" "" LPATH ${LPATH})
     string(REGEX REPLACE "//" "/" LPATH ${LPATH})
     list(APPEND MPI_LINK_PATH ${LPATH})
   endforeach(LPATH)
@@ -251,7 +251,7 @@ elseif (MPI_COMPILE_CMDLINE)
   endif (NOT MPI_LINK_PATH)
 
   # Extract linker flags from the link command line
-  string(REGEX MATCHALL "-Wl,([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE}")
+  string(REGEX MATCHALL "(^| )-Wl,([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE}")
   set(MPI_LINK_FLAGS_WORK)
   foreach(FLAG ${MPI_ALL_LINK_FLAGS})
     if (MPI_LINK_FLAGS_WORK)
