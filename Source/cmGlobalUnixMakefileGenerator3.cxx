@@ -750,8 +750,9 @@ cmGlobalUnixMakefileGenerator3
                                 cmLocalGenerator::FULL,
                                 cmLocalGenerator::SHELL);
         progCmd << " ";
-        std::vector<int> &progFiles = this->ProgressMap[&t->second].Marks;
-        for (std::vector<int>::iterator i = progFiles.begin();
+        std::vector<unsigned long>& progFiles =
+          this->ProgressMap[&t->second].Marks;
+        for (std::vector<unsigned long>::iterator i = progFiles.begin();
               i != progFiles.end(); ++i)
           {
           progCmd << " " << *i;
