@@ -454,7 +454,7 @@ int cmcompress_compress(struct cmcompress_stream* cdata, void* buff, size_t n)
       {
       goto nomatch;
       }
-    disp = cdata->hsize_reg - i;    /* secondary hash (after G. Knott) */
+    disp = (int)(cdata->hsize_reg - i);    /* secondary hash (after G. Knott) */
     if ( i == 0 )
       {
       disp = 1;

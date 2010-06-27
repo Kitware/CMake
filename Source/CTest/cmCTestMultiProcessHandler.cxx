@@ -484,8 +484,9 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
       }
     else //we ignore their cost
       {
-      this->TestCosts[this->Tests.size()
-        - this->Properties[i->first]->Index].insert(i->first);
+      size_t index = this->Tests.size()
+        - static_cast<size_t>(this->Properties[i->first]->Index);
+      this->TestCosts[index].insert(i->first);
       }
     }
 }
