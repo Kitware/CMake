@@ -758,7 +758,7 @@ CreateComponentDescription(cmCPackComponent *component,
     }
     
     // Create the NSIS code to download this file on-the-fly.
-    unsigned totalSizeInKbytes = (totalSize + 512) / 1024;
+    unsigned long totalSizeInKbytes = (totalSize + 512) / 1024;
     if (totalSizeInKbytes == 0)
       {
       totalSizeInKbytes = 1;
