@@ -332,12 +332,6 @@ else (MPI_COMPILE_CMDLINE)
   set(MPI_LINK_FLAGS "" CACHE STRING "MPI linking flags")
 endif (MPI_INCLUDE_PATH AND MPI_LIBRARY)
 
-# on BlueGene/L the MPI lib is named libmpich.rts.a, there also these additional libs are required
-if("${MPI_LIBRARY}" MATCHES "mpich.rts")
-   set(MPI_EXTRA_LIBRARY ${MPI_EXTRA_LIBRARY} msglayer.rts devices.rts rts.rts devices.rts)
-   set(MPI_LIBRARY ${MPI_LIBRARY}  msglayer.rts devices.rts rts.rts devices.rts)
-endif("${MPI_LIBRARY}" MATCHES "mpich.rts")
-
 # Set up extra variables to conform to
 if (MPI_EXTRA_LIBRARY)
   set(MPI_LIBRARIES ${MPI_LIBRARY} ${MPI_EXTRA_LIBRARY})
