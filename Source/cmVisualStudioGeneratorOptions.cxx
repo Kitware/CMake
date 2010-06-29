@@ -183,7 +183,7 @@ cmVisualStudioGeneratorOptions
     {
     fout << prefix <<  "PreprocessorDefinitions=\"";
     }
-  const char* comma = "";
+  const char* sep = "";
   for(std::vector<std::string>::const_iterator di = this->Defines.begin();
       di != this->Defines.end(); ++di)
     {
@@ -208,15 +208,8 @@ cmVisualStudioGeneratorOptions
       define = cmVisualStudioGeneratorOptionsEscapeForXML(define.c_str());
       }
     // Store the flag in the project file.
-    fout << comma << define;
-    if(this->Version == 10)
-      {
-      comma = ";";
-      }
-    else
-      {
-      comma = ",";
-      }
+    fout << sep << define;
+    sep = ";";
     }
   if(this->Version == 10)
     {
