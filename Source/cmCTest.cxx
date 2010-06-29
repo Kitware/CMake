@@ -1169,7 +1169,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
         if ( tick % tick_line_len == 0 && tick > 0 )
           {
           cmCTestLog(this, HANDLER_OUTPUT, "  Size: "
-            << int((output->size() / 1024.0) + 1) << "K" << std::endl
+            << int((double(output->size()) / 1024.0) + 1) << "K" << std::endl
             << "    " << std::flush);
           }
         }
@@ -1181,7 +1181,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
       }
     }
   cmCTestLog(this, OUTPUT, " Size of output: "
-    << int(output->size() / 1024.0) << "K" << std::endl);
+    << int(double(output->size()) / 1024.0) << "K" << std::endl);
 
   cmsysProcess_WaitForExit(cp, 0);
 

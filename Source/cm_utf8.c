@@ -62,7 +62,7 @@ const char* cm_utf8_decode_character(const char* first, const char* last,
   /* Extract bits from this multi-byte character.  */
   {
   unsigned int uc = c & cm_utf8_mask[ones];
-  unsigned char left;
+  int left;
   for(left = ones-1; left && first != last; --left)
     {
     c = (unsigned char)*first++;
