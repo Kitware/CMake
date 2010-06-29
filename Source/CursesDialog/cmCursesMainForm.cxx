@@ -242,7 +242,7 @@ void cmCursesMainForm::RePost()
   // Assign the fields: 3 for each entry: label, new entry marker
   // ('*' or ' ') and entry widget
   this->Fields = new FIELD*[3*this->NumberOfVisibleEntries+1];
-  int cc;
+  size_t cc;
   for ( cc = 0; cc < 3 * this->NumberOfVisibleEntries+1; cc ++ )
     {
     this->Fields[cc] = 0;
@@ -529,7 +529,7 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   size_t i, curFieldLen = strlen(curField);
   size_t helpLen = strlen(help);
 
-  int width;
+  size_t width;
   if (x < cmCursesMainForm::MAX_WIDTH )
     {
     width = x;
@@ -796,7 +796,7 @@ void cmCursesMainForm::RemoveEntry(const char* value)
 void cmCursesMainForm::FillCacheManagerFromUI()
 {   
   size_t size = this->Entries->size();
-  for(int i=0; i < size; i++)
+  for(size_t i=0; i < size; i++)
     {
     cmCacheManager::CacheIterator it = 
       this->CMakeInstance->GetCacheManager()->GetCacheIterator(
@@ -961,7 +961,7 @@ void cmCursesMainForm::HandleInput()
       else if ( key == KEY_DOWN || key == ctrl('n') )
         {
         FIELD* cur = current_field(this->Form);
-        int findex = field_index(cur);
+        size_t findex = field_index(cur);
         if ( findex == 3*this->NumberOfVisibleEntries-1 )
           {
           continue;
@@ -1108,7 +1108,7 @@ void cmCursesMainForm::HandleInput()
         {
         this->OkToGenerate = false;
         FIELD* cur = current_field(this->Form);
-        int findex = field_index(cur);
+        size_t findex = field_index(cur);
 
         // make the next or prev. current field after deletion
         // each entry consists of fields: label, isnew, value
@@ -1199,7 +1199,7 @@ void cmCursesMainForm::JumpToCacheEntry(int idx, const char* astr)
     str = cmSystemTools::LowerCase(astr);
     }
 
-  if ( idx > this->NumberOfVisibleEntries )
+  if ( size_t(idx) > this->NumberOfVisibleEntries )
     {
     return;
     }
@@ -1232,7 +1232,7 @@ void cmCursesMainForm::JumpToCacheEntry(int idx, const char* astr)
           }
         }
       }
-    if ( findex >= 3* this->NumberOfVisibleEntries-1 )
+    if ( size_t(findex) >= 3* this->NumberOfVisibleEntries-1 )
       {
       set_current_field(this->Form, this->Fields[2]);
       }
