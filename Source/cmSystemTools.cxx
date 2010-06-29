@@ -1989,9 +1989,9 @@ namespace{
 # pragma warn -8066 /* unreachable code */
 #endif
   
-int copy_data(struct archive *ar, struct archive *aw)
+long copy_data(struct archive *ar, struct archive *aw)
 {
-  int r;
+  long r;
   const void *buff;
   size_t size;
   off_t offset;
@@ -2136,7 +2136,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
         }
       else if(*outiter == '\n' || *outiter == '\0')
         {
-        int length = outiter-out.begin();
+        std::vector<char>::size_type length = outiter-out.begin();
         if(length > 1 && *(outiter-1) == '\r')
           {
           --length;
@@ -2159,7 +2159,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
         }
       else if(*erriter == '\n' || *erriter == '\0')
         {
-        int length = erriter-err.begin();
+        std::vector<char>::size_type length = erriter-err.begin();
         if(length > 1 && *(erriter-1) == '\r')
           {
           --length;

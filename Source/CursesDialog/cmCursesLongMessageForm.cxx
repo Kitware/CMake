@@ -53,13 +53,13 @@ void cmCursesLongMessageForm::UpdateStatusBar()
   getmaxyx(stdscr, y, x);
 
   char bar[cmCursesMainForm::MAX_WIDTH];
-  int size = strlen(this->Title.c_str());
+  size_t size = strlen(this->Title.c_str());
   if ( size >= cmCursesMainForm::MAX_WIDTH )
     {
     size = cmCursesMainForm::MAX_WIDTH-1;
     }
   strncpy(bar, this->Title.c_str(), size);
-  for(int i=size-1; i<cmCursesMainForm::MAX_WIDTH; i++) bar[i] = ' ';
+  for(size_t i=size-1; i<cmCursesMainForm::MAX_WIDTH; i++) bar[i] = ' ';
 
   int width;
   if (x < cmCursesMainForm::MAX_WIDTH )
@@ -76,8 +76,8 @@ void cmCursesLongMessageForm::UpdateStatusBar()
   char version[cmCursesMainForm::MAX_WIDTH];
   char vertmp[128];
   sprintf(vertmp,"CMake Version %s", cmVersion::GetCMakeVersion());
-  int sideSpace = (width-strlen(vertmp));
-  for(int i=0; i<sideSpace; i++) { version[i] = ' '; }
+  size_t sideSpace = (width-strlen(vertmp));
+  for(size_t i=0; i<sideSpace; i++) { version[i] = ' '; }
   sprintf(version+sideSpace, "%s", vertmp);
   version[width] = '\0';
 
