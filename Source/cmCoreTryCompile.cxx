@@ -178,7 +178,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
 
     const char* rulesOverrideBase = "CMAKE_USER_MAKE_RULES_OVERRIDE";
     std::string rulesOverrideLang =
-      rulesOverrideBase + (lang ? std::string("_") + lang : "");
+      rulesOverrideBase + (lang ? std::string("_") + lang : std::string(""));
     if(const char* rulesOverridePath =
        this->Makefile->GetDefinition(rulesOverrideLang.c_str()))
       {
