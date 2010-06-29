@@ -141,12 +141,6 @@ IF(COMMAND SET_PROPERTY)
     "KWSYS_HEADER(%)=<${KWSYS_NAMESPACE}/%>"
     )
 ENDIF(COMMAND SET_PROPERTY)
-# add option to disable memory cleanup at exit of putenv memory
-IF(DEFINED KWSYS_DO_NOT_CLEAN_PUTENV)
-  SET(KWSYS_DO_NOT_CLEAN_PUTENV 1)
-ELSE(DEFINED KWSYS_DO_NOT_CLEAN_PUTENV)
-  SET(KWSYS_DO_NOT_CLEAN_PUTENV 0)
-ENDIF(DEFINED KWSYS_DO_NOT_CLEAN_PUTENV)
 
 # Select library components.
 IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
@@ -605,6 +599,23 @@ ELSE(KWSYS_BUILD_SHARED)
 ENDIF(KWSYS_BUILD_SHARED)
 
 #-----------------------------------------------------------------------------
+# Configure some implementation details.
+
+KWSYS_PLATFORM_C_TEST(KWSYS_C_HAS_PTRDIFF_T
+  "Checking whether C compiler has ptrdiff_t in stddef.h" DIRECT)
+KWSYS_PLATFORM_C_TEST(KWSYS_C_HAS_SSIZE_T
+  "Checking whether C compiler has ssize_t in unistd.h" DIRECT)
+SET_SOURCE_FILES_PROPERTIES(ProcessUNIX.c System.c PROPERTIES
+  COMPILE_FLAGS "-DKWSYS_C_HAS_PTRDIFF_T=${KWSYS_C_HAS_PTRDIFF_T} -DKWSYS_C_HAS_SSIZE_T=${KWSYS_C_HAS_SSIZE_T}"
+  )
+
+IF(KWSYS_DO_NOT_CLEAN_PUTENV)
+  # Disable cleanup of putenv memory for issues with GCOV.
+  SET_SOURCE_FILES_PROPERTIES(SystemTools.cxx PROPERTIES
+    COMPILE_FLAGS -DKWSYS_DO_NOT_CLEAN_PUTENV=1)
+ENDIF(KWSYS_DO_NOT_CLEAN_PUTENV)
+
+#-----------------------------------------------------------------------------
 # Choose a directory for the generated headers.
 IF(NOT KWSYS_HEADER_ROOT)
   SET(KWSYS_HEADER_ROOT "${PROJECT_BINARY_DIR}")
@@ -782,15 +793,6 @@ IF(KWSYS_USE_Process)
   ELSE(NOT UNIX)
     # Use the UNIX implementation.
     SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessUNIX.c)
-
-    # Help ProcessUNIX.c compile properly on all platforms.
-    KWSYS_PLATFORM_C_TEST(KWSYS_C_HAS_PTRDIFF_T
-      "Checking whether C compiler has ptrdiff_t in stddef.h" DIRECT)
-    KWSYS_PLATFORM_C_TEST(KWSYS_C_HAS_SSIZE_T
-      "Checking whether C compiler has ssize_t in unistd.h" DIRECT)
-    SET_SOURCE_FILES_PROPERTIES(ProcessUNIX.c PROPERTIES
-      COMPILE_FLAGS "-DKWSYS_C_HAS_PTRDIFF_T=${KWSYS_C_HAS_PTRDIFF_T} -DKWSYS_C_HAS_SSIZE_T=${KWSYS_C_HAS_SSIZE_T}"
-      )
   ENDIF(NOT UNIX)
 ENDIF(KWSYS_USE_Process)
 
