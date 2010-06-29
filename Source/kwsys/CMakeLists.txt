@@ -141,12 +141,6 @@ IF(COMMAND SET_PROPERTY)
     "KWSYS_HEADER(%)=<${KWSYS_NAMESPACE}/%>"
     )
 ENDIF(COMMAND SET_PROPERTY)
-# add option to disable memory cleanup at exit of putenv memory
-IF(DEFINED KWSYS_DO_NOT_CLEAN_PUTENV)
-  SET(KWSYS_DO_NOT_CLEAN_PUTENV 1)
-ELSE(DEFINED KWSYS_DO_NOT_CLEAN_PUTENV)
-  SET(KWSYS_DO_NOT_CLEAN_PUTENV 0)
-ENDIF(DEFINED KWSYS_DO_NOT_CLEAN_PUTENV)
 
 # Select library components.
 IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
@@ -603,6 +597,15 @@ ELSE(KWSYS_BUILD_SHARED)
   SET(KWSYS_BUILD_SHARED 0)
   SET(KWSYS_LIBRARY_TYPE STATIC)
 ENDIF(KWSYS_BUILD_SHARED)
+
+#-----------------------------------------------------------------------------
+# Configure some implementation details.
+
+IF(KWSYS_DO_NOT_CLEAN_PUTENV)
+  # Disable cleanup of putenv memory for issues with GCOV.
+  SET_SOURCE_FILES_PROPERTIES(SystemTools.cxx PROPERTIES
+    COMPILE_FLAGS -DKWSYS_DO_NOT_CLEAN_PUTENV=1)
+ENDIF(KWSYS_DO_NOT_CLEAN_PUTENV)
 
 #-----------------------------------------------------------------------------
 # Choose a directory for the generated headers.
