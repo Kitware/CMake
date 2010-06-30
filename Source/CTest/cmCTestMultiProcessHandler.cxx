@@ -611,7 +611,7 @@ int cmCTestMultiProcessHandler::FindMaxIndex()
 //Returns true if no cycles exist in the dependency graph
 bool cmCTestMultiProcessHandler::CheckCycles()
 {
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "Checking test dependency graph..." << std::endl);
   for(TestMap::iterator it = this->Tests.begin();
       it != this->Tests.end(); ++it)
@@ -619,34 +619,29 @@ bool cmCTestMultiProcessHandler::CheckCycles()
     //DFS from each element to itself
     std::stack<int> s;
     std::vector<int> visited;
+
     s.push(it->first);
-    visited.push_back(it->first);
 
     while(!s.empty())
       {
       int test = s.top();
       s.pop();
-      
+
       for(TestSet::iterator d = this->Tests[test].begin();
           d != this->Tests[test].end(); ++d)
         {
-        s.push(*d);
-        for(std::vector<int>::iterator v = visited.begin();
-            v != visited.end(); ++v)
+        if(std::find(visited.begin(), visited.end(), *d) != visited.end())
           {
-          if(*v == *d)
-            {
-            //cycle exists
-            cmCTestLog(this->CTest, ERROR_MESSAGE, "Error: a cycle exists in "
-              "the test dependency graph for the test \""
-              << this->Properties[*d]->Name << "\"." << std::endl
-              << "Please fix the cycle and run ctest again." << std::endl);
-            return false;
-            }
+          //cycle exists
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Error: a cycle exists in "
+            "the test dependency graph for the test \""
+            << this->Properties[it->first]->Name << "\"." << std::endl
+            << "Please fix the cycle and run ctest again." << std::endl);
+          return false;
           }
-        visited.push_back(*d);
+        s.push(*d);
         }
-      visited.pop_back();
+      visited.push_back(test);
       }
     }
   return true;
