@@ -1097,6 +1097,7 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     FOREACH(n 1 2 3 4 5 6 ${KWSYS_TEST_PROCESS_7})
       ADD_TEST(kwsys.testProcess-${n} ${EXEC_DIR}/${KWSYS_NAMESPACE}TestProcess ${n})
       KWSYS_SET_PROPERTY(TEST kwsys.testProcess-${n} PROPERTY LABELS ${KWSYS_LABELS_TEST})
+      SET_TESTS_PROPERTIES(kwsys.testProcess-${n} PROPERTIES TIMEOUT 120)
     ENDFOREACH(n)
 
     # Some Apple compilers produce bad optimizations in this source.
