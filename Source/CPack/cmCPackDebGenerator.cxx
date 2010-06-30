@@ -135,7 +135,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   // now add all directories which have to be compressed
   // collect all top level install dirs for that
   // e.g. /opt/bin/foo, /usr/bin/bar and /usr/bin/baz would give /usr and /opt
-  int topLevelLength = strlen(toplevel);
+  size_t topLevelLength = strlen(toplevel);
   std::set<std::string> installDirs;
   for (std::vector<std::string>::const_iterator fileIt = files.begin(); 
        fileIt != files.end(); ++ fileIt )
@@ -371,7 +371,7 @@ static const char * ar_rname(const char *path)
 typedef struct ar_hdr HDR;
 static char ar_hb[sizeof(HDR) + 1];        /* real header */
 
-static int ar_already_written;
+static size_t ar_already_written;
 
 /* copy_ar --
  *      Copy size bytes from one file to another - taking care to handle the
@@ -431,7 +431,7 @@ static int put_arobj(CF *cfp, struct stat *sb)
 
  /* If not truncating names and the name is too long or contains
   * a space, use extended format 1.   */
-  unsigned int lname = strlen(name);
+  size_t lname = strlen(name);
   uid_t uid = sb->st_uid;
   gid_t gid = sb->st_gid;
   if (uid > USHRT_MAX) {
@@ -441,7 +441,7 @@ static int put_arobj(CF *cfp, struct stat *sb)
     gid = USHRT_MAX;
     }
   if (lname > sizeof(hdr->ar_name) || strchr(name, ' '))
-    (void)sprintf(ar_hb, HDR1, AR_EFMT1, lname,
+    (void)sprintf(ar_hb, HDR1, AR_EFMT1, (int)lname,
                   (long int)sb->st_mtime, uid, gid, sb->st_mode,
                   (long long)sb->st_size + lname, ARFMAG);
     else {
