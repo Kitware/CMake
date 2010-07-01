@@ -23,10 +23,11 @@
  */
 class cmCTestMultiProcessHandler 
 {
+  friend class TestComparator;
 public:
   struct TestSet : public std::set<int> {};
   struct TestMap : public std::map<int, TestSet> {};
-  struct TestCostMap : public std::map<float, TestSet> {};
+  struct TestList : public std::vector<int> {};
   struct PropertiesMap : public 
      std::map<int, cmCTestTestHandler::cmCTestTestProperties*> {};
 
@@ -88,7 +89,7 @@ protected:
   void UnlockResources(int index);
   // map from test number to set of depend tests
   TestMap Tests;
-  TestCostMap TestCosts;
+  TestList SortedTests;
   //Total number of tests we'll be running
   size_t Total;
   //Number of tests that are complete

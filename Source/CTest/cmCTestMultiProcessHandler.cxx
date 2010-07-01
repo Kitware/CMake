@@ -18,6 +18,23 @@
 #include <stack>
 #include <float.h>
 
+class TestComparator
+{
+public:
+  TestComparator(cmCTestMultiProcessHandler* handler) : Handler(handler) {}
+  ~TestComparator() {}
+
+  // Sorts tests in descending order of cost
+  bool operator() (int index1, int index2) const
+    {
+    return Handler->Properties[index1]->Cost >
+      Handler->Properties[index2]->Cost;
+    }
+
+private:
+  cmCTestMultiProcessHandler* Handler;
+};
+
 cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 {
   this->ParallelLevel = 1;
@@ -154,15 +171,8 @@ void cmCTestMultiProcessHandler::UnlockResources(int index)
 void cmCTestMultiProcessHandler::EraseTest(int test)
 {
   this->Tests.erase(test);
-  for(TestCostMap::iterator i = this->TestCosts.begin();
-      i != this->TestCosts.end(); ++i)
-    {
-    if(i->second.find(test) != i->second.end())
-      {
-      i->second.erase(test);
-      return;
-      }
-    }
+  this->SortedTests.erase(
+    std::find(this->SortedTests.begin(), this->SortedTests.end(), test));
 }
 
 //---------------------------------------------------------
@@ -244,41 +254,36 @@ void cmCTestMultiProcessHandler::StartNextTests()
     return;
     }
 
-  for(TestCostMap::reverse_iterator i = this->TestCosts.rbegin();
-      i != this->TestCosts.rend(); ++i)
+  TestList copy = this->SortedTests;
+  for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
     {
-    TestSet tests = i->second; //copy the test set
-    for(TestSet::iterator test = tests.begin();
-        test != tests.end(); ++test)
+    //in case this test has already been started due to dependency
+    if(this->TestRunningMap[*test] || this->TestFinishMap[*test])
       {
-      //in case this test has already been started due to dependency
-      if(this->TestRunningMap[*test] || this->TestFinishMap[*test])
-        {
-        continue;
-        }
-      size_t processors = GetProcessorsUsed(*test);
-      if(processors > numToStart)
-        {
-        return;
-        }
-      if(this->StartTest(*test))
-        {
-        if(this->StopTimePassed)
-          {
-          return;
-          }
-        numToStart -= processors;
-        }
-      else
-        {
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
-                   << "Test did not start waiting on depends to finish: "
-                   << *test << "\n");
-        }
-      if(numToStart == 0)
+      continue;
+      }
+    size_t processors = GetProcessorsUsed(*test);
+    if(processors > numToStart)
+      {
+      return;
+      }
+    if(this->StartTest(*test))
+      {
+      if(this->StopTimePassed)
         {
         return;
         }
+      numToStart -= processors;
+      }
+    else
+      {
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
+                 << "Test did not start waiting on depends to finish: "
+                 << *test << "\n");
+      }
+    if(numToStart == 0)
+      {
+      return;
       }
     }
 }
@@ -468,26 +473,21 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
   for(TestMap::iterator i = this->Tests.begin();
       i != this->Tests.end(); ++i)
     {
-    //We only want to schedule them by cost in a parallel situation
-    if(this->ParallelLevel > 1)
+    SortedTests.push_back(i->first);
+
+    //If the test failed last time, it should be run first, so max the cost
+    if(std::find(this->LastTestsFailed.begin(),
+                 this->LastTestsFailed.end(),
+                 this->Properties[i->first]->Name)
+       != this->LastTestsFailed.end())
       {
-      std::string name = this->Properties[i->first]->Name;
-      if(std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
-         name) != this->LastTestsFailed.end())
-        {
-        this->TestCosts[FLT_MAX].insert(i->first);
-        }
-      else
-        {
-        this->TestCosts[this->Properties[i->first]->Cost].insert(i->first);
-        }
+      this->Properties[i->first]->Cost = FLT_MAX;
       }
-    else //we ignore their cost
-      {
-      size_t index = this->Tests.size()
-        - static_cast<size_t>(this->Properties[i->first]->Index);
-      this->TestCosts[index].insert(i->first);
-      }
+    }
+  if(this->ParallelLevel > 1)
+    {
+    TestComparator comp(this);
+    std::sort(SortedTests.begin(), SortedTests.end(), comp);
     }
 }
 
