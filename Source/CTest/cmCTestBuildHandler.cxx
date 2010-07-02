@@ -65,7 +65,7 @@ static const char* cmCTestErrorMatches[] = {
   "^Unresolved:",
   "Undefined symbols:",
   "^Undefined[ \\t]+first referenced",
-  "^CMake Error:",
+  "^CMake Error.*:",
   ":[ \\t]cannot find",
   ":[ \\t]can't find",
   ": \\*\\*\\* No rule to make target \\`.*\\'.  Stop",
@@ -129,6 +129,7 @@ static const char* cmCTestWarningMatches[] = {
   "\\([0-9]*\\): remark #[0-9]*",
   "\".*\", line [0-9]+: remark\\([0-9]*\\):",
   "cc-[0-9]* CC: REMARK File = .*, Line = [0-9]*",
+  "^CMake Warning.*:",
   0
 };
 
@@ -174,8 +175,8 @@ cmCTestWarningErrorFileLine[] = {
 //----------------------------------------------------------------------
 cmCTestBuildHandler::cmCTestBuildHandler()
 {
-  this->MaxPreContext = 6;
-  this->MaxPostContext = 6;
+  this->MaxPreContext = 10;
+  this->MaxPostContext = 10;
 
   this->MaxErrors = 50;
   this->MaxWarnings = 50;
@@ -214,8 +215,8 @@ void cmCTestBuildHandler::Initialize()
   this->ErrorsAndWarnings.clear();
   this->LastErrorOrWarning = this->ErrorsAndWarnings.end();
   this->PostContextCount = 0;
-  this->MaxPreContext = 6;
-  this->MaxPostContext = 6;
+  this->MaxPreContext = 10;
+  this->MaxPostContext = 10;
   this->PreContext.clear();
 
   this->TotalErrors = 0;
@@ -248,6 +249,20 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
   this->CTest->PopulateCustomInteger(mf,
                              "CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS",
                              this->MaxWarnings);
+
+  int n = -1;
+  this->CTest->PopulateCustomInteger(mf, "CTEST_CUSTOM_ERROR_PRE_CONTEXT", n);
+  if (n != -1)
+    {
+    this->MaxPreContext = static_cast<size_t>(n);
+    }
+
+  n = -1;
+  this->CTest->PopulateCustomInteger(mf, "CTEST_CUSTOM_ERROR_POST_CONTEXT", n);
+  if (n != -1)
+    {
+    this->MaxPostContext = static_cast<size_t>(n);
+    }
 
   // Record the user-specified custom warning rules.
   if(const char* customWarningMatchers =

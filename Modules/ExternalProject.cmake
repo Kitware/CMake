@@ -780,7 +780,7 @@ function(ExternalProject_Add_Step name step)
 
   # Wrap with log script?
   get_property(log TARGET ${name} PROPERTY _EP_${step}_LOG)
-  if(log)
+  if(command AND log)
     _ep_write_log_script(${name} ${step} command)
   endif()
 
