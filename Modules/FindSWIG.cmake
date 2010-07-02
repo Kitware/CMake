@@ -5,7 +5,7 @@
 #  SWIG_EXECUTABLE - the path to the swig executable
 #  SWIG_VERSION   - the version number of the swig executable
 #
-# All informations are collected from the SWIG_EXECUTABLE so the
+# All information is collected from the SWIG_EXECUTABLE so the
 # version to be found can be changed from the command line by
 # means of setting SWIG_EXECUTABLE
 #

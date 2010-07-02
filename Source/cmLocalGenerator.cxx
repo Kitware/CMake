@@ -3045,7 +3045,7 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
   if(define.find_first_of("#") != define.npos)
     {
     cmOStringStream e;
-    e << "WARNING: Peprocessor definitions containing '#' may not be "
+    e << "WARNING: Preprocessor definitions containing '#' may not be "
       << "passed on the compiler command line because many compilers "
       << "do not support it.\n"
       << "CMake is dropping a preprocessor definition: " << define << "\n"

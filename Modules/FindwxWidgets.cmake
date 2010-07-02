@@ -57,14 +57,14 @@
 #   FIND_PACKAGE(wxWidgets COMPONENTS base core gl net)
 #   IF(wxWidgets_FOUND)
 #     INCLUDE(${wxWidgets_USE_FILE})
-#     # and for each of your dependant executable/library targets:
+#     # and for each of your dependent executable/library targets:
 #     TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
 #   ENDIF(wxWidgets_FOUND)
 #
 # If wxWidgets is required (i.e., not an optional part):
 #   FIND_PACKAGE(wxWidgets REQUIRED base core gl net)
 #   INCLUDE(${wxWidgets_USE_FILE})
-#   # and for each of your dependant executable/library targets:
+#   # and for each of your dependent executable/library targets:
 #   TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
 
 #=============================================================================

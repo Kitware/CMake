@@ -99,7 +99,7 @@ bool cmSetCommand
       }
     }
 
-  // collect any values into a single semi-colon seperated value list
+  // collect any values into a single semi-colon separated value list
   if(static_cast<unsigned short>(args.size()) >
      static_cast<unsigned short>(1 + ignoreLastArgs))
     {

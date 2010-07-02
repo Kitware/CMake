@@ -165,7 +165,7 @@
 #     and will link in the resulting object file automatically.
 #
 #     This script will also generate a separate cmake script that is used at
-#     build time to invoke nvcc.  This is for serveral reasons.
+#     build time to invoke nvcc.  This is for several reasons.
 #
 #       1. nvcc can return negative numbers as return values which confuses
 #       Visual Studio into thinking that the command succeeded.  The script now
@@ -811,7 +811,7 @@ endfunction()
 ##############################################################################
 # This helper macro populates the following variables and setups up custom
 # commands and targets to invoke the nvcc compiler to generate C or PTX source
-# dependant upon the format parameter.  The compiler is invoked once with -M
+# dependent upon the format parameter.  The compiler is invoked once with -M
 # to generate a dependency file and a second time with -cuda or -ptx to generate
 # a .cpp or .ptx file.
 # INPUT:

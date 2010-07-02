@@ -589,7 +589,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
           << turl.c_str() << std::endl);
         cmCTestLog(this->CTest, ERROR_MESSAGE, "   Error message was: "
           << error_buffer << std::endl);
-        *this->LogFile << "\tTrigerring failed with error: " << error_buffer
+        *this->LogFile << "\tTriggering failed with error: " << error_buffer
                        << std::endl
                        << "   Error message was: " << error_buffer 
                        << std::endl;

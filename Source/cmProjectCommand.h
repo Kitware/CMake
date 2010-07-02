@@ -66,7 +66,7 @@ public:
       "Optionally you can specify which languages your project supports.  "
       "Example languages are CXX (i.e. C++), C, Fortran, etc. "
       "By default C and CXX are enabled.  E.g. if you do not have a "
-      "C++ compiler, you can disable the check for it by explicitely listing "
+      "C++ compiler, you can disable the check for it by explicitly listing "
       "the languages you want to support, e.g. C.  By using the special "
       "language \"NONE\" all checks for any language can be disabled.";
     }

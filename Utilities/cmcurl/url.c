@@ -3983,7 +3983,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
         conn->bits.tcpconnect = FALSE;
 
       /* if the connection was closed by the server while exchanging
-         authentication informations, retry with the new set
+         authentication information, retry with the new set
          authentication information */
       if(conn->bits.proxy_connect_closed) {
         /* reset the error buffer */

@@ -81,7 +81,7 @@
 #  CPACK_RPM_PACKAGE_DEBUG
 #     Mandatory : NO
 #     Default   : -
-#     May be set when invoking cpack in order to trace debug informations 
+#     May be set when invoking cpack in order to trace debug information
 #     during CPack RPM run. For example you may launch CPack like this 
 #     cpack -D CPACK_RPM_PACKAGE_DEBUG=1 -G RPM
 #  CPACK_RPM_USER_BINARY_SPECFILE
@@ -260,7 +260,7 @@ ENDIF(NOT CPACK_RPM_PACKAGE_VENDOR)
 
 # CPACK_RPM_PACKAGE_DESCRIPTION
 # The variable content may be either
-#   - explicitely given by tthe user or
+#   - explicitly given by the user or
 #   - filled with the content of CPACK_PACKAGE_DESCRIPTION_FILE
 #     if it is defined
 #   - set to a default value
