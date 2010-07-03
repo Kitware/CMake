@@ -560,9 +560,9 @@ IF (QT4_QMAKE_FOUND)
       OUTPUT_VARIABLE qt_mkspecs_dirs )
     # do not replace : on windows as it might be a drive letter
     # and windows should already use ; as a separator
-    IF(UNIX)
+    IF(NOT WIN32)
       STRING(REPLACE ":" ";" qt_mkspecs_dirs "${qt_mkspecs_dirs}")
-    ENDIF(UNIX)
+    ENDIF(NOT WIN32)
     set(qt_cross_paths)
     foreach(qt_cross_path ${CMAKE_FIND_ROOT_PATH})
       set(qt_cross_paths ${qt_cross_paths} "${qt_cross_path}/mkspecs")
