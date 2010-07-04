@@ -430,12 +430,13 @@ SET(CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
 
 # Use files tree to construct files command (spec file)
 # We should not forget to include symlinks (thus -o -type l)
-# We must remove the './' due to the local search (thus the sed)
+# We must remove the './' due to the local search and escape the
+# file name by enclosing it between double quotes (thus the sed)
 # Then we must authorize any man pages extension (adding * at the end)
 # because rpmbuild may automatically compress those files
 EXECUTE_PROCESS(COMMAND find -type f -o -type l
-               COMMAND sed {s/\\.//}
-               COMMAND sed {s/.*man.*\\/.*/&*/}
+               COMMAND sed {s:.*/man.*/.*:&*:}
+               COMMAND sed {s/\\.\\\(.*\\\)/\"\\1\"/}
                WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}"
                OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
 
