@@ -177,7 +177,7 @@ protected:
     TargetProgress(): NumberOfActions(0) {}
     unsigned long NumberOfActions;
     std::string VariableFile;
-    std::vector<int> Marks;
+    std::vector<unsigned long> Marks;
     void WriteProgressVariables(unsigned long total, unsigned long& current);
   };
   struct ProgressMapCompare { bool operator()(cmTarget*,cmTarget*) const; };

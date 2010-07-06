@@ -576,7 +576,7 @@ unsigned int cmELFInternalImpl<Types>::GetDynamicEntryCount()
       return i;
       }
     }
-  return this->DynamicSectionEntries.size();
+  return static_cast<unsigned int>(this->DynamicSectionEntries.size());
 }
 
 //----------------------------------------------------------------------------

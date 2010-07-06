@@ -1204,6 +1204,7 @@ bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
   // Should be efficient enough on most system:
   const int bufferSize = 4096;
   char buffer[bufferSize];
+  unsigned char const* buffer_uc = reinterpret_cast<unsigned char const*>(buffer);
   // This copy loop is very sensitive on certain platforms with
   // slightly broken stream libraries (like HPUX).  Normally, it is
   // incorrect to not check the error condition on the fin.read()
@@ -1212,10 +1213,9 @@ bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
   while(fin)
     {
     fin.read(buffer, bufferSize);
-    if(fin.gcount())
+    if(int gcount = static_cast<int>(fin.gcount()))
       {
-      cmsysMD5_Append(md5, reinterpret_cast<unsigned char const*>(buffer), 
-                      fin.gcount());
+      cmsysMD5_Append(md5, buffer_uc, gcount);
       }
     }
   cmsysMD5_FinalizeHex(md5, md5out);
@@ -1989,9 +1989,9 @@ namespace{
 # pragma warn -8066 /* unreachable code */
 #endif
   
-int copy_data(struct archive *ar, struct archive *aw)
+long copy_data(struct archive *ar, struct archive *aw)
 {
-  int r;
+  long r;
   const void *buff;
   size_t size;
   off_t offset;
@@ -2136,7 +2136,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
         }
       else if(*outiter == '\n' || *outiter == '\0')
         {
-        int length = outiter-out.begin();
+        std::vector<char>::size_type length = outiter-out.begin();
         if(length > 1 && *(outiter-1) == '\r')
           {
           --length;
@@ -2159,7 +2159,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
         }
       else if(*erriter == '\n' || *erriter == '\0')
         {
-        int length = erriter-err.begin();
+        std::vector<char>::size_type length = erriter-err.begin();
         if(length > 1 && *(erriter-1) == '\r')
           {
           --length;

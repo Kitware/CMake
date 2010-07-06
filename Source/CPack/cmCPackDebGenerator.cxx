@@ -371,7 +371,7 @@ static const char * ar_rname(const char *path)
 typedef struct ar_hdr HDR;
 static char ar_hb[sizeof(HDR) + 1];        /* real header */
 
-static int ar_already_written;
+static size_t ar_already_written;
 
 /* copy_ar --
  *      Copy size bytes from one file to another - taking care to handle the

@@ -147,7 +147,7 @@ protected:
   // Where is cmake executable
   std::string WhereCMake;
   // Number of entries shown (depends on mode -normal or advanced-)
-  int NumberOfVisibleEntries;
+  size_t NumberOfVisibleEntries;
   bool AdvancedMode;
   // Did the iteration converge (no new entries) ?
   bool OkToGenerate;

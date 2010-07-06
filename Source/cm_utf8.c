@@ -50,7 +50,7 @@ const char* cm_utf8_decode_character(const char* first, const char* last,
                                      unsigned int* pc)
 {
   /* Count leading ones in the first byte.  */
-  unsigned char c = *first++;
+  unsigned char c = (unsigned char)*first++;
   unsigned char const ones = cm_utf8_ones[c];
   switch(ones)
     {
@@ -62,10 +62,10 @@ const char* cm_utf8_decode_character(const char* first, const char* last,
   /* Extract bits from this multi-byte character.  */
   {
   unsigned int uc = c & cm_utf8_mask[ones];
-  unsigned char left;
+  int left;
   for(left = ones-1; left && first != last; --left)
     {
-    c = *first++;
+    c = (unsigned char)*first++;
     if(cm_utf8_ones[c] != 1)
       {
       return 0;
