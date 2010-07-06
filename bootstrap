@@ -650,11 +650,74 @@ if ${cmake_system_haiku}; then
   cmake_ld_flags="${LDFLAGS} -lroot -lbe"
 fi
 
+#-----------------------------------------------------------------------------
+# Detect known toolchains on some platforms.
+cmake_toolchains=''
+case "${cmake_system}" in
+  *AIX*)   cmake_toolchains='XL GNU' ;;
+  *CYGWIN*) cmake_toolchains='GNU' ;;
+  *Darwin*) cmake_toolchains='GNU Clang' ;;
+  *Linux*) cmake_toolchains='GNU Clang XL PGI PathScale' ;;
+  *MINGW*) cmake_toolchains='GNU' ;;
+esac
+
+# Toolchain compiler name table.
+cmake_toolchain_Clang_CC='clang'
+cmake_toolchain_Clang_CXX='clang++'
+cmake_toolchain_GNU_CC='gcc'
+cmake_toolchain_GNU_CXX='g++'
+cmake_toolchain_PGI_CC='pgcc'
+cmake_toolchain_PGI_CXX='pgCC'
+cmake_toolchain_PathScale_CC='pathcc'
+cmake_toolchain_PathScale_CXX='pathCC'
+cmake_toolchain_XL_CC='xlc'
+cmake_toolchain_XL_CXX='xlC'
+
+cmake_toolchain_try()
+{
+  tc="$1"
+  TMPFILE=`cmake_tmp_file`
+
+  eval "tc_CC=\${cmake_toolchain_${tc}_CC}"
+  echo 'int main() { return 0; }' > "${TMPFILE}.c"
+  cmake_try_run "$tc_CC" "" "${TMPFILE}.c" >> cmake_bootstrap.log 2>&1
+  tc_result_CC="$?"
+  rm -f "${TMPFILE}.c"
+  test "${tc_result_CC}" = "0" || return 1
+
+  eval "tc_CXX=\${cmake_toolchain_${tc}_CXX}"
+  echo 'int main() { return 0; }' > "${TMPFILE}.cpp"
+  cmake_try_run "$tc_CXX" "" "${TMPFILE}.cpp" >> cmake_bootstrap.log 2>&1
+  tc_result_CXX="$?"
+  rm -f "${TMPFILE}.cpp"
+  test "${tc_result_CXX}" = "0" || return 1
+
+  cmake_toolchain="$tc"
+}
+
+cmake_toolchain_detect()
+{
+  cmake_toolchain=
+  for tc in ${cmake_toolchains}; do
+    echo "Checking for $tc toolchain" >> cmake_bootstrap.log 2>&1
+    cmake_toolchain_try "$tc" &&
+    echo "Found $tc toolchain" &&
+    break
+  done
+}
+
+if [ -z "${CC}" -a -z "${CXX}" ]; then
+  cmake_toolchain_detect
+fi
+
+#-----------------------------------------------------------------------------
 # Test C compiler
 cmake_c_compiler=
 
 # If CC is set, use that for compiler, otherwise use list of known compilers
-if [ -n "${CC}" ]; then
+if [ -n "${cmake_toolchain}" ]; then
+  eval cmake_c_compilers="\${cmake_toolchain_${cmake_toolchain}_CC}"
+elif [ -n "${CC}" ]; then
   cmake_c_compilers="${CC}"
 else
   cmake_c_compilers="${CMAKE_KNOWN_C_COMPILERS}"
@@ -697,13 +760,16 @@ See cmake_bootstrap.log for compilers attempted.
 fi
 echo "C compiler on this system is: ${cmake_c_compiler} ${cmake_c_flags}"
 
+#-----------------------------------------------------------------------------
 # Test CXX compiler
 cmake_cxx_compiler=
 
 # On Mac OSX, CC is the same as cc, so make sure not to try CC as c++ compiler.
 
 # If CC is set, use that for compiler, otherwise use list of known compilers
-if [ -n "${CXX}" ]; then
+if [ -n "${cmake_toolchain}" ]; then
+  eval cmake_cxx_compilers="\${cmake_toolchain_${cmake_toolchain}_CXX}"
+elif [ -n "${CXX}" ]; then
   cmake_cxx_compilers="${CXX}"
 else
   cmake_cxx_compilers="${CMAKE_KNOWN_CXX_COMPILERS}"
@@ -754,6 +820,7 @@ See cmake_bootstrap.log for compilers attempted."
 fi
 echo "C++ compiler on this system is: ${cmake_cxx_compiler} ${cmake_cxx_flags}"
 
+#-----------------------------------------------------------------------------
 # Test Make
 
 cmake_make_processor=
