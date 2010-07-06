@@ -175,6 +175,23 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       {
       fprintf(fout, "SET(CMAKE_MODULE_PATH %s)\n", def);
       }
+
+    const char* rulesOverrideBase = "CMAKE_USER_MAKE_RULES_OVERRIDE";
+    std::string rulesOverrideLang =
+      rulesOverrideBase + (lang ? std::string("_") + lang : std::string(""));
+    if(const char* rulesOverridePath =
+       this->Makefile->GetDefinition(rulesOverrideLang.c_str()))
+      {
+      fprintf(fout, "SET(%s \"%s\")\n",
+              rulesOverrideLang.c_str(), rulesOverridePath);
+      }
+    else if(const char* rulesOverridePath2 =
+            this->Makefile->GetDefinition(rulesOverrideBase))
+      {
+      fprintf(fout, "SET(%s \"%s\")\n",
+              rulesOverrideBase, rulesOverridePath2);
+      }
+
     if(lang)
       {
       fprintf(fout, "PROJECT(CMAKE_TRY_COMPILE %s)\n", lang);
