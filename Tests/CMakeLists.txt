@@ -1373,7 +1373,29 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   SET_TESTS_PROPERTIES(CTestTestTimeout PROPERTIES
     PASS_REGULAR_EXPRESSION "TestTimeout *\\.+ *\\*\\*\\*Timeout.*CheckChild *\\.+ *Passed")
-  
+
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestDepends/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestDepends/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestDepends ${CMAKE_CTEST_COMMAND}
+    -C "\${CTestTest_CONFIG}"
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestDepends/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestDepends/testOutput.log"
+    )
+
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestCycle/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestCycle/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestCycle ${CMAKE_CTEST_COMMAND}
+    -C "\${CTestTest_CONFIG}"
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestCycle/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestCycle/testOutput.log"
+    )
+  SET_TESTS_PROPERTIES(CTestTestCycle PROPERTIES
+    PASS_REGULAR_EXPRESSION "a cycle exists in the test dependency graph")
+
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestRunScript/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestRunScript/test.cmake"
