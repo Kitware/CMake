@@ -430,6 +430,10 @@ MACRO (_QT4_ADJUST_LIB_VARS _camelCaseBasename)
 
     SET(QT_${basename}_FOUND 1)
 
+  ELSE (QT_${basename}_LIBRARY_RELEASE OR QT_${basename}_LIBRARY_DEBUG)
+
+    SET(QT_${basename}_LIBRARY "" CACHE STRING "The Qt ${basename} library" FORCE)
+
   ENDIF (QT_${basename}_LIBRARY_RELEASE OR QT_${basename}_LIBRARY_DEBUG)
 
   IF (QT_${basename}_INCLUDE_DIR)
@@ -567,6 +571,7 @@ IF (QT4_QMAKE_FOUND)
     foreach(qt_cross_path ${CMAKE_FIND_ROOT_PATH})
       set(qt_cross_paths ${qt_cross_paths} "${qt_cross_path}/mkspecs")
     endforeach(qt_cross_path)
+    SET(QT_MKSPECS_DIR NOTFOUND)
     FIND_PATH(QT_MKSPECS_DIR NAMES qconfig.pri
       HINTS ${qt_cross_paths} ${qt_mkspecs_dirs}
       DOC "The location of the Qt mkspecs containing qconfig.pri")
@@ -592,6 +597,8 @@ IF (QT4_QMAKE_FOUND)
       OUTPUT_VARIABLE QT_LIBRARY_DIR_TMP )
     # make sure we have / and not \ as qmake gives on windows
     FILE(TO_CMAKE_PATH "${QT_LIBRARY_DIR_TMP}" QT_LIBRARY_DIR_TMP)
+    SET(QT_QTCORE_LIBRARY_RELEASE NOTFOUND)
+    SET(QT_QTCORE_LIBRARY_DEBUG NOTFOUND)
     FIND_LIBRARY(QT_QTCORE_LIBRARY_RELEASE
                  NAMES QtCore${QT_LIBINFIX} QtCore${QT_LIBINFIX}4
                  HINTS ${QT_LIBRARY_DIR_TMP}
