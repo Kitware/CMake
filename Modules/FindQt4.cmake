@@ -717,7 +717,13 @@ IF (QT4_QMAKE_FOUND)
       OUTPUT_VARIABLE qt_plugins_dir )
     # make sure we have / and not \ as qmake gives on windows
     FILE(TO_CMAKE_PATH "${qt_plugins_dir}" qt_plugins_dir)
-    SET(QT_PLUGINS_DIR ${qt_plugins_dir} CACHE PATH "The location of the Qt plugins" FORCE)
+    SET(QT_PLUGINS_DIR NOTFOUND)
+    foreach(qt_cross_path ${CMAKE_FIND_ROOT_PATH})
+      set(qt_cross_paths ${qt_cross_paths} "${qt_cross_path}/plugins")
+    endforeach(qt_cross_path)
+    FIND_PATH(QT_PLUGINS_DIR NAMES accessible imageformats sqldrivers codecs designer
+      HINTS ${qt_cross_paths} ${qt_plugins_dir}
+      DOC "The location of the Qt plugins")
   ENDIF (QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the translations directory
