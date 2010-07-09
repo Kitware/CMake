@@ -97,13 +97,13 @@ set(PostgreSQL_KNOWN_VERSIONS ${PostgreSQL_ADDITIONAL_VERSIONS}
 # Define additional search paths for root directories.
 if ( WIN32 )
   foreach (suffix ${PostgreSQL_KNOWN_VERSIONS} )
-    set(ADDITIONAL_SEARCH_PATHS ${ADDITIONAL_SEARCH_PATHS} "C:/Program Files/PostgreSQL/${suffix}" )
+    set(PostgreSQL_ADDITIONAL_SEARCH_PATHS ${PostgreSQL_ADDITIONAL_SEARCH_PATHS} "C:/Program Files/PostgreSQL/${suffix}" )
   endforeach(suffix)
 endif( WIN32 )
 set( PostgreSQL_ROOT_DIRECTORIES
    ${PostgreSQL_ROOT_DIRECTORIES}
    ${PostgreSQL_ROOT}
-   ${ADDITIONAL_SEARCH_PATHS}
+   ${PostgreSQL_ADDITIONAL_SEARCH_PATHS}
 )
 
 #
