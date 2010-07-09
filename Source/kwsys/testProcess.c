@@ -94,9 +94,8 @@ int test4(int argc, const char* argv[])
   fprintf(stderr, "Output before crash on stderr from crash test.\n");  
   fflush(stdout);
   fflush(stderr);
-#if defined(__APPLE__) && defined(__x86_64__) && defined(__OPTIMIZE__) \
- && defined(__clang__)
-  *(int*)1 = 0; /* Clang's optimizer produces bad code for 0-ptr.  */
+#if defined(__clang__)
+  *(int*)1 = 0; /* Clang warns about 0-ptr; undefined behavior.  */
 #else
   *(int*)0 = 0;
 #endif
