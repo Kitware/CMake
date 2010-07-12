@@ -306,6 +306,8 @@ class cmake
   // Do we want trace output during the cmake run.
   bool GetTrace() { return this->Trace;}
   void SetTrace(bool b) {  this->Trace = b;}
+  bool GetStrictMode() { return this->StrictMode;}
+  void SetStrictMode(bool b) {  this->StrictMode = b;}
   // Define a property
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
@@ -443,6 +445,7 @@ private:
   bool ScriptMode;
   bool DebugOutput;
   bool Trace;
+  bool StrictMode;
   std::string CMakeEditCommand;
   std::string CMakeCommand;
   std::string CXXEnvironment;

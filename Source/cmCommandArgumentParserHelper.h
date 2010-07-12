@@ -96,6 +96,7 @@ private:
   const cmMakefile* Makefile;
   std::string Result;
   const char* FileName;
+  bool StrictMode;
   long FileLine;
   bool EscapeQuotes;
   std::string ErrorString;

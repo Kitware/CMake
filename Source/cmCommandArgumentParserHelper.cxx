@@ -20,6 +20,7 @@ int cmCommandArgument_yyparse( yyscan_t yyscanner );
 //
 cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
 {
+  this->StrictMode = false;
   this->FileLine = -1;
   this->FileName = 0;
   this->RemoveEmpty = true;
@@ -123,10 +124,15 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
   const char* value = this->Makefile->GetDefinition(var);
   if(!value && !this->RemoveEmpty)
     {
-    if(!this->Makefile->VariableCleared(var))
+    // check to see if we need to print a warning
+    // if strict mode is on and the variable has
+    // not been "cleared"/initialized with a set(foo ) call
+    if(this->StrictMode && !this->Makefile->VariableCleared(var))
       {
-      std::cerr << this->FileName << ":" << this->FileLine << ":" <<
-        " warning: uninitialized variable \'" << var << "\'\n";
+      cmOStringStream msg;
+      msg << this->FileName << ":" << this->FileLine << ":" <<
+        " warning: uninitialized variable \'" << var << "\'";
+      cmSystemTools::Message(msg.str().c_str());
       }
     return 0;
     }
@@ -324,6 +330,7 @@ void cmCommandArgumentParserHelper::Error(const char* str)
 void cmCommandArgumentParserHelper::SetMakefile(const cmMakefile* mf)
 {
   this->Makefile = mf;
+  this->StrictMode = mf->GetCMakeInstance()->GetStrictMode();
 }
 
 void cmCommandArgumentParserHelper::SetResult(const char* value)

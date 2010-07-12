@@ -93,6 +93,7 @@ protected:
   QAction* ConfigureAction;
   QAction* GenerateAction;
   QAction* SuppressDevWarningsAction;
+  QAction* StrictModeAction;
   QAction* InstallForCommandLineAction;
   State CurrentState;
 

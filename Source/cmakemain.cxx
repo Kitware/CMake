@@ -120,6 +120,9 @@ static const char * cmDocumentationOptions[][3] =
   {"--trace", "Put cmake in trace mode.",
    "Print a trace of all calls made and from where with "
    "message(send_error ) calls."},
+  {"--strict-mode", "Put cmake in strict mode.",
+   "In strict mode cmake will print a warning when an uninitialized variable "
+   "is used."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed. "
    "If a file is specified, the documentation is written into and the output "

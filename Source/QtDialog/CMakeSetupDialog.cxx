@@ -114,8 +114,12 @@ CMakeSetupDialog::CMakeSetupDialog()
                    this, SLOT(doInstallForCommandLine()));
 #endif  
   QMenu* OptionsMenu = this->menuBar()->addMenu(tr("&Options"));
-  this->SuppressDevWarningsAction = OptionsMenu->addAction(tr("&Suppress dev Warnings (-Wno-dev)"));
+  this->SuppressDevWarningsAction =
+    OptionsMenu->addAction(tr("&Suppress dev Warnings (-Wno-dev)"));
   this->SuppressDevWarningsAction->setCheckable(true);
+  this->StrictModeAction =
+    OptionsMenu->addAction(tr("&Strict Mode (--strict-mode)"));
+  this->StrictModeAction->setCheckable(true);
 
   QAction* debugAction = OptionsMenu->addAction(tr("&Debug Output"));
   debugAction->setCheckable(true);
@@ -240,6 +244,9 @@ void CMakeSetupDialog::initialize()
 
   QObject::connect(this->SuppressDevWarningsAction, SIGNAL(triggered(bool)), 
                    this->CMakeThread->cmakeInstance(), SLOT(setSuppressDevWarnings(bool)));
+  QObject::connect(this->StrictModeAction, SIGNAL(triggered(bool)),
+                   this->CMakeThread->cmakeInstance(),
+                   SLOT(setStrictMode(bool)));
   
   if(!this->SourceDirectory->text().isEmpty() ||
      !this->BinaryDirectory->lineEdit()->text().isEmpty())
