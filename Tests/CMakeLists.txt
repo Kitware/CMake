@@ -1432,6 +1432,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   set(regex "${regex}|Error message was: ")
   set(regex "${regex}([Cc]ould *n.t resolve host")
   set(regex "${regex}|[Cc]ould *n.t connect to host")
+  set(regex "${regex}|Empty reply from server")
   set(regex "${regex}|The requested URL returned error")
   set(regex "${regex}|libcurl was built with SSL disabled. https: not supported)")
   set(regex "${regex}|Submission method .xmlrpc. not compiled into CTest")
