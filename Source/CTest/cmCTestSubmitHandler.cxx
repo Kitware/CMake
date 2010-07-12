@@ -536,8 +536,9 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
           << std::endl);
         }
 
-      // If we time out or checksum fails, wait and retry
-      if(res == CURLE_OPERATION_TIMEDOUT || this->HasErrors)
+      // If curl failed for any reason, or checksum fails, wait and retry
+      //
+      if(res != CURLE_OK || this->HasErrors)
         {
         std::string retryDelay = this->GetOption("RetryDelay") == NULL ?
           "" : this->GetOption("RetryDelay");
@@ -552,7 +553,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
         for(int i = 0; i < count; i++)
           {
           cmCTestLog(this->CTest, HANDLER_OUTPUT,
-            "   Connection timed out, waiting " << delay << " seconds...\n");
+            "   Submit failed, waiting " << delay << " seconds...\n");
 
           double stop = cmSystemTools::GetTime() + delay;
           while(cmSystemTools::GetTime() < stop)
@@ -582,7 +583,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
             this->ParseResponse(chunk);
             }
 
-          if(res != CURLE_OPERATION_TIMEDOUT && !this->HasErrors)
+          if(res == CURLE_OK && !this->HasErrors)
             {
             break;
             }
