@@ -81,6 +81,18 @@
 #     Mandatory : NO
 #     Default   : -
 #     May be used to set RPM packages that are obsoleted by this one.
+#  CPACK_RPM_PACKAGE_RELOCATABLE
+#     Mandatory : NO
+#     Default   : -
+#     If this variable is set to TRUE or ON CPackRPM will try
+#     to build a relocatable RPM package. A relocatable RPM may
+#     be installed using rpm --prefix or --relocate in order to
+#     install it at an alternate place see rpm(8).
+#     Note that currently this may fail if the package contains
+#     files installed with absolute path or CPACK_SET_DESTDIR is set to ON.
+#     If CPACK_SET_DESTDIR is set then you will get a warning message
+#     but if there is file installed with absolute path you'll get
+#     unexpected behavior.
 #  CPACK_RPM_SPEC_INSTALL_POST
 #     Mandatory : NO
 #     Default   : -
@@ -319,8 +331,19 @@ ELSE(CPACK_RPM_COMPRESSION_TYPE)
    SET(CPACK_RPM_COMPRESSION_TYPE_TMP "")
 ENDIF(CPACK_RPM_COMPRESSION_TYPE)
 
+if(CPACK_RPM_PACKAGE_RELOCATABLE)
+  if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: Trying to build a relocatable package")
+  endif(CPACK_RPM_PACKAGE_DEBUG)
+  if(CPACK_SET_DESTDIR)
+    message(SEND_ERROR "CPackRPM:Warning: CPACK_SET_DESTDIR is set while requesting a relocatable package (CPACK_RPM_PACKAGE_RELOCATABLE is set): this is not supported, the package won't be relocatable.")
+  else(CPACK_SET_DESTDIR)
+    set(CPACK_RPM_PACKAGE_PREFIX ${CPACK_PACKAGING_INSTALL_PREFIX})
+  endif(CPACK_SET_DESTDIR)
+endif(CPACK_RPM_PACKAGE_RELOCATABLE)
+
 # check if additional fields for RPM spec header are given
-FOREACH(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES)
+FOREACH(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX)
   IF(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
     STRING(LENGTH ${_RPM_SPEC_HEADER} _PACKAGE_HEADER_STRLENGTH)
     MATH(EXPR _PACKAGE_HEADER_STRLENGTH "${_PACKAGE_HEADER_STRLENGTH} - 1")
@@ -477,8 +500,8 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_PROVIDES\@
 \@TMP_RPM_OBSOLETES\@
 \@TMP_RPM_BUILDARCH\@
+\@TMP_RPM_PREFIX\@
 
-#p define prefix \@CMAKE_INSTALL_PREFIX\@
 %define _rpmdir \@CPACK_RPM_DIRECTORY\@
 %define _rpmfilename \@CPACK_RPM_FILE_NAME\@
 %define _unpackaged_files_terminate_build 0
