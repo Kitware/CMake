@@ -63,7 +63,7 @@ bool cmIncludeDirectoryCommand
 // "   /foo/bar
 //    /boo/hoo /dingle/berry "
 //
-// ideally that should be three seperate arguments but when sucking the
+// ideally that should be three separate arguments but when sucking the
 // output from a program and passing it into a command the cleanup doesn't
 // always happen
 //

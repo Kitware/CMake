@@ -55,7 +55,7 @@ if(NOT "${FOO_H_5}" STREQUAL "${_HEADER_FULL}")
    message(FATAL_ERROR "Did not find \"${_HEADER_FULL}\"\ngot ${FOO_H_5} instead !")
 endif(NOT "${FOO_H_5}" STREQUAL "${_HEADER_FULL}")
 
-# by explicitely disabling CMAKE_FIND_ROOT_PATH again it shouldn't be found
+# by explicitly disabling CMAKE_FIND_ROOT_PATH again it shouldn't be found
 find_file(FOO_H_6 ${_HEADER} NO_CMAKE_FIND_ROOT_PATH)
 if(FOO_H_6)
    message(FATAL_ERROR "${_HEADER} found: ${FOO_H_6}, it should not exist !")

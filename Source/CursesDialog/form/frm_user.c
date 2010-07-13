@@ -39,7 +39,7 @@ MODULE_ID("$Id$")
 |   Function      :  int set_form_userptr(FORM *form, void *usrptr)
 |   
 |   Description   :  Set the pointer that is reserved in any form to store
-|                    application relevant informations
+|                    application relevant information
 |
 |   Return Values :  E_OK         - on success
 +--------------------------------------------------------------------------*/
@@ -54,7 +54,7 @@ int set_form_userptr(FORM * form, void *usrptr)
 |   Function      :  void *form_userptr(const FORM *form)
 |   
 |   Description   :  Return the pointer that is reserved in any form to
-|                    store application relevant informations.
+|                    store application relevant information.
 |
 |   Return Values :  Value of pointer. If no such pointer has been set,
 |                    NULL is returned

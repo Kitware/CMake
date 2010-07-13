@@ -954,7 +954,7 @@ void CMakeCommandUsage(const char* program)
     << "  echo [string]...          - displays arguments as text\n"
     << "  echo_append [string]...   - displays arguments as text but no new "
        "line\n"
-    << "  environment               - display the current enviroment\n"
+    << "  environment               - display the current environment\n"
     << "  make_directory dir        - create a directory\n"
     << "  md5sum file1 [...]        - compute md5sum of files\n"
     << "  remove_directory dir      - remove a directory and its contents\n"

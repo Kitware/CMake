@@ -429,7 +429,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   //std::string fullBinaryDir = binaryDir + "/";
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
-    "   Acumulating results (each . represents one file):" << std::endl);
+    "   Accumulating results (each . represents one file):" << std::endl);
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "    ");
 
   std::vector<std::string> errorsWhileAccumulating;
@@ -508,7 +508,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     cmCTestCoverageHandlerContainer::SingleFileCoverageVector::size_type cc;
     std::string line;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-      "Actually perfoming coverage for: " << fullFileName << std::endl);
+      "Actually performing coverage for: " << fullFileName << std::endl);
     for ( cc= 0; cc < fcov.size(); cc ++ )
       {
       if ( !cmSystemTools::GetLineFromStream(ifs, line) &&
@@ -593,7 +593,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     int untested = 0;
     std::string line;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-      "Actually perfoming coverage for: " << i->c_str() << std::endl);
+      "Actually performing coverage for: " << i->c_str() << std::endl);
     while (cmSystemTools::GetLineFromStream(ifs, line))
       {
       covLogFile << "\t\t<Line Number=\"" << untested << "\" Count=\"0\">"

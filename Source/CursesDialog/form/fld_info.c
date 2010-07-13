@@ -69,7 +69,7 @@ int field_info(const FIELD *field,
 |                                           int *drows, int *dcols,
 |                                           int *maxgrow)
 |   
-|   Description   :  Retrieve informations about a dynamic fields current
+|   Description   :  Retrieve information about a dynamic fields current
 |                    dynamic parameters.
 |
 |   Return Values :  E_OK           - success
