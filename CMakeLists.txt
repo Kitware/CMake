@@ -330,7 +330,21 @@ MACRO (CMAKE_BUILD_UTILITIES)
   ENDIF(BUILD_CursesDialog)
 ENDMACRO (CMAKE_BUILD_UTILITIES)
 
-
+#-----------------------------------------------------------------------
+IF(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
+  EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER}
+    ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+    OUTPUT_VARIABLE _GXX_VERSION
+  )
+  STRING(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
+    _GXX_VERSION_SHORT ${_GXX_VERSION})
+  IF(_GXX_VERSION_SHORT EQUAL 33)
+    MESSAGE(FATAL_ERROR
+      "GXX 3.3 on OpenBSD is known to cause CPack to Crash.\n"
+      "Please use GXX 4.2 or greater to build CMake on OpenBSD\n"
+      "${CMAKE_CXX_COMPILER} version is: ${_GXX_VERSION}")
+  ENDIF()
+ENDIF()
 
 #-----------------------------------------------------------------------
 # The main section of the CMakeLists file
