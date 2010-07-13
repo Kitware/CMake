@@ -147,6 +147,13 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     static_cast<cmCTestSubmitHandler*>(handler)->SelectParts(this->Parts);
     }
 
+  static_cast<cmCTestSubmitHandler*>(handler)->SetOption("RetryDelay",
+    this->RetryDelay.c_str());
+  static_cast<cmCTestSubmitHandler*>(handler)->SetOption("RetryCount",
+    this->RetryCount.c_str());
+  static_cast<cmCTestSubmitHandler*>(handler)->SetOption("InternalTest",
+    this->InternalTest ? "ON" : "OFF");
+
   return handler;
 }
 
@@ -166,6 +173,24 @@ bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
     {
     this->ArgumentDoing = ArgumentDoingFiles;
     this->FilesMentioned = true;
+    return true;
+    }
+
+  if(arg == "RETRY_COUNT")
+    {
+    this->ArgumentDoing = ArgumentDoingRetryCount;
+    return true;
+    }
+
+  if(arg == "RETRY_DELAY")
+    {
+    this->ArgumentDoing = ArgumentDoingRetryDelay;
+    return true;
+    }
+
+  if(arg == "INTERNAL_TEST_CHECKSUM")
+    {
+    this->InternalTest = true;
     return true;
     }
 
@@ -210,6 +235,18 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       this->ArgumentDoing = ArgumentDoingError;
       }
+    return true;
+    }
+
+  if(this->ArgumentDoing == ArgumentDoingRetryCount)
+    {
+    this->RetryCount = arg;
+    return true;
+    }
+
+  if(this->ArgumentDoing == ArgumentDoingRetryDelay)
+    {
+    this->RetryDelay = arg;
     return true;
     }
 

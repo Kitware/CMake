@@ -29,6 +29,9 @@ public:
     {
     this->PartsMentioned = false;
     this->FilesMentioned = false;
+    this->InternalTest = false;
+    this->RetryCount = "";
+    this->RetryDelay = "";
     }
 
   /**
@@ -61,7 +64,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_submit([PARTS ...] [FILES ...] [RETURN_VALUE res])\n"
+      "  ctest_submit([PARTS ...] [FILES ...] [RETRY_COUNT count] "
+      "               [RETRY_DELAY delay][RETURN_VALUE res])\n"
       "By default all available parts are submitted if no PARTS or FILES "
       "are specified.  "
       "The PARTS option lists a subset of parts to be submitted.  "
@@ -77,7 +81,11 @@ public:
       "  ExtraFiles = Files listed by CTEST_EXTRA_SUBMIT_FILES\n"
       "  Submit     = nothing\n"
       "The FILES option explicitly lists specific files to be submitted.  "
-      "Each individual file must exist at the time of the call.\n";
+      "Each individual file must exist at the time of the call.\n"
+      "The RETRY_DELAY option specifies how long in seconds to wait after "
+      "a timed-out submission before attempting to re-submit.\n"
+      "The RETRY_COUNT option specifies how many times to retry a timed-out "
+      "submission.\n";
     }
 
   cmTypeMacro(cmCTestSubmitCommand, cmCTestHandlerCommand);
@@ -92,13 +100,18 @@ protected:
   {
     ArgumentDoingParts = Superclass::ArgumentDoingLast1,
     ArgumentDoingFiles,
+    ArgumentDoingRetryDelay,
+    ArgumentDoingRetryCount,
     ArgumentDoingLast2
   };
 
   bool PartsMentioned;
   std::set<cmCTest::Part> Parts;
   bool FilesMentioned;
+  bool InternalTest;
   cmCTest::SetOfStrings Files;
+  std::string RetryCount;
+  std::string RetryDelay;
 };
 
 

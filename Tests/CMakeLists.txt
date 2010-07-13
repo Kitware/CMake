@@ -1493,6 +1493,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
       )
 
+    CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTestChecksum/test.cmake.in"
+      "${CMake_BINARY_DIR}/Tests/CTestTestChecksum/test.cmake" @ONLY
+      ESCAPE_QUOTES)
+    ADD_TEST(CTestTestChecksum ${CMAKE_CTEST_COMMAND}
+      -S "${CMake_BINARY_DIR}/Tests/CTestTestChecksum/test.cmake" -V
+      --output-log
+      "${CMake_BINARY_DIR}/Tests/CTestTestChecksum/testOutput.log"
+      )
+    SET_TESTS_PROPERTIES(CTestTestChecksum PROPERTIES PASS_REGULAR_EXPRESSION
+      "Submission failed: Checksum failed for file")
+
     # these tests take a long time, make sure they have it
     # if timeouts have not already been set
     GET_TEST_PROPERTY(CTestTest TIMEOUT PREVIOUS_TIMEOUT)
