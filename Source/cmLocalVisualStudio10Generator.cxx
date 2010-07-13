@@ -37,7 +37,7 @@ class cmVS10XMLParser : public cmXMLParser
         {
         return;
         }
-      if(strcmp("ProjectGUID", name) == 0)
+      if(strcmp("ProjectGUID", name) == 0 || strcmp("ProjectGuid", name) == 0)
         {
         this->DoGUID = true;
         } 
