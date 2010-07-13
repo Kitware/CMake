@@ -4,15 +4,18 @@ Changes since CMake 2.8.1
 - Build on old Sun (#10550, #10543)
 - CPack: Add native BZip2 support
 - CPack: Set compression type in RPM spec (#10363)
+- CPack: Try harder to initialize staging directory (#10793)
 - CTest: Add --stop-time argument
 - CTest: Cost data with '-j'
 - CTest: Fix memory report
 - CTest: Glob for uncovered files during coverage tests
 - CTest: Option to specify cdash server
+- CTest: PHP Coverage support
 - CTest: Process tree kill for OpenBSD, FreeBSD, kFreeBSD, GNU/Hurd
 - CTest: Report failure in Update.xml
 - CTest: Submit author email in Update.xml
 - CTest: Teach ctest_update about Git submodules
+- Cygwin: Export all symbols with ENABLE_EXPORTS (#10122)
 - Do not list file names during 'cmake -E tar xz'
 - Documentation: Comply with "XHTML 1.0 Strict"
 - Documentation: Fix typo in CMAKE_LIBRARY_PATH (#10291)
@@ -20,6 +23,9 @@ Changes since CMake 2.8.1
 - Documentation: More consistent command signatures
 - Eclipse: Do not add INCLUDE to environment twice
 - Enable extra CodeBlocks generator on Cygwin
+- ExternalProject: Support .zip and .bz2 archives, MD5 verification
+- ExternalProject: Reconfigure when args change (#10258)
+- ExternalProject: Support Git, SVN username/password
 - FindCurses: Fix for cygwin ncurses package
 - FindHSPELL: Version support
 - FindJava: Error if version is not found only when REQUIRED
@@ -37,6 +43,7 @@ Changes since CMake 2.8.1
 - Fix cross-compiling from Linux to iPhone (#10526)
 - Fix documentation typos
 - Fix g95 Fortran compiler support
+- Fix uname masking in file(WRITE) and write_file (#10789)
 - GetPrerequisites: Provide an override hook
 - Handle non-ASCII terminators in file(STRINGS)
 - Module fixes: FindPythonLibs, FindQt4, FindX11, FindwxWidgets
@@ -44,11 +51,14 @@ Changes since CMake 2.8.1
 - Qt4 OpenGL framework fix
 - Qt4ConfigDependentSettings.cmake Qt4Macros.cmake UseQt4.cmake
 - Recognize ARM ABI/EABI with GNU compilers
+- Recognize Clang compiler
 - Search basic directories on "Generic" platform
 - Set MSVC* variables consistently on all generators, and test
+- Support SunPro C++ 5.11 on Linux (new compiler)
 - Support VS 10 Express (related to #10670)
 - Support compression with 'cmake -E tar'
 - Support multiple arguments in CC,CXX,FC environment variables
+- Support per-configuration librarian flags (#10768)
 - Support per-platform initial ASM language flags (#10577)
 - Use Fortran ABI detection results conservatively
 - Use libarchive to replace the unmaintained libtar

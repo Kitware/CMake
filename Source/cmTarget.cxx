@@ -708,6 +708,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "Extra flags to use when linking a static library.");
 
   cm->DefineProperty
+    ("STATIC_LIBRARY_FLAGS_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration flags for creating a static library.",
+     "This is the configuration-specific version of STATIC_LIBRARY_FLAGS.");
+
+  cm->DefineProperty
     ("SUFFIX", cmProperty::TARGET,
      "What comes after the library name.",
      "A target property that can be set to override the suffix "

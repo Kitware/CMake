@@ -39,6 +39,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "warning:.*is.*very unsafe.*consider using.*"
   "warning:.*is.*misused, please use.*"
   "CMakeSetupManifest.xml.*manifest authoring warning.*Unrecognized Element"
+  "cc-3968 CC: WARNING File.*" # "implicit" truncation by static_cast
   )
 
 IF(NOT "@CMAKE_GENERATOR@" MATCHES "Xcode")

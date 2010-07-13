@@ -86,11 +86,11 @@ public:
   /** Find the address of the symbol in the given library. */
   static SymbolPointer GetSymbolAddress(LibraryHandle, const char*);
 
-  /** Return the library prefix for the given architecture */
-  static const char* LibPrefix();
+  /** Return the default module prefix for the current platform.  */
+  static const char* LibPrefix() { return "@KWSYS_DynamicLoader_PREFIX@"; }
 
-  /** Return the library extension for the given architecture. */
-  static const char* LibExtension();
+  /** Return the default module suffix for the current platform.  */
+  static const char* LibExtension() { return "@KWSYS_DynamicLoader_SUFFIX@"; }
 
   /** Return the last error produced from a calls made on this class. */
   static const char* LastError();

@@ -436,6 +436,9 @@ public:
   static bool CheckRPath(std::string const& file,
                          std::string const& newRPath);
 
+  /** Remove a directory; repeat a few times in case of locked files.  */
+  static bool RepeatedRemoveDirectory(const char* dir);
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

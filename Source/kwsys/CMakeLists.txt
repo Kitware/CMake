@@ -309,6 +309,14 @@ IF(NOT KWSYS_IN_SOURCE_BUILD)
     ${PROJECT_BINARY_DIR}/kwsysPrivate.h COPY_ONLY IMMEDIATE)
 ENDIF(NOT KWSYS_IN_SOURCE_BUILD)
 
+# Select plugin module file name convention.
+IF(NOT KWSYS_DynamicLoader_PREFIX)
+  SET(KWSYS_DynamicLoader_PREFIX ${CMAKE_SHARED_MODULE_PREFIX})
+ENDIF()
+IF(NOT KWSYS_DynamicLoader_SUFFIX)
+  SET(KWSYS_DynamicLoader_SUFFIX ${CMAKE_SHARED_MODULE_SUFFIX})
+ENDIF()
+
 #-----------------------------------------------------------------------------
 # We require ANSI support from the C compiler.  Add any needed flags.
 IF(CMAKE_ANSI_CFLAGS)

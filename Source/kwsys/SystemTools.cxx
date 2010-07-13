@@ -1722,8 +1722,7 @@ kwsys_stl::string SystemTools::ConvertToWindowsOutputPath(const char* path)
 }
 
 bool SystemTools::CopyFileIfDifferent(const char* source,
-                                      const char* destination,
-                                      bool copyPermissions)
+                                      const char* destination)
 {
   // special check for a destination that is a directory
   // FilesDiffer does not handle file to directory compare
@@ -1736,8 +1735,7 @@ bool SystemTools::CopyFileIfDifferent(const char* source,
     new_destination += SystemTools::GetFilenameName(source_name);
     if(SystemTools::FilesDiffer(source, new_destination.c_str()))
       {
-      return SystemTools::CopyFileAlways(source, destination,
-                                         copyPermissions);
+      return SystemTools::CopyFileAlways(source, destination);
       }
     else
       {
@@ -1750,7 +1748,7 @@ bool SystemTools::CopyFileIfDifferent(const char* source,
   // are different
   if(SystemTools::FilesDiffer(source, destination))
     {
-    return SystemTools::CopyFileAlways(source, destination, copyPermissions);
+    return SystemTools::CopyFileAlways(source, destination);
     }
   // at this point the files must be the same so return true
   return true;
@@ -1836,8 +1834,7 @@ bool SystemTools::FilesDiffer(const char* source,
 /**
  * Copy a file named by "source" to the file named by "destination".
  */
-bool SystemTools::CopyFileAlways(const char* source, const char* destination,
-                                 bool copyPermissions)
+bool SystemTools::CopyFileAlways(const char* source, const char* destination)
 {
   // If files are the same do not copy
   if ( SystemTools::SameFile(source, destination) )
@@ -1924,23 +1921,11 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination,
   fin.close();
   fout.close();
 
-  // More checks.
-  struct stat statSource, statDestination;
-  statSource.st_size = 12345;
-  statDestination.st_size = 12345;
-  if(stat(source, &statSource) != 0)
+  if(!fout)
     {
     return false;
     }
-  else if(stat(destination, &statDestination) != 0)
-    {
-    return false;
-    }
-  else if(statSource.st_size != statDestination.st_size)
-    {
-   return false;
-    }
-  if ( copyPermissions && perms )
+  if ( perms )
     {
     if ( !SystemTools::SetPermissions(destination, perm) )
       {
@@ -1952,15 +1937,15 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination,
 
 //----------------------------------------------------------------------------
 bool SystemTools::CopyAFile(const char* source, const char* destination,
-                            bool always, bool copyPermissions)
+                            bool always)
 {
   if(always)
     {
-    return SystemTools::CopyFileAlways(source, destination, copyPermissions);
+    return SystemTools::CopyFileAlways(source, destination);
     }
   else
     {
-    return SystemTools::CopyFileIfDifferent(source, destination, copyPermissions);
+    return SystemTools::CopyFileIfDifferent(source, destination);
     }
 }
 
@@ -1969,7 +1954,7 @@ bool SystemTools::CopyAFile(const char* source, const char* destination,
  * "destination".
  */
 bool SystemTools::CopyADirectory(const char* source, const char* destination,
-                                 bool always, bool copyPermissions)
+                                 bool always)
 {
   Directory dir;
   dir.Load(source);
@@ -1993,16 +1978,14 @@ bool SystemTools::CopyADirectory(const char* source, const char* destination,
         fullDestPath += dir.GetFile(static_cast<unsigned long>(fileNum));
         if (!SystemTools::CopyADirectory(fullPath.c_str(),
                                          fullDestPath.c_str(),
-                                         always,
-                                         copyPermissions))
+                                         always))
           {
           return false;
           }
         }
       else
         {
-        if(!SystemTools::CopyAFile(fullPath.c_str(), destination, always,
-                                   copyPermissions))
+        if(!SystemTools::CopyAFile(fullPath.c_str(), destination, always))
           {
           return false;
           }

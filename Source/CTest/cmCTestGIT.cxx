@@ -119,7 +119,7 @@ bool cmCTestGIT::UpdateImpl()
     char const* git_submodule[] = {git, "submodule", "update", 0};
     OutputLogger out2(this->Log, "submodule-out> ");
     OutputLogger err2(this->Log, "submodule-err> ");
-    return this->RunChild(git_submodule, &out, &err);
+    return this->RunChild(git_submodule, &out2, &err2);
     }
   return false;
 }

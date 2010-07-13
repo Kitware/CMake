@@ -174,6 +174,34 @@ IF(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
 
+  ADD_TEST(LinkFlags-prepare
+    ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/LinkFlags"
+    "${CMake_BINARY_DIR}/Tests/LinkFlags"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-project LinkFlags
+    --build-target LinkFlags
+    --build-options -DTEST_CONFIG=\${CTEST_CONFIGURATION_TYPE}
+    )
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LinkFlags")
+
+  MACRO(ADD_LINK_FLAGS_TEST name depends)
+    ADD_TEST(LinkFlags-${name}
+      ${CMAKE_CMAKE_COMMAND} --build "${CMake_BINARY_DIR}/Tests/LinkFlags"
+      --target LinkFlags_${name} --config \${CTEST_CONFIGURATION_TYPE}
+      )
+    SET_TESTS_PROPERTIES(LinkFlags-${name} PROPERTIES
+      PASS_REGULAR_EXPRESSION "BADFLAG" DEPENDS LinkFlags-${depends})
+  ENDMACRO()
+  ADD_LINK_FLAGS_TEST(lib prepare)
+  ADD_LINK_FLAGS_TEST(dll lib)
+  ADD_LINK_FLAGS_TEST(exe dll)
+  ADD_LINK_FLAGS_TEST(lib_config exe)
+  ADD_LINK_FLAGS_TEST(dll_config lib_config)
+  ADD_LINK_FLAGS_TEST(exe_config dll_config)
+
   # If we are running right now with a UnixMakefiles based generator,
   # build the "Simple" test with the ExtraGenerators, if available
   # This doesn't test whether the generated project files work (unfortunately), 
@@ -270,7 +298,7 @@ IF(BUILD_TESTING)
     FILE(MAKE_DIRECTORY "${_TEST_DIR}")
     FILE(WRITE "${_TEST_DIR}/nightly-cmake.sh"
       "cd ${_TEST_DIR}
-${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=master -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
+${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=next -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
 ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/Release/upload_release.cmake
     ")
     ADD_TEST(${name} /bin/sh ${_TEST_DIR}/nightly-cmake.sh)
@@ -1442,13 +1470,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
       )
 
-    CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTest3/test.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" @ONLY ESCAPE_QUOTES)
-    ADD_TEST(CTestTest3 ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTest3/test.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTest3/testOutput.log"
-      )
-
     CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CTestTestChecksum/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTestChecksum/test.cmake" @ONLY
       ESCAPE_QUOTES)
@@ -1471,12 +1492,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     GET_TEST_PROPERTY(CTestTest2 TIMEOUT PREVIOUS_TIMEOUT)
     IF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
       SET_TESTS_PROPERTIES ( CTestTest2
-        PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
-    ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-
-    GET_TEST_PROPERTY(CTestTest3 TIMEOUT PREVIOUS_TIMEOUT)
-    IF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-      SET_TESTS_PROPERTIES ( CTestTest3
         PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
     ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS AND CMAKE_TESTS_CDASH_SERVER)
@@ -1504,6 +1519,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     #
     SET_TESTS_PROPERTIES(CTestSubmitLargeOutput PROPERTIES
       PASS_REGULAR_EXPRESSION "Errors occurred during submission")
+
+    # Give this test plenty of time to run on slower machines:
+    #
+    SET_TESTS_PROPERTIES(CTestSubmitLargeOutput PROPERTIES
+      TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
   ENDIF(CTEST_RUN_CTestSubmitLargeOutput)
 
   IF (CMAKE_RUN_LONG_TESTS AND TEST_KDE4_STABLE_BRANCH)

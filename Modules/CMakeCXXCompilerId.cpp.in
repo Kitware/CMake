@@ -11,6 +11,9 @@
 #elif defined(__INTEL_COMPILER) || defined(__ICC)
 # define COMPILER_ID "Intel"
 
+#elif defined(__clang__)
+# define COMPILER_ID "Clang"
+
 #elif defined(__BORLANDC__)
 # define COMPILER_ID "Borland"
 

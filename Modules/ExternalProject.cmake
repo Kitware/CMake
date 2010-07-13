@@ -16,7 +16,12 @@
 #    [CVS_TAG tag]               # Tag to checkout from CVS repo
 #    [SVN_REPOSITORY url]        # URL of Subversion repo
 #    [SVN_REVISION rev]          # Revision to checkout from Subversion repo
+#    [SVN_USERNAME john ]        # Username for Subversion checkout and update
+#    [SVN_PASSWORD doe ]         # Password for Subversion checkout and update
+#    [GIT_REPOSITORY url]        # URL of git repo
+#    [GIT_TAG tag]               # Git branch name, commit id or tag
 #    [URL /.../src.tgz]          # Full path or URL of source
+#    [URL_MD5 md5]               # MD5 checksum of file at URL
 #    [TIMEOUT seconds]           # Time allowed for file download operations
 #   #--Update/Patch step----------
 #    [UPDATE_COMMAND cmd...]     # Source work-tree update command
@@ -111,19 +116,19 @@
 #  License text for the above reference.)
 
 # Pre-compute a regex to match documented keywords for each command.
-file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines LIMIT_COUNT 100
-     REGEX "^#  (  \\[[A-Z_]+ [^]]*\\] +#.*$|[A-Za-z_]+\\()")
+file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines LIMIT_COUNT 103
+     REGEX "^#  (  \\[[A-Z0-9_]+ [^]]*\\] +#.*$|[A-Za-z0-9_]+\\()")
 foreach(line IN LISTS lines)
-  if("${line}" MATCHES "^#  [A-Za-z_]+\\(")
+  if("${line}" MATCHES "^#  [A-Za-z0-9_]+\\(")
     if(_ep_func)
       set(_ep_keywords_${_ep_func} "${_ep_keywords_${_ep_func}})$")
     endif()
-    string(REGEX REPLACE "^#  ([A-Za-z_]+)\\(.*" "\\1" _ep_func "${line}")
+    string(REGEX REPLACE "^#  ([A-Za-z0-9_]+)\\(.*" "\\1" _ep_func "${line}")
     #message("function [${_ep_func}]")
     set(_ep_keywords_${_ep_func} "^(")
     set(_ep_keyword_sep)
   else()
-    string(REGEX REPLACE "^#    \\[([A-Z_]+) .*" "\\1" _ep_key "${line}")
+    string(REGEX REPLACE "^#    \\[([A-Z0-9_]+) .*" "\\1" _ep_key "${line}")
     #message("  keyword [${_ep_key}]")
     set(_ep_keywords_${_ep_func}
       "${_ep_keywords_${_ep_func}}${_ep_keyword_sep}${_ep_key}")
@@ -148,7 +153,7 @@ function(_ep_parse_arguments f name ns args)
   foreach(arg IN LISTS args)
     set(is_value 1)
 
-    if(arg MATCHES "^[A-Z][A-Z_][A-Z_]+$" AND
+    if(arg MATCHES "^[A-Z][A-Z0-9_][A-Z0-9_]+$" AND
         NOT ((arg STREQUAL "${key}") AND (key STREQUAL "COMMAND")) AND
         NOT arg MATCHES "^(TRUE|FALSE)$")
       if(_ep_keywords_${f} AND arg MATCHES "${_ep_keywords_${f}}")
@@ -157,6 +162,7 @@ function(_ep_parse_arguments f name ns args)
         if(NOT (key STREQUAL "COMMAND")
           AND NOT (key STREQUAL "CVS_MODULE")
           AND NOT (key STREQUAL "DEPENDS")
+          AND NOT (key STREQUAL "DOWNLOAD_COMMAND")
           )
           message(AUTHOR_WARNING "unknown ${f} keyword: ${arg}")
         endif()
@@ -203,13 +209,75 @@ define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
   )
 
 
-function(_ep_write_downloadfile_script script_filename remote local timeout)
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag src_name work_dir)
+  file(WRITE ${script_filename}
+"if(\"${git_tag}\" STREQUAL \"\")
+  message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
+endif()
+
+execute_process(
+  COMMAND \${CMAKE_COMMAND} -E remove_directory \"${source_dir}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" clone \"${git_repository}\" \"${src_name}\"
+  WORKING_DIRECTORY \"${work_dir}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to clone repository: '${git_repository}'\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" checkout ${git_tag}
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" submodule init
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to init submodules in: '${work_dir}/${src_name}'\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" submodule update --recursive
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
+endif()
+
+"
+)
+
+endfunction(_ep_write_gitclone_script)
+
+
+function(_ep_write_downloadfile_script script_filename remote local timeout md5)
   if(timeout)
     set(timeout_args TIMEOUT ${timeout})
     set(timeout_msg "${timeout} seconds")
   else()
     set(timeout_args "# no TIMEOUT")
     set(timeout_msg "none")
+  endif()
+
+  if(md5)
+    set(md5_args EXPECTED_MD5 ${md5})
+  else()
+    set(md5_args "# no EXPECTED_MD5")
   endif()
 
   file(WRITE ${script_filename}
@@ -221,6 +289,8 @@ function(_ep_write_downloadfile_script script_filename remote local timeout)
 file(DOWNLOAD
   \"${remote}\"
   \"${local}\"
+  SHOW_PROGRESS
+  ${md5_args}
   ${timeout_args}
   STATUS status
   LOG log)
@@ -243,23 +313,64 @@ message(STATUS \"downloading... done\")
 endfunction(_ep_write_downloadfile_script)
 
 
-function(_ep_write_extractfile_script script_filename filename tmp directory)
+function(_ep_write_verifyfile_script script_filename local md5)
+  file(WRITE ${script_filename}
+"message(STATUS \"verifying file...
+     file='${local}'\")
+
+set(verified 0)
+
+# If an expected md5 checksum exists, compare against it:
+#
+if(NOT \"${md5}\" STREQUAL \"\")
+  execute_process(COMMAND \${CMAKE_COMMAND} -E md5sum \"${local}\"
+    OUTPUT_VARIABLE ov
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE rv)
+
+  if(NOT rv EQUAL 0)
+    message(FATAL_ERROR \"error: computing md5sum of '${local}' failed\")
+  endif()
+
+  string(REGEX MATCH \"^([0-9A-Fa-f]+)\" md5_actual \"\${ov}\")
+
+  string(TOLOWER \"\${md5_actual}\" md5_actual)
+  string(TOLOWER \"${md5}\" md5)
+
+  if(NOT \"\${md5}\" STREQUAL \"\${md5_actual}\")
+    message(FATAL_ERROR \"error: md5sum of '${local}' does not match expected value
+  md5_expected: \${md5}
+    md5_actual: \${md5_actual}
+\")
+  endif()
+
+  set(verified 1)
+endif()
+
+if(verified)
+  message(STATUS \"verifying file... done\")
+else()
+  message(STATUS \"verifying file... warning: did not verify file - no URL_MD5 checksum argument? corrupt file?\")
+endif()
+"
+)
+
+endfunction(_ep_write_verifyfile_script)
+
+
+function(_ep_write_extractfile_script script_filename filename directory)
   set(args "")
 
-  if(filename MATCHES ".tar$")
+  if(filename MATCHES "(\\.bz2|\\.tar\\.gz|\\.tgz|\\.zip)$")
+    set(args xfz)
+  endif()
+
+  if(filename MATCHES "\\.tar$")
     set(args xf)
   endif()
 
-  if(filename MATCHES ".tgz$")
-    set(args xfz)
-  endif()
-
-  if(filename MATCHES ".tar.gz$")
-    set(args xfz)
-  endif()
-
   if(args STREQUAL "")
-    message(SEND_ERROR "error: do not know how to extract '${filename}' -- known types are .tar, .tgz and .tar.gz")
+    message(SEND_ERROR "error: do not know how to extract '${filename}' -- known types are .bz2, .tar, .tar.gz, .tgz and .zip")
     return()
   endif()
 
@@ -267,20 +378,23 @@ function(_ep_write_extractfile_script script_filename filename tmp directory)
 "# Make file names absolute:
 #
 get_filename_component(filename \"${filename}\" ABSOLUTE)
-get_filename_component(tmp \"${tmp}\" ABSOLUTE)
 get_filename_component(directory \"${directory}\" ABSOLUTE)
 
 message(STATUS \"extracting...
      src='\${filename}'
      dst='\${directory}'\")
 
+if(NOT EXISTS \"\${filename}\")
+  message(FATAL_ERROR \"error: file to extract does not exist: '\${filename}'\")
+endif()
+
 # Prepare a space for extracting:
 #
-set(i 1)
-while(EXISTS \"\${tmp}/extract\${i}\")
+set(i 1234)
+while(EXISTS \"\${directory}/../ex\${i}\")
   math(EXPR i \"\${i} + 1\")
 endwhile()
-set(ut_dir \"\${tmp}/extract\${i}\")
+set(ut_dir \"\${directory}/../ex\${i}\")
 file(MAKE_DIRECTORY \"\${ut_dir}\")
 
 # Extract it:
@@ -305,10 +419,12 @@ if(NOT n EQUAL 1 OR NOT IS_DIRECTORY \"\${contents}\")
   set(contents \"\${ut_dir}\")
 endif()
 
-# Copy \"the one\" directory to the final directory:
+# Move \"the one\" directory to the final directory:
 #
-message(STATUS \"extracting... [copy]\")
-file(COPY \"\${contents}/\" DESTINATION \${directory})
+message(STATUS \"extracting... [rename]\")
+file(REMOVE_RECURSE \${directory})
+get_filename_component(contents \${contents} ABSOLUTE)
+file(RENAME \${contents} \${directory})
 
 # Clean up:
 #
@@ -609,6 +725,19 @@ function(_ep_add_mkdir_command name)
 endfunction(_ep_add_mkdir_command)
 
 
+function(_ep_get_git_version git_EXECUTABLE git_version_var)
+  if(git_EXECUTABLE)
+    execute_process(
+      COMMAND "${git_EXECUTABLE}" --version
+      OUTPUT_VARIABLE ov
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+    string(REGEX REPLACE "^git version (.+)$" "\\1" version "${ov}")
+    set(${git_version_var} "${version}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+
 function(_ep_add_download_command name)
   ExternalProject_Get_Property(${name} source_dir stamp_dir download_dir tmp_dir)
 
@@ -616,6 +745,7 @@ function(_ep_add_download_command name)
   get_property(cmd TARGET ${name} PROPERTY _EP_DOWNLOAD_COMMAND)
   get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
   get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
+  get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
   get_property(url TARGET ${name} PROPERTY _EP_URL)
 
   # TODO: Perhaps file:// should be copied to download dir before extraction.
@@ -661,8 +791,10 @@ function(_ep_add_download_command name)
     endif()
 
     get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
+    get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
+    get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
 
-    set(repository ${svn_repository})
+    set(repository "${svn_repository} user=${svn_username} password=${svn_password}")
     set(module)
     set(tag ${svn_revision})
     configure_file(
@@ -674,13 +806,55 @@ function(_ep_add_download_command name)
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
     set(comment "Performing download step (SVN checkout) for '${name}'")
-    set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_revision} ${src_name})
+    set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_revision}
+      --username=${svn_username} --password=${svn_password} ${src_name})
     list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
+  elseif(git_repository)
+    find_package(Git)
+    if(NOT GIT_EXECUTABLE)
+      message(FATAL_ERROR "error: could not find git for clone of ${name}")
+    endif()
+
+    # The git submodule update '--recursive' flag requires git >= v1.6.5
+    #
+    _ep_get_git_version("${GIT_EXECUTABLE}" git_version)
+    if(git_version VERSION_LESS 1.6.5)
+      message(FATAL_ERROR "error: git version 1.6.5 or later required for 'git submodule update --recursive': git_version='${git_version}'")
+    endif()
+
+    get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
+    if(NOT git_tag)
+      set(git_tag "master")
+    endif()
+
+    set(repository ${git_repository})
+    set(module)
+    set(tag ${git_tag})
+    configure_file(
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${stamp_dir}/${name}-gitinfo.txt"
+      @ONLY
+      )
+
+    get_filename_component(src_name "${source_dir}" NAME)
+    get_filename_component(work_dir "${source_dir}" PATH)
+
+    # Since git clone doesn't succeed if the non-empty source_dir exists,
+    # create a cmake script to invoke as download command.
+    # The script will delete the source directory and then call git clone.
+    #
+    _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
+      ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${src_name} ${work_dir}
+      )
+    set(comment "Performing download step (git clone) for '${name}'")
+    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
+    list(APPEND depends ${stamp_dir}/${name}-gitinfo.txt)
   elseif(url)
     get_filename_component(work_dir "${source_dir}" PATH)
+    get_property(md5 TARGET ${name} PROPERTY _EP_URL_MD5)
     set(repository "external project URL")
     set(module "${url}")
-    set(tag "")
+    set(tag "${md5}")
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-urlinfo.txt"
@@ -696,21 +870,23 @@ function(_ep_add_download_command name)
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
         string(REGEX MATCH "[^/]*$" fname "${url}")
-        if(NOT "${fname}" MATCHES "\\.(tar|tgz|tar\\.gz)$")
+        if(NOT "${fname}" MATCHES "\\.(bz2|tar|tgz|tar\\.gz|zip)$")
           message(FATAL_ERROR "Could not extract tarball filename from url:\n  ${url}")
         endif()
         set(file ${download_dir}/${fname})
         get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
-        _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake" "${url}" "${file}" "${timeout}")
+        _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake" "${url}" "${file}" "${timeout}" "${md5}")
         set(cmd ${CMAKE_COMMAND} -P ${stamp_dir}/download-${name}.cmake
           COMMAND)
-        set(comment "Performing download step (download and extract) for '${name}'")
+        set(comment "Performing download step (download, verify and extract) for '${name}'")
       else()
         set(file "${url}")
-        set(comment "Performing download step (extract) for '${name}'")
+        set(comment "Performing download step (verify and extract) for '${name}'")
       endif()
+      _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${md5}")
+      list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake)
       # TODO: Support other archive formats.
-      _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${file}" "${tmp_dir}" "${source_dir}")
+      _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${file}" "${source_dir}")
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake)
     endif()
   else()
@@ -734,6 +910,7 @@ function(_ep_add_update_command name)
   get_property(cmd TARGET ${name} PROPERTY _EP_UPDATE_COMMAND)
   get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
   get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
+  get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
 
   set(work_dir)
   set(comment)
@@ -757,7 +934,25 @@ function(_ep_add_update_command name)
     set(work_dir ${source_dir})
     set(comment "Performing update step (SVN update) for '${name}'")
     get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
-    set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_revision})
+    get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
+    get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
+    set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_revision}
+      --username=${svn_username} --password=${svn_password})
+    set(always 1)
+  elseif(git_repository)
+    if(NOT GIT_EXECUTABLE)
+      message(FATAL_ERROR "error: could not find git for fetch of ${name}")
+    endif()
+    set(work_dir ${source_dir})
+    set(comment "Performing update step (git fetch) for '${name}'")
+    get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
+    if(NOT git_tag)
+      set(git_tag "master")
+    endif()
+    set(cmd ${GIT_EXECUTABLE} fetch
+      COMMAND ${GIT_EXECUTABLE} checkout ${git_tag}
+      COMMAND ${GIT_EXECUTABLE} submodule update --recursive
+      )
     set(always 1)
   endif()
 
@@ -793,7 +988,7 @@ endfunction(_ep_add_patch_command)
 
 # TODO: Make sure external projects use the proper compiler
 function(_ep_add_configure_command name)
-  ExternalProject_Get_Property(${name} source_dir binary_dir)
+  ExternalProject_Get_Property(${name} source_dir binary_dir tmp_dir)
 
   _ep_get_configuration_subdir_suffix(cfgdir)
 
@@ -826,6 +1021,16 @@ function(_ep_add_configure_command name)
       list(APPEND cmd "-G${CMAKE_GENERATOR}" "${source_dir}")
     endif()
   endif()
+
+  # If anything about the configure command changes, (command itself, cmake
+  # used, cmake args or cmake generator) then re-run the configure step.
+  # Fixes issue http://public.kitware.com/Bug/view.php?id=10258
+  #
+  if(NOT EXISTS ${tmp_dir}/${name}-cfgcmd.txt.in)
+    file(WRITE ${tmp_dir}/${name}-cfgcmd.txt.in "cmd='@cmd@'\n")
+  endif()
+  configure_file(${tmp_dir}/${name}-cfgcmd.txt.in ${tmp_dir}/${name}-cfgcmd.txt)
+  list(APPEND file_deps ${tmp_dir}/${name}-cfgcmd.txt)
 
   ExternalProject_Add_Step(${name} configure
     COMMAND ${cmd}

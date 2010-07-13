@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCTestCoverageHandler.h"
+#include "cmParsePHPCoverage.h"
 #include "cmCTest.h"
 #include "cmake.h"
 #include "cmMakefile.h"
@@ -125,20 +126,6 @@ private:
 };
 
 
-//----------------------------------------------------------------------
-//**********************************************************************
-class cmCTestCoverageHandlerContainer
-{
-public:
-  int Error;
-  std::string SourceDir;
-  std::string BinaryDir;
-  typedef std::vector<int> SingleFileCoverageVector;
-  typedef std::map<std::string, SingleFileCoverageVector> TotalCoverageMap;
-  TotalCoverageMap TotalCoverage;
-  std::ostream* OFS;
-};
-//**********************************************************************
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
@@ -395,6 +382,11 @@ int cmCTestCoverageHandler::ProcessHandler()
     {
     return error;
     }
+  file_count += this->HandlePHPCoverage(&cont);
+  if ( file_count < 0 )
+    {
+    return error;
+    }
   error = cont.Error;
 
   std::set<std::string> uncovered = this->FindUncoveredFiles(&cont);
@@ -524,7 +516,7 @@ int cmCTestCoverageHandler::ProcessHandler()
         {
         cmOStringStream ostr;
         ostr << "Problem reading source file: " << fullFileName.c_str()
-          << " line:" << cc;
+             << " line:" << cc << "  out total: " << fcov.size()-1;
         errorsWhileAccumulating.push_back(ostr.str());
         error ++;
         break;
@@ -747,6 +739,18 @@ bool IsFileInDir(const std::string &infile, const std::string &indir)
   return false;
 }
 
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::HandlePHPCoverage(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  cmParsePHPCoverage cov(*cont, this->CTest);
+  std::string coverageDir = this->CTest->GetBinaryDir() + "/xdebugCoverage";
+  if(cmSystemTools::FileIsDirectory(coverageDir.c_str()))
+    {
+    cov.ReadPHPCoverageDirectory(coverageDir.c_str());
+    }
+  return static_cast<int>(cont->TotalCoverage.size());
+}
 //----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleGCovCoverage(
   cmCTestCoverageHandlerContainer* cont)

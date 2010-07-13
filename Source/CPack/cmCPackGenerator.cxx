@@ -789,7 +789,7 @@ int cmCPackGenerator::DoPackage()
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, 
                     "Remove toplevel directory: "
         << toplevelDirectory << std::endl);
-      if ( !cmSystemTools::RemoveADirectory(toplevelDirectory) )
+      if ( !cmSystemTools::RepeatedRemoveDirectory(toplevelDirectory) )
         {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
           "Problem removing toplevel directory: "
@@ -1084,7 +1084,7 @@ int cmCPackGenerator::CleanTemporaryDirectory()
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "- Clean temporary : "
                   << tempInstallDirectory << std::endl);
-    if(!cmsys::SystemTools::RemoveADirectory(tempInstallDirectory))
+    if(!cmSystemTools::RepeatedRemoveDirectory(tempInstallDirectory))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Problem removing temporary directory: " <<

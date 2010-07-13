@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 project(ExternalProjectTest NONE)
 
 include(ExternalProject)
 
 find_package(CVS)
 find_package(Subversion)
+find_package(Git)
 
 set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
 set(binary_base "${base}/Build")
@@ -37,8 +38,6 @@ if(NOT DEFINED can_build_tutorial_step5)
   endif()
 endif()
 
-message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
-
 
 # Empty projects that test all the known ExternalProject_Add argument key words:
 #
@@ -65,7 +64,9 @@ ExternalProject_Add(${proj}
   SVN_REPOSITORY ""
   SVN_REVISION ""
   TEST_COMMAND ""
+  TIMEOUT ""
   URL ""
+  URL_MD5 ""
   UPDATE_COMMAND ""
 )
 
@@ -96,6 +97,7 @@ endif()
 set(proj TutorialStep1-LocalTAR)
 ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tar"
+  URL_MD5 a87c5b47c0201c09ddfe1d5738fdb1e3
   LIST_SEPARATOR ::
   PATCH_COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Step1Patch.cmake
   CMAKE_GENERATOR "${CMAKE_GENERATOR}"
@@ -107,6 +109,7 @@ ExternalProject_Add(${proj}
 set(proj TutorialStep1-LocalNoDirTAR)
 ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tar"
+  URL_MD5 d09e3d370c5c908fa035c30939ee438e
   LIST_SEPARATOR @@
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
              -DTEST_LIST:STRING=1@@2@@3
@@ -126,6 +129,7 @@ ExternalProject_Add_Step(${proj} mypatch
 set(proj TutorialStep1-LocalTGZ)
 ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tgz"
+  URL_MD5 38c648e817339c356f6be00eeed79bd0
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
   INSTALL_COMMAND ""
 )
@@ -133,12 +137,63 @@ ExternalProject_Add(${proj}
 set(proj TutorialStep1-LocalNoDirTGZ)
 ExternalProject_Add(${proj}
   URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tgz"
+  URL_MD5 0b8182edcecdf40bf1c9d71d7d259f78
   CMAKE_GENERATOR "${CMAKE_GENERATOR}"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
   INSTALL_COMMAND ""
 )
 
 
+# Local BZ2:
+#
+# (The bz2 tests are here just to verify that the bz2 decompression is executed
+#  during a test suite run... The configure and build commands are set to
+#  nothing to make the test quicker. To make this more complete, I should add
+#  a diff between this and the TGZ source tree since that one does build...)
+#
+set(proj TutorialStep1-LocalBZ2)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tar.bz2"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+set(proj TutorialStep1-LocalNoDirBZ2)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tar.bz2"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+
+# Local ZIP:
+#
+# (The zip tests are here just to verify that the zip decompression is executed
+#  during a test suite run... The configure and build commands are set to
+#  nothing to make the test quicker. To make this more complete, I should add
+#  a diff between this and the TGZ source tree since that one does build...)
+#
+set(proj TutorialStep1-LocalZIP)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.zip"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+set(proj TutorialStep1-LocalNoDirZIP)
+ExternalProject_Add(${proj}
+  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.zip"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+
+# CVS-based tests:
+#
 set(do_cvs_tests 0)
 
 if(CVS_EXECUTABLE)
@@ -161,8 +216,9 @@ if(do_cvs_tests)
   ExternalProject_Add(${proj}
     SOURCE_DIR ${local_cvs_repo}
     URL ${CMAKE_CURRENT_SOURCE_DIR}/cvsrepo.tgz
+    URL_MD5 55fc85825ffdd9ed2597123c68b79f7e
     BUILD_COMMAND ""
-    CONFIGURE_COMMAND ${CVS_EXECUTABLE} --version
+    CONFIGURE_COMMAND "${CVS_EXECUTABLE}" --version
     INSTALL_COMMAND ""
   )
 
@@ -215,6 +271,8 @@ if(do_cvs_tests)
 endif()
 
 
+# SVN-based tests:
+#
 set(do_svn_tests 0)
 
 if(Subversion_SVN_EXECUTABLE)
@@ -257,8 +315,9 @@ if(do_svn_tests)
   ExternalProject_Add(${proj}
     SOURCE_DIR ${local_svn_repo}
     URL ${CMAKE_CURRENT_SOURCE_DIR}/svnrepo.tgz
+    URL_MD5 2f468be4ed1fa96377fca0cc830819c4
     BUILD_COMMAND ""
-    CONFIGURE_COMMAND ${Subversion_SVN_EXECUTABLE} --version
+    CONFIGURE_COMMAND "${Subversion_SVN_EXECUTABLE}" --version
     INSTALL_COMMAND ""
   )
 
@@ -297,6 +356,80 @@ if(do_svn_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalSVNRepository"
+  )
+endif()
+
+
+set(do_git_tests 0)
+
+if(GIT_EXECUTABLE)
+  set(do_git_tests 1)
+
+  execute_process(
+    COMMAND "${GIT_EXECUTABLE}" --version
+    OUTPUT_VARIABLE ov
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  string(REGEX REPLACE "^git version (.+)$" "\\1" git_version "${ov}")
+  message(STATUS "git_version='${git_version}'")
+
+  if(git_version VERSION_LESS 1.6.5)
+    message(STATUS "No ExternalProject git tests with git client less than version 1.6.5")
+    set(do_git_tests 0)
+  endif()
+endif()
+
+
+if(do_git_tests)
+  set(local_git_repo "../../LocalRepositories/GIT")
+
+  # Unzip/untar the git repository in our source folder so that other
+  # projects below may use it to test git args of ExternalProject_Add
+  #
+  set(proj SetupLocalGITRepository)
+  ExternalProject_Add(${proj}
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/GIT
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/gitrepo.tgz
+    BUILD_COMMAND ""
+    CONFIGURE_COMMAND "${GIT_EXECUTABLE}" --version
+    INSTALL_COMMAND ""
+  )
+
+  # git by commit id:
+  #
+  set(proj TutorialStep1-GIT-byhash)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    GIT_TAG d1970730310fe8bc07e73f15dc570071f9f9654a
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
+  )
+
+  # git by explicit branch/tag name:
+  #
+  set(proj TutorialStep1-GIT-bytag)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    GIT_TAG "origin/master"
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
+  )
+
+  # Live git / master (no GIT_TAG):
+  #
+  set(proj TutorialStep1-GIT-master)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
   )
 endif()
 
@@ -365,3 +498,10 @@ if(can_build_tutorial_step5)
   set_property(TEST TutorialStep5-InstallTreeTest
     APPEND PROPERTY LABELS Step5 InstallTree)
 endif()
+
+
+message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
+message(STATUS "do_cvs_tests='${do_cvs_tests}'")
+message(STATUS "do_svn_tests='${do_svn_tests}'")
+message(STATUS "do_git_tests='${do_git_tests}'")
+message(STATUS "GIT_EXECUTABLE='${GIT_EXECUTABLE}'")

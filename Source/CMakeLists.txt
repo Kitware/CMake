@@ -366,6 +366,7 @@ SET(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestConfigureHandler.cxx
   CTest/cmCTestCoverageCommand.cxx
   CTest/cmCTestCoverageHandler.cxx
+  CTest/cmParsePHPCoverage.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx
   CTest/cmCTestHandlerCommand.cxx
@@ -502,4 +503,3 @@ IF(APPLE)
 ENDIF(APPLE)
 
 INSTALL_FILES(${CMAKE_DATA_DIR}/include cmCPluginAPI.h)
-

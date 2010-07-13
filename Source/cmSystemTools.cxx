@@ -2938,3 +2938,18 @@ bool cmSystemTools::CheckRPath(std::string const& file,
   return false;
 #endif
 }
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::RepeatedRemoveDirectory(const char* dir)
+{
+  // Windows sometimes locks files temporarily so try a few times.
+  for(int i = 0; i < 10; ++i)
+    {
+    if(cmSystemTools::RemoveADirectory(dir))
+      {
+      return true;
+      }
+    cmSystemTools::Delay(100);
+    }
+  return false;
+}

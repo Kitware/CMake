@@ -1514,8 +1514,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     extraLinkOptions = this->CurrentMakefile->
       GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
     }
-  
-  const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
+
+  const char* linkFlagsProp = "LINK_FLAGS";
+  if(target.GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    linkFlagsProp = "STATIC_LIBRARY_FLAGS";
+    }
+  const char* targetLinkFlags = target.GetProperty(linkFlagsProp);
   if(targetLinkFlags)
     {
     extraLinkOptions += " ";
@@ -1523,7 +1528,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     }
   if(configName && *configName)
     {
-    std::string linkFlagsVar = "LINK_FLAGS_";
+    std::string linkFlagsVar = linkFlagsProp;
+    linkFlagsVar += "_";
     linkFlagsVar += cmSystemTools::UpperCase(configName);
     if(const char* linkFlags = target.GetProperty(linkFlagsVar.c_str()))
       {
