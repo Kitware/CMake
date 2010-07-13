@@ -959,7 +959,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
   this->ProcessBuffer(0, 0, tick, tick_len, ofs,
     &this->BuildProcessingErrorQueue);
   cmCTestLog(this->CTest, OUTPUT, " Size of output: "
-    << int(this->BuildOutputLogSize / 1024.0) << "K" << std::endl);
+    << ((this->BuildOutputLogSize + 512) / 1024) << "K" << std::endl);
 
   // Properly handle output of the build command
   cmsysProcess_WaitForExit(cp, 0);
@@ -1171,7 +1171,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
     if ( tick % tick_line_len == 0 && tick > 0 )
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "  Size: "
-        << int((this->BuildOutputLogSize / 1024.0) + 1) << "K" << std::endl
+        << ((this->BuildOutputLogSize + 512) / 1024) << "K" << std::endl
         << "    ");
       }
     }
