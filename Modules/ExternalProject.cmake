@@ -43,6 +43,13 @@
 #    [TEST_BEFORE_INSTALL 1]     # Add test step executed before install step
 #    [TEST_AFTER_INSTALL 1]      # Add test step executed after install step
 #    [TEST_COMMAND cmd...]       # Command to drive test
+#   #--Output logging-------------
+#    [LOG_DOWNLOAD 1]            # Wrap download in script to log output
+#    [LOG_UPDATE 1]              # Wrap update in script to log output
+#    [LOG_CONFIGURE 1]           # Wrap configure in script to log output
+#    [LOG_BUILD 1]               # Wrap build in script to log output
+#    [LOG_TEST 1]                # Wrap test in script to log output
+#    [LOG_INSTALL 1]             # Wrap install in script to log output
 #    )
 # The *_DIR options specify directories for the project, with default
 # directories computed as follows.
@@ -86,6 +93,7 @@
 #    [DEPENDS files...]      # Files on which this step depends
 #    [ALWAYS 1]              # No stamp file, step always runs
 #    [WORKING_DIRECTORY dir] # Working directory for command
+#    [LOG 1]                 # Wrap step in script to log output
 #    )
 # The command line, comment, and working directory of every standard
 # and custom step is processed to replace tokens
@@ -606,6 +614,81 @@ function(_ep_get_build_command name step cmd_var)
   set(${cmd_var} "${cmd}" PARENT_SCOPE)
 endfunction(_ep_get_build_command)
 
+function(_ep_write_log_script name step cmd_var)
+  ExternalProject_Get_Property(${name} stamp_dir)
+  set(command "${${cmd_var}}")
+
+  set(make "")
+  if("${command}" MATCHES "^\\$\\(MAKE\\)")
+    # GNU make recognizes the string "$(MAKE)" as recursive make, so
+    # ensure that it appears directly in the makefile.
+    string(REGEX REPLACE "^\\$\\(MAKE\\)" "\${make}" command "${command}")
+    set(make "-Dmake=$(MAKE)")
+  endif()
+
+  set(config "")
+  if("${CMAKE_CFG_INTDIR}" MATCHES "^\\$")
+    string(REPLACE "${CMAKE_CFG_INTDIR}" "\${config}" command "${command}")
+    set(config "-Dconfig=${CMAKE_CFG_INTDIR}")
+  endif()
+
+  # Wrap multiple 'COMMAND' lines up into a second-level wrapper
+  # script so all output can be sent to one log file.
+  if("${command}" MATCHES ";COMMAND;")
+    set(code_execute_process "
+execute_process(COMMAND \${command} RESULT_VARIABLE result)
+if(result)
+  set(msg \"Command failed (\${result}):\\n\")
+  foreach(arg IN LISTS command)
+    set(msg \"\${msg} '\${arg}'\")
+  endforeach(arg)
+  message(FATAL_ERROR \"\${msg}\")
+endif()
+")
+    set(code "")
+    set(cmd "")
+    set(sep "")
+    foreach(arg IN LISTS command)
+      if("x${arg}" STREQUAL "xCOMMAND")
+        set(code "${code}set(command \"${cmd}\")${code_execute_process}")
+        set(cmd "")
+        set(sep "")
+      else()
+        set(cmd "${cmd}${sep}${arg}")
+        set(sep ";")
+      endif()
+    endforeach()
+    set(code "${code}set(command \"${cmd}\")${code_execute_process}")
+    file(WRITE ${stamp_dir}/${name}-${step}-impl.cmake "${code}")
+    set(command ${CMAKE_COMMAND} "-Dmake=\${make}" "-Dconfig=\${config}" -P ${stamp_dir}/${name}-${step}-impl.cmake)
+  endif()
+
+  # Wrap the command in a script to log output to files.
+  set(script ${stamp_dir}/${name}-${step}.cmake)
+  set(logbase ${stamp_dir}/${name}-${step})
+  file(WRITE ${script} "
+set(command \"${command}\")
+execute_process(
+  COMMAND \${command}
+  RESULT_VARIABLE result
+  OUTPUT_FILE \"${logbase}-out.log\"
+  ERROR_FILE \"${logbase}-err.log\"
+  )
+if(result)
+  set(msg \"Command failed: \${result}\\n\")
+  foreach(arg IN LISTS command)
+    set(msg \"\${msg} '\${arg}'\")
+  endforeach(arg)
+  set(msg \"\${msg}\\nSee also\\n  ${logbase}-*.log\\n\")
+  message(FATAL_ERROR \"\${msg}\")
+else()
+  set(msg \"${name} ${step} command succeeded.  See also ${logbase}-*.log\\n\")
+  message(STATUS \"\${msg}\")
+endif()
+")
+  set(command ${CMAKE_COMMAND} ${make} ${config} -P ${script})
+  set(${cmd_var} "${command}" PARENT_SCOPE)
+endfunction(_ep_write_log_script)
 
 # This module used to use "/${CMAKE_CFG_INTDIR}" directly and produced
 # makefiles with "/./" in paths for custom command dependencies. Which
@@ -693,6 +776,12 @@ function(ExternalProject_Add_Step name step)
     set(touch)
   else()
     set(touch ${CMAKE_COMMAND} -E touch ${stamp_dir}${cfgdir}/${name}-${step})
+  endif()
+
+  # Wrap with log script?
+  get_property(log TARGET ${name} PROPERTY _EP_${step}_LOG)
+  if(command AND log)
+    _ep_write_log_script(${name} ${step} command)
   endif()
 
   add_custom_command(
@@ -905,12 +994,20 @@ function(_ep_add_download_command name)
     endif()
   endif()
 
+  get_property(log TARGET ${name} PROPERTY _EP_LOG_DOWNLOAD)
+  if(log)
+    set(log LOG 1)
+  else()
+    set(log "")
+  endif()
+
   ExternalProject_Add_Step(${name} download
     COMMENT ${comment}
     COMMAND ${cmd}
     WORKING_DIRECTORY ${work_dir}
     DEPENDS ${depends}
     DEPENDEES mkdir
+    ${log}
     )
 endfunction(_ep_add_download_command)
 
@@ -968,12 +1065,20 @@ function(_ep_add_update_command name)
     set(always 1)
   endif()
 
+  get_property(log TARGET ${name} PROPERTY _EP_LOG_UPDATE)
+  if(log)
+    set(log LOG 1)
+  else()
+    set(log "")
+  endif()
+
   ExternalProject_Add_Step(${name} update
     COMMENT ${comment}
     COMMAND ${cmd}
     ALWAYS ${always}
     WORKING_DIRECTORY ${work_dir}
     DEPENDEES download
+    ${log}
     )
 endfunction(_ep_add_update_command)
 
@@ -1044,11 +1149,19 @@ function(_ep_add_configure_command name)
   configure_file(${tmp_dir}/${name}-cfgcmd.txt.in ${tmp_dir}/${name}-cfgcmd.txt)
   list(APPEND file_deps ${tmp_dir}/${name}-cfgcmd.txt)
 
+  get_property(log TARGET ${name} PROPERTY _EP_LOG_CONFIGURE)
+  if(log)
+    set(log LOG 1)
+  else()
+    set(log "")
+  endif()
+
   ExternalProject_Add_Step(${name} configure
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES update patch
     DEPENDS ${file_deps}
+    ${log}
     )
 endfunction(_ep_add_configure_command)
 
@@ -1063,10 +1176,18 @@ function(_ep_add_build_command name)
     _ep_get_build_command(${name} BUILD cmd)
   endif()
 
+  get_property(log TARGET ${name} PROPERTY _EP_LOG_BUILD)
+  if(log)
+    set(log LOG 1)
+  else()
+    set(log "")
+  endif()
+
   ExternalProject_Add_Step(${name} build
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES configure
+    ${log}
     )
 endfunction(_ep_add_build_command)
 
@@ -1081,10 +1202,18 @@ function(_ep_add_install_command name)
     _ep_get_build_command(${name} INSTALL cmd)
   endif()
 
+  get_property(log TARGET ${name} PROPERTY _EP_LOG_INSTALL)
+  if(log)
+    set(log LOG 1)
+  else()
+    set(log "")
+  endif()
+
   ExternalProject_Add_Step(${name} install
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES build
+    ${log}
     )
 endfunction(_ep_add_install_command)
 
@@ -1112,10 +1241,18 @@ function(_ep_add_test_command name)
       set(dep_args DEPENDEES install)
     endif()
 
+    get_property(log TARGET ${name} PROPERTY _EP_LOG_TEST)
+    if(log)
+      set(log LOG 1)
+    else()
+      set(log "")
+    endif()
+
     ExternalProject_Add_Step(${name} test
       COMMAND ${cmd}
       WORKING_DIRECTORY ${binary_dir}
       ${dep_args}
+      ${log}
       )
   endif()
 endfunction(_ep_add_test_command)
