@@ -607,6 +607,14 @@ IF (QT4_QMAKE_FOUND)
                  NAMES QtCore${QT_LIBINFIX}_debug QtCore${QT_LIBINFIX}d QtCore${QT_LIBINFIX}d4
                  HINTS ${QT_LIBRARY_DIR_TMP}
         )
+
+    # try dropping a hint if trying to use Visual Studio with Qt built by mingw
+    IF(NOT QT_QTCORE_LIBRARY_RELEASE AND MSVC)
+      IF(EXISTS ${QT_LIBRARY_DIR_TMP}/libqtmain.a)
+        MESSAGE( FATAL_ERROR "It appears you're trying to use Visual Studio with Qt built by mingw.  Those compilers do not produce code compatible with each other.")
+      ENDIF(EXISTS ${QT_LIBRARY_DIR_TMP}/libqtmain.a)
+    ENDIF(NOT QT_QTCORE_LIBRARY_RELEASE AND MSVC)
+
   ENDIF (NOT QT_QTCORE_LIBRARY OR QT_QMAKE_CHANGED)
 
   _QT4_ADJUST_LIB_VARS(QtCore)
@@ -623,14 +631,6 @@ IF (QT4_QMAKE_FOUND)
   ELSE()
     MESSAGE("Warning: QT_QMAKE_EXECUTABLE reported QT_INSTALL_LIBS as ${QT_LIBRARY_DIR_TMP}")
     MESSAGE("Warning: But QtCore couldn't be found.  Qt must NOT be installed correctly.")
-
-    # try dropping a hint if trying to use Visual Studio with Qt built by mingw
-    IF(QT_LIBRARY_DIR AND MSVC)
-      IF(EXISTS ${QT_LIBRARY_DIR_TMP}/libqtmain.a)
-        MESSAGE( FATAL_ERROR "It appears you're trying to use Visual Studio with Qt built by mingw.  Those compilers do not produce code compatible with each other.")
-      ENDIF(EXISTS ${QT_LIBRARY_DIR_TMP}/libqtmain.a)
-    ENDIF(QT_LIBRARY_DIR AND MSVC)
-
     IF(Qt4_FIND_REQUIRED)
       MESSAGE( FATAL_ERROR "Could NOT find QtCore. Check ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log for more details.")
     ENDIF(Qt4_FIND_REQUIRED)
