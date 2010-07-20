@@ -126,6 +126,7 @@ bool cmCTestGIT::UpdateByFetchAndReset()
   std::string line;
   while(sha1.empty() && cmSystemTools::GetLineFromStream(fin, line))
     {
+    this->Log << "FETCH_HEAD> " << line << "\n";
     if(line.find("\tnot-for-merge\t") == line.npos)
       {
       std::string::size_type pos = line.find('\t');
@@ -134,6 +135,11 @@ bool cmCTestGIT::UpdateByFetchAndReset()
         sha1 = line.substr(0, pos);
         }
       }
+    }
+  if(sha1.empty())
+    {
+    this->Log << "FETCH_HEAD has no upstream branch candidate!\n";
+    return false;
     }
   }
 
