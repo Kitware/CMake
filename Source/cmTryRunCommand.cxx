@@ -361,7 +361,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
 
     std::string errorMessage = "TRY_RUN() invoked in cross-compiling mode, "
                                "please set the following cache variables "
-                               "appropriatly:\n";
+                               "appropriately:\n";
     errorMessage += "   " + this->RunResultVariable + " (advanced)\n";
     if (out!=0)
       {

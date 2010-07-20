@@ -203,7 +203,7 @@ int main (int argc, char *argv[])
   if ( verbose )
     {
     log.SetVerbose(verbose);
-    cmCPack_Log(&log, cmCPackLog::LOG_OUTPUT, "Enable Verbse" << std::endl);
+    cmCPack_Log(&log, cmCPackLog::LOG_OUTPUT, "Enable Verbose" << std::endl);
     }
   if ( debug )
     {

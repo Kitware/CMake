@@ -2121,7 +2121,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
       i++;
       std::string targ = args[i];
       // AddTestsForDashboard parses the dashborad type and converts it
-      // into the seperate stages
+      // into the separate stages
       if (!this->AddTestsForDashboardType(targ))
         {
         performSomeTest = false;
