@@ -69,6 +69,8 @@ MACRO(CMAKE_HANDLE_SYSTEM_LIBRARIES)
       CACHE BOOL "Use system-installed expat" FORCE)
     SET(CMAKE_USE_SYSTEM_ZLIB "${CMAKE_USE_SYSTEM_LIBRARIES}"
       CACHE BOOL "Use system-installed zlib" FORCE)
+    SET(CMAKE_USE_SYSTEM_BZIP2 "${CMAKE_USE_SYSTEM_LIBRARIES}"
+      CACHE BOOL "Use system-installed bzip2" FORCE)
   ENDIF(CMAKE_USE_SYSTEM_LIBRARIES_USER)
 
   # Optionally use system utility libraries.
@@ -78,9 +80,10 @@ MACRO(CMAKE_HANDLE_SYSTEM_LIBRARIES)
     ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CTEST_USE_XMLRPC" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
     ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_CURL" ON)
+  OPTION(CMAKE_USE_SYSTEM_BZIP2 "Use system-installed bzip2" OFF)
 
   # Mention to the user what system libraries are being used.
-  FOREACH(util CURL EXPAT XMLRPC ZLIB)
+  FOREACH(util BZIP2 CURL EXPAT ZLIB)
     IF(CMAKE_USE_SYSTEM_${util})
       MESSAGE(STATUS "Using system-installed ${util}")
     ENDIF(CMAKE_USE_SYSTEM_${util})
