@@ -275,6 +275,11 @@ execute_process(
   WORKING_DIRECTORY \"${TOP}\"
   COMMAND \"${GIT}\" clone \"${REPO}\" dash-source
   )
+
+# Test .git file.
+file(RENAME \"${TOP}/dash-source/.git\" \"${TOP}/dash-source/repo.git\")
+file(WRITE \"${TOP}/dash-source/.git\" \"gitdir: repo.git\n\")
+
 execute_process(
   WORKING_DIRECTORY \"${TOP}/dash-source\"
   COMMAND \"${GIT}\" reset --hard ${revision1}

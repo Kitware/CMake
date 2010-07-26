@@ -32,6 +32,8 @@ private:
   virtual void NoteNewRevision();
   virtual bool UpdateImpl();
 
+  std::string FindGitDir();
+
   bool UpdateByFetchAndReset();
   bool UpdateByCustom(std::string const& custom);
   bool UpdateInternal();
