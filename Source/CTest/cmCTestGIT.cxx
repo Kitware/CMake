@@ -133,6 +133,27 @@ std::string cmCTestGIT::FindGitDir()
 }
 
 //----------------------------------------------------------------------------
+std::string cmCTestGIT::FindTopDir()
+{
+  std::string top_dir = this->SourceDirectory;
+
+  // Run "git rev-parse --show-cdup" to locate the top of the tree.
+  const char* git = this->CommandLineTool.c_str();
+  char const* git_rev_parse[] = {git, "rev-parse", "--show-cdup", 0};
+  std::string cdup;
+  OneLineParser rev_parse_out(this, "rev-parse-out> ", cdup);
+  OutputLogger rev_parse_err(this->Log, "rev-parse-err> ");
+  if(this->RunChild(git_rev_parse, &rev_parse_out, &rev_parse_err) &&
+     !cdup.empty())
+    {
+    top_dir += "/";
+    top_dir += cdup;
+    top_dir = cmSystemTools::CollapseFullPath(top_dir.c_str());
+    }
+  return top_dir;
+}
+
+//----------------------------------------------------------------------------
 bool cmCTestGIT::UpdateByFetchAndReset()
 {
   const char* git = this->CommandLineTool.c_str();
@@ -240,11 +261,13 @@ bool cmCTestGIT::UpdateImpl()
     return false;
     }
 
+  std::string top_dir = this->FindTopDir();
   const char* git = this->CommandLineTool.c_str();
   char const* git_submodule[] = {git, "submodule", "update", 0};
   OutputLogger submodule_out(this->Log, "submodule-out> ");
   OutputLogger submodule_err(this->Log, "submodule-err> ");
-  return this->RunChild(git_submodule, &submodule_out, &submodule_err);
+  return this->RunChild(git_submodule, &submodule_out, &submodule_err,
+                        top_dir.c_str());
 }
 
 //----------------------------------------------------------------------------
