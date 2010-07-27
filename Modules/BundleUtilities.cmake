@@ -13,6 +13,7 @@
 #   set_bundle_key_values
 #   get_bundle_keys
 #   copy_resolved_item_into_bundle
+#   copy_resolved_framework_into_bundle
 #   fixup_bundle_item
 #   fixup_bundle
 #   copy_and_fixup_bundle
@@ -433,6 +434,59 @@ function(copy_resolved_item_into_bundle resolved_item resolved_embedded_item)
 endfunction(copy_resolved_item_into_bundle)
 
 
+# copy_resolved_framework_into_bundle
+#
+# Copy a resolved framework into the bundle if necessary. Copy is not necessary
+# if the resolved_item is "the same as" the resolved_embedded_item.
+#
+# By default, BU_COPY_FULL_FRAMEWORK_CONTENTS is not set. If you want full
+# frameworks embedded in your bundles, set BU_COPY_FULL_FRAMEWORK_CONTENTS to
+# ON before calling fixup_bundle. By default,
+# copy_resolved_framework_into_bundle copies the framework dylib itself plus
+# any framework Resources.
+#
+function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_item)
+  if(WIN32)
+    # ignore case on Windows
+    string(TOLOWER "${resolved_item}" resolved_item_compare)
+    string(TOLOWER "${resolved_embedded_item}" resolved_embedded_item_compare)
+  else()
+    set(resolved_item_compare "${resolved_item}")
+    set(resolved_embedded_item_compare "${resolved_embedded_item}")
+  endif()
+
+  if("${resolved_item_compare}" STREQUAL "${resolved_embedded_item_compare}")
+    message(STATUS "warning: resolved_item == resolved_embedded_item - not copying...")
+  else()
+    if(BU_COPY_FULL_FRAMEWORK_CONTENTS)
+      # Full Framework (everything):
+      get_filename_component(resolved_dir "${resolved_item}" PATH)
+      get_filename_component(resolved_dir "${resolved_dir}/../.." ABSOLUTE)
+      get_filename_component(resolved_embedded_dir "${resolved_embedded_item}" PATH)
+      get_filename_component(resolved_embedded_dir "${resolved_embedded_dir}/../.." ABSOLUTE)
+      #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy_directory '${resolved_dir}' '${resolved_embedded_dir}'")
+      execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${resolved_dir}" "${resolved_embedded_dir}")
+    else()
+      # Framework lib itself:
+      #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy ${resolved_item} ${resolved_embedded_item}")
+      execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}" "${resolved_embedded_item}")
+
+      # Plus Resources, if they exist:
+      string(REGEX REPLACE "^(.*)/[^/]+/[^/]+/[^/]+$" "\\1/Resources" resolved_resources "${resolved_item}")
+      string(REGEX REPLACE "^(.*)/[^/]+/[^/]+/[^/]+$" "\\1/Resources" resolved_embedded_resources "${resolved_embedded_item}")
+      if(EXISTS "${resolved_resources}")
+        #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy_directory '${resolved_resources}' '${resolved_embedded_resources}'")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${resolved_resources}" "${resolved_embedded_resources}")
+      endif()
+    endif()
+  endif()
+
+  if(UNIX AND NOT APPLE)
+    file(RPATH_REMOVE FILE "${resolved_embedded_item}")
+  endif(UNIX AND NOT APPLE)
+endfunction(copy_resolved_framework_into_bundle)
+
+
 # fixup_bundle_item
 #
 # Get the direct/non-system prerequisites of the resolved embedded item. For each
@@ -528,8 +582,14 @@ function(fixup_bundle app libs dirs)
       endif(show_status)
 
       if(${${key}_COPYFLAG})
-        copy_resolved_item_into_bundle("${${key}_RESOLVED_ITEM}"
-          "${${key}_RESOLVED_EMBEDDED_ITEM}")
+        set(item "${${key}_ITEM}")
+        if(item MATCHES "[^/]+\\.framework/")
+          copy_resolved_framework_into_bundle("${${key}_RESOLVED_ITEM}"
+            "${${key}_RESOLVED_EMBEDDED_ITEM}")
+        else()
+          copy_resolved_item_into_bundle("${${key}_RESOLVED_ITEM}"
+            "${${key}_RESOLVED_EMBEDDED_ITEM}")
+        endif()
       endif(${${key}_COPYFLAG})
     endforeach(key)
 
