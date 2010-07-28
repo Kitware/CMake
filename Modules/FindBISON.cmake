@@ -5,6 +5,9 @@
 #  BISON_VERSION - version of bison
 #  BISON_FOUND - true if the program was found
 #
+# The minimum required version of bison can be specified using the
+# standard CMake syntax, e.g. find_package(BISON 2.1.3)
+#
 # If bison is found, the module defines the macros:
 #  BISON_TARGET(<Name> <YaccInput> <CodeOutput> [VERBOSE <file>]
 #              [COMPILE_FLAGS <string>])
@@ -149,6 +152,7 @@ IF(BISON_EXECUTABLE)
 ENDIF(BISON_EXECUTABLE)
 
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(BISON DEFAULT_MSG BISON_EXECUTABLE)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(BISON REQUIRED_VARS  BISON_EXECUTABLE
+                                        VERSION_VAR BISON_VERSION)
 
 # FindBISON.cmake ends here
