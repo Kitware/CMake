@@ -154,8 +154,8 @@ function(_ep_parse_arguments f name ns args)
   # correctly based on target properties.
   #
   # We loop through ARGN and consider the namespace starting with an
-  # upper-case letter followed by at least two more upper-case letters
-  # or underscores to be keywords.
+  # upper-case letter followed by at least two more upper-case letters,
+  # numbers or underscores to be keywords.
   set(key)
 
   foreach(arg IN LISTS args)
@@ -166,14 +166,6 @@ function(_ep_parse_arguments f name ns args)
         NOT arg MATCHES "^(TRUE|FALSE)$")
       if(_ep_keywords_${f} AND arg MATCHES "${_ep_keywords_${f}}")
         set(is_value 0)
-      else()
-        if(NOT (key STREQUAL "COMMAND")
-          AND NOT (key STREQUAL "CVS_MODULE")
-          AND NOT (key STREQUAL "DEPENDS")
-          AND NOT (key STREQUAL "DOWNLOAD_COMMAND")
-          )
-          message(AUTHOR_WARNING "unknown ${f} keyword: ${arg}")
-        endif()
       endif()
     endif()
 
