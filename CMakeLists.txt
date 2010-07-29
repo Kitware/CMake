@@ -71,19 +71,23 @@ MACRO(CMAKE_HANDLE_SYSTEM_LIBRARIES)
       CACHE BOOL "Use system-installed zlib" FORCE)
     SET(CMAKE_USE_SYSTEM_BZIP2 "${CMAKE_USE_SYSTEM_LIBRARIES}"
       CACHE BOOL "Use system-installed bzip2" FORCE)
+    SET(CMAKE_USE_SYSTEM_LIBARCHIVE "${CMAKE_USE_SYSTEM_LIBRARIES}"
+      CACHE BOOL "Use system-installed libarchive" FORCE)
   ENDIF(CMAKE_USE_SYSTEM_LIBRARIES_USER)
 
   # Optionally use system utility libraries.
+  OPTION(CMAKE_USE_SYSTEM_LIBARCHIVE "Use system-installed libarchive" ${CMAKE_USE_SYSTEM_LIBRARIES})
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_CURL "Use system-installed curl"
     ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CTEST_USE_XMLRPC" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat"
     ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CTEST_USE_XMLRPC" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
-    ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_CURL" ON)
-  OPTION(CMAKE_USE_SYSTEM_BZIP2 "Use system-installed bzip2" OFF)
+    ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_LIBARCHIVE;NOT CMAKE_USE_SYSTEM_CURL" ON)
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_BZIP2 "Use system-installed bzip2"
+    ${CMAKE_USE_SYSTEM_LIBRARIES} "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
 
   # Mention to the user what system libraries are being used.
-  FOREACH(util BZIP2 CURL EXPAT ZLIB)
+  FOREACH(util BZIP2 CURL EXPAT LIBARCHIVE ZLIB)
     IF(CMAKE_USE_SYSTEM_${util})
       MESSAGE(STATUS "Using system-installed ${util}")
     ENDIF(CMAKE_USE_SYSTEM_${util})
@@ -266,9 +270,20 @@ MACRO (CMAKE_BUILD_UTILITIES)
     SET(BZIP2_LIBRARIES cmbzip2)
     ADD_SUBDIRECTORY(Utilities/cmbzip2)
   ENDIF()
+
+  #---------------------------------------------------------------------
+  # Build or use system libarchive for CMake and CTest.
   IF(CMAKE_USE_SYSTEM_LIBARCHIVE)
-    FIND_PACKAGE(libarchive)
-    SET(CMAKE_TAR_LIBRARIES libarchive)
+    IF(EXISTS ${CMAKE_ROOT}/Modules/FindLibArchive.cmake)
+      FIND_PACKAGE(LibArchive)
+    ELSE()
+      CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
+      INCLUDE(${CMake_SOURCE_DIR}/Modules/FindLibArchive.cmake)
+    ENDIF()
+    IF(NOT LibArchive_FOUND)
+      MESSAGE(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBARCHIVE is ON but LibArchive is not found!")
+    ENDIF()
+    SET(CMAKE_TAR_LIBRARIES ${LibArchive_LIBRARIES})
   ELSE(CMAKE_USE_SYSTEM_LIBARCHIVE)
     SET(HAVE_LIBZ 1)
     SET(HAVE_ZLIB_H 1)
