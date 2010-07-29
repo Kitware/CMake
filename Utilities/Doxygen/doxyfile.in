@@ -31,19 +31,19 @@ GRAPHICAL_HIERARCHY  = YES
 
 ALLEXTERNALS         = NO
 
-IMAGE_PATH           = "@CMAKE_BINARY_DIR@/Utilities/Doxygen/contrib"
+IMAGE_PATH           = "@CMake_BINARY_DIR@/Utilities/Doxygen/contrib"
 
-OUTPUT_DIRECTORY     = "@CMAKE_BINARY_DIR@/Utilities/Doxygen/doc"
+OUTPUT_DIRECTORY     = "@CMake_BINARY_DIR@/Utilities/Doxygen/doc"
 
 INPUT                = \
- "@CMAKE_SOURCE_DIR@/Source" \
- "@CMAKE_SOURCE_DIR@/Source/CPack" \
- "@CMAKE_SOURCE_DIR@/Source/CTest" \
- "@CMAKE_SOURCE_DIR@/Source/CursesDialog" \
- "@CMAKE_SOURCE_DIR@/Source/MFCDialog" \
- "@CMAKE_BINARY_DIR@/Source/kwsys" \
- "@CMAKE_BINARY_DIR@/Source/cmsys" \
- "@CMAKE_BINARY_DIR@/Utilities/Doxygen/dox/doc_CMake_contributors.dox" \
+ "@CMake_SOURCE_DIR@/Source" \
+ "@CMake_SOURCE_DIR@/Source/CPack" \
+ "@CMake_SOURCE_DIR@/Source/CTest" \
+ "@CMake_SOURCE_DIR@/Source/CursesDialog" \
+ "@CMake_SOURCE_DIR@/Source/MFCDialog" \
+ "@CMake_BINARY_DIR@/Source/kwsys" \
+ "@CMake_BINARY_DIR@/Source/cmsys" \
+ "@CMake_BINARY_DIR@/Utilities/Doxygen/dox/doc_CMake_contributors.dox" \
 
 EXTRACT_ALL          = YES
 EXTRACT_PRIVATE      = NO

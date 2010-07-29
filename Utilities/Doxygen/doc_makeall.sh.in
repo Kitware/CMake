@@ -48,7 +48,7 @@ export PATH_TO_VTK_DOX_SCRIPTS="@VTK_SOURCE_DIR@/Utilities/Doxygen"
 # Example: 
 #   SOURCE_DIR=@VTK_SOURCE_DIR@
 #
-export SOURCE_DIR="@CMAKE_SOURCE_DIR@"
+export SOURCE_DIR="@CMake_SOURCE_DIR@"
 
 # REL_PATH_TO_TOP:
 # Relative path from the top directory of the source files to the directory
@@ -71,7 +71,7 @@ export REL_PATH_TO_TOP=.
 #   DOXTEMP=DOXTEMP=@VTK_BINARY_DIR@/Utilities/Doxygen
 #   INTERMEDIATE_DOX_DIR=$DOXTEMP/dox
 #
-export DOXTEMP="@CMAKE_BINARY_DIR@/Utilities/Doxygen"
+export DOXTEMP="@CMake_BINARY_DIR@/Utilities/Doxygen"
 export INTERMEDIATE_DOX_DIR="$DOXTEMP/dox"
 
 # DOXYFILE:

@@ -404,7 +404,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
    #  --test-command t4
    #--test-command "${CMAKE_COMMAND}"
    #"-DCONFIGURATION=\${CTEST_CONFIGURATION_TYPE}"
-   #-P "${CMAKE_BINARY_DIR}/Tests/SimpleExclude/run.cmake"
+   #-P "${CMake_BINARY_DIR}/Tests/SimpleExclude/run.cmake"
    #)
 
 #  ADD_TEST(SameName  ${CMAKE_CTEST_COMMAND}
@@ -1051,7 +1051,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-target install
 #     --build-target package
       --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
-       "-DCMake_SOURCE_DIR:PATH=${CMAKE_SOURCE_DIR}"
+       "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
       --test-command
       ${BundleTestInstallDir}/Applications/SecondBundleExe.app/Contents/MacOS/SecondBundleExe)
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleTest")
@@ -1589,10 +1589,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   IF("${CMAKE_TEST_GENERATOR}" MATCHES Xcode)
     SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)
   ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES Xcode)
-  IF(EXISTS "${CMAKE_BINARY_DIR}/CMakeLists.txt")
+  IF(EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
     # If there is CMakeLists.txt in the binary tree, assume in-source build
     SET(CMAKE_SKIP_BOOTSTRAP_TEST 1)
-  ENDIF(EXISTS "${CMAKE_BINARY_DIR}/CMakeLists.txt")
+  ENDIF(EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
   SET(bootstrap "")
   IF(CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
     IF(UNIX)
@@ -1764,14 +1764,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   # If this is not an in-source build, provide a target to wipe out
   # all the test build directories.
-  IF(NOT EXISTS "${CMAKE_BINARY_DIR}/CMakeLists.txt")
+  IF(NOT EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
     CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/test_clean.cmake.in
                    ${CMake_BINARY_DIR}/Tests/test_clean.cmake @ONLY)
     ADD_CUSTOM_TARGET(test_clean
       COMMAND ${CMAKE_COMMAND} -P ${CMake_BINARY_DIR}/Tests/test_clean.cmake
       COMMENT "Removing test build directories."
       )
-  ENDIF(NOT EXISTS "${CMAKE_BINARY_DIR}/CMakeLists.txt")
+  ENDIF(NOT EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
 
   ADD_TEST(CMakeWizardTest ${CMAKE_CMAKE_COMMAND}
     -D build_dir:STRING=${CMAKE_CURRENT_BINARY_DIR}/CMakeWizardTest

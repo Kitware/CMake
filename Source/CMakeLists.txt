@@ -350,7 +350,7 @@ ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
 # CTestLib
 #
 INCLUDE_DIRECTORIES(
-  "${CMAKE_SOURCE_DIR}/Source/CTest"
+  "${CMake_SOURCE_DIR}/Source/CTest"
   ${CMAKE_XMLRPC_INCLUDES}
   ${CMAKE_CURL_INCLUDES}
   )
@@ -493,8 +493,8 @@ IF(BUILD_QtDialog)
   SUBDIRS(QtDialog)
 ENDIF(BUILD_QtDialog)
 
-INCLUDE (${CMAKE_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
-INCLUDE (${CMAKE_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
+INCLUDE (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
+INCLUDE (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
 INSTALL_TARGETS(/bin cmake)
 INSTALL_TARGETS(/bin ctest)
