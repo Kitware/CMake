@@ -1,56 +1,58 @@
 # FIND_PACKAGE_HANDLE_STANDARD_ARGS(<name> ... )
-#    This function is intended to be used in FindXXX.cmake modules files.
-#    It handles the REQUIRED, QUIET and version-related arguments to FIND_PACKAGE().
-#    It also sets the <UPPERCASED_NAME>_FOUND variable.
-#    The package is considered found if all variables <var1>... listed contain
-#    valid results, e.g. valid filepaths.
 #
-#    There are two modes of this function. The first argument in both modes is
-#    the name of the Find-module where it is called (in original casing).
+# This function is intended to be used in FindXXX.cmake modules files.
+# It handles the REQUIRED, QUIET and version-related arguments to FIND_PACKAGE().
+# It also sets the <UPPERCASED_NAME>_FOUND variable.
+# The package is considered found if all variables <var1>... listed contain
+# valid results, e.g. valid filepaths.
 #
-#    The first simple mode looks like this:
+# There are two modes of this function. The first argument in both modes is
+# the name of the Find-module where it is called (in original casing).
+#
+# The first simple mode looks like this:
 #    FIND_PACKAGE_HANDLE_STANDARD_ARGS(<name> (DEFAULT_MSG|"Custom failure message") <var1>...<varN> )
-#    If the variables <var1> to <varN> are all valid, then <UPPERCASED_NAME>_FOUND
-#    will be set to TRUE.
-#    If DEFAULT_MSG is given as second argument, then the function will generate
-#    itself useful success and error messages. You can also supply a custom error message
-#    for the failure case. This is not recommended.
+# If the variables <var1> to <varN> are all valid, then <UPPERCASED_NAME>_FOUND
+# will be set to TRUE.
+# If DEFAULT_MSG is given as second argument, then the function will generate
+# itself useful success and error messages. You can also supply a custom error message
+# for the failure case. This is not recommended.
 #
-#    The second mode is more powerful and also supports version checking:
+# The second mode is more powerful and also supports version checking:
 #    FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [REQUIRED_VARS <var1>...<varN>]
 #                                           [VERSION_VAR   <versionvar>
 #                                           [FAIL_MESSAGE "Custom failure message"] )
 #
-#    As above, if <var1> through <varN> are all valid, <UPPERCASED_NAME>_FOUND
-#    will be set to TRUE.
-#    Via FAIL_MESSAGE a custom failure message can be specified, if this is not
-#    used, the default message will be displayed.
-#    Following VERSION_VAR the name of the variable can be specified which holds
-#    the version of the package which has been found. If this is done, this version
-#    will be checked against the (potentially) specified required version used
-#    in the find_package() call. The EXACT keyword is also handled. The default
-#    messages include information about the required version and the version
-#    which has been actually found, both if the version is ok or not.
-#    Example for mode 1:
+# As above, if <var1> through <varN> are all valid, <UPPERCASED_NAME>_FOUND
+# will be set to TRUE.
+# Via FAIL_MESSAGE a custom failure message can be specified, if this is not
+# used, the default message will be displayed.
+# Following VERSION_VAR the name of the variable can be specified which holds
+# the version of the package which has been found. If this is done, this version
+# will be checked against the (potentially) specified required version used
+# in the find_package() call. The EXACT keyword is also handled. The default
+# messages include information about the required version and the version
+# which has been actually found, both if the version is ok or not.
+#
+# Example for mode 1:
 #
 #    FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibXml2  DEFAULT_MSG  LIBXML2_LIBRARY LIBXML2_INCLUDE_DIR)
 #
-#    LibXml2 is considered to be found, if both LIBXML2_LIBRARY and
-#    LIBXML2_INCLUDE_DIR are valid. Then also LIBXML2_FOUND is set to TRUE.
-#    If it is not found and REQUIRED was used, it fails with FATAL_ERROR,
-#    independent whether QUIET was used or not.
-#    If it is found, success will be reported, including the content of <var1>.
-#    On repeated Cmake runs, the same message won't be printed again.
+# LibXml2 is considered to be found, if both LIBXML2_LIBRARY and
+# LIBXML2_INCLUDE_DIR are valid. Then also LIBXML2_FOUND is set to TRUE.
+# If it is not found and REQUIRED was used, it fails with FATAL_ERROR,
+# independent whether QUIET was used or not.
+# If it is found, success will be reported, including the content of <var1>.
+# On repeated Cmake runs, the same message won't be printed again.
 #
-#    Example for mode 2:
+# Example for mode 2:
 #
 #    FIND_PACKAGE_HANDLE_STANDARD_ARGS(BISON  REQUIRED_VARS BISON_EXECUTABLE
 #                                             VERSION_VAR BISON_VERSION)
-#    In this case, BISON is considered to be found if the variable(s) listed
-#    after REQUIRED_VAR are all valid, i.e. BISON_EXECUTABLE in this case.
-#    Also the version of BISON will be checked by using the version contained
-#    in BISON_VERSION.
-#    Since no FAIL_MESSAGE is given, the default messages will be printed.
+# In this case, BISON is considered to be found if the variable(s) listed
+# after REQUIRED_VAR are all valid, i.e. BISON_EXECUTABLE in this case.
+# Also the version of BISON will be checked by using the version contained
+# in BISON_VERSION.
+# Since no FAIL_MESSAGE is given, the default messages will be printed.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
