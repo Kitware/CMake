@@ -2,7 +2,7 @@
 <Description>
   <ErrorThreshold>10</ErrorThreshold> 
   <LineLength>79</LineLength>
-  <Header>"@CMAKE_SOURCE_DIR@/Utilities/KWStyle/Headers",false,true</Header>
+  <Header>"@CMake_SOURCE_DIR@/Utilities/KWStyle/Headers",false,true</Header>
   <Functions>
     <regex>^(cm)?[A-Z]</regex>
     <length>200</length>
