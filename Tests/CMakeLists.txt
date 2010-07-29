@@ -1436,6 +1436,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   set(regex "${regex}|The requested URL returned error")
   set(regex "${regex}|libcurl was built with SSL disabled. https: not supported)")
   set(regex "${regex}|Submission method .xmlrpc. not compiled into CTest")
+  set(regex "${regex}|Submission problem")
   set(regex "${regex}|Submission successful)")
 
   set(ctest_coverage_labels_args "")
