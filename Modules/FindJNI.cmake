@@ -29,24 +29,49 @@
 # Expand {libarch} occurences to java_libarch subdirectory(-ies) and set ${_var}
 MACRO(java_append_library_directories _var)
     # Determine java arch-specific library subdir
-    IF (CMAKE_SYSTEM_NAME MATCHES "Linux")
-        # Based on openjdk/jdk/make/common/shared/Platform.gmk as of 6b16
-        # and kaffe as of 1.1.8 which uses the first part of the
-        # GNU config.guess platform triplet.
-        IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^i[3-9]86$")
-            SET(_java_libarch "i386")
-        ELSEIF(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-            SET(_java_libarch "amd64" "x86_64")
-        ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^ppc")
-            SET(_java_libarch "ppc" "powerpc" "ppc64")
-        ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^sparc")
-            SET(_java_libarch "sparc" "sparcv9")
-        ELSE(CMAKE_SYSTEM_PROCESSOR MATCHES "^i[3-9]86$")
-            SET(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}")
-        ENDIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^i[3-9]86$")
-    ELSE(CMAKE_SYSTEM_NAME MATCHES "Linux")
-        SET(_java_libarch "i386" "amd64" "ppc") # previous default
-    ENDIF(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    # Mostly based on openjdk/jdk/make/common/shared/Platform.gmk as of openjdk
+    # 1.6.0_18 + icedtea patches. However, it would be much better to base the
+    # guess on the first part of the GNU config.guess platform triplet.
+    IF(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+        SET(_java_libarch "amd64")
+    ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^i.86$")
+        SET(_java_libarch "i386")
+    ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^alpha")
+        SET(_java_libarch "alpha")
+    ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
+        # Subdir is "arm" for both big-endian (arm) and little-endian (armel).
+        SET(_java_libarch "arm")
+    ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^mips")
+        # mips* machines are bi-endian mostly so processor does not tell
+        # endianess of the underlying system.
+        SET(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "mips" "mipsel" "mipseb")
+    ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")
+        SET(_java_libarch "ppc64")
+    ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
+        SET(_java_libarch "ppc")
+    ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^sparc")
+        # Both flavours can run on the same processor
+        SET(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "sparc" "sparcv9")
+    ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(parisc|hppa)")
+        SET(_java_libarch "parisc" "parisc64")
+    ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^s390")
+        # s390 binaries can run on s390x machines
+        SET(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "s390" "s390x")
+    ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES "^sh")
+        SET(_java_libarch "sh")
+    ELSE(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+        SET(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}")
+    ENDIF(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+
+    # Append default list architectures if CMAKE_SYSTEM_PROCESSOR was empty or
+    # system is non-Linux (where the code above has not been well tested)
+    IF(NOT _java_libarch OR NOT (CMAKE_SYSTEM_NAME MATCHES "Linux"))
+        LIST(APPEND _java_libarch "i386" "amd64" "ppc")
+    ENDIF(NOT _java_libarch OR NOT (CMAKE_SYSTEM_NAME MATCHES "Linux"))
+
+    # Sometimes ${CMAKE_SYSTEM_PROCESSOR} is added to the list to prefer
+    # current value to a hardcoded list. Remove possible duplicates.
+    LIST(REMOVE_DUPLICATES _java_libarch)
 
     FOREACH(_path ${ARGN})
         IF(_path MATCHES "{libarch}")
