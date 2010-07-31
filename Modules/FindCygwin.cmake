@@ -17,7 +17,8 @@
 IF (WIN32)
   FIND_PATH(CYGWIN_INSTALL_PATH
     cygwin.bat
-    "C:/Cygwin" 
+    "C:/Cygwin"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygwin\\setup;rootdir]"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Cygnus Solutions\\Cygwin\\mounts v2\\/;native]"
   )
 
