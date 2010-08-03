@@ -621,11 +621,29 @@ function(_ep_write_log_script name step cmd_var)
   set(command "${${cmd_var}}")
 
   set(make "")
+  set(code_cygpath_make "")
   if("${command}" MATCHES "^\\$\\(MAKE\\)")
     # GNU make recognizes the string "$(MAKE)" as recursive make, so
     # ensure that it appears directly in the makefile.
     string(REGEX REPLACE "^\\$\\(MAKE\\)" "\${make}" command "${command}")
     set(make "-Dmake=$(MAKE)")
+
+    if(WIN32 AND NOT CYGWIN)
+      set(code_cygpath_make "
+if(\${make} MATCHES \"^/\")
+  execute_process(
+    COMMAND cygpath -w \${make}
+    OUTPUT_VARIABLE cygpath_make
+    ERROR_VARIABLE cygpath_make
+    RESULT_VARIABLE cygpath_error
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if(NOT cygpath_error)
+    set(make \${cygpath_make})
+  endif()
+endif()
+")
+    endif()
   endif()
 
   set(config "")
@@ -638,6 +656,7 @@ function(_ep_write_log_script name step cmd_var)
   # script so all output can be sent to one log file.
   if("${command}" MATCHES ";COMMAND;")
     set(code_execute_process "
+${code_cygpath_make}
 execute_process(COMMAND \${command} RESULT_VARIABLE result)
 if(result)
   set(msg \"Command failed (\${result}):\\n\")
@@ -669,6 +688,7 @@ endif()
   set(script ${stamp_dir}/${name}-${step}.cmake)
   set(logbase ${stamp_dir}/${name}-${step})
   file(WRITE ${script} "
+${code_cygpath_make}
 set(command \"${command}\")
 execute_process(
   COMMAND \${command}
