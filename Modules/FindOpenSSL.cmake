@@ -40,7 +40,7 @@ MARK_AS_ADVANCED(OPENSSL_ROOT_DIR)
 
 # Re-use the previous path:
 FIND_PATH(OPENSSL_INCLUDE_DIR openssl/ssl.h
-  ${OPENSSL_ROOT_DIR}/include
+  PATHS ${OPENSSL_ROOT_DIR}/include
 )
 
 IF(WIN32 AND NOT CYGWIN)
@@ -61,16 +61,16 @@ IF(WIN32 AND NOT CYGWIN)
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
     FIND_LIBRARY(LIB_EAY_DEBUG NAMES libeay32MDd libeay32
-      ${OPENSSL_ROOT_DIR}/lib/VC
+      PATHS ${OPENSSL_ROOT_DIR}/lib/VC
       )
     FIND_LIBRARY(LIB_EAY_RELEASE NAMES libeay32MD libeay32
-      ${OPENSSL_ROOT_DIR}/lib/VC
+      PATHS ${OPENSSL_ROOT_DIR}/lib/VC
       )
     FIND_LIBRARY(SSL_EAY_DEBUG NAMES ssleay32MDd ssleay32 ssl
-      ${OPENSSL_ROOT_DIR}/lib/VC
+      PATHS ${OPENSSL_ROOT_DIR}/lib/VC
       )
     FIND_LIBRARY(SSL_EAY_RELEASE NAMES ssleay32MD ssleay32 ssl
-      ${OPENSSL_ROOT_DIR}/lib/VC
+      PATHS ${OPENSSL_ROOT_DIR}/lib/VC
       )
     if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
       set( OPENSSL_LIBRARIES
@@ -85,20 +85,20 @@ IF(WIN32 AND NOT CYGWIN)
   ELSEIF(MINGW)
     # same player, for MingW
     FIND_LIBRARY(LIB_EAY NAMES libeay32
-      ${OPENSSL_ROOT_DIR}/lib/MinGW
+      PATHS ${OPENSSL_ROOT_DIR}/lib/MinGW
       )
     FIND_LIBRARY(SSL_EAY NAMES ssleay32
-      ${OPENSSL_ROOT_DIR}/lib/MinGW
+      PATHS ${OPENSSL_ROOT_DIR}/lib/MinGW
       )
     MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
   ELSE(MSVC)
     # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
     FIND_LIBRARY(LIB_EAY NAMES libeay32
-      ${OPENSSL_ROOT_DIR}/lib
+      PATHS ${OPENSSL_ROOT_DIR}/lib
       )
     FIND_LIBRARY(SSL_EAY NAMES ssleay32
-      ${OPENSSL_ROOT_DIR}/lib
+      PATHS ${OPENSSL_ROOT_DIR}/lib
       )
     MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
