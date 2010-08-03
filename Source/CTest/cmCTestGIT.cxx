@@ -85,6 +85,75 @@ void cmCTestGIT::NoteNewRevision()
 }
 
 //----------------------------------------------------------------------------
+std::string cmCTestGIT::FindGitDir()
+{
+  std::string git_dir;
+
+  // Run "git rev-parse --git-dir" to locate the real .git directory.
+  const char* git = this->CommandLineTool.c_str();
+  char const* git_rev_parse[] = {git, "rev-parse", "--git-dir", 0};
+  std::string git_dir_line;
+  OneLineParser rev_parse_out(this, "rev-parse-out> ", git_dir_line);
+  OutputLogger rev_parse_err(this->Log, "rev-parse-err> ");
+  if(this->RunChild(git_rev_parse, &rev_parse_out, &rev_parse_err))
+    {
+    git_dir = git_dir_line;
+    }
+  if(git_dir.empty())
+    {
+    git_dir = ".git";
+    }
+
+  // Git reports a relative path only when the .git directory is in
+  // the current directory.
+  if(git_dir[0] == '.')
+    {
+    git_dir = this->SourceDirectory + "/" + git_dir;
+    }
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  else if(git_dir[0] == '/')
+    {
+    // Cygwin Git reports a full path that Cygwin understands, but we
+    // are a Windows application.  Run "cygpath" to get Windows path.
+    std::string cygpath_exe = cmSystemTools::GetFilenamePath(git);
+    cygpath_exe += "/cygpath.exe";
+    if(cmSystemTools::FileExists(cygpath_exe.c_str()))
+      {
+      char const* cygpath[] = {cygpath_exe.c_str(), "-w", git_dir.c_str(), 0};
+      OneLineParser cygpath_out(this, "cygpath-out> ", git_dir_line);
+      OutputLogger cygpath_err(this->Log, "cygpath-err> ");
+      if(this->RunChild(cygpath, &cygpath_out, &cygpath_err))
+        {
+        git_dir = git_dir_line;
+        }
+      }
+    }
+#endif
+  return git_dir;
+}
+
+//----------------------------------------------------------------------------
+std::string cmCTestGIT::FindTopDir()
+{
+  std::string top_dir = this->SourceDirectory;
+
+  // Run "git rev-parse --show-cdup" to locate the top of the tree.
+  const char* git = this->CommandLineTool.c_str();
+  char const* git_rev_parse[] = {git, "rev-parse", "--show-cdup", 0};
+  std::string cdup;
+  OneLineParser rev_parse_out(this, "rev-parse-out> ", cdup);
+  OutputLogger rev_parse_err(this->Log, "rev-parse-err> ");
+  if(this->RunChild(git_rev_parse, &rev_parse_out, &rev_parse_err) &&
+     !cdup.empty())
+    {
+    top_dir += "/";
+    top_dir += cdup;
+    top_dir = cmSystemTools::CollapseFullPath(top_dir.c_str());
+    }
+  return top_dir;
+}
+
+//----------------------------------------------------------------------------
 bool cmCTestGIT::UpdateByFetchAndReset()
 {
   const char* git = this->CommandLineTool.c_str();
@@ -121,11 +190,17 @@ bool cmCTestGIT::UpdateByFetchAndReset()
   // Identify the merge head that would be used by "git pull".
   std::string sha1;
   {
-  std::string fetch_head = this->SourceDirectory + "/.git/FETCH_HEAD";
+  std::string fetch_head = this->FindGitDir() + "/FETCH_HEAD";
   std::ifstream fin(fetch_head.c_str(), std::ios::in | std::ios::binary);
+  if(!fin)
+    {
+    this->Log << "Unable to open " << fetch_head << "\n";
+    return false;
+    }
   std::string line;
   while(sha1.empty() && cmSystemTools::GetLineFromStream(fin, line))
     {
+    this->Log << "FETCH_HEAD> " << line << "\n";
     if(line.find("\tnot-for-merge\t") == line.npos)
       {
       std::string::size_type pos = line.find('\t');
@@ -134,6 +209,11 @@ bool cmCTestGIT::UpdateByFetchAndReset()
         sha1 = line.substr(0, pos);
         }
       }
+    }
+  if(sha1.empty())
+    {
+    this->Log << "FETCH_HEAD has no upstream branch candidate!\n";
+    return false;
     }
   }
 
@@ -181,11 +261,13 @@ bool cmCTestGIT::UpdateImpl()
     return false;
     }
 
+  std::string top_dir = this->FindTopDir();
   const char* git = this->CommandLineTool.c_str();
   char const* git_submodule[] = {git, "submodule", "update", 0};
   OutputLogger submodule_out(this->Log, "submodule-out> ");
   OutputLogger submodule_err(this->Log, "submodule-err> ");
-  return this->RunChild(git_submodule, &submodule_out, &submodule_err);
+  return this->RunChild(git_submodule, &submodule_out, &submodule_err,
+                        top_dir.c_str());
 }
 
 //----------------------------------------------------------------------------
