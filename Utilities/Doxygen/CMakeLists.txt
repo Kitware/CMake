@@ -27,15 +27,15 @@ IF (BUILD_DOCUMENTATION)
   ENDIF(NOT DOT_PATH)
 
   CONFIGURE_FILE(
-    ${CMAKE_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in
-    ${CMAKE_BINARY_DIR}/Utilities/Doxygen/doxyfile)
+    ${CMake_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in
+    ${CMake_BINARY_DIR}/Utilities/Doxygen/doxyfile)
 
   CONFIGURE_FILE(
-    ${CMAKE_SOURCE_DIR}/Utilities/Doxygen/doc_makeall.sh.in
-    ${CMAKE_BINARY_DIR}/Utilities/Doxygen/doc_makeall.sh)
+    ${CMake_SOURCE_DIR}/Utilities/Doxygen/doc_makeall.sh.in
+    ${CMake_BINARY_DIR}/Utilities/Doxygen/doc_makeall.sh)
 
   ADD_CUSTOM_TARGET(DoxygenDoc
     ${BASH}
-    ${CMAKE_BINARY_DIR}/Utilities/Doxygen/doc_makeall.sh)
+    ${CMake_BINARY_DIR}/Utilities/Doxygen/doc_makeall.sh)
 
 ENDIF (BUILD_DOCUMENTATION)
