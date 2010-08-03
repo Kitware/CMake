@@ -121,7 +121,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
         totalSize += cmSystemTools::FileLength(fileIt->c_str());
         }
     }
-    out << "Installed-Size: " << totalSize << "\n";
+    out << "Installed-Size: " << (totalSize + 1023) / 1024 << "\n";
     out << "Maintainer: " << maintainer << "\n";
     out << "Description: " << desc << "\n";
     out << std::endl;
