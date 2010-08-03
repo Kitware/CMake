@@ -87,10 +87,12 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
 
   // optional entries
   const char* debian_pkg_dep = this->GetOption("CPACK_DEBIAN_PACKAGE_DEPENDS");
-  const char* debian_pkg_rec = 
+  const char* debian_pkg_rec =
                             this->GetOption("CPACK_DEBIAN_PACKAGE_RECOMMENDS");
-  const char* debian_pkg_sug = 
+  const char* debian_pkg_sug =
                               this->GetOption("CPACK_DEBIAN_PACKAGE_SUGGESTS");
+  const char* debian_pkg_url =
+                              this->GetOption("CPACK_DEBIAN_PACKAGE_HOMEPAGE");
 
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(ctlfilename.c_str());
@@ -110,6 +112,10 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
     if(debian_pkg_sug)
       {
       out << "Suggests: " << debian_pkg_sug << "\n";
+      }
+    if(debian_pkg_url)
+      {
+      out << "Homepage: " << debian_pkg_url << "\n";
       }
     unsigned long totalSize = 0;
     {
