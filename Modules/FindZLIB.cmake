@@ -62,21 +62,8 @@ ENDIF()
 # handle the QUIETLY and REQUIRED arguments and set ZLIB_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB DEFAULT_MSG ZLIB_INCLUDE_DIR ZLIB_LIBRARY)
-
-# handle the VERSION provided in find_package() command
-if(ZLIB_FIND_VERSION)
-    if(ZLIB_FIND_VERSION_EXACT AND NOT ${ZLIB_VERSION_STRING} VERSION_EQUAL ${ZLIB_FIND_VERSION})
-        message(FATAL_ERROR "ZLIB version found (${ZLIB_VERSION_STRING}) does not match the required one (${ZLIB_FIND_VERSION}), aborting.")
-    elseif(${ZLIB_VERSION_STRING} VERSION_LESS ${ZLIB_FIND_VERSION})
-        if(ZLIB_FIND_REQUIRED)
-            message(FATAL_ERROR "ZLIB version found (${ZLIB_VERSION_STRING}) is less then the minimum required (${ZLIB_FIND_VERSION}), aborting.")
-        else(ZLIB_FIND_REQUIRED)
-            message("ZLIB version found (${ZLIB_VERSION_STRING}) is less then the minimum required (${ZLIB_FIND_VERSION}), continue without ZLIB support.")
-            set(ZLIB_FOUND FALSE)
-        endif(ZLIB_FIND_REQUIRED)
-    endif()
-endif(ZLIB_FIND_VERSION)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB REQUIRED_VARS ZLIB_INCLUDE_DIR ZLIB_LIBRARY
+                                       VERSION_VAR ZLIB_VERSION_STRING)
 
 IF(ZLIB_FOUND)
     SET(ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIR})
