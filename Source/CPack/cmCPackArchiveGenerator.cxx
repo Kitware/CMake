@@ -22,9 +22,7 @@
 #include <errno.h>
 
 #include <cmsys/SystemTools.hxx>
-#include <cmlibarchive/libarchive/archive.h>
-#include <cmlibarchive/libarchive/archive_entry.h>
-
+#include <cm_libarchive.h>
 
 //----------------------------------------------------------------------
 cmCPackArchiveGenerator::cmCPackArchiveGenerator(CompressType t,
