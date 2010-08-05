@@ -23,8 +23,7 @@
 #include <cmsys/Directory.hxx>
 #include <cmsys/System.h>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cmlibarchive/libarchive/archive.h>
-#include <cmlibarchive/libarchive/archive_entry.h>
+# include <cm_libarchive.h>
 # include <cmsys/Terminal.h>
 #endif
 #include <cmsys/stl/algorithm>
