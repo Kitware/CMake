@@ -5,6 +5,9 @@
 #  SWIG_EXECUTABLE - the path to the swig executable
 #  SWIG_VERSION   - the version number of the swig executable
 #
+# The minimum required version of SWIG can be specified using the
+# standard syntax, e.g. FIND_PACKAGE(SWIG 1.1)
+#
 # All information is collected from the SWIG_EXECUTABLE so the
 # version to be found can be changed from the command line by
 # means of setting SWIG_EXECUTABLE
@@ -22,8 +25,6 @@
 #=============================================================================
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
-
-SET(SWIG_FOUND FALSE)
 
 FIND_PROGRAM(SWIG_EXECUTABLE swig)
 
@@ -45,7 +46,6 @@ IF(SWIG_EXECUTABLE)
     SET(SWIG_DIR SWIG_DIR-NOTFOUND)
     FIND_PATH(SWIG_DIR swig.swg PATHS ${SWIG_swiglib_output})
     IF(SWIG_DIR)
-      SET(SWIG_FOUND 1)
       SET(SWIG_USE_FILE ${CMAKE_ROOT}/Modules/UseSWIG.cmake)
       EXECUTE_PROCESS(COMMAND ${SWIG_EXECUTABLE} -version
         OUTPUT_VARIABLE SWIG_version_output
@@ -62,12 +62,6 @@ IF(SWIG_EXECUTABLE)
   ENDIF(SWIG_swiglib_result)
 ENDIF(SWIG_EXECUTABLE)
 
-IF(NOT SWIG_FOUND)
-  IF(NOT SWIG_FIND_QUIETLY)
-    IF(SWIG_FIND_REQUIRED)
-      MESSAGE(FATAL_ERROR "SWIG was not found. Please specify Swig executable location")
-    ELSE(SWIG_FIND_REQUIRED)
-      MESSAGE(STATUS "SWIG was not found. Please specify Swig executable location")
-    ENDIF(SWIG_FIND_REQUIRED)
-  ENDIF(NOT SWIG_FIND_QUIETLY)
-ENDIF(NOT SWIG_FOUND)
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SWIG  REQUIRED_VARS SWIG_EXECUTABLE SWIG_DIR
+                                        VERSION_VAR SWIG_VERSION )
