@@ -1520,36 +1520,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
   ENDIF (CTEST_TEST_CTEST AND CMAKE_RUN_LONG_TESTS AND CMAKE_TESTS_CDASH_SERVER)
 
-  IF(NOT DEFINED CTEST_RUN_CTestSubmitLargeOutput)
-    SET(CTEST_RUN_CTestSubmitLargeOutput OFF)
-
-    IF (CMAKE_TESTS_CDASH_SERVER AND "${server}" STREQUAL "localhost")
-      SET(CTEST_RUN_CTestSubmitLargeOutput ON)
-    ENDIF (CMAKE_TESTS_CDASH_SERVER AND "${server}" STREQUAL "localhost")
-  ENDIF(NOT DEFINED CTEST_RUN_CTestSubmitLargeOutput)
-
-  IF(CTEST_RUN_CTestSubmitLargeOutput)
-    CONFIGURE_FILE(
-      "${CMake_SOURCE_DIR}/Tests/CTestSubmitLargeOutput/test.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestSubmitLargeOutput/test.cmake"
-      @ONLY ESCAPE_QUOTES
-      )
-    ADD_TEST(CTestSubmitLargeOutput ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestSubmitLargeOutput/test.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestSubmitLargeOutput/testOutput.log"
-      )
-
-    # This test only passes if it fails to submit properly...
-    #
-    SET_TESTS_PROPERTIES(CTestSubmitLargeOutput PROPERTIES
-      PASS_REGULAR_EXPRESSION "Errors occurred during submission")
-
-    # Give this test plenty of time to run on slower machines:
-    #
-    SET_TESTS_PROPERTIES(CTestSubmitLargeOutput PROPERTIES
-      TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
-  ENDIF(CTEST_RUN_CTestSubmitLargeOutput)
-
   IF (CMAKE_RUN_LONG_TESTS AND TEST_KDE4_STABLE_BRANCH)
     IF(UNIX)
       IF(NOT QT4_FOUND)
