@@ -12,6 +12,7 @@
 #include "cmArchiveWrite.h"
 
 #include "cmSystemTools.h"
+#include <cmsys/ios/iostream>
 #include <cmsys/Directory.hxx>
 #include <cm_libarchive.h>
 
@@ -33,7 +34,8 @@ struct cmArchiveWrite::Callback
                             const void *b, size_t n)
     {
     cmArchiveWrite* self = static_cast<cmArchiveWrite*>(cd);
-    if(self->Stream.write(static_cast<const char*>(b), n))
+    if(self->Stream.write(static_cast<const char*>(b),
+                          static_cast<cmsys_ios::streamsize>(n)))
       {
       return static_cast<__LA_SSIZE_T>(n);
       }
@@ -214,7 +216,8 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
   size_t nleft = size;
   while(nleft > 0)
     {
-    size_t nnext = nleft > sizeof(buffer)? sizeof(buffer) : nleft;
+    cmsys_ios::streamsize nnext = static_cast<cmsys_ios::streamsize>(
+      nleft > sizeof(buffer)? sizeof(buffer) : nleft);
     fin.read(buffer, nnext);
     // Some stream libraries (older HPUX) return failure at end of
     // file on the last read even if some data were read.  Check
@@ -223,13 +226,14 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
       {
       break;
       }
-    if(archive_write_data(this->Archive, buffer, nnext) != nnext)
+    if(archive_write_data(this->Archive, buffer,
+                          static_cast<size_t>(nnext)) != nnext)
       {
       this->Error = "archive_write_data: ";
       this->Error += archive_error_string(this->Archive);
       return false;
       }
-    nleft -= nnext;
+    nleft -= static_cast<size_t>(nnext);
     }
   if(nleft > 0)
     {
