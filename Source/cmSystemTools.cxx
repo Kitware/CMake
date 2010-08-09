@@ -23,6 +23,7 @@
 #include <cmsys/Directory.hxx>
 #include <cmsys/System.h>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+# include "cmArchiveWrite.h"
 # include <cm_libarchive.h>
 # include <cmsys/Terminal.h>
 #endif
@@ -1718,142 +1719,40 @@ bool cmSystemTools::CreateTar(const char* outFileName,
                               bool gzip, bool bzip2, bool verbose)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  
-  // Create a macro to handle return from libarchive 
-  // functions
-#define CHECK_ARCHIVE_ERROR(res, msg)\
-   if(res != ARCHIVE_OK)\
-    {\
-    cmSystemTools::Error(msg, \
-                         archive_error_string(a));\
-    return false;\
-    }
-  
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  // recursively expand all directories in files so that we have a list
-  // of files
-  std::vector<std::string> expandedFiles;
+  std::ofstream fout(outFileName, std::ios::out | cmsys_ios_binary);
+  if(!fout)
+    {
+    std::string e = "Cannot open output file \"";
+    e += outFileName;
+    e += "\": ";
+    e += cmSystemTools::GetLastSystemError();
+    cmSystemTools::Error(e.c_str());
+    return false;
+    }
+  cmArchiveWrite a(fout, (gzip? cmArchiveWrite::CompressGZip :
+                          (bzip2? cmArchiveWrite::CompressBZip2 :
+                           cmArchiveWrite::CompressNone)));
+  a.SetVerbose(verbose);
   for(std::vector<cmStdString>::const_iterator i = files.begin();
       i != files.end(); ++i)
     {
-    if(cmSystemTools::FileIsDirectory(i->c_str()))
+    std::string path = *i;
+    if(cmSystemTools::FileIsFullPath(path.c_str()))
       {
-      cmsys::Glob gl;
-      std::string findExpr = *i; 
-      if ( findExpr[findExpr.size()-1] != '/' )
-        {
-        findExpr +="/";
-        }
-      findExpr += "*";
-      gl.RecurseOn();
-      if ( gl.FindFiles(findExpr) )
-        {
-        std::vector<std::string> dirfiles = gl.GetFiles();
-        std::copy(dirfiles.begin(), dirfiles.end(),
-                  std::back_inserter(expandedFiles));
-        }
+      // Get the relative path to the file.
+      path = cmSystemTools::RelativePath(cwd.c_str(), path.c_str());
       }
-    else
+    if(!a.Add(path))
       {
-      if(!cmSystemTools::FileIsFullPath(i->c_str()))
-        {
-        std::string fullp = cwd + "/" + *i;
-        expandedFiles.push_back(fullp);
-        }
-      else
-        {
-        expandedFiles.push_back(*i);
-        }
+      break;
       }
     }
-  int res;
-  // create a new archive
-  struct archive* a = archive_write_new();
   if(!a)
     {
-    cmSystemTools::Error("Unable to use create archive");
+    cmSystemTools::Error(a.GetError().c_str());
     return false;
     }
-
-  if(gzip)
-    {
-    res = archive_write_set_compression_gzip(a);
-    CHECK_ARCHIVE_ERROR(res, "Can not set gzip:");
-    } 
-  if(bzip2)
-    {
-    res = archive_write_set_compression_bzip2(a); 
-    CHECK_ARCHIVE_ERROR(res, "Can not set bzip2:");
-    }
-  if(!bzip2 && !gzip)
-    { 
-    res = archive_write_set_compression_none(a); 
-    CHECK_ARCHIVE_ERROR(res, "Can not set none:");
-    }
-  res = archive_write_set_format_pax_restricted(a);
-  CHECK_ARCHIVE_ERROR(res, "Can not set tar format:");
-  res = archive_write_open_file(a, outFileName);
-  CHECK_ARCHIVE_ERROR(res, "write open:");
-    // create a new disk struct
-  struct archive* disk = archive_read_disk_new();
-  archive_read_disk_set_standard_lookup(disk);
-  std::vector<std::string>::const_iterator fileIt;
-  for ( fileIt = expandedFiles.begin(); 
-        fileIt != expandedFiles.end(); ++ fileIt )
-    {
-    // create a new entry for each file
-    struct archive_entry *entry = archive_entry_new(); 
-    // Get the relative path to the file
-    std::string rp = cmSystemTools::RelativePath(cwd.c_str(),
-                                                 fileIt->c_str());
-    if(verbose)
-      {
-      std::cout << rp << "\n";
-      }
-    // Set the name of the entry to the file name
-    archive_entry_set_pathname(entry, rp.c_str()); 
-    archive_read_disk_entry_from_file(disk, entry, -1, 0);
-    CHECK_ARCHIVE_ERROR(res, "read disk entry:");
-
-    // write  entry header
-    res = archive_write_header(a, entry);
-    CHECK_ARCHIVE_ERROR(res, "write header: ");
-    if(archive_entry_size(entry) > 0)
-      {
-      // now copy contents of file into archive a
-      FILE* file = fopen(fileIt->c_str(), "rb");
-      if(!file)
-        {
-          cmSystemTools::Error("Problem with fopen(): ",
-                               fileIt->c_str());
-          return false;
-        }
-      char buff[16384];
-      size_t len = fread(buff, 1, sizeof(buff), file);
-      while (len > 0)
-        {
-          size_t wlen = archive_write_data(a, buff, len);
-          if(wlen != len)
-            { 
-              cmOStringStream error;
-              error << "Problem with archive_write_data\n"
-                    << "Tried to write  [" << len << "] bytes.\n"
-                    << "archive_write_data wrote  [" << wlen << "] bytes.\n";
-              cmSystemTools::Error(error.str().c_str(),
-                                   archive_error_string(a)
-                                   );
-              return false;
-            }
-          len = fread(buff, 1, sizeof(buff), file);
-        }
-      // close the file and free the entry
-      fclose(file);
-      }
-    archive_entry_free(entry);
-    }
-  archive_write_close(a);
-  archive_write_finish(a);
-  archive_read_finish(disk);
   return true;
 #else
   (void)outFileName;
