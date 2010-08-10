@@ -49,6 +49,13 @@ set(CMAKE_CREATE_WIN32_EXE  "-mwindows")
 set(CMAKE_GNULD_IMAGE_VERSION
   "-Wl,--major-image-version,<TARGET_VERSION_MAJOR>,--minor-image-version,<TARGET_VERSION_MINOR>")
 
+# Check if GNU ld is too old to support @FILE syntax.
+set(__WINDOWS_GNU_LD_RESPONSE 1)
+execute_process(COMMAND ld -v OUTPUT_VARIABLE _help ERROR_VARIABLE _help)
+if("${_help}" MATCHES "GNU ld .* 2\\.1[1-6]")
+  set(__WINDOWS_GNU_LD_RESPONSE 0)
+endif()
+
 macro(__windows_compiler_gnu lang)
 
   if(MSYS OR MINGW)
@@ -68,7 +75,7 @@ macro(__windows_compiler_gnu lang)
   endif()
 
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "") # No -fPIC on Windows
-  set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+  set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS ${__WINDOWS_GNU_LD_RESPONSE})
   set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-Wl,@")
 
   # Binary link rules.
