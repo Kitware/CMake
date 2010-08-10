@@ -8,6 +8,9 @@
 #  PERL_LIBRARY      = path to libperl
 #  PERL_EXECUTABLE   = full path to the perl binary
 #
+# The minimum required version of Perl can be specified using the
+# standard syntax, e.g. FIND_PACKAGE(PerlLibs 6.0)
+#
 #  The following variables are also available if needed
 #  (introduced after CMake 2.6.4)
 #
@@ -227,8 +230,9 @@ endif (PERL_EXECUTABLE)
 
 # handle the QUIETLY and REQUIRED arguments and set PERLLIBS_FOUND to TRUE if 
 # all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(PerlLibs DEFAULT_MSG PERL_LIBRARY PERL_INCLUDE_PATH)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(PerlLibs REQUIRED_VARS PERL_LIBRARY PERL_INCLUDE_PATH
+                                           VERSION_VAR PERL_VERSION)
 
 # Introduced after CMake 2.6.4 to bring module into compliance
 set(PERL_INCLUDE_DIR  ${PERL_INCLUDE_PATH})

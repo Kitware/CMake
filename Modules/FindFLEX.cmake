@@ -6,6 +6,10 @@
 #  FLEX_VERSION - the version of flex
 #  FLEX_LIBRARIES - The flex libraries
 #
+# The minimum required version of flex can be specified using the
+# standard syntax, e.g. FIND_PACKAGE(FLEX 2.5.13)
+#
+#
 # If flex is found on the system, the module provides the macro:
 #  FLEX_TARGET(Name FlexInput FlexOutput [COMPILE_FLAGS <string>])
 # which creates a custom command  to generate the <FlexOutput> file from
@@ -136,6 +140,7 @@ IF(FLEX_EXECUTABLE)
 ENDIF(FLEX_EXECUTABLE)
 
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(FLEX DEFAULT_MSG FLEX_EXECUTABLE)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(FLEX REQUIRED_VARS FLEX_EXECUTABLE
+                                       VERSION_VAR FLEX_VERSION)
 
 # FindFLEX.cmake ends here

@@ -2,7 +2,12 @@
 # The module defines the following variables:
 #  Subversion_SVN_EXECUTABLE - path to svn command line client
 #  Subversion_VERSION_SVN - version of svn command line client
-#  Subversion_FOUND - true if the command line client was found
+#  SUBVERSION_FOUND - true if the command line client was found
+#  Subversion_FOUND - same as SUBVERSION_FOUND, kept around for compatibility
+#
+# The minimum required version of Subversion can be specified using the
+# standard syntax, e.g. FIND_PACKAGE(Subversion 1.4)
+#
 # If the command line client executable is found the macro
 #  Subversion_WC_INFO(<dir> <var-prefix>)
 # is defined to extract information of a subversion working copy at
@@ -17,12 +22,12 @@
 #  <var-prefix>_WC_INFO - output of command `svn info <dir>'
 # Example usage:
 #  FIND_PACKAGE(Subversion)
-#  IF(Subversion_FOUND)
+#  IF(SUBVERSION_FOUND)
 #    Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
 #    MESSAGE("Current revision is ${Project_WC_REVISION}")
 #    Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
 #    MESSAGE("Last changed log is ${Project_LAST_CHANGED_LOG}")
-#  ENDIF(Subversion_FOUND)
+#  ENDIF(SUBVERSION_FOUND)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -44,16 +49,18 @@ MARK_AS_ADVANCED(Subversion_SVN_EXECUTABLE)
 
 IF(Subversion_SVN_EXECUTABLE)
 
+  EXECUTE_PROCESS(COMMAND ${Subversion_SVN_EXECUTABLE} --version
+    OUTPUT_VARIABLE Subversion_VERSION_SVN
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  STRING(REGEX REPLACE "^(.*\n)?svn, version ([.0-9]+).*"
+    "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
+
   MACRO(Subversion_WC_INFO dir prefix)
     # the subversion commands should be executed with the C locale, otherwise
     # the message (which are parsed) may be translated, Alex
     SET(_Subversion_SAVED_LC_ALL "$ENV{LC_ALL}")
     SET(ENV{LC_ALL} C)
-
-    EXECUTE_PROCESS(COMMAND ${Subversion_SVN_EXECUTABLE} --version
-      WORKING_DIRECTORY ${dir}
-      OUTPUT_VARIABLE Subversion_VERSION_SVN
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     EXECUTE_PROCESS(COMMAND ${Subversion_SVN_EXECUTABLE} info ${dir}
       OUTPUT_VARIABLE ${prefix}_WC_INFO
@@ -65,8 +72,6 @@ IF(Subversion_SVN_EXECUTABLE)
       MESSAGE(SEND_ERROR "Command \"${Subversion_SVN_EXECUTABLE} info ${dir}\" failed with output:\n${Subversion_svn_info_error}")
     ELSE(NOT ${Subversion_svn_info_result} EQUAL 0)
 
-      STRING(REGEX REPLACE "^(.*\n)?svn, version ([.0-9]+).*"
-        "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
       STRING(REGEX REPLACE "^(.*\n)?URL: ([^\n]+).*"
         "\\2" ${prefix}_WC_URL "${${prefix}_WC_INFO}")
       STRING(REGEX REPLACE "^(.*\n)?Revision: ([^\n]+).*"
@@ -105,7 +110,8 @@ IF(Subversion_SVN_EXECUTABLE)
 ENDIF(Subversion_SVN_EXECUTABLE)
 
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Subversion DEFAULT_MSG Subversion_SVN_EXECUTABLE)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Subversion REQUIRED_VARS Subversion_SVN_EXECUTABLE
+                                             VERSION_VAR Subversion_VERSION_SVN )
 
 # for compatibility
 SET(Subversion_FOUND ${SUBVERSION_FOUND})

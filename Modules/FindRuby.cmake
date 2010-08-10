@@ -1,7 +1,10 @@
 # - Find Ruby
 # This module finds if Ruby is installed and determines where the include files
-# and libraries are. Ruby 1.8 and 1.9 are supported. The minimum required version 
-# specified in the find_package() command is honored.
+# and libraries are. Ruby 1.8 and 1.9 are supported.
+#
+# The minimum required version of Ruby can be specified using the
+# standard syntax, e.g. FIND_PACKAGE(Ruby 1.8)
+#
 # It also determines what the name of the library is. This
 # code sets the following variables:
 #
@@ -154,22 +157,6 @@ SET(_RUBY_VERSION_SHORT "${RUBY_VERSION_MAJOR}.${RUBY_VERSION_MINOR}")
 SET(_RUBY_VERSION_SHORT_NODOT "${RUBY_VERSION_MAJOR}${RUBY_VERSION_MINOR}")
 SET(_RUBY_NODOT_VERSION "${RUBY_VERSION_MAJOR}${RUBY_VERSION_MINOR}${RUBY_VERSION_PATCH}")
 
-# Now we know which version we found
-IF(Ruby_FIND_VERSION)
-   IF(${RUBY_VERSION}  VERSION_LESS  ${Ruby_FIND_VERSION})
-      # force running ruby the next time again
-      SET(RUBY_VERSION_MAJOR    ""    CACHE PATH "The Ruby major version" FORCE)
-      IF(Ruby_FIND_REQUIRED)
-         MESSAGE(FATAL_ERROR "Ruby version ${Ruby_FIND_VERSION} required, but only version ${RUBY_VERSION} found.")
-      ELSE(Ruby_FIND_REQUIRED)
-         IF(NOT Ruby_FIND_QUIETLY)
-            MESSAGE(STATUS "Ruby version ${Ruby_FIND_VERSION} required, but only version ${RUBY_VERSION} found.")
-         ENDIF(NOT Ruby_FIND_QUIETLY)
-         RETURN()
-      ENDIF(Ruby_FIND_REQUIRED)
-   ENDIF(${RUBY_VERSION}  VERSION_LESS  ${Ruby_FIND_VERSION})
-ENDIF(Ruby_FIND_VERSION)
-
 FIND_PATH(RUBY_INCLUDE_DIR
    NAMES ruby.h
    HINTS
@@ -240,7 +227,8 @@ IF(_RUBY_DEBUG_OUTPUT)
    MESSAGE(STATUS "--------------------")
 ENDIF(_RUBY_DEBUG_OUTPUT)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Ruby  DEFAULT_MSG  ${_RUBY_REQUIRED_VARS})
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Ruby  REQUIRED_VARS  ${_RUBY_REQUIRED_VARS}
+                                        VERSION_VAR RUBY_VERSION )
 
 MARK_AS_ADVANCED(
   RUBY_EXECUTABLE

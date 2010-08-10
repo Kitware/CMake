@@ -497,29 +497,6 @@ endif()
 # Always set this convenience variable
 set(CUDA_VERSION_STRING "${CUDA_VERSION}")
 
-# Here we need to determine if the version we found is acceptable.  We will
-# assume that is unless CUDA_FIND_VERSION_EXACT or CUDA_FIND_VERSION is
-# specified.  The presence of either of these options checks the version
-# string and signals if the version is acceptable or not.
-set(_cuda_version_acceptable TRUE)
-#
-if(CUDA_FIND_VERSION_EXACT AND NOT CUDA_VERSION VERSION_EQUAL CUDA_FIND_VERSION)
-  set(_cuda_version_acceptable FALSE)
-endif()
-#
-if(CUDA_FIND_VERSION       AND     CUDA_VERSION VERSION_LESS  CUDA_FIND_VERSION)
-  set(_cuda_version_acceptable FALSE)
-endif()
-#
-if(NOT _cuda_version_acceptable)
-  set(_cuda_error_message "Requested CUDA version ${CUDA_FIND_VERSION}, but found unacceptable version ${CUDA_VERSION}")
-  if(CUDA_FIND_REQUIRED)
-    message("${_cuda_error_message}")
-  elseif(NOT CUDA_FIND_QUIETLY)
-    message("${_cuda_error_message}")
-  endif()
-endif()
-
 # CUDA_TOOLKIT_INCLUDE
 find_path(CUDA_TOOLKIT_INCLUDE
   device_functions.h # Header included in toolkit
@@ -687,12 +664,14 @@ set(CUDA_SDK_ROOT_DIR_INTERNAL "${CUDA_SDK_ROOT_DIR}" CACHE INTERNAL
   "This is the value of the last time CUDA_SDK_ROOT_DIR was set successfully." FORCE)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(CUDA DEFAULT_MSG
-  CUDA_TOOLKIT_ROOT_DIR
-  CUDA_NVCC_EXECUTABLE
-  CUDA_INCLUDE_DIRS
-  CUDA_CUDART_LIBRARY
-  _cuda_version_acceptable
+find_package_handle_standard_args(CUDA
+  REQUIRED_VARS
+    CUDA_TOOLKIT_ROOT_DIR
+    CUDA_NVCC_EXECUTABLE
+    CUDA_INCLUDE_DIRS
+    CUDA_CUDART_LIBRARY
+  VERSION_VAR
+    CUDA_VERSION
   )
 
 

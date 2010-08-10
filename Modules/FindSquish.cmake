@@ -4,9 +4,6 @@
 #
 # ---- Variables and Macros
 #  SQUISH_FOUND                    If false, don't try to use Squish
-#  SQUISH_VERSION_MAJOR            The major version of Squish found
-#  SQUISH_VERSION_MINOR            The minor version of Squish found
-#  SQUISH_VERSION_PATCH            The patch version of Squish found
 #
 #  SQUISH_INSTALL_DIR              The Squish installation directory (containing bin, lib, etc)
 #  SQUISH_SERVER_EXECUTABLE        The squishserver executable
