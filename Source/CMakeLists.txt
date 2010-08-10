@@ -112,6 +112,7 @@ ENDIF(CMAKE_USE_ELF_PARSER)
 #
 SET(SRCS
   cmStandardIncludes.cxx
+  cmArchiveWrite.cxx
   cmBootstrapCommands.cxx
   cmCacheManager.cxx
   cmCacheManager.h
