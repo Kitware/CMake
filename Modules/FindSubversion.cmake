@@ -43,14 +43,11 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-SET(Subversion_SVN_FOUND FALSE)
-
 FIND_PROGRAM(Subversion_SVN_EXECUTABLE svn
   DOC "subversion command line client")
 MARK_AS_ADVANCED(Subversion_SVN_EXECUTABLE)
 
 IF(Subversion_SVN_EXECUTABLE)
-  SET(Subversion_SVN_FOUND TRUE)
 
   EXECUTE_PROCESS(COMMAND ${Subversion_SVN_EXECUTABLE} --version
     OUTPUT_VARIABLE Subversion_VERSION_SVN
@@ -58,7 +55,6 @@ IF(Subversion_SVN_EXECUTABLE)
 
   STRING(REGEX REPLACE "^(.*\n)?svn, version ([.0-9]+).*"
     "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
-
 
   MACRO(Subversion_WC_INFO dir prefix)
     # the subversion commands should be executed with the C locale, otherwise
@@ -117,4 +113,6 @@ INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Subversion REQUIRED_VARS Subversion_SVN_EXECUTABLE
                                              VERSION_VAR Subversion_VERSION_SVN )
 
+# for compatibility
 SET(Subversion_FOUND ${SUBVERSION_FOUND})
+SET(Subversion_SVN_FOUND ${SUBVERSION_FOUND})
