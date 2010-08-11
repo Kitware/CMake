@@ -59,12 +59,10 @@ int cmCPackPackageMakerGenerator::CopyInstallScript(const char* resdir,
 }
 
 //----------------------------------------------------------------------
-int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel,
-  const std::vector<std::string>& files)
+int cmCPackPackageMakerGenerator::PackageFiles()
 {
-  (void) files; // TODO: Fix api to not need files.
-  (void) toplevel; // TODO: Use toplevel
+  // TODO: Use toplevel
+  //       It is used! Is this an obsolete comment?
 
   std::string resDir; // Where this package's resources will go.
   std::string packageDirFileName
@@ -318,7 +316,7 @@ int cmCPackPackageMakerGenerator::CompressFiles(const char* outFileName,
   cmOStringStream dmgCmd;
   dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE")
     << "\" create -ov -format UDZO -srcfolder \"" << packageDirFileName
-    << "\" \"" << outFileName << "\"";
+    << "\" \"" << packageFileNames[0] << "\"";
   std::string output;
   int retVal = 1;
   int numTries = 4;

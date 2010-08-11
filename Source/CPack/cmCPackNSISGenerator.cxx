@@ -43,11 +43,10 @@ cmCPackNSISGenerator::~cmCPackNSISGenerator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel, const std::vector<std::string>& files)
+int cmCPackNSISGenerator::PackageFiles()
 {
-  (void)outFileName; // TODO: Fix nsis to force out file name
-  (void)toplevel;
+  // TODO: Fix nsis to force out file name
+
   std::string nsisInFileName = this->FindTemplate("NSIS.template.in");
   if ( nsisInFileName.size() == 0 )
     {
@@ -74,7 +73,7 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
   std::vector<std::string>::const_iterator it;
   for ( it = files.begin(); it != files.end(); ++ it )
     {
-    std::string fileN = cmSystemTools::RelativePath(toplevel,
+    std::string fileN = cmSystemTools::RelativePath(toplevel.c_str(),
                                                     it->c_str());
     if (!this->Components.empty())
       {
@@ -88,13 +87,13 @@ int cmCPackNSISGenerator::CompressFiles(const char* outFileName,
     << str.str().c_str() << std::endl);
   this->SetOptionIfNotSet("CPACK_NSIS_DELETE_FILES", str.str().c_str());
   std::vector<std::string> dirs;
-  this->GetListOfSubdirectories(toplevel, dirs);
+  this->GetListOfSubdirectories(toplevel.c_str(), dirs);
   std::vector<std::string>::const_iterator sit;
   cmOStringStream dstr;
   for ( sit = dirs.begin(); sit != dirs.end(); ++ sit )
     {
     std::string componentName;
-    std::string fileN = cmSystemTools::RelativePath(toplevel, sit->c_str());
+    std::string fileN = cmSystemTools::RelativePath(toplevel.c_str(), sit->c_str());
     if ( fileN.empty() )
       {
       continue;

@@ -33,8 +33,7 @@ public:
 
 protected:
   virtual int InitializeInternal();
-  int CompressFiles(const char* outFileName, const char* toplevel,
-    const std::vector<std::string>& files);
+  int PackageFiles();
   virtual const char* GetPackagingInstallPrefix();
   virtual const char* GetOutputExtension() { return ".dmg"; }
 

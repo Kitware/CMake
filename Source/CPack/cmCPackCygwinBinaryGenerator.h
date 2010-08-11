@@ -30,8 +30,7 @@ public:
   virtual ~cmCPackCygwinBinaryGenerator();
 protected:
   virtual int InitializeInternal();
-  int CompressFiles(const char* outFileName, const char* toplevel,
-    const std::vector<std::string>& files);
+  int PackageFiles();
   virtual const char* GetOutputExtension();
   std::string OutputExtension;
 };

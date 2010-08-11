@@ -41,8 +41,7 @@ int cmCPackCygwinBinaryGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-int cmCPackCygwinBinaryGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel, const std::vector<std::string>& files)
+int cmCPackCygwinBinaryGenerator::PackageFiles()
 {
   std::string packageName = this->GetOption("CPACK_PACKAGE_NAME");
   packageName += "-";
@@ -70,12 +69,10 @@ int cmCPackCygwinBinaryGenerator::CompressFiles(const char* outFileName,
   ofs << manifest << "\n";
   }
   // add the manifest file to the list of all files
-  std::vector<std::string> filesWithManifest = files;
-  filesWithManifest.push_back(manifestFile);
+  files.push_back(manifestFile);
   
   // create the bzip2 tar file 
-  return this->Superclass::CompressFiles(outFileName, toplevel, 
-                                         filesWithManifest);
+  return this->Superclass::PackageFiles();
 }
 
 const char* cmCPackCygwinBinaryGenerator::GetOutputExtension()

@@ -48,21 +48,19 @@ int cmCPackCygwinSourceGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-int cmCPackCygwinSourceGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel, const std::vector<std::string>& files)
+int cmCPackCygwinSourceGenerator::PackageFiles()
 {
   // Create a tar file of the sources
   std::string packageDirFileName
     = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   packageDirFileName += ".tar.bz2";
+  packageFileNames[0] = packageDirFileName;
   std::string output;
   // skip one parent up to the cmCPackTarBZip2Generator
   // to create tar.bz2 file with the list of source
   // files
   this->Compress = BZIP2; 
-  if ( !this->cmCPackTarBZip2Generator::
-       CompressFiles(packageDirFileName.c_str(),
-      toplevel, files) )
+  if ( !this->cmCPackTarBZip2Generator::PackageFiles() )
     {
     return 0;
     }
@@ -135,21 +133,25 @@ int cmCPackCygwinSourceGenerator::CompressFiles(const char* outFileName,
   patchFile += "/";
   patchFile += cmSystemTools::GetFilenameName(
     this->GetOption("CPACK_CYGWIN_PATCH_FILE"));
-  std::vector<std::string> outerFiles;
+
   std::string file = cmSystemTools::GetFilenameName(compressOutFile);
   std::string sourceTar = cmSystemTools::GetFilenamePath(compressOutFile);
   sourceTar += "/";
   sourceTar += file;
+  /* reset list of file to be packaged */
+  files.clear();
   // a source release in cygwin should have the build script used
   // to build the package, the patch file that is different from the
   // regular upstream version of the sources, and a bziped tar file
   // of the original sources
-  outerFiles.push_back(buildScript);
-  outerFiles.push_back(patchFile);
-  outerFiles.push_back(sourceTar);
-  if ( !this->cmCPackTarBZip2Generator::
-       CompressFiles(outerTarFile.c_str(),
-                     tmpDir.c_str(), outerFiles) )
+  files.push_back(buildScript);
+  files.push_back(patchFile);
+  files.push_back(sourceTar);
+  /* update the name of the produced package */
+  packageFileNames[0] = outerTarFile;
+  /* update the toplevel dir */
+  toplevel = tmpDir;
+  if ( !this->cmCPackTarBZip2Generator::PackageFiles() )
     {
     return 0;
     }
