@@ -331,13 +331,13 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       {
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
-      std::string toplevel = it->c_str();
+      std::string top = it->c_str();
       it ++;
       std::string subdir = it->c_str();
-      std::string findExpr = toplevel;
+      std::string findExpr = top;
       findExpr += "/*";
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-        "- Install directory: " << toplevel << std::endl);
+        "- Install directory: " << top << std::endl);
       gl.RecurseOn();
       if ( !gl.FindFiles(findExpr) )
         {
@@ -369,7 +369,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           }
         std::string filePath = tempDir;
         filePath += "/" + subdir + "/"
-          + cmSystemTools::RelativePath(toplevel.c_str(), gfit->c_str());
+          + cmSystemTools::RelativePath(top.c_str(), gfit->c_str());
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: "
           << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
         if ( !cmSystemTools::CopyFileIfDifferent(inFile.c_str(),
