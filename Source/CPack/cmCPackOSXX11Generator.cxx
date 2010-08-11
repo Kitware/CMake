@@ -33,12 +33,10 @@ cmCPackOSXX11Generator::~cmCPackOSXX11Generator()
 }
 
 //----------------------------------------------------------------------
-int cmCPackOSXX11Generator::CompressFiles(const char* outFileName,
-  const char* toplevel,
-  const std::vector<std::string>& files)
+int cmCPackOSXX11Generator::PackageFiles()
 {
-  (void) files; // TODO: Fix api to not need files.
-  (void) toplevel; // TODO: Use toplevel
+  // TODO: Use toplevel ?
+  //       It is used! Is this an obsolete comment?
 
   const char* cpackPackageExecutables
     = this->GetOption("CPACK_PACKAGE_EXECUTABLES");
@@ -144,7 +142,7 @@ int cmCPackOSXX11Generator::CompressFiles(const char* outFileName,
   dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE")
          << "\" create -ov -format UDZO -srcfolder \"" 
          << diskImageDirectory.c_str() 
-         << "\" \"" << outFileName << "\"";
+         << "\" \"" << packageFileNames[0] << "\"";
   int retVal = 1;
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Compress disk image using command: " 

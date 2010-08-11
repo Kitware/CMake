@@ -52,14 +52,13 @@ int cmCPackSTGZGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-int cmCPackSTGZGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel, const std::vector<std::string>& files)
+int cmCPackSTGZGenerator::PackageFiles()
 {
-  if ( !this->Superclass::CompressFiles(outFileName, toplevel, files) )
+  if ( !this->Superclass::PackageFiles() )
     {
     return 0;
     }
-  return cmSystemTools::SetPermissions(outFileName,
+  return cmSystemTools::SetPermissions(packageFileNames[0].c_str(),
 #if defined( _MSC_VER ) || defined( __MINGW32__ )
     S_IREAD | S_IWRITE | S_IEXEC
 #elif defined( __BORLANDC__ )

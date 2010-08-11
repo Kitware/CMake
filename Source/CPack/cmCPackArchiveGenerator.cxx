@@ -166,8 +166,7 @@ int cmCPackArchiveGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel, const std::vector<std::string>& files)
+int cmCPackArchiveGenerator::PackageFiles()
 {
   int res = ARCHIVE_OK;
 #define CHECK_ARCHIVE_ERROR(res, msg)           \
@@ -180,14 +179,15 @@ int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
                   << "\n");                       \
     }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: "
-                << (toplevel ? toplevel : "(NULL)") << std::endl);
+                << toplevel << std::endl);
+
   // create a new archive
   struct archive* a = archive_write_new();
   // Set the compress and archive types for the archive
   SetArchiveType(a, this->Compress, this->Archive);
   // Open binary stream
   cmGeneratedFileStream* gf = new cmGeneratedFileStream;
-  gf->Open(outFileName, false, true);
+  gf->Open(packageFileNames[0].c_str(), false, true);
   StreamData data(gf, this);
   // pass callbacks to archive_write_open to handle stream
   res = archive_write_open(a,
@@ -204,13 +204,13 @@ int cmCPackArchiveGenerator::CompressFiles(const char* outFileName,
   CHECK_ARCHIVE_ERROR(res, "archive_read_disk_set_standard_lookup:");
   std::vector<std::string>::const_iterator fileIt;
   std::string dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(toplevel);
+  cmSystemTools::ChangeDirectory(toplevel.c_str());
   for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
     {
     // create a new entry for each file
     struct archive_entry *entry = archive_entry_new();
     // Get the relative path to the file
-    std::string rp = cmSystemTools::RelativePath(toplevel, fileIt->c_str());
+    std::string rp = cmSystemTools::RelativePath(toplevel.c_str(), fileIt->c_str());
     // Set the name of the entry to the file name
     archive_entry_set_pathname(entry, rp.c_str());  
     res = archive_read_disk_entry_from_file(disk, entry, -1, 0);

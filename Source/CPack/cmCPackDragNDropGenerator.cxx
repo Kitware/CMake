@@ -104,12 +104,10 @@ const char* cmCPackDragNDropGenerator::GetOutputExtension()
 }
 
 //----------------------------------------------------------------------
-int cmCPackDragNDropGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel, const std::vector<std::string>& files)
+int cmCPackDragNDropGenerator::PackageFiles()
 {
-  (void) files;
 
-  return this->CreateDMG(toplevel, outFileName);
+  return this->CreateDMG(toplevel, packageFileNames[0]);
 }
 
 //----------------------------------------------------------------------
