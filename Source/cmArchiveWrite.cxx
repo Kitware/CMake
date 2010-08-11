@@ -216,24 +216,24 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
   size_t nleft = size;
   while(nleft > 0)
     {
-    cmsys_ios::streamsize nnext = static_cast<cmsys_ios::streamsize>(
-      nleft > sizeof(buffer)? sizeof(buffer) : nleft);
-    fin.read(buffer, nnext);
+    typedef cmsys_ios::streamsize ssize_type;
+    size_t const nnext = nleft > sizeof(buffer)? sizeof(buffer) : nleft;
+    ssize_type const nnext_s = static_cast<ssize_type>(nnext);
+    fin.read(buffer, nnext_s);
     // Some stream libraries (older HPUX) return failure at end of
     // file on the last read even if some data were read.  Check
     // gcount instead of trusting the stream error status.
-    if(fin.gcount() != nnext)
+    if(static_cast<size_t>(fin.gcount()) != nnext)
       {
       break;
       }
-    if(archive_write_data(this->Archive, buffer,
-                          static_cast<size_t>(nnext)) != nnext)
+    if(archive_write_data(this->Archive, buffer, nnext) != nnext_s)
       {
       this->Error = "archive_write_data: ";
       this->Error += archive_error_string(this->Archive);
       return false;
       }
-    nleft -= static_cast<size_t>(nnext);
+    nleft -= nnext;
     }
   if(nleft > 0)
     {
