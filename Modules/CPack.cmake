@@ -19,9 +19,41 @@
 # described below, for more information about component-specific
 # installations.
 #
-# Before including the CPack module, there are a variety of variables
-# that can be set to customize the resulting installers. The most
-# commonly-used variables are:
+# The CPACK_GENERATOR variable has different meanings in different
+# contexts. In your CMakeLists.txt file, CPACK_GENERATOR is a
+# *list of generators*: when run with no other arguments, CPack
+# will iterate over that list and produce one package for each
+# generator. In a CPACK_PROJECT_CONFIG_FILE, though, CPACK_GENERATOR
+# is a *string naming a single generator*. If you need per-cpack-
+# generator logic to control *other* cpack settings, then you need
+# a CPACK_PROJECT_CONFIG_FILE.
+#
+# The CMake source tree itself contains a CPACK_PROJECT_CONFIG_FILE.
+# See the top level file CMakeCPackOptions.cmake.in for an example.
+#
+# If set, the CPACK_PROJECT_CONFIG_FILE is included automatically
+# on a per-generator basis. It only need contain overrides.
+#
+# Here's how it works:
+# - cpack runs
+# - it includes CPackConfig.cmake
+# - it iterates over the generators listed in that file's
+#     CPACK_GENERATOR list variable (unless told to use just a
+#     specific one via -G on the command line...)
+#
+# - foreach generator, it then
+#   - sets CPACK_GENERATOR to the one currently being iterated
+#   - includes the CPACK_PROJECT_CONFIG_FILE
+#   - produces the package for that generator
+#
+# This is the key: For each generator listed in CPACK_GENERATOR
+# in CPackConfig.cmake, cpack will *reset* CPACK_GENERATOR
+# internally to *the one currently being used* and then include
+# the CPACK_PROJECT_CONFIG_FILE.
+#
+# Before including this CPack module in your CMakeLists.txt file,
+# there are a variety of variables that can be set to customize
+# the resulting installers. The most commonly-used variables are:
 #
 #   CPACK_PACKAGE_NAME - The name of the package (or application). If
 #   not specified, defaults to the project name.
@@ -47,6 +79,11 @@
 #
 #   CPACK_PACKAGE_INSTALL_DIRECTORY - Installation directory on the
 #   target system, e.g., "CMake 2.5".
+#
+#   CPACK_PROJECT_CONFIG_FILE - File included at cpack time, once per
+#   generator after setting CPACK_GENERATOR to the actual generator
+#   being used. Allows per-generator setting of CPACK_* variables at
+#   cpack time.
 #
 #   CPACK_RESOURCE_FILE_LICENSE - License file for the project, which
 #   will typically be displayed to the user (often with an explicit
