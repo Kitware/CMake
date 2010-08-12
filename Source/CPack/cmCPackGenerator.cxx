@@ -345,7 +345,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           "Cannot find any files in the installed directory" << std::endl);
         return 0;
         }
-      std::vector<std::string>& files = gl.GetFiles();
+      files = gl.GetFiles();
       std::vector<std::string>::iterator gfit;
       std::vector<cmsys::RegularExpression>::iterator regIt;
       for ( gfit = files.begin(); gfit != files.end(); ++ gfit )
