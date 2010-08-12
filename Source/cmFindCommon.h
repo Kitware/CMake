@@ -39,6 +39,14 @@ protected:
   /** Place a set of search paths under the search roots.  */
   void RerootPaths(std::vector<std::string>& paths);
 
+  /** Get ignored paths from CMAKE_[SYSTEM_]IGNORE_path variables.  */
+  void GetIgnoredPaths(std::vector<std::string>& ignore);
+  void GetIgnoredPaths(std::set<std::string>& ignore);
+
+  /** Remove paths in the ignore set from the supplied vector.  */
+  void FilterPaths(std::vector<std::string>& paths,
+                   const std::set<std::string>& ignore);
+
   /** Add trailing slashes to all search paths.  */
   void AddTrailingSlashes(std::vector<std::string>& paths);
 

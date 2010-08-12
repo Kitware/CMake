@@ -587,7 +587,39 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "directories for the current system. It is NOT intended "
      "to be modified by the project, use CMAKE_PREFIX_PATH for this. See also "
      "CMAKE_SYSTEM_INCLUDE_PATH, CMAKE_SYSTEM_LIBRARY_PATH, "
-     "CMAKE_SYSTEM_PROGRAM_PATH.", false,
+     "CMAKE_SYSTEM_PROGRAM_PATH, and CMAKE_SYSTEM_IGNORE_PATH.", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_SYSTEM_IGNORE_PATH", cmProperty::VARIABLE,
+     "Path to be ignored by FIND_XXX() commands.",
+     "Specifies directories to be ignored by searches in FIND_XXX() commands "
+     "This is useful in cross-compiled environments where some system "
+     "directories contain incompatible but possibly linkable libraries. For "
+     "example, on cross-compiled cluster environments, this allows a user to "
+     "ignore directories containing libraries meant for the front-end "
+     "machine that modules like FindX11 (and others) would normally search. "
+     "By default this contains a list of directories containing incompatible "
+     "binaries for the host system. "
+     "See also CMAKE_SYSTEM_PREFIX_PATH, CMAKE_SYSTEM_LIBRARY_PATH, "
+     "CMAKE_SYSTEM_INCLUDE_PATH, and CMAKE_SYSTEM_PROGRAM_PATH.", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_IGNORE_PATH", cmProperty::VARIABLE,
+     "Path to be ignored by FIND_XXX() commands.",
+     "Specifies directories to be ignored by searches in FIND_XXX() commands "
+     "This is useful in cross-compiled environments where some system "
+     "directories contain incompatible but possibly linkable libraries. For "
+     "example, on cross-compiled cluster environments, this allows a user to "
+     "ignore directories containing libraries meant for the front-end "
+     "machine that modules like FindX11 (and others) would normally search. "
+     "By default this is empty; it is intended to be set by the project. "
+     "Note that CMAKE_IGNORE_PATH takes a list of directory names, NOT a "
+     "list of prefixes. If you want to ignore paths under prefixes (bin, "
+     "include, lib, etc.), you'll need to specify them explicitly. "
+     "See also CMAKE_PREFIX_PATH, CMAKE_LIBRARY_PATH, CMAKE_INCLUDE_PATH, "
+     "CMAKE_PROGRAM_PATH.", false,
      "Variables That Change Behavior");
 
   cm->DefineProperty
