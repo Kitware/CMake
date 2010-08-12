@@ -439,6 +439,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_LIBRARY    (GTK2_CAIROMM_LIBRARY cairomm true true)
 
         _GTK2_FIND_INCLUDE_DIR(GTK2_PANGOMM_INCLUDE_DIR pangomm.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_PANGOMMCONFIG_INCLUDE_DIR pangommconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_PANGOMM_LIBRARY pangomm true true)
 
         _GTK2_FIND_INCLUDE_DIR(GTK2_SIGC++_INCLUDE_DIR sigc++/sigc++.h)
