@@ -33,7 +33,8 @@ public:
     CompressNone,
     CompressGZip,
     CompressBZip2,
-    CompressLZMA
+    CompressLZMA,
+    CompressXZ
   };
 
   /** Archive Type */

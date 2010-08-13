@@ -87,6 +87,14 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
         return;
         }
       break;
+    case CompressXZ:
+      if(archive_write_set_compression_xz(this->Archive) != ARCHIVE_OK)
+        {
+        this->Error = "archive_write_set_compression_xz: ";
+        this->Error += archive_error_string(this->Archive);
+        return;
+        }
+      break;
     };
 #if !defined(_WIN32) || defined(__CYGWIN__)
   if (archive_read_disk_set_standard_lookup(this->Disk) != ARCHIVE_OK)
