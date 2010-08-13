@@ -16,6 +16,13 @@
 #
 # The file has been proposed for inclusion in the bash-completion package
 # https://alioth.debian.org/tracker/?func=detail&atid=413095&aid=312632&group_id=100114
+# In the meantime,
+#   1) If you want to test bash completion for cmake/cpack/ctest
+#      just source the current file at bash prompt
+#      . ./cmake-completion
+#
+#   2) If you want to install it for good copy this file to
+#      cp cmake-completion /etc/bash_completion.d/cmake
 #
 
 #
@@ -150,6 +157,11 @@ _ctest()
     case "${prev}" in
         --help-command)
             local running=$(for x in `ctest --help-command-list`; do echo ${x} ; done )
+            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
+            return 0
+            ;;
+        -R)
+            local running=$(for x in `ctest -N 2> /dev/null | grep "^  Test" | cut -d: -f 2`; do echo ${x} ; done )
             COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
             return 0
             ;;
