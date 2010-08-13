@@ -269,6 +269,11 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     }
   this->ExpandPaths();
 
+  // Filter out ignored paths from the prefix list
+  std::set<std::string> ignored;
+  this->GetIgnoredPaths(ignored);
+  this->FilterPaths(this->SearchPaths, ignored);
+
   // Handle search root stuff.
   this->RerootPaths(this->SearchPaths);
 
