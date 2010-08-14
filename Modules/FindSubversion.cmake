@@ -2,8 +2,8 @@
 # The module defines the following variables:
 #  Subversion_SVN_EXECUTABLE - path to svn command line client
 #  Subversion_VERSION_SVN - version of svn command line client
-#  SUBVERSION_FOUND - true if the command line client was found
-#  Subversion_FOUND - same as SUBVERSION_FOUND, kept around for compatibility
+#  Subversion_FOUND - true if the command line client was found
+#  SUBVERSION_FOUND - same as Subversion_FOUND, set for compatiblity reasons
 #
 # The minimum required version of Subversion can be specified using the
 # standard syntax, e.g. FIND_PACKAGE(Subversion 1.4)
