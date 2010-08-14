@@ -68,89 +68,47 @@
 #  License text for the above reference.)
 
 INCLUDE(FindPackageMessage)
-
-# Checks a list of strings (typically function/macro parameters) whether it contains a keyword
-# (_keyword) and return the value(s) following this keyword in _outputVar.
-# If _multipleValues is true, this can be more than one value.
-# Then end of the values for a keyword is then determined by checking whether the
-# next argument is contained in _allKeywordsList.
-FUNCTION(FPHSA_GET_OPTION_VALUE _keyword _outputVar _allArgsList _allKeywordsList _multipleValues)
-  UNSET(${_outputVar})
-  UNSET(_removeIndices)
-
-  SET(_insideValues FALSE)
-  SET(_counter 0)
-  FOREACH(_currentArg ${${_allArgsList}})
-    IF(NOT _insideValues)  # first check that we find the keyword we are currently interested in...
-      IF("${_currentArg}" STREQUAL "${_keyword}")
-        SET(_insideValues TRUE)
-        LIST(APPEND _removeIndices ${_counter})
-      ENDIF("${_currentArg}" STREQUAL "${_keyword}")
-    ELSE(NOT _insideValues)
-
-      LIST(FIND ${_allKeywordsList} "${_currentArg}" _index)  # ... then this marks the end of the arguments belonging to this keyword
-      IF(${_index} EQUAL -1)
-        LIST(APPEND _result ${_currentArg})
-        LIST(APPEND _removeIndices ${_counter}) # collect the indices of the strings we found to remove them from the list afterwards
-        IF(NOT _multipleValues)
-          BREAK()
-        ENDIF(NOT _multipleValues)
-      ELSE(${_index} EQUAL -1)
-        SET(_insideValues FALSE)
-        BREAK()
-      ENDIF(${_index} EQUAL -1)
-    ENDIF(NOT _insideValues)
-
-    MATH(EXPR _counter "${_counter} + 1")
-
-  ENDFOREACH(_currentArg ${${_allArgsList}})
-
-  IF(DEFINED _removeIndices)
-    LIST(REMOVE_AT ${_allArgsList} ${_removeIndices})
-  ENDIF(DEFINED _removeIndices)
-
-  SET(${_outputVar} ${_result} PARENT_SCOPE)
-  SET(${_allArgsList} ${${_allArgsList}} PARENT_SCOPE)
-
-ENDFUNCTION(FPHSA_GET_OPTION_VALUE _keyword _outputVar _allArgsList _allKeywordsList _multipleValues)
+INCLUDE(CMakeParseArguments)
 
 
 FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG _VAR1)
 
-  SET(_KEYWORDS_FOR_EXTENDED_MODE  FAIL_MESSAGE REQUIRED_VARS VERSION_VAR )
+# set up the arguments for CMAKE_PARSE_ARGUMENTS and check whether we are in
+# new extended or in the "old" mode:
+  SET(options) # none
+  SET(oneValueArgs FAIL_MESSAGE VERSION_VAR)
+  SET(multiValueArgs REQUIRED_VARS)
+  SET(_KEYWORDS_FOR_EXTENDED_MODE  ${options} ${oneValueArgs} ${multiValueArgs} )
   LIST(FIND _KEYWORDS_FOR_EXTENDED_MODE "${_FIRST_ARG}" INDEX)
 
   IF(${INDEX} EQUAL -1)
-    SET(_FAIL_MESSAGE ${_FIRST_ARG})
-    SET(_REQUIRED_VARS ${_VAR1} ${ARGN})
-    SET(_VERSION_VAR)
+    SET(FPHSA_FAIL_MESSAGE ${_FIRST_ARG})
+    SET(FPHSA_REQUIRED_VARS ${_VAR1} ${ARGN})
+    SET(FPHSA_VERSION_VAR)
   ELSE(${INDEX} EQUAL -1)
-    SET(ALL_ARGS ${_FIRST_ARG} ${_VAR1} ${ARGN})
 
-    FPHSA_GET_OPTION_VALUE("FAIL_MESSAGE"    _FAIL_MESSAGE    ALL_ARGS _KEYWORDS_FOR_EXTENDED_MODE FALSE)
-    FPHSA_GET_OPTION_VALUE("REQUIRED_VARS"   _REQUIRED_VARS   ALL_ARGS _KEYWORDS_FOR_EXTENDED_MODE TRUE)
-    FPHSA_GET_OPTION_VALUE("VERSION_VAR"     _VERSION_VAR     ALL_ARGS _KEYWORDS_FOR_EXTENDED_MODE FALSE)
+    CMAKE_PARSE_ARGUMENTS(FPHSA "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${_FIRST_ARG} ${_VAR1} ${ARGN})
 
-    IF(ALL_ARGS)
-      MESSAGE(FATAL_ERROR "Unknown keywords given to FIND_PACKAGE_HANDLE_STANDARD_ARGS(): \"${ALL_ARGS}\"")
-    ENDIF(ALL_ARGS)
+    IF(FPHSA_UNPARSED_ARGUMENTS)
+      MESSAGE(FATAL_ERROR "Unknown keywords given to FIND_PACKAGE_HANDLE_STANDARD_ARGS(): \"${FPHSA_UNPARSED_ARGUMENTS}\"")
+    ENDIF(FPHSA_UNPARSED_ARGUMENTS)
 
-    IF(NOT _FAIL_MESSAGE)
-      SET(_FAIL_MESSAGE  "DEFAULT_MSG")
-    ENDIF(NOT _FAIL_MESSAGE)
+    IF(NOT FPHSA_FAIL_MESSAGE)
+      SET(FPHSA_FAIL_MESSAGE  "DEFAULT_MSG")
+    ENDIF(NOT FPHSA_FAIL_MESSAGE)
   ENDIF(${INDEX} EQUAL -1)
 
 # now that we collected all arguments, process them
 
-  IF("${_FAIL_MESSAGE}" STREQUAL "DEFAULT_MSG")
-    SET(_FAIL_MESSAGE "Could NOT find ${_NAME}")
-  ENDIF("${_FAIL_MESSAGE}" STREQUAL "DEFAULT_MSG")
+  IF("${FPHSA_FAIL_MESSAGE}" STREQUAL "DEFAULT_MSG")
+    SET(FPHSA_FAIL_MESSAGE "Could NOT find ${_NAME}")
+  ENDIF("${FPHSA_FAIL_MESSAGE}" STREQUAL "DEFAULT_MSG")
 
-  IF(NOT _REQUIRED_VARS)
+  IF(NOT FPHSA_REQUIRED_VARS)
     MESSAGE(FATAL_ERROR "No REQUIRED_VARS specified for FIND_PACKAGE_HANDLE_STANDARD_ARGS()")
-  ENDIF(NOT _REQUIRED_VARS)
+  ENDIF(NOT FPHSA_REQUIRED_VARS)
 
-  LIST(GET _REQUIRED_VARS 0 _FIRST_REQUIRED_VAR)
+  LIST(GET FPHSA_REQUIRED_VARS 0 _FIRST_REQUIRED_VAR)
 
   STRING(TOUPPER ${_NAME} _NAME_UPPER)
 
@@ -160,7 +118,7 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG _VAR1)
   SET(DETAILS "")
   SET(${_NAME_UPPER}_FOUND TRUE)
   # check if all passed variables are valid
-  FOREACH(_CURRENT_VAR ${_REQUIRED_VARS})
+  FOREACH(_CURRENT_VAR ${FPHSA_REQUIRED_VARS})
     IF(NOT ${_CURRENT_VAR})
       SET(${_NAME_UPPER}_FOUND FALSE)
       SET(MISSING_VARS "${MISSING_VARS} ${_CURRENT_VAR}")
@@ -177,7 +135,7 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG _VAR1)
 
     # if the package was found, check for the version using <NAME>_FIND_VERSION
     IF (${_NAME_UPPER}_FOUND)
-      SET(VERSION ${${_VERSION_VAR}} )
+      SET(VERSION ${${FPHSA_VERSION_VAR}} )
 
       IF(VERSION)
 
@@ -227,20 +185,20 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG _VAR1)
     IF(NOT VERSION_OK)
 
       IF (${_NAME}_FIND_REQUIRED)
-          MESSAGE(FATAL_ERROR "${_FAIL_MESSAGE}: ${VERSION_MSG} (found ${${_FIRST_REQUIRED_VAR}})")
+          MESSAGE(FATAL_ERROR "${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG} (found ${${_FIRST_REQUIRED_VAR}})")
       ELSE (${_NAME}_FIND_REQUIRED)
         IF (NOT ${_NAME}_FIND_QUIETLY)
-          MESSAGE(STATUS "${_FAIL_MESSAGE}: ${VERSION_MSG} (found ${${_FIRST_REQUIRED_VAR}})")
+          MESSAGE(STATUS "${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG} (found ${${_FIRST_REQUIRED_VAR}})")
         ENDIF (NOT ${_NAME}_FIND_QUIETLY)
       ENDIF (${_NAME}_FIND_REQUIRED)
 
     ELSE(NOT VERSION_OK)
 
       IF (${_NAME}_FIND_REQUIRED)
-          MESSAGE(FATAL_ERROR "${_FAIL_MESSAGE} (missing: ${MISSING_VARS}) ${VERSION_MSG}")
+          MESSAGE(FATAL_ERROR "${FPHSA_FAIL_MESSAGE} (missing: ${MISSING_VARS}) ${VERSION_MSG}")
       ELSE (${_NAME}_FIND_REQUIRED)
         IF (NOT ${_NAME}_FIND_QUIETLY)
-          MESSAGE(STATUS "${_FAIL_MESSAGE}  (missing: ${MISSING_VARS}) ${VERSION_MSG}")
+          MESSAGE(STATUS "${FPHSA_FAIL_MESSAGE}  (missing: ${MISSING_VARS}) ${VERSION_MSG}")
         ENDIF (NOT ${_NAME}_FIND_QUIETLY)
       ENDIF (${_NAME}_FIND_REQUIRED)
     ENDIF(NOT VERSION_OK)
