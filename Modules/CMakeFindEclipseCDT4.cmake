@@ -22,8 +22,8 @@ FIND_PROGRAM(CMAKE_ECLIPSE_EXECUTABLE NAMES eclipse DOC "The Eclipse executable"
 # so that Eclipse ca find the headers at runtime and parsing etc. works better
 # This is done here by actually running gcc with the options so it prints its
 # system include directories, which are parsed then and stored in the cache.
-MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _result _resultDefines)
-  SET(${_result})
+MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines)
+  SET(${_resultIncludeDirs})
   SET(_gccOutput)
   FILE(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/dummy" "\n" )
   EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -v -E -x ${_lang} -dD dummy
@@ -32,24 +32,38 @@ MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _result _resultDefines)
                   OUTPUT_VARIABLE _gccStdout )
   FILE(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/dummy")
 
+  # First find the system include dirs:
   IF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
-    SET(${_result} ${CMAKE_MATCH_1})
-    STRING(REPLACE "\n" " " ${_result} "${${_result}}")
-    SEPARATE_ARGUMENTS(${_result})
+
+    # split the output into lines and then remove leading and trailing spaces from each of them:
+    STRING(REGEX MATCHALL "[^\n]+\n" _includeLines "${CMAKE_MATCH_1}")
+    FOREACH(nextLine ${_includeLines})
+      STRING(STRIP "${nextLine}" _includePath)
+      LIST(APPEND ${_resultIncludeDirs} "${_includePath}")
+    ENDFOREACH(nextLine)
+
   ENDIF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
-  
-  IF( "${_gccStdout}" MATCHES "built-in>\"\n(.+)# 1 +\"dummy\"" )
-    SET(_builtinDefines ${CMAKE_MATCH_1})
-    # Remove the '# 1 "<command-line>"' lines
-    STRING(REGEX REPLACE "# 1[^\n]+\n" "" _filteredOutput "${_builtinDefines}")
-    # Remove the "#define " parts from the output:
-    STRING(REGEX REPLACE "#define " "" _defineRemoved "${_filteredOutput}")
-    # Replace the line breaks with spaces, so we can use separate arguments afterwards
-    STRING(REGEX REPLACE "\n" " " _defineRemoved "${_defineRemoved}")
-    # Remove space at the end, this would produce empty list items
-    STRING(REGEX REPLACE " +$" "" ${_resultDefines} "${_defineRemoved}")
-    SEPARATE_ARGUMENTS(${_resultDefines})
-  ENDIF( "${_gccStdout}" MATCHES "built-in>\"\n(.+)# 1 +\"dummy\"" )
+
+
+  # now find the builtin macros:
+  STRING(REGEX MATCHALL "#define[^\n]+\n" _defineLines "${_gccStdout}")
+
+  FOREACH(nextLine ${_defineLines})
+    STRING(REGEX REPLACE "#define " "" _defineRemoved "${nextLine}")
+# not sure why this longer regexp was in the patch, the shorter one in the line below seems to work just fine:
+#   STRING(REGEX MATCH "[A-Za-z_][A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*\\([A-Za-z0-9_, ]*\\)" _name "${_defineRemoved}")
+    STRING(REGEX MATCH "[A-Za-z_][A-Za-z0-9_]*" _name "${_defineRemoved}")
+    LIST(APPEND ${_resultDefines} "${_name}")
+
+    STRING(REPLACE ${_name} "" _nameRemoved "${_defineRemoved}")
+    STRING(STRIP "${_nameRemoved}" _value)
+    IF(_value)
+      LIST(APPEND ${_resultDefines} "${_value}")
+    ELSE()
+      LIST(APPEND ${_resultDefines} " ")
+    ENDIF()
+  ENDFOREACH(nextLine)
+
 ENDMACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang)
 
 # Save the current LC_ALL, LC_MESSAGES, and LANG environment variables and set them
