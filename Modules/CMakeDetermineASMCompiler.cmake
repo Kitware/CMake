@@ -57,6 +57,25 @@ IF (NOT _CMAKE_TOOLCHAIN_LOCATION)
   GET_FILENAME_COMPONENT(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_ASM${ASM_DIALECT}_COMPILER}" PATH)
 ENDIF (NOT _CMAKE_TOOLCHAIN_LOCATION)
 
+
+IF(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
+
+  # Table of per-vendor compiler id flags with expected output.
+  LIST(APPEND CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDORS GNU )
+  SET(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_FLAGS_GNU "--version")
+  SET(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_REGEX_GNU "GNU assembler")
+
+  CMAKE_DETERMINE_COMPILER_ID_VENDOR(ASM${ASM_DIALECT})
+
+  IF(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
+    MESSAGE(STATUS "The ASM${ASM_DIALECT} compiler identification is ${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID}")
+  ELSE(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
+    MESSAGE(STATUS "The ASM${ASM_DIALECT} compiler identification is unknown")
+  ENDIF(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
+
+ENDIF()
+
+
 # If we have a gas/as cross compiler, they have usually some prefix, like
 # e.g. powerpc-linux-gas, arm-elf-gas or i586-mingw32msvc-gas .
 # The other tools of the toolchain usually have the same prefix
