@@ -22,8 +22,8 @@ FIND_PROGRAM(CMAKE_ECLIPSE_EXECUTABLE NAMES eclipse DOC "The Eclipse executable"
 # so that Eclipse ca find the headers at runtime and parsing etc. works better
 # This is done here by actually running gcc with the options so it prints its
 # system include directories, which are parsed then and stored in the cache.
-MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _result _resultDefines)
-  SET(${_result})
+MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines)
+  SET(${_resultIncludeDirs})
   SET(_gccOutput)
   FILE(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/dummy" "\n" )
   EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -v -E -x ${_lang} -dD dummy
@@ -33,11 +33,16 @@ MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _result _resultDefines)
   FILE(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/dummy")
 
   IF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
-    SET(${_result} ${CMAKE_MATCH_1})
-    STRING(REPLACE "\n" " " ${_result} "${${_result}}")
-    SEPARATE_ARGUMENTS(${_result})
+
+    # split the output into lines and then remove leading and trailing spaces from each of them:
+    STRING(REGEX MATCHALL "[^\n]+\n" _includeLines "${CMAKE_MATCH_1}")
+    FOREACH(nextLine ${_includeLines})
+      STRING(STRIP "${nextLine}" _includePath)
+      LIST(APPEND ${_resultIncludeDirs} "${_includePath}")
+    ENDFOREACH(nextLine)
+
   ENDIF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
-  
+
   IF( "${_gccStdout}" MATCHES "built-in>\"\n(.+)# 1 +\"dummy\"" )
     SET(_builtinDefines ${CMAKE_MATCH_1})
     # Remove the '# 1 "<command-line>"' lines
