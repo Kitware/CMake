@@ -3143,9 +3143,9 @@ const char* SystemTools::SplitPathRootComponent(const char* p,
       }
     c += 2;
     }
-  else if(c[0] == '/')
+  else if(c[0] == '/' || c[0] == '\\')
     {
-    // Unix path.
+    // Unix path (or Windows path w/out drive letter).
     if(root)
       {
       *root = "/";
