@@ -3059,39 +3059,45 @@ kwsys_stl::string SystemTools::RelativePath(const char* local, const char* remot
 static int GetCasePathName(const kwsys_stl::string & pathIn,
                             kwsys_stl::string & casePath)
 {
-  kwsys_stl::string::size_type iFound = pathIn.rfind('/');
-  if (iFound > 1  && iFound != pathIn.npos)
+  kwsys_stl::vector<kwsys::String> path_components =
+    SystemTools::SplitString(pathIn.c_str(), '/', true);
+  if(path_components.empty())
     {
-    // recurse to peel off components
-    //
-    if (GetCasePathName(pathIn.substr(0, iFound), casePath) > 0)
-      {
-      casePath += '/';
-      if (pathIn[1] != '/')
-        {
-        WIN32_FIND_DATA findData;
-
-        // append the long component name to the path
-        //
-        HANDLE hFind = ::FindFirstFile(pathIn.c_str(), &findData);
-        if (INVALID_HANDLE_VALUE != hFind)
-          {
-          casePath += findData.cFileName;
-          ::FindClose(hFind);
-          }
-        else
-          {
-          // if FindFirstFile fails, return the error code
-          //
-          casePath = "";
-          return 0;
-          }
-        }
-      }
+    casePath = "";
+    return 0;
     }
-  else
+  kwsys_stl::vector<kwsys_stl::string>::size_type idx = 0;
+  // assume always absolute path, so just take first
+  casePath = path_components[idx++];
+  // If network path, fill casePath with server/share so FindFirstFile
+  // will work after that.  Maybe someday call other APIs to get
+  // actual case of servers and shares.
+  if(path_components.size() > 2 && pathIn.size() >= 2 &&
+     pathIn[0] == '/' && pathIn[1] == '/')
     {
-    casePath = pathIn;
+    casePath += path_components[idx++];
+    casePath += "/";
+    casePath += path_components[idx++];
+    }
+
+  for(; idx < path_components.size(); idx++)
+    {
+    casePath += "/";
+    kwsys_stl::string test_str = casePath;
+    test_str += path_components[idx];
+
+    WIN32_FIND_DATA findData;
+    HANDLE hFind = ::FindFirstFile(test_str.c_str(), &findData);
+    if (INVALID_HANDLE_VALUE != hFind)
+      {
+      casePath += findData.cFileName;
+      ::FindClose(hFind);
+      }
+    else
+      {
+      casePath = "";
+      return 0;
+      }
     }
   return (int)casePath.size();
 }
@@ -3104,28 +3110,29 @@ kwsys_stl::string SystemTools::GetActualCaseForPath(const char* p)
 #ifndef _WIN32
   return p;
 #else
-  // Check to see if actual case has already been called
-  // for this path, and the result is stored in the LongPathMap
-  SystemToolsTranslationMap::iterator i = 
-    SystemTools::LongPathMap->find(p);
-  if(i != SystemTools::LongPathMap->end())
-    {
-    return i->second;
-    }
-  kwsys_stl::string casePath;
-  int len = GetCasePathName(p, casePath);
-  if(len == 0 || len > MAX_PATH+1)
-    {
-    return p;
-    }
+  kwsys_stl::string casePath = p;
   // make sure drive letter is always upper case
   if(casePath.size() > 1 && casePath[1] == ':')
     {
     casePath[0] = toupper(casePath[0]);
     }
+
+  // Check to see if actual case has already been called
+  // for this path, and the result is stored in the LongPathMap
+  SystemToolsTranslationMap::iterator i =
+    SystemTools::LongPathMap->find(casePath);
+  if(i != SystemTools::LongPathMap->end())
+    {
+    return i->second;
+    }
+  int len = GetCasePathName(p, casePath);
+  if(len == 0 || len > MAX_PATH+1)
+    {
+    return p;
+    }
   (*SystemTools::LongPathMap)[p] = casePath;
   return casePath;
-#endif  
+#endif
 }
 
 //----------------------------------------------------------------------------
