@@ -31,6 +31,7 @@ public:
   enum Compress
   {
     CompressNone,
+    CompressCompress,
     CompressGZip,
     CompressBZip2,
     CompressLZMA,
