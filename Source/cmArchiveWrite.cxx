@@ -63,6 +63,14 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
         return;
         }
       break;
+    case CompressCompress:
+      if(archive_write_set_compression_compress(this->Archive) != ARCHIVE_OK)
+        {
+        this->Error = "archive_write_set_compression_compress: ";
+        this->Error += archive_error_string(this->Archive);
+        return;
+        }
+      break;
     case CompressGZip:
       if(archive_write_set_compression_gzip(this->Archive) != ARCHIVE_OK)
         {
