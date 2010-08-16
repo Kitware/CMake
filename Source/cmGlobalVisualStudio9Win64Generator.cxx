@@ -16,7 +16,6 @@
 
 cmGlobalVisualStudio9Win64Generator::cmGlobalVisualStudio9Win64Generator()
 {
-  this->PlatformName = "x64";
 }
 
 ///! Create a local generator appropriate to this Global Generator
@@ -24,7 +23,7 @@ cmLocalGenerator *cmGlobalVisualStudio9Win64Generator::CreateLocalGenerator()
 {
   cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
   lg->SetVersion9();
-  lg->SetPlatformName(this->PlatformName.c_str());
+  lg->SetPlatformName(this->GetPlatformName());
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   lg->SetGlobalGenerator(this);
   return lg;
