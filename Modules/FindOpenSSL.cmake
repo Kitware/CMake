@@ -74,8 +74,8 @@ IF(WIN32 AND NOT CYGWIN)
       )
     if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
       set( OPENSSL_LIBRARIES
-        optimized ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE}
-        debug ${SSL_EAY_DEBUG} ${LIB_EAY_DEBUG}
+        optimized ${SSL_EAY_RELEASE} debug ${SSL_EAY_DEBUG}
+        optimized ${LIB_EAY_RELEASE} debug ${LIB_EAY_DEBUG}
         )
     else()
       set( OPENSSL_LIBRARIES ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE} )
