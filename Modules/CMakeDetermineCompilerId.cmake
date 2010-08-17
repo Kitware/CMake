@@ -63,7 +63,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
 
   SET(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
   SET(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
-  SET(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}" 
+  SET(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
     PARENT_SCOPE)
 ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID)
 
@@ -247,7 +247,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
   # Return the information extracted.
   SET(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
   SET(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
-  SET(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}" 
+  SET(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
     PARENT_SCOPE)
   SET(CMAKE_EXECUTABLE_FORMAT "${CMAKE_EXECUTABLE_FORMAT}" PARENT_SCOPE)
 ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang)
@@ -261,6 +261,17 @@ ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang)
 # We try running the compiler with the flag for each vendor and
 # matching its regular expression in the output.
 FUNCTION(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
+
+  IF(NOT CMAKE_${lang}_COMPILER_ID_DIR)
+    # We get here when this function is called not from within CMAKE_DETERMINE_COMPILER_ID()
+    # This is done e.g. for detecting the compiler ID for assemblers.
+    # Compute the directory in which to run the test and Create a clean working directory.
+    SET(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CompilerId${lang})
+    FILE(REMOVE_RECURSE ${CMAKE_${lang}_COMPILER_ID_DIR})
+    FILE(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR})
+  ENDIF(NOT CMAKE_${lang}_COMPILER_ID_DIR)
+
+
   FOREACH(vendor ${CMAKE_${lang}_COMPILER_ID_VENDORS})
     SET(flags ${CMAKE_${lang}_COMPILER_ID_VENDOR_FLAGS_${vendor}})
     SET(regex ${CMAKE_${lang}_COMPILER_ID_VENDOR_REGEX_${vendor}})
