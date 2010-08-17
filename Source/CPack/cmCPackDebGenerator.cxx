@@ -48,9 +48,7 @@ int cmCPackDebGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-int cmCPackDebGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel,
-  const std::vector<std::string>& files)
+int cmCPackDebGenerator::PackageFiles()
 {
   this->ReadListFile("CPackDeb.cmake");
   const char* cmakeExecutable = this->GetOption("CMAKE_COMMAND");
@@ -141,7 +139,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   // now add all directories which have to be compressed
   // collect all top level install dirs for that
   // e.g. /opt/bin/foo, /usr/bin/bar and /usr/bin/baz would give /usr and /opt
-  size_t topLevelLength = strlen(toplevel);
+  size_t topLevelLength = toplevel.length();
   std::set<std::string> installDirs;
   for (std::vector<std::string>::const_iterator fileIt = files.begin(); 
        fileIt != files.end(); ++ fileIt )
@@ -160,7 +158,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   std::string output;
   int retVal = -1;
   int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
-    &retVal, toplevel, this->GeneratorVerbose, 0);
+    &retVal, toplevel.c_str(), this->GeneratorVerbose, 0);
 
   if ( !res || retVal )
     {
@@ -196,7 +194,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
       //std::string output;
       //int retVal = -1;
       res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
-        &retVal, toplevel, this->GeneratorVerbose, 0);
+        &retVal, toplevel.c_str(), this->GeneratorVerbose, 0);
       // debian md5sums entries are like this:
       // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
       // thus strip the full path (with the trailing slash)
@@ -237,7 +235,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
       }
     }
   res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
-    &retVal, toplevel, this->GeneratorVerbose, 0);
+    &retVal, toplevel.c_str(), this->GeneratorVerbose, 0);
 
   if ( !res || retVal )
     {
@@ -263,7 +261,7 @@ int cmCPackDebGenerator::CompressFiles(const char* outFileName,
   arFiles.push_back(topLevelString + "debian-binary");
   arFiles.push_back(topLevelString + "control.tar.gz");
   arFiles.push_back(topLevelString + "data.tar.gz");
-  res = ar_append(outFileName, arFiles);
+  res = ar_append(packageFileNames[0].c_str(), arFiles);
   if ( res!=0 )
     {
     std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");

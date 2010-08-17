@@ -100,6 +100,7 @@ int cmCPackGenerator::PrepareNames()
     }
 
   std::string destFile = pdir;
+  this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_PREFIX", destFile.c_str());
   destFile += "/" + outName;
   std::string outFile = topDirectory + "/" + outName;
   this->SetOptionIfNotSet("CPACK_TOPLEVEL_DIRECTORY", topDirectory.c_str());
@@ -330,13 +331,13 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       {
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
-      std::string toplevel = it->c_str();
+      std::string top = it->c_str();
       it ++;
       std::string subdir = it->c_str();
-      std::string findExpr = toplevel;
+      std::string findExpr = top;
       findExpr += "/*";
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-        "- Install directory: " << toplevel << std::endl);
+        "- Install directory: " << top << std::endl);
       gl.RecurseOn();
       if ( !gl.FindFiles(findExpr) )
         {
@@ -344,7 +345,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           "Cannot find any files in the installed directory" << std::endl);
         return 0;
         }
-      std::vector<std::string>& files = gl.GetFiles();
+      files = gl.GetFiles();
       std::vector<std::string>::iterator gfit;
       std::vector<cmsys::RegularExpression>::iterator regIt;
       for ( gfit = files.begin(); gfit != files.end(); ++ gfit )
@@ -368,7 +369,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           }
         std::string filePath = tempDir;
         filePath += "/" + subdir + "/"
-          + cmSystemTools::RelativePath(toplevel.c_str(), gfit->c_str());
+          + cmSystemTools::RelativePath(top.c_str(), gfit->c_str());
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: "
           << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
         if ( !cmSystemTools::CopyFileIfDifferent(inFile.c_str(),
@@ -843,7 +844,7 @@ int cmCPackGenerator::DoPackage()
     }
 
   // The files to be installed
-  std::vector<std::string> files = gl.GetFiles();
+  files = gl.GetFiles();
 
   // For component installations, determine which files go into which
   // components.
@@ -866,34 +867,59 @@ int cmCPackGenerator::DoPackage()
       }
     }
 
-  if ( !this->CompressFiles(tempPackageFileName,
-      tempDirectory, files) || cmSystemTools::GetErrorOccuredFlag())
+
+  packageFileNames.clear();
+  /* Put at least one file name into the list of
+   * wanted packageFileNames. The specific generator
+   * may update this during PackageFiles.
+   * (either putting several names or updating the provided one)
+   */
+  packageFileNames.push_back(tempPackageFileName);
+  toplevel = tempDirectory;
+  if ( !this->PackageFiles() || cmSystemTools::GetErrorOccuredFlag())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem compressing the directory"
       << std::endl);
     return 0;
     }
 
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Finalize package" << std::endl);
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Copy final package: "
-                << (tempPackageFileName ? tempPackageFileName : "(NULL)" )
-                << " to " 
-                << (packageFileName ? packageFileName : "(NULL)")
-                << std::endl);
-  if ( !cmSystemTools::CopyFileIfDifferent(tempPackageFileName,
-      packageFileName) )
+  /*
+   * Copy the generated packages to final destination
+   *  - there may be several of them
+   *  - the initially provided name may have changed
+   *    (because the specific generator did 'normalize' it)
+   */
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Copying final package(s) ["
+                   <<packageFileNames.size()
+                   <<"]:"<<std::endl);
+  std::vector<std::string>::iterator it;
+  /* now copy package one by one */
+  for (it=packageFileNames.begin();it!=packageFileNames.end();++it)
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the package: "
-                  << (tempPackageFileName ? tempPackageFileName : "(NULL)" )
-                  << " to " 
-                  << (packageFileName ? packageFileName : "(NULL)")
-                  << std::endl);
-    return 0;
+    std::string tmpPF(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
+    tempPackageFileName = it->c_str();
+    tmpPF += "/"+cmSystemTools::GetFilenameName(*it);
+    packageFileName = tmpPF.c_str();
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy final package(s): "
+        << (tempPackageFileName ? tempPackageFileName : "(NULL)" )
+        << " to "
+        << (packageFileName ? packageFileName : "(NULL)")
+        << std::endl);
+    if ( !cmSystemTools::CopyFileIfDifferent(tempPackageFileName,
+        packageFileName) )
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the package: "
+          << (tempPackageFileName ? tempPackageFileName : "(NULL)" )
+          << " to "
+          << (packageFileName ? packageFileName : "(NULL)")
+          << std::endl);
+      return 0;
+      }
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- package: "
+        << packageFileName
+        << " generated." << std::endl);
     }
 
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Package " 
-                << (packageFileName ? packageFileName : "(NULL)")
-                << " generated." << std::endl);
   return 1;
 }
 
@@ -984,12 +1010,8 @@ int cmCPackGenerator::SetCMakeRoot()
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel, const std::vector<std::string>& files)
+int cmCPackGenerator::PackageFiles()
 {
-  (void)outFileName;
-  (void)toplevel;
-  (void)files;
   return 0;
 }
 

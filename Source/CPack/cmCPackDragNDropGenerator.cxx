@@ -104,12 +104,10 @@ const char* cmCPackDragNDropGenerator::GetOutputExtension()
 }
 
 //----------------------------------------------------------------------
-int cmCPackDragNDropGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel, const std::vector<std::string>& files)
+int cmCPackDragNDropGenerator::PackageFiles()
 {
-  (void) files;
 
-  return this->CreateDMG(toplevel, outFileName);
+  return this->CreateDMG();
 }
 
 //----------------------------------------------------------------------
@@ -161,8 +159,7 @@ bool cmCPackDragNDropGenerator::RunCommand(cmOStringStream& command,
 }
 
 //----------------------------------------------------------------------
-int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel,
-  const std::string& outFileName)
+int cmCPackDragNDropGenerator::CreateDMG()
 {
   // Get optional arguments ...
   const std::string cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON") 
@@ -475,7 +472,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& toplevel,
   final_image_command << cpack_dmg_format;
   final_image_command << " -imagekey";
   final_image_command << " zlib-level=9";
-  final_image_command << " -o \"" << outFileName << "\"";
+  final_image_command << " -o \"" << packageFileNames[0] << "\"";
   
   if(!this->RunCommand(final_image_command))
     {

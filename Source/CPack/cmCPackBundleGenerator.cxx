@@ -53,10 +53,8 @@ const char* cmCPackBundleGenerator::GetPackagingInstallPrefix()
 }
 
 //----------------------------------------------------------------------
-int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
-  const char* toplevel, const std::vector<std::string>& files)
+int cmCPackBundleGenerator::PackageFiles()
 {
-  (void) files;
 
   // Get required arguments ...
   const std::string cpack_bundle_name = this->GetOption("CPACK_BUNDLE_NAME")
@@ -167,5 +165,5 @@ int cmCPackBundleGenerator::CompressFiles(const char* outFileName,
     cmSystemTools::SetPermissions(command_target.str().c_str(), 0777);
     }
 
-  return this->CreateDMG(toplevel, outFileName);
+  return this->CreateDMG();
 }

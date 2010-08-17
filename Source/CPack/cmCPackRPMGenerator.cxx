@@ -31,9 +31,7 @@ int cmCPackRPMGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-int cmCPackRPMGenerator::CompressFiles(const char* /*outFileName*/,
-  const char* /*toplevel*/,
-  const std::vector<std::string>& /*files*/)
+int cmCPackRPMGenerator::PackageFiles()
 {
   this->ReadListFile("CPackRPM.cmake");
   if (!this->IsSet("RPMBUILD_EXECUTABLE")) 

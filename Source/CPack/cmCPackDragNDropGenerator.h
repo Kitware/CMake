@@ -29,14 +29,12 @@ public:
 protected:
   virtual int InitializeInternal();
   virtual const char* GetOutputExtension();
-  int CompressFiles(const char* outFileName, const char* toplevel,
-    const std::vector<std::string>& files);
+  int PackageFiles();
 
   bool CopyFile(cmOStringStream& source, cmOStringStream& target);
   bool RunCommand(cmOStringStream& command, std::string* output = 0);
 
-  virtual int CreateDMG(const std::string& installdir,
-    const std::string& outdmg);
+  int CreateDMG();
 
   std::string InstallPrefix;
 };
