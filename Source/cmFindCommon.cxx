@@ -241,6 +241,63 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
 }
 
 //----------------------------------------------------------------------------
+void cmFindCommon::FilterPaths(std::vector<std::string>& paths,
+                               const std::set<std::string>& ignore)
+{
+  // Now filter out anything that's in the ignore set.
+  std::vector<std::string> unfiltered;
+  unfiltered.swap(paths);
+
+  for(std::vector<std::string>::iterator pi = unfiltered.begin();
+      pi != unfiltered.end(); ++pi)
+    {
+    if (ignore.count(*pi) == 0)
+      {
+      paths.push_back(*pi);
+      }
+    }
+}
+
+
+//----------------------------------------------------------------------------
+void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
+{
+  // null-terminated list of paths.
+  static const char *paths[] =
+    { "CMAKE_SYSTEM_IGNORE_PATH", "CMAKE_IGNORE_PATH", 0 };
+
+  // Construct the list of path roots with no trailing slashes.
+  for(const char **pathName = paths; *pathName; ++pathName)
+    {
+    // Get the list of paths to ignore from the variable.
+    const char* ignorePath = this->Makefile->GetDefinition(*pathName);
+    if((ignorePath == 0) || (strlen(ignorePath) == 0))
+      {
+      continue;
+      }
+
+    cmSystemTools::ExpandListArgument(ignorePath, ignore);
+    }
+
+  for(std::vector<std::string>::iterator i = ignore.begin();
+      i != ignore.end(); ++i)
+    {
+    cmSystemTools::ConvertToUnixSlashes(*i);
+    }
+}
+
+
+//----------------------------------------------------------------------------
+void cmFindCommon::GetIgnoredPaths(std::set<std::string>& ignore)
+{
+  std::vector<std::string> ignoreVec;
+  GetIgnoredPaths(ignoreVec);
+  ignore.insert(ignoreVec.begin(), ignoreVec.end());
+}
+
+
+
+//----------------------------------------------------------------------------
 bool cmFindCommon::CheckCommonArgument(std::string const& arg)
 {
   if(arg == "NO_DEFAULT_PATH")

@@ -136,6 +136,7 @@ private:
   bool PolicyScope;
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
+  std::set<std::string> IgnoredPaths;
 };
 
 #endif

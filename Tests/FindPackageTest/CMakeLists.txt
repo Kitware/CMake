@@ -54,6 +54,10 @@ SET(CMAKE_FIND_APPBUNDLE FIRST)
 # Set the wrong answer for a find to make sure it re-finds.
 set(VersionedA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/cmake/zot-4.0)
 
+# Test that CMAKE_IGNORE_PATH can ignore the purposely bad package
+# files in the lib/cmake/zot-3.1 directory.
+set(CMAKE_IGNORE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/cmake/zot-3.1)
+
 # Look for packages with new-style signatures.
 FIND_PACKAGE(foo NO_MODULE)
 FIND_PACKAGE(Foo CONFIGS FooConfig.cmake)

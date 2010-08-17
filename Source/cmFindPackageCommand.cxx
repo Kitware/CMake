@@ -596,6 +596,15 @@ bool cmFindPackageCommand
       }
     }
 
+  // get igonored paths from vars and reroot them.
+  std::vector<std::string> ignored;
+  this->GetIgnoredPaths(ignored);
+  this->RerootPaths(ignored);
+
+  // Construct a set of ignored paths
+  this->IgnoredPaths.clear();
+  this->IgnoredPaths.insert(ignored.begin(), ignored.end());
+
   // Find and load the package.
   bool result = this->HandlePackageMode();
   this->AppendSuccessInformation();
@@ -1431,6 +1440,11 @@ bool cmFindPackageCommand::CheckDirectory(std::string const& dir)
 bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
                                           std::string& file)
 {
+  if (this->IgnoredPaths.count(dir))
+    {
+    return false;
+    }
+
   for(std::vector<std::string>::const_iterator ci = this->Configs.begin();
       ci != this->Configs.end(); ++ci)
     {
