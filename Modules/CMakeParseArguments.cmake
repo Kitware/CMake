@@ -60,7 +60,8 @@
 # MY_INSTALL_DESTINATION set to "OPTIONAL", but MY_INSTALL_DESTINATION would
 # be empty and MY_INSTALL_OPTIONAL would be set to TRUE therefor.
 
-# Copyright (c) 2010, Alexander Neundorf, <neundorf@kde.org>
+#=============================================================================
+# Copyright 2010 Alexander Neundorf <neundorf@kde.org>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -69,7 +70,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
-# (To distributed this file outside of CMake, substitute the full
+# (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
 
