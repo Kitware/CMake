@@ -556,7 +556,7 @@ ELSE (_boost_IN_CACHE)
 
   # Setting some more suffixes for the library
   SET (Boost_LIB_PREFIX "")
-  if ( WIN32 AND Boost_USE_STATIC_LIBS )
+  if ( WIN32 AND Boost_USE_STATIC_LIBS AND NOT CYGWIN)
     SET (Boost_LIB_PREFIX "lib")
   endif()
 
