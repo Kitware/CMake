@@ -31,12 +31,22 @@ public:
   enum Compress
   {
     CompressNone,
+    CompressCompress,
     CompressGZip,
-    CompressBZip2
+    CompressBZip2,
+    CompressLZMA,
+    CompressXZ
+  };
+
+  /** Archive Type */
+  enum Type
+  {
+    TypeTAR,
+    TypeZIP
   };
 
   /** Construct with output stream to which to write archive.  */
-  cmArchiveWrite(std::ostream& os, Compress c = CompressNone);
+  cmArchiveWrite(std::ostream& os, Compress c = CompressNone, Type = TypeTAR);
   ~cmArchiveWrite();
 
   /**

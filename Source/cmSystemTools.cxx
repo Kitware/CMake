@@ -1732,7 +1732,8 @@ bool cmSystemTools::CreateTar(const char* outFileName,
     }
   cmArchiveWrite a(fout, (gzip? cmArchiveWrite::CompressGZip :
                           (bzip2? cmArchiveWrite::CompressBZip2 :
-                           cmArchiveWrite::CompressNone)));
+                           cmArchiveWrite::CompressNone)),
+                           cmArchiveWrite::TypeTAR);
   a.SetVerbose(verbose);
   for(std::vector<cmStdString>::const_iterator i = files.begin();
       i != files.end(); ++i)

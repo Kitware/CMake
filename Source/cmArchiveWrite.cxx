@@ -47,7 +47,7 @@ struct cmArchiveWrite::Callback
 };
 
 //----------------------------------------------------------------------------
-cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c):
+cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
   Stream(os),
   Archive(archive_write_new()),
   Disk(archive_read_disk_new()),
@@ -59,6 +59,14 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c):
       if(archive_write_set_compression_none(this->Archive) != ARCHIVE_OK)
         {
         this->Error = "archive_write_set_compression_none: ";
+        this->Error += archive_error_string(this->Archive);
+        return;
+        }
+      break;
+    case CompressCompress:
+      if(archive_write_set_compression_compress(this->Archive) != ARCHIVE_OK)
+        {
+        this->Error = "archive_write_set_compression_compress: ";
         this->Error += archive_error_string(this->Archive);
         return;
         }
@@ -79,11 +87,55 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c):
         return;
         }
       break;
+    case CompressLZMA:
+      if(archive_write_set_compression_lzma(this->Archive) != ARCHIVE_OK)
+        {
+        this->Error = "archive_write_set_compression_lzma: ";
+        this->Error += archive_error_string(this->Archive);
+        return;
+        }
+      break;
+    case CompressXZ:
+      if(archive_write_set_compression_xz(this->Archive) != ARCHIVE_OK)
+        {
+        this->Error = "archive_write_set_compression_xz: ";
+        this->Error += archive_error_string(this->Archive);
+        return;
+        }
+      break;
     };
-  archive_read_disk_set_standard_lookup(this->Disk);
-  if(archive_write_set_format_pax_restricted(this->Archive) != ARCHIVE_OK)
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  if (archive_read_disk_set_standard_lookup(this->Disk) != ARCHIVE_OK)
     {
-    this->Error = "archive_write_set_format_pax_restricted: ";
+    this->Error = "archive_read_disk_set_standard_lookup: ";
+    this->Error += archive_error_string(this->Archive);
+    return;;
+    }
+#endif
+  switch (t)
+    {
+    case TypeZIP:
+      if(archive_write_set_format_zip(this->Archive) != ARCHIVE_OK)
+        {
+        this->Error = "archive_write_set_format_zip: ";
+        this->Error += archive_error_string(this->Archive);
+        return;
+        }
+      break;
+    case TypeTAR:
+      if(archive_write_set_format_pax_restricted(this->Archive) != ARCHIVE_OK)
+        {
+        this->Error = "archive_write_set_format_pax_restricted: ";
+        this->Error += archive_error_string(this->Archive);
+        return;
+        }
+    break;
+    }
+
+  // do not pad the last block!!
+  if (archive_write_set_bytes_in_last_block(this->Archive, 1))
+    {
+    this->Error = "archive_write_set_bytes_in_last_block: ";
     this->Error += archive_error_string(this->Archive);
     return;
     }
@@ -216,24 +268,24 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
   size_t nleft = size;
   while(nleft > 0)
     {
-    cmsys_ios::streamsize nnext = static_cast<cmsys_ios::streamsize>(
-      nleft > sizeof(buffer)? sizeof(buffer) : nleft);
-    fin.read(buffer, nnext);
+    typedef cmsys_ios::streamsize ssize_type;
+    size_t const nnext = nleft > sizeof(buffer)? sizeof(buffer) : nleft;
+    ssize_type const nnext_s = static_cast<ssize_type>(nnext);
+    fin.read(buffer, nnext_s);
     // Some stream libraries (older HPUX) return failure at end of
     // file on the last read even if some data were read.  Check
     // gcount instead of trusting the stream error status.
-    if(fin.gcount() != nnext)
+    if(static_cast<size_t>(fin.gcount()) != nnext)
       {
       break;
       }
-    if(archive_write_data(this->Archive, buffer,
-                          static_cast<size_t>(nnext)) != nnext)
+    if(archive_write_data(this->Archive, buffer, nnext) != nnext_s)
       {
       this->Error = "archive_write_data: ";
       this->Error += archive_error_string(this->Archive);
       return false;
       }
-    nleft -= static_cast<size_t>(nnext);
+    nleft -= nnext;
     }
   if(nleft > 0)
     {
