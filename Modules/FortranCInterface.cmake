@@ -47,9 +47,9 @@
 #                            MACRO_NAMESPACE "FC_"
 #                            SYMBOL_NAMESPACE "FC_"
 #                            SYMBOLS mysub mymod:my_sub)
-# This creates a "FC.h" header that defines the same FC_*() mangling
-# macros as the previous example plus preprocessor symbols FC_mysub
-# and FC_mymod_my_sub.
+# This creates a "FCMangle.h" header that defines the same FC_*()
+# mangling macros as the previous example plus preprocessor symbols
+# FC_mysub and FC_mymod_my_sub.
 #
 # Another function is provided to verify that the Fortran and C/C++
 # compilers work together:
