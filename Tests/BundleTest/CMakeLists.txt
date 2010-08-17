@@ -25,14 +25,14 @@ SET_SOURCE_FILES_PROPERTIES(
 SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/foobar")
 
 # Test building a bundle linking to a shared library where the
-# shared library links to Carbon, but the executable does not
-# explicitly link to Carbon, but the executable does *depend*
-# on Carbon. There should be a link failure for the executable
+# shared library links to CoreFoundation, but the executable does not
+# explicitly link to CoreFoundation, but the executable does *depend*
+# on CoreFoundation. There should be a link failure for the executable
 # if CMake's dependency chaining for libraries with "-framework
 # blah" style dependencies gets broken...
 #
 ADD_LIBRARY(BundleTestLib SHARED BundleLib.cxx)
-TARGET_LINK_LIBRARIES(BundleTestLib "-framework Carbon")
+TARGET_LINK_LIBRARIES(BundleTestLib "-framework CoreFoundation")
 
 ADD_EXECUTABLE(BundleTest
   MACOSX_BUNDLE
@@ -43,8 +43,8 @@ ADD_EXECUTABLE(BundleTest
   )
 TARGET_LINK_LIBRARIES(BundleTest BundleTestLib)
 #
-# DO NOT: TARGET_LINK_LIBRARIES(BundleTest "-framework Carbon")
-#   (see above comments about Carbon)
+# DO NOT: TARGET_LINK_LIBRARIES(BundleTest "-framework CoreFoundation")
+#   (see above comments about CoreFoundation)
 #
 
 # Test bundle installation.

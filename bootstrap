@@ -666,9 +666,9 @@ if ${cmake_system_cygwin}; then
   cmake_ld_flags="${LDFLAGS} -Wl,--enable-auto-import"
 fi
 
-# Add Carbon framework on Darwin
+# Add CoreFoundation framework on Darwin
 if ${cmake_system_darwin}; then
-  cmake_ld_flags="${LDFLAGS} -framework Carbon"  
+  cmake_ld_flags="${LDFLAGS} -framework CoreFoundation"
 fi
 
 # Add BeOS toolkits...
