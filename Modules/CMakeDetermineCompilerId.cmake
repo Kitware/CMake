@@ -283,6 +283,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
       WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
       OUTPUT_VARIABLE output ERROR_VARIABLE output
       RESULT_VARIABLE result
+      TIMEOUT 10
       )
     IF("${output}" MATCHES "${regex}")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
@@ -291,9 +292,15 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
       SET(CMAKE_${lang}_COMPILER_ID "${vendor}" PARENT_SCOPE)
       BREAK()
     ELSE()
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Checking whether the ${lang} compiler is ${vendor} using \"${flags}\" "
-        "did not match \"${regex}\":\n${output}")
+      IF("${result}" MATCHES  "timeout")
+        FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+          "Checking whether the ${lang} compiler is ${vendor} using \"${flags}\" "
+          "terminated after 10 s due to timeout.")
+      ELSE()
+        FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+          "Checking whether the ${lang} compiler is ${vendor} using \"${flags}\" "
+          "did not match \"${regex}\":\n${output}")
+       ENDIF()
     ENDIF()
   ENDFOREACH()
 ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_VENDOR)
