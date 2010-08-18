@@ -201,8 +201,7 @@ void cmCTestMemCheckHandler::Initialize()
   this->CustomMaximumPassedTestOutputSize = 0;
   this->CustomMaximumFailedTestOutputSize = 0;
   this->MemoryTester = "";
-  this->MemoryTesterOptionsParsed.clear();
-  this->MemoryTesterOptions = "";
+  this->MemoryTesterOptions.clear();
   this->MemoryTesterStyle = UNKNOWN;
   this->MemoryTesterOutputFile = "";
   int cc;
@@ -249,12 +248,12 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
   std::vector<cmStdString>::size_type pp;
   std::string memcheckcommand = "";
   memcheckcommand = this->MemoryTester;
-  for ( pp = 0; pp < this->MemoryTesterOptionsParsed.size(); pp ++ )
+  for ( pp = 0; pp < this->MemoryTesterOptions.size(); pp ++ )
     {
-    args.push_back(this->MemoryTesterOptionsParsed[pp]);
-    memcheckcommand += " ";
-    memcheckcommand += cmSystemTools::EscapeSpaces(
-      this->MemoryTesterOptionsParsed[pp].c_str());
+    args.push_back(this->MemoryTesterOptions[pp]);
+    memcheckcommand += " \"";
+    memcheckcommand += this->MemoryTesterOptions[pp];
+    memcheckcommand += "\"";
     }
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Memory check command: "
     << memcheckcommand << std::endl);
@@ -440,18 +439,21 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     }
 
   // Setup the options
+  std::string memoryTesterOptions;
   if ( this->CTest->GetCTestConfiguration(
       "MemoryCheckCommandOptions").size() )
     {
-    this->MemoryTesterOptions = this->CTest->GetCTestConfiguration(
+    memoryTesterOptions = this->CTest->GetCTestConfiguration(
       "MemoryCheckCommandOptions");
     }
   else if ( this->CTest->GetCTestConfiguration(
       "ValgrindCommandOptions").size() )
     {
-    this->MemoryTesterOptions = this->CTest->GetCTestConfiguration(
+    memoryTesterOptions = this->CTest->GetCTestConfiguration(
       "ValgrindCommandOptions");
     }
+  this->MemoryTesterOptions
+    = cmSystemTools::ParseArguments(memoryTesterOptions.c_str());
 
   this->MemoryTesterOutputFile
     = this->CTest->GetBinaryDir() + "/Testing/Temporary/MemoryChecker.log";
@@ -459,10 +461,14 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
   if ( this->MemoryTester.find("valgrind") != std::string::npos )
     {
     this->MemoryTesterStyle = cmCTestMemCheckHandler::VALGRIND;
-    if ( !this->MemoryTesterOptions.size() )
+    if ( this->MemoryTesterOptions.empty() )
       {
-      this->MemoryTesterOptions = "-q --tool=memcheck --leak-check=yes "
-        "--show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=50";
+      this->MemoryTesterOptions.push_back("-q");
+      this->MemoryTesterOptions.push_back("--tool=memcheck");
+      this->MemoryTesterOptions.push_back("--leak-check=yes");
+      this->MemoryTesterOptions.push_back("--show-reachable=yes");
+      this->MemoryTesterOptions.push_back("--workaround-gcc296-bugs=yes");
+      this->MemoryTesterOptions.push_back("--num-callers=50");
       }
     if ( this->CTest->GetCTestConfiguration(
         "MemoryCheckSuppressionFile").size() )
@@ -476,17 +482,15 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
             "MemoryCheckSuppressionFile").c_str() << std::endl);
         return false;
         }
-      this->MemoryTesterOptions += " --suppressions=" +
-        cmSystemTools::EscapeSpaces(this->CTest->GetCTestConfiguration(
-            "MemoryCheckSuppressionFile").c_str()) + "";
+      std::string suppressions = "--suppressions="
+        + this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile");
+      this->MemoryTesterOptions.push_back(suppressions);
       }
     }
   else if ( this->MemoryTester.find("purify") != std::string::npos )
     {
     this->MemoryTesterStyle = cmCTestMemCheckHandler::PURIFY;
-    std::string outputFile = 
-      cmSystemTools::EscapeSpaces(this->MemoryTesterOutputFile.c_str());
-
+    std::string outputFile;
 #ifdef _WIN32
     if( this->CTest->GetCTestConfiguration(
           "MemoryCheckSuppressionFile").size() )
@@ -500,31 +504,29 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
                      "MemoryCheckSuppressionFile").c_str() << std::endl);
         return false;
         }
-      this->MemoryTesterOptions += " /FilterFiles=" +
-        cmSystemTools::EscapeSpaces(this->CTest->GetCTestConfiguration(
-                                      "MemoryCheckSuppressionFile").c_str());
+      std::string filterFiles = "/FilterFiles="
+        + this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile");
+      this->MemoryTesterOptions.push_back(filterFiles);
       }
-    this->MemoryTesterOptions += " /SAVETEXTDATA=" + outputFile;
+    outputFile = "/SAVETEXTDATA=";
 #else
-    this->MemoryTesterOptions += " -log-file=" + outputFile;
+    outputFile = "-log-file=";
 #endif
+    outputFile += this->MemoryTesterOutputFile;
+    this->MemoryTesterOptions.push_back(outputFile);
     }
   else if ( this->MemoryTester.find("BC") != std::string::npos )
     { 
     this->BoundsCheckerXMLFile = this->MemoryTesterOutputFile;
-    std::string outputFile = 
-      cmSystemTools::EscapeSpaces(this->MemoryTesterOutputFile.c_str());
     std::string dpbdFile = this->CTest->GetBinaryDir()
       + "/Testing/Temporary/MemoryChecker.DPbd";
-    std::string errorFile = this->CTest->GetBinaryDir()
-      + "/Testing/Temporary/MemoryChecker.error";
-    errorFile = cmSystemTools::EscapeSpaces(errorFile.c_str());
     this->BoundsCheckerDPBDFile = dpbdFile;
-    dpbdFile = cmSystemTools::EscapeSpaces(dpbdFile.c_str());
     this->MemoryTesterStyle = cmCTestMemCheckHandler::BOUNDS_CHECKER;
-    this->MemoryTesterOptions += " /B " + dpbdFile;
-    this->MemoryTesterOptions += " /X " + outputFile;
-    this->MemoryTesterOptions += " /M ";
+    this->MemoryTesterOptions.push_back("/B");
+    this->MemoryTesterOptions.push_back(dpbdFile);
+    this->MemoryTesterOptions.push_back("/X");
+    this->MemoryTesterOptions.push_back(this->MemoryTesterOutputFile);
+    this->MemoryTesterOptions.push_back("/M");
     }
   else
     {
@@ -534,8 +536,6 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     return false;
     }
 
-  this->MemoryTesterOptionsParsed
-    = cmSystemTools::ParseArguments(this->MemoryTesterOptions.c_str());
   std::vector<cmStdString>::size_type cc;
   for ( cc = 0; cmCTestMemCheckResultStrings[cc]; cc ++ )
     {

@@ -46,12 +46,6 @@ public:
   static void ExpandRegistryValues(std::string& source,
                                    KeyWOW64 view = KeyWOW64_Default);
 
-  /**
-   * Platform independent escape spaces, unix uses backslash,
-   * windows double quotes the string.
-   */
-  static std::string EscapeSpaces(const char* str);
-
   ///! Escape quotes in a string.
   static std::string EscapeQuotes(const char* str);
 

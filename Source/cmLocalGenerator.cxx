@@ -2810,17 +2810,29 @@ cmLocalGenerator
 std::string cmLocalGenerator::EscapeForShellOldStyle(const char* str)
 {
   std::string result;
-  bool forceOn =  cmSystemTools::GetForceUnixPaths();
-  if(forceOn && this->WindowsShell)
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  // if there are spaces
+  std::string temp = str;
+  if (temp.find(" ") != std::string::npos &&
+      temp.find("\"")==std::string::npos)
     {
-    cmSystemTools::SetForceUnixPaths(false);
+    result = "\"";
+    result += str;
+    result += "\"";
+    return result;
     }
-  result = cmSystemTools::EscapeSpaces(str);
-  if(forceOn && this->WindowsShell)
+  return str;
+#else
+  for(const char* ch = str; *ch != '\0'; ++ch)
     {
-    cmSystemTools::SetForceUnixPaths(true);
+    if(*ch == ' ')
+      {
+      result += '\\';
+      }
+    result += *ch;
     }
   return result;
+#endif
 }
 
 //----------------------------------------------------------------------------
