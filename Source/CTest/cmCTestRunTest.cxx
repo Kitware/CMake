@@ -471,7 +471,7 @@ void cmCTestRunTest::ComputeArguments()
       this->TestProperties->Args[1].c_str());
     ++j; //skip the executable (it will be actualCommand)
     }
-  this->TestCommand
+  std::string testCommand
     = cmSystemTools::ConvertToOutputPath(this->ActualCommand.c_str());
 
   //Prepends memcheck args to our command string
@@ -479,22 +479,24 @@ void cmCTestRunTest::ComputeArguments()
   for(std::vector<std::string>::iterator i = this->Arguments.begin();
       i != this->Arguments.end(); ++i)
     {
-    this->TestCommand += " ";
-    this->TestCommand += cmSystemTools::EscapeSpaces(i->c_str());
+    testCommand += " \"";
+    testCommand += *i;
+    testCommand += "\"";
     }
 
   for(;j != this->TestProperties->Args.end(); ++j)
     {
-    this->TestCommand += " ";
-    this->TestCommand += cmSystemTools::EscapeSpaces(j->c_str());
+    testCommand += " \"";
+    testCommand += *j;
+    testCommand += "\"";
     this->Arguments.push_back(*j);
     }
-  this->TestResult.FullCommandLine = this->TestCommand;
+  this->TestResult.FullCommandLine = testCommand;
 
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
              << this->Index << ": "
              << (this->TestHandler->MemCheck?"MemCheck":"Test") 
-             << " command: " << this->TestCommand
+             << " command: " << testCommand
              << std::endl);
 }
 
