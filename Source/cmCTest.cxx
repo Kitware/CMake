@@ -410,10 +410,14 @@ std::string cmCTest::GetCDashVersion()
   //First query the server.  If that fails, fall back to the local setting
   std::string response;
   std::string url = "http://";
-  url += this->GetCTestConfiguration("DropSite") + "/CDash/api/getversion.php";
-  
+  url += this->GetCTestConfiguration("DropSite");
+
+  std::string cdashUri = this->GetCTestConfiguration("DropLocation");
+  cdashUri = cdashUri.substr(0, cdashUri.find("/submit.php"));
+
+  url += cdashUri + "/api/getversion.php";
   int res = cmCTest::HTTPRequest(url, cmCTest::HTTP_GET, response, "", "", 3);
-  
+
   return res ? this->GetCTestConfiguration("CDashVersion") : response;
 #else
   return this->GetCTestConfiguration("CDashVersion");
