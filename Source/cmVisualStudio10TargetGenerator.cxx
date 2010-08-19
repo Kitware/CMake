@@ -1033,6 +1033,15 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
   this->OutputIncludes(includes);
   clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+
+  // If not in debug mode, write the DebugInformationFormat field
+  // without value so PDBs don't get generated uselessly.
+  if(!clOptions.IsDebug())
+    {
+    this->WriteString("<DebugInformationFormat>"
+                      "</DebugInformationFormat>\n", 3);
+    }
+
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ", 
                                           "\n");
   this->WriteString("<AssemblerListingLocation>", 3);
