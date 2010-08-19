@@ -89,8 +89,7 @@ private:
   std::string              BoundsCheckerDPBDFile;
   std::string              BoundsCheckerXMLFile;
   std::string              MemoryTester;
-  std::vector<cmStdString> MemoryTesterOptionsParsed;
-  std::string              MemoryTesterOptions;
+  std::vector<cmStdString> MemoryTesterOptions;
   int                      MemoryTesterStyle;
   std::string              MemoryTesterOutputFile;
   int                      MemoryTesterGlobalResults[NO_MEMORY_FAULT];

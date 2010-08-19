@@ -89,7 +89,6 @@ private:
   cmCTestTestHandler::cmCTestTestResult TestResult;
   int Index;
   std::string StartTime;
-  std::string TestCommand;
   std::string ActualCommand;
   std::vector<std::string> Arguments;
   bool StopTimePassed;
