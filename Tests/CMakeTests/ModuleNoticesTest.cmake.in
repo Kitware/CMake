@@ -3,7 +3,7 @@
 # match any additional copyright holder notices.
 set(notice_regex "
 #=============================================================================
-# Copyright (20[0-9][0-9]-)?20[0-9][0-9] Kitware[^\n]+(
+# Copyright (20[0-9][0-9]-)?20[0-9][0-9] [^\n]+(
 # Copyright (20[0-9][0-9]-)?20[0-9][0-9] [^\n]+)*
 #
 # Distributed under the OSI-approved BSD License \\(the \"License\"\\);
