@@ -117,6 +117,7 @@ private:
 
   // Ordering constraint graph adjacency list.
   typedef cmGraphNodeList NodeList;
+  typedef cmGraphEdgeList EdgeList;
   typedef cmGraphAdjacencyList Graph;
   Graph EntryConstraintGraph;
   void CleanConstraintGraph();

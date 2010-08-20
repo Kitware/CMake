@@ -33,6 +33,7 @@ class cmComputeComponentGraph
 public:
   // Represent the graph with an adjacency list.
   typedef cmGraphNodeList NodeList;
+  typedef cmGraphEdgeList EdgeList;
   typedef cmGraphAdjacencyList Graph;
 
   cmComputeComponentGraph(Graph const& input);
@@ -41,7 +42,7 @@ public:
   /** Get the adjacency list of the component graph.  */
   Graph const& GetComponentGraph() const
     { return this->ComponentGraph; }
-  NodeList const& GetComponentGraphEdges(int c) const
+  EdgeList const& GetComponentGraphEdges(int c) const
     { return this->ComponentGraph[c]; }
 
   /** Get map from component index to original node indices.  */

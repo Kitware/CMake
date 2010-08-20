@@ -14,7 +14,8 @@
 
 #include "cmStandardIncludes.h"
 
+struct cmGraphEdgeList: public std::vector<int> {};
 struct cmGraphNodeList: public std::vector<int> {};
-struct cmGraphAdjacencyList: public std::vector<cmGraphNodeList> {};
+struct cmGraphAdjacencyList: public std::vector<cmGraphEdgeList> {};
 
 #endif

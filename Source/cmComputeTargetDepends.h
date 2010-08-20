@@ -59,6 +59,7 @@ private:
   // top-level index corresponds to a depender whose dependencies are
   // listed.
   typedef cmGraphNodeList NodeList;
+  typedef cmGraphEdgeList EdgeList;
   typedef cmGraphAdjacencyList Graph;
   Graph InitialGraph;
   Graph FinalGraph;
