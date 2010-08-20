@@ -699,9 +699,8 @@ bool cmGlobalGenerator::IsDependedOn(const char* project,
          l != targets.end(); l++)
       {
       cmTarget& target = l->second;
-      std::set<cmStdString>::const_iterator pos =
-        target.GetUtilities().find(targetIn->GetName());
-      if(pos != target.GetUtilities().end())
+      TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
+      if(tgtdeps.count(targetIn))
         {
         return true;
         }
