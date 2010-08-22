@@ -21,6 +21,7 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
 {
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
+  this->ArchitectureId = "X86";
 }
 
 //----------------------------------------------------------------------------
@@ -55,8 +56,8 @@ void cmGlobalVisualStudio8Generator
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId);
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId);
   mf->AddDefinition("MSVC80", "1");
 }
 

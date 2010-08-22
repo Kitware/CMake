@@ -19,6 +19,7 @@
 
 cmGlobalVisualStudio8Win64Generator::cmGlobalVisualStudio8Win64Generator()
 {
+  this->ArchitectureId = "x64";
 }
 
 ///! Create a local generator appropriate to this Global Generator
@@ -47,6 +48,4 @@ void cmGlobalVisualStudio8Win64Generator
 {
   this->cmGlobalVisualStudio8Generator::AddPlatformDefinitions(mf);
   mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "x64");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "x64");
 }

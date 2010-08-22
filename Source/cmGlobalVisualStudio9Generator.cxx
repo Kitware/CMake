@@ -25,8 +25,8 @@ cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator()
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId);
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId);
   mf->AddDefinition("MSVC90", "1");
 }
 
