@@ -39,7 +39,7 @@
 #   #--Install step---------------
 #    [INSTALL_DIR dir]           # Installation prefix
 #    [INSTALL_COMMAND cmd...]    # Command to drive install after build
-#   #--Test step---------------
+#   #--Test step------------------
 #    [TEST_BEFORE_INSTALL 1]     # Add test step executed before install step
 #    [TEST_AFTER_INSTALL 1]      # Add test step executed after install step
 #    [TEST_COMMAND cmd...]       # Command to drive test
@@ -50,6 +50,8 @@
 #    [LOG_BUILD 1]               # Wrap build in script to log output
 #    [LOG_TEST 1]                # Wrap test in script to log output
 #    [LOG_INSTALL 1]             # Wrap install in script to log output
+#   #--Custom targets-------------
+#    [STEP_TARGETS st1 st2 ...]  # Generate custom targets for these steps
 #    )
 # The *_DIR options specify directories for the project, with default
 # directories computed as follows.
@@ -109,6 +111,35 @@
 # It stores property values in variables of the same name.
 # Property names correspond to the keyword argument names of
 # 'ExternalProject_Add'.
+#
+# The 'ExternalProject_Add_StepTargets' function generates custom targets for
+# the steps listed:
+#  ExternalProject_Add_StepTargets(<name> [step1 [step2 [...]]])
+#
+# If STEP_TARGETS is set then ExternalProject_Add_StepTargets is automatically
+# called at the end of matching calls to ExternalProject_Add_Step. Pass
+# STEP_TARGETS explicitly to individual ExternalProject_Add calls, or
+# implicitly to all ExternalProject_Add calls by setting the directory property
+# EP_STEP_TARGETS.
+#
+# If STEP_TARGETS is not set, clients may still manually call
+# ExternalProject_Add_StepTargets after calling ExternalProject_Add or
+# ExternalProject_Add_Step.
+#
+# This functionality is provided to make it easy to drive the steps
+# independently of each other by specifying targets on build command lines.
+# For example, you may be submitting to a sub-project based dashboard, where
+# you want to drive the configure portion of the build, then submit to the
+# dashboard, followed by the build portion, followed by tests. If you invoke
+# a custom target that depends on a step halfway through the step dependency
+# chain, then all the previous steps will also run to ensure everything is
+# up to date.
+#
+# For example, to drive configure, build and test steps independently for each
+# ExternalProject_Add call in your project, write the following line prior to
+# any ExternalProject_Add calls in your CMakeLists file:
+#
+#   set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
 
 #=============================================================================
 # Copyright 2008-2009 Kitware, Inc.
@@ -124,7 +155,9 @@
 #  License text for the above reference.)
 
 # Pre-compute a regex to match documented keywords for each command.
-file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines LIMIT_COUNT 103
+math(EXPR _ep_documentation_line_count "${CMAKE_CURRENT_LIST_LINE} - 16")
+file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines
+     LIMIT_COUNT ${_ep_documentation_line_count}
      REGEX "^#  (  \\[[A-Z0-9_]+ [^]]*\\] +#.*$|[A-Za-z0-9_]+\\()")
 foreach(line IN LISTS lines)
   if("${line}" MATCHES "^#  [A-Za-z0-9_]+\\(")
@@ -205,6 +238,14 @@ define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED
   BRIEF_DOCS "Top prefix for External Project storage."
   FULL_DOCS
   "See documentation of the ExternalProject_Add() function in the "
+  "ExternalProject module."
+  )
+
+define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED
+  BRIEF_DOCS
+  "List of ExternalProject steps that automatically get corresponding targets"
+  FULL_DOCS
+  "See documentation of the ExternalProject_Add_StepTargets() function in the "
   "ExternalProject module."
   )
 
@@ -721,6 +762,19 @@ function(_ep_get_configuration_subdir_suffix suffix_var)
 endfunction(_ep_get_configuration_subdir_suffix)
 
 
+function(ExternalProject_Add_StepTargets name)
+  set(steps ${ARGN})
+
+  _ep_get_configuration_subdir_suffix(cfgdir)
+  ExternalProject_Get_Property(${name} stamp_dir)
+
+  foreach(step ${steps})
+    add_custom_target(${name}-${step}
+      DEPENDS ${stamp_dir}${cfgdir}/${name}-${step})
+  endforeach()
+endfunction(ExternalProject_Add_StepTargets)
+
+
 function(ExternalProject_Add_Step name step)
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
   ExternalProject_Get_Property(${name} stamp_dir)
@@ -807,6 +861,18 @@ function(ExternalProject_Add_Step name step)
     WORKING_DIRECTORY ${work_dir}
     VERBATIM
     )
+
+  # Add custom "step target"?
+  get_property(step_targets TARGET ${name} PROPERTY _EP_STEP_TARGETS)
+  if(NOT step_targets)
+    get_property(step_targets DIRECTORY PROPERTY EP_STEP_TARGETS)
+  endif()
+  foreach(st ${step_targets})
+    if("${st}" STREQUAL "${step}")
+      ExternalProject_Add_StepTargets(${name} ${step})
+      break()
+    endif()
+  endforeach()
 endfunction(ExternalProject_Add_Step)
 
 
