@@ -103,6 +103,12 @@ public:
       cmSystemTools::s_ErrorOccured = false;
     }
   
+  /**
+   * Does a string indicates that CMake/CPack/CTest internally
+   * forced this value. This is not the same as On, but this
+   * may be considered as "internally switched on".
+   */
+  static bool IsInternallyOn(const char* val);
   /** 
    * does a string indicate a true or on value ? This is not the same
    * as ifdef. 
