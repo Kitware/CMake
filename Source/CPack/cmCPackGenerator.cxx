@@ -461,6 +461,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   const char* cmakeGenerator
     = this->GetOption("CPACK_CMAKE_GENERATOR");
+  std::string absoluteDestFiles;
   if ( cmakeProjects && *cmakeProjects )
     {
     if ( !cmakeGenerator )
@@ -735,6 +736,15 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           mf->AddDefinition("CMAKE_INSTALL_DO_STRIP", "1");
           }
         int res = mf->ReadListFile(0, installFile.c_str());
+        if (NULL !=mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
+          if (absoluteDestFiles.length()>0) {
+            absoluteDestFiles +=";";
+          }
+          absoluteDestFiles += mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES");
+          cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                                    "Got some ABSOLUTE DESTINATION FILES: "
+                                    << absoluteDestFiles << std::endl);
+        }
         if ( cmSystemTools::GetErrorOccuredFlag() || !res )
           {
           return 0;
@@ -742,6 +752,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         }
       }
     }
+  this->SetOption("CPACK_ABSOLUTE_DESTINATION_FILES",absoluteDestFiles.c_str());
   return 1;
 }
 
