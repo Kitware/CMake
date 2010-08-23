@@ -10,6 +10,7 @@ find_package(Git)
 set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
 set(binary_base "${base}/Build")
 set_property(DIRECTORY PROPERTY EP_BASE ${base})
+set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
 
 if(NOT DEFINED can_build_tutorial_step5)
   set(can_build_tutorial_step5 1)
@@ -61,6 +62,7 @@ ExternalProject_Add(${proj}
   DOWNLOAD_COMMAND ""
   INSTALL_COMMAND ""
   PATCH_COMMAND ""
+  STEP_TARGETS install update
   SVN_REPOSITORY ""
   SVN_REVISION ""
   TEST_COMMAND ""
