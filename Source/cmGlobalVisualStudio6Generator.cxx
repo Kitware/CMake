@@ -13,6 +13,7 @@
 #include "cmLocalVisualStudio6Generator.h"
 #include "cmMakefile.h"
 #include "cmake.h"
+#include "cmGeneratedFileStream.h"
 
 // Utility function to make a valid VS6 *.dsp filename out
 // of a CMake target name:
@@ -284,6 +285,23 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
     fout << "End Project Dependency\n";
     }
   fout << "}}}\n\n";
+
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(&target);
+  if(ui != this->UtilityDepends.end())
+    {
+    const char* uname = ui->second.c_str();
+    fout << "Project: \"" << uname << "\"="
+         << dir << "\\" << uname << ".dsp - Package Owner=<4>\n\n";
+    fout <<
+      "Package=<5>\n{{{\n}}}\n\n"
+      "Package=<4>\n"
+      "{{{\n"
+      "Begin Project Dependency\n"
+      "Project_Dep_Name " << dspname << "\n"
+      "End Project Dependency\n"
+      "}}}\n\n";
+      ;
+    }
 }
 
 
@@ -337,6 +355,49 @@ void cmGlobalVisualStudio6Generator::WriteDSWHeader(std::ostream& fout)
 {
   fout << "Microsoft Developer Studio Workspace File, Format Version 6.00\n";
   fout << "# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!\n\n";
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGlobalVisualStudio6Generator::WriteUtilityDepend(cmTarget* target)
+{
+  std::string pname = target->GetName();
+  pname += "_UTILITY";
+  pname = GetVS6TargetName(pname.c_str());
+  std::string fname = target->GetMakefile()->GetStartOutputDirectory();
+  fname += "/";
+  fname += pname;
+  fname += ".dsp";
+  cmGeneratedFileStream fout(fname.c_str());
+  fout.SetCopyIfDifferent(true);
+  fout <<
+    "# Microsoft Developer Studio Project File - Name=\""
+       << pname << "\" - Package Owner=<4>\n"
+    "# Microsoft Developer Studio Generated Build File, Format Version 6.00\n"
+    "# ** DO NOT EDIT **\n"
+    "\n"
+    "# TARGTYPE \"Win32 (x86) Generic Project\" 0x010a\n"
+    "\n"
+    "CFG=" << pname << " - Win32 Debug\n"
+    "!MESSAGE \"" << pname << " - Win32 Debug\""
+    " (based on \"Win32 (x86) Generic Project\")\n"
+    "!MESSAGE \"" << pname << " - Win32 Release\" "
+    "(based on \"Win32 (x86) Generic Project\")\n"
+    "!MESSAGE \"" << pname << " - Win32 MinSizeRel\" "
+    "(based on \"Win32 (x86) Generic Project\")\n"
+    "!MESSAGE \"" << pname << " - Win32 RelWithDebInfo\" "
+    "(based on \"Win32 (x86) Generic Project\")\n"
+    "\n"
+    "# Begin Project\n"
+    "# Begin Target\n"
+    "# Name \"" << pname << " - Win32 Debug\"\n"
+    "# Name \"" << pname << " - Win32 Release\"\n"
+    "# Name \"" << pname << " - Win32 MinSizeRel\"\n"
+    "# Name \"" << pname << " - Win32 RelWithDebInfo\"\n"
+    "# End Target\n"
+    "# End Project\n"
+    ;
+  return pname;
 }
 
 //----------------------------------------------------------------------------
