@@ -1,23 +1,65 @@
 # - Macros for generating a summary of enabled/disabled features
 #
-# PRINT_ENABLED_FEATURES()
-#   Print a summary of all enabled features. By default all successfull
-#   FIND_PACKAGE() calls will appear here, except the ones which used the
-#   QUIET keyword. Additional features can be added by appending an entry
-#   to the global ENABLED_FEATURES property. If SET_FEATURE_INFO() is
-#   used for that feature, the output will be much more informative.
+#    FEATURE_SUMMARY( [FILENAME <file>]
+#                     [APPEND]
+#                     [VAR <variable_name>]
+#                     [DESCRIPTION "Found packages:"]
+#                     WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND | ENABLED_FEATURES | DISABLED_FEATURES]
+#                 )
 #
-# PRINT_DISABLED_FEATURES()
-#   Same as PRINT_ENABLED_FEATURES(), but for disabled features. It can
-#   be extended the same way by adding to the global property
-#   DISABLED_FEATURES.
+# The FEATURE_SUMMARY() macro can be used to print information about enabled
+# or disabled features or packages of a project.
+# By default, only the names of the features/packages will be printed and their
+# required version when one was specified. Use SET_FEATURE_INFO() to add more
+# useful information, like e.g. a download URL for the respective package.
 #
-# SET_FEATURE_INFO(NAME DESCRIPTION [URL [COMMENT] ] )
-#    Use this macro to set up information about the named feature, which will
-#    then be displayed by PRINT_ENABLED/DISABLED_FEATURES().
-#    Example: SET_FEATURE_INFO(LibXml2 "XML processing library."
-#    "http://xmlsoft.org/")
+# The WHAT option is the only mandatory option. Here you specify what information
+# will be printed:
+#    ENABLED_FEATURES: the list of all packages which have been found, excluding the QUIET ones
+#    DISABLED_FEATURES: the list of all packages which have not been found, excluding the QUIET ones
+#    PACKAGES_FOUND: the list of all packages which have been found, including the QUIET ones
+#    PACKAGES_NOT_FOUND: the list of all packages which have not been found, including the QUIET ones
+#    ALL: this will give all packages which have or have not been found
 #
+# If a FILENAME is given, the information is printed into this file. If APPEND
+# is used, it is appended to this file, otherwise the file is overwritten if
+# it already existed.
+# If the VAR option is used, the information is "printed" into the specified
+# variable.
+# If FILENAME is not used, the information is printed to the terminal.
+# Using the DESCRIPTION option a description or headline can be set which will
+# be printed above the actual content.
+#
+# Example 1, append everything to a file:
+#   FEATURE_SUMMARY(WHAT ALL
+#                   FILENAME ${CMAKE_BINARY_DIR}/all.log APPEND)
+#
+# Example 2, print the enabled features into the variable enabledFeaturesText:
+#   FEATURE_SUMMARY(WHAT ENABLED_FEATURES
+#                   DESCRIPTION "Enabled Features:"
+#                   VAR enabledFeaturesText)
+#   MESSAGE(STATUS "${enabledFeaturesText}")
+#
+#
+#
+#    SET_FEATURE_INFO(NAME DESCRIPTION [URL [COMMENT] ] )
+# Use this macro to set up information about the named feature, which can
+# then be displayed via FEATURE_SUMMARY() or PRINT_ENABLED/DISABLED_FEATURES().
+# This can be done either directly in the Find-module or in the project
+# which uses the module after the FIND_PACKAGE() call.
+# The features for which information can be set are added automatically by the
+# find_package() command. If you want to add additional features, you can add
+# them by appending them to the global ENABLED_FEATURES, DISABLED_FEATURES,
+# PACKAGES_FOUND and PACKAGES_NOT_FOUND properties.
+#
+# Example:
+#   SET_FEATURE_INFO(LibXml2 "XML processing library." "http://xmlsoft.org/")
+#
+#    PRINT_ENABLED_FEATURES()
+# Does the same as FEATURE_SUMMARY(WHAT ENABLED_FEATURES  DESCRIPTION "Enabled features:")
+#
+#    PRINT_DISABLED_FEATURES()
+# Does the same as FEATURE_SUMMARY(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -82,12 +124,6 @@ FUNCTION(PRINT_DISABLED_FEATURES)
   FEATURE_SUMMARY(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
 ENDFUNCTION(PRINT_DISABLED_FEATURES)
 
-# feature_summary(FILENAME foo.log
-#                 APPEND TRUE
-#                 VAR <variable_name>
-#                 DESCRIPTION "Found packages:"
-#                 WHAT [ALL PACKAGES_FOUND PACKAGES_NOT_FOUND ENABLED_FEATURES DISABLED_FEATURES]
-#                 )
 
 
 FUNCTION(FEATURE_SUMMARY)
