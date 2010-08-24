@@ -44,6 +44,7 @@ class cmMakefile::Internals
 public:
   std::stack<cmDefinitions, std::list<cmDefinitions> > VarStack;
   std::stack<std::set<cmStdString> > VarInitStack;
+  std::stack<std::set<cmStdString> > VarUsageStack;
   std::set<cmStdString> VarRemoved;
 };
 
@@ -91,6 +92,8 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->AddDefaultDefinitions();
   this->Initialize();
   this->PreOrder = false;
+  this->FindUnused = false;
+  this->DefaultToUsed = false;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
@@ -133,6 +136,8 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->SubDirectoryOrder = mf.SubDirectoryOrder;
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
+  this->FindUnused = mf.FindUnused;
+  this->DefaultToUsed = mf.DefaultToUsed;
   this->ListFileStack = mf.ListFileStack;
   this->Initialize();
 }
@@ -757,6 +762,21 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
   this->AddSourceGroup("Resources", "\\.plist$");
 #endif
 
+  if (this->Internal->VarUsageStack.empty())
+    {
+    const cmDefinitions& defs = cmDefinitions();
+    const std::set<cmStdString> globalKeys = defs.LocalKeys();
+    this->FindUnused = this->GetCMakeInstance()->GetFindUnused();
+    this->DefaultToUsed = this->GetCMakeInstance()->GetDefaultToUsed();
+    if (this->FindUnused)
+      {
+      this->Internal->VarUsageStack.push(globalKeys);
+      }
+    else
+      {
+      this->Internal->VarUsageStack.push(std::set<cmStdString>());
+      }
+    }
 }
 
 bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
@@ -1690,6 +1710,10 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
   this->Internal->VarInitStack.top().insert(name);
+  if (this->FindUnused && this->DefaultToUsed)
+    {
+    this->Internal->VarUsageStack.top().insert(name);
+    }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -1703,6 +1727,15 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 bool cmMakefile::VariableInitialized(const char* var) const
 {
   if(this->Internal->VarInitStack.top().find(var) != this->Internal->VarInitStack.top().end())
+    {
+    return true;
+    }
+  return false;
+}
+
+bool cmMakefile::VariableUsed(const char* var) const
+{
+  if(this->Internal->VarUsageStack.top().find(var) != this->Internal->VarUsageStack.top().end())
     {
     return true;
     }
@@ -1723,6 +1756,10 @@ void cmMakefile::RemoveDefinition(const char* name)
   this->Internal->VarStack.top().Set(name, 0);
   this->Internal->VarRemoved.insert(name);
   this->Internal->VarInitStack.top().insert(name);
+  if (this->FindUnused)
+    {
+    this->Internal->VarUsageStack.top().insert(name);
+    }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -2101,6 +2138,10 @@ const char* cmMakefile::GetDefinition(const char* name) const
       RecordPropertyAccess(name,cmProperty::VARIABLE);
     }
 #endif
+  if (this->FindUnused)
+    {
+    this->Internal->VarUsageStack.top().insert(name);
+    }
   const char* def = this->Internal->VarStack.top().Get(name);
   if(!def)
     {
@@ -3332,28 +3373,48 @@ void cmMakefile::PushScope()
 {
   cmDefinitions* parent = &this->Internal->VarStack.top();
   const std::set<cmStdString>& init = this->Internal->VarInitStack.top();
+  const std::set<cmStdString>& usage = this->Internal->VarUsageStack.top();
   this->Internal->VarStack.push(cmDefinitions(parent));
   this->Internal->VarInitStack.push(init);
+  this->Internal->VarUsageStack.push(usage);
 }
 
 void cmMakefile::PopScope()
 {
   cmDefinitions* current = &this->Internal->VarStack.top();
   std::set<cmStdString> init = this->Internal->VarInitStack.top();
+  std::set<cmStdString> usage = this->Internal->VarUsageStack.top();
   const std::set<cmStdString>& locals = current->LocalKeys();
-  // Remove initialization information for variables in the local scope.
+  // Remove initialization and usage information for variables in the local
+  // scope.
   std::set<cmStdString>::const_iterator it = locals.begin();
   for (; it != locals.end(); ++it)
     {
     init.erase(*it);
+    if (this->FindUnused && usage.find(*it) == usage.end())
+      {
+      cmOStringStream m;
+      m << "unused variable \'" << *it << "\'";
+      this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
+      }
+    else
+      {
+      usage.erase(*it);
+      }
     }
   this->Internal->VarStack.pop();
   this->Internal->VarInitStack.pop();
-  // Push initialization up to the parent scope.
+  this->Internal->VarUsageStack.pop();
+  // Push initialization and usage up to the parent scope.
   it = init.begin();
   for (; it != init.end(); ++it)
     {
     this->Internal->VarInitStack.top().insert(*it);
+    }
+  it = usage.begin();
+  for (; it != usage.end(); ++it)
+    {
+    this->Internal->VarUsageStack.top().insert(*it);
     }
 }
 
