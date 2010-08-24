@@ -47,16 +47,21 @@ MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
 
   # now find the builtin macros:
   STRING(REGEX MATCHALL "#define[^\n]+\n" _defineLines "${_gccStdout}")
+# A few example lines which the regexp below has to match properly:
+#  #define   MAX(a,b) ((a) > (b) ? (a) : (b))
+#  #define __fastcall __attribute__((__fastcall__))
+#  #define   FOO (23)
+#  #define __UINTMAX_TYPE__ long long unsigned int
+#  #define __UINTMAX_TYPE__ long long unsigned int
+#  #define __i386__  1
 
   FOREACH(nextLine ${_defineLines})
-    STRING(REGEX REPLACE "#define " "" _defineRemoved "${nextLine}")
-# not sure why this longer regexp was in the patch, the shorter one in the line below seems to work just fine:
-#   STRING(REGEX MATCH "[A-Za-z_][A-Za-z0-9_]*|[A-Za-z_][A-Za-z0-9_]*\\([A-Za-z0-9_, ]*\\)" _name "${_defineRemoved}")
-    STRING(REGEX MATCH "[A-Za-z_][A-Za-z0-9_]*" _name "${_defineRemoved}")
-    LIST(APPEND ${_resultDefines} "${_name}")
+    STRING(REGEX MATCH "^#define +([A-Za-z_][A-Za-z0-9_]*)(\\([^\\)]+\\))? +(.+) *$" _dummy "${nextLine}")
+    SET(_name "${CMAKE_MATCH_1}${CMAKE_MATCH_2}")
+    STRING(STRIP "${CMAKE_MATCH_3}" _value)
+    #MESSAGE(STATUS "m1: -${CMAKE_MATCH_1}- m2: -${CMAKE_MATCH_2}- m3: -${CMAKE_MATCH_3}-")
 
-    STRING(REPLACE ${_name} "" _nameRemoved "${_defineRemoved}")
-    STRING(STRIP "${_nameRemoved}" _value)
+    LIST(APPEND ${_resultDefines} "${_name}")
     IF(_value)
       LIST(APPEND ${_resultDefines} "${_value}")
     ELSE()
