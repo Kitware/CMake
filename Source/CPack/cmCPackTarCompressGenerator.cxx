@@ -14,8 +14,8 @@
 
 //----------------------------------------------------------------------
 cmCPackTarCompressGenerator::cmCPackTarCompressGenerator() 
-  :cmCPackArchiveGenerator(cmCPackArchiveGenerator::COMPRESS,
-                           cmCPackArchiveGenerator::TAR)
+  :cmCPackArchiveGenerator(cmArchiveWrite::CompressCompress,
+                           cmArchiveWrite::TypeTAR)
 {
 }
 

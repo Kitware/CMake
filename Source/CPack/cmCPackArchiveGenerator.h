@@ -13,24 +13,25 @@
 #ifndef cmCPackArchiveGenerator_h
 #define cmCPackArchiveGenerator_h
 
+#include "cmArchiveWrite.h"
 #include "cmCPackGenerator.h"
 
 
 /** \class cmCPackArchiveGenerator
- * \brief A generator base for libarchive generation
+ * \brief A generator base for libarchive generation.
+ * The generator itself uses the libarchive wrapper
+ * \ref cmArchiveWrite.
  *
  */
 class cmCPackArchiveGenerator : public cmCPackGenerator
 {
 public:
-  enum CompressType{ GZIP, BZIP2, COMPRESS, LZMA, NONE};
-  enum ArchiveType{ TAR, ZIP};
   cmTypeMacro(cmCPackArchiveGenerator, cmCPackGenerator);
 
   /**
    * Construct generator
    */
-  cmCPackArchiveGenerator(CompressType, ArchiveType);
+  cmCPackArchiveGenerator(cmArchiveWrite::Compress, cmArchiveWrite::Type);
   virtual ~cmCPackArchiveGenerator();
   // Used to add a header to the archive 
   virtual int GenerateHeader(std::ostream* os);
@@ -39,8 +40,8 @@ protected:
   virtual int InitializeInternal();
   int PackageFiles();
   virtual const char* GetOutputExtension() = 0;
-  CompressType Compress;
-  ArchiveType Archive;
+  cmArchiveWrite::Compress Compress;
+  cmArchiveWrite::Type Archive;
 };
 
 #endif
