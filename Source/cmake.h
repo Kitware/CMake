@@ -308,6 +308,10 @@ class cmake
   void SetTrace(bool b) {  this->Trace = b;}
   bool GetStrictMode() { return this->StrictMode;}
   void SetStrictMode(bool b) {  this->StrictMode = b;}
+  bool GetFindUnused() { return this->FindUnused;}
+  void SetFindUnused(bool b) {  this->FindUnused = b;}
+  bool GetDefaultToUsed() { return this->DefaultToUsed;}
+  void SetDefaultToUsed(bool b) {  this->DefaultToUsed = b;}
   // Define a property
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
@@ -446,6 +450,8 @@ private:
   bool DebugOutput;
   bool Trace;
   bool StrictMode;
+  bool FindUnused;
+  bool DefaultToUsed;
   std::string CMakeEditCommand;
   std::string CMakeCommand;
   std::string CXXEnvironment;

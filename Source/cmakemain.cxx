@@ -123,6 +123,10 @@ static const char * cmDocumentationOptions[][3] =
   {"--strict-mode", "Put cmake in strict mode.",
    "In strict mode cmake will print a warning when an uninitialized variable "
    "is used."},
+  {"--find-unused", "Find unused variables.",
+   "Find variables that are declared on the command line, but not used."},
+  {"--find-unused-all", "Find all unused variables.",
+   "Find variables that are declared, but not used."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed. "
    "If a file is specified, the documentation is written into and the output "

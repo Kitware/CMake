@@ -141,6 +141,8 @@ cmake::cmake()
 {
   this->Trace = false;
   this->StrictMode = false;
+  this->FindUnused = false;
+  this->DefaultToUsed = false;
   this->SuppressDevWarnings = false;
   this->DoSuppressDevWarnings = false;
   this->DebugOutput = false;
@@ -618,6 +620,18 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       std::cout << "Running in strict mode.\n";
       this->SetStrictMode(true);
+      }
+    else if(arg.find("--find-unused",0) == 0)
+      {
+      std::cout << "Finding unused command line variables.\n";
+      this->SetFindUnused(true);
+      this->SetDefaultToUsed(true);
+      }
+    else if(arg.find("--find-unused-all",0) == 0)
+      {
+      std::cout << "Finding unused variables.\n";
+      this->SetFindUnused(true);
+      this->SetDefaultToUsed(false);
       }
     else if(arg.find("-G",0) == 0)
       {
