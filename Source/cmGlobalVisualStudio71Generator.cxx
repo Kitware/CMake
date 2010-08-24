@@ -185,59 +185,21 @@ cmGlobalVisualStudio71Generator
                       const char* dspname,
                       const char*, cmTarget& target)
 {
-#if 0
-  // Create inter-target dependencies in the solution file.  For VS
-  // 7.1 and below we cannot let static libraries depend directly on
-  // targets to which they "link" because the librarian tool will copy
-  // the targets into the static library.  See
-  // cmGlobalVisualStudioGenerator::FixUtilityDependsForTarget for a
-  // work-around.  VS 8 and above do not have this problem.
-  if (!this->VSLinksDependencies() ||
-      target.GetType() != cmTarget::STATIC_LIBRARY);
-#else
-  if (target.GetType() != cmTarget::STATIC_LIBRARY)
-#endif
+  VSDependSet const& depends = this->VSTargetDepends[&target];
+  for(VSDependSet::const_iterator di = depends.begin();
+      di != depends.end(); ++di)
     {
-    cmTarget::LinkLibraryVectorType::const_iterator j, jend;
-    j = target.GetLinkLibraries().begin();
-    jend = target.GetLinkLibraries().end();
-    for(;j!= jend; ++j)
+    const char* name = di->c_str();
+    std::string guid = this->GetGUID(name);
+    if(guid.size() == 0)
       {
-      if(j->first != dspname)
-        {
-        // is the library part of this SLN ? If so add dependency
-        // find target anywhere because all depend libraries are 
-        // brought in as well
-        if(this->FindTarget(0, j->first.c_str()))
-          {
-          fout << "\t\t{" << this->GetGUID(j->first.c_str()) << "} = {"
-               << this->GetGUID(j->first.c_str()) << "}\n";
-          }
-        }
+      std::string m = "Target: ";
+      m += target.GetName();
+      m += " depends on unknown target: ";
+      m += name;
+      cmSystemTools::Error(m.c_str());
       }
-    }
-
-  std::set<cmStdString>::const_iterator i, end;
-  // write utility dependencies.
-  i = target.GetUtilities().begin();
-  end = target.GetUtilities().end();
-  for(;i!= end; ++i)
-    {
-    if(*i != dspname)
-      {
-      std::string name = this->GetUtilityForTarget(target, i->c_str());
-      std::string guid = this->GetGUID(name.c_str());
-      if(guid.size() == 0)
-        {
-        std::string m = "Target: ";
-        m += target.GetName();
-        m += " depends on unknown target: ";
-        m += name;
-        cmSystemTools::Error(m.c_str());
-        }
-          
-      fout << "\t\t{" << guid << "} = {" << guid << "}\n";
-      }
+    fout << "\t\t{" << guid << "} = {" << guid << "}\n";
     }
 }
 

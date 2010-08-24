@@ -353,6 +353,64 @@ cmGlobalVisualStudioGenerator::CreateUtilityDependTarget(cmTarget& target)
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
+{
+  if(!this->cmGlobalGenerator::ComputeTargetDepends())
+    {
+    return false;
+    }
+  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
+    {
+    std::vector<cmLocalGenerator*>& gen = it->second;
+    for(std::vector<cmLocalGenerator*>::iterator i = gen.begin();
+        i != gen.end(); ++i)
+      {
+      cmTargets& targets = (*i)->GetMakefile()->GetTargets();
+      for(cmTargets::iterator ti = targets.begin();
+          ti != targets.end(); ++ti)
+        {
+        this->ComputeVSTargetDepends(ti->second);
+        }
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
+{
+  if(this->VSTargetDepends.find(&target) != this->VSTargetDepends.end())
+    {
+    return;
+    }
+  VSDependSet& vsTargetDepend = this->VSTargetDepends[&target];
+  if(target.GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    cmTarget::LinkLibraryVectorType const& libs = target.GetLinkLibraries();
+    for(cmTarget::LinkLibraryVectorType::const_iterator j = libs.begin();
+        j != libs.end(); ++j)
+      {
+      if(j->first != target.GetName() &&
+         this->FindTarget(0, j->first.c_str()))
+        {
+        vsTargetDepend.insert(j->first);
+        }
+      }
+    }
+  std::set<cmStdString> const& utils = target.GetUtilities();
+  for(std::set<cmStdString>::const_iterator i = utils.begin();
+      i != utils.end(); ++i)
+    {
+    if(*i != target.GetName())
+      {
+      std::string name = this->GetUtilityForTarget(target, i->c_str());
+      vsTargetDepend.insert(name);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmGlobalVisualStudioGenerator::CheckTargetLinks(cmTarget& target,
                                                      const char* name)
 {

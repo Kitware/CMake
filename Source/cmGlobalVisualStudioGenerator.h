@@ -93,6 +93,11 @@ protected:
   virtual void GetTargetSets(TargetDependSet& projectTargets,
                              TargetDependSet& originalTargets,
                              cmLocalGenerator* root, GeneratorVector const&);
+  virtual bool ComputeTargetDepends();
+  class VSDependSet: public std::set<cmStdString> {};
+  class VSDependMap: public std::map<cmTarget*, VSDependSet> {};
+  VSDependMap VSTargetDepends;
+  void ComputeVSTargetDepends(cmTarget&);
 
   bool CheckTargetLinks(cmTarget& target, const char* name);
 private:

@@ -274,42 +274,14 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
   fout << "Package=<5>\n{{{\n}}}\n\n";
   fout << "Package=<4>\n";
   fout << "{{{\n";
-
-  // insert Begin Project Dependency  Project_Dep_Name project stuff here 
-  if (target.GetType() != cmTarget::STATIC_LIBRARY)
+  VSDependSet const& depends = this->VSTargetDepends[&target];
+  for(VSDependSet::const_iterator di = depends.begin();
+      di != depends.end(); ++di)
     {
-    cmTarget::LinkLibraryVectorType::const_iterator j, jend;
-    j = target.GetLinkLibraries().begin();
-    jend = target.GetLinkLibraries().end();
-    for(;j!= jend; ++j)
-      {
-      if(j->first != dspname)
-        {
-        // is the library part of this DSW ? If so add dependency
-        if(this->FindTarget(0, j->first.c_str()))
-          {
-          fout << "Begin Project Dependency\n";
-          fout << "Project_Dep_Name "
-               << GetVS6TargetName(j->first.c_str()) << "\n";
-          fout << "End Project Dependency\n";
-          }
-        }
-      }
-    }
-
-  std::set<cmStdString>::const_iterator i, end;
-  // write utility dependencies.
-  i = target.GetUtilities().begin();
-  end = target.GetUtilities().end();
-  for(;i!= end; ++i)
-    {
-    if(*i != dspname)
-      {
-      std::string depName = this->GetUtilityForTarget(target, i->c_str());
-      fout << "Begin Project Dependency\n";
-      fout << "Project_Dep_Name " << GetVS6TargetName(depName) << "\n";
-      fout << "End Project Dependency\n";
-      }
+    const char* name = di->c_str();
+    fout << "Begin Project Dependency\n";
+    fout << "Project_Dep_Name " << GetVS6TargetName(name) << "\n";
+    fout << "End Project Dependency\n";
     }
   fout << "}}}\n\n";
 }
