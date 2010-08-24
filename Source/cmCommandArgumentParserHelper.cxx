@@ -127,7 +127,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     // check to see if we need to print a warning
     // if strict mode is on and the variable has
     // not been "cleared"/initialized with a set(foo ) call
-    if(this->StrictMode && !this->Makefile->VariableCleared(var))
+    if(this->StrictMode && !this->Makefile->VariableInitialized(var))
       {
       cmOStringStream msg;
       msg << this->FileName << ":" << this->FileLine << ":" <<

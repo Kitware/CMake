@@ -61,6 +61,8 @@ public:
   unsigned int GetCacheMajorVersion();
   unsigned int GetCacheMinorVersion();
 
+  /* return true if a variable has been initialized */
+  bool VariableInitialized(const char* ) const;
   /* return true if a variable has been set with
      set(foo )
   */

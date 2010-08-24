@@ -43,13 +43,17 @@ class cmMakefile::Internals
 {
 public:
   std::stack<cmDefinitions, std::list<cmDefinitions> > VarStack;
+  std::stack<std::set<cmStdString> > VarInitStack;
   std::set<cmStdString> VarRemoved;
 };
 
 // default is not to be building executables
 cmMakefile::cmMakefile(): Internal(new Internals)
 {
-  this->Internal->VarStack.push(cmDefinitions());
+  const cmDefinitions& defs = cmDefinitions();
+  const std::set<cmStdString> globalKeys = defs.LocalKeys();
+  this->Internal->VarStack.push(defs);
+  this->Internal->VarInitStack.push(globalKeys);
 
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
@@ -1685,6 +1689,7 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
 void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
+  this->Internal->VarInitStack.top().insert(name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -1693,6 +1698,15 @@ void cmMakefile::AddDefinition(const char* name, bool value)
       value?"ON":"OFF", this);
     }
 #endif
+}
+
+bool cmMakefile::VariableInitialized(const char* var) const
+{
+  if(this->Internal->VarInitStack.top().find(var) != this->Internal->VarInitStack.top().end())
+    {
+    return true;
+    }
+  return false;
 }
 
 bool cmMakefile::VariableCleared(const char* var) const
@@ -1708,6 +1722,7 @@ void cmMakefile::RemoveDefinition(const char* name)
 {
   this->Internal->VarStack.top().Set(name, 0);
   this->Internal->VarRemoved.insert(name);
+  this->Internal->VarInitStack.top().insert(name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -3316,12 +3331,30 @@ std::string cmMakefile::GetListFileStack()
 void cmMakefile::PushScope()
 {
   cmDefinitions* parent = &this->Internal->VarStack.top();
+  const std::set<cmStdString>& init = this->Internal->VarInitStack.top();
   this->Internal->VarStack.push(cmDefinitions(parent));
+  this->Internal->VarInitStack.push(init);
 }
 
 void cmMakefile::PopScope()
 {
+  cmDefinitions* current = &this->Internal->VarStack.top();
+  std::set<cmStdString> init = this->Internal->VarInitStack.top();
+  const std::set<cmStdString>& locals = current->LocalKeys();
+  // Remove initialization information for variables in the local scope.
+  std::set<cmStdString>::const_iterator it = locals.begin();
+  for (; it != locals.end(); ++it)
+    {
+    init.erase(*it);
+    }
   this->Internal->VarStack.pop();
+  this->Internal->VarInitStack.pop();
+  // Push initialization up to the parent scope.
+  it = init.begin();
+  for (; it != init.end(); ++it)
+    {
+    this->Internal->VarInitStack.top().insert(*it);
+    }
 }
 
 void cmMakefile::RaiseScope(const char *var, const char *varDef)
