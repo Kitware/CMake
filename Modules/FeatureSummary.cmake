@@ -15,8 +15,8 @@
 #
 # The WHAT option is the only mandatory option. Here you specify what information
 # will be printed:
-#    ENABLED_FEATURES: the list of all packages which have been found, excluding the QUIET ones
-#    DISABLED_FEATURES: the list of all packages which have not been found, excluding the QUIET ones
+#    ENABLED_FEATURES: the list of all features and packages which have been found, excluding the QUIET ones
+#    DISABLED_FEATURES: the list of all features and packages which have not been found, excluding the QUIET ones
 #    PACKAGES_FOUND: the list of all packages which have been found, including the QUIET ones
 #    PACKAGES_NOT_FOUND: the list of all packages which have not been found, including the QUIET ones
 #    ALL: this will give all packages which have or have not been found
@@ -49,14 +49,16 @@
 # which uses the module after the FIND_PACKAGE() call.
 # The features for which information can be set are added automatically by the
 # find_package() command. If you want to add additional features, you can add
-# them by appending them to the global ENABLED_FEATURES, DISABLED_FEATURES,
-# PACKAGES_FOUND and PACKAGES_NOT_FOUND properties.
+# them by appending them to the global ENABLED_FEATURES or DISABLED_FEATURES properties.
 #
-# Example:
+# Example for setting the info for a package:
+#   FIND_PACKAGE(LibXml2)
 #   SET_FEATURE_INFO(LibXml2 "XML processing library." "http://xmlsoft.org/")
+#
 #
 #    PRINT_ENABLED_FEATURES()
 # Does the same as FEATURE_SUMMARY(WHAT ENABLED_FEATURES  DESCRIPTION "Enabled features:")
+#
 #
 #    PRINT_DISABLED_FEATURES()
 # Does the same as FEATURE_SUMMARY(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
