@@ -175,6 +175,7 @@ public:
       "The EXPORT option associates the installed target files with an "
       "export called <export-name>.  "
       "It must appear before any RUNTIME, LIBRARY, or ARCHIVE options.  "
+      "To actually install the export file itself, call install(EXPORT).  "
       "See documentation of the install(EXPORT ...) signature below for "
       "details."
       "\n"
