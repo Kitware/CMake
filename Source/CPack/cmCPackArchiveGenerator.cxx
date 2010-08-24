@@ -218,10 +218,54 @@ int cmCPackArchiveGenerator::PackageFiles()
   bool allGroupInOne = (NULL != (this->GetOption("CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE")));
   bool allComponentInOne = (NULL != (this->GetOption("CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE")));
   bool ignoreComponentGroup = ( NULL != (this->GetOption("CPACK_COMPONENTS_IGNORE_GROUPS")));
+
+  std::string groupingType;
+
+  // Second way to specify grouping
+  if (NULL != this->GetOption("CPACK_COMPONENTS_GROUPING")) {
+     groupingType = this->GetOption("CPACK_COMPONENTS_GROUPING");
+  }
+
+  if (groupingType.length()>0)
+    {
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE,  "["
+        << this->Name << "]"
+        << " requested component grouping = "<< groupingType <<std::endl);
+    if (groupingType == "ALL_GROUP_IN_ONE")
+      {
+      allGroupInOne = true;
+      }
+    else if (groupingType == "ALL_COMPONENT_IN_ONE")
+      {
+      allComponentInOne = true;
+      }
+    else if (groupingType == "IGNORE")
+      {
+      ignoreComponentGroup = true;
+      }
+    else
+      {
+      cmCPackLogger(cmCPackLog::LOG_WARNING, "["
+              << this->Name << "]"
+              << " requested component grouping type <"<< groupingType
+              << "> UNKNOWN not in (ALL_GROUP_IN_ONE,ALL_COMPONENT_IN_ONE,IGNORE)" <<std::endl);
+      }
+    }
+
+  // Some components were defined but NO group
+  // force ignoreGroups
+  if (this->ComponentGroups.empty() && (!this->Components.empty()) && (!ignoreComponentGroup)) {
+    cmCPackLogger(cmCPackLog::LOG_WARNING, "["
+              << this->Name << "]"
+              << " Some Components defined but NO component group:"
+              << " Ignoring component group."
+              << std::endl);
+    ignoreComponentGroup = true;
+  }
   // CASE 1 : COMPONENT ALL-IN-ONE package
   // If ALL GROUPS or ALL COMPONENTS in ONE package has been requested
   // then the package file is unique and should be open here.
-  if ((allComponentInOne || allGroupInOne) && (!this->ComponentGroups.empty()))
+  if (allComponentInOne || (allGroupInOne && (!this->ComponentGroups.empty())))
     {
     return PackageComponentsAllInOne(allComponentInOne);
     }
@@ -229,7 +273,7 @@ int cmCPackArchiveGenerator::PackageFiles()
   // There will be 1 package for each component group
   // however one may require to ignore component group and
   // in this case you'll get 1 package for each component.
-  else if (!this->ComponentGroups.empty())
+  else if ((!this->ComponentGroups.empty()) || (ignoreComponentGroup))
     {
     return PackageComponents(ignoreComponentGroup);
     }
