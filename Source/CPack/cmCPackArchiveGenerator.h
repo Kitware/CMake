@@ -24,7 +24,7 @@
  *
  */
 class cmCPackArchiveGenerator : public cmCPackGenerator
-{
+  {
 public:
   cmTypeMacro(cmCPackArchiveGenerator, cmCPackGenerator);
 
@@ -35,13 +35,39 @@ public:
   virtual ~cmCPackArchiveGenerator();
   // Used to add a header to the archive 
   virtual int GenerateHeader(std::ostream* os);
-
+  // component support
+  virtual bool SupportsComponentInstallation() const;
 protected:
   virtual int InitializeInternal();
+  /**
+   * Add the files belonging to the specified component
+   * to the provided (already opened) archive.
+   * @param[in,out] archive the archive object
+   * @param[in] component the component whose file will be added to archive
+   */
+  int addOneComponentToArchive(cmArchiveWrite& archive, cmCPackComponent* component);
+
+  /**
+   * The main package file method.
+   * If component install was required this
+   * method will call either PackageComponents or
+   * PackageComponentsAllInOne.
+   */
   int PackageFiles();
+  /**
+   * The method used to package files when component
+   * install is used. This will create one
+   * archive for each component group.
+   */
+  int PackageComponents(bool ignoreComponentGroup);
+  /**
+   * Special case of component install where all
+   * components will be put in a single installer.
+   */
+  int PackageComponentsAllInOne(bool allComponentInOne);
   virtual const char* GetOutputExtension() = 0;
   cmArchiveWrite::Compress Compress;
   cmArchiveWrite::Type Archive;
-};
+  };
 
 #endif
