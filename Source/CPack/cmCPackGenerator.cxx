@@ -828,8 +828,8 @@ int cmCPackGenerator::DoPackage()
     return 0;
     }
 
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Compress package" << std::endl);
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Compress files to: "
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Create package" << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Package files to: "
     << (tempPackageFileName ? tempPackageFileName : "(NULL)") << std::endl);
   if ( cmSystemTools::FileExists(tempPackageFileName) )
     {
@@ -853,7 +853,10 @@ int cmCPackGenerator::DoPackage()
     std::vector<std::string>::const_iterator it;
     for ( it = files.begin(); it != files.end(); ++ it )
       {
-      std::string fileN = cmSystemTools::RelativePath(tempDirectory,
+      // beware we cannot just use tempDirectory as before
+      // because some generator will "CPACK_INCLUDE_TOPLEVEL_DIRECTORY"
+      // we really want "CPACK_TEMPORARY_DIRECTORY"
+      std::string fileN = cmSystemTools::RelativePath(this->GetOption("CPACK_TEMPORARY_DIRECTORY"),
                                                       it->c_str());
 
       // Determine which component we are in.
@@ -864,6 +867,7 @@ int cmCPackGenerator::DoPackage()
 
       // Add this file to the list of files for the component.
       this->Components[componentName].Files.push_back(fileN);
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file <" <<fileN<<"> to component <"<<componentName<<">"<<std::endl);
       }
     }
 

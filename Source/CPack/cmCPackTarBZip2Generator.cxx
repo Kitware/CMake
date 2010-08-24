@@ -13,8 +13,8 @@
 #include "cmCPackTarBZip2Generator.h"
 //----------------------------------------------------------------------
 cmCPackTarBZip2Generator::cmCPackTarBZip2Generator() 
- :cmCPackArchiveGenerator(cmCPackArchiveGenerator::BZIP2,
-                          cmCPackArchiveGenerator::TAR)
+ :cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2,
+                          cmArchiveWrite::TypeTAR)
 {
 }
 

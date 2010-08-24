@@ -14,8 +14,8 @@
 
 //----------------------------------------------------------------------
 cmCPackTGZGenerator::cmCPackTGZGenerator()
-  :cmCPackArchiveGenerator(cmCPackArchiveGenerator::GZIP,
-                           cmCPackArchiveGenerator::TAR)
+  :cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip,
+                           cmArchiveWrite::TypeTAR)
 {
 }
 
