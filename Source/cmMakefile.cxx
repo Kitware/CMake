@@ -92,7 +92,7 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->AddDefaultDefinitions();
   this->Initialize();
   this->PreOrder = false;
-  this->FindUnused = false;
+  this->WarnUnused = false;
   this->DefaultToUsed = false;
 }
 
@@ -136,7 +136,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->SubDirectoryOrder = mf.SubDirectoryOrder;
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
-  this->FindUnused = mf.FindUnused;
+  this->WarnUnused = mf.WarnUnused;
   this->DefaultToUsed = mf.DefaultToUsed;
   this->ListFileStack = mf.ListFileStack;
   this->Initialize();
@@ -766,9 +766,9 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
     {
     const cmDefinitions& defs = cmDefinitions();
     const std::set<cmStdString> globalKeys = defs.LocalKeys();
-    this->FindUnused = this->GetCMakeInstance()->GetFindUnused();
+    this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
     this->DefaultToUsed = this->GetCMakeInstance()->GetDefaultToUsed();
-    if (this->FindUnused)
+    if (this->WarnUnused)
       {
       this->Internal->VarUsageStack.push(globalKeys);
       }
@@ -1710,7 +1710,7 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
   this->Internal->VarInitStack.top().insert(name);
-  if (this->FindUnused && this->DefaultToUsed)
+  if (this->WarnUnused && this->DefaultToUsed)
     {
     this->Internal->VarUsageStack.top().insert(name);
     }
@@ -1756,7 +1756,7 @@ void cmMakefile::RemoveDefinition(const char* name)
   this->Internal->VarStack.top().Set(name, 0);
   this->Internal->VarRemoved.insert(name);
   this->Internal->VarInitStack.top().insert(name);
-  if (this->FindUnused)
+  if (this->WarnUnused)
     {
     this->Internal->VarUsageStack.top().insert(name);
     }
@@ -2138,7 +2138,7 @@ const char* cmMakefile::GetDefinition(const char* name) const
       RecordPropertyAccess(name,cmProperty::VARIABLE);
     }
 #endif
-  if (this->FindUnused)
+  if (this->WarnUnused)
     {
     this->Internal->VarUsageStack.top().insert(name);
     }
@@ -3391,7 +3391,7 @@ void cmMakefile::PopScope()
   for (; it != locals.end(); ++it)
     {
     init.erase(*it);
-    if (this->FindUnused && usage.find(*it) == usage.end())
+    if (this->WarnUnused && usage.find(*it) == usage.end())
       {
       cmOStringStream m;
       m << "unused variable \'" << *it << "\'";

@@ -308,8 +308,8 @@ class cmake
   void SetTrace(bool b) {  this->Trace = b;}
   bool GetWarnUninitialized() { return this->WarnUninitialized;}
   void SetWarnUninitialized(bool b) {  this->WarnUninitialized = b;}
-  bool GetFindUnused() { return this->FindUnused;}
-  void SetFindUnused(bool b) {  this->FindUnused = b;}
+  bool GetWarnUnused() { return this->WarnUnused;}
+  void SetWarnUnused(bool b) {  this->WarnUnused = b;}
   bool GetDefaultToUsed() { return this->DefaultToUsed;}
   void SetDefaultToUsed(bool b) {  this->DefaultToUsed = b;}
   // Define a property
@@ -450,7 +450,7 @@ private:
   bool DebugOutput;
   bool Trace;
   bool WarnUninitialized;
-  bool FindUnused;
+  bool WarnUnused;
   bool DefaultToUsed;
   std::string CMakeEditCommand;
   std::string CMakeCommand;

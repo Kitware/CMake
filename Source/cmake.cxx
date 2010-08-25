@@ -141,7 +141,7 @@ cmake::cmake()
 {
   this->Trace = false;
   this->WarnUninitialized = false;
-  this->FindUnused = false;
+  this->WarnUnused = false;
   this->DefaultToUsed = false;
   this->SuppressDevWarnings = false;
   this->DoSuppressDevWarnings = false;
@@ -621,16 +621,16 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       std::cout << "Warn about uninitialized values.\n";
       this->SetWarnUninitialized(true);
       }
-    else if(arg.find("--find-unused",0) == 0)
+    else if(arg.find("--warn-unused",0) == 0)
       {
       std::cout << "Finding unused command line variables.\n";
-      this->SetFindUnused(true);
+      this->SetWarnUnused(true);
       this->SetDefaultToUsed(true);
       }
-    else if(arg.find("--find-unused-all",0) == 0)
+    else if(arg.find("--warn-unused-all",0) == 0)
       {
       std::cout << "Finding unused variables.\n";
-      this->SetFindUnused(true);
+      this->SetWarnUnused(true);
       this->SetDefaultToUsed(false);
       }
     else if(arg.find("-G",0) == 0)

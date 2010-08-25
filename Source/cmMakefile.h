@@ -934,7 +934,7 @@ private:
   bool PreOrder;
 
   // Unused variable flags
-  bool FindUnused;
+  bool WarnUnused;
   bool DefaultToUsed;
 
   // stack of list files being read 
