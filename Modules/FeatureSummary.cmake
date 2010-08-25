@@ -1,11 +1,28 @@
 # - Macros for generating a summary of enabled/disabled features
 #
+# This module provides the macros feature_summary(), set_package_info() and
+# add_feature_info().
+# For compatiblity it also still provides set_feature_info(),
+# print_enabled_features() and print_disabled_features.
+#
+# These macros can be used to generate a summary of enabled and disabled
+# packages and/or feature for a build tree:
+#
+#    -- Enabled features:
+#    LibXml2 (required version >= 2.4) , XML processing library. , <http://xmlsoft.org>
+#    PNG , A PNG image library. , <http://www.libpng.org/pub/png/>
+#    -- Disabled features:
+#    Lua51 , The Lua scripting language. , <http://www.lua.org>
+#    Foo , Foo provides cool stuff.
+#
+#
 #    FEATURE_SUMMARY( [FILENAME <file>]
 #                     [APPEND]
 #                     [VAR <variable_name>]
 #                     [DESCRIPTION "Found packages:"]
-#                     WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND | ENABLED_FEATURES | DISABLED_FEATURES]
-#                 )
+#                     WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND
+#                          | ENABLED_FEATURES | DISABLED_FEATURES]
+#                   )
 #
 # The FEATURE_SUMMARY() macro can be used to print information about enabled
 # or disabled features or packages of a project.
@@ -15,10 +32,12 @@
 #
 # The WHAT option is the only mandatory option. Here you specify what information
 # will be printed:
-#    ENABLED_FEATURES: the list of all features and packages which have been found, excluding the QUIET ones
-#    DISABLED_FEATURES: the list of all features and packages which have not been found, excluding the QUIET ones
-#    PACKAGES_FOUND: the list of all packages which have been found, including the QUIET ones
-#    PACKAGES_NOT_FOUND: the list of all packages which have not been found, including the QUIET ones
+#    ENABLED_FEATURES: the list of all features and packages which are enabled,
+#                      excluding the QUIET packages
+#    DISABLED_FEATURES: the list of all features and packages which are disabled,
+#                       excluding the QUIET packages
+#    PACKAGES_FOUND: the list of all packages which have been found
+#    PACKAGES_NOT_FOUND: the list of all packages which have not been found
 #    ALL: this will give all packages which have or have not been found
 #
 # If a FILENAME is given, the information is printed into this file. If APPEND
@@ -31,37 +50,51 @@
 # be printed above the actual content.
 #
 # Example 1, append everything to a file:
-#   FEATURE_SUMMARY(WHAT ALL
+#   feature_summary(WHAT ALL
 #                   FILENAME ${CMAKE_BINARY_DIR}/all.log APPEND)
 #
 # Example 2, print the enabled features into the variable enabledFeaturesText:
-#   FEATURE_SUMMARY(WHAT ENABLED_FEATURES
+#   feature_summary(WHAT ENABLED_FEATURES
 #                   DESCRIPTION "Enabled Features:"
 #                   VAR enabledFeaturesText)
-#   MESSAGE(STATUS "${enabledFeaturesText}")
+#   message(STATUS "${enabledFeaturesText}")
 #
 #
-#
-#    SET_FEATURE_INFO(NAME DESCRIPTION [URL [COMMENT] ] )
-# Use this macro to set up information about the named feature, which can
-# then be displayed via FEATURE_SUMMARY() or PRINT_ENABLED/DISABLED_FEATURES().
+#    SET_PACKAGE_INFO(<name> <description> [<url> [<comment>] ] )
+# Use this macro to set up information about the named package, which can
+# then be displayed via FEATURE_SUMMARY().
 # This can be done either directly in the Find-module or in the project
 # which uses the module after the FIND_PACKAGE() call.
 # The features for which information can be set are added automatically by the
-# find_package() command. If you want to add additional features, you can add
-# them by appending them to the global ENABLED_FEATURES or DISABLED_FEATURES properties.
+# find_package() command.
 #
 # Example for setting the info for a package:
-#   FIND_PACKAGE(LibXml2)
-#   SET_FEATURE_INFO(LibXml2 "XML processing library." "http://xmlsoft.org/")
+#   find_package(LibXml2)
+#   set_package_info(LibXml2 "XML processing library." "http://xmlsoft.org/")
 #
+#
+#    ADD_FEATURE_INFO(<name> <enabled> <description>)
+# Use this macro to add information about a feature with the given <name>.
+# <enabled> contains whether this feature is enabled or not, <description>
+# is a text descibing the feature.
+# The information can be displayed using feature_summary() for ENABLED_FEATURES
+# and DISABLED_FEATURES respectively.
+#
+# Example for setting the info for a feature:
+#   option(WITH_FOO "Help for foo" ON)
+#   add_feature_info(Foo WITH_FOO "The Foo feature provides very cool stuff.")
+#
+#
+# The following macros are provided for compatibility with previous CMake versions:
 #
 #    PRINT_ENABLED_FEATURES()
 # Does the same as FEATURE_SUMMARY(WHAT ENABLED_FEATURES  DESCRIPTION "Enabled features:")
 #
-#
 #    PRINT_DISABLED_FEATURES()
 # Does the same as FEATURE_SUMMARY(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
+#
+#    SET_FEATURE_INFO(<name> <description> [<url> [<comment>] ] )
+# Does the same as SET_PACKAGE_INFO(<name> <description> <url> <comment> )
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -78,7 +111,24 @@
 
 INCLUDE(CMakeParseArguments)
 
-FUNCTION(SET_FEATURE_INFO _name _desc)
+
+FUNCTION(ADD_FEATURE_INFO _name _enabled _desc)
+  IF (${_enabled})
+    SET_PROPERTY(GLOBAL APPEND PROPERTY ENABLED_FEATURES "${_name}")
+  ELSE ()
+    SET_PROPERTY(GLOBAL APPEND PROPERTY DISABLED_FEATURES "${_name}")
+  ENDIF ()
+
+  SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_desc}" )
+ENDFUNCTION(SET_FEATURE_INFO)
+
+
+FUNCTION(SET_FEATURE_INFO)
+  SET_PACKAGE_INFO(${ARGN})
+ENDFUNCTION(SET_FEATURE_INFO)
+
+
+FUNCTION(SET_PACKAGE_INFO _name _desc)
   SET(_url "${ARGV2}")
   SET(_comment "${ARGV3}")
   SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_desc}" )
@@ -88,7 +138,7 @@ FUNCTION(SET_FEATURE_INFO _name _desc)
   IF(_comment MATCHES ".+")
     SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_COMMENT "${_comment}" )
   ENDIF(_comment MATCHES ".+")
-ENDFUNCTION(SET_FEATURE_INFO)
+ENDFUNCTION(SET_PACKAGE_INFO)
 
 
 FUNCTION(_FS_GET_FEATURE_SUMMARY _property _var)
