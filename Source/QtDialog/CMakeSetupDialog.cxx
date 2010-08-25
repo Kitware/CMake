@@ -120,6 +120,12 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->WarnUninitializedAction =
     OptionsMenu->addAction(tr("&Warn Uninitialized (--warn-uninitialized)"));
   this->WarnUninitializedAction->setCheckable(true);
+  this->WarnUnusedAction =
+    OptionsMenu->addAction(tr("&Warn Unused (--warn-unused)"));
+  this->WarnUnusedAction->setCheckable(true);
+  this->WarnUnusedAllAction =
+    OptionsMenu->addAction(tr("&Warn Unused All (--warn-unused-all)"));
+  this->WarnUnusedAllAction->setCheckable(true);
 
   QAction* debugAction = OptionsMenu->addAction(tr("&Debug Output"));
   debugAction->setCheckable(true);
@@ -247,6 +253,12 @@ void CMakeSetupDialog::initialize()
   QObject::connect(this->WarnUninitializedAction, SIGNAL(triggered(bool)),
                    this->CMakeThread->cmakeInstance(),
                    SLOT(setWarnUninitializedMode(bool)));
+  QObject::connect(this->WarnUnusedAction, SIGNAL(triggered(bool)),
+                   this->CMakeThread->cmakeInstance(),
+                   SLOT(setWarnUnusedMode(bool)));
+  QObject::connect(this->WarnUnusedAllAction, SIGNAL(triggered(bool)),
+                   this->CMakeThread->cmakeInstance(),
+                   SLOT(setWarnUnusedAllMode(bool)));
   
   if(!this->SourceDirectory->text().isEmpty() ||
      !this->BinaryDirectory->lineEdit()->text().isEmpty())
