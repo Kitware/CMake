@@ -761,7 +761,8 @@ cmComputeLinkDepends::DisplayComponents()
     EdgeList const& ol = this->CCG->GetComponentGraphEdges(c);
     for(EdgeList::const_iterator oi = ol.begin(); oi != ol.end(); ++oi)
       {
-      fprintf(stderr, "  followed by Component (%d)\n", *oi);
+      int i = *oi;
+      fprintf(stderr, "  followed by Component (%d)\n", i);
       }
     fprintf(stderr, "  topo order index %d\n",
             this->ComponentOrder[c]);

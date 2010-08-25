@@ -149,7 +149,10 @@ void cmComputeComponentGraph::TransferEdges()
       int j_component = this->TarjanComponents[j];
       if(i_component != j_component)
         {
-        this->ComponentGraph[i_component].push_back(j_component);
+        // We do not attempt to combine duplicate edges, but instead
+        // store the inter-component edges with suitable multiplicity.
+        this->ComponentGraph[i_component].push_back(
+          cmGraphEdge(j_component, ni->IsStrong()));
         }
       }
     }
