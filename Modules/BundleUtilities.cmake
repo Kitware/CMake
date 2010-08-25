@@ -1,4 +1,5 @@
-# - A collection of CMake utility functions useful for dealing with .app
+# - Functions to help assemble a standalone bundle application.
+# A collection of CMake utility functions useful for dealing with .app
 # bundles on the Mac and bundle-like directories on any OS.
 #
 # The following functions are provided by this module:
@@ -18,7 +19,6 @@
 #   fixup_bundle_item
 #   verify_bundle_prerequisites
 #   verify_bundle_symlinks
-#
 # Requires CMake 2.6 or greater because it uses function, break and
 # PARENT_SCOPE. Also depends on GetPrerequisites.cmake.
 #
@@ -127,7 +127,6 @@
 # Verifies that any symlinks found in the bundle point to other files that are
 # already also in the bundle... Anything that points to an external file causes
 # this function to fail the verification.
-#
 
 #=============================================================================
 # Copyright 2008-2009 Kitware, Inc.

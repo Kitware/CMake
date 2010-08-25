@@ -1,11 +1,12 @@
-# - This script provides functions to list the .dll, .dylib or .so files that
-# an executable or shared library file depends on. (Its prerequisites.)
+# - Functions to analyze and list executable file prerequisites.
+# This module provides functions to list the .dll, .dylib or .so
+# files that an executable or shared library file depends on. (Its
+# prerequisites.)
 #
 # It uses various tools to obtain the list of required shared library files:
 #   dumpbin (Windows)
 #   ldd (Linux/Unix)
 #   otool (Mac OSX)
-#
 # The following functions are provided by this module:
 #   get_prerequisites
 #   list_prerequisites
@@ -19,7 +20,6 @@
 #   gp_resolved_file_type
 #     (projects can override with gp_resolved_file_type_override)
 #   gp_file_type
-#
 # Requires CMake 2.6 or greater because it uses function, break, return and
 # PARENT_SCOPE.
 #
@@ -93,7 +93,6 @@
 #   local
 #   embedded
 #   other
-#
 # Override on a per-project basis by providing a project-specific
 # gp_resolved_file_type_override function.
 #
@@ -106,7 +105,6 @@
 #   local
 #   embedded
 #   other
-#
 
 #=============================================================================
 # Copyright 2008-2009 Kitware, Inc.
