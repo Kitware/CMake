@@ -237,6 +237,59 @@ std::string cmGlobalVisualStudioGenerator::GetUserMacrosRegKeyBase()
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::FillLinkClosure(cmTarget* target,
+                                                    TargetSet& linked)
+{
+  if(linked.insert(target).second)
+    {
+    TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
+    for(TargetDependSet::const_iterator di = depends.begin();
+        di != depends.end(); ++di)
+      {
+      if(di->IsLink())
+        {
+        this->FillLinkClosure(*di, linked);
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudioGenerator::TargetSet const&
+cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmTarget* target)
+{
+  TargetSetMap::iterator i = this->TargetLinkClosure.find(target);
+  if(i == this->TargetLinkClosure.end())
+    {
+    TargetSetMap::value_type entry(target, TargetSet());
+    i = this->TargetLinkClosure.insert(entry).first;
+    this->FillLinkClosure(target, i->second);
+    }
+  return i->second;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::FollowLinkDepends(
+  cmTarget* target, std::set<cmTarget*>& linked)
+{
+  if(linked.insert(target).second &&
+     target->GetType() == cmTarget::STATIC_LIBRARY)
+    {
+    // Static library targets do not list their link dependencies so
+    // we must follow them transitively now.
+    TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
+    for(TargetDependSet::const_iterator di = depends.begin();
+        di != depends.end(); ++di)
+      {
+      if(di->IsLink())
+        {
+        this->FollowLinkDepends(*di, linked);
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
 {
   if(!this->cmGlobalGenerator::ComputeTargetDepends())
@@ -269,51 +322,94 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
     return;
     }
   VSDependSet& vsTargetDepend = this->VSTargetDepends[&target];
+  // VS <= 7.1 has two behaviors that affect solution dependencies.
+  //
+  // (1) Solution-level dependencies between a linkable target and a
+  // library cause that library to be linked.  We use an intermedite
+  // empty utility target to express the dependency.  (VS 8 and above
+  // provide a project file "LinkLibraryDependencies" setting to
+  // choose whether to activate this behavior.  We disable it except
+  // when linking external project files.)
+  //
+  // (2) We cannot let static libraries depend directly on targets to
+  // which they "link" because the librarian tool will copy the
+  // targets into the static library.  While the work-around for
+  // behavior (1) would also avoid this, it would create a large
+  // number of extra utility targets for little gain.  Instead, use
+  // the above work-around only for dependencies explicitly added by
+  // the add_dependencies() command.  Approximate link dependencies by
+  // leaving them out for the static library itself but following them
+  // transitively for other targets.
+
+  bool allowLinkable = (target.GetType() != cmTarget::STATIC_LIBRARY &&
+                        target.GetType() != cmTarget::SHARED_LIBRARY &&
+                        target.GetType() != cmTarget::MODULE_LIBRARY &&
+                        target.GetType() != cmTarget::EXECUTABLE);
+
+  TargetDependSet const& depends = this->GetTargetDirectDepends(target);
+
+  // Collect implicit link dependencies (target_link_libraries).
+  // Static libraries cannot depend on their link implementation
+  // due to behavior (2), but they do not really need to.
+  std::set<cmTarget*> linkDepends;
   if(target.GetType() != cmTarget::STATIC_LIBRARY)
     {
-    cmTarget::LinkLibraryVectorType const& libs = target.GetLinkLibraries();
-    for(cmTarget::LinkLibraryVectorType::const_iterator j = libs.begin();
-        j != libs.end(); ++j)
+    for(TargetDependSet::const_iterator di = depends.begin();
+        di != depends.end(); ++di)
       {
-      if(j->first != target.GetName() &&
-         this->FindTarget(0, j->first.c_str()))
+      cmTargetDepend dep = *di;
+      if(dep.IsLink())
         {
-        vsTargetDepend.insert(j->first);
+        this->FollowLinkDepends(dep, linkDepends);
         }
       }
     }
-  std::set<cmStdString> const& utils = target.GetUtilities();
-  for(std::set<cmStdString>::const_iterator i = utils.begin();
-      i != utils.end(); ++i)
-    {
-    if(*i != target.GetName())
-      {
-      std::string name = this->GetUtilityForTarget(target, i->c_str());
-      vsTargetDepend.insert(name);
-      }
-    }
-}
 
-//----------------------------------------------------------------------------
-bool cmGlobalVisualStudioGenerator::CheckTargetLinks(cmTarget& target,
-                                                     const char* name)
-{
-  // Return whether the given target links to a target with the given name.
-  if(target.GetType() == cmTarget::STATIC_LIBRARY)
+  // Collext explicit util dependencies (add_dependencies).
+  std::set<cmTarget*> utilDepends;
+  for(TargetDependSet::const_iterator di = depends.begin();
+      di != depends.end(); ++di)
     {
-    // Static libraries never link to anything.
-    return false;
-    }
-  cmTarget::LinkLibraryVectorType const& libs = target.GetLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator i = libs.begin();
-      i != libs.end(); ++i)
-    {
-    if(i->first == name)
+    cmTargetDepend dep = *di;
+    if(dep.IsUtil())
       {
-      return true;
+      this->FollowLinkDepends(dep, utilDepends);
       }
     }
-  return false;
+
+  // Collect all targets linked by this target so we can avoid
+  // intermediate targets below.
+  TargetSet linked;
+  if(target.GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    linked = this->GetTargetLinkClosure(&target);
+    }
+
+  // Emit link dependencies.
+  for(std::set<cmTarget*>::iterator di = linkDepends.begin();
+      di != linkDepends.end(); ++di)
+    {
+    cmTarget* dep = *di;
+    vsTargetDepend.insert(dep->GetName());
+    }
+
+  // Emit util dependencies.  Possibly use intermediate targets.
+  for(std::set<cmTarget*>::iterator di = utilDepends.begin();
+      di != utilDepends.end(); ++di)
+    {
+    cmTarget* dep = *di;
+    if(allowLinkable || !dep->IsLinkable() || linked.count(dep))
+      {
+      // Direct dependency allowed.
+      vsTargetDepend.insert(dep->GetName());
+      }
+    else
+      {
+      // Direct dependency on linkable target not allowed.
+      // Use an intermediate utility target.
+      vsTargetDepend.insert(this->GetUtilityDepend(dep));
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -327,45 +423,6 @@ std::string cmGlobalVisualStudioGenerator::GetUtilityDepend(cmTarget* target)
     i = this->UtilityDepends.insert(entry).first;
     }
   return i->second;
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmGlobalVisualStudioGenerator::GetUtilityForTarget(cmTarget& target,
-                                                   const char* name)
-{
-  if(!this->VSLinksDependencies())
-    {
-    return name;
-    }
-
-  // Possibly depend on an intermediate utility target to avoid
-  // linking.
-  if(target.GetType() == cmTarget::STATIC_LIBRARY ||
-     target.GetType() == cmTarget::SHARED_LIBRARY ||
-     target.GetType() == cmTarget::MODULE_LIBRARY ||
-     target.GetType() == cmTarget::EXECUTABLE)
-    {
-    // The depender is a target that links.
-    if(cmTarget* depTarget = this->FindTarget(0, name))
-      {
-      if(depTarget->GetType() == cmTarget::STATIC_LIBRARY ||
-         depTarget->GetType() == cmTarget::SHARED_LIBRARY ||
-         depTarget->GetType() == cmTarget::MODULE_LIBRARY)
-        {
-        // This utility dependency will cause an attempt to link.  If
-        // the depender does not already link the dependee we need an
-        // intermediate target.
-        if(!this->CheckTargetLinks(target, name))
-          {
-          return this->GetUtilityDepend(depTarget);
-          }
-        }
-      }
-    }
-
-  // No special case.  Just use the original dependency name.
-  return name;
 }
 
 //----------------------------------------------------------------------------
@@ -706,10 +763,21 @@ cmGlobalVisualStudioGenerator::TargetCompare
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::OrderedTargetDependSet
-::OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const& targets)
+::OrderedTargetDependSet(TargetDependSet const& targets)
 {
-  for(cmGlobalGenerator::TargetDependSet::const_iterator ti =
+  for(TargetDependSet::const_iterator ti =
         targets.begin(); ti != targets.end(); ++ti)
+    {
+    this->insert(*ti);
+    }
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudioGenerator::OrderedTargetDependSet
+::OrderedTargetDependSet(TargetSet const& targets)
+{
+  for(TargetSet::const_iterator ti = targets.begin();
+      ti != targets.end(); ++ti)
     {
     this->insert(*ti);
     }
