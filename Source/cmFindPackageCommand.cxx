@@ -1083,6 +1083,20 @@ void cmFindPackageCommand::AppendSuccessInformation()
       }
     }
 
+  // set a global property to record the required version of this package
+  std::string versionInfoPropName = "_CMAKE_";
+  versionInfoPropName += this->Name;
+  versionInfoPropName += "_REQUIRED_VERSION";
+  std::string versionInfo;
+  if(!this->Version.empty())
+    {
+    versionInfo = this->VersionExact ? "==" : ">=";
+    versionInfo += " ";
+    versionInfo += this->Version;
+    }
+  this->Makefile->GetCMakeInstance()->SetProperty(versionInfoPropName.c_str(),
+                                                  versionInfo.c_str());
+
   // Restore original state of "_FIND_" variables we set.
   this->RestoreFindDefinitions();
 }
