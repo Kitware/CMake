@@ -142,7 +142,7 @@ cmake::cmake()
   this->Trace = false;
   this->WarnUninitialized = false;
   this->WarnUnused = false;
-  this->DefaultToUsed = false;
+  this->DefaultToUsed = true;
   this->SuppressDevWarnings = false;
   this->DoSuppressDevWarnings = false;
   this->DebugOutput = false;
@@ -625,7 +625,6 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       std::cout << "Finding unused command line variables.\n";
       this->SetWarnUnused(true);
-      this->SetDefaultToUsed(true);
       }
     else if(arg.find("--warn-unused-all",0) == 0)
       {

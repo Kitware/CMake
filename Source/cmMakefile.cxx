@@ -93,7 +93,7 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->Initialize();
   this->PreOrder = false;
   this->WarnUnused = false;
-  this->DefaultToUsed = false;
+  this->DefaultToUsed = true;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
