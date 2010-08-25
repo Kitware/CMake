@@ -28,7 +28,7 @@ QCMake::QCMake(QObject* p)
   : QObject(p)
 {
   this->SuppressDevWarnings = false;
-  this->StrictMode = false;
+  this->WarnUninitializedMode = false;
   qRegisterMetaType<QCMakeProperty>();
   qRegisterMetaType<QCMakePropertyList>();
   
@@ -165,8 +165,8 @@ void QCMake::configure()
     this->CMakeInstance->CreateGlobalGenerator(this->Generator.toAscii().data()));
   this->CMakeInstance->LoadCache();
   this->CMakeInstance->SetSuppressDevWarnings(this->SuppressDevWarnings);
-  std::cerr << "set strict " << this->StrictMode << "\n";
-  this->CMakeInstance->SetStrictMode(this->StrictMode);
+  std::cerr << "set warn uninitialized " << this->WarnUninitializedMode << "\n";
+  this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
   this->CMakeInstance->PreLoadCMakeFiles();
 
   cmSystemTools::ResetErrorOccuredFlag();
@@ -421,7 +421,7 @@ void QCMake::setSuppressDevWarnings(bool value)
   this->SuppressDevWarnings = value;
 }
 
-void QCMake::setStrictMode(bool value)
+void QCMake::setWarnUninitializedMode(bool value)
 {
-  this->StrictMode = value;
+  this->WarnUninitializedMode = value;
 }

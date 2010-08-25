@@ -88,8 +88,8 @@ public slots:
   void setDebugOutput(bool);
   /// set whether to do suppress dev warnings
   void setSuppressDevWarnings(bool value);
-  /// set whether to run cmake in strict mode
-  void setStrictMode(bool value);
+  /// set whether to run cmake with warnings about uninitialized variables
+  void setWarnUninitializedMode(bool value);
 
 public:
   /// get the list of cache properties
@@ -135,7 +135,7 @@ protected:
   static void errorCallback(const char* msg, const char* title, 
                             bool&, void* cd);
   bool SuppressDevWarnings;
-  bool StrictMode;
+  bool WarnUninitializedMode;
   QString SourceDirectory;
   QString BinaryDirectory;
   QString Generator;

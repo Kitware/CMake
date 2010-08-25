@@ -306,8 +306,8 @@ class cmake
   // Do we want trace output during the cmake run.
   bool GetTrace() { return this->Trace;}
   void SetTrace(bool b) {  this->Trace = b;}
-  bool GetStrictMode() { return this->StrictMode;}
-  void SetStrictMode(bool b) {  this->StrictMode = b;}
+  bool GetWarnUninitialized() { return this->WarnUninitialized;}
+  void SetWarnUninitialized(bool b) {  this->WarnUninitialized = b;}
   bool GetFindUnused() { return this->FindUnused;}
   void SetFindUnused(bool b) {  this->FindUnused = b;}
   bool GetDefaultToUsed() { return this->DefaultToUsed;}
@@ -449,7 +449,7 @@ private:
   bool ScriptMode;
   bool DebugOutput;
   bool Trace;
-  bool StrictMode;
+  bool WarnUninitialized;
   bool FindUnused;
   bool DefaultToUsed;
   std::string CMakeEditCommand;

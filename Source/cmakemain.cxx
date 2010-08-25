@@ -120,9 +120,8 @@ static const char * cmDocumentationOptions[][3] =
   {"--trace", "Put cmake in trace mode.",
    "Print a trace of all calls made and from where with "
    "message(send_error ) calls."},
-  {"--strict-mode", "Put cmake in strict mode.",
-   "In strict mode cmake will print a warning when an uninitialized variable "
-   "is used."},
+  {"--warn-uninitialized", "Warn about uninitialized values.",
+   "Print a warning when an uninitialized variable is used."},
   {"--find-unused", "Find unused variables.",
    "Find variables that are declared on the command line, but not used."},
   {"--find-unused-all", "Find all unused variables.",

@@ -20,7 +20,7 @@ int cmCommandArgument_yyparse( yyscan_t yyscanner );
 //
 cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
 {
-  this->StrictMode = false;
+  this->WarnUninitialized = false;
   this->FileLine = -1;
   this->FileName = 0;
   this->RemoveEmpty = true;
@@ -127,7 +127,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     // check to see if we need to print a warning
     // if strict mode is on and the variable has
     // not been "cleared"/initialized with a set(foo ) call
-    if(this->StrictMode && !this->Makefile->VariableInitialized(var))
+    if(this->WarnUninitialized && !this->Makefile->VariableInitialized(var))
       {
       cmOStringStream msg;
       msg << this->FileName << ":" << this->FileLine << ":" <<
@@ -330,7 +330,7 @@ void cmCommandArgumentParserHelper::Error(const char* str)
 void cmCommandArgumentParserHelper::SetMakefile(const cmMakefile* mf)
 {
   this->Makefile = mf;
-  this->StrictMode = mf->GetCMakeInstance()->GetStrictMode();
+  this->WarnUninitialized = mf->GetCMakeInstance()->GetWarnUninitialized();
 }
 
 void cmCommandArgumentParserHelper::SetResult(const char* value)

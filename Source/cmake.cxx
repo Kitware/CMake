@@ -140,7 +140,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 cmake::cmake()
 {
   this->Trace = false;
-  this->StrictMode = false;
+  this->WarnUninitialized = false;
   this->FindUnused = false;
   this->DefaultToUsed = false;
   this->SuppressDevWarnings = false;
@@ -616,10 +616,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       std::cout << "Running with trace output on.\n";
       this->SetTrace(true);
       }
-    else if(arg.find("--strict-mode",0) == 0)
+    else if(arg.find("--warn-uninitialized",0) == 0)
       {
-      std::cout << "Running in strict mode.\n";
-      this->SetStrictMode(true);
+      std::cout << "Warn about uninitialized values.\n";
+      this->SetWarnUninitialized(true);
       }
     else if(arg.find("--find-unused",0) == 0)
       {

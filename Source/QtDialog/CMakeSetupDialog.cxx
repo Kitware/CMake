@@ -117,9 +117,9 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->SuppressDevWarningsAction =
     OptionsMenu->addAction(tr("&Suppress dev Warnings (-Wno-dev)"));
   this->SuppressDevWarningsAction->setCheckable(true);
-  this->StrictModeAction =
-    OptionsMenu->addAction(tr("&Strict Mode (--strict-mode)"));
-  this->StrictModeAction->setCheckable(true);
+  this->WarnUninitializedAction =
+    OptionsMenu->addAction(tr("&Warn Uninitialized (--warn-uninitialized)"));
+  this->WarnUninitializedAction->setCheckable(true);
 
   QAction* debugAction = OptionsMenu->addAction(tr("&Debug Output"));
   debugAction->setCheckable(true);
@@ -244,9 +244,9 @@ void CMakeSetupDialog::initialize()
 
   QObject::connect(this->SuppressDevWarningsAction, SIGNAL(triggered(bool)), 
                    this->CMakeThread->cmakeInstance(), SLOT(setSuppressDevWarnings(bool)));
-  QObject::connect(this->StrictModeAction, SIGNAL(triggered(bool)),
+  QObject::connect(this->WarnUninitializedAction, SIGNAL(triggered(bool)),
                    this->CMakeThread->cmakeInstance(),
-                   SLOT(setStrictMode(bool)));
+                   SLOT(setWarnUninitializedMode(bool)));
   
   if(!this->SourceDirectory->text().isEmpty() ||
      !this->BinaryDirectory->lineEdit()->text().isEmpty())
