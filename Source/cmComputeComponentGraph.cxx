@@ -71,8 +71,8 @@ void cmComputeComponentGraph::TarjanVisit(int i)
   this->TarjanStack.push(i);
 
   // Follow outgoing edges.
-  NodeList const& nl = this->InputGraph[i];
-  for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
+  EdgeList const& nl = this->InputGraph[i];
+  for(EdgeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
     {
     int j = *ni;
 
@@ -142,14 +142,17 @@ void cmComputeComponentGraph::TransferEdges()
   for(int i=0; i < n; ++i)
     {
     int i_component = this->TarjanComponents[i];
-    NodeList const& nl = this->InputGraph[i];
-    for(NodeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
+    EdgeList const& nl = this->InputGraph[i];
+    for(EdgeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
       {
       int j = *ni;
       int j_component = this->TarjanComponents[j];
       if(i_component != j_component)
         {
-        this->ComponentGraph[i_component].push_back(j_component);
+        // We do not attempt to combine duplicate edges, but instead
+        // store the inter-component edges with suitable multiplicity.
+        this->ComponentGraph[i_component].push_back(
+          cmGraphEdge(j_component, ni->IsStrong()));
         }
       }
     }
