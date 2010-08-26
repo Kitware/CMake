@@ -29,12 +29,6 @@ bool cmTargetLinkLibrariesCommand
     return false;
     }
 
-  // but we might not have any libs after variable expansion
-  if(args.size() < 2)
-    {
-    return true;
-    }
-
   // Lookup the target for which libraries are specified.
   this->Target =
     this->Makefile->GetCMakeInstance()
@@ -49,6 +43,12 @@ bool cmTargetLinkLibrariesCommand
     return true;
     }
 
+  // but we might not have any libs after variable expansion
+  if(args.size() < 2)
+    {
+    return true;
+    }
+
   // Keep track of link configuration specifiers.
   cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
   bool haveLLT = false;
@@ -57,7 +57,7 @@ bool cmTargetLinkLibrariesCommand
   // specification when the keyword is encountered.
   this->DoingInterface = false;
 
-  // add libraries, nothe that there is an optional prefix 
+  // add libraries, nothe that there is an optional prefix
   // of debug and optimized than can be used
   for(unsigned int i=1; i < args.size(); ++i)
     {
@@ -118,7 +118,7 @@ bool cmTargetLinkLibrariesCommand
       llt = cmTarget::GENERAL;
       std::string linkType = args[0];
       linkType += "_LINK_TYPE";
-      const char* linkTypeString = 
+      const char* linkTypeString =
         this->Makefile->GetDefinition( linkType.c_str() );
       if(linkTypeString)
         {
@@ -133,7 +133,7 @@ bool cmTargetLinkLibrariesCommand
         }
       this->HandleLibrary(args[i].c_str(), llt);
       }
-    } 
+    }
 
   // Make sure the last argument was not a library type specifier.
   if(haveLLT)
