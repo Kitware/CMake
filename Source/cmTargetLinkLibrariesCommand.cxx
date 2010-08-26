@@ -29,12 +29,6 @@ bool cmTargetLinkLibrariesCommand
     return false;
     }
 
-  // but we might not have any libs after variable expansion
-  if(args.size() < 2)
-    {
-    return true;
-    }
-
   // Lookup the target for which libraries are specified.
   this->Target =
     this->Makefile->GetCMakeInstance()
@@ -46,6 +40,12 @@ bool cmTargetLinkLibrariesCommand
       << "which is not built by this project.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccured();
+    return true;
+    }
+
+  // but we might not have any libs after variable expansion
+  if(args.size() < 2)
+    {
     return true;
     }
 
