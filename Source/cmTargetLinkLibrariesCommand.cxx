@@ -38,8 +38,18 @@ bool cmTargetLinkLibrariesCommand
     cmOStringStream e;
     e << "Cannot specify link libraries for target \"" << args[0] << "\" "
       << "which is not built by this project.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    cmSystemTools::SetFatalErrorOccured();
+    // The bad target is the only argument, just warn, don't fail, because
+    // there is probably some code out there which would stop building
+    // otherwise:
+    if (args.size() < 2)
+      {
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      }
+    else
+      {
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      cmSystemTools::SetFatalErrorOccured();
+      }
     return true;
     }
 
