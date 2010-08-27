@@ -372,8 +372,8 @@ public:
    *    "c:/" = Windows full path (can be any drive letter)
    *    "c:"  = Windows drive-letter relative path (can be any drive letter)
    *    "//"  = Network path
-   *    "~"   = Home path for current user
-   *    "~u"  = Home path for user 'u'
+   *    "~/"  = Home path for current user
+   *    "~u/" = Home path for user 'u'
    *    ""    = Relative path
    *
    * A pointer to the rest of the path after the root component is
@@ -385,7 +385,7 @@ public:
 
   /**
    * Split a path name into its basic components.  The first component
-   * is one of the roots returned by SplitPathRootComponent.
+   * always exists and is the root returned by SplitPathRootComponent.
    * The remaining components form the path.  If there is a trailing
    * slash then the last component is the empty string.  The
    * components can be recombined as "c[0]c[1]/c[2]/.../c[n]" to
