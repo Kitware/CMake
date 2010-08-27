@@ -3063,30 +3063,35 @@ kwsys_stl::string SystemTools::RelativePath(const char* local, const char* remot
 static int GetCasePathName(const kwsys_stl::string & pathIn,
                             kwsys_stl::string & casePath)
 {
-  kwsys_stl::vector<kwsys::String> path_components =
-    SystemTools::SplitString(pathIn.c_str(), '/', true);
-  if(path_components.empty())
+  kwsys_stl::vector<kwsys_stl::string> path_components;
+  SystemTools::SplitPath(pathIn.c_str(), path_components);
+  if(path_components[0].empty()) // First component always exists.
     {
+    // Relative paths cannot be converted.
     casePath = "";
     return 0;
     }
+
+  // Start with root component.
   kwsys_stl::vector<kwsys_stl::string>::size_type idx = 0;
-  // assume always absolute path, so just take first
   casePath = path_components[idx++];
+  const char* sep = "";
+
   // If network path, fill casePath with server/share so FindFirstFile
   // will work after that.  Maybe someday call other APIs to get
   // actual case of servers and shares.
-  if(path_components.size() > 2 && pathIn.size() >= 2 &&
-     pathIn[0] == '/' && pathIn[1] == '/')
+  if(path_components.size() > 2 && path_components[0] == "//")
     {
     casePath += path_components[idx++];
     casePath += "/";
     casePath += path_components[idx++];
+    sep = "/";
     }
 
   for(; idx < path_components.size(); idx++)
     {
-    casePath += "/";
+    casePath += sep;
+    sep = "/";
     kwsys_stl::string test_str = casePath;
     test_str += path_components[idx];
 
