@@ -197,7 +197,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 void
 cmGlobalVisualStudio71Generator
 ::WriteProjectDepends(std::ostream& fout,
-                      const char* dspname,
+                      const char*,
                       const char*, cmTarget& target)
 {
   VSDependSet const& depends = this->VSTargetDepends[&target];
