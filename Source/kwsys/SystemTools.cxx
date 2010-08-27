@@ -1405,6 +1405,10 @@ kwsys_stl::vector<kwsys::String> SystemTools::SplitString(const char* p, char se
 {
   kwsys_stl::string path = p;
   kwsys_stl::vector<kwsys::String> paths;
+  if(path.empty())
+    {
+    return paths;
+    }
   if(isPath && path[0] == '/')
     {
     path.erase(path.begin());
