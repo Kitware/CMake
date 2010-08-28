@@ -438,6 +438,14 @@ cmPolicies::cmPolicies()
     "CMAKE_CURRENT_SOURCE_DIR.",
     2,8,1,0, cmPolicies::WARN);
 
+    this->DefinePolicy(
+    CMP0016, "CMP0016",
+    "target_link_libraries() reports error if only argument is not a target.",
+    "In CMake 2.8.2 and lower the target_link_libraries() command silently "
+    "ignored if it was called with only one argument, and this argument "
+    "wasn't a valid target. "
+    "In CMake 2.8.3 and above it reports an error in this case.",
+    2,8,3,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

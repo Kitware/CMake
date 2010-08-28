@@ -51,6 +51,7 @@ public:
     CMP0013, // Duplicate binary directories not allowed
     CMP0014, // Input directories must have CMakeLists.txt
     CMP0015, // link_directories() treats paths relative to source dir
+    CMP0016, // target_link_libraries() fails if only argument is not a target
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.
