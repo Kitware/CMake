@@ -35,20 +35,51 @@ bool cmTargetLinkLibrariesCommand
     ->GetGlobalGenerator()->FindTarget(0, args[0].c_str());
   if(!this->Target)
     {
+    cmake::MessageType t = cmake::FATAL_ERROR;  // fail by default
     cmOStringStream e;
     e << "Cannot specify link libraries for target \"" << args[0] << "\" "
       << "which is not built by this project.";
-    // The bad target is the only argument, just warn, don't fail, because
-    // there is probably some code out there which would stop building
-    // otherwise:
+    // The bad target is the only argument. Check how policy CMP0016 is set,
+    // and accept, warn or fail respectively:
     if (args.size() < 2)
       {
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0016))
+        {
+        case cmPolicies::WARN:
+          t = cmake::AUTHOR_WARNING;
+          // Print the warning.
+          e << "\n"
+            << "CMake does not support this but it used to work accidentally "
+            << "and is being allowed for compatibility."
+            << "\n" << this->Makefile->GetPolicies()->
+                                        GetPolicyWarning(cmPolicies::CMP0016);
+           break;
+        case cmPolicies::OLD:          // OLD behavior does not warn.
+          t = cmake::MESSAGE;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+          e << "\n" << this->Makefile->GetPolicies()->
+                                  GetRequiredPolicyError(cmPolicies::CMP0016);
+          break;
+        case cmPolicies::NEW:  // NEW behavior prints the error.
+        default:
+          break;
+        }
       }
-    else
+
+    // now actually print the message
+    switch(t)
       {
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-      cmSystemTools::SetFatalErrorOccured();
+      case cmake::AUTHOR_WARNING:
+        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        break;
+      case cmake::FATAL_ERROR:
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        cmSystemTools::SetFatalErrorOccured();
+        break;
+      default:
+        break;
       }
     return true;
     }

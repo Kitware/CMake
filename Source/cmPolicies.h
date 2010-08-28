@@ -51,6 +51,7 @@ public:
     CMP0013, // Duplicate binary directories not allowed
     CMP0014, // Input directories must have CMakeLists.txt
     CMP0015, // link_directories() treats paths relative to source dir
+    CMP0016, // target_link_libraries() fails if only argument is not a target
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.
@@ -60,10 +61,10 @@ public:
   ///! convert a string policy ID into a number
   bool GetPolicyID(const char *id, /* out */ cmPolicies::PolicyID &pid);
   std::string GetPolicyIDString(cmPolicies::PolicyID pid);
-  
+
   ///! Get the default status for a policy
   cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
-  
+
   ///! Define a Policy for CMake
   void DefinePolicy(cmPolicies::PolicyID id,
                     const char *stringID,
@@ -80,7 +81,7 @@ public:
 
   ///! return a warning string for a given policy
   std::string GetPolicyWarning(cmPolicies::PolicyID id);
-  
+
   ///! return an error string for when a required policy is unspecified
   std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
 
