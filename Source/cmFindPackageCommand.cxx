@@ -935,10 +935,13 @@ bool cmFindPackageCommand::HandlePackageMode()
   for(std::vector<ConfigFileInfo>::size_type i=0;
       i<this->ConsideredConfigs.size(); i++)
     {
+    if (i>0)
+      {
+      consideredConfigFiles += ";";
+      consideredVersions += ";";
+      }
     consideredConfigFiles += this->ConsideredConfigs[i].filename;
-    consideredConfigFiles += ";";
     consideredVersions += this->ConsideredConfigs[i].version;
-    consideredVersions += ";";
     }
 
   this->Makefile->AddDefinition(consideredConfigsVar.c_str(),
