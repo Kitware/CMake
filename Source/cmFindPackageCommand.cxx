@@ -817,36 +817,56 @@ bool cmFindPackageCommand::HandlePackageMode()
     {
     // The variable is not set.
     cmOStringStream e;
-    e << "Could not find ";
-    if(!this->NoModule)
+    // If there are files in ConsideredConfigs, it means that FooConfig.cmake
+    // have been found, but they didn't have appropriate versions.
+    if (this->ConsideredConfigFiles.size() > 0)
       {
-      e << "module Find" << this->Name << ".cmake or ";
-      }
-    e << "a configuration file for package " << this->Name << ".\n";
-    if(!this->NoModule)
-      {
-      e << "Adjust CMAKE_MODULE_PATH to find Find"
-        << this->Name << ".cmake or set ";
-      }
-    else
-      {
-      e << "Set ";
-      }
-    e << this->Variable << " to the directory containing a CMake "
-      << "configuration file for " << this->Name << ".  ";
-    if(this->Configs.size() == 1)
-      {
-      e << "The file will be called " << this->Configs[0];
-      }
-    else
-      {
-      e << "The file will have one of the following names:\n";
-      for(std::vector<std::string>::const_iterator ci = this->Configs.begin();
-          ci != this->Configs.end(); ++ci)
+      e << "Could not find configuration file for package " << this->Name
+        << " with " << (this->VersionExact ? "exact " : "at least ")
+        << "version " << this->Version << " .\n"
+        << "Found the following files:\n";
+      for(std::vector<std::string>::size_type i=0;
+          i<this->ConsideredConfigFiles.size(); i++)
         {
-        e << "  " << *ci << "\n";
+        e << "  " << this->ConsideredConfigFiles[i]
+          << ", version: " << this->ConsideredVersions[i] << "\n";
         }
       }
+    else
+      {
+      e << "Could not find ";
+      if(!this->NoModule)
+        {
+        e << "module Find" << this->Name << ".cmake or ";
+        }
+      e << "a configuration file for package " << this->Name << ".\n";
+      if(!this->NoModule)
+        {
+        e << "Adjust CMAKE_MODULE_PATH to find Find"
+          << this->Name << ".cmake or set ";
+        }
+      else
+        {
+        e << "Set ";
+        }
+      e << this->Variable << " to the directory containing a CMake "
+        << "configuration file for " << this->Name << ".  ";
+      if(this->Configs.size() == 1)
+        {
+        e << "The file will be called " << this->Configs[0];
+        }
+      else
+        {
+        e << "The file will have one of the following names:\n";
+        for(std::vector<std::string>::const_iterator ci=this->Configs.begin();
+            ci != this->Configs.end(); ++ci)
+          {
+          e << "  " << *ci << "\n";
+          }
+        }
+      }
+
+
     this->Makefile->IssueMessage(
       this->Required? cmake::FATAL_ERROR : cmake::WARNING, e.str());
     }
@@ -911,20 +931,14 @@ bool cmFindPackageCommand::HandlePackageMode()
   consideredVersionsVar += "_CONSIDERED_VERSIONS";
 
   std::string consideredConfigFiles;
-  for(std::vector<std::string>::const_iterator
-      it = this->ConsideredConfigFiles.begin();
-      it != this->ConsideredConfigFiles.end(); ++it)
-    {
-    consideredConfigFiles += *it;
-    consideredConfigFiles += ";";
-    }
-
   std::string consideredVersions;
-  for(std::vector<std::string>::const_iterator
-      it = this->ConsideredVersions.begin();
-      it != this->ConsideredVersions.end(); ++it)
+
+  for(std::vector<std::string>::size_type i=0;
+      i<this->ConsideredConfigFiles.size(); i++)
     {
-    consideredVersions += *it;
+    consideredConfigFiles += this->ConsideredConfigFiles[i];
+    consideredConfigFiles += ";";
+    consideredVersions += this->ConsideredVersions[i];
     consideredVersions += ";";
     }
 
