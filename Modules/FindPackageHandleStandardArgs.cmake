@@ -20,18 +20,24 @@
 # The second mode is more powerful and also supports version checking:
 #    FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [REQUIRED_VARS <var1>...<varN>]
 #                                           [VERSION_VAR   <versionvar>
+#                                           [CONFIG_MODE]
 #                                           [FAIL_MESSAGE "Custom failure message"] )
 #
 # As above, if <var1> through <varN> are all valid, <UPPERCASED_NAME>_FOUND
 # will be set to TRUE.
-# Via FAIL_MESSAGE a custom failure message can be specified, if this is not
-# used, the default message will be displayed.
+# After REQUIRED_VARS the variables which are required for this package are listed.
 # Following VERSION_VAR the name of the variable can be specified which holds
 # the version of the package which has been found. If this is done, this version
 # will be checked against the (potentially) specified required version used
 # in the find_package() call. The EXACT keyword is also handled. The default
 # messages include information about the required version and the version
 # which has been actually found, both if the version is ok or not.
+# Use the option CONFIG_MODE if your FindXXX.cmake module is a wrapper for
+# a find_package(... NO_MODULE) call, in this case all the information
+# provided by the config-mode of find_package() will be evaluated
+# automatically.
+# Via FAIL_MESSAGE a custom failure message can be specified, if this is not
+# used, the default message will be displayed.
 #
 # Example for mode 1:
 #
@@ -53,6 +59,15 @@
 # Also the version of BISON will be checked by using the version contained
 # in BISON_VERSION.
 # Since no FAIL_MESSAGE is given, the default messages will be printed.
+#
+# Another example for mode 2:
+#
+#    FIND_PACKAGE(Automoc4 QUIET NO_MODULE HINTS /opt/automoc4)
+#    FIND_PACKAGE_HANDLE_STANDARD_ARGS(Automoc4  CONFIG_MODE)
+# In this case, FindAutmoc4.cmake wraps a call to FIND_PACKAGE(Automoc4 NO_MODULE)
+# and adds an additional search directory for automoc4.
+# The following FIND_PACKAGE_HANDLE_STANDARD_ARGS() call produces a proper
+# success/error message.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -70,7 +85,7 @@
 INCLUDE(FindPackageMessage)
 INCLUDE(CMakeParseArguments)
 
-
+# internal helper macro
 MACRO(_FPHSA_FAILURE_MESSAGE _msg)
   IF (${_NAME}_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR "${_msg}")
@@ -86,7 +101,7 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
 # set up the arguments for CMAKE_PARSE_ARGUMENTS and check whether we are in
 # new extended or in the "old" mode:
-  SET(options) # none
+  SET(options CONFIG_MODE)
   SET(oneValueArgs FAIL_MESSAGE VERSION_VAR)
   SET(multiValueArgs REQUIRED_VARS)
   SET(_KEYWORDS_FOR_EXTENDED_MODE  ${options} ${oneValueArgs} ${multiValueArgs} )
@@ -115,6 +130,12 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     SET(FPHSA_FAIL_MESSAGE "Could NOT find ${_NAME}")
   ENDIF("${FPHSA_FAIL_MESSAGE}" STREQUAL "DEFAULT_MSG")
 
+  IF(FPHSA_CONFIG_MODE)
+    LIST(INSERT FPHSA_REQUIRED_VARS 0 ${_NAME}_CONFIG)
+    LIST(REMOVE_DUPLICATES FPHSA_REQUIRED_VARS)
+    SET(FPHSA_VERSION_VAR ${_NAME}_VERSION)
+  ENDIF(FPHSA_CONFIG_MODE)
+
   IF(NOT FPHSA_REQUIRED_VARS)
     MESSAGE(FATAL_ERROR "No REQUIRED_VARS specified for FIND_PACKAGE_HANDLE_STANDARD_ARGS()")
   ENDIF(NOT FPHSA_REQUIRED_VARS)
@@ -122,6 +143,7 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   LIST(GET FPHSA_REQUIRED_VARS 0 _FIRST_REQUIRED_VAR)
 
   STRING(TOUPPER ${_NAME} _NAME_UPPER)
+  STRING(TOLOWER ${_NAME} _NAME_LOWER)
 
   # collect all variables which were not found, so they can be printed, so the
   # user knows better what went wrong (#6375)
@@ -193,11 +215,35 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   IF (${_NAME_UPPER}_FOUND)
     FIND_PACKAGE_MESSAGE(${_NAME} "Found ${_NAME}: ${${_FIRST_REQUIRED_VAR}} ${VERSION_MSG}" "${DETAILS}")
   ELSE (${_NAME_UPPER}_FOUND)
-    IF(NOT VERSION_OK)
-      _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG} (found ${${_FIRST_REQUIRED_VAR}})")
-    ELSE(NOT VERSION_OK)
-      _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} (missing: ${MISSING_VARS}) ${VERSION_MSG}")
-    ENDIF(NOT VERSION_OK)
+
+    IF(FPHSA_CONFIG_MODE)
+      IF(${_NAME}_CONFIG)
+        _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: found ${${_NAME}_CONFIG} ${VERSION_MSG}, but missing: ${MISSING_VARS}")
+      ELSE(${_NAME}_CONFIG)
+        # if _CONSIDERED_CONFIGS is set, the config-file has been found, but no suitable version
+        IF(${_NAME}_CONSIDERED_CONFIGS)
+          SET(configsText "")
+          LIST(LENGTH ${_NAME}_CONSIDERED_CONFIGS configsCount)
+          MATH(EXPR configsCount "${configsCount} - 1")
+          FOREACH(currentConfigIndex RANGE ${configsCount})
+            LIST(GET ${_NAME}_CONSIDERED_CONFIGS ${currentConfigIndex} filename)
+            LIST(GET ${_NAME}_CONSIDERED_VERSIONS ${currentConfigIndex} version)
+            SET(configsText "${configsText}    ${filename} (version ${version})\n")
+          ENDFOREACH(currentConfigIndex)
+          _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} ${VERSION_MSG}, checked the following files:\n${configsText}")
+
+        ELSE(${_NAME}_CONSIDERED_CONFIGS)
+          _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG}(found neither ${_NAME}Config.cmake nor ${_NAME_LOWER}-config.cmake)")
+        ENDIF(${_NAME}_CONSIDERED_CONFIGS)
+      ENDIF(${_NAME}_CONFIG)
+
+    ELSE(FPHSA_CONFIG_MODE)
+      IF(NOT VERSION_OK)
+        _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG} (found ${${_FIRST_REQUIRED_VAR}})")
+      ELSE(NOT VERSION_OK)
+        _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} (missing: ${MISSING_VARS}) ${VERSION_MSG}")
+      ENDIF(NOT VERSION_OK)
+    ENDIF(FPHSA_CONFIG_MODE)
 
   ENDIF (${_NAME_UPPER}_FOUND)
 
