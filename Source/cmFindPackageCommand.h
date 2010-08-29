@@ -138,8 +138,9 @@ private:
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
   std::set<std::string> IgnoredPaths;
-  std::vector<std::string> ConsideredConfigFiles;
-  std::vector<std::string> ConsideredVersions;
+
+  struct ConfigFileInfo { std::string filename; std::string version; };
+  std::vector<ConfigFileInfo> ConsideredConfigs;
 };
 
 #endif

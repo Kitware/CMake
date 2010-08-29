@@ -726,8 +726,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::HandlePackageMode()
 {
-  this->ConsideredConfigFiles.clear();
-  this->ConsideredVersions.clear();
+  this->ConsideredConfigs.clear();
 
   // Support old capitalization behavior.
   std::string upperDir = cmSystemTools::UpperCase(this->Name);
@@ -819,17 +818,17 @@ bool cmFindPackageCommand::HandlePackageMode()
     cmOStringStream e;
     // If there are files in ConsideredConfigs, it means that FooConfig.cmake
     // have been found, but they didn't have appropriate versions.
-    if (this->ConsideredConfigFiles.size() > 0)
+    if (this->ConsideredConfigs.size() > 0)
       {
       e << "Could not find configuration file for package " << this->Name
         << " with " << (this->VersionExact ? "exact " : "at least ")
         << "version " << this->Version << " .\n"
         << "Found the following files:\n";
-      for(std::vector<std::string>::size_type i=0;
-          i<this->ConsideredConfigFiles.size(); i++)
+      for(std::vector<ConfigFileInfo>::size_type i=0;
+          i<this->ConsideredConfigs.size(); i++)
         {
-        e << "  " << this->ConsideredConfigFiles[i]
-          << ", version: " << this->ConsideredVersions[i] << "\n";
+        e << "  " << this->ConsideredConfigs[i].filename
+          << ", version: " << this->ConsideredConfigs[i].version << "\n";
         }
       }
     else
@@ -933,12 +932,12 @@ bool cmFindPackageCommand::HandlePackageMode()
   std::string consideredConfigFiles;
   std::string consideredVersions;
 
-  for(std::vector<std::string>::size_type i=0;
-      i<this->ConsideredConfigFiles.size(); i++)
+  for(std::vector<ConfigFileInfo>::size_type i=0;
+      i<this->ConsideredConfigs.size(); i++)
     {
-    consideredConfigFiles += this->ConsideredConfigFiles[i];
+    consideredConfigFiles += this->ConsideredConfigs[i].filename;
     consideredConfigFiles += ";";
-    consideredVersions += this->ConsideredVersions[i];
+    consideredVersions += this->ConsideredConfigs[i].version;
     consideredVersions += ";";
     }
 
@@ -1554,8 +1553,10 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
     haveResult = true;
     }
 
-  this->ConsideredConfigFiles.push_back(config_file);
-  this->ConsideredVersions.push_back(version);
+  ConfigFileInfo configFileInfo;
+  configFileInfo.filename = config_file;
+  configFileInfo.version = version;
+  this->ConsideredConfigs.push_back(configFileInfo);
 
   return result;
 }
