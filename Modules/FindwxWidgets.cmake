@@ -252,7 +252,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     # FIXME: What if both regex libs are available. regex should be
     # found outside the loop and only wx${LIB}${_UCD}${_DBG}.
     # Find wxWidgets common libraries.
-    FOREACH(LIB ${wxWidgets_COMMON_LIBRARIES})
+    FOREACH(LIB ${wxWidgets_COMMON_LIBRARIES} scintilla)
       FIND_LIBRARY(WX_${LIB}${_DBG}
         NAMES
         wx${LIB}${_UCD}${_DBG} # for regex
@@ -303,7 +303,8 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     MARK_AS_ADVANCED(WX_mono${_DBG})
 
     # Find wxWidgets multilib libraries.
-    FOREACH(LIB core adv aui html media xrc dbgrid gl qa richtext)
+    FOREACH(LIB core adv aui html media xrc dbgrid gl qa richtext
+                stc ribbon propgrid)
       FIND_LIBRARY(WX_${LIB}${_DBG}
         NAMES
         wxmsw${_UNV}29${_UCD}${_DBG}_${LIB}
