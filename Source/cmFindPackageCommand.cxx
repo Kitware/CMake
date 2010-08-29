@@ -156,6 +156,11 @@ cmFindPackageCommand::cmFindPackageCommand()
     "The full path to the configuration file is stored in the cmake "
     "variable <package>_CONFIG."
     "\n"
+    "All configuration files which have been considered by CMake while "
+    "searching for an installation of the package with an appropriate "
+    "version are stored in the cmake variable <package>_CONSIDERED_CONFIGS, "
+    "the associated versions in <package>_CONSIDERED_VERSIONS. "
+    "\n"
     "If the package configuration file cannot be found CMake "
     "will generate an error describing the problem unless the QUIET "
     "argument is specified.  If REQUIRED is specified and the package "
@@ -618,7 +623,7 @@ void cmFindPackageCommand::SetModuleVariables(const std::string& components)
   // Store the list of components.
   std::string components_var = this->Name + "_FIND_COMPONENTS";
   this->AddFindDefinition(components_var.c_str(), components.c_str());
-   
+
   if(this->Quiet)
     {
     // Tell the module that is about to be read that it should find
@@ -721,6 +726,9 @@ bool cmFindPackageCommand::FindModule(bool& found)
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::HandlePackageMode()
 {
+  this->ConsideredConfigFiles.clear();
+  this->ConsideredVersions.clear();
+
   // Support old capitalization behavior.
   std::string upperDir = cmSystemTools::UpperCase(this->Name);
   std::string upperFound = cmSystemTools::UpperCase(this->Name);
@@ -896,6 +904,35 @@ bool cmFindPackageCommand::HandlePackageMode()
       }
     }
 #endif
+
+  std::string consideredConfigsVar = this->Name;
+  consideredConfigsVar += "_CONSIDERED_CONFIGS";
+  std::string consideredVersionsVar = this->Name;
+  consideredVersionsVar += "_CONSIDERED_VERSIONS";
+
+  std::string consideredConfigFiles;
+  for(std::vector<std::string>::const_iterator
+      it = this->ConsideredConfigFiles.begin();
+      it != this->ConsideredConfigFiles.end(); ++it)
+    {
+    consideredConfigFiles += *it;
+    consideredConfigFiles += ";";
+    }
+
+  std::string consideredVersions;
+  for(std::vector<std::string>::const_iterator
+      it = this->ConsideredVersions.begin();
+      it != this->ConsideredVersions.end(); ++it)
+    {
+    consideredVersions += *it;
+    consideredVersions += ";";
+    }
+
+  this->Makefile->AddDefinition(consideredConfigsVar.c_str(),
+                                consideredConfigFiles.c_str());
+
+  this->Makefile->AddDefinition(consideredVersionsVar.c_str(),
+                                consideredVersions.c_str());
 
   return result;
 }
@@ -1467,6 +1504,10 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
 {
+  bool result = false; // by default, assume the version is not ok.
+  bool haveResult = false;
+  std::string version = "unknown";
+
   // Get the filename without the .cmake extension.
   std::string::size_type pos = config_file.rfind('.');
   std::string version_file_base = config_file.substr(0, pos);
@@ -1474,31 +1515,40 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   // Look for foo-config-version.cmake
   std::string version_file = version_file_base;
   version_file += "-version.cmake";
-  if(cmSystemTools::FileExists(version_file.c_str(), true))
+  if ((haveResult == false)
+       && (cmSystemTools::FileExists(version_file.c_str(), true)))
     {
-    return this->CheckVersionFile(version_file);
+    result = this->CheckVersionFile(version_file, version);
+    haveResult = true;
     }
 
   // Look for fooConfigVersion.cmake
   version_file = version_file_base;
   version_file += "Version.cmake";
-  if(cmSystemTools::FileExists(version_file.c_str(), true))
+  if ((haveResult == false)
+       && (cmSystemTools::FileExists(version_file.c_str(), true)))
     {
-    return this->CheckVersionFile(version_file);
+    result = this->CheckVersionFile(version_file, version);
+    haveResult = true;
     }
+
 
   // If no version was requested a versionless package is acceptable.
-  if(this->Version.empty())
+  if ((haveResult == false) && (this->Version.empty()))
     {
-    return true;
+    result = true;
+    haveResult = true;
     }
 
-  // No version file found.  Assume the version is incompatible.
-  return false;
+  this->ConsideredConfigFiles.push_back(config_file);
+  this->ConsideredVersions.push_back(version);
+
+  return result;
 }
 
 //----------------------------------------------------------------------------
-bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
+bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file,
+                                            std::string& result_version)
 {
   // The version file will be loaded in an isolated scope.
   cmMakefile::ScopePushPop varScope(this->Makefile);
@@ -1569,6 +1619,12 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file)
         default: break;
         }
       }
+    }
+
+  result_version = this->Makefile->GetSafeDefinition("PACKAGE_VERSION");
+  if (result_version.empty())
+    {
+    result_version = "unknown";
     }
 
   // Succeed if the version is suitable.
