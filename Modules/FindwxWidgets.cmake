@@ -331,7 +331,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
   # Clear all debug or release library paths (arguments are "d" or "").
   MACRO(WX_CLEAR_ALL_LIBS _DBG)
     # Clear wxWidgets common libraries.
-    FOREACH(LIB ${wxWidgets_COMMON_LIBRARIES})
+    FOREACH(LIB ${wxWidgets_COMMON_LIBRARIES} scintilla)
       WX_CLEAR_LIB(WX_${LIB}${_DBG})
     ENDFOREACH(LIB)
 
@@ -345,7 +345,8 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     WX_CLEAR_LIB(WX_mono${_DBG})
 
     # Clear wxWidgets multilib libraries.
-    FOREACH(LIB core adv aui html media xrc dbgrid gl qa richtext)
+    FOREACH(LIB core adv aui html media xrc dbgrid gl qa richtext
+                stc ribbon propgrid)
       WX_CLEAR_LIB(WX_${LIB}${_DBG})
     ENDFOREACH(LIB)
   ENDMACRO(WX_CLEAR_ALL_LIBS)
