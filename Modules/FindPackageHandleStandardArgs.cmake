@@ -97,6 +97,33 @@ MACRO(_FPHSA_FAILURE_MESSAGE _msg)
 ENDMACRO(_FPHSA_FAILURE_MESSAGE _msg)
 
 
+# internal helper macro to generate the failure message when used in CONFIG_MODE:
+MACRO(_FPHSA_HANDLE_FAILURE_CONFIG_MODE)
+  # <name>_CONFIG is set, but FOUND is false, this means that some other of the REQUIRED_VARS was not found:
+  IF(${_NAME}_CONFIG)
+    _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: missing: ${MISSING_VARS} (found ${${_NAME}_CONFIG} ${VERSION_MSG})")
+  ELSE(${_NAME}_CONFIG)
+    # If _CONSIDERED_CONFIGS is set, the config-file has been found, but no suitable version.
+    # List them all in the error message:
+    IF(${_NAME}_CONSIDERED_CONFIGS)
+      SET(configsText "")
+      LIST(LENGTH ${_NAME}_CONSIDERED_CONFIGS configsCount)
+      MATH(EXPR configsCount "${configsCount} - 1")
+      FOREACH(currentConfigIndex RANGE ${configsCount})
+        LIST(GET ${_NAME}_CONSIDERED_CONFIGS ${currentConfigIndex} filename)
+        LIST(GET ${_NAME}_CONSIDERED_VERSIONS ${currentConfigIndex} version)
+        SET(configsText "${configsText}    ${filename} (version ${version})\n")
+      ENDFOREACH(currentConfigIndex)
+      _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} ${VERSION_MSG}, checked the following files:\n${configsText}")
+
+    ELSE(${_NAME}_CONSIDERED_CONFIGS)
+      # Simple case: No Config-file was found at all:
+      _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: found neither ${_NAME}Config.cmake nor ${_NAME_LOWER}-config.cmake ${VERSION_MSG}")
+    ENDIF(${_NAME}_CONSIDERED_CONFIGS)
+  ENDIF(${_NAME}_CONFIG)
+ENDMACRO(_FPHSA_HANDLE_FAILURE_CONFIG_MODE)
+
+
 FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
 # set up the arguments for CMAKE_PARSE_ARGUMENTS and check whether we are in
@@ -130,6 +157,8 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     SET(FPHSA_FAIL_MESSAGE "Could NOT find ${_NAME}")
   ENDIF("${FPHSA_FAIL_MESSAGE}" STREQUAL "DEFAULT_MSG")
 
+  # In config-mode, we rely on the variable <package>_CONFIG, which is set by find_package()
+  # when it successfully found the config-file, including version checking:
   IF(FPHSA_CONFIG_MODE)
     LIST(INSERT FPHSA_REQUIRED_VARS 0 ${_NAME}_CONFIG)
     LIST(REMOVE_DUPLICATES FPHSA_REQUIRED_VARS)
@@ -164,44 +193,42 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   # version handling:
   SET(VERSION_MSG "")
   SET(VERSION_OK TRUE)
+  SET(VERSION ${${FPHSA_VERSION_VAR}} )
   IF (${_NAME}_FIND_VERSION)
 
-    # if the package was found, check for the version using <NAME>_FIND_VERSION
-    IF (${_NAME_UPPER}_FOUND)
-      SET(VERSION ${${FPHSA_VERSION_VAR}} )
+    IF(VERSION)
 
-      IF(VERSION)
+      IF(${_NAME}_FIND_VERSION_EXACT)       # exact version required
+        IF (NOT "${${_NAME}_FIND_VERSION}" VERSION_EQUAL "${VERSION}")
+          SET(VERSION_MSG "Found unsuitable version \"${VERSION}\", but required is exact version \"${${_NAME}_FIND_VERSION}\"")
+          SET(VERSION_OK FALSE)
+        ELSE (NOT "${${_NAME}_FIND_VERSION}" VERSION_EQUAL "${VERSION}")
+          SET(VERSION_MSG "(found suitable exact version \"${VERSION}\")")
+        ENDIF (NOT "${${_NAME}_FIND_VERSION}" VERSION_EQUAL "${VERSION}")
 
-        IF(${_NAME}_FIND_VERSION_EXACT)       # exact version required
-          IF (NOT "${${_NAME}_FIND_VERSION}" VERSION_EQUAL "${VERSION}")
-            SET(VERSION_MSG " Found version \"${VERSION}\", but required is exact version \"${${_NAME}_FIND_VERSION}\"")
-            SET(VERSION_OK FALSE)
-          ELSE (NOT "${${_NAME}_FIND_VERSION}" VERSION_EQUAL "${VERSION}")
-            SET(VERSION_MSG " (found exact version \"${VERSION}\")")
-          ENDIF (NOT "${${_NAME}_FIND_VERSION}" VERSION_EQUAL "${VERSION}")
-
-        ELSE(${_NAME}_FIND_VERSION_EXACT)     # minimum version specified:
-          IF ("${${_NAME}_FIND_VERSION}" VERSION_GREATER "${VERSION}")
-            SET(VERSION_MSG " Found version \"${VERSION}\", but required is at least \"${${_NAME}_FIND_VERSION}\"")
-            SET(VERSION_OK FALSE)
-          ELSE ("${${_NAME}_FIND_VERSION}" VERSION_GREATER "${VERSION}")
-            SET(VERSION_MSG " (found version \"${VERSION}\", required is \"${${_NAME}_FIND_VERSION}\")")
-          ENDIF ("${${_NAME}_FIND_VERSION}" VERSION_GREATER "${VERSION}")
-        ENDIF(${_NAME}_FIND_VERSION_EXACT)
-
-# Uncomment the following two lines to see to which Find-modules the VERSION_VAR keywords still need to be added:
-#      ELSE(VERSION)
-#        SET(VERSION_MSG " (WARNING: Required version is \"${${_NAME}_FIND_VERSION}\", but version of ${_NAME} is unknown)")
-      ENDIF(VERSION)
-
-    # if the package was not found, but a version was given, add that to the output:
-    ELSE (${_NAME_UPPER}_FOUND)
-      IF(${_NAME}_FIND_VERSION_EXACT)
-         SET(VERSION_MSG " (Required is exact version \"${${_NAME}_FIND_VERSION}\")")
-      ELSE(${_NAME}_FIND_VERSION_EXACT)
-         SET(VERSION_MSG " (Required is at least version \"${${_NAME}_FIND_VERSION}\")")
+      ELSE(${_NAME}_FIND_VERSION_EXACT)     # minimum version specified:
+        IF ("${${_NAME}_FIND_VERSION}" VERSION_GREATER "${VERSION}")
+          SET(VERSION_MSG "Found unsuitable version \"${VERSION}\", but required is at least \"${${_NAME}_FIND_VERSION}\"")
+          SET(VERSION_OK FALSE)
+        ELSE ("${${_NAME}_FIND_VERSION}" VERSION_GREATER "${VERSION}")
+          SET(VERSION_MSG "(found suitable version \"${VERSION}\", required is \"${${_NAME}_FIND_VERSION}\")")
+        ENDIF ("${${_NAME}_FIND_VERSION}" VERSION_GREATER "${VERSION}")
       ENDIF(${_NAME}_FIND_VERSION_EXACT)
-    ENDIF (${_NAME_UPPER}_FOUND)
+
+    ELSE(VERSION)
+
+      # if the package was not found, but a version was given, add that to the output:
+      IF(${_NAME}_FIND_VERSION_EXACT)
+         SET(VERSION_MSG "(Required is exact version \"${${_NAME}_FIND_VERSION}\")")
+      ELSE(${_NAME}_FIND_VERSION_EXACT)
+         SET(VERSION_MSG "(Required is at least version \"${${_NAME}_FIND_VERSION}\")")
+      ENDIF(${_NAME}_FIND_VERSION_EXACT)
+
+    ENDIF(VERSION)
+  ELSE (${_NAME}_FIND_VERSION)
+    IF(VERSION)
+      SET(VERSION_MSG "(found version \"${VERSION}\")")
+    ENDIF(VERSION)
   ENDIF (${_NAME}_FIND_VERSION)
 
   IF(VERSION_OK)
@@ -217,26 +244,7 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   ELSE (${_NAME_UPPER}_FOUND)
 
     IF(FPHSA_CONFIG_MODE)
-      IF(${_NAME}_CONFIG)
-        _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: found ${${_NAME}_CONFIG} ${VERSION_MSG}, but missing: ${MISSING_VARS}")
-      ELSE(${_NAME}_CONFIG)
-        # if _CONSIDERED_CONFIGS is set, the config-file has been found, but no suitable version
-        IF(${_NAME}_CONSIDERED_CONFIGS)
-          SET(configsText "")
-          LIST(LENGTH ${_NAME}_CONSIDERED_CONFIGS configsCount)
-          MATH(EXPR configsCount "${configsCount} - 1")
-          FOREACH(currentConfigIndex RANGE ${configsCount})
-            LIST(GET ${_NAME}_CONSIDERED_CONFIGS ${currentConfigIndex} filename)
-            LIST(GET ${_NAME}_CONSIDERED_VERSIONS ${currentConfigIndex} version)
-            SET(configsText "${configsText}    ${filename} (version ${version})\n")
-          ENDFOREACH(currentConfigIndex)
-          _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE} ${VERSION_MSG}, checked the following files:\n${configsText}")
-
-        ELSE(${_NAME}_CONSIDERED_CONFIGS)
-          _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG}(found neither ${_NAME}Config.cmake nor ${_NAME_LOWER}-config.cmake)")
-        ENDIF(${_NAME}_CONSIDERED_CONFIGS)
-      ENDIF(${_NAME}_CONFIG)
-
+      _FPHSA_HANDLE_FAILURE_CONFIG_MODE()
     ELSE(FPHSA_CONFIG_MODE)
       IF(NOT VERSION_OK)
         _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG} (found ${${_FIRST_REQUIRED_VAR}})")
