@@ -1487,7 +1487,7 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
         // Add dependencies of the included target.  An excluded
         // target may still be included if it is a dependency of a
         // non-excluded target.
-        TargetDependSet & tgtdeps = this->GetTargetDirectDepends(target);
+        TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
         for(TargetDependSet::const_iterator ti = tgtdeps.begin();
             ti != tgtdeps.end(); ++ti)
           {
@@ -1879,7 +1879,7 @@ void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
 }
 
 //----------------------------------------------------------------------------
-cmGlobalGenerator::TargetDependSet &
+cmGlobalGenerator::TargetDependSet const&
 cmGlobalGenerator::GetTargetDirectDepends(cmTarget & target)
 {
   return this->TargetDependencies[&target];

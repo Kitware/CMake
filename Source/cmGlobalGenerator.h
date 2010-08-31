@@ -238,7 +238,7 @@ public:
 
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
-  TargetDependSet & GetTargetDirectDepends(cmTarget & target);
+  TargetDependSet const& GetTargetDirectDepends(cmTarget & target);
 
   const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}

@@ -1422,7 +1422,7 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
 
 void cmVisualStudio10TargetGenerator::WriteProjectReferences()
 {
-  cmGlobalGenerator::TargetDependSet& depends
+  cmGlobalGenerator::TargetDependSet const& depends
     = this->GlobalGenerator->GetTargetDirectDepends(*this->Target);
   this->WriteString("<ItemGroup>\n", 1);
   for( cmGlobalGenerator::TargetDependSet::const_iterator i = depends.begin();
