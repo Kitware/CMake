@@ -59,7 +59,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   // skip one parent up to the cmCPackTarBZip2Generator
   // to create tar.bz2 file with the list of source
   // files
-  this->Compress = BZIP2; 
+  this->Compress = cmArchiveWrite::CompressBZip2;
   if ( !this->cmCPackTarBZip2Generator::PackageFiles() )
     {
     return 0;
