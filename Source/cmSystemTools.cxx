@@ -283,7 +283,22 @@ void cmSystemTools::ReportLastSystemError(const char* msg)
   cmSystemTools::Error(m.c_str());
 }
 
- 
+bool cmSystemTools::IsInternallyOn(const char* val)
+{
+  if (!val)
+    {
+    return false;
+    }
+  std::basic_string<char> v = val;
+
+  for(std::basic_string<char>::iterator c = v.begin();
+      c != v.end(); c++)
+    {
+    *c = static_cast<char>(toupper(*c));
+    }
+  return (v == "I_ON" || v == "i_on");
+}
+
 bool cmSystemTools::IsOn(const char* val)
 {
   if (!val)
