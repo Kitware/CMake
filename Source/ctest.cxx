@@ -152,7 +152,7 @@ static const char * cmDocumentationOptions[][3] =
    "popups and interactive "
    "debugging."},
   {"--no-label-summary", "Disable timing summary information for labels.",
-   "This option tells ctest to not print summary information for each label "
+   "This option tells ctest not to print summary information for each label "
    "associated with the tests run. If there are no labels on the "
    "tests, nothing extra is printed."},
   {"--build-and-test", "Configure, build and run a test.",
@@ -229,6 +229,9 @@ static const char * cmDocumentationOptions[][3] =
    "This flag will turn off automatic compression of test output.  Use this "
    "to maintain compatibility with an older version of CDash which doesn't "
    "support compressed test output."},
+  {"--print-labels", "Print all available test labels.",
+   "This option will not run any tests, it will simply print the list of "
+   "all labels associated with the test set."},
   {"--help-command <cmd> [<file>]", "Show help for a single command and exit.",
    "Prints the help for the command to stdout or to the specified file." },
   {"--help-command-list [<file>]", "List available commands and exit.",
