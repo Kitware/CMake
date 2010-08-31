@@ -516,11 +516,13 @@ void cmCTestMultiProcessHandler::PrintTestList()
 {
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
   int count = 0;
+
   for (PropertiesMap::iterator it = this->Properties.begin();
        it != this->Properties.end(); ++it)
     {
     count++;
     cmCTestTestHandler::cmCTestTestProperties& p = *it->second;
+
     //push working dir
     std::string current_dir = cmSystemTools::GetCurrentWorkingDirectory();
     cmSystemTools::ChangeDirectory(p.Directory.c_str());
@@ -529,6 +531,20 @@ void cmCTestMultiProcessHandler::PrintTestList()
     testRun.SetIndex(p.Index);
     testRun.SetTestProperties(&p);
     testRun.ComputeArguments(); //logs the command in verbose mode
+
+    if(p.Labels.size()) //print the labels
+      {
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Labels:");
+      }
+    for(std::vector<std::string>::iterator label = p.Labels.begin();
+        label != p.Labels.end(); ++label)
+      {
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, " " << *label);
+      }
+    if(p.Labels.size()) //print the labels
+      {
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl);
+      }
 
     if (this->TestHandler->MemCheck)
       {
@@ -548,8 +564,34 @@ void cmCTestMultiProcessHandler::PrintTestList()
     //pop working dir
     cmSystemTools::ChangeDirectory(current_dir.c_str());
     }
+
   cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl << "Total Tests: "
     << this->Total << std::endl);
+}
+
+void cmCTestMultiProcessHandler::PrintLabels()
+{
+  std::set<std::string> allLabels;
+  for (PropertiesMap::iterator it = this->Properties.begin();
+       it != this->Properties.end(); ++it)
+    {
+    cmCTestTestHandler::cmCTestTestProperties& p = *it->second;
+    allLabels.insert(p.Labels.begin(), p.Labels.end());
+    }
+
+  if(allLabels.size())
+    {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "All Labels:" << std::endl);
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "No Labels Exist" << std::endl);
+    }
+  for(std::set<std::string>::iterator label = allLabels.begin();
+      label != allLabels.end(); ++label)
+    {
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "  " << *label << std::endl);
+    }
 }
 
 //---------------------------------------------------------

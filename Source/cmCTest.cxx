@@ -304,6 +304,7 @@ cmCTest::cmCTest()
   this->ShowOnly               = false;
   this->RunConfigurationScript = false;
   this->UseHTTP10              = false;
+  this->PrintLabels            = false;
   this->CompressTestOutput     = true;
   this->ComputedCompressOutput = false;
   this->TestModel              = cmCTest::EXPERIMENTAL;
@@ -1875,6 +1876,11 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
   if(this->CheckArgument(arg, "--no-compress-output"))
     {
     this->CompressTestOutput = false;
+    }
+
+  if(this->CheckArgument(arg, "--print-labels"))
+    {
+    this->PrintLabels = true;
     }
 
   if(this->CheckArgument(arg, "--http1.0"))

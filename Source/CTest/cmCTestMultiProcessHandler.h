@@ -39,6 +39,7 @@ public:
   void SetParallelLevel(size_t);
   virtual void RunTests();
   void PrintTestList();
+  void PrintLabels();
 
   void SetPassFailVectors(std::vector<cmStdString>* passed,
                           std::vector<cmStdString>* failed)
