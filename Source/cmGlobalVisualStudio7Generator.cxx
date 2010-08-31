@@ -408,6 +408,18 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
        << this->ConvertToSolutionPath(dir)
        << "\\" << dspname << ext << "\", \"{"
        << this->GetGUID(dspname) << "}\"\nEndProject\n";
+
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(&target);
+  if(ui != this->UtilityDepends.end())
+    {
+    const char* uname = ui->second.c_str();
+    fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \""
+         << uname << "\", \""
+         << this->ConvertToSolutionPath(dir)
+         << "\\" << uname << ".vcproj" << "\", \"{"
+         << this->GetGUID(uname) << "}\"\n"
+         << "EndProject\n";
+    }
 }
 
 
@@ -422,59 +434,30 @@ cmGlobalVisualStudio7Generator
                       const char*, cmTarget& target)
 {
   int depcount = 0;
-  // insert Begin Project Dependency  Project_Dep_Name project stuff here 
-  if (target.GetType() != cmTarget::STATIC_LIBRARY)
+  std::string dspguid = this->GetGUID(dspname);
+  VSDependSet const& depends = this->VSTargetDepends[&target];
+  for(VSDependSet::const_iterator di = depends.begin();
+      di != depends.end(); ++di)
     {
-    cmTarget::LinkLibraryVectorType::const_iterator j, jend;
-    j = target.GetLinkLibraries().begin();
-    jend = target.GetLinkLibraries().end();
-    for(;j!= jend; ++j)
+    const char* name = di->c_str();
+    std::string guid = this->GetGUID(name);
+    if(guid.size() == 0)
       {
-      if(j->first != dspname)
-        {
-        // is the library part of this SLN ? If so add dependency
-        if(this->FindTarget(0, j->first.c_str()))
-          {
-          std::string guid = this->GetGUID(j->first.c_str());
-          if(guid.size() == 0)
-            {
-            std::string m = "Target: ";
-            m += dspname;
-            m += " depends on unknown target: ";
-            m += j->first.c_str();
-            cmSystemTools::Error(m.c_str());
-            }
-          fout << "\t\t{" << this->GetGUID(dspname) << "}."
-               << depcount << " = {" << guid << "}\n";
-          depcount++;
-          }
-        }
+      std::string m = "Target: ";
+      m += target.GetName();
+      m += " depends on unknown target: ";
+      m += name;
+      cmSystemTools::Error(m.c_str());
       }
+    fout << "\t\t{" << dspguid << "}." << depcount << " = {" << guid << "}\n";
+    depcount++;
     }
 
-  std::set<cmStdString>::const_iterator i, end;
-  // write utility dependencies.
-  i = target.GetUtilities().begin();
-  end = target.GetUtilities().end();
-  for(;i!= end; ++i)
+  UtilityDependsMap::iterator ui = this->UtilityDepends.find(&target);
+  if(ui != this->UtilityDepends.end())
     {
-    if(*i != dspname)
-      {
-      std::string name = this->GetUtilityForTarget(target, i->c_str());
-      std::string guid = this->GetGUID(name.c_str());
-      if(guid.size() == 0)
-        {
-        std::string m = "Target: ";
-        m += dspname;
-        m += " depends on unknown target: ";
-        m += name.c_str();
-        cmSystemTools::Error(m.c_str());
-        }
-          
-      fout << "\t\t{" << this->GetGUID(dspname) << "}." << depcount << " = {"
-           << guid << "}\n";
-      depcount++;
-      }
+    const char* uname = ui->second.c_str();
+    fout << "\t\t{" << this->GetGUID(uname) << "}.0 = {" << dspguid << "}\n";
     }
 }
 
@@ -535,6 +518,61 @@ void cmGlobalVisualStudio7Generator::WriteSLNFooter(std::ostream& fout)
 void cmGlobalVisualStudio7Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 7.00\n";
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget* target)
+{
+  std::string pname = target->GetName();
+  pname += "_UTILITY";
+  std::string fname = target->GetMakefile()->GetStartOutputDirectory();
+  fname += "/";
+  fname += pname;
+  fname += ".vcproj";
+  cmGeneratedFileStream fout(fname.c_str());
+  fout.SetCopyIfDifferent(true);
+  this->CreateGUID(pname.c_str());
+  std::string guid = this->GetGUID(pname.c_str());
+
+  fout <<
+    "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
+    "<VisualStudioProject\n"
+    "\tProjectType=\"Visual C++\"\n"
+    "\tVersion=\"" << this->GetIDEVersion() << "0\"\n"
+    "\tName=\"" << pname << "\"\n"
+    "\tProjectGUID=\"{" << guid << "}\"\n"
+    "\tKeyword=\"Win32Proj\">\n"
+    "\t<Platforms><Platform Name=\"Win32\"/></Platforms>\n"
+    "\t<Configurations>\n"
+    ;
+  for(std::vector<std::string>::iterator i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
+    {
+    fout <<
+      "\t\t<Configuration\n"
+      "\t\t\tName=\"" << *i << "|Win32\"\n"
+      "\t\t\tOutputDirectory=\"" << *i << "\"\n"
+      "\t\t\tIntermediateDirectory=\"" << pname << ".dir\\" << *i << "\"\n"
+      "\t\t\tConfigurationType=\"10\"\n"
+      "\t\t\tUseOfMFC=\"0\"\n"
+      "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"FALSE\"\n"
+      "\t\t\tCharacterSet=\"2\">\n"
+      "\t\t</Configuration>\n"
+      ;
+    }
+  fout <<
+    "\t</Configurations>\n"
+    "\t<Files></Files>\n"
+    "\t<Globals></Globals>\n"
+    "</VisualStudioProject>\n"
+    ;
+
+  if(fout.Close())
+    {
+    this->FileReplacedDuringGenerate(fname);
+    }
+  return pname;
 }
 
 std::string cmGlobalVisualStudio7Generator::GetGUID(const char* name)

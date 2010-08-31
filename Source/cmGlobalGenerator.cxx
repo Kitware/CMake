@@ -863,19 +863,10 @@ void cmGlobalGenerator::Generate()
     }
 
   // Compute the inter-target dependencies.
-  {
-  cmComputeTargetDepends ctd(this);
-  if(!ctd.Compute())
+  if(!this->ComputeTargetDepends())
     {
     return;
     }
-  std::vector<cmTarget*> const& targets = ctd.GetTargets();
-  for(std::vector<cmTarget*>::const_iterator ti = targets.begin();
-      ti != targets.end(); ++ti)
-    {
-    ctd.GetTargetDirectDepends(*ti, this->TargetDependencies[*ti]);
-    }
-  }
 
   // Create a map from local generator to the complete set of targets
   // it builds by default.
@@ -905,6 +896,23 @@ void cmGlobalGenerator::Generate()
     }
 
   this->CMakeInstance->UpdateProgress("Generating done", -1);
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalGenerator::ComputeTargetDepends()
+{
+  cmComputeTargetDepends ctd(this);
+  if(!ctd.Compute())
+    {
+    return false;
+    }
+  std::vector<cmTarget*> const& targets = ctd.GetTargets();
+  for(std::vector<cmTarget*>::const_iterator ti = targets.begin();
+      ti != targets.end(); ++ti)
+    {
+    ctd.GetTargetDirectDepends(*ti, this->TargetDependencies[*ti]);
+    }
+  return true;
 }
 
 //----------------------------------------------------------------------------
