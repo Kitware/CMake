@@ -1,3 +1,4 @@
+#include <two-test.h> /* Requires TwoCustom to be built first.  */
 void NoDepAFunction();
 void OneFunction();
 void TwoFunction();
