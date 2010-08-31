@@ -820,10 +820,12 @@ bool cmFindPackageCommand::HandlePackageMode()
     // have been found, but they didn't have appropriate versions.
     if (this->ConsideredConfigs.size() > 0)
       {
-      e << "Could not find configuration file for package " << this->Name
-        << " with " << (this->VersionExact ? "exact " : "at least ")
-        << "version " << this->Version << " .\n"
-        << "Found the following files:\n";
+      e << "Could not find a configuration file for package \""
+        << this->Name << "\" that "
+        << (this->VersionExact? "exactly matches" : "is compatible with")
+        << " requested version \"" << this->Version << "\".\n"
+        << "The following configuration files were considered but not "
+           "accepted:\n";
       for(std::vector<ConfigFileInfo>::size_type i=0;
           i<this->ConsideredConfigs.size(); i++)
         {
@@ -932,16 +934,15 @@ bool cmFindPackageCommand::HandlePackageMode()
   std::string consideredConfigFiles;
   std::string consideredVersions;
 
+  const char* sep = "";
   for(std::vector<ConfigFileInfo>::size_type i=0;
       i<this->ConsideredConfigs.size(); i++)
     {
-    if (i>0)
-      {
-      consideredConfigFiles += ";";
-      consideredVersions += ";";
-      }
+    consideredConfigFiles += sep;
+    consideredVersions += sep;
     consideredConfigFiles += this->ConsideredConfigs[i].filename;
     consideredVersions += this->ConsideredConfigs[i].version;
+    sep = ";";
     }
 
   this->Makefile->AddDefinition(consideredConfigsVar.c_str(),
