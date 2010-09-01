@@ -4,7 +4,7 @@
 # modules that you will use, you need to name them as components to
 # the package:
 # 
-# FIND_PACKAGE(wxWidgets COMPONENTS base core ...)
+# FIND_PACKAGE(wxWidgets COMPONENTS core base ...)
 # 
 # There are two search branches: a windows style and a unix style. For
 # windows, the following variables are searched for and set to
@@ -54,7 +54,8 @@
 #  wxWidgets_USE_FILE         - Convenience include file.
 #
 # Sample usage:
-#   FIND_PACKAGE(wxWidgets COMPONENTS base core gl net)
+#   # Note that for MinGW users the order of libs is important!
+#   FIND_PACKAGE(wxWidgets COMPONENTS net gl core base)
 #   IF(wxWidgets_FOUND)
 #     INCLUDE(${wxWidgets_USE_FILE})
 #     # and for each of your dependent executable/library targets:
@@ -62,7 +63,7 @@
 #   ENDIF(wxWidgets_FOUND)
 #
 # If wxWidgets is required (i.e., not an optional part):
-#   FIND_PACKAGE(wxWidgets REQUIRED base core gl net)
+#   FIND_PACKAGE(wxWidgets REQUIRED net gl core base)
 #   INCLUDE(${wxWidgets_USE_FILE})
 #   # and for each of your dependent executable/library targets:
 #   TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
@@ -213,7 +214,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     IF(wxWidgets_USE_MONOLITHIC)
       SET(wxWidgets_FIND_COMPONENTS mono)
     ELSE(wxWidgets_USE_MONOLITHIC)
-      SET(wxWidgets_FIND_COMPONENTS base core) # this is default
+      SET(wxWidgets_FIND_COMPONENTS core base) # this is default
     ENDIF(wxWidgets_USE_MONOLITHIC)
   ENDIF(NOT wxWidgets_FIND_COMPONENTS)
 

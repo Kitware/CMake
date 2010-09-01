@@ -3,7 +3,8 @@
 # flags, etc. INCLUDE_DIRECTORIES and LINK_DIRECTORIES are called.
 #
 # USAGE
-#  FIND_PACKAGE(wxWidgets REQUIRED base core gl net)
+#  # Note that for MinGW users the order of libs is important!
+#  FIND_PACKAGE(wxWidgets REQUIRED net gl core base)
 #  INCLUDE(${wxWidgets_USE_FILE})
 #  # and for each of your dependant executable/library targets:
 #  TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
