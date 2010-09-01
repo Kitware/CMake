@@ -563,22 +563,22 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
         # Get configuration parameters from the name.
         WX_GET_NAME_COMPONENTS(${wxWidgets_CONFIGURATION} UNV UCD DBG)
 
+        # Set wxWidgets lib setup include directory.
+        IF(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
+          SET(wxWidgets_INCLUDE_DIRS
+            ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION})
+        ELSE(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
+          DBG_MSG("wxWidgets_FOUND FALSE because ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h does not exists.")
+          SET(wxWidgets_FOUND FALSE)
+        ENDIF(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
+
         # Set wxWidgets main include directory.
         IF(EXISTS ${WX_ROOT_DIR}/include/wx/wx.h)
-          SET(wxWidgets_INCLUDE_DIRS ${WX_ROOT_DIR}/include)
+          LIST(APPEND wxWidgets_INCLUDE_DIRS ${WX_ROOT_DIR}/include)
         ELSE(EXISTS ${WX_ROOT_DIR}/include/wx/wx.h)
           DBG_MSG("wxWidgets_FOUND FALSE because WX_ROOT_DIR=${WX_ROOT_DIR} has no ${WX_ROOT_DIR}/include/wx/wx.h")
           SET(wxWidgets_FOUND FALSE)
         ENDIF(EXISTS ${WX_ROOT_DIR}/include/wx/wx.h)
-
-        # Set wxWidgets lib setup include directory.
-        IF(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
-          LIST(APPEND wxWidgets_INCLUDE_DIRS
-            ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION})
-        ELSE(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
-          DBG_MSG("WXWIDGET_FOUND FALSE because ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h does not exists.")
-          SET(wxWidgets_FOUND FALSE)
-        ENDIF(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
 
         # Find wxWidgets libraries.
         WX_FIND_LIBS("${UNV}" "${UCD}" "${DBG}")
