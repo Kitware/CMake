@@ -208,8 +208,8 @@ cmake::~cmake()
       {
       if(!it->second)
         {
-        std::string message = "The variable, \"" + it->first + "\", given "
-          "on the command line was not used within the build.";
+        std::string message = "warning: The variable, \"" + it->first + "\", given "
+          "on the command line, was not used within the build.";
         cmSystemTools::Message(message.c_str());
         }
       }
