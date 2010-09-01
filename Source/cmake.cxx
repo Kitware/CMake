@@ -137,12 +137,19 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 #endif
 }
 
+void cmWarnUnusedCliWarning(const std::string& variable,
+  int, void* ctx, const char*, const cmMakefile*)
+{
+  cmake* cm = reinterpret_cast<cmake*>(ctx);
+  cm->MarkCliAsUsed(variable);
+}
+
 cmake::cmake()
 {
   this->Trace = false;
   this->WarnUninitialized = false;
   this->WarnUnused = false;
-  this->DefaultToUsed = true;
+  this->WarnUnusedCli = true;
   this->SuppressDevWarnings = false;
   this->DoSuppressDevWarnings = false;
   this->DebugOutput = false;
@@ -193,6 +200,19 @@ cmake::cmake()
 
 cmake::~cmake()
 {
+  if(this->WarnUnusedCli)
+    {
+    std::map<std::string, bool>::const_iterator it;
+    for(it = this->UsedCliVariables.begin(); it != this->UsedCliVariables.end(); ++it)
+      {
+      if(!it->second)
+        {
+        std::string message = "The variable, \"" + it->first + "\", given "
+          "on the command line was not used within the build.";
+        cmSystemTools::Message(message.c_str());
+        }
+      }
+    }
   delete this->CacheManager;
   delete this->Policies;
   if (this->GlobalGenerator)
@@ -370,6 +390,11 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         {
         this->CacheManager->AddCacheEntry(var.c_str(), value.c_str(),
           "No help, variable specified on the command line.", type);
+        if(this->WarnUnusedCli)
+          {
+          this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
+          this->UsedCliVariables[var] = false;
+          }
         }
       else
         {
@@ -621,16 +646,15 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       std::cout << "Warn about uninitialized values.\n";
       this->SetWarnUninitialized(true);
       }
-    else if(arg.find("--warn-unused",0) == 0)
-      {
-      std::cout << "Finding unused command line variables.\n";
-      this->SetWarnUnused(true);
-      }
-    else if(arg.find("--warn-unused-all",0) == 0)
+    else if(arg.find("--warn-unused-vars",0) == 0)
       {
       std::cout << "Finding unused variables.\n";
       this->SetWarnUnused(true);
-      this->SetDefaultToUsed(false);
+      }
+    else if(arg.find("--warn-unused-cli",0) == 0)
+      {
+      std::cout << "Finding unused variables given on the command line.\n";
+      this->SetWarnUnusedCli(true);
       }
     else if(arg.find("-G",0) == 0)
       {
@@ -2834,6 +2858,11 @@ const char* cmake::GetCPackCommand()
     this->CPackCommand = "CPACK-COMMAND-NOT-FOUND";
     }
     return this->CPackCommand.c_str();
+}
+
+void cmake::MarkCliAsUsed(const std::string& variable)
+{
+  this->UsedCliVariables[variable] = true;
 }
 
 void cmake::GenerateGraphViz(const char* fileName) const

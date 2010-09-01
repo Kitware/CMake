@@ -935,7 +935,6 @@ private:
 
   // Unused variable flags
   bool WarnUnused;
-  bool DefaultToUsed;
 
   // stack of list files being read 
   std::deque<cmStdString> ListFileStack;

@@ -92,8 +92,6 @@ public slots:
   void setWarnUninitializedMode(bool value);
   /// set whether to run cmake with warnings about unused variables
   void setWarnUnusedMode(bool value);
-  /// set whether to run cmake with warnings about all unused variables
-  void setWarnUnusedAllMode(bool value);
 
 public:
   /// get the list of cache properties

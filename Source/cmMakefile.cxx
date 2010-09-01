@@ -93,7 +93,6 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->Initialize();
   this->PreOrder = false;
   this->WarnUnused = false;
-  this->DefaultToUsed = true;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
@@ -137,7 +136,6 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
   this->WarnUnused = mf.WarnUnused;
-  this->DefaultToUsed = mf.DefaultToUsed;
   this->ListFileStack = mf.ListFileStack;
   this->Initialize();
 }
@@ -767,7 +765,6 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
     const cmDefinitions& defs = cmDefinitions();
     const std::set<cmStdString> globalKeys = defs.LocalKeys();
     this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
-    this->DefaultToUsed = this->GetCMakeInstance()->GetDefaultToUsed();
     if (this->WarnUnused)
       {
       this->Internal->VarUsageStack.push(globalKeys);
@@ -1710,10 +1707,6 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
   this->Internal->VarInitStack.top().insert(name);
-  if (this->WarnUnused && this->DefaultToUsed)
-    {
-    this->Internal->VarUsageStack.top().insert(name);
-    }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )

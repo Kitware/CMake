@@ -310,8 +310,11 @@ class cmake
   void SetWarnUninitialized(bool b) {  this->WarnUninitialized = b;}
   bool GetWarnUnused() { return this->WarnUnused;}
   void SetWarnUnused(bool b) {  this->WarnUnused = b;}
-  bool GetDefaultToUsed() { return this->DefaultToUsed;}
-  void SetDefaultToUsed(bool b) {  this->DefaultToUsed = b;}
+  bool GetWarnUnusedCli() { return this->WarnUnusedCli;}
+  void SetWarnUnusedCli(bool b) {  this->WarnUnusedCli = b;}
+
+  void MarkCliAsUsed(const std::string& variable);
+
   // Define a property
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
@@ -451,7 +454,8 @@ private:
   bool Trace;
   bool WarnUninitialized;
   bool WarnUnused;
-  bool DefaultToUsed;
+  bool WarnUnusedCli;
+  std::map<std::string, bool> UsedCliVariables;
   std::string CMakeEditCommand;
   std::string CMakeCommand;
   std::string CXXEnvironment;
