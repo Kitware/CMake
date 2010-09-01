@@ -97,6 +97,7 @@ private:
   std::string Result;
   const char* FileName;
   bool WarnUninitialized;
+  bool CheckSystemVars;
   long FileLine;
   bool EscapeQuotes;
   std::string ErrorString;

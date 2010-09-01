@@ -150,6 +150,7 @@ cmake::cmake()
   this->WarnUninitialized = false;
   this->WarnUnused = false;
   this->WarnUnusedCli = true;
+  this->CheckSystemVars = false;
   this->SuppressDevWarnings = false;
   this->DoSuppressDevWarnings = false;
   this->DebugOutput = false;
@@ -655,6 +656,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       std::cout << "Finding unused variables given on the command line.\n";
       this->SetWarnUnusedCli(true);
+      }
+    else if(arg.find("--check-system-vars",0) == 0)
+      {
+      std::cout << "Also check system files when warning about unused and uninitialized variables.\n";
+      this->SetCheckSystemVars(true);
       }
     else if(arg.find("-G",0) == 0)
       {

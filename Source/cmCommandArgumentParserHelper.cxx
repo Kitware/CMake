@@ -21,6 +21,7 @@ int cmCommandArgument_yyparse( yyscan_t yyscanner );
 cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
 {
   this->WarnUninitialized = false;
+  this->CheckSystemVars = false;
   this->FileLine = -1;
   this->FileName = 0;
   this->RemoveEmpty = true;
@@ -129,10 +130,14 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     // not been "cleared"/initialized with a set(foo ) call
     if(this->WarnUninitialized && !this->Makefile->VariableInitialized(var))
       {
-      cmOStringStream msg;
-      msg << this->FileName << ":" << this->FileLine << ":" <<
-        " warning: uninitialized variable \'" << var << "\'";
-      cmSystemTools::Message(msg.str().c_str());
+      const char* root = this->Makefile->GetDefinition("CMAKE_ROOT");
+      if (this->CheckSystemVars || strstr(this->FileName, root) != this->FileName)
+        {
+        cmOStringStream msg;
+        msg << this->FileName << ":" << this->FileLine << ":" <<
+          " warning: uninitialized variable \'" << var << "\'";
+        cmSystemTools::Message(msg.str().c_str());
+        }
       }
     return 0;
     }
@@ -331,6 +336,7 @@ void cmCommandArgumentParserHelper::SetMakefile(const cmMakefile* mf)
 {
   this->Makefile = mf;
   this->WarnUninitialized = mf->GetCMakeInstance()->GetWarnUninitialized();
+  this->CheckSystemVars = mf->GetCMakeInstance()->GetCheckSystemVars();
 }
 
 void cmCommandArgumentParserHelper::SetResult(const char* value)

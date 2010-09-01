@@ -312,6 +312,8 @@ class cmake
   void SetWarnUnused(bool b) {  this->WarnUnused = b;}
   bool GetWarnUnusedCli() { return this->WarnUnusedCli;}
   void SetWarnUnusedCli(bool b) {  this->WarnUnusedCli = b;}
+  bool GetCheckSystemVars() { return this->CheckSystemVars;}
+  void SetCheckSystemVars(bool b) {  this->CheckSystemVars = b;}
 
   void MarkCliAsUsed(const std::string& variable);
 
@@ -455,6 +457,7 @@ private:
   bool WarnUninitialized;
   bool WarnUnused;
   bool WarnUnusedCli;
+  bool CheckSystemVars;
   std::map<std::string, bool> UsedCliVariables;
   std::string CMakeEditCommand;
   std::string CMakeCommand;

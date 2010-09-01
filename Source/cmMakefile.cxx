@@ -93,6 +93,7 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->Initialize();
   this->PreOrder = false;
   this->WarnUnused = false;
+  this->CheckSystemVars = false;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
@@ -136,6 +137,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
   this->WarnUnused = mf.WarnUnused;
+  this->CheckSystemVars = mf.CheckSystemVars;
   this->ListFileStack = mf.ListFileStack;
   this->Initialize();
 }
@@ -774,6 +776,7 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
       this->Internal->VarUsageStack.push(std::set<cmStdString>());
       }
     }
+    this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 }
 
 bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
@@ -3386,9 +3389,14 @@ void cmMakefile::PopScope()
     init.erase(*it);
     if (this->WarnUnused && usage.find(*it) == usage.end())
       {
-      cmOStringStream m;
-      m << "unused variable \'" << *it << "\'";
-      this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
+      const char* cdir = this->ListFileStack.back().c_str();
+      const char* root = this->GetDefinition("CMAKE_ROOT");
+      if (this->CheckSystemVars || strstr(cdir, root) != cdir)
+        {
+        cmOStringStream m;
+        m << "unused variable \'" << *it << "\'";
+        this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
+        }
       }
     else
       {
