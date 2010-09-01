@@ -61,6 +61,14 @@ public:
   unsigned int GetCacheMajorVersion();
   unsigned int GetCacheMinorVersion();
 
+  /* return true if a variable has been initialized */
+  bool VariableInitialized(const char* ) const;
+  /* return true if a variable has been used */
+  bool VariableUsed(const char* ) const;
+  /* return true if a variable has been set with
+     set(foo )
+  */
+  bool VariableCleared(const char* ) const;
   /** Return whether compatibility features needed for a version of
       the cache or lower should be enabled.  */
   bool NeedCacheCompatibility(int major, int minor);
@@ -924,6 +932,10 @@ private:
 
   // should this makefile be processed before or after processing the parent
   bool PreOrder;
+
+  // Unused variable flags
+  bool WarnUnused;
+  bool CheckSystemVars;
 
   // stack of list files being read 
   std::deque<cmStdString> ListFileStack;

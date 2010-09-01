@@ -306,6 +306,17 @@ class cmake
   // Do we want trace output during the cmake run.
   bool GetTrace() { return this->Trace;}
   void SetTrace(bool b) {  this->Trace = b;}
+  bool GetWarnUninitialized() { return this->WarnUninitialized;}
+  void SetWarnUninitialized(bool b) {  this->WarnUninitialized = b;}
+  bool GetWarnUnused() { return this->WarnUnused;}
+  void SetWarnUnused(bool b) {  this->WarnUnused = b;}
+  bool GetWarnUnusedCli() { return this->WarnUnusedCli;}
+  void SetWarnUnusedCli(bool b) {  this->WarnUnusedCli = b;}
+  bool GetCheckSystemVars() { return this->CheckSystemVars;}
+  void SetCheckSystemVars(bool b) {  this->CheckSystemVars = b;}
+
+  void MarkCliAsUsed(const std::string& variable);
+
   // Define a property
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
@@ -443,6 +454,11 @@ private:
   bool ScriptMode;
   bool DebugOutput;
   bool Trace;
+  bool WarnUninitialized;
+  bool WarnUnused;
+  bool WarnUnusedCli;
+  bool CheckSystemVars;
+  std::map<std::string, bool> UsedCliVariables;
   std::string CMakeEditCommand;
   std::string CMakeCommand;
   std::string CXXEnvironment;

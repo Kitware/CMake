@@ -40,6 +40,9 @@ public:
   /** Set (or unset if null) a value associated with a key.  */
   const char* Set(const char* key, const char* value);
 
+  /** Get the set of all local keys.  */
+  std::set<cmStdString> LocalKeys() const;
+
   /** Compute the closure of all defined keys with values.
       This flattens the scope.  The result has no parent.  */
   cmDefinitions Closure() const;

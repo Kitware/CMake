@@ -24,9 +24,13 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
 
     # Compile the ABI identification source.
     SET(BIN "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeDetermineCompilerABI_${lang}.bin")
+    SET(CMAKE_FLAGS )
+    IF(DEFINED CMAKE_${lang}_VERBOSE_FLAG)
+      SET(CMAKE_FLAGS "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}")
+    ENDIF()
     TRY_COMPILE(CMAKE_DETERMINE_${lang}_ABI_COMPILED
       ${CMAKE_BINARY_DIR} ${src}
-      CMAKE_FLAGS "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}"
+      CMAKE_FLAGS "${CMAKE_FLAGS}"
                   "-DCMAKE_${lang}_STANDARD_LIBRARIES="
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
@@ -58,10 +62,16 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
       # Parse implicit linker information for this language, if available.
       SET(implicit_dirs "")
       SET(implicit_libs "")
+      SET(MULTI_ARCH FALSE)
+      IF(DEFINED CMAKE_OSX_ARCHITECTURES)
+        IF( "${CMAKE_OSX_ARCHITECTURES}" MATCHES ";" )
+          SET(MULTI_ARCH TRUE)
+        ENDIF()
+      ENDIF()
       IF(CMAKE_${lang}_VERBOSE_FLAG
           # Implicit link information cannot be used explicitly for
           # multiple OS X architectures, so we skip it.
-          AND NOT "${CMAKE_OSX_ARCHITECTURES}" MATCHES ";"
+          AND NOT MULTI_ARCH
           # Skip this with Xcode for now.
           AND NOT "${CMAKE_GENERATOR}" MATCHES Xcode)
         CMAKE_PARSE_IMPLICIT_LINK_INFO("${OUTPUT}" implicit_libs implicit_dirs log)
