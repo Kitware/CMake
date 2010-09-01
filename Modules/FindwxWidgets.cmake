@@ -188,7 +188,7 @@ IF(EXISTS "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
   SET(wxWidgets_USE_FILE
     "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
 ELSE(EXISTS "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
-  SET(wxWidgets_USE_FILE UsewxWidgets.cmake)
+  SET(wxWidgets_USE_FILE UsewxWidgets)
 ENDIF(EXISTS "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
 
 #=====================================================================
