@@ -235,4 +235,7 @@ SET(CMAKE_SYSTEM_APPBUNDLE_PATH
   /Developer/Applications)
 
 INCLUDE(Platform/UnixPaths)
-LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH /sw)
+LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
+  /sw        # Fink
+  /opt/local # MacPorts
+  )
