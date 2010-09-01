@@ -66,7 +66,9 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-# Version 1.0 (8/12/2010)
+# Version 1.1 (8/19/2010) (CMake 2.8.3)
+#   * Add support for detecting GTK2 under macports (thanks to Gary Kramlich)
+# Version 1.0 (8/12/2010) (CMake 2.8.3)
 #   * Add support for detecting new pangommconfig.h header file
 #     (Thanks to Sune Vuorela & the Debian Project for the patch)
 #   * Add support for detecting fontconfig.h header
@@ -184,6 +186,8 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
             /usr/openwin/lib
             /sw/include
             /sw/lib
+            /opt/local/include
+            /opt/local/lib
             $ENV{GTKMM_BASEPATH}/include
             $ENV{GTKMM_BASEPATH}/lib
             [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]/include
