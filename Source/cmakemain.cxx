@@ -122,7 +122,7 @@ static const char * cmDocumentationOptions[][3] =
    "message(send_error ) calls."},
   {"--warn-uninitialized", "Warn about uninitialized values.",
    "Print a warning when an uninitialized variable is used."},
-  {"--warn-unused-all", "Warn about unused variables.",
+  {"--warn-unused-vars", "Warn about unused variables.",
    "Find variables that are declared or set, but not used."},
   {"--no-warn-unused-cli", "Don't warn about command line options.",
    "Don't find variables that are declared on the command line, but not used."},
