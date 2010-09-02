@@ -126,6 +126,9 @@ static const char * cmDocumentationOptions[][3] =
    "Find variables that are declared or set, but not used."},
   {"--no-warn-unused-cli", "Don't warn about command line options.",
    "Don't find variables that are declared on the command line, but not used."},
+  {"--check-system-vars", "Find problems with variable usage in system files.",
+   "Normally, unused and uninitialized variables are searched for only in CMAKE_SOURCE_DIR "
+   "and CMAKE_BINARY_DIR. This flag tells CMake to warn about other files as well."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed. "
    "If a file is specified, the documentation is written into and the output "
