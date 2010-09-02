@@ -130,8 +130,10 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     // not been "cleared"/initialized with a set(foo ) call
     if(this->WarnUninitialized && !this->Makefile->VariableInitialized(var))
       {
-      const char* root = this->Makefile->GetDefinition("CMAKE_ROOT");
-      if (this->CheckSystemVars || strstr(this->FileName, root) != this->FileName)
+      const char* srcRoot = this->Makefile->GetDefinition("CMAKE_SOURCE_DIR");
+      const char* binRoot = this->Makefile->GetDefinition("CMAKE_BINARY_DIR");
+      if (this->CheckSystemVars || strstr(this->FileName, srcRoot) == this->FileName ||
+          strstr(this->FileName, binRoot) == this->FileName)
         {
         cmOStringStream msg;
         msg << this->FileName << ":" << this->FileLine << ":" <<

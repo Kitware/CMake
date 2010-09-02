@@ -3392,8 +3392,9 @@ void cmMakefile::PopScope()
     if (this->WarnUnused && usage.find(*it) == usage.end())
       {
       const char* cdir = this->ListFileStack.back().c_str();
-      const char* root = this->GetDefinition("CMAKE_ROOT");
-      if (this->CheckSystemVars || strstr(cdir, root) != cdir)
+      const char* srcRoot = this->GetDefinition("CMAKE_SOURCE_DIR");
+      const char* binRoot = this->GetDefinition("CMAKE_BINARY_DIR");
+      if (this->CheckSystemVars || strstr(cdir, srcRoot) == cdir || strstr(cdir, binRoot) == cdir)
         {
         cmOStringStream m;
         m << "unused variable \'" << *it << "\'";
