@@ -201,6 +201,7 @@ cmake::cmake()
 
 cmake::~cmake()
 {
+#ifdef CMAKE_BUILD_WITH_CMAKE
   if(this->WarnUnusedCli)
     {
     std::map<std::string, bool>::const_iterator it;
@@ -214,6 +215,7 @@ cmake::~cmake()
         }
       }
     }
+#endif
   delete this->CacheManager;
   delete this->Policies;
   if (this->GlobalGenerator)
@@ -393,8 +395,10 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           "No help, variable specified on the command line.", type);
         if(this->WarnUnusedCli)
           {
+#ifdef CMAKE_BUILD_WITH_CMAKE
           this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
           this->UsedCliVariables[var] = false;
+#endif
           }
         }
       else
