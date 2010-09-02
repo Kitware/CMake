@@ -362,6 +362,8 @@ class cmake
             const std::string& config,
             const std::vector<std::string>& nativeOptions,
             bool clean);
+
+  void RunCheckForUnusedVariables() const;
 protected:
   void InitializeProperties();
   int HandleDeleteCacheVariables(const char* var);

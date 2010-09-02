@@ -201,21 +201,6 @@ cmake::cmake()
 
 cmake::~cmake()
 {
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  if(this->WarnUnusedCli)
-    {
-    std::map<std::string, bool>::const_iterator it;
-    for(it = this->UsedCliVariables.begin(); it != this->UsedCliVariables.end(); ++it)
-      {
-      if(!it->second)
-        {
-        std::string message = "warning: The variable, \"" + it->first + "\", given "
-          "on the command line, was not used within the build.";
-        cmSystemTools::Message(message.c_str());
-        }
-      }
-    }
-#endif
   delete this->CacheManager;
   delete this->Policies;
   if (this->GlobalGenerator)
@@ -4499,4 +4484,23 @@ int cmake::Build(const std::string& dir,
                     makeProgram.c_str(),
                     config.c_str(), clean, false, 0, true,
                     0, nativeOptions);
+}
+
+void cmake::RunCheckForUnusedVariables() const
+{
+#ifdef CMAKE_BUILD_WITH_CMAKE
+    if(this->WarnUnusedCli)
+      {
+      std::map<std::string, bool>::const_iterator it;
+      for(it = this->UsedCliVariables.begin(); it != this->UsedCliVariables.end(); ++it)
+        {
+        if(!it->second)
+          {
+          std::string message = "warning: The variable, \"" + it->first + "\", given "
+            "on the command line, was not used within the build.";
+          cmSystemTools::Message(message.c_str());
+          }
+        }
+      }
+#endif
 }
