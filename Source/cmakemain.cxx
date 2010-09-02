@@ -124,8 +124,8 @@ static const char * cmDocumentationOptions[][3] =
    "Print a warning when an uninitialized variable is used."},
   {"--warn-unused-all", "Warn about unused variables.",
    "Find variables that are declared or set, but not used."},
-  {"--warn-unused-cli", "Warn about command line options.",
-   "Find variables that are declared on the command line, but not used."},
+  {"--no-warn-unused-cli", "Don't warn about command line options.",
+   "Don't find variables that are declared on the command line, but not used."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed. "
    "If a file is specified, the documentation is written into and the output "

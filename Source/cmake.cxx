@@ -641,10 +641,10 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       std::cout << "Finding unused variables.\n";
       this->SetWarnUnused(true);
       }
-    else if(arg.find("--warn-unused-cli",0) == 0)
+    else if(arg.find("--no-warn-unused-cli",0) == 0)
       {
-      std::cout << "Finding unused variables given on the command line.\n";
-      this->SetWarnUnusedCli(true);
+      std::cout << "Not finding unused variables given on the command line.\n";
+      this->SetWarnUnusedCli(false);
       }
     else if(arg.find("--check-system-vars",0) == 0)
       {
