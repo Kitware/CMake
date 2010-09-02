@@ -1074,6 +1074,47 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleGeneratorTest")
   ENDIF(APPLE AND CTEST_TEST_CPACK)
 
+  ADD_TEST(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/VariableUsage"
+    "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --build-project WarnUnusedCliUnused
+    --build-options "-DUNUSED_VARIABLE=Unused")
+  SET_TESTS_PROPERTIES(WarnUnusedCliUnused PROPERTIES
+    PASS_REGULAR_EXPRESSION "warning: The variable, \"UNUSED_VARIABLE\"")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
+
+  ADD_TEST(WarnUnusedCliUsed ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/VariableUsage"
+    "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUsed"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --build-project WarnUnusedCliUsed
+    --build-options "-DUSED_VARIABLE=Usage proven")
+  SET_TESTS_PROPERTIES(WarnUnusedCliUsed PROPERTIES
+    PASS_REGULAR_EXPRESSION "Usage proven")
+  SET_TESTS_PROPERTIES(WarnUnusedCliUsed PROPERTIES
+    FAIL_REGULAR_EXPRESSION "warning: The variable, \"USED_VARIABLE\"")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUsed")
+
+  ADD_TEST(WarnUninitialized ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/VariableUsage"
+    "${CMake_BINARY_DIR}/Tests/WarnUninitialized"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --build-project WarnUninitialized
+    --build-options "--warn-uninitialized")
+  SET_TESTS_PROPERTIES(WarnUninitialized PROPERTIES
+    PASS_REGULAR_EXPRESSION "warning: uninitialized variable 'USED_VARIABLE'")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUninitialized")
+
   # Make sure CTest can handle a test with no newline in output.
   ADD_TEST(CTest.NoNewline
     ${CMAKE_CMAKE_COMMAND} -E echo_append "This line has no newline!")
