@@ -1102,6 +1102,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     FAIL_REGULAR_EXPRESSION "warning: The variable, \"USED_VARIABLE\"")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUsed")
 
+  ADD_TEST(WarnUninitialized ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/VariableUsage"
+    "${CMake_BINARY_DIR}/Tests/WarnUninitialized"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --build-project WarnUninitialized
+    --build-options "--warn-uninitialized")
+  SET_TESTS_PROPERTIES(WarnUninitialized PROPERTIES
+    PASS_REGULAR_EXPRESSION "warning: uninitialized variable 'USED_VARIABLE'")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUninitialized")
+
   # Make sure CTest can handle a test with no newline in output.
   ADD_TEST(CTest.NoNewline
     ${CMAKE_CMAKE_COMMAND} -E echo_append "This line has no newline!")
