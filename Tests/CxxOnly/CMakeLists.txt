@@ -2,7 +2,7 @@
 project (CxxOnly CXX)
 
 set(CMAKE_DEBUG_POSTFIX "_test_debug_postfix")
-add_library(testcxx1 STATIC libcxx1.cxx test.CPP test.CXX test.C++)
+add_library(testcxx1 STATIC libcxx1.cxx test.CPP)
 add_library(testcxx2 SHARED libcxx2.cxx)
 add_executable (CxxOnly cxxonly.cxx)
 target_link_libraries(CxxOnly testcxx1 testcxx2)
