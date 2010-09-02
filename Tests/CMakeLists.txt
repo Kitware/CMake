@@ -1082,9 +1082,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-noclean
     --build-project WarnUnusedCliUnused
-    --build-options "-DUNUSED_VARIABLE=Unused")
+    --build-options "-DUNUSED_CLI_VARIABLE=Unused")
   SET_TESTS_PROPERTIES(WarnUnusedCliUnused PROPERTIES
-    PASS_REGULAR_EXPRESSION "warning: The variable, \"UNUSED_VARIABLE\"")
+    PASS_REGULAR_EXPRESSION "warning: The variable, 'UNUSED_CLI_VARIABLE'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
 
   ADD_TEST(WarnUnusedCliUsed ${CMAKE_CTEST_COMMAND}
@@ -1099,7 +1099,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   SET_TESTS_PROPERTIES(WarnUnusedCliUsed PROPERTIES
     PASS_REGULAR_EXPRESSION "Usage proven")
   SET_TESTS_PROPERTIES(WarnUnusedCliUsed PROPERTIES
-    FAIL_REGULAR_EXPRESSION "warning: The variable, \"USED_VARIABLE\"")
+    FAIL_REGULAR_EXPRESSION "warning: The variable, 'USED_VARIABLE'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUsed")
 
   ADD_TEST(WarnUninitialized ${CMAKE_CTEST_COMMAND}
