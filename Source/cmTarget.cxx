@@ -854,10 +854,19 @@ void cmTarget::DefineProperties(cmake *cm)
      "set_source_files_properties command.");
 
   cm->DefineProperty
+    ("FOLDER", cmProperty::TARGET,
+     "Set the folder name. Use to organize targets in an IDE.",
+     "Targets with no FOLDER property will appear as top level "
+     "entities in IDEs like Visual Studio. Targets with the same "
+     "FOLDER property value will appear next to each other in a "
+     "folder of that name. To nest folders, use FOLDER values such "
+     "as 'GUI/Dialogs' with '/' characters separating folder levels.");
+
+  cm->DefineProperty
     ("PROJECT_LABEL", cmProperty::TARGET,
      "Change the name of a target in an IDE.",
      "Can be used to change the name of the target in an IDE "
-     "like visual stuido. ");
+     "like Visual Studio. ");
   cm->DefineProperty
     ("VS_KEYWORD", cmProperty::TARGET,
      "Visual Studio project keyword.",

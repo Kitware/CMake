@@ -300,6 +300,48 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
                             cmLocalGenerator::START_OUTPUT);
         this->WriteProject(fout, vcprojName, dir.c_str(),
                            *target);
+
+        // Create "solution folder" information from FOLDER target property
+        //
+        if (this->UseFolderProperty())
+          {
+          const char *targetFolder = target->GetProperty("FOLDER");
+          if (targetFolder)
+            {
+            std::vector<cmsys::String> tokens =
+              cmSystemTools::SplitString(targetFolder, '/', false);
+
+            std::string cumulativePath = "";
+
+            for(std::vector<cmsys::String>::iterator iter = tokens.begin();
+                iter != tokens.end(); ++iter)
+              {
+              if(!iter->size())
+                {
+                continue;
+                }
+
+              if (cumulativePath.empty())
+                {
+                cumulativePath = *iter;
+                }
+              else
+                {
+                VisualStudioFolders[cumulativePath].insert(
+                  cumulativePath + "/" + *iter);
+
+                cumulativePath = cumulativePath + "/" + *iter;
+                }
+
+              this->CreateGUID(cumulativePath.c_str());
+              }
+
+            if (!cumulativePath.empty())
+              {
+              VisualStudioFolders[cumulativePath].insert(target->GetName());
+              }
+            }
+          }
         }
       }
     }
@@ -327,6 +369,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
     }
 }
 
+//----------------------------------------------------------------------------
 // Write a SLN file to the stream
 void cmGlobalVisualStudio7Generator
 ::WriteSLNFile(std::ostream& fout,
@@ -344,6 +387,13 @@ void cmGlobalVisualStudio7Generator
   OrderedTargetDependSet orderedProjectTargets(projectTargets);
 
   this->WriteTargetsToSolution(fout, root, orderedProjectTargets);
+
+  bool useFolderProperty = this->UseFolderProperty();
+  if (useFolderProperty)
+    {
+    this->WriteFolders(fout);
+    }
+
   // Write out the configurations information for the solution
   fout << "Global\n"
        << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
@@ -361,6 +411,14 @@ void cmGlobalVisualStudio7Generator
   this->WriteTargetDepends(fout, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
+  if (useFolderProperty)
+    {
+    // Write out project folders
+    fout << "\tGlobalSection(NestedProjects) = preSolution\n";
+    this->WriteFoldersContent(fout);
+    fout << "\tEndGlobalSection\n";
+    }
+
   // Write out the configurations for all the targets in the project
   fout << "\tGlobalSection(ProjectConfiguration) = postSolution\n";
   this->WriteTargetConfigurations(fout, root, orderedProjectTargets);
@@ -368,6 +426,47 @@ void cmGlobalVisualStudio7Generator
 
   // Write the footer for the SLN file
   this->WriteSLNFooter(fout);
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
+{
+  std::string guidProjectTypeFolder = "2150E333-8FDC-42A3-9474-1A3956D46DE8";
+  for(std::map<std::string,std::set<std::string> >::iterator iter =
+    VisualStudioFolders.begin(); iter != VisualStudioFolders.end(); ++iter)
+    {
+    std::string fullName = iter->first;
+    std::string guid = this->GetGUID(fullName.c_str());
+    std::string nameOnly = cmSystemTools::GetFilenameName(fullName);
+    cmSystemTools::ReplaceString(fullName, "/", "\\");
+
+    fout << "Project(\"{" <<
+      guidProjectTypeFolder << "}\") = \"" <<
+      nameOnly << "\", \"" <<
+      fullName << "\", \"{" <<
+      guid <<
+      "}\"\nEndProject\n";
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio7Generator::WriteFoldersContent(std::ostream& fout)
+{
+  for(std::map<std::string,std::set<std::string> >::iterator iter =
+    VisualStudioFolders.begin(); iter != VisualStudioFolders.end(); ++iter)
+    {
+    std::string key(iter->first);
+    std::string guidParent(this->GetGUID(key.c_str()));
+
+    for(std::set<std::string>::iterator it = iter->second.begin();
+        it != iter->second.end(); ++it)
+      {
+      std::string value(*it);
+      std::string guid(this->GetGUID(value.c_str()));
+
+      fout << "\t\t{" << guid << "} = {" << guidParent << "}\n";
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
