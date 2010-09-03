@@ -173,6 +173,18 @@ MACRO(CMAKE_SETUP_TESTING)
 ENDMACRO(CMAKE_SETUP_TESTING)
 
 
+MACRO(CMAKE_SET_TARGET_FOLDER tgt folder)
+  # Really, I just want this to be an "if(TARGET ${tgt})" ...
+  # but I'm not sure that our min req'd., CMake 2.4.5 can handle
+  # that... so I'm just activating this for now, with a version
+  # compare, and only for MSVC builds.
+  IF(MSVC)
+    IF(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
+      SET_PROPERTY(TARGET "${tgt}" PROPERTY FOLDER "${folder}")
+    ENDIF()
+  ENDIF()
+ENDMACRO(CMAKE_SET_TARGET_FOLDER)
+
 
 #-----------------------------------------------------------------------
 # a macro to build the utilities used by CMake
@@ -192,7 +204,17 @@ MACRO (CMAKE_BUILD_UTILITIES)
   SET(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
   SET(KWSYS_INSTALL_DOC_DIR "${CMake_DOC_DEST}")
   ADD_SUBDIRECTORY(Source/kwsys)
-  
+  SET(kwsys_folder "Utilities/KWSys")
+  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE} "${kwsys_folder}")
+  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}_c "${kwsys_folder}")
+  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}EncodeExecutable "${kwsys_folder}")
+  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}ProcessFwd9x "${kwsys_folder}")
+  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestDynload "${kwsys_folder}")
+  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestProcess "${kwsys_folder}")
+  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestsC "${kwsys_folder}")
+  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestsCxx "${kwsys_folder}")
+  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestSharedForward "${kwsys_folder}")
+
   #---------------------------------------------------------------------
   # Setup third-party libraries.
   # Everything in the tree should be able to include files from the
@@ -221,6 +243,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     SET(CMAKE_ZLIB_INCLUDES)
     SET(CMAKE_ZLIB_LIBRARIES cmzlib)
     ADD_SUBDIRECTORY(Utilities/cmzlib)
+    CMAKE_SET_TARGET_FOLDER(cmzlib "Utilities/3rdParty")
   ENDIF(CMAKE_USE_SYSTEM_ZLIB)
   
   #---------------------------------------------------------------------
@@ -247,6 +270,8 @@ MACRO (CMAKE_BUILD_UTILITIES)
       SET(CMAKE_CURL_TEST_URL "${CMAKE_TESTS_CDASH_SERVER}/user.php")
     ENDIF(CMAKE_TESTS_CDASH_SERVER)
     ADD_SUBDIRECTORY(Utilities/cmcurl)
+    CMAKE_SET_TARGET_FOLDER(cmcurl "Utilities/3rdParty")
+    CMAKE_SET_TARGET_FOLDER(LIBCURL "Utilities/3rdParty")
   ENDIF(CMAKE_USE_SYSTEM_CURL)
 
   #---------------------------------------------------------------------
@@ -255,6 +280,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmcompress")
   SET(CMAKE_COMPRESS_LIBRARIES "cmcompress")
   ADD_SUBDIRECTORY(Utilities/cmcompress)
+  CMAKE_SET_TARGET_FOLDER(cmcompress "Utilities/3rdParty")
   IF(CMAKE_USE_SYSTEM_BZIP2)
     FIND_PACKAGE(BZip2)
   ELSE()
@@ -262,6 +288,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
       "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmbzip2")
     SET(BZIP2_LIBRARIES cmbzip2)
     ADD_SUBDIRECTORY(Utilities/cmbzip2)
+    CMAKE_SET_TARGET_FOLDER(cmbzip2 "Utilities/3rdParty")
   ENDIF()
   IF(CMAKE_USE_SYSTEM_LIBARCHIVE)
     FIND_PACKAGE(libarchive)
@@ -275,6 +302,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     SET(BUILD_ARCHIVE_WITHIN_CMAKE TRUE)
     ADD_DEFINITIONS(-DLIBARCHIVE_STATIC)
     ADD_SUBDIRECTORY(Utilities/cmlibarchive)
+    CMAKE_SET_TARGET_FOLDER(cmlibarchive "Utilities/3rdParty")
     SET(CMAKE_TAR_LIBRARIES cmlibarchive ${BZIP2_LIBRARIES})
   ENDIF(CMAKE_USE_SYSTEM_LIBARCHIVE)
 
@@ -292,6 +320,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     SET(CMAKE_EXPAT_INCLUDES)
     SET(CMAKE_EXPAT_LIBRARIES cmexpat)
     ADD_SUBDIRECTORY(Utilities/cmexpat)
+    CMAKE_SET_TARGET_FOLDER(cmexpat "Utilities/3rdParty")
   ENDIF(CMAKE_USE_SYSTEM_EXPAT)
   
   #---------------------------------------------------------------------
@@ -520,6 +549,10 @@ MARK_AS_ADVANCED(CMAKE_STRICT)
 ADD_SUBDIRECTORY(Source)
 ADD_SUBDIRECTORY(Utilities)
 ADD_SUBDIRECTORY(Tests)
+
+CMAKE_SET_TARGET_FOLDER(CMakeLibTests "Tests")
+CMAKE_SET_TARGET_FOLDER(cmw9xcom "Utilities/Win9xCompat")
+CMAKE_SET_TARGET_FOLDER(documentation "Documentation")
 
 # add a test
 ADD_TEST(SystemInformationNew "${CMAKE_CMAKE_COMMAND}" 

@@ -1837,6 +1837,38 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     }
 }
 
+//----------------------------------------------------------------------------
+const char* cmGlobalGenerator::GetPredefinedTargetsFolder()
+{
+  const char* prop =
+    this->GetCMakeInstance()->GetProperty("PREDEFINED_TARGETS_FOLDER");
+
+  if (prop)
+    {
+    return prop;
+    }
+
+  return "CMakePredefinedTargets";
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalGenerator::UseFolderProperty()
+{
+  const char* prop = this->GetCMakeInstance()->GetProperty("USE_FOLDERS");
+
+  // If this property is defined, let the setter turn this on or off...
+  //
+  if (prop)
+    {
+    return cmSystemTools::IsOn(prop);
+    }
+
+  // By default, this feature is ON:
+  //
+  return true;
+}
+
+//----------------------------------------------------------------------------
 cmTarget cmGlobalGenerator::CreateGlobalTarget(
   const char* name, const char* message,
   const cmCustomCommandLines* commandLines,
@@ -1866,6 +1898,14 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
     {
     target.AddUtility(dit->c_str());
     }
+
+  // Organize in the "predefined targets" folder:
+  //
+  if (this->UseFolderProperty())
+    {
+    target.SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
+    }
+
   return target;
 }
 

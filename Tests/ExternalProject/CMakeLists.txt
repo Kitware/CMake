@@ -7,6 +7,9 @@ find_package(CVS)
 find_package(Subversion)
 find_package(Git)
 
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER
+  "CMakePredefinedTargets-in-ExternalProjectTest")
+
 set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
 set(binary_base "${base}/Build")
 set_property(DIRECTORY PROPERTY EP_BASE ${base})
@@ -41,6 +44,22 @@ endif()
 
 # Empty projects that test all the known ExternalProject_Add argument key words:
 #
+set(proj AAA-TestAlphabetization)
+ExternalProject_Add(${proj}
+  BUILD_COMMAND ""
+  CONFIGURE_COMMAND ""
+  DOWNLOAD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
+set(proj ZZZ-TestAlphabetization)
+ExternalProject_Add(${proj}
+  BUILD_COMMAND ""
+  CONFIGURE_COMMAND ""
+  DOWNLOAD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+
 set(proj MinimalNoOpProject)
 ExternalProject_Add(${proj}
   BUILD_COMMAND ""
@@ -69,6 +88,7 @@ ExternalProject_Add(${proj}
   URL_MD5 ""
   UPDATE_COMMAND ""
 )
+set_property(TARGET ${proj} PROPERTY FOLDER "")
 
 
 # Local DIR:
@@ -80,6 +100,7 @@ if(can_build_tutorial_step5)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
     TEST_BEFORE_INSTALL 1
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "Local")
   ExternalProject_Get_Property(${proj} install_dir)
   set(TutorialStep5_install_dir ${install_dir})
 
@@ -89,6 +110,7 @@ if(can_build_tutorial_step5)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
     TEST_AFTER_INSTALL 1
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "Local")
 endif()
 
 
@@ -105,6 +127,7 @@ ExternalProject_Add(${proj}
              -DTEST_LIST:STRING=A::B::C
   INSTALL_COMMAND ""
 )
+set_property(TARGET ${proj} PROPERTY FOLDER "Local/TAR")
 
 set(proj TutorialStep1-LocalNoDirTAR)
 ExternalProject_Add(${proj}
@@ -115,6 +138,7 @@ ExternalProject_Add(${proj}
              -DTEST_LIST:STRING=1@@2@@3
   INSTALL_COMMAND ""
 )
+set_property(TARGET ${proj} PROPERTY FOLDER "Local/TAR")
 ExternalProject_Add_Step(${proj} mypatch
   COMMAND ${CMAKE_COMMAND} -E echo "This is a custom external project step."
   COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/Step1Patch.cmake
@@ -133,6 +157,7 @@ ExternalProject_Add(${proj}
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> -G ${CMAKE_GENERATOR} <SOURCE_DIR>
   INSTALL_COMMAND ""
 )
+set_property(TARGET ${proj} PROPERTY FOLDER "Local/TGZ")
 
 set(proj TutorialStep1-LocalNoDirTGZ)
 ExternalProject_Add(${proj}
@@ -142,6 +167,7 @@ ExternalProject_Add(${proj}
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
   INSTALL_COMMAND ""
 )
+set_property(TARGET ${proj} PROPERTY FOLDER "Local/TGZ")
 
 
 # Local BZ2:
@@ -158,6 +184,7 @@ ExternalProject_Add(${proj}
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
 )
+set_property(TARGET ${proj} PROPERTY FOLDER "Local/BZ2")
 
 set(proj TutorialStep1-LocalNoDirBZ2)
 ExternalProject_Add(${proj}
@@ -166,6 +193,7 @@ ExternalProject_Add(${proj}
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
 )
+set_property(TARGET ${proj} PROPERTY FOLDER "Local/BZ2")
 
 
 # Local ZIP:
@@ -182,6 +210,7 @@ ExternalProject_Add(${proj}
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
 )
+set_property(TARGET ${proj} PROPERTY FOLDER "Local/ZIP")
 
 set(proj TutorialStep1-LocalNoDirZIP)
 ExternalProject_Add(${proj}
@@ -190,6 +219,7 @@ ExternalProject_Add(${proj}
   BUILD_COMMAND ""
   INSTALL_COMMAND ""
 )
+set_property(TARGET ${proj} PROPERTY FOLDER "Local/ZIP")
 
 
 # CVS-based tests:
@@ -221,6 +251,8 @@ if(do_cvs_tests)
     CONFIGURE_COMMAND "${CVS_EXECUTABLE}" --version
     INSTALL_COMMAND ""
   )
+  set_property(TARGET ${proj}
+    PROPERTY FOLDER "SetupRepos/Local/Deeply/Nested/For/Testing")
 
   # CVS by date stamp:
   #
@@ -235,6 +267,7 @@ if(do_cvs_tests)
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalCVSRepository"
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "CVS")
 
   # CVS by tag:
   #
@@ -249,6 +282,7 @@ if(do_cvs_tests)
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalCVSRepository"
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "CVS")
 
   # Live CVS / HEAD (no CVS_TAG):
   #
@@ -268,6 +302,7 @@ if(do_cvs_tests)
     DEPENDS "TutorialStep1-CVS-20090626"
     DEPENDS "TutorialStep1-CVS-testtag1"
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "CVS")
 endif()
 
 
@@ -320,6 +355,8 @@ if(do_svn_tests)
     CONFIGURE_COMMAND "${Subversion_SVN_EXECUTABLE}" --version
     INSTALL_COMMAND ""
   )
+  set_property(TARGET ${proj}
+    PROPERTY FOLDER "SetupRepos/Local/Deeply/Nested/For/Testing")
 
   # SVN by date stamp:
   #
@@ -333,6 +370,7 @@ if(do_svn_tests)
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalSVNRepository"
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "SVN")
 
   # SVN by revision number:
   #
@@ -346,6 +384,7 @@ if(do_svn_tests)
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalSVNRepository"
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "SVN")
 
   # Live SVN / trunk (no SVN_REVISION):
   #
@@ -357,6 +396,7 @@ if(do_svn_tests)
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalSVNRepository"
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "SVN")
 endif()
 
 
@@ -394,6 +434,8 @@ if(do_git_tests)
     CONFIGURE_COMMAND "${GIT_EXECUTABLE}" --version
     INSTALL_COMMAND ""
   )
+  set_property(TARGET ${proj}
+    PROPERTY FOLDER "SetupRepos/Local/Deeply/Nested/For/Testing")
 
   # git by commit id:
   #
@@ -407,6 +449,7 @@ if(do_git_tests)
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 
   # git by explicit branch/tag name:
   #
@@ -420,6 +463,7 @@ if(do_git_tests)
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 
   # Live git / master (no GIT_TAG):
   #
@@ -431,6 +475,7 @@ if(do_git_tests)
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
   )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 endif()
 
 

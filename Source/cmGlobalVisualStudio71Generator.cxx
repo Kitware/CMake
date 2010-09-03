@@ -111,6 +111,13 @@ void cmGlobalVisualStudio71Generator
   OrderedTargetDependSet orderedProjectTargets(projectTargets);
 
   this->WriteTargetsToSolution(fout, root, orderedProjectTargets);
+
+  bool useFolderProperty = this->UseFolderProperty();
+  if (useFolderProperty)
+    {
+    this->WriteFolders(fout);
+    }
+
   // Write out the configurations information for the solution
   fout << "Global\n";
   // Write out the configurations for the solution
@@ -120,6 +127,15 @@ void cmGlobalVisualStudio71Generator
   // Write out the configurations for all the targets in the project
   this->WriteTargetConfigurations(fout, root, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
+
+  if (useFolderProperty)
+    {
+    // Write out project folders
+    fout << "\tGlobalSection(NestedProjects) = preSolution\n";
+    this->WriteFoldersContent(fout);
+    fout << "\tEndGlobalSection\n";
+    }
+
   // Write the footer for the SLN file
   this->WriteSLNFooter(fout);
 }
