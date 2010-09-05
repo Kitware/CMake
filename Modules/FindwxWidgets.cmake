@@ -32,7 +32,14 @@
 #  wxWidgets_USE_UNICODE
 #  wxWidgets_USE_UNIVERSAL
 #  wxWidgets_USE_STATIC
-#  
+#
+# There is also a wxWidgets_CONFIG_OPTIONS variable for all other
+# options that need to be passed to the wx-config utility. For
+# example, to use the base toolkit found in the /usr/local path, set
+# the variable (before calling the FIND_PACKAGE command) as such:
+#
+#  SET(wxWidgets_CONFIG_OPTIONS --toolkit=base --prefix=/usr)
+#
 # The following are set after the configuration is done for both
 # windows and unix style:
 #
@@ -615,7 +622,8 @@ ELSE(wxWidgets_FIND_STYLE STREQUAL "win32")
     #
     MACRO(WX_CONFIG_SELECT_GET_DEFAULT)
       EXECUTE_PROCESS(
-        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --selected-config
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}"
+          ${wxWidgets_CONFIG_OPTIONS} --selected-config
         OUTPUT_VARIABLE _wx_selected_config
         RESULT_VARIABLE _wx_result
         ERROR_QUIET
@@ -643,13 +651,15 @@ ELSE(wxWidgets_FIND_STYLE STREQUAL "win32")
     #
     MACRO(WX_CONFIG_SELECT_QUERY_BOOL _OPT_NAME _OPT_HELP)
       EXECUTE_PROCESS(
-        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --${_OPT_NAME}=yes
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}"
+          ${wxWidgets_CONFIG_OPTIONS} --${_OPT_NAME}=yes
         RESULT_VARIABLE _wx_result_yes
         OUTPUT_QUIET
         ERROR_QUIET
         )
       EXECUTE_PROCESS(
-        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --${_OPT_NAME}=no
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}"
+          ${wxWidgets_CONFIG_OPTIONS} --${_OPT_NAME}=no
         RESULT_VARIABLE _wx_result_no
         OUTPUT_QUIET
         ERROR_QUIET
@@ -675,7 +685,7 @@ ELSE(wxWidgets_FIND_STYLE STREQUAL "win32")
     # among multiple builds.
     #
     MACRO(WX_CONFIG_SELECT_SET_OPTIONS)
-      SET(wxWidgets_SELECT_OPTIONS "")
+      SET(wxWidgets_SELECT_OPTIONS ${wxWidgets_CONFIG_OPTIONS})
       FOREACH(_opt_name debug static unicode universal)
         STRING(TOUPPER ${_opt_name} _upper_opt_name)
         IF(DEFINED wxWidgets_USE_${_upper_opt_name})
