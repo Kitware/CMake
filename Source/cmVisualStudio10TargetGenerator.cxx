@@ -838,10 +838,10 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
     *this->BuildFileStream << intermediateDir
                            << "</IntDir>\n";
     this->WritePlatformConfigTag("TargetName", config->c_str(), 3);
-    *this->BuildFileStream << cmSystemTools::GetFilenameWithoutExtension(
+    *this->BuildFileStream
+      << cmSystemTools::GetFilenameWithoutLastExtension(
       targetNameFull.c_str())
                            << "</TargetName>\n";
-    
     this->WritePlatformConfigTag("TargetExt", config->c_str(), 3);
     *this->BuildFileStream << cmSystemTools::GetFilenameLastExtension(
       targetNameFull.c_str())
@@ -849,7 +849,6 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
     this->OutputLinkIncremental(*config);
     }
   this->WriteString("</PropertyGroup>\n", 2);
-        
 }
 
 
