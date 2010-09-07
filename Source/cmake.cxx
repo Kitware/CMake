@@ -4513,7 +4513,7 @@ void cmake::RunCheckForUnusedVariables() const
         {
         if(!it->second)
           {
-          std::string message = "warning: The variable, \"" + it->first + "\", given "
+          std::string message = "warning: The variable, '" + it->first + "', given "
             "on the command line, was not used within the build.";
           cmSystemTools::Message(message.c_str());
           }
