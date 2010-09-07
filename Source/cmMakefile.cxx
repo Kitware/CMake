@@ -99,6 +99,8 @@ cmMakefile::cmMakefile(): Internal(new Internals)
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
 {
   this->Internal->VarStack.push(mf.Internal->VarStack.top().Closure());
+  this->Internal->VarInitStack.push(mf.Internal->VarInitStack.top());
+  this->Internal->VarUsageStack.push(mf.Internal->VarUsageStack.top());
 
   this->Prefix = mf.Prefix;
   this->AuxSourceDirectories = mf.AuxSourceDirectories;
