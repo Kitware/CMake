@@ -2,7 +2,7 @@
 project (CxxOnly CXX)
 
 set(CMAKE_DEBUG_POSTFIX "_test_debug_postfix")
-if(MSVC)
+if(WIN32)
   set(EXTRA_SRCS test.CPP)
 endif()
 add_library(testcxx1.my STATIC libcxx1.cxx ${EXTRA_SRCS})
