@@ -61,7 +61,11 @@
 # endif
 #else
 # include <unistd.h>
-#define __LA_INT64_T    int64_t
+#ifdef __osf__
+#  define __LA_INT64_T    long long
+#else
+#  define __LA_INT64_T    int64_t
+#endif
 #define __LA_UID_T  uid_t
 #define __LA_GID_T  gid_t
 #define __LA_DEV_T  dev_t
