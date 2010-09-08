@@ -4,7 +4,7 @@
 # modules that you will use, you need to name them as components to
 # the package:
 # 
-# FIND_PACKAGE(wxWidgets COMPONENTS base core ...)
+# FIND_PACKAGE(wxWidgets COMPONENTS core base ...)
 # 
 # There are two search branches: a windows style and a unix style. For
 # windows, the following variables are searched for and set to
@@ -32,7 +32,14 @@
 #  wxWidgets_USE_UNICODE
 #  wxWidgets_USE_UNIVERSAL
 #  wxWidgets_USE_STATIC
-#  
+#
+# There is also a wxWidgets_CONFIG_OPTIONS variable for all other
+# options that need to be passed to the wx-config utility. For
+# example, to use the base toolkit found in the /usr/local path, set
+# the variable (before calling the FIND_PACKAGE command) as such:
+#
+#  SET(wxWidgets_CONFIG_OPTIONS --toolkit=base --prefix=/usr)
+#
 # The following are set after the configuration is done for both
 # windows and unix style:
 #
@@ -54,7 +61,8 @@
 #  wxWidgets_USE_FILE         - Convenience include file.
 #
 # Sample usage:
-#   FIND_PACKAGE(wxWidgets COMPONENTS base core gl net)
+#   # Note that for MinGW users the order of libs is important!
+#   FIND_PACKAGE(wxWidgets COMPONENTS net gl core base)
 #   IF(wxWidgets_FOUND)
 #     INCLUDE(${wxWidgets_USE_FILE})
 #     # and for each of your dependent executable/library targets:
@@ -62,7 +70,7 @@
 #   ENDIF(wxWidgets_FOUND)
 #
 # If wxWidgets is required (i.e., not an optional part):
-#   FIND_PACKAGE(wxWidgets REQUIRED base core gl net)
+#   FIND_PACKAGE(wxWidgets REQUIRED net gl core base)
 #   INCLUDE(${wxWidgets_USE_FILE})
 #   # and for each of your dependent executable/library targets:
 #   TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
@@ -188,7 +196,7 @@ IF(EXISTS "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
   SET(wxWidgets_USE_FILE
     "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
 ELSE(EXISTS "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
-  SET(wxWidgets_USE_FILE UsewxWidgets.cmake)
+  SET(wxWidgets_USE_FILE UsewxWidgets)
 ENDIF(EXISTS "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
 
 #=====================================================================
@@ -213,7 +221,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
     IF(wxWidgets_USE_MONOLITHIC)
       SET(wxWidgets_FIND_COMPONENTS mono)
     ELSE(wxWidgets_USE_MONOLITHIC)
-      SET(wxWidgets_FIND_COMPONENTS base core) # this is default
+      SET(wxWidgets_FIND_COMPONENTS core base) # this is default
     ENDIF(wxWidgets_USE_MONOLITHIC)
   ENDIF(NOT wxWidgets_FIND_COMPONENTS)
 
@@ -563,22 +571,22 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
         # Get configuration parameters from the name.
         WX_GET_NAME_COMPONENTS(${wxWidgets_CONFIGURATION} UNV UCD DBG)
 
+        # Set wxWidgets lib setup include directory.
+        IF(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
+          SET(wxWidgets_INCLUDE_DIRS
+            ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION})
+        ELSE(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
+          DBG_MSG("wxWidgets_FOUND FALSE because ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h does not exists.")
+          SET(wxWidgets_FOUND FALSE)
+        ENDIF(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
+
         # Set wxWidgets main include directory.
         IF(EXISTS ${WX_ROOT_DIR}/include/wx/wx.h)
-          SET(wxWidgets_INCLUDE_DIRS ${WX_ROOT_DIR}/include)
+          LIST(APPEND wxWidgets_INCLUDE_DIRS ${WX_ROOT_DIR}/include)
         ELSE(EXISTS ${WX_ROOT_DIR}/include/wx/wx.h)
           DBG_MSG("wxWidgets_FOUND FALSE because WX_ROOT_DIR=${WX_ROOT_DIR} has no ${WX_ROOT_DIR}/include/wx/wx.h")
           SET(wxWidgets_FOUND FALSE)
         ENDIF(EXISTS ${WX_ROOT_DIR}/include/wx/wx.h)
-
-        # Set wxWidgets lib setup include directory.
-        IF(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
-          LIST(APPEND wxWidgets_INCLUDE_DIRS
-            ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION})
-        ELSE(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
-          DBG_MSG("WXWIDGET_FOUND FALSE because ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h does not exists.")
-          SET(wxWidgets_FOUND FALSE)
-        ENDIF(EXISTS ${WX_LIB_DIR}/${wxWidgets_CONFIGURATION}/wx/setup.h)
 
         # Find wxWidgets libraries.
         WX_FIND_LIBS("${UNV}" "${UCD}" "${DBG}")
@@ -614,7 +622,8 @@ ELSE(wxWidgets_FIND_STYLE STREQUAL "win32")
     #
     MACRO(WX_CONFIG_SELECT_GET_DEFAULT)
       EXECUTE_PROCESS(
-        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --selected-config
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}"
+          ${wxWidgets_CONFIG_OPTIONS} --selected-config
         OUTPUT_VARIABLE _wx_selected_config
         RESULT_VARIABLE _wx_result
         ERROR_QUIET
@@ -642,13 +651,15 @@ ELSE(wxWidgets_FIND_STYLE STREQUAL "win32")
     #
     MACRO(WX_CONFIG_SELECT_QUERY_BOOL _OPT_NAME _OPT_HELP)
       EXECUTE_PROCESS(
-        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --${_OPT_NAME}=yes
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}"
+          ${wxWidgets_CONFIG_OPTIONS} --${_OPT_NAME}=yes
         RESULT_VARIABLE _wx_result_yes
         OUTPUT_QUIET
         ERROR_QUIET
         )
       EXECUTE_PROCESS(
-        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --${_OPT_NAME}=no
+        COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}"
+          ${wxWidgets_CONFIG_OPTIONS} --${_OPT_NAME}=no
         RESULT_VARIABLE _wx_result_no
         OUTPUT_QUIET
         ERROR_QUIET
@@ -674,7 +685,7 @@ ELSE(wxWidgets_FIND_STYLE STREQUAL "win32")
     # among multiple builds.
     #
     MACRO(WX_CONFIG_SELECT_SET_OPTIONS)
-      SET(wxWidgets_SELECT_OPTIONS "")
+      SET(wxWidgets_SELECT_OPTIONS ${wxWidgets_CONFIG_OPTIONS})
       FOREACH(_opt_name debug static unicode universal)
         STRING(TOUPPER ${_opt_name} _upper_opt_name)
         IF(DEFINED wxWidgets_USE_${_upper_opt_name})

@@ -1,15 +1,13 @@
-# - Convenience include for using wxWidgets library
-# Finds if wxWidgets is installed
-# and set the appropriate libs, incdirs, flags etc.
-# INCLUDE_DIRECTORIES, LINK_DIRECTORIES and ADD_DEFINITIONS
-# are called.
+# - Convenience include for using wxWidgets library.
+# Determines if wxWidgets was FOUND and sets the appropriate libs, incdirs,
+# flags, etc. INCLUDE_DIRECTORIES and LINK_DIRECTORIES are called.
 #
 # USAGE
-#  SET( wxWidgets_USE_LIBS  gl xml xrc ) # optionally: more than wx std libs
-#  FIND_PACKAGE(wxWidgets REQUIRED)
-#  INCLUDE( ${xWidgets_USE_FILE} )
-#  ... add your targets here, e.g. ADD_EXECUTABLE/ ADD_LIBRARY ...
-#  TARGET_LINK_LIBRARIERS( <yourWxDependantTarget>  ${wxWidgets_LIBRARIES})
+#  # Note that for MinGW users the order of libs is important!
+#  FIND_PACKAGE(wxWidgets REQUIRED net gl core base)
+#  INCLUDE(${wxWidgets_USE_FILE})
+#  # and for each of your dependant executable/library targets:
+#  TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
 #
 # DEPRECATED
 #  LINK_LIBRARIES is not called in favor of adding dependencies per target.
