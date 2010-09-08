@@ -1465,16 +1465,7 @@ void cmMakefile::InitializeFromParent()
   this->SetProperty("COMPILE_DEFINITIONS",
                     parent->GetProperty("COMPILE_DEFINITIONS"));
   std::vector<std::string> configs;
-  if(const char* configTypes =
-     this->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
-    {
-    cmSystemTools::ExpandListArgument(configTypes, configs);
-    }
-  else if(const char* buildType =
-          this->GetDefinition("CMAKE_BUILD_TYPE"))
-    {
-    configs.push_back(buildType);
-    }
+  this->GetConfigurations(configs);
   for(std::vector<std::string>::const_iterator ci = configs.begin();
       ci != configs.end(); ++ci)
     {
@@ -2432,6 +2423,31 @@ void cmMakefile::AddDefaultDefinitions()
 
   this->AddDefinition("CMAKE_FILES_DIRECTORY",
                       cmake::GetCMakeFilesDirectory());
+}
+
+//----------------------------------------------------------------------------
+const char*
+cmMakefile::GetConfigurations(std::vector<std::string>& configs,
+                              bool single) const
+{
+  if(this->LocalGenerator->GetGlobalGenerator()->IsMultiConfig())
+    {
+    if(const char* configTypes =
+       this->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+      {
+      cmSystemTools::ExpandListArgument(configTypes, configs);
+      }
+    return 0;
+    }
+  else
+    {
+    const char* buildType = this->GetDefinition("CMAKE_BUILD_TYPE");
+    if(single && buildType && *buildType)
+      {
+      configs.push_back(buildType);
+      }
+    return buildType;
+    }
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

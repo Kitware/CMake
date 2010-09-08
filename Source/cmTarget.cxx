@@ -1040,18 +1040,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
-  if(const char* configurationTypes =
-     mf->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
-    {
-    cmSystemTools::ExpandListArgument(configurationTypes, configNames);
-    }
-  else if(const char* buildType = mf->GetDefinition("CMAKE_BUILD_TYPE"))
-    {
-    if(*buildType)
-      {
-      configNames.push_back(buildType);
-      }
-    }
+  mf->GetConfigurations(configNames);
 
   // Setup per-configuration property default values.
   const char* configProps[] = {
