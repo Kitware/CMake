@@ -634,6 +634,23 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   string(REGEX REPLACE ";" "\\\\;" candidates "${gp_cmd_ov}")
   string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
 
+  # check for install id and remove it from list, since otool -L can include a
+  # reference to itself
+  set(gp_install_id)
+  if("${gp_tool}" STREQUAL "otool")
+    execute_process(
+      COMMAND otool -D ${target}
+      OUTPUT_VARIABLE gp_install_id_ov
+      )
+    # second line is install name
+    string(REGEX REPLACE ".*:\n" "" gp_install_id "${gp_install_id_ov}")
+    if(gp_install_id)
+      # trim
+      string(REGEX MATCH "[^\n ].*[^\n ]" gp_install_id "${gp_install_id}")
+      #message("INSTALL ID is \"${gp_install_id}\"")
+    endif(gp_install_id)
+  endif("${gp_tool}" STREQUAL "otool")
+
   # Analyze each line for file names that match the regular expression:
   #
   foreach(candidate ${candidates})
@@ -670,14 +687,18 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     #
     set(add_item 1)
 
-    if(${exclude_system})
+    if("${item}" STREQUAL "${gp_install_id}")
+      set(add_item 0)
+    endif("${item}" STREQUAL "${gp_install_id}")
+
+    if(add_item AND ${exclude_system})
       set(type "")
       gp_resolved_file_type("${target}" "${item}" "${exepath}" "${dirs}" type)
 
       if("${type}" STREQUAL "system")
         set(add_item 0)
       endif("${type}" STREQUAL "system")
-    endif(${exclude_system})
+    endif(add_item AND ${exclude_system})
 
     if(add_item)
       list(LENGTH ${prerequisites_var} list_length_before_append)

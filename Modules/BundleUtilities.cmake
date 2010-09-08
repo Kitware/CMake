@@ -415,7 +415,7 @@ function(get_bundle_keys app libs dirs keys_var)
     # but that do not show up in otool -L output...)
     #
     foreach(lib ${libs})
-      set_bundle_key_values(${keys_var} "${lib}" "${lib}" "${exepath}" "${dirs}" 1)
+      set_bundle_key_values(${keys_var} "${lib}" "${lib}" "${exepath}" "${dirs}" 0)
 
       set(prereqs "")
       get_prerequisites("${lib}" prereqs 1 1 "${exepath}" "${dirs}")
