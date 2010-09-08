@@ -309,7 +309,11 @@ public:
     {
       return this->ProjectName.c_str();
     }
-  
+
+  /** Get the configurations to be generated.  */
+  const char* GetConfigurations(std::vector<std::string>& configs,
+                                bool single = true) const;
+
   /**
    * Set the name of the library.
    */
