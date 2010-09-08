@@ -330,6 +330,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       it != installDirectoriesVector.end();
       ++it )
       {
+      std::list<std::pair<std::string,std::string> > symlinkedFiles;
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
       std::string top = it->c_str();
@@ -373,13 +374,54 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           + cmSystemTools::RelativePath(top.c_str(), gfit->c_str());
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: "
           << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
-        if ( !cmSystemTools::CopyFileIfDifferent(inFile.c_str(),
+        /* If the file is a symlink we will have to re-create it */
+        if ( cmSystemTools::FileIsSymlink(inFile.c_str()))
+          {
+          std::string targetFile;
+          std::string inFileRelative =
+             cmSystemTools::RelativePath(top.c_str(),inFile.c_str());
+          cmSystemTools::ReadSymlink(inFile.c_str(),targetFile);
+          symlinkedFiles.push_back(std::pair<std::string,
+                                   std::string>(targetFile,inFileRelative));
+          }
+        /* If it is not a symlink then do a plain copy */
+        else if ( !cmSystemTools::CopyFileIfDifferent(inFile.c_str(),
             filePath.c_str()) )
           {
           cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying file: "
             << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
           return 0;
           }
+        }
+      /* rebuild symlinks in the installed tree */
+      if (symlinkedFiles.size()>0)
+        {
+        std::list< std::pair<std::string,std::string> >::iterator symlinkedIt;
+        std::string curDir = cmSystemTools::GetCurrentWorkingDirectory();
+        std::string goToDir = tempDir;
+        goToDir  += "/"+subdir;
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                      "Change dir to: " << goToDir <<std::endl);
+        cmSystemTools::ChangeDirectory(goToDir.c_str());
+        for (symlinkedIt=symlinkedFiles.begin();
+             symlinkedIt != symlinkedFiles.end();
+             ++symlinkedIt)
+          {
+          cmCPackLogger(cmCPackLog::LOG_DEBUG, "Will create a symlink: "
+                         << symlinkedIt->second << "--> "
+                         << symlinkedIt->first << std::endl);
+          if (!cmSystemTools::CreateSymlink((symlinkedIt->first).c_str(),
+                                            (symlinkedIt->second).c_str()))
+            {
+            cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot create symlink: "
+                            << symlinkedIt->second << "--> "
+                            << symlinkedIt->first << std::endl);
+            return 0;
+            }
+          }
+        cmCPackLogger(cmCPackLog::LOG_DEBUG, "Going back to: "
+                      << curDir <<std::endl);
+        cmSystemTools::ChangeDirectory(curDir.c_str());
         }
       }
     }
