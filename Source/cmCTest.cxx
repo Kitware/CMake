@@ -490,10 +490,6 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
     return 0;
     }
 
-  // call this so that the information is cached up front
-  // and not the first time EndTest is called.
-  this->ShouldCompressTestOutput();
-
   if ( this->ProduceXML )
     {
     // Verify "Testing" directory exists:
