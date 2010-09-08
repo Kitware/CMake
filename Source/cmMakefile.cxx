@@ -778,7 +778,7 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
       this->Internal->VarUsageStack.push(std::set<cmStdString>());
       }
     }
-    this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
+  this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 }
 
 bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
@@ -3394,9 +3394,9 @@ void cmMakefile::PopScope()
     if (this->WarnUnused && usage.find(*it) == usage.end())
       {
       const char* cdir = this->ListFileStack.back().c_str();
-      const char* srcRoot = this->GetDefinition("CMAKE_SOURCE_DIR");
-      const char* binRoot = this->GetDefinition("CMAKE_BINARY_DIR");
-      if (this->CheckSystemVars || strstr(cdir, srcRoot) == cdir || strstr(cdir, binRoot) == cdir)
+      if (this->CheckSystemVars ||
+          cmSystemTools::IsSubDirectory(cdir, this->GetHomeDirectory()) ||
+          cmSystemTools::IsSubDirectory(cdir, this->GetHomeOutputDirectory()))
         {
         cmOStringStream m;
         m << "unused variable \'" << *it << "\'";
