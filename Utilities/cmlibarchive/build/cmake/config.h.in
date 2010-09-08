@@ -1,4 +1,7 @@
 /* config.h.  Generated from config.h.cmake by cmake configure */
+#if defined(__osf__)
+# define _OSF_SOURCE
+#endif
 
 /* Version number of bsdcpio */
 #cmakedefine BSDCPIO_VERSION_STRING "${BSDCPIO_VERSION_STRING}"
