@@ -98,7 +98,8 @@ private:
   bool CheckDirectory(std::string const& dir);
   bool FindConfigFile(std::string const& dir, std::string& file);
   bool CheckVersion(std::string const& config_file);
-  bool CheckVersionFile(std::string const& version_file);
+  bool CheckVersionFile(std::string const& version_file,
+                        std::string& result_version);
   bool SearchPrefix(std::string const& prefix);
   bool SearchFrameworkPrefix(std::string const& prefix_in);
   bool SearchAppBundlePrefix(std::string const& prefix_in);
@@ -137,6 +138,9 @@ private:
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
   std::set<std::string> IgnoredPaths;
+
+  struct ConfigFileInfo { std::string filename; std::string version; };
+  std::vector<ConfigFileInfo> ConsideredConfigs;
 };
 
 #endif
