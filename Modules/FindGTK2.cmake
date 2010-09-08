@@ -66,6 +66,10 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+# Version 1.2 (8/30/2010) (CMake 2.8.3)
+#   * Merge patch for detecting gdk-pixbuf library (split off
+#     from core GTK in 2.21).  Thanks to Vincent Untz for the patch
+#     and Ricardo Cruz for the heads up.
 # Version 1.1 (8/19/2010) (CMake 2.8.3)
 #   * Add support for detecting GTK2 under macports (thanks to Gary Kramlich)
 # Version 1.0 (8/12/2010) (CMake 2.8.3)
@@ -152,6 +156,7 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
         atkmm-1.6
         cairo
         cairomm-1.0
+        gdk-pixbuf-2.0
         gdkmm-2.4
         giomm-2.4
         gtk-2.0
@@ -419,6 +424,9 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(GTK2_GOBJECT_INCLUDE_DIR gobject/gobject.h)
         _GTK2_FIND_LIBRARY    (GTK2_GOBJECT_LIBRARY gobject false true)
 
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GDK_PIXBUF_INCLUDE_DIR gdk-pixbuf/gdk-pixbuf.h)
+        _GTK2_FIND_LIBRARY    (GTK2_GDK_PIXBUF_LIBRARY gdk_pixbuf false true)
+
         _GTK2_FIND_INCLUDE_DIR(GTK2_GDK_INCLUDE_DIR gdk/gdk.h)
         _GTK2_FIND_INCLUDE_DIR(GTK2_GDKCONFIG_INCLUDE_DIR gdkconfig.h)
         _GTK2_FIND_INCLUDE_DIR(GTK2_GTK_INCLUDE_DIR gtk/gtk.h)
@@ -442,9 +450,6 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(GTK2_ATK_INCLUDE_DIR atk/atk.h)
         _GTK2_FIND_LIBRARY    (GTK2_ATK_LIBRARY atk false true)
 
-        #elseif(_GTK2_component STREQUAL "gdk_pixbuf")
-        #_GTK2_FIND_INCLUDE_DIR(GTK2_GDKPIXBUF_INCLUDE_DIR gdk-pixbuf/gdk-pixbuf.h)
-        #_GTK2_FIND_LIBRARY    (GTK2_GDKPIXBUF_LIBRARY gdk_pixbuf false true)
 
     elseif(_GTK2_component STREQUAL "gtkmm")
 
