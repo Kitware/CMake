@@ -1315,6 +1315,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
 
+  ADD_TEST(CTestTestPrintLabels ${CMAKE_CTEST_COMMAND} --print-labels)
+  SET_TESTS_PROPERTIES(CTestTestPrintLabels PROPERTIES LABELS "Label1;Label2")
+  SET_TESTS_PROPERTIES(CTestTestPrintLabels PROPERTIES PASS_REGULAR_EXPRESSION
+    "All Labels:.*  Label1.*  Label2")
+
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestResourceLock/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestResourceLock/test.cmake"

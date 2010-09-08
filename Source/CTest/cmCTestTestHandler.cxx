@@ -567,7 +567,7 @@ int cmCTestTestHandler::ProcessHandler()
 
   if (total == 0)
     {
-    if ( !this->CTest->GetShowOnly() )
+    if ( !this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels() )
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "No tests were found!!!"
         << std::endl);
@@ -1079,7 +1079,12 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
   parallel->SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
   parallel->SetTestResults(&this->TestResults);
-  if(this->CTest->GetShowOnly())
+
+  if(this->CTest->ShouldPrintLabels())
+    {
+    parallel->PrintLabels();
+    }
+  else if(this->CTest->GetShowOnly())
     {
     parallel->PrintTestList();
     }
