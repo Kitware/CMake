@@ -130,8 +130,6 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     // not been "cleared"/initialized with a set(foo ) call
     if(this->WarnUninitialized && !this->Makefile->VariableInitialized(var))
       {
-      const char* srcRoot = this->Makefile->GetDefinition("CMAKE_SOURCE_DIR");
-      const char* binRoot = this->Makefile->GetDefinition("CMAKE_BINARY_DIR");
       if (this->CheckSystemVars ||
           cmSystemTools::IsSubDirectory(this->FileName, this->Makefile->GetHomeDirectory()) ||
           cmSystemTools::IsSubDirectory(this->FileName, this->Makefile->GetHomeOutputDirectory()))
