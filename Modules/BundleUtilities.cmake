@@ -118,6 +118,9 @@
 # Accumulate changes in a local variable and make *one* call to
 # install_name_tool at the end of the function with all the changes at once.
 #
+# If the BU_CHMOD_BUNDLE_ITEMS variable is set then bundle items will be
+# marked writable before install_name_tool tries to change them.
+#
 #  VERIFY_BUNDLE_PREREQUISITES(<bundle> <result_var> <info_var>)
 # Verifies that the sum of all prerequisites of all files inside the bundle
 # are contained within the bundle or are "system" libraries, presumed to exist
@@ -540,6 +543,10 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
       message("warning: unexpected reference to '${pr}'")
     endif(NOT "${${rkey}_EMBEDDED_ITEM}" STREQUAL "")
   endforeach(pr)
+
+  if(BU_CHMOD_BUNDLE_ITEMS)
+    execute_process(COMMAND chmod u+w "${resolved_embedded_item}")
+  endif()
 
   # Change this item's id and all of its references in one call
   # to install_name_tool:
