@@ -56,6 +56,21 @@ void cmGlobalVisualStudioGenerator::Generate()
         AddUtilityCommand("ALL_BUILD", true, no_working_dir,
                           no_depends, no_commands, false,
                           "Build all projects");
+
+#if 0
+      // Can't activate this code because we want ALL_BUILD
+      // selected as the default "startup project" when first
+      // opened in Visual Studio... And if it's nested in a
+      // folder, then that doesn't happen.
+      //
+      // Organize in the "predefined targets" folder:
+      //
+      if (this->UseFolderProperty())
+        {
+        allBuild->SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
+        }
+#endif
+
       // Now make all targets depend on the ALL_BUILD target
       cmTargets targets;
       for(std::vector<cmLocalGenerator*>::iterator i = gen.begin();

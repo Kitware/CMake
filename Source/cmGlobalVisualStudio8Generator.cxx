@@ -137,6 +137,13 @@ void cmGlobalVisualStudio8Generator::AddCheckTarget()
                           no_working_directory, no_depends,
                           noCommandLines);
 
+  // Organize in the "predefined targets" folder:
+  //
+  if (this->UseFolderProperty())
+    {
+    tgt->SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
+    }
+
   // Create a list of all stamp files for this project.
   std::vector<std::string> stamps;
   std::string stampList = cmake::GetCMakeFilesDirectoryPostSlash();

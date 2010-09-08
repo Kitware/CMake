@@ -322,6 +322,9 @@ protected:
   // All targets in the entire project.
   std::map<cmStdString,cmTarget *> TotalTargets;
 
+  virtual const char* GetPredefinedTargetsFolder();
+  virtual bool UseFolderProperty();
+
 private:
   float FirstTimeProgress;
   // If you add a new map here, make sure it is copied

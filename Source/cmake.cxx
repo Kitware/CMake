@@ -3483,6 +3483,23 @@ void cmake::DefineProperties(cmake *cm)
      "the value of this property.  "
      "Non-Makefile generators currently ignore this property.");
 
+  cm->DefineProperty
+    ("USE_FOLDERS", cmProperty::GLOBAL,
+     "Use the FOLDER target property to organize targets into folders.",
+     "If not set, CMake treats this property as ON by default. "
+     "CMake generators that are capable of organizing into a "
+     "hierarchy of folders use the values of the FOLDER target "
+     "property to name those folders. See also the documentation "
+     "for the FOLDER target property.");
+
+  cm->DefineProperty
+    ("PREDEFINED_TARGETS_FOLDER", cmProperty::GLOBAL,
+     "Name of FOLDER for targets that are added automatically by CMake.",
+     "If not set, CMake uses \"CMakePredefinedTargets\" as a default "
+     "value for this property. Targets such as INSTALL, PACKAGE and "
+     "RUN_TESTS will be organized into this FOLDER. See also the "
+     "documentation for the FOLDER target property.");
+
   // ================================================================
   // define variables as well
   // ================================================================
