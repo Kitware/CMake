@@ -166,3 +166,11 @@ ELSE(DEFINED SUBDIR_DEFINED)
 ENDIF(DEFINED SUBDIR_DEFINED)
 
 ADD_EXECUTABLE(FunctionTest functionTest.c)
+
+# Use the PROJECT_LABEL property: in IDEs, the project label should appear
+# in the UI rather than the target name. If this were a good test of the
+# property rather than just a smoke test, it would verify that the label
+# actually appears in the UI of the IDE... Or at least that the text appears
+# somewhere in the generated project files.
+SET_PROPERTY(TARGET miniFunctionTest
+  PROPERTY PROJECT_LABEL "Test de Fonctionnement")
