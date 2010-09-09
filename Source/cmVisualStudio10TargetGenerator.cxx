@@ -155,6 +155,13 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<Keyword>Win32Proj</Keyword>\n", 2);
   this->WriteString("<Platform>", 2);
   (*this->BuildFileStream) << this->Platform << "</Platform>\n";
+  const char* projLabel = this->Target->GetProperty("PROJECT_LABEL");
+  if(!projLabel)
+    {
+    projLabel = this->Name.c_str();
+    }
+  this->WriteString("<ProjectName>", 2);
+  (*this->BuildFileStream) << projLabel << "</ProjectName>\n";
   this->WriteString("</PropertyGroup>\n", 1);
   this->WriteString("<Import Project="
                     "\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n",
