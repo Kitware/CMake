@@ -1931,12 +1931,20 @@ bool extract_tar(const char* outFileName, bool verbose,
       }
     if(extract)
       {
+      r = archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
+      if (r != ARCHIVE_OK)
+        {
+        cmSystemTools::Error(
+          "Problem with archive_write_disk_set_options(): ",
+          archive_error_string(ext));
+        }
+
       r = archive_write_header(ext, entry);
       if (r != ARCHIVE_OK)
         {
         cmSystemTools::Error("Problem with archive_write_header(): ",
-                             archive_error_string(a));
-        cmSystemTools::Error("Curren file:", 
+                             archive_error_string(ext));
+        cmSystemTools::Error("Current file:",
                              archive_entry_pathname(entry));
         }
       else 
