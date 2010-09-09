@@ -188,7 +188,7 @@ if (MPI_INCLUDE_PATH AND MPI_LIBRARY)
   # the cache, and we don't want to override those settings.
 elseif (MPI_COMPILE_CMDLINE)
   # Extract compile flags from the compile command line.
-  string(REGEX MATCHALL "(^| )-D([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_FLAGS "${MPI_COMPILE_CMDLINE}")
+  string(REGEX MATCHALL "(^| )-[Df]([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_FLAGS "${MPI_COMPILE_CMDLINE}")
   set(MPI_COMPILE_FLAGS_WORK)
   foreach(FLAG ${MPI_ALL_COMPILE_FLAGS})
     if (MPI_COMPILE_FLAGS_WORK)
