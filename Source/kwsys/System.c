@@ -84,7 +84,8 @@ static int kwsysSystem_Shell__CharNeedsQuotesOnUnix(char c)
 static int kwsysSystem_Shell__CharNeedsQuotesOnWindows(char c)
 {
   return ((c == '\'') || (c == '#') || (c == '&') ||
-          (c == '<') || (c == '>') || (c == '|') || (c == '^'));
+          (c == '<') || (c == '>') || (c == '|') ||
+          (c == '^') || (c == ':'));
 }
 
 /*--------------------------------------------------------------------------*/
