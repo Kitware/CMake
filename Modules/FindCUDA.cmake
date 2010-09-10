@@ -514,11 +514,19 @@ set (CUDA_INCLUDE_DIRS ${CUDA_TOOLKIT_INCLUDE})
 
 macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(_cuda_64bit_lib_dir "${CUDA_TOOLKIT_ROOT_DIR}/lib64")
+    # CUDA 3.2+ on Windows moved the library directoryies, so we need the new
+    # and old paths.
+    set(_cuda_64bit_lib_dir
+      "${CUDA_TOOLKIT_ROOT_DIR}/lib/x64"
+      "${CUDA_TOOLKIT_ROOT_DIR}/lib64"
+      )
   endif()
+  # CUDA 3.2+ on Windows moved the library directories, so we need to new
+  # (lib/Win32) and the old path (lib).
   find_library(${_var}
     NAMES ${_names}
     PATHS ${_cuda_64bit_lib_dir}
+          "${CUDA_TOOLKIT_ROOT_DIR}/lib/Win32"
           "${CUDA_TOOLKIT_ROOT_DIR}/lib"
     ENV CUDA_LIB_PATH
     DOC ${_doc}
@@ -578,9 +586,20 @@ macro(FIND_CUDA_HELPER_LIBS _name)
   mark_as_advanced(CUDA_${_name}_LIBRARY)
 endmacro(FIND_CUDA_HELPER_LIBS)
 
+#######################
+# Disable emulation for v3.1 onward
+if(CUDA_VERSION VERSION_GREATER "3.0")
+  if(CUDA_BUILD_EMULATION)
+    message(FATAL_ERROR "CUDA_BUILD_EMULATION is not supported in version 3.1 and onwards.  You must disable it to proceed.  You have version ${CUDA_VERSION}.")
+  endif()
+endif()
+
 # Search for cufft and cublas libraries.
-find_cuda_helper_libs(cufftemu)
-find_cuda_helper_libs(cublasemu)
+if(CUDA_VERSION VERSION_LESS "3.1")
+  # Emulation libraries aren't available in version 3.1 onward.
+  find_cuda_helper_libs(cufftemu)
+  find_cuda_helper_libs(cublasemu)
+endif()
 find_cuda_helper_libs(cufft)
 find_cuda_helper_libs(cublas)
 
