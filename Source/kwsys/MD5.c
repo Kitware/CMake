@@ -29,6 +29,11 @@
    it in a single source file instead of a separate header and
    implementation file.  */
 
+#if defined(__clang__)
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wcast-align"
+#endif
+
 /*
   Copyright (C) 1999, 2000, 2002 Aladdin Enterprises.  All rights reserved.
 
@@ -427,6 +432,10 @@ static void md5_finish(md5_state_t *pms, md5_byte_t digest[16])
     for (i = 0; i < 16; ++i)
         digest[i] = (md5_byte_t)(pms->abcd[i >> 2] >> ((i & 3) << 3));
 }
+
+#if defined(__clang__)
+# pragma clang diagnostic pop
+#endif
 
 /*--------------------------------------------------------------------------*/
 /* Wrap up the MD5 state in our opaque structure.  */
