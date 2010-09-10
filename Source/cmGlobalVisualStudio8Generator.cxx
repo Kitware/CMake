@@ -260,8 +260,8 @@ cmGlobalVisualStudio8Generator
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    fout << "\t\t" << *i << "|" << this->GetPlatformName() << " = " << *i << "|"
-         << this->GetPlatformName() << "\n";
+    fout << "\t\t" << *i << "|" << this->GetPlatformName()
+         << " = "  << *i << "|" << this->GetPlatformName() << "\n";
     }
   fout << "\tEndGlobalSection\n";
 }

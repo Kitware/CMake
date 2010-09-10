@@ -1176,7 +1176,8 @@ bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
   // Should be efficient enough on most system:
   const int bufferSize = 4096;
   char buffer[bufferSize];
-  unsigned char const* buffer_uc = reinterpret_cast<unsigned char const*>(buffer);
+  unsigned char const* buffer_uc =
+    reinterpret_cast<unsigned char const*>(buffer);
   // This copy loop is very sensitive on certain platforms with
   // slightly broken stream libraries (like HPUX).  Normally, it is
   // incorrect to not check the error condition on the fin.read()
