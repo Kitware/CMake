@@ -47,6 +47,9 @@
 /* warning C4127: conditional expression is constant*/
 # pragma warning(disable:4127)
 #endif
+#if defined(__clang__)
+# pragma clang diagnostic ignored "-Wcast-align"
+#endif
 
 /*-- General stuff. --*/
 

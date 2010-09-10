@@ -69,7 +69,7 @@ diediedie(void)
     /* Cause a breakpoint exception  */
     DebugBreak();
 #endif
-    *(char *)0 = 1; /* Deliberately segfault and force a coredump. */
+    *(char *)1 = 1; /* Deliberately segfault and force a coredump. */
     _exit(1);   /* If that didn't work, just exit with an error. */
 }
 
