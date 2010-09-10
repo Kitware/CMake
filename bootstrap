@@ -839,7 +839,7 @@ mkdir "${cmake_bootstrap_dir}/${TMPFILE}"
 cd "${cmake_bootstrap_dir}/${TMPFILE}"
 echo '
 test: test.c
-	"'"${cmake_c_compiler}"'" -o test test.c
+	"'"${cmake_c_compiler}"'" '"${cmake_ld_flags} ${cmake_c_flags}"' -o test test.c
 '>"Makefile"
 echo '
 #include <stdio.h>
