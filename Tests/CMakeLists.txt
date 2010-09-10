@@ -376,7 +376,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project CustomCommand
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustomCommand/bin"
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustomCommand/bin dir"
     --test-command CustomCommand
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommand")
