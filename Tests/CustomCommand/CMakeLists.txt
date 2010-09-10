@@ -9,12 +9,12 @@ ADD_SUBDIRECTORY(GeneratedHeader)
 #
 # Lib and exe path
 #
-SET (LIBRARY_OUTPUT_PATH 
-  ${PROJECT_BINARY_DIR}/bin/ CACHE INTERNAL 
+SET (LIBRARY_OUTPUT_PATH
+  "${PROJECT_BINARY_DIR}/bin dir" CACHE INTERNAL
   "Single output directory for building all libraries.")
 
-SET (EXECUTABLE_OUTPUT_PATH 
-  ${PROJECT_BINARY_DIR}/bin/ CACHE INTERNAL 
+SET (EXECUTABLE_OUTPUT_PATH
+  "${PROJECT_BINARY_DIR}/bin dir" CACHE INTERNAL
   "Single output directory for building all executables.")
 
 ################################################################
@@ -221,6 +221,7 @@ ADD_CUSTOM_COMMAND(OUTPUT gen_redirect.c
 # Test non-trivial command line arguments in custom commands.
 SET(EXPECTED_ARGUMENTS)
 SET(CHECK_ARGS
+  -DPATH=c:/posix/path
   c:/posix/path
   c:\\windows\\path
   'single-quotes'
@@ -273,6 +274,8 @@ SET(CHECK_ARGS
   |nopipe
   "#two-pounds#"
   "one#pound"
+  ":two-colons:"
+  "one:colon"
   "#nocomment"
   "c:/posix/path/with space"
   "c:\\windows\\path\\with space"
@@ -359,13 +362,15 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/check_command_line.c.in
                @ONLY IMMEDIATE)
 ADD_EXECUTABLE(check_command_line
   ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c)
+SET_PROPERTY(TARGET check_command_line
+  PROPERTY OUTPUT_NAME "check command line")
 # SET_TARGET_PROPERTIES(check_command_line PROPERTIES
 #   COMPILE_FLAGS -DCHECK_COMMAND_LINE_VERBOSE)
 ADD_CUSTOM_COMMAND(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/command_line_check
   COMMAND ${CMAKE_COMMAND} -DMARK_FILE=${CMAKE_CURRENT_BINARY_DIR}/check_mark.txt
   -P ${CMAKE_CURRENT_SOURCE_DIR}/check_mark.cmake
-  COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
+  COMMAND "${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check command line"
   ${CHECK_ARGS} ""
   VERBATIM
   COMMENT "Checking custom command line escapes (single'quote)"
@@ -375,7 +380,7 @@ SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/command_line_check
 ADD_CUSTOM_TARGET(do_check_command_line ALL
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/command_line_check
   COMMAND ${CMAKE_COMMAND} -E echo "Checking custom target command escapes"
-  COMMAND ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check_command_line
+  COMMAND "${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/check command line"
   ${CHECK_ARGS} ""
   VERBATIM
   COMMENT "Checking custom target command line escapes ($dollar-signs$)"
