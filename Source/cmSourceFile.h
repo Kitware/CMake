@@ -60,7 +60,7 @@ public:
    * horrible interface, but is necessary for backwards
    * compatibility).
    */
-  std::string const& GetFullPath();
+  std::string const& GetFullPath(std::string* error = 0);
   std::string const& GetFullPath() const;
 
   /**
@@ -108,7 +108,7 @@ private:
   std::string FullPath;
   bool FindFullPathFailed;
 
-  bool FindFullPath();
+  bool FindFullPath(std::string* error);
   bool TryFullPath(const char* tryPath, const char* ext);
   void CheckExtension();
   void CheckLanguage(std::string const& ext);

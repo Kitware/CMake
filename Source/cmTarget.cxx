@@ -1428,8 +1428,15 @@ bool cmTarget::FindSourceFiles()
         si = this->SourceFiles.begin();
       si != this->SourceFiles.end(); ++si)
     {
-    if((*si)->GetFullPath().empty())
+    std::string e;
+    if((*si)->GetFullPath(&e).empty())
       {
+      if(!e.empty())
+        {
+        cmake* cm = this->Makefile->GetCMakeInstance();
+        cm->IssueMessage(cmake::FATAL_ERROR, e,
+                         this->GetBacktrace());
+        }
       return false;
       }
     }
