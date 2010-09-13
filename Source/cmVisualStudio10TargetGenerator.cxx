@@ -814,10 +814,12 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
 
 void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
 {
-  if(this->Target->GetType() > cmTarget::MODULE_LIBRARY)
+  cmTarget::TargetType ttype = this->Target->GetType();
+  if(ttype > cmTarget::GLOBAL_TARGET)
     {
     return;
     }
+
   this->WriteString("<PropertyGroup>\n", 2);
   this->WriteString("<_ProjectFileVersion>10.0.20506.1"
                     "</_ProjectFileVersion>\n", 3);
@@ -827,33 +829,48 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
   for(std::vector<std::string>::iterator config = configs->begin();
       config != configs->end(); ++config)
     {
-    std::string targetNameFull = 
-      this->Target->GetFullName(config->c_str());
-    std::string intermediateDir = this->LocalGenerator->
-      GetTargetDirectory(*this->Target);
-    intermediateDir += "/";
-    intermediateDir += *config;
-    intermediateDir += "/";
-    this->ConvertToWindowsSlash(intermediateDir);
-    std::string outDir = this->Target->GetDirectory(config->c_str());
-    this->ConvertToWindowsSlash(outDir);
-    this->WritePlatformConfigTag("OutDir", config->c_str(), 3);
-    *this->BuildFileStream << outDir
-                           << "\\"
-                           << "</OutDir>\n";
-    this->WritePlatformConfigTag("IntDir", config->c_str(), 3); 
-    *this->BuildFileStream << intermediateDir
-                           << "</IntDir>\n";
-    this->WritePlatformConfigTag("TargetName", config->c_str(), 3);
-    *this->BuildFileStream
-      << cmSystemTools::GetFilenameWithoutLastExtension(
-      targetNameFull.c_str())
-                           << "</TargetName>\n";
-    this->WritePlatformConfigTag("TargetExt", config->c_str(), 3);
-    *this->BuildFileStream << cmSystemTools::GetFilenameLastExtension(
-      targetNameFull.c_str())
-                           << "</TargetExt>\n";
-    this->OutputLinkIncremental(*config);
+    if(ttype >= cmTarget::UTILITY)
+      {
+      this->WritePlatformConfigTag("IntDir", config->c_str(), 3);
+      *this->BuildFileStream
+        << "$(Platform)\\$(Configuration)\\$(ProjectName)\\"
+        << "</IntDir>\n";
+      }
+    else
+      {
+      std::string targetNameFull =
+        this->Target->GetFullName(config->c_str());
+      std::string intermediateDir = this->LocalGenerator->
+        GetTargetDirectory(*this->Target);
+      intermediateDir += "/";
+      intermediateDir += *config;
+      intermediateDir += "/";
+      this->ConvertToWindowsSlash(intermediateDir);
+      std::string outDir = this->Target->GetDirectory(config->c_str());
+      this->ConvertToWindowsSlash(outDir);
+
+      this->WritePlatformConfigTag("OutDir", config->c_str(), 3);
+      *this->BuildFileStream << outDir
+                             << "\\"
+                             << "</OutDir>\n";
+
+      this->WritePlatformConfigTag("IntDir", config->c_str(), 3);
+      *this->BuildFileStream << intermediateDir
+                             << "</IntDir>\n";
+
+      this->WritePlatformConfigTag("TargetName", config->c_str(), 3);
+      *this->BuildFileStream
+        << cmSystemTools::GetFilenameWithoutLastExtension(
+             targetNameFull.c_str())
+        << "</TargetName>\n";
+
+      this->WritePlatformConfigTag("TargetExt", config->c_str(), 3);
+      *this->BuildFileStream
+        << cmSystemTools::GetFilenameLastExtension(targetNameFull.c_str())
+        << "</TargetExt>\n";
+
+      this->OutputLinkIncremental(*config);
+      }
     }
   this->WriteString("</PropertyGroup>\n", 2);
 }
