@@ -8,18 +8,22 @@
 # The minimum required version of Subversion can be specified using the
 # standard syntax, e.g. FIND_PACKAGE(Subversion 1.4)
 #
-# If the command line client executable is found the macro
+# If the command line client executable is found two macros are defined:
 #  Subversion_WC_INFO(<dir> <var-prefix>)
-# is defined to extract information of a subversion working copy at
-# a given location. The macro defines the following variables:
+#  Subversion_WC_LOG(<dir> <var-prefix>)
+# Subversion_WC_INFO extracts information of a subversion working copy at
+# a given location. This macro defines the following variables:
 #  <var-prefix>_WC_URL - url of the repository (at <dir>)
 #  <var-prefix>_WC_ROOT - root url of the repository
 #  <var-prefix>_WC_REVISION - current revision
 #  <var-prefix>_WC_LAST_CHANGED_AUTHOR - author of last commit
 #  <var-prefix>_WC_LAST_CHANGED_DATE - date of last commit
 #  <var-prefix>_WC_LAST_CHANGED_REV - revision of last commit
-#  <var-prefix>_WC_LAST_CHANGED_LOG - last log of base revision
 #  <var-prefix>_WC_INFO - output of command `svn info <dir>'
+# Subversion_WC_LOG retrieves the log message of the base revision of a
+# subversion working copy at a given location. This macro defines the
+# variable:
+#  <var-prefix>_LAST_CHANGED_LOG - last log of base revision
 # Example usage:
 #  FIND_PACKAGE(Subversion)
 #  IF(SUBVERSION_FOUND)
@@ -74,6 +78,8 @@ IF(Subversion_SVN_EXECUTABLE)
 
       STRING(REGEX REPLACE "^(.*\n)?URL: ([^\n]+).*"
         "\\2" ${prefix}_WC_URL "${${prefix}_WC_INFO}")
+      STRING(REGEX REPLACE "^(.*\n)?Repository Root: ([^\n]+).*"
+        "\\2" ${prefix}_WC_ROOT "${${prefix}_WC_INFO}")
       STRING(REGEX REPLACE "^(.*\n)?Revision: ([^\n]+).*"
         "\\2" ${prefix}_WC_REVISION "${${prefix}_WC_INFO}")
       STRING(REGEX REPLACE "^(.*\n)?Last Changed Author: ([^\n]+).*"
