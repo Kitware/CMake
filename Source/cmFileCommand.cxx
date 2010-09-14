@@ -2571,8 +2571,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
   std::vector<std::string>::const_iterator i = args.begin();
   if(args.size() < 3)
     {
-    this->SetError("FILE(DOWNLOAD url file) must be called with "
-                   "at least three arguments.");
+    this->SetError("DOWNLOAD must be called with at least three arguments.");
     return false;
     }
   ++i; // Get rid of subcommand
@@ -2598,8 +2597,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
         }
       else
         {
-        this->SetError("FILE(DOWNLOAD url file TIMEOUT time) missing "
-                       "time for TIMEOUT.");
+        this->SetError("DOWNLOAD missing time for TIMEOUT.");
         return false;
         }
       }
@@ -2608,8 +2606,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       ++i;
       if( i == args.end())
         {
-        this->SetError("FILE(DOWNLOAD url file LOG VAR) missing "
-                       "VAR for LOG.");
+        this->SetError("DOWNLOAD missing VAR for LOG.");
         return false;
         }
       verboseLog = *i;
@@ -2619,8 +2616,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       ++i;
       if( i == args.end())
         {
-        this->SetError("FILE(DOWNLOAD url file STATUS VAR) missing "
-                       "VAR for STATUS.");
+        this->SetError("DOWNLOAD missing VAR for STATUS.");
         return false;
         }
       statusVar = *i;
@@ -2630,8 +2626,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       ++i;
       if( i == args.end())
         {
-        this->SetError("FILE(DOWNLOAD url file EXPECTED_MD5 sum) missing "
-                       "sum value for EXPECTED_MD5.");
+        this->SetError("DOWNLOAD missing sum value for EXPECTED_MD5.");
         return false;
         }
       expectedMD5sum = cmSystemTools::LowerCase(*i);
@@ -2654,8 +2649,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
 
     if (!cmSystemTools::ComputeFileMD5(file.c_str(), computedMD5))
       {
-      this->SetError("FILE(DOWNLOAD ) error; cannot compute MD5 sum on "
-        "pre-existing file");
+      this->SetError("DOWNLOAD cannot compute MD5 sum on pre-existing file");
       return false;
       }
 
@@ -2665,7 +2659,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
     if (expectedMD5sum == actualMD5sum)
       {
       this->Makefile->DisplayStatus(
-        "FILE(DOWNLOAD ) returning early: file already exists with "
+        "FILE(DOWNLOAD) returning early: file already exists with "
         "expected MD5 sum", -1);
 
       if(statusVar.size())
@@ -2698,8 +2692,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
   std::ofstream fout(file.c_str(), std::ios::binary);
   if(!fout)
     {
-    this->SetError("FILE(DOWNLOAD url file TIMEOUT time) can not open "
-                       "file for write.");
+    this->SetError("DOWNLOAD cannot open file for write.");
     return false;
     }
 
@@ -2708,8 +2701,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
   curl = ::curl_easy_init();
   if(!curl)
     {
-    this->SetError("FILE(DOWNLOAD ) error "
-                   "initializing curl.");
+    this->SetError("DOWNLOAD error initializing curl.");
     return false;
     }
 
@@ -2718,9 +2710,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
   ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   if (res != CURLE_OK)
     {
-    std::string errstring = "FILE(DOWNLOAD ) error; cannot set url: ";
-    errstring += ::curl_easy_strerror(res);
-    this->SetError(errstring.c_str());
+    std::string e = "DOWNLOAD cannot set url: ";
+    e += ::curl_easy_strerror(res);
+    this->SetError(e.c_str());
     return false;
     }
 
@@ -2728,10 +2720,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
                            cmFileCommandWriteMemoryCallback);
   if (res != CURLE_OK)
     {
-    std::string errstring =
-      "FILE(DOWNLOAD ) error; cannot set write function: ";
-    errstring += ::curl_easy_strerror(res);
-    this->SetError(errstring.c_str());
+    std::string e = "DOWNLOAD cannot set write function: ";
+    e += ::curl_easy_strerror(res);
+    this->SetError(e.c_str());
     return false;
     }
 
@@ -2739,10 +2730,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
                            cmFileCommandCurlDebugCallback);
   if (res != CURLE_OK)
     {
-    std::string errstring =
-      "FILE(DOWNLOAD ) error; cannot set debug function: ";
-    errstring += ::curl_easy_strerror(res);
-    this->SetError(errstring.c_str());
+    std::string e = "DOWNLOAD cannot set debug function: ";
+    e += ::curl_easy_strerror(res);
+    this->SetError(e.c_str());
     return false;
     }
 
@@ -2752,27 +2742,27 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
 
   if (res != CURLE_OK)
     {
-    std::string errstring = "FILE(DOWNLOAD ) error; cannot set write data: ";
-    errstring += ::curl_easy_strerror(res);
-    this->SetError(errstring.c_str());
+    std::string e = "DOWNLOAD cannot set write data: ";
+    e += ::curl_easy_strerror(res);
+    this->SetError(e.c_str());
     return false;
     }
 
   res = ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, (void *)&chunkDebug);
   if (res != CURLE_OK)
     {
-    std::string errstring = "FILE(DOWNLOAD ) error; cannot set debug data: ";
-    errstring += ::curl_easy_strerror(res);
-    this->SetError(errstring.c_str());
+    std::string e = "DOWNLOAD cannot set debug data: ";
+    e += ::curl_easy_strerror(res);
+    this->SetError(e.c_str());
     return false;
     }
 
   res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   if (res != CURLE_OK)
     {
-    std::string errstring = "FILE(DOWNLOAD ) error; cannot set follow-redirect option: ";
-    errstring += ::curl_easy_strerror(res);
-    this->SetError(errstring.c_str());
+    std::string e = "DOWNLOAD cannot set follow-redirect option: ";
+    e += ::curl_easy_strerror(res);
+    this->SetError(e.c_str());
     return false;
     }
 
@@ -2782,9 +2772,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
 
     if (res != CURLE_OK)
       {
-      std::string errstring = "FILE(DOWNLOAD ) error; cannot set verbose: ";
-      errstring += ::curl_easy_strerror(res);
-      this->SetError(errstring.c_str());
+      std::string e = "DOWNLOAD cannot set verbose: ";
+      e += ::curl_easy_strerror(res);
+      this->SetError(e.c_str());
       return false;
       }
     }
@@ -2795,9 +2785,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
 
     if (res != CURLE_OK)
       {
-      std::string errstring = "FILE(DOWNLOAD ) error; cannot set timeout: ";
-      errstring += ::curl_easy_strerror(res);
-      this->SetError(errstring.c_str());
+      std::string e = "DOWNLOAD cannot set timeout: ";
+      e += ::curl_easy_strerror(res);
+      this->SetError(e.c_str());
       return false;
       }
     }
@@ -2815,9 +2805,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       CURLOPT_NOPROGRESS, 0);
     if (res != CURLE_OK)
       {
-      std::string errstring = "FILE(DOWNLOAD ) error; cannot set noprogress value: ";
-      errstring += ::curl_easy_strerror(res);
-      this->SetError(errstring.c_str());
+      std::string e = "DOWNLOAD cannot set noprogress value: ";
+      e += ::curl_easy_strerror(res);
+      this->SetError(e.c_str());
       return false;
       }
 
@@ -2825,9 +2815,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       CURLOPT_PROGRESSFUNCTION, cmFileCommandCurlProgressCallback);
     if (res != CURLE_OK)
       {
-      std::string errstring = "FILE(DOWNLOAD ) error; cannot set progress function: ";
-      errstring += ::curl_easy_strerror(res);
-      this->SetError(errstring.c_str());
+      std::string e = "DOWNLOAD cannot set progress function: ";
+      e += ::curl_easy_strerror(res);
+      this->SetError(e.c_str());
       return false;
       }
 
@@ -2835,9 +2825,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
       CURLOPT_PROGRESSDATA, reinterpret_cast<void*>(&helper));
     if (res != CURLE_OK)
       {
-      std::string errstring = "FILE(DOWNLOAD ) error; cannot set progress data: ";
-      errstring += ::curl_easy_strerror(res);
-      this->SetError(errstring.c_str());
+      std::string e = "DOWNLOAD cannot set progress data: ";
+      e += ::curl_easy_strerror(res);
+      this->SetError(e.c_str());
       return false;
       }
     }
@@ -2871,8 +2861,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
 
     if (!cmSystemTools::ComputeFileMD5(file.c_str(), computedMD5))
       {
-      this->SetError("FILE(DOWNLOAD ) error; cannot compute MD5 sum on "
-        "downloaded file");
+      this->SetError("DOWNLOAD cannot compute MD5 sum on downloaded file");
       return false;
       }
 
@@ -2882,8 +2871,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
     if (expectedMD5sum != actualMD5sum)
       {
       cmOStringStream oss;
-      oss << "FILE(DOWNLOAD ) error; expected and actual MD5 sums differ"
-        << std::endl
+      oss << "DOWNLOAD MD5 mismatch" << std::endl
         << "  for file: [" << file << "]" << std::endl
         << "    expected MD5 sum: [" << expectedMD5sum << "]" << std::endl
         << "      actual MD5 sum: [" << actualMD5sum << "]" << std::endl
@@ -2913,8 +2901,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
 
   return true;
 #else
-  this->SetError("FILE(DOWNLOAD ) "
-                 "not supported in bootstrap cmake ");
+  this->SetError("DOWNLOAD not supported by bootstrap cmake.");
   return false;
 #endif
 }

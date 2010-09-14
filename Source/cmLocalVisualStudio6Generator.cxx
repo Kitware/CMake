@@ -1304,7 +1304,8 @@ void cmLocalVisualStudio6Generator
                              optionsRelease);
     this->ComputeLinkOptions(target, "MinSizeRel", extraLinkOptionsMinSizeRel,
                              optionsMinSizeRel);
-    this->ComputeLinkOptions(target, "RelWithDebInfo", extraLinkOptionsRelWithDebInfo,
+    this->ComputeLinkOptions(target, "RelWithDebInfo",
+                             extraLinkOptionsRelWithDebInfo,
                              optionsRelWithDebInfo);
     }
 
