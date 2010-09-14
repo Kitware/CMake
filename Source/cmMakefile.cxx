@@ -1649,6 +1649,7 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 
   this->Internal->VarStack.top().Set(name, value);
+  this->Internal->VarInitStack.top().insert(name);
   if (this->Internal->VarUsageStack.size() > 1)
     {
     this->CheckForUnused("changing definition", name);
