@@ -1766,13 +1766,12 @@ bool cmMakefile::CheckForUnused(const char* reason, const char* name)
 {
   if (this->WarnUnused && !this->VariableUsed(name))
     {
-    const char* cdir = this->ListFileStack.back().c_str();
+    const cmListFileContext* file = this->CallStack.back().Context;
     if (this->CheckSystemVars ||
-        cmSystemTools::IsSubDirectory(cdir, this->GetHomeDirectory()) ||
-        cmSystemTools::IsSubDirectory(cdir, this->GetHomeOutputDirectory()))
+        cmSystemTools::IsSubDirectory(file->FilePath.c_str(), this->GetHomeDirectory()) ||
+        cmSystemTools::IsSubDirectory(file->FilePath.c_str(), this->GetHomeOutputDirectory()))
       {
       cmOStringStream msg;
-      const cmListFileContext* file = this->CallStack.back().Context;
       msg << file->FilePath << ":" << file->Line << ":" <<
         " warning: (" << reason << ") unused variable \'" << name << "\'";
       cmSystemTools::Message(msg.str().c_str());
