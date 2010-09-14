@@ -278,8 +278,6 @@ SET(CHECK_ARGS
   |nopipe
   "#two-pounds#"
   "one#pound"
-  ":two-colons:"
-  "one:colon"
   "#nocomment"
   "c:/posix/path/with space"
   "c:\\windows\\path\\with space"
