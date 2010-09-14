@@ -278,16 +278,8 @@ void cmLocalGenerator::GenerateTestFiles()
 
   // Compute the set of configurations.
   std::vector<std::string> configurationTypes;
-  if(const char* types =
-     this->Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
-    {
-    cmSystemTools::ExpandListArgument(types, configurationTypes);
-    }
-  const char* config = 0;
-  if(configurationTypes.empty())
-    {
-    config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-    }
+  const char* config =
+    this->Makefile->GetConfigurations(configurationTypes, false);
 
   std::string file = this->Makefile->GetStartOutputDirectory();
   file += "/";
@@ -383,16 +375,8 @@ void cmLocalGenerator::GenerateInstallRules()
 
   // Compute the set of configurations.
   std::vector<std::string> configurationTypes;
-  if(const char* types = 
-     this->Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
-    {
-    cmSystemTools::ExpandListArgument(types, configurationTypes);
-    }
-  const char* config = 0;
-  if(configurationTypes.empty())
-    {
-    config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-    }
+  const char* config =
+    this->Makefile->GetConfigurations(configurationTypes, false);
 
   // Choose a default install configuration.
   const char* default_config = config;
@@ -546,19 +530,7 @@ void cmLocalGenerator::GenerateTargetManifest()
 {
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
-  if(const char* configurationTypes =
-     this->Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
-    {
-    cmSystemTools::ExpandListArgument(configurationTypes, configNames);
-    }
-  else if(const char* buildType =
-          this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
-    {
-    if(*buildType)
-      {
-      configNames.push_back(buildType);
-      }
-    }
+  this->Makefile->GetConfigurations(configNames);
 
   // Add our targets to the manifest for each configuration.
   cmTargets& targets = this->Makefile->GetTargets();

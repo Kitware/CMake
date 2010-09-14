@@ -152,22 +152,16 @@ bool cmExportCommand
   ebfg.SetCommand(this);
 
   // Compute the set of configurations exported.
-  if(const char* types =
-     this->Makefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+  std::vector<std::string> configurationTypes;
+  this->Makefile->GetConfigurations(configurationTypes);
+  if(!configurationTypes.empty())
     {
-    std::vector<std::string> configurationTypes;
-    cmSystemTools::ExpandListArgument(types, configurationTypes);
     for(std::vector<std::string>::const_iterator
           ci = configurationTypes.begin();
         ci != configurationTypes.end(); ++ci)
       {
       ebfg.AddConfiguration(ci->c_str());
       }
-    }
-  else if(const char* config =
-          this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
-    {
-    ebfg.AddConfiguration(config);
     }
   else
     {

@@ -722,26 +722,10 @@ void cmGlobalXCodeGenerator::SetCurrentLocalGenerator(cmLocalGenerator* gen)
 
   // Select the current set of configuration types.
   this->CurrentConfigurationTypes.clear();
-  if(this->XcodeVersion > 20)
-    {
-    if(const char* types =
-       this->CurrentMakefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
-      {
-      cmSystemTools::ExpandListArgument(types, 
-                                        this->CurrentConfigurationTypes);
-      }
-    }
+  this->CurrentMakefile->GetConfigurations(this->CurrentConfigurationTypes);
   if(this->CurrentConfigurationTypes.empty())
     {
-    if(const char* buildType =
-       this->CurrentMakefile->GetDefinition("CMAKE_BUILD_TYPE"))
-      {
-      this->CurrentConfigurationTypes.push_back(buildType);
-      }
-    else
-      {
-      this->CurrentConfigurationTypes.push_back("");
-      }
+    this->CurrentConfigurationTypes.push_back("");
     }
 }
 
