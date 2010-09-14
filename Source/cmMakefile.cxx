@@ -1649,6 +1649,11 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 
   this->Internal->VarStack.top().Set(name, value);
+  if (this->Internal->VarUsageStack.size() > 1)
+    {
+    this->CheckForUnused("changing definition", name);
+    this->Internal->VarUsageStack.top().erase(name);
+    }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -1714,6 +1719,11 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
   this->Internal->VarInitStack.top().insert(name);
+  if (this->Internal->VarUsageStack.size() > 1)
+    {
+    this->CheckForUnused("changing definition", name);
+    this->Internal->VarUsageStack.top().erase(name);
+    }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -1751,15 +1761,32 @@ bool cmMakefile::VariableCleared(const char* var) const
   return false;
 }
 
+bool cmMakefile::CheckForUnused(const char* reason, const char* name)
+{
+  if (this->WarnUnused && !this->VariableUsed(name))
+    {
+    const char* cdir = this->ListFileStack.back().c_str();
+    if (this->CheckSystemVars ||
+        cmSystemTools::IsSubDirectory(cdir, this->GetHomeDirectory()) ||
+        cmSystemTools::IsSubDirectory(cdir, this->GetHomeOutputDirectory()))
+      {
+      cmOStringStream msg;
+      const cmListFileContext* file = this->CallStack.back().Context;
+      msg << file->FilePath << ":" << file->Line << ":" <<
+        " warning: (" << reason << ") unused variable \'" << name << "\'";
+      cmSystemTools::Message(msg.str().c_str());
+      return true;
+      }
+    }
+  return false;
+}
+
 void cmMakefile::RemoveDefinition(const char* name)
 {
   this->Internal->VarStack.top().Set(name, 0);
   this->Internal->VarRemoved.insert(name);
   this->Internal->VarInitStack.top().insert(name);
-  if (this->WarnUnused)
-    {
-    this->Internal->VarUsageStack.top().insert(name);
-    }
+  this->CheckForUnused("unsetting", name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -3391,19 +3418,7 @@ void cmMakefile::PopScope()
   for (; it != locals.end(); ++it)
     {
     init.erase(*it);
-    if (this->WarnUnused && usage.find(*it) == usage.end())
-      {
-      const char* cdir = this->ListFileStack.back().c_str();
-      if (this->CheckSystemVars ||
-          cmSystemTools::IsSubDirectory(cdir, this->GetHomeDirectory()) ||
-          cmSystemTools::IsSubDirectory(cdir, this->GetHomeOutputDirectory()))
-        {
-        cmOStringStream m;
-        m << "unused variable \'" << *it << "\'";
-        this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
-        }
-      }
-    else
+    if (!this->CheckForUnused("out of scope", it->c_str()))
       {
       usage.erase(*it);
       }

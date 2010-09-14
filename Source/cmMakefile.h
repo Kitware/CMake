@@ -840,7 +840,10 @@ public:
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
-  
+
+  // Check for a an unused variable
+  bool CheckForUnused(const char* reason, const char* name);
+
   std::string Prefix;
   std::vector<std::string> AuxSourceDirectories; // 
 
