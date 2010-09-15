@@ -1,28 +1,21 @@
-To create a cmake release, first test the branch:
+To create a cmake release, make sure the "release" tag is pointing to the
+expected git commit:
 
-mkdir 2-4
-cd 2-4
-cmake -DCMAKE_CREATE_VERSION=CMake-2-4 -P ../create-cmake-release.cmake
-./create-CMake-2-4.sh
+http://cmake.org/gitweb?p=cmake.git;a=shortlog;h=refs/heads/release
 
-If that works:
-EDIT CMakeLists.txt and remove the RC setting!
-commit that.
+Then as kitware@hythloth, using an up-to-date CMake:
 
-Then tag the minor release:
-cvs tag 2-4-7
-
-Then create a release from the tag:
-mkdir 2-4-7
-cd 2-4-7
-cmake -DCMAKE_CREATE_VERSION=CMake-2-4-7 -P ../create-cmake-release.cmake
-./create-CMake-2-4.sh
+  cd ~/CMakeReleases/cmake/Utilities/Release
+  mkdir 283rc1
+  cd 283rc1
+  ~/CMakeReleases/build/bin/cmake -DCMAKE_CREATE_VERSION=release -P ../create-cmake-release.cmake
+  ./create-release.sh
 
 
-create-cmake-release.cmake:  script to run to create release sh script
-To add or remove machines this file should be edited.
+create-cmake-release.cmake:  script to run to create release sh scripts
+Add or remove machines in create-cmake-release.cmake.
 
 Cygwin -> directory that contains cpack cygwin package files used in
- CMakeCPack.cmake)
+ CMakeCPack.cmake
 
 machine_release.cmake : config files for each machine
