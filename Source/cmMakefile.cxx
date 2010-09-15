@@ -1649,12 +1649,12 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 
   this->Internal->VarStack.top().Set(name, value);
-  this->Internal->VarInitStack.top().insert(name);
-  if (this->Internal->VarUsageStack.size() > 1)
+  if ((this->Internal->VarUsageStack.size() > 1) && this->VariableInitialized(name))
     {
     this->CheckForUnused("changing definition", name);
     this->Internal->VarUsageStack.top().erase(name);
     }
+  this->Internal->VarInitStack.top().insert(name);
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -1719,12 +1719,12 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
 void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
-  this->Internal->VarInitStack.top().insert(name);
-  if (this->Internal->VarUsageStack.size() > 1)
+  if ((this->Internal->VarUsageStack.size() > 1) && this->VariableInitialized(name))
     {
     this->CheckForUnused("changing definition", name);
     this->Internal->VarUsageStack.top().erase(name);
     }
+  this->Internal->VarInitStack.top().insert(name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
