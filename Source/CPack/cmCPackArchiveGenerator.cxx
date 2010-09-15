@@ -58,9 +58,11 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(cmArchiveWrite& archive,
   // Change to local toplevel
   cmSystemTools::ChangeDirectory(localToplevel.c_str());
   std::vector<std::string>::const_iterator fileIt;
-  for (fileIt = component->Files.begin(); fileIt != component->Files.end(); ++fileIt )
+  for (fileIt = component->Files.begin(); fileIt != component->Files.end();
+       ++fileIt )
     {
-    cmCPackLogger(cmCPackLog::LOG_DEBUG,"Adding file: " << (*fileIt) << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_DEBUG,"Adding file: "
+                  << (*fileIt) << std::endl);
     archive.Add(*fileIt);
     if (!archive)
       {
@@ -85,7 +87,8 @@ cmGeneratedFileStream gf; \
 gf.Open(filename.c_str(), false, true); \
 if (!GenerateHeader(&gf)) \
   { \
-   cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem to generate Header for archive < " \
+   cmCPackLogger(cmCPackLog::LOG_ERROR, \
+    "Problem to generate Header for archive < "     \
             << filename \
             << ">." << std::endl); \
     return 0; \
@@ -118,7 +121,9 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreComponentGroup)
           << std::endl);
       // Begin the archive for this group
       std::string packageFileName= std::string(toplevel);
-      packageFileName += "/"+std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))+"-"+compGIt->first + this->GetOutputExtension();
+      packageFileName += "/"
+        +std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
+        +"-"+compGIt->first + this->GetOutputExtension();
       // open a block in order to automatically close archive
       // at the end of the block
       {
@@ -142,13 +147,16 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreComponentGroup)
   else
     {
     std::map<std::string, cmCPackComponent>::iterator compIt;
-    for (compIt=this->Components.begin();compIt!=this->Components.end(); ++compIt )
+    for (compIt=this->Components.begin();
+         compIt!=this->Components.end(); ++compIt )
       {
       std::string localToplevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
       std::string packageFileName = std::string(toplevel);
 
       localToplevel += "/"+ compIt->first;
-      packageFileName += "/"+std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))+"-"+compIt->first + this->GetOutputExtension();
+      packageFileName += "/"
+        +std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
+        +"-"+compIt->first + this->GetOutputExtension();
       {
         DECLARE_AND_OPEN_ARCHIVE(packageFileName,archive);
         // Add the files of this component to the archive
@@ -167,8 +175,12 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne(bool allComponentInOne)
   // reset the package file names
   packageFileNames.clear();
   packageFileNames.push_back(std::string(toplevel));
-  packageFileNames[0] += "/"+std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))+"-ALL" + this->GetOutputExtension();
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging all groups in one package...(CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE is set)"
+  packageFileNames[0] += "/"
+    +std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
+    +"-ALL" + this->GetOutputExtension();
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                "Packaging all groups in one package..."
+                "(CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE is set)"
       << std::endl);
   DECLARE_AND_OPEN_ARCHIVE(packageFileNames[0],archive);
 
@@ -197,7 +209,8 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne(bool allComponentInOne)
   else
     {
     std::map<std::string, cmCPackComponent>::iterator compIt;
-    for (compIt=this->Components.begin();compIt!=this->Components.end(); ++compIt )
+    for (compIt=this->Components.begin();compIt!=this->Components.end();
+         ++compIt )
       {
       // Add the files of this component to the archive
       addOneComponentToArchive(archive,&(compIt->second));
@@ -215,9 +228,15 @@ int cmCPackArchiveGenerator::PackageFiles()
 
   // The default behavior is to create 1 package by component group
   // unless the user asked to put all COMPONENTS in a single package
-  bool allGroupInOne = (NULL != (this->GetOption("CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE")));
-  bool allComponentInOne = (NULL != (this->GetOption("CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE")));
-  bool ignoreComponentGroup = ( NULL != (this->GetOption("CPACK_COMPONENTS_IGNORE_GROUPS")));
+  bool allGroupInOne = (NULL !=
+                        (this->GetOption(
+                          "CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE")));
+  bool allComponentInOne = (NULL !=
+                            (this->GetOption(
+                              "CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE")));
+  bool ignoreComponentGroup = ( NULL !=
+                                (this->GetOption(
+                                  "CPACK_COMPONENTS_IGNORE_GROUPS")));
 
   std::string groupingType;
 
@@ -248,13 +267,15 @@ int cmCPackArchiveGenerator::PackageFiles()
       cmCPackLogger(cmCPackLog::LOG_WARNING, "["
               << this->Name << "]"
               << " requested component grouping type <"<< groupingType
-              << "> UNKNOWN not in (ALL_GROUP_IN_ONE,ALL_COMPONENT_IN_ONE,IGNORE)" <<std::endl);
+              << "> UNKNOWN not in (ALL_GROUP_IN_ONE,"
+                    "ALL_COMPONENT_IN_ONE,IGNORE)" <<std::endl);
       }
     }
 
   // Some components were defined but NO group
   // force ignoreGroups
-  if (this->ComponentGroups.empty() && (!this->Components.empty()) && (!ignoreComponentGroup)) {
+  if (this->ComponentGroups.empty() && (!this->Components.empty())
+      && (!ignoreComponentGroup)) {
     cmCPackLogger(cmCPackLog::LOG_WARNING, "["
               << this->Name << "]"
               << " Some Components defined but NO component group:"
@@ -286,7 +307,8 @@ int cmCPackArchiveGenerator::PackageFiles()
   for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
     {
     // Get the relative path to the file
-    std::string rp = cmSystemTools::RelativePath(toplevel.c_str(), fileIt->c_str());
+    std::string rp = cmSystemTools::RelativePath(toplevel.c_str(),
+                                                 fileIt->c_str());
     archive.Add(rp);
     if(!archive)
       {

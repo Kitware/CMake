@@ -172,7 +172,8 @@ int cmCPackGenerator::InstallProject()
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   std::string tempInstallDirectoryStr = bareTempInstallDirectory;
   bool setDestDir = cmSystemTools::IsOn(this->GetOption("CPACK_SET_DESTDIR"))
-                  | cmSystemTools::IsInternallyOn(this->GetOption("CPACK_SET_DESTDIR"));
+                  | cmSystemTools::IsInternallyOn(
+                    this->GetOption("CPACK_SET_DESTDIR"));
   if (!setDestDir)
     {
     tempInstallDirectoryStr += this->GetPackagingInstallPrefix();
@@ -694,9 +695,11 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           // CPACK_PACKAGING_INSTALL_PREFIX
           // I know this is tricky and awkward but it's the price for
           // CPACK_SET_DESTDIR backward compatibility.
-          if (cmSystemTools::IsInternallyOn(this->GetOption("CPACK_SET_DESTDIR")))
+          if (cmSystemTools::IsInternallyOn(
+                this->GetOption("CPACK_SET_DESTDIR")))
             {
-            this->SetOption("CPACK_INSTALL_PREFIX",this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX"));
+            this->SetOption("CPACK_INSTALL_PREFIX",
+                            this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX"));
             }
           std::string dir;
           if (this->GetOption("CPACK_INSTALL_PREFIX"))
@@ -782,7 +785,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           if (absoluteDestFiles.length()>0) {
             absoluteDestFiles +=";";
           }
-          absoluteDestFiles += mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES");
+          absoluteDestFiles +=
+            mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES");
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                                     "Got some ABSOLUTE DESTINATION FILES: "
                                     << absoluteDestFiles << std::endl);
@@ -794,7 +798,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         }
       }
     }
-  this->SetOption("CPACK_ABSOLUTE_DESTINATION_FILES",absoluteDestFiles.c_str());
+  this->SetOption("CPACK_ABSOLUTE_DESTINATION_FILES",
+                  absoluteDestFiles.c_str());
   return 1;
 }
 
@@ -921,8 +926,9 @@ int cmCPackGenerator::DoPackage()
       // beware we cannot just use tempDirectory as before
       // because some generator will "CPACK_INCLUDE_TOPLEVEL_DIRECTORY"
       // we really want "CPACK_TEMPORARY_DIRECTORY"
-      std::string fileN = cmSystemTools::RelativePath(this->GetOption("CPACK_TEMPORARY_DIRECTORY"),
-                                                      it->c_str());
+      std::string fileN =
+        cmSystemTools::RelativePath(
+          this->GetOption("CPACK_TEMPORARY_DIRECTORY"), it->c_str());
 
       // Determine which component we are in.
       std::string componentName = fileN.substr(0, fileN.find('/'));
@@ -932,7 +938,9 @@ int cmCPackGenerator::DoPackage()
 
       // Add this file to the list of files for the component.
       this->Components[componentName].Files.push_back(fileN);
-      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file <" <<fileN<<"> to component <"<<componentName<<">"<<std::endl);
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file <"
+                    <<fileN<<"> to component <"
+                    <<componentName<<">"<<std::endl);
       }
     }
 

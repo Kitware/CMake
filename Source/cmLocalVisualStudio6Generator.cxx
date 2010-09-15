@@ -1187,7 +1187,8 @@ void cmLocalVisualStudio6Generator
     extraLinkOptionsMinSizeRel += targetLinkFlags;
     }
 
-  if(const char* targetLinkFlags = target.GetProperty("LINK_FLAGS_RELWITHDEBINFO"))
+  if(const char* targetLinkFlags =
+     target.GetProperty("LINK_FLAGS_RELWITHDEBINFO"))
     {
     extraLinkOptionsRelWithDebInfo += " ";
     extraLinkOptionsRelWithDebInfo += targetLinkFlags;
