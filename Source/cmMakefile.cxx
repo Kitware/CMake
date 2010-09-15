@@ -1735,6 +1735,11 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 #endif
 }
 
+void cmMakefile::MarkVariableAsUsed(const char* var)
+{
+  this->Internal->VarUsageStack.top().insert(var);
+}
+
 bool cmMakefile::VariableInitialized(const char* var) const
 {
   if(this->Internal->VarInitStack.top().find(var) != this->Internal->VarInitStack.top().end())
