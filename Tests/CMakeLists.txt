@@ -1074,6 +1074,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleGeneratorTest")
   ENDIF(APPLE AND CTEST_TEST_CPACK)
 
+  ADD_TEST(WarnUnusedUnusedViaSet ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/VariableUnusedViaSet"
+    "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaSet"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --build-project WarnUnusedUnusedViaSet
+    --build-options "--warn-unused-vars")
+  SET_TESTS_PROPERTIES(WarnUnusedUnusedViaSet PROPERTIES
+    PASS_REGULAR_EXPRESSION "warning: \\(changing definition\\) unused variable 'UNUSED_VARIABLE'")
+  SET_TESTS_PROPERTIES(WarnUnusedUnusedViaSet PROPERTIES
+    FAIL_REGULAR_EXPRESSION "warning: \\(unsetting\\) unused variable 'UNUSED_VARIABLE'")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaSet")
+
   ADD_TEST(WarnUnusedUnusedViaUnset ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/VariableUnusedViaUnset"
