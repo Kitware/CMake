@@ -1648,7 +1648,7 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 
   this->Internal->VarStack.top().Set(name, value);
-  if ((this->Internal->VarUsageStack.size() > 1) &&
+  if (this->Internal->VarUsageStack.size() &&
       this->VariableInitialized(name))
     {
     this->CheckForUnused("changing definition", name);
@@ -1719,7 +1719,7 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
 void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
-  if ((this->Internal->VarUsageStack.size() > 1) &&
+  if (this->Internal->VarUsageStack.size() &&
       this->VariableInitialized(name))
     {
     this->CheckForUnused("changing definition", name);
@@ -1763,7 +1763,7 @@ bool cmMakefile::VariableUsed(const char* var) const
 
 void cmMakefile::CheckForUnused(const char* reason, const char* name) const
 {
-  if (this->WarnUnused && !this->VariableUsed(name))
+  if (this->WarnUnused && !this->VariableUsed(name) && this->CallStack.size())
     {
     const cmListFileContext* file = this->CallStack.back().Context;
     if (this->CheckSystemVars ||
