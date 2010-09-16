@@ -1783,8 +1783,13 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
 void cmMakefile::RemoveDefinition(const char* name)
 {
   this->Internal->VarStack.top().Set(name, 0);
+  if (this->Internal->VarUsageStack.size() &&
+      this->VariableInitialized(name))
+    {
+    this->CheckForUnused("unsetting", name);
+    this->Internal->VarUsageStack.top().erase(name);
+    }
   this->Internal->VarInitStack.top().insert(name);
-  this->CheckForUnused("unsetting", name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
