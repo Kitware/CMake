@@ -844,7 +844,7 @@ protected:
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
 
   // Check for a an unused variable
-  bool CheckForUnused(const char* reason, const char* name);
+  void CheckForUnused(const char* reason, const char* name) const;
 
   std::string Prefix;
   std::vector<std::string> AuxSourceDirectories; // 

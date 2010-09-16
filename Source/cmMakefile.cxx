@@ -1771,7 +1771,7 @@ bool cmMakefile::VariableCleared(const char* var) const
   return false;
 }
 
-bool cmMakefile::CheckForUnused(const char* reason, const char* name)
+void cmMakefile::CheckForUnused(const char* reason, const char* name) const
 {
   if (this->WarnUnused && !this->VariableUsed(name))
     {
@@ -1786,10 +1786,8 @@ bool cmMakefile::CheckForUnused(const char* reason, const char* name)
       msg << file->FilePath << ":" << file->Line << ":" <<
         " warning: (" << reason << ") unused variable \'" << name << "\'";
       cmSystemTools::Message(msg.str().c_str());
-      return true;
       }
     }
-  return false;
 }
 
 void cmMakefile::RemoveDefinition(const char* name)
@@ -3429,7 +3427,11 @@ void cmMakefile::PopScope()
   for (; it != locals.end(); ++it)
     {
     init.erase(*it);
-    if (!this->CheckForUnused("out of scope", it->c_str()))
+    if (!this->VariableUsed(it->c_str()))
+      {
+      this->CheckForUnused("out of scope", it->c_str());
+      }
+    else
       {
       usage.erase(*it);
       }
