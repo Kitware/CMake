@@ -131,8 +131,10 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     if(this->WarnUninitialized && !this->Makefile->VariableInitialized(var))
       {
       if (this->CheckSystemVars ||
-          cmSystemTools::IsSubDirectory(this->FileName, this->Makefile->GetHomeDirectory()) ||
-          cmSystemTools::IsSubDirectory(this->FileName, this->Makefile->GetHomeOutputDirectory()))
+          cmSystemTools::IsSubDirectory(this->FileName,
+                                        this->Makefile->GetHomeDirectory()) ||
+          cmSystemTools::IsSubDirectory(this->FileName,
+                                        this->Makefile->GetHomeOutputDirectory()))
         {
         cmOStringStream msg;
         msg << this->FileName << ":" << this->FileLine << ":" <<

@@ -1649,7 +1649,8 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 
   this->Internal->VarStack.top().Set(name, value);
-  if ((this->Internal->VarUsageStack.size() > 1) && this->VariableInitialized(name))
+  if ((this->Internal->VarUsageStack.size() > 1) &&
+      this->VariableInitialized(name))
     {
     this->CheckForUnused("changing definition", name);
     this->Internal->VarUsageStack.top().erase(name);
@@ -1719,7 +1720,8 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
 void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
-  if ((this->Internal->VarUsageStack.size() > 1) && this->VariableInitialized(name))
+  if ((this->Internal->VarUsageStack.size() > 1) &&
+      this->VariableInitialized(name))
     {
     this->CheckForUnused("changing definition", name);
     this->Internal->VarUsageStack.top().erase(name);
@@ -1742,7 +1744,8 @@ void cmMakefile::MarkVariableAsUsed(const char* var)
 
 bool cmMakefile::VariableInitialized(const char* var) const
 {
-  if(this->Internal->VarInitStack.top().find(var) != this->Internal->VarInitStack.top().end())
+  if(this->Internal->VarInitStack.top().find(var) !=
+      this->Internal->VarInitStack.top().end())
     {
     return true;
     }
@@ -1751,7 +1754,8 @@ bool cmMakefile::VariableInitialized(const char* var) const
 
 bool cmMakefile::VariableUsed(const char* var) const
 {
-  if(this->Internal->VarUsageStack.top().find(var) != this->Internal->VarUsageStack.top().end())
+  if(this->Internal->VarUsageStack.top().find(var) !=
+      this->Internal->VarUsageStack.top().end())
     {
     return true;
     }
@@ -1773,8 +1777,10 @@ bool cmMakefile::CheckForUnused(const char* reason, const char* name)
     {
     const cmListFileContext* file = this->CallStack.back().Context;
     if (this->CheckSystemVars ||
-        cmSystemTools::IsSubDirectory(file->FilePath.c_str(), this->GetHomeDirectory()) ||
-        cmSystemTools::IsSubDirectory(file->FilePath.c_str(), this->GetHomeOutputDirectory()))
+        cmSystemTools::IsSubDirectory(file->FilePath.c_str(),
+                                      this->GetHomeDirectory()) ||
+        cmSystemTools::IsSubDirectory(file->FilePath.c_str(),
+                                      this->GetHomeOutputDirectory()))
       {
       cmOStringStream msg;
       msg << file->FilePath << ":" << file->Line << ":" <<
