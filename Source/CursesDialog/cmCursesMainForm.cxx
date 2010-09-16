@@ -902,7 +902,7 @@ void cmCursesMainForm::HandleInput()
         this->SearchMode = false;
         if ( this->SearchString.size() > 0 )
           {
-          this->JumpToCacheEntry(-1, this->SearchString.c_str());
+          this->JumpToCacheEntry(this->SearchString.c_str());
           this->OldSearchString = this->SearchString;
           }
         this->SearchString = "";
@@ -1076,7 +1076,7 @@ void cmCursesMainForm::HandleInput()
         {
         if ( this->OldSearchString.size() > 0 )
           {
-          this->JumpToCacheEntry(-1, this->OldSearchString.c_str());
+          this->JumpToCacheEntry(this->OldSearchString.c_str());
           }
         }
       // switch advanced on/off
@@ -1191,7 +1191,7 @@ int cmCursesMainForm::LoadCache(const char *)
   return r;
 }
   
-void cmCursesMainForm::JumpToCacheEntry(int idx, const char* astr)
+void cmCursesMainForm::JumpToCacheEntry(const char* astr)
 {
   std::string str;
   if ( astr )
@@ -1199,18 +1199,14 @@ void cmCursesMainForm::JumpToCacheEntry(int idx, const char* astr)
     str = cmSystemTools::LowerCase(astr);
     }
 
-  if ( size_t(idx) > this->NumberOfVisibleEntries )
-    {
-    return;
-    }
-  if ( idx < 0 && str.size() == 0)
+  if(str.empty())
     {
     return;
     }
   FIELD* cur = current_field(this->Form);
   int start_index = field_index(cur);
   int findex = start_index;
-  while ( (findex / 3) != idx ) 
+  for(;;)
     {
     if ( str.size() > 0 )
       {
