@@ -1640,6 +1640,13 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 
   this->Internal->VarStack.top().Set(name, value);
+  if ((this->Internal->VarUsageStack.size() > 1) &&
+      this->VariableInitialized(name))
+    {
+    this->CheckForUnused("changing definition", name);
+    this->Internal->VarUsageStack.top().erase(name);
+    }
+  this->Internal->VarInitStack.top().insert(name);
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -1704,6 +1711,12 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
 void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
+  if ((this->Internal->VarUsageStack.size() > 1) &&
+      this->VariableInitialized(name))
+    {
+    this->CheckForUnused("changing definition", name);
+    this->Internal->VarUsageStack.top().erase(name);
+    }
   this->Internal->VarInitStack.top().insert(name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -1715,9 +1728,15 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 #endif
 }
 
+void cmMakefile::MarkVariableAsUsed(const char* var)
+{
+  this->Internal->VarUsageStack.top().insert(var);
+}
+
 bool cmMakefile::VariableInitialized(const char* var) const
 {
-  if(this->Internal->VarInitStack.top().find(var) != this->Internal->VarInitStack.top().end())
+  if(this->Internal->VarInitStack.top().find(var) !=
+      this->Internal->VarInitStack.top().end())
     {
     return true;
     }
@@ -1726,7 +1745,8 @@ bool cmMakefile::VariableInitialized(const char* var) const
 
 bool cmMakefile::VariableUsed(const char* var) const
 {
-  if(this->Internal->VarUsageStack.top().find(var) != this->Internal->VarUsageStack.top().end())
+  if(this->Internal->VarUsageStack.top().find(var) !=
+      this->Internal->VarUsageStack.top().end())
     {
     return true;
     }
@@ -1742,15 +1762,31 @@ bool cmMakefile::VariableCleared(const char* var) const
   return false;
 }
 
+void cmMakefile::CheckForUnused(const char* reason, const char* name) const
+{
+  if (this->WarnUnused && !this->VariableUsed(name))
+    {
+    const cmListFileContext* file = this->CallStack.back().Context;
+    if (this->CheckSystemVars ||
+        cmSystemTools::IsSubDirectory(file->FilePath.c_str(),
+                                      this->GetHomeDirectory()) ||
+        cmSystemTools::IsSubDirectory(file->FilePath.c_str(),
+                                      this->GetHomeOutputDirectory()))
+      {
+      cmOStringStream msg;
+      msg << file->FilePath << ":" << file->Line << ":" <<
+        " warning: (" << reason << ") unused variable \'" << name << "\'";
+      cmSystemTools::Message(msg.str().c_str());
+      }
+    }
+}
+
 void cmMakefile::RemoveDefinition(const char* name)
 {
   this->Internal->VarStack.top().Set(name, 0);
   this->Internal->VarRemoved.insert(name);
   this->Internal->VarInitStack.top().insert(name);
-  if (this->WarnUnused)
-    {
-    this->Internal->VarUsageStack.top().insert(name);
-    }
+  this->CheckForUnused("unsetting", name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -3407,17 +3443,9 @@ void cmMakefile::PopScope()
   for (; it != locals.end(); ++it)
     {
     init.erase(*it);
-    if (this->WarnUnused && usage.find(*it) == usage.end())
+    if (!this->VariableUsed(it->c_str()))
       {
-      const char* cdir = this->ListFileStack.back().c_str();
-      if (this->CheckSystemVars ||
-          cmSystemTools::IsSubDirectory(cdir, this->GetHomeDirectory()) ||
-          cmSystemTools::IsSubDirectory(cdir, this->GetHomeOutputDirectory()))
-        {
-        cmOStringStream m;
-        m << "unused variable \'" << *it << "\'";
-        this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
-        }
+      this->CheckForUnused("out of scope", it->c_str());
       }
     else
       {

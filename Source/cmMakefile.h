@@ -61,6 +61,8 @@ public:
   unsigned int GetCacheMajorVersion();
   unsigned int GetCacheMinorVersion();
 
+  /* Mark a variable as used */
+  void MarkVariableAsUsed(const char* var);
   /* return true if a variable has been initialized */
   bool VariableInitialized(const char* ) const;
   /* return true if a variable has been used */
@@ -844,7 +846,10 @@ public:
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
-  
+
+  // Check for a an unused variable
+  void CheckForUnused(const char* reason, const char* name) const;
+
   std::string Prefix;
   std::vector<std::string> AuxSourceDirectories; // 
 

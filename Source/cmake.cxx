@@ -643,12 +643,14 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       }
     else if(arg.find("--no-warn-unused-cli",0) == 0)
       {
-      std::cout << "Not finding unused variables given on the command line.\n";
+      std::cout << "Not searching for unused variables given on the " <<
+                   "command line.\n";
       this->SetWarnUnusedCli(false);
       }
     else if(arg.find("--check-system-vars",0) == 0)
       {
-      std::cout << "Also check system files when warning about unused and uninitialized variables.\n";
+      std::cout << "Also check system files when warning about unused and " <<
+                   "uninitialized variables.\n";
       this->SetCheckSystemVars(true);
       }
     else if(arg.find("-G",0) == 0)
