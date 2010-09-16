@@ -92,7 +92,10 @@ std::set<cmStdString> cmDefinitions::LocalKeys() const
   for(MapType::const_iterator mi = this->Map.begin();
       mi != this->Map.end(); ++mi)
     {
-    keys.insert(mi->first);
+    if (mi->second.Exists)
+      {
+      keys.insert(mi->first);
+      }
     }
   return keys;
 }
