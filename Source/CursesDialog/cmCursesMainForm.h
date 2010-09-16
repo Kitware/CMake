@@ -122,9 +122,8 @@ protected:
   // Remove an entry from the interface and the cache.
   void RemoveEntry(const char* value);
 
-  // Jump to the cache value with index idx. If string str is
-  // specified, it will stop on widget that contain that string.
-  void JumpToCacheEntry(int idx, const char* str);
+  // Jump to the cache entry whose name matches the string.
+  void JumpToCacheEntry(const char* str);
 
   // Copies of cache entries stored in the user interface
   std::vector<cmCursesCacheEntryComposite*>* Entries;
