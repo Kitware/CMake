@@ -590,6 +590,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   std::string currentFile
     = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
 
   const char* external = 0;
   std::string external_abs;
@@ -630,6 +631,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
 
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
 
   // try to see if the list file is the top most
   // list file for a project, and if it is, then it
@@ -662,7 +664,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       *fullPath = "";
       }
     this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+    this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
     this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+    this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
     return false;
     }
   // add this list file to the list of dependencies
@@ -702,7 +706,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
 
   // pop the listfile off the stack
   this->ListFileStack.pop_back();
