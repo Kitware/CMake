@@ -45,7 +45,6 @@ public:
   std::stack<cmDefinitions, std::list<cmDefinitions> > VarStack;
   std::stack<std::set<cmStdString> > VarInitStack;
   std::stack<std::set<cmStdString> > VarUsageStack;
-  std::set<cmStdString> VarRemoved;
 };
 
 // default is not to be building executables
@@ -179,6 +178,15 @@ bool cmMakefile::NeedCacheCompatibility(int major, int minor)
 
 cmMakefile::~cmMakefile()
 {
+  std::set<cmStdString> usage = this->Internal->VarUsageStack.top();
+  std::set<cmStdString>::const_iterator it = usage.begin();
+  for (; it != usage.end(); ++it)
+    {
+    if (!this->VariableUsed(it->c_str()))
+      {
+      this->CheckForUnused("out of scope", it->c_str());
+      }
+    }
   for(std::vector<cmInstallGenerator*>::iterator
         i = this->InstallGenerators.begin();
       i != this->InstallGenerators.end(); ++i)
@@ -582,6 +590,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   std::string currentFile
     = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
 
   const char* external = 0;
   std::string external_abs;
@@ -622,6 +631,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
 
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
 
   // try to see if the list file is the top most
   // list file for a project, and if it is, then it
@@ -654,7 +664,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       *fullPath = "";
       }
     this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+    this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
     this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+    this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
     return false;
     }
   // add this list file to the list of dependencies
@@ -694,7 +706,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
 
   // pop the listfile off the stack
   this->ListFileStack.pop_back();
@@ -1640,7 +1654,7 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 
   this->Internal->VarStack.top().Set(name, value);
-  if ((this->Internal->VarUsageStack.size() > 1) &&
+  if (this->Internal->VarUsageStack.size() &&
       this->VariableInitialized(name))
     {
     this->CheckForUnused("changing definition", name);
@@ -1711,7 +1725,7 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
 void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
-  if ((this->Internal->VarUsageStack.size() > 1) &&
+  if (this->Internal->VarUsageStack.size() &&
       this->VariableInitialized(name))
     {
     this->CheckForUnused("changing definition", name);
@@ -1753,18 +1767,9 @@ bool cmMakefile::VariableUsed(const char* var) const
   return false;
 }
 
-bool cmMakefile::VariableCleared(const char* var) const
-{
-  if(this->Internal->VarRemoved.find(var) != this->Internal->VarRemoved.end())
-    {
-    return true;
-    }
-  return false;
-}
-
 void cmMakefile::CheckForUnused(const char* reason, const char* name) const
 {
-  if (this->WarnUnused && !this->VariableUsed(name))
+  if (this->WarnUnused && !this->VariableUsed(name) && this->CallStack.size())
     {
     const cmListFileContext* file = this->CallStack.back().Context;
     if (this->CheckSystemVars ||
@@ -1784,9 +1789,13 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
 void cmMakefile::RemoveDefinition(const char* name)
 {
   this->Internal->VarStack.top().Set(name, 0);
-  this->Internal->VarRemoved.insert(name);
+  if (this->Internal->VarUsageStack.size() &&
+      this->VariableInitialized(name))
+    {
+    this->CheckForUnused("unsetting", name);
+    this->Internal->VarUsageStack.top().erase(name);
+    }
   this->Internal->VarInitStack.top().insert(name);
-  this->CheckForUnused("unsetting", name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -3490,7 +3499,7 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
     // directory's scope was initialized by the closure of the parent
     // scope, so we do not need to localize the definition first.
     cmMakefile* parent = plg->GetMakefile();
-    parent->Internal->VarStack.top().Set(var, varDef);
+    parent->AddDefinition(var, varDef);
     }
   else
     {

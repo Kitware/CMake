@@ -32,6 +32,10 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
       ${CMAKE_BINARY_DIR} ${src}
       CMAKE_FLAGS "${CMAKE_FLAGS}"
                   "-DCMAKE_${lang}_STANDARD_LIBRARIES="
+                  # We need ignore these warnings because some platforms need
+                  # CMAKE_${lang}_STANDARD_LIBRARIES to link properly and we
+                  # don't care when we are just determining the ABI.
+                  "--no-warn-unused-cli"
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
       )
