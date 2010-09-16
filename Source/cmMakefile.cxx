@@ -178,6 +178,15 @@ bool cmMakefile::NeedCacheCompatibility(int major, int minor)
 
 cmMakefile::~cmMakefile()
 {
+  std::set<cmStdString> usage = this->Internal->VarUsageStack.top();
+  std::set<cmStdString>::const_iterator it = usage.begin();
+  for (; it != usage.end(); ++it)
+    {
+    if (!this->VariableUsed(it->c_str()))
+      {
+      this->CheckForUnused("out of scope", it->c_str());
+      }
+    }
   for(std::vector<cmInstallGenerator*>::iterator
         i = this->InstallGenerators.begin();
       i != this->InstallGenerators.end(); ++i)
