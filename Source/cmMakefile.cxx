@@ -45,7 +45,6 @@ public:
   std::stack<cmDefinitions, std::list<cmDefinitions> > VarStack;
   std::stack<std::set<cmStdString> > VarInitStack;
   std::stack<std::set<cmStdString> > VarUsageStack;
-  std::set<cmStdString> VarRemoved;
 };
 
 // default is not to be building executables
@@ -1762,15 +1761,6 @@ bool cmMakefile::VariableUsed(const char* var) const
   return false;
 }
 
-bool cmMakefile::VariableCleared(const char* var) const
-{
-  if(this->Internal->VarRemoved.find(var) != this->Internal->VarRemoved.end())
-    {
-    return true;
-    }
-  return false;
-}
-
 void cmMakefile::CheckForUnused(const char* reason, const char* name) const
 {
   if (this->WarnUnused && !this->VariableUsed(name))
@@ -1793,7 +1783,6 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
 void cmMakefile::RemoveDefinition(const char* name)
 {
   this->Internal->VarStack.top().Set(name, 0);
-  this->Internal->VarRemoved.insert(name);
   this->Internal->VarInitStack.top().insert(name);
   this->CheckForUnused("unsetting", name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
