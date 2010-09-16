@@ -3477,7 +3477,7 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
     // directory's scope was initialized by the closure of the parent
     // scope, so we do not need to localize the definition first.
     cmMakefile* parent = plg->GetMakefile();
-    parent->Internal->VarStack.top().Set(var, varDef);
+    parent->AddDefinition(var, varDef);
     }
   else
     {
