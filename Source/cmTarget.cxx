@@ -278,6 +278,24 @@ void cmTarget::DefineProperties(cmake *cm)
      "from which the target is imported.");
 
   cm->DefineProperty
+    ("IMPORTED_NO_SONAME", cmProperty::TARGET,
+     "Specifies that an IMPORTED shared library target has no \"soname\".  ",
+     "Set this property to true for an imported shared library file that "
+     "has no \"soname\" field.  "
+     "CMake may adjust generated link commands for some platforms to prevent "
+     "the linker from using the path to the library in place of its missing "
+     "soname.  "
+     "Ignored for non-imported targets.");
+
+  cm->DefineProperty
+    ("IMPORTED_NO_SONAME_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration version of IMPORTED_NO_SONAME property.",
+     "This property is used when loading settings for the <CONFIG> "
+     "configuration of an imported target.  "
+     "Configuration names correspond to those provided by the project "
+     "from which the target is imported.");
+
+  cm->DefineProperty
     ("EXCLUDE_FROM_ALL", cmProperty::TARGET,
      "Exclude the target from the all target.",
      "A property on a target that indicates if the target is excluded "
