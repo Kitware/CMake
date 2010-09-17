@@ -112,7 +112,6 @@ bool cmFunctionHelperCommand::InvokeInitialPass
   // set the value of argc
   cmOStringStream strStream;
   strStream << expandedArgs.size();
-  this->Makefile->MarkVariableAsUsed("ARGC");
   this->Makefile->AddDefinition("ARGC",strStream.str().c_str());
   this->Makefile->MarkVariableAsUsed("ARGC");
 
@@ -121,7 +120,6 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     {
     cmOStringStream tmpStream;
     tmpStream << "ARGV" << t;
-    this->Makefile->MarkVariableAsUsed(tmpStream.str().c_str());
     this->Makefile->AddDefinition(tmpStream.str().c_str(), 
                                   expandedArgs[t].c_str());
     this->Makefile->MarkVariableAsUsed(tmpStream.str().c_str());
@@ -156,10 +154,8 @@ bool cmFunctionHelperCommand::InvokeInitialPass
       }
     cnt ++;
     }
-  this->Makefile->MarkVariableAsUsed("ARGV");
   this->Makefile->AddDefinition("ARGV", argvDef.c_str());
   this->Makefile->MarkVariableAsUsed("ARGV");
-  this->Makefile->MarkVariableAsUsed("ARGN");
   this->Makefile->AddDefinition("ARGN", argnDef.c_str());
   this->Makefile->MarkVariableAsUsed("ARGN");
 

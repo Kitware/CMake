@@ -1107,21 +1107,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     FAIL_REGULAR_EXPRESSION ":5: warning: \\(unsetting\\) unused variable 'UNUSED_VARIABLE'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset")
 
-  ADD_TEST(WarnUnusedUnusedViaScope ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/VariableUnusedViaScope"
-    "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaScope"
-    --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-noclean
-    --build-project WarnUnusedUnusedViaScope
-    --build-options "--warn-unused-vars")
-  SET_TESTS_PROPERTIES(WarnUnusedUnusedViaScope PROPERTIES
-    PASS_REGULAR_EXPRESSION "warning: \\(out of scope\\) unused variable 'UNUSED_VARIABLE'")
-  SET_TESTS_PROPERTIES(WarnUnusedUnusedViaScope PROPERTIES
-    FAIL_REGULAR_EXPRESSION "warning: \\(unsetting\\) unused variable 'UNUSED_VARIABLE'")
-  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaScope")
-
   ADD_TEST(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/VariableUsage"
