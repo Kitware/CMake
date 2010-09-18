@@ -86,6 +86,11 @@
 #   Boost_USE_STATIC_LIBS        Can be set to ON to force the use of the static
 #                                boost libraries. Defaults to OFF.
 #
+#   Boost_NO_SYSTEM_PATHS        Set to TRUE to suppress searching in system
+#                                paths (or other locations outside of BOOST_ROOT
+#                                or BOOST_INCLUDEDIR).  Useful when specifying
+#                                BOOST_ROOT. Defaults to OFF.
+#                                  [Since CMake 2.8.3]
 #
 #   Boost_USE_STATIC_RUNTIME     If enabled, searches for boost libraries
 #                                linked against a static C++ standard library
@@ -143,7 +148,9 @@
 #
 #   BOOST_ROOT or BOOSTROOT      The preferred installation prefix for searching for
 #                                Boost.  Set this if the module has problems finding
-#                                the proper Boost installation.
+#                                the proper Boost installation.  To prevent falling
+#                                back on the system paths, set Boost_NO_SYSTEM_PATHS
+#                                to true.
 #
 #   BOOST_INCLUDEDIR             Set this to the include directory of Boost, if the
 #                                module has problems finding the proper Boost installation
@@ -420,6 +427,8 @@ ELSE (_boost_IN_CACHE)
                    "Boost_USE_STATIC_RUNTIME = ${Boost_USE_STATIC_RUNTIME}")
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                    "Boost_ADDITIONAL_VERSIONS = ${Boost_ADDITIONAL_VERSIONS}")
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                   "Boost_NO_SYSTEM_PATHS = ${Boost_NO_SYSTEM_PATHS}")
   endif()
 
   IF(WIN32)
@@ -455,7 +464,8 @@ ELSE (_boost_IN_CACHE)
   # If Boost_ROOT was defined, gently correct the user
   if(Boost_ROOT)
     message("WARNING: Boost_ROOT was set which is incorrect and is being ignored.  "
-            "You need to use BOOST_ROOT instead.  ")
+            "You need to use BOOST_ROOT instead.  "
+            "Also, we suggest setting Boost_NO_SYSTEM_PATHS.")
   endif()
 
   # If BOOST_ROOT was defined in the environment, use it.
@@ -495,18 +505,26 @@ ELSE (_boost_IN_CACHE)
                    "_boost_TEST_VERSIONS = ${_boost_TEST_VERSIONS}")
   endif()
 
-  IF( BOOST_ROOT )
-    SET(_boost_INCLUDE_SEARCH_DIRS 
-      ${BOOST_ROOT}/include 
-      ${BOOST_ROOT}
-      ${_boost_INCLUDE_SEARCH_DIRS})
-  ENDIF( BOOST_ROOT )
+  if( BOOST_ROOT )
+    if( Boost_NO_SYSTEM_PATHS )
+      set(_boost_INCLUDE_SEARCH_DIRS
+        ${BOOST_ROOT}/include
+        ${BOOST_ROOT})
+      set(_boost_FIND_OPTIONS NO_CMAKE_SYSTEM_PATH)
+    else()
+      set(_boost_INCLUDE_SEARCH_DIRS
+        ${BOOST_ROOT}/include
+        ${BOOST_ROOT}
+        ${_boost_INCLUDE_SEARCH_DIRS})
+    endif()
+  endif( BOOST_ROOT )
 
-  IF( BOOST_INCLUDEDIR )
+  # prepend BOOST_INCLUDEDIR to search path if specified
+  if( BOOST_INCLUDEDIR )
     file(TO_CMAKE_PATH ${BOOST_INCLUDEDIR} BOOST_INCLUDEDIR)
-    SET(_boost_INCLUDE_SEARCH_DIRS 
+    set(_boost_INCLUDE_SEARCH_DIRS
       ${BOOST_INCLUDEDIR} ${_boost_INCLUDE_SEARCH_DIRS})
-  ENDIF( BOOST_INCLUDEDIR )
+  endif( BOOST_INCLUDEDIR )
 
   # ------------------------------------------------------------------------
   #  Search for Boost include DIR 
@@ -553,6 +571,7 @@ ELSE (_boost_IN_CACHE)
       NAMES         boost/config.hpp
       HINTS         ${_boost_INCLUDE_SEARCH_DIRS}
       PATH_SUFFIXES ${_boost_PATH_SUFFIXES}
+      ${_boost_FIND_OPTIONS}
       )
   ENDIF( NOT Boost_INCLUDE_DIR )
   
@@ -741,9 +760,14 @@ ELSE (_boost_IN_CACHE)
   #  Begin finding boost libraries
   # ------------------------------------------------------------------------
 
-  SET(_boost_LIBRARIES_SEARCH_DIRS
+  set(_boost_LIBRARY_SEARCH_DIRS_ALWAYS
+    ${BOOST_ROOT}/lib
+    ${BOOST_ROOT}/stage/lib
     ${Boost_INCLUDE_DIR}/lib
     ${Boost_INCLUDE_DIR}/../lib
+    ${Boost_INCLUDE_DIR}/stage/lib
+  )
+  set(_boost_LIBRARY_SEARCH_DIRS_SYSTEM
     C:/boost/lib
     C:/boost
     "$ENV{ProgramFiles}/boost/boost_${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}_${Boost_SUBMINOR_VERSION}/lib"
@@ -752,22 +776,25 @@ ELSE (_boost_IN_CACHE)
     "$ENV{ProgramFiles}/boost"
     /sw/local/lib
   )
-  IF( BOOST_ROOT )
-    SET(_boost_LIBRARIES_SEARCH_DIRS 
-      ${BOOST_ROOT}/lib 
-      ${BOOST_ROOT}/stage/lib 
-      ${_boost_LIBRARIES_SEARCH_DIRS})
-  ENDIF( BOOST_ROOT )
+  if( BOOST_ROOT )
+    set(_boost_LIBRARY_SEARCH_DIRS ${_boost_LIBRARY_SEARCH_DIRS_ALWAYS})
+    if( Boost_NO_SYSTEM_PATHS )
+      set(_boost_FIND_OPTIONS NO_CMAKE_SYSTEM_PATH)
+    else()
+      list(APPEND _boost_LIBRARY_SEARCH_DIRS ${_boost_LIBRARY_SEARCH_DIRS_SYSTEM})
+    endif()
+  endif( BOOST_ROOT )
 
-  IF( BOOST_LIBRARYDIR )
+  # prepend BOOST_LIBRARYDIR to search path if specified
+  if( BOOST_LIBRARYDIR )
     file(TO_CMAKE_PATH ${BOOST_LIBRARYDIR} BOOST_LIBRARYDIR)
-    SET(_boost_LIBRARIES_SEARCH_DIRS 
-      ${BOOST_LIBRARYDIR} ${_boost_LIBRARIES_SEARCH_DIRS})
-  ENDIF( BOOST_LIBRARYDIR )
+    set(_boost_LIBRARY_SEARCH_DIRS
+      ${BOOST_LIBRARYDIR} ${_boost_LIBRARY_SEARCH_DIRS})
+  endif()
 
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-      "_boost_LIBRARIES_SEARCH_DIRS = ${_boost_LIBRARIES_SEARCH_DIRS}")
+      "_boost_LIBRARY_SEARCH_DIRS = ${_boost_LIBRARY_SEARCH_DIRS}")
   endif()
 
   # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
@@ -835,7 +862,8 @@ ELSE (_boost_IN_CACHE)
     endif()
     find_library(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
         NAMES ${_boost_RELEASE_NAMES}
-        HINTS ${_boost_LIBRARIES_SEARCH_DIRS}
+        HINTS ${_boost_LIBRARY_SEARCH_DIRS}
+        ${_boost_FIND_OPTIONS}
     )
 
     #
@@ -860,7 +888,8 @@ ELSE (_boost_IN_CACHE)
     endif()
     find_library(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
         NAMES ${_boost_DEBUG_NAMES}
-        HINTS ${_boost_LIBRARIES_SEARCH_DIRS}
+        HINTS ${_boost_LIBRARY_SEARCH_DIRS}
+        ${_boost_FIND_OPTIONS}
     )
 
     _Boost_ADJUST_LIB_VARS(${UPPERCOMPONENT})
