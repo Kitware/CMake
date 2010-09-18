@@ -144,6 +144,21 @@
 #                                (e.g. "-gcc43") if FindBoost has problems finding
 #                                the proper Boost installation
 #
+#   Boost_THREADAPI                When building boost.thread, sometimes the name of the
+#                                library contains an additional "pthread" or "win32"
+#                                string known as the threadapi.  This can happen when
+#                                compiling against pthreads on Windows or win32 threads
+#                                on Cygwin.  You may specify this variable and if set
+#                                when FindBoost searches for the Boost threading library
+#                                it will first try to match the threadapi you specify.
+#                                  For Example: libboost_thread_win32-mgw45-mt-1_43.a
+#                                might be found if you specified "win32" here before
+#                                falling back on libboost_thread-mgw45-mt-1_43.a.
+#                                  [Since CMake 2.8.3]
+
+
+
+#
 # These last three variables are available also as environment variables:
 #
 #   BOOST_ROOT or BOOSTROOT      The preferred installation prefix for searching for
@@ -313,6 +328,17 @@ function(_Boost_MARK_COMPONENTS_FOUND _yes_or_no)
     string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
     set(Boost_${UPPERCOMPONENT}_FOUND ${_yes_or_no} CACHE INTERNAL "Whether the Boost ${COMPONENT} library found" FORCE)
   endforeach()
+endfunction()
+
+#
+# Take a list of libraries with "thread" in it
+# and prepend duplicates with "thread_${Boost_THREADAPI}"
+# at the front of the list
+#
+function(_Boost_PREPEND_LIST_WITH_THREADAPI _output)
+  set(_orig_libnames ${ARGN})
+  string(REPLACE "thread" "thread_${Boost_THREADAPI}" _threadapi_libnames ${_orig_libnames})
+  set(${_output} ${_threadapi_libnames} ${_orig_libnames} PARENT_SCOPE)
 endfunction()
 
 #
@@ -853,6 +879,9 @@ ELSE (_boost_IN_CACHE)
         ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
         ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
     endif()
+    if(Boost_THREADAPI AND ${COMPONENT} STREQUAL "thread")
+       _Boost_PREPEND_LIST_WITH_THREADAPI(_boost_RELEASE_NAMES ${_boost_RELEASE_NAMES})
+    endif()
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                      "Searching for ${UPPERCOMPONENT}_LIBRARY_RELEASE: ${_boost_RELEASE_NAMES}")
@@ -878,6 +907,9 @@ ELSE (_boost_IN_CACHE)
         ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}
         ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
         ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
+    endif()
+    if(Boost_THREADAPI AND ${COMPONENT} STREQUAL "thread")
+       _Boost_PREPEND_LIST_WITH_THREADAPI(_boost_DEBUG_NAMES ${_boost_DEBUG_NAMES})
     endif()
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
