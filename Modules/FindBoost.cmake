@@ -550,10 +550,7 @@ ELSE (_boost_IN_CACHE)
       ENDIF()
       
       list(APPEND _boost_PATH_SUFFIXES "boost-${_boost_BOOSTIFIED_VERSION}")
-      if(WIN32)
-        # For BoostPro's underscores (and others?)
-        list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
-      endif()
+      list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
 
     ENDFOREACH(_boost_VER)
       
