@@ -236,7 +236,7 @@ void cmXCodeObject::PrintString(std::ostream& os) const
   // considered special by the Xcode project file parser.
   bool needQuote =
     (this->String.empty() ||
-     this->String.find_first_of(" <>.+-=@") != this->String.npos);
+     this->String.find_first_of(" <>.+-=@$") != this->String.npos);
   const char* quote = needQuote? "\"" : "";
 
   // Print the string, quoted and escaped as necessary.
