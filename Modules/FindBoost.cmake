@@ -17,8 +17,10 @@
 #
 # == Using actual libraries from within Boost: ==
 #
-#   set(Boost_USE_STATIC_LIBS   ON)
-#   set(Boost_USE_MULTITHREADED ON)
+#   set(Boost_USE_STATIC_LIBS        ON)
+#   set(Boost_USE_MULTITHREADED      ON)
+#   set(Boost_USE_STATIC_RUNTIME    OFF)
+#   set(Boost_COMPAT_STATIC_RUNTIME OFF)
 #   find_package( Boost 1.36.0 COMPONENTS date_time filesystem system ... )
 #
 #   if(Boost_FOUND)
@@ -83,6 +85,37 @@
 #
 #   Boost_USE_STATIC_LIBS        Can be set to ON to force the use of the static
 #                                boost libraries. Defaults to OFF.
+#
+#
+#   Boost_USE_STATIC_RUNTIME     If enabled, searches for boost libraries
+#                                linked against a static C++ standard library
+#                                ('s' ABI tag). Defaults to OFF.
+#                                  [Since CMake 2.8.3]
+#
+#   Boost_USE_DEBUG_PYTHON       If enabled, searches for boost libraries
+#                                compiled against a special debug build of
+#                                Python ('y' ABI tag). Defaults to OFF.
+#                                  [Since CMake 2.8.3]
+#
+#   Boost_USE_STLPORT            If enabled, searches for boost libraries
+#                                compiled against the STLPort standard
+#                                library ('p' ABI tag). Defaults to OFF.
+#                                  [Since CMake 2.8.3]
+#
+#   Boost_USE_STLPORT_DEPRECATED_NATIVE_IOSTREAMS
+#                                If enabled, searches for boost libraries
+#                                compiled against the deprecated STLPort
+#                                "native iostreams" feature ('n' ABI tag).
+#                                Defaults to OFF.
+#                                  [Since CMake 2.8.3]
+#
+#   Boost_COMPAT_STATIC_RUNTIME  Set to OFF to disable backwards compatible
+#                                searching for libraries with the 's' ABI
+#                                tag on WIN32 after normal searches.  You
+#                                should set this to OFF and also set
+#                                Boost_USE_STATIC_RUNTIME appropriately.
+#                                If not specified, defaults to ON.
+#                                  [Since CMake 2.8.3]
 #
 # Other Variables used by this module which you may want to set.
 #
@@ -165,7 +198,7 @@
 # Copyright 2007      Wengo
 # Copyright 2007      Mike Jackson
 # Copyright 2008      Andreas Pakulat <apaku@gmx.de>
-# Copyright 2008-2009 Philip Lowman <philip@yhbt.com>
+# Copyright 2008-2010 Philip Lowman <philip@yhbt.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -286,6 +319,9 @@ endfunction()
 IF(NOT DEFINED Boost_USE_MULTITHREADED)
     SET(Boost_USE_MULTITHREADED TRUE)
 ENDIF()
+if(NOT DEFINED Boost_COMPAT_STATIC_RUNTIME)
+  set(Boost_COMPAT_STATIC_RUNTIME TRUE)
+endif()
 
 if(Boost_FIND_VERSION_EXACT)
   # The version may appear in a directory with or without the patch
@@ -380,6 +416,10 @@ ELSE (_boost_IN_CACHE)
                    "Boost_USE_MULTITHREADED = ${Boost_USE_MULTITHREADED}")
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                    "Boost_USE_STATIC_LIBS = ${Boost_USE_STATIC_LIBS}")
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                   "Boost_USE_STATIC_RUNTIME = ${Boost_USE_STATIC_RUNTIME}")
+    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                   "Boost_ADDITIONAL_VERSIONS = ${Boost_ADDITIONAL_VERSIONS}")
   endif()
 
   IF(WIN32)
@@ -646,23 +686,49 @@ ELSE (_boost_IN_CACHE)
       "_boost_MULTITHREADED = ${_boost_MULTITHREADED}")
   endif()
 
-  SET( _boost_STATIC_TAG "")
-  set( _boost_ABI_TAG "")
-  IF (WIN32)
-    IF(MSVC OR "${CMAKE_CXX_COMPILER}" MATCHES "icl"
+  #======================
+  # Systematically build up the Boost ABI tag
+  # http://boost.org/doc/libs/1_41_0/more/getting_started/windows.html#library-naming
+  set( _boost_RELEASE_ABI_TAG "-")
+  set( _boost_DEBUG_ABI_TAG   "-")
+  # Key       Use this library when:
+  #  s        linking statically to the C++ standard library and
+  #           compiler runtime support libraries.
+  if(Boost_USE_STATIC_RUNTIME)
+    set( _boost_RELEASE_ABI_TAG "${_boost_RELEASE_ABI_TAG}s")
+    set( _boost_DEBUG_ABI_TAG   "${_boost_DEBUG_ABI_TAG}s")
+  endif()
+  #  g        using debug versions of the standard and runtime
+  #           support libraries
+  if(WIN32)
+    if(MSVC OR "${CMAKE_CXX_COMPILER}" MATCHES "icl"
             OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc")
-      SET (_boost_ABI_TAG "g")
-    ENDIF()
-    IF( Boost_USE_STATIC_LIBS )
-      SET( _boost_STATIC_TAG "-s")
-    ENDIF( Boost_USE_STATIC_LIBS )
-  ENDIF(WIN32)
-  SET (_boost_ABI_TAG "${_boost_ABI_TAG}d")
+      set(_boost_DEBUG_ABI_TAG "${_boost_DEBUG_ABI_TAG}g")
+    endif()
+  endif()
+  #  y        using special debug build of python
+  if(Boost_USE_DEBUG_PYTHON)
+    set(_boost_DEBUG_ABI_TAG "${_boost_DEBUG_ABI_TAG}y")
+  endif()
+  #  d        using a debug version of your code
+  set(_boost_DEBUG_ABI_TAG "${_boost_DEBUG_ABI_TAG}d")
+  #  p        using the STLport standard library rather than the
+  #           default one supplied with your compiler
+  if(Boost_USE_STLPORT)
+    set( _boost_RELEASE_ABI_TAG "${_boost_RELEASE_ABI_TAG}p")
+    set( _boost_DEBUG_ABI_TAG   "${_boost_DEBUG_ABI_TAG}p")
+  endif()
+  #  n        using the STLport deprecated "native iostreams" feature
+  if(Boost_USE_STLPORT_DEPRECATED_NATIVE_IOSTREAMS)
+    set( _boost_RELEASE_ABI_TAG "${_boost_RELEASE_ABI_TAG}n")
+    set( _boost_DEBUG_ABI_TAG   "${_boost_DEBUG_ABI_TAG}n")
+  endif()
+
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-      "_boost_STATIC_TAG = ${_boost_STATIC_TAG}")
+      "_boost_RELEASE_ABI_TAG = ${_boost_RELEASE_ABI_TAG}")
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-      "_boost_ABI_TAG = ${_boost_ABI_TAG}")
+      "_boost_DEBUG_ABI_TAG = ${_boost_DEBUG_ABI_TAG}")
   endif()
 
   # ------------------------------------------------------------------------
@@ -698,12 +764,38 @@ ELSE (_boost_IN_CACHE)
       "_boost_LIBRARIES_SEARCH_DIRS = ${_boost_LIBRARIES_SEARCH_DIRS}")
   endif()
 
-  FOREACH(COMPONENT ${Boost_FIND_COMPONENTS})
-    STRING(TOUPPER ${COMPONENT} UPPERCOMPONENT)
-    SET( Boost_${UPPERCOMPONENT}_LIBRARY "Boost_${UPPERCOMPONENT}_LIBRARY-NOTFOUND" )
-    SET( Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE "Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE-NOTFOUND" )
-    SET( Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG "Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG-NOTFOUND")
+  # We want to use the tag inline below without risking double dashes
+  if(_boost_RELEASE_ABI_TAG)
+    if(${_boost_RELEASE_ABI_TAG} STREQUAL "-")
+      set(_boost_RELEASE_ABI_TAG "")
+    endif()
+  endif()
+  if(_boost_DEBUG_ABI_TAG)
+    if(${_boost_DEBUG_ABI_TAG} STREQUAL "-")
+      set(_boost_DEBUG_ABI_TAG "")
+    endif()
+  endif()
 
+  # The previous behavior of FindBoost when Boost_USE_STATIC_LIBS was enabled
+  # on WIN32 was to:
+  #  1. Search for static libs compiled against a SHARED C++ standard runtime library (use if found)
+  #  2. Search for static libs compiled against a STATIC C++ standard runtime library (use if found)
+  # We maintain this behavior since changing it could break people's builds.
+  # To disable the ambiguous behavior, the user can
+  # set Boost_COMPAT_STATIC_RUNTIME to FALSE
+  set(_boost_STATIC_RUNTIME_WORKAROUND false)
+  if(Boost_COMPAT_STATIC_RUNTIME AND WIN32 AND Boost_USE_STATIC_LIBS)
+    if(NOT Boost_USE_STATIC_RUNTIME)
+      set(_boost_STATIC_RUNTIME_WORKAROUND true)
+    endif()
+  endif()
+
+
+  foreach(COMPONENT ${Boost_FIND_COMPONENTS})
+    string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
+    set( Boost_${UPPERCOMPONENT}_LIBRARY "Boost_${UPPERCOMPONENT}_LIBRARY-NOTFOUND" )
+    set( Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE "Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE-NOTFOUND" )
+    set( Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG "Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG-NOTFOUND")
     # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
     IF( Boost_USE_STATIC_LIBS )
       SET( _boost_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
@@ -714,26 +806,54 @@ ELSE (_boost_IN_CACHE)
       ENDIF(WIN32)
     ENDIF( Boost_USE_STATIC_LIBS )
 
-    FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
-        NAMES  ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}-${Boost_LIB_VERSION}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_STATIC_TAG}-${Boost_LIB_VERSION}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}-${Boost_LIB_VERSION}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_STATIC_TAG}-${Boost_LIB_VERSION}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_STATIC_TAG}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}
-        HINTS  ${_boost_LIBRARIES_SEARCH_DIRS}
+    #
+    # Find RELEASE libraries
+    #
+    set(_boost_RELEASE_NAMES
+      ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_ABI_TAG}
+      ${Boost_LIB_PREFIX}boost_${COMPONENT} )
+    if(_boost_STATIC_RUNTIME_WORKAROUND)
+      set(_boost_RELEASE_STATIC_ABI_TAG "-s${_boost_RELEASE_ABI_TAG}")
+      list(APPEND _boost_RELEASE_NAMES
+        ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}
+        ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_RELEASE_STATIC_ABI_TAG} )
+    endif()
+    if(Boost_DEBUG)
+      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                     "Searching for ${UPPERCOMPONENT}_LIBRARY_RELEASE: ${_boost_RELEASE_NAMES}")
+    endif()
+    find_library(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
+        NAMES ${_boost_RELEASE_NAMES}
+        HINTS ${_boost_LIBRARIES_SEARCH_DIRS}
     )
 
-    FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
-        NAMES  ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}-${_boost_ABI_TAG}-${Boost_LIB_VERSION}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_STATIC_TAG}${_boost_ABI_TAG}-${Boost_LIB_VERSION}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}-${_boost_ABI_TAG}-${Boost_LIB_VERSION}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_STATIC_TAG}${_boost_ABI_TAG}-${Boost_LIB_VERSION}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}-${_boost_ABI_TAG}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_STATIC_TAG}${_boost_ABI_TAG}
-               ${Boost_LIB_PREFIX}boost_${COMPONENT}-${_boost_ABI_TAG}
-        HINTS  ${_boost_LIBRARIES_SEARCH_DIRS}
+    #
+    # Find DEBUG libraries
+    #
+    set(_boost_DEBUG_NAMES
+      ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_ABI_TAG}-${Boost_LIB_VERSION}
+      ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}
+      ${Boost_LIB_PREFIX}boost_${COMPONENT} )
+    if(_boost_STATIC_RUNTIME_WORKAROUND)
+      set(_boost_DEBUG_STATIC_ABI_TAG "-s${_boost_DEBUG_ABI_TAG}")
+      list(APPEND _boost_DEBUG_NAMES
+        ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_COMPILER}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}
+        ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG}-${Boost_LIB_VERSION}
+        ${Boost_LIB_PREFIX}boost_${COMPONENT}${_boost_MULTITHREADED}${_boost_DEBUG_STATIC_ABI_TAG} )
+    endif()
+    if(Boost_DEBUG)
+      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+                     "Searching for ${UPPERCOMPONENT}_LIBRARY_DEBUG: ${_boost_DEBUG_NAMES}")
+    endif()
+    find_library(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
+        NAMES ${_boost_DEBUG_NAMES}
+        HINTS ${_boost_LIBRARIES_SEARCH_DIRS}
     )
 
     _Boost_ADJUST_LIB_VARS(${UPPERCOMPONENT})
