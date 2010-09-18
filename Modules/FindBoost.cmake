@@ -155,7 +155,16 @@
 #                                might be found if you specified "win32" here before
 #                                falling back on libboost_thread-mgw45-mt-1_43.a.
 #                                  [Since CMake 2.8.3]
-
+#
+#   Boost_REALPATH               Resolves symbolic links for discovered boost libraries
+#                                to assist with packaging.  For example, instead of
+#                                Boost_SYSTEM_LIBRARY_RELEASE being resolved to
+#                                "/usr/lib/libboost_system.so" it would be
+#                                "/usr/lib/libboost_system.so.1.42.0" instead.
+#                                This does not affect linking and should not be
+#                                enabled unless the user needs this information.
+#                                  [Since CMake 2.8.3]
+#
 
 
 #
@@ -339,6 +348,17 @@ function(_Boost_PREPEND_LIST_WITH_THREADAPI _output)
   set(_orig_libnames ${ARGN})
   string(REPLACE "thread" "thread_${Boost_THREADAPI}" _threadapi_libnames ${_orig_libnames})
   set(${_output} ${_threadapi_libnames} ${_orig_libnames} PARENT_SCOPE)
+endfunction()
+
+#
+# If a library is found, replace its cache entry with its REALPATH
+#
+function(_Boost_SWAP_WITH_REALPATH _library _docstring)
+  if(${_library})
+    get_filename_component(_boost_filepathreal ${${_library}} REALPATH)
+    unset(${_library} CACHE)
+    set(${_library} ${_boost_filepathreal} CACHE FILEPATH "${_docstring}")
+  endif()
 endfunction()
 
 #
@@ -863,6 +883,9 @@ ELSE (_boost_IN_CACHE)
     set( Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE "Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE-NOTFOUND" )
     set( Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG "Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG-NOTFOUND")
 
+    set( _boost_docstring_release "Boost ${COMPONENT} library (release)")
+    set( _boost_docstring_debug   "Boost ${COMPONENT} library (debug)")
+
     #
     # Find RELEASE libraries
     #
@@ -891,6 +914,7 @@ ELSE (_boost_IN_CACHE)
         NAMES ${_boost_RELEASE_NAMES}
         HINTS ${_boost_LIBRARY_SEARCH_DIRS}
         ${_boost_FIND_OPTIONS}
+        DOC "${_boost_docstring_release}"
     )
 
     #
@@ -921,9 +945,16 @@ ELSE (_boost_IN_CACHE)
         NAMES ${_boost_DEBUG_NAMES}
         HINTS ${_boost_LIBRARY_SEARCH_DIRS}
         ${_boost_FIND_OPTIONS}
+        DOC "${_boost_docstring_debug}"
     )
 
+    if(Boost_REALPATH)
+      _Boost_SWAP_WITH_REALPATH(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE "${_boost_docstring_release}")
+      _Boost_SWAP_WITH_REALPATH(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG   "${_boost_docstring_debug}"  )
+    endif()
+
     _Boost_ADJUST_LIB_VARS(${UPPERCOMPONENT})
+
   endforeach(COMPONENT)
 
   # Restore the original find library ordering
