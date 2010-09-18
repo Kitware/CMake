@@ -402,7 +402,7 @@ IF (_boost_IN_CACHE)
   if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                      "boost ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} "
-                     "is already in the cache.  For debugging messages, please clear the cache.")
+                     "is already in the cache.  To view debugging messages, please clear the cache.")
   endif()
 ELSE (_boost_IN_CACHE)
   # Need to search for boost
@@ -451,6 +451,12 @@ ELSE (_boost_IN_CACHE)
     "$ENV{ProgramFiles}/boost"
     /sw/local/include
   )
+
+  # If Boost_ROOT was defined, gently correct the user
+  if(Boost_ROOT)
+    message("WARNING: Boost_ROOT was set which is incorrect and is being ignored.  "
+            "You need to use BOOST_ROOT instead.  ")
+  endif()
 
   # If BOOST_ROOT was defined in the environment, use it.
   if (NOT BOOST_ROOT AND NOT $ENV{BOOST_ROOT} STREQUAL "")
@@ -677,7 +683,7 @@ ELSE (_boost_IN_CACHE)
     endif()
   endif(Boost_COMPILER)
 
-  SET (_boost_MULTITHREADED "-mt")
+  set (_boost_MULTITHREADED "-mt")
   if( NOT Boost_USE_MULTITHREADED )
     set (_boost_MULTITHREADED "")
   endif()
@@ -764,6 +770,16 @@ ELSE (_boost_IN_CACHE)
       "_boost_LIBRARIES_SEARCH_DIRS = ${_boost_LIBRARIES_SEARCH_DIRS}")
   endif()
 
+  # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
+  if( Boost_USE_STATIC_LIBS )
+    set( _boost_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    if(WIN32)
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    else()
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES} )
+    endif()
+  endif()
+
   # We want to use the tag inline below without risking double dashes
   if(_boost_RELEASE_ABI_TAG)
     if(${_boost_RELEASE_ABI_TAG} STREQUAL "-")
@@ -796,15 +812,6 @@ ELSE (_boost_IN_CACHE)
     set( Boost_${UPPERCOMPONENT}_LIBRARY "Boost_${UPPERCOMPONENT}_LIBRARY-NOTFOUND" )
     set( Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE "Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE-NOTFOUND" )
     set( Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG "Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG-NOTFOUND")
-    # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
-    IF( Boost_USE_STATIC_LIBS )
-      SET( _boost_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-      IF(WIN32)
-        SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-      ELSE(WIN32)
-        SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-      ENDIF(WIN32)
-    ENDIF( Boost_USE_STATIC_LIBS )
 
     #
     # Find RELEASE libraries
@@ -857,10 +864,12 @@ ELSE (_boost_IN_CACHE)
     )
 
     _Boost_ADJUST_LIB_VARS(${UPPERCOMPONENT})
-    IF( Boost_USE_STATIC_LIBS )
-      SET(CMAKE_FIND_LIBRARY_SUFFIXES ${_boost_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
-    ENDIF( Boost_USE_STATIC_LIBS )
-  ENDFOREACH(COMPONENT)
+  endforeach(COMPONENT)
+
+  # Restore the original find library ordering
+  if( Boost_USE_STATIC_LIBS )
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ${_boost_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
+  endif()
   # ------------------------------------------------------------------------
   #  End finding boost libraries
   # ------------------------------------------------------------------------
