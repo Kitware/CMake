@@ -224,8 +224,12 @@ ADD_CUSTOM_COMMAND(OUTPUT gen_redirect.c
 ##############################################################################
 # Test non-trivial command line arguments in custom commands.
 SET(EXPECTED_ARGUMENTS)
+SET(CHECK_ARGS)
+IF(NOT MSVC71)
+  SET(CHECK_ARGS -DPATH=c:/posix/path)
+ENDIF()
 SET(CHECK_ARGS
-  -DPATH=c:/posix/path
+  ${CHECK_ARGS}
   c:/posix/path
   c:\\windows\\path
   'single-quotes'
