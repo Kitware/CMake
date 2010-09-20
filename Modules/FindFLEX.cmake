@@ -78,7 +78,11 @@ IF(FLEX_EXECUTABLE)
     RESULT_VARIABLE FLEX_version_result
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   IF(NOT ${FLEX_version_result} EQUAL 0)
-    MESSAGE(SEND_ERROR "Command \"${FLEX_EXECUTABLE} --version\" failed with output:\n${FLEX_version_error}")
+    IF(FLEX_FIND_REQUIRED)
+      MESSAGE(SEND_ERROR "Command \"${FLEX_EXECUTABLE} --version\" failed with output:\n${FLEX_version_output}\n${FLEX_version_error}")
+    ELSE()
+      MESSAGE("Command \"${FLEX_EXECUTABLE} --version\" failed with output:\n${FLEX_version_output}\n${FLEX_version_error}\nFLEX_VERSION will not be available")
+    ENDIF()
   ELSE()
     STRING(REGEX REPLACE "^flex (.*)$" "\\1"
       FLEX_VERSION "${FLEX_version_output}")
