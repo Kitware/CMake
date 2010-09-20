@@ -2726,12 +2726,14 @@ void cmGlobalXCodeGenerator
     buildSettings->AddAttribute("SDKROOT", 
                                 this->CreateString(sysroot));
     std::string archString;
+    const char* sep = "";
     for( std::vector<std::string>::iterator i = 
            this->Architectures.begin();
          i != this->Architectures.end(); ++i)
       {
+      archString += sep;
       archString += *i;
-      archString += " ";
+      sep = " ";
       }
     buildSettings->AddAttribute("ARCHS", 
                                 this->CreateString(archString.c_str()));
