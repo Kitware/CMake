@@ -499,7 +499,7 @@ ELSE (_boost_IN_CACHE)
       "-DBOOST_LIB_DIAGNOSTIC" CACHE STRING "Boost diagnostic define")
   ENDIF(WIN32)
 
-  SET(_boost_INCLUDE_SEARCH_DIRS
+  set(_boost_INCLUDE_SEARCH_DIRS_SYSTEM
     C:/boost/include
     C:/boost
     "$ENV{ProgramFiles}/boost/include"
@@ -551,19 +551,18 @@ ELSE (_boost_IN_CACHE)
                    "_boost_TEST_VERSIONS = ${_boost_TEST_VERSIONS}")
   endif()
 
+  if( Boost_NO_SYSTEM_PATHS)
+    set(_boost_FIND_OPTIONS NO_CMAKE_SYSTEM_PATH)
+  else()
+    set(_boost_INCLUDE_SEARCH_DIRS ${_boost_INCLUDE_SEARCH_DIRS_SYSTEM})
+  endif()
+
   if( BOOST_ROOT )
-    if( Boost_NO_SYSTEM_PATHS )
-      set(_boost_INCLUDE_SEARCH_DIRS
-        ${BOOST_ROOT}/include
-        ${BOOST_ROOT})
-      set(_boost_FIND_OPTIONS NO_CMAKE_SYSTEM_PATH)
-    else()
-      set(_boost_INCLUDE_SEARCH_DIRS
-        ${BOOST_ROOT}/include
-        ${BOOST_ROOT}
-        ${_boost_INCLUDE_SEARCH_DIRS})
-    endif()
-  endif( BOOST_ROOT )
+    set(_boost_INCLUDE_SEARCH_DIRS
+      ${BOOST_ROOT}/include
+      ${BOOST_ROOT}
+      ${_boost_INCLUDE_SEARCH_DIRS})
+  endif()
 
   # prepend BOOST_INCLUDEDIR to search path if specified
   if( BOOST_INCLUDEDIR )
@@ -803,9 +802,13 @@ ELSE (_boost_IN_CACHE)
   #  Begin finding boost libraries
   # ------------------------------------------------------------------------
 
+  if(BOOST_ROOT)
+    set(_boost_LIBRARY_SEARCH_DIRS_ALWAYS
+      ${BOOST_ROOT}/lib
+      ${BOOST_ROOT}/stage/lib)
+  endif()
   set(_boost_LIBRARY_SEARCH_DIRS_ALWAYS
-    ${BOOST_ROOT}/lib
-    ${BOOST_ROOT}/stage/lib
+    ${_boost_LIBRARY_SEARCH_DIRS_ALWAYS}
     ${Boost_INCLUDE_DIR}/lib
     ${Boost_INCLUDE_DIR}/../lib
     ${Boost_INCLUDE_DIR}/stage/lib
@@ -819,14 +822,12 @@ ELSE (_boost_IN_CACHE)
     "$ENV{ProgramFiles}/boost"
     /sw/local/lib
   )
-  if( BOOST_ROOT )
-    set(_boost_LIBRARY_SEARCH_DIRS ${_boost_LIBRARY_SEARCH_DIRS_ALWAYS})
-    if( Boost_NO_SYSTEM_PATHS )
-      set(_boost_FIND_OPTIONS NO_CMAKE_SYSTEM_PATH)
-    else()
-      list(APPEND _boost_LIBRARY_SEARCH_DIRS ${_boost_LIBRARY_SEARCH_DIRS_SYSTEM})
-    endif()
-  endif( BOOST_ROOT )
+  set(_boost_LIBRARY_SEARCH_DIRS ${_boost_LIBRARY_SEARCH_DIRS_ALWAYS})
+  if( Boost_NO_SYSTEM_PATHS )
+    set(_boost_FIND_OPTIONS NO_CMAKE_SYSTEM_PATH)
+  else()
+    list(APPEND _boost_LIBRARY_SEARCH_DIRS ${_boost_LIBRARY_SEARCH_DIRS_SYSTEM})
+  endif()
 
   # prepend BOOST_LIBRARYDIR to search path if specified
   if( BOOST_LIBRARYDIR )
