@@ -1574,6 +1574,24 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
           cmSystemTools::Error("Problem extracting tar: ", outFile.c_str());
           return 1;
           }
+#ifdef WIN32
+        // OK, on windows 7 after we untar some files,
+        // sometimes we can not rename the directory after
+        // the untar is done. This breaks the external project
+        // untar and rename code.  So, by default we will wait
+        // 1/10th of a second after the untar.  If CMAKE_UNTAR_DELAY
+        // is set in the env, its value will be used instead of 100.
+        int delay = 100;
+        const char* delayVar = cmSystemTools::GetEnv("CMAKE_UNTAR_DELAY");
+        if(delayVar)
+          {
+          delay = atoi(delayVar);
+          }
+        if(delay)
+          {
+          cmSystemTools::Delay(delay);
+          }
+#endif
         }
       return 0;
       }
