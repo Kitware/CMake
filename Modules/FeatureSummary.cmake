@@ -211,9 +211,9 @@ FUNCTION(FEATURE_SUMMARY)
 
   IF(_FS_FILENAME)
     IF(_FS_APPEND)
-      FILE(WRITE  "${_FS_FILENAME}" "${_fullText}")
-    ELSE(_FS_APPEND)
       FILE(APPEND "${_FS_FILENAME}" "${_fullText}")
+    ELSE(_FS_APPEND)
+      FILE(WRITE  "${_FS_FILENAME}" "${_fullText}")
     ENDIF(_FS_APPEND)
 
   ELSE(_FS_FILENAME)
