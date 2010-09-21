@@ -45,7 +45,8 @@ protected:
    * @param[in,out] archive the archive object
    * @param[in] component the component whose file will be added to archive
    */
-  int addOneComponentToArchive(cmArchiveWrite& archive, cmCPackComponent* component);
+  int addOneComponentToArchive(cmArchiveWrite& archive,
+                               cmCPackComponent* component);
 
   /**
    * The main package file method.

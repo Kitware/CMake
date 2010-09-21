@@ -93,7 +93,8 @@ int cmCPackNSISGenerator::PackageFiles()
   for ( sit = dirs.begin(); sit != dirs.end(); ++ sit )
     {
     std::string componentName;
-    std::string fileN = cmSystemTools::RelativePath(toplevel.c_str(), sit->c_str());
+    std::string fileN = cmSystemTools::RelativePath(toplevel.c_str(),
+                                                    sit->c_str());
     if ( fileN.empty() )
       {
       continue;
