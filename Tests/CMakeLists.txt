@@ -11,7 +11,7 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project ${proj}
-    --test-command ${COMMAND})
+    --test-command ${COMMAND} ${ARGN})
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 ENDMACRO(ADD_TEST_MACRO)
 
@@ -1828,6 +1828,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -D source_dir:STRING=${CMAKE_CURRENT_SOURCE_DIR}/Tutorial/Step3
     -D CMAKE_CTEST_COMMAND:STRING=${CMAKE_CTEST_COMMAND}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/CMakeWizardTest.cmake)
+  # If the cache variable CMAKE_CONTRACT_PROJECTS is set
+  # then the dashboard will run a contract with CMake test of that
+  # name.  For example CMAKE_CONTRACT_PROJECTS = vtk542 would run
+  # the vtk542 contract test.
+  FOREACH(project ${CMAKE_CONTRACT_PROJECTS})
+    ADD_TEST_MACRO(Contracts.${project}
+      VTK-build/bin/CommonCxxTests otherArrays)
+    SET_TESTS_PROPERTIES(Contracts.${project} PROPERTIES TIMEOUT 5400)
+  ENDFOREACH()
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)
