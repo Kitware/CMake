@@ -45,10 +45,6 @@ IF(APPLE)
   SET( FLTK2_PLATFORM_DEPENDENT_LIBS  "-framework Carbon -framework Cocoa -framework ApplicationServices -lz")
 ENDIF(APPLE)
 
-IF(CYGWIN)
-  SET( FLTK2_PLATFORM_DEPENDENT_LIBS ole32 uuid comctl32 wsock32 supc++ -lm -lgdi32)
-ENDIF(CYGWIN)
-
 # If FLTK2_INCLUDE_DIR is already defined we assigne its value to FLTK2_DIR
 IF(FLTK2_INCLUDE_DIR)
   SET(FLTK2_DIR ${FLTK2_INCLUDE_DIR})
