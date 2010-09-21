@@ -1832,9 +1832,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   # then the dashboard will run a contract with CMake test of that
   # name.  For example CMAKE_CONTRACT_PROJECTS = vtk542 would run
   # the vtk542 contract test.
+  # For each Contract test, the project should provide a directory
+  # with at least one CMakeLists.txt file that uses ExternalProject
+  # to download and configure the project. The directory should also
+  # contain a RunTest.cmake file that has a single set of the format:
+  # SET(project_RUN_TEST testToRun)
+  # The testToRun should be a test executable that can be run to
+  # smoke test the build.
   FOREACH(project ${CMAKE_CONTRACT_PROJECTS})
+    INCLUDE(Contracts/${project}/RunTest.cmake)
     ADD_TEST_MACRO(Contracts.${project}
-      VTK-build/bin/CommonCxxTests otherArrays)
+      ${${project}_RUN_TEST})
     SET_TESTS_PROPERTIES(Contracts.${project} PROPERTIES TIMEOUT 5400)
   ENDFOREACH()
 ENDIF(BUILD_TESTING)
