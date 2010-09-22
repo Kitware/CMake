@@ -56,6 +56,10 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->Internal->VarInitStack.push(globalKeys);
   this->Internal->VarUsageStack.push(globalKeys);
 
+  // Initialize these first since AddDefaultDefinitions calls AddDefinition
+  this->WarnUnused = false;
+  this->CheckSystemVars = false;
+
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
   // Setup the default include complaint regular expression (match nothing).
@@ -92,8 +96,6 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->AddDefaultDefinitions();
   this->Initialize();
   this->PreOrder = false;
-  this->WarnUnused = false;
-  this->CheckSystemVars = false;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
