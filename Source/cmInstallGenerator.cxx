@@ -67,8 +67,11 @@ void cmInstallGenerator
      for(std::vector<std::string>::const_iterator fi = files.begin();
                fi != files.end(); ++fi)
              {
-               if (fi!=files.begin()) os << ";";
-               os << dest << cmSystemTools::ConvertToOutputPath("/");
+               if (fi!=files.begin())
+                 {
+                 os << ";";
+                 }
+               os << dest << "/";
                if (rename && *rename)
                  {
                  os << rename;
