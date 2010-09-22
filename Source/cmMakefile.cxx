@@ -54,6 +54,7 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   const std::set<cmStdString> globalKeys = defs.LocalKeys();
   this->Internal->VarStack.push(defs);
   this->Internal->VarInitStack.push(globalKeys);
+  this->Internal->VarUsageStack.push(globalKeys);
 
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
@@ -775,20 +776,7 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
   this->AddSourceGroup("Resources", "\\.plist$");
 #endif
 
-  if (this->Internal->VarUsageStack.empty())
-    {
-    const cmDefinitions& defs = cmDefinitions();
-    const std::set<cmStdString> globalKeys = defs.LocalKeys();
-    this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
-    if (this->WarnUnused)
-      {
-      this->Internal->VarUsageStack.push(globalKeys);
-      }
-    else
-      {
-      this->Internal->VarUsageStack.push(std::set<cmStdString>());
-      }
-    }
+  this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 }
 
