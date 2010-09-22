@@ -61,6 +61,8 @@ public:
   unsigned int GetCacheMajorVersion();
   unsigned int GetCacheMinorVersion();
 
+  /* Check for unused variables in this scope */
+  void CheckForUnusedVariables() const;
   /* Mark a variable as used */
   void MarkVariableAsUsed(const char* var);
   /* return true if a variable has been initialized */

@@ -178,15 +178,9 @@ bool cmMakefile::NeedCacheCompatibility(int major, int minor)
 
 cmMakefile::~cmMakefile()
 {
-  std::set<cmStdString> usage = this->Internal->VarUsageStack.top();
-  std::set<cmStdString>::const_iterator it = usage.begin();
-  for (; it != usage.end(); ++it)
-    {
-    if (!this->VariableUsed(it->c_str()))
-      {
-      this->CheckForUnused("out of scope", it->c_str());
-      }
-    }
+  // Check for unused variables
+  this->CheckForUnusedVariables();
+
   for(std::vector<cmInstallGenerator*>::iterator
         i = this->InstallGenerators.begin();
       i != this->InstallGenerators.end(); ++i)
@@ -712,6 +706,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
 
   // pop the listfile off the stack
   this->ListFileStack.pop_back();
+
+  // Check for unused variables
+  this->CheckForUnusedVariables();
 
   return true;
 }
@@ -1749,6 +1746,17 @@ void cmMakefile::AddDefinition(const char* name, bool value)
       value?"ON":"OFF", this);
     }
 #endif
+}
+
+void cmMakefile::CheckForUnusedVariables() const
+{
+  const cmDefinitions& defs = this->Internal->VarStack.top();
+  const std::set<cmStdString>& locals = defs.LocalKeys();
+  std::set<cmStdString>::const_iterator it = locals.begin();
+  for (; it != locals.end(); ++it)
+    {
+    this->CheckForUnused("out of scope", it->c_str());
+    }
 }
 
 void cmMakefile::MarkVariableAsUsed(const char* var)
