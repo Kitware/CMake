@@ -249,6 +249,8 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
   // add some new properites
   foreach(QCMakeProperty s, props)
     {
+    this->CMakeInstance->WatchUnusedCli(s.Key.toAscii().data());
+
     if(s.Type == QCMakeProperty::BOOL)
       {
       this->CMakeInstance->AddCacheEntry(s.Key.toAscii().data(),

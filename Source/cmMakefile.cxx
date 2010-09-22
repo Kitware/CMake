@@ -54,6 +54,11 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   const std::set<cmStdString> globalKeys = defs.LocalKeys();
   this->Internal->VarStack.push(defs);
   this->Internal->VarInitStack.push(globalKeys);
+  this->Internal->VarUsageStack.push(globalKeys);
+
+  // Initialize these first since AddDefaultDefinitions calls AddDefinition
+  this->WarnUnused = false;
+  this->CheckSystemVars = false;
 
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
@@ -91,8 +96,6 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->AddDefaultDefinitions();
   this->Initialize();
   this->PreOrder = false;
-  this->WarnUnused = false;
-  this->CheckSystemVars = false;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
@@ -178,15 +181,9 @@ bool cmMakefile::NeedCacheCompatibility(int major, int minor)
 
 cmMakefile::~cmMakefile()
 {
-  std::set<cmStdString> usage = this->Internal->VarUsageStack.top();
-  std::set<cmStdString>::const_iterator it = usage.begin();
-  for (; it != usage.end(); ++it)
-    {
-    if (!this->VariableUsed(it->c_str()))
-      {
-      this->CheckForUnused("out of scope", it->c_str());
-      }
-    }
+  // Check for unused variables
+  this->CheckForUnusedVariables();
+
   for(std::vector<cmInstallGenerator*>::iterator
         i = this->InstallGenerators.begin();
       i != this->InstallGenerators.end(); ++i)
@@ -713,6 +710,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   // pop the listfile off the stack
   this->ListFileStack.pop_back();
 
+  // Check for unused variables
+  this->CheckForUnusedVariables();
+
   return true;
 }
 
@@ -778,20 +778,7 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
   this->AddSourceGroup("Resources", "\\.plist$");
 #endif
 
-  if (this->Internal->VarUsageStack.empty())
-    {
-    const cmDefinitions& defs = cmDefinitions();
-    const std::set<cmStdString> globalKeys = defs.LocalKeys();
-    this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
-    if (this->WarnUnused)
-      {
-      this->Internal->VarUsageStack.push(globalKeys);
-      }
-    else
-      {
-      this->Internal->VarUsageStack.push(std::set<cmStdString>());
-      }
-    }
+  this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 }
 
@@ -1742,6 +1729,17 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 #endif
 }
 
+void cmMakefile::CheckForUnusedVariables() const
+{
+  const cmDefinitions& defs = this->Internal->VarStack.top();
+  const std::set<cmStdString>& locals = defs.LocalKeys();
+  std::set<cmStdString>::const_iterator it = locals.begin();
+  for (; it != locals.end(); ++it)
+    {
+    this->CheckForUnused("out of scope", it->c_str());
+    }
+}
+
 void cmMakefile::MarkVariableAsUsed(const char* var)
 {
   this->Internal->VarUsageStack.top().insert(var);
@@ -1769,17 +1767,30 @@ bool cmMakefile::VariableUsed(const char* var) const
 
 void cmMakefile::CheckForUnused(const char* reason, const char* name) const
 {
-  if (this->WarnUnused && !this->VariableUsed(name) && this->CallStack.size())
+  if (this->WarnUnused && !this->VariableUsed(name))
     {
-    const cmListFileContext* file = this->CallStack.back().Context;
+    cmStdString path;
+    int line;
+    if (this->CallStack.size())
+      {
+      const cmListFileContext* file = this->CallStack.back().Context;
+      path = file->FilePath.c_str();
+      line = file->Line;
+      }
+    else
+      {
+      path = this->GetStartDirectory();
+      path += "/CMakeLists.txt";
+      line = 0;
+      }
     if (this->CheckSystemVars ||
-        cmSystemTools::IsSubDirectory(file->FilePath.c_str(),
+        cmSystemTools::IsSubDirectory(path.c_str(),
                                       this->GetHomeDirectory()) ||
-        cmSystemTools::IsSubDirectory(file->FilePath.c_str(),
+        cmSystemTools::IsSubDirectory(path.c_str(),
                                       this->GetHomeOutputDirectory()))
       {
       cmOStringStream msg;
-      msg << file->FilePath << ":" << file->Line << ":" <<
+      msg << path << ":" << line << ":" <<
         " warning: (" << reason << ") unused variable \'" << name << "\'";
       cmSystemTools::Message(msg.str().c_str());
       }

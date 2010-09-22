@@ -380,10 +380,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           "No help, variable specified on the command line.", type);
         if(this->WarnUnusedCli)
           {
-#ifdef CMAKE_BUILD_WITH_CMAKE
-          this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
-          this->UsedCliVariables[var] = false;
-#endif
+          this->WatchUnusedCli(var.c_str());
           }
         }
       else
@@ -4521,6 +4518,14 @@ int cmake::Build(const std::string& dir,
                     makeProgram.c_str(),
                     config.c_str(), clean, false, 0, true,
                     0, nativeOptions);
+}
+
+void cmake::WatchUnusedCli(const char* var)
+{
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
+  this->UsedCliVariables[var] = false;
+#endif
 }
 
 void cmake::RunCheckForUnusedVariables() const
