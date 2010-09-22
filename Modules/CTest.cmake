@@ -228,8 +228,10 @@ IF(BUILD_TESTING)
   ENDIF(NOT BUILDNAME)
 
   # the build command
-  BUILD_COMMAND(MAKECOMMAND CONFIGURATION "\${CTEST_CONFIGURATION_TYPE}")
-  SET(MAKECOMMAND ${MAKECOMMAND} CACHE STRING "Command to build the project")
+  BUILD_COMMAND(MAKECOMMAND_DEFAULT_VALUE
+    CONFIGURATION "\${CTEST_CONFIGURATION_TYPE}")
+  SET(MAKECOMMAND ${MAKECOMMAND_DEFAULT_VALUE}
+    CACHE STRING "Command to build the project")
 
   # the default build configuration the ctest build handler will use
   # if there is no -C arg given to ctest:
