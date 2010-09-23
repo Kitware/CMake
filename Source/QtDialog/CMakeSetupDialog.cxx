@@ -84,6 +84,10 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->setGroupedView(groupView);
   this->groupedCheck->setCheckState(groupView ? Qt::Checked : Qt::Unchecked);
 
+  bool advancedView = settings.value("AdvancedView", false).toBool();
+  this->setAdvancedView(advancedView);
+  this->advancedCheck->setCheckState(advancedView?Qt::Checked : Qt::Unchecked);
+
   QMenu* FileMenu = this->menuBar()->addMenu(tr("&File"));
   this->ReloadCacheAction = FileMenu->addAction(tr("&Reload Cache"));
   QObject::connect(this->ReloadCacheAction, SIGNAL(triggered(bool)),
@@ -963,6 +967,9 @@ void CMakeSetupDialog::setGroupedView(bool v)
 void CMakeSetupDialog::setAdvancedView(bool v)
 {
   this->CacheValues->setShowAdvanced(v);
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+  settings.setValue("AdvancedView", v);
 }
 
 void CMakeSetupDialog::showUserChanges()
