@@ -134,7 +134,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
           cmSystemTools::IsSubDirectory(this->FileName,
                                         this->Makefile->GetHomeDirectory()) ||
           cmSystemTools::IsSubDirectory(this->FileName,
-                                        this->Makefile->GetHomeOutputDirectory()))
+                                     this->Makefile->GetHomeOutputDirectory()))
         {
         cmOStringStream msg;
         msg << this->FileName << ":" << this->FileLine << ":" <<

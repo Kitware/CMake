@@ -4534,12 +4534,13 @@ void cmake::RunCheckForUnusedVariables() const
     if(this->WarnUnusedCli)
       {
       std::map<std::string, bool>::const_iterator it;
-      for(it = this->UsedCliVariables.begin(); it != this->UsedCliVariables.end(); ++it)
+      for(it = this->UsedCliVariables.begin();
+          it != this->UsedCliVariables.end(); ++it)
         {
         if(!it->second)
           {
-          std::string message = "warning: The variable, '" + it->first + "', given "
-            "on the command line, was not used within the build.";
+          std::string message = "warning: The variable, '" + it->first +
+            "', given on the command line, was not used within the build.";
           cmSystemTools::Message(message.c_str());
           }
         }
