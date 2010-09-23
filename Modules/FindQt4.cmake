@@ -602,10 +602,12 @@ IF (QT4_QMAKE_FOUND)
     FIND_LIBRARY(QT_QTCORE_LIBRARY_RELEASE
                  NAMES QtCore${QT_LIBINFIX} QtCore${QT_LIBINFIX}4
                  HINTS ${QT_LIBRARY_DIR_TMP}
+                 NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_SYSTEM_ENVIRONMENT_PATH
         )
     FIND_LIBRARY(QT_QTCORE_LIBRARY_DEBUG
                  NAMES QtCore${QT_LIBINFIX}_debug QtCore${QT_LIBINFIX}d QtCore${QT_LIBINFIX}d4
                  HINTS ${QT_LIBRARY_DIR_TMP}
+                 NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_SYSTEM_ENVIRONMENT_PATH
         )
 
     # try dropping a hint if trying to use Visual Studio with Qt built by mingw
@@ -630,7 +632,7 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_QTCORE_FOUND 1)
   ELSE()
     MESSAGE("Warning: QT_QMAKE_EXECUTABLE reported QT_INSTALL_LIBS as ${QT_LIBRARY_DIR_TMP}")
-    MESSAGE("Warning: But QtCore couldn't be found.  Qt must NOT be installed correctly.")
+    MESSAGE("Warning: But QtCore couldn't be found.  Qt must NOT be installed correctly, or it wasn't found for cross compiling.")
     IF(Qt4_FIND_REQUIRED)
       MESSAGE( FATAL_ERROR "Could NOT find QtCore. Check ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log for more details.")
     ENDIF(Qt4_FIND_REQUIRED)
