@@ -1,0 +1,30 @@
+# support for the nasm assembler
+
+set(CMAKE_ASM_NASM_SOURCE_FILE_EXTENSIONS nasm)
+
+if(WIN32)
+  if(CMAKE_C_SIZEOF_DATA_PTR EQUAL 8)
+    SET(CMAKE_ASM_NASM_OBJECT_FORMAT win64)
+  else()
+    SET(CMAKE_ASM_NASM_OBJECT_FORMAT win32)
+  endif()
+elseif(APPLE)
+  if(CMAKE_C_SIZEOF_DATA_PTR EQUAL 8)
+    SET(CMAKE_ASM_NASM_OBJECT_FORMAT macho64)
+  else()
+    SET(CMAKE_ASM_NASM_OBJECT_FORMAT macho)
+  endif()
+else()
+  if(CMAKE_C_SIZEOF_DATA_PTR EQUAL 8)
+    SET(CMAKE_ASM_NASM_OBJECT_FORMAT elf64)
+  else()
+    SET(CMAKE_ASM_NASM_OBJECT_FORMAT elf)
+  endif()
+endif()
+
+set(CMAKE_ASM_NASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> <FLAGS> -f ${CMAKE_ASM_NASM_OBJECT_FORMAT} -o <OBJECT> <SOURCE>")
+
+# Load the generic ASMInformation file:
+set(ASM_DIALECT "_NASM")
+include(CMakeASMInformation)
+set(ASM_DIALECT)
