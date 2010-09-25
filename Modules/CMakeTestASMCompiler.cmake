@@ -13,10 +13,11 @@
 #  License text for the above reference.)
 
 # This file is used by EnableLanguage in cmGlobalGenerator to
-# determine that that selected ASM compiler can actually compile
-# and link the most basic of programs.   If not, a fatal error
-# is set and cmake stops processing commands and will not generate
-# any makefiles or projects.
+# determine that the selected ASM compiler works.
+# For assembler this can only check whether the compiler has been found,
+# because otherwise there would have to be a separate assembler source file
+# for each assembler on every architecture.
+
 IF(CMAKE_ASM${ASM_DIALECT}_COMPILER)
   SET(CMAKE_ASM${ASM_DIALECT}_COMPILER_WORKS 1 CACHE INTERNAL "")
 ELSE(CMAKE_ASM${ASM_DIALECT}_COMPILER)
