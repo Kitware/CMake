@@ -87,10 +87,13 @@ public:
 
 private: 
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
-                                     cmSourceGroup* sg);
+                                     cmSourceGroup* sg,
+                                     bool child_group);
   void CreateGroups(cmLocalGenerator* root,
                     std::vector<cmLocalGenerator*>&
                     generators);
+  cmXCodeObject* CreateSourceGroup( cmSourceGroup& sg,
+                                    cmTarget& cmtarget, bool child_group );
   std::string XCodeEscapePath(const char* p);
   std::string RelativeToSource(const char* p);
   std::string RelativeToBinary(const char* p);
