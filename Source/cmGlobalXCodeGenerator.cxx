@@ -2450,7 +2450,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
       // Loop through every source group.
       for(unsigned int idx = 0; idx < sourceGroups.size(); ++idx)
         {
-        this->CreateSourceGroup( sourceGroups[i], cmtarget, false );
+        this->CreateSourceGroup( sourceGroups[idx], cmtarget, false );
         }
       }
     }
