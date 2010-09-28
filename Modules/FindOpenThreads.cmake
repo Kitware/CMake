@@ -118,6 +118,6 @@ else()
     set(OPENTHREADS_LIBRARIES ${OPENTHREADS_LIBRARY})
 endif()
 
-include(FindPackageHandleStandardArgs)
+include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenThreads DEFAULT_MSG
     OPENTHREADS_LIBRARY OPENTHREADS_INCLUDE_DIR)

@@ -516,7 +516,7 @@ endif()
 
 set(_GTK2_did_we_find_everything true)  # This gets set to GTK2_FOUND
 
-include(FindPackageHandleStandardArgs)
+include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 
 foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
     string(TOUPPER ${_GTK2_component} _COMPONENT_UPPER)
