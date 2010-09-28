@@ -16,6 +16,8 @@
 # It also loads the available platform file for the system-compiler
 # if it exists.
 
+SET(_INCLUDED_FILE 0)
+
 # Load compiler-specific information.
 IF(CMAKE_Fortran_COMPILER_ID)
   INCLUDE(Compiler/${CMAKE_Fortran_COMPILER_ID}-Fortran OPTIONAL)
