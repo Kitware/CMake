@@ -610,6 +610,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
 
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
+  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                       cmSystemTools::GetFilenamePath(filenametoread).c_str());
 
   // try to see if the list file is the top most
   // list file for a project, and if it is, then it
@@ -643,6 +645,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       }
     this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
     this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+    this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                        cmSystemTools::GetFilenamePath(currentFile).c_str());
     return false;
     }
   // add this list file to the list of dependencies
@@ -683,6 +687,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                      cmSystemTools::GetFilenamePath(currentFile).c_str());
 
   // pop the listfile off the stack
   this->ListFileStack.pop_back();
