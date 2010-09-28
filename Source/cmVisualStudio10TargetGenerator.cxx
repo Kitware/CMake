@@ -767,7 +767,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     hasFlags = true;
     this->WriteString("<ObjectFileName>", 3);
     (*this->BuildFileStream )
-      << "$(Configuration)/" << objectName << "</ObjectFileName>\n";
+      << "$(IntDir)/" << objectName << "</ObjectFileName>\n";
     }
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
