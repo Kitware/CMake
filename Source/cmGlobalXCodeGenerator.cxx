@@ -2448,7 +2448,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
 
       // Create all of the groups that should be created for this target.
       // Loop through every source group.
-      for(unsigned int idx = 0; idx < sourceGroups.size(); ++idx)
+      for(unsigned int i = 0; i < sourceGroups.size(); ++i)
         {
         this->CreateSourceGroup( sourceGroups[i], cmtarget, false );
         }
