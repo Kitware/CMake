@@ -1073,7 +1073,7 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
   std::vector<cmSourceFile*>const &classes = cmtarget.GetSourceFiles();
   // add all the sources
   std::vector<cmCustomCommand> commands;
-  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin(); 
+  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); ++i)
     {
     if((*i)->GetCustomCommand())
@@ -2443,14 +2443,10 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         std::string const& source = sf->GetFullPath();
         cmSourceGroup& sourceGroup =
           mf->FindSourceGroup(source.c_str(), sourceGroups);
-            sourceGroup.AssignSource( sf );
-        }
-
-      // Create all of the groups that should be created for this target.
-      // Loop through every source group.
-      for(unsigned int idx = 0; idx < sourceGroups.size(); ++idx)
-        {
-        this->CreateSourceGroup( sourceGroups[idx], cmtarget, false );
+        cmXCodeObject* pbxgroup =
+          this->CreateOrGetPBXGroup(cmtarget, &sourceGroup);
+        cmStdString key = GetGroupMapKey(cmtarget, sf);
+        this->GroupMap[key] = pbxgroup;
         }
       }
     }
@@ -2458,45 +2454,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
 
 //----------------------------------------------------------------------------
 cmXCodeObject* cmGlobalXCodeGenerator
-::CreateSourceGroup( cmSourceGroup& sg, cmTarget& cmtarget, bool child_group )
-{
-  // Only do something with the group if there are files or child groups
-  if( !sg.GetSourceFiles().empty() || !sg.GetGroupChildren().empty() )
-    {
-    cmXCodeObject* pbxgroup =
-      this->CreateOrGetPBXGroup(cmtarget, &sg, !child_group);
-
-    std::vector<const cmSourceFile*>& sources = sg.GetSourceFiles();
-    // Get all the source files and add them to the GroupMap
-    for(std::vector<const cmSourceFile*>::const_iterator s = sources.begin();
-        s != sources.end(); s++)
-      {
-      cmStdString key = GetGroupMapKey(cmtarget, (cmSourceFile*)*s);
-      this->GroupMap[key] = pbxgroup;
-      }
-
-    // Do the child groups
-    std::vector<cmSourceGroup> children  = sg.GetGroupChildren();
-    cmXCodeObject* groupChildren = pbxgroup->GetObject("children");
-
-    for(unsigned int i=0;i<children.size();++i)
-      {
-      cmXCodeObject* group =
-        this->CreateSourceGroup( children[i], cmtarget, true );
-      if (group)
-        {
-        groupChildren->AddObject(group);
-        }
-      }
-    return pbxgroup;
-    }
-  return NULL;
-}
-
-
-//----------------------------------------------------------------------------
-cmXCodeObject* cmGlobalXCodeGenerator
-::CreateOrGetPBXGroup(cmTarget& cmtarget, cmSourceGroup* sg, bool child_group)
+::CreateOrGetPBXGroup(cmTarget& cmtarget, cmSourceGroup* sg)
 {
   cmStdString s = cmtarget.GetName();
   s += "/";
@@ -2517,7 +2475,7 @@ cmXCodeObject* cmGlobalXCodeGenerator
     {
     tgroup = this->CreateObject(cmXCodeObject::PBXGroup);
     this->TargetGroup[cmtarget.GetName()] = tgroup;
-    cmXCodeObject* tgroupChildren = 
+    cmXCodeObject* tgroupChildren =
       this->CreateObject(cmXCodeObject::OBJECT_LIST);
     tgroup->AddAttribute("name", this->CreateString(cmtarget.GetName()));
     tgroup->AddAttribute("children", tgroupChildren);
@@ -2538,6 +2496,7 @@ cmXCodeObject* cmGlobalXCodeGenerator
     return tgroup;
     }
 
+  cmXCodeObject* tgroupChildren = tgroup->GetObject("children");
   cmXCodeObject* group = this->CreateObject(cmXCodeObject::PBXGroup);
   cmXCodeObject* groupChildren =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
@@ -2548,11 +2507,7 @@ cmXCodeObject* cmGlobalXCodeGenerator
     group->AddAttribute("refType", this->CreateString("4"));
     }
   group->AddAttribute("sourceTree", this->CreateString("<group>"));
-  if( child_group )
-    {
-    cmXCodeObject* tgroupChildren = tgroup->GetObject("children");
-    tgroupChildren->AddObject(group);
-    }
+  tgroupChildren->AddObject(group);
   this->GroupNameMap[s] = group;
   return group;
 }
@@ -2652,7 +2607,8 @@ void cmGlobalXCodeGenerator
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   productGroup->AddAttribute("children", productGroupChildren);
   this->MainGroupChildren->AddObject(productGroup);
-  
+
+
   this->RootObject = this->CreateObject(cmXCodeObject::PBXProject);
   this->RootObject->SetComment("Project object");
   group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
