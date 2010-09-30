@@ -125,7 +125,10 @@ void cmVisualStudio10TargetGenerator::Generate()
                             ".vcxproj");
   if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY)
     {
-    this->ComputeClOptions();
+    if(!this->ComputeClOptions())
+      {
+      return;
+      }
     }
   cmMakefile* mf = this->Target->GetMakefile();
   std::string path =  mf->GetStartOutputDirectory();
@@ -949,19 +952,23 @@ OutputLinkIncremental(std::string const& configName)
 }
 
 //----------------------------------------------------------------------------
-void cmVisualStudio10TargetGenerator::ComputeClOptions()
+bool cmVisualStudio10TargetGenerator::ComputeClOptions()
 {
   std::vector<std::string> const* configs =
     this->GlobalGenerator->GetConfigurations();
   for(std::vector<std::string>::const_iterator i = configs->begin();
       i != configs->end(); ++i)
     {
-    this->ComputeClOptions(*i);
+    if(!this->ComputeClOptions(*i))
+      {
+      return false;
+      }
     }
+  return true;
 }
 
 //----------------------------------------------------------------------------
-void cmVisualStudio10TargetGenerator::ComputeClOptions(
+bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   std::string const& configName)
 {
   // much of this was copied from here:
@@ -984,7 +991,7 @@ void cmVisualStudio10TargetGenerator::ComputeClOptions(
       cmSystemTools::Error
         ("CMake can not determine linker language for target:",
          this->Name.c_str());
-      return;
+      return false;
       }
     if(strcmp(linkLanguage, "C") == 0 || strcmp(linkLanguage, "CXX") == 0
        || strcmp(linkLanguage, "Fortran") == 0)
@@ -1044,6 +1051,7 @@ void cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
 
   this->ClOptions[configName] = pOptions.release();
+  return true;
 }
 
 //----------------------------------------------------------------------------
