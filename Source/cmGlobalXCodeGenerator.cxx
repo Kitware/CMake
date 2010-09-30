@@ -1424,6 +1424,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string defFlags;
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
+  bool binary = ((target.GetType() == cmTarget::STATIC_LIBRARY) ||
+                 (target.GetType() == cmTarget::EXECUTABLE) ||
+                 shared);
 
   const char* lang = target.GetLinkerLanguage(configName);
   std::string cflags;
@@ -1442,6 +1445,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     // Add shared-library flags if needed.
     this->CurrentLocalGenerator->AddSharedFlags(flags, lang, shared);
     }
+  else if(binary)
+  {
+    cmSystemTools::Error
+      ("CMake can not determine linker language for target:",
+       target.GetName());
+    return;
+  }
 
   // Add define flags
   this->CurrentLocalGenerator->
