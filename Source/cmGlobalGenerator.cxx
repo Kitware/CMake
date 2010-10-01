@@ -1863,9 +1863,10 @@ bool cmGlobalGenerator::UseFolderProperty()
     return cmSystemTools::IsOn(prop);
     }
 
-  // By default, this feature is ON:
+  // By default, this feature is OFF, since it is not supported in the
+  // Visual Studio Express editions:
   //
-  return true;
+  return false;
 }
 
 //----------------------------------------------------------------------------
