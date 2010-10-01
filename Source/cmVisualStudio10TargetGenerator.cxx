@@ -32,6 +32,30 @@ static std::string cmVS10EscapeXML(std::string arg)
   return arg;
 }
 
+static std::string cmVS10EscapeComment(std::string comment)
+{
+  // MSBuild takes the CDATA of a <Message></Message> element and just
+  // does "echo $CDATA" with no escapes.  We must encode the string.
+  // http://technet.microsoft.com/en-us/library/cc772462%28WS.10%29.aspx
+  std::string echoable;
+  for(std::string::iterator c = comment.begin(); c != comment.end(); ++c)
+    {
+    switch (*c)
+      {
+      case '\r': break;
+      case '\n': echoable += '\t'; break;
+      case '"': /* no break */
+      case '|': /* no break */
+      case '&': /* no break */
+      case '<': /* no break */
+      case '>': /* no break */
+      case '^': echoable += '^'; /* no break */
+      default:  echoable += *c; break;
+      }
+    }
+  return echoable;
+}
+
 cmVisualStudio10TargetGenerator::
 cmVisualStudio10TargetGenerator(cmTarget* target,
                                 cmGlobalVisualStudio10Generator* gg)
@@ -325,6 +349,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
     }
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
   std::string comment = lg->ConstructComment(command);
+  comment = cmVS10EscapeComment(comment);
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations(); 
@@ -347,7 +372,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
                             command.GetEscapeAllowMakeVars())
         );
     this->WritePlatformConfigTag("Message",i->c_str(), 3);
-    (*this->BuildFileStream ) << comment << "</Message>\n";
+    (*this->BuildFileStream ) << cmVS10EscapeXML(comment) << "</Message>\n";
     this->WritePlatformConfigTag("Command", i->c_str(), 3);
     (*this->BuildFileStream ) << script << "</Command>\n";
     this->WritePlatformConfigTag("AdditionalInputs", i->c_str(), 3);
@@ -1433,8 +1458,9 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
                             command.GetEscapeAllowMakeVars())
         );
     }
+  comment = cmVS10EscapeComment(comment);
   this->WriteString("<Message>",3);
-  (*this->BuildFileStream ) << comment << "</Message>\n";
+  (*this->BuildFileStream ) << cmVS10EscapeXML(comment) << "</Message>\n";
   this->WriteString("<Command>", 3);
   (*this->BuildFileStream ) << script;
   (*this->BuildFileStream ) << "</Command>" << "\n";
