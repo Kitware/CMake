@@ -548,16 +548,16 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 # We do only save CPack installed tree in _prepr
 # and then restore it in build.
 %prep
-mv $RPM_BUILD_ROOT \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot
+mv $RPM_BUILD_ROOT \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\"
 
 #p build
 
 %install
 if [ -e $RPM_BUILD_ROOT ];
 then
-  mv \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot/* $RPM_BUILD_ROOT
+  mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot/*\" $RPM_BUILD_ROOT
 else
-  mv \@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot $RPM_BUILD_ROOT
+  mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
 fi
 
 %clean
