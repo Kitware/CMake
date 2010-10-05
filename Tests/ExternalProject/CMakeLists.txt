@@ -7,6 +7,13 @@ find_package(CVS)
 find_package(Subversion)
 find_package(Git)
 
+option(ExternalProjectTest_USE_FOLDERS "Enable folder grouping in IDEs." ON)
+if(ExternalProjectTest_USE_FOLDERS)
+  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+else()
+  set_property(GLOBAL PROPERTY USE_FOLDERS OFF)
+endif()
+
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER
   "CMakePredefinedTargets-in-ExternalProjectTest")
 
@@ -60,6 +67,15 @@ ExternalProject_Add(${proj}
   DOWNLOAD_COMMAND ""
   INSTALL_COMMAND ""
 )
+
+set(proj TargetNameSameAsFolder)
+ExternalProject_Add(${proj}
+  BUILD_COMMAND ""
+  CONFIGURE_COMMAND ""
+  DOWNLOAD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+set_property(TARGET ${proj} PROPERTY FOLDER "${proj}")
 
 set(proj MinimalNoOpProject)
 ExternalProject_Add(${proj}
