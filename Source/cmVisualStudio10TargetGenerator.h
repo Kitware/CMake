@@ -50,8 +50,8 @@ private:
   void WriteObjSources();
   void WritePathAndIncrementalLinkOptions();
   void WriteItemDefinitionGroups();
-  void ComputeClOptions();
-  void ComputeClOptions(std::string const& configName);
+  bool ComputeClOptions();
+  bool ComputeClOptions(std::string const& configName);
   void WriteClOptions(std::string const& config,
                       std::vector<std::string> const & includes);
   void WriteRCOptions(std::string const& config,
