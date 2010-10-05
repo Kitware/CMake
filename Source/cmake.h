@@ -212,7 +212,7 @@ class cmake
   bool CommandExists(const char* name) const;
     
   ///! Parse command line arguments
-  void SetArgs(const std::vector<std::string>&);
+  void SetArgs(const std::vector<std::string>&, bool directoriesSetBefore = false);
 
   ///! Is this cmake running as a result of a TRY_COMPILE command
   bool GetIsInTryCompile() { return this->InTryCompile; }
