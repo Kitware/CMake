@@ -2810,6 +2810,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   // if cmake args were provided then pass them in
   if (cmakeArgs)
     {
+    cm.SetArgs(*cmakeArgs);
     cm.SetCacheArgs(*cmakeArgs);
     }
   // to save time we pass the EnableLanguage info directly
