@@ -1,3 +1,83 @@
+Changes in CMake 2.8.3-rc2 (since 2.8.3-rc1)
+--------------------------------------------
+Alex Neundorf (5):
+      APPEND and not-APPEND mode of feature_summary() were swapped
+      Set a default DESCRIPTION if none is given for ALL mode of feature_summary()
+      Close ENDFUNCTION() properly with the same name as FUNCTION()
+      Make cmake-gui remember whether the "Advanced" checkbox was checked or not
+      Also store the required version number in the details message.
+
+Ben Boeckel (3):
+      Add test that CMake errors with empty libs
+      Fix which string is checked for in the test
+      XCode generation should fail if lang isn't known
+
+Bill Hoffman (5):
+      Fix the name of the variable being tested.
+      Fix KWStyle line length issues.
+      Add a delay after untar on windows to make external project work on windows 7
+      Add a new line to the end of the generated main.cxx for the hpux compiler.
+      Fix for bug #11274, VS10 custom commands that create files in INTDIR fix.
+
+Brad King (12):
+      Evaluate <OBJECT_DIR> rule variable for executables
+      ccmake: Fix search with '/'
+      MinGW: Support long object file lists
+      Document IMPORTED_NO_SONAME target property
+      FindMPI: Recoginze -f flags from mpicc (#10771)
+      Add module-dir flag for Compaq Visual Fortran (#11248)
+      FindPythonInterp: Look for python2.7 interpreter
+      VS10: Use $(IntDir) for per-source output directory (#11270)
+      Reset platform/compiler info status for each language
+      Remove trailing whitespace from Xcode generator source
+      VS10: Skip targets with no linker language (#11230)
+      VS10: Encode custom command comments for echo (#11283)
+
+Clinton Stimpson (1):
+      Fix regression in cross-compile patches with finding Qt libs.
+
+David Cole (7):
+      Enable calling commands with : in argv[1] (#9963)
+      No extra spaces in CustomCommand test (#9963)
+      Avoid CustomCommand test failure on VS71 (#9963)
+      Update release scripts.
+      Avoid CustomCommand test failure on VS71 (#9963)
+      Honor MAKECOMMAND value saved in cache (#11026)
+      New USE_FOLDERS property OFF by default. (#3796)
+
+David Gobbi (1):
+      Set the module prefix, updated Windows suffix.
+
+Eric NOULARD (2):
+      InstallGen/CPack  fix handling absolute installed file regression
+      CPackRPM  Handle parenthesis in CPACK_SYSTEM_NAME (fix bug 10737)
+
+James Bigler (2):
+      Fix for bug 0011263.
+      Allow -g3 for CUDA v3.0+.
+
+Mikkel Krautz (2):
+      Xcode: Avoid trailing space in ARCHS list (#11244)
+      Xcode: Quote string values containing '$' (#11244)
+
+Philip Lowman (12):
+      FindBoost.cmake fixes for issues 11204 & 8529
+      FindBoost.cmake: Miscellaneous changes and refactoring
+      FindBoost.cmake: Add Boost_NO_SYSTEM_PATHS option
+      FindBoost.cmake: Fix compiling against a boost source tree
+      FindBoost.cmake: Fixes 11246
+      FindBoost.cmake: Fixes 11121
+      FindBoost.cmake: Fixes 10436
+      FindBoost.cmake: Implements 11160
+      Fix 11136: [patch] FindThreads.cmake documents the wrong variable
+      FindBoost.cmake: Fix library search path glitch introduced in earlier commit
+      FindFLEX.cmake: Fix issue 11249
+      Fixes issue 11279: CMakeDetermineVSServicePack support for VS10
+
+Yaakov Selkowitz (2):
+      FindFLTK*: Use Cygwin fltk on Cygwin (#11290)
+      Use 'uname -m' for processor on Cygwin (#10774)
+
 Changes in CMake 2.8.3-rc1 (since 2.8.2)
 ----------------------------------------
 Alex Neundorf (39):
