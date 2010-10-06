@@ -524,7 +524,8 @@ void cmake::ReadListFile(const char *path)
 }
 
 // Parse the args
-void cmake::SetArgs(const std::vector<std::string>& args, bool directoriesSetBefore)
+void cmake::SetArgs(const std::vector<std::string>& args,
+                    bool directoriesSetBefore)
 {
   bool directoriesSet = directoriesSetBefore;
   for(unsigned int i=1; i < args.size(); ++i)
