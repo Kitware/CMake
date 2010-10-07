@@ -69,14 +69,6 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() { return true; }
 
-protected:
-  // Does this VS version link targets to each other if there are
-  // dependencies in the SLN file?  This was done for VS versions
-  // below 8.
-  virtual bool VSLinksDependencies() const { return true; }
-
-  virtual const char* GetIDEVersion() = 0;
-
   struct TargetCompare
   {
     bool operator()(cmTarget const* l, cmTarget const* r) const;
@@ -86,6 +78,14 @@ protected:
   public:
     OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const&);
   };
+
+protected:
+  // Does this VS version link targets to each other if there are
+  // dependencies in the SLN file?  This was done for VS versions
+  // below 8.
+  virtual bool VSLinksDependencies() const { return true; }
+
+  virtual const char* GetIDEVersion() = 0;
 
   virtual bool ComputeTargetDepends();
   class VSDependSet: public std::set<cmStdString> {};
