@@ -69,7 +69,7 @@ IF(Subversion_SVN_EXECUTABLE)
     OUTPUT_VARIABLE Subversion_VERSION_SVN
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  STRING(REGEX REPLACE "^(.*\n)?svn, version ([.0-9]+).*"
+  STRING(REGEX REPLACE "^(.*\n)?svn, [Vv]ersion ([.0-9]+).*"
     "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
 
   MACRO(Subversion_WC_INFO dir prefix)
