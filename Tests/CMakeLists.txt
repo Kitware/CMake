@@ -374,6 +374,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustComDepend")
 
+  ADD_TEST(ArgumentExpansion  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/ArgumentExpansion"
+    "${CMake_BINARY_DIR}/Tests/ArgumentExpansion"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project ArgumentExpansion
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/ArgumentExpansion/bin"
+    )
+  IF(CMAKE_STRICT)
+    SET_TESTS_PROPERTIES(ArgumentExpansion PROPERTIES
+      FAIL_REGULAR_EXPRESSION "Error: ")
+  ENDIF(CMAKE_STRICT)
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ArgumentExpansion")
+
   ADD_TEST(CustomCommand  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/CustomCommand"
