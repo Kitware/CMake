@@ -2810,7 +2810,11 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   // if cmake args were provided then pass them in
   if (cmakeArgs)
     {
-    cm.SetArgs(*cmakeArgs, true);
+    // FIXME: Workaround to ignore unused CLI variables until the
+    // 'ArgumentExpansion' test succeeds with CMAKE_STRICT on
+    cm.SetWarnUnusedCli(true);
+    //cm.SetArgs(*cmakeArgs, true);
+
     cm.SetCacheArgs(*cmakeArgs);
     }
   // to save time we pass the EnableLanguage info directly
