@@ -52,12 +52,19 @@ FIND_PROGRAM(Subversion_SVN_EXECUTABLE svn
 MARK_AS_ADVANCED(Subversion_SVN_EXECUTABLE)
 
 IF(Subversion_SVN_EXECUTABLE)
+  # the subversion commands should be executed with the C locale, otherwise
+  # the message (which are parsed) may be translated, Alex
+  SET(_Subversion_SAVED_LC_ALL "$ENV{LC_ALL}")
+  SET(ENV{LC_ALL} C)
 
   EXECUTE_PROCESS(COMMAND ${Subversion_SVN_EXECUTABLE} --version
     OUTPUT_VARIABLE Subversion_VERSION_SVN
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  STRING(REGEX REPLACE "^(.*\n)?svn, [Vv]ersion ([.0-9]+).*"
+  # restore the previous LC_ALL
+  SET(ENV{LC_ALL} ${_Subversion_SAVED_LC_ALL})
+
+  STRING(REGEX REPLACE "^(.*\n)?svn, version ([.0-9]+).*"
     "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
 
   MACRO(Subversion_WC_INFO dir prefix)
