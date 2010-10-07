@@ -263,6 +263,20 @@ cmExportInstallFileGenerator
       value += ".framework/";
       value += itgen->GetInstallFilename(target, config);
       }
+    else if(target->IsCFBundleOnApple())
+      {
+      const char *ext = target->GetProperty("BUNDLE_EXTENSION");
+      if (!ext)
+        {
+        ext = "bundle";
+        }
+
+      value += itgen->GetInstallFilename(target, config);
+      value += ".";
+      value += ext;
+      value += "/";
+      value += itgen->GetInstallFilename(target, config);
+      }
     else if(target->IsAppBundleOnApple())
       {
       value += itgen->GetInstallFilename(target, config);

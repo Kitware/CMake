@@ -430,6 +430,9 @@ public:
       Apple.  */
   bool IsFrameworkOnApple();
 
+  /** Return whether this target is a CFBundle (plugin) on Apple.  */
+  bool IsCFBundleOnApple();
+
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple();
 

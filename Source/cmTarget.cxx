@@ -194,6 +194,22 @@ void cmTarget::DefineProperties(cmake *cm)
      "the target is built.");
 
   cm->DefineProperty
+    ("BUNDLE", cmProperty::TARGET,
+     "This target is a CFBundle on the Mac.",
+     "If a module library target has this property set to true it will "
+     "be built as a CFBundle when built on the mac. It will have the "
+     "directory structure required for a CFBundle and will be suitable "
+     "to be used for creating Browser Plugins or other application "
+     "resources.");
+
+  cm->DefineProperty
+    ("BUNDLE_EXTENSION", cmProperty::TARGET,
+     "The file extension used to name a BUNDLE target on the Mac.",
+     "The default value is \"bundle\" - you can also use \"plugin\" or "
+     "whatever file extension is required by the host app for your "
+     "bundle.");
+
+  cm->DefineProperty
     ("FRAMEWORK", cmProperty::TARGET,
      "This target is a framework on the Mac.",
      "If a shared library target has this property set to true it will "
@@ -1201,6 +1217,14 @@ bool cmTarget::IsAppBundleOnApple()
   return (this->GetType() == cmTarget::EXECUTABLE &&
           this->Makefile->IsOn("APPLE") &&
           this->GetPropertyAsBool("MACOSX_BUNDLE"));
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsCFBundleOnApple()
+{
+  return (this->GetType() == cmTarget::MODULE_LIBRARY &&
+          this->Makefile->IsOn("APPLE") &&
+          this->GetPropertyAsBool("BUNDLE"));
 }
 
 //----------------------------------------------------------------------------
