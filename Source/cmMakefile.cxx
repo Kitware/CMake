@@ -2812,7 +2812,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
     {
     // FIXME: Workaround to ignore unused CLI variables until the
     // 'ArgumentExpansion' test succeeds with CMAKE_STRICT on
-    cm.SetWarnUnusedCli(true);
+    cm.SetWarnUnusedCli(false);
     //cm.SetArgs(*cmakeArgs, true);
 
     cm.SetCacheArgs(*cmakeArgs);
