@@ -1479,10 +1479,13 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
 
 void cmVisualStudio10TargetGenerator::WriteProjectReferences()
 {
-  cmGlobalGenerator::TargetDependSet const& depends
+  cmGlobalGenerator::TargetDependSet const& unordered
     = this->GlobalGenerator->GetTargetDirectDepends(*this->Target);
+  typedef cmGlobalVisualStudioGenerator::OrderedTargetDependSet
+    OrderedTargetDependSet;
+  OrderedTargetDependSet depends(unordered);
   this->WriteString("<ItemGroup>\n", 1);
-  for( cmGlobalGenerator::TargetDependSet::const_iterator i = depends.begin();
+  for( OrderedTargetDependSet::const_iterator i = depends.begin();
        i != depends.end(); ++i)
     {
     cmTarget* dt = *i;
