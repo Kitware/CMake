@@ -21,7 +21,11 @@ IF(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
   FILE(MAKE_DIRECTORY "${TEST_HOME}")
   FILE(WRITE "${TEST_HOME}/.cvspass" ":pserver:anoncvs@www.cmake.org:/cvsroot/KWSys A\n")
   SET(TEST_HOME_ENV_CODE "# Fake a user home directory to avoid polluting the real one.
-SET(ENV{HOME} \"${TEST_HOME}\")")
+# But provide original ENV{HOME} value in ENV{CTEST_REAL_HOME} for tests that
+# need access to the real HOME directory.
+SET(ENV{CTEST_REAL_HOME} \"$ENV{HOME}\")
+SET(ENV{HOME} \"${TEST_HOME}\")
+")
 ENDIF()
 
 # Choose a default configuration for CTest tests.
