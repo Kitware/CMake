@@ -1779,7 +1779,7 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
   if (this->WarnUnused && !this->VariableUsed(name))
     {
     cmStdString path;
-    int line;
+    long line;
     if (this->CallStack.size())
       {
       const cmListFileContext* file = this->CallStack.back().Context;
