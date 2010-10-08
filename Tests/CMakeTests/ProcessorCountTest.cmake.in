@@ -1,0 +1,9 @@
+include(ProcessorCount)
+
+ProcessorCount(processor_count)
+message("processor_count='${processor_count}'")
+
+if(processor_count EQUAL 0)
+  message(FATAL_ERROR "could not determine number of processors
+- Additional code needed in ProcessorCount.cmake?")
+endif()
