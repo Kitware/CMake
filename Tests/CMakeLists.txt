@@ -379,7 +379,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   IF(CMAKE_STRICT)
     SET_TESTS_PROPERTIES(ArgumentExpansion PROPERTIES
-      FAIL_REGULAR_EXPRESSION "Error: ")
+      FAIL_REGULAR_EXPRESSION "Unexpected: ")
   ENDIF(CMAKE_STRICT)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ArgumentExpansion")
 
