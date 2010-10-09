@@ -242,6 +242,7 @@
 #  QT_LIBRARY_DIR              Path to "lib" of Qt4
 #  QT_PLUGINS_DIR              Path to "plugins" for Qt4
 #  QT_TRANSLATIONS_DIR         Path to "translations" of Qt4
+#  QT_IMPORTS_DIR              Path to "imports" of Qt4
 #  QT_DOC_DIR                  Path to "doc" of Qt4
 #  QT_MKSPECS_DIR              Path to "mkspecs" of Qt4
 #
@@ -445,6 +446,14 @@ MACRO (_QT4_ADJUST_LIB_VARS _camelCaseBasename)
   MARK_AS_ADVANCED(QT_${basename}_LIBRARY QT_${basename}_LIBRARY_RELEASE QT_${basename}_LIBRARY_DEBUG QT_${basename}_INCLUDE_DIR)
 ENDMACRO (_QT4_ADJUST_LIB_VARS)
 
+function(_QT4_QUERY_QMAKE VAR RESULT)
+  exec_program(${QT_QMAKE_EXECUTABLE} ARGS "-query ${VAR}" RETURN_VALUE return_code OUTPUT_VARIABLE output )
+  if(NOT return_code)
+    file(TO_CMAKE_PATH "${output}" output)
+    set(${RESULT} ${output} PARENT_SCOPE)
+  endif(NOT return_code)
+endfunction(_QT4_QUERY_QMAKE)
+
 
 SET(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
 
@@ -470,7 +479,7 @@ IF (QT_QMAKE_EXECUTABLE)
 
   SET(QT4_QMAKE_FOUND FALSE)
   
-  EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE} ARGS "-query QT_VERSION" OUTPUT_VARIABLE QTVERSION)
+  _qt4_query_qmake(QT_VERSION QTVERSION)
 
   # check for qt3 qmake and then try and find qmake4 or qmake-qt4 in the path
   IF("${QTVERSION}" MATCHES "Unknown")
@@ -482,8 +491,7 @@ IF (QT_QMAKE_EXECUTABLE)
       DOC "The qmake executable for the Qt installation to use"
       )
     IF(QT_QMAKE_EXECUTABLE)
-      EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE} 
-        ARGS "-query QT_VERSION" OUTPUT_VARIABLE QTVERSION)
+      _qt4_query_qmake(QT_VERSION QTVERSION)
     ENDIF(QT_QMAKE_EXECUTABLE)
   ENDIF("${QTVERSION}" MATCHES "Unknown")
 
@@ -559,9 +567,7 @@ IF (QT4_QMAKE_FOUND)
   # ask qmake for the mkspecs directory
   # we do this first because QT_LIBINFIX might be set
   IF (NOT QT_MKSPECS_DIR  OR  QT_QMAKE_CHANGED)
-    EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
-      ARGS "-query QMAKE_MKSPECS"
-      OUTPUT_VARIABLE qt_mkspecs_dirs )
+    _qt4_query_qmake(QMAKE_MKSPECS qt_mkspecs_dirs)
     # do not replace : on windows as it might be a drive letter
     # and windows should already use ; as a separator
     IF(NOT WIN32)
@@ -592,11 +598,7 @@ IF (QT4_QMAKE_FOUND)
   # ask qmake for the library dir as a hint, then search for QtCore library and use that as a reference for finding the
   # others and for setting QT_LIBRARY_DIR
   IF (NOT QT_QTCORE_LIBRARY OR QT_QMAKE_CHANGED)
-    EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
-      ARGS "-query QT_INSTALL_LIBS"
-      OUTPUT_VARIABLE QT_LIBRARY_DIR_TMP )
-    # make sure we have / and not \ as qmake gives on windows
-    FILE(TO_CMAKE_PATH "${QT_LIBRARY_DIR_TMP}" QT_LIBRARY_DIR_TMP)
+    _qt4_query_qmake(QT_INSTALL_LIBS QT_LIBRARY_DIR_TMP)
     SET(QT_QTCORE_LIBRARY_RELEASE NOTFOUND)
     SET(QT_QTCORE_LIBRARY_DEBUG NOTFOUND)
     FIND_LIBRARY(QT_QTCORE_LIBRARY_RELEASE
@@ -649,21 +651,13 @@ IF (QT4_QMAKE_FOUND)
   
   # ask qmake for the binary dir
   IF (NOT QT_BINARY_DIR  OR  QT_QMAKE_CHANGED)
-     EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE}
-       ARGS "-query QT_INSTALL_BINS"
-       OUTPUT_VARIABLE qt_bins )
-     # make sure we have / and not \ as qmake gives on windows
-     FILE(TO_CMAKE_PATH "${qt_bins}" qt_bins)
-     SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "" FORCE)
+    _qt4_query_qmake(QT_INSTALL_BINS qt_bins)
+    SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "" FORCE)
   ENDIF (NOT QT_BINARY_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the include dir
   IF (QT_LIBRARY_DIR AND (NOT QT_QTCORE_INCLUDE_DIR OR NOT QT_HEADERS_DIR OR  QT_QMAKE_CHANGED))
-      EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
-        ARGS "-query QT_INSTALL_HEADERS" 
-        OUTPUT_VARIABLE qt_headers ) 
-      # make sure we have / and not \ as qmake gives on windows
-      FILE(TO_CMAKE_PATH "${qt_headers}" qt_headers)
+      _qt4_query_qmake(QT_INSTALL_HEADERS qt_headers)
       SET(QT_QTCORE_INCLUDE_DIR NOTFOUND)
       FIND_PATH(QT_QTCORE_INCLUDE_DIR QtCore
                 HINTS ${qt_headers}
@@ -703,22 +697,14 @@ IF (QT4_QMAKE_FOUND)
 
   # ask qmake for the documentation directory
   IF (QT_LIBRARY_DIR AND NOT QT_DOC_DIR  OR  QT_QMAKE_CHANGED)
-    EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
-      ARGS "-query QT_INSTALL_DOCS"
-      OUTPUT_VARIABLE qt_doc_dir )
-    # make sure we have / and not \ as qmake gives on windows
-    FILE(TO_CMAKE_PATH "${qt_doc_dir}" qt_doc_dir)
+    _qt4_query_qmake(QT_INSTALL_DOCS qt_doc_dir)
     SET(QT_DOC_DIR ${qt_doc_dir} CACHE PATH "The location of the Qt docs" FORCE)
   ENDIF (QT_LIBRARY_DIR AND NOT QT_DOC_DIR  OR  QT_QMAKE_CHANGED)
 
 
   # ask qmake for the plugins directory
   IF (QT_LIBRARY_DIR AND NOT QT_PLUGINS_DIR  OR  QT_QMAKE_CHANGED)
-    EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
-      ARGS "-query QT_INSTALL_PLUGINS"
-      OUTPUT_VARIABLE qt_plugins_dir )
-    # make sure we have / and not \ as qmake gives on windows
-    FILE(TO_CMAKE_PATH "${qt_plugins_dir}" qt_plugins_dir)
+    _qt4_query_qmake(QT_INSTALL_PLUGINS qt_plugins_dir)
     SET(QT_PLUGINS_DIR NOTFOUND)
     foreach(qt_cross_path ${CMAKE_FIND_ROOT_PATH})
       set(qt_cross_paths ${qt_cross_paths} "${qt_cross_path}/plugins")
@@ -730,13 +716,26 @@ IF (QT4_QMAKE_FOUND)
 
   # ask qmake for the translations directory
   IF (QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR  OR  QT_QMAKE_CHANGED)
-    EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
-      ARGS "-query QT_INSTALL_TRANSLATIONS"
-      OUTPUT_VARIABLE qt_translations_dir )
-    # make sure we have / and not \ as qmake gives on windows
-    FILE(TO_CMAKE_PATH "${qt_translations_dir}" qt_translations_dir)
+    _qt4_query_qmake(QT_INSTALL_TRANSLATIONS qt_translations_dir)
     SET(QT_TRANSLATIONS_DIR ${qt_translations_dir} CACHE PATH "The location of the Qt translations" FORCE)
   ENDIF (QT_LIBRARY_DIR AND NOT QT_TRANSLATIONS_DIR  OR  QT_QMAKE_CHANGED)
+
+  # ask qmake for the imports directory
+  IF (QT_LIBRARY_DIR AND NOT QT_IMPORTS_DIR OR QT_QMAKE_CHANGED)
+    _qt4_query_qmake(QT_INSTALL_IMPORTS qt_imports_dir)
+    if(qt_imports_dir)
+      SET(QT_IMPORTS_DIR NOTFOUND)
+      foreach(qt_cross_path ${CMAKE_FIND_ROOT_PATH})
+        set(qt_cross_paths ${qt_cross_paths} "${qt_cross_path}/imports")
+      endforeach(qt_cross_path)
+      FIND_PATH(QT_IMPORTS_DIR NAMES Qt
+        HINTS ${qt_cross_paths} ${qt_imports_dir}
+        DOC "The location of the Qt imports"
+        NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_SYSTEM_ENVIRONMENT_PATH
+        NO_CMAKE_SYSTEM_PATH)
+      mark_as_advanced(QT_IMPORTS_DIR)
+    endif(qt_imports_dir)
+  ENDIF (QT_LIBRARY_DIR AND NOT QT_IMPORTS_DIR  OR  QT_QMAKE_CHANGED)
 
   # Make variables changeble to the advanced user
   MARK_AS_ADVANCED( QT_LIBRARY_DIR QT_DOC_DIR QT_MKSPECS_DIR
