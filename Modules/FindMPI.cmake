@@ -81,6 +81,7 @@ set(_MPI_PACKAGE_DIR
   lib/openmpi
   "MPICH/SDK"
   "Microsoft Compute Cluster Pack"
+  "Microsoft HPC Pack 2008 R2"
   )
 
 set(_MPI_PREFIX_PATH)
@@ -306,7 +307,7 @@ else (MPI_COMPILE_CMDLINE)
 # No MPI compiler to interogate so attempt to find everything with find functions.
   find_path(MPI_INCLUDE_PATH mpi.h
     HINTS ${_MPI_BASE_DIR} ${_MPI_PREFIX_PATH}
-    PATH_SUFFIXES include
+    PATH_SUFFIXES include Inc
     )
 
   # Decide between 32-bit and 64-bit libraries for Microsoft's MPI
