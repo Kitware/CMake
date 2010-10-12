@@ -20,7 +20,6 @@
 #   set(Boost_USE_STATIC_LIBS        ON)
 #   set(Boost_USE_MULTITHREADED      ON)
 #   set(Boost_USE_STATIC_RUNTIME    OFF)
-#   set(Boost_COMPAT_STATIC_RUNTIME OFF)
 #   find_package( Boost 1.36.0 COMPONENTS date_time filesystem system ... )
 #
 #   if(Boost_FOUND)
@@ -94,7 +93,10 @@
 #
 #   Boost_USE_STATIC_RUNTIME     If enabled, searches for boost libraries
 #                                linked against a static C++ standard library
-#                                ('s' ABI tag). Defaults to OFF.
+#                                ('s' ABI tag). This option should be set to
+#                                ON or OFF because the default behavior
+#                                if not specified is platform dependent
+#                                for backwards compatibility.
 #                                  [Since CMake 2.8.3]
 #
 #   Boost_USE_DEBUG_PYTHON       If enabled, searches for boost libraries
@@ -112,14 +114,6 @@
 #                                compiled against the deprecated STLPort
 #                                "native iostreams" feature ('n' ABI tag).
 #                                Defaults to OFF.
-#                                  [Since CMake 2.8.3]
-#
-#   Boost_COMPAT_STATIC_RUNTIME  Set to OFF to disable backwards compatible
-#                                searching for libraries with the 's' ABI
-#                                tag on WIN32 after normal searches.  You
-#                                should set this to OFF and also set
-#                                Boost_USE_STATIC_RUNTIME appropriately.
-#                                If not specified, defaults to ON.
 #                                  [Since CMake 2.8.3]
 #
 # Other Variables used by this module which you may want to set.
@@ -372,9 +366,6 @@ endfunction()
 IF(NOT DEFINED Boost_USE_MULTITHREADED)
     SET(Boost_USE_MULTITHREADED TRUE)
 ENDIF()
-if(NOT DEFINED Boost_COMPAT_STATIC_RUNTIME)
-  set(Boost_COMPAT_STATIC_RUNTIME TRUE)
-endif()
 
 if(Boost_FIND_VERSION_EXACT)
   # The version may appear in a directory with or without the patch
@@ -868,11 +859,11 @@ ELSE (_boost_IN_CACHE)
   #  1. Search for static libs compiled against a SHARED C++ standard runtime library (use if found)
   #  2. Search for static libs compiled against a STATIC C++ standard runtime library (use if found)
   # We maintain this behavior since changing it could break people's builds.
-  # To disable the ambiguous behavior, the user can
-  # set Boost_COMPAT_STATIC_RUNTIME to FALSE
+  # To disable the ambiguous behavior, the user need only
+  # set Boost_USE_STATIC_RUNTIME either ON or OFF.
   set(_boost_STATIC_RUNTIME_WORKAROUND false)
-  if(Boost_COMPAT_STATIC_RUNTIME AND WIN32 AND Boost_USE_STATIC_LIBS)
-    if(NOT Boost_USE_STATIC_RUNTIME)
+  if(WIN32 AND Boost_USE_STATIC_LIBS)
+    if(NOT DEFINED Boost_USE_STATIC_RUNTIME)
       set(_boost_STATIC_RUNTIME_WORKAROUND true)
     endif()
   endif()
