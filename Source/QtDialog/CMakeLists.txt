@@ -19,13 +19,6 @@ ELSE(NOT QT4_FOUND)
 
   INCLUDE(${QT_USE_FILE})
   SET(CMAKE_PACKAGE_QTGUI TRUE)
-  # i don't want to install or package the qt gui on windows 
-  # unless qt is static
-  IF(WIN32 AND NOT QT_CONFIG MATCHES "static")
-    SET(CMAKE_PACKAGE_QTGUI FALSE)
-    MESSAGE(STATUS 
-      "WARNING: QtDialog requires a static built qt for installation.")
-  ENDIF(WIN32 AND NOT QT_CONFIG MATCHES "static")
   SET(SRCS
     AddCacheEntry.cxx
     AddCacheEntry.h
@@ -86,12 +79,8 @@ ELSE(NOT QT4_FOUND)
     SET(CMAKE_INSTALL_DESTINATION_ARGS 
       BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}")
   ENDIF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
-  # if qt is not static and we are on windows then skip the install
-  # I don't want to distribute qt dlls
-  IF(CMAKE_PACKAGE_QTGUI)
-    INSTALL(TARGETS cmake-gui RUNTIME DESTINATION bin
-    ${CMAKE_INSTALL_DESTINATION_ARGS})
-  ENDIF(CMAKE_PACKAGE_QTGUI)
+
+  INSTALL(TARGETS cmake-gui RUNTIME DESTINATION bin ${CMAKE_INSTALL_DESTINATION_ARGS})
 
   IF(UNIX)
     # install a desktop file so CMake appears in the application start menu
@@ -112,10 +101,21 @@ ELSE(NOT QT4_FOUND)
       "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
     INSTALL(CODE "execute_process(COMMAND ln -s \"../MacOS/${CMAKE_BUNDLE_NAME}\" cmake-gui
                   WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)")
-    INSTALL(CODE "set(input_file
-       \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/MacOS/${CMAKE_BUNDLE_NAME}\")")
-    INSTALL(SCRIPT "${CMake_SOURCE_DIR}/Source/QtDialog/CMakeIngestOSXBundleLibraries.cmake")
   ENDIF(APPLE)
+
+  if(APPLE OR WIN32)
+    # install rules for including 3rd party libs such as Qt
+    # if a system Qt is used (e.g. installed in /usr/lib/), it will not be included in the installation
+    set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/cmake-gui${CMAKE_EXECUTABLE_SUFFIX}")
+    if(APPLE)
+      set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/MacOS/${CMAKE_BUNDLE_NAME}")
+    endif(APPLE)
+    install(CODE "
+      include(\"${CMake_SOURCE_DIR}/Modules/BundleUtilities.cmake\")
+      fixup_bundle(\"${fixup_exe}\" \"\" \"${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
+    ")
+  endif(APPLE OR WIN32)
+
   CONFIGURE_FILE("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
     "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)    
 ENDIF(NOT QT4_FOUND)
