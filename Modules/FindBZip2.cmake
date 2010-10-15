@@ -26,7 +26,7 @@ FIND_LIBRARY(BZIP2_LIBRARIES NAMES bz2 bzip2 )
 
 # handle the QUIETLY and REQUIRED arguments and set BZip2_FOUND to TRUE if 
 # all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2 DEFAULT_MSG BZIP2_LIBRARIES BZIP2_INCLUDE_DIR)
 
 IF (BZIP2_FOUND)

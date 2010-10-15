@@ -50,7 +50,7 @@ endif()
 
 # Handle the QUIETLY and REQUIRED arguments and set LIBARCHIVE_FOUND
 # to TRUE if all listed variables are TRUE.
-include(FindPackageHandleStandardArgs)
+include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 find_package_handle_standard_args(LibArchive DEFAULT_MSG
   LibArchive_LIBRARY LibArchive_INCLUDE_DIR
   )

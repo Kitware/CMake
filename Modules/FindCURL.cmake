@@ -34,7 +34,7 @@ MARK_AS_ADVANCED(CURL_LIBRARY)
 
 # handle the QUIETLY and REQUIRED arguments and set CURL_FOUND to TRUE if 
 # all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CURL DEFAULT_MSG CURL_LIBRARY CURL_INCLUDE_DIR)
 
 IF(CURL_FOUND)

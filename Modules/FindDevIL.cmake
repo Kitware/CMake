@@ -25,7 +25,7 @@
 # TODO: Add version support.
 # Tested under Linux and Windows (MSVC)
 
-INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 
 FIND_PATH(IL_INCLUDE_DIR il.h 
   PATH_SUFFIXES include IL

@@ -46,6 +46,6 @@ include(Findosg_functions)
 OSG_FIND_PATH   (OSGPARTICLE osgParticle/FireEffect)
 OSG_FIND_LIBRARY(OSGPARTICLE osgParticle)
 
-include(FindPackageHandleStandardArgs)
+include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(osgParticle DEFAULT_MSG
     OSGPARTICLE_LIBRARY OSGPARTICLE_INCLUDE_DIR)
