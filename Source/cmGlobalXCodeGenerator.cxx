@@ -643,7 +643,7 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     sourcecode += ".c.h";
     }
   else if(ext == "hxx" || ext == "hpp" || ext == "txx"
-    || ext == "pch")
+    || ext == "pch" || ext == "hh")
     {
     sourcecode += ".cpp.h";
     }
