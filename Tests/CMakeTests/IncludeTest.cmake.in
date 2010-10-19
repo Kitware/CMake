@@ -35,3 +35,7 @@ if(NOT "${fileOne}"   STREQUAL "${fileTwo}")
    message(FATAL_ERROR "Wrong CMake.cmake was included: \"${fileOne}\" expected \"${fileTwo}\"")
 endif(NOT "${fileOne}"   STREQUAL "${fileTwo}")
 
+# Check that CMAKE_CURRENT_LIST_DIR is working:
+# Needs to be a file in the build tree, which is correct cmake script
+# but doesn't do a lot, if possible only set() commands:
+include(${CMAKE_CURRENT_LIST_DIR}/../../CTestCustom.cmake)
