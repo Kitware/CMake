@@ -1,3 +1,30 @@
+Changes in CMake 2.8.3-rc3 (since 2.8.3-rc2)
+--------------------------------------------
+Alex Neundorf (4):
+      Remove trailing whitespace
+      Add automatic variable CMAKE_CURRENT_LIST_DIR(dir of CMAKE_CURRENT_LIST_FILE)
+      Use absolute path to FindPackageHandleStandardArgs.cmake everywhere
+      CodeBlocks Generator: Do not omit files in the project file listing.
+
+Brad King (4):
+      VS10: Order .vcxproj dependencies deterministically (#10502)
+      Document ENABLE_EXPORTS behavior on Mac (#11295)
+      FindHDF5: Fix typo in parallel-IO support check (#11291)
+      Xcode: Recognize .hh as C++ (#11307)
+
+Clinton Stimpson (1):
+      Find imports dir in Qt 4.7
+
+David Partyka (1):
+      Update module to locate newely released MS MPI HPC Pack R2.
+
+Philip Lowman (1):
+      Remove superfluous variable Boost_COMPAT_STATIC_RUNTIME.
+
+Rolf Eike Beer (2):
+      FindSubversion: Fix for German localized client (#11273)
+      FindSubversion: Use C locale to detect version (#11273)
+
 Changes in CMake 2.8.3-rc2 (since 2.8.3-rc1)
 --------------------------------------------
 Alex Neundorf (5):
