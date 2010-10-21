@@ -12,9 +12,9 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-# Find the nasm assembler
+# Find the nasm assembler. yasm (http://www.tortall.net/projects/yasm/) is nasm compatible
 
-SET(CMAKE_ASM_NASM_COMPILER_INIT nasm)
+SET(CMAKE_ASM_NASM_COMPILER_INIT nasm yasm)
 
 IF(NOT CMAKE_ASM_NASM_COMPILER)
   FIND_PROGRAM(CMAKE_ASM_NASM_COMPILER nasm

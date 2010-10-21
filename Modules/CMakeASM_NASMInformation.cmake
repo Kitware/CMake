@@ -14,7 +14,7 @@
 
 # support for the nasm assembler
 
-set(CMAKE_ASM_NASM_SOURCE_FILE_EXTENSIONS nasm)
+set(CMAKE_ASM_NASM_SOURCE_FILE_EXTENSIONS nasm asm)
 
 if(WIN32)
   if(CMAKE_C_SIZEOF_DATA_PTR EQUAL 8)
