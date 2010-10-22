@@ -597,8 +597,7 @@ function(_ep_get_build_command name step cmd_var)
       # CMake project.  Select build command based on generator.
       get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
       if("${CMAKE_GENERATOR}" MATCHES "Make" AND
-          ("${cmake_generator}" STREQUAL "${CMAKE_GENERATOR}" OR
-          NOT cmake_generator))
+         ("${cmake_generator}" MATCHES "Make" OR NOT cmake_generator))
         # The project uses the same Makefile generator.  Use recursive make.
         set(cmd "$(MAKE)")
         if(step STREQUAL "INSTALL")
