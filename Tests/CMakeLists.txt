@@ -23,7 +23,7 @@ IF(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
   SET(TEST_HOME_ENV_CODE "# Fake a user home directory to avoid polluting the real one.
 # But provide original ENV{HOME} value in ENV{CTEST_REAL_HOME} for tests that
 # need access to the real HOME directory.
-SET(ENV{CTEST_REAL_HOME} \"$ENV{HOME}\")
+SET(ENV{CTEST_REAL_HOME} \"\$ENV{HOME}\")
 SET(ENV{HOME} \"${TEST_HOME}\")
 ")
 ENDIF()
@@ -1865,7 +1865,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     INCLUDE(Contracts/${project}/RunTest.cmake)
     ADD_TEST_MACRO(Contracts.${project}
       ${${project}_RUN_TEST})
-    SET_TESTS_PROPERTIES(Contracts.${project} PROPERTIES TIMEOUT 5400)
+    # Contract test timeout in seconds.
+    # Default to 6 hours.
+    IF(DEFINED ${project}_TEST_TIMEOUT)
+      SET(timeout ${${project}_TEST_TIMEOUT})
+    ELSEIF(CMAKE_CONTRACT_TEST_TIMEOUT_DEFAULT)
+      SET(timeout ${CMAKE_CONTRACT_TEST_TIMEOUT_DEFAULT})
+    ELSE()
+      SET(timeout 21600)
+    ENDIF()
+    SET_TESTS_PROPERTIES(Contracts.${project} PROPERTIES TIMEOUT ${timeout})
   ENDFOREACH()
 ENDIF(BUILD_TESTING)
 
