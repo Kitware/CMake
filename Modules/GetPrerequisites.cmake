@@ -587,11 +587,19 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     #
     get_filename_component(gp_cmd_dir "${gp_cmd}" PATH)
     get_filename_component(gp_cmd_dlls_dir "${gp_cmd_dir}/../../Common7/IDE" ABSOLUTE)
+    file(TO_NATIVE_PATH "${gp_cmd_dlls_dir}" gp_cmd_dlls_dir)
     if(EXISTS "${gp_cmd_dlls_dir}")
       # only add to the path if it is not already in the path
-      if(NOT "$ENV{PATH}" MATCHES "${gp_cmd_dlls_dir}")
+      set(gp_found_cmd_dlls_dir 0)
+      foreach(gp_env_path_element $ENV{PATH})
+        if("${gp_env_path_element}" STREQUAL "${gp_cmd_dlls_dir}")
+          set(gp_found_cmd_dlls_dir 1)
+        endif()
+      endforeach(gp_env_path_element)
+
+      if(NOT gp_found_cmd_dlls_dir)
         set(ENV{PATH} "$ENV{PATH};${gp_cmd_dlls_dir}")
-      endif(NOT "$ENV{PATH}" MATCHES "${gp_cmd_dlls_dir}")
+      endif()
     endif(EXISTS "${gp_cmd_dlls_dir}")
   endif("${gp_tool}" STREQUAL "dumpbin")
   #
