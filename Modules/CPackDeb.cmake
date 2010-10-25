@@ -62,7 +62,43 @@
 #     Default   : -
 #     May be set when invoking cpack in order to trace debug informations
 #     during CPackDeb run.
-
+# CPACK_DEBIAN_PACKAGE_PREDEPENDS
+#     Mandatory : NO
+#     Default   : -
+#     see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#     This field is like Depends, except that it also forces dpkg to complete installation of
+#     the packages named before even starting the installation of the package which declares
+#     the pre-dependency.
+# CPACK_DEBIAN_PACKAGE_ENHANCES
+#     Mandatory : NO
+#     Default   : -
+#     see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#     This field is similar to Suggests but works in the opposite direction.
+#     It is used to declare that a package can enhance the functionality of another package.
+# CPACK_DEBIAN_PACKAGE_BREAKS
+#     Mandatory : NO
+#     Default   : -
+#     see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#     When one binary package declares that it breaks another, dpkg will refuse to allow the
+#     package which declares Breaks be installed unless the broken package is deconfigured first,
+#     and it will refuse to allow the broken package to be reconfigured.
+# CPACK_DEBIAN_PACKAGE_CONFLICTS
+#     Mandatory : NO
+#     Default   : -
+#     see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#     When one binary package declares a conflict with another using a Conflicts field,
+#     dpkg will refuse to allow them to be installed on the system at the same time.
+# CPACK_DEBIAN_PACKAGE_PROVIDES
+#     Mandatory : NO
+#     Default   : -
+#     see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#     A virtual package is one which appears in the Provides control field of another package.
+# CPACK_DEBIAN_PACKAGE_REPLACES
+#     Mandatory : NO
+#     Default   : -
+#     see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#     Packages can declare in their control file that they should overwrite
+#     files in certain other packages, or completely replace other packages.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
