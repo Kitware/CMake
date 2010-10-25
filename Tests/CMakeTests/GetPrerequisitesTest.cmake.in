@@ -77,6 +77,11 @@ message(STATUS "")
 list_prerequisites("${CMAKE_COMMAND}" 0 0 1)
 message(STATUS "")
 
+message(STATUS "=============================================================================")
+string(LENGTH "$ENV{PATH}" PATH_LENGTH_BEGIN)
+message(STATUS "Begin PATH length is: ${PATH_LENGTH_BEGIN}")
+message(STATUS "")
+
 
 # Leave the code for these tests in here, but turn them off by default... they
 # take longer than they're worth during development...
@@ -137,6 +142,15 @@ get_cmake_property(vs VARIABLES)
 foreach(v ${vs})
   message(STATUS "${v}='${${v}}'")
 endforeach(v)
+message(STATUS "")
+
+message(STATUS "=============================================================================")
+string(LENGTH "$ENV{PATH}" PATH_LENGTH_END)
+message(STATUS "Final PATH length is: ${PATH_LENGTH_END}")
+
+if(PATH_LENGTH_END GREATER ${PATH_LENGTH_BEGIN})
+    message(FATAL_ERROR "list_prerequisties is endlessly appending the path of gp_tool to the PATH.")
+endif()
 message(STATUS "")
 
 
