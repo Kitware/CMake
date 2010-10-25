@@ -1725,7 +1725,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ENDIF()
   ENDIF()
 
-  IF(NOT CMAKE_TEST_GENERATOR MATCHES "Xcode")
+  if(NOT DEFINED CTEST_RUN_Java)
+    if(APPLE)
+      set(CTEST_RUN_Java OFF)
+    else()
+      set(CTEST_RUN_Java ON)
+    endif()
+  endif()
+
+  IF(CTEST_RUN_Java)
     find_package(Java QUIET)
     IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
       GET_FILENAME_COMPONENT(JNIPATH ${JAVA_COMPILE} PATH)
@@ -1749,7 +1757,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         ENDIF("${JNI_FILE}" MATCHES "JDK1_2")
       ENDIF(JNI_H)
     ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
-  ENDIF(NOT CMAKE_TEST_GENERATOR MATCHES "Xcode")
+  ENDIF(CTEST_RUN_Java)
 
   # add some cross compiler tests, for now only with makefile based generators
   IF(CMAKE_TEST_GENERATOR MATCHES "Makefiles" OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
