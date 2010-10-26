@@ -1084,6 +1084,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleGeneratorTest")
   ENDIF(APPLE AND CTEST_TEST_CPACK)
 
+  ADD_TEST(WorkingDirectory ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/WorkingDirectory"
+    "${CMake_BINARY_DIR}/Tests/WorkingDirectory"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project WorkingDirectoryProj
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/WorkingDirectory"
+    --force-new-ctest-process
+    --test-command ${CMAKE_CTEST_COMMAND} -V
+    )
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WorkingDirectory")
+
   # Make sure CTest can handle a test with no newline in output.
   ADD_TEST(CTest.NoNewline
     ${CMAKE_CMAKE_COMMAND} -E echo_append "This line has no newline!")
