@@ -600,6 +600,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
       endforeach(gp_env_path_element)
 
       if(NOT gp_found_cmd_dlls_dir)
+        file(TO_NATIVE_PATH "${gp_cmd_dlls_dir}" gp_cmd_dlls_dir)
         set(ENV{PATH} "$ENV{PATH};${gp_cmd_dlls_dir}")
       endif()
     endif(EXISTS "${gp_cmd_dlls_dir}")
