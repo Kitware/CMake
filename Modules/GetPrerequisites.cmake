@@ -589,7 +589,6 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     get_filename_component(gp_cmd_dlls_dir "${gp_cmd_dir}/../../Common7/IDE" ABSOLUTE)
     # Use cmake paths as a user may have a PATH element ending with a backslash.
     # This will escape the list delimiter and create havoc!
-    file(TO_CMAKE_PATH "${gp_cmd_dlls_dir}" gp_cmd_dlls_dir)
     if(EXISTS "${gp_cmd_dlls_dir}")
       # only add to the path if it is not already in the path
       set(gp_found_cmd_dlls_dir 0)
