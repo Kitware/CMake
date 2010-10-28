@@ -146,7 +146,7 @@ function(is_file_executable file result_var)
 
   # If file name ends in .exe on Windows, *assume* executable:
   #
-  if(WIN32)
+  if(WIN32 AND NOT UNIX)
     if("${file_full_lower}" MATCHES "\\.exe$")
       set(${result_var} 1 PARENT_SCOPE)
       return()
@@ -156,7 +156,7 @@ function(is_file_executable file result_var)
     # to determine ${result_var}. In 99%+? practical cases, the exe name
     # match will be sufficient...
     #
-  endif(WIN32)
+  endif(WIN32 AND NOT UNIX)
 
   # Use the information returned from the Unix shell command "file" to
   # determine if ${file_full} should be considered an executable file...
@@ -335,7 +335,7 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
   # Using find_program on Windows will find dll files that are in the PATH.
   # (Converting simple file names into full path names if found.)
   #
-  if(WIN32)
+  if(WIN32 AND NOT UNIX)
   if(NOT resolved)
     set(ri "ri-NOTFOUND")
     find_program(ri "${item}" PATHS "${exepath};${dirs}" NO_DEFAULT_PATH)
@@ -347,7 +347,7 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
       set(ri "ri-NOTFOUND")
     endif(ri)
   endif(NOT resolved)
-  endif(WIN32)
+  endif(WIN32 AND NOT UNIX)
 
   # Provide a hook so that projects can override item resolution
   # by whatever logic they choose:
@@ -413,7 +413,7 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
     string(TOLOWER "${resolved_file}" lower)
 
     if(UNIX)
-      if(resolved_file MATCHES "^(/lib/|/lib32/|/lib64/|/usr/lib/|/usr/lib32/|/usr/lib64/|/usr/X11R6/)")
+      if(resolved_file MATCHES "^(/lib/|/lib32/|/lib64/|/usr/lib/|/usr/lib32/|/usr/lib64/|/usr/X11R6/|/usr/bin/)")
         set(is_system 1)
       endif()
     endif()
@@ -434,7 +434,27 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
       if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
         set(is_system 1)
       endif()
-    endif()
+
+      if(UNIX)
+        # if cygwin, we can get the properly formed windows paths from cygpath
+        find_program(CYGPATH_EXECUTABLE cygpath)
+
+        if(CYGPATH_EXECUTABLE)
+          execute_process(COMMAND ${CYGPATH_EXECUTABLE} -W
+                          OUTPUT_VARIABLE env_windir
+                          OUTPUT_STRIP_TRAILING_WHITESPACE)
+          execute_process(COMMAND ${CYGPATH_EXECUTABLE} -S
+                          OUTPUT_VARIABLE env_sysdir
+                          OUTPUT_STRIP_TRAILING_WHITESPACE)
+          string(TOLOWER "${env_windir}" windir)
+          string(TOLOWER "${env_sysdir}" sysroot)
+
+          if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
+            set(is_system 1)
+          endif()
+        endif(CYGPATH_EXECUTABLE)
+      endif(UNIX)
+    endif(WIN32)
 
     if(NOT is_system)
       get_filename_component(original_path "${original_lower}" PATH)
@@ -519,9 +539,9 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     if(APPLE)
       set(gp_tool "otool")
     endif(APPLE)
-    if(WIN32)
+    if(WIN32 AND NOT UNIX) # This is how to check for cygwin, har!
       set(gp_tool "dumpbin")
-    endif(WIN32)
+    endif(WIN32 AND NOT UNIX)
   endif("${gp_tool}" STREQUAL "")
 
   set(gp_tool_known 0)
@@ -587,11 +607,22 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     #
     get_filename_component(gp_cmd_dir "${gp_cmd}" PATH)
     get_filename_component(gp_cmd_dlls_dir "${gp_cmd_dir}/../../Common7/IDE" ABSOLUTE)
+    # Use cmake paths as a user may have a PATH element ending with a backslash.
+    # This will escape the list delimiter and create havoc!
     if(EXISTS "${gp_cmd_dlls_dir}")
       # only add to the path if it is not already in the path
-      if(NOT "$ENV{PATH}" MATCHES "${gp_cmd_dlls_dir}")
+      set(gp_found_cmd_dlls_dir 0)
+      file(TO_CMAKE_PATH "$ENV{PATH}" env_path)
+      foreach(gp_env_path_element ${env_path})
+        if("${gp_env_path_element}" STREQUAL "${gp_cmd_dlls_dir}")
+          set(gp_found_cmd_dlls_dir 1)
+        endif()
+      endforeach(gp_env_path_element)
+
+      if(NOT gp_found_cmd_dlls_dir)
+        file(TO_NATIVE_PATH "${gp_cmd_dlls_dir}" gp_cmd_dlls_dir)
         set(ENV{PATH} "$ENV{PATH};${gp_cmd_dlls_dir}")
-      endif(NOT "$ENV{PATH}" MATCHES "${gp_cmd_dlls_dir}")
+      endif()
     endif(EXISTS "${gp_cmd_dlls_dir}")
   endif("${gp_tool}" STREQUAL "dumpbin")
   #
