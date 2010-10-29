@@ -1,3 +1,26 @@
+Changes in CMake 2.8.3-rc4 (since 2.8.3-rc3)
+--------------------------------------------
+Bill Hoffman (1):
+      When processing DartMeasurements use the tests working directory.
+
+David Cole (2):
+      ExternalProject: No svn --username if empty (#11173)
+      Avoid problem reading jni.h on Macs.
+
+David Partyka (5):
+      Fixed appending PATH to dumpbin tool from growing without bounds.
+      Switch to CMAKE_PATH when doing PATH comparisons on Windows.
+      Remove unecessary TO_CMAKE_PATH for gp_cmd_dir.
+      Append the gp_tool path to the system PATH using native slashes.
+      Fixes to GetPrerequisites for cygwin
+
+Eric NOULARD (1):
+      CPackDeb Added several optional debian binary package fields
+
+Marcus D. Hanwell (2):
+      ENH: Added case for Python 2.7.
+      Fixed parallel build for generators with EXTRA.
+
 Changes in CMake 2.8.3-rc3 (since 2.8.3-rc2)
 --------------------------------------------
 Alex Neundorf (4):
