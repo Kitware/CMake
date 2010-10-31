@@ -2835,6 +2835,11 @@ const char* cmake::GetCPackCommand()
     return this->CPackCommand.c_str();
 }
 
+// for target deps
+#define DOT_DEP_TARGET 1
+#define DOT_DEP_EXTERNAL 2
+#define DOT_DEP_NONE 0
+
 void cmake::GenerateGraphViz(const char* fileName) const
 {
   cmGeneratedFileStream str(fileName);
@@ -2904,90 +2909,17 @@ void cmake::GenerateGraphViz(const char* fileName) const
   const cmGlobalGenerator* gg = this->GetGlobalGenerator();
   const std::vector<cmLocalGenerator*>& localGenerators =
       gg->GetLocalGenerators();
-  std::vector<cmLocalGenerator*>::const_iterator lit;
-  // for target deps
-  // 1 - cmake target
-  // 2 - external target
-  // 0 - no deps
+
   std::map<cmStdString, int> targetDeps;
   std::map<cmStdString, const cmTarget*> targetPtrs;
-  std::map<cmStdString, cmStdString> targetNamesNodes;
+  std::map<cmStdString, cmStdString> targetNamesNodes; // maps from the actual strings to node names in dot
   int cnt = 0;
-  // First pass get the list of all cmake targets
-  for ( lit = localGenerators.begin(); lit != localGenerators.end(); ++ lit )
-    {
-    const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
-    for ( cmTargets::const_iterator tit = targets->begin();
-          tit != targets->end();
-          ++ tit )
-      {
-      const char* realTargetName = tit->first.c_str();
-      if ( ignoreTargetsSet.find(realTargetName) != ignoreTargetsSet.end() )
-        {
-        // Skip ignored targets
-        continue;
-        }
-      //std::cout << "Found target: " << tit->first.c_str() << std::endl;
-      cmOStringStream ostr;
-      ostr << graphNodePrefix << cnt++;
-      targetNamesNodes[realTargetName] = ostr.str();
-      targetPtrs[realTargetName] = &tit->second;
-      }
-    }
+  cnt += getAllTargets(ignoreTargetsSet, targetNamesNodes, targetPtrs,
+                       graphNodePrefix);
 
-  // Ok, now find all the stuff we link to that is not in cmake
-  for ( lit = localGenerators.begin(); lit != localGenerators.end(); ++ lit )
-    {
-    const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
-    for ( cmTargets::const_iterator tit = targets->begin();
-          tit != targets->end();
-          ++ tit )
-      {
-      const cmTarget::LinkLibraryVectorType* ll =
-                                     &(tit->second.GetOriginalLinkLibraries());
-      const char* realTargetName = tit->first.c_str();
-      if ( ignoreTargetsSet.find(realTargetName) != ignoreTargetsSet.end() )
-        {
-        // Skip ignored targets
-        continue;
-        }
-      if ( ll->size() > 0 )
-        {
-        targetDeps[realTargetName] = 1;
-        }
-      for (cmTarget::LinkLibraryVectorType::const_iterator llit = ll->begin();
-           llit != ll->end();
-           ++ llit )
-        {
-        const char* libName = llit->first.c_str();
-        std::map<cmStdString, cmStdString>::const_iterator tarIt =
-                                                targetNamesNodes.find(libName);
-        if ( ignoreTargetsSet.find(libName) != ignoreTargetsSet.end() )
-          {
-          // Skip ignored targets
-          continue;
-          }
-        if ( tarIt == targetNamesNodes.end() )
-          {
-          cmOStringStream ostr;
-          ostr << graphNodePrefix << cnt++;
-          targetDeps[libName] = 2;
-          targetNamesNodes[libName] = ostr.str();
-          //str << "    \"" << ostr.c_str() << "\" [ label=\"" << libName
-          //<<  "\" shape=\"ellipse\"];" << std::endl;
-          }
-        else
-          {
-          std::map<cmStdString, int>::const_iterator depIt
-            = targetDeps.find(libName);
-          if ( depIt == targetDeps.end() )
-            {
-            targetDeps[libName] = 1;
-            }
-          }
-        }
-      }
-    }
+  cnt += getAllExternalLibs(ignoreTargetsSet, targetNamesNodes, targetPtrs,
+                            targetDeps, graphNodePrefix);
+
 
   // Write out nodes
   for(std::map<cmStdString, int>::const_iterator depIt = targetDeps.begin();
@@ -3008,7 +2940,7 @@ void cmake::GenerateGraphViz(const char* fileName) const
 
     str << "    \"" << tarIt->second.c_str() << "\" [ label=\""
         << newTargetName <<  "\" shape=\"";
-    if ( depIt->second == 1 )
+    if ( depIt->second == DOT_DEP_TARGET )
       {
       std::map<cmStdString, const cmTarget*>::const_iterator tarTypeIt =
                                                 targetPtrs.find(newTargetName);
@@ -3047,7 +2979,10 @@ void cmake::GenerateGraphViz(const char* fileName) const
     }
 
   // Now generate the connectivity
-  for ( lit = localGenerators.begin(); lit != localGenerators.end(); ++ lit )
+  for ( std::vector<cmLocalGenerator*>::const_iterator lit =
+                                                       localGenerators.begin();
+        lit != localGenerators.end();
+        ++ lit )
     {
     const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
     for (cmTargets::const_iterator tit = targets->begin();
@@ -3090,6 +3025,115 @@ void cmake::GenerateGraphViz(const char* fileName) const
   //<< std::endl;
   //
   str << "}" << std::endl;
+}
+
+
+int cmake::getAllTargets(const std::set<cmStdString>& ignoreTargetsSet,
+                      std::map<cmStdString, cmStdString>& targetNamesNodes,
+                      std::map<cmStdString, const cmTarget*>& targetPtrs,
+                      const char* graphNodePrefix) const
+{
+  int cnt = 0;
+  const std::vector<cmLocalGenerator*>& localGenerators =
+                              this->GetGlobalGenerator()->GetLocalGenerators();
+  // First pass get the list of all cmake targets
+  for (std::vector<cmLocalGenerator*>::const_iterator lit =
+                                                       localGenerators.begin();
+       lit != localGenerators.end();
+       ++ lit )
+    {
+    const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
+    for ( cmTargets::const_iterator tit = targets->begin();
+          tit != targets->end();
+          ++ tit )
+      {
+      const char* realTargetName = tit->first.c_str();
+      if ( ignoreTargetsSet.find(realTargetName) != ignoreTargetsSet.end() )
+        {
+        // Skip ignored targets
+        continue;
+        }
+      //std::cout << "Found target: " << tit->first.c_str() << std::endl;
+      cmOStringStream ostr;
+      ostr << graphNodePrefix << cnt++;
+      targetNamesNodes[realTargetName] = ostr.str();
+      targetPtrs[realTargetName] = &tit->second;
+      }
+    }
+
+  return cnt;
+}
+
+
+int cmake::getAllExternalLibs(const std::set<cmStdString>& ignoreTargetsSet,
+                          std::map<cmStdString, cmStdString>& targetNamesNodes,
+                          std::map<cmStdString, const cmTarget*>& targetPtrs,
+                          std::map<cmStdString, int>& targetDeps,
+                          const char* graphNodePrefix) const
+{
+  int cnt = 0;
+
+  const std::vector<cmLocalGenerator*>& localGenerators =
+                              this->GetGlobalGenerator()->GetLocalGenerators();
+  // Ok, now find all the stuff we link to that is not in cmake
+  for (std::vector<cmLocalGenerator*>::const_iterator lit =
+                                                       localGenerators.begin();
+       lit != localGenerators.end();
+       ++ lit )
+    {
+    const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
+    for ( cmTargets::const_iterator tit = targets->begin();
+          tit != targets->end();
+          ++ tit )
+      {
+      const char* realTargetName = tit->first.c_str();
+      if ( ignoreTargetsSet.find(realTargetName) != ignoreTargetsSet.end() )
+        {
+        // Skip ignored targets
+        continue;
+        }
+      const cmTarget::LinkLibraryVectorType* ll =
+                                     &(tit->second.GetOriginalLinkLibraries());
+      if ( ll->size() > 0 )
+        {
+        targetDeps[realTargetName] = DOT_DEP_TARGET;
+        fprintf(stderr, " + %s\n", realTargetName);
+        }
+      for (cmTarget::LinkLibraryVectorType::const_iterator llit = ll->begin();
+           llit != ll->end();
+           ++ llit )
+        {
+        const char* libName = llit->first.c_str();
+        if ( ignoreTargetsSet.find(libName) != ignoreTargetsSet.end() )
+          {
+          // Skip ignored targets
+          continue;
+          }
+
+        std::map<cmStdString, cmStdString>::const_iterator tarIt =
+                                                targetNamesNodes.find(libName);
+        if ( tarIt == targetNamesNodes.end() )
+          {
+          cmOStringStream ostr;
+          ostr << graphNodePrefix << cnt++;
+          targetDeps[libName] = DOT_DEP_EXTERNAL;
+          targetNamesNodes[libName] = ostr.str();
+          //str << "    \"" << ostr.c_str() << "\" [ label=\"" << libName
+          //<<  "\" shape=\"ellipse\"];" << std::endl;
+          }
+        else
+          {
+          std::map<cmStdString, int>::const_iterator depIt =
+                                                      targetDeps.find(libName);
+          if ( depIt == targetDeps.end() )
+            {
+            targetDeps[libName] = DOT_DEP_TARGET;
+            }
+          }
+        }
+      }
+    }
+   return cnt;
 }
 
 //----------------------------------------------------------------------------
