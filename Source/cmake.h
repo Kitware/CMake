@@ -440,7 +440,6 @@ protected:
   int getAllExternalLibs(const std::set<cmStdString>& ignoreTargetsSet,
                           std::map<cmStdString, cmStdString>& targetNamesNodes,
                           std::map<cmStdString, const cmTarget*>& targetPtrs,
-                          std::map<cmStdString, int>& targetDeps,
                           const char* graphNodePrefix) const;
 
   ///! Find the full path to one of the cmake programs like ctest, cpack, etc.
