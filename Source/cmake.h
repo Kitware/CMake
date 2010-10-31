@@ -51,6 +51,7 @@ class cmDocumentationSection;
 class cmPolicies;
 class cmListFileBacktrace;
 class cmTarget;
+class cmGeneratedFileStream;
 
 class cmake
 {
@@ -440,7 +441,14 @@ protected:
   int getAllExternalLibs(const std::set<cmStdString>& ignoreTargetsSet,
                           std::map<cmStdString, cmStdString>& targetNamesNodes,
                           std::map<cmStdString, const cmTarget*>& targetPtrs,
-                          const char* graphNodePrefix) const;
+                          const char* graphNodePrefix, int cnt) const;
+
+  void writeDotConnections(const char* targetName,
+                const std::map<cmStdString, cmStdString>& targetNamesNodes,
+                const std::map<cmStdString, const cmTarget*>& targetPtrs,
+                std::set<std::string>& insertedNodes,
+                std::set<std::string>& insertedConnections,
+                cmGeneratedFileStream& str) const;
 
   ///! Find the full path to one of the cmake programs like ctest, cpack, etc.
   std::string FindCMakeProgram(const char* name) const;

@@ -2861,13 +2861,26 @@ static const char* getShapeForTarget(const cmTarget* target)
 }
 
 
+static void writeNode(const char* targetName, const cmTarget* target,
+                      const std::map<cmStdString, cmStdString>& targetNamesNodes,
+                      std::set<std::string>& insertedNodes,
+                      cmGeneratedFileStream& str)
+{
+  if (insertedNodes.find(targetName) == insertedNodes.end())
+  {
+    insertedNodes.insert(targetName);
+    std::map<cmStdString, cmStdString>::const_iterator nameIt =
+                                          targetNamesNodes.find(targetName);
+
+    str << "    \"" << nameIt->second.c_str() << "\" [ label=\""
+        << targetName <<  "\" shape=\"" << getShapeForTarget(target)
+        << "\"];" << std::endl;
+  }
+}
+
+
 void cmake::GenerateGraphViz(const char* fileName) const
 {
-  cmGeneratedFileStream str(fileName);
-  if ( !str )
-    {
-    return;
-    }
   cmake cm;
   cmGlobalGenerator ggi;
   ggi.SetCMakeInstance(&cm);
@@ -2924,83 +2937,144 @@ void cmake::GenerateGraphViz(const char* fileName) const
       }
     }
 
+  std::map<cmStdString, const cmTarget*> targetPtrs;
+  std::map<cmStdString, cmStdString> targetNamesNodes; // maps from the actual strings to node names in dot
+  int cnt = getAllTargets(ignoreTargetsSet, targetNamesNodes, targetPtrs,
+                       graphNodePrefix);
+
+  cnt = getAllExternalLibs(ignoreTargetsSet, targetNamesNodes, targetPtrs,
+                            graphNodePrefix, cnt);
+
+  for(std::map<cmStdString, const cmTarget*>::const_iterator ptrIt =
+                                                            targetPtrs.begin();
+      ptrIt != targetPtrs.end();
+      ++ptrIt)
+    {
+    if (ptrIt->second == NULL)
+      {
+      continue;
+      }
+
+    if ((ptrIt->second->GetType() != cmTarget::EXECUTABLE)
+      && (ptrIt->second->GetType() != cmTarget::STATIC_LIBRARY)
+      && (ptrIt->second->GetType() != cmTarget::SHARED_LIBRARY)
+      && (ptrIt->second->GetType() != cmTarget::MODULE_LIBRARY))
+      {
+      continue;
+      }
+
+    std::set<std::string> insertedConnections;
+    std::set<std::string> insertedNodes;
+
+    std::string currentFilename = fileName;
+    currentFilename += ".";
+    currentFilename += ptrIt->first;
+    cmGeneratedFileStream str(currentFilename.c_str());
+    if ( !str )
+      {
+      return;
+      }
+
+    fprintf(stderr, "Writing %s...\n", currentFilename.c_str());
+    str << graphType << " " << graphName << " {" << std::endl;
+    str << graphHeader << std::endl;
+
+    writeDotConnections(ptrIt->first.c_str(), targetNamesNodes, targetPtrs,
+                        insertedNodes, insertedConnections, str);
+    str << "}" << std::endl;
+    }
+
+  cmGeneratedFileStream str(fileName);
+  if ( !str )
+    {
+    return;
+    }
   str << graphType << " " << graphName << " {" << std::endl;
   str << graphHeader << std::endl;
 
-  const cmGlobalGenerator* gg = this->GetGlobalGenerator();
-  const std::vector<cmLocalGenerator*>& localGenerators =
-      gg->GetLocalGenerators();
+  fprintf(stderr, "Writing %s...\n", fileName);
+  std::set<std::string> insertedConnections;
+  std::set<std::string> insertedNodes;
 
-  std::map<cmStdString, const cmTarget*> targetPtrs;
-  std::map<cmStdString, cmStdString> targetNamesNodes; // maps from the actual strings to node names in dot
-  int cnt = 0;
-  cnt += getAllTargets(ignoreTargetsSet, targetNamesNodes, targetPtrs,
-                       graphNodePrefix);
-
-  cnt += getAllExternalLibs(ignoreTargetsSet, targetNamesNodes, targetPtrs,
-                            graphNodePrefix);
-
-
-  // Write out nodes
-  for(std::map<cmStdString, const cmTarget*>::const_iterator tarIt =
-         targetPtrs.begin(); tarIt != targetPtrs.end(); ++ tarIt )
+  for(std::map<cmStdString, const cmTarget*>::const_iterator ptrIt =
+                                                            targetPtrs.begin();
+      ptrIt != targetPtrs.end();
+      ++ptrIt)
     {
-    const char* newTargetName = tarIt->first.c_str();
-    std::map<cmStdString, cmStdString>::const_iterator nameIt =
-                                          targetNamesNodes.find(newTargetName);
+    if (ptrIt->second == NULL)
+      {
+      continue;
+      }
 
-    str << "    \"" << nameIt->second.c_str() << "\" [ label=\""
-        << newTargetName <<  "\" shape=\"" << getShapeForTarget(tarIt->second)
-        << "\"];" << std::endl;
+    if ((ptrIt->second->GetType() != cmTarget::EXECUTABLE)
+      && (ptrIt->second->GetType() != cmTarget::STATIC_LIBRARY)
+      && (ptrIt->second->GetType() != cmTarget::SHARED_LIBRARY)
+      && (ptrIt->second->GetType() != cmTarget::MODULE_LIBRARY))
+      {
+      continue;
+      }
+
+    writeDotConnections(ptrIt->first.c_str(), targetNamesNodes, targetPtrs,
+                        insertedNodes, insertedConnections, str);
+    }
+  str << "}" << std::endl;
+}
+
+
+void cmake::writeDotConnections(const char* targetName,
+                const std::map<cmStdString, cmStdString>& targetNamesNodes,
+                const std::map<cmStdString, const cmTarget*>& targetPtrs,
+                std::set<std::string>& insertedNodes,
+                std::set<std::string>& insertedConnections,
+                cmGeneratedFileStream& str) const
+{
+  std::map<cmStdString, const cmTarget* >::const_iterator targetPtrIt =
+                                                   targetPtrs.find(targetName);
+
+  if (targetPtrIt == targetPtrs.end())  // not found at all
+    {
+    return;
     }
 
-  // Now generate the connectivity
-  for ( std::vector<cmLocalGenerator*>::const_iterator lit =
-                                                       localGenerators.begin();
-        lit != localGenerators.end();
-        ++ lit )
-    {
-    const cmTargets* targets = &((*lit)->GetMakefile()->GetTargets());
-    for (cmTargets::const_iterator tit = targets->begin();
-         tit != targets->end();
-         ++ tit )
-      {
-      std::map<cmStdString, const cmTarget* >::iterator cmakeTarIt
-                                         = targetPtrs.find(tit->first.c_str());
-      if ( cmakeTarIt == targetPtrs.end() ) // skip ignored targets
-        {
-        continue;
-        }
-      std::map<cmStdString, cmStdString>::iterator targetNameIt =
-                                     targetNamesNodes.find(tit->first.c_str());
-      const cmTarget::LinkLibraryVectorType* ll =
-                                     &(tit->second.GetOriginalLinkLibraries());
+  writeNode(targetName, targetPtrIt->second, targetNamesNodes, insertedNodes,
+            str);
 
-      for (cmTarget::LinkLibraryVectorType::const_iterator llit = ll->begin();
-           llit != ll->end();
-           ++ llit )
-        {
-        const char* libName = llit->first.c_str();
-        std::map<cmStdString, cmStdString>::const_iterator libNameIt =
+  if (targetPtrIt->second == NULL) // it's an external library
+    {
+    return;
+    }
+
+
+  std::string myNodeName = targetNamesNodes.find(targetName)->second;
+
+  const cmTarget::LinkLibraryVectorType* ll =
+                            &(targetPtrIt->second->GetOriginalLinkLibraries());
+
+  for (cmTarget::LinkLibraryVectorType::const_iterator llit = ll->begin();
+       llit != ll->end();
+       ++ llit )
+    {
+    const char* libName = llit->first.c_str();
+    std::map<cmStdString, cmStdString>::const_iterator libNameIt =
                                                 targetNamesNodes.find(libName);
-        if ( libNameIt == targetNamesNodes.end() )
-          {
-          // We should not be here.
-          std::cout << __LINE__ << " Cannot find library: " << libName
-            << " even though it was added in the previous pass" << std::endl;
-          abort();
-          }
-        str << "    \"" << targetNameIt->second.c_str() << "\" -> \""
-            << libNameIt->second.c_str() << "\"" << std::endl;
-        }
+
+    std::string connectionName = myNodeName;
+    connectionName += "-";
+    connectionName += libNameIt->second;
+    if (insertedConnections.find(connectionName) == insertedConnections.end())
+      {
+      insertedConnections.insert(connectionName);
+      writeNode(libName, targetPtrs.find(libName)->second, targetNamesNodes,
+                insertedNodes, str);
+
+      str << "    \"" << myNodeName.c_str() << "\" -> \""
+          << libNameIt->second.c_str() << "\"";
+      str << " // " << targetName << " -> " << libName << std::endl;
+      writeDotConnections(libName, targetNamesNodes, targetPtrs, insertedNodes,
+                          insertedConnections, str);
       }
     }
 
-  // TODO: Use dotted or something for external libraries
-  //str << "    \"node0\":f4 -> \"node12\"[color=\"#0000ff\" style=dotted]"
-  //<< std::endl;
-  //
-  str << "}" << std::endl;
 }
 
 
@@ -3044,10 +3118,8 @@ int cmake::getAllTargets(const std::set<cmStdString>& ignoreTargetsSet,
 int cmake::getAllExternalLibs(const std::set<cmStdString>& ignoreTargetsSet,
                           std::map<cmStdString, cmStdString>& targetNamesNodes,
                           std::map<cmStdString, const cmTarget*>& targetPtrs,
-                          const char* graphNodePrefix) const
+                          const char* graphNodePrefix, int cnt) const
 {
-  int cnt = 0;
-
   const std::vector<cmLocalGenerator*>& localGenerators =
                               this->GetGlobalGenerator()->GetLocalGenerators();
   // Ok, now find all the stuff we link to that is not in cmake
