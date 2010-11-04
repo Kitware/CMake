@@ -152,34 +152,6 @@ if(BUILD_TESTING)
         ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet --path .
         ${HTML_FILES}
         )
-    else()
-      # Intentionally committing this chunk of code for one night's run on the
-      # Nightly dashboard suite. This will help us identify all machines with
-      # older versions of xmllint installed. (This should match the set of
-      # machines where this test is failing at the moment anyhow...)
-      #
-      # After we identify all of them, we can decide whether to simply make
-      # this else block empty, skipping the test, or whether there should be
-      # some alternative equivalent test on such machines...
-      #
-      set(script "${CMAKE_CURRENT_BINARY_DIR}/CMake.HTML.cmake")
-
-      set(text "Intentionally fail when xmllint has no --nonet arg.")
-      set(text "${text} The CMake test suite should avoid network activity")
-      set(text "${text} when possible.")
-
-      if(NOT EXISTS "${script}.in")
-        file(WRITE "${script}.in" "execute_process(COMMAND
-  \"${LIBXML2_XMLLINT_EXECUTABLE}\" OUTPUT_VARIABLE noargs)
-message(\"\${noargs}\")
-execute_process(COMMAND
-  \"${LIBXML2_XMLLINT_EXECUTABLE}\" --version OUTPUT_VARIABLE version)
-message(\"\${version}\")
-message(FATAL_ERROR \"${text}\")
-")
-      endif()
-      configure_file("${script}.in" "${script}" @ONLY)
-      add_test(CMake.HTML ${CMAKE_CMAKE_COMMAND} -P ${script})
     endif()
   endif()
 endif()
