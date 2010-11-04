@@ -7,7 +7,7 @@
 # modify the build.
 
 #=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
+# Copyright 2006-2010 Kitware, Inc.
 # Copyright 2006 Alexander Neundorf <neundorf@kde.org>
 #
 # Distributed under the OSI-approved BSD License (the "License");
@@ -29,6 +29,7 @@ MACRO (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
      # Some compilers do not fail with a bad flag
      FAIL_REGEX "unrecognized .*option"                     # GNU
      FAIL_REGEX "ignoring unknown option"                   # MSVC
+     FAIL_REGEX "warning D9002"                             # MSVC, any lang
      FAIL_REGEX "[Uu]nknown option"                         # HP
      FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
      FAIL_REGEX "command option .* is not recognized"       # XL
