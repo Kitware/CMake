@@ -1534,6 +1534,13 @@ void cmMakefileTargetGenerator
     {
     depends.push_back(*obj);
     }
+
+  // Add user-specified dependencies.
+  if(const char* linkDepends =
+     this->Target->GetProperty("LINK_DEPENDS"))
+    {
+    cmSystemTools::ExpandListArgument(linkDepends, depends);
+    }
 }
 
 //----------------------------------------------------------------------------
