@@ -1507,6 +1507,37 @@ void cmMakefileTargetGenerator
 
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
+::AppendLinkDepends(std::vector<std::string>& depends)
+{
+  // Add dependencies on the compiled object files.
+  std::string relPath = this->LocalGenerator->GetHomeRelativeOutputPath();
+  std::string objTarget;
+  for(std::vector<std::string>::const_iterator obj = this->Objects.begin();
+      obj != this->Objects.end(); ++obj)
+    {
+    objTarget = relPath;
+    objTarget += *obj;
+    depends.push_back(objTarget);
+    }
+
+  // Add dependencies on targets that must be built first.
+  this->AppendTargetDepends(depends);
+
+  // Add a dependency on the rule file itself.
+  this->LocalGenerator->AppendRuleDepend(depends,
+                                         this->BuildFileNameFull.c_str());
+
+  // Add dependencies on the external object files.
+  for(std::vector<std::string>::const_iterator obj
+        = this->ExternalObjects.begin();
+      obj != this->ExternalObjects.end(); ++obj)
+    {
+    depends.push_back(*obj);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefileTargetGenerator
 ::CloseFileStreams()
 {
   delete this->BuildFileStream;
