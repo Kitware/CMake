@@ -30,6 +30,7 @@ function(ProcessorCount var)
   if(WIN32)
     # Windows:
     set(count "$ENV{NUMBER_OF_PROCESSORS}")
+    message("ProcessorCount: using environment variable")
   elseif(APPLE)
     # Mac:
     find_program(ProcessorCount_cmd_sysctl sysctl
@@ -38,21 +39,29 @@ function(ProcessorCount var)
       execute_process(COMMAND ${ProcessorCount_cmd_sysctl} -n hw.ncpu
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE count)
+      message("ProcessorCount: using sysctl '${ProcessorCount_cmd_sysctl}'")
     endif()
   else()
+    # Linux (and other systems with getconf):
     find_program(ProcessorCount_cmd_getconf getconf)
     if(ProcessorCount_cmd_getconf)
-      # Linux and other systems with getconf:
       execute_process(COMMAND ${ProcessorCount_cmd_getconf} _NPROCESSORS_ONLN
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE count)
-    else()
-      # Linux and other systems with /proc/cpuinfo:
-      set(cpuinfo_file /proc/cpuinfo)
-      if(EXISTS "${cpuinfo_file}")
-        file(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
-        list(LENGTH procs count)
-      endif()
+      message("ProcessorCount: using getconf '${ProcessorCount_cmd_getconf}'")
+    endif()
+  endif()
+
+  # Execute this code when there is no 'sysctl' or 'getconf' or
+  # when previously executed methods return empty output:
+  #
+  if(NOT count)
+    # Systems with /proc/cpuinfo:
+    set(cpuinfo_file /proc/cpuinfo)
+    if(EXISTS "${cpuinfo_file}")
+      file(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
+      list(LENGTH procs count)
+      message("ProcessorCount: using cpuinfo '${cpuinfo_file}'")
     endif()
   endif()
 
