@@ -82,34 +82,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 {
   std::vector<std::string> commands;
 
-  std::string relPath = this->LocalGenerator->GetHomeRelativeOutputPath();
-  std::string objTarget;
-
   // Build list of dependencies.
   std::vector<std::string> depends;
-  for(std::vector<std::string>::const_iterator obj = this->Objects.begin();
-      obj != this->Objects.end(); ++obj)
-    {
-    objTarget = relPath;
-    objTarget += *obj;
-    depends.push_back(objTarget);
-    }
-
-  // Add dependencies on targets that must be built first.
-  this->AppendTargetDepends(depends);
-
-  // Add a dependency on the rule file itself.
-  this->LocalGenerator->AppendRuleDepend(depends,
-                                         this->BuildFileNameFull.c_str());
-
-  for(std::vector<std::string>::const_iterator obj =
-        this->ExternalObjects.begin();
-      obj != this->ExternalObjects.end(); ++obj)
-    {
-    depends.push_back(*obj);
-    }
-
-  // from here up is the same for exe or lib
+  this->AppendLinkDepends(depends);
 
   // Get the name of the executable to generate.
   std::string targetName;

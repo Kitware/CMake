@@ -532,6 +532,18 @@ void cmTarget::DefineProperties(cmake *cm)
      "configurations explicitly.");
 
   cm->DefineProperty
+    ("LINK_DEPENDS", cmProperty::TARGET,
+     "Additional files on which a target binary depends for linking.",
+     "Specifies a semicolon-separated list of full-paths to files on which "
+     "the link rule for this target depends.  "
+     "The target binary will be linked if any of the named files is newer "
+     "than it."
+     "\n"
+     "This property is ignored by non-Makefile generators.  "
+     "It is intended to specify dependencies on \"linker scripts\" for "
+     "custom Makefile link rules.");
+
+  cm->DefineProperty
     ("LINK_INTERFACE_LIBRARIES", cmProperty::TARGET,
      "List public interface libraries for a shared library or executable.",
      "By default linking to a shared library target transitively "
