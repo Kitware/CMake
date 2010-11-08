@@ -147,6 +147,32 @@ if (PERL_EXECUTABLE)
     string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_VENDORLIB ${PERL_VENDORLIB_OUTPUT_VARIABLE})
   endif (NOT PERL_VENDORLIB_RESULT_VARIABLE)
 
+  macro(perl_adjust_darwin_lib_variable varname)
+    string( TOUPPER PERL_${varname} FINDPERL_VARNAME )
+    string( TOLOWER install${varname} PERL_VARNAME )
+
+    if (NOT PERL_MINUSV_OUTPUT_VARIABLE)
+      execute_process(
+        COMMAND
+        ${PERL_EXECUTABLE} -V
+        OUTPUT_VARIABLE
+        PERL_MINUSV_OUTPUT_VARIABLE
+        RESULT_VARIABLE
+        PERL_MINUSV_RESULT_VARIABLE
+        )
+    endif()
+
+    if (NOT PERL_MINUSV_RESULT_VARIABLE)
+      string(REGEX MATCH "(${PERL_VARNAME}.*points? to the Updates directory)"
+        PERL_NEEDS_ADJUSTMENT ${PERL_MINUSV_OUTPUT_VARIABLE})
+
+      if (PERL_NEEDS_ADJUSTMENT)
+        string(REGEX REPLACE "(.*)/Updates/" "/System/\\1/" ${FINDPERL_VARNAME} ${${FINDPERL_VARNAME}})
+      endif (PERL_NEEDS_ADJUSTMENT)
+
+    endif (NOT PERL_MINUSV_RESULT_VARIABLE)
+  endmacro()
+
   ### PERL_ARCHLIB
   execute_process(
     COMMAND
@@ -158,6 +184,7 @@ if (PERL_EXECUTABLE)
   )
   if (NOT PERL_ARCHLIB_RESULT_VARIABLE)
     string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_ARCHLIB ${PERL_ARCHLIB_OUTPUT_VARIABLE})
+    perl_adjust_darwin_lib_variable( ARCHLIB )
   endif (NOT PERL_ARCHLIB_RESULT_VARIABLE)
 
   ### PERL_PRIVLIB
@@ -171,6 +198,7 @@ if (PERL_EXECUTABLE)
   )
   if (NOT PERL_PRIVLIB_RESULT_VARIABLE)
     string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_PRIVLIB ${PERL_PRIVLIB_OUTPUT_VARIABLE})
+    perl_adjust_darwin_lib_variable( PRIVLIB )
   endif (NOT PERL_PRIVLIB_RESULT_VARIABLE)
 
 
