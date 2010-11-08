@@ -3,7 +3,11 @@ include(ProcessorCount)
 ProcessorCount(processor_count)
 message("processor_count='${processor_count}'")
 
+if(NOT processor_count MATCHES "^[0-9]+$")
+  message(FATAL_ERROR "ProcessorCount function returned a non-integer")
+endif()
+
 if(processor_count EQUAL 0)
   message(FATAL_ERROR "could not determine number of processors
-- Additional code needed in ProcessorCount.cmake?")
+- Additional code for this platform needed in ProcessorCount.cmake?")
 endif()

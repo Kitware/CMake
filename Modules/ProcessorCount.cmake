@@ -42,7 +42,7 @@ function(ProcessorCount var)
       message("ProcessorCount: using sysctl '${ProcessorCount_cmd_sysctl}'")
     endif()
   else()
-    # Linux (and other systems with getconf):
+    # Linux (systems with getconf):
     find_program(ProcessorCount_cmd_getconf getconf)
     if(ProcessorCount_cmd_getconf)
       execute_process(COMMAND ${ProcessorCount_cmd_getconf} _NPROCESSORS_ONLN
@@ -50,9 +50,22 @@ function(ProcessorCount var)
         OUTPUT_VARIABLE count)
       message("ProcessorCount: using getconf '${ProcessorCount_cmd_getconf}'")
     endif()
+
+    if(NOT count)
+      # QNX (systems with pidin):
+      find_program(ProcessorCount_cmd_pidin pidin)
+      if(ProcessorCount_cmd_pidin)
+        execute_process(COMMAND ${ProcessorCount_cmd_pidin} info
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          OUTPUT_VARIABLE pidin_output)
+        string(REGEX MATCHALL "Processor[0-9]+: " procs "${pidin_output}")
+        list(LENGTH procs count)
+        message("ProcessorCount: using pidin '${ProcessorCount_cmd_pidin}'")
+      endif()
+    endif()
   endif()
 
-  # Execute this code when there is no 'sysctl' or 'getconf' or
+  # Execute this code when there is no 'sysctl' or 'getconf' or 'pidin' or
   # when previously executed methods return empty output:
   #
   if(NOT count)
@@ -63,6 +76,13 @@ function(ProcessorCount var)
       list(LENGTH procs count)
       message("ProcessorCount: using cpuinfo '${cpuinfo_file}'")
     endif()
+  endif()
+
+  # Ensure an integer return (avoid inadvertently returning an empty string
+  # or an error string)... If it's not a decimal integer, return 0:
+  #
+  if(NOT count MATCHES "^[0-9]+$")
+    set(count 0)
   endif()
 
   set(${var} ${count} PARENT_SCOPE)
