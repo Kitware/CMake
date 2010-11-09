@@ -170,6 +170,7 @@ protected:
   std::string EmptyRuleHackCommand;
 
   bool ForceVerboseMakefiles;
+  bool NoRuleMessages;
 
   // Store per-target progress counters.
   struct TargetProgress
