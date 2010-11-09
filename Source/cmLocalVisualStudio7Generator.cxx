@@ -1098,11 +1098,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     if ( target.GetPropertyAsBool("WIN32_EXECUTABLE") )
       {
-      fout << "\t\t\t\tSubSystem=\"2\"\n";
+      fout << "\t\t\t\tSubSystem=\""
+           << (this->FortranProject? "subSystemWindows" : "2") << "\"\n";
       }
     else
       {
-      fout << "\t\t\t\tSubSystem=\"1\"\n";
+      fout << "\t\t\t\tSubSystem=\""
+           << (this->FortranProject? "subSystemConsole" : "1") << "\"\n";
       }
     std::string stackVar = "CMAKE_";
     stackVar += linkLanguage;
