@@ -669,6 +669,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.FixExceptionHandlingDefault();
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
+  targetOptions.ParseFinish();
   targetOptions.AddDefines
     (this->Makefile->GetProperty("COMPILE_DEFINITIONS"));
   targetOptions.AddDefines(target.GetProperty("COMPILE_DEFINITIONS"));

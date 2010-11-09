@@ -39,6 +39,7 @@ public:
 
   // Store options from command line flags.
   void Parse(const char* flags);
+  void ParseFinish();
 
   // Fix the ExceptionHandling option to default to off.
   void FixExceptionHandlingDefault();
@@ -66,6 +67,10 @@ private:
   std::string Configuration;
   Tool CurrentTool;
   cmVisualStudio10TargetGenerator* TargetGenerator;
+
+  bool FortranRuntimeDebug;
+  bool FortranRuntimeDLL;
+  bool FortranRuntimeMT;
 
   virtual void StoreUnknownFlag(const char* flag);
 };
