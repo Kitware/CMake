@@ -433,23 +433,6 @@ protected:
                          int* retCodeOut = 0);
   cmVariableWatch* VariableWatch;
 
-  int getAllTargets(const std::set<cmStdString>& ignoreTargetsSet,
-                    std::map<cmStdString, cmStdString>& targetNamesNodes,
-                    std::map<cmStdString, const cmTarget*>& targetPtrs,
-                    const char* graphNodePrefix) const;
-
-  int getAllExternalLibs(const std::set<cmStdString>& ignoreTargetsSet,
-                          std::map<cmStdString, cmStdString>& targetNamesNodes,
-                          std::map<cmStdString, const cmTarget*>& targetPtrs,
-                          const char* graphNodePrefix, int cnt) const;
-
-  void writeDotConnections(const char* targetName,
-                const std::map<cmStdString, cmStdString>& targetNamesNodes,
-                const std::map<cmStdString, const cmTarget*>& targetPtrs,
-                std::set<std::string>& insertedNodes,
-                std::set<std::string>& insertedConnections,
-                cmGeneratedFileStream& str) const;
-
   ///! Find the full path to one of the cmake programs like ctest, cpack, etc.
   std::string FindCMakeProgram(const char* name) const;
 private:
