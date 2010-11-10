@@ -279,6 +279,8 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
     cmTarget* target = *tt;
+    bool written = false;
+
     // handle external vc project files
     const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if(expath)
@@ -287,6 +289,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       std::string location = expath;
       this->WriteExternalProject(fout, project.c_str(), 
                                  location.c_str(), target->GetUtilities());
+      written = true;
       }
     else
       {
@@ -300,47 +303,48 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
                             cmLocalGenerator::START_OUTPUT);
         this->WriteProject(fout, vcprojName, dir.c_str(),
                            *target);
+        written = true;
+        }
+      }
 
-        // Create "solution folder" information from FOLDER target property
-        //
-        if (this->UseFolderProperty())
+    // Create "solution folder" information from FOLDER target property
+    //
+    if (written && this->UseFolderProperty())
+      {
+      const char *targetFolder = target->GetProperty("FOLDER");
+      if (targetFolder)
+        {
+        std::vector<cmsys::String> tokens =
+          cmSystemTools::SplitString(targetFolder, '/', false);
+
+        std::string cumulativePath = "";
+
+        for(std::vector<cmsys::String>::iterator iter = tokens.begin();
+            iter != tokens.end(); ++iter)
           {
-          const char *targetFolder = target->GetProperty("FOLDER");
-          if (targetFolder)
+          if(!iter->size())
             {
-            std::vector<cmsys::String> tokens =
-              cmSystemTools::SplitString(targetFolder, '/', false);
-
-            std::string cumulativePath = "";
-
-            for(std::vector<cmsys::String>::iterator iter = tokens.begin();
-                iter != tokens.end(); ++iter)
-              {
-              if(!iter->size())
-                {
-                continue;
-                }
-
-              if (cumulativePath.empty())
-                {
-                cumulativePath = "CMAKE_FOLDER_GUID_" + *iter;
-                }
-              else
-                {
-                VisualStudioFolders[cumulativePath].insert(
-                  cumulativePath + "/" + *iter);
-
-                cumulativePath = cumulativePath + "/" + *iter;
-                }
-
-              this->CreateGUID(cumulativePath.c_str());
-              }
-
-            if (!cumulativePath.empty())
-              {
-              VisualStudioFolders[cumulativePath].insert(target->GetName());
-              }
+            continue;
             }
+
+          if (cumulativePath.empty())
+            {
+            cumulativePath = "CMAKE_FOLDER_GUID_" + *iter;
+            }
+          else
+            {
+            VisualStudioFolders[cumulativePath].insert(
+              cumulativePath + "/" + *iter);
+
+            cumulativePath = cumulativePath + "/" + *iter;
+            }
+
+          this->CreateGUID(cumulativePath.c_str());
+          }
+
+        if (!cumulativePath.empty())
+          {
+          VisualStudioFolders[cumulativePath].insert(target->GetName());
           }
         }
       }
