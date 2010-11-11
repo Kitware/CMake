@@ -112,16 +112,6 @@ public:
   /** Record per-target progress information.  */
   void RecordTargetProgress(cmMakefileTargetGenerator* tg);
 
-  /**
-   * If true, the CMake variable CMAKE_VERBOSE_MAKEFILES doesn't have effect
-   * anymore. Set it to true when writing a generator where short output
-   * doesn't make sense, e.g. because the full output is parsed by an
-   * IDE/editor.
-   */
-  bool GetForceVerboseMakefiles() { return this->ForceVerboseMakefiles; }
-  void SetForceVerboseMakefiles(bool enable)
-    {this->ForceVerboseMakefiles=enable;}
-
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
@@ -169,7 +159,6 @@ protected:
   // in the rule to satisfy the make program.
   std::string EmptyRuleHackCommand;
 
-  bool ForceVerboseMakefiles;
   bool NoRuleMessages;
 
   // Store per-target progress counters.

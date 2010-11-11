@@ -70,7 +70,6 @@ void cmExtraCodeBlocksGenerator::SetGlobalGenerator(
   cmGlobalUnixMakefileGenerator3* mf = (cmGlobalUnixMakefileGenerator3*)
                                                                      generator;
   mf->SetToolSupportsColor(false);
-  mf->SetForceVerboseMakefiles(true);
 }
 
 void cmExtraCodeBlocksGenerator::Generate()
@@ -695,6 +694,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " /NOLOGO /f &quot;";
     command += makefileName;
     command += "&quot; ";
+    command += " VERBOSE=1 ";
     command += target;
     }
   else if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
@@ -705,6 +705,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " -f &quot;";
     command += makefileName;
     command += "&quot; ";
+    command += " VERBOSE=1 ";
     command += target;
     }
   else
@@ -713,6 +714,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " -f &quot;";
     command += makefileName;
     command += "&quot; ";
+    command += " VERBOSE=1 ";
     command += target;
     }
   return command;

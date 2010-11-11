@@ -722,8 +722,7 @@ cmLocalUnixMakefileGenerator3
   // "VERBOSE=1" to be added as a make variable which will change the
   // name of this special target.  This gives a make-time choice to
   // the user.
-  if((this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
-     || (gg->GetForceVerboseMakefiles()))
+  if(this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
     {
     makefileStream
       << "# Produce verbose output by default.\n"

@@ -24,7 +24,6 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
   this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeUnixFindMake.cmake";
   this->ToolSupportsColor = true;
-  this->ForceVerboseMakefiles = false;
   this->NoRuleMessages = false;
 
 #if defined(_WIN32) || defined(__VMS)
