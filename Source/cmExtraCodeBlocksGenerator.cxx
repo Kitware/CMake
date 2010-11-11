@@ -63,15 +63,6 @@ cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
 }
 
 
-void cmExtraCodeBlocksGenerator::SetGlobalGenerator(
-                                                  cmGlobalGenerator* generator)
-{
-  cmExternalMakefileProjectGenerator::SetGlobalGenerator(generator);
-  cmGlobalUnixMakefileGenerator3* mf = (cmGlobalUnixMakefileGenerator3*)
-                                                                     generator;
-  mf->SetToolSupportsColor(false);
-}
-
 void cmExtraCodeBlocksGenerator::Generate()
 {
   // for each sub project in the project create a codeblocks project

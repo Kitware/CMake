@@ -40,8 +40,6 @@ public:
   virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const char*           fullName) const;
 
-  virtual void SetGlobalGenerator(cmGlobalGenerator* generator);
-
   virtual void Generate();
 
 private:

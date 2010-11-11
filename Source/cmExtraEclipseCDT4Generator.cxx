@@ -52,16 +52,6 @@ void cmExtraEclipseCDT4Generator
 }
 
 //----------------------------------------------------------------------------
-void cmExtraEclipseCDT4Generator
-::SetGlobalGenerator(cmGlobalGenerator* generator)
-{
-  cmExternalMakefileProjectGenerator::SetGlobalGenerator(generator);
-  cmGlobalUnixMakefileGenerator3* mf
-    = static_cast<cmGlobalUnixMakefileGenerator3*>(generator);
-  mf->SetToolSupportsColor(true);
-}
-
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::Generate()
 {
   const cmMakefile* mf

@@ -27,7 +27,6 @@ class cmExtraCodeBlocksGenerator : public cmExternalMakefileProjectGenerator
 {
 public:
   cmExtraCodeBlocksGenerator();
-  virtual void SetGlobalGenerator(cmGlobalGenerator* generator);
 
   virtual const char* GetName() const
                          { return cmExtraCodeBlocksGenerator::GetActualName();}
