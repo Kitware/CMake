@@ -34,10 +34,10 @@ public:
   virtual const char* GetName() const
                          { return cmExtraCodeBlocksGenerator::GetActualName();}
   static const char* GetActualName()                    { return "CodeBlocks";}
-  static cmExternalMakefileProjectGenerator* New() 
+  static cmExternalMakefileProjectGenerator* New()
                                      { return new cmExtraCodeBlocksGenerator; }
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry, 
+  virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const char* fullName) const;
 
   virtual void Generate();
@@ -49,7 +49,7 @@ private:
                                 const std::string& filename);
   std::string GetCBCompilerId(const cmMakefile* mf);
   int GetCBTargetType(cmTarget* target);
-  std::string BuildMakeCommand(const std::string& make, const char* makefile, 
+  std::string BuildMakeCommand(const std::string& make, const char* makefile,
                                const char* target);
   void AppendTarget(cmGeneratedFileStream& fout,
                     const char* targetName,
