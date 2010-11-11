@@ -21,8 +21,6 @@ class cmGeneratedFileStream;
 
 /** \class cmExtraEclipseCDT4Generator
  * \brief Write Eclipse project files for Makefile based projects
- *
- * This generator is in early alpha stage.
  */
 class cmExtraEclipseCDT4Generator : public cmExternalMakefileProjectGenerator
 {

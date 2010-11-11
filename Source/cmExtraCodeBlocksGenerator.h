@@ -22,8 +22,6 @@ class cmGeneratedFileStream;
 
 /** \class cmExtraCodeBlocksGenerator
  * \brief Write CodeBlocks project files for Makefile based projects
- *
- * This generator is in early alpha stage.
  */
 class cmExtraCodeBlocksGenerator : public cmExternalMakefileProjectGenerator
 {
