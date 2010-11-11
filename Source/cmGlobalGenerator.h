@@ -38,31 +38,31 @@ public:
   ///! Free any memory allocated with the GlobalGenerator
   cmGlobalGenerator();
   virtual ~cmGlobalGenerator();
-  
+
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   ///! Get the name for this generator
   virtual const char *GetName() const { return "Generic"; };
-  
+
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-  
+
   /**
    * Create LocalGenerators and process the CMakeLists files. This does not
-   * actually produce any makefiles, DSPs, etc.  
+   * actually produce any makefiles, DSPs, etc.
    */
   virtual void Configure();
 
   /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and
-   * requests that they Generate.  
+   * requests that they Generate.
    */
   virtual void Generate();
 
   /**
-   * Set/Get and Clear the enabled languages.  
+   * Set/Get and Clear the enabled languages.
    */
   void SetLanguageEnabled(const char*, cmMakefile* mf);
   bool GetLanguageEnabled(const char*) const;
@@ -70,7 +70,7 @@ public:
   void GetEnabledLanguages(std::vector<std::string>& lang);
   /**
    * Try to determine system infomation such as shared library
-   * extension, pthreads, byte order etc.  
+   * extension, pthreads, byte order etc.
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);
@@ -88,7 +88,7 @@ public:
                          const char *projectName, const char *targetName,
                          bool fast, std::string *output, cmMakefile* mf);
 
-  
+
   /**
    * Build a file given the following information. This is a more direct call
    * that is used by both CTest and TryCompile. If target name is NULL or
@@ -104,28 +104,28 @@ public:
             const char* extraOptions = 0,
             std::vector<std::string> const& nativeOptions =
             std::vector<std::string>());
-  
+
   virtual std::string GenerateBuildCommand(
     const char* makeProgram,
-    const char *projectName, const char* additionalOptions, 
+    const char *projectName, const char* additionalOptions,
     const char *targetName,
     const char* config, bool ignoreErrors, bool fast);
-  
+
 
   ///! Set the CMake instance
   void SetCMakeInstance(cmake *cm);
-  
+
   ///! Get the CMake instance
   cmake *GetCMakeInstance() { return this->CMakeInstance; };
 
   void SetConfiguredFilesPath(cmGlobalGenerator* gen);
-  const std::vector<cmLocalGenerator *>& GetLocalGenerators() const { 
+  const std::vector<cmLocalGenerator *>& GetLocalGenerators() const {
     return this->LocalGenerators;}
 
-  cmLocalGenerator* GetCurrentLocalGenerator() 
+  cmLocalGenerator* GetCurrentLocalGenerator()
                                           {return this->CurrentLocalGenerator;}
 
-  void SetCurrentLocalGenerator(cmLocalGenerator* lg) 
+  void SetCurrentLocalGenerator(cmLocalGenerator* lg)
                                             {this->CurrentLocalGenerator = lg;}
 
   void AddLocalGenerator(cmLocalGenerator *lg);
@@ -138,11 +138,11 @@ public:
 
   void AddInstallComponent(const char* component);
 
-  const std::set<cmStdString>* GetInstallComponents() const 
+  const std::set<cmStdString>* GetInstallComponents() const
   { return &InstallComponents; }
 
   ///! Add one installed target to the sets of the exports
-  void AddTargetToExports(const char* exportSet, cmTarget* target, 
+  void AddTargetToExports(const char* exportSet, cmTarget* target,
                           cmInstallTargetGenerator* archive,
                           cmInstallTargetGenerator* runTime,
                           cmInstallTargetGenerator* library,
@@ -158,10 +158,9 @@ public:
   void EnableInstallTarget();
 
   int TryCompileTimeout;
-  
+
   bool GetForceUnixPaths() {return this->ForceUnixPaths;}
   bool GetToolSupportsColor() { return this->ToolSupportsColor; }
-  void SetToolSupportsColor(bool enable) { this->ToolSupportsColor = enable; }
 
   ///! return the language for the given extension
   const char* GetLanguageFromExtension(const char* ext);
@@ -254,7 +253,7 @@ public:
   bool BinaryDirectoryIsNew(const char* dir)
     {
     return this->BinaryDirectories.insert(dir).second;
-    } 
+    }
   /** Supported systems creates a GUID for the given name */
   virtual void CreateGUID(const char*) {}
 
@@ -281,7 +280,7 @@ protected:
 
   bool CheckTargets();
 
-  // Fill the ProjectMap, this must be called after LocalGenerators 
+  // Fill the ProjectMap, this must be called after LocalGenerators
   // has been populated.
   void FillProjectMap();
   void CheckLocalGenerators();
@@ -328,13 +327,13 @@ protected:
 private:
   float FirstTimeProgress;
   // If you add a new map here, make sure it is copied
-  // in EnableLanguagesFromGenerator 
+  // in EnableLanguagesFromGenerator
   std::map<cmStdString, bool> IgnoreExtensions;
   std::map<cmStdString, bool> LanguageEnabled;
   std::map<cmStdString, cmStdString> OutputExtensions;
   std::map<cmStdString, cmStdString> LanguageToOutputExtension;
   std::map<cmStdString, cmStdString> ExtensionToLanguage;
-  std::map<cmStdString, int> LanguageToLinkerPreference; 
+  std::map<cmStdString, int> LanguageToLinkerPreference;
 
   // Record hashes for rules and outputs.
   struct RuleHash { char Data[32]; };
