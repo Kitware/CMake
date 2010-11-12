@@ -51,13 +51,6 @@ void cmFindPackageNeedBackwardsCompatibility(const std::string& variable,
 //----------------------------------------------------------------------------
 cmFindPackageCommand::cmFindPackageCommand()
 {
-  cmSystemTools::ReplaceString(this->GenericDocumentationRootPath,
-                               "CMAKE_FIND_ROOT_PATH_MODE_XXX",
-                               "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE");
-  cmSystemTools::ReplaceString(this->GenericDocumentationPathsOrder,
-                               "FIND_ARGS_XXX", "<package>");
-  cmSystemTools::ReplaceString(this->GenericDocumentationPathsOrder,
-                               "FIND_XXX", "find_package");
   this->CMakePathName = "PACKAGE";
   this->Quiet = false;
   this->Required = false;
@@ -78,6 +71,19 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->VersionFoundPatch = 0;
   this->VersionFoundTweak = 0;
   this->VersionFoundCount = 0;
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::GenerateDocumentation()
+{
+  this->cmFindCommon::GenerateDocumentation();
+  cmSystemTools::ReplaceString(this->GenericDocumentationRootPath,
+                               "CMAKE_FIND_ROOT_PATH_MODE_XXX",
+                               "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE");
+  cmSystemTools::ReplaceString(this->GenericDocumentationPathsOrder,
+                               "FIND_ARGS_XXX", "<package>");
+  cmSystemTools::ReplaceString(this->GenericDocumentationPathsOrder,
+                               "FIND_XXX", "find_package");
   this->CommandDocumentation =
     "  find_package(<package> [version] [EXACT] [QUIET]\n"
     "               [[REQUIRED|COMPONENTS] [components...]]\n"
@@ -318,6 +324,10 @@ cmFindPackageCommand::cmFindPackageCommand()
 //----------------------------------------------------------------------------
 const char* cmFindPackageCommand::GetFullDocumentation()
 {
+  if(this->CommandDocumentation.empty())
+    {
+    this->GenerateDocumentation();
+    }
   return this->CommandDocumentation.c_str();
 }
 

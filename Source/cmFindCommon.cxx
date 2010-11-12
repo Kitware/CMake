@@ -34,7 +34,11 @@ cmFindCommon::cmFindCommon()
   this->SearchFrameworkLast = false;
   this->SearchAppBundleOnly = false;
   this->SearchAppBundleLast = false;
+}
 
+//----------------------------------------------------------------------------
+void cmFindCommon::GenerateDocumentation()
+{
   // Documentation components.
   this->GenericDocumentationMacPolicy =
     "On Darwin or systems supporting OS X Frameworks, the cmake variable"
