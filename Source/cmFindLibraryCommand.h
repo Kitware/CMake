@@ -64,6 +64,7 @@ protected:
   void AddArchitecturePaths(const char* suffix);
   void AddLib64Paths();
   std::string FindLibrary();
+  virtual void GenerateDocumentation();
 private:
   std::string FindNormalLibrary();
   std::string FindFrameworkLibrary();

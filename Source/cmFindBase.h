@@ -31,10 +31,10 @@ public:
   virtual bool ParseArguments(std::vector<std::string> const& args);
   cmTypeMacro(cmFindBase, cmFindCommon);
   
-  virtual const char* GetFullDocumentation()
-    {return this->GenericDocumentation.c_str();}
+  virtual const char* GetFullDocumentation();
 
 protected:
+  virtual void GenerateDocumentation();
   void PrintFindStuff();
   void ExpandPaths();
   void AddPathSuffixes();

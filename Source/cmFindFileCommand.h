@@ -44,6 +44,8 @@ public:
     }
   
   cmTypeMacro(cmFindFileCommand, cmFindPathCommand);
+protected:
+  virtual void GenerateDocumentation();
 };
 
 

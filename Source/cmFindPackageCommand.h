@@ -65,6 +65,8 @@ public:
   virtual const char* GetFullDocumentation();
 
   cmTypeMacro(cmFindPackageCommand, cmFindCommon);
+protected:
+  virtual void GenerateDocumentation();
 private:
   void AppendSuccessInformation();
   void AppendToProperty(const char* propertyName);
