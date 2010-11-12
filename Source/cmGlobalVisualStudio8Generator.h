@@ -78,6 +78,8 @@ protected:
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
                                           bool partOfDefaultBuild);
+  virtual void WriteProjectDepends(std::ostream& fout, const char* name,
+                                   const char* path, cmTarget &t);
 
   const char* ArchitectureId;
 };
