@@ -60,12 +60,12 @@ protected:
    * install is used. This will create one
    * archive for each component group.
    */
-  int PackageComponents(bool ignoreComponentGroup);
+  int PackageComponents(bool ignoreGroup);
   /**
    * Special case of component install where all
    * components will be put in a single installer.
    */
-  int PackageComponentsAllInOne(bool allComponentInOne);
+  int PackageComponentsAllInOne(bool allComponent);
   virtual const char* GetOutputExtension() = 0;
   cmArchiveWrite::Compress Compress;
   cmArchiveWrite::Type Archive;
