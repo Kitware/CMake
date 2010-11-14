@@ -65,13 +65,13 @@ protected:
   bool GenerateForSharedLibs;
   bool GenerateForModuleLibs;
 
+  std::set<cmStdString> TargetsToIgnore;
+
   const std::vector<cmLocalGenerator*>& LocalGenerators;
 
   std::map<cmStdString, const cmTarget*> TargetPtrs;
   // maps from the actual target names to node names in dot:
   std::map<cmStdString, cmStdString> TargetNamesNodes;
-
-  std::set<cmStdString> TargetsToIgnore;
 
 };
 
