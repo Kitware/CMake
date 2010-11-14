@@ -14,6 +14,7 @@
 #include "cmStandardIncludes.h"
 #include "cmLocalGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmTarget.h"
 
 
 /** This class implements writing files for graphviz (dot) for graphs
@@ -52,10 +53,17 @@ protected:
 
   bool IgnoreThisTarget(const char* name) const;
 
+  bool GenerateForTargetType(cmTarget::TargetType targetType) const;
+
   cmStdString GraphType;
   cmStdString GraphName;
   cmStdString GraphHeader;
   cmStdString GraphNodePrefix;
+
+  bool GenerateForExecutables;
+  bool GenerateForStaticLibs;
+  bool GenerateForSharedLibs;
+  bool GenerateForModuleLibs;
 
   const std::vector<cmLocalGenerator*>& LocalGenerators;
 

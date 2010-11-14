@@ -50,6 +50,10 @@ cmGraphVizWriter::cmGraphVizWriter(const std::vector<cmLocalGenerator*>&
 ,GraphName("GG")
 ,GraphHeader("node [\n  fontsize = \"12\"\n];")
 ,GraphNodePrefix("node")
+,GenerateForExecutables(true)
+,GenerateForStaticLibs(true)
+,GenerateForSharedLibs(true)
+,GenerateForModuleLibs(true)
 ,LocalGenerators(localGenerators)
 {
   int cnt = collectAllTargets();
@@ -100,6 +104,20 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   __set_if_set(this->GraphHeader, "GRAPHVIZ_GRAPH_HEADER");
   __set_if_set(this->GraphNodePrefix, "GRAPHVIZ_NODE_PREFIX");
 
+#define __set_bool_if_set(var, cmakeDefinition) \
+  { \
+  const char* value = mf->GetDefinition(cmakeDefinition); \
+  if ( value ) \
+    { \
+    var = mf->IsOn(cmakeDefinition); \
+    } \
+  }
+
+  __set_bool_if_set(this->GenerateForExecutables, "GRAPHVIZ_EXECUTABLES");
+  __set_bool_if_set(this->GenerateForStaticLibs, "GRAPHVIZ_STATIC_LIBS");
+  __set_bool_if_set(this->GenerateForSharedLibs, "GRAPHVIZ_SHARED_LIBS");
+  __set_bool_if_set(this->GenerateForModuleLibs , "GRAPHVIZ_MODULE_LIBS");
+
   this->TargetsToIgnore.clear();
   const char* ignoreTargets = mf->GetDefinition("GRAPHVIZ_IGNORE_TARGETS");
   if ( ignoreTargets )
@@ -129,10 +147,7 @@ void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
       continue;
       }
 
-    if ((ptrIt->second->GetType() != cmTarget::EXECUTABLE)
-      && (ptrIt->second->GetType() != cmTarget::STATIC_LIBRARY)
-      && (ptrIt->second->GetType() != cmTarget::SHARED_LIBRARY)
-      && (ptrIt->second->GetType() != cmTarget::MODULE_LIBRARY))
+    if (this->GenerateForTargetType(ptrIt->second->GetType()) == false)
       {
       continue;
       }
@@ -183,10 +198,7 @@ void cmGraphVizWriter::WriteGlobalFile(const char* fileName)
       continue;
       }
 
-    if ((ptrIt->second->GetType() != cmTarget::EXECUTABLE)
-      && (ptrIt->second->GetType() != cmTarget::STATIC_LIBRARY)
-      && (ptrIt->second->GetType() != cmTarget::SHARED_LIBRARY)
-      && (ptrIt->second->GetType() != cmTarget::MODULE_LIBRARY))
+    if (this->GenerateForTargetType(ptrIt->second->GetType()) == false)
       {
       continue;
       }
@@ -367,4 +379,24 @@ int cmGraphVizWriter::collectAllExternalLibs(int cnt)
 bool cmGraphVizWriter::IgnoreThisTarget(const char* name) const
 {
   return (this->TargetsToIgnore.find(name) != this->TargetsToIgnore.end());
+}
+
+
+bool cmGraphVizWriter::GenerateForTargetType(cmTarget::TargetType targetType)
+                                                                          const
+{
+  switch (targetType)
+  {
+    case cmTarget::EXECUTABLE:
+      return this->GenerateForExecutables;
+    case cmTarget::STATIC_LIBRARY:
+      return this->GenerateForStaticLibs;
+    case cmTarget::SHARED_LIBRARY:
+      return this->GenerateForSharedLibs;
+    case cmTarget::MODULE_LIBRARY:
+      return this->GenerateForModuleLibs;
+    default:
+      break;
+  }
+  return false;
 }
