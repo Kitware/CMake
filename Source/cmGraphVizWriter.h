@@ -15,6 +15,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmTarget.h"
+#include <cmsys/RegularExpression.hxx>
 
 
 /** This class implements writing files for graphviz (dot) for graphs
@@ -34,9 +35,11 @@ public:
 
 protected:
 
-  int collectAllTargets();
+  void CollectTargetsAndLibs();
 
-  int collectAllExternalLibs(int cnt);
+  int CollectAllTargets();
+
+  int CollectAllExternalLibs(int cnt);
 
   void WriteHeader(cmGeneratedFileStream& str) const;
 
@@ -65,6 +68,8 @@ protected:
   bool GenerateForSharedLibs;
   bool GenerateForModuleLibs;
 
+  cmsys::RegularExpression TargetIgnoreRegex;
+
   std::set<cmStdString> TargetsToIgnore;
 
   const std::vector<cmLocalGenerator*>& LocalGenerators;
@@ -73,6 +78,7 @@ protected:
   // maps from the actual target names to node names in dot:
   std::map<cmStdString, cmStdString> TargetNamesNodes;
 
+  bool HaveTargetsAndLibs;
 };
 
 #endif

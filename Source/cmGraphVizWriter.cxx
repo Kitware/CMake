@@ -55,9 +55,8 @@ cmGraphVizWriter::cmGraphVizWriter(const std::vector<cmLocalGenerator*>&
 ,GenerateForSharedLibs(true)
 ,GenerateForModuleLibs(true)
 ,LocalGenerators(localGenerators)
+,HaveTargetsAndLibs(false)
 {
-  int cnt = collectAllTargets();
-  collectAllExternalLibs(cnt);
 }
 
 
@@ -137,6 +136,8 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
 
 void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
 {
+  this->CollectTargetsAndLibs();
+
   for(std::map<cmStdString, const cmTarget*>::const_iterator ptrIt =
                                                       this->TargetPtrs.begin();
       ptrIt != this->TargetPtrs.end();
@@ -177,6 +178,8 @@ void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
 
 void cmGraphVizWriter::WriteGlobalFile(const char* fileName)
 {
+  this->CollectTargetsAndLibs();
+
   cmGeneratedFileStream str(fileName);
   if ( !str )
     {
@@ -295,7 +298,18 @@ void cmGraphVizWriter::WriteNode(const char* targetName,
 }
 
 
-int cmGraphVizWriter::collectAllTargets()
+void cmGraphVizWriter::CollectTargetsAndLibs()
+{
+  if (this->HaveTargetsAndLibs == false)
+    {
+    this->HaveTargetsAndLibs = true;
+    int cnt = this->CollectAllTargets();
+    this->CollectAllExternalLibs(cnt);
+    }
+}
+
+
+int cmGraphVizWriter::CollectAllTargets()
 {
   int cnt = 0;
   // First pass get the list of all cmake targets
@@ -327,7 +341,7 @@ int cmGraphVizWriter::collectAllTargets()
 }
 
 
-int cmGraphVizWriter::collectAllExternalLibs(int cnt)
+int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
 {
   // Ok, now find all the stuff we link to that is not in cmake
   for (std::vector<cmLocalGenerator*>::const_iterator lit =
