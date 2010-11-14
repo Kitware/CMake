@@ -117,6 +117,17 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   __set_bool_if_set(this->GenerateForSharedLibs, "GRAPHVIZ_SHARED_LIBS");
   __set_bool_if_set(this->GenerateForModuleLibs , "GRAPHVIZ_MODULE_LIBS");
 
+  cmStdString tmpRegexString;
+  __set_if_set(tmpRegexString, "GRAPHVIZ_TARGET_IGNORE_REGEX");
+  if (tmpRegexString.size() > 0)
+    {
+    if (!this->TargetIgnoreRegex.compile(tmpRegexString.c_str()))
+      {
+      std::cerr << "Could not compile bad regex \"" << tmpRegexString << "\""
+                << std::endl;
+      }
+    }
+
   this->TargetsToIgnore.clear();
   const char* ignoreTargets = mf->GetDefinition("GRAPHVIZ_IGNORE_TARGETS");
   if ( ignoreTargets )
@@ -391,8 +402,15 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
 }
 
 
-bool cmGraphVizWriter::IgnoreThisTarget(const char* name) const
+bool cmGraphVizWriter::IgnoreThisTarget(const char* name)
 {
+  if (this->TargetIgnoreRegex.is_valid())
+    {
+    if (this->TargetIgnoreRegex.find(name))
+      {
+      return true;
+      }
+    }
   return (this->TargetsToIgnore.find(name) != this->TargetsToIgnore.end());
 }
 

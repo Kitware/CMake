@@ -54,7 +54,7 @@ protected:
 
   void WriteFooter(cmGeneratedFileStream& str) const;
 
-  bool IgnoreThisTarget(const char* name) const;
+  bool IgnoreThisTarget(const char* name);
 
   bool GenerateForTargetType(cmTarget::TargetType targetType) const;
 
