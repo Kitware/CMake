@@ -44,7 +44,7 @@ int cmCPackRPMGenerator::PackageFiles()
                   << toplevel << std::endl);
 
   /* Are we in the component packaging case */
-  if (!this->ComponentGroups.empty())
+  if (SupportsComponentInstallation() & (!this->ComponentGroups.empty()))
     {
     /* Reset package file name list it will be populated during the
      * component packaging run*/
@@ -57,8 +57,12 @@ int cmCPackRPMGenerator::PackageFiles()
         compIt!=this->Components.end(); ++compIt )
       {
       std::string localToplevel(initialTopLevel);
-      std::string packageFileName(cmSystemTools::GetParentDirectory(toplevel.c_str()));
-      std::string outputFileName(std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
+      std::string packageFileName(
+          cmSystemTools::GetParentDirectory(toplevel.c_str())
+                                 );
+      std::string outputFileName(
+          std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")
+                                )
         +"-"+compIt->first + this->GetOutputExtension());
 
       localToplevel += "/"+ compIt->first;
@@ -68,12 +72,14 @@ int cmCPackRPMGenerator::PackageFiles()
       /* replace proposed CPACK_OUTPUT_FILE_NAME */
       this->SetOption("CPACK_OUTPUT_FILE_NAME",outputFileName.c_str());
       /* replace the TEMPORARY package file name */
-      this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",packageFileName.c_str());
+      this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
+                      packageFileName.c_str());
 
       this->SetOption("CPACK_RPM_PACKAGE_COMPONENT",compIt->first.c_str());
       if (!this->ReadListFile("CPackRPM.cmake"))
         {
-        cmCPackLogger(cmCPackLog::LOG_ERROR, "Error while execution CPackRPM.cmake" << std::endl);
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Error while execution CPackRPM.cmake" << std::endl);
         retval = 0;
         }
 
@@ -86,7 +92,8 @@ int cmCPackRPMGenerator::PackageFiles()
     {
     if (!this->ReadListFile("CPackRPM.cmake"))
       {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, "Error while execution CPackRPM.cmake" << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error while execution CPackRPM.cmake" << std::endl);
       retval = 0;
       }
     }
@@ -99,4 +106,15 @@ int cmCPackRPMGenerator::PackageFiles()
   return retval;
 }
 
+bool cmCPackRPMGenerator::SupportsComponentInstallation() const
+  {
+  if (IsSet("CPACK_RPM_COMPONENT_INSTALL"))
+    {
+      return true;
+    }
+  else
+    {
+      return false;
+    }
+  }
 

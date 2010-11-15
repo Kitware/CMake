@@ -741,7 +741,9 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
            *     - Because it was already used for component install
            *       in order to put things in subdirs...
            */
-          cmSystemTools::PutEnv((std::string("DESTDIR=")+tempInstallDirectory).c_str());
+          cmSystemTools::PutEnv(
+              (std::string("DESTDIR=")+tempInstallDirectory).c_str()
+                               );
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "- Creating directory: '" << dir << "'" << std::endl);
 
