@@ -895,6 +895,8 @@ void cmGlobalGenerator::Generate()
     }
 
   this->CMakeInstance->UpdateProgress("Generating done", -1);
+
+  this->CMakeInstance->RunCheckForUnusedVariables("generation");
 }
 
 //----------------------------------------------------------------------------

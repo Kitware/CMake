@@ -841,7 +841,7 @@ void cmMakefile::ConfigureFinalPass()
     l->second.FinishConfigure();
     }
 
-  this->GetCMakeInstance()->RunCheckForUnusedVariables();
+  this->GetCMakeInstance()->RunCheckForUnusedVariables("configure");
 }
 
 //----------------------------------------------------------------------------

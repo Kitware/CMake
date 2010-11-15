@@ -4529,7 +4529,7 @@ void cmake::WatchUnusedCli(const char* var)
 #endif
 }
 
-void cmake::RunCheckForUnusedVariables() const
+void cmake::RunCheckForUnusedVariables(const std::string& reason) const
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
     if(this->WarnUnusedCli)
@@ -4541,7 +4541,8 @@ void cmake::RunCheckForUnusedVariables() const
         if(!it->second)
           {
           std::string message = "warning: The variable, '" + it->first +
-            "', given on the command line, was not used within the build.";
+            "', given on the command line, was not used during the " + reason +
+            ".";
           cmSystemTools::Message(message.c_str());
           }
         }
