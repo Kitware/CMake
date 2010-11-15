@@ -2292,6 +2292,11 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   std::string oldstartoutputdir = this->GetStartOutputDirectory();
   this->SetStartDirectory(this->GetHomeDirectory());
   this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
+  const bool warncli = this->WarnUnusedCli;
+  if (!this->ScriptMode)
+    {
+    this->WarnUnusedCli = false;
+    }
   int ret = this->Configure();
   if (ret || this->ScriptMode)
     {
@@ -2313,6 +2318,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 #endif
     return ret;
     }
+  this->WarnUnusedCli = warncli;
   ret = this->Generate();
   std::string message = "Build files have been written to: ";
   message += this->GetHomeOutputDirectory();
