@@ -365,7 +365,7 @@ class cmake
             bool clean);
 
   void WatchUnusedCli(const char* var);
-  void RunCheckForUnusedVariables() const;
+  void RunCheckForUnusedVariables(const std::string& reason) const;
 protected:
   void InitializeProperties();
   int HandleDeleteCacheVariables(const char* var);
