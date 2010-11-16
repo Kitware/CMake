@@ -1228,7 +1228,12 @@ function(_ep_add_configure_command name)
     if(cmake_generator)
       list(APPEND cmd "-G${cmake_generator}" "${source_dir}")
     else()
-      list(APPEND cmd "-G${CMAKE_GENERATOR}" "${source_dir}")
+      if(CMAKE_EXTRA_GENERATOR)
+        list(APPEND cmd "-G${CMAKE_EXTRA_GENERATOR} - ${CMAKE_GENERATOR}"
+          "${source_dir}")
+      else()
+        list(APPEND cmd "-G${CMAKE_GENERATOR}" "${source_dir}")
+      endif()
     endif()
   endif()
 
