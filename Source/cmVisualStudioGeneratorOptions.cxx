@@ -45,6 +45,10 @@ cmVisualStudioGeneratorOptions
 
   // Slash options are allowed for VS.
   this->AllowSlash = true;
+
+  this->FortranRuntimeDebug = false;
+  this->FortranRuntimeDLL = false;
+  this->FortranRuntimeMT = false;
 }
 
 //----------------------------------------------------------------------------
@@ -133,8 +137,55 @@ void cmVisualStudioGeneratorOptions::Parse(const char* flags)
 }
 
 //----------------------------------------------------------------------------
+void cmVisualStudioGeneratorOptions::ParseFinish()
+{
+  if(this->CurrentTool == FortranCompiler)
+    {
+    // "RuntimeLibrary" attribute values:
+    //  "rtMultiThreaded", "0", /threads /libs:static
+    //  "rtMultiThreadedDLL", "2", /threads /libs:dll
+    //  "rtMultiThreadedDebug", "1", /threads /dbglibs /libs:static
+    //  "rtMultiThreadedDebugDLL", "3", /threads /dbglibs /libs:dll
+    // These seem unimplemented by the IDE:
+    //  "rtSingleThreaded", "4", /libs:static
+    //  "rtSingleThreadedDLL", "10", /libs:dll
+    //  "rtSingleThreadedDebug", "5", /dbglibs /libs:static
+    //  "rtSingleThreadedDebugDLL", "11", /dbglibs /libs:dll
+    std::string rl = "rtMultiThreaded";
+    rl += this->FortranRuntimeDebug? "Debug" : "";
+    rl += this->FortranRuntimeDLL? "DLL" : "";
+    this->FlagMap["RuntimeLibrary"] = rl;
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmVisualStudioGeneratorOptions::StoreUnknownFlag(const char* flag)
 {
+  // Look for Intel Fortran flags that do not map well in the flag table.
+  if(this->CurrentTool == FortranCompiler)
+    {
+    if(strcmp(flag, "/dbglibs") == 0)
+      {
+      this->FortranRuntimeDebug = true;
+      return;
+      }
+    if(strcmp(flag, "/threads") == 0)
+      {
+      this->FortranRuntimeMT = true;
+      return;
+      }
+    if(strcmp(flag, "/libs:dll") == 0)
+      {
+      this->FortranRuntimeDLL = true;
+      return;
+      }
+    if(strcmp(flag, "/libs:static") == 0)
+      {
+      this->FortranRuntimeDLL = false;
+      return;
+      }
+    }
+
   // This option is not known.  Store it in the output flags.
   this->FlagString += " ";
   this->FlagString +=
