@@ -50,3 +50,11 @@ IF(MSVC10)
   ADD_DEPENDENCIES(VSExternalInclude lib1)
 ENDIF()
 
+# Interaction testing between the FOLDER target property and
+# INCLUDE_EXTERNAL_MSPROJECT targets:
+set_target_properties(VSExternalInclude PROPERTIES FOLDER folder1/folder2)
+set_target_properties(lib1 PROPERTIES FOLDER folder1/folder2)
+set_target_properties(lib2 PROPERTIES FOLDER folder1/folder2)
+add_custom_target(EmptyCustomTarget)
+set_target_properties(EmptyCustomTarget PROPERTIES FOLDER folder1/folder2)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
