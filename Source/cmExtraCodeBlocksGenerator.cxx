@@ -23,7 +23,7 @@
 #include <cmsys/SystemTools.hxx>
 
 /* Some useful URLs:
-Homepage: 
+Homepage:
 http://www.codeblocks.org
 
 File format docs:
@@ -63,16 +63,6 @@ cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
 }
 
 
-void cmExtraCodeBlocksGenerator::SetGlobalGenerator(
-                                                  cmGlobalGenerator* generator)
-{
-  cmExternalMakefileProjectGenerator::SetGlobalGenerator(generator);
-  cmGlobalUnixMakefileGenerator3* mf = (cmGlobalUnixMakefileGenerator3*)
-                                                                     generator;
-  mf->SetToolSupportsColor(false);
-  mf->SetForceVerboseMakefiles(true);
-}
-
 void cmExtraCodeBlocksGenerator::Generate()
 {
   // for each sub project in the project create a codeblocks project
@@ -107,7 +97,7 @@ void cmExtraCodeBlocksGenerator::CreateProjectFile(
 /* Tree is used to create a "Virtual Folder" in CodeBlocks, in which all
  CMake files this project depends on will be put. This means additionally
  to the "Sources" and "Headers" virtual folders of CodeBlocks, there will
- now also be a "CMake Files" virtual folder. 
+ now also be a "CMake Files" virtual folder.
  Patch by Daniel Teske <daniel.teske AT nokia.com> (which use C::B project
  files in QtCreator).*/
 struct Tree
@@ -115,24 +105,24 @@ struct Tree
   std::string path; //only one component of the path
   std::vector<Tree> folders;
   std::vector<std::string> files;
-  void InsertPath(const std::vector<std::string>& splitted, 
-                  std::vector<std::string>::size_type start, 
+  void InsertPath(const std::vector<std::string>& splitted,
+                  std::vector<std::string>::size_type start,
                   const std::string& fileName);
   void BuildVirtualFolder(std::string& virtualFolders) const;
-  void BuildVirtualFolderImpl(std::string& virtualFolders, 
+  void BuildVirtualFolderImpl(std::string& virtualFolders,
                               const std::string& prefix) const;
   void BuildUnit(std::string& unitString, const std::string& fsPath) const;
-  void BuildUnitImpl(std::string& unitString, 
-                     const std::string& virtualFolderPath, 
+  void BuildUnitImpl(std::string& unitString,
+                     const std::string& virtualFolderPath,
                      const std::string& fsPath) const;
 };
 
 
-void Tree::InsertPath(const std::vector<std::string>& splitted, 
-                      std::vector<std::string>::size_type start, 
+void Tree::InsertPath(const std::vector<std::string>& splitted,
+                      std::vector<std::string>::size_type start,
                       const std::string& fileName)
 {
-  if (start == splitted.size()) 
+  if (start == splitted.size())
     {
     files.push_back(fileName);
     return;
@@ -301,7 +291,7 @@ void cmExtraCodeBlocksGenerator
     }
 
   // Now build a virtual tree string
-  std::string virtualFolders;  
+  std::string virtualFolders;
   tree.BuildVirtualFolder(virtualFolders);
   // And one for <Unit>
   std::string unitFiles;
@@ -323,7 +313,7 @@ void cmExtraCodeBlocksGenerator
 
   this->AppendTarget(fout, "all", 0, make.c_str(), mf, compiler.c_str());
 
-  // add all executable and library targets and some of the GLOBAL 
+  // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
        lg!=lgs.end(); lg++)
@@ -338,9 +328,9 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::GLOBAL_TARGET:
           {
           bool insertTarget = false;
-          // Only add the global targets from CMAKE_BINARY_DIR, 
+          // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
-          if (strcmp(makefile->GetStartOutputDirectory(), 
+          if (strcmp(makefile->GetStartOutputDirectory(),
                      makefile->GetHomeOutputDirectory())==0)
             {
             insertTarget = true;
@@ -362,7 +352,7 @@ void cmExtraCodeBlocksGenerator
             }
           if (insertTarget)
             {
-            this->AppendTarget(fout, ti->first.c_str(), 0, 
+            this->AppendTarget(fout, ti->first.c_str(), 0,
                                make.c_str(), makefile, compiler.c_str());
             }
           }
@@ -372,13 +362,13 @@ void cmExtraCodeBlocksGenerator
           // Experimental-"sub"targets as e.g. NightlyStart
           if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
              || ((ti->first.find("Continuous")==0)&&(ti->first!="Continuous"))
-             || ((ti->first.find("Experimental")==0) 
+             || ((ti->first.find("Experimental")==0)
                                                && (ti->first!="Experimental")))
             {
             break;
             }
 
-          this->AppendTarget(fout, ti->first.c_str(), 0, 
+          this->AppendTarget(fout, ti->first.c_str(), 0,
                                  make.c_str(), makefile, compiler.c_str());
           break;
         case cmTarget::EXECUTABLE:
@@ -386,11 +376,11 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::SHARED_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
           {
-          this->AppendTarget(fout, ti->first.c_str(), &ti->second, 
+          this->AppendTarget(fout, ti->first.c_str(), &ti->second,
                              make.c_str(), makefile, compiler.c_str());
           std::string fastTarget = ti->first;
           fastTarget += "/fast";
-          this->AppendTarget(fout, fastTarget.c_str(), &ti->second, 
+          this->AppendTarget(fout, fastTarget.c_str(), &ti->second,
                              make.c_str(), makefile, compiler.c_str());
           }
           break;
@@ -437,7 +427,7 @@ void cmExtraCodeBlocksGenerator
               {
               for(std::vector<std::string>::const_iterator
                   ext = mf->GetSourceExtensions().begin();
-                  ext !=  mf->GetSourceExtensions().end(); 
+                  ext !=  mf->GetSourceExtensions().end();
                   ++ext)
                 {
                 if ((*si)->GetExtension() == *ext)
@@ -467,11 +457,11 @@ void cmExtraCodeBlocksGenerator
 
   // The following loop tries to add header files matching to implementation
   // files to the project. It does that by iterating over all source files,
-  // replacing the file name extension with ".h" and checks whether such a 
+  // replacing the file name extension with ".h" and checks whether such a
   // file exists. If it does, it is inserted into the map of files.
   // A very similar version of that code exists also in the kdevelop
   // project generator.
-  for (std::map<std::string, cmSourceFile*>::const_iterator 
+  for (std::map<std::string, cmSourceFile*>::const_iterator
        sit=cFiles.begin();
        sit!=cFiles.end();
        ++sit)
@@ -483,7 +473,7 @@ void cmExtraCodeBlocksGenerator
     // check if there's a matching header around
     for(std::vector<std::string>::const_iterator
         ext = mf->GetHeaderExtensions().begin();
-        ext !=  mf->GetHeaderExtensions().end(); 
+        ext !=  mf->GetHeaderExtensions().end();
         ++ext)
       {
       std::string hname=headerBasename;
@@ -506,7 +496,7 @@ void cmExtraCodeBlocksGenerator
 
   // insert all source files in the CodeBlocks project
   // first the C/C++ implementation files, then all others
-  for (std::map<std::string, cmSourceFile*>::const_iterator 
+  for (std::map<std::string, cmSourceFile*>::const_iterator
        sit=cFiles.begin();
        sit!=cFiles.end();
        ++sit)
@@ -514,7 +504,7 @@ void cmExtraCodeBlocksGenerator
     fout<<"      <Unit filename=\""<< sit->first <<"\">\n"
           "      </Unit>\n";
     }
-  for (std::set<std::string>::const_iterator 
+  for (std::set<std::string>::const_iterator
        sit=otherFiles.begin();
        sit!=otherFiles.end();
        ++sit)
@@ -577,7 +567,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
           "         <Option compiler=\"" << compiler << "\" />\n"
           "         <Compiler>\n";
       // the include directories for this target
-      const std::vector<std::string>& incDirs = 
+      const std::vector<std::string>& incDirs =
           target->GetMakefile()->GetIncludeDirectories();
       for(std::vector<std::string>::const_iterator dirIt=incDirs.begin();
           dirIt != incDirs.end();
@@ -589,27 +579,27 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       }
     else // e.g. all and the GLOBAL and UTILITY targets
     {
-    fout<<"         <Option working_dir=\"" 
+    fout<<"         <Option working_dir=\""
                             << makefile->GetStartOutputDirectory() << "\" />\n"
         <<"         <Option type=\"" << 4 << "\" />\n";
     }
 
   fout<<"         <MakeCommands>\n"
-        "            <Build command=\"" 
+        "            <Build command=\""
       << this->BuildMakeCommand(make, makefileName.c_str(), targetName)
       << "\" />\n"
-        "            <CompileFile command=\"" 
+        "            <CompileFile command=\""
       << this->BuildMakeCommand(make, makefileName.c_str(),"&quot;$file&quot;")
       << "\" />\n"
-        "            <Clean command=\"" 
-      << this->BuildMakeCommand(make, makefileName.c_str(), "clean") 
+        "            <Clean command=\""
+      << this->BuildMakeCommand(make, makefileName.c_str(), "clean")
       << "\" />\n"
-        "            <DistClean command=\"" 
-      << this->BuildMakeCommand(make, makefileName.c_str(), "clean") 
+        "            <DistClean command=\""
+      << this->BuildMakeCommand(make, makefileName.c_str(), "clean")
       << "\" />\n"
         "         </MakeCommands>\n"
         "      </Target>\n";
-  
+
 }
 
 
@@ -675,7 +665,7 @@ int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
     {
     return 2;
     }
-  else if ((target->GetType()==cmTarget::SHARED_LIBRARY) 
+  else if ((target->GetType()==cmTarget::SHARED_LIBRARY)
            || (target->GetType()==cmTarget::MODULE_LIBRARY))
     {
     return 3;
@@ -695,16 +685,18 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " /NOLOGO /f &quot;";
     command += makefileName;
     command += "&quot; ";
+    command += " VERBOSE=1 ";
     command += target;
     }
   else if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
     {
-    // no escaping of spaces in this case, see 
+    // no escaping of spaces in this case, see
     // http://public.kitware.com/Bug/view.php?id=10014
-    std::string makefileName = makefile; 
+    std::string makefileName = makefile;
     command += " -f &quot;";
     command += makefileName;
     command += "&quot; ";
+    command += " VERBOSE=1 ";
     command += target;
     }
   else
@@ -713,6 +705,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " -f &quot;";
     command += makefileName;
     command += "&quot; ";
+    command += " VERBOSE=1 ";
     command += target;
     }
   return command;
