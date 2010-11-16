@@ -25,7 +25,6 @@
 class cmFindProgramCommand : public cmFindBase
 {
 public:
-  cmFindProgramCommand();
   /**
    * This is a virtual constructor for the command.
    */
@@ -63,6 +62,7 @@ public:
 
 protected:
   std::string FindProgram(std::vector<std::string> names);
+  virtual void GenerateDocumentation();
 
 private:
   std::string FindAppBundle(std::vector<std::string> names);

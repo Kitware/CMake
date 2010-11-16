@@ -13,11 +13,17 @@
   
 cmFindBase::cmFindBase()
 {
-  cmSystemTools::ReplaceString(this->GenericDocumentationPathsOrder,
-                               "FIND_ARGS_XXX", "<VAR> NAMES name");
   this->AlreadyInCache = false;
   this->AlreadyInCacheWithoutMetaInfo = false;
-  this->GenericDocumentation = 
+}
+
+//----------------------------------------------------------------------------
+void cmFindBase::GenerateDocumentation()
+{
+  this->cmFindCommon::GenerateDocumentation();
+  cmSystemTools::ReplaceString(this->GenericDocumentationPathsOrder,
+                               "FIND_ARGS_XXX", "<VAR> NAMES name");
+  this->GenericDocumentation =
     "   FIND_XXX(<VAR> name1 [path1 path2 ...])\n"
     "This is the short-hand signature for the command that "
     "is sufficient in many cases.  It is the same "
@@ -97,7 +103,18 @@ cmFindBase::cmFindBase()
   this->GenericDocumentation += this->GenericDocumentationRootPath;
   this->GenericDocumentation += this->GenericDocumentationPathsOrder;
 }
-  
+
+//----------------------------------------------------------------------------
+const char* cmFindBase::GetFullDocumentation()
+{
+  if(this->GenericDocumentation.empty())
+    {
+    this->GenerateDocumentation();
+    }
+  return this->GenericDocumentation.c_str();
+}
+
+//----------------------------------------------------------------------------
 bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
 {
   if(argsIn.size() < 2 )

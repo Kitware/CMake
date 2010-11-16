@@ -56,6 +56,8 @@ protected:
   /** Compute the current default bundle/framework search policy.  */
   void SelectDefaultMacMode();
 
+  virtual void GenerateDocumentation();
+
   cmStdString CMakePathName;
   RootPathMode FindRootPathMode;
 

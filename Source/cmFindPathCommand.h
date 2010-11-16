@@ -59,10 +59,10 @@ public:
     return "Find the directory containing a file.";
     }
 
-  virtual const char* GetFullDocumentation();
   cmTypeMacro(cmFindPathCommand, cmFindBase);
   bool IncludeFileInPath;
-  bool ExtraDocAdded;
+protected:
+  virtual void GenerateDocumentation();
 private:
   std::string FindHeaderInFramework(std::string const& file,
                                     std::string const& dir);
