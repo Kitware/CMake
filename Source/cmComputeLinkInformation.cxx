@@ -923,7 +923,7 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddLinkPrefix(const char* p)
 {
-  if(p)
+  if(p && *p)
     {
     this->LinkPrefixes.insert(p);
     }
