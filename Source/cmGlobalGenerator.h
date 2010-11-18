@@ -16,6 +16,7 @@
 #include "cmStandardIncludes.h"
 
 #include "cmTarget.h" // For cmTargets
+#include "cmTargetDepend.h" // For cmTargetDependSet
 
 class cmake;
 class cmMakefile;
@@ -233,7 +234,7 @@ public:
   virtual const char* GetCleanTargetName()        { return 0; }
 
   // Class to track a set of dependencies.
-  class TargetDependSet: public std::set<cmTarget*> {};
+  typedef cmTargetDependSet TargetDependSet;
 
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
