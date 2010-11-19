@@ -31,7 +31,7 @@ macro(_FIND_BULLET_LIBRARY _var)
   find_library(${_var}
      NAMES 
         ${ARGN}
-     PATHS
+     HINTS
         ${BULLET_ROOT}
         ${BULLET_ROOT}/out/release8/libs
         ${BULLET_ROOT}/out/debug8/libs
@@ -50,9 +50,10 @@ macro(_BULLET_APPEND_LIBRARIES _list _release)
 endmacro()
 
 find_path(BULLET_INCLUDE_DIR NAMES btBulletCollisionCommon.h
-  PATHS
+  HINTS
     ${BULLET_ROOT}/include
     ${BULLET_ROOT}/src
+  PATH_SUFFIXES bullet
 )
 
 # Find the libraries
