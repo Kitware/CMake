@@ -144,7 +144,7 @@ bool cmComputeTargetDepends::Compute()
 //----------------------------------------------------------------------------
 void
 cmComputeTargetDepends::GetTargetDirectDepends(cmTarget* t,
-                                               std::set<cmTarget*>& deps)
+                                               cmTargetDependSet& deps)
 {
   // Lookup the index for this target.  All targets should be known by
   // this point.
@@ -156,7 +156,9 @@ cmComputeTargetDepends::GetTargetDirectDepends(cmTarget* t,
   EdgeList const& nl = this->FinalGraph[i];
   for(EdgeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
     {
-    deps.insert(this->Targets[*ni]);
+    cmTarget* dep = this->Targets[*ni];
+    cmTargetDependSet::iterator di = deps.insert(dep).first;
+    di->SetType(ni->IsStrong());
     }
 }
 
@@ -445,7 +447,7 @@ cmComputeTargetDepends
       int j = *ei;
       if(cmap[j] == c && ei->IsStrong())
         {
-        this->FinalGraph[i].push_back(j);
+        this->FinalGraph[i].push_back(cmGraphEdge(j, true));
         if(!this->IntraComponent(cmap, c, j, head, emitted, visited))
           {
           return false;
@@ -456,7 +458,7 @@ cmComputeTargetDepends
     // Prepend to a linear linked-list of intra-component edges.
     if(*head >= 0)
       {
-      this->FinalGraph[i].push_back(*head);
+      this->FinalGraph[i].push_back(cmGraphEdge(*head, false));
       }
     else
       {
@@ -515,7 +517,7 @@ cmComputeTargetDepends
       int dependee_component = *ni;
       int dependee_component_head = this->ComponentHead[dependee_component];
       this->FinalGraph[depender_component_tail]
-        .push_back(dependee_component_head);
+        .push_back(cmGraphEdge(dependee_component_head, ni->IsStrong()));
       }
     }
   return true;

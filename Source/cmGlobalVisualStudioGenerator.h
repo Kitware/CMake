@@ -69,15 +69,12 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() { return true; }
 
+  class TargetSet: public std::set<cmTarget*> {};
   struct TargetCompare
   {
     bool operator()(cmTarget const* l, cmTarget const* r) const;
   };
-  class OrderedTargetDependSet: public std::multiset<cmTarget*, TargetCompare>
-  {
-  public:
-    OrderedTargetDependSet(cmGlobalGenerator::TargetDependSet const&);
-  };
+  class OrderedTargetDependSet;
 
 protected:
   // Does this VS version link targets to each other if there are
@@ -99,6 +96,24 @@ protected:
   std::string GetUtilityDepend(cmTarget* target);
   typedef std::map<cmTarget*, cmStdString> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
+private:
+  void FollowLinkDepends(cmTarget* target, std::set<cmTarget*>& linked);
+
+  class TargetSetMap: public std::map<cmTarget*, TargetSet> {};
+  TargetSetMap TargetLinkClosure;
+  void FillLinkClosure(cmTarget* target, TargetSet& linked);
+  TargetSet const& GetTargetLinkClosure(cmTarget* target);
+};
+
+class cmGlobalVisualStudioGenerator::OrderedTargetDependSet:
+  public std::multiset<cmTargetDepend,
+                       cmGlobalVisualStudioGenerator::TargetCompare>
+{
+public:
+  typedef cmGlobalGenerator::TargetDependSet TargetDependSet;
+  typedef cmGlobalVisualStudioGenerator::TargetSet TargetSet;
+  OrderedTargetDependSet(TargetDependSet const&);
+  OrderedTargetDependSet(TargetSet const&);
 };
 
 #endif
