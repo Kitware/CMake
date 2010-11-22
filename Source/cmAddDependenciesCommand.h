@@ -62,6 +62,8 @@ public:
       "top-level target is one created by ADD_EXECUTABLE, ADD_LIBRARY, "
       "or ADD_CUSTOM_TARGET.  Adding dependencies with this command "
       "can be used to make sure one target is built before another target.  "
+      "Dependencies added to an IMPORTED target are followed transitively "
+      "in its place since the target itself does not build.  "
       "See the DEPENDS option of ADD_CUSTOM_TARGET "
       "and ADD_CUSTOM_COMMAND for adding file-level dependencies in custom "
       "rules.  See the OBJECT_DEPENDS option in "

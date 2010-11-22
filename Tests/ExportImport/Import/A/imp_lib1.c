@@ -1,4 +1,4 @@
-extern int testLib2(void);
+#include "testLib2.h"
 
 int imp_lib1(void)
 {
