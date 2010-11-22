@@ -253,7 +253,8 @@ bool cmCacheManager::LoadCache(const char* path,
         }
       }
     e.SetProperty("HELPSTRING", helpString.c_str());
-    if(cmCacheManager::ParseEntry(realbuffer, entryKey, e.Value, e.Type))
+    if(cmCacheManager::ParseEntry(realbuffer, entryKey, e.Value, e.Type) ||
+      cmCacheManager::ParseEntry(realbuffer, entryKey, e.Value))
       {
       if ( excludes.find(entryKey) == excludes.end() )
         {
