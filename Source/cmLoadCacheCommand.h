@@ -83,7 +83,6 @@ protected:
   
   bool ReadWithPrefix(std::vector<std::string> const& args);
   void CheckLine(const char* line);
-  bool ParseEntry(const char* entry, std::string& var, std::string& value);
 };
 
 
