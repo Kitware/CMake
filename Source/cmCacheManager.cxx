@@ -93,9 +93,9 @@ bool cmCacheManager::LoadCache(const char* path,
   return this->LoadCache(path, internal, emptySet, emptySet);
 }
 
-bool cmCacheManager::ParseEntry(const char* entry,
-                                std::string& var,
-                                std::string& value)
+static bool ParseEntryWithoutType(const char* entry,
+                                  std::string& var,
+                                  std::string& value)
 {
   // input line is:         key=value
   static cmsys::RegularExpression reg(
@@ -167,6 +167,11 @@ bool cmCacheManager::ParseEntry(const char* entry,
     {
     value = value.substr(1,
                          value.size() - 2);
+    }
+
+  if (!flag)
+    {
+    return ParseEntryWithoutType(entry, var, value);
     }
 
   return flag;
@@ -253,8 +258,7 @@ bool cmCacheManager::LoadCache(const char* path,
         }
       }
     e.SetProperty("HELPSTRING", helpString.c_str());
-    if(cmCacheManager::ParseEntry(realbuffer, entryKey, e.Value, e.Type) ||
-      cmCacheManager::ParseEntry(realbuffer, entryKey, e.Value))
+    if(cmCacheManager::ParseEntry(realbuffer, entryKey, e.Value, e.Type))
       {
       if ( excludes.find(entryKey) == excludes.end() )
         {
