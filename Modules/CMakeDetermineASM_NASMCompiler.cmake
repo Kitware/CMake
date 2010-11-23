@@ -1,6 +1,6 @@
 
 #=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
+# Copyright 2010 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -12,12 +12,16 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-# This file is used by EnableLanguage in cmGlobalGenerator to
-# determine that the selected ASM-ATT "compiler" works.
-# For assembler this can only check whether the compiler has been found,
-# because otherwise there would have to be a separate assembler source file
-# for each assembler on every architecture.
+# Find the nasm assembler. yasm (http://www.tortall.net/projects/yasm/) is nasm compatible
 
-SET(ASM_DIALECT "-ATT")
-INCLUDE(CMakeTestASMCompiler)
+SET(CMAKE_ASM_NASM_COMPILER_INIT nasm yasm)
+
+IF(NOT CMAKE_ASM_NASM_COMPILER)
+  FIND_PROGRAM(CMAKE_ASM_NASM_COMPILER nasm
+    "$ENV{ProgramFiles}/NASM")
+ENDIF(NOT CMAKE_ASM_NASM_COMPILER)
+
+# Load the generic DetermineASM compiler file with the DIALECT set properly:
+SET(ASM_DIALECT "_NASM")
+INCLUDE(CMakeDetermineASMCompiler)
 SET(ASM_DIALECT)
