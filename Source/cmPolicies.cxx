@@ -581,9 +581,44 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
         {
         ancientPolicies.push_back(i->first);
         }
-      else if (!mf->SetPolicy(i->second->ID, cmPolicies::WARN))
+      else
         {
-        return false;
+        // By default, all policies which did not exist in older cmake versions
+        // will be set to WARN. This can be overridden using
+        // CMAKE_POLICY_DEFAULT_CMP<NNNN> variables. In some case this is
+        // necessary to keep old projects building.
+        cmPolicies::PolicyStatus policyStatus = cmPolicies::WARN;
+
+        std::string defaultPolicySettingVar = "CMAKE_POLICY_DEFAULT_";
+        defaultPolicySettingVar += i->second->IDString;
+        std::string defaultPolicySetting = mf->GetSafeDefinition(
+                                              defaultPolicySettingVar.c_str());
+
+        if (defaultPolicySetting.size() > 0)
+          {
+          if (defaultPolicySetting == "NEW")
+            {
+            policyStatus = cmPolicies::NEW;
+            }
+          else if (defaultPolicySetting == "OLD")
+            {
+            policyStatus = cmPolicies::OLD;
+            }
+          else
+            {
+            cmOStringStream e;
+            e << "Requested to set policy " << i->second->IDString << " to "
+              << defaultPolicySetting << ", but only NEW and OLD can be used."
+              <<  "\n";
+            mf->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+            return false;
+            }
+          }
+
+        if (!mf->SetPolicy(i->second->ID, policyStatus))
+          {
+          return false;
+          }
         }
       }
     else
