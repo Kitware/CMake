@@ -35,10 +35,10 @@ SET(QT_QTHELP_LIB_DEPENDENCIES ${QT_QTCLUCENE_LIBRARY})
 
 
 IF(Q_WS_WIN)
-  # On Windows, qconfig.pri has "static" for static library builds
-  IF(QT_CONFIG MATCHES "static")
+  # On Windows, qconfig.pri has "shared" for shared library builds
+  IF(NOT QT_CONFIG MATCHES "shared")
     SET(QT_IS_STATIC 1)
-  ENDIF(QT_CONFIG MATCHES "static")
+  ENDIF(NOT QT_CONFIG MATCHES "shared")
 ELSE(Q_WS_WIN)
   # On other platforms, check file extension to know if its static
   IF(QT_QTCORE_LIBRARY_RELEASE)
@@ -75,6 +75,23 @@ IF(QT_QCONFIG MATCHES "system-png")
   SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${PNG_LIBRARY})
 ENDIF(QT_QCONFIG MATCHES "system-png")
 
+## system jpeg
+IF(QT_QCONFIG MATCHES "system-jpeg")
+  find_package(JPEG)
+  SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${JPEG_LIBRARIES})
+ENDIF(QT_QCONFIG MATCHES "system-jpeg")
+
+## system tiff
+IF(QT_QCONFIG MATCHES "system-tiff")
+  find_package(TIFF)
+  SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${TIFF_LIBRARIES})
+ENDIF(QT_QCONFIG MATCHES "system-tiff")
+
+## system mng
+IF(QT_QCONFIG MATCHES "system-mng")
+  find_library(MNG_LIBRARY NAMES mng)
+  SET(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${MNG_LIBRARY})
+ENDIF(QT_QCONFIG MATCHES "system-mng")
 
 # for X11, get X11 library directory
 IF(Q_WS_X11)
