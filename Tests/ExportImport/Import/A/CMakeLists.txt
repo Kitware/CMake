@@ -75,6 +75,22 @@ foreach(c DEBUG RELWITHDEBINFO)
   set_property(TARGET imp_testExe1b PROPERTY COMPILE_DEFINITIONS_${c} EXE_DBG)
 endforeach(c)
 
+# Create a custom target to generate a header for the libraries below.
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+add_custom_command(
+  OUTPUT testLib2.h
+  VERBATIM COMMAND
+  ${CMAKE_COMMAND} -E echo "extern int testLib2(void);" > testLib2.h
+  )
+add_custom_target(hdr_testLib2 DEPENDS testLib2.h)
+
+# Drive the header generation through an indirect chain of imported
+# target dependencies.
+add_library(dep_testLib2 UNKNOWN IMPORTED)
+add_dependencies(dep_testLib2 hdr_testLib2)
+add_dependencies(bld_testLib2 dep_testLib2)
+add_dependencies(exp_testLib2 dep_testLib2)
+
 # Create a library to be linked by another directory in this project
 # to test transitive linking to otherwise invisible imported targets.
 add_library(imp_lib1 STATIC imp_lib1.c)

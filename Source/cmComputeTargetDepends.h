@@ -21,6 +21,7 @@
 class cmComputeComponentGraph;
 class cmGlobalGenerator;
 class cmTarget;
+class cmTargetDependSet;
 
 /** \class cmComputeTargetDepends
  * \brief Compute global interdependencies among targets.
@@ -38,13 +39,14 @@ public:
   bool Compute();
 
   std::vector<cmTarget*> const& GetTargets() const { return this->Targets; }
-  void GetTargetDirectDepends(cmTarget* t, std::set<cmTarget*>& deps);
+  void GetTargetDirectDepends(cmTarget* t, cmTargetDependSet& deps);
 private:
   void CollectTargets();
   void CollectDepends();
   void CollectTargetDepends(int depender_index);
   void AddTargetDepend(int depender_index, const char* dependee_name,
                        bool linking);
+  void AddTargetDepend(int depender_index, cmTarget* dependee, bool linking);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
 
   cmGlobalGenerator* GlobalGenerator;

@@ -24,11 +24,7 @@ bool cmAddDependenciesCommand
     }
 
   std::string target_name = args[0];
-
-  cmTarget* target = 
-    this->GetMakefile()->GetLocalGenerator()->
-    GetGlobalGenerator()->FindTarget(0, target_name.c_str());
-  if(target)
+  if(cmTarget* target = this->Makefile->FindTargetToUse(target_name.c_str()))
     {
     std::vector<std::string>::const_iterator s = args.begin();
     ++s; // skip over target_name

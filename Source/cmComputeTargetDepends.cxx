@@ -144,7 +144,7 @@ bool cmComputeTargetDepends::Compute()
 //----------------------------------------------------------------------------
 void
 cmComputeTargetDepends::GetTargetDirectDepends(cmTarget* t,
-                                               std::set<cmTarget*>& deps)
+                                               cmTargetDependSet& deps)
 {
   // Lookup the index for this target.  All targets should be known by
   // this point.
@@ -156,7 +156,9 @@ cmComputeTargetDepends::GetTargetDirectDepends(cmTarget* t,
   EdgeList const& nl = this->FinalGraph[i];
   for(EdgeList::const_iterator ni = nl.begin(); ni != nl.end(); ++ni)
     {
-    deps.insert(this->Targets[*ni]);
+    cmTarget* dep = this->Targets[*ni];
+    cmTargetDependSet::iterator di = deps.insert(dep).first;
+    di->SetType(ni->IsStrong());
     }
 }
 
@@ -244,13 +246,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
 
   // Check the target's makefile first.
   cmTarget* dependee =
-    depender->GetMakefile()->FindTarget(dependee_name);
-
-  // Then search globally.
-  if(!dependee)
-    {
-    dependee = this->GlobalGenerator->FindTarget(0, dependee_name);
-    }
+    depender->GetMakefile()->FindTargetToUse(dependee_name);
 
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
@@ -262,25 +258,42 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
     dependee = 0;
     }
 
-  // If not found then skip then the dependee.
-  if(!dependee)
+  if(dependee)
     {
-    return;
+    this->AddTargetDepend(depender_index, dependee, linking);
     }
+}
 
-  // No imported targets should have been found.
-  assert(!dependee->IsImported());
+//----------------------------------------------------------------------------
+void cmComputeTargetDepends::AddTargetDepend(int depender_index,
+                                             cmTarget* dependee,
+                                             bool linking)
+{
+  if(dependee->IsImported())
+    {
+    // Skip imported targets but follow their utility dependencies.
+    std::set<cmStdString> const& utils = dependee->GetUtilities();
+    for(std::set<cmStdString>::const_iterator i = utils.begin();
+        i != utils.end(); ++i)
+      {
+      cmTarget* transitive_dependee =
+        dependee->GetMakefile()->FindTargetToUse(i->c_str());
+      this->AddTargetDepend(depender_index, transitive_dependee, false);
+      }
+    }
+  else
+    {
+    // Lookup the index for this target.  All targets should be known by
+    // this point.
+    std::map<cmTarget*, int>::const_iterator tii =
+      this->TargetIndex.find(dependee);
+    assert(tii != this->TargetIndex.end());
+    int dependee_index = tii->second;
 
-  // Lookup the index for this target.  All targets should be known by
-  // this point.
-  std::map<cmTarget*, int>::const_iterator tii =
-    this->TargetIndex.find(dependee);
-  assert(tii != this->TargetIndex.end());
-  int dependee_index = tii->second;
-
-  // Add this entry to the dependency graph.
-  this->InitialGraph[depender_index].push_back(
-    cmGraphEdge(dependee_index, !linking));
+    // Add this entry to the dependency graph.
+    this->InitialGraph[depender_index].push_back(
+      cmGraphEdge(dependee_index, !linking));
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -445,7 +458,7 @@ cmComputeTargetDepends
       int j = *ei;
       if(cmap[j] == c && ei->IsStrong())
         {
-        this->FinalGraph[i].push_back(j);
+        this->FinalGraph[i].push_back(cmGraphEdge(j, true));
         if(!this->IntraComponent(cmap, c, j, head, emitted, visited))
           {
           return false;
@@ -456,7 +469,7 @@ cmComputeTargetDepends
     // Prepend to a linear linked-list of intra-component edges.
     if(*head >= 0)
       {
-      this->FinalGraph[i].push_back(*head);
+      this->FinalGraph[i].push_back(cmGraphEdge(*head, false));
       }
     else
       {
@@ -515,7 +528,7 @@ cmComputeTargetDepends
       int dependee_component = *ni;
       int dependee_component_head = this->ComponentHead[dependee_component];
       this->FinalGraph[depender_component_tail]
-        .push_back(dependee_component_head);
+        .push_back(cmGraphEdge(dependee_component_head, ni->IsStrong()));
       }
     }
   return true;
