@@ -275,12 +275,6 @@ void cmCTestMultiProcessHandler::StartNextTests()
         }
       numToStart -= processors;
       }
-    else
-      {
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
-                 << "Test did not start waiting on depends to finish: "
-                 << *test << "\n");
-      }
     if(numToStart == 0)
       {
       return;
