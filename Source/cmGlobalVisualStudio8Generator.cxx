@@ -289,6 +289,14 @@ cmGlobalVisualStudio8Generator
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
+{
+  // Skip over the cmGlobalVisualStudioGenerator implementation!
+  // We do not need the support that VS <= 7.1 needs.
+  return this->cmGlobalGenerator::ComputeTargetDepends();
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::WriteProjectDepends(
   std::ostream& fout, const char*, const char*, cmTarget& t)
 {
