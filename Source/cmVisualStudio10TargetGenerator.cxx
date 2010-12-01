@@ -244,6 +244,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
 
 void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 {
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
@@ -290,6 +292,13 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     else
       {
       this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
+      }
+    if(const char* toolset = gg->GetPlatformToolset())
+      {
+      std::string pts = "<PlatformToolset>";
+      pts += toolset;
+      pts += "</PlatformToolset>\n";
+      this->WriteString(pts.c_str(), 2);
       }
     this->WriteString("</PropertyGroup>\n", 1);
     }
