@@ -232,7 +232,9 @@ int cmCPackArchiveGenerator::PackageFiles()
     // CASE 1 : COMPONENT ALL-IN-ONE package
     // If ALL GROUPS or ALL COMPONENTS in ONE package has been requested
     // then the package file is unique and should be open here.
-    if (allComponentInOne || (allGroupInOne && (!this->ComponentGroups.empty())))
+    if (allComponentInOne ||
+        (allGroupInOne && (!this->ComponentGroups.empty()))
+       )
       {
       return PackageComponentsAllInOne(allComponentInOne);
       }
