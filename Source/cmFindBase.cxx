@@ -164,6 +164,11 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
         }
       }
     }
+  if(args.size() < 2 )
+    {
+    this->SetError("called with incorrect number of arguments");
+    return false;
+    }
   this->VariableName = args[0];
   if(this->CheckForVariableInCache())
     {
