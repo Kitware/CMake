@@ -472,11 +472,11 @@ function(copy_resolved_item_into_bundle resolved_item resolved_embedded_item)
   else()
     #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy ${resolved_item} ${resolved_embedded_item}")
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}" "${resolved_embedded_item}")
+    if(UNIX AND NOT APPLE)
+      file(RPATH_REMOVE FILE "${resolved_embedded_item}")
+    endif(UNIX AND NOT APPLE)
   endif()
 
-  if(UNIX AND NOT APPLE)
-    file(RPATH_REMOVE FILE "${resolved_embedded_item}")
-  endif(UNIX AND NOT APPLE)
 endfunction(copy_resolved_item_into_bundle)
 
 
@@ -514,11 +514,11 @@ function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_ite
         execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${resolved_resources}" "${resolved_embedded_resources}")
       endif()
     endif()
+    if(UNIX AND NOT APPLE)
+      file(RPATH_REMOVE FILE "${resolved_embedded_item}")
+    endif(UNIX AND NOT APPLE)
   endif()
 
-  if(UNIX AND NOT APPLE)
-    file(RPATH_REMOVE FILE "${resolved_embedded_item}")
-  endif(UNIX AND NOT APPLE)
 endfunction(copy_resolved_framework_into_bundle)
 
 
