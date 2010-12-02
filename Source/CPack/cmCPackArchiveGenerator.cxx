@@ -228,21 +228,25 @@ int cmCPackArchiveGenerator::PackageFiles()
 
   PrepareGroupingKind();
 
-  // CASE 1 : COMPONENT ALL-IN-ONE package
-  // If ALL GROUPS or ALL COMPONENTS in ONE package has been requested
-  // then the package file is unique and should be open here.
-  if (allComponentInOne || (allGroupInOne && (!this->ComponentGroups.empty())))
-    {
-    return PackageComponentsAllInOne(allComponentInOne);
-    }
-  // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
-  // There will be 1 package for each component group
-  // however one may require to ignore component group and
-  // in this case you'll get 1 package for each component.
-  else if ((!this->ComponentGroups.empty()) || (ignoreComponentGroup))
-    {
-    return PackageComponents(ignoreComponentGroup);
-    }
+  if (SupportsComponentInstallation()) {
+    // CASE 1 : COMPONENT ALL-IN-ONE package
+    // If ALL GROUPS or ALL COMPONENTS in ONE package has been requested
+    // then the package file is unique and should be open here.
+    if (allComponentInOne ||
+        (allGroupInOne && (!this->ComponentGroups.empty()))
+       )
+      {
+      return PackageComponentsAllInOne(allComponentInOne);
+      }
+    // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
+    // There will be 1 package for each component group
+    // however one may require to ignore component group and
+    // in this case you'll get 1 package for each component.
+    else if ((!this->ComponentGroups.empty()) || (ignoreComponentGroup))
+      {
+      return PackageComponents(ignoreComponentGroup);
+      }
+  }
 
   // CASE 3 : NON COMPONENT package.
   DECLARE_AND_OPEN_ARCHIVE(packageFileNames[0],archive);
@@ -278,5 +282,15 @@ int cmCPackArchiveGenerator::GenerateHeader(std::ostream*)
 }
 
 bool cmCPackArchiveGenerator::SupportsComponentInstallation() const {
-  return true;
+  // The Component installation support should only
+  // be activated if explicitly requested by the user
+  // (for backward compatibility reason)
+  if (IsSet("CPACK_ARCHIVE_COMPONENT_INSTALL"))
+    {
+    return true;
+    }
+  else
+    {
+    return false;
+    }
 }
