@@ -141,9 +141,9 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
   this->WarnUnused = mf.WarnUnused;
+  this->Initialize();
   this->CheckSystemVars = mf.CheckSystemVars;
   this->ListFileStack = mf.ListFileStack;
-  this->Initialize();
 }
 
 //----------------------------------------------------------------------------
@@ -840,8 +840,6 @@ void cmMakefile::ConfigureFinalPass()
     {
     l->second.FinishConfigure();
     }
-
-  this->GetCMakeInstance()->RunCheckForUnusedVariables("configure");
 }
 
 //----------------------------------------------------------------------------
@@ -1803,8 +1801,10 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
     if (this->CheckSystemVars ||
         cmSystemTools::IsSubDirectory(path.c_str(),
                                       this->GetHomeDirectory()) ||
-        cmSystemTools::IsSubDirectory(path.c_str(),
-                                      this->GetHomeOutputDirectory()))
+        (cmSystemTools::IsSubDirectory(path.c_str(),
+                                      this->GetHomeOutputDirectory()) &&
+        !cmSystemTools::IsSubDirectory(path.c_str(),
+                                cmake::GetCMakeFilesDirectory())))
       {
       cmOStringStream msg;
       msg << path << ":" << line << ":" <<
