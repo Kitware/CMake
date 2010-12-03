@@ -141,9 +141,9 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
   this->WarnUnused = mf.WarnUnused;
+  this->Initialize();
   this->CheckSystemVars = mf.CheckSystemVars;
   this->ListFileStack = mf.ListFileStack;
-  this->Initialize();
 }
 
 //----------------------------------------------------------------------------
