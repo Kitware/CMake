@@ -1793,8 +1793,10 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
     if (this->CheckSystemVars ||
         cmSystemTools::IsSubDirectory(path.c_str(),
                                       this->GetHomeDirectory()) ||
-        cmSystemTools::IsSubDirectory(path.c_str(),
-                                      this->GetHomeOutputDirectory()))
+        (cmSystemTools::IsSubDirectory(path.c_str(),
+                                      this->GetHomeOutputDirectory()) &&
+        !cmSystemTools::IsSubDirectory(path.c_str(),
+                                cmake::GetCMakeFilesDirectory())))
       {
       cmOStringStream msg;
       msg << path << ":" << line << ":" <<
