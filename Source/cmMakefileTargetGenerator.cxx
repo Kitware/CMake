@@ -849,7 +849,7 @@ cmMakefileTargetGenerator
   p_depends.push_back(relativeObj);
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       temp.c_str(), p_depends, no_commands,
-                                      true);
+                                      false);
 }
 
 //----------------------------------------------------------------------------
