@@ -341,7 +341,7 @@ bool cmCacheManager::LoadCache(const char* path,
         std::string("The current CMakeCache.txt directory ") +
         currentcwd + std::string(" is different than the directory ") +
         std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) +
-        std::string(" where CMackeCache.txt was created. This may result "
+        std::string(" where CMakeCache.txt was created. This may result "
                     "in binaries being created in the wrong place. If you "
                     "are not sure, reedit the CMakeCache.txt");
       cmSystemTools::Error(message.c_str());
