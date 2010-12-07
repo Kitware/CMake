@@ -181,9 +181,6 @@ bool cmMakefile::NeedCacheCompatibility(int major, int minor)
 
 cmMakefile::~cmMakefile()
 {
-  // Check for unused variables
-  this->CheckForUnusedVariables();
-
   for(std::vector<cmInstallGenerator*>::iterator
         i = this->InstallGenerators.begin();
       i != this->InstallGenerators.end(); ++i)
