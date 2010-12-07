@@ -1808,7 +1808,7 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
       {
       cmOStringStream msg;
       msg << path << ":" << line << ":" <<
-        " warning: (" << reason << ") unused variable \'" << name << "\'";
+        " CMake Warning: (" << reason << ") unused variable \'" << name << "\'";
       cmSystemTools::Message(msg.str().c_str());
       }
     }

@@ -138,7 +138,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
         {
         cmOStringStream msg;
         msg << this->FileName << ":" << this->FileLine << ":" <<
-          " warning: uninitialized variable \'" << var << "\'";
+          " CMake Warning: uninitialized variable \'" << var << "\'";
         cmSystemTools::Message(msg.str().c_str());
         }
       }
