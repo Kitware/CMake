@@ -137,9 +137,14 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
                                      this->Makefile->GetHomeOutputDirectory()))
         {
         cmOStringStream msg;
-        msg << this->FileName << ":" << this->FileLine << ":" <<
-          " CMake Warning: uninitialized variable \'" << var << "\'";
-        cmSystemTools::Message(msg.str().c_str());
+        cmListFileBacktrace bt;
+        cmListFileContext lfc;
+        lfc.FilePath = this->FileName;
+        lfc.Line = this->FileLine;
+        bt.push_back(lfc);
+        msg << "uninitialized variable \'" << var << "\'";
+        this->Makefile->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
+                                                        msg.str().c_str(), bt);
         }
       }
     return 0;

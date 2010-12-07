@@ -1109,9 +1109,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-project WarnUnusedUnusedViaSet
     --build-options "--warn-unused-vars")
   SET_TESTS_PROPERTIES(WarnUnusedUnusedViaSet PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMake Warning: \\(changing definition\\) unused variable 'UNUSED_VARIABLE'")
+    PASS_REGULAR_EXPRESSION "unused variable \\(changing definition\\) 'UNUSED_VARIABLE'")
   SET_TESTS_PROPERTIES(WarnUnusedUnusedViaSet PROPERTIES
-    FAIL_REGULAR_EXPRESSION "CMake Warning: \\(unsetting\\) unused variable 'UNUSED_VARIABLE'")
+    FAIL_REGULAR_EXPRESSION "unused variable \\(unsetting\\) 'UNUSED_VARIABLE'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaSet")
 
   ADD_TEST(WarnUnusedUnusedViaUnset ${CMAKE_CTEST_COMMAND}
@@ -1124,9 +1124,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-project WarnUnusedUnusedViaUnset
     --build-options "--warn-unused-vars")
   SET_TESTS_PROPERTIES(WarnUnusedUnusedViaUnset PROPERTIES
-    PASS_REGULAR_EXPRESSION ":7: CMake Warning: \\(unsetting\\) unused variable 'UNUSED_VARIABLE'")
+    PASS_REGULAR_EXPRESSION "CMake Warning .*:7 \\(set\\):")
   SET_TESTS_PROPERTIES(WarnUnusedUnusedViaUnset PROPERTIES
-    FAIL_REGULAR_EXPRESSION ":5: CMake Warning: \\(unsetting\\) unused variable 'UNUSED_VARIABLE'")
+    FAIL_REGULAR_EXPRESSION "CMake Warning .*:5 \\(set\\):")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset")
 
   ADD_TEST(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
