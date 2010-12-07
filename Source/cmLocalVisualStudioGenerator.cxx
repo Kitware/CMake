@@ -14,6 +14,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
+#include "cmCustomCommandGenerator.h"
 #include "windows.h"
 
 //----------------------------------------------------------------------------
@@ -157,8 +158,8 @@ cmLocalVisualStudioGenerator
 {
   const cmCustomCommandLines& commandLines = cc.GetCommandLines();
   const char* workingDirectory = cc.GetWorkingDirectory();
-  bool escapeOldStyle = cc.GetEscapeOldStyle();
-  bool escapeAllowMakeVars = cc.GetEscapeAllowMakeVars();
+  cmCustomCommandGenerator ccg(cc, configName, this->Makefile);
+  RelativeRoot relativeRoot = workingDirectory? NONE : START_OUTPUT;
 
   // Avoid leading or trailing newlines.
   const char* newline = "";
@@ -198,40 +199,16 @@ cmLocalVisualStudioGenerator
       }
     }
   // Write each command on a single line.
-  for(cmCustomCommandLines::const_iterator cl = commandLines.begin();
-      cl != commandLines.end(); ++cl)
+  for(unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c)
     {
     // Start a new line.
     script += newline;
     newline = newline_text;
 
-    // Start with the command name.
-    const cmCustomCommandLine& commandLine = *cl;
-    std::string commandName = this->GetRealLocation(commandLine[0].c_str(), 
-                                                    configName);
-    if(!workingDirectory)
-      {
-      script += this->Convert(commandName.c_str(),START_OUTPUT,SHELL);
-      }
-    else
-      {
-      script += this->Convert(commandName.c_str(),NONE,SHELL);
-      }
-
-    // Add the arguments.
-    for(unsigned int j=1;j < commandLine.size(); ++j)
-      {
-      script += " ";
-      if(escapeOldStyle)
-        {
-        script += this->EscapeForShellOldStyle(commandLine[j].c_str());
-        }
-      else
-        {
-        script += this->EscapeForShell(commandLine[j].c_str(),
-                                       escapeAllowMakeVars);
-        }
-      }
+    // Add this command line.
+    std::string cmd = ccg.GetCommand(c);
+    script += this->Convert(cmd.c_str(), relativeRoot, SHELL);
+    ccg.AppendArguments(c, script);
 
     // After each custom command, check for an error result.
     // If there was an error, jump to the VCReportError label,
