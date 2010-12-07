@@ -33,7 +33,13 @@ unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
 std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 {
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
-  return this->LG->GetRealLocation(argv0.c_str(), this->Config);
+  cmTarget* target = this->Makefile->FindTargetToUse(argv0.c_str());
+  if(target && target->GetType() == cmTarget::EXECUTABLE &&
+     (target->IsImported() || !this->Makefile->IsOn("CMAKE_CROSSCOMPILING")))
+    {
+    return target->GetLocation(this->Config);
+    }
+  return argv0;
 }
 
 //----------------------------------------------------------------------------
