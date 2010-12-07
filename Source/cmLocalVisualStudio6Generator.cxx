@@ -65,13 +65,7 @@ public:
       {
       this->Code += "\\\n\t";
       }
-    this->Code +=
-      this->LG->ConstructScript(cc.GetCommandLines(),
-                                cc.GetWorkingDirectory(),
-                                this->Config,
-                                cc.GetEscapeOldStyle(),
-                                cc.GetEscapeAllowMakeVars(),
-                                "\\\n\t");
+    this->Code += this->LG->ConstructScript(cc, this->Config, "\\\n\t");
     }
 private:
   cmLocalVisualStudio6Generator* LG;
@@ -659,12 +653,7 @@ cmLocalVisualStudio6Generator
     {
     std::string config = this->GetConfigName(*i);
     std::string script =
-      this->ConstructScript(command.GetCommandLines(), 
-                            command.GetWorkingDirectory(),
-                            config.c_str(),
-                            command.GetEscapeOldStyle(),
-                            command.GetEscapeAllowMakeVars(),
-                            "\\\n\t");
+      this->ConstructScript(command, config.c_str(), "\\\n\t");
       
     if (i == this->Configurations.begin())
       {

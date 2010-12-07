@@ -151,13 +151,15 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
 //----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudioGenerator
-::ConstructScript(const cmCustomCommandLines& commandLines,
-                  const char* workingDirectory,
+::ConstructScript(cmCustomCommand const& cc,
                   const char* configName,
-                  bool escapeOldStyle,
-                  bool escapeAllowMakeVars,
                   const char* newline_text)
 {
+  const cmCustomCommandLines& commandLines = cc.GetCommandLines();
+  const char* workingDirectory = cc.GetWorkingDirectory();
+  bool escapeOldStyle = cc.GetEscapeOldStyle();
+  bool escapeAllowMakeVars = cc.GetEscapeAllowMakeVars();
+
   // Avoid leading or trailing newlines.
   const char* newline = "";
 
