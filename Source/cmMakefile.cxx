@@ -1777,18 +1777,21 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
   if (this->WarnUnused && !this->VariableUsed(name))
     {
     cmStdString path;
-    long line;
+    cmListFileBacktrace bt;
     if (this->CallStack.size())
       {
       const cmListFileContext* file = this->CallStack.back().Context;
+      bt.push_back(*file);
       path = file->FilePath.c_str();
-      line = file->Line;
       }
     else
       {
       path = this->GetStartDirectory();
       path += "/CMakeLists.txt";
-      line = 0;
+      cmListFileContext lfc;
+      lfc.FilePath = path;
+      lfc.Line = 0;
+      bt.push_back(lfc);
       }
     if (this->CheckSystemVars ||
         cmSystemTools::IsSubDirectory(path.c_str(),
@@ -1799,9 +1802,10 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
                                 cmake::GetCMakeFilesDirectory())))
       {
       cmOStringStream msg;
-      msg << path << ":" << line << ":" <<
-        " CMake Warning: (" << reason << ") unused variable \'" << name << "\'";
-      cmSystemTools::Message(msg.str().c_str());
+      msg << "unused variable (" << reason << ") \'" << name << "\'";
+      this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
+                                             msg.str().c_str(),
+                                             bt);
       }
     }
 }
