@@ -1167,7 +1167,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-project WarnUninitialized
     --build-options "--warn-uninitialized")
   SET_TESTS_PROPERTIES(WarnUninitialized PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMake Warning: uninitialized variable 'USED_VARIABLE'")
+    PASS_REGULAR_EXPRESSION "uninitialized variable 'USED_VARIABLE'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUninitialized")
 
   # Make sure CTest can handle a test with no newline in output.
