@@ -1624,9 +1624,12 @@ WriteCustomRule(std::ostream& fout,
           ++d)
         {
         // Get the real name of the dependency in case it is a CMake target.
-        std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
-        fout << this->ConvertToXMLOutputPath(dep.c_str())
-             << ";";
+        std::string dep;
+        if(this->GetRealDependency(d->c_str(), i->c_str(), dep))
+          {
+          fout << this->ConvertToXMLOutputPath(dep.c_str())
+               << ";";
+          }
         }
       }
     fout << "\"\n";

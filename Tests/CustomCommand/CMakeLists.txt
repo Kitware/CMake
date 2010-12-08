@@ -130,6 +130,7 @@ ADD_CUSTOM_COMMAND(
 ################################################################
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.pre
   DEPENDS ${PROJECT_SOURCE_DIR}/foo.in
+          TDocument # Ensure doc1.h generates before this target
   COMMAND   ${CMAKE_COMMAND}  
   ARGS      -E copy ${PROJECT_SOURCE_DIR}/foo.in 
   ${PROJECT_BINARY_DIR}/foo.pre
@@ -180,10 +181,6 @@ ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/generated.c
   )
 
 TARGET_LINK_LIBRARIES(CustomCommand GeneratedHeader)
-
-# must add a dependency on TDocument otherwise it might never build and 
-# the CustomCommand executable really needs doc1.h
-ADD_DEPENDENCIES(CustomCommand TDocument)
 
 ##############################################################################
 # Test for using just the target name as executable in the COMMAND
