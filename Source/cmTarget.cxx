@@ -17,6 +17,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmComputeLinkInformation.h"
 #include "cmListFileCache.h"
+#include "cmGeneratorExpression.h"
 #include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <set>
@@ -1402,6 +1403,7 @@ cmTargetTraceDependencies
 {
   // Transform command names that reference targets built in this
   // project to corresponding target-level dependencies.
+  cmGeneratorExpression ge(this->Makefile, 0, cc.GetBacktrace(), true);
   for(cmCustomCommandLines::const_iterator cit = cc.GetCommandLines().begin();
       cit != cc.GetCommandLines().end(); ++cit)
     {
@@ -1418,6 +1420,21 @@ cmTargetTraceDependencies
         this->Target->AddUtility(command.c_str());
         }
       }
+
+    // Check for target references in generator expressions.
+    for(cmCustomCommandLine::const_iterator cli = cit->begin();
+        cli != cit->end(); ++cli)
+      {
+      ge.Process(*cli);
+      }
+    }
+
+  // Add target-level dependencies referenced by generator expressions.
+  std::set<cmTarget*> targets = ge.GetTargets();
+  for(std::set<cmTarget*>::iterator ti = targets.begin();
+      ti != targets.end(); ++ti)
+    {
+    this->Target->AddUtility((*ti)->GetName());
     }
 
   // Queue the custom command dependencies.

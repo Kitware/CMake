@@ -31,3 +31,4 @@ SET(PerConfig_COMMAND
     -P ${PerConfig_SOURCE_DIR}/perconfig.cmake
     )
 SET(PerConfig_COMMAND "${PerConfig_COMMAND}" PARENT_SCOPE)
+SET(PerConfig_DEPENDS ${PerConfig_SOURCE_DIR}/perconfig.cmake perconfig pcStatic pcShared)

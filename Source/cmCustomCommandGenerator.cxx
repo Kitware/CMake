@@ -14,13 +14,21 @@
 #include "cmMakefile.h"
 #include "cmCustomCommand.h"
 #include "cmLocalGenerator.h"
+#include "cmGeneratorExpression.h"
 
 //----------------------------------------------------------------------------
 cmCustomCommandGenerator::cmCustomCommandGenerator(
   cmCustomCommand const& cc, const char* config, cmMakefile* mf):
   CC(cc), Config(config), Makefile(mf), LG(mf->GetLocalGenerator()),
-  OldStyle(cc.GetEscapeOldStyle()), MakeVars(cc.GetEscapeAllowMakeVars())
+  OldStyle(cc.GetEscapeOldStyle()), MakeVars(cc.GetEscapeAllowMakeVars()),
+  GE(new cmGeneratorExpression(mf, config, cc.GetBacktrace()))
 {
+}
+
+//----------------------------------------------------------------------------
+cmCustomCommandGenerator::~cmCustomCommandGenerator()
+{
+  delete this->GE;
 }
 
 //----------------------------------------------------------------------------
@@ -39,7 +47,7 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
     {
     return target->GetLocation(this->Config);
     }
-  return argv0;
+  return this->GE->Process(argv0);
 }
 
 //----------------------------------------------------------------------------
@@ -50,7 +58,7 @@ cmCustomCommandGenerator
   cmCustomCommandLine const& commandLine = this->CC.GetCommandLines()[c];
   for(unsigned int j=1;j < commandLine.size(); ++j)
     {
-    std::string const& arg = commandLine[j];
+    std::string arg = this->GE->Process(commandLine[j]);
     cmd += " ";
     if(this->OldStyle)
       {
