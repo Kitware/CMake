@@ -1878,10 +1878,9 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
         break;
       case cmTarget::UTILITY:
       case cmTarget::GLOBAL_TARGET:
-        // Depending on a utility target may not work but just trust
-        // the user to have given a valid name.
-        dep = inName;
-        return true;
+        // A utility target has no file on which to depend.  This was listed
+        // only to get the target-level dependency.
+        return false;
       case cmTarget::INSTALL_FILES:
       case cmTarget::INSTALL_PROGRAMS:
       case cmTarget::INSTALL_DIRECTORY:

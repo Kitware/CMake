@@ -158,6 +158,7 @@ public:
 
   /** Translate a dependency as given in CMake code to the name to
       appear in a generated build file.  If the given name is that of
+      a utility target, returns false.  If the given name is that of
       a CMake target it will be transformed to the real output
       location of that target for the given configuration.  If the
       given name is the full path to a file it will be returned.
