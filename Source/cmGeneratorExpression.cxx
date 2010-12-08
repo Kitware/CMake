@@ -141,6 +141,7 @@ bool cmGeneratorExpression::EvaluateTargetInfo(std::string& result)
     result = "Target \"" + name + "\" is not an executable or library.";
     return false;
     }
+  this->Targets.insert(target);
 
   // Lookup the target file with the given purpose.
   std::string purpose = this->TargetInfo.match(1);
