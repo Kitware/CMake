@@ -378,9 +378,7 @@ void SystemTools::GetPath(kwsys_stl::vector<kwsys_stl::string>& path, const char
     kwsys_stl::string::size_type endpos = pathEnv.find(pathSep, start);
     if(endpos != kwsys_stl::string::npos)
       {
-      kwsys_stl::string convertedPath;
-      Realpath(pathEnv.substr(start, endpos-start).c_str(), convertedPath);
-      path.push_back(convertedPath);
+      path.push_back(pathEnv.substr(start, endpos-start));
       start = endpos+1;
       }
     else
