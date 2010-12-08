@@ -32,7 +32,8 @@ class cmGeneratorExpression
 public:
   /** Construct with an evaluation context and configuration.  */
   cmGeneratorExpression(cmMakefile* mf, const char* config,
-                        cmListFileBacktrace const& backtrace);
+                        cmListFileBacktrace const& backtrace,
+                        bool quiet = false);
 
   /** Evaluate generator expressions in a string.  */
   const char* Process(std::string const& input);
@@ -41,6 +42,7 @@ private:
   cmMakefile* Makefile;
   const char* Config;
   cmListFileBacktrace const& Backtrace;
+  bool Quiet;
   std::vector<char> Data;
   std::stack<size_t> Barriers;
   cmsys::RegularExpression TargetInfo;
