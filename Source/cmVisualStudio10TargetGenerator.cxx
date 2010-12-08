@@ -386,10 +386,12 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
         d != command.GetDepends().end(); 
         ++d)
       {
-      std::string dep = this->LocalGenerator->
-        GetRealDependency(d->c_str(), i->c_str());
-      this->ConvertToWindowsSlash(dep);
-      (*this->BuildFileStream ) << ";" << dep;
+      std::string dep;
+      if(this->LocalGenerator->GetRealDependency(d->c_str(), i->c_str(), dep))
+        {
+        this->ConvertToWindowsSlash(dep);
+        (*this->BuildFileStream ) << ";" << dep;
+        }
       }
     (*this->BuildFileStream ) << ";%(AdditionalInputs)</AdditionalInputs>\n";
     this->WritePlatformConfigTag("Outputs", i->c_str(), 3);

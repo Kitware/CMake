@@ -686,10 +686,12 @@ cmLocalVisualStudio6Generator
         ++d)
       {
       // Lookup the real name of the dependency in case it is a CMake target.
-      std::string dep = this->GetRealDependency(d->c_str(),
-                                                config.c_str());
-      fout << "\\\n\t" <<
-        this->ConvertToOptionallyRelativeOutputPath(dep.c_str());
+      std::string dep;
+      if(this->GetRealDependency(d->c_str(), config.c_str(), dep))
+        {
+        fout << "\\\n\t" <<
+          this->ConvertToOptionallyRelativeOutputPath(dep.c_str());
+        }
       }
     fout << "\n";
 

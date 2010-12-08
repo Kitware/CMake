@@ -164,8 +164,9 @@ public:
       Otherwise the name is treated as a relative path with respect to
       the source directory of this generator.  This should only be
       used for dependencies of custom commands.  */
-  std::string GetRealDependency(const char* name, const char* config);
-  
+  bool GetRealDependency(const char* name, const char* config,
+                         std::string& dep);
+
   /** Translate a command as given in CMake code to the location of the 
       executable if the command is the name of a CMake executable target.
       If that's not the case, just return the original name. */
