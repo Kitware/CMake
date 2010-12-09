@@ -1450,6 +1450,15 @@ cmTargetTraceDependencies
 //----------------------------------------------------------------------------
 void cmTarget::TraceDependencies(const char* vsProjectFile)
 {
+  // CMake-generated targets have no dependencies to trace.  Normally tracing
+  // would find nothing anyway, but when building CMake itself the "install"
+  // target command ends up referencing the "cmake" target but we do not
+  // really want the dependency because "install" depend on "all" anyway.
+  if(this->GetType() == cmTarget::GLOBAL_TARGET)
+    {
+    return;
+    }
+
   // Use a helper object to trace the dependencies.
   cmTargetTraceDependencies tracer(this, this->Internal.Get(), vsProjectFile);
   tracer.Trace();
