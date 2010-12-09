@@ -64,7 +64,8 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
           AND NOT "${CMAKE_OSX_ARCHITECTURES}" MATCHES ";"
           # Skip this with Xcode for now.
           AND NOT "${CMAKE_GENERATOR}" MATCHES Xcode)
-        CMAKE_PARSE_IMPLICIT_LINK_INFO("${OUTPUT}" implicit_libs implicit_dirs log)
+        CMAKE_PARSE_IMPLICIT_LINK_INFO("${OUTPUT}" implicit_libs implicit_dirs log
+          "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}")
         FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
           "Parsed ${lang} implicit link information from above output:\n${log}\n\n")
       ENDIF()

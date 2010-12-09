@@ -16,7 +16,7 @@
 # This is used internally by CMake and should not be included by user
 # code.
 
-function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var)
+function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var obj_regex)
   set(implicit_libs_tmp "")
   set(implicit_dirs_tmp)
   set(log "")
@@ -59,6 +59,11 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var)
           # Unix library full path.
           list(APPEND implicit_libs_tmp ${arg})
           set(log "${log}    arg [${arg}] ==> lib [${arg}]\n")
+        elseif("${arg}" MATCHES "^(.:)?[/\\].*\\.o$"
+            AND obj_regex AND "${arg}" MATCHES "${obj_regex}")
+          # Object file full path.
+          list(APPEND implicit_libs_tmp ${arg})
+          set(log "${log}    arg [${arg}] ==> obj [${arg}]\n")
         elseif("${arg}" MATCHES "^-Y(P,)?")
           # Sun search path.
           string(REGEX REPLACE "^-Y(P,)?" "" dirs "${arg}")
