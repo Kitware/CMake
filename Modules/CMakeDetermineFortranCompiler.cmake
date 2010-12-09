@@ -169,6 +169,9 @@ IF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   LIST(APPEND CMAKE_Fortran_COMPILER_ID_VENDORS Compaq)
   SET(CMAKE_Fortran_COMPILER_ID_VENDOR_FLAGS_Compaq "-what")
   SET(CMAKE_Fortran_COMPILER_ID_VENDOR_REGEX_Compaq "Compaq Visual Fortran")
+  LIST(APPEND CMAKE_Fortran_COMPILER_ID_VENDORS NAG) # Numerical Algorithms Group
+  SET(CMAKE_Fortran_COMPILER_ID_VENDOR_FLAGS_NAG "-V")
+  SET(CMAKE_Fortran_COMPILER_ID_VENDOR_REGEX_NAG "NAG Fortran Compiler")
 
   # Try to identify the compiler.
   SET(CMAKE_Fortran_COMPILER_ID)
