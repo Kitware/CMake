@@ -3205,6 +3205,7 @@ void cmTarget::GetLibraryNames(std::string& name,
     // the library version as the soversion.
     soversion = version;
     }
+  bool isApple = this->Makefile->IsOn("APPLE");
 
   // Get the components of the library name.
   std::string prefix;
@@ -3216,26 +3217,33 @@ void cmTarget::GetLibraryNames(std::string& name,
   name = prefix+base+suffix;
 
   // The library's soname.
-#if defined(__APPLE__)
-  soName = prefix+base;
-#else
-  soName = name;
-#endif
+  if(isApple)
+    {
+    soName = prefix+base;
+    }
+  else
+    {
+    soName = name;
+    }
   if(soversion)
     {
     soName += ".";
     soName += soversion;
     }
-#if defined(__APPLE__)
-  soName += suffix;
-#endif
+  if(isApple)
+    {
+    soName += suffix;
+    }
 
   // The library's real name on disk.
-#if defined(__APPLE__)
-  realName = prefix+base;
-#else
+  if(isApple)
+    {
+    realName = prefix+base;
+    }
+  else
+    {
   realName = name;
-#endif
+    }
   if(version)
     {
     realName += ".";
@@ -3246,9 +3254,10 @@ void cmTarget::GetLibraryNames(std::string& name,
     realName += ".";
     realName += soversion;
     }
-#if defined(__APPLE__)
-  realName += suffix;
-#endif
+  if(isApple)
+    {
+    realName += suffix;
+    }
 
   // The import library name.
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||
