@@ -45,10 +45,12 @@ set(module_symbols
   my_module_mp_my_sub_    # Intel
   MY_MODULE_mp_MY_SUB     # Intel on Windows
   my_module_my_sub_       # PGI
+  my_module_MP_my_sub     # NAG
   mymodule$mysub          # HP
   mymodule_mp_mysub_      # Intel
   MYMODULE_mp_MYSUB       # Intel on Windows
   mymodule_mysub_         # PGI
+  mymodule_MP_mysub       # NAG
   ${FortranCInterface_MODULE_SYMBOLS}
   )
 list(REMOVE_DUPLICATES module_symbols)
