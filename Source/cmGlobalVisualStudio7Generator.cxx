@@ -273,8 +273,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     cmLocalGenerator* root,
     OrderedTargetDependSet const& projectTargets)
 {
-  std::string rootdir = root->GetMakefile()->GetStartOutputDirectory();
-  rootdir += "/";
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
