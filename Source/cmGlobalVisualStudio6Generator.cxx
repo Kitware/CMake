@@ -197,8 +197,6 @@ void cmGlobalVisualStudio6Generator
   this->GetTargetSets(projectTargets, originalTargets, root, generators);
   OrderedTargetDependSet orderedProjectTargets(projectTargets);
 
-  std::string rootdir = root->GetMakefile()->GetStartOutputDirectory();
-  rootdir += "/";
   for(OrderedTargetDependSet::const_iterator
         tt = orderedProjectTargets.begin();
       tt != orderedProjectTargets.end(); ++tt)

@@ -270,11 +270,8 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
 
 void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     std::ostream& fout,
-    cmLocalGenerator* root,
     OrderedTargetDependSet const& projectTargets)
 {
-  std::string rootdir = root->GetMakefile()->GetStartOutputDirectory();
-  rootdir += "/";
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
@@ -299,8 +296,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         {
         cmMakefile* tmf = target->GetMakefile();
         std::string dir = tmf->GetStartOutputDirectory();
-        dir = root->Convert(dir.c_str(),
-                            cmLocalGenerator::START_OUTPUT);
         this->WriteProject(fout, vcprojName, dir.c_str(),
                            *target);
         written = true;
@@ -390,7 +385,7 @@ void cmGlobalVisualStudio7Generator
   this->GetTargetSets(projectTargets, originalTargets, root, generators);
   OrderedTargetDependSet orderedProjectTargets(projectTargets);
 
-  this->WriteTargetsToSolution(fout, root, orderedProjectTargets);
+  this->WriteTargetsToSolution(fout, orderedProjectTargets);
 
   bool useFolderProperty = this->UseFolderProperty();
   if (useFolderProperty)
