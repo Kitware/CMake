@@ -7,7 +7,7 @@
 # Depending on the CPack generator and on some CPACK_xxx var values
 # the generator may produce a single (NSIS, PackageMaker)
 # or several package files (Archive Generators, RPM, DEB)
-cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.3.20101130 FATAL_ERROR)
 project(CPackComponentsForAll)
 
 # Create the mylib library

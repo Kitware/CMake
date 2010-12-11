@@ -13,7 +13,14 @@ endif(NOT CPackGen)
 if(NOT CPackCommand)
   message(FATAL_ERROR "CPackCommand not set")
 endif(NOT CPackCommand)
+
+if(NOT CPackComponentWay)
+  message(FATAL_ERROR "CPackComponentWay not set")
+endif(NOT CPackComponentWay)
+
 set(expected_file_mask "")
+# The usual default behavior is to expect a single file
+set(expected_count 1)
 
 execute_process(COMMAND ${CPackCommand} -G ${CPackGen}
     RESULT_VARIABLE result
@@ -23,10 +30,14 @@ execute_process(COMMAND ${CPackCommand} -G ${CPackGen}
 
 if(CPackGen MATCHES "ZIP")
     set(expected_file_mask "${CPackComponentsForAll_BINARY_DIR}/MyLib-*.zip")
-    set(expected_count 2)
+    if (${CPackComponentWay} STREQUAL "default")
+        set(expected_count 1)
+    endif(${CPackComponentWay} STREQUAL "default")
 endif(CPackGen MATCHES "ZIP")
 
-
+# Now verify if the number of expected file is OK
+# - using expected_file_mask and
+# - expected_count
 if(expected_file_mask)
   file(GLOB expected_file "${expected_file_mask}")
 
@@ -35,12 +46,12 @@ if(expected_file_mask)
   message(STATUS "expected_file_mask='${expected_file_mask}'")
 
   if(NOT expected_file)
-    message(FATAL_ERROR "error: expected_file does not exist: CPackComponentsForAll test fails.")
+    message(FATAL_ERROR "error: expected_file=${expected_file} does not exist: CPackComponentsForAll test fails.")
   endif(NOT expected_file)
 
   list(LENGTH expected_file actual_count)
   message(STATUS "actual_count='${actual_count}'")
   if(NOT actual_count EQUAL expected_count)
-    message(FATAL_ERROR "error: expected_count does not match actual_count: CPackComponents test fails.")
+    message(FATAL_ERROR "error: expected_count=${expected_count} does not match actual_count=${actual_count}: CPackComponents test fails.")
   endif(NOT actual_count EQUAL expected_count)
 endif(expected_file_mask)

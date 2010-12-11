@@ -540,8 +540,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
     set(CPackRun_CPackGen  "-DCPackGen=ZIP")
     set(CPackRun_CPackCommand "-DCPackCommand=${CMAKE_CPACK_COMMAND}")
+    set(CPackRun_CPackComponentWay "-DCPackComponentWay=default")
 
-    ADD_TEST(CPackComponentsForAll-ZIP-NoComponent ${CMAKE_CTEST_COMMAND}
+    ADD_TEST(CPackComponentsForAll-ZIP-default ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll"
       "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/buildZIP-NoComponent"
@@ -556,6 +557,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         "-DCPackComponentsForAll_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/buildZIP-NoComponent"
         "${CPackRun_CPackCommand}"
         "${CPackRun_CPackGen}"
+        "${CPackRun_CPackComponentWay}"
         -P "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll/RunCPackVerifyResult.cmake")
 
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll")
