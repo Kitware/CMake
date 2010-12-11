@@ -501,6 +501,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   #
   set(CTEST_RUN_CPackComponents ${CTEST_TEST_CPACK})
   set(CTEST_package_X11_TEST ${CTEST_TEST_CPACK})
+  set(CTEST_RUN_CPackComponentsForAll ${CTEST_TEST_CPACK})
 
   find_program(NSIS_MAKENSIS_EXECUTABLE NAMES makensis
     PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS]
@@ -548,6 +549,34 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         -P "${CMake_SOURCE_DIR}/Tests/CPackComponents/VerifyResult.cmake")
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponents")
   ENDIF(CTEST_RUN_CPackComponents)
+
+  IF(CTEST_RUN_CPackComponentsForAll)
+    set(CPackComponentsForAll_EXTRA_OPTIONS)
+
+    set(CPackRun_CPackGen  "-DCPackGen=ZIP")
+    set(CPackRun_CPackCommand "-DCPackCommand=${CMAKE_CPACK_COMMAND}")
+    set(CPackRun_CPackComponentWay "-DCPackComponentWay=default")
+
+    ADD_TEST(CPackComponentsForAll-ZIP-default ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll"
+      "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/buildZIP-NoComponent"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project CPackComponentsForAll
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-options
+        -DCPACK_BINARY_ZIP:BOOL=ON
+        ${CPackComponentsForAll_EXTRA_OPTIONS}
+        --graphviz=CPackComponentsForAll.dot
+      --test-command ${CMAKE_CMAKE_COMMAND}
+        "-DCPackComponentsForAll_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/buildZIP-NoComponent"
+        "${CPackRun_CPackCommand}"
+        "${CPackRun_CPackGen}"
+        "${CPackRun_CPackComponentWay}"
+        -P "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll/RunCPackVerifyResult.cmake")
+
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll")
+  ENDIF(CTEST_RUN_CPackComponentsForAll)
 
   # By default, turn this test off (because it takes a long time...)
   #
