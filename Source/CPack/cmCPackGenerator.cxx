@@ -551,7 +551,14 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       std::vector<std::string> componentsVector;
 
       bool componentInstall = false;
-      if (this->SupportsComponentInstallation())
+      /*
+       * We do a component install iff
+       *    - the CPack generator support component
+       *    - the user did not request Monolithic install
+       *      (this works at CPack time too)
+       */
+      if (this->SupportsComponentInstallation() &
+          !(this->IsSet("CPACK_MONOLITHIC_INSTALL")))
         {
         // Determine the installation types for this project (if provided).
         std::string installTypesVar = "CPACK_" 
