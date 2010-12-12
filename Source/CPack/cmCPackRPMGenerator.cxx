@@ -108,7 +108,7 @@ int cmCPackRPMGenerator::PackageFiles()
 
 bool cmCPackRPMGenerator::SupportsComponentInstallation() const
   {
-  if (IsSet("CPACK_RPM_COMPONENT_INSTALL"))
+  if (IsOn("CPACK_RPM_COMPONENT_INSTALL"))
     {
       return true;
     }

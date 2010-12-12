@@ -1063,7 +1063,13 @@ bool cmCPackGenerator::IsSet(const char* name) const
 }
 
 //----------------------------------------------------------------------
-const char* cmCPackGenerator::GetOption(const char* op)
+bool cmCPackGenerator::IsOn(const char* name) const
+{
+  return cmSystemTools::IsOn(GetOption(name));
+}
+
+//----------------------------------------------------------------------
+const char* cmCPackGenerator::GetOption(const char* op) const
 { 
   const char* ret = this->MakefileMap->GetDefinition(op);
   if(!ret)
