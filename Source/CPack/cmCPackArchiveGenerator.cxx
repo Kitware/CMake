@@ -285,7 +285,7 @@ bool cmCPackArchiveGenerator::SupportsComponentInstallation() const {
   // The Component installation support should only
   // be activated if explicitly requested by the user
   // (for backward compatibility reason)
-  if (IsSet("CPACK_ARCHIVE_COMPONENT_INSTALL"))
+  if (IsOn("CPACK_ARCHIVE_COMPONENT_INSTALL"))
     {
     return true;
     }
