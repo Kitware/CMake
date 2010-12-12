@@ -17,6 +17,8 @@
 
 FIND_PROGRAM(CMAKE_ECLIPSE_EXECUTABLE NAMES eclipse DOC "The Eclipse executable")
 
+# This variable is used by the Eclipse generator and appended to the make invocation commands.
+SET(CMAKE_ECLIPSE_MAKE_ARGUMENTS "" CACHE STRING "Additional command line arguments when Eclipse invokes make. Enter e.g. -j<some_number> to get parallel builds")
 
 # The Eclipse generator needs to know the standard include path
 # so that Eclipse ca find the headers at runtime and parsing etc. works better

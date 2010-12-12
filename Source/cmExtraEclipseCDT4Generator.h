@@ -71,6 +71,7 @@ private:
   static void AppendTarget         (cmGeneratedFileStream& fout,
                                     const std::string&     target,
                                     const std::string&     make,
+                                    const std::string&     makeArguments,
                                     const std::string&     path,
                                     const char* prefix = "");
   static void AppendScannerProfile (cmGeneratedFileStream& fout,
