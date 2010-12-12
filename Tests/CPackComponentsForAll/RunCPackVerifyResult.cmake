@@ -25,7 +25,7 @@ set(expected_file_mask "")
 # CPACK_COMPONENT_xxx values
 set(expected_count 1)
 
-execute_process(COMMAND ${CPackCommand} -G ${CPackGen}
+execute_process(COMMAND ${CPackCommand} -G ${CPackGen} -C Release
     RESULT_VARIABLE CPack_result
     OUTPUT_VARIABLE CPack_output
     ERROR_VARIABLE CPack_error
