@@ -185,36 +185,33 @@ void cmSystemTools::ExpandResponseFiles(int ac, char** av,
   args.push_back(av[0]);
   for(int i = 1; i < ac; ++i)
     {
-      if(av[i][0] == '@')
+    if(av[i][0] == '@')
+      {
+      const char* fname = av[i]+1;
+      std::ifstream fin(fname);
+      if(fin)
         {
-        std::string filename = av[i];
-
-        filename = cmSystemTools::CollapseFullPath(filename.c_str());
-        cmSystemTools::ConvertToUnixSlashes(filename);
-        if(cmSystemTools::FileExists(filename.c_str()))
+        std::string line;
+        while(cmSystemTools::GetLineFromStream(fin, line))
           {
-          std::ifstream fin(filename.c_str());
-          size_t offset = i;
-          while (fin)
+          if(!line.empty())
             {
-            std::string next_filearg;
-            std::getline(fin, next_filearg);
-            if (!next_filearg.empty())
-              {
-              args.push_back(next_filearg);
-              }
+            args.push_back(line);
             }
-          }
-        else
-          {
-          cmSystemTools::Error("Could not open command line response file ",
-                               filename.c_str());
           }
         }
       else
         {
-        args.push_back(av[i]);
+        cmOStringStream e;
+        e << "Could not open response file \"" << fname << "\": "
+          << Superclass::GetLastSystemError();
+        cmSystemTools::Error(e.str().c_str());
         }
+      }
+    else
+      {
+      args.push_back(av[i]);
+      }
     }
 
   argc = args.size();
