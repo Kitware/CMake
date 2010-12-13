@@ -579,6 +579,11 @@ function(_ep_write_initial_cache script_filename args)
       set(accumulator "${accumulator};${line}")
     endif()
   endforeach()
+  # Catch the final line of the args
+  if(setArg)
+    set(setArg "${setArg}${accumulator}\" CACHE ${type} \"Initial cache\" FORCE)")
+    set(script_initial_cache "${script_initial_cache}\n${setArg}")
+  endif()
   # Write out the initial cache file to the location specified.
   if(NOT EXISTS "${script_filename}.in")
     file(WRITE "${script_filename}.in" "\@script_initial_cache\@\n")
