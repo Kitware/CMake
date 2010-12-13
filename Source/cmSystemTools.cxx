@@ -177,6 +177,65 @@ void cmSystemTools::ExpandRegistryValues(std::string& source, KeyWOW64)
 }
 #endif
 
+void cmSystemTools::ExpandResponseFiles(int ac, char** av,
+                                        int& argc, char**& argv)
+{
+  std::vector<std::string> args;
+
+  args.push_back(av[0]);
+  for(int i = 1; i < ac; ++i)
+    {
+      if(av[i][0] == '@')
+        {
+        std::string filename = av[i];
+
+        filename = cmSystemTools::CollapseFullPath(filename.c_str());
+        cmSystemTools::ConvertToUnixSlashes(filename);
+        if(cmSystemTools::FileExists(filename.c_str()))
+          {
+          std::ifstream fin(filename.c_str());
+          size_t offset = i;
+          while (fin)
+            {
+            std::string next_filearg;
+            std::getline(fin, next_filearg);
+            if (!next_filearg.empty())
+              {
+              args.push_back(next_filearg);
+              }
+            }
+          }
+        else
+          {
+          cmSystemTools::Error("Could not open command line response file ",
+                               filename.c_str());
+          }
+        }
+      else
+        {
+        args.push_back(av[i]);
+        }
+    }
+
+  argc = args.size();
+  argv = new char*[argc + 1];
+
+  for(size_t i = 0; i < argc; ++i)
+    {
+    argv[i] = strdup(args[i].c_str());
+    }
+  argv[argc] = NULL;
+}
+
+void cmSystemTools::FreeArgv(int argc, char** argv)
+{
+  for(int i = 0; i < argc; ++i)
+    {
+    free(argv[i]);
+    }
+  delete [] argv;
+}
+
 std::string cmSystemTools::EscapeQuotes(const char* str)
 {
   std::string result = "";

@@ -46,6 +46,13 @@ public:
   static void ExpandRegistryValues(std::string& source,
                                    KeyWOW64 view = KeyWOW64_Default);
 
+  ///! Expand response files in an argument list.
+  static void ExpandResponseFiles(int ac, char** av,
+                                  int& argc, char**& argv);
+
+  ///! Free an argument list returned by expanding response files.
+  static void FreeArgv(int ac, char** av);
+
   ///! Escape quotes in a string.
   static std::string EscapeQuotes(const char* str);
 
