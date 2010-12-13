@@ -3765,6 +3765,12 @@ cmTarget* cmMakefile::FindTargetToUse(const char* name)
     return imported->second;
     }
 
+  // Look for a target built in this directory.
+  if(cmTarget* t = this->FindTarget(name))
+    {
+    return t;
+    }
+
   // Look for a target built in this project.
   return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0, name);
 }

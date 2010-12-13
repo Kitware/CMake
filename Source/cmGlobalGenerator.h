@@ -291,8 +291,7 @@ protected:
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const char* name, const char* message,
     const cmCustomCommandLines* commandLines,
-    std::vector<std::string> depends, const char* workingDir,
-                              bool depends_on_all = false);
+    std::vector<std::string> depends, const char* workingDir);
 
   bool NeedSymbolicMark;
   bool UseLinkScript;
