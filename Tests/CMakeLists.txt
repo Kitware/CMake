@@ -757,7 +757,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   ENDIF(NOT COMPILER_IS_COMO)
 
-  ADD_TEST(ResponseFileBasic ${CMAKE_CTEST_COMMAND}
+  ADD_TEST(ResponseFile.Basic ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ResponseFile"
     "${CMake_BINARY_DIR}/Tests/ResponseFileBasic"
@@ -766,11 +766,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-noclean
     --build-project ResponseFileBasic
     --build-options "@${CMAKE_CURRENT_SOURCE_DIR}/ResponseFile/response-basic")
-  SET_TESTS_PROPERTIES(ResponseFileBasic PROPERTIES
+  SET_TESTS_PROPERTIES(ResponseFile.Basic PROPERTIES
     PASS_REGULAR_EXPRESSION "RESPONSE_VARIABLE is: 'foo'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ResponseFileBasic")
 
-  ADD_TEST(ResponseFileWithSpaces ${CMAKE_CTEST_COMMAND}
+  ADD_TEST(ResponseFile.WithSpaces ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ResponseFile"
     "${CMake_BINARY_DIR}/Tests/ResponseFileWithSpaces"
@@ -779,11 +779,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-noclean
     --build-project ResponseFileWithSpaces
     --build-options "@${CMAKE_CURRENT_SOURCE_DIR}/ResponseFile/response-with-spaces")
-  SET_TESTS_PROPERTIES(ResponseFileWithSpaces PROPERTIES
+  SET_TESTS_PROPERTIES(ResponseFile.WithSpaces PROPERTIES
     PASS_REGULAR_EXPRESSION "RESPONSE_VARIABLE is: 'with spaces'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ResponseFileWithSpaces")
 
-  ADD_TEST(ResponseFileWithBlankLine ${CMAKE_CTEST_COMMAND}
+  ADD_TEST(ResponseFile.WithBlankLine ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ResponseFile"
     "${CMake_BINARY_DIR}/Tests/ResponseFileWithBlankLine"
@@ -792,11 +792,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-noclean
     --build-project ResponseFileWithBlankLine
     --build-options "@${CMAKE_CURRENT_SOURCE_DIR}/ResponseFile/response-with-blank-line")
-  SET_TESTS_PROPERTIES(ResponseFileWithBlankLine PROPERTIES
+  SET_TESTS_PROPERTIES(ResponseFile.WithBlankLine PROPERTIES
     PASS_REGULAR_EXPRESSION "RESPONSE_VARIABLE is: 'after blank line'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ResponseFileWithBlankLine")
 
-  ADD_TEST(ResponseFileDuplicate ${CMAKE_CTEST_COMMAND}
+  ADD_TEST(ResponseFile.Duplicate ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ResponseFile"
     "${CMake_BINARY_DIR}/Tests/ResponseFileDuplicate"
@@ -805,13 +805,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-noclean
     --build-project ResponseFileDuplicate
     --build-options "@${CMAKE_CURRENT_SOURCE_DIR}/ResponseFile/response-duplicate")
-  SET_TESTS_PROPERTIES(ResponseFileDuplicate PROPERTIES
+  SET_TESTS_PROPERTIES(ResponseFile.Duplicate PROPERTIES
     PASS_REGULAR_EXPRESSION "RESPONSE_VARIABLE is: 'right'")
-  SET_TESTS_PROPERTIES(ResponseFileDuplicate PROPERTIES
+  SET_TESTS_PROPERTIES(ResponseFile.Duplicate PROPERTIES
     FAIL_REGULAR_EXPRESSION "RESPONSE_VARIABLE is: 'wrong'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ResponseFileDuplicate")
 
-  ADD_TEST(ResponseFileWithMany ${CMAKE_CTEST_COMMAND}
+  ADD_TEST(ResponseFile.WithMany ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ResponseFile"
     "${CMake_BINARY_DIR}/Tests/ResponseFileWithMany"
@@ -820,7 +820,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-noclean
     --build-project ResponseFileWithMany
     --build-options "@${CMAKE_CURRENT_SOURCE_DIR}/ResponseFile/response-with-many")
-  SET_TESTS_PROPERTIES(ResponseFileWithMany PROPERTIES
+  SET_TESTS_PROPERTIES(ResponseFile.WithMany PROPERTIES
     PASS_REGULAR_EXPRESSION "RESPONSE_VARIABLE is: 'twentieth'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ResponseFileWithMany")
 
