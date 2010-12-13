@@ -131,6 +131,8 @@ static const char * cmDocumentationOptions[][3] =
    "files.", "Normally, unused and uninitialized variables are searched for "
    "only in CMAKE_SOURCE_DIR and CMAKE_BINARY_DIR. This flag tells CMake to "
    "warn about other files as well."},
+  {"@[file]", "Specify a response file.",
+   "Read arguments from a file. Each argument should be on its own line."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed. "
    "If a file is specified, the documentation is written into and the output "
@@ -320,16 +322,25 @@ static void cmakemainProgressCallback(const char *m, float prog,
 
 int main(int ac, char** av)
 {
+  int argc;
+  char** argv;
+
   cmSystemTools::EnableMSVCDebugHook();
-  cmSystemTools::FindExecutableDirectory(av[0]);
-  if(ac > 1 && strcmp(av[1], "--build") == 0)
+  cmSystemTools::ExpandResponseFiles(ac, av, argc, argv);
+  cmSystemTools::FindExecutableDirectory(argv[0]);
+  if(argc > 1 && strcmp(argv[1], "--build") == 0)
     {
-    return do_build(ac, av);
+    int ret = do_build(argc, argv);
+    cmSystemTools::FreeArgv(argc, argv);
+    return ret;
     }
-  int ret = do_cmake(ac, av);
+  int ret = do_cmake(argc, argv);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDynamicLoader::FlushCache();
 #endif
+
+  cmSystemTools::FreeArgv(argc, argv);
+
   return ret;
 }
 
