@@ -217,7 +217,7 @@ void cmSystemTools::ExpandResponseFiles(int ac, char** av,
   argc = args.size();
   argv = new char*[argc + 1];
 
-  for(size_t i = 0; i < argc; ++i)
+  for(int i = 0; i < argc; ++i)
     {
     argv[i] = strdup(args[i].c_str());
     }
