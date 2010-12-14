@@ -32,6 +32,7 @@
 #    [CMAKE_COMMAND /.../cmake]  # Specify alternative cmake executable
 #    [CMAKE_GENERATOR gen]       # Specify generator for native build
 #    [CMAKE_ARGS args...]        # Arguments to CMake command line
+#    [CMAKE_CACHE_ARGS args...]  # Initial cache arguments, of the form -Dvar:string=on
 #   #--Build step-----------------
 #    [BINARY_DIR dir]            # Specify build dir location
 #    [BUILD_COMMAND cmd...]      # Command to drive the native build
@@ -548,6 +549,47 @@ function(_ep_set_directories name)
     endif()
   endforeach()
 endfunction(_ep_set_directories)
+
+function(_ep_write_initial_cache script_filename args)
+  # Write out values into an initial cache, that will be passed to CMake with -C
+  set(script_initial_cache "")
+  set(regex "^([^:]+):([^=]+)=(.*)$")
+  set(setArg "")
+  foreach(line ${args})
+    if("${line}" MATCHES "^-D")
+      if(setArg)
+        # This is required to build up lists in variables, or complete an entry
+        set(setArg "${setArg}${accumulator}\" CACHE ${type} \"Initial cache\" FORCE)")
+        set(script_initial_cache "${script_initial_cache}\n${setArg}")
+        set(accumulator "")
+        set(setArg "")
+      endif()
+      string(REGEX REPLACE "^-D" "" line ${line})
+      if("${line}" MATCHES "${regex}")
+        string(REGEX MATCH "${regex}" match "${line}")
+        set(name "${CMAKE_MATCH_1}")
+        set(type "${CMAKE_MATCH_2}")
+        set(value "${CMAKE_MATCH_3}")
+        set(setArg "set(${name} \"${value}")
+      else()
+        message(WARNING "Line '${line}' does not match regex. Ignoring.")
+      endif()
+    else()
+      # Assume this is a list to append to the last var
+      set(accumulator "${accumulator};${line}")
+    endif()
+  endforeach()
+  # Catch the final line of the args
+  if(setArg)
+    set(setArg "${setArg}${accumulator}\" CACHE ${type} \"Initial cache\" FORCE)")
+    set(script_initial_cache "${script_initial_cache}\n${setArg}")
+  endif()
+  # Write out the initial cache file to the location specified.
+  if(NOT EXISTS "${script_filename}.in")
+    file(WRITE "${script_filename}.in" "\@script_initial_cache\@\n")
+  endif()
+  configure_file("${script_filename}.in" "${script_filename}")
+endfunction(_ep_write_initial_cache)
 
 
 function(ExternalProject_Get_Property name)
@@ -1224,6 +1266,14 @@ function(_ep_add_configure_command name)
     get_property(cmake_args TARGET ${name} PROPERTY _EP_CMAKE_ARGS)
     list(APPEND cmd ${cmake_args})
 
+    # If there are any CMAKE_CACHE_ARGS, write an initial cache and use it
+    get_property(cmake_cache_args TARGET ${name} PROPERTY _EP_CMAKE_CACHE_ARGS)
+    if(cmake_cache_args)
+      set(_ep_cache_args_script "${tmp_dir}/${name}-cache.cmake")
+      _ep_write_initial_cache("${_ep_cache_args_script}" "${cmake_cache_args}")
+      list(APPEND cmd "-C${_ep_cache_args_script}")
+    endif()
+
     get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
     if(cmake_generator)
       list(APPEND cmd "-G${cmake_generator}" "${source_dir}")
@@ -1242,10 +1292,11 @@ function(_ep_add_configure_command name)
   # Fixes issue http://public.kitware.com/Bug/view.php?id=10258
   #
   if(NOT EXISTS ${tmp_dir}/${name}-cfgcmd.txt.in)
-    file(WRITE ${tmp_dir}/${name}-cfgcmd.txt.in "cmd='@cmd@'\n")
+    file(WRITE ${tmp_dir}/${name}-cfgcmd.txt.in "cmd='\@cmd\@'\n")
   endif()
   configure_file(${tmp_dir}/${name}-cfgcmd.txt.in ${tmp_dir}/${name}-cfgcmd.txt)
   list(APPEND file_deps ${tmp_dir}/${name}-cfgcmd.txt)
+  list(APPEND file_deps ${_ep_cache_args_script})
 
   get_property(log TARGET ${name} PROPERTY _EP_LOG_CONFIGURE)
   if(log)
