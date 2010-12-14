@@ -63,11 +63,10 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_sleep( seconds )\n"
-      "  ctest_sleep( time1 duration time2 )\n"
-      "With one argument it will sleep for a given number of seconds. "
-      "With three arguments it will wait for time2 - time1 - duration "
-      "seconds.";
+      "  ctest_sleep(<seconds>)\n"
+      "Sleep for given number of seconds.\n"
+      "  ctest_sleep(<time1> <duration> <time2>)\n"
+      "Sleep for t=(time1 + duration - time2) seconds if t > 0.";
     }
 
   cmTypeMacro(cmCTestSleepCommand, cmCTestCommand);
