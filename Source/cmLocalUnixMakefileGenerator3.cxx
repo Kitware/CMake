@@ -902,9 +902,12 @@ cmLocalUnixMakefileGenerator3
       d != cc.GetDepends().end(); ++d)
     {
     // Lookup the real name of the dependency in case it is a CMake target.
-    std::string dep = this->GetRealDependency
-      (d->c_str(), this->ConfigurationName.c_str());
-    depends.push_back(dep);
+    std::string dep;
+    if(this->GetRealDependency(d->c_str(), this->ConfigurationName.c_str(),
+                               dep))
+      {
+      depends.push_back(dep);
+      }
     }
 }
 
