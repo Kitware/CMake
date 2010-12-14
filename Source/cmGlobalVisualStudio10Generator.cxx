@@ -19,6 +19,10 @@
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator()
 {
   this->FindMakeProgramFile = "CMakeVS10FindMake.cmake";
+  std::string vc10Express;
+  this->ExpressEdition = cmSystemTools::ReadRegistryValue(
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
+    "ProductDir", vc10Express, cmSystemTools::KeyWOW64_32);
 }
 
 //----------------------------------------------------------------------------
@@ -60,6 +64,16 @@ void cmGlobalVisualStudio10Generator
                  cmMakefile *mf, bool optional)
 {
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
+}
+
+//----------------------------------------------------------------------------
+const char* cmGlobalVisualStudio10Generator::GetPlatformToolset()
+{
+  if(!this->PlatformToolset.empty())
+    {
+    return this->PlatformToolset.c_str();
+    }
+  return 0;
 }
 
 //----------------------------------------------------------------------------

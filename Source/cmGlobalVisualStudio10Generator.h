@@ -54,6 +54,12 @@ public:
                               cmMakefile *, bool optional);
   virtual void WriteSLNHeader(std::ostream& fout);
 
+  /** Is the installed VS an Express edition?  */
+  bool IsExpressEdition() const { return this->ExpressEdition; }
+
+  /** The toolset name for the target platform.  */
+  const char* GetPlatformToolset();
+
   /**
    * Where does this version of Visual Studio look for macros for the
    * current user? Returns the empty string if this version of Visual
@@ -70,5 +76,9 @@ public:
     { return "$(Configuration)";}
 protected:
   virtual const char* GetIDEVersion() { return "10.0"; }
+
+  std::string PlatformToolset;
+private:
+  bool ExpressEdition;
 };
 #endif
