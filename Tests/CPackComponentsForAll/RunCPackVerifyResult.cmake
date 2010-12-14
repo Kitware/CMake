@@ -9,7 +9,9 @@ endif(NOT CPackComponentsForAll_BINARY_DIR)
 if(NOT CPackGen)
   message(FATAL_ERROR "CPackGen not set")
 endif(NOT CPackGen)
-
+get_filename_component(CPACK_LOCATION ${CMAKE_COMMAND} PATH)
+set(CPackCommand "${CPACK_LOCATION}/cpack")
+message("cpack = ${CPackCommand}")
 if(NOT CPackCommand)
   message(FATAL_ERROR "CPackCommand not set")
 endif(NOT CPackCommand)
@@ -24,8 +26,13 @@ set(expected_file_mask "")
 # May produce several numbers of files depending on
 # CPACK_COMPONENT_xxx values
 set(expected_count 1)
-
-execute_process(COMMAND ${CPackCommand} -G ${CPackGen} -C Release
+set(config_type $ENV{CMAKE_CONFIG_TYPE})
+set(config_args )
+if(config_type)
+  set(config_args -C ${config_type})
+endif()
+message(" ${config_args}")
+execute_process(COMMAND ${CPackCommand} -G ${CPackGen} ${config_args}
     RESULT_VARIABLE CPack_result
     OUTPUT_VARIABLE CPack_output
     ERROR_VARIABLE CPack_error
