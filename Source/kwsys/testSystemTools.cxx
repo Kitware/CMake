@@ -297,7 +297,7 @@ bool CheckStringOperations()
 
   if (kwsys::SystemTools::ConvertToUnixOutputPath
       ("//Local Mojo/Hex Power Pack/Iffy Voodoo") != 
-      "/Local\\ Mojo/Hex\\ Power\\ Pack/Iffy\\ Voodoo")
+      "//Local\\ Mojo/Hex\\ Power\\ Pack/Iffy\\ Voodoo")
     {
     kwsys_ios::cerr
       << "Problem with ConvertToUnixOutputPath "
