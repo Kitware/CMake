@@ -177,62 +177,6 @@ void cmSystemTools::ExpandRegistryValues(std::string& source, KeyWOW64)
 }
 #endif
 
-void cmSystemTools::ExpandResponseFiles(int ac, char** av,
-                                        int& argc, char**& argv)
-{
-  std::vector<std::string> args;
-
-  args.push_back(av[0]);
-  for(int i = 1; i < ac; ++i)
-    {
-    if(av[i][0] == '@')
-      {
-      const char* fname = av[i]+1;
-      std::ifstream fin(fname);
-      if(fin)
-        {
-        std::string line;
-        while(cmSystemTools::GetLineFromStream(fin, line))
-          {
-          if(!line.empty())
-            {
-            args.push_back(line);
-            }
-          }
-        }
-      else
-        {
-        cmOStringStream e;
-        e << "Could not open response file \"" << fname << "\": "
-          << Superclass::GetLastSystemError();
-        cmSystemTools::Error(e.str().c_str());
-        }
-      }
-    else
-      {
-      args.push_back(av[i]);
-      }
-    }
-
-  argc = args.size();
-  argv = new char*[argc + 1];
-
-  for(int i = 0; i < argc; ++i)
-    {
-    argv[i] = strdup(args[i].c_str());
-    }
-  argv[argc] = NULL;
-}
-
-void cmSystemTools::FreeArgv(int argc, char** argv)
-{
-  for(int i = 0; i < argc; ++i)
-    {
-    free(argv[i]);
-    }
-  delete [] argv;
-}
-
 std::string cmSystemTools::EscapeQuotes(const char* str)
 {
   std::string result = "";
