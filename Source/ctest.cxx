@@ -232,8 +232,6 @@ static const char * cmDocumentationOptions[][3] =
   {"--print-labels", "Print all available test labels.",
    "This option will not run any tests, it will simply print the list of "
    "all labels associated with the test set."},
-  {"@[file]", "Specify a response file.",
-   "Read arguments from a file. Each argument should be on its own line."},
   {"--help-command <cmd> [<file>]", "Show help for a single command and exit.",
    "Prints the help for the command to stdout or to the specified file." },
   {"--help-command-list [<file>]", "List available commands and exit.",
@@ -253,22 +251,16 @@ static const char * cmDocumentationSeeAlso[][3] =
 };
 
 // this is a test driver program for cmCTest.
-int main (int ac, char *av[])
+int main (int argc, char *argv[])
 {
-  int argc;
-  char** argv;
-
   cmSystemTools::DoNotInheritStdPipes();
   cmSystemTools::EnableMSVCDebugHook();
-  cmSystemTools::ExpandResponseFiles(ac, av, argc, argv);
   cmSystemTools::FindExecutableDirectory(argv[0]);
 
   // Dispatch 'ctest --launch' mode directly.
   if(argc >= 2 && strcmp(argv[1], "--launch") == 0)
     {
-    int ret = cmCTestLaunch::Main(argc, argv);
-    cmSystemTools::FreeArgv(argc, argv);
-    return ret;
+    return cmCTestLaunch::Main(argc, argv);
     }
 
   int nocwd = 0;
@@ -315,9 +307,7 @@ int main (int ac, char *av[])
 #ifdef cout
 #  undef cout
 #endif
-      int ret = doc.PrintRequestedDocumentation(std::cout)? 0:1;
-      cmSystemTools::FreeArgv(argc, argv);
-      return ret;
+      return doc.PrintRequestedDocumentation(std::cout)? 0:1;
 #define cout no_cout_use_cmCTestLog
       }
     }
@@ -336,8 +326,6 @@ int main (int ac, char *av[])
   std::string output;
   int res = inst.Run(args,&output);
   cmCTestLog(&inst, OUTPUT, output);
-
-  cmSystemTools::FreeArgv(argc, argv);
 
   return res;
 }
