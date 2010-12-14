@@ -3815,6 +3815,10 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
       {
       hasIncremental = true;
       }
+    if(cmSystemTools::Strucmp(i->c_str(), "/INCREMENTAL") == 0)
+      {
+      hasIncremental = true;
+      }
     if(cmSystemTools::Strucmp(i->c_str(), "/MANIFEST:NO") == 0)
       {
       hasManifest = false;
