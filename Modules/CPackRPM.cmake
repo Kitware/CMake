@@ -566,10 +566,9 @@ mv $RPM_BUILD_ROOT \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\"
 %install
 if [ -e $RPM_BUILD_ROOT ];
 then
-  mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot/*\" $RPM_BUILD_ROOT
-else
-  mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
+  rm -rf $RPM_BUILD_ROOT
 fi
+mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
 
 %clean
 
