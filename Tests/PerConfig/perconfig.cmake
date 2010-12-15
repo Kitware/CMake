@@ -10,7 +10,7 @@ foreach(v
     pcShared_linker_file
     pcShared_soname_file
     )
-  message("${v}=${${v}}")
+  message(STATUS "${v}=${${v}}")
 endforeach()
 
 # Verify that file names match as expected.

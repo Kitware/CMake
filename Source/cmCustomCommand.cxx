@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmCustomCommand.h"
 
+#include "cmMakefile.h"
+
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand()
 {
@@ -28,12 +30,14 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   Comment(r.Comment),
   WorkingDirectory(r.WorkingDirectory),
   EscapeAllowMakeVars(r.EscapeAllowMakeVars),
-  EscapeOldStyle(r.EscapeOldStyle)
+  EscapeOldStyle(r.EscapeOldStyle),
+  Backtrace(new cmListFileBacktrace(*r.Backtrace))
 {
 }
 
 //----------------------------------------------------------------------------
-cmCustomCommand::cmCustomCommand(const std::vector<std::string>& outputs,
+cmCustomCommand::cmCustomCommand(cmMakefile* mf,
+                                 const std::vector<std::string>& outputs,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
                                  const char* comment,
@@ -45,10 +49,21 @@ cmCustomCommand::cmCustomCommand(const std::vector<std::string>& outputs,
   Comment(comment?comment:""),
   WorkingDirectory(workingDirectory?workingDirectory:""),
   EscapeAllowMakeVars(false),
-  EscapeOldStyle(true)
+  EscapeOldStyle(true),
+  Backtrace(new cmListFileBacktrace)
 {
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
+  if(mf)
+    {
+    mf->GetBacktrace(*this->Backtrace);
+    }
+}
+
+//----------------------------------------------------------------------------
+cmCustomCommand::~cmCustomCommand()
+{
+  delete this->Backtrace;
 }
 
 //----------------------------------------------------------------------------
@@ -128,6 +143,12 @@ bool cmCustomCommand::GetEscapeAllowMakeVars() const
 void cmCustomCommand::SetEscapeAllowMakeVars(bool b)
 {
   this->EscapeAllowMakeVars = b;
+}
+
+//----------------------------------------------------------------------------
+cmListFileBacktrace const& cmCustomCommand::GetBacktrace() const
+{
+  return *this->Backtrace;
 }
 
 //----------------------------------------------------------------------------

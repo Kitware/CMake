@@ -17,6 +17,7 @@
 class cmCustomCommand;
 class cmMakefile;
 class cmLocalGenerator;
+class cmGeneratorExpression;
 
 class cmCustomCommandGenerator
 {
@@ -26,9 +27,11 @@ class cmCustomCommandGenerator
   cmLocalGenerator* LG;
   bool OldStyle;
   bool MakeVars;
+  cmGeneratorExpression* GE;
 public:
   cmCustomCommandGenerator(cmCustomCommand const& cc, const char* config,
                            cmMakefile* mf);
+  ~cmCustomCommandGenerator();
   unsigned int GetNumberOfCommands() const;
   std::string GetCommand(unsigned int c) const;
   void AppendArguments(unsigned int c, std::string& cmd) const;
