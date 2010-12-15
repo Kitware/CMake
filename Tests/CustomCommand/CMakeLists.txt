@@ -55,7 +55,7 @@ ADD_CUSTOM_COMMAND(
 #  Test creating files from a custom target
 #
 ################################################################
-ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/doc1.dvi
+ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}//doc1.dvi # test 2 slashes
   DEPENDS ${PROJECT_SOURCE_DIR}/doc1.tex 
   COMMAND   ${CMAKE_COMMAND}  
   ARGS      -E copy ${PROJECT_SOURCE_DIR}/doc1.tex 
