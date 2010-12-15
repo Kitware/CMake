@@ -1527,6 +1527,12 @@ void cmMakefileTargetGenerator
   this->LocalGenerator->AppendRuleDepend(depends,
                                          this->BuildFileNameFull.c_str());
 
+  // Add a dependency on the link definitions file, if any.
+  if(!this->ModuleDefinitionFile.empty())
+    {
+    depends.push_back(this->ModuleDefinitionFile);
+    }
+
   // Add dependencies on the external object files.
   for(std::vector<std::string>::const_iterator obj
         = this->ExternalObjects.begin();
