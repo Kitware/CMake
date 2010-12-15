@@ -1729,8 +1729,6 @@ const char* cmMakefileTargetGenerator::GetFortranModuleDirectory()
       this->Target->GetProperty("Fortran_MODULE_DIRECTORY");
     const char* moddir_flag =
       this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_FLAG");
-    const char* moddir_default =
-      this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
     if(target_mod_dir && moddir_flag)
       {
       // Compute the full path to the module directory.
@@ -1750,10 +1748,6 @@ const char* cmMakefileTargetGenerator::GetFortranModuleDirectory()
 
       // Make sure the module output directory exists.
       cmSystemTools::MakeDirectory(this->FortranModuleDirectory.c_str());
-      }
-    else if(moddir_default && moddir_flag)
-      {
-      this->FortranModuleDirectory = moddir_default;
       }
     this->FortranModuleDirectoryComputed = true;
     }
@@ -1780,7 +1774,12 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
     }
 
   // Add a module output directory flag if necessary.
-  if(const char* mod_dir = this->GetFortranModuleDirectory())
+  const char* mod_dir = this->GetFortranModuleDirectory();
+  if(!mod_dir)
+    {
+    mod_dir = this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
+    }
+  if(mod_dir)
     {
     const char* moddir_flag =
       this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG");
