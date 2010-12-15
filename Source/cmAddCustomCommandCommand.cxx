@@ -161,6 +161,7 @@ bool cmAddCustomCommandCommand
             filename += "/";
             }
           filename += copy;
+          cmSystemTools::ConvertToUnixSlashes(filename);
           break;
         case doing_source:
           // We do not want to convert the argument to SOURCE because
