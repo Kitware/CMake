@@ -168,11 +168,6 @@ public:
   bool GetRealDependency(const char* name, const char* config,
                          std::string& dep);
 
-  /** Translate a command as given in CMake code to the location of the 
-      executable if the command is the name of a CMake executable target.
-      If that's not the case, just return the original name. */
-  std::string GetRealLocation(const char* inName, const char* config);
-
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char* remote,
                                          RelativeRoot local = START_OUTPUT);
