@@ -1392,8 +1392,8 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
     cmOStringStream e;
     e << "Attempt to add link library \""
       << lib << "\" to target \""
-      << target << "\" which is not built by this project.";
-    cmSystemTools::Error(e.str().c_str());
+      << target << "\" which is not built in this directory.";
+    this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     }
 }
 
