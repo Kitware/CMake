@@ -653,32 +653,37 @@ bool cmCTestMultiProcessHandler::CheckCycles()
       it != this->Tests.end(); ++it)
     {
     //DFS from each element to itself
+    int root = it->first;
+    std::set<int> visited;
     std::stack<int> s;
-    std::vector<int> visited;
-
-    s.push(it->first);
-
+    s.push(root);
     while(!s.empty())
       {
       int test = s.top();
       s.pop();
-
-      for(TestSet::iterator d = this->Tests[test].begin();
-          d != this->Tests[test].end(); ++d)
+      if(visited.insert(test).second)
         {
-        if(std::find(visited.begin(), visited.end(), *d) != visited.end())
+        for(TestSet::iterator d = this->Tests[test].begin();
+            d != this->Tests[test].end(); ++d)
           {
-          //cycle exists
-          cmCTestLog(this->CTest, ERROR_MESSAGE, "Error: a cycle exists in "
-            "the test dependency graph for the test \""
-            << this->Properties[it->first]->Name << "\"." << std::endl
-            << "Please fix the cycle and run ctest again." << std::endl);
-          return false;
+          if(*d == root)
+            {
+            //cycle exists
+            cmCTestLog(this->CTest, ERROR_MESSAGE, "Error: a cycle exists in "
+                       "the test dependency graph for the test \""
+                       << this->Properties[root]->Name << "\"." << std::endl
+                       << "Please fix the cycle and run ctest again." << std::endl);
+            return false;
+            }
+          else
+            {
+            s.push(*d);
+            }
           }
-        s.push(*d);
         }
-      visited.push_back(test);
       }
     }
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "Checking test dependency graph end" << std::endl);
   return true;
 }
