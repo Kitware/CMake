@@ -8,7 +8,7 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 # because otherwise FindPackageHandleStandardArgs.cmake from the current
 # directory is included (via CMAKE_MODULE_PATH).
 CMAKE_POLICY(SET CMP0017 NEW)
-FIND_PACKAGE(ZLIB)
+FIND_PACKAGE(ZLIB QUIET)
 
 # Look for a package that has a find module and may be found.
 FIND_PACKAGE(OpenGL QUIET)
