@@ -25,7 +25,7 @@ cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir):
   Verbose(false),
   FileComparison(0),
   TargetDirectory(targetDir),
-  MaxPath(cmSystemTools::GetMaximumFilePathLength()),
+  MaxPath(16384),
   Dependee(new char[MaxPath]),
   Depender(new char[MaxPath])
 {
