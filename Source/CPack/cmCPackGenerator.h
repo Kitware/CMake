@@ -88,8 +88,9 @@ public:
   //! Set and get the options
   void SetOption(const char* op, const char* value);
   void SetOptionIfNotSet(const char* op, const char* value);
-  const char* GetOption(const char* op);
+  const char* GetOption(const char* op) const;
   bool IsSet(const char* name) const;
+  bool IsOn(const char* name) const;
 
   //! Set all the variables
   int SetCMakeRoot();
