@@ -77,6 +77,13 @@ set(linux64_pgf90_libs "pgf90;pgf90_rpm1;pgf902;pgf90rtl;pgftnrtl;nspgc;pgc;rt;p
 set(linux64_pgf90_dirs "/opt/compiler/pgi/linux86-64/8.0-3/lib;/usr/lib64;/usr/lib64/gcc/x86_64-suse-linux/4.1.2")
 list(APPEND platforms linux64_pgf90)
 
+# nagfor dummy.f -Wl,-v
+set(linux64_nagfor_text " /usr/libexec/gcc/x86_64-redhat-linux/4.4.5/collect2 --no-add-needed --eh-frame-hdr --build-id -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o a.out /usr/lib/gcc/x86_64-redhat-linux/4.4.5/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/4.4.5/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/4.4.5/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/4.4.5 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.5 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.5/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.5/../../.. /usr/local/NAG/lib/f90_init.o /usr/local/NAG/lib/quickfit.o dummy.o -rpath /usr/local/NAG/lib /usr/local/NAG/lib/libf53.so /usr/local/NAG/lib/libf53.a -lm -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-redhat-linux/4.4.5/crtend.o /usr/lib/gcc/x86_64-redhat-linux/4.4.5/../../../../lib64/crtn.o")
+set(linux64_nagfor_libs "/usr/local/NAG/lib/f90_init.o;/usr/local/NAG/lib/quickfit.o;/usr/local/NAG/lib/libf53.a;m;c")
+set(linux64_nagfor_dirs "/usr/lib/gcc/x86_64-redhat-linux/4.4.5;/usr/lib64;/lib64;/usr/lib")
+set(linux64_nagfor_obj_regex "^/usr/local/NAG/lib")
+list(APPEND platforms linux64_nagfor)
+
 # gcc dummy.c -v # in strange path
 set(linux64_test1_text "
 /this/might/match/as/a/linker/ld/but/it/is/not because the ld is not the last path component
@@ -380,7 +387,7 @@ list(APPEND platforms msys_g77)
 # Test parsing for all above examples.
 
 foreach(p IN LISTS platforms)
-  cmake_parse_implicit_link_info("${${p}_text}" libs dirs log)
+  cmake_parse_implicit_link_info("${${p}_text}" libs dirs log "${${p}_obj_regex}")
 
   foreach(v libs dirs)
     if(NOT "${${v}}" STREQUAL "${${p}_${v}}")
