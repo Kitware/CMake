@@ -669,10 +669,10 @@ bool cmCTestMultiProcessHandler::CheckCycles()
           if(*d == root)
             {
             //cycle exists
-            cmCTestLog(this->CTest, ERROR_MESSAGE, "Error: a cycle exists in "
-                       "the test dependency graph for the test \""
-                       << this->Properties[root]->Name << "\"." << std::endl
-                       << "Please fix the cycle and run ctest again." << std::endl);
+            cmCTestLog(this->CTest, ERROR_MESSAGE,
+                       "Error: a cycle exists in the test dependency graph "
+                       "for the test \"" << this->Properties[root]->Name <<
+                       "\".\nPlease fix the cycle and run ctest again.\n");
             return false;
             }
           else
