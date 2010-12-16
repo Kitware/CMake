@@ -27,3 +27,24 @@ get_filename_component(_default_cwd "${_wd_exe}" ABSOLUTE)
 set_tests_properties(WorkingDirectory3 PROPERTIES
   PASS_REGULAR_EXPRESSION "Working directory: ${_default_cwd}"
 )
+
+add_test(NAME WorkingDirectory4 WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND WorkingDirectory)
+add_test(NAME WorkingDirectory5 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/.. COMMAND WorkingDirectory)
+add_test(WorkingDirectory6 WorkingDirectory WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
+
+set_tests_properties(WorkingDirectory4 PROPERTIES
+  PASS_REGULAR_EXPRESSION "Working directory: ${CMAKE_BINARY_DIR}"
+)
+
+string(REGEX REPLACE "/[^/]*$" "" _parent_dir "${CMAKE_BINARY_DIR}")
+
+set_tests_properties(WorkingDirectory5 PROPERTIES
+  PASS_REGULAR_EXPRESSION "Working directory: ${_parent_dir}"
+)
+
+string(REGEX REPLACE "/[^/]*$" "" _wd_exe "${CMAKE_BINARY_DIR}")
+get_filename_component(_default_cwd "${_wd_exe}" ABSOLUTE)
+
+set_tests_properties(WorkingDirectory6 PROPERTIES
+  PASS_REGULAR_EXPRESSION "Working directory: ${_default_cwd}"
+)
