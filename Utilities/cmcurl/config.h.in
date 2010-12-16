@@ -348,9 +348,6 @@
 /* Define to 1 if you have the `poll' function. */
 #cmakedefine HAVE_POLL ${HAVE_POLL}
 
-/* If you have a fine poll */
-#cmakedefine HAVE_POLL_FINE ${HAVE_POLL_FINE}
-
 /* we have a POSIX-style strerror_r() */
 #cmakedefine HAVE_POSIX_STRERROR_R ${HAVE_POSIX_STRERROR_R}
 
