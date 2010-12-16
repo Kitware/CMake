@@ -74,6 +74,7 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
 {
   std::string name;
   std::vector<std::string> configurations;
+  std::string working_directory;
   std::vector<std::string> command;
 
   // Read the arguments.
@@ -81,6 +82,7 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
     DoingName,
     DoingCommand,
     DoingConfigs,
+    DoingWorkingDirectory,
     DoingNone
   };
   Doing doing = DoingName;
@@ -104,6 +106,15 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
         }
       doing = DoingConfigs;
       }
+    else if(args[i] == "WORKING_DIRECTORY")
+      {
+      if(!working_directory.empty())
+        {
+        this->SetError(" may be given at most one WORKING_DIRECTORY.");
+        return false;
+        }
+      doing = DoingWorkingDirectory;
+      }
     else if(doing == DoingName)
       {
       name = args[i];
@@ -116,6 +127,11 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
     else if(doing == DoingConfigs)
       {
       configurations.push_back(args[i]);
+      }
+    else if(doing == DoingWorkingDirectory)
+      {
+      working_directory = args[i];
+      doing = DoingNone;
       }
     else
       {
@@ -154,6 +170,7 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
   cmTest* test = this->Makefile->CreateTest(name.c_str());
   test->SetOldStyle(false);
   test->SetCommand(command);
+  test->SetProperty("WORKING_DIRECTORY", working_directory.c_str());
   this->Makefile->AddTestGenerator(new cmTestGenerator(test, configurations));
 
   return true;
