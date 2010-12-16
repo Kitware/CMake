@@ -237,13 +237,24 @@ endif (BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
 
 #BLAS in acml library?
 if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "All")
+ # Either acml or acml_mp should be in LD_LIBRARY_PATH but not both
  if(NOT BLAS_LIBRARIES)
   check_fortran_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
   ""
-  "acml"
+  "acml;acml_mv"
+  ""
+  )
+ endif(NOT BLAS_LIBRARIES)
+ if(NOT BLAS_LIBRARIES)
+  check_fortran_libraries(
+  BLAS_LIBRARIES
+  BLAS
+  sgemm
+  ""
+  "acml_mp;acml_mv"
   ""
   )
  endif(NOT BLAS_LIBRARIES)
