@@ -19,6 +19,7 @@
 #include "cmake.h"
 #include "cmVersion.h"
 #include "cmFileTimeComparison.h"
+#include "cmCustomCommandGenerator.h"
 
 // Include dependency scanners for supported languages.  Only the
 // C/C++ scanner is needed for bootstrapping CMake.
@@ -902,9 +903,12 @@ cmLocalUnixMakefileGenerator3
       d != cc.GetDepends().end(); ++d)
     {
     // Lookup the real name of the dependency in case it is a CMake target.
-    std::string dep = this->GetRealDependency
-      (d->c_str(), this->ConfigurationName.c_str());
-    depends.push_back(dep);
+    std::string dep;
+    if(this->GetRealDependency(d->c_str(), this->ConfigurationName.c_str(),
+                               dep))
+      {
+      depends.push_back(dep);
+      }
     }
 }
 
@@ -958,18 +962,15 @@ cmLocalUnixMakefileGenerator3
     {
     *content << dir;
     }
-  bool escapeOldStyle = cc.GetEscapeOldStyle();
-  bool escapeAllowMakeVars = cc.GetEscapeAllowMakeVars();
+  cmCustomCommandGenerator ccg(cc, this->ConfigurationName.c_str(),
+                               this->Makefile);
 
   // Add each command line to the set of commands.
   std::vector<std::string> commands1;
-  for(cmCustomCommandLines::const_iterator cl = cc.GetCommandLines().begin();
-      cl != cc.GetCommandLines().end(); ++cl)
+  for(unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c)
     {
     // Build the command line in a single string.
-    const cmCustomCommandLine& commandLine = *cl;
-    std::string cmd = GetRealLocation(commandLine[0].c_str(),
-                                      this->ConfigurationName.c_str());
+    std::string cmd = ccg.GetCommand(c);
     if (cmd.size())
       {
       // Use "call " before any invocations of .bat or .cmd files
@@ -1022,19 +1023,8 @@ cmLocalUnixMakefileGenerator3
       std::string launcher =
         this->MakeLauncher(cc, target, workingDir? NONE : START_OUTPUT);
       cmd = launcher + this->Convert(cmd.c_str(),NONE,SHELL);
-      for(unsigned int j=1; j < commandLine.size(); ++j)
-        {
-        cmd += " ";
-        if(escapeOldStyle)
-          {
-          cmd += this->EscapeForShellOldStyle(commandLine[j].c_str());
-          }
-        else
-          {
-          cmd += this->EscapeForShell(commandLine[j].c_str(),
-                                      escapeAllowMakeVars);
-          }
-        }
+
+      ccg.AppendArguments(c, cmd);
       if(content)
         {
         // Rule content does not include the launcher.

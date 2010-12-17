@@ -65,13 +65,7 @@ public:
       {
       this->Code += "\\\n\t";
       }
-    this->Code +=
-      this->LG->ConstructScript(cc.GetCommandLines(),
-                                cc.GetWorkingDirectory(),
-                                this->Config,
-                                cc.GetEscapeOldStyle(),
-                                cc.GetEscapeAllowMakeVars(),
-                                "\\\n\t");
+    this->Code += this->LG->ConstructScript(cc, this->Config, "\\\n\t");
     }
 private:
   cmLocalVisualStudio6Generator* LG;
@@ -659,12 +653,7 @@ cmLocalVisualStudio6Generator
     {
     std::string config = this->GetConfigName(*i);
     std::string script =
-      this->ConstructScript(command.GetCommandLines(), 
-                            command.GetWorkingDirectory(),
-                            config.c_str(),
-                            command.GetEscapeOldStyle(),
-                            command.GetEscapeAllowMakeVars(),
-                            "\\\n\t");
+      this->ConstructScript(command, config.c_str(), "\\\n\t");
       
     if (i == this->Configurations.begin())
       {
@@ -686,10 +675,12 @@ cmLocalVisualStudio6Generator
         ++d)
       {
       // Lookup the real name of the dependency in case it is a CMake target.
-      std::string dep = this->GetRealDependency(d->c_str(),
-                                                config.c_str());
-      fout << "\\\n\t" <<
-        this->ConvertToOptionallyRelativeOutputPath(dep.c_str());
+      std::string dep;
+      if(this->GetRealDependency(d->c_str(), config.c_str(), dep))
+        {
+        fout << "\\\n\t" <<
+          this->ConvertToOptionallyRelativeOutputPath(dep.c_str());
+        }
       }
     fout << "\n";
 
@@ -847,7 +838,7 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
   std::vector<std::string> no_depends;
   cmCustomCommandLines commands;
   commands.push_back(command);
-  pcc.reset(new cmCustomCommand(no_output, no_depends, commands, 0, 0));
+  pcc.reset(new cmCustomCommand(0, no_output, no_depends, commands, 0, 0));
   pcc->SetEscapeOldStyle(false);
   pcc->SetEscapeAllowMakeVars(true);
   return pcc;

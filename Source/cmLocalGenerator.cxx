@@ -1818,8 +1818,9 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::GetRealDependency(const char* inName,
-                                                const char* config)
+bool cmLocalGenerator::GetRealDependency(const char* inName,
+                                         const char* config,
+                                         std::string& dep)
 {
   // Older CMake code may specify the dependency using the target
   // output file rather than the target name.  Such code would have
@@ -1855,7 +1856,8 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
         // it is a full path to a depend that has the same name
         // as a target but is in a different location so do not use
         // the target as the depend
-        return inName;
+        dep = inName;
+        return true;
         }
       }
     switch (target->GetType())
@@ -1869,15 +1871,16 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
         // Get the location of the target's output file and depend on it.
         if(const char* location = target->GetLocation(config))
           {
-          return location;
+          dep = location;
+          return true;
           }
         }
         break;
       case cmTarget::UTILITY:
       case cmTarget::GLOBAL_TARGET:
-        // Depending on a utility target may not work but just trust
-        // the user to have given a valid name.
-        return inName;
+        // A utility target has no file on which to depend.  This was listed
+        // only to get the target-level dependency.
+        return false;
       case cmTarget::INSTALL_FILES:
       case cmTarget::INSTALL_PROGRAMS:
       case cmTarget::INSTALL_DIRECTORY:
@@ -1889,41 +1892,24 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
   if(cmSystemTools::FileIsFullPath(inName))
     {
     // This is a full path.  Return it as given.
-    return inName;
+    dep = inName;
+    return true;
     }
 
   // Check for a source file in this directory that matches the
   // dependency.
   if(cmSourceFile* sf = this->Makefile->GetSource(inName))
     {
-    name = sf->GetFullPath();
-    return name;
+    dep = sf->GetFullPath();
+    return true;
     }
 
   // Treat the name as relative to the source directory in which it
   // was given.
-  name = this->Makefile->GetCurrentDirectory();
-  name += "/";
-  name += inName;
-  return name;
-}
-
-//----------------------------------------------------------------------------
-std::string cmLocalGenerator::GetRealLocation(const char* inName,
-                                              const char* config)
-{
-  std::string outName=inName;
-  // Look for a CMake target with the given name, which is an executable 
-  // and which can be run
-  cmTarget* target = this->Makefile->FindTargetToUse(inName);
-  if ((target != 0)
-       && (target->GetType() == cmTarget::EXECUTABLE)
-       && ((this->Makefile->IsOn("CMAKE_CROSSCOMPILING") == false) 
-            || (target->IsImported() == true)))
-    {
-    outName = target->GetLocation( config );
-    }
-  return outName;
+  dep = this->Makefile->GetCurrentDirectory();
+  dep += "/";
+  dep += inName;
+  return true;
 }
 
 //----------------------------------------------------------------------------

@@ -13,6 +13,8 @@
 #define cmCustomCommand_h
 
 #include "cmStandardIncludes.h"
+class cmMakefile;
+class cmListFileBacktrace;
 
 /** \class cmCustomCommand
  * \brief A class to encapsulate a custom command
@@ -27,11 +29,14 @@ public:
   cmCustomCommand(const cmCustomCommand& r);
 
   /** Main constructor specifies all information for the command.  */
-  cmCustomCommand(const std::vector<std::string>& outputs,
+  cmCustomCommand(cmMakefile* mf,
+                  const std::vector<std::string>& outputs,
                   const std::vector<std::string>& depends,
                   const cmCustomCommandLines& commandLines,
                   const char* comment,
                   const char* workingDirectory);
+
+  ~cmCustomCommand();
 
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;
@@ -63,6 +68,9 @@ public:
   bool GetEscapeAllowMakeVars() const;
   void SetEscapeAllowMakeVars(bool b);
 
+  /** Backtrace of the command that created this custom command.  */
+  cmListFileBacktrace const& GetBacktrace() const;
+
   typedef std::pair<cmStdString, cmStdString> ImplicitDependsPair;
   class ImplicitDependsList: public std::vector<ImplicitDependsPair> {};
   void SetImplicitDepends(ImplicitDependsList const&);
@@ -78,6 +86,7 @@ private:
   std::string WorkingDirectory;
   bool EscapeAllowMakeVars;
   bool EscapeOldStyle;
+  cmListFileBacktrace* Backtrace;
   ImplicitDependsList ImplicitDepends;
 };
 

@@ -1357,8 +1357,8 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     util = cmSystemTools::GetFilenameWithoutLastExtension(util);
     }
 
-  // Check for a non-imported target with this name.
-  if(cmTarget* t = this->GlobalGenerator->FindTarget(0, util.c_str()))
+  // Check for a target with this name.
+  if(cmTarget* t = this->Makefile->FindTargetToUse(util.c_str()))
     {
     // If we find the target and the dep was given as a full path,
     // then make sure it was not a full path to something else, and
@@ -1406,8 +1406,8 @@ cmTargetTraceDependencies
       cit != cc.GetCommandLines().end(); ++cit)
     {
     std::string const& command = *cit->begin();
-    // Look for a non-imported target with this name.
-    if(cmTarget* t = this->GlobalGenerator->FindTarget(0, command.c_str()))
+    // Check for a target with this name.
+    if(cmTarget* t = this->Makefile->FindTargetToUse(command.c_str()))
       {
       if(t->GetType() == cmTarget::EXECUTABLE)
         {
