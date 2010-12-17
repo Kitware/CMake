@@ -1,8 +1,7 @@
-#include <cstdlib>
-#include <cstring>
 #include <ctype.h>
-
-#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__MINGW32__))
 
@@ -14,12 +13,13 @@
 #define _getcwd getcwd
 #endif
 
-inline const char* Getcwd(char* buf, unsigned int len)
+static const char* Getcwd(char* buf, unsigned int len)
 {
   const char* ret = _getcwd(buf, len);
+  char* p = NULL;
   if(!ret)
     {
-    std::cerr << "No current working directory." << std::endl;
+    fprintf(stderr, "No current working directory.\n");
     abort();
     }
   // make sure the drive letter is capital
@@ -27,7 +27,7 @@ inline const char* Getcwd(char* buf, unsigned int len)
     {
     buf[0] = toupper(buf[0]);
     }
-  for(char* p = buf; *p; ++p)
+  for(p = buf; *p; ++p)
     {
     if(*p == '\\')
       {
@@ -42,12 +42,12 @@ inline const char* Getcwd(char* buf, unsigned int len)
 #include <fcntl.h>
 #include <unistd.h>
 
-inline const char* Getcwd(char* buf, unsigned int len)
+static const char* Getcwd(char* buf, unsigned int len)
 {
   const char* ret = getcwd(buf, len);
   if(!ret)
     {
-    std::cerr << "No current working directory" << std::endl;
+    fprintf(stderr, "No current working directory\n");
     abort();
     }
   return ret;
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
   char buf[2048];
   const char *cwd = Getcwd(buf, sizeof(buf));
 
-  std::cout << "Working directory: -->" << cwd << "<--";
+  fprintf(stdout, "Working directory: -->%s<--", cwd);
 
   return 0;
 }
