@@ -25,7 +25,7 @@ get_filename_component(_default_cwd "${EXECUTABLE_OUTPUT_PATH}" PATH)
 
 # FIXME: How to deal with /debug, /release, etc. with VS or XCode?
 if(${CMAKE_GENERATOR} MATCHES "Makefiles")
-add_test(WorkingDirectory3 WorkingDirectory)
+add_test(WorkingDirectory3 ${EXECUTABLE_OUTPUT_PATH}/WorkingDirectory)
 set_tests_properties(WorkingDirectory3 PROPERTIES
   PASS_REGULAR_EXPRESSION "Working directory: -->${_default_cwd}<--"
 )
@@ -45,7 +45,7 @@ set_tests_properties(WorkingDirectory5 PROPERTIES
 
 # FIXME: How to deal with /debug, /release, etc. with VS or XCode?
 if(${CMAKE_GENERATOR} MATCHES "Makefiles")
-add_test(WorkingDirectory6 WorkingDirectory WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
+add_test(WorkingDirectory6 ${EXECUTABLE_OUTPUT_PATH}/WorkingDirectory WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
 set_tests_properties(WorkingDirectory6 PROPERTIES
   PASS_REGULAR_EXPRESSION "Working directory: -->${_default_cwd}<--"
 )
