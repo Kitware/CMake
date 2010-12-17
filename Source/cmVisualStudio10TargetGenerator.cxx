@@ -32,6 +32,30 @@ static std::string cmVS10EscapeXML(std::string arg)
   return arg;
 }
 
+static std::string cmVS10EscapeComment(std::string comment)
+{
+  // MSBuild takes the CDATA of a <Message></Message> element and just
+  // does "echo $CDATA" with no escapes.  We must encode the string.
+  // http://technet.microsoft.com/en-us/library/cc772462%28WS.10%29.aspx
+  std::string echoable;
+  for(std::string::iterator c = comment.begin(); c != comment.end(); ++c)
+    {
+    switch (*c)
+      {
+      case '\r': break;
+      case '\n': echoable += '\t'; break;
+      case '"': /* no break */
+      case '|': /* no break */
+      case '&': /* no break */
+      case '<': /* no break */
+      case '>': /* no break */
+      case '^': echoable += '^'; /* no break */
+      default:  echoable += *c; break;
+      }
+    }
+  return echoable;
+}
+
 cmVisualStudio10TargetGenerator::
 cmVisualStudio10TargetGenerator(cmTarget* target,
                                 cmGlobalVisualStudio10Generator* gg)
@@ -125,7 +149,10 @@ void cmVisualStudio10TargetGenerator::Generate()
                             ".vcxproj");
   if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY)
     {
-    this->ComputeClOptions();
+    if(!this->ComputeClOptions())
+      {
+      return;
+      }
     }
   cmMakefile* mf = this->Target->GetMakefile();
   std::string path =  mf->GetStartOutputDirectory();
@@ -325,6 +352,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
     }
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
   std::string comment = lg->ConstructComment(command);
+  comment = cmVS10EscapeComment(comment);
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations(); 
@@ -347,7 +375,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
                             command.GetEscapeAllowMakeVars())
         );
     this->WritePlatformConfigTag("Message",i->c_str(), 3);
-    (*this->BuildFileStream ) << comment << "</Message>\n";
+    (*this->BuildFileStream ) << cmVS10EscapeXML(comment) << "</Message>\n";
     this->WritePlatformConfigTag("Command", i->c_str(), 3);
     (*this->BuildFileStream ) << script << "</Command>\n";
     this->WritePlatformConfigTag("AdditionalInputs", i->c_str(), 3);
@@ -949,19 +977,23 @@ OutputLinkIncremental(std::string const& configName)
 }
 
 //----------------------------------------------------------------------------
-void cmVisualStudio10TargetGenerator::ComputeClOptions()
+bool cmVisualStudio10TargetGenerator::ComputeClOptions()
 {
   std::vector<std::string> const* configs =
     this->GlobalGenerator->GetConfigurations();
   for(std::vector<std::string>::const_iterator i = configs->begin();
       i != configs->end(); ++i)
     {
-    this->ComputeClOptions(*i);
+    if(!this->ComputeClOptions(*i))
+      {
+      return false;
+      }
     }
+  return true;
 }
 
 //----------------------------------------------------------------------------
-void cmVisualStudio10TargetGenerator::ComputeClOptions(
+bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   std::string const& configName)
 {
   // much of this was copied from here:
@@ -984,7 +1016,7 @@ void cmVisualStudio10TargetGenerator::ComputeClOptions(
       cmSystemTools::Error
         ("CMake can not determine linker language for target:",
          this->Name.c_str());
-      return;
+      return false;
       }
     if(strcmp(linkLanguage, "C") == 0 || strcmp(linkLanguage, "CXX") == 0
        || strcmp(linkLanguage, "Fortran") == 0)
@@ -1044,6 +1076,7 @@ void cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
 
   this->ClOptions[configName] = pOptions.release();
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -1433,8 +1466,9 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
                             command.GetEscapeAllowMakeVars())
         );
     }
+  comment = cmVS10EscapeComment(comment);
   this->WriteString("<Message>",3);
-  (*this->BuildFileStream ) << comment << "</Message>\n";
+  (*this->BuildFileStream ) << cmVS10EscapeXML(comment) << "</Message>\n";
   this->WriteString("<Command>", 3);
   (*this->BuildFileStream ) << script;
   (*this->BuildFileStream ) << "</Command>" << "\n";
@@ -1445,10 +1479,13 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
 
 void cmVisualStudio10TargetGenerator::WriteProjectReferences()
 {
-  cmGlobalGenerator::TargetDependSet const& depends
+  cmGlobalGenerator::TargetDependSet const& unordered
     = this->GlobalGenerator->GetTargetDirectDepends(*this->Target);
+  typedef cmGlobalVisualStudioGenerator::OrderedTargetDependSet
+    OrderedTargetDependSet;
+  OrderedTargetDependSet depends(unordered);
   this->WriteString("<ItemGroup>\n", 1);
-  for( cmGlobalGenerator::TargetDependSet::const_iterator i = depends.begin();
+  for( OrderedTargetDependSet::const_iterator i = depends.begin();
        i != depends.end(); ++i)
     {
     cmTarget* dt = *i;

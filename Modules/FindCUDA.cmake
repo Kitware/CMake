@@ -612,8 +612,10 @@ else()
 endif()
 
 ########################
-# Look for the SDK stuff
+# Look for the SDK stuff.  As of CUDA 3.0 NVSDKCUDA_ROOT has been replaced with
+# NVSDKCOMPUTE_ROOT with the old CUDA C contents moved into the C subdirectory
 find_path(CUDA_SDK_ROOT_DIR common/inc/cutil.h
+  "$ENV{NVSDKCOMPUTE_ROOT}/C"
   "$ENV{NVSDKCUDA_ROOT}"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\NVIDIA Corporation\\Installed Products\\NVIDIA SDK 10\\Compute;InstallDir]"
   "/Developer/GPU\ Computing/C"
@@ -941,8 +943,8 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     # we convert the strings to lists (like we want).
 
     if(CUDA_PROPAGATE_HOST_FLAGS)
-      # nvcc chokes on -g3, so replace it with -g
-      if(CMAKE_COMPILER_IS_GNUCC)
+      # nvcc chokes on -g3 in versions previous to 3.0, so replace it with -g
+      if(CMAKE_COMPILER_IS_GNUCC AND CUDA_VERSION VERSION_LESS "3.0")
         string(REPLACE "-g3" "-g" _cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
       else()
         set(_cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")

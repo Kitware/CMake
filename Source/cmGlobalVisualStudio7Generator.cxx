@@ -323,7 +323,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 
               if (cumulativePath.empty())
                 {
-                cumulativePath = *iter;
+                cumulativePath = "CMAKE_FOLDER_GUID_" + *iter;
                 }
               else
                 {
@@ -431,14 +431,22 @@ void cmGlobalVisualStudio7Generator
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
 {
+  const char *prefix = "CMAKE_FOLDER_GUID_";
+  const std::string::size_type skip_prefix = strlen(prefix);
   std::string guidProjectTypeFolder = "2150E333-8FDC-42A3-9474-1A3956D46DE8";
   for(std::map<std::string,std::set<std::string> >::iterator iter =
     VisualStudioFolders.begin(); iter != VisualStudioFolders.end(); ++iter)
     {
     std::string fullName = iter->first;
     std::string guid = this->GetGUID(fullName.c_str());
-    std::string nameOnly = cmSystemTools::GetFilenameName(fullName);
+
     cmSystemTools::ReplaceString(fullName, "/", "\\");
+    if (cmSystemTools::StringStartsWith(fullName.c_str(), prefix))
+      {
+      fullName = fullName.substr(skip_prefix);
+      }
+
+    std::string nameOnly = cmSystemTools::GetFilenameName(fullName);
 
     fout << "Project(\"{" <<
       guidProjectTypeFolder << "}\") = \"" <<

@@ -76,7 +76,8 @@ endif()
 
 file(WRITE
   "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
-  "int main() { return 0; }"
+  "int main() { return 0; }
+"
   )
 
 add_executable(

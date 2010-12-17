@@ -94,6 +94,18 @@ int cmCPackDebGenerator::PackageFiles()
                               this->GetOption("CPACK_DEBIAN_PACKAGE_SUGGESTS");
   const char* debian_pkg_url =
                               this->GetOption("CPACK_DEBIAN_PACKAGE_HOMEPAGE");
+  const char* debian_pkg_predep =
+                    this->GetOption("CPACK_DEBIAN_PACKAGE_PREDEPENDS");
+  const char* debian_pkg_enhances =
+                    this->GetOption("CPACK_DEBIAN_PACKAGE_ENHANCES");
+  const char* debian_pkg_breaks =
+                    this->GetOption("CPACK_DEBIAN_PACKAGE_BREAKS");
+  const char* debian_pkg_conflicts =
+                    this->GetOption("CPACK_DEBIAN_PACKAGE_CONFLICTS");
+  const char* debian_pkg_provides =
+                    this->GetOption("CPACK_DEBIAN_PACKAGE_PROVIDES");
+  const char* debian_pkg_replaces =
+                    this->GetOption("CPACK_DEBIAN_PACKAGE_REPLACES");
 
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(ctlfilename.c_str());
@@ -102,21 +114,45 @@ int cmCPackDebGenerator::PackageFiles()
     out << "Section: " << debian_pkg_section << "\n";
     out << "Priority: " << debian_pkg_priority << "\n";
     out << "Architecture: " << debian_pkg_arch << "\n";
-    if(debian_pkg_dep)
+    if(debian_pkg_dep && *debian_pkg_dep)
       {
       out << "Depends: " << debian_pkg_dep << "\n";
       }
-    if(debian_pkg_rec)
+    if(debian_pkg_rec && *debian_pkg_rec)
       {
       out << "Recommends: " << debian_pkg_rec << "\n";
       }
-    if(debian_pkg_sug)
+    if(debian_pkg_sug && *debian_pkg_sug)
       {
       out << "Suggests: " << debian_pkg_sug << "\n";
       }
-    if(debian_pkg_url)
+    if(debian_pkg_url && *debian_pkg_url)
       {
       out << "Homepage: " << debian_pkg_url << "\n";
+      }
+    if (debian_pkg_predep && *debian_pkg_predep)
+      {
+      out << "Pre-Depends: " << debian_pkg_predep << "\n";
+      }
+    if (debian_pkg_enhances && *debian_pkg_enhances)
+      {
+      out << "Enhances: " << debian_pkg_enhances << "\n";
+      }
+    if (debian_pkg_breaks && *debian_pkg_breaks)
+      {
+      out << "Breaks: " << debian_pkg_breaks << "\n";
+      }
+    if (debian_pkg_conflicts && *debian_pkg_conflicts)
+      {
+      out << "Conflicts: " << debian_pkg_conflicts << "\n";
+      }
+    if (debian_pkg_provides && *debian_pkg_provides)
+      {
+      out << "Provides: " << debian_pkg_provides << "\n";
+      }
+    if (debian_pkg_replaces && *debian_pkg_replaces)
+      {
+      out << "Replaces: " << debian_pkg_replaces << "\n";
       }
     unsigned long totalSize = 0;
     {

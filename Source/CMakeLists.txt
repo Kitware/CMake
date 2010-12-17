@@ -183,6 +183,8 @@ SET(SRCS
   cmGlobalUnixMakefileGenerator3.cxx
   cmGlobalUnixMakefileGenerator3.h
   cmGraphAdjacencyList.h
+  cmGraphVizWriter.cxx
+  cmGraphVizWriter.h
   cmInstallGenerator.h
   cmInstallGenerator.cxx
   cmInstallExportGenerator.cxx
@@ -332,7 +334,7 @@ ENDIF (WIN32)
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
-TARGET_LINK_LIBRARIES(CMakeLib cmsys 
+TARGET_LINK_LIBRARIES(CMakeLib cmsys
   ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
   ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES}
   ${CMAKE_CURL_LIBRARIES} )
@@ -432,7 +434,7 @@ IF(CYGWIN)
     CPack/cmCPackCygwinSourceGenerator.cxx
     )
 ENDIF(CYGWIN)
-  
+
 IF(UNIX)
   SET(CPACK_SRCS ${CPACK_SRCS}
     CPack/cmCPackDebGenerator.cxx

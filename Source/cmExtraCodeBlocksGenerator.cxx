@@ -289,14 +289,10 @@ void cmExtraCodeBlocksGenerator
       std::string fileName = *(splitted.end()-1);
       splitted.erase(splitted.end() - 1, splitted.end());
 
-      // We don't want paths with ".." in them
-      // reasons are that we don't want files outside the project
-      // TODO: the path should be normalized first though
       // We don't want paths with CMakeFiles in them
       // or do we?
       // In speedcrunch those where purely internal
       if (splitted.size() >= 1
-          && relative.find("..") == std::string::npos
           && relative.find("CMakeFiles") == std::string::npos)
         {
         tree.InsertPath(splitted, 1, fileName);

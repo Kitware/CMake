@@ -293,7 +293,7 @@ else()
     # If the HDF5 include directory was found, open H5pubconf.h to determine if
     # HDF5 was compiled with parallel IO support
     set( HDF5_IS_PARALLEL FALSE )
-    foreach( _dir HDF5_INCLUDE_DIRS )
+    foreach( _dir IN LISTS HDF5_INCLUDE_DIRS )
         if( EXISTS "${_dir}/H5pubconf.h" )
             file( STRINGS "${_dir}/H5pubconf.h" 
                 HDF5_HAVE_PARALLEL_DEFINE

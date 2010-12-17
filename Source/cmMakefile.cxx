@@ -928,6 +928,14 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     // Construct a rule file associated with the first output produced.
     std::string outName = outputs[0];
     outName += ".rule";
+    const char* dir =
+      this->LocalGenerator->GetGlobalGenerator()->
+      GetCMakeCFGInitDirectory();
+    if(dir && dir[0] == '$')
+      {
+      cmSystemTools::ReplaceString(outName, dir,
+                                   cmake::GetCMakeFilesDirectory());
+      }
     // Check if the rule file already exists.
     file = this->GetSource(outName.c_str());
     if(file && file->GetCustomCommand() && !replace)
