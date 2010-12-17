@@ -26,6 +26,13 @@ inline const char* Getcwd(char* buf, unsigned int len)
     {
     buf[0] = toupper(buf[0]);
     }
+  for(char* p = buf; *p; ++p)
+    {
+    if(*p == '\\')
+      {
+      *p = '/';
+      }
+    }
   return ret;
 }
 
