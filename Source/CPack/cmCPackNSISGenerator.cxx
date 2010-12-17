@@ -337,6 +337,7 @@ int cmCPackNSISGenerator::InitializeInternal()
     << std::endl);
   std::vector<std::string> path;
   std::string nsisPath;
+  bool gotRegValue = true;
 
 #ifdef _WIN32
   if ( !cmsys::SystemTools::ReadRegistryValue(
@@ -346,24 +347,37 @@ int cmCPackNSISGenerator::InitializeInternal()
     if ( !cmsys::SystemTools::ReadRegistryValue(
         "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath) )
       {
-      cmCPackLogger
-        (cmCPackLog::LOG_ERROR,
-         "Cannot find NSIS registry value. This is usually caused by NSIS "
-         "not being installed. Please install NSIS from "
-         "http://nsis.sourceforge.net"
-         << std::endl);
-      return 0;
+      gotRegValue = false;
       }
     }
-  path.push_back(nsisPath);
+
+  if (gotRegValue)
+    {
+    path.push_back(nsisPath);
+    }
 #endif
+
   nsisPath = cmSystemTools::FindProgram("makensis", path, false);
+
   if ( nsisPath.empty() )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find NSIS compiler"
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Cannot find NSIS compiler makensis: likely it is not installed, "
+      "or not in your PATH"
       << std::endl);
+
+    if (!gotRegValue)
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+         "Could not read NSIS registry value. This is usually caused by "
+         "NSIS not being installed. Please install NSIS from "
+         "http://nsis.sourceforge.net"
+         << std::endl);
+      }
+
     return 0;
     }
+
   std::string nsisCmd = "\"" + nsisPath + "\" " NSIS_OPT "VERSION";
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Test NSIS version: "
     << nsisCmd.c_str() << std::endl);
