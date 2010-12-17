@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(TestsWorkingDirectoryProj)
 
-add_executable(WorkingDirectory main.cxx)
+add_executable(WorkingDirectory main.c)
 
 enable_testing()
 
