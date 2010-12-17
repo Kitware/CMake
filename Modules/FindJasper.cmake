@@ -27,7 +27,7 @@ FIND_LIBRARY(JASPER_LIBRARY NAMES jasper libjasper)
 
 # handle the QUIETLY and REQUIRED arguments and set JASPER_FOUND to TRUE if 
 # all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Jasper DEFAULT_MSG JASPER_LIBRARY JASPER_INCLUDE_DIR JPEG_LIBRARIES)
 
 IF (JASPER_FOUND)

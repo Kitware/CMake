@@ -120,7 +120,7 @@ FUNCTION(ADD_FEATURE_INFO _name _enabled _desc)
   ENDIF ()
 
   SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_desc}" )
-ENDFUNCTION(SET_FEATURE_INFO)
+ENDFUNCTION(ADD_FEATURE_INFO)
 
 
 FUNCTION(SET_FEATURE_INFO)
@@ -199,21 +199,25 @@ FUNCTION(FEATURE_SUMMARY)
      OR "${_FS_WHAT}" STREQUAL "PACKAGES_FOUND"
      OR "${_FS_WHAT}" STREQUAL "PACKAGES_NOT_FOUND")
     _FS_GET_FEATURE_SUMMARY( ${_FS_WHAT} _featureSummary)
+    SET(_fullText "${_FS_DESCRIPTION}${_featureSummary}\n")
   ELSEIF("${_FS_WHAT}" STREQUAL "ALL")
     _FS_GET_FEATURE_SUMMARY( PACKAGES_FOUND _tmp1)
     _FS_GET_FEATURE_SUMMARY( PACKAGES_NOT_FOUND _tmp2)
     SET(_featureSummary "${_tmp1}${_tmp2}")
+    IF(_FS_DESCRIPTION)
+      SET(_fullText "${_FS_DESCRIPTION}${_tmp1}${_tmp2}\n")
+    ELSE(_FS_DESCRIPTION)
+      SET(_fullText "-- Found the following packages:${_tmp1}\n-- Did not find the following packages:${_tmp2}\n")
+    ENDIF(_FS_DESCRIPTION)
   ELSE()
     MESSAGE(FATAL_ERROR "The WHAT argument of FEATURE_SUMMARY() is set to ${_FS_WHAT}, which is not a valid value.")
   ENDIF()
 
-  SET(_fullText "${_FS_DESCRIPTION}${_featureSummary}\n")
-
   IF(_FS_FILENAME)
     IF(_FS_APPEND)
-      FILE(WRITE  "${_FS_FILENAME}" "${_fullText}")
-    ELSE(_FS_APPEND)
       FILE(APPEND "${_FS_FILENAME}" "${_fullText}")
+    ELSE(_FS_APPEND)
+      FILE(WRITE  "${_FS_FILENAME}" "${_fullText}")
     ENDIF(_FS_APPEND)
 
   ELSE(_FS_FILENAME)

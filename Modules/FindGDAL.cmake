@@ -100,7 +100,7 @@ FIND_LIBRARY(GDAL_LIBRARY
     /usr/freeware
 )
 
-include(FindPackageHandleStandardArgs)
+include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GDAL DEFAULT_MSG GDAL_LIBRARY GDAL_INCLUDE_DIR)
 
 set(GDAL_LIBRARIES ${GDAL_LIBRARY})

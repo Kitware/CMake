@@ -46,6 +46,6 @@ include(Findosg_functions)
 OSG_FIND_PATH   (OSGVOLUME osgVolume/Volume)
 OSG_FIND_LIBRARY(OSGVOLUME osgVolume)
 
-include(FindPackageHandleStandardArgs)
+include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(osgVolume DEFAULT_MSG
     OSGVOLUME_LIBRARY OSGVOLUME_INCLUDE_DIR)

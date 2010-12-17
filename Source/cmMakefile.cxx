@@ -367,7 +367,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     // No error.
     return result;
     }
-  
+
   std::string name = lff.Name;
 
   // Place this call on the call stack.
@@ -391,7 +391,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
         cmOStringStream msg;
         msg << lff.FilePath << "(" << lff.Line << "):  ";
         msg << lff.Name << "(";
-        for(std::vector<cmListFileArgument>::const_iterator i = 
+        for(std::vector<cmListFileArgument>::const_iterator i =
               lff.Arguments.begin(); i != lff.Arguments.end(); ++i)
           {
           msg << i->Value;
@@ -626,6 +626,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
 
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
+  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                       cmSystemTools::GetFilenamePath(filenametoread).c_str());
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
   // try to see if the list file is the top most
   // list file for a project, and if it is, then it
@@ -661,6 +664,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
     this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
     this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
+    this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                        cmSystemTools::GetFilenamePath(currentFile).c_str());
+    this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
     return false;
     }
   // add this list file to the list of dependencies
@@ -703,6 +709,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
+  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                      cmSystemTools::GetFilenamePath(currentFile).c_str());
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
   // pop the listfile off the stack
   this->ListFileStack.pop_back();
@@ -1854,8 +1863,8 @@ void cmMakefile::AddLibrary(const char* lname, cmTarget::TargetType type,
                             bool excludeFromAll)
 {
   // wrong type ? default to STATIC
-  if (    (type != cmTarget::STATIC_LIBRARY) 
-       && (type != cmTarget::SHARED_LIBRARY) 
+  if (    (type != cmTarget::STATIC_LIBRARY)
+       && (type != cmTarget::SHARED_LIBRARY)
        && (type != cmTarget::MODULE_LIBRARY))
     {
     type = cmTarget::STATIC_LIBRARY;
@@ -2441,14 +2450,14 @@ void cmMakefile::AddDefaultDefinitions()
 {
 /* Up to CMake 2.4 here only WIN32, UNIX and APPLE were set.
   With CMake must separate between target and host platform. In most cases
-  the tests for WIN32, UNIX and APPLE will be for the target system, so an 
+  the tests for WIN32, UNIX and APPLE will be for the target system, so an
   additional set of variables for the host system is required ->
   CMAKE_HOST_WIN32, CMAKE_HOST_UNIX, CMAKE_HOST_APPLE.
-  WIN32, UNIX and APPLE are now set in the platform files in 
+  WIN32, UNIX and APPLE are now set in the platform files in
   Modules/Platforms/.
   To keep cmake scripts (-P) and custom language and compiler modules
   working, these variables are still also set here in this place, but they
-  will be reset in CMakeSystemSpecificInformation.cmake before the platform 
+  will be reset in CMakeSystemSpecificInformation.cmake before the platform
   files are executed. */
 #if defined(_WIN32) || defined(__CYGWIN__)
   this->AddDefinition("WIN32", "1");
@@ -2759,13 +2768,13 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
     }
 }
 
-void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang, 
+void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang,
                                bool optional)
 {
   this->AddDefinition("CMAKE_CFG_INTDIR",
                       this->LocalGenerator->GetGlobalGenerator()
                       ->GetCMakeCFGInitDirectory());
-  this->LocalGenerator->GetGlobalGenerator()->EnableLanguage(lang, this, 
+  this->LocalGenerator->GetGlobalGenerator()->EnableLanguage(lang, this,
                                                              optional);
 }
 
@@ -2846,7 +2855,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
     {
     cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS",
                      "FALSE", "", cmCacheManager::INTERNAL);
-    }    
+    }
   if (cm.Configure() != 0)
     {
     cmSystemTools::Error(
@@ -3134,7 +3143,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     {
     return;
     }
-  
+
   // handle special props
   std::string propname = prop;
   if ( propname == "INCLUDE_DIRECTORIES" )
@@ -3158,7 +3167,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     this->SetLinkDirectories(varArgsExpanded);
     return;
     }
-  
+
   if ( propname == "INCLUDE_REGULAR_EXPRESSION" )
     {
     this->SetIncludeRegularExpression(value);
@@ -3168,7 +3177,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   if ( propname == "ADDITIONAL_MAKE_CLEAN_FILES" )
     {
     // This property is not inherrited
-    if ( strcmp(this->GetCurrentDirectory(), 
+    if ( strcmp(this->GetCurrentDirectory(),
                 this->GetStartDirectory()) != 0 )
       {
       return;
@@ -3289,14 +3298,14 @@ const char *cmMakefile::GetProperty(const char* prop,
     return output.c_str();
     }
   else if (!strcmp("DEFINITIONS",prop))
-    { 
+    {
     output += this->DefineFlagsOrig;
     return output.c_str();
     }
   else if (!strcmp("INCLUDE_DIRECTORIES",prop) )
     {
     cmOStringStream str;
-    for (std::vector<std::string>::const_iterator 
+    for (std::vector<std::string>::const_iterator
          it = this->GetIncludeDirectories().begin();
          it != this->GetIncludeDirectories().end();
          ++ it )
@@ -3313,7 +3322,7 @@ const char *cmMakefile::GetProperty(const char* prop,
   else if (!strcmp("LINK_DIRECTORIES",prop))
     {
     cmOStringStream str;
-    for (std::vector<std::string>::const_iterator 
+    for (std::vector<std::string>::const_iterator
          it = this->GetLinkDirectories().begin();
          it != this->GetLinkDirectories().end();
          ++ it )
@@ -3770,7 +3779,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       msg = e.str();
       return false;
       }
-    else 
+    else
       {
       // target names must be globally unique
       switch (this->GetPolicyStatus(cmPolicies::CMP0002))
@@ -3789,7 +3798,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         case cmPolicies::NEW:
           break;
         }
-      
+
       // The conflict is with a non-imported target.
       // Allow this if the user has requested support.
       cmake* cm =
@@ -3938,7 +3947,7 @@ cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id)
   return this->GetPolicies()->GetPolicyStatus(id);
 }
 
-bool cmMakefile::SetPolicy(const char *id, 
+bool cmMakefile::SetPolicy(const char *id,
                            cmPolicies::PolicyStatus status)
 {
   cmPolicies::PolicyID pid;
@@ -4068,7 +4077,7 @@ bool cmMakefile::SetPolicyVersion(const char *version)
 }
 
 cmPolicies *cmMakefile::GetPolicies()
-{ 
+{
   if (!this->GetCMakeInstance())
   {
     return 0;

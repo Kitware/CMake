@@ -682,7 +682,7 @@ set(CUDA_TOOLKIT_ROOT_DIR_INTERNAL "${CUDA_TOOLKIT_ROOT_DIR}" CACHE INTERNAL
 set(CUDA_SDK_ROOT_DIR_INTERNAL "${CUDA_SDK_ROOT_DIR}" CACHE INTERNAL
   "This is the value of the last time CUDA_SDK_ROOT_DIR was set successfully." FORCE)
 
-include(FindPackageHandleStandardArgs)
+include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
 find_package_handle_standard_args(CUDA
   REQUIRED_VARS
     CUDA_TOOLKIT_ROOT_DIR
