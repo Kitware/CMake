@@ -30,6 +30,7 @@ class cmLocalVisualStudioGenerator : public cmLocalGenerator
 public:
   cmLocalVisualStudioGenerator();
   virtual ~cmLocalVisualStudioGenerator();
+
   /** Construct a script from the given list of command lines.  */
   std::string ConstructScript(const cmCustomCommandLines& commandLines,
                               const char* workingDirectory,
@@ -38,7 +39,13 @@ public:
                               bool escapeAllowMakeVars,
                               const char* newline = "\n");
 
+  /** Line of batch file text that skips to the end after
+    * a failed step in a sequence of custom commands.
+    */
+  std::string GetCheckForErrorLine();
+
 protected:
+  virtual std::string CheckForErrorLine();
 
   /** Construct a custom command to make exe import lib dir.  */
   cmsys::auto_ptr<cmCustomCommand>
