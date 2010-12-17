@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
   char buf[2048];
   const char *cwd = Getcwd(buf, sizeof(buf));
 
-  fprintf(stdout, "Working directory: %s\n", cwd);
+  fprintf(stdout, "Working directory: -->%s<--", cwd);
 
   return 0;
 }
