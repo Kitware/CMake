@@ -438,6 +438,8 @@ void cmCTestTestHandler::Initialize()
 
   this->TestsToRun.clear();
 
+  this->UseIncludeLabelRegExpFlag = false;
+  this->UseExcludeLabelRegExpFlag = false;
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
