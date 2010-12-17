@@ -42,6 +42,10 @@
 #define WIN32
 #endif
 
+#if defined(__clang__)
+# pragma clang diagnostic ignored "-Wcast-align"
+#endif
+
 /*
  * Include configuration script results or hand-crafted
  * configuration file for platforms which lack config tool.

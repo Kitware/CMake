@@ -171,7 +171,9 @@ int cmCPackGenerator::InstallProject()
   std::string bareTempInstallDirectory
     = this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   std::string tempInstallDirectoryStr = bareTempInstallDirectory;
-  bool setDestDir = cmSystemTools::IsOn(this->GetOption("CPACK_SET_DESTDIR"));
+  bool setDestDir = cmSystemTools::IsOn(this->GetOption("CPACK_SET_DESTDIR"))
+                  | cmSystemTools::IsInternallyOn(
+                    this->GetOption("CPACK_SET_DESTDIR"));
   if (!setDestDir)
     {
     tempInstallDirectoryStr += this->GetPackagingInstallPrefix();
@@ -329,6 +331,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       it != installDirectoriesVector.end();
       ++it )
       {
+      std::list<std::pair<std::string,std::string> > symlinkedFiles;
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
       std::string top = it->c_str();
@@ -372,13 +375,54 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           + cmSystemTools::RelativePath(top.c_str(), gfit->c_str());
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: "
           << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
-        if ( !cmSystemTools::CopyFileIfDifferent(inFile.c_str(),
+        /* If the file is a symlink we will have to re-create it */
+        if ( cmSystemTools::FileIsSymlink(inFile.c_str()))
+          {
+          std::string targetFile;
+          std::string inFileRelative =
+             cmSystemTools::RelativePath(top.c_str(),inFile.c_str());
+          cmSystemTools::ReadSymlink(inFile.c_str(),targetFile);
+          symlinkedFiles.push_back(std::pair<std::string,
+                                   std::string>(targetFile,inFileRelative));
+          }
+        /* If it is not a symlink then do a plain copy */
+        else if ( !cmSystemTools::CopyFileIfDifferent(inFile.c_str(),
             filePath.c_str()) )
           {
           cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying file: "
             << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
           return 0;
           }
+        }
+      /* rebuild symlinks in the installed tree */
+      if (symlinkedFiles.size()>0)
+        {
+        std::list< std::pair<std::string,std::string> >::iterator symlinkedIt;
+        std::string curDir = cmSystemTools::GetCurrentWorkingDirectory();
+        std::string goToDir = tempDir;
+        goToDir  += "/"+subdir;
+        cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                      "Change dir to: " << goToDir <<std::endl);
+        cmSystemTools::ChangeDirectory(goToDir.c_str());
+        for (symlinkedIt=symlinkedFiles.begin();
+             symlinkedIt != symlinkedFiles.end();
+             ++symlinkedIt)
+          {
+          cmCPackLogger(cmCPackLog::LOG_DEBUG, "Will create a symlink: "
+                         << symlinkedIt->second << "--> "
+                         << symlinkedIt->first << std::endl);
+          if (!cmSystemTools::CreateSymlink((symlinkedIt->first).c_str(),
+                                            (symlinkedIt->second).c_str()))
+            {
+            cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot create symlink: "
+                            << symlinkedIt->second << "--> "
+                            << symlinkedIt->first << std::endl);
+            return 0;
+            }
+          }
+        cmCPackLogger(cmCPackLog::LOG_DEBUG, "Going back to: "
+                      << curDir <<std::endl);
+        cmSystemTools::ChangeDirectory(curDir.c_str());
         }
       }
     }
@@ -414,7 +458,8 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
         // underneath the tempInstallDirectory. The value of the project's
         // CMAKE_INSTALL_PREFIX is sent in here as the value of the
         // CPACK_INSTALL_PREFIX variable.
-       std::string dir;
+
+        std::string dir;
         if (this->GetOption("CPACK_INSTALL_PREFIX"))
           {
           dir += this->GetOption("CPACK_INSTALL_PREFIX");
@@ -459,6 +504,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   const char* cmakeGenerator
     = this->GetOption("CPACK_CMAKE_GENERATOR");
+  std::string absoluteDestFiles;
   if ( cmakeProjects && *cmakeProjects )
     {
     if ( !cmakeGenerator )
@@ -643,6 +689,18 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           // value of the project's CMAKE_INSTALL_PREFIX is sent in here as
           // the value of the CPACK_INSTALL_PREFIX variable.
           //
+          // If DESTDIR has been 'internally set ON' this means that
+          // the underlying CPack specific generator did ask for that
+          // In this case we may overrode CPACK_INSTALL_PREFIX with
+          // CPACK_PACKAGING_INSTALL_PREFIX
+          // I know this is tricky and awkward but it's the price for
+          // CPACK_SET_DESTDIR backward compatibility.
+          if (cmSystemTools::IsInternallyOn(
+                this->GetOption("CPACK_SET_DESTDIR")))
+            {
+            this->SetOption("CPACK_INSTALL_PREFIX",
+                            this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX"));
+            }
           std::string dir;
           if (this->GetOption("CPACK_INSTALL_PREFIX"))
             {
@@ -723,6 +781,16 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           mf->AddDefinition("CMAKE_INSTALL_DO_STRIP", "1");
           }
         int res = mf->ReadListFile(0, installFile.c_str());
+        if (NULL !=mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
+          if (absoluteDestFiles.length()>0) {
+            absoluteDestFiles +=";";
+          }
+          absoluteDestFiles +=
+            mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES");
+          cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                                    "Got some ABSOLUTE DESTINATION FILES: "
+                                    << absoluteDestFiles << std::endl);
+        }
         if ( cmSystemTools::GetErrorOccuredFlag() || !res )
           {
           return 0;
@@ -730,6 +798,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         }
       }
     }
+  this->SetOption("CPACK_ABSOLUTE_DESTINATION_FILES",
+                  absoluteDestFiles.c_str());
   return 1;
 }
 
@@ -828,8 +898,8 @@ int cmCPackGenerator::DoPackage()
     return 0;
     }
 
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Compress package" << std::endl);
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Compress files to: "
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Create package" << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Package files to: "
     << (tempPackageFileName ? tempPackageFileName : "(NULL)") << std::endl);
   if ( cmSystemTools::FileExists(tempPackageFileName) )
     {
@@ -853,8 +923,12 @@ int cmCPackGenerator::DoPackage()
     std::vector<std::string>::const_iterator it;
     for ( it = files.begin(); it != files.end(); ++ it )
       {
-      std::string fileN = cmSystemTools::RelativePath(tempDirectory,
-                                                      it->c_str());
+      // beware we cannot just use tempDirectory as before
+      // because some generator will "CPACK_INCLUDE_TOPLEVEL_DIRECTORY"
+      // we really want "CPACK_TEMPORARY_DIRECTORY"
+      std::string fileN =
+        cmSystemTools::RelativePath(
+          this->GetOption("CPACK_TEMPORARY_DIRECTORY"), it->c_str());
 
       // Determine which component we are in.
       std::string componentName = fileN.substr(0, fileN.find('/'));
@@ -864,6 +938,9 @@ int cmCPackGenerator::DoPackage()
 
       // Add this file to the list of files for the component.
       this->Components[componentName].Files.push_back(fileN);
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file <"
+                    <<fileN<<"> to component <"
+                    <<componentName<<">"<<std::endl);
       }
     }
 

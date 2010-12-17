@@ -21,7 +21,7 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
 {
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
-  this->PlatformName = "Win32";
+  this->ArchitectureId = "X86";
 }
 
 //----------------------------------------------------------------------------
@@ -30,6 +30,7 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 {
   cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
   lg->SetVersion8();
+  lg->SetPlatformName(this->GetPlatformName());
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   lg->SetGlobalGenerator(this);
   return lg;
@@ -55,8 +56,8 @@ void cmGlobalVisualStudio8Generator
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId);
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId);
   mf->AddDefinition("MSVC80", "1");
 }
 
@@ -135,6 +136,13 @@ void cmGlobalVisualStudio8Generator::AddCheckTarget()
     mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
                           no_working_directory, no_depends,
                           noCommandLines);
+
+  // Organize in the "predefined targets" folder:
+  //
+  if (this->UseFolderProperty())
+    {
+    tgt->SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
+    }
 
   // Create a list of all stamp files for this project.
   std::vector<std::string> stamps;
@@ -252,8 +260,8 @@ cmGlobalVisualStudio8Generator
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    fout << "\t\t" << *i << "|" << this->PlatformName << " = " << *i << "|"
-         << this->PlatformName << "\n";
+    fout << "\t\t" << *i << "|" << this->GetPlatformName()
+         << " = "  << *i << "|" << this->GetPlatformName() << "\n";
     }
   fout << "\tEndGlobalSection\n";
 }
@@ -269,13 +277,13 @@ cmGlobalVisualStudio8Generator
       i != this->Configurations.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i
-         << "|" << this->PlatformName << ".ActiveCfg = "
-         << *i << "|" << this->PlatformName << "\n";
+         << "|" << this->GetPlatformName() << ".ActiveCfg = "
+         << *i << "|" << this->GetPlatformName() << "\n";
     if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i
-           << "|" << this->PlatformName << ".Build.0 = "
-           << *i << "|" << this->PlatformName << "\n";
+           << "|" << this->GetPlatformName() << ".Build.0 = "
+           << *i << "|" << this->GetPlatformName() << "\n";
       }
     }
 }

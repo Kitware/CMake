@@ -12,3 +12,9 @@ configure        crlf=input
 *.dsw           -crlf
 *.sln           -crlf
 *.vcproj        -crlf
+
+*.c              whitespace=tab-in-indent
+*.h              whitespace=tab-in-indent
+*.cxx            whitespace=tab-in-indent
+*.txt            whitespace=tab-in-indent
+*.cmake          whitespace=tab-in-indent

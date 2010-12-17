@@ -96,6 +96,7 @@ private:
                             const char* name, const char* path,
                             const std::set<cmStdString>& dependencies);
   void WriteDSWFooter(std::ostream& fout);
+  virtual std::string WriteUtilityDepend(cmTarget* target);
 };
 
 #endif

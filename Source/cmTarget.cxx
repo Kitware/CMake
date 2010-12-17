@@ -393,6 +393,24 @@ void cmTarget::DefineProperties(cmake *cm)
      "from which the target is imported.");
 
   cm->DefineProperty
+    ("IMPORTED_NO_SONAME", cmProperty::TARGET,
+     "Specifies that an IMPORTED shared library target has no \"soname\".  ",
+     "Set this property to true for an imported shared library file that "
+     "has no \"soname\" field.  "
+     "CMake may adjust generated link commands for some platforms to prevent "
+     "the linker from using the path to the library in place of its missing "
+     "soname.  "
+     "Ignored for non-imported targets.");
+
+  cm->DefineProperty
+    ("IMPORTED_NO_SONAME_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration version of IMPORTED_NO_SONAME property.",
+     "This property is used when loading settings for the <CONFIG> "
+     "configuration of an imported target.  "
+     "Configuration names correspond to those provided by the project "
+     "from which the target is imported.");
+
+  cm->DefineProperty
     ("EXCLUDE_FROM_ALL", cmProperty::TARGET,
      "Exclude the target from the all target.",
      "A property on a target that indicates if the target is excluded "
@@ -854,10 +872,19 @@ void cmTarget::DefineProperties(cmake *cm)
      "set_source_files_properties command.");
 
   cm->DefineProperty
+    ("FOLDER", cmProperty::TARGET,
+     "Set the folder name. Use to organize targets in an IDE.",
+     "Targets with no FOLDER property will appear as top level "
+     "entities in IDEs like Visual Studio. Targets with the same "
+     "FOLDER property value will appear next to each other in a "
+     "folder of that name. To nest folders, use FOLDER values such "
+     "as 'GUI/Dialogs' with '/' characters separating folder levels.");
+
+  cm->DefineProperty
     ("PROJECT_LABEL", cmProperty::TARGET,
      "Change the name of a target in an IDE.",
      "Can be used to change the name of the target in an IDE "
-     "like visual stuido. ");
+     "like Visual Studio. ");
   cm->DefineProperty
     ("VS_KEYWORD", cmProperty::TARGET,
      "Visual Studio project keyword.",
@@ -1031,18 +1058,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
-  if(const char* configurationTypes =
-     mf->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
-    {
-    cmSystemTools::ExpandListArgument(configurationTypes, configNames);
-    }
-  else if(const char* buildType = mf->GetDefinition("CMAKE_BUILD_TYPE"))
-    {
-    if(*buildType)
-      {
-      configNames.push_back(buildType);
-      }
-    }
+  mf->GetConfigurations(configNames);
 
   // Setup per-configuration property default values.
   const char* configProps[] = {
@@ -1430,8 +1446,15 @@ bool cmTarget::FindSourceFiles()
         si = this->SourceFiles.begin();
       si != this->SourceFiles.end(); ++si)
     {
-    if((*si)->GetFullPath().empty())
+    std::string e;
+    if((*si)->GetFullPath(&e).empty())
       {
+      if(!e.empty())
+        {
+        cmake* cm = this->Makefile->GetCMakeInstance();
+        cm->IssueMessage(cmake::FATAL_ERROR, e,
+                         this->GetBacktrace());
+        }
       return false;
       }
     }

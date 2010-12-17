@@ -60,6 +60,26 @@ void cmInstallGenerator
     }
   os << indent;
   std::string dest = this->GetInstallDestination();
+  if (cmSystemTools::FileIsFullPath(dest.c_str()))
+     {
+     os << "list(APPEND CPACK_ABSOLUTE_DESTINATION_FILES\n";
+     os << indent << " \"";
+     for(std::vector<std::string>::const_iterator fi = files.begin();
+               fi != files.end(); ++fi)
+             {
+               if (fi!=files.begin()) os << ";";
+               os << dest << cmSystemTools::ConvertToOutputPath("/");
+               if (rename && *rename)
+                 {
+                 os << rename;
+                 }
+               else
+                 {
+                 os << cmSystemTools::GetFilenameName(*fi);
+                 }
+             }
+     os << "\")\n";
+     }
   os << "FILE(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype.c_str();
   if(optional)
     {

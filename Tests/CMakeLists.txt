@@ -129,6 +129,9 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(MathTest MathTest)
   ADD_TEST_MACRO(Simple Simple)
   ADD_TEST_MACRO(PreOrder PreOrder)
+  ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
+  SET_TESTS_PROPERTIES(MissingSourceFile PROPERTIES
+    PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file \"MissingSourceFile.c\"")
   ADD_TEST_MACRO(COnly COnly)
   ADD_TEST_MACRO(CxxOnly CxxOnly)
   ADD_TEST_MACRO(IPO COnly/COnly)
@@ -1401,6 +1404,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
 
+  ADD_TEST(CTestTestPrintLabels ${CMAKE_CTEST_COMMAND} --print-labels)
+  SET_TESTS_PROPERTIES(CTestTestPrintLabels PROPERTIES LABELS "Label1;Label2")
+  SET_TESTS_PROPERTIES(CTestTestPrintLabels PROPERTIES PASS_REGULAR_EXPRESSION
+    "All Labels:.*  Label1.*  Label2")
+
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestResourceLock/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestResourceLock/test.cmake"
@@ -1711,7 +1719,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   ENDIF()
 
   IF(NOT CMAKE_TEST_GENERATOR MATCHES "Xcode")
-    INCLUDE(FindJava)
+    find_package(Java QUIET)
     IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
       GET_FILENAME_COMPONENT(JNIPATH ${JAVA_COMPILE} PATH)
       FIND_FILE(JNI_H jni.h

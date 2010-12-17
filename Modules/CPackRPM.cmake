@@ -83,13 +83,12 @@
 #     May be used to set RPM packages that are obsoleted by this one.
 #  CPACK_RPM_PACKAGE_RELOCATABLE
 #     Mandatory : NO
-#     Default   : -
+#     Default   : CPACK_PACKAGE_RELOCATABLE
 #     If this variable is set to TRUE or ON CPackRPM will try
 #     to build a relocatable RPM package. A relocatable RPM may
 #     be installed using rpm --prefix or --relocate in order to
 #     install it at an alternate place see rpm(8).
-#     Note that currently this may fail if the package contains
-#     files installed with absolute path or CPACK_SET_DESTDIR is set to ON.
+#     Note that currently this may fail if CPACK_SET_DESTDIR is set to ON.
 #     If CPACK_SET_DESTDIR is set then you will get a warning message
 #     but if there is file installed with absolute path you'll get
 #     unexpected behavior.
@@ -331,15 +330,18 @@ ELSE(CPACK_RPM_COMPRESSION_TYPE)
    SET(CPACK_RPM_COMPRESSION_TYPE_TMP "")
 ENDIF(CPACK_RPM_COMPRESSION_TYPE)
 
+if(CPACK_PACKAGE_RELOCATABLE)
+    set(CPACK_RPM_PACKAGE_RELOCATABLE TRUE)
+endif(CPACK_PACKAGE_RELOCATABLE)
 if(CPACK_RPM_PACKAGE_RELOCATABLE)
   if(CPACK_RPM_PACKAGE_DEBUG)
-      message("CPackRPM:Debug: Trying to build a relocatable package")
+    message("CPackRPM:Debug: Trying to build a relocatable package")
   endif(CPACK_RPM_PACKAGE_DEBUG)
-  if(CPACK_SET_DESTDIR)
-    message(SEND_ERROR "CPackRPM:Warning: CPACK_SET_DESTDIR is set while requesting a relocatable package (CPACK_RPM_PACKAGE_RELOCATABLE is set): this is not supported, the package won't be relocatable.")
-  else(CPACK_SET_DESTDIR)
+  if(CPACK_SET_DESTDIR AND (NOT CPACK_SET_DESTDIR STREQUAL "I_ON"))
+    message("CPackRPM:Warning: CPACK_SET_DESTDIR is set (=${CPACK_SET_DESTDIR}) while requesting a relocatable package (CPACK_RPM_PACKAGE_RELOCATABLE is set): this is not supported, the package won't be relocatable.")
+  else(CPACK_SET_DESTDIR AND (NOT CPACK_SET_DESTDIR STREQUAL "I_ON"))
     set(CPACK_RPM_PACKAGE_PREFIX ${CPACK_PACKAGING_INSTALL_PREFIX})
-  endif(CPACK_SET_DESTDIR)
+  endif(CPACK_SET_DESTDIR AND (NOT CPACK_SET_DESTDIR STREQUAL "I_ON"))
 endif(CPACK_RPM_PACKAGE_RELOCATABLE)
 
 # check if additional fields for RPM spec header are given
@@ -463,6 +465,34 @@ EXECUTE_PROCESS(COMMAND find -type f -o -type l
                WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}"
                OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
 
+if (CPACK_ABSOLUTE_DESTINATION_FILES)
+  IF(CPACK_RPM_PACKAGE_DEBUG)
+    message("CPackRPM:Debug: Handling Absolute Destination Files: ${CPACK_ABSOLUTE_DESTINATION_FILES}")
+  ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+  # Remove trailing space
+  string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
+  # Transform endline separated - string into CMake List
+  string(REPLACE "\n" ";" CPACK_RPM_INSTALL_FILES_LIST "${CPACK_RPM_INSTALL_FILES_LIST}")
+  # Remove unecessary quotes
+  string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST "${CPACK_RPM_INSTALL_FILES_LIST}")
+  # Remove ABSOLUTE install file from INSTALL FILE LIST
+  list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${CPACK_ABSOLUTE_DESTINATION_FILES})
+  # Rebuild INSTALL_FILES
+  set(CPACK_RPM_INSTALL_FILES "")
+  foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
+    set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}\"${F}\"\n")
+  endforeach(F)
+  # Build ABSOLUTE_INSTALL_FILES
+  set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
+  foreach(F IN LISTS CPACK_ABSOLUTE_DESTINATION_FILES)
+    set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "${CPACK_RPM_ABSOLUTE_INSTALL_FILES}%config \"${F}\"\n")
+  endforeach(F)
+  IF(CPACK_RPM_PACKAGE_DEBUG)
+    message("CPackRPM:Debug: CPACK_RPM_ABSOLUTE_INSTALL_FILES=${CPACK_RPM_ABSOLUTE_INSTALL_FILES}")
+    message("CPackRPM:Debug: CPACK_RPM_INSTALL_FILES=${CPACK_RPM_INSTALL_FILES}")
+  ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+endif(CPACK_ABSOLUTE_DESTINATION_FILES)
+
 # The name of the final spec file to be used by rpmbuild
 SET(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}.spec")
 
@@ -547,6 +577,7 @@ fi
 %files
 %defattr(-,root,root,-)
 ${CPACK_RPM_INSTALL_FILES}
+${CPACK_RPM_ABSOLUTE_INSTALL_FILES}
 
 %changelog
 \@CPACK_RPM_SPEC_CHANGELOG\@

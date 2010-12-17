@@ -283,7 +283,22 @@ void cmSystemTools::ReportLastSystemError(const char* msg)
   cmSystemTools::Error(m.c_str());
 }
 
- 
+bool cmSystemTools::IsInternallyOn(const char* val)
+{
+  if (!val)
+    {
+    return false;
+    }
+  std::basic_string<char> v = val;
+
+  for(std::basic_string<char>::iterator c = v.begin();
+      c != v.end(); c++)
+    {
+    *c = static_cast<char>(toupper(*c));
+    }
+  return (v == "I_ON" || v == "i_on");
+}
+
 bool cmSystemTools::IsOn(const char* val)
 {
   if (!val)
@@ -1161,7 +1176,8 @@ bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
   // Should be efficient enough on most system:
   const int bufferSize = 4096;
   char buffer[bufferSize];
-  unsigned char const* buffer_uc = reinterpret_cast<unsigned char const*>(buffer);
+  unsigned char const* buffer_uc =
+    reinterpret_cast<unsigned char const*>(buffer);
   // This copy loop is very sensitive on certain platforms with
   // slightly broken stream libraries (like HPUX).  Normally, it is
   // incorrect to not check the error condition on the fin.read()
@@ -1916,12 +1932,20 @@ bool extract_tar(const char* outFileName, bool verbose,
       }
     if(extract)
       {
+      r = archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
+      if (r != ARCHIVE_OK)
+        {
+        cmSystemTools::Error(
+          "Problem with archive_write_disk_set_options(): ",
+          archive_error_string(ext));
+        }
+
       r = archive_write_header(ext, entry);
       if (r != ARCHIVE_OK)
         {
         cmSystemTools::Error("Problem with archive_write_header(): ",
-                             archive_error_string(a));
-        cmSystemTools::Error("Curren file:", 
+                             archive_error_string(ext));
+        cmSystemTools::Error("Current file:",
                              archive_entry_pathname(entry));
         }
       else 

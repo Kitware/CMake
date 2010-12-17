@@ -813,16 +813,6 @@ archive_write_pax_header(struct archive_write *a,
             add_pax_attr_w(&(pax->pax_header),
                 "SCHILY.acl.default", wp);
 
-        /* Include star-compatible metadata info. */
-        /* Note: "SCHILY.dev{major,minor}" are NOT the
-         * major/minor portions of "SCHILY.dev". */
-        add_pax_attr_int(&(pax->pax_header), "SCHILY.dev",
-            archive_entry_dev(entry_main));
-        add_pax_attr_int(&(pax->pax_header), "SCHILY.ino",
-            archive_entry_ino64(entry_main));
-        add_pax_attr_int(&(pax->pax_header), "SCHILY.nlink",
-            archive_entry_nlink(entry_main));
-
         /* Store extended attributes */
         archive_write_pax_header_xattrs(pax, entry_original);
     }

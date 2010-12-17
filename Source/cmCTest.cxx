@@ -304,6 +304,7 @@ cmCTest::cmCTest()
   this->ShowOnly               = false;
   this->RunConfigurationScript = false;
   this->UseHTTP10              = false;
+  this->PrintLabels            = false;
   this->CompressTestOutput     = true;
   this->ComputedCompressOutput = false;
   this->TestModel              = cmCTest::EXPERIMENTAL;
@@ -488,10 +489,6 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
       << std::endl);
     return 0;
     }
-
-  // call this so that the information is cached up front
-  // and not the first time EndTest is called.
-  this->ShouldCompressTestOutput();
 
   if ( this->ProduceXML )
     {
@@ -1875,6 +1872,11 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
   if(this->CheckArgument(arg, "--no-compress-output"))
     {
     this->CompressTestOutput = false;
+    }
+
+  if(this->CheckArgument(arg, "--print-labels"))
+    {
+    this->PrintLabels = true;
     }
 
   if(this->CheckArgument(arg, "--http1.0"))

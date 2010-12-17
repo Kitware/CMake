@@ -59,7 +59,10 @@ public:
       "  option(<option_variable> \"help string describing option\"\n"
       "         [initial value])\n"
       "Provide an option for the user to select as ON or OFF.  If no "
-      "initial value is provided, OFF is used.";
+      "initial value is provided, OFF is used.\n"
+      "If you have options that depend on the values of other "
+      "options, see the module help for CMakeDependentOption."
+      ;
     }
 
   /**

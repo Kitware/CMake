@@ -15,8 +15,8 @@ const char* cmPolicies::PolicyStatusNames[] = {
 
 class cmPolicy
 {
-public:  
-  cmPolicy(cmPolicies::PolicyID iD, 
+public:
+  cmPolicy(cmPolicies::PolicyID iD,
             const char *idString,
             const char *shortDescription,
             const char *longDescription,
@@ -55,7 +55,7 @@ public:
     return v.str();
   }
 
-  bool IsPolicyNewerThan(unsigned int majorV, 
+  bool IsPolicyNewerThan(unsigned int majorV,
                          unsigned int minorV,
                          unsigned int patchV,
                          unsigned int tweakV)
@@ -86,7 +86,7 @@ public:
     }
     return (tweakV < this->TweakVersionIntroduced);
   }
-  
+
   cmPolicies::PolicyID ID;
   std::string IDString;
   std::string ShortDescription;
@@ -285,12 +285,12 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to produce an error if a bundle "
     "target is installed without a BUNDLE DESTINATION.",
     2,6,0,0, cmPolicies::WARN);
-  
+
   this->DefinePolicy(
     CMP0007, "CMP0007",
     "list command no longer ignores empty elements.",
     "This policy determines whether the list command will "
-    "ignore empty elements in the list. " 
+    "ignore empty elements in the list. "
     "CMake 2.4 and below list commands ignored all empty elements"
     " in the list.  For example, a;b;;c would have length 3 and not 4. "
     "The OLD behavior for this policy is to ignore empty list elements. "
@@ -426,7 +426,7 @@ cmPolicies::cmPolicies()
     this->DefinePolicy(
     CMP0015, "CMP0015",
     "link_directories() treats paths relative to the source dir.",
-    "In CMake 2.6.4 and lower the link_directories() command passed relative "
+    "In CMake 2.8.0 and lower the link_directories() command passed relative "
     "paths unchanged to the linker.  "
     "In CMake 2.8.1 and above the link_directories() command prefers to "
     "interpret relative paths with respect to CMAKE_CURRENT_SOURCE_DIR, "
@@ -437,12 +437,21 @@ cmPolicies::cmPolicies()
     "absolute paths by appending the relative path to "
     "CMAKE_CURRENT_SOURCE_DIR.",
     2,8,1,0, cmPolicies::WARN);
+
+    this->DefinePolicy(
+    CMP0016, "CMP0016",
+    "target_link_libraries() reports error if only argument is not a target.",
+    "In CMake 2.8.2 and lower the target_link_libraries() command silently "
+    "ignored if it was called with only one argument, and this argument "
+    "wasn't a valid target. "
+    "In CMake 2.8.3 and above it reports an error in this case.",
+    2,8,3,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
 {
   // free the policies
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
+  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
     = this->Policies.begin();
   for (;i != this->Policies.end(); ++i)
   {
@@ -451,7 +460,7 @@ cmPolicies::~cmPolicies()
 }
 
 void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
-                              const char *idString, 
+                              const char *idString,
                               const char *shortDescription,
                               const char *longDescription,
                               unsigned int majorVersionIntroduced,
@@ -467,7 +476,7 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
       "ID ", this->GetPolicyIDString(iD).c_str());
     return;
   }
-  
+
   this->Policies[iD] = new cmPolicy(iD, idString,
                                     shortDescription,
                                     longDescription,
@@ -480,7 +489,7 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
 }
 
 //----------------------------------------------------------------------------
-bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf, 
+bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
                                     const char *version)
 {
   std::string ver = "2.4.0";
@@ -505,7 +514,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
-  
+
   // it is an error if the policy version is less than 2.4
   if (majorVer < 2 || (majorVer == 2 && minorVer < 4))
     {
@@ -547,7 +556,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
 
   // now loop over all the policies and set them as appropriate
   std::vector<cmPolicies::PolicyID> ancientPolicies;
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
+  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
     = this->Policies.begin();
   for (;i != this->Policies.end(); ++i)
   {
@@ -589,7 +598,7 @@ bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
   {
     return false;
   }
-  std::map<std::string,cmPolicies::PolicyID>::iterator pos = 
+  std::map<std::string,cmPolicies::PolicyID>::iterator pos =
     this->PolicyStringMap.find(id);
   if (pos == this->PolicyStringMap.end())
   {
@@ -601,7 +610,7 @@ bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
 
 std::string cmPolicies::GetPolicyIDString(cmPolicies::PolicyID pid)
 {
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos = 
+  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
     this->Policies.find(pid);
   if (pos == this->Policies.end())
   {
@@ -614,7 +623,7 @@ std::string cmPolicies::GetPolicyIDString(cmPolicies::PolicyID pid)
 ///! return a warning string for a given policy
 std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 {
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos = 
+  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
     this->Policies.find(id);
   if (pos == this->Policies.end())
   {
@@ -633,12 +642,12 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
     "and suppress this warning.";
   return msg.str();
 }
-  
-  
+
+
 ///! return an error string for when a required policy is unspecified
 std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 {
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos = 
+  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
     this->Policies.find(id);
   if (pos == this->Policies.end())
   {
@@ -664,25 +673,25 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 }
 
 ///! Get the default status for a policy
-cmPolicies::PolicyStatus 
+cmPolicies::PolicyStatus
 cmPolicies::GetPolicyStatus(cmPolicies::PolicyID id)
 {
   // if the policy is not know then what?
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos = 
+  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
     this->Policies.find(id);
   if (pos == this->Policies.end())
   {
     // TODO is this right?
     return cmPolicies::WARN;
   }
-  
+
   return pos->second->Status;
 }
 
 void cmPolicies::GetDocumentation(std::vector<cmDocumentationEntry>& v)
 {
   // now loop over all the policies and set them as appropriate
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i 
+  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
     = this->Policies.begin();
   for (;i != this->Policies.end(); ++i)
   {

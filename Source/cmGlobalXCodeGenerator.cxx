@@ -722,26 +722,10 @@ void cmGlobalXCodeGenerator::SetCurrentLocalGenerator(cmLocalGenerator* gen)
 
   // Select the current set of configuration types.
   this->CurrentConfigurationTypes.clear();
-  if(this->XcodeVersion > 20)
-    {
-    if(const char* types =
-       this->CurrentMakefile->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
-      {
-      cmSystemTools::ExpandListArgument(types, 
-                                        this->CurrentConfigurationTypes);
-      }
-    }
+  this->CurrentMakefile->GetConfigurations(this->CurrentConfigurationTypes);
   if(this->CurrentConfigurationTypes.empty())
     {
-    if(const char* buildType =
-       this->CurrentMakefile->GetDefinition("CMAKE_BUILD_TYPE"))
-      {
-      this->CurrentConfigurationTypes.push_back(buildType);
-      }
-    else
-      {
-      this->CurrentConfigurationTypes.push_back("");
-      }
+    this->CurrentConfigurationTypes.push_back("");
     }
 }
 
@@ -2742,12 +2726,14 @@ void cmGlobalXCodeGenerator
     buildSettings->AddAttribute("SDKROOT", 
                                 this->CreateString(sysroot));
     std::string archString;
+    const char* sep = "";
     for( std::vector<std::string>::iterator i = 
            this->Architectures.begin();
          i != this->Architectures.end(); ++i)
       {
+      archString += sep;
       archString += *i;
-      archString += " ";
+      sep = " ";
       }
     buildSettings->AddAttribute("ARCHS", 
                                 this->CreateString(archString.c_str()));

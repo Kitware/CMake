@@ -113,6 +113,7 @@ protected:
                                           bool partOfDefaultBuild);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
+  virtual std::string WriteUtilityDepend(cmTarget* target);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   virtual void WriteTargetsToSolution(
@@ -141,6 +142,10 @@ protected:
                             cmTarget* target);
   std::vector<std::string> Configurations;
   std::map<cmStdString, cmStdString> GUIDMap;
+
+  virtual void WriteFolders(std::ostream& fout);
+  virtual void WriteFoldersContent(std::ostream& fout);
+  std::map<std::string,std::set<std::string> > VisualStudioFolders;
 
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.

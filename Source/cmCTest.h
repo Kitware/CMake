@@ -210,6 +210,8 @@ public:
 
   bool ShouldUseHTTP10() { return this->UseHTTP10; }
 
+  bool ShouldPrintLabels() { return this->PrintLabels; }
+
   bool ShouldCompressTestOutput();
 
   std::string GetCDashVersion();
@@ -413,6 +415,7 @@ private:
   bool ProduceXML;
   bool LabelSummary;
   bool UseHTTP10;
+  bool PrintLabels;
   bool Failover;
   bool BatchJobs;
 

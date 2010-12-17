@@ -863,19 +863,10 @@ void cmGlobalGenerator::Generate()
     }
 
   // Compute the inter-target dependencies.
-  {
-  cmComputeTargetDepends ctd(this);
-  if(!ctd.Compute())
+  if(!this->ComputeTargetDepends())
     {
     return;
     }
-  std::vector<cmTarget*> const& targets = ctd.GetTargets();
-  for(std::vector<cmTarget*>::const_iterator ti = targets.begin();
-      ti != targets.end(); ++ti)
-    {
-    ctd.GetTargetDirectDepends(*ti, this->TargetDependencies[*ti]);
-    }
-  }
 
   // Create a map from local generator to the complete set of targets
   // it builds by default.
@@ -907,6 +898,23 @@ void cmGlobalGenerator::Generate()
   this->CMakeInstance->UpdateProgress("Generating done", -1);
 
   this->CMakeInstance->RunCheckForUnusedVariables("generation");
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalGenerator::ComputeTargetDepends()
+{
+  cmComputeTargetDepends ctd(this);
+  if(!ctd.Compute())
+    {
+    return false;
+    }
+  std::vector<cmTarget*> const& targets = ctd.GetTargets();
+  for(std::vector<cmTarget*>::const_iterator ti = targets.begin();
+      ti != targets.end(); ++ti)
+    {
+    ctd.GetTargetDirectDepends(*ti, this->TargetDependencies[*ti]);
+    }
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -1489,7 +1497,7 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
         // Add dependencies of the included target.  An excluded
         // target may still be included if it is a dependency of a
         // non-excluded target.
-        TargetDependSet & tgtdeps = this->GetTargetDirectDepends(target);
+        TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
         for(TargetDependSet::const_iterator ti = tgtdeps.begin();
             ti != tgtdeps.end(); ++ti)
           {
@@ -1839,6 +1847,38 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     }
 }
 
+//----------------------------------------------------------------------------
+const char* cmGlobalGenerator::GetPredefinedTargetsFolder()
+{
+  const char* prop =
+    this->GetCMakeInstance()->GetProperty("PREDEFINED_TARGETS_FOLDER");
+
+  if (prop)
+    {
+    return prop;
+    }
+
+  return "CMakePredefinedTargets";
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalGenerator::UseFolderProperty()
+{
+  const char* prop = this->GetCMakeInstance()->GetProperty("USE_FOLDERS");
+
+  // If this property is defined, let the setter turn this on or off...
+  //
+  if (prop)
+    {
+    return cmSystemTools::IsOn(prop);
+    }
+
+  // By default, this feature is ON:
+  //
+  return true;
+}
+
+//----------------------------------------------------------------------------
 cmTarget cmGlobalGenerator::CreateGlobalTarget(
   const char* name, const char* message,
   const cmCustomCommandLines* commandLines,
@@ -1868,6 +1908,14 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
     {
     target.AddUtility(dit->c_str());
     }
+
+  // Organize in the "predefined targets" folder:
+  //
+  if (this->UseFolderProperty())
+    {
+    target.SetProperty("FOLDER", this->GetPredefinedTargetsFolder());
+    }
+
   return target;
 }
 
@@ -1881,7 +1929,7 @@ void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
 }
 
 //----------------------------------------------------------------------------
-cmGlobalGenerator::TargetDependSet &
+cmGlobalGenerator::TargetDependSet const&
 cmGlobalGenerator::GetTargetDirectDepends(cmTarget & target)
 {
   return this->TargetDependencies[&target];

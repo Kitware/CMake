@@ -101,11 +101,11 @@ cmSourceFileLocation const& cmSourceFile::GetLocation() const
 }
 
 //----------------------------------------------------------------------------
-std::string const& cmSourceFile::GetFullPath()
+std::string const& cmSourceFile::GetFullPath(std::string* error)
 {
   if(this->FullPath.empty())
     {
-    if(this->FindFullPath())
+    if(this->FindFullPath(error))
       {
       this->CheckExtension();
       }
@@ -120,7 +120,7 @@ std::string const& cmSourceFile::GetFullPath() const
 }
 
 //----------------------------------------------------------------------------
-bool cmSourceFile::FindFullPath()
+bool cmSourceFile::FindFullPath(std::string* error)
 {
   // If thie method has already failed once do not try again.
   if(this->FindFullPathFailed)
@@ -199,7 +199,14 @@ bool cmSourceFile::FindFullPath()
     {
     e << " ." << *ext;
     }
-  this->Location.GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+  if(error)
+    {
+    *error = e.str();
+    }
+  else
+    {
+    this->Location.GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+    }
   this->FindFullPathFailed = true;
   return false;
 }

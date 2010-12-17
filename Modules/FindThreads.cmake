@@ -6,7 +6,7 @@
 #  CMAKE_USE_PTHREADS_INIT    - are we using pthreads
 #  CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
 # For systems with multiple thread libraries, caller can set
-#  CMAKE_THREAD_PREFER_PTHREADS
+#  CMAKE_THREAD_PREFER_PTHREAD
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.

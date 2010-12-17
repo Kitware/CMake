@@ -238,7 +238,7 @@ public:
 
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
-  TargetDependSet & GetTargetDirectDepends(cmTarget & target);
+  TargetDependSet const& GetTargetDirectDepends(cmTarget & target);
 
   const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
@@ -274,6 +274,8 @@ protected:
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);
   void FillExtensionToLanguageMap(const char* l, cmMakefile* mf);
+
+  virtual bool ComputeTargetDepends();
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS();
 
@@ -319,6 +321,9 @@ protected:
 
   // All targets in the entire project.
   std::map<cmStdString,cmTarget *> TotalTargets;
+
+  virtual const char* GetPredefinedTargetsFolder();
+  virtual bool UseFolderProperty();
 
 private:
   float FirstTimeProgress;

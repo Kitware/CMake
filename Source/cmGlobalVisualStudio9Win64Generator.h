@@ -33,6 +33,8 @@ public:
     return cmGlobalVisualStudio9Win64Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 9 2008 Win64";}
 
+  virtual const char* GetPlatformName() const {return "x64";}
+
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
 
