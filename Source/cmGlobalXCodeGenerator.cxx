@@ -2636,7 +2636,10 @@ void cmGlobalXCodeGenerator
     group->AddAttribute("BuildIndependentTargetsInParallel",
                         this->CreateString("YES"));
     this->RootObject->AddAttribute("attributes", group);
-    if (this->XcodeVersion >= 31)
+    if (this->XcodeVersion >= 32)
+      this->RootObject->AddAttribute("compatibilityVersion",
+                                     this->CreateString("Xcode 3.2"));
+    else if (this->XcodeVersion >= 31)
       this->RootObject->AddAttribute("compatibilityVersion",
                                      this->CreateString("Xcode 3.1"));
     else
@@ -3042,7 +3045,9 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
   cmXCodeObject::Indent(1, fout);
   if(this->XcodeVersion >= 21)
     {
-    if (this->XcodeVersion >= 31)
+    if (this->XcodeVersion >= 32)
+      fout << "objectVersion = 46;\n";
+    else if (this->XcodeVersion >= 31)
       fout << "objectVersion = 45;\n";
     else if (this->XcodeVersion >= 30)
       fout << "objectVersion = 44;\n";
