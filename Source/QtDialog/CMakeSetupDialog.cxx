@@ -55,7 +55,7 @@ void QCMakeThread::run()
 }
 
 CMakeSetupDialog::CMakeSetupDialog()
-  : ExitAfterGenerate(true), CacheModified(false), CurrentState(Interrupting)
+  : ExitAfterGenerate(true), CacheModified(false), ConfigureNeeded(true), CurrentState(Interrupting)
 {
   QString title = QString(tr("CMake %1"));
   title = title.arg(cmVersion::GetCMakeVersion());
@@ -174,6 +174,9 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->CMakeThread->start();
 
   this->enterState(ReadyConfigure);
+
+  ProgressOffset = 0.0;
+  ProgressFactor = 1.0;
 }
 
 void CMakeSetupDialog::initialize()
@@ -186,12 +189,11 @@ void CMakeSetupDialog::initialize()
 
   QObject::connect(this->ConfigureButton, SIGNAL(clicked(bool)),
                    this, SLOT(doConfigure()));
-  QObject::connect(this->CMakeThread->cmakeInstance(),
-                   SIGNAL(configureDone(int)),
-                   this, SLOT(finishConfigure(int)));
-  QObject::connect(this->CMakeThread->cmakeInstance(),
-                   SIGNAL(generateDone(int)),
-                   this, SLOT(finishGenerate(int)));
+
+  QObject::connect(this->CMakeThread->cmakeInstance(), SIGNAL(configureDone(int)),
+                   this, SLOT(exitLoop(int)));
+  QObject::connect(this->CMakeThread->cmakeInstance(), SIGNAL(generateDone(int)),
+                   this, SLOT(exitLoop(int)));
 
   QObject::connect(this->GenerateButton, SIGNAL(clicked(bool)),
                    this, SLOT(doGenerate()));
@@ -284,15 +286,8 @@ CMakeSetupDialog::~CMakeSetupDialog()
   this->CMakeThread->wait(2000);
 }
 
-void CMakeSetupDialog::doConfigure()
+bool CMakeSetupDialog::prepareConfigure()
 {
-  if(this->CurrentState == Configuring)
-    {
-    // stop configure
-    doInterrupt();
-    return;
-    }
-
   // make sure build directory exists
   QString bindir = this->CMakeThread->cmakeInstance()->binaryDirectory();
   QDir dir(bindir);
@@ -309,7 +304,7 @@ void CMakeSetupDialog::doConfigure()
                                    QMessageBox::Yes | QMessageBox::No);
     if(btn == QMessageBox::No)
       {
-      return;
+      return false;
       }
     if(!dir.mkpath("."))
       {
@@ -317,7 +312,7 @@ void CMakeSetupDialog::doConfigure()
         QString(tr("Failed to create directory %1")).arg(dir.path()),
         QMessageBox::Ok);
 
-      return;
+      return false;
       }
     }
 
@@ -326,27 +321,45 @@ void CMakeSetupDialog::doConfigure()
     {
     if(!this->setupFirstConfigure())
       {
-      return;
+      return false;
       }
     }
 
   // remember path
   this->addBinaryPath(dir.absolutePath());
 
-  this->enterState(Configuring);
-
-  this->CacheValues->selectionModel()->clear();
-  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
-    "setProperties", Qt::QueuedConnection,
-    Q_ARG(QCMakePropertyList,
-      this->CacheValues->cacheModel()->properties()));
-  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
-    "configure", Qt::QueuedConnection);
+  return true;
 }
 
-void CMakeSetupDialog::finishConfigure(int err)
+void CMakeSetupDialog::exitLoop(int err)
 {
-  if(0 == err && !this->CacheValues->cacheModel()->newPropertyCount())
+  this->LocalLoop.exit(err);
+}
+
+void CMakeSetupDialog::doConfigure()
+{
+  if(this->CurrentState == Configuring)
+    {
+    // stop configure
+    doInterrupt();
+    return;
+    }
+
+  if(!prepareConfigure())
+    {
+    return;
+    }
+
+  this->enterState(Configuring);
+
+  bool ret = doConfigureInternal();
+
+  if(ret)
+    {
+    this->ConfigureNeeded = false;
+    }
+
+  if(ret && !this->CacheValues->cacheModel()->newPropertyCount())
     {
     this->enterState(ReadyGenerate);
     }
@@ -355,6 +368,22 @@ void CMakeSetupDialog::finishConfigure(int err)
     this->enterState(ReadyConfigure);
     this->CacheValues->scrollToTop();
     }
+  this->ProgressBar->reset();
+}
+
+bool CMakeSetupDialog::doConfigureInternal()
+{
+  this->Output->clear();
+  this->CacheValues->selectionModel()->clear();
+
+  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
+    "setProperties", Qt::QueuedConnection,
+    Q_ARG(QCMakePropertyList,
+      this->CacheValues->cacheModel()->properties()));
+  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
+    "configure", Qt::QueuedConnection);
+
+  int err = this->LocalLoop.exec();
 
   if(err != 0)
     {
@@ -362,23 +391,31 @@ void CMakeSetupDialog::finishConfigure(int err)
       tr("Error in configuration process, project files may be invalid"),
       QMessageBox::Ok);
     }
-}
 
-void CMakeSetupDialog::finishGenerate(int err)
-{
-  this->enterState(ReadyConfigure);
-  if(err != 0)
-    {
-    QMessageBox::critical(this, tr("Error"),
-      tr("Error in generation process, project files may be invalid"),
-      QMessageBox::Ok);
-    }
+  return 0 == err;
 }
 
 void CMakeSetupDialog::doInstallForCommandLine()
 {
   QMacInstallDialog setupdialog(0);
   setupdialog.exec();
+}
+
+bool CMakeSetupDialog::doGenerateInternal()
+{
+  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
+    "generate", Qt::QueuedConnection);
+
+  int err = this->LocalLoop.exec();
+
+  if(err != 0)
+    {
+    QMessageBox::critical(this, tr("Error"),
+      tr("Error in generation process, project files may be invalid"),
+      QMessageBox::Ok);
+    }
+
+  return 0 == err;
 }
 
 void CMakeSetupDialog::doGenerate()
@@ -389,9 +426,43 @@ void CMakeSetupDialog::doGenerate()
     doInterrupt();
     return;
     }
+
+  // see if we need to configure
+  // we'll need to configure if:
+  //   the configure step hasn't been done yet
+  //   generate was the last step done
+  if(this->ConfigureNeeded)
+    {
+    if(!prepareConfigure())
+      {
+      return;
+      }
+    }
+
   this->enterState(Generating);
-  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
-    "generate", Qt::QueuedConnection);
+
+  bool config_passed = true;
+  if(this->ConfigureNeeded)
+    {
+    this->CacheValues->cacheModel()->setShowNewProperties(false);
+    this->ProgressFactor = 0.5;
+    config_passed = doConfigureInternal();
+    this->ProgressOffset = 0.5;
+    }
+
+  if(config_passed)
+    {
+    doGenerateInternal();
+    }
+
+  this->ProgressOffset = 0.0;
+  this->ProgressFactor = 1.0;
+  this->CacheValues->cacheModel()->setShowNewProperties(true);
+
+  this->enterState(ReadyConfigure);
+  this->ProgressBar->reset();
+
+  this->ConfigureNeeded = true;
 }
 
 void CMakeSetupDialog::closeEvent(QCloseEvent* e)
@@ -556,6 +627,7 @@ void CMakeSetupDialog::setSourceDirectory(const QString& dir)
 
 void CMakeSetupDialog::showProgress(const QString& /*msg*/, float percent)
 {
+  percent = (percent * ProgressFactor) + ProgressOffset;
   this->ProgressBar->setValue(qRound(percent * 100));
 }
 
@@ -897,7 +969,6 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     }
   else if(s == Configuring)
     {
-    this->Output->clear();
     this->setEnabledState(false);
     this->GenerateButton->setEnabled(false);
     this->GenerateAction->setEnabled(false);
@@ -913,17 +984,15 @@ void CMakeSetupDialog::enterState(CMakeSetupDialog::State s)
     }
   else if(s == ReadyConfigure)
     {
-    this->ProgressBar->reset();
     this->setEnabledState(true);
-    this->GenerateButton->setEnabled(false);
-    this->GenerateAction->setEnabled(false);
+    this->GenerateButton->setEnabled(true);
+    this->GenerateAction->setEnabled(true);
     this->ConfigureButton->setEnabled(true);
     this->ConfigureButton->setText(tr("&Configure"));
     this->GenerateButton->setText(tr("&Generate"));
     }
   else if(s == ReadyGenerate)
     {
-    this->ProgressBar->reset();
     this->setEnabledState(true);
     this->GenerateButton->setEnabled(true);
     this->GenerateAction->setEnabled(true);
