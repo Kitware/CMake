@@ -694,7 +694,7 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
         }
       (*this->BuildFileStream ) << sourceFile << "\"";
       // ouput any flags specific to this source file
-      if(cl && this->OutputSourceSpecificFlags(*source))
+      if(!header && cl && this->OutputSourceSpecificFlags(*source))
         {
         // if the source file has specific flags the tag
         // is ended on a new line
