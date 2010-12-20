@@ -432,6 +432,7 @@ ADD_CUSTOM_COMMAND(
   DEPENDS ${PerConfig_DEPENDS}
   VERBATIM
   )
+SET_PROPERTY(SOURCE perconfig.out PROPERTY SYMBOLIC 1)
 ADD_CUSTOM_TARGET(perconfig_target ALL
   COMMAND ${CMAKE_COMMAND} -E echo "perconfig=$<TARGET_FILE:perconfig>" "config=$<CONFIGURATION>"
   DEPENDS perconfig.out)
