@@ -297,6 +297,8 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         {
         cmMakefile* tmf = target->GetMakefile();
         std::string dir = tmf->GetStartOutputDirectory();
+        dir = root->Convert(dir.c_str(),
+                            cmLocalGenerator::START_OUTPUT);
         this->WriteProject(fout, vcprojName, dir.c_str(),
                            *target);
         written = true;
