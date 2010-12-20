@@ -182,8 +182,8 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
   std::string guid = this->GetGUID(dspname);
   fout << project
        << dspname << "\", \""
-       << this->ConvertToSolutionPath(dir)
-       << "\\" << dspname << ext << "\", \"{" << guid << "}\"\n";
+       << this->ConvertToSolutionPath(dir) << (dir[0]? "\\":"")
+       << dspname << ext << "\", \"{" << guid << "}\"\n";
   fout << "\tProjectSection(ProjectDependencies) = postProject\n";
   this->WriteProjectDepends(fout, dspname, dir, t);
   fout << "\tEndProjectSection\n";
@@ -196,8 +196,8 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
     const char* uname = ui->second.c_str();
     fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \""
          << uname << "\", \""
-         << this->ConvertToSolutionPath(dir)
-         << "\\" << uname << ".vcproj" << "\", \"{"
+         << this->ConvertToSolutionPath(dir) << (dir[0]? "\\":"")
+         << uname << ".vcproj" << "\", \"{"
          << this->GetGUID(uname) << "}\"\n"
          << "\tProjectSection(ProjectDependencies) = postProject\n"
          << "\t\t{" << guid << "} = {" << guid << "}\n"

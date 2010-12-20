@@ -299,6 +299,10 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         std::string dir = tmf->GetStartOutputDirectory();
         dir = root->Convert(dir.c_str(),
                             cmLocalGenerator::START_OUTPUT);
+        if(dir == ".")
+          {
+          dir = ""; // msbuild cannot handle ".\" prefix
+          }
         this->WriteProject(fout, vcprojName, dir.c_str(),
                            *target);
         written = true;
@@ -514,8 +518,8 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
 
   fout << project
        << dspname << "\", \""
-       << this->ConvertToSolutionPath(dir)
-       << "\\" << dspname << ext << "\", \"{"
+       << this->ConvertToSolutionPath(dir) << (dir[0]? "\\":"")
+       << dspname << ext << "\", \"{"
        << this->GetGUID(dspname) << "}\"\nEndProject\n";
 
   UtilityDependsMap::iterator ui = this->UtilityDepends.find(&target);
@@ -524,8 +528,8 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
     const char* uname = ui->second.c_str();
     fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \""
          << uname << "\", \""
-         << this->ConvertToSolutionPath(dir)
-         << "\\" << uname << ".vcproj" << "\", \"{"
+         << this->ConvertToSolutionPath(dir) << (dir[0]? "\\":"")
+         << uname << ".vcproj" << "\", \"{"
          << this->GetGUID(uname) << "}\"\n"
          << "EndProject\n";
     }
