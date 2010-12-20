@@ -346,7 +346,7 @@ else (MPI_INCLUDE_PATH AND MPI_LIBRARY)
   set(MPI_FOUND FALSE)
 endif (MPI_INCLUDE_PATH AND MPI_LIBRARY)
 
-include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments
 find_package_handle_standard_args(MPI DEFAULT_MSG MPI_LIBRARY MPI_INCLUDE_PATH)
 

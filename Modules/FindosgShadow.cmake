@@ -46,6 +46,6 @@ include(Findosg_functions)
 OSG_FIND_PATH   (OSGSHADOW osgShadow/ShadowTexture)
 OSG_FIND_LIBRARY(OSGSHADOW osgShadow)
 
-include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(osgShadow DEFAULT_MSG
     OSGSHADOW_LIBRARY OSGSHADOW_INCLUDE_DIR)
