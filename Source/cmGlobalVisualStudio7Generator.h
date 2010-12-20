@@ -118,6 +118,7 @@ protected:
 
   virtual void WriteTargetsToSolution(
     std::ostream& fout,
+    cmLocalGenerator* root,
     OrderedTargetDependSet const& projectTargets);
   virtual void WriteTargetDepends(
     std::ostream& fout,

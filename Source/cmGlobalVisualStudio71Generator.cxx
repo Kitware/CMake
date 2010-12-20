@@ -110,7 +110,7 @@ void cmGlobalVisualStudio71Generator
   this->GetTargetSets(projectTargets, originalTargets, root, generators);
   OrderedTargetDependSet orderedProjectTargets(projectTargets);
 
-  this->WriteTargetsToSolution(fout, orderedProjectTargets);
+  this->WriteTargetsToSolution(fout, root, orderedProjectTargets);
 
   bool useFolderProperty = this->UseFolderProperty();
   if (useFolderProperty)
