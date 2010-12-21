@@ -74,7 +74,7 @@ public:
       "add_executable) it will automatically be replaced by the location "
       "of the executable created at build time.  "
       "If a CONFIGURATIONS option is given then the test will be executed "
-      "only when testing under one of the named configurations."
+      "only when testing under one of the named configurations.  "
       "If a WORKING_DIRECTORY option is given then the test will be executed "
       "in the given directory."
       "\n"
