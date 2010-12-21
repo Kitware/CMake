@@ -36,6 +36,10 @@ public:
   virtual void Generate();
   virtual void ReadAndStoreExternalGUID(const char* name,
                                         const char* path);
+
+protected:
+  virtual std::string CheckForErrorLine();
+
 private:
 };
 #endif

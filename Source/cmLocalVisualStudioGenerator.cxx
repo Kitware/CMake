@@ -149,6 +149,18 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
 }
 
 //----------------------------------------------------------------------------
+std::string cmLocalVisualStudioGenerator::CheckForErrorLine()
+{
+  return "if errorlevel 1 goto :VCReportError";
+}
+
+//----------------------------------------------------------------------------
+std::string cmLocalVisualStudioGenerator::GetCheckForErrorLine()
+{
+  return this->CheckForErrorLine();
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudioGenerator
 ::ConstructScript(const cmCustomCommandLines& commandLines,
@@ -237,7 +249,7 @@ cmLocalVisualStudioGenerator
     // sequence.
     //
     script += newline_text;
-    script += "if errorlevel 1 goto VCReportError";
+    script += this->GetCheckForErrorLine();
     }
 
   return script;
