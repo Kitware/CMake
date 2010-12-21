@@ -1,0 +1,5 @@
+#ifdef CMAKE_RCDEFINE
+hello TEXT DISCARDABLE CMAKE_RCDEFINE
+#else
+#error "resource compiler did not get defines from command line!"
+#endif
