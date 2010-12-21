@@ -2341,17 +2341,19 @@ void cmMakefile::AddDefaultDefinitions()
   working, these variables are still also set here in this place, but they
   will be reset in CMakeSystemSpecificInformation.cmake before the platform
   files are executed. */
-#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32)
   this->AddDefinition("WIN32", "1");
   this->AddDefinition("CMAKE_HOST_WIN32", "1");
 #else
   this->AddDefinition("UNIX", "1");
   this->AddDefinition("CMAKE_HOST_UNIX", "1");
 #endif
-  // Cygwin is more like unix so enable the unix commands
 #if defined(__CYGWIN__)
-  this->AddDefinition("UNIX", "1");
-  this->AddDefinition("CMAKE_HOST_UNIX", "1");
+  if(cmSystemTools::IsOn(cmSystemTools::GetEnv("CMAKE_LEGACY_CYGWIN_WIN32")))
+    {
+    this->AddDefinition("WIN32", "1");
+    this->AddDefinition("CMAKE_HOST_WIN32", "1");
+    }
 #endif
 #if defined(__APPLE__)
   this->AddDefinition("APPLE", "1");
