@@ -546,12 +546,7 @@ public:
       {
       this->Stream << this->LG->EscapeForXML("\n");
       }
-    std::string script =
-      this->LG->ConstructScript(cc.GetCommandLines(),
-                                cc.GetWorkingDirectory(),
-                                this->Config,
-                                cc.GetEscapeOldStyle(),
-                                cc.GetEscapeAllowMakeVars());
+    std::string script = this->LG->ConstructScript(cc, this->Config);
     this->Stream << this->LG->EscapeForXML(script.c_str());
     }
 private:
@@ -1591,12 +1586,7 @@ WriteCustomRule(std::ostream& fout,
            << this->EscapeForXML(fc.CompileFlags.c_str()) << "\"/>\n";
       }
 
-    std::string script = 
-      this->ConstructScript(command.GetCommandLines(),
-                            command.GetWorkingDirectory(),
-                            i->c_str(),
-                            command.GetEscapeOldStyle(),
-                            command.GetEscapeAllowMakeVars());
+    std::string script = this->ConstructScript(command, i->c_str());
     fout << "\t\t\t\t\t<Tool\n"
          << "\t\t\t\t\tName=\"" << customTool << "\"\n"
          << "\t\t\t\t\tDescription=\"" 

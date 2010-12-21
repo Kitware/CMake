@@ -1913,24 +1913,6 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::GetRealLocation(const char* inName,
-                                              const char* config)
-{
-  std::string outName=inName;
-  // Look for a CMake target with the given name, which is an executable 
-  // and which can be run
-  cmTarget* target = this->Makefile->FindTargetToUse(inName);
-  if ((target != 0)
-       && (target->GetType() == cmTarget::EXECUTABLE)
-       && ((this->Makefile->IsOn("CMAKE_CROSSCOMPILING") == false) 
-            || (target->IsImported() == true)))
-    {
-    outName = target->GetLocation( config );
-    }
-  return outName;
-}
-
-//----------------------------------------------------------------------------
 void cmLocalGenerator::AddSharedFlags(std::string& flags,
                                       const char* lang,
                                       bool shared)

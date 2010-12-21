@@ -18,6 +18,7 @@
 
 class cmSourceFile;
 class cmSourceGroup;
+class cmCustomCommand;
 
 /** \class cmLocalVisualStudioGenerator
  * \brief Base class for Visual Studio generators.
@@ -32,11 +33,8 @@ public:
   virtual ~cmLocalVisualStudioGenerator();
 
   /** Construct a script from the given list of command lines.  */
-  std::string ConstructScript(const cmCustomCommandLines& commandLines,
-                              const char* workingDirectory,
+  std::string ConstructScript(cmCustomCommand const& cc,
                               const char* configName,
-                              bool escapeOldStyle,
-                              bool escapeAllowMakeVars,
                               const char* newline = "\n");
 
   /** Line of batch file text that skips to the end after
