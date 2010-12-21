@@ -123,7 +123,6 @@ ELSE (WIN32)
   ENDIF(APPLE)
 ENDIF (WIN32)
 
-SET( OPENGL_FOUND "NO" )
 IF(OPENGL_gl_LIBRARY)
 
     IF(OPENGL_xmesa_INCLUDE_DIR)
@@ -140,16 +139,18 @@ IF(OPENGL_gl_LIBRARY)
       SET( OPENGL_GLU_FOUND "NO" )
     ENDIF(OPENGL_glu_LIBRARY)
 
-    SET( OPENGL_FOUND "YES" )
-
     # This deprecated setting is for backward compatibility with CMake1.4
-
     SET (OPENGL_LIBRARY ${OPENGL_LIBRARIES})
 
 ENDIF(OPENGL_gl_LIBRARY)
 
 # This deprecated setting is for backward compatibility with CMake1.4
 SET(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
+
+# handle the QUIETLY and REQUIRED arguments and set OPENGL_FOUND to TRUE if
+# all listed variables are TRUE
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL DEFAULT_MSG OPENGL_gl_LIBRARY)
 
 MARK_AS_ADVANCED(
   OPENGL_INCLUDE_DIR
