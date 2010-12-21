@@ -13,6 +13,7 @@
 #define cmAddCustomCommandCommand_h
 
 #include "cmCommand.h"
+#include "cmDocumentGeneratorExpressions.h"
 
 /** \class cmAddCustomCommandCommand
  * \brief 
@@ -146,8 +147,15 @@ public:
       "target-level dependency will be added so that the executable target "
       "will be built before any target using this custom command.  However "
       "this does NOT add a file-level dependency that would cause the "
-      "custom command to re-run whenever the executable is recompiled.\n"
-
+      "custom command to re-run whenever the executable is recompiled."
+      "\n"
+      "Arguments to COMMAND may use \"generator expressions\" with the "
+      "syntax \"$<...>\".  "
+      CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
+      "References to target names in generator expressions imply "
+      "target-level dependencies, but NOT file-level dependencies.  "
+      "List target names with the DEPENDS option to add file dependencies."
+      "\n"
       "The DEPENDS option specifies files on which the command depends.  "
       "If any dependency is an OUTPUT of another custom command in the "
       "same directory (CMakeLists.txt file) CMake automatically brings the "
