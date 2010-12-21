@@ -74,6 +74,9 @@ protected:
     std::string Date;
     std::string Author;
     std::string EMail;
+    std::string Committer;
+    std::string CommitterEMail;
+    std::string CommitDate;
     std::string Log;
   };
 
