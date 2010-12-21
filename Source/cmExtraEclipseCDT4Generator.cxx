@@ -201,7 +201,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     "<projectDescription>\n"
     "\t<name>" <<
     this->GenerateProjectName(mf->GetProjectName(),
-                              mf->GetDefinition("CMAKE_BUILD_TYPE"),
+                              mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
                               this->GetPathBasename(this->HomeOutputDirectory))
     << "</name>\n"
     "\t<comment></comment>\n"
