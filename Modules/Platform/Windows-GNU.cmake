@@ -56,6 +56,8 @@ if("${_help}" MATCHES "GNU ld .* 2\\.1[1-6]")
   set(__WINDOWS_GNU_LD_RESPONSE 0)
 endif()
 
+enable_language(RC)
+
 macro(__windows_compiler_gnu lang)
 
   if(MSYS OR MINGW)
