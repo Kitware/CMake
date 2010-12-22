@@ -131,6 +131,9 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(TarTest TarTest)
   ADD_TEST_MACRO(SystemInformation SystemInformation)
   ADD_TEST_MACRO(MathTest MathTest)
+  IF(MSVC)
+    ADD_TEST_MACRO(VSResource VSResource)
+  ENDIF()
   ADD_TEST_MACRO(Simple Simple)
   ADD_TEST_MACRO(PreOrder PreOrder)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
@@ -261,17 +264,6 @@ IF(BUILD_TESTING)
     ENDIF ("${cmakeOutput}" MATCHES KDevelop3)
 
   ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Unix Makefiles"  OR  ${CMAKE_TEST_GENERATOR} MATCHES "KDevelop")
- ADD_TEST(VSResource ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/VSResource"
-      "${CMake_BINARY_DIR}/Tests/VSResource"
-      --build-two-config
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project VSResource
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --test-command VSResource)
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSResource")
-
 
   # test for correct sub-project generation
   # not implemented in VS6 or Xcode
