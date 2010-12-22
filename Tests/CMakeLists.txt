@@ -246,7 +246,6 @@ IF(BUILD_TESTING)
          --test-command Simple)
       LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Simple_CodeBlocksGenerator")
     ENDIF ("${cmakeOutput}" MATCHES CodeBlocks)
-
     # check for the KDevelop3 generator
     IF ("${cmakeOutput}" MATCHES KDevelop3)
       ADD_TEST(Simple_KDevelop3Generator ${CMAKE_CTEST_COMMAND}
@@ -262,6 +261,17 @@ IF(BUILD_TESTING)
     ENDIF ("${cmakeOutput}" MATCHES KDevelop3)
 
   ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Unix Makefiles"  OR  ${CMAKE_TEST_GENERATOR} MATCHES "KDevelop")
+ ADD_TEST(VSResource ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/VSResource"
+      "${CMake_BINARY_DIR}/Tests/VSResource"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project VSResource
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --test-command VSResource)
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSResource")
+
 
   # test for correct sub-project generation
   # not implemented in VS6 or Xcode
