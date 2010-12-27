@@ -157,8 +157,18 @@ if(BLAS_FOUND)
     LAPACK
     cheev
     ""
-    "acml"
+    "acml;acml_mv"
     ""
+    ""
+    )
+  endif(NOT LAPACK_LIBRARIES)
+  if(NOT LAPACK_LIBRARIES)
+   check_lapack_libraries(
+    LAPACK_LIBRARIES
+    LAPACK
+    cheev
+    ""
+    "acml_mp;acml_mv"
     ""
     )
   endif(NOT LAPACK_LIBRARIES)
