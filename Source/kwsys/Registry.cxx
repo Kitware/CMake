@@ -401,8 +401,9 @@ bool RegistryHelper::Open(const char *toplevel, const char *subkey,
       }
     else
       {
+      char lpClass[] = "";
       res = ( RegCreateKeyEx(scope, str.str().c_str(),
-          0, "", REG_OPTION_NON_VOLATILE, KEY_READ|KEY_WRITE,
+          0, lpClass, REG_OPTION_NON_VOLATILE, KEY_READ|KEY_WRITE,
           NULL, &this->HKey, &dwDummy) == ERROR_SUCCESS );
       }
     if ( res != 0 )
