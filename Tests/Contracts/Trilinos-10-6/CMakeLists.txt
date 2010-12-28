@@ -37,6 +37,7 @@ endif()
 message(STATUS "md5='${md5}'")
 
 string(SUBSTRING "${md5}" 0 8 shorttag)
+set(shorttag "m${shorttag}")
 
 set(download_dir "${HOME}/.cmake/Downloads")
 
