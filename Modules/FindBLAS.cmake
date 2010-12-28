@@ -40,7 +40,11 @@
 #  License text for the above reference.)
 
 get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
+if (NOT _LANGUAGES_ MATCHES Fortran)
 include(CheckFunctionExists)
+else ()
+include(CheckFortranFunctionExists)
+endif()
 
 macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _threads)
 # This macro checks for the existence of the combination of fortran libraries
@@ -98,7 +102,11 @@ if(_libraries_work)
   # Test this combination of libraries.
   set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_threads})
 #  message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
+  if (_LANGUAGES_ MATCHES Fortran)
+    check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
+  else()
+    check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
+  endif()
   set(CMAKE_REQUIRED_LIBRARIES)
   mark_as_advanced(${_prefix}${_combined_name}_WORKS)
   set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
