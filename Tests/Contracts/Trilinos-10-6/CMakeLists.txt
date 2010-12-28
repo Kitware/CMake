@@ -61,6 +61,11 @@ configure_file(
   "${script_dir}/Dashboard.cmake"
   @ONLY)
 
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/ValidateBuild.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/ValidateBuild.cmake"
+  @ONLY)
+
 # Source dir for this project exists outside the CMake build tree because it
 # is absolutely huge. Source dir is therefore cached under a '.cmake/Contracts'
 # dir in your HOME directory. Downloads are cached under '.cmake/Downloads'
@@ -82,6 +87,7 @@ else()
     URL "${url}"
     URL_MD5 "${md5}"
     SOURCE_DIR "${source_dir}"
+    PATCH_COMMAND ${CMAKE_COMMAND} -Dsource_dir=${source_dir} -P "${CMAKE_CURRENT_SOURCE_DIR}/Patch.cmake"
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""

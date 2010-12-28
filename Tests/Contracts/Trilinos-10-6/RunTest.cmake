@@ -1,4 +1,7 @@
-get_filename_component(dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
+# ValidateBuild.cmake is configured into this location when the test is built:
+set(dir "${CMAKE_CURRENT_BINARY_DIR}/Contracts/${project}")
+
 set(exe "${CMAKE_COMMAND}")
 set(args -P "${dir}/ValidateBuild.cmake")
+
 set(Trilinos-10-6_RUN_TEST ${exe} ${args})

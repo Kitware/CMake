@@ -56,7 +56,8 @@ execute_process(COMMAND
   )
 
 if(NOT "${rv}" STREQUAL "0")
-  message(FATAL_ERROR "error(s) running Trilinos dashboard script experimental_build_test.cmake
+  message("error(s) (or warnings or test failures) running Trilinos dashboard
+script experimental_build_test.cmake...
 ctest returned rv='${rv}'
 ")
 endif()
