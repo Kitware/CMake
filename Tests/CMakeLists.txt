@@ -131,7 +131,18 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(TarTest TarTest)
   ADD_TEST_MACRO(SystemInformation SystemInformation)
   ADD_TEST_MACRO(MathTest MathTest)
-  IF(MSVC)
+  # assume no resources building to test
+  SET(TEST_RESOURCES FALSE)
+  # for windows and cygwin assume we have resources
+  IF(WIN32 OR CYGWIN)
+    SET(TEST_RESOURCES TRUE)
+  ENDIF()
+  # for borland and watcom there is no resource support
+  IF(("${CMAKE_TEST_GENERATOR}" MATCHES "WMake") OR
+      ("${CMAKE_TEST_GENERATOR}" MATCHES "Borland"))
+    SET(TEST_RESOURCES FALSE)
+  ENDIF()
+  IF(TEST_RESOURCES)
     ADD_TEST_MACRO(VSResource VSResource)
   ENDIF()
   ADD_TEST_MACRO(Simple Simple)
