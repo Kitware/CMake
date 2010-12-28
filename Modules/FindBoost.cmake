@@ -164,6 +164,7 @@
 
 #
 # These last three variables are available also as environment variables:
+# Also, note they are completely UPPERCASE.
 #
 #   BOOST_ROOT or BOOSTROOT      The preferred installation prefix for searching for
 #                                Boost.  Set this if the module has problems finding
@@ -356,6 +357,13 @@ function(_Boost_SWAP_WITH_REALPATH _library _docstring)
   endif()
 endfunction()
 
+function(_Boost_CHECK_SPELLING _var)
+  if(${_var})
+    string(TOUPPER ${_var} _var_UC)
+    message(FATAL_ERROR "ERROR: ${_var} is not the correct spelling.  The proper spelling is ${_var_UC}.")
+  endif()
+endfunction()
+
 #
 # End functions/macros
 #  
@@ -497,36 +505,33 @@ ELSE (_boost_IN_CACHE)
     /sw/local/include
   )
 
-  # If Boost_ROOT was defined, gently correct the user
-  if(Boost_ROOT)
-    message("WARNING: Boost_ROOT was set which is incorrect and is being ignored.  "
-            "You need to use BOOST_ROOT instead.  "
-            "Also, we suggest setting Boost_NO_SYSTEM_PATHS.")
-  endif()
+  _Boost_CHECK_SPELLING(Boost_ROOT)
+  _Boost_CHECK_SPELLING(Boost_LIBRARYDIR)
+  _Boost_CHECK_SPELLING(Boost_INCLUDEDIR)
 
   # If BOOST_ROOT was defined in the environment, use it.
   if (NOT BOOST_ROOT AND NOT $ENV{BOOST_ROOT} STREQUAL "")
     set(BOOST_ROOT $ENV{BOOST_ROOT})
-  endif(NOT BOOST_ROOT AND NOT $ENV{BOOST_ROOT} STREQUAL "")
+  endif()
 
   # If BOOSTROOT was defined in the environment, use it.
   if (NOT BOOST_ROOT AND NOT $ENV{BOOSTROOT} STREQUAL "")
     set(BOOST_ROOT $ENV{BOOSTROOT})
-  endif(NOT BOOST_ROOT AND NOT $ENV{BOOSTROOT} STREQUAL "")
+  endif()
 
   # If BOOST_INCLUDEDIR was defined in the environment, use it.
-  IF( NOT $ENV{BOOST_INCLUDEDIR} STREQUAL "" )
+  if( NOT $ENV{BOOST_INCLUDEDIR} STREQUAL "" )
     set(BOOST_INCLUDEDIR $ENV{BOOST_INCLUDEDIR})
-  ENDIF( NOT $ENV{BOOST_INCLUDEDIR} STREQUAL "" )
+  endif()
 
   # If BOOST_LIBRARYDIR was defined in the environment, use it.
-  IF( NOT $ENV{BOOST_LIBRARYDIR} STREQUAL "" )
+  if( NOT $ENV{BOOST_LIBRARYDIR} STREQUAL "" )
     set(BOOST_LIBRARYDIR $ENV{BOOST_LIBRARYDIR})
-  ENDIF( NOT $ENV{BOOST_LIBRARYDIR} STREQUAL "" )
+  endif()
 
-  IF( BOOST_ROOT )
+  if( BOOST_ROOT )
     file(TO_CMAKE_PATH ${BOOST_ROOT} BOOST_ROOT)
-  ENDIF( BOOST_ROOT )
+  endif()
 
   if(Boost_DEBUG)
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
@@ -1057,10 +1062,10 @@ ELSE (_boost_IN_CACHE)
       list(LENGTH _Boost_MISSING_COMPONENTS Boost_NUM_MISSING_COMPONENTS)
       if (${Boost_NUM_COMPONENTS_WANTED} EQUAL ${Boost_NUM_MISSING_COMPONENTS})
         set(Boost_ERROR_REASON
-          "${Boost_ERROR_REASON}No Boost libraries were found. You may need to set Boost_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
+          "${Boost_ERROR_REASON}No Boost libraries were found. You may need to set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
       else (${Boost_NUM_COMPONENTS_WANTED} EQUAL ${Boost_NUM_MISSING_COMPONENTS})
         set(Boost_ERROR_REASON
-          "${Boost_ERROR_REASON}Some (but not all) of the required Boost libraries were found. You may need to install these additional Boost libraries. Alternatively, set Boost_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
+          "${Boost_ERROR_REASON}Some (but not all) of the required Boost libraries were found. You may need to install these additional Boost libraries. Alternatively, set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
       endif (${Boost_NUM_COMPONENTS_WANTED} EQUAL ${Boost_NUM_MISSING_COMPONENTS})
     endif (_Boost_MISSING_COMPONENTS)
 
