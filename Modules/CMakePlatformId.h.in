@@ -109,6 +109,6 @@
    getting matched.  Store it in a pointer rather than an array
    because some compilers will just produce instructions to fill the
    array rather than assigning a pointer to a static array.  */
-char* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
-char* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
+char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
+char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
 
