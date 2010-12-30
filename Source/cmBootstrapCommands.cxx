@@ -32,6 +32,7 @@
 #include "cmCreateTestSourceList.cxx"
 #include "cmDefinePropertyCommand.cxx"
 #include "cmElseCommand.cxx"
+#include "cmEnableLanguageCommand.cxx"
 #include "cmEnableTestingCommand.cxx"
 #include "cmEndForEachCommand.cxx"
 #include "cmEndFunctionCommand.cxx"
@@ -109,6 +110,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmCreateTestSourceList);
   commands.push_back(new cmDefinePropertyCommand);
   commands.push_back(new cmElseCommand);
+  commands.push_back(new cmEnableLanguageCommand);
   commands.push_back(new cmEnableTestingCommand);  
   commands.push_back(new cmEndForEachCommand);
   commands.push_back(new cmEndFunctionCommand);
