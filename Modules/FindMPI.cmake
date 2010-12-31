@@ -127,6 +127,11 @@ set(_MPI_Intel_C_COMPILER_NAMES            mpiicc)
 set(_MPI_Intel_CXX_COMPILER_NAMES          mpiicpc  mpiicxx mpiic++ mpiiCC)
 set(_MPI_Intel_Fortran_COMPILER_NAMES      mpiifort mpiif95 mpiif90 mpiif77)
 
+# PGI compiler names
+set(_MPI_PGI_C_COMPILER_NAMES              mpipgcc mppgcc)
+set(_MPI_PGI_CXX_COMPILER_NAMES            mpipgCC mppgCC)
+set(_MPI_PGI_Fortran_COMPILER_NAMES        mpipgf95 mpipgf90 mppgf95 mppgf90 mpipgf77 mppgf77)
+
 # XLC MPI Compiler names
 set(_MPI_XL_C_COMPILER_NAMES               mpxlc      mpxlc_r    mpixlc     mpixlc_r)
 set(_MPI_XL_CXX_COMPILER_NAMES             mpixlcxx   mpixlC     mpixlc++   mpxlcxx   mpxlc++   mpixlc++   mpxlCC
@@ -139,7 +144,7 @@ set(_MPI_XL_Fortran_COMPILER_NAMES         mpixlf95   mpixlf95_r mpxlf95 mpxlf95
 # append vendor-specific compilers to the list if we either don't know the compiler id,
 # or if we know it matches the regular compiler.
 foreach (lang C CXX Fortran)
-  foreach (id GNU Intel XL)
+  foreach (id GNU Intel PGI XL)
     if (NOT CMAKE_${lang}_COMPILER_ID OR "${CMAKE_${lang}_COMPILER_ID}" STREQUAL "${id}")
       list(APPEND _MPI_${lang}_COMPILER_NAMES ${_MPI_${id}_${lang}_COMPILER_NAMES})
     endif()
