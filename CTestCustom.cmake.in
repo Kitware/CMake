@@ -25,6 +25,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "Clock skew detected"
   "remark\\(1209"
   "remark: .*LOOP WAS VECTORIZED"
+  "warning .980: wrong number of actual arguments to intrinsic function .std::basic_"
   "LINK : warning LNK4089: all references to.*ADVAPI32.dll.*discarded by /OPT:REF"
   "LINK : warning LNK4089: all references to.*USER32.dll.*discarded by /OPT:REF"
   "Warning: library was too large for page size.*"
