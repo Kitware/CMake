@@ -413,3 +413,70 @@ MACRO(QT4_ADD_TRANSLATION _qm_files)
     SET(${_qm_files} ${${_qm_files}} ${qm})
   ENDFOREACH (_current_FILE)
 ENDMACRO(QT4_ADD_TRANSLATION)
+
+
+function(QT4_DEPLOY_PLUGIN install_prefix _group _plugin)
+  string(TOUPPER ${_group} group)
+  string(TOUPPER ${_plugin} plugin)
+
+  set(plugin_file_release "${QT_${plugin}_PLUGIN_RELEASE}")
+  set(plugin_file_debug "${QT_${plugin}_PLUGIN_DEBUG}")
+
+  if(plugin_file_release AND plugin_file_debug)
+    install(FILES ${plugin_file_release} DESTINATION "${install_prefix}/${_group}/" CONFIGURATIONS Release OPTIONAL)
+    install(FILES ${plugin_file_debug} DESTINATION "${install_prefix}/${_group}/" CONFIGURATIONS Debug OPTIONAL)
+  else(plugin_file_release AND plugin_file_debug)
+    if(plugin_file_release)
+      install(FILES ${plugin_file_release} DESTINATION "${install_prefix}/${_group}/" OPTIONAL)
+    endif(plugin_file_release)
+    if(plugin_file_debug)
+      install(FILES ${plugin_file_debug} DESTINATION "${install_prefix}/${_group}/" OPTIONAL)
+    endif(plugin_file_debug)
+  endif(plugin_file_release AND plugin_file_debug)
+endfunction(QT4_DEPLOY_PLUGIN)
+
+
+
+function(QT4_DEPLOY_PLUGIN_GROUP install_prefix _group)
+  string(TOUPPER ${_group} group)
+  foreach(_plugin ${QT_${group}_PLUGINS})
+    qt4_deploy_plugin(${install_prefix} ${_group} ${_plugin})
+  endforeach(_plugin)
+endfunction(QT4_DEPLOY_PLUGIN_GROUP)
+
+
+
+function(QT4_DEPLOY_DEFAULT_PLUGINS install_prefix)
+
+  # always deploy image format plugins
+  qt4_deploy_plugin_group("${install_prefix}" imageformats)
+
+  #sql driver plugins if QtSql
+  if(QT_USE_QTSQL)
+    qt4_deploy_plugin_group("${install_prefix}" sqldrivers)
+  endif(QT_USE_QTSQL)
+
+  #script plugins if QtScript
+  if(QT_USE_QTSCRIPT)
+    qt4_deploy_plugin_group("${install_prefix}" script)
+  endif(QT_USE_QTSCRIPT)
+
+  #phonon backend plugins if phonon
+  if(QT_USE_PHONON)
+    qt4_deploy_plugin_group("${install_prefix}" phonon_backend)
+  endif(QT_USE_PHONON)
+
+  #svg icon plugin if QtSvg
+  if(QT_USE_QTSVG)
+    qt4_deploy_plugin_group("${install_prefix}" iconengines)
+  endif(QT_USE_QTSVG)
+
+  # always deploy accessibility plugins
+  qt4_deploy_plugin("${install_prefix}" accessible qtaccessiblewidgets)
+
+  # acessibility for qt3support if Qt3Support
+  if(QT_USE_QT3SUPPORT)
+    qt4_deploy_plugin("${install_prefix}" accessible qtaccessiblecompatwidgets)
+  endif(QT_USE_QT3SUPPORT)
+
+endfunction(QT4_DEPLOY_DEFAULT_PLUGINS)
