@@ -51,6 +51,7 @@ int post_form(FORM * form)
   WINDOW *formwin;
   int err;
   int page;
+  int height, width;
 
   if (!form)
     RETURN(E_BAD_ARGUMENT);
@@ -62,7 +63,8 @@ int post_form(FORM * form)
     RETURN(E_NOT_CONNECTED);
   
   formwin = Get_Form_Window(form);
-  if ((form->cols > getmaxx(formwin)) || (form->rows > getmaxy(formwin))) 
+  getmaxyx(formwin, height, width);
+  if ((form->cols > width) || (form->rows > height))
     RETURN(E_NO_ROOM);
 
   /* reset form->curpage to an invald value. This forces Set_Form_Page
