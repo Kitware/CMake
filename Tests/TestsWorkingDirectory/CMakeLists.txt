@@ -7,46 +7,32 @@ enable_testing()
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
-add_test(NAME WorkingDirectory1 COMMAND WorkingDirectory)
+add_test(NAME WorkingDirectory1 COMMAND WorkingDirectory "${CMAKE_BINARY_DIR}")
 set_tests_properties(WorkingDirectory1 PROPERTIES
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-  PASS_REGULAR_EXPRESSION "Working directory: -->${CMAKE_BINARY_DIR}<--"
 )
 
 string(REGEX REPLACE "/[^/]*$" "" _parent_dir "${CMAKE_BINARY_DIR}")
 
-add_test(NAME WorkingDirectory2 COMMAND WorkingDirectory)
+add_test(NAME WorkingDirectory2 COMMAND WorkingDirectory "${_parent_dir}")
 set_tests_properties(WorkingDirectory2 PROPERTIES
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/.."
-  PASS_REGULAR_EXPRESSION "Working directory: -->${_parent_dir}<--"
 )
 
 get_filename_component(_default_cwd "${EXECUTABLE_OUTPUT_PATH}" PATH)
 
 # FIXME: How to deal with /debug, /release, etc. with VS or XCode?
 if(${CMAKE_GENERATOR} MATCHES "Makefiles")
-add_test(WorkingDirectory3 ${EXECUTABLE_OUTPUT_PATH}/WorkingDirectory)
-set_tests_properties(WorkingDirectory3 PROPERTIES
-  PASS_REGULAR_EXPRESSION "Working directory: -->${_default_cwd}<--"
-)
+add_test(WorkingDirectory3 ${EXECUTABLE_OUTPUT_PATH}/WorkingDirectory ${_default_cwd})
 endif()
 
-add_test(NAME WorkingDirectory4 WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND WorkingDirectory)
-set_tests_properties(WorkingDirectory4 PROPERTIES
-  PASS_REGULAR_EXPRESSION "Working directory: -->${CMAKE_BINARY_DIR}<--"
-)
+add_test(NAME WorkingDirectory4 WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND WorkingDirectory ${CMAKE_BINARY_DIR})
 
 string(REGEX REPLACE "/[^/]*$" "" _parent_dir "${CMAKE_BINARY_DIR}")
 
-add_test(NAME WorkingDirectory5 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/.. COMMAND WorkingDirectory)
-set_tests_properties(WorkingDirectory5 PROPERTIES
-  PASS_REGULAR_EXPRESSION "Working directory: -->${_parent_dir}<--"
-)
+add_test(NAME WorkingDirectory5 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/.. COMMAND WorkingDirectory ${_parent_dir})
 
 # FIXME: How to deal with /debug, /release, etc. with VS or XCode?
 if(${CMAKE_GENERATOR} MATCHES "Makefiles")
-add_test(WorkingDirectory6 ${EXECUTABLE_OUTPUT_PATH}/WorkingDirectory WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
-set_tests_properties(WorkingDirectory6 PROPERTIES
-  PASS_REGULAR_EXPRESSION "Working directory: -->${_default_cwd}<--"
-)
+add_test(WorkingDirectory6 ${EXECUTABLE_OUTPUT_PATH}/WorkingDirectory ${_default_cwd} WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
 endif()
