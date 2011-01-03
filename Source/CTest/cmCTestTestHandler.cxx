@@ -2122,6 +2122,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "TIMEOUT" )
             {
             rtit->Timeout = atof(val.c_str());
+            rtit->ExplicitTimeout = true;
             }
           if ( key == "COST" )
             {
@@ -2295,6 +2296,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.WillFail = false;
   test.RunSerial = false;
   test.Timeout = 0;
+  test.ExplicitTimeout = false;
   test.Cost = 0;
   test.Processors = 1;
   test.PreviousRuns = 0;
