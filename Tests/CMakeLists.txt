@@ -1491,7 +1491,20 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestScheduler/testOutput.log"
     )
   SET_TESTS_PROPERTIES(CTestTestScheduler PROPERTIES
-    PASS_REGULAR_EXPRESSION "Start 1.*Start 2.*Start 3.*Start 4.*Start 4.*Start 3.*Start 2.*Start 1")
+    PASS_REGULAR_EXPRESSION "Start 1.*Start 2.*Start 3.*Start 4.*Start 4.*Start 3.*Start 2.*Start 1"
+    RESOURCE_LOCK "CostData")
+
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestCostSerial/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestCostSerial/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestCostSerial ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestCostSerial/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestCostSerial/testOutput.log"
+    )
+  SET_TESTS_PROPERTIES(CTestTestCostSerial PROPERTIES
+    PASS_REGULAR_EXPRESSION "Start 2.*Start 3.*Start 1.*Start 2.*Start 3.*Start 1"
+    RESOURCE_LOCK "CostData")
 
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestStopTime/test.cmake.in"
