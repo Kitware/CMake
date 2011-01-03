@@ -82,5 +82,23 @@ cmake_policy(GET CMP0002 cmp)
 check(CMP0002 "OLD" "${cmp}")
 
 #-----------------------------------------------------------------------------
+# Test CMAKE_POLICY_DEFAULT_CMP<NNNN> variable.
+cmake_policy(PUSH)
+  set(CMAKE_POLICY_DEFAULT_CMP0010 OLD) # ignored
+  set(CMAKE_POLICY_DEFAULT_CMP0012 OLD) # honored
+  set(CMAKE_POLICY_DEFAULT_CMP0013 NEW) # honored
+  set(CMAKE_POLICY_DEFAULT_CMP0014 "")  # noop
+  cmake_policy(VERSION 2.6.3)
+  cmake_policy(GET CMP0010 cmp)
+  check(CMP0010 "NEW" "${cmp}")
+  cmake_policy(GET CMP0012 cmp)
+  check(CMP0012 "OLD" "${cmp}")
+  cmake_policy(GET CMP0013 cmp)
+  check(CMP0013 "NEW" "${cmp}")
+  cmake_policy(GET CMP0014 cmp)
+  check(CMP0014 "" "${cmp}")
+cmake_policy(POP)
+
+#-----------------------------------------------------------------------------
 # Dummy executable so the project can build and run.
 add_executable(PolicyScope main.c)
