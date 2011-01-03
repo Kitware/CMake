@@ -1072,6 +1072,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SubDir")
 
   IF(CMAKE_TEST_MSVC)
+    ADD_TEST_MACRO(ForceInclude foo)
     ADD_TEST_MACRO(PrecompiledHeader foo)
     ADD_TEST_MACRO(ModuleDefinition example_exe)
   ENDIF(CMAKE_TEST_MSVC)
