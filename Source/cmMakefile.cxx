@@ -2177,6 +2177,7 @@ const char* cmMakefile::GetRequiredDefinition(const char* name) const
 bool cmMakefile::IsDefinitionSet(const char* name) const
 {
   const char* def = this->Internal->VarStack.top().Get(name);
+  this->Internal->VarUsageStack.top().insert(name);
   if(!def)
     {
     def = this->GetCacheManager()->GetCacheValue(name);
