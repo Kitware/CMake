@@ -357,8 +357,7 @@ static void Buffer_To_Window(const FIELD  * field, WINDOW * win)
 
   assert(win && field);
 
-  width  = getmaxx(win);
-  height = getmaxy(win);
+  getmaxyx(win, height, width);
 
   for(row=0, pBuffer=field->buf; 
       row < height; 
@@ -390,13 +389,13 @@ static void Window_To_Buffer(WINDOW * win, FIELD  * field)
   int pad;
   int len = 0;
   char *p;
-  int row, height;
+  int row, height, width;
   
   assert(win && field && field->buf );
 
   pad = field->pad;
   p = field->buf;
-  height = getmaxy(win);
+  getmaxyx(win, height, width);
 
   for(row=0; (row < height) && (row < field->drows); row++ )
     {
@@ -856,6 +855,8 @@ static int Display_Or_Erase_Field(FIELD * field, bool bEraseFlag)
 {
   WINDOW *win;
   WINDOW *fwin;
+  attr_t fwinAttrs;
+  short  fwinPair;
 
   if (!field)
     return E_SYSTEM_ERROR;
@@ -871,7 +872,12 @@ static int Display_Or_Erase_Field(FIELD * field, bool bEraseFlag)
       if (field->opts & O_VISIBLE)
         Set_Field_Window_Attributes(field,win);
       else
-        wattrset(win,getattrs(fwin));
+      {
+        /* getattrs() would be handy, but it is not part of LSB 4.0 */
+        /* wattrset(win,getattrs(fwin)); */
+        wattr_get(fwin, &fwinAttrs, &fwinPair, 0);
+        wattr_set(win, fwinAttrs, fwinPair, 0);
+      }
       werase(win);
     }
 
