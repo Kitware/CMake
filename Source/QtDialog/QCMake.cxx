@@ -166,7 +166,6 @@ void QCMake::configure()
     this->CMakeInstance->CreateGlobalGenerator(this->Generator.toAscii().data()));
   this->CMakeInstance->LoadCache();
   this->CMakeInstance->SetSuppressDevWarnings(this->SuppressDevWarnings);
-  std::cerr << "set warn uninitialized " << this->WarnUninitializedMode << "\n";
   this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
   this->CMakeInstance->SetWarnUnused(this->WarnUnusedMode);
   this->CMakeInstance->PreLoadCMakeFiles();
