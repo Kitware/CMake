@@ -18,6 +18,10 @@ if(__WINDOWS_INTEL)
 endif()
 set(__WINDOWS_INTEL 1)
 
+# make sure to enable languages after setting configuration types
+ENABLE_LANGUAGE(RC)
+SET(CMAKE_COMPILE_RESOURCE "rc <FLAGS> /fo<OBJECT> <SOURCE>")
+
 SET(CMAKE_LIBRARY_PATH_FLAG "-LIBPATH:")
 SET(CMAKE_LINK_LIBRARY_FLAG "")
 SET(WIN32 1)
