@@ -131,6 +131,9 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(TarTest TarTest)
   ADD_TEST_MACRO(SystemInformation SystemInformation)
   ADD_TEST_MACRO(MathTest MathTest)
+  IF(MSVC)
+    ADD_TEST_MACRO(VSResource VSResource)
+  ENDIF()
   ADD_TEST_MACRO(Simple Simple)
   ADD_TEST_MACRO(PreOrder PreOrder)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
@@ -246,7 +249,6 @@ IF(BUILD_TESTING)
          --test-command Simple)
       LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Simple_CodeBlocksGenerator")
     ENDIF ("${cmakeOutput}" MATCHES CodeBlocks)
-
     # check for the KDevelop3 generator
     IF ("${cmakeOutput}" MATCHES KDevelop3)
       ADD_TEST(Simple_KDevelop3Generator ${CMAKE_CTEST_COMMAND}

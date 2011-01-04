@@ -1133,10 +1133,13 @@ OutputIncludes(std::vector<std::string> const & includes)
 
 
 void cmVisualStudio10TargetGenerator::
-WriteRCOptions(std::string const& ,
+WriteRCOptions(std::string const& configName,
                std::vector<std::string> const & includes)
 {
   this->WriteString("<ResourceCompile>\n", 2);
+  Options& clOptions = *(this->ClOptions[configName]);
+  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+                                          "\n");
   this->OutputIncludes(includes);
   this->WriteString("</ResourceCompile>\n", 2);
 }
