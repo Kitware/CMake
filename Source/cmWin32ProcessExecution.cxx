@@ -290,7 +290,8 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
 {
   PROCESS_INFORMATION piProcInfo;
   STARTUPINFO siStartInfo;
-  char *s1=0,*s2=0, *s3 = " /c ";
+  char *s1=0,*s2=0;
+  const char *s3 = " /c ";
   int i = GetEnvironmentVariable("COMSPEC",NULL,0);
   if (i)
     {

@@ -611,8 +611,9 @@ void WriteVSMacrosFileRegistryEntry(
     {
     // Create the subkey and set the values of interest:
     HKEY hsubkey = NULL;
-    result = RegCreateKeyEx(hkey, nextAvailableSubKeyName.c_str(), 0, "", 0,
-      KEY_READ|KEY_WRITE, 0, &hsubkey, 0);
+    char lpClass[] = "";
+    result = RegCreateKeyEx(hkey, nextAvailableSubKeyName.c_str(), 0,
+                            lpClass, 0, KEY_READ|KEY_WRITE, 0, &hsubkey, 0);
     if (ERROR_SUCCESS == result)
       {
       DWORD dw = 0;
