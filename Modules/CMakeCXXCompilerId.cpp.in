@@ -47,6 +47,9 @@
 #elif defined(_CRAYC)
 # define COMPILER_ID "Cray"
 
+#elif defined(__TI_COMPILER_VERSION__)
+# define COMPILER_ID "TI_DSP"
+
 #elif defined(__GNUC__)
 # define COMPILER_ID "GNU"
 
