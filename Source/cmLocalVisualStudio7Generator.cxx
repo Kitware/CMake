@@ -427,7 +427,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   // The YX and Yu options are in a per-global-generator table because
   // their values differ based on the VS IDE version.
   {"ForcedIncludeFiles", "FI", "Forced include files", "",
-   cmVS7FlagTable::UserValueRequired},
+   cmVS7FlagTable::UserValueRequired | cmVS7FlagTable::SemicolonAppendable},
 
   // boolean flags
   {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE", 0},
