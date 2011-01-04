@@ -122,7 +122,7 @@ IF(Subversion_SVN_EXECUTABLE)
 
 ENDIF(Subversion_SVN_EXECUTABLE)
 
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Subversion REQUIRED_VARS Subversion_SVN_EXECUTABLE
                                              VERSION_VAR Subversion_VERSION_SVN )
 

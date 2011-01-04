@@ -26,7 +26,7 @@
 
 include(CheckCSourceCompiles)
 include(CheckCXXSourceCompiles)
-include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+include(FindPackageHandleStandardArgs)
 
 set(OpenMP_C_FLAG_CANDIDATES
   #Gnu
