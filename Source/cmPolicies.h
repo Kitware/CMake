@@ -52,7 +52,6 @@ public:
     CMP0014, // Input directories must have CMakeLists.txt
     CMP0015, // link_directories() treats paths relative to source dir
     CMP0016, // target_link_libraries() fails if only argument is not a target
-    CMP0017, // Prefer files in CMAKE_ROOT when including from CMAKE_ROOT
 
     // Always the last entry.  Useful mostly to avoid adding a comma
     // the last policy when adding a new one.
