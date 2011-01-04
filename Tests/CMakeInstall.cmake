@@ -41,6 +41,9 @@ if(CMake_TEST_INSTALL)
     --build-noclean
     --build-target install)
 
+  # Avoid running this test simultaneously with other tests:
+  set_tests_properties(CMake.Install PROPERTIES RUN_SERIAL ON)
+
   # TODO: Make all other tests depend on this one, and then drive them
   # with the installed CTest.
 else()
