@@ -495,9 +495,9 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   std::string ver = "2.4.0";
 
   if (version && strlen(version) > 0)
-  {
+    {
     ver = version;
-  }
+    }
 
   unsigned int majorVer = 2;
   unsigned int minorVer = 0;
@@ -556,29 +556,33 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
 
   // now loop over all the policies and set them as appropriate
   std::vector<cmPolicies::PolicyID> ancientPolicies;
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
-    = this->Policies.begin();
-  for (;i != this->Policies.end(); ++i)
-  {
-  if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer,tweakVer))
+  for(std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
+                     = this->Policies.begin(); i != this->Policies.end(); ++i)
     {
+    if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer,tweakVer))
+      {
       if(i->second->Status == cmPolicies::REQUIRED_ALWAYS)
-      {
+        {
         ancientPolicies.push_back(i->first);
+        }
+      else
+        {
+        cmPolicies::PolicyStatus status = cmPolicies::WARN;
+        if(!this->GetPolicyDefault(mf, i->second->IDString, &status) ||
+           !mf->SetPolicy(i->second->ID, status))
+          {
+          return false;
+          }
+        }
       }
-      else if (!mf->SetPolicy(i->second->ID, cmPolicies::WARN))
-      {
-        return false;
-      }
-    }
     else
-    {
-      if (!mf->SetPolicy(i->second->ID, cmPolicies::NEW))
       {
+      if (!mf->SetPolicy(i->second->ID, cmPolicies::NEW))
+        {
         return false;
+        }
       }
     }
-  }
 
   // Make sure the project does not use any ancient policies.
   if(!ancientPolicies.empty())
@@ -586,6 +590,36 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     this->DiagnoseAncientPolicies(ancientPolicies,
                                   majorVer, minorVer, patchVer, mf);
     cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmPolicies::GetPolicyDefault(cmMakefile* mf, std::string const& policy,
+                                  cmPolicies::PolicyStatus* defaultSetting)
+{
+  std::string defaultVar = "CMAKE_POLICY_DEFAULT_" + policy;
+  std::string defaultValue = mf->GetSafeDefinition(defaultVar.c_str());
+  if(defaultValue == "NEW")
+    {
+    *defaultSetting = cmPolicies::NEW;
+    }
+  else if(defaultValue == "OLD")
+    {
+    *defaultSetting = cmPolicies::OLD;
+    }
+  else if(defaultValue == "")
+    {
+    *defaultSetting = cmPolicies::WARN;
+    }
+  else
+    {
+    cmOStringStream e;
+    e << defaultVar << " has value \"" << defaultValue
+      << "\" but must be \"OLD\", \"NEW\", or \"\" (empty).";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return false;
     }
 
