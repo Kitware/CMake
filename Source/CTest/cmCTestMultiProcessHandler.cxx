@@ -428,7 +428,10 @@ void cmCTestMultiProcessHandler::ReadCostData()
       if(index == -1) continue;
 
       this->Properties[index]->PreviousRuns = prev;
-      if(this->Properties[index] && this->Properties[index]->Cost == 0)
+      // When not running in parallel mode, don't use cost data
+      if(this->ParallelLevel > 1 &&
+         this->Properties[index] &&
+         this->Properties[index]->Cost == 0)
         {
         this->Properties[index]->Cost = cost;
         }
@@ -469,20 +472,19 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
     {
     SortedTests.push_back(i->first);
 
-    //If the test failed last time, it should be run first, so max the cost
-    if(std::find(this->LastTestsFailed.begin(),
-                 this->LastTestsFailed.end(),
-                 this->Properties[i->first]->Name)
-       != this->LastTestsFailed.end())
+    //If the test failed last time, it should be run first, so max the cost.
+    //Only do this for parallel runs; in non-parallel runs, avoid clobbering
+    //the test's explicitly set cost.
+    if(this->ParallelLevel > 1 &&
+       std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
+       this->Properties[i->first]->Name) != this->LastTestsFailed.end())
       {
       this->Properties[i->first]->Cost = FLT_MAX;
       }
     }
-  if(this->ParallelLevel > 1)
-    {
-    TestComparator comp(this);
-    std::sort(SortedTests.begin(), SortedTests.end(), comp);
-    }
+
+  TestComparator comp(this);
+  std::sort(SortedTests.begin(), SortedTests.end(), comp);
 }
 
 //---------------------------------------------------------
