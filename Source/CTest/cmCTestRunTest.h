@@ -63,8 +63,8 @@ private:
   void ExeNotFound(std::string exe);
   // Figures out a final timeout which is min(STOP_TIME, NOW+TIMEOUT)
   double ResolveTimeout();
-  bool ForkProcess(double testTimeOut,
-                     std::vector<std::string>* environment);
+  bool ForkProcess(double testTimeOut, bool explicitTimeout,
+                   std::vector<std::string>* environment);
   void WriteLogOutputTop(size_t completed, size_t total);
   //Run post processing of the process output for MemCheck
   void MemCheckPostProcess();
