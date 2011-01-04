@@ -24,7 +24,8 @@ set(CMAKE_CREATE_WIN32_EXE  "-mwindows")
 
 set(CMAKE_GNULD_IMAGE_VERSION
   "-Wl,--major-image-version,<TARGET_VERSION_MAJOR>,--minor-image-version,<TARGET_VERSION_MINOR>")
-
+set(CMAKE_GENERATOR_RC windres)
+enable_language(RC)
 macro(__cygwin_compiler_gnu lang)
   # Binary link rules.
   set(CMAKE_${lang}_CREATE_SHARED_MODULE
