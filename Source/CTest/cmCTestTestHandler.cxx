@@ -26,6 +26,7 @@
 #include "cmCommand.h"
 #include "cmSystemTools.h"
 #include "cmXMLSafe.h"
+#include "cm_utf8.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -1980,65 +1981,45 @@ void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
     }
 }
 
-//----------------------------------------------------------------------
-bool cmCTestTestHandler::CleanTestOutput(std::string& output,
-  size_t remove_threshold)
+//----------------------------------------------------------------------------
+bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
 {
-  if ( remove_threshold == 0 )
+  if(!length || length >= output.size() ||
+     output.find("CTEST_FULL_OUTPUT") != output.npos)
     {
     return true;
     }
-  if ( output.find("CTEST_FULL_OUTPUT") != output.npos )
+
+  // Truncate at given length but do not break in the middle of a multi-byte
+  // UTF-8 encoding.
+  char const* const begin = output.c_str();
+  char const* const end = begin + output.size();
+  char const* const truncate = begin + length;
+  char const* current = begin;
+  while(current < truncate)
     {
-    return true;
-    }
-  cmOStringStream ostr;
-  std::string::size_type cc;
-  std::string::size_type skipsize = 0;
-  int inTag = 0;
-  int skipped = 0;
-  for ( cc = 0; cc < output.size(); cc ++ )
-    {
-    int ch = output[cc];
-    if ( ch < 0 || ch > 255 )
+    unsigned int ch;
+    if(const char* next = cm_utf8_decode_character(current, end, &ch))
       {
-      break;
-      }
-    if ( ch == '<' )
-      {
-      inTag = 1;
-      }
-    if ( !inTag )
-      {
-      int notskip = 0;
-      // Skip
-      if ( skipsize < remove_threshold )
+      if(next > truncate)
         {
-        ostr << static_cast<char>(ch);
-        notskip = 1;
+        break;
         }
-      skipsize ++;
-      if ( notskip && skipsize >= remove_threshold )
-        {
-        skipped = 1;
-        }
+      current = next;
       }
-    else
+    else // Bad byte will be handled by cmXMLSafe.
       {
-      ostr << static_cast<char>(ch);
-      }
-    if ( ch == '>' )
-      {
-      inTag = 0;
+      ++current;
       }
     }
-  if ( skipped )
-    {
-    ostr << "..." << std::endl << "The rest of the test output was removed "
-      "since it exceeds the threshold of "
-      << remove_threshold << " characters." << std::endl;
-    }
-  output = ostr.str();
+  output = output.substr(0, current - begin);
+
+  // Append truncation message.
+  cmOStringStream msg;
+  msg << "...\n"
+    "The rest of the test output was removed since it exceeds the threshold "
+    "of " << length << " bytes.\n";
+  output += msg.str();
   return true;
 }
 
