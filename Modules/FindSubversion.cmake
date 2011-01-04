@@ -8,11 +8,9 @@
 # The minimum required version of Subversion can be specified using the
 # standard syntax, e.g. FIND_PACKAGE(Subversion 1.4)
 #
-# If the command line client executable is found the following macros are
-# defined:
+# If the command line client executable is found two macros are defined:
 #  Subversion_WC_INFO(<dir> <var-prefix>)
 #  Subversion_WC_LOG(<dir> <var-prefix>)
-#  Subversion_WC_UPDATE([path...])
 # Subversion_WC_INFO extracts information of a subversion working copy at
 # a given location. This macro defines the following variables:
 #  <var-prefix>_WC_URL - url of the repository (at <dir>)
@@ -26,12 +24,6 @@
 # subversion working copy at a given location. This macro defines the
 # variable:
 #  <var-prefix>_LAST_CHANGED_LOG - last log of base revision
-# Subversion_WC_UPDATE runs 'svn update' on each of the paths supplied as
-# argument. Each path will be converted to an absolute. This is necessary in
-# order to determine its position relative to the top-level source directory
-# CMAKE_SOURCE_DIR.  If any intermediate directories are missing, they will be
-# 'svn update'-d non-recursively as well.
-#
 # Example usage:
 #  FIND_PACKAGE(Subversion)
 #  IF(SUBVERSION_FOUND)
@@ -39,10 +31,6 @@
 #    MESSAGE("Current revision is ${Project_WC_REVISION}")
 #    Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
 #    MESSAGE("Last changed log is ${Project_LAST_CHANGED_LOG}")
-#    Subversion_WC_UPDATE(${PROJECT_SOURCE_DIR})
-#    MESSAGE("Updated my working copy")
-#    Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-#    MESSAGE("Revision after update is ${Project_WC_REVISION}")
 #  ENDIF(SUBVERSION_FOUND)
 
 #=============================================================================
@@ -124,34 +112,6 @@ IF(Subversion_SVN_EXECUTABLE)
       MESSAGE(SEND_ERROR "Command \"${Subversion_SVN_EXECUTABLE} log -r BASE ${dir}\" failed with output:\n${Subversion_svn_log_error}")
     ENDIF(NOT ${Subversion_svn_log_result} EQUAL 0)
   ENDMACRO(Subversion_WC_LOG)
-
-  MACRO(Subversion_WC_UPDATE)
-    # This macro requires network access to the svn server and could be slow.
-    SET(_svn_update ${Subversion_SVN_EXECUTABLE} --non-interactive update -q)
-    FOREACH(_path ${ARGV})
-      IF(NOT IS_ABSOLUTE ${_path})
-        GET_FILENAME_COMPONENT(_path ${_path} ABSOLUTE)
-      ENDIF(NOT IS_ABSOLUTE ${_path})
-      STRING(REGEX REPLACE "^${CMAKE_SOURCE_DIR}/" "" _dirs "${_path}")
-      STRING(REPLACE "/" ";" _dirs "${_dirs}")
-      SET(_wc ${CMAKE_SOURCE_DIR})
-      FOREACH(_dir ${_dirs})
-        SET(_wc ${_wc}/${_dir})
-        IF("${_wc}" STREQUAL "${_path}")
-          SET(_cmd ${_svn_update} "${_wc}")
-        ELSE("${_wc}" STREQUAL "${_path}")
-          SET(_cmd ${_svn_update} -N "${_wc}")
-        ENDIF("${_wc}" STREQUAL "${_path}")
-        EXECUTE_PROCESS(
-          COMMAND ${_cmd}
-          RESULT_VARIABLE _result
-          ERROR_VARIABLE _error)
-        IF(_result)
-          MESSAGE(SEND_ERROR "${_cmd} failed:\n${_error}")
-        ENDIF(_result)
-      ENDFOREACH(_dir ${_dirs})
-    ENDFOREACH(_path ${ARGV})
-  ENDMACRO(Subversion_WC_UPDATE)
 
 ENDIF(Subversion_SVN_EXECUTABLE)
 
