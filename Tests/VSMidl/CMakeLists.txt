@@ -27,12 +27,15 @@ if(NOT DEFINED HOME)
   if(NOT HOME AND WIN32)
     # Try for USERPROFILE as HOME equivalent:
     string(REPLACE "\\" "/" HOME "$ENV{USERPROFILE}")
+  endif()
 
-    # But just use root of SystemDrive if USERPROFILE contains any spaces:
-    # (Default on XP and earlier...)
-    if(HOME MATCHES " ")
-      string(REPLACE "\\" "/" HOME "$ENV{SystemDrive}")
-    endif()
+  # But just use root of SystemDrive if HOME contains any spaces:
+  # (Default on XP and earlier...)
+  if(HOME MATCHES " " AND WIN32)
+    string(REPLACE "\\" "/" HOME "$ENV{SystemDrive}")
+  endif()
+  if(HOME MATCHES " ")
+    set(HOME "")
   endif()
 endif()
 message(STATUS "HOME='${HOME}'")
