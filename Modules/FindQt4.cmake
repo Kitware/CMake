@@ -150,23 +150,6 @@
 #        filenames can be found in qm_files. The ts_files
 #        must exists and are not updated in any way.
 #
-#  macro QT4_DEPLOY_DEFAULT_PLUGINS( install_prefix )
-#        in:  install_prefix
-#        Invokes install() commands for installing the default set of Qt plugins needed by an application.
-#        This can typically be called as qt4_deploy_default_plugins(bin/plugins)
-#        The QT_USE_* variables can control whether plugins for Qt modules are deployed.
-#
-#  macro QT4_DEPLOY_PLUGIN_GROUP( install_prefix group )
-#        in:  install_prefix
-#        in:  name of group of plugins (e.g. imageformats)
-#        Invokes install() commands for installing a group of Qt plugins.
-#
-#  macro QT4_DEPLOY_PLUGIN( install_prefix group plugin)
-#        in:  install_prefix
-#        in:  name of group of plugins (e.g. imageformats)
-#        in:  name of plugin to deploy (e.g. qgif)
-#        Invokes install() commands for installing a single Qt plugin.
-#
 #
 #  Below is a detailed list of variables that FindQt4.cmake sets.
 #  QT_FOUND         If false, don't try to use Qt.
@@ -1130,7 +1113,7 @@ IF (QT4_QMAKE_FOUND)
   #
   #######################################
 
-  SET( QT_PLUGIN_GROUPS accessible bearer codecs decorations designer gfxdrivers graphicssystems iconengines imageformats inputmethods mousedrivers phonon_backend script sqldrivers )
+  SET( QT_PLUGIN_TYPES accessible bearer codecs decorations designer gfxdrivers graphicssystems iconengines imageformats inputmethods mousedrivers phonon_backend script sqldrivers )
 
   SET( QT_ACCESSIBLE_PLUGINS qtaccessiblecompatwidgets qtaccessiblewidgets )
   SET( QT_BEARER_PLUGINS qcorewlanbearer qgenericbearer )
@@ -1148,34 +1131,35 @@ IF (QT4_QMAKE_FOUND)
   SET( QT_SQLDRIVERS_PLUGINS qsqldb2 qsqlibase qsqlite qsqlite2 qsqlmysql qsqloci qsqlodbc qsqlpsql qsqltds )
 
   IF(QT_QMAKE_CHANGED)
-    FOREACH(QT_PLUGIN_GROUP ${QT_PLUGIN_GROUPS})
-      STRING(TOUPPER ${QT_PLUGIN_GROUP} _upper_qt_plugin_group)
-      SET(QT_${_upper_qt_plugin_group}_PLUGINS_DIR ${QT_PLUGINS_DIR}/${QT_PLUGIN_GROUP})
-      FOREACH(QT_PLUGIN ${QT_${_upper_qt_plugin_group}_PLUGINS})
+    FOREACH(QT_PLUGIN_TYPE ${QT_PLUGIN_TYPES})
+      STRING(TOUPPER ${QT_PLUGIN_TYPE} _upper_qt_plugin_type)
+      SET(QT_${_upper_qt_plugin_type}_PLUGINS_DIR ${QT_PLUGINS_DIR}/${QT_PLUGIN_TYPE})
+      FOREACH(QT_PLUGIN ${QT_${_upper_qt_plugin_type}_PLUGINS})
         STRING(TOUPPER ${QT_PLUGIN} _upper_qt_plugin)
         UNSET(QT_${_upper_qt_plugin}_LIBRARY_RELEASE CACHE)
         UNSET(QT_${_upper_qt_plugin}_LIBRARY_DEBUG CACHE)
         UNSET(QT_${_upper_qt_plugin}_LIBRARY CACHE)
         UNSET(QT_${_upper_qt_plugin}_PLUGIN_RELEASE CACHE)
         UNSET(QT_${_upper_qt_plugin}_PLUGIN_DEBUG CACHE)
+        UNSET(QT_${_upper_qt_plugin}_PLUGIN CACHE)
       ENDFOREACH(QT_PLUGIN)
-    ENDFOREACH(QT_PLUGIN_GROUP)
+    ENDFOREACH(QT_PLUGIN_TYPE)
   ENDIF(QT_QMAKE_CHANGED)
 
-  FOREACH(QT_PLUGIN_GROUP ${QT_PLUGIN_GROUPS})
-    STRING(TOUPPER ${QT_PLUGIN_GROUP} _upper_qt_plugin_group)
-    SET(QT_${_upper_qt_plugin_group}_PLUGINS_DIR ${QT_PLUGINS_DIR}/${QT_PLUGIN_GROUP})
-    FOREACH(QT_PLUGIN ${QT_${_upper_qt_plugin_group}_PLUGINS})
+  # find_library works better than find_file but we need to set prefixes to only match plugins
+  FOREACH(QT_PLUGIN_TYPE ${QT_PLUGIN_TYPES})
+    STRING(TOUPPER ${QT_PLUGIN_TYPE} _upper_qt_plugin_type)
+    SET(QT_${_upper_qt_plugin_type}_PLUGINS_DIR ${QT_PLUGINS_DIR}/${QT_PLUGIN_TYPE})
+    FOREACH(QT_PLUGIN ${QT_${_upper_qt_plugin_type}_PLUGINS})
       STRING(TOUPPER ${QT_PLUGIN} _upper_qt_plugin)
       IF(QT_IS_STATIC)
-        # find static Qt plugins that user can link with if necessary
         FIND_LIBRARY(QT_${_upper_qt_plugin}_LIBRARY_RELEASE
                      NAMES ${QT_PLUGIN}${QT_LIBINFIX} ${QT_PLUGIN}${QT_LIBINFIX}4
-                     PATHS ${QT_${_upper_qt_plugin_group}_PLUGINS_DIR} NO_DEFAULT_PATH
+                     PATHS ${QT_${_upper_qt_plugin_type}_PLUGINS_DIR} NO_DEFAULT_PATH
             )
         FIND_LIBRARY(QT_${_upper_qt_plugin}_LIBRARY_DEBUG
                      NAMES ${QT_PLUGIN}${QT_LIBINFIX}_debug ${QT_PLUGIN}${QT_LIBINFIX}d ${QT_PLUGIN}${QT_LIBINFIX}d4
-                     PATHS ${QT_${_upper_qt_plugin_group}_PLUGINS_DIR} NO_DEFAULT_PATH
+                     PATHS ${QT_${_upper_qt_plugin_type}_PLUGINS_DIR} NO_DEFAULT_PATH
             )
         _QT4_ADJUST_LIB_VARS(${QT_PLUGIN})
       ELSE(QT_IS_STATIC)
@@ -1184,17 +1168,17 @@ IF (QT4_QMAKE_FOUND)
         SET(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_SHARED_MODULE_SUFFIX} ${CMAKE_SHARED_LIBRARY_SUFFIX})
         FIND_LIBRARY(QT_${_upper_qt_plugin}_PLUGIN_RELEASE
                      NAMES ${QT_PLUGIN}${QT_LIBINFIX} ${QT_PLUGIN}${QT_LIBINFIX}4
-                     PATHS ${QT_${_upper_qt_plugin_group}_PLUGINS_DIR} NO_DEFAULT_PATH
+                     PATHS ${QT_${_upper_qt_plugin_type}_PLUGINS_DIR} NO_DEFAULT_PATH
             )
         FIND_LIBRARY(QT_${_upper_qt_plugin}_PLUGIN_DEBUG
                      NAMES ${QT_PLUGIN}${QT_LIBINFIX}_debug ${QT_PLUGIN}${QT_LIBINFIX}d ${QT_PLUGIN}${QT_LIBINFIX}d4
-                     PATHS ${QT_${_upper_qt_plugin_group}_PLUGINS_DIR} NO_DEFAULT_PATH
+                     PATHS ${QT_${_upper_qt_plugin_type}_PLUGINS_DIR} NO_DEFAULT_PATH
             )
         MARK_AS_ADVANCED(QT_${_upper_qt_plugin}_PLUGIN_RELEASE QT_${_upper_qt_plugin}_PLUGIN_DEBUG)
         SET(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES_DEFAULT})
       ENDIF(QT_IS_STATIC)
     ENDFOREACH(QT_PLUGIN)
-  ENDFOREACH(QT_PLUGIN_GROUP)
+  ENDFOREACH(QT_PLUGIN_TYPE)
 
 
   ######################################
