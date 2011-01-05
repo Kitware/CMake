@@ -1548,17 +1548,17 @@ bool SystemInformationImplementation::RetrieveClassicalCPUClockSpeed()
   if (this->ChipID.Family == 3) 
     {
     // 80386 processors....  Loop time is 115 cycles!
-    dFrequency = (((CLASSICAL_CPU_FREQ_LOOP * 115) / dDifference) / 1048576);
+    dFrequency = (((CLASSICAL_CPU_FREQ_LOOP * 115) / dDifference) / 1000000);
     } 
   else if (this->ChipID.Family == 4) 
     {
     // 80486 processors....  Loop time is 47 cycles!
-    dFrequency = (((CLASSICAL_CPU_FREQ_LOOP * 47) / dDifference) / 1048576);
+    dFrequency = (((CLASSICAL_CPU_FREQ_LOOP * 47) / dDifference) / 1000000);
     } 
   else if (this->ChipID.Family == 5) 
     {
     // Pentium processors....  Loop time is 43 cycles!
-    dFrequency = (((CLASSICAL_CPU_FREQ_LOOP * 43) / dDifference) / 1048576);
+    dFrequency = (((CLASSICAL_CPU_FREQ_LOOP * 43) / dDifference) / 1000000);
     }
   
   // Save the clock speed.
@@ -2934,7 +2934,7 @@ bool SystemInformationImplementation::ParseSysCtl()
 
   len = sizeof(value);
   sysctlbyname("hw.cpufrequency", &value, &len, NULL, 0);
-  this->CPUSpeedInMHz = static_cast< float >( value )/ 1048576;
+  this->CPUSpeedInMHz = static_cast< float >( value )/ 1000000;
 
 
   // Chip family
