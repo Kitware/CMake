@@ -357,7 +357,12 @@ static void Buffer_To_Window(const FIELD  * field, WINDOW * win)
 
   assert(win && field);
 
+#if defined(__LSB_VERSION__)
   getmaxyx(win, height, width);
+#else
+  width  = getmaxx(win);
+  height = getmaxy(win);
+#endif
 
   for(row=0, pBuffer=field->buf; 
       row < height; 
@@ -389,13 +394,17 @@ static void Window_To_Buffer(WINDOW * win, FIELD  * field)
   int pad;
   int len = 0;
   char *p;
-  int row, height, width;
+  int row, height;
   
   assert(win && field && field->buf );
 
   pad = field->pad;
   p = field->buf;
-  getmaxyx(win, height, width);
+#if defined(__LSB_VERSION__)
+  { int width; getmaxyx(win, height, width); }
+#else
+  height = getmaxy(win);
+#endif
 
   for(row=0; (row < height) && (row < field->drows); row++ )
     {
