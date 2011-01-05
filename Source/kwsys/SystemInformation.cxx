@@ -264,6 +264,10 @@ protected:
   //For Haiku OS
   bool QueryHaikuInfo();
 
+  //For QNX
+  bool QueryQNXMemory();
+  bool QueryQNXProcessor();
+
   // Evaluate the memory information.
   int QueryMemory();
   size_t TotalVirtualMemory;
@@ -597,6 +601,8 @@ void SystemInformationImplementation::RunCPUCheck()
   this->QuerySolarisInfo();
 #elif defined(__HAIKU__)
   this->QueryHaikuInfo();
+#elif defined(__QNX__)
+  this->QueryQNXProcessor();
 #else
   this->RetreiveInformationFromCpuInfoFile();
 #endif
@@ -615,6 +621,8 @@ void SystemInformationImplementation::RunMemoryCheck()
   this->QuerySolarisInfo();
 #elif defined(__HAIKU__)
   this->QueryHaikuInfo();
+#elif defined(__QNX__)
+  this->QueryQNXMemory();
 #else
   this->QueryMemory();
 #endif
@@ -3264,6 +3272,89 @@ bool SystemInformationImplementation::QueryHaikuInfo()
 #endif
 }
 
+bool SystemInformationImplementation::QueryQNXMemory()
+{
+#if defined(__QNX__)
+  kwsys_stl::string buffer;
+  kwsys_stl::vector<const char*> args;
+  args.clear();
+
+  args.push_back("showmem");
+  args.push_back("-S");
+  args.push_back(0);
+  buffer = this->RunProcess(args);
+  args.clear();
+
+  size_t pos = buffer.find("System RAM:");
+  if (pos == buffer.npos)
+    return false;
+  pos = buffer.find(":", pos);
+  size_t pos2 = buffer.find("M (", pos);
+  if (pos2 == buffer.npos)
+    return false;
+
+  pos++;
+  while (buffer[pos] == ' ')
+    pos++;
+
+  this->TotalPhysicalMemory = atoi(buffer.substr(pos, pos2 - pos).c_str());
+  return true;
+#endif
+  return false;
+}
+
+bool SystemInformationImplementation::QueryQNXProcessor()
+{
+#if defined(__QNX__)
+  // the output on my QNX 6.4.1 looks like this:
+  // Processor1: 686 Pentium II Stepping 3 2175MHz FPU
+  kwsys_stl::string buffer;
+  kwsys_stl::vector<const char*> args;
+  args.clear();
+
+  args.push_back("pidin");
+  args.push_back("info");
+  args.push_back(0);
+  buffer = this->RunProcess(args);
+  args.clear();
+
+  size_t pos = buffer.find("Processor1:");
+  if (pos == buffer.npos)
+    return false;
+
+  size_t pos2 = buffer.find("MHz", pos);
+  if (pos2 == buffer.npos)
+    return false;
+
+  size_t pos3 = pos2;
+  while (buffer[pos3] != ' ')
+    --pos3;
+
+  this->CPUSpeedInMHz = atoi(buffer.substr(pos3 + 1, pos2 - pos3 - 1).c_str());
+
+  pos2 = buffer.find(" Stepping", pos);
+  if (pos2 != buffer.npos)
+    {
+    pos2 = buffer.find(" ", pos2 + 1);
+    if (pos2 != buffer.npos && pos2 < pos3)
+      {
+      this->ChipID.Revision = atoi(buffer.substr(pos2 + 1, pos3 - pos2).c_str());
+      }
+    }
+
+  this->NumberOfPhysicalCPU = 0;
+  do
+    {
+    pos = buffer.find("\nProcessor", pos + 1);
+    ++this->NumberOfPhysicalCPU;
+    } while (pos != buffer.npos);
+  this->NumberOfLogicalCPU = 1;
+
+  return true;
+#else
+  return false;
+#endif
+}
 
 /** Query the operating system information */
 bool SystemInformationImplementation::QueryOSInformation()
