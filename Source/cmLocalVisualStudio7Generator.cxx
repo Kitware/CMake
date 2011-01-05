@@ -797,7 +797,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     tool = "VFMIDLTool";
     }
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n";
-  targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tMkTypLibCompatible=\"FALSE\"\n";
   if( this->PlatformName == "x64" )
     {

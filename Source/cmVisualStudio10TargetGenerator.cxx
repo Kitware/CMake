@@ -436,6 +436,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::vector<cmSourceFile*> customBuild;
   std::vector<cmSourceFile*> none;
   std::vector<cmSourceFile*> headers;
+  std::vector<cmSourceFile*> idls;
   std::vector<cmSourceFile*> resource;
   
   for(std::vector<cmSourceFile*>::const_iterator s = classes.begin(); 
@@ -458,7 +459,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       {
       clCompile.push_back(sf);
       }
-    if(strcmp(lang, "RC") == 0)
+    else if(strcmp(lang, "RC") == 0)
       {
       resource.push_back(sf);
       }
@@ -469,6 +470,10 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     else if(header)
       {
       headers.push_back(sf);
+      }
+    else if(sf->GetExtension() == "idl")
+      {
+      idls.push_back(sf);
       }
     else
       {
@@ -498,6 +503,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   this->WriteGroupSources("ClCompile", clCompile, sourceGroups);
   this->WriteGroupSources("ClInclude", headers, sourceGroups);
   this->WriteGroupSources("ResourceCompile", resource, sourceGroups);
+  this->WriteGroupSources("Midl", idls, sourceGroups);
   this->WriteGroupSources("CustomBuild", customBuild, sourceGroups);
 
   this->WriteString("<ItemGroup>\n", 1);
@@ -670,6 +676,7 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
       const char* lang = (*source)->GetLanguage();
       bool cl = lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0);
       bool rc = lang && (strcmp(lang, "RC") == 0);
+      bool idl = (*source)->GetExtension() == "idl";
       std::string sourceFile = (*source)->GetFullPath();
       sourceFile =  cmSystemTools::RelativePath(
         this->Makefile->GetCurrentOutputDirectory(),
@@ -687,6 +694,10 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
       else if(rc)
         {
         this->WriteString("<ResourceCompile Include=\"", 2);
+        }
+      else if(idl)
+        {
+        this->WriteString("<Midl Include=\"", 2);
         }
       else
         {
@@ -1397,11 +1408,20 @@ WriteMidlOptions(std::string const& /*config*/,
 {
   this->WriteString("<Midl>\n", 2);
   this->OutputIncludes(includes);
+  this->WriteString("<OutputDirectory>$(IntDir)</OutputDirectory>\n", 3);
+  this->WriteString("<HeaderFileName>%(Filename).h</HeaderFileName>\n", 3);
+  this->WriteString(
+    "<TypeLibraryName>%(Filename).tlb</TypeLibraryName>\n", 3);
+  this->WriteString(
+    "<InterfaceIdentifierFileName>"
+    "%(Filename)_i.c</InterfaceIdentifierFileName>\n", 3);
+  this->WriteString("<ProxyFileName>%(Filename)_p.c</ProxyFileName>\n",3);
   this->WriteString("</Midl>\n", 2);
 }
-  
+
+
 void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
-{  
+{
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
