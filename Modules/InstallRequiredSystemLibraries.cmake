@@ -1,5 +1,5 @@
 # By including this file, all files in the CMAKE_INSTALL_DEBUG_LIBRARIES,
-# will be installed with INSTALL_PROGRAMS into /bin for WIN32 and /lib
+# will be installed with INSTALL(PROGRAMS ...) into bin for WIN32 and lib
 # for non-win32. If CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP is set to TRUE
 # before including this file, then the INSTALL command is not called.
 # The user can use the variable CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS to use a
@@ -11,6 +11,8 @@
 # compiler, then the debug libraries are installed when available.
 # If CMAKE_INSTALL_MFC_LIBRARIES is set then the MFC run time
 # libraries are installed as well as the CRT run time libraries.
+# If CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION is set then the libraries are
+# instaled to that directory rather than the default.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -292,10 +294,13 @@ ENDIF(MSVC)
 # specified by CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS.
 IF(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
   IF(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP)
-    IF(WIN32)
-      INSTALL_PROGRAMS(/bin ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-    ELSE(WIN32)
-      INSTALL_PROGRAMS(/lib ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
-    ENDIF(WIN32)
+    IF(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION)
+      IF(WIN32)
+        SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION bin)
+      ELSE(WIN32)
+        SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION lib)
+      ENDIF(WIN32)
+    ENDIF(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION)
+    INSTALL(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION ${CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION})
   ENDIF(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP)
 ENDIF(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
