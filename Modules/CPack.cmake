@@ -257,6 +257,11 @@
 #   CPACK_NSIS_DELETE_ICONS_EXTRA -Additional NSIS commands to
 #   uninstall start menu shortcuts.
 #
+#   CPACK_NSIS_EXECUTABLES_DIRECTORY - Creating NSIS start menu links
+#   assumes that they are in 'bin\' unless this variable is set.
+#   For example, you would set this to 'exec\' if your executables are
+#   in an exec directory.
+#
 # The following variable is specific to installers build on Mac OS X
 # using PackageMaker:
 #
