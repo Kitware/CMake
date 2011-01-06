@@ -421,10 +421,13 @@ int cmCPackNSISGenerator::InitializeInternal()
     return 0;
     }
   this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", nsisPath.c_str());
+  this->SetOptionIfNotSet("CPACK_NSIS_EXECUTABLES_DIRECTORY", "bin");
   const char* cpackPackageExecutables
     = this->GetOption("CPACK_PACKAGE_EXECUTABLES");
   const char* cpackPackageDeskTopLinks
     = this->GetOption("CPACK_CREATE_DESKTOP_LINKS");
+  const char* cpackNsisExecutablesDirectory
+    = this->GetOption("CPACK_NSIS_EXECUTABLES_DIRECTORY");
   std::vector<std::string> cpackPackageDesktopLinksVector;
   if(cpackPackageDeskTopLinks)
     {
@@ -472,7 +475,8 @@ int cmCPackNSISGenerator::InitializeInternal()
       ++ it;
       std::string linkName = *it;
       str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\"
-        << linkName << ".lnk\" \"$INSTDIR\\bin\\" << execName << ".exe\""
+        << linkName << ".lnk\" \"$INSTDIR\\"
+        << cpackNsisExecutablesDirectory << "\\" << execName << ".exe\""
         << std::endl;
       deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
         << ".lnk\"" << std::endl;
@@ -486,7 +490,8 @@ int cmCPackNSISGenerator::InitializeInternal()
         {
         str << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
         str << "    CreateShortCut \"$DESKTOP\\"
-            << linkName << ".lnk\" \"$INSTDIR\\bin\\" << execName << ".exe\""
+            << linkName << ".lnk\" \"$INSTDIR\\"
+            << cpackNsisExecutablesDirectory << "\\" << execName << ".exe\""
             << std::endl;
         deleteStr << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
         deleteStr << "    Delete \"$DESKTOP\\" << linkName
