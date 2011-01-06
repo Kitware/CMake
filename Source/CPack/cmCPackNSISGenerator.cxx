@@ -156,6 +156,16 @@ int cmCPackNSISGenerator::PackageFiles()
                             installerIconCode.c_str());
     }
 
+  if(this->IsSet("CPACK_NSIS_MUI_FINISHPAGE_RUN"))
+    {
+    std::string installerRunCode = "!define MUI_FINISHPAGE_RUN \"$INSTDIR\\";
+    installerRunCode += this->GetOption("CPACK_NSIS_EXECUTABLES_DIRECTORY");
+    installerRunCode += this->GetOption("CPACK_NSIS_MUI_FINISHPAGE_RUN");
+    installerRunCode += "\"\n";
+    this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_FINISHPAGE_RUN_CODE",
+                            installerRunCode.c_str());
+    }
+
   // Setup all of the component sections
   if (this->Components.empty())
     {
