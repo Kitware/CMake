@@ -129,14 +129,21 @@ int cmCPackNSISGenerator::PackageFiles()
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << nsisInFileName
     << " to " << nsisFileName << std::endl);
   if(this->IsSet("CPACK_NSIS_MUI_ICON") 
-     && this->IsSet("CPACK_NSIS_MUI_UNIICON"))
+     || this->IsSet("CPACK_NSIS_MUI_UNIICON"))
     {
-    std::string installerIconCode="!define MUI_ICON \"";
-    installerIconCode += this->GetOption("CPACK_NSIS_MUI_ICON");
-    installerIconCode += "\"\n";
-    installerIconCode += "!define MUI_UNICON \"";
-    installerIconCode += this->GetOption("CPACK_NSIS_MUI_UNIICON");
-    installerIconCode += "\"\n";
+    std::string installerIconCode;
+    if(this->IsSet("CPACK_NSIS_MUI_ICON"))
+      {
+      installerIconCode += "!define MUI_ICON \"";
+      installerIconCode += this->GetOption("CPACK_NSIS_MUI_ICON");
+      installerIconCode += "\"\n";
+      }
+    if(this->IsSet("CPACK_NSIS_MUI_UNIICON"))
+      {
+      installerIconCode += "!define MUI_UNICON \"";
+      installerIconCode += this->GetOption("CPACK_NSIS_MUI_UNIICON");
+      installerIconCode += "\"\n";
+      }
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_ICON_CODE",
                             installerIconCode.c_str());
     }
@@ -147,6 +154,17 @@ int cmCPackNSISGenerator::PackageFiles()
     installerIconCode += "\"\n";
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_ICON_CODE",
                             installerIconCode.c_str());
+    }
+
+  if(this->IsSet("CPACK_NSIS_MUI_FINISHPAGE_RUN"))
+    {
+    std::string installerRunCode = "!define MUI_FINISHPAGE_RUN \"$INSTDIR\\";
+    installerRunCode += this->GetOption("CPACK_NSIS_EXECUTABLES_DIRECTORY");
+    installerRunCode += "\\";
+    installerRunCode += this->GetOption("CPACK_NSIS_MUI_FINISHPAGE_RUN");
+    installerRunCode += "\"\n";
+    this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_FINISHPAGE_RUN_CODE",
+                            installerRunCode.c_str());
     }
 
   // Setup all of the component sections
@@ -414,10 +432,13 @@ int cmCPackNSISGenerator::InitializeInternal()
     return 0;
     }
   this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", nsisPath.c_str());
+  this->SetOptionIfNotSet("CPACK_NSIS_EXECUTABLES_DIRECTORY", "bin");
   const char* cpackPackageExecutables
     = this->GetOption("CPACK_PACKAGE_EXECUTABLES");
   const char* cpackPackageDeskTopLinks
     = this->GetOption("CPACK_CREATE_DESKTOP_LINKS");
+  const char* cpackNsisExecutablesDirectory
+    = this->GetOption("CPACK_NSIS_EXECUTABLES_DIRECTORY");
   std::vector<std::string> cpackPackageDesktopLinksVector;
   if(cpackPackageDeskTopLinks)
     {
@@ -465,7 +486,8 @@ int cmCPackNSISGenerator::InitializeInternal()
       ++ it;
       std::string linkName = *it;
       str << "  CreateShortCut \"$SMPROGRAMS\\$STARTMENU_FOLDER\\"
-        << linkName << ".lnk\" \"$INSTDIR\\bin\\" << execName << ".exe\""
+        << linkName << ".lnk\" \"$INSTDIR\\"
+        << cpackNsisExecutablesDirectory << "\\" << execName << ".exe\""
         << std::endl;
       deleteStr << "  Delete \"$SMPROGRAMS\\$MUI_TEMP\\" << linkName
         << ".lnk\"" << std::endl;
@@ -479,7 +501,8 @@ int cmCPackNSISGenerator::InitializeInternal()
         {
         str << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
         str << "    CreateShortCut \"$DESKTOP\\"
-            << linkName << ".lnk\" \"$INSTDIR\\bin\\" << execName << ".exe\""
+            << linkName << ".lnk\" \"$INSTDIR\\"
+            << cpackNsisExecutablesDirectory << "\\" << execName << ".exe\""
             << std::endl;
         deleteStr << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
         deleteStr << "    Delete \"$DESKTOP\\" << linkName
