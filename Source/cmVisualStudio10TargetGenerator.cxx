@@ -651,7 +651,7 @@ void cmVisualStudio10TargetGenerator::WriteObjSources()
 
 void cmVisualStudio10TargetGenerator::WriteCLSources()
 {
-  if(this->Target->GetType() > cmTarget::MODULE_LIBRARY)
+  if(this->Target->GetType() > cmTarget::UTILITY)
     {
     return;
     }
