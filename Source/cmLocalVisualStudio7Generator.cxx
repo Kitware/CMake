@@ -1027,7 +1027,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += "/";
     temp += targetNameImport;
     fout << "\t\t\t\tImportLibrary=\""
-         << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
+         << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"";
+    if(this->FortranProject)
+      {
+      fout << "\n\t\t\t\tLinkDLL=\"true\"";
+      }
+    fout << "/>\n";
     }
     break;
     case cmTarget::EXECUTABLE:
