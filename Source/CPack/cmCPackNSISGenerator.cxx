@@ -129,14 +129,21 @@ int cmCPackNSISGenerator::PackageFiles()
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << nsisInFileName
     << " to " << nsisFileName << std::endl);
   if(this->IsSet("CPACK_NSIS_MUI_ICON") 
-     && this->IsSet("CPACK_NSIS_MUI_UNIICON"))
+     || this->IsSet("CPACK_NSIS_MUI_UNIICON"))
     {
-    std::string installerIconCode="!define MUI_ICON \"";
-    installerIconCode += this->GetOption("CPACK_NSIS_MUI_ICON");
-    installerIconCode += "\"\n";
-    installerIconCode += "!define MUI_UNICON \"";
-    installerIconCode += this->GetOption("CPACK_NSIS_MUI_UNIICON");
-    installerIconCode += "\"\n";
+    std::string installerIconCode;
+    if(this->IsSet("CPACK_NSIS_MUI_ICON"))
+      {
+      installerIconCode += "!define MUI_ICON \"";
+      installerIconCode += this->GetOption("CPACK_NSIS_MUI_ICON");
+      installerIconCode += "\"\n";
+      }
+    if(this->IsSet("CPACK_NSIS_MUI_UNIICON"))
+      {
+      installerIconCode += "!define MUI_UNICON \"";
+      installerIconCode += this->GetOption("CPACK_NSIS_MUI_UNIICON");
+      installerIconCode += "\"\n";
+      }
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_ICON_CODE",
                             installerIconCode.c_str());
     }
