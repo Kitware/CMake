@@ -26,10 +26,10 @@ bool cmIncludeCommand
   bool noPolicyScope = false;
   std::string fname = args[0];
   std::string resultVarName;
-  
+
   for (unsigned int i=1; i<args.size(); i++)
     {
-    if (args[i] == "OPTIONAL") 
+    if (args[i] == "OPTIONAL")
       {
       if (optional)
         {
@@ -60,10 +60,10 @@ bool cmIncludeCommand
       {
       noPolicyScope = true;
       }
-      else if(i > 1)  // compat.: in previous cmake versions the second 
+      else if(i > 1)  // compat.: in previous cmake versions the second
                       // parameter was ignore if it wasn't "OPTIONAL"
         {
-        std::string errorText = "called with invalid argument: ";  
+        std::string errorText = "called with invalid argument: ";
         errorText += args[i];
         this->SetError(errorText.c_str());
         return false;
@@ -82,15 +82,15 @@ bool cmIncludeCommand
       }
     }
   std::string fullFilePath;
-  bool readit = 
-    this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(), 
+  bool readit =
+    this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(),
                                   fname.c_str(), &fullFilePath,
                                   noPolicyScope);
-  
+
   // add the location of the included file if a result variable was given
   if (resultVarName.size())
     {
-      this->Makefile->AddDefinition(resultVarName.c_str(), 
+      this->Makefile->AddDefinition(resultVarName.c_str(),
                                     readit?fullFilePath.c_str():"NOTFOUND");
     }
 

@@ -1,6 +1,15 @@
 cmake_minimum_required (VERSION 2.6)
 PROJECT(FindPackageTest)
 
+LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Look for a package which uses FindPackageHandleStandardArgs.cmake with the
+# new (as of cmake 2.8.3) syntax. This works only if CMP0017 is set to NEW,
+# because otherwise FindPackageHandleStandardArgs.cmake from the current
+# directory is included (via CMAKE_MODULE_PATH).
+CMAKE_POLICY(SET CMP0017 NEW)
+FIND_PACKAGE(ZLIB QUIET)
+
 # Look for a package that has a find module and may be found.
 FIND_PACKAGE(OpenGL QUIET)
 
@@ -23,7 +32,6 @@ IF(NOT FOO_DIR)
   CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
 ENDIF(NOT FOO_DIR)
 
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 FIND_PACKAGE(VersionTestA 1)
 FIND_PACKAGE(VersionTestB 1.2)
 FIND_PACKAGE(VersionTestC 1.2.3)

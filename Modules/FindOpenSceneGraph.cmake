@@ -231,7 +231,7 @@ else()
         endif()
     endif()
 
-    include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+    include(FindPackageHandleStandardArgs)
     FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenSceneGraph DEFAULT_MSG OPENSCENEGRAPH_LIBRARIES OPENSCENEGRAPH_INCLUDE_DIR)
 endif()
 
