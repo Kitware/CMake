@@ -1302,6 +1302,5 @@ const char* cmCursesMainForm::s_ConstHelpMessage =
 " g : generate build files and exit, only available when there are no "
 "new options and no errors have been detected during last configuration.\n"
 " l : shows last errors\n"
-" t : toggles advanced mode. In normal mode, only the most important options are shown. In advanced mode, all options are shown. We recommend using normal mode unless you are an expert.\n";
-
-
+" t : toggles advanced mode. In normal mode, only the most important options are shown. In advanced mode, all options are shown. We recommend using normal mode unless you are an expert.\n"
+" / : search for a variable name.\n";
