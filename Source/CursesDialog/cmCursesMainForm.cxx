@@ -427,15 +427,13 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
       {
       sprintf(firstLine,  "Press [c] to configure                                   ");
       }
-    if (this->AdvancedMode)
-      {
-      sprintf(thirdLine,  "Press [t] to toggle advanced mode (Currently On)");
-      }
-    else
-      {
-      sprintf(thirdLine,  "Press [t] to toggle advanced mode (Currently Off)");
-      }
-
+    {
+      const char* toggleKeyInstruction =
+        "Press [t] to toggle advanced mode (Currently %s)";
+      sprintf(thirdLine,
+              toggleKeyInstruction,
+              this->AdvancedMode ? "On" : "Off");
+    }
     sprintf(secondLine,
             "Press [h] for help           "
             "Press [q] to quit without generating");
