@@ -34,7 +34,7 @@ if(NOT DEFINED CVS_COMMAND)
   set(CVS_COMMAND cvs)
 endif(NOT DEFINED CVS_COMMAND)
 
-if(${CMAKE_CREATE_VERSION} MATCHES "^(release|maint|next)$")
+if(${CMAKE_CREATE_VERSION} MATCHES "^(release|maint|next|nightly)$")
   set(GIT_BRANCH origin/${CMAKE_CREATE_VERSION})
 else()
   set(GIT_BRANCH ${CMAKE_CREATE_VERSION})
