@@ -440,12 +440,14 @@ int cmCPackNSISGenerator::InitializeInternal()
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "CPACK_CREATE_DESKTOP_LINKS: "
                   << "not set" << std::endl);
     }
+
+  cmOStringStream str;
+  cmOStringStream deleteStr;
+
   if ( cpackPackageExecutables )
     {
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "The cpackPackageExecutables: "
       << cpackPackageExecutables << "." << std::endl);
-    cmOStringStream str;
-    cmOStringStream deleteStr;
     std::vector<std::string> cpackPackageExecutablesVector;
     cmSystemTools::ExpandListArgument(cpackPackageExecutables,
       cpackPackageExecutablesVector);
@@ -486,11 +488,13 @@ int cmCPackNSISGenerator::InitializeInternal()
                   << ".lnk\"" << std::endl;
         }
       }
-    this->CreateMenuLinks(str, deleteStr);
-    this->SetOptionIfNotSet("CPACK_NSIS_CREATE_ICONS", str.str().c_str());
-    this->SetOptionIfNotSet("CPACK_NSIS_DELETE_ICONS", 
-                            deleteStr.str().c_str());
     }
+
+  this->CreateMenuLinks(str, deleteStr);
+  this->SetOptionIfNotSet("CPACK_NSIS_CREATE_ICONS", str.str().c_str());
+  this->SetOptionIfNotSet("CPACK_NSIS_DELETE_ICONS",
+                          deleteStr.str().c_str());
+
   this->SetOptionIfNotSet("CPACK_NSIS_COMPRESSOR", "lzma");
 
   return this->Superclass::InitializeInternal();
@@ -519,22 +523,25 @@ void cmCPackNSISGenerator::CreateMenuLinks( cmOStringStream& str,
       "<icon name>." << std::endl);
     return;
     }
+
+  cmsys::RegularExpression urlRegex;
+  urlRegex.compile("^(mailto:|(ftps?|https?|news)://).*$");
+
   std::vector<std::string>::iterator it;
   for ( it = cpackMenuLinksVector.begin();
         it != cpackMenuLinksVector.end();
         ++it )
     {
     std::string sourceName = *it;
-    bool url = false;
-    if(sourceName.find("http:") == 0)
-      {
-      url = true;
-      }
-    /* convert / to \\ */
+    const bool url = urlRegex.find(sourceName);
+
+    // Convert / to \ in filenames, but not in urls:
+    //
     if(!url)
       {
       cmSystemTools::ReplaceString(sourceName, "/", "\\");
       }
+
     ++ it;
     std::string linkName = *it;
     if(!url)
