@@ -295,10 +295,21 @@ Configuration:
   --parallel=n            bootstrap cmake in parallel, where n is
                           number of nodes [1]
   --init=FILE             use FILE for cmake initialization
-  --system-libs           use system-installed third-party libraries
+  --system-libs           use all system-installed third-party libraries
                           (for use only by package maintainers)
-  --no-system-libs        use cmake-provided third-party libraries
+  --no-system-libs        use all cmake-provided third-party libraries
                           (default)
+  --system-curl           use system-installed curl library
+  --system-no-curl        use cmake-provided curl library (default)
+  --system-expat          use system-installed expat library
+  --system-no-expat       use cmake-provided expat library (default)
+  --system-zlib           use system-installed zlib library
+  --system-no-zlib        use cmake-provided zlib library (default)
+  --system-bzip2          use system-installed bzip2 library
+  --system-no-bzip2       use cmake-provided bzip2 library (default)
+  --system-libarchive     use system-installed libarchive library
+  --system-no-libarchive  use cmake-provided libarchive library (default)
+
   --qt-gui                build the Qt-based GUI (requires Qt >= 4.2)
   --no-qt-gui             do not build the Qt-based GUI (default)
   --qt-qmake=<qmake>      use <qmake> as the qmake executable to find Qt
@@ -527,6 +538,36 @@ for a in "$@"; do
   fi
   if echo $a | grep "^--init=" > /dev/null 2> /dev/null; then
     cmake_init_file=`echo $a | sed "s/^--init=//"`
+  fi
+  if echo $a | grep "^--system-curl" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_CURL=1"
+  fi
+  if echo $a | grep "^--no-system-curl" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_CURL=0"
+  fi
+  if echo $a | grep "^--system-expat" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_EXPAT=1"
+  fi
+  if echo $a | grep "^--no-system-expat" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_EXPAT=0"
+  fi
+  if echo $a | grep "^--system-zlib" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_ZLIB=1"
+  fi
+  if echo $a | grep "^--no-system-zlib" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_ZLIB=0"
+  fi
+  if echo $a | grep "^--system-bzip2" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_BZIP2=1"
+  fi
+  if echo $a | grep "^--no-system-bzip2" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_BZIP2=0"
+  fi
+  if echo $a | grep "^--system-libarchive" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_LIBARCHIVE=1"
+  fi
+  if echo $a | grep "^--no-system-libarchive" > /dev/null 2> /dev/null; then
+    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_LIBARCHIVE=0"
   fi
   if echo $a | grep "^--system-libs" > /dev/null 2> /dev/null; then
     cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_LIBRARIES=1"
