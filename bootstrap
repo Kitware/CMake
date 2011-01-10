@@ -299,7 +299,7 @@ Configuration:
   --verbose               display more information
   --parallel=n            bootstrap cmake in parallel, where n is
                           number of nodes [1]
-  --init=FILE             use FILE for cmake initialization
+  --init=FILE             load FILE as script to populate cache
   --system-libs           use all system-installed third-party libraries
                           (for use only by package maintainers)
   --no-system-libs        use all cmake-provided third-party libraries
