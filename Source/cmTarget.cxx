@@ -517,7 +517,17 @@ void cmTarget::DefineProperties(cmake *cm)
      "In CMake 2.6 and above add_custom_command automatically recognizes a "
      "target name in its COMMAND and DEPENDS options and computes the "
      "target location.  "
-     "Therefore this property is not needed for creating custom commands.");
+     "In CMake 2.8.4 and above add_custom_command recognizes generator "
+     "expressions to refer to target locations anywhere in the command.  "
+     "Therefore this property is not needed for creating custom commands."
+     "\n"
+     "Do not read this property until after all other properties that can "
+     "affect the location of the target have been set.  "
+     "These include properties whose names match "
+     "\"(IMPLIB_)?(PREFIX|SUFFIX)\" or "
+     "\"(RUNTIME|LIBRARY|ARCHIVE)_OUTPUT_(NAME|DIRECTORY)(_<CONFIG>)?\".  "
+     "Failure to follow this rule is not diagnosed and leaves the location "
+     "of the target undefined.");
 
   cm->DefineProperty
     ("LOCATION_<CONFIG>", cmProperty::TARGET,
