@@ -564,8 +564,8 @@ static DWORD SystemToolsMakeRegistryMode(DWORD mode,
                                          SystemTools::KeyWOW64 view)
 {
   // only add the modes when on a system that supports Wow64.
-  static void *wow64p = GetProcAddress(GetModuleHandle("kernel32"),
-                                       "IsWow64Process");
+  static FARPROC wow64p = GetProcAddress(GetModuleHandle("kernel32"),
+                                         "IsWow64Process");
   if(wow64p == NULL)
     {
     return mode;
