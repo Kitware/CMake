@@ -550,7 +550,24 @@ function(_ep_set_directories name)
   endforeach()
 endfunction(_ep_set_directories)
 
-function(_ep_write_initial_cache script_filename args)
+
+# IMPORTANT: this MUST be a macro and not a function because of the
+# in-place replacements that occur in each ${var}
+#
+macro(_ep_replace_location_tags target_name)
+  set(vars ${ARGN})
+  foreach(var ${vars})
+    if(${var})
+      foreach(dir SOURCE_DIR BINARY_DIR INSTALL_DIR TMP_DIR)
+        get_property(val TARGET ${target_name} PROPERTY _EP_${dir})
+        string(REPLACE "<${dir}>" "${val}" ${var} "${${var}}")
+      endforeach()
+    endif()
+  endforeach()
+endmacro()
+
+
+function(_ep_write_initial_cache target_name script_filename args)
   # Write out values into an initial cache, that will be passed to CMake with -C
   set(script_initial_cache "")
   set(regex "^([^:]+):([^=]+)=(.*)$")
@@ -584,6 +601,8 @@ function(_ep_write_initial_cache script_filename args)
     set(setArg "${setArg}${accumulator}\" CACHE ${type} \"Initial cache\" FORCE)")
     set(script_initial_cache "${script_initial_cache}\n${setArg}")
   endif()
+  # Replace location tags.
+  _ep_replace_location_tags(${target_name} script_initial_cache)
   # Write out the initial cache file to the location specified.
   if(NOT EXISTS "${script_filename}.in")
     file(WRITE "${script_filename}.in" "\@script_initial_cache\@\n")
@@ -753,7 +772,7 @@ endif()
         set(sep ";")
       endif()
     endforeach()
-    set(code "${code}set(command \"${cmd}\")${code_execute_process}")
+    set(code "set(ENV{VS_UNICODE_OUTPUT} \"\")\n${code}set(command \"${cmd}\")${code_execute_process}")
     file(WRITE ${stamp_dir}/${name}-${step}-impl.cmake "${code}")
     set(command ${CMAKE_COMMAND} "-Dmake=\${make}" "-Dconfig=\${config}" -P ${stamp_dir}/${name}-${step}-impl.cmake)
   endif()
@@ -763,6 +782,7 @@ endif()
   set(logbase ${stamp_dir}/${name}-${step})
   file(WRITE ${script} "
 ${code_cygpath_make}
+set(ENV{VS_UNICODE_OUTPUT} \"\")
 set(command \"${command}\")
 execute_process(
   COMMAND \${command}
@@ -863,14 +883,7 @@ function(ExternalProject_Add_Step name step)
   endif()
 
   # Replace location tags.
-  foreach(var comment command work_dir)
-    if(${var})
-      foreach(dir SOURCE_DIR BINARY_DIR INSTALL_DIR TMP_DIR)
-        get_property(val TARGET ${name} PROPERTY _EP_${dir})
-        string(REPLACE "<${dir}>" "${val}" ${var} "${${var}}")
-      endforeach()
-    endif()
-  endforeach()
+  _ep_replace_location_tags(${name} comment command work_dir)
 
   # Custom comment?
   get_property(comment_set TARGET ${name} PROPERTY _EP_${step}_COMMENT SET)
@@ -1270,7 +1283,7 @@ function(_ep_add_configure_command name)
     get_property(cmake_cache_args TARGET ${name} PROPERTY _EP_CMAKE_CACHE_ARGS)
     if(cmake_cache_args)
       set(_ep_cache_args_script "${tmp_dir}/${name}-cache.cmake")
-      _ep_write_initial_cache("${_ep_cache_args_script}" "${cmake_cache_args}")
+      _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${cmake_cache_args}")
       list(APPEND cmd "-C${_ep_cache_args_script}")
     endif()
 

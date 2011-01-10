@@ -246,10 +246,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       CMAKE_TRY_COMPILE_OSX_ARCHITECTURE first to i386 and then to ppc to
       have the tests run for each specific architecture. Since 
       cmLocalGenerator doesn't allow building for "the other" 
-      architecture only via CMAKE_OSX_ARCHITECTURES,use to CMAKE_DO_TRY_COMPILE
-      to enforce it for this case here.
+      architecture only via CMAKE_OSX_ARCHITECTURES.
       */
-    cmakeFlags.push_back("-DCMAKE_DO_TRY_COMPILE=TRUE");
     if(this->Makefile->GetDefinition("CMAKE_TRY_COMPILE_OSX_ARCHITECTURES")!=0)
       {
       std::string flag="-DCMAKE_OSX_ARCHITECTURES=";

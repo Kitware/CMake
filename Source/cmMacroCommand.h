@@ -112,7 +112,6 @@ public:
       "policies inside macros."
       ;
     }
-
   cmTypeMacro(cmMacroCommand, cmCommand);
 };
 

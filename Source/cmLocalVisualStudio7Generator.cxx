@@ -797,7 +797,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     tool = "VFMIDLTool";
     }
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n";
-  targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tMkTypLibCompatible=\"FALSE\"\n";
   if( this->PlatformName == "x64" )
     {
@@ -1028,7 +1027,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += "/";
     temp += targetNameImport;
     fout << "\t\t\t\tImportLibrary=\""
-         << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"/>\n";
+         << this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"";
+    if(this->FortranProject)
+      {
+      fout << "\n\t\t\t\tLinkDLL=\"true\"";
+      }
+    fout << "/>\n";
     }
     break;
     case cmTarget::EXECUTABLE:

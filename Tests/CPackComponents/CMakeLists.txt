@@ -68,6 +68,19 @@ set(CPACK_PACKAGE_VERSION_MINOR "0")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "CPack Component Example")
 
+# Settings used when building NSIS installers
+set(CPACK_NSIS_MENU_LINKS
+  "ftp://ftpserver" "Test Ftp Link"
+  "ftps://ftpsserver" "Test Ftps Link"
+  "http://www.cmake.org" "CMake Web Site"
+  "https://github.com/" "Test Https Link"
+  "mailto:kitware@kitware.com" "Test MailTo Link"
+  "news://newsserver" "Test News Link"
+  )
+
+# Suggested default root for end users of the installer:
+set(CPACK_NSIS_INSTALL_ROOT "C:\\Program Files\\CMake Tests Install Root")
+
 # Include CPack to introduce the appropriate targets
 include(CPack)
 

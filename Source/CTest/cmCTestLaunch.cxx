@@ -220,6 +220,13 @@ void cmCTestLaunch::ComputeFileNames()
 //----------------------------------------------------------------------------
 void cmCTestLaunch::RunChild()
 {
+  // Ignore noopt make rules
+  if(this->RealArgs.empty() || this->RealArgs[0] == ":")
+    {
+    this->ExitCode = 0;
+    return;
+    }
+
   // Prepare to run the real command.
   cmsysProcess* cp = this->Process;
   cmsysProcess_SetCommand(cp, this->RealArgV);

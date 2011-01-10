@@ -446,6 +446,23 @@ cmPolicies::cmPolicies()
     "wasn't a valid target. "
     "In CMake 2.8.3 and above it reports an error in this case.",
     2,8,3,0, cmPolicies::WARN);
+
+    this->DefinePolicy(
+    CMP0017, "CMP0017",
+    "Prefer files from the CMake module directory when including from there.",
+    "Starting with CMake 2.8.4, if a cmake-module shipped with CMake (i.e. "
+    "located in the CMake module directory) calls include() or "
+    "find_package(), the files located in the the CMake module directory are "
+    "prefered over the files in CMAKE_MODULE_PATH.  "
+    "This makes sure that the modules belonging to "
+    "CMake always get those files included which they expect, and against "
+    "which they were developed and tested.  "
+    "In call other cases, the files found in "
+    "CMAKE_MODULE_PATH still take precedence over the ones in "
+    "the CMake module directory.  "
+    "The OLD behaviour is to always prefer files from CMAKE_MODULE_PATH over "
+    "files from the CMake modules directory.",
+    2,8,4,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
@@ -495,9 +512,9 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   std::string ver = "2.4.0";
 
   if (version && strlen(version) > 0)
-  {
+    {
     ver = version;
-  }
+    }
 
   unsigned int majorVer = 2;
   unsigned int minorVer = 0;
@@ -556,29 +573,33 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
 
   // now loop over all the policies and set them as appropriate
   std::vector<cmPolicies::PolicyID> ancientPolicies;
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
-    = this->Policies.begin();
-  for (;i != this->Policies.end(); ++i)
-  {
-  if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer,tweakVer))
+  for(std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
+                     = this->Policies.begin(); i != this->Policies.end(); ++i)
     {
+    if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer,tweakVer))
+      {
       if(i->second->Status == cmPolicies::REQUIRED_ALWAYS)
-      {
+        {
         ancientPolicies.push_back(i->first);
+        }
+      else
+        {
+        cmPolicies::PolicyStatus status = cmPolicies::WARN;
+        if(!this->GetPolicyDefault(mf, i->second->IDString, &status) ||
+           !mf->SetPolicy(i->second->ID, status))
+          {
+          return false;
+          }
+        }
       }
-      else if (!mf->SetPolicy(i->second->ID, cmPolicies::WARN))
-      {
-        return false;
-      }
-    }
     else
-    {
-      if (!mf->SetPolicy(i->second->ID, cmPolicies::NEW))
       {
+      if (!mf->SetPolicy(i->second->ID, cmPolicies::NEW))
+        {
         return false;
+        }
       }
     }
-  }
 
   // Make sure the project does not use any ancient policies.
   if(!ancientPolicies.empty())
@@ -586,6 +607,36 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     this->DiagnoseAncientPolicies(ancientPolicies,
                                   majorVer, minorVer, patchVer, mf);
     cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmPolicies::GetPolicyDefault(cmMakefile* mf, std::string const& policy,
+                                  cmPolicies::PolicyStatus* defaultSetting)
+{
+  std::string defaultVar = "CMAKE_POLICY_DEFAULT_" + policy;
+  std::string defaultValue = mf->GetSafeDefinition(defaultVar.c_str());
+  if(defaultValue == "NEW")
+    {
+    *defaultSetting = cmPolicies::NEW;
+    }
+  else if(defaultValue == "OLD")
+    {
+    *defaultSetting = cmPolicies::OLD;
+    }
+  else if(defaultValue == "")
+    {
+    *defaultSetting = cmPolicies::WARN;
+    }
+  else
+    {
+    cmOStringStream e;
+    e << defaultVar << " has value \"" << defaultValue
+      << "\" but must be \"OLD\", \"NEW\", or \"\" (empty).";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return false;
     }
 

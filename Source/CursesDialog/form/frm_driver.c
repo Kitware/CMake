@@ -357,8 +357,12 @@ static void Buffer_To_Window(const FIELD  * field, WINDOW * win)
 
   assert(win && field);
 
+#if defined(__LSB_VERSION__)
+  getmaxyx(win, height, width);
+#else
   width  = getmaxx(win);
   height = getmaxy(win);
+#endif
 
   for(row=0, pBuffer=field->buf; 
       row < height; 
@@ -396,7 +400,11 @@ static void Window_To_Buffer(WINDOW * win, FIELD  * field)
 
   pad = field->pad;
   p = field->buf;
+#if defined(__LSB_VERSION__)
+  { int width; getmaxyx(win, height, width); }
+#else
   height = getmaxy(win);
+#endif
 
   for(row=0; (row < height) && (row < field->drows); row++ )
     {
@@ -871,7 +879,17 @@ static int Display_Or_Erase_Field(FIELD * field, bool bEraseFlag)
       if (field->opts & O_VISIBLE)
         Set_Field_Window_Attributes(field,win);
       else
+        {
+#if defined(__LSB_VERSION__)
+        /* getattrs() would be handy, but it is not part of LSB 4.0 */
+        attr_t fwinAttrs;
+        short  fwinPair;
+        wattr_get(fwin, &fwinAttrs, &fwinPair, 0);
+        wattr_set(win, fwinAttrs, fwinPair, 0);
+#else
         wattrset(win,getattrs(fwin));
+#endif
+        }
       werase(win);
     }
 

@@ -35,6 +35,7 @@ endif()
 
 find_program(GIT_EXECUTABLE
   NAMES ${git_names}
+  PATH_SUFFIXES Git/cmd Git/bin
   DOC "git command line client"
   )
 mark_as_advanced(GIT_EXECUTABLE)
@@ -42,5 +43,5 @@ mark_as_advanced(GIT_EXECUTABLE)
 # Handle the QUIETLY and REQUIRED arguments and set GIT_FOUND to TRUE if
 # all listed variables are TRUE
 
-include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Git DEFAULT_MSG GIT_EXECUTABLE)

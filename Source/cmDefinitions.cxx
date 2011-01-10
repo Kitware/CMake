@@ -85,6 +85,22 @@ const char* cmDefinitions::Set(const char* key, const char* value)
 }
 
 //----------------------------------------------------------------------------
+std::set<cmStdString> cmDefinitions::LocalKeys() const
+{
+  std::set<cmStdString> keys;
+  // Consider local definitions.
+  for(MapType::const_iterator mi = this->Map.begin();
+      mi != this->Map.end(); ++mi)
+    {
+    if (mi->second.Exists)
+      {
+      keys.insert(mi->first);
+      }
+    }
+  return keys;
+}
+
+//----------------------------------------------------------------------------
 cmDefinitions cmDefinitions::Closure() const
 {
   return cmDefinitions(ClosureTag(), this);

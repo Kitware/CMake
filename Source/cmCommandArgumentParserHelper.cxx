@@ -20,6 +20,8 @@ int cmCommandArgument_yyparse( yyscan_t yyscanner );
 //
 cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
 {
+  this->WarnUninitialized = false;
+  this->CheckSystemVars = false;
   this->FileLine = -1;
   this->FileName = 0;
   this->RemoveEmpty = true;
@@ -119,10 +121,32 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     cmOStringStream ostr;
     ostr << this->FileLine;
     return this->AddString(ostr.str().c_str());
-    } 
+    }
   const char* value = this->Makefile->GetDefinition(var);
   if(!value && !this->RemoveEmpty)
     {
+    // check to see if we need to print a warning
+    // if strict mode is on and the variable has
+    // not been "cleared"/initialized with a set(foo ) call
+    if(this->WarnUninitialized && !this->Makefile->VariableInitialized(var))
+      {
+      if (this->CheckSystemVars ||
+          cmSystemTools::IsSubDirectory(this->FileName,
+                                        this->Makefile->GetHomeDirectory()) ||
+          cmSystemTools::IsSubDirectory(this->FileName,
+                                     this->Makefile->GetHomeOutputDirectory()))
+        {
+        cmOStringStream msg;
+        cmListFileBacktrace bt;
+        cmListFileContext lfc;
+        lfc.FilePath = this->FileName;
+        lfc.Line = this->FileLine;
+        bt.push_back(lfc);
+        msg << "uninitialized variable \'" << var << "\'";
+        this->Makefile->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
+                                                        msg.str().c_str(), bt);
+        }
+      }
     return 0;
     }
   if (this->EscapeQuotes && value)
@@ -319,6 +343,8 @@ void cmCommandArgumentParserHelper::Error(const char* str)
 void cmCommandArgumentParserHelper::SetMakefile(const cmMakefile* mf)
 {
   this->Makefile = mf;
+  this->WarnUninitialized = mf->GetCMakeInstance()->GetWarnUninitialized();
+  this->CheckSystemVars = mf->GetCMakeInstance()->GetCheckSystemVars();
 }
 
 void cmCommandArgumentParserHelper::SetResult(const char* value)

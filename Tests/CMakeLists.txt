@@ -321,7 +321,7 @@ IF(BUILD_TESTING)
     FILE(MAKE_DIRECTORY "${_TEST_DIR}")
     FILE(WRITE "${_TEST_DIR}/nightly-cmake.sh"
       "cd ${_TEST_DIR}
-${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=next -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
+${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=nightly -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
 ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/Release/upload_release.cmake
     ")
     ADD_TEST(${name} /bin/sh ${_TEST_DIR}/nightly-cmake.sh)
@@ -390,6 +390,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --test-command foo bar.c
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustComDepend")
+
+  ADD_TEST(ArgumentExpansion  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/ArgumentExpansion"
+    "${CMake_BINARY_DIR}/Tests/ArgumentExpansion"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project ArgumentExpansion
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/ArgumentExpansion/bin"
+    )
+  IF(CMAKE_STRICT)
+    SET_TESTS_PROPERTIES(ArgumentExpansion PROPERTIES
+      FAIL_REGULAR_EXPRESSION "Unexpected: ")
+  ENDIF(CMAKE_STRICT)
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ArgumentExpansion")
 
   ADD_TEST(CustomCommand  ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -1089,6 +1104,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --test-command VSExternalInclude)
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSExternalInclude")
+
+    ADD_TEST(VSMidl ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/VSMidl"
+      "${CMake_BINARY_DIR}/Tests/VSMidl"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project VSMidl
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --test-command VSMidl)
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSMidl")
   ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
 
   IF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
@@ -1127,6 +1153,77 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       )
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleGeneratorTest")
   ENDIF(APPLE AND CTEST_TEST_CPACK)
+
+  ADD_TEST(WarnUnusedUnusedViaSet ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/VariableUnusedViaSet"
+    "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaSet"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --build-project WarnUnusedUnusedViaSet
+    --build-options "--warn-unused-vars")
+  SET_TESTS_PROPERTIES(WarnUnusedUnusedViaSet PROPERTIES
+    PASS_REGULAR_EXPRESSION "unused variable \\(changing definition\\) 'UNUSED_VARIABLE'")
+  SET_TESTS_PROPERTIES(WarnUnusedUnusedViaSet PROPERTIES
+    FAIL_REGULAR_EXPRESSION "unused variable \\(unsetting\\) 'UNUSED_VARIABLE'")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaSet")
+
+  ADD_TEST(WarnUnusedUnusedViaUnset ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/VariableUnusedViaUnset"
+    "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --build-project WarnUnusedUnusedViaUnset
+    --build-options "--warn-unused-vars")
+  SET_TESTS_PROPERTIES(WarnUnusedUnusedViaUnset PROPERTIES
+    PASS_REGULAR_EXPRESSION "CMake Warning .*:7 \\(set\\):")
+  SET_TESTS_PROPERTIES(WarnUnusedUnusedViaUnset PROPERTIES
+    FAIL_REGULAR_EXPRESSION "CMake Warning .*:5 \\(set\\):")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset")
+
+  ADD_TEST(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/VariableUsage"
+    "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --build-project WarnUnusedCliUnused
+    --build-options "-DUNUSED_CLI_VARIABLE=Unused")
+  SET_TESTS_PROPERTIES(WarnUnusedCliUnused PROPERTIES
+    PASS_REGULAR_EXPRESSION "CMake Warning: The variable, 'UNUSED_CLI_VARIABLE'")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
+
+  ADD_TEST(WarnUnusedCliUsed ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/VariableUsage"
+    "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUsed"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --build-project WarnUnusedCliUsed
+    --build-options "-DUSED_VARIABLE=Usage proven")
+  SET_TESTS_PROPERTIES(WarnUnusedCliUsed PROPERTIES
+    PASS_REGULAR_EXPRESSION "Usage proven")
+  SET_TESTS_PROPERTIES(WarnUnusedCliUsed PROPERTIES
+    FAIL_REGULAR_EXPRESSION "CMake Warning: The variable, 'USED_VARIABLE'")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUsed")
+
+  ADD_TEST(WarnUninitialized ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/VariableUsage"
+    "${CMake_BINARY_DIR}/Tests/WarnUninitialized"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --build-project WarnUninitialized
+    --build-options "--warn-uninitialized")
+  SET_TESTS_PROPERTIES(WarnUninitialized PROPERTIES
+    PASS_REGULAR_EXPRESSION "uninitialized variable 'USED_VARIABLE'")
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUninitialized")
 
   ADD_TEST(TestsWorkingDirectory ${CMAKE_CTEST_COMMAND}
     --build-and-test

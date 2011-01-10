@@ -43,12 +43,22 @@ class cmMakefile::Internals
 {
 public:
   std::stack<cmDefinitions, std::list<cmDefinitions> > VarStack;
+  std::stack<std::set<cmStdString> > VarInitStack;
+  std::stack<std::set<cmStdString> > VarUsageStack;
 };
 
 // default is not to be building executables
 cmMakefile::cmMakefile(): Internal(new Internals)
 {
-  this->Internal->VarStack.push(cmDefinitions());
+  const cmDefinitions& defs = cmDefinitions();
+  const std::set<cmStdString> globalKeys = defs.LocalKeys();
+  this->Internal->VarStack.push(defs);
+  this->Internal->VarInitStack.push(globalKeys);
+  this->Internal->VarUsageStack.push(globalKeys);
+
+  // Initialize these first since AddDefaultDefinitions calls AddDefinition
+  this->WarnUnused = false;
+  this->CheckSystemVars = false;
 
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
@@ -91,6 +101,8 @@ cmMakefile::cmMakefile(): Internal(new Internals)
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
 {
   this->Internal->VarStack.push(mf.Internal->VarStack.top().Closure());
+  this->Internal->VarInitStack.push(mf.Internal->VarInitStack.top());
+  this->Internal->VarUsageStack.push(mf.Internal->VarUsageStack.top());
 
   this->Prefix = mf.Prefix;
   this->AuxSourceDirectories = mf.AuxSourceDirectories;
@@ -128,8 +140,10 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->SubDirectoryOrder = mf.SubDirectoryOrder;
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
-  this->ListFileStack = mf.ListFileStack;
+  this->WarnUnused = mf.WarnUnused;
   this->Initialize();
+  this->CheckSystemVars = mf.CheckSystemVars;
+  this->ListFileStack = mf.ListFileStack;
 }
 
 //----------------------------------------------------------------------------
@@ -570,6 +584,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   std::string currentFile
     = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
 
   const char* external = 0;
   std::string external_abs;
@@ -610,8 +625,10 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
 
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
                        cmSystemTools::GetFilenamePath(filenametoread).c_str());
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
   // try to see if the list file is the top most
   // list file for a project, and if it is, then it
@@ -644,9 +661,12 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       *fullPath = "";
       }
     this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+    this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
     this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+    this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
     this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
                         cmSystemTools::GetFilenamePath(currentFile).c_str());
+    this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
     return false;
     }
   // add this list file to the list of dependencies
@@ -686,12 +706,18 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     }
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
                       cmSystemTools::GetFilenamePath(currentFile).c_str());
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
   // pop the listfile off the stack
   this->ListFileStack.pop_back();
+
+  // Check for unused variables
+  this->CheckForUnusedVariables();
 
   return true;
 }
@@ -758,6 +784,8 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
   this->AddSourceGroup("Resources", "\\.plist$");
 #endif
 
+  this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
+  this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 }
 
 bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
@@ -1626,6 +1654,13 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 #endif
 
   this->Internal->VarStack.top().Set(name, value);
+  if (this->Internal->VarUsageStack.size() &&
+      this->VariableInitialized(name))
+    {
+    this->CheckForUnused("changing definition", name);
+    this->Internal->VarUsageStack.top().erase(name);
+    }
+  this->Internal->VarInitStack.top().insert(name);
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -1690,6 +1725,13 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
 void cmMakefile::AddDefinition(const char* name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
+  if (this->Internal->VarUsageStack.size() &&
+      this->VariableInitialized(name))
+    {
+    this->CheckForUnused("changing definition", name);
+    this->Internal->VarUsageStack.top().erase(name);
+    }
+  this->Internal->VarInitStack.top().insert(name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -1700,9 +1742,90 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 #endif
 }
 
+void cmMakefile::CheckForUnusedVariables() const
+{
+  const cmDefinitions& defs = this->Internal->VarStack.top();
+  const std::set<cmStdString>& locals = defs.LocalKeys();
+  std::set<cmStdString>::const_iterator it = locals.begin();
+  for (; it != locals.end(); ++it)
+    {
+    this->CheckForUnused("out of scope", it->c_str());
+    }
+}
+
+void cmMakefile::MarkVariableAsUsed(const char* var)
+{
+  this->Internal->VarUsageStack.top().insert(var);
+}
+
+bool cmMakefile::VariableInitialized(const char* var) const
+{
+  if(this->Internal->VarInitStack.top().find(var) !=
+      this->Internal->VarInitStack.top().end())
+    {
+    return true;
+    }
+  return false;
+}
+
+bool cmMakefile::VariableUsed(const char* var) const
+{
+  if(this->Internal->VarUsageStack.top().find(var) !=
+      this->Internal->VarUsageStack.top().end())
+    {
+    return true;
+    }
+  return false;
+}
+
+void cmMakefile::CheckForUnused(const char* reason, const char* name) const
+{
+  if (this->WarnUnused && !this->VariableUsed(name))
+    {
+    cmStdString path;
+    cmListFileBacktrace bt;
+    if (this->CallStack.size())
+      {
+      const cmListFileContext* file = this->CallStack.back().Context;
+      bt.push_back(*file);
+      path = file->FilePath.c_str();
+      }
+    else
+      {
+      path = this->GetStartDirectory();
+      path += "/CMakeLists.txt";
+      cmListFileContext lfc;
+      lfc.FilePath = path;
+      lfc.Line = 0;
+      bt.push_back(lfc);
+      }
+    if (this->CheckSystemVars ||
+        cmSystemTools::IsSubDirectory(path.c_str(),
+                                      this->GetHomeDirectory()) ||
+        (cmSystemTools::IsSubDirectory(path.c_str(),
+                                      this->GetHomeOutputDirectory()) &&
+        !cmSystemTools::IsSubDirectory(path.c_str(),
+                                cmake::GetCMakeFilesDirectory())))
+      {
+      cmOStringStream msg;
+      msg << "unused variable (" << reason << ") \'" << name << "\'";
+      this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
+                                             msg.str().c_str(),
+                                             bt);
+      }
+    }
+}
+
 void cmMakefile::RemoveDefinition(const char* name)
 {
   this->Internal->VarStack.top().Set(name, 0);
+  if (this->Internal->VarUsageStack.size() &&
+      this->VariableInitialized(name))
+    {
+    this->CheckForUnused("unsetting", name);
+    this->Internal->VarUsageStack.top().erase(name);
+    }
+  this->Internal->VarInitStack.top().insert(name);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
   if ( vv )
@@ -2054,6 +2177,7 @@ const char* cmMakefile::GetRequiredDefinition(const char* name) const
 bool cmMakefile::IsDefinitionSet(const char* name) const
 {
   const char* def = this->Internal->VarStack.top().Get(name);
+  this->Internal->VarUsageStack.top().insert(name);
   if(!def)
     {
     def = this->GetCacheManager()->GetCacheValue(name);
@@ -2081,6 +2205,10 @@ const char* cmMakefile::GetDefinition(const char* name) const
       RecordPropertyAccess(name,cmProperty::VARIABLE);
     }
 #endif
+  if (this->WarnUnused)
+    {
+    this->Internal->VarUsageStack.top().insert(name);
+    }
   const char* def = this->Internal->VarStack.top().Get(name);
   if(!def)
     {
@@ -2720,6 +2848,11 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   // if cmake args were provided then pass them in
   if (cmakeArgs)
     {
+    // FIXME: Workaround to ignore unused CLI variables until the
+    // 'ArgumentExpansion' test succeeds with CMAKE_STRICT on
+    cm.SetWarnUnusedCli(false);
+    //cm.SetArgs(*cmakeArgs, true);
+
     cm.SetCacheArgs(*cmakeArgs);
     }
   // to save time we pass the EnableLanguage info directly
@@ -2825,35 +2958,100 @@ void cmMakefile::DisplayStatus(const char* message, float s)
 
 std::string cmMakefile::GetModulesFile(const char* filename)
 {
-  std::vector<std::string> modulePath;
-  const char* def = this->GetDefinition("CMAKE_MODULE_PATH");
-  if(def)
-    {
-    cmSystemTools::ExpandListArgument(def, modulePath);
-    }
+  std::string result;
 
-  // Also search in the standard modules location.
-  def = this->GetDefinition("CMAKE_ROOT");
-  if(def)
+  // We search the module always in CMAKE_ROOT and in CMAKE_MODULE_PATH,
+  // and then decide based on the policy setting which one to return.
+  // See CMP0017 for more details.
+  // The specific problem was that KDE 4.5.0 installs a
+  // FindPackageHandleStandardArgs.cmake which doesn't have the new features
+  // of FPHSA.cmake introduced in CMake 2.8.3 yet, and by setting
+  // CMAKE_MODULE_PATH also e.g. FindZLIB.cmake from cmake included
+  // FPHSA.cmake from kdelibs and not from CMake, and tried to use the
+  // new features, which were not there in the version from kdelibs, and so
+  // failed ("
+  std::string moduleInCMakeRoot;
+  std::string moduleInCMakeModulePath;
+
+  // Always search in CMAKE_MODULE_PATH:
+  const char* cmakeModulePath = this->GetDefinition("CMAKE_MODULE_PATH");
+  if(cmakeModulePath)
     {
-    std::string rootModules = def;
-    rootModules += "/Modules";
-    modulePath.push_back(rootModules);
-    }
-  //std::string  Look through the possible module directories.
-  for(std::vector<std::string>::iterator i = modulePath.begin();
-      i != modulePath.end(); ++i)
-    {
-    std::string itempl = *i;
-    cmSystemTools::ConvertToUnixSlashes(itempl);
-    itempl += "/";
-    itempl += filename;
-    if(cmSystemTools::FileExists(itempl.c_str()))
+    std::vector<std::string> modulePath;
+    cmSystemTools::ExpandListArgument(cmakeModulePath, modulePath);
+
+    //Look through the possible module directories.
+    for(std::vector<std::string>::iterator i = modulePath.begin();
+        i != modulePath.end(); ++i)
       {
-      return itempl;
+      std::string itempl = *i;
+      cmSystemTools::ConvertToUnixSlashes(itempl);
+      itempl += "/";
+      itempl += filename;
+      if(cmSystemTools::FileExists(itempl.c_str()))
+        {
+        moduleInCMakeModulePath = itempl;
+        break;
+        }
       }
     }
-  return "";
+
+  // Always search in the standard modules location.
+  const char* cmakeRoot = this->GetDefinition("CMAKE_ROOT");
+  if(cmakeRoot)
+    {
+    moduleInCMakeRoot = cmakeRoot;
+    moduleInCMakeRoot += "/Modules/";
+    moduleInCMakeRoot += filename;
+    cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
+    if(!cmSystemTools::FileExists(moduleInCMakeRoot.c_str()))
+      {
+      moduleInCMakeRoot = "";
+      }
+    }
+
+  // Normally, prefer the files found in CMAKE_MODULE_PATH. Only when the file
+  // from which we are being called is located itself in CMAKE_ROOT, then
+  // prefer results from CMAKE_ROOT depending on the policy setting.
+  result = moduleInCMakeModulePath;
+  if (result.size() == 0)
+    {
+    result = moduleInCMakeRoot;
+    }
+
+  if ((moduleInCMakeModulePath.size()>0) && (moduleInCMakeRoot.size()>0))
+    {
+    const char* currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
+    if (currentFile && (strstr(currentFile, cmakeRoot) == currentFile))
+      {
+      switch (this->GetPolicyStatus(cmPolicies::CMP0017))
+        {
+        case cmPolicies::WARN:
+        {
+          cmOStringStream e;
+          e << "File " << currentFile << " includes "
+            << moduleInCMakeModulePath
+            << " (found via CMAKE_MODULE_PATH) which shadows "
+            << moduleInCMakeRoot  << ". This may cause errors later on .\n"
+            << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0017);
+
+          this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+           // break;  // fall through to OLD behaviour
+        }
+        case cmPolicies::OLD:
+          result = moduleInCMakeModulePath;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+        default:
+          result = moduleInCMakeRoot;
+          break;
+        }
+      }
+    }
+
+  return result;
 }
 
 void cmMakefile::ConfigureString(const std::string& input,
@@ -3338,12 +3536,48 @@ std::string cmMakefile::GetListFileStack()
 void cmMakefile::PushScope()
 {
   cmDefinitions* parent = &this->Internal->VarStack.top();
+  const std::set<cmStdString>& init = this->Internal->VarInitStack.top();
+  const std::set<cmStdString>& usage = this->Internal->VarUsageStack.top();
   this->Internal->VarStack.push(cmDefinitions(parent));
+  this->Internal->VarInitStack.push(init);
+  this->Internal->VarUsageStack.push(usage);
 }
 
 void cmMakefile::PopScope()
 {
+  cmDefinitions* current = &this->Internal->VarStack.top();
+  std::set<cmStdString> init = this->Internal->VarInitStack.top();
+  std::set<cmStdString> usage = this->Internal->VarUsageStack.top();
+  const std::set<cmStdString>& locals = current->LocalKeys();
+  // Remove initialization and usage information for variables in the local
+  // scope.
+  std::set<cmStdString>::const_iterator it = locals.begin();
+  for (; it != locals.end(); ++it)
+    {
+    init.erase(*it);
+    if (!this->VariableUsed(it->c_str()))
+      {
+      this->CheckForUnused("out of scope", it->c_str());
+      }
+    else
+      {
+      usage.erase(*it);
+      }
+    }
   this->Internal->VarStack.pop();
+  this->Internal->VarInitStack.pop();
+  this->Internal->VarUsageStack.pop();
+  // Push initialization and usage up to the parent scope.
+  it = init.begin();
+  for (; it != init.end(); ++it)
+    {
+    this->Internal->VarInitStack.top().insert(*it);
+    }
+  it = usage.begin();
+  for (; it != usage.end(); ++it)
+    {
+    this->Internal->VarUsageStack.top().insert(*it);
+    }
 }
 
 void cmMakefile::RaiseScope(const char *var, const char *varDef)
@@ -3368,7 +3602,14 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
     // directory's scope was initialized by the closure of the parent
     // scope, so we do not need to localize the definition first.
     cmMakefile* parent = plg->GetMakefile();
-    parent->Internal->VarStack.top().Set(var, varDef);
+    if (varDef)
+      {
+      parent->AddDefinition(var, varDef);
+      }
+    else
+      {
+      parent->RemoveDefinition(var);
+      }
     }
   else
     {

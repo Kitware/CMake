@@ -28,6 +28,8 @@ QCMake::QCMake(QObject* p)
   : QObject(p)
 {
   this->SuppressDevWarnings = false;
+  this->WarnUninitializedMode = false;
+  this->WarnUnusedMode = false;
   qRegisterMetaType<QCMakeProperty>();
   qRegisterMetaType<QCMakePropertyList>();
   
@@ -164,6 +166,8 @@ void QCMake::configure()
     this->CMakeInstance->CreateGlobalGenerator(this->Generator.toAscii().data()));
   this->CMakeInstance->LoadCache();
   this->CMakeInstance->SetSuppressDevWarnings(this->SuppressDevWarnings);
+  this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
+  this->CMakeInstance->SetWarnUnused(this->WarnUnusedMode);
   this->CMakeInstance->PreLoadCMakeFiles();
 
   cmSystemTools::ResetErrorOccuredFlag();
@@ -244,6 +248,8 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
   // add some new properites
   foreach(QCMakeProperty s, props)
     {
+    this->CMakeInstance->WatchUnusedCli(s.Key.toAscii().data());
+
     if(s.Type == QCMakeProperty::BOOL)
       {
       this->CMakeInstance->AddCacheEntry(s.Key.toAscii().data(),
@@ -416,4 +422,14 @@ bool QCMake::getDebugOutput() const
 void QCMake::setSuppressDevWarnings(bool value)
 {
   this->SuppressDevWarnings = value;
+}
+
+void QCMake::setWarnUninitializedMode(bool value)
+{
+  this->WarnUninitializedMode = value;
+}
+
+void QCMake::setWarnUnusedMode(bool value)
+{
+  this->WarnUnusedMode = value;
 }

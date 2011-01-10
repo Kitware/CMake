@@ -155,7 +155,7 @@ SET(CURSES_INCLUDE_DIR ${CURSES_INCLUDE_PATH})
 
 # handle the QUIETLY and REQUIRED arguments and set CURSES_FOUND to TRUE if 
 # all listed variables are TRUE
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Curses DEFAULT_MSG
   CURSES_LIBRARY CURSES_INCLUDE_PATH)
 

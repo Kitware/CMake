@@ -214,7 +214,8 @@ class cmake
   bool CommandExists(const char* name) const;
 
   ///! Parse command line arguments
-  void SetArgs(const std::vector<std::string>&);
+  void SetArgs(const std::vector<std::string>&,
+               bool directoriesSetBefore = false);
 
   ///! Is this cmake running as a result of a TRY_COMPILE command
   bool GetIsInTryCompile() { return this->InTryCompile; }
@@ -308,6 +309,17 @@ class cmake
   // Do we want trace output during the cmake run.
   bool GetTrace() { return this->Trace;}
   void SetTrace(bool b) {  this->Trace = b;}
+  bool GetWarnUninitialized() { return this->WarnUninitialized;}
+  void SetWarnUninitialized(bool b) {  this->WarnUninitialized = b;}
+  bool GetWarnUnused() { return this->WarnUnused;}
+  void SetWarnUnused(bool b) {  this->WarnUnused = b;}
+  bool GetWarnUnusedCli() { return this->WarnUnusedCli;}
+  void SetWarnUnusedCli(bool b) {  this->WarnUnusedCli = b;}
+  bool GetCheckSystemVars() { return this->CheckSystemVars;}
+  void SetCheckSystemVars(bool b) {  this->CheckSystemVars = b;}
+
+  void MarkCliAsUsed(const std::string& variable);
+
   // Define a property
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
@@ -353,6 +365,9 @@ class cmake
             const std::string& config,
             const std::vector<std::string>& nativeOptions,
             bool clean);
+
+  void WatchUnusedCli(const char* var);
+  void RunCheckForUnusedVariables(const std::string& reason) const;
 protected:
   void InitializeProperties();
   int HandleDeleteCacheVariables(const char* var);
@@ -445,6 +460,11 @@ private:
   bool ScriptMode;
   bool DebugOutput;
   bool Trace;
+  bool WarnUninitialized;
+  bool WarnUnused;
+  bool WarnUnusedCli;
+  bool CheckSystemVars;
+  std::map<std::string, bool> UsedCliVariables;
   std::string CMakeEditCommand;
   std::string CMakeCommand;
   std::string CXXEnvironment;

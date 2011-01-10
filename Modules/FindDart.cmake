@@ -30,7 +30,7 @@ FIND_PATH(DART_ROOT README.INSTALL
 
 # handle the QUIETLY and REQUIRED arguments and set DART_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Dart DEFAULT_MSG DART_ROOT)
 
 MARK_AS_ADVANCED(DART_ROOT)

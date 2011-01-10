@@ -95,7 +95,7 @@ ENDIF (RTI_INCLUDE_DIR)
 # Set the modified system variables back to the original value.
 SET(CMAKE_FIND_LIBRARY_PREFIXES "${RTI_OLD_FIND_LIBRARY_PREFIXES}")
 
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(RTI DEFAULT_MSG
   RTI_LIBRARY RTI_INCLUDE_DIR)
 
