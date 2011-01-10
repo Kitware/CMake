@@ -78,6 +78,9 @@ set(CPACK_NSIS_MENU_LINKS
   "news://newsserver" "Test News Link"
   )
 
+# Suggested default root for end users of the installer:
+set(CPACK_NSIS_INSTALL_ROOT "C:\\Program Files\\CMake Tests Install Root")
+
 # Include CPack to introduce the appropriate targets
 include(CPack)
 
