@@ -210,6 +210,11 @@
 #   CPACK_PACKAGE_INSTALL_REGISTRY_KEY - Registry key used when
 #   installing this project.
 #
+#   CPACK_NSIS_INSTALL_ROOT - The default installation directory presented
+#   to the end user by the NSIS installer is under this root dir. The full
+#   directory presented to the end user is:
+#   ${CPACK_NSIS_INSTALL_ROOT}/${CPACK_PACKAGE_INSTALL_DIRECTORY}
+#
 #   CPACK_NSIS_MUI_ICON - The icon file (.ico) for the generated
 #   install program.
 #
@@ -776,6 +781,11 @@ IF(${__cpack_system_name} MATCHES Windows)
   ENDIF(CMAKE_CL_64)
 ENDIF(${__cpack_system_name} MATCHES Windows)
 cpack_set_if_not_set(CPACK_SYSTEM_NAME "${__cpack_system_name}")
+
+# Root dir: default value should be the string literal "$PROGRAMFILES"
+# for backwards compatibility. Projects may set this value to anything.
+set(__cpack_root_default "$PROGRAMFILES")
+cpack_set_if_not_set(CPACK_NSIS_INSTALL_ROOT "${__cpack_root_default}")
 
 # <project>-<major>.<minor>.<patch>-<release>-<platform>.<pkgtype>
 cpack_set_if_not_set(CPACK_PACKAGE_FILE_NAME
