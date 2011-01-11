@@ -16,11 +16,11 @@ function (argument_tester expected expected_len)
             list(GET ARGN ${i} argn_value)
             list(GET ${expected} ${i} expected_value)
 
-            if (NOT ${argn_value} STREQUAL ${expected_value})
+            if (NOT "${argn_value}" STREQUAL "${expected_value}")
                 message(STATUS "Unexpected: Argument ${i} doesn't match")
                 message(STATUS "    Expected: ${expected_value}")
                 message(STATUS "    Received: ${argn_value}")
-            endif (NOT ${argn_value} STREQUAL ${expected_value})
+            endif ()
 
             math(EXPR i "${i} + 1")
         endwhile (i LESS ${argn_len})
@@ -50,10 +50,11 @@ set(nested_list_arg_test
     "${multiple_arg_test}"
     "first arg"
     "second arg")
-message(STATUS "Test: Nested list argument")
-argument_tester(nested_list_arg_test 3 ${nested_list_arg_test})
+message(STATUS "Test: Nested list argument flattens")
+argument_tester(nested_list_arg_test 4 ${nested_list_arg_test})
 
 set(semicolon_arg_test
     "pre\;post")
-message(STATUS "Test: Semicolon argument")
-argument_tester(semicolon_arg_test 1 ${semicolon_arg_test})
+set(semicolon_arg_test_flat "pre;post")
+message(STATUS "Test: Semicolon argument flattens")
+argument_tester(semicolon_arg_test_flat 2 ${semicolon_arg_test})

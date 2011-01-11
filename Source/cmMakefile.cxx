@@ -2848,8 +2848,28 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   // if cmake args were provided then pass them in
   if (cmakeArgs)
     {
-    // FIXME: Workaround to ignore unused CLI variables until the
-    // 'ArgumentExpansion' test succeeds with CMAKE_STRICT on
+    // FIXME: Workaround to ignore unused CLI variables in try-compile.
+    //
+    // Ideally we should use SetArgs to honor options like --warn-unused-vars.
+    // However, there is a subtle problem when certain arguments are passed to
+    // a macro wrapping around try_compile or try_run that does not escape
+    // semicolons in its parameters but just passes ${ARGV} or ${ARGN}.  In
+    // this case a list argument like "-DVAR=a;b" gets split into multiple
+    // cmake arguments "-DVAR=a" and "b".  Currently SetCacheArgs ignores
+    // argument "b" and uses just "-DVAR=a", leading to a subtle bug in that
+    // the try_compile or try_run does not get the proper value of VAR.  If we
+    // call SetArgs here then it would treat "b" as the source directory and
+    // cause an error such as "The source directory .../CMakeFiles/CMakeTmp/b
+    // does not exist", thus breaking the try_compile or try_run completely.
+    //
+    // Strictly speaking the bug is in the wrapper macro because the CMake
+    // language has always flattened nested lists and the macro should escape
+    // the semicolons in its arguments before forwarding them.  However, this
+    // bug is so subtle that projects typically work anyway, usually because
+    // the value VAR=a is sufficient for the try_compile or try_run to get the
+    // correct result.  Calling SetArgs here would break such projects that
+    // previously built.  Instead we work around the issue by never reporting
+    // unused arguments and ignoring options such as --warn-unused-vars.
     cm.SetWarnUnusedCli(false);
     //cm.SetArgs(*cmakeArgs, true);
 
