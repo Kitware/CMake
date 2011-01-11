@@ -15,7 +15,7 @@
 #include "cmCommand.h"
 
 /** \class cmIncludeCommand
- * \brief 
+ * \brief
  *
  *  cmIncludeCommand defines a list of distant
  *  files that can be "included" in the current list file.
@@ -28,7 +28,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmIncludeCommand;
     }
@@ -49,15 +49,15 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() {return "include";}
-  
+
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Read CMake listfile code from the given file.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -79,7 +79,7 @@ public:
       "NO_POLICY_SCOPE option."
       ;
     }
-  
+
   cmTypeMacro(cmIncludeCommand, cmCommand);
 };
 
