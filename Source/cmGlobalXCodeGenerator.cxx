@@ -570,6 +570,12 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
       }
     }
 
+  if(cmtarget.IsCFBundleOnApple())
+    {
+    cmtarget.SetProperty("PREFIX", "");
+    cmtarget.SetProperty("SUFFIX", "");
+    }
+
   // Add the fileRef to the top level Resources group/folder if it is not
   // already there.
   //
@@ -804,6 +810,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     // some build phases only apply to bundles and/or frameworks
     bool isFrameworkTarget = cmtarget.IsFrameworkOnApple();
     bool isBundleTarget = cmtarget.GetPropertyAsBool("MACOSX_BUNDLE");
+    bool isCFBundleTarget = cmtarget.IsCFBundleOnApple();
 
     cmXCodeObject* buildFiles = 0;
 
@@ -849,7 +856,8 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 
     // create resource build phase - only for framework or bundle targets
     cmXCodeObject* resourceBuildPhase = 0;
-    if (!resourceFiles.empty() && (isFrameworkTarget || isBundleTarget))
+    if (!resourceFiles.empty() &&
+        (isFrameworkTarget || isBundleTarget || isCFBundleTarget))
       {
       resourceBuildPhase =
         this->CreateObject(cmXCodeObject::PBXResourcesBuildPhase);
@@ -870,7 +878,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     // create vector of "non-resource content file" build phases - only for
     // framework or bundle targets
     std::vector<cmXCodeObject*> contentBuildPhases;
-    if (isFrameworkTarget || isBundleTarget)
+    if (isFrameworkTarget || isBundleTarget || isCFBundleTarget)
       {
       typedef std::map<cmStdString, std::vector<cmSourceFile*> >
         mapOfVectorOfSourceFiles;
@@ -1594,7 +1602,33 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     buildSettings->AddAttribute("LIBRARY_STYLE",
                                 this->CreateString("BUNDLE"));
-    if(this->XcodeVersion >= 22)
+    if (target.GetPropertyAsBool("BUNDLE"))
+      {
+      // It turns out that a BUNDLE is basically the same
+      // in many ways as an application bundle, as far as
+      // link flags go
+      std::string createFlags =
+        this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", lang, "_FLAGS",
+                          "-bundle");
+      if(!createFlags.empty())
+        {
+        extraLinkOptions += " ";
+        extraLinkOptions += createFlags;
+        }
+      std::string plist = this->ComputeInfoPListLocation(target);
+      // Xcode will create the final version of Info.plist at build time,
+      // so let it replace the cfbundle name. This avoids creating
+      // a per-configuration Info.plist file. The cfbundle plist
+      // is very similar to the application bundle plist
+      this->CurrentLocalGenerator
+        ->GenerateAppleInfoPList(&target, "$(EXECUTABLE_NAME)",
+                                 plist.c_str());
+      std::string path =
+        this->ConvertToRelativeForXCode(plist.c_str());
+      buildSettings->AddAttribute("INFOPLIST_FILE",
+                                  this->CreateString(path.c_str()));
+      }
+    else if(this->XcodeVersion >= 22)
       {
       buildSettings->AddAttribute("MACH_O_TYPE",
                                   this->CreateString("mh_bundle"));
@@ -1633,7 +1667,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
       std::string plist = this->ComputeInfoPListLocation(target);
       // Xcode will create the final version of Info.plist at build time,
-      // so let it replace the framework name.  This avoids creating
+      // so let it replace the framework name. This avoids creating
       // a per-configuration Info.plist file.
       this->CurrentLocalGenerator
         ->GenerateFrameworkInfoPList(&target, "$(EXECUTABLE_NAME)",
@@ -2032,7 +2066,10 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(cmTarget& cmtarget)
     case cmTarget::STATIC_LIBRARY:
       return "archive.ar";
     case cmTarget::MODULE_LIBRARY:
-      return ((this->XcodeVersion >= 22)?
+      if (cmtarget.IsCFBundleOnApple())
+        return "wrapper.plug-in";
+      else
+        return ((this->XcodeVersion >= 22)?
               "compiled.mach-o.executable" : "compiled.mach-o.dylib");
     case cmTarget::SHARED_LIBRARY:
       return (cmtarget.GetPropertyAsBool("FRAMEWORK")?
@@ -2052,8 +2089,12 @@ const char* cmGlobalXCodeGenerator::GetTargetProductType(cmTarget& cmtarget)
     case cmTarget::STATIC_LIBRARY:
       return "com.apple.product-type.library.static";
     case cmTarget::MODULE_LIBRARY:
-      return ((this->XcodeVersion >= 22)? "com.apple.product-type.tool" :
-              "com.apple.product-type.library.dynamic");
+      if (cmtarget.IsCFBundleOnApple())
+        return "com.apple.product-type.bundle";
+      else
+        return ((this->XcodeVersion >= 22)?
+                "com.apple.product-type.tool" :
+                "com.apple.product-type.library.dynamic");
     case cmTarget::SHARED_LIBRARY:
       return (cmtarget.GetPropertyAsBool("FRAMEWORK")?
               "com.apple.product-type.framework" :
