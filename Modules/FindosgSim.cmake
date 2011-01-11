@@ -46,6 +46,6 @@ include(Findosg_functions)
 OSG_FIND_PATH   (OSGSIM osgSim/ImpostorSprite)
 OSG_FIND_LIBRARY(OSGSIM osgSim)
 
-include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(osgSim DEFAULT_MSG
     OSGSIM_LIBRARY OSGSIM_INCLUDE_DIR)

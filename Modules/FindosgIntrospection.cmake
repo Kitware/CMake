@@ -46,6 +46,6 @@ include(Findosg_functions)
 OSG_FIND_PATH   (OSGINTROSPECTION osgIntrospection/Reflection)
 OSG_FIND_LIBRARY(OSGINTROSPECTION osgIntrospection)
 
-include("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(osgIntrospection DEFAULT_MSG
     OSGINTROSPECTION_LIBRARY OSGINTROSPECTION_INCLUDE_DIR)

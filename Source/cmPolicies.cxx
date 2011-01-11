@@ -446,6 +446,23 @@ cmPolicies::cmPolicies()
     "wasn't a valid target. "
     "In CMake 2.8.3 and above it reports an error in this case.",
     2,8,3,0, cmPolicies::WARN);
+
+    this->DefinePolicy(
+    CMP0017, "CMP0017",
+    "Prefer files from the CMake module directory when including from there.",
+    "Starting with CMake 2.8.4, if a cmake-module shipped with CMake (i.e. "
+    "located in the CMake module directory) calls include() or "
+    "find_package(), the files located in the the CMake module directory are "
+    "prefered over the files in CMAKE_MODULE_PATH.  "
+    "This makes sure that the modules belonging to "
+    "CMake always get those files included which they expect, and against "
+    "which they were developed and tested.  "
+    "In call other cases, the files found in "
+    "CMAKE_MODULE_PATH still take precedence over the ones in "
+    "the CMake module directory.  "
+    "The OLD behaviour is to always prefer files from CMAKE_MODULE_PATH over "
+    "files from the CMake modules directory.",
+    2,8,4,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
