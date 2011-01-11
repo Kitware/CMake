@@ -383,10 +383,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ArgumentExpansion/bin"
     )
-  IF(CMAKE_STRICT)
-    SET_TESTS_PROPERTIES(ArgumentExpansion PROPERTIES
-      FAIL_REGULAR_EXPRESSION "Unexpected: ")
-  ENDIF(CMAKE_STRICT)
+  SET_TESTS_PROPERTIES(ArgumentExpansion PROPERTIES
+    FAIL_REGULAR_EXPRESSION "Unexpected: ")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ArgumentExpansion")
 
   ADD_TEST(CustomCommand  ${CMAKE_CTEST_COMMAND}
