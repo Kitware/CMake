@@ -37,7 +37,7 @@ ENDIF (UNIX)
 
 # handle the QUIETLY and REQUIRED arguments and set AVIFILE_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(AVIFile DEFAULT_MSG AVIFILE_INCLUDE_DIR AVIFILE_AVIPLAY_LIBRARY)
 
 IF (AVIFILE_FOUND)

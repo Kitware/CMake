@@ -827,7 +827,7 @@ DBG_MSG("wxWidgets_USE_FILE        : ${wxWidgets_USE_FILE}")
 
 #=====================================================================
 #=====================================================================
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake")
+INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(wxWidgets DEFAULT_MSG wxWidgets_FOUND)
 # Maintain consistency with all other variables.
 SET(wxWidgets_FOUND ${WXWIDGETS_FOUND})
