@@ -1089,6 +1089,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --test-command VSExternalInclude)
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSExternalInclude")
+
+    ADD_TEST(VSMidl ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/VSMidl"
+      "${CMake_BINARY_DIR}/Tests/VSMidl"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project VSMidl
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --test-command VSMidl)
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSMidl")
   ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
 
   IF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
