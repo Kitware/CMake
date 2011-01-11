@@ -13,7 +13,15 @@ set(CMAKE_PAREN TRUE)
 IF("${CMAKE_MAKE_PROGRAM}" MATCHES "wmake")
   message("wmake does not support () in path")
   set(CMAKE_PAREN FALSE)
-ENDIF("${CMAKE_MAKE_PROGRAM}" MATCHES "wmake")
+elseif("${CMAKE_MAKE_PROGRAM}" MATCHES "make")
+  execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} no_such_target --version
+    RESULT_VARIABLE res OUTPUT_VARIABLE out ERROR_VARIABLE out)
+  if("${out}" MATCHES "GNU Make 3.82")
+    # GNU Make 3.82 fails on parens: http://savannah.gnu.org/bugs/?30612
+    message(STATUS "GNU Make 3.82 sometimes fails on () in path")
+    set(CMAKE_PAREN FALSE)
+  endif()
+endif()
 
 IF(CMAKE_PAREN)
   ADD_DEFINITIONS(-DCMAKE_PAREN=1)
