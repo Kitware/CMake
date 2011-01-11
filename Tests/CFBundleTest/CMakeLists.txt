@@ -25,7 +25,10 @@ configure_file(Info.plist.in ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
 configure_file(InfoPlist.strings.in ${CMAKE_CURRENT_BINARY_DIR}/InfoPlist.strings)
 
 # Compile the resource file
-find_program(RC_COMPILER Rez NO_DEFAULT_PATHS)
+find_program(RC_COMPILER Rez NO_DEFAULT_PATHS PATHS /Developer/Tools)
+if(NOT RC_COMPILER)
+  message(FATAL_ERROR "could not find Rez to build resources from .r file...")
+endif()
 
 execute_process(COMMAND
     ${RC_COMPILER} ${RCFILES} -useDF -o ${CMAKE_CURRENT_BINARY_DIR}/Localized.rsrc
