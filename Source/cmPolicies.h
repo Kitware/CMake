@@ -102,6 +102,10 @@ public:
   void DiagnoseAncientPolicies(std::vector<PolicyID> const& ancient,
                                unsigned int majorVer, unsigned int minorVer,
                                unsigned int patchVer, cmMakefile* mf);
+
+  bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
+                        cmPolicies::PolicyStatus* defaultStatus);
+
 };
 
 #endif
