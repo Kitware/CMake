@@ -415,8 +415,12 @@ CHECK_SYMBOL_EXISTS(strerror_r       "string.h"   HAVE_STRERROR_R)
 CHECK_SYMBOL_EXISTS(strftime         "time.h"     HAVE_STRFTIME)
 CHECK_SYMBOL_EXISTS(vprintf          "stdio.h"    HAVE_VPRINTF)
 
-CHECK_SYMBOL_EXISTS(major            "sys/mkdev.h"     MAJOR_IN_MKDEV)
-CHECK_SYMBOL_EXISTS(major            "sys/sysmacros.h" MAJOR_IN_SYSMACROS)
+CHECK_C_SOURCE_COMPILES(
+  "#include <sys/mkdev.h>\nint main() { return major(256); }"
+  MAJOR_IN_MKDEV)
+CHECK_C_SOURCE_COMPILES(
+  "#include <sys/sysmacros.h>\nint main() { return major(256); }"
+  MAJOR_IN_SYSMACROS)
 
 IF(HAVE_STRERROR_R)
   SET(HAVE_DECL_STRERROR_R 1)
