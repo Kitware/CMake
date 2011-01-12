@@ -47,7 +47,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Try compiling some code.";
+    return "Try building some code.";
     }
 
   /**
@@ -55,23 +55,28 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  try_compile(RESULT_VAR bindir srcdir\n"
-      "              projectName <targetname> [CMAKE_FLAGS <Flags>]\n"
-      "              [OUTPUT_VARIABLE var])\n"
-      "Try compiling a program.  In this form, srcdir should contain a "
-      "complete CMake project with a CMakeLists.txt file and all sources. The "
-      "bindir and srcdir will not be deleted after this command is run. "
-      "If <target name> is specified then build just that target "
-      "otherwise the all or ALL_BUILD target is built.\n"
-      "  try_compile(RESULT_VAR bindir srcfile\n"
-      "              [CMAKE_FLAGS <Flags>]\n"
-      "              [COMPILE_DEFINITIONS <flags> ...]\n"
-      "              [OUTPUT_VARIABLE var]\n"
-      "              [COPY_FILE <filename> )\n"
-      "Try compiling a srcfile.  In this case, the user need only supply a "
-      "source file.  CMake will create the appropriate CMakeLists.txt file "
-      "to build the source. If COPY_FILE is used, the compiled file will be "
-      "copied to the given file.\n"
+      "  try_compile(RESULT_VAR <bindir> <srcdir>\n"
+      "              <projectName> [targetName] [CMAKE_FLAGS flags...]\n"
+      "              [OUTPUT_VARIABLE <var>])\n"
+      "Try building a project.  In this form, srcdir should contain a "
+      "complete CMake project with a CMakeLists.txt file and all sources. "
+      "The bindir and srcdir will not be deleted after this command is run. "
+      "Specify targetName to build a specific target instead of the 'all' or "
+      "'ALL_BUILD' target."
+      "\n"
+      "  try_compile(RESULT_VAR <bindir> <srcfile>\n"
+      "              [CMAKE_FLAGS flags...]\n"
+      "              [COMPILE_DEFINITIONS flags...]\n"
+      "              [OUTPUT_VARIABLE <var>]\n"
+      "              [COPY_FILE <fileName>])\n"
+      "Try building a source file into an executable.  "
+      "In this form the user need only supply a source file that defines "
+      "a 'main'.  "
+      "CMake will create a CMakeLists.txt file to build the source "
+      "as an executable.  "
+      "Specify COPY_FILE to get a copy of the linked executable at the "
+      "given fileName."
+      "\n"
       "In this version all files in bindir/CMakeFiles/CMakeTmp, "
       "will be cleaned automatically, for debugging a --debug-trycompile can "
       "be passed to cmake to avoid the clean. Some extra flags that "
