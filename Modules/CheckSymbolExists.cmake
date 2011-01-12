@@ -1,9 +1,16 @@
-# - Check if the symbol exists in include files
-# CHECK_SYMBOL_EXISTS(SYMBOL FILES VARIABLE)
+# - Check if a symbol exists as a function, variable, or macro
+# CHECK_SYMBOL_EXISTS(<symbol> <files> <variable>)
 #
-#  SYMBOL   - symbol
-#  FILES    - include files to check
-#  VARIABLE - variable to return result
+# Check that the <symbol> is available after including given header
+# <files> and store the result in a <variable>.  Specify the list
+# of files in one argument as a semicolon-separated list.
+#
+# If the header files define the symbol as a macro it is considered
+# available and assumed to work.  If the header files declare the
+# symbol as a function or variable then the symbol must also be
+# available for linking.  If the symbol is a type or enum value
+# it will not be recognized (consider using CheckTypeSize or
+# CheckCSourceCompiles).
 #
 # The following variables may be set before calling this macro to
 # modify the way the check is run:
