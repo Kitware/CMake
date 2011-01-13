@@ -3,8 +3,10 @@
 # in this file.  
 
 if(CPACK_GENERATOR MATCHES "NSIS")
+  SET(CPACK_NSIS_INSTALL_ROOT "@CPACK_NSIS_INSTALL_ROOT@")
+
   # set the install/unistall icon used for the installer itself
-  # There is a bug in NSI that does not handle full unix paths properly. 
+  # There is a bug in NSI that does not handle full unix paths properly.
   SET(CPACK_NSIS_MUI_ICON "@CMake_SOURCE_DIR@/Utilities/Release\\CMakeLogo.ico")
   SET(CPACK_NSIS_MUI_UNIICON "@CMake_SOURCE_DIR@/Utilities/Release\\CMakeLogo.ico")
   # set the package header icon for MUI
@@ -21,11 +23,11 @@ if(CPACK_GENERATOR MATCHES "NSIS")
     "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cpack.html" "CPack Help"
     "http://www.cmake.org" "CMake Web Site"
     )
-  # Use the icond from cmake-gui for add-remove programs
+  # Use the icon from cmake-gui for add-remove programs
   SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\cmake-gui.exe")
 
-  SET(CPACK_NSIS_DISPLAY_NAME "CMake @CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@ a cross-platform, open-source build system")
-  SET(CPACK_NSIS_PACKAGE_NAME "CMake @CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@")
+  SET(CPACK_NSIS_PACKAGE_NAME "@CPACK_NSIS_PACKAGE_NAME@")
+  SET(CPACK_NSIS_DISPLAY_NAME "@CPACK_NSIS_PACKAGE_NAME@, a cross-platform, open-source build system")
   SET(CPACK_NSIS_HELP_LINK "http://www.cmake.org")
   SET(CPACK_NSIS_URL_INFO_ABOUT "http://www.kitware.com")
   SET(CPACK_NSIS_CONTACT @CPACK_PACKAGE_CONTACT@)
