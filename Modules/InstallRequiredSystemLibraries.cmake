@@ -16,6 +16,12 @@
 # libraries are installed as well as the CRT run time libraries.
 # If CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION is set then the libraries are
 # installed to that directory rather than the default.
+# If CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS is NOT set, then this file
+# warns about required files that do not exist. You can set this variable to
+# ON before including this file to avoid the warning. For example, the Visual
+# Studio Express editions do not include the redistributable files, so if you
+# include this file on a machine with only VS Express installed, you'll get
+# the warning.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -304,9 +310,14 @@ IF(MSVC)
       SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
         ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} ${lib})
     ELSE(EXISTS ${lib})
-      MESSAGE(WARNING "system runtime library file does not exist: '${lib}'")
-      # This warning indicates an incomplete Visual Studio installation
-      # or a bug somewhere above here in this file
+      IF(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
+        MESSAGE(WARNING "system runtime library file does not exist: '${lib}'")
+        # This warning indicates an incomplete Visual Studio installation
+        # or a bug somewhere above here in this file.
+        # If you would like to avoid this warning, fix the real problem, or
+        # set CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS before including
+        # this file.
+      ENDIF()
     ENDIF(EXISTS ${lib})
   ENDFOREACH(lib)
 ENDIF(MSVC)

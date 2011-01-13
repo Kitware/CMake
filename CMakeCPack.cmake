@@ -13,9 +13,15 @@
 # If the cmake version includes cpack, use it
 IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   IF(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
-    OPTION(CMAKE_INSTALL_DEBUG_LIBRARIES 
+    OPTION(CMAKE_INSTALL_DEBUG_LIBRARIES
       "Install Microsoft runtime debug libraries with CMake." FALSE)
     MARK_AS_ADVANCED(CMAKE_INSTALL_DEBUG_LIBRARIES)
+
+    # By default, do not warn when built on machines using only VS Express:
+    IF(NOT DEFINED CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
+      SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS ON)
+    ENDIF()
+
     INCLUDE(${CMake_SOURCE_DIR}/Modules/InstallRequiredSystemLibraries.cmake)
   ENDIF(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
   # Set the options file that needs to be included inside CMakeCPackOptions.cmake
