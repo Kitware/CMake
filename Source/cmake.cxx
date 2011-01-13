@@ -4321,7 +4321,7 @@ void cmake::RunCheckForUnusedVariables(const std::string& reason) const
         if(!it->second)
           {
           std::string message = "CMake Warning: The variable, '" + it->first +
-            "', given on the command line, was not used during the " + reason +
+            "', specified manually, was not used during the " + reason +
             ".";
           cmSystemTools::Message(message.c_str());
           }
