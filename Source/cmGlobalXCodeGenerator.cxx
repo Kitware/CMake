@@ -355,7 +355,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   cmCustomCommandLines commandLines;
   commandLines.push_back(makecommand);
   // Add Re-Run CMake rules
-  this->CreateReRunCMakeFile(root);
+  this->CreateReRunCMakeFile(root, gens);
 
   // now make the allbuild depend on all the non-utility targets
   // in the project
@@ -403,10 +403,18 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::CreateReRunCMakeFile(cmLocalGenerator* root)
+void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
+  cmLocalGenerator* root, std::vector<cmLocalGenerator*> const& gens)
 {
   cmMakefile* mf = root->GetMakefile();
-  std::vector<std::string> lfiles = mf->GetListFiles();
+  std::vector<std::string> lfiles;
+  for(std::vector<cmLocalGenerator*>::const_iterator gi = gens.begin();
+      gi != gens.end(); ++gi)
+    {
+    std::vector<std::string> const& lf = (*gi)->GetMakefile()->GetListFiles();
+    lfiles.insert(lfiles.end(), lf.begin(), lf.end());
+    }
+
   // sort the array
   std::sort(lfiles.begin(), lfiles.end(), std::less<std::string>());
   std::vector<std::string>::iterator new_end =
