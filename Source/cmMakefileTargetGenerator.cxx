@@ -658,6 +658,9 @@ cmMakefileTargetGenerator
   vars.Flags = flags.c_str();
   vars.Defines = defines.c_str();
 
+  bool lang_is_c_or_cxx = ((strcmp(lang, "C") == 0) ||
+                           (strcmp(lang, "CXX") == 0));
+
   // Construct the compile rules.
   {
   std::string compileRuleVar = "CMAKE_";
@@ -667,6 +670,22 @@ cmMakefileTargetGenerator
     this->Makefile->GetRequiredDefinition(compileRuleVar.c_str());
   std::vector<std::string> compileCommands;
   cmSystemTools::ExpandListArgument(compileRule, compileCommands);
+
+  if (lang_is_c_or_cxx && compileCommands.size() == 1)
+    {
+    std::string compileCommand = compileCommands[0];
+    this->LocalGenerator->ExpandRuleVariables(compileCommand, vars);
+    std::string workingDirectory =
+      this->LocalGenerator->Convert(
+        this->Makefile->GetStartOutputDirectory(), cmLocalGenerator::FULL);
+    compileCommand.replace(compileCommand.find(langFlags),
+                           langFlags.size(), this->GetFlags(lang));
+    std::string langDefines = std::string("$(") + lang + "_DEFINES)";
+    compileCommand.replace(compileCommand.find(langDefines),
+                           langDefines.size(), this->GetDefines(lang));
+    this->GlobalGenerator->AddCXXCompileCommand(
+      source.GetFullPath(), workingDirectory, compileCommand);
+    }
 
   // Expand placeholders in the commands.
   for(std::vector<std::string>::iterator i = compileCommands.begin();
@@ -708,8 +727,6 @@ cmMakefileTargetGenerator
       }
     }
 
-  bool lang_is_c_or_cxx = ((strcmp(lang, "C") == 0) ||
-                           (strcmp(lang, "CXX") == 0));
   bool do_preprocess_rules = lang_is_c_or_cxx &&
     this->LocalGenerator->GetCreatePreprocessedSourceRules();
   bool do_assembly_rules = lang_is_c_or_cxx &&
