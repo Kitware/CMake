@@ -33,6 +33,21 @@
 IF(MSVC)
   FILE(TO_CMAKE_PATH "$ENV{SYSTEMROOT}" SYSTEMROOT)
 
+  IF(CMAKE_CL_64)
+    IF(MSVC_VERSION GREATER 1599)
+      # VS 10 and later:
+      SET(CMAKE_MSVC_ARCH x64)
+    ELSE()
+      # VS 9 and earlier:
+      SET(CMAKE_MSVC_ARCH amd64)
+    ENDIF()
+  ELSE(CMAKE_CL_64)
+    SET(CMAKE_MSVC_ARCH x86)
+  ENDIF(CMAKE_CL_64)
+
+  GET_FILENAME_COMPONENT(devenv_dir "${CMAKE_MAKE_PROGRAM}" PATH)
+  GET_FILENAME_COMPONENT(base_dir "${devenv_dir}/../.." ABSOLUTE)
+
   IF(MSVC70)
     SET(__install__libs
       "${SYSTEMROOT}/system32/msvcp70.dll"
@@ -46,15 +61,6 @@ IF(MSVC)
       "${SYSTEMROOT}/system32/msvcr71.dll"
       )
   ENDIF(MSVC71)
-
-  IF(CMAKE_CL_64)
-    SET(CMAKE_MSVC_ARCH amd64)
-  ELSE(CMAKE_CL_64)
-    SET(CMAKE_MSVC_ARCH x86)
-  ENDIF(CMAKE_CL_64)
-
-  GET_FILENAME_COMPONENT(devenv_dir "${CMAKE_MAKE_PROGRAM}" PATH)
-  GET_FILENAME_COMPONENT(base_dir "${devenv_dir}/../.." ABSOLUTE)
 
   IF(MSVC80)
     # Find the runtime library redistribution directory.
@@ -87,7 +93,6 @@ IF(MSVC)
         "${MSVC80_CRT_DIR}/msvcr80d.dll"
         )
     ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
-
   ENDIF(MSVC80)
 
   IF(MSVC90)
@@ -130,15 +135,14 @@ IF(MSVC)
       PATHS
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0;InstallDir]/../../VC/redist"
         "${base_dir}/VC/redist"
+        "$ENV{ProgramFiles}/Microsoft Visual Studio 10.0/VC/redist"
+        "$ENV{ProgramFiles(x86)}/Microsoft Visual Studio 10.0/VC/redist"
       )
     MARK_AS_ADVANCED(MSVC10_REDIST_DIR)
     SET(MSVC10_CRT_DIR "${MSVC10_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC100.CRT")
 
-    # Install the manifest that allows DLLs to be loaded from the
-    # directory containing the executable.
     IF(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
       SET(__install__libs
-        "${MSVC10_CRT_DIR}/Microsoft.VC100.CRT.manifest"
         "${MSVC10_CRT_DIR}/msvcp100.dll"
         "${MSVC10_CRT_DIR}/msvcr100.dll"
         )
@@ -146,9 +150,8 @@ IF(MSVC)
 
     IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
       SET(MSVC10_CRT_DIR
-        "${MSVC10_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC90.DebugCRT")
+        "${MSVC10_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC100.DebugCRT")
       SET(__install__libs ${__install__libs}
-        "${MSVC10_CRT_DIR}/Microsoft.VC100.DebugCRT.manifest"
         "${MSVC10_CRT_DIR}/msvcp100d.dll"
         "${MSVC10_CRT_DIR}/msvcr100d.dll"
         )
@@ -161,11 +164,13 @@ IF(MSVC)
         "${SYSTEMROOT}/system32/mfc70.dll"
         )
     ENDIF(MSVC70)
+
     IF(MSVC71)
       SET(__install__libs ${__install__libs}
         "${SYSTEMROOT}/system32/mfc71.dll"
         )
     ENDIF(MSVC71)
+
     IF(MSVC80)
       IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
         SET(MSVC80_MFC_DIR
@@ -259,7 +264,6 @@ IF(MSVC)
         SET(MSVC10_MFC_DIR
           "${MSVC10_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC100.DebugMFC")
         SET(__install__libs ${__install__libs}
-          "${MSVC10_MFC_DIR}/Microsoft.VC100.DebugMFC.manifest"
           "${MSVC10_MFC_DIR}/mfc100d.dll"
           "${MSVC10_MFC_DIR}/mfc100ud.dll"
           "${MSVC10_MFC_DIR}/mfcm100d.dll"
@@ -268,11 +272,8 @@ IF(MSVC)
       ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
 
       SET(MSVC10_MFC_DIR "${MSVC10_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC100.MFC")
-      # Install the manifest that allows DLLs to be loaded from the
-      # directory containing the executable.
       IF(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         SET(__install__libs ${__install__libs}
-          "${MSVC10_MFC_DIR}/Microsoft.VC100.MFC.manifest"
           "${MSVC10_MFC_DIR}/mfc100.dll"
           "${MSVC10_MFC_DIR}/mfc100u.dll"
           "${MSVC10_MFC_DIR}/mfcm100.dll"
@@ -282,10 +283,7 @@ IF(MSVC)
 
       # include the language dll's for vs10 as well as the actuall dll's
       SET(MSVC10_MFCLOC_DIR "${MSVC10_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC100.MFCLOC")
-      # Install the manifest that allows DLLs to be loaded from the
-      # directory containing the executable.
       SET(__install__libs ${__install__libs}
-        "${MSVC10_MFCLOC_DIR}/Microsoft.VC100.MFCLOC.manifest"
         "${MSVC10_MFCLOC_DIR}/mfc100chs.dll"
         "${MSVC10_MFCLOC_DIR}/mfc100cht.dll"
         "${MSVC10_MFCLOC_DIR}/mfc100enu.dll"
@@ -297,7 +295,6 @@ IF(MSVC)
         "${MSVC10_MFCLOC_DIR}/mfc100kor.dll"
         )
     ENDIF(MSVC10)
-
   ENDIF(CMAKE_INSTALL_MFC_LIBRARIES)
 
   FOREACH(lib
@@ -306,6 +303,10 @@ IF(MSVC)
     IF(EXISTS ${lib})
       SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
         ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} ${lib})
+    ELSE(EXISTS ${lib})
+      MESSAGE(WARNING "system runtime library file does not exist: '${lib}'")
+      # This warning indicates an incomplete Visual Studio installation
+      # or a bug somewhere above here in this file
     ENDIF(EXISTS ${lib})
   ENDFOREACH(lib)
 ENDIF(MSVC)
