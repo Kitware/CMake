@@ -249,6 +249,66 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
 }
 
 //----------------------------------------------------------------------------
+std::string cmMakefileTargetGenerator::GetFlags(const std::string &l) {
+  std::string flags;
+  const char *lang = l.c_str();
+
+  bool shared = ((this->Target->GetType() == cmTarget::SHARED_LIBRARY) ||
+                 (this->Target->GetType() == cmTarget::MODULE_LIBRARY));
+
+  // Add language feature flags.
+  this->AddFeatureFlags(flags, lang);
+
+  this->LocalGenerator->AddArchitectureFlags(flags, this->Target,
+                                             lang, this->ConfigName);
+
+  // Fortran-specific flags computed for this target.
+  if(l == "Fortran")
+    {
+    this->AddFortranFlags(flags);
+    }
+
+  // Add shared-library flags if needed.
+  this->LocalGenerator->AddSharedFlags(flags, lang, shared);
+
+  // Add include directory flags.
+  this->AddIncludeFlags(flags, lang);
+
+  // Append old-style preprocessor definition flags.
+  this->LocalGenerator->
+    AppendFlags(flags, this->Makefile->GetDefineFlags());
+
+  // Add include directory flags.
+  this->LocalGenerator->
+    AppendFlags(flags,this->GetFrameworkFlags().c_str());
+
+  return flags;
+}
+
+std::string cmMakefileTargetGenerator::GetDefines(const std::string &l) {
+  std::string defines;
+  const char *lang = l.c_str();
+  // Add the export symbol definition for shared library objects.
+  if(const char* exportMacro = this->Target->GetExportMacro())
+    {
+    this->LocalGenerator->AppendDefines(defines, exportMacro, lang);
+    }
+
+  // Add preprocessor definitions for this target and configuration.
+  this->LocalGenerator->AppendDefines
+    (defines, this->Makefile->GetProperty("COMPILE_DEFINITIONS"), lang);
+  this->LocalGenerator->AppendDefines
+    (defines, this->Target->GetProperty("COMPILE_DEFINITIONS"), lang);
+  std::string defPropName = "COMPILE_DEFINITIONS_";
+  defPropName +=
+    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
+  this->LocalGenerator->AppendDefines
+    (defines, this->Makefile->GetProperty(defPropName.c_str()), lang);
+  this->LocalGenerator->AppendDefines
+    (defines, this->Target->GetProperty(defPropName.c_str()), lang);
+  return defines;
+}
+
 void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 {
   // write language flags for target
@@ -262,72 +322,22 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     cmStdString compiler = "CMAKE_";
     compiler += *l;
     compiler += "_COMPILER";
-    *this->FlagFileStream << "# compile " << l->c_str() << " with " << 
+    *this->FlagFileStream << "# compile " << l->c_str() << " with " <<
       this->Makefile->GetSafeDefinition(compiler.c_str()) << "\n";
     }
 
   for(std::set<cmStdString>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
-    const char *lang = l->c_str();
-    std::string flags;
-    std::string defines;
-    bool shared = ((this->Target->GetType() == cmTarget::SHARED_LIBRARY) ||
-                   (this->Target->GetType() == cmTarget::MODULE_LIBRARY));
-
-    // Add the export symbol definition for shared library objects.
-    if(const char* exportMacro = this->Target->GetExportMacro())
-      {
-      this->LocalGenerator->AppendDefines(defines, exportMacro, lang);
-      }
-
-    // Add preprocessor definitions for this target and configuration.
-    this->LocalGenerator->AppendDefines
-      (defines, this->Makefile->GetProperty("COMPILE_DEFINITIONS"), lang);
-    this->LocalGenerator->AppendDefines
-      (defines, this->Target->GetProperty("COMPILE_DEFINITIONS"), lang);
-    std::string defPropName = "COMPILE_DEFINITIONS_";
-    defPropName +=
-      cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
-    this->LocalGenerator->AppendDefines
-      (defines, this->Makefile->GetProperty(defPropName.c_str()), lang);
-    this->LocalGenerator->AppendDefines
-      (defines, this->Target->GetProperty(defPropName.c_str()), lang);
-
-    // Add language feature flags.
-    this->AddFeatureFlags(flags, lang);
-
-    this->LocalGenerator->AddArchitectureFlags(flags, this->Target,
-                                               lang, this->ConfigName);
-
-    // Fortran-specific flags computed for this target.
-    if(*l == "Fortran")
-      {
-      this->AddFortranFlags(flags);
-      }
-
-    // Add shared-library flags if needed.
-    this->LocalGenerator->AddSharedFlags(flags, lang, shared);
-
-    // Add include directory flags.
-    this->AddIncludeFlags(flags, lang);
-
-    // Append old-style preprocessor definition flags.
-    this->LocalGenerator->
-      AppendFlags(flags, this->Makefile->GetDefineFlags());
-
-    // Add include directory flags.
-    this->LocalGenerator->
-      AppendFlags(flags,this->GetFrameworkFlags().c_str());
-
-    *this->FlagFileStream << lang << "_FLAGS = " << flags << "\n\n";
-    *this->FlagFileStream << lang << "_DEFINES = " << defines << "\n\n";
+    *this->FlagFileStream << *l << "_FLAGS = " << this->GetFlags(*l) << "\n\n";
+    *this->FlagFileStream << *l << "_DEFINES = " << this->GetDefines(*l) <<
+      "\n\n";
     }
 
   // Add target-specific flags.
   if(this->Target->GetProperty("COMPILE_FLAGS"))
     {
-    std::string flags;    
+    std::string flags;
     this->LocalGenerator->AppendFlags
       (flags, this->Target->GetProperty("COMPILE_FLAGS"));
     *this->FlagFileStream << "# TARGET_FLAGS = " << flags << "\n\n";

@@ -216,6 +216,9 @@ protected:
   std::string MacContentDirectory;
   std::set<cmStdString> MacContentFolders;
 
+  std::string GetFlags(const std::string &l);
+  std::string GetDefines(const std::string &l);
+
   // Target-wide Fortran module output directory.
   bool FortranModuleDirectoryComputed;
   std::string FortranModuleDirectory;
