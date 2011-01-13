@@ -366,6 +366,7 @@ class cmake
             const std::vector<std::string>& nativeOptions,
             bool clean);
 
+  void UnwatchUnusedCli(const char* var);
   void WatchUnusedCli(const char* var);
   void RunCheckForUnusedVariables(const std::string& reason) const;
 protected:
