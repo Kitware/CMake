@@ -242,6 +242,8 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
   // remove some properites
   foreach(QString s, toremove)
     {
+    this->CMakeInstance->UnwatchUnusedCli(s.toAscii().data());
+
     cachem->RemoveCacheEntry(s.toAscii().data());
     }
   
