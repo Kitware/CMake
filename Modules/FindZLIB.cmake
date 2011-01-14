@@ -35,7 +35,7 @@ FIND_PATH(ZLIB_INCLUDE_DIR zlib.h
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]/include"
 )
 
-SET(ZLIB_NAMES z zlib zdll)
+SET(ZLIB_NAMES z zlib zdll zlib1 zlibd zlibd1)
 FIND_LIBRARY(ZLIB_LIBRARY
     NAMES
         ${ZLIB_NAMES}
