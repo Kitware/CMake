@@ -218,6 +218,10 @@ ENDIF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
 
 INCLUDE(CMakeFindBinUtils)
 
+IF(MSVC_Fortran_ARCHITECTURE_ID)
+  SET(SET_MSVC_Fortran_ARCHITECTURE_ID
+    "SET(MSVC_Fortran_ARCHITECTURE_ID ${MSVC_Fortran_ARCHITECTURE_ID})")
+ENDIF()
 # configure variables set in this file for fast reload later on
 CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in
   ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake

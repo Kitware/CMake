@@ -171,9 +171,6 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #cmakedefine HAVE_GETTIMEOFDAY ${HAVE_GETTIMEOFDAY}
 
-/* we have a glibc-style strerror_r() */
-#cmakedefine HAVE_GLIBC_STRERROR_R ${HAVE_GLIBC_STRERROR_R}
-
 /* Define to 1 if you have the `gmtime_r' function. */
 #cmakedefine HAVE_GMTIME_R ${HAVE_GMTIME_R}
 
@@ -348,12 +345,6 @@
 /* Define to 1 if you have the `poll' function. */
 #cmakedefine HAVE_POLL ${HAVE_POLL}
 
-/* If you have a fine poll */
-#cmakedefine HAVE_POLL_FINE ${HAVE_POLL_FINE}
-
-/* we have a POSIX-style strerror_r() */
-#cmakedefine HAVE_POSIX_STRERROR_R ${HAVE_POSIX_STRERROR_R}
-
 /* Define to 1 if you have the <process.h> header file. */
 #cmakedefine HAVE_PROCESS_H ${HAVE_PROCESS_H}
 
@@ -443,9 +434,6 @@
 
 /* Define to 1 if you have the `strdup' function. */
 #cmakedefine HAVE_STRDUP ${HAVE_STRDUP}
-
-/* Define to 1 if you have the `strerror_r' function. */
-#cmakedefine HAVE_STRERROR_R ${HAVE_STRERROR_R}
 
 /* Define to 1 if you have the `stricmp' function. */
 #cmakedefine HAVE_STRICMP ${HAVE_STRICMP}

@@ -13,6 +13,7 @@
 #define cmAddTestCommand_h
 
 #include "cmCommand.h"
+#include "cmDocumentGeneratorExpressions.h"
 
 /** \class cmAddTestCommand
  * \brief Add a test to the lists of tests to run.
@@ -68,28 +69,19 @@ public:
       "in the binary tree.\n"
       "\n"
       "  add_test(NAME <name> [CONFIGURATIONS [Debug|Release|...]]\n"
+      "           [WORKING_DIRECTORY dir]\n"
       "           COMMAND <command> [arg1 [arg2 ...]])\n"
       "If COMMAND specifies an executable target (created by "
       "add_executable) it will automatically be replaced by the location "
       "of the executable created at build time.  "
       "If a CONFIGURATIONS option is given then the test will be executed "
-      "only when testing under one of the named configurations."
+      "only when testing under one of the named configurations.  "
+      "If a WORKING_DIRECTORY option is given then the test will be executed "
+      "in the given directory."
       "\n"
       "Arguments after COMMAND may use \"generator expressions\" with the "
       "syntax \"$<...>\".  "
-      "These expressions are evaluted during build system generation and "
-      "produce information specific to each generated build configuration.  "
-      "Valid expressions are:\n"
-      "  $<CONFIGURATION>          = configuration name\n"
-      "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"
-      "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"
-      "  $<TARGET_SONAME_FILE:tgt> = file with soname (.so.3)\n"
-      "where \"tgt\" is the name of a target.  "
-      "Target file expressions produce a full path, but _DIR and _NAME "
-      "versions can produce the directory and file name components:\n"
-      "  $<TARGET_FILE_DIR:tgt>/$<TARGET_FILE_NAME:tgt>\n"
-      "  $<TARGET_LINKER_FILE_DIR:tgt>/$<TARGET_LINKER_FILE_NAME:tgt>\n"
-      "  $<TARGET_SONAME_FILE_DIR:tgt>/$<TARGET_SONAME_FILE_NAME:tgt>\n"
+      CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
       "Example usage:\n"
       "  add_test(NAME mytest\n"
       "           COMMAND testDriver --config $<CONFIGURATION>\n"

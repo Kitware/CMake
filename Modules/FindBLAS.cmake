@@ -40,16 +40,11 @@
 #  License text for the above reference.)
 
 get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
-if(NOT _LANGUAGES_ MATCHES Fortran)
-  if(BLAS_FIND_REQUIRED)
-    message(FATAL_ERROR "FindBLAS is Fortran-only so Fortran must be enabled.")
-  else(BLAS_FIND_REQUIRED)
-    message(STATUS "Looking for BLAS... - NOT found (Fortran not enabled)") #
-    return()
-  endif(BLAS_FIND_REQUIRED)
-endif(NOT _LANGUAGES_ MATCHES Fortran)
-
+if (NOT _LANGUAGES_ MATCHES Fortran)
+include(CheckFunctionExists)
+else ()
 include(CheckFortranFunctionExists)
+endif()
 
 macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _threads)
 # This macro checks for the existence of the combination of fortran libraries
@@ -107,7 +102,11 @@ if(_libraries_work)
   # Test this combination of libraries.
   set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_threads})
 #  message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
+  if (_LANGUAGES_ MATCHES Fortran)
+    check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
+  else()
+    check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
+  endif()
   set(CMAKE_REQUIRED_LIBRARIES)
   mark_as_advanced(${_prefix}${_combined_name}_WORKS)
   set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
@@ -246,13 +245,24 @@ endif (BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
 
 #BLAS in acml library?
 if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "All")
+ # Either acml or acml_mp should be in LD_LIBRARY_PATH but not both
  if(NOT BLAS_LIBRARIES)
   check_fortran_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
   ""
-  "acml"
+  "acml;acml_mv"
+  ""
+  )
+ endif(NOT BLAS_LIBRARIES)
+ if(NOT BLAS_LIBRARIES)
+  check_fortran_libraries(
+  BLAS_LIBRARIES
+  BLAS
+  sgemm
+  ""
+  "acml_mp;acml_mv"
   ""
   )
  endif(NOT BLAS_LIBRARIES)
@@ -300,6 +310,9 @@ endif (BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
 
 #BLAS in intel mkl 10 library? (em64t 64bit)
 if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
+ if (NOT WIN32)
+  set(LM "-lm")
+ endif ()
  if (_LANGUAGES_ MATCHES C OR _LANGUAGES_ MATCHES CXX)
   if(BLAS_FIND_QUIETLY OR NOT BLAS_FIND_REQUIRED)
     find_package(Threads)
@@ -340,7 +353,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
       sgemm
       ""
       "mkl_blas95;mkl_intel;mkl_intel_thread;mkl_core;guide"
-      "${CMAKE_THREAD_LIBS_INIT}"
+      "${CMAKE_THREAD_LIBS_INIT};${LM}"
       )
       endif(NOT BLAS95_LIBRARIES)
     else(BLA_F95)
@@ -352,6 +365,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
       ""
       "mkl_intel;mkl_intel_thread;mkl_core;guide"
       "${CMAKE_THREAD_LIBS_INIT}"
+      "${LM}"
       )
       endif(NOT BLAS_LIBRARIES)
     endif(BLA_F95)
@@ -365,7 +379,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
       sgemm
       ""
       "mkl_blas95;mkl_intel_lp64;mkl_intel_thread;mkl_core;guide"
-      "${CMAKE_THREAD_LIBS_INIT}"
+      "${CMAKE_THREAD_LIBS_INIT};${LM}"
       )
     endif(NOT BLAS95_LIBRARIES)
    else(BLA_F95)
@@ -376,7 +390,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
       sgemm
       ""
       "mkl_intel_lp64;mkl_intel_thread;mkl_core;guide"
-      "${CMAKE_THREAD_LIBS_INIT}"
+      "${CMAKE_THREAD_LIBS_INIT};${LM}"
       )
      endif(NOT BLAS_LIBRARIES)
    endif(BLA_F95)
@@ -391,7 +405,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
     sgemm
     ""
     "mkl;guide"
-    "${CMAKE_THREAD_LIBS_INIT}"
+    "${CMAKE_THREAD_LIBS_INIT};${LM}"
     )
   endif(NOT BLAS_LIBRARIES)
   #BLAS in intel mkl library? (static, 32bit)
@@ -402,7 +416,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
     sgemm
     ""
     "mkl_ia32;guide"
-    "${CMAKE_THREAD_LIBS_INIT}"
+    "${CMAKE_THREAD_LIBS_INIT};${LM}"
     )
   endif(NOT BLAS_LIBRARIES)
   #BLAS in intel mkl library? (static, em64t 64bit)
@@ -413,7 +427,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
     sgemm
     ""
     "mkl_em64t;guide"
-    "${CMAKE_THREAD_LIBS_INIT}"
+    "${CMAKE_THREAD_LIBS_INIT};${LM}"
     )
   endif(NOT BLAS_LIBRARIES)
  endif (_LANGUAGES_ MATCHES C OR _LANGUAGES_ MATCHES CXX)

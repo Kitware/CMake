@@ -17,8 +17,8 @@
 //----------------------------------------------------------------------------
 cmGeneratorExpression::cmGeneratorExpression(
   cmMakefile* mf, const char* config,
-  cmListFileBacktrace const& backtrace):
-  Makefile(mf), Config(config), Backtrace(backtrace)
+  cmListFileBacktrace const& backtrace, bool quiet):
+  Makefile(mf), Config(config), Backtrace(backtrace), Quiet(quiet)
 {
   this->TargetInfo.compile("^\\$<TARGET"
                            "(|_SONAME|_LINKER)"  // File with what purpose?
@@ -87,7 +87,7 @@ bool cmGeneratorExpression::Evaluate()
     this->Data.insert(this->Data.end(), result.begin(), result.end());
     return true;
     }
-  else
+  else if(!this->Quiet)
     {
     // Failure.  Report the error message.
     cmOStringStream e;
@@ -99,6 +99,7 @@ bool cmGeneratorExpression::Evaluate()
                      this->Backtrace);
     return false;
     }
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -140,6 +141,7 @@ bool cmGeneratorExpression::EvaluateTargetInfo(std::string& result)
     result = "Target \"" + name + "\" is not an executable or library.";
     return false;
     }
+  this->Targets.insert(target);
 
   // Lookup the target file with the given purpose.
   std::string purpose = this->TargetInfo.match(1);

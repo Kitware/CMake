@@ -734,10 +734,11 @@ bool SystemTools::WriteRegistryValue(const char *key, const char *value,
   
   HKEY hKey;
   DWORD dwDummy;
+  char lpClass[] = "";
   if(RegCreateKeyEx(primaryKey, 
                     second.c_str(), 
                     0, 
-                    "",
+                    lpClass,
                     REG_OPTION_NON_VOLATILE,
                     SystemToolsMakeRegistryMode(KEY_WRITE, view),
                     NULL,

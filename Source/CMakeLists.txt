@@ -131,6 +131,8 @@ SET(SRCS
   cmComputeTargetDepends.cxx
   cmCustomCommand.cxx
   cmCustomCommand.h
+  cmCustomCommandGenerator.cxx
+  cmCustomCommandGenerator.h
   cmDefinitions.cxx
   cmDefinitions.h
   cmDepends.cxx
@@ -156,6 +158,7 @@ SET(SRCS
   cmDocumentationFormatterText.cxx
   cmDocumentationFormatterUsage.cxx
   cmDocumentationSection.cxx
+  cmDocumentGeneratorExpressions.h
   cmDocumentVariables.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h

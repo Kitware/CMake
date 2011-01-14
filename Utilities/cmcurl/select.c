@@ -78,7 +78,7 @@
  */
 int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 {
-#if defined(HAVE_POLL_FINE) || defined(CURL_HAVE_WSAPOLL)
+#if (defined(HAVE_POLL) && !defined(_POLL_EMUL_H_)) || defined(CURL_HAVE_WSAPOLL)
   struct pollfd pfd[2];
   int num;
   int r;
@@ -96,7 +96,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
     num++;
   }
 
-#ifdef HAVE_POLL_FINE
+#if defined(HAVE_POLL) && !defined(_POLL_EMUL_H_)
   do {
     r = poll(pfd, num, timeout_ms);
   } while((r == -1) && (errno == EINTR));
@@ -220,7 +220,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 {
   int r;
-#ifdef HAVE_POLL_FINE
+#if defined(HAVE_POLL) && !defined(_POLL_EMUL_H_)
   do {
     r = poll(ufds, nfds, timeout_ms);
   } while((r == -1) && (errno == EINTR));

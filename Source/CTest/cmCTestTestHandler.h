@@ -99,6 +99,7 @@ public:
     int PreviousRuns;
     bool RunSerial;
     double Timeout;
+    bool ExplicitTimeout;
     int Index;
     //Requested number of process slots
     int Processors;

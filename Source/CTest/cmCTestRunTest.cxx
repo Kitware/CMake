@@ -455,7 +455,8 @@ bool cmCTestRunTest::StartTest(size_t total)
     {
     return false;
     }
-  return this->ForkProcess(timeout, &this->TestProperties->Environment);
+  return this->ForkProcess(timeout, this->TestProperties->ExplicitTimeout,
+                           &this->TestProperties->Environment);
 }
 
 //----------------------------------------------------------------------
@@ -598,7 +599,7 @@ double cmCTestRunTest::ResolveTimeout()
 }
 
 //----------------------------------------------------------------------
-bool cmCTestRunTest::ForkProcess(double testTimeOut,
+bool cmCTestRunTest::ForkProcess(double testTimeOut, bool explicitTimeout,
                      std::vector<std::string>* environment)
 {
   this->TestProcess = new cmProcess;
@@ -619,11 +620,15 @@ bool cmCTestRunTest::ForkProcess(double testTimeOut,
     {
     timeout = testTimeOut;
     }
-
   // always have at least 1 second if we got to here
   if (timeout <= 0)
     {
     timeout = 1;
+    }
+  // handle timeout explicitly set to 0
+  if (testTimeOut == 0 && explicitTimeout)
+    {
+    timeout = 0;
     }
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index << ": "
              << "Test timeout computed to be: " << timeout << "\n");

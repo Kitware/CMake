@@ -200,6 +200,7 @@ QCMakeCacheModel::QCMakeCacheModel(QObject* p)
     NewPropertyCount(0),
     View(FlatView)
 {
+  this->ShowNewProperties = true;
   QStringList labels;
   labels << tr("Name") << tr("Value");
   this->setHorizontalHeaderLabels(labels);
@@ -214,6 +215,11 @@ static uint qHash(const QCMakeProperty& p)
   return qHash(p.Key);
 }
 
+void QCMakeCacheModel::setShowNewProperties(bool f)
+{
+  this->ShowNewProperties = f;
+}
+
 void QCMakeCacheModel::clear()
 {
   this->QStandardItemModel::clear();
@@ -226,13 +232,21 @@ void QCMakeCacheModel::clear()
 
 void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
 {
-  QSet<QCMakeProperty> newProps = props.toSet();
-  QSet<QCMakeProperty> newProps2 = newProps;
-  QSet<QCMakeProperty> oldProps = this->properties().toSet();
-  
-  oldProps.intersect(newProps);
-  newProps.subtract(oldProps);
-  newProps2.subtract(newProps);
+  QSet<QCMakeProperty> newProps, newProps2;
+
+  if(this->ShowNewProperties)
+    {
+    newProps = props.toSet();
+    newProps2 = newProps;
+    QSet<QCMakeProperty> oldProps = this->properties().toSet();
+    oldProps.intersect(newProps);
+    newProps.subtract(oldProps);
+    newProps2.subtract(newProps);
+    }
+  else
+    {
+    newProps2 = props.toSet();
+    }
 
   bool b = this->blockSignals(true);
 

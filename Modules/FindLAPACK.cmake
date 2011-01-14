@@ -37,17 +37,12 @@
 #  License text for the above reference.)
 
 get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
-if(NOT _LANGUAGES_ MATCHES Fortran)
-  if(LAPACK_FIND_REQUIRED)
-    message(FATAL_ERROR
-      "FindLAPACK is Fortran-only so Fortran must be enabled.")
-  else(LAPACK_FIND_REQUIRED)
-    message(STATUS "Looking for LAPACK... - NOT found (Fortran not enabled)")
-    return()
-  endif(LAPACK_FIND_REQUIRED)
-endif(NOT _LANGUAGES_ MATCHES Fortran)
-
+if (NOT _LANGUAGES_ MATCHES Fortran)
+include(CheckFunctionExists)
+else (NOT _LANGUAGES_ MATCHES Fortran)
 include(CheckFortranFunctionExists)
+endif (NOT _LANGUAGES_ MATCHES Fortran)
+
 set(LAPACK_FOUND FALSE)
 set(LAPACK95_FOUND FALSE)
 
@@ -112,7 +107,11 @@ if(_libraries_work)
     set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_threads})
   endif(UNIX AND BLA_STATIC)
 #  message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
+  if (NOT _LANGUAGES_ MATCHES Fortran)
+    check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
+  else (NOT _LANGUAGES_ MATCHES Fortran)
+    check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
+  endif (NOT _LANGUAGES_ MATCHES Fortran)
   set(CMAKE_REQUIRED_LIBRARIES)
   mark_as_advanced(${_prefix}${_combined_name}_WORKS)
   set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
@@ -157,7 +156,18 @@ if(BLAS_FOUND)
     LAPACK
     cheev
     ""
-    "acml"
+    "acml;acml_mv"
+    ""
+    ""
+    )
+  endif(NOT LAPACK_LIBRARIES)
+  if(NOT LAPACK_LIBRARIES)
+   check_lapack_libraries(
+    LAPACK_LIBRARIES
+    LAPACK
+    cheev
+    ""
+    "acml_mp;acml_mv"
     ""
     ""
     )

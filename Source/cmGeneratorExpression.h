@@ -15,6 +15,7 @@
 
 #include <cmsys/RegularExpression.hxx>
 
+class cmTarget;
 class cmMakefile;
 class cmListFileBacktrace;
 
@@ -32,18 +33,25 @@ class cmGeneratorExpression
 public:
   /** Construct with an evaluation context and configuration.  */
   cmGeneratorExpression(cmMakefile* mf, const char* config,
-                        cmListFileBacktrace const& backtrace);
+                        cmListFileBacktrace const& backtrace,
+                        bool quiet = false);
 
   /** Evaluate generator expressions in a string.  */
   const char* Process(std::string const& input);
   const char* Process(const char* input);
+
+  /** Get set of targets found during evaluations.  */
+  std::set<cmTarget*> const& GetTargets() const
+    { return this->Targets; }
 private:
   cmMakefile* Makefile;
   const char* Config;
   cmListFileBacktrace const& Backtrace;
+  bool Quiet;
   std::vector<char> Data;
   std::stack<size_t> Barriers;
   cmsys::RegularExpression TargetInfo;
+  std::set<cmTarget*> Targets;
   bool Evaluate();
   bool Evaluate(const char* expr, std::string& result);
   bool EvaluateTargetInfo(std::string& result);

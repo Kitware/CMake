@@ -117,3 +117,9 @@ void cmLocalVisualStudio10Generator
                   "Stored GUID",
                   cmCacheManager::INTERNAL);
 }
+
+//----------------------------------------------------------------------------
+std::string cmLocalVisualStudio10Generator::CheckForErrorLine()
+{
+  return "if errorlevel 1 goto :VCEnd";
+}

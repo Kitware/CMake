@@ -438,6 +438,8 @@ void cmCTestTestHandler::Initialize()
 
   this->TestsToRun.clear();
 
+  this->UseIncludeLabelRegExpFlag = false;
+  this->UseExcludeLabelRegExpFlag = false;
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
@@ -2120,6 +2122,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "TIMEOUT" )
             {
             rtit->Timeout = atof(val.c_str());
+            rtit->ExplicitTimeout = true;
             }
           if ( key == "COST" )
             {
@@ -2190,7 +2193,6 @@ bool cmCTestTestHandler::SetTestsProperties(
               {
               rtit->Labels.push_back(*crit);
               }
-            
             }
           if ( key == "MEASUREMENT" )
             {
@@ -2218,6 +2220,10 @@ bool cmCTestTestHandler::SetTestsProperties(
                   cmsys::RegularExpression(crit->c_str()),
                   std::string(crit->c_str())));
               }
+            }
+          if ( key == "WORKING_DIRECTORY" )
+            {
+            rtit->Directory = val;
             }
           }
         }
@@ -2290,6 +2296,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.WillFail = false;
   test.RunSerial = false;
   test.Timeout = 0;
+  test.ExplicitTimeout = false;
   test.Cost = 0;
   test.Processors = 1;
   test.PreviousRuns = 0;

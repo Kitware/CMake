@@ -18,6 +18,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmComputeLinkInformation.h"
 #include "cmSourceFile.h"
+#include "cmCustomCommandGenerator.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -1314,8 +1315,7 @@ void  cmGlobalXCodeGenerator
     cmCustomCommand const& cc = *i;
     if(!cc.GetCommandLines().empty())
       {
-      bool escapeOldStyle = cc.GetEscapeOldStyle();
-      bool escapeAllowMakeVars = cc.GetEscapeAllowMakeVars();
+      cmCustomCommandGenerator ccg(cc, configName, this->CurrentMakefile);
       makefileStream << "\n";
       const std::vector<std::string>& outputs = cc.GetOutputs();
       if(!outputs.empty())
@@ -1348,20 +1348,15 @@ void  cmGlobalXCodeGenerator
         {
         std::string echo_cmd = "echo ";
         echo_cmd += (this->CurrentLocalGenerator->
-                     EscapeForShell(comment, escapeAllowMakeVars));
+                     EscapeForShell(comment, cc.GetEscapeAllowMakeVars()));
         makefileStream << "\t" << echo_cmd.c_str() << "\n";
         }
 
       // Add each command line to the set of commands.
-      for(cmCustomCommandLines::const_iterator cl =
-          cc.GetCommandLines().begin();
-          cl != cc.GetCommandLines().end(); ++cl)
+      for(unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c)
         {
         // Build the command line in a single string.
-        const cmCustomCommandLine& commandLine = *cl;
-        std::string cmd2 = this->CurrentLocalGenerator
-                         ->GetRealLocation(commandLine[0].c_str(), configName);
-
+        std::string cmd2 = ccg.GetCommand(c);
         cmSystemTools::ReplaceString(cmd2, "/./", "/");
         cmd2 = this->ConvertToRelativeForMake(cmd2.c_str());
         std::string cmd;
@@ -1372,21 +1367,7 @@ void  cmGlobalXCodeGenerator
           cmd += " && ";
           }
         cmd += cmd2;
-        for(unsigned int j=1; j < commandLine.size(); ++j)
-          {
-          cmd += " ";
-          if(escapeOldStyle)
-            {
-            cmd += (this->CurrentLocalGenerator
-                ->EscapeForShellOldStyle(commandLine[j].c_str()));
-            }
-          else
-            {
-            cmd += (this->CurrentLocalGenerator->
-                EscapeForShell(commandLine[j].c_str(),
-                               escapeAllowMakeVars));
-            }
-          }
+        ccg.AppendArguments(c, cmd);
         makefileStream << "\t" << cmd.c_str() << "\n";
         }
       }
@@ -2636,7 +2617,10 @@ void cmGlobalXCodeGenerator
     group->AddAttribute("BuildIndependentTargetsInParallel",
                         this->CreateString("YES"));
     this->RootObject->AddAttribute("attributes", group);
-    if (this->XcodeVersion >= 31)
+    if (this->XcodeVersion >= 32)
+      this->RootObject->AddAttribute("compatibilityVersion",
+                                     this->CreateString("Xcode 3.2"));
+    else if (this->XcodeVersion >= 31)
       this->RootObject->AddAttribute("compatibilityVersion",
                                      this->CreateString("Xcode 3.1"));
     else
@@ -3042,7 +3026,9 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
   cmXCodeObject::Indent(1, fout);
   if(this->XcodeVersion >= 21)
     {
-    if (this->XcodeVersion >= 31)
+    if (this->XcodeVersion >= 32)
+      fout << "objectVersion = 46;\n";
+    else if (this->XcodeVersion >= 31)
       fout << "objectVersion = 45;\n";
     else if (this->XcodeVersion >= 30)
       fout << "objectVersion = 44;\n";

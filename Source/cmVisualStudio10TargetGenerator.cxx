@@ -376,13 +376,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
       i != configs->end(); ++i)
     {
     std::string script =
-      cmVS10EscapeXML(
-        lg->ConstructScript(command.GetCommandLines(),
-                            command.GetWorkingDirectory(),
-                            i->c_str(),
-                            command.GetEscapeOldStyle(),
-                            command.GetEscapeAllowMakeVars())
-        );
+      cmVS10EscapeXML(lg->ConstructScript(command, i->c_str()));
     this->WritePlatformConfigTag("Message",i->c_str(), 3);
     (*this->BuildFileStream ) << cmVS10EscapeXML(comment) << "</Message>\n";
     this->WritePlatformConfigTag("Command", i->c_str(), 3);
@@ -700,7 +694,7 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
         }
       (*this->BuildFileStream ) << sourceFile << "\"";
       // ouput any flags specific to this source file
-      if(cl && this->OutputSourceSpecificFlags(*source))
+      if(!header && cl && this->OutputSourceSpecificFlags(*source))
         {
         // if the source file has specific flags the tag
         // is ended on a new line
@@ -1472,13 +1466,7 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
     script += pre;
     pre = "\n";
     script +=
-      cmVS10EscapeXML(
-        lg->ConstructScript(command.GetCommandLines(),
-                            command.GetWorkingDirectory(),
-                            configName.c_str(),
-                            command.GetEscapeOldStyle(),
-                            command.GetEscapeAllowMakeVars())
-        );
+      cmVS10EscapeXML(lg->ConstructScript(command, configName.c_str()));
     }
   comment = cmVS10EscapeComment(comment);
   this->WriteString("<Message>",3);
