@@ -451,6 +451,8 @@ protected:
 
   ///! Find the full path to one of the cmake programs like ctest, cpack, etc.
   std::string FindCMakeProgram(const char* name) const;
+
+  bool RejectUnsupportedPaths(const char* desc, std::string const& path);
 private:
   cmake(const cmake&);  // Not implemented.
   void operator=(const cmake&);  // Not implemented.
