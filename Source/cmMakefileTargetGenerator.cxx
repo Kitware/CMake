@@ -671,7 +671,8 @@ cmMakefileTargetGenerator
   std::vector<std::string> compileCommands;
   cmSystemTools::ExpandListArgument(compileRule, compileCommands);
 
-  if (lang_is_c_or_cxx && compileCommands.size() == 1)
+  if (this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS") &&
+      lang_is_c_or_cxx && compileCommands.size() == 1)
     {
     std::string compileCommand = compileCommands[0];
     this->LocalGenerator->ExpandRuleVariables(compileCommand, vars);
