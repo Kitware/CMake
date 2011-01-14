@@ -1,6 +1,6 @@
-# - Check if the given C++ source code compiles.
+# - Check if given C++ source compiles and links into an executable
 # CHECK_CXX_SOURCE_COMPILES(<code> <var> [FAIL_REGEX <fail-regex>])
-#  <code>       - source code to try to compile
+#  <code>       - source code to try to compile, must define 'main'
 #  <var>        - variable to store whether the source code compiled
 #  <fail-regex> - fail if test output matches this regex
 # The following variables may be set before calling this macro to
