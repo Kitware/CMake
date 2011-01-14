@@ -1946,8 +1946,32 @@ int cmake::Configure()
 
 }
 
+bool cmake::RejectUnsupportedPaths(const char* desc, std::string const& path)
+{
+  // Some characters are not well-supported by native build systems.
+  std::string::size_type pos = path.find_first_of("=");
+  if(pos == std::string::npos)
+    {
+    return false;
+    }
+  cmOStringStream e;
+  e << "The path to the " << desc << " directory:\n"
+    << "  " << path << "\n"
+    << "contains unsupported character '" << path[pos] << "'.\n"
+    << "Please use a different " << desc << " directory name.";
+  cmListFileBacktrace bt;
+  this->IssueMessage(cmake::FATAL_ERROR, e.str(), bt);
+  return true;
+}
+
 int cmake::ActualConfigure()
 {
+  if(this->RejectUnsupportedPaths("source", this->cmHomeDirectory) ||
+     this->RejectUnsupportedPaths("binary", this->HomeOutputDirectory))
+    {
+    return 1;
+    }
+
   // Construct right now our path conversion table before it's too late:
   this->UpdateConversionPathTable();
   this->CleanupCommandsAndMacros();
