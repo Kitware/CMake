@@ -21,7 +21,7 @@
 #  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 #=============================================================================
-# Copyright 2003-2009 Kitware, Inc.
+# Copyright 2003-2011 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
