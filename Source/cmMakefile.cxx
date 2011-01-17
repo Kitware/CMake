@@ -2717,6 +2717,18 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   cm.SetStartOutputDirectory(bindir);
   cm.SetCMakeCommand(cmakeCommand.c_str());
   cm.LoadCache();
+  if(!gg->IsMultiConfig())
+    {
+    if(const char* config =
+       this->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION"))
+      {
+      // Tell the single-configuration generator which one to use.
+      // Add this before the user-provided CMake arguments in case
+      // one of the arguments is -DCMAKE_BUILD_TYPE=...
+      cm.AddCacheEntry("CMAKE_BUILD_TYPE", config,
+                       "Build configuration", cmCacheManager::STRING);
+      }
+    }
   // if cmake args were provided then pass them in
   if (cmakeArgs)
     {
