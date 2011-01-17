@@ -102,6 +102,7 @@ private:
                        cmTarget& t, bool debug);
   void OutputLibraryDirectories(std::ostream& fout,
                                 std::vector<std::string> const& dirs);
+  void WriteProjectSCC(std::ostream& fout, cmTarget& target);
   void WriteProjectStart(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteProjectStartFortran(std::ostream& fout, const char *libName,
