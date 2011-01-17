@@ -448,6 +448,7 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
       // Get the file being included.
       UnscannedEntry entry;
       entry.FileName = this->IncludeRegexLine.match(2);
+      cmSystemTools::ConvertToUnixSlashes(entry.FileName);
       if(this->IncludeRegexLine.match(3) == "\"" &&
          !cmSystemTools::FileIsFullPath(entry.FileName.c_str()))
         {
