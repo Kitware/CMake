@@ -20,6 +20,15 @@
   "work-around the problem by adding escape sequences to the value.  "  \
   "Your work-around may break in a future version of CMake that "       \
   "has improved escape support.  Instead consider defining the macro "  \
-  "in a (configured) header file.  Then report the limitation."
+  "in a (configured) header file.  Then report the limitation.  "       \
+  "Known limitations include:\n"                                        \
+  "  #          - broken almost everywhere\n"                           \
+  "  ;          - broken in VS IDE and Borland Makefiles\n"             \
+  "  ,          - broken in VS IDE\n"                                   \
+  "  %          - broken in some cases in NMake\n"                      \
+  "  & |        - broken in some cases on MinGW\n"                      \
+  "  ^ < > \\\"   - broken in most Make tools on Windows\n"             \
+  "CMake does not reject these values outright because they do work "   \
+  "in some cases.  Use with caution.  "
 
 #endif
