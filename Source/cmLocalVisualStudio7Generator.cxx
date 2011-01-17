@@ -1706,6 +1706,22 @@ void cmLocalVisualStudio7Generator
   event.Finish();
 }
 
+void cmLocalVisualStudio7Generator::WriteProjectSCC(std::ostream& fout,
+                                                    cmTarget& target)
+{
+  // if we have all the required Source code control tags
+  // then add that to the project
+  const char* vsProjectname = target.GetProperty("VS_SCC_PROJECTNAME");
+  const char* vsLocalpath = target.GetProperty("VS_SCC_LOCALPATH");
+  const char* vsProvider = target.GetProperty("VS_SCC_PROVIDER");
+  if(vsProvider && vsLocalpath && vsProjectname)
+    {
+    fout << "\tSccProjectName=\"" << vsProjectname << "\"\n"
+         << "\tSccLocalPath=\"" << vsLocalpath << "\"\n"
+         << "\tSccProvider=\"" << vsProvider << "\"\n";
+    }
+}
+
 void
 cmLocalVisualStudio7Generator
 ::WriteProjectStartFortran(std::ostream& fout,
@@ -1773,6 +1789,7 @@ cmLocalVisualStudio7Generator
     {
     fout << "\tProjectType=\"" << projectType << "\"\n";
     }
+  this->WriteProjectSCC(fout, target);
   fout<< "\tKeyword=\"" << keyword << "\">\n" 
        << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\">\n"
        << "\t<Platforms>\n"
@@ -1813,9 +1830,6 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     {
     keyword = "Win32Proj";
     }
-  const char* vsProjectname = target.GetProperty("VS_SCC_PROJECTNAME");
-  const char* vsLocalpath = target.GetProperty("VS_SCC_LOCALPATH");
-  const char* vsProvider = target.GetProperty("VS_SCC_PROVIDER");
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   fout << "\tName=\"" << projLabel << "\"\n";
@@ -1823,14 +1837,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     {
     fout << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\"\n";
     }
-  // if we have all the required Source code control tags
-  // then add that to the project
-  if(vsProvider && vsLocalpath && vsProjectname)
-    {
-    fout << "\tSccProjectName=\"" << vsProjectname << "\"\n"
-         << "\tSccLocalPath=\"" << vsLocalpath << "\"\n"
-         << "\tSccProvider=\"" << vsProvider << "\"\n";
-    }
+  this->WriteProjectSCC(fout, target);
   fout << "\tKeyword=\"" << keyword << "\">\n"
        << "\t<Platforms>\n"
        << "\t\t<Platform\n\t\t\tName=\"" << this->PlatformName << "\"/>\n"
