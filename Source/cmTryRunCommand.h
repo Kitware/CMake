@@ -93,7 +93,10 @@ public:
       "that when crosscompiling, the cache variables will have to be set "
       "manually to the output of the executable. You can also \"guard\" the "
       "calls to try_run with if(CMAKE_CROSSCOMPILING) and provide an "
-      "easy-to-preset alternative for this case.\n";
+      "easy-to-preset alternative for this case.\n"
+      "Set variable CMAKE_TRY_COMPILE_CONFIGURATION to choose a build "
+      "configuration."
+      ;
     }
 
   cmTypeMacro(cmTryRunCommand, cmCoreTryCompile);

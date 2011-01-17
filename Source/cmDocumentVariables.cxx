@@ -1121,6 +1121,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "this variable for a target if they are set.  "
      "Library targets are otherwise placed in this directory.",false,
      "Variables that Control the Build");
+  cm->DefineProperty
+    ("CMAKE_TRY_COMPILE_CONFIGURATION", cmProperty::VARIABLE,
+     "Build configuration used for try_compile and try_run projects.",
+     "Projects built by try_compile and try_run are built "
+     "synchronously during the CMake configuration step.  "
+     "Therefore a specific build configuration must be chosen even "
+     "if the generated build system supports multiple configurations.",false,
+     "Variables that Control the Build");
 
 
 //   Variables defined when the a language is enabled These variables will

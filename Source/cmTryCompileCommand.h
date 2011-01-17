@@ -94,7 +94,9 @@ public:
       "Return the success or failure in "
       "RESULT_VAR. CMAKE_FLAGS can be used to pass -DVAR:TYPE=VALUE flags "
       "to the cmake that is run during the build. "
-      "";
+      "Set variable CMAKE_TRY_COMPILE_CONFIGURATION to choose a build "
+      "configuration."
+      ;
     }
   
   cmTypeMacro(cmTryCompileCommand, cmCoreTryCompile);
