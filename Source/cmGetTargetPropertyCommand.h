@@ -55,7 +55,9 @@ public:
         "property values.  Properties are usually used to control how "
         "a target is built, but some query the target instead.  "
         "This command can get properties for any target so far created. "
-        "The targets do not need to be in the current CMakeLists.txt file.";
+        "The targets do not need to be in the current CMakeLists.txt file."
+        "\n"
+        "See also the more general get_property() command.";
     }
   
   cmTypeMacro(cmGetTargetPropertyCommand, cmCommand);

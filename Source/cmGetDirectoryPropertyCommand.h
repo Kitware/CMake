@@ -66,7 +66,8 @@ public:
         "Get a variable definition from a directory.  "
         "This form is useful to get a variable definition from another "
         "directory."
-        ;
+        "\n"
+        "See also the more general get_property() command.";
     }
   
   cmTypeMacro(cmGetDirectoryPropertyCommand, cmCommand);
