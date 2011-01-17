@@ -16,6 +16,7 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+#include "cmDocumentCompileDefinitions.h"
 
 //----------------------------------------------------------------------------
 cmSourceFile::cmSourceFile(cmMakefile* mf, const char* name):
@@ -416,15 +417,7 @@ void cmSourceFile::DefineProperties(cmake *cm)
      "The VS6 IDE does not support definition values with spaces "
      "(but NMake does).  Xcode does not support per-configuration "
      "definitions on source files.\n"
-     "Disclaimer: Most native build tools have poor support for escaping "
-     "certain values.  CMake has work-arounds for many cases but some "
-     "values may just not be possible to pass correctly.  If a value "
-     "does not seem to be escaped correctly, do not attempt to "
-     "work-around the problem by adding escape sequences to the value.  "
-     "Your work-around may break in a future version of CMake that "
-     "has improved escape support.  Instead consider defining the macro "
-     "in a (configured) header file.  Then report the limitation.");
-
+     CM_DOCUMENT_COMPILE_DEFINITIONS_DISCLAIMER);
 
   cm->DefineProperty
     ("COMPILE_DEFINITIONS_<CONFIG>", cmProperty::SOURCE_FILE,
