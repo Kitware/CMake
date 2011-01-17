@@ -299,6 +299,7 @@ Configuration:
   --verbose               display more information
   --parallel=n            bootstrap cmake in parallel, where n is
                           number of nodes [1]
+  --enable-ccache         Enable ccache when building cmake
   --init=FILE             load FILE as script to populate cache
   --system-libs           use all system-installed third-party libraries
                           (for use only by package maintainers)
@@ -523,6 +524,7 @@ cmake_try_make ()
 # Parse arguments
 cmake_verbose=
 cmake_parallel_make=
+cmake_ccache_enabled=
 cmake_prefix_dir="${cmake_default_prefix}"
 for a in "$@"; do
   if echo $a | grep "^--prefix=" > /dev/null 2> /dev/null; then
@@ -577,6 +579,9 @@ for a in "$@"; do
   fi
   if echo $a | grep "^--verbose" > /dev/null 2> /dev/null; then
     cmake_verbose=TRUE
+  fi
+  if echo $a | grep "^--enable-ccache" > /dev/null 2> /dev/null; then
+    cmake_ccache_enabled=TRUE
   fi
 done
 
@@ -1513,6 +1518,10 @@ cd "${cmake_binary_dir}"
 # build with same compiler and make
 CC="${cmake_c_compiler}"
 CXX="${cmake_cxx_compiler}"
+if [ -n "${cmake_ccache_enabled}" ]; then
+  CC="ccache ${CC}"
+  CXX="ccache ${CXX}"
+fi
 MAKE="${cmake_make_processor}"
 export CC
 export CXX
