@@ -52,7 +52,9 @@ public:
       "Get a property from the Test.  The value of the property is "
       "stored in the variable VAR.  If the property is not found, VAR "
       "will be set to \"NOTFOUND\". For a list of standard properties "
-      "you can type cmake --help-property-list";
+      "you can type cmake --help-property-list"
+      "\n"
+      "See also the more general get_property() command.";
     }
 
   cmTypeMacro(cmGetTestPropertyCommand, cmCommand);
