@@ -26,6 +26,11 @@ cmake_date_stamp_component()
 "
 }
 
+cmake_toupper()
+{
+    echo "$1" | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'
+}
+
 # Detect system and directory information.
 cmake_system=`uname`
 cmake_source_dir=`cd "\`dirname \"$0\"\`";pwd`
@@ -294,11 +299,22 @@ Configuration:
   --verbose               display more information
   --parallel=n            bootstrap cmake in parallel, where n is
                           number of nodes [1]
-  --init=FILE             use FILE for cmake initialization
-  --system-libs           use system-installed third-party libraries
+  --init=FILE             load FILE as script to populate cache
+  --system-libs           use all system-installed third-party libraries
                           (for use only by package maintainers)
-  --no-system-libs        use cmake-provided third-party libraries
+  --no-system-libs        use all cmake-provided third-party libraries
                           (default)
+  --system-curl           use system-installed curl library
+  --no-system-curl        use cmake-provided curl library (default)
+  --system-expat          use system-installed expat library
+  --no-system-expat       use cmake-provided expat library (default)
+  --system-zlib           use system-installed zlib library
+  --no-system-zlib        use cmake-provided zlib library (default)
+  --system-bzip2          use system-installed bzip2 library
+  --no-system-bzip2       use cmake-provided bzip2 library (default)
+  --system-libarchive     use system-installed libarchive library
+  --no-system-libarchive  use cmake-provided libarchive library (default)
+
   --qt-gui                build the Qt-based GUI (requires Qt >= 4.2)
   --no-qt-gui             do not build the Qt-based GUI (default)
   --qt-qmake=<qmake>      use <qmake> as the qmake executable to find Qt
@@ -528,11 +544,20 @@ for a in "$@"; do
   if echo $a | grep "^--init=" > /dev/null 2> /dev/null; then
     cmake_init_file=`echo $a | sed "s/^--init=//"`
   fi
+  for lib in bzip2 curl expat libarchive zlib; do
+    if echo $a | grep "^--system-${lib}" > /dev/null 2> /dev/null; then
+      cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper ${lib}`=1"
+      break
+    elif echo $a | grep "^--no-system-${lib}" > /dev/null 2> /dev/null; then
+      cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper ${lib}`=0"
+      break
+    fi
+  done
   if echo $a | grep "^--system-libs" > /dev/null 2> /dev/null; then
-    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_LIBRARIES=1"
+    cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=1"
   fi
   if echo $a | grep "^--no-system-libs" > /dev/null 2> /dev/null; then
-    cmake_bootstrap_system_libs="-DCMAKE_USE_SYSTEM_LIBRARIES=0"
+    cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=0"
   fi
   if echo $a | grep "^--qt-gui" > /dev/null 2> /dev/null; then
     cmake_bootstrap_qt_gui="1"
@@ -1494,7 +1519,7 @@ export CXX
 export MAKE
 
 # Run bootstrap CMake to configure real CMake
-"${cmake_bootstrap_dir}/cmake" "${cmake_source_dir}" "-C${cmake_bootstrap_dir}/InitialCacheFlags.cmake" "-G${cmake_bootstrap_generator}" ${cmake_bootstrap_system_libs}
+"${cmake_bootstrap_dir}/cmake" "${cmake_source_dir}" "-C${cmake_bootstrap_dir}/InitialCacheFlags.cmake" "-G${cmake_bootstrap_generator}" -DCMAKE_BOOTSTRAP=1 ${cmake_bootstrap_system_libs}
 RES=$?
 if [ "${RES}" -ne "0" ]; then
   cmake_error 11 "Problem while running initial CMake"
