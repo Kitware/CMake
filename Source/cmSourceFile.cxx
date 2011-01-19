@@ -188,8 +188,13 @@ bool cmSourceFile::FindFullPath(std::string* error)
     }
 
   cmOStringStream e;
-  e << "Cannot find source file \"" << this->Location.GetName() << "\"";
-  e << ".  Tried extensions";
+  std::string missing = this->Location.GetDirectory();
+  if(!missing.empty())
+    {
+    missing += "/";
+    }
+  missing += this->Location.GetName();
+  e << "Cannot find source file:\n  " << missing << "\nTried extensions";
   for(std::vector<std::string>::const_iterator ext = srcExts.begin();
       ext != srcExts.end(); ++ext)
     {
