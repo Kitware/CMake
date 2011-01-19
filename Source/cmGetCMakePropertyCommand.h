@@ -54,11 +54,14 @@ public:
     {
       return
         "  get_cmake_property(VAR property)\n"
-        "Get a property from the CMake instance.  The value of the "
-        "property is stored in the variable VAR. If the property is "
-        "not found, CMake will report an error. Some supported properties "
+        "Get a property from the CMake instance.  "
+        "The value of the property is stored in the variable VAR.  "
+        "If the property is not found, VAR will be set to \"NOTFOUND\".  "
+        "Some supported properties "
         "include: VARIABLES, CACHE_VARIABLES, COMMANDS, MACROS, and "
-        "COMPONENTS.";
+        "COMPONENTS."
+        "\n"
+        "See also the more general get_property() command.";
     }
   
   cmTypeMacro(cmGetCMakePropertyCommand, cmCommand);

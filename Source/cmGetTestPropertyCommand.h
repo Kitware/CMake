@@ -48,11 +48,13 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  get_test_property(test VAR property)\n"
-      "Get a property from the Test.  The value of the property is " 
-      "stored in the variable VAR. If the property is not found, "
-      "CMake will report an error. For a list of standard properties "
-      "you can type cmake --help-property-list";
+      "  get_test_property(test property VAR)\n"
+      "Get a property from the Test.  The value of the property is "
+      "stored in the variable VAR.  If the property is not found, VAR "
+      "will be set to \"NOTFOUND\". For a list of standard properties "
+      "you can type cmake --help-property-list"
+      "\n"
+      "See also the more general get_property() command.";
     }
 
   cmTypeMacro(cmGetTestPropertyCommand, cmCommand);
