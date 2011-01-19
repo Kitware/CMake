@@ -171,7 +171,8 @@ private:
                                   const char* name2,
                                   cmTarget& cmtarget,
                                   const std::vector<cmCustomCommand>&);
-  void CreateReRunCMakeFile(cmLocalGenerator* root);
+  void CreateReRunCMakeFile(cmLocalGenerator* root,
+                            std::vector<cmLocalGenerator*> const& gens);
 
   std::string LookupFlags(const char* varNamePrefix,
                           const char* varNameLang,
