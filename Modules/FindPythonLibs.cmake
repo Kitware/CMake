@@ -151,6 +151,7 @@ FUNCTION(PYTHON_WRITE_MODULES_HEADER _filename)
   GET_FILENAME_COMPONENT(_name "${_filename}" NAME)
   STRING(REPLACE "." "_" _name "${_name}")
   STRING(TOUPPER ${_name} _nameUpper)
+  SET(_filename ${CMAKE_CURRENT_BINARY_DIR}/${_filename})
 
   SET(_filenameTmp "${_filename}.in")
   FILE(WRITE ${_filenameTmp} "/*Created by cmake, do not edit, changes will be lost*/\n")
