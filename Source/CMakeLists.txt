@@ -158,6 +158,7 @@ SET(SRCS
   cmDocumentationFormatterText.cxx
   cmDocumentationFormatterUsage.cxx
   cmDocumentationSection.cxx
+  cmDocumentCompileDefinitions.h
   cmDocumentGeneratorExpressions.h
   cmDocumentVariables.cxx
   cmDynamicLoader.cxx
