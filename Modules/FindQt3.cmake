@@ -242,7 +242,7 @@ IF (QT_MIN_VERSION)
 ENDIF (QT_MIN_VERSION)
 
 # if the include a library are found then we have it
-INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Qt3  DEFAULT_MSG  QT_QT_LIBRARY QT_INCLUDE_DIR QT_MOC_EXECUTABLE)
 SET(QT_FOUND ${QT3_FOUND} )
 

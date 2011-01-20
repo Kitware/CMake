@@ -132,7 +132,7 @@ if(DCMTK_ofstd_INCLUDE_DIR)
   mark_as_advanced(DCMTK_dcmtk_INCLUDE_DIR)
 endif()
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(DCMTK DEFAULT_MSG
   DCMTK_config_INCLUDE_DIR
   DCMTK_ofstd_INCLUDE_DIR

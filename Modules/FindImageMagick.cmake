@@ -171,7 +171,7 @@ SET(ImageMagick_LIBRARIES ${ImageMagick_LIBRARIES})
 #---------------------------------------------------------------------
 # Standard Package Output
 #---------------------------------------------------------------------
-INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(
   ImageMagick DEFAULT_MSG ImageMagick_FOUND
   )

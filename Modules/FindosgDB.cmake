@@ -46,6 +46,6 @@ include(Findosg_functions)
 OSG_FIND_PATH   (OSGDB osgDB/DatabasePager)
 OSG_FIND_LIBRARY(OSGDB osgDB)
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(osgDB DEFAULT_MSG
     OSGDB_LIBRARY OSGDB_INCLUDE_DIR)

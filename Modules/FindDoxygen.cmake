@@ -76,7 +76,7 @@ FIND_PROGRAM(DOXYGEN_EXECUTABLE
   DOC "Doxygen documentation generation tool (http://www.doxygen.org)"
 )
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Doxygen DEFAULT_MSG DOXYGEN_EXECUTABLE)
 
 #

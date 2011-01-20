@@ -146,7 +146,7 @@ else()
     _gtest_find_library(GTEST_MAIN_LIBRARY_DEBUG gtest_maind)
 endif()
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTest DEFAULT_MSG GTEST_LIBRARY GTEST_INCLUDE_DIR GTEST_MAIN_LIBRARY)
 
 if(GTEST_FOUND)

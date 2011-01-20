@@ -149,7 +149,7 @@ SET(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 
 # handle the QUIETLY and REQUIRED arguments and set OPENGL_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL DEFAULT_MSG OPENGL_gl_LIBRARY)
 
 MARK_AS_ADVANCED(
