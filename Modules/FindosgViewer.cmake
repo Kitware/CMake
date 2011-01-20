@@ -46,6 +46,6 @@ include(Findosg_functions)
 OSG_FIND_PATH   (OSGVIEWER osgViewer/Viewer)
 OSG_FIND_LIBRARY(OSGVIEWER osgViewer)
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(osgViewer DEFAULT_MSG
     OSGVIEWER_LIBRARY OSGVIEWER_INCLUDE_DIR)

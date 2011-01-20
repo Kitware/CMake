@@ -26,7 +26,7 @@ FIND_PROGRAM(WGET_EXECUTABLE
 
 # handle the QUIETLY and REQUIRED arguments and set WGET_FOUND to TRUE if 
 # all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Wget DEFAULT_MSG WGET_EXECUTABLE)
 
 MARK_AS_ADVANCED( WGET_EXECUTABLE )
