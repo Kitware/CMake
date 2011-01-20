@@ -74,7 +74,8 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
 {
   std::string name;
   std::vector<std::string> configurations;
-  std::string working_directory;
+  std::string working_directory = this->Makefile->GetCurrentOutputDirectory();
+  bool working_directory_set = false;
   std::vector<std::string> command;
 
   // Read the arguments.
@@ -108,12 +109,13 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
       }
     else if(args[i] == "WORKING_DIRECTORY")
       {
-      if(!working_directory.empty())
+      if(working_directory_set)
         {
         this->SetError(" may be given at most one WORKING_DIRECTORY.");
         return false;
         }
       doing = DoingWorkingDirectory;
+      working_directory_set = true;
       }
     else if(doing == DoingName)
       {
