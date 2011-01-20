@@ -7,6 +7,8 @@ enable_testing()
 
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
+add_test(NAME WorkingDirectory0 COMMAND WorkingDirectory "${CMAKE_BINARY_DIR}")
+
 add_test(NAME WorkingDirectory1 COMMAND WorkingDirectory "${CMAKE_BINARY_DIR}")
 set_tests_properties(WorkingDirectory1 PROPERTIES
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -19,7 +21,7 @@ set_tests_properties(WorkingDirectory2 PROPERTIES
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/.."
 )
 
-get_filename_component(_default_cwd "${EXECUTABLE_OUTPUT_PATH}" PATH)
+set(_default_cwd "${CMAKE_BINARY_DIR}")
 
 # FIXME: How to deal with /debug, /release, etc. with VS or XCode?
 if(${CMAKE_GENERATOR} MATCHES "Makefiles")
@@ -36,3 +38,5 @@ add_test(NAME WorkingDirectory5 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/.. COMMAND
 if(${CMAKE_GENERATOR} MATCHES "Makefiles")
 add_test(WorkingDirectory6 ${EXECUTABLE_OUTPUT_PATH}/WorkingDirectory ${_default_cwd} WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
 endif()
+
+add_subdirectory(subdir)
