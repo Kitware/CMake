@@ -169,7 +169,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       }
 
     std::string source = argv[2];
-    std::string ext = cmSystemTools::GetFilenameExtension(source);
+    std::string ext = cmSystemTools::GetFilenameLastExtension(source);
     const char* lang =(this->Makefile->GetCMakeInstance()->GetGlobalGenerator()
                         ->GetLanguageFromExtension(ext.c_str()));
     const char* def = this->Makefile->GetDefinition("CMAKE_MODULE_PATH");
