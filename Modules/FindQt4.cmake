@@ -354,7 +354,7 @@ ENDIF(QT_QT_LIBRARY)
 
 INCLUDE(CheckSymbolExists)
 INCLUDE(MacroAddFileDependencies)
-INCLUDE(FindPackageHandleStandardArgs)
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 SET(QT_USE_FILE ${CMAKE_ROOT}/Modules/UseQt4.cmake)
 
