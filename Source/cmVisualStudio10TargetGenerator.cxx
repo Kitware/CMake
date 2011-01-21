@@ -597,7 +597,11 @@ WriteGroupSources(const char* name,
   for(std::vector<cmSourceFile*>::const_iterator s = sources.begin();
       s != sources.end(); ++s)
     {
-    cmSourceFile* sf = *s; 
+    cmSourceFile* sf = *s;
+    if(sf->GetExtension() == "obj")
+      {
+      continue;
+      }
     std::string const& source = sf->GetFullPath();
     cmSourceGroup& sourceGroup = 
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
@@ -666,55 +670,56 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {
-    // if it is not a custom command then add it as a c/c++ file,
-    // TODO: need to check for idl or rc
-    if(!(*source)->GetCustomCommand())
+    std::string ext = (*source)->GetExtension();
+    if((*source)->GetCustomCommand() || ext == "obj")
       {
-      bool header = (*source)->GetPropertyAsBool("HEADER_FILE_ONLY")
-        || this->GlobalGenerator->IgnoreFile
-        ((*source)->GetExtension().c_str());
-      const char* lang = (*source)->GetLanguage();
-      bool cl = lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0);
-      bool rc = lang && (strcmp(lang, "RC") == 0);
-      bool idl = (*source)->GetExtension() == "idl";
-      std::string sourceFile = (*source)->GetFullPath();
-      sourceFile =  cmSystemTools::RelativePath(
-        this->Makefile->GetCurrentOutputDirectory(),
-        sourceFile.c_str());
-      this->ConvertToWindowsSlash(sourceFile);
-      // output the source file
-      if(header)
-        {
-        this->WriteString("<ClInclude Include=\"", 2);
-        }
-      else if(cl)
-        {
-        this->WriteString("<ClCompile Include=\"", 2);
-        }
-      else if(rc)
-        {
-        this->WriteString("<ResourceCompile Include=\"", 2);
-        }
-      else if(idl)
-        {
-        this->WriteString("<Midl Include=\"", 2);
-        }
-      else
-        {
-        this->WriteString("<None Include=\"", 2);
-        }
-      (*this->BuildFileStream ) << sourceFile << "\"";
-      // ouput any flags specific to this source file
-      if(!header && cl && this->OutputSourceSpecificFlags(*source))
-        {
-        // if the source file has specific flags the tag
-        // is ended on a new line
-        this->WriteString("</ClCompile>\n", 2);
-        }
-      else
-        {
-        (*this->BuildFileStream ) << " />\n";
-        }
+      continue;
+      }
+    // If it is not a custom command and it is not a pre-built obj file,
+    // then add it as a source (c/c++/header/rc/idl) file
+    bool header = (*source)->GetPropertyAsBool("HEADER_FILE_ONLY")
+      || this->GlobalGenerator->IgnoreFile(ext.c_str());
+    const char* lang = (*source)->GetLanguage();
+    bool cl = lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0);
+    bool rc = lang && (strcmp(lang, "RC") == 0);
+    bool idl = ext == "idl";
+    std::string sourceFile = (*source)->GetFullPath();
+    sourceFile =  cmSystemTools::RelativePath(
+      this->Makefile->GetCurrentOutputDirectory(),
+      sourceFile.c_str());
+    this->ConvertToWindowsSlash(sourceFile);
+    // output the source file
+    if(header)
+      {
+      this->WriteString("<ClInclude Include=\"", 2);
+      }
+    else if(cl)
+      {
+      this->WriteString("<ClCompile Include=\"", 2);
+      }
+    else if(rc)
+      {
+      this->WriteString("<ResourceCompile Include=\"", 2);
+      }
+    else if(idl)
+      {
+      this->WriteString("<Midl Include=\"", 2);
+      }
+    else
+      {
+      this->WriteString("<None Include=\"", 2);
+      }
+    (*this->BuildFileStream ) << sourceFile << "\"";
+    // ouput any flags specific to this source file
+    if(!header && cl && this->OutputSourceSpecificFlags(*source))
+      {
+      // if the source file has specific flags the tag
+      // is ended on a new line
+      this->WriteString("</ClCompile>\n", 2);
+      }
+    else
+      {
+      (*this->BuildFileStream ) << " />\n";
       }
     }
   this->WriteString("</ItemGroup>\n", 1);
