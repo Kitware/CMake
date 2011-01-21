@@ -114,17 +114,22 @@ std::string cmGlobalVisualStudio10Generator
 ::GenerateBuildCommand(const char* makeProgram,
                        const char *projectName, 
                        const char* additionalOptions, const char *targetName,
-                       const char* config, bool ignoreErrors, bool)
+                       const char* config, bool ignoreErrors, bool fast)
 {
-  // Ingoring errors is not implemented in visual studio 6
-  (void) ignoreErrors;
-
-  
   // now build the test
   std::string makeCommand 
     = cmSystemTools::ConvertToOutputPath(makeProgram);
   std::string lowerCaseCommand = makeCommand;
   cmSystemTools::LowerCase(lowerCaseCommand);
+
+  // If makeProgram is devenv, parent class knows how to generate command:
+  if (lowerCaseCommand.find("devenv") != std::string::npos)
+    {
+    return cmGlobalVisualStudio7Generator::GenerateBuildCommand(makeProgram,
+      projectName, additionalOptions, targetName, config, ignoreErrors, fast);
+    }
+
+  // Otherwise, assume MSBuild command line, and construct accordingly.
 
   // if there are spaces in the makeCommand, assume a full path
   // and convert it to a path with no spaces in it as the
