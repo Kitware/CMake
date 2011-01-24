@@ -2691,7 +2691,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
     }
   // to save time we pass the EnableLanguage info directly
   gg->EnableLanguagesFromGenerator
-    (this->LocalGenerator->GetGlobalGenerator());
+    (this->LocalGenerator->GetGlobalGenerator(), this);
   if(this->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS"))
     {
     cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS",
