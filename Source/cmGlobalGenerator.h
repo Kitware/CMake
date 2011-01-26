@@ -79,7 +79,8 @@ public:
   /**
    * Try to determine system infomation, get it from another generator
    */
-  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen);
+  virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen,
+                                            cmMakefile* mf);
 
   /**
    * Try running cmake and building a file. This is used for dynalically
@@ -325,11 +326,13 @@ protected:
   virtual bool UseFolderProperty();
 
 private:
+  cmMakefile* TryCompileOuterMakefile;
   float FirstTimeProgress;
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator
   std::map<cmStdString, bool> IgnoreExtensions;
   std::map<cmStdString, bool> LanguageEnabled;
+  std::set<cmStdString> LanguagesReady; // Ready for try_compile
   std::map<cmStdString, cmStdString> OutputExtensions;
   std::map<cmStdString, cmStdString> LanguageToOutputExtension;
   std::map<cmStdString, cmStdString> ExtensionToLanguage;

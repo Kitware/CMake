@@ -56,6 +56,7 @@ cmGlobalGenerator::cmGlobalGenerator()
 
   this->ExtraGenerator = 0;
   this->CurrentLocalGenerator = 0;
+  this->TryCompileOuterMakefile = 0;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -199,6 +200,34 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     cmSystemTools::SetFatalErrorOccured();
     return;
     }
+
+  if(this->TryCompileOuterMakefile)
+    {
+    // In a try-compile we can only enable languages provided by caller.
+    for(std::vector<std::string>::const_iterator li = languages.begin();
+        li != languages.end(); ++li)
+      {
+      if(*li == "NONE")
+        {
+        this->SetLanguageEnabled("NONE", mf);
+        }
+      else
+        {
+        const char* lang = li->c_str();
+        if(this->LanguagesReady.find(lang) == this->LanguagesReady.end())
+          {
+          cmOStringStream e;
+          e << "The test project needs language "
+            << lang << " which is not enabled.";
+          this->TryCompileOuterMakefile
+            ->IssueMessage(cmake::FATAL_ERROR, e.str());
+          cmSystemTools::SetFatalErrorOccured();
+          return;
+          }
+        }
+      }
+    }
+
   mf->AddDefinition("RUN_CONFIGURE", true);
   std::string rootBin = mf->GetHomeOutputDirectory();
   rootBin += cmake::GetCMakeFilesDirectory();
@@ -208,15 +237,6 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   // files from the parent cmake bin dir, into the try compile bin dir
   if(this->ConfiguredFilesPath.size())
     {
-    for(std::vector<std::string>::const_iterator l = languages.begin();
-        l != languages.end(); ++l)
-      {
-      if(*l == "NONE")
-        {
-        this->SetLanguageEnabled("NONE", mf);
-        break;
-        }
-      }
     rootBin = this->ConfiguredFilesPath;
     }
 
@@ -421,6 +441,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       {
       this->SetLanguageEnabledMaps(lang, mf);
       }
+    this->LanguagesReady.insert(lang);
 
     std::string compilerName = "CMAKE_";
     compilerName += lang;
@@ -1333,9 +1354,11 @@ cmLocalGenerator *cmGlobalGenerator::CreateLocalGenerator()
   return lg;
 }
 
-void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
+void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen,
+                                                     cmMakefile* mf)
 {
   this->SetConfiguredFilesPath(gen);
+  this->TryCompileOuterMakefile = mf;
   const char* make =
     gen->GetCMakeInstance()->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
   this->GetCMakeInstance()->AddCacheEntry("CMAKE_MAKE_PROGRAM", make,
@@ -1343,6 +1366,7 @@ void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen )
                                           cmCacheManager::FILEPATH);
   // copy the enabled languages
   this->LanguageEnabled = gen->LanguageEnabled;
+  this->LanguagesReady = gen->LanguagesReady;
   this->ExtensionToLanguage = gen->ExtensionToLanguage;
   this->IgnoreExtensions = gen->IgnoreExtensions;
   this->LanguageToOutputExtension = gen->LanguageToOutputExtension;
