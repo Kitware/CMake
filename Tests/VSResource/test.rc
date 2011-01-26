@@ -1,5 +1,10 @@
 #ifdef CMAKE_RCDEFINE
 hello TEXT DISCARDABLE CMAKE_RCDEFINE
+
+STRINGTABLE
+BEGIN
+  1 CMAKE_RCDEFINE
+END
 #else
 #error "resource compiler did not get defines from command line!"
 #endif
