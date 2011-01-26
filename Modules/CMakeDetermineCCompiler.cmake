@@ -144,7 +144,8 @@ IF(NOT CMAKE_C_COMPILER_ID_RUN)
 ENDIF(NOT CMAKE_C_COMPILER_ID_RUN)
 
 # If we have a gcc cross compiler, they have usually some prefix, like
-# e.g. powerpc-linux-gcc, arm-elf-gcc or i586-mingw32msvc-gcc .
+# e.g. powerpc-linux-gcc, arm-elf-gcc or i586-mingw32msvc-gcc, optionally
+# with a 3-component version number at the end (e.g. arm-eabi-gcc-4.5.2).
 # The other tools of the toolchain usually have the same prefix
 # NAME_WE cannot be used since then this test will fail for names lile
 # "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be
@@ -153,9 +154,9 @@ IF (CMAKE_CROSSCOMPILING
     AND "${CMAKE_C_COMPILER_ID}" MATCHES "GNU"
     AND NOT _CMAKE_TOOLCHAIN_PREFIX)
   GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
-  IF (COMPILER_BASENAME MATCHES "^(.+-)g?cc(\\.exe)?$")
+  IF (COMPILER_BASENAME MATCHES "^(.+-)g?cc(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
     SET(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)g?cc(\\.exe)?$")
+  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)g?cc(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
 
   # if "llvm-" is part of the prefix, remove it, since llvm doesn't have its own binutils
   # but uses the regular ar, objcopy, etc. (instead of llvm-objcopy etc.)
