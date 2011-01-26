@@ -1522,7 +1522,8 @@ void cmLocalVisualStudio7Generator
             fileOptions.OutputAdditionalOptions(fout, "\t\t\t\t\t", "\n");
             fileOptions.OutputFlagMap(fout, "\t\t\t\t\t");
             fileOptions.OutputPreprocessorDefinitions(fout,
-                                                      "\t\t\t\t\t", "\n", lang);
+                                                      "\t\t\t\t\t", "\n",
+                                                      lang);
             }
           if(!fc.AdditionalDeps.empty())
             {
