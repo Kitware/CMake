@@ -15,10 +15,10 @@
 # determine the compiler to use for C++ programs
 # NOTE, a generator may set CMAKE_CXX_COMPILER before
 # loading this file to force a compiler.
-# use environment variable CXX first if defined by user, next use 
+# use environment variable CXX first if defined by user, next use
 # the cmake variable CMAKE_GENERATOR_CXX which can be defined by a generator
 # as a default compiler
-# If the internal cmake variable _CMAKE_TOOLCHAIN_PREFIX is set, this is used 
+# If the internal cmake variable _CMAKE_TOOLCHAIN_PREFIX is set, this is used
 # as prefix for the tools (e.g. arm-elf-g++, arm-elf-ar etc.)
 #
 # Sets the following variables:
@@ -63,7 +63,7 @@ IF(NOT CMAKE_CXX_COMPILER)
     FIND_PROGRAM(CMAKE_CXX_COMPILER NAMES ${CMAKE_CXX_COMPILER_LIST} PATHS ${_CMAKE_USER_C_COMPILER_PATH} DOC "C++ compiler" NO_DEFAULT_PATH)
   ENDIF (_CMAKE_USER_C_COMPILER_PATH)
   FIND_PROGRAM(CMAKE_CXX_COMPILER NAMES ${CMAKE_CXX_COMPILER_LIST} DOC "C++ compiler")
-  
+
   IF(CMAKE_CXX_COMPILER_INIT AND NOT CMAKE_CXX_COMPILER)
     SET(CMAKE_CXX_COMPILER "${CMAKE_CXX_COMPILER_INIT}" CACHE FILEPATH "C++ compiler" FORCE)
   ENDIF(CMAKE_CXX_COMPILER_INIT AND NOT CMAKE_CXX_COMPILER)
@@ -72,7 +72,7 @@ ELSE(NOT CMAKE_CXX_COMPILER)
 # we only get here if CMAKE_CXX_COMPILER was specified using -D or a pre-made CMakeCache.txt
 # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
 #
-# if CMAKE_CXX_COMPILER is a list of length 2, use the first item as 
+# if CMAKE_CXX_COMPILER is a list of length 2, use the first item as
 # CMAKE_CXX_COMPILER and the 2nd one as CMAKE_CXX_COMPILER_ARG1
 
   LIST(LENGTH CMAKE_CXX_COMPILER _CMAKE_CXX_COMPILER_LIST_LENGTH)
@@ -81,9 +81,9 @@ ELSE(NOT CMAKE_CXX_COMPILER)
     LIST(GET CMAKE_CXX_COMPILER 0 CMAKE_CXX_COMPILER)
   ENDIF("${_CMAKE_CXX_COMPILER_LIST_LENGTH}" EQUAL 2)
 
-# if a compiler was specified by the user but without path, 
+# if a compiler was specified by the user but without path,
 # now try to find it with the full path
-# if it is found, force it into the cache, 
+# if it is found, force it into the cache,
 # if not, don't overwrite the setting (which was given by the user) with "NOTFOUND"
 # if the CXX compiler already had a path, reuse it for searching the C compiler
   GET_FILENAME_COMPONENT(_CMAKE_USER_CXX_COMPILER_PATH "${CMAKE_CXX_COMPILER}" PATH)
@@ -151,19 +151,20 @@ IF(NOT CMAKE_CXX_COMPILER_ID_RUN)
   ENDIF("${CMAKE_CXX_PLATFORM_ID}" MATCHES "MinGW")
 ENDIF(NOT CMAKE_CXX_COMPILER_ID_RUN)
 
-# if we have a g++ cross compiler, they have usually some prefix, like 
-# e.g. powerpc-linux-g++, arm-elf-g++ or i586-mingw32msvc-g++
-# the other tools of the toolchain usually have the same prefix
+# if we have a g++ cross compiler, they have usually some prefix, like
+# e.g. powerpc-linux-g++, arm-elf-g++ or i586-mingw32msvc-g++ , optionally
+# with a 3-component version number at the end (e.g. arm-eabi-gcc-4.5.2).
+# The other tools of the toolchain usually have the same prefix
 # NAME_WE cannot be used since then this test will fail for names lile
-# "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be 
+# "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
-IF (CMAKE_CROSSCOMPILING  
+IF (CMAKE_CROSSCOMPILING
     AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU"
     AND NOT _CMAKE_TOOLCHAIN_PREFIX)
   GET_FILENAME_COMPONENT(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
-  IF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(\\.exe)?$")
+  IF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
     SET(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(\\.exe)?$")
+  ENDIF (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
 
   # if "llvm-" is part of the prefix, remove it, since llvm doesn't have its own binutils
   # but uses the regular ar, objcopy, etc. (instead of llvm-objcopy etc.)
@@ -171,7 +172,7 @@ IF (CMAKE_CROSSCOMPILING
     SET(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
   ENDIF ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
 
-ENDIF (CMAKE_CROSSCOMPILING  
+ENDIF (CMAKE_CROSSCOMPILING
     AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU"
     AND NOT _CMAKE_TOOLCHAIN_PREFIX)
 
