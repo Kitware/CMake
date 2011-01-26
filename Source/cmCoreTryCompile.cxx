@@ -1,6 +1,6 @@
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+  Copyright 2000-2011 Kitware, Inc., Insight Software Consortium
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -56,7 +56,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       {
       if ( argv.size() <= (i+1) )
         {
-        cmSystemTools::Error(
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR,
           "OUTPUT_VARIABLE specified but there is no variable");
         return -1;
         }
@@ -92,7 +92,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       {
       if ( argv.size() <= (i+1) )
         {
-        cmSystemTools::Error(
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR,
           "COPY_FILE specified but there is no variable");
         return -1;
         }
@@ -120,13 +120,14 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     // only valid for srcfile signatures
     if (compileFlags.size())
       {
-      cmSystemTools::Error(
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
         "COMPILE_FLAGS specified on a srcdir type TRY_COMPILE");
       return -1;
       }
     if (copyFile.size())
       {
-      cmSystemTools::Error("COPY_FILE specified on a srcdir type TRY_COMPILE");
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+        "COPY_FILE specified on a srcdir type TRY_COMPILE");
       return -1;
       }
     }
@@ -136,9 +137,10 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   // do not allow recursive try Compiles
   if (this->BinaryDirectory == this->Makefile->GetHomeOutputDirectory())
     {
-    cmSystemTools::Error(
-      "Attempt at a recursive or nested TRY_COMPILE in directory ",
-      this->BinaryDirectory.c_str());
+    cmOStringStream e;
+    e << "Attempt at a recursive or nested TRY_COMPILE in directory\n"
+      << "  " << this->BinaryDirectory << "\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return -1;
     }
   
@@ -158,9 +160,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     FILE *fout = fopen(outFileName.c_str(),"w");
     if (!fout)
       {
-      cmSystemTools::Error("Failed to create CMakeList file for ", 
-                           outFileName.c_str());
-      cmSystemTools::ReportLastSystemError("");
+      cmOStringStream e;
+      e << "Failed to open\n"
+        << "  " << outFileName.c_str() << "\n"
+        << cmSystemTools::GetLastSystemError();
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return -1;
       }
 
@@ -199,10 +203,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       }
     else
       {
+      fclose(fout);
       cmOStringStream err;
-      err << "Unknown extension \"" << ext << "\" for file \""
-          << source << "\".  TRY_COMPILE only works for enabled languages.\n"
-          << "Currently enabled languages are:";
+      err << "Unknown extension \"" << ext << "\" for file\n"
+          << "  " << source << "\n"
+          << "try_compile() works only for enabled languages.  "
+          << "Currently these are:\n ";
       std::vector<std::string> langs;
       this->Makefile->GetCMakeInstance()->GetGlobalGenerator()->
         GetEnabledLanguages(langs);
@@ -211,9 +217,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         {
         err << " " << *l;
         }
-      err << "\nSee PROJECT command for help enabling other languages.";
-      cmSystemTools::Error(err.str().c_str());
-      fclose(fout);
+      err << "\nSee project() command to enable other languages.";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, err.str());
       return -1;
       }
     std::string langFlags = "CMAKE_";
@@ -340,17 +345,15 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
                                         copyFile.c_str()))
         {
         cmOStringStream emsg;
-        emsg << "Could not COPY_FILE.\n"
-          << "  OutputFile: '" << this->OutputFile.c_str() << "'\n"
-          << "    copyFile: '" << copyFile.c_str() << "'\n";
-
-        if (this->FindErrorMessage.size())
+        emsg << "Cannot copy output executable\n"
+             << "  '" << this->OutputFile.c_str() << "'\n"
+             << "to destination specified by COPY_FILE:\n"
+             << "  '" << copyFile.c_str() << "'\n";
+        if(!this->FindErrorMessage.empty())
           {
-          emsg << "\n";
-          emsg << this->FindErrorMessage.c_str() << "\n";
+          emsg << this->FindErrorMessage.c_str();
           }
-
-        cmSystemTools::Error(emsg.str().c_str());
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR, emsg.str());
         return -1;
         }
       }
@@ -457,18 +460,11 @@ void cmCoreTryCompile::FindOutputFile(const char* targetName)
     }
 
   cmOStringStream emsg;
-  emsg << "Unable to find executable for " << this->GetName() << ": tried \"";
+  emsg << "Unable to find the executable at any of:\n";
   for (unsigned int i = 0; i < searchDirs.size(); ++i)
     {
-    emsg << this->BinaryDirectory << searchDirs[i] << tmpOutputFile;
-    if (i < searchDirs.size() - 1)
-      {
-      emsg << "\" and \"";
-      }
-    else
-      {
-      emsg << "\".";
-      }
+    emsg << "  " << this->BinaryDirectory << searchDirs[i]
+         << tmpOutputFile << "\n";
     }
   this->FindErrorMessage = emsg.str();
   return;
