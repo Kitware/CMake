@@ -9,8 +9,7 @@ ADD_CUSTOM_COMMAND(
 )
 
 SET_SOURCE_FILES_PROPERTIES(
-  "${TestWorkingDir_BINARY_DIR}/working.c" 
-  "${TestWorkingDir_BINARY_DIR}/customTarget.c" 
+  "${TestWorkingDir_BINARY_DIR}/customTarget.c"
   PROPERTIES GENERATED 1)
 
 ADD_EXECUTABLE(working "${TestWorkingDir_BINARY_DIR}/working.c" 
@@ -23,3 +22,14 @@ ADD_CUSTOM_TARGET(
 )
 
 ADD_DEPENDENCIES(working Custom)
+
+file(MAKE_DIRECTORY ${TestWorkingDir_BINARY_DIR}/work)
+add_custom_command(
+  OUTPUT working2.c # Relative to build tree
+  COMMAND "${CMAKE_COMMAND}" -E copy ${TestWorkingDir_SOURCE_DIR}/working.c.in ../working2.c
+  DEPENDS ${TestWorkingDir_SOURCE_DIR}/working.c.in/ # trailing slash should be removed
+  WORKING_DIRECTORY ${TestWorkingDir_BINARY_DIR}/work
+  )
+add_executable(working2 working2.c ${TestWorkingDir_BINARY_DIR}/customTarget.c)
+
+add_dependencies(working2 Custom2)
