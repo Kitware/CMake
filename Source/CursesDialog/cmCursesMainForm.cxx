@@ -334,32 +334,35 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
     }
 
   // Re-adjust the fields according to their place
-  bool isNewPage;
-  int i=0;
   this->NumberOfPages = 1;
-  std::vector<cmCursesCacheEntryComposite*>::iterator it;
-  for (it = this->Entries->begin(); it != this->Entries->end(); ++it)
+  if (height > 0)
     {
-    cmCacheManager::CacheIterator mit = 
-      this->CMakeInstance->GetCacheManager()->GetCacheIterator((*it)->GetValue());
-    if (mit.IsAtEnd() ||
-        (!this->AdvancedMode && mit.GetPropertyAsBool("ADVANCED")))
+    bool isNewPage;
+    int i=0;
+    std::vector<cmCursesCacheEntryComposite*>::iterator it;
+    for (it = this->Entries->begin(); it != this->Entries->end(); ++it)
       {
-      continue;
-      }
-    int row = (i % height) + 1;  
-    int page = (i / height) + 1;
-    isNewPage = ( page > 1 ) && ( row == 1 );
+      cmCacheManager::CacheIterator mit =
+        this->CMakeInstance->GetCacheManager()->GetCacheIterator((*it)->GetValue());
+      if (mit.IsAtEnd() ||
+          (!this->AdvancedMode && mit.GetPropertyAsBool("ADVANCED")))
+        {
+        continue;
+        }
+      int row = (i % height) + 1;
+      int page = (i / height) + 1;
+      isNewPage = ( page > 1 ) && ( row == 1 );
 
-    if (isNewPage)
-      {
-      this->NumberOfPages++;
+      if (isNewPage)
+        {
+        this->NumberOfPages++;
+        }
+      (*it)->Label->Move(left, top+row-1, isNewPage);
+      (*it)->IsNewLabel->Move(left+32, top+row-1, false);
+      (*it)->Entry->Move(left+33, top+row-1, false);
+      (*it)->Entry->SetPage(this->NumberOfPages);
+      i++;
       }
-    (*it)->Label->Move(left, top+row-1, isNewPage);
-    (*it)->IsNewLabel->Move(left+32, top+row-1, false);
-    (*it)->Entry->Move(left+33, top+row-1, false);
-    (*it)->Entry->SetPage(this->NumberOfPages);
-    i++;
     }
 
   // Post the form
