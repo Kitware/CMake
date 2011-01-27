@@ -97,6 +97,8 @@ protected:
   QAction* ConfigureAction;
   QAction* GenerateAction;
   QAction* SuppressDevWarningsAction;
+  QAction* WarnUninitializedAction;
+  QAction* WarnUnusedAction;
   QAction* InstallForCommandLineAction;
   State CurrentState;
 

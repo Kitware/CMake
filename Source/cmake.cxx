@@ -138,9 +138,20 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 #endif
 }
 
+void cmWarnUnusedCliWarning(const std::string& variable,
+  int, void* ctx, const char*, const cmMakefile*)
+{
+  cmake* cm = reinterpret_cast<cmake*>(ctx);
+  cm->MarkCliAsUsed(variable);
+}
+
 cmake::cmake()
 {
   this->Trace = false;
+  this->WarnUninitialized = false;
+  this->WarnUnused = false;
+  this->WarnUnusedCli = true;
+  this->CheckSystemVars = false;
   this->SuppressDevWarnings = false;
   this->DoSuppressDevWarnings = false;
   this->DebugOutput = false;
@@ -367,6 +378,10 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         {
         this->CacheManager->AddCacheEntry(var.c_str(), value.c_str(),
           "No help, variable specified on the command line.", type);
+        if(this->WarnUnusedCli)
+          {
+          this->WatchUnusedCli(var.c_str());
+          }
         }
       else
         {
@@ -509,9 +524,10 @@ void cmake::ReadListFile(const char *path)
 }
 
 // Parse the args
-void cmake::SetArgs(const std::vector<std::string>& args)
+void cmake::SetArgs(const std::vector<std::string>& args,
+                    bool directoriesSetBefore)
 {
-  bool directoriesSet = false;
+  bool directoriesSet = directoriesSetBefore;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
@@ -612,6 +628,28 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       std::cout << "Running with trace output on.\n";
       this->SetTrace(true);
+      }
+    else if(arg.find("--warn-uninitialized",0) == 0)
+      {
+      std::cout << "Warn about uninitialized values.\n";
+      this->SetWarnUninitialized(true);
+      }
+    else if(arg.find("--warn-unused-vars",0) == 0)
+      {
+      std::cout << "Finding unused variables.\n";
+      this->SetWarnUnused(true);
+      }
+    else if(arg.find("--no-warn-unused-cli",0) == 0)
+      {
+      std::cout << "Not searching for unused variables given on the " <<
+                   "command line.\n";
+      this->SetWarnUnusedCli(false);
+      }
+    else if(arg.find("--check-system-vars",0) == 0)
+      {
+      std::cout << "Also check system files when warning about unused and " <<
+                   "uninitialized variables.\n";
+      this->SetCheckSystemVars(true);
       }
     else if(arg.find("-G",0) == 0)
       {
@@ -2272,6 +2310,11 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   std::string oldstartoutputdir = this->GetStartOutputDirectory();
   this->SetStartDirectory(this->GetHomeDirectory());
   this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
+  const bool warncli = this->WarnUnusedCli;
+  if (!this->ScriptMode)
+    {
+    this->WarnUnusedCli = false;
+    }
   int ret = this->Configure();
   if (ret || this->ScriptMode)
     {
@@ -2293,6 +2336,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 #endif
     return ret;
     }
+  this->WarnUnusedCli = warncli;
   ret = this->Generate();
   std::string message = "Build files have been written to: ";
   message += this->GetHomeOutputDirectory();
@@ -2835,6 +2879,10 @@ const char* cmake::GetCPackCommand()
     return this->CPackCommand.c_str();
 }
 
+void cmake::MarkCliAsUsed(const std::string& variable)
+{
+  this->UsedCliVariables[variable] = true;
+}
 
 void cmake::GenerateGraphViz(const char* fileName) const
 {
@@ -4254,4 +4302,41 @@ int cmake::Build(const std::string& dir,
                     makeProgram.c_str(),
                     config.c_str(), clean, false, 0, true,
                     0, nativeOptions);
+}
+
+void cmake::WatchUnusedCli(const char* var)
+{
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
+  this->UsedCliVariables[var] = false;
+#endif
+}
+
+void cmake::UnwatchUnusedCli(const char* var)
+{
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  this->VariableWatch->RemoveWatch(var, cmWarnUnusedCliWarning);
+  this->UsedCliVariables[var] = true;
+#endif
+}
+
+void cmake::RunCheckForUnusedVariables(const std::string& reason) const
+{
+#ifdef CMAKE_BUILD_WITH_CMAKE
+    if(this->WarnUnusedCli)
+      {
+      std::map<std::string, bool>::const_iterator it;
+      for(it = this->UsedCliVariables.begin();
+          it != this->UsedCliVariables.end(); ++it)
+        {
+        if(!it->second)
+          {
+          std::string message = "CMake Warning: The variable, '" + it->first +
+            "', specified manually, was not used during the " + reason +
+            ".";
+          cmSystemTools::Message(message.c_str());
+          }
+        }
+      }
+#endif
 }

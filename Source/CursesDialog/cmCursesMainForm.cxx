@@ -789,6 +789,7 @@ void cmCursesMainForm::RemoveEntry(const char* value)
     const char* val = (*it)->GetValue();
     if (  val && !strcmp(value, val) )
       {
+      this->CMakeInstance->UnwatchUnusedCli(value);
       this->Entries->erase(it);
       break;
       }

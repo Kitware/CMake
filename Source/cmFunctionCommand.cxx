@@ -113,6 +113,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass
   cmOStringStream strStream;
   strStream << expandedArgs.size();
   this->Makefile->AddDefinition("ARGC",strStream.str().c_str());
+  this->Makefile->MarkVariableAsUsed("ARGC");
 
   // set the values for ARGV0 ARGV1 ...
   for (unsigned int t = 0; t < expandedArgs.size(); ++t)
@@ -121,6 +122,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     tmpStream << "ARGV" << t;
     this->Makefile->AddDefinition(tmpStream.str().c_str(), 
                                   expandedArgs[t].c_str());
+    this->Makefile->MarkVariableAsUsed(tmpStream.str().c_str());
     }
   
   // define the formal arguments
@@ -153,7 +155,9 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     cnt ++;
     }
   this->Makefile->AddDefinition("ARGV", argvDef.c_str());
+  this->Makefile->MarkVariableAsUsed("ARGV");
   this->Makefile->AddDefinition("ARGN", argnDef.c_str());
+  this->Makefile->MarkVariableAsUsed("ARGN");
 
   // Invoke all the functions that were collected in the block.
   // for each function

@@ -61,6 +61,14 @@ public:
   unsigned int GetCacheMajorVersion();
   unsigned int GetCacheMinorVersion();
 
+  /* Check for unused variables in this scope */
+  void CheckForUnusedVariables() const;
+  /* Mark a variable as used */
+  void MarkVariableAsUsed(const char* var);
+  /* return true if a variable has been initialized */
+  bool VariableInitialized(const char* ) const;
+  /* return true if a variable has been used */
+  bool VariableUsed(const char* ) const;
   /** Return whether compatibility features needed for a version of
       the cache or lower should be enabled.  */
   bool NeedCacheCompatibility(int major, int minor);
@@ -836,7 +844,10 @@ public:
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
-  
+
+  // Check for a an unused variable
+  void CheckForUnused(const char* reason, const char* name) const;
+
   std::string Prefix;
   std::vector<std::string> AuxSourceDirectories; // 
 
@@ -928,6 +939,10 @@ private:
 
   // should this makefile be processed before or after processing the parent
   bool PreOrder;
+
+  // Unused variable flags
+  bool WarnUnused;
+  bool CheckSystemVars;
 
   // stack of list files being read 
   std::deque<cmStdString> ListFileStack;
