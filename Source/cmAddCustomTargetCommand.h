@@ -79,6 +79,8 @@ public:
       "empty target will be created. "
       "If WORKING_DIRECTORY is set, then the command will be run in that "
       "directory. "
+      "If it is a relative path it will be interpreted relative to the "
+      "build tree directory corresponding to the current source directory. "
       "If COMMENT is set, the value will be displayed as a "
       "message before the commands are executed at build time. "
       "Dependencies listed with the DEPENDS argument may reference files "
