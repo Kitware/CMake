@@ -83,7 +83,7 @@
 #endif
 
 /* For windows compilers MSVC and Intel we can determine
-   the architecture of the compiler being used.  This is becase
+   the architecture of the compiler being used.  This is because
    the compilers do not have flags that can change the architecture,
    but rather depend on which compiler is being used
 */

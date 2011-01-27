@@ -37,7 +37,7 @@
  */
 #if defined(__BORLANDC__) && __BORLANDC__ >= 0x560
 # define __LA_STDINT_H <stdint.h>
-#elif !defined(__WATCOMC__) && !defined(_MSC_VER) && !defined(__INTERIX) && !defined(__BORLANDC__)
+#elif !defined(__WATCOMC__) && !defined(_MSC_VER) && !defined(__INTERIX) && !defined(__BORLANDC__) && !defined(__osf__)
 # define __LA_STDINT_H <inttypes.h>
 #endif
 
@@ -68,7 +68,11 @@
 # endif
 #else
 #include <unistd.h>  /* ssize_t, uid_t, and gid_t */
-#define __LA_INT64_T    int64_t
+#if defined(__osf__)
+#  define __LA_INT64_T    long long
+#else
+#  define __LA_INT64_T    int64_t
+#endif
 #define __LA_SSIZE_T    ssize_t
 #define __LA_UID_T  uid_t
 #define __LA_GID_T  gid_t

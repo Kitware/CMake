@@ -1392,8 +1392,8 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
     cmOStringStream e;
     e << "Attempt to add link library \""
       << lib << "\" to target \""
-      << target << "\" which is not built by this project.";
-    cmSystemTools::Error(e.str().c_str());
+      << target << "\" which is not built in this directory.";
+    this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     }
 }
 
@@ -3784,6 +3784,12 @@ cmTarget* cmMakefile::FindTargetToUse(const char* name)
   if(imported != this->ImportedTargets.end())
     {
     return imported->second;
+    }
+
+  // Look for a target built in this directory.
+  if(cmTarget* t = this->FindTarget(name))
+    {
+    return t;
     }
 
   // Look for a target built in this project.

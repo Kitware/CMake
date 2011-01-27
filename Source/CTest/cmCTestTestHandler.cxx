@@ -2190,7 +2190,6 @@ bool cmCTestTestHandler::SetTestsProperties(
               {
               rtit->Labels.push_back(*crit);
               }
-            
             }
           if ( key == "MEASUREMENT" )
             {
@@ -2218,6 +2217,10 @@ bool cmCTestTestHandler::SetTestsProperties(
                   cmsys::RegularExpression(crit->c_str()),
                   std::string(crit->c_str())));
               }
+            }
+          if ( key == "WORKING_DIRECTORY" )
+            {
+            rtit->Directory = val;
             }
           }
         }

@@ -35,6 +35,9 @@ cmCPackGenerator::cmCPackGenerator()
   this->GeneratorVerbose = false;
   this->MakefileMap = 0;
   this->Logger = 0;
+  this->allGroupInOne = false;
+  this->allComponentInOne = false;
+  this->ignoreComponentGroup = false;
 }
 
 //----------------------------------------------------------------------
@@ -220,7 +223,7 @@ int cmCPackGenerator::InstallProject()
 
   // If the CPackConfig file sets CPACK_INSTALLED_DIRECTORIES
   // then glob it and copy it to CPACK_TEMPORARY_DIRECTORY
-  // This is used in Source packageing
+  // This is used in Source packaging
   if ( !this->InstallProjectViaInstalledDirectories(
       setDestDir, tempInstallDirectory) )
     {
@@ -548,7 +551,14 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       std::vector<std::string> componentsVector;
 
       bool componentInstall = false;
-      if (this->SupportsComponentInstallation())
+      /*
+       * We do a component install iff
+       *    - the CPack generator support component
+       *    - the user did not request Monolithic install
+       *      (this works at CPack time too)
+       */
+      if (this->SupportsComponentInstallation() &
+          !(this->IsSet("CPACK_MONOLITHIC_INSTALL")))
         {
         // Determine the installation types for this project (if provided).
         std::string installTypesVar = "CPACK_" 
@@ -691,7 +701,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           //
           // If DESTDIR has been 'internally set ON' this means that
           // the underlying CPack specific generator did ask for that
-          // In this case we may overrode CPACK_INSTALL_PREFIX with
+          // In this case we may override CPACK_INSTALL_PREFIX with
           // CPACK_PACKAGING_INSTALL_PREFIX
           // I know this is tricky and awkward but it's the price for
           // CPACK_SET_DESTDIR backward compatibility.
@@ -727,7 +737,20 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             {
             dir = tempInstallDirectory + "/" + dir;
             }
-
+          /*
+           *  We must re-set DESTDIR for each component
+           *  We must not add the CPACK_INSTALL_PREFIX part because
+           *  it will be added using the override of CMAKE_INSTALL_PREFIX
+           *  The main reason for this awkward trick is that
+           *  are using DESTDIR for 2 different reasons:
+           *     - Because it was asked by the CPack Generator or the user
+           *       using CPACK_SET_DESTDIR
+           *     - Because it was already used for component install
+           *       in order to put things in subdirs...
+           */
+          cmSystemTools::PutEnv(
+              (std::string("DESTDIR=")+tempInstallDirectory).c_str()
+                               );
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "- Creating directory: '" << dir << "'" << std::endl);
 
@@ -1047,7 +1070,13 @@ bool cmCPackGenerator::IsSet(const char* name) const
 }
 
 //----------------------------------------------------------------------
-const char* cmCPackGenerator::GetOption(const char* op)
+bool cmCPackGenerator::IsOn(const char* name) const
+{
+  return cmSystemTools::IsOn(GetOption(name));
+}
+
+//----------------------------------------------------------------------
+const char* cmCPackGenerator::GetOption(const char* op) const
 { 
   const char* ret = this->MakefileMap->GetDefinition(op);
   if(!ret)
@@ -1192,6 +1221,70 @@ int cmCPackGenerator::CleanTemporaryDirectory()
       return 0;
       }
     }
+  return 1;
+}
+
+//----------------------------------------------------------------------
+int cmCPackGenerator::PrepareGroupingKind()
+{
+  // The default behavior is to create 1 package by component group
+  // unless the user asked to put all COMPONENTS in a single package
+  allGroupInOne = (NULL !=
+                    (this->GetOption(
+                      "CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE")));
+  allComponentInOne = (NULL !=
+                        (this->GetOption(
+                          "CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE")));
+  ignoreComponentGroup = (NULL !=
+                           (this->GetOption(
+                             "CPACK_COMPONENTS_IGNORE_GROUPS")));
+
+  std::string groupingType;
+
+  // Second way to specify grouping
+  if (NULL != this->GetOption("CPACK_COMPONENTS_GROUPING")) {
+     groupingType = this->GetOption("CPACK_COMPONENTS_GROUPING");
+  }
+
+  if (groupingType.length()>0)
+    {
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE,  "["
+        << this->Name << "]"
+        << " requested component grouping = "<< groupingType <<std::endl);
+    if (groupingType == "ALL_GROUP_IN_ONE")
+      {
+      allGroupInOne = true;
+      }
+    else if (groupingType == "ALL_COMPONENT_IN_ONE")
+      {
+      allComponentInOne = true;
+      }
+    else if (groupingType == "IGNORE")
+      {
+      ignoreComponentGroup = true;
+      }
+    else
+      {
+      cmCPackLogger(cmCPackLog::LOG_WARNING, "["
+              << this->Name << "]"
+              << " requested component grouping type <"<< groupingType
+              << "> UNKNOWN not in (ALL_GROUP_IN_ONE,"
+                    "ALL_COMPONENT_IN_ONE,IGNORE)" <<std::endl);
+      }
+    }
+
+  // Some components were defined but NO group
+  // force ignoreGroups
+  if (this->ComponentGroups.empty() && (!this->Components.empty())
+      && (!ignoreComponentGroup)) {
+    cmCPackLogger(cmCPackLog::LOG_WARNING, "["
+              << this->Name << "]"
+              << " Some Components defined but NO component group:"
+              << " Ignoring component group."
+              << std::endl);
+    ignoreComponentGroup = true;
+  }
+
   return 1;
 }
 

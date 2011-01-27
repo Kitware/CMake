@@ -88,8 +88,9 @@ public:
   //! Set and get the options
   void SetOption(const char* op, const char* value);
   void SetOptionIfNotSet(const char* op, const char* value);
-  const char* GetOption(const char* op);
+  const char* GetOption(const char* op) const;
   bool IsSet(const char* name) const;
+  bool IsOn(const char* name) const;
 
   //! Set all the variables
   int SetCMakeRoot();
@@ -118,6 +119,17 @@ protected:
 
   virtual const char* GetOutputExtension() { return ".cpack"; }
   virtual const char* GetOutputPostfix() { return 0; }
+
+  /**
+   * Prepare requested grouping kind from CPACK_xxx vars
+   * CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE
+   * CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE
+   * CPACK_COMPONENTS_IGNORE_GROUPS
+   * or
+   * CPACK_COMPONENTS_GROUPING
+   * @return 1 on success 0 on failure.
+   */
+  virtual int PrepareGroupingKind();
 
   /**
    * Package the list of files and/or components which
@@ -200,6 +212,20 @@ protected:
    */
   std::map<std::string, cmCPackComponent> Components;
   std::map<std::string, cmCPackComponentGroup> ComponentGroups;
+  /**
+   * If true All component groups will be put in a single package.
+   */
+  bool allGroupInOne;
+  /**
+   * If true All component will be put in a single package.
+   */
+  bool allComponentInOne;
+  /**
+   * If true component grouping will be ignored.
+   * You will still get 1 package for each component unless
+   * allComponentInOne is true.
+   */
+  bool ignoreComponentGroup;
 
   cmCPackLog* Logger;
 private:

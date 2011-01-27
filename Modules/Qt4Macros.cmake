@@ -71,12 +71,12 @@ MACRO (QT4_GET_MOC_FLAGS _moc_flags)
   GET_DIRECTORY_PROPERTY(_inc_DIRS INCLUDE_DIRECTORIES)
 
   FOREACH(_current ${_inc_DIRS})
-    IF("${_current}" MATCHES ".framework/?$")
-      STRING(REGEX REPLACE "/[^/]+.framework" "" framework_path "${_current}")
+    IF("${_current}" MATCHES "\\.framework/?$")
+      STRING(REGEX REPLACE "/[^/]+\\.framework" "" framework_path "${_current}")
       SET(${_moc_flags} ${${_moc_flags}} "-F${framework_path}")
-    ELSE("${_current}" MATCHES ".framework/?$")
+    ELSE("${_current}" MATCHES "\\.framework/?$")
       SET(${_moc_flags} ${${_moc_flags}} "-I${_current}")
-    ENDIF("${_current}" MATCHES ".framework/?$")
+    ENDIF("${_current}" MATCHES "\\.framework/?$")
   ENDFOREACH(_current ${_inc_DIRS})
 
   GET_DIRECTORY_PROPERTY(_defines COMPILE_DEFINITIONS)
@@ -196,11 +196,16 @@ MACRO (QT4_ADD_RESOURCES outfiles )
       ENDIF(NOT IS_ABSOLUTE "${_RC_FILE}")
       SET(_RC_DEPENDS ${_RC_DEPENDS} "${_RC_FILE}")
     ENDFOREACH(_RC_FILE)
+    # Since this cmake macro is doing the dependency scanning for these files,
+    # let's make a configured file and add it as a dependency so cmake is run
+    # again when dependencies need to be recomputed.
+    QT4_MAKE_OUTPUT_FILE("${infile}" "" "qrc.depends" out_depends)
+    CONFIGURE_FILE("${infile}" "${out_depends}" COPY_ONLY)
     ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
       COMMAND ${QT_RCC_EXECUTABLE}
       ARGS ${rcc_options} -name ${outfilename} -o ${outfile} ${infile}
       MAIN_DEPENDENCY ${infile}
-      DEPENDS ${_RC_DEPENDS})
+      DEPENDS ${_RC_DEPENDS} "${out_depends}")
     SET(${outfiles} ${${outfiles}} ${outfile})
   ENDFOREACH (it)
 

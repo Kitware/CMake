@@ -93,14 +93,14 @@ bool cmCacheManager::LoadCache(const char* path,
   return this->LoadCache(path, internal, emptySet, emptySet);
 }
 
-bool cmCacheManager::ParseEntry(const char* entry,
-                                std::string& var,
-                                std::string& value)
+static bool ParseEntryWithoutType(const char* entry,
+                                  std::string& var,
+                                  std::string& value)
 {
-  // input line is:         key:type=value
+  // input line is:         key=value
   static cmsys::RegularExpression reg(
-    "^([^:]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
-  // input line is:         "key":type=value
+    "^([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
+  // input line is:         "key"=value
   static cmsys::RegularExpression regQuoted(
     "^\"([^\"]*)\"=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
   bool flag = false;
@@ -167,6 +167,11 @@ bool cmCacheManager::ParseEntry(const char* entry,
     {
     value = value.substr(1,
                          value.size() - 2);
+    }
+
+  if (!flag)
+    {
+    return ParseEntryWithoutType(entry, var, value);
     }
 
   return flag;
@@ -336,7 +341,7 @@ bool cmCacheManager::LoadCache(const char* path,
         std::string("The current CMakeCache.txt directory ") +
         currentcwd + std::string(" is different than the directory ") +
         std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) +
-        std::string(" where CMackeCache.txt was created. This may result "
+        std::string(" where CMakeCache.txt was created. This may result "
                     "in binaries being created in the wrong place. If you "
                     "are not sure, reedit the CMakeCache.txt");
       cmSystemTools::Error(message.c_str());

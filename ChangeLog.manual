@@ -1,3 +1,413 @@
+No changes in CMake 2.8.3 since 2.8.3-rc4.
+
+Changes in CMake 2.8.3-rc4 (since 2.8.3-rc3)
+--------------------------------------------
+Bill Hoffman (1):
+      When processing DartMeasurements use the tests working directory.
+
+David Cole (2):
+      ExternalProject: No svn --username if empty (#11173)
+      Avoid problem reading jni.h on Macs.
+
+David Partyka (5):
+      Fixed appending PATH to dumpbin tool from growing without bounds.
+      Switch to CMAKE_PATH when doing PATH comparisons on Windows.
+      Remove unecessary TO_CMAKE_PATH for gp_cmd_dir.
+      Append the gp_tool path to the system PATH using native slashes.
+      Fixes to GetPrerequisites for cygwin
+
+Eric NOULARD (1):
+      CPackDeb Added several optional debian binary package fields
+
+Marcus D. Hanwell (2):
+      ENH: Added case for Python 2.7.
+      Fixed parallel build for generators with EXTRA.
+
+Changes in CMake 2.8.3-rc3 (since 2.8.3-rc2)
+--------------------------------------------
+Alex Neundorf (4):
+      Remove trailing whitespace
+      Add automatic variable CMAKE_CURRENT_LIST_DIR(dir of CMAKE_CURRENT_LIST_FILE)
+      Use absolute path to FindPackageHandleStandardArgs.cmake everywhere
+      CodeBlocks Generator: Do not omit files in the project file listing.
+
+Brad King (4):
+      VS10: Order .vcxproj dependencies deterministically (#10502)
+      Document ENABLE_EXPORTS behavior on Mac (#11295)
+      FindHDF5: Fix typo in parallel-IO support check (#11291)
+      Xcode: Recognize .hh as C++ (#11307)
+
+Clinton Stimpson (1):
+      Find imports dir in Qt 4.7
+
+David Partyka (1):
+      Update module to locate newely released MS MPI HPC Pack R2.
+
+Philip Lowman (1):
+      Remove superfluous variable Boost_COMPAT_STATIC_RUNTIME.
+
+Rolf Eike Beer (2):
+      FindSubversion: Fix for German localized client (#11273)
+      FindSubversion: Use C locale to detect version (#11273)
+
+Changes in CMake 2.8.3-rc2 (since 2.8.3-rc1)
+--------------------------------------------
+Alex Neundorf (5):
+      APPEND and not-APPEND mode of feature_summary() were swapped
+      Set a default DESCRIPTION if none is given for ALL mode of feature_summary()
+      Close ENDFUNCTION() properly with the same name as FUNCTION()
+      Make cmake-gui remember whether the "Advanced" checkbox was checked or not
+      Also store the required version number in the details message.
+
+Ben Boeckel (3):
+      Add test that CMake errors with empty libs
+      Fix which string is checked for in the test
+      XCode generation should fail if lang isn't known
+
+Bill Hoffman (5):
+      Fix the name of the variable being tested.
+      Fix KWStyle line length issues.
+      Add a delay after untar on windows to make external project work on windows 7
+      Add a new line to the end of the generated main.cxx for the hpux compiler.
+      Fix for bug #11274, VS10 custom commands that create files in INTDIR fix.
+
+Brad King (12):
+      Evaluate <OBJECT_DIR> rule variable for executables
+      ccmake: Fix search with '/'
+      MinGW: Support long object file lists
+      Document IMPORTED_NO_SONAME target property
+      FindMPI: Recoginze -f flags from mpicc (#10771)
+      Add module-dir flag for Compaq Visual Fortran (#11248)
+      FindPythonInterp: Look for python2.7 interpreter
+      VS10: Use $(IntDir) for per-source output directory (#11270)
+      Reset platform/compiler info status for each language
+      Remove trailing whitespace from Xcode generator source
+      VS10: Skip targets with no linker language (#11230)
+      VS10: Encode custom command comments for echo (#11283)
+
+Clinton Stimpson (1):
+      Fix regression in cross-compile patches with finding Qt libs.
+
+David Cole (7):
+      Enable calling commands with : in argv[1] (#9963)
+      No extra spaces in CustomCommand test (#9963)
+      Avoid CustomCommand test failure on VS71 (#9963)
+      Update release scripts.
+      Avoid CustomCommand test failure on VS71 (#9963)
+      Honor MAKECOMMAND value saved in cache (#11026)
+      New USE_FOLDERS property OFF by default. (#3796)
+
+David Gobbi (1):
+      Set the module prefix, updated Windows suffix.
+
+Eric NOULARD (2):
+      InstallGen/CPack  fix handling absolute installed file regression
+      CPackRPM  Handle parenthesis in CPACK_SYSTEM_NAME (fix bug 10737)
+
+James Bigler (2):
+      Fix for bug 0011263.
+      Allow -g3 for CUDA v3.0+.
+
+Mikkel Krautz (2):
+      Xcode: Avoid trailing space in ARCHS list (#11244)
+      Xcode: Quote string values containing '$' (#11244)
+
+Philip Lowman (12):
+      FindBoost.cmake fixes for issues 11204 & 8529
+      FindBoost.cmake: Miscellaneous changes and refactoring
+      FindBoost.cmake: Add Boost_NO_SYSTEM_PATHS option
+      FindBoost.cmake: Fix compiling against a boost source tree
+      FindBoost.cmake: Fixes 11246
+      FindBoost.cmake: Fixes 11121
+      FindBoost.cmake: Fixes 10436
+      FindBoost.cmake: Implements 11160
+      Fix 11136: [patch] FindThreads.cmake documents the wrong variable
+      FindBoost.cmake: Fix library search path glitch introduced in earlier commit
+      FindFLEX.cmake: Fix issue 11249
+      Fixes issue 11279: CMakeDetermineVSServicePack support for VS10
+
+Yaakov Selkowitz (2):
+      FindFLTK*: Use Cygwin fltk on Cygwin (#11290)
+      Use 'uname -m' for processor on Cygwin (#10774)
+
+Changes in CMake 2.8.3-rc1 (since 2.8.2)
+----------------------------------------
+Alex Neundorf (39):
+      fix build on SUSE 11.2 in cmcurl due to ssize_t
+      -add an additional name for finding libtiff on Windows
+      -fix typo in docs of deprecated MacroAddFileDependencies.cmake
+      add 2nd, more powerful mode to find_package_handle_standard_args()
+      -fix indentation of the documentation
+      Add version checking support to FindFlex and FindPerlLibs
+      FindSquish doesn't detect the version, remove that from the documentation
+      Improved version checking for FindRuby using the new mode of FPHSA()
+      Improved version checking for FindJava using the new FPHSA() mode
+      Fix DETAILS string with version number in FHPSA()
+      Improved version checking for FindSubversion using the new mode of FPHSA()
+      Improved version checking for FindCUDA using the new mode of FPHSA
+      Use FPHSA() in FindSWIG, including version checking.
+      Change documentation of Subversion_FOUND and SUBVERSION_FOUND.
+      Add macro CMakeParseArguments() and use it in FPHSA()
+      Fix ZLIB version parsing if no TWEAK version exists
+      Fix EclipseCDT include path parsing with spaces (#10868)
+      Fix EclipseCDT parsing of builtin macros with spaces (#10868)
+      Remove trailing spaces
+      Detect a COMPILER_ID also for ASM.
+      Add timeout to execute_process() in CMAKE_DETERMINE_COMPILER_ID().
+      Fix parsing of builtin macros so Eclipse handles them properly (#10868)
+      Log the required package version and major improvement to FeatureSummary
+      Improve documentation.
+      Improve wording of the documentation.
+      Add macro ADD_FEATURE_INFO() and improve docs.
+      Remove trailing whitespace
+      Make target_link_libraries() complain if bad target name is used
+      Just warn in case of a bad target as only argument for t_l_l()
+      Remove trailing whitespace
+      New CMP0016 for deciding whether an unknown target in TLL() is an error.
+      Record all considered Config files and their versions.
+      Improve error message in Config-mode when no appropriate version was found
+      Replace the two vector<string,string> with one vector<struct{string,string}>
+      Small cleanup of FindPackageHandleStandardArgs.cmake
+      Don't create an empty element at the end of Foo_CONSIDERED_CONFIGS/VERSIONS
+      Add option CONFIG_MODE to FPHSA()
+      Improve version notice in the generated message
+      Improve wording of the error message of find_package() in config-mode
+
+Andrew Maclean (3):
+      Adding a FindPostgreSQL.cmake module
+      Forgot the copyright notice.
+      Changed ADDITIONAL_SEARCH_PATHS to PostgreSQL_ADDITIONAL_SEARCH_PATHS.
+
+Arjen Verweij (1):
+      Pass objects to Intel linker using a response file
+
+Bill Hoffman (9):
+      Disable gcc 33 on OpenBSD because it crashes CPack by default.
+      Fix for bug#10483, INCLUDE_EXTERNAL_MSPROJECT: ProjectGUID now ProjectGuid
+      Remove the ctest submit larget output test.
+      Let CMake recognize .CPP .CXX and .C++ as c++ files.
+      Fix for bug 10388, fix various default flags.
+      Only use .CPP .CXX and .C++ do not work by default with g+++.
+      Fix targets with . in the name for VS 10 IDE.
+      Only test for .CPP on Microsoft compilers which will handle .CPP as c++.
+      Allow testing of .CPP on WIN32 as it is a case insensitive OS and should work.
+
+Brad King (69):
+      ExternalProject: Add LOG_* options to hide step output
+      FindMPI: Do not parse -l in middle of library name
+      FindMPI: Parse mpicc flags more carefully (#9093)
+      Fix or cast integer conversions in cmake
+      Begin post-2.8.2 development
+      FindMPI: Failure is not an error if not REQUIRED
+      FindMPI: Trust mpicc -showme on BlueGene/L
+      VS: Always separate preprocessor defs by semicolon (#10902)
+      KWSys: Cleanup putenv leak option implementation
+      KWSys: Pass ptrdiff_t check result to System.c
+      Fix or cast more integer conversions in cmake
+      Use same type in both cases of '?:' operator
+      FindMPI: Fix parsing of mpicc -Wl,-L link flags (#9093)
+      Fix signed/unsigned comparison warnings in ccmake
+      Fix integer conversions in cpack
+      bootstrap: Detect known C/C++ compiler toolchains
+      KWSys: Use short fallback timeout for Process tests
+      KWSys: Optionally suppress consistent test failures
+      KWSys: Avoid Clang optimizer bug in testProcess-[45]
+      Poison GCC 3.3 on OpenBSD a bit later
+      KWSys: Avoid undefined behavior in Process crash tests
+      Optionally use system bzip2 library (#10932)
+      ctest_update: Abort if Git FETCH_HEAD has no candidates
+      ctest_update: Support ".git file" work trees
+      ctest_update: Run 'git submodule' at top level
+      FindBoost: Search for Boost 1.42
+      Add FindLibArchive module (#10923)
+      Add option CMAKE_USE_SYSTEM_LIBARCHIVE (#10923)
+      Refer to self with CMake_(SOURCE|BINARY)_DIR (#10046)
+      ExternalProject: Fix $(MAKE) with cygpath on Windows
+      FindBoost: Search for Boost 1.43 and 1.44
+      Include headers from chosen libarchive (#10923)
+      No response files with GNU ld <= 2.16 (#10913)
+      Create class cmArchiveWrite to wrap libarchive (#11020)
+      Include entries for directories in tarballs (#11020)
+      cmArchiveWrite: Fix signed/unsigned compare/convert
+      cmArchiveWrite: Fix signed/unsigned again
+      CPack: Avoid member shadowing after API refactor
+      KWSys: Fix SplitPath for leading '\' on Windows
+      KWSys: Fix GetActualCaseForPath for UNC paths
+      ModuleNoticesTest: Do not require "Kitware" copyright
+      Modules: Fix CMakeParseArguments copyright notice
+      FortranCInterface: Fix doc typo FC.h -> FCMangle.h
+      CTest: Avoid use of old EscapeSpaces method
+      Remove cmSystemTools::EscapeSpaces method
+      Clarify install(TARGETS) docs for EXPORT option
+      Factor out global generator ComputeTargetDepends method
+      Factor out duplicate VS target dependency code
+      Refactor VS <= 7.1 utility-depends workaround
+      Restore GetTargetDirectDepends const return
+      Split notion of node lists and edge lists
+      Distinguish "strong" and "weak" target dependency edges
+      Honor strong intra-component target dependencies
+      libarchive: Remove SCHILY dev,ino,nlink attributes (#11176)
+      Fix unused parameter warning in VS 7.1 generator
+      KWSys: Avoid empty string dereference in SplitString
+      KWSys: Improve SplitPath method documentation
+      KWSys: Use SplitPath in GetActualCaseForPath
+      Add whitespace=tab-in-indent attribute for sources
+      Search MacPorts /opt/local prefix on Mac
+      HP-UX: Always add /usr/lib to rpath (#10571)
+      No CMAKE_CONFIGURATION_TYPES in single-config generators (#10202)
+      KWSys: Suppress -Wcast-align warning in MD5.c
+      Suppress -Wcast-align in curl and bzip2
+      libarchive: Fix purposeful crash
+      bootstrap: Honor CFLAGS during "make" test (#10545)
+      file(DOWNLOAD): Fix error message formatting
+      Fix line-too-long style errors
+      Report missing source files with context of target
+
+Clinton Stimpson (10):
+      Fix performance issue with getting version from zlib.h
+      Fix bug 10418 - GetPrerequisites returning "not" as a dependency.
+      Fix regression in 5e6634fd77969433a87c150a2fb3f2079131484f for Windows.
+      Change Qt4ConfigDependentSettings to use more standard find modules.
+      Add cross-compiling support to FindQt4.cmake
+      Tweak for cygwin, don't convert : to ;
+      Fix some issues with refinding when qmake executable is changed.
+      Find correct Qt plugins for cross-compiling.
+      Fix mingw/VS warning message with cross compile re-org.
+      Make sure moc parameters file goes in binary directory.
+
+David Cole (20):
+      CheckSourceTree test: read UpdateCommand from Update.xml.
+      Eliminate -Wconversion warnings.
+      Detect CMake warnings and errors in build output.
+      Activate retry code on any curl submit failure.
+      Add another expected output for the failed submit tests.
+      ExternalProject: Use $(MAKE) whenever possible.
+      Copy Resources in Frameworks during fixup_bundle (#10020)
+      Update path to git. dashmacmini2 was "upgraded."
+      ExternalProject: Remove 'unknown keyword' warning (#11034)
+      Add documentation for CPACK_PROJECT_CONFIG_FILE.
+      Add STEP_TARGETS to ExternalProject module.
+      Refine formatting for cmake --help-module output.
+      Improve documentation of OPTION command.
+      Add FOLDER target property, for IDEs (#3796)
+      Avoid adding self as prerequisite. (#10417)
+      Correct CMAKE_INSTALL_PREFIX value for Win64 apps (#9992)
+      Preserve timestamps on files on tar extract.
+      Use QUIET to avoid Java status messages.
+      VS2010: Honor PROJECT_LABEL target property (#10611)
+      VS2010: Set IntDir for utility and global targets.
+
+David Genest (1):
+      Honor CMAKE_USER_MAKE_RULES_OVERRIDE in try_compile (#10902)
+
+Eric NOULARD (20):
+      CPackRPM:: Replace - with _ in RPM Version (fix bug 0010934)
+      Provides default changelog if no file is provided
+      CPackRPM:: Quote every filenames in %file section (see bugs 10701,10871,10345)
+      CPackRPM:: [partially] support relocatable package
+      CPackDEB:  merge wrong installed size patch. see bugs 10296 (and 10292)
+      CPackDeb  optionally generates auto-dependency list part fix of bug 10292
+      Proposal for bash-completion support file
+      CPack: Refactor API in order to handle multi-file packages
+      CPack: Avoid member shadowing after API refactor (part2)
+      Improve cmake-completion (install doc, ctest -R completion)
+      Add ZIP archive format and LZMA compress support to libarchive-wrapper
+      Add XZ compress support to libarchive-wrapper
+      Add Compress compress support to libarchive-wrapper
+      CPack   Backward-compatibly enforce DESTDIR for DEB and RPM
+      CPack   Enable better handling of absolute installed files
+      CPackArchiveGenerator  use cmArchiveWrite wrapper
+      CPackArchiveGenerator  add component supports
+      CPackArchiveGenerator improve usability and robustness
+      CPack fix broken compilation for CygwinSource generator
+      CPack  handle symlinks in CPACK_INSTALLED_DIRECTORIES fix for bug5430
+
+James Bigler (1):
+      Added CUDA 3.2 directory changes.  Disable emulation mode for CUDA 3.1+.
+
+Kai Wasserbäch (1):
+      Fix spelling errors reported by Lintian.
+
+Kovarththanan Rajaratnam (4):
+      FindZLIB: optimize zlib.h version parsing
+      FindCygwin: add new registry entry for Cygwin 1.7 (#10951)
+      FindZLIB: use the FPHSA version mode
+      FindSubversion: set compatibility variables based on FPHSA()
+
+Marcel Loose (1):
+      Issue 10199: Fixed code documentation and now set <prefix>_WC_ROOT
+
+Marcus D. Hanwell (1):
+      Bug with default library type of Python modules.
+
+Mathieu Malaterre (3):
+      Add missing PATHS to find_path commands to fix openssl searching
+      BUG: 0009611 Fix Arch independent FindJNI.cmake on Linux
+      Fix 11035 : debug/release library configuration mistake
+
+Michael Wild (2):
+      Improve documentation of BundleUtilities.cmake
+      Improve documentation of GetPrerequisites.cmake
+
+Miguel A. Figueroa-Villanueva (7):
+      ENH: #9775 Added support for new wxWidgets 2.9 libraries.
+      BUG: #9775 Fixed patch FindwxWidgets-fixed-bug-9775.
+      BUG #10658: FindwxWidgets USE_FILE should not include .cmake extension.
+      STYLE: Clarified/Fixed documentation of UsewxWidgets.
+      BUG #11123: Generic include dir should come after config specific one.
+      BUG #8184: Fixed FindwxWidgets wrong order of default libs for MinGW.
+      ENH #8993: FindwxWidgets add support for wx-config custom options.
+
+Mike McQuaid (1):
+      Make bundle items writable before fixup (#9284)
+
+Modestas Vainius (1):
+      CTestTestFailedSubmit-xmlrpc: Pass with "Submission problem"
+
+Patrick Gansterer (4):
+      VS: Convert PlatformName member to a virtual method
+      VS: Add more TargetMachine option values
+      VS: Map /ENTRY linker option to EntryPointSymbol
+      VS: Add ArchitectureId to VS 8 and 9 generators
+
+Philip Lowman (7):
+      Fixes problem finding libraries under Boost (#9510)
+      Add detection for new pangommconfig.h header file
+      Several fixes needed to improve Windows support
+      11041: Improve FindCxxTest to use Python or Perl automatically; custom flags
+      10241: FindBISON.cmake clears wrong variable
+      10688: FindGTK2.cmake doesn't auto-detect macports
+      Merge patch for detecting gdk-pixbuf library
+
+Pino Toscano (1):
+      GNU/Hurd platform support fixes (#9873)
+
+Robert Goulet (1):
+      VS2010: Disable PDBs when there is no debug info
+
+Rolf Eike Beer (2):
+      clean up some stuff in CPack RPM script
+      Set MSVC_VERSION for MSVC 6, 7, 7.1 (#7944)
+
+Todd Gamblin (3):
+      Modules: Fix spelling 'To distributed' -> 'To distribute'
+      Teach find_* commands to ignore some paths
+      Add platform files for BlueGene/P systems
+
+Zach Mullen (12):
+      Checksums on CTest submit files, and retry timed out submissions.
+      Cross-platform fixes for checksum/retry code
+      Fix subscript out of range crash
+      CTest should resubmit in the checksum failed case
+      Testing for CTest checksum
+      Mock checksum failure output for old CDash versions
+      Checksum test should use CMAKE_TESTS_CDASH_SERVER
+      Fix cycle detection for test dependencies
+      More robust cost-based scheduling impl
+      Fix hard-coded CDash URI in version query
+      Added CTest command --print-labels
+      We shouldn't ask CDash for its version info until/unless we actually need it.
+
 No changes in CMake 2.8.2 since 2.8.2-rc4.
 
 Changes in CMake 2.8.2-rc4 (since 2.8.2-rc3)

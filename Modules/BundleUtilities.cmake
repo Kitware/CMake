@@ -27,6 +27,11 @@
 # drag-n-drop copied to another machine and run on that machine as long as all
 # of the system libraries are compatible.
 #
+# If you pass plugins to fixup_bundle as the libs parameter, you should install
+# them or copy them into the bundle before calling fixup_bundle. The "libs"
+# parameter is a list of libraries that must be fixed up, but that cannot be
+# determined by otool output analysis. (i.e., plugins)
+#
 # Gather all the keys for all the executables and libraries in a bundle, and
 # then, for each key, copy each prerequisite into the bundle. Then fix each one
 # up according to its own list of prerequisites.
@@ -111,6 +116,13 @@
 # each prerequisite, change the way it is referenced to the value of the
 # _EMBEDDED_ITEM keyed variable for that prerequisite. (Most likely changing to
 # an "@executable_path" style reference.)
+#
+# This function requires that the resolved_embedded_item be "inside" the bundle
+# already. In other words, if you pass plugins to fixup_bundle as the libs
+# parameter, you should install them or copy them into the bundle before
+# calling fixup_bundle. The "libs" parameter is a list of libraries that must
+# be fixed up, but that cannot be determined by otool output analysis. (i.e.,
+# plugins)
 #
 # Also, change the id of the item being fixed up to its own _EMBEDDED_ITEM
 # value.
@@ -472,11 +484,11 @@ function(copy_resolved_item_into_bundle resolved_item resolved_embedded_item)
   else()
     #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy ${resolved_item} ${resolved_embedded_item}")
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}" "${resolved_embedded_item}")
+    if(UNIX AND NOT APPLE)
+      file(RPATH_REMOVE FILE "${resolved_embedded_item}")
+    endif(UNIX AND NOT APPLE)
   endif()
 
-  if(UNIX AND NOT APPLE)
-    file(RPATH_REMOVE FILE "${resolved_embedded_item}")
-  endif(UNIX AND NOT APPLE)
 endfunction(copy_resolved_item_into_bundle)
 
 
@@ -514,11 +526,11 @@ function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_ite
         execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${resolved_resources}" "${resolved_embedded_resources}")
       endif()
     endif()
+    if(UNIX AND NOT APPLE)
+      file(RPATH_REMOVE FILE "${resolved_embedded_item}")
+    endif(UNIX AND NOT APPLE)
   endif()
 
-  if(UNIX AND NOT APPLE)
-    file(RPATH_REMOVE FILE "${resolved_embedded_item}")
-  endif(UNIX AND NOT APPLE)
 endfunction(copy_resolved_framework_into_bundle)
 
 
@@ -526,6 +538,24 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
   # This item's key is "ikey":
   #
   get_item_key("${resolved_embedded_item}" ikey)
+
+  # Ensure the item is "inside the .app bundle" -- it should not be fixed up if
+  # it is not in the .app bundle... Otherwise, we'll modify files in the build
+  # tree, or in other varied locations around the file system, with our call to
+  # install_name_tool. Make sure that doesn't happen here:
+  #
+  get_dotapp_dir("${exepath}" exe_dotapp_dir)
+  string(LENGTH "${exe_dotapp_dir}/" exe_dotapp_dir_length)
+  string(SUBSTRING "${resolved_embedded_item}" 0 ${exe_dotapp_dir_length} item_substring)
+  if(NOT "${exe_dotapp_dir}/" STREQUAL "${item_substring}")
+    message("  exe_dotapp_dir/='${exe_dotapp_dir}/'")
+    message("  item_substring='${item_substring}'")
+    message("  resolved_embedded_item='${resolved_embedded_item}'")
+    message("")
+    message("Install or copy the item into the bundle before calling fixup_bundle")
+    message("")
+    message(FATAL_ERROR "cannot fixup an item that is not in the bundle...")
+  endif()
 
   set(prereqs "")
   get_prerequisites("${resolved_embedded_item}" prereqs 1 0 "${exepath}" "${dirs}")

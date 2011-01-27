@@ -16,6 +16,13 @@
 
 cmFindLibraryCommand::cmFindLibraryCommand()
 { 
+  this->EnvironmentPath = "LIB";
+}
+
+//----------------------------------------------------------------------------
+void cmFindLibraryCommand::GenerateDocumentation()
+{
+  this->cmFindBase::GenerateDocumentation();
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "FIND_XXX", "find_library");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
@@ -29,7 +36,7 @@ cmFindLibraryCommand::cmFindLibraryCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SYSTEM", "LIB");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_SYSTEM_XXX_PATH", 
+                               "CMAKE_SYSTEM_XXX_PATH",
                                "CMAKE_SYSTEM_LIBRARY_PATH");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "SEARCH_XXX_DESC", "library");
@@ -38,11 +45,9 @@ cmFindLibraryCommand::cmFindLibraryCommand()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SUBDIR", "lib");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_FIND_ROOT_PATH_MODE_XXX", 
+                               "CMAKE_FIND_ROOT_PATH_MODE_XXX",
                                "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY");
-
-  this->EnvironmentPath = "LIB";
-  this->GenericDocumentation += 
+  this->GenericDocumentation +=
     "\n"
     "If the library found is a framework, then VAR will be set to "
     "the full path to the framework <fullPath>/A.framework. "

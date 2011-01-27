@@ -97,6 +97,11 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+# Version 1.4 (11/18/10) (CMake 2.8.4)
+#     Issue 11384: Added support to the CXX_ADD_TEST macro so header
+#                  files (containing the tests themselves) show up in
+#                  Visual Studio and other IDEs.
+#
 # Version 1.3 (8/19/10) (CMake 2.8.3)
 #     Included patch by Simone Rossetto to check if either Python or Perl
 #     are present in the system.  Whichever intepreter that is detected
@@ -131,7 +136,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname _cxxtest_outfname)
     )
 
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
-    add_executable(${_cxxtest_testname} ${_cxxtest_real_outfname})
+    add_executable(${_cxxtest_testname} ${_cxxtest_real_outfname} ${ARGN})
 
     if(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
         add_test(${_cxxtest_testname} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_cxxtest_testname})

@@ -669,6 +669,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.FixExceptionHandlingDefault();
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
+  targetOptions.ParseFinish();
   targetOptions.AddDefines
     (this->Makefile->GetProperty("COMPILE_DEFINITIONS"));
   targetOptions.AddDefines(target.GetProperty("COMPILE_DEFINITIONS"));
@@ -1098,11 +1099,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     if ( target.GetPropertyAsBool("WIN32_EXECUTABLE") )
       {
-      fout << "\t\t\t\tSubSystem=\"2\"\n";
+      fout << "\t\t\t\tSubSystem=\""
+           << (this->FortranProject? "subSystemWindows" : "2") << "\"\n";
       }
     else
       {
-      fout << "\t\t\t\tSubSystem=\"1\"\n";
+      fout << "\t\t\t\tSubSystem=\""
+           << (this->FortranProject? "subSystemConsole" : "1") << "\"\n";
       }
     std::string stackVar = "CMAKE_";
     stackVar += linkLanguage;
@@ -1621,9 +1624,12 @@ WriteCustomRule(std::ostream& fout,
           ++d)
         {
         // Get the real name of the dependency in case it is a CMake target.
-        std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
-        fout << this->ConvertToXMLOutputPath(dep.c_str())
-             << ";";
+        std::string dep;
+        if(this->GetRealDependency(d->c_str(), i->c_str(), dep))
+          {
+          fout << this->ConvertToXMLOutputPath(dep.c_str())
+               << ";";
+          }
         }
       }
     fout << "\"\n";

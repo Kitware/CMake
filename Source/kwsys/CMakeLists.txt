@@ -61,6 +61,8 @@
 #                                             If not given the install rules
 #                                             will not be in any component.
 #
+#  KWSYS_INSTALL_EXPORT_NAME = The EXPORT option value for install(TARGETS) calls.
+#
 #    Example:
 #
 #      SET(KWSYS_INSTALL_BIN_DIR bin)
@@ -236,6 +238,9 @@ IF(COMMAND INSTALL)
   # Setup library install rules.
   SET(KWSYS_INSTALL_LIBRARY_RULE)
   IF(KWSYS_INSTALL_LIB_DIR)
+    IF(KWSYS_INSTALL_EXPORT_NAME)
+      LIST(APPEND KWSYS_INSTALL_LIBRARY_RULE EXPORT ${KWSYS_INSTALL_EXPORT_NAME})
+    ENDIF()
     # Install the shared library to the lib directory.
     SET(KWSYS_INSTALL_LIBRARY_RULE ${KWSYS_INSTALL_LIBRARY_RULE}
       LIBRARY DESTINATION ${KWSYS_INSTALL_LIB_DIR}

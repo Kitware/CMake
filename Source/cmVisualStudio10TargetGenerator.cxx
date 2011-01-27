@@ -244,6 +244,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
 
 void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 {
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
@@ -290,6 +292,13 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     else
       {
       this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
+      }
+    if(const char* toolset = gg->GetPlatformToolset())
+      {
+      std::string pts = "<PlatformToolset>";
+      pts += toolset;
+      pts += "</PlatformToolset>\n";
+      this->WriteString(pts.c_str(), 2);
       }
     this->WriteString("</PropertyGroup>\n", 1);
     }
@@ -386,10 +395,12 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
         d != command.GetDepends().end(); 
         ++d)
       {
-      std::string dep = this->LocalGenerator->
-        GetRealDependency(d->c_str(), i->c_str());
-      this->ConvertToWindowsSlash(dep);
-      (*this->BuildFileStream ) << ";" << dep;
+      std::string dep;
+      if(this->LocalGenerator->GetRealDependency(d->c_str(), i->c_str(), dep))
+        {
+        this->ConvertToWindowsSlash(dep);
+        (*this->BuildFileStream ) << ";" << dep;
+        }
       }
     (*this->BuildFileStream ) << ";%(AdditionalInputs)</AdditionalInputs>\n";
     this->WritePlatformConfigTag("Outputs", i->c_str(), 3);

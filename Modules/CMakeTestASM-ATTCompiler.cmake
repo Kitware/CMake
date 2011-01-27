@@ -13,10 +13,10 @@
 #  License text for the above reference.)
 
 # This file is used by EnableLanguage in cmGlobalGenerator to
-# determine that that selected ASM-ATT compiler can actually compile
-# and link the most basic of programs.   If not, a fatal error
-# is set and cmake stops processing commands and will not generate
-# any makefiles or projects.
+# determine that the selected ASM-ATT "compiler" works.
+# For assembler this can only check whether the compiler has been found,
+# because otherwise there would have to be a separate assembler source file
+# for each assembler on every architecture.
 
 SET(ASM_DIALECT "-ATT")
 INCLUDE(CMakeTestASMCompiler)

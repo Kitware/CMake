@@ -289,6 +289,28 @@ cmGlobalVisualStudio8Generator
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
+{
+  // Skip over the cmGlobalVisualStudioGenerator implementation!
+  // We do not need the support that VS <= 7.1 needs.
+  return this->cmGlobalGenerator::ComputeTargetDepends();
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio8Generator::WriteProjectDepends(
+  std::ostream& fout, const char*, const char*, cmTarget& t)
+{
+  TargetDependSet const& unordered = this->GetTargetDirectDepends(t);
+  OrderedTargetDependSet depends(unordered);
+  for(OrderedTargetDependSet::const_iterator i = depends.begin();
+      i != depends.end(); ++i)
+    {
+    std::string guid = this->GetGUID((*i)->GetName());
+    fout << "\t\t{" << guid << "} = {" << guid << "}\n";
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
   cmTarget& target)
 {

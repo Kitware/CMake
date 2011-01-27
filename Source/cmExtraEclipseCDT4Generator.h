@@ -21,8 +21,6 @@ class cmGeneratedFileStream;
 
 /** \class cmExtraEclipseCDT4Generator
  * \brief Write Eclipse project files for Makefile based projects
- *
- * This generator is in early alpha stage.
  */
 class cmExtraEclipseCDT4Generator : public cmExternalMakefileProjectGenerator
 {
@@ -41,8 +39,6 @@ public:
 
   virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const char*           fullName) const;
-
-  virtual void SetGlobalGenerator(cmGlobalGenerator* generator);
 
   virtual void Generate();
 
@@ -70,11 +66,12 @@ private:
   static std::string EscapeForXML(const std::string& value);
 
   // Helper functions
-  static void AppendStorageScanners(cmGeneratedFileStream& fout, 
+  static void AppendStorageScanners(cmGeneratedFileStream& fout,
                                     const cmMakefile& makefile);
   static void AppendTarget         (cmGeneratedFileStream& fout,
                                     const std::string&     target,
                                     const std::string&     make,
+                                    const std::string&     makeArguments,
                                     const std::string&     path,
                                     const char* prefix = "");
   static void AppendScannerProfile (cmGeneratedFileStream& fout,
@@ -100,7 +97,7 @@ private:
                                    const std::vector<std::string>& includeDirs,
                                    std::set<std::string>& emittedDirs);
 
-  static void AddEnvVar(cmGeneratedFileStream& fout, const char* envVar, 
+  static void AddEnvVar(cmGeneratedFileStream& fout, const char* envVar,
                         cmMakefile* mf);
 
   std::vector<std::string> SrcLinkedResources;

@@ -39,6 +39,7 @@ protected:
   virtual int InitializeInternal();
   virtual int PackageFiles();
   virtual const char* GetOutputExtension() { return ".rpm"; }
+  virtual bool SupportsComponentInstallation() const;
 
 };
 

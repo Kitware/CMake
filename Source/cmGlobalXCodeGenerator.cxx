@@ -1334,11 +1334,13 @@ void  cmGlobalXCodeGenerator
           cc.GetDepends().begin();
           d != cc.GetDepends().end(); ++d)
         {
-        std::string dep =
-          this->CurrentLocalGenerator->GetRealDependency(d->c_str(),
-                                                         configName);
-        makefileStream << "\\\n" << this
-          ->ConvertToRelativeForMake(dep.c_str());
+        std::string dep;
+        if(this->CurrentLocalGenerator
+           ->GetRealDependency(d->c_str(), configName, dep))
+          {
+          makefileStream << "\\\n" <<
+            this->ConvertToRelativeForMake(dep.c_str());
+          }
         }
       makefileStream << "\n";
 

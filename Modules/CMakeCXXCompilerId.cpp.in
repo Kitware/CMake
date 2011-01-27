@@ -44,6 +44,9 @@
 #elif defined(__PATHSCALE__)
 # define COMPILER_ID "PathScale"
 
+#elif defined(_CRAYC)
+# define COMPILER_ID "Cray"
+
 #elif defined(__GNUC__)
 # define COMPILER_ID "GNU"
 

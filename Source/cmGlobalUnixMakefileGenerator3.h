@@ -22,19 +22,19 @@ class cmLocalUnixMakefileGenerator3;
  * \brief Write a Unix makefiles.
  *
  * cmGlobalUnixMakefileGenerator3 manages UNIX build process for a tree
- 
- 
+
+
  The basic approach of this generator is to produce Makefiles that will all
  be run with the current working directory set to the Home Output
  directory. The one exception to this is the subdirectory Makefiles which are
  created as a convenience and just cd up to the Home Output directory and
- invoke the main Makefiles. 
- 
+ invoke the main Makefiles.
+
  The make process starts with Makefile. Makefile should only contain the
  targets the user is likely to invoke directly from a make command line. No
  internal targets should be in this file. Makefile2 contains the internal
  targets that are required to make the process work.
- 
+
  Makefile2 in turn will recursively make targets in the correct order. Each
  target has its own directory <target>.dir and its own makefile build.make in
  that directory. Also in that directory is a couple makefiles per source file
@@ -47,7 +47,7 @@ class cmLocalUnixMakefileGenerator3;
  rescanned.
 
  Rules for custom commands follow the same model as rules for source files.
- 
+
  */
 
 class cmGlobalUnixMakefileGenerator3 : public cmGlobalGenerator
@@ -64,13 +64,13 @@ public:
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-  
+
   ///! Create a local generator appropriate to this Global Generator3
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   /**
    * Try to determine system infomation such as shared library
-   * extension, pthreads, byte order etc.  
+   * extension, pthreads, byte order etc.
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);
@@ -78,11 +78,11 @@ public:
   /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and
-   * requests that they Generate.  
+   * requests that they Generate.
    */
   virtual void Generate();
-  
-  
+
+
   void WriteMainCMakefileLanguageRules(cmGeneratedFileStream& cmakefileStream,
                                        std::vector<cmLocalGenerator *> &);
 
@@ -91,7 +91,7 @@ public:
                      cmLocalUnixMakefileGenerator3 *);
 
   // write the top lvel target rules
-  void WriteConvenienceRules(std::ostream& ruleFileStream, 
+  void WriteConvenienceRules(std::ostream& ruleFileStream,
                              std::set<cmStdString> &emitted);
 
   /** Get the command to use for a target that has no rule.  This is
@@ -105,22 +105,12 @@ public:
   // change the build command for speed
   virtual std::string GenerateBuildCommand
   (const char* makeProgram,
-   const char *projectName, const char* additionalOptions, 
+   const char *projectName, const char* additionalOptions,
    const char *targetName,
    const char* config, bool ignoreErrors, bool fast);
 
   /** Record per-target progress information.  */
   void RecordTargetProgress(cmMakefileTargetGenerator* tg);
-
-  /**
-   * If true, the CMake variable CMAKE_VERBOSE_MAKEFILES doesn't have effect
-   * anymore. Set it to true when writing a generator where short output
-   * doesn't make sense, e.g. because the full output is parsed by an
-   * IDE/editor.
-   */
-  bool GetForceVerboseMakefiles() { return this->ForceVerboseMakefiles; }
-  void SetForceVerboseMakefiles(bool enable) 
-    {this->ForceVerboseMakefiles=enable;}
 
 protected:
   void WriteMainMakefile2();
@@ -169,7 +159,7 @@ protected:
   // in the rule to satisfy the make program.
   std::string EmptyRuleHackCommand;
 
-  bool ForceVerboseMakefiles;
+  bool NoRuleMessages;
 
   // Store per-target progress counters.
   struct TargetProgress

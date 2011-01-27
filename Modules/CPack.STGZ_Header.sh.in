@@ -80,7 +80,7 @@ then
 
   if [ "x${cpack_skip_license}x" != "xTRUEx" ]
   then
-    more << ____cpack__here_doc____
+    more << '____cpack__here_doc____'
 @CPACK_RESOURCE_FILE_LICENSE_CONTENT@
 ____cpack__here_doc____
     echo

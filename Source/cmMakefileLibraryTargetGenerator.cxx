@@ -308,33 +308,10 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // code duplication.
   std::vector<std::string> commands;
 
-  std::string relPath = this->LocalGenerator->GetHomeRelativeOutputPath();
-  std::string objTarget;
-
   // Build list of dependencies.
   std::vector<std::string> depends;
-  for(std::vector<std::string>::const_iterator obj = this->Objects.begin();
-      obj != this->Objects.end(); ++obj)
-    {
-    objTarget = relPath;
-    objTarget += *obj;
-    depends.push_back(objTarget);
-    }
+  this->AppendLinkDepends(depends);
 
-  // Add dependencies on targets that must be built first.
-  this->AppendTargetDepends(depends);
-
-  // Add a dependency on the rule file itself.
-  this->LocalGenerator->AppendRuleDepend(depends, 
-                                         this->BuildFileNameFull.c_str());
-  
-  for(std::vector<std::string>::const_iterator obj 
-        = this->ExternalObjects.begin();
-      obj != this->ExternalObjects.end(); ++obj)
-    {
-    depends.push_back(*obj);
-    }
-  
   // Get the language to use for linking this library.
   const char* linkLanguage =
     this->Target->GetLinkerLanguage(this->ConfigName);

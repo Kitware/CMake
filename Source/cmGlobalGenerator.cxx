@@ -699,9 +699,8 @@ bool cmGlobalGenerator::IsDependedOn(const char* project,
          l != targets.end(); l++)
       {
       cmTarget& target = l->second;
-      std::set<cmStdString>::const_iterator pos =
-        target.GetUtilities().find(targetIn->GetName());
-      if(pos != target.GetUtilities().end())
+      TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
+      if(tgtdeps.count(targetIn))
         {
         return true;
         }
@@ -815,22 +814,9 @@ void cmGlobalGenerator::Generate()
   // For each existing cmLocalGenerator
   unsigned int i;
 
-  // Consolidate global targets
+  // Put a copy of each global target in every directory.
   cmTargets globalTargets;
   this->CreateDefaultGlobalTargets(&globalTargets);
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    cmTargets* targets =
-      &(this->LocalGenerators[i]->GetMakefile()->GetTargets());
-    cmTargets::iterator tarIt;
-    for ( tarIt = targets->begin(); tarIt != targets->end(); ++ tarIt )
-      {
-      if ( tarIt->second.GetType() == cmTarget::GLOBAL_TARGET )
-        {
-        globalTargets[tarIt->first] = tarIt->second;
-        }
-      }
-    }
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
     cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
@@ -1884,8 +1870,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   const char* name, const char* message,
   const cmCustomCommandLines* commandLines,
   std::vector<std::string> depends,
-  const char* workingDirectory,
-  bool depends_on_all /* = false */)
+  const char* workingDirectory)
 {
   // Package
   cmTarget target;
@@ -1900,10 +1885,6 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
                      workingDirectory);
   target.GetPostBuildCommands().push_back(cc);
   target.SetProperty("EchoString", message);
-  if ( depends_on_all )
-    {
-    target.AddUtility("all");
-    }
   std::vector<std::string>::iterator dit;
   for ( dit = depends.begin(); dit != depends.end(); ++ dit )
     {

@@ -849,7 +849,7 @@ cmMakefileTargetGenerator
   p_depends.push_back(relativeObj);
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                       temp.c_str(), p_depends, no_commands,
-                                      true);
+                                      false);
 }
 
 //----------------------------------------------------------------------------
@@ -1507,6 +1507,50 @@ void cmMakefileTargetGenerator
 
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
+::AppendLinkDepends(std::vector<std::string>& depends)
+{
+  // Add dependencies on the compiled object files.
+  std::string relPath = this->LocalGenerator->GetHomeRelativeOutputPath();
+  std::string objTarget;
+  for(std::vector<std::string>::const_iterator obj = this->Objects.begin();
+      obj != this->Objects.end(); ++obj)
+    {
+    objTarget = relPath;
+    objTarget += *obj;
+    depends.push_back(objTarget);
+    }
+
+  // Add dependencies on targets that must be built first.
+  this->AppendTargetDepends(depends);
+
+  // Add a dependency on the rule file itself.
+  this->LocalGenerator->AppendRuleDepend(depends,
+                                         this->BuildFileNameFull.c_str());
+
+  // Add a dependency on the link definitions file, if any.
+  if(!this->ModuleDefinitionFile.empty())
+    {
+    depends.push_back(this->ModuleDefinitionFile);
+    }
+
+  // Add dependencies on the external object files.
+  for(std::vector<std::string>::const_iterator obj
+        = this->ExternalObjects.begin();
+      obj != this->ExternalObjects.end(); ++obj)
+    {
+    depends.push_back(*obj);
+    }
+
+  // Add user-specified dependencies.
+  if(const char* linkDepends =
+     this->Target->GetProperty("LINK_DEPENDS"))
+    {
+    cmSystemTools::ExpandListArgument(linkDepends, depends);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefileTargetGenerator
 ::CloseFileStreams()
 {
   delete this->BuildFileStream;
@@ -1722,8 +1766,20 @@ const char* cmMakefileTargetGenerator::GetFortranModuleDirectory()
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
 {
+  // Enable module output if necessary.
+  if(const char* modout_flag =
+     this->Makefile->GetDefinition("CMAKE_Fortran_MODOUT_FLAG"))
+    {
+    this->LocalGenerator->AppendFlags(flags, modout_flag);
+    }
+
   // Add a module output directory flag if necessary.
-  if(const char* mod_dir = this->GetFortranModuleDirectory())
+  const char* mod_dir = this->GetFortranModuleDirectory();
+  if(!mod_dir)
+    {
+    mod_dir = this->Makefile->GetDefinition("CMAKE_Fortran_MODDIR_DEFAULT");
+    }
+  if(mod_dir)
     {
     const char* moddir_flag =
       this->Makefile->GetRequiredDefinition("CMAKE_Fortran_MODDIR_FLAG");

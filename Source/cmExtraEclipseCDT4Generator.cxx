@@ -52,16 +52,6 @@ void cmExtraEclipseCDT4Generator
 }
 
 //----------------------------------------------------------------------------
-void cmExtraEclipseCDT4Generator
-::SetGlobalGenerator(cmGlobalGenerator* generator)
-{
-  cmExternalMakefileProjectGenerator::SetGlobalGenerator(generator);
-  cmGlobalUnixMakefileGenerator3* mf
-    = static_cast<cmGlobalUnixMakefileGenerator3*>(generator);
-  mf->SetToolSupportsColor(true);
-}
-
-//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::Generate()
 {
   const cmMakefile* mf
@@ -73,7 +63,7 @@ void cmExtraEclipseCDT4Generator::Generate()
 
   this->IsOutOfSourceBuild = (this->HomeDirectory!=this->HomeOutputDirectory);
 
-  this->GenerateSourceProject = (this->IsOutOfSourceBuild && 
+  this->GenerateSourceProject = (this->IsOutOfSourceBuild &&
                             mf->IsOn("ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT"));
 
   // NOTE: This is not good, since it pollutes the source tree. However,
@@ -109,7 +99,7 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile() const
     return;
     }
 
-  fout << 
+  fout <<
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<projectDescription>\n"
     "\t<name>" << name << "</name>\n"
@@ -129,7 +119,7 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile() const
 void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
                                             const char* envVar, cmMakefile* mf)
 {
-  // get the variables from the environment and from the cache and then 
+  // get the variables from the environment and from the cache and then
   // figure out which one to use:
 
   const char* envVarValue = getenv(envVar);
@@ -148,7 +138,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
     }
   else if (envVarValue!=0 && cacheValue==0)
     {
-    // The variable is in the env, but not in the cache. Use it and put it 
+    // The variable is in the env, but not in the cache. Use it and put it
     // in the cache
     valueToUse = envVarValue;
     mf->AddCacheDefinition(cacheEntryName.c_str(), valueToUse.c_str(),
@@ -206,7 +196,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     compilerId = mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
     }
 
-  fout << 
+  fout <<
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<projectDescription>\n"
     "\t<name>" <<
@@ -225,7 +215,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     ;
 
   // use clean target
-  fout << 
+  fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>\n"
     "\t\t\t\t\t<value>clean</value>\n"
@@ -246,7 +236,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
   // set the make command
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  fout << 
+  fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.enabledIncrementalBuild</key>\n"
     "\t\t\t\t\t<value>true</value>\n"
@@ -296,7 +286,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   else if (compilerId == "Intel")
     {
     // if the env.var is set, use this one and put it in the cache
-    // if the env.var is not set, but the value is in the cache, 
+    // if the env.var is not set, but the value is in the cache,
     // use it from the cache:
     AddEnvVar(fout, "INTEL_LICENSE_FILE", mf);
     }
@@ -392,9 +382,9 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     {
     fout << "\t<linkedResources>\n";
     // create a linked resource to CMAKE_SOURCE_DIR
-    // (this is not done anymore for each project because of 
-    // http://public.kitware.com/Bug/view.php?id=9978 and because I found it 
-    // actually quite confusing in bigger projects with many directories and 
+    // (this is not done anymore for each project because of
+    // http://public.kitware.com/Bug/view.php?id=9978 and because I found it
+    // actually quite confusing in bigger projects with many directories and
     // projects, Alex
 
     std::string sourceLinkedResourceName = "[Source directory]";
@@ -440,7 +430,7 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
       if(emittedDirs.find(dir) == emittedDirs.end())
         {
         emittedDirs.insert(dir);
-        fout << "<pathentry include=\"" 
+        fout << "<pathentry include=\""
              << cmExtraEclipseCDT4Generator::GetEclipsePath(dir)
              << "\" kind=\"inc\" path=\"\" system=\"true\"/>\n";
         }
@@ -452,7 +442,7 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
 void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 {
   std::set<std::string> emmited;
-  
+
   const cmMakefile* mf
     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
 
@@ -465,7 +455,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     }
 
   // add header
-  fout << 
+  fout <<
     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
     "<?fileVersion 4.0.0?>\n\n"
     "<cproject>\n"
@@ -475,7 +465,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   fout << "<cconfiguration id=\"org.eclipse.cdt.core.default.config.1\">\n";
 
   // Configuration settings...
-  fout << 
+  fout <<
     "<storageModule"
     " buildSystemId=\"org.eclipse.cdt.core.defaultConfigDataProvider\""
     " id=\"org.eclipse.cdt.core.default.config.1\""
@@ -536,9 +526,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   fout << "</extensions>\n"
           "</storageModule>\n"
           ;
-  
+
   // ???
-  fout << 
+  fout <<
     "<storageModule moduleId=\"org.eclipse.cdt.core.language.mapping\">\n"
     "<project-mappings/>\n"
     "</storageModule>\n"
@@ -619,13 +609,13 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           // we have -DFOO
           def = *di;
           }
-          
+
         // insert the definition if not already added.
         if(emmited.find(def) == emmited.end())
           {
           emmited.insert(def);
           fout << "<pathentry kind=\"mac\" name=\"" << def
-               << "\" path=\"\" value=\"" << this->EscapeForXML(val) 
+               << "\" path=\"\" value=\"" << this->EscapeForXML(val)
                << "\"/>\n";
           }
         }
@@ -712,8 +702,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       = (*it)->GetMakefile()->GetIncludeDirectories();
     this->AppendIncludeDirectories(fout, includeDirs, emmited);
     }
-  // now also the system include directories, in case we found them in 
-  // CMakeSystemSpecificInformation.cmake. This makes Eclipse find the 
+  // now also the system include directories, in case we found them in
+  // CMakeSystemSpecificInformation.cmake. This makes Eclipse find the
   // standard headers.
   mf->GetDefinition("CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS");
   std::string compiler = mf->GetSafeDefinition("CMAKE_C_COMPILER");
@@ -738,15 +728,17 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   fout << "</storageModule>\n";
 
   // add build targets
-  fout << 
+  fout <<
     "<storageModule moduleId=\"org.eclipse.cdt.make.core.buildtargets\">\n"
     "<buildTargets>\n"
     ;
   emmited.clear();
   const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string makeArgs = mf->GetSafeDefinition(
+                                               "CMAKE_ECLIPSE_MAKE_ARGUMENTS");
   cmGlobalGenerator* generator
     = const_cast<cmGlobalGenerator*>(this->GlobalGenerator);
-  
+
   std::string allTarget;
   std::string cleanTarget;
   if (generator->GetAllTargetName())
@@ -758,7 +750,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     cleanTarget = generator->GetCleanTargetName();
     }
 
-  // add all executable and library targets and some of the GLOBAL 
+  // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
   for (std::vector<cmLocalGenerator*>::const_iterator
         it = this->GlobalGenerator->GetLocalGenerators().begin();
@@ -781,7 +773,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         case cmTarget::GLOBAL_TARGET:
           {
           bool insertTarget = false;
-          // Only add the global targets from CMAKE_BINARY_DIR, 
+          // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
           if (subdir.empty())
            {
@@ -804,7 +796,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
            }
          if (insertTarget)
            {
-           this->AppendTarget(fout, ti->first, make, subdir, ": ");
+           this->AppendTarget(fout, ti->first, make, makeArgs, subdir, ": ");
            }
          }
          break;
@@ -813,13 +805,13 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
          // Experimental-"sub"targets as e.g. NightlyStart
          if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
           || ((ti->first.find("Continuous")==0)&&(ti->first!="Continuous"))
-          || ((ti->first.find("Experimental")==0) 
+          || ((ti->first.find("Experimental")==0)
                                             && (ti->first!="Experimental")))
            {
            break;
            }
 
-         this->AppendTarget(fout, ti->first, make, subdir, ": ");
+         this->AppendTarget(fout, ti->first, make, makeArgs, subdir, ": ");
          break;
        case cmTarget::EXECUTABLE:
        case cmTarget::STATIC_LIBRARY:
@@ -828,10 +820,10 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
          {
          const char* prefix = (ti->second.GetType()==cmTarget::EXECUTABLE ?
                                                           "[exe] " : "[lib] ");
-         this->AppendTarget(fout, ti->first, make, subdir, prefix);
+         this->AppendTarget(fout, ti->first, make, makeArgs, subdir, prefix);
          std::string fastTarget = ti->first;
          fastTarget += "/fast";
-         this->AppendTarget(fout, fastTarget, make, subdir, prefix);
+         this->AppendTarget(fout, fastTarget, make, makeArgs, subdir, prefix);
          }
          break;
         // ignore these:
@@ -842,15 +834,15 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           break;
         }
       }
-      
+
     // insert the all and clean targets in every subdir
     if (!allTarget.empty())
       {
-      this->AppendTarget(fout, allTarget, make, subdir, ": ");
+      this->AppendTarget(fout, allTarget, make, makeArgs, subdir, ": ");
       }
     if (!cleanTarget.empty())
       {
-      this->AppendTarget(fout, cleanTarget, make, subdir, ": ");
+      this->AppendTarget(fout, cleanTarget, make, makeArgs, subdir, ": ");
       }
 
     //insert rules for compiling, preprocessing and assembling individual files
@@ -870,7 +862,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
         {
         prefix = "[pre] ";
         }
-      this->AppendTarget(fout, *fit, make, subdir, prefix);
+      this->AppendTarget(fout, *fit, make, makeArgs, subdir, prefix);
       }
     }
 
@@ -955,7 +947,7 @@ std::string cmExtraEclipseCDT4Generator::EscapeForXML(const std::string& value)
 // Helper functions
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
-::AppendStorageScanners(cmGeneratedFileStream& fout, 
+::AppendStorageScanners(cmGeneratedFileStream& fout,
                         const cmMakefile& makefile)
 {
   // we need the "make" and the C (or C++) compiler which are used, Alex
@@ -972,7 +964,7 @@ void cmExtraEclipseCDT4Generator
 
 
   // the following right now hardcodes gcc behaviour :-/
-  fout << 
+  fout <<
     "<storageModule moduleId=\"scannerConfiguration\">\n"
     "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
     " selectedProfileId="
@@ -996,24 +988,25 @@ void cmExtraEclipseCDT4Generator
 // of that is to sort the targets in the view of Eclipse, so that at first
 // the global/utility/all/clean targets appear ": ", then the executable
 // targets "[exe] ", then the libraries "[lib]", then the rules for the
-// object files "[obj]", then for preprocessing only "[pre] " and 
-// finally the assembly files "[to asm] ". Note the "to" in "to asm", 
+// object files "[obj]", then for preprocessing only "[pre] " and
+// finally the assembly files "[to asm] ". Note the "to" in "to asm",
 // without it, "asm" would be the first targets in the list, with the "to"
 // they are the last targets, which makes more sense.
 void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
                                                const std::string&     target,
                                                const std::string&     make,
+                                               const std::string&     makeArgs,
                                                const std::string&     path,
                                                const char* prefix)
 {
-  fout << 
+  fout <<
     "<target name=\"" << prefix << target << "\""
     " path=\"" << path.c_str() << "\""
     " targetID=\"org.eclipse.cdt.make.MakeTargetBuilder\">\n"
     "<buildCommand>"
     << cmExtraEclipseCDT4Generator::GetEclipsePath(make)
     << "</buildCommand>\n"
-    "<buildArguments/>\n"
+    "<buildArguments>"  << makeArgs << "</buildArguments>\n"
     "<buildTarget>" << target << "</buildTarget>\n"
     "<stopOnError>true</stopOnError>\n"
     "<useDefaultCommand>false</useDefaultCommand>\n"
@@ -1033,7 +1026,7 @@ void cmExtraEclipseCDT4Generator
                        bool                   runActionUseDefault,
                        bool                   sipParserEnabled)
 {
-  fout << 
+  fout <<
     "<profile id=\"" << profileID << "\">\n"
     "<buildOutputProvider>\n"
     "<openAction enabled=\"" << (openActionEnabled ? "true" : "false")

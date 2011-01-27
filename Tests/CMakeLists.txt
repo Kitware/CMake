@@ -11,7 +11,7 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project ${proj}
-    --test-command ${COMMAND})
+    --test-command ${COMMAND} ${ARGN})
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 ENDMACRO(ADD_TEST_MACRO)
 
@@ -21,7 +21,11 @@ IF(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
   FILE(MAKE_DIRECTORY "${TEST_HOME}")
   FILE(WRITE "${TEST_HOME}/.cvspass" ":pserver:anoncvs@www.cmake.org:/cvsroot/KWSys A\n")
   SET(TEST_HOME_ENV_CODE "# Fake a user home directory to avoid polluting the real one.
-SET(ENV{HOME} \"${TEST_HOME}\")")
+# But provide original ENV{HOME} value in ENV{CTEST_REAL_HOME} for tests that
+# need access to the real HOME directory.
+SET(ENV{CTEST_REAL_HOME} \"\$ENV{HOME}\")
+SET(ENV{HOME} \"${TEST_HOME}\")
+")
 ENDIF()
 
 # Choose a default configuration for CTest tests.
@@ -1164,6 +1168,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     PASS_REGULAR_EXPRESSION "uninitialized variable 'USED_VARIABLE'")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUninitialized")
 
+  ADD_TEST(TestsWorkingDirectory ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/TestsWorkingDirectory"
+    "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project TestsWorkingDirectoryProj
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory"
+    --force-new-ctest-process
+    --test-command ${CMAKE_CTEST_COMMAND} -V
+    )
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory")
+
   # Make sure CTest can handle a test with no newline in output.
   ADD_TEST(CTest.NoNewline
     ${CMAKE_CMAKE_COMMAND} -E echo_append "This line has no newline!")
@@ -1852,6 +1869,32 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -D source_dir:STRING=${CMAKE_CURRENT_SOURCE_DIR}/Tutorial/Step3
     -D CMAKE_CTEST_COMMAND:STRING=${CMAKE_CTEST_COMMAND}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/CMakeWizardTest.cmake)
+  # If the cache variable CMAKE_CONTRACT_PROJECTS is set
+  # then the dashboard will run a contract with CMake test of that
+  # name.  For example CMAKE_CONTRACT_PROJECTS = vtk542 would run
+  # the vtk542 contract test.
+  # For each Contract test, the project should provide a directory
+  # with at least one CMakeLists.txt file that uses ExternalProject
+  # to download and configure the project. The directory should also
+  # contain a RunTest.cmake file that has a single set of the format:
+  # SET(project_RUN_TEST testToRun)
+  # The testToRun should be a test executable that can be run to
+  # smoke test the build.
+  FOREACH(project ${CMAKE_CONTRACT_PROJECTS})
+    INCLUDE(Contracts/${project}/RunTest.cmake)
+    ADD_TEST_MACRO(Contracts.${project}
+      ${${project}_RUN_TEST})
+    # Contract test timeout in seconds.
+    # Default to 6 hours.
+    IF(DEFINED ${project}_TEST_TIMEOUT)
+      SET(timeout ${${project}_TEST_TIMEOUT})
+    ELSEIF(CMAKE_CONTRACT_TEST_TIMEOUT_DEFAULT)
+      SET(timeout ${CMAKE_CONTRACT_TEST_TIMEOUT_DEFAULT})
+    ELSE()
+      SET(timeout 21600)
+    ENDIF()
+    SET_TESTS_PROPERTIES(Contracts.${project} PROPERTIES TIMEOUT ${timeout})
+  ENDFOREACH()
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)
