@@ -293,6 +293,8 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
       parentItems.append(new QStandardItem());
       parentItems[0]->setData(QBrush(QColor(255,100,100)), Qt::BackgroundColorRole);
       parentItems[1]->setData(QBrush(QColor(255,100,100)), Qt::BackgroundColorRole);
+      parentItems[0]->setData(1, GroupRole);
+      parentItems[1]->setData(1, GroupRole);
       root->appendRow(parentItems);
 
       int num = props2.size();
@@ -314,6 +316,7 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
       QStandardItem* parentItem = 
         new QStandardItem(key.isEmpty() ? tr("Ungrouped Entries") : key);
       root->appendRow(parentItem);
+      parentItem->setData(1, GroupRole);
 
       int num = props2.size();
       for(int i=0; i<num; i++)
@@ -478,10 +481,13 @@ QCMakePropertyList QCMakeCacheModel::properties() const
     }
     else
     {
-      // get data
-      QCMakeProperty prop;
-      this->getPropertyData(idx, prop);
-      props.append(prop);
+      if(!data(idx, GroupRole).toInt())
+      {
+        // get data
+        QCMakeProperty prop;
+        this->getPropertyData(idx, prop);
+        props.append(prop);
+      }
       
       // go to the next in the tree
       while(!idxs.isEmpty() && !idxs.last().sibling(idxs.last().row()+1, 0).isValid())
