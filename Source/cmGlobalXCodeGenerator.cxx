@@ -2693,7 +2693,7 @@ void cmGlobalXCodeGenerator
       this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   const char* osxArch =
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_ARCHITECTURES");
-  if(strlen(osxArch) == 0)
+  if(!osxArch || strlen(osxArch) == 0)
     {
     if(this->XcodeVersion >= 32)
       {
