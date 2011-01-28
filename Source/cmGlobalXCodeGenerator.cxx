@@ -165,13 +165,16 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
     }
   else
     {
-    mf->AddCacheDefinition(
-      "CMAKE_CONFIGURATION_TYPES",
-      "Debug;Release;MinSizeRel;RelWithDebInfo",
-      "Semicolon separated list of supported configuration types, "
-      "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
-      "anything else will be ignored.",
-      cmCacheManager::STRING);
+    if(!mf->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
+      {
+      mf->AddCacheDefinition(
+        "CMAKE_CONFIGURATION_TYPES",
+        "Debug;Release;MinSizeRel;RelWithDebInfo",
+        "Semicolon separated list of supported configuration types, "
+        "only supports Debug, Release, MinSizeRel, and RelWithDebInfo, "
+        "anything else will be ignored.",
+        cmCacheManager::STRING);
+      }
     }
   mf->AddDefinition("CMAKE_GENERATOR_CC", "gcc");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
