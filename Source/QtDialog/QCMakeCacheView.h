@@ -67,7 +67,9 @@ public:
   enum { HelpRole = Qt::ToolTipRole,
          TypeRole = Qt::UserRole, 
          AdvancedRole,
-         StringsRole};
+         StringsRole,
+         GroupRole
+       };
 
   enum ViewType { FlatView, GroupView };
 
