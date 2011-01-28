@@ -204,7 +204,8 @@ void
 cmVisualStudioGeneratorOptions
 ::OutputPreprocessorDefinitions(std::ostream& fout,
                                 const char* prefix,
-                                const char* suffix)
+                                const char* suffix,
+                                const char* lang)
 {
   if(this->Defines.empty())
     {
@@ -251,6 +252,11 @@ cmVisualStudioGeneratorOptions
     if(this->Version == 10)
       {
       define = cmVisualStudio10GeneratorOptionsEscapeForXML(define.c_str());
+
+      if(0 == strcmp(lang, "RC"))
+        {
+        cmSystemTools::ReplaceString(define, "\"", "\\\"");
+        }
       }
     else
       {

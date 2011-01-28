@@ -717,6 +717,10 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
       // is ended on a new line
       this->WriteString("</ClCompile>\n", 2);
       }
+    else if(!header && rc && this->OutputSourceSpecificFlags(*source))
+      {
+      this->WriteString("</ResourceCompile>\n", 2);
+      }
     else
       {
       (*this->BuildFileStream ) << " />\n";
@@ -853,8 +857,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
       clOptions.OutputFlagMap(*this->BuildFileStream, "      "); 
       clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream,
-                                              "      ", "\n");
-      
+                                              "      ", "\n", lang);
       }
     }
   return hasFlags;
@@ -1120,7 +1123,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     }
 
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ", 
-                                          "\n");
+                                          "\n", "CXX");
   this->WriteString("<AssemblerListingLocation>", 3);
   *this->BuildFileStream << configName 
                          << "</AssemblerListingLocation>\n";
@@ -1155,7 +1158,7 @@ WriteRCOptions(std::string const& configName,
   this->WriteString("<ResourceCompile>\n", 2);
   Options& clOptions = *(this->ClOptions[configName]);
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                          "\n");
+                                          "\n", "RC");
   this->OutputIncludes(includes);
   this->WriteString("</ResourceCompile>\n", 2);
 }
