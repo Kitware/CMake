@@ -107,14 +107,14 @@ set(CPACK_COMPONENT_HEADERS_INSTALL_TYPES Developer Full)
 set(CPACK_COMPONENT_APPLICATIONS_INSTALL_TYPES Full)
 
 # We may use the CPack specific config file in order
-# to tailor CPack behavio on a CPack generator specific way
+# to tailor CPack behavior on a CPack generator specific way
 # (Behavior would be different for RPM or TGZ or DEB ...)
-if (USE_CPACK_PROJECT_CONFIG)
+if (NOT ("${CPackComponentWay}" STREQUAL "default"))
   # Setup project specific CPack-time CPack Config file.
-  configure_file(${MyLib_SOURCE_DIR}/MyLibCPackConfig.cmake.in
-    ${MyLib_BINARY_DIR}/MyLibCPackConfig.cmake
+  configure_file(${CPackComponentsForAll_SOURCE_DIR}/MyLibCPackConfig-${CPackComponentWay}.cmake.in
+    ${CPackComponentsForAll_BINARY_DIR}/MyLibCPackConfig-${CPackComponentWay}.cmake
     @ONLY)
-  set(CPACK_PROJECT_CONFIG_FILE ${MyLib_BINARY_DIR}/MyLibCPackConfig.cmake)
-endif (USE_CPACK_PROJECT_CONFIG)
+  set(CPACK_PROJECT_CONFIG_FILE ${CPackComponentsForAll_BINARY_DIR}/MyLibCPackConfig-${CPackComponentWay}.cmake)
+endif (NOT ("${CPackComponentWay}" STREQUAL "default"))
 # Include CPack to introduce the appropriate targets
 include(CPack)
