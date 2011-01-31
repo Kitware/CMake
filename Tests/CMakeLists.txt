@@ -572,9 +572,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     list(APPEND CWAYLST "IgnoreGroup")
     list(APPEND CWAYLST "AllInOne")
     list(APPEND CWAYLST "AllGroupsInOne")
-    foreach(CPackGen IN LISTS GENLST)
+    foreach(CPackGen ${GENLST})
       set(CPackRun_CPackGen  "-DCPackGen=${CPackGen}")
-      foreach(CPackComponentWay IN LISTS CWAYLST)
+      foreach(CPackComponentWay ${CWAYLST})
         set(CPackRun_CPackComponentWay "-DCPackComponentWay=${CPackComponentWay}")
         ADD_TEST(CPackComponentsForAll-${CPackGen}-${CPackComponentWay} ${CMAKE_CTEST_COMMAND}
           --build-and-test
