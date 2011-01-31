@@ -168,9 +168,10 @@ SET(CMAKE_Fortran_ARCHIVE_APPEND "<CMAKE_AR> r  <TARGET> <LINK_FLAGS> <OBJECTS>"
 SET(CMAKE_Fortran_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
 
 # compile a Fortran file into an object file
+# (put -o after -c to workaround bug in at least one mpif77 wrapper)
 IF(NOT CMAKE_Fortran_COMPILE_OBJECT)
   SET(CMAKE_Fortran_COMPILE_OBJECT
-    "<CMAKE_Fortran_COMPILER> -o <OBJECT> <DEFINES> <FLAGS> -c <SOURCE>")
+    "<CMAKE_Fortran_COMPILER> <DEFINES> <FLAGS> -c <SOURCE> -o <OBJECT>")
 ENDIF(NOT CMAKE_Fortran_COMPILE_OBJECT)
 
 # link a fortran program
