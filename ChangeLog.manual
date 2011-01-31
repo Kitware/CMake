@@ -1,3 +1,88 @@
+Changes in CMake 2.8.4-rc2 (since 2.8.4-rc1)
+--------------------------------------------
+Alex Neundorf (3):
+      Make cmake build again with cmake < 2.6.3
+      Strip trailing whitespace.
+      Fix parsing of compiler name with a version number
+
+Ben Boeckel (86):
+      ... 86 commit messages summarized as:
+      Fix ADD_TEST regression when WORKING_DIRECTORY not given
+      Add new "strict-mode" CMake variable checking
+      Activate / avoid using new command line arguments:
+        --warn-uninitialized
+        --warn-unused-vars
+        --no-warn-unused-cli
+        --check-system-vars
+
+Bill Hoffman (3):
+      For macros make sure the FilePath points to a valid pointer in the args.
+      Add a warning when variables are used uninitialized.
+      Make --strict-mode option, and integrate with cmake-gui
+
+Brad King (34):
+      bootstrap: Granular system library selection (#11431)
+      bootstrap: Clarify --init flag documentation (#11431)
+      bootstrap: --verbose implies verbose Makefiles (#11708)
+      Combine duplicate COMPILE_DEFINITIONS disclaimer
+      Document COMPILE_DEFINITIONS known limitations (#11660, #11712)
+      Document try_compile behavior more clearly (#11688)
+      Document Check(C|CXX)SourceCompiles behavior more clearly (#11688)
+      Fix get_(cmake|test)_property documentation (#11703)
+      Reference get_property() from old get_*_property() commands
+      Replace misleading example in the if() documentation (#10773)
+      Clarify auto-dereference cases in if() command (#11701)
+      Document CheckFunctionExists more clearly (#10044)
+      Document CheckSymbolExists more clearly (#11685)
+      Update CheckSymbolExists copyright year
+      Report directory with missing source file (#11677)
+      Test that missing source mentions directory (#11677)
+      Teach Simple_Mingw_Linux2Win test to use windres
+      Disable SubDirSpaces parens with GNU Make 3.82 (#11654)
+      libarchive: Fix major() check for LSB 4.0 (#11648)
+      Xcode: Make generation depend on all input directories
+      Recognize SCO UnixWare C/C++ compilers (#11700)
+      Factor SCO compiler info out of platform file (#11700)
+      Honor CMAKE_TRY_COMPILE_CONFIGURATION in Makefile generators (#10809)
+      Document CMAKE_TRY_COMPILE_CONFIGURATION variable
+      Honor VS_SCC_* properties in Fortran targets (#10237)
+      Normalize slashes in scanned #include lines (#10281)
+      Improve try_compile and try_run error messages
+      Use shortest extension to verify try_compile language (#11731)
+      Modules: Include builtin FindPackageHandleStandardArgs directly
+      Fix relative CMAKE_USER_MAKE_RULES_OVERRIDE (#11725)
+      Clarify CMAKE_USER_MAKE_RULES_OVERRIDE documentation (#11724)
+      Always place try_compile executables predictably (#11724)
+      try_compile: Allow only languages loaded in caller (#11469)
+      Fix ArgumentExpansion test expected results
+
+Clinton Stimpson (1):
+      Replace exec_program with execute_process for qmake queries.
+
+David Cole (16):
+      Update script with new machine name
+      VS10: Fix problems with InstallRequiredSystemLibraries.
+      Add CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS variable
+      Add CPACK_NSIS_INSTALL_ROOT for CMake's own installer (#9148)
+      Xcode: Disable implicit make rules in custom rules makefiles.
+      Add freeglut as library name (#10031)
+      Add new names for PNG and ZLIB libraries
+      Avoid exceptions when ccmake terminal window is too small (#11668)
+      VS10: Load projects with obj "source" files (#11147)
+      VS10: Enable using devenv as CMAKE_MAKE_PROGRAM (#11459)
+      Xcode: Fix crash: avoid strlen call on NULL char *
+      CTestTest2: Avoid running purify unless requested
+      VS10: Escape double quote chars in defines for rc files (#11695)
+      Fix line too long KWStyle issue (#11695)
+      Avoid space in rc /D values for VS6 and Cygwin (#11695)
+      VSResource: Avoid windres /D with quoted spaces (#11695)
+
+Marcus D. Hanwell (1):
+      Bug #11715 - generate header in the build tree.
+
+Nicolas Despres (1):
+      bootstrap: Add --enable-ccache option (#11707)
+
 Changes in CMake 2.8.4-rc1 (since 2.8.3)
 ----------------------------------------
 Alex Neundorf (32):
