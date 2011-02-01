@@ -462,6 +462,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
    "Disables whole program optimization", "FALSE", 0},
   {"WarnAsError", "WX", "Treat warnings as errors", "TRUE", 0},
   {"BrowseInformation", "FR", "Generate browse information", "1", 0},
+  {"StringPooling", "GF", "Enable StringPooling", "TRUE", 0},
   {0,0,0,0,0}
 };
 
