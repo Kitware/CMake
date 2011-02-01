@@ -456,6 +456,10 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
    "Turn off Run time type information for c++", "FALSE", 0},
   {"SmallerTypeCheck", "RTCc", "smaller type check", "TRUE", 0},
   {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "TRUE", 0},
+  {"WholeProgramOptimization", "GL",
+   "Enables whole program optimization", "TRUE", 0},
+  {"WholeProgramOptimization", "GL-",
+   "Disables whole program optimization", "FALSE", 0},
   {"WarnAsError", "WX", "Treat warnings as errors", "TRUE", 0},
   {"BrowseInformation", "FR", "Generate browse information", "1", 0},
   {0,0,0,0,0}
