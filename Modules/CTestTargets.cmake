@@ -84,4 +84,12 @@ IF(NOT _CTEST_TARGETS_ADDED)
       ENDFOREACH(testtype)
     ENDFOREACH(mode)
   ENDIF("${CMAKE_GENERATOR}" MATCHES Make)
+
+  # If requested, add an alias that is the equivalent of the built-in "test"
+  # or "RUN_TESTS" target:
+  IF(CTEST_TEST_TARGET_ALIAS)
+    ADD_CUSTOM_TARGET(${CTEST_TEST_TARGET_ALIAS}
+      ${CMAKE_CTEST_COMMAND} ${__conf_types}
+      )
+  ENDIF()
 ENDIF(NOT _CTEST_TARGETS_ADDED)
