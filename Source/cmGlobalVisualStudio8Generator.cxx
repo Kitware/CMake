@@ -358,6 +358,9 @@ static cmVS7FlagTable cmVS8ExtraFlagTable[] =
   {"ExceptionHandling", "EHsc", "enable c++ exceptions", "1", 0},
   {"ExceptionHandling", "EHa", "enable SEH exceptions", "2", 0},
 
+  {"EnablePREfast", "analyze", "", "TRUE", 0},
+  {"EnablePREfast", "analyze-", "", "FALSE", 0},
+
   {0,0,0,0,0}
 };
 cmIDEFlagTable const* cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8()
