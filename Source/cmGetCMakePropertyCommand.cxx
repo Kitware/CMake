@@ -22,21 +22,22 @@ bool cmGetCMakePropertyCommand
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   std::vector<std::string>::size_type cc;
   std::string variable = args[0];
   std::string output = "NOTFOUND";
 
-  if ( args[1] == "VARIABLES")
+  if ( args[1] == "VARIABLES" )
     {
     int cacheonly = 0;
     std::vector<std::string> vars = this->Makefile->GetDefinitions(cacheonly);
-    for ( cc = 0; cc < vars.size(); cc ++ )
+    if (vars.size()>0)
       {
-      if ( cc > 0 )
-        {
-        output += ";";
-        }
+      output = vars[0];
+      }
+    for ( cc = 1; cc < vars.size(); ++cc )
+      {
+      output += ";";
       output += vars[cc];
       }
     }
@@ -62,15 +63,15 @@ bool cmGetCMakePropertyCommand
     }
   else
     {
-    const char *prop = 
+    const char *prop =
       this->Makefile->GetCMakeInstance()->GetProperty(args[1].c_str());
     if (prop)
       {
       output = prop;
       }
     }
+
   this->Makefile->AddDefinition(variable.c_str(), output.c_str());
-  
+
   return true;
 }
-

@@ -194,6 +194,8 @@ elseif(testname STREQUAL random_with_various_alphabets) # pass
   string(RANDOM LENGTH 78 ALPHABET "~`!@#$%^&*()_-+={}[]\\|:\\;'\",.<>/?" v)
   message(STATUS "v='${v}'")
 
+  message(STATUS "CMAKE_SCRIPT_MODE_FILE='${CMAKE_SCRIPT_MODE_FILE}'")
+
 else() # fail
   message(FATAL_ERROR "testname='${testname}' - error: no such test in '${CMAKE_CURRENT_LIST_FILE}'")
 

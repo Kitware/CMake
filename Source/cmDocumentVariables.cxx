@@ -97,6 +97,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Provide Information");
 
   cm->DefineProperty
+    ("CMAKE_SCRIPT_MODE_FILE", cmProperty::VARIABLE,
+     "Full path to the -P script file currently being processed. ",
+     "When run in -P script mode, CMake sets this variable to the full "
+     "path of the script file. When run to configure a CMakeLists.txt "
+     "file, this variable is not set.", false,
+     "Variables that Provide Information");
+
+  cm->DefineProperty
     ("CMAKE_BUILD_TOOL", cmProperty::VARIABLE,
      "Tool used for the actual build process.",
      "This variable is set to the program that will be"

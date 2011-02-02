@@ -510,6 +510,12 @@ void cmake::ReadListFile(const char *path)
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     lg->GetMakefile()->SetStartDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    if (this->GetScriptMode())
+      {
+      std::string file(cmSystemTools::CollapseFullPath(path));
+      cmSystemTools::ConvertToUnixSlashes(file);
+      lg->GetMakefile()->SetScriptModeFile(file.c_str());
+      }
     if (!lg->GetMakefile()->ReadListFile(0, path))
       {
       cmSystemTools::Error("Error processing file:", path);
