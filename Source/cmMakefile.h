@@ -411,7 +411,17 @@ public:
       return this->HomeOutputDirectory.c_str();
     }
   //@}
-  
+
+  /**
+   * Set CMAKE_SCRIPT_MODE_FILE variable when running a -P script.
+   */
+  void SetScriptModeFile(const char* scriptfile);
+
+  /**
+   * Set CMAKE_ARGC, CMAKE_ARGV0 ... variables.
+   */
+  void SetArgcArgv(const std::vector<std::string>& args);
+
   //@{
   /**
    * Set/Get the start directory (or output directory). The start directory

@@ -462,7 +462,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           }
         }
       std::cerr << "loading initial cache file " << path.c_str() << "\n";
-      this->ReadListFile(path.c_str());
+      this->ReadListFile(args, path.c_str());
       }
     else if(arg.find("-P",0) == 0)
       {
@@ -478,13 +478,13 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         cmSystemTools::Error("No cmake script provided.");
         return false;
         }
-      this->ReadListFile(path.c_str());
+      this->ReadListFile(args, path.c_str());
       }
     }
   return true;
 }
 
-void cmake::ReadListFile(const char *path)
+void cmake::ReadListFile(const std::vector<std::string>& args, const char *path)
 {
   // if a generator was not yet created, temporarily create one
   cmGlobalGenerator *gg = this->GetGlobalGenerator();
@@ -510,6 +510,14 @@ void cmake::ReadListFile(const char *path)
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     lg->GetMakefile()->SetStartDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    if (this->GetScriptMode())
+      {
+      std::string file(cmSystemTools::CollapseFullPath(path));
+      cmSystemTools::ConvertToUnixSlashes(file);
+      lg->GetMakefile()->SetScriptModeFile(file.c_str());
+
+      lg->GetMakefile()->SetArgcArgv(args);
+      }
     if (!lg->GetMakefile()->ReadListFile(0, path))
       {
       cmSystemTools::Error("Error processing file:", path);
@@ -2221,13 +2229,14 @@ int cmake::ActualConfigure()
 
 void cmake::PreLoadCMakeFiles()
 {
+  std::vector<std::string> args;
   std::string pre_load = this->GetHomeDirectory();
   if ( pre_load.size() > 0 )
     {
     pre_load += "/PreLoad.cmake";
     if ( cmSystemTools::FileExists(pre_load.c_str()) )
       {
-      this->ReadListFile(pre_load.c_str());
+      this->ReadListFile(args, pre_load.c_str());
       }
     }
   pre_load = this->GetHomeOutputDirectory();
@@ -2236,7 +2245,7 @@ void cmake::PreLoadCMakeFiles()
     pre_load += "/PreLoad.cmake";
     if ( cmSystemTools::FileExists(pre_load.c_str()) )
       {
-      this->ReadListFile(pre_load.c_str());
+      this->ReadListFile(args, pre_load.c_str());
       }
     }
 }
