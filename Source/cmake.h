@@ -406,7 +406,7 @@ protected:
   bool DoSuppressDevWarnings;
 
   ///! read in a cmake list file to initialize the cache
-  void ReadListFile(const char *path);
+  void ReadListFile(const std::vector<std::string>& args, const char *path);
 
   ///! Check if CMAKE_CACHEFILE_DIR is set. If it is not, delete the log file.
   ///  If it is set, truncate it to 50kb

@@ -105,6 +105,22 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Provide Information");
 
   cm->DefineProperty
+    ("CMAKE_ARGC", cmProperty::VARIABLE,
+     "Number of command line arguments passed to CMake in script mode. ",
+     "When run in -P script mode, CMake sets this variable to the number "
+     "of command line arguments. See also CMAKE_ARGV0, 1, 2 ... ", false,
+     "Variables that Provide Information");
+
+  cm->DefineProperty
+    ("CMAKE_ARGV0", cmProperty::VARIABLE,
+     "Command line argument passed to CMake in script mode. ",
+     "When run in -P script mode, CMake sets this variable to "
+     "the first command line argument. It then also sets CMAKE_ARGV1, "
+     "CMAKE_ARGV2, ... and so on, up to the number of command line arguments "
+     "given. See also CMAKE_ARGC.", false,
+     "Variables that Provide Information");
+
+  cm->DefineProperty
     ("CMAKE_BUILD_TOOL", cmProperty::VARIABLE,
      "Tool used for the actual build process.",
      "This variable is set to the program that will be"

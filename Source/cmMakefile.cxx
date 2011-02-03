@@ -2749,6 +2749,22 @@ void cmMakefile::SetScriptModeFile(const char* scriptfile)
   this->AddDefinition("CMAKE_SCRIPT_MODE_FILE", scriptfile);
 }
 
+void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
+{
+  cmOStringStream strStream;
+  strStream << args.size();
+  this->AddDefinition("CMAKE_ARGC", strStream.str().c_str());
+  //this->MarkVariableAsUsed("CMAKE_ARGC");
+
+  for (unsigned int t = 0; t < args.size(); ++t)
+  {
+    cmOStringStream tmpStream;
+    tmpStream << "CMAKE_ARGV" << t;
+    this->AddDefinition(tmpStream.str().c_str(), args[t].c_str());
+    //this->MarkVariableAsUsed(tmpStream.str().c_str());
+  }
+}
+
 //----------------------------------------------------------------------------
 cmSourceFile* cmMakefile::GetSource(const char* sourceName)
 {

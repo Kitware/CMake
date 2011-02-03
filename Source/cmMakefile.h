@@ -417,6 +417,11 @@ public:
    */
   void SetScriptModeFile(const char* scriptfile);
 
+  /**
+   * Set CMAKE_ARGC, CMAKE_ARGV0 ... variables.
+   */
+  void SetArgcArgv(const std::vector<std::string>& args);
+
   //@{
   /**
    * Set/Get the start directory (or output directory). The start directory
