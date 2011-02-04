@@ -484,7 +484,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
   return true;
 }
 
-void cmake::ReadListFile(const std::vector<std::string>& args, const char *path)
+void cmake::ReadListFile(const std::vector<std::string>& args,
+                         const char *path)
 {
   // if a generator was not yet created, temporarily create one
   cmGlobalGenerator *gg = this->GetGlobalGenerator();
