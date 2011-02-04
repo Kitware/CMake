@@ -272,6 +272,12 @@ void cmGraphVizWriter::WriteConnections(const char* targetName,
     std::map<cmStdString, cmStdString>::const_iterator libNameIt =
                                           this->TargetNamesNodes.find(libName);
 
+    // can happen e.g. if GRAPHVIZ_TARGET_IGNORE_REGEX is used
+    if(libNameIt == this->TargetNamesNodes.end())
+      {
+      continue;
+      }
+
     std::string connectionName = myNodeName;
     connectionName += "-";
     connectionName += libNameIt->second;
