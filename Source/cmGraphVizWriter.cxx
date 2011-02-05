@@ -54,6 +54,7 @@ cmGraphVizWriter::cmGraphVizWriter(const std::vector<cmLocalGenerator*>&
 ,GenerateForStaticLibs(true)
 ,GenerateForSharedLibs(true)
 ,GenerateForModuleLibs(true)
+,GenerateForExternals(true)
 ,LocalGenerators(localGenerators)
 ,HaveTargetsAndLibs(false)
 {
@@ -115,7 +116,8 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   __set_bool_if_set(this->GenerateForExecutables, "GRAPHVIZ_EXECUTABLES");
   __set_bool_if_set(this->GenerateForStaticLibs, "GRAPHVIZ_STATIC_LIBS");
   __set_bool_if_set(this->GenerateForSharedLibs, "GRAPHVIZ_SHARED_LIBS");
-  __set_bool_if_set(this->GenerateForModuleLibs , "GRAPHVIZ_MODULE_LIBS");
+  __set_bool_if_set(this->GenerateForModuleLibs, "GRAPHVIZ_MODULE_LIBS");
+  __set_bool_if_set(this->GenerateForExternals, "GRAPHVIZ_EXTERNAL_LIBS");
 
   cmStdString tmpRegexString;
   __set_if_set(tmpRegexString, "GRAPHVIZ_TARGET_IGNORE_REGEX");
@@ -321,7 +323,10 @@ void cmGraphVizWriter::CollectTargetsAndLibs()
     {
     this->HaveTargetsAndLibs = true;
     int cnt = this->CollectAllTargets();
-    this->CollectAllExternalLibs(cnt);
+    if (this->GenerateForExternals)
+      {
+      this->CollectAllExternalLibs(cnt);
+      }
     }
 }
 

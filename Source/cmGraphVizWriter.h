@@ -67,6 +67,7 @@ protected:
   bool GenerateForStaticLibs;
   bool GenerateForSharedLibs;
   bool GenerateForModuleLibs;
+  bool GenerateForExternals;
 
   cmsys::RegularExpression TargetIgnoreRegex;
 
