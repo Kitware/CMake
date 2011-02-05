@@ -69,9 +69,7 @@ protected:
   bool GenerateForModuleLibs;
   bool GenerateForExternals;
 
-  cmsys::RegularExpression TargetIgnoreRegex;
-
-  std::set<cmStdString> TargetsToIgnore;
+  std::vector<cmsys::RegularExpression> TargetsToIgnoreRegex;
 
   const std::vector<cmLocalGenerator*>& LocalGenerators;
 

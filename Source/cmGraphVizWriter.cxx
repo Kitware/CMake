@@ -119,28 +119,28 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   __set_bool_if_set(this->GenerateForModuleLibs, "GRAPHVIZ_MODULE_LIBS");
   __set_bool_if_set(this->GenerateForExternals, "GRAPHVIZ_EXTERNAL_LIBS");
 
-  cmStdString tmpRegexString;
-  __set_if_set(tmpRegexString, "GRAPHVIZ_TARGET_IGNORE_REGEX");
-  if (tmpRegexString.size() > 0)
-    {
-    if (!this->TargetIgnoreRegex.compile(tmpRegexString.c_str()))
-      {
-      std::cerr << "Could not compile bad regex \"" << tmpRegexString << "\""
-                << std::endl;
-      }
-    }
+  cmStdString ignoreTargetsRegexes;
+  __set_if_set(ignoreTargetsRegexes, "GRAPHVIZ_IGNORE_TARGETS");
 
-  this->TargetsToIgnore.clear();
-  const char* ignoreTargets = mf->GetDefinition("GRAPHVIZ_IGNORE_TARGETS");
-  if ( ignoreTargets )
+  this->TargetsToIgnoreRegex.clear();
+  if (ignoreTargetsRegexes.size() > 0)
     {
-    std::vector<std::string> ignoreTargetsVector;
-    cmSystemTools::ExpandListArgument(ignoreTargets,ignoreTargetsVector);
-    for(std::vector<std::string>::iterator itvIt = ignoreTargetsVector.begin();
-        itvIt != ignoreTargetsVector.end();
+    std::vector<std::string> ignoreTargetsRegExVector;
+    cmSystemTools::ExpandListArgument(ignoreTargetsRegexes,
+                                      ignoreTargetsRegExVector);
+    for(std::vector<std::string>::const_iterator itvIt
+                                            = ignoreTargetsRegExVector.begin();
+        itvIt != ignoreTargetsRegExVector.end();
         ++ itvIt )
       {
-      this->TargetsToIgnore.insert(itvIt->c_str());
+      cmStdString currentRegexString(*itvIt);
+      cmsys::RegularExpression currentRegex;
+      if (!currentRegex.compile(currentRegexString.c_str()))
+        {
+        std::cerr << "Could not compile bad regex \"" << currentRegexString
+                  << "\"" << std::endl;
+        }
+      this->TargetsToIgnoreRegex.push_back(currentRegex);
       }
     }
 
@@ -415,14 +415,22 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
 
 bool cmGraphVizWriter::IgnoreThisTarget(const char* name)
 {
-  if (this->TargetIgnoreRegex.is_valid())
+  for(std::vector<cmsys::RegularExpression>::iterator itvIt
+                                          = this->TargetsToIgnoreRegex.begin();
+      itvIt != this->TargetsToIgnoreRegex.end();
+      ++ itvIt )
     {
-    if (this->TargetIgnoreRegex.find(name))
+    cmsys::RegularExpression& regEx = *itvIt;
+    if (regEx.is_valid())
       {
-      return true;
+      if (regEx.find(name))
+        {
+        return true;
+        }
       }
     }
-  return (this->TargetsToIgnore.find(name) != this->TargetsToIgnore.end());
+
+  return false;
 }
 
 
