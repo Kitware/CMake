@@ -30,6 +30,7 @@ public:
                     const char* fallbackSettingsFileName);
 
   void WritePerTargetFiles(const char* fileName);
+  void WriteTargetDependersFiles(const char* fileName);
 
   void WriteGlobalFile(const char* fileName);
 
@@ -47,6 +48,11 @@ protected:
                         std::set<std::string>& insertedNodes,
                         std::set<std::string>& insertedConnections,
                         cmGeneratedFileStream& str) const;
+
+  void WriteDependerConnections(const char* targetName,
+                                std::set<std::string>& insertedNodes,
+                                std::set<std::string>& insertedConnections,
+                                cmGeneratedFileStream& str) const;
 
   void WriteNode(const char* targetName, const cmTarget* target,
                  std::set<std::string>& insertedNodes,

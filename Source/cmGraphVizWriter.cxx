@@ -147,6 +147,54 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
 }
 
 
+// Iterate over all targets and write for each one a graph which shows
+// which other targets depend on it.
+void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
+{
+  this->CollectTargetsAndLibs();
+
+  for(std::map<cmStdString, const cmTarget*>::const_iterator ptrIt =
+                                                      this->TargetPtrs.begin();
+      ptrIt != this->TargetPtrs.end();
+      ++ptrIt)
+    {
+    if (ptrIt->second == NULL)
+      {
+      continue;
+      }
+
+    if (this->GenerateForTargetType(ptrIt->second->GetType()) == false)
+      {
+      continue;
+      }
+
+    std::string currentFilename = fileName;
+    currentFilename += ".";
+    currentFilename += ptrIt->first;
+    currentFilename += ".dependers";
+
+    cmGeneratedFileStream str(currentFilename.c_str());
+    if ( !str )
+      {
+      return;
+      }
+
+    std::set<std::string> insertedConnections;
+    std::set<std::string> insertedNodes;
+
+    std::cout << "Writing " << currentFilename << "..." << std::endl;
+    this->WriteHeader(str);
+
+    this->WriteDependerConnections(ptrIt->first.c_str(),
+                                   insertedNodes, insertedConnections, str);
+
+    this->WriteFooter(str);
+    }
+}
+
+
+// Iterate over all targets and write for each one a graph which shows
+// on which targets it depends.
 void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
 {
   this->CollectTargetsAndLibs();
@@ -293,6 +341,91 @@ void cmGraphVizWriter::WriteConnections(const char* targetName,
           << libNameIt->second.c_str() << "\"";
       str << " // " << targetName << " -> " << libName << std::endl;
       this->WriteConnections(libName, insertedNodes, insertedConnections, str);
+      }
+    }
+
+}
+
+
+void cmGraphVizWriter::WriteDependerConnections(const char* targetName,
+                                    std::set<std::string>& insertedNodes,
+                                    std::set<std::string>& insertedConnections,
+                                    cmGeneratedFileStream& str) const
+{
+  std::map<cmStdString, const cmTarget* >::const_iterator targetPtrIt =
+                                             this->TargetPtrs.find(targetName);
+
+  if (targetPtrIt == this->TargetPtrs.end())  // not found at all
+    {
+    return;
+    }
+
+  this->WriteNode(targetName, targetPtrIt->second, insertedNodes, str);
+
+  if (targetPtrIt->second == NULL) // it's an external library
+    {
+    return;
+    }
+
+
+  std::string myNodeName = this->TargetNamesNodes.find(targetName)->second;
+
+  // now search who links against me
+  for(std::map<cmStdString, const cmTarget*>::const_iterator dependerIt =
+                                                      this->TargetPtrs.begin();
+      dependerIt != this->TargetPtrs.end();
+      ++dependerIt)
+    {
+    if (dependerIt->second == NULL)
+      {
+      continue;
+      }
+
+    if (this->GenerateForTargetType(dependerIt->second->GetType()) == false)
+      {
+      continue;
+      }
+
+    // Now we have a target, check whether it links against targetName.
+    // If so, draw a connection, and then continue with dependers on that one.
+    const cmTarget::LinkLibraryVectorType* ll =
+                            &(dependerIt->second->GetOriginalLinkLibraries());
+
+    for (cmTarget::LinkLibraryVectorType::const_iterator llit = ll->begin();
+         llit != ll->end();
+         ++ llit )
+      {
+      std::string libName = llit->first.c_str();
+      if (libName == targetName)
+        {
+        // So this target links against targetName.
+        std::map<cmStdString, cmStdString>::const_iterator dependerNodeNameIt =
+                                this->TargetNamesNodes.find(dependerIt->first);
+
+        if(dependerNodeNameIt != this->TargetNamesNodes.end())
+          {
+          std::string connectionName = dependerNodeNameIt->second;
+          connectionName += "-";
+          connectionName += myNodeName;
+
+          if (insertedConnections.find(connectionName) ==
+                                                     insertedConnections.end())
+            {
+            insertedConnections.insert(connectionName);
+            this->WriteNode(dependerIt->first.c_str(), dependerIt->second,
+                            insertedNodes, str);
+
+            str << "    \"" << dependerNodeNameIt->second << "\" -> \""
+                << myNodeName << "\"";
+            str << " // " <<targetName<< " -> " <<dependerIt->first<<std::endl;
+            this->WriteDependerConnections(dependerIt->first.c_str(),
+                                      insertedNodes, insertedConnections, str);
+            }
+
+
+          }
+        break;
+        }
       }
     }
 

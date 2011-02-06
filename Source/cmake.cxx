@@ -2898,6 +2898,7 @@ void cmake::GenerateGraphViz(const char* fileName) const
   gvWriter->ReadSettings(settingsFile.c_str(), fallbackSettingsFile.c_str());
 
   gvWriter->WritePerTargetFiles(fileName);
+  gvWriter->WriteTargetDependersFiles(fileName);
   gvWriter->WriteGlobalFile(fileName);
 
 #endif
