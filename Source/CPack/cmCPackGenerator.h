@@ -132,6 +132,19 @@ protected:
   virtual int PrepareGroupingKind();
 
   /**
+   * Some CPack generators may prefer to have
+   * CPack install all components belonging to the same
+   * [component] group to be install in the same directory.
+   * The default behavior is to install each component in
+   * a separate directory.
+   * @param[in] componentName the name of the component to be installed
+   * @return the name suffix the generator wants for the specified component
+   *         default is "componentName"
+   */
+  virtual std::string GetComponentInstallDirNameSuffix(
+      const std::string& componentName);
+
+  /**
    * Package the list of files and/or components which
    * has been prepared by the beginning of DoPackage.
    * @pre @ref toplevel has been filled-in
