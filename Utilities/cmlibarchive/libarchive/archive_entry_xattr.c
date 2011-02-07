@@ -32,13 +32,6 @@ __FBSDID("$FreeBSD: src/lib/libarchive/archive_entry.c,v 1.55 2008/12/23 05:01:4
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef MAJOR_IN_MKDEV
-#include <sys/mkdev.h>
-#else
-#ifdef MAJOR_IN_SYSMACROS
-#include <sys/sysmacros.h>
-#endif
-#endif
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
