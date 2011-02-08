@@ -320,7 +320,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   std::string output;
   int retVal = 1;
   int numTries = 4;
-  bool res;
+  bool res = false;
   while(numTries > 0)
     {
     res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
