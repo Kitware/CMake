@@ -563,30 +563,40 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   IF(CTEST_RUN_CPackComponentsForAll)
     set(CPackComponentsForAll_EXTRA_OPTIONS)
-
-    set(CPackRun_CPackGen  "-DCPackGen=ZIP")
     set(CPackRun_CPackCommand "-DCPackCommand=${CMAKE_CPACK_COMMAND}")
-    set(CPackRun_CPackComponentWay "-DCPackComponentWay=default")
-
-    ADD_TEST(CPackComponentsForAll-ZIP-default ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll"
-      "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/buildZIP-NoComponent"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project CPackComponentsForAll
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-options
-        -DCPACK_BINARY_ZIP:BOOL=ON
-        ${CPackComponentsForAll_EXTRA_OPTIONS}
-        --graphviz=CPackComponentsForAll.dot
-      --test-command ${CMAKE_CMAKE_COMMAND}
-        "-DCPackComponentsForAll_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/buildZIP-NoComponent"
-        "${CPackRun_CPackCommand}"
-        "${CPackRun_CPackGen}"
-        "${CPackRun_CPackComponentWay}"
-        -P "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll/RunCPackVerifyResult.cmake")
-
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll")
+    # set up list of CPack generators
+    list(APPEND GENLST "ZIP")
+    # set up list of component packaging ways
+    list(APPEND CWAYLST "default")
+    list(APPEND CWAYLST "OnePackPerGroup")
+    list(APPEND CWAYLST "IgnoreGroup")
+    list(APPEND CWAYLST "AllInOne")
+    list(APPEND CWAYLST "AllGroupsInOne")
+    foreach(CPackGen ${GENLST})
+      set(CPackRun_CPackGen  "-DCPackGen=${CPackGen}")
+      foreach(CPackComponentWay ${CWAYLST})
+        set(CPackRun_CPackComponentWay "-DCPackComponentWay=${CPackComponentWay}")
+        ADD_TEST(CPackComponentsForAll-${CPackGen}-${CPackComponentWay} ${CMAKE_CTEST_COMMAND}
+          --build-and-test
+          "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll"
+          "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}"
+          --build-generator ${CMAKE_TEST_GENERATOR}
+          --build-project CPackComponentsForAll
+          --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+          --build-options
+             -DCPACK_BINARY_${CPackGen}:BOOL=ON
+             ${CPackRun_CPackComponentWay}
+             ${CPackComponentsForAll_EXTRA_OPTIONS}
+             --graphviz=CPackComponentsForAll.dot
+          --test-command ${CMAKE_CMAKE_COMMAND}
+            "-DCPackComponentsForAll_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}"
+            "${CPackRun_CPackCommand}"
+            "${CPackRun_CPackGen}"
+            "${CPackRun_CPackComponentWay}"
+            -P "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll/RunCPackVerifyResult.cmake")
+        LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}")
+      endforeach(CPackComponentWay)
+    endforeach(CPackGen)
   ENDIF(CTEST_RUN_CPackComponentsForAll)
 
   # By default, turn this test off (because it takes a long time...)
