@@ -167,6 +167,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   // Write the encoding header into the file
   char magic[] = {0xEF,0xBB, 0xBF};
   this->BuildFileStream->write(magic, 3);
+  this->WriteString("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n",0);
   this->WriteString("<Project DefaultTargets=\"Build\" "
                     "ToolsVersion=\"4.0\" "
                     "xmlns=\"http://schemas.microsoft.com/"
@@ -998,6 +999,15 @@ OutputLinkIncremental(std::string const& configName)
   this->WritePlatformConfigTag("LinkIncremental", configName.c_str(), 3);
   *this->BuildFileStream << incremental
                          << "</LinkIncremental>\n"; 
+
+  const char* manifest = "true";
+  if(flags.find("MANIFEST:NO") != flags.npos)
+    {
+    manifest = "false";
+    }
+  this->WritePlatformConfigTag("GenerateManifest", configName.c_str(), 3);
+  *this->BuildFileStream << manifest
+                         << "</GenerateManifest>\n";
 }
 
 //----------------------------------------------------------------------------
@@ -1326,7 +1336,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   linkDirs += "%(AdditionalLibraryDirectories)";
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs.c_str());
   linkOptions.AddFlag("AdditionalDependencies", libs.c_str());
-  linkOptions.AddFlag("Version", "0.0");
+  linkOptions.AddFlag("Version", "");
   if(linkOptions.IsDebug() || flags.find("/debug") != flags.npos)
     {
     linkOptions.AddFlag("GenerateDebugInformation", "true");
@@ -1369,6 +1379,8 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     linkOptions.AddFlag("ModuleDefinitionFile",
                         this->ModuleDefinitionFile.c_str());
     }
+
+  linkOptions.RemoveFlag("GenerateManifest");
   linkOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
   linkOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   

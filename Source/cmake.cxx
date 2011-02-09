@@ -4144,7 +4144,10 @@ int cmake::VisualStudioLinkNonIncremental(std::vector<std::string>& args,
     return -1;
     }
   // Run the link command as given
-  linkCommand.push_back("/MANIFEST");
+  if (hasManifest)
+    {
+    linkCommand.push_back("/MANIFEST");
+    }
   if(!cmake::RunCommand("LINK", linkCommand, verbose))
     {
     return -1;
