@@ -2658,10 +2658,6 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string>
 
     if (expectedMD5sum == actualMD5sum)
       {
-      this->Makefile->DisplayStatus(
-        "FILE(DOWNLOAD) returning early: file already exists with "
-        "expected MD5 sum", -1);
-
       if(statusVar.size())
         {
         cmOStringStream result;
