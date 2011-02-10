@@ -863,7 +863,7 @@ cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
   event.Write(target.GetPreBuildCommands());
   event.Write(target.GetPreLinkCommands());
   cmsys::auto_ptr<cmCustomCommand> pcc(
-    this->MaybeCreateImplibDir(target, configName));
+    this->MaybeCreateImplibDir(target, configName, false));
   if(pcc.get())
     {
     event.Write(*pcc);
