@@ -431,7 +431,8 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
         {
         emittedDirs.insert(dir);
         fout << "<pathentry include=\""
-             << cmExtraEclipseCDT4Generator::GetEclipsePath(dir)
+             << cmExtraEclipseCDT4Generator::EscapeForXML(
+                              cmExtraEclipseCDT4Generator::GetEclipsePath(dir))
              << "\" kind=\"inc\" path=\"\" system=\"true\"/>\n";
         }
       }
@@ -1002,9 +1003,10 @@ void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
                                                const char* prefix)
 {
   std::string targetXml = cmExtraEclipseCDT4Generator::EscapeForXML(target);
+  std::string pathXml = cmExtraEclipseCDT4Generator::EscapeForXML(path);
   fout <<
     "<target name=\"" << prefix << targetXml << "\""
-    " path=\"" << path.c_str() << "\""
+    " path=\"" << pathXml.c_str() << "\""
     " targetID=\"org.eclipse.cdt.make.MakeTargetBuilder\">\n"
     "<buildCommand>"
     << cmExtraEclipseCDT4Generator::GetEclipsePath(make)
