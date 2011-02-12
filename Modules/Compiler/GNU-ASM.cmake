@@ -3,6 +3,4 @@ include(Compiler/GNU)
 
 set(CMAKE_ASM_SOURCE_FILE_EXTENSIONS s;S;asm)
 
-set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_ASM_COMPILER> <DEFINES> <FLAGS> -o <OBJECT>   -c <SOURCE>")
-
 __compiler_gnu(ASM)
