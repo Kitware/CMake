@@ -1001,15 +1001,16 @@ void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
                                                const std::string&     path,
                                                const char* prefix)
 {
+  std::string targetXml = cmExtraEclipseCDT4Generator::EscapeForXML(target);
   fout <<
-    "<target name=\"" << prefix << target << "\""
+    "<target name=\"" << prefix << targetXml << "\""
     " path=\"" << path.c_str() << "\""
     " targetID=\"org.eclipse.cdt.make.MakeTargetBuilder\">\n"
     "<buildCommand>"
     << cmExtraEclipseCDT4Generator::GetEclipsePath(make)
     << "</buildCommand>\n"
     "<buildArguments>"  << makeArgs << "</buildArguments>\n"
-    "<buildTarget>" << target << "</buildTarget>\n"
+    "<buildTarget>" << targetXml << "</buildTarget>\n"
     "<stopOnError>true</stopOnError>\n"
     "<useDefaultCommand>false</useDefaultCommand>\n"
     "</target>\n"
