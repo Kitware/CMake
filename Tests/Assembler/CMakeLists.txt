@@ -3,24 +3,27 @@ project(Assembler)
 
 set(SRCS)
 
-# if no file has been set as source and we are on linux with an x86 processor try to use the gas/as assembler
-# main-linux-x86-gas.s seems to work for Linux and FreeBSD
-if(NOT SRCS AND CMAKE_SYSTEM_PROCESSOR MATCHES "[ix].?86$")
-  if(CMAKE_SYSTEM MATCHES Linux OR CMAKE_SYSTEM MATCHES FreeBSD)
-    message(STATUS "Trying to enable ASM-ATT for Linux or FreeBSD on x86")
-    enable_language(ASM-ATT OPTIONAL)
-    if(CMAKE_ASM-ATT_COMPILER_WORKS)
-      message(STATUS "Trying to enable ASM-ATT for Linux/x86 - succeeded")
-      # this assembler file was created using gcc -S main.c
-      set(SRCS main-linux-x86-gas.s)
-    endif(CMAKE_ASM-ATT_COMPILER_WORKS)
-  endif(CMAKE_SYSTEM MATCHES Linux OR CMAKE_SYSTEM MATCHES FreeBSD)
-endif(NOT SRCS AND CMAKE_SYSTEM_PROCESSOR MATCHES "[ix].?86$")
+# (at least) the following toolchains xan process assembler files directly
+# and also generate assembler files from C:
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU"
+   OR CMAKE_C_COMPILER_ID STREQUAL "HP"
+   OR CMAKE_C_COMPILER_ID STREQUAL "Intel"
+   OR CMAKE_C_COMPILER_ID STREQUAL "SunPro"
+   OR CMAKE_C_COMPILER_ID STREQUAL "XL")
+  execute_process(COMMAND ${CMAKE_C_COMPILER} -S "${CMAKE_CURRENT_SOURCE_DIR}/main.c" -o "${CMAKE_CURRENT_BINARY_DIR}/main.s")
+  set(SRCS "${CMAKE_CURRENT_BINARY_DIR}/main.s")
+endif(CMAKE_C_COMPILER_ID STREQUAL "GNU"
+   OR CMAKE_C_COMPILER_ID STREQUAL "HP"
+   OR CMAKE_C_COMPILER_ID STREQUAL "Intel"
+   OR CMAKE_C_COMPILER_ID STREQUAL "SunPro"
+   OR CMAKE_C_COMPILER_ID STREQUAL "XL")
 
-if(NOT SRCS)
+
+if(SRCS)
+  enable_language(ASM OPTIONAL)
+else(SRCS)
   message(STATUS "No assembler enabled, using C")
   set(SRCS main.c)
-endif(NOT SRCS)
+endif(SRCS)
 
 add_executable(HelloAsm ${SRCS})
-set_target_properties(HelloAsm PROPERTIES LINKER_LANGUAGE C)
