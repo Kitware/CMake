@@ -875,8 +875,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   fout << "</cconfiguration>\n"
           "</storageModule>\n"
           "<storageModule moduleId=\"cdtBuildSystem\" version=\"4.0.0\">\n"
-          "<project id=\"" << mf->GetProjectName() << ".null.1\""
-          " name=\"" << mf->GetProjectName() << "\"/>\n"
+          "<project id=\"" << this->EscapeForXML(mf->GetProjectName())
+       << ".null.1\" name=\"" << this->EscapeForXML(mf->GetProjectName())
+       << "\"/>\n"
           "</storageModule>\n"
           "</cproject>\n"
           ;
@@ -927,7 +928,8 @@ cmExtraEclipseCDT4Generator::GenerateProjectName(const std::string& name,
                                                  const std::string& type,
                                                  const std::string& path)
 {
-  return name + (type.empty() ? "" : "-") + type + "@" + path;
+  return cmExtraEclipseCDT4Generator::EscapeForXML(name)
+                                +(type.empty() ? "" : "-") + type + "@" + path;
 }
 
 std::string cmExtraEclipseCDT4Generator::EscapeForXML(const std::string& value)
