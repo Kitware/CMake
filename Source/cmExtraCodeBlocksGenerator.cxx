@@ -416,11 +416,18 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::STATIC_LIBRARY:
         case cmTarget::SHARED_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
+        case cmTarget::UTILITY: // can have sources since 2.6.3
           {
           const std::vector<cmSourceFile*>&sources=ti->second.GetSourceFiles();
           for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
                si!=sources.end(); si++)
             {
+            // don't add source files which have the GENERATED property set:
+            if ((*si)->GetPropertyAsBool("GENERATED"))
+              {
+              continue;
+              }
+
             // check whether it is a C/C++ implementation file
             bool isCFile = false;
             if ((*si)->GetLanguage() && (*(*si)->GetLanguage() == 'C'))
