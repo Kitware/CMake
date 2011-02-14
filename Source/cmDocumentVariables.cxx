@@ -867,8 +867,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("MSVC_VERSION", cmProperty::VARIABLE,
      "The version of Microsoft Visual C/C++ being used if any.",
-     "The version of Microsoft Visual C/C++ being used if any. "
-     "For example 1300 is MSVC 6.0.",
+     "Known version numbers are:\n"
+     "  1200 = VS  6.0\n"
+     "  1300 = VS  7.0\n"
+     "  1310 = VS  7.1\n"
+     "  1400 = VS  8.0\n"
+     "  1500 = VS  9.0\n"
+     "  1600 = VS 10.0\n"
+     "",
      false,
      "Variables That Describe the System");
 
