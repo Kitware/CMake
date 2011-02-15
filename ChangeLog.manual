@@ -1,3 +1,23 @@
+Changes in CMake 2.8.4 (since 2.8.4-rc2)
+----------------------------------------
+Alex Neundorf (1):
+      Fix crash in GraphVizWriter when GRAPHVIZ_TARGET_IGNORE_REGEX is used
+
+Andreas Schneider (1):
+      FindPerlLibs: Add notice of copyright
+
+Brad King (3):
+      libarchive: Define major/minor/makedev only where needed (#11648)
+      libarchive: Use OpenSSL only if CMAKE_USE_OPENSSL (#11815)
+      Fix documentation of MSVC_VERSION (#11833)
+
+David Cole (1):
+      Silence the may be used uninitialized warnings: initialize stuff.
+
+Eric NOULARD (2):
+      CPack   Tests the different ways of packaging components
+      Avoid foreach IN LISTS syntax which is not supported by CMake 2.6
+
 Changes in CMake 2.8.4-rc2 (since 2.8.4-rc1)
 --------------------------------------------
 Alex Neundorf (3):
