@@ -194,6 +194,8 @@ elseif(testname STREQUAL random_with_various_alphabets) # pass
   string(RANDOM LENGTH 78 ALPHABET "~`!@#$%^&*()_-+={}[]\\|:\\;'\",.<>/?" v)
   message(STATUS "v='${v}'")
 
+  message(STATUS "CMAKE_SCRIPT_MODE_FILE='${CMAKE_SCRIPT_MODE_FILE}'")
+
 elseif(testname STREQUAL string_find_with_no_parameter) # fail
   string(FIND)
 

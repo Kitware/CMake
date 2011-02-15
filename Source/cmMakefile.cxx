@@ -2744,6 +2744,11 @@ void cmMakefile::SetHomeOutputDirectory(const char* lib)
     }
 }
 
+void cmMakefile::SetScriptModeFile(const char* scriptfile)
+{
+  this->AddDefinition("CMAKE_SCRIPT_MODE_FILE", scriptfile);
+}
+
 //----------------------------------------------------------------------------
 cmSourceFile* cmMakefile::GetSource(const char* sourceName)
 {
