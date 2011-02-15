@@ -182,7 +182,7 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne(bool allComponent)
   // add the generated package to package file names list
   packageFileNames.push_back(packageFileName);
 
-  return 1;
+  return retval;
 }
 
 //----------------------------------------------------------------------
