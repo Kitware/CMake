@@ -439,6 +439,9 @@ public:
   /** Remove a directory; repeat a few times in case of locked files.  */
   static bool RepeatedRemoveDirectory(const char* dir);
 
+  /** Tokenize a string */
+  static std::vector<std::string> tokenize(const std::string& str,
+                                           const std::string& sep);
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
