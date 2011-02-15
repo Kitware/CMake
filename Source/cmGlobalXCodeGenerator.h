@@ -88,6 +88,8 @@ public:
 private: 
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
                                      cmSourceGroup* sg);
+  cmXCodeObject* CreatePBXGroup(cmXCodeObject *parent,
+                                cmStdString name);
   void CreateGroups(cmLocalGenerator* root,
                     std::vector<cmLocalGenerator*>&
                     generators);
