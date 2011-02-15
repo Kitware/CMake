@@ -1,3 +1,416 @@
+Changes in CMake 2.8.4 (since 2.8.4-rc2)
+----------------------------------------
+Alex Neundorf (1):
+      Fix crash in GraphVizWriter when GRAPHVIZ_TARGET_IGNORE_REGEX is used
+
+Andreas Schneider (1):
+      FindPerlLibs: Add notice of copyright
+
+Brad King (3):
+      libarchive: Define major/minor/makedev only where needed (#11648)
+      libarchive: Use OpenSSL only if CMAKE_USE_OPENSSL (#11815)
+      Fix documentation of MSVC_VERSION (#11833)
+
+David Cole (1):
+      Silence the may be used uninitialized warnings: initialize stuff.
+
+Eric NOULARD (2):
+      CPack   Tests the different ways of packaging components
+      Avoid foreach IN LISTS syntax which is not supported by CMake 2.6
+
+Changes in CMake 2.8.4-rc2 (since 2.8.4-rc1)
+--------------------------------------------
+Alex Neundorf (3):
+      Make cmake build again with cmake < 2.6.3
+      Strip trailing whitespace.
+      Fix parsing of compiler name with a version number
+
+Ben Boeckel (86):
+      ... 86 commit messages summarized as:
+      Fix ADD_TEST regression when WORKING_DIRECTORY not given
+      Add new "strict-mode" CMake variable checking
+      Activate / avoid using new command line arguments:
+        --warn-uninitialized
+        --warn-unused-vars
+        --no-warn-unused-cli
+        --check-system-vars
+
+Bill Hoffman (3):
+      For macros make sure the FilePath points to a valid pointer in the args.
+      Add a warning when variables are used uninitialized.
+      Make --strict-mode option, and integrate with cmake-gui
+
+Brad King (34):
+      bootstrap: Granular system library selection (#11431)
+      bootstrap: Clarify --init flag documentation (#11431)
+      bootstrap: --verbose implies verbose Makefiles (#11708)
+      Combine duplicate COMPILE_DEFINITIONS disclaimer
+      Document COMPILE_DEFINITIONS known limitations (#11660, #11712)
+      Document try_compile behavior more clearly (#11688)
+      Document Check(C|CXX)SourceCompiles behavior more clearly (#11688)
+      Fix get_(cmake|test)_property documentation (#11703)
+      Reference get_property() from old get_*_property() commands
+      Replace misleading example in the if() documentation (#10773)
+      Clarify auto-dereference cases in if() command (#11701)
+      Document CheckFunctionExists more clearly (#10044)
+      Document CheckSymbolExists more clearly (#11685)
+      Update CheckSymbolExists copyright year
+      Report directory with missing source file (#11677)
+      Test that missing source mentions directory (#11677)
+      Teach Simple_Mingw_Linux2Win test to use windres
+      Disable SubDirSpaces parens with GNU Make 3.82 (#11654)
+      libarchive: Fix major() check for LSB 4.0 (#11648)
+      Xcode: Make generation depend on all input directories
+      Recognize SCO UnixWare C/C++ compilers (#11700)
+      Factor SCO compiler info out of platform file (#11700)
+      Honor CMAKE_TRY_COMPILE_CONFIGURATION in Makefile generators (#10809)
+      Document CMAKE_TRY_COMPILE_CONFIGURATION variable
+      Honor VS_SCC_* properties in Fortran targets (#10237)
+      Normalize slashes in scanned #include lines (#10281)
+      Improve try_compile and try_run error messages
+      Use shortest extension to verify try_compile language (#11731)
+      Modules: Include builtin FindPackageHandleStandardArgs directly
+      Fix relative CMAKE_USER_MAKE_RULES_OVERRIDE (#11725)
+      Clarify CMAKE_USER_MAKE_RULES_OVERRIDE documentation (#11724)
+      Always place try_compile executables predictably (#11724)
+      try_compile: Allow only languages loaded in caller (#11469)
+      Fix ArgumentExpansion test expected results
+
+Clinton Stimpson (1):
+      Replace exec_program with execute_process for qmake queries.
+
+David Cole (16):
+      Update script with new machine name
+      VS10: Fix problems with InstallRequiredSystemLibraries.
+      Add CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS variable
+      Add CPACK_NSIS_INSTALL_ROOT for CMake's own installer (#9148)
+      Xcode: Disable implicit make rules in custom rules makefiles.
+      Add freeglut as library name (#10031)
+      Add new names for PNG and ZLIB libraries
+      Avoid exceptions when ccmake terminal window is too small (#11668)
+      VS10: Load projects with obj "source" files (#11147)
+      VS10: Enable using devenv as CMAKE_MAKE_PROGRAM (#11459)
+      Xcode: Fix crash: avoid strlen call on NULL char *
+      CTestTest2: Avoid running purify unless requested
+      VS10: Escape double quote chars in defines for rc files (#11695)
+      Fix line too long KWStyle issue (#11695)
+      Avoid space in rc /D values for VS6 and Cygwin (#11695)
+      VSResource: Avoid windres /D with quoted spaces (#11695)
+
+Marcus D. Hanwell (1):
+      Bug #11715 - generate header in the build tree.
+
+Nicolas Despres (1):
+      bootstrap: Add --enable-ccache option (#11707)
+
+Changes in CMake 2.8.4-rc1 (since 2.8.3)
+----------------------------------------
+Alex Neundorf (32):
+      Add support for nasm assembler, patch by Peter Collingbourne (see #10069)
+      Improve misleading comments.
+      Add missing copyright headers
+      We already have 2010, fix copyright year.
+      Make FindBISON work properly with non-C locales (#11326)
+      Add support for yasm, a nasm compatible assembler
+      Use CMAKE_ASM_NASM_FLAGS for nasm instead of FLAGS
+      Remove trailing whitespace and minor formatting changes for the dot-code
+      Move the code for collecting targets and libraries into separate functions
+      Properly insert all targets, also those which don't link to anything.
+      Generate separate dot files for each target, and a big one with everything.
+      Move the code for generating dot-files into separate class cmGraphVizWriter
+      Fix #11421: FindQt3.cmake doesn't honor the REQUIRED keyword
+      Remove trailing whitespace
+      Don't enforce VERBOSE makefiles for the CodeBlocks generator
+      Remove the "early alpha stage" comments about Eclipse and C::B
+      Don't disable colors in the CodeBlocks generator and minor cleanup.
+      Some more fixes for nasm support, from Etienne (#10069)
+      Enable/disable generating graphs depending on the target type
+      Use std::cout instead of fprintf
+      Collect targets and libs on demand instead of in the ctor
+      Exclude targets from the graphviz file based on a regex
+      Include CMakeDetermineCompilerId in CMakeDetermineASMCompiler.cmake (#11467)
+      Fix typos in the doc
+      Add cache var CMAKE_ECLIPSE_MAKE_ARGUMENTS when using the Eclipse generator
+      Add ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT as a ADVANCED cache variable (#9631)
+      Fix crash in Eclipse generator with empty project (#11616)
+      Fix indentation in cmPolicies::ApplyPolicyVersion()
+      Remove trailing whitespace
+      Prefer files from CMAKE_ROOT when including from CMAKE_ROOT
+      Improve documentation and messages for the new CMP0017
+      Remove usage of CMAKE_CURRENT_LIST_DIR now that we have CMP0017
+
+Alexey Ozeritsky (5):
+      FindBLAS works in C/C++ projects without Fortran
+      ACML find fixes (issue 0011219)
+      find ACML fixes
+      fix for Fortran-only projects
+      FindLAPACK works with C/C++ only projects (issue 0009976)
+
+Andrius Štikonas (1):
+      Modules: Fix spelling 'becase' -> 'because'.
+
+Ben Boeckel (25):
+      Fix parsing of cache variables without a type
+      Use cmCacheManager to load entries from the cache
+      Support manual cache entries
+      Condense parsing of cache entries
+      Use FPHSA in FindOpenGL
+      Ignore strerror_r since CMake isn't threaded
+      Use _POLL_EMUL_H_ instead of HAVE_POLL_FINE
+      Rename WorkingDirectory test
+      Add WORKING_DIRECTORY argument to add_test
+      Add tests for WORKING_DIRECTORY arg to add_test
+      Rename the project to match the test
+      Fix header includes for C++ and Visual Studio
+      Add ctype.h include for toupper()
+      Flip slashes around on Windows
+      Use --><-- markers to denote the path
+      Simplify the _default_cwd derivation
+      Only test the default cwd with Makefiles
+      Group adding tests with its properties
+      Fully specify the path to old-signature add_test
+      Use iostream to make Borland happy
+      Check for poll when looking for _POLL_EMUL_H_
+      Toss out strerror_r macros
+      Fix missed _POLL_EMUL_H_ and HAVE_POLL combo
+      Make TestsWorkingDirectory test a C file
+      Pass the expected value as the first argument
+
+Bill Hoffman (17):
+      Fixes for the OSF operating system build.
+      Add a fix for the inline keyword on the osf os.
+      Add a "Contract" test for VTK.  The test downloads and builds VTK.
+      Fix contract test so it is not hard coded to the vtk542 test.
+      Fix incremental linking for VS2010 with nmake or make.
+      Change cpack run and verify script to work with multi-config generators.
+      Fix vs2010 project generation error when HEADER_FILE_ONLY is set.
+      Add more documentation for LANGUAGE property.
+      Add flags to resource builds on vs 2010 with a test.
+      Disable incremental testing for this test, it crashes vs9 linker.
+      Only run resource test for MSVC compilers.
+      Add support for windows resources with mingw/msys.
+      Add support for windres to cygwin.
+      Add testing for windows resources for mingw/msys/cygwin and remove for watcom.
+      Enable resource building with the intel compiler on windows.
+      Add support for source files in custom targets for VS 10 (Bug#11330).
+      Change the nightly tests to build from the nightly branch and not next.
+
+Brad King (90):
+      Store direct dependencies in solutions for VS >= 8
+      BUG: Fix compiler flag test for non-English MSVC (#11336)
+      Document custom command behavior without DEPENDS (#11407)
+      Consolidate duplicate link rule make dependency code
+      Define LINK_DEPENDS target property (#11406)
+      KWSys: Teach SystemInformation about WinXP Pro and Win7
+      Fix Intel .vfproj SubSystem attribute values
+      Set Intel .vfproj RuntimeLibrary attribute
+      Create Fortran info variables for .mod behavior
+      Teach CMake about Cray C, C++, and Fortran compilers
+      Speedup find_* commands (#11412)
+      Prefer non-empty prefixes when matching lib names (#11468)
+      Record edge type in global dependency graph
+      Use modern global dependency graph for VS < 8 deps
+      Allow add_dependencies() on imported targets (#10395)
+      Pass Mac linker flag through PGI compiler using "-Wl,"
+      Modernize FindITK module (#11494)
+      Fix find_* argument parsing crash (#11513)
+      Skip VS <= 7.1 dependency analysis for VS >= 8
+      Enable 64-bit tools with VS 2010 Express (#9981, #10722)
+      KWSys: Associate installed library with an EXPORT
+      Fix try_compile RemoveFile anti-virus loop (#11503)
+      Fix Fortran .mod timestamps with Cray compiler
+      Make Fortran $obj.provides.build targets not .PHONY
+      Honor custom command dependencies on imported targets (#10395)
+      Improve signature of cmLocalGenerator::GetRealDependency
+      Skip file-level dependencies on custom targets (#11332)
+      Simplify VS generator ConstructScript interface
+      Factor out common custom command generator
+      Remove cmLocalGenerator::GetRealLocation
+      KWSys: Remove realpath from SystemTools::GetPath (#10335)
+      Fix parallel "make install" of CMake itself
+      CTest: Fix ctest_sleep documentation (#11554)
+      Fix soname in cross-compiled targets with Mac host (#11547)
+      Detect object files in implicit link information
+      Allow Fortran platform files to set empty values
+      Recognize the NAG Fortran compiler
+      Add NAG Fortran compiler information files
+      FortranCInterface: Recognize NAG Fortran module symbols
+      Remove unused variable "rootdir" in VS generators
+      Avoid msbuild idiosyncrasy that builds multiple configs (#11594)
+      Remove unused parameter "root" in some VS generator methods
+      Fix dependency tracing of INSTALL and PACKAGE (#11598)
+      Remove unused GLOBAL_TARGET generation code
+      KWSys: Use EXPORT name only if installing library
+      Write full version into try_compile CMakeLists
+      KWSys: Do not mangle UNC paths in ConvertToUnixOutputPath (#10206)
+      Normalize add_custom_command OUTPUT names (#10485)
+      Make link rule depend on ".def" file (#11014)
+      Document target_link_libraries target scope (#11058)
+      Record backtrace in cmCustomCommand
+      Factor generator expression docs out of add_test
+      Factor per-config sample targets out of 'Testing' test
+      Optionally suppress errors in cmGeneratorExpression
+      Record set of targets used in cmGeneratorExpression
+      Introduce "generator expression" syntax to custom commands (#11209)
+      CTest: Fix test DEPEND cycle detection
+      Make Intel defines consistent with MSVC on Windows (#9904)
+      CTest: Fix line-too-long style in DEPEND cycle error
+      Detect Fortran target architecture on Windows
+      Modernize Intel compiler info on Windows
+      Remove unused old-style g++ info file
+      CheckCCompilerFlag: Strict signature of 'main' (#11615)
+      Warn in find(GLOB) docs about bad use case (#11617)
+      Remove call to SystemTools::GetMaximumFilePathLength
+      Xcode: Generate native 3.2 projects
+      Declare min CMake version in --system-information project
+      Cygwin: Fix tests to check CYGWIN instead of WIN32
+      Cygwin: Do not define 'WIN32' (#10122)
+      Revert "Remove unused parameter "root" in some VS generator methods"
+      Revert "Avoid msbuild idiosyncrasy that builds multiple configs" (#11633)
+      Avoid msbuild ".\" idiosyncrasy that builds multiple configs (#11594)
+      Mark CustomCommand test perconfig.out as SYMBOLIC
+      CTest: Factor out duplicate Git author/committer code
+      KWSys: Avoid buffer overflow in SystemInformation (#11018)
+      Fix sentence break in add_test documentation
+      Pass Mac linker flag through all compilers with -Wl,
+      KWSys: Avoid passing string literal as char*
+      Avoid passing string literal to char* type
+      Fix constness in compiler id detection
+      Build enable_language command during bootstrap
+      Map multiple /FI flags for VS < 10 (#11649)
+      KWSys: Remove useless include <sys/procfs.h> (#11648)
+      Allow users to specify defaults for unset policies
+      ccmake: Use LSB 4.0 curses API conditionally
+      CTest: Do not truncate UTF-8 test output too early (#10656)
+      ccmake: Use LSB 4.0 getmaxyx conditionally
+      Allow platform files to set large archive rules (#11674)
+      Document reading LOCATION early as undefined (#11671)
+      Document reading LOCATION_<CONFIG> early as undefined (#11671)
+
+Brian Bassett (1):
+      VS: Fix linking of Fortran-only DLL projects (#10803)
+
+Campbell Barton (1):
+      Honor RULE_MESSAGES property for build target messages
+
+Chuck Atkins (1):
+      CTest: Teach launcher to ignore empty/no-op make commands
+
+Clinton Stimpson (11):
+      Fix regex for moc includes when looking for frameworks.
+      cmake-gui: use BundleUtilities in place of custom script.
+      Fix regression in 2dae2f1 which added find of Qt imports dir.
+      Force cmake to run again when qrc dependency scanning needs to happen.
+      Fix regression to allow specifying a CMakeCache.txt file on the command line.
+      BundleUtilities: only do rpath strip on copied prerequisites.
+      Fix build issues cross compiling with static Qt.
+      CTest: multiple ctest_test calls w/LABEL regexs (#11487)
+      cmake-gui: always enable generate button.
+      allow absolute paths for dbus interface.
+      Add support for using static/dynamic Qt plugins.
+
+Craig Scott (1):
+      ccmake: Port for LSB 4.0 (#11648)
+
+Dave Abrahams (1):
+      FindPerlLibs: Fix for Mac locally applied patches
+
+David Cole (31):
+      Add a contract test for building the CSE.
+      Enable overriding contract test timeout values.
+      Update tag in the Contracts/cse-snapshot test.
+      Make HTML test fail when --nonet arg is not available.
+      Begin post-2.8.3 development
+      No CMake.HTML test if xmllint has no --nonet.
+      Suppress "loop was vectorized" "warnings."
+      Add contract test for Trilinos 10.6.1 snapshot.
+      Honor FOLDER on include_external_msproject targets (#11436)
+      Correct misspelling in error message text.
+      BundleUtilities: error if fixup_bundle_item called on non-embedded item
+      VS10: stop build on custom command error (#11533)
+      CPack: look for makensis in the PATH (#8210)
+      VS10: avoid warning, no nologo when verbose (#10587)
+      Use m prefix in shorttag value to indicate "md5 of tarball"
+      Establish pass criteria for the Trilinos contract test.
+      Suppress erroneous warnings from Intel compiler
+      Avoid running CMake.Install test simultaneously with other tests
+      VS10: Finish Midl support (#11461)
+      Prohibit space in HOME value for VSMidl test.
+      KWSys: Fix CPU speed calculations (#9963)
+      KWSys: Retrieve QNX specific memory and processor info (#11329)
+      Improve build error detection.
+      VSMidl Test: Use correct include_directories with VS6 (#11461)
+      Add PATH_SUFFIXES for finding git.
+      ExternalProject: Avoid bleed-through output when logging.
+      Fix WOW64 registry mode on Windows 2000 (#10759)
+      ExternalProject: Replace location tags in CMAKE_CACHE_ARGS
+      CPack: Detect more URLs in CPACK_NSIS_MENU_LINKS (#10644)
+      KWSys: Fix WOW64 registry mode on Windows 2000 (#10759)
+      CPack: Add CPACK_NSIS_INSTALL_ROOT variable (#9148)
+
+Eric NOULARD (13):
+      CPackRPM  add basic component support to CPackRPM
+      CPack  fix kwstyle breakage and make CPackRPM backward compatible
+      CPack backward compatibility fix 2.8.3-2.8.2 (bug 11452)
+      CPack Fix KWStyle error
+      CPack Honor CPACK_MONOLITHIC_INSTALL at CPack time too
+      CPack  use IsOn when it's better than IsSet
+      CPackRPM fix bug 0011595 : Can't generate RPMs (on FC11...)
+      CPack new tests for component install
+      CPack  Default component test for ZIP should be OK
+      CPackTest spit out more output in case of failure
+      Arrange output in a better way
+      Precise the project config type when invoking cpack
+      CPackSTGZ  quote here-doc, fix bug10518
+
+Kai Wasserbäch (1):
+      FindTCL: Fix TCL and TK version variable references (#11528)
+
+Marcus D. Hanwell (5):
+      BUG 11451 - pass CMAKE_EXTRA_GENERATOR down.
+      Added CMAKE_CACHE_ARGS to ExternalProject.
+      Escape file write expansion, and build up lists.
+      Fixed bug where last entry would be lost.
+      Python additional version support, bug #10279.
+
+Matthias Kretz (1):
+      Inline help in vim with vertical split.
+
+Mike McQuaid (6):
+      Fix incorrect variable documentation (#11127)
+      Add variable for InstallRequiredSystemLibraries dir (#11140)
+      InstallRequiredSystemLibraries debug-only (#11141)
+      Allow NSIS package or uninstall icon (#11143)
+      Add CPACK_NSIS_EXECUTABLES_DIRECTORY (#7828)
+      Add CPack NSIS MUI_FINISHPAGE_RUN support (#11144)
+
+Philip Lowman (8):
+      11363: FindBoost.cmake fails to find debug libraries in tagged layout install
+      11429: FindGTK2 does not find libraries built for Visual Studio 2010
+      11430: FindBullet doesn't find header files installed by Bullet >= 2.77
+      11384: FindCxxTest now includes test code in VS project
+      [patch] Add Boost 1.45 to search, simplify a check removing VERSION_LESS
+      Add Boost 1.46
+      Fix spelling BOOST_LIBRARYDIR message. Add error for common misspellings.
+      Lowercase all function names and improve consistency
+
+Rolf Eike Beer (2):
+      allow STRING(SUBSTRING) work with length -1 as "rest of the string"
+      Add the WORKING_DIRECTORY property to tests
+
+Wojciech Migda (1):
+      Recognize the Texas Instruments DSP compiler (#11645)
+
+Yaakov Selkowitz (2):
+      Cygwin: Use 'cyg' prefix for module DLLs (#10122)
+      Cygwin: Fix release script libncurses search patterns (#10766)
+
+Zach Mullen (4):
+      Remove debugging message from parallel ctest
+      CTest git update should pass the committer as well as the author
+      Support explicitly set test costs in non-parallel testing.
+      Test TIMEOUT property explicitly set to zero should be honored
+
 No changes in CMake 2.8.3 since 2.8.3-rc4.
 
 Changes in CMake 2.8.3-rc4 (since 2.8.3-rc3)
