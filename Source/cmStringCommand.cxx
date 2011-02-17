@@ -553,7 +553,7 @@ bool cmStringCommand::HandleFindCommand(std::vector<std::string> const&
     }
   if(std::string::npos != pos)
     {
-    std::stringstream s;
+    cmOStringStream s;
     s << pos;
     this->Makefile->AddDefinition(outvar.c_str(), s.str().c_str());
     return true;
