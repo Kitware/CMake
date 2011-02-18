@@ -296,7 +296,7 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
         *this->LogFile << "   Error when uploading file: "
                        << local_file.c_str()
                        << std::endl
-                       << "   Error message was: " 
+                       << "   Error message was: "
                        << error_buffer << std::endl
                        << "   Curl output was: ";
         // avoid dereference of empty vector
@@ -364,13 +364,13 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
       {
       if(verifyPeerOff)
         {
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                    "  Set CURLOPT_SSL_VERIFYPEER to off\n");
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
         }
       if(verifyHostOff)
         {
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
+        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                    "  Set CURLOPT_SSL_VERIFYHOST to off\n");
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
         }
@@ -601,7 +601,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
         *this->LogFile << "   Error when uploading file: "
                        << local_file.c_str()
                        << std::endl
-                       << "   Error message was: " << error_buffer 
+                       << "   Error message was: " << error_buffer
                        << std::endl;
         // avoid deref of begin for zero size array
         if(chunk.size())
@@ -763,7 +763,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
           << error_buffer << std::endl);
         *this->LogFile << "\tTriggering failed with error: " << error_buffer
                        << std::endl
-                       << "   Error message was: " << error_buffer 
+                       << "   Error message was: " << error_buffer
                        << std::endl;
         if(chunk.size())
           {
@@ -913,8 +913,8 @@ bool cmCTestSubmitHandler::SubmitUsingCP(
 {
   if ( !localprefix.size() ||
     !files.size() || !remoteprefix.size() || !destination.size() )
-    { 
-    cmCTestLog(this->CTest, ERROR_MESSAGE, 
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Missing arguments for submit via cp:\n"
                << "\tlocalprefix: " << localprefix << "\n"
                << "\tNumber of files: " << files.size() << "\n"
@@ -1204,6 +1204,7 @@ int cmCTestSubmitHandler::ProcessHandler()
   this->CTest->AddIfExists(cmCTest::PartMemCheck, "DynamicAnalysis.xml");
   this->CTest->AddIfExists(cmCTest::PartMemCheck, "Purify.xml");
   this->CTest->AddIfExists(cmCTest::PartNotes, "Notes.xml");
+  this->CTest->AddIfExists(cmCTest::PartUpload, "Upload.xml");
 
   // Query parts for files to submit.
   for(cmCTest::Part p = cmCTest::PartStart;
@@ -1285,7 +1286,7 @@ int cmCTestSubmitHandler::ProcessHandler()
         << std::endl);
       ofs << "   Problems when submitting via FTP" << std::endl;
       return -1;
-      } 
+      }
     if(!this->CDash)
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using HTTP trigger method"
@@ -1369,7 +1370,7 @@ int cmCTestSubmitHandler::ProcessHandler()
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Submission successful" <<
         (this->HasWarnings ? ", with warnings." : "") << std::endl);
-      ofs << "   Submission successful" << 
+      ofs << "   Submission successful" <<
         (this->HasWarnings ? ", with warnings." : "") << std::endl;
       }
 
@@ -1439,20 +1440,20 @@ int cmCTestSubmitHandler::ProcessHandler()
     {
     std::string location
       = this->CTest->GetCTestConfiguration("DropLocation");
-    
+
 
     // change to the build directory so that we can uses a relative path
     // on windows since scp dosn't support "c:" a drive in the path
-    std::string 
+    std::string
       oldWorkingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
     cmSystemTools::ChangeDirectory(buildDirectory.c_str());
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   Change directory: "
                << buildDirectory.c_str() << std::endl);
 
     if ( !this->SubmitUsingCP(
-           "Testing/"+this->CTest->GetCurrentTag(), 
-           files, 
-           prefix, 
+           "Testing/"+this->CTest->GetCurrentTag(),
+           files,
+           prefix,
            location) )
       {
       cmSystemTools::ChangeDirectory(oldWorkingDirectory.c_str());
