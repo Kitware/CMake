@@ -50,6 +50,7 @@
 #include "cmCTestSubmitCommand.h"
 #include "cmCTestTestCommand.h"
 #include "cmCTestUpdateCommand.h"
+#include "cmCTestUploadCommand.h"
 
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
 
@@ -164,7 +165,7 @@ cmCTestScriptHandler::~cmCTestScriptHandler()
 
 //----------------------------------------------------------------------
 // just adds an argument to the vector
-void cmCTestScriptHandler::AddConfigurationScript(const char *script, 
+void cmCTestScriptHandler::AddConfigurationScript(const char *script,
                                                   bool pscope)
 {
   this->ConfigurationScripts.push_back(script);
@@ -224,12 +225,12 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   argv.push_back("-SR");
   argv.push_back(total_script_arg.c_str());
 
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
-             "Executable for CTest is: " << 
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "Executable for CTest is: " <<
              this->CTest->GetCTestExecutable() << "\n");
 
   // now pass through all the other arguments
-  std::vector<cmStdString> &initArgs = 
+  std::vector<cmStdString> &initArgs =
     this->CTest->GetInitialCommandLineArguments();
   //*** need to make sure this does not have the current script ***
   for(size_t i=1; i < initArgs.size(); ++i)
@@ -252,7 +253,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   int pipe = cmSystemTools::WaitForLine(cp, line, 100.0, out, err);
   while(pipe != cmsysProcess_Pipe_None)
     {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Output: " 
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Output: "
                << line << "\n");
     if(pipe == cmsysProcess_Pipe_STDERR)
       {
@@ -264,7 +265,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
       }
     pipe = cmSystemTools::WaitForLine(cp, line, 100, out, err);
     }
-  
+
   // Properly handle output of the build command
   cmsysProcess_WaitForExit(cp, 0);
   int result = cmsysProcess_GetState(cp);
@@ -278,7 +279,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
     {
     retVal = cmsysProcess_GetExitException(cp);
     cmCTestLog(this->CTest, ERROR_MESSAGE, "\tThere was an exception: "
-               << cmsysProcess_GetExceptionString(cp) << " " << 
+               << cmsysProcess_GetExceptionString(cp) << " " <<
                retVal << std::endl);
     failed = true;
     }
@@ -338,7 +339,7 @@ void cmCTestScriptHandler::CreateCMake()
   this->Makefile->SetStartDirectory(cwd.c_str());
   this->Makefile->SetStartOutputDirectory(cwd.c_str());
 
-  // remove all cmake commands which are not scriptable, since they can't be 
+  // remove all cmake commands which are not scriptable, since they can't be
   // used in ctest scripts
   this->CMake->RemoveUnscriptableCommands();
 
@@ -357,6 +358,7 @@ void cmCTestScriptHandler::CreateCMake()
   this->AddCTestCommand(new cmCTestSubmitCommand);
   this->AddCTestCommand(new cmCTestTestCommand);
   this->AddCTestCommand(new cmCTestUpdateCommand);
+  this->AddCTestCommand(new cmCTestUploadCommand);
 }
 
 void cmCTestScriptHandler::GetCommandDocumentation(
@@ -418,17 +420,17 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->Makefile->AddFunctionBlocker(f);
 
 
-  /* Execute CTestScriptMode.cmake, which loads CMakeDetermineSystem and 
-  CMakeSystemSpecificInformation, so 
+  /* Execute CTestScriptMode.cmake, which loads CMakeDetermineSystem and
+  CMakeSystemSpecificInformation, so
   that variables like CMAKE_SYSTEM and also the search paths for libraries,
   header and executables are set correctly and can be used. Makes new-style
   ctest scripting easier. */
-  std::string systemFile = 
+  std::string systemFile =
       this->Makefile->GetModulesFile("CTestScriptMode.cmake");
   if (!this->Makefile->ReadListFile(0, systemFile.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag())
-    {  
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:" 
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:"
                << systemFile.c_str() << "\n");
     return 2;
     }
@@ -440,8 +442,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read script: "
                << script.c_str()
                << std::endl);
-    // Reset the error flag so that it can run more than 
-    // one script with an error when you 
+    // Reset the error flag so that it can run more than
+    // one script with an error when you
     // use ctest_run_script
     cmSystemTools::ResetErrorOccuredFlag();
     return 2;
@@ -880,7 +882,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
   // put the initial cache into the bin dir
   if (!this->InitialCache.empty())
     {
-    if (!this->WriteInitialCache(this->BinaryDir.c_str(), 
+    if (!this->WriteInitialCache(this->BinaryDir.c_str(),
          this->InitialCache.c_str()))
       {
       this->RestoreBackupDirectories();
@@ -986,7 +988,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
 }
 
 //-------------------------------------------------------------------------
-bool cmCTestScriptHandler::WriteInitialCache(const char* directory, 
+bool cmCTestScriptHandler::WriteInitialCache(const char* directory,
                                              const char* text)
 {
   std::string cacheFile = directory;
@@ -1032,7 +1034,7 @@ void cmCTestScriptHandler::RestoreBackupDirectories()
     }
 }
 
-bool cmCTestScriptHandler::RunScript(cmCTest* ctest, const char *sname, 
+bool cmCTestScriptHandler::RunScript(cmCTest* ctest, const char *sname,
                                      bool InProcess, int* returnValue)
 {
   cmCTestScriptHandler* sh = new cmCTestScriptHandler();
@@ -1076,13 +1078,13 @@ double cmCTestScriptHandler::GetRemainingTimeAllowed()
 
   const char *timelimitS
     = this->Makefile->GetDefinition("CTEST_TIME_LIMIT");
-  
+
   if (!timelimitS)
     {
     return 1.0e7;
     }
 
   double timelimit = atof(timelimitS);
-  
+
   return timelimit - cmSystemTools::GetTime() + this->ScriptStartTime;
 }
