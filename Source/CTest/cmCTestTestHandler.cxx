@@ -1282,7 +1282,7 @@ void cmCTestTestHandler::AttachFiles(std::ostream& os,
       result->Properties->AttachedFiles.begin();
       file != result->Properties->AttachedFiles.end(); ++file)
     {
-    std::string base64 = this->EncodeFile(*file);
+    std::string base64 = this->CTest->Base64GzipEncodeFile(*file);
     std::string fname = cmSystemTools::GetFilenameName(*file);
     os << "\t\t<NamedMeasurement name=\"Attached File\" encoding=\"base64\" "
       "compression=\"tar/gzip\" filename=\"" << fname << "\" type=\"file\">"
@@ -1290,48 +1290,6 @@ void cmCTestTestHandler::AttachFiles(std::ostream& os,
       << base64
       << "\n\t\t\t</Value>\n\t\t</NamedMeasurement>\n";
     }
-}
-
-//----------------------------------------------------------------------
-std::string cmCTestTestHandler::EncodeFile(std::string file)
-{
-  std::string tarFile = file + "_temp.tar.gz";
-  std::vector<cmStdString> files;
-  files.push_back(file);
-
-  if(!cmSystemTools::CreateTar(tarFile.c_str(), files, true, false, false))
-    {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error creating tar while "
-      "attaching file: " << file << std::endl);
-    return "";
-    }
-  long len = cmSystemTools::FileLength(tarFile.c_str());
-  std::ifstream ifs(tarFile.c_str(), std::ios::in
-#ifdef _WIN32
-    | std::ios::binary
-#endif
-    );
-  unsigned char *file_buffer = new unsigned char [ len + 1 ];
-  ifs.read(reinterpret_cast<char*>(file_buffer), len);
-  ifs.close();
-  cmSystemTools::RemoveFile(tarFile.c_str());
-
-  unsigned char *encoded_buffer
-    = new unsigned char [ static_cast<int>(
-        static_cast<double>(len) * 1.5 + 5.0) ];
-
-  unsigned long rlen
-    = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
-
-  std::string base64 = "";
-  for(unsigned long i = 0; i < rlen; i++)
-    {
-    base64 += encoded_buffer[i];
-    }
-  delete [] file_buffer;
-  delete [] encoded_buffer;
-
-  return base64;
 }
 
 //----------------------------------------------------------------------
