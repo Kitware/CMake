@@ -484,7 +484,7 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
     }
 
   TestComparator comp(this);
-  std::sort(SortedTests.begin(), SortedTests.end(), comp);
+  std::stable_sort(SortedTests.begin(), SortedTests.end(), comp);
 }
 
 //---------------------------------------------------------
