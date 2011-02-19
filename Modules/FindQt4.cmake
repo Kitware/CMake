@@ -607,13 +607,24 @@ IF (QT4_QMAKE_FOUND)
     FIND_LIBRARY(QT_QTCORE_LIBRARY_RELEASE
                  NAMES QtCore${QT_LIBINFIX} QtCore${QT_LIBINFIX}4
                  HINTS ${QT_LIBRARY_DIR_TMP}
-                 NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_SYSTEM_ENVIRONMENT_PATH
+                 NO_DEFAULT_PATH
         )
     FIND_LIBRARY(QT_QTCORE_LIBRARY_DEBUG
                  NAMES QtCore${QT_LIBINFIX}_debug QtCore${QT_LIBINFIX}d QtCore${QT_LIBINFIX}d4
                  HINTS ${QT_LIBRARY_DIR_TMP}
-                 NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_SYSTEM_ENVIRONMENT_PATH
+                 NO_DEFAULT_PATH
         )
+
+    IF(NOT QT_QTCORE_LIBRARY_RELEASE AND NOT QT_QTCORE_LIBRARY_DEBUG)
+      FIND_LIBRARY(QT_QTCORE_LIBRARY_RELEASE
+                   NAMES QtCore${QT_LIBINFIX} QtCore${QT_LIBINFIX}4
+                   HINTS ${QT_LIBRARY_DIR_TMP}
+          )
+      FIND_LIBRARY(QT_QTCORE_LIBRARY_DEBUG
+                   NAMES QtCore${QT_LIBINFIX}_debug QtCore${QT_LIBINFIX}d QtCore${QT_LIBINFIX}d4
+                   HINTS ${QT_LIBRARY_DIR_TMP}
+          )
+    ENDIF(NOT QT_QTCORE_LIBRARY_RELEASE AND NOT QT_QTCORE_LIBRARY_DEBUG)
 
     # try dropping a hint if trying to use Visual Studio with Qt built by mingw
     IF(NOT QT_QTCORE_LIBRARY_RELEASE AND MSVC)
@@ -644,10 +655,13 @@ IF (QT4_QMAKE_FOUND)
   ENDIF()
 
   IF (APPLE)
+    SET(CMAKE_FIND_FRAMEWORK_OLD ${CMAKE_FIND_FRAMEWORK})
     IF (EXISTS ${QT_LIBRARY_DIR}/QtCore.framework)
       SET(QT_USE_FRAMEWORKS ON CACHE INTERNAL "" FORCE)
+      SET(CMAKE_FIND_FRAMEWORK FIRST)
     ELSE (EXISTS ${QT_LIBRARY_DIR}/QtCore.framework)
       SET(QT_USE_FRAMEWORKS OFF CACHE INTERNAL "" FORCE)
+      SET(CMAKE_FIND_FRAMEWORK LAST)
     ENDIF (EXISTS ${QT_LIBRARY_DIR}/QtCore.framework)
     MARK_AS_ADVANCED(QT_USE_FRAMEWORKS)
   ENDIF (APPLE)
@@ -663,8 +677,7 @@ IF (QT4_QMAKE_FOUND)
       _qt4_query_qmake(QT_INSTALL_HEADERS qt_headers)
       SET(QT_QTCORE_INCLUDE_DIR NOTFOUND)
       FIND_PATH(QT_QTCORE_INCLUDE_DIR QtCore
-                HINTS ${qt_headers}
-                ${QT_LIBRARY_DIR}/QtCore.framework/Headers
+                HINTS ${qt_headers} ${QT_LIBRARY_DIR}
                 PATH_SUFFIXES QtCore
         )
 
@@ -681,6 +694,10 @@ IF (QT4_QMAKE_FOUND)
         MESSAGE("Warning: But QtCore couldn't be found.  Qt must NOT be installed correctly.")
       ENDIF()
   ENDIF()
+
+  IF(APPLE)
+    SET(CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK_OLD})
+  ENDIF(APPLE)
 
   # Set QT_INCLUDE_DIR based on QT_HEADERS_DIR
   IF(QT_HEADERS_DIR)
