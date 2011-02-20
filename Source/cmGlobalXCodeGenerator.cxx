@@ -2481,27 +2481,55 @@ cmXCodeObject *cmGlobalXCodeGenerator
 cmXCodeObject* cmGlobalXCodeGenerator
 ::CreateOrGetPBXGroup(cmTarget& cmtarget, cmSourceGroup* sg)
 {
-  cmStdString s = cmtarget.GetName();
-  s += "/";
+  cmStdString s;
+  cmStdString target;
+  const char *targetFolder= cmtarget.GetProperty("FOLDER");
+  if(targetFolder) {
+    target = targetFolder;
+    target += "/";
+  }
+  target += cmtarget.GetName();
+  s = target + "/";
   s += sg->GetFullName();
-  std::map<cmStdString, cmXCodeObject* >::iterator i =
+  std::map<cmStdString, cmXCodeObject* >::iterator it =
     this->GroupNameMap.find(s);
-  if(i != this->GroupNameMap.end())
+  if(it != this->GroupNameMap.end())
     {
-    return i->second;
+    return it->second;
     }
-  i = this->TargetGroup.find(cmtarget.GetName());
+
+  it = this->TargetGroup.find(target);
   cmXCodeObject* tgroup = 0;
-  if(i != this->TargetGroup.end())
+  if(it != this->TargetGroup.end())
     {
-    tgroup = i->second;
+    tgroup = it->second;
     }
   else
     {
-    tgroup = this->CreatePBXGroup(NULL,cmtarget.GetName());
-    this->TargetGroup[cmtarget.GetName()] = tgroup;
-    this->SourcesGroupChildren->AddObject(tgroup);
+    std::vector<std::string> tgt_folders = cmSystemTools::tokenize(target, "/");
+    cmStdString curr_tgt_folder;
+    for(std::vector<std::string>::size_type i = 0; i < tgt_folders.size();i++)
+      {
+      curr_tgt_folder += tgt_folders[i];
+      it = this->TargetGroup.find(curr_tgt_folder);
+      if(it == this->TargetGroup.end())
+        {
+        tgroup = this->CreatePBXGroup(tgroup,tgt_folders[i]);
+        this->TargetGroup[curr_tgt_folder] = tgroup;
+        }
+      else
+        {
+        tgroup = it->second;
+        continue;
+        }
+      if(i == 0)
+        {
+        this->SourcesGroupChildren->AddObject(tgroup);
+        }
+      curr_tgt_folder += "/";
+      }
     }
+  this->TargetGroup[target] = tgroup;
 
   // If it's the default source group (empty name) then put the source file
   // directly in the tgroup...
