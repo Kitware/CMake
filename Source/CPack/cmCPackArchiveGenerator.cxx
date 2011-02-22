@@ -177,7 +177,7 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne(bool allComponent)
   packageFileNames.push_back(std::string(toplevel));
   packageFileNames[0] += "/"
     +std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
-    +"-ALL" + this->GetOutputExtension();
+    + this->GetOutputExtension();
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Packaging all groups in one package..."
                 "(CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE is set)"

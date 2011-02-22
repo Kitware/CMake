@@ -158,7 +158,7 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne(bool allComponent)
                              );
   std::string outputFileName(
             std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
-            +"-ALL"+ this->GetOutputExtension()
+            + this->GetOutputExtension()
                             );
   // all GROUP in one vs all COMPONENT in one
   localToplevel += "/"+compInstDirName;
