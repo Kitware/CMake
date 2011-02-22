@@ -431,7 +431,8 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
         {
         emittedDirs.insert(dir);
         fout << "<pathentry include=\""
-             << cmExtraEclipseCDT4Generator::GetEclipsePath(dir)
+             << cmExtraEclipseCDT4Generator::EscapeForXML(
+                              cmExtraEclipseCDT4Generator::GetEclipsePath(dir))
              << "\" kind=\"inc\" path=\"\" system=\"true\"/>\n";
         }
       }
@@ -875,8 +876,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   fout << "</cconfiguration>\n"
           "</storageModule>\n"
           "<storageModule moduleId=\"cdtBuildSystem\" version=\"4.0.0\">\n"
-          "<project id=\"" << mf->GetProjectName() << ".null.1\""
-          " name=\"" << mf->GetProjectName() << "\"/>\n"
+          "<project id=\"" << this->EscapeForXML(mf->GetProjectName())
+       << ".null.1\" name=\"" << this->EscapeForXML(mf->GetProjectName())
+       << "\"/>\n"
           "</storageModule>\n"
           "</cproject>\n"
           ;
@@ -927,7 +929,8 @@ cmExtraEclipseCDT4Generator::GenerateProjectName(const std::string& name,
                                                  const std::string& type,
                                                  const std::string& path)
 {
-  return name + (type.empty() ? "" : "-") + type + "@" + path;
+  return cmExtraEclipseCDT4Generator::EscapeForXML(name)
+                                +(type.empty() ? "" : "-") + type + "@" + path;
 }
 
 std::string cmExtraEclipseCDT4Generator::EscapeForXML(const std::string& value)
@@ -999,15 +1002,17 @@ void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
                                                const std::string&     path,
                                                const char* prefix)
 {
+  std::string targetXml = cmExtraEclipseCDT4Generator::EscapeForXML(target);
+  std::string pathXml = cmExtraEclipseCDT4Generator::EscapeForXML(path);
   fout <<
-    "<target name=\"" << prefix << target << "\""
-    " path=\"" << path.c_str() << "\""
+    "<target name=\"" << prefix << targetXml << "\""
+    " path=\"" << pathXml.c_str() << "\""
     " targetID=\"org.eclipse.cdt.make.MakeTargetBuilder\">\n"
     "<buildCommand>"
     << cmExtraEclipseCDT4Generator::GetEclipsePath(make)
     << "</buildCommand>\n"
     "<buildArguments>"  << makeArgs << "</buildArguments>\n"
-    "<buildTarget>" << target << "</buildTarget>\n"
+    "<buildTarget>" << targetXml << "</buildTarget>\n"
     "<stopOnError>true</stopOnError>\n"
     "<useDefaultCommand>false</useDefaultCommand>\n"
     "</target>\n"
