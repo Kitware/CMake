@@ -14,7 +14,6 @@
 #include <cmsys/ios/fstream>
 #include <cmsys/ios/iostream>
 
-#include <Carbon/Carbon.h>
 #include <CoreFoundation/CoreFoundation.h>
 
 // For the PATH_MAX constant

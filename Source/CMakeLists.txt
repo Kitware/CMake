@@ -343,7 +343,7 @@ TARGET_LINK_LIBRARIES(CMakeLib cmsys
   ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES}
   ${CMAKE_CURL_LIBRARIES} )
 
-# On Apple we need Carbon
+# On Apple we need CoreFoundation
 IF(APPLE)
   TARGET_LINK_LIBRARIES(CMakeLib "-framework CoreFoundation")
 ENDIF(APPLE)
@@ -465,7 +465,7 @@ IF(APPLE)
   ADD_EXECUTABLE(OSXScriptLauncher
     CPack/OSXScriptLauncher.cxx)
   TARGET_LINK_LIBRARIES(OSXScriptLauncher cmsys)
-  TARGET_LINK_LIBRARIES(OSXScriptLauncher "-framework Carbon")
+  TARGET_LINK_LIBRARIES(OSXScriptLauncher "-framework CoreFoundation")
 ENDIF(APPLE)
 
 # Build CMake executable
