@@ -28,6 +28,7 @@ public:
   void AddDefine(const std::string& define);
   void AddDefines(const char* defines);
   void AddFlag(const char* flag, const char* value);
+  void RemoveFlag(const char* flag);
 
 protected:
   // create a map of xml tags to the values they should have in the output
