@@ -26,6 +26,12 @@ cmMakefileLibraryTargetGenerator
 ::cmMakefileLibraryTargetGenerator(cmTarget* target):
   cmMakefileTargetGenerator(target)
 {
+  if(this->Target->IsCFBundleOnApple())
+    {
+    target->SetProperty("PREFIX", "");
+    target->SetProperty("SUFFIX", "");
+    }
+
   this->CustomCommandDriver = OnDepends;
   this->Target->GetLibraryNames(
     this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
@@ -40,6 +46,20 @@ cmMakefileLibraryTargetGenerator
     this->MacContentDirectory += ".framework/Versions/";
     this->MacContentDirectory += this->FrameworkVersion;
     this->MacContentDirectory += "/";
+    }
+  else if(this->Target->IsCFBundleOnApple())
+    {
+    this->MacContentDirectory = this->Target->GetDirectory(this->ConfigName);
+    this->MacContentDirectory += "/";
+    this->MacContentDirectory += this->TargetNameOut;
+    this->MacContentDirectory += ".";
+    const char *ext = this->Target->GetProperty("BUNDLE_EXTENSION");
+    if (!ext)
+      {
+      ext = "bundle";
+      }
+    this->MacContentDirectory += ext;
+    this->MacContentDirectory += "/Contents/";
     }
 }
 
@@ -301,6 +321,27 @@ cmMakefileLibraryTargetGenerator
 }
 
 //----------------------------------------------------------------------------
+void
+cmMakefileLibraryTargetGenerator::CreateCFBundle(std::string& targetName,
+                                                 std::string& outpath)
+{
+  // Compute bundle directory names.
+  outpath = this->MacContentDirectory;
+  outpath += "MacOS";
+  cmSystemTools::MakeDirectory(outpath.c_str());
+  this->Makefile->AddCMakeOutputFile(outpath.c_str());
+  outpath += "/";
+
+  // Configure the Info.plist file.  Note that it needs the executable name
+  // to be set.
+  std::string plist = this->MacContentDirectory + "Info.plist";
+  this->LocalGenerator->GenerateAppleInfoPList(this->Target,
+                                               targetName.c_str(),
+                                               plist.c_str());
+  this->Makefile->AddCMakeOutputFile(plist.c_str());
+}
+
+//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 (const char* linkRuleVar, const char* extraFlags, bool relink)
 {
@@ -353,6 +394,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     outpath = this->MacContentDirectory;
     this->CreateFramework(targetName);
+    }
+  else if(this->Target->IsCFBundleOnApple())
+    {
+    outpath = this->Target->GetDirectory(this->ConfigName);
+    outpath += "/";
+    this->CreateCFBundle(targetName, outpath);
     }
   else if(relink)
     {
@@ -417,6 +464,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
         buildEcho += " shared library ";
         break;
       case cmTarget::MODULE_LIBRARY:
+        if (this->Target->IsCFBundleOnApple())
+            buildEcho += " CFBundle";
         buildEcho += " shared module ";
         break;
       default:
