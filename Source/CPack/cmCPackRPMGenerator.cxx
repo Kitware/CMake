@@ -60,8 +60,10 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
           cmSystemTools::GetParentDirectory(toplevel.c_str())
                                  );
       std::string outputFileName(
-          std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
-          +"-"+compGIt->first + this->GetOutputExtension()
+       GetComponentPackageFileName(this->GetOption("CPACK_PACKAGE_FILE_NAME"),
+                                   compGIt->first,
+                                   true)
+                                   + this->GetOutputExtension()
                                 );
 
       localToplevel += "/"+ compGIt->first;
@@ -98,9 +100,10 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
           cmSystemTools::GetParentDirectory(toplevel.c_str())
                                  );
       std::string outputFileName(
-          std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")
-                                )
-        +"-"+compIt->first + this->GetOutputExtension());
+       GetComponentPackageFileName(this->GetOption("CPACK_PACKAGE_FILE_NAME"),
+                                   compIt->first,
+                                   false)
+       + this->GetOutputExtension());
 
       localToplevel += "/"+ compIt->first;
       /* replace the TEMP DIRECTORY with the component one */
