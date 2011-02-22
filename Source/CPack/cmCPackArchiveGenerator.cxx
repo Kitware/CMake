@@ -226,8 +226,6 @@ int cmCPackArchiveGenerator::PackageFiles()
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Toplevel: "
                 << toplevel << std::endl);
 
-  PrepareGroupingKind();
-
   if (SupportsComponentInstallation()) {
     // CASE 1 : COMPONENT ALL-IN-ONE package
     // If ALL GROUPS or ALL COMPONENTS in ONE package has been requested
