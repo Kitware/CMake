@@ -155,7 +155,7 @@ typedef unsigned char bool;
 #define SIZEOF_CURL_OFF_T 4
 #endif
 
-/* We set up our internal prefered (CURL_)FORMAT_OFF_T here */
+/* We set up our internal preferred (CURL_)FORMAT_OFF_T here */
 #if SIZEOF_CURL_OFF_T > 4
 #define FORMAT_OFF_T "lld"
 #else

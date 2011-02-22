@@ -6,7 +6,7 @@
 #  # Note that for MinGW users the order of libs is important!
 #  FIND_PACKAGE(wxWidgets REQUIRED net gl core base)
 #  INCLUDE(${wxWidgets_USE_FILE})
-#  # and for each of your dependant executable/library targets:
+#  # and for each of your dependent executable/library targets:
 #  TARGET_LINK_LIBRARIES(<YourTarget> ${wxWidgets_LIBRARIES})
 #
 # DEPRECATED
