@@ -166,6 +166,14 @@ bool cmAddCustomTargetCommand
     }
   }
 
+  // Convert working directory to a full path.
+  if(!working_directory.empty())
+    {
+    const char* build_dir = this->Makefile->GetCurrentOutputDirectory();
+    working_directory =
+      cmSystemTools::CollapseFullPath(working_directory.c_str(), build_dir);
+    }
+
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
   cmTarget* target =

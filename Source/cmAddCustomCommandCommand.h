@@ -110,6 +110,8 @@ public:
       "will be treated as PRE_LINK.\n"
       "If WORKING_DIRECTORY is specified the command will be executed "
       "in the directory given. "
+      "If it is a relative path it will be interpreted relative to the "
+      "build tree directory corresponding to the current source directory. "
       "If COMMENT is set, the value will be displayed as a "
       "message before the commands are executed at build time. "
       "If APPEND is specified the COMMAND and DEPENDS option values "
