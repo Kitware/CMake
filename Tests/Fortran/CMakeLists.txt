@@ -22,8 +22,19 @@ elseif("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU")
   endif()
 endif()
 
+# Pick a module .def file with the properly mangled symbol name.
+set(world_def "")
+if(WIN32 AND NOT CYGWIN)
+  if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+    set(world_def world_gnu.def)
+  elseif("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel" OR
+      "${CMAKE_GENERATOR}" MATCHES "Visual Studio") # Intel plugin
+    set(world_def world_icl.def)
+  endif()
+endif()
+
 add_library(hello STATIC hello.f)
-add_library(world ${_SHARED} world.f world.def)
+add_library(world ${_SHARED} world.f ${world_def})
 add_executable(testf testf.f)
 target_link_libraries(testf hello world)
 
