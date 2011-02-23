@@ -32,17 +32,6 @@ if(config_type)
   set(config_args -C ${config_type})
 endif()
 message(" ${config_args}")
-execute_process(COMMAND ${CPackCommand} -G ${CPackGen} ${config_args}
-    RESULT_VARIABLE CPack_result
-    OUTPUT_VARIABLE CPack_output
-    ERROR_VARIABLE CPack_error
-    WORKING_DIRECTORY ${CPackComponentsForAll_BINARY_DIR})
-
-if (CPack_result)
-  message(FATAL_ERROR "error: CPack execution went wrong!, CPack_output=${CPack_output}, CPack_error=${CPack_error}")
-else (CPack_result)
-  message(STATUS "CPack_output=${CPack_output}")
-endif(CPack_result)
 
 if(CPackGen MATCHES "ZIP")
     set(expected_file_mask "${CPackComponentsForAll_BINARY_DIR}/MyLib-*.zip")
@@ -62,6 +51,26 @@ if(CPackGen MATCHES "ZIP")
         set(expected_count 1)
     endif (${CPackComponentWay} STREQUAL "AllGroupsInOne")
 endif(CPackGen MATCHES "ZIP")
+
+# clean-up previously CPack generated files
+if(expected_file_mask)
+  file(GLOB expected_file "${expected_file_mask}")
+  if (expected_file)
+    file(REMOVE ${expected_file})
+  endif(expected_file)
+endif(expected_file_mask)
+
+execute_process(COMMAND ${CPackCommand} -G ${CPackGen} ${config_args}
+    RESULT_VARIABLE CPack_result
+    OUTPUT_VARIABLE CPack_output
+    ERROR_VARIABLE CPack_error
+    WORKING_DIRECTORY ${CPackComponentsForAll_BINARY_DIR})
+
+if (CPack_result)
+  message(FATAL_ERROR "error: CPack execution went wrong!, CPack_output=${CPack_output}, CPack_error=${CPack_error}")
+else (CPack_result)
+  message(STATUS "CPack_output=${CPack_output}")
+endif(CPack_result)
 
 # Now verify if the number of expected file is OK
 # - using expected_file_mask and
