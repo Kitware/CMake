@@ -1344,7 +1344,7 @@ std::string cmCPackGenerator::GetComponentPackageFileName(
     else
       {
       std::string dispVar = "CPACK_COMPONENT_"
-                + cmSystemTools::UpperCase(groupOrComponentName) + "_DISPLAY_NAME";
+           + cmSystemTools::UpperCase(groupOrComponentName) + "_DISPLAY_NAME";
             const char* dispName = GetOption(dispVar.c_str());
             if(dispName)
               {
