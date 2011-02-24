@@ -1119,6 +1119,11 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
 
   INCLUDE("${_qt4_current_dir}/Qt4Macros.cmake")
 
+  # set version variables
+  STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" QT_VERSION_MAJOR "${QTVERSION}")
+  STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+.*" "\\1" QT_VERSION_MINOR "${QTVERSION}")
+  STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" QT_VERSION_PATCH "${QTVERSION}")
+
 ENDIF(QT_QMAKE_EXECUTABLE AND QTVERSION)
 
 #support old QT_MIN_VERSION if set, but not if version is supplied by find_package()
