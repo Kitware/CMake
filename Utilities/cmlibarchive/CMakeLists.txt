@@ -1,8 +1,8 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3 FATAL_ERROR)
 #
 #
 PROJECT(libarchive C)
 #
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.1)
 SET(CMAKE_MODULE_PATH "${libarchive_SOURCE_DIR}/build/cmake")
 
 # We use CHECK_TYPE_SIZE for existence tests, so use only one arch.
