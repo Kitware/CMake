@@ -1707,7 +1707,7 @@ protected:
   {
     DoingType = DoingLast1,
     DoingRename,
-    DoingSelf24
+    DoingLast2
   };
   virtual bool CheckKeyword(std::string const& arg);
   virtual bool CheckValue(std::string const& arg);
@@ -1846,22 +1846,12 @@ bool cmFileInstaller::CheckKeyword(std::string const& arg)
   else if(arg == "COMPONENTS" || arg == "CONFIGURATIONS" ||
           arg == "PROPERTIES")
     {
-    if(this->Makefile->IsOn("CMAKE_INSTALL_SELF_2_4"))
-      {
-      // When CMake 2.4 builds this CMake version we need to support
-      // the install scripts it generates since it asks this CMake
-      // to install itself using the rules it generated.
-      this->Doing = DoingSelf24;
-      }
-    else
-      {
-      cmOStringStream e;
-      e << "INSTALL called with old-style " << arg << " argument.  "
-        << "This script was generated with an older version of CMake.  "
-        << "Re-run this cmake version on your build tree.";
-      this->FileCommand->SetError(e.str().c_str());
-      this->Doing = DoingError;
-      }
+    cmOStringStream e;
+    e << "INSTALL called with old-style " << arg << " argument.  "
+      << "This script was generated with an older version of CMake.  "
+      << "Re-run this cmake version on your build tree.";
+    this->FileCommand->SetError(e.str().c_str());
+    this->Doing = DoingError;
     }
   else
     {
@@ -1883,12 +1873,6 @@ bool cmFileInstaller::CheckValue(std::string const& arg)
       break;
     case DoingRename:
       this->Rename = arg;
-      break;
-    case DoingSelf24:
-      // Ignore these arguments for compatibility.  This should be
-      // reached only when CMake 2.4 is installing the current
-      // CMake.  It can be removed when CMake 2.6 or higher is
-      // required to build CMake.
       break;
     default:
       return this->cmFileCopier::CheckValue(arg);

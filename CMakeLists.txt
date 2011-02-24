@@ -1,6 +1,6 @@
 #=============================================================================
 # CMake - Cross Platform Makefile Generator
-# Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+# Copyright 2000-2011 Kitware, Inc., Insight Software Consortium
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -9,12 +9,9 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3 FATAL_ERROR)
 SET(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 PROJECT(CMake)
-IF(COMMAND CMAKE_POLICY)
-  CMAKE_POLICY(SET CMP0003 NEW)
-ENDIF(COMMAND CMAKE_POLICY)
 
 IF(CMAKE_BOOTSTRAP)
   # Running from bootstrap script.  Set local variable and remove from cache.
@@ -24,17 +21,7 @@ ENDIF()
 
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 
-# Allow empty endif() and such with CMake 2.4.
-SET(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 1)
-
 SET(CMake_BIN_DIR ${CMake_BINARY_DIR}/bin)
-
-IF(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
-  # Since the built CMake will install itself instead of the
-  # generating CMake, tell it that the install rules were generated
-  # by CMake 2.4.
-  INSTALL(CODE "SET(CMAKE_INSTALL_SELF_2_4 1)")
-ENDIF()
 
 IF("${CMake_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
   # Disallow architecture-specific try_run.  It may not run on the host.
