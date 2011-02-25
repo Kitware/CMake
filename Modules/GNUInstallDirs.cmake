@@ -84,25 +84,37 @@ if(NOT DEFINED CMAKE_INSTALL_DATAROOTDIR)
   set(CMAKE_INSTALL_DATAROOTDIR "share" CACHE PATH "read-only architecture-independent data root (share)")
 endif()
 
-if(NOT DEFINED CMAKE_INSTALL_DATADIR)
-  set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATAROOTDIR}" CACHE PATH "read-only architecture-independent data (DATAROOTDIR)")
+#-----------------------------------------------------------------------------
+# Values whose defaults are relative to DATAROOTDIR.  Store empty values in
+# the cache and store the defaults in local variables if the cache values are
+# not set explicitly.  This auto-updates the defaults as DATAROOTDIR changes.
+
+if(NOT CMAKE_INSTALL_DATADIR)
+  set(CMAKE_INSTALL_DATADIR "" CACHE PATH "read-only architecture-independent data (DATAROOTDIR)")
+  set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATAROOTDIR}")
 endif()
 
-if(NOT DEFINED CMAKE_INSTALL_INFODIR)
-  set(CMAKE_INSTALL_INFODIR "${CMAKE_INSTALL_DATAROOTDIR}/info" CACHE PATH "info documentation (DATAROOTDIR/info)")
+if(NOT CMAKE_INSTALL_INFODIR)
+  set(CMAKE_INSTALL_INFODIR "" CACHE PATH "info documentation (DATAROOTDIR/info)")
+  set(CMAKE_INSTALL_INFODIR "${CMAKE_INSTALL_DATAROOTDIR}/info")
 endif()
 
-if(NOT DEFINED CMAKE_INSTALL_LOCALEDIR)
-  set(CMAKE_INSTALL_LOCALEDIR "${CMAKE_INSTALL_DATAROOTDIR}/locale" CACHE PATH "locale-dependent data (DATAROOTDIR/locale)")
+if(NOT CMAKE_INSTALL_LOCALEDIR)
+  set(CMAKE_INSTALL_LOCALEDIR "" CACHE PATH "locale-dependent data (DATAROOTDIR/locale)")
+  set(CMAKE_INSTALL_LOCALEDIR "${CMAKE_INSTALL_DATAROOTDIR}/locale")
 endif()
 
-if(NOT DEFINED CMAKE_INSTALL_MANDIR)
-  set(CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_DATAROOTDIR}/man" CACHE PATH "man documentation (DATAROOTDIR/man)")
+if(NOT CMAKE_INSTALL_MANDIR)
+  set(CMAKE_INSTALL_MANDIR "" CACHE PATH "man documentation (DATAROOTDIR/man)")
+  set(CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_DATAROOTDIR}/man")
 endif()
 
-if(NOT DEFINED CMAKE_INSTALL_DOCDIR)
-  set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME}" CACHE PATH "documentation root (DATAROOTDIR/doc/PROJECT_NAME)")
+if(NOT CMAKE_INSTALL_DOCDIR)
+  set(CMAKE_INSTALL_DOCDIR "" CACHE PATH "documentation root (DATAROOTDIR/doc/PROJECT_NAME)")
+  set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME}")
 endif()
+
+#-----------------------------------------------------------------------------
 
 mark_as_advanced(
   CMAKE_INSTALL_BINDIR
