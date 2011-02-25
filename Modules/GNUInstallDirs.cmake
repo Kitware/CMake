@@ -1,53 +1,36 @@
-# - Define the installation directories conforming to GNU standards.
-# This module defines installation directories, as described by GNU standards.
-# For more information about this standards, see the following site:
-# http://www.gnu.org/prep/standards/html_node/Directory-Variables.html
-#
-# Module defines variables for installation directories and for resulting paths
-# of this directories.
-#
-# Installation directories appointed to use during install. If such variable
-# contains relative path, during install resulting path will be created by
-# prepending it with CMAKE_INSTALL_PREFIX. If it contains absolute path, it
-# would be taken as is.
-# This variables only set if not defined already, thus allowing to override them
-# and are stored in cache.
-#   CMAKE_INSTALL_BINDIR              - user executables (bin)
-#   CMAKE_INSTALL_SBINDIR             - system admin executables (sbin)
-#   CMAKE_INSTALL_LIBEXECDIR          - program executables (libexec)
-#   CMAKE_INSTALL_SYSCONFDIR          - read-only single-machine data (etc)
-#   CMAKE_INSTALL_SHAREDSTATEDIR      - modifiable architecture-independent data (com)
-#   CMAKE_INSTALL_LOCALSTATEDIR       - modifiable single-machine data (var)
-#   CMAKE_INSTALL_LIBDIR              - object code libraries (lib)
-#   CMAKE_INSTALL_INCLUDEDIR          - C header files (include)
-#   CMAKE_INSTALL_OLDINCLUDEDIR       - C header files for non-gcc (/usr/include)
-#   CMAKE_INSTALL_DATAROOTDIR         - read-only architecture-independent data root (share)
-#   CMAKE_INSTALL_DATADIR             - read-only architecture-independent data (DATAROOTDIR)
-#   CMAKE_INSTALL_INFODIR             - info documentation (DATAROOTDIR/info)
-#   CMAKE_INSTALL_LOCALEDIR           - locale-dependent data (DATAROOTDIR/locale)
-#   CMAKE_INSTALL_MANDIR              - man documentation (DATAROOTDIR/man)
-#   CMAKE_INSTALL_DOCDIR              - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
-# Resulting directories derived from installation directories and always
-# contains absolute paths.
-# This variables computed in runtime and not stored in cache.
-#   CMAKE_INSTALL_FULL_BINDIR         - user executables full path (PREFIX/BINDIR)
-#   CMAKE_INSTALL_FULL_SBINDIR        - system admin executables full path (PREFIX/SBINDIR)
-#   CMAKE_INSTALL_FULL_LIBEXECDIR     - program executables full path (PREFIX/LIBEXECDIR)
-#   CMAKE_INSTALL_FULL_SYSCONFDIR     - read-only single-machine data fill path (PREFIX/SYSCONFDIR)
-#   CMAKE_INSTALL_FULL_SHAREDSTATEDIR - modifiable architecture-independent data full path (PREFIX/SHAREDSTATEDIR)
-#   CMAKE_INSTALL_FULL_LOCALSTATEDIR  - modifiable single-machine data full path (PREFIX/LOCALSTATEDIR)
-#   CMAKE_INSTALL_FULL_LIBDIR         - object code libraries full path (PREFIX/LIBDIR)
-#   CMAKE_INSTALL_FULL_INCLUDEDIR     - C header files full path (PREFIX/INCLUDEDIR)
-#   CMAKE_INSTALL_FULL_OLDINCLUDEDIR  - C header files for non-gcc full path (/usr/include)
-#   CMAKE_INSTALL_FULL_DATAROOTDIR    - read-only architecture-independent data root full path (PREFIX/DATAROOTDIR)
-#   CMAKE_INSTALL_FULL_DATADIR        - read-only architecture-independent data full path (PREFIX/DATADIR)
-#   CMAKE_INSTALL_FULL_INFODIR        - info documentation full path (PREFIX/INFODIR)
-#   CMAKE_INSTALL_FULL_LOCALEDIR      - locale-dependent data full path (PREFIX/LOCALEDIR)
-#   CMAKE_INSTALL_FULL_MANDIR         - man documentation full path (PREFIX/MANDIR)
-#   CMAKE_INSTALL_FULL_DOCDIR         - documentation root full path (PREFIX/DOCDIR)
+# - Define GNU standard installation directories
+# Provides install directory variables as defined for GNU software:
+#  http://www.gnu.org/prep/standards/html_node/Directory-Variables.html
+# Inclusion of this module defines the following variables:
+#  CMAKE_INSTALL_<dir>      - destination for files of a given type
+#  CMAKE_INSTALL_FULL_<dir> - corresponding absolute path
+# where <dir> is one of:
+#  BINDIR           - user executables (bin)
+#  SBINDIR          - system admin executables (sbin)
+#  LIBEXECDIR       - program executables (libexec)
+#  SYSCONFDIR       - read-only single-machine data (etc)
+#  SHAREDSTATEDIR   - modifiable architecture-independent data (com)
+#  LOCALSTATEDIR    - modifiable single-machine data (var)
+#  LIBDIR           - object code libraries (lib)
+#  INCLUDEDIR       - C header files (include)
+#  OLDINCLUDEDIR    - C header files for non-gcc (/usr/include)
+#  DATAROOTDIR      - read-only architecture-independent data root (share)
+#  DATADIR          - read-only architecture-independent data (DATAROOTDIR)
+#  INFODIR          - info documentation (DATAROOTDIR/info)
+#  LOCALEDIR        - locale-dependent data (DATAROOTDIR/locale)
+#  MANDIR           - man documentation (DATAROOTDIR/man)
+#  DOCDIR           - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
+# Each CMAKE_INSTALL_<dir> value may be passed to the DESTINATION options of
+# install() commands for the corresponding file type.  If the includer does
+# not define a value the above-shown default will be used and the value will
+# appear in the cache for editing by the user.
+# Each CMAKE_INSTALL_FULL_<dir> value contains an absolute path constructed
+# from the corresponding destination by prepending (if necessary) the value
+# of CMAKE_INSTALL_PREFIX.
 
 #=============================================================================
 # Copyright 2011 Nikita Krupen'ko <krnekit@gmail.com>
+# Copyright 2011 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
