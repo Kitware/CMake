@@ -31,6 +31,21 @@ int cmCPackRPMGenerator::InitializeInternal()
     {
     this->SetOption("CPACK_SET_DESTDIR", "I_ON");
     }
+  /* Replace space in CPACK_PACKAGE_NAME in order to avoid
+   * rpmbuild scream on unwanted space in filename issue
+   * Moreover RPM file do not usually embed space in filename
+   */
+  if (this->GetOption("CPACK_PACKAGE_NAME")) {
+    std::string packageName=this->GetOption("CPACK_PACKAGE_NAME");
+    cmSystemTools::ReplaceString(packageName," ","-");
+    this->SetOption("CPACK_PACKAGE_NAME",packageName.c_str());
+  }
+  /* same for CPACK_PACKAGE_FILE_NAME */
+  if (this->GetOption("CPACK_PACKAGE_FILE_NAME")) {
+    std::string packageName=this->GetOption("CPACK_PACKAGE_FILE_NAME");
+    cmSystemTools::ReplaceString(packageName," ","-");
+    this->SetOption("CPACK_PACKAGE_FILE_NAME",packageName.c_str());
+  }
   return this->Superclass::InitializeInternal();
 }
 
