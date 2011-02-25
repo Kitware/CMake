@@ -201,6 +201,26 @@ elseif(testname STREQUAL download_with_bogus_protocol) # pass
   message("l='${l}'")
   message("s='${s}'")
 
+elseif(testname STREQUAL upload_wrong_number_of_args) # fail
+  file(UPLOAD ./ffff)
+
+elseif(testname STREQUAL upload_missing_time) # fail
+  file(UPLOAD ./ffff zzzz://bogus/ffff TIMEOUT)
+
+elseif(testname STREQUAL upload_missing_log_var) # fail
+  file(UPLOAD ./ffff zzzz://bogus/ffff TIMEOUT 2 LOG)
+
+elseif(testname STREQUAL upload_missing_status_var) # fail
+  file(UPLOAD ./ffff zzzz://bogus/ffff TIMEOUT 2 LOG l STATUS)
+
+elseif(testname STREQUAL upload_file_that_doesnt_exist) # fail
+  file(UPLOAD ./ffff zzzz://bogus/ffff)
+
+elseif(testname STREQUAL upload_with_bogus_protocol) # pass
+  file(UPLOAD ${CMAKE_CURRENT_LIST_FILE} zzzz://bogus/ffff TIMEOUT 2 LOG l STATUS s)
+  message("l='${l}'")
+  message("s='${s}'")
+
 else() # fail
   message(FATAL_ERROR "testname='${testname}' - error: no such test in '${CMAKE_CURRENT_LIST_FILE}'")
 
