@@ -59,7 +59,7 @@ int cmCTestUploadHandler::ProcessHandler()
      << cmVersion::GetCMakeVersion()
      << "\">\n";
   this->CTest->AddSiteProperties(ofs);
-  ofs << "<Files>\n";
+  ofs << "<Upload>\n";
 
   for ( it = this->Files.begin(); it != this->Files.end(); it ++ )
     {
@@ -71,7 +71,7 @@ int cmCTestUploadHandler::ProcessHandler()
     ofs << "\n</Content>\n"
       << "</File>\n";
     }
-  ofs << "</Files>\n"
+  ofs << "</Upload>\n"
     << "</Site>\n";
   return 0;
 }
