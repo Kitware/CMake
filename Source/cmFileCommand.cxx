@@ -3045,7 +3045,8 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   check_curl_result(res, "UPLOAD cannot set input file: ");
 
   // and give the size of the upload (optional)
-  res = ::curl_easy_setopt(curl, CURLOPT_INFILESIZE, static_cast<long>(st.st_size));
+  res = ::curl_easy_setopt(curl,
+    CURLOPT_INFILESIZE, static_cast<long>(st.st_size));
   check_curl_result(res, "UPLOAD cannot set input file size: ");
 
   res = ::curl_easy_perform(curl);
