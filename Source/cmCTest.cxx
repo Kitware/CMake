@@ -1600,8 +1600,16 @@ std::string cmCTest::Base64GzipEncodeFile(std::string file)
       "encoding file: " << file << std::endl);
     return "";
     }
-  long len = cmSystemTools::FileLength(tarFile.c_str());
-  std::ifstream ifs(tarFile.c_str(), std::ios::in
+  std::string base64 = this->Base64EncodeFile(tarFile);
+  cmSystemTools::RemoveFile(tarFile.c_str());
+  return base64;
+}
+
+//----------------------------------------------------------------------
+std::string cmCTest::Base64EncodeFile(std::string file)
+{
+  long len = cmSystemTools::FileLength(file.c_str());
+  std::ifstream ifs(file.c_str(), std::ios::in
 #ifdef _WIN32
     | std::ios::binary
 #endif
@@ -1609,7 +1617,6 @@ std::string cmCTest::Base64GzipEncodeFile(std::string file)
   unsigned char *file_buffer = new unsigned char [ len + 1 ];
   ifs.read(reinterpret_cast<char*>(file_buffer), len);
   ifs.close();
-  cmSystemTools::RemoveFile(tarFile.c_str());
 
   unsigned char *encoded_buffer
     = new unsigned char [ static_cast<int>(
@@ -1628,6 +1635,7 @@ std::string cmCTest::Base64GzipEncodeFile(std::string file)
 
   return base64;
 }
+
 
 //----------------------------------------------------------------------
 bool cmCTest::SubmitExtraFiles(const std::vector<cmStdString> &files)

@@ -195,6 +195,8 @@ public:
 
   //! tar/gzip and then base 64 encode a file
   std::string Base64GzipEncodeFile(std::string file);
+  //! base64 encode a file
+  std::string Base64EncodeFile(std::string file);
 
   /** 
    * Return the time remaining that the script is allowed to run in
