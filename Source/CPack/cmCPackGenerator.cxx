@@ -1309,9 +1309,50 @@ int cmCPackGenerator::PrepareGroupingKind()
   return 1;
 }
 
+//----------------------------------------------------------------------
 std::string cmCPackGenerator::GetComponentInstallDirNameSuffix(
     const std::string& componentName) {
   return componentName;
+}
+//----------------------------------------------------------------------
+std::string cmCPackGenerator::GetComponentPackageFileName(
+    const std::string& initialPackageFileName,
+    const std::string& groupOrComponentName,
+    bool isGroupName) {
+
+  /*
+   * the default behavior is to use the
+   * component [group] name as a suffix
+   */
+  std::string suffix="-"+groupOrComponentName;
+  /* check if we should use DISPLAY name */
+  std::string dispNameVar = "CPACK_"+Name+"_USE_DISPLAY_NAME_IN_FILENAME";
+  if (IsOn(dispNameVar.c_str()))
+    {
+    /* the component Group case */
+    if (isGroupName)
+      {
+      std::string groupDispVar = "CPACK_COMPONENT_GROUP_"
+          + cmSystemTools::UpperCase(groupOrComponentName) + "_DISPLAY_NAME";
+      const char* groupDispName = GetOption(groupDispVar.c_str());
+      if (groupDispName)
+        {
+        suffix = "-"+std::string(groupDispName);
+        }
+      }
+    /* the [single] component case */
+    else
+      {
+      std::string dispVar = "CPACK_COMPONENT_"
+           + cmSystemTools::UpperCase(groupOrComponentName) + "_DISPLAY_NAME";
+            const char* dispName = GetOption(dispVar.c_str());
+            if(dispName)
+              {
+              suffix = "-"+std::string(dispName);
+              }
+            }
+      }
+  return initialPackageFileName + suffix;
 }
 
 //----------------------------------------------------------------------
