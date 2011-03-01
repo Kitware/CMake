@@ -708,7 +708,7 @@ void curl_easy_reset(CURL *curl)
   data->set.ssl.verifypeer = TRUE;
   data->set.ssl.verifyhost = 2;
 #ifdef CURL_CA_BUNDLE
-  /* This is our prefered CA cert bundle since install time */
+  /* This is our preferred CA cert bundle since install time */
   data->set.ssl.CAfile = (char *)CURL_CA_BUNDLE;
 #endif
 

@@ -1,6 +1,4 @@
-# Find the PostgreSQL installation.
-#
-# ----------------------------------------------------------------------------
+# - Find the PostgreSQL installation.
 # Usage:
 # In your CMakeLists.txt file do something like this:
 # ...
