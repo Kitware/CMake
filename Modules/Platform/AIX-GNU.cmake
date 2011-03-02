@@ -19,5 +19,7 @@ endif()
 set(__AIX_COMPILER_GNU 1)
 
 macro(__aix_compiler_gnu lang)
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG "-Wl,-blibpath:")
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP ":")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS} -Wl,-G")
 endmacro()
