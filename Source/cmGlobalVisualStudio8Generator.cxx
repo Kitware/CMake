@@ -358,6 +358,15 @@ static cmVS7FlagTable cmVS8ExtraFlagTable[] =
   {"ExceptionHandling", "EHsc", "enable c++ exceptions", "1", 0},
   {"ExceptionHandling", "EHa", "enable SEH exceptions", "2", 0},
 
+  {"EnablePREfast", "analyze", "", "true", 0},
+  {"EnablePREfast", "analyze-", "", "false", 0},
+
+  // Language options
+  {"TreatWChar_tAsBuiltInType", "Zc:wchar_t",
+   "wchar_t is a built-in type", "true", 0},
+  {"TreatWChar_tAsBuiltInType", "Zc:wchar_t-",
+   "wchar_t is not a built-in type", "false", 0},
+
   {0,0,0,0,0}
 };
 cmIDEFlagTable const* cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8()

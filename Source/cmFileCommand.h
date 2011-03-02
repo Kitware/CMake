@@ -82,6 +82,8 @@ public:
       "  file(TO_NATIVE_PATH path result)\n"
       "  file(DOWNLOAD url file [TIMEOUT timeout] [STATUS status] [LOG log]\n"
       "       [EXPECTED_MD5 sum] [SHOW_PROGRESS])\n"
+      "  file(UPLOAD filename url [TIMEOUT timeout] [STATUS status]\n"
+      "       [LOG log] [SHOW_PROGRESS])\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
       "if it does not exist.\n"
@@ -165,6 +167,18 @@ public:
       "If SHOW_PROGRESS is specified, progress information will be printed "
       "as status messages until the operation is complete."
       "\n"
+      "UPLOAD will upload the given file to the given URL. "
+      "If LOG var is specified a log of the upload will be put in var. "
+      "If STATUS var is specified the status of the operation will"
+      " be put in var. The status is returned in a list of length 2. "
+      "The first element is the numeric return value for the operation, "
+      "and the second element is a string value for the error. A 0 "
+      "numeric error means no error in the operation. "
+      "If TIMEOUT time is specified, the operation will "
+      "timeout after time seconds, time should be specified as an integer. "
+      "If SHOW_PROGRESS is specified, progress information will be printed "
+      "as status messages until the operation is complete."
+      "\n"
       "The file() command also provides COPY and INSTALL signatures:\n"
       "  file(<COPY|INSTALL> files... DESTINATION <dir>\n"
       "       [FILE_PERMISSIONS permissions...]\n"
@@ -223,6 +237,7 @@ protected:
   bool HandleCopyCommand(std::vector<std::string> const& args);
   bool HandleInstallCommand(std::vector<std::string> const& args);
   bool HandleDownloadCommand(std::vector<std::string> const& args);
+  bool HandleUploadCommand(std::vector<std::string> const& args);
 };
 
 

@@ -171,3 +171,9 @@ void cmIDEOptions::AddFlag(const char* flag, const char* value)
 {
   this->FlagMap[flag] = value;
 }
+
+//----------------------------------------------------------------------------
+void cmIDEOptions::RemoveFlag(const char* flag)
+{
+  this->FlagMap.erase(flag);
+}

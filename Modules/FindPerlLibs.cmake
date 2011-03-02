@@ -25,6 +25,7 @@
 
 #=============================================================================
 # Copyright 2004-2009 Kitware, Inc.
+# Copyright 2008      Andreas Schneider <asn@cryptomilk.org>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.

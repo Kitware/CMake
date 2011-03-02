@@ -462,7 +462,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           }
         }
       std::cerr << "loading initial cache file " << path.c_str() << "\n";
-      this->ReadListFile(path.c_str());
+      this->ReadListFile(args, path.c_str());
       }
     else if(arg.find("-P",0) == 0)
       {
@@ -478,13 +478,14 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         cmSystemTools::Error("No cmake script provided.");
         return false;
         }
-      this->ReadListFile(path.c_str());
+      this->ReadListFile(args, path.c_str());
       }
     }
   return true;
 }
 
-void cmake::ReadListFile(const char *path)
+void cmake::ReadListFile(const std::vector<std::string>& args,
+                         const char *path)
 {
   // if a generator was not yet created, temporarily create one
   cmGlobalGenerator *gg = this->GetGlobalGenerator();
@@ -510,6 +511,14 @@ void cmake::ReadListFile(const char *path)
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     lg->GetMakefile()->SetStartDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+    if (this->GetScriptMode())
+      {
+      std::string file(cmSystemTools::CollapseFullPath(path));
+      cmSystemTools::ConvertToUnixSlashes(file);
+      lg->GetMakefile()->SetScriptModeFile(file.c_str());
+
+      lg->GetMakefile()->SetArgcArgv(args);
+      }
     if (!lg->GetMakefile()->ReadListFile(0, path))
       {
       cmSystemTools::Error("Error processing file:", path);
@@ -979,37 +988,39 @@ void CMakeCommandUsage(const char* program)
   errorStream
     << "Usage: " << program << " -E [command] [arguments ...]\n"
     << "Available commands: \n"
+    << "  build build_dir           - build the project in build_dir.\n"
     << "  chdir dir cmd [args]...   - run command in a given directory\n"
-    << "  rename oldname newname    - rename a file or directory "
-       "(on one volume)\n"
+    << "  compare_files file1 file2 - check if file1 is same as file2\n"
     << "  copy file destination     - copy file to destination (either file "
        "or directory)\n"
-    << "  copy_if_different in-file out-file  - copy file if input has "
-       "changed\n"
     << "  copy_directory source destination   - copy directory 'source' "
        "content to directory 'destination'\n"
-    << "  compare_files file1 file2 - check if file1 is same as file2\n"
+    << "  copy_if_different in-file out-file  - copy file if input has "
+       "changed\n"
     << "  echo [string]...          - displays arguments as text\n"
     << "  echo_append [string]...   - displays arguments as text but no new "
        "line\n"
     << "  environment               - display the current environment\n"
     << "  make_directory dir        - create a directory\n"
     << "  md5sum file1 [...]        - compute md5sum of files\n"
-    << "  remove_directory dir      - remove a directory and its contents\n"
     << "  remove [-f] file1 file2 ... - remove the file(s), use -f to force "
        "it\n"
+    << "  remove_directory dir      - remove a directory and its contents\n"
+    << "  rename oldname newname    - rename a file or directory "
+       "(on one volume)\n"
     << "  tar [cxt][vfz][cvfj] file.tar "
     "file/dir1 file/dir2 ... - create a tar "
     "archive\n"
     << "  time command [args] ...   - run command and return elapsed time\n"
     << "  touch file                - touch a file.\n"
     << "  touch_nocreate file       - touch a file but do not create it.\n"
-    << "  build build_dir           - build the project in build_dir.\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    << "  write_regv key value      - write registry value\n"
-    << "  delete_regv key           - delete registry value\n"
+    << "Available on Windows only:\n"
     << "  comspec                   - on windows 9x use this for RunCommand\n"
+    << "  delete_regv key           - delete registry value\n"
+    << "  write_regv key value      - write registry value\n"
 #else
+    << "Available on UNIX only:\n"
     << "  create_symlink old new    - create a symbolic link new -> old\n"
 #endif
     ;
@@ -1984,8 +1995,32 @@ int cmake::Configure()
 
 }
 
+bool cmake::RejectUnsupportedPaths(const char* desc, std::string const& path)
+{
+  // Some characters are not well-supported by native build systems.
+  std::string::size_type pos = path.find_first_of("=");
+  if(pos == std::string::npos)
+    {
+    return false;
+    }
+  cmOStringStream e;
+  e << "The path to the " << desc << " directory:\n"
+    << "  " << path << "\n"
+    << "contains unsupported character '" << path[pos] << "'.\n"
+    << "Please use a different " << desc << " directory name.";
+  cmListFileBacktrace bt;
+  this->IssueMessage(cmake::FATAL_ERROR, e.str(), bt);
+  return true;
+}
+
 int cmake::ActualConfigure()
 {
+  if(this->RejectUnsupportedPaths("source", this->cmHomeDirectory) ||
+     this->RejectUnsupportedPaths("binary", this->HomeOutputDirectory))
+    {
+    return 1;
+    }
+
   // Construct right now our path conversion table before it's too late:
   this->UpdateConversionPathTable();
   this->CleanupCommandsAndMacros();
@@ -2197,13 +2232,14 @@ int cmake::ActualConfigure()
 
 void cmake::PreLoadCMakeFiles()
 {
+  std::vector<std::string> args;
   std::string pre_load = this->GetHomeDirectory();
   if ( pre_load.size() > 0 )
     {
     pre_load += "/PreLoad.cmake";
     if ( cmSystemTools::FileExists(pre_load.c_str()) )
       {
-      this->ReadListFile(pre_load.c_str());
+      this->ReadListFile(args, pre_load.c_str());
       }
     }
   pre_load = this->GetHomeOutputDirectory();
@@ -2212,7 +2248,7 @@ void cmake::PreLoadCMakeFiles()
     pre_load += "/PreLoad.cmake";
     if ( cmSystemTools::FileExists(pre_load.c_str()) )
       {
-      this->ReadListFile(pre_load.c_str());
+      this->ReadListFile(args, pre_load.c_str());
       }
     }
 }
@@ -4108,7 +4144,10 @@ int cmake::VisualStudioLinkNonIncremental(std::vector<std::string>& args,
     return -1;
     }
   // Run the link command as given
-  linkCommand.push_back("/MANIFEST");
+  if (hasManifest)
+    {
+    linkCommand.push_back("/MANIFEST");
+    }
   if(!cmake::RunCommand("LINK", linkCommand, verbose))
     {
     return -1;

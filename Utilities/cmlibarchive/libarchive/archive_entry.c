@@ -32,12 +32,12 @@ __FBSDID("$FreeBSD: src/lib/libarchive/archive_entry.c,v 1.55 2008/12/23 05:01:4
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef MAJOR_IN_MKDEV
+#if MAJOR_IN_MKDEV
 #include <sys/mkdev.h>
-#else
-#ifdef MAJOR_IN_SYSMACROS
+#define HAVE_MAJOR
+#elif MAJOR_IN_SYSMACROS
 #include <sys/sysmacros.h>
-#endif
+#define HAVE_MAJOR
 #endif
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
@@ -74,6 +74,13 @@ __FBSDID("$FreeBSD: src/lib/libarchive/archive_entry.c,v 1.55 2008/12/23 05:01:4
 
 #undef max
 #define max(a, b)   ((a)>(b)?(a):(b))
+
+#if !defined(HAVE_MAJOR) && !defined(major)
+/* Replacement for major/minor/makedev. */
+#define	major(x) ((int)(0x00ff & ((x) >> 8)))
+#define	minor(x) ((int)(0xffff00ff & (x)))
+#define	makedev(maj,min) ((0xff00 & ((maj)<<8)) | (0xffff00ff & (min)))
+#endif
 
 /* Play games to come up with a suitable makedev() definition. */
 #ifdef __QNXNTO__

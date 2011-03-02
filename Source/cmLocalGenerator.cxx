@@ -1893,6 +1893,7 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
     {
     // This is a full path.  Return it as given.
     dep = inName;
+    cmSystemTools::ConvertToUnixSlashes(dep);
     return true;
     }
 

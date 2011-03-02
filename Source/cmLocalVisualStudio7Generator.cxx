@@ -381,6 +381,11 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
    "Use sse2 instructions", "2", 0},
   {"EnableEnhancedInstructionSet", "arch:SSE",
    "Use sse instructions",   "1", 0},
+  {"FloatingPointModel", "fp:precise",
+   "Use precise floating point model", "0", 0},
+  {"FloatingPointModel", "fp:strict",
+   "Use strict floating point model", "1", 0},
+  {"FloatingPointModel", "fp:fast", "Use fast floating point model", "2", 0},
   {"FavorSizeOrSpeed",  "Ot", "Favor fast code",  "1", 0},
   {"FavorSizeOrSpeed",  "Os", "Favor small code", "2", 0},
   {"CompileAs", "TC", "Compile as c code",        "1", 0},
@@ -451,8 +456,13 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
    "Turn off Run time type information for c++", "FALSE", 0},
   {"SmallerTypeCheck", "RTCc", "smaller type check", "TRUE", 0},
   {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "TRUE", 0},
+  {"WholeProgramOptimization", "GL",
+   "Enables whole program optimization", "TRUE", 0},
+  {"WholeProgramOptimization", "GL-",
+   "Disables whole program optimization", "FALSE", 0},
   {"WarnAsError", "WX", "Treat warnings as errors", "TRUE", 0},
   {"BrowseInformation", "FR", "Generate browse information", "1", 0},
+  {"StringPooling", "GF", "Enable StringPooling", "TRUE", 0},
   {0,0,0,0,0}
 };
 
@@ -466,6 +476,14 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
   {"GenerateManifest", "MANIFEST", "enable manifest generation", "TRUE", 0},
   {"LinkIncremental", "INCREMENTAL:NO", "link incremental", "1", 0},
   {"LinkIncremental", "INCREMENTAL:YES", "link incremental", "2", 0},
+  {"CLRUnmanagedCodeCheck", "CLRUNMANAGEDCODECHECK:NO", "", "false", 0},
+  {"CLRUnmanagedCodeCheck", "CLRUNMANAGEDCODECHECK", "", "true", 0},
+  {"DataExecutionPrevention", "NXCOMPAT:NO",
+   "Not known to work with Windows Data Execution Prevention", "1", 0},
+  {"DataExecutionPrevention", "NXCOMPAT",
+   "Known to work with Windows Data Execution Prevention", "2", 0},
+  {"DelaySign", "DELAYSIGN:NO", "", "false", 0},
+  {"DelaySign", "DELAYSIGN", "", "true", 0},
   {"EntryPointSymbol", "ENTRY:", "sets the starting address", "",
    cmVS7FlagTable::UserValue},
   {"IgnoreDefaultLibraryNames", "NODEFAULTLIB:", "default libs to ignore", "",
@@ -478,8 +496,16 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
   {"EnableCOMDATFolding", "OPT:NOICF", "Do not remove redundant COMDATs",
    "1", 0},
   {"EnableCOMDATFolding", "OPT:ICF", "Remove redundant COMDATs", "2", 0},
+  {"ResourceOnlyDLL", "NOENTRY", "Create DLL with no entry point", "true", 0},
   {"OptimizeReferences", "OPT:NOREF", "Keep unreferenced data", "1", 0},
   {"OptimizeReferences", "OPT:REF", "Eliminate unreferenced data", "2", 0},
+  {"Profile", "PROFILE", "", "true", 0},
+  {"RandomizedBaseAddress", "DYNAMICBASE:NO",
+   "Image may not be rebased at load-time", "1", 0},
+  {"RandomizedBaseAddress", "DYNAMICBASE",
+   "Image may be rebased at load-time", "2", 0},
+  {"SetChecksum", "RELEASE", "Enable setting checksum in header", "true", 0},
+  {"SupportUnloadOfDelayLoadedDLL", "DELAY:UNLOAD", "", "true", 0},
   {"TargetMachine", "MACHINE:I386", "Machine x86", "1", 0},
   {"TargetMachine", "MACHINE:X86", "Machine x86", "1", 0},
   {"TargetMachine", "MACHINE:AM33", "Machine AM33", "2", 0},
@@ -498,6 +524,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
   {"TargetMachine", "MACHINE:SH5", "Machine SH5", "15", 0},
   {"TargetMachine", "MACHINE:THUMB", "Machine THUMB", "16", 0},
   {"TargetMachine", "MACHINE:X64", "Machine x64", "17", 0},
+  {"TurnOffAssemblyGeneration", "NOASSEMBLY",
+   "No assembly even if CLR information is present in objects.", "true", 0},
   {"ModuleDefinitionFile", "DEF:", "add an export def file", "",
    cmVS7FlagTable::UserValue}, 
   {"GenerateMapFile", "MAP", "enable generation of map file", "TRUE", 0},
@@ -1695,7 +1723,7 @@ void cmLocalVisualStudio7Generator
   event.Start(tool);
   event.Write(target.GetPreLinkCommands());
   cmsys::auto_ptr<cmCustomCommand> pcc(
-    this->MaybeCreateImplibDir(target, configName));
+    this->MaybeCreateImplibDir(target, configName, this->FortranProject));
   if(pcc.get())
     {
     event.Write(*pcc);

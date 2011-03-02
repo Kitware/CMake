@@ -825,7 +825,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     // Call gcov to get coverage data for this *.gcda file:
     //
     std::string fileDir = cmSystemTools::GetFilenamePath(it->c_str());
-    std::string command = "\"" + gcovCommand + "\" -l -o \"" + fileDir
+    std::string command = "\"" + gcovCommand + "\" -l -p -o \"" + fileDir
       + "\" \"" + *it + "\"";
 
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, command.c_str()

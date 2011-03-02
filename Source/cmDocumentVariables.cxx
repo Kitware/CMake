@@ -97,6 +97,30 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Provide Information");
 
   cm->DefineProperty
+    ("CMAKE_SCRIPT_MODE_FILE", cmProperty::VARIABLE,
+     "Full path to the -P script file currently being processed. ",
+     "When run in -P script mode, CMake sets this variable to the full "
+     "path of the script file. When run to configure a CMakeLists.txt "
+     "file, this variable is not set.", false,
+     "Variables that Provide Information");
+
+  cm->DefineProperty
+    ("CMAKE_ARGC", cmProperty::VARIABLE,
+     "Number of command line arguments passed to CMake in script mode. ",
+     "When run in -P script mode, CMake sets this variable to the number "
+     "of command line arguments. See also CMAKE_ARGV0, 1, 2 ... ", false,
+     "Variables that Provide Information");
+
+  cm->DefineProperty
+    ("CMAKE_ARGV0", cmProperty::VARIABLE,
+     "Command line argument passed to CMake in script mode. ",
+     "When run in -P script mode, CMake sets this variable to "
+     "the first command line argument. It then also sets CMAKE_ARGV1, "
+     "CMAKE_ARGV2, ... and so on, up to the number of command line arguments "
+     "given. See also CMAKE_ARGC.", false,
+     "Variables that Provide Information");
+
+  cm->DefineProperty
     ("CMAKE_BUILD_TOOL", cmProperty::VARIABLE,
      "Tool used for the actual build process.",
      "This variable is set to the program that will be"
@@ -867,8 +891,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("MSVC_VERSION", cmProperty::VARIABLE,
      "The version of Microsoft Visual C/C++ being used if any.",
-     "The version of Microsoft Visual C/C++ being used if any. "
-     "For example 1300 is MSVC 6.0.",
+     "Known version numbers are:\n"
+     "  1200 = VS  6.0\n"
+     "  1300 = VS  7.0\n"
+     "  1310 = VS  7.1\n"
+     "  1400 = VS  8.0\n"
+     "  1500 = VS  9.0\n"
+     "  1600 = VS 10.0\n"
+     "",
      false,
      "Variables That Describe the System");
 

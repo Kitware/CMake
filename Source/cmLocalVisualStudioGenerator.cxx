@@ -32,13 +32,17 @@ cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 //----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCustomCommand>
 cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
-                                                   const char* config)
+                                                   const char* config,
+                                                   bool isFortran)
 {
   cmsys::auto_ptr<cmCustomCommand> pcc;
 
   // If an executable exports symbols then VS wants to create an
   // import library but forgets to create the output directory.
-  if(target.GetType() != cmTarget::EXECUTABLE) { return pcc; }
+  // The Intel Fortran plugin always forgets to the directory.
+  if(target.GetType() != cmTarget::EXECUTABLE &&
+     !(isFortran && target.GetType() == cmTarget::SHARED_LIBRARY))
+    { return pcc; }
   std::string outDir = target.GetDirectory(config, false);
   std::string impDir = target.GetDirectory(config, true);
   if(impDir == outDir) { return pcc; }

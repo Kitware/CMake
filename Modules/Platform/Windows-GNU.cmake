@@ -43,6 +43,7 @@ endif()
 set(CMAKE_DL_LIBS "")
 set(CMAKE_LIBRARY_PATH_FLAG "-L")
 set(CMAKE_LINK_LIBRARY_FLAG "-l")
+set(CMAKE_LINK_DEF_FILE_FLAG "") # Empty string: passing the file is enough
 set(CMAKE_LINK_LIBRARY_SUFFIX "")
 set(CMAKE_CREATE_WIN32_EXE  "-mwindows")
 

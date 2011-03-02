@@ -102,7 +102,7 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile() const
   fout <<
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<projectDescription>\n"
-    "\t<name>" << name << "</name>\n"
+    "\t<name>" << this->EscapeForXML(name) << "</name>\n"
     "\t<comment></comment>\n"
     "\t<projects>\n"
     "\t</projects>\n"
@@ -376,11 +376,10 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     "\t</natures>\n"
     ;
 
-  // TODO: refactor this
+  fout << "\t<linkedResources>\n";
   // create linked resources
   if (this->IsOutOfSourceBuild)
     {
-    fout << "\t<linkedResources>\n";
     // create a linked resource to CMAKE_SOURCE_DIR
     // (this is not done anymore for each project because of
     // http://public.kitware.com/Bug/view.php?id=9978 and because I found it
@@ -399,17 +398,47 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
       this->SrcLinkedResources.push_back(sourceLinkedResourceName);
       }
 
-    // for EXECUTABLE_OUTPUT_PATH when not in binary dir
-    this->AppendOutLinkedResource(fout,
-      mf->GetSafeDefinition("CMAKE_RUNTIME_OUTPUT_DIRECTORY"),
-      mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH"));
-    // for LIBRARY_OUTPUT_PATH when not in binary dir
-    this->AppendOutLinkedResource(fout,
-      mf->GetSafeDefinition("CMAKE_LIBRARY_OUTPUT_DIRECTORY"),
-      mf->GetSafeDefinition("LIBRARY_OUTPUT_PATH"));
-
-    fout << "\t</linkedResources>\n";
     }
+
+  // for each sub project create a linked resource to the source dir
+  // - only if it is an out-of-source build
+  this->AppendLinkedResource(fout, "[Subprojects]",
+                             "virtual:/virtual");
+
+  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+       it = this->GlobalGenerator->GetProjectMap().begin();
+       it != this->GlobalGenerator->GetProjectMap().end();
+       ++it)
+    {
+    std::string linkSourceDirectory = this->GetEclipsePath(
+                            it->second[0]->GetMakefile()->GetStartDirectory());
+    // a linked resource must not point to a parent directory of .project or
+    // .project itself
+    if ((this->HomeOutputDirectory != linkSourceDirectory) &&
+        !cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
+                                       linkSourceDirectory.c_str()))
+      {
+      std::string linkName = "[Subprojects]/";
+      linkName += it->first;
+      this->AppendLinkedResource(fout, linkName,
+                                 this->GetEclipsePath(linkSourceDirectory));
+      this->SrcLinkedResources.push_back(it->first);
+      }
+    }
+
+  // I'm not sure this makes too much sense. There can be different
+  // output directories in different subdirs, so we would need more of them.
+
+  // for EXECUTABLE_OUTPUT_PATH when not in binary dir
+  this->AppendOutLinkedResource(fout,
+    mf->GetSafeDefinition("CMAKE_RUNTIME_OUTPUT_DIRECTORY"),
+    mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH"));
+  // for LIBRARY_OUTPUT_PATH when not in binary dir
+  this->AppendOutLinkedResource(fout,
+    mf->GetSafeDefinition("CMAKE_LIBRARY_OUTPUT_DIRECTORY"),
+    mf->GetSafeDefinition("LIBRARY_OUTPUT_PATH"));
+
+  fout << "\t</linkedResources>\n";
 
   fout << "</projectDescription>\n";
 }
@@ -431,7 +460,8 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
         {
         emittedDirs.insert(dir);
         fout << "<pathentry include=\""
-             << cmExtraEclipseCDT4Generator::GetEclipsePath(dir)
+             << cmExtraEclipseCDT4Generator::EscapeForXML(
+                              cmExtraEclipseCDT4Generator::GetEclipsePath(dir))
              << "\" kind=\"inc\" path=\"\" system=\"true\"/>\n";
         }
       }
@@ -550,14 +580,15 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        it != this->SrcLinkedResources.end();
        ++it)
     {
-    fout << "<pathentry kind=\"src\" path=\"" << *it << "\"/>\n";
+    fout << "<pathentry kind=\"src\" path=\"" << this->EscapeForXML(*it)
+         << "\"/>\n";
 
     // exlude source directory from output search path
     // - only if not named the same as an output directory
     if (!cmSystemTools::FileIsDirectory(
            std::string(this->HomeOutputDirectory + "/" + *it).c_str()))
       {
-      excludeFromOut += *it + "/|";
+      excludeFromOut += this->EscapeForXML(*it) + "/|";
       }
     }
   excludeFromOut += "**/CMakeFiles/";
@@ -572,7 +603,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        it != this->OutLinkedResources.end();
        ++it)
     {
-    fout << "<pathentry kind=\"out\" path=\"" << *it << "\"/>\n";
+    fout << "<pathentry kind=\"out\" path=\"" << this->EscapeForXML(*it)
+         << "\"/>\n";
     }
 
   // add pre-processor definitions to allow eclipse to gray out sections
@@ -875,8 +907,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   fout << "</cconfiguration>\n"
           "</storageModule>\n"
           "<storageModule moduleId=\"cdtBuildSystem\" version=\"4.0.0\">\n"
-          "<project id=\"" << mf->GetProjectName() << ".null.1\""
-          " name=\"" << mf->GetProjectName() << "\"/>\n"
+          "<project id=\"" << this->EscapeForXML(mf->GetProjectName())
+       << ".null.1\" name=\"" << this->EscapeForXML(mf->GetProjectName())
+       << "\"/>\n"
           "</storageModule>\n"
           "</cproject>\n"
           ;
@@ -927,7 +960,8 @@ cmExtraEclipseCDT4Generator::GenerateProjectName(const std::string& name,
                                                  const std::string& type,
                                                  const std::string& path)
 {
-  return name + (type.empty() ? "" : "-") + type + "@" + path;
+  return cmExtraEclipseCDT4Generator::EscapeForXML(name)
+                                +(type.empty() ? "" : "-") + type + "@" + path;
 }
 
 std::string cmExtraEclipseCDT4Generator::EscapeForXML(const std::string& value)
@@ -999,15 +1033,17 @@ void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
                                                const std::string&     path,
                                                const char* prefix)
 {
+  std::string targetXml = cmExtraEclipseCDT4Generator::EscapeForXML(target);
+  std::string pathXml = cmExtraEclipseCDT4Generator::EscapeForXML(path);
   fout <<
-    "<target name=\"" << prefix << target << "\""
-    " path=\"" << path.c_str() << "\""
+    "<target name=\"" << prefix << targetXml << "\""
+    " path=\"" << pathXml.c_str() << "\""
     " targetID=\"org.eclipse.cdt.make.MakeTargetBuilder\">\n"
     "<buildCommand>"
     << cmExtraEclipseCDT4Generator::GetEclipsePath(make)
     << "</buildCommand>\n"
     "<buildArguments>"  << makeArgs << "</buildArguments>\n"
-    "<buildTarget>" << target << "</buildTarget>\n"
+    "<buildTarget>" << targetXml << "</buildTarget>\n"
     "<stopOnError>true</stopOnError>\n"
     "<useDefaultCommand>false</useDefaultCommand>\n"
     "</target>\n"
@@ -1050,11 +1086,13 @@ void cmExtraEclipseCDT4Generator
 {
   fout <<
     "\t\t<link>\n"
-    "\t\t\t<name>" << name << "</name>\n"
+    "\t\t\t<name>"
+    << cmExtraEclipseCDT4Generator::EscapeForXML(name)
+    << "</name>\n"
     "\t\t\t<type>2</type>\n"
-    "\t\t\t<location>"
-    << path
-    << "</location>\n"
+    "\t\t\t<locationURI>"
+    << cmExtraEclipseCDT4Generator::EscapeForXML(path)
+    << "</locationURI>\n"
     "\t\t</link>\n"
     ;
 }

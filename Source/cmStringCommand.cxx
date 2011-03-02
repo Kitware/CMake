@@ -72,7 +72,11 @@ bool cmStringCommand
     {
     return this->HandleRandomCommand(args);
     }
-  
+  else if(subCommand == "FIND")
+    {
+    return this->HandleFindCommand(args);
+    }
+
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
   return false;
@@ -496,6 +500,68 @@ void cmStringCommand::StoreMatches(cmMakefile* mf,cmsys::RegularExpression& re)
     mf->AddDefinition(name, re.match(i).c_str());
     mf->MarkVariableAsUsed(name);
     }
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleFindCommand(std::vector<std::string> const&
+                                           args)
+{
+  // check if all required parameters were passed
+  if(args.size() < 4 || args.size() > 5)
+    {
+    this->SetError("sub-command FIND requires 3 or 4 parameters.");
+    return false;
+    }
+
+  // check if the reverse flag was set or not
+  bool reverseMode = false;
+  if(args.size() == 5 && args[4] == "REVERSE")
+    {
+    reverseMode = true;
+    }
+
+  // if we have 5 arguments the last one must be REVERSE
+  if(args.size() == 5 && args[4] != "REVERSE")
+    {
+    this->SetError("sub-command FIND: unknown last parameter");
+    return false;
+    }
+
+  // local parameter names.
+  const std::string& sstring = args[1];
+  const std::string& schar = args[2];
+  const std::string& outvar = args[3];
+
+  // ensure that the user cannot accidentally specify REVERSE as a variable
+  if(outvar == "REVERSE")
+    {
+    this->SetError("sub-command FIND does not allow to select REVERSE as "
+                   "the output variable.  "
+                   "Maybe you missed the actual output variable?");
+    return false;
+    }
+
+  // try to find the character and return its position
+  size_t pos;
+  if(!reverseMode)
+    {
+    pos = sstring.find(schar);
+    }
+  else
+    {
+    pos = sstring.rfind(schar);
+    }
+  if(std::string::npos != pos)
+    {
+    cmOStringStream s;
+    s << pos;
+    this->Makefile->AddDefinition(outvar.c_str(), s.str().c_str());
+    return true;
+    }
+
+  // the character was not found, but this is not really an error
+  this->Makefile->AddDefinition(outvar.c_str(), "-1");
+  return true;
 }
 
 //----------------------------------------------------------------------------

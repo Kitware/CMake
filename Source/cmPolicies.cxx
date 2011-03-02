@@ -453,7 +453,7 @@ cmPolicies::cmPolicies()
     "Starting with CMake 2.8.4, if a cmake-module shipped with CMake (i.e. "
     "located in the CMake module directory) calls include() or "
     "find_package(), the files located in the the CMake module directory are "
-    "prefered over the files in CMAKE_MODULE_PATH.  "
+    "preferred over the files in CMAKE_MODULE_PATH.  "
     "This makes sure that the modules belonging to "
     "CMake always get those files included which they expect, and against "
     "which they were developed and tested.  "

@@ -94,11 +94,6 @@
 #endif
 #endif
 
-/* Replacement for major/minor/makedev. */
-#define major(x) ((int)(0x00ff & ((x) >> 8)))
-#define minor(x) ((int)(0xffff00ff & (x)))
-#define makedev(maj,min) ((0xff00 & ((maj)<<8))|(0xffff00ff & (min)))
-
 /* Alias the Windows _function to the POSIX equivalent. */
 #define access      _access
 #define chdir       __la_chdir

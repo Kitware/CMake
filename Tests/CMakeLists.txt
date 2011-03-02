@@ -563,30 +563,40 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   IF(CTEST_RUN_CPackComponentsForAll)
     set(CPackComponentsForAll_EXTRA_OPTIONS)
-
-    set(CPackRun_CPackGen  "-DCPackGen=ZIP")
     set(CPackRun_CPackCommand "-DCPackCommand=${CMAKE_CPACK_COMMAND}")
-    set(CPackRun_CPackComponentWay "-DCPackComponentWay=default")
-
-    ADD_TEST(CPackComponentsForAll-ZIP-default ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll"
-      "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/buildZIP-NoComponent"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project CPackComponentsForAll
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-options
-        -DCPACK_BINARY_ZIP:BOOL=ON
-        ${CPackComponentsForAll_EXTRA_OPTIONS}
-        --graphviz=CPackComponentsForAll.dot
-      --test-command ${CMAKE_CMAKE_COMMAND}
-        "-DCPackComponentsForAll_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/buildZIP-NoComponent"
-        "${CPackRun_CPackCommand}"
-        "${CPackRun_CPackGen}"
-        "${CPackRun_CPackComponentWay}"
-        -P "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll/RunCPackVerifyResult.cmake")
-
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll")
+    # set up list of CPack generators
+    list(APPEND GENLST "ZIP")
+    # set up list of component packaging ways
+    list(APPEND CWAYLST "default")
+    list(APPEND CWAYLST "OnePackPerGroup")
+    list(APPEND CWAYLST "IgnoreGroup")
+    list(APPEND CWAYLST "AllInOne")
+    list(APPEND CWAYLST "AllGroupsInOne")
+    foreach(CPackGen ${GENLST})
+      set(CPackRun_CPackGen  "-DCPackGen=${CPackGen}")
+      foreach(CPackComponentWay ${CWAYLST})
+        set(CPackRun_CPackComponentWay "-DCPackComponentWay=${CPackComponentWay}")
+        ADD_TEST(CPackComponentsForAll-${CPackGen}-${CPackComponentWay} ${CMAKE_CTEST_COMMAND}
+          --build-and-test
+          "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll"
+          "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}"
+          --build-generator ${CMAKE_TEST_GENERATOR}
+          --build-project CPackComponentsForAll
+          --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+          --build-options
+             -DCPACK_BINARY_${CPackGen}:BOOL=ON
+             ${CPackRun_CPackComponentWay}
+             ${CPackComponentsForAll_EXTRA_OPTIONS}
+             --graphviz=CPackComponentsForAll.dot
+          --test-command ${CMAKE_CMAKE_COMMAND}
+            "-DCPackComponentsForAll_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}"
+            "${CPackRun_CPackCommand}"
+            "${CPackRun_CPackGen}"
+            "${CPackRun_CPackComponentWay}"
+            -P "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll/RunCPackVerifyResult.cmake")
+        LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}")
+      endforeach(CPackComponentWay)
+    endforeach(CPackGen)
   ENDIF(CTEST_RUN_CPackComponentsForAll)
 
   # By default, turn this test off (because it takes a long time...)
@@ -805,11 +815,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProject")
-  # The ExternalProject test takes 900 seconds on some machines!
-  GET_TEST_PROPERTY(ExternalProject TIMEOUT PREVIOUS_TIMEOUT)
-  IF("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-    SET_TESTS_PROPERTIES(ExternalProject PROPERTIES TIMEOUT 1000)
-  ENDIF("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
+  SET_TESTS_PROPERTIES(ExternalProject PROPERTIES
+    TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
   # do each of the tutorial steps
   FOREACH(STP RANGE 1 7)
@@ -1072,8 +1079,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   IF(CMAKE_TEST_MSVC)
     ADD_TEST_MACRO(ForceInclude foo)
     ADD_TEST_MACRO(PrecompiledHeader foo)
+  ENDIF()
+  IF(CMAKE_TEST_MSVC OR
+      "${CMAKE_TEST_GENERATOR}" MATCHES "(MSYS|MinGW) Makefiles")
     ADD_TEST_MACRO(ModuleDefinition example_exe)
-  ENDIF(CMAKE_TEST_MSVC)
+  ENDIF()
 
   ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
 
@@ -1133,6 +1143,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --test-command
       ${BundleTestInstallDir}/Applications/SecondBundleExe.app/Contents/MacOS/SecondBundleExe)
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleTest")
+
+    ADD_TEST(CFBundleTest ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CFBundleTest"
+      "${CMake_BINARY_DIR}/Tests/CFBundleTest"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-project CFBundleTest
+      --test-command
+      ${CMAKE_CMAKE_COMMAND} -DCTEST_CONFIGURATION_TYPE=\${CTEST_CONFIGURATION_TYPE}
+        -Ddir=${CMake_BINARY_DIR}/Tests/CFBundleTest
+        -Dgen=${CMAKE_TEST_GENERATOR}
+        -P ${CMake_SOURCE_DIR}/Tests/CFBundleTest/VerifyResult.cmake)
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CFBundleTest")
 
     ADD_TEST_MACRO(ObjC++ ObjC++)
   ENDIF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)

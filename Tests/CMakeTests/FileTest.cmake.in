@@ -27,7 +27,7 @@ check_cmake_test(File
 # Also execute each test listed in FileTestScript.cmake:
 #
 set(scriptname "@CMAKE_CURRENT_SOURCE_DIR@/FileTestScript.cmake")
-set(number_of_tests_expected 56)
+set(number_of_tests_expected 62)
 
 include("@CMAKE_CURRENT_SOURCE_DIR@/ExecuteScriptTests.cmake")
 execute_all_script_tests(${scriptname} number_of_tests_executed)

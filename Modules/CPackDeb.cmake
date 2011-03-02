@@ -60,7 +60,7 @@
 # CPACK_DEBIAN_PACKAGE_DEBUG
 #     Mandatory : NO
 #     Default   : -
-#     May be set when invoking cpack in order to trace debug informations
+#     May be set when invoking cpack in order to trace debug information
 #     during CPackDeb run.
 # CPACK_DEBIAN_PACKAGE_PREDEPENDS
 #     Mandatory : NO

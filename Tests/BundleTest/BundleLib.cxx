@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <Carbon/Carbon.h>
+#include <CoreFoundation/CoreFoundation.h>
 
 int fileExists(char* filename)
 {
@@ -51,7 +51,7 @@ int findBundleFile(char* exec, const char* file)
 
 int foo(char *exec)
 {
-  // Call a "Carbon" function...
+  // Call a CoreFoundation function...
   //
   CFBundleRef br = CFBundleGetMainBundle();
   (void) br;

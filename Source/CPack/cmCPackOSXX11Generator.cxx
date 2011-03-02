@@ -150,7 +150,7 @@ int cmCPackOSXX11Generator::PackageFiles()
   // since we get random dashboard failures with this one
   // try running it more than once
   int numTries = 4;
-  bool res;
+  bool res = false;
   while(numTries > 0)
     {
     res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,

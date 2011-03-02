@@ -194,6 +194,85 @@ elseif(testname STREQUAL random_with_various_alphabets) # pass
   string(RANDOM LENGTH 78 ALPHABET "~`!@#$%^&*()_-+={}[]\\|:\\;'\",.<>/?" v)
   message(STATUS "v='${v}'")
 
+  message(STATUS "CMAKE_SCRIPT_MODE_FILE='${CMAKE_SCRIPT_MODE_FILE}'")
+
+elseif(testname STREQUAL string_find_with_no_parameter) # fail
+  string(FIND)
+
+elseif(testname STREQUAL string_find_with_one_parameter) # fail
+  string(FIND "CMake is great.")
+
+elseif(testname STREQUAL string_find_with_two_parameters) # fail
+  string(FIND "CMake is great." "a")
+
+elseif(testname STREQUAL string_find_with_three_parameters) # pass
+  string(FIND "CMake is great." "a" v)
+  message(STATUS "v='${v}'")
+
+elseif(testname STREQUAL string_find_with_four_parameters) # fail
+  string(FIND "CMake is great." "a" v v2)
+
+elseif(testname STREQUAL string_find_reverse_with_no_parameter) # fail
+  string(FIND REVERSE)
+
+elseif(testname STREQUAL string_find_reverse_with_one_parameter) # fail
+  string(FIND "CMake is great." REVERSE)
+
+elseif(testname STREQUAL string_find_reverse_with_two_parameters) # fail
+  string(FIND "CMake is great." "a" REVERSE)
+
+elseif(testname STREQUAL string_find_reverse_with_three_parameters) # pass
+  string(FIND "CMake is great." "a" v REVERSE)
+  message(STATUS "v='${v}'")
+
+elseif(testname STREQUAL string_find_reverse_with_four_parameters_part1) # fail
+  string(FIND "CMake is great." "a" v v2 REVERSE)
+
+elseif(testname STREQUAL string_find_reverse_with_four_parameters_part2) # fail
+  string(FIND "CMake is great." "a" v REVERSE v2)
+
+elseif(testname STREQUAL string_find_with_no_possible_result) # pass
+  string(FIND "CMake is a great application." "z" v)
+  message(STATUS "v='${v}'")
+  if(NOT(-1 EQUAL ${v}))
+    message(SEND_ERROR "FIND sub-command should return -1 but returned ${v}.")
+  endif(NOT(-1 EQUAL ${v}))
+
+elseif(testname STREQUAL string_find_reverse_with_no_possible_result) # pass
+  string(FIND "CMake is a great application." "z" v REVERSE)
+  message(STATUS "v='${v}'")
+  if(NOT(-1 EQUAL ${v}))
+    message(SEND_ERROR "FIND REVERSE sub-command should return -1 but returned ${v}.")
+  endif(NOT(-1 EQUAL ${v}))
+
+elseif(testname STREQUAL string_find_with_required_result) # pass
+  string(FIND "CMake is a great application." "g" v)
+  message(STATUS "v='${v}'")
+  if(NOT(11 EQUAL ${v}))
+    message(SEND_ERROR "FIND sub-command should return 11 but returned ${v}.")
+  endif(NOT(11 EQUAL ${v}))
+
+elseif(testname STREQUAL string_find_reverse_with_required_result) # pass
+  string(FIND "CMake is a great application." "e" v REVERSE)
+  message(STATUS "v='${v}'")
+  if(NOT(13 EQUAL ${v}))
+    message(SEND_ERROR "FIND REVERSE sub-command should return 13 but returned ${v}.")
+  endif(NOT(13 EQUAL ${v}))
+
+elseif(testname STREQUAL string_find_word_reverse_with_required_result) # pass
+  string(FIND "The command should find REVERSE in this string. Or maybe this REVERSE?!" "REVERSE" v)
+  message(STATUS "v='${v}'")
+  if(NOT(24 EQUAL ${v}))
+    message(SEND_ERROR "FIND sub-command should return 24 but returned ${v}.")
+  endif(NOT(24 EQUAL ${v}))
+
+elseif(testname STREQUAL string_find_reverse_word_reverse_with_required_result) # pass
+  string(FIND "The command should find REVERSE in this string. Or maybe this REVERSE?!" "REVERSE" v REVERSE)
+  message(STATUS "v='${v}'")
+  if(NOT(62 EQUAL ${v}))
+    message(SEND_ERROR "FIND sub-command should return 62 but returned ${v}.")
+  endif(NOT(62 EQUAL ${v}))
+
 else() # fail
   message(FATAL_ERROR "testname='${testname}' - error: no such test in '${CMAKE_CURRENT_LIST_FILE}'")
 

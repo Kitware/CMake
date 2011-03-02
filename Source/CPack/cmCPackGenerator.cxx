@@ -684,7 +684,14 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         if (componentInstall)
           {
           tempInstallDirectory += "/";
-          tempInstallDirectory += installComponent;
+          // Some CPack generators would rather chose
+          // the local installation directory suffix.
+          // Some (e.g. RPM) use
+          //  one install directory for each component **GROUP**
+          // instead of the default
+          //  one install directory for each component.
+          tempInstallDirectory +=
+            GetComponentInstallDirNameSuffix(installComponent);
           }
 
         if (!setDestDir)
@@ -869,6 +876,12 @@ int cmCPackGenerator::DoPackage()
     "Create package using " << this->Name.c_str() << std::endl);
 
   if ( !this->PrepareNames() )
+    {
+    return 0;
+    }
+
+  // Digest Component grouping specification
+  if ( !this->PrepareGroupingKind() )
     {
     return 0;
     }
@@ -1251,11 +1264,11 @@ int cmCPackGenerator::PrepareGroupingKind()
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,  "["
         << this->Name << "]"
         << " requested component grouping = "<< groupingType <<std::endl);
-    if (groupingType == "ALL_GROUP_IN_ONE")
+    if (groupingType == "ALL_GROUPS_IN_ONE")
       {
       allGroupInOne = true;
       }
-    else if (groupingType == "ALL_COMPONENT_IN_ONE")
+    else if (groupingType == "ALL_COMPONENTS_IN_ONE")
       {
       allComponentInOne = true;
       }
@@ -1268,11 +1281,19 @@ int cmCPackGenerator::PrepareGroupingKind()
       cmCPackLogger(cmCPackLog::LOG_WARNING, "["
               << this->Name << "]"
               << " requested component grouping type <"<< groupingType
-              << "> UNKNOWN not in (ALL_GROUP_IN_ONE,"
-                    "ALL_COMPONENT_IN_ONE,IGNORE)" <<std::endl);
+              << "> UNKNOWN not in (ALL_GROUPS_IN_ONE,"
+                    "ALL_COMPONENTS_IN_ONE,IGNORE)" <<std::endl);
       }
     }
 
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,  "["
+        << this->Name << "]"
+        << " requested component grouping = ("
+        << "ALL_GROUPS_IN_ONE=" << allGroupInOne
+        << ", ALL_COMPONENTS_IN_ONE=" << allComponentInOne
+        << ", IGNORE_GROUPS=" << ignoreComponentGroup
+        << ")"
+        << std::endl);
   // Some components were defined but NO group
   // force ignoreGroups
   if (this->ComponentGroups.empty() && (!this->Components.empty())
@@ -1286,6 +1307,52 @@ int cmCPackGenerator::PrepareGroupingKind()
   }
 
   return 1;
+}
+
+//----------------------------------------------------------------------
+std::string cmCPackGenerator::GetComponentInstallDirNameSuffix(
+    const std::string& componentName) {
+  return componentName;
+}
+//----------------------------------------------------------------------
+std::string cmCPackGenerator::GetComponentPackageFileName(
+    const std::string& initialPackageFileName,
+    const std::string& groupOrComponentName,
+    bool isGroupName) {
+
+  /*
+   * the default behavior is to use the
+   * component [group] name as a suffix
+   */
+  std::string suffix="-"+groupOrComponentName;
+  /* check if we should use DISPLAY name */
+  std::string dispNameVar = "CPACK_"+Name+"_USE_DISPLAY_NAME_IN_FILENAME";
+  if (IsOn(dispNameVar.c_str()))
+    {
+    /* the component Group case */
+    if (isGroupName)
+      {
+      std::string groupDispVar = "CPACK_COMPONENT_GROUP_"
+          + cmSystemTools::UpperCase(groupOrComponentName) + "_DISPLAY_NAME";
+      const char* groupDispName = GetOption(groupDispVar.c_str());
+      if (groupDispName)
+        {
+        suffix = "-"+std::string(groupDispName);
+        }
+      }
+    /* the [single] component case */
+    else
+      {
+      std::string dispVar = "CPACK_COMPONENT_"
+           + cmSystemTools::UpperCase(groupOrComponentName) + "_DISPLAY_NAME";
+            const char* dispName = GetOption(dispVar.c_str());
+            if(dispName)
+              {
+              suffix = "-"+std::string(dispName);
+              }
+            }
+      }
+  return initialPackageFileName + suffix;
 }
 
 //----------------------------------------------------------------------

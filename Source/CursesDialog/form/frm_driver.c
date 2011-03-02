@@ -1086,7 +1086,7 @@ _nc_Synchronize_Options(FIELD *field, Field_Options newopts)
 
       if (form->status & _POSTED)
         {
-          if ((form->curpage == field->page))
+          if (form->curpage == field->page)
             {
               if (changed_opts & O_VISIBLE)
                 {

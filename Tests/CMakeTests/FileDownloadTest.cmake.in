@@ -37,5 +37,7 @@ file(DOWNLOAD
   ${url}
   ${dir}/file3.png
   TIMEOUT 2
+  STATUS status
   EXPECTED_MD5 d16778650db435bda3a8c3435c3ff5d1
   )
+message(STATUS "${status}")

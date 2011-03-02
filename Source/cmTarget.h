@@ -326,7 +326,7 @@ public:
    */
   bool FindSourceFiles();
 
-  ///! Return the prefered linker language for this target
+  ///! Return the preferred linker language for this target
   const char* GetLinkerLanguage(const char* config = 0);
 
   ///! Return the rule variable used to create this type of target,
@@ -429,6 +429,9 @@ public:
   /** Return whether this target is a shared library Framework on
       Apple.  */
   bool IsFrameworkOnApple();
+
+  /** Return whether this target is a CFBundle (plugin) on Apple.  */
+  bool IsCFBundleOnApple();
 
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple();
