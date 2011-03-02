@@ -23,7 +23,7 @@
 ##########
 ### List of vendors (BLA_VENDOR) valid in this module
 ##  ATLAS, PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,Intel10_32 (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,lp thread model, lp64 model),
-##  Intel( older versions of mkl 32 and 64 bit), ACML,Apple, NAS, Generic
+##  Intel( older versions of mkl 32 and 64 bit), ACML,ACML_MP,Apple, NAS, Generic
 # C/CXX should be enabled to use Intel mkl
 
 #=============================================================================
@@ -39,12 +39,23 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
-if (NOT _LANGUAGES_ MATCHES Fortran)
 include(CheckFunctionExists)
-else ()
 include(CheckFortranFunctionExists)
-endif()
+
+# Check the language being used
+get_property( _LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES )
+if( _LANGUAGES_ MATCHES Fortran )
+  set( _CHECK_FORTRAN TRUE )
+elseif( (_LANGUAGES_ MATCHES C) OR (_LANGUAGES_ MATCHES CXX) )
+  set( _CHECK_FORTRAN FALSE )
+else()
+  if(BLAS_FIND_REQUIRED)
+    message(FATAL_ERROR "FindBLAS requires Fortran, C, or C++ to be enabled.")
+  else(BLAS_FIND_REQUIRED)
+    message(STATUS "Looking for BLAS... - NOT found (Unsupported languages)")
+    return()
+  endif(BLAS_FIND_REQUIRED)
+endif( )
 
 macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _threads)
 # This macro checks for the existence of the combination of fortran libraries
@@ -102,7 +113,7 @@ if(_libraries_work)
   # Test this combination of libraries.
   set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_threads})
 #  message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  if (_LANGUAGES_ MATCHES Fortran)
+  if (_CHECK_FORTRAN)
     check_fortran_function_exists("${_name}" ${_prefix}${_combined_name}_WORKS)
   else()
     check_function_exists("${_name}_" ${_prefix}${_combined_name}_WORKS)
@@ -244,7 +255,76 @@ if (BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
 endif (BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
 
 #BLAS in acml library?
-if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "All")
+if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "ACML_MP" OR BLA_VENDOR STREQUAL "All")
+# the patch from Chuck Atkins:
+ if( ((_BLAS_VENDOR STREQUAL "ACML") AND (NOT BLAS_ACML_LIB_DIRS)) OR
+    ((_BLAS_VENDOR STREQUAL "ACML_MP") AND (NOT BLAS_ACML_MP_LIB_DIRS)) )
+   if( WIN32 )
+    file( GLOB _ACML_ROOT "C:/AMD/acml*/ACML-EULA.txt" )
+   else()
+    file( GLOB _ACML_ROOT "/opt/acml*/ACML-EULA.txt" )
+   endif()
+   if( _ACML_ROOT )
+    get_filename_component( _ACML_ROOT ${_ACML_ROOT} PATH )
+    if( SIZEOF_INTEGER EQUAL 8 )
+     set( _ACML_PATH_SUFFIX "_int64" )
+    else()
+    set( _ACML_PATH_SUFFIX "" )
+   endif()
+   if( CMAKE_Fortran_COMPILER_ID STREQUAL "Intel" )
+    set( _ACML_COMPILER32 "ifort32" )
+    set( _ACML_COMPILER64 "ifort64" )
+   elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "SunPro" )
+    set( _ACML_COMPILER32 "sun32" )
+    set( _ACML_COMPILER64 "sun64" )
+   elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "PGI" )
+    set( _ACML_COMPILER32 "pgi32" )
+    if( WIN32 )
+     set( _ACML_COMPILER64 "win64" )
+    else()
+     set( _ACML_COMPILER64 "pgi64" )
+    endif()
+   elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "Open64" )
+    # 32 bit builds not supported on Open64 but for code simplicity
+    # We'll just use the same directory twice
+    set( _ACML_COMPILER32 "open64_64" )
+    set( _ACML_COMPILER64 "open64_64" )
+   elseif( CMAKE_Fortran_COMPILER_ID STREQUAL "NAG" )
+    set( _ACML_COMPILER32 "nag32" )
+    set( _ACML_COMPILER64 "nag64" )
+   else() #if( CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" )
+    set( _ACML_COMPILER32 "gfortran32" )
+    set( _ACML_COMPILER64 "gfortran64" )
+   endif()
+
+   if( _BLAS_VENDOR STREQUAL "ACML_MP" )
+    set(_ACML_MP_LIB_DIRS
+     "${_ACML_ROOT}/${_ACML_COMPILER32}_mp${_ACML_PATH_SUFFIX}/lib"
+     "${_ACML_ROOT}/${_ACML_COMPILER64}_mp${_ACML_PATH_SUFFIX}/lib" )
+   else() #if( _BLAS_VENDOR STREQUAL "ACML" )
+    set(_ACML_LIB_DIRS
+     "${_ACML_ROOT}/${_ACML_COMPILER32}${_ACML_PATH_SUFFIX}/lib"
+     "${_ACML_ROOT}/${_ACML_COMPILER64}${_ACML_PATH_SUFFIX}/lib" )
+   endif()
+  endif()
+ endif()
+
+ if( _BLAS_VENDOR STREQUAL "ACML_MP" )
+  foreach( BLAS_ACML_MP_LIB_DIRS ${_ACML_MP_LIB_DIRS} )
+   _BLAS_LOCATE_AND_TEST( ${_BLAS_VENDOR} "acml_mp;acml_mv" "" )
+   if( BLAS_${_BLAS_VENDOR}_FOUND )
+    break()
+   endif()
+  endforeach()
+ else() #if( _BLAS_VENDOR STREQUAL "ACML" )
+  foreach( BLAS_ACML_LIB_DIRS ${_ACML_LIB_DIRS} )
+   _BLAS_LOCATE_AND_TEST( ${_BLAS_VENDOR} "acml;acml_mv" "" )
+   if( BLAS_${_BLAS_VENDOR}_FOUND )
+    break()
+   endif()
+  endforeach()
+ endif()
+
  # Either acml or acml_mp should be in LD_LIBRARY_PATH but not both
  if(NOT BLAS_LIBRARIES)
   check_fortran_libraries(
@@ -266,7 +346,7 @@ if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "All")
   ""
   )
  endif(NOT BLAS_LIBRARIES)
-endif (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "All")
+endif () # ACML
 
 # Apple BLAS library?
 if (BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All")
