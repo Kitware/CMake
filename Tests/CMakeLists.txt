@@ -999,6 +999,22 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   SET_TESTS_PROPERTIES ( linkorder2 PROPERTIES DEPENDS linkorder1)
   SET_TESTS_PROPERTIES ( SimpleInstall-Stage2 PROPERTIES DEPENDS SimpleInstall)
 
+  # Test static linking on toolchains known to support it.
+  IF("${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU)$"
+      AND NOT APPLE AND NOT WIN32 AND NOT CYGWIN
+      AND EXISTS "/usr/lib/libm.a")
+    ADD_TEST(LinkStatic  ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/LinkStatic"
+      "${CMake_BINARY_DIR}/Tests/LinkStatic"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-project LinkStatic
+      --build-options -DMATH_LIBRARY:FILEPATH=/usr/lib/libm.a
+      --test-command LinkStatic
+      )
+  ENDIF()
+
   IF(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
     ADD_TEST(kwsys ${CMAKE_CTEST_COMMAND}
       --build-and-test
