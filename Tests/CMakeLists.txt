@@ -566,9 +566,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     set(CPackRun_CPackCommand "-DCPackCommand=${CMAKE_CPACK_COMMAND}")
     # set up list of CPack generators
     list(APPEND GENLST "ZIP")
-    if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+    if (CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
         find_program(RPMBUILD NAMES rpmbuild)
-    endif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    endif(CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
     if (RPMBUILD)
        list(APPEND GENLST "RPM")
     endif(RPMBUILD)
