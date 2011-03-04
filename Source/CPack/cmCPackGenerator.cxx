@@ -24,6 +24,7 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
 #include <memory> // auto_ptr
+#include <algorithm>
 
 #if defined(__HAIKU__)
 #include <StorageKit.h>
@@ -822,7 +823,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           glB.RecurseOn();
           glB.FindFiles(findExpr);
           filesBefore = glB.GetFiles();
-          sort(filesBefore.begin(),filesBefore.end());
+          std::sort(filesBefore.begin(),filesBefore.end());
           }
         // do installation
         int res = mf->ReadListFile(0, installFile.c_str());
@@ -834,10 +835,10 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           glA.RecurseOn();
           glA.FindFiles(findExpr);
           std::vector<std::string> filesAfter = glA.GetFiles();
-          sort(filesAfter.begin(),filesAfter.end());
+          std::sort(filesAfter.begin(),filesAfter.end());
           std::vector<std::string>::iterator diff;
           std::vector<std::string> result(filesAfter.size());
-          diff = set_difference (
+          diff = std::set_difference (
                   filesAfter.begin(),filesAfter.end(),
                   filesBefore.begin(),filesBefore.end(),
                   result.begin());
@@ -847,8 +848,11 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           // Populate the File field of each component
           for (fit=result.begin();fit!=diff;++fit)
             {
-            localFileName = cmSystemTools::RelativePath(InstallPrefix, fit->c_str());
-            localFileName = localFileName.substr(localFileName.find('/')+1,std::string::npos);
+            localFileName =
+                cmSystemTools::RelativePath(InstallPrefix, fit->c_str());
+            localFileName =
+                localFileName.substr(localFileName.find('/')+1,
+                                     std::string::npos);
             Components[installComponent].Files.push_back(localFileName);
             cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file <"
                                 <<localFileName<<"> to component <"
