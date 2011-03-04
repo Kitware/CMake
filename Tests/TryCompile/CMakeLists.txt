@@ -232,3 +232,16 @@ IF("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   CHECK_C_COMPILER_FLAG("-Werror;-Wstrict-prototypes" C_STRICT_PROTOTYPES)
   TEST_ASSERT(C_STRICT_PROTOTYPES "CHECK_C_COMPILER_FLAG failed -Werror -Wstrict-prototypes")
 ENDIF()
+
+#######################################################################
+#
+# also test that the check_prototype_definition macro works
+
+include(CheckPrototypeDefinition)
+
+check_prototype_definition(remove
+  "int remove(const char *pathname)"
+  "0"
+  "stdio.h"
+  TEST_REMOVE_PROTO)
+test_assert(TEST_REMOVE_PROTO "check_prototype_definition for remove() failed")
