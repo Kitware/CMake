@@ -487,17 +487,32 @@ void cmTarget::DefineProperties(cmake *cm)
      "Per-configuration linker flags for a target.",
      "This is the configuration-specific version of LINK_FLAGS.");
 
+#define CM_LINK_SEARCH_SUMMARY \
+  "Some linkers support switches such as -Bstatic and -Bdynamic " \
+  "to determine whether to use static or shared libraries for -lXXX " \
+  "options.  CMake uses these options to set the link type for " \
+  "libraries whose full paths are not known or (in some cases) are in " \
+  "implicit link directories for the platform.  "
+
+  cm->DefineProperty
+    ("LINK_SEARCH_START_STATIC", cmProperty::TARGET,
+     "Assume the linker looks for static libraries by default.",
+     CM_LINK_SEARCH_SUMMARY
+     "By default the linker search type is assumed to be -Bdynamic at "
+     "the beginning of the library list.  This property switches the "
+     "assumption to -Bstatic.  It is intended for use when linking an "
+     "executable statically (e.g. with the GNU -static option).  "
+     "See also LINK_SEARCH_END_STATIC.");
+
   cm->DefineProperty
     ("LINK_SEARCH_END_STATIC", cmProperty::TARGET,
      "End a link line such that static system libraries are used.",
-     "Some linkers support switches such as -Bstatic and -Bdynamic "
-     "to determine whether to use static or shared libraries for -lXXX "
-     "options.  CMake uses these options to set the link type for "
-     "libraries whose full paths are not known or (in some cases) are in "
-     "implicit link directories for the platform.  By default the "
-     "linker search type is left at -Bdynamic by the end of the library "
-     "list.  This property switches the final linker search type to "
-     "-Bstatic.");
+     CM_LINK_SEARCH_SUMMARY
+     "By default CMake adds an option at the end of the library list (if "
+     "necessary) to set the linker search type back to its starting type.  "
+     "This property switches the final linker search type to -Bstatic "
+     "regardless of how it started.  "
+     "See also LINK_SEARCH_START_STATIC.");
 
   cm->DefineProperty
     ("LINKER_LANGUAGE", cmProperty::TARGET,
