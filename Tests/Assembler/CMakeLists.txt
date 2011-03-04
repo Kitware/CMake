@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project(Assembler)
+project(Assembler C)
 message("CTEST_FULL_OUTPUT ")
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
