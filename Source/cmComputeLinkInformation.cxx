@@ -817,9 +817,9 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
     this->SharedLinkTypeFlag = shared_link_type_flag;
     }
 
-  // TODO: Lookup the starting link type from the target (is it being
-  // linked statically?).
-  this->StartLinkType = LinkShared;
+  // Lookup the starting link type from the target (linked statically?).
+  const char* lss = this->Target->GetProperty("LINK_SEARCH_START_STATIC");
+  this->StartLinkType = cmSystemTools::IsOn(lss)? LinkStatic : LinkShared;
   this->CurrentLinkType = this->StartLinkType;
 }
 
