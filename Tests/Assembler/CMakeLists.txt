@@ -1,26 +1,32 @@
 cmake_minimum_required (VERSION 2.6)
-project(Assembler)
+project(Assembler C)
+message("CTEST_FULL_OUTPUT ")
+set(CMAKE_VERBOSE_MAKEFILE 1)
 
 set(SRCS)
 
-# if no file has been set as source and we are on linux with an x86 processor try to use the gas/as assembler
-# main-linux-x86-gas.s seems to work for Linux and FreeBSD
-if(NOT SRCS AND CMAKE_SYSTEM_PROCESSOR MATCHES "[ix].?86$")
-  if(CMAKE_SYSTEM MATCHES Linux OR CMAKE_SYSTEM MATCHES FreeBSD)
-    message(STATUS "Trying to enable ASM-ATT for Linux or FreeBSD on x86")
-    enable_language(ASM-ATT OPTIONAL)
-    if(CMAKE_ASM-ATT_COMPILER_WORKS)
-      message(STATUS "Trying to enable ASM-ATT for Linux/x86 - succeeded")
-      # this assembler file was created using gcc -S main.c
-      set(SRCS main-linux-x86-gas.s)
-    endif(CMAKE_ASM-ATT_COMPILER_WORKS)
-  endif(CMAKE_SYSTEM MATCHES Linux OR CMAKE_SYSTEM MATCHES FreeBSD)
-endif(NOT SRCS AND CMAKE_SYSTEM_PROCESSOR MATCHES "[ix].?86$")
+# (at least) the following toolchains can process assembler files directly
+# and also generate assembler files from C:
+if("${CMAKE_GENERATOR}" MATCHES "Makefile")
+  if(("${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU|HP|SunPro|XL)$") OR ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel"  AND  UNIX))
+    set(C_FLAGS "${CMAKE_C_FLAGS}")
+    separate_arguments(C_FLAGS)
+    set(SRCS main.s)
+    add_custom_command(
+      OUTPUT main.s
+      COMMAND ${CMAKE_C_COMPILER} ${C_FLAGS} -S ${CMAKE_CURRENT_SOURCE_DIR}/main.c -o main.s
+      DEPENDS main.c
+      VERBATIM
+      )
+  endif(("${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU|HP|SunPro|XL)$") OR ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel"  AND  UNIX))
+endif("${CMAKE_GENERATOR}" MATCHES "Makefile")
 
-if(NOT SRCS)
+
+if(SRCS)
+  enable_language(ASM OPTIONAL)
+else(SRCS)
   message(STATUS "No assembler enabled, using C")
   set(SRCS main.c)
-endif(NOT SRCS)
+endif(SRCS)
 
 add_executable(HelloAsm ${SRCS})
-set_target_properties(HelloAsm PROPERTIES LINKER_LANGUAGE C)

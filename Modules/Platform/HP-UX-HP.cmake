@@ -20,6 +20,7 @@ set(__HPUX_COMPILER_HP 1)
 set(_Wl_C "")
 set(_Wl_CXX "-Wl,")
 set(_Wl_Fortran "")
+set(_Wl_ASM "")
 
 macro(__hpux_compiler_hp lang)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "+Z")
