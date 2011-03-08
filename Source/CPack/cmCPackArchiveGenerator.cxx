@@ -143,6 +143,39 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
       // add the generated package to package file names list
       packageFileNames.push_back(packageFileName);
       }
+    // Handle Orphan components (components not belonging to any groups)
+    std::map<std::string, cmCPackComponent>::iterator compIt;
+    for (compIt=this->Components.begin();
+         compIt!=this->Components.end(); ++compIt )
+      {
+      // Does the component belong to a group?
+      if (compIt->second.Group==NULL)
+        {
+        cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+            "Component <"
+              << compIt->second.Name
+              << "> does not belong to any group, package it separately."
+              << std::endl);
+        std::string localToplevel(
+          this->GetOption("CPACK_TEMPORARY_DIRECTORY")
+                                 );
+        std::string packageFileName = std::string(toplevel);
+
+        localToplevel += "/"+ compIt->first;
+        packageFileName += "/"+
+        GetComponentPackageFileName(this->GetOption("CPACK_PACKAGE_FILE_NAME"),
+                                    compIt->first,
+                                    false)
+                              + this->GetOutputExtension();
+        {
+          DECLARE_AND_OPEN_ARCHIVE(packageFileName,archive);
+          // Add the files of this component to the archive
+          addOneComponentToArchive(archive,&(compIt->second));
+        }
+        // add the generated package to package file names list
+        packageFileNames.push_back(packageFileName);
+        }
+      }
     }
   // CPACK_COMPONENTS_IGNORE_GROUPS is set
   // We build 1 package per component
