@@ -24,6 +24,7 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
 #include <memory> // auto_ptr
+#include <algorithm>
 
 #if defined(__HAIKU__)
 #include <StorageKit.h>
@@ -810,7 +811,55 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           {
           mf->AddDefinition("CMAKE_INSTALL_DO_STRIP", "1");
           }
+        // Remember the list of files before installation
+        // of the current component (if we are in component install)
+        const char* InstallPrefix = tempInstallDirectory.c_str();
+        std::vector<std::string> filesBefore;
+        std::string findExpr(InstallPrefix);
+        if (componentInstall)
+          {
+          cmsys::Glob glB;
+          findExpr += "/*";
+          glB.RecurseOn();
+          glB.FindFiles(findExpr);
+          filesBefore = glB.GetFiles();
+          std::sort(filesBefore.begin(),filesBefore.end());
+          }
+        // do installation
         int res = mf->ReadListFile(0, installFile.c_str());
+        // Now rebuild the list of files after installation
+        // of the current component (if we are in component install)
+        if (componentInstall)
+          {
+          cmsys::Glob glA;
+          glA.RecurseOn();
+          glA.FindFiles(findExpr);
+          std::vector<std::string> filesAfter = glA.GetFiles();
+          std::sort(filesAfter.begin(),filesAfter.end());
+          std::vector<std::string>::iterator diff;
+          std::vector<std::string> result(filesAfter.size());
+          diff = std::set_difference (
+                  filesAfter.begin(),filesAfter.end(),
+                  filesBefore.begin(),filesBefore.end(),
+                  result.begin());
+
+          std::vector<std::string>::iterator fit;
+          std::string localFileName;
+          // Populate the File field of each component
+          for (fit=result.begin();fit!=diff;++fit)
+            {
+            localFileName =
+                cmSystemTools::RelativePath(InstallPrefix, fit->c_str());
+            localFileName =
+                localFileName.substr(localFileName.find('/')+1,
+                                     std::string::npos);
+            Components[installComponent].Files.push_back(localFileName);
+            cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file <"
+                                <<localFileName<<"> to component <"
+                                <<installComponent<<">"<<std::endl);
+            }
+          }
+
         if (NULL !=mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
           if (absoluteDestFiles.length()>0) {
             absoluteDestFiles +=";";
@@ -951,35 +1000,6 @@ int cmCPackGenerator::DoPackage()
 
   // The files to be installed
   files = gl.GetFiles();
-
-  // For component installations, determine which files go into which
-  // components.
-  if (!this->Components.empty())
-    {
-    std::vector<std::string>::const_iterator it;
-    for ( it = files.begin(); it != files.end(); ++ it )
-      {
-      // beware we cannot just use tempDirectory as before
-      // because some generator will "CPACK_INCLUDE_TOPLEVEL_DIRECTORY"
-      // we really want "CPACK_TEMPORARY_DIRECTORY"
-      std::string fileN =
-        cmSystemTools::RelativePath(
-          this->GetOption("CPACK_TEMPORARY_DIRECTORY"), it->c_str());
-
-      // Determine which component we are in.
-      std::string componentName = fileN.substr(0, fileN.find('/'));
-
-      // Strip off the component part of the path.
-      fileN = fileN.substr(fileN.find('/')+1, std::string::npos);
-
-      // Add this file to the list of files for the component.
-      this->Components[componentName].Files.push_back(fileN);
-      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file <"
-                    <<fileN<<"> to component <"
-                    <<componentName<<">"<<std::endl);
-      }
-    }
-
 
   packageFileNames.clear();
   /* Put at least one file name into the list of
