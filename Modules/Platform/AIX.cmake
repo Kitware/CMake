@@ -9,8 +9,6 @@ SET(CMAKE_DL_LIBS "-lld")
 # When our own RPATH is to be added it may be inserted before the
 # "always" paths.
 SET(CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH /usr/lib /lib)
-SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-blibpath:")
-SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
 
 # Files named "libfoo.a" may actually be shared libraries.
 SET_PROPERTY(GLOBAL PROPERTY TARGET_ARCHIVES_MAY_BE_SHARED_LIBS 1)
