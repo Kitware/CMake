@@ -4278,9 +4278,13 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
       }
     }
 
-  // There is no implicit link interface for executables, so if none
-  // was explicitly set, there is no link interface.
-  if(!explicitLibraries && this->GetType() == cmTarget::EXECUTABLE)
+  // There is no implicit link interface for executables or modules
+  // so if none was explicitly set then there is no link interface.
+  // Note that CMake versions 2.2 and below allowed linking to modules.
+  bool canLinkModules = this->Makefile->NeedBackwardsCompatibility(2,2);
+  if(!explicitLibraries &&
+     (this->GetType() == cmTarget::EXECUTABLE ||
+      this->GetType() == cmTarget::MODULE_LIBRARY && !canLinkModules))
     {
     return false;
     }
