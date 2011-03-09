@@ -70,9 +70,11 @@ IF(MSVC)
 
   IF(MSVC80)
     # Find the runtime library redistribution directory.
+    GET_FILENAME_COMPONENT(msvc_install_dir
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0;InstallDir]" ABSOLUTE)
     FIND_PATH(MSVC80_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC80.CRT/Microsoft.VC80.CRT.manifest
       PATHS
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0;InstallDir]/../../VC/redist"
+        "${msvc_install_dir}/../../VC/redist"
         "${base_dir}/VC/redist"
       )
     MARK_AS_ADVANCED(MSVC80_REDIST_DIR)
@@ -103,10 +105,14 @@ IF(MSVC)
 
   IF(MSVC90)
     # Find the runtime library redistribution directory.
+    GET_FILENAME_COMPONENT(msvc_install_dir
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]" ABSOLUTE)
+    GET_FILENAME_COMPONENT(msvc_express_install_dir
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0;InstallDir]" ABSOLUTE)
     FIND_PATH(MSVC90_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest
       PATHS
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0;InstallDir]/../../VC/redist"
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\9.0;InstallDir]/../../VC/redist"
+        "${msvc_install_dir}/../../VC/redist"
+        "${msvc_express_install_dir}/../../VC/redist"
         "${base_dir}/VC/redist"
       )
     MARK_AS_ADVANCED(MSVC90_REDIST_DIR)
@@ -137,9 +143,11 @@ IF(MSVC)
 
   IF(MSVC10)
     # Find the runtime library redistribution directory.
+    GET_FILENAME_COMPONENT(msvc_install_dir
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0;InstallDir]" ABSOLUTE)
     FIND_PATH(MSVC10_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC100.CRT
       PATHS
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0;InstallDir]/../../VC/redist"
+        "${msvc_install_dir}/../../VC/redist"
         "${base_dir}/VC/redist"
         "$ENV{ProgramFiles}/Microsoft Visual Studio 10.0/VC/redist"
         "$ENV{ProgramFiles(x86)}/Microsoft Visual Studio 10.0/VC/redist"
