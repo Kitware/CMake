@@ -25,9 +25,11 @@ message("")
 # Evaluate possible error conditions:
 #
 set(err 0)
+set(fatal 0)
 
 if(processor_count EQUAL 0)
   set(err 1)
+  set(fatal 1)
   message("err 1")
   message("could not determine number of processors
 - Additional code for this platform needed in ProcessorCount.cmake?")
@@ -45,6 +47,7 @@ endif()
 
 if(NOT processor_count MATCHES "^[0-9]+$")
   set(err 3)
+  set(fatal 1)
   message("err 3")
   message("ProcessorCount function returned a non-integer")
   message("")
@@ -57,8 +60,6 @@ if(NOT system_info_processor_count MATCHES "^[0-9]+$")
   message("")
 endif()
 
-# TODO: Make this test fail again, once all the dev work is done...
-#
-if(err)
-#  message(FATAL_ERROR "err='${err}'")
+if(fatal)
+  message(FATAL_ERROR "processor_count='${processor_count}' - see previous test output for more details - it is likely more/different code is needed in ProcessorCount.cmake to fix this test failure - processor_count should be a non-zero positive integer (>=1) for all supported CMake platforms")
 endif()
