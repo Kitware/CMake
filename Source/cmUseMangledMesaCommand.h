@@ -30,7 +30,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmUseMangledMesaCommand;
     }
@@ -41,7 +41,7 @@ public:
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  
+
   /**
    * The name of the command as specified in CMakeList.txt.
    */
@@ -50,11 +50,11 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Copy mesa headers for use in combination with system GL.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -78,7 +78,6 @@ protected:
   void CopyAndFullPathMesaHeader(const char* source,
                                  const char* outdir);
 };
-
 
 
 #endif
