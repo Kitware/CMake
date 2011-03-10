@@ -30,8 +30,8 @@ set(config_type $ENV{CMAKE_CONFIG_TYPE})
 set(config_args )
 if(config_type)
   set(config_args -C ${config_type})
-endif()
-message(" ${config_args}")
+endif(config_type)
+set(config_verbose )
 
 if(CPackGen MATCHES "ZIP")
     set(expected_file_mask "${CPackComponentsForAll_BINARY_DIR}/MyLib-*.zip")
@@ -51,10 +51,11 @@ if(CPackGen MATCHES "ZIP")
         set(expected_count 1)
     endif (${CPackComponentWay} STREQUAL "AllGroupsInOne")
 elseif (CPackGen MATCHES "RPM")
+    set(config_verbose -D "CPACK_RPM_PACKAGE_DEBUG=1")
     set(expected_file_mask "${CPackComponentsForAll_BINARY_DIR}/MyLib-*.rpm")
     if (${CPackComponentWay} STREQUAL "default")
         set(expected_count 1)
-    endif(${CPackComponentWay} STREQUAL "default")
+    endif (${CPackComponentWay} STREQUAL "default")
     if (${CPackComponentWay} STREQUAL "OnePackPerGroup")
         set(expected_count 2)
     endif (${CPackComponentWay} STREQUAL "OnePackPerGroup")
@@ -77,7 +78,9 @@ if(expected_file_mask)
   endif(expected_file)
 endif(expected_file_mask)
 
-execute_process(COMMAND ${CPackCommand} -G ${CPackGen} ${config_args}
+message("config_args = ${config_args}")
+message("config_verbose = ${config_verbose}")
+execute_process(COMMAND ${CPackCommand} ${config_verbose} -G ${CPackGen} ${config_args}
     RESULT_VARIABLE CPack_result
     OUTPUT_VARIABLE CPack_output
     ERROR_VARIABLE CPack_error
