@@ -59,7 +59,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ctest_upload(...)\n"
+      "  ctest_upload(FILES ...)\n"
       "Pass a list of files to be sent along with the build results to "
       "the dashboard server.\n";
     }
@@ -71,6 +71,12 @@ protected:
 
   virtual bool CheckArgumentKeyword(std::string const& arg);
   virtual bool CheckArgumentValue(std::string const& arg);
+
+  enum
+  {
+    ArgumentDoingFiles = Superclass::ArgumentDoingLast1,
+    ArgumentDoingLast2
+  };
 
   cmCTest::SetOfStrings Files;
 };
