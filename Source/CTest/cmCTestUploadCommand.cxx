@@ -33,6 +33,11 @@ cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
 //----------------------------------------------------------------------------
 bool cmCTestUploadCommand::CheckArgumentKeyword(std::string const& arg)
 {
+  if(arg == "FILES")
+    {
+    this->ArgumentDoing = ArgumentDoingFiles;
+    return true;
+    }
   return this->CheckArgumentValue(arg);
 }
 
@@ -40,18 +45,25 @@ bool cmCTestUploadCommand::CheckArgumentKeyword(std::string const& arg)
 //----------------------------------------------------------------------------
 bool cmCTestUploadCommand::CheckArgumentValue(std::string const& arg)
 {
-  cmStdString filename(arg);
-  if(cmSystemTools::FileExists(filename.c_str()))
+  if(this->ArgumentDoing == ArgumentDoingFiles)
     {
-    this->Files.insert(filename);
-    return true;
+    cmStdString filename(arg);
+    if(cmSystemTools::FileExists(filename.c_str()))
+      {
+      this->Files.insert(filename);
+      return true;
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "File \"" << filename << "\" does not exist. Cannot submit "
+          << "a non-existent file.";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->ArgumentDoing = ArgumentDoingError;
+      return false;
+      }
     }
-  else
-    {
-    cmOStringStream e;
-    e << "File \"" << filename << "\" does not exist. Cannot submit "
-        << "a non-existent file.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return false;
-    }
+
+  // Look for other arguments.
+  return this->Superclass::CheckArgumentValue(arg);
 }
