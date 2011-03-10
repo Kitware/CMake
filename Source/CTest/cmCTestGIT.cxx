@@ -281,8 +281,7 @@ bool cmCTestGIT::UpdateImpl()
     // No need to require >= 1.6.5.0 if there are no submodules.
     if(cmSystemTools::FileExists((top_dir + "/.gitmodules").c_str()))
       {
-      this->Log << "Git >= 1.6.5.0 required for submodule support\n";
-      return false;
+      this->Log << "Git < 1.6.5.0 cannot update submodules recursively\n";
       }
     }
 
