@@ -68,6 +68,11 @@ public:
       "being added to the include directory path earlier.";
     }
 
+  /**
+   * This determines if the command is invoked when in script mode.
+   */
+  virtual bool IsScriptable() { return true; }
+
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged()
     {
