@@ -194,6 +194,25 @@ IF(NOT RPMBUILD_EXECUTABLE)
   MESSAGE(FATAL_ERROR "RPM package requires rpmbuild executable")
 ENDIF(NOT RPMBUILD_EXECUTABLE)
 
+# Display lsb_release output if DEBUG mode enable
+# This will help to diagnose problem with CPackRPM
+# because we will know on which kind of Linux we are
+IF(CPACK_RPM_PACKAGE_DEBUG)
+  find_program(LSB_RELEASE_EXECUTABLE lsb_release)
+  if(LSB_RELEASE_EXECUTABLE)
+    execute_process(COMMAND ${LSB_RELEASE_EXECUTABLE} -a
+                    OUTPUT_VARIABLE _TMP_LSB_RELEASE_OUTPUT
+                    ERROR_QUIET
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(REGEX REPLACE "\n" ", "
+           LSB_RELEASE_OUTPUT
+           ${_TMP_LSB_RELEASE_OUTPUT})
+  else (LSB_RELEASE_EXECUTABLE)
+    set(LSB_RELEASE_OUTPUT "lsb_release not installed/found!")
+  endif(LSB_RELEASE_EXECUTABLE)
+  MESSAGE("CPackRPM:Debug: LSB_RELEASE  = ${LSB_RELEASE_OUTPUT}")
+ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+
 # We may use RPM version in the future in order
 # to shut down warning about space in buildtree
 # some recent RPM version should support space in different places.
