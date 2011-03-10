@@ -107,10 +107,8 @@ MACRO (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options)
     ENDIF(_moc_outfile_dir)
     SET (_moc_parameters_file ${outfile}_parameters)
     SET (_moc_parameters ${moc_flags} ${moc_options} -o "${outfile}" "${infile}")
-    FILE (REMOVE ${_moc_parameters_file})
-    FOREACH(arg ${_moc_parameters})
-      FILE (APPEND ${_moc_parameters_file} "${arg}\n")
-    ENDFOREACH(arg)
+    STRING (REPLACE ";" "\n" _moc_parameters "${_moc_parameters}")
+    FILE (WRITE ${_moc_parameters_file} "${_moc_parameters}")
     ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
                        COMMAND ${QT_MOC_EXECUTABLE} @${_moc_outfile_name}_parameters
                        DEPENDS ${infile}
