@@ -572,6 +572,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     if (RPMBUILD)
        list(APPEND GENLST "RPM")
     endif(RPMBUILD)
+    if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+       find_program(DPKG NAMES dpkg)
+       if (DPKG)
+          list(APPEND GENLST "DEB")
+       endif(DPKG)
+    endif(CMAKE_SYSTEM_NAME MATCHES "Linux")
     # set up list of component packaging ways
     list(APPEND CWAYLST "default")
     list(APPEND CWAYLST "OnePackPerGroup")

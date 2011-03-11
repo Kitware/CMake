@@ -33,8 +33,26 @@ public:
 
 protected:
   virtual int InitializeInternal();
+  /**
+   * The method used to package files when component
+   * install is used. This will create one
+   * archive for each component group.
+   */
+  int PackageComponents(bool ignoreGroup);
+  /**
+   * Special case of component install where all
+   * components will be put in a single installer.
+   */
+  int PackageComponentsAllInOne(bool allComponent);
   virtual int PackageFiles();
   virtual const char* GetOutputExtension() { return ".deb"; }
+  virtual bool SupportsComponentInstallation() const;
+  virtual std::string GetComponentInstallDirNameSuffix(
+      const std::string& componentName);
+
+private:
+  int createDeb();
+  std::vector<std::string> packageFiles;
 
 };
 

@@ -51,14 +51,256 @@ int cmCPackDebGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
+int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
+{
+  int retval = 1;
+  /* Reset package file name list it will be populated during the
+   * component packaging run*/
+  packageFileNames.clear();
+  std::string initialTopLevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
+
+  // The default behavior is to have one package by component group
+  // unless CPACK_COMPONENTS_IGNORE_GROUP is specified.
+  if (!ignoreGroup)
+    {
+    std::map<std::string, cmCPackComponentGroup>::iterator compGIt;
+    for (compGIt=this->ComponentGroups.begin();
+        compGIt!=this->ComponentGroups.end(); ++compGIt)
+      {
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging component group: "
+          << compGIt->first
+          << std::endl);
+      // Begin the archive for this group
+      std::string localToplevel(initialTopLevel);
+      std::string packageFileName(
+          cmSystemTools::GetParentDirectory(toplevel.c_str())
+                                 );
+      std::string outputFileName(
+          std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
+          +"-"+compGIt->first + this->GetOutputExtension()
+                                );
+
+      localToplevel += "/"+ compGIt->first;
+      /* replace the TEMP DIRECTORY with the component one */
+      this->SetOption("CPACK_TEMPORARY_DIRECTORY",localToplevel.c_str());
+      packageFileName += "/"+ outputFileName;
+      /* replace proposed CPACK_OUTPUT_FILE_NAME */
+      this->SetOption("CPACK_OUTPUT_FILE_NAME",outputFileName.c_str());
+      /* replace the TEMPORARY package file name */
+      this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
+                      packageFileName.c_str());
+      // Tell CPackDeb.cmake the name of the component GROUP.
+      this->SetOption("CPACK_DEB_PACKAGE_COMPONENT",compGIt->first.c_str());
+      if (!this->ReadListFile("CPackDeb.cmake"))
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+            "Error while execution CPackDeb.cmake" << std::endl);
+        retval = 0;
+        }
+
+      cmsys::Glob gl;
+      std::string findExpr(this->GetOption("WDIR"));
+      findExpr += "/*";
+      gl.RecurseOn();
+      if ( !gl.FindFiles(findExpr) )
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Cannot find any files in the installed directory" << std::endl);
+        return 0;
+        }
+      packageFiles = gl.GetFiles();
+
+      int res = createDeb();
+      if (res != 1)
+        {
+        retval = 0;
+        }
+      // add the generated package to package file names list
+      packageFileNames.push_back(packageFileName);
+      }
+    }
+  // CPACK_COMPONENTS_IGNORE_GROUPS is set
+  // We build 1 package per component
+  else
+    {
+    std::map<std::string, cmCPackComponent>::iterator compIt;
+    for (compIt=this->Components.begin();
+         compIt!=this->Components.end(); ++compIt )
+      {
+      std::string localToplevel(initialTopLevel);
+      std::string packageFileName(
+          cmSystemTools::GetParentDirectory(toplevel.c_str())
+                                 );
+      std::string outputFileName(
+          std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME")
+                                )
+        +"-"+compIt->first + this->GetOutputExtension());
+
+      localToplevel += "/"+ compIt->first;
+      /* replace the TEMP DIRECTORY with the component one */
+      this->SetOption("CPACK_TEMPORARY_DIRECTORY",localToplevel.c_str());
+      packageFileName += "/"+ outputFileName;
+      /* replace proposed CPACK_OUTPUT_FILE_NAME */
+      this->SetOption("CPACK_OUTPUT_FILE_NAME",outputFileName.c_str());
+      /* replace the TEMPORARY package file name */
+      this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
+                      packageFileName.c_str());
+
+      this->SetOption("CPACK_DEB_PACKAGE_COMPONENT",compIt->first.c_str());
+      if (!this->ReadListFile("CPackDeb.cmake"))
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Error while execution CPackDeb.cmake" << std::endl);
+        retval = 0;
+        }
+
+      cmsys::Glob gl;
+      std::string findExpr(this->GetOption("WDIR"));
+      findExpr += "/*";
+      gl.RecurseOn();
+      if ( !gl.FindFiles(findExpr) )
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Cannot find any files in the installed directory" << std::endl);
+        return 0;
+        }
+      packageFiles = gl.GetFiles();
+
+      int res = createDeb();
+      if (res != 1)
+        {
+        retval = 0;
+        }
+      // add the generated package to package file names list
+      packageFileNames.push_back(packageFileName);
+      }
+    }
+  return retval;
+}
+
+//----------------------------------------------------------------------
+int cmCPackDebGenerator::PackageComponentsAllInOne(bool allComponent)
+{
+  int retval = 1;
+  std::string compInstDirName;
+  /* Reset package file name list it will be populated during the
+   * component packaging run*/
+  packageFileNames.clear();
+  std::string initialTopLevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
+
+  // all GROUP in one vs all COMPONENT in one
+  if (allComponent)
+    {
+    compInstDirName = "ALL_COMPONENTS_IN_ONE";
+    }
+  else
+    {
+    compInstDirName = "ALL_GROUPS_IN_ONE";
+    }
+
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                "Packaging all groups in one package..."
+                "(CPACK_COMPONENTS_ALL_[GROUPS_]IN_ONE_PACKAGE is set)"
+      << std::endl);
+
+  // The ALL GROUPS in ONE package case
+  std::string localToplevel(initialTopLevel);
+  std::string packageFileName(
+      cmSystemTools::GetParentDirectory(toplevel.c_str())
+                             );
+  std::string outputFileName(
+            std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
+            + this->GetOutputExtension()
+                            );
+  // all GROUP in one vs all COMPONENT in one
+  localToplevel += "/"+compInstDirName;
+
+  /* replace the TEMP DIRECTORY with the component one */
+  this->SetOption("CPACK_TEMPORARY_DIRECTORY",localToplevel.c_str());
+  packageFileName += "/"+ outputFileName;
+  /* replace proposed CPACK_OUTPUT_FILE_NAME */
+  this->SetOption("CPACK_OUTPUT_FILE_NAME",outputFileName.c_str());
+  /* replace the TEMPORARY package file name */
+  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
+      packageFileName.c_str());
+  // Tell CPackDeb.cmake the name of the component GROUP.
+  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT",compInstDirName.c_str());
+  if (!this->ReadListFile("CPackDeb.cmake"))
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error while execution CPackDeb.cmake" << std::endl);
+    retval = 0;
+    }
+
+  cmsys::Glob gl;
+  std::string findExpr(this->GetOption("WDIR"));
+  findExpr += "/*";
+  gl.RecurseOn();
+  if ( !gl.FindFiles(findExpr) )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+    "Cannot find any files in the installed directory" << std::endl);
+    return 0;
+    }
+  packageFiles = gl.GetFiles();
+
+  int res = createDeb();
+  if (res != 1)
+    {
+    retval = 0;
+    }
+  // add the generated package to package file names list
+  packageFileNames.push_back(packageFileName);
+  return retval;
+}
+
+//----------------------------------------------------------------------
 int cmCPackDebGenerator::PackageFiles()
 {
-  this->ReadListFile("CPackDeb.cmake");
+  int retval = -1;
+
+  /* Are we in the component packaging case */
+  if (SupportsComponentInstallation()) {
+    // CASE 1 : COMPONENT ALL-IN-ONE package
+    // If ALL GROUPS or ALL COMPONENTS in ONE package has been requested
+    // then the package file is unique and should be open here.
+    if (allComponentInOne ||
+        (allGroupInOne && (!this->ComponentGroups.empty()))
+       )
+      {
+      return PackageComponentsAllInOne(allComponentInOne);
+      }
+    // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
+    // There will be 1 package for each component group
+    // however one may require to ignore component group and
+    // in this case you'll get 1 package for each component.
+    else if ((!this->ComponentGroups.empty()) || (ignoreComponentGroup))
+      {
+      return PackageComponents(ignoreComponentGroup);
+      }
+  }
+  // CASE 3 : NON COMPONENT package.
+  else
+    {
+    if (!this->ReadListFile("CPackDeb.cmake"))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error while execution CPackDeb.cmake" << std::endl);
+      retval = 0;
+      }
+    packageFiles = files;
+    return createDeb();
+    }
+  return retval;
+}
+
+int cmCPackDebGenerator::createDeb()
+{
   const char* cmakeExecutable = this->GetOption("CMAKE_COMMAND");
 
   // debian-binary file
   std::string dbfilename;
-  dbfilename = toplevel;
+    dbfilename += this->GetOption("WDIR");
   dbfilename += "/debian-binary";
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(dbfilename.c_str());
@@ -68,7 +310,7 @@ int cmCPackDebGenerator::PackageFiles()
 
   // control file
   std::string ctlfilename;
-  ctlfilename = toplevel;
+    ctlfilename = this->GetOption("WDIR");
   ctlfilename += "/control";
 
   // debian policy enforce lower case for package name
@@ -158,8 +400,9 @@ int cmCPackDebGenerator::PackageFiles()
     {
       std::string dirName = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
       dirName += '/';
-      for (std::vector<std::string>::const_iterator fileIt = files.begin();
-              fileIt != files.end(); ++ fileIt )
+        for (std::vector<std::string>::const_iterator fileIt =
+              packageFiles.begin();
+              fileIt != packageFiles.end(); ++ fileIt )
         {
         totalSize += cmSystemTools::FileLength(fileIt->c_str());
         }
@@ -178,14 +421,22 @@ int cmCPackDebGenerator::PackageFiles()
   // now add all directories which have to be compressed
   // collect all top level install dirs for that
   // e.g. /opt/bin/foo, /usr/bin/bar and /usr/bin/baz would give /usr and /opt
-  size_t topLevelLength = toplevel.length();
+    size_t topLevelLength = std::string(this->GetOption("WDIR")).length();
+    cmCPackLogger(cmCPackLog::LOG_DEBUG, "WDIR: \"" << this->GetOption("WDIR")
+          << "\", length = " << topLevelLength
+          << std::endl);
   std::set<std::string> installDirs;
-  for (std::vector<std::string>::const_iterator fileIt = files.begin(); 
-       fileIt != files.end(); ++ fileIt )
+    for (std::vector<std::string>::const_iterator fileIt =
+        packageFiles.begin();
+        fileIt != packageFiles.end(); ++ fileIt )
     {
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "FILEIT: \"" << *fileIt << "\""
+          << std::endl);
     std::string::size_type slashPos = fileIt->find('/', topLevelLength+1);
-    std::string relativeDir = fileIt->substr(topLevelLength, 
+    std::string relativeDir = fileIt->substr(topLevelLength,
                                              slashPos - topLevelLength);
+      cmCPackLogger(cmCPackLog::LOG_DEBUG, "RELATIVEDIR: \"" << relativeDir
+      << "\"" << std::endl);
     if (installDirs.find(relativeDir) == installDirs.end())
       {
       installDirs.insert(relativeDir);
@@ -195,11 +446,11 @@ int cmCPackDebGenerator::PackageFiles()
     }
 
   std::string output;
-  int retVal = -1;
+    int retval = -1;
   int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
-    &retVal, toplevel.c_str(), this->GeneratorVerbose, 0);
+      &retval, this->GetOption("WDIR"), this->GeneratorVerbose, 0);
 
-  if ( !res || retVal )
+    if ( !res || retval )
     {
     std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     tmpFile += "/Deb.log";
@@ -215,15 +466,18 @@ int cmCPackDebGenerator::PackageFiles()
     }
 
   std::string md5filename;
-  md5filename = toplevel;
+    md5filename = this->GetOption("WDIR");
   md5filename += "/md5sums";
 
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(md5filename.c_str());
     std::vector<std::string>::const_iterator fileIt;
-    std::string topLevelWithTrailingSlash = toplevel;
+//       std::string topLevelWithTrailingSlash = toplevel;
+    std::string topLevelWithTrailingSlash =
+        this->GetOption("CPACK_TEMPORARY_DIRECTORY");
     topLevelWithTrailingSlash += '/';
-    for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
+      for ( fileIt = packageFiles.begin();
+            fileIt != packageFiles.end(); ++ fileIt )
       {
       cmd = "\"";
       cmd += cmakeExecutable;
@@ -233,32 +487,31 @@ int cmCPackDebGenerator::PackageFiles()
       //std::string output;
       //int retVal = -1;
       res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
-        &retVal, toplevel.c_str(), this->GeneratorVerbose, 0);
+          &retval, toplevel.c_str(), this->GeneratorVerbose, 0);
       // debian md5sums entries are like this:
       // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
       // thus strip the full path (with the trailing slash)
-      cmSystemTools::ReplaceString(output, 
+      cmSystemTools::ReplaceString(output,
                                    topLevelWithTrailingSlash.c_str(), "");
       out << output;
       }
-    // each line contains a eol. 
+    // each line contains a eol.
     // Do not end the md5sum file with yet another (invalid)
     }
-
 
   cmd = "\"";
   cmd += cmakeExecutable;
   cmd += "\" -E tar cfz control.tar.gz ./control ./md5sums";
-  const char* controlExtra = 
+  const char* controlExtra =
     this->GetOption("CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA");
   if( controlExtra )
-    { 
+    {
     std::vector<std::string> controlExtraList;
     cmSystemTools::ExpandListArgument(controlExtra, controlExtraList);
-    for(std::vector<std::string>::iterator i = 
+    for(std::vector<std::string>::iterator i =
           controlExtraList.begin(); i != controlExtraList.end(); ++i)
       {
-      std::string filenamename = 
+      std::string filenamename =
         cmsys::SystemTools::GetFilenameName(i->c_str());
       std::string localcopy = toplevel;
       localcopy += "/";
@@ -274,9 +527,9 @@ int cmCPackDebGenerator::PackageFiles()
       }
     }
   res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
-    &retVal, toplevel.c_str(), this->GeneratorVerbose, 0);
+      &retval, this->GetOption("WDIR"), this->GeneratorVerbose, 0);
 
-  if ( !res || retVal )
+    if ( !res || retval )
     {
     std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     tmpFile += "/Deb.log";
@@ -295,23 +548,69 @@ int cmCPackDebGenerator::PackageFiles()
   // since debian packages require BSD ar (most Linux distros and even
   // FreeBSD and NetBSD ship GNU ar) we use a copy of OpenBSD ar here.
   std::vector<std::string> arFiles;
-  std::string topLevelString = toplevel;
+    std::string topLevelString = this->GetOption("WDIR");
   topLevelString += "/";
   arFiles.push_back(topLevelString + "debian-binary");
   arFiles.push_back(topLevelString + "control.tar.gz");
   arFiles.push_back(topLevelString + "data.tar.gz");
-  res = ar_append(packageFileNames[0].c_str(), arFiles);
+    std::string outputFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    outputFileName += "/";
+    outputFileName += this->GetOption("CPACK_OUTPUT_FILE_NAME");
+    res = ar_append(outputFileName.c_str(), arFiles);
   if ( res!=0 )
     {
-    std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+    std::string tmpFile = this->GetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME");
     tmpFile += "/Deb.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Problem creating archive using: " << res << std::endl;
     return 0;
     }
-
   return 1;
 }
+
+bool cmCPackDebGenerator::SupportsComponentInstallation() const
+  {
+  if (IsOn("CPACK_DEB_COMPONENT_INSTALL"))
+    {
+      return true;
+    }
+  else
+    {
+      return false;
+    }
+  }
+
+std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
+    const std::string& componentName)
+  {
+  if (ignoreComponentGroup) {
+    return componentName;
+  }
+
+  if (allComponentInOne) {
+    return std::string("ALL_COMPONENTS_IN_ONE");
+  }
+  // We have to find the name of the COMPONENT GROUP
+  // the current COMPONENT belongs to.
+  std::string groupVar = "CPACK_COMPONENT_" +
+        cmSystemTools::UpperCase(componentName) + "_GROUP";
+    if (NULL != GetOption(groupVar.c_str()))
+      {
+      if (allGroupInOne)
+        {
+        return std::string("ALL_GROUPS_IN_ONE");
+        }
+      else
+        {
+        return std::string(GetOption(groupVar.c_str()));
+        }
+      }
+    else
+      {
+      return componentName;
+      }
+  }
+
 
 // The following code is taken from OpenBSD ar:
 // http://www.openbsd.org/cgi-bin/cvsweb/src/usr.bin/ar/
