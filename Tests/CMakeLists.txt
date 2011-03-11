@@ -815,8 +815,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProject")
-  SET_TESTS_PROPERTIES(ExternalProject PROPERTIES
-    TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
+  # The ExternalProject test takes 900 seconds on some machines!
+  GET_TEST_PROPERTY(ExternalProject TIMEOUT PREVIOUS_TIMEOUT)
+  IF("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
+    SET_TESTS_PROPERTIES(ExternalProject PROPERTIES TIMEOUT 1000)
+  ENDIF("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
 
   # do each of the tutorial steps
   FOREACH(STP RANGE 1 7)
@@ -1141,21 +1144,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       ${BundleTestInstallDir}/Applications/SecondBundleExe.app/Contents/MacOS/SecondBundleExe)
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleTest")
 
-    ADD_TEST(CFBundleTest ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/CFBundleTest"
-      "${CMake_BINARY_DIR}/Tests/CFBundleTest"
-      --build-two-config
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-project CFBundleTest
-      --test-command
-      ${CMAKE_CMAKE_COMMAND} -DCTEST_CONFIGURATION_TYPE=\${CTEST_CONFIGURATION_TYPE}
-        -Ddir=${CMake_BINARY_DIR}/Tests/CFBundleTest
-        -Dgen=${CMAKE_TEST_GENERATOR}
-        -P ${CMake_SOURCE_DIR}/Tests/CFBundleTest/VerifyResult.cmake)
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CFBundleTest")
-
     ADD_TEST_MACRO(ObjC++ ObjC++)
   ENDIF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
 
@@ -1412,16 +1400,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     PASS_REGULAR_EXPRESSION "Could not find executable"
     FAIL_REGULAR_EXPRESSION "SegFault")
 
-  CONFIGURE_FILE(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestUpload/test.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestUpload/test.cmake"
-    @ONLY ESCAPE_QUOTES)
-  ADD_TEST(CTestTestUpload ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestUpload/test.cmake" -V
-    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestUpload/testOut.log"
-    )
-  SET_TESTS_PROPERTIES(CTestTestUpload PROPERTIES
-    PASS_REGULAR_EXPRESSION "Upload\\.xml")
 
   # Use macro, not function so that build can still be driven by CMake 2.4.
   # After 2.6 is required, this could be a function without the extra 'set'
