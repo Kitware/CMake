@@ -126,7 +126,7 @@ public:
   };
 
   // add configuraitons to a search path for an executable
-  static void AddConfigurations(cmCTest *ctest, 
+  static void AddConfigurations(cmCTest *ctest,
                                 std::vector<std::string> &attempted,
                                 std::vector<std::string> &attemptedConfigs,
                                 std::string filepath,
@@ -205,7 +205,7 @@ private:
   // compute the lists of tests that will actually run
   // based on union regex and -I stuff
   void ComputeTestList();
-  
+
   bool GetValue(const char* tag,
                 std::string& value,
                 std::ifstream& fin);
