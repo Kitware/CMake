@@ -16,6 +16,7 @@
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
+#include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/SystemInformation.hxx>
 #include "cmDynamicLoader.h"
@@ -31,9 +32,10 @@
 #include "cmCTestCoverageHandler.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestScriptHandler.h"
+#include "cmCTestSubmitHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmCTestUpdateHandler.h"
-#include "cmCTestSubmitHandler.h"
+#include "cmCTestUploadHandler.h"
 
 #include "cmVersion.h"
 
@@ -339,6 +341,7 @@ cmCTest::cmCTest()
   this->Parts[PartSubmit].SetName("Submit");
   this->Parts[PartNotes].SetName("Notes");
   this->Parts[PartExtraFiles].SetName("ExtraFiles");
+  this->Parts[PartUpload].SetName("Upload");
 
   // Fill the part name-to-id map.
   for(Part p = PartStart; p != PartCount; p = Part(p+1))
@@ -357,6 +360,7 @@ cmCTest::cmCTest()
   this->TestingHandlers["configure"] = new cmCTestConfigureHandler;
   this->TestingHandlers["memcheck"]  = new cmCTestMemCheckHandler;
   this->TestingHandlers["submit"]    = new cmCTestSubmitHandler;
+  this->TestingHandlers["upload"]    = new cmCTestUploadHandler;
 
   cmCTest::t_TestingHandlers::iterator it;
   for ( it = this->TestingHandlers.begin();
@@ -1582,6 +1586,56 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
 
   return this->GenerateNotesFile(files);
 }
+
+//----------------------------------------------------------------------
+std::string cmCTest::Base64GzipEncodeFile(std::string file)
+{
+  std::string tarFile = file + "_temp.tar.gz";
+  std::vector<cmStdString> files;
+  files.push_back(file);
+
+  if(!cmSystemTools::CreateTar(tarFile.c_str(), files, true, false, false))
+    {
+    cmCTestLog(this, ERROR_MESSAGE, "Error creating tar while "
+      "encoding file: " << file << std::endl);
+    return "";
+    }
+  std::string base64 = this->Base64EncodeFile(tarFile);
+  cmSystemTools::RemoveFile(tarFile.c_str());
+  return base64;
+}
+
+//----------------------------------------------------------------------
+std::string cmCTest::Base64EncodeFile(std::string file)
+{
+  long len = cmSystemTools::FileLength(file.c_str());
+  std::ifstream ifs(file.c_str(), std::ios::in
+#ifdef _WIN32
+    | std::ios::binary
+#endif
+    );
+  unsigned char *file_buffer = new unsigned char [ len + 1 ];
+  ifs.read(reinterpret_cast<char*>(file_buffer), len);
+  ifs.close();
+
+  unsigned char *encoded_buffer
+    = new unsigned char [ static_cast<int>(
+        static_cast<double>(len) * 1.5 + 5.0) ];
+
+  unsigned long rlen
+    = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
+
+  std::string base64 = "";
+  for(unsigned long i = 0; i < rlen; i++)
+    {
+    base64 += encoded_buffer[i];
+    }
+  delete [] file_buffer;
+  delete [] encoded_buffer;
+
+  return base64;
+}
+
 
 //----------------------------------------------------------------------
 bool cmCTest::SubmitExtraFiles(const std::vector<cmStdString> &files)

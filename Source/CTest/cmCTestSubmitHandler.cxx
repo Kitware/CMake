@@ -1204,6 +1204,7 @@ int cmCTestSubmitHandler::ProcessHandler()
   this->CTest->AddIfExists(cmCTest::PartMemCheck, "DynamicAnalysis.xml");
   this->CTest->AddIfExists(cmCTest::PartMemCheck, "Purify.xml");
   this->CTest->AddIfExists(cmCTest::PartNotes, "Notes.xml");
+  this->CTest->AddIfExists(cmCTest::PartUpload, "Upload.xml");
 
   // Query parts for files to submit.
   for(cmCTest::Part p = cmCTest::PartStart;
