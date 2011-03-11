@@ -50,7 +50,6 @@
 #include "cmCTestSubmitCommand.h"
 #include "cmCTestTestCommand.h"
 #include "cmCTestUpdateCommand.h"
-#include "cmCTestUploadCommand.h"
 
 #define CTEST_INITIAL_CMAKE_OUTPUT_FILE_NAME "CTestInitialCMakeOutput.log"
 
@@ -358,7 +357,6 @@ void cmCTestScriptHandler::CreateCMake()
   this->AddCTestCommand(new cmCTestSubmitCommand);
   this->AddCTestCommand(new cmCTestTestCommand);
   this->AddCTestCommand(new cmCTestUpdateCommand);
-  this->AddCTestCommand(new cmCTestUploadCommand);
 }
 
 void cmCTestScriptHandler::GetCommandDocumentation(
