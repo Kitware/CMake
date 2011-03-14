@@ -88,7 +88,7 @@ if(UNIX)
     set(SPECIFIC_SYSTEM_VERSION_NAME "${CMAKE_SYSTEM_NAME}")
     set(SPECIFIC_SYSTEM_PREFERED_CPACK_GENERATOR "TGZ")
     find_program(LSB_RELEASE_EXECUTABLE lsb_release)
-    if(LSB_RELEASE_EXECUTABLEF)
+    if(LSB_RELEASE_EXECUTABLE)
       execute_process(COMMAND ${LSB_RELEASE_EXECUTABLE} -i
                       OUTPUT_VARIABLE _TMP_LSB_RELEASE_OUTPUT
                       ERROR_QUIET
@@ -145,7 +145,7 @@ if(UNIX)
       endif(LINUX_ISSUE MATCHES "SUSE")
       # Mandriva case
       # TODO
-    endif(LSB_RELEASE_EXECUTABLEF)
+    endif(LSB_RELEASE_EXECUTABLE)
     # Now mangle some names
     set(LINUX_NAME "${DISTRO_ID}_${DISTRO_RELEASE}")
     if(DISTRO_ID MATCHES "Fedora|Mandriva|SUSE|OpenSUSE")
