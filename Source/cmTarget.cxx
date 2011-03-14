@@ -4323,7 +4323,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
   bool canLinkModules = this->Makefile->NeedBackwardsCompatibility(2,2);
   if(!explicitLibraries &&
      (this->GetType() == cmTarget::EXECUTABLE ||
-      this->GetType() == cmTarget::MODULE_LIBRARY && !canLinkModules))
+      (this->GetType() == cmTarget::MODULE_LIBRARY && !canLinkModules)))
     {
     return false;
     }
