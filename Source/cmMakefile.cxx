@@ -893,6 +893,20 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     return;
     }
 
+  // Validate custom commands.  TODO: More strict?
+  for(cmCustomCommandLines::const_iterator i=commandLines.begin();
+      i != commandLines.end(); ++i)
+    {
+    cmCustomCommandLine const& cl = *i;
+    if(!cl.empty() && !cl[0].empty() && cl[0][0] == '"')
+      {
+      cmOStringStream e;
+      e << "COMMAND may not contain literal quotes:\n  " << cl[0] << "\n";
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+      }
+    }
+
   // Choose a source file on which to store the custom command.
   cmSourceFile* file = 0;
   if(main_dependency && main_dependency[0])
