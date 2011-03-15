@@ -312,6 +312,11 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     // Add include directory flags.
     this->LocalGenerator->
       AppendFlags(flags, this->LocalGenerator->GetIncludeFlags(lang));
+
+    // Append old-style preprocessor definition flags.
+    this->LocalGenerator->
+      AppendFlags(flags, this->Makefile->GetDefineFlags());
+
     // Add include directory flags.
     this->LocalGenerator->
       AppendFlags(flags,this->GetFrameworkFlags().c_str());

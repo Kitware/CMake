@@ -575,6 +575,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   flags += this->Makefile->GetSafeDefinition(varString.c_str());
   flags += " ";
   flags += this->GetIncludeFlags(lang);
+  flags += this->Makefile->GetDefineFlags();
 
   // Construct the command lines.
   cmCustomCommandLines commandLines;
@@ -1291,8 +1292,6 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     {
     flags[flags.size()-1] = ' ';
     }
-  std::string defineFlags = this->Makefile->GetDefineFlags();
-  flags += defineFlags;
   this->LanguageToIncludeFlags[lang] = flags;
 
   // Use this temorary variable for the return value to work-around a
