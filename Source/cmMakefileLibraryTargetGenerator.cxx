@@ -52,11 +52,11 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
   // write rules used to help build object files
   this->WriteCommonCodeRules();
 
-  // write in rules for object files and custom commands
-  this->WriteTargetBuildRules();
-
   // write the per-target per-language flags
   this->WriteTargetLanguageFlags();
+
+  // write in rules for object files and custom commands
+  this->WriteTargetBuildRules();
 
   // write the link rules
   // Write the rule for this target type.
