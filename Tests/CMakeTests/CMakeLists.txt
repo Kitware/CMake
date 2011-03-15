@@ -27,7 +27,6 @@ AddCMakeTest(String "")
 AddCMakeTest(Math "")
 AddCMakeTest(CMakeMinimumRequired "")
 AddCMakeTest(CompilerIdVendor "")
-AddCMakeTest(ProcessorCount "")
 
 AddCMakeTest(FileDownload "")
 set_property(TEST CMake.FileDownload PROPERTY

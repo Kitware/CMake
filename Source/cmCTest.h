@@ -61,7 +61,6 @@ public:
     PartSubmit,
     PartNotes,
     PartExtraFiles,
-    PartUpload,
     PartCount // Update names in constructor when adding a part
   };
 
@@ -193,13 +192,8 @@ public:
   ///! Get the current time as string
   std::string CurrentTime();
 
-  //! tar/gzip and then base 64 encode a file
-  std::string Base64GzipEncodeFile(std::string file);
-  //! base64 encode a file
-  std::string Base64EncodeFile(std::string file);
-
   /** 
-   * Return the time remaining that the script is allowed to run in
+   * Return the time remaianing that the script is allowed to run in
    * seconds if the user has set the variable CTEST_TIME_LIMIT. If that has
    * not been set it returns 1e7 seconds
    */
@@ -521,7 +515,7 @@ private:
   //! Reread the configuration file
   bool UpdateCTestConfiguration();
 
-  //! Create note from files.
+  //! Create not from files.
   int GenerateCTestNotesOutput(std::ostream& os,
     const VectorOfStrings& files);
 
