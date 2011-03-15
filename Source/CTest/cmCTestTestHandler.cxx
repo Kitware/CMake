@@ -108,7 +108,7 @@ bool cmCTestSubdirCommand
       // does the CTestTestfile.cmake exist ?
       testFilename = "CTestTestfile.cmake";
       }
-    else if( cmSystemTools::FileExists("DartTestfile.txt") ) 
+    else if( cmSystemTools::FileExists("DartTestfile.txt") )
       {
       // does the DartTestfile.txt exist ?
       testFilename = "DartTestfile.txt";
@@ -121,7 +121,7 @@ bool cmCTestSubdirCommand
       }
     fname += "/";
     fname += testFilename;
-    bool readit = 
+    bool readit =
       this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(),
                                    fname.c_str());
     cmSystemTools::ChangeDirectory(cwd.c_str());
@@ -212,7 +212,7 @@ bool cmCTestAddSubdirectoryCommand
     }
   fname += "/";
   fname += testFilename;
-  bool readit = 
+  bool readit =
     this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(),
                                  fname.c_str());
   cmSystemTools::ChangeDirectory(cwd.c_str());
@@ -538,7 +538,7 @@ int cmCTestTestHandler::ProcessHandler()
     this->UseExcludeRegExp();
     this->SetExcludeRegExp(val);
     }
-  
+
   this->TestResults.clear();
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
@@ -616,7 +616,7 @@ int cmCTestTestHandler::ProcessHandler()
       cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
                  << "The following tests FAILED:" << std::endl);
       this->StartLogFile("TestsFailed", ofs);
-      
+
       std::vector<cmCTestTestHandler::cmCTestTestResult>::iterator ftit;
       for(ftit = this->TestResults.begin();
           ftit != this->TestResults.end(); ++ftit)
@@ -625,9 +625,9 @@ int cmCTestTestHandler::ProcessHandler()
           {
           ofs << ftit->TestCount << ":" << ftit->Name << std::endl;
           cmCTestLog(this->CTest, HANDLER_OUTPUT, "\t" << std::setw(3)
-                     << ftit->TestCount << " - " 
+                     << ftit->TestCount << " - "
                      << ftit->Name.c_str() << " ("
-                     << this->GetTestStatus(ftit->Status) << ")" 
+                     << this->GetTestStatus(ftit->Status) << ")"
                      << std::endl);
           }
         }
@@ -696,18 +696,18 @@ void cmCTestTestHandler::PrintLabelSummary()
   // fill maps
   for(; ri != this->TestResults.end(); ++ri)
     {
-    cmCTestTestResult &result = *ri; 
+    cmCTestTestResult &result = *ri;
     cmCTestTestProperties& p = *result.Properties;
     if(p.Labels.size() != 0)
       {
       for(std::vector<std::string>::iterator l = p.Labels.begin();
           l !=  p.Labels.end(); ++l)
-        {  
+        {
         labelTimes[*l] += result.ExecutionTime;
         }
       }
     }
-  // now print times  
+  // now print times
   if(labels.size())
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "\nLabel Time Summary:");
@@ -728,7 +728,7 @@ void cmCTestTestHandler::PrintLabelSummary()
       }
     }
   if(labels.size())
-    { 
+    {
     if(this->LogFile)
       {
       *this->LogFile << "\n";
@@ -840,7 +840,7 @@ void cmCTestTestHandler::ComputeTestList()
   // Now create a final list of tests to run
   int cnt = 0;
   inREcnt = 0;
-  std::string last_directory = ""; 
+  std::string last_directory = "";
   ListOfTests finalList;
   for ( it = this->TestList.begin(); it != this->TestList.end(); it ++ )
     {
@@ -888,13 +888,13 @@ void cmCTestTestHandler::ComputeTestList()
       max = p.Name.size();
       }
     }
-  if(static_cast<std::string::size_type>(this->CTest->GetMaxTestNameWidth()) 
+  if(static_cast<std::string::size_type>(this->CTest->GetMaxTestNameWidth())
      != max)
     {
     this->CTest->SetMaxTestNameWidth(static_cast<int>(max));
     }
 }
- 
+
 bool cmCTestTestHandler::GetValue(const char* tag,
                                   int& value,
                                   std::ifstream& fin)
@@ -984,7 +984,7 @@ bool cmCTestTestHandler::GetValue(const char* tag,
     ret = cmSystemTools::GetLineFromStream(fin, line); // read blank line
     }
   else
-    { 
+    {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "parse error: missing tag: "
                << tag << " found [" << line.c_str() << "]" << std::endl);
@@ -1036,7 +1036,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
 
   cmCTestMultiProcessHandler::TestMap tests;
   cmCTestMultiProcessHandler::PropertiesMap properties;
-  
+
   bool randomSchedule = this->CTest->GetScheduleType() == "Random";
   if(randomSchedule)
     {
@@ -1045,7 +1045,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
 
   for (ListOfTests::iterator it = this->TestList.begin();
        it != this->TestList.end(); ++it)
-    { 
+    {
     cmCTestTestProperties& p = *it;
     cmCTestMultiProcessHandler::TestSet depends;
 
@@ -1158,7 +1158,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
         << result->ExecutionTime
         << "</Value></NamedMeasurement>\n";
       if(result->Reason.size())
-        { 
+        {
         const char* reasonType = "Pass Reason";
         if(result->Status != cmCTestTestHandler::COMPLETED &&
            result->Status != cmCTestTestHandler::NOT_RUN)
@@ -1195,7 +1195,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
     os
       << "\t\t\t<Measurement>\n"
       << "\t\t\t\t<Value"
-      << (result->CompressOutput ? 
+      << (result->CompressOutput ?
       " encoding=\"base64\" compression=\"gzip\">"
       : ">");
     os << cmXMLSafe(result->Output);
@@ -1278,7 +1278,7 @@ void cmCTestTestHandler::AttachFiles(std::ostream& os,
       result->Properties->AttachOnFail.begin(),
       result->Properties->AttachOnFail.end());
     }
-  for(std::vector<std::string>::const_iterator file = 
+  for(std::vector<std::string>::const_iterator file =
       result->Properties->AttachedFiles.begin();
       file != result->Properties->AttachedFiles.end(); ++file)
     {
@@ -1322,7 +1322,7 @@ std::string cmCTestTestHandler::EncodeFile(std::string file)
 
   unsigned long rlen
     = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
-  
+
   std::string base64 = "";
   for(unsigned long i = 0; i < rlen; i++)
     {
@@ -1370,7 +1370,7 @@ std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
 
 // add additional configurations to the search path
 void cmCTestTestHandler
-::AddConfigurations(cmCTest *ctest, 
+::AddConfigurations(cmCTest *ctest,
                     std::vector<std::string> &attempted,
                     std::vector<std::string> &attemptedConfigs,
                     std::string filepath,
@@ -1378,7 +1378,7 @@ void cmCTestTestHandler
 {
   std::string tempPath;
 
-  if (filepath.size() && 
+  if (filepath.size() &&
       filepath[filepath.size()-1] != '/')
     {
     filepath += "/";
@@ -1386,7 +1386,7 @@ void cmCTestTestHandler
   tempPath = filepath + filename;
   attempted.push_back(tempPath);
   attemptedConfigs.push_back("");
-  
+
   if(ctest->GetConfigType().size())
     {
     tempPath = filepath;
@@ -1425,7 +1425,7 @@ void cmCTestTestHandler
     tempPath = filepath;
     tempPath += "RelWithDebInfo/";
     tempPath += filename;
-    attempted.push_back(tempPath);    
+    attempted.push_back(tempPath);
     attemptedConfigs.push_back("RelWithDebInfo");
     tempPath = filepath;
     tempPath += "Deployment/";
@@ -1472,8 +1472,8 @@ std::string cmCTestTestHandler
                                           attemptedConfigs,
                                           localfilepath,filename);
     }
-    
-  
+
+
   // if extraPaths are provided and we were not passed a full path, try them,
   // try any extra paths
   if (filepath.size() == 0)
@@ -1489,8 +1489,8 @@ std::string cmCTestTestHandler
                                             filepathExtra,
                                             filenameExtra);
       }
-    }  
-    
+    }
+
   // store the final location in fullPath
   std::string fullPath;
 
@@ -1523,7 +1523,7 @@ std::string cmCTestTestHandler
         }
       }
     }
-  
+
   // if everything else failed, check the users path, but only if a full path
   // wasn't specified
   if (fullPath.size() == 0 && filepath.size() == 0)
@@ -1547,7 +1547,7 @@ std::string cmCTestTestHandler
                  i->c_str() << "\n");
       }
     }
-  
+
   return fullPath;
 }
 
@@ -1589,13 +1589,13 @@ void cmCTestTestHandler::GetListOfTests()
   cm.AddCommand(newCom1);
 
   // Add handler for SUBDIRS
-  cmCTestSubdirCommand* newCom2 = 
+  cmCTestSubdirCommand* newCom2 =
     new cmCTestSubdirCommand;
   newCom2->TestHandler = this;
   cm.AddCommand(newCom2);
 
   // Add handler for ADD_SUBDIRECTORY
-  cmCTestAddSubdirectoryCommand* newCom3 = 
+  cmCTestAddSubdirectoryCommand* newCom3 =
     new cmCTestAddSubdirectoryCommand;
   newCom3->TestHandler = this;
   cm.AddCommand(newCom3);
@@ -2156,7 +2156,7 @@ bool cmCTestTestHandler::SetTestsProperties(
               }
             }
           if ( key == "ENVIRONMENT" )
-            { 
+            {
             std::vector<std::string> lval;
             cmSystemTools::ExpandListArgument(val.c_str(), lval);
             std::vector<std::string>::iterator crit;
@@ -2272,7 +2272,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.Directory = cmSystemTools::GetCurrentWorkingDirectory();
   cmCTestLog(this->CTest, DEBUG, "Set test directory: "
     << test.Directory << std::endl);
-  
+
   test.IsInBasedOnREOptions = true;
   test.WillFail = false;
   test.RunSerial = false;
