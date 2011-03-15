@@ -27,6 +27,8 @@ public:
   virtual ~cmCTestGIT();
 
 private:
+  unsigned int CurrentGitVersion;
+  unsigned int GetGitVersion();
   std::string GetWorkingRevision();
   virtual void NoteOldRevision();
   virtual void NoteNewRevision();

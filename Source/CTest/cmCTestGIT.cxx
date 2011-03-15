@@ -24,10 +24,19 @@
 #include <ctype.h>
 
 //----------------------------------------------------------------------------
+static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
+                                      unsigned int minor, unsigned int fix)
+{
+  // 1.6.5.0 maps to 10605000
+  return fix + minor*1000 + major*100000 + epic*10000000;
+}
+
+//----------------------------------------------------------------------------
 cmCTestGIT::cmCTestGIT(cmCTest* ct, std::ostream& log):
   cmCTestGlobalVC(ct, log)
 {
   this->PriorRev = this->Unknown;
+  this->CurrentGitVersion = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -263,11 +272,45 @@ bool cmCTestGIT::UpdateImpl()
 
   std::string top_dir = this->FindTopDir();
   const char* git = this->CommandLineTool.c_str();
-  char const* git_submodule[] = {git, "submodule", "update", 0};
+  const char* recursive = "--recursive";
+
+  // Git < 1.6.5.0 did not support --recursive
+  if(this->GetGitVersion() < cmCTestGITVersion(1,6,5,0))
+    {
+    recursive = 0;
+    // No need to require >= 1.6.5.0 if there are no submodules.
+    if(cmSystemTools::FileExists((top_dir + "/.gitmodules").c_str()))
+      {
+      this->Log << "Git < 1.6.5.0 cannot update submodules recursively\n";
+      }
+    }
+
+  char const* git_submodule[] = {git, "submodule", "update", recursive, 0};
   OutputLogger submodule_out(this->Log, "submodule-out> ");
   OutputLogger submodule_err(this->Log, "submodule-err> ");
   return this->RunChild(git_submodule, &submodule_out, &submodule_err,
                         top_dir.c_str());
+}
+
+//----------------------------------------------------------------------------
+unsigned int cmCTestGIT::GetGitVersion()
+{
+  if(!this->CurrentGitVersion)
+    {
+    const char* git = this->CommandLineTool.c_str();
+    char const* git_version[] = {git, "--version", 0};
+    std::string version;
+    OneLineParser version_out(this, "version-out> ", version);
+    OutputLogger version_err(this->Log, "version-err> ");
+    unsigned int v[4] = {0,0,0,0};
+    if(this->RunChild(git_version, &version_out, &version_err) &&
+       sscanf(version.c_str(), "git version %u.%u.%u.%u",
+              &v[0], &v[1], &v[2], &v[3]) >= 3)
+      {
+      this->CurrentGitVersion = cmCTestGITVersion(v[0], v[1], v[2], v[3]);
+      }
+    }
+  return this->CurrentGitVersion;
 }
 
 //----------------------------------------------------------------------------
