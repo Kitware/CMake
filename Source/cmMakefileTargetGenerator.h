@@ -146,6 +146,8 @@ protected:
                          bool useResponseFile, std::string& buildObjs,
                          std::vector<std::string>& makefile_depends);
 
+  void AddIncludeFlags(std::string& flags, const char* lang);
+
   virtual void CloseFileStreams();
   void RemoveForbiddenFlags(const char* flagVar, const char* linkLang,
                             std::string& linkFlags);
@@ -177,6 +179,8 @@ protected:
   // the stream for the flag file
   std::string FlagFileNameFull;
   cmGeneratedFileStream *FlagFileStream;
+  class StringList: public std::vector<std::string> {};
+  std::map<cmStdString, StringList> FlagFileDepends;
 
   // the stream for the info file
   std::string InfoFileNameFull;

@@ -310,8 +310,7 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     this->LocalGenerator->AddSharedFlags(flags, lang, shared);
 
     // Add include directory flags.
-    this->LocalGenerator->
-      AppendFlags(flags, this->LocalGenerator->GetIncludeFlags(lang));
+    this->AddIncludeFlags(flags, lang);
 
     // Append old-style preprocessor definition flags.
     this->LocalGenerator->
@@ -487,6 +486,8 @@ cmMakefileTargetGenerator
 {
   this->LocalGenerator->AppendRuleDepend(depends,
                                          this->FlagFileNameFull.c_str());
+  this->LocalGenerator->AppendRuleDepends(depends,
+                                          this->FlagFileDepends[lang]);
 
   // generate the depend scanning rule
   this->WriteObjectDependRules(source, depends);
@@ -1721,6 +1722,38 @@ cmMakefileTargetGenerator
     buildObjs += ") $(";
     buildObjs += variableNameExternal;
     buildObjs += ")";
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
+                                                const char* lang)
+{
+  std::string responseVar = "CMAKE_";
+  responseVar += lang;
+  responseVar += "_USE_RESPONSE_FILE_FOR_INCLUDES";
+  bool useResponseFile = this->Makefile->IsOn(responseVar.c_str());
+
+  std::string includeFlags =
+    this->LocalGenerator->GetIncludeFlags(lang, useResponseFile);
+  if(includeFlags.empty())
+    {
+    return;
+    }
+
+  if(useResponseFile)
+    {
+    std::string name = "includes_";
+    name += lang;
+    name += ".rsp";
+    std::string arg = "@" +
+      this->CreateResponseFile(name.c_str(), includeFlags,
+                               this->FlagFileDepends[lang]);
+    this->LocalGenerator->AppendFlags(flags, arg.c_str());
+    }
+  else
+    {
+    this->LocalGenerator->AppendFlags(flags, includeFlags.c_str());
     }
 }
 
