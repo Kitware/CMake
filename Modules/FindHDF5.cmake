@@ -9,10 +9,9 @@
 # The module will optionally accept the COMPONENTS argument.  If no COMPONENTS
 # are specified, then the find module will default to finding only the HDF5 C
 # library.  If one or more COMPONENTS are specified, the module will attempt to
-# find the language bindings for the specified components.  Currently, the only
-# valid components are C and CXX.  The module does not yet support finding the
-# Fortran bindings.  If the COMPONENTS argument is not given, the module will
-# attempt to find only the C bindings.
+# find the language bindings for the specified components.  The only valid
+# components are C, CXX, and Fortran.  If the COMPONENTS argument is not
+# given, the module will attempt to find only the C bindings.
 #
 # On UNIX systems, this module will read the variable HDF5_USE_STATIC_LIBRARIES
 # to determine whether or not to prefer a static link to a dynamic link for HDF5
@@ -33,12 +32,14 @@
 #  HDF5_DEFINITIONS - Required compiler definitions for HDF5
 #  HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings.
 #  HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
+#  HDF5_Fortran_LIBRARIES - Required libraries for the HDF5 Fortran bindings
 #  HDF5_LIBRARIES - Required libraries for all requested bindings
 #  HDF5_FOUND - true if HDF5 was found on the system
 #  HDF5_LIBRARY_DIRS - the full set of library directories
 #  HDF5_IS_PARALLEL - Whether or not HDF5 was found with parallel IO support
 #  HDF5_C_COMPILER_EXECUTABLE - the path to the HDF5 C wrapper compiler
 #  HDF5_CXX_COMPILER_EXECUTABLE - the path to the HDF5 C++ wrapper compiler
+#  HDF5_Fortran_COMPILER_EXECUTABLE - the path to the HDF5 Fortran wrapper compiler
 #  HDF5_DIFF_EXECUTABLE - the path to the HDF5 dataset comparison tool
 
 #=============================================================================
@@ -57,12 +58,13 @@
 # This module is maintained by Will Dicharry <wdicharry@stellarscience.com>.
 
 include(SelectLibraryConfigurations)
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 # List of the valid HDF5 components
 set( HDF5_VALID_COMPONENTS 
     C
     CXX
+    Fortran
 )
 
 # try to find the HDF5 wrapper compilers
@@ -79,6 +81,13 @@ find_program( HDF5_CXX_COMPILER_EXECUTABLE
     PATH_SUFFIXES bin Bin
     DOC "HDF5 C++ Wrapper compiler.  Used only to detect HDF5 compile flags." )
 mark_as_advanced( HDF5_CXX_COMPILER_EXECUTABLE )
+
+find_program( HDF5_Fortran_COMPILER_EXECUTABLE
+    NAMES h5fc h5pfc
+    HINTS ENV HDF5_ROOT
+    PATH_SUFFIXES bin Bin
+    DOC "HDF5 Fortran Wrapper compiler.  Used only to detect HDF5 compile flags." )
+mark_as_advanced( HDF5_Fortran_COMPILER_EXECUTABLE )
 
 find_program( HDF5_DIFF_EXECUTABLE 
     NAMES h5diff
@@ -158,6 +167,7 @@ if( HDF5_INCLUDE_DIRS AND HDF5_LIBRARIES )
 else()
     _HDF5_invoke_compiler( C HDF5_C_COMPILE_LINE HDF5_C_RETURN_VALUE )
     _HDF5_invoke_compiler( CXX HDF5_CXX_COMPILE_LINE HDF5_CXX_RETURN_VALUE )
+    _HDF5_invoke_compiler( Fortran HDF5_Fortran_COMPILE_LINE HDF5_Fortran_RETURN_VALUE )
 
     if( NOT HDF5_FIND_COMPONENTS )
         set( HDF5_LANGUAGE_BINDINGS "C" )
@@ -177,6 +187,7 @@ else()
     # seed the initial lists of libraries to find with items we know we need
     set( HDF5_C_LIBRARY_NAMES_INIT hdf5_hl hdf5 )
     set( HDF5_CXX_LIBRARY_NAMES_INIT hdf5_cpp ${HDF5_C_LIBRARY_NAMES_INIT} )
+    set( HDF5_Fortran_LIBRARY_NAMES_INIT hdf5_fortran ${HDF5_C_LIBRARY_NAMES_INIT} )
     
     foreach( LANGUAGE ${HDF5_LANGUAGE_BINDINGS} )
         if( HDF5_${LANGUAGE}_COMPILE_LINE )
@@ -198,7 +209,13 @@ else()
         list( APPEND HDF5_DEFINITIONS ${HDF5_${LANGUAGE}_DEFINITIONS} )
     
         # find the HDF5 include directories
-        find_path( HDF5_${LANGUAGE}_INCLUDE_DIR hdf5.h
+        if(${LANGUAGE} STREQUAL "Fortran")
+            set(HDF5_INCLUDE_FILENAME hdf5.mod)
+        else()
+            set(HDF5_INCLUDE_FILENAME hdf5.h)
+        endif()
+
+        find_path( HDF5_${LANGUAGE}_INCLUDE_DIR ${HDF5_INCLUDE_FILENAME}
             HINTS
                 ${HDF5_${LANGUAGE}_INCLUDE_FLAGS}
                 ENV
@@ -320,7 +337,8 @@ mark_as_advanced(
     HDF5_DEFINTIONS
     HDF5_LIBRARY_DIRS
     HDF5_C_COMPILER_EXECUTABLE
-    HDF5_CXX_COMPILER_EXECUTABLE )
+    HDF5_CXX_COMPILER_EXECUTABLE
+    HDF5_Fortran_COMPILER_EXECUTABLE )
 
 # For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
 # HDF5_INCLUDE_DIRS
