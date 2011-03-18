@@ -883,6 +883,20 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3
+::AppendRuleDepends(std::vector<std::string>& depends,
+                    std::vector<std::string> const& ruleFiles)
+{
+  // Add a dependency on the rule file itself unless an option to skip
+  // it is specifically enabled by the user or project.
+  if(!this->Makefile->IsOn("CMAKE_SKIP_RULE_DEPENDENCY"))
+    {
+    depends.insert(depends.end(), ruleFiles.begin(), ruleFiles.end());
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmLocalUnixMakefileGenerator3
 ::AppendCustomDepends(std::vector<std::string>& depends,
                       const std::vector<cmCustomCommand>& ccs)
 {
