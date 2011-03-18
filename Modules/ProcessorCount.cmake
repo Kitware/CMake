@@ -17,6 +17,14 @@
 #     set(CTEST_BUILD_FLAGS -j${N})
 #     set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
 #   endif()
+#
+# This function is intended to offer an approximation of the value of the
+# number of compute cores available on the current machine, such that you
+# may use that value for parallel building and parallel testing. It is meant
+# to help utilize as much of the machine as seems reasonable. Of course,
+# knowledge of what else might be running on the machine simultaneously
+# should be used when deciding whether to request a machine's full capacity
+# all for yourself.
 
 # A more reliable way might be to compile a small C program that uses the CPUID
 # instruction, but that again requires compiler support or compiling assembler
@@ -42,7 +50,7 @@ function(ProcessorCount var)
   if(WIN32)
     # Windows:
     set(count "$ENV{NUMBER_OF_PROCESSORS}")
-    message("ProcessorCount: WIN32, trying environment variable")
+    #message("ProcessorCount: WIN32, trying environment variable")
   endif()
 
   if(NOT count)
@@ -51,9 +59,10 @@ function(ProcessorCount var)
       PATHS /usr/sbin /sbin)
     if(ProcessorCount_cmd_sysctl)
       execute_process(COMMAND ${ProcessorCount_cmd_sysctl} -n hw.ncpu
+        ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE count)
-      message("ProcessorCount: trying sysctl '${ProcessorCount_cmd_sysctl}'")
+      #message("ProcessorCount: trying sysctl '${ProcessorCount_cmd_sysctl}'")
     endif()
   endif()
 
@@ -62,9 +71,10 @@ function(ProcessorCount var)
     find_program(ProcessorCount_cmd_getconf getconf)
     if(ProcessorCount_cmd_getconf)
       execute_process(COMMAND ${ProcessorCount_cmd_getconf} _NPROCESSORS_ONLN
+        ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE count)
-      message("ProcessorCount: trying getconf '${ProcessorCount_cmd_getconf}'")
+      #message("ProcessorCount: trying getconf '${ProcessorCount_cmd_getconf}'")
     endif()
   endif()
 
@@ -74,11 +84,12 @@ function(ProcessorCount var)
       PATHS /usr/contrib/bin)
     if(ProcessorCount_cmd_machinfo)
       execute_process(COMMAND ${ProcessorCount_cmd_machinfo}
+        ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE machinfo_output)
       string(REGEX MATCHALL "Number of CPUs = ([0-9]+)" procs "${machinfo_output}")
       set(count "${CMAKE_MATCH_1}")
-      message("ProcessorCount: trying machinfo '${ProcessorCount_cmd_machinfo}'")
+      #message("ProcessorCount: trying machinfo '${ProcessorCount_cmd_machinfo}'")
     endif()
   endif()
 
@@ -88,11 +99,12 @@ function(ProcessorCount var)
       PATHS /sbin)
     if(ProcessorCount_cmd_hinv)
       execute_process(COMMAND ${ProcessorCount_cmd_hinv}
+        ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE hinv_output)
       string(REGEX MATCHALL "([0-9]+) .* Processors" procs "${hinv_output}")
       set(count "${CMAKE_MATCH_1}")
-      message("ProcessorCount: trying hinv '${ProcessorCount_cmd_hinv}'")
+      #message("ProcessorCount: trying hinv '${ProcessorCount_cmd_hinv}'")
     endif()
   endif()
 
@@ -102,11 +114,12 @@ function(ProcessorCount var)
       PATHS /usr/sbin)
     if(ProcessorCount_cmd_lsconf)
       execute_process(COMMAND ${ProcessorCount_cmd_lsconf}
+        ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE lsconf_output)
       string(REGEX MATCHALL "Number Of Processors: ([0-9]+)" procs "${lsconf_output}")
       set(count "${CMAKE_MATCH_1}")
-      message("ProcessorCount: trying lsconf '${ProcessorCount_cmd_lsconf}'")
+      #message("ProcessorCount: trying lsconf '${ProcessorCount_cmd_lsconf}'")
     endif()
   endif()
 
@@ -115,11 +128,12 @@ function(ProcessorCount var)
     find_program(ProcessorCount_cmd_pidin pidin)
     if(ProcessorCount_cmd_pidin)
       execute_process(COMMAND ${ProcessorCount_cmd_pidin} info
+        ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE pidin_output)
       string(REGEX MATCHALL "Processor[0-9]+: " procs "${pidin_output}")
       list(LENGTH procs count)
-      message("ProcessorCount: trying pidin '${ProcessorCount_cmd_pidin}'")
+      #message("ProcessorCount: trying pidin '${ProcessorCount_cmd_pidin}'")
     endif()
   endif()
 
@@ -128,11 +142,12 @@ function(ProcessorCount var)
     find_program(ProcessorCount_cmd_uname uname)
     if(ProcessorCount_cmd_uname)
       execute_process(COMMAND ${ProcessorCount_cmd_uname} -X
+        ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
         OUTPUT_VARIABLE uname_X_output)
       string(REGEX MATCHALL "NumCPU = ([0-9]+)" procs "${uname_X_output}")
       set(count "${CMAKE_MATCH_1}")
-      message("ProcessorCount: trying uname -X '${ProcessorCount_cmd_uname}'")
+      #message("ProcessorCount: trying uname -X '${ProcessorCount_cmd_uname}'")
     endif()
   endif()
 
@@ -145,7 +160,7 @@ function(ProcessorCount var)
     if(EXISTS "${cpuinfo_file}")
       file(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
       list(LENGTH procs count)
-      message("ProcessorCount: trying cpuinfo '${cpuinfo_file}'")
+      #message("ProcessorCount: trying cpuinfo '${cpuinfo_file}'")
     endif()
   endif()
 
@@ -154,7 +169,7 @@ function(ProcessorCount var)
   #
   if(NOT count)
     set(count "$ENV{NUMBER_OF_PROCESSORS}")
-    message("ProcessorCount: last fallback, trying environment variable")
+    #message("ProcessorCount: last fallback, trying environment variable")
   endif()
 
   # Ensure an integer return (avoid inadvertently returning an empty string
