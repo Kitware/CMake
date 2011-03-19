@@ -885,8 +885,12 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
 //----------------------------------------------------------------------
 bool cmCPackGenerator::ReadListFile(const char* moduleName)
 {
+  bool retval;
   std::string fullPath = this->MakefileMap->GetModulesFile(moduleName);
-  return this->MakefileMap->ReadListFile(0, fullPath.c_str());
+  retval = this->MakefileMap->ReadListFile(0, fullPath.c_str());
+  // include FATAL_ERROR and ERROR in the return status
+  retval = retval && (! cmSystemTools::GetErrorOccuredFlag());
+  return retval;
 }
 
 //----------------------------------------------------------------------
