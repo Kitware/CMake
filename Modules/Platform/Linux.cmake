@@ -47,8 +47,30 @@ ENDIF(DEFINED CMAKE_INSTALL_SO_NO_EXE)
 
 INCLUDE(Platform/UnixPaths)
 
+
 # Debian has lib64 paths only for compatibility so they should not be
 # searched.
 IF(EXISTS "/etc/debian_version")
   SET_PROPERTY(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
+ELSE(EXISTS "/etc/debian_version")
+  # Guess whether if we are on a 64 or 32 bits Linux host
+  # and define CMAKE_USE_LIB64_PATH accordingly.
+  # CMAKE_USE_LIB64_PATH would be either "" or "64" on 64 bits host
+  # see amd64 ABI: http://www.x86-64.org/documentation/abi.pdf
+  # If we are cross-compiling don't do anything and let the developer decide.
+  IF(NOT CMAKE_CROSSCOMPILING)
+    FIND_PROGRAM(UNAME_PROGRAM NAMES uname)
+    IF(UNAME_PROGRAM)
+      EXECUTE_PROCESS(COMMAND ${UNAME_PROGRAM} -m
+                      OUTPUT_VARIABLE LINUX_ARCH
+                      ERROR_QUIET
+                      OUTPUT_STRIP_TRAILING_WHITESPACE
+                     )
+      IF(LINUX_ARCH MATCHES "x86_64")
+        SET_PROPERTY(GLOBAL PROPERTY CMAKE_USE_LIB64_PATH TRUE)
+      ELSE(LINUX_ARCH MATCHES "x86_64")
+        SET_PROPERTY(GLOBAL PROPERTY CMAKE_USE_LIB64_PATH FALSE)
+      ENDIF(LINUX_ARCH MATCHES "x86_64")
+    ENDIF(UNAME_PROGRAM)
+  ENDIF(NOT CMAKE_CROSSCOMPILING)
 ENDIF(EXISTS "/etc/debian_version")

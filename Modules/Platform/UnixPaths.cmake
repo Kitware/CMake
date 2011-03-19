@@ -86,3 +86,7 @@ LIST(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
 
 # Enable use of lib64 search path variants by default.
 SET_PROPERTY(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
+# However the lib->lib64 automatic name mangling is
+# not the default because it is only set on Linux x86_64
+# and not on Debian based distro
+SET_PROPERTY(GLOBAL PROPERTY CMAKE_USE_LIB64_PATH FALSE)
