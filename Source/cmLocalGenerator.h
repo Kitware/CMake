@@ -25,7 +25,7 @@ class cmCustomCommand;
  * \brief Create required build files for a directory.
  *
  * Subclasses of this abstract class generate makefiles, DSP, etc for various
- * platforms. This class should never be constructued directly. A
+ * platforms. This class should never be constructed directly. A
  * GlobalGenerator will create it and invoke the appropriate commands on it.
  */
 class cmLocalGenerator
@@ -90,7 +90,7 @@ public:
   void SetGlobalGenerator(cmGlobalGenerator *gg);
 
   /**
-   * Convert something to something else. This is a centralized coversion
+   * Convert something to something else. This is a centralized conversion
    * routine used by the generators to handle relative paths and the like.
    * The flags determine what is actually done.
    *

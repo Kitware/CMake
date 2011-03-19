@@ -161,7 +161,7 @@ public:
   // used in writing out Cmake files such as WriteDirectoryInformation
   static void WriteCMakeArgument(std::ostream& os, const char* s);
 
-  /** creates the common disclainer text at the top of each makefile */
+  /** creates the common disclaimer text at the top of each makefile */
   void WriteDisclaimer(std::ostream& os);
 
   // write a  comment line #====... in the stream

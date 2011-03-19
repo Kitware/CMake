@@ -48,7 +48,7 @@ public:
                               cmMakefile *, bool optional);
 
   /**
-   * Try running cmake and building a file. This is used for dynalically
+   * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
   virtual std::string GenerateBuildCommand(const char* makeProgram,

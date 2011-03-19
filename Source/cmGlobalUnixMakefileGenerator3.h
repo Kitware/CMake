@@ -90,7 +90,7 @@ public:
   void WriteHelpRule(std::ostream& ruleFileStream,
                      cmLocalUnixMakefileGenerator3 *);
 
-  // write the top lvel target rules
+  // write the top level target rules
   void WriteConvenienceRules(std::ostream& ruleFileStream,
                              std::set<cmStdString> &emitted);
 
