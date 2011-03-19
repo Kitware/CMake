@@ -96,6 +96,7 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
         cmCPackLogger(cmCPackLog::LOG_ERROR,
             "Error while execution CPackDeb.cmake" << std::endl);
         retval = 0;
+        return retval;
         }
 
       cmsys::Glob gl;
@@ -105,7 +106,7 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
       if ( !gl.FindFiles(findExpr) )
         {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
-          "Cannot find any files in the installed directory" << std::endl);
+            "Cannot find any files in the installed directory" << std::endl);
         return 0;
         }
       packageFiles = gl.GetFiles();
@@ -152,8 +153,8 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Error while execution CPackDeb.cmake" << std::endl);
         retval = 0;
+        return retval;
         }
-
       cmsys::Glob gl;
       std::string findExpr(this->GetOption("WDIR"));
       findExpr += "/*";
@@ -230,6 +231,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne(bool allComponent)
     cmCPackLogger(cmCPackLog::LOG_ERROR,
         "Error while execution CPackDeb.cmake" << std::endl);
     retval = 0;
+    return retval;
     }
 
   cmsys::Glob gl;
@@ -288,8 +290,11 @@ int cmCPackDebGenerator::PackageFiles()
                     "Error while execution CPackDeb.cmake" << std::endl);
       retval = 0;
       }
-    packageFiles = files;
-    return createDeb();
+    else
+      {
+      packageFiles = files;
+      return createDeb();
+      }
     }
   return retval;
 }
