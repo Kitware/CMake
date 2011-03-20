@@ -143,6 +143,7 @@ public:
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);
   void AddConfigVariableFlags(std::string& flags, const char* var,
                               const char* config);
+  ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);
   ///! Get the include flags for the current makefile and language
   const char* GetIncludeFlags(const char* lang,
