@@ -1672,9 +1672,9 @@ YY_BUFFER_STATE cmCommandArgument_yy_scan_string (yyconst char * yystr , yyscan_
 }
 
 /** Setup the input buffer state to scan the given bytes. The next call to cmCommandArgument_yylex() will
- * scan from a @e copy of @a bytes.
- * @param bytes the byte buffer to scan
- * @param len the number of bytes in the buffer pointed to by @a bytes.
+ * scan from a @e copy of @a yybytes.
+ * @param yybytes the byte buffer to scan
+ * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
@@ -1835,7 +1835,7 @@ void cmCommandArgument_yyset_lineno (int  line_number , yyscan_t yyscanner)
 }
 
 /** Set the current column.
- * @param line_number
+ * @param column_no
  * @param yyscanner The scanner object.
  */
 void cmCommandArgument_yyset_column (int  column_no , yyscan_t yyscanner)

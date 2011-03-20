@@ -23,8 +23,8 @@ class cmLocalGenerator;
  * cmGlobalKdevelopGenerator produces a project file for KDevelop 3 (KDevelop
  * > 3.1.1).  The project is based on the "Custom Makefile based C/C++"
  * project of KDevelop.  Such a project consists of Unix Makefiles in the
- * build directory together with a <your_project>.kdevelop project file,
- * which contains the project settings and a <your_project>.kdevelop.filelist
+ * build directory together with a \<your_project\>.kdevelop project file,
+ * which contains the project settings and a \<your_project\>.kdevelop.filelist
  * file, which lists the source files relative to the kdevelop project
  * directory. The kdevelop project directory is the base source directory.
  */

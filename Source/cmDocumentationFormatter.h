@@ -60,7 +60,7 @@ public:
                           std::vector<const cmDocumentationSection *>&)
     {}
 
-  /** Compute a prefix for links into a section (#<prefix>_SOMETHING).  */
+  /** Compute a prefix for links into a section (#\<prefix\>_SOMETHING). */
   std::string ComputeSectionLinkPrefix(std::string const& name);
 };
 

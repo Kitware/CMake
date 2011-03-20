@@ -1554,8 +1554,7 @@ YY_BUFFER_STATE cmExpr_yy_scan_buffer  (char * base, yy_size_t  size , yyscan_t 
 }
 
 /** Setup the input buffer state to scan a string. The next call to cmExpr_yylex() will
- * scan from a @e copy of @a str.
- * @param str a NUL-terminated string to scan
+ * scan from a @e copy of @a yy_str.
  * @param yy_str a NUL-terminated string to scan
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
@@ -1732,7 +1731,7 @@ void cmExpr_yyset_lineno (int  line_number , yyscan_t yyscanner)
 }
 
 /** Set the current column.
- * @param line_number
+ * @param column_no
  * @param yyscanner The scanner object.
  */
 void cmExpr_yyset_column (int  column_no , yyscan_t yyscanner)

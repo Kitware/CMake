@@ -668,7 +668,7 @@ public:
    * Expand all defined variables in the string.
    * Defined variables come from the this->Definitions map.
    * They are expanded with ${var} where var is the
-   * entry in the this->Definitions map.  Also @var@ is
+   * entry in the this->Definitions map.  Also \@var\@ is
    * expanded to match autoconf style expansions.
    */
   const char *ExpandVariablesInString(std::string& source);
@@ -682,7 +682,7 @@ public:
 
   /**
    * Remove any remaining variables in the string. Anything with ${var} or
-   * @var@ will be removed.
+   * \@var\@ will be removed.
    */
   void RemoveVariablesInString(std::string& source,
                                bool atOnly = false) const;

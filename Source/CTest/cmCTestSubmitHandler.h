@@ -75,7 +75,9 @@ private:
                        const cmStdString& remoteprefix,
                        const cmStdString& url);
 
-  void ParseResponse(std::vector<char>);
+  typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
+
+  void ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk);
 
   std::string GetSubmitResultsPrefix();
 

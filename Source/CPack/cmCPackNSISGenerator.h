@@ -72,7 +72,7 @@ protected:
   CreateComponentGroupDescription(cmCPackComponentGroup *group,
                                   cmOStringStream& macrosOut);
 
-  /// Translations any newlines found in the string into \r\n, so that the
+  /// Translations any newlines found in the string into \\r\\n, so that the
   /// resulting string can be used within NSIS.
   static std::string TranslateNewlines(std::string str);
 };
