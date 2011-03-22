@@ -67,10 +67,7 @@ ELSE(EXISTS "/etc/debian_version")
                       OUTPUT_STRIP_TRAILING_WHITESPACE
                      )
       IF(LINUX_ARCH MATCHES "x86_64")
-        #SET_PROPERTY(GLOBAL PROPERTY CMAKE_USE_LIB64_PATH TRUE)
-        # cannot enable this by as default because
-        # it breaks [at least] SimpleInstall
-        SET_PROPERTY(GLOBAL PROPERTY CMAKE_USE_LIB64_PATH FALSE)
+        SET_PROPERTY(GLOBAL PROPERTY CMAKE_USE_LIB64_PATH TRUE)
       ELSE(LINUX_ARCH MATCHES "x86_64")
         SET_PROPERTY(GLOBAL PROPERTY CMAKE_USE_LIB64_PATH FALSE)
       ENDIF(LINUX_ARCH MATCHES "x86_64")
