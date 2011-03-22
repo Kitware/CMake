@@ -27,8 +27,6 @@ class cmInstallCommandArguments
 
     // Compute destination path.and check permissions
     bool Finalize();
-    /** Enable Lib destination mangling */
-    void EnableMangleLibDestination() {this->mangleLibDestination = true;}
 
     const std::string& GetDestination() const;
     const std::string& GetComponent() const;
@@ -46,15 +44,6 @@ class cmInstallCommandArguments
                                  std::string& perm);
     cmCommandArgumentsHelper Parser;
     cmCommandArgumentGroup ArgumentGroup;
-    /**
-     * Mangle the lib destination in order to handle
-     * the special lib64/lib32/lib case on Linux.
-     * the user may have specified DESTINATION lib
-     * and get the final destination as lib64 if the
-     * current host system requires it.
-     * see CMAKE_USE_LIB64_PATH global property
-     */
-    bool DoMangleLibDestination();
   private:
     cmCAString Destination;
     cmCAString Component;
@@ -64,12 +53,6 @@ class cmInstallCommandArguments
     cmCAEnabler Optional;
     cmCAEnabler NamelinkOnly;
     cmCAEnabler NamelinkSkip;
-    /**
-     * This boolean indicate that the destination
-     * has to be mangled in some way.
-     * Currently this only used for lib64 mangling on 64 bit Linux.
-     */
-    bool mangleLibDestination;
 
     std::string DestinationString;
     std::string PermissionsString;
