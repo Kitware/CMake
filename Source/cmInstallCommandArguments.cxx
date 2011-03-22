@@ -34,7 +34,6 @@ cmInstallCommandArguments::cmInstallCommandArguments()
 ,Optional      (&Parser, "OPTIONAL"      , &ArgumentGroup)
 ,NamelinkOnly  (&Parser, "NAMELINK_ONLY" , &ArgumentGroup)
 ,NamelinkSkip  (&Parser, "NAMELINK_SKIP" , &ArgumentGroup)
-,mangleLibDestination(false)
 ,GenericArguments(0)
 {}
 
@@ -154,10 +153,6 @@ bool cmInstallCommandArguments::Finalize()
     }
   this->DestinationString = this->Destination.GetString();
   cmSystemTools::ConvertToUnixSlashes(this->DestinationString);
-  if (this->mangleLibDestination)
-    {
-      this->DoMangleLibDestination();
-    }
   return true;
 }
 
@@ -201,25 +196,4 @@ bool cmInstallCommandArguments::CheckPermissions(
     }
   // This is not a valid permission.
   return false;
-}
-
-bool cmInstallCommandArguments::DoMangleLibDestination() {
-
-  size_t pos = this->DestinationString.find("lib");
-  // We should replace lib, if it is found AND
-  // it is not part of a name
-  if (pos!=std::string::npos) {
-    // "lib" alone
-    if (this->DestinationString.length()==(pos+3)) {
-      this->DestinationString.insert(pos+3,"64");
-    }
-    // something/lib or lib/something or some1/lib/some2
-    if ((this->DestinationString.length()>(pos+3)) &&
-        (this->DestinationString[pos+3]=='/')) {
-      if ((pos==0) || (this->DestinationString[pos-1]=='/')){
-        this->DestinationString.insert(pos+3,"64");
-      }
-    }
-  }
-  return true;
 }

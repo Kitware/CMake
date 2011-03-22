@@ -268,11 +268,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   privateHeaderArgs.SetGenericArguments(&genericArgs);
   publicHeaderArgs.SetGenericArguments(&genericArgs);
   resourceArgs.SetGenericArguments(&genericArgs);
-  if (this->Makefile->GetCMakeInstance()
-        ->GetPropertyAsBool("CMAKE_USE_LIB64_PATH")) {
-    archiveArgs.EnableMangleLibDestination();
-    libraryArgs.EnableMangleLibDestination();
-  }
+
   success = success && archiveArgs.Finalize();
   success = success && libraryArgs.Finalize();
   success = success && runtimeArgs.Finalize();

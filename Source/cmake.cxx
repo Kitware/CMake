@@ -3223,13 +3223,6 @@ void cmake::DefineProperties(cmake *cm)
      "directories called lib in the search path when building 64-bit "
      "binaries.");
   cm->DefineProperty
-  ("CMAKE_USE_LIB64_PATH", cmProperty::GLOBAL,
-   "Whether INSTALL(TARGETS command should use lib64 instead of lib.",
-   "CMAKE_USE_LIB64_PATH is a boolean specifying whether the "
-   "INSTALL(TARGETS ...) command should automatically mangle *lib/*"
-   "ARCHIVE or LIBRARY destination to *lib64/*. This is automatically"
-   "set by CMake on (non-Debian) Linux x86_64 distributions.");
-  cm->DefineProperty
     ("FIND_LIBRARY_USE_OPENBSD_VERSIONING", cmProperty::GLOBAL,
      "Whether FIND_LIBRARY should find OpenBSD-style shared libraries.",
      "This property is a boolean specifying whether the FIND_LIBRARY "
