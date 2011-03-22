@@ -93,6 +93,7 @@ static const char* cmCTestErrorMatches[] = {
   ": No such file or directory",
   ": Invalid argument",
   "^The project cannot be built\\.",
+  "^\\[ERROR\\]",
   0
 };
 
@@ -119,7 +120,7 @@ static const char* cmCTestWarningMatches[] = {
   "^\"[^\"]+\", line [0-9]+: [Ww](arning|arnung)",
   "([^:]+): warning[ \\t]*[0-9]+[ \\t]*:",
   "^(Warning|Warnung) ([0-9]+):",
-  "^(Warning|Warnung) ",
+  "^(Warning|Warnung)[ :]",
   "WARNING: ",
   "([^ :]+) : warning",
   "([^:]+): warning",
@@ -131,6 +132,7 @@ static const char* cmCTestWarningMatches[] = {
   "\".*\", line [0-9]+: remark\\([0-9]*\\):",
   "cc-[0-9]* CC: REMARK File = .*, Line = [0-9]*",
   "^CMake Warning.*:",
+  "^\\[WARNING\\]",
   0
 };
 
