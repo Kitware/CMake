@@ -1868,39 +1868,30 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ENDIF()
   ENDIF()
 
-  if(NOT DEFINED CTEST_RUN_Java)
-    if(APPLE)
-      set(CTEST_RUN_Java OFF)
-    else()
-      set(CTEST_RUN_Java ON)
-    endif()
-  endif()
-
-  IF(CTEST_RUN_Java)
-    find_package(Java QUIET)
-    IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
-      GET_FILENAME_COMPONENT(JNIPATH ${JAVA_COMPILE} PATH)
-      FIND_FILE(JNI_H jni.h
-        "${JNIPATH}/../include"
-        "${JNIPATH}/../java/include")
-      IF(JNI_H)
-        FILE(READ "${JNI_H}" JNI_FILE)
-        IF("${JNI_FILE}" MATCHES "JDK1_2")
-          ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
-            --build-and-test
-            "${CMake_SOURCE_DIR}/Tests/Java"
-            "${CMake_BINARY_DIR}/Tests/Java"
-            --build-generator ${CMAKE_TEST_GENERATOR}
-            --build-project hello
-            --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-            --build-two-config
-            --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
-            --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
-          LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Java")
-        ENDIF("${JNI_FILE}" MATCHES "JDK1_2")
-      ENDIF(JNI_H)
-    ENDIF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW)
-  ENDIF(CTEST_RUN_Java)
+  find_package(Java QUIET)
+  IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW
+      AND NOT "${CMAKE_TEST_GENERATOR}" MATCHES "Xcode")
+    GET_FILENAME_COMPONENT(JNIPATH ${JAVA_COMPILE} PATH)
+    FIND_FILE(JNI_H jni.h
+      "${JNIPATH}/../include"
+      "${JNIPATH}/../java/include")
+    IF(JNI_H AND EXISTS "${JNI_H}") # in case jni.h is a broken symlink
+      FILE(READ "${JNI_H}" JNI_FILE)
+      IF("${JNI_FILE}" MATCHES "JDK1_2")
+        ADD_TEST(Java ${CMAKE_CTEST_COMMAND}
+          --build-and-test
+          "${CMake_SOURCE_DIR}/Tests/Java"
+          "${CMake_BINARY_DIR}/Tests/Java"
+          --build-generator ${CMAKE_TEST_GENERATOR}
+          --build-project hello
+          --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+          --build-two-config
+          --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
+          --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
+        LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Java")
+      ENDIF("${JNI_FILE}" MATCHES "JDK1_2")
+    ENDIF()
+  ENDIF()
 
   # add some cross compiler tests, for now only with makefile based generators
   IF(CMAKE_TEST_GENERATOR MATCHES "Makefiles" OR CMAKE_TEST_GENERATOR MATCHES "KDevelop")
