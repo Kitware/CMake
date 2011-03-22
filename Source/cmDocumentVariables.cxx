@@ -1475,6 +1475,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_STANDARD_LIBRARIES_INIT",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_USE_RESPONSE_FILE_FOR_INCLUDES",
+                     cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_USE_RESPONSE_FILE_FOR_OBJECTS",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_EXECUTABLE_SUFFIX_<LANG>",

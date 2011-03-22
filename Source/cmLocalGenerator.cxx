@@ -575,6 +575,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   flags += this->Makefile->GetSafeDefinition(varString.c_str());
   flags += " ";
   flags += this->GetIncludeFlags(lang);
+  flags += this->Makefile->GetDefineFlags();
 
   // Construct the command lines.
   cmCustomCommandLines commandLines;
@@ -1184,15 +1185,18 @@ cmLocalGenerator::ConvertToOutputForExisting(RelativeRoot remote,
 }
 
 //----------------------------------------------------------------------------
-const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
+const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
+                                              bool forResponseFile)
 {
   if(!lang)
     {
     return "";
     }
-  if(this->LanguageToIncludeFlags.count(lang))
+  std::string key = lang;
+  key += forResponseFile? "@" : "";
+  if(this->LanguageToIncludeFlags.count(key))
     {
-    return this->LanguageToIncludeFlags[lang].c_str();
+    return this->LanguageToIncludeFlags[key].c_str();
     }
 
   cmOStringStream includeFlags;
@@ -1250,10 +1254,10 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
       if(emitted.insert(frameworkDir).second)
         {
+        OutputFormat format = forResponseFile? RESPONSE : SHELL;
         includeFlags
           << "-F" << this->Convert(frameworkDir.c_str(),
-                                   cmLocalGenerator::START_OUTPUT,
-                                   cmLocalGenerator::SHELL, true)
+                                   START_OUTPUT, format, true)
           << " ";
         }
       continue;
@@ -1273,7 +1277,16 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
         }
       flagUsed = true;
       }
-    std::string includePath = this->ConvertToOutputForExisting(i->c_str());
+    std::string includePath;
+    if(forResponseFile)
+      {
+      includePath = this->Convert(i->c_str(), START_OUTPUT,
+                                  RESPONSE, true);
+      }
+    else
+      {
+      includePath = this->ConvertToOutputForExisting(i->c_str());
+      }
     if(quotePaths && includePath.size() && includePath[0] != '\"')
       {
       includeFlags << "\"";
@@ -1291,13 +1304,11 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang)
     {
     flags[flags.size()-1] = ' ';
     }
-  std::string defineFlags = this->Makefile->GetDefineFlags();
-  flags += defineFlags;
-  this->LanguageToIncludeFlags[lang] = flags;
+  this->LanguageToIncludeFlags[key] = flags;
 
   // Use this temorary variable for the return value to work-around a
   // bogus GCC 2.95 warning.
-  const char* ret = this->LanguageToIncludeFlags[lang].c_str();
+  const char* ret = this->LanguageToIncludeFlags[key].c_str();
   return ret;
 }
 

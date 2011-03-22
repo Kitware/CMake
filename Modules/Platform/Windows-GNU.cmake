@@ -79,6 +79,7 @@ macro(__windows_compiler_gnu lang)
 
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "") # No -fPIC on Windows
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS ${__WINDOWS_GNU_LD_RESPONSE})
+  set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 1)
 
   # We prefer "@" for response files but it is not supported by gcc 3.
   execute_process(COMMAND ${CMAKE_${lang}_COMPILER} --version OUTPUT_VARIABLE _ver ERROR_VARIABLE _ver)
@@ -92,6 +93,8 @@ macro(__windows_compiler_gnu lang)
       # Use "-Wl,@" to pass the response file to the linker.
       set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-Wl,@")
     endif()
+    # The GNU 3.x compilers do not support response files (only linkers).
+    set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 0)
   elseif(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS)
     # Use "@" to pass the response file to the front-end.
     set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "@")

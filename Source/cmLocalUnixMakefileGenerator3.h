@@ -320,6 +320,8 @@ protected:
 
   void AppendRuleDepend(std::vector<std::string>& depends,
                         const char* ruleFileName);
+  void AppendRuleDepends(std::vector<std::string>& depends,
+                         std::vector<std::string> const& ruleFiles);
   void AppendCustomDepends(std::vector<std::string>& depends,
                            const std::vector<cmCustomCommand>& ccs);
   void AppendCustomDepend(std::vector<std::string>& depends,
