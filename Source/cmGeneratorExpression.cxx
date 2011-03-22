@@ -23,7 +23,7 @@ cmGeneratorExpression::cmGeneratorExpression(
   this->TargetInfo.compile("^\\$<TARGET"
                            "(|_SONAME|_LINKER)"  // File with what purpose?
                            "_FILE(|_NAME|_DIR):" // Filename component.
-                           "([A-Za-z0-9_-]+)"    // Target name.
+                           "([A-Za-z0-9_.-]+)"   // Target name.
                            ">$");
 }
 
