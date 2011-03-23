@@ -583,7 +583,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     list(APPEND CWAYLST "OnePackPerGroup")
     list(APPEND CWAYLST "IgnoreGroup")
     list(APPEND CWAYLST "AllInOne")
-    list(APPEND CWAYLST "AllGroupsInOne")
     foreach(CPackGen ${GENLST})
       set(CPackRun_CPackGen  "-DCPackGen=${CPackGen}")
       foreach(CPackComponentWay ${CWAYLST})
