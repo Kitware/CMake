@@ -65,7 +65,7 @@ protected:
    * Special case of component install where all
    * components will be put in a single installer.
    */
-  int PackageComponentsAllInOne(bool allComponent);
+  int PackageComponentsAllInOne();
   virtual const char* GetOutputExtension() = 0;
   cmArchiveWrite::Compress Compress;
   cmArchiveWrite::Type Archive;

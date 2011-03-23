@@ -36,7 +36,6 @@ cmCPackGenerator::cmCPackGenerator()
   this->GeneratorVerbose = false;
   this->MakefileMap = 0;
   this->Logger = 0;
-  this->allGroupInOne = false;
   this->allComponentInOne = false;
   this->ignoreComponentGroup = false;
 }
@@ -1266,15 +1265,12 @@ int cmCPackGenerator::PrepareGroupingKind()
 {
   // The default behavior is to create 1 package by component group
   // unless the user asked to put all COMPONENTS in a single package
-  allGroupInOne = (NULL !=
-                    (this->GetOption(
-                      "CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE")));
-  allComponentInOne = (NULL !=
-                        (this->GetOption(
-                          "CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE")));
-  ignoreComponentGroup = (NULL !=
-                           (this->GetOption(
-                             "CPACK_COMPONENTS_IGNORE_GROUPS")));
+  allComponentInOne = (NULL != (this->GetOption(
+                                      "CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE"))
+                      );
+  ignoreComponentGroup = (NULL != (this->GetOption(
+                                         "CPACK_COMPONENTS_IGNORE_GROUPS"))
+                         );
 
   std::string groupingType;
 
@@ -1288,11 +1284,7 @@ int cmCPackGenerator::PrepareGroupingKind()
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,  "["
         << this->Name << "]"
         << " requested component grouping = "<< groupingType <<std::endl);
-    if (groupingType == "ALL_GROUPS_IN_ONE")
-      {
-      allGroupInOne = true;
-      }
-    else if (groupingType == "ALL_COMPONENTS_IN_ONE")
+    if (groupingType == "ALL_COMPONENTS_IN_ONE")
       {
       allComponentInOne = true;
       }
@@ -1305,15 +1297,14 @@ int cmCPackGenerator::PrepareGroupingKind()
       cmCPackLogger(cmCPackLog::LOG_WARNING, "["
               << this->Name << "]"
               << " requested component grouping type <"<< groupingType
-              << "> UNKNOWN not in (ALL_GROUPS_IN_ONE,"
-                    "ALL_COMPONENTS_IN_ONE,IGNORE)" <<std::endl);
+              << "> UNKNOWN not in (ALL_COMPONENTS_IN_ONE,IGNORE)"
+              << std::endl);
       }
     }
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,  "["
         << this->Name << "]"
         << " requested component grouping = ("
-        << "ALL_GROUPS_IN_ONE=" << allGroupInOne
         << ", ALL_COMPONENTS_IN_ONE=" << allComponentInOne
         << ", IGNORE_GROUPS=" << ignoreComponentGroup
         << ")"
