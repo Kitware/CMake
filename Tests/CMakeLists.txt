@@ -1202,7 +1202,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-project WarnUnusedCliUnused
     --build-options "-DUNUSED_CLI_VARIABLE=Unused")
   SET_TESTS_PROPERTIES(WarnUnusedCliUnused PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMake Warning: The variable, 'UNUSED_CLI_VARIABLE'")
+    PASS_REGULAR_EXPRESSION "CMake Warning:.*Manually-specified variables were not used by the project:.*  UNUSED_CLI_VARIABLE")
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
 
   ADD_TEST(WarnUnusedCliUsed ${CMAKE_CTEST_COMMAND}
