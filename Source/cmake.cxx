@@ -4306,7 +4306,10 @@ void cmake::WatchUnusedCli(const char* var)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
-  this->UsedCliVariables[var] = false;
+  if(this->UsedCliVariables.find(var) == this->UsedCliVariables.end())
+    {
+    this->UsedCliVariables[var] = false;
+    }
 #endif
 }
 
@@ -4314,7 +4317,7 @@ void cmake::UnwatchUnusedCli(const char* var)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->VariableWatch->RemoveWatch(var, cmWarnUnusedCliWarning);
-  this->UsedCliVariables[var] = true;
+  this->UsedCliVariables.erase(var);
 #endif
 }
 
