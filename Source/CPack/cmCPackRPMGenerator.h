@@ -39,6 +39,10 @@ protected:
   virtual int InitializeInternal();
   virtual int PackageFiles();
   /**
+   * This method factors out the work done in component packaging case.
+   */
+  int PackageOnePack(std::string initialToplevel, std::string packageName);
+  /**
    * The method used to package files when component
    * install is used. This will create one
    * archive for each component group.
@@ -48,7 +52,7 @@ protected:
    * Special case of component install where all
    * components will be put in a single installer.
    */
-  int PackageComponentsAllInOne(bool allComponent);
+  int PackageComponentsAllInOne();
   virtual const char* GetOutputExtension() { return ".rpm"; }
   virtual bool SupportsComponentInstallation() const;
   virtual std::string GetComponentInstallDirNameSuffix(
