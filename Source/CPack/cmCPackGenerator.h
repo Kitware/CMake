@@ -125,7 +125,7 @@ protected:
    * CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE
    * CPACK_COMPONENTS_IGNORE_GROUPS
    * or
-   * CPACK_COMPONENTS_GROUPING
+   * CPACK_COMPONENTS_ONE_PACKAGE_PER_GROUP
    * @return 1 on success 0 on failure.
    */
   virtual int PrepareGroupingKind();
@@ -237,16 +237,28 @@ protected:
    */
   std::map<std::string, cmCPackComponent> Components;
   std::map<std::string, cmCPackComponentGroup> ComponentGroups;
+
   /**
-   * If true All component will be put in a single package.
+   * If components are enabled, this enum represents the different
+   * ways of mapping components to package files.
    */
-  bool allComponentInOne;
+  enum ComponentPackageMethod
+  {
+    /* one package for all components */
+    ONE_PACKAGE,
+    /* one package for each component */
+    ONE_PACKAGE_PER_COMPONENT,
+    /* one package for each group, with left over components in their own package */
+    ONE_PACKAGE_PER_GROUP,
+    UNKNOWN_COMPONENT_PACKAGE_METHOD
+  };
+
   /**
-   * If true component grouping will be ignored.
-   * You will still get 1 package for each component unless
-   * allComponentInOne is true.
+   * The component package method
+   * The default is ONE_PACKAGE_PER_GROUP, and generators may override the default
+   * before PrepareGroupingKind() is called.
    */
-  bool ignoreComponentGroup;
+  ComponentPackageMethod componentPackageMethod;
 
   cmCPackLog* Logger;
 private:
