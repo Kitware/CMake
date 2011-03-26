@@ -83,6 +83,8 @@ public:
   ///! Get the GlobalGenerator this is associated with
   cmGlobalGenerator *GetGlobalGenerator() {
     return this->GlobalGenerator; };
+  const cmGlobalGenerator *GetGlobalGenerator() const {
+    return this->GlobalGenerator; };
 
   ///! Set the Global Generator, done on creation by the GlobalGenerator
   void SetGlobalGenerator(cmGlobalGenerator *gg);
