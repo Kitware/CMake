@@ -163,8 +163,8 @@ public:
 
   int TryCompileTimeout;
 
-  bool GetForceUnixPaths() {return this->ForceUnixPaths;}
-  bool GetToolSupportsColor() { return this->ToolSupportsColor; }
+  bool GetForceUnixPaths() const { return this->ForceUnixPaths; }
+  bool GetToolSupportsColor() const { return this->ToolSupportsColor; }
 
   ///! return the language for the given extension
   const char* GetLanguageFromExtension(const char* ext);
@@ -179,11 +179,11 @@ public:
   virtual const char* GetCMakeCFGInitDirectory()  { return "."; }
 
   /** Get whether the generator should use a script for link commands.  */
-  bool GetUseLinkScript() { return this->UseLinkScript; }
+  bool GetUseLinkScript() const { return this->UseLinkScript; }
 
   /** Get whether the generator should produce special marks on rules
       producing symbolic (non-file) outputs.  */
-  bool GetNeedSymbolicMark() { return this->NeedSymbolicMark; }
+  bool GetNeedSymbolicMark() const { return this->NeedSymbolicMark; }
 
   /*
    * Determine what program to use for building the project.
@@ -213,7 +213,7 @@ public:
 
   /** Get the manifest of all targets that will be built for each
       configuration.  This is valid during generation only.  */
-  cmTargetManifest const& GetTargetManifest() { return this->TargetManifest; }
+  cmTargetManifest const& GetTargetManifest() const { return this->TargetManifest; }
 
   /** Get the content of a directory.  Directory listings are loaded
       from disk at most once and cached.  During the generation step
@@ -224,17 +224,17 @@ public:
 
   void AddTarget(cmTargets::value_type &v);
 
-  virtual const char* GetAllTargetName()          { return "ALL_BUILD"; }
-  virtual const char* GetInstallTargetName()      { return "INSTALL"; }
-  virtual const char* GetInstallLocalTargetName() { return 0; }
-  virtual const char* GetInstallStripTargetName() { return 0; }
-  virtual const char* GetPreinstallTargetName()   { return 0; }
-  virtual const char* GetTestTargetName()         { return "RUN_TESTS"; }
-  virtual const char* GetPackageTargetName()      { return "PACKAGE"; }
-  virtual const char* GetPackageSourceTargetName(){ return 0; }
-  virtual const char* GetEditCacheTargetName()    { return 0; }
-  virtual const char* GetRebuildCacheTargetName() { return 0; }
-  virtual const char* GetCleanTargetName()        { return 0; }
+  virtual const char* GetAllTargetName()           const { return "ALL_BUILD"; }
+  virtual const char* GetInstallTargetName()       const { return "INSTALL"; }
+  virtual const char* GetInstallLocalTargetName()  const { return 0; }
+  virtual const char* GetInstallStripTargetName()  const { return 0; }
+  virtual const char* GetPreinstallTargetName()    const { return 0; }
+  virtual const char* GetTestTargetName()          const { return "RUN_TESTS"; }
+  virtual const char* GetPackageTargetName()       const { return "PACKAGE"; }
+  virtual const char* GetPackageSourceTargetName() const { return 0; }
+  virtual const char* GetEditCacheTargetName()     const { return 0; }
+  virtual const char* GetRebuildCacheTargetName()  const { return 0; }
+  virtual const char* GetCleanTargetName()         const { return 0; }
 
   // Class to track a set of dependencies.
   typedef cmTargetDependSet TargetDependSet;

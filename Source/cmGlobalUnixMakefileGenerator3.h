@@ -137,17 +137,17 @@ protected:
   bool NeedRequiresStep(cmTarget const&);
 
   // Setup target names
-  virtual const char* GetAllTargetName()          { return "all"; }
-  virtual const char* GetInstallTargetName()      { return "install"; }
-  virtual const char* GetInstallLocalTargetName() { return "install/local"; }
-  virtual const char* GetInstallStripTargetName() { return "install/strip"; }
-  virtual const char* GetPreinstallTargetName()   { return "preinstall"; }
-  virtual const char* GetTestTargetName()         { return "test"; }
-  virtual const char* GetPackageTargetName()      { return "package"; }
-  virtual const char* GetPackageSourceTargetName(){ return "package_source"; }
-  virtual const char* GetEditCacheTargetName()    { return "edit_cache"; }
-  virtual const char* GetRebuildCacheTargetName() { return "rebuild_cache"; }
-  virtual const char* GetCleanTargetName()        { return "clean"; }
+  virtual const char* GetAllTargetName()           const { return "all"; }
+  virtual const char* GetInstallTargetName()       const { return "install"; }
+  virtual const char* GetInstallLocalTargetName()  const { return "install/local"; }
+  virtual const char* GetInstallStripTargetName()  const { return "install/strip"; }
+  virtual const char* GetPreinstallTargetName()    const { return "preinstall"; }
+  virtual const char* GetTestTargetName()          const { return "test"; }
+  virtual const char* GetPackageTargetName()       const { return "package"; }
+  virtual const char* GetPackageSourceTargetName() const { return "package_source"; }
+  virtual const char* GetEditCacheTargetName()     const { return "edit_cache"; }
+  virtual const char* GetRebuildCacheTargetName()  const { return "rebuild_cache"; }
+  virtual const char* GetCleanTargetName()         const { return "clean"; }
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() { return true; }
 
