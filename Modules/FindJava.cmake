@@ -42,7 +42,7 @@
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
-# Copyright 2009 Mathieu Malaterre <mathieu.malaterre@gmail.com>
+# Copyright 2009-2011 Mathieu Malaterre <mathieu.malaterre@gmail.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -105,9 +105,9 @@ IF(Java_JAVA_EXECUTABLE)
       # 2. OpenJDK 1.6
       # 3. GCJ 1.5
       # 4. Kaffe 1.4.2
-      IF(var MATCHES "java version \"[0-9]+\\.[0-9]+\\.[0-9_]+[oem-]*\".*")
+      IF(var MATCHES "java version \"[0-9]+\\.[0-9]+\\.[0-9_.]+[oem-]*\".*")
         # This is most likely Sun / OpenJDK, or maybe GCJ-java compat layer
-        STRING( REGEX REPLACE ".* version \"([0-9]+\\.[0-9]+\\.[0-9_]+)[oem-]*\".*"
+        STRING( REGEX REPLACE ".* version \"([0-9]+\\.[0-9]+\\.[0-9_.]+)[oem-]*\".*"
                 "\\1" Java_VERSION_STRING "${var}" )
       ELSEIF(var MATCHES "java full version \"kaffe-[0-9]+\\.[0-9]+\\.[0-9_]+\".*")
         # Kaffe style
@@ -122,7 +122,7 @@ IF(Java_JAVA_EXECUTABLE)
       STRING( REGEX REPLACE "[0-9]+\\.([0-9]+).*" "\\1" Java_VERSION_MINOR "${Java_VERSION_STRING}" )
       STRING( REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" Java_VERSION_PATCH "${Java_VERSION_STRING}" )
       # warning tweak version can be empty:
-      STRING( REGEX REPLACE "[0-9]+\\.[0-9]+\\.[0-9]+\\_?([0-9]*)$" "\\1" Java_VERSION_TWEAK "${Java_VERSION_STRING}" )
+      STRING( REGEX REPLACE "[0-9]+\\.[0-9]+\\.[0-9]+\\_?\\.?([0-9]*)$" "\\1" Java_VERSION_TWEAK "${Java_VERSION_STRING}" )
       if( Java_VERSION_TWEAK STREQUAL "" ) # check case where tweak is not defined
         set(Java_VERSION ${Java_VERSION_MAJOR}.${Java_VERSION_MINOR}.${Java_VERSION_PATCH})
       else( )
