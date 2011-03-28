@@ -15,6 +15,7 @@
 
 #=============================================================================
 # Copyright 2004-2009 Kitware, Inc.
+# Copyright 2011 Mathieu Malaterre <mathieu.malaterre@gmail.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -26,7 +27,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PROGRAM(SWIG_EXECUTABLE swig)
+FIND_PROGRAM(SWIG_EXECUTABLE swig2.0 swig)
 
 IF(SWIG_EXECUTABLE)
   EXECUTE_PROCESS(COMMAND ${SWIG_EXECUTABLE} -swiglib
