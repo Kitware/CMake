@@ -7,11 +7,12 @@
 #  OPENSSL_FOUND - system has the OpenSSL library
 #  OPENSSL_INCLUDE_DIR - the OpenSSL include directory
 #  OPENSSL_LIBRARIES - The libraries needed to use OpenSSL
+#  OPENSSL_VERSION - This is set to $major.$minor.$revision (eg. 0.9.8)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
 # Copyright 2006 Alexander Neundorf <neundorf@kde.org>
-# Copyright 2009-2010 Mathieu Malaterre <mathieu.malaterre@gmail.com>
+# Copyright 2009-2011 Mathieu Malaterre <mathieu.malaterre@gmail.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -35,6 +36,7 @@ FIND_PATH(OPENSSL_ROOT_DIR
   NAMES include/openssl/ssl.h
   HINTS ${_OPENSSL_ROOT_HINTS}
   PATHS ${_OPENSSL_ROOT_PATHS}
+  ENV OPENSSL_ROOT_DIR
 )
 MARK_AS_ADVANCED(OPENSSL_ROOT_DIR)
 
@@ -61,16 +63,20 @@ IF(WIN32 AND NOT CYGWIN)
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
     FIND_LIBRARY(LIB_EAY_DEBUG NAMES libeay32MDd libeay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib/VC
+      PATHS ${OPENSSL_ROOT_DIR}
+      PATH_SUFFIXES "lib" "VC" "lib/VC"
       )
     FIND_LIBRARY(LIB_EAY_RELEASE NAMES libeay32MD libeay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib/VC
+      PATHS ${OPENSSL_ROOT_DIR}
+      PATH_SUFFIXES "lib" "VC" "lib/VC"
       )
     FIND_LIBRARY(SSL_EAY_DEBUG NAMES ssleay32MDd ssleay32 ssl
-      PATHS ${OPENSSL_ROOT_DIR}/lib/VC
+      PATHS ${OPENSSL_ROOT_DIR}
+      PATH_SUFFIXES "lib" "VC" "lib/VC"
       )
     FIND_LIBRARY(SSL_EAY_RELEASE NAMES ssleay32MD ssleay32 ssl
-      PATHS ${OPENSSL_ROOT_DIR}/lib/VC
+      PATHS ${OPENSSL_ROOT_DIR}
+      PATH_SUFFIXES "lib" "VC" "lib/VC"
       )
     if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
       set( OPENSSL_LIBRARIES
@@ -85,10 +91,12 @@ IF(WIN32 AND NOT CYGWIN)
   ELSEIF(MINGW)
     # same player, for MingW
     FIND_LIBRARY(LIB_EAY NAMES libeay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib/MinGW
+      PATHS ${OPENSSL_ROOT_DIR}
+      PATH_SUFFIXES "lib" "VC" "lib/MinGW"
       )
     FIND_LIBRARY(SSL_EAY NAMES ssleay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib/MinGW
+      PATHS ${OPENSSL_ROOT_DIR}
+      PATH_SUFFIXES "lib" "VC" "lib/MinGW"
       )
     MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
@@ -114,10 +122,35 @@ ELSE(WIN32 AND NOT CYGWIN)
 ENDIF(WIN32 AND NOT CYGWIN)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-find_package_handle_standard_args(OpenSSL DEFAULT_MSG
-  OPENSSL_LIBRARIES 
+find_package_handle_standard_args(OpenSSL "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
+  OPENSSL_LIBRARIES
   OPENSSL_INCLUDE_DIR
 )
 
-MARK_AS_ADVANCED(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)
+IF(OPENSSL_FOUND)
+  file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" openssl_version_str REGEX "^#define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x[0-9][0-9][0-9][0-9][0-9][0-9].*")
 
+  string(REGEX REPLACE "^.*OPENSSL_VERSION_NUMBER[\t ]+0x([0-9]).*$" "\\1" OPENSSL_VERSION_MAJOR "${openssl_version_str}")
+  string(REGEX REPLACE "^.*OPENSSL_VERSION_NUMBER[\t ]+0x[0-9]([0-9][0-9]).*$" "\\1" OPENSSL_VERSION_MINOR  "${openssl_version_str}")
+  string(REGEX REPLACE "^.*OPENSSL_VERSION_NUMBER[\t ]+0x[0-9][0-9][0-9]([0-9][0-9]).*$" "\\1" OPENSSL_VERSION_PATCH "${openssl_version_str}")
+
+  string(REGEX REPLACE "^0" "" OPENSSL_VERSION_MINOR "${OPENSSL_VERSION_MINOR}")
+  string(REGEX REPLACE "^0" "" OPENSSL_VERSION_PATCH "${OPENSSL_VERSION_PATCH}")
+
+  set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_PATCH}")
+
+  if(OpenSSL_FIND_VERSION)
+    if(OpenSSL_FIND_VERSION_EXACT AND NOT ${OPENSSL_VERSION} VERSION_EQUAL ${OpenSSL_FIND_VERSION})
+      message(FATAL_ERROR "OpenSSL version found (${OPENSSL_VERSION}) does not match the required one (${OpenSSL_FIND_VERSION}), aborting.")
+    elseif(${OPENSSL_VERSION} VERSION_LESS ${OpenSSL_FIND_VERSION})
+      if(OpenSSL_FIND_REQUIRED)
+        message(FATAL_ERROR "OpenSSL version found (${OPENSSL_VERSION}) is less then the minimum required (${OpenSSL_FIND_VERSION}), aborting.")
+      else(OpenSSL_FIND_REQUIRED)
+        message("OpenSSL version found (${OPENSSL_VERSION}) is less then the minimum required (${OpenSSL_FIND_VERSION}), continue without OpenSSL support.")
+        set(OPENSSL_FOUND FALSE)
+      endif(OpenSSL_FIND_REQUIRED)
+    endif()
+  endif(OpenSSL_FIND_VERSION)
+ENDIF (OPENSSL_FOUND)
+
+MARK_AS_ADVANCED(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)
