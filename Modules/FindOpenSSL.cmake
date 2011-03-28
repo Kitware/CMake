@@ -24,6 +24,13 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+if (UNIX)
+  find_package(PkgConfig)
+  if (PKG_CONFIG_FOUND)
+    pkg_check_modules(_OPENSSL openssl)
+  endif (PKG_CONFIG_FOUND)
+endif (UNIX)
+
 # http://www.slproweb.com/products/Win32OpenSSL.html
 SET(_OPENSSL_ROOT_HINTS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
@@ -41,8 +48,12 @@ FIND_PATH(OPENSSL_ROOT_DIR
 MARK_AS_ADVANCED(OPENSSL_ROOT_DIR)
 
 # Re-use the previous path:
-FIND_PATH(OPENSSL_INCLUDE_DIR openssl/ssl.h
-  PATHS ${OPENSSL_ROOT_DIR}/include
+FIND_PATH(OPENSSL_INCLUDE_DIR
+  NAMES
+    openssl/ssl.h
+  PATHS
+    ${_OPENSSL_INCLUDEDIR}
+    ${OPENSSL_ROOT_DIR}/include
 )
 
 IF(WIN32 AND NOT CYGWIN)
@@ -102,19 +113,43 @@ IF(WIN32 AND NOT CYGWIN)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
   ELSE(MSVC)
     # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
-    FIND_LIBRARY(LIB_EAY NAMES libeay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib
-      )
-    FIND_LIBRARY(SSL_EAY NAMES ssleay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib
-      )
+    FIND_LIBRARY(LIB_EAY
+      NAMES
+        libeay32
+      PATHS
+        ${_OPENSSL_LIBDIR}
+        ${OPENSSL_ROOT_DIR}/lib
+    )
+
+    FIND_LIBRARY(SSL_EAY
+      NAMES
+        ssleay32
+      PATHS
+        ${_OPENSSL_LIBDIR}
+        ${OPENSSL_ROOT_DIR}/lib
+    )
+
     MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
   ENDIF(MSVC)
 ELSE(WIN32 AND NOT CYGWIN)
 
-  FIND_LIBRARY(OPENSSL_SSL_LIBRARIES NAMES ssl ssleay32 ssleay32MD)
-  FIND_LIBRARY(OPENSSL_CRYPTO_LIBRARIES NAMES crypto)
+  FIND_LIBRARY(OPENSSL_SSL_LIBRARIES
+    NAMES
+      ssl
+      ssleay32
+      ssleay32MD
+    PATHS
+      ${_OPENSSL_LIBDIR}
+  )
+
+  FIND_LIBRARY(OPENSSL_CRYPTO_LIBRARIES
+    NAMES
+      crypto
+    PATHS
+      ${_OPENSSL_LIBDIR}
+  )
+
   MARK_AS_ADVANCED(OPENSSL_CRYPTO_LIBRARIES OPENSSL_SSL_LIBRARIES)
 
   SET(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
