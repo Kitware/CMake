@@ -165,5 +165,10 @@ int cmCPackBundleGenerator::PackageFiles()
     cmSystemTools::SetPermissions(command_target.str().c_str(), 0777);
     }
 
-  return this->CreateDMG();
+  return this->CreateDMG(toplevel, packageFileNames[0]);
+}
+
+bool cmCPackBundleGenerator::SupportsComponentInstallation() const
+{
+  return false;
 }

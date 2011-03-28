@@ -32,6 +32,7 @@ protected:
   virtual int InitializeInternal();
   virtual const char* GetPackagingInstallPrefix();
   int PackageFiles();
+  bool SupportsComponentInstallation() const;
 
   std::string InstallPrefix;
 };
