@@ -215,13 +215,7 @@ ELSE(WIN32 AND NOT CYGWIN)
 
 ENDIF(WIN32 AND NOT CYGWIN)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-find_package_handle_standard_args(OpenSSL "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
-  OPENSSL_LIBRARIES
-  OPENSSL_INCLUDE_DIR
-)
-
-IF(OPENSSL_FOUND)
+if (OPENSSL_INCLUDE_DIR)
   file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" openssl_version_str REGEX "^#define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x[0-9][0-9][0-9][0-9][0-9][0-9].*")
 
   string(REGEX REPLACE "^.*OPENSSL_VERSION_NUMBER[\t ]+0x([0-9]).*$" "\\1" OPENSSL_VERSION_MAJOR "${openssl_version_str}")
@@ -232,19 +226,25 @@ IF(OPENSSL_FOUND)
   string(REGEX REPLACE "^0" "" OPENSSL_VERSION_PATCH "${OPENSSL_VERSION_PATCH}")
 
   set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_PATCH}")
+endif (OPENSSL_INCLUDE_DIR)
 
-  if(OpenSSL_FIND_VERSION)
-    if(OpenSSL_FIND_VERSION_EXACT AND NOT ${OPENSSL_VERSION} VERSION_EQUAL ${OpenSSL_FIND_VERSION})
-      message(FATAL_ERROR "OpenSSL version found (${OPENSSL_VERSION}) does not match the required one (${OpenSSL_FIND_VERSION}), aborting.")
-    elseif(${OPENSSL_VERSION} VERSION_LESS ${OpenSSL_FIND_VERSION})
-      if(OpenSSL_FIND_REQUIRED)
-        message(FATAL_ERROR "OpenSSL version found (${OPENSSL_VERSION}) is less then the minimum required (${OpenSSL_FIND_VERSION}), aborting.")
-      else(OpenSSL_FIND_REQUIRED)
-        message("OpenSSL version found (${OPENSSL_VERSION}) is less then the minimum required (${OpenSSL_FIND_VERSION}), continue without OpenSSL support.")
-        set(OPENSSL_FOUND FALSE)
-      endif(OpenSSL_FIND_REQUIRED)
-    endif()
-  endif(OpenSSL_FIND_VERSION)
-ENDIF (OPENSSL_FOUND)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
+if (OPENSSL_VERSION)
+  find_package_handle_standard_args(OpenSSL
+    REQUIRED_VARS
+      OPENSSL_LIBRARIES
+      OPENSSL_INCLUDE_DIR
+    VERSION_VAR
+      OPENSSL_VERSION
+    FAIL_MESSAGE
+      "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
+  )
+else (OPENSSL_VERSION)
+  find_package_handle_standard_args(OpenSSL "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
+    OPENSSL_LIBRARIES
+    OPENSSL_INCLUDE_DIR
+  )
+endif (OPENSSL_VERSION)
 
 MARK_AS_ADVANCED(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)
