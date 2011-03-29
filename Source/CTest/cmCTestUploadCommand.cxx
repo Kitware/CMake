@@ -38,7 +38,7 @@ bool cmCTestUploadCommand::CheckArgumentKeyword(std::string const& arg)
     this->ArgumentDoing = ArgumentDoingFiles;
     return true;
     }
-  return this->CheckArgumentValue(arg);
+  return false;
 }
 
 
