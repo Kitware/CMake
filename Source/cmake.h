@@ -368,8 +368,8 @@ class cmake
 
   void UnwatchUnusedCli(const char* var);
   void WatchUnusedCli(const char* var);
-  void RunCheckForUnusedVariables(const std::string& reason) const;
 protected:
+  void RunCheckForUnusedVariables();
   void InitializeProperties();
   int HandleDeleteCacheVariables(const char* var);
   cmPropertyMap Properties;
@@ -467,7 +467,7 @@ private:
   bool WarnUnused;
   bool WarnUnusedCli;
   bool CheckSystemVars;
-  std::map<std::string, bool> UsedCliVariables;
+  std::map<cmStdString, bool> UsedCliVariables;
   std::string CMakeEditCommand;
   std::string CMakeCommand;
   std::string CXXEnvironment;
