@@ -207,7 +207,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
 }
 
 //----------------------------------------------------------------------
-int cmCPackArchiveGenerator::PackageComponentsAllInOne(bool allComponent)
+int cmCPackArchiveGenerator::PackageComponentsAllInOne()
 {
   // reset the package file names
   packageFileNames.clear();
@@ -221,38 +221,15 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne(bool allComponent)
       << std::endl);
   DECLARE_AND_OPEN_ARCHIVE(packageFileNames[0],archive);
 
-  // The ALL GROUP in ONE package case
-  if (! allComponent) {
-    // iterate over the component groups
-    std::map<std::string, cmCPackComponentGroup>::iterator compGIt;
-    for (compGIt=this->ComponentGroups.begin();
-        compGIt!=this->ComponentGroups.end(); ++compGIt)
-      {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging component group: "
-          << compGIt->first
-          << std::endl);
-      // now iterate over the component of this group
-      std::vector<cmCPackComponent*>::iterator compIt;
-      for (compIt=(compGIt->second).Components.begin();
-          compIt!=(compGIt->second).Components.end();
-          ++compIt)
-        {
-        // Add the files of this component to the archive
-        addOneComponentToArchive(archive,*compIt);
-        }
-      }
-  }
-  // The ALL COMPONENT in ONE package case
-  else
+  // The ALL COMPONENTS in ONE package case
+  std::map<std::string, cmCPackComponent>::iterator compIt;
+  for (compIt=this->Components.begin();compIt!=this->Components.end();
+      ++compIt )
     {
-    std::map<std::string, cmCPackComponent>::iterator compIt;
-    for (compIt=this->Components.begin();compIt!=this->Components.end();
-         ++compIt )
-      {
-      // Add the files of this component to the archive
-      addOneComponentToArchive(archive,&(compIt->second));
-      }
+    // Add the files of this component to the archive
+    addOneComponentToArchive(archive,&(compIt->second));
     }
+
   // archive goes out of scope so it will finalized and closed.
   return 1;
 }
@@ -265,19 +242,17 @@ int cmCPackArchiveGenerator::PackageFiles()
 
   if (SupportsComponentInstallation()) {
     // CASE 1 : COMPONENT ALL-IN-ONE package
-    // If ALL GROUPS or ALL COMPONENTS in ONE package has been requested
+    // If ALL COMPONENTS in ONE package has been requested
     // then the package file is unique and should be open here.
-    if (allComponentInOne ||
-        (allGroupInOne && (!this->ComponentGroups.empty()))
-       )
+    if (allComponentInOne)
       {
-      return PackageComponentsAllInOne(allComponentInOne);
+      return PackageComponentsAllInOne();
       }
     // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
     // There will be 1 package for each component group
     // however one may require to ignore component group and
     // in this case you'll get 1 package for each component.
-    else if ((!this->ComponentGroups.empty()) || (ignoreComponentGroup))
+    else
       {
       return PackageComponents(ignoreComponentGroup);
       }

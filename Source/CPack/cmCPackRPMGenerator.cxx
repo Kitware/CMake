@@ -50,6 +50,45 @@ int cmCPackRPMGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
+int cmCPackRPMGenerator::PackageOnePack(std::string initialToplevel,
+                                        std::string packageName)
+{
+  int retval = 1;
+  // Begin the archive for this pack
+  std::string localToplevel(initialToplevel);
+  std::string packageFileName(
+      cmSystemTools::GetParentDirectory(toplevel.c_str())
+                             );
+  std::string outputFileName(
+   GetComponentPackageFileName(this->GetOption("CPACK_PACKAGE_FILE_NAME"),
+                               packageName,
+                               true)
+                               + this->GetOutputExtension()
+                            );
+
+  localToplevel += "/"+ packageName;
+  /* replace the TEMP DIRECTORY with the component one */
+  this->SetOption("CPACK_TEMPORARY_DIRECTORY",localToplevel.c_str());
+  packageFileName += "/"+ outputFileName;
+  /* replace proposed CPACK_OUTPUT_FILE_NAME */
+  this->SetOption("CPACK_OUTPUT_FILE_NAME",outputFileName.c_str());
+  /* replace the TEMPORARY package file name */
+  this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
+                  packageFileName.c_str());
+  // Tell CPackRPM.cmake the name of the component NAME.
+  this->SetOption("CPACK_RPM_PACKAGE_COMPONENT",packageName.c_str());
+  if (!this->ReadListFile("CPackRPM.cmake"))
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error while execution CPackRPM.cmake" << std::endl);
+    retval = 0;
+    }
+  // add the generated package to package file names list
+  packageFileNames.push_back(packageFileName);
+  return retval;
+}
+
+//----------------------------------------------------------------------
 int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
 {
   int retval = 1;
@@ -69,37 +108,23 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
       cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Packaging component group: "
           << compGIt->first
           << std::endl);
-      // Begin the archive for this group
-      std::string localToplevel(initialTopLevel);
-      std::string packageFileName(
-          cmSystemTools::GetParentDirectory(toplevel.c_str())
-                                 );
-      std::string outputFileName(
-       GetComponentPackageFileName(this->GetOption("CPACK_PACKAGE_FILE_NAME"),
-                                   compGIt->first,
-                                   true)
-                                   + this->GetOutputExtension()
-                                );
-
-      localToplevel += "/"+ compGIt->first;
-      /* replace the TEMP DIRECTORY with the component one */
-      this->SetOption("CPACK_TEMPORARY_DIRECTORY",localToplevel.c_str());
-      packageFileName += "/"+ outputFileName;
-      /* replace proposed CPACK_OUTPUT_FILE_NAME */
-      this->SetOption("CPACK_OUTPUT_FILE_NAME",outputFileName.c_str());
-      /* replace the TEMPORARY package file name */
-      this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
-                      packageFileName.c_str());
-      // Tell CPackRPM.cmake the name of the component GROUP.
-      this->SetOption("CPACK_RPM_PACKAGE_COMPONENT",compGIt->first.c_str());
-      if (!this->ReadListFile("CPackRPM.cmake"))
+      retval &= PackageOnePack(initialTopLevel,compGIt->first);
+      }
+    // Handle Orphan components (components not belonging to any groups)
+    std::map<std::string, cmCPackComponent>::iterator compIt;
+    for (compIt=this->Components.begin();
+        compIt!=this->Components.end(); ++compIt )
+      {
+      // Does the component belong to a group?
+      if (compIt->second.Group==NULL)
         {
-        cmCPackLogger(cmCPackLog::LOG_ERROR,
-            "Error while execution CPackRPM.cmake" << std::endl);
-        retval = 0;
+        cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+            "Component <"
+            << compIt->second.Name
+            << "> does not belong to any group, package it separately."
+            << std::endl);
+        retval &= PackageOnePack(initialTopLevel,compIt->first);
         }
-      // add the generated package to package file names list
-      packageFileNames.push_back(packageFileName);
       }
     }
   // CPACK_COMPONENTS_IGNORE_GROUPS is set
@@ -110,42 +135,14 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
     for (compIt=this->Components.begin();
          compIt!=this->Components.end(); ++compIt )
       {
-      std::string localToplevel(initialTopLevel);
-      std::string packageFileName(
-          cmSystemTools::GetParentDirectory(toplevel.c_str())
-                                 );
-      std::string outputFileName(
-       GetComponentPackageFileName(this->GetOption("CPACK_PACKAGE_FILE_NAME"),
-                                   compIt->first,
-                                   false)
-       + this->GetOutputExtension());
-
-      localToplevel += "/"+ compIt->first;
-      /* replace the TEMP DIRECTORY with the component one */
-      this->SetOption("CPACK_TEMPORARY_DIRECTORY",localToplevel.c_str());
-      packageFileName += "/"+ outputFileName;
-      /* replace proposed CPACK_OUTPUT_FILE_NAME */
-      this->SetOption("CPACK_OUTPUT_FILE_NAME",outputFileName.c_str());
-      /* replace the TEMPORARY package file name */
-      this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
-                      packageFileName.c_str());
-
-      this->SetOption("CPACK_RPM_PACKAGE_COMPONENT",compIt->first.c_str());
-      if (!this->ReadListFile("CPackRPM.cmake"))
-        {
-        cmCPackLogger(cmCPackLog::LOG_ERROR,
-                      "Error while execution CPackRPM.cmake" << std::endl);
-        retval = 0;
-        }
-      // add the generated package to package file names list
-      packageFileNames.push_back(packageFileName);
+      retval &= PackageOnePack(initialTopLevel,compIt->first);
       }
     }
   return retval;
 }
 
 //----------------------------------------------------------------------
-int cmCPackRPMGenerator::PackageComponentsAllInOne(bool allComponent)
+int cmCPackRPMGenerator::PackageComponentsAllInOne()
 {
   int retval = 1;
   std::string compInstDirName;
@@ -154,15 +151,7 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne(bool allComponent)
   packageFileNames.clear();
   std::string initialTopLevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
 
-  // all GROUP in one vs all COMPONENT in one
-  if (allComponent)
-    {
-    compInstDirName = "ALL_COMPONENTS_IN_ONE";
-    }
-  else
-    {
-    compInstDirName = "ALL_GROUPS_IN_ONE";
-    }
+  compInstDirName = "ALL_COMPONENTS_IN_ONE";
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Packaging all groups in one package..."
@@ -214,19 +203,17 @@ int cmCPackRPMGenerator::PackageFiles()
   /* Are we in the component packaging case */
   if (SupportsComponentInstallation()) {
     // CASE 1 : COMPONENT ALL-IN-ONE package
-    // If ALL GROUPS or ALL COMPONENTS in ONE package has been requested
+    // If ALL COMPONENTS in ONE package has been requested
     // then the package file is unique and should be open here.
-    if (allComponentInOne ||
-        (allGroupInOne && (!this->ComponentGroups.empty()))
-       )
+    if (allComponentInOne)
       {
-      return PackageComponentsAllInOne(allComponentInOne);
+      return PackageComponentsAllInOne();
       }
     // CASE 2 : COMPONENT CLASSICAL package(s) (i.e. not all-in-one)
     // There will be 1 package for each component group
     // however one may require to ignore component group and
     // in this case you'll get 1 package for each component.
-    else if ((!this->ComponentGroups.empty()) || (ignoreComponentGroup))
+    else
       {
       return PackageComponents(ignoreComponentGroup);
       }
@@ -278,14 +265,7 @@ std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
         cmSystemTools::UpperCase(componentName) + "_GROUP";
     if (NULL != GetOption(groupVar.c_str()))
       {
-      if (allGroupInOne)
-        {
-        return std::string("ALL_GROUPS_IN_ONE");
-        }
-      else
-        {
-        return std::string(GetOption(groupVar.c_str()));
-        }
+      return std::string(GetOption(groupVar.c_str()));
       }
     else
       {

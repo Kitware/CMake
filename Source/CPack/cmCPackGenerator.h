@@ -122,7 +122,6 @@ protected:
 
   /**
    * Prepare requested grouping kind from CPACK_xxx vars
-   * CPACK_COMPONENTS_ALL_GROUPS_IN_ONE_PACKAGE
    * CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE
    * CPACK_COMPONENTS_IGNORE_GROUPS
    * or
@@ -238,10 +237,6 @@ protected:
    */
   std::map<std::string, cmCPackComponent> Components;
   std::map<std::string, cmCPackComponentGroup> ComponentGroups;
-  /**
-   * If true All component groups will be put in a single package.
-   */
-  bool allGroupInOne;
   /**
    * If true All component will be put in a single package.
    */
