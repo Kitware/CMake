@@ -367,10 +367,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations(); 
   this->WriteString("<CustomBuild Include=\"", 2);
-  std::string path =
-    cmSystemTools::RelativePath(
-      this->Makefile->GetCurrentOutputDirectory(),
-      sourcePath.c_str());
+  std::string path = sourcePath;
   this->ConvertToWindowsSlash(path);
   (*this->BuildFileStream ) << path << "\">\n";
   for(std::vector<std::string>::iterator i = configs->begin();
@@ -609,9 +606,6 @@ WriteGroupSources(const char* name,
     const char* filter = sourceGroup.GetFullName();
     this->WriteString("<", 2); 
     std::string path = source;
-    path = cmSystemTools::RelativePath(
-      this->Makefile->GetCurrentOutputDirectory(),
-      source.c_str());
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << name << " Include=\""
                              << path;
@@ -685,9 +679,6 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
     bool rc = lang && (strcmp(lang, "RC") == 0);
     bool idl = ext == "idl";
     std::string sourceFile = (*source)->GetFullPath();
-    sourceFile =  cmSystemTools::RelativePath(
-      this->Makefile->GetCurrentOutputDirectory(),
-      sourceFile.c_str());
     this->ConvertToWindowsSlash(sourceFile);
     // output the source file
     if(header)
