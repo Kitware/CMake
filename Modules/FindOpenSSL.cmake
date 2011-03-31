@@ -24,25 +24,41 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+if (UNIX)
+  find_package(PkgConfig)
+  if (PKG_CONFIG_FOUND)
+    pkg_check_modules(_OPENSSL openssl)
+  endif (PKG_CONFIG_FOUND)
+endif (UNIX)
+
 # http://www.slproweb.com/products/Win32OpenSSL.html
 SET(_OPENSSL_ROOT_HINTS
+  $ENV{OPENSSL_ROOT_DIR}
+  ${OPENSSL_ROOT_DIR}
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
   )
 SET(_OPENSSL_ROOT_PATHS
+  "$ENV{PROGRAMFILES}/OpenSSL"
+  "$ENV{PROGRAMFILES}/OpenSSL-Win32"
+  "$ENV{PROGRAMFILES}/OpenSSL-Win64"
   "C:/OpenSSL/"
+  "C:/OpenSSL-Win32/"
+  "C:/OpenSSL-Win64/"
   )
-FIND_PATH(OPENSSL_ROOT_DIR
-  NAMES include/openssl/ssl.h
+SET(_OPENSSL_ROOT_HINTS_AND_PATHS
   HINTS ${_OPENSSL_ROOT_HINTS}
   PATHS ${_OPENSSL_ROOT_PATHS}
-  ENV OPENSSL_ROOT_DIR
-)
-MARK_AS_ADVANCED(OPENSSL_ROOT_DIR)
+  )
 
-# Re-use the previous path:
-FIND_PATH(OPENSSL_INCLUDE_DIR openssl/ssl.h
-  PATHS ${OPENSSL_ROOT_DIR}/include
+FIND_PATH(OPENSSL_INCLUDE_DIR
+  NAMES
+    openssl/ssl.h
+  HINTS
+    ${_OPENSSL_INCLUDEDIR}
+  ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+  PATH_SUFFIXES
+    include
 )
 
 IF(WIN32 AND NOT CYGWIN)
@@ -62,22 +78,52 @@ IF(WIN32 AND NOT CYGWIN)
     # We are using the libraries located in the VC subdir instead of the parent directory eventhough :
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
-    FIND_LIBRARY(LIB_EAY_DEBUG NAMES libeay32MDd libeay32
-      PATHS ${OPENSSL_ROOT_DIR}
-      PATH_SUFFIXES "lib" "VC" "lib/VC"
-      )
-    FIND_LIBRARY(LIB_EAY_RELEASE NAMES libeay32MD libeay32
-      PATHS ${OPENSSL_ROOT_DIR}
-      PATH_SUFFIXES "lib" "VC" "lib/VC"
-      )
-    FIND_LIBRARY(SSL_EAY_DEBUG NAMES ssleay32MDd ssleay32 ssl
-      PATHS ${OPENSSL_ROOT_DIR}
-      PATH_SUFFIXES "lib" "VC" "lib/VC"
-      )
-    FIND_LIBRARY(SSL_EAY_RELEASE NAMES ssleay32MD ssleay32 ssl
-      PATHS ${OPENSSL_ROOT_DIR}
-      PATH_SUFFIXES "lib" "VC" "lib/VC"
-      )
+    FIND_LIBRARY(LIB_EAY_DEBUG
+      NAMES
+        libeay32MDd
+        libeay32
+      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+      PATH_SUFFIXES
+        "lib"
+        "VC"
+        "lib/VC"
+    )
+
+    FIND_LIBRARY(LIB_EAY_RELEASE
+      NAMES
+        libeay32MD
+        libeay32
+      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+      PATH_SUFFIXES
+        "lib"
+        "VC"
+        "lib/VC"
+    )
+
+    FIND_LIBRARY(SSL_EAY_DEBUG
+      NAMES
+        ssleay32MDd
+        ssleay32
+        ssl
+      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+      PATH_SUFFIXES
+        "lib"
+        "VC"
+        "lib/VC"
+    )
+
+    FIND_LIBRARY(SSL_EAY_RELEASE
+      NAMES
+        ssleay32MD
+        ssleay32
+        ssl
+      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+      PATH_SUFFIXES
+        "lib"
+        "VC"
+        "lib/VC"
+    )
+
     if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
       set( OPENSSL_LIBRARIES
         optimized ${SSL_EAY_RELEASE} debug ${SSL_EAY_DEBUG}
@@ -90,44 +136,86 @@ IF(WIN32 AND NOT CYGWIN)
     MARK_AS_ADVANCED(LIB_EAY_DEBUG LIB_EAY_RELEASE)
   ELSEIF(MINGW)
     # same player, for MingW
-    FIND_LIBRARY(LIB_EAY NAMES libeay32
-      PATHS ${OPENSSL_ROOT_DIR}
-      PATH_SUFFIXES "lib" "VC" "lib/MinGW"
-      )
-    FIND_LIBRARY(SSL_EAY NAMES ssleay32
-      PATHS ${OPENSSL_ROOT_DIR}
-      PATH_SUFFIXES "lib" "VC" "lib/MinGW"
-      )
+    FIND_LIBRARY(LIB_EAY
+      NAMES
+        libeay32
+      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+      PATH_SUFFIXES
+        "lib"
+        "lib/MinGW"
+    )
+
+    FIND_LIBRARY(SSL_EAY
+      NAMES
+        ssleay32
+      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+      PATH_SUFFIXES
+        "lib"
+        "lib/MinGW"
+    )
+
     MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
   ELSE(MSVC)
     # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
-    FIND_LIBRARY(LIB_EAY NAMES libeay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib
-      )
-    FIND_LIBRARY(SSL_EAY NAMES ssleay32
-      PATHS ${OPENSSL_ROOT_DIR}/lib
-      )
+    FIND_LIBRARY(LIB_EAY
+      NAMES
+        libeay32
+      HINTS
+        ${_OPENSSL_LIBDIR}
+      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+      PATH_SUFFIXES
+        lib
+    )
+
+    FIND_LIBRARY(SSL_EAY
+      NAMES
+        ssleay32
+      HINTS
+        ${_OPENSSL_LIBDIR}
+      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+      PATH_SUFFIXES
+        lib
+    )
+
     MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
   ENDIF(MSVC)
 ELSE(WIN32 AND NOT CYGWIN)
 
-  FIND_LIBRARY(OPENSSL_SSL_LIBRARIES NAMES ssl ssleay32 ssleay32MD)
-  FIND_LIBRARY(OPENSSL_CRYPTO_LIBRARIES NAMES crypto)
-  MARK_AS_ADVANCED(OPENSSL_CRYPTO_LIBRARIES OPENSSL_SSL_LIBRARIES)
+  FIND_LIBRARY(OPENSSL_SSL_LIBRARY
+    NAMES
+      ssl
+      ssleay32
+      ssleay32MD
+    HINTS
+      ${_OPENSSL_LIBDIR}
+    ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+    PATH_SUFFIXES
+      lib
+  )
 
-  SET(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
+  FIND_LIBRARY(OPENSSL_CRYPTO_LIBRARY
+    NAMES
+      crypto
+    HINTS
+      ${_OPENSSL_LIBDIR}
+    ${_OPENSSL_ROOT_HINTS_AND_PATHS}
+    PATH_SUFFIXES
+      lib
+  )
+
+  MARK_AS_ADVANCED(OPENSSL_CRYPTO_LIBRARY OPENSSL_SSL_LIBRARY)
+
+  # compat defines
+  SET(OPENSSL_SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY})
+  SET(OPENSSL_CRYPTO_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
+
+  SET(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
 
 ENDIF(WIN32 AND NOT CYGWIN)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-find_package_handle_standard_args(OpenSSL "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
-  OPENSSL_LIBRARIES
-  OPENSSL_INCLUDE_DIR
-)
-
-IF(OPENSSL_FOUND)
+if (OPENSSL_INCLUDE_DIR)
   file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" openssl_version_str REGEX "^#define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x[0-9][0-9][0-9][0-9][0-9][0-9].*")
 
   string(REGEX REPLACE "^.*OPENSSL_VERSION_NUMBER[\t ]+0x([0-9]).*$" "\\1" OPENSSL_VERSION_MAJOR "${openssl_version_str}")
@@ -138,19 +226,25 @@ IF(OPENSSL_FOUND)
   string(REGEX REPLACE "^0" "" OPENSSL_VERSION_PATCH "${OPENSSL_VERSION_PATCH}")
 
   set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_PATCH}")
+endif (OPENSSL_INCLUDE_DIR)
 
-  if(OpenSSL_FIND_VERSION)
-    if(OpenSSL_FIND_VERSION_EXACT AND NOT ${OPENSSL_VERSION} VERSION_EQUAL ${OpenSSL_FIND_VERSION})
-      message(FATAL_ERROR "OpenSSL version found (${OPENSSL_VERSION}) does not match the required one (${OpenSSL_FIND_VERSION}), aborting.")
-    elseif(${OPENSSL_VERSION} VERSION_LESS ${OpenSSL_FIND_VERSION})
-      if(OpenSSL_FIND_REQUIRED)
-        message(FATAL_ERROR "OpenSSL version found (${OPENSSL_VERSION}) is less then the minimum required (${OpenSSL_FIND_VERSION}), aborting.")
-      else(OpenSSL_FIND_REQUIRED)
-        message("OpenSSL version found (${OPENSSL_VERSION}) is less then the minimum required (${OpenSSL_FIND_VERSION}), continue without OpenSSL support.")
-        set(OPENSSL_FOUND FALSE)
-      endif(OpenSSL_FIND_REQUIRED)
-    endif()
-  endif(OpenSSL_FIND_VERSION)
-ENDIF (OPENSSL_FOUND)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
+if (OPENSSL_VERSION)
+  find_package_handle_standard_args(OpenSSL
+    REQUIRED_VARS
+      OPENSSL_LIBRARIES
+      OPENSSL_INCLUDE_DIR
+    VERSION_VAR
+      OPENSSL_VERSION
+    FAIL_MESSAGE
+      "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
+  )
+else (OPENSSL_VERSION)
+  find_package_handle_standard_args(OpenSSL "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
+    OPENSSL_LIBRARIES
+    OPENSSL_INCLUDE_DIR
+  )
+endif (OPENSSL_VERSION)
 
 MARK_AS_ADVANCED(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)
