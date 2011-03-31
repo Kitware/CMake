@@ -2031,6 +2031,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ENDIF()
     SET_TESTS_PROPERTIES(Contracts.${project} PROPERTIES TIMEOUT ${timeout})
   ENDFOREACH()
+
+  ADD_TEST_MACRO(CompileCommandOutput
+    "${CMake_BINARY_DIR}/Tests/CMakeLib/runcompilecommands")
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)

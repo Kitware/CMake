@@ -30,3 +30,6 @@ endif()
 foreach(test ${CMakeLib_TESTS})
   add_test(CMakeLib.${test} CMakeLibTests ${test})
 endforeach()
+
+ADD_EXECUTABLE(runcompilecommands run_compile_commands.cxx)
+TARGET_LINK_LIBRARIES(runcompilecommands CMakeLib)
