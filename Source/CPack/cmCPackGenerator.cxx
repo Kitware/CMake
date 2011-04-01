@@ -1307,10 +1307,10 @@ int cmCPackGenerator::PrepareGroupingKind()
     else
       {
       cmCPackLogger(cmCPackLog::LOG_WARNING, "["
-              << this->Name << "]"
-              << " requested component grouping type <"<< groupingType
-              << "> UNKNOWN not in (ALL_COMPONENTS_IN_ONE,IGNORE,ONE_PER_GROUP)"
-              << std::endl);
+          << this->Name << "]"
+          << " requested component grouping type <"<< groupingType
+          << "> UNKNOWN not in (ALL_COMPONENTS_IN_ONE,IGNORE,ONE_PER_GROUP)"
+          << std::endl);
       }
     }
 
@@ -1328,10 +1328,10 @@ int cmCPackGenerator::PrepareGroupingKind()
       method = ONE_PACKAGE_PER_COMPONENT;
       }
     cmCPackLogger(cmCPackLog::LOG_WARNING, "["
-              << this->Name << "]"
-              << " One package per component group requested, but NO component groups exist:"
-              << " Ignoring component group."
-              << std::endl);
+         << this->Name << "]"
+         << " One package per component group requested, "
+         << "but NO component groups exist: Ignoring component group."
+         << std::endl);
     }
 
   // if user specified packaging method, override the default packaging method
@@ -1349,7 +1349,8 @@ int cmCPackGenerator::PrepareGroupingKind()
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,  "["
         << this->Name << "]"
-        << " requested component grouping = " << method_names[componentPackageMethod]
+        << " requested component grouping = "
+        << method_names[componentPackageMethod]
         << std::endl);
 
   return 1;
