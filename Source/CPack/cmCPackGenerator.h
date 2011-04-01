@@ -248,14 +248,16 @@ protected:
     ONE_PACKAGE,
     /* one package for each component */
     ONE_PACKAGE_PER_COMPONENT,
-    /* one package for each group, with left over components in their own package */
+    /* one package for each group,
+     * with left over components in their own package */
     ONE_PACKAGE_PER_GROUP,
     UNKNOWN_COMPONENT_PACKAGE_METHOD
   };
 
   /**
    * The component package method
-   * The default is ONE_PACKAGE_PER_GROUP, and generators may override the default
+   * The default is ONE_PACKAGE_PER_GROUP,
+   * and generators may override the default
    * before PrepareGroupingKind() is called.
    */
   ComponentPackageMethod componentPackageMethod;

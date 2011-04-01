@@ -254,7 +254,8 @@ int cmCPackArchiveGenerator::PackageFiles()
     // in this case you'll get 1 package for each component.
     else
       {
-      return PackageComponents(componentPackageMethod == ONE_PACKAGE_PER_COMPONENT);
+      return PackageComponents(componentPackageMethod ==
+                               ONE_PACKAGE_PER_COMPONENT);
       }
   }
 
