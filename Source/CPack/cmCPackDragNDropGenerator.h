@@ -36,7 +36,8 @@ protected:
   bool CopyFile(cmOStringStream& source, cmOStringStream& target);
   bool RunCommand(cmOStringStream& command, std::string* output = 0);
 
-  std::string GetComponentInstallDirNameSuffix(const std::string& componentName);
+  std::string
+  GetComponentInstallDirNameSuffix(const std::string& componentName);
 
   int CreateDMG(const std::string& src_dir, const std::string& output_file);
 
