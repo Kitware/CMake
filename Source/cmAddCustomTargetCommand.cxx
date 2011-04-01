@@ -123,7 +123,11 @@ bool cmAddCustomTargetCommand
           currentLine.push_back(copy);
           break;
         case doing_depends:
-          depends.push_back(copy);
+          {
+          std::string dep = copy;
+          cmSystemTools::ConvertToUnixSlashes(dep);
+          depends.push_back(dep);
+          }
           break;
          case doing_comment:
            comment_buffer = copy;

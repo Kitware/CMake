@@ -102,7 +102,7 @@ ADD_CUSTOM_TARGET(TDocument ALL
   COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1.h to doc2.h."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1.h
                                    ${PROJECT_BINARY_DIR}/doc2.h
-  DEPENDS ${PROJECT_BINARY_DIR}/doc1.h doc1.txt
+  DEPENDS doc1.txt ${PROJECT_BINARY_DIR}//doc1.h # test 2 slashes
   COMMENT "Running top-level TDocument commands"
   SOURCES doc1.tex
   )

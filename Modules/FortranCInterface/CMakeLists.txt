@@ -70,6 +70,17 @@ else()
 endif()
 
 # Generate C symbol sources.
+set(symbol_sources)
+if(NOT "${CMAKE_Fortran_COMPILER_ID}" MATCHES "^(PathScale|Cray)$")
+  # Provide mymodule_ and my_module_ init symbols because:
+  #  - PGI Fortran uses module init symbols
+  # but not for:
+  #  - PathScale Fortran uses module init symbols but module symbols
+  #    use '.in.' so we cannot provide them anyway.
+  #  - Cray Fortran >= 7.3.2 uses module init symbols but module symbols
+  #    use 'mysub$mymodule_' so we cannot provide them anyway.
+  list(APPEND symbol_sources mymodule_.c my_module_.c)
+endif()
 foreach(symbol IN LISTS global_symbols module_symbols)
   # Skip symbols with '$' if C cannot handle them.
   if(C_SUPPORTS_DOLLAR OR NOT "${symbol}" MATCHES "\\$")
@@ -89,7 +100,7 @@ endforeach()
 add_library(myfort STATIC mysub.f my_sub.f ${myfort_modules})
 
 # Provide symbols through C but fall back to Fortran.
-add_library(symbols STATIC mymodule_.c my_module_.c ${symbol_sources})
+add_library(symbols STATIC ${symbol_sources})
 target_link_libraries(symbols myfort)
 
 # Require symbols through Fortran.
