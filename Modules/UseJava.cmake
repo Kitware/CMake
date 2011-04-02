@@ -289,9 +289,6 @@ function(add_jar _TARGET_NAME)
         file(WRITE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist "")
     endif()
 
-    # Add the target and make sure we have the latest resource files.
-    add_custom_target(${_TARGET_NAME} ALL DEPENDS ${_JAVA_RESOURCE_FILES} ${_JAVA_DEPENDS})
-
     if (_JAVA_COMPILE_FILES)
         # Compile the java files and create a list of class files
         add_custom_command(
@@ -321,7 +318,7 @@ function(add_jar _TARGET_NAME)
     # create the jar file
     if (CMAKE_JNI_TARGET)
         add_custom_command(
-            TARGET ${_TARGET_NAME}
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
             COMMAND ${Java_JAR_EXECUTABLE}
                 -cf ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
                 ${_JAVA_RESOURCE_FILES} @java_class_filelist
@@ -335,12 +332,13 @@ function(add_jar _TARGET_NAME)
                 -D_JAVA_TARGET_OUTPUT_NAME=${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
                 -D_JAVA_TARGET_OUTPUT_LINK=${_JAVA_TARGET_OUTPUT_LINK}
                 -P ${_JAVA_SYMLINK_SCRIPT}
+            DEPENDS ${_JAVA_RESOURCE_FILES} ${_JAVA_DEPENDS} ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
             WORKING_DIRECTORY ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
             COMMENT "Creating Java archive ${_JAVA_TARGET_OUTPUT_NAME}"
         )
     else ()
         add_custom_command(
-            TARGET ${_TARGET_NAME}
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
             COMMAND ${Java_JAR_EXECUTABLE}
                 -cf ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
                 ${_JAVA_RESOURCE_FILES} @java_class_filelist
@@ -350,9 +348,13 @@ function(add_jar _TARGET_NAME)
                 -D_JAVA_TARGET_OUTPUT_LINK=${_JAVA_TARGET_OUTPUT_LINK}
                 -P ${_JAVA_SYMLINK_SCRIPT}
             WORKING_DIRECTORY ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
+            DEPENDS ${_JAVA_RESOURCE_FILES} ${_JAVA_DEPENDS} ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
             COMMENT "Creating Java archive ${_JAVA_TARGET_OUTPUT_NAME}"
         )
     endif (CMAKE_JNI_TARGET)
+
+    # Add the target and make sure we have the latest resource files.
+    add_custom_target(${_TARGET_NAME} ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME})
 
     set(${_TARGET_NAME}_INSTALL_FILES
         ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
