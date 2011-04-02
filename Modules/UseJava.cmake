@@ -285,7 +285,9 @@ function(add_jar _TARGET_NAME)
     endforeach(_JAVA_SOURCE_FILE)
 
     # create an empty java_class_filelist
-    file(WRITE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist "")
+    if (NOT EXISTS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist)
+        file(WRITE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist "")
+    endif()
 
     # Add the target and make sure we have the latest resource files.
     add_custom_target(${_TARGET_NAME} ALL DEPENDS ${_JAVA_RESOURCE_FILES} ${_JAVA_DEPENDS})
