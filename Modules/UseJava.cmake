@@ -295,18 +295,26 @@ function(add_jar _TARGET_NAME)
     if (_JAVA_COMPILE_FILES)
         # Compile the java files and create a list of class files
         add_custom_command(
-            TARGET ${_TARGET_NAME}
+            # NOTE: this command generates an artificial dependency file
+            OUTPUT ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
             COMMAND ${Java_JAVAC_EXECUTABLE}
                 ${CMAKE_JAVA_COMPILE_FLAGS}
                 -classpath "${CMAKE_JAVA_INCLUDE_PATH_FINAL}"
                 -d ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
                 ${_JAVA_COMPILE_FILES}
+            COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
+            DEPENDS ${_JAVA_COMPILE_FILES}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Building Java objects for ${_TARGET_NAME}.jar"
+        )
+        add_custom_command(
+            OUTPUT ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -DCMAKE_JAVA_CLASS_OUTPUT_PATH=${CMAKE_JAVA_CLASS_OUTPUT_PATH}
                 -DCMAKE_JAR_CLASSES_PREFIX="${CMAKE_JAR_CLASSES_PREFIX}"
                 -P ${_JAVA_CLASS_FILELIST_SCRIPT}
+            DEPENDS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            COMMENT "Building Java objects for ${_TARGET_NAME}.jar"
         )
     endif (_JAVA_COMPILE_FILES)
 
