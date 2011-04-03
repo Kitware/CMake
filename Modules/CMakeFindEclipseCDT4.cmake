@@ -45,7 +45,7 @@ MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
   FILE(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/dummy")
 
   # First find the system include dirs:
-  IF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
+  IF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+ *\n) *End of (search) list" )
 
     # split the output into lines and then remove leading and trailing spaces from each of them:
     STRING(REGEX MATCHALL "[^\n]+\n" _includeLines "${CMAKE_MATCH_1}")
@@ -54,7 +54,7 @@ MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
       LIST(APPEND ${_resultIncludeDirs} "${_includePath}")
     ENDFOREACH(nextLine)
 
-  ENDIF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
+  ENDIF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+ *\n) *End of (search) list" )
 
 
   # now find the builtin macros:
