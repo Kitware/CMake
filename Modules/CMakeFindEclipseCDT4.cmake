@@ -32,14 +32,20 @@ MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
   SET(${_resultIncludeDirs})
   SET(_gccOutput)
   FILE(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/dummy" "\n" )
-  EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} -v -E -x ${_lang} -dD dummy
+
+  IF (${_lang} STREQUAL "c++")
+    SET(_compilerExecutable "${CMAKE_CXX_COMPILER}")
+  ELSE (${_lang} STREQUAL "c++")
+    SET(_compilerExecutable "${CMAKE_C_COMPILER}")
+  ENDIF (${_lang} STREQUAL "c++")
+  EXECUTE_PROCESS(COMMAND ${_compilerExecutable} -v -E -x ${_lang} -dD dummy
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles
                   ERROR_VARIABLE _gccOutput
                   OUTPUT_VARIABLE _gccStdout )
   FILE(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/dummy")
 
   # First find the system include dirs:
-  IF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
+  IF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+ *\n) *End of (search) list" )
 
     # split the output into lines and then remove leading and trailing spaces from each of them:
     STRING(REGEX MATCHALL "[^\n]+\n" _includeLines "${CMAKE_MATCH_1}")
@@ -48,7 +54,7 @@ MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
       LIST(APPEND ${_resultIncludeDirs} "${_includePath}")
     ENDFOREACH(nextLine)
 
-  ENDIF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+) *\n *End of (search) list" )
+  ENDIF( "${_gccOutput}" MATCHES "> search starts here[^\n]+\n *(.+ *\n) *End of (search) list" )
 
 
   # now find the builtin macros:
