@@ -64,9 +64,31 @@ For example:
 #  VAR_REALLY_COOL - cool right?
 #
 
+Test the documentation formatting by running "cmake --help-module FindXXX".
+Edit the comments until the output of this command looks satisfactory.
+
 To have a .cmake file in this directory NOT show up in the
 modules documentation, you should start the file with a blank
 line.
+
+After the documentation, leave a *BLANK* line, and then add a
+copyright and licence notice block like this one:
+
+#=============================================================================
+# Copyright 2009-2011 Your Name
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distribute this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
+The layout of the notice block is strictly enforced by the ModuleNotices test.
+Only the year range and name may be changed freely.
 
 A FindXXX.cmake module will typically be loaded by the command
 
