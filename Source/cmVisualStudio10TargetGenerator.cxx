@@ -449,6 +449,8 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     bool header = (*s)->GetPropertyAsBool("HEADER_FILE_ONLY")
       || this->GlobalGenerator->IgnoreFile
       ((*s)->GetExtension().c_str());
+    std::string ext =
+      cmSystemTools::LowerCase((*s)->GetExtension());
     if(!lang)
       {
       lang = "None";
@@ -469,7 +471,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       {
       headers.push_back(sf);
       }
-    else if(sf->GetExtension() == "idl")
+    else if(ext == "idl")
       {
       idls.push_back(sf);
       }
@@ -636,14 +638,28 @@ void cmVisualStudio10TargetGenerator::WriteObjSources()
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {
-    if((*source)->GetExtension() == "obj")
+    std::string ext =
+      cmSystemTools::LowerCase((*source)->GetExtension());
+    if(ext == "obj" || ext == "o")
       {
       if(first)
         {
         this->WriteString("<ItemGroup>\n", 1);
         first = false;
         }
-      this->WriteString("<None Include=\"", 2);
+      // If an object file is generated, then vs10
+      // will use it in the build, and we have to list
+      // it as None instead of Object
+      if((*source)->GetPropertyAsBool("GENERATED"))
+        {
+        this->WriteString("<None Include=\"", 2);
+        }
+      // If it is not a generated object then we have
+      // to use the Object type
+      else
+        {
+        this->WriteString("<Object Include=\"", 2);
+        }
       (*this->BuildFileStream ) << (*source)->GetFullPath() << "\" />\n";
       }
     }
@@ -665,8 +681,8 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {
-    std::string ext = (*source)->GetExtension();
-    if((*source)->GetCustomCommand() || ext == "obj")
+    std::string ext = cmSystemTools::LowerCase((*source)->GetExtension());
+    if((*source)->GetCustomCommand() || ext == "o" || ext == "obj")
       {
       continue;
       }
