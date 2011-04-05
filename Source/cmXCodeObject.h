@@ -141,6 +141,7 @@ public:
     }
   std::vector<cmXCodeObject*> const& GetObjectList() { return this->List;}
   void SetComment(const char* c) { this->Comment = c;}
+  static void PrintString(std::ostream& os,cmStdString String);
 protected:
   void PrintString(std::ostream& os) const;
 
