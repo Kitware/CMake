@@ -205,7 +205,7 @@ int cmCPackRPMGenerator::PackageFiles()
     // CASE 1 : COMPONENT ALL-IN-ONE package
     // If ALL COMPONENTS in ONE package has been requested
     // then the package file is unique and should be open here.
-    if (allComponentInOne)
+    if (componentPackageMethod == ONE_PACKAGE)
       {
       return PackageComponentsAllInOne();
       }
@@ -215,7 +215,8 @@ int cmCPackRPMGenerator::PackageFiles()
     // in this case you'll get 1 package for each component.
     else
       {
-      return PackageComponents(ignoreComponentGroup);
+      return PackageComponents(componentPackageMethod ==
+                               ONE_PACKAGE_PER_COMPONENT);
       }
   }
   // CASE 3 : NON COMPONENT package.
@@ -252,11 +253,11 @@ bool cmCPackRPMGenerator::SupportsComponentInstallation() const
 std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
     const std::string& componentName)
   {
-  if (ignoreComponentGroup) {
+  if (componentPackageMethod == ONE_PACKAGE_PER_COMPONENT) {
     return componentName;
   }
 
-  if (allComponentInOne) {
+  if (componentPackageMethod == ONE_PACKAGE) {
     return std::string("ALL_COMPONENTS_IN_ONE");
   }
   // We have to find the name of the COMPONENT GROUP

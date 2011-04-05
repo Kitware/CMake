@@ -36,8 +36,7 @@ cmCPackGenerator::cmCPackGenerator()
   this->GeneratorVerbose = false;
   this->MakefileMap = 0;
   this->Logger = 0;
-  this->allComponentInOne = false;
-  this->ignoreComponentGroup = false;
+  this->componentPackageMethod = ONE_PACKAGE_PER_GROUP;
 }
 
 //----------------------------------------------------------------------
@@ -1263,14 +1262,23 @@ int cmCPackGenerator::CleanTemporaryDirectory()
 //----------------------------------------------------------------------
 int cmCPackGenerator::PrepareGroupingKind()
 {
-  // The default behavior is to create 1 package by component group
-  // unless the user asked to put all COMPONENTS in a single package
-  allComponentInOne = (NULL != (this->GetOption(
-                                      "CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE"))
-                      );
-  ignoreComponentGroup = (NULL != (this->GetOption(
-                                         "CPACK_COMPONENTS_IGNORE_GROUPS"))
-                         );
+  // find a component package method specified by the user
+  ComponentPackageMethod method = UNKNOWN_COMPONENT_PACKAGE_METHOD;
+
+  if(this->GetOption("CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE"))
+    {
+    method = ONE_PACKAGE;
+    }
+
+  if(this->GetOption("CPACK_COMPONENTS_IGNORE_GROUPS"))
+    {
+    method = ONE_PACKAGE_PER_COMPONENT;
+    }
+
+  if(this->GetOption("CPACK_COMPONENTS_ONE_PACKAGE_PER_GROUP"))
+    {
+    method = ONE_PACKAGE_PER_GROUP;
+    }
 
   std::string groupingType;
 
@@ -1286,40 +1294,64 @@ int cmCPackGenerator::PrepareGroupingKind()
         << " requested component grouping = "<< groupingType <<std::endl);
     if (groupingType == "ALL_COMPONENTS_IN_ONE")
       {
-      allComponentInOne = true;
+      method = ONE_PACKAGE;
       }
     else if (groupingType == "IGNORE")
       {
-      ignoreComponentGroup = true;
+      method = ONE_PACKAGE_PER_COMPONENT;
+      }
+    else if (groupingType == "ONE_PER_GROUP")
+      {
+      method = ONE_PACKAGE_PER_GROUP;
       }
     else
       {
       cmCPackLogger(cmCPackLog::LOG_WARNING, "["
-              << this->Name << "]"
-              << " requested component grouping type <"<< groupingType
-              << "> UNKNOWN not in (ALL_COMPONENTS_IN_ONE,IGNORE)"
-              << std::endl);
+          << this->Name << "]"
+          << " requested component grouping type <"<< groupingType
+          << "> UNKNOWN not in (ALL_COMPONENTS_IN_ONE,IGNORE,ONE_PER_GROUP)"
+          << std::endl);
       }
     }
 
+  // Some components were defined but NO group
+  // fallback to default if not group based
+  if(method == ONE_PACKAGE_PER_GROUP &&
+     this->ComponentGroups.empty() && !this->Components.empty())
+    {
+    if(componentPackageMethod == ONE_PACKAGE)
+      {
+      method = ONE_PACKAGE;
+      }
+    else
+      {
+      method = ONE_PACKAGE_PER_COMPONENT;
+      }
+    cmCPackLogger(cmCPackLog::LOG_WARNING, "["
+         << this->Name << "]"
+         << " One package per component group requested, "
+         << "but NO component groups exist: Ignoring component group."
+         << std::endl);
+    }
+
+  // if user specified packaging method, override the default packaging method
+  if(method != UNKNOWN_COMPONENT_PACKAGE_METHOD)
+    {
+    componentPackageMethod = method;
+    }
+
+  const char* method_names[] =
+    {
+    "ALL_COMPONENTS_IN_ONE",
+    "IGNORE_GROUPS",
+    "ONE_PER_GROUP"
+    };
+
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,  "["
         << this->Name << "]"
-        << " requested component grouping = ("
-        << ", ALL_COMPONENTS_IN_ONE=" << allComponentInOne
-        << ", IGNORE_GROUPS=" << ignoreComponentGroup
-        << ")"
+        << " requested component grouping = "
+        << method_names[componentPackageMethod]
         << std::endl);
-  // Some components were defined but NO group
-  // force ignoreGroups
-  if (this->ComponentGroups.empty() && (!this->Components.empty())
-      && (!ignoreComponentGroup)) {
-    cmCPackLogger(cmCPackLog::LOG_WARNING, "["
-              << this->Name << "]"
-              << " Some Components defined but NO component group:"
-              << " Ignoring component group."
-              << std::endl);
-    ignoreComponentGroup = true;
-  }
 
   return 1;
 }
