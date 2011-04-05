@@ -30,11 +30,16 @@ protected:
   virtual int InitializeInternal();
   virtual const char* GetOutputExtension();
   int PackageFiles();
+  bool SupportsComponentInstallation() const;
+
 
   bool CopyFile(cmOStringStream& source, cmOStringStream& target);
   bool RunCommand(cmOStringStream& command, std::string* output = 0);
 
-  int CreateDMG();
+  std::string
+  GetComponentInstallDirNameSuffix(const std::string& componentName);
+
+  int CreateDMG(const std::string& src_dir, const std::string& output_file);
 
   std::string InstallPrefix;
 };
