@@ -1442,6 +1442,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     PASS_REGULAR_EXPRESSION "Could not find executable"
     FAIL_REGULAR_EXPRESSION "SegFault")
 
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestUpload/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestUpload/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestUpload ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestUpload/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestUpload/testOut.log"
+    )
+  SET_TESTS_PROPERTIES(CTestTestUpload PROPERTIES
+    PASS_REGULAR_EXPRESSION "Upload\\.xml")
 
   # Use macro, not function so that build can still be driven by CMake 2.4.
   # After 2.6 is required, this could be a function without the extra 'set'
