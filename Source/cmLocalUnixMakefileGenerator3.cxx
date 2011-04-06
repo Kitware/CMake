@@ -2046,9 +2046,14 @@ std::string
 cmLocalUnixMakefileGenerator3
 ::GetRecursiveMakeCall(const char *makefile, const char* tgt)
 {
+  const char* root =
+    (this->Makefile->IsOn("CMAKE_MAKE_RECURSIVE_CALL_FROM_ROOT")?
+     "$(CMAKE_BINARY_DIR)/" : "");
+
   // Call make on the given file.
   std::string cmd;
   cmd += "$(MAKE) -f ";
+  cmd += root;
   cmd += this->Convert(makefile,NONE,SHELL);
   cmd += " ";
 

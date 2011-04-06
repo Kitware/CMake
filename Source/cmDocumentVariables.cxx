@@ -1549,4 +1549,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_MAKE_INCLUDE_FROM_ROOT",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_MAKE_RECURSIVE_CALL_FROM_ROOT",
+                     cmProperty::VARIABLE,0,0);
 }
