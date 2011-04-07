@@ -101,9 +101,10 @@ void cmFindPackageCommand::GenerateDocumentation()
     "The [version] argument requests a version with which the package found "
     "should be compatible (format is major[.minor[.patch[.tweak]]]).  "
     "The EXACT option requests that the version be matched exactly.  "
-    "If no [version] is given to a recursive invocation inside a "
-    "find-module, the [version] and EXACT arguments are forwarded "
-    "automatically from the outer call.  "
+    "If no [version] and/or component list is given to a recursive "
+    "invocation inside a find-module, the corresponding arguments "
+    "are forwarded automatically from the outer call (including the "
+    "EXACT flag for [version]).  "
     "Version support is currently provided only on a package-by-package "
     "basis (details below).\n"
     "User code should generally look for packages using the above simple "
@@ -524,7 +525,7 @@ bool cmFindPackageCommand
       cmake::AUTHOR_WARNING, "Ignoring EXACT since no version is requested.");
     }
 
-  if(this->Version.empty())
+  if(this->Version.empty() || components.empty())
     {
     // Check whether we are recursing inside "Find<name>.cmake" within
     // another find_package(<name>) call.
@@ -532,16 +533,24 @@ bool cmFindPackageCommand
     mod += "_FIND_MODULE";
     if(this->Makefile->IsOn(mod.c_str()))
       {
-      // Get version information from the outer call if necessary.
-      // Requested version string.
-      std::string ver = this->Name;
-      ver += "_FIND_VERSION";
-      this->Version = this->Makefile->GetSafeDefinition(ver.c_str());
+      if(this->Version.empty())
+        {
+        // Get version information from the outer call if necessary.
+        // Requested version string.
+        std::string ver = this->Name;
+        ver += "_FIND_VERSION";
+        this->Version = this->Makefile->GetSafeDefinition(ver.c_str());
 
-      // Whether an exact version is required.
-      std::string exact = this->Name;
-      exact += "_FIND_VERSION_EXACT";
-      this->VersionExact = this->Makefile->IsOn(exact.c_str());
+        // Whether an exact version is required.
+        std::string exact = this->Name;
+        exact += "_FIND_VERSION_EXACT";
+        this->VersionExact = this->Makefile->IsOn(exact.c_str());
+        }
+      if(components.empty())
+        {
+        std::string components_var = this->Name + "_FIND_COMPONENTS";
+        components = this->Makefile->GetSafeDefinition(components_var.c_str());
+        }
       }
     }
 
