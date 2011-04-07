@@ -1,5 +1,9 @@
 SET(CMAKE_CXX_VERBOSE_FLAG "-V")
 
+# -qthreaded     = Ensures that all optimizations will be thread-safe
+# -qhalt=e       = Halt on error messages (rather than just severe errors)
+SET(CMAKE_CXX_FLAGS_INIT "-qthreaded -qhalt=e")
+
 SET(CMAKE_CXX_FLAGS_DEBUG_INIT "-g")
 SET(CMAKE_CXX_FLAGS_RELEASE_INIT "-O -DNDEBUG")
 SET(CMAKE_CXX_FLAGS_MINSIZEREL_INIT "-O -DNDEBUG")
