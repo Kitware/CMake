@@ -105,7 +105,7 @@ FIND_PACKAGE(wibbleA NAMES wibble PATHS B)
 FIND_PACKAGE(wibbleB NAMES wibble HINTS B)
 
 # Look for package with recursive find-modules.
-FIND_PACKAGE(RecursiveA)
+FIND_PACKAGE(RecursiveA COMPONENTS A)
 FIND_PACKAGE(RecursiveB 2)
 FIND_PACKAGE(RecursiveC 3.1 EXACT)
 
