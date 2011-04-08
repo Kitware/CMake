@@ -37,13 +37,12 @@ public:
                               const char* configName,
                               const char* newline = "\n");
 
-  /** Line of batch file text that skips to the end after
-    * a failed step in a sequence of custom commands.
-    */
-  std::string GetCheckForErrorLine();
+  /** Label to which to jump in a batch file after a failed step in a
+      sequence of custom commands. */
+  const char* GetReportErrorLabel() const;
 
 protected:
-  virtual std::string CheckForErrorLine();
+  virtual const char* ReportErrorLabel() const;
 
   /** Construct a custom command to make exe import lib dir.  */
   cmsys::auto_ptr<cmCustomCommand>
