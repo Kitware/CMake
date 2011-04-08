@@ -2228,8 +2228,11 @@ void cmLocalUnixMakefileGenerator3
     return;
     }
 
-  // In a Windows shell we must change drive letter too.
-  const char* cd_cmd = this->WindowsShell? "cd /d " : "cd ";
+  // In a Windows shell we must change drive letter too.  The shell
+  // used by NMake and Borland make does not support "cd /d" so this
+  // feature simply cannot work with them (Borland make does not even
+  // support changing the drive letter with just "d:").
+  const char* cd_cmd = this->MinGWMake? "cd /d " : "cd ";
 
   if(!this->UnixCD)
     {
