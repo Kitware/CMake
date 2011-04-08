@@ -38,7 +38,7 @@ public:
                                         const char* path);
 
 protected:
-  virtual std::string CheckForErrorLine();
+  virtual const char* ReportErrorLabel() const;
 
 private:
 };
