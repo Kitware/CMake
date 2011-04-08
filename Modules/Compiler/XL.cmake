@@ -18,6 +18,12 @@ if(__COMPILER_XL)
 endif()
 set(__COMPILER_XL 1)
 
+# Find the CreateExportList program that comes with this toolchain.
+find_program(CMAKE_XL_CreateExportList
+  NAMES CreateExportList
+  DOC "IBM XL CreateExportList tool"
+  )
+
 macro(__compiler_xl lang)
   # Feature flags.
   set(CMAKE_${lang}_VERBOSE_FLAG "-V")
@@ -28,4 +34,15 @@ macro(__compiler_xl lang)
   set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "-g")
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
   set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> <DEFINES> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
+
+  # The compiler front-end passes all object files, archive files, and shared
+  # library files named on the command line to CreateExportList to create a
+  # list of all symbols to be exported from the shared library.  This causes
+  # all archive members to be copied into the shared library whether they are
+  # needed or not.  Instead we run the tool ourselves to pass only the object
+  # files so that we export only the symbols actually provided by the sources.
+  set(CMAKE_${lang}_CREATE_SHARED_LIBRARY
+    "${CMAKE_XL_CreateExportList} <OBJECT_DIR>/objects.exp <OBJECTS>"
+    "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_LIBRARY_${lang}_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> -Wl,-bE:<OBJECT_DIR>/objects.exp <CMAKE_SHARED_LIBRARY_SONAME_${lang}_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>"
+    )
 endmacro()
