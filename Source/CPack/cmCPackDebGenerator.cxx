@@ -491,7 +491,7 @@ int cmCPackDebGenerator::createDeb()
       {
       std::string filenamename =
         cmsys::SystemTools::GetFilenameName(i->c_str());
-      std::string localcopy = toplevel;
+      std::string localcopy = this->GetOption("WDIR");
       localcopy += "/";
       localcopy += filenamename;
       // if we can copy the file, it means it does exist, let's add it:
