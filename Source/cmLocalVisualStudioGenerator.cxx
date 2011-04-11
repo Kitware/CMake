@@ -170,29 +170,47 @@ std::string
 cmLocalVisualStudioGenerator
 ::ConstructScript(cmCustomCommand const& cc,
                   const char* configName,
-                  const char* newline)
+                  const char* newline_text)
 {
+  bool useLocal = this->CustomCommandUseLocal();
   const cmCustomCommandLines& commandLines = cc.GetCommandLines();
   const char* workingDirectory = cc.GetWorkingDirectory();
   cmCustomCommandGenerator ccg(cc, configName, this->Makefile);
   RelativeRoot relativeRoot = workingDirectory? NONE : START_OUTPUT;
 
+  // Avoid leading or trailing newlines.
+  const char* newline = "";
+
   // Line to check for error between commands.
-  std::string check_error = newline;
-  check_error += "if %errorlevel% neq 0 goto :cmEnd";
+  std::string check_error = newline_text;
+  if(useLocal)
+    {
+    check_error += "if %errorlevel% neq 0 goto :cmEnd";
+    }
+  else
+    {
+    check_error += "if errorlevel 1 goto ";
+    check_error += this->GetReportErrorLabel();
+    }
 
   // Store the script in a string.
   std::string script;
 
   // Open a local context.
-  script += "set errlev=";
-  script += newline;
-  script += "setlocal";
+  if(useLocal)
+    {
+    script += newline;
+    newline = newline_text;
+    script += "set errlev=";
+    script += newline;
+    script += "setlocal";
+    }
 
   if(workingDirectory)
     {
     // Change the working directory.
     script += newline;
+    newline = newline_text;
     script += "cd ";
     script += this->Convert(workingDirectory, FULL, SHELL);
     script += check_error;
@@ -201,6 +219,7 @@ cmLocalVisualStudioGenerator
     if(workingDirectory[0] && workingDirectory[1] == ':')
       {
       script += newline;
+      newline = newline_text;
       script += workingDirectory[0];
       script += workingDirectory[1];
       script += check_error;
@@ -216,6 +235,7 @@ cmLocalVisualStudioGenerator
     if(extraPath)
       {
       script += newline;
+      newline = newline_text;
       script += "set PATH=";
       script += extraPath;
       script += ";%PATH%";
@@ -227,6 +247,7 @@ cmLocalVisualStudioGenerator
     {
     // Start a new line.
     script += newline;
+    newline = newline_text;
 
     // Add this command line.
     std::string cmd = ccg.GetCommand(c);
@@ -241,13 +262,16 @@ cmLocalVisualStudioGenerator
     }
 
   // Close the local context.
-  script += newline;
-  script += ":cmEnd";
-  script += newline;
-  script += "endlocal & set errlev=%errorlevel%";
-  script += newline;
-  script += "if %errlev% neq 0 goto ";
-  script += this->GetReportErrorLabel();
+  if(useLocal)
+    {
+    script += newline;
+    script += ":cmEnd";
+    script += newline;
+    script += "endlocal & set errlev=%errorlevel%";
+    script += newline;
+    script += "if %errlev% neq 0 goto ";
+    script += this->GetReportErrorLabel();
+    }
 
   return script;
 }

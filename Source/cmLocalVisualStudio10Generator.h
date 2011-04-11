@@ -39,6 +39,7 @@ public:
 
 protected:
   virtual const char* ReportErrorLabel() const;
+  virtual bool CustomCommandUseLocal() const { return true; }
 
 private:
 };
