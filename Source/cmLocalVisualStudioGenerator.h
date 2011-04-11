@@ -43,6 +43,7 @@ public:
 
 protected:
   virtual const char* ReportErrorLabel() const;
+  virtual bool CustomCommandUseLocal() const { return false; }
 
   /** Construct a custom command to make exe import lib dir.  */
   cmsys::auto_ptr<cmCustomCommand>
