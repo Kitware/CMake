@@ -201,8 +201,6 @@ cmLocalVisualStudioGenerator
     {
     script += newline;
     newline = newline_text;
-    script += "set errlev=";
-    script += newline;
     script += "setlocal";
     }
 
@@ -267,9 +265,15 @@ cmLocalVisualStudioGenerator
     script += newline;
     script += ":cmEnd";
     script += newline;
-    script += "endlocal & set errlev=%errorlevel%";
+    script += "endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone";
     script += newline;
-    script += "if %errlev% neq 0 goto ";
+    script += ":cmErrorLevel";
+    script += newline;
+    script += "exit /b %1";
+    script += newline;
+    script += ":cmDone";
+    script += newline;
+    script += "if %errorlevel% neq 0 goto ";
     script += this->GetReportErrorLabel();
     }
 
