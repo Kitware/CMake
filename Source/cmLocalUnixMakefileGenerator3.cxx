@@ -2228,17 +2228,23 @@ void cmLocalUnixMakefileGenerator3
     return;
     }
 
+  // In a Windows shell we must change drive letter too.  The shell
+  // used by NMake and Borland make does not support "cd /d" so this
+  // feature simply cannot work with them (Borland make does not even
+  // support changing the drive letter with just "d:").
+  const char* cd_cmd = this->MinGWMake? "cd /d " : "cd ";
+
   if(!this->UnixCD)
     {
     // On Windows we must perform each step separately and then change
     // back because the shell keeps the working directory between
     // commands.
-    std::string cmd = "cd ";
+    std::string cmd = cd_cmd;
     cmd += this->ConvertToOutputForExisting(tgtDir, relRetDir);
     commands.insert(commands.begin(),cmd);
 
     // Change back to the starting directory.
-    cmd = "cd ";
+    cmd = cd_cmd;
     cmd += this->ConvertToOutputForExisting(relRetDir, tgtDir);
     commands.push_back(cmd);
     }
@@ -2250,7 +2256,7 @@ void cmLocalUnixMakefileGenerator3
     std::vector<std::string>::iterator i = commands.begin();
     for (; i != commands.end(); ++i)
       {
-      std::string cmd = "cd ";
+      std::string cmd = cd_cmd;
       cmd += this->ConvertToOutputForExisting(tgtDir, relRetDir);
       cmd += " && ";
       cmd += *i;
