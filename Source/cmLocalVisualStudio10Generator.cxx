@@ -119,7 +119,7 @@ void cmLocalVisualStudio10Generator
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalVisualStudio10Generator::CheckForErrorLine()
+const char* cmLocalVisualStudio10Generator::ReportErrorLabel() const
 {
-  return "if errorlevel 1 goto :VCEnd";
+  return ":VCEnd";
 }

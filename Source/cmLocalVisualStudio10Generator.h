@@ -38,7 +38,8 @@ public:
                                         const char* path);
 
 protected:
-  virtual std::string CheckForErrorLine();
+  virtual const char* ReportErrorLabel() const;
+  virtual bool CustomCommandUseLocal() const { return true; }
 
 private:
 };

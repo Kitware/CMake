@@ -154,15 +154,15 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalVisualStudioGenerator::CheckForErrorLine()
+const char* cmLocalVisualStudioGenerator::ReportErrorLabel() const
 {
-  return "if errorlevel 1 goto :VCReportError";
+  return ":VCReportError";
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalVisualStudioGenerator::GetCheckForErrorLine()
+const char* cmLocalVisualStudioGenerator::GetReportErrorLabel() const
 {
-  return this->CheckForErrorLine();
+  return this->ReportErrorLabel();
 }
 
 //----------------------------------------------------------------------------
@@ -172,6 +172,7 @@ cmLocalVisualStudioGenerator
                   const char* configName,
                   const char* newline_text)
 {
+  bool useLocal = this->CustomCommandUseLocal();
   const cmCustomCommandLines& commandLines = cc.GetCommandLines();
   const char* workingDirectory = cc.GetWorkingDirectory();
   cmCustomCommandGenerator ccg(cc, configName, this->Makefile);
@@ -180,8 +181,29 @@ cmLocalVisualStudioGenerator
   // Avoid leading or trailing newlines.
   const char* newline = "";
 
+  // Line to check for error between commands.
+  std::string check_error = newline_text;
+  if(useLocal)
+    {
+    check_error += "if %errorlevel% neq 0 goto :cmEnd";
+    }
+  else
+    {
+    check_error += "if errorlevel 1 goto ";
+    check_error += this->GetReportErrorLabel();
+    }
+
   // Store the script in a string.
   std::string script;
+
+  // Open a local context.
+  if(useLocal)
+    {
+    script += newline;
+    newline = newline_text;
+    script += "setlocal";
+    }
+
   if(workingDirectory)
     {
     // Change the working directory.
@@ -189,6 +211,7 @@ cmLocalVisualStudioGenerator
     newline = newline_text;
     script += "cd ";
     script += this->Convert(workingDirectory, FULL, SHELL);
+    script += check_error;
 
     // Change the working drive.
     if(workingDirectory[0] && workingDirectory[1] == ':')
@@ -197,8 +220,10 @@ cmLocalVisualStudioGenerator
       newline = newline_text;
       script += workingDirectory[0];
       script += workingDirectory[1];
+      script += check_error;
       }
     }
+
   // for visual studio IDE add extra stuff to the PATH
   // if CMAKE_MSVCIDE_RUN_PATH is set.
   if(this->Makefile->GetDefinition("MSVC_IDE"))
@@ -214,6 +239,7 @@ cmLocalVisualStudioGenerator
       script += ";%PATH%";
       }
     }
+
   // Write each command on a single line.
   for(unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c)
     {
@@ -230,9 +256,25 @@ cmLocalVisualStudioGenerator
     // If there was an error, jump to the VCReportError label,
     // skipping the run of any subsequent commands in this
     // sequence.
-    //
-    script += newline_text;
-    script += this->GetCheckForErrorLine();
+    script += check_error;
+    }
+
+  // Close the local context.
+  if(useLocal)
+    {
+    script += newline;
+    script += ":cmEnd";
+    script += newline;
+    script += "endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone";
+    script += newline;
+    script += ":cmErrorLevel";
+    script += newline;
+    script += "exit /b %1";
+    script += newline;
+    script += ":cmDone";
+    script += newline;
+    script += "if %errorlevel% neq 0 goto ";
+    script += this->GetReportErrorLabel();
     }
 
   return script;
