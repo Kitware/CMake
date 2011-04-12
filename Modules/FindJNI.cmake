@@ -114,6 +114,7 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/jvm/java-1.5.0-sun/jre/lib/{libarch}
   /usr/lib/jvm/java-6-sun-1.6.0.00/jre/lib/{libarch}       # can this one be removed according to #8821 ? Alex
   /usr/lib/jvm/java-6-openjdk/jre/lib/{libarch}
+  /usr/lib/jvm/java-1.6.0-openjdk-1.6.0.0/jre/lib/{libarch}        # fedora
   # Debian specific paths for default JVM
   /usr/lib/jvm/default-java/jre/lib/{libarch}
   /usr/lib/jvm/default-java/jre/lib
