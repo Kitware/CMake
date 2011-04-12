@@ -109,7 +109,8 @@ static const char * cmDocumentationOptions[][3] =
    "Dump a wide range of information about the current system. If run "
    "from the top of a binary tree for a CMake project it will dump "
    "additional information such as the cache, log files etc."},
-  {"--debug-trycompile", "Do not delete the try compile directories..",
+  {"--debug-trycompile", "Do not delete the try_compile build tree. Only "
+   "useful on one try_compile at a time.",
    "Do not delete the files and directories created for try_compile calls. "
    "This is useful in debugging failed try_compiles. It may however "
    "change the results of the try-compiles as old junk from a previous "
