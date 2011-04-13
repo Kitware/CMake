@@ -87,7 +87,7 @@ private:
   void AddPrefixesCMakeEnvironment();
   void AddPrefixesCMakeVariable();
   void AddPrefixesSystemEnvironment();
-  void AddPrefixesRegistry();
+  void AddPrefixesUserRegistry();
   void AddPrefixesBuilds();
   void AddPrefixesCMakeSystemVariable();
   void AddPrefixesUserGuess();
@@ -132,7 +132,7 @@ private:
   bool Required;
   bool Compatibility_1_6;
   bool NoModule;
-  bool NoRegistry;
+  bool NoUserRegistry;
   bool NoBuilds;
   bool DebugMode;
   bool UseLib64Paths;

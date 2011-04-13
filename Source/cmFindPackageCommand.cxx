@@ -54,7 +54,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->CMakePathName = "PACKAGE";
   this->Quiet = false;
   this->Required = false;
-  this->NoRegistry = false;
+  this->NoUserRegistry = false;
   this->NoBuilds = false;
   this->NoModule = false;
   this->DebugMode = false;
@@ -444,7 +444,7 @@ bool cmFindPackageCommand
       }
     else if(args[i] == "NO_CMAKE_PACKAGE_REGISTRY")
       {
-      this->NoRegistry = true;
+      this->NoUserRegistry = true;
       this->NoModule = true;
       this->Compatibility_1_6 = false;
       doing = DoingNone;
@@ -1181,7 +1181,7 @@ void cmFindPackageCommand::ComputePrefixes()
   this->AddPrefixesCMakeEnvironment();
   this->AddPrefixesUserHints();
   this->AddPrefixesSystemEnvironment();
-  this->AddPrefixesRegistry();
+  this->AddPrefixesUserRegistry();
   this->AddPrefixesBuilds();
   this->AddPrefixesCMakeSystemVariable();
   this->AddPrefixesUserGuess();
@@ -1249,9 +1249,9 @@ void cmFindPackageCommand::AddPrefixesSystemEnvironment()
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesRegistry()
+void cmFindPackageCommand::AddPrefixesUserRegistry()
 {
-  if(this->NoRegistry || this->NoDefaultPath)
+  if(this->NoUserRegistry || this->NoDefaultPath)
     {
     return;
     }
