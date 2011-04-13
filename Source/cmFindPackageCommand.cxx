@@ -1308,13 +1308,12 @@ void cmFindPackageCommand::LoadPackageRegistryWin()
             {
             data[dataSize] = 0;
             cmsys_ios::stringstream ss(&data[0]);
-            if(this->CheckPackageRegistryEntry(ss))
+            if(!this->CheckPackageRegistryEntry(ss))
               {
-              // The entry is okay.
-              continue;
+              // The entry is invalid.
+              bad.insert(name);
               }
             }
-          bad.insert(name);
           break;
         case ERROR_MORE_DATA:
           data.resize(dataSize+1);
