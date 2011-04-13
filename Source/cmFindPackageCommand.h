@@ -95,7 +95,9 @@ private:
   void AddPrefixesUserHints();
   void ComputeFinalPrefixes();
   void LoadPackageRegistryDir(std::string const& dir);
-  void LoadPackageRegistryWin(bool user);
+  void LoadPackageRegistryWinUser();
+  void LoadPackageRegistryWinSystem();
+  void LoadPackageRegistryWin(bool user, unsigned int view);
   bool CheckPackageRegistryEntry(std::istream& is);
   bool SearchDirectory(std::string const& dir);
   bool CheckDirectory(std::string const& dir);

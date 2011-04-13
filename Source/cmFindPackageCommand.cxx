@@ -1282,7 +1282,7 @@ void cmFindPackageCommand::AddPrefixesUserRegistry()
     }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  this->LoadPackageRegistryWin(true);
+  this->LoadPackageRegistryWinUser();
 #elif defined(__HAIKU__)
   BPath dir;
   if (find_directory(B_USER_SETTINGS_DIRECTORY, &dir) == B_OK)
@@ -1311,22 +1311,54 @@ void cmFindPackageCommand::AddPrefixesSystemRegistry()
     }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  this->LoadPackageRegistryWin(false);
+  this->LoadPackageRegistryWinSystem();
 #endif
 }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # include <windows.h>
 # undef GetCurrentDirectory
+  // http://msdn.microsoft.com/en-us/library/aa384253%28v=vs.85%29.aspx
+# if !defined(KEY_WOW64_32KEY)
+#  define KEY_WOW64_32KEY 0x0200
+# endif
+# if !defined(KEY_WOW64_64KEY)
+#  define KEY_WOW64_64KEY 0x0100
+# endif
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::LoadPackageRegistryWin(bool user)
+void cmFindPackageCommand::LoadPackageRegistryWinUser()
+{
+  // HKEY_CURRENT_USER\\Software shares 32-bit and 64-bit views.
+  this->LoadPackageRegistryWin(true, 0);
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::LoadPackageRegistryWinSystem()
+{
+  // HKEY_LOCAL_MACHINE\\SOFTWARE has separate 32-bit and 64-bit views.
+  // Prefer the target platform view first.
+  if(this->Makefile->PlatformIs64Bit())
+    {
+    this->LoadPackageRegistryWin(false, KEY_WOW64_64KEY);
+    this->LoadPackageRegistryWin(false, KEY_WOW64_32KEY);
+    }
+  else
+    {
+    this->LoadPackageRegistryWin(false, KEY_WOW64_32KEY);
+    this->LoadPackageRegistryWin(false, KEY_WOW64_64KEY);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::LoadPackageRegistryWin(bool user,
+                                                  unsigned int view)
 {
   std::string key = "Software\\Kitware\\CMake\\Packages\\";
   key += this->Name;
   std::set<cmStdString> bad;
   HKEY hKey;
   if(RegOpenKeyEx(user? HKEY_CURRENT_USER : HKEY_LOCAL_MACHINE, key.c_str(),
-                  0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
+                  0, KEY_QUERY_VALUE|view, &hKey) == ERROR_SUCCESS)
     {
     DWORD valueType = REG_NONE;
     char name[16384];
@@ -1365,7 +1397,7 @@ void cmFindPackageCommand::LoadPackageRegistryWin(bool user)
   // Remove bad values if possible.
   if(user && !bad.empty() &&
      RegOpenKeyEx(HKEY_CURRENT_USER, key.c_str(),
-                  0, KEY_SET_VALUE, &hKey) == ERROR_SUCCESS)
+                  0, KEY_SET_VALUE|view, &hKey) == ERROR_SUCCESS)
     {
     for(std::set<cmStdString>::const_iterator vi = bad.begin();
         vi != bad.end(); ++vi)
