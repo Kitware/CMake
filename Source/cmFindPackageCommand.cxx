@@ -55,6 +55,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->Quiet = false;
   this->Required = false;
   this->NoUserRegistry = false;
+  this->NoSystemRegistry = false;
   this->NoBuilds = false;
   this->NoModule = false;
   this->DebugMode = false;
@@ -140,6 +141,7 @@ void cmFindPackageCommand::GenerateDocumentation()
     "               [NO_CMAKE_PACKAGE_REGISTRY]\n"
     "               [NO_CMAKE_BUILDS_PATH]\n"
     "               [NO_CMAKE_SYSTEM_PATH]\n"
+    "               [NO_CMAKE_SYSTEM_PACKAGE_REGISTRY]\n"
     "               [CMAKE_FIND_ROOT_PATH_BOTH |\n"
     "                ONLY_CMAKE_FIND_ROOT_PATH |\n"
     "                NO_CMAKE_FIND_ROOT_PATH])\n"
@@ -316,7 +318,15 @@ void cmFindPackageCommand::GenerateDocumentation()
     "   CMAKE_SYSTEM_PREFIX_PATH\n"
     "   CMAKE_SYSTEM_FRAMEWORK_PATH\n"
     "   CMAKE_SYSTEM_APPBUNDLE_PATH\n"
-    "8. Search paths specified by the PATHS option.  "
+    "8. Search paths stored in the CMake system package registry.  "
+    "This can be skipped if NO_CMAKE_SYSTEM_PACKAGE_REGISTRY is passed.  "
+    "On Windows a <package> may appear under registry key\n"
+    "  HKEY_LOCAL_MACHINE\\Software\\Kitware\\CMake\\Packages\\<package>\n"
+    "as a REG_SZ value, with arbitrary name, that specifies the directory "
+    "containing the package configuration file.  "
+    "There is no system package registry on non-Windows platforms."
+    "\n"
+    "9. Search paths specified by the PATHS option.  "
     "These are typically hard-coded guesses.\n"
     ;
   this->CommandDocumentation += this->GenericDocumentationMacPolicy;
@@ -452,6 +462,13 @@ bool cmFindPackageCommand
     else if(args[i] == "NO_CMAKE_PACKAGE_REGISTRY")
       {
       this->NoUserRegistry = true;
+      this->NoModule = true;
+      this->Compatibility_1_6 = false;
+      doing = DoingNone;
+      }
+    else if(args[i] == "NO_CMAKE_SYSTEM_PACKAGE_REGISTRY")
+      {
+      this->NoSystemRegistry = true;
       this->NoModule = true;
       this->Compatibility_1_6 = false;
       doing = DoingNone;
@@ -1191,6 +1208,7 @@ void cmFindPackageCommand::ComputePrefixes()
   this->AddPrefixesUserRegistry();
   this->AddPrefixesBuilds();
   this->AddPrefixesCMakeSystemVariable();
+  this->AddPrefixesSystemRegistry();
   this->AddPrefixesUserGuess();
   this->ComputeFinalPrefixes();
 }
@@ -1264,7 +1282,7 @@ void cmFindPackageCommand::AddPrefixesUserRegistry()
     }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  this->LoadPackageRegistryWin();
+  this->LoadPackageRegistryWin(true);
 #elif defined(__HAIKU__)
   BPath dir;
   if (find_directory(B_USER_SETTINGS_DIRECTORY, &dir) == B_OK)
@@ -1284,17 +1302,30 @@ void cmFindPackageCommand::AddPrefixesUserRegistry()
 #endif
 }
 
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AddPrefixesSystemRegistry()
+{
+  if(this->NoSystemRegistry || this->NoDefaultPath)
+    {
+    return;
+    }
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  this->LoadPackageRegistryWin(false);
+#endif
+}
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # include <windows.h>
 # undef GetCurrentDirectory
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::LoadPackageRegistryWin()
+void cmFindPackageCommand::LoadPackageRegistryWin(bool user)
 {
   std::string key = "Software\\Kitware\\CMake\\Packages\\";
   key += this->Name;
   std::set<cmStdString> bad;
   HKEY hKey;
-  if(RegOpenKeyEx(HKEY_CURRENT_USER, key.c_str(),
+  if(RegOpenKeyEx(user? HKEY_CURRENT_USER : HKEY_LOCAL_MACHINE, key.c_str(),
                   0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
     {
     DWORD valueType = REG_NONE;
@@ -1332,7 +1363,7 @@ void cmFindPackageCommand::LoadPackageRegistryWin()
     }
 
   // Remove bad values if possible.
-  if(!bad.empty() &&
+  if(user && !bad.empty() &&
      RegOpenKeyEx(HKEY_CURRENT_USER, key.c_str(),
                   0, KEY_SET_VALUE, &hKey) == ERROR_SUCCESS)
     {
@@ -2292,11 +2323,3 @@ bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
 }
 
 // TODO: Debug cmsys::Glob double slash problem.
-
-// TODO: Add registry entries after cmake system search path?
-// Currently the user must specify them with the PATHS option.
-//
-//  [HKEY_CURRENT_USER\Software\*\Foo*;InstallDir]
-//  [HKEY_CURRENT_USER\Software\*\*\Foo*;InstallDir]
-//  [HKEY_LOCAL_MACHINE\Software\*\Foo*;InstallDir]
-//  [HKEY_LOCAL_MACHINE\Software\*\*\Foo*;InstallDir]

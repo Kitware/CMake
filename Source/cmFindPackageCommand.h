@@ -88,13 +88,14 @@ private:
   void AddPrefixesCMakeVariable();
   void AddPrefixesSystemEnvironment();
   void AddPrefixesUserRegistry();
+  void AddPrefixesSystemRegistry();
   void AddPrefixesBuilds();
   void AddPrefixesCMakeSystemVariable();
   void AddPrefixesUserGuess();
   void AddPrefixesUserHints();
   void ComputeFinalPrefixes();
   void LoadPackageRegistryDir(std::string const& dir);
-  void LoadPackageRegistryWin();
+  void LoadPackageRegistryWin(bool user);
   bool CheckPackageRegistryEntry(std::istream& is);
   bool SearchDirectory(std::string const& dir);
   bool CheckDirectory(std::string const& dir);
@@ -133,6 +134,7 @@ private:
   bool Compatibility_1_6;
   bool NoModule;
   bool NoUserRegistry;
+  bool NoSystemRegistry;
   bool NoBuilds;
   bool DebugMode;
   bool UseLib64Paths;
