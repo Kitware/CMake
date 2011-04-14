@@ -42,7 +42,7 @@ FIND_PACKAGE(VersionTestD 1.2.3.4)
 SET(CMakeTestSystemPackage "")
 IF(WIN32 AND NOT CYGWIN)
   # Try writing a value to the system package registry.
-  FILE(TO_NATIVE_PATH "${FindPackageTest_SOURCE_DIR}/SystemPackage" _data)
+  SET(_data "${FindPackageTest_SOURCE_DIR}/SystemPackage")
   SET(_key "HKLM\\Software\\Kitware\\CMake\\Packages\\CMakeTestSystemPackage")
   SET(_file "${FindPackageTest_BINARY_DIR}/CMakeTestSystemPackage.data")
   FILE(WRITE ${_file} "${_data}\n")
