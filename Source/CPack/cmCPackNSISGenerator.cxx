@@ -542,8 +542,8 @@ void cmCPackNSISGenerator::CreateMenuLinks( cmOStringStream& str,
     {
     cmCPackLogger(
       cmCPackLog::LOG_ERROR,
-      "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
-      "<icon name>." << std::endl);
+      "CPACK_NSIS_MENU_LINKS should contain pairs of <shortcut target> and "
+      "<shortcut label>." << std::endl);
     return;
     }
 
