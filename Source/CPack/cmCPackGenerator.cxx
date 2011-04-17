@@ -867,6 +867,28 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                                     "Got some ABSOLUTE DESTINATION FILES: "
                                     << absoluteDestFiles << std::endl);
+          // define component specific var
+          if (componentInstall)
+            {
+            std::string absoluteDestFileComponent =
+                std::string("CPACK_ABSOLUTE_DESTINATION_FILES")
+                + "_" + GetComponentInstallDirNameSuffix(installComponent);
+            if (NULL != this->GetOption(absoluteDestFileComponent.c_str()))
+              {
+                std::string absoluteDestFilesListComponent =
+                    this->GetOption(absoluteDestFileComponent.c_str());
+                absoluteDestFilesListComponent +=";";
+                absoluteDestFilesListComponent +=
+                    mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES");
+                this->SetOption(absoluteDestFileComponent.c_str(),
+                    absoluteDestFilesListComponent.c_str());
+              }
+            else
+              {
+              this->SetOption(absoluteDestFileComponent.c_str(),
+                  mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES"));
+              }
+            }
         }
         if ( cmSystemTools::GetErrorOccuredFlag() || !res )
           {
