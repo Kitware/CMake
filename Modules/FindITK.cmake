@@ -37,19 +37,21 @@
 # If this succeeds (possibly because ITK_DIR is already set), the
 # command will have already loaded ITKConfig.cmake and set ITK_FOUND.
 IF(NOT ITK_FOUND)
-  FIND_PACKAGE(ITK QUIET NO_MODULE
+  SET(_ITK_REQUIRED "")
+  IF(ITK_FIND_REQUIRED)
+    SET(_ITK_REQUIRED REQUIRED)
+  ENDIF()
+  SET(_ITK_QUIET "")
+  IF(ITK_FIND_QUIETLY)
+    SET(_ITK_QUIET QUIET)
+  ENDIF()
+  FIND_PACKAGE(ITK ${_ITK_REQUIRED} ${_ITK_QUIET} NO_MODULE
     NAMES ITK InsightToolkit
     CONFIGS ITKConfig.cmake
     )
 ENDIF()
 
-SET(ITK_DIR_MESSAGE "Please set ITK_DIR to the directory containing ITKConfig.cmake.  This is either the root of the build tree, or PREFIX/lib/InsightToolkit for an installation.")
-
 IF(ITK_FOUND)
   # Set USE_ITK_FILE for backward-compatability.
   SET(USE_ITK_FILE ${ITK_USE_FILE})
-ELSEIF(ITK_FIND_REQUIRED)
-  MESSAGE(FATAL_ERROR ${ITK_DIR_MESSAGE})
-ELSEIF(NOT ITK_FIND_QUIETLY)
-  MESSAGE(STATUS ${ITK_DIR_MESSAGE})
 ENDIF()
