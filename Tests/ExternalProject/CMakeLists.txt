@@ -100,6 +100,9 @@ ExternalProject_Add(${proj}
   STEP_TARGETS install update
   SVN_REPOSITORY ""
   SVN_REVISION ""
+  SVN_USERNAME ""
+  SVN_PASSWORD ""
+  SVN_TRUST_CERT 1
   TEST_COMMAND ""
   TIMEOUT ""
   URL ""

@@ -18,6 +18,7 @@
 #    [SVN_REVISION rev]          # Revision to checkout from Subversion repo
 #    [SVN_USERNAME john ]        # Username for Subversion checkout and update
 #    [SVN_PASSWORD doe ]         # Password for Subversion checkout and update
+#    [SVN_TRUST_CERT 1 ]         # Trust the Subversion server site certificate
 #    [GIT_REPOSITORY url]        # URL of git repo
 #    [GIT_TAG tag]               # Git branch name, commit id or tag
 #    [URL /.../src.tgz]          # Full path or URL of source
@@ -1026,6 +1027,7 @@ function(_ep_add_download_command name)
     get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
     get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
     get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
+    get_property(svn_trust_cert TARGET ${name} PROPERTY _EP_SVN_TRUST_CERT)
 
     set(repository "${svn_repository} user=${svn_username} password=${svn_password}")
     set(module)
@@ -1046,8 +1048,11 @@ function(_ep_add_download_command name)
     if(svn_password)
       set(svn_user_pw_args ${svn_user_pw_args} "--password=${svn_password}")
     endif()
+    if(svn_trust_cert)
+      set(svn_trust_cert_args --trust-server-cert)
+    endif()
     set(cmd ${Subversion_SVN_EXECUTABLE} co ${svn_repository} ${svn_revision}
-      ${svn_user_pw_args} ${src_name})
+      --non-interactive ${svn_trust_cert_args} ${svn_user_pw_args} ${src_name})
     list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
   elseif(git_repository)
     find_package(Git)
@@ -1191,6 +1196,7 @@ function(_ep_add_update_command name)
     get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
     get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
     get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
+    get_property(svn_trust_cert TARGET ${name} PROPERTY _EP_SVN_TRUST_CERT)
     set(svn_user_pw_args "")
     if(svn_username)
       set(svn_user_pw_args ${svn_user_pw_args} "--username=${svn_username}")
@@ -1198,8 +1204,11 @@ function(_ep_add_update_command name)
     if(svn_password)
       set(svn_user_pw_args ${svn_user_pw_args} "--password=${svn_password}")
     endif()
+    if(svn_trust_cert)
+      set(svn_trust_cert_args --trust-server-cert)
+    endif()
     set(cmd ${Subversion_SVN_EXECUTABLE} up ${svn_revision}
-      ${svn_user_pw_args})
+      --non-interactive ${svn_trust_cert_args} ${svn_user_pw_args})
     set(always 1)
   elseif(git_repository)
     if(NOT GIT_EXECUTABLE)
