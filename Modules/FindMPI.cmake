@@ -185,7 +185,7 @@ endforeach()
 #
 function (interrogate_mpi_compiler lang try_libs)
   # if it's already in the cache, don't bother with any of this stuff
-  if ((NOT MPI_INCLUDE_PATH) OR (NOT MPI_${lang}_LIBRARIES))
+  if ((NOT MPI_${lang}_INCLUDE_PATH) OR (NOT MPI_${lang}_LIBRARIES))
     if (MPI_${lang}_COMPILER)
       # Check whether the -showme:compile option works. This indicates that we have either OpenMPI
       # or a newer version of LAM-MPI, and implies that -showme:link will also work.
@@ -456,6 +456,34 @@ set(MPIEXEC_POSTFLAGS    ""    CACHE STRING "These flags will come after all fla
 set(MPIEXEC_MAX_NUMPROCS "2"   CACHE STRING "Maximum number of processors available to run MPI applications.")
 mark_as_advanced(MPIEXEC MPIEXEC_NUMPROC_FLAG MPIEXEC_PREFLAGS MPIEXEC_POSTFLAGS MPIEXEC_MAX_NUMPROCS)
 
+
+#=============================================================================
+# Backward compatibility input hacks.  Propagate the FindMPI hints to C and
+# CXX if the respective new versions are not defined.  Translate the old
+# MPI_LIBRARY and MPI_EXTRA_LIBRARY to respective MPI_${lang}_LIBRARIES.
+#
+# Once we find the new variables, we translate them back into their old
+# equivalents below.
+foreach (lang C CXX)
+  # Old input variables.
+  set(_MPI_OLD_INPUT_VARS COMPILER COMPILE_FLAGS INCLUDE_PATH LINK_FLAGS)
+
+  # Set new vars based on their old equivalents, if the new versions are not already set.
+  foreach (var ${_MPI_OLD_INPUT_VARS})
+    if (NOT MPI_${lang}_${var} AND MPI_${var})
+      set(MPI_${lang}_${var} "${MPI_${var}}")
+    endif()
+  endforeach()
+
+  # Special handling for MPI_LIBRARY and MPI_EXTRA_LIBRARY, which we nixed in the
+  # new FindMPI.  These need to be merged into MPI_<lang>_LIBRARIES
+  if (NOT MPI_${lang}_LIBRARIES AND (MPI_LIBRARY OR MPI_EXTRA_LIBRARY))
+    set(MPI_${lang}_LIBRARIES ${MPI_LIBRARY} ${MPI_EXTRA_LIBRARY})
+  endif()
+endforeach()
+#=============================================================================
+
+
 # This loop finds the compilers and sends them off for interrogation.
 foreach (lang C CXX Fortran)
   if (CMAKE_${lang}_COMPILER_WORKS)
@@ -486,7 +514,7 @@ endforeach()
 
 
 #=============================================================================
-# Backward compatibility stuff
+# More backward compatibility stuff
 #
 # Bare MPI sans ${lang} vars are set to CXX then C, depending on what was found.
 # This mimics the behavior of the old language-oblivious FindMPI.
@@ -520,8 +548,6 @@ if (MPI_NUMLIBS GREATER 1)
 else()
   set(MPI_EXTRA_LIBRARY "MPI_EXTRA_LIBRARY-NOTFOUND" CACHE STRING "Extra MPI libraries to link against" FORCE)
 endif()
-
-# End backward compatibility contortions.
 #=============================================================================
 
 # unset these vars to cleanup namespace
