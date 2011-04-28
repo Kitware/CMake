@@ -27,7 +27,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PROGRAM(SWIG_EXECUTABLE swig2.0 swig)
+FIND_PROGRAM(SWIG_EXECUTABLE NAMES swig2.0 swig)
 
 IF(SWIG_EXECUTABLE)
   EXECUTE_PROCESS(COMMAND ${SWIG_EXECUTABLE} -swiglib
