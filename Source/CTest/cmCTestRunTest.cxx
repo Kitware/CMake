@@ -135,7 +135,7 @@ void cmCTestRunTest::CompressOutput()
 //---------------------------------------------------------
 bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 {
-  if (this->CTest->ShouldCompressTestOutput())
+  if (!this->TestHandler->MemCheck && this->CTest->ShouldCompressTestOutput())
     {
     this->CompressOutput();
     }
@@ -332,7 +332,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   // record the results in TestResult 
   if(started)
     {
-    bool compress = this->CompressionRatio < 1 &&
+    bool compress = !this->TestHandler->MemCheck &&
+      this->CompressionRatio < 1 &&
       this->CTest->ShouldCompressTestOutput();
     this->TestResult.Output = compress ? this->CompressedOutput 
       : this->ProcessOutput;
