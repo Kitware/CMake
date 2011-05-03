@@ -546,7 +546,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "make based generators. If this variable is supported, "
      "then CMake will also provide initial values for the "
      "variables with the name "
-     " CMAKE_C_FLAGS_[Debug|Release|RelWithDebInfo|MinSizeRel]."
+     " CMAKE_C_FLAGS_[DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL]."
      " For example, if CMAKE_BUILD_TYPE is Debug, then "
      "CMAKE_C_FLAGS_DEBUG will be added to the CMAKE_C_FLAGS.",false,
      "Variables That Change Behavior");
