@@ -403,7 +403,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   // for each sub project create a linked resource to the source dir
   // - only if it is an out-of-source build
   this->AppendLinkedResource(fout, "[Subprojects]",
-                             "virtual:/virtual");
+                             "virtual:/virtual", true);
 
   for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
@@ -1082,17 +1082,24 @@ void cmExtraEclipseCDT4Generator
 void cmExtraEclipseCDT4Generator
 ::AppendLinkedResource (cmGeneratedFileStream& fout,
                         const std::string&     name,
-                        const std::string&     path)
+                        const std::string&     path,
+                        bool isVirtualFolder)
 {
+  const char* locationTag = "location";
+  if (isVirtualFolder) // ... and not a linked folder
+    {
+    locationTag = "locationURI";
+    }
+
   fout <<
     "\t\t<link>\n"
     "\t\t\t<name>"
     << cmExtraEclipseCDT4Generator::EscapeForXML(name)
     << "</name>\n"
     "\t\t\t<type>2</type>\n"
-    "\t\t\t<locationURI>"
+    "\t\t\t<" << locationTag << ">"
     << cmExtraEclipseCDT4Generator::EscapeForXML(path)
-    << "</locationURI>\n"
+    << "</" << locationTag << ">\n"
     "\t\t</link>\n"
     ;
 }

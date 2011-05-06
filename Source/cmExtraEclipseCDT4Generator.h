@@ -87,7 +87,8 @@ private:
 
   static void AppendLinkedResource (cmGeneratedFileStream& fout,
                                     const std::string&     name,
-                                    const std::string&     path);
+                                    const std::string&     path,
+                                    bool isVirtualFolder = false);
 
   bool AppendOutLinkedResource(cmGeneratedFileStream& fout,
                                const std::string&     defname,
