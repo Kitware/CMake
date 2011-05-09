@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
   if(!ofp)
     {
     fprintf(stderr, "Cannot open output file: \"%s\"\n", argv[2]);
+    fclose(ifp);
     return 2;
     }
   
