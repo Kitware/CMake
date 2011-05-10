@@ -307,6 +307,9 @@ cmComputeLinkInformation
     std::string rtSepVar = rtVar + "_SEP";
     this->RuntimeFlag = this->Makefile->GetSafeDefinition(rtVar.c_str());
     this->RuntimeSep = this->Makefile->GetSafeDefinition(rtSepVar.c_str());
+    this->RuntimeEnd =
+      (this->Makefile->
+       GetSafeDefinition("CMAKE_PLATFORM_RPATH_PLACEHOLDER_END"));
     this->RuntimeAlways =
       (this->Makefile->
        GetSafeDefinition("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH"));
@@ -1824,6 +1827,10 @@ std::string cmComputeLinkInformation::GetRPathString(bool for_install)
       {
       rpath += this->GetRuntimeSep();
       }
+
+    // Some linkers (e.g. SGI ld 7.44) remove one trailing separator
+    // so we may add a bogus trailing path.
+    rpath += this->RuntimeEnd;
     }
 
   return rpath;

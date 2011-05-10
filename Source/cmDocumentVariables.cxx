@@ -1525,6 +1525,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_EXECUTABLE_RPATH_LINK_<LANG>_FLAG",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_PLATFORM_RPATH_PLACEHOLDER_END",
+                     cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_CREATE_<LANG>_FLAGS",
