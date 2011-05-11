@@ -100,7 +100,6 @@ private:
   std::string LibLinkSuffix;
   std::string RuntimeFlag;
   std::string RuntimeSep;
-  std::string RuntimeEnd;
   std::string RuntimeAlways;
   bool RuntimeUseChrpath;
   bool NoSONameUsesPath;
