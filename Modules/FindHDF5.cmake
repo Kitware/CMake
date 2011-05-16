@@ -10,7 +10,7 @@
 # are specified, then the find module will default to finding only the HDF5 C
 # library.  If one or more COMPONENTS are specified, the module will attempt to
 # find the language bindings for the specified components.  The only valid
-# components are C, CXX, and Fortran.  If the COMPONENTS argument is not
+# components are C, CXX, Fortran, and HL.  If the COMPONENTS argument is not
 # given, the module will attempt to find only the C bindings.
 #
 # On UNIX systems, this module will read the variable HDF5_USE_STATIC_LIBRARIES
@@ -33,6 +33,7 @@
 #  HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings.
 #  HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
 #  HDF5_Fortran_LIBRARIES - Required libraries for the HDF5 Fortran bindings
+#  HDF5_HL_LIBRARIES - Required libraries for the HDF5 high level API
 #  HDF5_LIBRARIES - Required libraries for all requested bindings
 #  HDF5_FOUND - true if HDF5 was found on the system
 #  HDF5_LIBRARY_DIRS - the full set of library directories
@@ -65,6 +66,7 @@ set( HDF5_VALID_COMPONENTS
     C
     CXX
     Fortran
+    HL
 )
 
 # try to find the HDF5 wrapper compilers
@@ -185,7 +187,8 @@ else()
     endif()
     
     # seed the initial lists of libraries to find with items we know we need
-    set( HDF5_C_LIBRARY_NAMES_INIT hdf5_hl hdf5 )
+    set( HDF5_C_LIBRARY_NAMES_INIT hdf5 )
+    set( HDF5_HL_LIBRARY_NAMES_INIT hdf5_hl ${HDF5_C_LIBRARY_NAMES_INIT} )
     set( HDF5_CXX_LIBRARY_NAMES_INIT hdf5_cpp ${HDF5_C_LIBRARY_NAMES_INIT} )
     set( HDF5_Fortran_LIBRARY_NAMES_INIT hdf5_fortran ${HDF5_C_LIBRARY_NAMES_INIT} )
     
@@ -234,7 +237,9 @@ else()
             ${HDF5_${LANGUAGE}_LIBRARY_NAMES} )
         
         # find the HDF5 libraries
+        message( STATUS "FindHDF5 -- search for ${LANGUAGE}" )
         foreach( LIB ${HDF5_${LANGUAGE}_LIBRARY_NAMES} )
+            message( STATUS "FindHDF5 -- Searching for ${LIB}" )
             if( UNIX AND HDF5_USE_STATIC_LIBRARIES )
                 # According to bug 1643 on the CMake bug tracker, this is the
                 # preferred method for searching for a static library.
