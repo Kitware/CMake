@@ -2,7 +2,19 @@
 
 class CompileCommandParser {
 public:
-  typedef std::map<std::string, std::string> CommandType;
+  class CommandType: public std::map<cmStdString, cmStdString>
+  {
+  public:
+#if defined(__GNUC__) && __GNUC__ == 3 && __GNUC_MINOR__ < 4
+    cmStdString const& at(cmStdString const& k) const
+      {
+      const_iterator i = this->find(k);
+      if(i != this->end()) { return i->second; }
+      static cmStdString empty;
+      return empty;
+      }
+#endif
+  };
   typedef std::vector<CommandType> TranslationUnitsType;
 
   CompileCommandParser(std::ifstream *input)
