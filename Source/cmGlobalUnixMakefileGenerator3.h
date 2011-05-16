@@ -112,6 +112,10 @@ public:
   /** Record per-target progress information.  */
   void RecordTargetProgress(cmMakefileTargetGenerator* tg);
 
+  void AddCXXCompileCommand(const std::string &sourceFile,
+                            const std::string &workingDirectory,
+                            const std::string &compileCommand);
+
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
@@ -178,6 +182,8 @@ protected:
   size_t CountProgressMarksInTarget(cmTarget* target,
                                     std::set<cmTarget*>& emitted);
   size_t CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg);
+
+  cmGeneratedFileStream *CommandDatabase;
 };
 
 #endif

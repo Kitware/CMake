@@ -39,6 +39,10 @@ CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
 
 # Testing
 IF(BUILD_TESTING)
+  IF("${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles")
+    SET(TEST_CompileCommandOutput 1)
+  ENDIF()
+
   ADD_SUBDIRECTORY(CMakeLib)
 
   # Collect a list of all test build directories.
@@ -2031,6 +2035,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ENDIF()
     SET_TESTS_PROPERTIES(Contracts.${project} PROPERTIES TIMEOUT ${timeout})
   ENDFOREACH()
+
+  IF(TEST_CompileCommandOutput)
+    ADD_TEST_MACRO(CompileCommandOutput
+      "${CMake_BINARY_DIR}/Tests/CMakeLib/runcompilecommands")
+  ENDIF()
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)

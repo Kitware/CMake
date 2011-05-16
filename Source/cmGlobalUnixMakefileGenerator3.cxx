@@ -31,6 +31,7 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
 #else
   this->UseLinkScript = true;
 #endif
+  this->CommandDatabase = NULL;
 }
 
 void cmGlobalUnixMakefileGenerator3
@@ -139,6 +140,17 @@ void cmGlobalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
+std::string EscapeJSON(const std::string& s) {
+  std::string result;
+  for (int i = 0; i < s.size(); ++i) {
+    if (s[i] == '"' || s[i] == '\\') {
+      result += '\\';
+    }
+    result += s[i];
+  }
+  return result;
+}
+
 void cmGlobalUnixMakefileGenerator3::Generate()
 {
   // first do superclass method
@@ -189,6 +201,35 @@ void cmGlobalUnixMakefileGenerator3::Generate()
   // write the main makefile
   this->WriteMainMakefile2();
   this->WriteMainCMakefile();
+
+  if (this->CommandDatabase != NULL) {
+    *this->CommandDatabase << std::endl << "]";
+    delete this->CommandDatabase;
+    this->CommandDatabase = NULL;
+  }
+}
+
+void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
+    const std::string &sourceFile, const std::string &workingDirectory,
+    const std::string &compileCommand) {
+  if (this->CommandDatabase == NULL)
+    {
+    std::string commandDatabaseName =
+      std::string(this->GetCMakeInstance()->GetHomeOutputDirectory())
+      + "/compile_commands.json";
+    this->CommandDatabase =
+      new cmGeneratedFileStream(commandDatabaseName.c_str());
+    *this->CommandDatabase << "[" << std::endl;
+    } else {
+    *this->CommandDatabase << "," << std::endl;
+    }
+  *this->CommandDatabase << "{" << std::endl
+      << "  \"directory\": \"" << EscapeJSON(workingDirectory) << "\","
+      << std::endl
+      << "  \"command\": \"" << EscapeJSON(compileCommand) << "\","
+      << std::endl
+      << "  \"file\": \"" << EscapeJSON(sourceFile) << "\""
+      << std::endl << "}";
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
