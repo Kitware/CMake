@@ -69,6 +69,22 @@ set( HDF5_VALID_COMPONENTS
     HL
 )
 
+# Validate the list of find components.
+if( NOT HDF5_FIND_COMPONENTS )
+    set( HDF5_LANGUAGE_BINDINGS "C" )
+else()
+    # add the extra specified components, ensuring that they are valid.
+    foreach( component ${HDF5_FIND_COMPONENTS} )
+        list( FIND HDF5_VALID_COMPONENTS ${component} component_location )
+        if( ${component_location} EQUAL -1 )
+            message( FATAL_ERROR
+                "\"${component}\" is not a valid HDF5 component." )
+        else()
+            list( APPEND HDF5_LANGUAGE_BINDINGS ${component} )
+        endif()
+    endforeach()
+endif()
+
 # try to find the HDF5 wrapper compilers
 find_program( HDF5_C_COMPILER_EXECUTABLE
     NAMES h5cc h5pcc
@@ -163,6 +179,27 @@ macro( _HDF5_parse_compile_line
     endforeach()
 endmacro()
 
+# Try to find HDF5 using an installed hdf5-config.cmake
+find_package( HDF5 QUIET NO_MODULE )
+if( HDF5_INCLUDE_DIR )
+    set( HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR} )
+    set( HDF5_LIBRARIES )
+    set( HDF5_C_TARGET hdf5 )
+    set( HDF5_CXX_TARGET hdf5_cpp )
+    set( HDF5_HL_TARGET hdf5_hl )
+    set( HDF5_Fortran_TARGET hdf5_fortran )
+    foreach( _component ${HDF5_LANGUAGE_BINDINGS} )
+        list( FIND HDF5_VALID_COMPONENTS ${_component} _component_location )
+        get_target_property( _comp_location ${HDF5_${_component}_TARGET} LOCATION )
+        if( _comp_location )
+            set( HDF5_${_component}_LIBRARY ${_comp_location} CACHE PATH
+                "HDF5 ${_component} library" )
+            mark_as_advanced( HDF5_${_component}_LIBRARY )
+            list( APPEND HDF5_LIBRARIES ${HDF5_${_component}_LIBRARY} )
+        endif()
+    endforeach()
+endif()
+
 if( HDF5_INCLUDE_DIRS AND HDF5_LIBRARIES )
     # Do nothing: we already have HDF5_INCLUDE_PATH and HDF5_LIBRARIES in the
     # cache, it would be a shame to override them
@@ -171,21 +208,6 @@ else()
     _HDF5_invoke_compiler( CXX HDF5_CXX_COMPILE_LINE HDF5_CXX_RETURN_VALUE )
     _HDF5_invoke_compiler( Fortran HDF5_Fortran_COMPILE_LINE HDF5_Fortran_RETURN_VALUE )
 
-    if( NOT HDF5_FIND_COMPONENTS )
-        set( HDF5_LANGUAGE_BINDINGS "C" )
-    else()
-        # add the extra specified components, ensuring that they are valid.
-        foreach( component ${HDF5_FIND_COMPONENTS} )
-            list( FIND HDF5_VALID_COMPONENTS ${component} component_location )
-            if( ${component_location} EQUAL -1 )
-                message( FATAL_ERROR  
-                    "\"${component}\" is not a valid HDF5 component." )
-            else()
-                list( APPEND HDF5_LANGUAGE_BINDINGS ${component} )
-            endif()
-        endforeach()
-    endif()
-    
     # seed the initial lists of libraries to find with items we know we need
     set( HDF5_C_LIBRARY_NAMES_INIT hdf5 )
     set( HDF5_HL_LIBRARY_NAMES_INIT hdf5_hl ${HDF5_C_LIBRARY_NAMES_INIT} )
