@@ -152,10 +152,6 @@ if(BUILD_TESTING)
         ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet --path .
         ${HTML_FILES}
         )
-    else()
-      add_test(CMake.HTML
-        ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout ${HTML_FILES}
-        )
     endif()
   endif()
 endif()

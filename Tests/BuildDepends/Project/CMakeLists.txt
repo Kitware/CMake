@@ -80,3 +80,8 @@ set_property(
   DIRECTORY
   PROPERTY IMPLICIT_DEPENDS_INCLUDE_TRANSFORM "ZOT_DIR(%)=<zot_%_dir.hxx>"
   )
+
+if(TEST_LINK_DEPENDS)
+  add_executable(linkdep linkdep.cxx)
+  set_property(TARGET linkdep PROPERTY LINK_DEPENDS ${TEST_LINK_DEPENDS})
+endif()

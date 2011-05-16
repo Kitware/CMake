@@ -3304,27 +3304,36 @@ bool SystemInformationImplementation::QueryOSInformation()
     {
     case VER_PLATFORM_WIN32_NT:
       // Test for the product.
-      if (osvi.dwMajorVersion <= 4) 
+      if (osvi.dwMajorVersion <= 4)
         {
         this->OSRelease = "NT";
         }
-      if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0) 
+      if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0)
         {
         this->OSRelease = "2000";
         }
-      if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1) 
+      if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1)
+        {
+        this->OSRelease = "XP";
+        }
+      // XP Professional x64
+      if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2)
         {
         this->OSRelease = "XP";
         }
 #ifdef VER_NT_WORKSTATION
       // Test for product type.
-      if (bOsVersionInfoEx) 
+      if (bOsVersionInfoEx)
         {
-        if (osvi.wProductType == VER_NT_WORKSTATION) 
+        if (osvi.wProductType == VER_NT_WORKSTATION)
           {
-          if (osvi.dwMajorVersion == 6) 
+          if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0)
             {
             this->OSRelease = "Vista";
+            }
+          if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1)
+            {
+            this->OSRelease = "7";
             }
 // VER_SUITE_PERSONAL may not be defined
 #ifdef VER_SUITE_PERSONAL

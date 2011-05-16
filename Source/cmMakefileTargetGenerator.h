@@ -115,6 +115,9 @@ protected:
   // append intertarget dependencies
   void AppendTargetDepends(std::vector<std::string>& depends);
 
+  // Append link rule dependencies (objects, etc.).
+  void AppendLinkDepends(std::vector<std::string>& depends);
+
   /** In order to support parallel builds for custom commands with
       multiple outputs the outputs are given a serial order, and only
       the first output actually has the build rule.  Other outputs
