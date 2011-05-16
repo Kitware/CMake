@@ -1770,10 +1770,14 @@ cmLocalVisualStudio7Generator
   vskey += "\\Packages\\" CM_INTEL_PLUGIN_GUID ";ProductVersion";
   cmSystemTools::ReadRegistryValue(vskey.c_str(), intelVersion,
                                    cmSystemTools::KeyWOW64_32);
-
-  // Version 10.1 actually uses 9.10 in project files!
-  if(intelVersion == "10.1")
+  if (intelVersion == "12.0")
     {
+    // Version 12 actually uses 11.0 in project files!
+    intelVersion = "11.0" ;
+    }
+  else if(intelVersion == "10.1")
+    {
+    // Version 10.1 actually uses 9.10 in project files!
     intelVersion = "9.10";
     }
 
