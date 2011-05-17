@@ -402,6 +402,9 @@ public:
   static bool FileTimeGet(const char* fname, cmSystemToolsFileTime* t);
   static bool FileTimeSet(const char* fname, cmSystemToolsFileTime* t);
 
+  /** Random seed generation.  */
+  static unsigned int RandomSeed();
+
   /** Find the directory containing the running executable.  Save it
    in a global location to be queried by GetExecutableDirectory
    later.  */
