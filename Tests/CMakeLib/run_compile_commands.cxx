@@ -9,8 +9,8 @@ public:
       {
       const_iterator i = this->find(k);
       if(i != this->end()) { return i->second; }
-      static cmStdString empty;
-      return empty;
+      static cmStdString emptyString;
+      return emptyString;
       }
   };
   typedef std::vector<CommandType> TranslationUnitsType;
