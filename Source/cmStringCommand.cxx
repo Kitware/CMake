@@ -770,7 +770,7 @@ bool cmStringCommand
 
   static bool seeded = false;
   bool force_seed = false;
-  int seed = (int) time(NULL);
+  int seed = 0;
   int length = 5;
   const char cmStringCommandDefaultAlphabet[] = "qwertyuiopasdfghjklzxcvbnm"
     "QWERTYUIOPASDFGHJKLZXCVBNM"
@@ -825,7 +825,7 @@ bool cmStringCommand
   if (!seeded || force_seed)
     {
     seeded = true;
-    srand(seed);
+    srand(force_seed? seed : cmSystemTools::RandomSeed());
     }
 
   const char* alphaPtr = alphabet.c_str();

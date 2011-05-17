@@ -31,7 +31,9 @@
 
 #if defined(_WIN32)
 # include <windows.h>
+# include <wincrypt.h>
 #else
+# include <sys/time.h>
 # include <sys/types.h>
 # include <unistd.h>
 # include <utime.h>
@@ -2230,6 +2232,68 @@ bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
     }
 #endif
   return true;
+}
+
+//----------------------------------------------------------------------------
+#ifdef _WIN32
+static int WinCryptRandom(void* data, size_t size)
+{
+  int result = 0;
+  HCRYPTPROV hProvider = 0;
+  if(CryptAcquireContextW(&hProvider, 0, 0, PROV_RSA_FULL,
+                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+    {
+    result = CryptGenRandom(hProvider, (DWORD)size, (BYTE*)data)? 1:0;
+    CryptReleaseContext(hProvider, 0);
+    }
+  return result;
+}
+#endif
+
+//----------------------------------------------------------------------------
+unsigned int cmSystemTools::RandomSeed()
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  unsigned int seed = 0;
+
+  // Try using a real random source.
+  if(WinCryptRandom(&seed, sizeof(seed)))
+    {
+    return seed;
+    }
+
+  // Fall back to the time and pid.
+  FILETIME ft;
+  GetSystemTimeAsFileTime(&ft);
+  unsigned int t1 = static_cast<unsigned int>(ft.dwHighDateTime);
+  unsigned int t2 = static_cast<unsigned int>(ft.dwLowDateTime);
+  unsigned int pid = static_cast<unsigned int>(GetCurrentProcessId());
+  return t1 ^ t2 ^ pid;
+#else
+  union
+  {
+    unsigned int integer;
+    char bytes[sizeof(unsigned int)];
+  } seed;
+
+  // Try using a real random source.
+  std::ifstream fin("/dev/urandom");
+  if(fin && fin.read(seed.bytes, sizeof(seed)) &&
+     fin.gcount() == sizeof(seed))
+    {
+    return seed.integer;
+    }
+
+  // Fall back to the time and pid.
+  struct timeval t;
+  gettimeofday(&t, 0);
+  unsigned int pid = static_cast<unsigned int>(getpid());
+  unsigned int tv_sec = t.tv_sec;
+  unsigned int tv_usec = t.tv_usec;
+  // Since tv_usec never fills more than 11 bits we shift it to fill
+  // in the slow-changing high-order bits of tv_sec.
+  return tv_sec ^ (tv_usec << 21) ^ pid;
+#endif
 }
 
 //----------------------------------------------------------------------------
