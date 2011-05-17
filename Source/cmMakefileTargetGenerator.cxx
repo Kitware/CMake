@@ -249,11 +249,12 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
 }
 
 //----------------------------------------------------------------------------
-std::string cmMakefileTargetGenerator::GetFlags(const std::string &l) {
-  std::pair<std::map<std::string, std::string>::iterator, bool>
-    insert_result = this->FlagsByLanguage.insert(std::make_pair(l, ""));
-  if (insert_result.second) {
-    std::string& flags = insert_result.first->second;
+std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
+{
+  ByLanguageMap::iterator i = this->FlagsByLanguage.find(l);
+  if (i == this->FlagsByLanguage.end())
+    {
+    std::string flags;
     const char *lang = l.c_str();
 
     bool shared = ((this->Target->GetType() == cmTarget::SHARED_LIBRARY) ||
@@ -284,15 +285,19 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l) {
     // Add include directory flags.
     this->LocalGenerator->
       AppendFlags(flags,this->GetFrameworkFlags().c_str());
-  }
-  return insert_result.first->second;
+
+    ByLanguageMap::value_type entry(l, flags);
+    i = this->FlagsByLanguage.insert(entry).first;
+    }
+  return i->second;
 }
 
-std::string cmMakefileTargetGenerator::GetDefines(const std::string &l) {
-  std::pair<std::map<std::string, std::string>::iterator, bool>
-    insert_result = this->DefinesByLanguage.insert(std::make_pair(l, ""));
-  if (insert_result.second) {
-    std::string &defines = insert_result.first->second;
+std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
+{
+  ByLanguageMap::iterator i = this->DefinesByLanguage.find(l);
+  if (i == this->DefinesByLanguage.end())
+    {
+    std::string defines;
     const char *lang = l.c_str();
     // Add the export symbol definition for shared library objects.
     if(const char* exportMacro = this->Target->GetExportMacro())
@@ -312,8 +317,11 @@ std::string cmMakefileTargetGenerator::GetDefines(const std::string &l) {
       (defines, this->Makefile->GetProperty(defPropName.c_str()), lang);
     this->LocalGenerator->AppendDefines
       (defines, this->Target->GetProperty(defPropName.c_str()), lang);
-  }
-  return insert_result.first->second;
+
+    ByLanguageMap::value_type entry(l, defines);
+    i = this->DefinesByLanguage.insert(entry).first;
+    }
+  return i->second;
 }
 
 void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
