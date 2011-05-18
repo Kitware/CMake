@@ -9,6 +9,9 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+#if defined(_MSC_VER) && _MSC_VER < 1300
+# define _WIN32_WINNT 0x0400 /* for wincrypt.h */
+#endif
 #include "cmSystemTools.h"   
 #include <ctype.h>
 #include <errno.h>
@@ -2236,6 +2239,9 @@ bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
 
 //----------------------------------------------------------------------------
 #ifdef _WIN32
+# ifndef CRYPT_SILENT
+#  define CRYPT_SILENT 0x40 /* Not defined by VS 6 version of header.  */
+# endif
 static int WinCryptRandom(void* data, size_t size)
 {
   int result = 0;
