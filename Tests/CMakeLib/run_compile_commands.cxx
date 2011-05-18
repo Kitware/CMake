@@ -127,9 +127,8 @@ int main ()
       it = parser.GetTranslationUnits().begin(),
       end = parser.GetTranslationUnits().end(); it != end; ++it)
     {
-    std::vector<std::string> std_command;
-    cmSystemTools::ParseUnixCommandLine(it->at("command").c_str(), std_command);
-    std::vector<cmStdString> command(std_command.begin(), std_command.end());
+    std::vector<cmStdString> command;
+    cmSystemTools::ParseUnixCommandLine(it->at("command").c_str(), command);
     if (!cmSystemTools::RunSingleCommand(
             command, 0, 0, it->at("directory").c_str()))
       {
