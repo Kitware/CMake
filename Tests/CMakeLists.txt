@@ -11,6 +11,7 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project ${proj}
+    ${${NAME}_EXTRA_OPTIONS}
     --test-command ${COMMAND} ${ARGN})
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 ENDMACRO(ADD_TEST_MACRO)
@@ -2037,6 +2038,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   ENDFOREACH()
 
   IF(TEST_CompileCommandOutput)
+    SET(CompileCommandOutput_EXTRA_OPTIONS
+      --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_IS_GNU})
     ADD_TEST_MACRO(CompileCommandOutput
       "${CMake_BINARY_DIR}/Tests/CMakeLib/runcompilecommands")
   ENDIF()

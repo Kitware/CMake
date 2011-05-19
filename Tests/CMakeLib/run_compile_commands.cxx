@@ -96,7 +96,7 @@ private:
 
   void Next()
   {
-    this->C = Input->get();
+    this->C = char(Input->get());
     if (this->Input->bad()) ErrorExit("Unexpected end of file.");
   }
 
