@@ -1,3 +1,1 @@
-#include "file with spaces.h"
-
-void file_with_spaces() {}
+#include "file_with_underscores.cxx"
