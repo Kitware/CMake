@@ -2310,8 +2310,8 @@ unsigned int cmSystemTools::RandomSeed()
   struct timeval t;
   gettimeofday(&t, 0);
   unsigned int pid = static_cast<unsigned int>(getpid());
-  unsigned int tv_sec = t.tv_sec;
-  unsigned int tv_usec = t.tv_usec;
+  unsigned int tv_sec = static_cast<unsigned int>(t.tv_sec);
+  unsigned int tv_usec = static_cast<unsigned int>(t.tv_usec);
   // Since tv_usec never fills more than 11 bits we shift it to fill
   // in the slow-changing high-order bits of tv_sec.
   return tv_sec ^ (tv_usec << 21) ^ pid;
