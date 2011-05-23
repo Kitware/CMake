@@ -12,6 +12,8 @@
         PRINT *, 'INFO:compiler[G95]'
 #elif defined(__PATHSCALE__)
         PRINT *, 'INFO:compiler[PathScale]'
+#elif defined(__ABSOFT__)
+        PRINT *, 'INFO:compiler[Absoft]'
 #elif defined(__GNUC__)
         PRINT *, 'INFO:compiler[GNU]'
 #elif defined(__IBMC__)

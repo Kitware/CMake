@@ -29,11 +29,13 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var obj_regex)
   # Construct a regex to match linker lines.  It must match both the
   # whole line and just the command (argv[0]).
   set(linker_regex "^( *|.*[/\\])(${linker}|ld|collect2)[^/\\]*( |$)")
+  set(linker_exclude_regex "collect2 version ")
   set(log "${log}  link line regex: [${linker_regex}]\n")
   string(REGEX REPLACE "\r?\n" ";" output_lines "${text}")
   foreach(line IN LISTS output_lines)
     set(cmd)
-    if("${line}" MATCHES "${linker_regex}")
+    if("${line}" MATCHES "${linker_regex}" AND
+        NOT "${line}" MATCHES "${linker_exclude_regex}")
       if(UNIX)
         separate_arguments(args UNIX_COMMAND "${line}")
       else()
@@ -64,8 +66,8 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var obj_regex)
           # Object file full path.
           list(APPEND implicit_libs_tmp ${arg})
           set(log "${log}    arg [${arg}] ==> obj [${arg}]\n")
-        elseif("${arg}" MATCHES "^-Y(P,)?")
-          # Sun search path.
+        elseif("${arg}" MATCHES "^-Y(P,)?[^0-9]")
+          # Sun search path ([^0-9] avoids conflict with Mac -Y<num>).
           string(REGEX REPLACE "^-Y(P,)?" "" dirs "${arg}")
           string(REPLACE ":" ";" dirs "${dirs}")
           list(APPEND implicit_dirs_tmp ${dirs})
