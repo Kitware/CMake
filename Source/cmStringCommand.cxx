@@ -770,7 +770,7 @@ bool cmStringCommand
 
   static bool seeded = false;
   bool force_seed = false;
-  int seed = 0;
+  unsigned int seed = 0;
   int length = 5;
   const char cmStringCommandDefaultAlphabet[] = "qwertyuiopasdfghjklzxcvbnm"
     "QWERTYUIOPASDFGHJKLZXCVBNM"
@@ -797,7 +797,7 @@ bool cmStringCommand
       else if ( args[i] == "RANDOM_SEED" )
         {
         ++i;
-        seed = atoi(args[i].c_str());
+        seed = static_cast<unsigned int>(atoi(args[i].c_str()));
         force_seed = true;
         }
       }
