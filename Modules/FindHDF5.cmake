@@ -180,30 +180,29 @@ macro( _HDF5_parse_compile_line
 endmacro()
 
 # Try to find HDF5 using an installed hdf5-config.cmake
-find_package( HDF5 QUIET NO_MODULE )
-if( HDF5_INCLUDE_DIR )
-    set( HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR} )
-    set( HDF5_LIBRARIES )
-    set( HDF5_C_TARGET hdf5 )
-    set( HDF5_CXX_TARGET hdf5_cpp )
-    set( HDF5_HL_TARGET hdf5_hl )
-    set( HDF5_Fortran_TARGET hdf5_fortran )
-    foreach( _component ${HDF5_LANGUAGE_BINDINGS} )
-        list( FIND HDF5_VALID_COMPONENTS ${_component} _component_location )
-        get_target_property( _comp_location ${HDF5_${_component}_TARGET} LOCATION )
-        if( _comp_location )
-            set( HDF5_${_component}_LIBRARY ${_comp_location} CACHE PATH
-                "HDF5 ${_component} library" )
-            mark_as_advanced( HDF5_${_component}_LIBRARY )
-            list( APPEND HDF5_LIBRARIES ${HDF5_${_component}_LIBRARY} )
-        endif()
-    endforeach()
+if( NOT HDF5_FOUND )
+    find_package( HDF5 QUIET NO_MODULE )
+    if( HDF5_FOUND )
+        set( HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR} )
+        set( HDF5_LIBRARIES )
+        set( HDF5_C_TARGET hdf5 )
+        set( HDF5_CXX_TARGET hdf5_cpp )
+        set( HDF5_HL_TARGET hdf5_hl )
+        set( HDF5_Fortran_TARGET hdf5_fortran )
+        foreach( _component ${HDF5_LANGUAGE_BINDINGS} )
+            list( FIND HDF5_VALID_COMPONENTS ${_component} _component_location )
+            get_target_property( _comp_location ${HDF5_${_component}_TARGET} LOCATION )
+            if( _comp_location )
+                set( HDF5_${_component}_LIBRARY ${_comp_location} CACHE PATH
+                    "HDF5 ${_component} library" )
+                mark_as_advanced( HDF5_${_component}_LIBRARY )
+                list( APPEND HDF5_LIBRARIES ${HDF5_${_component}_LIBRARY} )
+            endif()
+        endforeach()
+    endif()
 endif()
 
-if( HDF5_INCLUDE_DIRS AND HDF5_LIBRARIES )
-    # Do nothing: we already have HDF5_INCLUDE_PATH and HDF5_LIBRARIES in the
-    # cache, it would be a shame to override them
-else()
+if( NOT HDF5_FOUND )
     _HDF5_invoke_compiler( C HDF5_C_COMPILE_LINE HDF5_C_RETURN_VALUE )
     _HDF5_invoke_compiler( CXX HDF5_CXX_COMPILE_LINE HDF5_CXX_RETURN_VALUE )
     _HDF5_invoke_compiler( Fortran HDF5_Fortran_COMPILE_LINE HDF5_Fortran_RETURN_VALUE )
@@ -259,9 +258,7 @@ else()
             ${HDF5_${LANGUAGE}_LIBRARY_NAMES} )
         
         # find the HDF5 libraries
-        message( STATUS "FindHDF5 -- search for ${LANGUAGE}" )
         foreach( LIB ${HDF5_${LANGUAGE}_LIBRARY_NAMES} )
-            message( STATUS "FindHDF5 -- Searching for ${LIB}" )
             if( UNIX AND HDF5_USE_STATIC_LIBRARIES )
                 # According to bug 1643 on the CMake bug tracker, this is the
                 # preferred method for searching for a static library.
@@ -358,16 +355,18 @@ find_package_handle_standard_args( HDF5 DEFAULT_MSG
     HDF5_INCLUDE_DIRS
 )
 
-mark_as_advanced( 
-    HDF5_INCLUDE_DIRS 
-    HDF5_LIBRARIES 
-    HDF5_DEFINTIONS
-    HDF5_LIBRARY_DIRS
-    HDF5_C_COMPILER_EXECUTABLE
-    HDF5_CXX_COMPILER_EXECUTABLE
-    HDF5_Fortran_COMPILER_EXECUTABLE )
+if( HDF5_FOUND )
+    mark_as_advanced(
+        HDF5_INCLUDE_DIRS
+        HDF5_LIBRARIES
+        HDF5_DEFINTIONS
+        HDF5_LIBRARY_DIRS
+        HDF5_C_COMPILER_EXECUTABLE
+        HDF5_CXX_COMPILER_EXECUTABLE
+        HDF5_Fortran_COMPILER_EXECUTABLE )
 
-# For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
-# HDF5_INCLUDE_DIRS
-set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
+    # For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
+    # HDF5_INCLUDE_DIRS
+    set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
+endif()
 
