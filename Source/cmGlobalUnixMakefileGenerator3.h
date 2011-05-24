@@ -159,8 +159,6 @@ protected:
   // in the rule to satisfy the make program.
   std::string EmptyRuleHackCommand;
 
-  bool NoRuleMessages;
-
   // Store per-target progress counters.
   struct TargetProgress
   {
