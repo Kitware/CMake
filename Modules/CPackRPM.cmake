@@ -489,9 +489,9 @@ ENDIF(CPACK_RPM_PACKAGE_COMPONENT)
 # file name by enclosing it between double quotes (thus the sed)
 # Then we must authorize any man pages extension (adding * at the end)
 # because rpmbuild may automatically compress those files
-EXECUTE_PROCESS(COMMAND find -type f -o -type l
-                COMMAND sed {s:.*/man.*/.*:&*:}
-                COMMAND sed {s/\\.\\\(.*\\\)/\"\\1\"/}
+EXECUTE_PROCESS(COMMAND find . -type f -o -type l
+                COMMAND sed s:.*/man.*/.*:&*:
+                COMMAND sed s/\\.\\\(.*\\\)/\"\\1\"/
                 WORKING_DIRECTORY "${WDIR}"
                 OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
 
