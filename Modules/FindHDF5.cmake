@@ -59,7 +59,7 @@
 # This module is maintained by Will Dicharry <wdicharry@stellarscience.com>.
 
 include(SelectLibraryConfigurations)
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 # List of the valid HDF5 components
 set( HDF5_VALID_COMPONENTS 
@@ -180,30 +180,29 @@ macro( _HDF5_parse_compile_line
 endmacro()
 
 # Try to find HDF5 using an installed hdf5-config.cmake
-find_package( HDF5 QUIET NO_MODULE )
-if( HDF5_INCLUDE_DIR )
-    set( HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR} )
-    set( HDF5_LIBRARIES )
-    set( HDF5_C_TARGET hdf5 )
-    set( HDF5_CXX_TARGET hdf5_cpp )
-    set( HDF5_HL_TARGET hdf5_hl )
-    set( HDF5_Fortran_TARGET hdf5_fortran )
-    foreach( _component ${HDF5_LANGUAGE_BINDINGS} )
-        list( FIND HDF5_VALID_COMPONENTS ${_component} _component_location )
-        get_target_property( _comp_location ${HDF5_${_component}_TARGET} LOCATION )
-        if( _comp_location )
-            set( HDF5_${_component}_LIBRARY ${_comp_location} CACHE PATH
-                "HDF5 ${_component} library" )
-            mark_as_advanced( HDF5_${_component}_LIBRARY )
-            list( APPEND HDF5_LIBRARIES ${HDF5_${_component}_LIBRARY} )
-        endif()
-    endforeach()
+if( NOT HDF5_FOUND )
+    find_package( HDF5 QUIET NO_MODULE )
+    if( HDF5_FOUND )
+        set( HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR} )
+        set( HDF5_LIBRARIES )
+        set( HDF5_C_TARGET hdf5 )
+        set( HDF5_CXX_TARGET hdf5_cpp )
+        set( HDF5_HL_TARGET hdf5_hl )
+        set( HDF5_Fortran_TARGET hdf5_fortran )
+        foreach( _component ${HDF5_LANGUAGE_BINDINGS} )
+            list( FIND HDF5_VALID_COMPONENTS ${_component} _component_location )
+            get_target_property( _comp_location ${HDF5_${_component}_TARGET} LOCATION )
+            if( _comp_location )
+                set( HDF5_${_component}_LIBRARY ${_comp_location} CACHE PATH
+                    "HDF5 ${_component} library" )
+                mark_as_advanced( HDF5_${_component}_LIBRARY )
+                list( APPEND HDF5_LIBRARIES ${HDF5_${_component}_LIBRARY} )
+            endif()
+        endforeach()
+    endif()
 endif()
 
-if( HDF5_INCLUDE_DIRS AND HDF5_LIBRARIES )
-    # Do nothing: we already have HDF5_INCLUDE_PATH and HDF5_LIBRARIES in the
-    # cache, it would be a shame to override them
-else()
+if( NOT HDF5_FOUND )
     _HDF5_invoke_compiler( C HDF5_C_COMPILE_LINE HDF5_C_RETURN_VALUE )
     _HDF5_invoke_compiler( CXX HDF5_CXX_COMPILE_LINE HDF5_CXX_RETURN_VALUE )
     _HDF5_invoke_compiler( Fortran HDF5_Fortran_COMPILE_LINE HDF5_Fortran_RETURN_VALUE )
@@ -259,9 +258,7 @@ else()
             ${HDF5_${LANGUAGE}_LIBRARY_NAMES} )
         
         # find the HDF5 libraries
-        message( STATUS "FindHDF5 -- search for ${LANGUAGE}" )
         foreach( LIB ${HDF5_${LANGUAGE}_LIBRARY_NAMES} )
-            message( STATUS "FindHDF5 -- Searching for ${LIB}" )
             if( UNIX AND HDF5_USE_STATIC_LIBRARIES )
                 # According to bug 1643 on the CMake bug tracker, this is the
                 # preferred method for searching for a static library.
@@ -310,26 +307,41 @@ else()
 
     # We may have picked up some duplicates in various lists during the above
     # process for the language bindings (both the C and C++ bindings depend on
-    # libz for example).  Remove the duplicates.
+    # libz for example).  Remove the duplicates. It appears that the default
+    # CMake behavior is to remove duplicates from the end of a list. However,
+    # for link lines, this is incorrect since unresolved symbols are searched
+    # for down the link line. Therefore, we reverse the list, remove the
+    # duplicates, and then reverse it again to get the duplicates removed from
+    # the beginning.
+    macro( _remove_duplicates_from_beginning _list_name )
+        list( REVERSE ${_list_name} )
+        list( REMOVE_DUPLICATES ${_list_name} )
+        list( REVERSE ${_list_name} )
+    endmacro()
+
     if( HDF5_INCLUDE_DIRS )
-        list( REMOVE_DUPLICATES HDF5_INCLUDE_DIRS )
+        _remove_duplicates_from_beginning( HDF5_INCLUDE_DIRS )
     endif()
     if( HDF5_LIBRARIES_DEBUG )
-        list( REMOVE_DUPLICATES HDF5_LIBRARIES_DEBUG )
+        _remove_duplicates_from_beginning( HDF5_LIBRARIES_DEBUG )
     endif()
     if( HDF5_LIBRARIES_RELEASE )
-        list( REMOVE_DUPLICATES HDF5_LIBRARIES_RELEASE )
+        _remove_duplicates_from_beginning( HDF5_LIBRARIES_RELEASE )
     endif()
     if( HDF5_LIBRARY_DIRS )
-        list( REMOVE_DUPLICATES HDF5_LIBRARY_DIRS )
+        _remove_duplicates_from_beginning( HDF5_LIBRARY_DIRS )
     endif()
 
     # Construct the complete list of HDF5 libraries with debug and optimized
     # variants when the generator supports them.
     if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
-        set( HDF5_LIBRARIES
-            debug ${HDF5_LIBRARIES_DEBUG}
-            optimized ${HDF5_LIBRARIES_RELEASE} )
+        set( HDF5_LIBRARIES )
+        foreach( _lib ${HDF5_LIBRARIES_DEBUG} )
+            list( APPEND HDF5_LIBRARIES debug ${_lib} )
+        endforeach()
+        foreach( _lib ${HDF5_LIBRARIES_RELEASE} )
+            list( APPEND HDF5_LIBRARIES optimized ${_lib} )
+        endforeach()
     else()
         set( HDF5_LIBRARIES ${HDF5_LIBRARIES_RELEASE} )
     endif()
@@ -358,16 +370,18 @@ find_package_handle_standard_args( HDF5 DEFAULT_MSG
     HDF5_INCLUDE_DIRS
 )
 
-mark_as_advanced( 
-    HDF5_INCLUDE_DIRS 
-    HDF5_LIBRARIES 
-    HDF5_DEFINTIONS
-    HDF5_LIBRARY_DIRS
-    HDF5_C_COMPILER_EXECUTABLE
-    HDF5_CXX_COMPILER_EXECUTABLE
-    HDF5_Fortran_COMPILER_EXECUTABLE )
+if( HDF5_FOUND )
+    mark_as_advanced(
+        HDF5_INCLUDE_DIRS
+        HDF5_LIBRARIES
+        HDF5_DEFINTIONS
+        HDF5_LIBRARY_DIRS
+        HDF5_C_COMPILER_EXECUTABLE
+        HDF5_CXX_COMPILER_EXECUTABLE
+        HDF5_Fortran_COMPILER_EXECUTABLE )
 
-# For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
-# HDF5_INCLUDE_DIRS
-set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
+    # For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
+    # HDF5_INCLUDE_DIRS
+    set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
+endif()
 
