@@ -363,25 +363,16 @@ if( NOT HDF5_FOUND )
         "HDF5 library compiled with parallel IO support" )
     mark_as_advanced( HDF5_IS_PARALLEL )
 
+    # For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
+    # HDF5_INCLUDE_DIRS
+    if( HDF5_INCLUDE_DIRS )
+        set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
+    endif()
+
 endif()
 
 find_package_handle_standard_args( HDF5 DEFAULT_MSG 
     HDF5_LIBRARIES 
     HDF5_INCLUDE_DIRS
 )
-
-if( HDF5_FOUND )
-    mark_as_advanced(
-        HDF5_INCLUDE_DIRS
-        HDF5_LIBRARIES
-        HDF5_DEFINTIONS
-        HDF5_LIBRARY_DIRS
-        HDF5_C_COMPILER_EXECUTABLE
-        HDF5_CXX_COMPILER_EXECUTABLE
-        HDF5_Fortran_COMPILER_EXECUTABLE )
-
-    # For backwards compatibility we set HDF5_INCLUDE_DIR to the value of
-    # HDF5_INCLUDE_DIRS
-    set( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
-endif()
 
