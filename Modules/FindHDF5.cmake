@@ -324,9 +324,13 @@ if( NOT HDF5_FOUND )
     # Construct the complete list of HDF5 libraries with debug and optimized
     # variants when the generator supports them.
     if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
-        set( HDF5_LIBRARIES
-            debug ${HDF5_LIBRARIES_DEBUG}
-            optimized ${HDF5_LIBRARIES_RELEASE} )
+        set( HDF5_LIBRARIES )
+        foreach( _lib ${HDF5_LIBRARIES_DEBUG} )
+            list( APPEND HDF5_LIBRARIES debug ${_lib} )
+        endforeach()
+        foreach( _lib ${HDF5_LIBRARIES_RELEASE} )
+            list( APPEND HDF5_LIBRARIES optimized ${_lib} )
+        endforeach()
     else()
         set( HDF5_LIBRARIES ${HDF5_LIBRARIES_RELEASE} )
     endif()
