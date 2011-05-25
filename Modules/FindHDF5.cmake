@@ -307,18 +307,29 @@ if( NOT HDF5_FOUND )
 
     # We may have picked up some duplicates in various lists during the above
     # process for the language bindings (both the C and C++ bindings depend on
-    # libz for example).  Remove the duplicates.
+    # libz for example).  Remove the duplicates. It appears that the default
+    # CMake behavior is to remove duplicates from the end of a list. However,
+    # for link lines, this is incorrect since unresolved symbols are searched
+    # for down the link line. Therefore, we reverse the list, remove the
+    # duplicates, and then reverse it again to get the duplicates removed from
+    # the beginning.
+    macro( _remove_duplicates_from_beginning _list_name )
+        list( REVERSE ${_list_name} )
+        list( REMOVE_DUPLICATES ${_list_name} )
+        list( REVERSE ${_list_name} )
+    endmacro()
+
     if( HDF5_INCLUDE_DIRS )
-        list( REMOVE_DUPLICATES HDF5_INCLUDE_DIRS )
+        _remove_duplicates_from_beginning( HDF5_INCLUDE_DIRS )
     endif()
     if( HDF5_LIBRARIES_DEBUG )
-        list( REMOVE_DUPLICATES HDF5_LIBRARIES_DEBUG )
+        _remove_duplicates_from_beginning( HDF5_LIBRARIES_DEBUG )
     endif()
     if( HDF5_LIBRARIES_RELEASE )
-        list( REMOVE_DUPLICATES HDF5_LIBRARIES_RELEASE )
+        _remove_duplicates_from_beginning( HDF5_LIBRARIES_RELEASE )
     endif()
     if( HDF5_LIBRARY_DIRS )
-        list( REMOVE_DUPLICATES HDF5_LIBRARY_DIRS )
+        _remove_duplicates_from_beginning( HDF5_LIBRARY_DIRS )
     endif()
 
     # Construct the complete list of HDF5 libraries with debug and optimized
