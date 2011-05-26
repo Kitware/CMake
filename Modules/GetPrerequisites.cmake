@@ -261,9 +261,9 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
 
   # Is it already resolved?
   #
-  if(EXISTS "${resolved_item}")
+  if(IS_ABSOLUTE "${resolved_item}" AND EXISTS "${resolved_item}")
     set(resolved 1)
-  endif(EXISTS "${resolved_item}")
+  endif(IS_ABSOLUTE "${resolved_item}" AND EXISTS "${resolved_item}")
 
   if(NOT resolved)
     if(item MATCHES "@executable_path")
