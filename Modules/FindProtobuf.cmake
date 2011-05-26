@@ -54,7 +54,7 @@
 
 #=============================================================================
 # Copyright 2009 Kitware, Inc.
-# Copyright 2009,2011 Philip Lowman <philip@yhbt.com>
+# Copyright 2009-2011 Philip Lowman <philip@yhbt.com>
 # Copyright 2008 Esben Mose Hansen, Ange Optimization ApS
 #
 # Distributed under the OSI-approved BSD License (the "License");
