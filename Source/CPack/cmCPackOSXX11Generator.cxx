@@ -21,6 +21,7 @@
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
+#include <sys/stat.h>
 
 //----------------------------------------------------------------------
 cmCPackOSXX11Generator::cmCPackOSXX11Generator()
@@ -133,6 +134,32 @@ int cmCPackOSXX11Generator::PackageFiles()
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying the resource files"
       << std::endl);
     return 0;
+    }
+
+  // Two of the files need to have execute permission, so ensure they do:
+  std::string runTimeScript = dir;
+  runTimeScript += "/";
+  runTimeScript += "RuntimeScript";
+
+  std::string appScriptName = appdir;
+  appScriptName += "/";
+  appScriptName += this->GetOption("CPACK_PACKAGE_FILE_NAME");
+
+  mode_t mode;
+  if (cmsys::SystemTools::GetPermissions(runTimeScript.c_str(), mode))
+    {
+    mode |= (S_IXUSR | S_IXGRP | S_IXOTH);
+    cmsys::SystemTools::SetPermissions(runTimeScript.c_str(), mode);
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Setting: " << runTimeScript
+      << " to permission: " << mode << std::endl);
+    }
+
+  if (cmsys::SystemTools::GetPermissions(appScriptName.c_str(), mode))
+    {
+    mode |= (S_IXUSR | S_IXGRP | S_IXOTH);
+    cmsys::SystemTools::SetPermissions(appScriptName.c_str(), mode);
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT,  "Setting: " << appScriptName
+      << " to permission: " << mode << std::endl);
     }
 
   std::string output;

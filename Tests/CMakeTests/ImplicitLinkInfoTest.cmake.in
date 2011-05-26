@@ -84,6 +84,13 @@ set(linux64_nagfor_dirs "/usr/lib/gcc/x86_64-redhat-linux/4.4.5;/usr/lib64;/lib6
 set(linux64_nagfor_obj_regex "^/usr/local/NAG/lib")
 list(APPEND platforms linux64_nagfor)
 
+# absoft dummy.f -X -v
+set(linux64_absoft_text "collect2 version 4.4.5 (x86-64 Linux/ELF)
+/usr/bin/ld --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=both -dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib/gcc/x86_64-linux-gnu/4.4.5/../../../../lib/crt1.o /usr/lib/gcc/x86_64-linux-gnu/4.4.5/../../../../lib/crti.o /usr/lib/gcc/x86_64-linux-gnu/4.4.5/crtbegin.o -L/opt/absoft11.1/lib64 -L/usr/lib/gcc/x86_64-linux-gnu/4.4.5 -L/usr/lib/gcc/x86_64-linux-gnu/4.4.5 -L/usr/lib/gcc/x86_64-linux-gnu/4.4.5/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/4.4.5/../../.. /tmp/E3Bii1/dummy.o -v -laf90math -lafio -lamisc -labsoftmain -laf77math -lm -lmv -lpthread -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-linux-gnu/4.4.5/crtend.o /usr/lib/gcc/x86_64-linux-gnu/4.4.5/../../../../lib/crtn.o")
+set(linux64_absoft_libs "af90math;afio;amisc;absoftmain;af77math;m;mv;pthread;c")
+set(linux64_absoft_dirs "/opt/absoft11.1/lib64;/usr/lib/gcc/x86_64-linux-gnu/4.4.5;/usr/lib;/lib")
+list(APPEND platforms linux64_absoft)
+
 # gcc dummy.c -v # in strange path
 set(linux64_test1_text "
 /this/might/match/as/a/linker/ld/but/it/is/not because the ld is not the last path component
@@ -124,6 +131,14 @@ set(mac_ppc_g++_text " /usr/libexec/gcc/powerpc-apple-darwin10/4.2.1/collect2 -d
 set(mac_ppc_g++_libs "stdc++")
 set(mac_ppc_g++_dirs "/usr/lib/powerpc-apple-darwin10/4.2.1;/usr/lib/gcc/powerpc-apple-darwin10/4.2.1;/usr/lib")
 list(APPEND platforms mac_ppc_g++)
+
+# absoft dummy.f -X -v
+set(mac_absoft_text "collect2 version 4.2.1 (Apple Inc. build 5664) (i686 Darwin)
+/usr/libexec/gcc/i686-apple-darwin10/4.2.1/ld -dynamic -arch i386 -macosx_version_min 10.6.6 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.6.o -L/Applications/Absoft11.1/lib -L/usr/lib/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../../i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../.. /var/folders/04/04+Djjm8GZWBmuEdp2Gsw++++TM/-Tmp-//bTAoJc/dummy.o -v -Y 10 -laf90math -lafio -lamisc -labsoftmain -laf77math -lm -lmv -lSystem -lgcc -lSystem
+")
+set(mac_absoft_libs "af90math;afio;amisc;absoftmain;af77math;m;mv")
+set(mac_absoft_dirs "/Applications/Absoft11.1/lib;/usr/lib/i686-apple-darwin10/4.2.1;/usr/lib/gcc/i686-apple-darwin10/4.2.1;/usr/lib")
+list(APPEND platforms mac_absoft)
 
 #-----------------------------------------------------------------------------
 # Sun

@@ -455,7 +455,11 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       {
       lang = "None";
       }
-    if(lang[0] == 'C')
+    if(header)
+      {
+      headers.push_back(sf);
+      }
+    else if(lang[0] == 'C')
       {
       clCompile.push_back(sf);
       }
@@ -466,10 +470,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     else if(sf->GetCustomCommand())
       {
       customBuild.push_back(sf);
-      }
-    else if(header)
-      {
-      headers.push_back(sf);
       }
     else if(ext == "idl")
       {
