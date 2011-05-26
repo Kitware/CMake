@@ -2689,7 +2689,7 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
     else if(lhs[i] > rhs[i])
       {
       // lhs > rhs, so true if operation is GREATER
-        return op == cmSystemTools::OP_GREATER;
+      return op == cmSystemTools::OP_GREATER;
       }
     }
   // lhs == rhs, so true if operation is EQUAL

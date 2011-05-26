@@ -344,9 +344,21 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
         }
       this->MemoryTesterGlobalResults[kk] += memcheckresults[kk];
       }
+
+    std::string logTag;
+    if(this->CTest->ShouldCompressMemCheckOutput())
+      {
+      this->CTest->CompressString(memcheckstr);
+      logTag = "\t<Log compression=\"gzip\" encoding=\"base64\">\n";
+      }
+    else
+      {
+      logTag = "\t<Log>\n";
+      }
+
     os
       << "\t\t</Results>\n"
-      << "\t<Log>\n" << memcheckstr << std::endl
+      << logTag << memcheckstr << std::endl
       << "\t</Log>\n";
     this->WriteTestResultFooter(os, result);
     if ( current < cc )
