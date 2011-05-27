@@ -53,9 +53,8 @@
 #
 #  GET_DOTAPP_DIR(<exe> <dotapp_dir_var>)
 # Returns the nearest parent dir whose name ends with ".app" given the full
-# path to an executable. If there is no such parent dir, then return a dir at
-# the same level as the executable, named with the executable's base name and
-# ending with ".app"
+# path to an executable. If there is no such parent dir, then simply return
+# the dir containing the executable.
 #
 # The returned directory may or may not exist.
 #
@@ -227,35 +226,35 @@ endfunction(get_bundle_main_executable)
 function(get_dotapp_dir exe dotapp_dir_var)
   set(s "${exe}")
 
-  set(has_dotapp_parent 0)
   if(s MATCHES "^.*/.*\\.app/.*$")
-    set(has_dotapp_parent 1)
-  endif(s MATCHES "^.*/.*\\.app/.*$")
-
-  set(done 0)
-  while(NOT ${done})
-    get_filename_component(snamewe "${s}" NAME_WE)
-    get_filename_component(sname "${s}" NAME)
-    get_filename_component(sdir "${s}" PATH)
-    if(has_dotapp_parent)
-      # If there is a ".app" parent directory,
-      # ascend until we hit it:
-      #   (typical of a Mac bundle executable)
-      #
+    # If there is a ".app" parent directory,
+    # ascend until we hit it:
+    #   (typical of a Mac bundle executable)
+    #
+    set(done 0)
+    while(NOT ${done})
+      get_filename_component(snamewe "${s}" NAME_WE)
+      get_filename_component(sname "${s}" NAME)
+      get_filename_component(sdir "${s}" PATH)
       set(s "${sdir}")
       if(sname MATCHES "\\.app$")
         set(done 1)
         set(dotapp_dir "${sdir}/${sname}")
       endif(sname MATCHES "\\.app$")
-    else(has_dotapp_parent)
-      # Otherwise use a directory named the same
-      # as the exe, but with a ".app" extension:
-      #   (typical of a non-bundle executable on Mac, Windows or Linux)
-      #
-      set(done 1)
-      set(dotapp_dir "${sdir}/${snamewe}.app")
-    endif(has_dotapp_parent)
-  endwhile(NOT ${done})
+    endwhile(NOT ${done})
+  else(s MATCHES "^.*/.*\\.app/.*$")
+    # Otherwise use a directory containing the exe
+    #   (typical of a non-bundle executable on Mac, Windows or Linux)
+    #
+    is_file_executable("${s}" is_executable)
+    if(is_executable)
+      get_filename_component(sdir "${s}" PATH)
+      set(dotapp_dir "${sdir}")
+    else(is_executable)
+      set(dotapp_dir "${s}")
+    endif(is_executable)
+  endif(s MATCHES "^.*/.*\\.app/.*$")
+
 
   set(${dotapp_dir_var} "${dotapp_dir}" PARENT_SCOPE)
 endfunction(get_dotapp_dir)
