@@ -3099,7 +3099,7 @@ bool cmCTest::CompressString(std::string& str)
     return false;
     }
 
-  strm.avail_in = str.size();
+  strm.avail_in = static_cast<uInt>(str.size());
   strm.next_in = in;
   strm.avail_out = outSize;
   strm.next_out = out;
