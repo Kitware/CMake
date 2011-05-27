@@ -1,5 +1,5 @@
 
-CFBundle test project.  The generated .plugin/ bundle from either makefiles or XCode should look like this:
+CFBundle test project.  The generated .plugin/ bundle from either makefiles or Xcode should look like this:
 
 ./Contents
 ./Contents/Info.plist
