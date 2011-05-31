@@ -205,7 +205,6 @@ IF(BUILD_TESTING)
       --build-generator ${CMAKE_TEST_GENERATOR}
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-project BundleUtilities
-      --test-command testdir2/testbundleutils2
       )
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleUtilities")
   endif(CMAKE_SYSTEM_NAME MATCHES "Windows" OR
