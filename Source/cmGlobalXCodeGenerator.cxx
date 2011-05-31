@@ -147,7 +147,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
     }
   return gg.release();
 #else
-  std::cerr << "CMake should be built with cmake to use XCode, "
+  std::cerr << "CMake should be built with cmake to use Xcode, "
     "default to Xcode 1.5\n";
   return new cmGlobalXCodeGenerator;
 #endif
@@ -963,7 +963,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                         this->CreateString("0"));
       }
 
-    // create list of build phases and create the XCode target
+    // create list of build phases and create the Xcode target
     cmXCodeObject* buildPhases =
       this->CreateObject(cmXCodeObject::OBJECT_LIST);
 
@@ -2883,7 +2883,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
   makefileStream << "# DO NOT EDIT\n";
   makefileStream << "# This makefile makes sure all linkable targets are\n";
   makefileStream << "# up-to-date with anything they link to, avoiding a "
-    "bug in XCode 1.5\n";
+    "bug in Xcode 1.5\n";
   for(std::vector<std::string>::const_iterator
         ct = this->CurrentConfigurationTypes.begin();
       ct != this->CurrentConfigurationTypes.end(); ++ct)
@@ -3112,7 +3112,7 @@ void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
   const
 {
   entry.Name = this->GetName();
-  entry.Brief = "Generate XCode project files.";
+  entry.Brief = "Generate Xcode project files.";
   entry.Full = "";
 }
 

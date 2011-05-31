@@ -294,7 +294,7 @@ ELSE(STAGE2)
     "${CMAKE_INSTALL_PREFIX}/InstallScriptOut.cmake;${CMAKE_INSTALL_PREFIX}/InstallScript4Out.cmake")
 
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES OUTPUT_NAME SimpleInstExe)
-  # Disable VERSION test until it is implemented in the XCode generator.
+  # Disable VERSION test until it is implemented in the Xcode generator.
   IF(NOT XCODE)
     SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES VERSION 1.2)
   ENDIF(NOT XCODE)
