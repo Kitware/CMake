@@ -37,8 +37,9 @@ include(BundleUtilities)
 fixup_bundle("${OUTPUT}" "${OUTPUT_MODULE}" "${INPUTDIR}")
 
 # make sure we can run the app
-execute_process(COMMAND "${OUTPUT}" RESULT_VARIABLE result WORKING_DIRECTORY "${EXE_DIR}")
+message("Executing ${OUTPUT} in ${EXE_DIR}")
+execute_process(COMMAND "${OUTPUT}" RESULT_VARIABLE result OUTPUT_VARIABLE out ERROR_VARIABLE out WORKING_DIRECTORY "${EXE_DIR}")
 
 if(NOT result STREQUAL "0")
-  message(FATAL_ERROR " failed to execute test program")
+  message(FATAL_ERROR " failed to execute test program\n${out}")
 endif(NOT result STREQUAL "0")

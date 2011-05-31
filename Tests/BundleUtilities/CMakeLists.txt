@@ -43,6 +43,7 @@ add_custom_target(testbundleutils1_test  ALL
   "-DINPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}"
   "-DOUTPUTDIR=${TESTBUNDLEDIR}"
   -P "${CMAKE_CURRENT_SOURCE_DIR}/bundleutils.cmake"
+  DEPENDS testbundleutils1 module
   )
 
 add_dependencies(testbundleutils1_test testbundleutils1)
@@ -66,5 +67,6 @@ add_custom_target(testbundleutils2_test  ALL
   "-DINPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}"
   "-DOUTPUTDIR=${TESTBUNDLEDIR}"
   -P "${CMAKE_CURRENT_SOURCE_DIR}/bundleutils.cmake"
+  DEPENDS testbundleutils1 module
   )
 add_dependencies(testbundleutils2_test testbundleutils2)
