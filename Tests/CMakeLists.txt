@@ -194,8 +194,8 @@ IF(BUILD_TESTING)
   LIST(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
 
 
-  # run test for BundleUtilities on supported platforms
-  if(CMAKE_SYSTEM_NAME MATCHES "Windows" OR
+  # run test for BundleUtilities on supported platforms/compilers
+  if(MSVC OR
      CMAKE_SYSTEM_NAME MATCHES "Linux" OR
      CMAKE_SYSTEM_NAME MATCHES "Darwin")
     ADD_TEST(BundleUtilities ${CMAKE_CTEST_COMMAND}
@@ -207,7 +207,7 @@ IF(BUILD_TESTING)
       --build-project BundleUtilities
       )
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleUtilities")
-  endif(CMAKE_SYSTEM_NAME MATCHES "Windows" OR
+  endif(MSVC OR
      CMAKE_SYSTEM_NAME MATCHES "Linux" OR
      CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
