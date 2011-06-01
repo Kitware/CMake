@@ -1,6 +1,8 @@
 include(Compiler/XL)
 __compiler_xl(Fortran)
 
+SET(CMAKE_Fortran_MODDIR_FLAG "-qmoddir=")
+
 SET(CMAKE_Fortran_DEFINE_FLAG "-WF,-D")
 
 # -qthreaded     = Ensures that all optimizations will be thread-safe
