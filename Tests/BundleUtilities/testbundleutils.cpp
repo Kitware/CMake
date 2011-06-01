@@ -16,14 +16,18 @@ int main(int, char**)
 
 #if defined(WIN32)
   HANDLE lib = LoadLibraryA("module.dll");
-#else
-  void* lib = dlopen("module.so", RTLD_LAZY);
-#endif
-
   if(!lib)
   {
     printf("Failed to open module\n");
   }
+#else
+  void* lib = dlopen("module.so", RTLD_LAZY);
+  if(!lib)
+  {
+    printf("Failed to open module\n%s\n", dlerror());
+  }
+#endif
+
 
   return lib == 0 ? 1 : 0;
 }
