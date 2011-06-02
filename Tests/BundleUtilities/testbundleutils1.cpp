@@ -15,16 +15,16 @@ int main(int, char**)
   shared();
 
 #if defined(WIN32)
-  HANDLE lib = LoadLibraryA("module.dll");
+  HANDLE lib = LoadLibraryA("module1.dll");
   if(!lib)
   {
-    printf("Failed to open module\n");
+    printf("Failed to open module1\n");
   }
 #else
-  void* lib = dlopen("module.so", RTLD_LAZY);
+  void* lib = dlopen("module1.so", RTLD_LAZY);
   if(!lib)
   {
-    printf("Failed to open module\n%s\n", dlerror());
+    printf("Failed to open module1\n%s\n", dlerror());
   }
 #endif
 
