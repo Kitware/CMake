@@ -2043,6 +2043,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ADD_TEST_MACRO(CompileCommandOutput
       "${CMake_BINARY_DIR}/Tests/CMakeLib/runcompilecommands")
   ENDIF()
+
+  ADD_TEST(IncludeDirectories ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/IncludeDirectories"
+    "${CMake_BINARY_DIR}/Tests/IncludeDirectories"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project IncludeDirectories
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --test-command IncludeDirectories)
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
+
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)
