@@ -677,7 +677,7 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
   if ( end < -1 || end > leftOverLength )
     {
     cmOStringStream ostr;
-    ostr << "end index: " << end << " is out of range " << 0 << " - "
+    ostr << "end index: " << end << " is out of range -1 - "
          << leftOverLength;
     this->SetError(ostr.str().c_str());
     return false;
