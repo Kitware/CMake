@@ -1,5 +1,3 @@
-set(CVSROOT ":pserver:anonymous@cmake.org:/cmake.git")
-
 get_filename_component(SCRIPT_PATH "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 # default to self extracting tgz, tgz, and tar.Z
@@ -30,17 +28,15 @@ endif(NOT DEFINED PROCESSORS)
 if(NOT DEFINED CMAKE_CREATE_VERSION)
   message(FATAL_ERROR "CMAKE_CREATE_VERSION not defined")
 endif(NOT DEFINED CMAKE_CREATE_VERSION)
-if(NOT DEFINED CVS_COMMAND)
-  set(CVS_COMMAND cvs)
-endif(NOT DEFINED CVS_COMMAND)
+if(NOT DEFINED GIT_COMMAND)
+  set(GIT_COMMAND git)
+endif()
 
 if(${CMAKE_CREATE_VERSION} MATCHES "^(release|maint|next|nightly)$")
   set(GIT_BRANCH origin/${CMAKE_CREATE_VERSION})
 else()
   set(GIT_BRANCH ${CMAKE_CREATE_VERSION})
 endif()
-set( CMAKE_CHECKOUT "${CVS_COMMAND} -q -d ${CVSROOT} co -d ${CMAKE_CREATE_VERSION} ${CMAKE_CREATE_VERSION}")
-
 
 if(NOT DEFINED FINAL_PATH )
   set(FINAL_PATH ${CMAKE_RELEASE_DIRECTORY}/${CMAKE_CREATE_VERSION}-build)

@@ -1,7 +1,6 @@
 set(CMAKE_RELEASE_DIRECTORY "/bench1/noibm34/CMakeReleaseDirectory")
 set(FINAL_PATH /u/noibm34/cmake-release)
 set(PROCESSORS 2)
-set(CVS_COMMAND /vol/local/bin/cvs)
 set(HOST "sshserv.centers.ihost.com")
 set(EXTRA_HOP "rsh p90n03")
 set(MAKE_PROGRAM "make")
