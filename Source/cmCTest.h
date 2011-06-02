@@ -219,6 +219,8 @@ public:
   bool ShouldPrintLabels() { return this->PrintLabels; }
 
   bool ShouldCompressTestOutput();
+  bool ShouldCompressMemCheckOutput();
+  bool CompressString(std::string& str);
 
   std::string GetCDashVersion();
 
@@ -430,7 +432,8 @@ private:
   bool RunConfigurationScript;
 
   //flag for lazy getter (optimization)
-  bool ComputedCompressOutput;
+  bool ComputedCompressTestOutput;
+  bool ComputedCompressMemCheckOutput;
 
   int GenerateNotesFile(const char* files);
 
@@ -487,8 +490,8 @@ private:
   bool                     ShortDateFormat;
 
   bool                     CompressXMLFiles;
-
   bool                     CompressTestOutput;
+  bool                     CompressMemCheckOutput;
 
   void InitStreams();
   std::ostream* StreamOut;
