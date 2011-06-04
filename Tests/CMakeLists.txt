@@ -198,6 +198,7 @@ IF(BUILD_TESTING)
   if(MSVC OR
      CMAKE_SYSTEM_NAME MATCHES "Linux" OR
      CMAKE_SYSTEM_NAME MATCHES "Darwin")
+  if(NOT "${CMAKE_TEST_GENERATOR}" STREQUAL "Watcom WMake")
     ADD_TEST(BundleUtilities ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/BundleUtilities"
@@ -207,9 +208,8 @@ IF(BUILD_TESTING)
       --build-project BundleUtilities
       )
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleUtilities")
-  endif(MSVC OR
-     CMAKE_SYSTEM_NAME MATCHES "Linux" OR
-     CMAKE_SYSTEM_NAME MATCHES "Darwin")
+  endif()
+  endif()
 
   SET(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
   SET(CMAKE_BUILD_TEST_BINARY_DIR "${CMake_BINARY_DIR}/Tests/CMakeBuildCOnly")
