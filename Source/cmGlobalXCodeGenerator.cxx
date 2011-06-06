@@ -323,6 +323,19 @@ void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmGlobalXCodeGenerator::PostBuildMakeTarget(std::string const& tName,
+                                            std::string const& configName)
+{
+  std::string out = "PostBuild." + tName;
+  if(this->XcodeVersion > 20)
+    {
+    out += "." + configName;
+    }
+  return out;
+}
+
+//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                                         std::vector<cmLocalGenerator*>& gens)
@@ -351,12 +364,8 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   makecommand.push_back(dir.c_str());
   makecommand.push_back("-f");
   makecommand.push_back(this->CurrentXCodeHackMakefile.c_str());
-  if(this->XcodeVersion > 20)
-    {
-    makecommand.push_back("all.$(CONFIGURATION)");
-    }
-  cmCustomCommandLines commandLines;
-  commandLines.push_back(makecommand);
+  makecommand.push_back(""); // placeholder, see below
+
   // Add Re-Run CMake rules
   this->CreateReRunCMakeFile(root, gens);
 
@@ -383,6 +392,10 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
           target.GetType() == cmTarget::SHARED_LIBRARY ||
           target.GetType() == cmTarget::MODULE_LIBRARY))
         {
+        makecommand[makecommand.size()-1] =
+          this->PostBuildMakeTarget(target.GetName(), "$(CONFIGURATION)");
+        cmCustomCommandLines commandLines;
+        commandLines.push_back(makecommand);
         lg->GetMakefile()->AddCustomCommandToTarget(target.GetName(),
                                                     no_depends,
                                                     commandLines,
@@ -2437,6 +2450,10 @@ void cmGlobalXCodeGenerator
         {
         linkLibs += li->Value;
         }
+      if(li->Target && !li->Target->IsImported())
+        {
+        target->AddDependTarget(configName, li->Target->GetName());
+        }
       }
     this->AppendBuildSettingAttribute(target, "OTHER_LDFLAGS",
                                       linkLibs.c_str(), configName);
@@ -2882,41 +2899,10 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
   // correctly by xcode
   makefileStream << "# DO NOT EDIT\n";
   makefileStream << "# This makefile makes sure all linkable targets are\n";
-  makefileStream << "# up-to-date with anything they link to, avoiding a "
-    "bug in Xcode 1.5\n";
-  for(std::vector<std::string>::const_iterator
-        ct = this->CurrentConfigurationTypes.begin();
-      ct != this->CurrentConfigurationTypes.end(); ++ct)
-    {
-    if(this->XcodeVersion < 21 || ct->empty())
-      {
-      makefileStream << "all: ";
-      }
-    else
-      {
-      makefileStream << "all." << *ct << ": ";
-      }
-    const char* configName = 0;
-    if(!ct->empty())
-      {
-      configName = ct->c_str();
-      }
-    for(std::vector<cmXCodeObject*>::iterator i = targets.begin();
-        i != targets.end(); ++i)
-      {
-      cmXCodeObject* target = *i;
-      cmTarget* t =target->GetTarget();
-      if(t->GetType() == cmTarget::EXECUTABLE ||
-         t->GetType() == cmTarget::SHARED_LIBRARY ||
-         t->GetType() == cmTarget::MODULE_LIBRARY)
-        {
-        std::string tfull = t->GetFullPath(configName);
-        makefileStream << "\\\n\t" <<
-          this->ConvertToRelativeForMake(tfull.c_str());
-        }
-      }
-    makefileStream << "\n\n";
-    }
+  makefileStream << "# up-to-date with anything they link to\n"
+    "default:\n"
+    "\techo \"Do not invoke directly\"\n"
+    "\n";
   makefileStream
     << "# For each target create a dummy rule "
     "so the target does not have to exist\n";
@@ -2962,14 +2948,40 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       {
       cmXCodeObject* target = *i;
       cmTarget* t =target->GetTarget();
+
+      if(t->GetType() == cmTarget::EXECUTABLE ||
+         t->GetType() == cmTarget::STATIC_LIBRARY ||
+         t->GetType() == cmTarget::SHARED_LIBRARY ||
+         t->GetType() == cmTarget::MODULE_LIBRARY)
+        {
+        // Declare an entry point for the target post-build phase.
+        makefileStream << this->PostBuildMakeTarget(t->GetName(), *ct)
+                       << ":\n";
+        }
+
       if(t->GetType() == cmTarget::EXECUTABLE ||
          t->GetType() == cmTarget::SHARED_LIBRARY ||
          t->GetType() == cmTarget::MODULE_LIBRARY)
         {
-        // Create a rule for this target.
         std::string tfull = t->GetFullPath(configName);
-        makefileStream << this->ConvertToRelativeForMake(tfull.c_str())
-                       << ":";
+        std::string trel = this->ConvertToRelativeForMake(tfull.c_str());
+
+        // Add this target to the post-build phases of its dependencies.
+        std::map<cmStdString, cmXCodeObject::StringVec>::const_iterator
+          y = target->GetDependTargets().find(*ct);
+        if(y != target->GetDependTargets().end())
+          {
+          std::vector<cmStdString> const& deptgts = y->second;
+          for(std::vector<cmStdString>::const_iterator d = deptgts.begin();
+              d != deptgts.end(); ++d)
+            {
+            makefileStream << this->PostBuildMakeTarget(*d, *ct) << ": "
+                           << trel << "\n";
+            }
+          }
+
+        // Create a rule for this target.
+        makefileStream << trel << ":";
 
         // List dependencies if any exist.
         std::map<cmStdString, cmXCodeObject::StringVec>::const_iterator

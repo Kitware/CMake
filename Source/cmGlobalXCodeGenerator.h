@@ -198,6 +198,8 @@ protected:
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
+  std::string PostBuildMakeTarget(std::string const& tName,
+                                  std::string const& configName);
   cmXCodeObject* MainGroupChildren;
   cmXCodeObject* SourcesGroupChildren;
   cmXCodeObject* ResourcesGroupChildren;
