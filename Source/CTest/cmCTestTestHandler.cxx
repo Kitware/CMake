@@ -1936,6 +1936,7 @@ void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
     fin.getline(buff, filelen);
     buff[fin.gcount()] = 0;
     this->TestsToRunString = buff;
+    delete [] buff;
     }
 }
 
