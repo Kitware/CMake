@@ -2517,62 +2517,116 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
     }
 }
 
+cmXCodeObject *cmGlobalXCodeGenerator
+::CreatePBXGroup(cmXCodeObject *parent, cmStdString name)
+{
+  cmXCodeObject* parentChildren = NULL;
+  if(parent)
+    parentChildren = parent->GetObject("children");
+  cmXCodeObject* group = this->CreateObject(cmXCodeObject::PBXGroup);
+  cmXCodeObject* groupChildren =
+  this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  group->AddAttribute("name", this->CreateString(name.c_str()));
+  group->AddAttribute("children", groupChildren);
+  if(this->XcodeVersion == 15)
+  {
+    group->AddAttribute("refType", this->CreateString("4"));
+  }
+  group->AddAttribute("sourceTree", this->CreateString("<group>"));
+  if(parentChildren)
+    parentChildren->AddObject(group);
+  return group;
+}
+
 //----------------------------------------------------------------------------
 cmXCodeObject* cmGlobalXCodeGenerator
 ::CreateOrGetPBXGroup(cmTarget& cmtarget, cmSourceGroup* sg)
 {
-  cmStdString s = cmtarget.GetName();
-  s += "/";
-  s += sg->GetName();
-  std::map<cmStdString, cmXCodeObject* >::iterator i =
+  cmStdString s;
+  cmStdString target;
+  const char *targetFolder= cmtarget.GetProperty("FOLDER");
+  if(targetFolder) {
+    target = targetFolder;
+    target += "/";
+  }
+  target += cmtarget.GetName();
+  s = target + "/";
+  s += sg->GetFullName();
+  std::map<cmStdString, cmXCodeObject* >::iterator it =
     this->GroupNameMap.find(s);
-  if(i != this->GroupNameMap.end())
+  if(it != this->GroupNameMap.end())
     {
-    return i->second;
+    return it->second;
     }
-  i = this->TargetGroup.find(cmtarget.GetName());
+
+  it = this->TargetGroup.find(target);
   cmXCodeObject* tgroup = 0;
-  if(i != this->TargetGroup.end())
+  if(it != this->TargetGroup.end())
     {
-    tgroup = i->second;
+    tgroup = it->second;
     }
   else
     {
-    tgroup = this->CreateObject(cmXCodeObject::PBXGroup);
-    this->TargetGroup[cmtarget.GetName()] = tgroup;
-    cmXCodeObject* tgroupChildren =
-      this->CreateObject(cmXCodeObject::OBJECT_LIST);
-    tgroup->AddAttribute("name", this->CreateString(cmtarget.GetName()));
-    tgroup->AddAttribute("children", tgroupChildren);
-    if(this->XcodeVersion == 15)
+    std::vector<std::string> tgt_folders = cmSystemTools::tokenize(target, "/");
+    cmStdString curr_tgt_folder;
+    for(std::vector<std::string>::size_type i = 0; i < tgt_folders.size();i++)
       {
-      tgroup->AddAttribute("refType", this->CreateString("4"));
+      curr_tgt_folder += tgt_folders[i];
+      it = this->TargetGroup.find(curr_tgt_folder);
+      if(it == this->TargetGroup.end())
+        {
+        tgroup = this->CreatePBXGroup(tgroup,tgt_folders[i]);
+        this->TargetGroup[curr_tgt_folder] = tgroup;
+        }
+      else
+        {
+        tgroup = it->second;
+        continue;
+        }
+      if(i == 0)
+        {
+        this->SourcesGroupChildren->AddObject(tgroup);
+        }
+      curr_tgt_folder += "/";
       }
-    tgroup->AddAttribute("sourceTree", this->CreateString("<group>"));
-    this->SourcesGroupChildren->AddObject(tgroup);
     }
+  this->TargetGroup[target] = tgroup;
 
   // If it's the default source group (empty name) then put the source file
   // directly in the tgroup...
   //
-  if (cmStdString(sg->GetName()) == "")
+  if (cmStdString(sg->GetFullName()) == "")
     {
     this->GroupNameMap[s] = tgroup;
     return tgroup;
     }
 
-  cmXCodeObject* tgroupChildren = tgroup->GetObject("children");
-  cmXCodeObject* group = this->CreateObject(cmXCodeObject::PBXGroup);
-  cmXCodeObject* groupChildren =
-    this->CreateObject(cmXCodeObject::OBJECT_LIST);
-  group->AddAttribute("name", this->CreateString(sg->GetName()));
-  group->AddAttribute("children", groupChildren);
-  if(this->XcodeVersion == 15)
+  //It's a recursive folder structure, let's find the real parent group
+  if(std::string(sg->GetFullName()) != std::string(sg->GetName()))
     {
-    group->AddAttribute("refType", this->CreateString("4"));
+    std::vector<std::string> folders = cmSystemTools::tokenize(sg->GetFullName(), "\\");
+    cmStdString curr_folder = cmtarget.GetName();
+    curr_folder += "/";
+    for(std::vector<std::string>::size_type i = 0; i < folders.size();i++)
+      {
+      curr_folder += folders[i];
+      std::map<cmStdString, cmXCodeObject* >::iterator i_folder = this->GroupNameMap.find(curr_folder);
+      //Create new folder
+      if(i_folder == this->GroupNameMap.end())
+        {
+        cmXCodeObject *group = this->CreatePBXGroup(tgroup,folders[i]);
+        this->GroupNameMap[curr_folder] = group;
+        tgroup = group;
+        }
+      else
+        {
+        tgroup = i_folder->second;
+        }
+      curr_folder = curr_folder + "\\";
+      }
+    return tgroup;
     }
-  group->AddAttribute("sourceTree", this->CreateString("<group>"));
-  tgroupChildren->AddObject(group);
+  cmXCodeObject *group = this->CreatePBXGroup(tgroup,sg->GetName());
   this->GroupNameMap[s] = group;
   return group;
 }
