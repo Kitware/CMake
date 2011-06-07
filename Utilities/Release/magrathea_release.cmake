@@ -3,7 +3,6 @@ set(HOST magrathea)
 set(MAKE_PROGRAM "make")
 set(CC gcc332s)
 set(CXX c++332s)
-set(GIT_COMMAND /home/kitware/.userroot/git/bin/git)
 set(INITIAL_CACHE "
 CMAKE_BUILD_TYPE:STRING=Release
 CURSES_LIBRARY:FILEPATH=/usr/i686-gcc-332s/lib/libncurses.a

@@ -1,4 +1,3 @@
-set(CVS_COMMAND "/home/whoffman/bin/cvs")
 set(CMAKE_RELEASE_DIRECTORY "/home/whoffman/CMakeReleaseDirectory64")
 set(PROCESSORS 2)
 set(CFLAGS "-64")
