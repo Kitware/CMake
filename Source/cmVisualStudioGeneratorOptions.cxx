@@ -299,7 +299,12 @@ cmVisualStudioGeneratorOptions
         {
         fout << "<" << m->first << ">";
         }
-      fout  << m->second << "</" << m->first << ">\n";
+      fout  << m->second;
+      if (m->first == "AdditionalIncludeDirectories")
+        {
+        fout  << ";%(AdditionalIncludeDirectories)";
+        }
+      fout  << "</" << m->first << ">\n";
       }
     }
   else
