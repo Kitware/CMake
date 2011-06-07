@@ -5,7 +5,7 @@ project(SourceGroups)
 # it is more an example with several source_group() 
 # commands.
 # The created projects have to be loaded manually 
-# in Visual Studio/XCode/Eclipse/...
+# in Visual Studio/Xcode/Eclipse/...
 # to see whether the correct groups have been created.
 
 source_group(Base             FILES main.c)

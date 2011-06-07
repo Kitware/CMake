@@ -23,7 +23,7 @@ set_tests_properties(WorkingDirectory2 PROPERTIES
 
 set(_default_cwd "${CMAKE_BINARY_DIR}")
 
-# FIXME: How to deal with /debug, /release, etc. with VS or XCode?
+# FIXME: How to deal with /debug, /release, etc. with VS or Xcode?
 if(${CMAKE_GENERATOR} MATCHES "Makefiles")
 add_test(WorkingDirectory3 ${EXECUTABLE_OUTPUT_PATH}/WorkingDirectory ${_default_cwd})
 endif()
@@ -34,7 +34,7 @@ string(REGEX REPLACE "/[^/]*$" "" _parent_dir "${CMAKE_BINARY_DIR}")
 
 add_test(NAME WorkingDirectory5 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/.. COMMAND WorkingDirectory ${_parent_dir})
 
-# FIXME: How to deal with /debug, /release, etc. with VS or XCode?
+# FIXME: How to deal with /debug, /release, etc. with VS or Xcode?
 if(${CMAKE_GENERATOR} MATCHES "Makefiles")
 add_test(WorkingDirectory6 ${EXECUTABLE_OUTPUT_PATH}/WorkingDirectory ${_default_cwd} WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
 endif()

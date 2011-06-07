@@ -266,7 +266,7 @@ IF(UNIX)
   SET(SRCS ${SRCS} cmGlobalKdevelopGenerator.cxx)
 ENDIF(UNIX)
 
-# XCode only works on apple
+# Xcode only works on Apple
 IF(APPLE)
   SET(SRCS ${SRCS}
     cmXCodeObject.cxx

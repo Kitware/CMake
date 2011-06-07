@@ -50,6 +50,9 @@
 
 #include <memory> // auto_ptr
 
+#include <cm_zlib.h>
+#include <cmsys/Base64.h>
+
 #if defined(__BEOS__) && !defined(__HAIKU__)
 #include <be/kernel/OS.h>   /* disable_debugger() API. */
 #endif
@@ -308,7 +311,7 @@ cmCTest::cmCTest()
   this->UseHTTP10              = false;
   this->PrintLabels            = false;
   this->CompressTestOutput     = true;
-  this->ComputedCompressOutput = false;
+  this->CompressMemCheckOutput = true;
   this->TestModel              = cmCTest::EXPERIMENTAL;
   this->MaxTestNameWidth       = 30;
   this->InteractiveDebugMode   = true;
@@ -325,6 +328,8 @@ cmCTest::cmCTest()
   this->SuppressUpdatingCTestConfiguration = false;
   this->DartVersion            = 1;
   this->OutputTestOutputOnTestFailure = false;
+  this->ComputedCompressTestOutput = false;
+  this->ComputedCompressMemCheckOutput = false;
   if(cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE"))
     {
     this->OutputTestOutputOnTestFailure = true;
@@ -394,7 +399,7 @@ void cmCTest::SetParallelLevel(int level)
 //----------------------------------------------------------------------------
 bool cmCTest::ShouldCompressTestOutput()
 {
-  if(!this->ComputedCompressOutput)
+  if(!this->ComputedCompressTestOutput)
     {
     std::string cdashVersion = this->GetCDashVersion();
     //version >= 1.6?
@@ -403,9 +408,24 @@ bool cmCTest::ShouldCompressTestOutput()
       cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
       cdashVersion.c_str(), "1.6");
     this->CompressTestOutput &= cdashSupportsGzip;
-    this->ComputedCompressOutput = true;
+    this->ComputedCompressTestOutput = true;
     }
   return this->CompressTestOutput;
+}
+
+//----------------------------------------------------------------------------
+bool cmCTest::ShouldCompressMemCheckOutput()
+{
+  if(!this->ComputedCompressMemCheckOutput)
+    {
+    std::string cdashVersion = this->GetCDashVersion();
+
+    bool compressionSupported = cmSystemTools::VersionCompare(
+      cmSystemTools::OP_GREATER, cdashVersion.c_str(), "1.9.0");
+    this->CompressMemCheckOutput &= compressionSupported;
+    this->ComputedCompressMemCheckOutput = true;
+    }
+  return this->CompressMemCheckOutput;
 }
 
 //----------------------------------------------------------------------------
@@ -1926,6 +1946,7 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
   if(this->CheckArgument(arg, "--no-compress-output"))
     {
     this->CompressTestOutput = false;
+    this->CompressMemCheckOutput = false;
     }
 
   if(this->CheckArgument(arg, "--print-labels"))
@@ -3054,4 +3075,57 @@ void cmCTest::OutputTestErrors(std::vector<char> const &process_output)
     test_outputs.append(&*process_output.begin(), process_output.size());
     }
   cmCTestLog(this, HANDLER_OUTPUT, test_outputs << std::endl << std::flush);
+}
+
+//----------------------------------------------------------------------
+bool cmCTest::CompressString(std::string& str)
+{
+  int ret;
+  z_stream strm;
+
+  unsigned char* in = reinterpret_cast<unsigned char*>(
+    const_cast<char*>(str.c_str()));
+  //zlib makes the guarantee that this is the maximum output size
+  int outSize = static_cast<int>(
+    static_cast<double>(str.size()) * 1.001 + 13.0);
+  unsigned char* out = new unsigned char[outSize];
+
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  strm.opaque = Z_NULL;
+  ret = deflateInit(&strm, -1); //default compression level
+  if (ret != Z_OK)
+    {
+    return false;
+    }
+
+  strm.avail_in = static_cast<uInt>(str.size());
+  strm.next_in = in;
+  strm.avail_out = outSize;
+  strm.next_out = out;
+  ret = deflate(&strm, Z_FINISH);
+
+  if(ret == Z_STREAM_ERROR || ret != Z_STREAM_END)
+    {
+    cmCTestLog(this, ERROR_MESSAGE, "Error during gzip compression."
+      << std::endl);
+    return false;
+    }
+
+  (void)deflateEnd(&strm);
+
+  // Now base64 encode the resulting binary string
+  unsigned char* base64EncodedBuffer
+    = new unsigned char[static_cast<int>(outSize * 1.5)];
+
+  unsigned long rlen
+    = cmsysBase64_Encode(out, strm.total_out, base64EncodedBuffer, 1);
+
+  str = "";
+  str.append(reinterpret_cast<char*>(base64EncodedBuffer), rlen);
+
+  delete [] base64EncodedBuffer;
+  delete [] out;
+
+  return true;
 }
