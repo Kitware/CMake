@@ -2567,7 +2567,8 @@ cmXCodeObject* cmGlobalXCodeGenerator
     }
   else
     {
-    std::vector<std::string> tgt_folders = cmSystemTools::tokenize(target, "/");
+    std::vector<std::string> tgt_folders =
+      cmSystemTools::tokenize(target, "/");
     cmStdString curr_tgt_folder;
     for(std::vector<std::string>::size_type i = 0; i < tgt_folders.size();i++)
       {
@@ -2604,13 +2605,15 @@ cmXCodeObject* cmGlobalXCodeGenerator
   //It's a recursive folder structure, let's find the real parent group
   if(std::string(sg->GetFullName()) != std::string(sg->GetName()))
     {
-    std::vector<std::string> folders = cmSystemTools::tokenize(sg->GetFullName(), "\\");
+    std::vector<std::string> folders =
+      cmSystemTools::tokenize(sg->GetFullName(), "\\");
     cmStdString curr_folder = cmtarget.GetName();
     curr_folder += "/";
     for(std::vector<std::string>::size_type i = 0; i < folders.size();i++)
       {
       curr_folder += folders[i];
-      std::map<cmStdString, cmXCodeObject* >::iterator i_folder = this->GroupNameMap.find(curr_folder);
+      std::map<cmStdString, cmXCodeObject* >::iterator i_folder =
+        this->GroupNameMap.find(curr_folder);
       //Create new folder
       if(i_folder == this->GroupNameMap.end())
         {
