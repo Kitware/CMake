@@ -351,12 +351,23 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
     {
     if(!cmSystemTools::FileExists(sourcePath.c_str()))
       {
+      // Make sure the path exists for the file
+      std::string path = cmSystemTools::GetFilenamePath(sourcePath);
+      cmSystemTools::MakeDirectory(path.c_str());
       std::ofstream fout(sourcePath.c_str());
       if(fout)
         {
         fout << "# generated from CMake\n";
         fout.flush();
         fout.close();
+        }
+      else
+        {
+        std::string error = "Could not create file: [";
+        error +=  sourcePath;
+        error += "]  ";
+        cmSystemTools::Error
+          (error.c_str(), cmSystemTools::GetLastSystemError().c_str());
         }
       }
     }
