@@ -27,7 +27,8 @@ bool cmSourceGroupCommand
     delimiter = this->Makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
     }
 
-  std::vector<std::string> folders = cmSystemTools::tokenize(args[0], delimiter);
+  std::vector<std::string> folders =
+    cmSystemTools::tokenize(args[0], delimiter);
  
   cmSourceGroup* sg = 0;
   sg = this->Makefile->GetSourceGroup(folders);
