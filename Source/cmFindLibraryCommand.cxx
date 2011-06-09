@@ -44,6 +44,10 @@ void cmFindLibraryCommand::GenerateDocumentation()
                                "SEARCH_XXX", "library");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SUBDIR", "lib");
+  cmSystemTools::ReplaceString(
+    this->GenericDocumentation,
+    "XXX_EXTRA_PREFIX_ENTRY",
+    "   <prefix>/lib/<arch> if CMAKE_LIBRARY_ARCHITECTURE is set, and\n");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_FIND_ROOT_PATH_MODE_XXX",
                                "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY");

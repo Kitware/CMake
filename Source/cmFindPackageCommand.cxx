@@ -243,9 +243,9 @@ void cmFindPackageCommand::GenerateDocumentation()
     "  <prefix>/(cmake|CMake)/                                 (W)\n"
     "  <prefix>/<name>*/                                       (W)\n"
     "  <prefix>/<name>*/(cmake|CMake)/                         (W)\n"
-    "  <prefix>/(share|lib)/cmake/<name>*/                     (U)\n"
-    "  <prefix>/(share|lib)/<name>*/                           (U)\n"
-    "  <prefix>/(share|lib)/<name>*/(cmake|CMake)/             (U)\n"
+    "  <prefix>/(lib/<arch>|lib|share)/cmake/<name>*/          (U)\n"
+    "  <prefix>/(lib/<arch>|lib|share)/<name>*/                (U)\n"
+    "  <prefix>/(lib/<arch>|lib|share)/<name>*/(cmake|CMake)/  (U)\n"
     "On systems supporting OS X Frameworks and Application Bundles "
     "the following directories are searched for frameworks or bundles "
     "containing a configuration file:\n"
@@ -257,6 +257,7 @@ void cmFindPackageCommand::GenerateDocumentation()
     "  <prefix>/<name>.app/Contents/Resources/CMake/           (A)\n"
     "In all cases the <name> is treated as case-insensitive and corresponds "
     "to any of the names specified (<package> or names given by NAMES).  "
+    "Paths with lib/<arch> are enabled if CMAKE_LIBRARY_ARCHITECTURE is set.  "
     "If PATH_SUFFIXES is specified the suffixes are appended to each "
     "(W) or (U) directory entry one-by-one.\n"
     "This set of directories is intended to work in cooperation with "
@@ -361,6 +362,13 @@ bool cmFindPackageCommand
 
   // Check for debug mode.
   this->DebugMode = this->Makefile->IsOn("CMAKE_FIND_DEBUG_MODE");
+
+  // Lookup target architecture, if any.
+  if(const char* arch =
+     this->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE"))
+    {
+    this->LibraryArchitecture = arch;
+    }
 
   // Lookup whether lib64 paths should be used.
   if(this->Makefile->PlatformIs64Bit() &&
@@ -2189,6 +2197,10 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   // Construct list of common install locations (lib and share).
   std::vector<std::string> common;
+  if(!this->LibraryArchitecture.empty())
+    {
+    common.push_back("lib/"+this->LibraryArchitecture);
+    }
   if(this->UseLib64Paths)
     {
     common.push_back("lib64");
@@ -2196,7 +2208,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   common.push_back("lib");
   common.push_back("share");
 
-  //  PREFIX/(share|lib)/cmake/(Foo|foo|FOO).*/
+  //  PREFIX/(lib/ARCH|lib|share)/cmake/(Foo|foo|FOO).*/
   {
   cmFindPackageFileList lister(this);
   lister
@@ -2210,7 +2222,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
   }
 
-  //  PREFIX/(share|lib)/(Foo|foo|FOO).*/
+  //  PREFIX/(lib/ARCH|lib|share)/(Foo|foo|FOO).*/
   {
   cmFindPackageFileList lister(this);
   lister
@@ -2223,7 +2235,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
   }
 
-  //  PREFIX/(share|lib)/(Foo|foo|FOO).*/(cmake|CMake)/
+  //  PREFIX/(lib/ARCH|lib|share)/(Foo|foo|FOO).*/(cmake|CMake)/
   {
   cmFindPackageFileList lister(this);
   lister

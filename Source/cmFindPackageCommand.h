@@ -141,6 +141,7 @@ private:
   bool DebugMode;
   bool UseLib64Paths;
   bool PolicyScope;
+  std::string LibraryArchitecture;
   std::vector<std::string> Names;
   std::vector<std::string> Configs;
   std::set<std::string> IgnoredPaths;

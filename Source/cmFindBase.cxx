@@ -72,12 +72,14 @@ void cmFindBase::GenerateDocumentation()
     "1. Search paths specified in cmake-specific cache variables.  "
     "These are intended to be used on the command line with a -DVAR=value.  "
     "This can be skipped if NO_CMAKE_PATH is passed.\n"
+    "XXX_EXTRA_PREFIX_ENTRY"
     "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_PREFIX_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "   CMAKE_XXX_MAC_PATH\n"
     "2. Search paths specified in cmake-specific environment variables.  "
     "These are intended to be set in the user's shell configuration.  "
     "This can be skipped if NO_CMAKE_ENVIRONMENT_PATH is passed.\n"
+    "XXX_EXTRA_PREFIX_ENTRY"
     "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_PREFIX_PATH\n"
     "   CMAKE_XXX_PATH\n"
     "   CMAKE_XXX_MAC_PATH\n"
@@ -92,6 +94,7 @@ void cmFindBase::GenerateDocumentation()
     "5. Search cmake variables defined in the Platform files "
     "for the current system.  This can be skipped if NO_CMAKE_SYSTEM_PATH "
     "is passed.\n"
+    "XXX_EXTRA_PREFIX_ENTRY"
     "   <prefix>/XXX_SUBDIR for each <prefix> in CMAKE_SYSTEM_PREFIX_PATH\n"
     "   CMAKE_SYSTEM_XXX_PATH\n"
     "   CMAKE_SYSTEM_XXX_MAC_PATH\n"
@@ -345,6 +348,15 @@ void cmFindBase::AddPrefixPaths(std::vector<std::string> const& in_paths,
     if(!subdir.empty() && !dir.empty() && dir[dir.size()-1] != '/')
       {
       dir += "/";
+      }
+    if(subdir == "lib")
+      {
+      const char* arch =
+        this->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE");
+      if(arch && *arch)
+        {
+        this->AddPathInternal(dir+"lib/"+arch, pathType);
+        }
       }
     std::string add = dir + subdir;
     if(add != "/")
