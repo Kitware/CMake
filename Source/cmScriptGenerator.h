@@ -65,6 +65,8 @@ protected:
   virtual void GenerateScriptForConfig(std::ostream& os,
                                        const char* config,
                                        Indent const& indent);
+  virtual void GenerateScriptNoConfig(std::ostream&, Indent const&) {}
+  virtual bool NeedsScriptNoConfig() const { return false; }
 
   // Test if this generator does something for a given configuration.
   bool GeneratesForConfig(const char*);

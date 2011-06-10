@@ -1320,6 +1320,10 @@ std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
   std::string resConfig;
   std::vector<std::string> extraPaths;
   std::vector<std::string> failedPaths;
+  if(strcmp(exe, "NOT_AVAILABLE") == 0)
+    {
+    return exe;
+    }
   return cmCTestTestHandler::FindExecutable(this->CTest,
                                             exe, resConfig,
                                             extraPaths,
