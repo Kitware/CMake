@@ -46,6 +46,14 @@
 ##end
 #
 ##variable
+#   CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL - Ask about uninstalling
+#   previous versions first.
+#   If this is set to "ON", then an installer will look for previous
+#   installed versions and if one is found, ask the user whether to
+#   uninstall it before proceeding with the install.
+##end
+#
+##variable
 #   CPACK_NSIS_MODIFY_PATH - Modify PATH toggle.
 #   If this is set to "ON", then an extra page
 #   will appear in the installer that will allow the user to choose
