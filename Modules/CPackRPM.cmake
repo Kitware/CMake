@@ -4,8 +4,10 @@
 # used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration
 #
 # However CPackRPM has specific features which are controlled by
-# the specifics CPACK_RPM_XXX variables. You'll find a detailed usage on
-# the wiki:
+# the specifics CPACK_RPM_XXX variables.
+# Usually those vars correspond to RPM spec file entities, one may find
+# information about spec files here http://www.rpm.org/wiki/Docs.
+# You'll find a detailed usage of CPackRPM on the wiki:
 #  http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
 # However as a handy reminder here comes the list of specific variables:
 #
@@ -68,6 +70,8 @@
 #     Note that you must enclose the complete requires string between quotes,
 #     for example:
 #     set(CPACK_RPM_PACKAGE_REQUIRES "python >= 2.5.0, cmake >= 2.8")
+#     The required package list of an RPM file could be printed with
+#     rpm -qp --requires file.rpm
 #  CPACK_RPM_PACKAGE_SUGGESTS
 #     Mandatory : NO
 #     Default   : -
@@ -77,6 +81,8 @@
 #     Mandatory : NO
 #     Default   : -
 #     May be used to set RPM dependencies (provides).
+#     The provided package list of an RPM file could be printed with
+#     rpm -qp --provides file.rpm
 #  CPACK_RPM_PACKAGE_OBSOLETES
 #     Mandatory : NO
 #     Default   : -
