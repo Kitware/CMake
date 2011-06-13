@@ -46,7 +46,7 @@ ELSE(DEFINED CMAKE_INSTALL_SO_NO_EXE)
 ENDIF(DEFINED CMAKE_INSTALL_SO_NO_EXE)
 
 # Match multiarch library directory names.
-SET(CMAKE_LIBRARY_ARCHITECTURE_REGEX "[a-z0-9_]+-linux-gnu")
+SET(CMAKE_LIBRARY_ARCHITECTURE_REGEX "[a-z0-9_]+(-[a-z0-9_]+)?-linux-gnu[a-z0-9_]*")
 
 INCLUDE(Platform/UnixPaths)
 
