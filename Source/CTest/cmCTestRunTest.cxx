@@ -412,6 +412,30 @@ bool cmCTestRunTest::StartTest(size_t total)
   this->TestResult.TestCount = this->TestProperties->Index;  
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory.c_str();
+
+  if(args.size() >= 2 && args[1] == "NOT_AVAILABLE")
+    {
+    this->TestProcess = new cmProcess;
+    std::string msg;
+    if(this->CTest->GetConfigType().empty())
+      {
+      msg = "Test not available without configuration.";
+      msg += "  (Missing \"-C <config>\"?)";
+      }
+    else
+      {
+      msg = "Test not available in configuration \"";
+      msg += this->CTest->GetConfigType();
+      msg += "\".";
+      }
+    *this->TestHandler->LogFile << msg << std::endl;
+    cmCTestLog(this->CTest, ERROR_MESSAGE, msg << std::endl);
+    this->TestResult.Output = msg;
+    this->TestResult.FullCommandLine = "";
+    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+    return false;
+    }
   
   // Check if all required files exist
   for(std::vector<std::string>::iterator i =

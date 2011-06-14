@@ -209,6 +209,7 @@ void cmScriptGenerator::GenerateScriptActionsPerConfig(std::ostream& os,
     // In a multi-configuration generator we produce a separate rule
     // in a block for each configuration that is built.  We restrict
     // the list of configurations to those to which this rule applies.
+    bool first = true;
     for(std::vector<std::string>::const_iterator i =
           this->ConfigurationTypes->begin();
         i != this->ConfigurationTypes->end(); ++i)
@@ -218,10 +219,19 @@ void cmScriptGenerator::GenerateScriptActionsPerConfig(std::ostream& os,
         {
         // Generate a per-configuration block.
         std::string config_test = this->CreateConfigTest(config);
-        os << indent << "IF(" << config_test << ")\n";
+        os << indent << (first? "IF(" : "ELSEIF(") << config_test << ")\n";
         this->GenerateScriptForConfig(os, config, indent.Next());
-        os << indent << "ENDIF(" << config_test << ")\n";
+        first = false;
         }
+      }
+    if(!first)
+      {
+      if(this->NeedsScriptNoConfig())
+        {
+        os << indent << "ELSE()\n";
+        this->GenerateScriptNoConfig(os, indent.Next());
+        }
+      os << indent << "ENDIF()\n";
       }
     }
 }
