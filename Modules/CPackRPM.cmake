@@ -4,8 +4,10 @@
 # used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration
 #
 # However CPackRPM has specific features which are controlled by
-# the specifics CPACK_RPM_XXX variables. You'll find a detailed usage on
-# the wiki:
+# the specifics CPACK_RPM_XXX variables.
+# Usually those vars correspond to RPM spec file entities, one may find
+# information about spec files here http://www.rpm.org/wiki/Docs.
+# You'll find a detailed usage of CPackRPM on the wiki:
 #  http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
 # However as a handy reminder here comes the list of specific variables:
 #
@@ -68,6 +70,8 @@
 #     Note that you must enclose the complete requires string between quotes,
 #     for example:
 #     set(CPACK_RPM_PACKAGE_REQUIRES "python >= 2.5.0, cmake >= 2.8")
+#     The required package list of an RPM file could be printed with
+#     rpm -qp --requires file.rpm
 #  CPACK_RPM_PACKAGE_SUGGESTS
 #     Mandatory : NO
 #     Default   : -
@@ -77,6 +81,8 @@
 #     Mandatory : NO
 #     Default   : -
 #     May be used to set RPM dependencies (provides).
+#     The provided package list of an RPM file could be printed with
+#     rpm -qp --provides file.rpm
 #  CPACK_RPM_PACKAGE_OBSOLETES
 #     Mandatory : NO
 #     Default   : -
@@ -364,7 +370,7 @@ if(CPACK_RPM_PACKAGE_RELOCATABLE)
 endif(CPACK_RPM_PACKAGE_RELOCATABLE)
 
 # check if additional fields for RPM spec header are given
-FOREACH(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX)
+FOREACH(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV)
   IF(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
     STRING(LENGTH ${_RPM_SPEC_HEADER} _PACKAGE_HEADER_STRLENGTH)
     MATH(EXPR _PACKAGE_HEADER_STRLENGTH "${_PACKAGE_HEADER_STRLENGTH} - 1")
@@ -573,6 +579,10 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_REQUIRES\@
 \@TMP_RPM_PROVIDES\@
 \@TMP_RPM_OBSOLETES\@
+\@TMP_RPM_CONFLICTS\@
+\@TMP_RPM_AUTOPROV\@
+\@TMP_RPM_AUTOREQ\@
+\@TMP_RPM_AUTOREQPROV\@
 \@TMP_RPM_BUILDARCH\@
 \@TMP_RPM_PREFIX\@
 
