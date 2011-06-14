@@ -46,6 +46,8 @@ void cmFindPathCommand::GenerateDocumentation()
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SUBDIR", "include");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "XXX_EXTRA_PREFIX_ENTRY", "");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_FIND_ROOT_PATH_MODE_XXX",
                                "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE");
   if(!this->IncludeFileInPath)

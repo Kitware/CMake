@@ -80,6 +80,7 @@ SET(PACKAGES
   WrongA WrongB WrongC WrongD
   wibbleA wibbleB
   RecursiveA RecursiveB RecursiveC
+  ArchA ArchB ArchC ArchD
   EnvA EnvB
   ${CMakeTestSystemPackage}
   )
@@ -142,6 +143,14 @@ FIND_PACKAGE(RecursiveA COMPONENTS A)
 FIND_PACKAGE(RecursiveB 2)
 FIND_PACKAGE(RecursiveC 3.1 EXACT)
 
+# Test architecture-specific search directories.
+SET(CMAKE_LIBRARY_ARCHITECTURE arch)
+FIND_PACKAGE(ArchA NAMES Bar)
+FIND_PACKAGE(ArchB NAMES Foo CONFIGS FooConfig.cmake)
+FIND_PACKAGE(ArchC 3.1 EXACT NAMES zot)
+FIND_PACKAGE(ArchD 4.0 EXACT NAMES zot)
+UNSET(CMAKE_LIBRARY_ARCHITECTURE)
+
 # Test <Package>_DIR environment variable.
 # We erase the main prefix path to ensure the env var is used.
 SET(CMAKE_PREFIX_PATH)
@@ -183,6 +192,10 @@ SET(wibbleB_EXPECTED "B/wibble-config.cmake")
 SET(RecursiveA_EXPECTED "lib/RecursiveA/recursivea-config.cmake")
 SET(RecursiveB_EXPECTED "lib/zot-2.0/zot-config.cmake")
 SET(RecursiveC_EXPECTED "lib/zot-3.1/zot-config.cmake")
+SET(ArchA_EXPECTED "lib/arch/Bar/BarConfig.cmake")
+SET(ArchB_EXPECTED "lib/arch/foo-1.2/CMake/FooConfig.cmake")
+SET(ArchC_EXPECTED "lib/arch/zot-3.1/zot-config.cmake")
+SET(ArchD_EXPECTED "lib/arch/cmake/zot-4.0/zot-config.cmake")
 SET(EnvA_EXPECTED "lib/zot-3.1/zot-config.cmake")
 SET(EnvB_MISSING "EnvB_DIR-NOTFOUND")
 SET(CMakeTestSystemPackage_EXPECTED "SystemPackage/CMakeTestSystemPackageConfig.cmake")

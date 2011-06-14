@@ -8,4 +8,6 @@ SET(CMAKE_SHARED_LIBRARY_RPATH_LINK_C_FLAG "-Wl,-rpath-link,")
 SET(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,-soname,")
 SET(CMAKE_EXE_EXPORTS_C_FLAG "-Wl,--export-dynamic")
 
+SET(CMAKE_LIBRARY_ARCHITECTURE_REGEX "[a-z0-9_]+(-[a-z0-9_]+)?-gnu[a-z0-9_]*")
+
 INCLUDE(Platform/UnixPaths)

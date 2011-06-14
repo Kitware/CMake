@@ -822,6 +822,18 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "set to the output of uname -r. On other "
      "systems this is set to major-minor version numbers.",false,
      "Variables That Describe the System");
+  cm->DefineProperty
+    ("CMAKE_LIBRARY_ARCHITECTURE", cmProperty::VARIABLE,
+     "Target architecture library directory name, if detected.",
+     "This is the value of CMAKE_<lang>_LIBRARY_ARCHITECTURE as "
+     "detected for one of the enabled languages.",false,
+     "Variables That Describe the System");
+  cm->DefineProperty
+    ("CMAKE_LIBRARY_ARCHITECTURE_REGEX", cmProperty::VARIABLE,
+     "Regex matching possible target architecture library directory names.",
+     "This is used to detect CMAKE_<lang>_LIBRARY_ARCHITECTURE from the "
+     "implicit linker search path by matching the <arch> name.",false,
+     "Variables That Describe the System");
 
   cm->DefineProperty
     ("CMAKE_HOST_SYSTEM", cmProperty::VARIABLE,
@@ -1357,6 +1369,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "These flags are implicit link options for the compiler's language.  "
      "CMake automatically detects these libraries and flags for each "
      "language and reports the results in this variable.", false,
+     "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_LIBRARY_ARCHITECTURE", cmProperty::VARIABLE,
+     "Target architecture library directory name detected for <lang>.",
+     "If the <lang> compiler passes to the linker an architecture-specific "
+     "system library search directory such as <prefix>/lib/<arch> this "
+     "variable contains the <arch> name if/as detected by CMake.",false,
      "Variables for Languages");
 
   cm->DefineProperty
