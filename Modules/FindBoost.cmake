@@ -65,7 +65,7 @@
 # 1.33, 1.33.0, 1.33.1, 1.34, 1.34.0, 1.34.1, 1.35, 1.35.0, 1.35.1,
 # 1.36, 1.36.0, 1.36.1, 1.37, 1.37.0, 1.38, 1.38.0, 1.39, 1.39.0,
 # 1.40, 1.40.0, 1.41, 1.41.0, 1.42, 1.42.0, 1.43, 1.43.0, 1.44, 1.44.0,
-# 1.45, 1.45.0, 1.46, 1.46.0
+# 1.45, 1.45.0, 1.46, 1.46.0, 1.46.1
 #
 # NOTE: If you add a new major 1.x version in Boost_ADDITIONAL_VERSIONS you should
 # add both 1.x and 1.x.0 as shown above.  Official Boost include directories
@@ -281,6 +281,12 @@ macro(_Boost_ADJUST_LIB_VARS basename)
       set(Boost_${basename}_LIBRARY         ${Boost_${basename}_LIBRARY_DEBUG})
       set(Boost_${basename}_LIBRARIES       ${Boost_${basename}_LIBRARY_DEBUG})
     endif()
+
+    # If the debug & release library ends up being the same, omit the keywords
+    if(${Boost_${basename}_LIBRARY_RELEASE} STREQUAL ${Boost_${basename}_LIBRARY_DEBUG})
+      set(Boost_${basename}_LIBRARY   ${Boost_${basename}_LIBRARY_RELEASE} )
+      set(Boost_${basename}_LIBRARIES ${Boost_${basename}_LIBRARY_RELEASE} )
+    endif()
     
     if(Boost_${basename}_LIBRARY)
       set(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE FILEPATH "The Boost ${basename} library")
@@ -386,6 +392,7 @@ else(Boost_FIND_VERSION_EXACT)
   # The user has not requested an exact version.  Among known
   # versions, find those that are acceptable to the user request.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
+    "1.46.1"
     "1.46.0" "1.46" "1.45.0" "1.45" "1.44.0" "1.44" "1.43.0" "1.43" "1.42.0" "1.42"
     "1.41.0" "1.41" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37"
     "1.36.1" "1.36.0" "1.36" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0"
