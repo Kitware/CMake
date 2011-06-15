@@ -164,11 +164,6 @@ void cmFindLibraryCommand::AddArchitecturePaths(const char* suffix)
 
 void cmFindLibraryCommand::AddLib64Paths()
 {  
-  if(!this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
-     GetLanguageEnabled("C"))
-    {
-    return;
-    }
   std::string voidsize =
     this->Makefile->GetSafeDefinition("CMAKE_SIZEOF_VOID_P");
   int size = atoi(voidsize.c_str());
