@@ -1,3 +1,85 @@
+Changes in CMake 2.8.5-rc2 (since 2.8.5-rc1)
+--------------------------------------------
+Bill Hoffman (6):
+      Fix a memory leak.
+      Fix for bug#10798.  VS10 did not append -I flags with COMPILE_FLAGS prop.
+      Append and do not clobber CMAKE_CXX_FLAGS in the test.
+      Use bin tree for inclues to avoid -I with spaces in the path.
+      One more try.  Use full path by default, and relative on broken compilers.
+      Fix for bug #11927, external project git clone step always runs vs10.
+
+Brad King (9):
+      XL: Place Fortran modules with -qmoddir= flag (#12246)
+      Teach file(DOWNLOAD|UPLOAD) to timeout after inactivity
+      Xcode: Fix parallel build depends with universal binaries (#11844)
+      Fix style errors added by parent and grandparent
+      Use cascading-if for per-config test and install code
+      CTest: Report tests not run due to unknown configuration
+      GNU: Fix CMAKE_INCLUDE_SYSTEM_FLAG_<lang> value (#12258)
+      Teach find_(library|package) about Linux multiarch (#12037)
+      Test find_package multiarch support (#12037)
+
+Clinton Stimpson (11):
+      BundleUtilities: Work w/ non .app exes on Mac (#12034)
+      BundleUtilities: Fix regex to extract dependents from ldd (#12034)
+      BundleUtilities: Fix test when using xcode (#12034)
+      BundleUtilities: Fix issues with custom target DEPENDS in test (#12034)
+      BundleUtilities: Disable running test on Windows unless using MSVC.
+      BundleUtilities: Run test on Windows if either MSVC or dumpbin was found.
+      BundleUtilities: Print reason for not loading module.so
+      BundleUtilities: Add rpath to loadable modules in test.
+      Revert "BundleUtilities: Run test on Windows if either MSVC or dumpbin was found."
+      Qt4: complete module dependencies in UseQt4.cmake
+      Add imported targets support for frameworks on Mac.
+
+Daniel R. Gomez (1):
+      Fix plugin API for gcc 2.9-aix51-020209 (#12233)
+
+David Cole (3):
+      BundleUtilities: Avoid a cryptic and unhelpful error message
+      BundleUtilities: Avoid test on Watcom dashboards (#12034)
+      CMake: eliminate use of cvs in the Release scripts
+
+Eric NOULARD (2):
+      CPackRPM: Enhance documentation
+      Add some more Specs file tag handling.
+
+Johan Björk (3):
+      CMake: Move tokenize to cmSystemTools
+      Xcode: Support multiple level nesting of XCode folders (#10039)
+      XCode: Support target folders on XCode.
+
+Modestas Vainius (1):
+      multiarch: Set CMAKE_LIBRARY_ARCHITECTURE_REGEX for Linux|Hurd|kFreeBSD
+
+Philip Lowman (3):
+      FindProtobuf: Better MSVC support, Searching for protobuf lite
+      Fix , to - in Copyright message so it passes CMake.ModuleNotices test
+      10997: PROTOBUF_GENERATE_CPP now supports proto files outside current dir
+
+Rolf Eike Beer (1):
+      CMake: Update documentation of STRING(SUBSTRING) for length -1 (#10740)
+
+Sean McBride (1):
+      Fix XCode -> Xcode typos, notably in man page (#12231)
+
+Tim Gallagher (1):
+      Modified the FindHDF5.cmake file to locate the Fortran bindings.
+
+Will Dicharry (7):
+      HDF5 high level library is a find COMPONENT now.
+      Add logic for CMake built HDF5 install.
+      Use CMAKE_CURRENT_LIST_DIR to locate FindPackageHandleStandardArgs.
+      Use HDF5_FOUND to control autoconf and CMake built FindHDF5.
+      Fix for bug 11752, mixed debug and release libraries.
+      FindHDF5 ensures good link lines when libraries are duplicated.
+      Remove unnecessary mark_as_advanced from FindHDF5.
+
+Zach Mullen (3):
+      Dynamic analysis test output should not be compressed.
+      We will actually compress memcheck output if the server supports it.
+      Fix type conversion warning
+
 Changes in CMake 2.8.5-rc1 (since 2.8.4)
 ----------------------------------------
 Alex Neundorf (33):
