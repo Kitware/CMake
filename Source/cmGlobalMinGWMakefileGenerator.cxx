@@ -66,18 +66,6 @@ cmLocalGenerator *cmGlobalMinGWMakefileGenerator::CreateLocalGenerator()
   lg->SetPassMakeflags(false);
   lg->SetUnixCD(true);
   lg->SetMinGWMake(true);
-
-  // mingw32-make has trouble running code like
-  //
-  //  @echo message with spaces
-  //
-  // If quotes are added
-  //
-  //  @echo "message with spaces"
-  //
-  // it runs but the quotes are displayed.  Instead just use cmake to
-  // echo.
-  lg->SetNativeEchoCommand("@$(CMAKE_COMMAND) -E echo ", false);
   return lg;
 }
 
