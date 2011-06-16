@@ -335,6 +335,10 @@ void cmFindPackageCommand::GenerateDocumentation()
   this->CommandDocumentation += this->GenericDocumentationPathsOrder;
   this->CommandDocumentation +=
     "\n"
+    "Every non-REQUIRED find_package() call can be disabled by setting the "
+    "variable CMAKE_DISABLE_FIND_PACKAGE_<package> to TRUE. See the "
+    "documentation for the CMAKE_DISABLE_FIND_PACKAGE_<package> variable for "
+    "more information.\n"
     "See the cmake_policy() command documentation for discussion of the "
     "NO_POLICY_SCOPE option."
     ;
