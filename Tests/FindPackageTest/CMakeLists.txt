@@ -75,7 +75,7 @@ ENDIF()
 
 # For purposes of the test wipe out previous find results.
 SET(PACKAGES
-  foo Foo Bar TFramework Tframework TApp Tapp Special
+  foo Foo Bar Blub TFramework Tframework TApp Tapp Special
   VersionedA VersionedB VersionedC VersionedD VersionedE
   WrongA WrongB WrongC WrongD
   wibbleA wibbleB
@@ -104,6 +104,8 @@ set(CMAKE_IGNORE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/cmake/zot-3.1)
 FIND_PACKAGE(foo NO_MODULE)
 FIND_PACKAGE(Foo CONFIGS FooConfig.cmake)
 FIND_PACKAGE(Bar)
+SET(CMAKE_DISABLE_FIND_PACKAGE_Blub TRUE)
+FIND_PACKAGE(Blub NO_MODULE)
 FIND_PACKAGE(TFramework CONFIGS TFrameworkConfig.cmake)
 FIND_PACKAGE(Tframework)
 FIND_PACKAGE(TApp)
@@ -169,6 +171,7 @@ ENDIF()
 SET(foo_EXPECTED "lib/foo-1.2/foo-config.cmake")
 SET(Foo_EXPECTED "lib/foo-1.2/CMake/FooConfig.cmake")
 SET(Bar_EXPECTED "lib/Bar/BarConfig.cmake")
+SET(Blub_MISSING "")
 SET(Special_EXPECTED "lib/suffix/test/SuffixTestConfig.cmake")
 SET(TFramework_EXPECTED
   "TFramework.framework/Versions/A/Resources/CMake/TFrameworkConfig.cmake")
