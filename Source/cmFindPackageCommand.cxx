@@ -607,6 +607,24 @@ bool cmFindPackageCommand
       }
     }
 
+  std::string disableFindPackageVar = "CMAKE_DISABLE_FIND_PACKAGE_";
+  disableFindPackageVar += this->Name;
+  if(this->Makefile->IsOn(disableFindPackageVar.c_str()))
+    {
+    if (this->Required)
+      {
+      cmOStringStream e;
+      e << "for module " << this->Name << " called with REQUIRED, but "
+        << disableFindPackageVar
+        << " is enabled. A REQUIRED package cannot be disabled.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
+    return true;
+    }
+
+
   this->SetModuleVariables(components);
 
   // See if there is a Find<package>.cmake module.
