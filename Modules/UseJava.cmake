@@ -55,20 +55,20 @@
 #        set(CMAKE_JAR_CLASSES_PREFIX com/redhat/bar)
 #        add_jar(bar bar.java)
 #
-#  Variables set:
-#    The add_jar() functions sets some variables which can be used in the
-#    same scope where add_jar() is called.
+#  Target Properties:
+#    The add_jar() functions sets some target properties. You can get these
+#    properties with the
+#       get_property(TARGET <target_name> PROPERTY <propery_name>)
+#    command.
 #
-#    <target>_INSTALL_FILES      The files which should be installed. This
-#                                is used by install_jar().
-#    <target>_JNI_SYMLINK        The JNI symlink which should be
-#                                installed.
-#                                This is used by install_jni_symlink().
-#    <target>_JAR_FILE           The location of the jar file so that you
-#                                can include it.
-#    <target>_CLASS_DIR          The directory where the class files can
-#                                be found. For example to use them with
-#                                javah.
+#    INSTALL_FILES      The files which should be installed. This is used by
+#                       install_jar().
+#    JNI_SYMLINK        The JNI symlink which should be installed.
+#                       This is used by install_jni_symlink().
+#    JAR_FILE           The location of the jar file so that you can include
+#                       it.
+#    CLASS_DIR          The directory where the class files can be found. For
+#                       example to use them with javah.
 #
 #   find_jar(
 #            <VAR>
@@ -356,51 +356,91 @@ function(add_jar _TARGET_NAME)
     # Add the target and make sure we have the latest resource files.
     add_custom_target(${_TARGET_NAME} ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME})
 
-    set(${_TARGET_NAME}_INSTALL_FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
-        PARENT_SCOPE)
+    set_property(
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            INSTALL_FILES
+                ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+    )
+
     if (_JAVA_TARGET_OUTPUT_LINK)
-        set(${_TARGET_NAME}_INSTALL_FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
-            ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_LINK}
-            PARENT_SCOPE)
+        set_property(
+            TARGET
+                ${_TARGET_NAME}
+            PROPERTY
+                INSTALL_FILES
+                    ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                    ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_LINK}
+        )
+
         if (CMAKE_JNI_TARGET)
-            set(${_TARGET_NAME}_JNI_SYMLINK
-                ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_LINK}
-                PARENT_SCOPE)
+            set_property(
+                TARGET
+                    ${_TARGET_NAME}
+                PROPERTY
+                    JNI_SYMLINK
+                        ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_LINK}
+            )
         endif (CMAKE_JNI_TARGET)
     endif (_JAVA_TARGET_OUTPUT_LINK)
-    set(${_TARGET_NAME}_JAR_FILE
-        ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME} PARENT_SCOPE)
-    set(${_TARGET_NAME}_CLASS_DIR
-        ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
-         PARENT_SCOPE)
+
+    set_property(
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            JAR_FILE
+                ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+    )
+
+    set_property(
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            CLASSDIR
+                ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
+    )
+
 endfunction(add_jar)
 
 function(INSTALL_JAR _TARGET_NAME _DESTINATION)
-    if (${_TARGET_NAME}_INSTALL_FILES)
+    get_property(__FILES
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            INSTALL_FILES
+    )
+
+    if (__FILES)
         install(
             FILES
-                ${${_TARGET_NAME}_INSTALL_FILES}
+                ${__FILES}
             DESTINATION
                 ${_DESTINATION}
         )
-    else (${_TARGET_NAME}_INSTALL_FILES)
+    else (__FILES)
         message(SEND_ERROR "The target ${_TARGET_NAME} is not known in this scope.")
-    endif (${_TARGET_NAME}_INSTALL_FILES)
+    endif (__FILES)
 endfunction(INSTALL_JAR _TARGET_NAME _DESTINATION)
 
 function(INSTALL_JNI_SYMLINK _TARGET_NAME _DESTINATION)
-    if (${_TARGET_NAME}_JNI_SYMLINK)
+    get_property(__SYMLINK
+        TARGET
+            ${_TARGET_NAME}
+        PROPERTY
+            JNI_SYMLINK
+    )
+
+    if (__SYMLINK)
         install(
             FILES
-                ${${_TARGET_NAME}_JNI_SYMLINK}
+                ${__SYMLINK}
             DESTINATION
                 ${_DESTINATION}
         )
-    else (${_TARGET_NAME}_JNI_SYMLINK)
+    else (__SYMLINK)
         message(SEND_ERROR "The target ${_TARGET_NAME} is not known in this scope.")
-    endif (${_TARGET_NAME}_JNI_SYMLINK)
+    endif (__SYMLINK)
 endfunction(INSTALL_JNI_SYMLINK _TARGET_NAME _DESTINATION)
 
 function (find_jar VARIABLE)
