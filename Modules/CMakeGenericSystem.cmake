@@ -73,7 +73,7 @@ function(GetDefaultWindowsPrefixBase var)
   # the architecture of the targets being built to choose the right
   # default value for CMAKE_INSTALL_PREFIX.
   #
-  if("${CMAKE_GENERATOR}" MATCHES "Win64")
+  if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
     set(arch_hint "x64")
   elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(arch_hint "x64")
