@@ -163,6 +163,7 @@ static const char* kwsysTerminalVT100Names[] =
   "rxvt-unicode-256color",
   "screen",
   "screen-256color",
+  "screen-256color-bce",
   "screen-bce",
   "screen-w",
   "screen.linux",
