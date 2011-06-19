@@ -34,7 +34,6 @@ public:
 
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
-  bool Find64BitTools(cmMakefile* mf);
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);
 };
