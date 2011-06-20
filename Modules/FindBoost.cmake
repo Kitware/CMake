@@ -34,7 +34,7 @@
 # Boost that contain header files only (e.g. foreach) you do not need to
 # specify COMPONENTS.
 #
-# You should provide a minimum version number that should be used. If you provide this 
+# You should provide a minimum version number that should be used. If you provide this
 # version number and specify the REQUIRED attribute, this module will fail if it
 # can't find the specified or a later version. If you specify a version number this is
 # automatically put into the considered list of version numbers and thus doesn't need
@@ -134,7 +134,7 @@
 #                                unless this is set to TRUE or the REQUIRED
 #                                keyword is specified in find_package().
 #                                  [Since CMake 2.8.0]
-# 
+#
 #   Boost_COMPILER               Set this to the compiler suffix used by Boost
 #                                (e.g. "-gcc43") if FindBoost has problems finding
 #                                the proper Boost installation
@@ -287,7 +287,7 @@ macro(_Boost_ADJUST_LIB_VARS basename)
       set(Boost_${basename}_LIBRARY   ${Boost_${basename}_LIBRARY_RELEASE} )
       set(Boost_${basename}_LIBRARIES ${Boost_${basename}_LIBRARY_RELEASE} )
     endif()
-    
+
     if(Boost_${basename}_LIBRARY)
       set(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE FILEPATH "The Boost ${basename} library")
 
@@ -372,7 +372,7 @@ endfunction()
 
 #
 # End functions/macros
-#  
+#
 #-------------------------------------------------------------------------------
 
 
@@ -573,34 +573,35 @@ else(_boost_IN_CACHE)
       ${BOOST_INCLUDEDIR} ${_boost_INCLUDE_SEARCH_DIRS})
   endif( BOOST_INCLUDEDIR )
 
+  # Build a list of path suffixes for each version.
+  set(_boost_PATH_SUFFIXES)
+  foreach(_boost_VER ${_boost_TEST_VERSIONS})
+    # Add in a path suffix, based on the required version, ideally
+    # we could read this from version.hpp, but for that to work we'd
+    # need to know the include dir already
+    set(_boost_BOOSTIFIED_VERSION)
+
+    # Transform 1.35 => 1_35 and 1.36.0 => 1_36_0
+    if(_boost_VER MATCHES "[0-9]+\\.[0-9]+\\.[0-9]+")
+      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1_\\2_\\3"
+        _boost_BOOSTIFIED_VERSION ${_boost_VER})
+    elseif()
+      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)" "\\1_\\2"
+        _boost_BOOSTIFIED_VERSION ${_boost_VER})
+    endif()
+
+    list(APPEND _boost_PATH_SUFFIXES "boost-${_boost_VER}")
+    list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_VER}")
+    list(APPEND _boost_PATH_SUFFIXES "boost-${_boost_BOOSTIFIED_VERSION}")
+    list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
+  endforeach()
+
   # ------------------------------------------------------------------------
   #  Search for Boost include DIR
   # ------------------------------------------------------------------------
   # Try to find Boost by stepping backwards through the Boost versions
   # we know about.
   if( NOT Boost_INCLUDE_DIR )
-    # Build a list of path suffixes for each version.
-    set(_boost_PATH_SUFFIXES)
-    foreach(_boost_VER ${_boost_TEST_VERSIONS})
-      # Add in a path suffix, based on the required version, ideally
-      # we could read this from version.hpp, but for that to work we'd
-      # need to know the include dir already
-      set(_boost_BOOSTIFIED_VERSION)
-
-      # Transform 1.35 => 1_35 and 1.36.0 => 1_36_0
-      if(_boost_VER MATCHES "[0-9]+\\.[0-9]+\\.[0-9]+")
-          string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1_\\2_\\3"
-            _boost_BOOSTIFIED_VERSION ${_boost_VER})
-      elseif(_boost_VER MATCHES "[0-9]+\\.[0-9]+")
-          string(REGEX REPLACE "([0-9]+)\\.([0-9]+)" "\\1_\\2"
-            _boost_BOOSTIFIED_VERSION ${_boost_VER})
-      endif()
-
-      list(APPEND _boost_PATH_SUFFIXES "boost-${_boost_BOOSTIFIED_VERSION}")
-      list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
-
-    endforeach(_boost_VER)
-
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                      "Include debugging info:")
@@ -916,6 +917,7 @@ else(_boost_IN_CACHE)
     find_library(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
         NAMES ${_boost_RELEASE_NAMES}
         HINTS ${_boost_LIBRARY_SEARCH_DIRS}
+        PATH_SUFFIXES ${_boost_PATH_SUFFIXES}
         ${_boost_FIND_OPTIONS}
         DOC "${_boost_docstring_release}"
     )
@@ -948,6 +950,7 @@ else(_boost_IN_CACHE)
     find_library(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
         NAMES ${_boost_DEBUG_NAMES}
         HINTS ${_boost_LIBRARY_SEARCH_DIRS}
+        PATH_SUFFIXES ${_boost_PATH_SUFFIXES}
         ${_boost_FIND_OPTIONS}
         DOC "${_boost_docstring_debug}"
     )
