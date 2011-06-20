@@ -736,3 +736,5 @@ ENDIF(ENABLE_TEST)
 add_subdirectory(libarchive)
 #add_subdirectory(tar)
 #add_subdirectory(cpio)
+
+install(FILES COPYING DESTINATION ${CMake_DOC_DEST}/cmlibarchive)
