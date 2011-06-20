@@ -590,7 +590,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "For an executable with exports (see the ENABLE_EXPORTS property) "
      "no default transitive link dependencies are used.  "
      "This property replaces the default transitive link dependencies with "
-     "an explict list.  "
+     "an explicit list.  "
      "When the target is linked into another target the libraries "
      "listed (and recursively their link interface libraries) will be "
      "provided to the other target also.  "
