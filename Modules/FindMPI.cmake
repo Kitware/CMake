@@ -443,10 +443,14 @@ function (interrogate_mpi_compiler lang try_libs)
 endfunction()
 
 
+# This function attempts to compile with the regular compiler, to see if MPI programs
+# work with it.  This is a last ditch attempt after we've tried interrogating mpicc and
+# friends, and after we've tried to find generic libraries.  Works on machines like
+# Cray XE6, where the modules environment changes what MPI version cc, CC, and ftn use.
 function(try_regular_compiler lang success)
-  # last ditch attempt: just try to compile something with the regular compiler
+  set(scratch_directory ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY})
   if (${lang} STREQUAL Fortran)
-    set(test_file ${CMAKE_CURRENT_BINARY_DIR}/cmake_mpi_test.f90)
+    set(test_file ${scratch_directory}/cmake_mpi_test.f90)
     file(WRITE ${test_file}
       "program hello\n"
       "include 'mpif.h'\n"
@@ -456,9 +460,9 @@ function(try_regular_compiler lang success)
       "end\n")
   else()
     if (${lang} STREQUAL CXX)
-      set(test_file ${CMAKE_CURRENT_BINARY_DIR}/cmake_mpi_test.cpp)
+      set(test_file ${scratch_directory}/cmake_mpi_test.cpp)
     else()
-      set(test_file ${CMAKE_CURRENT_BINARY_DIR}/cmake_mpi_test.c)
+      set(test_file ${scratch_directory}/cmake_mpi_test.c)
     endif()
     file(WRITE ${test_file}
       "#include <mpi.h>\n"
@@ -467,8 +471,8 @@ function(try_regular_compiler lang success)
       "  MPI_Finalize();\n"
       "}\n")
   endif()
-  try_compile(worked ${CMAKE_CURRENT_BINARY_DIR} ${test_file})
-  if (worked)
+  try_compile(compiler_has_mpi ${scratch_directory} ${test_file})
+  if (compiler_has_mpi)
     set(MPI_${lang}_NO_INTERROGATE ${CMAKE_${lang}_COMPILER} CACHE STRING "Whether to interrogate MPI ${lang} compiler" FORCE)
     set(MPI_${lang}_COMPILER       ${CMAKE_${lang}_COMPILER} CACHE STRING "MPI ${lang} compiler"                        FORCE)
     set(MPI_${lang}_COMPILE_FLAGS  ""                        CACHE STRING "MPI ${lang} compilation flags"               FORCE)
@@ -476,8 +480,8 @@ function(try_regular_compiler lang success)
     set(MPI_${lang}_LINK_FLAGS     ""                        CACHE STRING "MPI ${lang} linking flags"                   FORCE)
     set(MPI_${lang}_LIBRARIES      ""                        CACHE STRING "MPI ${lang} libraries to link against"       FORCE)
   endif()
-  set(${success} ${worked} PARENT_SCOPE)
-  file(REMOVE ${test_file})
+  set(${success} ${compiler_has_mpi} PARENT_SCOPE)
+  unset(compiler_has_mpi CACHE)
 endfunction()
 
 # End definitions, commence real work here.
