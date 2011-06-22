@@ -378,7 +378,11 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations(); 
   this->WriteString("<CustomBuild Include=\"", 2);
-  std::string path = sourcePath;
+  // custom command have to use relative paths or they do not
+  // show up in the GUI
+  std::string path = cmSystemTools::RelativePath(
+    this->Makefile->GetCurrentOutputDirectory(),
+    sourcePath.c_str());
   this->ConvertToWindowsSlash(path);
   (*this->BuildFileStream ) << path << "\">\n";
   for(std::vector<std::string>::iterator i = configs->begin();
@@ -619,6 +623,14 @@ WriteGroupSources(const char* name,
     const char* filter = sourceGroup.GetFullName();
     this->WriteString("<", 2); 
     std::string path = source;
+    // custom command sources must use relative paths or they will
+    // not show up in the GUI.
+    if(sf->GetCustomCommand())
+      {
+      path = cmSystemTools::RelativePath(
+        this->Makefile->GetCurrentOutputDirectory(),
+        source.c_str());
+      }
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << name << " Include=\""
                              << path;
@@ -706,6 +718,8 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
     bool rc = lang && (strcmp(lang, "RC") == 0);
     bool idl = ext == "idl";
     std::string sourceFile = (*source)->GetFullPath();
+    // do not use a relative path here because it means that you
+    // can not use as long a path to the file.
     this->ConvertToWindowsSlash(sourceFile);
     // output the source file
     if(header)
