@@ -123,7 +123,8 @@ std::string cmGlobalVisualStudio10Generator
   cmSystemTools::LowerCase(lowerCaseCommand);
 
   // If makeProgram is devenv, parent class knows how to generate command:
-  if (lowerCaseCommand.find("devenv") != std::string::npos)
+  if (lowerCaseCommand.find("devenv") != std::string::npos ||
+      lowerCaseCommand.find("VCExpress") != std::string::npos)
     {
     return cmGlobalVisualStudio7Generator::GenerateBuildCommand(makeProgram,
       projectName, additionalOptions, targetName, config, ignoreErrors, fast);
