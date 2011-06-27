@@ -1,5 +1,11 @@
 Changes in CMake 2.8.5-rc3 (since 2.8.5-rc2)
 --------------------------------------------
+Bill Hoffman (4):
+      Use devenv instead of msbuild for vs2010.
+      Revert "With very long file names, VS 2010 was unable to compile files."
+      Use relative paths for custom command inputs.
+      Look for VCExpress as a possible build tool as well as devenv.
+
 Brad King (3):
       KWSys: Recognize color TERM=screen-256color-bce (#12287)
       find_library: Use lib->lib64 conversion in CXX-only projects (#12247,#12248)
