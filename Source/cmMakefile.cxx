@@ -1759,6 +1759,10 @@ void cmMakefile::AddDefinition(const char* name, bool value)
 
 void cmMakefile::CheckForUnusedVariables() const
 {
+  if (!this->WarnUnused)
+    {
+    return;
+    }
   const cmDefinitions& defs = this->Internal->VarStack.top();
   const std::set<cmStdString>& locals = defs.LocalKeys();
   std::set<cmStdString>::const_iterator it = locals.begin();
