@@ -282,6 +282,9 @@ class cmake
   void SetScriptMode(bool mode) { this->ScriptMode = mode; }
   bool GetScriptMode() { return this->ScriptMode; }
 
+  void SetFindPackageMode(bool mode) {this->FindPackageMode = mode; }
+  bool GetFindPackageMode() {return this->FindPackageMode;}
+
   ///! Debug the try compile stuff by not delelting the files
   bool GetDebugTryCompile(){return this->DebugTryCompile;}
   void DebugTryCompileOn(){this->DebugTryCompile = true;}
@@ -407,6 +410,7 @@ protected:
 
   ///! read in a cmake list file to initialize the cache
   void ReadListFile(const std::vector<std::string>& args, const char *path);
+  bool FindPackage(const std::vector<std::string>& args);
 
   ///! Check if CMAKE_CACHEFILE_DIR is set. If it is not, delete the log file.
   ///  If it is set, truncate it to 50kb
@@ -461,6 +465,7 @@ private:
   bool Verbose;
   bool InTryCompile;
   bool ScriptMode;
+  bool FindPackageMode;
   bool DebugOutput;
   bool Trace;
   bool WarnUninitialized;

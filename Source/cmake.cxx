@@ -181,6 +181,7 @@ cmake::cmake()
   this->ProgressCallback = 0;
   this->ProgressCallbackClientData = 0;
   this->ScriptMode = false;
+  this->FindPackageMode = false;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->VariableWatch = new cmVariableWatch;
@@ -353,6 +354,7 @@ void cmake::RemoveUnscriptableCommands()
 // Parse the args
 bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 {
+  bool findPackageMode = false;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
@@ -480,7 +482,17 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         }
       this->ReadListFile(args, path.c_str());
       }
+    else if (arg.find("--find-package",0) == 0)
+      {
+      findPackageMode = true;
+      }
     }
+
+  if (findPackageMode)
+    {
+    return this->FindPackage(args);
+    }
+
   return true;
 }
 
@@ -531,6 +543,14 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     delete gg;
     }
 }
+
+
+bool cmake::FindPackage(const std::vector<std::string>& args)
+{
+  // create empty function for now, will be filled later
+  return true;
+}
+
 
 // Parse the args
 void cmake::SetArgs(const std::vector<std::string>& args,
@@ -600,6 +620,11 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       // skip for now
       }
     else if(arg.find("-P",0) == 0)
+      {
+      // skip for now
+      i++;
+      }
+    else if(arg.find("--find-package",0) == 0)
       {
       // skip for now
       i++;

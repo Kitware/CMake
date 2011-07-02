@@ -384,7 +384,9 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
 
     // Decide whether to invoke the command.
     if(pcmd->GetEnabled() && !cmSystemTools::GetFatalErrorOccured()  &&
-       (!this->GetCMakeInstance()->GetScriptMode() || pcmd->IsScriptable()))
+       (this->GetCMakeInstance()->GetFindPackageMode()
+       || !this->GetCMakeInstance()->GetScriptMode() || pcmd->IsScriptable()))
+
       {
       // if trace is one, print out invoke information
       if(this->GetCMakeInstance()->GetTrace())

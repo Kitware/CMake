@@ -102,6 +102,9 @@ static const char * cmDocumentationOptions[][3] =
    "No configure or generate step is performed and the cache is not"
    " modified. If variables are defined using -D, this must be done "
    "before the -P argument."},
+  {"--find-package", "Run in pkg-config like mode.",
+   "Search a package using find_package() and print the resulting flags "
+   "to stdout. "},
   {"--graphviz=[file]", "Generate graphviz of dependencies.",
    "Generate a graphviz input file that will contain all the library and "
    "executable dependencies in the project."},
@@ -434,6 +437,7 @@ int do_cmake(int ac, char** av)
   bool list_help = false;
   bool view_only = false;
   bool script_mode = false;
+  bool find_package_mode = false;
   std::vector<std::string> args;
   for(int i =0; i < ac; ++i)
     {
@@ -487,6 +491,12 @@ int do_cmake(int ac, char** av)
         args.push_back(av[i]);
         }
       }
+    else if (!command && strncmp(av[i], "--find-package",
+                                 strlen("--find-package")) == 0)
+      {
+      find_package_mode = true;
+      args.push_back(av[i]);
+      }
     else 
       {
       args.push_back(av[i]);
@@ -511,7 +521,8 @@ int do_cmake(int ac, char** av)
   cmake cm;  
   cmSystemTools::SetErrorCallback(cmakemainErrorCallback, (void *)&cm);
   cm.SetProgressCallback(cmakemainProgressCallback, (void *)&cm);
-  cm.SetScriptMode(script_mode);
+  cm.SetScriptMode(script_mode || find_package_mode);
+  cm.SetFindPackageMode(find_package_mode);
 
   int res = cm.Run(args, view_only);
   if ( list_cached || list_all_cached )
