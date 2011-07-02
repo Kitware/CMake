@@ -547,8 +547,104 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
 
 bool cmake::FindPackage(const std::vector<std::string>& args)
 {
-  // create empty function for now, will be filled later
-  return true;
+  // if a generator was not yet created, temporarily create one
+  cmGlobalGenerator *gg = new cmGlobalGenerator;
+  gg->SetCMakeInstance(this);
+  this->SetGlobalGenerator(gg);
+
+  // read in the list file to fill the cache
+  std::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
+  cmMakefile* mf = lg->GetMakefile();
+  mf->SetHomeOutputDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+  mf->SetStartOutputDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+  mf->SetHomeDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+  mf->SetStartDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+
+  mf->SetArgcArgv(args);
+
+  std::string systemFile = mf->GetModulesFile("CMakeFindPackageMode.cmake");
+  mf->ReadListFile(0, systemFile.c_str());
+
+  std::string language = mf->GetSafeDefinition("LANGUAGE");
+  std::string mode = mf->GetSafeDefinition("MODE");
+  std::string packageName = mf->GetSafeDefinition("NAME");
+  bool packageFound = mf->IsOn("PACKAGE_FOUND");
+  bool quiet = mf->IsOn("PACKAGE_QUIET");
+
+  if (!packageFound)
+    {
+    if (!quiet)
+      {
+      printf("%s not found.\n", packageName.c_str());
+      }
+    }
+  else if (mode == "EXIST")
+    {
+    if (!quiet)
+      {
+      printf("%s found.\n", packageName.c_str());
+      }
+    }
+  else if (mode == "COMPILE")
+    {
+    std::string includes = mf->GetSafeDefinition("PACKAGE_INCLUDE_DIRS");
+    std::vector<std::string> includeDirs;
+    cmSystemTools::ExpandListArgument(includes, includeDirs);
+    for(std::vector<std::string>::const_iterator dirIt=includeDirs.begin();
+            dirIt != includeDirs.end();
+            ++dirIt)
+      {
+      mf->AddIncludeDirectory(dirIt->c_str(), false);
+      }
+
+    std::string includeFlags = lg->GetIncludeFlags(language.c_str(), false);
+    std::string definitions = mf->GetSafeDefinition("PACKAGE_DEFINITIONS");
+    printf("%s %s\n", includeFlags.c_str(), definitions.c_str());
+    }
+  else if (mode == "LINK")
+    {
+    const char* targetName = "dummy";
+    std::vector<std::string> srcs;
+    cmTarget* tgt = mf->AddExecutable(targetName, srcs, true);
+    tgt->SetProperty("LINKER_LANGUAGE", language.c_str());
+
+    std::string libs = mf->GetSafeDefinition("PACKAGE_LIBRARIES");
+    std::vector<std::string> libList;
+    cmSystemTools::ExpandListArgument(libs, libList);
+    for(std::vector<std::string>::const_iterator libIt=libList.begin();
+            libIt != libList.end();
+            ++libIt)
+      {
+      mf->AddLinkLibraryForTarget(targetName, libIt->c_str(), cmTarget::GENERAL);
+      }
+
+
+    std::string linkLibs;
+    std::string flags;
+    std::string linkFlags;
+    lg->GetTargetFlags(linkLibs, flags, linkFlags, *tgt);
+
+    printf("%s\n", linkLibs.c_str() );
+
+/*    if ( use_win32 )
+      {
+      tgt->SetProperty("WIN32_EXECUTABLE", "ON");
+      }
+    if ( use_macbundle)
+      {
+      tgt->SetProperty("MACOSX_BUNDLE", "ON");
+      }*/
+    }
+
+  // free generic one if generated
+//  this->SetGlobalGenerator(0); // setting 0-pointer is not possible
+//  delete gg; // this crashes inside the cmake instance
+
+  return packageFound;
 }
 
 
