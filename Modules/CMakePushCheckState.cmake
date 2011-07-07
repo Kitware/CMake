@@ -17,10 +17,19 @@
 #   check_function_exists(...)
 #   cmake_pop_check_state()
 
-# Copyright (c) 2006-2011, Alexander Neundorf, <neundorf@kde.org>
+#=============================================================================
+# Copyright 2006-2011 Alexander Neundorf, <neundorf@kde.org>
 #
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distribute this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 
 MACRO(CMAKE_PUSH_CHECK_STATE)
 
