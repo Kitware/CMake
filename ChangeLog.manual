@@ -1,3 +1,426 @@
+Changes in CMake 2.8.5 (since 2.8.5-rc3)
+--------------------------------------------
+Brad King (1):
+      Revert "Add a new function SWIG_GET_WRAPPER_DEPENDENCIES to UseSWIG.cmake"
+      (this revert means that issue #4147 has been re-opened)
+
+Changes in CMake 2.8.5-rc3 (since 2.8.5-rc2)
+--------------------------------------------
+Bill Hoffman (4):
+      Use devenv instead of msbuild for vs2010.
+      Revert "With very long file names, VS 2010 was unable to compile files."
+      Use relative paths for custom command inputs.
+      Look for VCExpress as a possible build tool as well as devenv.
+
+Brad King (3):
+      KWSys: Recognize color TERM=screen-256color-bce (#12287)
+      find_library: Use lib->lib64 conversion in CXX-only projects (#12247,#12248)
+      libarchive: Install COPYING with CMake documentation
+
+Christoph Höger (1):
+      FindJNI: Search in Fedora arch-specific JVM location (#12276)
+
+Julien Malik (1):
+      FindSWIG: Use NAMES in find_program directives (#12280)
+
+Modestas Vainius (1):
+      Documentation: Fix spelling / formatting errors (#12287)
+
+Philip Lowman (3):
+      FindBoost: Fixes #12188
+      FindBoost: Also search for 1.46.1
+      Detect VS 2010 SP1, faster and more robust detection
+
+Changes in CMake 2.8.5-rc2 (since 2.8.5-rc1)
+--------------------------------------------
+Bill Hoffman (6):
+      Fix a memory leak.
+      Fix for bug#10798.  VS10 did not append -I flags with COMPILE_FLAGS prop.
+      Append and do not clobber CMAKE_CXX_FLAGS in the test.
+      Use bin tree for inclues to avoid -I with spaces in the path.
+      One more try.  Use full path by default, and relative on broken compilers.
+      Fix for bug #11927, external project git clone step always runs vs10.
+
+Brad King (9):
+      XL: Place Fortran modules with -qmoddir= flag (#12246)
+      Teach file(DOWNLOAD|UPLOAD) to timeout after inactivity
+      Xcode: Fix parallel build depends with universal binaries (#11844)
+      Fix style errors added by parent and grandparent
+      Use cascading-if for per-config test and install code
+      CTest: Report tests not run due to unknown configuration
+      GNU: Fix CMAKE_INCLUDE_SYSTEM_FLAG_<lang> value (#12258)
+      Teach find_(library|package) about Linux multiarch (#12037)
+      Test find_package multiarch support (#12037)
+
+Clinton Stimpson (11):
+      BundleUtilities: Work w/ non .app exes on Mac (#12034)
+      BundleUtilities: Fix regex to extract dependents from ldd (#12034)
+      BundleUtilities: Fix test when using xcode (#12034)
+      BundleUtilities: Fix issues with custom target DEPENDS in test (#12034)
+      BundleUtilities: Disable running test on Windows unless using MSVC.
+      BundleUtilities: Run test on Windows if either MSVC or dumpbin was found.
+      BundleUtilities: Print reason for not loading module.so
+      BundleUtilities: Add rpath to loadable modules in test.
+      Revert "BundleUtilities: Run test on Windows if either MSVC or dumpbin was found."
+      Qt4: complete module dependencies in UseQt4.cmake
+      Add imported targets support for frameworks on Mac.
+
+Daniel R. Gomez (1):
+      Fix plugin API for gcc 2.9-aix51-020209 (#12233)
+
+David Cole (3):
+      BundleUtilities: Avoid a cryptic and unhelpful error message
+      BundleUtilities: Avoid test on Watcom dashboards (#12034)
+      CMake: eliminate use of cvs in the Release scripts
+
+Eric NOULARD (2):
+      CPackRPM: Enhance documentation
+      Add some more Specs file tag handling.
+
+Johan Björk (3):
+      CMake: Move tokenize to cmSystemTools
+      Xcode: Support multiple level nesting of XCode folders (#10039)
+      XCode: Support target folders on XCode.
+
+Modestas Vainius (1):
+      multiarch: Set CMAKE_LIBRARY_ARCHITECTURE_REGEX for Linux|Hurd|kFreeBSD
+
+Philip Lowman (3):
+      FindProtobuf: Better MSVC support, Searching for protobuf lite
+      Fix , to - in Copyright message so it passes CMake.ModuleNotices test
+      10997: PROTOBUF_GENERATE_CPP now supports proto files outside current dir
+
+Rolf Eike Beer (1):
+      CMake: Update documentation of STRING(SUBSTRING) for length -1 (#10740)
+
+Sean McBride (1):
+      Fix XCode -> Xcode typos, notably in man page (#12231)
+
+Tim Gallagher (1):
+      Modified the FindHDF5.cmake file to locate the Fortran bindings.
+
+Will Dicharry (7):
+      HDF5 high level library is a find COMPONENT now.
+      Add logic for CMake built HDF5 install.
+      Use CMAKE_CURRENT_LIST_DIR to locate FindPackageHandleStandardArgs.
+      Use HDF5_FOUND to control autoconf and CMake built FindHDF5.
+      Fix for bug 11752, mixed debug and release libraries.
+      FindHDF5 ensures good link lines when libraries are duplicated.
+      Remove unnecessary mark_as_advanced from FindHDF5.
+
+Zach Mullen (3):
+      Dynamic analysis test output should not be compressed.
+      We will actually compress memcheck output if the server supports it.
+      Fix type conversion warning
+
+Changes in CMake 2.8.5-rc1 (since 2.8.4)
+----------------------------------------
+Alex Neundorf (33):
+      Rework the way assembler is handled, use the C/CXX compiler by default
+      Make it possible to exlude external libs from dot files
+      GRAPHVIZ_IGNORE_TARGETS is now a list of regular expressions
+      Also generate dependers-graphviz files.
+      Fix XML escaping for the project() name in Eclipse projects (#11658)
+      Fix XML escaping for target names in Eclipse project files (#11658)
+      Add XML escaping for directory name in Eclipse projects (#11658)
+      Eclipse projects: created one linked resource for each subproject
+      Also add the SOURCES from add_custom_target() to CodeBlocks projects (#11736)
+      Add ASM support for the Intel compiler
+      Actually use CMAKE_ASM_COMPILER for asm, instead of CMAKE_C_COMPILER
+      Add support for ASM for the SunPro compiler
+      Add suport for ASM for the IBM XL compiler
+      Add support for ASm for the HP compiler.
+      Set the HP asm file suffix
+      Change the default rules so they fit better to the new ASM handling
+      Fix the default CMAKE_ASM_COMPILE_OBJECT, make XL-ASM use it
+      Add assemble- and preprocess commands for HP
+      The Assembler test now tests ASM for GNU, Intel, HP, XL and SunPro
+      Use a regexp instead a lot of ORs for checking the compiler ID
+      Only try assembler support for Makefile-based generators
+      Fix bad comparison in the detect assembler-code
+      It's ELSEIF(), not ELSIF()
+      Add temporary debug output for compiler ID detection for ASM
+      Add more regex for gcc, always print the ASM compiler ID
+      Add support for the Intel compiler used for ASM under Windows
+      -use CMAKE_C_FLAGS when generating the assembler file
+      -only enable the asm test for the Intel compiler if we are under UNIX
+      Remove trailing whitespace
+      Make use_mangled_mesa() available in cmake script mode (#11926)
+      Fix parsing include dirs and builtin macros for CXX-only projects
+      Don't skip the last builtin include dir for the Eclipse project file
+      -fix VirtualFolders in Eclipse under Windows
+
+Alexey Ozeritsky (1):
+      ACML search improvement
+
+Andreas Schneider (6):
+      Modules: Added CheckPrototypeDefinition module.
+      Tests: Added test for check_prototype_definition.
+      FindOpenSSL: Added support for pkg-config.
+      FindOpenSSL: We should only use hints to find OpenSSL.
+      FindOpenSSL: Fixed crypto und ssl variable names.
+      FindOpenSSL: Use find_package_handle_standard_args for version check.
+
+Bill Hoffman (2):
+      With very long file names, VS 2010 was unable to compile files.
+      Fix for bug where VS2010 did not use .obj files as part of the build.
+
+Brad King (94):
+      Reject directory names containing '=' (#11689)
+      FindQt4: Include builtin FindPackageHandleStandardArgs directly
+      Handle trailing slashes on add_custom_command DEPENDS
+      Handle relative WORKING_DIRECTORY in add_custom_(command|target)
+      Pass -o after -c for Fortran to avoid mpif77 ordering bug
+      Add link flag table entries for VS 7,8,9
+      VS: Create a Fortran DLL's import library directory
+      Fix linker flag initialization from LDFLAGS (#11840)
+      ccmake: Remove extra parens around comparison
+      Avoid direct use of std::stringstream
+      Honor module .def files with MinGW tools (#9997)
+      CTest: Update Git submodules with --recursive
+      libarchive: Remove unused build/windows directory (#11885)
+      Pass .def files directly to MinGW tools (#9997)
+      Fix Fortran test .def file symbol mangling
+      Require at least CMake 2.6.3 to build current CMake
+      GNUInstallDirs: Simplify and clarify documentation
+      KWSys: Require at least CMake 2.6.3
+      Remove unused CMAKE_BACKWARDS_COMPATIBILITY mark
+      Factor AIX and XL compiler flags into common module
+      Move RPATH flags to AIX per-compiler information files
+      Initialize ASM rpath flags for executables with those for shared libs
+      Add ASM platform information for XL compiler on AIX
+      Factor HP compiler flags into per-platform/per-compiler files
+      Add ASM platform information for HP compiler on HP
+      Add target property LINK_SEARCH_START_STATIC to aid static linking
+      Test static linking with LINK_SEARCH_START_STATIC
+      Fix Assembler test to parse C flags string before using
+      Teach Assembler test to generate main.s at build time
+      Do not bother enabling C++ in Assembler test
+      The link interface of MODULE libraries is empty (#11945)
+      CTest: Do not fail with submodules and Git < 1.6.5.0
+      Remove trailing whitespace
+      Add parens in cmTarget::ComputeLinkInterface logic
+      Validate custom command arguments (#11963)
+      Factor old-style -D flags out from -I flag generation
+      FindMPI: Fix documentation formatting
+      Generate target-wide flags before individual build rules
+      Optionally pass include directories with response files
+      Pass include directories with response files to GNU on Windows
+      Enable Java test more carefully on Apple
+      Disable Java test with Xcode generator
+      Allow '.' in target names in generator expressions (#12002)
+      GNUInstallDirs: Propagate DATAROOTDIR changes to dependent defaults
+      KWSys: Do not trust EXECUTABLE_OUTPUT_PATH for ProcessFwd9x encoding
+      Refine unused cache variable warning
+      Fix unused cache warning after multiple configure iterations
+      FortranCInterface: Fix mangling detection with Cray Fortran >= 7.3.2
+      Fix typo in include_directories documentation (#12020)
+      KWSys: Recognize rxvt-unicode-256color terminal (#12013)
+      Normalize slashes of add_custom_(command|target) DEPENDS (#11973)
+      COMP: Fix build against non-standard outside libarchive
+      Modules: Add comment and copyright notice validation to readme.txt
+      cmArchiveWrite: Clear xattr and acl from entries (#11958)
+      find_package: Forward component list for recursive calls in modules
+      XL: Set C++ and Fortran flags consistently with C
+      XL: Consolidate compiler flag information
+      XL: Avoid copying archives into shared libraries that link them
+      VS10: Fix working directory of consecutive custom commands (#11938)
+      Fix working drive of make rules on Windows
+      Change working drive only in MinGW Makefiles
+      VS: Use setlocal/endlocal only in VS 10 custom commands
+      VS10: Fix exit code of custom commands with setlocal/endlocal (#11938)
+      KWSys: Remove unused CheckCXXSourceRuns cmake module
+      find_package: Rename implementation of user package registry
+      find_package: Cleanup user package registry less aggressively
+      find_package: Document user package registry locations
+      find_package: Search a "system package registry"
+      find_package: Check both 32-bit and 64-bit registry views
+      find_package: Test system package registry when possible
+      find_package: Fix system package registry test path conversion
+      FindITK: Use passthru find_package config mode for messages
+      OpenBSD: Use 'arch -s' for host processor (#12143)
+      Fix case typo in CMAKE_BUILD_TYPE docs (#12148)
+      KWSys: Fix leaked FILE in EncodeExecutable error case
+      ENH: Fix Intel 12 plugin project generation for VS < 10
+      Revert "Honor RULE_MESSAGES property for build target messages" (#12190)
+      Fix signed/unsigned comparison in EscapeJSON
+      Fix run_compile_commands build on Apple GCC 3.3
+      Make std::map usage more portable in language=>flags/defines maps
+      Provide std::map<>::at for use in run_compile_commands
+      run_compile_commands: Avoid shadow in std::map<>::at workaround
+      Improve string(RANDOM) default seed
+      run_compile_commands: Avoid extra stl vector conversion
+      VS 6: Define _WIN32_WINNT to load wincrypt.h correctly
+      run_compile_commands: Cast istream::get() result to char
+      Fix CompileCommandOutput test for Make tools not supporting spaces
+      Explicitly cast time value in cmSystemTools::RandomSeed
+      Fix CompileCommandOutput test build on Windows
+      Add Absoft Fortran compiler id and basic flags
+      Absoft: Detect implicit link libraries on Linux and Mac
+      Absoft: Enable FortranCInterface check in Fortran test
+      Document status of output_required_files command (#12214)
+      Fix forced-seed argument type in string(RANDOM)
+
+Clement Creusot (2):
+      Add new module Armadillo
+      Corrected copyright format in FindArmadillo.cmake
+
+Clinton Stimpson (8):
+      Change to use fphsa to check required variables and version.
+      Fix grouping bug where "Ungrouped Entries" showed up as a child.
+      When checking find_package() components, special case qtmain.
+      Fix issues with find_path() for QtCore include dir on Mac.  Fixes 11868.
+      Fix regression in 43cb9b8.
+      Speed up creation of parameters file for moc custom command.
+      Combine component packaging methods into an enum.
+      Add component support to DragNDrop generator.
+
+David Cole (34):
+      ExternalProject Test: Increase test timeout value
+      CFBundle Test: Add PATHS for finding Rez (#11295)
+      CTest: Mark DART_TESTING_TIMEOUT as advanced (#10150)
+      Xcode: Allow override of CMAKE_CONFIGURATION_TYPES (#8914)
+      Tests: Eliminate unnecessary files and variables.
+      VS9: Map enable/disable PREfast flags (#10638)
+      Strip trailing space from xcode-select output (#10723)
+      CTest: Add alias for make test target (#4564)
+      Add CMAKE_SCRIPT_MODE_FILE variable (#2828)
+      Add CMAKE_ARGC and CMAKE_ARGV0..N-1 variables (#2828)
+      Fix KWStyle line-too-long complaint (#2828)
+      Documentation: Sync two differing copies of -E docs (#10446)
+      Clarify list subcommand documentation (#8154)
+      VS2010: Fixed GenerateManifest flag (#10704)
+      VS: Only use /MANIFEST if hasManifest is true (#11216)
+      Make file DOWNLOAD less noisy (#11761)
+      Begin post-2.8.4 development
+      Use stable_sort to preserve test order (#11877)
+      Implement file(UPLOAD (#11286)
+      Fix KWStyle line too long error (#11286)
+      ExternalProject: Extract file names from more urls
+      InstallRequiredSystemLibraries: Read reg values with get_filename_component
+      Add correct module notice header.
+      If getconf returns empty output, try cpuinfo. (#11302)
+      Add ProcessorCount support for QNX via pidin. (#11302)
+      Compare ProcessorCount to SystemInformation count. (#11302)
+      ProcessorCount test: more output, do not fail. (#11302)
+      ProcessorCount: Add support for remaining platforms (#11302)
+      ProcessorCount: Test fails if count is 0 (#11302)
+      ProcessorCount: Use ERROR_QUIET with execute_process (#11302)
+      ExternalProject: Add SVN_TRUST_CERT argument
+      CMake: Clarify the --debug-trycompile help text
+      ExternalProject: Always use --non-interactive with svn
+      VS10: Write header-only files in correct xml element (#11925)
+
+Eric NOULARD (25):
+      CPackRPM  honors all the different ways of packaging components
+      CPackRPM  fix IRIX compiler warning (variable never used)
+      CPack remove "-ALL" suffix for ALL-IN-ONE packages
+      CPack Authorize DISPLAY_NAME usage in component package
+      CPack  fix KWStyle warning
+      CPack remove previously CPack generated files (if any) before running CPack
+      CPackRPM Replace space in some CPACK_ vars (Fix bug 9932)
+      CPackRPM  activate CPackRPM test on Linux systems where rpmbuild is found
+      CPackArchive package all components specified in CPACK_COMPONENTS_ALL
+      CPack  more robust way to collect files belonging to a component
+      CPackRPM  do not run test if build dir contains space
+      CPack  fix compile error on VS70 and avoid KWStyle warnings
+      CPackRPM  add more trace output in order to help failing diagnostics
+      CPackRPM even more trace in debug mode or in case of failure
+      CPackRPM  non matching ENDIF
+      CPack try to please SUSE 64 bits and install lib in lib64 and not lib.
+      Remove debbuging typo
+      CPack fix CPackDeb crash when CPackDeb.cmake ends with a FATAL_ERROR
+      CPack fix #11930 and simplifies component packaging options
+      Fix #11964 Handle lib64 library on Linux
+      Fix KWStyle warnings
+      Split CPack.cmake in more manageable parts
+      Fix KWStyle warnings
+      CPackRPM  Fix #12096: handle absolute install path with component install
+      CPack  make RPM work on AIX. fix #0012183 merge patch from Pasi Valminen
+
+James Bigler (1):
+      Add FloatingPointModel to the list of known VS7 generator flags.
+
+Johan Björk (1):
+      XCode: Also qoute [] as needed to set build-configurations.
+
+Kovarththanan Rajaratnam (1):
+      Documentation: document platform specific -E commands (#10446)
+
+M. Konrad (1):
+      CPackDeb  add Component Support to DEB generator fix #0011655
+
+Manuel Klimek (6):
+      refactor flags and defines
+      cache flags and defines
+      implement cxx command output
+      make compile command output optional
+      Adds a test for the compile command line output.
+      Only offer the compile command output feature on unix systems
+
+Marco Craveiro (1):
+      CTest: Use the gcov --preserve-paths flag (#11717)
+
+Markus Rathgeb (1):
+      When cross compiling, don't double-root paths when using find_*.
+
+Martin Konrad (2):
+      CPackDeb: Fix #12006 broken package names
+      CPackDeb: Handle dirs for CONTROL_EXTRA correctly when packaging components
+
+Mathieu Malaterre (8):
+      This commit fixes bug #0010316
+      Add a new function SWIG_GET_WRAPPER_DEPENDENCIES to UseSWIG.cmake
+      Add support for Java on HP
+      Add support for java on fedora
+      UseSWIG.cmake does not expand $(OutDir)
+      Add support for new swig 2.0 application
+      UseSWIG.cmake did not support multiple modules and parallel builds
+      Add support for FindJava on HP-UX and alpha
+
+Michael Wild (1):
+      Add module ProcessorCount.cmake (#11302)
+
+Modestas Vainius (1):
+      Documentation: Fix a few typos (#11883)
+
+Nikita Krupen'ko (1):
+      Add GNUInstallDirs module to define GNU layout (#3976)
+
+Philip Lowman (1):
+      VS7/8/9: Map whole program optimization flags (#10263)
+
+Richard Bateman (1):
+      Add support for CFBundle targets on the Mac (#11295)
+
+Rolf Eike Beer (2):
+      CTest: catch warning output of Apache Maven
+      FindZLIB: print library instead of include directory
+
+Sean McBride (1):
+      Removed most usage of Carbon in favour of CoreFoundation
+
+Sebastian Herbst (2):
+      VS8/9: Add flag map entries for /Zc:wchar_t (#10397)
+      VS7/8/9: Add flag map for string pooling option (#10397)
+
+Tim Hütz (1):
+      Add a string(FIND) sub-command (#11795)
+
+Todd Gamblin (2):
+      FindMPI: Handle multiple languages
+      Added backward compatibility for input as well as output vars.
+
+Wesley Turner (1):
+      Ensure executable files have executable permissions.
+
+Zach Mullen (5):
+      Implement ctest_upload command
+      Change 'Files' tag to 'Upload' in Upload.xml
+      Don't tar/gz ctest_upload() files
+      Add the FILES keyword to ctest_upload command
+      cmCTestUploadCommand::CheckArgumentKeyword should return false if not FILES
+
 Changes in CMake 2.8.4 (since 2.8.4-rc2)
 ----------------------------------------
 Alex Neundorf (1):
