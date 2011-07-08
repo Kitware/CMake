@@ -1,3 +1,9 @@
+Changes in CMake 2.8.5 (since 2.8.5-rc3)
+--------------------------------------------
+Brad King (1):
+      Revert "Add a new function SWIG_GET_WRAPPER_DEPENDENCIES to UseSWIG.cmake"
+      (this revert means that issue #4147 has been re-opened)
+
 Changes in CMake 2.8.5-rc3 (since 2.8.5-rc2)
 --------------------------------------------
 Bill Hoffman (4):
