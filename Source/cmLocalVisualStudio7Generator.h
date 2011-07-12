@@ -75,6 +75,8 @@ public:
 
   virtual void ReadAndStoreExternalGUID(const char* name,
                                         const char* path);
+protected:
+  void CreateSingleVCProj(const char *lname, cmTarget &tgt);
 private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
@@ -85,7 +87,6 @@ private:
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteVCProjFooter(std::ostream& fout);
-  void CreateSingleVCProj(const char *lname, cmTarget &tgt);
   void WriteVCProjFile(std::ostream& fout, const char *libName, 
                        cmTarget &tgt);
   void WriteConfigurations(std::ostream& fout,
