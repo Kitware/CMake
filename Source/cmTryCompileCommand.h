@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmTryCompileCommand;
     }
@@ -45,7 +45,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Try building some code.";
     }
@@ -102,14 +102,15 @@ public:
       "In both versions of the command, "
       "if OUTPUT_VARIABLE is specified, then the "
       "output from the build process is stored in the given variable. "
-      "Return the success or failure in "
+      "The success or failure of the try_compile, i.e. TRUE or FALSE "
+      "respectively, is returned in "
       "RESULT_VAR. CMAKE_FLAGS can be used to pass -DVAR:TYPE=VALUE flags "
       "to the cmake that is run during the build. "
       "Set variable CMAKE_TRY_COMPILE_CONFIGURATION to choose a build "
       "configuration."
       ;
     }
-  
+
   cmTypeMacro(cmTryCompileCommand, cmCoreTryCompile);
 
 };
