@@ -3536,7 +3536,7 @@ void cmake::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop, value, cmProperty::GLOBAL);
 }
 
-void cmake::AppendProperty(const char* prop, const char* value)
+void cmake::AppendProperty(const char* prop, const char* value, bool asString)
 {
   if (!prop)
     {
@@ -3549,7 +3549,7 @@ void cmake::AppendProperty(const char* prop, const char* value)
     this->DebugConfigs.clear();
     }
 
-  this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL);
+  this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL, asString);
 }
 
 const char *cmake::GetProperty(const char* prop)

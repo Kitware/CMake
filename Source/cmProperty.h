@@ -24,7 +24,7 @@ public:
   void Set(const char *name, const char *value);
 
   // append to this property
-  void Append(const char *name, const char *value);
+  void Append(const char *name, const char *value, bool asString = false);
 
   // get the value
   const char *GetValue() const;

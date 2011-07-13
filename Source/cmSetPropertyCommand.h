@@ -56,7 +56,7 @@ public:
         "                SOURCE    [src1 [src2 ...]]       |\n"
         "                TEST      [test1 [test2 ...]]     |\n"
         "                CACHE     [entry1 [entry2 ...]]>\n"
-        "               [APPEND]\n"
+        "               [APPEND] [APPEND_STRING]\n"
         "               PROPERTY <name> [value1 [value2 ...]])\n"
         "Set one property on zero or more objects of a scope.  "
         "The first argument determines the scope in which the property "
@@ -77,6 +77,9 @@ public:
         "list.  "
         "If the APPEND option is given the list is appended to any "
         "existing property value."
+        "If the APPEND_STRING option is given the string is append to any "
+        "existing property value as string, i.e. it results in a longer "
+        "string and not a list of strings."
         ;
     }
 
@@ -93,6 +96,7 @@ private:
   std::string PropertyValue;
   bool Remove;
   bool AppendMode;
+  bool AppendAsString;
 
   // Implementation of each property type.
   bool HandleGlobalMode();

@@ -20,6 +20,7 @@
 cmSetPropertyCommand::cmSetPropertyCommand()
 {
   this->AppendMode = false;
+  this->AppendAsString = false;
   this->Remove = true;
 }
 
@@ -83,6 +84,13 @@ bool cmSetPropertyCommand
       {
       doing = DoingNone;
       this->AppendMode = true;
+      this->AppendAsString = false;
+      }
+    else if(*arg == "APPEND_STRING")
+      {
+      doing = DoingNone;
+      this->AppendMode = true;
+      this->AppendAsString = true;
       }
     else if(doing == DoingNames)
       {
@@ -152,7 +160,7 @@ bool cmSetPropertyCommand::HandleGlobalMode()
     }
   if(this->AppendMode)
     {
-    cm->AppendProperty(name, value);
+    cm->AppendProperty(name, value, this->AppendAsString);
     }
   else
     {
@@ -218,7 +226,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
     }
   if(this->AppendMode)
     {
-    mf->AppendProperty(name, value);
+    mf->AppendProperty(name, value, this->AppendAsString);
     }
   else
     {
@@ -266,7 +274,7 @@ bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
     }
   if(this->AppendMode)
     {
-    target->AppendProperty(name, value);
+    target->AppendProperty(name, value, this->AppendAsString);
     }
   else
     {
@@ -317,7 +325,7 @@ bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
 
   if(this->AppendMode)
     {
-    sf->AppendProperty(name, value);
+    sf->AppendProperty(name, value, this->AppendAsString);
     }
   else
     {
@@ -377,7 +385,7 @@ bool cmSetPropertyCommand::HandleTest(cmTest* test)
     }
   if(this->AppendMode)
     {
-    test->AppendProperty(name, value);
+    test->AppendProperty(name, value, this->AppendAsString);
     }
   else
     {
@@ -464,7 +472,7 @@ bool cmSetPropertyCommand::HandleCacheEntry(cmCacheManager::CacheIterator& it)
     }
   if(this->AppendMode)
     {
-    it.AppendProperty(name, value);
+    it.AppendProperty(name, value, this->AppendAsString);
     }
   else
     {

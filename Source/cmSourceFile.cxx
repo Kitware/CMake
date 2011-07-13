@@ -291,13 +291,15 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFile::AppendProperty(const char* prop, const char* value)
+void cmSourceFile::AppendProperty(const char* prop, const char* value,
+                                  bool asString)
 {
   if (!prop)
     {
     return;
     }
-  this->Properties.AppendProperty(prop, value, cmProperty::SOURCE_FILE);
+  this->Properties.AppendProperty(prop, value, cmProperty::SOURCE_FILE,
+                                  asString);
 }
 
 //----------------------------------------------------------------------------
