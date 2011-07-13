@@ -782,7 +782,7 @@ void cmGlobalGenerator::Configure()
   // so create the map from project name to vector of local generators
   this->FillProjectMap();
 
-  if ( !this->CMakeInstance->GetScriptMode() )
+  if ( this->CMakeInstance->GetWorkingMode() == cmake::NORMAL_MODE)
     {
     const char* msg = "Configuring done";
     if(cmSystemTools::GetErrorOccuredFlag())

@@ -64,6 +64,25 @@ class cmake
     WARNING,
     LOG
   };
+
+
+  /** Describes the working modes of cmake.
+   * NORMAL_MODE: cmake runs to create project files
+   * SCRIPT_MODE: in script mode there is no generator and no cache. Also,
+   *              language are not enabled, so add_executable and things do
+   *              not do anything. Started by using -P
+   * FIND_PACKAGE_MODE: cmake runs in pkg-config like mode, i.e. it just
+   *              searches for a package and prints the results to stdout.
+   *              This is similar to SCRIPT_MODE, but commands like
+   *              add_library() work too, since they may be used e.g. in
+   *              exported target files. Started via --find-package
+   */
+  enum WorkingMode
+  {
+    NORMAL_MODE,
+    SCRIPT_MODE,
+    FIND_PACKAGE_MODE
+  };
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
 
   ///! construct an instance of cmake
@@ -274,16 +293,8 @@ class cmake
   ///! Do all the checks before running configure
   int DoPreConfigureChecks();
 
-  /**
-   * Set and get the script mode option. In script mode there is no
-   * generator and no cache. Also, language are not enabled, so
-   * add_executable and things do not do anything.
-   */
-  void SetScriptMode(bool mode) { this->ScriptMode = mode; }
-  bool GetScriptMode() { return this->ScriptMode; }
-
-  void SetFindPackageMode(bool mode) {this->FindPackageMode = mode; }
-  bool GetFindPackageMode() {return this->FindPackageMode;}
+  void SetWorkingMode(WorkingMode mode) { this->CurrentWorkingMode = mode; }
+  WorkingMode GetWorkingMode() { return this->CurrentWorkingMode; }
 
   ///! Debug the try compile stuff by not delelting the files
   bool GetDebugTryCompile(){return this->DebugTryCompile;}
@@ -464,8 +475,7 @@ private:
   void* ProgressCallbackClientData;
   bool Verbose;
   bool InTryCompile;
-  bool ScriptMode;
-  bool FindPackageMode;
+  WorkingMode CurrentWorkingMode;
   bool DebugOutput;
   bool Trace;
   bool WarnUninitialized;

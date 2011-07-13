@@ -180,8 +180,7 @@ cmake::cmake()
   this->GlobalGenerator = 0;
   this->ProgressCallback = 0;
   this->ProgressCallbackClientData = 0;
-  this->ScriptMode = false;
-  this->FindPackageMode = false;
+  this->CurrentWorkingMode = NORMAL_MODE;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->VariableWatch = new cmVariableWatch;
@@ -523,7 +522,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     lg->GetMakefile()->SetStartDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
-    if (this->GetScriptMode())
+    if (this->GetWorkingMode() != NORMAL_MODE)
       {
       std::string file(cmSystemTools::CollapseFullPath(path));
       cmSystemTools::ConvertToUnixSlashes(file);
@@ -2147,7 +2146,7 @@ int cmake::ActualConfigure()
   this->CleanupCommandsAndMacros();
 
   int res = 0;
-  if ( !this->ScriptMode )
+  if ( this->GetWorkingMode() == NORMAL_MODE )
     {
     res = this->DoPreConfigureChecks();
     }
@@ -2335,7 +2334,7 @@ int cmake::ActualConfigure()
     this->CacheManager->RemoveCacheEntry("CMAKE_EXTRA_GENERATOR");
     }
   // only save the cache if there were no fatal errors
-  if ( !this->ScriptMode )
+  if ( this->GetWorkingMode() == NORMAL_MODE )
     {
     this->CacheManager->SaveCache(this->GetHomeOutputDirectory());
     }
@@ -2401,7 +2400,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   // set the cmake command
   this->CMakeCommand = args[0];
 
-  if ( !this->ScriptMode )
+  if ( this->GetWorkingMode() == NORMAL_MODE )
     {
     // load the cache
     if(this->LoadCache() < 0)
@@ -2422,7 +2421,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     }
 
   // In script mode we terminate after running the script.
-  if(this->ScriptMode)
+  if(this->GetWorkingMode() != NORMAL_MODE)
     {
     if(cmSystemTools::GetErrorOccuredFlag())
       {
@@ -2468,7 +2467,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   this->SetStartDirectory(this->GetHomeDirectory());
   this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
   int ret = this->Configure();
-  if (ret || this->ScriptMode)
+  if (ret || this->GetWorkingMode() != NORMAL_MODE)
     {
 #if defined(CMAKE_HAVE_VS_GENERATORS)
     if(!this->VSSolutionFile.empty() && this->GlobalGenerator)

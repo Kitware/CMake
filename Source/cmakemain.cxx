@@ -436,8 +436,7 @@ int do_cmake(int ac, char** av)
   bool list_all_cached = false;
   bool list_help = false;
   bool view_only = false;
-  bool script_mode = false;
-  bool find_package_mode = false;
+  cmake::WorkingMode workingMode = cmake::NORMAL_MODE;
   std::vector<std::string> args;
   for(int i =0; i < ac; ++i)
     {
@@ -485,7 +484,7 @@ int do_cmake(int ac, char** av)
         }
       else
         {
-        script_mode = true;
+        workingMode = cmake::SCRIPT_MODE;
         args.push_back(av[i]);
         i++;
         args.push_back(av[i]);
@@ -494,7 +493,7 @@ int do_cmake(int ac, char** av)
     else if (!command && strncmp(av[i], "--find-package",
                                  strlen("--find-package")) == 0)
       {
-      find_package_mode = true;
+      workingMode = cmake::FIND_PACKAGE_MODE;
       args.push_back(av[i]);
       }
     else 
@@ -521,8 +520,7 @@ int do_cmake(int ac, char** av)
   cmake cm;  
   cmSystemTools::SetErrorCallback(cmakemainErrorCallback, (void *)&cm);
   cm.SetProgressCallback(cmakemainProgressCallback, (void *)&cm);
-  cm.SetScriptMode(script_mode || find_package_mode);
-  cm.SetFindPackageMode(find_package_mode);
+  cm.SetWorkingMode(workingMode);
 
   int res = cm.Run(args, view_only);
   if ( list_cached || list_all_cached )
