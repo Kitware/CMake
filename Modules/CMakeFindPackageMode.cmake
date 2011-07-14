@@ -40,9 +40,32 @@ include(CMakeDetermineSystem)
 # This makes the FIND_XXX() calls work much better
 include(CMakeSystemSpecificInformation)
 
-# this is ugly, and not enough for the multilib-stuff I guess
-if(UNIX AND EXISTS /usr/lib64)
-  set(CMAKE_SIZEOF_VOID_P 8)
+if(UNIX)
+
+  # try to guess whether we have a 64bit system, if it has not been set
+  # from the outside
+  if(NOT CMAKE_SIZEOF_VOID_P)
+    if(EXISTS /usr/lib64)
+      set(CMAKE_SIZEOF_VOID_P 8)
+    else()
+      set(CMAKE_SIZEOF_VOID_P 4)
+    endif()
+  endif()
+
+  # guess Debian multiarch if it has not been set:
+  if(EXISTS /etc/debian_version)
+    if(NOT CMAKE_${LANGUAGE}_LANGUAGE_ARCHITECTURE )
+      file(GLOB filesInLib RELATIVE /lib /lib/*-linux-gnu* )
+      list(APPEND filesInLib i386-linux-gnu)
+      foreach(file ${filesInLib})
+        if("${file}" MATCHES "${CMAKE_LIBRARY_ARCHITECTURE_REGEX}")
+          set(CMAKE_${LANGUAGE}_LANGUAGE_ARCHITECTURE ${file})
+          break()
+        endif()
+      endforeach()
+    endif()
+  endif()
+
 endif()
 
 set(CMAKE_${LANGUAGE}_COMPILER "dummy")
