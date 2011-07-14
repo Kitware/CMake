@@ -43,6 +43,13 @@ if(NOT PYTHON_EXECUTABLE)
     endforeach()
 endif()
 
+if(PYTHON_EXECUTABLE)
+    execute_process(COMMAND "${PYTHON_EXECUTABLE}" --version ERROR_VARIABLE _VERSION OUTPUT_QUIET ERROR_STRIP_TRAILING_WHITESPACE)
+    string(REPLACE "Python " "" PYTHON_VERSION_STRING "${_VERSION}")
+    string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" PYTHON_VERSION_MAJOR "${PYTHON_VERSION_STRING}")
+    string(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+.*" "\\1" PYTHON_VERSION_MINOR "${PYTHON_VERSION_STRING}")
+    string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" PYTHON_VERSION_PATCH "${PYTHON_VERSION_STRING}")
+endif()
 
 # handle the QUIETLY and REQUIRED arguments and set PYTHONINTERP_FOUND to TRUE if
 # all listed variables are TRUE
