@@ -71,6 +71,24 @@ if (NOT TARGETRESULT)
       "Error: target result is TARGETRESULT=${TARGETRESULT}")
 endif (NOT TARGETRESULT)
 
+# test APPEND and APPEND_STRING set_property()
+set_property(TARGET Properties PROPERTY FOO foo)
+set_property(TARGET Properties PROPERTY BAR bar)
+set_property(TARGET Properties APPEND PROPERTY FOO 123)
+set_property(TARGET Properties APPEND_STRING PROPERTY BAR 456)
+
+get_property(APPEND_RESULT TARGET Properties PROPERTY FOO)
+if (NOT "${APPEND_RESULT}" STREQUAL "foo;123")
+    message(SEND_ERROR
+      "Error: target result is APPEND_RESULT=${APPEND_RESULT}")
+endif ()
+
+get_property(APPEND_STRING_RESULT TARGET Properties PROPERTY BAR)
+if (NOT "${APPEND_STRING_RESULT}" STREQUAL "bar456")
+    message(SEND_ERROR
+      "Error: target result is APPEND_STRING_RESULT=${APPEND_STRING_RESULT}")
+endif ()
+
 # test get_property SET
 get_property(TARGETRESULT TARGET Properties PROPERTY TARGETTEST SET)
 if (NOT TARGETRESULT)

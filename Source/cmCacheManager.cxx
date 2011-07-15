@@ -849,7 +849,8 @@ void cmCacheManager::CacheEntry::SetProperty(const char* prop,
 
 //----------------------------------------------------------------------------
 void cmCacheManager::CacheEntry::AppendProperty(const char* prop,
-                                                const char* value)
+                                                const char* value,
+                                                bool asString)
 {
   if(strcmp(prop, "TYPE") == 0)
     {
@@ -859,7 +860,7 @@ void cmCacheManager::CacheEntry::AppendProperty(const char* prop,
     {
     if(value)
       {
-      if(!this->Value.empty() && *value)
+      if(!this->Value.empty() && *value && !asString)
         {
         this->Value += ";";
         }
@@ -868,7 +869,7 @@ void cmCacheManager::CacheEntry::AppendProperty(const char* prop,
     }
   else
     {
-    this->Properties.AppendProperty(prop, value, cmProperty::CACHE);
+    this->Properties.AppendProperty(prop, value, cmProperty::CACHE, asString);
     }
 }
 
@@ -893,11 +894,12 @@ void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v)
 
 //----------------------------------------------------------------------------
 void cmCacheManager::CacheIterator::AppendProperty(const char* p,
-                                                   const char* v)
+                                                   const char* v,
+                                                   bool asString)
 {
   if(!this->IsAtEnd())
     {
-    this->GetEntry().AppendProperty(p, v);
+    this->GetEntry().AppendProperty(p, v, asString);
     }
 }
 

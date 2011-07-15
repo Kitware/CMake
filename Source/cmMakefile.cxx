@@ -3336,7 +3336,8 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop,value,cmProperty::DIRECTORY);
 }
 
-void cmMakefile::AppendProperty(const char* prop, const char* value)
+void cmMakefile::AppendProperty(const char* prop, const char* value,
+                                bool asString)
 {
   if (!prop)
     {
@@ -3369,7 +3370,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value)
     return;
     }
 
-  this->Properties.AppendProperty(prop,value,cmProperty::DIRECTORY);
+  this->Properties.AppendProperty(prop,value,cmProperty::DIRECTORY,asString);
 }
 
 const char *cmMakefile::GetPropertyOrDefinition(const char* prop)
