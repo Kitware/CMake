@@ -4,6 +4,11 @@ if(APPLE)
   # only use multi-arch if the sysroot exists on this machine
   if(EXISTS "${CMAKE_OSX_SYSROOT}")
     set(CMAKE_OSX_ARCHITECTURES "ppc;i386")
+    if(NOT "${DARWIN_MAJOR_VERSION}.${DARWIN_MINOR_VERSION}" VERSION_LESS 10.0)
+      # Snow Leopard or later, use modern architectures as defaults
+      # Arch 'ppc' no longer works: tools no longer available starting with Xcode 4
+      set(CMAKE_OSX_ARCHITECTURES i386 x86_64)
+    endif()
   endif(EXISTS "${CMAKE_OSX_SYSROOT}")
 endif(APPLE)
 
