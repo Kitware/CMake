@@ -72,6 +72,12 @@
 #   find_package(LibXml2)
 #   set_package_info(LibXml2 "XML processing library." "http://xmlsoft.org/")
 #
+#    SET_PACKAGE_PROPERTIES(<name> PROPERTIES <description> [<url> [<purpose>  [<type>] ] ] )
+#
+# URL: homepage of the package
+# DESCRIPTION: short description of the package itself
+# PURPOSE: what is the purpopse of using the package in the current project, always appended
+# TYPE: OPTIONAL (default), RECOMMENDED, REQUIRED, RUNTIME
 #
 #    ADD_FEATURE_INFO(<name> <enabled> <description>)
 # Use this macro to add information about a feature with the given <name>.
@@ -141,27 +147,123 @@ FUNCTION(SET_PACKAGE_INFO _name _desc)
 ENDFUNCTION(SET_PACKAGE_INFO)
 
 
+
+FUNCTION(SET_PACKAGE_PROPERTIES _name _props)
+  IF(NOT "${_props}" STREQUAL "PROPERTIES")
+    MESSAGE(FATAL_ERROR "PROPERTIES keyword is missing in SET_PACKAGE_PROPERTIES() call.")
+  ENDIF()
+
+  SET(options ) # none
+  SET(oneValueArgs DESCRIPTION URL TYPE PURPOSE )
+  SET(multiValueArgs ) # none
+
+  CMAKE_PARSE_ARGUMENTS(_SPP "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
+
+  IF(_SPP_UNPARSED_ARGUMENTS)
+    MESSAGE(FATAL_ERROR "Unknown keywords given to SET_PACKAGE_PROPERTIES(): \"${_SPP_UNPARSED_ARGUMENTS}\"")
+  ENDIF()
+
+  IF(_SPP_DESCRIPTION)
+    GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION)
+    IF(_info)
+      MESSAGE(STATUS "Warning: Property DESCRIPTION for package ${_name} already set to \"${_info}\", overriding it with \"${_SPP_DESCRIPTION}\"")
+    ENDIF()
+
+    SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_SPP_DESCRIPTION}" )
+  ENDIF()
+
+
+  IF(_SPP_URL)
+    GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_name}_URL)
+    IF(_info)
+      MESSAGE(STATUS "Warning: Property URL already set to \"${_info}\", overriding it with \"${_SPP_URL}\"")
+    ENDIF()
+
+    SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_URL "${_SPP_URL}" )
+  ENDIF()
+
+
+  # handle the PURPOSE: use APPEND, since there can be multiple purposes for one package inside a project
+  IF(_SPP_PURPOSE)
+    SET_PROPERTY(GLOBAL APPEND PROPERTY _CMAKE_${_name}_PURPOSE "${_SPP_PURPOSE}" )
+  ENDIF()
+
+  # handle the TYPE
+  IF(NOT _SPP_TYPE)
+    SET(_SPP_TYPE OPTIONAL)
+  ENDIF()
+
+  SET(validTypes OPTIONAL RECOMMENDED REQUIRED RUNTIME )
+  LIST(FIND validTypes ${_SPP_TYPE} _typeIndexInList)
+  IF("${_typeIndexInList}" STREQUAL "-1" )
+    MESSAGE(FATAL_ERROR "Bad package property type ${_SPP_TYPE} used in SET_PACKAGE_PROPERTIES(). "
+                        "Valid types are OPTIONAL, RECOMMENDED, REQUIRED and RUNTIME." )
+  ENDIF()
+
+  SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_TYPE "${_SPP_TYPE}" )
+
+ENDFUNCTION(SET_PACKAGE_PROPERTIES)
+
+
+
 FUNCTION(_FS_GET_FEATURE_SUMMARY _property _var)
+
+  SET(_type "ANY")
+  IF("${_property}" MATCHES "REQUIRED_")
+    SET(_type "REQUIRED")
+  ELSEIF("${_property}" MATCHES "RECOMMENDED_")
+    SET(_type "RECOMMENDED")
+  ELSEIF("${_property}" MATCHES "RUNTIME_")
+    SET(_type "RUNTIME")
+  ELSEIF("${_property}" MATCHES "OPTIONAL_")
+    SET(_type "OPTIONAL")
+  ENDIF()
+
+  IF("${_property}" MATCHES "PACKAGES_FOUND")
+    SET(_property "PACKAGES_FOUND")
+  ELSEIF("${_property}" MATCHES "PACKAGES_NOT_FOUND")
+    SET(_property "PACKAGES_NOT_FOUND")
+  ENDIF()
+
+
   SET(_currentFeatureText "")
   GET_PROPERTY(_EnabledFeatures  GLOBAL PROPERTY ${_property})
+
   FOREACH(_currentFeature ${_EnabledFeatures})
-    SET(_currentFeatureText "${_currentFeatureText}\n${_currentFeature}")
-    GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_REQUIRED_VERSION)
-    IF(_info)
-      SET(_currentFeatureText "${_currentFeatureText} (required version ${_info})")
-    ENDIF(_info)
-    GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_DESCRIPTION)
-    IF(_info)
-      SET(_currentFeatureText "${_currentFeatureText} , ${_info}")
-    ENDIF(_info)
-    GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_URL)
-    IF(_info)
-      SET(_currentFeatureText "${_currentFeatureText} , <${_info}>")
-    ENDIF(_info)
-    GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_COMMENT)
-    IF(_info)
-      SET(_currentFeatureText "${_currentFeatureText} , ${_info}")
-    ENDIF(_info)
+
+    # does this package belong to the type we currently want to list ?
+    GET_PROPERTY(_currentType  GLOBAL PROPERTY _CMAKE_${_currentFeature}_TYPE)
+    IF(NOT _currentType)
+      SET(_currentType OPTIONAL)
+    ENDIF()
+
+    IF("${_type}" STREQUAL ANY  OR  "${_type}" STREQUAL "${_currentType}")
+
+      SET(_currentFeatureText "${_currentFeatureText}\n${_currentFeature}")
+      GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_REQUIRED_VERSION)
+      IF(_info)
+        SET(_currentFeatureText "${_currentFeatureText} (required version ${_info})")
+      ENDIF(_info)
+      GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_DESCRIPTION)
+      IF(_info)
+        SET(_currentFeatureText "${_currentFeatureText} , ${_info}")
+      ENDIF(_info)
+      GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_URL)
+      IF(_info)
+        SET(_currentFeatureText "${_currentFeatureText} , <${_info}>")
+      ENDIF(_info)
+      GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_COMMENT)
+      IF(_info)
+        SET(_currentFeatureText "${_currentFeatureText} , ${_info}")
+      ENDIF(_info)
+
+      GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_PURPOSE)
+      FOREACH(_purpose ${_info})
+        SET(_currentFeatureText "${_currentFeatureText}\n   * ${_purpose}")
+      ENDFOREACH()
+
+    ENDIF("${_type}" STREQUAL ANY  OR  "${_type}" STREQUAL "${_currentType}")
+
   ENDFOREACH(_currentFeature)
   SET(${_var} "${_currentFeatureText}" PARENT_SCOPE)
 ENDFUNCTION(_FS_GET_FEATURE_SUMMARY)
@@ -194,21 +296,57 @@ FUNCTION(FEATURE_SUMMARY)
     MESSAGE(FATAL_ERROR "The call to FEATURE_SUMMAY() doesn't set the required WHAT argument.")
   ENDIF(NOT _FS_WHAT)
 
-  IF(   "${_FS_WHAT}" STREQUAL "ENABLED_FEATURES"
-     OR "${_FS_WHAT}" STREQUAL "DISABLED_FEATURES"
-     OR "${_FS_WHAT}" STREQUAL "PACKAGES_FOUND"
-     OR "${_FS_WHAT}" STREQUAL "PACKAGES_NOT_FOUND")
+  SET(validWhatParts "ENABLED_FEATURES"
+                     "DISABLED_FEATURES"
+                     "PACKAGES_FOUND"
+                     "PACKAGES_NOT_FOUND"
+                     "OPTIONAL_PACKAGES_FOUND"
+                     "OPTIONAL_PACKAGES_NOT_FOUND"
+                     "RECOMMENDED_PACKAGES_FOUND"
+                     "RECOMMENDED_PACKAGES_NOT_FOUND"
+                     "REQUIRED_PACKAGES_FOUND"
+                     "REQUIRED_PACKAGES_NOT_FOUND"
+                     "RUNTIME_PACKAGES_FOUND"
+                     "RUNTIME_PACKAGES_NOT_FOUND")
+
+  LIST(FIND validWhatParts "${_FS_WHAT}" indexInList)
+  IF(NOT "${indexInList}" STREQUAL "-1")
     _FS_GET_FEATURE_SUMMARY( ${_FS_WHAT} _featureSummary)
     SET(_fullText "${_FS_DESCRIPTION}${_featureSummary}\n")
   ELSEIF("${_FS_WHAT}" STREQUAL "ALL")
-    _FS_GET_FEATURE_SUMMARY( PACKAGES_FOUND _tmp1)
-    _FS_GET_FEATURE_SUMMARY( PACKAGES_NOT_FOUND _tmp2)
-    SET(_featureSummary "${_tmp1}${_tmp2}")
-    IF(_FS_DESCRIPTION)
-      SET(_fullText "${_FS_DESCRIPTION}${_tmp1}${_tmp2}\n")
-    ELSE(_FS_DESCRIPTION)
-      SET(_fullText "-- Found the following packages:${_tmp1}\n-- Did not find the following packages:${_tmp2}\n")
-    ENDIF(_FS_DESCRIPTION)
+
+    SET(allWhatParts "ENABLED_FEATURES"
+                     "RUNTIME_PACKAGES_FOUND"
+                     "OPTIONAL_PACKAGES_FOUND"
+                     "RECOMMENDED_PACKAGES_FOUND"
+                     "REQUIRED_PACKAGES_FOUND"
+
+                     "DISABLED_FEATURES"
+                     "RUNTIME_PACKAGES_NOT_FOUND"
+                     "OPTIONAL_PACKAGES_NOT_FOUND"
+                     "RECOMMENDED_PACKAGES_NOT_FOUND"
+                     "REQUIRED_PACKAGES_NOT_FOUND"
+       )
+
+    SET(title_ENABLED_FEATURES               "The following features have been enabled:")
+    SET(title_DISABLED_FEATURES              "The following features have been disabled:")
+    SET(title_OPTIONAL_PACKAGES_FOUND        "The following OPTIONAL packages have been found:")
+    SET(title_OPTIONAL_PACKAGES_NOT_FOUND    "The following OPTIONAL packages have not been found:")
+    SET(title_RECOMMENDED_PACKAGES_FOUND     "The following RECOMMENDED packages have been found:")
+    SET(title_RECOMMENDED_PACKAGES_NOT_FOUND "The following RECOMMENDED packages have not been found:")
+    SET(title_REQUIRED_PACKAGES_FOUND        "The following REQUIRED packages have been found:")
+    SET(title_REQUIRED_PACKAGES_NOT_FOUND    "The following REQUIRED packages have not been found:")
+    SET(title_RUNTIME_PACKAGES_FOUND         "The following RUNTIME packages have been found:")
+    SET(title_RUNTIME_PACKAGES_NOT_FOUND     "The following RUNTIME packages have not been found:")
+
+    SET(_fullText "${_FS_DESCRIPTION}\n")
+    FOREACH(part ${allWhatParts})
+      SET(_tmp)
+      _FS_GET_FEATURE_SUMMARY( ${part} _tmp)
+      IF(_tmp)
+        SET(_fullText "${_fullText}\n${title_${part}}\n${_tmp}")
+      ENDIF()
+    ENDFOREACH()
   ELSE()
     MESSAGE(FATAL_ERROR "The WHAT argument of FEATURE_SUMMARY() is set to ${_FS_WHAT}, which is not a valid value.")
   ENDIF()
