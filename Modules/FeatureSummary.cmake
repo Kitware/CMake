@@ -240,7 +240,8 @@ FUNCTION(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
 
       # check whether the current feature/package should be in the output depending on whether it was QUIET or not
       SET(includeThisOne TRUE)
-      IF(NOT _includeQuiet)
+      # skip QUIET packages, except if they are REQUIRED or INCLUDE_QUIET_PACKAGES has been set
+      IF((NOT "${_currentType}" STREQUAL "REQUIRED") AND NOT _includeQuiet)
         GET_PROPERTY(_isQuiet  GLOBAL PROPERTY _CMAKE_${_currentFeature}_QUIET)
         IF(_isQuiet)
           SET(includeThisOne FALSE)
@@ -290,7 +291,7 @@ ENDFUNCTION(PRINT_DISABLED_FEATURES)
 
 FUNCTION(FEATURE_SUMMARY)
 # CMAKE_PARSE_ARGUMENTS(<prefix> <options> <one_value_keywords> <multi_value_keywords> args...)
-  SET(options APPEND INCLUDE_QUIET_PACKAGES )
+  SET(options APPEND INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
   SET(oneValueArgs FILENAME VAR DESCRIPTION WHAT)
   SET(multiValueArgs ) # none
 
@@ -321,6 +322,10 @@ FUNCTION(FEATURE_SUMMARY)
   IF(NOT "${indexInList}" STREQUAL "-1")
     _FS_GET_FEATURE_SUMMARY( ${_FS_WHAT} _featureSummary ${_FS_INCLUDE_QUIET_PACKAGES} )
     SET(_fullText "${_FS_DESCRIPTION}${_featureSummary}\n")
+    IF (("${_FS_WHAT}" STREQUAL "REQUIRED_PACKAGES_NOT_FOUND") AND _featureSummary)
+      SET(requiredPackagesNotFound TRUE)
+    ENDIF()
+
   ELSEIF("${_FS_WHAT}" STREQUAL "ALL")
 
     SET(allWhatParts "ENABLED_FEATURES"
@@ -347,12 +352,15 @@ FUNCTION(FEATURE_SUMMARY)
     SET(title_RUNTIME_PACKAGES_FOUND         "The following RUNTIME packages have been found:")
     SET(title_RUNTIME_PACKAGES_NOT_FOUND     "The following RUNTIME packages have not been found:")
 
-    SET(_fullText "${_FS_DESCRIPTION}\n")
+    SET(_fullText "${_FS_DESCRIPTION}")
     FOREACH(part ${allWhatParts})
       SET(_tmp)
       _FS_GET_FEATURE_SUMMARY( ${part} _tmp ${_FS_INCLUDE_QUIET_PACKAGES})
       IF(_tmp)
-        SET(_fullText "${_fullText}\n${title_${part}}\n${_tmp}")
+        SET(_fullText "${_fullText}\n\n${title_${part}}\n${_tmp}")
+        IF("${part}" STREQUAL "REQUIRED_PACKAGES_NOT_FOUND")
+          SET(requiredPackagesNotFound TRUE)
+        ENDIF()
       ENDIF()
     ENDFOREACH()
   ELSE()
@@ -375,5 +383,9 @@ FUNCTION(FEATURE_SUMMARY)
   IF(_FS_VAR)
     SET(${_FS_VAR} "${_fullText}" PARENT_SCOPE)
   ENDIF(_FS_VAR)
+
+  IF(requiredPackagesNotFound  AND  _FS_FATAL_ON_MISSING_REQUIRED_PACKAGES)
+    MESSAGE(FATAL_ERROR "feature_summary() Error: REQUIRED package(s) are missing, aborting CMake run.")
+  ENDIF()
 
 ENDFUNCTION(FEATURE_SUMMARY)
