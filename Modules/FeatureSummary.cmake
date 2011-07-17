@@ -192,14 +192,21 @@ FUNCTION(SET_PACKAGE_PROPERTIES _name _props)
     SET(_SPP_TYPE OPTIONAL)
   ENDIF()
 
-  SET(validTypes OPTIONAL RECOMMENDED REQUIRED RUNTIME )
+  # List the supported types, according to their priority
+  SET(validTypes "RUNTIME" "OPTIONAL" "RECOMMENDED" "REQUIRED" )
   LIST(FIND validTypes ${_SPP_TYPE} _typeIndexInList)
   IF("${_typeIndexInList}" STREQUAL "-1" )
     MESSAGE(FATAL_ERROR "Bad package property type ${_SPP_TYPE} used in SET_PACKAGE_PROPERTIES(). "
                         "Valid types are OPTIONAL, RECOMMENDED, REQUIRED and RUNTIME." )
   ENDIF()
 
-  SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_TYPE "${_SPP_TYPE}" )
+  GET_PROPERTY(_previousType  GLOBAL PROPERTY _CMAKE_${_name}_TYPE)
+  LIST(FIND validTypes "${_previousType}" _prevTypeIndexInList)
+
+  # make sure a previously set TYPE is not overridden with a lower new TYPE:
+  IF("${_typeIndexInList}" GREATER "${_prevTypeIndexInList}")
+    SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_TYPE "${_SPP_TYPE}" )
+  ENDIF()
 
 ENDFUNCTION(SET_PACKAGE_PROPERTIES)
 
