@@ -60,7 +60,7 @@
 #   message(STATUS "${enabledFeaturesText}")
 #
 #
-#    SET_PACKAGE_INFO(<name> <description> [<url> [<comment>] ] )
+#    SET_PACKAGE_INFO(<name> <description> [<url> [<purpose>] ] )
 # Use this macro to set up information about the named package, which can
 # then be displayed via FEATURE_SUMMARY().
 # This can be done either directly in the Find-module or in the project
@@ -99,8 +99,8 @@
 #    PRINT_DISABLED_FEATURES()
 # Does the same as FEATURE_SUMMARY(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
 #
-#    SET_FEATURE_INFO(<name> <description> [<url> [<comment>] ] )
-# Does the same as SET_PACKAGE_INFO(<name> <description> <url> <comment> )
+#    SET_FEATURE_INFO(<name> <description> [<url>] )
+# Does the same as SET_PACKAGE_INFO(<name> <description> <url> )
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -136,14 +136,14 @@ ENDFUNCTION(SET_FEATURE_INFO)
 
 FUNCTION(SET_PACKAGE_INFO _name _desc)
   SET(_url "${ARGV2}")
-  SET(_comment "${ARGV3}")
+  SET(_purpose "${ARGV3}")
   SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_desc}" )
   IF(_url MATCHES ".+")
     SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_URL "${_url}" )
-  ENDIF(_url MATCHES ".+")
-  IF(_comment MATCHES ".+")
-    SET_PROPERTY(GLOBAL PROPERTY _CMAKE_${_name}_COMMENT "${_comment}" )
-  ENDIF(_comment MATCHES ".+")
+  ENDIF()
+  IF(_purpose MATCHES ".+")
+    SET_PROPERTY(GLOBAL APPEND PROPERTY _CMAKE_${_name}_PURPOSE "${_purpose}" )
+  ENDIF()
 ENDFUNCTION(SET_PACKAGE_INFO)
 
 
@@ -251,10 +251,6 @@ FUNCTION(_FS_GET_FEATURE_SUMMARY _property _var)
       GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_URL)
       IF(_info)
         SET(_currentFeatureText "${_currentFeatureText} , <${_info}>")
-      ENDIF(_info)
-      GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_COMMENT)
-      IF(_info)
-        SET(_currentFeatureText "${_currentFeatureText} , ${_info}")
       ENDIF(_info)
 
       GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_PURPOSE)
