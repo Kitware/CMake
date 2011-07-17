@@ -1174,19 +1174,19 @@ void cmFindPackageCommand::AppendSuccessInformation()
   if ((cmSystemTools::IsOn(result)) || (cmSystemTools::IsOn(upperResult)))
     {
     this->AppendToProperty("PACKAGES_FOUND");
-    if (!this->Quiet)
-      {
-      this->AppendToProperty("ENABLED_FEATURES");
-      }
     }
   else
     {
     this->AppendToProperty("PACKAGES_NOT_FOUND");
-    if (!this->Quiet)
-      {
-      this->AppendToProperty("DISABLED_FEATURES");
-      }
     }
+
+  // Record whether the find was quiet or not, so this can be used
+  // e.g. in FeatureSummary.cmake
+  std::string quietInfoPropName = "_CMAKE_";
+  quietInfoPropName += this->Name;
+  quietInfoPropName += "_QUIET";
+  this->Makefile->GetCMakeInstance()->SetProperty(quietInfoPropName.c_str(),
+                                               this->Quiet ? "TRUE" : "FALSE");
 
   // set a global property to record the required version of this package
   std::string versionInfoPropName = "_CMAKE_";

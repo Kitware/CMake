@@ -19,6 +19,7 @@
 #    FEATURE_SUMMARY( [FILENAME <file>]
 #                     [APPEND]
 #                     [VAR <variable_name>]
+#                     [INCLUDE_QUIET_PACKAGES]
 #                     [DESCRIPTION "Found packages:"]
 #                     WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND
 #                          | ENABLED_FEATURES | DISABLED_FEATURES]
@@ -32,10 +33,8 @@
 #
 # The WHAT option is the only mandatory option. Here you specify what information
 # will be printed:
-#    ENABLED_FEATURES: the list of all features and packages which are enabled,
-#                      excluding the QUIET packages
-#    DISABLED_FEATURES: the list of all features and packages which are disabled,
-#                       excluding the QUIET packages
+#    ENABLED_FEATURES: the list of all features which are enabled
+#    DISABLED_FEATURES: the list of all features which are disabled
 #    PACKAGES_FOUND: the list of all packages which have been found
 #    PACKAGES_NOT_FOUND: the list of all packages which have not been found
 #    ALL: this will give all packages which have or have not been found
@@ -206,7 +205,7 @@ ENDFUNCTION(SET_PACKAGE_PROPERTIES)
 
 
 
-FUNCTION(_FS_GET_FEATURE_SUMMARY _property _var)
+FUNCTION(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
 
   SET(_type "ANY")
   IF("${_property}" MATCHES "REQUIRED_")
@@ -239,24 +238,37 @@ FUNCTION(_FS_GET_FEATURE_SUMMARY _property _var)
 
     IF("${_type}" STREQUAL ANY  OR  "${_type}" STREQUAL "${_currentType}")
 
-      SET(_currentFeatureText "${_currentFeatureText}\n${_currentFeature}")
-      GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_REQUIRED_VERSION)
-      IF(_info)
-        SET(_currentFeatureText "${_currentFeatureText} (required version ${_info})")
-      ENDIF(_info)
-      GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_DESCRIPTION)
-      IF(_info)
-        SET(_currentFeatureText "${_currentFeatureText} , ${_info}")
-      ENDIF(_info)
-      GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_URL)
-      IF(_info)
-        SET(_currentFeatureText "${_currentFeatureText} , <${_info}>")
-      ENDIF(_info)
+      # check whether the current feature/package should be in the output depending on whether it was QUIET or not
+      SET(includeThisOne TRUE)
+      IF(NOT _includeQuiet)
+        GET_PROPERTY(_isQuiet  GLOBAL PROPERTY _CMAKE_${_currentFeature}_QUIET)
+        IF(_isQuiet)
+          SET(includeThisOne FALSE)
+        ENDIF()
+      ENDIF()
 
-      GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_PURPOSE)
-      FOREACH(_purpose ${_info})
-        SET(_currentFeatureText "${_currentFeatureText}\n   * ${_purpose}")
-      ENDFOREACH()
+      IF(includeThisOne)
+
+        SET(_currentFeatureText "${_currentFeatureText}\n${_currentFeature}")
+        GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_REQUIRED_VERSION)
+        IF(_info)
+          SET(_currentFeatureText "${_currentFeatureText} (required version ${_info})")
+        ENDIF(_info)
+        GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_DESCRIPTION)
+        IF(_info)
+          SET(_currentFeatureText "${_currentFeatureText} , ${_info}")
+        ENDIF(_info)
+        GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_URL)
+        IF(_info)
+          SET(_currentFeatureText "${_currentFeatureText} , <${_info}>")
+        ENDIF(_info)
+
+        GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_PURPOSE)
+        FOREACH(_purpose ${_info})
+          SET(_currentFeatureText "${_currentFeatureText}\n   * ${_purpose}")
+        ENDFOREACH()
+
+      ENDIF(includeThisOne)
 
     ENDIF("${_type}" STREQUAL ANY  OR  "${_type}" STREQUAL "${_currentType}")
 
@@ -278,7 +290,7 @@ ENDFUNCTION(PRINT_DISABLED_FEATURES)
 
 FUNCTION(FEATURE_SUMMARY)
 # CMAKE_PARSE_ARGUMENTS(<prefix> <options> <one_value_keywords> <multi_value_keywords> args...)
-  SET(options APPEND)
+  SET(options APPEND INCLUDE_QUIET_PACKAGES )
   SET(oneValueArgs FILENAME VAR DESCRIPTION WHAT)
   SET(multiValueArgs ) # none
 
@@ -307,7 +319,7 @@ FUNCTION(FEATURE_SUMMARY)
 
   LIST(FIND validWhatParts "${_FS_WHAT}" indexInList)
   IF(NOT "${indexInList}" STREQUAL "-1")
-    _FS_GET_FEATURE_SUMMARY( ${_FS_WHAT} _featureSummary)
+    _FS_GET_FEATURE_SUMMARY( ${_FS_WHAT} _featureSummary ${_FS_INCLUDE_QUIET_PACKAGES} )
     SET(_fullText "${_FS_DESCRIPTION}${_featureSummary}\n")
   ELSEIF("${_FS_WHAT}" STREQUAL "ALL")
 
@@ -338,7 +350,7 @@ FUNCTION(FEATURE_SUMMARY)
     SET(_fullText "${_FS_DESCRIPTION}\n")
     FOREACH(part ${allWhatParts})
       SET(_tmp)
-      _FS_GET_FEATURE_SUMMARY( ${part} _tmp)
+      _FS_GET_FEATURE_SUMMARY( ${part} _tmp ${_FS_INCLUDE_QUIET_PACKAGES})
       IF(_tmp)
         SET(_fullText "${_fullText}\n${title_${part}}\n${_tmp}")
       ENDIF()
