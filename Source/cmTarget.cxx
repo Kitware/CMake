@@ -3688,9 +3688,11 @@ const char* cmTarget::GetOutputTargetType(bool implib)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::ComputeOutputDir(const char* config,
+bool cmTarget::ComputeOutputDir(const char* config,
                                 bool implib, std::string& out)
 {
+  bool usesDefaultOutputDir = false;
+
   // Look for a target property defining the target output directory
   // based on the target type.
   std::string targetTypeName = this->GetOutputTargetType(implib);
@@ -3742,6 +3744,7 @@ void cmTarget::ComputeOutputDir(const char* config,
   if(out.empty())
     {
     // Default to the current output directory.
+    usesDefaultOutputDir = true;
     out = ".";
     }
 
@@ -3757,6 +3760,15 @@ void cmTarget::ComputeOutputDir(const char* config,
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", config, "", out);
     }
+
+  return usesDefaultOutputDir;
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::UsesDefaultOutputDir(const char* config, bool implib)
+{
+  std::string dir;
+  return this->ComputeOutputDir(config, implib, dir);
 }
 
 //----------------------------------------------------------------------------
