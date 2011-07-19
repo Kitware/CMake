@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(Architecture C)
 
-set(archs i386 ppc)
-
 function(test_for_xcode4 result_var)
   set(${result_var} 0 PARENT_SCOPE)
   if(APPLE)
@@ -19,10 +17,14 @@ endfunction()
 
 test_for_xcode4(is_xcode4)
 
+set(arch0 i386)
+set(arch1 ppc)
+
 if(is_xcode4)
   # Xcode 4, use modern architectures as defaults
   # Arch 'ppc' no longer works: tools no longer available starting with Xcode 4
-  set(archs i386 x86_64)
+  set(arch0 i386)
+  set(arch1 x86_64)
 endif()
 
 add_library(foo foo.c)
@@ -34,12 +36,11 @@ if(CMAKE_OSX_ARCHITECTURES)
       "Expected [${CMAKE_OSX_ARCHITECTURES}], got [${archs}]."
       )
   endif()
-endif()
-
-list(LENGTH archs archs_len)
-if(archs_len GREATER 1)
-  list(GET archs 0 arch0)
-  list(GET archs 1 arch1)
+  list(LENGTH archs archs_len)
+  if(archs_len GREATER 1)
+    list(GET archs 0 arch0)
+    list(GET archs 1 arch1)
+  endif()
 endif()
 
 message("is_xcode4='${is_xcode4}'")
