@@ -2403,7 +2403,8 @@ void cmGlobalXCodeGenerator
         {
         if(this->XcodeVersion > 15)
           {
-          // now add the same one but append $(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) to it:
+          // Now add the same one but append
+          // $(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) to it:
           linkDirs += " ";
           linkDirs += this->XCodeEscapePath(
             (*libDir + "/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)").c_str());
