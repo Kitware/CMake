@@ -620,7 +620,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
       SET(QT_QTCORE_INCLUDE_DIR NOTFOUND)
       FIND_PATH(QT_QTCORE_INCLUDE_DIR QtCore
                 HINTS ${qt_headers} ${QT_LIBRARY_DIR}
-                PATH_SUFFIXES QtCore
+                PATH_SUFFIXES QtCore qt4/QtCore
         )
 
       # Set QT_HEADERS_DIR based on finding QtCore header
