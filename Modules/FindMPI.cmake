@@ -184,8 +184,15 @@ endforeach()
 # (Windows implementations) do not have compiler wrappers, so this approach must be used.
 #
 function (interrogate_mpi_compiler lang try_libs)
-  # if it's already in the cache, don't bother with any of this stuff
-  if ((NOT MPI_${lang}_INCLUDE_PATH) OR (NOT MPI_${lang}_LIBRARIES))
+  # MPI_${lang}_NO_INTERROGATE will be set to a compiler name when the *regular* compiler was
+  # discovered to be the MPI compiler.  This happens on machines like the Cray XE6 that use
+  # modules to set cc, CC, and ftn to the MPI compilers.  If the user force-sets another MPI
+  # compiler, MPI_${lang}_COMPILER won't be equal to MPI_${lang}_NO_INTERROGATE, and we'll
+  # inspect that compiler anew.  This allows users to set new compilers w/o rm'ing cache.
+  string(COMPARE NOTEQUAL "${MPI_${lang}_NO_INTERROGATE}" "${MPI_${lang}_COMPILER}" interrogate)
+
+  # If MPI is set already in the cache, don't bother with interrogating the compiler.
+  if (interrogate AND ((NOT MPI_${lang}_INCLUDE_PATH) OR (NOT MPI_${lang}_LIBRARIES)))
     if (MPI_${lang}_COMPILER)
       # Check whether the -showme:compile option works. This indicates that we have either OpenMPI
       # or a newer version of LAM-MPI, and implies that -showme:link will also work.
@@ -436,6 +443,47 @@ function (interrogate_mpi_compiler lang try_libs)
 endfunction()
 
 
+# This function attempts to compile with the regular compiler, to see if MPI programs
+# work with it.  This is a last ditch attempt after we've tried interrogating mpicc and
+# friends, and after we've tried to find generic libraries.  Works on machines like
+# Cray XE6, where the modules environment changes what MPI version cc, CC, and ftn use.
+function(try_regular_compiler lang success)
+  set(scratch_directory ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY})
+  if (${lang} STREQUAL Fortran)
+    set(test_file ${scratch_directory}/cmake_mpi_test.f90)
+    file(WRITE ${test_file}
+      "program hello\n"
+      "include 'mpif.h'\n"
+      "integer ierror\n"
+      "call MPI_INIT(ierror)\n"
+      "call MPI_FINALIZE(ierror)\n"
+      "end\n")
+  else()
+    if (${lang} STREQUAL CXX)
+      set(test_file ${scratch_directory}/cmake_mpi_test.cpp)
+    else()
+      set(test_file ${scratch_directory}/cmake_mpi_test.c)
+    endif()
+    file(WRITE ${test_file}
+      "#include <mpi.h>\n"
+      "int main(int argc, char **argv) {\n"
+      "  MPI_Init(&argc, &argv);\n"
+      "  MPI_Finalize();\n"
+      "}\n")
+  endif()
+  try_compile(compiler_has_mpi ${scratch_directory} ${test_file})
+  if (compiler_has_mpi)
+    set(MPI_${lang}_NO_INTERROGATE ${CMAKE_${lang}_COMPILER} CACHE STRING "Whether to interrogate MPI ${lang} compiler" FORCE)
+    set(MPI_${lang}_COMPILER       ${CMAKE_${lang}_COMPILER} CACHE STRING "MPI ${lang} compiler"                        FORCE)
+    set(MPI_${lang}_COMPILE_FLAGS  ""                        CACHE STRING "MPI ${lang} compilation flags"               FORCE)
+    set(MPI_${lang}_INCLUDE_PATH   ""                        CACHE STRING "MPI ${lang} include path"                    FORCE)
+    set(MPI_${lang}_LINK_FLAGS     ""                        CACHE STRING "MPI ${lang} linking flags"                   FORCE)
+    set(MPI_${lang}_LIBRARIES      ""                        CACHE STRING "MPI ${lang} libraries to link against"       FORCE)
+  endif()
+  set(${success} ${compiler_has_mpi} PARENT_SCOPE)
+  unset(compiler_has_mpi CACHE)
+endfunction()
+
 # End definitions, commence real work here.
 
 # Most mpi distros have some form of mpiexec which gives us something we can reliably look for.
@@ -507,8 +555,18 @@ foreach (lang C CXX Fortran)
     interrogate_mpi_compiler(${lang} ${try_libs})
     mark_as_advanced(MPI_${lang}_COMPILER)
 
-    # Treat each language separately as far as outputting whether we found support for it and setting MPI_<lang>_FOUND.
-    find_package_handle_standard_args(MPI_${lang} DEFAULT_MSG MPI_${lang}_LIBRARIES MPI_${lang}_INCLUDE_PATH)
+    # last ditch try -- if nothing works so far, just try running the regular compiler and
+    # see if we can create an MPI executable.
+    set(regular_compiler_worked 0)
+    if (NOT MPI_${lang}_LIBRARIES OR NOT MPI_${lang}_INCLUDE_PATH)
+      try_regular_compiler(${lang} regular_compiler_worked)
+    endif()
+
+    if (regular_compiler_worked)
+      find_package_handle_standard_args(MPI_${lang} DEFAULT_MSG MPI_${lang}_COMPILER)
+    else()
+      find_package_handle_standard_args(MPI_${lang} DEFAULT_MSG MPI_${lang}_LIBRARIES MPI_${lang}_INCLUDE_PATH)
+    endif()
   endif()
 endforeach()
 
