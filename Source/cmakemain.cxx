@@ -62,6 +62,7 @@ static const char * cmDocumentationDescription[][3] =
   "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"   \
   "  --clean-first  = Build target 'clean' first, then build.\n"        \
   "                   (To clean only, use --target 'clean'.)\n"         \
+  "  --use-stderr  =  Don't merge stdout/stderr.\n"                     \
   "  --             = Pass remaining options to the native tool.\n"
 
 //----------------------------------------------------------------------------
@@ -568,6 +569,7 @@ static int do_build(int ac, char** av)
   std::string dir;
   std::vector<std::string> nativeOptions;
   bool clean = false;
+  cmSystemTools::OutputOption outputflag = cmSystemTools::OUTPUT_MERGE;
 
   enum Doing { DoingNone, DoingDir, DoingTarget, DoingConfig, DoingNative};
   Doing doing = DoingDir;
@@ -589,6 +591,10 @@ static int do_build(int ac, char** av)
       {
       clean = true;
       doing = DoingNone;
+      }
+    else if(strcmp(av[i], "--use-stderr") == 0)
+      {
+        outputflag = cmSystemTools::OUTPUT_NORMAL;
       }
     else if(strcmp(av[i], "--") == 0)
       {
@@ -635,6 +641,6 @@ static int do_build(int ac, char** av)
     }
 
   cmake cm;
-  return cm.Build(dir, target, config, nativeOptions, clean);
+  return cm.Build(dir, target, config, nativeOptions, clean, outputflag);
 #endif
 }

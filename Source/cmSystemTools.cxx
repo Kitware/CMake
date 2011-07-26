@@ -247,6 +247,12 @@ void cmSystemTools::Stdout(const char* s)
     }
 }
 
+void cmSystemTools::Stderr(const char* s, int length)
+{
+    std::cerr.write(s, length);
+    std::cerr.flush();
+}
+
 void cmSystemTools::Stdout(const char* s, int length)
 {
   if(s_StdoutCallback)
@@ -630,7 +636,21 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
         }
       if(outputflag != OUTPUT_NONE)
         {
-        cmSystemTools::Stdout(data, length);
+        if(outputflag == OUTPUT_MERGE)
+          {
+          cmSystemTools::Stdout(data, length);
+          }
+        else
+          {
+          if(pipe == cmsysProcess_Pipe_STDERR)
+            {
+            cmSystemTools::Stderr(data, length);
+            }
+          else if(pipe == cmsysProcess_Pipe_STDOUT)
+            {
+            cmSystemTools::Stdout(data, length);
+            }
+          }
         }
       }
     }
