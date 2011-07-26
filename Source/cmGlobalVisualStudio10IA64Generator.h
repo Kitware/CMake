@@ -9,25 +9,25 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef cmGlobalVisualStudio10Win64Generator_h
-#define cmGlobalVisualStudio10Win64Generator_h
+#ifndef cmGlobalVisualStudio10IA64Generator_h
+#define cmGlobalVisualStudio10IA64Generator_h
 
 #include "cmGlobalVisualStudio10Generator.h"
 
-class cmGlobalVisualStudio10Win64Generator :
+class cmGlobalVisualStudio10IA64Generator :
   public cmGlobalVisualStudio10Generator
 {
 public:
-  cmGlobalVisualStudio10Win64Generator();
+  cmGlobalVisualStudio10IA64Generator();
   static cmGlobalGenerator* New() {
-    return new cmGlobalVisualStudio10Win64Generator; }
+    return new cmGlobalVisualStudio10IA64Generator; }
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {
-    return cmGlobalVisualStudio10Win64Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 10 Win64";}
+    return cmGlobalVisualStudio10IA64Generator::GetActualName();}
+  static const char* GetActualName() {return "Visual Studio 10 IA64";}
 
-  virtual const char* GetPlatformName() const {return "x64";}
+  virtual const char* GetPlatformName() const {return "Itanium";}
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;

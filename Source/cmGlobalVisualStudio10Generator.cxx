@@ -175,3 +175,39 @@ std::string cmGlobalVisualStudio10Generator
     }
   return makeCommand;
 }
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
+{
+  if(!this->PlatformToolset.empty())
+    {
+    return true;
+    }
+  // This edition does not come with 64-bit tools.  Look for them.
+  //
+  // TODO: Detect available tools?  x64\v100 exists but does not work?
+  // KHLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\4.0;VCTargetsPath
+  // c:/Program Files (x86)/MSBuild/Microsoft.Cpp/v4.0/Platforms/
+  //   {Itanium,Win32,x64}/PlatformToolsets/{v100,v90,Windows7.1SDK}
+  std::string winSDK_7_1;
+  if(cmSystemTools::ReadRegistryValue(
+       "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\"
+       "Windows\\v7.1;InstallationFolder", winSDK_7_1))
+    {
+    cmOStringStream m;
+    m << "Found Windows SDK v7.1: " << winSDK_7_1;
+    mf->DisplayStatus(m.str().c_str(), -1);
+    this->PlatformToolset = "Windows7.1SDK";
+    return true;
+    }
+  else
+    {
+    cmOStringStream e;
+    e << "Cannot enable 64-bit tools with Visual Studio 2010 Express.\n"
+      << "Install the Microsoft Windows SDK v7.1 to get 64-bit tools:\n"
+      << "  http://msdn.microsoft.com/en-us/windows/bb980924.aspx";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+}
