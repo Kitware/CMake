@@ -335,6 +335,10 @@ void cmFindPackageCommand::GenerateDocumentation()
   this->CommandDocumentation += this->GenericDocumentationPathsOrder;
   this->CommandDocumentation +=
     "\n"
+    "Every non-REQUIRED find_package() call can be disabled by setting the "
+    "variable CMAKE_DISABLE_FIND_PACKAGE_<package> to TRUE. See the "
+    "documentation for the CMAKE_DISABLE_FIND_PACKAGE_<package> variable for "
+    "more information.\n"
     "See the cmake_policy() command documentation for discussion of the "
     "NO_POLICY_SCOPE option."
     ;
@@ -606,6 +610,24 @@ bool cmFindPackageCommand
       default: break;
       }
     }
+
+  std::string disableFindPackageVar = "CMAKE_DISABLE_FIND_PACKAGE_";
+  disableFindPackageVar += this->Name;
+  if(this->Makefile->IsOn(disableFindPackageVar.c_str()))
+    {
+    if (this->Required)
+      {
+      cmOStringStream e;
+      e << "for module " << this->Name << " called with REQUIRED, but "
+        << disableFindPackageVar
+        << " is enabled. A REQUIRED package cannot be disabled.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
+    return true;
+    }
+
 
   this->SetModuleVariables(components);
 
