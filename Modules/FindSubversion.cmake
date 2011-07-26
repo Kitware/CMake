@@ -109,7 +109,7 @@ IF(Subversion_SVN_EXECUTABLE)
     # This macro requires a svn server network access (Internet most of the time)
     # and can also be slow since it access the svn server
     EXECUTE_PROCESS(COMMAND
-      ${Subversion_SVN_EXECUTABLE} log -r BASE ${dir}
+      ${Subversion_SVN_EXECUTABLE} --non-interactive log -r BASE ${dir}
       OUTPUT_VARIABLE ${prefix}_LAST_CHANGED_LOG
       ERROR_VARIABLE Subversion_svn_log_error
       RESULT_VARIABLE Subversion_svn_log_result
