@@ -4296,7 +4296,8 @@ int cmake::Build(const std::string& dir,
                  const std::string& target,
                  const std::string& config,
                  const std::vector<std::string>& nativeOptions,
-                 bool clean)
+                 bool clean,
+                 cmSystemTools::OutputOption outputflag)
 {
   if(!cmSystemTools::FileIsDirectory(dir.c_str()))
     {
@@ -4338,8 +4339,7 @@ int cmake::Build(const std::string& dir,
                     projName.c_str(), target.c_str(),
                     &output,
                     makeProgram.c_str(),
-                    config.c_str(), clean, false, 0,
-                    cmSystemTools::OUTPUT_MERGE,
+                    config.c_str(), clean, false, 0, outputflag,
                     0, nativeOptions);
 }
 
