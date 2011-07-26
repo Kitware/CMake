@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------
 cmCTestGenericHandler::cmCTestGenericHandler()
 {
-  this->HandlerVerbose = false;
+  this->HandlerVerbose = cmSystemTools::OUTPUT_NONE;
   this->CTest = 0;
   this->SubmitIndex = 0;
   this->AppendXML = false;
