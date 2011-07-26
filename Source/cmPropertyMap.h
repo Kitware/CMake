@@ -25,7 +25,7 @@ public:
                    cmProperty::ScopeType scope);
 
   void AppendProperty(const char* name, const char* value,
-                      cmProperty::ScopeType scope);
+                      cmProperty::ScopeType scope, bool asString=false);
 
   const char *GetPropertyValue(const char *name, 
                                cmProperty::ScopeType scope,

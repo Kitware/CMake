@@ -19,10 +19,10 @@ void cmProperty::Set(const char *name, const char *value)
   this->ValueHasBeenSet = true;
 }
 
-void cmProperty::Append(const char *name, const char *value)
+void cmProperty::Append(const char *name, const char *value, bool asString)
 {
   this->Name = name;
-  if(!this->Value.empty() && *value)
+  if(!this->Value.empty() && *value && !asString)
     {
     this->Value += ";";
     }
