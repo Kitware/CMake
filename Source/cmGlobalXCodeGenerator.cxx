@@ -1480,7 +1480,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   BuildObjectListOrString ppDefs(this, this->XcodeVersion >= 30);
   if(this->XcodeVersion > 15)
     {
-    this->AppendDefines(ppDefs, "CMAKE_INTDIR=\"$(CONFIGURATION)\"");
+    this->AppendDefines(ppDefs,
+      "CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"");
     }
   if(const char* exportMacro = target.GetExportMacro())
     {
@@ -1597,9 +1598,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     if(this->XcodeVersion >= 21)
       {
-      std::string pncdir = target.GetDirectory(configName);
-      buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
-                                  this->CreateString(pncdir.c_str()));
+      if(!target.UsesDefaultOutputDir(configName, false))
+        {
+        std::string pncdir = target.GetDirectory(configName);
+        buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
+                                    this->CreateString(pncdir.c_str()));
+        }
       }
     else
       {
@@ -2399,10 +2403,11 @@ void cmGlobalXCodeGenerator
         {
         if(this->XcodeVersion > 15)
           {
-          // now add the same one but append $(CONFIGURATION) to it:
+          // Now add the same one but append
+          // $(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) to it:
           linkDirs += " ";
           linkDirs += this->XCodeEscapePath(
-            (*libDir + "/$(CONFIGURATION)").c_str());
+            (*libDir + "/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)").c_str());
           }
         linkDirs += " ";
         linkDirs += this->XCodeEscapePath(libDir->c_str());
@@ -3173,7 +3178,8 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
 //----------------------------------------------------------------------------
 const char* cmGlobalXCodeGenerator::GetCMakeCFGInitDirectory()
 {
-  return this->XcodeVersion >= 21? "$(CONFIGURATION)" : ".";
+  return this->XcodeVersion >= 21 ?
+    "$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" : ".";
 }
 
 //----------------------------------------------------------------------------
