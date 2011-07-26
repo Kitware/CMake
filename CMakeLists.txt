@@ -33,22 +33,6 @@ IF("${CMake_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
 ENDIF()
 
 #-----------------------------------------------------------------------
-# For dashboard runs, emit a warning if the source tree is NOT a git
-# repository checkout
-#-----------------------------------------------------------------------
-if(NOT "$ENV{DASHBOARD_TEST_FROM_CTEST}" STREQUAL "")
-if(NOT EXISTS "${CMake_SOURCE_DIR}/.git")
-  message(AUTHOR_WARNING "CMake_SOURCE_DIR is NOT a git checkout
-
-Please update this dashboard to use git, cvs support will
-soon be removed...
-
-CMake_SOURCE_DIR='${CMake_SOURCE_DIR}'
-")
-endif()
-endif()
-
-#-----------------------------------------------------------------------
 # a macro to deal with system libraries, implemented as a macro
 # simply to improve readability of the main script
 #-----------------------------------------------------------------------
