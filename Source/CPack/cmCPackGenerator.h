@@ -14,6 +14,7 @@
 #define cmCPackGenerator_h
 
 #include "cmObject.h"
+#include "cmSystemTools.h"
 #include <map>
 #include <vector>
 
@@ -57,7 +58,9 @@ public:
   /**
    * If verbose then more information is printed out
    */
-  void SetVerbose(bool val) { this->GeneratorVerbose = val; }
+  void SetVerbose(bool val)
+    { this->GeneratorVerbose = val ?
+      cmSystemTools::OUTPUT_MERGE : cmSystemTools::OUTPUT_NONE; }
 
   /**
    * Do the actual whole package processing.
@@ -194,7 +197,7 @@ protected:
   virtual cmCPackComponentGroup* GetComponentGroup(const char *projectName,
                                                    const char* name);
 
-  bool GeneratorVerbose;
+  cmSystemTools::OutputOption GeneratorVerbose;
   std::string Name;
 
   std::string InstallPath;

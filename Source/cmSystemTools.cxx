@@ -577,7 +577,7 @@ std::vector<cmStdString> cmSystemTools::ParseArguments(const char* command)
 bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
                                      std::string* output ,
                                      int* retVal , const char* dir ,
-                                     bool verbose ,
+                                     OutputOption outputflag ,
                                      double timeout )
 {
   std::vector<const char*> argv;
@@ -599,17 +599,19 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
     {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
     }
+
   cmsysProcess_SetTimeout(cp, timeout);
   cmsysProcess_Execute(cp);
 
   std::vector<char> tempOutput;
   char* data;
   int length;
-  if ( output || verbose )
+  int pipe;
+  if ( output || outputflag != OUTPUT_NONE )
     {
-    while(cmsysProcess_WaitForData(cp, &data, &length, 0))
+    while((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)))
       {
-      if(output || verbose)
+      if(output || outputflag != OUTPUT_NONE)
         {
         // Translate NULL characters in the output into valid text.
         // Visual Studio 7 puts these characters in the output of its
@@ -626,7 +628,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
         {
         tempOutput.insert(tempOutput.end(), data, data+length);
         }
-      if(verbose)
+      if(outputflag != OUTPUT_NONE)
         {
         cmSystemTools::Stdout(data, length);
         }
@@ -657,7 +659,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exception)
     {
     const char* exception_str = cmsysProcess_GetExceptionString(cp);
-    if ( verbose )
+    if ( outputflag != OUTPUT_NONE )
       {
       std::cerr << exception_str << std::endl;
       }
@@ -670,7 +672,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Error)
     {
     const char* error_str = cmsysProcess_GetErrorString(cp);
-    if ( verbose )
+    if ( outputflag != OUTPUT_NONE )
       {
       std::cerr << error_str << std::endl;
       }
@@ -683,7 +685,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Expired)
     {
     const char* error_str = "Process terminated due to timeout\n";
-    if ( verbose )
+    if ( outputflag != OUTPUT_NONE )
       {
       std::cerr << error_str << std::endl;
       }
@@ -703,12 +705,12 @@ bool cmSystemTools::RunSingleCommand(
   std::string* output,
   int *retVal,
   const char* dir,
-  bool verbose,
+  OutputOption outputflag,
   double timeout)
 {
   if(s_DisableRunCommandOutput)
     {
-    verbose = false;
+    outputflag = OUTPUT_NONE;
     }
 
   std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
@@ -718,7 +720,7 @@ bool cmSystemTools::RunSingleCommand(
     return false;
     }
   return cmSystemTools::RunSingleCommand(args, output,retVal,
-                                         dir, verbose, timeout);
+                                         dir, outputflag, timeout);
 }
 bool cmSystemTools::RunCommand(const char* command,
                                std::string& output,
