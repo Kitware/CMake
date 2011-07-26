@@ -1,9 +1,30 @@
 cmake_minimum_required(VERSION 2.6)
 project(testRebuild)
+
+function(test_for_xcode4 result_var)
+  set(${result_var} 0 PARENT_SCOPE)
+  if(APPLE)
+    execute_process(COMMAND xcodebuild -version
+      OUTPUT_VARIABLE ov RESULT_VARIABLE rv
+      )
+    if("${rv}" STREQUAL "0")
+      if(ov MATCHES "^Xcode 4.[0-9].*$")
+        set(${result_var} 1 PARENT_SCOPE)
+      endif()
+    endif()
+  endif()
+endfunction()
+
 if(APPLE)
   # only use multi-arch if the sysroot exists on this machine
   if(EXISTS "${CMAKE_OSX_SYSROOT}")
     set(CMAKE_OSX_ARCHITECTURES "ppc;i386")
+    test_for_xcode4(is_xcode4)
+    if(is_xcode4)
+      # Xcode 4, use modern architectures as defaults
+      # Arch 'ppc' no longer works: tools no longer available starting with Xcode 4
+      set(CMAKE_OSX_ARCHITECTURES i386 x86_64)
+    endif()
   endif(EXISTS "${CMAKE_OSX_SYSROOT}")
 endif(APPLE)
 
