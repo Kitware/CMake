@@ -32,7 +32,7 @@ FIND_PATH(GIF_INCLUDE_DIR gif_lib.h
 )
 
 # the gif library can have many names :-/
-SET(POTENTIAL_GIF_LIBS gif libgif ungif libungif giflib)
+SET(POTENTIAL_GIF_LIBS gif libgif ungif libungif giflib giflib4)
 
 FIND_LIBRARY(GIF_LIBRARY
   NAMES ${POTENTIAL_GIF_LIBS}
