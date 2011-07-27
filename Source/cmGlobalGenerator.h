@@ -17,7 +17,7 @@
 
 #include "cmTarget.h" // For cmTargets
 #include "cmTargetDepend.h" // For cmTargetDependSet
-
+#include "cmSystemTools.h" // for cmSystemTools::OutputOption
 class cmake;
 class cmMakefile;
 class cmLocalGenerator;
@@ -102,7 +102,8 @@ public:
             std::string *output,
             const char *makeProgram, const char *config,
             bool clean, bool fast,
-            double timeout, bool verbose=false,
+            double timeout,
+            cmSystemTools::OutputOption outputflag=cmSystemTools::OUTPUT_NONE,
             const char* extraOptions = 0,
             std::vector<std::string> const& nativeOptions =
             std::vector<std::string>());

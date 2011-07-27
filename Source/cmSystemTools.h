@@ -75,6 +75,9 @@ public:
   typedef  void (*StdoutCallback)(const char*, int length, void*);
   static void SetStdoutCallback(StdoutCallback, void* clientData=0);
 
+  ///! Send a string to stderr. Stdout callbacks will not be invoced.
+  static void Stderr(const char* s, int length);
+
   ///! Return true if there was an error at any point.
   static bool GetErrorOccuredFlag() 
     {
@@ -191,11 +194,13 @@ public:
                          int &retVal, const char* directory = 0, 
                          bool verbose = true, int timeout = 0);  
   /**
-   * Run a single executable command and put the stdout and stderr 
-   * in output.
+   * Run a single executable command
    *
-   * If verbose is false, no user-viewable output from the program
-   * being run will be generated.
+   * Output is controlled with outputflag. If outputflag is OUTPUT_NONE, no
+   * user-viewable output from the program being run will be generated.
+   * OUTPUT_MERGE is the legacy behaviour where stdout and stderr are merged
+   * into stdout.  OUTPUT_NORMAL passes through the output to stdout/stderr as
+   * it was received.
    *
    * If timeout is specified, the command will be terminated after
    * timeout expires. Timeout is specified in seconds.
@@ -210,9 +215,15 @@ public:
    * it into this function or it will not work.  The command must be correctly
    * escaped for this to with spaces.  
    */
+   enum OutputOption
+   {
+     OUTPUT_NONE = 0,
+     OUTPUT_MERGE,
+     OUTPUT_NORMAL
+   };
   static bool RunSingleCommand(const char* command, std::string* output = 0,
                                int* retVal = 0, const char* dir = 0, 
-                               bool verbose = true,
+                               OutputOption outputflag = OUTPUT_MERGE,
                                double timeout = 0.0);
   /** 
    * In this version of RunSingleCommand, command[0] should be
@@ -222,7 +233,7 @@ public:
   static bool RunSingleCommand(std::vector<cmStdString> const& command,
                                std::string* output = 0,
                                int* retVal = 0, const char* dir = 0, 
-                               bool verbose = true,
+                               OutputOption outputflag = OUTPUT_MERGE,
                                double timeout = 0.0);
 
   /**

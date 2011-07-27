@@ -16,6 +16,7 @@
 
 #include "cmObject.h"
 #include "cmCTest.h"
+#include "cmSystemTools.h" //OutputOption
 
 class cmMakefile;
 class cmCTestCommand;
@@ -31,7 +32,9 @@ public:
   /**
    * If verbose then more informaiton is printed out
    */
-  void SetVerbose(bool val) { this->HandlerVerbose = val; }
+  void SetVerbose(bool val)
+    { this->HandlerVerbose = val ?
+      cmSystemTools::OUTPUT_MERGE : cmSystemTools::OUTPUT_NONE; }
 
   /**
    * Populate internals from CTest custom scripts
@@ -91,7 +94,7 @@ protected:
   bool StartLogFile(const char* name, cmGeneratedFileStream& xofs);
 
   bool AppendXML;
-  bool HandlerVerbose;
+  cmSystemTools::OutputOption HandlerVerbose;
   cmCTest *CTest;
   t_StringToString Options;
   t_StringToString PersistentOptions;
