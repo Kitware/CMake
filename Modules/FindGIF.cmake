@@ -1,6 +1,6 @@
 # This module defines
 # GIF_LIBRARIES - libraries to link to in order to use GIF
-# GIF_FOUND, if false, do not try to link 
+# GIF_FOUND, if false, do not try to link
 # GIF_INCLUDE_DIR, where to find the headers
 #
 # $GIF_DIR is an environment variable that would
@@ -19,7 +19,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-# Created by Eric Wing. 
+# Created by Eric Wing.
 # Modifications by Alexander Neundorf
 
 FIND_PATH(GIF_INCLUDE_DIR gif_lib.h
@@ -37,7 +37,7 @@ FIND_PATH(GIF_INCLUDE_DIR gif_lib.h
 # the gif library can have many names :-/
 SET(POTENTIAL_GIF_LIBS gif libgif ungif libungif giflib)
 
-FIND_LIBRARY(GIF_LIBRARY 
+FIND_LIBRARY(GIF_LIBRARY
   NAMES ${POTENTIAL_GIF_LIBS}
   HINTS
   $ENV{GIF_DIR}
@@ -58,7 +58,7 @@ FIND_LIBRARY(GIF_LIBRARY
 # see readme.txt
 SET(GIF_LIBRARIES ${GIF_LIBRARY})
 
-# handle the QUIETLY and REQUIRED arguments and set GIF_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set GIF_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GIF  DEFAULT_MSG  GIF_LIBRARY  GIF_INCLUDE_DIR)
