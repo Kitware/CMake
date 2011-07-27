@@ -28,10 +28,7 @@ FIND_PATH(GIF_INCLUDE_DIR gif_lib.h
   PATH_SUFFIXES include
   PATHS
   ~/Library/Frameworks
-  /Library/Frameworks
-  /sw/include # Fink
-  [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]/include
-  /usr/freeware/include
+  /usr/freeware
 )
 
 # the gif library can have many names :-/
@@ -44,14 +41,6 @@ FIND_LIBRARY(GIF_LIBRARY
   PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-  [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]
   /usr/freeware
 )
 
