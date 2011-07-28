@@ -615,7 +615,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
   int pipe;
   if ( output || outputflag != OUTPUT_NONE )
     {
-    while((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)))
+    while((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)) > 0)
       {
       if(output || outputflag != OUTPUT_NONE)
         {
