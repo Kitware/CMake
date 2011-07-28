@@ -75,9 +75,6 @@ public:
   typedef  void (*StdoutCallback)(const char*, int length, void*);
   static void SetStdoutCallback(StdoutCallback, void* clientData=0);
 
-  ///! Send a string to stderr. Stdout callbacks will not be invoced.
-  static void Stderr(const char* s, int length);
-
   ///! Return true if there was an error at any point.
   static bool GetErrorOccuredFlag() 
     {
@@ -199,8 +196,7 @@ public:
    * Output is controlled with outputflag. If outputflag is OUTPUT_NONE, no
    * user-viewable output from the program being run will be generated.
    * OUTPUT_MERGE is the legacy behaviour where stdout and stderr are merged
-   * into stdout.  OUTPUT_NORMAL passes through the output to stdout/stderr as
-   * it was received.
+   * into stdout.
    *
    * If timeout is specified, the command will be terminated after
    * timeout expires. Timeout is specified in seconds.
