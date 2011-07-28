@@ -1297,7 +1297,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       int retval = 0;
       int timeout = 0;
       if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, &retval,
-             directory.c_str(), cmSystemTools::OUTPUT_MERGE, timeout) )
+                                           directory.c_str(), true, timeout) )
         {
         return retval;
         }
@@ -3978,7 +3978,7 @@ bool cmake::RunCommand(const char* comment,
   // use rc command to create .res file
   cmSystemTools::RunSingleCommand(command,
                                   &output,
-                                  &retCode, 0, cmSystemTools::OUTPUT_NONE);
+                                  &retCode, 0, false);
   // always print the output of the command, unless
   // it is the dumb rc command banner, but if the command
   // returned an error code then print the output anyway as
@@ -4338,8 +4338,7 @@ int cmake::Build(const std::string& dir,
                     projName.c_str(), target.c_str(),
                     &output,
                     makeProgram.c_str(),
-                    config.c_str(), clean, false, 0,
-                    cmSystemTools::OUTPUT_MERGE,
+                    config.c_str(), clean, false, 0, true,
                     0, nativeOptions);
 }
 

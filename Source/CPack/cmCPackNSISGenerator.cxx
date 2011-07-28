@@ -786,8 +786,7 @@ CreateComponentDescription(cmCPackComponent *component,
     std::string output;
     int retVal = -1;
     int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &retVal, 
-                                              dirName.c_str(),
-                                              cmSystemTools::OUTPUT_NONE, 0);
+                                              dirName.c_str(), false, 0);
     if ( !res || retVal )
     {
       std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");

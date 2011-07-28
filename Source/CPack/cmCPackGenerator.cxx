@@ -33,7 +33,7 @@
 //----------------------------------------------------------------------
 cmCPackGenerator::cmCPackGenerator()
 {
-  this->GeneratorVerbose = cmSystemTools::OUTPUT_NONE;
+  this->GeneratorVerbose = false;
   this->MakefileMap = 0;
   this->Logger = 0;
   this->componentPackageMethod = ONE_PACKAGE_PER_GROUP;
