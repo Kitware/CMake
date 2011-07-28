@@ -29,9 +29,9 @@ class cmSystemTools: public cmsys::SystemTools
 {
 public:
   typedef cmsys::SystemTools Superclass;
-  
+
   /** Expand out any arguements in the vector that have ; separated
-   *  strings into multiple arguements.  A new vector is created 
+   *  strings into multiple arguements.  A new vector is created
    *  containing the expanded versions of all arguments in argsIn.
    */
   static void ExpandList(std::vector<std::string> const& argsIn,
@@ -52,7 +52,7 @@ public:
   typedef  void (*ErrorCallback)(const char*, const char*, bool&, void*);
   /**
    *  Set the function used by GUI's to display error messages
-   *  Function gets passed: message as a const char*, 
+   *  Function gets passed: message as a const char*,
    *  title as a const char*, and a reference to bool that when
    *  set to false, will disable furthur messages (cancel).
    */
@@ -76,9 +76,9 @@ public:
   static void SetStdoutCallback(StdoutCallback, void* clientData=0);
 
   ///! Return true if there was an error at any point.
-  static bool GetErrorOccuredFlag() 
+  static bool GetErrorOccuredFlag()
     {
-      return cmSystemTools::s_ErrorOccured || 
+      return cmSystemTools::s_ErrorOccured ||
         cmSystemTools::s_FatalErrorOccured;
     }
   ///! If this is set to true, cmake stops processing commands.
@@ -91,7 +91,7 @@ public:
       cmSystemTools::s_ErrorOccured = true;
     }
  ///! Return true if there was an error at any point.
-  static bool GetFatalErrorOccured() 
+  static bool GetFatalErrorOccured()
     {
       return cmSystemTools::s_FatalErrorOccured;
     }
@@ -102,25 +102,25 @@ public:
       cmSystemTools::s_FatalErrorOccured = false;
       cmSystemTools::s_ErrorOccured = false;
     }
-  
+
   /**
    * Does a string indicates that CMake/CPack/CTest internally
    * forced this value. This is not the same as On, but this
    * may be considered as "internally switched on".
    */
   static bool IsInternallyOn(const char* val);
-  /** 
+  /**
    * does a string indicate a true or on value ? This is not the same
-   * as ifdef. 
-   */ 
+   * as ifdef.
+   */
   static bool IsOn(const char* val);
-  
-  /** 
+
+  /**
    * does a string indicate a false or off value ? Note that this is
    * not the same as !IsOn(...) because there are a number of
    * ambiguous values such as "/usr/local/bin" a path will result in
    * IsON and IsOff both returning false. Note that the special path
-   * NOTFOUND, *-NOTFOUND or IGNORE will cause IsOff to return true. 
+   * NOTFOUND, *-NOTFOUND or IGNORE will cause IsOff to return true.
    */
   static bool IsOff(const char* val);
 
@@ -128,7 +128,7 @@ public:
   static bool IsNOTFOUND(const char* value);
   ///! Return true if the path is a framework
   static bool IsPathToFramework(const char* value);
-  
+
   static bool DoesFileExistWithExtensions(
     const char *name,
     const std::vector<std::string>& sourceExts);
@@ -154,13 +154,13 @@ public:
    * want to find. 0 means all files, -1 means directories, 1 means
    * files only. This method returns true if search was succesfull.
    */
-  static bool SimpleGlob(const cmStdString& glob, 
-                         std::vector<cmStdString>& files, 
+  static bool SimpleGlob(const cmStdString& glob,
+                         std::vector<cmStdString>& files,
                          int type = 0);
-  
+
   ///! Copy a file.
   static bool cmCopyFile(const char* source, const char* destination);
-  static bool CopyFileIfDifferent(const char* source, 
+  static bool CopyFileIfDifferent(const char* source,
     const char* destination);
 
   /** Rename a file or directory within a single disk volume (atomic
@@ -184,12 +184,12 @@ public:
    * If timeout is specified, the command will be terminated after
    * timeout expires.
    */
-  static bool RunCommand(const char* command, std::string& output, 
+  static bool RunCommand(const char* command, std::string& output,
                          const char* directory = 0,
                          bool verbose = true, int timeout = 0);
   static bool RunCommand(const char* command, std::string& output,
-                         int &retVal, const char* directory = 0, 
-                         bool verbose = true, int timeout = 0);  
+                         int &retVal, const char* directory = 0,
+                         bool verbose = true, int timeout = 0);
   /**
    * Run a single executable command and put the stdout and stderr
    * in output.
@@ -201,27 +201,27 @@ public:
    * timeout expires. Timeout is specified in seconds.
    *
    * Argument retVal should be a pointer to the location where the
-   * exit code will be stored. If the retVal is not specified and 
-   * the program exits with a code other than 0, then the this 
+   * exit code will be stored. If the retVal is not specified and
+   * the program exits with a code other than 0, then the this
    * function will return false.
    *
    * If the command has spaces in the path the caller MUST call
    * cmSystemTools::ConvertToRunCommandPath on the command before passing
    * it into this function or it will not work.  The command must be correctly
-   * escaped for this to with spaces.  
+   * escaped for this to with spaces.
    */
   static bool RunSingleCommand(const char* command, std::string* output = 0,
-                               int* retVal = 0, const char* dir = 0, 
+                               int* retVal = 0, const char* dir = 0,
                                bool verbose = true,
                                double timeout = 0.0);
-  /** 
+  /**
    * In this version of RunSingleCommand, command[0] should be
    * the command to run, and each argument to the command should
    * be in comand[1]...command[command.size()]
    */
   static bool RunSingleCommand(std::vector<cmStdString> const& command,
                                std::string* output = 0,
-                               int* retVal = 0, const char* dir = 0, 
+                               int* retVal = 0, const char* dir = 0,
                                bool verbose = true,
                                double timeout = 0.0);
 
@@ -295,7 +295,7 @@ public:
   static const char* GetWindows9xComspecSubstitute();
 
   /** Windows if this is true, the CreateProcess in RunCommand will
-   *  not show new consol windows when running programs.   
+   *  not show new consol windows when running programs.
    */
   static void SetRunCommandHideConsole(bool v){s_RunCommandHideConsole = v;}
   static bool GetRunCommandHideConsole(){ return s_RunCommandHideConsole;}
@@ -303,16 +303,16 @@ public:
    * result of strerror(errno)
    */
   static void ReportLastSystemError(const char* m);
-  
+
   /** a general output handler for cmsysProcess  */
   static int WaitForLine(cmsysProcess* process, std::string& line,
                          double timeout,
                          std::vector<char>& out,
                          std::vector<char>& err);
-    
+
   /** Split a string on its newlines into multiple lines.  Returns
       false only if the last line stored had no newline.  */
-  static bool Split(const char* s, std::vector<cmStdString>& l);  
+  static bool Split(const char* s, std::vector<cmStdString>& l);
   static void SetForceUnixPaths(bool v)
     {
       s_ForceUnixPaths = v;
@@ -327,14 +327,14 @@ public:
   static void ConvertToOutputSlashes(std::string& path);
 
   // ConvertToRunCommandPath does not use s_ForceUnixPaths and should
-  // be used when RunCommand is called from cmake, because the 
+  // be used when RunCommand is called from cmake, because the
   // running cmake needs paths to be in its format
   static std::string ConvertToRunCommandPath(const char* path);
   //! Check if the first string ends with the second one.
   static bool StringEndsWith(const char* str1, const char* str2);
-  
-  /** compute the relative path from local to remote.  local must 
-      be a directory.  remote can be a file or a directory.  
+
+  /** compute the relative path from local to remote.  local must
+      be a directory.  remote can be a file or a directory.
       Both remote and local must be full paths.  Basically, if
       you are in directory local and you want to access the file in remote
       what is the relative path to do that.  For example:
@@ -385,7 +385,7 @@ public:
   static bool CreateTar(const char* outFileName,
                         const std::vector<cmStdString>& files, bool gzip,
                         bool bzip2, bool verbose);
-  static bool ExtractTar(const char* inFileName, bool gzip, 
+  static bool ExtractTar(const char* inFileName, bool gzip,
                          bool verbose);
   // This should be called first thing in main
   // it will keep child processes from inheriting the
