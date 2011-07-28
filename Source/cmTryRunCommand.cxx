@@ -194,7 +194,7 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
   int timeout = 0;
   bool worked = cmSystemTools::RunSingleCommand(finalCommand.c_str(),
                 out, &retVal,
-                0, false, timeout);
+                0, cmSystemTools::OUTPUT_NONE, timeout);
   // set the run var
   char retChar[1000];
   if (worked)

@@ -1301,7 +1301,8 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<cmStdString>& vec)
     int retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run command: " << *it
       << std::endl);
-    if ( !cmSystemTools::RunSingleCommand(it->c_str(), 0, &retVal, 0, true
+    if ( !cmSystemTools::RunSingleCommand(it->c_str(), 0, &retVal, 0,
+                                          cmSystemTools::OUTPUT_MERGE
         /*this->Verbose*/) || retVal != 0 )
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Problem running command: "
