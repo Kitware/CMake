@@ -113,6 +113,21 @@ find_path(PostgreSQL_INCLUDE_DIR
    # Look in other places.
    ${PostgreSQL_ROOT_DIRECTORIES}
   PATH_SUFFIXES
+    pgsql
+    postgresql
+    include
+  # Help the user find it if we cannot.
+  DOC "The ${PostgreSQL_INCLUDE_DIR_MESSAGE}"
+)
+
+find_path(PostgreSQL_TYPE_INCLUDE_DIR
+  NAMES catalog/pg_type.h
+  PATHS
+   # Look in other places.
+   ${PostgreSQL_ROOT_DIRECTORIES}
+  PATH_SUFFIXES
+    server
+    pgsql
     postgresql
     include
   # Help the user find it if we cannot.
@@ -155,6 +170,13 @@ if(PostgreSQL_FOUND)
       ${PostgreSQL_INCLUDE_DIR}
     )
   endif(EXISTS "${PostgreSQL_INCLUDE_DIR}")
+
+  if(EXISTS "${PostgreSQL_TYPE_INCLUDE_DIR}")
+    list(APPEND PostgreSQL_INCLUDE_DIRS
+      ${PostgreSQL_TYPE_INCLUDE_DIR}
+    )
+  endif(EXISTS "${PostgreSQL_TYPE_INCLUDE_DIR}")
+
 
   if(EXISTS "${PostgreSQL_LIBRARY_DIR}")
     set(PostgreSQL_LIBRARY_DIRS
