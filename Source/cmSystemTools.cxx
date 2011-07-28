@@ -607,30 +607,30 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
   int length;
   if ( output || verbose )
     {
-  while(cmsysProcess_WaitForData(cp, &data, &length, 0))
-    {
-    if(output || verbose)
+    while(cmsysProcess_WaitForData(cp, &data, &length, 0))
       {
-      // Translate NULL characters in the output into valid text.
-      // Visual Studio 7 puts these characters in the output of its
-      // build process.
-      for(int i=0; i < length; ++i)
+      if(output || verbose)
         {
-        if(data[i] == '\0')
+        // Translate NULL characters in the output into valid text.
+        // Visual Studio 7 puts these characters in the output of its
+        // build process.
+        for(int i=0; i < length; ++i)
           {
-          data[i] = ' ';
+          if(data[i] == '\0')
+            {
+            data[i] = ' ';
+            }
           }
         }
+      if ( output )
+        {
+        tempOutput.insert(tempOutput.end(), data, data+length);
+        }
+      if(verbose)
+        {
+        cmSystemTools::Stdout(data, length);
+        }
       }
-    if ( output )
-      {
-      tempOutput.insert(tempOutput.end(), data, data+length);
-      }
-    if(verbose)
-      {
-      cmSystemTools::Stdout(data, length);
-      }
-    }
     }
 
   cmsysProcess_WaitForExit(cp, 0);
