@@ -1279,7 +1279,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   fout << "\t</Files>\n";
 
   // Write the VCProj file's footer.
-  this->WriteVCProjFooter(fout);
+  this->WriteVCProjFooter(fout, target);
 }
 
 struct cmLVS7GFileConfig
@@ -1880,10 +1880,28 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
 }
 
 
-void cmLocalVisualStudio7Generator::WriteVCProjFooter(std::ostream& fout)
+void cmLocalVisualStudio7Generator::WriteVCProjFooter(std::ostream& fout,
+                                                      cmTarget &target)
 {
-  fout << "\t<Globals>\n"
-       << "\t</Globals>\n"
+  fout << "\t<Globals>\n";
+
+  cmPropertyMap const& props = target.GetProperties();
+  for(cmPropertyMap::const_iterator i = props.begin(); i != props.end(); ++i)
+    {
+    if(i->first.find("VS_GLOBAL_") == 0)
+      {
+      std::string name = i->first.substr(10);
+      if(name != "")
+        {
+        fout << "\t\t<Global\n"
+             << "\t\t\tName=\"" << name << "\"\n"
+             << "\t\t\tValue=\"" << i->second.GetValue() << "\"\n"
+             << "\t\t/>\n";
+        }
+      }
+    }
+
+  fout << "\t</Globals>\n"
        << "</VisualStudioProject>\n";
 }
 
