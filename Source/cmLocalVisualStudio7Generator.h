@@ -84,7 +84,7 @@ private:
   void WriteProjectFiles();
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
-  void WriteVCProjFooter(std::ostream& fout);
+  void WriteVCProjFooter(std::ostream& fout, cmTarget &target);
   void CreateSingleVCProj(const char *lname, cmTarget &tgt);
   void WriteVCProjFile(std::ostream& fout, const char *libName, 
                        cmTarget &tgt);
