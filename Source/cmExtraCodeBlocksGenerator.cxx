@@ -573,6 +573,22 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
           "         <Option type=\"" << cbTargetType << "\" />\n"
           "         <Option compiler=\"" << compiler << "\" />\n"
           "         <Compiler>\n";
+
+    // the compilerdefines for this target
+    const char* cdefs = target->GetMakefile()->GetProperty(
+                                                        "COMPILE_DEFINITIONS");
+    if(cdefs)
+      {
+      // Expand the list.
+      std::vector<std::string> defs;
+      cmSystemTools::ExpandListArgument(cdefs, defs);
+      for(std::vector<std::string>::const_iterator di = defs.begin();
+          di != defs.end(); ++di)
+        {
+        fout <<"            <Add option=\"-D" << di->c_str() << "\" />\n";
+        }
+      }
+
       // the include directories for this target
       const std::vector<std::string>& incDirs =
           target->GetMakefile()->GetIncludeDirectories();
