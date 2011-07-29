@@ -330,6 +330,40 @@ IF(MSVC)
   ENDFOREACH(lib)
 ENDIF(MSVC)
 
+IF(WATCOM)
+  GET_FILENAME_COMPONENT( CompilerPath ${CMAKE_C_COMPILER} PATH )
+  IF(WATCOM17)
+     SET( __install__libs ${CompilerPath}/clbr17.dll
+       ${CompilerPath}/mt7r17.dll ${CompilerPath}/plbr17.dll )
+  ENDIF()
+  IF(WATCOM18)
+     SET( __install__libs ${CompilerPath}/clbr18.dll
+       ${CompilerPath}/mt7r18.dll ${CompilerPath}/plbr18.dll )
+  ENDIF()
+  IF(WATCOM19)
+     SET( __install__libs ${CompilerPath}/clbr19.dll
+       ${CompilerPath}/mt7r19.dll ${CompilerPath}/plbr19.dll )
+  ENDIF()
+  FOREACH(lib
+      ${__install__libs}
+      )
+    IF(EXISTS ${lib})
+      SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+        ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} ${lib})
+    ELSE()
+      IF(NOT CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
+        MESSAGE(WARNING "system runtime library file does not exist: '${lib}'")
+        # This warning indicates an incomplete Watcom installation
+        # or a bug somewhere above here in this file.
+        # If you would like to avoid this warning, fix the real problem, or
+        # set CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS before including
+        # this file.
+      ENDIF()
+    ENDIF()
+  ENDFOREACH()
+ENDIF()
+
+
 # Include system runtime libraries in the installation if any are
 # specified by CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS.
 IF(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
