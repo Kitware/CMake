@@ -672,9 +672,6 @@ CreateComponentDescription(cmCPackComponent *component,
     }
   componentCode += "  SetOutPath \"$INSTDIR\"\n";
 
-  componentCode += "  IntCmp $" + component->Name 
-    + "_was_installed ${SF_SELECTED} noinstall_" + component->Name + "\n";
-
   // Create the actual installation commands
   if (component->IsDownloaded)
     {
@@ -825,7 +822,6 @@ CreateComponentDescription(cmCPackComponent *component,
     componentCode += "  File /r \"${INST_DIR}\\" +
       component->Name + "\\*.*\"\n";
     }
-  componentCode += "  noinstall_" + component->Name + ":\n";
   componentCode += "SectionEnd\n";
 
   // Macro used to remove the component
