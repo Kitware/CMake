@@ -953,7 +953,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("WIN32", cmProperty::VARIABLE,
      "True on windows systems, including win64.",
-     "Set to true when the target system is Windows and on cygwin.",false,
+     "Set to true when the target system is Windows.",false,
      "Variables That Describe the System");
 
   cm->DefineProperty
