@@ -60,6 +60,28 @@ message(STATUS "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
 
 message(STATUS "CMake generators='${generators}'")
 
+# If we'll be testing any of the MinGW Makefiles generators, adjust the
+# ENV{PATH} to make sure libgmp-10.dll can be loaded as needed. But only if
+# the testing machine has a default MinGW install... (If you have a
+# non-default install, append to the PATH before running the test...)
+#
+if(generators MATCHES "MinGW Makefiles")
+  if(EXISTS "C:/MinGW/bin/libgmp-10.dll")
+    string(TOLOWER "$ENV{PATH}" path)
+    if(NOT path MATCHES "/mingw/bin")
+      if(UNIX)
+        set(sep ":")
+        set(mingw_bin "/mingw/bin")
+      else()
+        set(sep ";")
+        set(mingw_bin "C:/MinGW/bin")
+      endif()
+      set(ENV{PATH} "$ENV{PATH}${sep}${mingw_bin}")
+      message(STATUS "info: appending '${sep}${mingw_bin}' to the PATH")
+    endif()
+  endif()
+endif()
+
 # First setup a source tree to run CMake on.
 #
 execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory
