@@ -266,10 +266,17 @@ void cmExtraCodeBlocksGenerator
       }
 
     // Convert
+    const char* cmakeRoot = mf->GetDefinition("CMAKE_ROOT");
     for (std::vector<std::string>::const_iterator jt = listFiles.begin();
          jt != listFiles.end();
          ++jt)
       {
+      // don't put cmake's own files into the project (#12110):
+      if (jt->find(cmakeRoot) == 0)
+        {
+        continue;
+        }
+
       const std::string &relative = cmSystemTools::RelativePath(
                          it->second[0]->GetMakefile()->GetHomeDirectory(),
                          jt->c_str());
