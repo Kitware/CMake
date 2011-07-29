@@ -125,10 +125,9 @@ find_path(PostgreSQL_TYPE_INCLUDE_DIR
    # Look in other places.
    ${PostgreSQL_ROOT_DIRECTORIES}
   PATH_SUFFIXES
-    server
-    pgsql
-    postgresql
-    include
+    pgsql/server
+    postgresql/server
+    include/server
   # Help the user find it if we cannot.
   DOC "The ${PostgreSQL_INCLUDE_DIR_MESSAGE}"
 )
@@ -154,7 +153,7 @@ get_filename_component(PostgreSQL_LIBRARY_DIR ${PostgreSQL_LIBRARY} PATH)
 # Did we find anything?
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PostgreSQL DEFAULT_MSG
-                                  PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR PostgreSQL_LIBRARY)
+                                  PostgreSQL_LIBRARY PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR)
 
 set( PostgreSQL_FOUND  ${POSTGRESQL_FOUND})
 
