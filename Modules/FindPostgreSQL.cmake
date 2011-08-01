@@ -169,3 +169,5 @@ if(PostgreSQL_FOUND)
   #message("Final PostgreSQL library dir: ${PostgreSQL_LIBRARY_DIRS}")
   #message("Final PostgreSQL libraries:   ${PostgreSQL_LIBRARIES}")
 endif(PostgreSQL_FOUND)
+
+mark_as_advanced(PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR PostgreSQL_LIBRARY )
