@@ -10,6 +10,8 @@
 
 set(PACKAGE_VERSION "@CVF_VERSION@")
 
+set(PACKAGE_VERSION_EXACT FALSE) # initialize to FALSE
+
 # check that the installed version has the same 32/64bit-ness as the one which is currently searching:
 if(NOT "${CMAKE_SIZEOF_VOID_P}"  STREQUAL  "@CMAKE_SIZEOF_VOID_P@")
    math(EXPR installedBits "@CMAKE_SIZEOF_VOID_P@ * 8")
