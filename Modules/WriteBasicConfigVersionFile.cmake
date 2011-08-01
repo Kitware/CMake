@@ -24,7 +24,7 @@
 # create the resulting version file.
 
 #=============================================================================
-# Copyright (c) 2008-2011, Alexander Neundorf, <neundorf@kde.org>
+# Copyright 2008-2011 Alexander Neundorf, <neundorf@kde.org>
 # Copyright 2004-2009 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
