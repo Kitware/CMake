@@ -12,6 +12,13 @@
 # If you project has more elaborated version matching rules, you will need to write your
 # own custom ConfigVersion.cmake file, instead of using this macro.
 #
+# Example:
+#     write_basic_config_version_file(${CMAKE_CURRENT_BINARY_DIR}/FooConfigVersion.cmake
+#                                     VERSION 1.2.3
+#                                     COMPATIBILITY SameMajorVersion )
+#     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FooConfigVersion.cmake
+#             DESTINATION lib/cmake/Foo )
+#
 # Internally, this macro executes configure_file() on the input file
 # Modules/BasicConfigVersion-AnyNewerVersion/SameMajorVersion.cmake.in to
 # create the resulting version file.
