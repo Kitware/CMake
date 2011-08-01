@@ -737,7 +737,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // now also the system include directories, in case we found them in
   // CMakeSystemSpecificInformation.cmake. This makes Eclipse find the
   // standard headers.
-  mf->GetDefinition("CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS");
   std::string compiler = mf->GetSafeDefinition("CMAKE_C_COMPILER");
   if (!compiler.empty())
     {
