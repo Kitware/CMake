@@ -10,8 +10,8 @@
 # are specified, then the find module will default to finding only the HDF5 C
 # library.  If one or more COMPONENTS are specified, the module will attempt to
 # find the language bindings for the specified components.  The only valid
-# components are C, CXX, Fortran, and HL.  If the COMPONENTS argument is not
-# given, the module will attempt to find only the C bindings.
+# components are C, CXX, Fortran, HL, and Fortran_HL.  If the COMPONENTS
+# argument is not given, the module will attempt to find only the C bindings.
 #
 # On UNIX systems, this module will read the variable HDF5_USE_STATIC_LIBRARIES
 # to determine whether or not to prefer a static link to a dynamic link for HDF5
@@ -34,6 +34,8 @@
 #  HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
 #  HDF5_Fortran_LIBRARIES - Required libraries for the HDF5 Fortran bindings
 #  HDF5_HL_LIBRARIES - Required libraries for the HDF5 high level API
+#  HDF5_Fortran_HL_LIBRARIES - Required libraries for the high level Fortran
+#                              bindings.
 #  HDF5_LIBRARIES - Required libraries for all requested bindings
 #  HDF5_FOUND - true if HDF5 was found on the system
 #  HDF5_LIBRARY_DIRS - the full set of library directories
@@ -67,6 +69,7 @@ set( HDF5_VALID_COMPONENTS
     CXX
     Fortran
     HL
+    Fortran_HL
 )
 
 # Validate the list of find components.
@@ -189,6 +192,7 @@ if( NOT HDF5_FOUND )
         set( HDF5_CXX_TARGET hdf5_cpp )
         set( HDF5_HL_TARGET hdf5_hl )
         set( HDF5_Fortran_TARGET hdf5_fortran )
+        set( HDF5_Fortran_HL_TARGET hdf5_hl_fortran )
         foreach( _component ${HDF5_LANGUAGE_BINDINGS} )
             list( FIND HDF5_VALID_COMPONENTS ${_component} _component_location )
             get_target_property( _comp_location ${HDF5_${_component}_TARGET} LOCATION )
@@ -211,7 +215,10 @@ if( NOT HDF5_FOUND )
     set( HDF5_C_LIBRARY_NAMES_INIT hdf5 )
     set( HDF5_HL_LIBRARY_NAMES_INIT hdf5_hl ${HDF5_C_LIBRARY_NAMES_INIT} )
     set( HDF5_CXX_LIBRARY_NAMES_INIT hdf5_cpp ${HDF5_C_LIBRARY_NAMES_INIT} )
-    set( HDF5_Fortran_LIBRARY_NAMES_INIT hdf5_fortran ${HDF5_C_LIBRARY_NAMES_INIT} )
+    set( HDF5_Fortran_LIBRARY_NAMES_INIT hdf5_fortran
+        ${HDF5_C_LIBRARY_NAMES_INIT} )
+    set( HDF5_Fortran_HL_LIBRARY_NAMES_INIT hdf5hl_fortran
+        ${HDF5_Fortran_LIBRARY_NAMES_INIT} )
     
     foreach( LANGUAGE ${HDF5_LANGUAGE_BINDINGS} )
         if( HDF5_${LANGUAGE}_COMPILE_LINE )
@@ -222,8 +229,8 @@ if( NOT HDF5_FOUND )
                 HDF5_${LANGUAGE}_LIBRARY_NAMES
             )
         
-            # take a guess that the includes may be in the 'include' sibling directory
-            # of a library directory.
+            # take a guess that the includes may be in the 'include' sibling
+            # directory of a library directory.
             foreach( dir ${HDF5_${LANGUAGE}_LIBRARY_DIRS} )
                 list( APPEND HDF5_${LANGUAGE}_INCLUDE_FLAGS ${dir}/../include )
             endforeach()
@@ -233,7 +240,7 @@ if( NOT HDF5_FOUND )
         list( APPEND HDF5_DEFINITIONS ${HDF5_${LANGUAGE}_DEFINITIONS} )
     
         # find the HDF5 include directories
-        if(${LANGUAGE} STREQUAL "Fortran")
+        if(${LANGUAGE} MATCHES "Fortran.*")
             set(HDF5_INCLUDE_FILENAME hdf5.mod)
         else()
             set(HDF5_INCLUDE_FILENAME hdf5.h)
