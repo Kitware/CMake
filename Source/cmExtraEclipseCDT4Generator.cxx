@@ -654,7 +654,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       }
     }
   // add system defined c macros
-  const char* cDefs=mf->GetDefinition("CMAKE_ECLIPSE_C_SYSTEM_DEFINED_MACROS");
+  const char* cDefs=mf->GetDefinition(
+                              "CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS");
   if(cDefs)
     {
     // Expand the list.
@@ -689,7 +690,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     }
   // add system defined c++ macros
   const char* cxxDefs = mf->GetDefinition(
-                                    "CMAKE_ECLIPSE_CXX_SYSTEM_DEFINED_MACROS");
+                            "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_DEFINED_MACROS");
   if(cxxDefs)
     {
     // Expand the list.
@@ -737,12 +738,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // now also the system include directories, in case we found them in
   // CMakeSystemSpecificInformation.cmake. This makes Eclipse find the
   // standard headers.
-  mf->GetDefinition("CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS");
   std::string compiler = mf->GetSafeDefinition("CMAKE_C_COMPILER");
   if (!compiler.empty())
     {
     std::string systemIncludeDirs = mf->GetSafeDefinition(
-                                      "CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS");
+                                "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs;
     cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
     this->AppendIncludeDirectories(fout, dirs, emmited);
@@ -751,7 +751,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   if (!compiler.empty())
     {
     std::string systemIncludeDirs = mf->GetSafeDefinition(
-                                      "CMAKE_ECLIPSE_CXX_SYSTEM_INCLUDE_DIRS");
+                              "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs;
     cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
     this->AppendIncludeDirectories(fout, dirs, emmited);
