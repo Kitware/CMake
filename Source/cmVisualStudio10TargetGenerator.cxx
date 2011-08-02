@@ -178,8 +178,23 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ProjectGUID>", 2);
   (*this->BuildFileStream) <<  "{" << this->GUID << "}</ProjectGUID>\n";
 
-  this->WriteString("<SccProjectName />\n", 2);
-  this->WriteString("<SccLocalPath />\n", 2);
+  const char* vsProjectName = this->Target->GetProperty("VS_SCC_PROJECTNAME");
+  const char* vsLocalPath = this->Target->GetProperty("VS_SCC_LOCALPATH");
+  const char* vsProvider = this->Target->GetProperty("VS_SCC_PROVIDER");
+
+  if ( vsProjectName && vsLocalPath && vsProvider)
+    {
+    this->WriteString("<SccProjectName>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsProjectName) <<
+      "</SccProjectName>\n";
+    this->WriteString("<SccLocalPath>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsLocalPath) <<
+      "</SccLocalPath>\n";
+    this->WriteString("<SccProvider>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsProvider) <<
+      "</SccProvider>\n";
+    }
+
   this->WriteString("<Keyword>Win32Proj</Keyword>\n", 2);
   this->WriteString("<Platform>", 2);
   (*this->BuildFileStream) << this->Platform << "</Platform>\n";
