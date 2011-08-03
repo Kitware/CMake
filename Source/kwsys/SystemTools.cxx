@@ -56,6 +56,7 @@
 
 // support for realpath call
 #ifndef _WIN32
+#include <sys/time.h>
 #include <utime.h>
 #include <limits.h>
 #include <sys/wait.h>
@@ -281,70 +282,28 @@ extern int putenv (char *__string) __THROW;
 }
 #endif
 
-/* Implement floattime() for various platforms */
-// Taken from Python 2.1.3
-
-#if defined( _WIN32 ) && !defined( __CYGWIN__ )
-#  include <sys/timeb.h>
-#  define HAVE_FTIME
-#  if defined( __BORLANDC__)
-#    define FTIME ftime
-#    define TIMEB timeb
-#  else // Visual studio?
-#    define FTIME _ftime
-#    define TIMEB _timeb
-#  endif
-#elif defined( __CYGWIN__ ) || defined( __linux__ ) || defined(__APPLE__)
-#  include <sys/time.h>
-#  include <time.h>
-#  define HAVE_GETTIMEOFDAY
-#endif
-
 namespace KWSYS_NAMESPACE
 {
+
+double SystemTools::GetTime(void)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  FILETIME ft;
+  GetSystemTimeAsFileTime(&ft);
+  return (429.4967296*ft.dwHighDateTime
+          + 0.0000001*ft.dwLowDateTime
+          - 11644473600.0);
+#else
+  struct timeval t;
+  gettimeofday(&t, 0);
+  return 1.0*t.tv_sec + 0.000001*t.tv_usec;
+#endif
+}
 
 class SystemToolsTranslationMap : 
     public kwsys_stl::map<kwsys_stl::string,kwsys_stl::string>
 {
 };
-
-
-double
-SystemTools::GetTime(void)
-{
-  /* There are three ways to get the time:
-     (1) gettimeofday() -- resolution in microseconds
-     (2) ftime() -- resolution in milliseconds
-     (3) time() -- resolution in seconds
-     In all cases the return value is a float in seconds.
-     Since on some systems (e.g. SCO ODT 3.0) gettimeofday() may
-     fail, so we fall back on ftime() or time().
-     Note: clock resolution does not imply clock accuracy! */
-#ifdef HAVE_GETTIMEOFDAY
-  {
-  struct timeval t;
-#ifdef GETTIMEOFDAY_NO_TZ
-  if (gettimeofday(&t) == 0)
-#else /* !GETTIMEOFDAY_NO_TZ */
-  if (gettimeofday(&t, static_cast<struct timezone *>(NULL)) == 0)
-#endif /* !GETTIMEOFDAY_NO_TZ */
-    return static_cast<double>(t.tv_sec) +
-      static_cast<double>(t.tv_usec)*0.000001;
-  }
-#endif /* !HAVE_GETTIMEOFDAY */
-  {
-#if defined(HAVE_FTIME)
-  struct TIMEB t;
-  ::FTIME(&t);
-  return static_cast<double>(t.time) +
-    static_cast<double>(t.millitm) * static_cast<double>(0.001);
-#else /* !HAVE_FTIME */
-  time_t secs;
-  time(&secs);
-  return static_cast<double>(secs);
-#endif /* !HAVE_FTIME */
-  }
-}
 
 // adds the elements of the env variable path to the arg passed in
 void SystemTools::GetPath(kwsys_stl::vector<kwsys_stl::string>& path, const char* env)
