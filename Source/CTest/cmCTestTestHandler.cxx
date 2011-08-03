@@ -620,7 +620,8 @@ int cmCTestTestHandler::ProcessHandler()
 
       typedef std::set<cmCTestTestHandler::cmCTestTestResult,
                        cmCTestTestResultLess> SetOfTests;
-      SetOfTests resultsSet(this->TestResults.begin(), this->TestResults.end());
+      SetOfTests resultsSet(this->TestResults.begin(),
+                            this->TestResults.end());
 
       for(SetOfTests::iterator ftit = resultsSet.begin();
           ftit != resultsSet.end(); ++ftit)
