@@ -59,7 +59,7 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
 }
 
 void cmPropertyMap::AppendProperty(const char* name, const char* value,
-                                   cmProperty::ScopeType scope)
+                                   cmProperty::ScopeType scope, bool asString)
 {
   // Skip if nothing to append.
   if(!name || !value || !*value)
@@ -81,7 +81,7 @@ void cmPropertyMap::AppendProperty(const char* name, const char* value,
 #endif
 
   cmProperty *prop = this->GetOrCreateProperty(name);
-  prop->Append(name,value);
+  prop->Append(name,value,asString);
 }
 
 const char *cmPropertyMap

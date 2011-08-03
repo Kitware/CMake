@@ -105,6 +105,7 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/local/lib
   /usr/lib/jvm/java/lib
   /usr/lib/java/jre/lib/{libarch}
+  /usr/lib/jvm/jre/lib/{libarch}
   /usr/local/lib/java/jre/lib/{libarch}
   /usr/local/share/java/jre/lib/{libarch}
   /usr/lib/j2sdk1.4-sun/jre/lib/{libarch}

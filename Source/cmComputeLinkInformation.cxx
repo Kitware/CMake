@@ -1603,6 +1603,18 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
     cmSystemTools::ExpandListArgument(implicitLinks, implicitDirVec);
     }
 
+  // Append library architecture to all implicit platform directories
+  // and add them to the set
+  if(const char* libraryArch =
+     this->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE"))
+    {
+    for (std::vector<std::string>::const_iterator i = implicitDirVec.begin();
+         i != implicitDirVec.end(); ++i)
+      {
+      this->ImplicitLinkDirs.insert(*i + "/" + libraryArch);
+      }
+    }
+
   // Get language-specific implicit directories.
   std::string implicitDirVar = "CMAKE_";
   implicitDirVar += this->LinkLanguage;

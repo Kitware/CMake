@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3.20110118)
+cmake_minimum_required(VERSION 2.8.4)
 project(VSResource)
 
 string(REPLACE "/INCREMENTAL:YES" ""
@@ -35,3 +35,6 @@ else()
 endif()
 
 add_executable(VSResource main.cpp test.rc)
+
+set_property(TARGET VSResource
+  PROPERTY VS_GLOBAL_CMakeTestVsGlobalVariable "test val")

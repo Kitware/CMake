@@ -9,7 +9,10 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "cmSystemTools.h"   
+#if defined(_MSC_VER) && _MSC_VER < 1300
+# define _WIN32_WINNT 0x0400 /* for wincrypt.h */
+#endif
+#include "cmSystemTools.h"
 #include <ctype.h>
 #include <errno.h>
 #include <time.h>
@@ -31,7 +34,9 @@
 
 #if defined(_WIN32)
 # include <windows.h>
+# include <wincrypt.h>
 #else
+# include <sys/time.h>
 # include <sys/types.h>
 # include <unistd.h>
 # include <utime.h>
@@ -121,7 +126,7 @@ const char* cmSystemTools::GetWindows9xComspecSubstitute()
   return cmSystemTools::s_Windows9xComspecSubstitute.c_str();
 }
 
-void (*cmSystemTools::s_ErrorCallback)(const char*, const char*, 
+void (*cmSystemTools::s_ErrorCallback)(const char*, const char*,
                                        bool&, void*);
 void (*cmSystemTools::s_StdoutCallback)(const char*, int len, void*);
 void* cmSystemTools::s_ErrorCallbackClientData = 0;
@@ -139,7 +144,7 @@ void cmSystemTools::ExpandRegistryValues(std::string& source, KeyWOW64 view)
   // a close square-bracket.  The ']' character must be the first in the
   // list of characters inside the [^...] block of the expression.
   cmsys::RegularExpression regEntry("\\[(HKEY[^]]*)\\]");
-  
+
   // check for black line or comment
   while (regEntry.find(source))
     {
@@ -232,7 +237,7 @@ void cmSystemTools::Stdout(const char* s)
 {
   if(s_StdoutCallback)
     {
-    (*s_StdoutCallback)(s, static_cast<int>(strlen(s)), 
+    (*s_StdoutCallback)(s, static_cast<int>(strlen(s)),
                         s_StdoutCallbackClientData);
     }
   else
@@ -240,6 +245,12 @@ void cmSystemTools::Stdout(const char* s)
     std::cout << s;
     std::cout.flush();
     }
+}
+
+void cmSystemTools::Stderr(const char* s, int length)
+{
+    std::cerr.write(s, length);
+    std::cerr.flush();
 }
 
 void cmSystemTools::Stdout(const char* s, int length)
@@ -263,7 +274,7 @@ void cmSystemTools::Message(const char* m1, const char *title)
     }
   if(s_ErrorCallback)
     {
-    (*s_ErrorCallback)(m1, title, s_DisableMessages, 
+    (*s_ErrorCallback)(m1, title, s_DisableMessages,
                        s_ErrorCallbackClientData);
     return;
     }
@@ -271,7 +282,7 @@ void cmSystemTools::Message(const char* m1, const char *title)
     {
     std::cerr << m1 << std::endl << std::flush;
     }
-  
+
 }
 
 
@@ -306,7 +317,7 @@ bool cmSystemTools::IsOn(const char* val)
     return false;
     }
   std::basic_string<char> v = val;
-  
+
   for(std::basic_string<char>::iterator c = v.begin();
       c != v.end(); c++)
     {
@@ -339,13 +350,13 @@ bool cmSystemTools::IsOff(const char* val)
     return true;
     }
   std::basic_string<char> v = val;
-  
+
   for(std::basic_string<char>::iterator c = v.begin();
       c != v.end(); c++)
     {
     *c = static_cast<char>(toupper(*c));
     }
-  return (v == "OFF" || v == "0" || v == "NO" || v == "FALSE" || 
+  return (v == "OFF" || v == "0" || v == "NO" || v == "FALSE" ||
           v == "N" || cmSystemTools::IsNOTFOUND(v.c_str()) || v == "IGNORE");
 }
 
@@ -440,11 +451,27 @@ public:
       args.push_back(*arg);
       }
     }
+  void Store(std::vector<cmStdString>& args) const
+    {
+    for(char** arg = this->ArgV; arg && *arg; ++arg)
+      {
+      args.push_back(*arg);
+      }
+    }
 };
 
 //----------------------------------------------------------------------------
 void cmSystemTools::ParseUnixCommandLine(const char* command,
                                          std::vector<std::string>& args)
+{
+  // Invoke the underlying parser.
+  cmSystemToolsArgV argv = cmsysSystem_Parse_CommandForUnix(command, 0);
+  argv.Store(args);
+}
+
+//----------------------------------------------------------------------------
+void cmSystemTools::ParseUnixCommandLine(const char* command,
+                                         std::vector<cmStdString>& args)
 {
   // Invoke the underlying parser.
   cmSystemToolsArgV argv = cmsysSystem_Parse_CommandForUnix(command, 0);
@@ -548,15 +575,15 @@ std::vector<cmStdString> cmSystemTools::ParseArguments(const char* command)
       args.push_back(arg);
       }
     }
-  
+
   return args;
 }
 
 
 bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
                                      std::string* output ,
-                                     int* retVal , const char* dir , 
-                                     bool verbose ,
+                                     int* retVal , const char* dir ,
+                                     OutputOption outputflag ,
                                      double timeout )
 {
   std::vector<const char*> argv;
@@ -578,46 +605,62 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
     {
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
     }
+
   cmsysProcess_SetTimeout(cp, timeout);
   cmsysProcess_Execute(cp);
-  
+
   std::vector<char> tempOutput;
   char* data;
   int length;
-  if ( output || verbose )
+  int pipe;
+  if ( output || outputflag != OUTPUT_NONE )
     {
-  while(cmsysProcess_WaitForData(cp, &data, &length, 0))
-    {
-    if(output || verbose)
+    while((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)) > 0)
       {
-      // Translate NULL characters in the output into valid text.
-      // Visual Studio 7 puts these characters in the output of its
-      // build process.
-      for(int i=0; i < length; ++i)
+      if(output || outputflag != OUTPUT_NONE)
         {
-        if(data[i] == '\0')
+        // Translate NULL characters in the output into valid text.
+        // Visual Studio 7 puts these characters in the output of its
+        // build process.
+        for(int i=0; i < length; ++i)
           {
-          data[i] = ' ';
+          if(data[i] == '\0')
+            {
+            data[i] = ' ';
+            }
+          }
+        }
+      if ( output )
+        {
+        tempOutput.insert(tempOutput.end(), data, data+length);
+        }
+      if(outputflag != OUTPUT_NONE)
+        {
+        if(outputflag == OUTPUT_MERGE)
+          {
+          cmSystemTools::Stdout(data, length);
+          }
+        else
+          {
+          if(pipe == cmsysProcess_Pipe_STDERR)
+            {
+            cmSystemTools::Stderr(data, length);
+            }
+          else if(pipe == cmsysProcess_Pipe_STDOUT)
+            {
+            cmSystemTools::Stdout(data, length);
+            }
           }
         }
       }
-    if ( output )
-      {
-      tempOutput.insert(tempOutput.end(), data, data+length);
-      }
-    if(verbose)
-      {
-      cmSystemTools::Stdout(data, length);
-      }
     }
-    }
-  
+
   cmsysProcess_WaitForExit(cp, 0);
   if ( output && tempOutput.begin() != tempOutput.end())
     {
     output->append(&*tempOutput.begin(), tempOutput.size());
     }
-  
+
   bool result = true;
   if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
     {
@@ -636,7 +679,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exception)
     {
     const char* exception_str = cmsysProcess_GetExceptionString(cp);
-    if ( verbose )
+    if ( outputflag != OUTPUT_NONE )
       {
       std::cerr << exception_str << std::endl;
       }
@@ -649,7 +692,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Error)
     {
     const char* error_str = cmsysProcess_GetErrorString(cp);
-    if ( verbose )
+    if ( outputflag != OUTPUT_NONE )
       {
       std::cerr << error_str << std::endl;
       }
@@ -662,7 +705,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
   else if(cmsysProcess_GetState(cp) == cmsysProcess_State_Expired)
     {
     const char* error_str = "Process terminated due to timeout\n";
-    if ( verbose )
+    if ( outputflag != OUTPUT_NONE )
       {
       std::cerr << error_str << std::endl;
       }
@@ -672,22 +715,22 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
       }
     result = false;
     }
-  
+
   cmsysProcess_Delete(cp);
   return result;
 }
 
 bool cmSystemTools::RunSingleCommand(
-  const char* command, 
+  const char* command,
   std::string* output,
-  int *retVal, 
+  int *retVal,
   const char* dir,
-  bool verbose,
+  OutputOption outputflag,
   double timeout)
 {
   if(s_DisableRunCommandOutput)
     {
-    verbose = false;
+    outputflag = OUTPUT_NONE;
     }
 
   std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
@@ -696,17 +739,17 @@ bool cmSystemTools::RunSingleCommand(
     {
     return false;
     }
-  return cmSystemTools::RunSingleCommand(args, output,retVal, 
-                                         dir, verbose, timeout);
+  return cmSystemTools::RunSingleCommand(args, output,retVal,
+                                         dir, outputflag, timeout);
 }
-bool cmSystemTools::RunCommand(const char* command, 
+bool cmSystemTools::RunCommand(const char* command,
                                std::string& output,
                                const char* dir,
                                bool verbose,
                                int timeout)
 {
   int dummy;
-  return cmSystemTools::RunCommand(command, output, dummy, 
+  return cmSystemTools::RunCommand(command, output, dummy,
                                    dir, verbose, timeout);
 }
 
@@ -721,11 +764,11 @@ bool RunCommandViaWin32(const char* command,
                         int timeout)
 {
 #if defined(__BORLANDC__)
-  return 
+  return
     cmWin32ProcessExecution::
-    BorlandRunCommand(command, dir, output, 
-                      retVal, 
-                      verbose, timeout, 
+    BorlandRunCommand(command, dir, output,
+                      retVal,
+                      verbose, timeout,
                       cmSystemTools::GetRunCommandHideConsole());
 #else // Visual studio
   ::SetLastError(ERROR_SUCCESS);
@@ -739,7 +782,7 @@ bool RunCommandViaWin32(const char* command,
     {
     resProc.SetHideWindows(true);
     }
-  
+
   if ( cmSystemTools::GetWindows9xComspecSubstitute() )
     {
     resProc.SetConsoleSpawn(cmSystemTools::GetWindows9xComspecSubstitute() );
@@ -766,7 +809,7 @@ bool RunCommandViaSystem(const char* command,
                          std::string& output,
                          int& retVal,
                          bool verbose)
-{  
+{
   std::cout << "@@ " << command << std::endl;
 
   std::string commandInDir;
@@ -966,9 +1009,9 @@ bool RunCommandViaPopen(const char* command,
 
 // run a command unix uses popen (easy)
 // windows uses system and ShortPath
-bool cmSystemTools::RunCommand(const char* command, 
+bool cmSystemTools::RunCommand(const char* command,
                                std::string& output,
-                               int &retVal, 
+                               int &retVal,
                                const char* dir,
                                bool verbose,
                                int timeout)
@@ -977,7 +1020,7 @@ bool cmSystemTools::RunCommand(const char* command,
     {
     verbose = false;
     }
-  
+
 #if defined(WIN32) && !defined(__CYGWIN__)
   // if the command does not start with a quote, then
   // try to find the program, and if the program can not be
@@ -996,9 +1039,9 @@ bool cmSystemTools::RunCommand(const char* command,
           {
           break;
           }
-        }      
+        }
       }
-    // if there are more than two double quotes use 
+    // if there are more than two double quotes use
     // GetShortPathName, the cmd.exe program in windows which
     // is used by system fails to execute if there are more than
     // one set of quotes in the arguments
@@ -1022,16 +1065,16 @@ bool cmSystemTools::RunCommand(const char* command,
         shortCmd += " ";
         shortCmd += args;
 
-        //return RunCommandViaSystem(shortCmd.c_str(), dir, 
+        //return RunCommandViaSystem(shortCmd.c_str(), dir,
         //                           output, retVal, verbose);
-        //return WindowsRunCommand(shortCmd.c_str(), dir, 
+        //return WindowsRunCommand(shortCmd.c_str(), dir,
         //output, retVal, verbose);
-        return RunCommandViaWin32(shortCmd.c_str(), dir, 
+        return RunCommandViaWin32(shortCmd.c_str(), dir,
                                   output, retVal, verbose, timeout);
         }
       else
         {
-        cmSystemTools::Error("Could not parse command line with quotes ", 
+        cmSystemTools::Error("Could not parse command line with quotes ",
                              command);
         }
       }
@@ -1095,7 +1138,7 @@ bool cmSystemTools::cmCopyFile(const char* source, const char* destination)
   return Superclass::CopyFileAlways(source, destination);
 }
 
-bool cmSystemTools::CopyFileIfDifferent(const char* source, 
+bool cmSystemTools::CopyFileIfDifferent(const char* source,
   const char* destination)
 {
   return Superclass::CopyFileIfDifferent(source, destination);
@@ -1226,7 +1269,7 @@ void cmSystemTools::Glob(const char *directory, const char *regexp,
 {
   cmsys::Directory d;
   cmsys::RegularExpression reg(regexp);
-  
+
   if (d.Load(directory))
     {
     size_t numf;
@@ -1279,7 +1322,7 @@ void cmSystemTools::GlobDirs(const char *fullPath,
 }
 
 
-void cmSystemTools::ExpandList(std::vector<std::string> const& arguments, 
+void cmSystemTools::ExpandList(std::vector<std::string> const& arguments,
                                std::vector<std::string>& newargs)
 {
   std::vector<std::string>::const_iterator i;
@@ -1378,8 +1421,8 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
     }
 }
 
-bool cmSystemTools::SimpleGlob(const cmStdString& glob, 
-                               std::vector<cmStdString>& files, 
+bool cmSystemTools::SimpleGlob(const cmStdString& glob,
+                               std::vector<cmStdString>& files,
                                int type /* = 0 */)
 {
   files.clear();
@@ -1419,8 +1462,8 @@ bool cmSystemTools::SimpleGlob(const cmStdString& glob,
           {
           continue;
           }
-        if ( sfname.size() >= ppath.size() && 
-             sfname.substr(0, ppath.size()) == 
+        if ( sfname.size() >= ppath.size() &&
+             sfname.substr(0, ppath.size()) ==
              ppath )
           {
           files.push_back(fname);
@@ -1440,10 +1483,10 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
     }
   //std::string ext = cmSystemTools::LowerCase(cext);
   std::string ext = cext;
-  if ( ext == "c" || ext == ".c" || 
-       ext == "m" || ext == ".m" 
+  if ( ext == "c" || ext == ".c" ||
+       ext == "m" || ext == ".m"
     ) { return cmSystemTools::C_FILE_FORMAT; }
-  if ( 
+  if (
     ext == "C" || ext == ".C" ||
     ext == "M" || ext == ".M" ||
     ext == "c++" || ext == ".c++" ||
@@ -1452,22 +1495,22 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
     ext == "cxx" || ext == ".cxx" ||
     ext == "mm" || ext == ".mm"
     ) { return cmSystemTools::CXX_FILE_FORMAT; }
-  if ( 
+  if (
     ext == "f" || ext == ".f" ||
     ext == "F" || ext == ".F" ||
     ext == "f77" || ext == ".f77" ||
     ext == "f90" || ext == ".f90" ||
     ext == "for" || ext == ".for" ||
-    ext == "f95" || ext == ".f95" 
+    ext == "f95" || ext == ".f95"
     ) { return cmSystemTools::FORTRAN_FILE_FORMAT; }
   if ( ext == "java" || ext == ".java" )
     { return cmSystemTools::JAVA_FILE_FORMAT; }
-  if ( 
-    ext == "H" || ext == ".H" || 
-    ext == "h" || ext == ".h" || 
+  if (
+    ext == "H" || ext == ".H" ||
+    ext == "h" || ext == ".h" ||
     ext == "h++" || ext == ".h++" ||
-    ext == "hm" || ext == ".hm" || 
-    ext == "hpp" || ext == ".hpp" || 
+    ext == "hm" || ext == ".hm" ||
+    ext == "hpp" || ext == ".hpp" ||
     ext == "hxx" || ext == ".hxx" ||
     ext == "in" || ext == ".in" ||
     ext == "txx" || ext == ".txx"
@@ -1480,18 +1523,18 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
        ext == "a" || ext == ".a")
     { return cmSystemTools::STATIC_LIBRARY_FILE_FORMAT; }
   if ( ext == "o" || ext == ".o" ||
-       ext == "obj" || ext == ".obj") 
+       ext == "obj" || ext == ".obj")
     { return cmSystemTools::OBJECT_FILE_FORMAT; }
 #ifdef __APPLE__
-  if ( ext == "dylib" || ext == ".dylib" ) 
+  if ( ext == "dylib" || ext == ".dylib" )
     { return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT; }
-  if ( ext == "so" || ext == ".so" || 
-       ext == "bundle" || ext == ".bundle" ) 
-    { return cmSystemTools::MODULE_FILE_FORMAT; } 
+  if ( ext == "so" || ext == ".so" ||
+       ext == "bundle" || ext == ".bundle" )
+    { return cmSystemTools::MODULE_FILE_FORMAT; }
 #else // __APPLE__
-  if ( ext == "so" || ext == ".so" || 
-       ext == "sl" || ext == ".sl" || 
-       ext == "dll" || ext == ".dll" ) 
+  if ( ext == "so" || ext == ".so" ||
+       ext == "sl" || ext == ".sl" ||
+       ext == "dll" || ext == ".dll" )
     { return cmSystemTools::SHARED_LIBRARY_FILE_FORMAT; }
 #endif // __APPLE__
   return cmSystemTools::UNKNOWN_FILE_FORMAT;
@@ -1687,7 +1730,7 @@ bool cmSystemTools::IsPathToFramework(const char* path)
   return false;
 }
 
-bool cmSystemTools::CreateTar(const char* outFileName, 
+bool cmSystemTools::CreateTar(const char* outFileName,
                               const std::vector<cmStdString>& files,
                               bool gzip, bool bzip2, bool verbose)
 {
@@ -1752,7 +1795,7 @@ namespace{
   static time_t          now;
   size_t u_width = 6;
   size_t gs_width = 13;
-  
+
   /*
    * We avoid collecting the entire list in memory at once by
    * listing things as we see them.  However, that also means we can't
@@ -1767,7 +1810,7 @@ namespace{
   fprintf(out, "%s %d ",
           archive_entry_strmode(entry),
           archive_entry_nlink(entry));
-  
+
   /* Use uname if it's present, else uid. */
   p = archive_entry_uname(entry);
   if ((p == NULL) || (*p == '\0'))
@@ -1788,7 +1831,7 @@ namespace{
     {
     fprintf(out, "%s", p);
     w = strlen(p);
-    } 
+    }
   else
     {
     sprintf(tmp, "%lu",
@@ -1796,20 +1839,20 @@ namespace{
     w = strlen(tmp);
     fprintf(out, "%s", tmp);
     }
-  
+
   /*
    * Print device number or file size, right-aligned so as to make
    * total width of group and devnum/filesize fields be gs_width.
    * If gs_width is too small, grow it.
    */
   if (archive_entry_filetype(entry) == AE_IFCHR
-      || archive_entry_filetype(entry) == AE_IFBLK) 
+      || archive_entry_filetype(entry) == AE_IFBLK)
     {
     sprintf(tmp, "%lu,%lu",
             (unsigned long)archive_entry_rdevmajor(entry),
             (unsigned long)archive_entry_rdevminor(entry));
     }
-  else 
+  else
     {
     /*
      * Note the use of platform-dependent macros to format
@@ -1830,7 +1873,7 @@ namespace{
 #define HALF_YEAR (time_t)365 * 86400 / 2
 #if defined(_WIN32) && !defined(__CYGWIN__)
   /* Windows' strftime function does not support %e format. */
-#define DAY_FMT  "%d"  
+#define DAY_FMT  "%d"
 #else
 #define DAY_FMT  "%e"  /* Day number without leading zeros */
 #endif
@@ -1860,15 +1903,15 @@ namespace{
 #ifdef __BORLANDC__
 # pragma warn -8066 /* unreachable code */
 #endif
-  
+
 long copy_data(struct archive *ar, struct archive *aw)
 {
   long r;
   const void *buff;
   size_t size;
   off_t offset;
-  
-  for (;;) 
+
+  for (;;)
     {
     r = archive_read_data_block(ar, &buff, &size, &offset);
     if (r == ARCHIVE_EOF)
@@ -1880,7 +1923,7 @@ long copy_data(struct archive *ar, struct archive *aw)
       return (r);
       }
     r = archive_write_data_block(aw, buff, size, offset);
-    if (r != ARCHIVE_OK) 
+    if (r != ARCHIVE_OK)
       {
       cmSystemTools::Message("archive_write_data_block()",
                              archive_error_string(aw));
@@ -1890,7 +1933,7 @@ long copy_data(struct archive *ar, struct archive *aw)
   return r;
 }
 
-bool extract_tar(const char* outFileName, bool verbose, 
+bool extract_tar(const char* outFileName, bool verbose,
                  bool extract)
 {
   struct archive* a = archive_read_new();
@@ -1900,12 +1943,12 @@ bool extract_tar(const char* outFileName, bool verbose,
   struct archive_entry *entry;
   int r = archive_read_open_file(a, outFileName, 10240);
   if(r)
-    { 
+    {
     cmSystemTools::Error("Problem with archive_read_open_file(): ",
                          archive_error_string(a));
     return false;
     }
-  for (;;) 
+  for (;;)
     {
     r = archive_read_next_header(a, &entry);
     if (r == ARCHIVE_EOF)
@@ -1948,7 +1991,7 @@ bool extract_tar(const char* outFileName, bool verbose,
         cmSystemTools::Error("Current file:",
                              archive_entry_pathname(entry));
         }
-      else 
+      else
         {
         copy_data(a, ext);
         r = archive_write_finish_entry(ext);
@@ -1970,9 +2013,9 @@ bool extract_tar(const char* outFileName, bool verbose,
 
 }
 }
-#endif 
+#endif
 
-bool cmSystemTools::ExtractTar(const char* outFileName, 
+bool cmSystemTools::ExtractTar(const char* outFileName,
                                bool , bool verbose)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -1984,7 +2027,7 @@ bool cmSystemTools::ExtractTar(const char* outFileName,
 #endif
 }
 
-bool cmSystemTools::ListTar(const char* outFileName, 
+bool cmSystemTools::ListTar(const char* outFileName,
                             bool ,
                             bool verbose)
 {
@@ -2100,8 +2143,8 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
 }
 
 void cmSystemTools::DoNotInheritStdPipes()
-{   
-#ifdef _WIN32  
+{
+#ifdef _WIN32
   // Check to see if we are attached to a console
   // if so, then do not stop the inherited pipes
   // or stdout and stderr will not show up in dos
@@ -2230,6 +2273,71 @@ bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
     }
 #endif
   return true;
+}
+
+//----------------------------------------------------------------------------
+#ifdef _WIN32
+# ifndef CRYPT_SILENT
+#  define CRYPT_SILENT 0x40 /* Not defined by VS 6 version of header.  */
+# endif
+static int WinCryptRandom(void* data, size_t size)
+{
+  int result = 0;
+  HCRYPTPROV hProvider = 0;
+  if(CryptAcquireContextW(&hProvider, 0, 0, PROV_RSA_FULL,
+                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+    {
+    result = CryptGenRandom(hProvider, (DWORD)size, (BYTE*)data)? 1:0;
+    CryptReleaseContext(hProvider, 0);
+    }
+  return result;
+}
+#endif
+
+//----------------------------------------------------------------------------
+unsigned int cmSystemTools::RandomSeed()
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  unsigned int seed = 0;
+
+  // Try using a real random source.
+  if(WinCryptRandom(&seed, sizeof(seed)))
+    {
+    return seed;
+    }
+
+  // Fall back to the time and pid.
+  FILETIME ft;
+  GetSystemTimeAsFileTime(&ft);
+  unsigned int t1 = static_cast<unsigned int>(ft.dwHighDateTime);
+  unsigned int t2 = static_cast<unsigned int>(ft.dwLowDateTime);
+  unsigned int pid = static_cast<unsigned int>(GetCurrentProcessId());
+  return t1 ^ t2 ^ pid;
+#else
+  union
+  {
+    unsigned int integer;
+    char bytes[sizeof(unsigned int)];
+  } seed;
+
+  // Try using a real random source.
+  std::ifstream fin("/dev/urandom");
+  if(fin && fin.read(seed.bytes, sizeof(seed)) &&
+     fin.gcount() == sizeof(seed))
+    {
+    return seed.integer;
+    }
+
+  // Fall back to the time and pid.
+  struct timeval t;
+  gettimeofday(&t, 0);
+  unsigned int pid = static_cast<unsigned int>(getpid());
+  unsigned int tv_sec = static_cast<unsigned int>(t.tv_sec);
+  unsigned int tv_usec = static_cast<unsigned int>(t.tv_usec);
+  // Since tv_usec never fills more than 11 bits we shift it to fill
+  // in the slow-changing high-order bits of tv_sec.
+  return tv_sec ^ (tv_usec << 21) ^ pid;
+#endif
 }
 
 //----------------------------------------------------------------------------
@@ -2603,7 +2711,7 @@ bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
     else if(lhs[i] > rhs[i])
       {
       // lhs > rhs, so true if operation is GREATER
-        return op == cmSystemTools::OP_GREATER;
+      return op == cmSystemTools::OP_GREATER;
       }
     }
   // lhs == rhs, so true if operation is EQUAL
@@ -2832,4 +2940,36 @@ bool cmSystemTools::RepeatedRemoveDirectory(const char* dir)
     cmSystemTools::Delay(100);
     }
   return false;
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> cmSystemTools::tokenize(const std::string& str,
+                                  const std::string& sep)
+{
+  std::vector<std::string> tokens;
+  std::string::size_type tokend = 0;
+
+  do
+    {
+    std::string::size_type tokstart=str.find_first_not_of(sep, tokend);
+    if (tokstart==std::string::npos)
+      {
+      break;    // no more tokens
+      }
+    tokend=str.find_first_of(sep,tokstart);
+    if (tokend==std::string::npos)
+      {
+      tokens.push_back(str.substr(tokstart));
+      }
+    else
+      {
+      tokens.push_back(str.substr(tokstart,tokend-tokstart));
+      }
+    } while (tokend!=std::string::npos);
+
+  if (tokens.empty())
+    {
+    tokens.push_back("");
+    }
+  return tokens;
 }

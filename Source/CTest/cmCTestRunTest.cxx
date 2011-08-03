@@ -135,7 +135,10 @@ void cmCTestRunTest::CompressOutput()
 //---------------------------------------------------------
 bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 {
-  if (this->CTest->ShouldCompressTestOutput())
+  if ((!this->TestHandler->MemCheck &&
+      this->CTest->ShouldCompressTestOutput()) ||
+      (this->TestHandler->MemCheck &&
+      this->CTest->ShouldCompressMemCheckOutput()))
     {
     this->CompressOutput();
     }
@@ -279,11 +282,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   // Output since that is what is parsed by cmCTestMemCheckHandler
   if(!this->TestHandler->MemCheck && started)
     {
-      this->TestHandler->CleanTestOutput(this->ProcessOutput, 
-          static_cast<size_t>
-          (this->TestResult.Status == cmCTestTestHandler::COMPLETED ? 
-          this->TestHandler->CustomMaximumPassedTestOutputSize :
-          this->TestHandler->CustomMaximumFailedTestOutputSize));
+    this->TestHandler->CleanTestOutput(this->ProcessOutput,
+      static_cast<size_t>
+      (this->TestResult.Status == cmCTestTestHandler::COMPLETED ?
+      this->TestHandler->CustomMaximumPassedTestOutputSize :
+      this->TestHandler->CustomMaximumFailedTestOutputSize));
     }
   this->TestResult.Reason = reason;
   if (this->TestHandler->LogFile)
@@ -332,7 +335,8 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
   // record the results in TestResult 
   if(started)
     {
-    bool compress = this->CompressionRatio < 1 &&
+    bool compress = !this->TestHandler->MemCheck &&
+      this->CompressionRatio < 1 &&
       this->CTest->ShouldCompressTestOutput();
     this->TestResult.Output = compress ? this->CompressedOutput 
       : this->ProcessOutput;
@@ -408,6 +412,30 @@ bool cmCTestRunTest::StartTest(size_t total)
   this->TestResult.TestCount = this->TestProperties->Index;  
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory.c_str();
+
+  if(args.size() >= 2 && args[1] == "NOT_AVAILABLE")
+    {
+    this->TestProcess = new cmProcess;
+    std::string msg;
+    if(this->CTest->GetConfigType().empty())
+      {
+      msg = "Test not available without configuration.";
+      msg += "  (Missing \"-C <config>\"?)";
+      }
+    else
+      {
+      msg = "Test not available in configuration \"";
+      msg += this->CTest->GetConfigType();
+      msg += "\".";
+      }
+    *this->TestHandler->LogFile << msg << std::endl;
+    cmCTestLog(this->CTest, ERROR_MESSAGE, msg << std::endl);
+    this->TestResult.Output = msg;
+    this->TestResult.FullCommandLine = "";
+    this->TestResult.CompletionStatus = "Not Run";
+    this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+    return false;
+    }
   
   // Check if all required files exist
   for(std::vector<std::string>::iterator i =

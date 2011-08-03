@@ -130,6 +130,22 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
+void cmTestGenerator::GenerateScriptNoConfig(std::ostream& os,
+                                             Indent const& indent)
+{
+  os << indent << "ADD_TEST(" << this->Test->GetName() << " NOT_AVAILABLE)\n";
+}
+
+//----------------------------------------------------------------------------
+bool cmTestGenerator::NeedsScriptNoConfig() const
+{
+  return (this->TestGenerated && // test generated for at least one config
+          this->ActionsPerConfig && // test is config-aware
+          this->Configurations.empty() && // test runs in all configs
+          !this->ConfigurationTypes->empty()); // config-dependent command
+}
+
+//----------------------------------------------------------------------------
 void cmTestGenerator::GenerateOldStyle(std::ostream& fout,
                                        Indent const& indent)
 {

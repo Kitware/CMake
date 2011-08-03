@@ -2614,6 +2614,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   ++i;
 
   long timeout = 0;
+  long inactivity_timeout = 0;
   std::string verboseLog;
   std::string statusVar;
   std::string expectedMD5sum;
@@ -2631,6 +2632,19 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       else
         {
         this->SetError("DOWNLOAD missing time for TIMEOUT.");
+        return false;
+        }
+      }
+    else if(*i == "INACTIVITY_TIMEOUT")
+      {
+      ++i;
+      if(i != args.end())
+        {
+        inactivity_timeout = atol(i->c_str());
+        }
+      else
+        {
+        this->SetError("DOWNLOAD missing time for INACTIVITY_TIMEOUT.");
         return false;
         }
       }
@@ -2770,6 +2784,13 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     check_curl_result(res, "DOWNLOAD cannot set timeout: ");
     }
 
+  if(inactivity_timeout > 0)
+    {
+    // Give up if there is no progress for a long time.
+    ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
+    ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, inactivity_timeout);
+    }
+
   // Need the progress helper's scope to last through the duration of
   // the curl_easy_perform call... so this object is declared at function
   // scope intentionally, rather than inside the "if(showProgress)"
@@ -2883,6 +2904,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   ++i;
 
   long timeout = 0;
+  long inactivity_timeout = 0;
   std::string logVar;
   std::string statusVar;
   bool showProgress = false;
@@ -2899,6 +2921,19 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
       else
         {
         this->SetError("UPLOAD missing time for TIMEOUT.");
+        return false;
+        }
+      }
+    else if(*i == "INACTIVITY_TIMEOUT")
+      {
+      ++i;
+      if(i != args.end())
+        {
+        inactivity_timeout = atol(i->c_str());
+        }
+      else
+        {
+        this->SetError("UPLOAD missing time for INACTIVITY_TIMEOUT.");
         return false;
         }
       }
@@ -3001,6 +3036,13 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     {
     res = ::curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout );
     check_curl_result(res, "UPLOAD cannot set timeout: ");
+    }
+
+  if(inactivity_timeout > 0)
+    {
+    // Give up if there is no progress for a long time.
+    ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
+    ::curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, inactivity_timeout);
     }
 
   // Need the progress helper's scope to last through the duration of

@@ -34,6 +34,8 @@ protected:
   virtual void GenerateScriptForConfig(std::ostream& os,
                                        const char* config,
                                        Indent const& indent);
+  virtual void GenerateScriptNoConfig(std::ostream& os, Indent const& indent);
+  virtual bool NeedsScriptNoConfig() const;
   void GenerateOldStyle(std::ostream& os, Indent const& indent);
 
   cmTest* Test;

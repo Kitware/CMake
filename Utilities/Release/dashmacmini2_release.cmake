@@ -15,6 +15,5 @@ CPACK_SYSTEM_NAME:STRING=Darwin-universal
 BUILD_QtDialog:BOOL:=TRUE
 QT_QMAKE_EXECUTABLE:FILEPATH=/Users/kitware/Software/QtBinUniversal/bin/qmake
 ")
-set(GIT_COMMAND /opt/local/bin/git)
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)

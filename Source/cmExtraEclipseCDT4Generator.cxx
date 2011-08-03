@@ -403,7 +403,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   // for each sub project create a linked resource to the source dir
   // - only if it is an out-of-source build
   this->AppendLinkedResource(fout, "[Subprojects]",
-                             "virtual:/virtual");
+                             "virtual:/virtual", true);
 
   for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
@@ -654,7 +654,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       }
     }
   // add system defined c macros
-  const char* cDefs=mf->GetDefinition("CMAKE_ECLIPSE_C_SYSTEM_DEFINED_MACROS");
+  const char* cDefs=mf->GetDefinition(
+                              "CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS");
   if(cDefs)
     {
     // Expand the list.
@@ -689,7 +690,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     }
   // add system defined c++ macros
   const char* cxxDefs = mf->GetDefinition(
-                                    "CMAKE_ECLIPSE_CXX_SYSTEM_DEFINED_MACROS");
+                            "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_DEFINED_MACROS");
   if(cxxDefs)
     {
     // Expand the list.
@@ -737,12 +738,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // now also the system include directories, in case we found them in
   // CMakeSystemSpecificInformation.cmake. This makes Eclipse find the
   // standard headers.
-  mf->GetDefinition("CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS");
   std::string compiler = mf->GetSafeDefinition("CMAKE_C_COMPILER");
   if (!compiler.empty())
     {
     std::string systemIncludeDirs = mf->GetSafeDefinition(
-                                      "CMAKE_ECLIPSE_C_SYSTEM_INCLUDE_DIRS");
+                                "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs;
     cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
     this->AppendIncludeDirectories(fout, dirs, emmited);
@@ -751,7 +751,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   if (!compiler.empty())
     {
     std::string systemIncludeDirs = mf->GetSafeDefinition(
-                                      "CMAKE_ECLIPSE_CXX_SYSTEM_INCLUDE_DIRS");
+                              "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs;
     cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
     this->AppendIncludeDirectories(fout, dirs, emmited);
@@ -1082,17 +1082,24 @@ void cmExtraEclipseCDT4Generator
 void cmExtraEclipseCDT4Generator
 ::AppendLinkedResource (cmGeneratedFileStream& fout,
                         const std::string&     name,
-                        const std::string&     path)
+                        const std::string&     path,
+                        bool isVirtualFolder)
 {
+  const char* locationTag = "location";
+  if (isVirtualFolder) // ... and not a linked folder
+    {
+    locationTag = "locationURI";
+    }
+
   fout <<
     "\t\t<link>\n"
     "\t\t\t<name>"
     << cmExtraEclipseCDT4Generator::EscapeForXML(name)
     << "</name>\n"
     "\t\t\t<type>2</type>\n"
-    "\t\t\t<locationURI>"
+    "\t\t\t<" << locationTag << ">"
     << cmExtraEclipseCDT4Generator::EscapeForXML(path)
-    << "</locationURI>\n"
+    << "</" << locationTag << ">\n"
     "\t\t</link>\n"
     ;
 }

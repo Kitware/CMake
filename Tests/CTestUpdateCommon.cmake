@@ -29,11 +29,13 @@ function(check_updates build)
   endif(NOT UPDATE_XML_FILE)
   message(" found ${UPDATE_XML_FILE}")
 
+  set(max_update_xml_size 16384)
+
   # Read entries from the Update.xml file
   set(types "Updated|Modified|Conflicting")
   file(STRINGS ${TOP}/${UPDATE_XML_FILE} UPDATE_XML_ENTRIES
     REGEX "<(${types}|FullName)>"
-    LIMIT_INPUT 4096
+    LIMIT_INPUT ${max_update_xml_size}
     )
   string(REGEX REPLACE
     "[ \t]*<(${types})>[ \t]*;[ \t]*<FullName>([^<]*)</FullName>"
@@ -51,7 +53,7 @@ function(check_updates build)
     set(rev_regex "^\t<(${rev_regex})>[^<\n]+</(${rev_regex})>$")
     file(STRINGS ${TOP}/${UPDATE_XML_FILE} UPDATE_XML_REVISIONS
       REGEX "${rev_regex}"
-      LIMIT_INPUT 4096
+      LIMIT_INPUT ${max_update_xml_size}
       )
     foreach(r IN LISTS UPDATE_XML_REVISIONS)
       string(REGEX REPLACE "${rev_regex}" "\\1" element "${r}")
@@ -94,7 +96,7 @@ function(check_updates build)
     file(GLOB UPDATE_LOG_FILE
       ${TOP}/${build}/Testing/Temporary/LastUpdate*.log)
     if(UPDATE_LOG_FILE)
-      file(READ ${UPDATE_LOG_FILE} UPDATE_LOG LIMIT 4096)
+      file(READ ${UPDATE_LOG_FILE} UPDATE_LOG LIMIT ${max_update_xml_size})
       string(REGEX REPLACE "\n" "\n  " UPDATE_LOG "${UPDATE_LOG}")
       set(MSG "${MSG}Update log:\n  ${UPDATE_LOG}")
     else(UPDATE_LOG_FILE)

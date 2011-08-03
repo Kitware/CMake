@@ -69,7 +69,7 @@ We can also infer the edge
 because *every* time A appears B is seen on its right.  We do not know
 whether A really needs symbols from B to link, but it *might* so we
 must preserve their order.  This is the case also for the following
-explict lists:
+explicit lists:
 
   X: A B Y
   Y: A B

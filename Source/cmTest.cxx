@@ -84,13 +84,13 @@ void cmTest::SetProperty(const char* prop, const char* value)
 }
 
 //----------------------------------------------------------------------------
-void cmTest::AppendProperty(const char* prop, const char* value)
+void cmTest::AppendProperty(const char* prop, const char* value, bool asString)
 {
   if (!prop)
     {
     return;
     }
-  this->Properties.AppendProperty(prop, value, cmProperty::TEST);
+  this->Properties.AppendProperty(prop, value, cmProperty::TEST, asString);
 }
 
 //----------------------------------------------------------------------------

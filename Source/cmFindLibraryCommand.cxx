@@ -44,6 +44,10 @@ void cmFindLibraryCommand::GenerateDocumentation()
                                "SEARCH_XXX", "library");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SUBDIR", "lib");
+  cmSystemTools::ReplaceString(
+    this->GenericDocumentation,
+    "XXX_EXTRA_PREFIX_ENTRY",
+    "   <prefix>/lib/<arch> if CMAKE_LIBRARY_ARCHITECTURE is set, and\n");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "CMAKE_FIND_ROOT_PATH_MODE_XXX",
                                "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY");
@@ -160,11 +164,6 @@ void cmFindLibraryCommand::AddArchitecturePaths(const char* suffix)
 
 void cmFindLibraryCommand::AddLib64Paths()
 {  
-  if(!this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
-     GetLanguageEnabled("C"))
-    {
-    return;
-    }
   std::string voidsize =
     this->Makefile->GetSafeDefinition("CMAKE_SIZEOF_VOID_P");
   int size = atoi(voidsize.c_str());

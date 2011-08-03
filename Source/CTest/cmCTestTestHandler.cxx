@@ -1301,7 +1301,8 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<cmStdString>& vec)
     int retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run command: " << *it
       << std::endl);
-    if ( !cmSystemTools::RunSingleCommand(it->c_str(), 0, &retVal, 0, true
+    if ( !cmSystemTools::RunSingleCommand(it->c_str(), 0, &retVal, 0,
+                                          cmSystemTools::OUTPUT_MERGE
         /*this->Verbose*/) || retVal != 0 )
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Problem running command: "
@@ -1320,6 +1321,10 @@ std::string cmCTestTestHandler::FindTheExecutable(const char *exe)
   std::string resConfig;
   std::vector<std::string> extraPaths;
   std::vector<std::string> failedPaths;
+  if(strcmp(exe, "NOT_AVAILABLE") == 0)
+    {
+    return exe;
+    }
   return cmCTestTestHandler::FindExecutable(this->CTest,
                                             exe, resConfig,
                                             extraPaths,
@@ -1936,6 +1941,7 @@ void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
     fin.getline(buff, filelen);
     buff[fin.gcount()] = 0;
     this->TestsToRunString = buff;
+    delete [] buff;
     }
 }
 

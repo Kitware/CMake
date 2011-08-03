@@ -546,7 +546,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "make based generators. If this variable is supported, "
      "then CMake will also provide initial values for the "
      "variables with the name "
-     " CMAKE_C_FLAGS_[Debug|Release|RelWithDebInfo|MinSizeRel]."
+     " CMAKE_C_FLAGS_[DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL]."
      " For example, if CMAKE_BUILD_TYPE is Debug, then "
      "CMAKE_C_FLAGS_DEBUG will be added to the CMAKE_C_FLAGS.",false,
      "Variables That Change Behavior");
@@ -719,6 +719,20 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Change Behavior");
 
   cm->DefineProperty
+    ("CMAKE_DISABLE_FIND_PACKAGE_<PackageName>", cmProperty::VARIABLE,
+     "Variable for disabling find_package() calls.",
+     "Every non-REQUIRED find_package() call in a project can be disabled "
+     "by setting the variable CMAKE_DISABLE_FIND_PACKAGE_<PackageName> to "
+     "TRUE. This can be used to build a project without an optional package, "
+     "although that package is installed.\n"
+     "This switch should be used during the initial CMake run. Otherwise if "
+     "the package has already been found in a previous CMake run, the "
+     "variables which have been stored in the cache will still be there. "
+     "In the case it is recommended to remove the cache variables for "
+     "this package from the cache using the cache editor or cmake -U", false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
     ("CMAKE_USER_MAKE_RULES_OVERRIDE", cmProperty::VARIABLE,
      "Specify a CMake file that overrides platform information.",
      "CMake loads the specified file while enabling support for each "
@@ -821,6 +835,18 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "systems that support uname, this variable is "
      "set to the output of uname -r. On other "
      "systems this is set to major-minor version numbers.",false,
+     "Variables That Describe the System");
+  cm->DefineProperty
+    ("CMAKE_LIBRARY_ARCHITECTURE", cmProperty::VARIABLE,
+     "Target architecture library directory name, if detected.",
+     "This is the value of CMAKE_<lang>_LIBRARY_ARCHITECTURE as "
+     "detected for one of the enabled languages.",false,
+     "Variables That Describe the System");
+  cm->DefineProperty
+    ("CMAKE_LIBRARY_ARCHITECTURE_REGEX", cmProperty::VARIABLE,
+     "Regex matching possible target architecture library directory names.",
+     "This is used to detect CMAKE_<lang>_LIBRARY_ARCHITECTURE from the "
+     "implicit linker search path by matching the <arch> name.",false,
      "Variables That Describe the System");
 
   cm->DefineProperty
@@ -927,7 +953,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("WIN32", cmProperty::VARIABLE,
      "True on windows systems, including win64.",
-     "Set to true when the target system is Windows and on cygwin.",false,
+     "Set to true when the target system is Windows.",false,
      "Variables That Describe the System");
 
   cm->DefineProperty
@@ -1357,6 +1383,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "These flags are implicit link options for the compiler's language.  "
      "CMake automatically detects these libraries and flags for each "
      "language and reports the results in this variable.", false,
+     "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_LIBRARY_ARCHITECTURE", cmProperty::VARIABLE,
+     "Target architecture library directory name detected for <lang>.",
+     "If the <lang> compiler passes to the linker an architecture-specific "
+     "system library search directory such as <prefix>/lib/<arch> this "
+     "variable contains the <arch> name if/as detected by CMake.",false,
      "Variables for Languages");
 
   cm->DefineProperty

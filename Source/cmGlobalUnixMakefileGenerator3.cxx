@@ -24,13 +24,13 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
   this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeUnixFindMake.cmake";
   this->ToolSupportsColor = true;
-  this->NoRuleMessages = false;
 
 #if defined(_WIN32) || defined(__VMS)
   this->UseLinkScript = false;
 #else
   this->UseLinkScript = true;
 #endif
+  this->CommandDatabase = NULL;
 }
 
 void cmGlobalUnixMakefileGenerator3
@@ -139,56 +139,87 @@ void cmGlobalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
+std::string EscapeJSON(const std::string& s) {
+  std::string result;
+  for (std::string::size_type i = 0; i < s.size(); ++i) {
+    if (s[i] == '"' || s[i] == '\\') {
+      result += '\\';
+    }
+    result += s[i];
+  }
+  return result;
+}
+
 void cmGlobalUnixMakefileGenerator3::Generate()
 {
   // first do superclass method
   this->cmGlobalGenerator::Generate();
 
-  cmake* cm = this->GetCMakeInstance();
-  if(const char* ruleStatus = cm->GetProperty("RULE_MESSAGES"))
+  // initialize progress
+  unsigned long total = 0;
+  for(ProgressMapType::const_iterator pmi = this->ProgressMap.begin();
+      pmi != this->ProgressMap.end(); ++pmi)
     {
-    this->NoRuleMessages = cmSystemTools::IsOff(ruleStatus);
+    total += pmi->second.NumberOfActions;
     }
 
-  if(!this->NoRuleMessages)
+  // write each target's progress.make this loop is done twice. Bascially the
+  // Generate pass counts all the actions, the first loop below determines
+  // how many actions have progress updates for each target and writes to
+  // corrrect variable values for everything except the all targets. The
+  // second loop actually writes out correct values for the all targets as
+  // well. This is because the all targets require more information that is
+  // computed in the first loop.
+  unsigned long current = 0;
+  for(ProgressMapType::iterator pmi = this->ProgressMap.begin();
+      pmi != this->ProgressMap.end(); ++pmi)
     {
-    // initialize progress
-    unsigned long total = 0;
-    for(ProgressMapType::const_iterator pmi = this->ProgressMap.begin();
-        pmi != this->ProgressMap.end(); ++pmi)
-      {
-      total += pmi->second.NumberOfActions;
-      }
-
-    // write each target's progress.make this loop is done twice. Bascially the
-    // Generate pass counts all the actions, the first loop below determines
-    // how many actions have progress updates for each target and writes to
-    // corrrect variable values for everything except the all targets. The
-    // second loop actually writes out correct values for the all targets as
-    // well. This is because the all targets require more information that is
-    // computed in the first loop.
-    unsigned long current = 0;
-    for(ProgressMapType::iterator pmi = this->ProgressMap.begin();
-        pmi != this->ProgressMap.end(); ++pmi)
-      {
-      pmi->second.WriteProgressVariables(total, current);
-      }
-    for(unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
-      {
-      cmLocalUnixMakefileGenerator3 *lg =
-        static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
-      std::string markFileName = lg->GetMakefile()->GetStartOutputDirectory();
-      markFileName += "/";
-      markFileName += cmake::GetCMakeFilesDirectory();
-      markFileName += "/progress.marks";
-      cmGeneratedFileStream markFile(markFileName.c_str());
-      markFile << this->CountProgressMarksInAll(lg) << "\n";
-      }
+    pmi->second.WriteProgressVariables(total, current);
+    }
+  for(unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmLocalUnixMakefileGenerator3 *lg =
+      static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
+    std::string markFileName = lg->GetMakefile()->GetStartOutputDirectory();
+    markFileName += "/";
+    markFileName += cmake::GetCMakeFilesDirectory();
+    markFileName += "/progress.marks";
+    cmGeneratedFileStream markFile(markFileName.c_str());
+    markFile << this->CountProgressMarksInAll(lg) << "\n";
     }
 
   // write the main makefile
   this->WriteMainMakefile2();
   this->WriteMainCMakefile();
+
+  if (this->CommandDatabase != NULL) {
+    *this->CommandDatabase << std::endl << "]";
+    delete this->CommandDatabase;
+    this->CommandDatabase = NULL;
+  }
+}
+
+void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
+    const std::string &sourceFile, const std::string &workingDirectory,
+    const std::string &compileCommand) {
+  if (this->CommandDatabase == NULL)
+    {
+    std::string commandDatabaseName =
+      std::string(this->GetCMakeInstance()->GetHomeOutputDirectory())
+      + "/compile_commands.json";
+    this->CommandDatabase =
+      new cmGeneratedFileStream(commandDatabaseName.c_str());
+    *this->CommandDatabase << "[" << std::endl;
+    } else {
+    *this->CommandDatabase << "," << std::endl;
+    }
+  *this->CommandDatabase << "{" << std::endl
+      << "  \"directory\": \"" << EscapeJSON(workingDirectory) << "\","
+      << std::endl
+      << "  \"command\": \"" << EscapeJSON(compileCommand) << "\","
+      << std::endl
+      << "  \"file\": \"" << EscapeJSON(sourceFile) << "\""
+      << std::endl << "}";
 }
 
 void cmGlobalUnixMakefileGenerator3::WriteMainMakefile2()
@@ -747,34 +778,30 @@ cmGlobalUnixMakefileGenerator3
       // Write the rule.
       localName += "/all";
       depends.clear();
-      std::string progressDir;
 
-      if(!this->NoRuleMessages)
+      std::string progressDir =
+        lg->GetMakefile()->GetHomeOutputDirectory();
+      progressDir += cmake::GetCMakeFilesDirectory();
         {
-        progressDir =
-          lg->GetMakefile()->GetHomeOutputDirectory();
-        progressDir += cmake::GetCMakeFilesDirectory();
+        cmOStringStream progCmd;
+        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
+        // all target counts
+        progCmd << lg->Convert(progressDir.c_str(),
+                                cmLocalGenerator::FULL,
+                                cmLocalGenerator::SHELL);
+        progCmd << " ";
+        std::vector<unsigned long>& progFiles =
+          this->ProgressMap[&t->second].Marks;
+        for (std::vector<unsigned long>::iterator i = progFiles.begin();
+              i != progFiles.end(); ++i)
           {
-          cmOStringStream progCmd;
-          progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-          // all target counts
-          progCmd << lg->Convert(progressDir.c_str(),
-                                  cmLocalGenerator::FULL,
-                                  cmLocalGenerator::SHELL);
-          progCmd << " ";
-          std::vector<unsigned long>& progFiles =
-            this->ProgressMap[&t->second].Marks;
-          for (std::vector<unsigned long>::iterator i = progFiles.begin();
-                i != progFiles.end(); ++i)
-            {
-            progCmd << " " << *i;
-            }
-          commands.push_back(progCmd.str());
+          progCmd << " " << *i;
           }
-        progressDir = "Built target ";
-        progressDir += t->first;
-        lg->AppendEcho(commands,progressDir.c_str());
+        commands.push_back(progCmd.str());
         }
+      progressDir = "Built target ";
+      progressDir += t->first;
+      lg->AppendEcho(commands,progressDir.c_str());
 
       this->AppendGlobalTargetDepends(depends,t->second);
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
@@ -790,42 +817,38 @@ cmGlobalUnixMakefileGenerator3
                           "all", depends, commands, true);
         }
 
-      if(!this->NoRuleMessages)
-        {
-        // Write the rule.
-        commands.clear();
-        progressDir = lg->GetMakefile()->GetHomeOutputDirectory();
-        progressDir += cmake::GetCMakeFilesDirectory();
+      // Write the rule.
+      commands.clear();
+      progressDir = lg->GetMakefile()->GetHomeOutputDirectory();
+      progressDir += cmake::GetCMakeFilesDirectory();
 
-        {
-        // TODO: Convert the total progress count to a make variable.
-        cmOStringStream progCmd;
-        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
-        // # in target
-        progCmd << lg->Convert(progressDir.c_str(),
-                                cmLocalGenerator::FULL,
-                                cmLocalGenerator::SHELL);
-        //
-        std::set<cmTarget *> emitted;
-        progCmd << " "
-                << this->CountProgressMarksInTarget(&t->second, emitted);
-        commands.push_back(progCmd.str());
-        }
-        }
+      {
+      // TODO: Convert the total progress count to a make variable.
+      cmOStringStream progCmd;
+      progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
+      // # in target
+      progCmd << lg->Convert(progressDir.c_str(),
+                              cmLocalGenerator::FULL,
+                              cmLocalGenerator::SHELL);
+      //
+      std::set<cmTarget *> emitted;
+      progCmd << " "
+              << this->CountProgressMarksInTarget(&t->second, emitted);
+      commands.push_back(progCmd.str());
+      }
       std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
       tmp += "Makefile2";
       commands.push_back(lg->GetRecursiveMakeCall
                           (tmp.c_str(),localName.c_str()));
-      if(!this->NoRuleMessages)
-        {
-        cmOStringStream progCmd;
-        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
-        progCmd << lg->Convert(progressDir.c_str(),
-                                cmLocalGenerator::FULL,
-                                cmLocalGenerator::SHELL);
-        progCmd << " 0";
-        commands.push_back(progCmd.str());
-        }
+      {
+      cmOStringStream progCmd;
+      progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
+      progCmd << lg->Convert(progressDir.c_str(),
+                              cmLocalGenerator::FULL,
+                              cmLocalGenerator::SHELL);
+      progCmd << " 0";
+      commands.push_back(progCmd.str());
+      }
       depends.clear();
       depends.push_back("cmake_check_build_system");
       localName = lg->GetRelativeTargetDirectory(t->second);

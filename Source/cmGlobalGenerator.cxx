@@ -1136,7 +1136,7 @@ int cmGlobalGenerator::Build(
   const char *config,
   bool clean, bool fast,
   double timeout,
-  bool verbose,
+  cmSystemTools::OutputOption outputflag,
   const char* extraOptions,
   std::vector<std::string> const& nativeOptions)
 {
@@ -1176,7 +1176,7 @@ int cmGlobalGenerator::Build(
       }
 
     if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), outputPtr,
-                                         &retVal, 0, verbose, timeout))
+                                         &retVal, 0, outputflag, timeout))
       {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
@@ -1217,7 +1217,7 @@ int cmGlobalGenerator::Build(
     }
 
   if (!cmSystemTools::RunSingleCommand(command, outputPtr,
-                                       &retVal, 0, verbose, timeout))
+                                       &retVal, 0, outputflag, timeout))
     {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     cmSystemTools::Error

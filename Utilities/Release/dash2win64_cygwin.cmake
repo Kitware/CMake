@@ -12,7 +12,6 @@ CMAKE_Fortran_COMPILER_FULLPATH:FILEPATH=FALSE
 set(CXX g++)
 set(CC  gcc)
 set(SCRIPT_NAME dash2win64cygwin)
-set(GIT_COMMAND git)
 set(GIT_EXTRA "git config core.autocrlf true")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)

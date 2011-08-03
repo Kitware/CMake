@@ -38,17 +38,51 @@ FIND_PACKAGE(VersionTestC 1.2.3)
 FIND_PACKAGE(VersionTestD 1.2.3.4)
 
 #-----------------------------------------------------------------------------
+# Test system package registry if possible.
+SET(CMakeTestSystemPackage "")
+IF(WIN32 AND NOT CYGWIN)
+  # Try writing a value to the system package registry.
+  SET(_data "${FindPackageTest_SOURCE_DIR}/SystemPackage")
+  SET(_key "HKLM\\Software\\Kitware\\CMake\\Packages\\CMakeTestSystemPackage")
+  SET(_file "${FindPackageTest_BINARY_DIR}/CMakeTestSystemPackage.data")
+  FILE(WRITE ${_file} "${_data}\n")
+  EXECUTE_PROCESS(
+    COMMAND ${CMAKE_COMMAND} -E md5sum ${_file}
+    OUTPUT_VARIABLE _output ERROR_VARIABLE _error RESULT_VARIABLE _failed
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  STRING(REGEX REPLACE " .*" "" _value "${_output}")
+  IF(NOT _failed AND _value)
+    EXECUTE_PROCESS(
+      COMMAND reg add "${_key}" /v "${_value}" /t REG_SZ /d "${_data}" /f
+      OUTPUT_VARIABLE _output ERROR_VARIABLE _output RESULT_VARIABLE _failed
+      )
+  ENDIF()
+  # If the above worked, add the rest of the test and a rule to
+  # cleanup the value.
+  IF(NOT _failed)
+    MESSAGE(STATUS "HKLM is writable: enabling CMakeTestSystemPackage")
+    SET(CMakeTestSystemPackage_CLEANUP reg delete "${_key}" /v "${_value}" /f)
+    SET(CMakeTestSystemPackage CMakeTestSystemPackage)
+  ELSE()
+    MESSAGE(STATUS "HKLM is readonly: disabling CMakeTestSystemPackage")
+  ENDIF()
+ENDIF()
+
+#-----------------------------------------------------------------------------
 
 #SET(CMAKE_FIND_DEBUG_MODE 1)
 
 # For purposes of the test wipe out previous find results.
 SET(PACKAGES
-  foo Foo Bar TFramework Tframework TApp Tapp Special
+  foo Foo Bar Blub TFramework Tframework TApp Tapp Special
   VersionedA VersionedB VersionedC VersionedD VersionedE
   WrongA WrongB WrongC WrongD
   wibbleA wibbleB
   RecursiveA RecursiveB RecursiveC
+  ArchA ArchB ArchC ArchD
   EnvA EnvB
+  ${CMakeTestSystemPackage}
   )
 FOREACH(p ${PACKAGES})
   SET(${p}_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
@@ -70,6 +104,8 @@ set(CMAKE_IGNORE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib/cmake/zot-3.1)
 FIND_PACKAGE(foo NO_MODULE)
 FIND_PACKAGE(Foo CONFIGS FooConfig.cmake)
 FIND_PACKAGE(Bar)
+SET(CMAKE_DISABLE_FIND_PACKAGE_Blub TRUE)
+FIND_PACKAGE(Blub NO_MODULE)
 FIND_PACKAGE(TFramework CONFIGS TFrameworkConfig.cmake)
 FIND_PACKAGE(Tframework)
 FIND_PACKAGE(TApp)
@@ -109,6 +145,14 @@ FIND_PACKAGE(RecursiveA COMPONENTS A)
 FIND_PACKAGE(RecursiveB 2)
 FIND_PACKAGE(RecursiveC 3.1 EXACT)
 
+# Test architecture-specific search directories.
+SET(CMAKE_LIBRARY_ARCHITECTURE arch)
+FIND_PACKAGE(ArchA NAMES Bar)
+FIND_PACKAGE(ArchB NAMES Foo CONFIGS FooConfig.cmake)
+FIND_PACKAGE(ArchC 3.1 EXACT NAMES zot)
+FIND_PACKAGE(ArchD 4.0 EXACT NAMES zot)
+UNSET(CMAKE_LIBRARY_ARCHITECTURE)
+
 # Test <Package>_DIR environment variable.
 # We erase the main prefix path to ensure the env var is used.
 SET(CMAKE_PREFIX_PATH)
@@ -116,10 +160,18 @@ SET(ENV{EnvA_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/lib/zot-3.1")
 FIND_PACKAGE(EnvA 3.1 EXACT QUIET NAMES zot) # Should Work
 FIND_PACKAGE(EnvB 3.1 EXACT QUIET NAMES zot) # Should Fail
 
+# Test system package registry if available.
+IF(CMakeTestSystemPackage)
+  FIND_PACKAGE(CMakeTestSystemPackage)
+  EXECUTE_PROCESS(COMMAND ${CMakeTestSystemPackage_CLEANUP}
+    OUTPUT_VARIABLE _output ERROR_VARIABLE _error)
+ENDIF()
+
 # Expected locations at which packages should be found.
 SET(foo_EXPECTED "lib/foo-1.2/foo-config.cmake")
 SET(Foo_EXPECTED "lib/foo-1.2/CMake/FooConfig.cmake")
 SET(Bar_EXPECTED "lib/Bar/BarConfig.cmake")
+SET(Blub_MISSING "")
 SET(Special_EXPECTED "lib/suffix/test/SuffixTestConfig.cmake")
 SET(TFramework_EXPECTED
   "TFramework.framework/Versions/A/Resources/CMake/TFrameworkConfig.cmake")
@@ -143,8 +195,13 @@ SET(wibbleB_EXPECTED "B/wibble-config.cmake")
 SET(RecursiveA_EXPECTED "lib/RecursiveA/recursivea-config.cmake")
 SET(RecursiveB_EXPECTED "lib/zot-2.0/zot-config.cmake")
 SET(RecursiveC_EXPECTED "lib/zot-3.1/zot-config.cmake")
+SET(ArchA_EXPECTED "lib/arch/Bar/BarConfig.cmake")
+SET(ArchB_EXPECTED "lib/arch/foo-1.2/CMake/FooConfig.cmake")
+SET(ArchC_EXPECTED "lib/arch/zot-3.1/zot-config.cmake")
+SET(ArchD_EXPECTED "lib/arch/cmake/zot-4.0/zot-config.cmake")
 SET(EnvA_EXPECTED "lib/zot-3.1/zot-config.cmake")
 SET(EnvB_MISSING "EnvB_DIR-NOTFOUND")
+SET(CMakeTestSystemPackage_EXPECTED "SystemPackage/CMakeTestSystemPackageConfig.cmake")
 
 # Check the results.
 FOREACH(p ${PACKAGES})

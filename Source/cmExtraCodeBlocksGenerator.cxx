@@ -266,10 +266,17 @@ void cmExtraCodeBlocksGenerator
       }
 
     // Convert
+    const char* cmakeRoot = mf->GetDefinition("CMAKE_ROOT");
     for (std::vector<std::string>::const_iterator jt = listFiles.begin();
          jt != listFiles.end();
          ++jt)
       {
+      // don't put cmake's own files into the project (#12110):
+      if (jt->find(cmakeRoot) == 0)
+        {
+        continue;
+        }
+
       const std::string &relative = cmSystemTools::RelativePath(
                          it->second[0]->GetMakefile()->GetHomeDirectory(),
                          jt->c_str());
@@ -573,15 +580,69 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
           "         <Option type=\"" << cbTargetType << "\" />\n"
           "         <Option compiler=\"" << compiler << "\" />\n"
           "         <Compiler>\n";
+
+    // the compilerdefines for this target
+    const char* cdefs = target->GetMakefile()->GetProperty(
+                                                        "COMPILE_DEFINITIONS");
+    if(cdefs)
+      {
+      // Expand the list.
+      std::vector<std::string> defs;
+      cmSystemTools::ExpandListArgument(cdefs, defs);
+      for(std::vector<std::string>::const_iterator di = defs.begin();
+          di != defs.end(); ++di)
+        {
+        fout <<"            <Add option=\"-D" << di->c_str() << "\" />\n";
+        }
+      }
+
       // the include directories for this target
+      std::set<std::string> uniqIncludeDirs;
       const std::vector<std::string>& incDirs =
           target->GetMakefile()->GetIncludeDirectories();
       for(std::vector<std::string>::const_iterator dirIt=incDirs.begin();
           dirIt != incDirs.end();
           ++dirIt)
         {
+        uniqIncludeDirs.insert(*dirIt);
+        }
+
+
+      std::string systemIncludeDirs = makefile->GetSafeDefinition(
+                                "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
+      if (!systemIncludeDirs.empty())
+        {
+        std::vector<std::string> dirs;
+        cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+        for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
+            dirIt != dirs.end();
+            ++dirIt)
+          {
+          uniqIncludeDirs.insert(*dirIt);
+          }
+        }
+
+      systemIncludeDirs = makefile->GetSafeDefinition(
+                              "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
+      if (!systemIncludeDirs.empty())
+        {
+        std::vector<std::string> dirs;
+        cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+        for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
+            dirIt != dirs.end();
+            ++dirIt)
+          {
+          uniqIncludeDirs.insert(*dirIt);
+          }
+        }
+
+      for(std::set<std::string>::const_iterator dirIt=uniqIncludeDirs.begin();
+          dirIt != uniqIncludeDirs.end();
+          ++dirIt)
+        {
         fout <<"            <Add directory=\"" << dirIt->c_str() << "\" />\n";
         }
+
       fout<<"         </Compiler>\n";
       }
     else // e.g. all and the GLOBAL and UTILITY targets

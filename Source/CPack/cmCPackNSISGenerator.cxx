@@ -672,9 +672,6 @@ CreateComponentDescription(cmCPackComponent *component,
     }
   componentCode += "  SetOutPath \"$INSTDIR\"\n";
 
-  componentCode += "  IntCmp $" + component->Name 
-    + "_was_installed ${SF_SELECTED} noinstall_" + component->Name + "\n";
-
   // Create the actual installation commands
   if (component->IsDownloaded)
     {
@@ -786,7 +783,8 @@ CreateComponentDescription(cmCPackComponent *component,
     std::string output;
     int retVal = -1;
     int res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output, &retVal, 
-                                              dirName.c_str(), false, 0);
+                                              dirName.c_str(),
+                                              cmSystemTools::OUTPUT_NONE, 0);
     if ( !res || retVal )
     {
       std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -824,7 +822,6 @@ CreateComponentDescription(cmCPackComponent *component,
     componentCode += "  File /r \"${INST_DIR}\\" +
       component->Name + "\\*.*\"\n";
     }
-  componentCode += "  noinstall_" + component->Name + ":\n";
   componentCode += "SectionEnd\n";
 
   // Macro used to remove the component

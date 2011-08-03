@@ -62,8 +62,10 @@
 #    include "cmGlobalVisualStudio71Generator.h"
 #    include "cmGlobalVisualStudio8Generator.h"
 #    include "cmGlobalVisualStudio9Generator.h"
+#    include "cmGlobalVisualStudio9IA64Generator.h"
 #    include "cmGlobalVisualStudio9Win64Generator.h"
 #    include "cmGlobalVisualStudio10Generator.h"
+#    include "cmGlobalVisualStudio10IA64Generator.h"
 #    include "cmGlobalVisualStudio10Win64Generator.h"
 #    include "cmGlobalVisualStudio8Win64Generator.h"
 #    include "cmGlobalBorlandMakefileGenerator.h"
@@ -1297,7 +1299,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       int retval = 0;
       int timeout = 0;
       if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, &retval,
-                                           directory.c_str(), true, timeout) )
+             directory.c_str(), cmSystemTools::OUTPUT_MERGE, timeout) )
         {
         return retval;
         }
@@ -2440,6 +2442,8 @@ void cmake::AddDefaultGenerators()
     &cmGlobalVisualStudio7Generator::New;
   this->Generators[cmGlobalVisualStudio10Generator::GetActualName()] =
     &cmGlobalVisualStudio10Generator::New;
+  this->Generators[cmGlobalVisualStudio10IA64Generator::GetActualName()] =
+    &cmGlobalVisualStudio10IA64Generator::New;
   this->Generators[cmGlobalVisualStudio10Win64Generator::GetActualName()] =
     &cmGlobalVisualStudio10Win64Generator::New;
   this->Generators[cmGlobalVisualStudio71Generator::GetActualName()] =
@@ -2448,6 +2452,8 @@ void cmake::AddDefaultGenerators()
     &cmGlobalVisualStudio8Generator::New;
   this->Generators[cmGlobalVisualStudio9Generator::GetActualName()] =
     &cmGlobalVisualStudio9Generator::New;
+  this->Generators[cmGlobalVisualStudio9IA64Generator::GetActualName()] =
+    &cmGlobalVisualStudio9IA64Generator::New;
   this->Generators[cmGlobalVisualStudio9Win64Generator::GetActualName()] =
     &cmGlobalVisualStudio9Win64Generator::New;
   this->Generators[cmGlobalVisualStudio8Win64Generator::GetActualName()] =
@@ -2932,6 +2938,7 @@ void cmake::GenerateGraphViz(const char* fileName) const
   gvWriter->ReadSettings(settingsFile.c_str(), fallbackSettingsFile.c_str());
 
   gvWriter->WritePerTargetFiles(fileName);
+  gvWriter->WriteTargetDependersFiles(fileName);
   gvWriter->WriteGlobalFile(fileName);
 
 #endif
@@ -3535,7 +3542,7 @@ void cmake::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop, value, cmProperty::GLOBAL);
 }
 
-void cmake::AppendProperty(const char* prop, const char* value)
+void cmake::AppendProperty(const char* prop, const char* value, bool asString)
 {
   if (!prop)
     {
@@ -3548,7 +3555,7 @@ void cmake::AppendProperty(const char* prop, const char* value)
     this->DebugConfigs.clear();
     }
 
-  this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL);
+  this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL, asString);
 }
 
 const char *cmake::GetProperty(const char* prop)
@@ -3977,7 +3984,7 @@ bool cmake::RunCommand(const char* comment,
   // use rc command to create .res file
   cmSystemTools::RunSingleCommand(command,
                                   &output,
-                                  &retCode, 0, false);
+                                  &retCode, 0, cmSystemTools::OUTPUT_NONE);
   // always print the output of the command, unless
   // it is the dumb rc command banner, but if the command
   // returned an error code then print the output anyway as
@@ -4295,7 +4302,8 @@ int cmake::Build(const std::string& dir,
                  const std::string& target,
                  const std::string& config,
                  const std::vector<std::string>& nativeOptions,
-                 bool clean)
+                 bool clean,
+                 cmSystemTools::OutputOption outputflag)
 {
   if(!cmSystemTools::FileIsDirectory(dir.c_str()))
     {
@@ -4337,7 +4345,7 @@ int cmake::Build(const std::string& dir,
                     projName.c_str(), target.c_str(),
                     &output,
                     makeProgram.c_str(),
-                    config.c_str(), clean, false, 0, true,
+                    config.c_str(), clean, false, 0, outputflag,
                     0, nativeOptions);
 }
 

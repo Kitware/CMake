@@ -11,37 +11,6 @@
 ============================================================================*/
 #include "cmSourceGroupCommand.h"
 
-inline std::vector<std::string> tokenize(const std::string& str,
-                                         const std::string& sep)
-{
-  std::vector<std::string> tokens;
-  std::string::size_type tokend = 0;
-
-  do
-    {
-    std::string::size_type tokstart=str.find_first_not_of(sep, tokend);
-    if (tokstart==std::string::npos) 
-      {
-      break;    // no more tokens
-      }
-    tokend=str.find_first_of(sep,tokstart);
-    if (tokend==std::string::npos)
-      {
-      tokens.push_back(str.substr(tokstart));
-      }
-    else
-      {
-      tokens.push_back(str.substr(tokstart,tokend-tokstart));
-      }
-    } while (tokend!=std::string::npos);
-
-  if (tokens.empty())
-    {
-    tokens.push_back("");
-    }
-  return tokens;
-}
-
 // cmSourceGroupCommand
 bool cmSourceGroupCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -58,7 +27,8 @@ bool cmSourceGroupCommand
     delimiter = this->Makefile->GetDefinition("SOURCE_GROUP_DELIMITER");
     }
 
-  std::vector<std::string> folders = tokenize(args[0], delimiter);
+  std::vector<std::string> folders =
+    cmSystemTools::tokenize(args[0], delimiter);
  
   cmSourceGroup* sg = 0;
   sg = this->Makefile->GetSourceGroup(folders);

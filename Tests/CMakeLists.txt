@@ -11,6 +11,7 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project ${proj}
+    ${${NAME}_EXTRA_OPTIONS}
     --test-command ${COMMAND} ${ARGN})
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 ENDMACRO(ADD_TEST_MACRO)
@@ -39,6 +40,10 @@ CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
 
 # Testing
 IF(BUILD_TESTING)
+  IF("${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles")
+    SET(TEST_CompileCommandOutput 1)
+  ENDIF()
+
   ADD_SUBDIRECTORY(CMakeLib)
 
   # Collect a list of all test build directories.
@@ -187,6 +192,24 @@ IF(BUILD_TESTING)
   ENDIF(CTEST_TEST_OSX_ARCH)
 
   LIST(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
+
+
+  # run test for BundleUtilities on supported platforms/compilers
+  if(MSVC OR
+     CMAKE_SYSTEM_NAME MATCHES "Linux" OR
+     CMAKE_SYSTEM_NAME MATCHES "Darwin")
+  if(NOT "${CMAKE_TEST_GENERATOR}" STREQUAL "Watcom WMake")
+    ADD_TEST(BundleUtilities ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/BundleUtilities"
+      "${CMake_BINARY_DIR}/Tests/BundleUtilities"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-project BundleUtilities
+      )
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleUtilities")
+  endif()
+  endif()
 
   SET(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
   SET(CMAKE_BUILD_TEST_BINARY_DIR "${CMake_BINARY_DIR}/Tests/CMakeBuildCOnly")
@@ -1287,7 +1310,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory"
     --force-new-ctest-process
-    --test-command ${CMAKE_CTEST_COMMAND} -V
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C \${CTEST_CONFIGURATION_TYPE}
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory")
 
@@ -1880,8 +1903,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ENDIF()
   ENDIF()
 
-  find_package(Java QUIET)
-  IF(JAVA_COMPILE AND JAVA_RUNTIME AND JAVA_ARCHIVE AND NOT MINGW
+  find_package(Java COMPONENTS Development QUIET)
+  IF(Java_JAVA_EXECUTABLE AND Java_JAVAC_EXECUTABLE AND Java_JAR_EXECUTABLE AND NOT MINGW
       AND NOT "${CMAKE_TEST_GENERATOR}" MATCHES "Xcode")
     GET_FILENAME_COMPONENT(JNIPATH ${JAVA_COMPILE} PATH)
     FIND_FILE(JNI_H jni.h
@@ -2031,6 +2054,25 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ENDIF()
     SET_TESTS_PROPERTIES(Contracts.${project} PROPERTIES TIMEOUT ${timeout})
   ENDFOREACH()
+
+  IF(TEST_CompileCommandOutput)
+    SET(CompileCommandOutput_EXTRA_OPTIONS
+      --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_IS_GNU})
+    ADD_TEST_MACRO(CompileCommandOutput
+      "${CMake_BINARY_DIR}/Tests/CMakeLib/runcompilecommands")
+  ENDIF()
+
+  ADD_TEST(IncludeDirectories ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/IncludeDirectories"
+    "${CMake_BINARY_DIR}/Tests/IncludeDirectories"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project IncludeDirectories
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --test-command IncludeDirectories)
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
+
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)

@@ -352,7 +352,7 @@ IF(QT_QT_LIBRARY)
 ENDIF(QT_QT_LIBRARY)
 
 
-INCLUDE(CheckSymbolExists)
+INCLUDE(CheckCXXSymbolExists)
 INCLUDE(MacroAddFileDependencies)
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
@@ -375,12 +375,20 @@ MACRO (_QT4_ADJUST_LIB_VARS _camelCaseBasename)
 
       IF (QT_${basename}_LIBRARY_RELEASE)
         SET_PROPERTY(TARGET Qt4::${_camelCaseBasename} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
-        SET_PROPERTY(TARGET Qt4::${_camelCaseBasename}        PROPERTY IMPORTED_LOCATION_RELEASE "${QT_${basename}_LIBRARY_RELEASE}" )
+        if(QT_USE_FRAMEWORKS)
+          SET_PROPERTY(TARGET Qt4::${_camelCaseBasename}        PROPERTY IMPORTED_LOCATION_RELEASE "${QT_${basename}_LIBRARY_RELEASE}/${_camelCaseBasename}" )
+        else()
+          SET_PROPERTY(TARGET Qt4::${_camelCaseBasename}        PROPERTY IMPORTED_LOCATION_RELEASE "${QT_${basename}_LIBRARY_RELEASE}" )
+        endif()
       ENDIF (QT_${basename}_LIBRARY_RELEASE)
 
       IF (QT_${basename}_LIBRARY_DEBUG)
         SET_PROPERTY(TARGET Qt4::${_camelCaseBasename} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-        SET_PROPERTY(TARGET Qt4::${_camelCaseBasename}        PROPERTY IMPORTED_LOCATION_DEBUG "${QT_${basename}_LIBRARY_DEBUG}" )
+        if(QT_USE_FRAMEWORKS)
+          SET_PROPERTY(TARGET Qt4::${_camelCaseBasename}        PROPERTY IMPORTED_LOCATION_DEBUG "${QT_${basename}_LIBRARY_DEBUG}/${_camelCaseBasename}" )
+        else()
+          SET_PROPERTY(TARGET Qt4::${_camelCaseBasename}        PROPERTY IMPORTED_LOCATION_DEBUG "${QT_${basename}_LIBRARY_DEBUG}" )
+        endif()
       ENDIF (QT_${basename}_LIBRARY_DEBUG)
     ENDIF(NOT TARGET Qt4::${_camelCaseBasename})
 
@@ -535,7 +543,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
 
   # ask qmake for the library dir as a hint, then search for QtCore library and use that as a reference for finding the
   # others and for setting QT_LIBRARY_DIR
-  IF (NOT QT_QTCORE_LIBRARY OR QT_QMAKE_CHANGED)
+  IF (NOT (QT_QTCORE_LIBRARY_RELEASE OR QT_QTCORE_LIBRARY_DEBUG)  OR QT_QMAKE_CHANGED)
     _qt4_query_qmake(QT_INSTALL_LIBS QT_LIBRARY_DIR_TMP)
     SET(QT_QTCORE_LIBRARY_RELEASE NOTFOUND)
     SET(QT_QTCORE_LIBRARY_DEBUG NOTFOUND)
@@ -568,9 +576,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
       ENDIF(EXISTS ${QT_LIBRARY_DIR_TMP}/libqtmain.a)
     ENDIF(NOT QT_QTCORE_LIBRARY_RELEASE AND MSVC)
 
-  ENDIF (NOT QT_QTCORE_LIBRARY OR QT_QMAKE_CHANGED)
-
-  _QT4_ADJUST_LIB_VARS(QtCore)
+  ENDIF ()
 
   # set QT_LIBRARY_DIR based on location of QtCore found.
   IF(QT_QTCORE_LIBRARY_RELEASE)
@@ -589,6 +595,12 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
     ENDIF(Qt4_FIND_REQUIRED)
   ENDIF()
 
+  # ask qmake for the binary dir
+  IF (NOT QT_BINARY_DIR  OR  QT_QMAKE_CHANGED)
+    _qt4_query_qmake(QT_INSTALL_BINS qt_bins)
+    SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "" FORCE)
+  ENDIF (NOT QT_BINARY_DIR  OR  QT_QMAKE_CHANGED)
+
   IF (APPLE)
     SET(CMAKE_FIND_FRAMEWORK_OLD ${CMAKE_FIND_FRAMEWORK})
     IF (EXISTS ${QT_LIBRARY_DIR}/QtCore.framework)
@@ -598,14 +610,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
       SET(QT_USE_FRAMEWORKS OFF CACHE INTERNAL "" FORCE)
       SET(CMAKE_FIND_FRAMEWORK LAST)
     ENDIF (EXISTS ${QT_LIBRARY_DIR}/QtCore.framework)
-    MARK_AS_ADVANCED(QT_USE_FRAMEWORKS)
   ENDIF (APPLE)
-  
-  # ask qmake for the binary dir
-  IF (NOT QT_BINARY_DIR  OR  QT_QMAKE_CHANGED)
-    _qt4_query_qmake(QT_INSTALL_BINS qt_bins)
-    SET(QT_BINARY_DIR ${qt_bins} CACHE INTERNAL "" FORCE)
-  ENDIF (NOT QT_BINARY_DIR  OR  QT_QMAKE_CHANGED)
 
   # ask qmake for the include dir
   IF (QT_LIBRARY_DIR AND (NOT QT_QTCORE_INCLUDE_DIR OR NOT QT_HEADERS_DIR OR  QT_QMAKE_CHANGED))
@@ -613,7 +618,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
       SET(QT_QTCORE_INCLUDE_DIR NOTFOUND)
       FIND_PATH(QT_QTCORE_INCLUDE_DIR QtCore
                 HINTS ${qt_headers} ${QT_LIBRARY_DIR}
-                PATH_SUFFIXES QtCore
+                PATH_SUFFIXES QtCore qt4/QtCore
         )
 
       # Set QT_HEADERS_DIR based on finding QtCore header
@@ -640,7 +645,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
       # Qt/Mac frameworks has two include dirs.
       # One is the framework include for which CMake will add a -F flag
       # and the other is an include dir for non-framework Qt modules
-      SET(QT_INCLUDE_DIR ${QT_HEADERS_DIR} ${QT_QTCORE_LIBRARY} )
+      SET(QT_INCLUDE_DIR ${QT_HEADERS_DIR} ${QT_QTCORE_LIBRARY_RELEASE} )
     ELSE(QT_USE_FRAMEWORKS)
       SET(QT_INCLUDE_DIR ${QT_HEADERS_DIR})
     ENDIF(QT_USE_FRAMEWORKS)
@@ -710,19 +715,19 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
   # Add QT_INCLUDE_DIR to CMAKE_REQUIRED_INCLUDES
   SET(CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES};${QT_INCLUDE_DIR}")
   # Check for Window system symbols (note: only one should end up being set)
-  CHECK_SYMBOL_EXISTS(Q_WS_X11 "QtCore/qglobal.h" Q_WS_X11)
-  CHECK_SYMBOL_EXISTS(Q_WS_WIN "QtCore/qglobal.h" Q_WS_WIN)
-  CHECK_SYMBOL_EXISTS(Q_WS_QWS "QtCore/qglobal.h" Q_WS_QWS)
-  CHECK_SYMBOL_EXISTS(Q_WS_MAC "QtCore/qglobal.h" Q_WS_MAC)
+  CHECK_CXX_SYMBOL_EXISTS(Q_WS_X11 "QtCore/qglobal.h" Q_WS_X11)
+  CHECK_CXX_SYMBOL_EXISTS(Q_WS_WIN "QtCore/qglobal.h" Q_WS_WIN)
+  CHECK_CXX_SYMBOL_EXISTS(Q_WS_QWS "QtCore/qglobal.h" Q_WS_QWS)
+  CHECK_CXX_SYMBOL_EXISTS(Q_WS_MAC "QtCore/qglobal.h" Q_WS_MAC)
   IF(Q_WS_MAC)
     IF(QT_QMAKE_CHANGED)
       UNSET(QT_MAC_USE_COCOA CACHE)
     ENDIF(QT_QMAKE_CHANGED)
-    CHECK_SYMBOL_EXISTS(QT_MAC_USE_COCOA "QtCore/qconfig.h" QT_MAC_USE_COCOA)
+    CHECK_CXX_SYMBOL_EXISTS(QT_MAC_USE_COCOA "QtCore/qconfig.h" QT_MAC_USE_COCOA)
   ENDIF(Q_WS_MAC)
 
   IF (QT_QTCOPY_REQUIRED)
-     CHECK_SYMBOL_EXISTS(QT_IS_QTCOPY "QtCore/qglobal.h" QT_KDE_QT_COPY)
+     CHECK_CXX_SYMBOL_EXISTS(QT_IS_QTCOPY "QtCore/qglobal.h" QT_KDE_QT_COPY)
      IF (NOT QT_IS_QTCOPY)
         MESSAGE(FATAL_ERROR "qt-copy is required, but hasn't been found")
      ENDIF (NOT QT_IS_QTCOPY)
@@ -894,15 +899,11 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
   #
   ############################################
 
-  # On OSX when Qt is found as framework, never use the imported targets for now, since 
-  # in this case the handling of the framework directory currently does not work correctly.
-  IF(QT_USE_FRAMEWORKS)
-    SET(QT_USE_IMPORTED_TARGETS FALSE)
-  ENDIF(QT_USE_FRAMEWORKS)
-
 
   # Set QT_xyz_LIBRARY variable and add 
   # library include path to QT_INCLUDES
+  _QT4_ADJUST_LIB_VARS(QtCore)
+
   FOREACH(QT_MODULE ${QT_MODULES})
     _QT4_ADJUST_LIB_VARS(${QT_MODULE})
   ENDFOREACH(QT_MODULE)

@@ -54,6 +54,7 @@ cmGraphVizWriter::cmGraphVizWriter(const std::vector<cmLocalGenerator*>&
 ,GenerateForStaticLibs(true)
 ,GenerateForSharedLibs(true)
 ,GenerateForModuleLibs(true)
+,GenerateForExternals(true)
 ,LocalGenerators(localGenerators)
 ,HaveTargetsAndLibs(false)
 {
@@ -115,36 +116,85 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   __set_bool_if_set(this->GenerateForExecutables, "GRAPHVIZ_EXECUTABLES");
   __set_bool_if_set(this->GenerateForStaticLibs, "GRAPHVIZ_STATIC_LIBS");
   __set_bool_if_set(this->GenerateForSharedLibs, "GRAPHVIZ_SHARED_LIBS");
-  __set_bool_if_set(this->GenerateForModuleLibs , "GRAPHVIZ_MODULE_LIBS");
+  __set_bool_if_set(this->GenerateForModuleLibs, "GRAPHVIZ_MODULE_LIBS");
+  __set_bool_if_set(this->GenerateForExternals, "GRAPHVIZ_EXTERNAL_LIBS");
 
-  cmStdString tmpRegexString;
-  __set_if_set(tmpRegexString, "GRAPHVIZ_TARGET_IGNORE_REGEX");
-  if (tmpRegexString.size() > 0)
-    {
-    if (!this->TargetIgnoreRegex.compile(tmpRegexString.c_str()))
-      {
-      std::cerr << "Could not compile bad regex \"" << tmpRegexString << "\""
-                << std::endl;
-      }
-    }
+  cmStdString ignoreTargetsRegexes;
+  __set_if_set(ignoreTargetsRegexes, "GRAPHVIZ_IGNORE_TARGETS");
 
-  this->TargetsToIgnore.clear();
-  const char* ignoreTargets = mf->GetDefinition("GRAPHVIZ_IGNORE_TARGETS");
-  if ( ignoreTargets )
+  this->TargetsToIgnoreRegex.clear();
+  if (ignoreTargetsRegexes.size() > 0)
     {
-    std::vector<std::string> ignoreTargetsVector;
-    cmSystemTools::ExpandListArgument(ignoreTargets,ignoreTargetsVector);
-    for(std::vector<std::string>::iterator itvIt = ignoreTargetsVector.begin();
-        itvIt != ignoreTargetsVector.end();
+    std::vector<std::string> ignoreTargetsRegExVector;
+    cmSystemTools::ExpandListArgument(ignoreTargetsRegexes,
+                                      ignoreTargetsRegExVector);
+    for(std::vector<std::string>::const_iterator itvIt
+                                            = ignoreTargetsRegExVector.begin();
+        itvIt != ignoreTargetsRegExVector.end();
         ++ itvIt )
       {
-      this->TargetsToIgnore.insert(itvIt->c_str());
+      cmStdString currentRegexString(*itvIt);
+      cmsys::RegularExpression currentRegex;
+      if (!currentRegex.compile(currentRegexString.c_str()))
+        {
+        std::cerr << "Could not compile bad regex \"" << currentRegexString
+                  << "\"" << std::endl;
+        }
+      this->TargetsToIgnoreRegex.push_back(currentRegex);
       }
     }
 
 }
 
 
+// Iterate over all targets and write for each one a graph which shows
+// which other targets depend on it.
+void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
+{
+  this->CollectTargetsAndLibs();
+
+  for(std::map<cmStdString, const cmTarget*>::const_iterator ptrIt =
+                                                      this->TargetPtrs.begin();
+      ptrIt != this->TargetPtrs.end();
+      ++ptrIt)
+    {
+    if (ptrIt->second == NULL)
+      {
+      continue;
+      }
+
+    if (this->GenerateForTargetType(ptrIt->second->GetType()) == false)
+      {
+      continue;
+      }
+
+    std::string currentFilename = fileName;
+    currentFilename += ".";
+    currentFilename += ptrIt->first;
+    currentFilename += ".dependers";
+
+    cmGeneratedFileStream str(currentFilename.c_str());
+    if ( !str )
+      {
+      return;
+      }
+
+    std::set<std::string> insertedConnections;
+    std::set<std::string> insertedNodes;
+
+    std::cout << "Writing " << currentFilename << "..." << std::endl;
+    this->WriteHeader(str);
+
+    this->WriteDependerConnections(ptrIt->first.c_str(),
+                                   insertedNodes, insertedConnections, str);
+
+    this->WriteFooter(str);
+    }
+}
+
+
+// Iterate over all targets and write for each one a graph which shows
+// on which targets it depends.
 void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
 {
   this->CollectTargetsAndLibs();
@@ -297,6 +347,91 @@ void cmGraphVizWriter::WriteConnections(const char* targetName,
 }
 
 
+void cmGraphVizWriter::WriteDependerConnections(const char* targetName,
+                                    std::set<std::string>& insertedNodes,
+                                    std::set<std::string>& insertedConnections,
+                                    cmGeneratedFileStream& str) const
+{
+  std::map<cmStdString, const cmTarget* >::const_iterator targetPtrIt =
+                                             this->TargetPtrs.find(targetName);
+
+  if (targetPtrIt == this->TargetPtrs.end())  // not found at all
+    {
+    return;
+    }
+
+  this->WriteNode(targetName, targetPtrIt->second, insertedNodes, str);
+
+  if (targetPtrIt->second == NULL) // it's an external library
+    {
+    return;
+    }
+
+
+  std::string myNodeName = this->TargetNamesNodes.find(targetName)->second;
+
+  // now search who links against me
+  for(std::map<cmStdString, const cmTarget*>::const_iterator dependerIt =
+                                                      this->TargetPtrs.begin();
+      dependerIt != this->TargetPtrs.end();
+      ++dependerIt)
+    {
+    if (dependerIt->second == NULL)
+      {
+      continue;
+      }
+
+    if (this->GenerateForTargetType(dependerIt->second->GetType()) == false)
+      {
+      continue;
+      }
+
+    // Now we have a target, check whether it links against targetName.
+    // If so, draw a connection, and then continue with dependers on that one.
+    const cmTarget::LinkLibraryVectorType* ll =
+                            &(dependerIt->second->GetOriginalLinkLibraries());
+
+    for (cmTarget::LinkLibraryVectorType::const_iterator llit = ll->begin();
+         llit != ll->end();
+         ++ llit )
+      {
+      std::string libName = llit->first.c_str();
+      if (libName == targetName)
+        {
+        // So this target links against targetName.
+        std::map<cmStdString, cmStdString>::const_iterator dependerNodeNameIt =
+                                this->TargetNamesNodes.find(dependerIt->first);
+
+        if(dependerNodeNameIt != this->TargetNamesNodes.end())
+          {
+          std::string connectionName = dependerNodeNameIt->second;
+          connectionName += "-";
+          connectionName += myNodeName;
+
+          if (insertedConnections.find(connectionName) ==
+                                                     insertedConnections.end())
+            {
+            insertedConnections.insert(connectionName);
+            this->WriteNode(dependerIt->first.c_str(), dependerIt->second,
+                            insertedNodes, str);
+
+            str << "    \"" << dependerNodeNameIt->second << "\" -> \""
+                << myNodeName << "\"";
+            str << " // " <<targetName<< " -> " <<dependerIt->first<<std::endl;
+            this->WriteDependerConnections(dependerIt->first.c_str(),
+                                      insertedNodes, insertedConnections, str);
+            }
+
+
+          }
+        break;
+        }
+      }
+    }
+
+}
+
+
 void cmGraphVizWriter::WriteNode(const char* targetName,
                                  const cmTarget* target,
                                  std::set<std::string>& insertedNodes,
@@ -321,7 +456,10 @@ void cmGraphVizWriter::CollectTargetsAndLibs()
     {
     this->HaveTargetsAndLibs = true;
     int cnt = this->CollectAllTargets();
-    this->CollectAllExternalLibs(cnt);
+    if (this->GenerateForExternals)
+      {
+      this->CollectAllExternalLibs(cnt);
+      }
     }
 }
 
@@ -410,14 +548,22 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
 
 bool cmGraphVizWriter::IgnoreThisTarget(const char* name)
 {
-  if (this->TargetIgnoreRegex.is_valid())
+  for(std::vector<cmsys::RegularExpression>::iterator itvIt
+                                          = this->TargetsToIgnoreRegex.begin();
+      itvIt != this->TargetsToIgnoreRegex.end();
+      ++ itvIt )
     {
-    if (this->TargetIgnoreRegex.find(name))
+    cmsys::RegularExpression& regEx = *itvIt;
+    if (regEx.is_valid())
       {
-      return true;
+      if (regEx.find(name))
+        {
+        return true;
+        }
       }
     }
-  return (this->TargetsToIgnore.find(name) != this->TargetsToIgnore.end());
+
+  return false;
 }
 
 

@@ -62,6 +62,7 @@ static const char * cmDocumentationDescription[][3] =
   "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"   \
   "  --clean-first  = Build target 'clean' first, then build.\n"        \
   "                   (To clean only, use --target 'clean'.)\n"         \
+  "  --use-stderr  =  Don't merge stdout/stderr.\n"                     \
   "  --             = Pass remaining options to the native tool.\n"
 
 //----------------------------------------------------------------------------
@@ -109,7 +110,8 @@ static const char * cmDocumentationOptions[][3] =
    "Dump a wide range of information about the current system. If run "
    "from the top of a binary tree for a CMake project it will dump "
    "additional information such as the cache, log files etc."},
-  {"--debug-trycompile", "Do not delete the try compile directories..",
+  {"--debug-trycompile", "Do not delete the try_compile build tree. Only "
+   "useful on one try_compile at a time.",
    "Do not delete the files and directories created for try_compile calls. "
    "This is useful in debugging failed try_compiles. It may however "
    "change the results of the try-compiles as old junk from a previous "
@@ -567,6 +569,7 @@ static int do_build(int ac, char** av)
   std::string dir;
   std::vector<std::string> nativeOptions;
   bool clean = false;
+  cmSystemTools::OutputOption outputflag = cmSystemTools::OUTPUT_MERGE;
 
   enum Doing { DoingNone, DoingDir, DoingTarget, DoingConfig, DoingNative};
   Doing doing = DoingDir;
@@ -588,6 +591,10 @@ static int do_build(int ac, char** av)
       {
       clean = true;
       doing = DoingNone;
+      }
+    else if(strcmp(av[i], "--use-stderr") == 0)
+      {
+        outputflag = cmSystemTools::OUTPUT_NORMAL;
       }
     else if(strcmp(av[i], "--") == 0)
       {
@@ -634,6 +641,6 @@ static int do_build(int ac, char** av)
     }
 
   cmake cm;
-  return cm.Build(dir, target, config, nativeOptions, clean);
+  return cm.Build(dir, target, config, nativeOptions, clean, outputflag);
 #endif
 }

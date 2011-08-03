@@ -263,7 +263,7 @@ class cmake
 
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);
-  void AppendProperty(const char *prop, const char *value);
+  void AppendProperty(const char *prop, const char *value,bool asString=false);
   const char *GetProperty(const char *prop);
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);
@@ -364,7 +364,8 @@ class cmake
             const std::string& target,
             const std::string& config,
             const std::vector<std::string>& nativeOptions,
-            bool clean);
+            bool clean,
+            cmSystemTools::OutputOption outputflag);
 
   void UnwatchUnusedCli(const char* var);
   void WatchUnusedCli(const char* var);

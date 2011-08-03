@@ -261,9 +261,9 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
 
   # Is it already resolved?
   #
-  if(EXISTS "${resolved_item}")
+  if(IS_ABSOLUTE "${resolved_item}" AND EXISTS "${resolved_item}")
     set(resolved 1)
-  endif(EXISTS "${resolved_item}")
+  endif(IS_ABSOLUTE "${resolved_item}" AND EXISTS "${resolved_item}")
 
   if(NOT resolved)
     if(item MATCHES "@executable_path")
@@ -548,7 +548,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
 
   if("${gp_tool}" STREQUAL "ldd")
     set(gp_cmd_args "")
-    set(gp_regex "^[\t ]*[^\t ]+ => ([^\t ]+).*${eol_char}$")
+    set(gp_regex "^[\t ]*[^\t ]+ => ([^\t\(]+) .*${eol_char}$")
     set(gp_regex_error "not found${eol_char}$")
     set(gp_regex_fallback "^[\t ]*([^\t ]+) => ([^\t ]+).*${eol_char}$")
     set(gp_regex_cmp_count 1)

@@ -86,6 +86,17 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ABI lang src)
       SET(CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES "${implicit_libs}" PARENT_SCOPE)
       SET(CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES "${implicit_dirs}" PARENT_SCOPE)
 
+      # Detect library architecture directory name.
+      IF(CMAKE_LIBRARY_ARCHITECTURE_REGEX)
+        FOREACH(dir ${implicit_dirs})
+          IF("${dir}" MATCHES "/lib/${CMAKE_LIBRARY_ARCHITECTURE_REGEX}$")
+            GET_FILENAME_COMPONENT(arch "${dir}" NAME)
+            SET(CMAKE_${lang}_LIBRARY_ARCHITECTURE "${arch}" PARENT_SCOPE)
+            BREAK()
+          ENDIF()
+        ENDFOREACH()
+      ENDIF()
+
     ELSE(CMAKE_DETERMINE_${lang}_ABI_COMPILED)
       MESSAGE(STATUS "Detecting ${lang} compiler ABI info - failed")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log

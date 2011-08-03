@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmTryCompileCommand;
     }
@@ -45,7 +45,7 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
     return "Try building some code.";
     }
@@ -77,14 +77,20 @@ public:
       "Specify COPY_FILE to get a copy of the linked executable at the "
       "given fileName."
       "\n"
-      "In this version all files in bindir/CMakeFiles/CMakeTmp, "
-      "will be cleaned automatically, for debugging a --debug-trycompile can "
-      "be passed to cmake to avoid the clean. Some extra flags that "
-      " can be included are,  "
+      "In this version all files in bindir/CMakeFiles/CMakeTmp "
+      "will be cleaned automatically. For debugging, --debug-trycompile can "
+      "be passed to cmake to avoid this clean. However, multiple sequential "
+      "try_compile operations reuse this single output directory. If you "
+      "use --debug-trycompile, you can only debug one try_compile call at a "
+      "time. The recommended procedure is to configure with cmake all the "
+      "way through once, then delete the cache entry associated with "
+      "the try_compile call of interest, and then re-run cmake again with "
+      "--debug-trycompile."
+      "\n"
+      "Some extra flags that can be included are,  "
       "INCLUDE_DIRECTORIES, LINK_DIRECTORIES, and LINK_LIBRARIES.  "
       "COMPILE_DEFINITIONS are -Ddefinition that will be passed to the "
       "compile line.  "
-
       "try_compile creates a CMakeList.txt "
       "file on the fly that looks like this:\n"
       "  add_definitions( <expanded COMPILE_DEFINITIONS from calling "
@@ -96,14 +102,15 @@ public:
       "In both versions of the command, "
       "if OUTPUT_VARIABLE is specified, then the "
       "output from the build process is stored in the given variable. "
-      "Return the success or failure in "
+      "The success or failure of the try_compile, i.e. TRUE or FALSE "
+      "respectively, is returned in "
       "RESULT_VAR. CMAKE_FLAGS can be used to pass -DVAR:TYPE=VALUE flags "
       "to the cmake that is run during the build. "
       "Set variable CMAKE_TRY_COMPILE_CONFIGURATION to choose a build "
       "configuration."
       ;
     }
-  
+
   cmTypeMacro(cmTryCompileCommand, cmCoreTryCompile);
 
 };

@@ -590,7 +590,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "For an executable with exports (see the ENABLE_EXPORTS property) "
      "no default transitive link dependencies are used.  "
      "This property replaces the default transitive link dependencies with "
-     "an explict list.  "
+     "an explicit list.  "
      "When the target is linked into another target the libraries "
      "listed (and recursively their link interface libraries) will be "
      "provided to the other target also.  "
@@ -960,6 +960,14 @@ void cmTarget::DefineProperties(cmake *cm)
      "Visual Studio Source Code Control Project.",
      "Can be set to change the visual studio source code control "
      "project name property.");
+  cm->DefineProperty
+    ("VS_GLOBAL_<variable>", cmProperty::TARGET,
+     "Visual Studio project-specific global variable.",
+     "Tell the Visual Studio generator to set the global variable "
+     "'<variable>' to a given value in the generated Visual Studio "
+     "project. Ignored on other generators. Qt integration works "
+     "better if VS_GLOBAL_QtVersion is set to the version "
+     "FindQt4.cmake found. For example, \"4.7.3\"");
 
 #if 0
   cm->DefineProperty
@@ -2191,13 +2199,14 @@ void cmTarget::SetProperty(const char* prop, const char* value)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::AppendProperty(const char* prop, const char* value)
+void cmTarget::AppendProperty(const char* prop, const char* value,
+                              bool asString)
 {
   if (!prop)
     {
     return;
     }
-  this->Properties.AppendProperty(prop, value, cmProperty::TARGET);
+  this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
   this->MaybeInvalidatePropertyCache(prop);
 }
 
@@ -3688,9 +3697,11 @@ const char* cmTarget::GetOutputTargetType(bool implib)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::ComputeOutputDir(const char* config,
+bool cmTarget::ComputeOutputDir(const char* config,
                                 bool implib, std::string& out)
 {
+  bool usesDefaultOutputDir = false;
+
   // Look for a target property defining the target output directory
   // based on the target type.
   std::string targetTypeName = this->GetOutputTargetType(implib);
@@ -3742,6 +3753,7 @@ void cmTarget::ComputeOutputDir(const char* config,
   if(out.empty())
     {
     // Default to the current output directory.
+    usesDefaultOutputDir = true;
     out = ".";
     }
 
@@ -3757,6 +3769,15 @@ void cmTarget::ComputeOutputDir(const char* config,
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", config, "", out);
     }
+
+  return usesDefaultOutputDir;
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::UsesDefaultOutputDir(const char* config, bool implib)
+{
+  std::string dir;
+  return this->ComputeOutputDir(config, implib, dir);
 }
 
 //----------------------------------------------------------------------------

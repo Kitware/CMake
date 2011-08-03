@@ -518,7 +518,7 @@ public:
 };
 cmCPluginAPISourceFileMap cmCPluginAPISourceFiles;
 
-void * CCONV cmCreateSourceFile()
+void * CCONV cmCreateSourceFile(void)
 {
   return (void*)new cmCPluginAPISourceFile;
 }

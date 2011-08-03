@@ -216,6 +216,12 @@ protected:
   std::string MacContentDirectory;
   std::set<cmStdString> MacContentFolders;
 
+  typedef std::map<cmStdString, cmStdString> ByLanguageMap;
+  std::string GetFlags(const std::string &l);
+  ByLanguageMap FlagsByLanguage;
+  std::string GetDefines(const std::string &l);
+  ByLanguageMap DefinesByLanguage;
+
   // Target-wide Fortran module output directory.
   bool FortranModuleDirectoryComputed;
   std::string FortranModuleDirectory;

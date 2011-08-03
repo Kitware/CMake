@@ -50,6 +50,12 @@ IF(CMAKE_GENERATOR MATCHES "Makefiles")
   IF(DEFINED CMAKE_RULE_MESSAGES)
     SET_PROPERTY(GLOBAL PROPERTY RULE_MESSAGES ${CMAKE_RULE_MESSAGES})
   ENDIF(DEFINED CMAKE_RULE_MESSAGES)
+  IF(CMAKE_GENERATOR MATCHES "Unix Makefiles")
+    SET(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
+      "Enable/Disable output of compile commands during generation."
+      )
+    MARK_AS_ADVANCED(CMAKE_EXPORT_COMPILE_COMMANDS)
+  ENDIF(CMAKE_GENERATOR MATCHES "Unix Makefiles")
 ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
 
 
@@ -67,7 +73,7 @@ function(GetDefaultWindowsPrefixBase var)
   # the architecture of the targets being built to choose the right
   # default value for CMAKE_INSTALL_PREFIX.
   #
-  if("${CMAKE_GENERATOR}" MATCHES "Win64")
+  if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
     set(arch_hint "x64")
   elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(arch_hint "x64")

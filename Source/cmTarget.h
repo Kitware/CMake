@@ -224,7 +224,7 @@ public:
 
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);
-  void AppendProperty(const char* prop, const char* value);
+  void AppendProperty(const char* prop, const char* value,bool asString=false);
   const char *GetProperty(const char *prop);
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const char *prop);
@@ -446,6 +446,10 @@ public:
   /** Get a build-tree directory in which to place target support files.  */
   std::string GetSupportDirectory() const;
 
+  /** Return whether this target uses the default value for its output
+      directory.  */
+  bool UsesDefaultOutputDir(const char* config, bool implib);
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -558,7 +562,7 @@ private:
   // Cache target output paths for each configuration.
   struct OutputInfo;
   OutputInfo const* GetOutputInfo(const char* config);
-  void ComputeOutputDir(const char* config, bool implib, std::string& out);
+  bool ComputeOutputDir(const char* config, bool implib, std::string& out);
 
   // Cache import information from properties for each configuration.
   struct ImportInfo;

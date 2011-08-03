@@ -677,7 +677,7 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
   if ( end < -1 || end > leftOverLength )
     {
     cmOStringStream ostr;
-    ostr << "end index: " << end << " is out of range " << 0 << " - "
+    ostr << "end index: " << end << " is out of range -1 - "
          << leftOverLength;
     this->SetError(ostr.str().c_str());
     return false;
@@ -770,7 +770,7 @@ bool cmStringCommand
 
   static bool seeded = false;
   bool force_seed = false;
-  int seed = (int) time(NULL);
+  unsigned int seed = 0;
   int length = 5;
   const char cmStringCommandDefaultAlphabet[] = "qwertyuiopasdfghjklzxcvbnm"
     "QWERTYUIOPASDFGHJKLZXCVBNM"
@@ -797,7 +797,7 @@ bool cmStringCommand
       else if ( args[i] == "RANDOM_SEED" )
         {
         ++i;
-        seed = atoi(args[i].c_str());
+        seed = static_cast<unsigned int>(atoi(args[i].c_str()));
         force_seed = true;
         }
       }
@@ -825,7 +825,7 @@ bool cmStringCommand
   if (!seeded || force_seed)
     {
     seeded = true;
-    srand(seed);
+    srand(force_seed? seed : cmSystemTools::RandomSeed());
     }
 
   const char* alphaPtr = alphabet.c_str();

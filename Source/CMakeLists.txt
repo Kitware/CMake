@@ -266,7 +266,7 @@ IF(UNIX)
   SET(SRCS ${SRCS} cmGlobalKdevelopGenerator.cxx)
 ENDIF(UNIX)
 
-# XCode only works on apple
+# Xcode only works on Apple
 IF(APPLE)
   SET(SRCS ${SRCS}
     cmXCodeObject.cxx
@@ -308,6 +308,8 @@ IF (WIN32)
       cmGlobalVisualStudio8Win64Generator.h
       cmGlobalVisualStudio9Win64Generator.cxx
       cmGlobalVisualStudio9Win64Generator.h
+      cmGlobalVisualStudio9IA64Generator.cxx
+      cmGlobalVisualStudio9IA64Generator.h
       cmVisualStudioGeneratorOptions.h
       cmVisualStudioGeneratorOptions.cxx
       cmVisualStudio10TargetGenerator.h
@@ -318,6 +320,8 @@ IF (WIN32)
       cmGlobalVisualStudio10Generator.cxx
       cmGlobalVisualStudio10Win64Generator.h
       cmGlobalVisualStudio10Win64Generator.cxx
+      cmGlobalVisualStudio10IA64Generator.h
+      cmGlobalVisualStudio10IA64Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx

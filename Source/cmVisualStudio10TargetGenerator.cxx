@@ -178,8 +178,23 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ProjectGUID>", 2);
   (*this->BuildFileStream) <<  "{" << this->GUID << "}</ProjectGUID>\n";
 
-  this->WriteString("<SccProjectName />\n", 2);
-  this->WriteString("<SccLocalPath />\n", 2);
+  const char* vsProjectName = this->Target->GetProperty("VS_SCC_PROJECTNAME");
+  const char* vsLocalPath = this->Target->GetProperty("VS_SCC_LOCALPATH");
+  const char* vsProvider = this->Target->GetProperty("VS_SCC_PROVIDER");
+
+  if ( vsProjectName && vsLocalPath && vsProvider)
+    {
+    this->WriteString("<SccProjectName>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsProjectName) <<
+      "</SccProjectName>\n";
+    this->WriteString("<SccLocalPath>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsLocalPath) <<
+      "</SccLocalPath>\n";
+    this->WriteString("<SccProvider>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsProvider) <<
+      "</SccProvider>\n";
+    }
+
   this->WriteString("<Keyword>Win32Proj</Keyword>\n", 2);
   this->WriteString("<Platform>", 2);
   (*this->BuildFileStream) << this->Platform << "</Platform>\n";
@@ -351,12 +366,23 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
     {
     if(!cmSystemTools::FileExists(sourcePath.c_str()))
       {
+      // Make sure the path exists for the file
+      std::string path = cmSystemTools::GetFilenamePath(sourcePath);
+      cmSystemTools::MakeDirectory(path.c_str());
       std::ofstream fout(sourcePath.c_str());
       if(fout)
         {
         fout << "# generated from CMake\n";
         fout.flush();
         fout.close();
+        }
+      else
+        {
+        std::string error = "Could not create file: [";
+        error +=  sourcePath;
+        error += "]  ";
+        cmSystemTools::Error
+          (error.c_str(), cmSystemTools::GetLastSystemError().c_str());
         }
       }
     }
@@ -367,7 +393,11 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations(); 
   this->WriteString("<CustomBuild Include=\"", 2);
-  std::string path = sourcePath;
+  // custom command have to use relative paths or they do not
+  // show up in the GUI
+  std::string path = cmSystemTools::RelativePath(
+    this->Makefile->GetCurrentOutputDirectory(),
+    sourcePath.c_str());
   this->ConvertToWindowsSlash(path);
   (*this->BuildFileStream ) << path << "\">\n";
   for(std::vector<std::string>::iterator i = configs->begin();
@@ -455,7 +485,11 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       {
       lang = "None";
       }
-    if(lang[0] == 'C')
+    if(header)
+      {
+      headers.push_back(sf);
+      }
+    else if(lang[0] == 'C')
       {
       clCompile.push_back(sf);
       }
@@ -466,10 +500,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     else if(sf->GetCustomCommand())
       {
       customBuild.push_back(sf);
-      }
-    else if(header)
-      {
-      headers.push_back(sf);
       }
     else if(ext == "idl")
       {
@@ -608,6 +638,14 @@ WriteGroupSources(const char* name,
     const char* filter = sourceGroup.GetFullName();
     this->WriteString("<", 2); 
     std::string path = source;
+    // custom command sources must use relative paths or they will
+    // not show up in the GUI.
+    if(sf->GetCustomCommand())
+      {
+      path = cmSystemTools::RelativePath(
+        this->Makefile->GetCurrentOutputDirectory(),
+        source.c_str());
+      }
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << name << " Include=\""
                              << path;
@@ -695,6 +733,8 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
     bool rc = lang && (strcmp(lang, "RC") == 0);
     bool idl = ext == "idl";
     std::string sourceFile = (*source)->GetFullPath();
+    // do not use a relative path here because it means that you
+    // can not use as long a path to the file.
     this->ConvertToWindowsSlash(sourceFile);
     // output the source file
     if(header)
