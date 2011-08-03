@@ -33,6 +33,7 @@
 #include <float.h>
 
 #include <memory> // auto_ptr
+#include <set>
 
 //----------------------------------------------------------------------
 class cmCTestSubdirCommand : public cmCommand
@@ -617,9 +618,12 @@ int cmCTestTestHandler::ProcessHandler()
                  << "The following tests FAILED:" << std::endl);
       this->StartLogFile("TestsFailed", ofs);
 
-      std::vector<cmCTestTestHandler::cmCTestTestResult>::iterator ftit;
-      for(ftit = this->TestResults.begin();
-          ftit != this->TestResults.end(); ++ftit)
+      typedef std::set<cmCTestTestHandler::cmCTestTestResult,
+                       cmCTestTestResultLess> SetOfTests;
+      SetOfTests resultsSet(this->TestResults.begin(), this->TestResults.end());
+
+      for(SetOfTests::iterator ftit = resultsSet.begin();
+          ftit != resultsSet.end(); ++ftit)
         {
         if ( ftit->Status != cmCTestTestHandler::COMPLETED )
           {
