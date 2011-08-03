@@ -6,6 +6,7 @@
 #
 # and also the following more fine grained variables:
 # Include paths: X11_ICE_INCLUDE_PATH,          X11_ICE_LIB,        X11_ICE_FOUND
+#                X11_SM_INCLUDE_PATH,           X11_SM_LIB,         X11_SM_FOUND
 #                X11_X11_INCLUDE_PATH,          X11_X11_LIB
 #                X11_Xaccessrules_INCLUDE_PATH,                     X11_Xaccess_FOUND
 #                X11_Xaccessstr_INCLUDE_PATH,                       X11_Xaccess_FOUND
@@ -27,6 +28,7 @@
 #                X11_Xinput_INCLUDE_PATH,       X11_Xinput_LIB,     X11_Xinput_FOUND
 #                X11_Xkb_INCLUDE_PATH,                              X11_Xkb_FOUND
 #                X11_Xkblib_INCLUDE_PATH,                           X11_Xkb_FOUND
+#                X11_Xkbfile_INCLUDE_PATH,      X11_Xkbfile_LIB,    X11_Xkbfile_FOUND
 #                X11_Xpm_INCLUDE_PATH,          X11_Xpm_LIB,        X11_Xpm_FOUND
 #                X11_XTest_INCLUDE_PATH,        X11_XTest_LIB,      X11_XTest_FOUND
 #                X11_Xrandr_INCLUDE_PATH,       X11_Xrandr_LIB,     X11_Xrandr_FOUND
@@ -35,6 +37,8 @@
 #                X11_Xt_INCLUDE_PATH,           X11_Xt_LIB,         X11_Xt_FOUND
 #                X11_Xutil_INCLUDE_PATH,                            X11_Xutil_FOUND
 #                X11_Xv_INCLUDE_PATH,           X11_Xv_LIB,         X11_Xv_FOUND
+#                X11_XSync_INCLUDE_PATH,        (in X11_Xext_LIB),  X11_XSync_FOUND
+
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
@@ -57,11 +61,11 @@ IF (UNIX)
   SET(CMAKE_FIND_FRAMEWORK NEVER)
   SET(X11_INC_SEARCH_PATH
     /usr/pkg/xorg/include
-    /usr/X11R6/include 
-    /usr/X11R7/include 
+    /usr/X11R6/include
+    /usr/X11R7/include
     /usr/include/X11
-    /usr/openwin/include 
-    /usr/openwin/share/include 
+    /usr/openwin/include
+    /usr/openwin/share/include
     /opt/graphics/OpenGL/include
   )
 
@@ -69,7 +73,7 @@ IF (UNIX)
     /usr/pkg/xorg/lib
     /usr/X11R6/lib
     /usr/X11R7/lib
-    /usr/openwin/lib 
+    /usr/openwin/lib
   )
 
   FIND_PATH(X11_X11_INCLUDE_PATH X11/X.h                             ${X11_INC_SEARCH_PATH})
@@ -77,9 +81,10 @@ IF (UNIX)
 
   # Look for includes; keep the list sorted by name of the cmake *_INCLUDE_PATH
   # variable (which doesn't need to match the include file name).
-  
+
   # Solaris lacks XKBrules.h, so we should skip kxkbd there.
   FIND_PATH(X11_ICE_INCLUDE_PATH X11/ICE/ICE.h                       ${X11_INC_SEARCH_PATH})
+  FIND_PATH(X11_SM_INCLUDE_PATH X11/SM/SM.h                          ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xaccessrules_INCLUDE_PATH X11/extensions/XKBrules.h  ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xaccessstr_INCLUDE_PATH X11/extensions/XKBstr.h      ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xau_INCLUDE_PATH X11/Xauth.h                         ${X11_INC_SEARCH_PATH})
@@ -97,6 +102,7 @@ IF (UNIX)
   FIND_PATH(X11_Xinput_INCLUDE_PATH X11/extensions/XInput.h          ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xkb_INCLUDE_PATH X11/extensions/XKB.h                ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xkblib_INCLUDE_PATH X11/XKBlib.h                     ${X11_INC_SEARCH_PATH})
+  FIND_PATH(X11_Xkbfile_INCLUDE_PATH X11/extensions/XKBfile.h        ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xpm_INCLUDE_PATH X11/xpm.h                           ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_XTest_INCLUDE_PATH X11/extensions/XTest.h            ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_XShm_INCLUDE_PATH X11/extensions/XShm.h              ${X11_INC_SEARCH_PATH})
@@ -107,6 +113,7 @@ IF (UNIX)
   FIND_PATH(X11_Xutil_INCLUDE_PATH X11/Xutil.h                       ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xt_INCLUDE_PATH X11/Intrinsic.h                      ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xv_INCLUDE_PATH X11/extensions/Xvlib.h               ${X11_INC_SEARCH_PATH})
+  FIND_PATH(X11_XSync_INCLUDE_PATH X11/extensions/sync.h             ${X11_INC_SEARCH_PATH})
 
 
   FIND_LIBRARY(X11_X11_LIB X11               ${X11_LIB_SEARCH_PATH})
@@ -125,6 +132,7 @@ IF (UNIX)
   FIND_LIBRARY(X11_Xi_LIB Xi                 ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xinerama_LIB Xinerama     ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xinput_LIB Xi             ${X11_LIB_SEARCH_PATH})
+  FIND_LIBRARY(X11_Xkbfile_LIB xkbfile       ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xpm_LIB Xpm               ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xrandr_LIB Xrandr         ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xrender_LIB Xrender       ${X11_LIB_SEARCH_PATH})
@@ -277,14 +285,29 @@ IF (UNIX)
      SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xkb_INCLUDE_PATH} )
   ENDIF (X11_Xkb_INCLUDE_PATH AND X11_Xkblib_INCLUDE_PATH AND X11_Xlib_INCLUDE_PATH)
 
+  IF (X11_Xkbfile_INCLUDE_PATH AND X11_Xkbfile_LIB AND X11_Xlib_INCLUDE_PATH)
+     SET(X11_Xkbfile_FOUND TRUE)
+     SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xkbfile_INCLUDE_PATH} )
+  ENDIF (X11_Xkbfile_INCLUDE_PATH AND X11_Xkbfile_LIB AND X11_Xlib_INCLUDE_PATH)
+
   IF (X11_Xinput_INCLUDE_PATH AND X11_Xinput_LIB)
      SET(X11_Xinput_FOUND TRUE)
      SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xinput_INCLUDE_PATH})
   ENDIF (X11_Xinput_INCLUDE_PATH AND X11_Xinput_LIB)
 
+  IF (X11_XSync_INCLUDE_PATH)
+     SET(X11_XSync_FOUND TRUE)
+     SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_XSync_INCLUDE_PATH})
+  ENDIF (X11_XSync_INCLUDE_PATH)
+
   IF(X11_ICE_LIB AND X11_ICE_INCLUDE_PATH)
      SET(X11_ICE_FOUND TRUE)
   ENDIF(X11_ICE_LIB AND X11_ICE_INCLUDE_PATH)
+
+  IF(X11_SM_LIB AND X11_SM_INCLUDE_PATH)
+     SET(X11_SM_FOUND TRUE)
+  ENDIF(X11_SM_LIB AND X11_SM_INCLUDE_PATH)
+
 
   # Deprecated variable for backwards compatibility with CMake 1.4
   IF (X11_X11_INCLUDE_PATH AND X11_LIBRARIES)
@@ -306,11 +329,11 @@ IF (UNIX)
       CHECK_LIBRARY_EXISTS("${X11_LIBRARIES}" "XOpenDisplay" "${X11_LIBRARY_DIR}" X11_LIB_X11_SOLO)
       IF(NOT X11_LIB_X11_SOLO)
         # Find library needed for dnet_ntoa.
-        CHECK_LIBRARY_EXISTS("dnet" "dnet_ntoa" "" X11_LIB_DNET_HAS_DNET_NTOA) 
+        CHECK_LIBRARY_EXISTS("dnet" "dnet_ntoa" "" X11_LIB_DNET_HAS_DNET_NTOA)
         IF (X11_LIB_DNET_HAS_DNET_NTOA)
           SET (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -ldnet)
         ELSE (X11_LIB_DNET_HAS_DNET_NTOA)
-          CHECK_LIBRARY_EXISTS("dnet_stub" "dnet_ntoa" "" X11_LIB_DNET_STUB_HAS_DNET_NTOA) 
+          CHECK_LIBRARY_EXISTS("dnet_stub" "dnet_ntoa" "" X11_LIB_DNET_STUB_HAS_DNET_NTOA)
           IF (X11_LIB_DNET_STUB_HAS_DNET_NTOA)
             SET (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -ldnet_stub)
           ENDIF (X11_LIB_DNET_STUB_HAS_DNET_NTOA)
@@ -320,11 +343,11 @@ IF (UNIX)
       # Find library needed for gethostbyname.
       CHECK_FUNCTION_EXISTS("gethostbyname" CMAKE_HAVE_GETHOSTBYNAME)
       IF(NOT CMAKE_HAVE_GETHOSTBYNAME)
-        CHECK_LIBRARY_EXISTS("nsl" "gethostbyname" "" CMAKE_LIB_NSL_HAS_GETHOSTBYNAME) 
+        CHECK_LIBRARY_EXISTS("nsl" "gethostbyname" "" CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
         IF (CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
           SET (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lnsl)
         ELSE (CMAKE_LIB_NSL_HAS_GETHOSTBYNAME)
-          CHECK_LIBRARY_EXISTS("bsd" "gethostbyname" "" CMAKE_LIB_BSD_HAS_GETHOSTBYNAME) 
+          CHECK_LIBRARY_EXISTS("bsd" "gethostbyname" "" CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
           IF (CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
             SET (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lbsd)
           ENDIF (CMAKE_LIB_BSD_HAS_GETHOSTBYNAME)
@@ -334,7 +357,7 @@ IF (UNIX)
       # Find library needed for connect.
       CHECK_FUNCTION_EXISTS("connect" CMAKE_HAVE_CONNECT)
       IF(NOT CMAKE_HAVE_CONNECT)
-        CHECK_LIBRARY_EXISTS("socket" "connect" "" CMAKE_LIB_SOCKET_HAS_CONNECT) 
+        CHECK_LIBRARY_EXISTS("socket" "connect" "" CMAKE_LIB_SOCKET_HAS_CONNECT)
         IF (CMAKE_LIB_SOCKET_HAS_CONNECT)
           SET (X11_X_EXTRA_LIBS -lsocket ${X11_X_EXTRA_LIBS})
         ENDIF (CMAKE_LIB_SOCKET_HAS_CONNECT)
@@ -343,7 +366,7 @@ IF (UNIX)
       # Find library needed for remove.
       CHECK_FUNCTION_EXISTS("remove" CMAKE_HAVE_REMOVE)
       IF(NOT CMAKE_HAVE_REMOVE)
-        CHECK_LIBRARY_EXISTS("posix" "remove" "" CMAKE_LIB_POSIX_HAS_REMOVE) 
+        CHECK_LIBRARY_EXISTS("posix" "remove" "" CMAKE_LIB_POSIX_HAS_REMOVE)
         IF (CMAKE_LIB_POSIX_HAS_REMOVE)
           SET (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lposix)
         ENDIF (CMAKE_LIB_POSIX_HAS_REMOVE)
@@ -352,7 +375,7 @@ IF (UNIX)
       # Find library needed for shmat.
       CHECK_FUNCTION_EXISTS("shmat" CMAKE_HAVE_SHMAT)
       IF(NOT CMAKE_HAVE_SHMAT)
-        CHECK_LIBRARY_EXISTS("ipc" "shmat" "" CMAKE_LIB_IPS_HAS_SHMAT) 
+        CHECK_LIBRARY_EXISTS("ipc" "shmat" "" CMAKE_LIB_IPS_HAS_SHMAT)
         IF (CMAKE_LIB_IPS_HAS_SHMAT)
           SET (X11_X_EXTRA_LIBS ${X11_X_EXTRA_LIBS} -lipc)
         ENDIF (CMAKE_LIB_IPS_HAS_SHMAT)
@@ -422,6 +445,8 @@ IF (UNIX)
     X11_Xdmcp_INCLUDE_PATH
     X11_Xkb_INCLUDE_PATH
     X11_Xkblib_INCLUDE_PATH
+    X11_Xkbfile_INCLUDE_PATH
+    X11_Xkbfile_LIB
     X11_Xscreensaver_INCLUDE_PATH
     X11_Xscreensaver_LIB
     X11_Xpm_INCLUDE_PATH
@@ -437,6 +462,8 @@ IF (UNIX)
     X11_ICE_LIB
     X11_ICE_INCLUDE_PATH
     X11_SM_LIB
+    X11_SM_INCLUDE_PATH
+    X11_XSync_INCLUDE_PATH
   )
   SET(CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK_SAVE})
 ENDIF (UNIX)
