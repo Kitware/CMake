@@ -1622,6 +1622,10 @@ WriteCustomRule(std::ostream& fout,
       }
 
     std::string script = this->ConstructScript(command, i->c_str());
+    if(this->FortranProject)
+      {
+      cmSystemTools::ReplaceString(script, "$(Configuration)", i->c_str());
+      }
     fout << "\t\t\t\t\t<Tool\n"
          << "\t\t\t\t\tName=\"" << customTool << "\"\n"
          << "\t\t\t\t\tDescription=\"" 
