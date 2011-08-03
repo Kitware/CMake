@@ -6,6 +6,7 @@
 #
 # and also the following more fine grained variables:
 # Include paths: X11_ICE_INCLUDE_PATH,          X11_ICE_LIB,        X11_ICE_FOUND
+#                X11_SM_INCLUDE_PATH,           X11_SM_LIB,         X11_SM_FOUND
 #                X11_X11_INCLUDE_PATH,          X11_X11_LIB
 #                X11_Xaccessrules_INCLUDE_PATH,                     X11_Xaccess_FOUND
 #                X11_Xaccessstr_INCLUDE_PATH,                       X11_Xaccess_FOUND
@@ -27,6 +28,7 @@
 #                X11_Xinput_INCLUDE_PATH,       X11_Xinput_LIB,     X11_Xinput_FOUND
 #                X11_Xkb_INCLUDE_PATH,                              X11_Xkb_FOUND
 #                X11_Xkblib_INCLUDE_PATH,                           X11_Xkb_FOUND
+#                X11_Xkbfile_INCLUDE_PATH,      X11_Xkbfile_LIB,    X11_Xkbfile_FOUND
 #                X11_Xpm_INCLUDE_PATH,          X11_Xpm_LIB,        X11_Xpm_FOUND
 #                X11_XTest_INCLUDE_PATH,        X11_XTest_LIB,      X11_XTest_FOUND
 #                X11_Xrandr_INCLUDE_PATH,       X11_Xrandr_LIB,     X11_Xrandr_FOUND
@@ -35,6 +37,8 @@
 #                X11_Xt_INCLUDE_PATH,           X11_Xt_LIB,         X11_Xt_FOUND
 #                X11_Xutil_INCLUDE_PATH,                            X11_Xutil_FOUND
 #                X11_Xv_INCLUDE_PATH,           X11_Xv_LIB,         X11_Xv_FOUND
+#                X11_XSync_INCLUDE_PATH,        (in X11_Xext_LIB),  X11_XSync_FOUND
+
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
@@ -80,6 +84,7 @@ IF (UNIX)
 
   # Solaris lacks XKBrules.h, so we should skip kxkbd there.
   FIND_PATH(X11_ICE_INCLUDE_PATH X11/ICE/ICE.h                       ${X11_INC_SEARCH_PATH})
+  FIND_PATH(X11_SM_INCLUDE_PATH X11/SM/SM.h                          ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xaccessrules_INCLUDE_PATH X11/extensions/XKBrules.h  ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xaccessstr_INCLUDE_PATH X11/extensions/XKBstr.h      ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xau_INCLUDE_PATH X11/Xauth.h                         ${X11_INC_SEARCH_PATH})
@@ -97,6 +102,7 @@ IF (UNIX)
   FIND_PATH(X11_Xinput_INCLUDE_PATH X11/extensions/XInput.h          ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xkb_INCLUDE_PATH X11/extensions/XKB.h                ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xkblib_INCLUDE_PATH X11/XKBlib.h                     ${X11_INC_SEARCH_PATH})
+  FIND_PATH(X11_Xkbfile_INCLUDE_PATH X11/extensions/XKBfile.h        ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xpm_INCLUDE_PATH X11/xpm.h                           ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_XTest_INCLUDE_PATH X11/extensions/XTest.h            ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_XShm_INCLUDE_PATH X11/extensions/XShm.h              ${X11_INC_SEARCH_PATH})
@@ -107,6 +113,7 @@ IF (UNIX)
   FIND_PATH(X11_Xutil_INCLUDE_PATH X11/Xutil.h                       ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xt_INCLUDE_PATH X11/Intrinsic.h                      ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xv_INCLUDE_PATH X11/extensions/Xvlib.h               ${X11_INC_SEARCH_PATH})
+  FIND_PATH(X11_XSync_INCLUDE_PATH X11/extensions/sync.h             ${X11_INC_SEARCH_PATH})
 
 
   FIND_LIBRARY(X11_X11_LIB X11               ${X11_LIB_SEARCH_PATH})
@@ -125,6 +132,7 @@ IF (UNIX)
   FIND_LIBRARY(X11_Xi_LIB Xi                 ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xinerama_LIB Xinerama     ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xinput_LIB Xi             ${X11_LIB_SEARCH_PATH})
+  FIND_LIBRARY(X11_Xkbfile_LIB xkbfile       ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xpm_LIB Xpm               ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xrandr_LIB Xrandr         ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xrender_LIB Xrender       ${X11_LIB_SEARCH_PATH})
@@ -277,14 +285,29 @@ IF (UNIX)
      SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xkb_INCLUDE_PATH} )
   ENDIF (X11_Xkb_INCLUDE_PATH AND X11_Xkblib_INCLUDE_PATH AND X11_Xlib_INCLUDE_PATH)
 
+  IF (X11_Xkbfile_INCLUDE_PATH AND X11_Xkbfile_LIB AND X11_Xlib_INCLUDE_PATH)
+     SET(X11_Xkbfile_FOUND TRUE)
+     SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xkbfile_INCLUDE_PATH} )
+  ENDIF (X11_Xkbfile_INCLUDE_PATH AND X11_Xkbfile_LIB AND X11_Xlib_INCLUDE_PATH)
+
   IF (X11_Xinput_INCLUDE_PATH AND X11_Xinput_LIB)
      SET(X11_Xinput_FOUND TRUE)
      SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xinput_INCLUDE_PATH})
   ENDIF (X11_Xinput_INCLUDE_PATH AND X11_Xinput_LIB)
 
+  IF (X11_XSync_INCLUDE_PATH)
+     SET(X11_XSync_FOUND TRUE)
+     SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_XSync_INCLUDE_PATH})
+  ENDIF (X11_XSync_INCLUDE_PATH)
+
   IF(X11_ICE_LIB AND X11_ICE_INCLUDE_PATH)
      SET(X11_ICE_FOUND TRUE)
   ENDIF(X11_ICE_LIB AND X11_ICE_INCLUDE_PATH)
+
+  IF(X11_SM_LIB AND X11_SM_INCLUDE_PATH)
+     SET(X11_SM_FOUND TRUE)
+  ENDIF(X11_SM_LIB AND X11_SM_INCLUDE_PATH)
+
 
   # Deprecated variable for backwards compatibility with CMake 1.4
   IF (X11_X11_INCLUDE_PATH AND X11_LIBRARIES)
@@ -422,6 +445,8 @@ IF (UNIX)
     X11_Xdmcp_INCLUDE_PATH
     X11_Xkb_INCLUDE_PATH
     X11_Xkblib_INCLUDE_PATH
+    X11_Xkbfile_INCLUDE_PATH
+    X11_Xkbfile_LIB
     X11_Xscreensaver_INCLUDE_PATH
     X11_Xscreensaver_LIB
     X11_Xpm_INCLUDE_PATH
@@ -437,6 +462,8 @@ IF (UNIX)
     X11_ICE_LIB
     X11_ICE_INCLUDE_PATH
     X11_SM_LIB
+    X11_SM_INCLUDE_PATH
+    X11_XSync_INCLUDE_PATH
   )
   SET(CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK_SAVE})
 ENDIF (UNIX)
