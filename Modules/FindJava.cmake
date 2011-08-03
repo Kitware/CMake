@@ -130,11 +130,6 @@ IF(Java_JAVA_EXECUTABLE)
       else( )
         set(Java_VERSION ${Java_VERSION_MAJOR}.${Java_VERSION_MINOR}.${Java_VERSION_PATCH}.${Java_VERSION_TWEAK})
       endif( )
-      # display info
-      #MESSAGE( STATUS "Java version ${Java_VERSION_STRING} configured successfully!" ) # keep me, used for debug
-      IF(NOT Java_FIND_QUIETLY)
-        MESSAGE( STATUS "Java version ${Java_VERSION} configured successfully!" )
-      ENDIF(NOT Java_FIND_QUIETLY)
     ENDIF()
 
 ENDIF(Java_JAVA_EXECUTABLE)
