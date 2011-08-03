@@ -1563,6 +1563,13 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
        i != depends.end(); ++i)
     {
     cmTarget* dt = *i;
+    // skip fortran targets as they can not be processed by MSBuild
+    // the only reference will be in the .sln file
+    if(static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
+       ->TargetIsFortranOnly(*dt))
+      {
+      continue;
+      }
     this->WriteString("<ProjectReference Include=\"", 2);
     cmMakefile* mf = dt->GetMakefile();
     std::string name = dt->GetName();

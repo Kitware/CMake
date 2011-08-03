@@ -16,6 +16,8 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 ENDMACRO(ADD_TEST_MACRO)
 
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
+
 # Fake a user home directory to avoid polluting the real one.
 IF(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
   SET(TEST_HOME "${CMake_BINARY_DIR}/Tests/CMakeFiles/TestHome")
@@ -155,6 +157,9 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
   SET_TESTS_PROPERTIES(MissingSourceFile PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
+  IF(CMAKE_Fortran_COMPILER)
+    ADD_TEST_MACRO(FortranOnly FortranOnly)
+  ENDIF()
   ADD_TEST_MACRO(COnly COnly)
   ADD_TEST_MACRO(CxxOnly CxxOnly)
   ADD_TEST_MACRO(IPO COnly/COnly)
@@ -1879,7 +1884,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   # fortran does not work for IDE builds because
   # CMAKE_STANDARD_LIBRARIES needs to be per language
   IF(CMAKE_TEST_GENERATOR MATCHES "Make|KDevelop")
-    INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
     IF(CMAKE_Fortran_COMPILER)
       ADD_TEST(Fortran ${CMAKE_CTEST_COMMAND}
         --build-and-test
