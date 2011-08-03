@@ -690,13 +690,7 @@ public:
    *  -----------------------------------------------------------------
    */
 
-  /**
-   * Get current time as a double. On certain platforms this will
-   * return higher resolution than seconds:
-   * (1) gettimeofday() -- resolution in microseconds
-   * (2) ftime() -- resolution in milliseconds
-   * (3) time() -- resolution in seconds
-   */
+  /** Get current time in seconds since Posix Epoch (Jan 1, 1970).  */
   static double GetTime();
 
   /**
