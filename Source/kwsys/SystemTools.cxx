@@ -296,7 +296,7 @@ double SystemTools::GetTime(void)
 #else
   struct timeval t;
   gettimeofday(&t, 0);
-  return 1.0*t.tv_sec + 0.000001*t.tv_usec;
+  return 1.0*double(t.tv_sec) + 0.000001*double(t.tv_usec);
 #endif
 }
 
