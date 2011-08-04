@@ -15,9 +15,9 @@
 #include "cmCommand.h"
 
 /** \class cmBuildNameCommand
- * \brief BuildName a CMAKE variable
+ * \brief build_name command
  *
- * cmBuildNameCommand sets a variable to a value with expansion.
+ * cmBuildNameCommand implements the build_name CMake command
  */
 class cmBuildNameCommand : public cmCommand
 {

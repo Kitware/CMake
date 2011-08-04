@@ -15,9 +15,9 @@
 #include "cmCommand.h"
 
 /** \class cmRemoveCommand
- * \brief Set a CMAKE variable
+ * \brief remove command
  *
- * cmRemoveCommand sets a variable to a value with expansion.  
+ * cmRemoveCommand implements the remove CMake command
  */
 class cmRemoveCommand : public cmCommand
 {
