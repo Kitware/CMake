@@ -1,5 +1,4 @@
-# This is a basic file for the new style find_package() search mode,
-# i.e. Config-mode.
+# This is a basic version file for the Config-mode of find_package().
 # It is used by WriteBasicConfigVersionFile.cmake as input file for configure_file()
 # to create a version-file which can be installed along a config.cmake file.
 #
