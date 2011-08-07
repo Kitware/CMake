@@ -20,6 +20,7 @@
 #include "cmCommand.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
+#include "cmQtAutomoc.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmTest.h"
@@ -1573,6 +1574,12 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       return cmake::ExecuteEchoColor(args);
       }
 #endif
+
+    else if (args[1] == "cmake_automoc")
+      {
+        cmQtAutomoc automoc;
+        automoc.Run("target directory");
+      }
 
     // Tar files
     else if (args[1] == "tar" && args.size() > 3)
