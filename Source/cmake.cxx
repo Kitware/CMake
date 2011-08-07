@@ -1578,7 +1578,8 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "cmake_automoc")
       {
         cmQtAutomoc automoc;
-        automoc.Run("target directory");
+        automoc.Run(args[2].c_str());
+        return 0;
       }
 
     // Tar files
