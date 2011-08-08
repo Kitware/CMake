@@ -21,8 +21,37 @@ private:
   void WriteOldMocDefinitionsFile(const char* targetDirectory);
 
   bool RunAutomocQt4();
+  bool GenerateMoc(const std::string& sourceFile,
+                   const std::string& mocFileName);
+  void Init();
+
+  std::string Join(const std::list<std::string>& lst, char separator);
+  bool EndsWith(const std::string& str, const std::string& with);
+  bool StartsWith(const std::string& str, const std::string& with);
+  std::string ReadAll(const std::string& filename);
 
   std::string QtMajorVersion;
+  std::string Sources;
+  bool IncludeProjectDirsBefore;
+  std::string Srcdir;
+  std::string Builddir;
+  std::string MocExecutable;
+  std::string MocCompileDefinitionsStr;
+  std::string MocDefinitionsStr;
+  std::string MocIncludesStr;
+  std::string ProjectBinaryDir;
+  std::string ProjectSourceDir;
+  std::string TargetName;
+
+  std::string OldMocDefinitionsStr;
+
+  std::string OutMocCppFilename;
+  std::list<std::string> MocIncludes;
+  std::list<std::string> MocDefinitions;
+
+  bool Verbose;
+  bool RunMocFailed;
+  bool GenerateAll;
 
 };
 

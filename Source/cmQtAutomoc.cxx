@@ -5,7 +5,13 @@
 
 #include "cmQtAutomoc.h"
 
+
+#define TRACE_LINE() printf(" %s %d\n", __PRETTY_FUNCTION__, __LINE__)
+
 cmQtAutomoc::cmQtAutomoc()
+:Verbose(true)
+,RunMocFailed(false)
+,GenerateAll(false)
 {
 }
 
@@ -19,9 +25,7 @@ bool cmQtAutomoc::Run(const char* targetDirectory)
   this->ReadAutomocInfoFile(makefile, targetDirectory);
   this->ReadOldMocDefinitionsFile(makefile, targetDirectory);
 
-  delete gg;
-  gg = NULL;
-  makefile = NULL;
+  this->Init();
 
   if (this->QtMajorVersion == "4")
     {
@@ -29,6 +33,11 @@ bool cmQtAutomoc::Run(const char* targetDirectory)
     }
 
   this->WriteOldMocDefinitionsFile(targetDirectory);
+
+  delete gg;
+  gg = NULL;
+  makefile = NULL;
+
 }
 
 
@@ -59,7 +68,22 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
   if (!makefile->ReadListFile(0, filename.c_str()))
     {
     cmSystemTools::Error("Error processing file:", filename.c_str());
+    return false;
     }
+
+  this->QtMajorVersion = makefile->GetSafeDefinition("AM_QT_VERSION_MAJOR");
+  this->Sources = makefile->GetSafeDefinition("AM_SOURCES");
+  this->IncludeProjectDirsBefore = makefile->IsOn("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
+  this->Srcdir = makefile->GetSafeDefinition("AM_CMAKE_CURRENT_SOURCE_DIR");
+  this->Builddir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
+  this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
+  this->MocCompileDefinitionsStr = makefile->GetSafeDefinition("AM_MOC_COMPILE_DEFINITIONS");
+  this->MocDefinitionsStr = makefile->GetSafeDefinition("AM_MOC_DEFINITIONS");
+  this->MocIncludesStr = makefile->GetSafeDefinition("AM_MOC_INCLUDES");
+  this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
+  this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
+  this->TargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
+
   return true;
 }
 
@@ -71,20 +95,550 @@ bool cmQtAutomoc::ReadOldMocDefinitionsFile(cmMakefile* makefile,
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutomocOldMocDefinitions.cmake";
 
-  if (!makefile->ReadListFile(0, filename.c_str()))
+  if (makefile->ReadListFile(0, filename.c_str()))
     {
-    cmSystemTools::Error("Error processing file:", filename.c_str());
+    this->OldMocDefinitionsStr =
+                         makefile->GetSafeDefinition("AM_OLD_MOC_DEFINITIONS");
     }
-  return true;
-}
-
-
-bool cmQtAutomoc::RunAutomocQt4()
-{
   return true;
 }
 
 
 void cmQtAutomoc::WriteOldMocDefinitionsFile(const char* targetDirectory)
 {
+  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
+  cmSystemTools::ConvertToUnixSlashes(filename);
+  filename += "/AutomocOldMocDefinitions.cmake";
+
+  std::fstream outfile;
+  outfile.open(filename.c_str(),
+               std::ios_base::out | std::ios_base::trunc);
+  outfile << "set(AM_OLD_MOC_DEFINITIONS \""
+              << this->Join(this->MocDefinitions, ' ') << "\")\n";
+
+  outfile.close();
+}
+
+
+void cmQtAutomoc::Init()
+{
+  this->OutMocCppFilename = this->Builddir;
+  this->OutMocCppFilename += this->TargetName;
+  this->OutMocCppFilename += ".cpp";
+
+  std::vector<std::string> cdefList;
+  cmSystemTools::ExpandListArgument(this->MocCompileDefinitionsStr, cdefList);
+  if (!cdefList.empty())
+    {
+    for(std::vector<std::string>::const_iterator it = cdefList.begin();
+        it != cdefList.end();
+        ++it)
+      {
+      this->MocDefinitions.push_back("-D" + (*it));
+      }
+    }
+  else
+    {
+    std::string tmpMocDefs = this->MocDefinitionsStr;
+    cmSystemTools::ReplaceString(tmpMocDefs, " ", ";");
+
+    std::vector<std::string> defList;
+    cmSystemTools::ExpandListArgument(tmpMocDefs, defList);
+
+    for(std::vector<std::string>::const_iterator it = defList.begin();
+        it != defList.end();
+        ++it)
+      {
+      if (this->StartsWith(*it, "-D"))
+        {
+        this->MocDefinitions.push_back(*it);
+        }
+      }
+    }
+
+  std::vector<std::string> incPaths;
+  cmSystemTools::ExpandListArgument(this->MocIncludesStr, incPaths);
+
+  std::set<std::string> frameworkPaths;
+  for(std::vector<std::string>::const_iterator it = incPaths.begin();
+      it != incPaths.end();
+      ++it)
+    {
+    const std::string &path = *it;
+    this->MocIncludes.push_back("-I" + path);
+    if (this->EndsWith(path, ".framework/Headers"))
+      {
+      // Go up twice to get to the framework root
+      std::vector<std::string> pathComponents;
+      cmsys::SystemTools::SplitPath(path.c_str(), pathComponents);
+      std::string frameworkPath =cmsys::SystemTools::JoinPath(
+                             pathComponents.begin(), pathComponents.end() - 2);
+      frameworkPaths.insert(frameworkPath);
+      }
+    }
+
+  for (std::set<std::string>::const_iterator it = frameworkPaths.begin();
+         it != frameworkPaths.end(); ++it)
+    {
+    this->MocIncludes.push_back("-F");
+    this->MocIncludes.push_back(*it);
+    }
+
+
+    if (this->IncludeProjectDirsBefore)
+      {
+      const std::string &binDir = "-I" + this->ProjectBinaryDir;
+
+      const std::string srcDir = "-I" + this->ProjectSourceDir;
+
+      std::list<std::string> sortedMocIncludes;
+      std::list<std::string>::iterator it = this->MocIncludes.begin();
+      while (it != this->MocIncludes.end())
+        {
+        if (this->StartsWith(*it, binDir))
+          {
+          sortedMocIncludes.push_back(*it);
+          it = this->MocIncludes.erase(it);
+          }
+        else
+          {
+          ++it;
+          }
+        }
+      it = this->MocIncludes.begin();
+      while (it != this->MocIncludes.end())
+        {
+        if (this->StartsWith(*it, srcDir))
+          {
+          sortedMocIncludes.push_back(*it);
+          it = this->MocIncludes.erase(it);
+          }
+        else
+          {
+          ++it;
+          }
+        }
+      sortedMocIncludes.insert(sortedMocIncludes.end(),
+                           this->MocIncludes.begin(), this->MocIncludes.end());
+      this->MocIncludes = sortedMocIncludes;
+    }
+
+}
+
+
+bool cmQtAutomoc::RunAutomocQt4()
+{
+  if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str())
+    || (this->OldMocDefinitionsStr != this->Join(this->MocDefinitions, ' ')))
+    {
+    this->GenerateAll = true;
+    }
+
+  // the program goes through all .cpp files to see which moc files are included. It is not really
+  // interesting how the moc file is named, but what file the moc is created from. Once a moc is
+  // included the same moc may not be included in the _automoc.cpp file anymore. OTOH if there's a
+  // header containing Q_OBJECT where no corresponding moc file is included anywhere a
+  // moc_<filename>.cpp file is created and included in the _automoc.cpp file.
+  std::map<std::string, std::string> includedMocs;    // key = moc source filepath, value = moc output filepath
+  std::map<std::string, std::string> notIncludedMocs; // key = moc source filepath, value = moc output filename
+
+  cmsys::RegularExpression mocIncludeRegExp(
+              "[\n][ \t]*#[ \t]*include[ \t]+"
+              "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
+  cmsys::RegularExpression qObjectRegExp("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
+  std::list<std::string> headerExtensions;
+#if defined(_WIN32)
+  // not case sensitive
+  headerExtensions.push_back(".h");
+  headerExtensions.push_back(".hpp");
+  headerExtensions.push_back(".hxx");
+#elif defined(__APPLE__)
+  headerExtensions.push_back(".h");
+  headerExtensions.push_back(".hpp");
+  headerExtensions.push_back(".hxx");
+
+  // detect case-sensitive filesystem
+  long caseSensitive = pathconf(this->Srcdir.c_str(), _PC_CASE_SENSITIVE);
+  if (caseSensitive == 1)
+  {
+    headerExtensions.push_back(".H");
+  }
+#else
+  headerExtensions.push_back(".h");
+  headerExtensions.push_back(".hpp");
+  headerExtensions.push_back(".hxx");
+  headerExtensions.push_back(".H");
+#endif
+
+  std::vector<std::string> sourceFiles;
+  cmSystemTools::ExpandListArgument(this->Sources, sourceFiles);
+
+  for (std::vector<std::string>::const_iterator it = sourceFiles.begin();
+       it != sourceFiles.end();
+       ++it)
+    {
+    const std::string &absFilename = *it;
+    if (this->Verbose)
+      {
+      printf("Checking -%s-\n", absFilename.c_str());
+      }
+    std::string extension = absFilename.substr(absFilename.find_last_of('.'));
+
+    if (extension == ".cpp" || extension == ".cc" || extension == ".mm"
+         || extension == ".cxx" || extension == ".C")
+      {
+      const std::string contentsString = this->ReadAll(absFilename);
+      if (contentsString.empty())
+        {
+        std::cerr << "automoc4: empty source file: " << absFilename << std::endl;
+        continue;
+        }
+      const std::string absPath = cmsys::SystemTools::GetFilenamePath(
+                  cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
+
+      int matchOffset = 0;
+      if (!mocIncludeRegExp.find(contentsString.c_str()))
+        {
+        // no moc #include, look whether we need to create a moc from the .h nevertheless
+        //std::cout << "no moc #include in the .cpp file";
+        const std::string basename =
+              cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
+        for(std::list<std::string>::const_iterator ext =
+                                                      headerExtensions.begin();
+            ext != headerExtensions.end();
+            ++ext)
+          {
+          const std::string headername = absPath + basename + (*ext);
+          if (cmsys::SystemTools::FileExists(headername.c_str())
+                  && includedMocs.find(headername) == includedMocs.end()
+                  && notIncludedMocs.find(headername) == notIncludedMocs.end())
+            {
+            const std::string currentMoc = "moc_" + basename + ".cpp";
+            const std::string contents = this->ReadAll(headername);
+            if (qObjectRegExp.find(contents))
+              {
+              //std::cout << "header contains Q_OBJECT macro";
+              notIncludedMocs[headername] = currentMoc;
+              }
+            break;
+            }
+          }
+        for(std::list<std::string>::const_iterator ext =
+                                                      headerExtensions.begin();
+            ext != headerExtensions.end();
+            ++ext)
+          {
+          const std::string privateHeaderName = absPath+basename+"_p"+(*ext);
+          if (cmsys::SystemTools::FileExists(privateHeaderName.c_str())
+                  && includedMocs.find(privateHeaderName) == includedMocs.end()
+                  && notIncludedMocs.find(privateHeaderName) == notIncludedMocs.end())
+            {
+            const std::string currentMoc = "moc_" + basename + "_p.cpp";
+            const std::string contents = this->ReadAll(privateHeaderName);
+            if (qObjectRegExp.find(contents))
+              {
+              //std::cout << "header contains Q_OBJECT macro";
+              notIncludedMocs[privateHeaderName] = currentMoc;
+              }
+            break;
+            }
+          }
+        }
+      else
+        {
+        // for every moc include in the file
+        do
+          {
+          const std::string currentMoc = mocIncludeRegExp.match(1);
+          //std::cout << "found moc include: " << currentMoc << std::endl;
+
+          std::string basename = cmsys::SystemTools::
+                                   GetFilenameWithoutLastExtension(currentMoc);
+          const bool moc_style = this->StartsWith(basename, "moc_");
+
+          // If the moc include is of the moc_foo.cpp style we expect the Q_OBJECT class
+          // declaration in a header file.
+          // If the moc include is of the foo.moc style we need to look for a Q_OBJECT
+          // macro in the current source file, if it contains the macro we generate the
+          // moc file from the source file, else from the header.
+          //
+          // TODO: currently any .moc file name will be used if the source contains
+          // Q_OBJECT
+          if (moc_style || !qObjectRegExp.find(contentsString))
+            {
+            if (moc_style)
+              {
+              // basename should be the part of the moc filename used for finding the
+              // correct header, so we need to remove the moc_ part
+              basename = basename.substr(4);
+              }
+
+            bool headerFound = false;
+            for(std::list<std::string>::const_iterator ext =
+                                                      headerExtensions.begin();
+                ext != headerExtensions.end();
+                ++ext)
+              {
+              const std::string &sourceFilePath = absPath + basename + (*ext);
+              if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
+                {
+                headerFound = true;
+                includedMocs[sourceFilePath] = currentMoc;
+                notIncludedMocs.erase(sourceFilePath);
+                break;
+                }
+              }
+            if (!headerFound)
+              {
+              // the moc file is in a subdir => look for the header in the same subdir
+              if (currentMoc.find_first_of('/') != std::string::npos)
+                {
+                const std::string &filepath = absPath
+                        + cmsys::SystemTools::GetFilenamePath(currentMoc)
+                        + '/' + basename;
+
+                for(std::list<std::string>::const_iterator ext =
+                                                      headerExtensions.begin();
+                    ext != headerExtensions.end();
+                    ++ext)
+                  {
+                  const std::string &sourceFilePath = filepath + (*ext);
+                  if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
+                    {
+                    headerFound = true;
+                    includedMocs[sourceFilePath] = currentMoc;
+                    notIncludedMocs.erase(sourceFilePath);
+                    break;
+                    }
+                  }
+                if (!headerFound)
+                  {
+                  std::cerr << "automoc4: The file \"" << absFilename <<
+                      "\" includes the moc file \"" << currentMoc << "\", but neither \"" <<
+                      absPath + basename + '{' + this->Join(headerExtensions, ',') + "}\" nor \"" <<
+                      filepath + '{' + this->Join(headerExtensions, ',') + '}' <<
+                      "\" exist." << std::endl;
+                  ::exit(EXIT_FAILURE);
+                  }
+                }
+              else
+                {
+                std::cerr << "automoc4: The file \"" << absFilename <<
+                    "\" includes the moc file \"" << currentMoc << "\", but \"" <<
+                    absPath + basename + '{' + this->Join(headerExtensions, ',') + '}' <<
+                    "\" does not exist." << std::endl;
+                ::exit(EXIT_FAILURE);
+                }
+              }
+            }
+          else
+            {
+            includedMocs[absFilename] = currentMoc;
+            notIncludedMocs.erase(absFilename);
+            }
+          matchOffset += mocIncludeRegExp.end();
+          } while(mocIncludeRegExp.find(contentsString.c_str() + matchOffset));
+        }
+      }
+    else if (extension == ".h" || extension == ".hpp"
+            || extension == ".hxx" || extension == ".H")
+      {
+      if (includedMocs.find(absFilename) == includedMocs.end()
+              && notIncludedMocs.find(absFilename) == notIncludedMocs.end())
+        {
+        // if this header is not getting processed yet and is explicitly mentioned for the
+        // automoc the moc is run unconditionally on the header and the resulting file is
+        // included in the _automoc.cpp file (unless there's a .cpp file later on that
+        // includes the moc from this header)
+        const std::string currentMoc = "moc_" + cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename) + ".cpp";
+        notIncludedMocs[absFilename] = currentMoc;
+        }
+      }
+    else
+      {
+      if (this->Verbose)
+        {
+        std::cout << "automoc4: ignoring file '" << absFilename << "' with unknown suffix" << std::endl;
+        }
+      }
+    }
+
+  // run moc on all the moc's that are #included in source files
+  for(std::map<std::string, std::string>::const_iterator it = includedMocs.begin();
+      it != includedMocs.end();
+      ++it)
+    {
+    this->GenerateMoc(it->first, it->second);
+    }
+
+  std::stringstream outStream(std::stringstream::out);
+  outStream << "/* This file is autogenerated, do not edit*/\n";
+
+  bool automocCppChanged = false;
+  if (notIncludedMocs.empty())
+    {
+    outStream << "enum some_compilers { need_more_than_nothing };\n";
+    }
+  else
+    {
+    // run moc on the remaining headers and include them in the _automoc.cpp file
+    for(std::map<std::string, std::string>::const_iterator it = notIncludedMocs.begin();
+        it != notIncludedMocs.end();
+        ++it)
+      {
+      bool mocSuccess = this->GenerateMoc(it->first, it->second);
+      if (mocSuccess)
+        {
+        automocCppChanged = true;
+        }
+      outStream << "#include \"" << it->second << "\"\n";
+      }
+    }
+
+  if (this->RunMocFailed)
+    {
+    // if any moc process failed we don't want to touch the _automoc.cpp file so that
+    // automoc4 is rerun until the issue is fixed
+    std::cerr << "returning failed.."<< std::endl;
+    return false;
+    }
+  outStream.flush();
+  std::string automocSource = outStream.str();
+  if (!automocCppChanged)
+    {
+    // compare contents of the _automoc.cpp file
+    const std::string oldContents = this->ReadAll(this->OutMocCppFilename);
+    if (oldContents == automocSource)
+      {
+      // nothing changed: don't touch the _automoc.cpp file
+      return true;
+      }
+    }
+  // either the contents of the _automoc.cpp file or one of the mocs included by it have changed
+
+  // source file that includes all remaining moc files (_automoc.cpp file)
+  std::fstream outfile;
+  outfile.open(this->OutMocCppFilename.c_str(),
+               std::ios_base::out | std::ios_base::trunc);
+  outfile << automocSource;
+  outfile.close();
+
+  return true;
+}
+
+
+bool cmQtAutomoc::GenerateMoc(const std::string& sourceFile,
+                              const std::string& mocFileName)
+{
+    //std::cout << "AutoMoc::generateMoc" << sourceFile << mocFileName << std::endl;
+  const std::string mocFilePath = this->Builddir + mocFileName;
+  int sourceNewerThanMoc = 0;
+  bool success = cmsys::SystemTools::FileTimeCompare(sourceFile.c_str(),
+                                                     mocFilePath.c_str(),
+                                                     &sourceNewerThanMoc);
+  if (this->GenerateAll || !success || sourceNewerThanMoc >= 0)
+    {
+    // make sure the directory for the resulting moc file exists
+    std::string mocDir = mocFilePath.substr(0, mocFilePath.rfind('/'));
+    if (!cmsys::SystemTools::FileExists(mocDir.c_str(), false))
+      {
+      cmsys::SystemTools::MakeDirectory(mocDir.c_str());
+      }
+
+/*    if (this->Verbose)
+      {
+      echoColor("Generating " + mocFilePath + " from " + sourceFile);
+      }
+    else
+      {
+      echoColor("Generating " + mocFileName);
+      }*/
+
+    std::vector<cmStdString> command;
+    command.push_back(this->MocExecutable);
+    for (std::list<std::string>::const_iterator it = this->MocIncludes.begin();
+         it != this->MocIncludes.end();
+         ++it)
+      {
+      command.push_back(*it);
+      }
+    for(std::list<std::string>::const_iterator it=this->MocDefinitions.begin();
+        it != this->MocDefinitions.end();
+        ++it)
+      {
+      command.push_back(*it);
+      }
+#ifdef _WIN32
+    command.push_back("-DWIN32");
+#endif
+    command.push_back("-o");
+    command.push_back(mocFilePath);
+    command.push_back(sourceFile);
+
+    if (this->Verbose)
+      {
+      for(int i=0; i<command.size(); i++)
+        {
+        printf("%s ", command[i].c_str());
+        }
+      printf("\n");
+      }
+
+    std::string output;
+    int retVal = 0;
+    const bool result = cmSystemTools::RunSingleCommand(command, &output, &retVal);
+    if (!result || retVal)
+      {
+      std::cerr << "automoc4: process for " << mocFilePath << " failed:\n" << output << std::endl;
+      this->RunMocFailed = true;
+      cmSystemTools::RemoveFile(mocFilePath.c_str());
+      }
+    return true;
+    }
+  return false;
+}
+
+
+std::string cmQtAutomoc::Join(const std::list<std::string>& lst,char separator)
+{
+    if (lst.empty())
+      {
+      return "";
+      }
+
+    std::string result;
+    for (std::list<std::string>::const_iterator it = lst.begin();
+         it != lst.end();
+         ++it)
+      {
+      result += (*it) + separator;
+      }
+    result.erase(result.end() - 1);
+    return result;
+}
+
+
+bool cmQtAutomoc::StartsWith(const std::string& str, const std::string& with)
+{
+  return (str.substr(0, with.length()) == with);
+}
+
+
+bool cmQtAutomoc::EndsWith(const std::string& str, const std::string& with)
+{
+  if (with.length() > (str.length()))
+    {
+    return false;
+    }
+  return (str.substr(str.length() - with.length(), with.length()) == with);
+}
+
+
+std::string cmQtAutomoc::ReadAll(const std::string& filename)
+{
+  std::ifstream file(filename.c_str());
+  std::stringstream stream;
+  stream << file.rdbuf();
+  file.close();
+  return stream.str();
 }
