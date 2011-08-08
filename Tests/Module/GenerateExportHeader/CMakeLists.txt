@@ -107,6 +107,8 @@ macro_add_test_library(libstatic)
 add_subdirectory(lib_shared_and_static)
 add_subdirectory(lib_shared_and_statictest)
 
+add_subdirectory(override_symbol)
+
 if (CMAKE_COMPILER_IS_GNUCXX)
   # We deliberately call deprecated methods, and test for that elsewhere.
   # No need to clutter the test output with warnings.
