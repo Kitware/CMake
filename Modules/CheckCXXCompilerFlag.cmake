@@ -28,6 +28,7 @@ MACRO (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
    CHECK_CXX_SOURCE_COMPILES("int main() { return 0;}" ${_RESULT}
      # Some compilers do not fail with a bad flag
      FAIL_REGEX "unrecognized .*option"                     # GNU
+     FAIL_REGEX "unknown .*option"                          # Clang
      FAIL_REGEX "ignoring unknown option"                   # MSVC
      FAIL_REGEX "warning D9002"                             # MSVC, any lang
      FAIL_REGEX "[Uu]nknown option"                         # HP
