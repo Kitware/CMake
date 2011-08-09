@@ -32,6 +32,7 @@ private:
 
   std::string QtMajorVersion;
   std::string Sources;
+  std::string Headers;
   bool IncludeProjectDirsBefore;
   std::string Srcdir;
   std::string Builddir;
