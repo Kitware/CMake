@@ -1,4 +1,4 @@
-# COMPILER_ID = GNU/Intel/etc.
+# COMPILER_ID = GNU/Intel/Clang/MSVC, etc.
 # LANGUAGE = C/CXX/Fortan/ASM
 # MODE = EXIST/COMPILE/LINK
 # NAME = name of the package
