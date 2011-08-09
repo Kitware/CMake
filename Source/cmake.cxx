@@ -2927,6 +2927,13 @@ const char* cmake::GetCPackCommand()
     return this->CPackCommand.c_str();
 }
 
+
+const char* cmake::GetCMakeCommand()
+{
+  return this->CMakeCommand.c_str();
+}
+
+
 void cmake::MarkCliAsUsed(const std::string& variable)
 {
   this->UsedCliVariables[variable] = true;

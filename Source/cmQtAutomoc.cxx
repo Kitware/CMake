@@ -1,6 +1,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
 #include "cmQtAutomoc.h"
@@ -13,6 +14,131 @@ cmQtAutomoc::cmQtAutomoc()
 ,RunMocFailed(false)
 ,GenerateAll(false)
 {
+}
+
+
+void cmQtAutomoc::SetupAutomocTarget(cmMakefile* makefile,
+                                     const char* targetName,
+                                     std::vector<std::string>& srcs)
+{
+  // don't do anything if there is no Qt4:
+  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
+  if (qtMajorVersion != "4")
+    {
+    return;
+    }
+
+  std::string automocTargetName = targetName;
+  automocTargetName += "_automoc";
+
+  std::string targetDir = makefile->GetCurrentOutputDirectory();
+  targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
+  targetDir += "/";
+  targetDir += automocTargetName;
+  targetDir += ".dir/";
+
+  cmCustomCommandLine currentLine;
+  currentLine.push_back(makefile->GetCMakeInstance()->GetCMakeCommand());
+  currentLine.push_back("-E");
+  currentLine.push_back("cmake_automoc");
+  currentLine.push_back(targetDir);
+
+  cmCustomCommandLines commandLines;
+  commandLines.push_back(currentLine);
+
+  std::string workingDirectory = cmSystemTools::CollapseFullPath(
+                                    "", makefile->GetCurrentOutputDirectory());
+
+  std::vector<std::string> depends;
+
+  cmTarget* target = makefile->AddUtilityCommand(automocTargetName.c_str(),
+                                                 true,
+                                      workingDirectory.c_str(), depends,
+                                      commandLines, false, "Automoc target");
+
+  std::string _moc_files;
+  std::string _moc_headers;
+  const char* sepFiles = "";
+  const char* sepHeaders = "";
+  for(std::vector<std::string>::const_iterator fileIt = srcs.begin();
+      fileIt != srcs.end();
+      ++fileIt)
+    {
+    std::string absFile = cmSystemTools::CollapseFullPath(
+                             fileIt->c_str(), makefile->GetCurrentDirectory());
+
+    bool skip = false;
+    bool generated = false;
+    cmSourceFile* sf = makefile->GetSource(absFile.c_str());
+    if (sf)
+      {
+      skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
+      generated = cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"));
+      }
+
+    if ((skip==false) && (generated == false))
+      {
+      std::string ext = cmSystemTools::GetFilenameExtension(fileIt->c_str());
+      cmSystemTools::FileFormat fileType = cmSystemTools::GetFileFormat(ext.c_str());
+      if (fileType == cmSystemTools::CXX_FILE_FORMAT)
+        {
+        _moc_files += sepFiles;
+        _moc_files += absFile;
+        sepFiles = ";";
+        }
+      else if (fileType == cmSystemTools::HEADER_FILE_FORMAT)
+        {
+        _moc_headers += sepHeaders;
+        _moc_headers += absFile;
+        sepHeaders = ";";
+        }
+      }
+    }
+
+  std::string _moc_incs = makefile->GetProperty("INCLUDE_DIRECTORIES");
+  std::string _moc_defs = makefile->GetProperty("DEFINITIONS");
+  std::string _moc_compile_defs = makefile->GetProperty("COMPILE_DEFINITIONS");
+  // forget the variables added here afterwards again:
+  cmMakefile::ScopePushPop varScope(makefile);
+  static_cast<void>(varScope);
+
+  makefile->AddDefinition("_moc_target_name", automocTargetName.c_str());
+  makefile->AddDefinition("_moc_incs", _moc_incs.c_str());
+  makefile->AddDefinition("_moc_defs", _moc_defs.c_str());
+  makefile->AddDefinition("_moc_compile_defs", _moc_compile_defs.c_str());
+  makefile->AddDefinition("_moc_files", _moc_files.c_str());
+  makefile->AddDefinition("_moc_headers", _moc_headers.c_str());
+
+  const char* cmakeRoot = makefile->GetDefinition("CMAKE_ROOT");
+  std::string inputFile = cmakeRoot;
+  inputFile += "/Modules/AutomocInfo.cmake.in";
+  std::string outputFile = targetDir;
+  outputFile += "/AutomocInfo.cmake";
+  makefile->ConfigureFile(inputFile.c_str(), outputFile.c_str(),
+                          false, true, false);
+
+  std::string mocCppFile =  makefile->GetCurrentOutputDirectory();
+  mocCppFile += "/";
+  mocCppFile += automocTargetName;
+  mocCppFile += ".cpp";
+  makefile->GetOrCreateSource(mocCppFile.c_str(), true);
+  srcs.push_back(mocCppFile);
+
+}
+
+
+void cmQtAutomoc::AddTargetDependency(cmMakefile* makefile, cmTarget* target)
+{
+  // don't do anything if there is no Qt4:
+  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
+  if (qtMajorVersion != "4")
+    {
+    return;
+    }
+
+  std::string automocTargetName = target->GetName();
+  automocTargetName += "_automoc";
+  target->AddUtility(automocTargetName.c_str());
 }
 
 
