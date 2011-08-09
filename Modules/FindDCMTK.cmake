@@ -108,8 +108,10 @@ foreach(dir
     PATHS
     ${DCMTK_DIR}/${dir}/include
     ${DCMTK_DIR}/${dir}
-    ${DCMTK_DIR}/include/${dir})
-
+    ${DCMTK_DIR}/include/${dir}
+    ${DCMTK_DIR}/include/dcmtk/${dir}
+    ${DCMTK_DIR}/${dir}/include/dcmtk/${dir}
+    )
   mark_as_advanced(DCMTK_${dir}_INCLUDE_DIR)
 
   if(DCMTK_${dir}_INCLUDE_DIR)
