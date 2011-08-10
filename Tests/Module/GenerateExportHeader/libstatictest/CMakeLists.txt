@@ -9,5 +9,7 @@ endmacro()
 
 static_build_pass("Libstatic l; return l.libstatic_exported();" "Failed to build exported.")
 
-static_build_fail("Libstatic l; return l.libstatic_deprecated();" "Built use of deprecated class method. This should not be possible.")
+if (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES Borland)
+  static_build_fail("Libstatic l; return l.libstatic_deprecated();" "Built use of deprecated class method. This should not be possible.")
+endif()
 static_build_fail("libstatic_deprecated();" "Built use of deprecated function. This should not be possible.")
