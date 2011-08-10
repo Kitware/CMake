@@ -8,7 +8,7 @@
 
 
 cmQtAutomoc::cmQtAutomoc()
-:Verbose(true)
+:Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != 0)
 ,RunMocFailed(false)
 ,GenerateAll(false)
 {
