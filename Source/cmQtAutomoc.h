@@ -29,6 +29,10 @@ private:
   bool RunAutomocQt4();
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
+  void ParseCppFile(const std::string& absFilename,
+                    std::map<std::string, std::string>& includedMocs,
+                    std::map<std::string, std::string>& notIncludedMocs);
+
   void Init();
 
   std::string Join(const std::list<std::string>& lst, char separator);
