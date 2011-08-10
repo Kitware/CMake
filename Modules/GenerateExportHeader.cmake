@@ -149,7 +149,7 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   set(DEFINE_NO_EXPORT)
 
   if(WIN32)
-    if (${CMAKE_CXX_COMPILER_ID} MATCHES Borland)
+    if (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES Borland)
       set(DEFINE_DEPRECATED "__declspec(deprecated)")
     endif()
   else()
