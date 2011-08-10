@@ -44,7 +44,7 @@ macro(_do_build Include Library LibrarySource Source)
 
     "add_compiler_export_flags()\n"
 
-    "if(CMAKE_COMPILER_IS_GNUCXX)\n"
+    "if(CMAKE_COMPILER_IS_GNUCXXOR OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))\n"
     "  add_definitions(-Werror)\n"
     "else()\n"
     "  if(MSVC)\n"
@@ -76,10 +76,11 @@ endmacro()
 
 macro(build_fail Include Library LibrarySource Source Message)
   _do_build(${Include} ${Library} ${LibrarySource} "${Source}")
-  if((USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY) OR WIN32)
+  if((USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY) OR WIN32 OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
     test_fail(Result ${Message})
-  endif()
+  else()
     test_pass(Result ${Message})
+  endif()
 endmacro()
 
 macro(build_pass Include Library LibrarySource Source Message)
@@ -112,7 +113,7 @@ add_subdirectory(lib_shared_and_statictest)
 
 add_subdirectory(override_symbol)
 
-if (CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
   # We deliberately call deprecated methods, and test for that elsewhere.
   # No need to clutter the test output with warnings.
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
