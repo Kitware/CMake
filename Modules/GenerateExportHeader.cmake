@@ -232,18 +232,6 @@ function(add_compiler_export_flags)
     return()
   endif()
 
-  set(options)
-  set(oneValueArgs FATAL_WARNINGS)
-  set(multiValueArgs)
-
-  cmake_parse_arguments(_EGHV "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-  set(MESSAGE_TYPE WARNING)
-
-  if(_EGHV_FATAL_WARNINGS)
-    set(MESSAGE_TYPE FATAL_ERROR)
-  endif()
-
   if (CMAKE_COMPILER_IS_GNUCXX)
     exec_program(${CMAKE_C_COMPILER} ARGS --version OUTPUT_VARIABLE     _gcc_version_info)
     string (REGEX MATCH "[345]\\.[0-9]\\.[0-9]" _gcc_version "${_gcc_version_info}")
