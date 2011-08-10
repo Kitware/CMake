@@ -71,7 +71,7 @@ macro(_do_build Include Library LibrarySource Source)
 
   try_compile(Result ${CMAKE_CURRENT_BINARY_DIR}/fail${COUNT}
     ${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}
-    compilefail
+    compiletest
     OUTPUT_VARIABLE Out
   )
 endmacro()
