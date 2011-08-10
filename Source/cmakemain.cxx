@@ -104,7 +104,9 @@ static const char * cmDocumentationOptions[][3] =
    "before the -P argument."},
   {"--find-package", "Run in pkg-config like mode.",
    "Search a package using find_package() and print the resulting flags "
-   "to stdout. "},
+   "to stdout. This can be used to use cmake instead of pkg-config to find "
+   "installed libraries in plain Makefile-based projects or in "
+   "autoconf-based projects (via share/aclocal/cmake.m4)."},
   {"--graphviz=[file]", "Generate graphviz of dependencies.",
    "Generate a graphviz input file that will contain all the library and "
    "executable dependencies in the project."},
