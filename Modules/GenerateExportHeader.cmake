@@ -228,7 +228,9 @@ endfunction()
 
 function(add_compiler_export_flags)
 
-  if(NOT CMAKE_COMPILER_IS_GNUCXX OR MINGW)
+  _test_compiler_hidden_visibility()
+
+  if(NOT (USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY) OR MINGW)
     return()
   endif()
 
@@ -245,8 +247,6 @@ function(add_compiler_export_flags)
       return()
     endif()
   endif()
-
-  _test_compiler_hidden_visibility()
 
   if(USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY AND NOT _GCC_COMPILED_WITH_BAD_ALLOCATOR)
     set (EXTRA_FLAGS "-fvisibility=hidden")
