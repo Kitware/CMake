@@ -74,9 +74,24 @@ macro(_do_build Include Library LibrarySource Source)
   )
 endmacro()
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+  exec_program(${CMAKE_C_COMPILER} ARGS --version OUTPUT_VARIABLE     _gcc_version_info)
+  string (REGEX MATCH "[345]\\.[0-9]\\.[0-9]" _gcc_version "${_gcc_version_info}")
+  # gcc on mac just reports: "gcc (GCC) 3.3 20030304 ..." without the
+  # patch level, handle this here:
+  if(NOT _gcc_version)
+    string (REGEX REPLACE ".*\\(GCC\\).* ([34]\\.[0-9]) .*" "\\1.0" _gcc_version "${_gcc_version_info}")
+  endif()
+
+  if(${_gcc_version} VERSION_LESS "4.2")
+    set(GCC_IS_LESS_THAN_4_2 TRUE)
+    message(WARNING "GCC version older than 4.2. Actual version: ${_gcc_version}")
+  endif()
+endif()
+
 macro(build_fail Include Library LibrarySource Source Message)
   _do_build(${Include} ${Library} ${LibrarySource} "${Source}")
-  if((USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY) OR WIN32 OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
+  if(NOT GCC_IS_LESS_THAN_4_2 AND (USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY) OR WIN32 OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
     test_fail(Result ${Message})
   else()
     test_pass(Result ${Message})
