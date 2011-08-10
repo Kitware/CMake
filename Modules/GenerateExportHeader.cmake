@@ -229,6 +229,7 @@ function(add_compiler_export_flags)
   _test_compiler_hidden_visibility()
 
   if(NOT (USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY) OR MINGW)
+    message(WARNING "Compiler doesn't have hidden visibility")
     return()
   endif()
 
@@ -242,6 +243,7 @@ function(add_compiler_export_flags)
     endif()
 
     if(${_gcc_version} VERSION_LESS "4.2")
+      message(WARNING "GCC version older than 4.2")
       return()
     endif()
   endif()
