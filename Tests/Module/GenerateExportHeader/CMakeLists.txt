@@ -44,7 +44,7 @@ macro(_do_build Include Library LibrarySource Source)
 
     "add_compiler_export_flags()\n"
 
-    "if(CMAKE_COMPILER_IS_GNUCXXOR OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))\n"
+    "if(CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))\n"
     "  add_definitions(-Werror)\n"
     "else()\n"
     "  if(MSVC)\n"
