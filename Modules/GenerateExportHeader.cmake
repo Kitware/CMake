@@ -116,10 +116,28 @@ include(CMakeParseArguments)
 include(CheckCXXCompilerFlag)
 
 macro(_test_compiler_hidden_visibility)
-  check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
-  check_cxx_compiler_flag(-fvisibility-inlines-hidden COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
-  option(USE_COMPILER_HIDDEN_VISIBILITY "Use HIDDEN visibility support if available." ON)
-  mark_as_advanced(USE_COMPILER_HIDDEN_VISIBILITY)
+
+  if (CMAKE_COMPILER_IS_GNUCXX)
+    exec_program(${CMAKE_C_COMPILER} ARGS --version OUTPUT_VARIABLE     _gcc_version_info)
+    string (REGEX MATCH "[345]\\.[0-9]\\.[0-9]" _gcc_version "${_gcc_version_info}")
+    # gcc on mac just reports: "gcc (GCC) 3.3 20030304 ..." without the
+    # patch level, handle this here:
+    if(NOT _gcc_version)
+      string (REGEX REPLACE ".*\\(GCC\\).* ([34]\\.[0-9]) .*" "\\1.0" _gcc_version "${_gcc_version_info}")
+    endif()
+
+    if(${_gcc_version} VERSION_LESS "4.2")
+      set(GCC_TOO_OLD TRUE)
+      message(WARNING "GCC version older than 4.2")
+    endif()
+  endif()
+
+  if (NOT GCC_TOO_OLD)
+    check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
+    check_cxx_compiler_flag(-fvisibility-inlines-hidden COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
+    option(USE_COMPILER_HIDDEN_VISIBILITY "Use HIDDEN visibility support if available." ON)
+    mark_as_advanced(USE_COMPILER_HIDDEN_VISIBILITY)
+  endif()
 endmacro()
 
 set(myDir ${CMAKE_CURRENT_LIST_DIR})
@@ -130,7 +148,7 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   set(DEFINE_IMPORT)
   set(DEFINE_NO_EXPORT)
 
-  if(WIN32)
+  if(WIN32 AND NOT (${CMAKE_CXX_COMPILER_ID} MATCHES Borland))
     set(DEFINE_DEPRECATED "__declspec(deprecated)")
   else()
     set(DEFINE_DEPRECATED "__attribute__ ((__deprecated__))")
@@ -139,7 +157,7 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   get_property(type TARGET ${TARGET_LIBRARY} PROPERTY TYPE)
 
   if(NOT ${type} STREQUAL "STATIC_LIBRARY")
-    if(WIN32)
+    if(WIN32 AND NOT (${CMAKE_CXX_COMPILER_ID} MATCHES Borland))
       set(DEFINE_EXPORT "__declspec(dllexport)")
       set(DEFINE_IMPORT "__declspec(dllimport)")
     elseif(COMPILER_HAS_HIDDEN_VISIBILITY AND USE_COMPILER_HIDDEN_VISIBILITY)
@@ -231,21 +249,6 @@ function(add_compiler_export_flags)
   if(NOT (USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY) OR MINGW)
     message(WARNING "Compiler doesn't have hidden visibility")
     return()
-  endif()
-
-  if (CMAKE_COMPILER_IS_GNUCXX)
-    exec_program(${CMAKE_C_COMPILER} ARGS --version OUTPUT_VARIABLE     _gcc_version_info)
-    string (REGEX MATCH "[345]\\.[0-9]\\.[0-9]" _gcc_version "${_gcc_version_info}")
-    # gcc on mac just reports: "gcc (GCC) 3.3 20030304 ..." without the
-    # patch level, handle this here:
-    if(NOT _gcc_version)
-      string (REGEX REPLACE ".*\\(GCC\\).* ([34]\\.[0-9]) .*" "\\1.0" _gcc_version "${_gcc_version_info}")
-    endif()
-
-    if(${_gcc_version} VERSION_LESS "4.2")
-      message(WARNING "GCC version older than 4.2")
-      return()
-    endif()
   endif()
 
   set (EXTRA_FLAGS "-fvisibility=hidden")
