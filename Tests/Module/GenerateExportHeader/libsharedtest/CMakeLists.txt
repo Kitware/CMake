@@ -9,7 +9,11 @@ endmacro()
 
 shared_build_pass("Libshared l; return l.libshared_exported();" "Failed to build exported")
 
-shared_build_fail("Libshared l; return l.libshared_deprecated();" "Built use of deprecated class method. This should not be possible.")
+if (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES Borland)
+  shared_build_fail("Libshared l; return l.libshared_deprecated();" "Built use of deprecated class method. This should not be possible.")
+else()
+  shared_build_pass("Libshared l; return l.libshared_deprecated();" "Built use of deprecated class method. This should not be possible.")
+endif()
 if (COMPILER_HAS_HIDDEN_VISIBILITY)
   shared_build_fail("Libshared l; return l.libshared_excluded();" "Built use of excluded class method. This should not be possible.")
 else()
