@@ -45,7 +45,7 @@ public:
 
 LIBSTATIC_EXPORT int libstatic_exported();
 
-LIBSTATIC_DEPRECATED int libstatic_deprecated();
+LIBSTATIC_DEPRECATED_EXPORT int libstatic_deprecated();
 
 int libstatic_not_exported();
 
