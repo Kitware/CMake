@@ -1886,7 +1886,7 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
 }
 
 
-void cmMakefile::AddLibrary(const char* lname, cmTarget::TargetType type,
+cmTarget* cmMakefile::AddLibrary(const char* lname, cmTarget::TargetType type,
                             const std::vector<std::string> &srcs,
                             bool excludeFromAll)
 {
@@ -1909,6 +1909,7 @@ void cmMakefile::AddLibrary(const char* lname, cmTarget::TargetType type,
     }
   target->AddSources(srcs);
   this->AddGlobalLinkInformation(lname, *target);
+  return target;
 }
 
 cmTarget* cmMakefile::AddExecutable(const char *exeName,

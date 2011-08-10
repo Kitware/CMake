@@ -12,6 +12,7 @@
 #include "cmAddLibraryCommand.h"
 
 #include "cmake.h"
+#include "cmQtAutomoc.h"
 
 // cmLibraryCommand
 bool cmAddLibraryCommand
@@ -31,13 +32,14 @@ bool cmAddLibraryCommand
     }
   bool excludeFromAll = false;
   bool importTarget = false;
-  
+  bool doAutomoc = false;
+
   std::vector<std::string>::const_iterator s = args.begin();
 
   std::string libName = *s;
 
   ++s;
-  
+
   // If the second argument is "SHARED" or "STATIC", then it controls
   // the type of library.  Otherwise, it is treated as a source or
   // source list name. There may be two keyword arguments, check for them
@@ -79,6 +81,11 @@ bool cmAddLibraryCommand
       ++s;
       importTarget = true;
       }
+    else if (*s == "AUTOMOC")
+      {
+      ++s;
+      doAutomoc = true;
+      }
     else
       {
       break;
@@ -103,16 +110,23 @@ bool cmAddLibraryCommand
     type = cmTarget::STATIC_LIBRARY;
     }
 
-  // The IMPORTED signature requires a type to be specified explicitly.
-  if(importTarget && !haveSpecifiedType)
-    {
-    this->SetError("called with IMPORTED argument but no library type.");
-    return false;
-    }
-
   // Handle imported target creation.
   if(importTarget)
     {
+    // The IMPORTED signature requires a type to be specified explicitly.
+    if (!haveSpecifiedType)
+      {
+      this->SetError("called with IMPORTED argument but no library type.");
+      return false;
+      }
+
+    // Don't run automoc on an imported library
+    if (doAutomoc)
+      {
+      this->SetError("cannot be called with AUTOMOC for an IMPORTED library.");
+      return false;
+      }
+
     // Make sure the target does not already exist.
     if(this->Makefile->FindTargetToUse(libName.c_str()))
       {
@@ -164,8 +178,22 @@ bool cmAddLibraryCommand
     ++s;
     }
 
-  this->Makefile->AddLibrary(libName.c_str(), type, srclists,
-                             excludeFromAll);
+  cmQtAutomoc* automoc = 0;
+  if ( doAutomoc )
+    {
+    automoc = new cmQtAutomoc;
+    automoc->SetupAutomocTarget(this->Makefile, libName.c_str(), srclists);
+    }
+
+  cmTarget* tgt =this->Makefile->AddLibrary(libName.c_str(), type, srclists,
+                                            excludeFromAll);
+
+  if ( automoc )
+    {
+    automoc->AddTargetDependency(this->Makefile, tgt);
+    delete automoc;
+    automoc = 0;
+    }
   
   return true;
 }
