@@ -40,6 +40,8 @@ macro(_do_build Include Library LibrarySource Source)
 
     "set(CMAKE_INCLUDE_CURRENT_DIR ON)\n"
 
+    "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \${CMAKE_CURRENT_BINARY_DIR})\n"
+
     "include(GenerateExportHeader)\n"
 
     "add_compiler_export_flags()\n"
@@ -110,6 +112,8 @@ add_compiler_export_flags()
 if (MSVC)
   add_definitions(-DCOMPILER_IS_MSVC)
 endif()
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 set(link_libraries)
 macro(macro_add_test_library name)
