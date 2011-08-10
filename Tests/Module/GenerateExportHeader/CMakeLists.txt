@@ -88,6 +88,12 @@ include(GenerateExportHeader)
 
 add_compiler_export_flags()
 
+if(NOT ((USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY) OR WIN32))
+  message(WARNING "Compiler does not support export feature")
+  return()
+endif()
+
+
 if (MSVC)
   add_definitions(-DCOMPILER_IS_MSVC)
 endif()
