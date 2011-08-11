@@ -146,7 +146,10 @@ macro(_test_compiler_hidden_visibility)
     endif()
   endif()
 
-  if (NOT GCC_TOO_OLD AND NOT WIN32)
+  # Exclude XL here because it misinterprets -fvisibility=hidden even though
+  # the check_cxx_compiler_flag passes
+  # http://www.cdash.org/CDash/testDetails.php?test=109109951&build=1419259
+  if (NOT GCC_TOO_OLD AND NOT WIN32 AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES XL)
     check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
     check_cxx_compiler_flag(-fvisibility-inlines-hidden COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
     option(USE_COMPILER_HIDDEN_VISIBILITY "Use HIDDEN visibility support if available." ON)
@@ -157,11 +160,10 @@ endmacro()
 macro(_test_compiler_has_deprecated)
   _check_cxx_compiler_attribute("__declspec(deprecated)" COMPILER_HAS_DEPRECATED_DECLSPEC)
   if(COMPILER_HAS_DEPRECATED_DECLSPEC)
-    set(COMPILER_HAS_DEPRECATED ${COMPILER_HAS_DEPRECATED_DECLSPEC})
+    set(COMPILER_HAS_DEPRECATED "${COMPILER_HAS_DEPRECATED_DECLSPEC}" CACHE INTERNAL "Compiler support for a deprecated attribute")
   else()
     _check_cxx_compiler_attribute("__attribute__((__deprecated__))" COMPILER_HAS_DEPRECATED)
   endif()
-  set(COMPILER_HAS_DEPRECATED "${COMPILER_HAS_DEPRECATED}" CACHE INTERNAL "Compiler support for a deprecated attribute")
 endmacro()
 
 set(myDir ${CMAKE_CURRENT_LIST_DIR})
