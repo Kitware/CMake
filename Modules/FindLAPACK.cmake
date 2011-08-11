@@ -149,6 +149,21 @@ if(BLAS_FOUND)
     endif(NOT BLA_VENDOR)
   endif ($ENV{BLA_VENDOR} MATCHES ".+")
 
+if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
+ if(NOT LAPACK_LIBRARIES)
+  check_lapack_libraries(
+  LAPACK_LIBRARIES
+  LAPACK
+  cheev
+  ""
+  "goto2"
+  "${BLAS_LIBRARIES}"
+  ""
+  )
+ endif(NOT LAPACK_LIBRARIES)
+endif (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
+
+
 #acml lapack
  if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "ACML_MP" OR BLA_VENDOR STREQUAL "All")
    if (BLAS_LIBRARIES MATCHES ".+acml.+")
