@@ -17,7 +17,7 @@ endmacro()
 
 static_variant_build_pass("return libshared_and_static_exported();" "Failed to build static variant")
 shared_variant_build_pass("return libshared_and_static_exported();" "Failed to build shared variant")
-if (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES Borland)
+if (COMPILER_HAS_DEPRECATED)
   shared_variant_build_fail("return libshared_and_static_deprecated();" "Built shared deprecated variant")
   static_variant_build_fail("return libshared_and_static_deprecated();" "Built static deprecated variant")
 else()
