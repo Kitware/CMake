@@ -8,12 +8,7 @@ class LIBSHARED_EXPORT Libshared {
 public:
   int libshared() const;
 
-#ifdef COMPILER_IS_MSVC
-  // Double exporting not possible with MSVC
   int libshared_exported() const;
-#else
-  int LIBSHARED_EXPORT libshared_exported() const;
-#endif
 
   int LIBSHARED_DEPRECATED libshared_deprecated() const;
 
