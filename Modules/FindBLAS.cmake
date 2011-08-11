@@ -22,7 +22,7 @@
 #  BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
 ##########
 ### List of vendors (BLA_VENDOR) valid in this module
-##  ATLAS, PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,Intel10_32 (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,lp thread model, lp64 model),
+##  Goto,ATLAS PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,Intel10_32 (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,lp thread model, lp64 model),
 ##  Intel( older versions of mkl 32 and 64 bit), ACML,ACML_MP,Apple, NAS, Generic
 # C/CXX should be enabled to use Intel mkl
 
@@ -57,7 +57,7 @@ else()
   endif(BLAS_FIND_REQUIRED)
 endif( )
 
-macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _threads)
+macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _optional)
 # This macro checks for the existence of the combination of fortran libraries
 # given by _list.  If the combination is found, this macro checks (using the
 # Check_Fortran_Function_Exists macro) whether can link against that library
@@ -69,41 +69,39 @@ macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _threads)
 # N.B. _prefix is the prefix applied to the names of all cached variables that
 # are generated internally and marked advanced by this macro.
 
+list(GET _optional 0 _thread)
+list(GET _optional 1 _libdir)
+
 set(_libraries_work TRUE)
 set(${LIBRARIES})
 set(_combined_name)
+if (NOT _libdir)
+  if (WIN32)
+    set(_libdir ENV LIB)
+  elseif (APPLE)
+    set(_libdir /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV DYLD_LIBRARY_PATH)
+  else ()
+    set(_libdir /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV LD_LIBRARY_PATH)
+  endif ()
+endif ()
 foreach(_library ${_list})
   set(_combined_name ${_combined_name}_${_library})
 
   if(_libraries_work)
-   if ( WIN32 )
-    if(BLA_STATIC)
-      set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.dll")
-    endif(BLA_STATIC)
+    if (BLA_STATIC)
+      if (WIN32)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.dll")
+      endif ( WIN32 )
+      if (APPLE)
+       set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.dll")
+      else (APPLE)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
+      endif (APPLE)
+    endif (BLA_STATIC)
     find_library(${_prefix}_${_library}_LIBRARY
-    NAMES ${_library}
-    PATHS ENV LIB
-    )
-   endif ( WIN32 )
-
-   if ( APPLE )
-    if(BLA_STATIC)
-     set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.dll")
-    endif(BLA_STATIC)
-    find_library(${_prefix}_${_library}_LIBRARY
-    NAMES ${_library}
-    PATHS /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV DYLD_LIBRARY_PATH
-    )
-
-   else ( APPLE )
-    if(BLA_STATIC)
-      set(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
-    endif(BLA_STATIC)
-    find_library(${_prefix}_${_library}_LIBRARY
-    NAMES ${_library}
-    PATHS /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV LD_LIBRARY_PATH
-    )
-   endif( APPLE )
+      NAMES ${_library}
+      PATHS ${_libdir}
+      )
     mark_as_advanced(${_prefix}_${_library}_LIBRARY)
     set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
     set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
@@ -138,6 +136,20 @@ else ($ENV{BLA_VENDOR} MATCHES ".+")
     set(BLA_VENDOR "All")
   endif(NOT BLA_VENDOR)
 endif ($ENV{BLA_VENDOR} MATCHES ".+")
+
+if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
+ if(NOT BLAS_LIBRARIES)
+  # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
+  check_fortran_libraries(
+  BLAS_LIBRARIES
+  BLAS
+  sgemm
+  ""
+  "goto2"
+  ""
+  )
+ endif(NOT BLAS_LIBRARIES)
+endif (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
 
 if (BLA_VENDOR STREQUAL "ATLAS" OR BLA_VENDOR STREQUAL "All")
  if(NOT BLAS_LIBRARIES)
@@ -311,15 +323,25 @@ if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "ACML_MP" OR BLA_VENDOR ST
 
  if( _BLAS_VENDOR STREQUAL "ACML_MP" )
   foreach( BLAS_ACML_MP_LIB_DIRS ${_ACML_MP_LIB_DIRS} )
-   _BLAS_LOCATE_AND_TEST( ${_BLAS_VENDOR} "acml_mp;acml_mv" "" )
-   if( BLAS_${_BLAS_VENDOR}_FOUND )
+   check_fortran_libraries (
+     BLAS_LIBRARIES
+     BLAS
+     sgemm
+     "" "acml_mp;acml_mv" "" ${BLAS_ACML_MP_LIB_DIRS}
+   )
+   if( BLAS_LIBRARIES )
     break()
    endif()
   endforeach()
  else() #if( _BLAS_VENDOR STREQUAL "ACML" )
   foreach( BLAS_ACML_LIB_DIRS ${_ACML_LIB_DIRS} )
-   _BLAS_LOCATE_AND_TEST( ${_BLAS_VENDOR} "acml;acml_mv" "" )
-   if( BLAS_${_BLAS_VENDOR}_FOUND )
+   check_fortran_libraries (
+     BLAS_LIBRARIES
+     BLAS
+     sgemm
+     "" "acml_mp;acml_mv" "" ${BLAS_ACML_LIB_DIRS}
+   )
+   if( BLAS_LIBRARIES )
     break()
    endif()
   endforeach()
