@@ -78,11 +78,7 @@ endmacro()
 
 macro(build_fail Include Library LibrarySource Source Message)
   _do_build(${Include} ${Library} ${LibrarySource} "${Source}")
-  if(COMPILER_HAS_HIDDEN_VISIBILITY OR WIN32 OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
-    test_fail(Result ${Message})
-  else()
-    test_pass(Result ${Message})
-  endif()
+  test_fail(Result ${Message})
 endmacro()
 
 macro(build_pass Include Library LibrarySource Source Message)
