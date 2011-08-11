@@ -148,31 +148,13 @@ if(BLAS_FOUND)
       set(BLA_VENDOR "All")
     endif(NOT BLA_VENDOR)
   endif ($ENV{BLA_VENDOR} MATCHES ".+")
+
 #acml lapack
- if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "All")
-  if(NOT LAPACK_LIBRARIES)
-   check_lapack_libraries(
-    LAPACK_LIBRARIES
-    LAPACK
-    cheev
-    ""
-    "acml;acml_mv"
-    ""
-    ""
-    )
-  endif(NOT LAPACK_LIBRARIES)
-  if(NOT LAPACK_LIBRARIES)
-   check_lapack_libraries(
-    LAPACK_LIBRARIES
-    LAPACK
-    cheev
-    ""
-    "acml_mp;acml_mv"
-    ""
-    ""
-    )
-  endif(NOT LAPACK_LIBRARIES)
- endif (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "All")
+ if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "ACML_MP" OR BLA_VENDOR STREQUAL "All")
+   if (BLAS_LIBRARIES MATCHES ".+acml.+")
+     set (LAPACK_LIBRARIES ${BLAS_LIBRARIES})
+   endif ()
+ endif (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "ACML_MP" OR BLA_VENDOR STREQUAL "All")
 
 # Apple LAPACK library?
 if (BLA_VENDOR STREQUAL "Apple" OR BLA_VENDOR STREQUAL "All")
