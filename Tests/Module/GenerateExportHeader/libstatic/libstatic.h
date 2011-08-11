@@ -8,7 +8,7 @@ class LIBSTATIC_EXPORT Libstatic {
 public:
   int libstatic() const;
 
-  int LIBSTATIC_EXPORT libstatic_exported() const;
+  int libstatic_exported() const;
 
   int LIBSTATIC_DEPRECATED libstatic_deprecated() const;
 

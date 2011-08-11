@@ -132,7 +132,7 @@ macro(_test_compiler_hidden_visibility)
     endif()
   endif()
 
-  if (NOT GCC_TOO_OLD AND NOT MINGW)
+  if (NOT GCC_TOO_OLD AND NOT WIN32)
     check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
     check_cxx_compiler_flag(-fvisibility-inlines-hidden COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
     option(USE_COMPILER_HIDDEN_VISIBILITY "Use HIDDEN visibility support if available." ON)

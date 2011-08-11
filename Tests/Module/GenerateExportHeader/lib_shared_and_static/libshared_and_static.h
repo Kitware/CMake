@@ -8,11 +8,7 @@ class LIBSHARED_AND_STATIC_EXPORT LibsharedAndStatic {
 public:
   int libshared_and_static() const;
 
-#ifdef COMPILER_IS_MSVC
   int libshared_and_static_exported() const;
-#else
-  int LIBSHARED_AND_STATIC_EXPORT libshared_and_static_exported() const;
-#endif
 
   int LIBSHARED_AND_STATIC_DEPRECATED libshared_and_static_deprecated() const;
 
