@@ -46,6 +46,8 @@ IF(BUILD_TESTING)
 
   ADD_SUBDIRECTORY(CMakeLib)
 
+  ADD_SUBDIRECTORY(FindPackageModeMakefileTest)
+
   # Collect a list of all test build directories.
   SET(TEST_BUILD_DIRS)
 
