@@ -8,7 +8,7 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES GNU
   find_package(PNG)
 
   # the test program links against the png lib, so test first whether it exists
-  if(PNG_FOUND)
+  if(PNG_FOUND  AND  UNIX  AND  "${CMAKE_GENERATOR}" MATCHES "Makefile")
 
     get_target_property(cmakeExecutable cmake LOCATION)
 
