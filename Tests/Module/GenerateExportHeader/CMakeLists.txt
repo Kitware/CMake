@@ -49,7 +49,7 @@ macro(_do_build Include Library LibrarySource Source)
     "if(CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))\n"
     "  add_definitions(-Werror)\n"
     "else()\n"
-    "  if(MSVC)\n"
+    "  if(MSVC AND COMPILER_HAS_DEPRECATED)\n"
          # Treat deprecation warnings as errors.
     "    add_definitions(/we4996)\n"
     "  endif()\n"
@@ -123,7 +123,7 @@ if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 endif()
 
-if(MSVC)
+if(MSVC AND COMPILER_HAS_DEPRECATED)
   add_definitions(/wd4996)
 endif()
 

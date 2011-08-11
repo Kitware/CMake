@@ -115,6 +115,20 @@
 include(CMakeParseArguments)
 include(CheckCXXCompilerFlag)
 
+
+# TODO: Install this macro separately?
+macro(_check_cxx_compiler_attribute _ATTRIBUTE _RESULT)
+  check_cxx_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; } int main() { return somefunc();}" ${_RESULT}
+    # Some compilers do not fail with a bad flag
+    FAIL_REGEX "unrecognized .*option"                     # GNU
+    FAIL_REGEX "ignoring unknown option"                   # MSVC
+    FAIL_REGEX "warning D9002"                             # MSVC, any lang
+    FAIL_REGEX "[Uu]nknown option"                         # HP
+    FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
+    FAIL_REGEX "command option .* is not recognized"       # XL
+  )
+endmacro()
+
 macro(_test_compiler_hidden_visibility)
 
   if (CMAKE_COMPILER_IS_GNUCXX)
@@ -141,15 +155,11 @@ macro(_test_compiler_hidden_visibility)
 endmacro()
 
 macro(_test_compiler_has_deprecated)
-  if (WIN32)
-    if (NOT ${CMAKE_CXX_COMPILER_ID} MATCHES Borland)
-      set(COMPILER_HAS_DEPRECATED TRUE)
-    endif()
+  _check_cxx_compiler_attribute("__declspec(deprecated)" COMPILER_HAS_DEPRECATED_DECLSPEC)
+  if(COMPILER_HAS_DEPRECATED_DECLSPEC)
+    set(COMPILER_HAS_DEPRECATED ${COMPILER_HAS_DEPRECATED_DECLSPEC})
   else()
-    # TODO: Test properly for this
-    if(COMPILER_HAS_HIDDEN_VISIBILITY AND USE_COMPILER_HIDDEN_VISIBILITY)
-      set(COMPILER_HAS_DEPRECATED TRUE)
-    endif()
+    _check_cxx_compiler_attribute("__attribute__((__deprecated__))" COMPILER_HAS_DEPRECATED)
   endif()
   set(COMPILER_HAS_DEPRECATED "${COMPILER_HAS_DEPRECATED}" CACHE INTERNAL "Compiler support for a deprecated attribute")
 endmacro()
@@ -162,14 +172,10 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   set(DEFINE_IMPORT)
   set(DEFINE_NO_EXPORT)
 
-  if(WIN32)
-    if (COMPILER_HAS_DEPRECATED)
-      set(DEFINE_DEPRECATED "__declspec(deprecated)")
-    endif()
-  else()
-    if(COMPILER_HAS_DEPRECATED)
-      set(DEFINE_DEPRECATED "__attribute__ ((__deprecated__))")
-    endif()
+  if (COMPILER_HAS_DEPRECATED_DECLSPEC)
+    set(DEFINE_DEPRECATED "__declspec(deprecated)")
+  elseif(COMPILER_HAS_DEPRECATED)
+    set(DEFINE_DEPRECATED "__attribute__ ((__deprecated__))")
   endif()
 
   get_property(type TARGET ${TARGET_LIBRARY} PROPERTY TYPE)
