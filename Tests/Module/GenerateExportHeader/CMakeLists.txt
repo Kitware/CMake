@@ -98,6 +98,10 @@ endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
+message("#### COMPILER_HAS_DEPRECATED: " ${COMPILER_HAS_DEPRECATED})
+message("#### COMPILER_HAS_HIDDEN_VISIBILITY: " ${COMPILER_HAS_HIDDEN_VISIBILITY})
+message("#### WIN32: " ${WIN32})
+
 set(link_libraries)
 macro(macro_add_test_library name)
   add_subdirectory(${name})
