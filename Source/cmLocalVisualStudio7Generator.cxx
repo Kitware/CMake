@@ -825,6 +825,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     tool = "VFMIDLTool";
     }
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n";
+  fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
+  for(i = includes.begin(); i != includes.end(); ++i)
+    {
+    std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
+    fout << ipath << ";";
+    }
+  fout << "\"\n";
   fout << "\t\t\t\tMkTypLibCompatible=\"FALSE\"\n";
   if( this->PlatformName == "x64" )
     {
