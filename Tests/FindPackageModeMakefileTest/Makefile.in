@@ -1,0 +1,8 @@
+all: clean pngtest
+
+pngtest: main.o
+	"@CMAKE_CXX_COMPILER@" -c `"@cmakeExecutable@" --find-package -DNAME=PNG -DLANGUAGE=CXX -DCOMPILER_ID=@CMAKE_CXX_COMPILER_ID@ -DMODE=COMPILE` main.cpp
+	"@CMAKE_CXX_COMPILER@" -o pngtest main.o `"@cmakeExecutable@" --find-package -DNAME=PNG -DLANGUAGE=CXX -DCOMPILER_ID=@CMAKE_CXX_COMPILER_ID@ -DMODE=LINK`
+
+clean:
+	rm -f *.o pngtest
