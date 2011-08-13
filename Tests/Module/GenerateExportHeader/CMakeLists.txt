@@ -20,6 +20,27 @@ endmacro()
 
 check_cxx_compiler_flag(-Werror HAS_WERROR_FLAG)
 
+if(HAS_WERROR_FLAG)
+  set(ERROR_FLAG "-Werror")
+else()
+  # MSVC
+  # And intel on windows?
+  # http://software.intel.com/en-us/articles/how-to-handle-warnings-message-in-compiler/?wapkw=%28compiler+warning+message%29
+  check_cxx_compiler_flag("/WX" HAS_WX_FLAG)
+  if(HAS_WX_FLAG)
+    set(ERROR_FLAG "/WX")
+  else()
+    # Sun CC
+    # http://www.acsu.buffalo.edu/~charngda/sunstudio.html
+    check_cxx_compiler_flag("-errwarn=%all" HAS_ERRWARN_ALL)
+    if (HAS_ERRWARN_ALL)
+      set(ERROR_FLAG "-errwarn=%all")
+    else()
+    endif()
+  endif()
+endif()
+
+
 # We seem to get race conditions is writing this stuff to the same file at least on MinGW
 # So to write to separate source and build directories, we use a count to differentiate.
 set (COUNT 0)
@@ -50,13 +71,8 @@ macro(_do_build Include Library LibrarySource Source)
 
     "add_compiler_export_flags()\n"
 
-    "if(${HAS_WERROR_FLAG})\n"
-    "  add_definitions(-Werror)\n"
-    "else()\n"
-    "  if(MSVC AND COMPILER_HAS_DEPRECATED)\n"
-         # Treat deprecation warnings as errors.
-    "    add_definitions(/we4996)\n"
-    "  endif()\n"
+    "if(NOT \"${ERROR_FLAG}\" STREQUAL \"\")\n"
+    "  add_definitions(${ERROR_FLAG})\n"
     "endif()\n"
 
     "if(MSVC)\n"
