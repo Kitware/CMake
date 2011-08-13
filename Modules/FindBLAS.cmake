@@ -23,7 +23,7 @@
 ##########
 ### List of vendors (BLA_VENDOR) valid in this module
 ##  Goto,ATLAS PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,Intel10_32 (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,lp thread model, lp64 model),
-##  Intel( older versions of mkl 32 and 64 bit), ACML,ACML_MP,Apple, NAS, Generic
+##  Intel( older versions of mkl 32 and 64 bit), ACML,ACML_MP,ACML_GPU,Apple, NAS, Generic
 # C/CXX should be enabled to use Intel mkl
 
 #=============================================================================
@@ -57,7 +57,7 @@ else()
   endif(BLAS_FIND_REQUIRED)
 endif( )
 
-macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _optional)
+macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _thread)
 # This macro checks for the existence of the combination of fortran libraries
 # given by _list.  If the combination is found, this macro checks (using the
 # Check_Fortran_Function_Exists macro) whether can link against that library
@@ -69,8 +69,7 @@ macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list _optional)
 # N.B. _prefix is the prefix applied to the names of all cached variables that
 # are generated internally and marked advanced by this macro.
 
-list(GET _optional 0 _thread)
-list(GET _optional 1 _libdir)
+set(_libdir ${ARGN})
 
 set(_libraries_work TRUE)
 set(${LIBRARIES})
@@ -267,15 +266,24 @@ if (BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
 endif (BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
 
 #BLAS in acml library?
-if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "ACML_MP" OR BLA_VENDOR STREQUAL "All")
-# the patch from Chuck Atkins:
- if( ((_BLAS_VENDOR STREQUAL "ACML") AND (NOT BLAS_ACML_LIB_DIRS)) OR
-    ((_BLAS_VENDOR STREQUAL "ACML_MP") AND (NOT BLAS_ACML_MP_LIB_DIRS)) )
+if (BLA_VENDOR MATCHES "ACML.*" OR BLA_VENDOR STREQUAL "All")
+ if( ((BLA_VENDOR STREQUAL "ACML") AND (NOT BLAS_ACML_LIB_DIRS)) OR
+     ((BLA_VENDOR STREQUAL "ACML_MP") AND (NOT BLAS_ACML_MP_LIB_DIRS)) OR
+     ((BLA_VENDOR STREQUAL "ACML_GPU") AND (NOT BLAS_ACML_GPU_LIB_DIRS))
+   )
+   # try to find acml in "standard" paths
    if( WIN32 )
     file( GLOB _ACML_ROOT "C:/AMD/acml*/ACML-EULA.txt" )
    else()
     file( GLOB _ACML_ROOT "/opt/acml*/ACML-EULA.txt" )
    endif()
+   if( WIN32 )
+    file( GLOB _ACML_GPU_ROOT "C:/AMD/acml*/GPGPUexamples" )
+   else()
+    file( GLOB _ACML_GPU_ROOT "/opt/acml*/GPGPUexamples" )
+   endif()
+   list(GET _ACML_ROOT 0 _ACML_ROOT)
+   list(GET _ACML_GPU_ROOT 0 _ACML_GPU_ROOT)
    if( _ACML_ROOT )
     get_filename_component( _ACML_ROOT ${_ACML_ROOT} PATH )
     if( SIZEOF_INTEGER EQUAL 8 )
@@ -309,7 +317,7 @@ if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "ACML_MP" OR BLA_VENDOR ST
     set( _ACML_COMPILER64 "gfortran64" )
    endif()
 
-   if( _BLAS_VENDOR STREQUAL "ACML_MP" )
+   if( BLA_VENDOR STREQUAL "ACML_MP" )
     set(_ACML_MP_LIB_DIRS
      "${_ACML_ROOT}/${_ACML_COMPILER32}_mp${_ACML_PATH_SUFFIX}/lib"
      "${_ACML_ROOT}/${_ACML_COMPILER64}_mp${_ACML_PATH_SUFFIX}/lib" )
@@ -319,15 +327,29 @@ if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "ACML_MP" OR BLA_VENDOR ST
      "${_ACML_ROOT}/${_ACML_COMPILER64}${_ACML_PATH_SUFFIX}/lib" )
    endif()
   endif()
+ elseif(BLAS_${BLA_VENDOR}_LIB_DIRS)
+   set(_${BLA_VENDOR}_LIB_DIRS ${BLAS_${BLA_VENDOR}_LIB_DIRS})
  endif()
 
- if( _BLAS_VENDOR STREQUAL "ACML_MP" )
-  foreach( BLAS_ACML_MP_LIB_DIRS ${_ACML_MP_LIB_DIRS} )
+ if( BLA_VENDOR STREQUAL "ACML_MP" )
+  foreach( BLAS_ACML_MP_LIB_DIRS ${_ACML_MP_LIB_DIRS})
    check_fortran_libraries (
      BLAS_LIBRARIES
      BLAS
      sgemm
      "" "acml_mp;acml_mv" "" ${BLAS_ACML_MP_LIB_DIRS}
+   )
+   if( BLAS_LIBRARIES )
+    break()
+   endif()
+  endforeach()
+ elseif( BLA_VENDOR STREQUAL "ACML_GPU" )
+  foreach( BLAS_ACML_GPU_LIB_DIRS ${_ACML_GPU_LIB_DIRS})
+   check_fortran_libraries (
+     BLAS_LIBRARIES
+     BLAS
+     sgemm
+     "" "acml_mp;acml_mv;CALBLAS" "" ${BLAS_ACML_GPU_LIB_DIRS}
    )
    if( BLAS_LIBRARIES )
     break()
@@ -365,6 +387,16 @@ if (BLA_VENDOR STREQUAL "ACML" OR BLA_VENDOR STREQUAL "ACML_MP" OR BLA_VENDOR ST
   sgemm
   ""
   "acml_mp;acml_mv"
+  ""
+  )
+ endif(NOT BLAS_LIBRARIES)
+ if(NOT BLAS_LIBRARIES)
+  check_fortran_libraries(
+  BLAS_LIBRARIES
+  BLAS
+  sgemm
+  ""
+  "acml;acml_mv;CALBLAS"
   ""
   )
  endif(NOT BLAS_LIBRARIES)
