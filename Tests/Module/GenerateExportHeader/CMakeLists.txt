@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
 
 project(GenerateExportHeader)
 
+include(CheckCXXCompilerFlag)
+
 set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
 macro(TEST_FAIL value msg)
@@ -15,6 +17,29 @@ macro(TEST_PASS value msg)
     message (SEND_ERROR "Test fail:" ${msg} ${Out} )
   endif ()
 endmacro()
+
+check_cxx_compiler_flag(-Werror HAS_WERROR_FLAG)
+
+if(HAS_WERROR_FLAG)
+  set(ERROR_FLAG "-Werror")
+else()
+  # MSVC
+  # And intel on windows?
+  # http://software.intel.com/en-us/articles/how-to-handle-warnings-message-in-compiler/?wapkw=%28compiler+warning+message%29
+  check_cxx_compiler_flag("/WX" HAS_WX_FLAG)
+  if(HAS_WX_FLAG)
+    set(ERROR_FLAG "/WX")
+  else()
+    # Sun CC
+    # http://www.acsu.buffalo.edu/~charngda/sunstudio.html
+    check_cxx_compiler_flag("-errwarn=%all" HAS_ERRWARN_ALL)
+    if (HAS_ERRWARN_ALL)
+      set(ERROR_FLAG "-errwarn=%all")
+    else()
+    endif()
+  endif()
+endif()
+
 
 # We seem to get race conditions is writing this stuff to the same file at least on MinGW
 # So to write to separate source and build directories, we use a count to differentiate.
@@ -46,15 +71,8 @@ macro(_do_build Include Library LibrarySource Source)
 
     "add_compiler_export_flags()\n"
 
-    "check_cxx_compiler_flag(-Werror HAS_WERROR_FLAG)\n"
-
-    "if(HAS_WERROR_FLAG)\n"
-    "  add_definitions(-Werror)\n"
-    "else()\n"
-    "  if(MSVC AND COMPILER_HAS_DEPRECATED)\n"
-         # Treat deprecation warnings as errors.
-    "    add_definitions(/we4996)\n"
-    "  endif()\n"
+    "if(NOT \"${ERROR_FLAG}\" STREQUAL \"\")\n"
+    "  add_definitions(${ERROR_FLAG})\n"
     "endif()\n"
 
     "if(MSVC)\n"
@@ -101,6 +119,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 message("#### COMPILER_HAS_DEPRECATED: " ${COMPILER_HAS_DEPRECATED})
 message("#### COMPILER_HAS_HIDDEN_VISIBILITY: " ${COMPILER_HAS_HIDDEN_VISIBILITY})
 message("#### WIN32: " ${WIN32})
+message("#### HAS_WERROR_FLAG: " ${HAS_WERROR_FLAG})
 
 set(link_libraries)
 macro(macro_add_test_library name)
