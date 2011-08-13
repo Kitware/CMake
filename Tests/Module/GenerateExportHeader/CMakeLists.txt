@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
 
 project(GenerateExportHeader)
 
+include(CheckCXXCompilerFlag)
+
 set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
 macro(TEST_FAIL value msg)
@@ -15,6 +17,8 @@ macro(TEST_PASS value msg)
     message (SEND_ERROR "Test fail:" ${msg} ${Out} )
   endif ()
 endmacro()
+
+check_cxx_compiler_flag(-Werror HAS_WERROR_FLAG)
 
 # We seem to get race conditions is writing this stuff to the same file at least on MinGW
 # So to write to separate source and build directories, we use a count to differentiate.
@@ -46,9 +50,7 @@ macro(_do_build Include Library LibrarySource Source)
 
     "add_compiler_export_flags()\n"
 
-    "check_cxx_compiler_flag(-Werror HAS_WERROR_FLAG)\n"
-
-    "if(HAS_WERROR_FLAG)\n"
+    "if(${HAS_WERROR_FLAG})\n"
     "  add_definitions(-Werror)\n"
     "else()\n"
     "  if(MSVC AND COMPILER_HAS_DEPRECATED)\n"
@@ -101,6 +103,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 message("#### COMPILER_HAS_DEPRECATED: " ${COMPILER_HAS_DEPRECATED})
 message("#### COMPILER_HAS_HIDDEN_VISIBILITY: " ${COMPILER_HAS_HIDDEN_VISIBILITY})
 message("#### WIN32: " ${WIN32})
+message("#### HAS_WERROR_FLAG: " ${HAS_WERROR_FLAG})
 
 set(link_libraries)
 macro(macro_add_test_library name)
