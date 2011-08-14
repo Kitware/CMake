@@ -140,6 +140,8 @@ void cmQtAutomoc::SetupAutomocTarget(cmMakefile* makefile,
   makefile->GetOrCreateSource(mocCppFile.c_str(), true);
   srcs.push_back(mocCppFile);
 
+  makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
+                           mocCppFile.c_str(), false);
 }
 
 
