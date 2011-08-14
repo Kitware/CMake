@@ -178,10 +178,10 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   set(DEFINE_IMPORT)
   set(DEFINE_NO_EXPORT)
 
-  if (COMPILER_HAS_DEPRECATED_DECLSPEC)
-    set(DEFINE_DEPRECATED "__declspec(deprecated)")
-  elseif(COMPILER_HAS_DEPRECATED)
+  if (COMPILER_HAS_DEPRECATED_ATTR)
     set(DEFINE_DEPRECATED "__attribute__ ((__deprecated__))")
+  elseif(COMPILER_HAS_DEPRECATED)
+    set(DEFINE_DEPRECATED "__declspec(deprecated)")
   endif()
 
   get_property(type TARGET ${TARGET_LIBRARY} PROPERTY TYPE)
