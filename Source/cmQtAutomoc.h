@@ -61,6 +61,7 @@ private:
   std::list<std::string> MocDefinitions;
 
   bool Verbose;
+  bool ColorOutput;
   bool RunMocFailed;
   bool GenerateAll;
 

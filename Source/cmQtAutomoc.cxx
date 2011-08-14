@@ -4,14 +4,31 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
+# include <cmsys/Terminal.h>
+
 #include "cmQtAutomoc.h"
 
 
 cmQtAutomoc::cmQtAutomoc()
 :Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != 0)
+,ColorOutput(true)
 ,RunMocFailed(false)
 ,GenerateAll(false)
 {
+
+  std::string colorEnv = "";
+  cmsys::SystemTools::GetEnv("COLOR", colorEnv);
+  if(!colorEnv.empty())
+    {
+    if(cmSystemTools::IsOn(colorEnv.c_str()))
+      {
+      this->ColorOutput = true;
+      }
+    else
+      {
+      this->ColorOutput = false;
+      }
+    }
 }
 
 
@@ -678,14 +695,11 @@ bool cmQtAutomoc::GenerateMoc(const std::string& sourceFile,
       cmsys::SystemTools::MakeDirectory(mocDir.c_str());
       }
 
-/*    if (this->Verbose)
-      {
-      echoColor("Generating " + mocFilePath + " from " + sourceFile);
-      }
-    else
-      {
-      echoColor("Generating " + mocFileName);
-      }*/
+    std::string msg = "Generating ";
+    msg += mocFileName;
+    cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue
+                                           |cmsysTerminal_Color_ForegroundBold,
+                                     msg.c_str(), true, this->ColorOutput);
 
     std::vector<cmStdString> command;
     command.push_back(this->MocExecutable);
