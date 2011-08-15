@@ -40,6 +40,12 @@ endif()
 
 include(CMakeDetermineSystem)
 
+# short-cut some tests on Darwin, see Darwin-GNU.cmake:
+if("${CMAKE_SYSTEM_NAME}" MATCHES Darwin  AND  "${COMPILER_ID}" MATCHES GNU)
+  set(${CMAKE_${LANGUAGE}_HAS_ISYSROOT} 0 )
+  set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG "")
+endif()
+
 # Also load the system specific file, which sets up e.g. the search paths.
 # This makes the FIND_XXX() calls work much better
 include(CMakeSystemSpecificInformation)
