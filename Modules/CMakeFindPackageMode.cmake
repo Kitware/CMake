@@ -84,7 +84,7 @@ set(CMAKE_${LANGUAGE}_COMPILER_ID "${COMPILER_ID}")
 include(CMake${LANGUAGE}Information)
 
 
-function(print_compile_flags _packageName)
+function(set_compile_flags_var _packageName)
   string(TOUPPER "${_packageName}" PACKAGE_NAME)
   # Check the following variables:
   # FOO_INCLUDE_DIRS
@@ -125,7 +125,7 @@ function(print_compile_flags _packageName)
 endfunction()
 
 
-function(print_link_flags _packageName)
+function(set_link_flags_var _packageName)
   string(TOUPPER "${_packageName}" PACKAGE_NAME)
   # Check the following variables:
   # FOO_LIBRARIES
@@ -160,9 +160,9 @@ if(${NAME}_FOUND  OR  ${UPPERCASE_NAME}_FOUND)
   if("${MODE}" STREQUAL "EXIST")
     # do nothing
   elseif("${MODE}" STREQUAL "COMPILE")
-    print_compile_flags(${NAME})
+    set_compile_flags_var(${NAME})
   elseif("${MODE}" STREQUAL "LINK")
-    print_link_flags(${NAME})
+    set_link_flags_var(${NAME})
   else("${MODE}" STREQUAL "LINK")
     message(FATAL_ERROR "Invalid mode argument ${MODE} given.")
   endif()
