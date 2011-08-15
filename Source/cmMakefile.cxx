@@ -3026,8 +3026,15 @@ cmCacheManager *cmMakefile::GetCacheManager() const
 
 void cmMakefile::DisplayStatus(const char* message, float s)
 {
-  this->GetLocalGenerator()->GetGlobalGenerator()
-    ->GetCMakeInstance()->UpdateProgress(message, s);
+  cmake* cm = this->GetLocalGenerator()->GetGlobalGenerator()
+                                                          ->GetCMakeInstance();
+  if (cm->GetWorkingMode() == cmake::FIND_PACKAGE_MODE)
+    {
+    // don't output any STATUS message in FIND_PACKAGE_MODE, since they will
+    // directly be fed to the compiler, which will be confused.
+    return;
+    }
+  cm->UpdateProgress(message, s);
 }
 
 std::string cmMakefile::GetModulesFile(const char* filename)

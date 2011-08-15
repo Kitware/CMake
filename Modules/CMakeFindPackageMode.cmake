@@ -40,6 +40,12 @@ endif()
 
 include(CMakeDetermineSystem)
 
+# short-cut some tests on Darwin, see Darwin-GNU.cmake:
+if("${CMAKE_SYSTEM_NAME}" MATCHES Darwin  AND  "${COMPILER_ID}" MATCHES GNU)
+  set(${CMAKE_${LANGUAGE}_HAS_ISYSROOT} 0 )
+  set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG "")
+endif()
+
 # Also load the system specific file, which sets up e.g. the search paths.
 # This makes the FIND_XXX() calls work much better
 include(CMakeSystemSpecificInformation)
@@ -84,7 +90,7 @@ set(CMAKE_${LANGUAGE}_COMPILER_ID "${COMPILER_ID}")
 include(CMake${LANGUAGE}Information)
 
 
-function(print_compile_flags _packageName)
+function(set_compile_flags_var _packageName)
   string(TOUPPER "${_packageName}" PACKAGE_NAME)
   # Check the following variables:
   # FOO_INCLUDE_DIRS
@@ -125,7 +131,7 @@ function(print_compile_flags _packageName)
 endfunction()
 
 
-function(print_link_flags _packageName)
+function(set_link_flags_var _packageName)
   string(TOUPPER "${_packageName}" PACKAGE_NAME)
   # Check the following variables:
   # FOO_LIBRARIES
@@ -160,9 +166,9 @@ if(${NAME}_FOUND  OR  ${UPPERCASE_NAME}_FOUND)
   if("${MODE}" STREQUAL "EXIST")
     # do nothing
   elseif("${MODE}" STREQUAL "COMPILE")
-    print_compile_flags(${NAME})
+    set_compile_flags_var(${NAME})
   elseif("${MODE}" STREQUAL "LINK")
-    print_link_flags(${NAME})
+    set_link_flags_var(${NAME})
   else("${MODE}" STREQUAL "LINK")
     message(FATAL_ERROR "Invalid mode argument ${MODE} given.")
   endif()

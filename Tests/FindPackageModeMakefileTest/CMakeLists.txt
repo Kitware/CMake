@@ -15,7 +15,7 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES GNU
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Makefile.in ${CMAKE_CURRENT_BINARY_DIR}/ConfMakefile @ONLY)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${CMAKE_CURRENT_BINARY_DIR}/main.cpp COPYONLY)
 
-    add_test(FindPackageModeMakefileTest ${CMAKE_MAKE_PROGRAM} -f ${CMAKE_CURRENT_BINARY_DIR}/ConfMakefile -C ${CMAKE_CURRENT_BINARY_DIR} )
+    add_test(FindPackageModeMakefileTest ${CMAKE_MAKE_PROGRAM} -f ${CMAKE_CURRENT_BINARY_DIR}/ConfMakefile )
 
   endif()
 
