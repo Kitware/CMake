@@ -32,10 +32,10 @@ cmQtAutomoc::cmQtAutomoc()
 }
 
 
-void cmQtAutomoc::SetupAutomocTarget(cmMakefile* makefile,
-                                     const char* targetName,
-                                     std::vector<std::string>& srcs)
+void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 {
+  cmMakefile* makefile = target->GetMakefile();
+  const char* targetName = target->GetName();
   // don't do anything if there is no Qt4:
   std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
   if (qtMajorVersion != "4")
@@ -43,6 +43,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmMakefile* makefile,
     return;
     }
 
+  // create a custom target for running automoc at buildtime:
   std::string automocTargetName = targetName;
   automocTargetName += "_automoc";
 
@@ -66,34 +67,32 @@ void cmQtAutomoc::SetupAutomocTarget(cmMakefile* makefile,
 
   std::vector<std::string> depends;
 
-  cmTarget* target = makefile->AddUtilityCommand(automocTargetName.c_str(),
-                                                 true,
+  cmTarget* mocTarget = makefile->AddUtilityCommand(automocTargetName.c_str(),
+                                                    true,
                                       workingDirectory.c_str(), depends,
                                       commandLines, false, "Automoc target");
+  target->AddUtility(automocTargetName.c_str());
 
+  // configure a file to get all information to automoc at buildtime:
   std::string _moc_files;
   std::string _moc_headers;
   const char* sepFiles = "";
   const char* sepHeaders = "";
-  for(std::vector<std::string>::const_iterator fileIt = srcs.begin();
-      fileIt != srcs.end();
+
+  const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
+
+  for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
+      fileIt != srcFiles.end();
       ++fileIt)
     {
-    std::string absFile = cmSystemTools::CollapseFullPath(
-                             fileIt->c_str(), makefile->GetCurrentDirectory());
-
-    bool skip = false;
-    bool generated = false;
-    cmSourceFile* sf = makefile->GetSource(absFile.c_str());
-    if (sf)
-      {
-      skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
-      generated = cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"));
-      }
+    cmSourceFile* sf = *fileIt;
+    std::string absFile = sf->GetFullPath();
+    bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
+    bool generated = cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"));
 
     if ((skip==false) && (generated == false))
       {
-      std::string ext = cmSystemTools::GetFilenameExtension(fileIt->c_str());
+      std::string ext = sf->GetExtension();
       cmSystemTools::FileFormat fileType = cmSystemTools::GetFileFormat(
                                                                   ext.c_str());
       if (fileType == cmSystemTools::CXX_FILE_FORMAT)
@@ -137,26 +136,12 @@ void cmQtAutomoc::SetupAutomocTarget(cmMakefile* makefile,
   mocCppFile += "/";
   mocCppFile += automocTargetName;
   mocCppFile += ".cpp";
-  makefile->GetOrCreateSource(mocCppFile.c_str(), true);
-  srcs.push_back(mocCppFile);
+  cmSourceFile* mocCppSource = makefile->GetOrCreateSource(mocCppFile.c_str(),
+                                                         true);
+  target->AddSourceFile(mocCppSource);
 
   makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
                            mocCppFile.c_str(), false);
-}
-
-
-void cmQtAutomoc::AddTargetDependency(cmMakefile* makefile, cmTarget* target)
-{
-  // don't do anything if there is no Qt4:
-  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
-  if (qtMajorVersion != "4")
-    {
-    return;
-    }
-
-  std::string automocTargetName = target->GetName();
-  automocTargetName += "_automoc";
-  target->AddUtility(automocTargetName.c_str());
 }
 
 

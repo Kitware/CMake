@@ -126,14 +126,6 @@ bool cmAddExecutableCommand
     }
 
   std::vector<std::string> srclists(s, args.end());
-  cmQtAutomoc* automoc = 0;
-  if ( doAutomoc )
-    {
-    automoc = new cmQtAutomoc;
-    automoc->SetupAutomocTarget(this->Makefile, exename.c_str(), srclists);
-    }
-
-
   cmTarget* tgt = this->Makefile->AddExecutable(exename.c_str(), srclists,
                                                 excludeFromAll);
   if ( use_win32 )
@@ -145,11 +137,10 @@ bool cmAddExecutableCommand
     tgt->SetProperty("MACOSX_BUNDLE", "ON");
     }
 
-  if ( automoc )
+  if ( doAutomoc )
     {
-    automoc->AddTargetDependency(this->Makefile, tgt);
-    delete automoc;
-    automoc = 0;
+    cmQtAutomoc automoc;
+    automoc.SetupAutomocTarget(tgt);
     }
 
   return true;

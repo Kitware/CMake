@@ -178,21 +178,13 @@ bool cmAddLibraryCommand
     ++s;
     }
 
-  cmQtAutomoc* automoc = 0;
-  if ( doAutomoc )
-    {
-    automoc = new cmQtAutomoc;
-    automoc->SetupAutomocTarget(this->Makefile, libName.c_str(), srclists);
-    }
-
   cmTarget* tgt =this->Makefile->AddLibrary(libName.c_str(), type, srclists,
                                             excludeFromAll);
 
-  if ( automoc )
+  if ( doAutomoc )
     {
-    automoc->AddTargetDependency(this->Makefile, tgt);
-    delete automoc;
-    automoc = 0;
+    cmQtAutomoc automoc;
+    automoc.SetupAutomocTarget(tgt);
     }
 
   return true;

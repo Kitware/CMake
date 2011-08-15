@@ -10,11 +10,7 @@ public:
   cmQtAutomoc();
   bool Run(const char* targetDirectory);
 
-  void SetupAutomocTarget(cmMakefile* makefile,
-                          const char* targetName,
-                          std::vector<std::string>& srcs);
-
-  void AddTargetDependency(cmMakefile* makefile, cmTarget* target);
+  void SetupAutomocTarget(cmTarget* target);
 
 private:
   cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
