@@ -18,6 +18,7 @@
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmake.h"
 #include "cmMakefile.h"
+#include "cmQtAutomoc.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmExportInstallFileGenerator.h"
@@ -832,6 +833,10 @@ void cmGlobalGenerator::Generate()
     return;
     }
 
+  // Iterate through all targets and set up automoc for those which have
+  // the AUTOMOC property set
+  this->CreateAutomocTargets();
+
   // For each existing cmLocalGenerator
   unsigned int i;
 
@@ -949,6 +954,33 @@ bool cmGlobalGenerator::CheckTargets()
     }
   return true;
 }
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::CreateAutomocTargets()
+{
+  for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmTargets& targets =
+      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    for(cmTargets::iterator ti = targets.begin();
+        ti != targets.end(); ++ti)
+      {
+      cmTarget& target = ti->second;
+      if(target.GetType() == cmTarget::EXECUTABLE ||
+         target.GetType() == cmTarget::STATIC_LIBRARY ||
+         target.GetType() == cmTarget::SHARED_LIBRARY ||
+         target.GetType() == cmTarget::MODULE_LIBRARY)
+        {
+        if(target.GetPropertyAsBool("AUTOMOC") && !target.IsImported())
+          {
+          cmQtAutomoc automoc;
+          automoc.SetupAutomocTarget(&target);
+          }
+        }
+      }
+    }
+}
+
 
 void cmGlobalGenerator::CheckLocalGenerators()
 {

@@ -12,7 +12,6 @@
 #include "cmAddLibraryCommand.h"
 
 #include "cmake.h"
-#include "cmQtAutomoc.h"
 
 // cmLibraryCommand
 bool cmAddLibraryCommand
@@ -32,7 +31,6 @@ bool cmAddLibraryCommand
     }
   bool excludeFromAll = false;
   bool importTarget = false;
-  bool doAutomoc = false;
 
   std::vector<std::string>::const_iterator s = args.begin();
 
@@ -81,11 +79,6 @@ bool cmAddLibraryCommand
       ++s;
       importTarget = true;
       }
-    else if (*s == "AUTOMOC")
-      {
-      ++s;
-      doAutomoc = true;
-      }
     else
       {
       break;
@@ -117,13 +110,6 @@ bool cmAddLibraryCommand
     if (!haveSpecifiedType)
       {
       this->SetError("called with IMPORTED argument but no library type.");
-      return false;
-      }
-
-    // Don't run automoc on an imported library
-    if (doAutomoc)
-      {
-      this->SetError("cannot be called with AUTOMOC for an IMPORTED library.");
       return false;
       }
 
@@ -178,14 +164,7 @@ bool cmAddLibraryCommand
     ++s;
     }
 
-  cmTarget* tgt =this->Makefile->AddLibrary(libName.c_str(), type, srclists,
-                                            excludeFromAll);
-
-  if ( doAutomoc )
-    {
-    cmQtAutomoc automoc;
-    automoc.SetupAutomocTarget(tgt);
-    }
+  this->Makefile->AddLibrary(libName.c_str(), type, srclists, excludeFromAll);
 
   return true;
 }

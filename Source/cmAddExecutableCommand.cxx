@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "cmAddExecutableCommand.h"
-#include "cmQtAutomoc.h"
 
 // cmExecutableCommand
 bool cmAddExecutableCommand
@@ -30,7 +29,6 @@ bool cmAddExecutableCommand
   bool use_macbundle = false;
   bool excludeFromAll = false;
   bool importTarget = false;
-  bool doAutomoc = false;
   while ( s != args.end() )
     {
     if (*s == "WIN32")
@@ -42,11 +40,6 @@ bool cmAddExecutableCommand
       {
       ++s;
       use_macbundle = true;
-      }
-    else if ( *s == "AUTOMOC" )
-      {
-      ++s;
-      doAutomoc = true;
       }
     else if(*s == "EXCLUDE_FROM_ALL")
       {
@@ -66,16 +59,11 @@ bool cmAddExecutableCommand
 
   // Special modifiers are not allowed with IMPORTED signature.
   if(importTarget
-      && (use_win32 || use_macbundle || excludeFromAll  || doAutomoc))
+      && (use_win32 || use_macbundle || excludeFromAll))
     {
     if(use_win32)
       {
       this->SetError("may not be given WIN32 for an IMPORTED target.");
-      }
-    else if(doAutomoc)
-      {
-      this->SetError(
-        "may not be given AUTOMOC for an IMPORTED target.");
       }
     else if(use_macbundle)
       {
@@ -135,12 +123,6 @@ bool cmAddExecutableCommand
   if ( use_macbundle)
     {
     tgt->SetProperty("MACOSX_BUNDLE", "ON");
-    }
-
-  if ( doAutomoc )
-    {
-    cmQtAutomoc automoc;
-    automoc.SetupAutomocTarget(tgt);
     }
 
   return true;
