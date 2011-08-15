@@ -158,7 +158,7 @@ macro(_test_compiler_hidden_visibility)
 endmacro()
 
 macro(_test_compiler_has_deprecated)
-  if("${CMAKE_CXX_COMPILER_ID}" MATCHES Borland)
+  if("${CMAKE_CXX_COMPILER_ID}" MATCHES Borland OR "${CMAKE_CXX_COMPILER_ID}" MATCHES HP)
     set(COMPILER_HAS_DEPRECATED "" CACHE INTERNAL "Compiler support for a deprecated attribute")
   else()
     _check_cxx_compiler_attribute("__attribute__((__deprecated__))" COMPILER_HAS_DEPRECATED_ATTR)
