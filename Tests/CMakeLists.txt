@@ -840,6 +840,24 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
 
+  IF(NOT QT4_FOUND)
+    FIND_PACKAGE(Qt4)
+    IF(QT4_FOUND)
+      ADD_TEST(QtAutomoc ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/QtAutomoc"
+        "${CMake_BINARY_DIR}/Tests/QtAutomoc"
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-project QtAutomoc
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-exe-dir "${CMake_BINARY_DIR}/Tests/QtAutomoc"
+        --force-new-ctest-process
+        --test-command ${CMAKE_CTEST_COMMAND} -V
+        )
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
+    ENDIF()
+  ENDIF(NOT QT4_FOUND)
+
   ADD_TEST(ExternalProject ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ExternalProject"
