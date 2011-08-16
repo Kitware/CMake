@@ -168,7 +168,7 @@ bool cmQtAutomoc::Run(const char* targetDirectory)
   delete gg;
   gg = NULL;
   makefile = NULL;
-
+  return true;
 }
 
 
