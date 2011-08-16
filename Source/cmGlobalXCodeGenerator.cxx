@@ -336,6 +336,9 @@ cmGlobalXCodeGenerator::PostBuildMakeTarget(std::string const& tName,
 }
 
 //----------------------------------------------------------------------------
+#define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"
+
+//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                                         std::vector<cmLocalGenerator*>& gens)
@@ -366,8 +369,18 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   makecommand.push_back(this->CurrentXCodeHackMakefile.c_str());
   makecommand.push_back(""); // placeholder, see below
 
-  // Add Re-Run CMake rules
-  this->CreateReRunCMakeFile(root, gens);
+  // Add ZERO_CHECK
+  bool regenerate = !mf->IsOn("CMAKE_SUPPRESS_REGENERATION");
+  if (regenerate)
+    {
+    this->CreateReRunCMakeFile(root, gens);
+    std::string file = this->ConvertToRelativeForMake(
+      this->CurrentReRunCMakeMakefile.c_str());
+    cmSystemTools::ReplaceString(file, "\\ ", " ");
+    mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, true, no_depends,
+                          no_working_directory,
+                          "make", "-f", file.c_str());
+    }
 
   // now make the allbuild depend on all the non-utility targets
   // in the project
@@ -379,10 +392,17 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
       {
       continue;
       }
+
     cmTargets& tgts = lg->GetMakefile()->GetTargets();
     for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
       {
       cmTarget& target = l->second;
+
+      if (regenerate && (l->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET))
+        {
+        target.AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+        }
+
       // make all exe, shared libs and modules
       // run the depend check makefile as a post build rule
       // this will make sure that when the next target is built
@@ -402,8 +422,8 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                                                     cmTarget::POST_BUILD,
                                                     "Depend check for xcode",
                                                     dir.c_str());
-
         }
+
       if(!target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
         allbuild->AddUtility(target.GetName());
@@ -1114,11 +1134,6 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
       commands.push_back(*(*i)->GetCustomCommand());
       }
     }
-  std::vector<cmCustomCommand> reruncom;
-  cmXCodeObject* cmakeReRunPhase =
-    this->CreateBuildPhase("CMake ReRun", "cmakeReRunPhase",
-                           cmtarget, reruncom);
-  buildPhases->AddObject(cmakeReRunPhase);
   // create prebuild phase
   cmXCodeObject* cmakeRulesBuildPhase =
     this->CreateBuildPhase("CMake Rules",
@@ -1207,20 +1222,6 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                                 const & commands,
                                                 const char* name)
 {
-  if(strcmp(name, "cmakeReRunPhase") == 0)
-    {
-    std::string cdir = this->CurrentMakefile->GetHomeOutputDirectory();
-    cdir = this->ConvertToRelativeForMake(cdir.c_str());
-    std::string makecmd = "make -C ";
-    makecmd += cdir;
-    makecmd += " -f ";
-    makecmd +=
-      this->ConvertToRelativeForMake(this->CurrentReRunCMakeMakefile.c_str());
-    cmSystemTools::ReplaceString(makecmd, "\\ ", "\\\\ ");
-    buildphase->AddAttribute("shellScript",
-                             this->CreateString(makecmd.c_str()));
-    return;
-    }
 
   // collect multiple outputs of custom commands into a set
   // which will be used for every configuration
