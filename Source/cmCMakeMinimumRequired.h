@@ -15,9 +15,9 @@
 #include "cmCommand.h"
 
 /** \class cmCMakeMinimumRequired
- * \brief Build a CMAKE variable
+ * \brief cmake_minimum_required command
  *
- * cmCMakeMinimumRequired sets a variable to a value with expansion.  
+ * cmCMakeMinimumRequired implements the cmake_minimum_required CMake command
  */
 class cmCMakeMinimumRequired : public cmCommand
 {

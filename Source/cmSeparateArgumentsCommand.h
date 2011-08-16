@@ -15,9 +15,9 @@
 #include "cmCommand.h"
 
 /** \class cmSeparateArgumentsCommand
- * \brief SeparateArguments a CMAKE variable
+ * \brief separate_arguments command
  *
- * cmSeparateArgumentsCommand sets a variable to a value with expansion.  
+ * cmSeparateArgumentsCommand implements the separate_arguments CMake command
  */
 class cmSeparateArgumentsCommand : public cmCommand
 {

@@ -15,9 +15,9 @@
 #include "cmCommand.h"
 
 /** \class cmSiteNameCommand
- * \brief SiteName a CMAKE variable
+ * \brief site_name command
  *
- * cmSiteNameCommand sets a variable to a value with expansion.  
+ * cmSiteNameCommand implements the site_name CMake command
  */
 class cmSiteNameCommand : public cmCommand
 {
