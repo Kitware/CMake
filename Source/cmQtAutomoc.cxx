@@ -69,10 +69,9 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   std::string automocComment = "Automoc for target ";
   automocComment += targetName;
 
-  cmTarget* mocTarget = makefile->AddUtilityCommand(automocTargetName.c_str(),
-                                                    true,
-                                  workingDirectory.c_str(), depends,
-                                  commandLines, false, automocComment.c_str());
+  makefile->AddUtilityCommand(automocTargetName.c_str(), true,
+                              workingDirectory.c_str(), depends,
+                              commandLines, false, automocComment.c_str());
   target->AddUtility(automocTargetName.c_str());
 
   // configure a file to get all information to automoc at buildtime:
@@ -713,9 +712,11 @@ bool cmQtAutomoc::GenerateMoc(const std::string& sourceFile,
 
     if (this->Verbose)
       {
-      for(int i=0; i<command.size(); i++)
+      for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+          cmdIt != command.end();
+          ++cmdIt)
         {
-        std::cout << command[i] << " ";
+        std::cout << *cmdIt << " ";
         }
       std::cout << std::endl;
       }
