@@ -315,6 +315,7 @@ class cmake
    */
   const char* GetCTestCommand();
   const char* GetCPackCommand();
+  const char* GetCMakeCommand();
 
   // Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }

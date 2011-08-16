@@ -20,6 +20,7 @@
 #include "cmCommand.h"
 #include "cmFileTimeComparison.h"
 #include "cmGeneratedFileStream.h"
+#include "cmQtAutomoc.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmTest.h"
@@ -1694,6 +1695,13 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
 #endif
 
+    else if (args[1] == "cmake_automoc")
+      {
+        cmQtAutomoc automoc;
+        automoc.Run(args[2].c_str());
+        return 0;
+      }
+
     // Tar files
     else if (args[1] == "tar" && args.size() > 3)
       {
@@ -3038,6 +3046,13 @@ const char* cmake::GetCPackCommand()
     }
     return this->CPackCommand.c_str();
 }
+
+
+const char* cmake::GetCMakeCommand()
+{
+  return this->CMakeCommand.c_str();
+}
+
 
 void cmake::MarkCliAsUsed(const std::string& variable)
 {

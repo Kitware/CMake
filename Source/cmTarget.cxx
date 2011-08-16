@@ -115,6 +115,28 @@ cmTarget::cmTarget()
 void cmTarget::DefineProperties(cmake *cm)
 {
   cm->DefineProperty
+    ("AUTOMOC", cmProperty::TARGET,
+     "Should the target be processed with automoc (for Qt projects).",
+     "AUTOMOC is a boolean specifying whether CMake will handle "
+     "the Qt moc preprocessor automatically, i.e. without having to use "
+     "the QT4_WRAP_CPP() macro. Currently Qt4 is supported. "
+     "When this property is set to TRUE, CMake will scan the source files "
+     "at build time and invoke moc accordingly. "
+     "If an #include statement like #include \"moc_foo.cpp\" is found, "
+     "the Q_OBJECT class declaration is expected in the header, and moc is "
+     "run on the header file. "
+     "If an #include statement like #include \"foo.moc\" is found, "
+     "then a Q_OBJECT is expected in the current source file and moc "
+     "is run on the file itself. "
+     "Additionally, all header files are parsed for Q_OBJECT macros, "
+     "and if found, moc is also executed on those files. The resulting "
+     "moc files, which are not included as shown above in any of the source "
+     "files are included in a generated <targetname>_automoc.cpp file, "
+     "which is compiled as part of the target."
+     "This property is initialized by the value of the variable "
+     "CMAKE_AUTOMOC if it is set when a target is created.");
+
+  cm->DefineProperty
     ("BUILD_WITH_INSTALL_RPATH", cmProperty::TARGET,
      "Should build tree targets have install tree rpaths.",
      "BUILD_WITH_INSTALL_RPATH is a boolean specifying whether to link "
@@ -1118,6 +1140,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
   this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
+  this->SetPropertyDefault("AUTOMOC", 0);
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
@@ -1420,7 +1443,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     // the fact that the name matched a target was just a coincidence.
     if(cmSystemTools::FileIsFullPath(dep.c_str()))
       {
-      if(t->GetType() >= cmTarget::EXECUTABLE && 
+      if(t->GetType() >= cmTarget::EXECUTABLE &&
          t->GetType() <= cmTarget::MODULE_LIBRARY)
         {
         // This is really only for compatibility so we do not need to
