@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include <png.h>
+#include <foo.h>
 
 int main()
 {
- printf("PNG copyright: %s\n", png_get_copyright(NULL));
+ printf("foo is: %d\n", foo());
  return 0;
 }

@@ -1,0 +1,8 @@
+
+find_library(FOO_LIBRARY NAMES foo HINTS "@CMAKE_CURRENT_BINARY_DIR@" )
+find_path(FOO_INCLUDE_DIR NAMES foo.h HINTS "@CMAKE_CURRENT_SOURCE_DIR@" )
+
+set(FOO_LIBRARIES ${FOO_LIBRARY})
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Foo  DEFAULT_MSG  FOO_LIBRARY FOO_INCLUDE_DIR )
