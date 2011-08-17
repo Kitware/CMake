@@ -223,6 +223,8 @@ IF(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.GenerateExportHeader GenerateExportHeader)
 
+  ADD_TEST_MACRO(Module.CheckCXXCompilerFlag CheckCXXCompilerFlag)
+
   ADD_TEST(LinkFlags-prepare
     ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     --build-and-test

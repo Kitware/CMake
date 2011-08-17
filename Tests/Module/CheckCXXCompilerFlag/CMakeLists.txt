@@ -1,0 +1,63 @@
+cmake_minimum_required(VERSION 2.8)
+project(CheckCXXCompilerFlag)
+
+macro(TEST_FAIL value msg)
+  if (${value})
+    message (SEND_ERROR "Test fail:" ${msg} ${Out} )
+  endif ()
+endmacro()
+
+macro(TEST_PASS value msg)
+  if (NOT ${value})
+    message (SEND_ERROR "Test fail:" ${msg} ${Out} )
+  endif ()
+endmacro()
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+  exec_program(${CMAKE_C_COMPILER} ARGS --version OUTPUT_VARIABLE     _gcc_version_info)
+  string (REGEX MATCH "[345]\\.[0-9]\\.[0-9]" _gcc_version "${_gcc_version_info}")
+  # gcc on mac just reports: "gcc (GCC) 3.3 20030304 ..." without the
+  # patch level, handle this here:
+  if(NOT _gcc_version)
+    string (REGEX REPLACE ".*\\(GCC\\).* ([34]\\.[0-9]) .*" "\\1.0" _gcc_version "${_gcc_version_info}")
+  endif()
+endif()
+
+if(CMAKE_COMPILER_ID MATCHES Clang)
+  exec_program(${CMAKE_CXX_COMPILER} ARGS --version OUTPUT_VARIABLE     _clang_version_info)
+  string (REGEX MATCH "version [345]\\.[0-9]" _clang_version "${_clang_version_info}")
+endif()
+
+message("Platform:\n  WIN32: ${WIN32}\n  UNIX: ${UNIX}\n  APPLE: ${APPLE}\n  MINGW: ${MINGW}\n  CYGWIN: ${CYGWIN}\n"
+  "  MSVC: ${MSVC}\n  MSVC60: ${MSVC60}\n  MSVC70: ${MSVC70}\n  MSVC71: ${MSVC71}\n  MSVC80: ${MSVC80}\n  MSVC90: ${MSVC90}\n  MSVC10: ${MSVC10}\n"
+  "  GCC: ${_gcc_version}\n"
+  "  Clang: ${_clang_version}\n"
+)
+
+include(CheckCXXCompilerFlag)
+
+check_cxx_compiler_flag(-fvisibility=hidden HAS_HIDDEN_VISIBILITY)
+
+message("HAS_HIDDEN_VISIBILITY: ${HAS_HIDDEN_VISIBILITY}\n\nCOMPILE OUTPUT:\n${OUTPUT}")
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+  test_pass(HAS_HIDDEN_VISIBILITY "GCC should support hidden visibility, but does not.")
+else()
+  message("Unhandled Platform")
+endif()
+
+#
+# This is a no-op executable... If this test is going to fail, it fails during
+# the configure step while cmake is configuring this CMakeLists.txt file...
+#
+
+file(WRITE
+  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
+  "int main() { return 0; }
+"
+)
+
+add_executable(
+  CheckCXXCompilerFlag
+  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
+)
