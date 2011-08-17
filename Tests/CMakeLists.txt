@@ -845,18 +845,37 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   ENDIF(NOT QT4_FOUND)
 
   IF(QT4_FOUND)
-    ADD_TEST(QtAutomoc ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutomoc"
-      "${CMake_BINARY_DIR}/Tests/QtAutomoc"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project QtAutomoc
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/QtAutomoc"
-      --force-new-ctest-process
-      --test-command ${CMAKE_CTEST_COMMAND} -V
-      )
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
+    # test whether the Qt4 which has been found works, on some machines
+    # which run nightly builds there were errors like "wrong file format"
+    # for libQtCore.so. So first check it works, and only if it does add
+    # the automoc test.
+    INCLUDE(CheckCXXSourceCompiles)
+    SET(_save_CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
+    SET(_save_CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}")
+
+    SET(CMAKE_REQUIRED_INCLUDES ${QT_INCLUDES})
+    SET(CMAKE_REQUIRED_LIBRARIES ${QT_QTCORE_LIBRARIES})
+
+    CHECK_CXX_SOURCE_COMPILES("#include <QCoreApplication>\n int main() {return (qApp == 0 ? 0 : 1); }\n"
+                              QT4_WORKS_FOR_AUTOMOC_TEST)
+
+    SET(CMAKE_REQUIRED_INCLUDES "${_save_CMAKE_REQUIRED_INCLUDES}")
+    SET(CMAKE_REQUIRED_LIBRARIES "${_save_CMAKE_REQUIRED_LIBRARIES}")
+
+    IF(QT4_WORKS_FOR_AUTOMOC_TEST)
+      ADD_TEST(QtAutomoc ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/QtAutomoc"
+        "${CMake_BINARY_DIR}/Tests/QtAutomoc"
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-project QtAutomoc
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-exe-dir "${CMake_BINARY_DIR}/Tests/QtAutomoc"
+        --force-new-ctest-process
+        --test-command ${CMAKE_CTEST_COMMAND} -V
+        )
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
+    ENDIF()
   ENDIF()
 
   ADD_TEST(ExternalProject ${CMAKE_CTEST_COMMAND}
