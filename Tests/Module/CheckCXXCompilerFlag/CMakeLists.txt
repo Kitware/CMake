@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 project(CheckCXXCompilerFlag)
 
+message(STATUS "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
+set(CMAKE_VERBOSE_MAKEFILE 1)
+
 macro(TEST_FAIL value msg)
   if (${value})
     message (SEND_ERROR "Test fail:" ${msg} ${Out} )
