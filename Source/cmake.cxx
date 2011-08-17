@@ -1573,14 +1573,13 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       {
       return cmake::ExecuteEchoColor(args);
       }
-#endif
-
     else if (args[1] == "cmake_automoc")
       {
         cmQtAutomoc automoc;
         automoc.Run(args[2].c_str());
         return 0;
       }
+#endif
 
     // Tar files
     else if (args[1] == "tar" && args.size() > 3)

@@ -958,6 +958,7 @@ bool cmGlobalGenerator::CheckTargets()
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::CreateAutomocTargets()
 {
+#ifdef CMAKE_BUILD_WITH_CMAKE
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
     cmTargets& targets =
@@ -979,6 +980,7 @@ void cmGlobalGenerator::CreateAutomocTargets()
         }
       }
     }
+#endif
 }
 
 
