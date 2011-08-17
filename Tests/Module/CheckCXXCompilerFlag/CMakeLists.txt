@@ -42,7 +42,7 @@ message("HAS_HIDDEN_VISIBILITY: ${HAS_HIDDEN_VISIBILITY}\n\nCOMPILE OUTPUT:\n${O
 
 if(CMAKE_COMPILER_IS_GNUCXX)
   if(NOT WIN32)
-    test_pass(HAS_HIDDEN_VISIBILITY "GCC should support hidden visibility, but does not.")
+#     test_pass(HAS_HIDDEN_VISIBILITY "GCC should support hidden visibility, but does not.")
   endif()
 else()
   message("Unhandled Platform")
