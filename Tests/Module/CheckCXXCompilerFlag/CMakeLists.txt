@@ -28,10 +28,16 @@ if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
   string (REGEX REPLACE ".*version ([0-9]\\.[0-9]).*" "\\1" _clang_version "${_clang_version_info}")
 endif()
 
+if(CMAKE_CXX_COMPILER_ID MATCHES Intel)
+  exec_program(${CMAKE_CXX_COMPILER} ARGS -V OUTPUT_VARIABLE     _intel_version_info)
+  string (REGEX REPLACE ".*Version ([0-9]+(\\.[0-9]+)+).*" _intel_version "${_intel_version_info}")
+endif()
+
 message("Platform:\n  WIN32: ${WIN32}\n  UNIX: ${UNIX}\n  APPLE: ${APPLE}\n  MINGW: ${MINGW}\n  CYGWIN: ${CYGWIN}\n"
   "  MSVC: ${MSVC}\n  MSVC60: ${MSVC60}\n  MSVC70: ${MSVC70}\n  MSVC71: ${MSVC71}\n  MSVC80: ${MSVC80}\n  MSVC90: ${MSVC90}\n  MSVC10: ${MSVC10}\n"
   "  GCC: ${_gcc_version}\n"
   "  Clang: ${_clang_version}\n"
+  "  Intel: ${_intel_version}\n"
 )
 
 include(CheckCXXCompilerFlag)
