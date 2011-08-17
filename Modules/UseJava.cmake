@@ -262,7 +262,10 @@ function(add_jar _TARGET_NAME)
             set(_JAVA_CLASS_FILE "${CMAKE_JAVA_CLASS_OUTPUT_PATH}/${_JAVA_REL_PATH}/${_JAVA_FILE}.class")
             set(_JAVA_CLASS_FILES ${_JAVA_CLASS_FILES} ${_JAVA_CLASS_FILE})
 
-        elseif (_JAVA_EXT MATCHES ".jar")
+        elseif (_JAVA_EXT MATCHES ".jar"
+                OR _JAVA_EXT MATCHES ".war"
+                OR _JAVA_EXT MATCHES ".ear"
+                OR _JAVA_EXT MATCHES ".sar")
             list(APPEND CMAKE_JAVA_INCLUDE_PATH ${_JAVA_SOURCE_FILE})
 
         elseif (_JAVA_EXT STREQUAL "")
