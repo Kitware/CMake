@@ -23,7 +23,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   endif()
 endif()
 
-if(CMAKE_COMPILER_ID MATCHES Clang)
+if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
   exec_program(${CMAKE_CXX_COMPILER} ARGS --version OUTPUT_VARIABLE     _clang_version_info)
   string (REGEX MATCH "version [345]\\.[0-9]" _clang_version "${_clang_version_info}")
 endif()
