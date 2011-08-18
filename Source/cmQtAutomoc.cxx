@@ -245,7 +245,7 @@ void cmQtAutomoc::WriteOldMocDefinitionsFile(const char* targetDirectory)
 
   std::fstream outfile;
   outfile.open(filename.c_str(),
-               std::ios_base::out | std::ios_base::trunc);
+               std::ios::out | std::ios::trunc);
   outfile << "set(AM_OLD_MOC_DEFINITIONS \""
               << this->Join(this->MocDefinitions, ' ') << "\")\n";
 
@@ -477,7 +477,7 @@ bool cmQtAutomoc::RunAutomocQt4()
   // source file that includes all remaining moc files (_automoc.cpp file)
   std::fstream outfile;
   outfile.open(this->OutMocCppFilename.c_str(),
-               std::ios_base::out | std::ios_base::trunc);
+               std::ios::out | std::ios::trunc);
   outfile << automocSource;
   outfile.close();
 
