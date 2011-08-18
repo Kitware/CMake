@@ -68,6 +68,27 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
   lang.insert("DEF");
   lang.insert("Fortran");
   this->CreateCustomTargetsAndCommands(lang);
+
+  // Now create GUIDs for targets
+  cmTargets &tgts = this->Makefile->GetTargets();
+
+  cmGlobalVisualStudio7Generator* gg =
+    static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
+  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+    {
+    const char* path = l->second.GetProperty("EXTERNAL_MSPROJECT");
+    if(path)
+      {
+      this->ReadAndStoreExternalGUID(
+        l->second.GetName(), path);
+      }
+    else
+      {
+      gg->CreateGUID(l->first.c_str());
+      }
+    }
+
+
   this->FixGlobalTargets();
 }
 
@@ -2020,29 +2041,6 @@ void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
                   cmCacheManager::INTERNAL);
 }
 
-
-void cmLocalVisualStudio7Generator::ConfigureFinalPass()
-{
-  cmLocalGenerator::ConfigureFinalPass();
-  cmTargets &tgts = this->Makefile->GetTargets();
-
-  cmGlobalVisualStudio7Generator* gg =
-    static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
-  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
-    {
-    const char* path = l->second.GetProperty("EXTERNAL_MSPROJECT");
-    if(path)
-      {
-      this->ReadAndStoreExternalGUID(
-        l->second.GetName(), path);
-      }
-    else
-      {
-      gg->CreateGUID(l->first.c_str());
-      }
-    }
-
-}
 
 //----------------------------------------------------------------------------
 std::string cmLocalVisualStudio7Generator

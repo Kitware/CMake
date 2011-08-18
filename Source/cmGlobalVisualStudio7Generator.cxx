@@ -739,18 +739,6 @@ void cmGlobalVisualStudio7Generator
   entry.Full = "";
 }
 
-// make sure "special" targets have GUID's
-void cmGlobalVisualStudio7Generator::Configure()
-{
-  cmGlobalGenerator::Configure();
-  this->CreateGUID("ALL_BUILD");
-  this->CreateGUID("INSTALL");
-  this->CreateGUID("RUN_TESTS");
-  this->CreateGUID("EDIT_CACHE");
-  this->CreateGUID("REBUILD_CACHE");
-  this->CreateGUID("PACKAGE");
-}
-
 //----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio7Generator
