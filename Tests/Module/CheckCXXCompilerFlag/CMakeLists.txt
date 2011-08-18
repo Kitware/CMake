@@ -33,7 +33,7 @@ endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Intel)
   exec_program(${CMAKE_CXX_COMPILER} ARGS -V OUTPUT_VARIABLE     _intel_version_info)
-  string (REGEX REPLACE ".*Version ([0-9]+(\\.[0-9]+)+).*" _intel_version "${_intel_version_info}")
+  string (REGEX REPLACE ".*Version ([0-9]+(\\.[0-9]+)+).*" "\\1" _intel_version "${_intel_version_info}")
 endif()
 
 message("Platform:\n  WIN32: ${WIN32}\n  UNIX: ${UNIX}\n  APPLE: ${APPLE}\n  MINGW: ${MINGW}\n  CYGWIN: ${CYGWIN}\n"
