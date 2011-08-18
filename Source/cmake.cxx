@@ -618,7 +618,8 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
             libIt != libList.end();
             ++libIt)
       {
-      mf->AddLinkLibraryForTarget(targetName, libIt->c_str(), cmTarget::GENERAL);
+      mf->AddLinkLibraryForTarget(targetName, libIt->c_str(),
+                                  cmTarget::GENERAL);
       }
 
 
