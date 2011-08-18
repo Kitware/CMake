@@ -1219,19 +1219,30 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
 }
 
 //----------------------------------------------------------------------------
+// This function removes each occurence of the flag and returns the last one
+// (i.e., the dominant flag in GCC)
 std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
                                                 std::string& flags)
 {
   std::string retFlag;
-  std::string::size_type pos = flags.find(flag);
-  if(pos != flags.npos && (pos ==0 || flags[pos-1]==' '))
+  std::string::size_type pos = flags.rfind(flag);
+  bool saved = false;
+  while(pos != flags.npos)
     {
-    while(pos < flags.size() && flags[pos] != ' ')
+    if(pos == 0 || flags[pos-1]==' ')
       {
-      retFlag += flags[pos];
-      flags[pos] = ' ';
-      pos++;
+      while(pos < flags.size() && flags[pos] != ' ')
+        {
+        if(!saved)
+          {
+          retFlag += flags[pos];
+          }
+        flags[pos] = ' ';
+        pos++;
+        }
       }
+      saved = true;
+      pos = flags.rfind(flag);
     }
   return retFlag;
 }
@@ -1870,7 +1881,17 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     flags += gflag;
     }
   const char* debugStr = "YES";
-  if(gflagc.size() ==0  && gflag.size() == 0)
+  // We can't set the Xcode flag differently depending on the language,
+  // so put them back in this case.
+  if( (lang && strcmp(lang, "CXX") == 0) && gflag != gflagc )
+    {
+    cflags += " ";
+    cflags += gflagc;
+    flags += " ";
+    flags += gflag;
+    debugStr = "NO";
+    }
+  if( gflag == "-g0" || gflag.size() == 0 )
     {
     debugStr = "NO";
     }
