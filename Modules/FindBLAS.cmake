@@ -138,7 +138,7 @@ endif ($ENV{BLA_VENDOR} MATCHES ".+")
 
 if (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
  if(NOT BLAS_LIBRARIES)
-  # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
+  # gotoblas (http://www.tacc.utexas.edu/tacc-projects/gotoblas2)
   check_fortran_libraries(
   BLAS_LIBRARIES
   BLAS
@@ -156,9 +156,9 @@ if (BLA_VENDOR STREQUAL "ATLAS" OR BLA_VENDOR STREQUAL "All")
   check_fortran_libraries(
   BLAS_LIBRARIES
   BLAS
-  cblas_dgemm
+  dgemm
   ""
-  "cblas;f77blas;atlas"
+  "f77blas;atlas"
   ""
   )
  endif(NOT BLAS_LIBRARIES)
