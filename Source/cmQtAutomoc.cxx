@@ -519,7 +519,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   const std::string absPath = cmsys::SystemTools::GetFilenamePath(
                    cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
 
-  long matchOffset = 0;
+  std::string::size_type matchOffset = 0;
   if (!mocIncludeRegExp.find(contentsString.c_str()))
     {
     // no moc #include, look whether we need to create a moc from
