@@ -1758,7 +1758,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     default:
       break;
     }
-  if(this->XcodeVersion >= 22)
+  if(this->XcodeVersion >= 22 && this->XcodeVersion < 40)
     {
     buildSettings->AddAttribute("PREBINDING",
                                 this->CreateString("NO"));
