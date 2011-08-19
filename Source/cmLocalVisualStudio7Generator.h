@@ -57,7 +57,6 @@ public:
   void SetVersion8() {this->Version = 8;}
   void SetVersion9() {this->Version = 9;}
   void SetPlatformName(const char* n) { this->PlatformName = n;}
-  virtual void ConfigureFinalPass();
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& 
                                       dirs); 

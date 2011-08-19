@@ -80,9 +80,6 @@ public:
   void CreateGUID(const char* name);
   std::string GetGUID(const char* name);
 
-  ///! do configure step
-  virtual void Configure();
-
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* prefix,
                                         const char* config,

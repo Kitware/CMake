@@ -883,6 +883,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
         --build-exe-dir "${CMake_BINARY_DIR}/Tests/QtAutomoc"
         --force-new-ctest-process
+        --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
         --test-command ${CMAKE_CTEST_COMMAND} -V
         )
       LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
