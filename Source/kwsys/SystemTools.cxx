@@ -4573,8 +4573,6 @@ void SystemTools::ClassInitialize()
   // for windows because drive letters need to be maintained.  Also,
   // there are not sym-links and mount points on windows anyway.
 #if !defined(_WIN32) || defined(__CYGWIN__)
-  // Work-around an SGI problem by always adding this mapping:
-  SystemTools::AddTranslationPath("/tmp_mnt/", "/");
   // The tmp path is frequently a logical path so always keep it:
   SystemTools::AddKeepPath("/tmp/");
 
