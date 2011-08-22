@@ -63,7 +63,7 @@ MACRO(_CHECK_SYMBOL_EXISTS SOURCEFILE SYMBOL FILES VARIABLE)
       "${CMAKE_CONFIGURABLE_FILE_CONTENT}\nvoid cmakeRequireSymbol(int dummy,...){(void)dummy;}\nint main()\n{\n#ifndef ${SYMBOL}\n  cmakeRequireSymbol(0,&${SYMBOL});\n#endif\n  return 0;\n}\n")
 
     CONFIGURE_FILE("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-      "${SOURCEFILE}" @ONLY)
+      "${SOURCEFILE}" @ONLY IMMEDIATE)
 
     MESSAGE(STATUS "Looking for ${SYMBOL}")
     TRY_COMPILE(${VARIABLE}
