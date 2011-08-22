@@ -37,6 +37,9 @@ if(NOT MODE)
   message(FATAL_ERROR "MODE argument not specified. Use either EXIST, COMPILE or LINK.")
 endif()
 
+# require the current version. If we don't do this, Platforms/CYGWIN.cmake complains because
+# it doesn't know whether it should set WIN32 or not:
+cmake_minimum_required(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION} )
 
 include(CMakeDetermineSystem)
 
