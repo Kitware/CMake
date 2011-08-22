@@ -41,6 +41,12 @@ endif()
 # it doesn't know whether it should set WIN32 or not:
 cmake_minimum_required(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION} )
 
+macro(ENABLE_LANGUAGE)
+  # disable the enable_language() command, otherwise --find-package breaks on Windows.
+  # On Windows, enable_language(RC) is called in the platform files unconditionally.
+  # But in --find-package mode, we don't want (and can't) enable any language.
+endmacro()
+
 include(CMakeDetermineSystem)
 
 # short-cut some tests on Darwin, see Darwin-GNU.cmake:
