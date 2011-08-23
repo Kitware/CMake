@@ -12,7 +12,7 @@
 #             [BASE_NAME <base_name>]
 #             [EXPORT_MACRO_NAME <export_macro_name>]
 #             [EXPORT_FILE_NAME <export_file_name>]
-#             [DEPRECATED_NAME <deprecated_name>]
+#             [DEPRECATED_MACRO_NAME <deprecated_macro_name>]
 #             [NO_EXPORT_MACRO_NAME <no_export_macro_name>]
 #             [STATIC_DEFINE <static_define>]
 # )
@@ -78,7 +78,7 @@
 #
 #   add_library(somelib someclass.cpp)
 #   generate_export_header(somelib
-#     DEPRECATED_NAME KDE_DEPRECATED
+#     DEPRECATED_MACRO_NAME KDE_DEPRECATED
 #   )
 #
 # creates the macro KDE_DEPRECATED instead of SOMELIB_DEPRECATED.
@@ -222,7 +222,7 @@ endmacro()
 macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   # Option overrides
   set(options)
-  set(oneValueArgs PREFIX_NAME BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME DEPRECATED_NAME NO_EXPORT_MACRO_NAME STATIC_DEFINE)
+  set(oneValueArgs PREFIX_NAME BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME DEPRECATED_MACRO_NAME NO_EXPORT_MACRO_NAME STATIC_DEFINE)
   set(multiValueArgs)
 
   cmake_parse_arguments(_GEH "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -240,7 +240,7 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   set(EXPORT_MACRO_NAME "${PREFIX}${BASE_NAME_UPPER}_EXPORT")
   set(NO_EXPORT_MACRO_NAME "${PREFIX}${BASE_NAME_UPPER}_NO_EXPORT")
   set(EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${BASE_NAME_LOWER}_export.h")
-  set(DEPRECATED_NAME "${PREFIX}${BASE_NAME_UPPER}_DEPRECATED")
+  set(DEPRECATED_MACRO_NAME "${PREFIX}${BASE_NAME_UPPER}_DEPRECATED")
   set(STATIC_DEFINE "${PREFIX}${BASE_NAME_UPPER}_STATIC_DEFINE")
 
   if(_GEH_UNPARSED_ARGUMENTS)
@@ -257,8 +257,8 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
       set(EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${_GEH_EXPORT_FILE_NAME}")
     endif()
   endif()
-  if(_GEH_DEPRECATED_NAME)
-    set(DEPRECATED_NAME ${PREFIX}${_GEH_DEPRECATED_NAME})
+  if(_GEH_DEPRECATED_MACRO_NAME)
+    set(DEPRECATED_MACRO_NAME ${PREFIX}${_GEH_DEPRECATED_MACRO_NAME})
   endif()
   if(_GEH_NO_EXPORT_MACRO_NAME)
     set(NO_EXPORT_MACRO_NAME ${PREFIX}${_GEH_NO_EXPORT_MACRO_NAME})
