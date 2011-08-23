@@ -146,10 +146,27 @@ macro(_test_compiler_hidden_visibility)
     endif()
   endif()
 
+  if(CMAKE_CXX_COMPILER_ID MATCHES Intel)
+    exec_program(${CMAKE_CXX_COMPILER} ARGS -V OUTPUT_VARIABLE     _intel_version_info)
+    string (REGEX REPLACE ".*Version ([0-9]+(\\.[0-9]+)+).*" "\\1" _intel_version "${_intel_version_info}")
+
+    if(${_intel_version} VERSION_LESS "12.0")
+      set(_INTEL_TOO_OLD TRUE)
+      message(WARNING "Intel compiler older than 12.0")
+    endif()
+  endif()
+
+
   # Exclude XL here because it misinterprets -fvisibility=hidden even though
   # the check_cxx_compiler_flag passes
   # http://www.cdash.org/CDash/testDetails.php?test=109109951&build=1419259
-  if (NOT GCC_TOO_OLD AND NOT WIN32 AND NOT CYGWIN AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES XL AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES PGI)
+  if (NOT GCC_TOO_OLD
+      AND NOT _INTEL_TOO_OLD
+      AND NOT WIN32
+      AND NOT CYGWIN
+      AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES XL
+      AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES PGI
+      AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES Watcom)
     check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
     check_cxx_compiler_flag(-fvisibility-inlines-hidden COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
     option(USE_COMPILER_HIDDEN_VISIBILITY "Use HIDDEN visibility support if available." ON)
@@ -158,7 +175,11 @@ macro(_test_compiler_hidden_visibility)
 endmacro()
 
 macro(_test_compiler_has_deprecated)
-  if("${CMAKE_CXX_COMPILER_ID}" MATCHES Borland OR "${CMAKE_CXX_COMPILER_ID}" MATCHES HP OR GCC_TOO_OLD OR "${CMAKE_CXX_COMPILER_ID}" MATCHES PGI)
+  if("${CMAKE_CXX_COMPILER_ID}" MATCHES Borland
+      OR "${CMAKE_CXX_COMPILER_ID}" MATCHES HP
+      OR GCC_TOO_OLD
+      OR "${CMAKE_CXX_COMPILER_ID}" MATCHES PGI
+      OR "${CMAKE_CXX_COMPILER_ID}" MATCHES Watcom)
     set(COMPILER_HAS_DEPRECATED "" CACHE INTERNAL "Compiler support for a deprecated attribute")
   else()
     _check_cxx_compiler_attribute("__attribute__((__deprecated__))" COMPILER_HAS_DEPRECATED_ATTR)
