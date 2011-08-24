@@ -2,6 +2,21 @@ cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
 
 project(GenerateExportHeader)
 
+# Prevent timeout on Watcom by not running the tests.
+if ("${CMAKE_COMPILER_ID}" MATCHES Watcom)
+  file(WRITE
+    "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
+    "int main() { return 0; }
+  "
+  )
+
+  add_executable(
+    GenerateExportHeader
+    "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
+  )
+  return()
+endif()
+
 include(CheckCXXCompilerFlag)
 
 set( CMAKE_INCLUDE_CURRENT_DIR ON )
@@ -65,7 +80,7 @@ macro(_do_build Include Library LibrarySource Source)
 
     "set(CMAKE_INCLUDE_CURRENT_DIR ON)\n"
 
-    "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \${CMAKE_CURRENT_BINARY_DIR})\n"
+    "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"\${CMAKE_CURRENT_BINARY_DIR}\")\n"
 
     "include(GenerateExportHeader)\n"
 
@@ -79,9 +94,9 @@ macro(_do_build Include Library LibrarySource Source)
     "  add_definitions(-DCOMPILER_IS_MSVC)\n"
     "endif()\n"
 
-    "add_subdirectory(${LibrarySource})\n"
+    "add_subdirectory(\"${LibrarySource}\")\n"
 
-    "include_directories(${LibrarySource} \${CMAKE_CURRENT_BINARY_DIR}/${LibrarySource})\n"
+    "include_directories(\"${LibrarySource}\" \"\${CMAKE_CURRENT_BINARY_DIR}/${LibrarySource}\")\n"
 
     "${CONDITIONAL_STATIC_DEFINE}"
 
