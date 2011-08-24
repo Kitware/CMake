@@ -65,7 +65,7 @@ macro(_do_build Include Library LibrarySource Source)
 
     "set(CMAKE_INCLUDE_CURRENT_DIR ON)\n"
 
-    "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \${CMAKE_CURRENT_BINARY_DIR})\n"
+    "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"\${CMAKE_CURRENT_BINARY_DIR}\")\n"
 
     "include(GenerateExportHeader)\n"
 
@@ -79,9 +79,9 @@ macro(_do_build Include Library LibrarySource Source)
     "  add_definitions(-DCOMPILER_IS_MSVC)\n"
     "endif()\n"
 
-    "add_subdirectory(${LibrarySource})\n"
+    "add_subdirectory(\"${LibrarySource}\")\n"
 
-    "include_directories(${LibrarySource} \${CMAKE_CURRENT_BINARY_DIR}/${LibrarySource})\n"
+    "include_directories(\"${LibrarySource}\" \"\${CMAKE_CURRENT_BINARY_DIR}/${LibrarySource}\")\n"
 
     "${CONDITIONAL_STATIC_DEFINE}"
 
